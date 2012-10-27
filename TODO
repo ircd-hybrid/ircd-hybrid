@@ -1,0 +1,70 @@
+$Id$
+
+- dynamically extensible parser for modules
+
+- modularize channel, network code etc (not just commands)
+  we can use override_function() or similar for this
+  => means prepared, now just make use of them
+
+- username/passwords (iauth ?)
+
+- make the reserved FD limit run-time tunable, esp from comm_open()
+  This involves making fd_table[] a dynamically growing/(don't bother with
+  shrinking) list.. have the max fd list configurable in the conf file..
+  => partially done, just turn HARD_FDLIMIT into a variable
+
+- Add the IRCnet(?) split logic for nick collisions - on a nick collision,
+  change to "%d-%s", random, nick
+  => this is rather equal to their /nick 0, ie set nick to user's UID
+
+------------------------------------------------------------------------------
+Little things to be done given enough time and initiative -Hwy
+
+.  <Riedel> walter : have you implemented the motd= thing in the auth block ?
+.  A FAQ
+.  More translations!
+
+
+-- Rodder's list
+.  Add scalable database-based authentication.  Probably part of Iauth.
+   Also add support for server-side notify with the list stored in the
+   auth database.  This would make ircd an awesome instant messaging
+   back-end.
+   => currently possible to do as a module
+
+
+-- Diane's list
+* add logging to ircd.log of possible channel floods
+* add code to log a minute worth of flooding if the ircd gets n possible
+  flood messages on a channel in t seconds.. This log would be available
+  to hand to authorities if requested.
+
+
+-- Josh's list
+* Find out the status of the build with IRIX64/MIPSpro.
+* TENDRA IS BROKEN! (Not quite our fault)
+* Fix lack of error message for oper initiating /connect that fails because
+it's a leaf.
+
+
+-- knight's list
+* Add Czechoslovakian support.
+* Database Authentication (IAUTH).
+* VMS, NetBSD, Mac OS X (testing and porting).
+* AMD64, Sparc(64) testing and development.
+* Re-work nickname collision code to change
+  nicknames on collide rather than issue a
+  server kill.
+
+
+-- adx's list
+* modularize parser, channel modes, member flags and more
+* split libio (engines, logging etc) from irc related sources?
+* implement ND/CD split logic
+* implement /nick 0 and uid addressing
+* more I/O backends (ports)
+* get rid of conf attaching as much as possible
+
+
+-- metalrock's list
+* Fix that missing server connection timed out notice.

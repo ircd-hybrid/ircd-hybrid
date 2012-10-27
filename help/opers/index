@@ -1,0 +1,28 @@
+# $Id$
+Help topics available to opers only:
+
+CAPAB           CLOSE
+CONNECT         CRYPTLINK       DIE             DLINE
+DROP            EOB             ETRACE          GLINE
+HASH            KILL            KLINE           LOCOPS
+MODULE          NOTICE          OMOTD           OPERWALL
+POST            PRIVMSG         REHASH          RESTART
+RESV            SERVER          SET             SJOIN
+SQUIT           STATS           SVINFO          TESTGECOS
+TESTLINE        TESTMASK        TRACE           UHELP
+UMODE           UNDLINE         UNGLINE         UNKLINE
+UNRESV          UNXLINE         WALLOPS
+XLINE
+
+Help topics available to users:
+
+ACCEPT          ADMIN           AWAY            CHALLENGE
+CMODE           ERROR           HELP            INFO
+INVITE          ISON            JOIN            KICK
+KNOCK           LINKS           LIST            LUSERS
+MAP             MOTD            NAMES           NICK
+NOTICE          OPER            PART            PASS
+PING            PONG            PRIVMSG         QUIT
+STATS           TIME            TOPIC           UMODE
+USER            USERHOST        USERS           VERSION
+WHO             WHOIS           WHOWAS

@@ -1,0 +1,115 @@
+/*
+ * doc/resv.txt - Overview of the resv system 
+ * Lee Hardy <lee@leeh.co.uk>
+ *
+ * Copyright (C) 2001 Hybrid Development Team
+ *
+ * $Id$
+ */
+
+				RESV
+			      -======-
+
+- What is resv, and why was it coded?
+
+  Resv is a method of 'juping' or 'reserving' nicks and channels, to prevent
+  local clients using them. It is commonly used to block channels which
+  are home to abusers, and which attract DoS. It can also be used to stop
+  people pretending to be services, on a network that doesn't support them.
+
+  It was coded to replace the method in hybrid-6 of blocking channels and
+  nicks, and was implemented in a much cleaner way to make it faster.
+
+  The hybrid-6 method used to have to physically create channels, and
+  suffered flaws, resv does not.
+
+- How can I create a resv?
+
+  There are two types of resv. 'permanent' and 'temporary'. Temporary
+  resv's will be erased when a server restarts (they will stay through a
+  rehash). Permanent resv's will stay through a restart.
+
+  You may add permanent resv's into ircd.conf, but they are deprecated.
+  They should have the reason for the resv, followed by the nicks and
+  channels being resv'd. The following would block the channel
+  #services, the nick 'services' and any nick ending in 'serv' (ie: chanserv)
+
+  resv {
+  	reason = "There are no services on this network";
+	channel = "#services";
+	nick = "services";
+	nick = "*serv";
+  };
+
+  All resv's created by RESV are stored in cresv.conf or nresv.conf depending
+  on the nature of the RESV.
+
+    Syntax: /quote resv <#channel|nick> :<reason>
+
+  So to resv #warez:
+    /quote resv #warez :No warez on this network.
+
+  To resv kiddie01:
+    /quote resv kiddie01 :Abuse
+
+  To resv clone*:
+    /quote resv clone* :clones
+
+    If a non admin does this, he will see:
+      -irc.leeh.co.uk- You must be an admin to perform a wildcard RESV
+
+- How do I remove a resv?
+
+  If the resv is stored in ircd.conf, then the resv must be removed from there,
+  then a /rehash, should do the trick.
+
+  If the resv was made using /RESV, then use the unresv command:
+    
+    Syntax: /quote unresv <#channel|nick>
+
+- Can I make a resv on all servers?
+
+  No.  In Hybrid resv's are local only.  If a channel is full of abusers,
+  the solution is not to just block the channel, the abusers themselves
+  should be removed through /kline and /dline.
+
+- How do I list resv's?
+
+  To list all current resv's:
+    /stats q
+
+  Which will give a reply like:
+    q #warez No warez *@*
+    Q hax No hackers allowed here
+
+  If the first letter is a 'q', then the resv is in [cn]resv.conf, if the
+  first letter is a 'Q' then the resv is hardcoded (in ircd.conf).
+
+- What does a client see if they try using a channel/nick that is resv'd?
+
+  They see the numeric 437 (ERR_UNAVAILRESOURCE)
+
+  Other networks (namely IRCNet) use this numeric on a split, to indicate
+  the channel cannot be joined, as such it is recognised by a lot of
+  clients.
+
+- Can an oper see when someone tries to use a resv'd nick/channel?
+
+  No.  When there is a valid reason for this, then possibly, but I honestly
+  don't see why anyone needs it.
+
+- Can I resv a local channel?
+
+  Yes. It takes the same format as creating a resv on a normal channel:
+    /resv &clones :no clonebots!
+    
+- Do you support wildcard channel resv's?
+
+  No.  This is mainly for speed reasons.  When we are searching nicks, we
+  cannot just check if the nick, and the item in the list of resv'd nicks
+  are string equal, we have to check if they match, so we have to search a
+  full list.  With channels however, we can search a hash table to see if an
+  entry exists, if it doesn't, then the channel isn't resv'd.  We don't have
+  to search through all the channels.
+
+  Besides.. it's legal for a channel to be called #*warez* anyway ;)

@@ -1,0 +1,54 @@
+#   $Id$
+
+RM = @RM@
+
+# Default make flags - you may want to uncomment this on a multicpu machine
+#MFLAGS   = -j 4
+BUILD_DIRS = pcre
+
+# The make used HAS to set $(MAKE). But then, if we don't do it this
+# way, people lose the option to use a 'make' called something other 
+# than `make.' If it doesn't set $(MAKE), fall back to the old behavior
+# by substing SET_MAKE.
+
+@SET_MAKE@
+
+all:	build
+
+build: .depend
+	@for i in $(BUILD_DIRS); do \
+		echo "build ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} build || exit; cd ..;\
+	done
+
+clean:
+	${RM} -f *~ core
+	@for i in $(BUILD_DIRS); do \
+		echo "clean ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} clean || exit; cd ..;\
+	done
+	-@if [ -f include/setup.h ] ; then \
+		echo "To really restart installation, ${MAKE} distclean" ; \
+	fi
+
+distclean:
+	${RM} -f Makefile *~ *.rej *.orig *core
+	@for i in $(BUILD_DIRS); do \
+		echo "distclean ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} distclean || exit; cd ..; \
+	done
+
+.depend:
+	@for i in $(BUILD_DIRS); do \
+		echo "depend ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} .depend || exit; cd .. ; \
+	done
+
+install:
+	@for i in $(BUILD_DIRS); do \
+		echo "install ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} install || exit; cd .. ; \
+	done
+
+# A la Linux kernel config :)
+dep: .depend

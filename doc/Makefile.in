@@ -1,0 +1,17 @@
+# $Id$
+INSTALL		= @INSTALL@
+INSTALL_DATA	= @INSTALL_DATA@
+RM		= @RM@
+prefix		= $(DESTDIR)@prefix@
+mandir          = $(DESTDIR)@mandir@
+
+all:
+
+install:
+	mkdir -p $(mandir)/man8
+	$(INSTALL_DATA) ircd.8 $(mandir)/man8/
+
+distclean:
+	${RM} -f Makefile
+
+.PHONY: install distclean

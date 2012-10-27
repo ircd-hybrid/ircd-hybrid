@@ -1,0 +1,12 @@
+# $Id$
+SVSNICK <oldnick> <newnick>
+
+The SVSNICK command is designed to change a user's nickname to something else.
+This is mainly to be used by services such as NickServ but can be used for
+other purposes.
+
+If you want to chance nick1 to nick2 for instance you issue the following:
+
+SVSNICK nick1 nick2
+
+You won't get a confirmation of the nickname change unless you are +n however.

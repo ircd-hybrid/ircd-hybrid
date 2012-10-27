@@ -1,0 +1,105 @@
+		          Persistent Clients
+			  ==================
+   (Ideas by Dianora and madmax and many others.; initial spec by Dianora)
+
+Background: This idea has been going around for a while, I think I 
+            first described it to bleep of Undernet over a year ago,
+            and it made it in an edited irc log form to coder-com
+            on Undernet. I'd have to look.
+
+Basic idea: Clients really don't need to "quit" when the user using
+            using that client /quit's or the client gets DDoS'ed off.
+            Rather, that client can be marked as "suspended" waiting 
+            for an active person to reconnect to the client making 
+            it active again.
+
+	    What this means is, a client has the option of staying alive
+            even if the controlling connection has died.
+
+To work ircd would need the following commands added:
+
+1) /cookie
+
+To resume a suspended client, an user must have an unique client id
+and password to resume the client later. The cookie command would
+return a numeric (TBD) that would give both the UID and password
+for that client. This could be cut and pasted into a buffer for later
+resume, or captured by a simple script.
+
+To work effectively, EFnet must implement unique client id's. This
+could be based on orabidoo's TS4 code. 
+
+2) /suspend
+
+An user can suspend their client for later reconnection at any
+time, using the suspend command. 
+
+3) /resume uid cookie
+
+Any user who has become disconnected or has voluntarily suspended
+from their active client can resume that client by registering to the
+ircd in the normal user/nick way, then issuing a /resume uid cookie command.
+Their session then becomes attached to the client sitting in all the
+channels with all their modes restored.
+
+
+Unfortunately occasional oper intervention will be necessary using
+the following commands.
+
+4) /destroy uid|channel
+
+Any client uid matching that uid can be destroyed from the network. This
+is a form of old style /kill but it also destroys the uid and cookie pair.
+(TBD)
+
+A channel name if given instead, will result in all members of the channel
+being tossed out, and apparently kicked by themselves. (chanop hiding
+in h7) The channel will then be marked as "juped" for a period of 1 
+minute. First come, first serve just like old style EFnet.
+
+5) /setpass uid
+
+A client after successfully proven their ownership can have their
+cookie password reset.
+
+1.1
+
+The TS NICK command as described in orabidoo's TSora paper is rather
+overloaded as it is for adding an unique UID to each nick. It is proposed
+to add a new UID command that would result in NICK being deprecated.
+It would also add the capability "UID" to the servers capability list.
+
+The format would take this form.
+
+:%s UID uid_string nick UID hopcount nick_creation umodes username
+    host server :gecos
+
+The observant will note this is the old NICK command with an 
+additional parameter added "uid_string."
+
+1.2
+
+With an UID, there is no reason to nick collide, the client is now
+uniquely identified by the UID not the nick. When a nick collide happens,
+the client still maintains any chanop status it had, and is marked
+as suspended.
+
+1.3
+
+User disconnection due to DDoS or phone line hang ups results in the
+client being marked as suspended.
+
+1.4
+
+Client expiries would take place on a 24 hour basis. If you do not
+resume every 24 hours, you lose the client.
+
+1.5
+
+To cut down on abuse, a client may not register more than one suspended
+client per user@host.
+
+TBD. What to do if a dronebot net is programmed to /suspend as many
+as possible, in order to eat up memory in a DDoS attempt.
+
+$Id$

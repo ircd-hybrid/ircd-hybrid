@@ -1,0 +1,58 @@
+# $Id$
+
+CC		= @CC@
+INSTALL		= @INSTALL@
+INSTALL_BIN	= @INSTALL_PROGRAM@
+RM		= @RM@
+CFLAGS		= @IRC_CFLAGS@
+CPPFLAGS	= @CPPFLAGS@
+LDFLAGS   	= @LDFLAGS@
+MV		= @MV@
+RM		= @RM@
+LN              = @LN@
+
+CLOBBER=@CLOBBER@
+
+SSL_LIBS	= @SSL_LIBS@
+SSL_INCLUDES	= @SSL_INCLUDES@
+CRYPT_LIB	= @CRYPT_LIB@
+
+INCLUDES	= -I../include $(SSL_INCLUDES)
+
+prefix		= $(DESTDIR)@prefix@
+exec_prefix	= $(DESTDIR)@exec_prefix@
+bindir		= $(DESTDIR)@bindir@
+
+PROGS		= mkpasswd @ENCSPEED@
+
+all: $(PROGS)
+
+build: all
+
+# We must link these two against special libs
+encspeed: ../include/setup.h encspeed.c
+	$(CC) $(CFLAGS) $(INCLUDES) $(LDFLAGS) encspeed.c -o encspeed $(SSL_LIBS)
+
+mkpasswd: ../include/setup.h mkpasswd.c
+	$(CC) $(CFLAGS) $(INCLUDES) $(LDFLAGS) mkpasswd.c -o mkpasswd $(CRYPT_LIB)
+
+# Default rule for everything
+
+clean:
+	$(RM) -f *.o *~ core *.exe $(PROGS)
+
+distclean: clean
+	$(RM) -f Makefile
+
+install: build
+	mkdir -p $(bindir)
+	@for i in $(PROGS); do \
+		if test -f $(bindir)/$$i -a -z "$(CLOBBER)"; then \
+			echo $(MV) $(bindir)/$$i $(bindir)/$$i.old; \
+			$(MV) $(bindir)/$$i $(bindir)/$$i.old; \
+		fi; \
+		echo $(INSTALL_BIN) $$i $(bindir); \
+		$(INSTALL_BIN) $$i $(bindir); \
+	done
+
+.PHONY: install distclean clean build

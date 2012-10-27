@@ -1,0 +1,15 @@
+# $Id$
+FLAGS [-|+ flag]
+
+The FLAGS command is designed to enable or disable user mode flags in plain english.
+The idea is to make it easier to toggle flags without having to remember their letter.
+
+If you run FLAGS without any extra parameters or arguments you'll get an example listing:
+
+--- Current flags: OWALLOPS SWALLOPS OKILLS SKILLS SNOTICES THROTTLES LWALLOPS CONNECTS SQUITS 
+                   FULL INVISIBLE BOTS CALLERID
+--- Current missing flags: STATSNOTICES CLICONNECTS CLIDISCONNECTS IPMISMATCHES UNAUTH DEBUG NICKCHANGES
+
+So if you want to enable NICKCHANGES (+n) for instance you do
+
+FLAGS +NICKCHANGES and you can disable it with FLAGS -NICKCHANGES

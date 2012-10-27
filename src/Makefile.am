@@ -1,0 +1,62 @@
+AUTOMAKE_OPTIONS = foreign
+
+sbin_PROGRAMS = ircd
+
+AM_YFLAGS = -d
+
+AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include
+ircd_LDFLAGS = -export-dynamic
+ircd_LDADD = $(LIBLTDL)
+ircd_DEPENDENCIES = $(LTDLDEPS)
+
+ircd_SOURCES = balloc.c          \
+               channel.c         \
+               channel_mode.c    \
+               client.c          \
+               conf.c            \
+               conf_parser.y     \
+               conf_lexer.l      \
+               csvlib.c          \
+               dbuf.c            \
+               event.c           \
+               fdlist.c          \
+               getopt.c          \
+               hash.c            \
+               hook.c            \
+               hostmask.c        \
+               irc_res.c         \
+               irc_reslib.c      \
+               irc_string.c      \
+               ircd.c            \
+               ircd_signal.c     \
+               list.c            \
+               listener.c        \
+               log.c             \
+               match.c           \
+               memory.c          \
+               modules.c         \
+               motd.c            \
+               rng_mt.c          \
+               numeric.c         \
+               packet.c          \
+               parse.c           \
+               s_bsd_epoll.c     \
+               s_bsd_poll.c      \
+               s_bsd_sigio.c     \
+               s_bsd_devpoll.c   \
+               s_bsd_kqueue.c    \
+               s_bsd_select.c    \
+               restart.c         \
+               resv.c            \
+               rsa.c             \
+               s_auth.c          \
+               s_bsd.c           \
+               s_gline.c         \
+               s_misc.c          \
+               s_serv.c          \
+               s_user.c          \
+               send.c            \
+               sprintf_irc.c     \
+               version.c         \
+               watch.c           \
+               whowas.c

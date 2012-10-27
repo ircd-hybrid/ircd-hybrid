@@ -1,0 +1,9 @@
+# $Id$
+CTRACE <class>
+
+The CTRACE command will do a trace of users depending on class. Similar
+to TRACE but class specific.
+
+For example if you want to do a trace on the clients in the users class:
+
+CTRACE users - Shows the totals in the users class.

@@ -1,0 +1,99 @@
+; ircd-hybrid-7 custom message file
+; Copyright (C) 2010 Bulgarian interface
+; Borislav Borisov <VoodooServ@mail.bg>, 2010.
+; $Id$
+
+RPL_WELCOME:             :%s 001 %s :Добрe дошъл в %s мрежата %s
+RPL_YOURHOST:            :%s 002 %s :Вашия сървър %s, версия %s
+RPL_CREATED:             :%s 003 %s :Сървъра е създаден %s
+RPL_ISUPPORT:            :%s 005 %s %s :съвместим
+RPL_REDIR:               :%s 010 %s %s %d :Желателно е да ползвате този сървър/порт
+RPL_MAPEND:              :%s 017 %s :Край на /MAP
+RPL_YOURID:              :%s 042 %s %s :вашият уникален ID
+RPL_ENDOFSTATS:          :%s 219 %s %c :Край на отчета /STATS
+RPL_STATSUPTIME:         :%s 242 %s :Сървъра работи %d дена, %d:%02d:%02d
+RPL_STATSCONN:           :%s 250 %s :Най голямо количество свързани: %d (%d клиенти) (%llu входящи свързвания)
+RPL_LUSERCLIENT:         :%s 251 %s :В момента има %d потребителя %d невидими на %d сървъра
+RPL_LUSEROP:             :%s 252 %s %d :IRC Опъри на линия
+RPL_LUSERUNKNOWN:        :%s 253 %s %d :неизвестни свръзки
+RPL_LUSERCHANNELS:       :%s 254 %s %d :сформирани канали
+RPL_LUSERME:             :%s 255 %s :Сървъра има %d клиенти и %d сървъри
+RPL_ADMINME:             :%s 256 %s :Информация за администратора на %s
+RPL_ENDOFTRACE:          :%s 262 %s %s :Завършване на TRACE
+RPL_LOAD2HI:             :%s 263 %s :Сървъра временно е претоварен. Моля изчакайте момент и опитаите отново.
+RPL_LOCALUSERS:          :%s 265 %s :Текущо количество локални потребители: %d  Максимално: %d
+RPL_GLOBALUSERS:         :%s 266 %s :Текущо количество глобални потребители: %d  Максимално: %d
+RPL_UNAWAY:              :%s 305 %s :Вече не сте маркиран като away
+RPL_NOWAWAY:             :%s 306 %s :Маркиран сте като away
+RPL_WHOISADMIN:          :%s 313 %s %s :е Сървър Администратор
+RPL_ENDOFWHO:            :%s 315 %s %s :Край на списъка /WHO
+RPL_WHOISIDLE:           :%s 317 %s %s %d %d :секунди мълчи (IDLE).
+RPL_ENDOFWHOIS:          :%s 318 %s %s :Край на списъка /WHOIS.
+RPL_LISTEND:             :%s 323 %s :Край на списъка /LIST
+RPL_NOTOPIC:             :%s 331 %s %s :Няма поставен топик.
+RPL_ENDOFINVEXLIST:      :%s 347 %s %s :Край на списъка на поканени в канала.
+RPL_ENDOFEXCEPTLIST:     :%s 349 %s %s :Край на списъка с изключения в канала.
+RPL_CLOSING:             :%s 362 %s %s :Затворен. Статус = %d
+RPL_CLOSEEND:            :%s 363 %s %d :Връзката затворена
+RPL_ENDOFLINKS:          :%s 365 %s %s :Край на списъка /LINKS.
+RPL_ENDOFNAMES:          :%s 366 %s %s :Край на списъка /NAMES.
+RPL_ENDOFBANLIST:        :%s 368 %s %s :Край на списъка на баннати в Канала
+RPL_ENDOFWHOWAS:         :%s 369 %s %s :Край на WHOWAS
+RPL_ENDOFINFO:           :%s 374 %s :Край на списъка /INFO
+RPL_MOTDSTART:           :%s 375 %s :- %s Инфо за деня - 
+RPL_ENDOFMOTD:           :%s 376 %s :Край на /MOTD.
+RPL_YOUREOPER:           :%s 381 %s :Вие влезнахте в ... Зоната На Здрача!
+RPL_REHASHING:           :%s 382 %s %s :Препрочитане на файла с настройки на сървъра.
+ERR_NOSUCHNICK:          :%s 401 %s %s :Ник/канал не е намерен
+ERR_NOSUCHSERVER:        :%s 402 %s %s :Сървъра не е намерен
+ERR_NOSUCHCHANNEL:       :%s 403 %s %s :Канала не е намерен
+ERR_CANNOTSENDTOCHAN:    :%s 404 %s %s :Невъзможно да се прати в канала
+ERR_TOOMANYCHANNELS:     :%s 405 %s %s :Вие сте влезли в прекалено голямо количество канали
+ERR_WASNOSUCHNICK:       :%s 406 %s %s :Не е открит такъв ник
+ERR_NOORIGIN:            :%s 409 %s :Источника не е известен
+ERR_NOTEXTTOSEND:        :%s 412 %s :Няма текст за пращане
+ERR_NOTOPLEVEL:          :%s 413 %s %s :Не е указан домен...
+ERR_WILDTOPLEVEL:        :%s 414 %s %s :Wildcard символ в домена не съответства
+ERR_UNKNOWNCOMMAND:      :%s 421 %s %s :Неизвесна команда
+ERR_NOMOTD:              :%s 422 %s :Файл MOTD не е намерен
+ERR_NOADMININFO:         :%s 423 %s %s :Информация за админа не е достъпна
+ERR_NONICKNAMEGIVEN:     :%s 431 %s :Няма инфо за ника
+ERR_ERRONEUSNICKNAME:    :%s 432 %s %s :Неверен ник
+ERR_NICKNAMEINUSE:       :%s 433 %s %s :Този ник в момента се ползва.
+ERR_NICKCOLLISION:       :%s 436 %s %s :Съвпадение на ника KILL
+ERR_UNAVAILRESOURCE:     :%s 437 %s %s :Ник/канал временно недостъпен
+ERR_SERVICESDOWN:        :%s 440 %s :Services времено не са на линия.
+ERR_USERNOTINCHANNEL:    :%s 441 %s %s %s :Потребителя не се намира в този канал
+ERR_NOTONCHANNEL:        :%s 442 %s %s :Не сте в този канал
+ERR_USERONCHANNEL:       :%s 443 %s %s %s :вие вече сте в този канал
+ERR_NOTREGISTERED:       :%s 451 %s :Вие не сте регистриран
+ERR_NEEDMOREPARAMS:      :%s 461 %s %s :Недостатъчно параметри
+ERR_ALREADYREGISTRED:    :%s 462 %s :Вие не можете да се регистрирате
+ERR_PASSWDMISMATCH:      :%s 464 %s :Невярна парола
+ERR_YOUREBANNEDCREEP:    :%s 465 %s :На вас ви е забанен този сървър- %s
+ERR_CHANNELISFULL:       :%s 471 %s %s :Невъзможно е влизането в канала (+l)
+ERR_UNKNOWNMODE:         :%s 472 %s %c :неизвестен символ на режим
+ERR_INVITEONLYCHAN:      :%s 473 %s %s :Невъзможно е влизането в канала (+i)
+ERR_BANNEDFROMCHAN:      :%s 474 %s %s :Невъзможно е влизането в канала (+b)
+ERR_BADCHANNELKEY:       :%s 475 %s %s :Невъзможно е влизането в канала (+k)
+ERR_BANLISTFULL:         :%s 478 %s %s %s :Бан листа в канала е перепълнен
+ERR_BADCHANNAME:         :%s 479 %s %s :Недопустимо име на канала
+ERR_NOPRIVILEGES:        :%s 481 %s :Достъп отказан - Вие нямате статут на IRC оператор
+ERR_CHANOPRIVSNEEDED:    :%s 482 %s %s :Вие не сте оператор на канала
+ERR_CANTKILLSERVER:      :%s 483 %s :Вие не можете да убиете сървъра!
+ERR_RESTRICTED:          :%s 484 %s :Вие сте ограничен (RESTRICTED).
+ERR_NOOPERHOST:          :%s 491 %s :Само малцина смъртни могат да се опитат да влезнат в зоната на здрача
+ERR_UMODEUNKNOWNFLAG:    :%s 501 %s :Неизвестен MODE флаг
+ERR_USERSDONTMATCH:      :%s 502 %s :Не можете да променяте режима на другите потребители
+ERR_GHOSTEDCLIENT:       :%s 503 %s :Инфото не може да се достави до %s
+ERR_USERNOTONSERV:       :%s 504 %s %s :Потребителя не се намира на този сървър
+ERR_WRONGPONG:           :%s 513 %s :За да се свържиш напиши /QUOTE PONG %lu
+ERR_HELPNOTFOUND:        :%s 524 %s %s :Файла с помощна информация не е намерен
+RPL_WHOISSECURE:         :%s 671 %s %s :е свъзран през SSL (шифрована връзка)
+RPL_ENDOFMODLIST:        :%s 703 %s :Край на листа /MODLIST.
+RPL_ENDOFHELP            :%s 706 %s %s :Край на лист-а /HELP.
+RPL_KNOCK:               :%s 710 %s %s %s!%s@%s :пита за покана.
+RPL_KNOCKDLVR:           :%s 711 %s %s :Вашия KNOCK е доставен.
+ERR_TOOMANYKNOCK:        :%s 712 %s %s :Твърде много KNOCKs (%s).
+ERR_CHANOPEN:            :%s 713 %s %s :Канала е отворен.
+ERR_KNOCKONCHAN:         :%s 714 %s %s :Вие вече сте в този канал.

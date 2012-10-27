@@ -1,0 +1,120 @@
+                             Server Hide Reference
+
+   $Id$
+
+   Copyright (c) 2001-2012 by ircd-hybrid team
+
+     ----------------------------------------------------------------------
+
+   Due to pressures from abusers, the Hybrid developers have created a set of
+   options to limit what users can and cannot do on the server. Each option
+   can be enabled or disabled at runtime.
+
+   This document describes the ircd-hybrid implementation of the server hiding
+   ideas originated by (and credited to) numerous people.
+
+     * LINKS as a file: This option is always enabled. It will generate a
+       file at a certain interval, defined by the links_delay in ircd.conf,
+       that contains the current LINKS data. This data is sent to users
+       whenever a LINKS is requested. Opers will always see the current
+       server structure.
+
+       The file that the LINKS data is stored in is by default etc/links.txt.
+
+       The benefits of this are that transient splits will not be seen by
+       users issuing LINKS commands, and if a server is split, users can
+       still see what other servers are normally available.
+
+     * Flattened LINKS: This option forces every server to look as if it is
+       connected to the local server. Users will see a flat LINKS tree.
+
+       The benefit to using LINKS flattening is that users cannot get
+       information on how servers are routed.
+
+       The flatten_links in the serverhide {} block in the ircd.conf controls
+       this feature.
+
+       As a side effect, all netsplit quit messages will appear to originate
+       from the local server.
+
+       +--------------------------------------------------------------------+
+       | Flattened LINKS is needed for any network that uses the hidden hub |
+       | option. See below for more details.                                |
+       +--------------------------------------------------------------------+
+
+        
+
+     * Hidden server option: This option will hide the server from a
+       flattened LINKS list on other servers. Opers will of course see the
+       true routing of the network.
+
+       This is controlled by the hidden option in ircd.conf.
+
+       +--------------------------------------------------------------------+
+       | Technically, this code is a hack. With this option enabled, the    |
+       | server will prepend '(H) ' to the server info field when           |
+       | connecting to other servers. Other servers must understand that    |
+       | the (H) means hidden.                                              |
+       +--------------------------------------------------------------------+
+
+     * The allow_hidden option is needed to allow servers to use the hidden
+       server option described above.
+
+     * The hide_servers option forces the server to not be shown when a user
+       issues WHOIS and other commands which may show what server a user is
+       on.
+
+       Local user counts, as normally displayed in LUSERS, USERS, and the 255
+       numeric, will be shown with the same values as the global counts.
+       Displaying it this way will help protect servers and avoid breaking
+       scripts that depend on the 265 and 266 numerics on connect.
+
+       To be effective, this option must be used network wide.
+
+     * The disable_remote_commands option takes care of most of the remaining
+       issues. These include, for example, ADMIN some.hub.server, VERSION
+       someuser, and similar commands. A server with this option enabled will
+       only prevent local users from issuing remote commands. Remote users
+       will not be affected.
+
+       Remote WHOIS is not blocked. It is, however, restricted to only
+       querying WHOIS nick nick. The ircd will disregard the server parameter
+       and always use queried nick.
+
+     * All server modes appear to originate from the server you are using.
+       This feature is not tunable; and opers also do not see the real server
+       setting the mode.
+
+   Each item is briefly described in the serverhide {} block in ircd.conf.
+
+     ----------------------------------------------------------------------
+
+Using Non-QS Compliant Hubs
+
+   The flattened LINKS option will, as a side effect, display all user QUITs
+   due to network splits in the following format:
+
+   :user QUIT :*.net *.split
+
+   This works extremely well as long as all servers on your network are
+   compliant with the QS capability, which sends a single SQUIT to the
+   network when a server (or tree of servers) splits. All quit messages are
+   generated on the local server. Certain older servers do not have this
+   ability, and as such will generate their own quit messages for users who
+   left because of the split. This can cause leaks in the hub server names
+   and the structure of the network.
+
+   A quick example is the following network structure:
+
+   servA(Hyb7) --- hubA(nonQS) --- servB(not-important)
+
+   When servB splits from hubA, hubA will generate a QUIT command for every
+   user on servB (and anything behind servB). Since the QUIT message was not
+   created on your server, with server hiding enabled, the QUIT message will
+   contain the real server names.
+
+   The only way to prevent this leak on a network is to only use hubs
+   supporting the QS capability. Hybrid 6, Hybrid 7, and csircd all are
+   currently running daemons that support QS. Hybrid 5 and 2.8.21+CSr servers
+   do not support QS, and will leak server names (and therefore routing
+   information) on splits.

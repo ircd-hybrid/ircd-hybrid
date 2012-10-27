@@ -1,0 +1,20 @@
+; A compilation of original h5/h6/bsdnet numerics
+; $Id$
+
+RPL_CREATED:           :%s 003 %s :This server rose from the ashes %s
+RPL_STATSUPTIME:       :%s 242 %s :Dianora hasn't messed with the server code now in %d days, %d:%02d:%02d
+RPL_LUSEROP:           :%s 252 %s %d :Smurf Targets (IRC Operators) online
+RPL_LOAD2HI:           :%s 263 %s :Hold your horses... the server load is temporarily too heavy. Try again later, ok?
+RPL_UNAWAY:            :%s 305 %s :OK, you're not /away anymore. Did you have fun?
+RPL_NOWAWAY:           :%s 306 %s :OK, you're /away now. Hurry back!
+RPL_WHOISOPERATOR:     :%s 313 %s %s :is a Smurf Target (IRC Operator)
+RPL_WHOISADMIN:        :%s 313 %s %s :is a Smurf Magnet (IRC Administrator)
+RPL_YOUREOPER:         :%s 381 %s :You have the phorce.  Use it wisely.
+RPL_REHASHING:         :%s 382 %s %s :it slices, dices, and even reloads config files!  Rehashing config file, mang.
+ERR_PASSWDMISMATCH:    :%s 464 %s :BZZZT!! Wrong password, dewd. Are you sure you know what you're doing?
+ERR_YOUREBANNEDCREEP:  :%s 465 %s :You are BANNED from this server - %s
+ERR_NOPRIVILEGES:      :%s 481 %s :UHHH, I don't THINK so, dewd... you ain't got those mad l33+ sk1llz. (IRC Operator)
+ERR_CHANOPRIVSNEEDED:  :%s 482 %s %s :You can't do that thing, when you don't have that swing (You're not channel operator)
+ERR_CANTKILLSERVER:    :%s 483 %s :Don't be an idiot -  you can't kill a SERVER, fool.
+ERR_UMODEUNKNOWNFLAG:  :%s 501 %s :Unknown MODE flag - you smokin' something?
+ERR_USERSDONTMATCH:    :%s 502 %s :You can't change user modes for other users, silly - check that nickname again.

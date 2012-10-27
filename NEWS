@@ -1,0 +1,183 @@
+-- ircd-hybrid-7.3.0 Release Notes
+o) Added Bulgarian language file provided by Borislav Borisov
+o) Server hostmasking has been removed due to TS6 requirements
+o) Fixed broken IPv6 detection
+o) Minor code optimizations. Reduced memory consumption
+o) User IDs are now shown in client connection notices
+o) Increased maximum temporary kline time to 360 days
+o) Added back STATS/TRACE/MOTD/ADMIN request notices. Removed
+   spy_*_notice modules accordingly.
+o) Channelmode +O; channel can be joined by ircops only.
+o) Channelmode +S; only clients with a secure connection (ssl/tls)
+   can join this channel.
+
+
+-- ircd-hybrid-7.3-rc1 Release Notes
+o) Major 64-bit cleanups and portability fixes.
+o) Fixed bug where unregistered clients were not able to complete registration
+   process with /quote PONG <ping_cookie> in case the client was assigned a
+   zero value ping-cookie. This may only happen with general::ping_cookie
+   being enabled.
+o) "STATS z" now shows the actual amount of memory consumption being
+   used by channel bans/excepts/invites.
+o) Fixed archaic bug where bursting servers with missconfigured NICKLEN were
+   able to desync the network's nickname database.
+o) The PCRE library has been removed from the ircd sources. ./configure will
+   now automatically detect an already installed version of the PCRE library.
+o) Various resolver improvements and fixes
+o) Implemented GUNGLINE (global ungline)
+o) Completely rewrote build system. We're now using automake and libtool
+o) Added support for SHA-256/512 encrypted passwords to mkpasswd. Whether
+   passwords hashed using these algorithms will work depends on the system's
+   crypt() implementation. For example, SHA-256/512 is available in glibc since
+   version 2.7.
+o) Added ssl_server_protocol configuration option to servinfo{}.
+   Valid flags are 'sslv3' and 'tlsv1'
+o) Added new 'server' option to listener::flags. Listener with that flag
+   set may only accept server connections.
+o) Fixed occasional core when placing RESVs on channel names
+o) Fixed topic desynchronization which sometimes may
+   happen during netbursts
+o) WATCH support implemented. Known from other irc-daemons, such
+   as Dreamforge and Bahamut. The general::max_watch configuration directive
+   has been added in order to allow run-time configuration of how many
+   watch entries a single client may have on its watchlist.
+o) Fixed bug which would cause invalid invisible counts on oper-up in case
+   operator::umodes and/or general::oper_umodes contains 'invisible'
+o) Removed broken LazyLinks
+o) Removed --disable-gline-voting configure option
+o) Minor code optimizations and cleanups
+o) ACCEPT now supports nick!user@host masks
+o) Unregistered clients are no longer allowed to request the server's motd
+o) general::dot_in_ip6_addr configuration option is obsolete and no longer exists
+o) Dropped support for old style 'operflag = yes|no;' format
+
+
+-- ircd-hybrid-7.2.3 Release Notes
+o) Added ircd-italian.lang language file
+o) Added -full to etrace
+o) Added +C for opers
+o) Fixed core in temp channel resv
+o) Fixed CHALLENGE to work with user=IP
+o) Misc fixes to TESTMASK and TESTLINE
+o) Added support for nick masks to TESTMASK
+o) Fixed /modlist to show up whether or not a module is resident
+o) Fixed command line arguments handling to allow more than one switch
+o) Fixed numeric delivery for mixed TS5 target on the other side of a TS6 server.
+
+
+-- ircd-hybrid-7.2.2 Release Notes
+o) Added channel::disable_fake_channels config directive
+o) Fixed broken FORCEJOIN  (contrib)
+o) Added missing documentation for connect::vhost
+o) Fixed problem with G-Line voting
+o) Fixed "STATS ?" so it doesn't report negative traffic statistics
+o) Fixed core in m_mkpasswd.c  (contrib)
+o) Reduced memory usage for channel members
+o) Added general::stats_e_disabled which simply disables "STATS e"
+   for other operators and administrators
+o) Ignore signal SIGXFSZ to prevent the daemon from dying on missconfigured
+   file size limits
+o) Slight optimizations to the block allocator
+o) Fixed harmless bug that could result in incorrect bytes sent statistics
+   in "STATS t"
+o) "STATS y|Y" now shows whether a class is active or disabled
+o) Added ircd-brazilian_pt.lang language file
+o) Misc. ACCEPT fixes. E.g. don't remove an accept record if a client is
+   changing between equivalent nicknames like 'nick' and 'NiCk'.
+o) Minor resolv.conf parser fixes.  Added missing support for ';' comments
+o) Fixed core on MODRESTART
+
+
+-- ircd-hybrid-7.2.1 Release Notes
+o) Fixed build on SRV4
+o) Fixed problem where ircd would disconnect all SSL connections
+o) Added initial CAP support.  Additional documentation can be found
+   in doc/technical
+o) Speeded up command parsing
+o) Fixed occasional core dump on UN*LINE
+o) Fixed bug where particular clients would always receive
+   "Load is temporarily too heavy" message
+o) Improved memory consumption, i.e. memory consumption has
+   been reduced for remote clients
+o) Fixed possible core in case default_cipher_preference directive isn't set
+o) Fixed "CHANSERV INVITE" bug with anope services
+o) Updated example configuration files to reflect new topicburst flags
+   directive in connect{} blocks
+o) Fixed core if using the operator::umodes directive
+o) Don't allow shared k-lines to be set without a valid reason
+o) Improved channel ban match processing.  This also fixes CIDR bans
+
+
+-- ircd-hybrid-7.2.0 Release Notes
+o) Fixed broken operwall = yes;
+o) Added 'umode' directive to oper{}.  List of modes to get on /OPER.
+   This behaves exactly like H6's sixth O line field
+o) Fixed a WHOIS bug
+o) Fixed bug where we would increase Count.invisi even
+   if general::invisible_on_connect is turned off
+o) Removed invite_ops_only, controlled by paranoid (+p) now
+o) Better DDoS protection
+o) Fixed va_list bug on amd64
+o) Fixed /dev/poll
+
+
+-- ircd-hybrid-7.2rc1 Release Notes
+o) ircd can dynamically change all its client/fd limits at runtime
+o) Added epoll as the primary I/O engine under Linux
+o) Local channels will not show up in remote /WHOIS
+o) Added hidden_name which allows customized hidden server names
+o) Added restrict_channels to define a static channel set
+o) Added --disable-gline-voting to disable G-Line votes
+   for small networks or people who don't want it.
+o) Allow accumulating more ip= entries in an exempt{} block
+o) Various improvements and bugfixes
+o) Make win32 build usable
+o) Fixed ban caching bug
+o) Cosmetical fixes to TIME
+o) Get "KLINE nick" to work with clients that have a spoof
+o) Fixed RESV/XLINE bug in conjunction with names that include escaped
+   characters such as \*, \?, \#.
+
+
+-- ircd-hybrid-7.2beta1 Release Notes
+o) Usermode +G, like +g, but allow messaging from people on common channels
+o) Usermode +D - "deaf", don't receive channel messages
+o) RXLINE and RKLINE - commands for setting perl compatible regular expression
+   based K and X lines
+o) Join flood is now detected and reported to +b opers
+o) Re-added REJECT_HOLD - lock clients for a while before throwing away
+o) ping_warning, a class{} option to notify opers before "Ping timeout"
+o) New hooking system, modularized: usermodes, iauth, message filtering etc.
+o) Network I/O speedups
+o) Various cleanups and bugfixes
+o) Support for client SSL
+o) Support for services (contrib/m_services.c)
+o) IP cloaking module (contrib/ip_cloaking.c)
+o) Native win32 build
+o) The password set in auth::password can now be encrypted
+o) Introduced new listen::flags directive.  Currently available flags are
+   'ssl' and 'hidden'.  Please read example.conf for further details
+
+--------------------------------------------------------------------------------
+
+BUGS: Major bugs in this release are listed in BUGS
+
+BUG REPORTS: If you run this code and encounter problems, you must report
+ the bug by EMAIL to bugs@ircd-hybrid.org
+ Please include a gdb backtrace and a copy of your config.h and
+ ircd.conf with any report (with passwords and other sensitive
+ information masked).
+
+DISCUSSION: There is a mailing list for discussion of hybrid issues,
+ including betas.  To subscribe, use this link:
+    https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
+ This is the proper place to discuss new features, bugs, etc.  Posting here
+ is much more likely to get something done than ranting on #TZ.
+
+Questions/comments directed to bugs@ircd-hybrid.org
+
+Other files recommended for reading: BUGS, README, INSTALL
+
+--------------------------------------------------------------------------------
+$Id$

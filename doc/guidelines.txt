@@ -1,0 +1,36 @@
+ircd-hybrid documentation guidelines
+
+1.  When a major change in the code affects users, it MUST be documented
+in whats-new and all other appropriate locations.
+
+2.  When something affects the configuration file, and it's compatibility
+with previous versions, it MUST be documented in example.conf and in a
+proposed new document README.NOW. This is VERY important during the beta
+phase to help anyone who mans the "help desk".
+
+3.  All documentation must properly fit in an 80 character wide terminal.
+SGML and other "professional" documentation systems are good for some
+projects, but hybrid is intended to be used on minimal UNIX installations
+where any extra binary is a security risk. Text only docs, sized to fit
+properly in an 80 character wide console, are what admins expect, and that's
+what they should get.
+
+4.  All documentation must be spell checked before a release or a beta.
+'ispell' (using either the US or British dictionary) is probably the
+easiest way to spell check the documentation. 'ispell -a' at the command
+line will allow you to check individual words as you are editing.
+
+5.  When a document is over approximately 5 pages long, it should be split
+into sections to facilitate users reading them.
+
+6.  All docs (except docs specifically describing code) should be written
+in a way that all users of the software (not just programmers) will be able
+to easily understand.
+
+7.  Don't make documentation a chore. If it's done while coding, or shortly
+after, it usually is more accurate and the documentation tasks don't get
+pushed back and pile up.
+
+8.  Don't forget to include a CVS Id.
+
+# $Id$

@@ -1,0 +1,21 @@
+# $Id$
+RKLINE [time] <mask> [ON <server>] :[reason]
+
+[time] if present, gives number of minutes for temporary RXLINE
+
+Adds a regular expression RKLINE to the rkline.conf file which
+will ban the specified regex mask from that server.
+The banned client will receive a message saying he/she
+is banned with reason [reason]
+
+regular expression examples:
+rkline ^O[[:alpha:]]?[[:digit:]]+(x\.o|\.xo)$@^[[:alnum:]]{4}\.evilnet.org$
+
+Note: The mask has to be a valid regular expression based on user@host mask
+
+See: http://en.wikipedia.org/wiki/Regular_expression
+     http://www.pcre.org/pcre.txt
+
+If ON server is present, the RKLINE is propagated to given server.
+
+- Requires Oper Priv: admin, kline

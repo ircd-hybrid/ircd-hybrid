@@ -1,0 +1,25 @@
+IRCD-Hybrid Platforms Information
+
+Sometimes problems and inconsistencies in the Hybrid code may only occur
+on a specific platform (architecture and/or operating system and/or
+compiler). In these cases you may want to directly contact a person who
+is interested in maintaining Hybrid on that platform. Below is a list of
+people who have jumped up and taken responsibility for Hybrid, including
+making sure it compiles, runs, and doesn't crash.
+
+Platforms marked with a '*' are known to be broken. In general,
+README.FIRST will include specific notes on broken platforms.
+
+ARCHITECTURE COMPILER         SYSTEM	    MAINTAINER
+============ ================ ============= ===================================
+Alpha        cc               Tru64 5.2b    Joshua Kwan <joshk@triplehelix.org>
+MIPS         gcc              IRIX          Joshua Kwan <joshk@triplehelix.org>	
+SPARC        Forte C v6,v7    Solaris       Joan Touzet <joant@ieee.org>
+SPARC        gcc              Solaris       Joan Touzet <joant@ieee.org>
+SPARC        gcc              Linux         Alan LeVee <alan.levee@prometheus-designs.net>
+x86          gcc              Linux         Joshua Kwan <joshk@triplehelix.org>
+x86          gcc              FreeBSD       Diane Bruce <db@db.net>
+x86          gcc              OpenBSD       Joshua Kwan <joshk@triplehelix.org>
+x86          TenDRA           FreeBSD       Stuart Walsh <stu@ipng.org.uk>
+
+$Id$

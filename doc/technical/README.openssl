@@ -1,0 +1,238 @@
+Getting OpenSSL to work with hybrid-7
+=====================================
+$Id$
+
+PREFACE
+=======
+  As an administrator, you more than likely are looking at this because
+  you wish to enable what are known as "cryptlinks" -- server-to-server
+  encryption (via OpenSSL) with RSA key authentication.
+
+  The intention of this document is to make administrators aware of
+  what issues can come forth from attempting to use this newfangled
+  technology, and how to properly get it "up and going."
+
+  In the following sections, we hope to address this issue, so that
+  OpenSSL can be (hopefully) used on all systems where available.
+
+  Other sections include more technical descriptions, such as issues
+  pertaining to ciphers (encryption methods/algorithms) and other
+  related information.
+
+
+OBTAINING OPENSSL
+=================
+  If you are looking to obtain OpenSSL, be sure to visit their official
+  home page at:
+
+    http://www.openssl.org/
+
+  Be sure to download the non-engine version of OpenSSL; the engine
+  release is OpenSSL with hardware SSL accelerator support.  It is
+  presently in alpha stages (and even in the engine release, is disabled
+  by default as a safety precaution).
+
+  The present stable release of OpenSSL, as of the authoring of this
+  document, is 0.9.7b (old stable 0.9.6j.)
+
+
+GETTING IT TO WORK
+==================
+  OpenSSL is enabled by default when running configure. If the script
+  cannot locate a working version of OpenSSL, you may specify one on
+  the command line:
+
+    ./configure --enable-openssl=/usr/local/openssl
+
+  To explicitly disable it, use --disable-openssl.
+
+  For multiple versions of OpenSSL installed on the same system,
+  please read the "MULTIPLE OPENSSL INSTALLATIONS" section within
+  this document.
+
+  If no directory is specified, OpenSSL will check for the proper
+  installation tree in the following directories (by default), and
+  in this order:
+
+    /usr/local/ssl
+    /usr/pkg
+    /usr/local
+    /usr/local/openssl
+
+  Please make a note of this, as if you have multiple OpenSSL install-
+  ations, this will decide precedence.
+
+
+SERVER CONFIGURATION
+====================
+  Step 1:  Create your private and public keys.  Read how in the
+           example.conf file, or use the tools/mkkeypair utility.
+  Step 2:  Place the keys where your IRC daemon can access them.
+  Step 3:  Provide your *PUBLIC* key to another server.
+  Step 4:  Obtain another servers' *PUBLIC* key and place it in a
+           file where your IRC daemon can access it.
+  Step 5:  Edit ircd.conf and specify your private key location via
+           the "rsa_private_key_file" directive in serverinfo {}.
+  Step 6:  Edit ircd.conf and specify the public key location via
+           the "rsa_public_key_file" directive in the appropriate
+           connect {} block.
+  Step 7:  /REHASH or send a SIGHUP to the daemon
+  Step 8:  Check ircd.log to make sure no errors showed up.
+  Step 9:  Try to connect to one another.
+
+  More to come later.
+
+
+OPENSSL VERSION REQUIREMENT
+===========================
+  OpenSSL 0.9.6 (or above) is required for cryptlinks to work.
+
+  The reason for this is severe: prior to OpenSSL 0.9.6, none of the
+  encryption/decryption functions did any form of error handling.  The
+  reasons for this are unknown, but the reasons behind not supporting
+  0.9.5 or below should be self-explanatory at this point.
+
+  To find out what OpenSSL version you have, try the following:
+
+    $ openssl version
+    OpenSSL 0.9.6 24 Sep 2000
+
+
+MULTIPLE OPENSSL INSTALLATIONS
+==============================
+  Some systems may have multiple copies of OpenSSL installed for any of
+  (but not limited to) the following reasons:
+
+    1.  The OpenSSL which came with the system is outdated.
+    2.  The OpenSSL which came with the system is broken.
+    3.  The administrator wanted a more recent version.
+    4.  Another software package automatically installed another copy
+        of OpenSSL based upon dependencies.
+
+  *******************************************************************
+  **  HAVING MULTIPLE COPIES OF OpenSSL ON THE SAME SYSTEM IS NOT  **
+  **           RECOMMENDED BY THE HYBRID DEVELOPMENT TEAM          **
+  *******************************************************************
+
+  If you are attempting to use hybrid-7 on a system where you do not
+  have root access, it is recommended that you communicate with your
+  system administrator or ISP (whichever the case may be) and request
+  that a newer version of OpenSSL be installed.
+
+  This disclaimer enforces the "clean system" concept.  Keeping a system
+  up-to-date with software releases and fixes (vendor-specific or free-lance)
+  is part of a system administrators job (professionally or socially).  It
+  is not a tedious task if the application is small and generally compact
+  (in comparison to, say, XFree86).
+
+  In the case of FreeBSD, you may either rebuild world (make buildworld)
+  or use the OpenSSL version provided in /usr/ports/security/openssl.
+
+
+OPENSSL INSTALLATION PATHS
+==========================
+  The stock source-code release of OpenSSL is written to install itself,
+  by default, in /usr/local/ssl.  This can be changed using the
+  "--prefix" and "--openssldir" arguments of OpenSSL's "config" stage.
+
+  The Hybrid team has verified the directory structure of stock OpenSSL
+  installations.  Here are some examples of OpenSSL configurations, and
+  how to get hybrid-7 to work with them:
+
+    OpenSSL:  ./config --prefix=/usr/local
+    hybrid-7: ./configure --enable-openssl=/usr/local
+
+    OpenSSL:  ./config --openssldir=/usr/local
+    hybrid-7: ./configure --enable-openssl=/usr/local
+
+    OpenSSL:  ./config --prefix=/usr/local --openssldir=/usr/local/ssl
+    hybrid-7: ./configure --enable-openssl=/usr/local
+
+  We recommend that administrators install OpenSSL using the "--openssldir"
+  argument, rather than the "--prefix" argument.  The reason for this is
+  purely cosmetical; it's nice to keep everything in one place, and keeps
+  a clean directory tree.
+
+  Finally, please verify that your OpenSSL installation was installed
+  properly, otherwise you will be unable to compile hybrid-7.  A proper
+  installation should have an include/openssl/ directory, and a
+  lib/ directory.  Both (and the files within) are needed for hybrid-7
+  to properly work with OpenSSL.
+
+
+CIPHERS
+=======
+  Ciphers can be selected specifically in hybrid-7, per connect {}
+  block (using 'cipher_preference'), as well as a default cipher
+  method defined in general {} ('default_cipher_preference').  Please
+  consult doc/example.conf or doc/ircd.conf for more information.
+
+  hybrid-7 chooses and checks ciphers in the following order:
+
+    Name           Cipher type        Cipher information
+    ----------------------------------------------------
+    BF/168         Blowfish           168-bit
+    BF/128         Blowfish           128-bit
+    CAST/128       CAST               128-bit
+    IDEA/128       IDEA               128-bit
+    RC5.16/128     RC5 16 round       128-bit
+    RC5.12/128     RC5 12 round       128-bit
+    RC5.8/128      RC5 8 round        128-bit
+    3DES/168       3DES               168-bit
+    DES/56         Standard DES       56-bit
+    ----------------------------------------------------
+
+  On most systems, Blowfish will be secure and fast enough for most
+  IRC networks and general transmissions.  Use the "encspeed" utility
+  (tools/encspeed) provided with hybrid-7 to find out which cipher may
+  work best on your system.  Naturally, you may want to pick a more
+  secure cipher depending upon the sensitivity of the data being
+  transmitted/received.  Also, be sure to pick something the remote
+  end (server) is able to handle well as well.  Communicate with your
+  administrators!
+
+  Some systems may lack the IDEA cipher (such is the case with FreeBSD
+  versions which originate in the USA).  The reason for this is simple:
+  there are licensing issues regarding this cipher (export regulations).
+  OpenSSL does support the IDEA cipher, but it cannot be provided with
+  this system for legal reasons.
+
+
+SOLARIS CAVEATS
+===============
+  Some versions of Solaris lack /dev/random or /dev/urandom.  These
+  are practically considered pre-requisites for OpenSSL to function
+  properly.
+
+  If you're using a version of Solaris which lacks /dev/random or
+  /dev/urandom, the OpenSSL authors provide two (2) possible
+  solutions.  Please read the following section of the OpenSSL FAQ:
+
+    http://www.openssl.org/support/faq.html#USER1
+
+  It is recommended that Solaris users choose one of the following
+  options:
+
+    1.  Install the EGD (Entropy Gathering Daemon) from:
+
+      http://sourceforge.net/projects/egd/
+
+    2.  If EGD does not work, use PRNGD (which is compatible with the
+        EGD interface for OpenSSL).  PRNGD can be obtained via:
+
+      http://www.aet.tu-cottbus.de/personen/jaenicke/postfix_tls/prngd.html
+
+    3.  For Solaris 2.6 users, install Sun vendor patch 105710-0 (known
+        as "SUNWski") and use the $RANDFILE environment variable to
+        specify /dev/random.  There are known caveats when using this
+        method (blocking vs. non-blocking).
+
+    4.  For Solaris 2.5.1, Solaris 2.6, Solaris 7, and Solaris 8, the
+        ANDIrand package can be used to emulate /dev/random and
+        /dev/urandom.  Check out the ANDIrand page at:
+
+      http://www.cosy.sbg.ac.at/~andi/
+
+
+
+END OF DOCUMENT

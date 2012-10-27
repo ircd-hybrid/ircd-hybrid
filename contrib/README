@@ -1,0 +1,233 @@
+$Id$
+-----------------------------------------------
+
+ircd-hybrid contributive add-ons ::
+
+This directory contains contributive modules, patches and other add-ons 
+that have been created by other people, or are not suitable to be included
+into the main ircd-hybrid tree for various reasons. The coding team does
+not officially support modules, patches and add-ons nor do they guarantee
+that any of them will work to their intended capacity.
+
+It is to be noted WITH feeling, that not all of these modules, patches
+or add-ons have been thoroughly tested, only that they've been tested
+enough to see if they compile or work. This is one of the main driving
+reasons why many of these are not in the main ircd-hybrid tree. At least
+one or two of the modules in contrib have been known to core servers when
+used. Heed this warning!
+
+To reiterate, ONE OR MORE OF THESE MAY AND PROBABLY WILL CORE YOUR SERVER.
+USE AT YOUR OWN RISK. Reading this dicticates that you agree to the stated
+fact.
+
+Modules ::
+-----------------------------------------------
+ip_cloaking.c    --  This module enables IP/hostname cloaking support for
+                     ircd-hybrid. It adds a CRC32 encrypted based cloaking
+                     known to be used by other daemons such as Unreal IRCd
+                     but with some modifications and different hashing
+                     methods. Please read README.cloaking before you compile
+                     and load this module, it contains VERY important
+                     information.
+
+
+m_capture.c      --  This module will essentially capture a client (making it
+                     impossible for a user to send commands to the server).
+
+                     Syntax: CAPTURE <nickname/mask>
+		             UNCAPTURE <nickname/mask>
+
+                     Example: (UN)CAPTURE scriptkiddie
+		              (UN)CAPTURE *!*@abuser.host
+
+
+m_change.c       --  This module will allow IRC operators to alter the ident,
+                     hostname or gecos (realname) fields of a given user.
+
+                     Syntax: CHGIDENT <nickname> <newident>
+                             CHGHOST <nickname> <newhostname>
+                             CHGNAME <nickname> <newname>
+
+                     Example: CHGIDENT lart llama
+                              CHGHOST lart i.hate.packets
+                              CHGNAME lart oorgle
+
+
+m_classlist.c    --  This module will show the number of clients connected in
+                     a specific class. Valid classes would be servers, users,
+                     operators, or any custom one you defined in class {} 
+                     blocks.
+
+                     Syntax: CLASSLIST <class>
+
+                     Example: CLASSLIST users
+
+
+m_clearchan.c    --  Similar to the OperServ command CLEARCHAN, this module
+                     will clear all users out of a channel, joins the person
+                     who issued it, and locks the channel. It should be noted
+                     that this command can be abused heavily.
+
+                     Syntax: CLEARCHAN <channel>
+
+                     Example: CLEARCHAN #warez
+
+
+m_ctrace.c       --  This module will perform a trace on a certain class. Valid
+                     classes would be servers, users, operators or any custom
+                     one you defined in class {} blocks.
+
+                     Syntax: CTRACE <class>
+
+                     Example: CTRACE users
+
+
+m_flags.c        --  This module adds csircd like support for changing
+                     usermodes. If passed without any arguments, it will
+                     show what flags are enabled and which are available.
+
+                     Syntax: FLAGS [+|-FLAG]
+
+                     Example: FLAGS +CALLERID
+
+
+m_force.c        --  This module will force a user to either part or join a
+                     channel with an optional status (@%+)
+
+                     Syntax: FORCEJOIN <nickname> [status]<channel>
+                             FORCEPART <nickname> <channel>
+
+                     Example: FORCEJOIN nick @#chitchat
+                              FORCEPART lamer #chitchat
+
+
+m_jupe.c         --  Similar to the OperServ command JUPE, this module adds the
+                     ability to jupiter (ban) a server from your network. It can
+                     be extremely dangerous if not used correctly or without 
+                     proper information. So use it with EXTREME care.
+
+                     Syntax: JUPE <server> :[reason]
+
+                     Example: JUPE node.server.net :get lost
+
+
+m_killhost.c     --  Similar to the OperServ command KILLHOST, allows you to
+                     issue (mass) KILLs to a specific hostname or hostmask that is 
+                     connected to the server.
+
+                     Syntax: KILLHOST <hostmask> [reason]
+
+                     Example: KILLHOST *@cloners.com clones
+
+
+m_ltrace.c       --  This module will give a limited trace. This is similar to
+                     TRACE except that it only reports current operators and servers.
+
+                     Syntax: LTRACE [nick|mask [server]]
+
+                     Example: LTRACE god
+                              LTRACE node.server.com
+
+
+m_mkpasswd.c     --  This module will generate a DES or MD5 encrypted password
+                     similar to the console version bundled with hybrid.
+
+                     Syntax: MKPASSWD <plaintext> [MD5|DES]
+
+
+m_ojoin.c        --  This module will add the ability to join any channel no
+                     matter what modes or limits are set with an optional 
+                     status (@%+) It should be noted that this command can be
+                     abused heavily.
+
+                     Syntax: OJOIN [status]<channel>
+
+                     Example: OJOIN @#private
+
+
+m_operspy.c      --  This module will allow operators with access to spy on
+                     users. It should be noted the notion of this module
+                     practically invalidates any form of privacy.
+
+                     Syntax: OPERSPY <LIST/WHO/MODE/WHOIS/NAMES> <parameter>
+
+
+m_opme.c         --  This module will allow an IRC operator to op themselves in
+                     an opless channel should the need arise.
+
+                     Syntax: OPME <channel>
+                     Example: OPME #orphanchan
+
+
+m_services.c     --  This module will add services hook support to hybrid. It
+                     will add secure messaging aliases to services like such
+                     as NickServ, OperServ and so on. It also adds SVSNICK
+                     support to allow NickServ to change nicknames should
+                     a user fail to identify or if an operator chooses
+                     to want to change a user's nickname if it is offensive.
+                     To use the aliases simply do ServiceName without MSG,
+                     e.g. /NickServ IDENTIFY instead of /MSG NickServ IDENTIFY.
+
+                     Syntax: SVSNICK <nickname> <newnick>
+
+                     Example: SVSNICK fsck lamer
+
+
+m_spoof.c        --  This module adds automated auth {} block configurations
+                     on local and over-local levels. Check m_spoof.c for
+                     more information and the help pages for SPOOF and
+                     DELSPOOF.
+
+                     Syntax: SPOOF <umask@hmask> <spoof> [flags [password]]
+                             DELSPOOF <umask@hmask>
+
+                     Example: SPOOF *@some.host.org i.hate.packets lkgf
+                              DELSPOOF *@other.host.edu
+
+
+example_module.c --  This is an example module template to help users create
+                     their own modules.
+
+
+Spy Modules ::
+-----------------------------------------------
+
+The following modules are the 'spy' parts and are accessible via the +y
+user mode.
+
+spy_admin_notice.c   -- Spy on clients doing ADMIN
+spy_info_notice.c    -- Spy on clients doing INFO
+spy_links_notice.c   -- Spy on clients doing LINKS
+spy_motd_notice.c    -- Spy on clients doing MOTD
+spy_stats_notice.c   -- Spy on clients doing all STATS
+spy_stats_p_notice.c -- Spy on clients doing STATS p only
+spy_trace_notice.c   -- Spy on clients doing TRACE/LTRACE
+spy_whois_notice.c   -- Spy on local clients who WHOIS you.
+
+Note: If you have both spy_stats_notice.c and spy_stats_p_notice.c
+loaded at the same time you will get two messages. So only load one
+or the other to avoid duplicate NOTICE events.
+
+Help Files ::
+-----------------------------------------------
+
+Each contrib module listed here has an accompanying help page or set of
+help pages. They will be installed when you issue 'make install' inside
+the contrib directory. To view them do /QUOTE HELP COMMAND.
+
+
+Other Files ::
+-----------------------------------------------
+
+Other files that have been put into the contrib directory but do not have
+a specific category are listed here with a brief description of what they
+are and what they do.
+
+challange.irc    -- ircII script that works in conjunction with rsa_respond
+                    so you can authenticate within your client.
+
+ircd-hybrid.spec -- RPM specifications file that can be used to build an RPM of
+                    ircd-hybrid.
+
+ircd.init.in     -- rc-init style file used with the spec file to allow system
+                    loading of ircd-hybrid.

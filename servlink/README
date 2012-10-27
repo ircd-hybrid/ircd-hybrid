@@ -1,0 +1,113 @@
+Servlink protocol documentation.
+$Id$
+--------------
+
+After negotiating an incoming/outgoing server connection, the ircd will
+fork, then execve servlink, with fd 0 as one end of a control pipe and
+fd 1 as one end of a data pipe. fd 2 will be the socket connected to
+the remote server.
+
+The data pipe is used by the ircd to send/receive normal, decrypted,
+uncompressed IRC commands to/from the remote server.  The socket is used to
+send the (processed) data to the remote server, and receive the data from
+the remote server.
+
+The control pipe is used to activate encryption/compression and to set the
+encryption key/algorithm to be used.
+
+Format of control messages:
+
+<u8 command><optional data>
+
+data format:
+<u16 len><data>
+
+Commands:
+
+001 - SET_ZIP_OUT_LEVEL
+	data: yes
+	description:
+		set compression level (0 [use default, 6], or 1-9)
+
+002 - START_ZIP_OUT
+	data: no
+	description:
+		all data written to the data pipe will be compressed
+		prior to being sent to the remote server.
+
+003 - START_ZIP_IN
+	data: no
+	description:
+		all data not yet read from the slink program will be
+		decompressed before reading
+
+004 - SET_CRYPT_IN_CIPHER
+	data: <u8 cipher id>
+
+	001 - BLOWFISH
+	002 -     CAST
+	003 -      DES
+	004 -     3DES
+	005 -     IDEA
+	006 -      RC5 ( 8 rounds)
+	007 -      RC5 (12 rounds)
+	008 -      RC5 (16 rounds)
+
+	cannot be called whilst decryption is active.
+
+005 - SET_CRYPT_IN_KEY
+	data: <key>
+
+	cannot be called whilst decryption is active.
+	
+006 - START_CRYPT_IN
+
+007 - SET_CRYPT_OUT_CIPHER
+	data: <u8 cipher id>
+
+        001 - BLOWFISH
+        002 -     CAST
+        003 -      DES
+        004 -     3DES
+        005 -     IDEA
+        006 -      RC5 ( 8 rounds)
+        007 -      RC5 (12 rounds)
+        008 -      RC5 (16 rounds)
+
+	cannot be called whilst encryption is active.
+
+008 - SET_CRYPT_OUT_KEY
+	data: <key>
+
+	cannot be called whilst encryption is active.
+
+009 - START_CRYPT_OUT
+
+010 - INJECT_RECVQ
+	data: recvq
+
+	Used before INIT to inject any data read from the server fd which
+	should be pre-processed by servlink before being sent back
+	to the LOCAL_FD through the data fd.
+
+011 - INJECT_SENDQ
+	data: sendq
+
+	As above, but sent to remote server without processing.
+
+012 - INIT
+
+013 - ZIPSTATS
+	request to send ziplinks statistics reply.
+
+replies
+
+001 - ERROR
+	data: u32 len/char error[len]
+
+	fatal error message.
+
+002 - ZIPSTATS
+        data: u32 in/u32 in_wire/u32 out/u32 out_wire                           
+
+	ziplinks commpression statistics

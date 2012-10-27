@@ -1,0 +1,7 @@
+# $Id$
+JUPE [servername] :[reason]
+
+The JUPE command takes two arguments. The first argument is the server
+you wish to jupe (ban) and the second argument is the reason for the
+jupe. Please be aware that the use of this command can be highly dangerous
+and can be used to jupe your own servers if you're not careful.

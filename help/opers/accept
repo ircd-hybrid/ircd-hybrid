@@ -1,0 +1,9 @@
+ACCEPT [parameter]
+
+ACCEPT allows you to control who can send you a NOTICE or PRIVMSG
+while you have user mode +g enabled.
+
+For +g: /QUOTE ACCEPT <n!u@h>   -- Add a permitted mask
+        /QUOTE ACCEPT -<n!u@h>  -- Remove a permitted mask
+        /QUOTE ACCEPT *         -- List the present permitted masks
+        /QUOTE ACCEPT           -- List the present permitted masks

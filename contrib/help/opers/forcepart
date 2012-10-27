@@ -1,0 +1,6 @@
+# $Id$
+FORCEPART <nickname> <channel>
+
+The FORCEPART command requires two arguments to be given. The first
+argument is the nickname of the user you wish to execute the command
+on, and the second argument is the destination channel they are to part.

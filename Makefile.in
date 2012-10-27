@@ -1,0 +1,87 @@
+#************************************************************************
+#*   IRC - Internet Relay Chat, Makefile
+#*   Copyright (C) 1990, Jarkko Oikarinen
+#*
+#*   This program is free software; you can redistribute it and/or modify
+#*   it under the terms of the GNU General Public License as published by
+#*   the Free Software Foundation; either version 1, or (at your option)
+#*   any later version.
+#*
+#*   This program is distributed in the hope that it will be useful,
+#*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#*   GNU General Public License for more details.
+#*
+#*   You should have received a copy of the GNU General Public License
+#*   along with this program; if not, write to the Free Software
+#*   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*   $Id$
+#*/
+
+RM          = @RM@
+
+# Default make flags - you may want to uncomment this on a multicpu machine
+#MFLAGS   = -j 4
+DEPEND_DIRS  = lib modules src servlink
+BUILD_DIRS   = ${DEPEND_DIRS} tools
+INSTALL_DIRS = ${BUILD_DIRS} etc doc help
+CLEAN_DIRS   = ${BUILD_DIRS} contrib
+# Anywhere that we can make install, we obviously can rm -f Makefile
+DISTCLEAN_DIRS = ${INSTALL_DIRS} contrib messages
+
+prefix		= $(DESTDIR)@prefix@
+datarootdir	= $(DESTDIR)@datarootdir@
+
+# The make used HAS to set $(MAKE). But then, if we don't do it this
+# way, people lose the option to use a 'make' called something other 
+# than `make.' If it doesn't set $(MAKE), fall back to the old behavior
+# by substing SET_MAKE.
+
+@SET_MAKE@
+
+all:	build
+
+build: include/setup.h depend
+	@for i in $(BUILD_DIRS); do \
+		echo "build ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} build || exit; cd ..;\
+	done
+
+clean:
+	${RM} -f *~ core rsa_respond.tar rsa_respond.tar.gz
+	@for i in $(CLEAN_DIRS); do \
+		echo "clean ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} clean || exit; cd ..;\
+	done
+	-@if [ -f include/setup.h ] ; then \
+		echo "To really restart installation, ${MAKE} distclean" ; \
+	fi
+
+distclean:
+	${RM} -f Makefile *~ *.rej *.orig *core
+	${RM} -f config.status config.cache config.log
+	${RM} -rf autom4te.cache
+	cd include; ${RM} -f setup.h *~ *.rej *.orig ; cd ..
+	@for i in $(DISTCLEAN_DIRS); do \
+		echo "distclean ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} distclean || exit; cd ..; \
+	done
+
+depend:
+	@for i in $(DEPEND_DIRS); do \
+		echo "depend ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} .depend || exit; cd .. ; \
+	done
+
+install: all
+	@for i in $(INSTALL_DIRS); do \
+		echo "install ==> $$i";\
+		cd $$i && ${MAKE} ${MFLAGS} install || exit; cd ..; \
+	done
+
+include/setup.h:
+	@sh configure
+
+# A la Linux kernel config :)
+dep: depend

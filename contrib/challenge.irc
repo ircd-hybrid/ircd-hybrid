@@ -1,0 +1,75 @@
+/*
+ * $Id$
+
+	CHALLENGE.IRC
+
+	Original code/idea by xyst
+	Rewritten by BlackJac [December 22, 2002]
+*/
+
+# make it /unloadable
+package challenge
+
+# Location and filename of your private key
+@ challenge.keypath = [~/.irc/challenge/identity]
+
+# Does your private key require a passphrase [yes/no]?
+@ challenge.passphrase = [yes]
+
+# Location of the 'respond' binary
+@ challenge.resppath = [~/.irc/challenge/respond]
+
+# Location and filename of your saved configuration file
+@ challenge.savepath = [~/.irc/challenge/config]
+
+/******************************************************************************/
+
+alias challenge {
+  if ((fexist($challenge.keypath) != -1) && (fexist($challenge.resppath) != -1)) {
+    quote CHALLENGE ${[$0] ? [$0] : servernick()}
+  }{xecho $G Challenge error - make sure keypath and resppath are set correctly.;rsaconfig}
+}
+
+alias rsaconfig {
+  if ([$0]) {
+    switch ($0) {
+      (keypath) (passphrase) (resppath) {
+        if ([$1]) {@ challenge[$0] = [$1]}
+        fe (keypath passphrase resppath) cc {xecho $G Challenge -- $cc: ${challenge[$cc]}}
+      }
+      (save) {
+        @ unlink($challenge.savepath)
+        @ :fd = open($challenge.savepath W)
+        fe (keypath passphrase resppath) cc {@ write($fd @ challenge.$cc = [${challenge[$cc]}])}
+        @ close($fd)
+        xecho $G Challenge -- saved settings.
+      }
+      (*) {xecho $G Usage: /rsaconfig <keypath|passphrase|resppath> [value]}
+    }
+  }{
+    xecho $G Current settings for challenge.irc:
+    fe (keypath passphrase resppath) cc {xecho $G   Challenge -- $cc: ${challenge[$cc]}}
+    xecho $G Type "/rsaconfig <keypath|passphrase|resppath> <value>" to change values, "/rsaconfig save" to save them.
+  }
+}
+
+^on ^386 "% %" {
+  @ challenge.num++
+  ^on ^exec "chall$challenge.num *" {
+    if ([$2]) {xecho $G Challenge error -- $1-}{quote CHALLENGE +$1}
+    ^on ^exec -"chall$challenge.num *"
+  }
+  ^on ^exec_exit "chall$challenge.num *" {^on exec_exit -"chall$challenge.num *"}
+  ^exec -name chall$challenge.num $challenge.resppath $challenge.keypath $1
+  if (challenge.passphrase == [yes]) {
+    input -noecho "Enter passphrase for challenge: " {^msg %chall$challenge.num $*}
+  }
+  ^on ^464 * {xecho $G Challenge error -- password incorrect. Check your key.}
+}
+
+if (fexist($challenge.savepath) != -1) {
+  xecho $G Loading settings from $challenge.savepath\...
+  load $challenge.savepath
+}{xecho $G Config file not found, use "/rsaconfig save"\; using defaults.}
+
+rsaconfig

@@ -1,0 +1,100 @@
+-- ircd-hybrid-8beta3 Release Notes
+o) Fixed wrong syntax of several language files
+o) &localchannels have been removed
+o) /messaging opers@some.server is no longer supported
+o) Fixed bug that would possibly lead to a topic desynchronization
+o) Removed serverhide::disable_hidden configuration option
+o) Dropped ircd-hybrid-6 GLINE compatibility mode
+o) use_invex, use_except and use_knock configuration options
+   have been removed. These features are now enabled by default
+
+
+-- ircd-hybrid-8beta2 Release Notes
+o) channel::disable_fake_channels now also disables ascii 29 (mIRC italic)
+   when set to yes
+o) Added channel::max_chans_per_oper configuration directive. The old way
+   was to let ircops join three times the amount of max_chans_per_user
+o) Replaced MODLOAD, MODUNLOAD, MODRELOAD, MODLIST and MODRESTART commands
+   with the new MODULE command which can be fed with the LOAD, UNLOAD, RELOAD
+   and LIST parameters.
+   MODRESTART has been entirely removed. Use "MODULE RELOAD *" to reload all modules
+o) Added back server notice when a client tries to obtain a reserved nick name
+o) Removed OMOTD module
+o) Added 'set' to operator privilege flags. Gives access to the "SET" command
+o) Improved TS6 support
+
+
+-- ircd-hybrid-8beta1 Release Notes
+o) Implemented full services support. Among other things, the following changes
+   have been done for this:
+   - Added SVSNICK, and SVSMODE command handlers
+   - Added service stamps to NICK/UID messages
+   - Added SVS to server capabilities (CAPAB). SVS capable servers can
+     deal with extended NICK/UID messages that contain service IDs/stamps.
+   - Usermode +r (registered nick) has been added, as well as
+     channelmode +r (registered channel)
+   - Now that usermode +r has a different function than before, rejected
+     client notices now go to new usermode +j
+   - Various services shortcuts have been added (/NS, /CS, /NICKSERV, /CHANSERV, etc.)
+   - Added channelmode +R (only registered clients may join that channel)
+   - Added usermode +R (only registered clients may send a private message)
+   - Added services{} block to ircd.conf
+   - Added services_name directive to general{} block
+   - Added GLOBOPS mainly for services compatibility, but can be used by operators, too
+o) RKLINE and RXLINE commands have been removed. Regular expression based
+   bans should only be added via ircd.conf
+o) Added 'globops', 'restart', 'dline', 'undline' and 'module' operator privilege flags.
+   Read doc/example.conf for further explanation of what these flags
+   are supposed to be doing
+o) Idle-time klines have been removed
+o) Cleaned up modules API. Old modules won't work anymore
+o) Remove general::burst_away configuration directive. AWAY bursts are now
+   controlled via connect::flags explicitly
+o) Introduced new logging subsystem including log rotation based on
+   file sizes. Log timestamp format is ISO8601 now
+o) Added support for remote D-lines
+o) Added usermode +H which is basically a replacement for the hidden_admin and
+   hidden_oper operator flags. With usermode +H, irc operator status can now
+   be hidden even on remote servers
+o) Added CIDR support for operator{} blocks
+o) The servlink program has been removed. ircd-hybrid can now make use of SSL/TLS
+   for inter-server communication.
+   NOTE: compressed server links are of course still available, but a SSL/TLS
+   connection is required, as compression is now handled via the OpenSSL library
+o) Removed 'ssl_server_protocol' configuration directive and
+   added 'ssl_client_method' and 'ssl_server_method' instead.
+   Both of these options can now be changed at runtime
+o) Oper login IDs are no longer limited to NICKLEN*2
+o) Removed channel::burst_topicwho configuration option. Topicsetters are
+   now sent by default
+o) "STATS Y|y" now reports CIDR limits as well
+o) Added m_webirc.c to contrib/
+o) Overall code cleanup and speed improvements
+
+--------------------------------------------------------------------------------
+
+NOTE: This is still BETA code.  Run it at your own risk.  By running this
+ code you assume FULL responsibility for any problems it may cause.  We do
+ NOT recommend that you run BETA code on production IRC networks such
+ as EFnet.
+
+BUGS: Major bugs in this release are listed in BUGS
+
+BUG REPORTS: If you run this code and encounter problems, you must report
+ the bug by EMAIL to bugs@ircd-hybrid.org
+ Please include a gdb backtrace and a copy of your config.h and
+ ircd.conf with any report (with passwords and other sensitive
+ information masked).
+
+DISCUSSION: There is a mailing list for discussion of hybrid issues,
+ including betas.  To subscribe, use this link:
+    https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
+ This is the proper place to discuss new features, bugs, etc.  Posting here
+ is much more likely to get something done than ranting on #TZ.
+
+Questions/comments directed to bugs@ircd-hybrid.org
+
+Other files recommended for reading: BUGS, README, INSTALL
+
+--------------------------------------------------------------------------------
+$Id$

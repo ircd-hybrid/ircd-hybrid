@@ -1,0 +1,16 @@
+GUNGLINE <user@host> :[reason]
+
+-- if glines are enabled --
+Attempts to remove a global IRC-network wide ban on
+<user@host> for the reason [reason].
+
+It takes three different opers on three different
+servers to do the same GUNGLINE within a short interval,
+to have a GUNGLINE triggered for a compiled time of hours.
+
+GUNGLINE user@ip.ip.ip.ip
+will ungline the user at the unresolved ip.
+ip.ip.ip.ip can be in CIDR form i.e. 192.168.0.0/24
+or 192.168.0.* (which is converted to CIDR form internally)
+
+- Requires Oper Priv: G

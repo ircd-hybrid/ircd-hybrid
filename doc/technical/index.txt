@@ -1,0 +1,16 @@
+$Id$
+-----------------------------------------------
+
+Technical Documentation for ircd-hybrid-8
+
+event.txt                 - Outline of the event system
+fd-management.txt         - Outline of the file descriptor management system
+hostmask.txt              - Outline of hostmask handling
+network.txt               - Outline of the network traffic subsystem
+rfc1459.txt               - The IRC RFC
+rfc2812.txt               - The IRC Client RFC
+rfc2813.txt               - The IRC Server RFC
+send.txt                  - Document on all of the send_to functions
+ts3.txt                   - TSora Version 3 Protocol
+ts5.txt                   - TSora Version 5 Protocol
+ts6.txt                   - TSora Version 6 Protocol

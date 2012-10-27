@@ -1,0 +1,48 @@
+                              Server VERSION Info
+
+   $Id$
+
+   Copyright (c) 2005 by ircd-hybrid team
+
+     ----------------------------------------------------------------------
+
+   Updated for Hybrid 7.2 (2005/08/20)
+
+   When you type /VERSION, you will often see something like this:
+
+   hybrid-7.2beta1(20050820_4). test1.chatjunkies.org :eGgHIKMZ6 TS6ow
+
+   Ever wondered what those funny chars mean after the version number? Well
+   here they are:
+
+   +----------------------------+
+   | 'e'  | USE_EXCEPT          |
+   |------+---------------------|
+   | 'G'  | GLINES              |
+   |------+---------------------|
+   | 'g'  | NO_FAKE_GLINES      |
+   |------+---------------------|
+   | 'H'  | HUB                 |
+   |------+---------------------|
+   | 'I'  | USE_INVEX           |
+   |------+---------------------|
+   | 'K'  | USE_KNOCK           |
+   |------+---------------------|
+   | 'M'  | IDLE_FROM_MSG       |
+   |------+---------------------|
+   | 'Z'  | ZIPLINKS            |
+   |------+---------------------|
+   | 'T'  | IGNORE_BOGUS_TS     |
+   |------+---------------------|
+   | '6'  | IPv6                |
+   |------+---------------------|
+   | ---  | ------------------- |
+   |------+---------------------|
+   | 'TS' | Supports TS         |
+   |------+---------------------|
+   | '6'  | TS Version 6        |
+   |------+---------------------|
+   | 'o'  | TS Only             |
+   |------+---------------------|
+   | 'w'  | TS Warnings         |
+   +----------------------------+

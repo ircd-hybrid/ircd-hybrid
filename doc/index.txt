@@ -1,0 +1,23 @@
+$Id$
+-----------------------------------------------
+
+Documentation for ircd-hybrid
+
+CIDR.txt		- Description of CIDR in IPv4
+challenge.txt           - Overview of the challenge/response system for
+                          obtaining operator status
+guidelines.txt		- Documentation guidelines
+index.txt		- This file
+ircd.8                  - The new revised manpage, read with the following
+                          commands in the prefix directory:
+                          man -M . ircd
+kline.txt               - Outline of the remote K-line protocol for both
+                          opers and servers
+messages.txt            - A general help file for users and admins to
+                          customize ircd's messages.
+modeg.txt               - An in depth description of the server side silence
+                          user mode (+g)
+modes.txt               - A list of all user and channel modes
+resv.txt		- Outline of the RESV command.
+server-version-info     - Overview of the flags shown in /version
+serverhide.txt          - Information about the server hide options

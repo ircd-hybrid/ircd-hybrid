@@ -1,0 +1,54 @@
+#!/bin/sh
+# $Id$
+#
+# mkkeypair - short shell script to generate a OpenSSL RSA key suitable 
+# for use with cryptlinks.
+#
+# (C) 2003 Joshua Kwan and the IRCD-Hybrid team
+# See LICENSE for the terms of copying.
+
+if test -f rsa.key; then
+	echo Moving old key out of the way to rsa.key.old
+	mv rsa.key rsa.key.old
+fi
+
+if test -f rsa.pub; then
+	echo Moving old public key out of the way to rsa.pub.old
+	mv rsa.pub rsa.pub.old
+fi
+
+echo Generating random bytes
+
+if test -c /dev/urandom; then
+	RANDGEN=/dev/urandom
+elif test -c /dev/random; then
+	RANDGEN=/dev/random
+else
+	RANDGEN=input
+fi
+
+if test "$RANDGEN" = input; then
+	echo "Your system doesn't have a suitable random data generator,"
+	echo "so type 150 characters of gibberish here to simulate it."
+	read -n 150 randomdata
+	echo
+	echo "$randomdata" > randdata
+	sort < randdata >> randdata.1
+	cat randdata.1 >> randdata
+	rm -f randdata.1
+else
+	dd if=$RANDGEN of=randdata count=1 bs=2048
+fi
+
+echo Creating the private key.
+openssl genrsa -rand randdata -out rsa.key 2048 || exit 1
+chmod 600 rsa.key
+echo Creating the public key from the private key.
+openssl rsa -in rsa.key -out rsa.pub -pubout || exit 1
+chmod 644 rsa.pub
+
+echo
+echo Private key now exists as rsa.key
+echo Public key now exists as rsa.pub
+
+rm -f randdata

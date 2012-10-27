@@ -1,0 +1,6 @@
+# $Id$
+OMOTD [servername]
+
+OMOTD will display the operator message of the day for the
+server name specified, or the local server if no servername
+was given.

@@ -1,0 +1,13 @@
+# $Id$
+UNRESV <channel|nick>
+
+-- Remove a RESV on a channel or nick
+Will attempt to remove the resv for the given
+channel/nick. If the resv is conf based, the resv
+will not be removed.
+
+UNRESV <channel|nick> ON irc.server
+will unresv the <channel|nick> on irc.server if irc.server
+accepts remote unresvs. If the resv is conf based, the resv
+will not be removed.
+

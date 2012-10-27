@@ -1,0 +1,57 @@
+# $Id$
+
+INSTALL		= @INSTALL@
+INSTALL_DATA	= @INSTALL_DATA@
+MV		= @MV@
+RM		= @RM@
+TEST		= @TEST@
+
+# no whitespace here, test will mess up
+CLOBBER=@CLOBBER@
+
+prefix		= $(DESTDIR)@prefix@
+sysconfdir	= $(DESTDIR)@sysconfdir@
+exec_prefix	= $(DESTDIR)@exec_prefix@
+datarootdir	= $(DESTDIR)@datarootdir@
+
+DISTFILES	= @EXAMPLE_CONF@
+
+all:
+
+install:
+	-@if $(TEST) $(sysconfdir) -ef `pwd`; then exit; fi; \
+	mkdir -p $(sysconfdir); \
+	for i in $(DISTFILES); do \
+		if test -f $(sysconfdir)/$$i -a -z "$(CLOBBER)"; then \
+			echo $(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
+			$(MV) $(sysconfdir)/$$i $(sysconfdir)/$$i.old; \
+		fi; \
+		echo $(INSTALL_DATA) $$i $(sysconfdir); \
+		$(INSTALL_DATA) $$i $(sysconfdir); \
+	done
+
+	@echo "Note: more example configuration files can be found in this directory (etc/)."
+	
+	@if test ! -f "$(sysconfdir)/ircd.motd"; then \
+		echo "Creating generic $(sysconfdir)/ircd.motd"; \
+		echo "This is ircd-hybrid MOTD replace it with something better" > $(sysconfdir)/ircd.motd; \
+	fi
+	
+	@for i in d k x rx rk; do \
+		if test ! -f "$(sysconfdir)/$${i}line.conf"; then \
+			echo touch $(sysconfdir)/$${i}line.conf; \
+			touch $(sysconfdir)/$${i}line.conf; \
+		fi; \
+	done
+
+	@for i in n c; do \
+		if test ! -f "$(sysconfdir)/$${i}resv.conf"; then \
+			echo touch $(sysconfdir)/$${i}resv.conf; \
+			touch $(sysconfdir)/$${i}resv.conf; \
+		fi; \
+	done
+
+distclean:
+	${RM} -f Makefile
+
+.PHONY: install distclean

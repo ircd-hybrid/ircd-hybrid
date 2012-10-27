@@ -1,0 +1,7 @@
+# $Id$
+MKPASSWD <plaintext> [DES|MD5]
+
+The MKPASSWD command is essentially the same as the mkpasswd binary
+distributed with hybrid. It can make an encrypted password for use
+in the ircd.conf using either DES or MD5 encryption, and then give
+you the salted result via NOTICE.

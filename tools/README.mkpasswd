@@ -1,0 +1,47 @@
+mkpasswd.c documentation
+$Id$
+
+This is documentation for the mkpasswd.c included in ircd-hybrid-7.
+
+This version of mkpasswd can create both DES and MD5 passwords, with
+either randomly generated or user provided salts.  
+
+Options:
+-m - Create an MD5 password
+-d - Create a DES password
+-l - Specify the length of a random MD5 salt
+-p - Specify the plaintext password at the command line
+-s - Specify the salt at the command line
+-h - Get help
+
+Without the presence of any parameters, it'll behave like the old mkpasswd,
+creating a DES password with a randomly generated salt and prompting for
+the password (without echo).
+
+A DES salt is a pair of alphanumeric characters ('.' and '/' are permitted
+as well), such as 'a4' or 'Td'.
+
+An MD5 salt consists of up to 16 (though most implementations limit you to
+8) alphanumeric characters (plus '.' and '/'),
+such as 'tGd' or 'J6d4dfG'.
+
+Known bugs:
+Blowfish (on OpenBSD) is not yet supported
+The encryption algorithms supported depend on your system's crypt()
+  implementation.
+The maximum length of an MD5 salt is limited to your systems crypt()
+  implementation, typically 8.
+crypt.c (MD5 implementation) is included, but not yet compiled into the
+  program for systems that do not support MD5.
+
+Supported Platforms (Known and tested):
+Linux glibc (DES and MD5)
+FreeBSD 3.x (DES (MD5 maybe))
+FreeBSD 4.x (DES and MD5)
+Solaris 2.5-2.6 (DES only)
+Cygwin 1.1.4 (DES only)
+Prior Cygwin with the MD5 libcrypt (MD5 only)
+OpenBSD 2.7 (don't link with -lcrypt) (DES and MD5, no Blowfish support)
+Mac OS-X (Darwin) (don't link with -lcrypt) (DES only)
+
+Other systems probably work, but they haven't been amply tested.

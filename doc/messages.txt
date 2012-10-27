@@ -1,0 +1,54 @@
+                         Message Customization Overview
+
+   $Id$
+
+   Copyright (c) 2005-2012 by ircd-hybrid team
+
+     ----------------------------------------------------------------------
+
+   Hybrid now supports its own .lang format for i18n'd IRC status messages.
+
+   This document is split into two parts, using message files, and creating
+   your own.
+
+     ----------------------------------------------------------------------
+
+                    Using Provided or Pre-made Message Files
+
+   There are a number of message files provided with ircd-hybrid. These can
+   be found in the source tree in messages/.
+
+   These files are automatically installed by `make install'.
+
+   These message files can be used in ircd once they are installed. Try the
+   installed message file with /quote SET MSGLOCALE <locale> first. The
+   locale will be 'standard' for the plain messages that are Hybrid's
+   default.
+
+   If the desired message file works without any issues, it can be set to be
+   the default message file in the ircd.conf file. Refer to example.conf's
+   documentation on the message_locale setting.
+
+     ----------------------------------------------------------------------
+
+                           Creating Your Own Messages
+
+   This process is a little more complicated. The easiest way to start
+   editing messages is to take ircd-standard.example.lang, make a copy,
+   and change whichever status lines you wish.
+
+   Once you have your customized message file ready, just copy it into the
+   same place as the rest of the messages, typically $PREFIX/messages.
+
+   If you think your .lang file deserves to be in the official distribution,
+   submit it to us at bugs@ircd-hybrid.org. It must be complete and as error-
+   free as you can make it since it is subject to public consumption. Providing
+   a translation will be a way that nearly anyone who knows multiple languages
+   to contribute to ircd, and get their name in the translation credits.
+
+   When making such a translation, you should base it off
+   ircd-standard.example.lang, which is a conversion of our base (English)
+   messages.tab into the .lang format. You should edit it from there into your
+   own language, and of course give credit to yourself and whoever else you
+   may have done the translation with. Then, send it off to us, and we'll see
+   what we can do.

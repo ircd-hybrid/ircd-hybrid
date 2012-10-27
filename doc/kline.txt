@@ -1,0 +1,101 @@
+/* doc/kline.txt - Overview of the remote kline system
+ * 
+ * Copyright (C) 2005-2012 Hybrid Development Team
+ *
+ * $Id$
+ */
+
+
+Introduction
+------------
+
+Since ircd-hybrid-7, opers are allowed to add and remove K-Lines on multiple
+servers, an extension and replacement of the old ircd-hybrid-6 method of sharing
+all K-Lines between servers.
+
+In this implementation, it is extended to be routable among servers which
+understand the "KLN" capability. This allows us to continue to "talk"
+to non remote kline capable servers without breaking anything.
+
+
+Usage
+-----
+
+The old K-Line method has not been changed.  To place a K-Line it is still:
+
+/quote kline <nick|user@host> :reason
+/quote kline [tkline_duration] <nick|user@host> :reason
+
+Scenario 1
+----------
+
+Oper wishes to K-Line user@host on server irc.xyz.net
+
+/quote kline <nick|user@host> on irc.xyz.net :reason
+/quote kline [duration] <nick|user@host> on irc.xyz.net :reason
+
+Scenario 2
+----------
+
+Oper wishes to K-Line user@host on all servers named *.uk
+
+/quote kline <nick|user@host> on *.uk :reason
+/quote kline [duration] <nick|user@host> on *.uk :reason
+
+Scenario 3
+----------
+
+Oper wishes to place a network wide K-Line on user@host
+
+/quote kline <nick|user@host> on * :reason
+/quote kline [duration] <nick|user@host> on * :reason
+
+
+Authorization
+-------------
+
+For the K-Line to be accepted by the remote server, the server must have
+explicitly allowed K-Lines from that user.  This is done via a shared {};
+block in ircd.conf.
+
+The shared block contains two settings, a user@host mask of the oper
+who is allowed to K-Line, and a servername.
+
+- If both of these options are present, K-Lines will only be allowed 
+  from that specific user@host on that specific server. 
+- If only the servername is present, all K-Lines from opers on that
+  server will be accepted.
+- If only the user@host is present, all K-Lines from that user@host on
+  any server will be accepted.
+- If neither are present, the shared block is invalid.
+
+shared {
+	/* The name of the server we allow K-Lines from */
+	name = "this.server.net";
+
+	/* the user@host allowed to K-Line */
+	user = "user@host.com";
+};
+
+Server to Server Protocol
+-------------------------
+
+As mentioned above, each server capable of remote K-Lines passes
+the capability KLN along. No server will send a KLINE to a server
+without a KLN capability.
+
+Server to server messages are formatted like this:
+
+  ":oper KLINE target.server duration user host :reason"
+    
+Note the difference between hybrid-6 GLINE which explicitly passed
+the oper user@host and server along. This was originally done to handle
+possible desync conditions, but is now shelved in favor of saving 
+some bandwidth.
+
+oper:		the nick of the oper performing the K-Line
+target.server:	the server(s) this K-Line is destined for
+duration:	the duration if a TK-Line, 0 if permanent.
+user:		the 'user' portion of the K-Line
+host:		the 'host' portion of the K-Line
+reason:		the reason for the K-Line.

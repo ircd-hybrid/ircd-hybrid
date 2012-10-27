@@ -1,0 +1,122 @@
+$Id$
+-----------------------------------------------
+
+ircd-hybrid contributive add-ons ::
+
+This directory contains contributive modules, patches and other add-ons 
+that have been created by other people, or are not suitable to be included
+into the main ircd-hybrid tree for various reasons. The coding team does
+not officially support modules, patches and add-ons nor do they guarantee
+that any of them will work to their intended capacity.
+
+It is to be noted WITH feeling, that not all of these modules, patches
+or add-ons have been thoroughly tested, only that they've been tested
+enough to see if they compile or work. This is one of the main driving
+reasons why many of these are not in the main ircd-hybrid tree. At least
+one or two of the modules in contrib have been known to core servers when
+used. Heed this warning!
+
+To reiterate, ONE OR MORE OF THESE MAY AND PROBABLY WILL CORE YOUR SERVER.
+USE AT YOUR OWN RISK. Reading this dicticates that you agree to the stated
+fact.
+
+Modules ::
+-----------------------------------------------
+ip_cloaking.c    --  This module enables IP/hostname cloaking support for
+                     ircd-hybrid. It adds a CRC32 encrypted based cloaking
+                     known to be used by other daemons such as Unreal IRCd
+                     but with some modifications and different hashing
+                     methods. Please read README.cloaking before you compile
+                     and load this module, it contains VERY important
+                     information.
+
+
+m_change.c       --  This module will allow IRC operators to alter the ident,
+                     hostname or gecos (realname) fields of a given user.
+
+                     Syntax: CHGIDENT <nickname> <newident>
+                             CHGHOST <nickname> <newhostname>
+                             CHGNAME <nickname> <newname>
+
+                     Example: CHGIDENT lart llama
+                              CHGHOST lart i.hate.packets
+                              CHGNAME lart oorgle
+
+
+m_clearchan.c    --  Similar to the OperServ command CLEARCHAN, this module
+                     will clear all users out of a channel, joins the person
+                     who issued it, and locks the channel. It should be noted
+                     that this command can be abused heavily.
+
+                     Syntax: CLEARCHAN <channel>
+
+                     Example: CLEARCHAN #warez
+
+
+m_ctrace.c       --  This module will perform a trace on a certain class. Valid
+                     classes would be servers, users, operators or any custom
+                     one you defined in class {} blocks.
+
+                     Syntax: CTRACE <class>
+
+                     Example: CTRACE users
+
+
+m_force.c        --  This module will force a user to either part or join a
+                     channel with an optional status (@%+)
+
+                     Syntax: FORCEJOIN <nickname> [status]<channel>
+                             FORCEPART <nickname> <channel>
+
+                     Example: FORCEJOIN nick @#chitchat
+                              FORCEPART lamer #chitchat
+
+
+m_ltrace.c       --  This module will give a limited trace. This is similar to
+                     TRACE except that it only reports current operators and servers.
+
+                     Syntax: LTRACE [nick|mask [server]]
+
+                     Example: LTRACE god
+                              LTRACE node.server.com
+
+
+m_ojoin.c        --  This module will add the ability to join any channel no
+                     matter what modes or limits are set with an optional 
+                     status (@%+) It should be noted that this command can be
+                     abused heavily.
+
+                     Syntax: OJOIN [status]<channel>
+
+                     Example: OJOIN @#private
+
+
+m_operspy.c      --  This module will allow operators with access to spy on
+                     users. It should be noted the notion of this module
+                     practically invalidates any form of privacy.
+
+                     Syntax: OPERSPY <LIST/WHO/MODE/WHOIS/NAMES> <parameter>
+
+
+m_opme.c         --  This module will allow an IRC operator to op themselves in
+                     an opless channel should the need arise.
+
+                     Syntax: OPME <channel>
+                     Example: OPME #orphanchan
+
+
+m_webirc.c       --  Adds CGI:IRC/WebIRC support. A special auth{} block is
+                     required in order to enable WebIRC support. For more
+                     details check m_webirc.c
+
+
+example_module.c --  This is an example module template to help users create
+                     their own modules.
+
+
+Help Files ::
+-----------------------------------------------
+
+Each contrib module listed here has an accompanying help page or set of
+help pages. They will be installed when you issue 'make install' inside
+the contrib directory. To view them do /QUOTE HELP COMMAND.

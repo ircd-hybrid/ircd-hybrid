@@ -1,0 +1,113 @@
+-- ircd-hybrid-8.0.0 Release Notes
+o) Fixed an off-by-one with spoofs. Spoofs are now also checked for
+   invalid characters
+o) Removed general::use_whois_actually configuration directive. This is
+   now enabled by default
+o) Minor SQUIT handling fixes
+o) Fixed bancache not being updated on CHGHOST/CHGIDENT
+
+
+-- ircd-hybrid-8rc1 Release Notes
+o) Removed general::client_flood configuration option and added the
+   new 'recvq' configuration directive to class{} blocks.
+   The max size of a receive queue can be seen in "STATS Y"
+   for each class
+o) Allow the '[' and ']' characters in server description
+
+
+-- ircd-hybrid-8beta3 Release Notes
+o) Fixed wrong syntax in several language files
+o) Removed &localchannels
+o) PRIVMSG to opers@some.server is no longer supported
+o) Fixed bug that could lead to topic desynchronization
+o) Removed serverhide::disable_hidden configuration option
+o) Dropped ircd-hybrid-6 GLINE compatibility mode
+o) Removed use_invex, use_except and use_knock configuration options.
+   These features are now enabled by default
+
+
+-- ircd-hybrid-8beta2 Release Notes
+o) channel::disable_fake_channels now also disables ascii 29 (mIRC italic)
+   when set to yes
+o) Added channel::max_chans_per_oper configuration directive. The old way
+   was to let operators join three times the amount of max_chans_per_user
+o) Replaced MODLOAD, MODUNLOAD, MODRELOAD, MODLIST and MODRESTART commands
+   with the new MODULE command which can be fed with the LOAD, UNLOAD, RELOAD
+   and LIST parameters.
+   MODRESTART has been entirely removed. Use "MODULE RELOAD *" to reload
+   all modules
+o) Added back server notice when a client tries to obtain a reserved nick name
+o) Removed OMOTD module
+o) Added 'set' to operator privilege flags. Gives access to the "SET" command
+o) Improved TS6 support
+o) Channel keys/passwords are now case sensitive
+
+
+-- ircd-hybrid-8beta1 Release Notes
+o) Implemented full services support, including but not limited to the
+   following changes:
+   - Added SVSNICK, and SVSMODE command handlers
+   - Added service stamps to NICK/UID messages
+   - Added SVS to server capabilities (CAPAB). SVS capable servers can
+     deal with extended NICK/UID messages that contain service IDs/stamps.
+   - Changed rejected client notices to go to new usermode +j.  These
+     previously used usermode +r.
+   - Added usermode +r (registered nick) and channelmode +r (registered channel)
+   - Added usermode +R (only registered clients may send a private message)
+   - Added channelmode +R (only registered clients may join that channel)
+   - Various services shortcuts have been added (/NS, /CS, /NICKSERV, /CHANSERV, etc.)
+   - Added services{} block to ircd.conf
+   - Added services_name directive to general{} block
+   - Added GLOBOPS mainly for services compatibility, but can be used by operators, too
+o) Removed RKLINE and RXLINE commands. Regular expression based bans should
+   only be added via ircd.conf
+o) Added 'globops', 'restart', 'dline', 'undline' and 'module' operator
+   privilege flags. Read doc/example.conf for further explanation of what
+   these flags control
+o) Removed Idle-time klines
+o) Cleaned up modules API. Old modules won't work anymore
+o) Removed general::burst_away configuration directive. AWAY bursts are now
+   controlled via connect::flags explicitly
+o) Introduced new logging subsystem including log rotation based on
+   file sizes. Log timestamp format is ISO8601 now
+o) Added support for remote D-lines
+o) Added usermode +H which is basically a replacement for the hidden_admin and
+   hidden_oper operator flags. With usermode +H, irc operator status can now
+   be hidden even on remote servers
+o) Added CIDR support for operator{} blocks
+o) Removed the servlink program. ircd-hybrid can now make use of
+   SSL/TLS for inter-server communication.
+   NOTE: compressed server links are of course still available, but a SSL/TLS
+   connection is required, as compression is now handled via OpenSSL
+o) Removed 'ssl_server_protocol' configuration directive and
+   added 'ssl_client_method' and 'ssl_server_method' instead.
+   Both of these options can now be changed at runtime
+o) Oper login IDs are no longer limited to NICKLEN*2
+o) Removed channel::burst_topicwho configuration option. Topicsetters are
+   now sent by default
+o) "STATS Y|y" now reports CIDR limits as well
+o) Added m_webirc.c to contrib/
+o) Overall code cleanup and speed improvements
+
+--------------------------------------------------------------------------------
+
+BUGS: Major bugs in this release are listed in BUGS
+
+BUG REPORTS: If you run this code and encounter problems, you must report
+ the bug by EMAIL to bugs@ircd-hybrid.org
+ Please include a gdb backtrace and a copy of your config.h and
+ ircd.conf with any report (with passwords and other sensitive
+ information masked).
+
+DISCUSSION: There is a mailing list for discussion of hybrid issues,
+ including betas.  To subscribe, use this link:
+    https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
+ This is the proper place to discuss new features, bugs, etc.  Posting here
+ is much more likely to get something done than ranting on #TZ.
+
+Questions/comments directed to bugs@ircd-hybrid.org
+
+Other files recommended for reading: BUGS, README, INSTALL
+
+--------------------------------------------------------------------------------
+$Id$

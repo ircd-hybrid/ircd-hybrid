@@ -1,0 +1,18 @@
+ Known Bugs worthy of a mention:
+--------------------------------------------------------------------------------
+  
+* None
+
+
+ BUG REPORTS: If you run this code and encounter problems, you should report
+ the bug on our SourceForge.net bug tracker, which you can find at this URL:
+
+ https://sourceforge.net/tracker/?atid=409046&group_id=33573&func=browse
+
+ Please include a gdb backtrace and a copy of your config.h and ircd.conf with
+ any report (with passwords and other sensitive information masked).
+
+ For information how to get a gdb backtrace, see INSTALL (near the end of file).
+
+--------------------------------------------------------------------------------
+$Id$

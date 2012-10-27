@@ -1,0 +1,22 @@
+MODULE <option> [module name]
+
+<option> can be one of the following:
+  LIST    - List the modules that are currently loaded into the
+            ircd, along with their address and version.
+            When a match string is provided, LIST only prints
+            modules with names matching the match string.
+
+  LOAD    - Loads a module into the ircd.
+            The optional path can be an absolute path
+            from / or from the IRCD_PREFIX
+            (ie modules/autoload/m_users.la)
+
+  UNLOAD  - Unload a module from the ircd.
+            Use just the module name, the path is not needed.
+            When a module is unloaded, all commands associated
+            with it are unloaded as well.
+
+  RELOAD  - Reloads all modules.
+            All modules are unloaded, then those in modules/autoload
+            are loaded. If "*" has been specified as module name,
+            all modules will be reloaded.

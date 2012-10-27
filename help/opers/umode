@@ -1,0 +1,33 @@
+# $Id$
+MODE <nick> <+|-><modes>
+
+Usermodes: (* designates that the umode is oper only)
+
+     USERMODE     DESCRIPTION
+-----------------------------------------------------------------
+         +o     - Designates this client is an IRC Operator.
+                  Use the /oper command to attain this.
+         +i     - Designates this client 'invisible'.
+       * +w     - Can see server wallops.
+       * +z     - Can see oper wallops.
+       * +l     - Can see oper locops (local wallops).
+       * +s     - Can see generic server messages and oper kills.
+       * +c     - Can see client connections and exits.
+       * +u     - Can see unauthorized client connections.
+       * +j     - Can see 'rejected' client notices.
+       * +k     - Can see server kill messages.
+       * +f     - Can see 'I-line is full' notices.
+       * +y     - Can see stats/links/admin requests to name a few.
+       * +d     - Can see server debug messages.
+       * +n     - Can see client nick changes.
+         +r     - User has been registered and identified for its nick.
+                  This mode can be set by servers and services only.
+         +R     - Only registered clients may message you.
+       * +x     - Can see new server introduction and split messages.
+       * +b     - Can see possible bot / join flood warnings.
+       * +a     - Is marked as a server admin in stats p/o.
+         +D     - "deaf": don't receive channel messages
+         +G     - "soft caller id": block private messages from people not on
+                  any common channels with you (unless they are /accept'ed)
+         +g     - "caller id" mode: only allow /accept clients to message you
+       * +H     - Operator status is hidden to other users.

@@ -1,0 +1,72 @@
+                        User and Channel Modes Guide
+			----------------------------
+
+In /VERSION one might see something like this:
+
+irc.corefailure.com hybrid-7beta5 oiwszcerkfydnxbaugl biklmnopstveIh bkloveIh
+
+These describe the user modes, channel modes, and channel modes that require
+arguments that are available to the user. It is hardcoded into src/messages.tab.
+
+Here is a guide to the preceding modes:
+
+User Modes:
+
++a - admin        - Admin status. Can for example see IPs in "STATS c"
++b - bots         - See bot and drone flooding notices
++c - cconn        - Client connection/quit notices
++D - deaf         - Don't receive channel messages
++d - debug        - See debugging notices
++f - full         - See I: line full notices
++G - softcallerid - Server Side Ignore for users not on your channels
++g - callerid     - Server Side Ignore (see modeg.txt)
++h - hidden       - Hides operator status to other users
++i - invisible    - Not shown in NAMES or WHO unless you share a channel
++j - rej          - See rejected client notices
++k - skill        - See server generated KILL messages
++l - locops       - See LOCOPS messages
++n - nchange      - See client nick changes
++o - oper         - Operator status
++r - registered   - User has been registered and identified for its nick.
+                    This mode can be set by servers and services only.
++R - regonly      - Only registered clients may message you
++s - servnotice   - See general server notices
++u - unauth       - See unauthorized client notices
++w - wallop       - See server generated WALLOPS
++x - external     - See remote server connection and split notices
++y - spy          - See LINKS, STATS (if configured), TRACE notices
++z - operwall     - See oper generated WALLOPS
+
+Channel Modes:
+
++b - ban          - Channel ban on nick!user@host
++e - exempt       - Exemption from bans
++I - invex        - Invite exceptions, nick!user@host does not need to be
+                    explicitly INVITE'd into the channel before being able
+                    JOIN
++i - invite       - Invite only
++k - key          - Key/password for the channel
++l - limit        - Limit the number of users in a channel
++m - moderated    - Users without +v/h/o cannot send text to the channel
++n - noexternal   - Users must be in the channel to send text to it
++o - chanop       - Full operator status
++O - operonly     - This mode will prevent anyone who hasn't obtained
+                    IRCOp status from joining the channel. Can be set by an IRCOp
+                    only
++p - private      - Private is obsolete, this now restricts KNOCK, and can be
+                    set at the same time as +s.
++r - registered   - Channel has been registered
++R - regonly      - Only registered clients may join a channel with that mode set
++s - secret       - The channel does not show up on NAMES or LIST or in the 
+                    WHOIS channel list unless you are a member of the channel
++S - sslonly      - This mode will prevent anyone who isn't securely connected
+                    via SSL/TLS from joining the channel.
++t - topic        - Only chanops can change the topic
++v - voice        - Can speak in a moderated channel, and is exempt from flood 
+                    restrictions
+
+The third part of the 004 numeric lists channel modes that require arguments.
+Currently these are bkloveIh.
+
+
+# $Id$

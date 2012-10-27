@@ -1,0 +1,37 @@
+
+Whats changed in the codebase
+
+# $Id$
+
+First, please note one thing - a *LOT* has changed in hybrid-7.
+
+* Most of the file descriptor and network code has been rewritten.
+  A lot of ideas were borrowed from squid, but they have been simplified
+  in places and extended in others to cover the needs of hybrid-7.
+
+  The core network routines now sit in src/s_bsd.c. There are some remnants
+  of client/server specific functions which should really be moved.
+  The actual network IO loop lives in src/s_bsd_${type}.c where ${type}
+  is the type of network loop (poll, select, kqueue, etc.)
+  You can select the type of network loop by passing --enable-${type} /
+  --disable-${type} to configure.
+
+  Note: the code hasn't been rearranged, its been rewritten. We think
+  it is more efficient, but the split-list code in s_bsd_poll.c needs some
+  further research.
+
+  Please read the documentation available, which will go into more detail.
+
+* An event system has been added, again borrowed mainly from squid. This
+  allows periodic events (channel cleanup, server connection retries, etc)
+  to be scheduled without needing to add it to the main loop.
+
+* Server to server links are now handled by the 'servlink' program
+  (located in the servlink/ directory).  After negotiating a server<->server
+  link, (CAPAB/SERVER/PASS or CAPAB/CRYPTSERV/CRYPTAUTH) hybrid-7 will
+  fork, then exec a servlink process.  ircd-hybrid communicates with the
+  program using a control socket (turn on/off crypto/zip, etc), and
+  a data socket (which looks to the rest of the code like a network socket
+  connected to the remote server).  The servlink process handles encryption
+  and compression of server links, but is still compatable with ziplinks
+  used in hybrid-6, and the hybrid-6 cryptlinks patch.

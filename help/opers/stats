@@ -1,0 +1,42 @@
+# $Id$
+STATS <letter> [server|nick]
+
+Queries server [server] (or your own server if no
+server parameter is given) for info corresponding to
+<letter>.
+
+       (X = Admin only.)
+LETTER (* = Oper only.)
+------ (^ = Can be configured to be oper only.)
+X A - Shows the ADNS DNS servers in use
+* c - Shows connect blocks
+* d - Shows temporary D lines
+* D - Shows D lines
+* e - Shows exemptions to D lines
+X E - Shows Events
+X f - Shows File Descriptors
+* g - Shows pending G lines
+* G - Shows G lines
+X h - Shows ircd callback statistics
+* H - Shows H/L lines
+^ i - Shows I lines
+^ K - Shows K lines (or matched klines)
+^ k - Shows temporary K lines (or matched temp klines)
+* L - Shows IP and generic info about [nick]
+* l - Shows hostname and generic info about [nick]
+  m - Shows commands and their usage
+^ o - Shows O/o lines
+* P - Shows configured ports
+  p - Shows opers connected and their idle times
+* q - Shows resv'd nicks and channels
+* r - Shows resource usage by ircd
+* s - Shows the server cache
+* t - Shows generic server stats
+* U - Shows shared blocks (Old U: lines)
+  u - Shows server uptime
+* v - Shows connected servers and their idle times
+* x - Shows gecos bans (Old X: lines)
+* y - Shows Y lines
+* z - Shows memory stats
+* Z - Show ziplinks stats
+* ? - Shows connected servers and sendq info about them

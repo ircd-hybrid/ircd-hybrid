@@ -1,0 +1,8 @@
+# $Id$
+CLASSLIST <class>
+
+The CLASSLIST command will show complete totals of a class you wish to see.
+
+For example if you want to see the totals for the class users you would do:
+
+CLASSLIST users - Shows the totals in the users class.

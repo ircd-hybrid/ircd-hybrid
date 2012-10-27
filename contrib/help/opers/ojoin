@@ -1,0 +1,12 @@
+# $Id$
+OJOIN [flags]<channel>
+
+The OJOIN command requires only one argument with optional status flags.
+Valid mode flags are @ % and +. This allows operators to join any channel
+with the given status.
+
+Examples:
+OJOIN @#secretchan - Will join you to #secretchan with chan ops.
+OJOIN +#secretchan - Will join you to #secretchan with voice.
+
+This also works on local channels as well.

@@ -1,0 +1,35 @@
+SET <option> <value>
+
+<option> can be one of the following:
+  AUTOCONN    - Sets auto-connect on or off for a particular
+                server
+  AUTOCONNALL - Sets auto-connect on or off for all servers
+  LOG         - Sets the Logging level for what is logged
+                to ircd.log and syslog.
+  MAX         - Sets the number of max connections
+                to <value>.  (This number cannot exceed
+                HARD_FDLIMIT in defaults.h)
+  IDLETIME    - The number of seconds a client can be idle
+                before disconnecting them
+  FLOODCOUNT  - The number of lines allowed before
+                throttling a connection due to flooding
+                Note that this variable is used for both
+                channels and clients
+  SPAMNUM     - Sets how many join/parts to channels
+                constitutes a possible spambot.
+  SPAMTIME    - Below this time on a channel
+                counts as a join/part as above.
+  MSGLOCALE   - Set the message locale
+                standard - Compiled in defaults
+                custom   - Old CUSTOM_ERR messages
+  SPLITMODE   - Sets splitmode to <value>:
+                 ON   - splitmode is permanently on
+                 OFF  - splitmode is permanently off
+                 AUTO - ircd chooses splitmode based on 
+                        SPLITUSERS and SPLITNUM
+  SPLITUSERS  - Sets the minimum amount of users needed to
+                deactivate automatic splitmode.
+  SPLITNUM    - Sets the minimum amount of servers needed to
+                deactivate automatic splitmode.
+
+# $Id$

@@ -1,0 +1,6 @@
+# $Id$
+CAPTURE <nickname> 
+
+The CAPTURE command will essentially capture a client (e.g. the nickname you pass)
+preventing them from sending any commands to the server basically making them
+captive.

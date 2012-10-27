@@ -1,0 +1,90 @@
+; SOME DESCRIPTIVE TITLE.
+; Copyright (C) YEAR Free Software Foundation, Inc.
+; FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+; $Id$
+
+RPL_WELCOME:             :%s 001 %s :Velkommen til %s Internet Relay Nettverket %s
+RPL_YOURHOST:            :%s 002 %s :Verten din er %s, som bruker versjon %s
+RPL_CREATED:             :%s 003 %s :Serveren ble kompilert %s
+RPL_ISUPPORT:            :%s 005 %s %s :er gyldig for denne serveren
+RPL_REDIR:               :%s 010 %s %s %d :Vennligst bruk Server/Port istedenfor
+RPL_TRACECONNECTING:     :%s 201 %s Prøv. %s %s
+RPL_TRACEHANDSHAKE:      :%s 202 %s T.S. %s %s
+RPL_TRACEUSER:           :%s 205 %s Bruker %s %s (%s) %lu %lu
+RPL_TRACENEWTYPE:        :%s 208 %s <nytype> 0 %s
+RPL_TRACECLASS:          :%s 209 %s Klasse %s %d
+RPL_STATSUPTIME:         :%s 242 %s :Serveren har vært oppe %d dager, %d:%02d:%02d
+RPL_STATSCONN:           :%s 250 %s :Høyeste tilkoblings telling: %d (%d klienter) (%llu tilkoblinger received)
+RPL_LUSERCLIENT:         :%s 251 %s :Det er %d brukere og %d usynlige på %d serverere
+RPL_LUSEROP:             :%s 252 %s %d :IRC Operatører online
+RPL_LUSERUNKNOWN:        :%s 253 %s %d :ukjente tilkoblinger
+RPL_LUSERCHANNELS:       :%s 254 %s %d :kanaler laget
+RPL_LUSERME:             :%s 255 %s :Jeg har %d klienter og %d serverere
+RPL_ADMINME:             :%s 256 %s :Administrativ informasjon om %s
+RPL_ENDOFTRACE:          :%s 262 %s %s :Slutten av TRACE
+RPL_LOAD2HI:             :%s 263 %s :Server lasten er for tiden for høy. Vennligst vent litt og prøv igjen.
+RPL_LOCALUSERS:          :%s 265 %s :Lokale brukere nå: %d  Maks: %d
+RPL_GLOBALUSERS:         :%s 266 %s :Globale brukere nå: %d  Maks: %d
+RPL_UNAWAY:              :%s 305 %s :Du er ikke lenger markert som vekke (away)
+RPL_NOWAWAY:             :%s 306 %s :Du har blitt markert som vekke (away)
+RPL_WHOISIDLE:           :%s 317 %s %s %d %d :sekunder uaktiv, påloggings tid
+RPL_ENDOFWHOIS:          :%s 318 %s %s :Slutten av /WHOIS listen.
+RPL_LISTSTART:           :%s 321 %s Kanal :Bruker  Navn
+RPL_LISTEND:             :%s 323 %s :Slutten av /LIST
+RPL_NOTOPIC:             :%s 331 %s %s :Ingen topic (overskrift) er satt.
+RPL_ENDOFINVEXLIST:      :%s 347 %s %s :Slutten av Kanal Invite List (Inviterte Listen)
+RPL_ENDOFEXCEPTLIST:     :%s 349 %s %s :Slutten av Kanal Exception List (Unntaks Listen)
+RPL_CLOSING:             :%s 362 %s %s :Lukket. Status = %d
+RPL_CLOSEEND:            :%s 363 %s %d: Tilkobling Stengt
+RPL_ENDOFLINKS:          :%s 365 %s %s :Slutten av /LINKS listen.
+RPL_ENDOFNAMES:          :%s 366 %s %s :Slutten av /NAMES listen.
+RPL_ENDOFBANLIST:        :%s 368 %s %s :Slutten av Kanal Ban List (Utestengt Listen)
+RPL_ENDOFWHOWAS:         :%s 369 %s %s :Slutten av WHOWAS
+RPL_ENDOFINFO:           :%s 374 %s :Slutten av /INFO listen.
+RPL_MOTDSTART:           :%s 375 %s :- %s Beskjed for Dagen - 
+RPL_ENDOFMOTD:           :%s 376 %s :Slutten av /MOTD kommandoen.
+RPL_YOUREOPER:           :%s 381 %s :Du har nå kommet inn i... det Forbudte Området! (Twilight Zone!).
+ERR_NOSUCHNICK:          :%s 401 %s %s :Ikke noen slik bruker/kanal
+ERR_NOSUCHSERVER:        :%s 402 %s %s :Ikke noen slik server
+ERR_NOSUCHCHANNEL:       :%s 403 %s %s :Ikke noen slik kanal
+ERR_CANNOTSENDTOCHAN:    :%s 404 %s %s :Kan ikke sende til kanalen
+ERR_TOOMANYCHANNELS:     :%s 405 %s %s :Du har gått på (joined) for mange kanaler
+ERR_WASNOSUCHNICK:       :%s 406 %s %s :Det var ikke noen slik kallenavn (nickname)
+ERR_TOOMANYTARGETS:      :%s 407 %s %s :For mange mottakere. Bare %d gikk gjennom
+ERR_NOORIGIN:            :%s 409 %s :Ingen opprinnelse spesifisert
+ERR_NORECIPIENT:         :%s 411 %s :Ingen mottaker definert (%s)
+ERR_NOTEXTTOSEND:        :%s 412 %s :Ingen tekst å sende
+ERR_NOTOPLEVEL:          :%s 413 %s %s :Ingen øverste-nivå domene (toplevel domain) spesifisert
+ERR_WILDTOPLEVEL:        :%s 414 %s %s :Uspesifisert i øverste-nivå domene (toplevel domain)
+ERR_UNKNOWNCOMMAND:      :%s 421 %s %s :Ukjent kommando
+ERR_NOMOTD:              :%s 422 %s :MOTD Filen mangler
+ERR_NOADMININFO:         :%s 423 %s %s :Ingen administrativ info tilgjengelig
+ERR_NONICKNAMEGIVEN:     :%s 431 %s :Ingen kallenavn (nickname) definert
+ERR_ERRONEUSNICKNAME:    :%s 432 %s %s :Feilaktig Kallenavn (Nickname)
+ERR_NICKNAMEINUSE:       :%s 433 %s %s :Kallenavnet (Nickname) er allered i bruk.
+ERR_NICKCOLLISION:       :%s 436 %s %s :Kallenavn (Nickname) kollisjon KILL
+ERR_UNAVAILRESOURCE:     :%s 437 %s %s :Kallenavnet/Kanalen er midlertidig utilgjengelig
+ERR_USERNOTINCHANNEL:    :%s 441 %s %s %s :De er ikke på den kanalen
+ERR_NOTONCHANNEL:        :%s 442 %s %s :Du er ikke på den kanalen
+ERR_USERONCHANNEL:       :%s 443 %s %s %s :er allered på kanalen
+ERR_NOTREGISTERED:       :%s 451 %s :Du har ikke registrert
+ERR_NEEDMOREPARAMS:      :%s 461 %s %s :Ikke nok verdier (parameters)
+ERR_ALREADYREGISTRED:    :%s 462 %s :Du kan ikke registrere
+ERR_PASSWDMISMATCH:      :%s 464 %s :Passordet var inkorrekt
+ERR_YOUREBANNEDCREEP:    :%s 465 %s :Du er utestengt fra denne serveren- %s
+ERR_CHANNELISFULL:       :%s 471 %s %s :Kan ikke komme inn i kanalen (+l)
+ERR_UNKNOWNMODE:         :%s 472 %s %c :er en ukjent modus tegn for meg
+ERR_INVITEONLYCHAN:      :%s 473 %s %s :Kan ikke komme inn i kanalen (+i)
+ERR_BANNEDFROMCHAN:      :%s 474 %s %s :Kan ikke komme inn i kanalen (+b)
+ERR_BADCHANNELKEY:       :%s 475 %s %s :Kan ikke komme inn i kanalen (+k)
+ERR_BANLISTFULL:         :%s 478 %s %s %s :Kanalens utestengings liste er full
+ERR_BADCHANNAME:         :%s 479 %s %s :Ulovlig kanal navn
+ERR_NOPRIVILEGES:        :%s 481 %s :Tillatelse nektet - Du er ikke en IRC operatør
+ERR_CHANOPRIVSNEEDED:    :%s 482 %s %s :Du er ikke en kanal operatør
+ERR_CANTKILLSERVER:      :%s 483 %s :Du kan ikke drepe (kill) en server!
+ERR_RESTRICTED:          :%s 484 %s :Du er begrenset
+ERR_NOOPERHOST:          :%s 491 %s :Kun få dødelige kan prøve å komme inn i det forbudte området (twilight zone)
+ERR_UMODEUNKNOWNFLAG:    :%s 501 %s :Ukjent MODE flag
+ERR_USERSDONTMATCH:      :%s 502 %s :Kan ikke forandre modus på andre brukere
+ERR_GHOSTEDCLIENT:       :%s 503 %s :Beskjeden kunne ikke bli levert til %s
+ERR_USERNOTONSERV:       :%s 504 %s %s :Bruker er ikke på denne serveren

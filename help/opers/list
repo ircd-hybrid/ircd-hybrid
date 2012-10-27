@@ -1,0 +1,24 @@
+LIST [options]
+
+Without any arguments, LIST will give an entire list of all
+channels which are not set as secret (+s). The list will be in
+the form:
+
+  <#channel> <amount of users> :[topic]
+
+If you want to use a specific filter, you can pass one or more
+options separated by commas (','). Recognized options are:
+  *mask*   List channels matching *mask*
+  !*mask*  List channels NOT matching *mask*
+  >num     Show only channels which contain more than <num> users
+  <num     Show only channels which contain less than <num> users
+  C>num    Display channels created within last <num> minutes
+  C<num    Display channels created earlier than <num> minutes ago
+  T>num    Limit matches to those channels whose topics are older
+           than <num> minutes
+  T<num    Limit matches to those channels whose topics have been
+           changed within last <num> minutes
+
+To stop a running LIST request, use /LIST command again.
+
+See also: join

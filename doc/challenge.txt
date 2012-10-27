@@ -1,0 +1,208 @@
+                       Oper Challenge and Response System
+
+   $Id$
+
+   Copyright (c) 2001-2012 by ircd-hybrid team
+
+     ----------------------------------------------------------------------
+
+   ircd-hybrid
+
+   In an effort to reduce the damage caused to a network by a hacked O-line,
+   Hybrid supports an OpenSSL based challenge-response system. This new
+   system allows the admin to remove all oper block passwords from the conf
+   file. Authentication is done through a public/private key.
+
+     ----------------------------------------------------------------------
+
+                                  Requirements
+
+   The ircd must be compiled with the --enable-openssl option to configure.
+   If configure detects a working openssl library, --enable-openssl is
+   implicitly enabled.
+
+   oper {} blocks should not have normal passwords, but should contain the
+   the name of the private key file. However it is possible for the user to
+   use both challenge and normal passwords, but this would defeat the purpose
+   of the challenge system.
+
+   m_challenge.la must be loaded.
+
+   The oper has their private key file and an implementation of the RSA
+   Respond tool available to be run.
+
+     ----------------------------------------------------------------------
+
+                                    Process
+
+   Each oper should have a private key file and a public key file. The keys
+   can be generated with the mkkeypair utility provided in tools/.
+
+   The oper keeps their private key file in a safe place, and gives their
+   public key file to their admin(s).
+
+   The admin will place an entry for the public key file into a field called
+   rsa_public_key_file of each oper's oper {} block in the conf file.
+
+   The oper wishes to obtain their operator status, and issues the CHALLENGE
+   command.
+
+   The server will print out a long hexadecimal string, that needs to be fed
+   to the respond utility provided in tools/rsa_respond.
+
+   The respond program will generate an answer that is fed back to the
+   CHALLENGE command.
+
+     ----------------------------------------------------------------------
+
+                            Generating the Key Files
+
+   The keys can be generated with the openssl command as follows:
+
+       openssl genrsa -des3(1) -out rsa.key 1024(2)
+       openssl rsa -in rsa.key -pubout -out rsa.pub
+   
+
+   (1)
+           The -des3 must be included in order to create a key with a
+           passphrase. Omitting this option will create a non protected key.
+   (2)
+           The key size must be 1024 or below. The challenge sent for a
+           longer keysize will be too long to fit into the ircd's 512 byte
+           line constraint.
+
+   It is highly recommended that you set a password on your private key.
+
+   The tools/mkkeypair utility cannot be used to create a key suitable for
+   use in CHALLENGE.
+
+     ----------------------------------------------------------------------
+
+                          Using CHALLENGE and respond
+
+     Note: All examples assume the use of the stock respond client included
+     with the ircd-hybrid-8 source, run on a UNIX(c) platform.
+
+   The administrator of the server you oper on should remove the password in
+   your oper {} block and replace it with an entry for your public key, so
+   that /oper will be disabled.
+
+     Note: The public key is a VERY long string.
+
+   The oper will issue /challenge oper_nick, and see something like below:
+
+ *** 56F1FDAE4C590C524CF758917E62C2A2A1376CB9C4C2E7D411BB0AD9C4A
+ 605A2D05A94E7254197E9D71438B5FB565B6FD35465E462305F35F4A2D45311
+ F983B3E062F635912FA155B4B1E18EAA782CC107F4C9DA83092658D16A2E88A
+ 6BCF9820F5A044A29CDD4C062F05BF509CA3B561375CBC4179BD1CF6026BDE9
+ 60E52C6B
+
+     Note: The challenge is all on one line.
+
+     Note: With some clients, the oper will have to issue /quote CHALLENGE
+     instead of /challenge.
+
+   The oper will then have to feed that challenge to the respond program.
+
+   +------------------------------------------------------------------+
+   | The respond utility's syntax is:                                 |
+   |                                                                  |
+   |$ ./respond private_key_file challenge_from_server                |
+   |                                                                  |
+   |                                                                  |
+   | Example:                                                         |
+   |                                                                  |
+   |wcampbel@botbay (rsa_respond): ./respond hwy.key \                |
+   |56F1FDAE4C590C524CF758917E62C2A2A1376CB9C4C2E7D411BB0AD9C4A605A2D0|
+   |5A94E7254197E9D71438B5FB565B6FD35465E462305F35F4A2D45311F983B3E062|
+   |F635912FA155B4B1E18EAA782CC107F4C9DA83092658D16A2E88A6BCF9820F5A04|
+   |4A29CDD4C062F05BF509CA3B561375CBC4179BD1CF6026BDE960E52C6B        |
+   |Keyphrase:                                                        |
+   |6B882932DD00F86123869E401F7334B9B0D0018A60F1DE244E90E47246AA87C7  |
+   |                                                                  |
+   |   Note: The challenge parameter must be on one line.             |
+   +------------------------------------------------------------------+
+
+   The keyphrase must be entered properly to get the response. The bottom
+   line is the response that must be sent back to the server.
+
+   The oper will issue the following command in order to obtain operator
+   status:
+
+   /challenge
+   +6B882932DD00F86123869E401F7334B9B0D0018A60F1DE244E90E47246AA87C7
+
+     Note: The '+' is needed
+
+   If successful, the oper will obtain operator status on the server.
+
+   +------------------------------------------------------------------------+
+   |                                Warning                                 |
+   |------------------------------------------------------------------------|
+   | If the CHALLENGE fails, and you use ircII, EPIC, or BX, you may get    |
+   | disconnected with the client asking for the server password. This is a |
+   | client bug, not an ircd bug.                                           |
+   +------------------------------------------------------------------------+
+
+     ----------------------------------------------------------------------
+
+                                RSA Respond Tool
+
+   The RSA Respond tool is a vital part of challenge/response system. In
+   order to function, the operator must have must have a way to quickly issue
+   the respond command, and to copy and paste data to and from the IRC
+   client.
+
+   The respond source code is included with the ircd-hybrid source, in the
+   tools/rsa_respond directory.
+
+   A copy of the source tar file is available on
+   http://www.wohmart.com/ircd/pub/irc_tools/rsa/rsa_respond-src-hyb7.tar.gz
+
+   For Windows platforms, there are two available RSA Respond tools. One is a
+   text only port of the stock tool. The binary is available from
+   http://www.wohmart.com/ircd/pub/irc_tools/rsa/rsa_respond-bin.tar.gz.
+   The other tool is a GUI enabled version[3]. The source tree[4] is available
+   from http://www.wohmart.com/ircd/pub/irc_tools/rsa/winrespond-src.tar.gz.
+   A binary distribution is available from
+   http://www.wohmart.com/ircd/pub/irc_tools/rsa/winrespond-bin.tar.gz.
+
+   With the appropriate version of the RSA Respond tool, any operator can
+   protect their privileged access to the server, with little additional
+   effort over using standard operator passwords.
+
+     ----------------------------------------------------------------------
+
+                                    Benefits
+
+   The greatest benefit of using the challenge/response system is that there
+   are no passwords sent over the network in plaintext. There are also no
+   credentials left on the server side, as only public keys are kept in the
+   conf. The use of public/private key encryption provides far greater
+   security over having a single password, and may (if the key is kept
+   secure, and has a good passphrase) virtually eliminate hacked O-lines.
+
+     ----------------------------------------------------------------------
+
+                                  A. Numerics
+
+ :server 381 user :You have entered... the Twilight Zone!.
+ :server 386 user :challenge-text
+ :server 464 user :Password Incorrect
+ :server 491 user :Only few of mere mortals may try to enter the twilight zone
+
+
+     Note: The text used can be changed by the server administrator.
+
+     ----------------------------------------------------------------------
+
+                                       Notes
+
+   [1] Some platforms may require Makefile changes in order to link in the
+       OpenSSL library. This may change in the future.
+   [2] Platforms known to function include: Linux, FreeBSD, Solaris, and
+       Cygwin.
+   [3] A screenshot of the program is available on
+       http://www.wohmart.com/ircd/pub/irc_tools/rsa/winrespond.png .
+   [4] The winrespond source depends on a working, up to date, Cygwin
+       installation.

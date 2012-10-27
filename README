@@ -1,0 +1,72 @@
+Contact Information:
+
+  * Bug Reports:
+    - bugs@ircd-hybrid.org
+  * General Discussion and Support mailing list:
+    - https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
+    - hybrid@lists.ircd-hybrid.org
+
+******************************* IMPORTANT *************************************
+
+
+  ************ Note for those who don't bother reading docs ***************
+  * - Reading INSTALL is now a must, as the old DPATH is now specified    *
+  *   when configure is run.                                              *
+  *   You now need to ./configure --prefix="/path/to/install/it"          *
+  * - The old config format WILL NOT WORK. Please see doc/example.conf !  *
+  * - The old kline, dline, xline format WILL NOT WORK.                   *
+  *************************************************************************
+
+  ALSO, IF YOU ARE UPGRADING YOUR CURRENT SOURCE TREE, AND YOU TRY TO BUILD
+  IN IT WITHOUT PERFORMING AT LEAST 'make clean', THINGS _WILL_ BREAK. IT IS
+  RECOMMENDED THAT YOU RUN 'make distclean' AND THEN RERUN './configure'!
+
+******************************* REQUIREMENTS **********************************
+
+Necessary Requirements:
+
+- A supported platform (look below)
+
+- A working dynamic load library
+
+Feature Specific Requirements:
+
+- For the SSL Challenge controlled OPER feature, compressed and/or
+  SSL/TLS server links, as well as SSL/TLS client connections,
+  a working OpenSSL library is required
+
+- For encrypted oper and (optional) server passwords, a working DES and/or
+  MD5 library
+
+- For regular expression based kline{} and gecos{} blocks, the
+  PCRE - Perl Compatible Regular Expressions library is required
+
+*******************************************************************************
+
+- See the INSTALL document for info on configuring and compiling
+  ircd-hybrid.
+
+- Please read doc/index.txt to get an overview of the current documentation.
+
+- Known bugs are listed in the BUGS file
+
+- TESTED PLATFORMS:  The code has been tested on the following platforms, and
+  is known to run properly.
+  (FIXME: this list is out of date)
+  CentOS 5.8
+  Red Hat Linux 9
+  Ubuntu 12.04
+
+- If you are wondering why config.h no longer exists, it's because most
+  things that were once in config.h are now specified in the 'general'
+  block of ircd.conf. Look at example.conf for more information about
+  these options.
+
+- /etc/resolv.conf must exist for the resolver to work.
+
+- Please read NEWS for information about what is in this release.
+
+- Other files recommended for reading: BUGS, INSTALL
+
+--------------------------------------------------------------------------------
+$Id$

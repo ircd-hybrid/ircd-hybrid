@@ -1,0 +1,7 @@
+# $Id$
+CHGNAME [nickname] <realname>
+
+The CHGNAME command takes two arguments. The first argument is optional and
+can be the nickname of a user you wish to alter the gecos of. If no 
+argument for the nickname is supplied it will change your gecos instead. 
+The second argument is the gecos you wish to use. 

@@ -1,0 +1,6 @@
+WALLOPS :<message>
+
+Sends a WALLOPS message of <message> to all opers
+who are umode +z.
+
+Server sent WALLOPS go to all opers who are umode +w.

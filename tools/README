@@ -1,0 +1,10 @@
+$Id$
+
+A directory of support programs for ircd.
+
+mkkeypair       - a small program used for generating a public and private
+                  key pair
+mkpasswd.c      - makes password for operator{} blocks
+respond.c       - a tool to generate an RSA response to the challenge asked
+                  by the server, and a tool to generate a keypair for the
+                  C/R system

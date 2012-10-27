@@ -1,0 +1,9 @@
+RESV <channel|nick> :<reason>
+
+-- RESV a channel or nick
+Will create a resv for the given channel/nick, stopping
+local users from joining the channel, or using the
+nick.  Will not affect remote clients.
+
+If the oper is an admin, they may create a wildcard
+resv, for example: clones*

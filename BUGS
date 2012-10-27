@@ -1,0 +1,37 @@
+ Known Bugs worthy of a mention:
+--------------------------------------------------------------------------------
+  
+1.  /MODUNLOAD causes cores:
+    - If a module is modified before being unloaded, /MODUNLOAD (and
+      therefore /MODRELOAD) may cause a core.
+
+      This problem is caused by the behaviour of the OS, which treats
+      shared libraries differently to executables (modifying the ircd
+      binary whilst it is running would also cause a core, but is denied
+      by the OS). There is no way to fix this at the application level,
+      and fixing the OS to do the right thing is also difficult.
+
+      A workaround to avoid coring is possible however. To install new
+      modules, first remove or rename the old module, then copy/move the
+      new file into place. /MODUNLOAD will then work successfully.
+
+      Alternatively, running ./configure with the --disable-shared-modules
+      argument will link all the commands statically, losing the advantages
+      of upgrading at runtime, but reducing the chances of accidentally
+      coring your server.
+
+2.  Solaris stock 32bit stdio is limited to 256 fds. This breaks when using
+    cryptlinks.
+
+ BUG REPORTS: If you run this code and encounter problems, you should report
+ the bug on our SourceForge.net bug tracker, which you can find at this URL:
+
+ https://sourceforge.net/tracker/?atid=409046&group_id=33573&func=browse
+
+ Please include a gdb backtrace and a copy of your config.h and ircd.conf with
+ any report (with passwords and other sensitive information masked).
+
+ For information how to get a gdb backtrace, see INSTALL (near the end of file).
+
+--------------------------------------------------------------------------------
+$Id$

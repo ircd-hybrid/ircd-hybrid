@@ -1,4 +1,8 @@
 -- ircd-hybrid-8.0.0 Release Notes
+o) Fixed possible TBURST desynchronization with services
+o) Fixed TBURST sending server's name to clients if it's a hidden server
+
+-- ircd-hybrid-8.0.0 Release Notes
 o) Fixed an off-by-one with spoofs. Spoofs are now also checked for
    invalid characters
 o) Removed general::use_whois_actually configuration directive. This is

@@ -2078,7 +2078,7 @@ expire_tklines(dlink_list *tklist)
       {
         if (ConfigFileEntry.tkline_expire_notices)
 	  sendto_realops_flags(UMODE_ALL, L_ALL,
-                               "Temporary X-line for [%s] sexpired", conf->name);
+                               "Temporary X-line for [%s] expired", conf->name);
 	dlinkDelete(ptr, tklist);
         free_dlink_node(ptr);
 	delete_conf_item(conf);

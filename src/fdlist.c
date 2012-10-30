@@ -52,7 +52,7 @@ changing_fdlimit(va_list args)
   if (ServerInfo.max_clients > (unsigned int)MAXCLIENTS_MAX)
   {
     if (old_fdlimit != 0)
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
         "HARD_FDLIMIT changed to %d, adjusting MAXCLIENTS to %d",
         hard_fdlimit, MAXCLIENTS_MAX);
 

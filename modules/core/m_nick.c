@@ -145,7 +145,8 @@ change_local_nick(struct Client *source_p, const char *nick)
     /* XXX - the format of this notice should eventually be changed
      * to either %s[%s@%s], or even better would be get_client_name() -bill
      */
-    sendto_realops_flags(UMODE_NCHANGE, L_ALL, "Nick change: From %s to %s [%s@%s]",
+    sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
+                         "Nick change: From %s to %s [%s@%s]",
                          source_p->name, nick, source_p->username, source_p->host);
     sendto_common_channels_local(source_p, 1, ":%s!%s@%s NICK :%s",
                                  source_p->name, source_p->username,
@@ -225,7 +226,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name,
                source_p->name[0] ? source_p->name : "*", nick);
-    sendto_realops_flags(L_ALL, UMODE_REJ,
+    sendto_realops_flags(L_ALL, UMODE_REJ, SEND_NOTICE,
                          "Forbidding reserved nick [%s] from user %s",
                          nick, get_client_name(client_p, HIDE_IP));
     return;
@@ -291,7 +292,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
                me.name, source_p->name, nick);
-    sendto_realops_flags(L_ALL, UMODE_REJ,
+    sendto_realops_flags(L_ALL, UMODE_REJ, SEND_NOTICE,
                          "Forbidding reserved nick [%s] from user %s",
                          nick, get_client_name(client_p, HIDE_IP));
     return;
@@ -382,7 +383,7 @@ ms_nick(struct Client *client_p, struct Client *source_p,
 
     if (server_p == NULL)
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "Invalid server %s from %s for NICK %s",
 			   parv[7], source_p->name, parv[1]);
       sendto_one(client_p, ":%s KILL %s :%s (Server doesn't exist!)",
@@ -495,7 +496,7 @@ ms_uid(struct Client *client_p, struct Client *source_p,
    */
   if ((target_p = hash_find_id(parv[8])) != NULL)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 		         "ID collision on %s(%s <- %s)(both killed)",
 			 target_p->name, target_p->from->name,
 			 client_p->name);
@@ -542,7 +543,7 @@ check_clean_nick(struct Client *client_p, struct Client *source_p,
   if (!valid_nickname(nick, 0))
   {
     ++ServerStats.is_kill;
-    sendto_realops_flags(UMODE_DEBUG, L_ALL,
+    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "Bad/long Nick: %s From: %s(via %s)",
                          nick, server_p->name, client_p->name);
 
@@ -581,7 +582,7 @@ check_clean_user(struct Client *client_p, char *nick,
   if (!clean_user_name(user))
   {
     ++ServerStats.is_kill;
-    sendto_realops_flags(UMODE_DEBUG, L_ALL,
+    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
                          user, nick, server_p->name, client_p->name);
     sendto_one(client_p, ":%s KILL %s :%s (Bad Username)",
@@ -608,7 +609,7 @@ check_clean_host(struct Client *client_p, char *nick,
   if (!clean_host_name(host))
   {
     ++ServerStats.is_kill;
-    sendto_realops_flags(UMODE_DEBUG, L_ALL,
+    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
                          host, nick, server_p->name, client_p->name);
     sendto_one(client_p, ":%s KILL %s :%s (Bad Hostname)",
@@ -803,7 +804,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
     /* if we dont have a ts, or their TS's are the same, kill both */
     if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Nick collision on %s(%s <- %s)(both killed)",
 			   target_p->name, target_p->from->name,
 			   client_p->name);
@@ -845,7 +846,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
       else
       {
         if (sameuser)
-	  sendto_realops_flags(UMODE_ALL, L_ALL,
+	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 	                  "Nick collision on %s(%s <- %s)(older killed)",
 			  target_p->name, target_p->from->name,
 			  client_p->name);
@@ -882,7 +883,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
   /* its a client changing nick and causing a collide */
   if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))
   {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                  "Nick change collision from %s to %s(%s <- %s)(both killed)",
 		 source_p->name, target_p->name, target_p->from->name,
 		 client_p->name);
@@ -914,12 +915,12 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
           (!sameuser && newts > target_p->tsinfo))
       {
         if (sameuser)
-	  sendto_realops_flags(UMODE_ALL, L_ALL,
+	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
  	       "Nick change collision from %s to %s(%s <- %s)(older killed)",
 	       source_p->name, target_p->name, target_p->from->name,
 	       client_p->name);
         else
-	  sendto_realops_flags(UMODE_ALL, L_ALL,
+	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 	       "Nick change collision from %s to %s(%s <- %s)(newer killed)",
 	       source_p->name, target_p->name, target_p->from->name,
 	       client_p->name);
@@ -940,12 +941,12 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
      else
      {
        if (sameuser)
-         sendto_realops_flags(UMODE_ALL, L_ALL,
+         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 	                      "Nick collision on %s(%s <- %s)(older killed)",
 			      target_p->name, target_p->from->name,
 			      client_p->name);
        else
-         sendto_realops_flags(UMODE_ALL, L_ALL,
+         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 	                      "Nick collision on %s(%s <- %s)(newer killed)",
 			      target_p->name, target_p->from->name,
 			      client_p->name);

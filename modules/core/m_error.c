@@ -51,17 +51,21 @@ m_error(struct Client *client_p, struct Client *source_p,
 
   if (client_p == source_p)
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, "ERROR :from %s -- %s",
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "ERROR :from %s -- %s",
                          get_client_name(client_p, HIDE_IP), para);
-    sendto_realops_flags(UMODE_ALL, L_OPER, "ERROR :from %s -- %s",
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "ERROR :from %s -- %s",
                          get_client_name(client_p, MASK_IP), para);
   }
   else
   {
-    sendto_realops_flags(UMODE_ALL, L_OPER, "ERROR :from %s via %s -- %s",
-                         source_p->name, get_client_name(client_p, MASK_IP), para);
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, "ERROR :from %s via %s -- %s",
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "ERROR :from %s via %s -- %s",
                          source_p->name, get_client_name(client_p, HIDE_IP), para);
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "ERROR :from %s via %s -- %s",
+                         source_p->name, get_client_name(client_p, MASK_IP), para);
   }
 
   if (MyClient(source_p))
@@ -80,10 +84,12 @@ ms_error(struct Client *client_p, struct Client *source_p,
        source_p->name, para);
 
   if (client_p == source_p)
-    sendto_realops_flags(UMODE_ALL, L_ALL, "ERROR :from %s -- %s",
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "ERROR :from %s -- %s",
                          get_client_name(client_p, MASK_IP), para);
   else
-    sendto_realops_flags(UMODE_ALL, L_ALL, "ERROR :from %s via %s -- %s",
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "ERROR :from %s via %s -- %s",
                          source_p->name,
                          get_client_name(client_p, MASK_IP), para);
 }

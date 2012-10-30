@@ -1398,7 +1398,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
         break;
       }
 
-      sendto_realops_flags(UMODE_SPY, L_ALL,
+      sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                            "STATS %c requested by %s (%s@%s) [%s]",
                            statchar, source_p->name, source_p->username,
                            source_p->host, source_p->servptr->name);

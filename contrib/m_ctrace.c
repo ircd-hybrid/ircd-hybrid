@@ -69,7 +69,7 @@ do_ctrace(struct Client *source_p, int parc, char *parv[])
   const char *class_name = NULL;
   dlink_node *ptr;
 
-  sendto_realops_flags(UMODE_SPY, L_ALL,
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "CTRACE requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);

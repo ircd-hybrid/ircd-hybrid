@@ -422,7 +422,8 @@ module_init(void)
     {
       ilog(LOG_TYPE_IRCD, "You have more than 32 usermodes, "
            "IP cloaking not installed");
-      sendto_realops_flags(UMODE_ALL, L_ALL, "You have more than "
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                           "You have more than "
                            "32 usermodes, IP cloaking not installed");
       return;
     }
@@ -433,7 +434,8 @@ module_init(void)
   else
   {
     ilog(LOG_TYPE_IRCD, "Usermode +h already in use, IP cloaking not installed");
-    sendto_realops_flags(UMODE_ALL, L_ALL, "Usermode +h already in use, "
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Usermode +h already in use, "
                          "IP cloaking not installed");
     return;
   }

@@ -103,7 +103,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who,
       if (!IsSetJoinFloodNoticed(chptr))
       {
         SetJoinFloodNoticed(chptr);
-        sendto_realops_flags(UMODE_BOTS, L_ALL,
+        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "Possible Join Flooder %s on %s target: %s",
                              get_client_name(who, HIDE_IP),
                              who->servptr->name, chptr->chname);
@@ -777,12 +777,12 @@ check_spambot_warning(struct Client *source_p, const char *name)
     {
       /* Its already known as a possible spambot */
       if (name != NULL)
-        sendto_realops_flags(UMODE_BOTS, L_ALL,
+        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "User %s (%s@%s) trying to join %s is a possible spambot",
                              source_p->name, source_p->username,
                              source_p->host, name);
       else
-        sendto_realops_flags(UMODE_BOTS, L_ALL,
+        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "User %s (%s@%s) is a possible spambot",
                              source_p->name, source_p->username,
                              source_p->host);
@@ -833,7 +833,7 @@ check_splitmode(void *unused)
     {
       splitmode = 1;
 
-      sendto_realops_flags(UMODE_ALL,L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Network split, activating splitmode");
       eventAddIsh("check_splitmode", check_splitmode, NULL, 10);
     }
@@ -841,7 +841,7 @@ check_splitmode(void *unused)
     {
       splitmode = 0;
 
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Network rejoined, deactivating splitmode");
       eventDelete(check_splitmode, NULL);
     }

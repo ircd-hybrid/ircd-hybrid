@@ -77,7 +77,7 @@ set_local_gline(const struct Client *source_p, const char *user,
   SetConfTemporary(aconf);
   add_conf_by_address(CONF_GLINE, aconf);
 
-  sendto_realops_flags(UMODE_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "%s added G-Line for [%s@%s] [%s]",
                        get_oper_name(source_p),
                        aconf->user, aconf->host, aconf->reason);
@@ -215,7 +215,7 @@ check_majority(const struct Client *source_p, const char *user,
       {
         if (remove_gline_match(user, host))
         {
-          sendto_realops_flags(UMODE_ALL, L_ALL,
+          sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "%s has removed the G-Line for: [%s@%s]",
                                get_oper_name(source_p), user, host);
           ilog(LOG_TYPE_GLINE, "%s removed G-Line for [%s@%s]",
@@ -296,10 +296,10 @@ do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
 
         if (bitlen < min_bitlen)
         {
-          sendto_realops_flags(UMODE_ALL, L_ALL, "%s!%s@%s on %s is requesting "
-                               "a GLINE with a CIDR mask < %d for [%s@%s] [%s]",
-                               source_p->name, source_p->username, source_p->host,
-                               source_p->servptr->name, min_bitlen, user, host, reason);
+          sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                               "%s is requesting a GLINE with a CIDR mask < %d for [%s@%s] [%s]",
+                               get_oper_name(source_p), min_bitlen,
+                               user, host, reason);
           return;
         }
       }
@@ -309,11 +309,12 @@ do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
      if (check_majority(source_p, user, host, reason, GLINE_PENDING_ADD_TYPE) ==
          GLINE_ALREADY_VOTED)
      {
-       sendto_realops_flags(UMODE_ALL, L_ALL, "oper or server has already voted");
+       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                            "oper or server has already voted");
        return;
      }
 
-     sendto_realops_flags(UMODE_ALL, L_ALL,
+     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                           "%s requesting G-Line for [%s@%s] [%s]",
                           get_oper_name(source_p),
                           user, host, reason);
@@ -391,7 +392,7 @@ mo_gline(struct Client *client_p, struct Client *source_p,
    * call these two functions first so the 'requesting' notice always comes
    * before the 'has triggered' notice.  -bill
    */
-  sendto_realops_flags(UMODE_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "%s requesting G-Line for [%s@%s] [%s]",
                        get_oper_name(source_p),
                        user, host, reason);
@@ -444,7 +445,7 @@ do_sungline(struct Client *source_p, const char *user,
 {
   assert(source_p->servptr != NULL);
 
-  sendto_realops_flags(UMODE_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "%s requesting UNG-Line for [%s@%s] [%s]",
                        get_oper_name(source_p), user, host, reason);
   ilog(LOG_TYPE_GLINE, "#ungline for %s@%s [%s] requested by %s",
@@ -453,7 +454,8 @@ do_sungline(struct Client *source_p, const char *user,
   /* If at least 3 opers agree this user should be un G lined then do it */
   if (check_majority(source_p, user, host, reason, GLINE_PENDING_DEL_TYPE) ==
       GLINE_ALREADY_VOTED)
-    sendto_realops_flags(UMODE_ALL, L_ALL, "oper or server has already voted");
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "oper or server has already voted");
 
   if (prop)
   {

@@ -138,7 +138,7 @@ m_join(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_BADCHANNAME),
                  me.name, source_p->name, chan);
-      sendto_realops_flags(UMODE_SPY, L_ALL,
+      sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                            "Forbidding reserved channel [%s] from user %s",
                            chan, get_client_name(source_p, HIDE_IP));
       continue;
@@ -302,7 +302,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
 
   if (!check_channel_name(parv[2], 0))
   {
-    sendto_realops_flags(UMODE_DEBUG, L_ALL,
+    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s: %s",
                          client_p->name, parv[2]);
     return;
@@ -326,7 +326,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
   {
     if (newts < 800000000)
     {
-      sendto_realops_flags(UMODE_DEBUG, L_ALL,
+      sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                            "*** Bogus TS %lu on %s ignored from %s",
                            (unsigned long)newts, chptr->chname,
                            client_p->name);
@@ -341,7 +341,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
       sendto_channel_local(ALL_MEMBERS, 0, chptr,
                            ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
                            me.name, chptr->chname, chptr->chname, (unsigned long)oldts);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Server %s changing TS on %s from %lu to 0",
                            source_p->name, chptr->chname, (unsigned long)oldts);
     }

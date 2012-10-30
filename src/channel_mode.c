@@ -302,7 +302,7 @@ del_id(struct Channel *chptr, char *banid, int type)
       list = &chptr->invexlist;
       break;
     default:
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "del_id() called with unknown ban type %d!", type);
       return 0;
   }

@@ -341,10 +341,12 @@ try_connections(void *unused)
        *   -- adrian
        */
       if (ConfigServerHide.hide_server_ips)
-        sendto_realops_flags(UMODE_ALL, L_ALL, "Connection to %s activated.",
+        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                             "Connection to %s activated.",
                              conf->name);
       else
-        sendto_realops_flags(UMODE_ALL, L_ALL, "Connection to %s[%s] activated.",
+        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                             "Connection to %s[%s] activated.",
                              conf->name, aconf->host);
 
       serv_connect(aconf, NULL);
@@ -702,7 +704,8 @@ server_estab(struct Client *client_p)
       == NULL)
   {
     /* This shouldn't happen, better tell the ops... -A1kmm */
-    sendto_realops_flags(UMODE_ALL, L_ALL, "Warning: Lost connect{} block "
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Warning: Lost connect{} block "
                          "for server %s(this shouldn't happen)!", host);
     exit_client(client_p, &me, "Lost connect{} block!");
     return;
@@ -812,14 +815,14 @@ server_estab(struct Client *client_p)
     compression = SSL_get_current_compression(client_p->localClient->fd.ssl);
     expansion   = SSL_get_current_expansion(client_p->localClient->fd.ssl);
 
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
                          inpath_ip, ssl_get_cipher(client_p->localClient->fd.ssl),
                          compression ? SSL_COMP_get_name(compression) : "NONE",
                          expansion ? SSL_COMP_get_name(expansion) : "NONE",
                          show_capabilities(client_p));
     /* Now show the masked hostname/IP to opers */
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
                          inpath, ssl_get_cipher(client_p->localClient->fd.ssl),
                          compression ? SSL_COMP_get_name(compression) : "NONE",
@@ -834,13 +837,13 @@ server_estab(struct Client *client_p)
   else
 #endif
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
-                         inpath_ip,show_capabilities(client_p));
+                         inpath_ip, show_capabilities(client_p));
     /* Now show the masked hostname/IP to opers */
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
-                         inpath,show_capabilities(client_p));
+                         inpath, show_capabilities(client_p));
     ilog(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
          inpath_ip, show_capabilities(client_p));
   }
@@ -1098,7 +1101,7 @@ serv_connect(struct AccessItem *aconf, struct Client *by)
   /* Still processing a DNS lookup? -> exit */
   if (aconf->dns_pending)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} in progress.",
                          conf->name);
     return (0);
@@ -1106,7 +1109,7 @@ serv_connect(struct AccessItem *aconf, struct Client *by)
 
   if (aconf->dns_failed)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} failed.",
                          conf->name);
     return (0);
@@ -1117,10 +1120,10 @@ serv_connect(struct AccessItem *aconf, struct Client *by)
    */
   if ((client_p = hash_find_server(conf->name)) != NULL)
   { 
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 		         "Server %s already present from %s",
 		         conf->name, get_client_name(client_p, SHOW_IP));
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 		         "Server %s already present from %s",
 		         conf->name, get_client_name(client_p, MASK_IP));
     if (by && IsClient(by) && !MyClient(by))
@@ -1160,8 +1163,8 @@ serv_connect(struct AccessItem *aconf, struct Client *by)
    */
   if (!attach_connect_block(client_p, conf->name, aconf->host))
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-		         "Host %s is not enabled for connecting:no C/N-line",
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+		         "Host %s is not enabled for connecting: no connect{} block",
 			 conf->name);
     if (by && IsClient(by) && !MyClient(by))  
       sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
@@ -1282,9 +1285,9 @@ finish_ssl_server_handshake(struct Client *client_p)
                         client_p->name, SERVER_TYPE);
   if (conf == NULL)
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Lost connect{} block for %s", get_client_name(client_p, HIDE_IP));
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
 
     exit_client(client_p, &me, "Lost connect{} block");
@@ -1309,11 +1312,11 @@ finish_ssl_server_handshake(struct Client *client_p)
    */
   if (IsDead(client_p))
   {
-      sendto_realops_flags(UMODE_ALL, L_ADMIN,
+      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                            "%s[%s] went dead during handshake",
                            client_p->name,
                            client_p->host);
-      sendto_realops_flags(UMODE_ALL, L_OPER,
+      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                            "%s went dead during handshake", client_p->name);
       return;
   }
@@ -1346,7 +1349,7 @@ ssl_server_handshake(fde_t *fd, struct Client *client_p)
       default:
       {
         const char *sslerr = ERR_error_string(ERR_get_error(), NULL);
-        sendto_realops_flags(UMODE_ALL, L_ALL,
+        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                              "Error connecting to %s: %s", client_p->name,
                              sslerr ? sslerr : "unknown SSL error");
         exit_client(client_p, client_p, "Error during SSL handshake");
@@ -1408,15 +1411,15 @@ serv_connect_callback(fde_t *fd, int status, void *data)
      * Admins get to see any IP, mere opers don't *sigh*
      */
      if (ConfigServerHide.hide_server_ips)
-       sendto_realops_flags(UMODE_ALL, L_ADMIN,
+       sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                             "Error connecting to %s: %s",
                             client_p->name, comm_errstr(status));
      else
-       sendto_realops_flags(UMODE_ALL, L_ADMIN,
+       sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 	      		    "Error connecting to %s[%s]: %s", client_p->name,
 			    client_p->host, comm_errstr(status));
 
-     sendto_realops_flags(UMODE_ALL, L_OPER,
+     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 			  "Error connecting to %s: %s",
 			  client_p->name, comm_errstr(status));
 
@@ -1433,9 +1436,9 @@ serv_connect_callback(fde_t *fd, int status, void *data)
 			client_p->name, SERVER_TYPE); 
   if (conf == NULL)
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 	                 "Lost connect{} block for %s", get_client_name(client_p, HIDE_IP));
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 		         "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
 
     exit_client(client_p, &me, "Lost connect{} block");
@@ -1470,11 +1473,11 @@ serv_connect_callback(fde_t *fd, int status, void *data)
    */
   if (IsDead(client_p)) 
   {
-      sendto_realops_flags(UMODE_ALL, L_ADMIN,
+      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 			   "%s[%s] went dead during handshake",
                            client_p->name,
 			   client_p->host);
-      sendto_realops_flags(UMODE_ALL, L_OPER,
+      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 			   "%s went dead during handshake", client_p->name);
       return;
   }

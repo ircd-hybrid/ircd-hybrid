@@ -63,9 +63,8 @@ extern void sendto_match_butone(struct Client *, struct Client *,
                                 char *, int, const char *, ...);
 extern void sendto_match_servs(struct Client *, const char *, int,
                                const char *, ...);
-extern void sendto_realops_flags(unsigned int, int,
+extern void sendto_realops_flags(unsigned int, int, int,
                                  const char *, ...);
-extern void sendto_globops_flags(unsigned int, int, const char *, ...);
 extern void sendto_wallops_flags(unsigned int, struct Client *,
                                  const char *, ...);
 extern void ts_warn(const char *, ...);
@@ -87,6 +86,10 @@ extern void kill_client_ll_serv_butone(struct Client *, struct Client *,
 #define L_ALL 	0
 #define L_OPER 	1
 #define L_ADMIN	2
+
+#define SEND_NOTICE 1
+#define SEND_GLOBAL 2
+#define SEND_LOCOPS 3
 
 #define NOCAPS          0               /* no caps */
 #define NOFLAGS         0               /* no flags */

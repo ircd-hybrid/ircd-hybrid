@@ -58,7 +58,8 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     if (irccmp(parv[1], "DNS") == 0)
     {
       sendto_one(source_p, form_str(RPL_REHASHING), me.name, source_p->name, "DNS");
-      sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing DNS",
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                           "%s is rehashing DNS",
                            get_oper_name(source_p));
       restart_resolver();   /* re-read /etc/resolv.conf AGAIN?
                                and close/re-open res socket */
@@ -68,14 +69,15 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_REHASHING), me.name,
                  source_p->name, "FDLIMIT");
-      sendto_realops_flags(UMODE_ALL, L_ALL, "%s is updating FDLIMIT",
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                           "%s is updating FDLIMIT",
                            get_oper_name(source_p));
       recalc_fdlimit(NULL);
       found = 1;
     }
     else if (irccmp(parv[1], "MOTD") == 0)
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s is forcing re-reading of MOTD file",
                            get_oper_name(source_p));
       read_message_file(&ConfigFileEntry.motd);
@@ -99,7 +101,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(RPL_REHASHING),
                me.name, source_p->name, ConfigFileEntry.configfile);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s is rehashing server config file",
                          get_oper_name(source_p));
     ilog(LOG_TYPE_IRCD, "REHASH From %s[%s]",

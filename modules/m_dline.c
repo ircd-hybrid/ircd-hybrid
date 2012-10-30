@@ -62,7 +62,7 @@ apply_tdline(struct Client *source_p, struct ConfItem *conf,
   add_conf_by_address(CONF_DLINE, aconf);
 
 
-  sendto_realops_flags(UMODE_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 		       "%s added temporary %d min. D-Line for [%s] [%s]",
 		       get_oper_name(source_p), tkline_time/60,
 		       aconf->host, aconf->reason);
@@ -468,7 +468,7 @@ mo_undline(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p,
                ":%s NOTICE %s :Un-Dlined [%s] from temporary D-Lines",
                me.name, source_p->name, addr);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the temporary D-Line for: [%s]",
                          get_oper_name(source_p), addr);
     ilog(LOG_TYPE_DLINE, "%s removed temporary D-Line for [%s]",
@@ -480,7 +480,7 @@ mo_undline(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
                me.name, source_p->name, addr);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			 "%s has removed the D-Line for: [%s]",
 			 get_oper_name(source_p), addr);
     ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
@@ -515,7 +515,7 @@ me_undline(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,
                  ":%s NOTICE %s :Un-Dlined [%s] from temporary D-Lines",
                  me.name, source_p->name, addr);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the temporary D-Line for: [%s]",
                            get_oper_name(source_p), addr);
       ilog(LOG_TYPE_DLINE, "%s removed temporary D-Line for [%s]",
@@ -527,7 +527,7 @@ me_undline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
                  me.name, source_p->name, addr);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the D-Line for: [%s]",
                            get_oper_name(source_p), addr);
       ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",

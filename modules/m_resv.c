@@ -240,7 +240,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
                  me.name, source_p->name,
 		 tkline_time/60,
                  (MyClient(source_p) ? "local" : "remote"), name);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "%s has placed a %d minute %s RESV on channel: %s [%s]",
 			   get_oper_name(source_p),
 			   tkline_time/60,
@@ -258,7 +258,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 		 ":%s NOTICE %s :A %s RESV has been placed on channel %s",
                  me.name, source_p->name,
                  (MyClient(source_p) ? "local" : "remote"), name);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "%s has placed a %s RESV on channel %s : [%s]",
 			   get_oper_name(source_p),
 			   (MyClient(source_p) ? "local" : "remote"),
@@ -302,7 +302,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 		 tkline_time/60,
                  (MyClient(source_p) ? "local" : "remote"),
                  conf->name, resv_p->reason);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "%s has placed a %d minute %s RESV on nick %s : [%s]",
 			   get_oper_name(source_p),
 			   tkline_time/60,
@@ -321,7 +321,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
                  me.name, source_p->name,
                  (MyClient(source_p) ? "local" : "remote"),
                  conf->name, resv_p->reason);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "%s has placed a %s RESV on nick %s : [%s]",
 			   get_oper_name(source_p),
 			   (MyClient(source_p) ? "local" : "remote"),
@@ -363,7 +363,7 @@ remove_resv(struct Client *source_p, const char *name)
     sendto_one(source_p,
                ":%s NOTICE %s :The RESV has been removed on channel: %s",
                me.name, source_p->name, name);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the RESV for channel: %s",
                          get_oper_name(source_p), name);
   }
@@ -393,7 +393,7 @@ remove_resv(struct Client *source_p, const char *name)
 
     sendto_one(source_p, ":%s NOTICE %s :The RESV has been removed on nick: %s",
                me.name, source_p->name, name);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the RESV for nick: %s",
                          get_oper_name(source_p), name);
   }

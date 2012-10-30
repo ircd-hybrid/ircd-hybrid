@@ -51,13 +51,14 @@ failed_oper_notice(struct Client *source_p, const char *name,
                    const char *reason)
 {
   if (ConfigFileEntry.failed_oper_notice)
-    sendto_realops_flags(UMODE_ALL, L_ALL, "Failed OPER attempt as %s "
-                         "by %s (%s@%s) - %s", name, source_p->name,
-                         source_p->username, source_p->host, reason);
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Failed OPER attempt as %s by %s (%s@%s) - %s",
+                         name, source_p->name, source_p->username,
+                         source_p->host, reason);
 
-  ilog(LOG_TYPE_OPER, "Failed OPER attempt as %s "
-       "by %s (%s@%s) - %s", name, source_p->name,
-       source_p->username, source_p->host, reason);
+  ilog(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s (%s@%s) - %s",
+       name, source_p->name, source_p->username,
+       source_p->host, reason);
 }
 
 /*

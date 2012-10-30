@@ -70,10 +70,10 @@ mr_server(struct Client *client_p, struct Client *source_p,
    */
   if (!DoesTS(client_p))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Non-TS server "
           "for server %s", get_client_name(client_p, HIDE_IP), name);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Non-TS server "
           "for server %s", get_client_name(client_p, MASK_IP), name);
     exit_client(client_p, client_p, "Non-TS server");
@@ -82,7 +82,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
 
   if (!valid_servname(name))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", get_client_name(client_p, HIDE_IP), name);
     sendto_realops_flags(UMODE_ALL, L_OPER,
@@ -100,11 +100,11 @@ mr_server(struct Client *client_p, struct Client *source_p,
     case -1:
       if (ConfigFileEntry.warn_no_nline)
       {
-        sendto_realops_flags(UMODE_ALL, L_ADMIN,
+        sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(client_p, HIDE_IP), name);
 
-        sendto_realops_flags(UMODE_ALL, L_OPER,
+        sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(client_p, MASK_IP), name);
       }
@@ -115,11 +115,11 @@ mr_server(struct Client *client_p, struct Client *source_p,
       break;
 
     case -2:
-      sendto_realops_flags(UMODE_ALL, L_ADMIN,
+      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Bad password "
            "for server %s", get_client_name(client_p, HIDE_IP), name);
 
-      sendto_realops_flags(UMODE_ALL, L_OPER,
+      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Bad password "
            "for server %s", get_client_name(client_p, MASK_IP), name);
 
@@ -129,11 +129,11 @@ mr_server(struct Client *client_p, struct Client *source_p,
       break;
 
     case -3:
-      sendto_realops_flags(UMODE_ALL, L_ADMIN,
+      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid host "
            "for server %s", get_client_name(client_p, HIDE_IP), name);
 
-      sendto_realops_flags(UMODE_ALL, L_OPER,
+      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid host "
            "for server %s", get_client_name(client_p, MASK_IP), name);
 
@@ -156,11 +156,11 @@ mr_server(struct Client *client_p, struct Client *source_p,
      * Definitely don't do that here. This is from an unregistered
      * connect - A1kmm.
      */
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 			 "Attempt to re-introduce server %s SID %s from %s",
                          name, client_p->id, 
 			 get_client_name(client_p, HIDE_IP));
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 			 "Attempt to re-introduce server %s SID %s from %s",
                          name, client_p->id,
 			 get_client_name(client_p, MASK_IP));
@@ -219,10 +219,10 @@ ms_server(struct Client *client_p, struct Client *source_p,
 
   if (!valid_servname(name))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, SHOW_IP), name);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, MASK_IP), name);
     sendto_one(client_p, "ERROR :Bogus server name introduced");
@@ -250,10 +250,10 @@ ms_server(struct Client *client_p, struct Client *source_p,
      * solution.. --fl_ 
      */
     sendto_one(client_p, "ERROR :Server %s already exists", name);
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 			 "Link %s cancelled, server %s already exists",
                          get_client_name(client_p, SHOW_IP), name);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 			 "Link %s cancelled, server %s already exists",
                          client_p->name, name);
     exit_client(client_p, &me, "Server Exists");
@@ -314,9 +314,11 @@ ms_server(struct Client *client_p, struct Client *source_p,
   if (!hlined)
   {
     /* OOOPs nope can't HUB */
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, "Non-Hub link %s introduced %s.",
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, HIDE_IP), name);
-    sendto_realops_flags(UMODE_ALL, L_OPER,  "Non-Hub link %s introduced %s.",
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, MASK_IP), name);
     exit_client(source_p, &me, "No matching hub_mask.");
     return;
@@ -326,10 +328,10 @@ ms_server(struct Client *client_p, struct Client *source_p,
   if (llined)
   {
     /* OOOPs nope can't HUB this leaf */
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 			 "Link %s introduced leafed server %s.",
                          get_client_name(client_p, HIDE_IP), name);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 			 "Link %s introduced leafed server %s.",
                          get_client_name(client_p, MASK_IP), name);
     /* If it is new, we are probably misconfigured, so split the
@@ -366,7 +368,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
                 source_p->name, target_p->name, hop + 1,
                 IsHidden(target_p) ? "(H) " : "", target_p->info);
 
-  sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
+  sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
                        "Server %s being introduced by %s",
                        target_p->name, source_p->name);
 }
@@ -403,10 +405,10 @@ ms_sid(struct Client *client_p, struct Client *source_p,
 
   if (!valid_servname(parv[1]))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, SHOW_IP), parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, MASK_IP), parv[1]);
     sendto_one(client_p, "ERROR :Bogus server name introduced");
@@ -416,10 +418,10 @@ ms_sid(struct Client *client_p, struct Client *source_p,
 
   if (!valid_sid(parv[3]))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(client_p, SHOW_IP), parv[3]);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(client_p, MASK_IP), parv[3]);
     sendto_one(client_p, "ERROR :Bogus server ID introduced");
@@ -431,10 +433,10 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   if ((target_p = hash_find_id(parv[3])))
   {
     sendto_one(client_p, "ERROR :SID %s already exists", parv[3]);
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 			 "Link %s cancelled, SID %s already exists",
                          get_client_name(client_p, SHOW_IP), parv[3]);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 			 "Link %s cancelled, SID %s already exists",
                          client_p->name, parv[3]);
     exit_client(client_p, &me, "SID Exists");
@@ -445,10 +447,10 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   if ((target_p = hash_find_server(parv[1])))
   {
     sendto_one(client_p, "ERROR :Server %s already exists", parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",   
                          get_client_name(client_p, SHOW_IP), parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",   
                          client_p->name, parv[1]);
     exit_client(client_p, &me, "Server Exists");
@@ -510,9 +512,11 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   if (!hlined)
   {
     /* OOOPs nope can't HUB */
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, "Non-Hub link %s introduced %s.",
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, SHOW_IP), parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_OPER,  "Non-Hub link %s introduced %s.",
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, MASK_IP), parv[1]);
     exit_client(source_p, &me, "No matching hub_mask.");
     return;
@@ -522,10 +526,10 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   if (llined)
   {
     /* OOOPs nope can't HUB this leaf */
-    sendto_realops_flags(UMODE_ALL, L_ADMIN,
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
 			 "Link %s introduced leafed server %s.",
                          get_client_name(client_p, SHOW_IP), parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_OPER,  
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
 			 "Link %s introduced leafed server %s.",
                          get_client_name(client_p, MASK_IP), parv[1]);
     exit_client(client_p, &me, "Leafed Server.");
@@ -560,7 +564,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
                 source_p->name, target_p->name, hop + 1,
                 IsHidden(target_p) ? "(H) " : "", target_p->info);
 
-  sendto_realops_flags(UMODE_EXTERNAL, L_ALL, 
+  sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
                        "Server %s being introduced by %s",
                        target_p->name, source_p->name);
 }

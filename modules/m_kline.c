@@ -266,7 +266,7 @@ apply_tkline(struct Client *source_p, struct ConfItem *conf,
   SetConfTemporary(aconf);
   add_conf_by_address(CONF_KLINE, aconf);
 
-  sendto_realops_flags(UMODE_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 		       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
 		       get_oper_name(source_p), tkline_time/60,
 		       aconf->user, aconf->host,
@@ -386,7 +386,7 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
     sendto_one(source_p,
                ":%s NOTICE %s :Un-klined [%s@%s] from temporary K-Lines",
                me.name, source_p->name, user, host);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the temporary K-Line for: [%s@%s]",
                          get_oper_name(source_p), user, host);
     ilog(LOG_TYPE_KLINE, "%s removed temporary K-Line for [%s@%s]",
@@ -398,7 +398,7 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
   {
     sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
                me.name, source_p->name, user,host);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the K-Line for: [%s@%s]",
                          get_oper_name(source_p), user, host);
     ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
@@ -444,7 +444,7 @@ me_unkline(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,
                  ":%s NOTICE %s :Un-klined [%s@%s] from temporary K-Lines",
                  me.name, source_p->name, kuser, khost);
-      sendto_realops_flags(UMODE_ALL, L_ALL,  
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the temporary K-Line for: [%s@%s]",
                            get_oper_name(source_p), kuser, khost);
       ilog(LOG_TYPE_KLINE, "%s removed temporary K-Line for [%s@%s]",
@@ -456,7 +456,7 @@ me_unkline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed",
                  me.name, source_p->name, kuser, khost);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the K-Line for: [%s@%s]",
                          get_oper_name(source_p), kuser, khost);
 

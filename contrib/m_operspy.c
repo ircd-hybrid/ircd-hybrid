@@ -603,7 +603,7 @@ operspy_log(struct Client *source_p, const char *command, const char *target)
 #endif
 
 #ifdef OPERSPY_NOTICE
-  sendto_realops_flags(UMODE_SPY, L_ALL, "OPERSPY %s %s %s",
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "OPERSPY %s %s %s",
                        get_oper_name(source_p), command, target);
 #endif
 

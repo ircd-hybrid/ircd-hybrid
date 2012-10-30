@@ -760,7 +760,7 @@ check_client(va_list args)
   switch (i)
   {
     case TOO_MANY:
-      sendto_realops_flags(UMODE_FULL, L_ALL,
+      sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                            "Too many on IP for %s (%s).",
 			   get_client_name(source_p, SHOW_IP),
 			   source_p->sockhost);
@@ -771,8 +771,8 @@ check_client(va_list args)
       break;
 
     case I_LINE_FULL:
-      sendto_realops_flags(UMODE_FULL, L_ALL,
-                           "I-line is full for %s (%s).",
+      sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
+                           "auth{} block is full for %s (%s).",
 			   get_client_name(source_p, SHOW_IP),
 			   source_p->sockhost);
       ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
@@ -786,7 +786,7 @@ check_client(va_list args)
       ++ServerStats.is_ref;
       /* jdc - lists server name & port connections are on */
       /*       a purely cosmetical change */
-      sendto_realops_flags(UMODE_UNAUTH, L_ALL,
+      sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
 			   "Unauthorized client connection from %s [%s] on [%s/%u].",
 			   get_client_name(source_p, SHOW_IP),
 			   source_p->sockhost,
@@ -875,7 +875,8 @@ verify_access(struct Client *client_p, const char *username)
 	conf = unmap_conf_item(aconf);
 
         if (!ConfigFileEntry.hide_spoof_ips && IsConfSpoofNotice(aconf))
-          sendto_realops_flags(UMODE_ALL, L_ADMIN, "%s spoofing: %s as %s",
+          sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                               "%s spoofing: %s as %s",
                                client_p->name, client_p->host, conf->name);
         strlcpy(client_p->host, conf->name, sizeof(client_p->host));
         SetIPSpoof(client_p);
@@ -1685,7 +1686,7 @@ int
 rehash(int sig)
 {
   if (sig != 0)
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Got signal SIGHUP, reloading ircd.conf file");
 
   restart_resolver();
@@ -2077,8 +2078,8 @@ expire_tklines(dlink_list *tklist)
       if (xconf->hold <= CurrentTime)
       {
         if (ConfigFileEntry.tkline_expire_notices)
-	  sendto_realops_flags(UMODE_ALL, L_ALL,
-                               "Temporary X-line for [%s] sexpired", conf->name);
+	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                               "Temporary X-line for [%s] expired", conf->name);
 	dlinkDelete(ptr, tklist);
         free_dlink_node(ptr);
 	delete_conf_item(conf);
@@ -2090,7 +2091,7 @@ expire_tklines(dlink_list *tklist)
       if (nconf->hold <= CurrentTime)
       {
         if (ConfigFileEntry.tkline_expire_notices)
-	  sendto_realops_flags(UMODE_ALL, L_ALL,
+	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary RESV for [%s] expired", conf->name);
 	dlinkDelete(ptr, tklist);
         free_dlink_node(ptr);
@@ -2103,7 +2104,7 @@ expire_tklines(dlink_list *tklist)
       if (cconf->hold <= CurrentTime)
       {
         if (ConfigFileEntry.tkline_expire_notices)
-	  sendto_realops_flags(UMODE_ALL, L_ALL,
+	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary RESV for [%s] expired", cconf->name);
 	delete_channel_resv(cconf);
       }
@@ -2231,7 +2232,7 @@ read_conf_files(int cold)
     }
     else
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "Unable to read configuration file '%s': %s",
 			   filename, strerror(errno));
       return;
@@ -2294,7 +2295,7 @@ parse_conf_file(int type, int cold)
       ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
            filename, strerror(errno));
     else
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                     "Unable to read configuration file '%s': %s",
                            filename, strerror(errno));
   }
@@ -2775,11 +2776,11 @@ conf_add_class_to_conf(struct ConfItem *conf, const char *class_name)
     aconf->class_ptr = class_default;
 
     if (conf->type == CLIENT_TYPE)
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "Warning *** Defaulting to default class for %s@%s",
 			   aconf->user, aconf->host);
     else
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "Warning *** Defaulting to default class for %s",
 			   conf->name);
   }
@@ -2792,11 +2793,11 @@ conf_add_class_to_conf(struct ConfItem *conf, const char *class_name)
   if (aconf->class_ptr == NULL || !class->active)
   {
     if (conf->type == CLIENT_TYPE)
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "Warning *** Defaulting to default class for %s@%s",
 			   aconf->user, aconf->host);
     else
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			   "Warning *** Defaulting to default class for %s",
 			   conf->name);
     aconf->class_ptr = class_default;
@@ -2819,14 +2820,16 @@ conf_add_server(struct ConfItem *conf, const char *class_name)
 
   if (!aconf->host || !conf->name)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block");
+    sendto_realops_flags(UMODE_ALL, L_ALL,  SEND_NOTICE,
+                         "Bad connect block");
     ilog(LOG_TYPE_IRCD, "Bad connect block");
     return -1;
   }
 
   if (EmptyString(aconf->passwd))
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s",
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Bad connect block, name %s",
                          conf->name);
     ilog(LOG_TYPE_IRCD, "Bad connect block, host %s", conf->name);
     return -1;
@@ -2852,7 +2855,8 @@ yyerror(const char *msg)
     return;
 
   strip_tabs(newlinebuf, linebuf, sizeof(newlinebuf));
-  sendto_realops_flags(UMODE_ALL, L_ALL, "\"%s\", line %u: %s: %s",
+  sendto_realops_flags(UMODE_ALL, L_ALL,  SEND_NOTICE,
+                       "\"%s\", line %u: %s: %s",
                        conffilebuf, lineno + 1, msg, newlinebuf);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
        conffilebuf, lineno + 1, msg, newlinebuf);

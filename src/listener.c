@@ -384,7 +384,8 @@ accept_connection(fde_t *pfd, void *data)
        */
       if ((last_oper_notice + 20) <= CurrentTime)
       {
-        sendto_realops_flags(UMODE_ALL, L_ALL, "All connections in use. (%s)",
+        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                             "All connections in use. (%s)",
                              get_listener_name(listener));
         last_oper_notice = CurrentTime;
       }

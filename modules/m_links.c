@@ -38,7 +38,7 @@
 static void
 do_links(struct Client *source_p, int parc, char *parv[])
 {
-  sendto_realops_flags(UMODE_SPY, L_ALL,
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "LINKS requested by %s (%s@%s) [%s]",
                        source_p->name,
                        source_p->username, source_p->host,

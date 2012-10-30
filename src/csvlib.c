@@ -244,7 +244,7 @@ write_conf_line(struct Client *source_p, struct ConfItem *conf,
 
   if ((out = fopen(filename, "a")) == NULL)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "*** Problem opening %s ", filename);
     return;
   }
@@ -253,7 +253,7 @@ write_conf_line(struct Client *source_p, struct ConfItem *conf,
   {
   case KLINE_TYPE:
     aconf = (struct AccessItem *)map_to_conf(conf);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p),
 			 aconf->user, aconf->host, aconf->reason);
@@ -268,7 +268,7 @@ write_conf_line(struct Client *source_p, struct ConfItem *conf,
     break;
   case DLINE_TYPE:
     aconf = (struct AccessItem *)map_to_conf(conf);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added D-Line for [%s] [%s]",
                          get_oper_name(source_p), aconf->host, aconf->reason);
     sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
@@ -283,7 +283,7 @@ write_conf_line(struct Client *source_p, struct ConfItem *conf,
 
   case XLINE_TYPE:
     xconf = (struct MatchItem *)map_to_conf(conf);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added X-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->name,
 			 xconf->reason);

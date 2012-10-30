@@ -213,7 +213,8 @@ set_locale(const char *locale)
 
   strlcpy(used_locale, locale, sizeof(used_locale));
   if (!res)
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, "Language file [%s] contains "
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "Language file [%s] contains "
                          "errors, check server log file for more details",
 			 used_locale);
 }

@@ -390,7 +390,7 @@ register_local_user(struct Client *source_p)
   if ((Count.local >= ServerInfo.max_clients + MAX_BUFFER) ||
       (Count.local >= ServerInfo.max_clients && !IsExemptLimits(source_p)))
   {
-    sendto_realops_flags(UMODE_FULL, L_ALL,
+    sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                          "Too many clients, rejecting %s[%s].",
                          source_p->name, source_p->host);
     ++ServerStats.is_ref;
@@ -403,7 +403,8 @@ register_local_user(struct Client *source_p)
   {
     char tmpstr2[IRCD_BUFSIZE];
 
-    sendto_realops_flags(UMODE_REJ, L_ALL, "Invalid username: %s (%s@%s)",
+    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
+                         "Invalid username: %s (%s@%s)",
                          source_p->name, source_p->username, source_p->host);
     ++ServerStats.is_ref;
     snprintf(tmpstr2, sizeof(tmpstr2), "Invalid username [%s]",
@@ -421,7 +422,7 @@ register_local_user(struct Client *source_p)
   strlcpy(source_p->id, id, sizeof(source_p->id));
   hash_add_id(source_p);
 
-  sendto_realops_flags(UMODE_CCONN, L_ALL,
+  sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                        "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
                        source_p->name, source_p->username, source_p->host,
                        ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
@@ -429,7 +430,7 @@ register_local_user(struct Client *source_p)
                        get_client_class(source_p),
                        source_p->info, source_p->id);
 
-  sendto_realops_flags(UMODE_CCONN_FULL, L_ALL,
+  sendto_realops_flags(UMODE_CCONN_FULL, L_ALL, SEND_NOTICE,
                        "CLICONN %s %s %s %s %s %s %s 0 %s",
                        source_p->name, source_p->username, source_p->host,
                        ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
@@ -453,7 +454,8 @@ register_local_user(struct Client *source_p)
     Count.max_loc = Count.local;
 
     if (!(Count.max_loc % 10))
-      sendto_realops_flags(UMODE_ALL, L_ALL, "New Max Local Clients: %d",
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                           "New Max Local Clients: %d",
                            Count.max_loc);
   }
 
@@ -509,13 +511,14 @@ register_remote_user(struct Client *source_p,
    */
   source_p->servptr = hash_find_server(server);
 
-  /* Super GhostDetect:
+  /*
+   * Super GhostDetect:
    * If we can't find the server the user is supposed to be on,
    * then simply blow the user away.        -Taner
    */
   if (source_p->servptr == NULL)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "No server %s for user %s[%s@%s] from %s",
                          server, source_p->name, source_p->username,
                          source_p->host, source_p->from->name);
@@ -528,7 +531,7 @@ register_remote_user(struct Client *source_p,
 
   if ((target_p = source_p->servptr) && target_p->from != source_p->from)
   {
-    sendto_realops_flags(UMODE_DEBUG, L_ALL,
+    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
                          source_p->from->name, source_p->name, source_p->username,
                          source_p->host, source_p->servptr->name,
@@ -848,7 +851,8 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
 
   if (IsServer(source_p))
   {
-     sendto_realops_flags(UMODE_ALL, L_ADMIN, "*** Mode for User %s from %s",
+     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                          "*** Mode for User %s from %s",
                           parv[1], source_p->name);
      return;
   }
@@ -1169,7 +1173,7 @@ check_xline(struct Client *source_p)
     else
       reason = "No Reason";
 
-    sendto_realops_flags(UMODE_REJ, L_ALL,
+    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "X-line Rejecting [%s] [%s], user %s [%s]",
                          source_p->info, reason,
                          get_client_name(source_p, HIDE_IP),
@@ -1223,7 +1227,7 @@ oper_up(struct Client *source_p)
   if (!HasOFlag(source_p, OPER_FLAG_N))
     DelUMode(source_p, UMODE_NCHANGE);
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, "%s is now an operator",
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
   send_umode_out(source_p, source_p, old);
   sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);

@@ -109,7 +109,7 @@ send_message(struct Client *to, char *buf, int len)
   if (dbuf_length(&to->localClient->buf_sendq) + len > get_sendq(to))
   {
     if (IsServer(to))
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Max SendQ limit exceeded for %s: %lu > %lu",
                            get_client_name(to, HIDE_IP),
                            (unsigned long)(dbuf_length(&to->localClient->buf_sendq) + len),
@@ -152,7 +152,7 @@ send_message_remote(struct Client *to, struct Client *from,
 {
   if (!MyConnect(to))
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			 "server send message to %s [%s] dropped from %s(Not local server)",
 			 to->name, to->from->name, from->name);
     return;
@@ -165,13 +165,13 @@ send_message_remote(struct Client *to, struct Client *from,
   {
     if (IsServer(from))
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Send message to %s [%s] dropped from %s(Fake Dir)",
                            to->name, to->from->name, from->name);
       return;
     }
 
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
                          to->name, to->username, to->host,
                          from->name, from->username, from->host,
@@ -892,60 +892,48 @@ sendto_anywhere(struct Client *to, struct Client *from,
  * side effects	- Send to *local* ops only but NOT +s nonopers.
  */
 void
-sendto_realops_flags(unsigned int flags, int level, const char *pattern, ...)
+sendto_realops_flags(unsigned int flags, int level, int type, const char *pattern, ...)
 {
+  const char *ntype = NULL;
   dlink_node *ptr = NULL;
   char nbuf[IRCD_BUFSIZE];
   va_list args;
 
   va_start(args, pattern);
-  vsnprintf(nbuf, IRCD_BUFSIZE, pattern, args);
+  vsnprintf(nbuf, sizeof(nbuf), pattern, args);
   va_end(args);
+
+  switch (type)
+  {
+    case SEND_NOTICE:
+      ntype = "Notice";
+      break;
+    case SEND_GLOBAL:
+      ntype = "Global";
+      break;
+    case SEND_LOCOPS:
+      ntype = "LocOps";
+      break;
+    default:
+      assert(0);
+  }
 
   DLINK_FOREACH(ptr, oper_list.head)
   {
     struct Client *client_p = ptr->data;
     assert(HasUMode(client_p, UMODE_OPER));
 
-    /* If we're sending it to opers and theyre an admin, skip.
-     * If we're sending it to admins, and theyre not, skip.
+    /*
+     * If we're sending it to opers and they're an admin, skip.
+     * If we're sending it to admins, and they're not, skip.
      */
     if (((level == L_ADMIN) && !HasUMode(client_p, UMODE_ADMIN)) ||
 	((level == L_OPER) && HasUMode(client_p, UMODE_ADMIN)))
       continue;
 
     if (HasUMode(client_p, flags))
-      sendto_one(client_p, ":%s NOTICE %s :*** Notice -- %s",
-                 me.name, client_p->name, nbuf);
-  }
-}
-
-void
-sendto_globops_flags(unsigned int flags, int level, const char *pattern, ...)
-{
-  dlink_node *ptr = NULL;
-  char nbuf[IRCD_BUFSIZE];
-  va_list args;
-
-  va_start(args, pattern);
-  vsnprintf(nbuf, IRCD_BUFSIZE, pattern, args);
-  va_end(args);
-
-  DLINK_FOREACH(ptr, oper_list.head)
-  {
-    struct Client *client_p = ptr->data;
-    assert(client_p->umodes & UMODE_OPER);
-
-    /* If we're sending it to opers and theyre an admin, skip.
-     * If we're sending it to admins, and theyre not, skip.
-     */
-    if (((level == L_ADMIN) && !HasUMode(client_p, UMODE_ADMIN)) ||
-        ((level == L_OPER) && HasUMode(client_p, UMODE_ADMIN)))
-      continue;
-
-    if (HasUMode(client_p, flags))
-      sendto_one(client_p, ":%s NOTICE %s :*** Global -- %s",
-                 me.name, client_p->name, nbuf);
+      sendto_one(client_p, ":%s NOTICE %s :*** %s -- %s",
+                 me.name, client_p->name, ntype, nbuf);
   }
 }
 
@@ -1023,7 +1011,7 @@ ts_warn(const char *pattern, ...)
   vsnprintf(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, "%s", buffer);
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s", buffer);
   ilog(LOG_TYPE_IRCD, "%s", buffer);
 }
 

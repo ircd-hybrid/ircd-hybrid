@@ -353,7 +353,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
 
   if (tkline_time != 0)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			 "%s added temporary %d min. X-Line for [%s] [%s]",
 			 get_oper_name(source_p), (int)tkline_time/60,
 			 conf->name, match_item->reason);
@@ -380,7 +380,7 @@ remove_xline(struct Client *source_p, char *gecos)
     sendto_one(source_p,
                ":%s NOTICE %s :Un-xlined [%s] from temporary X-Lines",
                me.name, source_p->name, gecos);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the temporary X-Line for: [%s]",
                          get_oper_name(source_p), gecos);
     ilog(LOG_TYPE_KLINE, "%s removed temporary X-Line for [%s]",
@@ -392,7 +392,7 @@ remove_xline(struct Client *source_p, char *gecos)
   {
     sendto_one(source_p, ":%s NOTICE %s :X-Line for [%s] is removed",
                me.name, source_p->name, gecos);
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the X-Line for: [%s]",
                          get_oper_name(source_p), gecos);
     ilog(LOG_TYPE_KLINE, "%s removed X-Line for [%s]",

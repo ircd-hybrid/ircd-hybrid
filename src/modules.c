@@ -97,7 +97,8 @@ unload_one_module(const char *name, int warn)
   if (warn == 1)
   {
     ilog(LOG_TYPE_IRCD, "Module %s unloaded", name);
-    sendto_realops_flags(UMODE_ALL, L_ALL, "Module %s unloaded", name);
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Module %s unloaded", name);
   }
 
   return 0;
@@ -122,7 +123,8 @@ load_a_module(const char *path, int warn)
   if (!(tmpptr = lt_dlopen(path))) {
     const char *err = ((err = lt_dlerror())) ? err : "<unknown>";
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, "Error loading module %s: %s",
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Error loading module %s: %s",
                          mod_basename, err);
     ilog(LOG_TYPE_IRCD, "Error loading module %s: %s", mod_basename, err);
     return -1;
@@ -132,7 +134,8 @@ load_a_module(const char *path, int warn)
   {
     const char *err = ((err = lt_dlerror())) ? err : "<unknown>";
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, "Error loading module %s: %s",
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Error loading module %s: %s",
                          mod_basename, err);
     ilog(LOG_TYPE_IRCD, "Error loading module %s: %s", mod_basename, err);
     lt_dlclose(tmpptr);
@@ -152,7 +155,7 @@ load_a_module(const char *path, int warn)
 
   if (warn == 1)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Module %s [version: %s handle: %p] loaded.",
                          modp->name, modp->version, tmpptr);
     ilog(LOG_TYPE_IRCD, "Module %s [version: %s handle: %p] loaded.",
@@ -394,7 +397,7 @@ load_one_module(const char *path)
           return load_a_module(modpath, 1);
   }
 
-  sendto_realops_flags(UMODE_ALL, L_ALL,
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "Cannot locate module %s", path);
   ilog(LOG_TYPE_IRCD, "Cannot locate module %s", path);
   return -1;

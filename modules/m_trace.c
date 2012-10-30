@@ -186,7 +186,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     to = source_p->name;
   }
 
-  sendto_realops_flags(UMODE_SPY, L_ALL,
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "TRACE requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);

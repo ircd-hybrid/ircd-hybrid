@@ -174,7 +174,7 @@ set_time(void)
   {
     ilog(LOG_TYPE_IRCD, "Clock Failure (%s), TS can be corrupted",
          strerror(errno));
-    sendto_realops_flags(UMODE_ALL, L_ALL,
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Clock Failure (%s), TS can be corrupted",
                          strerror(errno));
     restart("Clock Failure");
@@ -243,7 +243,7 @@ io_loop(void)
     if (doremotd)
     {
       read_message_file(&ConfigFileEntry.motd);
-      sendto_realops_flags(UMODE_ALL, L_ALL,
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Got signal SIGUSR1, reloading ircd motd file");
       doremotd = 0;
     }

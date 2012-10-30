@@ -322,7 +322,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
     }
     else
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL, 
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Dropping server %s due to (invalid) command '%s' "
                            "with only %d arguments (expecting %d).",
                            client_p->name, mptr->cmd, i, mptr->args_min);
@@ -572,13 +572,15 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
    */
   if (IsServer(source_p) || IsMe(source_p))
   {
-    sendto_realops_flags(UMODE_DEBUG, L_ADMIN, "Message for %s[%s] from %s",
+    sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
+                         "Message for %s[%s] from %s",
                          source_p->name, source_p->from->name,
                          get_client_name(client_p, SHOW_IP));
-    sendto_realops_flags(UMODE_DEBUG, L_OPER,  "Message for %s[%s] from %s",
+    sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
+                         "Message for %s[%s] from %s",
                          source_p->name, source_p->from->name,
                          get_client_name(client_p, MASK_IP));
-    sendto_realops_flags(UMODE_DEBUG, L_ALL,
+    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "Not dropping server %s (%s) for Fake Direction",
                          client_p->name, source_p->name);
     return -1;
@@ -594,11 +596,11 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
    *
    * all servers must be TS these days --is
    */
-  sendto_realops_flags(UMODE_DEBUG, L_ADMIN,
+  sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                        "Message for %s[%s@%s!%s] from %s (TS, ignored)",
                        source_p->name, source_p->username, source_p->host,
                        source_p->from->name, get_client_name(client_p, SHOW_IP));
-  sendto_realops_flags(UMODE_DEBUG, L_OPER,
+  sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
                        "Message for %s[%s@%s!%s] from %s (TS, ignored)",
                        source_p->name, source_p->username, source_p->host,
                        source_p->from->name, get_client_name(client_p, MASK_IP));
@@ -626,10 +628,10 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
   if ((IsDigit(*lsender) && strlen(lsender) <= IRC_MAXSID) ||
       strchr(lsender, '.') != NULL)
   {
-    sendto_realops_flags(UMODE_DEBUG, L_ADMIN,
+    sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",
                          lbuffer, get_client_name(client_p, SHOW_IP), lsender);
-    sendto_realops_flags(UMODE_DEBUG, L_OPER,
+    sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",
                          lbuffer, client_p->name, lsender);
     sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
@@ -716,7 +718,7 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
       num = atoi(numeric);
 
       if ((num != ERR_NOSUCHNICK))
-        sendto_realops_flags(UMODE_ALL, L_ADMIN,
+        sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                              "*** %s(via %s) sent a %s numeric to me: %s",
                              source_p->name, client_p->name, numeric, buffer);
       return;
@@ -797,17 +799,21 @@ rfc1459_command_send_error(struct Client *client_p, struct Client *source_p,
 
   if (client_p == source_p)
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, "ERROR :from %s -- %s",
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "ERROR :from %s -- %s",
                          get_client_name(client_p, HIDE_IP), in_para);
-    sendto_realops_flags(UMODE_ALL, L_OPER,  "ERROR :from %s -- %s",
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "ERROR :from %s -- %s",
                          get_client_name(client_p, MASK_IP), in_para);
   }
   else
   {
-    sendto_realops_flags(UMODE_ALL, L_OPER, "ERROR :from %s via %s -- %s",
-                         source_p->name, get_client_name(client_p, MASK_IP), in_para);
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, "ERROR :from %s via %s -- %s",
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "ERROR :from %s via %s -- %s",
                          source_p->name, get_client_name(client_p, HIDE_IP), in_para);
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "ERROR :from %s via %s -- %s",
+                         source_p->name, get_client_name(client_p, MASK_IP), in_para);
   }
 
   if (MyClient(source_p))

@@ -41,26 +41,21 @@
  * \param f dbFile Struct Member
  * \return int 0 if failure, 1 > is the version number
  */
-int
+uint32_t
 get_file_version(struct dbFILE *f)
 {
-  FILE *fp = f->fp;
-  int version = fgetc(fp) << 24 | fgetc(fp) << 16 | fgetc(fp) << 8 | fgetc(fp);
+  uint32_t version = 0;
 
-  if (ferror(fp))
+  if (read_uint32(&version, f) == -1)
   {
-    ilog(LOG_TYPE_IRCD, "Error reading version number on %s", f->filename);
+    ilog(LOG_TYPE_IRCD, "Error reading version number on %s: %s",
+         f->filename, strerror(errno));
     return 0;
   }
-  else if (feof(fp))
+
+  if (version < 1)
   {
-    ilog(LOG_TYPE_IRCD, "Error reading version number on %s: End of file detected",
-         f->filename);
-    return 0;
-  }
-  else if (version < 1)
-  {
-    ilog(LOG_TYPE_IRCD, "Invalid version number (%d) on %s",
+    ilog(LOG_TYPE_IRCD, "Invalid version number (%u) on %s",
          version, f->filename);
     return 0;
   }

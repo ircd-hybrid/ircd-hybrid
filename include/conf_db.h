@@ -39,7 +39,7 @@ struct dbFILE
 };
 
 extern void check_file_version(struct dbFILE *);
-extern int get_file_version(struct dbFILE *);
+extern uint32_t get_file_version(struct dbFILE *);
 extern int write_file_version(struct dbFILE *, uint32_t);
 
 extern struct dbFILE *open_db(const char *, const char *, const char *, uint32_t);

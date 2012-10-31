@@ -68,22 +68,23 @@ am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
 am_ircd_OBJECTS = balloc.$(OBJEXT) channel.$(OBJEXT) \
 	channel_mode.$(OBJEXT) client.$(OBJEXT) conf.$(OBJEXT) \
-	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) csvlib.$(OBJEXT) \
-	dbuf.$(OBJEXT) event.$(OBJEXT) fdlist.$(OBJEXT) \
-	getopt.$(OBJEXT) hash.$(OBJEXT) hook.$(OBJEXT) \
-	hostmask.$(OBJEXT) irc_res.$(OBJEXT) irc_reslib.$(OBJEXT) \
-	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
-	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
-	match.$(OBJEXT) memory.$(OBJEXT) modules.$(OBJEXT) \
-	motd.$(OBJEXT) rng_mt.$(OBJEXT) numeric.$(OBJEXT) \
-	packet.$(OBJEXT) parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
-	s_bsd_poll.$(OBJEXT) s_bsd_sigio.$(OBJEXT) \
-	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
-	s_bsd_select.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
-	rsa.$(OBJEXT) s_auth.$(OBJEXT) s_bsd.$(OBJEXT) \
-	s_gline.$(OBJEXT) s_misc.$(OBJEXT) s_serv.$(OBJEXT) \
-	s_user.$(OBJEXT) send.$(OBJEXT) sprintf_irc.$(OBJEXT) \
-	version.$(OBJEXT) watch.$(OBJEXT) whowas.$(OBJEXT)
+	conf_db.$(OBJEXT) conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) \
+	csvlib.$(OBJEXT) dbuf.$(OBJEXT) event.$(OBJEXT) \
+	fdlist.$(OBJEXT) getopt.$(OBJEXT) hash.$(OBJEXT) \
+	hook.$(OBJEXT) hostmask.$(OBJEXT) irc_res.$(OBJEXT) \
+	irc_reslib.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_signal.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
+	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) \
+	modules.$(OBJEXT) motd.$(OBJEXT) rng_mt.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	s_bsd_sigio.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
+	s_bsd_kqueue.$(OBJEXT) s_bsd_select.$(OBJEXT) \
+	restart.$(OBJEXT) resv.$(OBJEXT) rsa.$(OBJEXT) \
+	s_auth.$(OBJEXT) s_bsd.$(OBJEXT) s_gline.$(OBJEXT) \
+	s_misc.$(OBJEXT) s_serv.$(OBJEXT) s_user.$(OBJEXT) \
+	send.$(OBJEXT) sprintf_irc.$(OBJEXT) version.$(OBJEXT) \
+	watch.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 ircd_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -274,6 +275,7 @@ ircd_SOURCES = balloc.c          \
                channel_mode.c    \
                client.c          \
                conf.c            \
+               conf_db.c         \
                conf_parser.y     \
                conf_lexer.l      \
                csvlib.c          \
@@ -419,6 +421,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_lexer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csvlib.Po@am__quote@

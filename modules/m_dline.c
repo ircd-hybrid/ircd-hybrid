@@ -83,7 +83,6 @@ apply_dline(struct Client *source_p, struct AccessItem *aconf,
 
   aconf->setat = CurrentTime;
   add_conf_by_address(CONF_DLINE, aconf);
-  save_dline_database();
   rehashed_klines = 1;
 }
 
@@ -120,7 +119,6 @@ remove_dline_match(const char *host)
     if (!IsConfMain(aconf))
     {
       delete_one_address_conf(host, aconf);
-      save_dline_database();
       return 1;
     }
   }

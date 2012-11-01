@@ -375,7 +375,6 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
          get_oper_name(source_p), conf->name, xconf->reason);
   }
 
-  save_xline_database();
   rehashed_klines = 1;
 }
 
@@ -392,7 +391,6 @@ remove_xline(struct Client *source_p, char *gecos)
                          get_oper_name(source_p), gecos);
     ilog(LOG_TYPE_KLINE, "%s removed X-Line for [%s]",
          source_p->name, gecos);
-    save_xline_database();
   }
   else
     sendto_one(source_p, ":%s NOTICE %s :No X-Line for %s",

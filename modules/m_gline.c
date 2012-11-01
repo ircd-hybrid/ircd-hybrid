@@ -81,7 +81,6 @@ set_local_gline(const struct Client *source_p, const char *user,
        get_oper_name(source_p), aconf->user, aconf->host, aconf->reason);
 
   add_conf_by_address(CONF_GLINE, aconf);
-  save_gline_database();
   rehashed_klines = 1;
 }
 
@@ -116,7 +115,6 @@ remove_gline_match(const char *user, const char *host)
   if ((aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0)))
   {
     delete_one_address_conf(host, aconf);
-    save_gline_database();
     return 1;
   }
 

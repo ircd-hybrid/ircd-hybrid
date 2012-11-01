@@ -651,6 +651,8 @@ main(int argc, char *argv[])
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
   eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
 
+  eventAddIsh("save_all_databases", save_all_databases, NULL, DATABASE_UPDATE_TIMEOUT);
+
   if (ConfigServerHide.links_delay > 0)
     eventAddIsh("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
   else

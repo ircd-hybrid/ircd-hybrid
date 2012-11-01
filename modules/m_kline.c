@@ -257,7 +257,6 @@ m_kline_add_kline(struct Client *source_p, struct AccessItem *aconf,
   }
 
   add_conf_by_address(CONF_KLINE, aconf);
-  save_kline_database();
   rehashed_klines = 1;
 }
 
@@ -472,7 +471,6 @@ remove_kline_match(const char *host, const char *user)
     if (!IsConfMain(aconf))
     {
       delete_one_address_conf(host, aconf);
-      save_kline_database();
       return 1;
     }
   }

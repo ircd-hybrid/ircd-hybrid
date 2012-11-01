@@ -74,7 +74,7 @@ extern void load_xline_database(void);
 extern void save_xline_database(void);
 extern void load_resv_database(void);
 extern void save_resv_database(void);
-
+extern void save_all_databases(void *);
 
 #define read_buffer(buf,f)	(read_db((f),(buf),sizeof(buf)) == sizeof(buf))
 #define write_buffer(buf,f)	(write_db((f),(buf),sizeof(buf)) == sizeof(buf))
@@ -83,7 +83,6 @@ extern void save_resv_database(void);
 #define read_variable(var,f)	(read_db((f),&(var),sizeof(var)) == sizeof(var))
 #define write_variable(var,f)	(write_db((f),&(var),sizeof(var)) == sizeof(var))
 
+#define DATABASE_UPDATE_TIMEOUT 300
 #define KLINE_DB_VERSION 1
-
-
 #endif

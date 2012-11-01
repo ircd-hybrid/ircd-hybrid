@@ -1073,3 +1073,13 @@ load_xline_database(void)
 
   close_db(f);
 }
+
+void
+save_all_databases(void *unused)
+{
+  save_kline_database();
+  save_dline_database();
+  save_gline_database();
+  save_xline_database();
+  save_resv_database();
+}

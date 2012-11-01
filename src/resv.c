@@ -73,9 +73,6 @@ create_channel_resv(char *name, char *reason, int in_conf)
   dlinkAdd(resv_p, &resv_p->node, &resv_channel_list);
   hash_add_resv(resv_p);
 
-  if (!in_conf)
-    save_resv_database();
-
   return conf;
 }
 
@@ -108,9 +105,6 @@ create_nick_resv(char *name, char *reason, int in_conf)
   DupString(conf->name, name);
   DupString(resv_p->reason, reason);
   resv_p->action = in_conf;
-
-  if (!in_conf)
-    save_resv_database();
 
   return conf;
 }

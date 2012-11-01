@@ -68,7 +68,6 @@ dlink_list rkconf_items  = { NULL, NULL, 0 };
 dlink_list nresv_items   = { NULL, NULL, 0 };
 dlink_list class_items   = { NULL, NULL, 0 };
 
-dlink_list temporary_xlines  = { NULL, NULL, 0 };
 dlink_list temporary_resv = { NULL, NULL, 0 };
 
 extern unsigned int lineno;

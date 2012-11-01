@@ -414,7 +414,6 @@ extern dlink_list rxconf_items;
 extern dlink_list rkconf_items;
 extern dlink_list leaf_items;
 extern dlink_list service_items;
-extern dlink_list temporary_xlines;
 extern struct logging_entry ConfigLoggingEntry;
 extern struct config_file_entry ConfigFileEntry;/* defined in ircd.c*/
 extern struct config_channel_entry ConfigChannel;/* defined in channel.c*/
@@ -466,7 +465,6 @@ extern int rehash(int);
 extern int conf_add_server(struct ConfItem *, const char *);
 extern void conf_add_class_to_conf(struct ConfItem *, const char *);
 
-extern int find_and_delete_temporary(const char *, const char *, int);
 extern const char *get_oper_name(const struct Client *);
 
 extern void *map_to_conf(struct ConfItem *);

@@ -177,8 +177,8 @@ open_db_write(const char *service, const char *filename,
   unlink(filename);
 
   /* Use open() to avoid people sneaking a new file in under us */
-  fd = open(filename, O_WRONLY | O_CREAT | O_EXCL, 0666);
-  f->fp = fdopen(fd, "wb");   /* will fail and return NULL if fd < 0 */
+  if ((fd = open(filename, O_WRONLY | O_CREAT | O_EXCL, 0666)) >= 0)
+    f->fp = fdopen(fd, "wb");
 
   if (!f->fp || !write_file_version(f, version))
   {
@@ -332,7 +332,7 @@ close_db(struct dbFILE *f)
  * and read pointers are returned as either (void *)0 or (void *)1.  A
  * string is stored with a 2-byte unsigned length (including the trailing
  * \0) first; a length of 0 indicates that the string pointer is NULL.
- * Written strings are truncated silently at 65534 bytes, and are always
+ * Written strings are truncated silently at 4294967294 bytes, and are always
  * null-terminated.
  */
 
@@ -545,9 +545,9 @@ int
 read_string(char **ret, struct dbFILE *f)
 {
   char *s = NULL;
-  uint16_t len = 0;
+  uint32_t len = 0;
 
-  if (read_uint16(&len, f) < 0)
+  if (read_uint32(&len, f) < 0)
     return -1;
 
   if (len == 0)
@@ -580,13 +580,13 @@ write_string(const char *s, struct dbFILE *f)
   uint32_t len = 0;
 
   if (!s)
-    return write_uint16(0, f);
+    return write_uint32(0, f);
 
   len = strlen(s);
 
-  if (len > 65534)
-    len = 65534;
-  if (write_uint16((uint16_t)(len + 1), f) < 0)
+  if (len > 4294967294)
+    len = 4294967294;
+  if (write_uint32(len + 1, f) < 0)
     return -1;
   if (len > 0 && fwrite(s, 1, len, f->fp) != len)
     return -1;

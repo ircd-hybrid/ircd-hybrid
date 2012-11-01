@@ -749,6 +749,10 @@ clear_out_address_conf(void)
        */  
       if (!(arec->aconf->flags & CONF_FLAGS_TEMPORARY))
       {
+      /* XXX HACK */
+        if (arec->type == CONF_KLINE && !IsConfMain(arec->aconf))
+          continue;
+
         dlinkDelete(&arec->node, &atable[i]);
         /* unlink it from link list - Dianora */
         arec->aconf->status |= CONF_ILLEGAL;

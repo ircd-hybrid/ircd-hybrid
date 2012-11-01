@@ -2269,6 +2269,8 @@ kill_entry: KILL
         yy_aconf->regexuser = exp_user;
         yy_aconf->regexhost = exp_host;
 
+        SetConfMain(yy_aconf);
+
         DupString(yy_aconf->user, userbuf);
         DupString(yy_aconf->host, hostbuf);
 
@@ -2283,9 +2285,9 @@ kill_entry: KILL
       }
       else
       {
-        find_and_delete_temporary(userbuf, hostbuf, CONF_KLINE);
-
         yy_aconf = map_to_conf(make_conf_item(KLINE_TYPE));
+
+        SetConfMain(yy_aconf);
 
         DupString(yy_aconf->user, userbuf);
         DupString(yy_aconf->host, hostbuf);
@@ -2354,10 +2356,9 @@ deny_entry: DENY
   {
     if (hostbuf[0] && parse_netmask(hostbuf, NULL, NULL) != HM_HOST)
     {
-      find_and_delete_temporary(NULL, hostbuf, CONF_DLINE);
-
       yy_aconf = map_to_conf(make_conf_item(DLINE_TYPE));
       DupString(yy_aconf->host, hostbuf);
+      SetConfMain(yy_aconf);
 
       if (reasonbuf[0])
         DupString(yy_aconf->reason, reasonbuf);
@@ -2446,6 +2447,7 @@ gecos_entry: GECOS
       else
         yy_conf = make_conf_item(XLINE_TYPE);
 
+      SetConfMain(yy_conf);
       yy_match_item = map_to_conf(yy_conf);
       DupString(yy_conf->name, gecos_name);
 

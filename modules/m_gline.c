@@ -43,6 +43,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "log.h"
+#include "conf_db.h"
 
 #define GLINE_NOT_PLACED     0
 #define GLINE_ALREADY_VOTED -1
@@ -61,21 +62,16 @@ set_local_gline(const struct Client *source_p, const char *user,
                 const char *host, const char *reason)
 {
   char buffer[IRCD_BUFSIZE];
-  struct ConfItem *conf;
-  struct AccessItem *aconf;
-
-
-  conf = make_conf_item(GLINE_TYPE);
-  aconf = map_to_conf(conf);
+  struct AccessItem *aconf = map_to_conf(make_conf_item(GLINE_TYPE));
 
   snprintf(buffer, sizeof(buffer), "%s (%s)", reason, smalldate(CurrentTime));
   DupString(aconf->reason, buffer);
   DupString(aconf->user, user);
   DupString(aconf->host, host);
 
+  aconf->setat = CurrentTime;
   aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
   SetConfTemporary(aconf);
-  add_conf_by_address(CONF_GLINE, aconf);
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "%s added G-Line for [%s@%s] [%s]",
@@ -84,7 +80,8 @@ set_local_gline(const struct Client *source_p, const char *user,
   ilog(LOG_TYPE_GLINE, "%s added G-Line for [%s@%s] [%s]",
        get_oper_name(source_p), aconf->user, aconf->host, aconf->reason);
 
-  /* Now, activate gline against current online clients */
+  add_conf_by_address(CONF_GLINE, aconf);
+  save_gline_database();
   rehashed_klines = 1;
 }
 
@@ -118,11 +115,9 @@ remove_gline_match(const char *user, const char *host)
 
   if ((aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0)))
   {
-    if (IsConfTemporary(aconf))
-    {
-      delete_one_address_conf(host, aconf);
-      return 1;
-    }
+    delete_one_address_conf(host, aconf);
+    save_gline_database();
+    return 1;
   }
 
   return 0;

@@ -17,7 +17,6 @@ ircd_SOURCES = balloc.c          \
                conf_db.c         \
                conf_parser.y     \
                conf_lexer.l      \
-               csvlib.c          \
                dbuf.c            \
                event.c           \
                fdlist.c          \

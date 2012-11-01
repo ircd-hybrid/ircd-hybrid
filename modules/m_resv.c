@@ -232,6 +232,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     }
 
     resv_p = map_to_conf(conf);
+    resv_p->setat = CurrentTime;
 
     if (tkline_time != 0)
     {
@@ -293,6 +294,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     }
 
     resv_p = map_to_conf(conf);
+    resv_p->setat = CurrentTime;
 
     if (tkline_time != 0)
     {

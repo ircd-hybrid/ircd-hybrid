@@ -51,6 +51,7 @@
 #include "channel_mode.h"
 #include "parse.h"
 #include "s_misc.h"
+#include "conf_db.h"
 
 struct Callback *client_check_cb = NULL;
 struct config_server_hide ConfigServerHide;
@@ -87,7 +88,6 @@ static int hash_ip(struct irc_ssaddr *);
 static int verify_access(struct Client *, const char *);
 static int attach_iline(struct Client *, struct ConfItem *);
 static struct ip_entry *find_or_add_ip(struct irc_ssaddr *);
-static void parse_conf_file(int, int);
 static dlink_list *map_to_list(ConfType);
 static struct AccessItem *find_regexp_kline(const char *[]);
 static int find_user_host(struct Client *, char *, char *, char *, unsigned int);
@@ -355,7 +355,6 @@ delete_conf_item(struct ConfItem *conf)
     MyFree(aconf->passwd);
     MyFree(aconf->spasswd);
     MyFree(aconf->reason);
-    MyFree(aconf->oper_reason);
     MyFree(aconf->user);
     MyFree(aconf->host);
 #ifdef HAVE_LIBCRYPTO
@@ -414,7 +413,6 @@ delete_conf_item(struct ConfItem *conf)
     MyFree(match_item->user);
     MyFree(match_item->host);
     MyFree(match_item->reason);
-    MyFree(match_item->oper_reason);
     dlinkDelete(&conf->node, &uconf_items);
     MyFree(conf);
     break;
@@ -424,7 +422,6 @@ delete_conf_item(struct ConfItem *conf)
     MyFree(match_item->user);
     MyFree(match_item->host);
     MyFree(match_item->reason);
-    MyFree(match_item->oper_reason);
     dlinkDelete(&conf->node, &xconf_items);
     MyFree(conf);
     break;
@@ -436,7 +433,6 @@ delete_conf_item(struct ConfItem *conf)
     MyFree(aconf->user);
     MyFree(aconf->host);
     MyFree(aconf->reason);
-    MyFree(aconf->oper_reason);
     dlinkDelete(&conf->node, &rkconf_items);
     MyFree(conf);
     break;
@@ -447,7 +443,6 @@ delete_conf_item(struct ConfItem *conf)
     MyFree(match_item->user);
     MyFree(match_item->host);
     MyFree(match_item->reason);
-    MyFree(match_item->oper_reason);
     dlinkDelete(&conf->node, &rxconf_items);
     MyFree(conf);
     break;
@@ -457,7 +452,6 @@ delete_conf_item(struct ConfItem *conf)
     MyFree(match_item->user);
     MyFree(match_item->host);
     MyFree(match_item->reason);
-    MyFree(match_item->oper_reason);
     dlinkDelete(&conf->node, &nresv_items);
 
     if (conf->flags & CONF_FLAGS_TEMPORARY)
@@ -569,7 +563,7 @@ report_confitem_types(struct Client *source_p, ConfType type)
 
       sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
                  source_p->name, "KR", aconf->host, aconf->user,
-                 aconf->reason, aconf->oper_reason ? aconf->oper_reason : "");
+                 aconf->reason);
     }
     break;
 #endif
@@ -2025,12 +2019,7 @@ find_gline(struct Client *client_p)
 void
 add_temp_line(struct ConfItem *conf)
 {
-  if (conf->type == XLINE_TYPE)
-  {
-    conf->flags |= CONF_FLAGS_TEMPORARY;
-    dlinkAdd(conf, make_dlink_node(), &temporary_xlines);
-  }
-  else if ((conf->type == NRESV_TYPE) || (conf->type == CRESV_TYPE))
+  if ((conf->type == NRESV_TYPE) || (conf->type == CRESV_TYPE))
   {
     conf->flags |= CONF_FLAGS_TEMPORARY;
     dlinkAdd(conf, make_dlink_node(), &temporary_resv);
@@ -2048,7 +2037,7 @@ void
 cleanup_tklines(void *notused)
 {
   hostmask_expire_temporary();
-  expire_tklines(&temporary_xlines);
+  expire_tklines(&xconf_items); 
   expire_tklines(&temporary_resv);
 }
 
@@ -2074,14 +2063,15 @@ expire_tklines(dlink_list *tklist)
 
     if (conf->type == XLINE_TYPE)
     {
+      if (!IsConfTemporary(conf))
+        continue;
+
       xconf = (struct MatchItem *)map_to_conf(conf);
       if (xconf->hold <= CurrentTime)
       {
         if (ConfigFileEntry.tkline_expire_notices)
 	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary X-line for [%s] expired", conf->name);
-	dlinkDelete(ptr, tklist);
-        free_dlink_node(ptr);
 	delete_conf_item(conf);
       }
     }
@@ -2212,7 +2202,7 @@ read_conf_files(int cold)
   char chanlimit[32];
 
   conf_parser_ctx.boot = cold;
-  filename = get_conf_name(CONF_TYPE);
+  filename = ConfigFileEntry.configfile;
 
   /* We need to know the initial filename for the yyerror() to report
      FIXME: The full path is in conffilenamebuf first time since we
@@ -2269,41 +2259,6 @@ read_conf_files(int cold)
    * on strlen(form_str(RPL_ISUPPORT))
    */
   rebuild_isupport_message_line();
-
-  parse_conf_file(KLINE_TYPE, cold);
-  parse_conf_file(DLINE_TYPE, cold);
-  parse_conf_file(XLINE_TYPE, cold);
-  parse_conf_file(NRESV_TYPE, cold);
-  parse_conf_file(CRESV_TYPE, cold);
-}
-
-/* parse_conf_file()
- *
- * inputs	- type of conf file to parse 
- * output	- none
- * side effects	- conf file for givenconf type is opened and read then parsed
- */
-static void
-parse_conf_file(int type, int cold)
-{
-  FILE *file = NULL;
-  const char *filename = get_conf_name(type);
-
-  if ((file = fopen(filename, "r")) == NULL)
-  {
-    if (cold)
-      ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
-           filename, strerror(errno));
-    else
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                    "Unable to read configuration file '%s': %s",
-                           filename, strerror(errno));
-  }
-  else
-  {
-    parse_csv_file(file, type);
-    fclose(file);
-  }
 }
 
 /* clear_out_old_conf()
@@ -2492,42 +2447,6 @@ flush_deleted_I_P(void)
 	  delete_conf_item(conf);
       }
     }
-  }
-}
-
-/* get_conf_name()
- *
- * inputs       - type of conf file to return name of file for
- * output       - pointer to filename for type of conf
- * side effects - none
- */
-const char *
-get_conf_name(ConfType type)
-{
-  switch (type)
-  {
-    case CONF_TYPE:
-      return ConfigFileEntry.configfile;
-      break;
-    case KLINE_TYPE:
-      return ConfigFileEntry.klinefile;
-      break;
-    case DLINE_TYPE:
-      return ConfigFileEntry.dlinefile;
-      break;
-    case XLINE_TYPE:
-      return ConfigFileEntry.xlinefile;
-      break;
-    case CRESV_TYPE:
-      return ConfigFileEntry.cresvfile;
-      break;
-    case NRESV_TYPE:
-      return ConfigFileEntry.nresvfile;
-      break;
-    default:
-      return NULL;  /* This should NEVER HAPPEN since we call this function
-                       only with the above values, this will cause us to core
-                       at some point if this happens so we know where it was */
   }
 }
 

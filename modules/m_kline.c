@@ -42,14 +42,14 @@
 #include "s_gline.h"
 #include "parse.h"
 #include "modules.h"
+#include "conf_db.h"
 
 
 static int already_placed_kline(struct Client *, const char *, const char *, int);
-static void apply_kline(struct Client *, struct ConfItem *, const char *, time_t);
-static void apply_tkline(struct Client *, struct ConfItem *, int);
+static void m_kline_add_kline(struct Client *, struct AccessItem *, time_t);
 
 static char buffer[IRCD_BUFSIZE];
-static int remove_tkline_match(const char *, const char *);
+static int remove_kline_match(const char *, const char *);
 
 
 /* mo_kline()
@@ -66,7 +66,6 @@ mo_kline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   char *reason = NULL;
-  char *oper_reason;
   char *user = NULL;
   char *host = NULL;
   const char *current_date;
@@ -117,10 +116,6 @@ mo_kline(struct Client *client_p, struct Client *source_p,
   if (already_placed_kline(source_p, user, host, 1))
     return;
 
-  /* Look for an oper reason */
-  if ((oper_reason = strchr(reason, '|')) != NULL)
-    *oper_reason++ = '\0';
-
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
   conf = make_conf_item(KLINE_TYPE);
@@ -135,18 +130,14 @@ mo_kline(struct Client *client_p, struct Client *source_p,
              (int)(tkline_time/60), reason, current_date);
     DupString(aconf->reason, buffer);
 
-    if (oper_reason != NULL)
-      DupString(aconf->oper_reason, oper_reason);
-    apply_tkline(source_p, conf, tkline_time);
+    m_kline_add_kline(source_p, aconf, tkline_time);
   }
   else
   {
     snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
     DupString(aconf->reason, buffer);
 
-    if (oper_reason != NULL)
-      DupString(aconf->oper_reason, oper_reason);
-    apply_kline(source_p, conf, current_date, cur_time);
+    m_kline_add_kline(source_p, aconf, 0);
   }
 }
 
@@ -160,7 +151,7 @@ me_kline(struct Client *client_p, struct Client *source_p,
   int tkline_time;
   const char* current_date;
   time_t cur_time;
-  char *kuser, *khost, *kreason, *oper_reason;
+  char *kuser, *khost, *kreason;
 
   if (parc != 6 || EmptyString(parv[5]))
     return;
@@ -172,9 +163,6 @@ me_kline(struct Client *client_p, struct Client *source_p,
   kuser = parv[3];
   khost = parv[4];
   kreason = parv[5];
-
-  if ((oper_reason = strchr(kreason, '|')) != NULL)
-    *oper_reason++ = '\0';
 
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
@@ -198,18 +186,14 @@ me_kline(struct Client *client_p, struct Client *source_p,
                (int)(tkline_time/60), kreason, current_date);
       DupString(aconf->reason, buffer);
 
-      if (oper_reason != NULL)
-        DupString(aconf->oper_reason, oper_reason);
-      apply_tkline(source_p, conf, tkline_time);
+      m_kline_add_kline(source_p, aconf, tkline_time);
     }
     else
     {
       snprintf(buffer, sizeof(buffer), "%s (%s)", kreason, current_date);
       DupString(aconf->reason, buffer);
 
-      if (oper_reason != NULL)
-        DupString(aconf->oper_reason, oper_reason);
-      apply_kline(source_p, conf, current_date, cur_time);
+      m_kline_add_kline(source_p, aconf, 0);
     }
   }
 }
@@ -230,25 +214,6 @@ ms_kline(struct Client *client_p, struct Client *source_p,
   me_kline(client_p, source_p, parc, parv);
 }
 
-/* apply_kline()
- *
- * inputs	-
- * output	- NONE
- * side effects	- kline as given, is added to the hashtable
- *		  and conf file
- */
-static void 
-apply_kline(struct Client *source_p, struct ConfItem *conf,
-            const char *current_date, time_t cur_time)
-{
-  struct AccessItem *aconf = map_to_conf(conf);
-
-  add_conf_by_address(CONF_KLINE, aconf);
-  write_conf_line(source_p, conf, current_date, cur_time);
-  /* Now, activate kline against current online clients */
-  rehashed_klines = 1;
-}
-
 /* apply_tkline()
  *
  * inputs	-
@@ -256,28 +221,43 @@ apply_kline(struct Client *source_p, struct ConfItem *conf,
  * side effects	- tkline as given is placed
  */
 static void
-apply_tkline(struct Client *source_p, struct ConfItem *conf,
-             int tkline_time)
+m_kline_add_kline(struct Client *source_p, struct AccessItem *aconf,
+                  time_t tkline_time)
 {
-  struct AccessItem *aconf;
+  aconf->setat = CurrentTime;
 
-  aconf = (struct AccessItem *)map_to_conf(conf);
-  aconf->hold = CurrentTime + tkline_time;
-  SetConfTemporary(aconf);
+  if (tkline_time)
+  {
+    aconf->hold = CurrentTime + tkline_time;
+    SetConfTemporary(aconf);
+
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+                         get_oper_name(source_p), tkline_time/60,
+                         aconf->user, aconf->host,
+                         aconf->reason);
+    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line [%s@%s]",
+                 MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+                 source_p->name, tkline_time/60, aconf->user, aconf->host);
+    ilog(LOG_TYPE_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+         source_p->name, tkline_time/60,
+         aconf->user, aconf->host, aconf->reason);
+  }
+  else
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s added K-Line for [%s@%s] [%s]",
+                         get_oper_name(source_p),
+                         aconf->user, aconf->host, aconf->reason);
+    sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+                 source_p->name, aconf->user, aconf->host);
+    ilog(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
+         source_p->name, aconf->user, aconf->host, aconf->reason);
+  }
+
   add_conf_by_address(CONF_KLINE, aconf);
-
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-		       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-		       get_oper_name(source_p), tkline_time/60,
-		       aconf->user, aconf->host,
-		       aconf->reason);
-  sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line [%s@%s]",
-	     MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
-	     source_p->name, tkline_time/60, aconf->user, aconf->host);
-  ilog(LOG_TYPE_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-       source_p->name, tkline_time/60,
-       aconf->user, aconf->host, aconf->reason);
-
+  save_kline_database();
   rehashed_klines = 1;
 }
 
@@ -356,7 +336,7 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
     return;
   }
 
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "UNKLINE");
@@ -381,23 +361,11 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
     cluster_a_line(source_p, "UNKLINE", CAP_UNKLN, SHARED_UNKLINE,
                    "%s %s", user, host);
 
-  if (remove_tkline_match(host, user))
+  if (remove_kline_match(host, user))
   {
     sendto_one(source_p,
-               ":%s NOTICE %s :Un-klined [%s@%s] from temporary K-Lines",
+               ":%s NOTICE %s :K-Line for [%s@%s] is removed",
                me.name, source_p->name, user, host);
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has removed the temporary K-Line for: [%s@%s]",
-                         get_oper_name(source_p), user, host);
-    ilog(LOG_TYPE_KLINE, "%s removed temporary K-Line for [%s@%s]",
-         source_p->name, user, host);
-    return;
-  }
-
-  if (remove_conf_line(KLINE_TYPE, source_p, user, host) > 0)
-  {
-    sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
-               me.name, source_p->name, user,host);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the K-Line for: [%s@%s]",
                          get_oper_name(source_p), user, host);
@@ -439,27 +407,14 @@ me_unkline(struct Client *client_p, struct Client *source_p,
 				   source_p->username, source_p->host,
 				   SHARED_UNKLINE))
   {
-    if (remove_tkline_match(khost, kuser))
+    if (remove_kline_match(khost, kuser))
     {
       sendto_one(source_p,
-                 ":%s NOTICE %s :Un-klined [%s@%s] from temporary K-Lines",
-                 me.name, source_p->name, kuser, khost);
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "%s has removed the temporary K-Line for: [%s@%s]",
-                           get_oper_name(source_p), kuser, khost);
-      ilog(LOG_TYPE_KLINE, "%s removed temporary K-Line for [%s@%s]",
-           source_p->name, kuser, khost);
-      return;
-    }
-
-    if (remove_conf_line(KLINE_TYPE, source_p, kuser, khost) > 0)
-    {
-      sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed",
+                 ":%s NOTICE %s :K-Line for [%s@%s] is removed",
                  me.name, source_p->name, kuser, khost);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the K-Line for: [%s@%s]",
-                         get_oper_name(source_p), kuser, khost);
-
+                           get_oper_name(source_p), kuser, khost);
       ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
            source_p->name, kuser, khost);
     }
@@ -490,7 +445,7 @@ ms_unkline(struct Client *client_p, struct Client *source_p,
  * Side effects: Any matching tklines are removed.
  */
 static int
-remove_tkline_match(const char *host, const char *user)
+remove_kline_match(const char *host, const char *user)
 {
   struct irc_ssaddr iphost, *piphost;
   struct AccessItem *aconf;
@@ -514,9 +469,10 @@ remove_tkline_match(const char *host, const char *user)
 
   if ((aconf = find_conf_by_address(host, piphost, CONF_KLINE, t, user, NULL, 0)))
   {
-    if (IsConfTemporary(aconf))
+    if (!IsConfMain(aconf))
     {
       delete_one_address_conf(host, aconf);
+      save_kline_database();
       return 1;
     }
   }

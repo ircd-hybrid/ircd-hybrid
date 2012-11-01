@@ -125,8 +125,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
                    IsConfTemporary(aconf) ? 'd' : 'D',
                    IsConfTemporary(aconf) ? ((aconf->hold - CurrentTime) / 60)
                    : 0L,
-                   aconf->host, aconf->reason,
-                   aconf->oper_reason ? aconf->oper_reason : "");
+                   aconf->host, aconf->reason);
     }
   }
 
@@ -159,8 +158,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
                  IsConfTemporary(aconf) ? 'k' : 'K',
                  IsConfTemporary(aconf) ? ((aconf->hold - CurrentTime) / 60)
                  : 0L,
-                 userhost, aconf->reason? aconf->reason : "No reason",
-                 aconf->oper_reason ? aconf->oper_reason : "");
+                 userhost, aconf->reason? aconf->reason : "No reason");
       ++matches;
     }
   }
@@ -174,8 +172,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, form_str(RPL_TESTLINE),
                me.name, source_p->name, 'Q', 0L,
                conf->name, 
-               mconf->reason ? mconf->reason : "No reason",
-               mconf->oper_reason ? mconf->oper_reason : "");
+               mconf->reason ? mconf->reason : "No reason");;
     ++matches;
   }
 
@@ -215,8 +212,7 @@ mo_testgecos(struct Client *client_p, struct Client *source_p,
     const struct MatchItem *xconf = map_to_conf(conf);
     sendto_one(source_p, form_str(RPL_TESTLINE),
                me.name, source_p->name, 'X', 0L,
-               conf->name, xconf->reason ? xconf->reason : "X-lined",
-               xconf->oper_reason ? xconf->oper_reason : "");
+               conf->name, xconf->reason ? xconf->reason : "X-lined");
   }
   else
     sendto_one(source_p, form_str(RPL_NOTESTLINE),

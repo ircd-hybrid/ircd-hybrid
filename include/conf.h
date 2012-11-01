@@ -108,6 +108,7 @@ struct MatchItem
   int ref_count;	/* How many times is this matchitem in use */
   int illegal;		/* Should it be deleted when possible? */
   time_t           hold;     /* Hold action until this time (calendar time) */
+  time_t setat;
 };
 
 struct AccessItem
@@ -128,9 +129,9 @@ struct AccessItem
   char *           passwd;
   char *           spasswd;  /* Password to send. */
   char *	   reason;
-  char *	   oper_reason;
   char *           user;     /* user part of user@host */
   time_t           hold;     /* Hold action until this time (calendar time) */
+  time_t           setat;
   struct ConfItem *class_ptr;  /* Class of connection */
   int              aftype;
 #ifdef HAVE_LIBCRYPTO
@@ -229,6 +230,7 @@ struct CidrItem
 #define CONF_FLAGS_TEMPORARY            0x00008000
 #define CONF_FLAGS_EXEMPTRESV           0x00010000
 #define CONF_FLAGS_SSL                  0x00020000
+#define CONF_FLAGS_MAINCONF             0x00040000
 
 /* Macros for struct AccessItem */
 #define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
@@ -256,6 +258,9 @@ struct CidrItem
 #define IsConfSSL(x)      ((x)->flags & CONF_FLAGS_SSL)
 #define SetConfSSL(x)     ((x)->flags |= CONF_FLAGS_SSL)
 #define ClearConfSSL(x)   ((x)->flags &= ~CONF_FLAGS_SSL)
+#define IsConfMain(x)      ((x)->flags & CONF_FLAGS_MAINCONF)
+#define SetConfMain(x)     ((x)->flags |= CONF_FLAGS_MAINCONF)
+#define ClearConfMain(x)   ((x)->flags &= ~CONF_FLAGS_MAINCONF)
 
 /* shared/cluster server entry types 
  * These defines are used for both shared and cluster.
@@ -404,6 +409,7 @@ extern dlink_list class_items;
 extern dlink_list server_items;
 extern dlink_list cluster_items;
 extern dlink_list hub_items;
+extern dlink_list xconf_items;
 extern dlink_list rxconf_items;
 extern dlink_list rkconf_items;
 extern dlink_list leaf_items;
@@ -456,13 +462,10 @@ extern int remove_conf_line(ConfType, struct Client *, const char *,
                             const char *);
 extern void add_temp_line(struct ConfItem *);
 extern void cleanup_tklines(void *);
-extern const char *get_conf_name(ConfType);
 extern int rehash(int);
 extern int conf_add_server(struct ConfItem *, const char *);
 extern void conf_add_class_to_conf(struct ConfItem *, const char *);
 
-/* XXX consider moving these into csvlib.h */
-extern void parse_csv_file(FILE *, ConfType);
 extern int find_and_delete_temporary(const char *, const char *, int);
 extern const char *get_oper_name(const struct Client *);
 

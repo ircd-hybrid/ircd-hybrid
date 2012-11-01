@@ -39,9 +39,9 @@
 #include "send.h"
 #include "hash.h"
 #include "s_serv.h"
-#include "s_gline.h"
 #include "parse.h"
 #include "modules.h"
+#include "conf_db.h"
 
 
 /* apply_tdline()
@@ -51,28 +51,39 @@
  * side effects	- tkline as given is placed
  */
 static void
-apply_tdline(struct Client *source_p, struct ConfItem *conf,
-	     const char *current_date, int tkline_time)
+apply_dline(struct Client *source_p, struct AccessItem *aconf,
+            time_t tkline_time)
 {
-  struct AccessItem *aconf;
+  if (tkline_time)
+  {
+    aconf->hold = CurrentTime + tkline_time;
+    SetConfTemporary(aconf);
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s added temporary %d min. D-Line for [%s] [%s]",
+                         get_oper_name(source_p), tkline_time/60,
+                         aconf->host, aconf->reason);
+    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line [%s]",
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+               source_p->name, tkline_time/60, aconf->host);
+    ilog(LOG_TYPE_DLINE, "%s added temporary %d min. D-Line for [%s] [%s]",
+         get_oper_name(source_p), tkline_time/60, aconf->host, aconf->reason);
+  }
+  else
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s added D-Line for [%s] [%s]",
+                         get_oper_name(source_p), aconf->host, aconf->reason);
+    sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s]",
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+               source_p->name, aconf->host);
+    ilog(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",
+         get_oper_name(source_p), aconf->host, aconf->reason);
 
-  aconf = map_to_conf(conf);
-  aconf->hold = CurrentTime + tkline_time;
-  SetConfTemporary(aconf);
+  }
+
+  aconf->setat = CurrentTime;
   add_conf_by_address(CONF_DLINE, aconf);
-
-
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-		       "%s added temporary %d min. D-Line for [%s] [%s]",
-		       get_oper_name(source_p), tkline_time/60,
-		       aconf->host, aconf->reason);
-
-  sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line [%s]",
-	     MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
-             source_p->name, tkline_time/60, aconf->host);
-  ilog(LOG_TYPE_DLINE, "%s added temporary %d min. D-Line for [%s] [%s]",
-       source_p->name, tkline_time/60, aconf->host, aconf->reason);
-
+  save_dline_database();
   rehashed_klines = 1;
 }
 
@@ -82,7 +93,7 @@ apply_tdline(struct Client *source_p, struct ConfItem *conf,
  * Side effects: Any matching tdlines are removed.
  */
 static int
-remove_tdline_match(const char *host)
+remove_dline_match(const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
   struct AccessItem *aconf;
@@ -106,9 +117,10 @@ remove_tdline_match(const char *host)
 
   if ((aconf = find_conf_by_address(host, piphost, CONF_DLINE, t, NULL, NULL, 0)))
   {
-    if (IsConfTemporary(aconf))
+    if (!IsConfMain(aconf))
     {
       delete_one_address_conf(host, aconf);
+      save_dline_database();
       return 1;
     }
   }
@@ -131,7 +143,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   char def_reason[] = "<No reason specified>";
-  char *dlhost = NULL, *oper_reason = NULL, *reason = NULL;
+  char *dlhost = NULL, *reason = NULL;
   char *target_server = NULL;
   const char *creason;
   const struct Client *target_p = NULL;
@@ -246,10 +258,6 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
 
-  /* Look for an oper reason */
-  if ((oper_reason = strchr(reason, '|')) != NULL)
-    *oper_reason++ = '\0';
-
   if (!valid_comment(source_p, reason, 1))
     return;
 
@@ -262,18 +270,13 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %s (%s)",
              (int)(tkline_time/60), reason, current_date);
     DupString(aconf->reason, buffer);
-    if (oper_reason != NULL)
-      DupString(aconf->oper_reason, oper_reason);
-    apply_tdline(source_p, conf, current_date, tkline_time);
+    apply_dline(source_p, aconf, tkline_time);
   }
   else
   {
     snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
     DupString(aconf->reason, buffer);
-    if (oper_reason != NULL)
-      DupString(aconf->oper_reason, oper_reason);
-    add_conf_by_address(CONF_DLINE, aconf);
-    write_conf_line(source_p, conf, current_date, cur_time);
+    apply_dline(source_p, aconf, 0);
   }
 
   rehashed_klines = 1;
@@ -284,7 +287,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   char def_reason[] = "<No reason specified>";
-  char *dlhost, *oper_reason, *reason;
+  char *dlhost, *reason;
   const char *creason;
   const struct Client *target_p = NULL;
   struct irc_ssaddr daddr;
@@ -382,10 +385,6 @@ ms_dline(struct Client *client_p, struct Client *source_p,
     cur_time = CurrentTime;
     current_date = smalldate(cur_time);
 
-    /* Look for an oper reason */
-    if ((oper_reason = strchr(reason, '|')) != NULL)
-      *oper_reason++ = '\0';
-
     if (!valid_comment(source_p, reason, 1))
       return;
 
@@ -398,18 +397,13 @@ ms_dline(struct Client *client_p, struct Client *source_p,
       snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %s (%s)",
                (int)(tkline_time/60), reason, current_date);
       DupString(aconf->reason, buffer);
-      if (oper_reason != NULL)
-        DupString(aconf->oper_reason, oper_reason);
-      apply_tdline(source_p, conf, current_date, tkline_time);
+      apply_dline(source_p, aconf, tkline_time);
     }
     else
     {
       snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
       DupString(aconf->reason, buffer);
-      if (oper_reason != NULL)
-        DupString(aconf->oper_reason, oper_reason);
-      add_conf_by_address(CONF_DLINE, aconf);
-      write_conf_line(source_p, conf, current_date, cur_time);
+      apply_dline(source_p, aconf, 0);
     }
 
     rehashed_klines = 1;
@@ -463,26 +457,14 @@ mo_undline(struct Client *client_p, struct Client *source_p,
     cluster_a_line(source_p, "UNDLINE", CAP_UNDLN, SHARED_UNDLINE,
                    "%s", addr);
 
-  if (remove_tdline_match(addr))
+  if (remove_dline_match(addr))
   {
     sendto_one(source_p,
-               ":%s NOTICE %s :Un-Dlined [%s] from temporary D-Lines",
+               ":%s NOTICE %s :D-Line for [%s] is removed",
                me.name, source_p->name, addr);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has removed the temporary D-Line for: [%s]",
+                         "%s has removed the D-Line for: [%s]",
                          get_oper_name(source_p), addr);
-    ilog(LOG_TYPE_DLINE, "%s removed temporary D-Line for [%s]",
-         source_p->name, addr);
-    return;
-  }
-
-  if (remove_conf_line(DLINE_TYPE, source_p, addr, NULL) > 0)
-  {
-    sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
-               me.name, source_p->name, addr);
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			 "%s has removed the D-Line for: [%s]",
-			 get_oper_name(source_p), addr);
     ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
          get_oper_name(source_p), addr);
   }
@@ -510,27 +492,15 @@ me_undline(struct Client *client_p, struct Client *source_p,
                                    source_p->username, source_p->host,
                                    SHARED_UNDLINE))
   {
-    if (remove_tdline_match(addr))
+    if (remove_dline_match(addr))
     {
       sendto_one(source_p,
-                 ":%s NOTICE %s :Un-Dlined [%s] from temporary D-Lines",
-                 me.name, source_p->name, addr);
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "%s has removed the temporary D-Line for: [%s]",
-                           get_oper_name(source_p), addr);
-      ilog(LOG_TYPE_DLINE, "%s removed temporary D-Line for [%s]",
-           source_p->name, addr);
-      return;
-    }
-
-    if (remove_conf_line(DLINE_TYPE, source_p, addr, NULL) > 0)
-    {
-      sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
+                 ":%s NOTICE %s :D-Line for [%s] is removed",
                  me.name, source_p->name, addr);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the D-Line for: [%s]",
                            get_oper_name(source_p), addr);
-      ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
+      ilog(LOG_TYPE_DLINE, "%s removed temporary D-Line for [%s]",
            get_oper_name(source_p), addr);
     }
     else

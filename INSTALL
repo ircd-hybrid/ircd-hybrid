@@ -106,15 +106,6 @@
    5.  If you wish to install the contrib modules, run 'make install' in the
        contrib/ folder to compile and install the modules and help pages.
 
-   6.  If you are upgrading from Hybrid 5 or Hybrid 6, the config files
-       have changed drastically.
-
-       By default, the kline file is named kline.conf, the dline file is 
-       named dline.conf, and the xline file is called xline.conf.
-
-       The nick resv file is named nresv.conf, channel resv file is named
-       cresv.conf.
-
      ----------------------------------------------------------------------
 
                                 HOW TO GET HELP

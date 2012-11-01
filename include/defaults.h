@@ -62,11 +62,11 @@
 /* files */
 #define SPATH   SBINPATH "/ircd"                /* ircd executable */
 #define CPATH   ETCPATH "/ircd.conf"            /* ircd.conf file */
-#define KPATH   ETCPATH "/kline.conf"           /* kline file */
-#define CRESVPATH   ETCPATH "/cresv.conf"       /* channel resvs file */
-#define NRESVPATH   ETCPATH "/nresv.conf"       /* nick resvs file */
-#define DLPATH  ETCPATH "/dline.conf"           /* dline file */
-#define XPATH   ETCPATH "/xline.conf"           /* xline file */
+#define KPATH   ETCPATH "/kline.db"           /* kline file */
+#define RESVPATH ETCPATH "/resv.db" /* resv file */
+#define DLPATH  ETCPATH "/dline.db"           /* dline file */
+#define XPATH   ETCPATH "/xline.db"           /* xline file */
+#define GPATH  ETCPATH "/gline.db"           /* gline file */
 #define MPATH   ETCPATH "/ircd.motd"            /* MOTD file */
 #define LPATH   LOGPATH "/ircd.log"             /* ircd logfile */
 #define PPATH   LOCALSTATEDIR "/ircd.pid"             /* pid file */

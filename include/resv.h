@@ -30,7 +30,7 @@ struct ResvChannel
   dlink_node node;
   struct ResvChannel *hnext;
   time_t hold;          /* Hold action until this time (calendar time) */
-  /* +1 for \0 */
+  time_t setat;
   char name[CHANNELLEN + 1];
   char *reason;
   int	conf;		/* 1 if set from ircd.conf, 0 if from elsewhere */

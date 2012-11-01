@@ -59,7 +59,7 @@
 #include "motd.h"
 #include "supported.h"
 #include "watch.h"
-
+#include "conf_db.h"
 
 /* /quote set variables */
 struct SetOptions GlobalSetOptions;
@@ -506,8 +506,8 @@ main(int argc, char *argv[])
   ConfigFileEntry.klinefile  = KPATH;  /* Server kline file         */
   ConfigFileEntry.xlinefile  = XPATH;  /* Server xline file         */
   ConfigFileEntry.dlinefile  = DLPATH; /* dline file                */
-  ConfigFileEntry.cresvfile  = CRESVPATH; /* channel resv file      */
-  ConfigFileEntry.nresvfile  = NRESVPATH; /* nick resv file         */
+//  ConfigFileEntry.cresvfile  = CRESVPATH; /* channel resv file      */
+//  ConfigFileEntry.nresvfile  = NRESVPATH; /* nick resv file         */
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
 
@@ -607,6 +607,12 @@ main(int argc, char *argv[])
   
   /* add ourselves to global_serv_list */
   dlinkAdd(&me, make_dlink_node(), &global_serv_list);
+
+  load_kline_database();
+  load_dline_database();
+  load_gline_database();
+  load_xline_database();
+  load_resv_database();
 
   if (chdir(MODPATH))
   {

@@ -32,6 +32,9 @@
 #include "log.h"
 #include "send.h"
 #include "irc_string.h"
+#include "conf.h"
+#include "hostmask.h"
+#include "resv.h"
 
 
 /*! \brief Return the version number on the file.  Return 0 if there is no version
@@ -101,7 +104,7 @@ open_db_read(const char *service, const char *filename)
     int errno_save = errno;
 
     if (errno != ENOENT)
-      ilog(LOG_TYPE_IRCD, "Can not read %s database %s", service,
+      ilog(LOG_TYPE_IRCD, "Can't read %s database %s", service,
            f->filename);
 
     MyFree(f);
@@ -157,11 +160,11 @@ open_db_write(const char *service, const char *filename,
 
     if (!walloped++)
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Can not back up %s database %s",
+                           "Can't back up %s database %s",
                            service, filename);
 
     errno = errno_save;
-    ilog(LOG_TYPE_IRCD, "Can not back up %s database %s", service, filename);
+    ilog(LOG_TYPE_IRCD, "Can't back up %s database %s", service, filename);
 
     if (f->backupfp)
       fclose(f->backupfp);
@@ -198,7 +201,7 @@ open_db_write(const char *service, const char *filename,
     }
 
     if (f->backupname[0] && rename(f->backupname, filename) < 0)
-      ilog(LOG_TYPE_IRCD, "Cannot restore backup copy of %s",
+      ilog(LOG_TYPE_IRCD, "Can't restore backup copy of %s",
            filename);
 
      MyFree(f);
@@ -591,4 +594,482 @@ write_string(const char *s, struct dbFILE *f)
     return -1;
 
   return 0;
+}
+
+#define SAFE_READ(x) do {                             \
+    if ((x) < 0) {                                    \
+        break;                                        \
+    }                                                 \
+} while (0)
+
+#define SAFE_WRITE(x,db) do {                         \
+    if ((x) < 0) {                                    \
+        restore_db(f);                                \
+        ilog(LOG_TYPE_IRCD, "Write error on %s", db); \
+        return;                                       \
+    }                                                 \
+} while (0)
+
+void
+save_kline_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL;
+
+  if (!(f = open_db("kline", KPATH, "w", KLINE_DB_VERSION)))
+    return;
+
+  for (i = 0; i < ATABLE_SIZE; ++i)
+  {
+    DLINK_FOREACH(ptr, atable[i].head)
+    {
+      struct AddressRec *arec = ptr->data;
+
+      if (arec->type == CONF_KLINE && !IsConfMain(arec->aconf))
+        ++cnt;
+    }
+  }
+
+  SAFE_WRITE(write_uint32(cnt, f), KPATH);
+
+  for (i = 0; i < ATABLE_SIZE; ++i)
+  {
+    DLINK_FOREACH(ptr, atable[i].head)
+    {
+      struct AddressRec *arec = ptr->data;
+
+      if (arec->type == CONF_KLINE && !IsConfMain(arec->aconf))
+      {
+        SAFE_WRITE(write_string(arec->aconf->user, f), KPATH);
+        SAFE_WRITE(write_string(arec->aconf->host, f), KPATH);
+        SAFE_WRITE(write_string(arec->aconf->reason, f), KPATH);
+        SAFE_WRITE(write_uint64(arec->aconf->setat, f), KPATH);
+        SAFE_WRITE(write_uint64(arec->aconf->hold, f), KPATH);
+      }
+    }
+  }
+
+  close_db(f);
+}
+
+void
+load_kline_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  uint64_t tmp64 = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+
+  if (!(f = open_db("kline", KPATH, "r", KLINE_DB_VERSION)))
+    return;
+
+  if ((version = get_file_version(f) < 1))
+  {
+    close_db(f);
+    return;
+  }
+
+  read_uint32(&cnt, f);
+
+  for (i = 0; i < cnt; ++i)
+  {
+    struct AccessItem *aconf = map_to_conf(make_conf_item(KLINE_TYPE));
+
+    SAFE_READ(read_string(&aconf->user, f));
+    SAFE_READ(read_string(&aconf->host, f));
+    SAFE_READ(read_string(&aconf->reason, f));
+
+    SAFE_READ(read_uint64(&tmp64, f));
+    aconf->setat = tmp64;
+
+    SAFE_READ(read_uint64(&tmp64, f));
+    aconf->hold = tmp64;
+
+    if (aconf->hold)
+      SetConfTemporary(aconf);
+
+    add_conf_by_address(CONF_KLINE, aconf);
+  }
+
+  close_db(f);
+}
+
+void
+save_dline_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL;
+
+  if (!(f = open_db("dline", DLPATH, "w", KLINE_DB_VERSION)))
+    return;
+
+  for (i = 0; i < ATABLE_SIZE; ++i)
+  {
+    DLINK_FOREACH(ptr, atable[i].head)
+    {
+      struct AddressRec *arec = ptr->data;
+
+      if (arec->type == CONF_DLINE && !IsConfMain(arec->aconf))
+        ++cnt;
+    }
+  }
+
+  SAFE_WRITE(write_uint32(cnt, f), DLPATH);
+
+  for (i = 0; i < ATABLE_SIZE; ++i)
+  {
+    DLINK_FOREACH(ptr, atable[i].head)
+    {
+      struct AddressRec *arec = ptr->data;
+
+      if (arec->type == CONF_DLINE && !IsConfMain(arec->aconf))
+      {
+        SAFE_WRITE(write_string(arec->aconf->host, f), DLPATH);
+        SAFE_WRITE(write_string(arec->aconf->reason, f), DLPATH);
+        SAFE_WRITE(write_uint64(arec->aconf->setat, f), DLPATH);
+        SAFE_WRITE(write_uint64(arec->aconf->hold, f), DLPATH);
+      }
+    }
+  }
+
+  close_db(f);
+}
+
+void
+load_dline_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  uint64_t tmp64 = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+
+  if (!(f = open_db("dline", DLPATH, "r", KLINE_DB_VERSION)))
+    return;
+
+  if ((version = get_file_version(f) < 1))
+  {
+    close_db(f);
+    return;
+  }
+
+  read_uint32(&cnt, f);
+
+  for (i = 0; i < cnt; ++i)
+  {
+    struct AccessItem *aconf = map_to_conf(make_conf_item(DLINE_TYPE));
+
+    SAFE_READ(read_string(&aconf->host, f));
+    SAFE_READ(read_string(&aconf->reason, f));
+
+    SAFE_READ(read_uint64(&tmp64, f));
+    aconf->setat = tmp64;
+
+    SAFE_READ(read_uint64(&tmp64, f));
+    aconf->hold = tmp64;
+
+    if (aconf->hold)
+      SetConfTemporary(aconf);
+
+    add_conf_by_address(CONF_DLINE, aconf);
+  }
+
+  close_db(f);
+}
+
+void
+save_gline_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL;
+
+  if (!(f = open_db("gline", GPATH, "w", KLINE_DB_VERSION)))
+    return;
+
+  for (i = 0; i < ATABLE_SIZE; ++i)
+  {
+    DLINK_FOREACH(ptr, atable[i].head)
+    {
+      struct AddressRec *arec = ptr->data;
+
+      if (arec->type == CONF_GLINE && !IsConfMain(arec->aconf))
+        ++cnt;
+    }
+  }
+
+  SAFE_WRITE(write_uint32(cnt, f), GPATH);
+
+  for (i = 0; i < ATABLE_SIZE; ++i)
+  {
+    DLINK_FOREACH(ptr, atable[i].head)
+    {
+      struct AddressRec *arec = ptr->data;
+
+      if (arec->type == CONF_GLINE && !IsConfMain(arec->aconf))
+      {
+        SAFE_WRITE(write_string(arec->aconf->user, f), GPATH);
+        SAFE_WRITE(write_string(arec->aconf->host, f), GPATH);
+        SAFE_WRITE(write_string(arec->aconf->reason, f), GPATH);
+        SAFE_WRITE(write_uint64(arec->aconf->setat, f), GPATH);
+        SAFE_WRITE(write_uint64(arec->aconf->hold, f), GPATH);
+      }
+    }
+  }
+
+  close_db(f);
+}
+
+void
+load_gline_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  uint64_t tmp64 = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+
+  if (!(f = open_db("gline", GPATH, "r", KLINE_DB_VERSION)))
+    return;
+
+  if ((version = get_file_version(f) < 1))
+  {
+    close_db(f);
+    return;
+  }
+
+  read_uint32(&cnt, f);
+
+  for (i = 0; i < cnt; ++i)
+  {
+    struct AccessItem *aconf = map_to_conf(make_conf_item(GLINE_TYPE));
+
+    SAFE_READ(read_string(&aconf->user, f));
+    SAFE_READ(read_string(&aconf->host, f));
+    SAFE_READ(read_string(&aconf->reason, f));
+
+    SAFE_READ(read_uint64(&tmp64, f));
+    aconf->setat = tmp64;
+
+    SAFE_READ(read_uint64(&tmp64, f));
+    aconf->hold = tmp64;
+
+    if (aconf->hold)
+      SetConfTemporary(aconf);
+
+    add_conf_by_address(CONF_GLINE, aconf);
+  }
+
+  close_db(f);
+}
+
+void
+save_resv_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL;
+  struct ConfItem *conf;
+  struct ResvChannel *resv_cp;
+  struct MatchItem *resv_np;
+
+  if (!(f = open_db("resv", RESVPATH, "w", KLINE_DB_VERSION)))
+    return;
+
+  DLINK_FOREACH(ptr, resv_channel_list.head)
+  {
+    resv_cp = ptr->data;
+
+    if (!resv_cp->conf)
+      ++cnt;
+  }
+
+  DLINK_FOREACH(ptr, nresv_items.head)
+  {
+    resv_np = map_to_conf(ptr->data);
+
+    if (!resv_np->action)
+      ++cnt;
+  }
+
+  SAFE_WRITE(write_uint32(cnt, f), RESVPATH);
+
+
+  DLINK_FOREACH(ptr, resv_channel_list.head)
+  {
+    resv_cp = ptr->data;
+
+    SAFE_WRITE(write_string(resv_cp->name, f), RESVPATH);
+    SAFE_WRITE(write_string(resv_cp->reason, f), RESVPATH);
+    SAFE_WRITE(write_uint64(resv_cp->setat, f), RESVPATH);
+    SAFE_WRITE(write_uint64(resv_cp->hold, f), RESVPATH);
+  }
+
+  DLINK_FOREACH(ptr, nresv_items.head)
+  {
+    conf = ptr->data;
+    resv_np = map_to_conf(conf);
+
+    SAFE_WRITE(write_string(conf->name, f), RESVPATH);
+    SAFE_WRITE(write_string(resv_np->reason, f), RESVPATH);
+    SAFE_WRITE(write_uint64(resv_np->setat, f), RESVPATH);
+    SAFE_WRITE(write_uint64(resv_np->hold, f), RESVPATH);
+  }
+
+  close_db(f);
+}
+
+void
+load_resv_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  uint64_t tmp64_hold = 0, tmp64_setat = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+  char *name = NULL;
+  char *reason = NULL;
+  struct ConfItem *conf;
+  struct ResvChannel *resv_cp;
+  struct MatchItem *resv_np;
+
+  if (!(f = open_db("resv", RESVPATH, "r", KLINE_DB_VERSION)))
+    return;
+
+  if ((version = get_file_version(f) < 1))
+  {
+    close_db(f);
+    return;
+  }
+
+  read_uint32(&cnt, f);
+
+  for (i = 0; i < cnt; ++i)
+  {
+    SAFE_READ(read_string(&name, f));
+    SAFE_READ(read_string(&reason, f));
+    SAFE_READ(read_uint64(&tmp64_setat, f));
+    SAFE_READ(read_uint64(&tmp64_hold, f));
+
+    if (IsChanPrefix(*name))
+    {
+      if ((conf = create_channel_resv(name, reason, 0)) == NULL)
+        continue;
+
+      resv_cp = map_to_conf(conf);
+      resv_cp->setat = tmp64_setat;
+      resv_cp->hold = tmp64_hold;
+
+      if (resv_cp->hold)
+        add_temp_line(conf);
+    }
+    else
+    {
+      if ((conf = create_nick_resv(name, reason, 0)) == NULL)
+        continue;
+
+      resv_np = map_to_conf(conf);
+      resv_np->setat = tmp64_setat;
+      resv_np->hold = tmp64_hold;
+
+      if (resv_np->hold)
+        add_temp_line(conf);
+    }
+
+    MyFree(name);
+    MyFree(reason);
+  }
+
+  close_db(f);
+}
+
+void
+save_xline_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL;
+  struct ConfItem *conf = NULL;
+  struct MatchItem *xconf = NULL;
+
+  if (!(f = open_db("xline", XPATH, "w", KLINE_DB_VERSION)))
+    return;
+
+  DLINK_FOREACH(ptr, xconf_items.head)
+  {
+    conf = ptr->data;
+
+    if (!IsConfMain(conf))
+      ++cnt;
+  }
+
+  SAFE_WRITE(write_uint32(cnt, f), XPATH);
+
+
+  DLINK_FOREACH(ptr, xconf_items.head)
+  {
+    conf = ptr->data;
+    xconf = map_to_conf(conf);
+
+    SAFE_WRITE(write_string(conf->name, f), XPATH);
+    SAFE_WRITE(write_string(xconf->reason, f), XPATH);
+    SAFE_WRITE(write_uint64(xconf->setat, f), XPATH);
+    SAFE_WRITE(write_uint64(xconf->hold, f), XPATH);
+  }
+
+  close_db(f);
+}
+
+void
+load_xline_database(void)
+{
+  unsigned int i = 0;
+  uint32_t cnt = 0, version = 0;
+  uint64_t tmp64_hold = 0, tmp64_setat = 0;
+  struct dbFILE *f = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+  char *name = NULL;
+  char *reason = NULL;
+  struct ConfItem *conf = NULL;
+  struct MatchItem *xconf = NULL;
+
+  if (!(f = open_db("xline", XPATH, "r", KLINE_DB_VERSION)))
+    return;
+
+  if ((version = get_file_version(f) < 1))
+  {
+    close_db(f);
+    return;
+  }
+
+  read_uint32(&cnt, f);
+
+  for (i = 0; i < cnt; ++i)
+  {
+    SAFE_READ(read_string(&name, f));
+    SAFE_READ(read_string(&reason, f));
+    SAFE_READ(read_uint64(&tmp64_setat, f));
+    SAFE_READ(read_uint64(&tmp64_hold, f));
+
+    conf = make_conf_item(XLINE_TYPE);
+    xconf = map_to_conf(conf);
+
+    conf->name = name;
+    xconf->reason = reason;
+    xconf->setat = tmp64_setat;
+    xconf->hold = tmp64_hold;
+
+    if (xconf->hold)
+      SetConfTemporary(conf);
+  }
+
+  close_db(f);
 }

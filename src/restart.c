@@ -32,6 +32,7 @@
 #include "log.h"
 #include "client.h" /* for UMODE_ALL */
 #include "memory.h"
+#include "conf_db.h"
 
 void
 restart(const char *mesg)
@@ -82,6 +83,7 @@ server_die(const char *mesg, int rboot)
   send_queued_all();
   close_fds(NULL);
 
+  save_all_databases(NULL);
   unlink(pidFileName);
 
   if (rboot)

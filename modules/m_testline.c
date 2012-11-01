@@ -122,8 +122,8 @@ mo_testline(struct Client *client_p, struct Client *source_p,
       else
         sendto_one(source_p, form_str(RPL_TESTLINE),
                    me.name, source_p->name,
-                   IsConfTemporary(aconf) ? 'd' : 'D',
-                   IsConfTemporary(aconf) ? ((aconf->hold - CurrentTime) / 60)
+                   aconf->hold ? 'd' : 'D',
+                   aconf->hold ? ((aconf->hold - CurrentTime) / 60)
                    : 0L,
                    aconf->host, aconf->reason);
     }
@@ -155,8 +155,8 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_TESTLINE),
                  me.name, source_p->name,
-                 IsConfTemporary(aconf) ? 'k' : 'K',
-                 IsConfTemporary(aconf) ? ((aconf->hold - CurrentTime) / 60)
+                 aconf->hold ? 'k' : 'K',
+                 aconf->hold ? ((aconf->hold - CurrentTime) / 60)
                  : 0L,
                  userhost, aconf->reason? aconf->reason : "No reason");
       ++matches;

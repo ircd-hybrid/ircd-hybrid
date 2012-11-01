@@ -345,6 +345,8 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
   current_date = smalldate(cur_time);
   xconf->setat = CurrentTime;
 
+  SetConfDatabase(xconf);
+
   if (tkline_time != 0)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -358,7 +360,6 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
 	 source_p->name, (int)tkline_time/60,
 	 conf->name, xconf->reason);
     xconf->hold = CurrentTime + tkline_time;
-    SetConfTemporary(conf);
   }
   else
   {
@@ -412,13 +413,13 @@ remove_xline_match(const char *gecos)
   DLINK_FOREACH_SAFE(ptr, next_ptr, xconf_items.head)
   {
     conf = ptr->data;
+    struct MatchItem *xconf = map_to_conf(conf);
 
-    if (IsConfMain(conf))
+    if (!IsConfDatabase(xconf))
       continue;
 
     if (!irccmp(gecos, conf->name))
     {
-      free_dlink_node(ptr);
       delete_conf_item(conf);
       return 1;
     }

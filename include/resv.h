@@ -33,7 +33,7 @@ struct ResvChannel
   time_t setat;
   char name[CHANNELLEN + 1];
   char *reason;
-  int	conf;		/* 1 if set from ircd.conf, 0 if from elsewhere */
+  unsigned int flags;
 };
 
 extern dlink_list nresv_items;

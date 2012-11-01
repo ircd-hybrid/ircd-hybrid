@@ -57,7 +57,6 @@ apply_dline(struct Client *source_p, struct AccessItem *aconf,
   if (tkline_time)
   {
     aconf->hold = CurrentTime + tkline_time;
-    SetConfTemporary(aconf);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. D-Line for [%s] [%s]",
                          get_oper_name(source_p), tkline_time/60,
@@ -81,6 +80,7 @@ apply_dline(struct Client *source_p, struct AccessItem *aconf,
 
   }
 
+  SetConfDatabase(aconf);
   aconf->setat = CurrentTime;
   add_conf_by_address(CONF_DLINE, aconf);
   rehashed_klines = 1;
@@ -116,7 +116,7 @@ remove_dline_match(const char *host)
 
   if ((aconf = find_conf_by_address(host, piphost, CONF_DLINE, t, NULL, NULL, 0)))
   {
-    if (!IsConfMain(aconf))
+    if (IsConfDatabase(aconf))
     {
       delete_one_address_conf(host, aconf);
       return 1;
@@ -146,7 +146,6 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   const char *creason;
   const struct Client *target_p = NULL;
   struct irc_ssaddr daddr;
-  struct ConfItem *conf=NULL;
   struct AccessItem *aconf=NULL;
   time_t tkline_time=0;
   int bits, t;
@@ -259,24 +258,17 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   if (!valid_comment(source_p, reason, 1))
     return;
 
-  conf = make_conf_item(DLINE_TYPE);
-  aconf = map_to_conf(conf);
+  aconf = map_to_conf(make_conf_item(DLINE_TYPE));
   DupString(aconf->host, dlhost);
 
   if (tkline_time != 0)
-  {
     snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %s (%s)",
              (int)(tkline_time/60), reason, current_date);
-    DupString(aconf->reason, buffer);
-    apply_dline(source_p, aconf, tkline_time);
-  }
   else
-  {
     snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
-    DupString(aconf->reason, buffer);
-    apply_dline(source_p, aconf, 0);
-  }
 
+  DupString(aconf->reason, buffer);
+  apply_dline(source_p, aconf, tkline_time);
   rehashed_klines = 1;
 }
 
@@ -289,7 +281,6 @@ ms_dline(struct Client *client_p, struct Client *source_p,
   const char *creason;
   const struct Client *target_p = NULL;
   struct irc_ssaddr daddr;
-  struct ConfItem *conf=NULL;
   struct AccessItem *aconf=NULL;
   time_t tkline_time=0;
   int bits, t;
@@ -386,24 +377,17 @@ ms_dline(struct Client *client_p, struct Client *source_p,
     if (!valid_comment(source_p, reason, 1))
       return;
 
-    conf = make_conf_item(DLINE_TYPE);
-    aconf = map_to_conf(conf);
+    aconf = map_to_conf(make_conf_item(DLINE_TYPE));
     DupString(aconf->host, dlhost);
 
     if (tkline_time != 0)
-    {
       snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %s (%s)",
                (int)(tkline_time/60), reason, current_date);
-      DupString(aconf->reason, buffer);
-      apply_dline(source_p, aconf, tkline_time);
-    }
     else
-    {
       snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
-      DupString(aconf->reason, buffer);
-      apply_dline(source_p, aconf, 0);
-    }
 
+    DupString(aconf->reason, buffer);
+    apply_dline(source_p, aconf, tkline_time);
     rehashed_klines = 1;
   }
 }

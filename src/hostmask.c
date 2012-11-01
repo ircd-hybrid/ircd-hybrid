@@ -744,23 +744,19 @@ clear_out_address_conf(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      /* We keep the temporary K-lines and destroy the
-       * permanent ones, just to be confusing :) -A1kmm
-       */  
-      if (!(arec->aconf->flags & CONF_FLAGS_TEMPORARY))
-      {
-      /* XXX HACK */
-        if (arec->type == CONF_KLINE && !IsConfMain(arec->aconf))
-          continue;
+      /*
+       * We keep the temporary K-lines and destroy the permanent ones,
+       * just to be confusing :) -A1kmm
+       */
+      if (arec->aconf->hold || IsConfDatabase(arec->aconf))
+        continue;
 
-        dlinkDelete(&arec->node, &atable[i]);
-        /* unlink it from link list - Dianora */
-        arec->aconf->status |= CONF_ILLEGAL;
+      dlinkDelete(&arec->node, &atable[i]);
+      arec->aconf->status |= CONF_ILLEGAL;
 
-        if (!arec->aconf->clients)
-          free_access_item(arec->aconf);
-        MyFree(arec);
-      }
+      if (!arec->aconf->clients)
+        free_access_item(arec->aconf);
+      MyFree(arec);
     }
   }
 }
@@ -804,7 +800,7 @@ hostmask_expire_temporary(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (!IsConfTemporary(arec->aconf) || arec->aconf->hold > CurrentTime)
+      if (!arec->aconf->hold || arec->aconf->hold > CurrentTime)
         continue;
 
       switch (arec->type)

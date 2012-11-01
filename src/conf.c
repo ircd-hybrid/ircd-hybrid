@@ -452,11 +452,6 @@ delete_conf_item(struct ConfItem *conf)
     MyFree(match_item->host);
     MyFree(match_item->reason);
     dlinkDelete(&conf->node, &nresv_items);
-
-    if (conf->flags & CONF_FLAGS_TEMPORARY)
-      if ((m = dlinkFindDelete(&temporary_resv, conf)) != NULL)
-        free_dlink_node(m);
-
     MyFree(conf);
     break;
 
@@ -466,10 +461,6 @@ delete_conf_item(struct ConfItem *conf)
     break;
 
   case CRESV_TYPE:
-    if (conf->flags & CONF_FLAGS_TEMPORARY)
-      if ((m = dlinkFindDelete(&temporary_resv, conf)) != NULL)
-        free_dlink_node(m);
-
     MyFree(conf);
     break;
 
@@ -2008,23 +1999,6 @@ find_gline(struct Client *client_p)
   return aconf;
 }
 
-/* add_temp_line()
- *
- * inputs        - pointer to struct ConfItem
- * output        - none
- * Side effects  - links in given struct ConfItem into 
- *                 temporary *line link list
- */
-void
-add_temp_line(struct ConfItem *conf)
-{
-  if ((conf->type == NRESV_TYPE) || (conf->type == CRESV_TYPE))
-  {
-    conf->flags |= CONF_FLAGS_TEMPORARY;
-    dlinkAdd(conf, make_dlink_node(), &temporary_resv);
-  }
-}
-
 /* cleanup_tklines()
  *
  * inputs       - NONE
@@ -2037,7 +2011,8 @@ cleanup_tklines(void *notused)
 {
   hostmask_expire_temporary();
   expire_tklines(&xconf_items); 
-  expire_tklines(&temporary_resv);
+  expire_tklines(&nresv_items);
+  expire_tklines(&resv_channel_list);
 }
 
 /* expire_tklines()
@@ -2062,11 +2037,8 @@ expire_tklines(dlink_list *tklist)
 
     if (conf->type == XLINE_TYPE)
     {
-      if (!IsConfTemporary(conf))
-        continue;
-
       xconf = (struct MatchItem *)map_to_conf(conf);
-      if (xconf->hold <= CurrentTime)
+      if (xconf->hold && xconf->hold <= CurrentTime)
       {
         if (ConfigFileEntry.tkline_expire_notices)
 	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -2077,20 +2049,18 @@ expire_tklines(dlink_list *tklist)
     else if (conf->type == NRESV_TYPE)
     {
       nconf = (struct MatchItem *)map_to_conf(conf);
-      if (nconf->hold <= CurrentTime)
+      if (nconf->hold && nconf->hold <= CurrentTime)
       {
         if (ConfigFileEntry.tkline_expire_notices)
 	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary RESV for [%s] expired", conf->name);
-	dlinkDelete(ptr, tklist);
-        free_dlink_node(ptr);
 	delete_conf_item(conf);
       }
     }
     else if (conf->type == CRESV_TYPE)
     {
-      cconf = (struct ResvChannel *)map_to_conf(conf);
-      if (cconf->hold <= CurrentTime)
+      cconf = ptr->data;
+      if (cconf->hold && cconf->hold <= CurrentTime)
       {
         if (ConfigFileEntry.tkline_expire_notices)
 	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -2325,7 +2295,8 @@ clear_out_old_conf(void)
       {
         /* temporary (r)xlines are also on
          * the (r)xconf items list */
-        if (conf->flags & CONF_FLAGS_TEMPORARY)
+        aconf = map_to_conf(conf);
+        if (aconf->hold)
           continue;
 
         delete_conf_item(conf);

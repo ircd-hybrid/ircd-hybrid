@@ -107,6 +107,7 @@ struct MatchItem
   int count;		/* How many times this matchitem has been matched */
   int ref_count;	/* How many times is this matchitem in use */
   int illegal;		/* Should it be deleted when possible? */
+  unsigned int flags;
   time_t           hold;     /* Hold action until this time (calendar time) */
   time_t setat;
 };
@@ -227,7 +228,7 @@ struct CidrItem
 /* server flags */
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x00002000
 #define CONF_FLAGS_ENCRYPTED            0x00004000
-#define CONF_FLAGS_TEMPORARY            0x00008000
+#define CONF_FLAGS_IN_DATABASE          0x00008000
 #define CONF_FLAGS_EXEMPTRESV           0x00010000
 #define CONF_FLAGS_SSL                  0x00020000
 #define CONF_FLAGS_MAINCONF             0x00040000
@@ -252,15 +253,13 @@ struct CidrItem
 #define IsConfAllowAutoConn(x)  ((x)->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
 #define SetConfAllowAutoConn(x)	((x)->flags |= CONF_FLAGS_ALLOW_AUTO_CONN)
 #define ClearConfAllowAutoConn(x) ((x)->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN)
-#define IsConfTemporary(x)      ((x)->flags & CONF_FLAGS_TEMPORARY)
-#define SetConfTemporary(x)     ((x)->flags |= CONF_FLAGS_TEMPORARY)
 #define IsConfRedir(x)          ((x)->flags & CONF_FLAGS_REDIR)
 #define IsConfSSL(x)      ((x)->flags & CONF_FLAGS_SSL)
 #define SetConfSSL(x)     ((x)->flags |= CONF_FLAGS_SSL)
 #define ClearConfSSL(x)   ((x)->flags &= ~CONF_FLAGS_SSL)
-#define IsConfMain(x)      ((x)->flags & CONF_FLAGS_MAINCONF)
-#define SetConfMain(x)     ((x)->flags |= CONF_FLAGS_MAINCONF)
-#define ClearConfMain(x)   ((x)->flags &= ~CONF_FLAGS_MAINCONF)
+#define IsConfDatabase(x)      ((x)->flags & CONF_FLAGS_IN_DATABASE)
+#define SetConfDatabase(x)     ((x)->flags |= CONF_FLAGS_IN_DATABASE)
+
 
 /* shared/cluster server entry types 
  * These defines are used for both shared and cluster.
@@ -455,11 +454,6 @@ extern struct ConfItem *find_exact_name_conf(ConfType, const struct Client *, co
 extern void delete_conf_item(struct ConfItem *);
 extern void report_confitem_types(struct Client *, ConfType);
 extern void yyerror(const char *);
-extern void write_conf_line(struct Client *, struct ConfItem *,
-                            const char *, time_t);
-extern int remove_conf_line(ConfType, struct Client *, const char *,
-                            const char *);
-extern void add_temp_line(struct ConfItem *);
 extern void cleanup_tklines(void *);
 extern int rehash(int);
 extern int conf_add_server(struct ConfItem *, const char *);

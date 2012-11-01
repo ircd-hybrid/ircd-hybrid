@@ -71,7 +71,7 @@ set_local_gline(const struct Client *source_p, const char *user,
 
   aconf->setat = CurrentTime;
   aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-  SetConfTemporary(aconf);
+  SetConfDatabase(aconf);
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "%s added G-Line for [%s@%s] [%s]",
@@ -114,8 +114,11 @@ remove_gline_match(const char *user, const char *host)
 
   if ((aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0)))
   {
-    delete_one_address_conf(host, aconf);
-    return 1;
+    if (IsConfDatabase(aconf))
+    {
+      delete_one_address_conf(host, aconf);
+      return 1;
+    }
   }
 
   return 0;

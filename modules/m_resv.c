@@ -233,6 +233,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 
     resv_p = map_to_conf(conf);
     resv_p->setat = CurrentTime;
+    SetConfDatabase(resv_p);
 
     if (tkline_time != 0)
     {
@@ -251,7 +252,6 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 	   source_p->name, (int)tkline_time/60,
 	   conf->name, resv_p->reason);
       resv_p->hold = CurrentTime + tkline_time;
-      add_temp_line(conf);
     }
     else
     {
@@ -264,7 +264,6 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 			   get_oper_name(source_p),
 			   (MyClient(source_p) ? "local" : "remote"),
 			   resv_p->name, resv_p->reason);
-      write_conf_line(source_p, conf, NULL /* not used */, 0 /* not used */);
     }
   }
   else
@@ -295,6 +294,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 
     resv_p = map_to_conf(conf);
     resv_p->setat = CurrentTime;
+    SetConfDatabase(resv_p);
 
     if (tkline_time != 0)
     {
@@ -314,7 +314,6 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 	   source_p->name, (int)tkline_time/60,
 	   conf->name, resv_p->reason);
       resv_p->hold = CurrentTime + tkline_time;
-      add_temp_line(conf);
     }
     else
     {
@@ -328,7 +327,6 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 			   get_oper_name(source_p),
 			   (MyClient(source_p) ? "local" : "remote"),
 			   conf->name, resv_p->reason);
-      write_conf_line(source_p, conf, NULL /* not used */, 0 /* not used */);
     }
   }
 }
@@ -351,7 +349,7 @@ remove_resv(struct Client *source_p, const char *name)
       return;
     }
 
-    if (resv_p->conf)
+    if (!IsConfDatabase(resv_p))
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :The RESV for channel: %s is in ircd.conf and must be removed by hand.",
@@ -360,8 +358,6 @@ remove_resv(struct Client *source_p, const char *name)
     }
 
     delete_channel_resv(resv_p);
-    remove_conf_line(CRESV_TYPE, source_p, name, NULL);
-
     sendto_one(source_p,
                ":%s NOTICE %s :The RESV has been removed on channel: %s",
                me.name, source_p->name, name);
@@ -382,7 +378,7 @@ remove_resv(struct Client *source_p, const char *name)
 
     resv_p = map_to_conf(conf);
 
-    if (resv_p->action)
+    if (IsConfDatabase(resv_p))
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :The RESV for nick: %s is in ircd.conf and must be removed by hand.",
@@ -391,8 +387,6 @@ remove_resv(struct Client *source_p, const char *name)
     }
 
     delete_conf_item(conf);
-    remove_conf_line(NRESV_TYPE, source_p, name, NULL);
-
     sendto_one(source_p, ":%s NOTICE %s :The RESV has been removed on nick: %s",
                me.name, source_p->name, name);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,

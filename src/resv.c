@@ -68,7 +68,6 @@ create_channel_resv(char *name, char *reason, int in_conf)
   strlcpy(resv_p->name, name, sizeof(resv_p->name));
   DupString(conf->name, name);
   DupString(resv_p->reason, reason);
-  resv_p->conf = in_conf;
 
   dlinkAdd(resv_p, &resv_p->node, &resv_channel_list);
   hash_add_resv(resv_p);
@@ -104,7 +103,6 @@ create_nick_resv(char *name, char *reason, int in_conf)
 
   DupString(conf->name, name);
   DupString(resv_p->reason, reason);
-  resv_p->action = in_conf;
 
   return conf;
 }
@@ -121,7 +119,12 @@ clear_conf_resv(void)
   dlink_node *ptr = NULL, *next_ptr = NULL;
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, resv_channel_list.head)
-    delete_channel_resv(ptr->data);
+  {
+    struct ResvChannel *resv_p = ptr->data;
+
+    if (!IsConfDatabase(resv_p))
+      delete_channel_resv(resv_p);
+  }
 }
 
 /* delete_channel_resv()
@@ -190,7 +193,7 @@ report_resv(struct Client *source_p)
     resv_cp = ptr->data;
     sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
-	       resv_cp->conf ? 'Q' : 'q',
+	       resv_cp->hold ? 'q' : 'Q',
 	       resv_cp->name, resv_cp->reason);
   }
 
@@ -201,7 +204,7 @@ report_resv(struct Client *source_p)
 
     sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
-	       resv_np->action ? 'Q' : 'q',
+	       resv_np->hold ? 'q' : 'Q',
 	       conf->name, resv_np->reason);
   }
 }

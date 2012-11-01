@@ -80,10 +80,11 @@ server_die(const char *mesg, int rboot)
 
   ilog(LOG_TYPE_IRCD, "%s", buffer);
 
+  save_all_databases(NULL);
+
   send_queued_all();
   close_fds(NULL);
 
-  save_all_databases(NULL);
   unlink(pidFileName);
 
   if (rboot)

@@ -343,7 +343,7 @@ close_db(struct dbFILE *f)
  * \return -1 on error, 0 otherwise.
  */
 int
-read_uint8(unsigned char *ret, struct dbFILE *f)
+read_uint8(uint8_t*ret, struct dbFILE *f)
 {
   int c = fgetc(f->fp);
 
@@ -361,7 +361,7 @@ read_uint8(unsigned char *ret, struct dbFILE *f)
  * \return -1 on error, 0 otherwise.
  */
 int
-write_uint8(unsigned char val, struct dbFILE *f)
+write_uint8(uint8_t val, struct dbFILE *f)
 {
   if (fputc(val, f->fp) == EOF)
     return -1;

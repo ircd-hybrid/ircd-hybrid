@@ -51,8 +51,8 @@ extern void backup_databases(void);
 #define write_db(f,buf,len)	(fwrite((buf),1,(len),(f)->fp))
 #define getc_db(f)		(fgetc((f)->fp))
 
-extern int read_uint8(unsigned char *, struct dbFILE *);
-extern int write_uint8(unsigned char, struct dbFILE *);
+extern int read_uint8(uint8_t *, struct dbFILE *);
+extern int write_uint8(uint8_t, struct dbFILE *);
 extern int read_uint16(uint16_t *, struct dbFILE *);
 extern int write_uint16(uint16_t, struct dbFILE *);
 extern int read_uint32(uint32_t *, struct dbFILE *);

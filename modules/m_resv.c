@@ -378,7 +378,7 @@ remove_resv(struct Client *source_p, const char *name)
 
     resv_p = map_to_conf(conf);
 
-    if (IsConfDatabase(resv_p))
+    if (!IsConfDatabase(resv_p))
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :The RESV for nick: %s is in ircd.conf and must be removed by hand.",

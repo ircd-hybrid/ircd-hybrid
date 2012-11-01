@@ -851,7 +851,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 			  target_p->name, target_p->from->name,
 			  client_p->name);
         else
-	  sendto_realops_flags(UMODE_ALL, L_ALL,
+	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 	                  "Nick collision on %s(%s <- %s)(newer killed)",
 			  target_p->name, target_p->from->name,
 			  client_p->name);

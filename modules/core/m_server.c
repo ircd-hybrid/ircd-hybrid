@@ -85,7 +85,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", get_client_name(client_p, HIDE_IP), name);
-    sendto_realops_flags(UMODE_ALL, L_OPER,
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", get_client_name(client_p, MASK_IP), name);
     exit_client(client_p, client_p, "Bogus server name");

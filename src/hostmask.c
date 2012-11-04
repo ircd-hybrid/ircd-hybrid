@@ -596,8 +596,11 @@ find_address_conf(const char *host, const char *user,
   if (kconf != NULL)
     return kconf;
 
+  if (IsConfExemptGline(iconf))
+    return iconf;
+
   kconf = find_conf_by_address(host, ip, CONF_GLINE, aftype, user, NULL, 1);
-  if (kconf != NULL && !IsConfExemptGline(iconf))
+  if (kconf != NULL)
     return kconf;
 
   return iconf;

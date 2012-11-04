@@ -115,7 +115,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
           {
             dlink_node *dm = NULL;
 
-            detach_conf(target_p, OPER_TYPE);
+            detach_conf(target_p, CONF_OPER);
             ClrOFlag(target_p);
             DelUMode(target_p, ConfigFileEntry.oper_only_umodes);
  

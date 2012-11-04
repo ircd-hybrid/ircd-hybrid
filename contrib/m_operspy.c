@@ -566,7 +566,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 static void
 operspy_log(struct Client *source_p, const char *command, const char *target)
 {
-  struct ConfItem *conf = NULL;
+  struct MaskItem *conf = NULL;
 #ifdef OPERSPY_LOGFILE
   FILE *operspy_fb;
   dlink_node *cnode;
@@ -583,7 +583,7 @@ operspy_log(struct Client *source_p, const char *command, const char *target)
     {
       conf = cnode->data;
 
-      if (conf->type == OPER_TYPE)
+      if (conf->type == CONF_OPER)
         opername = conf->name;
     }
   }

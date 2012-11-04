@@ -29,11 +29,11 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
+#include "conf.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"
-#include "conf.h"
 #include "log.h"
 #include "s_misc.h"
 #include "send.h"
@@ -68,8 +68,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
 {
   char *reason = NULL;
   char *gecos = NULL;
-  struct ConfItem *conf = NULL;
-  struct MatchItem *match_item = NULL;
+  struct MaskItem *conf = NULL;
   char *target_server = NULL;
   time_t tkline_time = 0;
 
@@ -117,14 +116,12 @@ mo_xline(struct Client *client_p, struct Client *source_p,
   if (!valid_xline(source_p, gecos, reason, 0))
     return;
 
-  if ((conf = find_matching_name_conf(XLINE_TYPE, gecos,
+  if ((conf = find_matching_name_conf(CONF_XLINE, gecos,
                                       NULL, NULL, 0)) != NULL)
   {
-    match_item = map_to_conf(conf);
-
     sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
                me.name, source_p->name, gecos,
-               conf->name, match_item->reason);
+               conf->name, conf->reason);
     return;
   }
 
@@ -184,8 +181,7 @@ me_xline(struct Client *client_p, struct Client *source_p,
 static void
 relay_xline(struct Client *source_p, char *parv[])
 {
-  struct ConfItem *conf;
-  struct MatchItem *match_item;
+  struct MaskItem *conf = NULL;
   int t_sec;
 
   t_sec = atoi(parv[3]);
@@ -200,18 +196,17 @@ relay_xline(struct Client *source_p, char *parv[])
   if (!match(parv[1], me.name))
     return;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(ULINE_TYPE, source_p->servptr->name,
+  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_XLINE))
   {
-    if ((conf = find_matching_name_conf(XLINE_TYPE, parv[2],
+    if ((conf = find_matching_name_conf(CONF_XLINE, parv[2],
 					NULL, NULL, 0)) != NULL)
     {
-      match_item = map_to_conf(conf);
       sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
                  ID_or_name(&me, source_p->from),
                  ID_or_name(source_p, source_p->from),
-                 parv[2], conf->name, match_item->reason);
+                 parv[2], conf->name, conf->reason);
       return;
     }
 
@@ -285,7 +280,7 @@ ms_unxline(struct Client *client_p, struct Client *source_p,
   if (!match(parv[1], me.name))
     return;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(ULINE_TYPE, source_p->servptr->name,
+  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_UNXLINE))
     remove_xline(source_p, parv[2]);
@@ -330,50 +325,48 @@ static void
 write_xline(struct Client *source_p, char *gecos, char *reason,
 	    time_t tkline_time)
 {
-  struct ConfItem *conf;
-  struct MatchItem *xconf;
+  struct MaskItem *conf;
   const char *current_date;
   time_t cur_time;
 
-  conf = make_conf_item(XLINE_TYPE);
-  xconf = map_to_conf(conf);
+  conf = conf_make(CONF_XLINE);
 
   collapse(gecos);
   DupString(conf->name, gecos);
-  DupString(xconf->reason, reason);
+  DupString(conf->reason, reason);
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
-  xconf->setat = CurrentTime;
+  conf->setat = CurrentTime;
 
-  SetConfDatabase(xconf);
+  SetConfDatabase(conf);
 
   if (tkline_time != 0)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
 			 "%s added temporary %d min. X-Line for [%s] [%s]",
 			 get_oper_name(source_p), (int)tkline_time/60,
-			 conf->name, xconf->reason);
+			 conf->name, conf->reason);
     sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. X-Line [%s]",
 	       MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
 	       source_p->name, (int)tkline_time/60, conf->name);
     ilog(LOG_TYPE_KLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
 	 source_p->name, (int)tkline_time/60,
-	 conf->name, xconf->reason);
-    xconf->hold = CurrentTime + tkline_time;
+	 conf->name, conf->reason);
+    conf->hold = CurrentTime + tkline_time;
   }
   else
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added X-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->name,
-                         xconf->reason);
+                         conf->reason);
     sendto_one(source_p,
                ":%s NOTICE %s :Added X-Line [%s] [%d] [%s]",
                MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
                source_p->name, conf->name,
-               xconf->action, xconf->reason);
+               conf->action, conf->reason);
     ilog(LOG_TYPE_IRCD, "%s added X-Line for [%s] [%s]",
-         get_oper_name(source_p), conf->name, xconf->reason);
+         get_oper_name(source_p), conf->name, conf->reason);
   }
 
   rehashed_klines = 1;
@@ -408,19 +401,17 @@ static int
 remove_xline_match(const char *gecos)
 {
   dlink_node *ptr = NULL, *next_ptr = NULL;
-  struct ConfItem *conf = NULL;
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, xconf_items.head)
   {
-    conf = ptr->data;
-    struct MatchItem *xconf = map_to_conf(conf);
+    struct MaskItem *conf = ptr->data;
 
-    if (!IsConfDatabase(xconf))
+    if (!IsConfDatabase(conf))
       continue;
 
     if (!irccmp(gecos, conf->name))
     {
-      delete_conf_item(conf);
+      conf_free(conf);
       return 1;
     }
   }

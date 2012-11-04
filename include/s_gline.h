@@ -30,10 +30,10 @@
 #define GLINE_PENDING_DEL_TYPE 0
 #define GLINE_PENDING_ADD_TYPE 1
 
-struct AccessItem;
+struct MaskItem;
 
 extern void cleanup_glines(void *);
-extern struct AccessItem *find_is_glined(const char *, const char *);
+extern struct MaskItem *find_is_glined(const char *, const char *);
 
 struct gline_pending
 {

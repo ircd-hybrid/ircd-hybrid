@@ -221,7 +221,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
   }
 
   /* check if the nick is resv'd */
-  if (find_matching_name_conf(NRESV_TYPE, nick, NULL, NULL, 0) &&
+  if (find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0) &&
       !IsExemptResv(source_p))
   {
     sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name,
@@ -286,7 +286,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (find_matching_name_conf(NRESV_TYPE, nick,
+  if (find_matching_name_conf(CONF_NRESV, nick,
 			     NULL, NULL, 0) && !IsExemptResv(source_p) &&
      !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv))
   {

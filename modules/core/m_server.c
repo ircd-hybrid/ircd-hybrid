@@ -30,7 +30,7 @@
 #include "irc_string.h" 
 #include "ircd.h"        /* me */
 #include "numeric.h"     /* ERR_xxx */
-#include "conf.h"      /* struct AccessItem */
+#include "conf.h"      /* struct MaskItem */
 #include "log.h"       /* log level defines */
 #include "s_serv.h"      /* server_estab, check_server */
 #include "s_user.h"
@@ -198,7 +198,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
 {
   char *name;
   struct Client *target_p;
-  struct AccessItem *aconf;
+  struct MaskItem *conf = NULL;
   int hop;
   int hlined = 0;
   int llined = 0;
@@ -268,19 +268,19 @@ ms_server(struct Client *client_p, struct Client *source_p,
     if (target_p != client_p)
       exit_client(target_p, &me, "Overridden");
 
-  aconf = map_to_conf(client_p->localClient->confs.head->data);
+  conf = client_p->localClient->confs.head->data;
 
   /* See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  DLINK_FOREACH(ptr, aconf->leaf_list.head)
+  DLINK_FOREACH(ptr, conf->leaf_list.head)
     if (match(ptr->data, name))
     {
       llined = 1;
       break;
     }
 
-  DLINK_FOREACH(ptr, aconf->hub_list.head)
+  DLINK_FOREACH(ptr, conf->hub_list.head)
     if (match(ptr->data, name))
     {
       hlined = 1;
@@ -355,7 +355,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
   set_server_gecos(target_p, parv[3]);
   SetServer(target_p);
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(SERVICE_TYPE, target_p->name, NULL, NULL, 0))
+  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_SERVICE, target_p->name, NULL, NULL, 0))
     AddFlag(target_p, FLAGS_SERVICE);
 
   dlinkAdd(target_p, &target_p->node, &global_client_list);
@@ -385,7 +385,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
   struct Client *target_p;
-  struct AccessItem *aconf = NULL;
+  struct MaskItem *conf = NULL;
   int hlined = 0;
   int llined = 0;
   dlink_node *ptr = NULL;
@@ -465,19 +465,19 @@ ms_sid(struct Client *client_p, struct Client *source_p,
     if (target_p != client_p)
       exit_client(target_p, &me, "Overridden");
 
-  aconf = map_to_conf(client_p->localClient->confs.head->data);
+  conf = client_p->localClient->confs.head->data;
 
   /* See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  DLINK_FOREACH(ptr, aconf->leaf_list.head)
+  DLINK_FOREACH(ptr, conf->leaf_list.head)
     if (match(ptr->data, parv[1]))
     {
       llined = 1;
       break;
     }
 
-  DLINK_FOREACH(ptr, aconf->hub_list.head)
+  DLINK_FOREACH(ptr, conf->hub_list.head)
     if (match(ptr->data, parv[1]))
     {
       hlined = 1;
@@ -547,7 +547,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   set_server_gecos(target_p, parv[4]);
   SetServer(target_p);
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(SERVICE_TYPE, target_p->name, NULL, NULL, 0))
+  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_SERVICE, target_p->name, NULL, NULL, 0))
     AddFlag(target_p, FLAGS_SERVICE);
 
   dlinkAdd(target_p, &target_p->node, &global_client_list);

@@ -627,7 +627,7 @@ save_kline_database(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_KLINE && IsConfDatabase(arec->aconf))
+      if (arec->type == CONF_KLINE && IsConfDatabase(arec->conf))
         ++records;
     }
   }
@@ -640,13 +640,13 @@ save_kline_database(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_KLINE && IsConfDatabase(arec->aconf))
+      if (arec->type == CONF_KLINE && IsConfDatabase(arec->conf))
       {
-        SAFE_WRITE(write_string(arec->aconf->user, f), KPATH);
-        SAFE_WRITE(write_string(arec->aconf->host, f), KPATH);
-        SAFE_WRITE(write_string(arec->aconf->reason, f), KPATH);
-        SAFE_WRITE(write_uint64(arec->aconf->setat, f), KPATH);
-        SAFE_WRITE(write_uint64(arec->aconf->hold, f), KPATH);
+        SAFE_WRITE(write_string(arec->conf->user, f), KPATH);
+        SAFE_WRITE(write_string(arec->conf->host, f), KPATH);
+        SAFE_WRITE(write_string(arec->conf->reason, f), KPATH);
+        SAFE_WRITE(write_uint64(arec->conf->setat, f), KPATH);
+        SAFE_WRITE(write_uint64(arec->conf->hold, f), KPATH);
       }
     }
   }
@@ -658,7 +658,7 @@ void
 load_kline_database(void)
 {
   struct dbFILE *f = NULL;
-  struct AccessItem *aconf = NULL;
+  struct MaskItem *conf = NULL;
   char *field_1 = NULL;
   char *field_2 = NULL;
   char *field_3 = NULL;
@@ -686,15 +686,15 @@ load_kline_database(void)
     SAFE_READ(read_uint64(&field_4, f));
     SAFE_READ(read_uint64(&field_5, f));
 
-    aconf = map_to_conf(make_conf_item(KLINE_TYPE));
-    aconf->user = field_1;
-    aconf->host = field_2;
-    aconf->reason = field_3;
-    aconf->setat = field_4;
-    aconf->hold = field_5;
-    SetConfDatabase(aconf);
+    conf = conf_make(CONF_KLINE);
+    conf->user = field_1;
+    conf->host = field_2;
+    conf->reason = field_3;
+    conf->setat = field_4;
+    conf->hold = field_5;
+    SetConfDatabase(conf);
 
-    add_conf_by_address(CONF_KLINE, aconf);
+    add_conf_by_address(CONF_KLINE, conf);
   }
 
   close_db(f);
@@ -717,7 +717,7 @@ save_dline_database(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_DLINE && IsConfDatabase(arec->aconf))
+      if (arec->type == CONF_DLINE && IsConfDatabase(arec->conf))
         ++records;
     }
   }
@@ -730,12 +730,12 @@ save_dline_database(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_DLINE && IsConfDatabase(arec->aconf))
+      if (arec->type == CONF_DLINE && IsConfDatabase(arec->conf))
       {
-        SAFE_WRITE(write_string(arec->aconf->host, f), DLPATH);
-        SAFE_WRITE(write_string(arec->aconf->reason, f), DLPATH);
-        SAFE_WRITE(write_uint64(arec->aconf->setat, f), DLPATH);
-        SAFE_WRITE(write_uint64(arec->aconf->hold, f), DLPATH);
+        SAFE_WRITE(write_string(arec->conf->host, f), DLPATH);
+        SAFE_WRITE(write_string(arec->conf->reason, f), DLPATH);
+        SAFE_WRITE(write_uint64(arec->conf->setat, f), DLPATH);
+        SAFE_WRITE(write_uint64(arec->conf->hold, f), DLPATH);
       }
     }
   }
@@ -747,7 +747,7 @@ void
 load_dline_database(void)
 {
   struct dbFILE *f = NULL;
-  struct AccessItem *aconf = NULL;
+  struct MaskItem *conf = NULL;
   char *field_1 = NULL;
   char *field_2 = NULL;
   uint32_t i = 0;
@@ -773,14 +773,14 @@ load_dline_database(void)
     SAFE_READ(read_uint64(&field_3, f));
     SAFE_READ(read_uint64(&field_4, f));
 
-    aconf = map_to_conf(make_conf_item(DLINE_TYPE));
-    aconf->host = field_1;
-    aconf->reason = field_2;
-    aconf->setat = field_3;
-    aconf->hold = field_4;
-    SetConfDatabase(aconf);
+    conf = conf_make(CONF_DLINE);
+    conf->host = field_1;
+    conf->reason = field_2;
+    conf->setat = field_3;
+    conf->hold = field_4;
+    SetConfDatabase(conf);
 
-    add_conf_by_address(CONF_DLINE, aconf);
+    add_conf_by_address(CONF_DLINE, conf);
   }
 
   close_db(f);
@@ -803,7 +803,7 @@ save_gline_database(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_GLINE && IsConfDatabase(arec->aconf))
+      if (arec->type == CONF_GLINE && IsConfDatabase(arec->conf))
         ++records;
     }
   }
@@ -816,13 +816,13 @@ save_gline_database(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_GLINE && IsConfDatabase(arec->aconf))
+      if (arec->type == CONF_GLINE && IsConfDatabase(arec->conf))
       {
-        SAFE_WRITE(write_string(arec->aconf->user, f), GPATH);
-        SAFE_WRITE(write_string(arec->aconf->host, f), GPATH);
-        SAFE_WRITE(write_string(arec->aconf->reason, f), GPATH);
-        SAFE_WRITE(write_uint64(arec->aconf->setat, f), GPATH);
-        SAFE_WRITE(write_uint64(arec->aconf->hold, f), GPATH);
+        SAFE_WRITE(write_string(arec->conf->user, f), GPATH);
+        SAFE_WRITE(write_string(arec->conf->host, f), GPATH);
+        SAFE_WRITE(write_string(arec->conf->reason, f), GPATH);
+        SAFE_WRITE(write_uint64(arec->conf->setat, f), GPATH);
+        SAFE_WRITE(write_uint64(arec->conf->hold, f), GPATH);
       }
     }
   }
@@ -834,7 +834,7 @@ void
 load_gline_database(void)
 {
   struct dbFILE *f = NULL;
-  struct AccessItem *aconf = NULL;
+  struct MaskItem *conf = NULL;
   char *field_1 = NULL;
   char *field_2 = NULL;
   char *field_3 = NULL;
@@ -862,15 +862,15 @@ load_gline_database(void)
     SAFE_READ(read_uint64(&field_4, f));
     SAFE_READ(read_uint64(&field_5, f));
 
-    aconf = map_to_conf(make_conf_item(KLINE_TYPE));
-    aconf->user = field_1;
-    aconf->host = field_2;
-    aconf->reason = field_3;
-    aconf->setat = field_4;
-    aconf->hold = field_5;
-    SetConfDatabase(aconf);
+    conf = conf_make(CONF_GLINE);
+    conf->user = field_1;
+    conf->host = field_2;
+    conf->reason = field_3;
+    conf->setat = field_4;
+    conf->hold = field_5;
+    SetConfDatabase(conf);
 
-    add_conf_by_address(CONF_GLINE, aconf);
+    add_conf_by_address(CONF_GLINE, conf);
   }
 
   close_db(f);
@@ -882,26 +882,24 @@ save_resv_database(void)
   uint32_t records = 0;
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
-  struct ConfItem *conf;
-  struct ResvChannel *resv_cp;
-  struct MatchItem *resv_np;
+  struct MaskItem *conf = NULL;
 
   if (!(f = open_db("resv", RESVPATH, "w", KLINE_DB_VERSION)))
     return;
 
   DLINK_FOREACH(ptr, resv_channel_list.head)
   {
-    resv_cp = ptr->data;
+    conf = ptr->data;
 
-    if (IsConfDatabase(resv_cp))
+    if (IsConfDatabase(conf))
       ++records;
   }
 
   DLINK_FOREACH(ptr, nresv_items.head)
   {
-    resv_np = map_to_conf(ptr->data);
+    conf = ptr->data;
 
-    if (IsConfDatabase(resv_np))
+    if (IsConfDatabase(conf))
       ++records;
   }
 
@@ -909,29 +907,28 @@ save_resv_database(void)
 
   DLINK_FOREACH(ptr, resv_channel_list.head)
   {
-    resv_cp = ptr->data;
+    conf = ptr->data;
 
-    if (!IsConfDatabase(resv_cp))
+    if (!IsConfDatabase(conf))
       continue;
 
-    SAFE_WRITE(write_string(resv_cp->name, f), RESVPATH);
-    SAFE_WRITE(write_string(resv_cp->reason, f), RESVPATH);
-    SAFE_WRITE(write_uint64(resv_cp->setat, f), RESVPATH);
-    SAFE_WRITE(write_uint64(resv_cp->hold, f), RESVPATH);
+    SAFE_WRITE(write_string(conf->name, f), RESVPATH);
+    SAFE_WRITE(write_string(conf->reason, f), RESVPATH);
+    SAFE_WRITE(write_uint64(conf->setat, f), RESVPATH);
+    SAFE_WRITE(write_uint64(conf->hold, f), RESVPATH);
   }
 
   DLINK_FOREACH(ptr, nresv_items.head)
   {
     conf = ptr->data;
-    resv_np = map_to_conf(conf);
 
-    if (!IsConfDatabase(resv_np))
+    if (!IsConfDatabase(conf))
       continue;
 
     SAFE_WRITE(write_string(conf->name, f), RESVPATH);
-    SAFE_WRITE(write_string(resv_np->reason, f), RESVPATH);
-    SAFE_WRITE(write_uint64(resv_np->setat, f), RESVPATH);
-    SAFE_WRITE(write_uint64(resv_np->hold, f), RESVPATH);
+    SAFE_WRITE(write_string(conf->reason, f), RESVPATH);
+    SAFE_WRITE(write_uint64(conf->setat, f), RESVPATH);
+    SAFE_WRITE(write_uint64(conf->hold, f), RESVPATH);
   }
 
   close_db(f);
@@ -946,9 +943,7 @@ load_resv_database(void)
   struct dbFILE *f = NULL;
   char *name = NULL;
   char *reason = NULL;
-  struct ConfItem *conf;
-  struct ResvChannel *resv_cp;
-  struct MatchItem *resv_np;
+  struct MaskItem *conf = NULL;
 
   if (!(f = open_db("resv", RESVPATH, "r", KLINE_DB_VERSION)))
     return;
@@ -973,20 +968,18 @@ load_resv_database(void)
       if ((conf = create_channel_resv(name, reason, 0)) == NULL)
         continue;
 
-      resv_cp = map_to_conf(conf);
-      resv_cp->setat = tmp64_setat;
-      resv_cp->hold = tmp64_hold;
-      SetConfDatabase(resv_cp);
+      conf->setat = tmp64_setat;
+      conf->hold = tmp64_hold;
+      SetConfDatabase(conf);
     }
     else
     {
       if ((conf = create_nick_resv(name, reason, 0)) == NULL)
         continue;
 
-      resv_np = map_to_conf(conf);
-      resv_np->setat = tmp64_setat;
-      resv_np->hold = tmp64_hold;
-      SetConfDatabase(resv_np);
+      conf->setat = tmp64_setat;
+      conf->hold = tmp64_hold;
+      SetConfDatabase(conf);
     }
 
     MyFree(name);
@@ -1002,8 +995,7 @@ save_xline_database(void)
   uint32_t records = 0;
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
-  struct ConfItem *conf = NULL;
-  struct MatchItem *xconf = NULL;
+  struct MaskItem *conf = NULL;
 
   if (!(f = open_db("xline", XPATH, "w", KLINE_DB_VERSION)))
     return;
@@ -1012,7 +1004,7 @@ save_xline_database(void)
   {
     conf = ptr->data;
 
-    if (IsConfDatabase(xconf))
+    if (IsConfDatabase(conf))
       ++records;
   }
 
@@ -1021,15 +1013,14 @@ save_xline_database(void)
   DLINK_FOREACH(ptr, xconf_items.head)
   {
     conf = ptr->data;
-    xconf = map_to_conf(conf);
 
-    if (!IsConfDatabase(xconf))
+    if (!IsConfDatabase(conf))
       continue;
 
     SAFE_WRITE(write_string(conf->name, f), XPATH);
-    SAFE_WRITE(write_string(xconf->reason, f), XPATH);
-    SAFE_WRITE(write_uint64(xconf->setat, f), XPATH);
-    SAFE_WRITE(write_uint64(xconf->hold, f), XPATH);
+    SAFE_WRITE(write_string(conf->reason, f), XPATH);
+    SAFE_WRITE(write_uint64(conf->setat, f), XPATH);
+    SAFE_WRITE(write_uint64(conf->hold, f), XPATH);
   }
 
   close_db(f);
@@ -1044,8 +1035,7 @@ load_xline_database(void)
   struct dbFILE *f = NULL;
   char *name = NULL;
   char *reason = NULL;
-  struct ConfItem *conf = NULL;
-  struct MatchItem *xconf = NULL;
+  struct MaskItem *conf = NULL;
 
   if (!(f = open_db("xline", XPATH, "r", KLINE_DB_VERSION)))
     return;
@@ -1065,15 +1055,14 @@ load_xline_database(void)
     SAFE_READ(read_uint64(&tmp64_setat, f));
     SAFE_READ(read_uint64(&tmp64_hold, f));
 
-    conf = make_conf_item(XLINE_TYPE);
-    xconf = map_to_conf(conf);
+    conf = conf_make(CONF_XLINE);
 
-    SetConfDatabase(xconf);
+    SetConfDatabase(conf);
 
     conf->name = name;
-    xconf->reason = reason;
-    xconf->setat = tmp64_setat;
-    xconf->hold = tmp64_hold;
+    conf->reason = reason;
+    conf->setat = tmp64_setat;
+    conf->hold = tmp64_hold;
   }
 
   close_db(f);

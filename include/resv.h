@@ -25,28 +25,17 @@
 #ifndef INCLUDED_resv_h
 #define INCLUDED_resv_h
 
-struct ResvChannel
-{
-  dlink_node node;
-  struct ResvChannel *hnext;
-  time_t hold;          /* Hold action until this time (calendar time) */
-  time_t setat;
-  char name[CHANNELLEN + 1];
-  char *reason;
-  unsigned int flags;
-};
-
 extern dlink_list nresv_items;
 extern dlink_list resv_channel_list;
 
-extern struct ConfItem *create_channel_resv(char *, char *, int);
-extern struct ConfItem *create_nick_resv(char *, char *, int);
+extern struct MaskItem *create_channel_resv(char *, char *, int);
+extern struct MaskItem *create_nick_resv(char *, char *, int);
 
-extern int delete_channel_resv(struct ResvChannel *);
+extern int delete_channel_resv(struct MaskItem *);
 
 extern void clear_conf_resv(void);
 extern void report_resv(struct Client *);
 
 extern int valid_wild_card_simple(const char *);
-extern struct ResvChannel *match_find_resv(const char *);
+extern struct MaskItem *match_find_resv(const char *);
 #endif  /* INCLUDED_resv_h */

@@ -30,12 +30,12 @@
 #include "ircd.h"        /* me */
 #include "listener.h"    /* show_ports */
 #include "s_gline.h"
+#include "conf.h"
 #include "hostmask.h"
 #include "numeric.h"     /* ERR_xxx */
 #include "send.h"        /* sendto_one */
 #include "fdlist.h"      /* PF and friends */
 #include "s_bsd.h"       /* highest_fd */
-#include "conf.h"      /* AccessItem, report_configured_links */
 #include "s_misc.h"      /* serv_info */
 #include "s_serv.h"      /* hunt_server */
 #include "s_user.h"      /* show_opers */
@@ -291,9 +291,9 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   sendto_one(source_p, ":%s %d %s z :Resv channels %u(%lu) nicks %u(%lu)",
              me.name, RPL_STATSDEBUG, source_p->name,
              dlink_list_length(&resv_channel_list),
-             dlink_list_length(&resv_channel_list) * sizeof(struct ResvChannel),
+             dlink_list_length(&resv_channel_list) * sizeof(struct MaskItem),
              dlink_list_length(&nresv_items),
-             dlink_list_length(&nresv_items) * sizeof(struct MatchItem));
+             dlink_list_length(&nresv_items) * sizeof(struct MaskItem));
 
   sendto_one(source_p, ":%s %d %s z :Classes %u(%llu)",
              me.name, RPL_STATSDEBUG, source_p->name,
@@ -381,7 +381,7 @@ stats_dns_servers(struct Client *source_p)
 static void
 stats_connect(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, SERVER_TYPE);
+  report_confitem_types(source_p, CONF_SERVER);
 }
 
 /* stats_deny()
@@ -393,8 +393,7 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
 static void
 stats_deny(struct Client *source_p, int parc, char *parv[])
 {
-  struct ConfItem *conf;
-  struct AccessItem *aconf;
+  struct MaskItem *conf;
   dlink_node *ptr = NULL;
   unsigned int i = 0;
 
@@ -405,19 +404,17 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_DLINE)
-      {
-        aconf = arec->aconf;
+      if (arec->type != CONF_DLINE)
+        continue;
 
-        /* dont report a tdline as a dline */
-        if (aconf->hold)
-          continue;
+      conf = arec->conf;
 
-	conf = unmap_conf_item(aconf);
+      /* dont report a tdline as a dline */
+      if (conf->hold)
+        continue;
 
-        sendto_one(source_p, form_str(RPL_STATSDLINE),
-                   from, to, 'D', aconf->host, aconf->reason);
-      }
+      sendto_one(source_p, form_str(RPL_STATSDLINE),
+                 from, to, 'D', conf->host, conf->reason);
     }
   }
 }
@@ -431,8 +428,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_tdeny(struct Client *source_p, int parc, char *parv[])
 {
-  struct ConfItem *conf;
-  struct AccessItem *aconf;
+  struct MaskItem *conf = NULL;
   dlink_node *ptr = NULL;
   unsigned int i = 0;
 
@@ -443,19 +439,17 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_DLINE)
-      {
-        aconf = arec->aconf;
+      if (arec->type != CONF_DLINE)
+        continue;
 
-        /* dont report a permanent dline as a tdline */
-        if (!aconf->hold)
-          continue;
+      conf = arec->conf;
 
-        conf = unmap_conf_item(aconf);
+      /* dont report a permanent dline as a tdline */
+      if (!conf->hold)
+        continue;
 
-        sendto_one(source_p, form_str(RPL_STATSDLINE),
-                   from, to, 'd', aconf->host, aconf->reason);
-      }
+      sendto_one(source_p, form_str(RPL_STATSDLINE),
+                 from, to, 'd', conf->host, conf->reason);
     }
   }
 }
@@ -469,8 +463,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_exempt(struct Client *source_p, int parc, char *parv[])
 {
-  struct ConfItem *conf;
-  struct AccessItem *aconf;
+  struct MaskItem *conf;
   dlink_node *ptr = NULL;
   unsigned int i = 0;
 
@@ -488,16 +481,13 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_EXEMPTDLINE)
-      {
-        aconf = arec->aconf;
+      if (arec->type != CONF_EXEMPT)
+        continue;
 
-        conf = unmap_conf_item(aconf);
+      conf = arec->conf;
 
-        sendto_one(source_p, form_str(RPL_STATSDLINE),
-                   from, to, 'e', aconf->host, 
-		   aconf->reason);
-      }
+      sendto_one(source_p, form_str(RPL_STATSDLINE),
+                 from, to, 'e', conf->host, conf->reason /* XXX */);
     }
   }
 }
@@ -624,13 +614,13 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
 
       if (arec->type == CONF_GLINE)
       {
-        const struct AccessItem *aconf = arec->aconf;
+        const struct MaskItem *conf = arec->conf;
 
         sendto_one(source_p, form_str(RPL_STATSKLINE),
                    from, to, "G",
-                   aconf->host ? aconf->host : "*",
-                   aconf->user ? aconf->user : "*",
-                   aconf->reason ? aconf->reason : "No reason");
+                   conf->host ? conf->host : "*",
+                   conf->user ? conf->user : "*",
+                   conf->reason ? conf->reason : "No reason");
       }
     }
   }
@@ -639,49 +629,48 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
 static void
 stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, HUB_TYPE);
-  report_confitem_types(source_p, LEAF_TYPE);
+  report_confitem_types(source_p, CONF_HUB);
 }
 
 /*
  * show_iline_prefix()
  *
  * inputs       - pointer to struct Client requesting output
- *              - pointer to struct AccessItem 
+ *              - pointer to struct MaskItem 
  *              - name to which iline prefix will be prefixed to
  * output       - pointer to static string with prefixes listed in ascii form
  * side effects - NONE
  */
 static const char *
-show_iline_prefix(struct Client *sptr, struct AccessItem *aconf, const char *name)
+show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
 {
   static char prefix_of_host[USERLEN + 14];
   char *prefix_ptr = prefix_of_host;
 
-  if (IsNoTilde(aconf))
+  if (IsNoTilde(conf))
     *prefix_ptr++ = '-';
-  if (IsLimitIp(aconf))
+  if (IsLimitIp(conf))
     *prefix_ptr++ = '!';
-  if (IsNeedIdentd(aconf))
+  if (IsNeedIdentd(conf))
     *prefix_ptr++ = '+';
-  if (!IsNeedPassword(aconf))
+  if (!IsNeedPassword(conf))
     *prefix_ptr++ = '&';
-  if (IsConfExemptResv(aconf))
+  if (IsConfExemptResv(conf))
     *prefix_ptr++ = '$';
-  if (IsNoMatchIp(aconf))
+  if (IsNoMatchIp(conf))
     *prefix_ptr++ = '%';
-  if (IsConfDoSpoofIp(aconf))
+  if (IsConfDoSpoofIp(conf))
     *prefix_ptr++ = '=';
-  if (MyOper(sptr) && IsConfExemptKline(aconf))
+  if (MyOper(sptr) && IsConfExemptKline(conf))
     *prefix_ptr++ = '^';
-  if (MyOper(sptr) && IsConfExemptGline(aconf))
+  if (MyOper(sptr) && IsConfExemptGline(conf))
     *prefix_ptr++ = '_';
-  if (MyOper(sptr) && IsConfExemptLimits(aconf))
+  if (MyOper(sptr) && IsConfExemptLimits(conf))
     *prefix_ptr++ = '>';
-  if (IsConfCanFlood(aconf))
+  if (IsConfCanFlood(conf))
     *prefix_ptr++ = '|';
 
-  strlcpy(prefix_ptr, name, USERLEN+1);
+  strlcpy(prefix_ptr, conf->user, USERLEN+1);
 
   return prefix_of_host;
 }
@@ -689,8 +678,7 @@ show_iline_prefix(struct Client *sptr, struct AccessItem *aconf, const char *nam
 static void
 report_auth(struct Client *client_p, int parc, char *parv[])
 {
-  struct ConfItem *conf;
-  struct AccessItem *aconf;
+  struct MaskItem *conf = NULL;
   dlink_node *ptr = NULL;
   unsigned int i;
 
@@ -701,35 +689,33 @@ report_auth(struct Client *client_p, int parc, char *parv[])
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_CLIENT)
-      {
-        aconf = arec->aconf;
+      if (arec->type != CONF_CLIENT)
+        continue;
 
-        if (!MyOper(client_p) && IsConfDoSpoofIp(aconf))
-          continue;
+      conf = arec->conf;
 
-        conf = unmap_conf_item(aconf);
+      if (!MyOper(client_p) && IsConfDoSpoofIp(conf))
+        continue;
 
-        /* We are doing a partial list, based on what matches the u@h of the
-         * sender, so prepare the strings for comparing --fl_
-         */
-        if (ConfigFileEntry.hide_spoof_ips)
-          sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
-                     client_p->name, 'I',
-                     conf->name == NULL ? "*" : conf->name,
-                     show_iline_prefix(client_p, aconf, aconf->user),
-                     IsConfDoSpoofIp(aconf) ? "255.255.255.255" :
-                     aconf->host, aconf->port,
-                     aconf->class_ptr ? aconf->class_ptr->name : "<default>");
+      /* We are doing a partial list, based on what matches the u@h of the
+       * sender, so prepare the strings for comparing --fl_
+       */
+      if (ConfigFileEntry.hide_spoof_ips)
+        sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
+                   client_p->name, 'I',
+                   conf->name == NULL ? "*" : conf->name,
+                   show_iline_prefix(client_p, conf),
+                   IsConfDoSpoofIp(conf) ? "255.255.255.255" :
+                   conf->host, conf->port,
+                   conf->class ? conf->class->name : "<default>");
 
-        else
-          sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
-                     client_p->name, 'I',
-                     conf->name == NULL ? "*" : conf->name,
-                     show_iline_prefix(client_p, aconf, aconf->user),
-                     aconf->host, aconf->port,
-                     aconf->class_ptr ? aconf->class_ptr->name : "<default>");
-      }
+      else
+        sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
+                   client_p->name, 'I',
+                   conf->name == NULL ? "*" : conf->name,
+                   show_iline_prefix(client_p, conf),
+                   conf->host, conf->port,
+                   conf->class ? conf->class->name : "<default>");
     }
   }
 }
@@ -745,30 +731,27 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
   /* If unopered, Only return matching auth blocks */
   else if ((ConfigFileEntry.stats_i_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
   {
-    struct ConfItem *conf;
-    struct AccessItem *aconf;
+    struct MaskItem *conf;
 
     if (MyConnect(source_p))
-      aconf = find_conf_by_address(source_p->host,
+      conf = find_conf_by_address(source_p->host,
                                    &source_p->localClient->ip,
 				   CONF_CLIENT,
 				   source_p->localClient->aftype,
 				   source_p->username,
                                    source_p->localClient->passwd, 1);
     else
-      aconf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT,
+      conf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT,
                                    0, source_p->username, NULL, 1);
 
-    if (aconf == NULL)
+    if (conf == NULL)
       return;
-
-    conf = unmap_conf_item(aconf);
 
     sendto_one(source_p, form_str(RPL_STATSILINE), from,
                to, 'I',
-	       "*", show_iline_prefix(source_p, aconf, aconf->user), 
-	       aconf->host, aconf->port,
-	       aconf->class_ptr ? aconf->class_ptr->name : "<default>");
+	       "*", show_iline_prefix(source_p, conf),
+	       conf->host, conf->port,
+	       conf->class ? conf->class->name : "<default>");
   }
   /* They are opered, or allowed to see all auth blocks */
   else
@@ -785,7 +768,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
 static void
 report_Klines(struct Client *client_p, int tkline)
 {
-  struct AccessItem *aconf = NULL;
+  struct MaskItem *conf = NULL;
   unsigned int i = 0;
   const char *p = NULL;
   dlink_node *ptr = NULL;
@@ -801,22 +784,22 @@ report_Klines(struct Client *client_p, int tkline)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (arec->type == CONF_KLINE)
-      {
-        aconf = arec->aconf;
+      if (arec->type != CONF_KLINE)
+        continue;
 
-        if (!tkline && aconf->hold)
-          continue;
+      conf = arec->conf;
 
-        if (HasUMode(client_p, UMODE_OPER))
-          sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
-                     client_p->name, p, aconf->host, aconf->user,
-                     aconf->reason);
-        else
-          sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
-                     client_p->name, p, aconf->host, aconf->user,
-                     aconf->reason);
-      }
+      if (!tkline && conf->hold)
+        continue;
+
+      if (HasUMode(client_p, UMODE_OPER))
+        sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
+                   client_p->name, p, conf->host, conf->user,
+                   conf->reason);
+      else
+        sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
+                   client_p->name, p, conf->host, conf->user,
+                   conf->reason);
     }
   }
 }
@@ -832,27 +815,27 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
   /* If unopered, Only return matching klines */
   else if ((ConfigFileEntry.stats_k_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
   {
-    struct AccessItem *aconf = NULL;
+    struct MaskItem *conf = NULL;
 
     if (MyConnect(source_p))
-      aconf = find_conf_by_address(source_p->host,
-                                   &source_p->localClient->ip,
+      conf = find_conf_by_address(source_p->host,
+                                  &source_p->localClient->ip,
 				   CONF_KLINE,
 				   source_p->localClient->aftype,
 				   source_p->username, NULL, 1);
     else
-      aconf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
+      conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
                                    0, source_p->username, NULL, 1);
 
-    if (aconf == NULL)
+    if (!conf)
       return;
 
     /* dont report a permanent kline as a tkline */
-    if (!aconf->hold)
+    if (!conf->hold)
       return;
 
     sendto_one(source_p, form_str(RPL_STATSKLINE), from,
-               to, "k", aconf->host, aconf->user, aconf->reason);
+               to, "k", conf->host, conf->user, conf->reason);
   }
   /* Theyre opered, or allowed to see all klines */
   else {
@@ -871,33 +854,33 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
   /* If unopered, Only return matching klines */
   else if ((ConfigFileEntry.stats_k_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
   {
-    struct AccessItem *aconf = NULL;
+    struct MaskItem *conf = NULL;
 
     /* search for a kline */
     if (MyConnect(source_p))
-      aconf = find_conf_by_address(source_p->host,
+      conf = find_conf_by_address(source_p->host,
                                    &source_p->localClient->ip,
 				   CONF_KLINE,
 				   source_p->localClient->aftype,
 				   source_p->username, NULL, 0);
     else
-      aconf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
+      conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
                                    0, source_p->username, NULL, 0);
 
-    if (aconf == NULL)
+    if (!conf)
       return;
 
     /* dont report a tkline as a kline */
-    if (aconf->hold)
+    if (conf->hold)
       return;
       
     sendto_one(source_p, form_str(RPL_STATSKLINE), from,
-               to, "K", aconf->host, aconf->user, aconf->reason);
+               to, "K", conf->host, conf->user, conf->reason);
   }
   /* Theyre opered, or allowed to see all klines */
   else {
     report_Klines(source_p, 0);
-    report_confitem_types(source_p, RKLINE_TYPE);
+    report_confitem_types(source_p, CONF_RKLINE);
   }
 }
 
@@ -914,7 +897,7 @@ stats_oper(struct Client *source_p, int parc, char *parv[])
     sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
                from, to);
   else
-    report_confitem_types(source_p, OPER_TYPE);
+    report_confitem_types(source_p, CONF_OPER);
 }
 
 /* stats_operedup()
@@ -973,7 +956,7 @@ stats_resv(struct Client *source_p, int parc, char *parv[])
 static void
 stats_service(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, SERVICE_TYPE);
+  report_confitem_types(source_p, CONF_SERVICE);
 }
 
 static void
@@ -1063,7 +1046,7 @@ stats_uptime(struct Client *source_p, int parc, char *parv[])
 static void
 stats_shared(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, ULINE_TYPE);
+  report_confitem_types(source_p, CONF_ULINE);
 }
 
 /* stats_servers()
@@ -1094,14 +1077,14 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
 static void
 stats_gecos(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, XLINE_TYPE);
-  report_confitem_types(source_p, RXLINE_TYPE);
+  report_confitem_types(source_p, CONF_XLINE);
+  report_confitem_types(source_p, CONF_RXLINE);
 }
 
 static void
 stats_class(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, CLASS_TYPE);
+  report_confitem_types(source_p, CONF_CLASS);
 }
 
 static void

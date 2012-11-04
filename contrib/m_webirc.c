@@ -93,8 +93,7 @@ invalid_hostname(const char *hostname)
 static void
 mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-  struct AccessItem *aconf = NULL;
-  struct ConfItem *conf = NULL;
+  struct MaskItem *conf = NULL;
   struct addrinfo hints, *res;
 
   assert(source_p == client_p);
@@ -106,30 +105,28 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
     return;
   }
 
-  aconf = find_address_conf(source_p->host,
-                            IsGotId(source_p) ? source_p->username : "webirc",
-                            &source_p->localClient->ip,
-                            source_p->localClient->aftype, parv[1]);
-  if (aconf == NULL || !IsConfClient(aconf))
+  conf = find_address_conf(source_p->host,
+                           IsGotId(source_p) ? source_p->username : "webirc",
+                           &source_p->localClient->ip,
+                           source_p->localClient->aftype, parv[1]);
+  if (conf == NULL || !IsConfClient(conf))
     return;
 
-  conf = unmap_conf_item(aconf);
-
-  if (!IsConfDoSpoofIp(aconf) || irccmp(conf->name, "webirc."))
+  if (!IsConfDoSpoofIp(conf) || irccmp(conf->name, "webirc."))
   {
     sendto_one(source_p, ":%s NOTICE %s :Not a CGI:IRC auth block", me.name,
                source_p->name[0] ? source_p->name : "*");
     return;
   }
 
-  if (EmptyString(aconf->passwd))
+  if (EmptyString(conf->passwd))
   {
     sendto_one(source_p, ":%s NOTICE %s :CGI:IRC auth blocks must have a password",
                me.name, source_p->name[0] ? source_p->name : "*");
     return;
   }
 
-  if (!match_conf_password(parv[1], aconf))
+  if (!match_conf_password(parv[1], conf))
   {
     sendto_one(source_p, ":%s NOTICE %s :CGI:IRC password incorrect",
                me.name, source_p->name[0] ? source_p->name : "*");
@@ -166,10 +163,10 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
     strlcpy(source_p->host, source_p->sockhost, sizeof(source_p->host));
 
   /* Check dlines now, k/glines will be checked on registration */
-  if ((aconf = find_dline_conf(&client_p->localClient->ip,
-                                client_p->localClient->aftype)))
+  if ((conf = find_dline_conf(&client_p->localClient->ip,
+                               client_p->localClient->aftype)))
   {
-    if (!(aconf->status & CONF_EXEMPTDLINE))
+    if (!(conf->status & CONF_EXEMPTDLINE))
     {
       exit_client(client_p, &me, "D-lined");
       return;

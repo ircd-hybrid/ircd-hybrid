@@ -28,6 +28,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
+#include "conf.h"
 #include "hostmask.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -37,7 +38,6 @@
 #include "s_user.h"
 #include "send.h"
 #include "whowas.h"
-#include "conf.h"             /* ConfigFileEntry, ConfigChannel */
 #include "event.h"
 #include "memory.h"
 #include "balloc.h"

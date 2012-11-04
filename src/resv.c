@@ -47,11 +47,10 @@ dlink_list resv_channel_list = { NULL, NULL, 0 };
  * output	- pointer to struct ResvChannel
  * side effects	-
  */
-struct ConfItem *
+struct MaskItem *
 create_channel_resv(char *name, char *reason, int in_conf)
 {
-  struct ConfItem *conf = NULL;
-  struct ResvChannel *resv_p = NULL;
+  struct MaskItem *conf = NULL;
 
   if (name == NULL || reason == NULL)
     return NULL;
@@ -62,15 +61,13 @@ create_channel_resv(char *name, char *reason, int in_conf)
   if (strlen(reason) > REASONLEN)
     reason[REASONLEN] = '\0';
 
-  conf = make_conf_item(CRESV_TYPE);
-  resv_p = map_to_conf(conf);
+  conf = conf_make(CONF_CRESV);
 
-  strlcpy(resv_p->name, name, sizeof(resv_p->name));
   DupString(conf->name, name);
-  DupString(resv_p->reason, reason);
+  DupString(conf->reason, reason);
 
-  dlinkAdd(resv_p, &resv_p->node, &resv_channel_list);
-  hash_add_resv(resv_p);
+  dlinkAdd(conf, &conf->node, &resv_channel_list);
+  hash_add_resv(conf);
 
   return conf;
 }
@@ -83,26 +80,24 @@ create_channel_resv(char *name, char *reason, int in_conf)
  * output	- pointer to struct ResvNick
  * side effects	-
  */
-struct ConfItem *
+struct MaskItem *
 create_nick_resv(char *name, char *reason, int in_conf)
 {
-  struct ConfItem *conf = NULL;
-  struct MatchItem *resv_p = NULL;
+  struct MaskItem *conf = NULL;
 
   if (name == NULL || reason == NULL)
     return NULL;
 
-  if (find_matching_name_conf(NRESV_TYPE, name, NULL, NULL, 0))
+  if (find_matching_name_conf(CONF_NRESV, name, NULL, NULL, 0))
     return NULL;
 
   if (strlen(reason) > REASONLEN)
     reason[REASONLEN] = '\0';
 
-  conf = make_conf_item(NRESV_TYPE);
-  resv_p = map_to_conf(conf);
+  conf = conf_make(CONF_NRESV);
 
   DupString(conf->name, name);
-  DupString(resv_p->reason, reason);
+  DupString(conf->reason, reason);
 
   return conf;
 }
@@ -120,10 +115,10 @@ clear_conf_resv(void)
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, resv_channel_list.head)
   {
-    struct ResvChannel *resv_p = ptr->data;
+    struct MaskItem *conf = ptr->data;
 
-    if (!IsConfDatabase(resv_p))
-      delete_channel_resv(resv_p);
+    if (!IsConfDatabase(conf))
+      delete_channel_resv(conf);
   }
 }
 
@@ -134,16 +129,11 @@ clear_conf_resv(void)
  * side effects	- given struct ResvChannel * is removed
  */
 int
-delete_channel_resv(struct ResvChannel *resv_p)
+delete_channel_resv(struct MaskItem *conf)
 {
-  struct ConfItem *conf = NULL;
-  assert(resv_p != NULL);
-
-  hash_del_resv(resv_p);
-  dlinkDelete(&resv_p->node, &resv_channel_list);
-  MyFree(resv_p->reason);
-  conf = unmap_conf_item(resv_p);
-  delete_conf_item(conf);
+  hash_del_resv(conf);
+  dlinkDelete(&conf->node, &resv_channel_list);
+  conf_free(conf);
 
   return 1;
 }
@@ -155,7 +145,7 @@ delete_channel_resv(struct ResvChannel *resv_p)
  * side effects - Finds a reserved channel whose name matches 'name',
  *                if can't find one returns NULL.
  */
-struct ResvChannel *
+struct MaskItem *
 match_find_resv(const char *name)
 {
   dlink_node *ptr = NULL;
@@ -165,10 +155,10 @@ match_find_resv(const char *name)
 
   DLINK_FOREACH(ptr, resv_channel_list.head)
   {
-    struct ResvChannel *chptr = ptr->data;
+    struct MaskItem *conf = ptr->data;
 
-    if (match_chan(name, chptr->name))
-      return chptr;
+    if (match_chan(name, conf->name))
+      return conf;
   }
 
   return NULL;
@@ -183,29 +173,25 @@ match_find_resv(const char *name)
 void
 report_resv(struct Client *source_p)
 {
-  dlink_node *ptr;
-  struct ConfItem *conf;
-  struct ResvChannel *resv_cp;
-  struct MatchItem *resv_np;
+  dlink_node *ptr = NULL;
+  struct MaskItem *conf = NULL;
 
   DLINK_FOREACH(ptr, resv_channel_list.head)
   {
-    resv_cp = ptr->data;
+    conf = ptr->data;
     sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
-	       resv_cp->hold ? 'q' : 'Q',
-	       resv_cp->name, resv_cp->reason);
+	       conf->hold ? 'q' : 'Q',
+	       conf->name, conf->reason);
   }
 
   DLINK_FOREACH(ptr, nresv_items.head)
   {
-    conf = ptr->data;
-    resv_np = map_to_conf(conf);
-
+    conf = ptr->data;;
     sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
-	       resv_np->hold ? 'q' : 'Q',
-	       conf->name, resv_np->reason);
+	       conf->hold ? 'q' : 'Q',
+	       conf->name, conf->reason);
   }
 }
 

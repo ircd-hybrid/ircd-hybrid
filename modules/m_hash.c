@@ -32,7 +32,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_user.h"
-#include "resv.h"
+#include "conf.h"
 #include "userhost.h"
 
 
@@ -48,7 +48,7 @@ mo_hash(struct Client *client_p, struct Client *source_p,
   struct Client *icl;
   struct Channel *ch;
   struct UserHost *ush;
-  struct ResvChannel *rch;
+  struct MaskItem *rch;
 
   for (i = 0; i < HASHSIZE; ++i)
   {

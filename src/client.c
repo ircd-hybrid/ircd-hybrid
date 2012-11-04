@@ -74,7 +74,7 @@ static dlink_node *eac_next;  /* next aborted client to exit */
 
 static void check_pings_list(dlink_list *);
 static void check_unknowns_list(void);
-static void ban_them(struct Client *, struct ConfItem *);
+static void ban_them(struct Client *, struct MaskItem *);
 
 
 /* init_client()
@@ -254,7 +254,7 @@ check_pings_list(dlink_list *list)
     if (!IsRegistered(client_p))
       ping = CONNECTTIMEOUT, pingwarn = 0;
     else
-      ping = get_client_ping(client_p, &pingwarn);
+      ping = get_client_ping(&client_p->localClient->confs, &pingwarn);
 
     if (ping < CurrentTime - client_p->localClient->lasttime)
     {
@@ -352,8 +352,7 @@ void
 check_conf_klines(void)
 {               
   struct Client *client_p = NULL;       /* current local client_p being examined */
-  struct AccessItem *aconf = NULL;
-  struct ConfItem *conf = NULL;
+  struct MaskItem *conf = NULL;
   dlink_node *ptr, *next_ptr;
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, local_client_list.head)
@@ -365,19 +364,17 @@ check_conf_klines(void)
     if (IsDead(client_p) || !IsClient(client_p))
       continue;
 
-    /* if there is a returned struct ConfItem then kill it */
-    if ((aconf = find_dline_conf(&client_p->localClient->ip,
+    if ((conf = find_dline_conf(&client_p->localClient->ip,
                                   client_p->localClient->aftype)) != NULL)
     {
-      if (aconf->status & CONF_EXEMPTDLINE)
+      if (conf->status & CONF_EXEMPT)
 	continue;
 
-      conf = unmap_conf_item(aconf);
       ban_them(client_p, conf);
       continue; /* and go examine next fd/client_p */
     }
 
-    if (ConfigFileEntry.glines && (aconf = find_gline(client_p)))
+    if (ConfigFileEntry.glines && (conf = find_gline(client_p)))
     {
       if (IsExemptKline(client_p) ||
           IsExemptGline(client_p))
@@ -388,16 +385,13 @@ check_conf_klines(void)
         continue;
       }
 
-      conf = unmap_conf_item(aconf);
       ban_them(client_p, conf);
       /* and go examine next fd/client_p */    
       continue;
     } 
 
-    if ((aconf = find_kill(client_p)) != NULL) 
+    if ((conf = find_kill(client_p)) != NULL) 
     {
-
-      /* if there is a returned struct AccessItem.. then kill it */
       if (IsExemptKline(client_p))
       {
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -406,15 +400,13 @@ check_conf_klines(void)
         continue;
       }
 
-      conf = unmap_conf_item(aconf);
       ban_them(client_p, conf);
       continue; 
     }
 
-    /* if there is a returned struct MatchItem then kill it */
-    if ((conf = find_matching_name_conf(XLINE_TYPE,  client_p->info,
+    if ((conf = find_matching_name_conf(CONF_XLINE,  client_p->info,
                                         NULL, NULL, 0)) != NULL ||
-        (conf = find_matching_name_conf(RXLINE_TYPE, client_p->info,
+        (conf = find_matching_name_conf(CONF_RXLINE, client_p->info,
                                         NULL, NULL, 0)) != NULL)
     {
       ban_them(client_p, conf);
@@ -427,10 +419,10 @@ check_conf_klines(void)
   {
     client_p = ptr->data;
 
-    if ((aconf = find_dline_conf(&client_p->localClient->ip,
-                                  client_p->localClient->aftype)))
+    if ((conf = find_dline_conf(&client_p->localClient->ip,
+                                 client_p->localClient->aftype)))
     {
-      if (aconf->status & CONF_EXEMPTDLINE)
+      if (conf->status & CONF_EXEMPT)
         continue;
 
       exit_client(client_p, &me, "D-lined");
@@ -442,16 +434,14 @@ check_conf_klines(void)
  * ban_them
  *
  * inputs	- pointer to client to ban
- * 		- pointer to ConfItem
+ * 		- pointer to MaskItem
  * output	- NONE
  * side effects	- given client_p is banned
  */
 static void
-ban_them(struct Client *client_p, struct ConfItem *conf)
+ban_them(struct Client *client_p, struct MaskItem *conf)
 {
   const char *user_reason = NULL;	/* What is sent to user */
-  struct AccessItem *aconf = NULL;
-  struct MatchItem *xconf = NULL;
   const char *type_string = NULL;
   const char dline_string[] = "D-line";
   const char kline_string[] = "K-line";
@@ -460,34 +450,27 @@ ban_them(struct Client *client_p, struct ConfItem *conf)
 
   switch (conf->type)
   {
-    case RKLINE_TYPE:
-    case KLINE_TYPE:
+    case CONF_RKLINE:
+    case CONF_KLINE:
       type_string = kline_string;
-      aconf = map_to_conf(conf);
       break;
-    case DLINE_TYPE:
+    case CONF_DLINE:
       type_string = dline_string;
-      aconf = map_to_conf(conf);
       break;
-    case GLINE_TYPE:
+    case CONF_GLINE:
       type_string = gline_string;
-      aconf = map_to_conf(conf);
       break;
-    case RXLINE_TYPE:
-    case XLINE_TYPE:
+    case CONF_RXLINE:
+    case CONF_XLINE:
       type_string = xline_string;
-      xconf = map_to_conf(conf);
-      ++xconf->count;
+      ++conf->count;
       break;
     default:
       assert(0);
       break;
   }
 
-  if (aconf != NULL)
-    user_reason = aconf->reason ? aconf->reason : type_string;
-  if (xconf != NULL)
-    user_reason = xconf->reason ? xconf->reason : type_string;
+  user_reason = conf->reason ? conf->reason : type_string;
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s active for %s",
                        type_string, get_client_name(client_p, HIDE_IP));

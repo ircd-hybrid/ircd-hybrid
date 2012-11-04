@@ -36,6 +36,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
+#include "conf_class.h"
 
 
 static void report_this_status(struct Client *, struct Client *, int);
@@ -142,7 +143,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
   const char *class_name;
 
   name = get_client_name(target_p, HIDE_IP);
-  class_name = get_client_class(target_p);
+  class_name = get_client_class(&target_p->localClient->confs);
 
   set_time();
 

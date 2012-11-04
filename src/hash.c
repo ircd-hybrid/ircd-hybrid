@@ -57,7 +57,7 @@ static struct Client *idTable[HASHSIZE];
 static struct Client *clientTable[HASHSIZE];
 static struct Channel *channelTable[HASHSIZE];
 static struct UserHost *userhostTable[HASHSIZE];
-static struct ResvChannel *resvchannelTable[HASHSIZE];
+static struct MaskItem *resvchannelTable[HASHSIZE];
 
 
 /* init_hash()
@@ -153,12 +153,12 @@ hash_add_channel(struct Channel *chptr)
 }
 
 void
-hash_add_resv(struct ResvChannel *chptr)
+hash_add_resv(struct MaskItem *conf)
 {
-  unsigned int hashv = strhash(chptr->name);
+  unsigned int hashv = strhash(conf->name);
 
-  chptr->hnext = resvchannelTable[hashv];
-  resvchannelTable[hashv] = chptr;
+  conf->hnext = resvchannelTable[hashv];
+  resvchannelTable[hashv] = conf;
 }
 
 void
@@ -305,10 +305,10 @@ hash_del_channel(struct Channel *chptr)
 }
 
 void
-hash_del_resv(struct ResvChannel *chptr)
+hash_del_resv(struct MaskItem *chptr)
 {
   unsigned int hashv = strhash(chptr->name);
-  struct ResvChannel *tmp = resvchannelTable[hashv];
+  struct MaskItem *tmp = resvchannelTable[hashv];
 
   if (tmp != NULL)
   {
@@ -511,17 +511,17 @@ hash_get_bucket(int type, unsigned int hashv)
  *                if can't find one returns NULL, if can find it moves
  *                it to the top of the list and returns it.
  */
-struct ResvChannel *
+struct MaskItem *
 hash_find_resv(const char *name)
 {
   unsigned int hashv = strhash(name);
-  struct ResvChannel *chptr;
+  struct MaskItem *chptr;
 
   if ((chptr = resvchannelTable[hashv]) != NULL)
   {
     if (irccmp(name, chptr->name))
     {
-      struct ResvChannel *prev;
+      struct MaskItem *prev;
 
       while (prev = chptr, (chptr = chptr->hnext) != NULL)
       {
@@ -769,7 +769,7 @@ delete_user_host(const char *user, const char *host, int global)
 static int
 exceeding_sendq(struct Client *to)
 {
-  if (dbuf_length(&to->localClient->buf_sendq) > (get_sendq(to) / 2))
+  if (dbuf_length(&to->localClient->buf_sendq) > (get_sendq(&to->localClient->confs) / 2))
     return 1;
   else
     return 0;

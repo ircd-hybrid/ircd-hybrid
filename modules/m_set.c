@@ -138,19 +138,16 @@ list_quote_commands(struct Client *source_p)
 static void
 quote_autoconn(struct Client *source_p, const char *arg, int newval)
 {
-  struct AccessItem *aconf;
-
   if (arg != NULL)
   {
-    struct ConfItem *conf = find_exact_name_conf(SERVER_TYPE, NULL, arg, NULL, NULL);
+    struct MaskItem *conf = find_exact_name_conf(CONF_SERVER, NULL, arg, NULL, NULL);
 
     if (conf != NULL)
     {
-      aconf = map_to_conf(conf);
       if (newval)
-        SetConfAllowAutoConn(aconf);
+        SetConfAllowAutoConn(conf);
       else
-        ClearConfAllowAutoConn(aconf);
+        ClearConfAllowAutoConn(conf);
 
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has changed AUTOCONN for %s to %i",

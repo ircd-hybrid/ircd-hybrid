@@ -74,7 +74,7 @@ ms_locops(struct Client *client_p, struct Client *source_p,
   if (!IsClient(source_p) || !match(parv[1], me.name))
     return;
 
-  if (find_matching_name_conf(ULINE_TYPE, source_p->servptr->name,
+  if (find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               "*", "*", SHARED_LOCOPS))
     sendto_wallops_flags(UMODE_LOCOPS, source_p, "SLOCOPS - %s", parv[2]);
 }

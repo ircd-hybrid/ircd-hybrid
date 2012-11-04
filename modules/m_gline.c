@@ -32,10 +32,10 @@
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
+#include "conf.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "s_bsd.h"
-#include "conf.h"
 #include "s_misc.h"
 #include "send.h"
 #include "s_serv.h"
@@ -62,25 +62,25 @@ set_local_gline(const struct Client *source_p, const char *user,
                 const char *host, const char *reason)
 {
   char buffer[IRCD_BUFSIZE];
-  struct AccessItem *aconf = map_to_conf(make_conf_item(GLINE_TYPE));
+  struct MaskItem *conf = conf_make(CONF_GLINE);
 
   snprintf(buffer, sizeof(buffer), "%s (%s)", reason, smalldate(CurrentTime));
-  DupString(aconf->reason, buffer);
-  DupString(aconf->user, user);
-  DupString(aconf->host, host);
+  DupString(conf->reason, buffer);
+  DupString(conf->user, user);
+  DupString(conf->host, host);
 
-  aconf->setat = CurrentTime;
-  aconf->hold = CurrentTime + ConfigFileEntry.gline_time;
-  SetConfDatabase(aconf);
+  conf->setat = CurrentTime;
+  conf->hold = CurrentTime + ConfigFileEntry.gline_time;
+  SetConfDatabase(conf);
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "%s added G-Line for [%s@%s] [%s]",
                        get_oper_name(source_p),
-                       aconf->user, aconf->host, aconf->reason);
+                       conf->user, conf->host, conf->reason);
   ilog(LOG_TYPE_GLINE, "%s added G-Line for [%s@%s] [%s]",
-       get_oper_name(source_p), aconf->user, aconf->host, aconf->reason);
+       get_oper_name(source_p), conf->user, conf->host, conf->reason);
 
-  add_conf_by_address(CONF_GLINE, aconf);
+  add_conf_by_address(CONF_GLINE, conf);
   rehashed_klines = 1;
 }
 
@@ -93,7 +93,7 @@ static int
 remove_gline_match(const char *user, const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
-  struct AccessItem *aconf;
+  struct MaskItem *conf;
   int t;
 
   if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
@@ -112,11 +112,11 @@ remove_gline_match(const char *user, const char *host)
     piphost = NULL;
   }
 
-  if ((aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0)))
+  if ((conf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0)))
   {
-    if (IsConfDatabase(aconf))
+    if (IsConfDatabase(conf))
     {
-      delete_one_address_conf(host, aconf);
+      delete_one_address_conf(host, conf);
       return 1;
     }
   }

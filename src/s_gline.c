@@ -27,8 +27,8 @@
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "hostmask.h"
 #include "conf.h"
+#include "hostmask.h"
 #include "s_misc.h"
 #include "send.h"
 #include "s_serv.h"
@@ -42,11 +42,11 @@ dlink_list pending_glines[GLINE_PENDING_ADD_TYPE + 1] = { { NULL, NULL, 0 },
 static void expire_pending_glines(struct gline_pending *);
 
 
-struct AccessItem *
+struct MaskItem *
 find_is_glined(const char *host, const char *user)
 {
   struct irc_ssaddr iphost, *piphost;
-  struct AccessItem *aconf;
+  struct MaskItem *conf = NULL;
   int t;
 
   if ((t = parse_netmask(host, &iphost, &t)) != HM_HOST)
@@ -65,8 +65,8 @@ find_is_glined(const char *host, const char *user)
     piphost = NULL;
   }
 
-  aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0);
-  return aconf;
+  conf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0);
+  return conf;
 }
 
 /* cleanup_glines()

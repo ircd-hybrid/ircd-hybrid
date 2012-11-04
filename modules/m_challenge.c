@@ -71,8 +71,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
             int parc, char *parv[])
 {
   char *challenge = NULL;
-  struct ConfItem *conf = NULL;
-  struct AccessItem *aconf = NULL;
+  struct MaskItem *conf = NULL;
 
   if (*parv[1] == '+')
   {
@@ -89,7 +88,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
       return;
     }
     
-    conf = find_exact_name_conf(OPER_TYPE, source_p,
+    conf = find_exact_name_conf(CONF_OPER, source_p,
                                 source_p->localClient->auth_oper, NULL, NULL);
     if (conf == NULL)
     {
@@ -124,25 +123,23 @@ m_challenge(struct Client *client_p, struct Client *source_p,
   source_p->localClient->response  = NULL;
   source_p->localClient->auth_oper = NULL;
 
-  if ((conf = find_conf_exact(OPER_TYPE,
-			      parv[1], source_p->username, source_p->host
-			      )) != NULL)
-    aconf = map_to_conf(conf);
-  else if ((conf = find_conf_exact(OPER_TYPE,
-				   parv[1], source_p->username,
-				   source_p->sockhost)) != NULL)
-    aconf = map_to_conf(conf);
+  if ((conf = find_conf_exact(CONF_OPER,
+			      parv[1], source_p->username, source_p->host)))
+    ;
+  else if ((conf = find_conf_exact(CONF_OPER, parv[1], source_p->username,
+				   source_p->sockhost)))
+    ;
 
-  if (aconf == NULL)
+  if (!conf)
   {
     sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
-    conf = find_exact_name_conf(OPER_TYPE, NULL, parv[1], NULL, NULL);
+    conf = find_exact_name_conf(CONF_OPER, NULL, parv[1], NULL, NULL);
     failed_challenge_notice(source_p, parv[1], (conf != NULL)
                             ? "host mismatch" : "no oper {} block");
     return;
   }
 
-  if (aconf->rsa_public_key == NULL)
+  if (conf->rsa_public_key == NULL)
   {
     sendto_one (source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
 		"is not enabled for your oper{} block.", me.name,
@@ -151,7 +148,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
   }
 
   if (!generate_challenge(&challenge, &(source_p->localClient->response),
-                          aconf->rsa_public_key))
+                          conf->rsa_public_key))
     sendto_one(source_p, form_str(RPL_RSACHALLENGE),
                me.name, source_p->name, challenge);
 

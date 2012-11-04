@@ -44,24 +44,24 @@ struct AddressRec
   {
     struct
     {
-      /* Pointer into AccessItem... -A1kmm */
+      /* Pointer into MaskItem... -A1kmm */
       struct irc_ssaddr addr;
       int bits;
     } ipa;
 
-    /* Pointer into AccessItem... -A1kmm */
+    /* Pointer into MaskItem... -A1kmm */
     const char *hostname;
   } Mask;
 
   /* type: CONF_CLIENT, CONF_DLINE, CONF_KLINE etc... -A1kmm */
-  unsigned int type;
+  enum maskitem_type type;
 
   /* Higher precedences overrule lower ones... */
   unsigned int precedence;
 
   /* Only checked if !(type & 1)... */
   const char *username;
-  struct AccessItem *aconf;
+  struct MaskItem *conf;
 
   dlink_node node;
 };
@@ -73,14 +73,14 @@ extern int match_ipv4(const struct irc_ssaddr *, const struct irc_ssaddr *, int)
 
 extern void mask_addr(struct irc_ssaddr *, int);
 extern void init_host_hash(void);
-extern void add_conf_by_address(const unsigned int, struct AccessItem *);
-extern void delete_one_address_conf(const char *, struct AccessItem *);
+extern void add_conf_by_address(const unsigned int, struct MaskItem *);
+extern void delete_one_address_conf(const char *, struct MaskItem *);
 extern void clear_out_address_conf(void);
 extern void hostmask_expire_temporary(void);
 
-extern struct AccessItem *find_address_conf(const char *, const char *,
+extern struct MaskItem *find_address_conf(const char *, const char *,
                                             struct irc_ssaddr *, int, char *);
-extern struct AccessItem *find_dline_conf(struct irc_ssaddr *, int);
-extern struct AccessItem *find_conf_by_address(const char *, struct irc_ssaddr *,
-                                               unsigned int, int, const char *, const char *, int);
+extern struct MaskItem *find_dline_conf(struct irc_ssaddr *, int);
+extern struct MaskItem *find_conf_by_address(const char *, struct irc_ssaddr *,
+                                             unsigned int, int, const char *, const char *, int);
 #endif /* INCLUDE_hostmask_h */

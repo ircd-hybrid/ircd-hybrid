@@ -36,6 +36,7 @@
 #include "ircd_signal.h"
 #include "s_gline.h"
 #include "motd.h"
+#include "conf.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "packet.h"
@@ -45,7 +46,6 @@
 #include "rng_mt.h"
 #include "s_auth.h"
 #include "s_bsd.h"
-#include "conf.h"
 #include "log.h"
 #include "s_misc.h"
 #include "s_serv.h"      /* try_connections */
@@ -60,6 +60,7 @@
 #include "supported.h"
 #include "watch.h"
 #include "conf_db.h"
+#include "conf_class.h"
 
 /* /quote set variables */
 struct SetOptions GlobalSetOptions;
@@ -556,7 +557,7 @@ main(int argc, char *argv[])
   init_ip_hash_table();      /* client host ip hash table */
   init_host_hash();          /* Host-hashtable. */
   init_client();
-  init_class();
+  class_init();
   whowas_init();
   watch_init();
   init_auth();          /* Initialise the auth code */

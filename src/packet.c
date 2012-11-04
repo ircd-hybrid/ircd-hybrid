@@ -364,7 +364,7 @@ read_packet(fde_t *fd, void *data)
     /* Check to make sure we're not flooding */
     if (!(IsServer(client_p) || IsHandshake(client_p) || IsConnecting(client_p))
         && (dbuf_length(&client_p->localClient->buf_recvq) >
-            get_recvq(client_p)))
+            get_recvq(&client_p->localClient->confs)))
     {
       if (!(ConfigFileEntry.no_oper_flood && HasUMode(client_p, UMODE_OPER)))
       {

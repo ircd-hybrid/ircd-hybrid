@@ -106,14 +106,14 @@ send_message(struct Client *to, char *buf, int len)
   assert(!IsMe(to));
   assert(to != &me);
 
-  if (dbuf_length(&to->localClient->buf_sendq) + len > get_sendq(to))
+  if (dbuf_length(&to->localClient->buf_sendq) + len > get_sendq(&to->localClient->confs))
   {
     if (IsServer(to))
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Max SendQ limit exceeded for %s: %lu > %lu",
                            get_client_name(to, HIDE_IP),
                            (unsigned long)(dbuf_length(&to->localClient->buf_sendq) + len),
-                           get_sendq(to));
+                           get_sendq(&to->localClient->confs));
     if (IsClient(to))
       SetSendQExceeded(to);
     dead_link_on_write(to, 0);

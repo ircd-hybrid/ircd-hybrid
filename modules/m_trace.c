@@ -35,6 +35,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
+#include "conf_class.h"
 
 
 static void do_actual_trace(struct Client *, int, char *[]);
@@ -163,8 +164,6 @@ static void
 do_actual_trace(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-  struct ConfItem *conf;
-  struct ClassItem *cltmp;
   int doall = 0;
   int wilds, dow;
   dlink_node *ptr;
@@ -207,19 +206,16 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
                               /* lets also do this for opers tracing nicks */
   {
     const char *name;
-    const char *class_name;
-
     target_p = hash_find_client(tname);
       
     if (target_p && IsClient(target_p)) 
     {
       name = get_client_name(target_p, HIDE_IP);
-      class_name = get_client_class(target_p);
 
       if (HasUMode(target_p, UMODE_OPER))
       {
         sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
-                   from, to, class_name, name, 
+                   from, to, get_client_class(&target_p->localClient->confs), name, 
                    IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
                    CurrentTime - target_p->localClient->lasttime,
                    CurrentTime - target_p->localClient->last_privmsg);
@@ -227,7 +223,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
       else
       {
         sendto_one(source_p,form_str(RPL_TRACEUSER),
-                   from, to, class_name, name, 
+                   from, to, get_client_class(&target_p->localClient->confs), name,
 		   IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
                    CurrentTime - target_p->localClient->lasttime,
                    CurrentTime - target_p->localClient->last_privmsg);
@@ -281,14 +277,13 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     report_this_status(source_p, target_p, dow);
   }
 
-  DLINK_FOREACH(ptr, class_items.head)
+  DLINK_FOREACH(ptr, class_get_list()->head)
   {
-    conf = ptr->data;
-    cltmp = map_to_conf(conf);
+    const struct ClassItem *class = ptr->data;
 
-    if (cltmp->curr_user_count > 0)
+    if (class->ref_count > 0)
       sendto_one(source_p, form_str(RPL_TRACECLASS),
-                 from, to, conf->name, cltmp->curr_user_count);
+                 from, to, class->name, class->ref_count);
   }
 
   sendto_one(source_p, form_str(RPL_ENDOFTRACE), from, to, tname);
@@ -320,7 +315,7 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
   }
 
   name = get_client_name(target_p, HIDE_IP);
-  class_name = get_client_class(target_p);
+  class_name = get_client_class(&target_p->localClient->confs);
 
   set_time();
 

@@ -60,7 +60,7 @@ struct Callback *umode_cb = NULL;
 static char umode_buffer[IRCD_BUFSIZE];
 
 static void user_welcome(struct Client *);
-static void report_and_set_user_flags(struct Client *, const struct AccessItem *);
+static void report_and_set_user_flags(struct Client *, const struct MaskItem *);
 static int check_xline(struct Client *);
 static void introduce_client(struct Client *);
 static const char *uid_get(void);
@@ -280,8 +280,7 @@ void
 register_local_user(struct Client *source_p)
 {
   const char *id = NULL;
-  const struct AccessItem *aconf = NULL;
-  dlink_node *ptr = NULL;
+  const struct MaskItem *conf = NULL;
 
   assert(source_p != NULL);
   assert(source_p == source_p->from);
@@ -323,8 +322,7 @@ register_local_user(struct Client *source_p)
             sizeof(source_p->host));
   }
 
-  ptr   = source_p->localClient->confs.head;
-  aconf = map_to_conf(ptr->data);
+  conf = source_p->localClient->confs.head->data;
 
   if (!IsGotId(source_p))
   {
@@ -332,7 +330,7 @@ register_local_user(struct Client *source_p)
     const char *p = username;
     unsigned int i = 0;
 
-    if (IsNeedIdentd(aconf))
+    if (IsNeedIdentd(conf))
     {
       ++ServerStats.is_ref;
       sendto_one(source_p, ":%s NOTICE %s :*** Notice -- You need to install "
@@ -343,7 +341,7 @@ register_local_user(struct Client *source_p)
 
     strlcpy(username, source_p->username, sizeof(username));
 
-    if (!IsNoTilde(aconf))
+    if (!IsNoTilde(conf))
       source_p->username[i++] = '~';
 
     for (; *p && i < USERLEN; ++p)
@@ -354,11 +352,11 @@ register_local_user(struct Client *source_p)
   }
 
   /* password check */
-  if (!EmptyString(aconf->passwd))
+  if (!EmptyString(conf->passwd))
   {
     const char *pass = source_p->localClient->passwd;
 
-    if (!match_conf_password(pass, aconf))
+    if (!match_conf_password(pass, conf))
     {
       ++ServerStats.is_ref;
       sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
@@ -374,7 +372,7 @@ register_local_user(struct Client *source_p)
    */
 
   /* report if user has &^>= etc. and set flags as needed in source_p */
-  report_and_set_user_flags(source_p, aconf);
+  report_and_set_user_flags(source_p, conf);
 
   if (IsDead(source_p))
     return;
@@ -427,7 +425,7 @@ register_local_user(struct Client *source_p)
                        source_p->name, source_p->username, source_p->host,
                        ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
                        "255.255.255.255" : source_p->sockhost,
-                       get_client_class(source_p),
+                       get_client_class(&source_p->localClient->confs),
                        source_p->info, source_p->id);
 
   sendto_realops_flags(UMODE_CCONN_FULL, L_ALL, SEND_NOTICE,
@@ -435,7 +433,7 @@ register_local_user(struct Client *source_p)
                        source_p->name, source_p->username, source_p->host,
                        ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
                        "255.255.255.255" : source_p->sockhost,
-		       get_client_class(source_p),
+		       get_client_class(&source_p->localClient->confs),
 		       ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
                            "<hidden>" : source_p->localClient->client_host,
 		       ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
@@ -737,16 +735,16 @@ valid_nickname(const char *nickname, const int local)
 /* report_and_set_user_flags()
  *
  * inputs       - pointer to source_p
- *              - pointer to aconf for this user
+ *              - pointer to conf for this user
  * output       - NONE
  * side effects - Report to user any special flags
  *                they are getting, and set them.
  */
 static void
-report_and_set_user_flags(struct Client *source_p, const struct AccessItem *aconf)
+report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
 {
   /* If this user is being spoofed, tell them so */
-  if (IsConfDoSpoofIp(aconf))
+  if (IsConfDoSpoofIp(conf))
   {
     sendto_one(source_p,
                ":%s NOTICE %s :*** Spoofing your IP. congrats.",
@@ -754,7 +752,7 @@ report_and_set_user_flags(struct Client *source_p, const struct AccessItem *acon
   }
 
   /* If this user is in the exception class, Set it "E lined" */
-  if (IsConfExemptKline(aconf))
+  if (IsConfExemptKline(conf))
   {
     SetExemptKline(source_p);
     sendto_one(source_p,
@@ -765,14 +763,14 @@ report_and_set_user_flags(struct Client *source_p, const struct AccessItem *acon
   /* The else here is to make sure that G line exempt users
    * do not get noticed twice.
    */
-  else if (IsConfExemptGline(aconf))
+  else if (IsConfExemptGline(conf))
   {
     SetExemptGline(source_p);
     sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from G lines.",
                me.name, source_p->name);
   }
 
-  if (IsConfExemptResv(aconf))
+  if (IsConfExemptResv(conf))
   {
     SetExemptResv(source_p);
     sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from resvs.",
@@ -780,7 +778,7 @@ report_and_set_user_flags(struct Client *source_p, const struct AccessItem *acon
   }
 
   /* If this user is exempt from user limits set it "F lined" */
-  if (IsConfExemptLimits(aconf))
+  if (IsConfExemptLimits(conf))
   {
     SetExemptLimits(source_p);
     sendto_one(source_p,
@@ -788,7 +786,7 @@ report_and_set_user_flags(struct Client *source_p, const struct AccessItem *acon
                me.name,source_p->name);
   }
 
-  if (IsConfCanFlood(aconf))
+  if (IsConfCanFlood(conf))
   {
     SetCanFlood(source_p);
     sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from flood "
@@ -921,7 +919,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
             {
               dlink_node *dm;
 
-              detach_conf(source_p, OPER_TYPE);
+              detach_conf(source_p, CONF_OPER);
               ClrOFlag(source_p);
               DelUMode(source_p, ConfigFileEntry.oper_only_umodes);
 
@@ -1158,18 +1156,16 @@ user_welcome(struct Client *source_p)
 static int
 check_xline(struct Client *source_p)
 {
-  struct ConfItem *conf = NULL;
+  struct MaskItem *conf = NULL;
   const char *reason = NULL;
 
-  if ((conf = find_matching_name_conf(XLINE_TYPE, source_p->info, NULL, NULL, 0)) ||
-      (conf = find_matching_name_conf(RXLINE_TYPE, source_p->info, NULL, NULL, 0)))
+  if ((conf = find_matching_name_conf(CONF_XLINE, source_p->info, NULL, NULL, 0)) ||
+      (conf = find_matching_name_conf(CONF_RXLINE, source_p->info, NULL, NULL, 0)))
   {
-    struct MatchItem *reg = map_to_conf(conf);
+    ++conf->count;
 
-    ++reg->count;
-
-    if (reg->reason != NULL)
-      reason = reg->reason;
+    if (conf->reason != NULL)
+      reason = conf->reason;
     else
       reason = "No Reason";
 
@@ -1191,7 +1187,7 @@ check_xline(struct Client *source_p)
  *
  * inputs	- pointer to given client to oper
  * output	- NONE
- * side effects	- Blindly opers up given source_p, using aconf info
+ * side effects	- Blindly opers up given source_p, using conf info
  *                all checks on passwords have already been done.
  *                This could also be used by rsa oper routines. 
  */
@@ -1199,16 +1195,16 @@ void
 oper_up(struct Client *source_p)
 {
   const unsigned int old = source_p->umodes;
-  const struct AccessItem *oconf = NULL;
+  const struct MaskItem *conf = NULL;
 
   assert(source_p->localClient->confs.head);
-  oconf = map_to_conf((source_p->localClient->confs.head)->data);
+  conf = source_p->localClient->confs.head->data;
 
   ++Count.oper;
   SetOper(source_p);
 
-  if (oconf->modes)
-    AddUMode(source_p, oconf->modes);
+  if (conf->modes)
+    AddUMode(source_p, conf->modes);
   else if (ConfigFileEntry.oper_umodes)
     AddUMode(source_p, ConfigFileEntry.oper_umodes);
 
@@ -1220,7 +1216,7 @@ oper_up(struct Client *source_p)
   assert(dlinkFind(&oper_list, source_p) == NULL);
   dlinkAdd(source_p, make_dlink_node(), &oper_list);
 
-  AddOFlag(source_p, oconf->port);
+  AddOFlag(source_p, conf->port);
 
   if (HasOFlag(source_p, OPER_FLAG_ADMIN))
     AddUMode(source_p, UMODE_ADMIN);

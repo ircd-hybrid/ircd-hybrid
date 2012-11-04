@@ -32,9 +32,9 @@
 #include "motd.h"               /* MessageFile */
 #include "client.h"
 #include "hook.h"
+#include "conf_class.h"
 
 
-struct Client;
 
 extern struct Callback *client_check_cb;
 
@@ -47,28 +47,27 @@ struct conf_parser_context
 
 extern struct conf_parser_context conf_parser_ctx;
 
-typedef enum
-{  
-  CONF_TYPE, 
-  CLASS_TYPE,
-  OPER_TYPE,
-  CLIENT_TYPE,
-  SERVER_TYPE,
-  HUB_TYPE,
-  LEAF_TYPE,
-  KLINE_TYPE,
-  DLINE_TYPE,
-  EXEMPTDLINE_TYPE,
-  CLUSTER_TYPE,
-  RKLINE_TYPE,
-  RXLINE_TYPE,
-  XLINE_TYPE,    
-  ULINE_TYPE,
-  GLINE_TYPE,
-  CRESV_TYPE,     
-  NRESV_TYPE,
-  SERVICE_TYPE
-} ConfType;
+enum maskitem_type
+{
+  CONF_RESERVED = 1 <<  0, /* XXX */
+  CONF_CLIENT   = 1 <<  1,
+  CONF_SERVER   = 1 <<  2,
+  CONF_KLINE    = 1 <<  3,
+  CONF_DLINE    = 1 <<  4,
+  CONF_EXEMPT   = 1 <<  5,
+  CONF_CLUSTER  = 1 <<  6,
+  CONF_RKLINE   = 1 <<  7,
+  CONF_RXLINE   = 1 <<  8,
+  CONF_XLINE    = 1 <<  9,
+  CONF_ULINE    = 1 << 10,
+  CONF_GLINE    = 1 << 11,
+  CONF_CRESV    = 1 << 12,
+  CONF_NRESV    = 1 << 13,
+  CONF_SERVICE  = 1 << 14,
+  CONF_OPER     = 1 << 15,
+  CONF_HUB      = 1 << 16, /* XXX There are no separate hub/leaf configs anymore. This is just for /stats h */
+  CONF_CLASS    = 1 << 17
+};
 
 struct split_nuh_item
 {
@@ -84,48 +83,27 @@ struct split_nuh_item
   size_t hostsize;
 };
 
-struct ConfItem
+struct MaskItem
 {
-  dlink_node node;      /* link into known ConfItems of this type */
-
-  char *name;		/* Primary key */
-  void *regexpname;
-  unsigned int flags;
-  ConfType type;
-};
-
-/*
- * MatchItem - used for XLINE and ULINE types
- */
-struct MatchItem
-{
-  char *user;		/* Used for ULINE only */
-  char *host;		/* Used for ULINE only */
-  char *reason;
-  char *oper_reason;
-  int action;		/* used for uline */
-  int count;		/* How many times this matchitem has been matched */
-  int ref_count;	/* How many times is this matchitem in use */
-  int illegal;		/* Should it be deleted when possible? */
-  unsigned int flags;
-  time_t           hold;     /* Hold action until this time (calendar time) */
-  time_t setat;
-};
-
-struct AccessItem
-{
+  struct MaskItem *hnext;
   dlink_node node;
+  enum maskitem_type type;
   unsigned int     dns_failed;
   unsigned int     dns_pending;
   unsigned int     status;   /* If CONF_ILLEGAL, delete when no clients */
   unsigned int     flags;
   unsigned int     modes;
   unsigned int     port;
+  unsigned int     count;
+  unsigned int     action;
   int              clients;  /* Number of *LOCAL* clients using this */
   int              bits;
-  int              type;
+  unsigned int     aftype;
+  unsigned int     htype;
+  unsigned int     active;
   struct irc_ssaddr bind;  /* ip to bind to for outgoing connect */
   struct irc_ssaddr addr;  /* ip to connect to */
+  char *           name;
   char *           host;     /* host part of user@host */
   char *           passwd;
   char *           spasswd;  /* Password to send. */
@@ -133,8 +111,7 @@ struct AccessItem
   char *           user;     /* user part of user@host */
   time_t           hold;     /* Hold action until this time (calendar time) */
   time_t           setat;
-  struct ConfItem *class_ptr;  /* Class of connection */
-  int              aftype;
+  struct ClassItem *class;  /* Class of connection */
 #ifdef HAVE_LIBCRYPTO
   /* certs */
   char *cipher_list;
@@ -147,27 +124,6 @@ struct AccessItem
   dlink_list hub_list;
 };
 
-struct ClassItem
-{
-  dlink_list list_ipv4;         /* base of per cidr ipv4 client link list */
-  dlink_list list_ipv6;         /* base of per cidr ipv6 client link list */
-  unsigned int max_sendq;
-  unsigned int max_recvq;
-  int con_freq;
-  int ping_freq;
-  int ping_warning;
-  int max_total;
-  int max_local;
-  int max_global;
-  int max_ident;
-  int max_perip;
-  int curr_user_count;
-  int cidr_bitlen_ipv4;
-  int cidr_bitlen_ipv6;
-  int number_per_cidr;
-  int active;
-};
-
 struct CidrItem
 {
   dlink_node node;
@@ -176,39 +132,12 @@ struct CidrItem
 };
 
 
-#define CONF_ILLEGAL            0x80000000
-#define CONF_RESERVED           0x00000001
-#define CONF_CLIENT             0x00000002
-#define CONF_SERVER             0x00000004
-#define CONF_OPERATOR           0x00000008
-#define CONF_KLINE              0x00000010
-#define CONF_CLASS              0x00000020
-#define CONF_DLINE              0x00000040
-#define CONF_XLINE              0x00000080
-#define CONF_ULINE              0x00000100
-#define CONF_EXEMPTDLINE        0x00000200
-#define CONF_GLINE              0x00000400
-#define CONF_SERVICE            0x00000800
+#define IsConfOperator(x)	((x)->type & CONF_OPER)
+#define IsConfKill(x)		((x)->type == CONF_KLINE)
+#define IsConfClient(x)		((x)->type & CONF_CLIENT)
+#define IsConfGline(x)          ((x)->type == CONF_GLINE)
 
-#define CONF_SERVER_MASK       CONF_SERVER
-#define CONF_CLIENT_MASK       (CONF_CLIENT | CONF_OPERATOR | CONF_SERVER_MASK)
-
-/* XXX temporary hack */
-#define CONF_CRESV	        0x80000001
-#define CONF_NRESV	        0x80000002
-
-#define IsConfIllegal(x)	((x)->status & CONF_ILLEGAL)
-#define SetConfIllegal(x)	((x)->status |= CONF_ILLEGAL)
-#define IsConfServer(x)		((x)->status == CONF_SERVER)
-#define SetConfServer(x)	((x)->status = CONF_SERVER)
-#define IsConfOperator(x)	((x)->status & CONF_OPERATOR)
-#define IsConfKill(x)		((x)->status == CONF_KLINE)
-#define IsConfClient(x)		((x)->status & CONF_CLIENT)
-#define IsConfUline(x)		((x)->status & CONF_ULINE)
-#define IsConfXline(x)		((x)->status & CONF_XLINE)
-#define IsConfGline(x)          ((x)->status == CONF_GLINE)
-
-/* AccessItem->flags */
+/* MaskItem->flags */
 
 /* Generic flags... */
 /* access flags... */
@@ -233,7 +162,7 @@ struct CidrItem
 #define CONF_FLAGS_SSL                  0x00020000
 #define CONF_FLAGS_MAINCONF             0x00040000
 
-/* Macros for struct AccessItem */
+/* Macros for struct MaskItem */
 #define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
 #define IsNoTilde(x)            ((x)->flags & CONF_FLAGS_NO_TILDE)
 #define IsConfCanFlood(x)       ((x)->flags & CONF_FLAGS_CAN_FLOOD)
@@ -407,11 +336,9 @@ struct logging_entry
 extern dlink_list class_items;
 extern dlink_list server_items;
 extern dlink_list cluster_items;
-extern dlink_list hub_items;
 extern dlink_list xconf_items;
 extern dlink_list rxconf_items;
 extern dlink_list rkconf_items;
-extern dlink_list leaf_items;
 extern dlink_list service_items;
 extern struct logging_entry ConfigLoggingEntry;
 extern struct config_file_entry ConfigFileEntry;/* defined in ircd.c*/
@@ -422,47 +349,40 @@ extern struct admin_info AdminInfo;        /* defined in ircd.c */
 extern int valid_wild_card(struct Client *, int, int, ...);
 /* End GLOBAL section */
 
-extern unsigned int get_sendq(struct Client *);
-extern unsigned int get_recvq(struct Client *);
-extern const char *get_client_class(struct Client *);
-extern int get_client_ping(struct Client *, int *);
-extern void check_class(void);
-extern void init_class(void);
-extern struct ConfItem *find_class(const char *);
+
+
+
 extern void init_ip_hash_table(void);
 extern void count_ip_hash(unsigned int *, uint64_t *);
 extern void remove_one_ip(struct irc_ssaddr *);
-extern struct ConfItem *make_conf_item(ConfType type);
-extern void free_access_item(struct AccessItem *);
+extern struct MaskItem *conf_make(enum maskitem_type);
 extern void read_conf_files(int);
-extern int attach_conf(struct Client *, struct ConfItem *);
+extern int attach_conf(struct Client *, struct MaskItem *);
 extern int attach_connect_block(struct Client *, const char *, const char *);
+extern int get_conf_ping(const struct MaskItem *, int *);
 
-extern int detach_conf(struct Client *, ConfType);
-
-extern struct ConfItem *find_conf_name(dlink_list *, const char *, ConfType);
-extern struct ConfItem *find_conf_exact(ConfType, const char *, const char *, const char *);
-extern struct AccessItem *find_kill(struct Client *);
-extern struct AccessItem *find_gline(struct Client *);
+extern void detach_conf(struct Client *, enum maskitem_type);
+extern struct MaskItem *find_conf_name(dlink_list *, const char *, enum maskitem_type);
+extern struct MaskItem *find_conf_exact(enum maskitem_type, const char *, const char *, const char *);
+extern struct MaskItem *find_kill(struct Client *);
+extern struct MaskItem *find_gline(struct Client *);
 extern int conf_connect_allowed(struct irc_ssaddr *, int);
 extern char *oper_privs_as_string(const unsigned int);
 extern void split_nuh(struct split_nuh_item *);
-extern struct ConfItem *find_matching_name_conf(ConfType, const char *,
-                                                const char *, const char *, int);
-extern struct ConfItem *find_exact_name_conf(ConfType, const struct Client *, const char *,
+extern struct MaskItem *find_matching_name_conf(enum maskitem_type, const char *,
+                                                const char *, const char *, unsigned int);
+extern struct MaskItem *find_exact_name_conf(enum maskitem_type, const struct Client *, const char *,
                                              const char *, const char *);
-extern void delete_conf_item(struct ConfItem *);
-extern void report_confitem_types(struct Client *, ConfType);
+extern void conf_free(struct MaskItem *);
+extern void report_confitem_types(struct Client *, enum maskitem_type);
 extern void yyerror(const char *);
 extern void cleanup_tklines(void *);
 extern int rehash(int);
-extern int conf_add_server(struct ConfItem *, const char *);
-extern void conf_add_class_to_conf(struct ConfItem *, const char *);
+extern int conf_add_server(struct MaskItem *, const char *);
+extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 
 extern const char *get_oper_name(const struct Client *);
 
-extern void *map_to_conf(struct ConfItem *);
-extern struct ConfItem *unmap_conf_item(void *);
 /* XXX should the parse_aline stuff go into another file ?? */
 #define AWILD 0x1		/* check wild cards */
 extern int parse_aline(const char *, struct Client *, int, char **,
@@ -473,7 +393,7 @@ extern int valid_comment(struct Client *, char *, int);
 #define TK_SECONDS 0
 #define TK_MINUTES 1
 extern time_t valid_tkline(const char *, int);
-extern int match_conf_password(const char *, const struct AccessItem *);
+extern int match_conf_password(const char *, const struct MaskItem *);
 
 #define NOT_AUTHORIZED    (-1)
 #define I_LINE_FULL       (-2)
@@ -485,5 +405,4 @@ extern int match_conf_password(const char *, const struct AccessItem *);
 
 extern void cluster_a_line(struct Client *,
 			   const char *, int, int, const char *,...);
-extern void rebuild_cidr_class(struct ConfItem *, struct ClassItem *);
 #endif /* INCLUDED_s_conf_h */

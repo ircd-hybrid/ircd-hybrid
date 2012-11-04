@@ -32,7 +32,7 @@
 
 struct Client;
 struct Channel;
-struct ResvChannel;
+struct MaskItem;
 struct UserHost;
 
 enum {
@@ -48,8 +48,8 @@ extern void hash_add_client(struct Client *);
 extern void hash_del_client(struct Client *);
 extern void hash_add_channel(struct Channel *);
 extern void hash_del_channel(struct Channel *);
-extern void hash_add_resv(struct ResvChannel *);
-extern void hash_del_resv(struct ResvChannel *);
+extern void hash_add_resv(struct MaskItem *);
+extern void hash_del_resv(struct MaskItem *);
 extern void hash_add_id(struct Client *);
 extern void hash_del_id(struct Client *);
 extern void hash_add_userhost(struct UserHost *);
@@ -61,7 +61,7 @@ extern struct Client *hash_find_client(const char *);
 extern struct Client *hash_find_server(const char *);
 extern struct Channel *hash_find_channel(const char *);
 extern void *hash_get_bucket(int, unsigned int);
-extern struct ResvChannel *hash_find_resv(const char *);
+extern struct MaskItem *hash_find_resv(const char *);
 
 extern void free_list_task(struct ListTask *, struct Client *);
 extern void safe_list_channels(struct Client *, struct ListTask *, int);

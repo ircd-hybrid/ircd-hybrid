@@ -71,8 +71,7 @@ static void
 m_oper(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
-  struct ConfItem *conf;
-  struct AccessItem *aconf=NULL;
+  struct MaskItem *conf = NULL;
   const char *name = parv[1];
   const char *password = parv[2];
 
@@ -87,18 +86,16 @@ m_oper(struct Client *client_p, struct Client *source_p,
   if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  if ((conf = find_exact_name_conf(OPER_TYPE, source_p, name, NULL, NULL)) == NULL)
+  if ((conf = find_exact_name_conf(CONF_OPER, source_p, name, NULL, NULL)) == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
-    conf = find_exact_name_conf(OPER_TYPE, NULL, name, NULL, NULL);
+    conf = find_exact_name_conf(CONF_OPER, NULL, name, NULL, NULL);
     failed_oper_notice(source_p, name, (conf != NULL) ?
                        "host mismatch" : "no oper {} block");
     return;
   }
 
-  aconf = map_to_conf(conf);
-
-  if (match_conf_password(password, aconf))
+  if (match_conf_password(password, conf))
   {
     if (attach_conf(source_p, conf) != 0)
     {

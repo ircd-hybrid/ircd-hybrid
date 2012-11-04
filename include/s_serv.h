@@ -26,7 +26,7 @@
 #define INCLUDED_serv_h
 #include "config.h"
 
-struct ConfItem;
+struct MaskItem;
 
 /*
  * number of seconds to wait after server starts up, before
@@ -36,7 +36,7 @@ struct ConfItem;
 #define STARTUP_CONNECTIONS_TIME 60
 
 struct Client;
-struct AccessItem;
+struct MaskItem;
 struct Channel;
 
 /* Capabilities */
@@ -88,14 +88,14 @@ extern int hunt_server(struct Client *, struct Client *,
 extern void add_capability(const char *, int, int);
 extern int delete_capability(const char *);
 extern int find_capability(const char *);
-extern void send_capabilities(struct Client *, struct AccessItem *, int);
+extern void send_capabilities(struct Client *, int);
 extern void write_links_file(void *);
 extern void server_estab(struct Client *);
 extern const char *show_capabilities(struct Client *);
 extern void try_connections(void *);
 extern void burst_channel(struct Client *client_p, struct Channel *);
 extern void sendnick_TS(struct Client *, struct Client *);
-extern int serv_connect(struct AccessItem *, struct Client *);
+extern int serv_connect(struct MaskItem *, struct Client *);
 extern struct Client *find_servconn_in_progress(const char *);
 extern struct Server *make_server(struct Client *);
 #endif /* INCLUDED_s_serv_h */

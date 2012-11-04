@@ -177,8 +177,6 @@ init_comm(void)
 void
 close_connection(struct Client *client_p)
 {
-  struct AccessItem *aconf;
-  struct ClassItem *aclass;
   dlink_node *ptr = NULL;
 
   assert(client_p);
@@ -210,7 +208,7 @@ close_connection(struct Client *client_p)
 
     DLINK_FOREACH(ptr, server_items.head)
     {
-      struct ConfItem *conf = ptr->data;
+      struct MaskItem *conf = ptr->data;
 
       if (irccmp(conf->name, client_p->name))
         continue;
@@ -219,9 +217,7 @@ close_connection(struct Client *client_p)
        * Reset next-connect cycle of all connect{} blocks that match
        * this servername.
        */
-      aconf  = map_to_conf(conf);
-      aclass = map_to_conf(aconf->class_ptr);
-      aconf->hold = CurrentTime + aclass->con_freq;
+      conf->hold = CurrentTime + conf->class->con_freq;
     }
   }
   else
@@ -243,7 +239,7 @@ close_connection(struct Client *client_p)
   dbuf_clear(&client_p->localClient->buf_recvq);
   
   MyFree(client_p->localClient->passwd);
-  detach_conf(client_p, CONF_TYPE);
+  detach_conf(client_p, CONF_CLIENT|CONF_OPER|CONF_SERVER);
   client_p->from = NULL; /* ...this should catch them! >:) --msa */
 }
 

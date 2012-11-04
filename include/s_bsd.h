@@ -37,7 +37,7 @@
 #define SELECT_DELAY    500
 
 struct Client;
-struct AccessItem;
+struct MaskItem;
 struct Listener;
 
 extern struct Callback *setup_socket_cb;

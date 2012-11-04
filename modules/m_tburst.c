@@ -92,25 +92,22 @@ ms_tburst(struct Client *client_p, struct Client *source_p,
   if (accept_remote)
   {
     int topic_differs = strncmp(chptr->topic, topic, sizeof(chptr->topic) - 1);
+    int hidden_server = (ConfigServerHide.hide_servers || IsHidden(source_p));
 
     set_channel_topic(chptr, topic, setby, remote_topic_ts);
 
+    sendto_server(source_p, CAP_TBURST|CAP_TS6, NOCAPS,
+                  ":%s TBURST %s %s %s %s :%s",
+                  ID(source_p), parv[1], parv[2], parv[3], setby, topic);
+    sendto_server(source_p, CAP_TBURST, CAP_TS6,
+                  ":%s TBURST %s %s %s %s :%s",
+                  source_p->name, parv[1], parv[2], parv[3], setby, topic);
+
     if (topic_differs)
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :%s",
-                           ConfigServerHide.hide_servers ? me.name : source_p->name,
+                           hidden_server ? me.name : source_p->name,
                            chptr->chname, chptr->topic);
   }
-
-  /*
-   * Always propagate what we have received, not only if we accept the topic.
-   * This will keep other servers in sync.
-   */
-  sendto_server(source_p, CAP_TBURST|CAP_TS6, NOCAPS,
-                ":%s TBURST %s %s %s %s :%s",
-                ID(source_p), parv[1], parv[2], parv[3], setby, topic);
-  sendto_server(source_p, CAP_TBURST, CAP_TS6,
-                ":%s TBURST %s %s %s %s :%s",
-                source_p->name, parv[1], parv[2], parv[3], setby, topic);
 }
 
 static struct Message tburst_msgtab = {

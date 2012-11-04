@@ -1322,61 +1322,6 @@ attach_connect_block(struct Client *client_p, const char *name,
   return 0;
 }
 
-/* find_conf_exact()
- *
- * inputs	- type of ConfItem
- *		- pointer to name to find
- *		- pointer to username to find
- *		- pointer to host to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the hostname
- *		  and has the same name.
- */
-struct ConfItem *
-find_conf_exact(ConfType type, const char *name, const char *user, 
-                const char *host)
-{
-  dlink_node *ptr;
-  dlink_list *list_p;
-  struct ConfItem *conf = NULL;
-  struct AccessItem *aconf;
-
-  /* Only valid for OPER_TYPE and ...? */
-  list_p = map_to_list(type);
-
-  DLINK_FOREACH(ptr, (*list_p).head)
-  {
-    conf = ptr->data;
-
-    if (conf->name == NULL)
-      continue;
-    aconf = map_to_conf(conf);
-    if (aconf->host == NULL)
-      continue;
-    if (irccmp(conf->name, name) != 0)
-      continue;
-
-    /*
-    ** Accept if the *real* hostname (usually sockethost)
-    ** socket host) matches *either* host or name field
-    ** of the configuration.
-    */
-    if (!match(aconf->host, host) || !match(aconf->user, user))
-      continue;
-    if (type == OPER_TYPE)
-    {
-      struct ClassItem *aclass = map_to_conf(aconf->class_ptr);
-
-      if (aconf->clients >= aclass->max_total)
-	continue;
-    }
-
-    return conf;
-  }
-
-  return NULL;
-}
-
 /* find_conf_name()
  *
  * inputs	- pointer to conf link list to search
@@ -1602,28 +1547,33 @@ find_exact_name_conf(ConfType type, const struct Client *who, const char *name,
 
       if (!irccmp(conf->name, name))
       {
+        struct ClassItem *aclass = map_to_conf(aconf->class_ptr);
+
         if (!who)
           return conf;
         if (EmptyString(aconf->user) || EmptyString(aconf->host))
-          return conf;
+          return NULL;
         if (match(aconf->user, who->username))
         {
           switch (aconf->type)
           {
             case HM_HOST:
               if (match(aconf->host, who->host) || match(aconf->host, who->sockhost))
-                return conf;
+                if (!aclass->max_total || aclass->curr_user_count < aclass->max_total)
+                  return conf;
               break;
             case HM_IPV4:
               if (who->localClient->aftype == AF_INET)
                 if (match_ipv4(&who->localClient->ip, &aconf->addr, aconf->bits))
-                  return conf;
+                  if (!aclass->max_total || aclass->curr_user_count < aclass->max_total)
+                    return conf;
               break;
 #ifdef IPV6
             case HM_IPV6:
               if (who->localClient->aftype == AF_INET6)
                 if (match_ipv6(&who->localClient->ip, &aconf->addr, aconf->bits))
-                  return conf;
+                  if (!aclass->max_total || aclass->curr_user_count < aclass->max_total)
+                    return conf;
               break;
 #endif
             default:
@@ -2078,7 +2028,7 @@ expire_tklines(dlink_list *tklist)
       {
         if (ConfigFileEntry.tkline_expire_notices)
 	  sendto_realops_flags(UMODE_ALL, L_ALL,
-                               "Temporary X-line for [%s] sexpired", conf->name);
+                               "Temporary X-line for [%s] expired", conf->name);
 	dlinkDelete(ptr, tklist);
         free_dlink_node(ptr);
 	delete_conf_item(conf);

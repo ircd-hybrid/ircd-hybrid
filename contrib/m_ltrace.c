@@ -138,7 +138,7 @@ do_ltrace(struct Client *source_p, int parc, char *parv[])
     if (target_p && IsClient(target_p)) 
     {
       name = get_client_name(target_p, HIDE_IP);
-      class_name = get_client_class(target_p);
+      class_name = get_client_class(&target_p->localClient->confs);
 
       if (HasUMode(target_p, UMODE_OPER))
       {
@@ -234,7 +234,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
   const char *class_name = NULL;
 
   name = get_client_name(target_p, HIDE_IP);
-  class_name = get_client_class(target_p);
+  class_name = get_client_class(&target_p->localClient->confs);
 
   switch (target_p->status)
   {

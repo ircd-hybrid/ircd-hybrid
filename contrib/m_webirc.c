@@ -166,7 +166,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
   if ((conf = find_dline_conf(&client_p->localClient->ip,
                                client_p->localClient->aftype)))
   {
-    if (!(conf->status & CONF_EXEMPTDLINE))
+    if (!(conf->status & CONF_EXEMPT))
     {
       exit_client(client_p, &me, "D-lined");
       return;

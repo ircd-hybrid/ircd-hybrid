@@ -79,7 +79,7 @@ do_ctrace(struct Client *source_p, int parc, char *parv[])
   {
     struct Client *target_p = ptr->data;
 
-    class_name = get_client_class(target_p);
+    class_name = get_client_class(&target_p->localClient->confs);
     if ((class_name != NULL) && match(class_looking_for, class_name))
       report_this_status(source_p, target_p);
   }
@@ -103,7 +103,7 @@ report_this_status(struct Client *source_p, struct Client *target_p)
   const char *class_name = NULL;
 
   name = get_client_name(target_p, HIDE_IP);
-  class_name = get_client_class(target_p);
+  class_name = get_client_class(&target_p->localClient->confs);
 
   switch(target_p->status)
   {

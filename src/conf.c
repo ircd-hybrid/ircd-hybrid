@@ -1559,26 +1559,20 @@ find_exact_name_conf(ConfType type, const struct Client *who, const char *name,
           {
             case HM_HOST:
               if (match(aconf->host, who->host) || match(aconf->host, who->sockhost))
-                if (aclass->max_total != 0 && aclass->curr_user_count >= aclass->max_total)
-                  break;
-                else
+                if (!aclass->max_total || aclass->curr_user_count < aclass->max_total)
                   return conf;
               break;
             case HM_IPV4:
               if (who->localClient->aftype == AF_INET)
                 if (match_ipv4(&who->localClient->ip, &aconf->addr, aconf->bits))
-                  if (aclass->max_total != 0 && aclass->curr_user_count >= aclass->max_total)
-                    break;
-                  else
+                  if (!aclass->max_total || aclass->curr_user_count < aclass->max_total)
                     return conf;
               break;
 #ifdef IPV6
             case HM_IPV6:
               if (who->localClient->aftype == AF_INET6)
                 if (match_ipv6(&who->localClient->ip, &aconf->addr, aconf->bits))
-                  if (aclass->max_total != 0 && aclass->curr_user_count >= aclass->max_total)
-                    break;
-                  else
+                  if (!aclass->max_total || aclass->curr_user_count < aclass->max_total)
                     return conf;
               break;
 #endif

@@ -1,6 +1,9 @@
--- ircd-hybrid-8.0.0 Release Notes
+-- ircd-hybrid-8.0.1 Release Notes
+o) Fixed broken CIDR support for CHALLENGE based irc operator logins
+o) Fixed class limits not properly applying to oper{} blocks
 o) Fixed possible TBURST desynchronization with services
 o) Fixed TBURST sending server's name to clients if it's a hidden server
+
 
 -- ircd-hybrid-8.0.0 Release Notes
 o) Fixed an off-by-one with spoofs. Spoofs are now also checked for

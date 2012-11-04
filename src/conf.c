@@ -171,7 +171,12 @@ void
 conf_free(struct MaskItem *conf)
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
- 
+  dlink_list *list = NULL;
+
+  if (conf->node.next)
+    if ((list = map_to_list(conf->type)))
+      dlinkDelete(&conf->node, list);
+
   MyFree(conf->name);
 
   if (conf->dns_pending)
@@ -188,6 +193,8 @@ conf_free(struct MaskItem *conf)
   MyFree(conf->reason);
   MyFree(conf->user);
   MyFree(conf->host);
+  MyFree(conf->regexuser);
+  MyFree(conf->regexhost);
 #ifdef HAVE_LIBCRYPTO
   MyFree(conf->cipher_list);
 
@@ -207,324 +214,9 @@ conf_free(struct MaskItem *conf)
     MyFree(ptr->data);
     free_dlink_node(ptr);
   }
+
+  MyFree(conf);
 }
-#if 0
-/* make_conf_item()
- *
- * inputs	- type of item
- * output	- pointer to new conf entry
- * side effects	- none
- */
-struct ConfItem *
-make_conf_item(ConfType type)
-{
-  struct ConfItem *conf = NULL;
-  struct AccessItem *aconf = NULL;
-  struct ClassItem *aclass = NULL;
-  int status = 0;
-
-  switch (type)
-  {
-  case DLINE_TYPE:
-  case EXEMPTDLINE_TYPE:
-  case GLINE_TYPE:
-  case KLINE_TYPE:
-  case CLIENT_TYPE:
-  case OPER_TYPE:
-  case SERVER_TYPE:
-    conf = MyMalloc(sizeof(struct ConfItem) +
-                    sizeof(struct AccessItem));
-    aconf = map_to_conf(conf);
-    aconf->aftype = AF_INET;
-
-    /* Yes, sigh. switch on type again */
-    switch (type)
-    {
-    case EXEMPTDLINE_TYPE:
-      status = CONF_EXEMPTDLINE;
-      break;
-
-    case DLINE_TYPE:
-      status = CONF_DLINE;
-      break;
-
-    case KLINE_TYPE:
-      status = CONF_KLINE;
-      break;
-
-    case GLINE_TYPE:
-      status = CONF_GLINE;
-      break;
-
-    case CLIENT_TYPE:
-      status = CONF_CLIENT;
-      break;
-
-    case OPER_TYPE:
-      status = CONF_OPERATOR;
-      dlinkAdd(conf, &conf->node, &oconf_items);
-      break;
-
-    case SERVER_TYPE:
-      status = CONF_SERVER;
-      dlinkAdd(conf, &conf->node, &server_items);
-      break;
-
-    default:
-      break;
-    }
-    aconf->status = status;
-    break;
-
-  case ULINE_TYPE:
-    conf = (struct ConfItem *)MyMalloc(sizeof(struct ConfItem) +
-                                       sizeof(struct MatchItem));
-    dlinkAdd(conf, &conf->node, &uconf_items);
-    break;
-
-  case XLINE_TYPE:
-    conf = (struct ConfItem *)MyMalloc(sizeof(struct ConfItem) +
-                                       sizeof(struct MatchItem));
-    dlinkAdd(conf, &conf->node, &xconf_items);
-    break;
-#ifdef HAVE_LIBPCRE
-  case RXLINE_TYPE:
-    conf = (struct ConfItem *)MyMalloc(sizeof(struct ConfItem) +
-                                       sizeof(struct MatchItem));
-    dlinkAdd(conf, &conf->node, &rxconf_items);
-    break;
-
-  case RKLINE_TYPE:
-    conf = (struct ConfItem *)MyMalloc(sizeof(struct ConfItem) +
-                                       sizeof(struct AccessItem));
-    aconf = map_to_conf(conf);
-    aconf->status = CONF_KLINE;
-    dlinkAdd(conf, &conf->node, &rkconf_items);
-    break;
-#endif
-  case CLUSTER_TYPE:
-    conf = (struct ConfItem *)MyMalloc(sizeof(struct ConfItem));
-    dlinkAdd(conf, &conf->node, &cluster_items);
-    break;
-
-  case CRESV_TYPE:
-    conf = (struct ConfItem *)MyMalloc(sizeof(struct ConfItem) +
-                                       sizeof(struct ResvChannel));
-    break;
-
-  case NRESV_TYPE:
-    conf = (struct ConfItem *)MyMalloc(sizeof(struct ConfItem) +
-                                       sizeof(struct MatchItem));
-    dlinkAdd(conf, &conf->node, &nresv_items);
-    break;
-
-  case SERVICE_TYPE:
-    status = CONF_SERVICE;
-    conf = MyMalloc(sizeof(struct ConfItem));
-    dlinkAdd(conf, &conf->node, &service_items);
-    break;
-
-  case CONF_CLASS:
-    conf = MyMalloc(sizeof(struct ConfItem) +
-                           sizeof(struct ClassItem));
-    dlinkAdd(conf, &conf->node, &class_items);
-
-    aclass = map_to_conf(conf);
-    aclass->active = 1;
-    aclass->con_freq = DEFAULT_CONNECTFREQUENCY;
-    aclass->ping_freq = DEFAULT_PINGFREQUENCY;
-    aclass->max_total = MAXIMUM_LINKS_DEFAULT;
-    aclass->max_sendq = DEFAULT_SENDQ;
-    aclass->max_recvq = DEFAULT_RECVQ;
-
-    break;
-
-  default:
-    conf = NULL;
-    break;
-  }
-
-  /* XXX Yes, this will core if default is hit. I want it to for now - db */
-  conf->type = type;
-
-  return conf;
-}
-
-void
-delete_conf_item(struct ConfItem *conf)
-{
-  dlink_node *m = NULL, *m_next = NULL;
-  struct MatchItem *match_item;
-  struct AccessItem *aconf;
-  ConfType type = conf->type;
-
-  MyFree(conf->name);
-  conf->name = NULL;
-
-  switch(type)
-  {
-  case DLINE_TYPE:
-  case EXEMPTDLINE_TYPE:
-  case GLINE_TYPE:
-  case KLINE_TYPE:
-  case CLIENT_TYPE:
-  case OPER_TYPE:
-  case SERVER_TYPE:
-    aconf = map_to_conf(conf);
-
-    if (aconf->dns_pending)
-      delete_resolver_queries(aconf);
-    if (aconf->passwd != NULL)
-      memset(aconf->passwd, 0, strlen(aconf->passwd));
-    if (aconf->spasswd != NULL)
-      memset(aconf->spasswd, 0, strlen(aconf->spasswd));
-    aconf->class_ptr = NULL;
-
-    MyFree(aconf->passwd);
-    MyFree(aconf->spasswd);
-    MyFree(aconf->reason);
-    MyFree(aconf->user);
-    MyFree(aconf->host);
-#ifdef HAVE_LIBCRYPTO
-    MyFree(aconf->cipher_list);
-
-    if (aconf->rsa_public_key)
-      RSA_free(aconf->rsa_public_key);
-    MyFree(aconf->rsa_public_key_file);
-#endif
-
-    /* Yes, sigh. switch on type again */
-    switch(type)
-    {
-    case EXEMPTDLINE_TYPE:
-    case DLINE_TYPE:
-    case GLINE_TYPE:
-    case KLINE_TYPE:
-    case CLIENT_TYPE:
-      MyFree(conf);
-      break;
-
-    case OPER_TYPE:
-      aconf = map_to_conf(conf);
-      if (!IsConfIllegal(aconf))
-	dlinkDelete(&conf->node, &oconf_items);
-      MyFree(conf);
-      break;
-
-    case SERVER_TYPE:
-      aconf = map_to_conf(conf);
-
-      DLINK_FOREACH_SAFE(m, m_next, aconf->hub_list.head)
-      {
-        MyFree(m->data);
-        free_dlink_node(m);
-      }
-
-      DLINK_FOREACH_SAFE(m, m_next, aconf->leaf_list.head)
-      {
-        MyFree(m->data);
-        free_dlink_node(m);  
-      }
-
-      if (!IsConfIllegal(aconf))
-	dlinkDelete(&conf->node, &server_items);
-      MyFree(conf);
-      break;
-
-    default:
-      break;
-    }
-    break;
-
-  case ULINE_TYPE:
-    match_item = map_to_conf(conf);
-    MyFree(match_item->user);
-    MyFree(match_item->host);
-    MyFree(match_item->reason);
-    dlinkDelete(&conf->node, &uconf_items);
-    MyFree(conf);
-    break;
-
-  case XLINE_TYPE:
-    match_item = map_to_conf(conf);
-    MyFree(match_item->user);
-    MyFree(match_item->host);
-    MyFree(match_item->reason);
-    dlinkDelete(&conf->node, &xconf_items);
-    MyFree(conf);
-    break;
-#ifdef HAVE_LIBPCRE
-  case RKLINE_TYPE:
-    aconf = map_to_conf(conf);
-    MyFree(aconf->regexuser);
-    MyFree(aconf->regexhost);
-    MyFree(aconf->user);
-    MyFree(aconf->host);
-    MyFree(aconf->reason);
-    dlinkDelete(&conf->node, &rkconf_items);
-    MyFree(conf);
-    break;
-
-  case RXLINE_TYPE:
-    MyFree(conf->regexpname);
-    match_item = map_to_conf(conf);
-    MyFree(match_item->user);
-    MyFree(match_item->host);
-    MyFree(match_item->reason);
-    dlinkDelete(&conf->node, &rxconf_items);
-    MyFree(conf);
-    break;
-#endif
-  case NRESV_TYPE:
-    match_item = map_to_conf(conf);
-    MyFree(match_item->user);
-    MyFree(match_item->host);
-    MyFree(match_item->reason);
-    dlinkDelete(&conf->node, &nresv_items);
-    MyFree(conf);
-    break;
-
-  case CLUSTER_TYPE:
-    dlinkDelete(&conf->node, &cluster_items);
-    MyFree(conf);
-    break;
-
-  case CRESV_TYPE:
-    MyFree(conf);
-    break;
-
-  case CLASS_TYPE:
-    dlinkDelete(&conf->node, &class_items);
-    MyFree(conf);
-    break;
-
-  case SERVICE_TYPE:
-    dlinkDelete(&conf->node, &service_items);
-    MyFree(conf);
-    break;
-
-  default:
-    break;
-  }
-}
-
-/* free_access_item()
- *
- * inputs	- pointer to conf to free
- * output	- none
- * side effects	- crucial password fields are zeroed, conf is freed
- */
-void
-free_access_item(struct AccessItem *aconf)
-{
-  struct ConfItem *conf;
-
-  if (aconf == NULL)
-    return;
-  conf = unmap_conf_item(aconf);
-  delete_conf_item(conf);
-}
-#endif
 
 static const unsigned int shared_bit_table[] =
   { 'K', 'k', 'U', 'X', 'x', 'Y', 'Q', 'q', 'R', 'L', 0};
@@ -1285,56 +977,6 @@ attach_connect_block(struct Client *client_p, const char *name,
   return 0;
 }
 
-/* find_conf_exact()
- *
- * inputs	- type of MaskItem
- *		- pointer to name to find
- *		- pointer to username to find
- *		- pointer to host to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the hostname
- *		  and has the same name.
- */
-struct MaskItem *
-find_conf_exact(enum maskitem_type type, const char *name, const char *user, 
-                const char *host)
-{
-  dlink_node *ptr;
-  dlink_list *list_p;
-  struct MaskItem *conf = NULL;
-
-  /* Only valid for OPER_TYPE and ...? */
-  list_p = map_to_list(type);
-
-  DLINK_FOREACH(ptr, (*list_p).head)
-  {
-    conf = ptr->data;
-
-    if (conf->name == NULL)
-      continue;
-    if (conf->host == NULL)
-      continue;
-
-    if (irccmp(conf->name, name) != 0)
-      continue;
-
-    /*
-    ** Accept if the *real* hostname (usually sockethost)
-    ** socket host) matches *either* host or name field
-    ** of the configuration.
-    */
-    if (!match(conf->host, host) || !match(conf->user, user))
-      continue;
-    if (type == CONF_OPER)
-      if (conf->clients >= conf->class->max_total)
-	continue;
-
-    return conf;
-  }
-
-  return NULL;
-}
-
 /* find_conf_name()
  *
  * inputs	- pointer to conf link list to search
@@ -1543,10 +1185,12 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
 
       if (!irccmp(conf->name, name))
       {
+        if (conf->class->ref_count >= conf->class->max_total)
+          continue;
         if (!who)
           return conf;
         if (EmptyString(conf->user) || EmptyString(conf->host))
-          return conf;
+          return NULL;
         if (match(conf->user, who->username))
         {
           switch (conf->htype)
@@ -1857,7 +1501,7 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
   struct MaskItem *conf = find_dline_conf(addr, aftype);
 
   /* DLINE exempt also gets you out of static limits/pacing... */
-  if (conf && (conf->status & CONF_EXEMPT))
+  if (conf && (conf->type == CONF_EXEMPT))
     return 0;
 
   if (conf != NULL)

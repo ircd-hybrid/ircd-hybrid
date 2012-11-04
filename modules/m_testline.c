@@ -114,7 +114,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     if (conf != NULL)
     {
       ++matches;
-      if (conf->status & CONF_EXEMPT)
+      if (conf->type == CONF_EXEMPT)
         sendto_one(source_p,
                    ":%s NOTICE %s :Exempt D-line host [%s] reason [%s]",
                    me.name, source_p->name, conf->host, conf->reason);
@@ -143,14 +143,14 @@ mo_testline(struct Client *client_p, struct Client *source_p,
   {
     snprintf(userhost, sizeof(userhost), "%s@%s", conf->user, conf->host);
 
-    if (conf->status & CONF_CLIENT)
+    if (conf->type == CONF_CLIENT)
     {
       sendto_one(source_p, form_str(RPL_TESTLINE),
                  me.name, source_p->name, 'I', 0L, userhost,
                  conf->class ? conf->class->name : "<default>", "");
       ++matches;
     }
-    else if (conf->status & CONF_KLINE)
+    else if (conf->type == CONF_KLINE)
     {
       sendto_one(source_p, form_str(RPL_TESTLINE),
                  me.name, source_p->name,

@@ -90,7 +90,6 @@ struct MaskItem
   enum maskitem_type type;
   unsigned int     dns_failed;
   unsigned int     dns_pending;
-  unsigned int     status;   /* If CONF_ILLEGAL, delete when no clients */
   unsigned int     flags;
   unsigned int     modes;
   unsigned int     port;
@@ -132,9 +131,9 @@ struct CidrItem
 };
 
 
-#define IsConfOperator(x)	((x)->type & CONF_OPER)
+#define IsConfOperator(x)	((x)->type == CONF_OPER)
 #define IsConfKill(x)		((x)->type == CONF_KLINE)
-#define IsConfClient(x)		((x)->type & CONF_CLIENT)
+#define IsConfClient(x)		((x)->type == CONF_CLIENT)
 #define IsConfGline(x)          ((x)->type == CONF_GLINE)
 
 /* MaskItem->flags */
@@ -363,7 +362,6 @@ extern int get_conf_ping(const struct MaskItem *, int *);
 
 extern void detach_conf(struct Client *, enum maskitem_type);
 extern struct MaskItem *find_conf_name(dlink_list *, const char *, enum maskitem_type);
-extern struct MaskItem *find_conf_exact(enum maskitem_type, const char *, const char *, const char *);
 extern struct MaskItem *find_kill(struct Client *);
 extern struct MaskItem *find_gline(struct Client *);
 extern int conf_connect_allowed(struct irc_ssaddr *, int);

@@ -283,7 +283,7 @@ try_connections(void *unused)
   {
     conf = ptr->data;
 
-    assert(conf->status & CONF_SERVER);
+    assert(conf->type == CONF_SERVER);
 
     /* Also when already connecting! (update holdtimes) --SRB 
      */

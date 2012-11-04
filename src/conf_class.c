@@ -94,8 +94,9 @@ class_init(void)
 {
   class_default = class_make();
 
-  class_default->active = 1;
   DupString(class_default->name, "default");
+
+  class_default->active    = 1;
   class_default->con_freq  = DEFAULT_CONNECTFREQUENCY;
   class_default->ping_freq = DEFAULT_PINGFREQUENCY;
   class_default->max_total = MAXIMUM_LINKS_DEFAULT;

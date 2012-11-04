@@ -367,7 +367,7 @@ check_conf_klines(void)
     if ((conf = find_dline_conf(&client_p->localClient->ip,
                                   client_p->localClient->aftype)) != NULL)
     {
-      if (conf->status & CONF_EXEMPT)
+      if (conf->type == CONF_EXEMPT)
 	continue;
 
       ban_them(client_p, conf);
@@ -422,7 +422,7 @@ check_conf_klines(void)
     if ((conf = find_dline_conf(&client_p->localClient->ip,
                                  client_p->localClient->aftype)))
     {
-      if (conf->status & CONF_EXEMPT)
+      if (conf->type == CONF_EXEMPT)
         continue;
 
       exit_client(client_p, &me, "D-lined");

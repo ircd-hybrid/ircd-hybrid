@@ -90,17 +90,15 @@ mo_connect(struct Client *client_p, struct Client *source_p,
   /*
    * try to find the name, then host, if both fail notify ops and bail
    */
-  if ((conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
-    ;
-  else if  ((conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
-    ;
- 
-  if (!conf)
+  if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
   {
-    sendto_one(source_p,
-	       ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
-	       me.name, source_p->name, parv[1]);
-    return;
+    if  (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
+    {
+      sendto_one(source_p,
+                 ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
+                 me.name, source_p->name, parv[1]);
+      return;
+    }
   }
 
   /* Get port number from user, if given. If not specified,
@@ -207,18 +205,15 @@ ms_connect(struct Client *client_p, struct Client *source_p,
   /*
    * try to find the name, then host, if both fail notify ops and bail
    */
-
-  if ((conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
-    ;
-  else if  ((conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
-    ;
-
-  if (!conf)
-  {
-    sendto_one(source_p,
-	       ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
-	       me.name, source_p->name, parv[1]);
-    return;
+  if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
+  { 
+    if  (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
+    {
+      sendto_one(source_p,
+                 ":%s NOTICE %s :Connect: Host %s not listed in ircd.conf",
+                 me.name, source_p->name, parv[1]);
+      return;
+    }
   }
 
   /* Get port number from user, if given. If not specified,

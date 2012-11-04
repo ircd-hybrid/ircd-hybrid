@@ -123,12 +123,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
   source_p->localClient->response  = NULL;
   source_p->localClient->auth_oper = NULL;
 
-  if ((conf = find_conf_exact(CONF_OPER,
-			      parv[1], source_p->username, source_p->host)))
-    ;
-  else if ((conf = find_conf_exact(CONF_OPER, parv[1], source_p->username,
-				   source_p->sockhost)))
-    ;
+  conf = find_exact_name_conf(CONF_OPER, source_p, parv[1], NULL, NULL);
 
   if (!conf)
   {

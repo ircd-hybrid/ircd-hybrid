@@ -1185,8 +1185,6 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
 
       if (!irccmp(conf->name, name))
       {
-        if (conf->class->ref_count >= conf->class->max_total)
-          continue;
         if (!who)
           return conf;
         if (EmptyString(conf->user) || EmptyString(conf->host))
@@ -1197,18 +1195,21 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
           {
             case HM_HOST:
               if (match(conf->host, who->host) || match(conf->host, who->sockhost))
-                return conf;
+                if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
+                  return conf;
               break;
             case HM_IPV4:
               if (who->localClient->aftype == AF_INET)
                 if (match_ipv4(&who->localClient->ip, &conf->addr, conf->bits))
-                  return conf;
+                  if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
+                    return conf;
               break;
 #ifdef IPV6
             case HM_IPV6:
               if (who->localClient->aftype == AF_INET6)
                 if (match_ipv6(&who->localClient->ip, &conf->addr, conf->bits))
-                  return conf;
+                  if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
+                    return conf;
               break;
 #endif
             default:

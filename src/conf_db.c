@@ -22,7 +22,7 @@
 
 /*! \file conf_db.c
  * \brief Includes file utilities for database handling
- * \version $Id: conf_db.c 1569 2012-10-16 18:46:53Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

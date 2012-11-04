@@ -22,7 +22,7 @@
 
 /*! \file conf_db.h
  * \brief Includes file utilities for database handling
- * \version $Id: conf_db.h 1569 2012-10-16 18:46:53Z michael $
+ * \version $Id$
  */
 
 #ifndef DATAFILES_H

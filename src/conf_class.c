@@ -21,7 +21,7 @@
 
 /*! \file
  * \brief Configuration managment for class{} blocks
- * \version $Id: conf_class.c,v 1.54 2007/10/21 21:57:05 devil Exp $
+ * \version $Id$
  */
 
 #include "stdinc.h"

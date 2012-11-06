@@ -31,6 +31,7 @@
 #include "listener.h"    /* show_ports */
 #include "s_gline.h"
 #include "conf.h"
+#include "conf_class.h"
 #include "hostmask.h"
 #include "numeric.h"     /* ERR_xxx */
 #include "send.h"        /* sendto_one */
@@ -265,7 +266,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   }
 #endif
   /* count up all classes */
-  class_count = dlink_list_length(&class_items);
+  class_count = dlink_list_length(class_get_list());
 
   count_whowas_memory(&wwu, &wwm);
   watch_count_memory(&watch_list_headers, &watch_list_memory);

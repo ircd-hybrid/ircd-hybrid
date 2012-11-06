@@ -39,6 +39,8 @@ struct AddressRec
 {
   /* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
   enum hostmask_type masktype;
+  /* type: CONF_CLIENT, CONF_DLINE, CONF_KLINE etc... -A1kmm */
+  enum maskitem_type type;
 
   union
   {
@@ -52,9 +54,6 @@ struct AddressRec
     /* Pointer into MaskItem... -A1kmm */
     const char *hostname;
   } Mask;
-
-  /* type: CONF_CLIENT, CONF_DLINE, CONF_KLINE etc... -A1kmm */
-  enum maskitem_type type;
 
   /* Higher precedences overrule lower ones... */
   unsigned int precedence;

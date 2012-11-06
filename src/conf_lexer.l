@@ -235,7 +235,6 @@ passwd		{ return PASSWORD; }
 password	{ return PASSWORD; }
 ping_cookie	{ return PING_COOKIE; }
 ping_time	{ return PING_TIME; }
-ping_warning	{ return PING_WARNING; }
 port		{ return PORT; }
 quarantine	{ return RESV; }
 quiet_on_ban    { return QUIET_ON_BAN; }

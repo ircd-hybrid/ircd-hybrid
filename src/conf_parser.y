@@ -222,7 +222,6 @@ free_collect_item(struct CollectItem *item)
 %token  PATH
 %token  PING_COOKIE
 %token  PING_TIME
-%token  PING_WARNING
 %token  PORT
 %token  QSTRING
 %token  QUIET_ON_BAN
@@ -1309,7 +1308,6 @@ class_items:    class_items class_item | class_item;
 class_item:     class_name |
 		class_cidr_bitlen_ipv4 | class_cidr_bitlen_ipv6 |
                 class_ping_time |
-		class_ping_warning |
 		class_number_per_cidr |
                 class_number_per_ip |
                 class_connectfreq |
@@ -1333,12 +1331,6 @@ class_ping_time: PING_TIME '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 1)
     yy_class->ping_freq = $3;
-};
-
-class_ping_warning: PING_WARNING '=' timespec ';'
-{
-  if (conf_parser_ctx.pass == 1)
-    yy_class->ping_warning = $3;
 };
 
 class_number_per_ip: NUMBER_PER_IP '=' NUMBER ';'
@@ -1813,7 +1805,7 @@ shared_entry: T_SHARED
   if (conf_parser_ctx.pass == 2)
   {
     yy_conf = conf_make(CONF_ULINE);
-    yy_conf->action = SHARED_ALL;
+    yy_conf->flags = SHARED_ALL;
   }
 } '{' shared_items '}' ';'
 {
@@ -1860,50 +1852,50 @@ shared_user: USER '=' QSTRING ';'
 shared_type: TYPE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action = 0;
+    yy_conf->flags = 0;
 } '=' shared_types ';' ;
 
 shared_types: shared_types ',' shared_type_item | shared_type_item;
 shared_type_item: KLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_KLINE;
+    yy_conf->flags |= SHARED_KLINE;
 } | UNKLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_UNKLINE;
+    yy_conf->flags |= SHARED_UNKLINE;
 } | T_DLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_DLINE;
+    yy_conf->flags |= SHARED_DLINE;
 } | T_UNDLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_UNDLINE;
+    yy_conf->flags |= SHARED_UNDLINE;
 } | XLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_XLINE;
+    yy_conf->flags |= SHARED_XLINE;
 } | T_UNXLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_UNXLINE;
+    yy_conf->flags |= SHARED_UNXLINE;
 } | RESV
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_RESV;
+    yy_conf->flags |= SHARED_RESV;
 } | T_UNRESV
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_UNRESV;
+    yy_conf->flags |= SHARED_UNRESV;
 } | T_LOCOPS
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action |= SHARED_LOCOPS;
+    yy_conf->flags |= SHARED_LOCOPS;
 } | T_ALL
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->action = SHARED_ALL;
+    yy_conf->flags = SHARED_ALL;
 };
 
 /***************************************************************************

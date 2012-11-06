@@ -311,7 +311,7 @@ register_local_user(struct Client *source_p)
   /* Straight up the maximum rate of flooding... */
   source_p->localClient->allow_read = MAX_FLOOD_BURST;
 
-  if (!execute_callback(client_check_cb, source_p, source_p->username))
+  if (!check_client(source_p))
     return;
 
   if (valid_hostname(source_p->host) == 0)
@@ -1195,10 +1195,9 @@ void
 oper_up(struct Client *source_p)
 {
   const unsigned int old = source_p->umodes;
-  const struct MaskItem *conf = NULL;
+  const struct MaskItem *conf = source_p->localClient->confs.head->data;
 
   assert(source_p->localClient->confs.head);
-  conf = source_p->localClient->confs.head->data;
 
   ++Count.oper;
   SetOper(source_p);

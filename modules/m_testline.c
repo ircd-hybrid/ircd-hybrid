@@ -62,7 +62,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
   struct MaskItem *conf = NULL;
   struct irc_ssaddr ip;
   int host_mask;
-  int t;
+  enum hostmask_type t;
   int matches = 0;
   char userhost[HOSTLEN + USERLEN + 2];
   struct split_nuh_item nuh;

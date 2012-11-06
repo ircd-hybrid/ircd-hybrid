@@ -94,25 +94,23 @@ remove_gline_match(const char *user, const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
-  int t;
+  int t = 0;
+  int aftype = 0;
 
   if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
   {
 #ifdef IPV6
     if (t == HM_IPV6)
-      t = AF_INET6;
+      aftype = AF_INET6;
     else
 #endif
-      t = AF_INET;
+      aftype = AF_INET;
     piphost = &iphost;
   }
   else
-  {
-    t = 0;
     piphost = NULL;
-  }
 
-  if ((conf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0)))
+  if ((conf = find_conf_by_address(host, piphost, CONF_GLINE, aftype, user, NULL, 0)))
   {
     if (IsConfDatabase(conf))
     {

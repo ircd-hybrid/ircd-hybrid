@@ -96,25 +96,23 @@ remove_dline_match(const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
-  int t;
+  int t = 0;
+  int aftype = 0;
 
   if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
   {
 #ifdef IPV6
     if (t == HM_IPV6)
-      t = AF_INET6;
+      aftype = AF_INET6;
     else
 #endif
-      t = AF_INET;
+      aftype = AF_INET;
     piphost = &iphost;
   }
   else
-  {
-    t = 0;
     piphost = NULL;
-  }
 
-  if ((conf = find_conf_by_address(host, piphost, CONF_DLINE, t, NULL, NULL, 0)))
+  if ((conf = find_conf_by_address(host, piphost, CONF_DLINE, aftype, NULL, NULL, 0)))
   {
     if (IsConfDatabase(conf))
     {
@@ -148,7 +146,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   struct irc_ssaddr daddr;
   struct MaskItem *conf=NULL;
   time_t tkline_time=0;
-  int bits, t;
+  int bits = 0, aftype = 0, t = 0;
   const char *current_date = NULL;
   time_t cur_time;
   char hostip[HOSTIPLEN + 1];
@@ -231,14 +229,14 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
 #ifdef IPV6
   if (t == HM_IPV6)
-    t = AF_INET6;
+    aftype = AF_INET6;
   else
 #endif
-    t = AF_INET;
+    aftype = AF_INET;
 
   parse_netmask(dlhost, &daddr, NULL);
 
-  if ((conf = find_dline_conf(&daddr, t)) != NULL)
+  if ((conf = find_dline_conf(&daddr, aftype)) != NULL)
   {
     creason = conf->reason ? conf->reason : def_reason;
     if (IsConfExemptKline(conf))
@@ -283,7 +281,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
   struct irc_ssaddr daddr;
   struct MaskItem *conf=NULL;
   time_t tkline_time=0;
-  int bits, t;
+  int bits = 0, aftype = 0, t = 0;
   const char *current_date = NULL;
   time_t cur_time;
   char hostip[HOSTIPLEN + 1];
@@ -350,14 +348,14 @@ ms_dline(struct Client *client_p, struct Client *source_p,
 
 #ifdef IPV6
     if (t == HM_IPV6)
-      t = AF_INET6;
+      aftype= AF_INET6;
     else
 #endif
-      t = AF_INET;
+      aftype = AF_INET;
 
     parse_netmask(dlhost, &daddr, NULL);
 
-    if ((conf = find_dline_conf(&daddr, t)) != NULL)
+    if ((conf = find_dline_conf(&daddr, aftype)) != NULL)
     {
       creason = conf->reason ? conf->reason : def_reason;
       if (IsConfExemptKline(conf))

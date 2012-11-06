@@ -257,25 +257,23 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
   const char *reason;
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf = NULL;
-  int t;
+  int t = 0;
+  int aftype = 0;
 
-  if ((t = parse_netmask(lhost, &iphost, &t)) != HM_HOST)
+  if ((t = parse_netmask(lhost, &iphost, NULL)) != HM_HOST)
   {
 #ifdef IPV6
     if (t == HM_IPV6)
-      t = AF_INET6;
+      aftype = AF_INET6;
     else
 #endif
-      t = AF_INET;
+      aftype = AF_INET;
     piphost = &iphost;
   }
   else
-  {
-    t = 0;
     piphost = NULL;
-  }
 
-  if ((conf = find_conf_by_address(lhost, piphost, CONF_KLINE, t, luser, NULL, 0)))
+  if ((conf = find_conf_by_address(lhost, piphost, CONF_KLINE, aftype, luser, NULL, 0)))
   {
     if (warn)
     {
@@ -428,26 +426,24 @@ static int
 remove_kline_match(const char *host, const char *user)
 {
   struct irc_ssaddr iphost, *piphost;
-  struct MaskItem *conf = NULL;
-  int t;
+  struct MaskItem *conf;
+  int t = 0;
+  int aftype = 0;
 
   if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
   {
 #ifdef IPV6
     if (t == HM_IPV6)
-      t = AF_INET6;
+      aftype = AF_INET6;
     else
 #endif
-      t = AF_INET;
+      aftype = AF_INET;
     piphost = &iphost;
   }
   else
-  {
-    t = 0;
     piphost = NULL;
-  }
 
-  if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, t, user, NULL, 0)))
+  if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, aftype, user, NULL, 0)))
   {
     if (IsConfDatabase(conf))
     {

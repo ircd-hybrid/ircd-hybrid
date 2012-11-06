@@ -102,8 +102,6 @@ class_init(void)
   class_default->max_total = MAXIMUM_LINKS_DEFAULT;
   class_default->max_sendq = DEFAULT_SENDQ;
   class_default->max_recvq = DEFAULT_RECVQ;
-
-  client_check_cb = register_callback("check_client", check_client);
 }
 
 const char *
@@ -124,10 +122,9 @@ get_client_class(const dlink_list *const list)
 }
 
 unsigned int
-get_client_ping(const dlink_list *const list, int *pingwarn)
+get_client_ping(const dlink_list *const list)
 {
   const dlink_node *ptr = NULL;
-  int ping = 0;
 
   if ((ptr = list->head)) {
     const struct MaskItem *conf = ptr->data;
@@ -135,9 +132,7 @@ get_client_ping(const dlink_list *const list, int *pingwarn)
     assert(aconf->class);
     assert(aconf->type & (CONF_OPERATOR | CONF_CLIENT | CONF_SERVER));
 
-    ping = get_conf_ping(conf, pingwarn);
-    if (ping > 0)
-      return ping;
+    return conf->class->ping_freq;
   }
 
   return class_default->ping_freq;
@@ -248,12 +243,12 @@ cidr_limit_reached(int over_rule,
   dlink_node *ptr = NULL;
   struct CidrItem *cidr = NULL;
 
-  if (class->number_per_cidr <= 0)
+  if (class->number_per_cidr == 0)
     return 0;
 
   if (ip->ss.ss_family == AF_INET)
   {
-    if (class->cidr_bitlen_ipv4 <= 0)
+    if (class->cidr_bitlen_ipv4 == 0)
       return 0;
 
     DLINK_FOREACH(ptr, class->list_ipv4.head)
@@ -317,7 +312,7 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 
   if (ip->ss.ss_family == AF_INET)
   {
-    if (aclass->cidr_bitlen_ipv4 <= 0)
+    if (aclass->cidr_bitlen_ipv4 == 0)
       return;
 
     DLINK_FOREACH_SAFE(ptr, next_ptr, aclass->list_ipv4.head)

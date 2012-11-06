@@ -717,7 +717,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
     {
       dlinkDelete(&arec->node, &atable[hv]);
 
-      if (!conf->clients)
+      if (!conf->ref_count)
         conf_free(conf);
 
       MyFree(arec);
@@ -754,7 +754,7 @@ clear_out_address_conf(void)
 
       dlinkDelete(&arec->node, &atable[i]);
 
-      if (!arec->conf->clients)
+      if (!arec->conf->ref_count)
         conf_free(arec->conf);
       MyFree(arec);
     }
@@ -780,6 +780,7 @@ hostmask_send_expiration(struct AddressRec *arec)
     case CONF_GLINE:
       ban_type = 'G';
       break;
+    default: break;
   }
   
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -814,6 +815,7 @@ hostmask_expire_temporary(void)
           conf_free(arec->conf);
           MyFree(arec);
           break;
+        default: break;
       }
     }
   }

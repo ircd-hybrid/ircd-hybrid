@@ -54,7 +54,6 @@
 #include "conf_db.h"
 #include "conf_class.h"
 
-struct Callback *client_check_cb = NULL;
 struct config_server_hide ConfigServerHide;
 
 /* general conf items link list root, other than k lines etc. */
@@ -82,17 +81,13 @@ static void clear_out_old_conf(void);
 static void expire_tklines(dlink_list *);
 static void garbage_collect_ip_entries(void);
 static int hash_ip(struct irc_ssaddr *);
-static int verify_access(struct Client *, const char *);
+static int verify_access(struct Client *);
 static int attach_iline(struct Client *, struct MaskItem *);
 static struct ip_entry *find_or_add_ip(struct irc_ssaddr *);
 static dlink_list *map_to_list(enum maskitem_type);
 static struct MaskItem *find_regexp_kline(const char *[]);
 static int find_user_host(struct Client *, char *, char *, char *, unsigned int);
 
-/*
- * bit_len
- */
-static void flags_to_ascii(unsigned int, const unsigned int[], char *, int);
 
 /* usually, with hash tables, you use a prime number...
  * but in this case I am dealing with ip addresses,
@@ -103,7 +98,7 @@ static void flags_to_ascii(unsigned int, const unsigned int[], char *, int);
 struct ip_entry
 {
   struct irc_ssaddr ip;
-  int count;
+  unsigned int count;
   time_t last_attempt;
   struct ip_entry *next;
 };
@@ -218,11 +213,24 @@ conf_free(struct MaskItem *conf)
   MyFree(conf);
 }
 
-static const unsigned int shared_bit_table[] =
-  { 'K', 'k', 'U', 'X', 'x', 'Y', 'Q', 'q', 'R', 'L', 0};
+static const struct shared_flags
+{
+  const unsigned int type;
+  const unsigned char letter;
+} flag_table[] = {
+  { SHARED_KLINE,   'K' },
+  { SHARED_UNKLINE, 'U' },
+  { SHARED_XLINE,   'X' },
+  { SHARED_UNXLINE, 'Y' },
+  { SHARED_RESV,    'Q' },
+  { SHARED_UNRESV,  'R' },
+  { SHARED_LOCOPS,  'L' },
+  { SHARED_DLINE,   'D' },
+  { SHARED_UNDLINE, 'E' },
+  { 0, '\0' }
+};
 
-/* report_confitem_types()
- *
+/*
  * inputs	- pointer to client requesting confitem report
  *		- ConfType to report
  * output	- none
@@ -234,6 +242,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
   dlink_node *ptr = NULL, *dptr = NULL;
   struct MaskItem *conf = NULL;
   const struct ClassItem *class = NULL;
+  const struct shared_flags *shared = NULL;
   char buf[12];
   char *p = NULL;
 
@@ -277,17 +286,19 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 #endif
 
   case CONF_ULINE:
+    shared = flag_table;
     DLINK_FOREACH(ptr, uconf_items.head)
     {
       conf = ptr->data;
 
       p = buf;
 
-      /* some of these are redundant for the sake of 
-       * consistency with cluster{} flags
-       */
       *p++ = 'c';
-      flags_to_ascii(conf->action /* XXX XXX */, shared_bit_table, p, 0);
+      for (; shared->type; ++shared)
+        if (shared->type & conf->flags)
+          *p++ = shared->letter;
+        else
+          *p++ = ToLower(shared->letter);
 
       sendto_one(source_p, form_str(RPL_STATSULINE),
 		 me.name, source_p->name, conf->name,
@@ -295,6 +306,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 		 conf->host?conf->host: "*", buf);
     }
 
+    shared = flag_table;
     DLINK_FOREACH(ptr, cluster_items.head)
     {
       conf = ptr->data;
@@ -302,7 +314,11 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       p = buf;
 
       *p++ = 'C';
-      flags_to_ascii(conf->flags /* XXX XXX */, shared_bit_table, p, 0);
+      for (; shared->type; ++shared)
+        if (shared->type & conf->flags)
+          *p++ = shared->letter;
+        else
+          *p++ = ToLower(shared->letter);
 
       sendto_one(source_p, form_str(RPL_STATSULINE),
                  me.name, source_p->name, conf->name,
@@ -360,7 +376,6 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
     DLINK_FOREACH(ptr, server_items.head)
     {
       p = buf;
-
       conf = ptr->data;
 
       buf[0] = '\0';
@@ -429,15 +444,12 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
  *		  Look for conf lines which have the same
  * 		  status as the flags passed.
  */
-void *
-check_client(va_list args)
+int
+check_client(struct Client *source_p)
 {
-  struct Client *source_p = va_arg(args, struct Client *);
-  const char *username = va_arg(args, const char *);
   int i;
  
-  /* I'm already in big trouble if source_p->localClient is NULL -db */
-  if ((i = verify_access(source_p, username)))
+  if ((i = verify_access(source_p)))
     ilog(LOG_TYPE_IRCD, "Access denied: %s[%s]", 
          source_p->name, source_p->sockhost);
 
@@ -495,18 +507,17 @@ check_client(va_list args)
      break;
   }
 
-  return (i < 0 ? NULL : source_p);
+  return (i < 0 ? 0 : 1);
 }
 
 /* verify_access()
  *
  * inputs	- pointer to client to verify
- *		- pointer to proposed username
  * output	- 0 if success -'ve if not
  * side effect	- find the first (best) I line to attach.
  */
 static int
-verify_access(struct Client *client_p, const char *username)
+verify_access(struct Client *client_p)
 {
   struct MaskItem *conf = NULL, *rkconf = NULL;
   char non_ident[USERLEN + 1] = { '~', '\0' };
@@ -521,7 +532,7 @@ verify_access(struct Client *client_p, const char *username)
   }
   else
   {
-    strlcpy(non_ident+1, username, sizeof(non_ident)-1);
+    strlcpy(non_ident+1, client_p->username, sizeof(non_ident)-1);
     conf = find_address_conf(client_p->host,non_ident,
 			     &client_p->localClient->ip,
 			     client_p->localClient->aftype,
@@ -589,11 +600,10 @@ verify_access(struct Client *client_p, const char *username)
 static int
 attach_iline(struct Client *client_p, struct MaskItem *conf)
 {
-//  struct MaskItem *conf = NULL;
   struct ClassItem *class = NULL;
   struct ip_entry *ip_found;
   int a_limit_reached = 0;
-  int local = 0, global = 0, ident = 0;
+  unsigned int local = 0, global = 0, ident = 0;
 
   ip_found = find_or_add_ip(&client_p->localClient->ip);
   ip_found->count++;
@@ -894,15 +904,18 @@ detach_conf(struct Client *client_p, enum maskitem_type type)
       case CONF_CLIENT:
       case CONF_OPER:
       case CONF_SERVER:
-        assert(conf->clients > 0);
-
+        assert(conf->ref_count > 0);
         assert(conf->class->ref_count > 0);
 
         if (conf->type == CONF_CLIENT)
           remove_from_cidr_check(&client_p->localClient->ip, conf->class);
         if (--conf->class->ref_count == 0 && conf->class->active == 0)
+        {
           class_free(conf->class);
-        if (--conf->clients == 0 && conf->active == 0)
+          conf->class = NULL;
+        }
+
+        if (--conf->ref_count == 0 && conf->active == 0)
           conf_free(conf);
 
         break;
@@ -935,7 +948,7 @@ attach_conf(struct Client *client_p, struct MaskItem *conf)
       return TOO_MANY;    /* Already at maximum allowed */
 
   conf->class->ref_count++;
-  conf->clients++;
+  conf->ref_count++;
 
   dlinkAdd(conf, make_dlink_node(), &client_p->localClient->confs);
 
@@ -1018,6 +1031,9 @@ map_to_list(enum maskitem_type type)
 {
   switch(type)
   {
+  case CONF_RKLINE:
+    return(&rkconf_items);
+    break;
   case CONF_RXLINE:
     return(&rxconf_items);
     break;
@@ -1053,13 +1069,13 @@ map_to_list(enum maskitem_type type)
  *		- pointer to name string to find
  *		- pointer to user
  *		- pointer to host
- *		- optional action to match on as well
+ *		- optional flags to match on as well
  * output       - NULL or pointer to found struct MaskItem
  * side effects - looks for a match on name field
  */
 struct MaskItem *
 find_matching_name_conf(enum maskitem_type type, const char *name, const char *user,
-                        const char *host, unsigned int action)
+                        const char *host, unsigned int flags)
 {
   dlink_node *ptr=NULL;
   struct MaskItem *conf=NULL;
@@ -1104,7 +1120,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
       {
 	if ((user == NULL && (host == NULL)))
 	  return conf;
-	if ((conf->action & action) != action)
+	if ((conf->flags & flags) != flags)
           continue;
 	if (EmptyString(conf->user) || EmptyString(conf->host))
 	  return conf;
@@ -1299,7 +1315,7 @@ set_default_conf(void)
   /* verify init_class() ran, this should be an unnecessary check
    * but its not much work.
    */
-  assert(class_default == class_items.tail->data);
+  assert(class_default == class_get_list()->tail->data);
 
 #ifdef HAVE_LIBCRYPTO
   ServerInfo.rsa_private_key = NULL;
@@ -1617,35 +1633,29 @@ expire_tklines(dlink_list *tklist)
   {
     conf = ptr->data;
 
+    if (!conf->hold || conf->hold > CurrentTime)
+      continue;
+
     if (conf->type == CONF_XLINE)
     {
-      if (conf->hold && conf->hold <= CurrentTime)
-      {
-        if (ConfigFileEntry.tkline_expire_notices)
-	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      if (ConfigFileEntry.tkline_expire_notices)
+        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary X-line for [%s] expired", conf->name);
-	conf_free(conf);
-      }
+      conf_free(conf);
     }
     else if (conf->type == CONF_NRESV)
     {
-      if (conf->hold && conf->hold <= CurrentTime)
-      {
-        if (ConfigFileEntry.tkline_expire_notices)
-	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      if (ConfigFileEntry.tkline_expire_notices)
+        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary RESV for [%s] expired", conf->name);
-	conf_free(conf);
-      }
+      conf_free(conf);
     }
     else if (conf->type == CONF_CRESV)
-    { /* XXX XXX */
-      if (conf->hold && conf->hold <= CurrentTime)
-      {
-        if (ConfigFileEntry.tkline_expire_notices)
-	  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    {
+      if (ConfigFileEntry.tkline_expire_notices)
+        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary RESV for [%s] expired", conf->name);
-	delete_channel_resv(conf);
-      }
+      delete_channel_resv(conf);
     }
   }
 }
@@ -1658,7 +1668,7 @@ expire_tklines(dlink_list *tklist)
  */
 static const struct oper_privs
 {
-  const unsigned int oprivs;
+  const unsigned int flag;
   const unsigned char c;
 } flag_list[] = {
   { OPER_FLAG_ADMIN,       'A' },
@@ -1682,14 +1692,14 @@ oper_privs_as_string(const unsigned int port)
 {
   static char privs_out[16];
   char *privs_ptr = privs_out;
-  unsigned int i = 0;
+  const struct oper_privs *opriv = flag_list;
 
-  for (; flag_list[i].oprivs; ++i)
+  for (; opriv->flag; ++opriv)
   {
-    if (port & flag_list[i].oprivs)
-      *privs_ptr++ = flag_list[i].c;
+    if (port & opriv->flag)
+      *privs_ptr++ = opriv->c;
     else
-      *privs_ptr++ = ToLowerTab[flag_list[i].c];
+      *privs_ptr++ = ToLower(opriv->c);
   }
 
   *privs_ptr = '\0';
@@ -1842,7 +1852,7 @@ clear_out_old_conf(void)
       /* XXX This is less than pretty */
       if (conf->type == CONF_SERVER || conf->type == CONF_OPER)
       {
-        if (!conf->clients)
+        if (!conf->ref_count)
 	  conf_free(conf);
       }
       else if (conf->type == CONF_XLINE  ||
@@ -1908,13 +1918,8 @@ clear_out_old_conf(void)
   MyFree(AdminInfo.description);
   AdminInfo.description = NULL;
 
-  /* operator{} and class{} blocks are freed above */
   /* clean out listeners */
   close_listeners();
-
-  /* auth{}, quarantine{}, shared{}, connect{}, kill{}, deny{},
-   * exempt{} and gecos{} blocks are freed above too
-   */
 
   /* clean out general */
   MyFree(ConfigFileEntry.service_name);
@@ -1922,30 +1927,6 @@ clear_out_old_conf(void)
 
   delete_isupport("INVEX");
   delete_isupport("EXCEPTS");
-}
-
-#define BAD_PING (-1)
-
-/* get_conf_ping()
- *
- * inputs       - pointer to struct MaskItem
- *              - pointer to a variable that receives ping warning time
- * output       - ping frequency
- * side effects - NONE
- */
-int
-get_conf_ping(const struct MaskItem *conf, int *pingwarn)
-{
-  if (conf != NULL)
-  {
-    if (conf->class)
-    {
-      *pingwarn = conf->class->ping_warning;
-      return conf->class->ping_freq;
-    }
-  }
-
-  return BAD_PING;
 }
 
 /* conf_add_class_to_conf()
@@ -2001,7 +1982,7 @@ conf_add_server(struct MaskItem *conf, const char *class_name)
 {
   conf_add_class_to_conf(conf, class_name);
 
-  if (!conf->host || !conf->name)
+  if (EmptyString(conf->host) || EmptyString(conf->name))
   {
     sendto_realops_flags(UMODE_ALL, L_ALL,  SEND_NOTICE,
                          "Bad connect block");
@@ -2398,14 +2379,6 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
 int
 valid_comment(struct Client *source_p, char *comment, int warn)
 {
-  if (strchr(comment, '"'))
-  {
-    if (warn)
-      sendto_one(source_p, ":%s NOTICE %s :Invalid character '\"' in comment",
-                 me.name, source_p->name);
-    return 0;
-  }
-
   if (strlen(comment) > REASONLEN)
     comment[REASONLEN-1] = '\0';
 
@@ -2554,32 +2527,4 @@ split_nuh(struct split_nuh_item *const iptr)
         strlcpy(iptr->nickptr, iptr->nuhmask, iptr->nicksize);
     }
   }
-}
-
-/*
- * flags_to_ascii
- *
- * inputs	- flags is a bitmask
- *		- pointer to table of ascii letters corresponding
- *		  to each bit
- *		- flag 1 for convert ToLower if bit missing 
- *		  0 if ignore.
- * output	- none
- * side effects	- string pointed to by p has bitmap chars written to it
- */
-static void
-flags_to_ascii(unsigned int flags, const unsigned int bit_table[], char *p,
-	       int lowerit)
-{
-  unsigned int mask = 1;
-  int i = 0;
-
-  for (mask = 1; (mask != 0) && (bit_table[i] != 0); mask <<= 1, i++)
-  {
-    if (flags & mask)
-      *p++ = bit_table[i];
-    else if (lowerit)
-      *p++ = ToLower(bit_table[i]);
-  }
-  *p = '\0';
 }

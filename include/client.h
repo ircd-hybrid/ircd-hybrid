@@ -292,10 +292,9 @@ struct Client
 #define FLAGS_BURSTED       0x00100000 /**< user was already bursted */
 #define FLAGS_EXEMPTRESV    0x00200000 /**< client is exempt from RESV */
 #define FLAGS_GOTUSER       0x00400000 /**< if we received a USER command */
-#define FLAGS_PINGWARNING   0x00800000 /**< unreplied ping warning already sent */
-#define FLAGS_FINISHED_AUTH 0x01000000 /**< Client has been released from auth */
-#define FLAGS_FLOOD_NOTICED 0x02000000 /**< Notice to opers about this flooder has been sent */
-#define FLAGS_SERVICE       0x04000000 /**< Client/server is a network service */
+#define FLAGS_FINISHED_AUTH 0x00800000 /**< Client has been released from auth */
+#define FLAGS_FLOOD_NOTICED 0x01000000 /**< Notice to opers about this flooder has been sent */
+#define FLAGS_SERVICE       0x02000000 /**< Client/server is a network service */
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
@@ -404,10 +403,6 @@ struct Client
 #define SetPingSent(x)		((x)->flags |= FLAGS_PINGSENT)
 #define IsPingSent(x)		((x)->flags & FLAGS_PINGSENT)
 #define ClearPingSent(x)	((x)->flags &= ~FLAGS_PINGSENT)
-
-#define SetPingWarning(x)       ((x)->flags |= FLAGS_PINGWARNING)
-#define IsPingWarning(x)        ((x)->flags & FLAGS_PINGWARNING)
-#define ClearPingWarning(x)     ((x)->flags &= ~FLAGS_PINGWARNING)
 
 #define SetNeedId(x)            ((x)->flags |= FLAGS_NEEDID)
 #define IsNeedId(x)             ((x)->flags & FLAGS_NEEDID)

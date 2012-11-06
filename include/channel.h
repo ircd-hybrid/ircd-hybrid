@@ -91,7 +91,7 @@ struct Ban
   time_t when;
   struct irc_ssaddr addr;
   int bits;
-  char type;
+  int type;
 };
 
 extern dlink_list global_channel_list;

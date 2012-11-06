@@ -233,13 +233,12 @@ static void
 check_pings_list(dlink_list *list)
 {
   char scratch[32];        /* way too generous but... */
-  struct Client *client_p; /* current local client_p being examined */
-  int ping, pingwarn;      /* ping time value from client */
-  dlink_node *ptr, *next_ptr;
+  int ping = 0;      /* ping time value from client */
+  dlink_node *ptr = NULL, *next_ptr = NULL;
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
   {
-    client_p = ptr->data;
+    struct Client *client_p = ptr->data;
 
     /*
     ** Note: No need to notify opers here. It's
@@ -252,9 +251,9 @@ check_pings_list(dlink_list *list)
     }
 
     if (!IsRegistered(client_p))
-      ping = CONNECTTIMEOUT, pingwarn = 0;
+      ping = CONNECTTIMEOUT;
     else
-      ping = get_client_ping(&client_p->localClient->confs, &pingwarn);
+      ping = get_client_ping(&client_p->localClient->confs);
 
     if (ping < CurrentTime - client_p->localClient->lasttime)
     {
@@ -266,7 +265,6 @@ check_pings_list(dlink_list *list)
 	 * it is still alive.
 	 */
 	SetPingSent(client_p);
-	ClearPingWarning(client_p);
 	client_p->localClient->lasttime = CurrentTime - ping;
 	sendto_one(client_p, "PING :%s", ID_or_name(&me, client_p));
       }
@@ -293,24 +291,6 @@ check_pings_list(dlink_list *list)
           snprintf(scratch, sizeof(scratch), "Ping timeout: %d seconds",
                    (int)(CurrentTime - client_p->localClient->lasttime));
           exit_client(client_p, &me, scratch);
-        }
-        else if (!IsPingWarning(client_p) && pingwarn > 0 &&
-	         (IsServer(client_p) || IsHandshake(client_p)) &&
-	         CurrentTime - client_p->localClient->lasttime >= ping + pingwarn)
-        {
-          /*
-           * If the server hasn't replied in pingwarn seconds after sending
-           * the PING, notify the opers so that they are aware of the problem.
-           */
-	  SetPingWarning(client_p);
-          sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-	                       "Warning, no response from %s in %d seconds",
-	                       get_client_name(client_p, HIDE_IP), pingwarn);
-	  sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-	                       "Warning, no response from %s in %d seconds",
-	                       get_client_name(client_p, MASK_IP), pingwarn);
-          ilog(LOG_TYPE_IRCD, "No response from %s in %d seconds",
-	       get_client_name(client_p, HIDE_IP), pingwarn);
         }
       }
     }

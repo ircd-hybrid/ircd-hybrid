@@ -579,8 +579,8 @@ hash_find_userhost(const char *host)
  * side effects	-
  */
 void
-count_user_host(const char *user, const char *host, int *global_p,
-                int *local_p, int *icount_p)
+count_user_host(const char *user, const char *host, unsigned int *global_p,
+                unsigned int *local_p, unsigned int *icount_p)
 {
   dlink_node *ptr;
   struct UserHost *found_userhost;

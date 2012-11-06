@@ -25,9 +25,6 @@
 #ifndef INCLUDED_s_conf_h
 #define INCLUDED_s_conf_h
 #include "config.h"
-#ifdef HAVE_LIBCRYPTO
-#include <openssl/rsa.h>
-#endif
 #include "ircd_defs.h"
 #include "motd.h"               /* MessageFile */
 #include "client.h"
@@ -35,8 +32,6 @@
 #include "conf_class.h"
 
 
-
-extern struct Callback *client_check_cb;
 
 struct conf_parser_context
 {
@@ -66,7 +61,7 @@ enum maskitem_type
   CONF_SERVICE  = 1 << 14,
   CONF_OPER     = 1 << 15,
   CONF_HUB      = 1 << 16, /* XXX There are no separate hub/leaf configs anymore. This is just for /stats h */
-  CONF_CLASS    = 1 << 17
+  CONF_CLASS    = 1 << 17  /* XXX Same here; just for /stats Y|y */
 };
 
 struct split_nuh_item
@@ -85,49 +80,45 @@ struct split_nuh_item
 
 struct MaskItem
 {
-  struct MaskItem *hnext;
-  dlink_node node;
+  struct MaskItem   *hnext;
+  dlink_node         node;
+  dlink_list         leaf_list;
+  dlink_list         hub_list;
   enum maskitem_type type;
-  unsigned int     dns_failed;
-  unsigned int     dns_pending;
-  unsigned int     flags;
-  unsigned int     modes;
-  unsigned int     port;
-  unsigned int     count;
-  unsigned int     action;
-  int              clients;  /* Number of *LOCAL* clients using this */
-  int              bits;
-  unsigned int     aftype;
-  unsigned int     htype;
-  unsigned int     active;
-  struct irc_ssaddr bind;  /* ip to bind to for outgoing connect */
-  struct irc_ssaddr addr;  /* ip to connect to */
-  char *           name;
-  char *           host;     /* host part of user@host */
-  char *           passwd;
-  char *           spasswd;  /* Password to send. */
-  char *	   reason;
-  char *           user;     /* user part of user@host */
-  time_t           hold;     /* Hold action until this time (calendar time) */
-  time_t           setat;
-  struct ClassItem *class;  /* Class of connection */
-#ifdef HAVE_LIBCRYPTO
-  /* certs */
-  char *cipher_list;
-  char *           rsa_public_key_file;
-  RSA *            rsa_public_key;
-#endif
-  void *regexuser;
-  void *regexhost;
-  dlink_list leaf_list;
-  dlink_list hub_list;
+  unsigned int       dns_failed;
+  unsigned int       dns_pending;
+  unsigned int       flags;
+  unsigned int       modes;
+  unsigned int       port;
+  unsigned int       count;
+  unsigned int       aftype;
+  unsigned int       active;
+  unsigned int       htype;
+  unsigned int       ref_count;  /* Number of *LOCAL* clients using this */
+  int                bits;
+  time_t             hold;     /* Hold action until this time (calendar time) */
+  time_t             setat;
+  struct irc_ssaddr  bind;  /* ip to bind to for outgoing connect */
+  struct irc_ssaddr  addr;  /* ip to connect to */
+  struct ClassItem  *class;  /* Class of connection */
+  char              *name;
+  char              *host;     /* host part of user@host */
+  char              *passwd;
+  char              *spasswd;  /* Password to send. */
+  char              *reason;
+  char              *user;     /* user part of user@host */
+  char              *cipher_list;
+  char              *rsa_public_key_file;
+  void              *rsa_public_key;
+  void              *regexuser;
+  void              *regexhost;
 };
 
 struct CidrItem
 {
   dlink_node node;
   struct irc_ssaddr mask;
-  int number_on_this_cidr;
+  unsigned int number_on_this_cidr;
 };
 
 
@@ -137,9 +128,6 @@ struct CidrItem
 #define IsConfGline(x)          ((x)->type == CONF_GLINE)
 
 /* MaskItem->flags */
-
-/* Generic flags... */
-/* access flags... */
 #define CONF_FLAGS_DO_IDENTD            0x00000001
 #define CONF_FLAGS_LIMIT_IP             0x00000002
 #define CONF_FLAGS_NO_TILDE             0x00000004
@@ -153,7 +141,6 @@ struct CidrItem
 #define CONF_FLAGS_EXEMPTGLINE          0x00000400
 #define CONF_FLAGS_CAN_FLOOD            0x00000800
 #define CONF_FLAGS_NEED_PASSWORD        0x00001000
-/* server flags */
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x00002000
 #define CONF_FLAGS_ENCRYPTED            0x00004000
 #define CONF_FLAGS_IN_DATABASE          0x00008000
@@ -304,12 +291,10 @@ struct server_info
   char *description;
   char *network_name;
   char *network_desc;
-#ifdef HAVE_LIBCRYPTO
   char *rsa_private_key_file;
-  RSA *rsa_private_key;
-  SSL_CTX *server_ctx;
-  SSL_CTX *client_ctx;
-#endif
+  void *rsa_private_key;
+  void *server_ctx;
+  void *client_ctx;
   int hub;
   struct irc_ssaddr ip;
   struct irc_ssaddr ip6;
@@ -332,7 +317,6 @@ struct logging_entry
   unsigned int use_logging;
 };
 
-extern dlink_list class_items;
 extern dlink_list server_items;
 extern dlink_list cluster_items;
 extern dlink_list xconf_items;
@@ -358,7 +342,8 @@ extern struct MaskItem *conf_make(enum maskitem_type);
 extern void read_conf_files(int);
 extern int attach_conf(struct Client *, struct MaskItem *);
 extern int attach_connect_block(struct Client *, const char *, const char *);
-extern int get_conf_ping(const struct MaskItem *, int *);
+extern int check_client(struct Client *);
+
 
 extern void detach_conf(struct Client *, enum maskitem_type);
 extern struct MaskItem *find_conf_name(dlink_list *, const char *, enum maskitem_type);

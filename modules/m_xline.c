@@ -361,10 +361,9 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
                          get_oper_name(source_p), conf->name,
                          conf->reason);
     sendto_one(source_p,
-               ":%s NOTICE %s :Added X-Line [%s] [%d] [%s]",
+               ":%s NOTICE %s :Added X-Line [%s] [%s]",
                MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
-               source_p->name, conf->name,
-               conf->action, conf->reason);
+               source_p->name, conf->name, conf->reason);
     ilog(LOG_TYPE_IRCD, "%s added X-Line for [%s] [%s]",
          get_oper_name(source_p), conf->name, conf->reason);
   }

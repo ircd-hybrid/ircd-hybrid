@@ -74,7 +74,7 @@ register_callback(const char *name, CBFUNC *func)
 
   if (name != NULL)
   {
-    DupString(cb->name, name);
+    cb->name = xstrdup(name);
     dlinkAdd(cb, &cb->node, &callback_list);
   }
 

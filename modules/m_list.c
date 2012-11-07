@@ -133,8 +133,7 @@ do_list(struct Client *source_p, int parc, char *parv[])
 		   errors = 1;
 		 if (!errors)
 		 {
-                   char *s;
-		   DupString(s, opt);
+                   char *s = xstrdup(opt);
 		   dlinkAdd(s, make_dlink_node(), list);
 		 }
       }

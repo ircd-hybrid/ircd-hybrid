@@ -32,6 +32,7 @@
 #include "conf_class.h"
 
 
+#define CONF_NOREASON "<No reason supplied>"
 
 struct conf_parser_context
 {

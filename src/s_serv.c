@@ -456,7 +456,7 @@ add_capability(const char *capab_name, int cap_flag, int add_to_default)
 {
   struct Capability *cap = MyMalloc(sizeof(*cap));
 
-  DupString(cap->name, capab_name);
+  cap->name = xstrdup(capab_name);
   cap->cap = cap_flag;
   dlinkAdd(cap, &cap->node, &cap_list);
 

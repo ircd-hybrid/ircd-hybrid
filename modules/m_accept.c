@@ -95,9 +95,9 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
 {
   struct split_nuh_item *accept_p = MyMalloc(sizeof(*accept_p));
 
-  DupString(accept_p->nickptr, nuh->nickptr);
-  DupString(accept_p->userptr, nuh->userptr);
-  DupString(accept_p->hostptr, nuh->hostptr);
+  accept_p->nickptr = xstrdup(nuh->nickptr);
+  accept_p->userptr = xstrdup(nuh->userptr);
+  accept_p->hostptr = xstrdup(nuh->hostptr);
 
   dlinkAdd(accept_p, &accept_p->node, &source_p->localClient->acceptlist);
 

@@ -147,7 +147,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, form_str(RPL_RSACHALLENGE),
                me.name, source_p->name, challenge);
 
-  DupString(source_p->localClient->auth_oper, conf->name);
+  source_p->localClient->auth_oper = xstrdup(conf->name);
   MyFree(challenge);
 }
 

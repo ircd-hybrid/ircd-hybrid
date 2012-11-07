@@ -32,6 +32,7 @@
 #include "modules.h"
 #include "s_serv.h"
 #include "s_user.h"
+#include "s_misc.h"
 
 
 /*
@@ -47,11 +48,9 @@ static void
 mr_pass(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  char *password = parv[1];
-
   assert(client_p == source_p);
 
-  if (EmptyString(password))
+  if (EmptyString(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name,
                source_p->name[0] ? source_p->name : "*", "PASS");
@@ -59,9 +58,7 @@ mr_pass(struct Client *client_p, struct Client *source_p,
   }
 
   MyFree(source_p->localClient->passwd);
-  if (strlen(password) > PASSWDLEN)
-    password[PASSWDLEN] = '\0';
-  DupString(source_p->localClient->passwd, password);
+  source_p->localClient->passwd = xstrndup(parv[1], IRCD_MIN(strlen(parv[1]), PASSWDLEN));
 
   if (parc > 2)
   {

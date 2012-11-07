@@ -33,9 +33,8 @@ extern void outofmemory(void);
 extern void *MyMalloc(size_t);
 extern void *MyRealloc(void *, size_t);
 extern void MyFree(void *);
-extern void _DupString(char **, const char *);
-
-#define DupString(x,y) _DupString(&x, y)
+extern void *xstrdup(const char *);
+extern void *xstrndup(const char *, size_t);
 
 #ifndef NDEBUG
 extern void mem_frob(void *, int);

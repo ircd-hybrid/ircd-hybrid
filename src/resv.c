@@ -33,6 +33,7 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd_defs.h"
+#include "s_misc.h"
 #include "conf.h"
 #include "conf_db.h"
 
@@ -58,13 +59,9 @@ create_channel_resv(char *name, char *reason, int in_conf)
   if (hash_find_resv(name))
     return NULL;
 
-  if (strlen(reason) > REASONLEN)
-    reason[REASONLEN] = '\0';
-
   conf = conf_make(CONF_CRESV);
-
-  DupString(conf->name, name);
-  DupString(conf->reason, reason);
+  conf->name = xstrdup(name);
+  conf->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
 
   dlinkAdd(conf, &conf->node, &resv_channel_list);
   hash_add_resv(conf);
@@ -91,13 +88,9 @@ create_nick_resv(char *name, char *reason, int in_conf)
   if (find_matching_name_conf(CONF_NRESV, name, NULL, NULL, 0))
     return NULL;
 
-  if (strlen(reason) > REASONLEN)
-    reason[REASONLEN] = '\0';
-
   conf = conf_make(CONF_NRESV);
-
-  DupString(conf->name, name);
-  DupString(conf->reason, reason);
+  conf->name = xstrdup(name);
+  conf->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
 
   return conf;
 }

@@ -94,8 +94,7 @@ class_init(void)
 {
   class_default = class_make();
 
-  DupString(class_default->name, "default");
-
+  class_default->name      = xstrdup("default");
   class_default->active    = 1;
   class_default->con_freq  = DEFAULT_CONNECTFREQUENCY;
   class_default->ping_freq = DEFAULT_PINGFREQUENCY;

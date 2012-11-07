@@ -66,11 +66,30 @@ MyFree(void *x)
     free(x);
 }
 
-void
-_DupString(char **x, const char *y)
+void *
+xstrdup(const char *s)
 {
-  (*x) = malloc(strlen(y) + 1);
-  strcpy((*x), y);
+  void *ret = malloc(strlen(s) + 1);
+
+  if (ret == NULL)
+    outofmemory();
+
+  strcpy(ret, s);
+
+  return ret;
+}
+
+void *
+xstrndup(const char *s, size_t len)
+{
+  void *ret = malloc(len + 1);
+
+  if (ret == NULL)
+    outofmemory();
+
+  strlcpy(ret, s, len + 1);
+
+  return ret;
 }
 
 /* outofmemory()

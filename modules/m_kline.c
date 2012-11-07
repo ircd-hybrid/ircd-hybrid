@@ -119,8 +119,8 @@ mo_kline(struct Client *client_p, struct Client *source_p,
   current_date = smalldate(cur_time);
   conf = conf_make(CONF_KLINE);
 
-  DupString(conf->host, host);
-  DupString(conf->user, user);
+  conf->host = xstrdup(host);
+  conf->user = xstrdup(user);
 
   if (tkline_time != 0)
     snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %s (%s)",
@@ -128,7 +128,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
   else
     snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
 
-  DupString(conf->reason, buffer);
+  conf->reason = xstrdup(buffer);
   m_kline_add_kline(source_p, conf, tkline_time);
 }
 
@@ -166,8 +166,8 @@ me_kline(struct Client *client_p, struct Client *source_p,
       return;
 
     conf = conf_make(CONF_KLINE);
-    DupString(conf->host, khost);
-    DupString(conf->user, kuser);
+    conf->host = xstrdup(khost);
+    conf->user = xstrdup(kuser);
 
     if (tkline_time != 0)
       snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %s (%s)",
@@ -175,7 +175,7 @@ me_kline(struct Client *client_p, struct Client *source_p,
     else
       snprintf(buffer, sizeof(buffer), "%s (%s)", kreason, current_date);
 
-    DupString(conf->reason, buffer);
+    conf->reason = xstrdup(buffer);
     m_kline_add_kline(source_p, conf, tkline_time);
   }
 }

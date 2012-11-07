@@ -257,7 +257,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     return;
 
   conf = conf_make(CONF_DLINE);
-  DupString(conf->host, dlhost);
+  conf->host = xstrdup(dlhost);
 
   if (tkline_time != 0)
     snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %s (%s)",
@@ -265,7 +265,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   else
     snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
 
-  DupString(conf->reason, buffer);
+  conf->reason = xstrdup(buffer);
   apply_dline(source_p, conf, tkline_time);
   rehashed_klines = 1;
 }
@@ -376,7 +376,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
       return;
 
     conf = conf_make(CONF_DLINE);
-    DupString(conf->host, dlhost);
+    conf->host = xstrdup(dlhost);
 
     if (tkline_time != 0)
       snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %s (%s)",
@@ -384,7 +384,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
     else
       snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
 
-    DupString(conf->reason, buffer);
+    conf->reason = xstrdup(buffer);
     apply_dline(source_p, conf, tkline_time);
     rehashed_klines = 1;
   }

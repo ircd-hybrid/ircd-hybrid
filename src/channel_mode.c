@@ -226,10 +226,9 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
 
   ban_p = BlockHeapAlloc(ban_heap);
 
-  DupString(ban_p->name, name);
-  DupString(ban_p->username, user);
-  DupString(ban_p->host, host);
-
+  ban_p->name = xstrdup(name);
+  ban_p->username = xstrdup(user);
+  ban_p->host = xstrdup(host);
   ban_p->when = CurrentTime;
   ban_p->len = len - 2; /* -2 for @ and ! */
   ban_p->type = parse_netmask(host, &ban_p->addr, &ban_p->bits);
@@ -243,7 +242,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
                client_p->username, client_p->host);
   }
   else
-    DupString(ban_p->who, client_p->name);
+    ban_p->who = xstrdup(client_p->name);
 
   dlinkAdd(ban_p, &ban_p->node, list);
 

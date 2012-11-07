@@ -1316,8 +1316,8 @@ set_default_conf(void)
   /* ServerInfo.name is not rehashable */
   /* ServerInfo.name = ServerInfo.name; */
   ServerInfo.description = NULL;
-  DupString(ServerInfo.network_name, NETWORK_NAME_DEFAULT);
-  DupString(ServerInfo.network_desc, NETWORK_DESC_DEFAULT);
+  ServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
+  ServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
 
   memset(&ServerInfo.ip, 0, sizeof(ServerInfo.ip));
   ServerInfo.specific_ipv4_vhost = 0;
@@ -1354,11 +1354,11 @@ set_default_conf(void)
   ConfigServerHide.links_delay = 300;
   ConfigServerHide.hidden = 0;
   ConfigServerHide.hide_servers = 0;
-  DupString(ConfigServerHide.hidden_name, NETWORK_NAME_DEFAULT);
+  ConfigServerHide.hidden_name = xstrdup(NETWORK_NAME_DEFAULT);
   ConfigServerHide.hide_server_ips = 0;
 
   
-  DupString(ConfigFileEntry.service_name, SERVICE_NAME_DEFAULT);
+  ConfigFileEntry.service_name = xstrdup(SERVICE_NAME_DEFAULT);
   ConfigFileEntry.max_watch = WATCHSIZE_DEFAULT;
   ConfigFileEntry.glines = 0;
   ConfigFileEntry.gline_time = 12 * 3600;
@@ -1417,13 +1417,13 @@ validate_conf(void)
     ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
 
   if (ServerInfo.network_name == NULL)
-    DupString(ServerInfo.network_name,NETWORK_NAME_DEFAULT);
+    ServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
 
   if (ServerInfo.network_desc == NULL)
-    DupString(ServerInfo.network_desc,NETWORK_DESC_DEFAULT);
+    ServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
 
   if (ConfigFileEntry.service_name == NULL)
-    DupString(ConfigFileEntry.service_name, SERVICE_NAME_DEFAULT);
+    ConfigFileEntry.service_name = xstrdup(SERVICE_NAME_DEFAULT);
 
   ConfigFileEntry.max_watch = IRCD_MAX(ConfigFileEntry.max_watch, WATCHSIZE_MIN);
 }

@@ -147,7 +147,7 @@ load_a_module(const char *path, int warn)
   if (EmptyString(modp->version))
     modp->version = unknown_ver;
 
-  DupString(modp->name, mod_basename);
+  modp->name = xstrdup(mod_basename);
   dlinkAdd(modp, &modp->node, &modules_list);
 
   if (modp->modinit)

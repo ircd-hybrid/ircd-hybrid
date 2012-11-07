@@ -332,8 +332,8 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
   conf = conf_make(CONF_XLINE);
 
   collapse(gecos);
-  DupString(conf->name, gecos);
-  DupString(conf->reason, reason);
+  conf->name = xstrdup(gecos);
+  conf->reason = xstrdup(reason);
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
   conf->setat = CurrentTime;

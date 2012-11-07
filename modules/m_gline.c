@@ -65,9 +65,9 @@ set_local_gline(const struct Client *source_p, const char *user,
   struct MaskItem *conf = conf_make(CONF_GLINE);
 
   snprintf(buffer, sizeof(buffer), "%s (%s)", reason, smalldate(CurrentTime));
-  DupString(conf->reason, buffer);
-  DupString(conf->user, user);
-  DupString(conf->host, host);
+  conf->reason = xstrdup(buffer);
+  conf->user = xstrdup(user);
+  conf->host = xstrdup(host);
 
   conf->setat = CurrentTime;
   conf->hold = CurrentTime + ConfigFileEntry.gline_time;

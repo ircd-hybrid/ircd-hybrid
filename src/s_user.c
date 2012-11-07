@@ -1382,9 +1382,9 @@ add_isupport(const char *name, const char *options, int n)
     dlinkAddTail(support, &support->node, &support_list);
   }
 
-  DupString(support->name, name);
+  support->name = xstrdup(name);
   if (options != NULL)
-    DupString(support->options, options);
+    support->options = xstrdup(options);
   support->number = n;
 
   rebuild_isupport_message_line();

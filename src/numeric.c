@@ -108,7 +108,7 @@ change_reply(const char *locale, int linecnt, int reply, char *new_reply)
   }
 
   MyFree(replies[reply].translated);
-  DupString(replies[reply].translated, new_reply);
+  replies[reply].translated = xstrdup(new_reply);
   return(1);
 }
 

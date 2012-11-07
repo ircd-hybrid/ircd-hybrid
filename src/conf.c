@@ -888,41 +888,32 @@ void
 detach_conf(struct Client *client_p, enum maskitem_type type)
 {
   dlink_node *ptr = NULL, *next_ptr = NULL;
-  struct MaskItem *conf = NULL;
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->localClient->confs.head)
   {
-    conf = ptr->data;
+    struct MaskItem *conf = ptr->data;
 
-    if (conf->type & type)
+    assert(conf->type & (CONF_CLIENT | CONF_OPER | CONF_SERVER));
+    assert(conf->ref_count > 0);
+    assert(conf->class->ref_count > 0);
+
+    if (!(conf->type & type))
+      continue;
+
+    dlinkDelete(ptr, &client_p->localClient->confs);
+    free_dlink_node(ptr);
+
+    if (conf->type == CONF_CLIENT)
+      remove_from_cidr_check(&client_p->localClient->ip, conf->class);
+
+    if (--conf->class->ref_count == 0 && conf->class->active == 0)
     {
-      dlinkDelete(ptr, &client_p->localClient->confs);
-      free_dlink_node(ptr);
-
-      switch (conf->type)
-      {
-      case CONF_CLIENT:
-      case CONF_OPER:
-      case CONF_SERVER:
-        assert(conf->ref_count > 0);
-        assert(conf->class->ref_count > 0);
-
-        if (conf->type == CONF_CLIENT)
-          remove_from_cidr_check(&client_p->localClient->ip, conf->class);
-        if (--conf->class->ref_count == 0 && conf->class->active == 0)
-        {
-          class_free(conf->class);
-          conf->class = NULL;
-        }
-
-        if (--conf->ref_count == 0 && conf->active == 0)
-          conf_free(conf);
-
-        break;
-      default:
-        break;
-      }
+      class_free(conf->class);
+      conf->class = NULL;
     }
+
+    if (--conf->ref_count == 0 && conf->active == 0)
+      conf_free(conf);
   }
 }
 

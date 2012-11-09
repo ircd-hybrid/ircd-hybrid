@@ -65,7 +65,7 @@ extern struct ClassItem *class_find(const char *, int);
 extern void class_mark_for_deletion(void);
 extern void class_delete_marked(void);
 extern void destroy_cidr_class(struct ClassItem *);
-extern void rebuild_cidr_class(struct ClassItem *, struct ClassItem *);
 extern int cidr_limit_reached(int, struct irc_ssaddr *, struct ClassItem *);
 extern void remove_from_cidr_check(struct irc_ssaddr *, struct ClassItem *);
+extern void rebuild_cidr_list(struct ClassItem *);
 #endif

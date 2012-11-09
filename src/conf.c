@@ -1457,17 +1457,10 @@ read_conf(FILE *file)
  * start DNS lookups of all hostnames in the conf
  * line and convert an IP addresses in a.b.c.d number for to IP#s.
  */
-static void
+void
 lookup_confhost(struct MaskItem *conf)
 {
   struct addrinfo hints, *res;
-
-  if (has_wildcards(conf->host))
-  {
-    ilog(LOG_TYPE_IRCD, "Host/server name error: (%s) (%s)",
-         conf->host, conf->name);
-    return;
-  }
 
   /* Do name lookup now on hostnames given and store the
    * ip numbers in conf structure.
@@ -1959,40 +1952,6 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
 			   conf->name);
     conf->class = class_default;
   }
-}
-
-/* conf_add_server()
- *
- * inputs       - pointer to config item
- *		- pointer to link count already on this conf
- * output       - NONE
- * side effects - Add a connect block
- */
-int
-conf_add_server(struct MaskItem *conf, const char *class_name)
-{
-  conf_add_class_to_conf(conf, class_name);
-
-  if (EmptyString(conf->host) || EmptyString(conf->name))
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL,  SEND_NOTICE,
-                         "Bad connect block");
-    ilog(LOG_TYPE_IRCD, "Bad connect block");
-    return -1;
-  }
-
-  if (EmptyString(conf->passwd))
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "Bad connect block, name %s",
-                         conf->name);
-    ilog(LOG_TYPE_IRCD, "Bad connect block, host %s", conf->name);
-    return -1;
-  }
-
-  lookup_confhost(conf);
-
-  return 0;
 }
 
 /* yyerror()

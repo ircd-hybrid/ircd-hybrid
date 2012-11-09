@@ -362,7 +362,7 @@ extern void report_confitem_types(struct Client *, enum maskitem_type);
 extern void yyerror(const char *);
 extern void cleanup_tklines(void *);
 extern int rehash(int);
-extern int conf_add_server(struct MaskItem *, const char *);
+extern void lookup_confhost(struct MaskItem *);
 extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 
 extern const char *get_oper_name(const struct Client *);

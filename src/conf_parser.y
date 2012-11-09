@@ -58,24 +58,6 @@
 
 int yylex(void);
 
-static char *class_name = NULL;
-static struct MaskItem *yy_conf = NULL;
-static struct ClassItem *yy_class = NULL;
-static char *yy_class_name = NULL;
-
-static dlink_list col_conf_list  = { NULL, NULL, 0 };
-static unsigned int listener_flags = 0;
-static unsigned int regex_ban = 0;
-static char userbuf[IRCD_BUFSIZE];
-static char hostbuf[IRCD_BUFSIZE];
-static char reasonbuf[REASONLEN + 1];
-static char gecos_name[REALLEN * 4];
-static char lfile[IRCD_BUFSIZE];
-static unsigned int ltype = 0;
-static unsigned int lsize = 0;
-static char *resv_reason = NULL;
-static char *listener_address = NULL;
-
 static struct
 {
   struct {
@@ -90,15 +72,21 @@ static struct
     user,
     host,
     addr,
-    pass,
+    bind,
     file,
+    ciph,
+    rpass,
+    spass,
     class;
 
   struct {
     unsigned int value;
   } flags,
     modes,
+    size,
+    type,
     port,
+    aftype,
     ping_freq,
     max_perip,
     con_freq,
@@ -832,13 +820,16 @@ logging_use_logging: USE_LOGGING '=' TBOOL ';'
 
 logging_file_entry:
 {
-  lfile[0] = '\0';
-  ltype = 0;
-  lsize = 0;
+  if (conf_parser_ctx.pass == 2)
+    reset_block_state();
 } T_FILE  '{' logging_file_items '}' ';'
 {
-  if (conf_parser_ctx.pass == 2 && ltype > 0)
-    log_add_file(ltype, lsize, lfile);
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (block_state.type.value && block_state.file.buf[0])
+    log_add_file(block_state.type.value, block_state.size.value,
+                 block_state.file.buf);
 };
 
 logging_file_items: logging_file_items logging_file_item |
@@ -849,52 +840,55 @@ logging_file_item:  logging_file_name | logging_file_type |
 
 logging_file_name: NAME '=' QSTRING ';'
 {
-  strlcpy(lfile, yylval.string, sizeof(lfile));
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
 }
 
 logging_file_size: T_SIZE '=' sizespec ';'
 {
-  lsize = $3;
+  block_state.size.value = $3;
 } | T_SIZE '=' T_UNLIMITED ';'
 {
-  lsize = 0;
+  block_state.size.value = 0;
 };
 
 logging_file_type: TYPE
 {
   if (conf_parser_ctx.pass == 2)
-    ltype = 0;
+    block_state.type.value = 0;
 } '='  logging_file_type_items ';' ;
 
 logging_file_type_items: logging_file_type_items ',' logging_file_type_item | logging_file_type_item;
 logging_file_type_item:  USER
 {
   if (conf_parser_ctx.pass == 2)
-    ltype = LOG_TYPE_USER;
+    block_state.type.value = LOG_TYPE_USER;
 } | OPERATOR
 {
   if (conf_parser_ctx.pass == 2)
-    ltype = LOG_TYPE_OPER;
+    block_state.type.value = LOG_TYPE_OPER;
 } | GLINE
 {
   if (conf_parser_ctx.pass == 2)
-    ltype = LOG_TYPE_GLINE;
+    block_state.type.value = LOG_TYPE_GLINE;
 } | T_DLINE
 {
   if (conf_parser_ctx.pass == 2)
-    ltype = LOG_TYPE_DLINE;
+    block_state.type.value = LOG_TYPE_DLINE;
 } | KLINE
 {
   if (conf_parser_ctx.pass == 2)
-    ltype = LOG_TYPE_KLINE;
+    block_state.type.value = LOG_TYPE_KLINE;
 } | KILL
 {
   if (conf_parser_ctx.pass == 2)
-    ltype = LOG_TYPE_KILL;
+    block_state.type.value = LOG_TYPE_KILL;
 } | T_DEBUG
 {
   if (conf_parser_ctx.pass == 2)
-    ltype = LOG_TYPE_DEBUG;
+    block_state.type.value = LOG_TYPE_DEBUG;
 };
 
 
@@ -919,10 +913,10 @@ oper_entry: OPERATOR
     break;
 #ifdef HAVE_LIBCRYPTO
   if (!(block_state.file.buf[0] ||
-        block_state.pass.buf[0]))
+        block_state.rpass.buf[0]))
     break;
 #else
-  if (!block_state.pass.buf[0])
+  if (!block_state.rpass.buf[0])
     break;
 #endif
 
@@ -933,19 +927,19 @@ oper_entry: OPERATOR
 
     nuh.nuhmask  = ptr->data;
     nuh.nickptr  = NULL;
-    nuh.userptr  = userbuf;
-    nuh.hostptr  = hostbuf;
+    nuh.userptr  = block_state.user.buf;
+    nuh.hostptr  = block_state.host.buf;
     nuh.nicksize = 0;
-    nuh.usersize = sizeof(userbuf);
-    nuh.hostsize = sizeof(hostbuf);
+    nuh.usersize = sizeof(block_state.user.buf);
+    nuh.hostsize = sizeof(block_state.host.buf);
     split_nuh(&nuh);
 
     conf        = conf_make(CONF_OPER);
-    conf->user  = xstrdup(userbuf);
-    conf->host  = xstrdup(hostbuf);
+    conf->user  = xstrdup(block_state.user.buf);
+    conf->host  = xstrdup(block_state.host.buf);
 
-    if (block_state.pass.buf[0])
-      conf->passwd = xstrdup(block_state.pass.buf);
+    if (block_state.rpass.buf[0])
+      conf->passwd = xstrdup(block_state.rpass.buf);
 
     conf->flags = block_state.flags.value;
     conf->modes = block_state.modes.value;
@@ -1000,7 +994,7 @@ oper_user: USER '=' QSTRING ';'
 oper_password: PASSWORD '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.pass.buf, yylval.string, sizeof(block_state.pass.buf));
+    strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
 oper_encrypted: ENCRYPTED '=' TBOOL ';'
@@ -1207,47 +1201,43 @@ oper_flags_item: GLOBAL_KILL
 class_entry: CLASS
 {
   if (conf_parser_ctx.pass == 1)
-  {
-    yy_class = class_make();
-  }
+    reset_block_state();
 } '{' class_items '}' ';'
 {
-  if (conf_parser_ctx.pass == 1)
-  {
-    struct ClassItem *class = NULL;
+  struct ClassItem *class = NULL;
 
-    if (yy_class_name == NULL)
-      class_free(yy_class);
-    else
-    {
-      class = class_find(yy_class_name, 0);
+  if (conf_parser_ctx.pass != 1)
+    break;
 
-      if (class != NULL)		/* The class existed already */
-      {
-        int user_count = 0;
+  if (!block_state.class.buf[0])
+    break;
 
-        rebuild_cidr_class(class, yy_class);
+  if (!(class = class_find(block_state.class.buf, 0)))
+    class = class_make();
 
-        user_count = class->ref_count;
-        memcpy(class, yy_class, sizeof(*class));
-        class->ref_count = user_count;
-        class->active = 1;
+  class->active = 1;
+  MyFree(class->name);
+  class->name = xstrdup(block_state.class.buf);
+  class->ping_freq = block_state.ping_freq.value;
+  class->max_perip = block_state.max_perip.value;
+  class->con_freq = block_state.con_freq.value;
+  class->max_total = block_state.max_total.value;
+  class->max_global = block_state.max_global.value;
+  class->max_local = block_state.max_local.value;
+  class->max_ident = block_state.max_ident.value;
+  class->max_sendq = block_state.max_sendq.value;
+  class->max_recvq = block_state.max_recvq.value;
 
-        class_free(yy_class);
+  if (class->number_per_cidr && block_state.number_per_cidr.value)
+    if ((class->cidr_bitlen_ipv4 && block_state.cidr_bitlen_ipv4.value) ||
+        (class->cidr_bitlen_ipv6 && block_state.cidr_bitlen_ipv6.value))
+      if ((class->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value) ||
+          (class->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value))
+        rebuild_cidr_list(class);
 
-        MyFree(class->name);            /* Allows case change of class name */
-        class->name = yy_class_name;
-      }
-      else	/* Brand new class */
-      {
-        MyFree(yy_class->name);          /* just in case it was allocated */
-        yy_class->name = yy_class_name;
-        yy_class->active = 1;
-      }
-    }
-
-    yy_class_name = NULL;
-  }
+  class->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
+  class->cidr_bitlen_ipv6 = block_state.cidr_bitlen_ipv6.value;
+  class->number_per_cidr = block_state.number_per_cidr.value;
 };
 
 class_items:    class_items class_item | class_item;
@@ -1267,83 +1257,80 @@ class_item:     class_name |
 class_name: NAME '=' QSTRING ';' 
 {
   if (conf_parser_ctx.pass == 1)
-  {
-    MyFree(yy_class_name);
-    yy_class_name = xstrdup(yylval.string);
-  }
+    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
 };
 
 class_ping_time: PING_TIME '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->ping_freq = $3;
+    block_state.ping_freq.value = $3;
 };
 
 class_number_per_ip: NUMBER_PER_IP '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->max_perip = $3;
+    block_state.max_perip.value = $3;
 };
 
 class_connectfreq: CONNECTFREQ '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->con_freq = $3;
+    block_state.con_freq.value = $3;
 };
 
 class_max_number: MAX_NUMBER '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->max_total = $3;
+    block_state.max_total.value = $3;
 };
 
 class_max_global: MAX_GLOBAL '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->max_global = $3;
+    block_state.max_global.value = $3;
 };
 
 class_max_local: MAX_LOCAL '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->max_local = $3;
+    block_state.max_local.value = $3;
 };
 
 class_max_ident: MAX_IDENT '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->max_ident = $3;
+    block_state.max_ident.value = $3;
 };
 
 class_sendq: SENDQ '=' sizespec ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->max_sendq = $3;
+    block_state.max_sendq.value = $3;
 };
 
 class_recvq: T_RECVQ '=' sizespec ';'
 {
   if (conf_parser_ctx.pass == 1)
     if ($3 >= CLIENT_FLOOD_MIN && $3 <= CLIENT_FLOOD_MAX)
-      yy_class->max_recvq = $3;
+      block_state.max_recvq.value = $3;
 };
 
 class_cidr_bitlen_ipv4: CIDR_BITLEN_IPV4 '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->cidr_bitlen_ipv4 = $3 > 32 ? 32 : $3;
+    block_state.cidr_bitlen_ipv4.value = $3 > 32 ? 32 : $3;
 };
 
 class_cidr_bitlen_ipv6: CIDR_BITLEN_IPV6 '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->cidr_bitlen_ipv6 = $3 > 128 ? 128 : $3;
+    block_state.cidr_bitlen_ipv6.value = $3 > 128 ? 128 : $3;
 };
 
 class_number_per_cidr: NUMBER_PER_CIDR '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    yy_class->number_per_cidr = $3;
+    block_state.number_per_cidr.value = $3;
 };
 
 /***************************************************************************
@@ -1368,11 +1355,11 @@ listen_flags_item: T_SSL
 } | HIDDEN
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |=LISTENER_HIDDEN;
+    block_state.flags.value |= LISTENER_HIDDEN;
 } | T_SERVER
 {
   if (conf_parser_ctx.pass == 2)
-   block_state.flags.value |=LISTENER_SERVER;
+   block_state.flags.value |= LISTENER_SERVER;
 };
 
 listen_items:   listen_items listen_item | listen_item;
@@ -1449,19 +1436,19 @@ auth_entry: IRCD_AUTH
 
     nuh.nuhmask  = ptr->data;
     nuh.nickptr  = NULL;
-    nuh.userptr  = userbuf;
-    nuh.hostptr  = hostbuf;
+    nuh.userptr  = block_state.user.buf;
+    nuh.hostptr  = block_state.host.buf;
     nuh.nicksize = 0;
-    nuh.usersize = sizeof(userbuf);
-    nuh.hostsize = sizeof(hostbuf);
+    nuh.usersize = sizeof(block_state.user.buf);
+    nuh.hostsize = sizeof(block_state.host.buf);
     split_nuh(&nuh);
 
     conf        = conf_make(CONF_CLIENT);
-    conf->user  = xstrdup(collapse(userbuf));
-    conf->host  = xstrdup(collapse(hostbuf));
+    conf->user  = xstrdup(collapse(block_state.user.buf));
+    conf->host  = xstrdup(collapse(block_state.host.buf));
 
-    if (block_state.pass.buf[0])
-      conf->passwd = xstrdup(block_state.pass.buf);
+    if (block_state.rpass.buf[0])
+      conf->passwd = xstrdup(block_state.rpass.buf);
     if (block_state.name.buf[0])
       conf->passwd = xstrdup(block_state.name.buf);
 
@@ -1487,7 +1474,7 @@ auth_user: USER '=' QSTRING ';'
 auth_passwd: PASSWORD '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.pass.buf, yylval.string, sizeof(block_state.pass.buf));
+    strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
 auth_class: CLASS '=' QSTRING ';'
@@ -1579,6 +1566,7 @@ auth_redir_port: REDIRPORT '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass != 2)
     break;
+
   block_state.flags.value |= CONF_FLAGS_REDIR;
   block_state.port.value = $3;
 };
@@ -1589,19 +1577,12 @@ auth_redir_port: REDIRPORT '=' NUMBER ';'
  ***************************************************************************/
 resv_entry: RESV
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(resv_reason);
-    resv_reason = NULL;
-  }
-} '{' resv_items '}' ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(resv_reason);
-    resv_reason = NULL;
-  }
-};
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  reset_block_state();
+  strlcpy(block_state.rpass.buf, CONF_NOREASON, sizeof(block_state.rpass.buf));
+} '{' resv_items '}' ';';
 
 resv_items:	resv_items resv_item | resv_item;
 resv_item:	resv_creason | resv_channel | resv_nick | error ';' ;
@@ -1609,35 +1590,22 @@ resv_item:	resv_creason | resv_channel | resv_nick | error ';' ;
 resv_creason: REASON '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(resv_reason);
-    resv_reason = xstrdup(yylval.string);
-  }
+    strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
 resv_channel: CHANNEL '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    if (IsChanPrefix(*yylval.string))
-    {
-      char def_reason[] = "No reason";
+  if (conf_parser_ctx.pass != 2)
+    break;
 
-      create_channel_resv(yylval.string, resv_reason != NULL ? resv_reason : def_reason, 1);
-    }
-  }
-  /* ignore it for now.. but we really should make a warning if
-   * its an erroneous name --fl_ */
+  if (IsChanPrefix(*yylval.string))
+    create_channel_resv(yylval.string, block_state.rpass.buf, 1);
 };
 
 resv_nick: NICK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    char def_reason[] = "No reason";
-
-    create_nick_resv(yylval.string, resv_reason != NULL ? resv_reason : def_reason, 1);
-  }
+    create_nick_resv(yylval.string, block_state.rpass.buf, 1);
 };
 
 /***************************************************************************
@@ -1654,8 +1622,8 @@ service_name: NAME '=' QSTRING ';'
   {
     if (valid_servname(yylval.string))
     {
-      yy_conf = conf_make(CONF_SERVICE);
-      yy_conf->name = xstrdup(yylval.string);
+      struct MaskItem *conf = conf_make(CONF_SERVICE);
+      conf->name = xstrdup(yylval.string);
     }
   }
 };
@@ -1665,17 +1633,27 @@ service_name: NAME '=' QSTRING ';'
  ***************************************************************************/
 shared_entry: T_SHARED
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    yy_conf = conf_make(CONF_ULINE);
-    yy_conf->flags = SHARED_ALL;
-  }
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  reset_block_state();
+
+  strlcpy(block_state.name.buf, "*", sizeof(block_state.name.buf));
+  strlcpy(block_state.user.buf, "*", sizeof(block_state.user.buf));
+  strlcpy(block_state.host.buf, "*", sizeof(block_state.host.buf));
+  block_state.flags.value = SHARED_ALL;
 } '{' shared_items '}' ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    yy_conf = NULL;
-  }
+  struct MaskItem *conf = NULL;
+
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  conf = conf_make(CONF_ULINE);
+  conf->flags = block_state.flags.value;
+  conf->name = xstrdup(block_state.name.buf);
+  conf->user = xstrdup(block_state.user.buf);
+  conf->user = xstrdup(block_state.host.buf);
 };
 
 shared_items: shared_items shared_item | shared_item;
@@ -1684,10 +1662,7 @@ shared_item:  shared_name | shared_user | shared_type | error ';' ;
 shared_name: NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(yy_conf->name);
-    DupString(yy_conf->name, yylval.string);
-  }
+    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 };
 
 shared_user: USER '=' QSTRING ';'
@@ -1698,67 +1673,64 @@ shared_user: USER '=' QSTRING ';'
 
     nuh.nuhmask  = yylval.string;
     nuh.nickptr  = NULL;
-    nuh.userptr  = userbuf;
-    nuh.hostptr  = hostbuf;
+    nuh.userptr  = block_state.user.buf;
+    nuh.hostptr  = block_state.host.buf;
 
     nuh.nicksize = 0;
-    nuh.usersize = sizeof(userbuf);
-    nuh.hostsize = sizeof(hostbuf);
+    nuh.usersize = sizeof(block_state.user.buf);
+    nuh.hostsize = sizeof(block_state.host.buf);
 
     split_nuh(&nuh);
-
-    DupString(yy_conf->user, userbuf);
-    DupString(yy_conf->host, hostbuf);
   }
 };
 
 shared_type: TYPE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags = 0;
+    block_state.flags.value = 0;
 } '=' shared_types ';' ;
 
 shared_types: shared_types ',' shared_type_item | shared_type_item;
 shared_type_item: KLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_KLINE;
+    block_state.flags.value |= SHARED_KLINE;
 } | UNKLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_UNKLINE;
+    block_state.flags.value |= SHARED_UNKLINE;
 } | T_DLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_DLINE;
+    block_state.flags.value |= SHARED_DLINE;
 } | T_UNDLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_UNDLINE;
+    block_state.flags.value |= SHARED_UNDLINE;
 } | XLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_XLINE;
+    block_state.flags.value |= SHARED_XLINE;
 } | T_UNXLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_UNXLINE;
+    block_state.flags.value |= SHARED_UNXLINE;
 } | RESV
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_RESV;
+    block_state.flags.value |= SHARED_RESV;
 } | T_UNRESV
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_UNRESV;
+    block_state.flags.value |= SHARED_UNRESV;
 } | T_LOCOPS
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_LOCOPS;
+    block_state.flags.value |= SHARED_LOCOPS;
 } | T_ALL
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags = SHARED_ALL;
+    block_state.flags.value = SHARED_ALL;
 };
 
 /***************************************************************************
@@ -1766,18 +1738,23 @@ shared_type_item: KLINE
  ***************************************************************************/
 cluster_entry: T_CLUSTER
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    yy_conf = conf_make(CONF_CLUSTER);
-  }
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  reset_block_state();
+
+  strlcpy(block_state.name.buf, "*", sizeof(block_state.name.buf));
+  block_state.flags.value = SHARED_ALL;
 } '{' cluster_items '}' ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    if (yy_conf->name == NULL)
-      DupString(yy_conf->name, "*");
-    yy_conf = NULL;
-  }
+  struct MaskItem *conf = NULL;
+
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  conf = conf_make(CONF_CLUSTER);
+  conf->flags = block_state.flags.value;
+  conf->name = xstrdup(block_state.name.buf);
 };
 
 cluster_items:	cluster_items cluster_item | cluster_item;
@@ -1786,56 +1763,56 @@ cluster_item:	cluster_name | cluster_type | error ';' ;
 cluster_name: NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    DupString(yy_conf->name, yylval.string);
+    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 };
 
 cluster_type: TYPE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags = 0;
+    block_state.flags.value = 0;
 } '=' cluster_types ';' ;
 
 cluster_types:	cluster_types ',' cluster_type_item | cluster_type_item;
 cluster_type_item: KLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_KLINE;
+    block_state.flags.value |= SHARED_KLINE;
 } | UNKLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_UNKLINE;
+    block_state.flags.value |= SHARED_UNKLINE;
 } | T_DLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_DLINE;
+    block_state.flags.value |= SHARED_DLINE;
 } | T_UNDLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_UNDLINE;
+    block_state.flags.value |= SHARED_UNDLINE;
 } | XLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_XLINE;
+    block_state.flags.value |= SHARED_XLINE;
 } | T_UNXLINE
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_UNXLINE;
+    block_state.flags.value |= SHARED_UNXLINE;
 } | RESV
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_RESV;
+    block_state.flags.value |= SHARED_RESV;
 } | T_UNRESV
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_UNRESV;
+    block_state.flags.value |= SHARED_UNRESV;
 } | T_LOCOPS
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags |= SHARED_LOCOPS;
+    block_state.flags.value |= SHARED_LOCOPS;
 } | T_ALL
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->flags = SHARED_ALL;
+    block_state.flags.value = SHARED_ALL;
 };
 
 /***************************************************************************
@@ -1843,51 +1820,68 @@ cluster_type_item: KLINE
  ***************************************************************************/
 connect_entry: CONNECT   
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    yy_conf = conf_make(CONF_SERVER);
 
-    /* defaults */
-    yy_conf->port = PORTNUM;
-  }
-  else
-  {
-    MyFree(class_name);
-    class_name = NULL;
-  }
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  reset_block_state();
+  block_state.port.value = PORTNUM;
 } '{' connect_items '}' ';'
 {
-  if (conf_parser_ctx.pass == 2)
+  struct MaskItem *conf = NULL;
+  struct addrinfo hints, *res;
+
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (!(block_state.name.buf[0] ||
+        block_state.host.buf[0]))
+    break;
+
+  if (!(block_state.rpass.buf[0] ||
+        block_state.spass.buf[0]))
+    break;
+
+  if (has_wildcards(block_state.name.buf) ||
+      has_wildcards(block_state.host.buf))
+    break;
+
+  conf = conf_make(CONF_SERVER);
+  conf->port = block_state.port.value;
+  conf->flags = block_state.flags.value;
+  conf->aftype = block_state.aftype.value;
+  conf->host = xstrdup(block_state.host.buf);
+  conf->name = xstrdup(block_state.name.buf);
+  conf->passwd = xstrdup(block_state.rpass.buf);
+  conf->spasswd = xstrdup(block_state.spass.buf);
+  conf->cipher_list = xstrdup(block_state.ciph.buf);
+
+  dlinkMoveList(&block_state.leaf.list, &conf->leaf_list);
+  dlinkMoveList(&block_state.hub.list, &conf->hub_list);
+
+  if (block_state.bind.buf[0])
   {
-    if (yy_conf->host && yy_conf->passwd && yy_conf->spasswd)
-    {
-      if (conf_add_server(yy_conf, class_name) == -1)
-        conf_free(yy_conf);
-    }
+    memset(&hints, 0, sizeof(hints));
+
+    hints.ai_family   = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
+
+    if (getaddrinfo(block_state.bind.buf, NULL, &hints, &res))
+      ilog(LOG_TYPE_IRCD, "Invalid netmask for server vhost(%s)", block_state.bind.buf);
     else
     {
-      if (yy_conf->name != NULL)
-      {
-        if (yy_conf->host == NULL)
-          yyerror("Ignoring connect block -- missing host");
-        else if (!yy_conf->passwd || !yy_conf->spasswd)
-          yyerror("Ignoring connect block -- missing password");
-      }
+      assert(res != NULL);
 
-      /* XXX
-       * This fixes a try_connections() core (caused by invalid class_ptr
-       * pointers) reported by metalrock. That's an ugly fix, but there
-       * is currently no better way. The entire config subsystem needs an
-       * rewrite ASAP. make_conf_item() shouldn't really add things onto
-       * a doubly linked list immediately without any sanity checks!  -Michael
-       */
-      conf_free(yy_conf);
+      memcpy(&conf->bind, res->ai_addr, res->ai_addrlen);
+      conf->bind.ss.ss_family = res->ai_family;
+      conf->bind.ss_len = res->ai_addrlen;
+      freeaddrinfo(res);
     }
-
-    MyFree(class_name);
-    class_name = NULL;
-    yy_conf = NULL;
   }
+
+  conf_add_class_to_conf(conf, block_state.class.buf);
+  lookup_confhost(conf);
 };
 
 connect_items:  connect_items connect_item | connect_item;
@@ -1901,114 +1895,79 @@ connect_item:   connect_name | connect_host | connect_vhost |
 connect_name: NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(yy_conf->name);
-    DupString(yy_conf->name, yylval.string);
-  }
+    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 };
 
 connect_host: HOST '=' QSTRING ';' 
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(yy_conf->host);
-    DupString(yy_conf->host, yylval.string);
-  }
+    strlcpy(block_state.host.buf, yylval.string, sizeof(block_state.host.buf));
 };
 
 connect_vhost: VHOST '=' QSTRING ';' 
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    struct addrinfo hints, *res;
-
-    memset(&hints, 0, sizeof(hints));
-
-    hints.ai_family   = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
-
-    if (getaddrinfo(yylval.string, NULL, &hints, &res))
-      ilog(LOG_TYPE_IRCD, "Invalid netmask for server vhost(%s)", yylval.string);
-    else
-    {
-      assert(res != NULL);
-
-      memcpy(&yy_conf->bind, res->ai_addr, res->ai_addrlen);
-      yy_conf->bind.ss.ss_family = res->ai_family;
-      yy_conf->bind.ss_len = res->ai_addrlen;
-      freeaddrinfo(res);
-    }
-  }
+    strlcpy(block_state.bind.buf, yylval.string, sizeof(block_state.bind.buf));
 };
  
 connect_send_password: SEND_PASSWORD '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    if ($3[0] == ':')
-      yyerror("Server passwords cannot begin with a colon");
-    else if (strchr($3, ' ') != NULL)
-      yyerror("Server passwords cannot contain spaces");
-    else {
-      if (yy_conf->spasswd != NULL)
-        memset(yy_conf->spasswd, 0, strlen(yy_conf->spasswd));
+  if (conf_parser_ctx.pass != 2)
+    break;
 
-      MyFree(yy_conf->spasswd);
-      DupString(yy_conf->spasswd, yylval.string);
-    }
-  }
+  if ($3[0] == ':')
+    yyerror("Server passwords cannot begin with a colon");
+  else if (strchr($3, ' ') != NULL)
+    yyerror("Server passwords cannot contain spaces");
+  else
+    strlcpy(block_state.spass.buf, yylval.string, sizeof(block_state.spass.buf));
 };
 
 connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    if ($3[0] == ':')
-      yyerror("Server passwords cannot begin with a colon");
-    else if (strchr($3, ' ') != NULL)
-      yyerror("Server passwords cannot contain spaces");
-    else {
-      if (yy_conf->passwd != NULL)
-        memset(yy_conf->passwd, 0, strlen(yy_conf->passwd));
+  if (conf_parser_ctx.pass != 2)
+    break;
 
-      MyFree(yy_conf->passwd);
-      DupString(yy_conf->passwd, yylval.string);
-    }
-  }
+  if ($3[0] == ':')
+    yyerror("Server passwords cannot begin with a colon");
+  else if (strchr($3, ' ') != NULL)
+    yyerror("Server passwords cannot contain spaces");
+  else
+    strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
 connect_port: PORT '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->port = $3;
+    block_state.port.value = $3;
 };
 
 connect_aftype: AFTYPE '=' T_IPV4 ';'
 {
   if (conf_parser_ctx.pass == 2)
-    yy_conf->aftype = AF_INET;
+    block_state.aftype.value = AF_INET;
 } | AFTYPE '=' T_IPV6 ';'
 {
 #ifdef IPV6
   if (conf_parser_ctx.pass == 2)
-    yy_conf->aftype = AF_INET6;
+    block_state.aftype.value = AF_INET6;
 #endif
 };
 
 connect_flags: IRCD_FLAGS
 {
+/* XXX */
 } '='  connect_flags_items ';';
 
 connect_flags_items: connect_flags_items ',' connect_flags_item | connect_flags_item;
 connect_flags_item: AUTOCONN
 {
   if (conf_parser_ctx.pass == 2)
-    SetConfAllowAutoConn(yy_conf);
+    block_state.flags.value |= CONF_FLAGS_ALLOW_AUTO_CONN;
 } | T_SSL
 {
   if (conf_parser_ctx.pass == 2)
-    SetConfSSL(yy_conf);
+    block_state.flags.value |= CONF_FLAGS_SSL;
 };
 
 connect_encrypted: ENCRYPTED '=' TBOOL ';'
@@ -2016,50 +1975,35 @@ connect_encrypted: ENCRYPTED '=' TBOOL ';'
   if (conf_parser_ctx.pass == 2)
   {
     if (yylval.number)
-      yy_conf->flags |= CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
     else
-      yy_conf->flags &= ~CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
   }
 };
 
 connect_hub_mask: HUB_MASK '=' QSTRING ';' 
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    char *mask = xstrdup(yylval.string);
-
-    dlinkAdd(mask, make_dlink_node(), &yy_conf->hub_list);
-  }
+    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.hub.list);
 };
 
 connect_leaf_mask: LEAF_MASK '=' QSTRING ';' 
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    char *mask;
-
-    DupString(mask, yylval.string);
-    dlinkAdd(mask, make_dlink_node(), &yy_conf->leaf_list);
-  }
+    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.leaf.list);
 };
 
 connect_class: CLASS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(class_name);
-    DupString(class_name, yylval.string);
-  }
+    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
 };
 
 connect_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
   if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(yy_conf->cipher_list);
-    DupString(yy_conf->cipher_list, yylval.string);
-  }
+    strlcpy(block_state.ciph.buf, yylval.string, sizeof(block_state.ciph.buf));
 #else
   if (conf_parser_ctx.pass == 2)
     yyerror("Ignoring connect::ciphers -- no OpenSSL support");
@@ -2073,75 +2017,76 @@ connect_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
 kill_entry: KILL
 {
   if (conf_parser_ctx.pass == 2)
-  {
-    userbuf[0] = hostbuf[0] = reasonbuf[0] = '\0';
-    regex_ban = 0;
-  }
+    reset_block_state();
 } '{' kill_items '}' ';'
 {
-  if (conf_parser_ctx.pass == 2)
+  struct MaskItem *conf = NULL;
+
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (!block_state.user.buf[0] ||
+      !block_state.host.buf[0])
+    break;
+
+
+  if (block_state.port.value == 1)
   {
-    struct MaskItem *conf = NULL;
-
-    if (userbuf[0] && hostbuf[0])
-    {
-      if (regex_ban)
-      {
 #ifdef HAVE_LIBPCRE
-        void *exp_user = NULL;
-        void *exp_host = NULL;
-        const char *errptr = NULL;
-
-        if (!(exp_user = ircd_pcre_compile(userbuf, &errptr)) ||
-            !(exp_host = ircd_pcre_compile(hostbuf, &errptr)))
-        {
-          ilog(LOG_TYPE_IRCD, "Failed to add regular expression based K-Line: %s",
-               errptr);
-          break;
-        }
-
-        conf = conf_make(CONF_RKLINE);
-        conf->regexuser = exp_user;
-        conf->regexhost = exp_host;
-
-        conf->user = xstrdup(userbuf);
-        conf->host = xstrdup(hostbuf);
-
-        if (reasonbuf[0])
-          conf->reason = xstrdup(reasonbuf);
-        else
-          conf->reason = xstrdup(CONF_NOREASON);
-#else
-        ilog(LOG_TYPE_IRCD, "Failed to add regular expression based K-Line: no PCRE support");
-        break;
-#endif
-      }
-      else
-      {
-        conf = conf_make(CONF_KLINE);
-
-        conf->user = xstrdup(userbuf);
-        conf->host = xstrdup(hostbuf);
-
-        if (reasonbuf[0])
-          conf->reason = xstrdup(reasonbuf);
-        else
-          conf->reason = xstrdup(CONF_NOREASON);
-        add_conf_by_address(CONF_KLINE, conf);
-      }
+    void *exp_user = NULL;
+    void *exp_host = NULL;
+    const char *errptr = NULL;
+ 
+    if (!(exp_user = ircd_pcre_compile(block_state.user.buf, &errptr)) ||
+        !(exp_host = ircd_pcre_compile(block_state.host.buf, &errptr)))
+    {
+      ilog(LOG_TYPE_IRCD, "Failed to add regular expression based K-Line: %s",
+           errptr);
+      break;
     }
+
+    conf = conf_make(CONF_RKLINE);
+    conf->regexuser = exp_user;
+    conf->regexhost = exp_host;
+
+    conf->user = xstrdup(block_state.user.buf);
+    conf->host = xstrdup(block_state.host.buf);
+
+    if (block_state.rpass.buf[0])
+      conf->reason = xstrdup(block_state.rpass.buf);
+    else
+      conf->reason = xstrdup(CONF_NOREASON);
+#else
+    ilog(LOG_TYPE_IRCD, "Failed to add regular expression based K-Line: no PCRE support");
+    break;
+#endif
+  }
+  else
+  {
+    conf = conf_make(CONF_KLINE);
+
+    conf->user = xstrdup(block_state.user.buf);
+    conf->host = xstrdup(block_state.host.buf);
+
+    if (block_state.rpass.buf[0])
+      conf->reason = xstrdup(block_state.rpass.buf);
+    else
+      conf->reason = xstrdup(CONF_NOREASON);
+    add_conf_by_address(CONF_KLINE, conf);
   }
 }; 
 
 kill_type: TYPE
 {
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value = 0;
 } '='  kill_type_items ';';
 
 kill_type_items: kill_type_items ',' kill_type_item | kill_type_item;
 kill_type_item: REGEX_T
 {
   if (conf_parser_ctx.pass == 2)
-    regex_ban = 1;
+    block_state.port.value = 1;
 };
 
 kill_items:     kill_items kill_item | kill_item;
@@ -2149,18 +2094,19 @@ kill_item:      kill_user | kill_reason | kill_type | error;
 
 kill_user: USER '=' QSTRING ';'
 {
+
   if (conf_parser_ctx.pass == 2)
   {
     struct split_nuh_item nuh;
 
     nuh.nuhmask  = yylval.string;
     nuh.nickptr  = NULL;
-    nuh.userptr  = userbuf;
-    nuh.hostptr  = hostbuf;
+    nuh.userptr  = block_state.user.buf;
+    nuh.hostptr  = block_state.host.buf;
 
     nuh.nicksize = 0;
-    nuh.usersize = sizeof(userbuf);
-    nuh.hostsize = sizeof(hostbuf);
+    nuh.usersize = sizeof(block_state.user.buf);
+    nuh.hostsize = sizeof(block_state.host.buf);
 
     split_nuh(&nuh);
   }
@@ -2169,7 +2115,7 @@ kill_user: USER '=' QSTRING ';'
 kill_reason: REASON '=' QSTRING ';' 
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(reasonbuf, yylval.string, sizeof(reasonbuf));
+    strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
 /***************************************************************************
@@ -2194,8 +2140,8 @@ deny_entry: DENY
     conf = conf_make(CONF_DLINE);
     conf->host = xstrdup(block_state.addr.buf);
 
-    if (block_state.pass.buf[0])
-      conf->reason = xstrdup(block_state.pass.buf);
+    if (block_state.rpass.buf[0])
+      conf->reason = xstrdup(block_state.rpass.buf);
     else
       conf->reason = xstrdup(CONF_NOREASON);
     add_conf_by_address(CONF_DLINE, conf);
@@ -2214,7 +2160,7 @@ deny_ip: IP '=' QSTRING ';'
 deny_reason: REASON '=' QSTRING ';' 
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.pass.buf, yylval.string, sizeof(block_state.pass.buf));
+    strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
 /***************************************************************************
@@ -2281,8 +2227,8 @@ gecos_entry: GECOS
 
   conf->name = xstrdup(block_state.name.buf);
 
-  if (block_state.pass.buf[0])
-    conf->reason = xstrdup(block_state.pass.buf);
+  if (block_state.rpass.buf[0])
+    conf->reason = xstrdup(block_state.rpass.buf);
   else
     conf->reason = xstrdup(CONF_NOREASON);
 };
@@ -2312,7 +2258,7 @@ gecos_name: NAME '=' QSTRING ';'
 gecos_reason: REASON '=' QSTRING ';' 
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.pass.buf, yylval.string, sizeof(block_state.pass.buf));
+    strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
 /***************************************************************************

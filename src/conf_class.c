@@ -350,64 +350,22 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 #endif
 }
 
-static void
-rebuild_cidr_list(int aftype, struct ClassItem *oldcl, struct ClassItem *newcl,
-                  dlink_list *old_list, dlink_list *new_list, int changed)
+void
+rebuild_cidr_list(struct ClassItem *class)
 {
   dlink_node *ptr;
-  struct Client *client_p;
-  struct MaskItem *conf;
 
-  if (!changed)
-  {
-    *new_list = *old_list;
-    old_list->head = old_list->tail = NULL;
-    old_list->length = 0;
-    return;
-  }
+  destroy_cidr_class(class);
 
   DLINK_FOREACH(ptr, local_client_list.head)
   {
-    client_p = ptr->data;
-    if (client_p->localClient->aftype != aftype)
-      continue;
-    if (dlink_list_length(&client_p->localClient->confs) == 0)
-      continue;
+    struct Client *client_p = ptr->data;
+    struct MaskItem *conf = client_p->localClient->confs.tail->data;
 
-    conf = client_p->localClient->confs.tail->data;
-    if (conf->type == CONF_CLIENT)
-      if (conf->class == oldcl)
-        cidr_limit_reached(1, &client_p->localClient->ip, newcl);
+    if (conf && (conf->type == CONF_CLIENT))
+      if (conf->class == class)
+        cidr_limit_reached(1, &client_p->localClient->ip, class);
   }
-}
-
-/*
- * rebuild_cidr_class
- *
- * inputs	- pointer to old conf
- *		- pointer to new_class
- * output	- none
- * side effects	- rebuilds the class link list of cidr blocks
- */
-void
-rebuild_cidr_class(struct ClassItem *old_class, struct ClassItem *new_class)
-{
-  if (old_class->number_per_cidr > 0 && new_class->number_per_cidr > 0)
-  {
-    if (old_class->cidr_bitlen_ipv4 > 0 && new_class->cidr_bitlen_ipv4 > 0)
-      rebuild_cidr_list(AF_INET, old_class, new_class,
-                        &old_class->list_ipv4, &new_class->list_ipv4,
-                        old_class->cidr_bitlen_ipv4 != new_class->cidr_bitlen_ipv4);
-
-#ifdef IPV6
-    if (old_class->cidr_bitlen_ipv6 > 0 && new_class->cidr_bitlen_ipv6 > 0)
-      rebuild_cidr_list(AF_INET6, old_class, new_class,
-                        &old_class->list_ipv6, &new_class->list_ipv6,
-                        old_class->cidr_bitlen_ipv6 != new_class->cidr_bitlen_ipv6);
-#endif
-  }
-
-  destroy_cidr_class(old_class);
 }
 
 /*

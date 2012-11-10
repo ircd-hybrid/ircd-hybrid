@@ -97,19 +97,18 @@ struct MaskItem
   unsigned int       htype;
   unsigned int       ref_count;  /* Number of *LOCAL* clients using this */
   int                bits;
-  time_t             hold;     /* Hold action until this time (calendar time) */
+  time_t             until;     /* Hold action until this time (calendar time) */
   time_t             setat;
   struct irc_ssaddr  bind;  /* ip to bind to for outgoing connect */
   struct irc_ssaddr  addr;  /* ip to connect to */
   struct ClassItem  *class;  /* Class of connection */
   char              *name;
+  char              *user;     /* user part of user@host */
   char              *host;     /* host part of user@host */
   char              *passwd;
   char              *spasswd;  /* Password to send. */
   char              *reason;
-  char              *user;     /* user part of user@host */
   char              *cipher_list;
-  char              *rsa_public_key_file;
   void              *rsa_public_key;
   void              *regexuser;
   void              *regexhost;
@@ -147,7 +146,6 @@ struct CidrItem
 #define CONF_FLAGS_IN_DATABASE          0x00008000
 #define CONF_FLAGS_EXEMPTRESV           0x00010000
 #define CONF_FLAGS_SSL                  0x00020000
-#define CONF_FLAGS_MAINCONF             0x00040000
 
 /* Macros for struct MaskItem */
 #define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)

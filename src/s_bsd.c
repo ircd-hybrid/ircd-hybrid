@@ -217,7 +217,7 @@ close_connection(struct Client *client_p)
        * Reset next-connect cycle of all connect{} blocks that match
        * this servername.
        */
-      conf->hold = CurrentTime + conf->class->con_freq;
+      conf->until = CurrentTime + conf->class->con_freq;
     }
   }
   else

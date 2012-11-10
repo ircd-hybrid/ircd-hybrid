@@ -56,7 +56,7 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
 {
   if (tkline_time)
   {
-    conf->hold = CurrentTime + tkline_time;
+    conf->until = CurrentTime + tkline_time;
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. D-Line for [%s] [%s]",
                          get_oper_name(source_p), tkline_time/60,

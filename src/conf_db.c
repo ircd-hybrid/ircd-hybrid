@@ -646,7 +646,7 @@ save_kline_database(void)
         SAFE_WRITE(write_string(arec->conf->host, f), KPATH);
         SAFE_WRITE(write_string(arec->conf->reason, f), KPATH);
         SAFE_WRITE(write_uint64(arec->conf->setat, f), KPATH);
-        SAFE_WRITE(write_uint64(arec->conf->hold, f), KPATH);
+        SAFE_WRITE(write_uint64(arec->conf->until, f), KPATH);
       }
     }
   }
@@ -691,7 +691,7 @@ load_kline_database(void)
     conf->host = field_2;
     conf->reason = field_3;
     conf->setat = field_4;
-    conf->hold = field_5;
+    conf->until = field_5;
     SetConfDatabase(conf);
 
     add_conf_by_address(CONF_KLINE, conf);
@@ -735,7 +735,7 @@ save_dline_database(void)
         SAFE_WRITE(write_string(arec->conf->host, f), DLPATH);
         SAFE_WRITE(write_string(arec->conf->reason, f), DLPATH);
         SAFE_WRITE(write_uint64(arec->conf->setat, f), DLPATH);
-        SAFE_WRITE(write_uint64(arec->conf->hold, f), DLPATH);
+        SAFE_WRITE(write_uint64(arec->conf->until, f), DLPATH);
       }
     }
   }
@@ -777,7 +777,7 @@ load_dline_database(void)
     conf->host = field_1;
     conf->reason = field_2;
     conf->setat = field_3;
-    conf->hold = field_4;
+    conf->until = field_4;
     SetConfDatabase(conf);
 
     add_conf_by_address(CONF_DLINE, conf);
@@ -822,7 +822,7 @@ save_gline_database(void)
         SAFE_WRITE(write_string(arec->conf->host, f), GPATH);
         SAFE_WRITE(write_string(arec->conf->reason, f), GPATH);
         SAFE_WRITE(write_uint64(arec->conf->setat, f), GPATH);
-        SAFE_WRITE(write_uint64(arec->conf->hold, f), GPATH);
+        SAFE_WRITE(write_uint64(arec->conf->until, f), GPATH);
       }
     }
   }
@@ -867,7 +867,7 @@ load_gline_database(void)
     conf->host = field_2;
     conf->reason = field_3;
     conf->setat = field_4;
-    conf->hold = field_5;
+    conf->until = field_5;
     SetConfDatabase(conf);
 
     add_conf_by_address(CONF_GLINE, conf);
@@ -915,7 +915,7 @@ save_resv_database(void)
     SAFE_WRITE(write_string(conf->name, f), RESVPATH);
     SAFE_WRITE(write_string(conf->reason, f), RESVPATH);
     SAFE_WRITE(write_uint64(conf->setat, f), RESVPATH);
-    SAFE_WRITE(write_uint64(conf->hold, f), RESVPATH);
+    SAFE_WRITE(write_uint64(conf->until, f), RESVPATH);
   }
 
   DLINK_FOREACH(ptr, nresv_items.head)
@@ -928,7 +928,7 @@ save_resv_database(void)
     SAFE_WRITE(write_string(conf->name, f), RESVPATH);
     SAFE_WRITE(write_string(conf->reason, f), RESVPATH);
     SAFE_WRITE(write_uint64(conf->setat, f), RESVPATH);
-    SAFE_WRITE(write_uint64(conf->hold, f), RESVPATH);
+    SAFE_WRITE(write_uint64(conf->until, f), RESVPATH);
   }
 
   close_db(f);
@@ -969,7 +969,7 @@ load_resv_database(void)
         continue;
 
       conf->setat = tmp64_setat;
-      conf->hold = tmp64_hold;
+      conf->until = tmp64_hold;
       SetConfDatabase(conf);
     }
     else
@@ -978,7 +978,7 @@ load_resv_database(void)
         continue;
 
       conf->setat = tmp64_setat;
-      conf->hold = tmp64_hold;
+      conf->until = tmp64_hold;
       SetConfDatabase(conf);
     }
 
@@ -1020,7 +1020,7 @@ save_xline_database(void)
     SAFE_WRITE(write_string(conf->name, f), XPATH);
     SAFE_WRITE(write_string(conf->reason, f), XPATH);
     SAFE_WRITE(write_uint64(conf->setat, f), XPATH);
-    SAFE_WRITE(write_uint64(conf->hold, f), XPATH);
+    SAFE_WRITE(write_uint64(conf->until, f), XPATH);
   }
 
   close_db(f);
@@ -1062,7 +1062,7 @@ load_xline_database(void)
     conf->name = name;
     conf->reason = reason;
     conf->setat = tmp64_setat;
-    conf->hold = tmp64_hold;
+    conf->until = tmp64_hold;
   }
 
   close_db(f);

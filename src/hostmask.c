@@ -749,7 +749,7 @@ clear_out_address_conf(void)
        * We keep the temporary K-lines and destroy the permanent ones,
        * just to be confusing :) -A1kmm
        */
-      if (arec->conf->hold || IsConfDatabase(arec->conf))
+      if (arec->conf->until || IsConfDatabase(arec->conf))
         continue;
 
       dlinkDelete(&arec->node, &atable[i]);
@@ -801,7 +801,7 @@ hostmask_expire_temporary(void)
     {
       struct AddressRec *arec = ptr->data;
 
-      if (!arec->conf->hold || arec->conf->hold > CurrentTime)
+      if (!arec->conf->until || arec->conf->until > CurrentTime)
         continue;
 
       switch (arec->type)

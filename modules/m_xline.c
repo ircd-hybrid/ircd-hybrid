@@ -352,7 +352,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
     ilog(LOG_TYPE_KLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
 	 source_p->name, (int)tkline_time/60,
 	 conf->name, conf->reason);
-    conf->hold = CurrentTime + tkline_time;
+    conf->until = CurrentTime + tkline_time;
   }
   else
   {

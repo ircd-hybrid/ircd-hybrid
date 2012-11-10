@@ -195,8 +195,6 @@ conf_free(struct MaskItem *conf)
 
   if (conf->rsa_public_key)
     RSA_free(conf->rsa_public_key);
-
-  MyFree(conf->rsa_public_key_file);
 #endif
   DLINK_FOREACH_SAFE(ptr, ptr_next, conf->hub_list.head)
   {
@@ -255,7 +253,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 
       sendto_one(source_p, form_str(RPL_STATSXLINE),
 		 me.name, source_p->name, 
-		 conf->hold ? "x": "X", conf->count,
+		 conf->until ? "x": "X", conf->count,
 		 conf->name, conf->reason);
     }
     break;
@@ -1617,7 +1615,7 @@ expire_tklines(dlink_list *tklist)
   {
     conf = ptr->data;
 
-    if (!conf->hold || conf->hold > CurrentTime)
+    if (!conf->until || conf->until > CurrentTime)
       continue;
 
     if (conf->type == CONF_XLINE)
@@ -1843,7 +1841,7 @@ clear_out_old_conf(void)
                conf->type == CONF_RXLINE ||
                conf->type == CONF_RKLINE)
       {
-        if (!conf->hold)
+        if (!conf->until)
           conf_free(conf);
       }
       else

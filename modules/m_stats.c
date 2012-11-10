@@ -411,7 +411,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
       conf = arec->conf;
 
       /* dont report a tdline as a dline */
-      if (conf->hold)
+      if (conf->until)
         continue;
 
       sendto_one(source_p, form_str(RPL_STATSDLINE),
@@ -446,7 +446,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
       conf = arec->conf;
 
       /* dont report a permanent dline as a tdline */
-      if (!conf->hold)
+      if (!conf->until)
         continue;
 
       sendto_one(source_p, form_str(RPL_STATSDLINE),
@@ -790,7 +790,7 @@ report_Klines(struct Client *client_p, int tkline)
 
       conf = arec->conf;
 
-      if (!tkline && conf->hold)
+      if (!tkline && conf->until)
         continue;
 
       if (HasUMode(client_p, UMODE_OPER))
@@ -832,7 +832,7 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
       return;
 
     /* dont report a permanent kline as a tkline */
-    if (!conf->hold)
+    if (!conf->until)
       return;
 
     sendto_one(source_p, form_str(RPL_STATSKLINE), from,
@@ -872,7 +872,7 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
       return;
 
     /* dont report a tkline as a kline */
-    if (conf->hold)
+    if (conf->until)
       return;
       
     sendto_one(source_p, form_str(RPL_STATSKLINE), from,

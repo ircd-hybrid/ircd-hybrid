@@ -297,7 +297,7 @@ try_connections(void *unused)
      * made one successfull connection... [this algorithm is
      * a bit fuzzy... -- msa >;) ]
      */
-    if (conf->hold > CurrentTime)
+    if (conf->until > CurrentTime)
       continue;
 
     if (conf->class == NULL)
@@ -309,7 +309,7 @@ try_connections(void *unused)
 	confrq = MIN_CONN_FREQ;
     }
 
-    conf->hold = CurrentTime + confrq;
+    conf->until = CurrentTime + confrq;
 
     /* Found a CONNECT config with port specified, scan clients
      * and see if this server is already connected?

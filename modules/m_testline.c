@@ -121,8 +121,8 @@ mo_testline(struct Client *client_p, struct Client *source_p,
       else
         sendto_one(source_p, form_str(RPL_TESTLINE),
                    me.name, source_p->name,
-                   conf->hold ? 'd' : 'D',
-                   conf->hold ? ((conf->hold - CurrentTime) / 60)
+                   conf->until ? 'd' : 'D',
+                   conf->until ? ((conf->until - CurrentTime) / 60)
                    : 0L,
                    conf->host, conf->reason);
     }
@@ -154,8 +154,8 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_TESTLINE),
                  me.name, source_p->name,
-                 conf->hold ? 'k' : 'K',
-                 conf->hold ? ((conf->hold - CurrentTime) / 60)
+                 conf->until ? 'k' : 'K',
+                 conf->until ? ((conf->until - CurrentTime) / 60)
                  : 0L,
                  userhost, conf->reason? conf->reason : "No reason");
       ++matches;

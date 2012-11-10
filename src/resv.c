@@ -174,16 +174,16 @@ report_resv(struct Client *source_p)
     conf = ptr->data;
     sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
-	       conf->hold ? 'q' : 'Q',
+	       conf->until ? 'q' : 'Q',
 	       conf->name, conf->reason);
   }
 
   DLINK_FOREACH(ptr, nresv_items.head)
   {
-    conf = ptr->data;;
+    conf = ptr->data;
     sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
-	       conf->hold ? 'q' : 'Q',
+	       conf->until ? 'q' : 'Q',
 	       conf->name, conf->reason);
   }
 }

@@ -70,7 +70,7 @@ set_local_gline(const struct Client *source_p, const char *user,
   conf->host = xstrdup(host);
 
   conf->setat = CurrentTime;
-  conf->hold = CurrentTime + ConfigFileEntry.gline_time;
+  conf->until = CurrentTime + ConfigFileEntry.gline_time;
   SetConfDatabase(conf);
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,

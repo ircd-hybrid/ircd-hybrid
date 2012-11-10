@@ -935,6 +935,7 @@ oper_entry: OPERATOR
     split_nuh(&nuh);
 
     conf        = conf_make(CONF_OPER);
+    conf->name  = xstrdup(block_state.name.buf);
     conf->user  = xstrdup(block_state.user.buf);
     conf->host  = xstrdup(block_state.host.buf);
 

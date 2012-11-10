@@ -72,6 +72,13 @@ class_make(void)
 {
   struct ClassItem *class = MyMalloc(sizeof(*class));
 
+  class->active    = 1;
+  class->con_freq  = DEFAULT_CONNECTFREQUENCY;
+  class->ping_freq = DEFAULT_PINGFREQUENCY;
+  class->max_total = MAXIMUM_LINKS_DEFAULT;
+  class->max_sendq = DEFAULT_SENDQ;
+  class->max_recvq = DEFAULT_RECVQ;
+
   dlinkAdd(class, &class->node, &class_list);
 
   return class;
@@ -92,15 +99,7 @@ class_free(struct ClassItem *class)
 void
 class_init(void)
 {
-  class_default = class_make();
-
-  class_default->name      = xstrdup("default");
-  class_default->active    = 1;
-  class_default->con_freq  = DEFAULT_CONNECTFREQUENCY;
-  class_default->ping_freq = DEFAULT_PINGFREQUENCY;
-  class_default->max_total = MAXIMUM_LINKS_DEFAULT;
-  class_default->max_sendq = DEFAULT_SENDQ;
-  class_default->max_recvq = DEFAULT_RECVQ;
+  (class_default = class_make())->name = xstrdup("default");
 }
 
 const char *
@@ -200,13 +199,8 @@ class_mark_for_deletion(void)
 {
   dlink_node *ptr = NULL;
 
-  DLINK_FOREACH(ptr, class_list.head)
-  {
-    struct ClassItem *class = ptr->data;
-
-    if (class != class_default)
-      class->active = 0;
-  }
+  DLINK_FOREACH_PREV(ptr, class_list.tail->prev)
+    ((struct ClassItem *)ptr->data)->active = 0;
 }
 
 void

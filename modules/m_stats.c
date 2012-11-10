@@ -790,7 +790,8 @@ report_Klines(struct Client *client_p, int tkline)
 
       conf = arec->conf;
 
-      if (!tkline && conf->until)
+      if ((!tkline && conf->until) ||
+          (tkline && !conf->until))
         continue;
 
       if (HasUMode(client_p, UMODE_OPER))

@@ -4520,7 +4520,7 @@ yyreduce:
   case 242:
 /* Line 1813 of yacc.c  */
 #line 1368 "conf_parser.y"
-    { block_state.flags.value |= 0; }
+    { block_state.flags.value = 0; }
     break;
 
   case 246:
@@ -4679,7 +4679,7 @@ yyreduce:
 #line 1498 "conf_parser.y"
     {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value = 0;
+    block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
 }
     break;
 
@@ -5185,8 +5185,8 @@ yyreduce:
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (!(block_state.name.buf[0] ||
-        block_state.host.buf[0]))
+  if (!block_state.name.buf[0] ||
+      !block_state.host.buf[0])
     break;
 
   if (!(block_state.rpass.buf[0] ||
@@ -5328,7 +5328,7 @@ yyreduce:
 /* Line 1813 of yacc.c  */
 #line 1958 "conf_parser.y"
     {
-/* XXX */
+  block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
 }
     break;
 

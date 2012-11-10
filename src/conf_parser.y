@@ -1365,7 +1365,7 @@ listen_flags_item: T_SSL
 listen_items:   listen_items listen_item | listen_item;
 listen_item:    listen_port | listen_flags | listen_address | listen_host | error ';';
 
-listen_port: PORT '=' port_items { block_state.flags.value |= 0; } ';';
+listen_port: PORT '=' port_items { block_state.flags.value = 0; } ';';
 
 port_items: port_items ',' port_item | port_item;
 
@@ -1497,7 +1497,7 @@ auth_encrypted: ENCRYPTED '=' TBOOL ';'
 auth_flags: IRCD_FLAGS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value = 0;
+    block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
 } '='  auth_flags_items ';';
 
 auth_flags_items: auth_flags_items ',' auth_flags_item | auth_flags_item;
@@ -1834,8 +1834,8 @@ connect_entry: CONNECT
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (!(block_state.name.buf[0] ||
-        block_state.host.buf[0]))
+  if (!block_state.name.buf[0] ||
+      !block_state.host.buf[0])
     break;
 
   if (!(block_state.rpass.buf[0] ||
@@ -1956,7 +1956,7 @@ connect_aftype: AFTYPE '=' T_IPV4 ';'
 
 connect_flags: IRCD_FLAGS
 {
-/* XXX */
+  block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
 } '='  connect_flags_items ';';
 
 connect_flags_items: connect_flags_items ',' connect_flags_item | connect_flags_item;

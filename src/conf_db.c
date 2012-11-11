@@ -790,7 +790,7 @@ void
 save_gline_database(void)
 {
   uint32_t i = 0;
-  uint32_t records = 0, version = 0;
+  uint32_t records = 0;
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
 

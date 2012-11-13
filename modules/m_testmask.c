@@ -89,11 +89,11 @@ mo_testmask(struct Client *client_p, struct Client *source_p,
   {
     const struct Client *target_p = ptr->data;
 
-    if (!IsClient(target_p) || !match(given_nick, target_p->name))
+    if (!IsClient(target_p) || match(given_nick, target_p->name))
       continue;
 
-    if (match(given_user, target_p->username))
-      if (match(given_host, target_p->host) || match(given_host, target_p->sockhost))
+    if (!match(given_user, target_p->username))
+      if (!match(given_host, target_p->host) || !match(given_host, target_p->sockhost))
         ++count[!MyConnect(target_p)];
   }
 

@@ -98,7 +98,7 @@ do_ltrace(struct Client *source_p, int parc, char *parv[])
         {
           ac2ptr = ptr->data;
 
-          if (match(tname, ac2ptr->name))
+          if (!match(tname, ac2ptr->name))
             break;
           else
             ac2ptr = NULL;
@@ -123,7 +123,7 @@ do_ltrace(struct Client *source_p, int parc, char *parv[])
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  doall = (parv[1] && (parc > 1)) ? match(tname, me.name) : 1;
+  doall = (parv[1] && (parc > 1)) ? !match(tname, me.name) : 1;
   wilds = !parv[1] || strchr(tname, '*') || strchr(tname, '?');
   dow = wilds || doall;
   
@@ -170,7 +170,7 @@ do_ltrace(struct Client *source_p, int parc, char *parv[])
     if (!HasUMode(target_p, UMODE_OPER))
       continue;
 
-    if (!doall && wilds && !match(tname, target_p->name))
+    if (!doall && wilds && match(tname, target_p->name))
       continue;
 
     if (!dow && irccmp(tname, target_p->name))
@@ -184,7 +184,7 @@ do_ltrace(struct Client *source_p, int parc, char *parv[])
   {
     target_p = ptr->data;
 
-    if (!doall && wilds && !match(tname, target_p->name))
+    if (!doall && wilds && match(tname, target_p->name))
       continue;
     if (!dow && irccmp(tname, target_p->name))
       continue;

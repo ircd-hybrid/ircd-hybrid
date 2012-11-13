@@ -100,7 +100,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
 			 target_server, gecos, (int)tkline_time, reason);
 
     /* Allow ON to apply local xline as well if it matches */
-    if (!match(target_server, me.name))
+    if (match(target_server, me.name))
       return;
   }
   else 
@@ -193,7 +193,7 @@ relay_xline(struct Client *source_p, char *parv[])
                      "XLINE %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4]);
 
-  if (!match(parv[1], me.name))
+  if (match(parv[1], me.name))
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
@@ -248,7 +248,7 @@ mo_unxline(struct Client *client_p, struct Client *source_p,
                        "UNXLINE %s %s", target_server, gecos);
 
     /* Allow ON to apply local unxline as well if it matches */
-    if (!match(target_server, me.name))
+    if (match(target_server, me.name))
       return;
   }
   else
@@ -277,7 +277,7 @@ ms_unxline(struct Client *client_p, struct Client *source_p,
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
                      "UNXLINE %s %s", parv[1], parv[2]);
 
-  if (!match(parv[1], me.name))
+  if (match(parv[1], me.name))
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,

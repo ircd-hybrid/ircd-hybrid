@@ -1174,7 +1174,7 @@ parse_stats_args(int parc, char *parv[], int *doall, int *wilds)
 
     if (!irccmp(name, from))
       *doall = 2;
-    else if (match(name, from))
+    else if (!match(name, from))
       *doall = 1;
 
     *wilds = has_wildcards(name);
@@ -1206,7 +1206,7 @@ stats_L_list(struct Client *source_p,char *name, int doall, int wilds,
         !(MyConnect(source_p) && HasUMode(source_p, UMODE_OPER)) &&
         !HasUMode(target_p, UMODE_OPER) && (target_p != source_p))
       continue;
-    if (!doall && wilds && !match(name, target_p->name))
+    if (!doall && wilds && match(name, target_p->name))
       continue;
     if (!(doall || wilds) && irccmp(name, target_p->name))
       continue;

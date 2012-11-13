@@ -71,7 +71,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
 
     if (IsServer(p) || IsMe(p))
     {
-      if (match(server, p->name))
+      if (!match(server, p->name))
       {
         target_p = p;
         break;

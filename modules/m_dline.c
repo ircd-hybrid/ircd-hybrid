@@ -183,7 +183,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
                     dlhost, reason);
 
     /* Allow ON to apply local kline as well if it matches */
-    if (!match(target_server, me.name))
+    if (match(target_server, me.name))
       return;
   }
   else
@@ -296,7 +296,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
                      "DLINE %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4]);
 
-  if (!match(parv[1], me.name))
+  if (match(parv[1], me.name))
     return;
 
   tkline_time = valid_tkline(parv[2], TK_SECONDS);
@@ -430,7 +430,7 @@ mo_undline(struct Client *client_p, struct Client *source_p,
                        "UNDLINE %s %s", target_server, addr);
 
     /* Allow ON to apply local unkline as well if it matches */
-    if (!match(target_server, me.name))
+    if (match(target_server, me.name))
       return;
   }
   else
@@ -464,7 +464,7 @@ me_undline(struct Client *client_p, struct Client *source_p,
 
   addr = parv[2];
 
-  if (!IsClient(source_p) || !match(parv[1], me.name))
+  if (!IsClient(source_p) || match(parv[1], me.name))
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE,

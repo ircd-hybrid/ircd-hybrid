@@ -82,7 +82,7 @@ ms_encap(struct Client *client_p, struct Client *source_p,
   sendto_match_servs(source_p, parv[1], CAP_ENCAP,
                      "ENCAP %s", buffer);
 
-  if (!match(parv[1], me.name))
+  if (match(parv[1], me.name))
     return;
 
   if ((mptr = find_command(parv[2])) == NULL)

@@ -1121,9 +1121,9 @@ find_accept(const char *nick, const char *user,
   {
     struct split_nuh_item *accept_p = ptr->data;
 
-    if (cmpfunc(accept_p->nickptr, nick) == do_match &&
-        cmpfunc(accept_p->userptr, user) == do_match &&
-        cmpfunc(accept_p->hostptr, host) == do_match)
+    if (!cmpfunc(accept_p->nickptr, nick) &&
+        !cmpfunc(accept_p->userptr, user) &&
+        !cmpfunc(accept_p->hostptr, host))
       return accept_p;
   }
 

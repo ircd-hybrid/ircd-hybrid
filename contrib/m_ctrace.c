@@ -80,7 +80,7 @@ do_ctrace(struct Client *source_p, int parc, char *parv[])
     struct Client *target_p = ptr->data;
 
     class_name = get_client_class(&target_p->localClient->confs);
-    if ((class_name != NULL) && match(class_looking_for, class_name))
+    if ((class_name != NULL) && !match(class_looking_for, class_name))
       report_this_status(source_p, target_p);
   }
 

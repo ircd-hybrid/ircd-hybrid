@@ -969,7 +969,7 @@ attach_connect_block(struct Client *client_p, const char *name,
   {
     conf = ptr->data;
 
-    if (match(conf->name, name) == 0 || match(conf->host, host) == 0)
+    if (match(conf->name, name) || match(conf->host, host))
       continue;
 
     attach_conf(client_p, conf);
@@ -1001,7 +1001,7 @@ find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
     if (conf->type == type)
     {
       if (conf->name && (irccmp(conf->name, name) == 0 ||
-                         match(conf->name, name)))
+                         !match(conf->name, name)))
       return conf;
     }
   }
@@ -1113,7 +1113,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
           continue;
 	if (EmptyString(conf->user) || EmptyString(conf->host))
 	  return conf;
-	if (match(conf->user, user) && match(conf->host, host))
+	if (!match(conf->user, user) && !match(conf->host, host))
 	  return conf;
       }
     }
@@ -1124,9 +1124,9 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
     {
       conf = ptr->data;
 
-      if ((name != NULL) && match(name, conf->name))
+      if ((name != NULL) && !match(name, conf->name))
         return conf;
-      else if ((host != NULL) && match(host, conf->host))
+      else if ((host != NULL) && !match(host, conf->host))
         return conf;
     }
     break;
@@ -1174,7 +1174,7 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
 	  return (conf);
 	if (EmptyString(conf->user) || EmptyString(conf->host))
 	  return (conf);
-	if (match(conf->user, user) && match(conf->host, host))
+	if (!match(conf->user, user) && !match(conf->host, host))
 	  return (conf);
       }
     }
@@ -1194,12 +1194,12 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
           return conf;
         if (EmptyString(conf->user) || EmptyString(conf->host))
           return NULL;
-        if (match(conf->user, who->username))
+        if (!match(conf->user, who->username))
         {
           switch (conf->htype)
           {
             case HM_HOST:
-              if (match(conf->host, who->host) || match(conf->host, who->sockhost))
+              if (!match(conf->host, who->host) || !match(conf->host, who->sockhost))
                 if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                   return conf;
               break;

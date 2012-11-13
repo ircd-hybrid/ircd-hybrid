@@ -274,14 +274,14 @@ ms_server(struct Client *client_p, struct Client *source_p,
    * leaf. If so, close the link.
    */
   DLINK_FOREACH(ptr, conf->leaf_list.head)
-    if (match(ptr->data, name))
+    if (!match(ptr->data, name))
     {
       llined = 1;
       break;
     }
 
   DLINK_FOREACH(ptr, conf->hub_list.head)
-    if (match(ptr->data, name))
+    if (!match(ptr->data, name))
     {
       hlined = 1;
       break;
@@ -471,14 +471,14 @@ ms_sid(struct Client *client_p, struct Client *source_p,
    * leaf. If so, close the link.
    */
   DLINK_FOREACH(ptr, conf->leaf_list.head)
-    if (match(ptr->data, parv[1]))
+    if (!match(ptr->data, parv[1]))
     {
       llined = 1;
       break;
     }
 
   DLINK_FOREACH(ptr, conf->hub_list.head)
-    if (match(ptr->data, parv[1]))
+    if (!match(ptr->data, parv[1]))
     {
       hlined = 1;
       break;

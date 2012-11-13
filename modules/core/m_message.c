@@ -888,7 +888,7 @@ find_userhost(char *user, char *host, int *count)
       if (!IsClient(c2ptr)) /* something other than a client */
         continue;
 
-      if ((!host || match(host, c2ptr->host)) &&
+      if ((!host || !match(host, c2ptr->host)) &&
           irccmp(user, c2ptr->username) == 0)
       {
         (*count)++;

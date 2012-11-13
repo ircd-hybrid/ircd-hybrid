@@ -65,13 +65,13 @@ match(const char *mask, const char *name)
     if (!*m)
     {
       if (!*n)
-        return 1;
-      if (!ma)
         return 0;
+      if (!ma)
+        return 1;
       for (m--; (m > (const unsigned char *)mask) && (*m == '?'); m--)
         ;
       if (*m == '*')
-        return 1;
+        return 0;
       m = ma;
       n = ++na;
     }
@@ -79,13 +79,13 @@ match(const char *mask, const char *name)
     {
       while (*m == '*')
         m++;
-      return *m == 0;
+      return *m != '\0';
     }
 
     if (ToLower(*m) != ToLower(*n) && *m != '?' && (*m != '#' || !IsDigit(*n)))
     {
       if (!ma)
-        return 0;
+        return 1;
       m = ma;
       n = ++na;
     }
@@ -93,7 +93,7 @@ match(const char *mask, const char *name)
       m++, n++;
   }
 
-  return 0;
+  return 1;
 }
 
 /* match_esc()
@@ -125,13 +125,13 @@ match_esc(const char *mask, const char *name)
     if (!*m)
     {
       if (!*n)
-        return 1;
-      if (!ma)
         return 0;
+      if (!ma)
+        return 1;
       for (m--; (m > (const unsigned char *)mask) && (*m == '?'); m--)
         ;
       if (*m == '*')
-        return 1;
+        return 0;
       m = ma;
       n = ++na;
     }
@@ -139,18 +139,18 @@ match_esc(const char *mask, const char *name)
     {
       while (*m == '*')
         m++;
-      return *m == 0;
+      return *m != '\0';
     }
 
     if (*m != '?' && (*m != '#' || IsDigit(*n)))
     {
       if (*m == '\\')
 	if (!*++m)
-	  return 0;
+	  return 1;
       if (ToLower(*m) != ToLower(*n))
       {
         if (!ma)
-          return 0;
+          return 1;
         m = ma;
         n = ++na;
       }
@@ -161,7 +161,7 @@ match_esc(const char *mask, const char *name)
       m++, n++;
   }
 
-  return 0;
+  return 1;
 }
 
 /* match_chan()
@@ -179,63 +179,72 @@ match_chan(const char *mask, const char *name)
     ++name, ++mask;
   }
 
-  return match_esc(mask, name);
+  return match_esc(mask, name) == 0;
 }
 
-/* collapse()
+/*
+ * collapse()
+ * Collapse a pattern string into minimal components.
+ * This particular version is "in place", so that it changes the pattern
+ * which is to be reduced to a "minimal" size.
  *
- * collapses a string containing multiple *'s.
+ * (C) Carlo Wood - 6 Oct 1998
+ * Speedup rewrite by Andrea Cocito, December 1998.
+ * Note that this new optimized algorithm can *only* work in place.
+ */
+
+/*! \brief Collapse a mask string to remove redundancies.
+ * Specifically, it replaces a sequence of '*' followed by additional
+ * '*' or '?' with the same number of '?'s as the input, followed by
+ * one '*'.  This minimizes useless backtracking when matching later.
+ * \param mask Mask string to collapse.
+ * \return Pointer to the start of the string.
  */
 char *
-collapse(char *pattern)
+collapse(char *mask)
 {
-  char *p = pattern, *po = pattern;
-  char c;
+  int star = 0;
+  char *m = mask;
+  char *b = NULL;
 
-  if (p == NULL)
-    return NULL;
- 
-  while ((c = *p++))
+  if (m)
   {
-    if (c != '*')
-      *po++ = c;
-    else if (*p != '*')
-      *po++ = '*';
-  }
-
-  *po = 0;
-
-  return pattern;
-}
-
-/* collapse_esc()
- *
- * The collapse() function with support for escaping characters
- */
-char *
-collapse_esc(char *pattern)
-{
-  char *p = pattern, *po = pattern;
-  char c;
-
-  if (p == NULL)
-    return NULL;
-
-  while ((c = *p++))
-  {
-    if (c != '*')
+    do
     {
-      *po++ = c;
-      if (c == '\\' && *p)
-        *po++ = *p++;
-    }
-    else if (*p != '*')
-      *po++ = '*';
+      if ((*m == '*') && ((m[1] == '*') || (m[1] == '?')))
+      {
+        b = m;
+
+        do
+        {
+          if (*m == '*')
+            star = 1;
+          else
+          {
+            if (star && (*m != '?'))
+            {
+              *b++ = '*';
+              star = 0;
+            }
+
+            *b++ = *m;
+
+            if ((*m == '\\') && ((m[1] == '*') || (m[1] == '?')))
+              *b++ = *++m;
+          }
+        } while (*m++);
+
+        break;
+      }
+      else
+      {
+        if ((*m == '\\') && ((m[1] == '*') || (m[1] == '?')))
+          m++;
+      }
+    } while (*m++);
   }
 
-  *po = 0;
-
-  return pattern;
+  return mask;
 }
 
 /*

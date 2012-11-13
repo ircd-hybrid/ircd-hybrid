@@ -212,7 +212,7 @@ global_whois(struct Client *source_p, const char *nick)
     if (!IsClient(target_p))
       continue;
 
-    if (!match(nick, target_p->name))
+    if (match(nick, target_p->name))
       continue;
 
     assert(target_p->servptr != NULL);

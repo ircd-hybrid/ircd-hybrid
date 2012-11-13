@@ -171,11 +171,11 @@ who_common_channel(struct Client *source_p, struct Channel *chptr,
     assert(target_p->servptr != NULL);
 
     if ((mask == NULL) ||
-      match(mask, target_p->name) || match(mask, target_p->username) ||
-      match(mask, target_p->host) || 
+      !match(mask, target_p->name) || !match(mask, target_p->username) ||
+      !match(mask, target_p->host) || 
       ((!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER)) &&
-       match(mask, target_p->servptr->name)) ||
-      match(mask, target_p->info))
+       !match(mask, target_p->servptr->name)) ||
+      !match(mask, target_p->info))
     {
       do_who(source_p, target_p, NULL, "");
 
@@ -250,9 +250,9 @@ who_global(struct Client *source_p, char *mask, int server_oper)
     assert(target_p->servptr != NULL);
 
     if (!mask ||
-        match(mask, target_p->name) || match(mask, target_p->username) ||
-        match(mask, target_p->host) || match(mask, target_p->servptr->name) ||
-        match(mask, target_p->info))
+        !match(mask, target_p->name) || !match(mask, target_p->username) ||
+        !match(mask, target_p->host) || !match(mask, target_p->servptr->name) ||
+        !match(mask, target_p->info))
     {
       do_who(source_p, target_p, NULL, "");
 

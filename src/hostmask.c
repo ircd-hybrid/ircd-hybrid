@@ -480,7 +480,7 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
               arec->masktype == HM_IPV6 &&
               match_ipv6(addr, &arec->Mask.ipa.addr,
                          arec->Mask.ipa.bits) &&
-              (type & 0x1 || cmpfunc(arec->username, username) == do_match) &&
+              (type & 0x1 || !cmpfunc(arec->username, username)) &&
 	      (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
 	       match_conf_password(password, arec->conf)))
           {
@@ -505,7 +505,7 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
               arec->masktype == HM_IPV4 &&
               match_ipv4(addr, &arec->Mask.ipa.addr,
                          arec->Mask.ipa.bits) &&
-              (type & 0x1 || cmpfunc(arec->username, username) == do_match) &&
+              (type & 0x1 || !cmpfunc(arec->username, username)) &&
 	      (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
 	       match_conf_password(password, arec->conf)))
           {
@@ -529,8 +529,8 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
           if ((arec->type == (type & ~0x1)) &&
             arec->precedence > hprecv &&
             (arec->masktype == HM_HOST) &&
-            cmpfunc(arec->Mask.hostname, name) == do_match &&
-            (type & 0x1 || cmpfunc(arec->username, username) == do_match) &&
+            !cmpfunc(arec->Mask.hostname, name) &&
+            (type & 0x1 || !cmpfunc(arec->username, username)) &&
             (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
              match_conf_password(password, arec->conf)))
         {
@@ -551,8 +551,8 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
       if (arec->type == (type & ~0x1) &&
           arec->precedence > hprecv &&
           arec->masktype == HM_HOST &&
-          cmpfunc(arec->Mask.hostname, name) == do_match &&
-          (type & 0x1 || cmpfunc(arec->username, username) == do_match) &&
+          !cmpfunc(arec->Mask.hostname, name) &&
+          (type & 0x1 || cmpfunc(arec->username, username)) &&
           (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
            match_conf_password(password, arec->conf)))
       {

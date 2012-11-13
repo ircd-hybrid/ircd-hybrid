@@ -120,7 +120,7 @@ mo_trace(struct Client *client_p, struct Client *source_p,
         {
           ac2ptr = ptr->data;
 
-          if (match(tname, ac2ptr->name))
+          if (!match(tname, ac2ptr->name))
             break;
           else
             ac2ptr = NULL;
@@ -190,7 +190,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  if (match(tname, me.name))
+  if (!match(tname, me.name))
     doall = 1;
   else if (!MyClient(source_p) && !strcmp(tname, me.id))
   {
@@ -244,7 +244,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
 	!(MyConnect(source_p) && HasUMode(source_p, UMODE_OPER)) &&
 	!HasUMode(target_p, UMODE_OPER) && (target_p != source_p))
       continue;
-    if (!doall && wilds && !match(tname, target_p->name))
+    if (!doall && wilds && match(tname, target_p->name))
       continue;
     if (!dow && irccmp(tname, target_p->name))
       continue;
@@ -256,7 +256,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
   {
     target_p = ptr->data;
 
-    if (!doall && wilds && !match(tname, target_p->name))
+    if (!doall && wilds && match(tname, target_p->name))
       continue;
     if (!dow && irccmp(tname, target_p->name))
       continue;
@@ -269,7 +269,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
   {
     target_p = ptr->data;
 
-    if (!doall && wilds && !match(tname, target_p->name))
+    if (!doall && wilds && match(tname, target_p->name))
       continue;
     if (!dow && irccmp(tname, target_p->name))
       continue;

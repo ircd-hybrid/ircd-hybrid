@@ -71,7 +71,7 @@ ms_locops(struct Client *client_p, struct Client *source_p,
   sendto_server(client_p, CAP_CLUSTER, 0, "LOCOPS %s :%s",
                 parv[1], parv[2]);
 
-  if (!IsClient(source_p) || !match(parv[1], me.name))
+  if (!IsClient(source_p) || match(parv[1], me.name))
     return;
 
   if (find_matching_name_conf(CONF_ULINE, source_p->servptr->name,

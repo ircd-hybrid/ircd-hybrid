@@ -47,11 +47,8 @@ extern int match_chan(const char *, const char *);
  * collapse - collapse a string in place, converts multiple adjacent *'s 
  * into a single *.
  * collapse - modifies the contents of pattern 
- *
- * collapse_esc() - collapse with support for escaping chars
  */
 extern char *collapse(char *);
-extern char *collapse_esc(char *);
 
 /*
  * NOTE: The following functions are NOT the same as strcasecmp

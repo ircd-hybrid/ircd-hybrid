@@ -62,7 +62,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
         if (!HasUMode(source_p, UMODE_OPER))
           continue;
 
-      if (!EmptyString(mask) && !match(mask, target_p->name))
+      if (!EmptyString(mask) && match(mask, target_p->name))
         continue;
 
       /*

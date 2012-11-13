@@ -520,10 +520,10 @@ who_global(struct Client *source_p, char *mask, int server_oper)
       continue;
 
     if (!mask ||
-        match(mask, target_p->name) || match(mask, target_p->username) ||
-        match(mask, target_p->host) || match(mask, target_p->servptr->name) ||
-        match(mask, target_p->info) ||
-        (MyClient(target_p) && match(mask, target_p->sockhost)))
+        !match(mask, target_p->name) || !match(mask, target_p->username) ||
+        !match(mask, target_p->host) || !match(mask, target_p->servptr->name) ||
+        !match(mask, target_p->info) ||
+        (MyClient(target_p) && !match(mask, target_p->sockhost)))
     {
       if (dlink_list_length(&target_p->channel))
       {

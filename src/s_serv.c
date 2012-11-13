@@ -170,7 +170,7 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
   if (parc <= server || EmptyString(parv[server]))
     return HUNTED_ISME;
 
-  if (!strcmp(parv[server], me.id) || match(parv[server], me.name))
+  if (!strcmp(parv[server], me.id) || !match(parv[server], me.name))
     return HUNTED_ISME;
 
   /* These are to pickup matches that would cause the following
@@ -213,7 +213,7 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
       {
         target_tmp = ptr->data;
 
-        if (match(parv[server], target_tmp->name))
+        if (!match(parv[server], target_tmp->name))
         {
           if (target_tmp->from == source_p->from && !MyConnect(target_tmp))
             continue;
@@ -238,7 +238,7 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
     if (IsMe(target_p) || MyClient(target_p))
       return HUNTED_ISME;
 
-    if (!match(target_p->name, parv[server]))
+    if (match(target_p->name, parv[server]))
       parv[server] = target_p->name;
 
     /* This is a little kludgy but should work... */
@@ -389,15 +389,15 @@ check_server(const char *name, struct Client *client_p)
   {
     conf = ptr->data;
 
-    if (!match(name, conf->name))
+    if (match(name, conf->name))
       continue;
 
     error = -3;
 
     /* XXX: Fix me for IPv6                    */
     /* XXX sockhost is the IPv4 ip as a string */
-    if (match(conf->host, client_p->host) || 
-        match(conf->host, client_p->sockhost))
+    if (!match(conf->host, client_p->host) || 
+        !match(conf->host, client_p->sockhost))
     {
       error = -2;
 
@@ -1470,7 +1470,7 @@ find_servconn_in_progress(const char *name)
     cptr = ptr->data;
 
     if (cptr && cptr->name[0])
-      if (match(name, cptr->name))
+      if (!match(name, cptr->name))
         return cptr;
   }
   

@@ -707,9 +707,9 @@ static int
 match_it(const struct Client *one, const char *mask, int what)
 {
   if (what == MATCH_HOST)
-    return match(mask, one->host);
+    return !match(mask, one->host);
 
-  return match(mask, one->servptr->name);
+  return !match(mask, one->servptr->name);
 }
 
 /* sendto_match_butone()
@@ -820,7 +820,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap,
     if (target_p->from->localClient->serial == current_serial)
       continue;
 
-    if (match(mask, target_p->name))
+    if (!match(mask, target_p->name))
     {
       /*
        * if we set the serial here, then we'll never do a

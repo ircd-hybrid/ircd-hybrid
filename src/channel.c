@@ -595,12 +595,12 @@ find_bmask(const struct Client *who, const dlink_list *const list)
   {
     const struct Ban *bp = ptr->data;
 
-    if (match(bp->name, who->name) && match(bp->username, who->username))
+    if (!match(bp->name, who->name) && !match(bp->username, who->username))
     {
       switch (bp->type)
       {
         case HM_HOST:
-          if (match(bp->host, who->host) || match(bp->host, who->sockhost))
+          if (!match(bp->host, who->host) || !match(bp->host, who->sockhost))
             return 1;
           break;
         case HM_IPV4:

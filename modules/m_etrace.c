@@ -105,7 +105,7 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
 
     if (wilds)
     {
-      if (match(tname, target_p->name))
+      if (!match(tname, target_p->name))
         report_this_status(source_p, target_p, full_etrace);
     }
     else

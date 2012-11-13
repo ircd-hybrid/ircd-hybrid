@@ -74,7 +74,7 @@ mo_resv(struct Client *client_p, struct Client *source_p,
 			 "RESV %s %s :%s",
 			 target_server, resv, reason);
     /* Allow ON to apply local resv as well if it matches */
-    if (!match(target_server, me.name))
+    if (match(target_server, me.name))
       return;
   }
   else
@@ -137,7 +137,7 @@ ms_resv(struct Client *client_p, struct Client *source_p,
                      "RESV %s %s :%s",
                      parv[1], parv[2], parv[3]);
 
-  if (!IsClient(source_p) || !match(parv[1], me.name))
+  if (!IsClient(source_p) || match(parv[1], me.name))
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
@@ -171,7 +171,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p,
                        target_server, resv);
 
     /* Allow ON to apply local unresv as well if it matches */
-    if (!match(target_server, me.name))
+    if (match(target_server, me.name))
       return;
   }
   else 
@@ -196,7 +196,7 @@ ms_unresv(struct Client *client_p, struct Client *source_p,
                      "UNRESV %s %s",
                      parv[1], parv[2]);
 
-  if (!IsClient(source_p) || !match(parv[1], me.name))
+  if (!IsClient(source_p) || match(parv[1], me.name))
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,

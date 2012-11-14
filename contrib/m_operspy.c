@@ -191,12 +191,10 @@ operspy_list(struct Client *client_p, int parc, char *parv[])
   {
     const struct Channel *chptr_list = ptr->data;
 
-    if (match_chan(parv[2], chptr_list->chname))
-    {
+    if (!match(parv[2], chptr_list->chname))
       sendto_one(client_p, form_str(RPL_LIST), me.name, client_p->name,
                  chptr_list->chname, dlink_list_length(&chptr_list->members),
                  chptr_list->topic);
-    }
   }
 
   sendto_one(client_p, form_str(RPL_LISTEND),

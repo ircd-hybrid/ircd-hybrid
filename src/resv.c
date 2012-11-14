@@ -150,7 +150,7 @@ match_find_resv(const char *name)
   {
     struct MaskItem *conf = ptr->data;
 
-    if (match_chan(name, conf->name))
+    if (!match(name, conf->name))
       return conf;
   }
 

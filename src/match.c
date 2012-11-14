@@ -25,161 +25,91 @@
 #include "client.h"
 #include "ircd.h"
 
-/* Fix "statement not reached" warnings on Sun WorkShop C */
-#ifdef __SUNPRO_C
-#   pragma error_messages(off, E_STATEMENT_NOT_REACHED)
-#endif
 
-/* match()
- * 
- *  Compare if a given string (name) matches the given
- *  mask (which can contain wild cards: '*' - match any
- *  number of chars, '?' - match any single character.
- *
- *      return  1, if match
- *              0, if no match
- *
- *  Originally by Douglas A Lewis (dalewis@acsu.buffalo.edu)
+/*! \brief Check a string against a mask.
+ * This test checks using traditional IRC wildcards only: '*' means
+ * match zero or more characters of any type; '?' means match exactly
+ * one character of any type.  A backslash escapes the next character
+ * so that a wildcard may be matched exactly.
+ * param mask Wildcard-containing mask.
+ * param name String to check against \a mask.
+ * return Zero if \a mask matches \a name, non-zero if no match.
  */
 int
 match(const char *mask, const char *name)
 {
-  const unsigned char *m = (const unsigned char *)mask;
-  const unsigned char *n = (const unsigned char *)name;
-  const unsigned char *ma = NULL;
-  const unsigned char *na = (const unsigned char *)name;
-
-  assert(mask != NULL);
-  assert(name != NULL);
+  const char *m = mask, *n = name;
+  const char *m_tmp = mask, *n_tmp = name;
+  int star = 0;
 
   while (1)
   {
-    if (*m == '*')
+    switch (*m)
     {
-      while (*m == '*')
-        m++;
-      ma = m;
-      na = n;
-    }
-
-    if (!*m)
-    {
-      if (!*n)
-        return 0;
-      if (!ma)
-        return 1;
-      for (m--; (m > (const unsigned char *)mask) && (*m == '?'); m--)
-        ;
-      if (*m == '*')
-        return 0;
-      m = ma;
-      n = ++na;
-    }
-    else if (!*n)
-    {
-      while (*m == '*')
-        m++;
-      return *m != '\0';
-    }
-
-    if (ToLower(*m) != ToLower(*n) && *m != '?' && (*m != '#' || !IsDigit(*n)))
-    {
-      if (!ma)
-        return 1;
-      m = ma;
-      n = ++na;
-    }
-    else
-      m++, n++;
-  }
-
-  return 1;
-}
-
-/* match_esc()
- *
- * The match() function with support for escaping characters such
- * as '*' and '?'
- */
-int
-match_esc(const char *mask, const char *name)
-{
-  const unsigned char *m = (const unsigned char *)mask;
-  const unsigned char *n = (const unsigned char *)name;
-  const unsigned char *ma = NULL;
-  const unsigned char *na = (const unsigned char *)name;
-
-  assert(mask != NULL);
-  assert(name != NULL);
-
-  while (1)
-  {
-    if (*m == '*')
-    {
-      while (*m == '*')
-        m++;
-      ma = m;
-      na = n;
-    }
-
-    if (!*m)
-    {
-      if (!*n)
-        return 0;
-      if (!ma)
-        return 1;
-      for (m--; (m > (const unsigned char *)mask) && (*m == '?'); m--)
-        ;
-      if (*m == '*')
-        return 0;
-      m = ma;
-      n = ++na;
-    }
-    else if (!*n)
-    {
-      while (*m == '*')
-        m++;
-      return *m != '\0';
-    }
-
-    if (*m != '?' && (*m != '#' || IsDigit(*n)))
-    {
-      if (*m == '\\')
-	if (!*++m)
-	  return 1;
-      if (ToLower(*m) != ToLower(*n))
-      {
-        if (!ma)
+      case '\0':
+        if (!*n)
+          return 0;
+  backtrack:
+        if (m_tmp == mask)
           return 1;
-        m = ma;
-        n = ++na;
-      }
-      else
-        m++, n++;
+        m = m_tmp;
+        n = ++n_tmp;
+        if (*n == '\0')
+          return 1;
+        break;
+      case '\\':
+        m++;
+        /* allow escaping to force capitalization */
+        if (*m++ != *n++)
+          goto backtrack;
+        break;
+      case '*':
+      case '?':
+        for (star = 0; ; m++)
+        {
+          if (*m == '*')
+            star = 1;
+          else if (*m == '?')
+          {
+            if (!*n++)
+              goto backtrack;
+          }
+          else
+            break;
+        }
+
+        if (star)
+        {
+          if (!*m)
+            return 0;
+          else if (*m == '\\')
+          {
+            m_tmp = ++m;
+            if (!*m)
+              return 1;
+            for (n_tmp = n; *n && *n != *m; n++)
+              ;
+          }
+          else
+          {
+            m_tmp = m;
+            for (n_tmp = n; *n && ToLower(*n) != ToLower(*m); n++)
+              ;
+          }
+        }
+        /* and fall through */
+      default:
+        if (!*n)
+          return *m != '\0';
+        if (ToLower(*m) != ToLower(*n))
+          goto backtrack;
+        m++;
+        n++;
+        break;
     }
-    else
-      m++, n++;
   }
 
   return 1;
-}
-
-/* match_chan()
- *
- * The match_esc() function doing channel prefix auto-escape,
- * ie. mask: #blah*blah is seen like \#blah*blah
- */
-int
-match_chan(const char *mask, const char *name)
-{
-  if (*mask == '#')
-  {
-    if (*name != '#')
-      return 0;
-    ++name, ++mask;
-  }
-
-  return match_esc(mask, name) == 0;
 }
 
 /*
@@ -401,7 +331,7 @@ const unsigned int CharAttrs[] = {
 /* SP */     PRINT_C|SPACE_C,
 /* ! */      PRINT_C|KWILD_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* " */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C,
-/* # */      PRINT_C|KWILD_C|MWILD_C|CHANPFX_C|CHAN_C|VCHAN_C|NONEOS_C,
+/* # */      PRINT_C|KWILD_C|CHANPFX_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* $ */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C|USER_C,
 /* % */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* & */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C,

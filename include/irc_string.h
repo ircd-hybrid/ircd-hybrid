@@ -31,17 +31,7 @@
 extern int has_wildcards(const char *);
 extern int ircd_pcre_exec(const void *, const char *);
 extern void *ircd_pcre_compile(const char *, const char **);
-
-/*
- * match - compare name with mask, mask may contain * and ? as wildcards
- * match - returns 1 on successful match, 0 otherwise
- *
- * match_esc - compare with support for escaping chars
- * match_chan - like match_esc with first character auto-escaped
- */
 extern int match(const char *, const char *);
-extern int match_esc(const char *, const char *);
-extern int match_chan(const char *, const char *);
 
 /*
  * collapse - collapse a string in place, converts multiple adjacent *'s 

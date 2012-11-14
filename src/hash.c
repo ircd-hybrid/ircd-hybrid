@@ -815,11 +815,11 @@ list_allow_channel(const char *chname, struct ListTask *lt)
   dlink_node *dl = NULL;
 
   DLINK_FOREACH(dl, lt->show_mask.head)
-    if (!match_chan(dl->data, chname))
+    if (match(dl->data, chname) != 0)
       return 0;
 
   DLINK_FOREACH(dl, lt->hide_mask.head)
-    if (match_chan(dl->data, chname))
+    if (match(dl->data, chname) == 0)
       return 0;
 
   return 1;

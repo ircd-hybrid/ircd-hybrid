@@ -217,7 +217,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
     {
       modp = ptr->data;
 
-      if (!EmpyString(parv[2]) && match(parv[2], modp->name))
+      if (!EmptyString(parv[2]) && match(parv[2], modp->name))
         continue;
 
       sendto_one(source_p, form_str(RPL_MODLIST), me.name, source_p->name,

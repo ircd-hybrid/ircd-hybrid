@@ -1105,7 +1105,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
 
       if (EmptyString(conf->name))
 	continue;
-      if ((name != NULL) && match_esc(conf->name, name))
+      if ((name != NULL) && !match(conf->name, name))
       {
 	if ((user == NULL && (host == NULL)))
 	  return conf;

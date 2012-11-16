@@ -21,9 +21,6 @@
 /* Size of the dbuf heap. */
 #undef DBUF_HEAP_SIZE
 
-/* Define to 1 to enable debugging. */
-#undef DEBUG
-
 /* Size of the dlink_node heap. */
 #undef DNODE_HEAP_SIZE
 
@@ -255,7 +252,7 @@
 /* Define to the shared library suffix, say, ".dylib". */
 #undef LT_SHARED_EXT
 
-/* Define to 1 to disable debugging. */
+/* Define to disable assert() statements. */
 #undef NDEBUG
 
 /* Define if dlsym() requires a leading underscore in symbol names. */

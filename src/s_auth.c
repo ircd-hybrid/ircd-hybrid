@@ -39,7 +39,6 @@
 #include "fdlist.h"
 #include "s_auth.h"
 #include "conf.h"
-#include "balloc.h"
 #include "client.h"
 #include "event.h"
 #include "hook.h"
@@ -50,6 +49,7 @@
 #include "s_bsd.h"
 #include "log.h"
 #include "send.h"
+#include "mempool.h"
 
 
 static const char *HeaderMessages[] = {
@@ -76,7 +76,7 @@ enum {
 
 #define sendheader(c, i) sendto_one((c), HeaderMessages[(i)], me.name)
 
-static BlockHeap *auth_heap = NULL;
+static mp_pool_t *auth_pool = NULL;
 static dlink_list auth_doing_list = { NULL, NULL, 0 };
 
 static EVH timeout_auth_queries_event;
@@ -94,7 +94,7 @@ struct Callback *auth_cb = NULL;
 void
 init_auth(void)
 {
-  auth_heap = BlockHeapCreate("auth", sizeof(struct AuthRequest), AUTH_HEAP_SIZE);
+  auth_pool = mp_pool_new(sizeof(struct AuthRequest), MP_CHUNK_SIZE_AUTH);
   auth_cb = register_callback("start_auth", start_auth);
   eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 }
@@ -105,8 +105,9 @@ init_auth(void)
 static struct AuthRequest *
 make_auth_request(struct Client *client)
 {
-  struct AuthRequest *request = BlockHeapAlloc(auth_heap);
+  struct AuthRequest *request = mp_pool_get(auth_pool);
 
+  memset(request, 0, sizeof(*request));
   client->localClient->auth = request;
   request->client           = client;
   request->timeout          = CurrentTime + CONNECTTIMEOUT;
@@ -129,7 +130,7 @@ release_auth_client(struct AuthRequest *auth)
 
   client->localClient->auth = NULL;
   dlinkDelete(&auth->node, &auth_doing_list);
-  BlockHeapFree(auth_heap, auth);
+  mp_pool_release(auth);
 
   /*
    * When a client has auth'ed, we want to start reading what it sends
@@ -594,5 +595,5 @@ delete_auth(struct AuthRequest *auth)
     fd_close(&auth->fd);
 
   dlinkDelete(&auth->node, &auth_doing_list);
-  BlockHeapFree(auth_heap, auth);
+  mp_pool_release(auth);
 }

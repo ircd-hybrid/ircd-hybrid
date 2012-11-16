@@ -53,9 +53,9 @@
 #include "whowas.h"
 #include "modules.h"
 #include "memory.h"
+#include "mempool.h"
 #include "hook.h"
 #include "ircd_getopt.h"
-#include "balloc.h"
 #include "motd.h"
 #include "supported.h"
 #include "watch.h"
@@ -548,7 +548,7 @@ main(int argc, char *argv[])
   /* Check if there is pidfile and daemon already running */
   check_pidfile(pidFileName);
 
-  initBlockHeap();
+  mp_pool_init();
   init_dlink_nodes();
   init_callbacks();
   initialize_message_files();

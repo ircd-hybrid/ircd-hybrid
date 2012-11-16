@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "list.h"
 #include "ircd_defs.h"
-#include "balloc.h"
 #include "conf.h"
 #include "s_serv.h"
 #include "resv.h"
@@ -111,7 +110,7 @@ get_client_class(const dlink_list *const list)
     const struct MaskItem *conf = ptr->data;
 
     assert(conf->class);
-    assert(conf->type & (CONF_OPERATOR | CONF_CLIENT | CONF_SERVER));
+    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
 
     return conf->class->name;
   }
@@ -127,8 +126,8 @@ get_client_ping(const dlink_list *const list)
   if ((ptr = list->head)) {
     const struct MaskItem *conf = ptr->data;
 
-    assert(aconf->class);
-    assert(aconf->type & (CONF_OPERATOR | CONF_CLIENT | CONF_SERVER));
+    assert(conf->class);
+    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
 
     return conf->class->ping_freq;
   }
@@ -145,7 +144,7 @@ get_sendq(const dlink_list *const list)
     const struct MaskItem *conf = ptr->data;
 
     assert(conf->class);
-    assert(conf->type & (CONF_OPERATOR | CONF_CLIENT | CONF_SERVER));
+    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
 
     return conf->class->max_sendq;
   }
@@ -162,7 +161,7 @@ get_recvq(const dlink_list *const list)
     const struct MaskItem *conf = ptr->data;
 
     assert(conf->class);
-    assert(conf->type & (CONF_OPERATOR | CONF_CLIENT | CONF_SERVER));
+    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
 
     return conf->class->max_recvq;
   }

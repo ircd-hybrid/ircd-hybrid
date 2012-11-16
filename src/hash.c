@@ -24,7 +24,6 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "balloc.h"
 #include "conf.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -39,12 +38,13 @@
 #include "numeric.h"
 #include "send.h"
 #include "memory.h"
+#include "mempool.h"
 #include "dbuf.h"
 #include "s_user.h"
 
 
-static BlockHeap *userhost_heap = NULL;
-static BlockHeap *namehost_heap = NULL;
+static mp_pool_t *userhost_pool = NULL;
+static mp_pool_t *namehost_pool = NULL;
 
 static unsigned int hashf_xor_key = 0;
 
@@ -74,8 +74,8 @@ init_hash(void)
    * should be a good close approximation anyway
    * - Dianora
    */
-  userhost_heap = BlockHeapCreate("userhost", sizeof(struct UserHost), CLIENT_HEAP_SIZE);
-  namehost_heap = BlockHeapCreate("namehost", sizeof(struct NameHost), CLIENT_HEAP_SIZE);
+  userhost_pool = mp_pool_new(sizeof(struct UserHost), MP_CHUNK_SIZE_CLIENT);
+  namehost_pool = mp_pool_new(sizeof(struct NameHost), MP_CHUNK_SIZE_CLIENT);
 
   hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
 }
@@ -620,7 +620,9 @@ find_or_add_userhost(const char *host)
   if ((userhost = hash_find_userhost(host)) != NULL)
     return userhost;
 
-  userhost = BlockHeapAlloc(userhost_heap);
+  userhost = mp_pool_get(userhost_pool);
+
+  memset(userhost, 0, sizeof(*userhost));
   strlcpy(userhost->host, host, sizeof(userhost->host));
   hash_add_userhost(userhost);
 
@@ -671,7 +673,8 @@ add_user_host(const char *user, const char *host, int global)
     }
   }
 
-  nameh = BlockHeapAlloc(namehost_heap);
+  nameh = mp_pool_get(namehost_pool);
+  memset(nameh, 0, sizeof(*nameh));
   strlcpy(nameh->name, user, sizeof(nameh->name));
 
   nameh->gcount = 1;
@@ -730,13 +733,13 @@ delete_user_host(const char *user, const char *host, int global)
       if (nameh->gcount == 0 && nameh->lcount == 0)
       {
         dlinkDelete(&nameh->node, &found_userhost->list);
-        BlockHeapFree(namehost_heap, nameh);
+        mp_pool_release(nameh);
       }
 
       if (dlink_list_length(&found_userhost->list) == 0)
       {
         hash_del_userhost(found_userhost);
-        BlockHeapFree(userhost_heap, found_userhost);
+        mp_pool_release(found_userhost);
       }
 
       return;

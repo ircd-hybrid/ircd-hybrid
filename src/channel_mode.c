@@ -40,7 +40,7 @@
 #include "whowas.h"
 #include "event.h"
 #include "memory.h"
-#include "balloc.h"
+#include "mempool.h"
 #include "log.h"
 #include "parse.h"
 
@@ -107,7 +107,7 @@ static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6, CAP_HOPS };
 static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6 };
 #endif
 static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
-extern BlockHeap *ban_heap;
+extern mp_pool_t *ban_pool;
 
 
 /* XXX check_string is propably not longer required in add_id and del_id */
@@ -224,8 +224,8 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
     }
   }
 
-  ban_p = BlockHeapAlloc(ban_heap);
-
+  ban_p = mp_pool_get(ban_pool);
+  memset(ban_p, 0, sizeof(*ban_p));
   ban_p->name = xstrdup(name);
   ban_p->username = xstrdup(user);
   ban_p->host = xstrdup(host);

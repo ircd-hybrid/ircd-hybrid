@@ -3,32 +3,8 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
-/* Size of the auth heap. */
-#undef AUTH_HEAP_SIZE
-
-/* Size of the ban heap. */
-#undef BAN_HEAP_SIZE
-
-/* Size of the channel heap. */
-#undef CHANNEL_HEAP_SIZE
-
-/* Size of the client heap. */
-#undef CLIENT_HEAP_SIZE
-
 /* Set to datadir. */
 #undef DATADIR
-
-/* Size of the dbuf heap. */
-#undef DBUF_HEAP_SIZE
-
-/* Define to 1 to enable debugging. */
-#undef DEBUG
-
-/* Size of the dlink_node heap. */
-#undef DNODE_HEAP_SIZE
-
-/* Size of the dns heap. */
-#undef DNS_HEAP_SIZE
 
 /* Define to 1 if you want halfops support. */
 #undef HALFOPS
@@ -220,9 +196,6 @@
 /* Define to 1 if you have IPv6 support. */
 #undef IPV6
 
-/* Size of the local client heap. */
-#undef LCLIENT_HEAP_SIZE
-
 /* Set to libdir. */
 #undef LIBDIR
 
@@ -255,7 +228,37 @@
 /* Define to the shared library suffix, say, ".dylib". */
 #undef LT_SHARED_EXT
 
-/* Define to 1 to disable debugging. */
+/* Size of the auth mempool chunk. */
+#undef MP_CHUNK_SIZE_AUTH
+
+/* Size of the ban mempool chunk. */
+#undef MP_CHUNK_SIZE_BAN
+
+/* Size of the channel mempool chunk. */
+#undef MP_CHUNK_SIZE_CHANNEL
+
+/* Size of the client mempool chunk. */
+#undef MP_CHUNK_SIZE_CLIENT
+
+/* Size of the dbuf mempool chunk. */
+#undef MP_CHUNK_SIZE_DBUF
+
+/* Size of the dlink_node mempool chunk. */
+#undef MP_CHUNK_SIZE_DNODE
+
+/* Size of the dns mempool chunk. */
+#undef MP_CHUNK_SIZE_DNS
+
+/* Size of the local client mempool chunk. */
+#undef MP_CHUNK_SIZE_LCLIENT
+
+/* Size of the channel mempool chunk. */
+#undef MP_CHUNK_SIZE_MEMBER
+
+/* Size of the watch mempool chunk. */
+#undef MP_CHUNK_SIZE_WATCH
+
+/* Define to disable assert() statements. */
 #undef NDEBUG
 
 /* Define if dlsym() requires a leading underscore in symbol names. */

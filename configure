@@ -13905,29 +13905,34 @@ fi
 $as_echo "#define NICKNAMEHISTORYLENGTH 16384" >>confdefs.h
 
 
-$as_echo "#define CHANNEL_HEAP_SIZE 1024" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_CHANNEL 64*1024" >>confdefs.h
 
 
-$as_echo "#define BAN_HEAP_SIZE 1024" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_MEMBER 32*1024" >>confdefs.h
 
 
-$as_echo "#define CLIENT_HEAP_SIZE 1024" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_BAN 16*1024" >>confdefs.h
 
 
-$as_echo "#define LCLIENT_HEAP_SIZE 512" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_CLIENT 256*1024" >>confdefs.h
 
 
-$as_echo "#define DNODE_HEAP_SIZE 1024" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_LCLIENT 128*1024" >>confdefs.h
 
 
-$as_echo "#define DBUF_HEAP_SIZE 512" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_DNODE 8*1024" >>confdefs.h
 
 
-$as_echo "#define AUTH_HEAP_SIZE 256" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_DBUF 512*1024" >>confdefs.h
 
 
-$as_echo "#define DNS_HEAP_SIZE 256" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_AUTH 32*1024" >>confdefs.h
 
+
+$as_echo "#define MP_CHUNK_SIZE_DNS 16*1024" >>confdefs.h
+
+
+$as_echo "#define MP_CHUNK_SIZE_WATCH 4*1024" >>confdefs.h
 
 
 # Argument processing.
@@ -14375,14 +14380,7 @@ else
 fi
 
   if test "$debugging" = "yes" ; then
-
-$as_echo "#define DEBUG 1" >>confdefs.h
-
     CFLAGS="-Wall -g -O0"
-  else
-
-$as_echo "#define NDEBUG 1" >>confdefs.h
-
   fi
 
 

@@ -24,7 +24,6 @@
 
 #include "stdinc.h"
 #include "list.h"	 /* dlink_node/dlink_list */
-#include "balloc.h"
 #include "client.h"      /* Client */
 #include "irc_string.h"  
 #include "ircd.h"        /* me */
@@ -364,8 +363,6 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   sendto_one(source_p, ":%s %d %s z :Remote client Memory in use: %u(%llu)",
              me.name, RPL_STATSDEBUG, source_p->name, remote_client_count,
              remote_client_memory_used);
-
-  block_heap_report_stats(source_p);
 
   sendto_one(source_p,
              ":%s %d %s z :TOTAL: %llu",

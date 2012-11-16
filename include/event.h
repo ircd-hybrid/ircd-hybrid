@@ -24,6 +24,7 @@
 
 #ifndef INCLUDED_event_h
 #define INCLUDED_event_h
+#include "client.h"
 
 /*
  * How many event entries we need to allocate at a time in the block

@@ -66,15 +66,15 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
-am_ircd_OBJECTS = balloc.$(OBJEXT) channel.$(OBJEXT) \
-	channel_mode.$(OBJEXT) client.$(OBJEXT) conf.$(OBJEXT) \
-	conf_class.$(OBJEXT) conf_db.$(OBJEXT) conf_parser.$(OBJEXT) \
-	conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) event.$(OBJEXT) \
-	fdlist.$(OBJEXT) getopt.$(OBJEXT) hash.$(OBJEXT) \
-	hook.$(OBJEXT) hostmask.$(OBJEXT) irc_res.$(OBJEXT) \
-	irc_reslib.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_signal.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
-	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) \
+am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
+	client.$(OBJEXT) conf.$(OBJEXT) conf_class.$(OBJEXT) \
+	conf_db.$(OBJEXT) conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) \
+	dbuf.$(OBJEXT) event.$(OBJEXT) fdlist.$(OBJEXT) \
+	getopt.$(OBJEXT) hash.$(OBJEXT) hook.$(OBJEXT) \
+	hostmask.$(OBJEXT) irc_res.$(OBJEXT) irc_reslib.$(OBJEXT) \
+	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
+	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
+	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
 	modules.$(OBJEXT) motd.$(OBJEXT) rng_mt.$(OBJEXT) \
 	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
 	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
@@ -270,8 +270,7 @@ AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include
 ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
-ircd_SOURCES = balloc.c          \
-               channel.c         \
+ircd_SOURCES = channel.c         \
                channel_mode.c    \
                client.c          \
                conf.c            \
@@ -296,6 +295,7 @@ ircd_SOURCES = balloc.c          \
                log.c             \
                match.c           \
                memory.c          \
+               mempool.c         \
                modules.c         \
                motd.c            \
                rng_mt.c          \
@@ -416,7 +416,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/balloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
@@ -442,6 +441,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@

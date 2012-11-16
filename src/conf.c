@@ -25,7 +25,6 @@
 #include "stdinc.h"
 #include "list.h"
 #include "ircd_defs.h"
-#include "balloc.h"
 #include "conf.h"
 #include "s_serv.h"
 #include "resv.h"
@@ -45,6 +44,7 @@
 #include "send.h"
 #include "s_gline.h"
 #include "memory.h"
+#include "mempool.h"
 #include "irc_res.h"
 #include "userhost.h"
 #include "s_user.h"
@@ -104,7 +104,7 @@ struct ip_entry
 };
 
 static struct ip_entry *ip_hash_table[IP_HASH_SIZE];
-static BlockHeap *ip_entry_heap = NULL;
+static mp_pool_t *ip_entry_pool = NULL;
 static int ip_entries_count = 0;
 
 
@@ -654,7 +654,7 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
 void
 init_ip_hash_table(void)
 {
-  ip_entry_heap = BlockHeapCreate("ip", sizeof(struct ip_entry),
+  ip_entry_pool = mp_pool_new(sizeof(struct ip_entry),
     2 * hard_fdlimit);
   memset(ip_hash_table, 0, sizeof(ip_hash_table));
 }
@@ -704,7 +704,8 @@ find_or_add_ip(struct irc_ssaddr *ip_in)
   if (ip_entries_count >= 2 * hard_fdlimit)
     garbage_collect_ip_entries();
 
-  newptr = BlockHeapAlloc(ip_entry_heap);
+  newptr = mp_pool_get(ip_entry_pool);
+  memset(newptr, 0, sizeof(*newptr));
   ip_entries_count++;
   memcpy(&newptr->ip, ip_in, sizeof(struct irc_ssaddr));
 
@@ -762,7 +763,7 @@ remove_one_ip(struct irc_ssaddr *ip_in)
       else
 	ip_hash_table[hash_index] = ptr->next;
 
-      BlockHeapFree(ip_entry_heap, ptr);
+      mp_pool_release(ptr);
       ip_entries_count--;
       return;
     }
@@ -865,7 +866,7 @@ garbage_collect_ip_entries(void)
           last_ptr->next = ptr->next;
         else
           ip_hash_table[i] = ptr->next;
-        BlockHeapFree(ip_entry_heap, ptr);
+        mp_pool_release(ptr);
         ip_entries_count--;
       }
       else
@@ -1077,7 +1078,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
       DLINK_FOREACH(ptr, list_p->head)
       {
         conf = ptr->data;
-        assert(conf->regexpname);
+        assert(conf->regexuser);
 
         if (!ircd_pcre_exec(conf->regexuser, name))
           return conf;

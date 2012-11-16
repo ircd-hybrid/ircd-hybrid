@@ -45,8 +45,8 @@
 #include "s_user.h"
 #include "dbuf.h"
 #include "memory.h"
+#include "mempool.h"
 #include "hostmask.h"
-#include "balloc.h"
 #include "listener.h"
 #include "irc_res.h"
 #include "userhost.h"
@@ -64,8 +64,8 @@ dlink_list oper_list = {NULL, NULL, 0};
 
 static EVH check_pings;
 
-static BlockHeap *client_heap  = NULL;
-static BlockHeap *lclient_heap = NULL;
+static mp_pool_t *client_pool  = NULL;
+static mp_pool_t *lclient_pool = NULL;
 
 static dlink_list dead_list  = { NULL, NULL, 0};
 static dlink_list abort_list = { NULL, NULL, 0};
@@ -89,8 +89,8 @@ init_client(void)
   /* start off the check ping event ..  -- adrian
    * Every 30 seconds is plenty -- db
    */
-  client_heap = BlockHeapCreate("client", sizeof(struct Client), CLIENT_HEAP_SIZE);
-  lclient_heap = BlockHeapCreate("local client", sizeof(struct LocalUser), LCLIENT_HEAP_SIZE);
+  client_pool = mp_pool_new(sizeof(struct Client), MP_CHUNK_SIZE_CLIENT);
+  lclient_pool = mp_pool_new(sizeof(struct LocalUser), MP_CHUNK_SIZE_LCLIENT);
   eventAdd("check_pings", check_pings, NULL, 5);
 }
 
@@ -112,12 +112,17 @@ init_client(void)
 struct Client *
 make_client(struct Client *from)
 {
-  struct Client *client_p = BlockHeapAlloc(client_heap);
+  struct Client *client_p = mp_pool_get(client_pool);
+
+  memset(client_p, 0, sizeof(*client_p));
 
   if (from == NULL)
   {
     client_p->from                      = client_p; /* 'from' of local client is self! */
-    client_p->localClient               = BlockHeapAlloc(lclient_heap);
+    client_p->localClient               = mp_pool_get(lclient_pool);
+
+    memset(client_p->localClient, 0, sizeof(*client_p->localClient));
+
     client_p->localClient->since        = CurrentTime;
     client_p->localClient->lasttime     = CurrentTime;
     client_p->localClient->firsttime    = CurrentTime;
@@ -183,10 +188,10 @@ free_client(struct Client *client_p)
     dbuf_clear(&client_p->localClient->buf_recvq);
     dbuf_clear(&client_p->localClient->buf_sendq);
 
-    BlockHeapFree(lclient_heap, client_p->localClient);
+    mp_pool_release(client_p->localClient);
   }
 
-  BlockHeapFree(client_heap, client_p);
+  mp_pool_release(client_p);
 }
 
 /*

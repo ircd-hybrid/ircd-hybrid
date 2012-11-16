@@ -27,7 +27,6 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "balloc.h"
 #include "s_user.h"
 #include "s_misc.h"
 #include "client.h"
@@ -42,21 +41,21 @@
 #include "supported.h"
 #include "whowas.h"
 #include "memory.h"
+#include "mempool.h"
 #include "packet.h"
 #include "watch.h"
 
-#define WATCH_HEAP_SIZE 32
 
 static dlink_list watchTable[HASHSIZE];
 
-static BlockHeap *watch_heap = NULL;
+static mp_pool_t *watch_pool = NULL;
 
 /*! \brief Initializes the watch table
  */
 void
 watch_init(void)
 {
-  watch_heap = BlockHeapCreate("watch", sizeof(struct Watch), WATCH_HEAP_SIZE);
+  watch_pool = mp_pool_new(sizeof(struct Watch), MP_CHUNK_SIZE_WATCH);
 }
 
 /*
@@ -146,7 +145,8 @@ watch_add_to_hash_table(const char *nick, struct Client *client_p)
   /* If found NULL (no header for this nick), make one... */
   if ((anptr = watch_find_hash(nick)) == NULL)
   {
-    anptr = BlockHeapAlloc(watch_heap);
+    anptr = mp_pool_get(watch_pool);
+    memset(anptr, 0, sizeof(*anptr));
     anptr->lasttime = CurrentTime;
     strlcpy(anptr->nick, nick, sizeof(anptr->nick));
 
@@ -193,7 +193,7 @@ watch_del_from_hash_table(const char *nick, struct Client *client_p)
   {
     assert(dlinkFind(&watchTable[strhash(nick)], anptr) != NULL);
     dlinkDelete(&anptr->node, &watchTable[strhash(nick)]);
-    BlockHeapFree(watch_heap, anptr);
+    mp_pool_release(anptr);
   }
 }
 
@@ -223,7 +223,7 @@ watch_del_watch_list(struct Client *client_p)
       assert(dlinkFind(&watchTable[strhash(anptr->nick)], anptr) != NULL);
       dlinkDelete(&anptr->node, &watchTable[strhash(anptr->nick)]);
 
-      BlockHeapFree(watch_heap, anptr);
+      mp_pool_release(anptr);
     }
 
     dlinkDelete(ptr, &client_p->localClient->watches);

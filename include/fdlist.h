@@ -92,7 +92,7 @@ typedef struct _fde {
   struct _fde *hnext;
 } fde_t;
 
-#define FD_HASH_SIZE CLIENT_HEAP_SIZE
+#define FD_HASH_SIZE 1024
 
 extern int number_fd;
 extern int hard_fdlimit;

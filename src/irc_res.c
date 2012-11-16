@@ -21,7 +21,6 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "balloc.h"
 #include "client.h"
 #include "event.h"
 #include "irc_string.h"
@@ -35,6 +34,7 @@
 #include "s_misc.h"
 #include "send.h"
 #include "memory.h"
+#include "mempool.h"
 #include "irc_res.h"
 #include "irc_reslib.h"
 
@@ -91,7 +91,7 @@ struct reslist
 
 static fde_t ResolverFileDescriptor;
 static dlink_list request_list = { NULL, NULL, 0 };
-static BlockHeap *dns_heap = NULL;
+static mp_pool_t *dns_pool = NULL;
 
 static void rem_request(struct reslist *);
 static struct reslist *make_request(dns_callback_fnc, void *);
@@ -244,7 +244,7 @@ start_resolver(void)
 void
 init_resolver(void)
 {
-  dns_heap = BlockHeapCreate("dns", sizeof(struct reslist), DNS_HEAP_SIZE);
+  dns_pool = mp_pool_new(sizeof(struct reslist), MP_CHUNK_SIZE_DNS);
   memset(&ResolverFileDescriptor, 0, sizeof(fde_t));
   start_resolver();
 }
@@ -271,7 +271,7 @@ rem_request(struct reslist *request)
   dlinkDelete(&request->node, &request_list);
 
   MyFree(request->name);
-  BlockHeapFree(dns_heap, request);
+  mp_pool_release(request);
 }
 
 /*
@@ -280,8 +280,9 @@ rem_request(struct reslist *request)
 static struct reslist *
 make_request(dns_callback_fnc callback, void *ctx)
 {
-  struct reslist *request = BlockHeapAlloc(dns_heap);
+  struct reslist *request = mp_pool_get(dns_pool);
 
+  memset(request, 0, sizeof(*request));
   request->sentat       = CurrentTime;
   request->retries      = 3;
   request->resend       = 1;

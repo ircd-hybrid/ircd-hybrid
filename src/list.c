@@ -24,9 +24,9 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "balloc.h"
+#include "mempool.h"
 
-static BlockHeap *dnode_heap;
+static mp_pool_t *dnode_pool;
 
 
 /* init_dlink_nodes()
@@ -38,7 +38,7 @@ static BlockHeap *dnode_heap;
 void
 init_dlink_nodes(void)
 {
-  dnode_heap = BlockHeapCreate("dlink node", sizeof(dlink_node), DNODE_HEAP_SIZE);
+  dnode_pool = mp_pool_new(sizeof(dlink_node), MP_CHUNK_SIZE_DNODE);
 }
 
 /* make_dlink_node()
@@ -50,9 +50,10 @@ init_dlink_nodes(void)
 dlink_node *
 make_dlink_node(void)
 {
-  dlink_node *lp = BlockHeapAlloc(dnode_heap);
+  dlink_node *ptr = mp_pool_get(dnode_pool);
 
-  return lp;
+  memset(ptr, 0, sizeof(*ptr));
+  return ptr;
 }
 
 /* free_dlink_node()
@@ -64,7 +65,7 @@ make_dlink_node(void)
 void
 free_dlink_node(dlink_node *ptr)
 {
-  BlockHeapFree(dnode_heap, ptr);
+  mp_pool_release(ptr);
 }
 
 /*
@@ -213,7 +214,7 @@ dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
     m->next->prev = m->prev;
   else
   {
-    assert(list->tail == m);
+    assert(list_del->tail == m);
     list_del->tail = m->prev;
   }
 
@@ -221,7 +222,7 @@ dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
     m->prev->next = m->next;
   else
   {
-    assert(list->head == m);
+    assert(list_del->head == m);
     list_del->head = m->next;
   }
 

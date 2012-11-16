@@ -24,23 +24,24 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "balloc.h"
 #include "dbuf.h"
 #include "memory.h"
+#include "mempool.h"
 
-static BlockHeap *dbuf_heap;
+static mp_pool_t *dbuf_pool;
 
 void
 dbuf_init(void)
 {
-  dbuf_heap = BlockHeapCreate("dbuf", sizeof(struct dbuf_block), DBUF_HEAP_SIZE);
+  dbuf_pool = mp_pool_new(sizeof(struct dbuf_block), MP_CHUNK_SIZE_DBUF);
 }
 
 static struct dbuf_block *
 dbuf_alloc(struct dbuf_queue *qptr)
 {
-  struct dbuf_block *block = BlockHeapAlloc(dbuf_heap);
+  struct dbuf_block *block = mp_pool_get(dbuf_pool);
 
+  memset(block, 0, sizeof(*block));
   dlinkAddTail(block, make_dlink_node(), &qptr->blocks);
   return block;
 }
@@ -101,7 +102,7 @@ dbuf_delete(struct dbuf_queue *qptr, size_t count)
     count -= first->size;
     dlinkDelete(ptr, &qptr->blocks);
     free_dlink_node(ptr);
-    BlockHeapFree(dbuf_heap, first);
+    mp_pool_release(first);
   }
 
   /* ..then remove data from the beginning of the queue */

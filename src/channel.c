@@ -41,14 +41,14 @@
 #include "send.h"
 #include "event.h"
 #include "memory.h"
-#include "balloc.h"
+#include "mempool.h"
 
 struct config_channel_entry ConfigChannel;
 dlink_list global_channel_list = { NULL, NULL, 0 };
-BlockHeap *ban_heap;    /*! \todo ban_heap shouldn't be a global var */
+mp_pool_t *ban_pool;    /*! \todo ban_pool shouldn't be a global var */
 
-static BlockHeap *member_heap = NULL;
-static BlockHeap *channel_heap = NULL;
+static mp_pool_t *member_pool = NULL;
+static mp_pool_t *channel_pool = NULL;
 
 static char buf[IRCD_BUFSIZE];
 static char modebuf[MODEBUFLEN];
@@ -64,9 +64,9 @@ init_channels(void)
   add_capability("IE", CAP_IE, 1);
   add_capability("CHW", CAP_CHW, 1);
 
-  channel_heap = BlockHeapCreate("channel", sizeof(struct Channel), CHANNEL_HEAP_SIZE);
-  ban_heap = BlockHeapCreate("ban", sizeof(struct Ban), BAN_HEAP_SIZE);
-  member_heap = BlockHeapCreate("member", sizeof(struct Membership), CHANNEL_HEAP_SIZE*2);
+  channel_pool = mp_pool_new(sizeof(struct Channel), MP_CHUNK_SIZE_CHANNEL);
+  ban_pool = mp_pool_new(sizeof(struct Ban), MP_CHUNK_SIZE_BAN);
+  member_pool = mp_pool_new(sizeof(struct Membership), MP_CHUNK_SIZE_MEMBER);
 }
 
 /*! \brief adds a user to a channel by adding another link to the
@@ -113,7 +113,9 @@ add_user_to_channel(struct Channel *chptr, struct Client *who,
     chptr->last_join_time = CurrentTime;
   }
 
-  ms = BlockHeapAlloc(member_heap);
+  ms = mp_pool_get(member_pool);
+  memset(ms, 0, sizeof(*ms));
+
   ms->client_p = who;
   ms->chptr = chptr;
   ms->flags = flags;
@@ -135,7 +137,7 @@ remove_user_from_channel(struct Membership *member)
   dlinkDelete(&member->channode, &chptr->members);
   dlinkDelete(&member->usernode, &client_p->channel);
 
-  BlockHeapFree(member_heap, member);
+  mp_pool_release(member);
 
   if (chptr->members.head == NULL)
     destroy_channel(chptr);
@@ -339,7 +341,7 @@ remove_ban(struct Ban *bptr, dlink_list *list)
   MyFree(bptr->host);
   MyFree(bptr->who);
 
-  BlockHeapFree(ban_heap, bptr);
+  mp_pool_release(bptr);
 }
 
 /* free_channel_list()
@@ -371,7 +373,9 @@ make_channel(const char *chname)
 
   assert(!EmptyString(chname));
 
-  chptr = BlockHeapAlloc(channel_heap);
+  chptr = mp_pool_get(channel_pool);
+
+  memset(chptr, 0, sizeof(*chptr));
 
   /* doesn't hurt to set it here */
   chptr->channelts = CurrentTime;
@@ -404,7 +408,7 @@ destroy_channel(struct Channel *chptr)
   dlinkDelete(&chptr->node, &global_channel_list);
   hash_del_channel(chptr);
 
-  BlockHeapFree(channel_heap, chptr);
+  mp_pool_release(chptr);
 }
 
 /*!

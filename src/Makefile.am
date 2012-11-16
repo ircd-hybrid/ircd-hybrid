@@ -9,8 +9,7 @@ ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
 
-ircd_SOURCES = balloc.c          \
-               channel.c         \
+ircd_SOURCES = channel.c         \
                channel_mode.c    \
                client.c          \
                conf.c            \
@@ -35,6 +34,7 @@ ircd_SOURCES = balloc.c          \
                log.c             \
                match.c           \
                memory.c          \
+               mempool.c         \
                modules.c         \
                motd.c            \
                rng_mt.c          \

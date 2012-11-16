@@ -149,15 +149,16 @@ AS_IF([test "$assert" = "no"],
 
 
 AC_DEFINE([NICKNAMEHISTORYLENGTH], 16384, [Size of the WHOWAS array.])
-AC_DEFINE([CHANNEL_HEAP_SIZE], 1024, [Size of the channel heap.])
-AC_DEFINE([BAN_HEAP_SIZE], 1024, [Size of the ban heap.])
-AC_DEFINE([CLIENT_HEAP_SIZE], 1024, [Size of the client heap.])
-AC_DEFINE([LCLIENT_HEAP_SIZE], 512, [Size of the local client heap.])
-AC_DEFINE([DNODE_HEAP_SIZE], 1024, [Size of the dlink_node heap.])
-AC_DEFINE([DBUF_HEAP_SIZE], 512, [Size of the dbuf heap.])
-AC_DEFINE([AUTH_HEAP_SIZE], 256, [Size of the auth heap.])
-AC_DEFINE([DNS_HEAP_SIZE], 256, [Size of the dns heap.])
-
+AC_DEFINE([MP_CHUNK_SIZE_CHANNEL], 64*1024, [Size of the channel mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_MEMBER], 32*1024, [Size of the channel mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_BAN], 16*1024, [Size of the ban mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_CLIENT], 256*1024, [Size of the client mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_LCLIENT], 128*1024, [Size of the local client mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_DNODE], 8*1024, [Size of the dlink_node mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_DBUF], 512*1024, [Size of the dbuf mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_AUTH], 32*1024, [Size of the auth mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_DNS], 16*1024, [Size of the dns mempool chunk.])
+AC_DEFINE([MP_CHUNK_SIZE_WATCH], 4*1024, [Size of the watch mempool chunk.])
 
 # Argument processing.
 AX_ARG_ENABLE_IOLOOP_MECHANISM

@@ -552,7 +552,7 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
           arec->precedence > hprecv &&
           arec->masktype == HM_HOST &&
           !cmpfunc(arec->Mask.hostname, name) &&
-          (type & 0x1 || cmpfunc(arec->username, username)) &&
+          (type & 0x1 || !cmpfunc(arec->username, username)) &&
           (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
            match_conf_password(password, arec->conf)))
       {

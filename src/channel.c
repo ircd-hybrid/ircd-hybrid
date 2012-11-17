@@ -293,11 +293,8 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
   send_members(client_p, chptr, modebuf, parabuf);
 
   send_mode_list(client_p, chptr, &chptr->banlist, 'b');
-
-  if (IsCapable(client_p, CAP_EX))
-    send_mode_list(client_p, chptr, &chptr->exceptlist, 'e');
-  if (IsCapable(client_p, CAP_IE))
-    send_mode_list(client_p, chptr, &chptr->invexlist, 'I');
+  send_mode_list(client_p, chptr, &chptr->exceptlist, 'e');
+  send_mode_list(client_p, chptr, &chptr->invexlist, 'I');
 }
 
 /*! \brief check channel name for invalid characters

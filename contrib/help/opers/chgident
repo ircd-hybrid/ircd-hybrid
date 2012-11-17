@@ -1,7 +1,0 @@
-# $Id$
-CHGIDENT [nickname] <ident>
-
-The CHGIDENT command takes two arguments. The first argument is optional and
-can be the nickname of a user you wish to alter the ident of. If no 
-argument for the nickname is supplied it will change your ident instead. 
-The second argument is the ident you wish to use.

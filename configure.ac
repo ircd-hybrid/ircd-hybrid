@@ -176,8 +176,6 @@ AC_DEFINE_DIR([LOCALSTATEDIR],[localstatedir],[Set to localstatedir.])
 
 AC_CONFIG_FILES(              \
        Makefile               \
-       contrib/Makefile       \
-       contrib/help/Makefile  \
        src/Makefile           \
        libltdl/Makefile       \
        messages/Makefile      \

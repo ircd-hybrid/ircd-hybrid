@@ -14482,7 +14482,7 @@ _ACEOF
   test "$exec_prefix_NONE" && exec_prefix=NONE
 
 
-ac_config_files="$ac_config_files Makefile contrib/Makefile contrib/help/Makefile src/Makefile libltdl/Makefile messages/Makefile modules/Makefile modules/core/Makefile doc/Makefile help/Makefile help/opers/Makefile help/users/Makefile tools/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile libltdl/Makefile messages/Makefile modules/Makefile modules/core/Makefile doc/Makefile help/Makefile help/opers/Makefile help/users/Makefile tools/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -15525,8 +15525,6 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "contrib/Makefile") CONFIG_FILES="$CONFIG_FILES contrib/Makefile" ;;
-    "contrib/help/Makefile") CONFIG_FILES="$CONFIG_FILES contrib/help/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "libltdl/Makefile") CONFIG_FILES="$CONFIG_FILES libltdl/Makefile" ;;
     "messages/Makefile") CONFIG_FILES="$CONFIG_FILES messages/Makefile" ;;

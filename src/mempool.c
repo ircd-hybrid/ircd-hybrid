@@ -32,7 +32,7 @@
 
 /*! \file mempool.c
  * \brief A pooling allocator
- * \version $Id: mempool.c 1652 2012-11-13 20:28:53Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

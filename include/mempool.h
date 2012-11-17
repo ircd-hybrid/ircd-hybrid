@@ -32,7 +32,7 @@
 
 /*! \file mempool.h
  * \brief Pooling allocator
- * \version $Id: mempool.h 1652 2012-11-13 20:28:53Z michael $
+ * \version $Id$
  */
 
 #ifndef TOR_MEMPOOL_H

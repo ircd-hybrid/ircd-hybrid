@@ -15,8 +15,6 @@
    | - You now need to ./configure --prefix="/path/to/install/it" as a      |
    |   minimum. Try ./configure --help or read this file for more info on   |
    |   the possible options you can pass to configure.                      |
-   |                                                                        |
-   | - Important: The old config format WILL NOT WORK. Please see point 6!  |
    +------------------------------------------------------------------------+
 
    ***** EFNET NOTE *****
@@ -86,6 +84,10 @@
             should not be used on any production servers for maximum speed
             so as to prevent cores from things that shouldn't normally happen.
 
+          * --enable-debugging - Prepares Makefiles to compile the ircd sources
+            with proper settings that are required for debugging purposes.
+            This switch basically sets CFLAGS to "-g -O0".
+
           * --enable-halfops - Enable halfops (%, mode +h) usage. Halfops
             are similar to plain ops, but can't kick/deop plain ops. Halfops
             may or may not kick/deop other halfops depending on if (+p) is
@@ -102,9 +104,6 @@
 
    4.  Run 'make install'; this will install the server, modules, and tools
        in the path with the prefix specified when configure was ran.
-
-   5.  If you wish to install the contrib modules, run 'make install' in the
-       contrib/ folder to compile and install the modules and help pages.
 
      ----------------------------------------------------------------------
 

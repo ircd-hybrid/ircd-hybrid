@@ -427,6 +427,12 @@ m_watch_la_OBJECTS = $(am_m_watch_la_OBJECTS)
 m_watch_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_watch_la_LDFLAGS) $(LDFLAGS) -o $@
+m_webirc_la_LIBADD =
+am_m_webirc_la_OBJECTS = m_webirc.lo
+m_webirc_la_OBJECTS = $(am_m_webirc_la_OBJECTS)
+m_webirc_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_webirc_la_LDFLAGS) $(LDFLAGS) -o $@
 m_who_la_LIBADD =
 am_m_who_la_OBJECTS = m_who.lo
 m_who_la_OBJECTS = $(am_m_who_la_OBJECTS)
@@ -491,8 +497,9 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
 	$(m_users_la_SOURCES) $(m_version_la_SOURCES) \
 	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
-	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
+	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
+	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
+	$(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
 	$(m_challenge_la_SOURCES) $(m_close_la_SOURCES) \
@@ -520,8 +527,9 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
 	$(m_users_la_SOURCES) $(m_version_la_SOURCES) \
 	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
-	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
+	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
+	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
+	$(m_xline_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -769,6 +777,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_version.la   \
                       m_wallops.la   \
                       m_watch.la     \
+                      m_webirc.la    \
                       m_who.la       \
                       m_whois.la     \
                       m_whowas.la    \
@@ -830,6 +839,7 @@ m_users_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
 m_wallops_la_LDFLAGS = $(MODULE_FLAGS)
 m_watch_la_LDFLAGS = $(MODULE_FLAGS)
+m_webirc_la_LDFLAGS = $(MODULE_FLAGS)
 m_who_la_LDFLAGS = $(MODULE_FLAGS)
 m_whois_la_LDFLAGS = $(MODULE_FLAGS)
 m_whowas_la_LDFLAGS = $(MODULE_FLAGS)
@@ -890,6 +900,7 @@ m_users_la_SOURCES = m_users.c
 m_version_la_SOURCES = m_version.c
 m_wallops_la_SOURCES = m_wallops.c
 m_watch_la_SOURCES = m_watch.c
+m_webirc_la_SOURCES = m_webirc.c
 m_who_la_SOURCES = m_who.c
 m_whois_la_SOURCES = m_whois.c
 m_whowas_la_SOURCES = m_whowas.c
@@ -1074,6 +1085,8 @@ m_wallops.la: $(m_wallops_la_OBJECTS) $(m_wallops_la_DEPENDENCIES) $(EXTRA_m_wal
 	$(m_wallops_la_LINK) -rpath $(modulesdir) $(m_wallops_la_OBJECTS) $(m_wallops_la_LIBADD) $(LIBS)
 m_watch.la: $(m_watch_la_OBJECTS) $(m_watch_la_DEPENDENCIES) $(EXTRA_m_watch_la_DEPENDENCIES) 
 	$(m_watch_la_LINK) -rpath $(modulesdir) $(m_watch_la_OBJECTS) $(m_watch_la_LIBADD) $(LIBS)
+m_webirc.la: $(m_webirc_la_OBJECTS) $(m_webirc_la_DEPENDENCIES) $(EXTRA_m_webirc_la_DEPENDENCIES) 
+	$(m_webirc_la_LINK) -rpath $(modulesdir) $(m_webirc_la_OBJECTS) $(m_webirc_la_LIBADD) $(LIBS)
 m_who.la: $(m_who_la_OBJECTS) $(m_who_la_DEPENDENCIES) $(EXTRA_m_who_la_DEPENDENCIES) 
 	$(m_who_la_LINK) -rpath $(modulesdir) $(m_who_la_OBJECTS) $(m_who_la_LIBADD) $(LIBS)
 m_whois.la: $(m_whois_la_OBJECTS) $(m_whois_la_DEPENDENCIES) $(EXTRA_m_whois_la_DEPENDENCIES) 
@@ -1145,6 +1158,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_version.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_wallops.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_watch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_webirc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_who.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_whois.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_whowas.Plo@am__quote@

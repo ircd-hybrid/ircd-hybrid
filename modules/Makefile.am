@@ -61,6 +61,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_version.la   \
                       m_wallops.la   \
                       m_watch.la     \
+                      m_webirc.la    \
                       m_who.la       \
                       m_whois.la     \
                       m_whowas.la    \
@@ -123,6 +124,7 @@ m_users_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
 m_wallops_la_LDFLAGS = $(MODULE_FLAGS)
 m_watch_la_LDFLAGS = $(MODULE_FLAGS)
+m_webirc_la_LDFLAGS = $(MODULE_FLAGS)
 m_who_la_LDFLAGS = $(MODULE_FLAGS)
 m_whois_la_LDFLAGS = $(MODULE_FLAGS)
 m_whowas_la_LDFLAGS = $(MODULE_FLAGS)
@@ -184,6 +186,7 @@ m_users_la_SOURCES = m_users.c
 m_version_la_SOURCES = m_version.c
 m_wallops_la_SOURCES = m_wallops.c
 m_watch_la_SOURCES = m_watch.c
+m_webirc_la_SOURCES = m_webirc.c
 m_who_la_SOURCES = m_who.c
 m_whois_la_SOURCES = m_whois.c
 m_whowas_la_SOURCES = m_whowas.c

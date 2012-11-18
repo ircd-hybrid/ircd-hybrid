@@ -213,7 +213,7 @@ dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
     m->next->prev = m->prev;
   else
   {
-    assert(list->tail == m);
+    assert(list_del->tail == m);
     list_del->tail = m->prev;
   }
 
@@ -221,7 +221,7 @@ dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
     m->prev->next = m->next;
   else
   {
-    assert(list->head == m);
+    assert(list_del->head == m);
     list_del->head = m->next;
   }
 

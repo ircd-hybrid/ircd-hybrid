@@ -43,6 +43,7 @@
 #include "modules.h"
 #include "resv.h"
 #include "conf_db.h"
+#include "memory.h"
 
 
 static int valid_xline(struct Client *, char *, char *, int);

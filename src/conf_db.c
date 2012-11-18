@@ -28,7 +28,6 @@
 #include "stdinc.h"
 #include "conf_db.h"
 #include "memory.h"
-#include "client.h"
 #include "log.h"
 #include "send.h"
 #include "irc_string.h"

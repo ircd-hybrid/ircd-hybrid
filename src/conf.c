@@ -1921,8 +1921,6 @@ clear_out_old_conf(void)
 void
 conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
 {
-  struct ClassItem *class = NULL;
-
   if (class_name == NULL) 
   {
     conf->class = class_default;

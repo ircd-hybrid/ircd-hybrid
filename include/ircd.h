@@ -27,10 +27,8 @@
 
 #include "ircd_defs.h"
 #include "config.h"
-#include "memory.h"
-#include "list.h"
 
-struct Client;
+//struct Client;
 
 struct SetOptions
 {
@@ -114,11 +112,6 @@ extern unsigned int splitchecking;
 extern unsigned int split_users;
 extern unsigned int split_servers;
 
-extern dlink_list unknown_list;       /* unknown clients ON this server only        */
-extern dlink_list local_client_list;  /* local clients only ON this server          */
-extern dlink_list serv_list;          /* local servers to this server ONLY          */
-extern dlink_list global_serv_list;   /* global servers on the network              */
-extern dlink_list oper_list;          /* our opers, duplicated in local_client_list */
 extern int rehashed_klines;
 extern void set_time(void);
 #endif

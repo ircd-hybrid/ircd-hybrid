@@ -43,7 +43,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "conf_db.h"
-
+#include "memory.h"
 
 static int already_placed_kline(struct Client *, const char *, const char *, int);
 static void m_kline_add_kline(struct Client *, struct MaskItem *, time_t);

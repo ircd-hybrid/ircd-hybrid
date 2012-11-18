@@ -22,7 +22,6 @@
 
 #include "stdinc.h"
 #include "irc_string.h"
-#include "client.h"
 #include "ircd.h"
 
 

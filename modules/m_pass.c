@@ -33,6 +33,7 @@
 #include "s_serv.h"
 #include "s_user.h"
 #include "s_misc.h"
+#include "memory.h"
 
 
 /*

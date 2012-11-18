@@ -27,22 +27,14 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "s_user.h"
-#include "s_misc.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"
-#include "s_serv.h"
 #include "send.h"
-#include "supported.h"
-#include "whowas.h"
-#include "memory.h"
 #include "mempool.h"
-#include "packet.h"
 #include "watch.h"
 
 

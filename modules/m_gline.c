@@ -44,6 +44,7 @@
 #include "modules.h"
 #include "log.h"
 #include "conf_db.h"
+#include "memory.h"
 
 #define GLINE_NOT_PLACED     0
 #define GLINE_ALREADY_VOTED -1

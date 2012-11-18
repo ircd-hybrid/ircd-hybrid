@@ -37,6 +37,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_user.h"
+#include "memory.h"
 
 
 static void

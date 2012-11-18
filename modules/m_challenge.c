@@ -34,6 +34,7 @@
 #include "irc_string.h"
 #include "log.h"
 #include "s_user.h"
+#include "memory.h"
 
 
 #ifdef HAVE_LIBCRYPTO

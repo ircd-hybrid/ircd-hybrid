@@ -27,7 +27,6 @@
 
 #include "config.h"       
 #include "fdlist.h"
-#include "hook.h"
 
 /* Type of IO */
 #define	COMM_SELECT_READ		1

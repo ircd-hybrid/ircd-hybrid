@@ -26,7 +26,6 @@
 #define _I_MEMORY_H
 
 #include "ircd_defs.h"
-#include "config.h"
 
 extern void outofmemory(void);
 
@@ -35,10 +34,4 @@ extern void *MyRealloc(void *, size_t);
 extern void MyFree(void *);
 extern void *xstrdup(const char *);
 extern void *xstrndup(const char *, size_t);
-
-#ifndef NDEBUG
-extern void mem_frob(void *, int);
-#else
-#define mem_frob(x, y)
-#endif
 #endif /* _I_MEMORY_H */

@@ -5,7 +5,7 @@ AC_REVISION([$Id$])
 
 AC_PREREQ(2.69)
 AC_INIT([ircd-hybrid], [8.0.0], [bugs@ircd-hybrid.org])
-AM_INIT_AUTOMAKE(1.12.4)
+AM_INIT_AUTOMAKE(1.12.5)
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(src/ircd.c)
@@ -32,8 +32,7 @@ AX_CHECK_LIB_IPV6
 AC_C_BIGENDIAN
 
 # Checks for library functions.
-AC_CHECK_FUNCS_ONCE(mmap     \
-                    strtok_r \
+AC_CHECK_FUNCS_ONCE(strtok_r \
                     usleep   \
                     strlcat  \
                     strlcpy)

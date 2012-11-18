@@ -110,24 +110,3 @@ outofmemory(void)
   ilog(LOG_TYPE_IRCD, "Out of memory: restarting server...");
   restart("Out of Memory");
 }
-
-#ifndef NDEBUG
-/*
- * frob some memory. debugging time.
- * -- adrian
- */
-void
-mem_frob(void *data, int len)
-{
-  /* correct for Intel only! little endian */
-  unsigned char b[4] = { 0xef, 0xbe, 0xad, 0xde };
-  int i;
-  char *cdata = data;
-
-  for (i = 0; i < len; i++)
-  {
-    *cdata = b[i % 4];
-    cdata++;
-  }
-}
-#endif

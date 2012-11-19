@@ -1,7 +1,7 @@
 /*
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *
- *  Copyright (C) 1996-2002 by Andrew Church <achurch@achurch.org>
+ *  Copyright (C) 1996-2009 by Andrew Church <achurch@achurch.org>
  *  Copyright (C) 2012 by the Hybrid Development Team.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -30,21 +30,19 @@
 
 struct dbFILE
 {
-  int mode;			/**< 'r' for reading, 'w' for writing */
-  FILE *fp;			/**< The normal file descriptor */
-  FILE *backupfp;		/**< Open file pointer to a backup copy of
-				 *    the database file (if non-NULL) */
+  char mode;			/**< 'r' for reading, 'w' for writing */
+  FILE *fp;			/**< The file pointer itself */
   char filename[PATH_MAX + 1];	/**< Name of the database file */
-  char backupname[PATH_MAX + 1];	/**< Name of the backup file */
+  char tempname[PATH_MAX + 1];	/**< Name of the temporary file (for writing) */
 };
 
 extern void check_file_version(struct dbFILE *);
 extern uint32_t get_file_version(struct dbFILE *);
 extern int write_file_version(struct dbFILE *, uint32_t);
 
-extern struct dbFILE *open_db(const char *, const char *, const char *, uint32_t);
+extern struct dbFILE *open_db(const char *, const char *, uint32_t);
 extern void restore_db(struct dbFILE *);	/* Restore to state before open_db() */
-extern void close_db(struct dbFILE *);
+extern int close_db(struct dbFILE *);
 extern void backup_databases(void); 
 
 #define read_db(f,buf,len)	(fread((buf),1,(len),(f)->fp))

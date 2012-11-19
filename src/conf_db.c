@@ -1,7 +1,7 @@
 /*
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *
- *  Copyright (C) 1996-2002 by Andrew Church <achurch@achurch.org>
+ *  Copyright (C) 1996-2009 by Andrew Church <achurch@achurch.org>
  *  Copyright (C) 2012 by the Hybrid Development Team.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -88,7 +88,7 @@ write_file_version(struct dbFILE *f, uint32_t version)
  * \return dbFile struct
  */
 static struct dbFILE *
-open_db_read(const char *service, const char *filename)
+open_db_read(const char *filename)
 {
   struct dbFILE *f = MyMalloc(sizeof(*f));
   FILE *fp = NULL;
@@ -103,8 +103,7 @@ open_db_read(const char *service, const char *filename)
     int errno_save = errno;
 
     if (errno != ENOENT)
-      ilog(LOG_TYPE_IRCD, "Can't read %s database %s", service,
-           f->filename);
+      ilog(LOG_TYPE_IRCD, "Can't read database file %s", f->filename);
 
     MyFree(f);
     errno = errno_save;
@@ -112,20 +111,16 @@ open_db_read(const char *service, const char *filename)
   }
 
   f->fp = fp;
-  f->backupfp = NULL;
-
   return f;
 }
 
 /*! \brief Open the database for writting
- * \param service If error whom to return the error as
  * \param filename File to open as the database
  * \param version Database Version
  * \return dbFile struct
  */
 static struct dbFILE *
-open_db_write(const char *service, const char *filename,
-              uint32_t version)
+open_db_write(const char *filename, uint32_t version)
 {
   struct dbFILE *f = MyMalloc(sizeof(*f));
   int fd = 0;
@@ -135,48 +130,22 @@ open_db_write(const char *service, const char *filename,
   filename = f->filename;
   f->mode = 'w';
 
-  snprintf(f->backupname, sizeof(f->backupname), "%s.save", filename);
+  snprintf(f->tempname, sizeof(f->tempname), "%s.new", filename);
 
-  if (!*f->backupname || !strcmp(f->backupname, filename))
+  if (f->tempname[0] == '\0' || !strcmp(f->tempname, filename))
   {
-    int errno_save = errno;
-
-    ilog(LOG_TYPE_IRCD, "Opening %s database %s for write: Filename too long",
-         service, filename);
+    ilog(LOG_TYPE_IRCD, "Opening database file %s for write: Filename too long",
+         filename);
     MyFree(f);
-    errno = errno_save;
+    errno = ENAMETOOLONG;
     return NULL;
   }
 
-  unlink(filename);
-
-  f->backupfp = fopen(filename, "rb");
-
-  if (rename(filename, f->backupname) < 0 && errno != ENOENT)
-  {
-    int errno_save = errno;
-    static int walloped = 0;
-
-    if (!walloped++)
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Can't back up %s database %s",
-                           service, filename);
-
-    errno = errno_save;
-    ilog(LOG_TYPE_IRCD, "Can't back up %s database %s", service, filename);
-
-    if (f->backupfp)
-      fclose(f->backupfp);
-
-    MyFree(f);
-    errno = errno_save;
-    return NULL;
-  }
-
-  unlink(filename);
+  remove(f->tempname);
 
   /* Use open() to avoid people sneaking a new file in under us */
-  if ((fd = open(filename, O_WRONLY | O_CREAT | O_EXCL, 0666)) >= 0)
+  fd = open(f->tempname, O_WRONLY | O_CREAT | O_EXCL, 0666);
+  if (fd >= 0)
     f->fp = fdopen(fd, "wb");
 
   if (!f->fp || !write_file_version(f, version))
@@ -186,56 +155,49 @@ open_db_write(const char *service, const char *filename,
 
     if (!walloped++)
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Can't write to %s database %s",
-                           service, filename);
+                           "Can't create temporary database file %s",
+                           f->tempname);
 
     errno = errno_save;
-    ilog(LOG_TYPE_IRCD, "Can't write to %s database %s",
-         service, filename);
+    ilog(LOG_TYPE_IRCD, "Can't create temporary database file %s",
+        f->tempname);
 
     if (f->fp)
-    {
       fclose(f->fp);
-      unlink(filename);
-    }
 
-    if (f->backupname[0] && rename(f->backupname, filename) < 0)
-      ilog(LOG_TYPE_IRCD, "Can't restore backup copy of %s",
-           filename);
+    remove(f->tempname);
+    MyFree(f);
 
-     MyFree(f);
-     errno = errno_save;
-     return NULL;
+    errno = errno_save;
+    return NULL;
   }
 
   return f;
 }
 
 /*! \brief Open a database file for reading (*mode == 'r') or writing (*mode == 'w').
- * Return the stream pointer, or NULL on error.  When opening for write, it
- * is an error for rename() to return an error (when backing up the original
- * file) other than ENOENT, if NO_BACKUP_OKAY is not defined; it is an error
- * if the version number cannot be written to the file; and it is a fatal
- * error if opening the file for write fails and the backup was successfully
- * made but cannot be restored.
+ * Return the stream pointer, or NULL on error.  When opening for write, the
+ * file actually opened is a temporary file, which will be renamed to the
+ * original file on close.
  *
- * \param service If error whom to return the error as
+ * `version' is only used when opening a file for writing, and indicates the
+ * version number to write to the file.
+ *
  * \param filename File to open as the database
  * \param mode Mode for writting or reading
  * \param version Database Version
  * \return dbFile struct
  */
 struct dbFILE *
-open_db(const char *service, const char *filename,
-        const char *mode, uint32_t version)
+open_db(const char *filename, const char *mode, uint32_t version)
 {
   switch (*mode)
   {
     case 'r':
-      return open_db_read(service, filename);
+      return open_db_read(filename);
       break;
     case 'w':
-      return open_db_write(service, filename, version);
+      return open_db_write(filename, version);
       break;
     default:
       errno = EINVAL;
@@ -243,10 +205,10 @@ open_db(const char *service, const char *filename,
   }
 }
 
-/*! \brief Restore the database file to its condition before open_db().  This is
+/*! \brief  Restore the database file to its condition before open_db(). This is
  * identical to close_db() for files open for reading; however, for files
- * open for writing, we first attempt to restore any backup file before
- * closing files.
+ * open for writing, we discard the new temporary file instead of renaming
+ * it over the old file.  The value of errno is preserved.
  *
  * \param dbFile struct
  */
@@ -255,73 +217,56 @@ restore_db(struct dbFILE *f)
 {
   int errno_save = errno;
 
-  if (f->mode == 'w')
-  {
-    int ok = 0;             /* Did we manage to restore the old file? */
-
-    errno = errno_save = 0;
-
-    if (f->backupname[0] && strcmp(f->backupname, f->filename))
-      if (rename(f->backupname, f->filename) == 0)
-        ok = 1;
-
-    if (!ok && f->backupfp)
-    {
-      char buf[1024];
-      size_t i;
-
-      ok = fseek(f->fp, 0, SEEK_SET) == 0;
-
-      while (ok && (i = fread(buf, 1, sizeof(buf), f->backupfp)) > 0)
-        if (fwrite(buf, 1, i, f->fp) != i)
-          ok = 0;
-
-      if (ok)
-      {
-        fflush(f->fp);
-        ftruncate(fileno(f->fp), ftell(f->fp));
-      }
-    }
-
-    if (!ok && errno > 0)
-      ilog(LOG_TYPE_IRCD, "Unable to restore backup of %s", f->filename);
-
-    errno_save = errno;
-
-    if (f->backupfp)
-      fclose(f->backupfp);
-    if (f->backupname[0])
-      unlink(f->backupname);
-  }
-
-  fclose(f->fp);
-
-  if (!errno_save)
-    errno_save = errno;
+  if (f->fp)
+    fclose(f->fp);
+  if (f->mode == 'w' && f->tempname[0])
+    remove(f->tempname);
 
   MyFree(f);
   errno = errno_save;
 }
 
-/*! \brief Close a database file.  If the file was opened for write, remove the
- * backup we (may have) created earlier.
+/*! \brief Close a database file.  If the file was opened for write, moves the new
+ * file over the old one, and logs/wallops an error message if the rename()
+ * fails.
  *
  * \param dbFile struct
  */
-void
+int
 close_db(struct dbFILE *f)
 {
-  if (f->mode == 'w' && f->backupname[0] &&
-      strcmp(f->backupname, f->filename))
-  {
-    if (f->backupfp)
-      fclose(f->backupfp);
+  int res;
 
-    unlink(f->backupname);
+  if (!f->fp)
+  {
+    errno = EINVAL;
+    return -1;
   }
 
-  fclose(f->fp);
+  res = fclose(f->fp);
+  f->fp = NULL;
+
+  if (res != 0)
+    return -1;
+
+  if (f->mode == 'w' && f->tempname[0] && strcmp(f->tempname, f->filename))
+  {
+    if (rename(f->tempname, f->filename) < 0)
+    {
+      int errno_save = errno;
+
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "Unable to move new "
+                           "data to database file %s; new data NOT saved.",
+                           f->filename);
+      errno = errno_save;
+      ilog(LOG_TYPE_IRCD, "Unable to move new data to database file %s; new "
+           "data NOT saved.", f->filename);
+      remove(f->tempname);
+    }
+  }
+
   MyFree(f);
+  return 0;
 }
 
 /*
@@ -617,7 +562,7 @@ save_kline_database(void)
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
 
-  if (!(f = open_db("kline", KPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(KPATH, "w", KLINE_DB_VERSION)))
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)
@@ -666,7 +611,7 @@ load_kline_database(void)
   uint64_t field_4 = 0;
   uint64_t field_5 = 0;
 
-  if (!(f = open_db("kline", KPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(KPATH, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)
@@ -707,7 +652,7 @@ save_dline_database(void)
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
 
-  if (!(f = open_db("dline", DLPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(DLPATH, "w", KLINE_DB_VERSION)))
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)
@@ -754,7 +699,7 @@ load_dline_database(void)
   uint64_t field_3 = 0;
   uint64_t field_4 = 0;
 
-  if (!(f = open_db("dline", DLPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(DLPATH, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)
@@ -793,7 +738,7 @@ save_gline_database(void)
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
 
-  if (!(f = open_db("gline", GPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(GPATH, "w", KLINE_DB_VERSION)))
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)
@@ -842,7 +787,7 @@ load_gline_database(void)
   uint64_t field_4 = 0;
   uint64_t field_5 = 0;
 
-  if (!(f = open_db("gline", GPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(GPATH, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)
@@ -883,7 +828,7 @@ save_resv_database(void)
   dlink_node *ptr = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!(f = open_db("resv", RESVPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(RESVPATH, "w", KLINE_DB_VERSION)))
     return;
 
   DLINK_FOREACH(ptr, resv_channel_list.head)
@@ -944,7 +889,7 @@ load_resv_database(void)
   char *reason = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!(f = open_db("resv", RESVPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(RESVPATH, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)
@@ -996,7 +941,7 @@ save_xline_database(void)
   dlink_node *ptr = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!(f = open_db("xline", XPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(XPATH, "w", KLINE_DB_VERSION)))
     return;
 
   DLINK_FOREACH(ptr, xconf_items.head)
@@ -1036,7 +981,7 @@ load_xline_database(void)
   char *reason = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!(f = open_db("xline", XPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(XPATH, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)

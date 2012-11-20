@@ -268,7 +268,7 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
 
   snprintf(portname, PORTNAMELEN, "%d", port);
 
-  if (vhost_ip)
+  if (!EmptyString(vhost_ip))
   {
     if (getaddrinfo(vhost_ip, portname, &hints, &res))
       return;

@@ -2,10 +2,9 @@ dnl Inspired by work Copyright (C) 2006 Luca Filipozzi
 dnl vim: set fdm=marker sw=2 ts=2 et si:
 dnl {{{ ax_check_lib_ipv4
 AC_DEFUN([AX_CHECK_LIB_IPV4],[
+  AC_CHECK_FUNC(getaddrinfo, [], AC_SEARCH_LIBS(getaddrinfo, nsl))
+  AC_CHECK_FUNC(getnameinfo, [], AC_SEARCH_LIBS(getnameinfo, nsl))
   AC_SEARCH_LIBS([socket],[socket],,[AC_MSG_ERROR([socket library not found])])
-  AC_SEARCH_LIBS([inet_ntoa], [nsl])
-  AC_SEARCH_LIBS([inet_aton], [resolv])
-  AC_CHECK_FUNCS([inet_aton inet_ntop inet_pton])
   AC_CHECK_TYPES([struct sockaddr_in, struct sockaddr_storage, struct addrinfo],,,[#include <sys/types.h>
    #include <sys/socket.h>
    #include <netdb.h>

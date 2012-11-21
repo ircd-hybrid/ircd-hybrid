@@ -281,6 +281,8 @@ set_back_events(time_t by)
 {
   int i;
 
+  event_time_min = -1;
+
   for (i = 0; i < MAX_EVENTS; i++)
   {
     if (event_table[i].when > by)

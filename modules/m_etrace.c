@@ -139,14 +139,6 @@ static void
 report_this_status(struct Client *source_p, struct Client *target_p,
                    int full_etrace)
 {
-  const char *name;
-  const char *class_name;
-
-  name = get_client_name(target_p, HIDE_IP);
-  class_name = get_client_class(&target_p->localClient->confs);
-
-  set_time();
-
   if (target_p->status == STAT_CLIENT)
   {
     if (full_etrace)
@@ -156,7 +148,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		   me.name,
 		   source_p->name,
 		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-		   class_name,
+		   get_client_class(&target_p->localClient->confs),
 		   target_p->name,
 		   target_p->username,
 		   target_p->host,
@@ -169,7 +161,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		   me.name,
 		   source_p->name, 
 		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User", 
-		   class_name,
+		   get_client_class(&target_p->localClient->confs),
 		   target_p->name,
 		   target_p->username,
 		   target_p->host,
@@ -185,7 +177,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		   me.name,
 		   source_p->name,
 		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-		   class_name,
+		   get_client_class(&target_p->localClient->confs),
 		   target_p->name,
 		   target_p->username,
 		   target_p->host,
@@ -196,7 +188,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		   me.name,
 		   source_p->name, 
 		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User", 
-		   class_name,
+		   get_client_class(&target_p->localClient->confs),
 		   target_p->name,
 		   target_p->username,
 		   target_p->host,

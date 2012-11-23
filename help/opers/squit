@@ -1,4 +1,3 @@
-# $Id$
 SQUIT <server> :[reason]
 
 Splits <server> away from your side of the net with [reason].

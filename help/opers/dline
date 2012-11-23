@@ -1,17 +1,10 @@
-# $Id$
-DLINE <time> <nick|ip> :[reason] [| oper reason]
+DLINE <time> <nick|ip> :[reason]
 
 <time> if present, gives number of minutes for DLINE
 
-Adds a DLINE to the dline.conf file
-which will deny any connections from the IP address
-of the banned client.  The banned client will receive
-a message saying he/she is banned with reason [reason]
-
-If an oper reason is added (the pipe must be specified
-to separate the fields) this will be added into the
-dline.conf but will not be shown to the user when they
-are given the dline reason.
+Adds a DLINE which will deny any connections from the
+IP address of the banned client. The banned client will
+receive a message saying he/she is banned with reason [reason]
 
 In order to use <nick> rather than <ip>, <nick> must
 be on your server.

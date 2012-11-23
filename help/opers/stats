@@ -1,4 +1,3 @@
-# $Id$
 STATS <letter> [server|nick]
 
 Queries server [server] (or your own server if no

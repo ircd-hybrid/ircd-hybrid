@@ -1,4 +1,3 @@
-# $Id$
 VERSION [servername]
 
 VERSION will display the server version of the specified

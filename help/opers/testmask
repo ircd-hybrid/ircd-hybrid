@@ -1,4 +1,3 @@
-# $Id$
 TESTMASK <user@host>
 
 Will test the given user@host mask, reporting how many local and

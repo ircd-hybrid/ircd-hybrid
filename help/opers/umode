@@ -1,4 +1,3 @@
-# $Id$
 MODE <nick> <+|-><modes>
 
 Usermodes: (* designates that the umode is oper only)

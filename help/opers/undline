@@ -1,4 +1,3 @@
-# $Id$
 UNDLINE <ip>
 
 Will attempt to undline the given <ip>

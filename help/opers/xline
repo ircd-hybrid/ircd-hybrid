@@ -1,12 +1,10 @@
-# $Id$
 XLINE [time] <gecos> :[reason]
 
 [time] if present, gives number of minutes for XLINE
 
-Adds a XLINE to the xline.conf file which
-will ban the specified gecos from that server.
-The banned client will receive a message saying he/she
-is banned with reason [reason]
+Adds a XLINE which will ban the specified gecos from
+that server. The banned client will receive a message
+saying he/she is banned with reason [reason]
 
 XLINE [time] <gecos> ON irc.server :[reason]
 will xline the gecos on irc.server if irc.server accepts

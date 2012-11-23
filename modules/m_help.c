@@ -91,21 +91,13 @@ dohelp(struct Client *source_p, const char *hpath, char *topic)
   char h_index[] = "index";
   char path[PATH_MAX + 1];
   struct stat sb;
-  int i;
+  unsigned int i;
 
-  if (topic != NULL)
-  {
-    if (*topic == '\0')
-      topic = h_index;
-    else
-    {
-      /* convert to lower case */
-      for (i = 0; topic[i] != '\0'; ++i)
-        topic[i] = ToLower(topic[i]);
-    }
-  }
+  if (EmptyString(topic))
+    topic = h_index;
   else
-    topic = h_index;    /* list available help topics */
+    for (i = 0; topic[i] != '\0'; ++i)
+      topic[i] = ToLower(topic[i]);
 
   if (strpbrk(topic, "/\\"))
   {
@@ -145,8 +137,6 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 {
   FILE *file;
   char line[HELPLEN];
-  char started = 0;
-  int type;
 
   if ((file = fopen(path, "r")) == NULL)
   {
@@ -162,35 +152,19 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
     return;
   }
 
-  else if (line[0] != '#')
-  {
-    line[strlen(line) - 1] = '\0';	  
-    sendto_one(source_p, form_str(RPL_HELPSTART),
+  line[strlen(line) - 1] = '\0';
+  sendto_one(source_p, form_str(RPL_HELPSTART),
              me.name, source_p->name, topic, line);
-    started = 1;
-  }
 
   while (fgets(line, sizeof(line), file))
   {
     line[strlen(line) - 1] = '\0';
-    if (line[0] != '#')
-    {
-      if (!started)
-      {
-        type = RPL_HELPSTART;
-        started = 1;
-      }
-      else
-        type = RPL_HELPTXT;
-      
-      sendto_one(source_p, form_str(RPL_HELPTXT),
-                 me.name, source_p->name, topic, line);
-    }
+
+    sendto_one(source_p, form_str(RPL_HELPTXT),
+               me.name, source_p->name, topic, line);
   }
 
   fclose(file);
-  sendto_one(source_p, form_str(RPL_HELPTXT),
-             me.name, source_p->name, topic, "");
   sendto_one(source_p, form_str(RPL_ENDOFHELP),
              me.name, source_p->name, topic);
 }

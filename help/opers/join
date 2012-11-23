@@ -1,4 +1,3 @@
-# $Id$
 JOIN <#channel1[,#channel2,#channel3...]> [key]
 
 The JOIN command allows you to enter a public chat area known as

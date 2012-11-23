@@ -1,4 +1,3 @@
-# $Id$
 UNRESV <channel|nick>
 
 -- Remove a RESV on a channel or nick

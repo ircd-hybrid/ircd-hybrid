@@ -1,4 +1,3 @@
-# $Id$
 UNKLINE <user@host>
 
 Will attempt to unkline the given <user@host>

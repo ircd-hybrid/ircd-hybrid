@@ -712,12 +712,27 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
        * unfortunately, it did not work. --Dianora
        */
 
+
+      /*
+       * Also ignoring ERR_NOTREGISTERED for now. A connecting server may send this
+       * in response to the "NOTICE AUTH ..." message upon registration. Normally
+       * the !IsServer() test in handle_numeric() would take care of this situation,
+       * but due to the fact that read_packet() in s_auth.c:release_auth_client() is
+       * called for the very first time _after_ ident/dns registration, it looks like
+       * the numeric (451) messages are queued up whereas meanwhile the serverlink
+       * succesfully establishes. Right after that, after IsServer() is true, the queued
+       * numeric messages will then be processed, and a notice is falsely sent to operators.
+       * The I/O engine will be rewritten soon (a mixture of libevent), so maybe this also
+       * will fix described behavior above, but for now we're just going to drop this message
+       * (no problem at all, we propably shouldn't process numeric destined to servers anyway)
+       * -Michael
+       */
       /* Yes, a good compiler would have optimised this, but
        * this is probably easier to read. -db
        */
       num = atoi(numeric);
 
-      if ((num != ERR_NOSUCHNICK))
+      if ((num != ERR_NOSUCHNICK) && (num != ERR_NOTREGISTERED))
         sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                              "*** %s(via %s) sent a %s numeric to me: %s",
                              source_p->name, client_p->name, numeric, buffer);

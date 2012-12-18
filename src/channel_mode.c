@@ -889,7 +889,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
 
   mode_changes[mode_count].letter = c;
   mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].caps = CAP_EX;
+  mode_changes[mode_count].caps = 0;
   mode_changes[mode_count].nocaps = 0;
   mode_changes[mode_count].mems = ONLY_CHANOPS;
   mode_changes[mode_count].id = NULL;
@@ -964,7 +964,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 
   mode_changes[mode_count].letter = c;
   mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].caps = CAP_IE;
+  mode_changes[mode_count].caps = 0;
   mode_changes[mode_count].nocaps = 0;
   mode_changes[mode_count].mems = ONLY_CHANOPS;
   mode_changes[mode_count].id = NULL;

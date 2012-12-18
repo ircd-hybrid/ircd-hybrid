@@ -1652,7 +1652,7 @@ char *yytext;
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
  *
- *  $Id: conf_lexer.l 1547 2012-09-30 17:50:03Z michael $
+ *  $Id: conf_lexer.l 1549 2012-10-01 18:11:11Z michael $
  */
 #line 31 "conf_lexer.l"
 #include "stdinc.h"

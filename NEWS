@@ -1,3 +1,11 @@
+-- ircd-hybrid-8.0.2 Release Notes
+o) Minor updates to the build system
+o) Fixed broken --enable-assert configure switch
+o) Fixed bug where timed events stopped from working if the system's
+   clock is running backwards
+o) STATS q|Q now shows how many times a resv{} block has been matched
+
+
 -- ircd-hybrid-8.0.1 Release Notes
 o) Fixed broken CIDR support for CHALLENGE based irc operator logins
 o) Fixed class limits not properly applying to oper{} blocks

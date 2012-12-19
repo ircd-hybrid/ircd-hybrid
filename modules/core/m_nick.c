@@ -222,8 +222,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
   }
 
   /* check if the nick is resv'd */
-  if (!IsExemptResv(source_p) &&
-      (conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
+  if ((conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
   {
     ++conf->count;
     sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name,

@@ -195,6 +195,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   struct Client *target_p = NULL;
+  struct MaskItem *conf = NULL;
   char nick[NICKLEN + 1];
   char *s = NULL;
 
@@ -221,9 +222,10 @@ mr_nick(struct Client *client_p, struct Client *source_p,
   }
 
   /* check if the nick is resv'd */
-  if (find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0) &&
-      !IsExemptResv(source_p))
+  if (!IsExemptResv(source_p) &&
+      (conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
   {
+    ++conf->count;
     sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name,
                source_p->name[0] ? source_p->name : "*", nick);
     sendto_realops_flags(L_ALL, UMODE_REJ, SEND_NOTICE,
@@ -261,6 +263,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
 {
   char nick[NICKLEN + 1];
   struct Client *target_p = NULL;
+  struct MaskItem *conf = NULL;
 
   assert(source_p == client_p);
 
@@ -286,10 +289,12 @@ m_nick(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (find_matching_name_conf(CONF_NRESV, nick,
-			     NULL, NULL, 0) && !IsExemptResv(source_p) &&
-     !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv))
+
+  if (!IsExemptResv(source_p) &&
+      !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv) &&
+      (conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
   {
+    ++conf->count;
     sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
                me.name, source_p->name, nick);
     sendto_realops_flags(L_ALL, UMODE_REJ, SEND_NOTICE,

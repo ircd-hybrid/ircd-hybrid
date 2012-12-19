@@ -174,7 +174,7 @@ report_resv(struct Client *source_p)
     conf = ptr->data;
     sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
-	       conf->until ? 'q' : 'Q',
+	       conf->until ? 'q' : 'Q', conf->count,
 	       conf->name, conf->reason);
   }
 
@@ -183,7 +183,7 @@ report_resv(struct Client *source_p)
     conf = ptr->data;
     sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
-	       conf->until ? 'q' : 'Q',
+	       conf->until ? 'q' : 'Q', conf->count,
 	       conf->name, conf->reason);
   }
 }

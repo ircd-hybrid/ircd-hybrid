@@ -97,6 +97,7 @@ m_join(struct Client *client_p, struct Client *source_p,
   char *chan_list = NULL;
   char *chan = NULL;
   struct Channel *chptr = NULL;
+  struct MaskItem *conf = NULL;
   int i = 0;
   unsigned int flags = 0;
 
@@ -134,8 +135,10 @@ m_join(struct Client *client_p, struct Client *source_p,
 
     if (!IsExemptResv(source_p) &&
         !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv) &&
-        (!hash_find_resv(chan) == ConfigChannel.restrict_channels))
+        (!(conf = hash_find_resv(chan)) == ConfigChannel.restrict_channels))
     {
+      if (conf)
+        ++conf->count;
       sendto_one(source_p, form_str(ERR_BADCHANNAME),
                  me.name, source_p->name, chan);
       sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,

@@ -4,6 +4,7 @@ o) Fixed broken --enable-assert configure switch
 o) Fixed bug where timed events stopped from working if the system's
    clock is running backwards
 o) STATS q|Q now shows how many times a resv{} block has been matched
+o) Fixed contributed WEBIRC module
 
 
 -- ircd-hybrid-8.0.1 Release Notes

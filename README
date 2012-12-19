@@ -56,6 +56,8 @@ Feature Specific Requirements:
   CentOS 5.8
   Red Hat Linux 9
   Ubuntu 12.04
+  OpenBSD 5.2
+  Arch Linux 2012.12.01
 
 - If you are wondering why config.h no longer exists, it's because most
   things that were once in config.h are now specified in the 'general'

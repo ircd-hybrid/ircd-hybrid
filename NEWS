@@ -5,6 +5,7 @@ o) Fixed bug where timed events stopped from working if the system's
    clock is running backwards
 o) STATS q|Q now shows how many times a resv{} block has been matched
 o) Fixed contributed WEBIRC module
+o) IRC operators may now again see server generated nick rejection notices
 
 
 -- ircd-hybrid-8.0.1 Release Notes

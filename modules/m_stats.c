@@ -393,7 +393,6 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
 static void
 stats_deny(struct Client *source_p, int parc, char *parv[])
 {
-  struct ConfItem *conf;
   struct AccessItem *aconf;
   dlink_node *ptr = NULL;
   unsigned int i = 0;
@@ -413,8 +412,6 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
         if (aconf->flags & CONF_FLAGS_TEMPORARY)
           continue;
 
-	conf = unmap_conf_item(aconf);
-
         sendto_one(source_p, form_str(RPL_STATSDLINE),
                    from, to, 'D', aconf->host, aconf->reason,
 		   aconf->oper_reason ? aconf->oper_reason : "");
@@ -432,7 +429,6 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_tdeny(struct Client *source_p, int parc, char *parv[])
 {
-  struct ConfItem *conf;
   struct AccessItem *aconf;
   dlink_node *ptr = NULL;
   unsigned int i = 0;
@@ -452,8 +448,6 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
         if (!(aconf->flags & CONF_FLAGS_TEMPORARY))
           continue;
 
-        conf = unmap_conf_item(aconf);
-
         sendto_one(source_p, form_str(RPL_STATSDLINE),
                    from, to, 'd', aconf->host, aconf->reason,
 		   aconf->oper_reason ? aconf->oper_reason : "");
@@ -471,7 +465,6 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_exempt(struct Client *source_p, int parc, char *parv[])
 {
-  struct ConfItem *conf;
   struct AccessItem *aconf;
   dlink_node *ptr = NULL;
   unsigned int i = 0;
@@ -493,8 +486,6 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
       if (arec->type == CONF_EXEMPTDLINE)
       {
         aconf = arec->aconf;
-
-        conf = unmap_conf_item(aconf);
 
         sendto_one(source_p, form_str(RPL_STATSDLINE),
                    from, to, 'e', aconf->host, 

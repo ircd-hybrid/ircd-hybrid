@@ -170,12 +170,12 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 }
 
 static struct Message help_msgtab = {
-  "HELP", 0, 0, 0, 0, MFLG_SLOW, 0,
+  "HELP", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   {m_unregistered, m_help, m_ignore, m_ignore, mo_help, m_ignore}
 };
 
 static struct Message uhelp_msgtab = {
-  "UHELP", 0, 0, 0, 0, MFLG_SLOW, 0,
+  "UHELP", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   {m_unregistered, m_help, m_ignore, m_ignore, mo_uhelp, m_ignore}
 };
 

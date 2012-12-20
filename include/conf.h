@@ -197,10 +197,10 @@ struct config_file_entry
   const char *dpath;          /* DPATH if set from command line */
   const char *configfile;
   const char *klinefile;
+  const char *glinefile;
   const char *xlinefile;
   const char *dlinefile;
-  const char *cresvfile;
-  const char *nresvfile;
+  const char *resvfile;
 
   char *egdpool_path;
   char *service_name;

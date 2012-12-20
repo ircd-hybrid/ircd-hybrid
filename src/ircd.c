@@ -503,12 +503,13 @@ main(int argc, char *argv[])
   init_chcap_usage_counts();
 
   ConfigFileEntry.dpath      = DPATH;
-  ConfigFileEntry.configfile = CPATH;  /* Server configuration file */
-  ConfigFileEntry.klinefile  = KPATH;  /* Server kline file         */
-  ConfigFileEntry.xlinefile  = XPATH;  /* Server xline file         */
-  ConfigFileEntry.dlinefile  = DLPATH; /* dline file                */
-//  ConfigFileEntry.cresvfile  = CRESVPATH; /* channel resv file      */
-//  ConfigFileEntry.nresvfile  = NRESVPATH; /* nick resv file         */
+  ConfigFileEntry.configfile = CPATH;    /* Server configuration file */
+  ConfigFileEntry.klinefile  = KPATH;    /* Server kline file         */
+  ConfigFileEntry.klinefile  = GPATH;    /* Server gline file         */
+  ConfigFileEntry.xlinefile  = XPATH;    /* Server xline file         */
+  ConfigFileEntry.dlinefile  = DLPATH;   /* dline file                */
+  ConfigFileEntry.resvfile   = RESVPATH; /* resv file                 */
+
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
 

@@ -68,25 +68,43 @@ static const struct InfoStruct info_table[] =
     "CPATH",
     OUTPUT_STRING,
     &ConfigFileEntry.configfile,
-    "Path to Main Configuration File"
+    "Path to main configuration file"
   },
   {
     "DPATH",
     OUTPUT_STRING,
     &ConfigFileEntry.dpath,
-    "Directory Containing Configuration Files"
+    "Directory containing configuration files"
   },
   {
     "DLPATH",
     OUTPUT_STRING,
     &ConfigFileEntry.dlinefile,
-    "Path to D-line File"
+    "Path to D-line database file"
   },
   {
     "KPATH",
     OUTPUT_STRING,
     &ConfigFileEntry.klinefile,
-    "Path to K-line File"
+    "Path to K-line database file"
+  },
+  {
+    "GPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.glinefile,
+    "Path to G-line database file"
+  },
+  {
+    "XPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.xlinefile,
+    "Path to X-line database file"
+  },
+  {
+    "RESVPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.xlinefile,
+    "Path to resv database file"
   },
   {
     "network_name",
@@ -278,7 +296,7 @@ static const struct InfoStruct info_table[] =
     "failed_oper_notice",
     OUTPUT_BOOLEAN,
     &ConfigFileEntry.failed_oper_notice,
-    "Inform opers if someone /oper's with the wrong password"
+    "Inform opers if someone tries to /oper with the wrong password"
   },
   {
     "dots_in_ident",

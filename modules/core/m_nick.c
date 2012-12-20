@@ -228,7 +228,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
 
     sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name,
                source_p->name[0] ? source_p->name : "*", nick);
-    sendto_realops_flags(L_ALL, UMODE_REJ,
+    sendto_realops_flags(UMODE_REJ, L_ALL,
                          "Forbidding reserved nick [%s] from user %s",
                          nick, get_client_name(client_p, HIDE_IP));
     return;
@@ -298,7 +298,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
       ++mi->count;
       sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
                  me.name, source_p->name, nick);
-      sendto_realops_flags(L_ALL, UMODE_REJ,
+      sendto_realops_flags(UMODE_REJ, L_ALL,
                            "Forbidding reserved nick [%s] from user %s",
                            nick, get_client_name(client_p, HIDE_IP));
       return;

@@ -319,7 +319,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
   {
     if (warn)
     {
-      reason = aconf->reason ? aconf->reason : "No reason";
+      reason = aconf->reason ? aconf->reason : CONF_NOREASON;
       sendto_one(source_p,
                  ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
                  me.name, source_p->name, luser, lhost, aconf->user,

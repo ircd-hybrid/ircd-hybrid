@@ -83,7 +83,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_TESTLINE),
                  me.name, source_p->name, 'Q', 0, chptr->name, 
-                 chptr->reason ? chptr->reason : "No reason", "");
+                 chptr->reason ? chptr->reason : CONF_NOREASON, "");
       return;
     }
   }
@@ -159,7 +159,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
                  IsConfTemporary(aconf) ? 'k' : 'K',
                  IsConfTemporary(aconf) ? ((aconf->hold - CurrentTime) / 60)
                  : 0L,
-                 userhost, aconf->reason? aconf->reason : "No reason",
+                 userhost, aconf->reason? aconf->reason : CONF_NOREASON,
                  aconf->oper_reason ? aconf->oper_reason : "");
       ++matches;
     }
@@ -174,7 +174,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, form_str(RPL_TESTLINE),
                me.name, source_p->name, 'Q', 0L,
                conf->name, 
-               mconf->reason ? mconf->reason : "No reason",
+               mconf->reason ? mconf->reason : CONF_NOREASON,
                mconf->oper_reason ? mconf->oper_reason : "");
     ++matches;
   }

@@ -130,7 +130,7 @@ static void
 mo_dline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  char def_reason[] = "<No reason specified>";
+  char def_reason[] = CONF_NOREASON;
   char *dlhost = NULL, *oper_reason = NULL, *reason = NULL;
   char *target_server = NULL;
   const char *creason;
@@ -283,7 +283,7 @@ static void
 ms_dline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  char def_reason[] = "<No reason specified>";
+  char def_reason[] = CONF_NOREASON;
   char *dlhost, *oper_reason, *reason;
   const char *creason;
   const struct Client *target_p = NULL;

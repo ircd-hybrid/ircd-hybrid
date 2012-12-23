@@ -623,7 +623,7 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
                    from, to, "G",
                    aconf->host ? aconf->host : "*",
                    aconf->user ? aconf->user : "*",
-                   aconf->reason ? aconf->reason : "No reason", "" );
+                   aconf->reason ? aconf->reason : CONF_NOREASON, "" );
       }
     }
   }

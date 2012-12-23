@@ -1783,7 +1783,7 @@ resv_channel: CHANNEL '=' QSTRING ';'
   {
     if (IsChanPrefix(*yylval.string))
     {
-      char def_reason[] = "No reason";
+      char def_reason[] = CONF_NOREASON;
 
       create_channel_resv(yylval.string, resv_reason != NULL ? resv_reason : def_reason, 1);
     }
@@ -1796,7 +1796,7 @@ resv_nick: NICK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    char def_reason[] = "No reason";
+    char def_reason[] = CONF_NOREASON;
 
     create_nick_resv(yylval.string, resv_reason != NULL ? resv_reason : def_reason, 1);
   }
@@ -2275,7 +2275,7 @@ kill_entry: KILL
         if (reasonbuf[0])
           DupString(yy_aconf->reason, reasonbuf);
         else
-          DupString(yy_aconf->reason, "No reason");
+          DupString(yy_aconf->reason, CONF_NOREASON);
 #else
         ilog(LOG_TYPE_IRCD, "Failed to add regular expression based K-Line: no PCRE support");
         break;
@@ -2293,7 +2293,7 @@ kill_entry: KILL
         if (reasonbuf[0])
           DupString(yy_aconf->reason, reasonbuf);
         else
-          DupString(yy_aconf->reason, "No reason");
+          DupString(yy_aconf->reason, CONF_NOREASON);
         add_conf_by_address(CONF_KLINE, yy_aconf);
       }
     }
@@ -2354,7 +2354,7 @@ deny_entry: DENY
   {
     if (hostbuf[0] && parse_netmask(hostbuf, NULL, NULL) != HM_HOST)
     {
-      find_and_delete_temporary(NULL, hostbuf, CONF_DLINE);
+      find_and_delete_temporary(NULL, hostbuf, CONF_DLINE|1);
 
       yy_aconf = map_to_conf(make_conf_item(DLINE_TYPE));
       DupString(yy_aconf->host, hostbuf);
@@ -2362,7 +2362,7 @@ deny_entry: DENY
       if (reasonbuf[0])
         DupString(yy_aconf->reason, reasonbuf);
       else
-        DupString(yy_aconf->reason, "No reason");
+        DupString(yy_aconf->reason, CONF_NOREASON);
       add_conf_by_address(CONF_DLINE, yy_aconf);
       yy_aconf = NULL;
     }
@@ -2452,7 +2452,7 @@ gecos_entry: GECOS
       if (reasonbuf[0])
         DupString(yy_match_item->reason, reasonbuf);
       else
-        DupString(yy_match_item->reason, "No reason");
+        DupString(yy_match_item->reason, CONF_NOREASON);
     }
   }
 };

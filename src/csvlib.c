@@ -131,7 +131,7 @@ parse_csv_file(FILE *file, ConfType conf_type)
         if (reason_field != NULL)
           DupString(aconf->reason, reason_field);
         else
-          DupString(aconf->reason, "No reason");
+          DupString(aconf->reason, CONF_NOREASON);
         add_conf_by_address(CONF_DLINE, aconf);
       }
 

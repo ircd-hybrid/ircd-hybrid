@@ -123,7 +123,7 @@ parse_csv_file(FILE *file, ConfType conf_type)
 
       if (host_field && parse_netmask(host_field, NULL, NULL) != HM_HOST)
       {
-        find_and_delete_temporary(NULL, host_field, CONF_DLINE);
+        find_and_delete_temporary(NULL, host_field, CONF_DLINE | 1);
 
         aconf = map_to_conf(make_conf_item(DLINE_TYPE));
         DupString(aconf->host, host_field);

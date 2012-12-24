@@ -285,6 +285,7 @@ throttle_time { return THROTTLE_TIME; }
 user		{ return USER; } 
 vhost	{ return VHOST; }
 vhost6	{ return VHOST6; }
+webirc           { return T_WEBIRC; }
 xline		{ return XLINE; }
 yes		{ yylval.number = 1; return TBOOL; }
 

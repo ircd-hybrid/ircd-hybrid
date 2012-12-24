@@ -327,6 +327,7 @@ reset_block_state(void)
 %token  T_UNXLINE
 %token  T_GLOBOPS
 %token  T_WALLOP
+%token  T_WEBIRC
 %token  T_RESTART
 %token  T_SERVICE
 %token  T_SERVICES_NAME
@@ -1543,6 +1544,10 @@ auth_flags_item: SPOOF_NOTICE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_EXEMPTRESV;
+} | T_WEBIRC
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.flags.value |= CONF_FLAGS_WEBIRC;
 } | NEED_PASSWORD
 {
   if (conf_parser_ctx.pass == 2)

@@ -146,8 +146,10 @@ struct CidrItem
 #define CONF_FLAGS_IN_DATABASE          0x00008000
 #define CONF_FLAGS_EXEMPTRESV           0x00010000
 #define CONF_FLAGS_SSL                  0x00020000
+#define CONF_FLAGS_WEBIRC               0x00040000
 
 /* Macros for struct MaskItem */
+#define IsConfWebIRC(x)         ((x)->flags & CONF_FLAGS_WEBIRC)
 #define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
 #define IsNoTilde(x)            ((x)->flags & CONF_FLAGS_NO_TILDE)
 #define IsConfCanFlood(x)       ((x)->flags & CONF_FLAGS_CAN_FLOOD)

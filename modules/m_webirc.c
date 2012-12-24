@@ -37,28 +37,6 @@
 #include "conf.h"
 #include "hostmask.h"
 
-/*
- * Usage:
- *
- * auth {
- *   user = "webirc@<cgiirc ip>"; # if identd used, put ident username instead
- *   password = "<password>"; # encryption possible
- *   spoof = "webirc."
- *   class = "users";
- *   encrypted = yes; # [Using encryption is highly recommended]
- * };
- *
- * Possible flags:
- *   kline_exempt - k/g lines on the cgiirc ip are ignored
- *   gline_exempt - glines on the cgiirc ip are ignored
- *
- * dlines are checked on the cgiirc ip (of course).
- * k/d/g/x lines, auth blocks, user limits, etc are checked using the
- * real host/ip.
- *
- * The password should be specified unencrypted in webirc_password in
- * cgiirc.config
- */
 
 static int
 invalid_hostname(const char *hostname)
@@ -112,7 +90,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
   if (conf == NULL || !IsConfClient(conf))
     return;
 
-  if (!IsConfDoSpoofIp(conf) || irccmp(conf->name, "webirc."))
+  if (!IsConfWebIRC(conf))
   {
     sendto_one(source_p, ":%s NOTICE %s :Not a CGI:IRC auth block", me.name,
                source_p->name[0] ? source_p->name : "*");

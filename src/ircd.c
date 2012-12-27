@@ -143,14 +143,18 @@ make_daemon(void)
 static int printVersion = 0;
 
 static struct lgetopt myopts[] = {
-  {"dlinefile",  &ConfigFileEntry.dlinefile, 
-   STRING, "File to use for dline.conf"},
   {"configfile", &ConfigFileEntry.configfile, 
    STRING, "File to use for ircd.conf"},
+  {"glinefile",  &ConfigFileEntry.glinefile,
+   STRING, "File to use for gline database"},
   {"klinefile",  &ConfigFileEntry.klinefile, 
-   STRING, "File to use for kline.conf"},
+   STRING, "File to use for kline database"},
+  {"dlinefile",  &ConfigFileEntry.dlinefile,
+   STRING, "File to use for dline database"},
   {"xlinefile",  &ConfigFileEntry.xlinefile, 
-   STRING, "File to use for xline.conf"},
+   STRING, "File to use for xline database"},
+  {"resvfile",  &ConfigFileEntry.resvfile,
+   STRING, "File to use for resv database"},
   {"logfile",    &logFileName, 
    STRING, "File to use for ircd.log"},
   {"pidfile",    &pidFileName,
@@ -505,7 +509,7 @@ main(int argc, char *argv[])
   ConfigFileEntry.dpath      = DPATH;
   ConfigFileEntry.configfile = CPATH;    /* Server configuration file */
   ConfigFileEntry.klinefile  = KPATH;    /* Server kline file         */
-  ConfigFileEntry.klinefile  = GPATH;    /* Server gline file         */
+  ConfigFileEntry.glinefile  = GPATH;    /* Server gline file         */
   ConfigFileEntry.xlinefile  = XPATH;    /* Server xline file         */
   ConfigFileEntry.dlinefile  = DLPATH;   /* dline file                */
   ConfigFileEntry.resvfile   = RESVPATH; /* resv file                 */

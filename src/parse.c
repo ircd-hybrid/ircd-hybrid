@@ -103,7 +103,6 @@ static struct MessageTree msg_tree;
  */
 static char *sender;
 static char *para[MAXPARA + 2]; /* <prefix> + <params> + NULL */
-static char buffer[1024];
 
 static int cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
@@ -198,7 +197,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)))
   {
     numeric = ch;
-    paramcount = MAXPARA;
+    paramcount = 2; /* destination, and the rest of it */
     ++ServerStats.is_num;
     s = ch + 3;  /* I know this is ' ' from above if            */
     *s++ = '\0'; /* blow away the ' ', and point s to next part */
@@ -267,7 +266,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
        if (*s == ':')
        {
          /* The rest is a single parameter */
-         para[++parc] = s + 1;
+         para[++parc] = s + (!numeric); /* keep the colon if it's a numeric */
          break;
        }
 
@@ -655,114 +654,65 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
  *      wrong with the message, just *DROP* it! Don't even think of
  *      sending back a neat error message -- big danger of creating
  *      a ping pong error message...
+ *
+ * Rewritten by Nemesi, Jan 1999, to support numeric nicks in parv[1]
+ *
+ * Called when we get a numeric message from a remote _server_ and we are
+ * supposed to forward it somewhere. Note that we always ignore numerics sent
+ * to 'me' and simply drop the message if we can't handle with this properly:
+ * the savvy approach is NEVER generate an error in response to an... error :)
  */
 static void
 handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
                int parc, char *parv[])
 {
-  struct Client *target_p;
-  struct Channel *chptr;
-  char *t;    /* current position within the buffer */
-  int i, tl;  /* current length of presently being built string in t */
+  struct Client *target_p = NULL;
+  struct Channel *chptr = NULL;
 
+  /* Avoid trash, we need it to come from a server and have a target  */
   if (parc < 2 || !IsServer(source_p))
     return;
 
-  /* Remap low number numerics. */
+  /*
+   * Who should receive this message ? Will we do something with it ?
+   *  Note that we use findUser functions, so the target can't be neither
+   *  a server, nor a channel (?) nor a list of targets (?) .. u2.10
+   *  should never generate numeric replies to non-users anyway
+   *  Ahem... it can be a channel actually, csc bots use it :\ --Nem
+   */
+  if (IsChanPrefix(*parv[1]))
+    chptr = hash_find_channel(parv[1]);
+  else
+    target_p = find_person(client_p, parv[1]);
+
+  if (((!target_p) || (target_p->from == client_p)) && !chptr)
+    return;
+
+  /*
+   * Remap low number numerics, not that I understand WHY.. --Nemesi
+   */
+  /*
+   * numerics below 100 talk about the current 'connection', you're not
+   * connected to a remote server so it doesn't make sense to send them
+   * remotely - but the information they contain may be useful, so we
+   * remap them up.  Weird, but true.  -- Isomer
+   */
   if (numeric[0] == '0')
     numeric[0] = '1';
 
-  /* Prepare the parameter portion of the message into 'buffer'.
-   * (Because the buffer is twice as large as the message buffer
-   * for the socket, no overflow can occur here... ...on current
-   * assumptions--bets are off, if these are changed --msa)
-   */
-  t = buffer;
-  for (i = 2; i < (parc - 1); i++)
+  if (target_p)
   {
-    tl = ircsprintf(t, " %s", parv[i]);
-    t += tl;
-  }
-
-  ircsprintf(t, " :%s", parv[parc-1]);
-
-  if (((target_p = find_person(client_p, parv[1])) != NULL) ||
-      ((target_p = hash_find_server(parv[1])) != NULL))
-  {
-    if (IsMe(target_p)) 
-    {
-      int num;
-
-      /*
-       * We shouldn't get numerics sent to us,
-       * any numerics we do get indicate a bug somewhere..
-       */
-      /* ugh.  this is here because of nick collisions.  when two servers
-       * relink, they burst each other their nicks, then perform collides.
-       * if there is a nick collision, BOTH servers will kill their own
-       * nicks, and BOTH will kill the other servers nick, which wont exist,
-       * because it will have been already killed by the local server.
-       *
-       * unfortunately, as we cant guarantee other servers will do the
-       * "right thing" on a nick collision, we have to keep both kills.  
-       * ergo we need to ignore ERR_NOSUCHNICK. --fl_
-       */
-      /* quick comment. This _was_ tried. i.e. assume the other servers
-       * will do the "right thing" and kill a nick that is colliding.
-       * unfortunately, it did not work. --Dianora
-       */
-
-
-      /*
-       * Also ignoring ERR_NOTREGISTERED for now. A connecting server may send this
-       * in response to the "NOTICE AUTH ..." message upon registration. Normally
-       * the !IsServer() test in handle_numeric() would take care of this situation,
-       * but due to the fact that read_packet() in s_auth.c:release_auth_client() is
-       * called for the very first time _after_ ident/dns registration, it looks like
-       * the numeric (451) messages are queued up whereas meanwhile the serverlink
-       * succesfully establishes. Right after that, after IsServer() is true, the queued
-       * numeric messages will then be processed, and a notice is falsely sent to operators.
-       * The I/O engine will be rewritten soon (a mixture of libevent), so maybe this also
-       * will fix described behavior above, but for now we're just going to drop this message
-       * (no problem at all, we propably shouldn't process numeric destined to servers anyway)
-       * -Michael
-       */
-      /* Yes, a good compiler would have optimised this, but
-       * this is probably easier to read. -db
-       */
-      num = atoi(numeric);
-
-      if ((num != ERR_NOSUCHNICK) && (num != ERR_NOTREGISTERED))
-        sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-                             "*** %s(via %s) sent a %s numeric to me: %s",
-                             source_p->name, client_p->name, numeric, buffer);
-      return;
-    }
-    else if (target_p->from == client_p) 
-    {
-      /* This message changed direction (nick collision?)
-       * ignore it.
-       */
-      return;
-    }
-
-    /* csircd will send out unknown umode flag for +a (admin), drop it here. */
-    if ((atoi(numeric) == ERR_UMODEUNKNOWNFLAG) && MyClient(target_p))
-      return;
-    
     /* Fake it for server hiding, if its our client */
-    if (ConfigServerHide.hide_servers &&
-        MyClient(target_p) && !HasUMode(target_p, UMODE_OPER))
-      sendto_one(target_p, ":%s %s %s%s", me.name, numeric, target_p->name, buffer);
+    if (ConfigServerHide.hide_servers && MyClient(target_p) &&
+        !HasUMode(target_p, UMODE_OPER))
+      sendto_one(target_p, ":%s %s %s %s", me.name, numeric, target_p->name, parv[2]);
     else
       sendto_one(target_p, ":%s %s %s%s", ID_or_name(source_p, target_p->from),
-                 numeric, ID_or_name(target_p, target_p->from), buffer);
-    return;
+                 numeric, ID_or_name(target_p, target_p->from), parv[2]);
   }
-  else if ((chptr = hash_find_channel(parv[1])) != NULL)
+  else
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s %s %s %s",
-                         source_p->name,
-                         numeric, chptr->chname, buffer);
+                         source_p->name, numeric, chptr->chname, parv[2]);
 }
 
 /* m_not_oper()

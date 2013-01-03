@@ -707,7 +707,7 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
         !HasUMode(target_p, UMODE_OPER))
       sendto_one(target_p, ":%s %s %s %s", me.name, numeric, target_p->name, parv[2]);
     else
-      sendto_one(target_p, ":%s %s %s%s", ID_or_name(source_p, target_p->from),
+      sendto_one(target_p, ":%s %s %s %s", ID_or_name(source_p, target_p->from),
                  numeric, ID_or_name(target_p, target_p->from), parv[2]);
   }
   else

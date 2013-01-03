@@ -1,3 +1,8 @@
+-- ircd-hybrid-8.0.4 Release Notes
+o) Fixed possible core on USERHOST/ISON with optimization enabled
+o) Fixed bug where can_flood sometimes didn't work as expected
+
+
 -- ircd-hybrid-8.0.3 Release Notes
 o) Fixed core on UNDLINE
 o) XLINE/KLINE/RESV/DLINE/SQUIT and KILL now have the same default reason

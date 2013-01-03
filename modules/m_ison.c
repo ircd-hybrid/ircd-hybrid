@@ -107,7 +107,7 @@ m_ison(struct Client *client_p, struct Client *source_p,
 }
 
 static struct Message ison_msgtab = {
-  "ISON", 0, 0, 1, 1, MFLG_SLOW, 0,
+  "ISON", 0, 0, 2, 1, MFLG_SLOW, 0,
   {m_unregistered, m_ison, m_ignore, m_ignore, m_ison, m_ignore}
 };
 

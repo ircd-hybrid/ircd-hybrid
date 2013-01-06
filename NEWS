@@ -1,3 +1,41 @@
+-- ircd-hybrid-8.1.0beta1 Release Notes
+o) Improved WEBIRC authentication; added 'webirc' to auth::flags.
+   A "webirc." spoof is now no longer required
+o) Implemented new memory pool allocator which basically is taken from Tor's
+   mempool allocator for Tor cells
+o) Major code cleanups
+o) Implemented new binary database storage for X-,D-,K-,G-Lines and RESVs
+   Temporary bans are now stored as well and will persist after a reboot
+
+
+-- ircd-hybrid-8.0.4 Release Notes
+o) Fixed possible core on USERHOST/ISON with optimization enabled
+o) Fixed bug where can_flood sometimes didn't work as expected
+
+
+-- ircd-hybrid-8.0.3 Release Notes
+o) Fixed core on UNDLINE
+o) XLINE/KLINE/RESV/DLINE/SQUIT and KILL now have the same default reason
+   if a reason hasn't been specified
+
+
+-- ircd-hybrid-8.0.2 Release Notes
+o) Minor updates to the build system
+o) Fixed broken --enable-assert configure switch
+o) Fixed bug where timed events stopped from working if the system's
+   clock is running backwards
+o) STATS q|Q now shows how many times a resv{} block has been matched
+o) Fixed contributed WEBIRC module
+o) IRC operators may now again see server generated nick rejection notices
+
+
+-- ircd-hybrid-8.0.1 Release Notes
+o) Fixed broken CIDR support for CHALLENGE based irc operator logins
+o) Fixed class limits not properly applying to oper{} blocks
+o) Fixed possible TBURST desynchronization with services
+o) Fixed TBURST sending server's name to clients if it's a hidden server
+
+
 -- ircd-hybrid-8.0.0 Release Notes
 o) Fixed possible TBURST desynchronization with services
 o) Fixed TBURST sending server's name to clients if it's a hidden server

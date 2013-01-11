@@ -718,19 +718,21 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    recalc_fdlimit(NULL);
-
     if ($3 < MAXCLIENTS_MIN)
     {
       char buf[IRCD_BUFSIZE];
-      ircsprintf(buf, "MAXCLIENTS too low, setting to %d", MAXCLIENTS_MIN);
+
+      snprintf(buf, sizeof(buf), "MAXCLIENTS too low, setting to %d", MAXCLIENTS_MIN);
       yyerror(buf);
+      ServerInfo.max_clients = MAXCLIENTS_MIN;
     }
     else if ($3 > MAXCLIENTS_MAX)
     {
       char buf[IRCD_BUFSIZE];
-      ircsprintf(buf, "MAXCLIENTS too high, setting to %d", MAXCLIENTS_MAX);
+
+      snprintf(buf, sizeof(buf), "MAXCLIENTS too high, setting to %d", MAXCLIENTS_MAX);
       yyerror(buf);
+      ServerInfo.max_clients = MAXCLIENTS_MAX;
     }
     else
       ServerInfo.max_clients = $3;

@@ -98,7 +98,6 @@ extern int number_fd;
 extern int hard_fdlimit;
 extern fde_t *fd_hash[];
 extern fde_t *fd_next_in_loop;
-extern struct Callback *fdlimit_cb;
 
 extern void fdlist_init(void);
 extern fde_t *lookup_fd(int);
@@ -108,6 +107,4 @@ extern void fd_dump(struct Client *);
 extern void fd_note(fde_t *, const char *, ...);
 extern void close_standard_fds(void);
 extern void close_fds(fde_t *);
-extern void recalc_fdlimit(void *);
-
 #endif /* INCLUDED_fdlist_h */

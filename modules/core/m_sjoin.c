@@ -423,6 +423,11 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            target_p->name, target_p->username,
                            target_p->host, chptr->chname);
+      if (target_p->away[0])
+        sendto_channel_local_butone(target_p, 0, CAP_AWAY_NOTIFY, chptr,
+                                    ":%s!%s@%s AWAY :%s",
+                                    target_p->name, target_p->username,
+                                    target_p->host, target_p->away);
     }
 
     if (fl & CHFL_CHANOP)

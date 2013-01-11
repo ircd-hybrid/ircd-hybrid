@@ -58,7 +58,8 @@ static struct capabilities
 } capab_list[] = {
 #define _CAP(cap, flags, name)  \
 	{ (cap), (flags), (name), sizeof(name) - 1 }
-  _CAP(CAP_MULTI_PREFIX, 0, "multi-prefix")
+  _CAP(CAP_MULTI_PREFIX, 0, "multi-prefix"),
+  _CAP(CAP_AWAY_NOTIFY, 0, "away-notify")
 #undef _CAP
 };
 

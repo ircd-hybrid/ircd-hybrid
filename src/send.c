@@ -506,7 +506,7 @@ sendto_server(struct Client *one,
  *		  used by m_nick.c and exit_one_client.
  */
 void
-sendto_common_channels_local(struct Client *user, int touser,
+sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
                              const char *pattern, ...)
 {
   va_list args;
@@ -539,6 +539,9 @@ sendto_common_channels_local(struct Client *user, int touser,
           target_p->localClient->serial == current_serial)
         continue;
 
+      if (HasCap(target_p, cap) != cap)
+        continue;
+
       target_p->localClient->serial = current_serial;
       send_message(target_p, buffer, len);
     }
@@ -546,7 +549,8 @@ sendto_common_channels_local(struct Client *user, int touser,
 
   if (touser && MyConnect(user) && !IsDead(user) &&
       user->localClient->serial != current_serial)
-    send_message(user, buffer, len);
+    if (HasCap(target_p, cap) == cap)
+      send_message(user, buffer, len);
 }
 
 /* sendto_channel_local()
@@ -603,7 +607,7 @@ sendto_channel_local(int type, int nodeaf, struct Channel *chptr,
  * WARNING - +D clients are omitted
  */
 void       
-sendto_channel_local_butone(struct Client *one, int type,
+sendto_channel_local_butone(struct Client *one, int type, unsigned int cap,
 			    struct Channel *chptr, const char *pattern, ...)
 {
   va_list args;
@@ -628,6 +632,9 @@ sendto_channel_local_butone(struct Client *one, int type,
     if (!MyConnect(target_p) || target_p == one ||
         IsDefunct(target_p) || HasUMode(target_p, UMODE_DEAF))
       continue;
+
+    if (HasCap(target_p, cap) != cap)
+        continue;
     send_message(target_p, buffer, len);
   }
 }

@@ -233,6 +233,11 @@ m_join(struct Client *client_p, struct Client *source_p,
                            source_p->host, chptr->chname);
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s +nt",
                            me.name, chptr->chname);
+      if (source_p->away[0])
+        sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
+                                    ":%s!%s@%s AWAY :%s",
+                                    source_p->name, source_p->username,
+                                    source_p->host, source_p->away);
     }
     else
     {
@@ -248,6 +253,12 @@ m_join(struct Client *client_p, struct Client *source_p,
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            source_p->name, source_p->username,
                            source_p->host, chptr->chname);
+
+      if (source_p->away[0])
+        sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
+                                    ":%s!%s@%s AWAY :%s",
+                                    source_p->name, source_p->username,
+                                    source_p->host, source_p->away);
     }
 
     del_invite(chptr, source_p);
@@ -415,6 +426,11 @@ ms_join(struct Client *client_p, struct Client *source_p,
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname);
+    if (source_p->away[0])
+      sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
+                                  ":%s!%s@%s AWAY :%s",
+                                  source_p->name, source_p->username,
+                                  source_p->host, source_p->away);
   }
 
   sendto_server(client_p, CAP_TS6, NOCAPS,

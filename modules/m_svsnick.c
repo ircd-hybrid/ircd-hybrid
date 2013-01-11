@@ -98,7 +98,7 @@ ms_svsnick(struct Client *client_p, struct Client *source_p,
     send_umode(target_p, target_p, oldmodes, 0xffffffff, modebuf);
   }
 
-  sendto_common_channels_local(target_p, 1, ":%s!%s@%s NICK :%s",
+  sendto_common_channels_local(target_p, 1, 0, ":%s!%s@%s NICK :%s",
                                target_p->name, target_p->username,
                                target_p->host, parv[2]);
 

@@ -47,11 +47,11 @@ extern void sendto_one(struct Client *, const char *, ...);
 extern void sendto_channel_butone(struct Client *, struct Client *,
                                   struct Channel *, unsigned int,
                                   const char *, ...);
-extern void sendto_common_channels_local(struct Client *, int,
+extern void sendto_common_channels_local(struct Client *, int, unsigned int,
                                          const char *, ...);
 extern void sendto_channel_local(int, int, struct Channel *,
                                  const char *, ...);
-extern void sendto_channel_local_butone(struct Client *, int, struct Channel *,
+extern void sendto_channel_local_butone(struct Client *, int, unsigned int, struct Channel *,
                                         const char *, ...);
 extern void sendto_channel_remote(struct Client *, struct Client *, int,
                                   const unsigned int, const unsigned int,

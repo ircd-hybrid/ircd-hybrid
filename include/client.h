@@ -265,6 +265,7 @@ struct Client
 
 
 #define CAP_MULTI_PREFIX  0x00000001
+#define CAP_AWAY_NOTIFY   0x00000002
 
 #define HasCap(x, y) ((x)->localClient->cap_active & (y))
 

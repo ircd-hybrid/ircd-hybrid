@@ -53,12 +53,16 @@ m_away(struct Client *client_p, struct Client *source_p,
     /* Marking as not away */
     if (source_p->away[0])
     {
+      source_p->away[0] = '\0';
       /* we now send this only if they were away before --is */
       sendto_server(client_p, CAP_TS6, NOCAPS,
                     ":%s AWAY", ID(source_p));
       sendto_server(client_p, NOCAPS, CAP_TS6,
                     ":%s AWAY", source_p->name);
-      source_p->away[0] = '\0';
+      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
+                                   ":%s!%s@%s AWAY",
+                                   source_p->name, source_p->username,
+                                   source_p->host);
     }
 
     sendto_one(source_p, form_str(RPL_UNAWAY),
@@ -74,13 +78,21 @@ m_away(struct Client *client_p, struct Client *source_p,
   }
 
   source_p->localClient->last_away = CurrentTime;
+  sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, source_p->name);
+
+  if (strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
+    return;
+
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 
+  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
+                               ":%s!%s@%s AWAY :%s",
+                               source_p->name, source_p->username,
+                               source_p->host, source_p->away);
   sendto_server(client_p, CAP_TS6, NOCAPS,
                 ":%s AWAY :%s", ID(source_p), source_p->away);
   sendto_server(client_p, NOCAPS, CAP_TS6,
                 ":%s AWAY :%s", source_p->name, source_p->away);
-  sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, source_p->name);
 }
 
 static void
@@ -95,19 +107,30 @@ ms_away(struct Client *client_p, struct Client *source_p,
     /* Marking as not away */
     if (source_p->away[0])
     {
+      source_p->away[0] = '\0';
       /* we now send this only if they were away before --is */
       sendto_server(client_p, CAP_TS6, NOCAPS,
                     ":%s AWAY", ID(source_p));
       sendto_server(client_p, NOCAPS, CAP_TS6,
                     ":%s AWAY", source_p->name);
-      source_p->away[0] = '\0';
+      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
+                                   ":%s!%s@%s AWAY",
+                                   source_p->name, source_p->username,
+                                   source_p->host);
     }
 
     return;
   }
 
+  if (strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
+    return;
+
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 
+  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
+                               ":%s!%s@%s AWAY :%s",
+                               source_p->name, source_p->username,
+                               source_p->host, source_p->away);
   sendto_server(client_p, CAP_TS6, NOCAPS,
                 ":%s AWAY :%s", ID(source_p), source_p->away);
   sendto_server(client_p, NOCAPS, CAP_TS6,

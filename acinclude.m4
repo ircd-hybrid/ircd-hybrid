@@ -24,7 +24,6 @@ AC_DEFUN([AX_ARG_ENABLE_IOLOOP_MECHANISM],[
   AC_ARG_ENABLE([kqueue], [AS_HELP_STRING([--enable-kqueue], [Force kqueue usage.])], [desired_iopoll_mechanism="kqueue"])
   AC_ARG_ENABLE([epoll],  [AS_HELP_STRING([--enable-epoll],  [Force epoll usage.])],  [desired_iopoll_mechanism="epoll"])
   AC_ARG_ENABLE([devpoll],[AS_HELP_STRING([--enable-devpoll],[Force devpoll usage.])],[desired_iopoll_mechanism="devpoll"])
-  AC_ARG_ENABLE([rtsigio],[AS_HELP_STRING([--enable-rtsigio],[Force rtsigio usage.])],[desired_iopoll_mechanism="rtsigio"])
   AC_ARG_ENABLE([poll],   [AS_HELP_STRING([--enable-poll],   [Force poll usage.])],   [desired_iopoll_mechanism="poll"]) 
   AC_ARG_ENABLE([select], [AS_HELP_STRING([--enable-select], [Force select usage.])], [desired_iopoll_mechanism="select"])
   dnl }}}

@@ -811,7 +811,6 @@ enable_assert
 enable_kqueue
 enable_epoll
 enable_devpoll
-enable_rtsigio
 enable_poll
 enable_select
 with_nicklen
@@ -1471,7 +1470,6 @@ Optional Features:
   --enable-kqueue         Force kqueue usage.
   --enable-epoll          Force epoll usage.
   --enable-devpoll        Force devpoll usage.
-  --enable-rtsigio        Force rtsigio usage.
   --enable-poll           Force poll usage.
   --enable-select         Force select usage.
   --enable-halfops        Enable halfops support.
@@ -13992,11 +13990,6 @@ fi
   # Check whether --enable-devpoll was given.
 if test "${enable_devpoll+set}" = set; then :
   enableval=$enable_devpoll; desired_iopoll_mechanism="devpoll"
-fi
-
-  # Check whether --enable-rtsigio was given.
-if test "${enable_rtsigio+set}" = set; then :
-  enableval=$enable_rtsigio; desired_iopoll_mechanism="rtsigio"
 fi
 
   # Check whether --enable-poll was given.

@@ -328,9 +328,6 @@
 /* poll mechanism */
 #undef __IOPOLL_MECHANISM_POLL
 
-/* rtsigio mechanism */
-#undef __IOPOLL_MECHANISM_RTSIGIO
-
 /* select mechanism */
 #undef __IOPOLL_MECHANISM_SELECT
 

@@ -56,10 +56,6 @@
             currently only available on 2.5.44 Linux kernel versions or
             later.
 
-          * --enable-rtsigio - Enable the superior Linux RealTime Signal I/O
-            system. This is currently only available on 2.4 Linux kernel
-            versions or later.
-
           * --enable-poll - Use POSIX poll(2).
 
           * --enable-select - Use POSIX select(2).

@@ -43,7 +43,6 @@ ircd_SOURCES = channel.c         \
                parse.c           \
                s_bsd_epoll.c     \
                s_bsd_poll.c      \
-               s_bsd_sigio.c     \
                s_bsd_devpoll.c   \
                s_bsd_kqueue.c    \
                s_bsd_select.c    \

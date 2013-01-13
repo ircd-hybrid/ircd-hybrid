@@ -43,25 +43,7 @@
 
 static struct pollfd *pollfds;
 static int pollmax = -1;  /* highest FD number */
-static dlink_node *hookptr;
 
-/*
- * changing_fdlimit
- *
- * Resize pollfds array if necessary.
- */
-static void *
-changing_fdlimit(va_list args)
-{
-  int old_fdlimit = hard_fdlimit;
-
-  pass_callback(hookptr, va_arg(args, int));
-
-  if (hard_fdlimit != old_fdlimit)
-    pollfds = MyRealloc(pollfds, sizeof(struct pollfd) * hard_fdlimit);
-
-  return NULL;
-}
 
 /*
  * init_netio
@@ -78,8 +60,6 @@ init_netio(void)
 
   for (fd = 0; fd < hard_fdlimit; fd++)
     pollfds[fd].fd = -1;
-
-  hookptr = install_hook(fdlimit_cb, changing_fdlimit);
 }
 
 /*

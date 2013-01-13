@@ -811,7 +811,6 @@ enable_assert
 enable_kqueue
 enable_epoll
 enable_devpoll
-enable_rtsigio
 enable_poll
 enable_select
 with_nicklen
@@ -1471,7 +1470,6 @@ Optional Features:
   --enable-kqueue         Force kqueue usage.
   --enable-epoll          Force epoll usage.
   --enable-devpoll        Force devpoll usage.
-  --enable-rtsigio        Force rtsigio usage.
   --enable-poll           Force poll usage.
   --enable-select         Force select usage.
   --enable-halfops        Enable halfops support.
@@ -13996,11 +13994,6 @@ if test "${enable_devpoll+set}" = set; then :
   enableval=$enable_devpoll; desired_iopoll_mechanism="devpoll"
 fi
 
-  # Check whether --enable-rtsigio was given.
-if test "${enable_rtsigio+set}" = set; then :
-  enableval=$enable_rtsigio; desired_iopoll_mechanism="rtsigio"
-fi
-
   # Check whether --enable-poll was given.
 if test "${enable_poll+set}" = set; then :
   enableval=$enable_poll; desired_iopoll_mechanism="poll"
@@ -14184,48 +14177,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 $as_echo "#define HAVE_SYS_DEVPOLL_H 1" >>confdefs.h
 
   fi
-      iopoll_mechanism_rtsigio=4
-
-cat >>confdefs.h <<_ACEOF
-#define __IOPOLL_MECHANISM_RTSIGIO $iopoll_mechanism_rtsigio
-_ACEOF
-
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define _GNU_SOURCE
-#include <fcntl.h>
-static unsigned int have_f_setsig = 0;
-
-int
-main ()
-{
-
-#ifdef F_SETSIG
-  have_f_setsig = 1;
-#endif
-  return have_f_setsig == 0;
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  is_rtsigio_mechanism_available="yes"
-else
-  is_rtsigio_mechanism_available="no"
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-      iopoll_mechanism_poll=5
+      iopoll_mechanism_poll=4
 
 cat >>confdefs.h <<_ACEOF
 #define __IOPOLL_MECHANISM_POLL $iopoll_mechanism_poll
@@ -14279,7 +14231,7 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-      iopoll_mechanism_select=6
+      iopoll_mechanism_select=5
 
 cat >>confdefs.h <<_ACEOF
 #define __IOPOLL_MECHANISM_SELECT $iopoll_mechanism_select
@@ -14334,7 +14286,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
       optimal_iopoll_mechanism="none"
-  for mechanism in "kqueue" "epoll" "devpoll" "rtsigio" "poll" "select" ; do # order is important
+  for mechanism in "kqueue" "epoll" "devpoll" "poll" "select" ; do # order is important
     eval "is_optimal_iopoll_mechanism_available=\$is_${mechanism}_mechanism_available"
     if test "$is_optimal_iopoll_mechanism_available" = "yes" ; then
       optimal_iopoll_mechanism="$mechanism"

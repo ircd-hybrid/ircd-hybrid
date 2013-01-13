@@ -40,40 +40,10 @@ fde_t *fd_hash[FD_HASH_SIZE];
 fde_t *fd_next_in_loop = NULL;
 int number_fd = LEAKED_FDS;
 int hard_fdlimit = 0;
-struct Callback *fdlimit_cb = NULL;
 
-static void *
-changing_fdlimit(va_list args)
-{
-  int old_fdlimit = hard_fdlimit;
 
-  hard_fdlimit = va_arg(args, int);
-
-  if (ServerInfo.max_clients > (unsigned int)MAXCLIENTS_MAX)
-  {
-    if (old_fdlimit != 0)
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-        "HARD_FDLIMIT changed to %d, adjusting MAXCLIENTS to %d",
-        hard_fdlimit, MAXCLIENTS_MAX);
-
-    ServerInfo.max_clients = MAXCLIENTS_MAX;
-  }
-
-  return NULL;
-}
-
-void
-fdlist_init(void)
-{
-  memset(&fd_hash, 0, sizeof(fd_hash));
-
-  fdlimit_cb = register_callback("changing_fdlimit", changing_fdlimit);
-  eventAddIsh("recalc_fdlimit", recalc_fdlimit, NULL, 58);
-  recalc_fdlimit(NULL);
-}
-
-void
-recalc_fdlimit(void *unused)
+static int
+set_fdlimit(void)
 {
   int fdmax;
   struct rlimit limit;
@@ -92,10 +62,15 @@ recalc_fdlimit(void *unused)
 
   /* under no condition shall this raise over 65536
    * for example user ip heap is sized 2*hard_fdlimit */
-  fdmax = IRCD_MIN(fdmax, 65536);
+  hard_fdlimit = IRCD_MIN(fdmax, 65536);
 
-  if (fdmax != hard_fdlimit)
-    execute_callback(fdlimit_cb, fdmax);
+  return -1;
+}
+
+void
+fdlist_init(void)
+{
+  set_fdlimit();
 }
 
 static inline unsigned int

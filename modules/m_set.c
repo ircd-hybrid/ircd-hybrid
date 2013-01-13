@@ -231,8 +231,6 @@ quote_max(struct Client *source_p, int newval)
 {
   if (newval > 0)
   {
-    recalc_fdlimit(NULL);
-
     if (newval > MAXCLIENTS_MAX)
     {
       sendto_one(source_p,

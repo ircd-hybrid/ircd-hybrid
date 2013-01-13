@@ -78,13 +78,12 @@ am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
 	modules.$(OBJEXT) motd.$(OBJEXT) rng_mt.$(OBJEXT) \
 	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
 	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
-	s_bsd_sigio.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
-	s_bsd_kqueue.$(OBJEXT) s_bsd_select.$(OBJEXT) \
-	restart.$(OBJEXT) resv.$(OBJEXT) rsa.$(OBJEXT) \
-	s_auth.$(OBJEXT) s_bsd.$(OBJEXT) s_gline.$(OBJEXT) \
-	s_misc.$(OBJEXT) s_serv.$(OBJEXT) s_user.$(OBJEXT) \
-	send.$(OBJEXT) sprintf_irc.$(OBJEXT) version.$(OBJEXT) \
-	watch.$(OBJEXT) whowas.$(OBJEXT)
+	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
+	s_bsd_select.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
+	rsa.$(OBJEXT) s_auth.$(OBJEXT) s_bsd.$(OBJEXT) \
+	s_gline.$(OBJEXT) s_misc.$(OBJEXT) s_serv.$(OBJEXT) \
+	s_user.$(OBJEXT) send.$(OBJEXT) sprintf_irc.$(OBJEXT) \
+	version.$(OBJEXT) watch.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -355,7 +354,6 @@ ircd_SOURCES = channel.c         \
                parse.c           \
                s_bsd_epoll.c     \
                s_bsd_poll.c      \
-               s_bsd_sigio.c     \
                s_bsd_devpoll.c   \
                s_bsd_kqueue.c    \
                s_bsd_select.c    \
@@ -512,7 +510,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_kqueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_poll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_select.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_sigio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_gline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_serv.Po@am__quote@

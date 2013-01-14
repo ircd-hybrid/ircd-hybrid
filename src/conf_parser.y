@@ -965,10 +965,7 @@ oper_entry: OPERATOR
       }
 
       if ((pkey = PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL)) == NULL)
-      {
         yyerror("Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
-        break;
-      }
 
       conf->rsa_public_key = pkey;
       BIO_set_close(file, BIO_CLOSE);

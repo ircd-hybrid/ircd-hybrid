@@ -87,4 +87,10 @@
 #include <sys/param.h>
 #endif
 
+#ifdef PATH_MAX
+#define HYB_PATH_MAX PATH_MAX
+#else
+#define HYB_PATH_MAX 4096
+#endif
+
 #endif

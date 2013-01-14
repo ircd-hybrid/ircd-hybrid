@@ -47,7 +47,7 @@ struct MessageFile
 {
   MessageFileLine *contentsOfFile;
   MotdType motdType;
-  char fileName[PATH_MAX + 1];
+  char fileName[HYB_PATH_MAX + 1];
   char lastChangedDate[MAX_DATE_STRING + 1];
 };
 

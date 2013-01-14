@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.0.5 Release Notes
+o) Fixed build on GNU/Hurd as reported by Dominic Hargreaves
+
+
 -- ircd-hybrid-8.0.4 Release Notes
 o) Fixed possible core on USERHOST/ISON with optimization enabled
 o) Fixed bug where can_flood sometimes didn't work as expected

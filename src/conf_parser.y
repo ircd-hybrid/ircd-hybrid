@@ -54,6 +54,7 @@
 #include <openssl/pem.h>
 #include <openssl/dh.h>
 #endif
+#include "rsa.h"
 
 int yylex(void);
 
@@ -467,7 +468,7 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
   {
     if (!ServerInfo.rsa_private_key_file)
     {
-      yyerror("No rsa_private_key_file specified, SSL disabled");
+      conf_error_report("No rsa_private_key_file specified, SSL disabled");
       break;
     }
 
@@ -476,7 +477,8 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
         SSL_CTX_use_certificate_file(ServerInfo.client_ctx, yylval.string,
                                      SSL_FILETYPE_PEM) <= 0)
     {
-      yyerror(ERR_lib_error_string(ERR_get_error()));
+      conf_error_report("Could not open/read certificate file");
+      report_crypto_errors();
       break;
     }
 
@@ -485,14 +487,16 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
         SSL_CTX_use_PrivateKey_file(ServerInfo.client_ctx, ServerInfo.rsa_private_key_file,
                                     SSL_FILETYPE_PEM) <= 0)
     {
-      yyerror(ERR_lib_error_string(ERR_get_error()));
+      conf_error_report("Could not read RSA private key");
+      report_crypto_errors();
       break;
     }
 
     if (!SSL_CTX_check_private_key(ServerInfo.server_ctx) ||
         !SSL_CTX_check_private_key(ServerInfo.client_ctx))
     {
-      yyerror(ERR_lib_error_string(ERR_get_error()));
+      conf_error_report("Could not read RSA private key");
+      report_crypto_errors();
       break;
     }
   }
@@ -522,7 +526,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 
     if ((file = BIO_new_file(yylval.string, "r")) == NULL)
     {
-      yyerror("File open failed, ignoring");
+      conf_error_report("File open failed, ignoring");
       break;
     }
 
@@ -533,7 +537,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 
     if (ServerInfo.rsa_private_key == NULL)
     {
-      yyerror("Couldn't extract key, ignoring");
+      conf_error_report("Couldn't extract key, ignoring");
       break;
     }
 
@@ -542,7 +546,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
       RSA_free(ServerInfo.rsa_private_key);
       ServerInfo.rsa_private_key = NULL;
 
-      yyerror("Invalid key, ignoring");
+      conf_error_report("Invalid key, ignoring");
       break;
     }
 
@@ -552,7 +556,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
       RSA_free(ServerInfo.rsa_private_key);
       ServerInfo.rsa_private_key = NULL;
 
-      yyerror("Not a 2048 bit key, ignoring");
+      conf_error_report("Not a 2048 bit key, ignoring");
     }
   }
 #endif
@@ -575,7 +579,7 @@ serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
       if (dh)
       {
         if (DH_size(dh) < 128)
-          ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- need at least a 1024 bit DH prime size");
+          conf_error_report("Ignoring serverinfo::ssl_dh_param_file -- need at least a 1024 bit DH prime size");
         else
           SSL_CTX_set_tmp_dh(ServerInfo.server_ctx, dh);
 
@@ -603,7 +607,7 @@ serverinfo_name: NAME '=' QSTRING ';'
       DupString(ServerInfo.name, yylval.string);
     else
     {
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::name -- invalid name. Aborting.");
+      conf_error_report("Ignoring serverinfo::name -- invalid name. Aborting.");
       exit(0);
     }
   }
@@ -618,7 +622,7 @@ serverinfo_sid: IRCD_SID '=' QSTRING ';'
       DupString(ServerInfo.sid, yylval.string);
     else
     {
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::sid -- invalid SID. Aborting.");
+      conf_error_report("Ignoring serverinfo::sid -- invalid SID. Aborting.");
       exit(0);
     }
   }
@@ -722,16 +726,16 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
     {
       char buf[IRCD_BUFSIZE];
 
-      snprintf(buf, sizeof(buf), "MAXCLIENTS too low, setting to %d", MAXCLIENTS_MIN);
-      yyerror(buf);
+      snprintf(buf, sizeof(buf), "max_clients too low, setting to %d", MAXCLIENTS_MIN);
+      conf_error_report(buf);
       ServerInfo.max_clients = MAXCLIENTS_MIN;
     }
     else if ($3 > MAXCLIENTS_MAX)
     {
       char buf[IRCD_BUFSIZE];
 
-      snprintf(buf, sizeof(buf), "MAXCLIENTS too high, setting to %d", MAXCLIENTS_MAX);
-      yyerror(buf);
+      snprintf(buf, sizeof(buf), "max_clients too high, setting to %d", MAXCLIENTS_MAX);
+      conf_error_report(buf);
       ServerInfo.max_clients = MAXCLIENTS_MAX;
     }
     else
@@ -1063,7 +1067,7 @@ oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
 
     if (file == NULL)
     {
-      yyerror("Ignoring rsa_public_key_file -- file doesn't exist");
+      conf_error_report("Ignoring rsa_public_key_file -- file doesn't exist");
       break;
     }
 
@@ -1071,7 +1075,7 @@ oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
 
     if (yy_aconf->rsa_public_key == NULL)
     {
-      yyerror("Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
+      conf_error_report("Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
       break;
     }
 
@@ -1478,7 +1482,7 @@ port_item: NUMBER
       if (!ServerInfo.server_ctx)
 #endif
       {
-        yyerror("SSL not available - port closed");
+        conf_error_report("SSL not available - port closed");
 	break;
       }
     add_listener($1, listener_address, listener_flags);
@@ -1494,7 +1498,7 @@ port_item: NUMBER
       if (!ServerInfo.server_ctx)
 #endif
       {
-        yyerror("SSL not available - port closed");
+        conf_error_report("SSL not available - port closed");
 	break;
       }
 
@@ -2036,9 +2040,9 @@ connect_entry: CONNECT
       if (yy_conf->name != NULL)
       {
         if (yy_aconf->host == NULL)
-          yyerror("Ignoring connect block -- missing host");
+          conf_error_report("Ignoring connect block -- missing host");
         else if (!yy_aconf->passwd || !yy_aconf->spasswd)
-          yyerror("Ignoring connect block -- missing password");
+          conf_error_report("Ignoring connect block -- missing password");
       }
 
       /* XXX
@@ -2115,10 +2119,11 @@ connect_send_password: SEND_PASSWORD '=' QSTRING ';'
   if (conf_parser_ctx.pass == 2)
   {
     if ($3[0] == ':')
-      yyerror("Server passwords cannot begin with a colon");
+      conf_error_report("Server passwords cannot begin with a colon");
     else if (strchr($3, ' ') != NULL)
-      yyerror("Server passwords cannot contain spaces");
-    else {
+      conf_error_report("Server passwords cannot contain spaces");
+    else
+    {
       if (yy_aconf->spasswd != NULL)
         memset(yy_aconf->spasswd, 0, strlen(yy_aconf->spasswd));
 
@@ -2133,10 +2138,11 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   if (conf_parser_ctx.pass == 2)
   {
     if ($3[0] == ':')
-      yyerror("Server passwords cannot begin with a colon");
+      conf_error_report("Server passwords cannot begin with a colon");
     else if (strchr($3, ' ') != NULL)
-      yyerror("Server passwords cannot contain spaces");
-    else {
+      conf_error_report("Server passwords cannot contain spaces");
+    else
+    {
       if (yy_aconf->passwd != NULL)
         memset(yy_aconf->passwd, 0, strlen(yy_aconf->passwd));
 
@@ -2231,7 +2237,7 @@ connect_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
   }
 #else
   if (conf_parser_ctx.pass == 2)
-    yyerror("Ignoring connect::ciphers -- no OpenSSL support");
+    conf_error_report("Ignoring connect::ciphers -- no OpenSSL support");
 #endif
 };
 

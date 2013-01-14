@@ -492,4 +492,5 @@ extern int match_conf_password(const char *, const struct AccessItem *);
 extern void cluster_a_line(struct Client *,
 			   const char *, int, int, const char *,...);
 extern void rebuild_cidr_class(struct ConfItem *, struct ClassItem *);
+extern void conf_error_report(const char *);
 #endif /* INCLUDED_s_conf_h */

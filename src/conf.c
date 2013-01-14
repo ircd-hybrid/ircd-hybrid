@@ -2808,6 +2808,18 @@ yyerror(const char *msg)
        conffilebuf, lineno + 1, msg, newlinebuf);
 }
 
+void
+conf_error_report(const char *msg)
+{
+  char newlinebuf[IRCD_BUFSIZE];
+
+  strip_tabs(newlinebuf, linebuf, sizeof(newlinebuf));
+  sendto_realops_flags(UMODE_ALL, L_ALL, "\"%s\", line %u: %s: %s",
+                       conffilebuf, lineno + 1, msg, newlinebuf);
+  ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
+       conffilebuf, lineno + 1, msg, newlinebuf);
+}
+
 /*
  * valid_tkline()
  * 

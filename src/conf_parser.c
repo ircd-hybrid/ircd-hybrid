@@ -3955,14 +3955,14 @@ yyreduce:
 
     yy_aconf->rsa_public_key = PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL);
 
+    BIO_set_close(file, BIO_CLOSE);
+    BIO_free(file);
+
     if (yy_aconf->rsa_public_key == NULL)
     {
       conf_error_report("Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
       break;
     }
-
-    BIO_set_close(file, BIO_CLOSE);
-    BIO_free(file);
   }
 #endif /* HAVE_LIBCRYPTO */
 }

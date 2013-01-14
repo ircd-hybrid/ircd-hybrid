@@ -89,7 +89,7 @@ static void
 dohelp(struct Client *source_p, const char *hpath, char *topic)
 {
   char h_index[] = "index";
-  char path[PATH_MAX + 1];
+  char path[HYB_PATH_MAX + 1];
   struct stat sb;
   unsigned int i;
 
@@ -106,7 +106,7 @@ dohelp(struct Client *source_p, const char *hpath, char *topic)
     return;
   }
 
-  if (strlen(hpath) + strlen(topic) + 1 > PATH_MAX)
+  if (strlen(hpath) + strlen(topic) + 1 > HYB_PATH_MAX)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);

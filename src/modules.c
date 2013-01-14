@@ -299,7 +299,7 @@ load_all_modules(int warn)
 {
   DIR *system_module_dir = NULL;
   struct dirent *ldirent = NULL;
-  char module_fq_name[PATH_MAX + 1];
+  char module_fq_name[HYB_PATH_MAX + 1];
 
   if ((system_module_dir = opendir(AUTOMODPATH)) == NULL)
   {
@@ -350,7 +350,7 @@ load_conf_modules(void)
 void
 load_core_modules(int warn)
 {
-  char module_name[PATH_MAX + 1];
+  char module_name[HYB_PATH_MAX + 1];
   int i = 0;
 
   for (; core_module_table[i]; ++i)
@@ -378,7 +378,7 @@ int
 load_one_module(const char *path)
 {
   dlink_node *ptr = NULL;
-  char modpath[PATH_MAX + 1];
+  char modpath[HYB_PATH_MAX + 1];
   struct stat statbuf;
 
   DLINK_FOREACH(ptr, mod_paths.head)

@@ -32,7 +32,7 @@
 
 
 static struct {
-  char path[PATH_MAX + 1];
+  char path[HYB_PATH_MAX + 1];
   size_t size;
   FILE *file;
 } log_type_table[LOG_TYPE_LAST];

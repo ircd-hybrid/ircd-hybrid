@@ -32,8 +32,8 @@ struct dbFILE
 {
   char mode;			/**< 'r' for reading, 'w' for writing */
   FILE *fp;			/**< The file pointer itself */
-  char filename[PATH_MAX + 1];	/**< Name of the database file */
-  char tempname[PATH_MAX + 1];	/**< Name of the temporary file (for writing) */
+  char filename[HYB_PATH_MAX + 1];  /**< Name of the database file */
+  char tempname[HYB_PATH_MAX + 1];  /**< Name of the temporary file (for writing) */
 };
 
 extern void check_file_version(struct dbFILE *);

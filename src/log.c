@@ -38,30 +38,40 @@ static struct {
 } log_type_table[LOG_TYPE_LAST];
 
 
-int
-log_add_file(enum log_type type, size_t size, const char *path)
+void
+log_set_file(enum log_type type, size_t size, const char *path)
 {
-  if (log_type_table[type].file)
-    fclose(log_type_table[type].file);
-
   strlcpy(log_type_table[type].path, path, sizeof(log_type_table[type].path));
   log_type_table[type].size = size;
 
-  return (log_type_table[type].file = fopen(path, "a")) != NULL;
+  if (type == LOG_TYPE_IRCD)
+    log_type_table[type].file = fopen(log_type_table[type].path, "a");
 }
 
 void
-log_close_all(void)
+log_del_all(void)
+{
+  unsigned int type = 0;
+
+  while (++type < LOG_TYPE_LAST)
+    log_type_table[type].path[0] = '\0';
+}
+
+void
+log_reopen_all(void)
 {
   unsigned int type = 0;
 
   while (++type < LOG_TYPE_LAST)
   {
-    if (log_type_table[type].file == NULL)
-      continue;
+    if (log_type_table[type].file)
+    {
+      fclose(log_type_table[type].file);
+      log_type_table[type].file = NULL;
+    }
 
-    fclose(log_type_table[type].file);
-    log_type_table[type].file = NULL;
+    if (log_type_table[type].path[0])
+      log_type_table[type].file = fopen(log_type_table[type].path, "a");
   }
 }
 
@@ -119,5 +129,6 @@ ilog(enum log_type type, const char *fmt, ...)
   unlink(buf);
   rename(log_type_table[type].path, buf);
 
-  log_add_file(type, log_type_table[type].size, log_type_table[type].path);
+  log_set_file(type, log_type_table[type].size, log_type_table[type].path);
+  log_type_table[type].file = fopen(log_type_table[type].path, "a");
 }

@@ -1,5 +1,9 @@
 -- ircd-hybrid-8.0.5 Release Notes
 o) Fixed build on GNU/Hurd as reported by Dominic Hargreaves
+o) Fixed log files not getting reopened after /rehash
+o) Improved logging of configuration file issues
+o) ircd.pid has been accidentally saved in /var instead of /var/run
+o) Linux RT signal support for notification of socket events has been dropped
 
 
 -- ircd-hybrid-8.0.4 Release Notes

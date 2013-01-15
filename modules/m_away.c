@@ -80,7 +80,7 @@ m_away(struct Client *client_p, struct Client *source_p,
   source_p->localClient->last_away = CurrentTime;
   sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, source_p->name);
 
-  if (strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
+  if (!strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
     return;
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
@@ -122,7 +122,7 @@ ms_away(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
+  if (!strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
     return;
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));

@@ -524,8 +524,8 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
     if (!SSL_CTX_check_private_key(ServerInfo.server_ctx) ||
         !SSL_CTX_check_private_key(ServerInfo.client_ctx))
     {
-      report_crypto_errors("Could not read RSA private key");
-      conf_error_report(ERR_lib_error_string(ERR_get_error()));
+      report_crypto_errors();
+      conf_error_report("Could not read RSA private key");
       break;
     }
   }

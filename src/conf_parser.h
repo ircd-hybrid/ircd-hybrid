@@ -484,7 +484,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 135 "conf_parser.y"
+#line 137 "conf_parser.y"
 
   int number;
   char *string;

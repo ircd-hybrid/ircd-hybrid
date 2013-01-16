@@ -44,14 +44,10 @@
 void
 report_crypto_errors(void)
 {
-  unsigned long e   = 0;
-  unsigned long cnt = 0;
+  unsigned long e = 0;
 
-  while ((cnt < 100) && (e = ERR_get_error()))
-  {
+  while ((e = ERR_get_error()))
     ilog(LOG_TYPE_IRCD, "SSL error: %s", ERR_error_string(e, 0));
-    cnt++;
-  }
 }
 
 static void

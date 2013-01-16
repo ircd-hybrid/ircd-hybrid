@@ -239,7 +239,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
 
     if (chptr->topic[0])
     {
-      set_channel_topic(chptr, "", "", 0);
+      set_channel_topic(chptr, "", "", 0, 0);
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :",
                            (IsHidden(source_p) ||
                            ConfigServerHide.hide_servers) ?

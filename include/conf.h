@@ -384,6 +384,8 @@ struct server_info
   struct irc_ssaddr ip;
   struct irc_ssaddr ip6;
   unsigned int max_clients;
+  unsigned int max_nick_length;
+  unsigned int max_topic_length;
   int specific_ipv4_vhost;
   int specific_ipv6_vhost;
   struct sockaddr_in dns_host;

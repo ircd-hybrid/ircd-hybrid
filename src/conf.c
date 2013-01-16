@@ -1693,6 +1693,8 @@ set_default_conf(void)
   ServerInfo.specific_ipv6_vhost = 0;
 
   ServerInfo.max_clients = MAXCLIENTS_MAX;
+  ServerInfo.max_nick_length = 9;
+  ServerInfo.max_topic_length = 80;
 
   ServerInfo.hub = 0;
   ServerInfo.dns_host.sin_addr.s_addr = 0;
@@ -2193,6 +2195,8 @@ read_conf_files(int cold)
 
   log_reopen_all();
 
+  add_isupport("NICKLEN", NULL, ServerInfo.max_nick_length);
+
   add_isupport("NETWORK", ServerInfo.network_name, -1);
   snprintf(chanmodes, sizeof(chanmodes), "beI:%d",
            ConfigChannel.max_bans);
@@ -2207,6 +2211,7 @@ read_conf_files(int cold)
   snprintf(chanmodes, sizeof(chanmodes), "%s",
            "beI,k,l,imnprstORS");
   add_isupport("CHANNELLEN", NULL, LOCAL_CHANNELLEN);
+  add_isupport("TOPICLEN", NULL, ServerInfo.max_topic_length);
 
   add_isupport("EXCEPTS", "e", -1);
   add_isupport("INVEX", "I", -1);

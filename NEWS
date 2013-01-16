@@ -1,4 +1,7 @@
 -- ircd-hybrid-8.0.5 Release Notes
+o) IMPORTANT: nick and topic lengths are now configurable via ircd.conf.
+   A max_nick_length, as well as a max_topic_length configuration option
+   can now be found in the serverinfo{} block
 o) Fixed build on GNU/Hurd as reported by Dominic Hargreaves
 o) Fixed log files not getting reopened after /rehash
 o) Improved logging of configuration file issues

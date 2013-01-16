@@ -252,9 +252,6 @@
 /* Define if dlsym() requires a leading underscore in symbol names. */
 #undef NEED_USCORE
 
-/* Length of nicknames. */
-#undef NICKLEN
-
 /* Size of the WHOWAS array. */
 #undef NICKNAMEHISTORYLENGTH
 
@@ -287,9 +284,6 @@
 
 /* Set to sysconfdir. */
 #undef SYSCONFDIR
-
-/* Length of topics. */
-#undef TOPICLEN
 
 /* use this iopoll mechanism */
 #undef USE_IOPOLL_MECHANISM

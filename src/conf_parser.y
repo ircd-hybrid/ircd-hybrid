@@ -212,9 +212,11 @@ reset_block_state(void)
 %token  MAX_IDENT
 %token  MAX_LOCAL
 %token  MAX_NICK_CHANGES
+%token  MAX_NICK_LENGTH
 %token  MAX_NICK_TIME
 %token  MAX_NUMBER
 %token  MAX_TARGETS
+%token  MAX_TOPIC_LENGTH
 %token  MAX_WATCH
 %token  MESSAGE_LOCALE
 %token  MIN_NONWILDCARD
@@ -444,7 +446,8 @@ serverinfo_items:       serverinfo_items serverinfo_item | serverinfo_item ;
 serverinfo_item:        serverinfo_name | serverinfo_vhost |
                         serverinfo_hub | serverinfo_description |
                         serverinfo_network_name | serverinfo_network_desc |
-                        serverinfo_max_clients | serverinfo_ssl_dh_param_file |
+                        serverinfo_max_clients | serverinfo_max_nick_length |
+                        serverinfo_max_topic_length | serverinfo_ssl_dh_param_file |
                         serverinfo_rsa_private_key_file | serverinfo_vhost6 |
                         serverinfo_sid | serverinfo_ssl_certificate_file |
                         serverinfo_ssl_client_method | serverinfo_ssl_server_method |
@@ -762,6 +765,50 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
   }
   else
     ServerInfo.max_clients = $3;
+};
+
+serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if ($3 < 9)
+  {
+    conf_error_report("max_nick_length too low, setting to 9");
+    ServerInfo.max_nick_length = 9;
+  }
+  else if ($3 > NICKLEN)
+  {
+    char buf[IRCD_BUFSIZE];
+
+    snprintf(buf, sizeof(buf), "max_nick_length too high, setting to %d", NICKLEN);
+    conf_error_report(buf);
+    ServerInfo.max_nick_length = NICKLEN;
+  }
+  else
+    ServerInfo.max_nick_length = $3;
+};
+
+serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if ($3 < 80)
+  {
+    conf_error_report("max_topic_length too low, setting to 80");
+    ServerInfo.max_topic_length = 80;
+  }
+  else if ($3 > TOPICLEN)
+  {
+    char buf[IRCD_BUFSIZE];
+
+    snprintf(buf, sizeof(buf), "max_topic_length too high, setting to %d", TOPICLEN);
+    conf_error_report(buf);
+    ServerInfo.max_topic_length = TOPICLEN;
+  }
+  else
+    ServerInfo.max_topic_length = $3;
 };
 
 serverinfo_hub: HUB '=' TBOOL ';' 

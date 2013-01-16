@@ -1324,6 +1324,8 @@ set_default_conf(void)
   ServerInfo.specific_ipv6_vhost = 0;
 
   ServerInfo.max_clients = MAXCLIENTS_MAX;
+  ServerInfo.max_nick_length = 9;
+  ServerInfo.max_topic_length = 80;
 
   ServerInfo.hub = 0;
   ServerInfo.dns_host.sin_addr.s_addr = 0;
@@ -1775,21 +1777,20 @@ read_conf_files(int cold)
   read_conf(conf_parser_ctx.conf_file);
   fclose(conf_parser_ctx.conf_file);
 
+  add_isupport("NICKLEN", NULL, ServerInfo.max_nick_length);
   add_isupport("NETWORK", ServerInfo.network_name, -1);
-  snprintf(chanmodes, sizeof(chanmodes), "beI:%d",
-           ConfigChannel.max_bans);
+
+  snprintf(chanmodes, sizeof(chanmodes), "beI:%d", ConfigChannel.max_bans);
   add_isupport("MAXLIST", chanmodes, -1);
   add_isupport("MAXTARGETS", NULL, ConfigFileEntry.max_targets);
-
   add_isupport("CHANTYPES", "#", -1);
 
   snprintf(chanlimit, sizeof(chanlimit), "#:%d",
-	   ConfigChannel.max_chans_per_user);
+           ConfigChannel.max_chans_per_user);
   add_isupport("CHANLIMIT", chanlimit, -1);
-  snprintf(chanmodes, sizeof(chanmodes), "%s",
-           "beI,k,l,imnprstORS");
+  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,imnprstORS");
   add_isupport("CHANNELLEN", NULL, LOCAL_CHANNELLEN);
-
+  add_isupport("TOPICLEN", NULL, ServerInfo.max_topic_length);
   add_isupport("EXCEPTS", "e", -1);
   add_isupport("INVEX", "I", -1);
   add_isupport("CHANMODES", chanmodes, -1);
@@ -1966,7 +1967,20 @@ yyerror(const char *msg)
     return;
 
   strip_tabs(newlinebuf, linebuf, sizeof(newlinebuf));
-  sendto_realops_flags(UMODE_ALL, L_ALL,  SEND_NOTICE,
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                       "\"%s\", line %u: %s: %s",
+                       conffilebuf, lineno + 1, msg, newlinebuf);
+  ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
+       conffilebuf, lineno + 1, msg, newlinebuf);
+}
+
+void
+conf_error_report(const char *msg)
+{
+  char newlinebuf[IRCD_BUFSIZE];
+
+  strip_tabs(newlinebuf, linebuf, sizeof(newlinebuf));
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
                        conffilebuf, lineno + 1, msg, newlinebuf);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",

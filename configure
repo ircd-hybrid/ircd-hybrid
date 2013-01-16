@@ -813,8 +813,6 @@ enable_epoll
 enable_devpoll
 enable_poll
 enable_select
-with_nicklen
-with_topiclen
 enable_halfops
 enable_debugging
 enable_warnings
@@ -1487,8 +1485,6 @@ Optional Packages:
   --with-included-ltdl    use the GNU ltdl sources included here
   --with-ltdl-include=DIR use the ltdl headers installed in DIR
   --with-ltdl-lib=DIR     use the libltdl.la installed in DIR
-  --with-nicklen=<value>  Set nickname length (default 9).
-  --with-topiclen=<value> Set topic length (default 160).
 
 Some influential environment variables:
   CC          C compiler command
@@ -13784,8 +13780,8 @@ $as_echo "disabled" >&6; }
 fi
 
 if test "$cf_enable_openssl" != "no"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OpenSSL 0.9.8 or above" >&5
-$as_echo_n "checking for OpenSSL 0.9.8 or above... " >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OpenSSL 0.9.8s or above" >&5
+$as_echo_n "checking for OpenSSL 0.9.8s or above... " >&6; }
   if test "$cross_compiling" = yes; then :
   cf_openssl_version_ok=no
 else
@@ -13798,7 +13794,7 @@ else
 int
 main ()
 {
- exit(!(OPENSSL_VERSION_NUMBER >= 0x00908000));
+ exit(!(OPENSSL_VERSION_NUMBER >= 0x0090813f));
   ;
   return 0;
 }
@@ -14319,36 +14315,6 @@ $as_echo "none" >&6; }
 
 cat >>confdefs.h <<_ACEOF
 #define USE_IOPOLL_MECHANISM $use_iopoll_mechanism
-_ACEOF
-
-
-
-
-# Check whether --with-nicklen was given.
-if test "${with_nicklen+set}" = set; then :
-  withval=$with_nicklen; nicklen="$withval"
-else
-  nicklen="9"
-fi
-
-
-cat >>confdefs.h <<_ACEOF
-#define NICKLEN ($nicklen)
-_ACEOF
-
-
-
-
-# Check whether --with-topiclen was given.
-if test "${with_topiclen+set}" = set; then :
-  withval=$with_topiclen; topiclen="$withval"
-else
-  topiclen="160"
-fi
-
-
-cat >>confdefs.h <<_ACEOF
-#define TOPICLEN ($topiclen)
 _ACEOF
 
 

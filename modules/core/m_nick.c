@@ -43,6 +43,7 @@
 #include "modules.h"
 #include "packet.h"
 #include "watch.h"
+#include "s_misc.h"
 
 
 static void nick_from_server(struct Client *, struct Client *, int, char **,
@@ -211,7 +212,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
     *s = '\0';
 
   /* copy the nick and terminate it */
-  strlcpy(nick, parv[1], sizeof(nick));
+  strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ServerInfo.max_nick_length + 1));
 
   /* check the nickname is ok */
   if (!valid_nickname(nick, 1))
@@ -278,7 +279,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
     flood_endgrace(source_p);
 
   /* terminate nick to NICKLEN */
-  strlcpy(nick, parv[1], sizeof(nick));
+  strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ServerInfo.max_nick_length + 1));
 
   /* check the nickname is ok */
   if (!valid_nickname(nick, 1))

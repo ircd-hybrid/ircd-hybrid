@@ -38,6 +38,7 @@
 #define IRCD_BUFSIZE    512     /* WARNING: *DONT* CHANGE THIS!!!!         */
 #define HOSTLEN          63     /* Length of hostname. Updated to comply
                                    with RFC 1123 */
+#define NICKLEN         30
 #define USERLEN          10
 #define PORTNAMELEN 6  /* ":31337" */
 
@@ -49,6 +50,7 @@
 #define KILLLEN         90
 #define LOCAL_CHANNELLEN 50
 #define CHANNELLEN      200
+#define TOPICLEN        300
 #define REASONLEN       120
 #define KICKLEN         160
 #define AWAYLEN         160

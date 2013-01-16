@@ -98,7 +98,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
 
       snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
                source_p->username, source_p->host);
-      set_channel_topic(chptr, parv[2], topic_info, CurrentTime);
+      set_channel_topic(chptr, parv[2], topic_info, CurrentTime, !!MyClient(source_p));
 
       sendto_server(client_p, CAP_TS6, NOCAPS,
                     ":%s TOPIC %s :%s",

@@ -5,7 +5,7 @@ AC_REVISION([$Id$])
 
 AC_PREREQ(2.69)
 AC_INIT([ircd-hybrid], [TRUNK], [bugs@ircd-hybrid.org])
-AM_INIT_AUTOMAKE(1.13)
+AM_INIT_AUTOMAKE(1.13.1)
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(src/ircd.c)
@@ -117,12 +117,12 @@ else
 fi
 
 AS_IF([test "$cf_enable_openssl" != "no"],
- [AC_MSG_CHECKING(for OpenSSL 0.9.8 or above)
+ [AC_MSG_CHECKING(for OpenSSL 0.9.8s or above)
   AC_RUN_IFELSE([
     AC_LANG_PROGRAM([
     #include <openssl/opensslv.h>
     #include <stdlib.h>],
-    [[ exit(!(OPENSSL_VERSION_NUMBER >= 0x00908000)); ]])],
+    [[ exit(!(OPENSSL_VERSION_NUMBER >= 0x0090813f)); ]])],
   [cf_openssl_version_ok=yes],
   [cf_openssl_version_ok=no],
   [cf_openssl_version_ok=no])
@@ -161,8 +161,6 @@ AC_DEFINE([MP_CHUNK_SIZE_WATCH], 4*1024, [Size of the watch mempool chunk.])
 
 # Argument processing.
 AX_ARG_ENABLE_IOLOOP_MECHANISM
-AX_ARG_WITH_NICKLEN
-AX_ARG_WITH_TOPICLEN
 AX_ARG_ENABLE_HALFOPS
 AX_ARG_ENABLE_DEBUGGING
 AX_ARG_ENABLE_WARNINGS

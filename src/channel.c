@@ -42,6 +42,7 @@
 #include "event.h"
 #include "memory.h"
 #include "mempool.h"
+#include "s_misc.h"
 
 struct config_channel_entry ConfigChannel;
 dlink_list global_channel_list = { NULL, NULL, 0 };
@@ -857,9 +858,13 @@ check_splitmode(void *unused)
  */
 void
 set_channel_topic(struct Channel *chptr, const char *topic,
-                  const char *topic_info, time_t topicts)
+                  const char *topic_info, time_t topicts, int local)
 {
-  strlcpy(chptr->topic, topic, sizeof(chptr->topic));
+  if (local)
+    strlcpy(chptr->topic, topic, IRCD_MIN(sizeof(chptr->topic), ServerInfo.max_topic_length + 1));
+  else
+    strlcpy(chptr->topic, topic, sizeof(chptr->topic));
+
   strlcpy(chptr->topic_info, topic_info, sizeof(chptr->topic_info));
   chptr->topic_time = topicts; 
 }

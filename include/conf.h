@@ -300,6 +300,8 @@ struct server_info
   struct irc_ssaddr ip;
   struct irc_ssaddr ip6;
   unsigned int max_clients;
+  unsigned int max_nick_length;
+  unsigned int max_topic_length;
   int specific_ipv4_vhost;
   int specific_ipv6_vhost;
   struct sockaddr_in dns_host;
@@ -360,6 +362,7 @@ extern struct MaskItem *find_exact_name_conf(enum maskitem_type, const struct Cl
 extern void conf_free(struct MaskItem *);
 extern void report_confitem_types(struct Client *, enum maskitem_type);
 extern void yyerror(const char *);
+extern void conf_error_report(const char *);
 extern void cleanup_tklines(void *);
 extern int rehash(int);
 extern void lookup_confhost(struct MaskItem *);

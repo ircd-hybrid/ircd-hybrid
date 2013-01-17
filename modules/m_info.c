@@ -125,6 +125,24 @@ static const struct InfoStruct info_table[] =
     "Server is a hub"
   },
   {
+    "max_clients",
+    OUTPUT_DECIMAL,
+    &ServerInfo.max_clients,
+    "Maximum number of clients permitted simultaneously on this server"
+  },
+  {
+    "max_nick_length",
+    OUTPUT_DECIMAL,
+    &ServerInfo.max_nick_length,
+    "Maximum nickname length"
+  },
+  {
+    "max_topic_length",
+    OUTPUT_DECIMAL,
+    &ServerInfo.max_topic_length,
+    "Maximum topic length"
+  },
+  {
     "use_logging",
     OUTPUT_BOOLEAN_YN,
     &ConfigLoggingEntry.use_logging,

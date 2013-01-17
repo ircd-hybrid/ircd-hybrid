@@ -934,7 +934,7 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
 		 (int)(CurrentTime - target_p->localClient->last_privmsg));
   }
 
-  sendto_one(source_p, ":%s %d %s p :%lu OPER(s)",
+  sendto_one(source_p, ":%s %d %s p :%u OPER(s)",
              from, RPL_STATSDEBUG, to, dlink_list_length(&oper_list));
 }
 

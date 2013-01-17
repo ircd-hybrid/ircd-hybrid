@@ -539,7 +539,7 @@ static struct NumericInfo replies[] = {
 /* 510 */  {NULL, NULL, NULL},
 /* 511 */  {NULL, NULL, NULL},
 /* 512 */  {"ERR_TOOMANYWATCH", ":%s 512 %s %s :Maximum size for WATCH-list is %d entries", NULL},
-/* 513 */  {"ERR_WRONGPONG", ":%s 513 %s :To connect type /QUOTE PONG %lu", NULL},
+/* 513 */  {"ERR_WRONGPONG", ":%s 513 %s :To connect type /QUOTE PONG %u", NULL},
 /* 514 */  {NULL, NULL, NULL},
 /* 515 */  {NULL, NULL, NULL},
 /* 516 */  {NULL, NULL, NULL},

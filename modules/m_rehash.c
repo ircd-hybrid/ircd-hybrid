@@ -82,8 +82,8 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     }
     else
     {
-      sendto_one(source_p, ":%s NOTICE %s :rehash one of :DNS FDLIMIT "
-                 "MOTD", me.name, source_p->name);
+      sendto_one(source_p, ":%s NOTICE %s :rehash one of :DNS MOTD",
+                 me.name, source_p->name);
       return;
     }
   }

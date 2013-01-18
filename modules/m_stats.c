@@ -299,7 +299,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
              me.name, RPL_STATSDEBUG, source_p->name,
              class_count, (unsigned long long)(class_count * sizeof(struct ClassItem)));
 
-  sendto_one(source_p, ":%s %d %s z :Channels %uu(%llu) Topics %u(%u)",
+  sendto_one(source_p, ":%s %d %s z :Channels %u(%llu) Topics %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,
              dlink_list_length(&global_channel_list),
              channel_memory, topic_count, topic_count *

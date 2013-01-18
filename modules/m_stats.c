@@ -270,7 +270,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   count_whowas_memory(&wwu, &wwm);
   watch_count_memory(&watch_list_headers, &watch_list_memory);
 
-  sendto_one(source_p, ":%s %d %s z :WATCH headers %u(%u) entries %d(%u)",
+  sendto_one(source_p, ":%s %d %s z :WATCH headers %u(%llu) entries %d(%u)",
              me.name, RPL_STATSDEBUG, source_p->name, watch_list_headers,
              watch_list_memory, watch_list_entries,
              watch_list_entries * sizeof(dlink_node) * 2);
@@ -299,7 +299,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
              me.name, RPL_STATSDEBUG, source_p->name,
              class_count, (unsigned long long)(class_count * sizeof(struct ClassItem)));
 
-  sendto_one(source_p, ":%s %d %s z :Channels %uu(%llu) Topics %u(%u)",
+  sendto_one(source_p, ":%s %d %s z :Channels %u(%llu) Topics %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,
              dlink_list_length(&global_channel_list),
              channel_memory, topic_count, topic_count *

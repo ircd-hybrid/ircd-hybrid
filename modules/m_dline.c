@@ -498,7 +498,7 @@ ms_undline(struct Client *client_p, struct Client *source_p,
     return;
 
   sendto_match_servs(source_p, parv[1], CAP_UNDLN,
-                     "UNDLINE %s %s %s",
+                     "UNDLINE %s %s",
                      parv[1], parv[2]);
 
   me_undline(client_p, source_p, parc, parv);

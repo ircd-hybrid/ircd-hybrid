@@ -41,6 +41,6 @@ enum log_type {
 
 extern int log_add_file(enum log_type, size_t, const char *);
 extern void log_close_all(void);
-extern void ilog(enum log_type, const char *, ...);
+extern void ilog(enum log_type, const char *, ...) AFP(2,3);
 
 #endif /* INCLUDED_s_log_h */

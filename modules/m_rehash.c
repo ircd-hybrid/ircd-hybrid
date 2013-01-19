@@ -53,7 +53,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (parc > 1)
+  if (!EmptyString(parv[1]))
   {
     if (irccmp(parv[1], "DNS") == 0)
     {
@@ -82,8 +82,9 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     }
     else
     {
-      sendto_one(source_p, ":%s NOTICE %s :rehash one of :DNS MOTD",
-                 me.name, source_p->name);
+      sendto_one(source_p, ":%s NOTICE %s :%s is not a valid option. "
+                 "Choose from DNS, MOTD",
+                 me.name, source_p->name, parv[1]);
       return;
     }
   }

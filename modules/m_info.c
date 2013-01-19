@@ -149,6 +149,12 @@ static const struct InfoStruct info_table[] =
     "Enable logging"
   },
   {
+    "disable_fake_channels",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.disable_fake_channels,
+    "Forbids channels with special ASCII characters in their name"
+  },
+  {
     "restrict_channels",
     OUTPUT_BOOLEAN_YN,
     &ConfigChannel.restrict_channels,
@@ -381,6 +387,12 @@ static const struct InfoStruct info_table[] =
     OUTPUT_BOOLEAN,
     &ConfigFileEntry.warn_no_nline,
     "Display warning if connecting server lacks N-line"
+  },
+  {
+    "stats_e_disabled",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.stats_e_disabled,
+    "Whether or not STATS e is disabled"
   },
   {
     "stats_o_oper_only",

@@ -110,7 +110,6 @@ static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
 extern mp_pool_t *ban_pool;
 
 
-/* XXX check_string is propably not longer required in add_id and del_id */
 /* check_string()
  *
  * inputs       - string to check
@@ -126,7 +125,7 @@ check_string(char *s)
   char *str = s;
   static char star[] = "*";
 
-  if (EmptyString(s))
+  if (EmptyString(str))
     return star;
 
   for (; *s; ++s)
@@ -138,7 +137,7 @@ check_string(char *s)
     }
   }
 
-  return str;
+  return EmptyString(str) ? star : str;
 }
 
 /*

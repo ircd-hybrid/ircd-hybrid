@@ -158,12 +158,6 @@ m_opme_la_OBJECTS = $(am_m_opme_la_OBJECTS)
 m_opme_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_opme_la_LDFLAGS) $(LDFLAGS) -o $@
-m_webirc_la_LIBADD =
-am_m_webirc_la_OBJECTS = m_webirc.lo
-m_webirc_la_OBJECTS = $(am_m_webirc_la_OBJECTS)
-m_webirc_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_webirc_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -202,14 +196,12 @@ SOURCES = $(example_module_la_SOURCES) $(ip_cloaking_la_SOURCES) \
 	$(m_change_la_SOURCES) $(m_clearchan_la_SOURCES) \
 	$(m_ctrace_la_SOURCES) $(m_force_la_SOURCES) \
 	$(m_ltrace_la_SOURCES) $(m_ojoin_la_SOURCES) \
-	$(m_operspy_la_SOURCES) $(m_opme_la_SOURCES) \
-	$(m_webirc_la_SOURCES)
+	$(m_operspy_la_SOURCES) $(m_opme_la_SOURCES)
 DIST_SOURCES = $(example_module_la_SOURCES) $(ip_cloaking_la_SOURCES) \
 	$(m_change_la_SOURCES) $(m_clearchan_la_SOURCES) \
 	$(m_ctrace_la_SOURCES) $(m_force_la_SOURCES) \
 	$(m_ltrace_la_SOURCES) $(m_ojoin_la_SOURCES) \
-	$(m_operspy_la_SOURCES) $(m_opme_la_SOURCES) \
-	$(m_webirc_la_SOURCES)
+	$(m_operspy_la_SOURCES) $(m_opme_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -389,8 +381,7 @@ modules_LTLIBRARIES = example_module.la     \
                       m_ltrace.la           \
                       m_ojoin.la            \
                       m_operspy.la          \
-                      m_opme.la             \
-                      m_webirc.la
+                      m_opme.la
 
 example_module_la_LDFLAGS = $(MODULE_FLAGS)
 ip_cloaking_la_LDFLAGS = $(MODULE_FLAGS)
@@ -402,7 +393,6 @@ m_ltrace_la_LDFLAGS = $(MODULE_FLAGS)
 m_ojoin_la_LDFLAGS = $(MODULE_FLAGS)
 m_operspy_la_LDFLAGS = $(MODULE_FLAGS)
 m_opme_la_LDFLAGS = $(MODULE_FLAGS)
-m_webirc_la_LDFLAGS = $(MODULE_FLAGS)
 example_module_la_SOURCES = example_module.c
 ip_cloaking_la_SOURCES = ip_cloaking.c
 m_change_la_SOURCES = m_change.c
@@ -413,7 +403,6 @@ m_ltrace_la_SOURCES = m_ltrace.c
 m_ojoin_la_SOURCES = m_ojoin.c
 m_operspy_la_SOURCES = m_operspy.c
 m_opme_la_SOURCES = m_opme.c
-m_webirc_la_SOURCES = m_webirc.c
 all: all-am
 
 .SUFFIXES:
@@ -503,8 +492,6 @@ m_operspy.la: $(m_operspy_la_OBJECTS) $(m_operspy_la_DEPENDENCIES) $(EXTRA_m_ope
 	$(AM_V_CCLD)$(m_operspy_la_LINK) -rpath $(modulesdir) $(m_operspy_la_OBJECTS) $(m_operspy_la_LIBADD) $(LIBS)
 m_opme.la: $(m_opme_la_OBJECTS) $(m_opme_la_DEPENDENCIES) $(EXTRA_m_opme_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_opme_la_LINK) -rpath $(modulesdir) $(m_opme_la_OBJECTS) $(m_opme_la_LIBADD) $(LIBS)
-m_webirc.la: $(m_webirc_la_OBJECTS) $(m_webirc_la_DEPENDENCIES) $(EXTRA_m_webirc_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_webirc_la_LINK) -rpath $(modulesdir) $(m_webirc_la_OBJECTS) $(m_webirc_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -522,7 +509,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_ojoin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_operspy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_opme.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_webirc.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

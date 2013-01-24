@@ -105,11 +105,6 @@ m_opme.c         --  This module will allow an IRC operator to op themselves in
                      Example: OPME #orphanchan
 
 
-m_webirc.c       --  Adds CGI:IRC/WebIRC support. A special auth{} block is
-                     required in order to enable WebIRC support. For more
-                     details check m_webirc.c
-
-
 example_module.c --  This is an example module template to help users create
                      their own modules.
 

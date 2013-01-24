@@ -2513,6 +2513,29 @@ get_conf_ping(struct ConfItem *conf, int *pingwarn)
   return BAD_PING;
 }
 
+struct ClassItem *
+get_client_class_ptr(struct Client *target_p)
+{
+  dlink_node *cnode = NULL;
+  struct AccessItem *aconf = NULL;
+
+  assert(!IsMe(target_p));
+
+  if ((cnode = target_p->localClient->confs.head))
+  {
+    struct ConfItem *conf = cnode->data;
+
+    assert((conf->type == CLIENT_TYPE) || (conf->type == SERVER_TYPE) ||
+          (conf->type == OPER_TYPE));
+
+    aconf = map_to_conf(conf);
+    if (aconf->class_ptr != NULL)
+      return map_to_conf(aconf->class_ptr);
+  }
+
+  return NULL;
+}
+
 /* get_client_class()
  *
  * inputs	- pointer to client struct

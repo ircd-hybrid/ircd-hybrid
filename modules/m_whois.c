@@ -38,6 +38,7 @@
 #include "sprintf_irc.h"
 #include "parse.h"
 #include "modules.h"
+#include "rng_mt.h"
 
 
 static void do_whois(struct Client *, int, char *[]);
@@ -119,6 +120,44 @@ mo_whois(struct Client *client_p, struct Client *source_p,
   }
 
   do_whois(source_p, parc, parv);
+}
+
+static unsigned int
+idle_time_get(struct Client *source_p, struct Client *target_p)
+{
+  unsigned int idle = 0;
+  unsigned int min_idle = 0;
+  unsigned int max_idle = 0;
+  const struct ClassItem *class = get_client_class_ptr(target_p);
+
+  if (target_p == source_p)
+    return CurrentTime - target_p->localClient->last_privmsg;
+  if (HasUMode(source_p, UMODE_OPER) &&
+      (!(class->flags & CONF_FLAGS_HIDE_IDLE_FROM_OPERS)))
+    return CurrentTime - target_p->localClient->last_privmsg;
+
+  min_idle = class->min_idle;
+  max_idle = class->max_idle;
+
+  if (min_idle == max_idle)
+    return min_idle;
+
+  if (class->flags & CONF_FLAGS_RANDOM_IDLE)
+    idle = genrand_int32();
+  else
+    idle = CurrentTime - target_p->localClient->last_privmsg;
+
+  if (!max_idle)
+    idle = 0;
+  else if (max_idle > 0)
+    idle %= max_idle;
+  else
+    max_idle = idle;
+
+  if (idle < min_idle)
+    idle = min_idle + (idle % (max_idle - min_idle));
+
+  return idle;
 }
 
 /* do_whois()
@@ -382,7 +421,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
 #endif
     sendto_one(source_p, form_str(RPL_WHOISIDLE),
                me.name, source_p->name, target_p->name,
-               CurrentTime - target_p->localClient->last_privmsg,
+               idle_time_get(source_p, target_p),
                target_p->localClient->firsttime);
 
     if (HasUMode(target_p, UMODE_OPER) && target_p != source_p)

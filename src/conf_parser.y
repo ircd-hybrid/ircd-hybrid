@@ -197,6 +197,10 @@ free_collect_item(struct CollectItem *item)
 %token  MESSAGE_LOCALE
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
+%token  MIN_IDLE
+%token  MAX_IDLE
+%token  RANDOM_IDLE
+%token  HIDE_IDLE_FROM_OPERS
 %token  MODULE
 %token  MODULES
 %token  NAME
@@ -248,7 +252,7 @@ free_collect_item(struct CollectItem *item)
 %token  T_TLSV1
 %token  RESV
 %token  RESV_EXEMPT
-%token  SECONDS MINUTES HOURS DAYS WEEKS
+%token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERHIDE
@@ -384,6 +388,16 @@ timespec:	NUMBER timespec_
 		{
 			$$ = $1 * 60 * 60 * 24 * 7 + $3;
 		}
+                | NUMBER MONTHS timespec_
+                {
+                        $$ = $1 * 60 * 60 * 24 * 7 * 4 + $3;
+                }
+                | NUMBER YEARS timespec_
+                {
+                        $$ = $1 * 60 * 60 * 24 * 365 + $3;
+                }
+
+
 		;
 
 sizespec_:	{ $$ = 0; } | sizespec;
@@ -1383,6 +1397,9 @@ class_item:     class_name |
 		class_max_local |
 		class_max_ident |
                 class_sendq | class_recvq |
+                class_min_idle |
+                class_max_idle |
+                class_flags |
 		error ';' ;
 
 class_name: NAME '=' QSTRING ';' 
@@ -1471,6 +1488,34 @@ class_number_per_cidr: NUMBER_PER_CIDR '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
     yy_class->number_per_cidr = $3;
+};
+
+class_min_idle: MIN_IDLE '=' timespec ';'
+{
+  if (conf_parser_ctx.pass == 1)
+    yy_class->min_idle = $3;
+};
+
+class_max_idle: MAX_IDLE '=' timespec ';'
+{
+  if (conf_parser_ctx.pass == 1)
+    yy_class->max_idle = $3;
+};
+
+class_flags: IRCD_FLAGS
+{
+  yy_class->flags = 0;
+} '='  class_flags_items ';';
+
+class_flags_items: class_flags_items ',' class_flags_item | class_flags_item;
+class_flags_item: RANDOM_IDLE
+{
+  if (conf_parser_ctx.pass == 1)
+    yy_class->flags |= CONF_FLAGS_RANDOM_IDLE;
+} | HIDE_IDLE_FROM_OPERS
+{
+  if (conf_parser_ctx.pass == 1)
+    yy_class->flags |= CONF_FLAGS_HIDE_IDLE_FROM_OPERS;
 };
 
 /***************************************************************************

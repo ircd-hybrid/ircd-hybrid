@@ -14,6 +14,11 @@ o) INFO now also shows configured values of 'disable_fake_channels',
    and 'stats_e_disabled'
 o) m_webirc.c is now officially supported, and has been moved from contrib/
    to modules/
+o) /whois may now show fake idle times depending on how the new
+   class::min_idle and class::max_idle configuration directives
+   have been configured. This feature basically works in the same
+   way as it does in csircd
+o) The configuration parser now does support 'year' and 'month' units
 
 
 -- ircd-hybrid-8.0.4 Release Notes

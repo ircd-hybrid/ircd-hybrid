@@ -153,6 +153,9 @@ struct ClassItem
   dlink_list list_ipv6;         /* base of per cidr ipv6 client link list */
   unsigned int max_sendq;
   unsigned int max_recvq;
+  unsigned int min_idle;
+  unsigned int max_idle;
+  unsigned int flags;
   int con_freq;
   int ping_freq;
   int ping_warning;
@@ -231,6 +234,8 @@ struct CidrItem
 #define CONF_FLAGS_TEMPORARY            0x00008000
 #define CONF_FLAGS_EXEMPTRESV           0x00010000
 #define CONF_FLAGS_SSL                  0x00020000
+#define CONF_FLAGS_RANDOM_IDLE          0x00040000
+#define CONF_FLAGS_HIDE_IDLE_FROM_OPERS 0x00080000
 
 /* Macros for struct AccessItem */
 #define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
@@ -425,6 +430,7 @@ extern int valid_wild_card(struct Client *, int, int, ...);
 extern unsigned int get_sendq(struct Client *);
 extern unsigned int get_recvq(struct Client *);
 extern const char *get_client_class(struct Client *);
+struct ClassItem *get_client_class_ptr(struct Client *);
 extern int get_client_ping(struct Client *, int *);
 extern void check_class(void);
 extern void init_class(void);

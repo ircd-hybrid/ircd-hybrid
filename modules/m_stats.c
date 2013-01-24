@@ -935,7 +935,7 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
 		 target_p->name, target_p->username, target_p->host,
                  idle_time_get(source_p, target_p));
     else
-      sendto_one(source_p, ":%s %d %s p :[%c] %s (%s@%s) Idle: %d",
+      sendto_one(source_p, ":%s %d %s p :[%c] %s (%s@%s) Idle: %u",
                  from, RPL_STATSDEBUG, to,
                  HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
 		 target_p->name, target_p->username, target_p->host,

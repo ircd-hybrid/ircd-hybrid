@@ -147,12 +147,10 @@ idle_time_get(struct Client *source_p, struct Client *target_p)
   else
     idle = CurrentTime - target_p->localClient->last_privmsg;
 
-  if (!max_idle)
+  if (max_idle == 0)
     idle = 0;
-  else if (max_idle > 0)
-    idle %= max_idle;
   else
-    max_idle = idle;
+    idle %= max_idle;
 
   if (idle < min_idle)
     idle = min_idle + (idle % (max_idle - min_idle));

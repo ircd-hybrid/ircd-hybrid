@@ -119,7 +119,7 @@ mo_clearchan(struct Client *client_p, struct Client *source_p,
   chptr->mode.mode = MODE_SECRET | MODE_TOPICLIMIT |
                      MODE_INVITEONLY | MODE_NOPRIVMSGS;
 
-  set_channel_topic(chptr, "", "", 0);
+  set_channel_topic(chptr, "", "", 0, 0);
   chptr->mode.key[0] = '\0';
 
   /* Kick the users out and join the oper */

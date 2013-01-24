@@ -2,7 +2,7 @@
 
    $Id$
 
-   Copyright (c) 1997-2012 IRCD-Hybrid Development Team
+   Copyright (c) 1997-2013 IRCD-Hybrid Development Team
 
      ----------------------------------------------------------------------
 
@@ -88,12 +88,6 @@
             are similar to plain ops, but can't kick/deop plain ops. Halfops
             may or may not kick/deop other halfops depending on if (+p) is
             set. Halfops may not set (+/-p).
-
-          * --with-nicklen,
-            --with-topiclen - Respectively, sets the maximum NICK length and
-            maximum TOPIC length. Note that this must be consistent across your
-            entire network. Defaults are 9 and 120, respectively.
-
 
 
    3.  Run 'make'; this should build the ircd.

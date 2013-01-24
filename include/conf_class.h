@@ -28,6 +28,9 @@
 #ifndef INCLUDED_conf_class_h
 #define INCLUDED_conf_class_h
 
+#define CLASS_FLAGS_RANDOM_IDLE          0x1
+#define CLASS_FLAGS_HIDE_IDLE_FROM_OPERS 0x2
+
 struct ClassItem
 {
   char *name;
@@ -44,9 +47,12 @@ struct ClassItem
   unsigned int max_global;
   unsigned int max_ident;
   unsigned int max_perip;
+  unsigned int min_idle;
+  unsigned int max_idle;
   unsigned int cidr_bitlen_ipv4;
   unsigned int cidr_bitlen_ipv6;
   unsigned int number_per_cidr;
+  unsigned int flags;
   unsigned int active;
 };
 
@@ -54,6 +60,7 @@ struct ClassItem
 extern struct ClassItem *class_default;
 
 extern struct ClassItem *class_make(void);
+extern struct ClassItem *get_class_ptr(const dlink_list *const);
 extern const dlink_list *class_get_list(void);
 extern void class_free(struct ClassItem *);
 extern void class_init(void);

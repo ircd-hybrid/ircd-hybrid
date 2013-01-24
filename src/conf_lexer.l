@@ -183,6 +183,7 @@ need_ident	{ return NEED_IDENT; }
 havent_read_conf { return HAVENT_READ_CONF; }
 hidden		{ return HIDDEN; }
 hidden_name	{ return HIDDEN_NAME; }
+hide_idle_from_opers { return HIDE_IDLE_FROM_OPERS; }
 hide_server_ips	{ return HIDE_SERVER_IPS; }
 hide_servers	{ return HIDE_SERVERS; }
 hide_spoof_ips	{ return HIDE_SPOOF_IPS; }
@@ -206,6 +207,8 @@ log		{ return T_LOG; }
 masked		{ return TMASKED; }
 max_clients     { return T_MAX_CLIENTS; }
 max_ident	{ return MAX_IDENT; }
+max_idle        { return MAX_IDLE; }
+min_idle        { return MIN_IDLE; }
 max_local	{ return MAX_LOCAL; }
 max_global	{ return MAX_GLOBAL; }
 max_number	{ return MAX_NUMBER; }
@@ -238,6 +241,7 @@ ping_time	{ return PING_TIME; }
 port		{ return PORT; }
 quarantine	{ return RESV; }
 quiet_on_ban    { return QUIET_ON_BAN; }
+random_idle     { return RANDOM_IDLE; }
 reason		{ return REASON; }
 recvq           { return T_RECVQ; }
 redirport       { return REDIRPORT; }
@@ -344,6 +348,10 @@ callerid                { return T_CALLERID; }
 softcallerid            { return T_SOFTCALLERID; }
 locops                  { return T_LOCOPS; }
 
+years                   { return YEARS; }
+year                    { return YEARS; }
+months                  { return MONTHS; }
+month                   { return MONTHS; }
 weeks			{ return WEEKS; }
 week			{ return WEEKS; }
 days			{ return DAYS; }

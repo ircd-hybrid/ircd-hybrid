@@ -444,6 +444,7 @@ extern dlink_list global_serv_list;   /* global servers on the network          
 extern dlink_list oper_list;          /* our opers, duplicated in local_client_list */
 
 extern int accept_message(struct Client *, struct Client *);
+extern unsigned int idle_time_get(const struct Client *, const struct Client *);
 extern struct split_nuh_item *find_accept(const char *, const char *,
                                           const char *, struct Client *, int);
 extern void del_accept(struct split_nuh_item *, struct Client *);

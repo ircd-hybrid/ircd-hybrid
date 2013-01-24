@@ -92,6 +92,8 @@ static struct
     ping_freq,
     max_perip,
     con_freq,
+    min_idle,
+    max_idle,
     max_total,
     max_global,
     max_local,
@@ -223,6 +225,10 @@ reset_block_state(void)
 %token  MESSAGE_LOCALE
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
+%token  MIN_IDLE
+%token  MAX_IDLE
+%token  RANDOM_IDLE
+%token  HIDE_IDLE_FROM_OPERS
 %token  MODULE
 %token  MODULES
 %token  NAME
@@ -273,7 +279,7 @@ reset_block_state(void)
 %token  T_TLSV1
 %token  RESV
 %token  RESV_EXEMPT
-%token  SECONDS MINUTES HOURS DAYS WEEKS
+%token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
 %token  SENDQ
 %token  SEND_PASSWORD
 %token  SERVERHIDE
@@ -410,6 +416,14 @@ timespec:	NUMBER timespec_
 		{
 			$$ = $1 * 60 * 60 * 24 * 7 + $3;
 		}
+                | NUMBER MONTHS timespec_
+                {
+                        $$ = $1 * 60 * 60 * 24 * 7 * 4 + $3;
+                }
+                | NUMBER YEARS timespec_
+                {
+                        $$ = $1 * 60 * 60 * 24 * 365 + $3;
+                }
 		;
 
 sizespec_:	{ $$ = 0; } | sizespec;
@@ -1263,7 +1277,6 @@ class_entry: CLASS
   block_state.max_total.value = MAXIMUM_LINKS_DEFAULT;
   block_state.max_sendq.value = DEFAULT_SENDQ;
   block_state.max_recvq.value = DEFAULT_RECVQ;
-
 } '{' class_items '}' ';'
 {
   struct ClassItem *class = NULL;
@@ -1280,9 +1293,12 @@ class_entry: CLASS
   class->active = 1;
   MyFree(class->name);
   class->name = xstrdup(block_state.class.buf);
+  class->flags = block_state.flags.value;
   class->ping_freq = block_state.ping_freq.value;
   class->max_perip = block_state.max_perip.value;
   class->con_freq = block_state.con_freq.value;
+  class->min_idle = block_state.min_idle.value;
+  class->max_idle = block_state.max_idle.value;
   class->max_total = block_state.max_total.value;
   class->max_global = block_state.max_global.value;
   class->max_local = block_state.max_local.value;
@@ -1314,6 +1330,9 @@ class_item:     class_name |
 		class_max_local |
 		class_max_ident |
                 class_sendq | class_recvq |
+                class_min_idle |
+                class_max_idle |
+                class_flags |
 		error ';' ;
 
 class_name: NAME '=' QSTRING ';' 
@@ -1394,6 +1413,36 @@ class_number_per_cidr: NUMBER_PER_CIDR '=' NUMBER ';'
   if (conf_parser_ctx.pass == 1)
     block_state.number_per_cidr.value = $3;
 };
+
+class_min_idle: MIN_IDLE '=' timespec ';'
+{
+  if (conf_parser_ctx.pass == 1)
+    block_state.min_idle.value = $3;
+};
+
+class_max_idle: MAX_IDLE '=' timespec ';'
+{
+  if (conf_parser_ctx.pass == 1)
+    block_state.max_idle.value = $3;
+};
+
+class_flags: IRCD_FLAGS
+{
+  if (conf_parser_ctx.pass == 1)
+    block_state.flags.value = 0;
+} '='  class_flags_items ';';
+
+class_flags_items: class_flags_items ',' class_flags_item | class_flags_item;
+class_flags_item: RANDOM_IDLE
+{
+  if (conf_parser_ctx.pass == 1)
+    block_state.flags.value |= CLASS_FLAGS_RANDOM_IDLE;
+} | HIDE_IDLE_FROM_OPERS
+{
+  if (conf_parser_ctx.pass == 1)
+    block_state.flags.value |= CLASS_FLAGS_HIDE_IDLE_FROM_OPERS;
+};
+
 
 /***************************************************************************
  *  section listen

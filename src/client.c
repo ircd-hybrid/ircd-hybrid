@@ -51,6 +51,7 @@
 #include "irc_res.h"
 #include "userhost.h"
 #include "watch.h"
+#include "rng_mt.h"
 
 dlink_list listing_client_list = { NULL, NULL, 0 };
 /* Pointer to beginning of Client list */
@@ -1173,4 +1174,40 @@ del_all_accepts(struct Client *client_p)
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->localClient->acceptlist.head)
     del_accept(ptr->data, client_p);
+}
+
+unsigned int
+idle_time_get(const struct Client *source_p, const struct Client *target_p)
+{
+  unsigned int idle = 0;
+  unsigned int min_idle = 0;
+  unsigned int max_idle = 0;
+  struct ClassItem *class = get_class_ptr(&target_p->localClient->confs);
+
+  if (target_p == source_p)
+    return CurrentTime - target_p->localClient->last_privmsg;
+  if (HasUMode(source_p, UMODE_OPER) &&
+      (!(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS)))
+    return CurrentTime - target_p->localClient->last_privmsg;
+
+  min_idle = class->min_idle;
+  max_idle = class->max_idle;
+
+  if (min_idle == max_idle)
+    return min_idle;
+
+  if (class->flags & CLASS_FLAGS_RANDOM_IDLE)
+    idle = genrand_int32();
+  else
+    idle = CurrentTime - target_p->localClient->last_privmsg;
+
+  if (max_idle == 0)
+    idle = 0;
+  else
+    idle %= max_idle;
+
+  if (idle < min_idle)
+    idle = min_idle + (idle % (max_idle - min_idle));
+
+  return idle;
 }

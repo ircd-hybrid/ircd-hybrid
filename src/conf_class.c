@@ -79,6 +79,23 @@ class_init(void)
   (class_default = class_make())->name = xstrdup("default");
 }
 
+struct ClassItem *
+get_class_ptr(const dlink_list *const list)
+{
+  const dlink_node *ptr = NULL;
+
+  if ((ptr = list->head)) {
+    const struct MaskItem *conf = ptr->data;
+
+    assert(conf->class);
+    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
+
+    return conf->class;
+  }
+
+  return class_default;
+}
+
 const char *
 get_client_class(const dlink_list *const list)
 {

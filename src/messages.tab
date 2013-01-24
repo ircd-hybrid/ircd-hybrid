@@ -341,7 +341,7 @@ static struct NumericInfo replies[] = {
 /* 314 */  {"RPL_WHOWASUSER", ":%s 314 %s %s %s %s * :%s", NULL},
 /* 315 */  {"RPL_ENDOFWHO", ":%s 315 %s %s :End of /WHO list.", NULL},
 /* 316 */  {"RPL_WHOISCHANOP", NULL, NULL},
-/* 317 */  {"RPL_WHOISIDLE", ":%s 317 %s %s %d %d :seconds idle, signon time", NULL},
+/* 317 */  {"RPL_WHOISIDLE", ":%s 317 %s %s %u %d :seconds idle, signon time", NULL},
 /* 318 */  {"RPL_ENDOFWHOIS", ":%s 318 %s %s :End of /WHOIS list.", NULL},
 /* 319 */  {"RPL_WHOISCHANNELS", ":%s 319 %s %s :%s", NULL},
 /* 320 */  {NULL, NULL, NULL},

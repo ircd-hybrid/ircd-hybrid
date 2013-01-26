@@ -1293,18 +1293,26 @@ class_entry: CLASS
   class->active = 1;
   MyFree(class->name);
   class->name = xstrdup(block_state.class.buf);
-  class->flags = block_state.flags.value;
   class->ping_freq = block_state.ping_freq.value;
   class->max_perip = block_state.max_perip.value;
   class->con_freq = block_state.con_freq.value;
-  class->min_idle = block_state.min_idle.value;
-  class->max_idle = block_state.max_idle.value;
   class->max_total = block_state.max_total.value;
   class->max_global = block_state.max_global.value;
   class->max_local = block_state.max_local.value;
   class->max_ident = block_state.max_ident.value;
   class->max_sendq = block_state.max_sendq.value;
   class->max_recvq = block_state.max_recvq.value;
+
+  if (block_state.min_idle.value > block_state.max_idle.value)
+  {
+    block_state.min_idle.value = 0;
+    block_state.max_idle.value = 0;
+    block_state.flags.value &= ~CLASS_FLAGS_FAKE_IDLE;
+  }
+
+  class->flags = block_state.flags.value;
+  class->min_idle = block_state.min_idle.value;
+  class->max_idle = block_state.max_idle.value;
 
   if (class->number_per_cidr && block_state.number_per_cidr.value)
     if ((class->cidr_bitlen_ipv4 && block_state.cidr_bitlen_ipv4.value) ||
@@ -1416,20 +1424,26 @@ class_number_per_cidr: NUMBER_PER_CIDR '=' NUMBER ';'
 
 class_min_idle: MIN_IDLE '=' timespec ';'
 {
-  if (conf_parser_ctx.pass == 1)
-    block_state.min_idle.value = $3;
+  if (conf_parser_ctx.pass != 1)
+    break;
+
+  block_state.min_idle.value = $3;
+  block_state.flags.value |= CLASS_FLAGS_FAKE_IDLE;
 };
 
 class_max_idle: MAX_IDLE '=' timespec ';'
 {
-  if (conf_parser_ctx.pass == 1)
-    block_state.max_idle.value = $3;
+  if (conf_parser_ctx.pass != 1)
+    break;
+
+  block_state.max_idle.value = $3;
+  block_state.flags.value |= CLASS_FLAGS_FAKE_IDLE;
 };
 
 class_flags: IRCD_FLAGS
 {
   if (conf_parser_ctx.pass == 1)
-    block_state.flags.value = 0;
+    block_state.flags.value &= CLASS_FLAGS_FAKE_IDLE;
 } '='  class_flags_items ';';
 
 class_flags_items: class_flags_items ',' class_flags_item | class_flags_item;

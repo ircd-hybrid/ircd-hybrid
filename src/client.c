@@ -1184,10 +1184,10 @@ idle_time_get(const struct Client *source_p, const struct Client *target_p)
   unsigned int max_idle = 0;
   struct ClassItem *class = get_class_ptr(&target_p->localClient->confs);
 
-  if (target_p == source_p)
+  if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target_p == source_p)
     return CurrentTime - target_p->localClient->last_privmsg;
   if (HasUMode(source_p, UMODE_OPER) &&
-      (!(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS)))
+      !(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
     return CurrentTime - target_p->localClient->last_privmsg;
 
   min_idle = class->min_idle;

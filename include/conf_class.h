@@ -28,8 +28,10 @@
 #ifndef INCLUDED_conf_class_h
 #define INCLUDED_conf_class_h
 
-#define CLASS_FLAGS_RANDOM_IDLE          0x1
-#define CLASS_FLAGS_HIDE_IDLE_FROM_OPERS 0x2
+#define CLASS_FLAGS_FAKE_IDLE            0x01
+#define CLASS_FLAGS_RANDOM_IDLE          0x02
+#define CLASS_FLAGS_HIDE_IDLE_FROM_OPERS 0x04
+
 
 struct ClassItem
 {

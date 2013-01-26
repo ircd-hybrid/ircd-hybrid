@@ -1354,6 +1354,13 @@ class_entry: CLASS
     {
       cconf = find_exact_name_conf(CLASS_TYPE, NULL, yy_class_name, NULL, NULL);
 
+      if (yy_class->min_idle > yy_class->max_idle)
+      {
+        yy_class->min_idle = 0;
+        yy_class->max_idle = 0;
+        yy_class->flags &= ~CONF_FLAGS_FAKE_IDLE;
+      }
+
       if (cconf != NULL)		/* The class existed already */
       {
         int user_count = 0;
@@ -1493,18 +1500,25 @@ class_number_per_cidr: NUMBER_PER_CIDR '=' NUMBER ';'
 class_min_idle: MIN_IDLE '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 1)
+  {
     yy_class->min_idle = $3;
+    yy_class->flags |= CONF_FLAGS_FAKE_IDLE;
+  }
 };
 
 class_max_idle: MAX_IDLE '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 1)
+  {
     yy_class->max_idle = $3;
+    yy_class->flags |= CONF_FLAGS_FAKE_IDLE;
+  }
 };
 
 class_flags: IRCD_FLAGS
 {
-  yy_class->flags = 0;
+  if (conf_parser_ctx.pass == 1)
+    yy_class->flags &= CONF_FLAGS_FAKE_IDLE;
 } '='  class_flags_items ';';
 
 class_flags_items: class_flags_items ',' class_flags_item | class_flags_item;

@@ -202,7 +202,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
       char *after;
       bits = strtoul(p + 1, &after, 10);
 
-      if (!bits || *after)
+      if (bits < 0 || *after)
         return HM_HOST;
       if (bits > n * 8)
         return HM_HOST;

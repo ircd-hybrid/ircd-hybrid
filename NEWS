@@ -1,3 +1,9 @@
+-- ircd-hybrid-8.0.6 Release Notes
+o) Fix bug where idle time sometimes is 0 even if the client didn't
+   send any private message
+o) Fixed possible core in try_parse_v4_netmask()
+
+
 -- ircd-hybrid-8.0.5 Release Notes
 ########################################################################
 o) IMPORTANT: nick and topic lengths are now configurable via ircd.conf.

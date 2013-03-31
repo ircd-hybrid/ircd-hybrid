@@ -33,7 +33,6 @@
 #include "conf.h"
 #include "hostmask.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_serv.h"             /* captab */
@@ -159,10 +158,10 @@ send_members(struct Client *client_p, struct Channel *chptr,
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
 
-  start = t = buf + ircsprintf(buf, ":%s SJOIN %lu %s %s %s:",
-                               ID_or_name(&me, client_p),
-                               (unsigned long)chptr->channelts,
-                               chptr->chname, lmodebuf, lparabuf);
+  start = t = buf + sprintf(buf, ":%s SJOIN %lu %s %s %s:",
+                            ID_or_name(&me, client_p),
+                            (unsigned long)chptr->channelts,
+                            chptr->chname, lmodebuf, lparabuf);
 
   DLINK_FOREACH(ptr, chptr->members.head)
   {
@@ -232,10 +231,10 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
     return;
 
   if (ts5)
-    mlen = ircsprintf(buf, ":%s MODE %s +", me.name, chptr->chname);
+    mlen = sprintf(buf, ":%s MODE %s +", me.name, chptr->chname);
   else
-    mlen = ircsprintf(buf, ":%s BMASK %lu %s %c :", me.id,
-                      (unsigned long)chptr->channelts, chptr->chname, flag);
+    mlen = sprintf(buf, ":%s BMASK %lu %s %c :", me.id,
+                   (unsigned long)chptr->channelts, chptr->chname, flag);
 
   /* MODE needs additional one byte for space between buf and pbuf */
   cur_len = mlen + ts5;
@@ -273,8 +272,8 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
       *mp = '\0';
     }
 
-    pp += ircsprintf(pp, "%s!%s@%s ", banptr->name, banptr->username,
-                     banptr->host);
+    pp += sprintf(pp, "%s!%s@%s ", banptr->name, banptr->username,
+                  banptr->host);
     cur_len += tlen;
   }
 
@@ -444,10 +443,10 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
 
   if (PubChannel(chptr) || is_member)
   {
-    t = lbuf + ircsprintf(lbuf, form_str(RPL_NAMREPLY),
-                          me.name, source_p->name,
-                          channel_pub_or_secret(chptr),
-                          chptr->chname);
+    t = lbuf + sprintf(lbuf, form_str(RPL_NAMREPLY),
+                       me.name, source_p->name,
+                       channel_pub_or_secret(chptr),
+                       chptr->chname);
     start = t;
 
     DLINK_FOREACH(ptr, chptr->members.head)
@@ -482,8 +481,8 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
         t = start;
       }
 
-      t += ircsprintf(t, "%s%s ", get_member_status(ms, multi_prefix),
-                      target_p->name);
+      t += sprintf(t, "%s%s ", get_member_status(ms, multi_prefix),
+                   target_p->name);
     }
 
     if (tlen != 0)

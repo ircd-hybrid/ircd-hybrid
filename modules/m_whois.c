@@ -35,7 +35,6 @@
 #include "s_serv.h"
 #include "send.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "parse.h"
 #include "modules.h"
 
@@ -317,7 +316,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
 	t = buf + mlen;
       }
 
-      tlen = ircsprintf(t, "%s%s ", get_member_status(ms, 1), chptr->chname);
+      tlen = sprintf(t, "%s%s ", get_member_status(ms, 1), chptr->chname);
       t += tlen;
       cur_len += tlen;
       reply_to_send = 1;

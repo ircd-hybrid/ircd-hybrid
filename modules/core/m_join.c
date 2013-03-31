@@ -29,7 +29,6 @@
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
@@ -541,7 +540,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
       what = -1;
     }
     *mbuf++ = 'k';
-    len = ircsprintf(pbuf, "%s ", oldmode->key);
+    len = sprintf(pbuf, "%s ", oldmode->key);
     pbuf += len;
   }
 
@@ -553,7 +552,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
       what = 1;
     }
     *mbuf++ = 'l';
-    len = ircsprintf(pbuf, "%d ", mode->limit);
+    len = sprintf(pbuf, "%d ", mode->limit);
     pbuf += len;
   }
 
@@ -565,7 +564,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
       what = 1;
     }
     *mbuf++ = 'k';
-    len = ircsprintf(pbuf, "%s ", mode->key);
+    len = sprintf(pbuf, "%s ", mode->key);
     pbuf += len;
   }
   *mbuf = '\0';

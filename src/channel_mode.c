@@ -31,7 +31,6 @@
 #include "conf.h"
 #include "hostmask.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_serv.h"             /* captab */
@@ -192,7 +191,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
    * Re-assemble a new n!u@h and print it back to banid for sending
    * the mode to the channel.
    */
-  len = ircsprintf(banid, "%s!%s@%s", name, user, host);
+  len = sprintf(banid, "%s!%s@%s", name, user, host);
 
   switch (type)
   {
@@ -237,7 +236,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
     ban_p->who = MyMalloc(strlen(client_p->name) +
                           strlen(client_p->username) +
                           strlen(client_p->host) + 3);
-    ircsprintf(ban_p->who, "%s!%s@%s", client_p->name,
+    sprintf(ban_p->who, "%s!%s@%s", client_p->name,
                client_p->username, client_p->host);
   }
   else
@@ -284,7 +283,7 @@ del_id(struct Channel *chptr, char *banid, int type)
    * Re-assemble a new n!u@h and print it back to banid for sending
    * the mode to the channel.
    */
-  ircsprintf(banid, "%s!%s@%s", name, user, host);
+  sprintf(banid, "%s!%s@%s", name, user, host);
 
   switch (type)
   {
@@ -363,7 +362,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
     *mbuf++ = 'l';
 
     if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE) || IsMember(client_p, chptr))
-      pbuf += ircsprintf(pbuf, "%d ", chptr->mode.limit);
+      pbuf += sprintf(pbuf, "%d ", chptr->mode.limit);
   }
 
   if (chptr->mode.key[0])
@@ -371,7 +370,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
     *mbuf++ = 'k';
 
     if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE) || IsMember(client_p, chptr))
-      ircsprintf(pbuf, "%s ", chptr->mode.key);
+      sprintf(pbuf, "%s ", chptr->mode.key);
   }
 
   *mbuf = '\0';
@@ -1276,7 +1275,7 @@ chm_limit(struct Client *client_p, struct Client *source_p,
     if ((limit = atoi(lstr)) <= 0)
       return;
 
-    ircsprintf(lstr, "%d", limit);
+    sprintf(lstr, "%d", limit);
 
     /* if somebody sets MODE #channel +ll 1 2, accept latter --fl */
     for (i = 0; i < mode_count; i++)
@@ -1531,10 +1530,10 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
   parptr = parabuf;
 
   if ((cap & CAP_TS6) && source_p->id[0] != '\0')
-    mbl = ircsprintf(modebuf, ":%s TMODE %lu %s ", source_p->id,
+    mbl = sprintf(modebuf, ":%s TMODE %lu %s ", source_p->id,
                      (unsigned long)chptr->channelts, chptr->chname);
   else
-    mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->name,
+    mbl = sprintf(modebuf, ":%s MODE %s ", source_p->name,
                      chptr->chname);
 
   /* loop the list of - modes we have */
@@ -1580,11 +1579,11 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       mc = 0;
 
       if ((cap & CAP_TS6) && source_p->id[0] != '\0')
-        mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->id,
-                         chptr->chname);
+        mbl = sprintf(modebuf, ":%s MODE %s ", source_p->id,
+                      chptr->chname);
       else
-        mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->name,
-                         chptr->chname);
+        mbl = sprintf(modebuf, ":%s MODE %s ", source_p->name,
+                      chptr->chname);
 
       pbl = 0;
       parabuf[0] = '\0';
@@ -1604,7 +1603,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
     if (arg != NULL)
     {
-      len = ircsprintf(parptr, "%s ", arg);
+      len = sprintf(parptr, "%s ", arg);
       pbl += len;
       parptr += len;
       mc++;
@@ -1645,12 +1644,12 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     return;
 
   if (IsServer(source_p))
-    mbl = ircsprintf(modebuf, ":%s MODE %s ", (IsHidden(source_p) ||
-		     ConfigServerHide.hide_servers) ?
-		     me.name : source_p->name, chname);
+    mbl = sprintf(modebuf, ":%s MODE %s ", (IsHidden(source_p) ||
+                  ConfigServerHide.hide_servers) ?
+                  me.name : source_p->name, chname);
   else
-    mbl = ircsprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
-                     source_p->username, source_p->host, chname);
+    mbl = sprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
+                  source_p->username, source_p->host, chname);
 
   mc = 0;
   nc = 0;
@@ -1686,10 +1685,10 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
       mc = 0;
 
       if (IsServer(source_p))
-        mbl = ircsprintf(modebuf, ":%s MODE %s ", me.name, chname);
+        mbl = sprintf(modebuf, ":%s MODE %s ", me.name, chname);
       else
-        mbl = ircsprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
-                         source_p->username, source_p->host, chname);
+        mbl = sprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
+                      source_p->username, source_p->host, chname);
 
       pbl = 0;
       parabuf[0] = '\0';
@@ -1709,7 +1708,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 
     if (arg != NULL)
     {
-      len = ircsprintf(parptr, "%s ", arg);
+      len = sprintf(parptr, "%s ", arg);
       pbl += len;
       parptr += len;
       mc++;

@@ -26,7 +26,6 @@
 #include "stdinc.h"
 #include "client.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"

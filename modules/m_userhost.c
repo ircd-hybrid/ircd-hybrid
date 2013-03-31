@@ -29,7 +29,6 @@
 #include "s_serv.h"
 #include "send.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "parse.h"
 #include "modules.h"
 
@@ -67,27 +66,27 @@ m_userhost(struct Client *client_p, struct Client *source_p,
        */
       if (MyClient(target_p) && (target_p == source_p))
       {
-        rl = ircsprintf(response, "%s%s=%c%s@%s ",
-                        target_p->name,
-                        HasUMode(target_p, UMODE_OPER) ? "*" : "",
-                        (target_p->away[0]) ? '-' : '+',
-                        target_p->username,
-                        target_p->sockhost);
+        rl = sprintf(response, "%s%s=%c%s@%s ",
+                     target_p->name,
+                     HasUMode(target_p, UMODE_OPER) ? "*" : "",
+                     (target_p->away[0]) ? '-' : '+',
+                     target_p->username,
+                     target_p->sockhost);
       }
       else
       {
-        rl = ircsprintf(response, "%s%s=%c%s@%s ",
-                        target_p->name, (HasUMode(target_p, UMODE_OPER) &&
-                                         (!HasUMode(target_p, UMODE_HIDDEN) ||
-                                           HasUMode(source_p, UMODE_OPER))) ? "*" : "",
-                        (target_p->away[0]) ? '-' : '+',
-                        target_p->username,
-                        target_p->host);
+        rl = sprintf(response, "%s%s=%c%s@%s ",
+                     target_p->name, (HasUMode(target_p, UMODE_OPER) &&
+                                      (!HasUMode(target_p, UMODE_HIDDEN) ||
+                                        HasUMode(source_p, UMODE_OPER))) ? "*" : "",
+                     (target_p->away[0]) ? '-' : '+',
+                     target_p->username,
+                     target_p->host);
       }
 
       if ((rl + cur_len) < (IRCD_BUFSIZE - 10))
       {
-        ircsprintf(t, "%s", response);
+        sprintf(t, "%s", response);
         t += rl;
         cur_len += rl;
       }

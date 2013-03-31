@@ -29,7 +29,6 @@
 
 #include "stdinc.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 
 
 int

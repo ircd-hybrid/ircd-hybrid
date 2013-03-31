@@ -25,7 +25,6 @@
 #include "stdinc.h"
 #include "client.h"
 #include "parse.h"
-#include "sprintf_irc.h"
 #include "s_serv.h"
 #include "send.h"
 #include "modules.h"

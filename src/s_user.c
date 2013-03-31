@@ -32,7 +32,6 @@
 #include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "s_bsd.h"
 #include "ircd.h"
 #include "listener.h"
@@ -1441,18 +1440,18 @@ rebuild_isupport_message_line(void)
   {
     struct Isupport *support = ptr->data;
 
-    p += (n = ircsprintf(p, "%s", support->name));
+    p += (n = sprintf(p, "%s", support->name));
     len += n;
 
     if (support->options != NULL)
     {
-      p += (n = ircsprintf(p, "=%s", support->options));
+      p += (n = sprintf(p, "=%s", support->options));
       len += n;
     }
 
     if (support->number > 0)
     {
-      p += (n = ircsprintf(p, "=%d", support->number));
+      p += (n = sprintf(p, "=%d", support->number));
       len += n;
     }
 

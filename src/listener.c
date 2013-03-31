@@ -28,7 +28,6 @@
 #include "client.h"
 #include "fdlist.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "s_bsd.h"

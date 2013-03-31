@@ -38,7 +38,6 @@
 #include "log.h"
 #include "client.h"	/* for UMODE_ALL only */
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "memory.h"
 #include "modules.h"
 #include "s_serv.h"

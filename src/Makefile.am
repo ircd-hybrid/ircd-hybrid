@@ -56,7 +56,6 @@ ircd_SOURCES = channel.c         \
                s_serv.c          \
                s_user.c          \
                send.c            \
-               sprintf_irc.c     \
                version.c         \
                watch.c           \
                whowas.c

@@ -30,7 +30,6 @@
 #include "conf.h"
 #include "ircd.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "parse.h"
 
 
@@ -51,13 +50,13 @@ dump_map(struct Client *client_p, const struct Client *root_p,
   *pbuf= '\0';
   pb = pbuf;
 
-  l = ircsprintf(pb, "%s", root_p->name);
+  l = sprintf(pb, "%s", root_p->name);
   pb += l;
   len += l;
 
   if (root_p->id[0] != '\0')
   {
-    l = ircsprintf(pb, "[%s]", root_p->id);
+    l = sprintf(pb, "[%s]", root_p->id);
     pb += l;
     len += l;
   }

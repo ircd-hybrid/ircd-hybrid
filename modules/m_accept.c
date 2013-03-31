@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "client.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"
@@ -69,9 +68,9 @@ list_accepts(struct Client *source_p)
       t = nicks;
     }
 
-    t += ircsprintf(t, "%s!%s@%s ",
-                    accept_p->nickptr,
-                    accept_p->userptr, accept_p->hostptr);
+    t += sprintf(t, "%s!%s@%s ",
+                 accept_p->nickptr,
+                 accept_p->userptr, accept_p->hostptr);
   }
 
   if (nicks[0] != '\0')

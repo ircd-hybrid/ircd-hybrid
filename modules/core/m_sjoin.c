@@ -29,7 +29,6 @@
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
@@ -270,14 +269,14 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
     modebuf[1] = '\0';
   }
 
-  buflen = ircsprintf(nick_buf, ":%s SJOIN %lu %s %s %s:",
-		      source_p->name, (unsigned long)tstosend,
-		      chptr->chname, modebuf, parabuf);
+  buflen = snprintf(nick_buf, sizeof(nick_buf), ":%s SJOIN %lu %s %s %s:",
+                    source_p->name, (unsigned long)tstosend,
+                    chptr->chname, modebuf, parabuf);
   nick_ptr = nick_buf + buflen;
 
-  buflen = ircsprintf(uid_buf, ":%s SJOIN %lu %s %s %s:",
-                      ID(source_p), (unsigned long)tstosend,
-                      chptr->chname, modebuf, parabuf);
+  buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
+                    ID(source_p), (unsigned long)tstosend,
+                    chptr->chname, modebuf, parabuf);
   uid_ptr = uid_buf + buflen;
 
   /* check we can fit a nick on the end, as well as \r\n and a prefix "
@@ -397,25 +396,25 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
     {
       sendto_server(client_p, 0, CAP_TS6, "%s", nick_buf);
       
-      buflen = ircsprintf(nick_buf, ":%s SJOIN %lu %s %s %s:",
-                          source_p->name, (unsigned long)tstosend,
-                          chptr->chname, modebuf, parabuf);
+      buflen = snprintf(nick_buf, sizeof(nick_buf), ":%s SJOIN %lu %s %s %s:",
+                        source_p->name, (unsigned long)tstosend,
+                        chptr->chname, modebuf, parabuf);
       nick_ptr = nick_buf + buflen;
     }
 
-    nick_ptr += ircsprintf(nick_ptr, "%s%s ", nick_prefix, target_p->name);
+    nick_ptr += sprintf(nick_ptr, "%s%s ", nick_prefix, target_p->name);
     
     if ((uid_ptr - uid_buf + len_uid) > (IRCD_BUFSIZE - 2))
     {
       sendto_server(client_p, CAP_TS6, 0, "%s", uid_buf);
       
-      buflen = ircsprintf(uid_buf, ":%s SJOIN %lu %s %s %s:",
-                          ID(source_p), (unsigned long)tstosend,
-                          chptr->chname, modebuf, parabuf);
+      buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
+                        ID(source_p), (unsigned long)tstosend,
+                        chptr->chname, modebuf, parabuf);
       uid_ptr = uid_buf + buflen;
     }
 
-    uid_ptr  += ircsprintf(uid_ptr,  "%s%s ", uid_prefix, ID(target_p));
+    uid_ptr += sprintf(uid_ptr,  "%s%s ", uid_prefix, ID(target_p));
 	
     if (!IsMember(target_p, chptr))
     {
@@ -450,7 +449,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
         *mbuf = '\0';
         for(lcount = 0; lcount < MAXMODEPARAMS; lcount++)
         {
-          slen = ircsprintf(sptr, " %s", para[lcount]);	/* see? */
+          slen = sprintf(sptr, " %s", para[lcount]);	/* see? */
 	  sptr += slen;					/* ready for next */
         }
         sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
@@ -474,7 +473,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
         *mbuf = '\0';
         for(lcount = 0; lcount < MAXMODEPARAMS; lcount++)
         {
-          slen = ircsprintf(sptr, " %s", para[lcount]);
+          slen = sprintf(sptr, " %s", para[lcount]);
           sptr += slen;
         }
         sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
@@ -499,7 +498,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
         *mbuf = '\0';
         for (lcount = 0; lcount < MAXMODEPARAMS; lcount++)
         {
-          slen = ircsprintf(sptr, " %s", para[lcount]);
+          slen = sprintf(sptr, " %s", para[lcount]);
 	  sptr += slen;
         }
         sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
@@ -544,7 +543,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
 
     for (lcount = 0; lcount < pargs; lcount++)
     {
-      slen = ircsprintf(sptr, " %s", para[lcount]);
+      slen = sprintf(sptr, " %s", para[lcount]);
       sptr += slen;
     }
 
@@ -631,7 +630,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
   if (oldmode->key[0] && !mode->key[0])
   {
     *mbuf++ = 'k';
-    len = ircsprintf(pbuf, "%s ", oldmode->key);
+    len = sprintf(pbuf, "%s ", oldmode->key);
     pbuf += len;
     pargs++;
   }
@@ -651,7 +650,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
   if (mode->limit != 0 && oldmode->limit != mode->limit)
   {
     *mbuf++ = 'l';
-    len = ircsprintf(pbuf, "%d ", mode->limit);
+    len = sprintf(pbuf, "%d ", mode->limit);
     pbuf += len;
     pargs++;
   }
@@ -659,7 +658,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
   if (mode->key[0] && strcmp(oldmode->key, mode->key))
   {
     *mbuf++ = 'k';
-    len = ircsprintf(pbuf, "%s ", mode->key);
+    len = sprintf(pbuf, "%s ", mode->key);
     pbuf += len;
     pargs++;
   }
@@ -730,7 +729,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
     {
       for(i = 0; i < MAXMODEPARAMS; i++)
       {
-        l = ircsprintf(sp, " %s", lpara[i]);
+        l = sprintf(sp, " %s", lpara[i]);
 	sp += l;
       }
 
@@ -754,7 +753,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
     *mbuf = '\0';
     for(i = 0; i < count; i++)
     {
-      l = ircsprintf(sp, " %s", lpara[i]);
+      l = sprintf(sp, " %s", lpara[i]);
       sp += l;
     }
     sendto_channel_local(ALL_MEMBERS, 0, chptr,
@@ -787,8 +786,8 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 
   pbuf = lparabuf;
   
-  cur_len = mlen = ircsprintf(lmodebuf, ":%s MODE %s -",
-                              source_p->name, chptr->chname);
+  cur_len = mlen = sprintf(lmodebuf, ":%s MODE %s -",
+                           source_p->name, chptr->chname);
   mbuf = lmodebuf + mlen;
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
@@ -814,8 +813,8 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 
     *mbuf++ = c;
     cur_len += plen;
-    pbuf += ircsprintf(pbuf, "%s!%s@%s ", banptr->name, banptr->username,
-		       banptr->host);
+    pbuf += sprintf(pbuf, "%s!%s@%s ", banptr->name, banptr->username,
+                    banptr->host);
     ++count;
 
     remove_ban(banptr, list);

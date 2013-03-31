@@ -27,7 +27,6 @@
 #include "channel.h"
 #include "client.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "conf.h"
 #include "ircd.h"
 #include "hostmask.h"

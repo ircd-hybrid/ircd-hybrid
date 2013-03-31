@@ -36,7 +36,6 @@
 #include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "s_bsd.h"
@@ -545,7 +544,7 @@ send_capabilities(struct Client *client_p, int cap_can_send)
 
     if (cap->cap & (cap_can_send|default_server_capabs))
     {
-      tl = ircsprintf(t, "%s ", cap->name);
+      tl = sprintf(t, "%s ", cap->name);
       t += tl;
     }
   }
@@ -634,14 +633,14 @@ show_capabilities(struct Client *target_p)
   char *t = msgbuf;
   dlink_node *ptr;
 
-  t += ircsprintf(msgbuf, "TS ");
+  t += sprintf(msgbuf, "TS ");
 
   DLINK_FOREACH(ptr, cap_list.head)
   {
     const struct Capability *cap = ptr->data;
 
     if (IsCapable(target_p, cap->cap))
-      t += ircsprintf(t, "%s ", cap->name);
+      t += sprintf(t, "%s ", cap->name);
   }
 
   *(t - 1) = '\0';

@@ -26,7 +26,6 @@
 #include "s_misc.h"
 #include "client.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "irc_res.h"

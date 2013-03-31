@@ -29,7 +29,6 @@
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_user.h"
@@ -215,8 +214,8 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
   strlcpy(s, parv[4], sizeof(banbuf));
 
   /* only need to construct one buffer, for non-ts6 servers */
-  mlen = ircsprintf(modebuf, ":%s MODE %s +",
-                    source_p->name, chptr->chname);
+  mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s +",
+                  source_p->name, chptr->chname);
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 
@@ -249,7 +248,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
       }
 
       *mbuf++ = parv[3][0];
-      pbuf += ircsprintf(pbuf, "%s ", s);
+      pbuf += sprintf(pbuf, "%s ", s);
       modecount++;
     }
 

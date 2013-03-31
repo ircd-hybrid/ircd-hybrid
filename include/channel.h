@@ -29,6 +29,24 @@
 
 #include "ircd_defs.h"        /* KEYLEN, CHANNELLEN */
 
+/* channel visible */
+#define ShowChannel(v,c)        (PubChannel(c) || IsMember((v),(c)))
+
+#define IsMember(who, chan) ((find_channel_link(who, chan)) ? 1 : 0)
+#define AddMemberFlag(x, y) ((x)->flags |=  (y))
+#define DelMemberFlag(x, y) ((x)->flags &= ~(y))
+
+#define FLOOD_NOTICED           1
+#define JOIN_FLOOD_NOTICED      2
+
+#define SetFloodNoticed(x)   ((x)->flags |= FLOOD_NOTICED)
+#define IsSetFloodNoticed(x) ((x)->flags & FLOOD_NOTICED)
+#define ClearFloodNoticed(x) ((x)->flags &= ~FLOOD_NOTICED)
+
+#define SetJoinFloodNoticed(x)   ((x)->flags |= JOIN_FLOOD_NOTICED)
+#define IsSetJoinFloodNoticed(x) ((x)->flags & JOIN_FLOOD_NOTICED)
+#define ClearJoinFloodNoticed(x) ((x)->flags &= ~JOIN_FLOOD_NOTICED)
+
 struct Client;
 
 /*! \brief Mode structure for channels */
@@ -103,7 +121,7 @@ extern int can_join(struct Client *, struct Channel *, const char *);
 extern int has_member_flags(struct Membership *, unsigned int);
 
 extern void remove_ban(struct Ban *, dlink_list *);
-extern void init_channels(void);
+extern void channel_init(void);
 extern void add_user_to_channel(struct Channel *, struct Client *,
                                 unsigned int, int);
 extern void remove_user_from_channel(struct Membership *);
@@ -122,23 +140,4 @@ extern const char *get_member_status(const struct Membership *, int);
 
 extern struct Channel *make_channel(const char *);
 extern struct Membership *find_channel_link(struct Client *, struct Channel *);
-
-/* channel visible */
-#define ShowChannel(v,c)        (PubChannel(c) || IsMember((v),(c)))
-
-#define IsMember(who, chan) ((find_channel_link(who, chan)) ? 1 : 0)
-#define AddMemberFlag(x, y) ((x)->flags |=  (y))
-#define DelMemberFlag(x, y) ((x)->flags &= ~(y))
-
-#define FLOOD_NOTICED		1
-#define JOIN_FLOOD_NOTICED	2
-
-#define SetFloodNoticed(x)   ((x)->flags |= FLOOD_NOTICED)
-#define IsSetFloodNoticed(x) ((x)->flags & FLOOD_NOTICED)
-#define ClearFloodNoticed(x) ((x)->flags &= ~FLOOD_NOTICED)
-
-#define SetJoinFloodNoticed(x)   ((x)->flags |= JOIN_FLOOD_NOTICED)
-#define IsSetJoinFloodNoticed(x) ((x)->flags & JOIN_FLOOD_NOTICED)
-#define ClearJoinFloodNoticed(x) ((x)->flags &= ~JOIN_FLOOD_NOTICED)
-
 #endif  /* INCLUDED_channel_h */

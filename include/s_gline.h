@@ -30,6 +30,8 @@
 #define GLINE_PENDING_DEL_TYPE 0
 #define GLINE_PENDING_ADD_TYPE 1
 
+#define CLEANUP_GLINES_TIME  300
+
 struct MaskItem;
 
 extern void cleanup_glines(void *);
@@ -52,9 +54,6 @@ struct gline_pending
   char user[USERLEN * 2 + 2];
   char host[HOSTLEN * 2 + 2];
 };
-
-
-#define CLEANUP_GLINES_TIME  300
 
 extern dlink_list pending_glines[];
 #endif /* INCLUDED_s_gline_h */

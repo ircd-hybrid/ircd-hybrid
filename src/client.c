@@ -78,14 +78,14 @@ static void check_unknowns_list(void);
 static void ban_them(struct Client *, struct MaskItem *);
 
 
-/* init_client()
+/* client_init()
  *
  * inputs	- NONE
  * output	- NONE
  * side effects	- initialize client free memory
  */
 void
-init_client(void)
+client_init(void)
 {
   /* start off the check ping event ..  -- adrian
    * Every 30 seconds is plenty -- db

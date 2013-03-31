@@ -432,7 +432,7 @@ setup_corefile(void)
  * side effects - setups SSL context.
  */
 static void
-init_ssl(void)
+ssl_init(void)
 {
 #ifdef HAVE_LIBCRYPTO
   SSL_load_error_strings();
@@ -464,19 +464,6 @@ init_ssl(void)
   SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_TLS_ROLLBACK_BUG|SSL_OP_ALL);
   SSL_CTX_set_verify(ServerInfo.client_ctx, SSL_VERIFY_NONE, NULL);
 #endif /* HAVE_LIBCRYPTO */
-}
-
-/* init_callbacks()
- *
- * inputs       - nothing
- * output       - nothing
- * side effects - setups standard hook points
- */
-static void
-init_callbacks(void)
-{
-  iorecv_cb = register_callback("iorecv", iorecv_default);
-  iosend_cb = register_callback("iosend", iosend_default);
 }
 
 int
@@ -531,7 +518,7 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  init_ssl();
+  ssl_init();
 
   if (!server_state.foreground)
   {
@@ -555,24 +542,23 @@ main(int argc, char *argv[])
 
   mp_pool_init();
   init_dlink_nodes();
-  init_callbacks();
   initialize_message_files();
   dbuf_init();
-  init_hash();
+  hash_init();
   init_ip_hash_table();      /* client host ip hash table */
   init_host_hash();          /* Host-hashtable. */
-  init_client();
+  client_init();
   class_init();
   whowas_init();
   watch_init();
-  init_auth();          /* Initialise the auth code */
+  auth_init();          /* Initialise the auth code */
   init_resolver();      /* Needs to be setup before the io loop */
   modules_init();
   read_conf_files(1);   /* cold start init conf files */
   init_uid();
   initialize_server_capabs();   /* Set up default_server_capabs */
   initialize_global_set_options();
-  init_channels();
+  channel_init();
 
   if (EmptyString(ServerInfo.sid))
   {

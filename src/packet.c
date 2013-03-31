@@ -39,8 +39,6 @@
 
 #define READBUF_SIZE 16384
 
-struct Callback *iorecv_cb = NULL;
-
 static char readBuf[READBUF_SIZE];
 static void client_dopacket(struct Client *, char *, size_t);
 
@@ -271,20 +269,6 @@ flood_recalc(fde_t *fd, void *data)
 }
 
 /*
- * iorecv_default - append a packet to the recvq dbuf
- */
-void *
-iorecv_default(va_list args)
-{
-  struct Client *client_p = va_arg(args, struct Client *);
-  int length = va_arg(args, int);
-  char *buf = va_arg(args, char *);
-
-  dbuf_put(&client_p->localClient->buf_recvq, buf, length);
-  return NULL;
-}
-
-/*
  * read_packet - Read a 'packet' of data from a connection and process it.
  */
 void
@@ -347,7 +331,7 @@ read_packet(fde_t *fd, void *data)
       return;
     }
 
-    execute_callback(iorecv_cb, client_p, length, readBuf);
+    dbuf_put(&client_p->localClient->buf_recvq, readBuf, length);
 
     if (client_p->localClient->lasttime < CurrentTime)
       client_p->localClient->lasttime = CurrentTime;

@@ -37,11 +37,9 @@
 #include "conf.h"
 #include "log.h"
 #include "memory.h"
-#include "hook.h"
 #include "packet.h"
 
 
-struct Callback *iosend_cb = NULL;
 static unsigned int current_serial = 0;
 
 
@@ -81,20 +79,6 @@ send_format(char *lsendbuf, int bufsize, const char *pattern, va_list args)
 }
 
 /*
- * iosend_default - append a packet to the client's sendq.
- */
-void *
-iosend_default(va_list args)
-{
-  struct Client *to = va_arg(args, struct Client *);
-  int length = va_arg(args, int);
-  char *buf = va_arg(args, char *);
-
-  dbuf_put(&to->localClient->buf_sendq, buf, length);
-  return NULL;
-}
-
-/*
  ** send_message
  **      Internal utility which appends given buffer to the sockets
  **      sendq.
@@ -118,8 +102,8 @@ send_message(struct Client *to, char *buf, int len)
     dead_link_on_write(to, 0);
     return;
   }
-
-  execute_callback(iosend_cb, to, len, buf);
+ 
+  dbuf_put(&to->localClient->buf_sendq, buf, len);
 
   /*
    ** Update statistics. The following is slightly incorrect

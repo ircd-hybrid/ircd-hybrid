@@ -68,7 +68,7 @@ static struct MaskItem *resvchannelTable[HASHSIZE];
  *                functions and clear the tables
  */
 void
-init_hash(void)
+hash_init(void)
 {
   /* Default the userhost/namehost sizes to CLIENT_HEAP_SIZE for now,
    * should be a good close approximation anyway

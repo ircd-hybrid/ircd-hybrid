@@ -25,20 +25,7 @@
 #ifndef INCLUDED_s_auth_h
 #define INCLUDED_s_auth_h
 
-#include "irc_res.h"
 #include "hook.h"
-
-
-struct Client;
-
-struct AuthRequest
-{
-  dlink_node	      node;	 /* auth_doing_list */
-  int 		      flags;
-  struct Client*      client;    /* pointer to client struct for request */
-  fde_t               fd;        /* file descriptor for auth queries */
-  time_t              timeout;   /* time when query expires */
-};
 
 /*
  * flag values for AuthRequest
@@ -55,9 +42,20 @@ struct AuthRequest
 #define ClearAuth(x)         ((x)->flags &= ~AM_DOING_AUTH)
 #define IsDoingAuth(x)       ((x)->flags &  AM_DOING_AUTH)
 
+struct Client;
+
+struct AuthRequest
+{
+  dlink_node	      node;	 /* auth_doing_list */
+  int 		      flags;
+  struct Client*      client;    /* pointer to client struct for request */
+  fde_t               fd;        /* file descriptor for auth queries */
+  time_t              timeout;   /* time when query expires */
+};
+
 extern struct Callback *auth_cb;
 
-extern void init_auth(void);
+extern void auth_init(void);
 extern void send_auth_query(struct AuthRequest *);
 extern void remove_auth_request(struct AuthRequest *);
 extern void delete_auth(struct AuthRequest *);

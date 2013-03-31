@@ -46,11 +46,6 @@
 #define MAX_FLOOD 5
 #define MAX_FLOOD_BURST MAX_FLOOD * 8
 
-struct Callback;
-
-void *iorecv_default(va_list);
-extern struct Callback *iorecv_cb;
-
 PF read_packet;
 PF flood_recalc;
 void flood_endgrace(struct Client *);

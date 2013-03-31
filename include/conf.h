@@ -34,14 +34,78 @@
 
 #define CONF_NOREASON "<No reason supplied>"
 
-struct conf_parser_context
-{
-  unsigned int boot;
-  unsigned int pass;
-  FILE *conf_file;
-};
+#define IsConfOperator(x)       ((x)->type == CONF_OPER)
+#define IsConfKill(x)           ((x)->type == CONF_KLINE)
+#define IsConfClient(x)         ((x)->type == CONF_CLIENT)
+#define IsConfGline(x)          ((x)->type == CONF_GLINE)
 
-extern struct conf_parser_context conf_parser_ctx;
+/* MaskItem->flags */
+#define CONF_FLAGS_DO_IDENTD            0x00000001
+#define CONF_FLAGS_LIMIT_IP             0x00000002
+#define CONF_FLAGS_NO_TILDE             0x00000004
+#define CONF_FLAGS_NEED_IDENTD          0x00000008
+#define CONF_FLAGS_NOMATCH_IP           0x00000010
+#define CONF_FLAGS_EXEMPTKLINE          0x00000020
+#define CONF_FLAGS_NOLIMIT              0x00000040
+#define CONF_FLAGS_SPOOF_IP             0x00000080
+#define CONF_FLAGS_SPOOF_NOTICE         0x00000100
+#define CONF_FLAGS_REDIR                0x00000200
+#define CONF_FLAGS_EXEMPTGLINE          0x00000400
+#define CONF_FLAGS_CAN_FLOOD            0x00000800
+#define CONF_FLAGS_NEED_PASSWORD        0x00001000
+#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00002000
+#define CONF_FLAGS_ENCRYPTED            0x00004000
+#define CONF_FLAGS_IN_DATABASE          0x00008000
+#define CONF_FLAGS_EXEMPTRESV           0x00010000
+#define CONF_FLAGS_SSL                  0x00020000
+#define CONF_FLAGS_WEBIRC               0x00040000
+
+/* Macros for struct MaskItem */
+#define IsConfWebIRC(x)         ((x)->flags & CONF_FLAGS_WEBIRC)
+#define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
+#define IsNoTilde(x)            ((x)->flags & CONF_FLAGS_NO_TILDE)
+#define IsConfCanFlood(x)       ((x)->flags & CONF_FLAGS_CAN_FLOOD)
+#define IsNeedPassword(x)       ((x)->flags & CONF_FLAGS_NEED_PASSWORD)
+#define IsNeedIdentd(x)         ((x)->flags & CONF_FLAGS_NEED_IDENTD)
+#define IsNoMatchIp(x)          ((x)->flags & CONF_FLAGS_NOMATCH_IP)
+#define IsConfExemptKline(x)    ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
+#define IsConfExemptLimits(x)   ((x)->flags & CONF_FLAGS_NOLIMIT)
+#define IsConfExemptGline(x)    ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
+#define IsConfExemptResv(x)     ((x)->flags & CONF_FLAGS_EXEMPTRESV)
+#define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
+#define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
+#define IsConfSpoofNotice(x)    ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
+#define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
+#define SetConfEncrypted(x)     ((x)->flags |= CONF_FLAGS_ENCRYPTED)
+#define ClearConfEncrypted(x)   ((x)->flags &= ~CONF_FLAGS_ENCRYPTED)
+#define IsConfAllowAutoConn(x)  ((x)->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
+#define SetConfAllowAutoConn(x) ((x)->flags |= CONF_FLAGS_ALLOW_AUTO_CONN)
+#define ClearConfAllowAutoConn(x) ((x)->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN)
+#define IsConfRedir(x)          ((x)->flags & CONF_FLAGS_REDIR)
+#define IsConfSSL(x)      ((x)->flags & CONF_FLAGS_SSL)
+#define SetConfSSL(x)     ((x)->flags |= CONF_FLAGS_SSL)
+#define ClearConfSSL(x)   ((x)->flags &= ~CONF_FLAGS_SSL)
+#define IsConfDatabase(x)      ((x)->flags & CONF_FLAGS_IN_DATABASE)
+#define SetConfDatabase(x)     ((x)->flags |= CONF_FLAGS_IN_DATABASE)
+
+
+/* shared/cluster server entry types 
+ * These defines are used for both shared and cluster.
+ */
+#define SHARED_KLINE            0x0001
+#define SHARED_UNKLINE          0x0002
+#define SHARED_XLINE            0x0004
+#define SHARED_UNXLINE          0x0008
+#define SHARED_RESV             0x0010
+#define SHARED_UNRESV           0x0020
+#define SHARED_LOCOPS           0x0040
+#define SHARED_DLINE            0x0080
+#define SHARED_UNDLINE          0x0100
+#define SHARED_ALL              (SHARED_KLINE | SHARED_UNKLINE |\
+                                 SHARED_XLINE | SHARED_UNXLINE |\
+                                 SHARED_RESV | SHARED_UNRESV |\
+                                 SHARED_LOCOPS | SHARED_DLINE | SHARED_UNDLINE)
+
 
 enum maskitem_type
 {
@@ -63,6 +127,13 @@ enum maskitem_type
   CONF_OPER     = 1 << 15,
   CONF_HUB      = 1 << 16, /* XXX There are no separate hub/leaf configs anymore. This is just for /stats h */
   CONF_CLASS    = 1 << 17  /* XXX Same here; just for /stats Y|y */
+};
+
+struct conf_parser_context
+{
+  unsigned int boot;
+  unsigned int pass;
+  FILE *conf_file;
 };
 
 struct split_nuh_item
@@ -120,79 +191,6 @@ struct CidrItem
   struct irc_ssaddr mask;
   unsigned int number_on_this_cidr;
 };
-
-
-#define IsConfOperator(x)	((x)->type == CONF_OPER)
-#define IsConfKill(x)		((x)->type == CONF_KLINE)
-#define IsConfClient(x)		((x)->type == CONF_CLIENT)
-#define IsConfGline(x)          ((x)->type == CONF_GLINE)
-
-/* MaskItem->flags */
-#define CONF_FLAGS_DO_IDENTD            0x00000001
-#define CONF_FLAGS_LIMIT_IP             0x00000002
-#define CONF_FLAGS_NO_TILDE             0x00000004
-#define CONF_FLAGS_NEED_IDENTD          0x00000008
-#define CONF_FLAGS_NOMATCH_IP           0x00000010
-#define CONF_FLAGS_EXEMPTKLINE          0x00000020
-#define CONF_FLAGS_NOLIMIT              0x00000040
-#define CONF_FLAGS_SPOOF_IP             0x00000080
-#define CONF_FLAGS_SPOOF_NOTICE         0x00000100
-#define CONF_FLAGS_REDIR                0x00000200
-#define CONF_FLAGS_EXEMPTGLINE          0x00000400
-#define CONF_FLAGS_CAN_FLOOD            0x00000800
-#define CONF_FLAGS_NEED_PASSWORD        0x00001000
-#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00002000
-#define CONF_FLAGS_ENCRYPTED            0x00004000
-#define CONF_FLAGS_IN_DATABASE          0x00008000
-#define CONF_FLAGS_EXEMPTRESV           0x00010000
-#define CONF_FLAGS_SSL                  0x00020000
-#define CONF_FLAGS_WEBIRC               0x00040000
-
-/* Macros for struct MaskItem */
-#define IsConfWebIRC(x)         ((x)->flags & CONF_FLAGS_WEBIRC)
-#define IsLimitIp(x)            ((x)->flags & CONF_FLAGS_LIMIT_IP)
-#define IsNoTilde(x)            ((x)->flags & CONF_FLAGS_NO_TILDE)
-#define IsConfCanFlood(x)       ((x)->flags & CONF_FLAGS_CAN_FLOOD)
-#define IsNeedPassword(x)       ((x)->flags & CONF_FLAGS_NEED_PASSWORD)
-#define IsNeedIdentd(x)         ((x)->flags & CONF_FLAGS_NEED_IDENTD)
-#define IsNoMatchIp(x)          ((x)->flags & CONF_FLAGS_NOMATCH_IP)
-#define IsConfExemptKline(x)    ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
-#define IsConfExemptLimits(x)   ((x)->flags & CONF_FLAGS_NOLIMIT)
-#define IsConfExemptGline(x)    ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
-#define IsConfExemptResv(x)     ((x)->flags & CONF_FLAGS_EXEMPTRESV)
-#define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
-#define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#define IsConfSpoofNotice(x)    ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
-#define IsConfEncrypted(x)      ((x)->flags & CONF_FLAGS_ENCRYPTED)
-#define SetConfEncrypted(x)	((x)->flags |= CONF_FLAGS_ENCRYPTED)
-#define ClearConfEncrypted(x)	((x)->flags &= ~CONF_FLAGS_ENCRYPTED)
-#define IsConfAllowAutoConn(x)  ((x)->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
-#define SetConfAllowAutoConn(x)	((x)->flags |= CONF_FLAGS_ALLOW_AUTO_CONN)
-#define ClearConfAllowAutoConn(x) ((x)->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN)
-#define IsConfRedir(x)          ((x)->flags & CONF_FLAGS_REDIR)
-#define IsConfSSL(x)      ((x)->flags & CONF_FLAGS_SSL)
-#define SetConfSSL(x)     ((x)->flags |= CONF_FLAGS_SSL)
-#define ClearConfSSL(x)   ((x)->flags &= ~CONF_FLAGS_SSL)
-#define IsConfDatabase(x)      ((x)->flags & CONF_FLAGS_IN_DATABASE)
-#define SetConfDatabase(x)     ((x)->flags |= CONF_FLAGS_IN_DATABASE)
-
-
-/* shared/cluster server entry types 
- * These defines are used for both shared and cluster.
- */
-#define SHARED_KLINE		0x0001
-#define SHARED_UNKLINE		0x0002
-#define SHARED_XLINE		0x0004
-#define SHARED_UNXLINE		0x0008
-#define SHARED_RESV		0x0010
-#define SHARED_UNRESV		0x0020
-#define SHARED_LOCOPS           0x0040
-#define SHARED_DLINE            0x0080
-#define SHARED_UNDLINE          0x0100
-#define SHARED_ALL		(SHARED_KLINE | SHARED_UNKLINE |\
-				 SHARED_XLINE | SHARED_UNXLINE |\
-				 SHARED_RESV | SHARED_UNRESV |\
-                                 SHARED_LOCOPS | SHARED_DLINE | SHARED_UNDLINE)
 
 struct config_file_entry
 {
@@ -326,6 +324,7 @@ extern dlink_list xconf_items;
 extern dlink_list rxconf_items;
 extern dlink_list rkconf_items;
 extern dlink_list service_items;
+extern struct conf_parser_context conf_parser_ctx;
 extern struct logging_entry ConfigLoggingEntry;
 extern struct config_file_entry ConfigFileEntry;/* defined in ircd.c*/
 extern struct config_channel_entry ConfigChannel;/* defined in channel.c*/
@@ -334,9 +333,6 @@ extern struct server_info ServerInfo;       /* defined in ircd.c */
 extern struct admin_info AdminInfo;        /* defined in ircd.c */
 extern int valid_wild_card(struct Client *, int, int, ...);
 /* End GLOBAL section */
-
-
-
 
 extern void init_ip_hash_table(void);
 extern void count_ip_hash(unsigned int *, uint64_t *);

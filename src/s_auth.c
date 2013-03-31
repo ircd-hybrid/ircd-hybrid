@@ -87,12 +87,12 @@ static CBFUNC start_auth;
 
 struct Callback *auth_cb = NULL;
 
-/* init_auth()
+/* auth_init
  *
  * Initialise the auth code
  */
 void
-init_auth(void)
+auth_init(void)
 {
   auth_pool = mp_pool_new(sizeof(struct AuthRequest), MP_CHUNK_SIZE_AUTH);
   auth_cb = register_callback("start_auth", start_auth);

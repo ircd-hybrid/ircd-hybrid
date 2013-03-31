@@ -57,7 +57,7 @@ free_listener(struct Listener *listener)
 {
   assert(listener != NULL);
 
-  dlinkDelete(&listener->listener_node, &ListenerPollList);
+  dlinkDelete(&listener->node, &ListenerPollList);
   MyFree(listener);
 }
 
@@ -298,7 +298,7 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
   else
   {
     listener = make_listener(port, &vaddr);
-    dlinkAdd(listener, &listener->listener_node, &ListenerPollList);
+    dlinkAdd(listener, &listener->node, &ListenerPollList);
     listener->flags = flags;
   }
 

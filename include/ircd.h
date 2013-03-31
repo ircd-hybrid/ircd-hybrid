@@ -28,7 +28,6 @@
 #include "ircd_defs.h"
 #include "config.h"
 
-//struct Client;
 
 struct SetOptions
 {
@@ -69,9 +68,6 @@ struct ServerStatistics
   unsigned int    is_abad; /* bad auth requests */
 };
 
-extern struct ServerStatistics ServerStats;
-
-
 struct Counter
 {
   uint64_t totalrestartcount; /* Total client count ever */
@@ -86,14 +82,11 @@ struct Counter
   unsigned int max_loc_cli;   /* XXX This is redundant - Max local client count */
 };
 
-extern struct SetOptions GlobalSetOptions; /* defined in ircd.c */
-
 struct ServerState_t
 {
   int foreground;
 };
 
-extern struct ServerState_t server_state;
 
 extern char **myargv;
 extern const char *infotext[];
@@ -104,6 +97,9 @@ extern const char *pidFileName;
 extern int dorehash;
 extern int doremotd;
 extern struct Counter Count;
+extern struct ServerStatistics ServerStats;
+extern struct SetOptions GlobalSetOptions; /* defined in ircd.c */
+extern struct ServerState_t server_state;
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec
 extern int default_server_capabs;

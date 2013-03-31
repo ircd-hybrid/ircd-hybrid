@@ -27,20 +27,35 @@
 
 #include "fdlist.h"
 
+#define ALL_MEMBERS  0
+#define NON_CHANOPS  1
+#define ONLY_CHANOPS_VOICED  2
+#define ONLY_CHANOPS 3
+#define ONLY_SERVERS 4 /* for channel_mode.c */
+
+#define L_ALL   0
+#define L_OPER  1
+#define L_ADMIN 2
+
+#define SEND_NOTICE 1
+#define SEND_GLOBAL 2
+#define SEND_LOCOPS 3
+
+#define NOCAPS          0               /* no caps */
+#define NOFLAGS         0               /* no flags */
+
+/* used when sending to #mask or $mask */
+#define MATCH_SERVER  1
+#define MATCH_HOST    2
+
 
 /*
  * struct decls
  */
-struct Callback;
 struct Channel;
 struct Client;
-struct dlink_list;
-
-extern void *iosend_default(va_list);
-extern struct Callback *iosend_cb;
 
 /* send.c prototypes */
-
 extern void sendq_unblocked(fde_t *, struct Client *);
 extern void send_queued_write(struct Client *);
 extern void send_queued_all(void);
@@ -76,27 +91,4 @@ extern void kill_client(struct Client *, struct Client *,
                         const char *, ... ) AFP(3,4);
 extern void kill_client_ll_serv_butone(struct Client *, struct Client *,
                                        const char *, ...) AFP(3,4);
-
-
-#define ALL_MEMBERS  0
-#define NON_CHANOPS  1
-#define ONLY_CHANOPS_VOICED  2
-#define ONLY_CHANOPS 3
-#define ONLY_SERVERS 4 /* for channel_mode.c */
-
-#define L_ALL 	0
-#define L_OPER 	1
-#define L_ADMIN	2
-
-#define SEND_NOTICE 1
-#define SEND_GLOBAL 2
-#define SEND_LOCOPS 3
-
-#define NOCAPS          0               /* no caps */
-#define NOFLAGS         0               /* no flags */
-
-/* used when sending to #mask or $mask */
-#define MATCH_SERVER  1
-#define MATCH_HOST    2
-
 #endif /* INCLUDED_send_h */

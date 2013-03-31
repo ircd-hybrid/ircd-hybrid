@@ -35,176 +35,6 @@
 #include "dbuf.h"
 #include "channel.h"
 
-
-/*! \brief addr_mask_type enumeration */
-enum addr_mask_type
-{
-  HIDE_IP, /**< IP is hidden. Resolved hostname is shown instead */
-  SHOW_IP, /**< IP is shown. No parts of it are hidden or masked */
-  MASK_IP  /**< IP is masked. 255.255.255.255 is shown instead */
-};
-
-/*! \brief Server structure */
-struct Server
-{
-  dlink_list server_list; /**< Servers on this server */
-  dlink_list client_list; /**< Clients on this server */
-  char by[NICKLEN + 1];   /**< who activated this connection */
-};
-
-/*! \brief ListTask structure */
-struct ListTask
-{
-  dlink_list show_mask; /**< show these channels.. */
-  dlink_list hide_mask; /**< ..and hide these ones */
-
-  unsigned int hash_index; /**< the bucket we are currently in */
-  unsigned int users_min;
-  unsigned int users_max;
-  unsigned int created_min;
-  unsigned int created_max;
-  unsigned int topicts_min;
-  unsigned int topicts_max;
-};
-
-/*! \brief LocalUser structure
- *
- * Allocated only for local clients, that are directly connected
- * to \b this server with a socket.
- */
-struct LocalUser
-{
-  dlink_node   lclient_node;
-
-  char         client_host[HOSTLEN + 1];
-  char         client_server[HOSTLEN + 1];
-
-  unsigned int registration;
-  unsigned int cap_client;    /**< Client capabilities (from us) */
-  unsigned int cap_active;    /**< Active capabilities (to us) */
-  unsigned int       caps;       /**< capabilities bit-field */
-
-  unsigned int operflags;     /**< IRC Operator privilege flags */
-  unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
-
-  unsigned int serial;     /**< used to enforce 1 send per nick */
-
-  time_t       lasttime;   /**< ...should be only LOCAL clients? --msa */
-  time_t       firsttime;  /**< time client was created */
-  time_t       since;      /**< last time we parsed something */
-  time_t       last_knock;    /**< time of last knock */
-  time_t       last_join_time;   /**< when this client last 
-                                    joined a channel */
-  time_t       last_leave_time;  /**< when this client last 
-                                       * left a channel */
-  int          join_leave_count; /**< count of JOIN/LEAVE in less than 
-                                         MIN_JOIN_LEAVE_TIME seconds */
-  int          oper_warn_count_down; /**< warn opers of this possible 
-                                          spambot every time this gets to 0 */
-  time_t       last_caller_id_time;
-  time_t       first_received_message_time;
-  time_t       last_nick_change;
-  time_t       last_privmsg; /**< Last time we got a PRIVMSG */
-  time_t       last_away; /**< Away since... */
-
-  int          received_number_of_privmsgs;
-  unsigned int number_of_nick_changes;
-
-  struct ListTask  *list_task;
-
-  struct dbuf_queue buf_sendq;
-  struct dbuf_queue buf_recvq;
-
-  struct {
-    unsigned int messages;      /**< Statistics: protocol messages sent/received */
-    uint64_t bytes;             /**< Statistics: total bytes sent/received */
-  } recv, send;
-
-  struct AuthRequest *auth;
-  struct Listener *listener;   /**< listener accepted from */
-  dlink_list        acceptlist; /**< clients I'll allow to talk to me */
-  dlink_list        watches;   /**< chain of Watch pointer blocks */
-  dlink_list        confs;     /**< Configuration record associated */
-  dlink_list        invited;   /**< chain of invite pointer blocks */
-  struct irc_ssaddr ip;
-  int               aftype;    /**< Makes life easier for DNS res in IPV6 */
-
-  char              *passwd;
-  fde_t             fd;
-
-  /* Anti-flood stuff. We track how many messages were parsed and how
-   * many we were allowed in the current second, and apply a simple
-   * decay to avoid flooding.
-   *   -- adrian
-   */
-  int allow_read;       /**< how many we're allowed to read in this second */
-  int sent_parsed;      /**< how many messages we've parsed in this second */
-
-  char*          response;  /**< expected response from client */
-  char*          auth_oper; /**< Operator to become if they supply the response.*/
-};
-
-/*! \brief Client structure */
-struct Client
-{
-  dlink_node node;
-  dlink_node lnode;             /**< Used for Server->servers/users */
-
-  struct LocalUser *localClient;
-  struct Client    *hnext;      /**< For client hash table lookups by name */
-  struct Client    *idhnext;    /**< For SID hash table lookups by sid */
-  struct Server    *serv;       /**< ...defined, if this is a server */
-  struct Client    *servptr;    /**< Points to server this Client is on */
-  struct Client    *from;       /**< == self, if Local Client, *NEVER* NULL! */
-
-  time_t            tsinfo;     /**< TS on the nick, SVINFO on server */
-
-  unsigned int      flags;      /**< client flags */
-  unsigned int      umodes;     /**< opers, normal users subset */
-  unsigned int      hopcount;   /**< number of servers to this 0 = local */
-  unsigned int      status;     /**< Client type */
-  unsigned int      handler;    /**< Handler index */
-
-  dlink_list        whowas;
-  dlink_list        channel;   /**< chain of channel pointer blocks */
-
-  char away[AWAYLEN + 1]; /**< Client's AWAY message. Can be set/unset via AWAY command */
-  char name[HOSTLEN + 1]; /**< unique name for a client nick or host */
-  char svid[HOSTLEN + 1]; /**< Services ID. XXX: Going with HOSTLEN for now. NICKLEN might be too small
-                                if dealing with timestamps */
-  char id[IDLEN + 1];       /**< client ID, unique ID per client */
-  /* 
-   * client->username is the username from ident or the USER message, 
-   * If the client is idented the USER message is ignored, otherwise 
-   * the username part of the USER message is put here prefixed with a 
-   * tilde depending on the auth{} block. Once a client has registered,
-   * this field should be considered read-only.
-   */ 
-  char              username[USERLEN + 1]; /* client's username */
-
-  /*
-   * client->host contains the resolved name or ip address
-   * as a string for the user, it may be fiddled with for oper spoofing etc.
-   * once it's changed the *real* address goes away. This should be
-   * considered a read-only field after the client has registered.
-   */
-  char              host[HOSTLEN + 1];     /* client's hostname */
-
-  /*
-   * client->info for unix clients will normally contain the info from the 
-   * gcos field in /etc/passwd but anything can go here.
-   */
-  char              info[REALLEN + 1]; /* Free form additional client info */
-
-  /*
-   * client->sockhost contains the ip address gotten from the socket as a
-   * string, this field should be considered read-only once the connection
-   * has been made. (set in s_bsd.c only)
-   */
-  char              sockhost[HOSTIPLEN + 1]; /* This is the host name from the 
-                                                socket ip address as string */
-};
-
 /*
  * status macros.
  */
@@ -434,6 +264,174 @@ struct Client
 #define ClearSendqBlocked(x)    ((x)->flags &= ~FLAGS_BLOCKED)
 
 
+/*! \brief addr_mask_type enumeration */
+enum addr_mask_type
+{
+  HIDE_IP, /**< IP is hidden. Resolved hostname is shown instead */
+  SHOW_IP, /**< IP is shown. No parts of it are hidden or masked */
+  MASK_IP  /**< IP is masked. 255.255.255.255 is shown instead */
+};
+
+/*! \brief Server structure */
+struct Server
+{
+  dlink_list server_list; /**< Servers on this server */
+  dlink_list client_list; /**< Clients on this server */
+  char by[NICKLEN + 1];   /**< who activated this connection */
+};
+
+/*! \brief ListTask structure */
+struct ListTask
+{
+  dlink_list show_mask; /**< show these channels.. */
+  dlink_list hide_mask; /**< ..and hide these ones */
+
+  unsigned int hash_index; /**< the bucket we are currently in */
+  unsigned int users_min;
+  unsigned int users_max;
+  unsigned int created_min;
+  unsigned int created_max;
+  unsigned int topicts_min;
+  unsigned int topicts_max;
+};
+
+/*! \brief LocalUser structure
+ *
+ * Allocated only for local clients, that are directly connected
+ * to \b this server with a socket.
+ */
+struct LocalUser
+{
+  dlink_node   lclient_node;
+
+  char         client_host[HOSTLEN + 1];
+  char         client_server[HOSTLEN + 1];
+
+  unsigned int registration;
+  unsigned int cap_client;    /**< Client capabilities (from us) */
+  unsigned int cap_active;    /**< Active capabilities (to us) */
+  unsigned int       caps;       /**< capabilities bit-field */
+
+  unsigned int operflags;     /**< IRC Operator privilege flags */
+  unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
+
+  unsigned int serial;     /**< used to enforce 1 send per nick */
+
+  time_t       lasttime;   /**< ...should be only LOCAL clients? --msa */
+  time_t       firsttime;  /**< time client was created */
+  time_t       since;      /**< last time we parsed something */
+  time_t       last_knock;    /**< time of last knock */
+  time_t       last_join_time;   /**< when this client last 
+                                    joined a channel */
+  time_t       last_leave_time;  /**< when this client last 
+                                       * left a channel */
+  int          join_leave_count; /**< count of JOIN/LEAVE in less than 
+                                         MIN_JOIN_LEAVE_TIME seconds */
+  int          oper_warn_count_down; /**< warn opers of this possible 
+                                          spambot every time this gets to 0 */
+  time_t       last_caller_id_time;
+  time_t       first_received_message_time;
+  time_t       last_nick_change;
+  time_t       last_privmsg; /**< Last time we got a PRIVMSG */
+  time_t       last_away; /**< Away since... */
+
+  int          received_number_of_privmsgs;
+  unsigned int number_of_nick_changes;
+
+  struct ListTask  *list_task;
+
+  struct dbuf_queue buf_sendq;
+  struct dbuf_queue buf_recvq;
+
+  struct {
+    unsigned int messages;      /**< Statistics: protocol messages sent/received */
+    uint64_t bytes;             /**< Statistics: total bytes sent/received */
+  } recv, send;
+
+  struct AuthRequest *auth;
+  struct Listener *listener;   /**< listener accepted from */
+  dlink_list        acceptlist; /**< clients I'll allow to talk to me */
+  dlink_list        watches;   /**< chain of Watch pointer blocks */
+  dlink_list        confs;     /**< Configuration record associated */
+  dlink_list        invited;   /**< chain of invite pointer blocks */
+  struct irc_ssaddr ip;
+  int               aftype;    /**< Makes life easier for DNS res in IPV6 */
+
+  char              *passwd;
+  fde_t             fd;
+  /* Anti-flood stuff. We track how many messages were parsed and how
+   * many we were allowed in the current second, and apply a simple
+   * decay to avoid flooding.
+   *   -- adrian
+   */
+  int allow_read;       /**< how many we're allowed to read in this second */
+  int sent_parsed;      /**< how many messages we've parsed in this second */
+
+  char*          response;  /**< expected response from client */
+  char*          auth_oper; /**< Operator to become if they supply the response.*/
+};
+
+/*! \brief Client structure */
+struct Client
+{
+  dlink_node node;
+  dlink_node lnode;             /**< Used for Server->servers/users */
+
+  struct LocalUser *localClient;
+  struct Client    *hnext;      /**< For client hash table lookups by name */
+  struct Client    *idhnext;    /**< For SID hash table lookups by sid */
+  struct Server    *serv;       /**< ...defined, if this is a server */
+  struct Client    *servptr;    /**< Points to server this Client is on */
+  struct Client    *from;       /**< == self, if Local Client, *NEVER* NULL! */
+
+  time_t            tsinfo;     /**< TS on the nick, SVINFO on server */
+
+  unsigned int      flags;      /**< client flags */
+  unsigned int      umodes;     /**< opers, normal users subset */
+  unsigned int      hopcount;   /**< number of servers to this 0 = local */
+  unsigned int      status;     /**< Client type */
+  unsigned int      handler;    /**< Handler index */
+
+  dlink_list        whowas;
+  dlink_list        channel;   /**< chain of channel pointer blocks */
+
+  char away[AWAYLEN + 1]; /**< Client's AWAY message. Can be set/unset via AWAY command */
+  char name[HOSTLEN + 1]; /**< unique name for a client nick or host */
+  char svid[HOSTLEN + 1]; /**< Services ID. XXX: Going with HOSTLEN for now. NICKLEN might be too small
+                                if dealing with timestamps */
+  char id[IDLEN + 1];       /**< client ID, unique ID per client */
+  /* 
+   * client->username is the username from ident or the USER message, 
+   * If the client is idented the USER message is ignored, otherwise 
+   * the username part of the USER message is put here prefixed with a 
+   * tilde depending on the auth{} block. Once a client has registered,
+   * this field should be considered read-only.
+   */
+  char              username[USERLEN + 1]; /* client's username */
+  /*
+   * client->host contains the resolved name or ip address
+   * as a string for the user, it may be fiddled with for oper spoofing etc.
+   * once it's changed the *real* address goes away. This should be
+   * considered a read-only field after the client has registered.
+   */
+  char              host[HOSTLEN + 1];     /* client's hostname */
+
+  /*
+   * client->info for unix clients will normally contain the info from the 
+   * gcos field in /etc/passwd but anything can go here.
+   */
+  char              info[REALLEN + 1]; /* Free form additional client info */
+
+  /*
+   * client->sockhost contains the ip address gotten from the socket as a
+   * string, this field should be considered read-only once the connection
+   * has been made. (set in s_bsd.c only)
+   */
+  char              sockhost[HOSTIPLEN + 1]; /* This is the host name from the 
+                                                socket ip address as string */
+};
+
+
 extern struct Client me;
 extern dlink_list listing_client_list;
 extern dlink_list global_client_list;
@@ -451,7 +449,7 @@ extern void del_accept(struct split_nuh_item *, struct Client *);
 extern void del_all_accepts(struct Client *);
 extern void exit_client(struct Client *, struct Client *, const char *);
 extern void check_conf_klines(void);
-extern void init_client(void);
+extern void client_init(void);
 extern void dead_link_on_write(struct Client *, int);
 extern void dead_link_on_read(struct Client *, int);
 extern void exit_aborted_clients(void);

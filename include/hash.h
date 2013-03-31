@@ -35,7 +35,8 @@ struct Channel;
 struct MaskItem;
 struct UserHost;
 
-enum {
+enum
+{
   HASH_TYPE_ID,
   HASH_TYPE_CLIENT,
   HASH_TYPE_CHANNEL,
@@ -43,7 +44,7 @@ enum {
   HASH_TYPE_RESERVED
 };
 
-extern void init_hash(void);
+extern void hash_init(void);
 extern void hash_add_client(struct Client *);
 extern void hash_del_client(struct Client *);
 extern void hash_add_channel(struct Channel *);

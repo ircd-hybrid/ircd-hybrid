@@ -58,7 +58,7 @@ static char parabuf[MODEBUFLEN];
 /*! \brief Initializes the channel blockheap, adds known channel CAPAB
  */
 void
-init_channels(void)
+channel_init(void)
 {
   add_capability("EX", CAP_EX, 1);
   add_capability("IE", CAP_IE, 1);

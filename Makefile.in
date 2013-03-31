@@ -52,7 +52,7 @@ host_triplet = @host@
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(srcdir)/config.h.in AUTHORS COPYING INSTALL NEWS README TODO \
+	$(srcdir)/config.h.in AUTHORS COPYING INSTALL NEWS README \
 	config.guess config.sub depcomp install-sh missing ylwrap \
 	ltmain.sh
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4

@@ -48,33 +48,21 @@ m_topic(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  const char *from, *to;
-
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
-    from = me.id;
-    to = source_p->id;
-  }
-  else
-  {
-    from = me.name;
-    to = source_p->name;
-  }
 
   if (EmptyString(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               from, to, "TOPIC");
+               me.name, source_p->name, "TOPIC");
     return;
   }
 
-  if (MyClient(source_p) && !IsFloodDone(source_p))
+  if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               from, to, parv[1]);
+               me.name, source_p->name, parv[1]);
     return;
   }
 
@@ -85,8 +73,8 @@ m_topic(struct Client *client_p, struct Client *source_p,
 
     if ((ms = find_channel_link(source_p, chptr)) == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOTONCHANNEL), from,
-                 to, parv[1]);
+      sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name,
+                 source_p->name, parv[1]);
       return;
     }
 
@@ -97,7 +85,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
 
       snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
                source_p->username, source_p->host);
-      set_channel_topic(chptr, parv[2], topic_info, CurrentTime, !!MyClient(source_p));
+      set_channel_topic(chptr, parv[2], topic_info, CurrentTime, 1);
 
       sendto_server(client_p, CAP_TS6, NOCAPS,
                     ":%s TOPIC %s :%s",
@@ -116,7 +104,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
     }
     else
       sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-                 from, to, chptr->chname);
+                 me.name, source_p->name, chptr->chname);
   }
   else /* only asking for topic */
   {
@@ -124,27 +112,83 @@ m_topic(struct Client *client_p, struct Client *source_p,
     {
       if (chptr->topic[0] == '\0')
         sendto_one(source_p, form_str(RPL_NOTOPIC),
-                   from, to, chptr->chname);
+                   me.name, source_p->name, chptr->chname);
       else
       {
         sendto_one(source_p, form_str(RPL_TOPIC),
-                   from, to,
+                   me.name, source_p->name,
                    chptr->chname, chptr->topic);
         sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-                   from, to, chptr->chname,
+                   me.name, source_p->name, chptr->chname,
                    chptr->topic_info,
                    chptr->topic_time);
       }
     }
     else
       sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
-                 from, to, chptr->chname);
+                 me.name, source_p->name, chptr->chname);
   }
 }
 
+static void
+ms_topic(struct Client *client_p, struct Client *source_p,
+         int parc, char *parv[])
+{
+  struct Channel *chptr = NULL;
+  const char *from, *to;
+  char topic_info[USERHOST_REPLYLEN];
+
+  if (IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
+  {
+    from = me.id;
+    to = source_p->id;
+  }
+
+  if (EmptyString(parv[1]))
+  {
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+               from, to, "TOPIC");
+    return;
+  }
+
+  if ((chptr = hash_find_channel(parv[1])) == NULL)
+  {
+    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+               from, to, parv[1]);
+    return;
+  }
+
+  if (!IsClient(source_p))
+    strlcpy(topic_info, source_p->name, sizeof(topic_info));
+  else
+    snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
+             source_p->username, source_p->host);
+  set_channel_topic(chptr, parv[2], topic_info, CurrentTime, 0);
+
+  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s TOPIC %s :%s",
+                ID(source_p), chptr->chname,
+                chptr->topic);
+  sendto_server(client_p, NOCAPS, CAP_TS6, ":%s TOPIC %s :%s",
+                source_p->name, chptr->chname,
+                chptr->topic);
+
+  if (!IsClient(source_p))
+    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :%s",
+                         source_p->name,
+                         chptr->chname, chptr->topic);
+
+  else
+    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s TOPIC %s :%s",
+                         source_p->name,
+                         source_p->username,
+                         source_p->host,
+                         chptr->chname, chptr->topic);
+}
+
+
 static struct Message topic_msgtab = {
   "TOPIC", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_topic, m_topic, m_ignore, m_topic, m_ignore}
+  {m_unregistered, m_topic, ms_topic, m_ignore, m_topic, m_ignore}
 };
 
 static void

@@ -1,6 +1,7 @@
 -- ircd-hybrid-8.0.7 Release Notes
 o) Added SVSHOST command handler which allows services to change the
    hostname of a specific user
+o) Services may now set a channel topic without joining the channel first
 
 
 -- ircd-hybrid-8.0.6 Release Notes

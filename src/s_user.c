@@ -658,7 +658,7 @@ valid_hostname(const char *hostname)
     if (!IsHostChar(*p))
       return 0;
 
-  return 1;
+  return p - hostname <= HOSTLEN;
 }
 
 /* valid_username()

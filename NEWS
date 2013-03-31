@@ -1,3 +1,8 @@
+-- ircd-hybrid-8.0.7 Release Notes
+o) Added SVSHOST command handler which allows services to change the
+   hostname of a specific user
+
+
 -- ircd-hybrid-8.0.6 Release Notes
 o) Fix bug where idle time sometimes is 0 even if the client didn't
    send any private message

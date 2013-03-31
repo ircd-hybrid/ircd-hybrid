@@ -58,7 +58,6 @@ static int check_clean_host(struct Client *client_p, char *nick, char *host,
 			    struct Client *server_p);
 
 static int clean_user_name(const char *);
-static int clean_host_name(const char *);
 static void perform_nick_collides(struct Client *, struct Client *, struct Client *,
 				  int, char **, time_t, const char *, char *, char *, char *);
 
@@ -611,7 +610,7 @@ static int
 check_clean_host(struct Client *client_p, char *nick,
                  char *host, struct Client *server_p)
 {
-  if (!clean_host_name(host))
+  if (!valid_hostname(host))
   {
     ++ServerStats.is_kill;
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
@@ -643,25 +642,6 @@ clean_user_name(const char *user)
       return 0;
 
   return p - user <= USERLEN;
-}
-
-/* clean_host_name()
- * input	- hostname
- * output	- none
- * side effects - walks through the hostname, returning 0 if erroneous
- */
-static int
-clean_host_name(const char *host)
-{
-  const char *p = host;
-
-  assert(host && *host);
-
-  for (; *p; ++p)
-    if (!IsHostChar(*p))
-      return 0;
-
-  return p - host <= HOSTLEN;
 }
 
 /*

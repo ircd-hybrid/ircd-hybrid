@@ -7,6 +7,39 @@ o) Major code cleanups
 o) Implemented new binary database storage for X-,D-,K-,G-Lines and RESVs
    Temporary bans are now stored as well and will persist after a reboot
 
+-- ircd-hybrid-8.0.7 Release Notes
+o) Added SVSHOST command handler which allows services to change the
+   hostname of a specific user
+
+
+-- ircd-hybrid-8.0.6 Release Notes
+o) Fix bug where idle time sometimes is 0 even if the client didn't
+   send any private message
+o) Fixed possible core in try_parse_v4_netmask()
+
+
+-- ircd-hybrid-8.0.5 Release Notes
+########################################################################
+o) IMPORTANT: nick and topic lengths are now configurable via ircd.conf.
+   A max_nick_length, as well as a max_topic_length configuration option
+   can now be found in the serverinfo{} block
+########################################################################
+o) Fixed build on GNU/Hurd as reported by Dominic Hargreaves
+o) Fixed log files not getting reopened after /rehash
+o) Improved logging of configuration file issues
+o) ircd.pid has been accidentally saved in /var instead of /var/run
+o) Linux RT signal support for notification of socket events has been dropped
+o) Fixed "STATS Y|y" sometimes sending weird sendq/recvq values
+o) INFO now also shows configured values of 'disable_fake_channels',
+   and 'stats_e_disabled'
+o) m_webirc.c is now officially supported, and has been moved from contrib/
+   to modules/
+o) /whois, /stats p, and /trace may now show fake idle times depending on
+   how the new class::min_idle and class::max_idle configuration directives
+   have been configured. This feature basically works in the same
+   way as it does in csircd
+o) The configuration parser now does support 'year' and 'month' units
+
 
 -- ircd-hybrid-8.0.4 Release Notes
 o) Fixed possible core on USERHOST/ISON with optimization enabled

@@ -80,7 +80,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
   const char *inpath = client_p->name;
   char *user;
   char *reason;
-  char def_reason[] = "No reason";
+  char def_reason[] = CONF_NOREASON;
 
   user   = parv[1];
   reason = parv[2]; /* Either defined or NULL (parc >= 2!!) */
@@ -191,7 +191,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
   char *user;
   char *reason;
   const char *path;
-  char def_reason[] = "No reason";
+  char def_reason[] = CONF_NOREASON;
 
   if (EmptyString(parv[1]))
   {

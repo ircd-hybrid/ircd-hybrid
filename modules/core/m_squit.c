@@ -51,7 +51,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
   dlink_node *ptr;
   char *comment;
   const char *server;
-  char def_reason[] = "No reason";
+  char def_reason[] = CONF_NOREASON;
 
   if (parc < 2 || EmptyString(parv[1]))
   {

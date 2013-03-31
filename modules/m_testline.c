@@ -82,7 +82,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_TESTLINE),
                  me.name, source_p->name, 'Q', 0, chptr->name, 
-                 chptr->reason ? chptr->reason : "No reason", "");
+                 chptr->reason ? chptr->reason : CONF_NOREASON, "");
       return;
     }
   }
@@ -157,7 +157,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
                  conf->until ? 'k' : 'K',
                  conf->until ? ((conf->until - CurrentTime) / 60)
                  : 0L,
-                 userhost, conf->reason? conf->reason : "No reason");
+                 userhost, conf->reason? conf->reason : CONF_NOREASON);
       ++matches;
     }
   }
@@ -169,7 +169,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, form_str(RPL_TESTLINE),
                me.name, source_p->name, 'Q', 0L,
                conf->name, 
-               conf->reason ? conf->reason : "No reason");;
+               conf->reason ? conf->reason : CONF_NOREASON);
     ++matches;
   }
 

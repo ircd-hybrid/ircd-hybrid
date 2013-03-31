@@ -618,7 +618,7 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
                    from, to, "G",
                    conf->host ? conf->host : "*",
                    conf->user ? conf->user : "*",
-                   conf->reason ? conf->reason : "No reason");
+                   conf->reason ? conf->reason : CONF_NOREASON);
       }
     }
   }

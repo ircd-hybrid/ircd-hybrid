@@ -48,8 +48,6 @@ Feature Specific Requirements:
 
 - Please read doc/index.txt to get an overview of the current documentation.
 
-- Known bugs are listed in the BUGS file
-
 - TESTED PLATFORMS:  The code has been tested on the following platforms, and
   is known to run properly.
   (FIXME: this list is out of date)
@@ -69,7 +67,7 @@ Feature Specific Requirements:
 
 - Please read NEWS for information about what is in this release.
 
-- Other files recommended for reading: BUGS, INSTALL
+- Other files recommended for reading: INSTALL
 
 --------------------------------------------------------------------------------
 $Id$

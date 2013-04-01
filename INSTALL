@@ -30,8 +30,7 @@
    ircd-hybrid.
    
    1.  Read the NEWS file to find out about the exciting new features in
-       this version. Other good reads are BUGS, doc/example.conf, and
-       README.
+       this version. Other good reads are doc/example.conf, and README.
 
    2.  Run the configure script. It will create config.h and the
        Makefiles to match your system. The paths are now handled

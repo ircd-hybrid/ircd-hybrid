@@ -61,7 +61,7 @@ myctime(time_t value)
   static char buf[32];
   char *p;
 
-  strcpy(buf, ctime(&value));
+  strlcpy(buf, ctime(&value), sizeof(buf));
 
   if ((p = strchr(buf, '\n')) != NULL)
     *p = '\0';

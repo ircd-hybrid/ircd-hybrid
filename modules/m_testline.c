@@ -82,7 +82,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_TESTLINE),
                  me.name, source_p->name, 'Q', 0, chptr->name, 
-                 chptr->reason ? chptr->reason : CONF_NOREASON, "");
+                 chptr->reason ? chptr->reason : CONF_NOREASON);
       return;
     }
   }
@@ -147,7 +147,7 @@ mo_testline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_TESTLINE),
                  me.name, source_p->name, 'I', 0L, userhost,
-                 conf->class ? conf->class->name : "<default>", "");
+                 conf->class ? conf->class->name : "<default>");
       ++matches;
     }
     else if (conf->type == CONF_KLINE)
@@ -207,7 +207,7 @@ mo_testgecos(struct Client *client_p, struct Client *source_p,
   if ((conf = find_matching_name_conf(CONF_XLINE, parv[1], NULL, NULL, 0)))
     sendto_one(source_p, form_str(RPL_TESTLINE),
                me.name, source_p->name, 'X', 0L,
-               conf->name, conf->reason ? conf->reason : "X-lined");
+               conf->name, conf->reason ? conf->reason : CONF_NOREASON);
   else
     sendto_one(source_p, form_str(RPL_NOTESTLINE),
                me.name, source_p->name, parv[1]);

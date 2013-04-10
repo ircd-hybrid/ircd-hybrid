@@ -61,7 +61,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-  char *m = NULL, *extarg = NULL;
+  const char *m = NULL, *extarg = NULL;
   int what = MODE_ADD;
   unsigned int flag = 0, setflags = 0;
   time_t ts = 0;

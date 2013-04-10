@@ -52,8 +52,8 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = sender prefix
  *      - parv[1] = nickname
- *      - parv[2] = TS (or mode, depending on svs version)
- *      - parv[3] = mode (or services id if old svs version)
+ *      - parv[2] = TS
+ *      - parv[3] = mode
  *      - parv[4] = optional argument (services id)
  */
 static void
@@ -61,35 +61,26 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   struct Client *target_p = NULL;
+  const char *m = NULL, *extarg = NULL;
   int what = MODE_ADD;
-  unsigned int flag = 0, setflags = 0;
-  char *m = NULL, *modes = NULL, *extarg = NULL;
+  unsigned int flag = 0, setmodes = 0;
   time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return;
 
-  if ((parc >= 4) && ((*parv[3] == '+') || (*parv[3] == '-')))
-  {
-    ts     = atol(parv[2]);
-    modes  = parv[3];
-    extarg = (parc > 4) ? parv[4] : NULL;
-  }
-  else
-  {
-    modes  = parv[2];
-    extarg = (parc > 3) ? parv[3] : NULL;
-  }
-
   if ((target_p = find_person(client_p, parv[1])) == NULL)
     return;
 
-  if (ts && (ts != target_p->tsinfo))
+  if ((ts = atol(parv[2])) && (ts != target_p->tsinfo))
     return;
 
-  setflags = target_p->umodes;
+  if (parc > 4 && !EmptyString(parv[4]))
+    extarg = parv[4];
 
-  for (m = modes; *m; ++m)
+  setmodes = target_p->umodes;
+
+  for (m = parv[3]; *m; ++m)
   {
     switch (*m)
     {
@@ -101,7 +92,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
         break;
 
       case 'd':
-        if (!EmptyString(extarg))
+        if (extarg)
           strlcpy(target_p->svid, extarg, sizeof(target_p->svid));
         break;
 
@@ -157,31 +148,31 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   {
     sendto_server(client_p, CAP_TS6, NOCAPS,
                   ":%s SVSMODE %s %lu %s %s", ID(source_p),
-                  ID(target_p), (unsigned long)target_p->tsinfo, modes, extarg);
+                  ID(target_p), (unsigned long)target_p->tsinfo, parv[3], extarg);
     sendto_server(client_p, NOCAPS, CAP_TS6,
                   ":%s SVSMODE %s %lu %s %s", source_p->name,
-                  target_p->name, (unsigned long)target_p->tsinfo, modes, extarg);
+                  target_p->name, (unsigned long)target_p->tsinfo, parv[3], extarg);
   }
   else
   {
     sendto_server(client_p, CAP_TS6, NOCAPS,
                   ":%s SVSMODE %s %lu %s", ID(source_p),
-                  ID(target_p), (unsigned long)target_p->tsinfo, modes);
+                  ID(target_p), (unsigned long)target_p->tsinfo, parv[3]);
     sendto_server(client_p, NOCAPS, CAP_TS6,
                   ":%s SVSMODE %s %lu %s", source_p->name,
-                  target_p->name, (unsigned long)target_p->tsinfo, modes);
+                  target_p->name, (unsigned long)target_p->tsinfo, parv[3]);
   }
 
-  if (MyConnect(target_p) && (setflags != target_p->umodes))
+  if (MyConnect(target_p) && (setmodes != target_p->umodes))
   {
     char modebuf[IRCD_BUFSIZE];
 
-    send_umode(target_p, target_p, setflags, 0xffffffff, modebuf);
+    send_umode(target_p, target_p, setmodes, 0xffffffff, modebuf);
   }
 }
 
 static struct Message svsmode_msgtab = {
-  "SVSMODE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "SVSMODE", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
   {m_ignore, m_ignore, ms_svsmode, m_ignore, m_ignore, m_ignore}
 };
 

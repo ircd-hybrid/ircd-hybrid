@@ -1,11 +1,11 @@
 -- ircd-hybrid-8.0.7 Release Notes
-o) Added SVSHOST command handler which allows services to change the
-   hostname of a specific user
 o) Services may now set a channel topic without joining the channel first
 o) Fixed bug where /whois would send empty sockhost information on TS5
    servers
 o) Remote server connection and split notices now go to new usermode +e.
    These previously used usermode +x.
+o) Services may now change the host of a specific user
+   via "SVSMODE <timestamp> <target> +x <hostname>"
 
 
 -- ircd-hybrid-8.0.6 Release Notes

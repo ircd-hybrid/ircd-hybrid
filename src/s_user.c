@@ -119,7 +119,7 @@ unsigned int user_modes[256] =
   UMODE_BOTS,         /* b */
   UMODE_CCONN,        /* c */
   UMODE_DEBUG,        /* d */
-  0,                  /* e */
+  UMODE_EXTERNAL,     /* e */
   UMODE_FULL,         /* f */
   UMODE_CALLERID,     /* g */
   0,                  /* h */
@@ -138,7 +138,7 @@ unsigned int user_modes[256] =
   UMODE_UNAUTH,       /* u */
   0,                  /* v */
   UMODE_WALLOP,       /* w */
-  UMODE_EXTERNAL,     /* x */
+  0,                  /* x */
   UMODE_SPY,          /* y */
   UMODE_OPERWALL,     /* z      0x7A */
   0,0,0,0,0,          /* 0x7B - 0x7F */

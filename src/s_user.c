@@ -846,14 +846,6 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (IsServer(source_p))
-  {
-     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-                          "*** Mode for User %s from %s",
-                          parv[1], source_p->name);
-     return;
-  }
-
   if (source_p != target_p)
   {
      sendto_one(source_p, form_str(ERR_USERSDONTMATCH),

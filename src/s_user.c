@@ -1081,6 +1081,25 @@ send_umode_out(struct Client *client_p, struct Client *source_p,
     send_umode(client_p, source_p, old, 0xffffffff, buf);
 }
 
+void
+user_set_hostmask(struct Client *target_p, const char *hostname)
+{
+  if (!valid_hostname(hostname))
+    return;
+
+  if (IsUserHostIp(target_p))
+    delete_user_host(target_p->username, target_p->host, !MyConnect(target_p));
+
+  strlcpy(target_p->host, hostname, sizeof(target_p->host));
+  SetIPSpoof(target_p);
+
+  add_user_host(target_p->username, target_p->host, !MyConnect(target_p));
+  SetUserHost(target_p);
+
+  if (MyClient(target_p))
+    clear_ban_cache_client(target_p);
+}
+
 /* user_welcome()
  *
  * inputs	- client pointer to client to welcome

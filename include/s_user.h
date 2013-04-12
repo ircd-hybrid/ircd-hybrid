@@ -57,5 +57,6 @@ extern void add_isupport(const char *, const char *, int);
 extern void delete_isupport(const char *);
 extern void init_isupport(void);
 extern void rebuild_isupport_message_line(void);
+extern void user_set_hostmask(struct Client *, const char *);
 
 #endif

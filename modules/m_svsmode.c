@@ -54,7 +54,7 @@
  *      - parv[1] = nickname
  *      - parv[2] = TS
  *      - parv[3] = mode
- *      - parv[4] = optional argument (services id)
+ *      - parv[4] = optional argument (services id, hostname)
  */
 static void
 ms_svsmode(struct Client *client_p, struct Client *source_p,
@@ -63,7 +63,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   struct Client *target_p = NULL;
   const char *m = NULL, *extarg = NULL;
   int what = MODE_ADD;
-  unsigned int flag = 0, setmodes = 0;
+  unsigned int flag = 0, setflags = 0;
   time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
@@ -78,7 +78,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   if (parc > 4 && !EmptyString(parv[4]))
     extarg = parv[4];
 
-  setmodes = target_p->umodes;
+  setflags = target_p->umodes;
 
   for (m = parv[3]; *m; ++m)
   {
@@ -94,6 +94,11 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
       case 'd':
         if (extarg)
           strlcpy(target_p->svid, extarg, sizeof(target_p->svid));
+        break;
+
+      case 'x':
+        if (what == MODE_ADD && extarg)
+          user_set_hostmask(target_p, extarg);
         break;
 
       case 'o':
@@ -163,11 +168,11 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
                   target_p->name, (unsigned long)target_p->tsinfo, parv[3]);
   }
 
-  if (MyConnect(target_p) && (setmodes != target_p->umodes))
+  if (MyConnect(target_p) && (setflags != target_p->umodes))
   {
     char modebuf[IRCD_BUFSIZE];
 
-    send_umode(target_p, target_p, setmodes, 0xffffffff, modebuf);
+    send_umode(target_p, target_p, setflags, 0xffffffff, modebuf);
   }
 }
 

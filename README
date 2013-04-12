@@ -54,6 +54,7 @@ Feature Specific Requirements:
   CentOS 5.8
   Red Hat Linux 9
   Ubuntu 12.04
+  FreeBSD 9.1
   OpenBSD 5.2
   Arch Linux 2012.12.01
   Debian GNU/Hurd 0.3

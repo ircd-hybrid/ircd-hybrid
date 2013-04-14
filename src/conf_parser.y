@@ -1713,9 +1713,9 @@ resv_entry: RESV
 } '{' resv_items '}' ';'
 {
   if (IsChanPrefix(block_state.name.buf[0]))
-    create_channel_resv(block_state.name.buf, block_state.rpass.buf, 1);
+    create_channel_resv(block_state.name.buf, block_state.rpass.buf);
   else if (block_state.name.buf[0])
-    create_nick_resv(block_state.name.buf, block_state.rpass.buf, 1);
+    create_nick_resv(block_state.name.buf, block_state.rpass.buf);
 };
 
 resv_items:	resv_items resv_item | resv_item;

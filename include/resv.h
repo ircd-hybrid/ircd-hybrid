@@ -28,12 +28,9 @@
 extern dlink_list nresv_items;
 extern dlink_list resv_channel_list;
 
-extern struct MaskItem *create_channel_resv(char *, char *, int);
-extern struct MaskItem *create_nick_resv(char *, char *, int);
+extern struct MaskItem *create_channel_resv(const char *, const char *);
+extern struct MaskItem *create_nick_resv(const char *, const char *);
 
-extern int delete_channel_resv(struct MaskItem *);
-
-extern void clear_conf_resv(void);
 extern void report_resv(struct Client *);
 
 extern int valid_wild_card_simple(const char *);

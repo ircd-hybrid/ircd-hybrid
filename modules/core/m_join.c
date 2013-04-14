@@ -36,6 +36,7 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
+#include "resv.h"
 
 
 static void do_join_0(struct Client *, struct Client *);
@@ -134,7 +135,7 @@ m_join(struct Client *client_p, struct Client *source_p,
 
     if (!IsExemptResv(source_p) &&
         !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv) &&
-        (!(conf = hash_find_resv(chan)) == ConfigChannel.restrict_channels))
+        (!(conf = match_find_resv(chan)) == ConfigChannel.restrict_channels))
     {
       if (conf)
         ++conf->count;

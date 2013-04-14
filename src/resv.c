@@ -49,22 +49,19 @@ dlink_list resv_channel_list = { NULL, NULL, 0 };
  * side effects	-
  */
 struct MaskItem *
-create_channel_resv(char *name, char *reason, int in_conf)
+create_channel_resv(const char *name, const char *reason)
 {
   struct MaskItem *conf = NULL;
 
   if (name == NULL || reason == NULL)
     return NULL;
 
-  if (hash_find_resv(name))
+  if (find_exact_name_conf(CONF_CRESV, NULL, name, NULL, NULL))
     return NULL;
 
   conf = conf_make(CONF_CRESV);
   conf->name = xstrdup(name);
   conf->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
-
-  dlinkAdd(conf, &conf->node, &resv_channel_list);
-  hash_add_resv(conf);
 
   return conf;
 }
@@ -78,14 +75,14 @@ create_channel_resv(char *name, char *reason, int in_conf)
  * side effects	-
  */
 struct MaskItem *
-create_nick_resv(char *name, char *reason, int in_conf)
+create_nick_resv(const char *name, const char *reason)
 {
   struct MaskItem *conf = NULL;
 
   if (name == NULL || reason == NULL)
     return NULL;
 
-  if (find_matching_name_conf(CONF_NRESV, name, NULL, NULL, 0))
+  if (find_exact_name_conf(CONF_NRESV, NULL, name, NULL, NULL))
     return NULL;
 
   conf = conf_make(CONF_NRESV);
@@ -93,42 +90,6 @@ create_nick_resv(char *name, char *reason, int in_conf)
   conf->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
 
   return conf;
-}
-
-/* clear_conf_resv()
- *
- * inputs	- none
- * output	- none
- * side effects	- All resvs are cleared out
- */
-void
-clear_conf_resv(void)
-{
-  dlink_node *ptr = NULL, *next_ptr = NULL;
-
-  DLINK_FOREACH_SAFE(ptr, next_ptr, resv_channel_list.head)
-  {
-    struct MaskItem *conf = ptr->data;
-
-    if (!IsConfDatabase(conf))
-      delete_channel_resv(conf);
-  }
-}
-
-/* delete_channel_resv()
- *
- * inputs	- pointer to channel resv to delete
- * output	- none
- * side effects	- given struct ResvChannel * is removed
- */
-int
-delete_channel_resv(struct MaskItem *conf)
-{
-  hash_del_resv(conf);
-  dlinkDelete(&conf->node, &resv_channel_list);
-  conf_free(conf);
-
-  return 1;
 }
 
 /* match_find_resv()
@@ -150,7 +111,7 @@ match_find_resv(const char *name)
   {
     struct MaskItem *conf = ptr->data;
 
-    if (!match(name, conf->name))
+    if (!match(conf->name, name))
       return conf;
   }
 

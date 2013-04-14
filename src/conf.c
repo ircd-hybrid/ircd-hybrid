@@ -1036,6 +1036,8 @@ map_to_list(enum maskitem_type type)
   case CONF_NRESV:
     return(&nresv_items);
     break;
+  case CONF_CRESV:
+    return(&resv_channel_list);
   case CONF_OPER:
     return(&oconf_items);
     break;
@@ -1100,6 +1102,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
   case CONF_XLINE:
   case CONF_ULINE:
   case CONF_NRESV:
+  case CONF_CRESV:
     DLINK_FOREACH(ptr, list_p->head)
     {
       conf = ptr->data;
@@ -1161,6 +1164,7 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
   case CONF_XLINE:
   case CONF_ULINE:
   case CONF_NRESV:
+  case CONF_CRESV:
 
     DLINK_FOREACH(ptr, list_p->head)
     {
@@ -1628,19 +1632,12 @@ expire_tklines(dlink_list *tklist)
                                "Temporary X-line for [%s] expired", conf->name);
       conf_free(conf);
     }
-    else if (conf->type == CONF_NRESV)
+    else if (conf->type == CONF_NRESV || conf->type == CONF_CRESV)
     {
       if (ConfigFileEntry.tkline_expire_notices)
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary RESV for [%s] expired", conf->name);
       conf_free(conf);
-    }
-    else if (conf->type == CONF_CRESV)
-    {
-      if (ConfigFileEntry.tkline_expire_notices)
-        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                               "Temporary RESV for [%s] expired", conf->name);
-      delete_channel_resv(conf);
     }
   }
 }
@@ -1816,7 +1813,7 @@ clear_out_old_conf(void)
   dlink_list *free_items [] = {
     &server_items,   &oconf_items,
      &uconf_items,   &xconf_items, &rxconf_items, &rkconf_items,
-     &nresv_items, &cluster_items,  &service_items, NULL
+     &nresv_items, &cluster_items,  &service_items, &resv_channel_list, NULL
   };
 
   dlink_list ** iterator = free_items; /* C is dumb */
@@ -1890,9 +1887,6 @@ clear_out_old_conf(void)
                                                SSL_OP_NO_SSLv3|
                                                SSL_OP_NO_TLSv1);
 #endif
-
-  /* clean out old resvs from the conf */
-  clear_conf_resv();
 
   /* clean out AdminInfo */
   MyFree(AdminInfo.name);

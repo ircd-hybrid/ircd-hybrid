@@ -221,7 +221,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
   {
     struct MaskItem *conf = NULL;
 
-    if ((conf = create_channel_resv(name, reason, 0)) == NULL)
+    if ((conf = create_channel_resv(name, reason)) == NULL)
     {
       sendto_one(source_p,
 	   ":%s NOTICE %s :A RESV has already been placed on channel: %s",
@@ -281,7 +281,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
       return;
     }
 
-    if ((conf = create_nick_resv(name, reason, 0)) == NULL)
+    if ((conf = create_nick_resv(name, reason)) == NULL)
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :A RESV has already been placed on nick %s",
@@ -334,8 +334,7 @@ remove_resv(struct Client *source_p, const char *name)
 
   if (IsChanPrefix(*name))
   {
-    if (resv_channel_list.head == NULL ||
-        !(conf = hash_find_resv(name)))
+    if ((conf = find_exact_name_conf(CONF_CRESV, NULL, name, NULL, NULL)) == NULL)
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :A RESV does not exist for channel: %s",
@@ -351,7 +350,7 @@ remove_resv(struct Client *source_p, const char *name)
       return;
     }
 
-    delete_channel_resv(conf);
+    conf_free(conf);
     sendto_one(source_p,
                ":%s NOTICE %s :The RESV has been removed on channel: %s",
                me.name, source_p->name, name);

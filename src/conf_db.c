@@ -909,7 +909,7 @@ load_resv_database(void)
 
     if (IsChanPrefix(*name))
     {
-      if ((conf = create_channel_resv(name, reason, 0)) == NULL)
+      if ((conf = create_channel_resv(name, reason)) == NULL)
         continue;
 
       conf->setat = tmp64_setat;
@@ -918,7 +918,7 @@ load_resv_database(void)
     }
     else
     {
-      if ((conf = create_nick_resv(name, reason, 0)) == NULL)
+      if ((conf = create_nick_resv(name, reason)) == NULL)
         continue;
 
       conf->setat = tmp64_setat;

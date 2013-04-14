@@ -13,7 +13,7 @@ Contact Information:
   * - Reading INSTALL is now a must, as the old DPATH is now specified    *
   *   when configure is run.                                              *
   *   You now need to ./configure --prefix="/path/to/install/it"          *
-  * - The old config format WILL NOT WORK. Please see doc/example.conf !  *
+  * - The old config format WILL NOT WORK. Please see doc/reference.conf !*
   * - The old kline, dline, xline format WILL NOT WORK.                   *
   *************************************************************************
 
@@ -60,7 +60,7 @@ Feature Specific Requirements:
 
 - If you are wondering why config.h no longer exists, it's because most
   things that were once in config.h are now specified in the 'general'
-  block of ircd.conf. Look at example.conf for more information about
+  block of ircd.conf. Look at reference.conf for more information about
   these options.
 
 - /etc/resolv.conf must exist for the resolver to work.

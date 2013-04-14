@@ -258,7 +258,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 man_MANS = ircd.8
-dist_sysconf_DATA = example.conf example.efnet.conf
+dist_sysconf_DATA = example.conf
 all: all-am
 
 .SUFFIXES:

@@ -26,7 +26,7 @@
    default.
 
    If the desired message file works without any issues, it can be set to be
-   the default message file in the ircd.conf file. Refer to example.conf's
+   the default message file in the ircd.conf file. Refer to reference.conf's
    documentation on the message_locale setting.
 
      ----------------------------------------------------------------------

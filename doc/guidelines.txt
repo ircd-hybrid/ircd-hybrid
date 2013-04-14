@@ -4,7 +4,7 @@ ircd-hybrid documentation guidelines
 in whats-new and all other appropriate locations.
 
 2.  When something affects the configuration file, and it's compatibility
-with previous versions, it MUST be documented in example.conf and in a
+with previous versions, it MUST be documented in reference.conf and in a
 proposed new document README.NOW. This is VERY important during the beta
 phase to help anyone who mans the "help desk".
 

@@ -138,7 +138,7 @@ o) Implemented full services support, including but not limited to the
 o) Removed RKLINE and RXLINE commands. Regular expression based bans should
    only be added via ircd.conf
 o) Added 'globops', 'restart', 'dline', 'undline' and 'module' operator
-   privilege flags. Read doc/example.conf for further explanation of what
+   privilege flags. Read doc/reference.conf for further explanation of what
    these flags control
 o) Removed Idle-time klines
 o) Cleaned up modules API. Old modules won't work anymore

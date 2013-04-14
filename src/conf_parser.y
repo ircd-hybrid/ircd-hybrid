@@ -1710,12 +1710,18 @@ resv_entry: RESV
 
   reset_block_state();
   strlcpy(block_state.rpass.buf, CONF_NOREASON, sizeof(block_state.rpass.buf));
-} '{' resv_items '}' ';';
+} '{' resv_items '}' ';'
+{
+  if (IsChanPrefix(block_state.name.buf[0]))
+    create_channel_resv(block_state.name.buf, block_state.rpass.buf, 1);
+  else if (block_state.name.buf[0])
+    create_nick_resv(block_state.name.buf, block_state.rpass.buf, 1);
+};
 
 resv_items:	resv_items resv_item | resv_item;
-resv_item:	resv_creason | resv_channel | resv_nick | error ';' ;
+resv_item:	resv_reason | resv_channel | resv_nick | error ';' ;
 
-resv_creason: REASON '=' QSTRING ';'
+resv_reason: REASON '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
@@ -1723,17 +1729,14 @@ resv_creason: REASON '=' QSTRING ';'
 
 resv_channel: CHANNEL '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  if (IsChanPrefix(*yylval.string))
-    create_channel_resv(yylval.string, block_state.rpass.buf, 1);
+  if (conf_parser_ctx.pass == 2)
+    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 };
 
 resv_nick: NICK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    create_nick_resv(yylval.string, block_state.rpass.buf, 1);
+    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 };
 
 /***************************************************************************

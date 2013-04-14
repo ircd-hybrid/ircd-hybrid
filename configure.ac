@@ -55,6 +55,12 @@ AC_ARG_ENABLE(libpcre,
       [AC_SEARCH_LIBS(pcre_study, pcre,
         [AC_DEFINE(HAVE_LIBPCRE, 1, [Define to 1 if libpcre (-lpcre) is available.])])])], [])
 
+AC_ARG_ENABLE(libGeoIP,
+  [AS_HELP_STRING([--disable-libgeoip],[Disable GeoIP support])], [],
+    [AC_CHECK_HEADER(GeoIP.h,
+      [AC_SEARCH_LIBS(GeoIP_lib_version, GeoIP,
+        [AC_DEFINE(HAVE_LIBGEOIP, 1, [Define to 1 if libGeoIP (-lGeoIP) is available.])])])], [])
+
 dnl Openssl checks
 AC_ARG_ENABLE(openssl,
 [  --enable-openssl[=DIR]       Enable OpenSSL support (DIR optional).

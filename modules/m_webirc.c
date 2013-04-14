@@ -109,7 +109,8 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
   aconf = find_address_conf(source_p->host,
                             IsGotId(source_p) ? source_p->username : "webirc",
                             &source_p->localClient->ip,
-                            source_p->localClient->aftype, parv[1]);
+                            source_p->localClient->aftype, parv[1],
+                            source_p->localClient->country_id);
   if (aconf == NULL || !IsConfClient(aconf))
     return;
 

@@ -315,7 +315,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
     piphost = NULL;
   }
 
-  if ((aconf = find_conf_by_address(lhost, piphost, CONF_KLINE, t, luser, NULL, 0)))
+  if ((aconf = find_conf_by_address(lhost, piphost, CONF_KLINE, t, luser, NULL, 0, 0)))
   {
     if (warn)
     {
@@ -512,7 +512,7 @@ remove_tkline_match(const char *host, const char *user)
     piphost = NULL;
   }
 
-  if ((aconf = find_conf_by_address(host, piphost, CONF_KLINE, t, user, NULL, 0)))
+  if ((aconf = find_conf_by_address(host, piphost, CONF_KLINE, t, user, NULL, 0, 0)))
   {
     if (IsConfTemporary(aconf))
     {

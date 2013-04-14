@@ -65,7 +65,7 @@ find_is_glined(const char *host, const char *user)
     piphost = NULL;
   }
 
-  aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0);
+  aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0, 0);
   return aconf;
 }
 

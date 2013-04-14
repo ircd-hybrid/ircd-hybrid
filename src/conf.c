@@ -834,7 +834,8 @@ verify_access(struct Client *client_p, const char *username)
     aconf = find_address_conf(client_p->host, client_p->username,
 			     &client_p->localClient->ip,
 			     client_p->localClient->aftype,
-                             client_p->localClient->passwd);
+                             client_p->localClient->passwd,
+                             client_p->localClient->country_id);
   }
   else
   {
@@ -842,7 +843,8 @@ verify_access(struct Client *client_p, const char *username)
     aconf = find_address_conf(client_p->host,non_ident,
 			     &client_p->localClient->ip,
 			     client_p->localClient->aftype,
-	                     client_p->localClient->passwd);
+	                     client_p->localClient->passwd,
+                             client_p->localClient->country_id);
   }
 
   uhi[0] = IsGotId(client_p) ? client_p->username : non_ident;
@@ -1943,7 +1945,7 @@ find_kill(struct Client *client_p)
 
   aconf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
                                CONF_KLINE, client_p->localClient->aftype,
-                               client_p->username, NULL, 1);
+                               client_p->username, NULL, 1, 0);
   if (aconf == NULL)
     aconf = find_regexp_kline(uhi);
 
@@ -1959,7 +1961,7 @@ find_gline(struct Client *client_p)
 
   aconf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
                                CONF_GLINE, client_p->localClient->aftype,
-                               client_p->username, NULL, 1);
+                               client_p->username, NULL, 1, 0);
   return aconf;
 }
 

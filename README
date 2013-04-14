@@ -31,6 +31,9 @@ Necessary Requirements:
 
 Feature Specific Requirements:
 
+- For ISO 3166 alpha-2 two letter country code enabled auth{} blocks, a working
+  libGeoIP is required
+
 - For the SSL Challenge controlled OPER feature, compressed and/or
   SSL/TLS server links, as well as SSL/TLS client connections,
   a working OpenSSL library is required

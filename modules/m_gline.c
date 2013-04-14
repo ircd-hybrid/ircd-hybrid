@@ -116,7 +116,7 @@ remove_gline_match(const char *user, const char *host)
     piphost = NULL;
   }
 
-  if ((aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0)))
+  if ((aconf = find_conf_by_address(host, piphost, CONF_GLINE, t, user, NULL, 0, 0)))
   {
     if (IsConfTemporary(aconf))
     {

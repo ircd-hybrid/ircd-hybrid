@@ -58,7 +58,7 @@ find_and_delete_temporary(const char *user, const char *host, int type)
     piphost = NULL;
   }
 
-  if ((aconf = find_conf_by_address(host, piphost, type, t, user, NULL, 0)))
+  if ((aconf = find_conf_by_address(host, piphost, type, t, user, NULL, 0, 0)))
   {
     if (IsConfTemporary(aconf))
     {

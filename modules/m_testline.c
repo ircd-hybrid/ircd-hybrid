@@ -137,10 +137,10 @@ mo_testline(struct Client *client_p, struct Client *source_p,
 #else
                               AF_INET,
 #endif
-                              parv[2]);
+                              parv[2], 0);
   else
-    aconf = find_address_conf(given_host, given_name, NULL, 0, parv[2]);
-                 
+    aconf = find_address_conf(given_host, given_name, NULL, 0, parv[2], 0);
+
   if (aconf != NULL)
   {
     snprintf(userhost, sizeof(userhost), "%s@%s", aconf->user, aconf->host);

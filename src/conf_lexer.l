@@ -150,6 +150,7 @@ class		{ return CLASS; }
 cluster		{ return T_CLUSTER; }
 connect		{ return CONNECT; }
 connectfreq     { return CONNECTFREQ; }
+country_code    { return COUNTRY_CODE; }
 default_floodcount  { return DEFAULT_FLOODCOUNT; }
 default_split_server_count { return DEFAULT_SPLIT_SERVER_COUNT; }
 default_split_user_count   { return DEFAULT_SPLIT_USER_COUNT; }
@@ -228,6 +229,7 @@ nick		{ return NICK; }
 nick_changes	{ return NICK_CHANGES; }
 no		{ yylval.number = 0; return TBOOL; }
 no_create_on_split { return NO_CREATE_ON_SPLIT; }
+no_join            { return T_NO_JOIN; }
 no_join_on_split   { return NO_JOIN_ON_SPLIT; }
 no_oper_flood   { return NO_OPER_FLOOD; }
 no_tilde	{ return NO_TILDE; }

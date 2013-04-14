@@ -88,6 +88,7 @@ struct LocalUser
   unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
 
   unsigned int serial;     /**< used to enforce 1 send per nick */
+  unsigned int country_id;
 
   time_t       lasttime;   /**< ...should be only LOCAL clients? --msa */
   time_t       firsttime;  /**< time client was created */
@@ -296,6 +297,7 @@ struct Client
 #define FLAGS_FINISHED_AUTH 0x01000000 /**< Client has been released from auth */
 #define FLAGS_FLOOD_NOTICED 0x02000000 /**< Notice to opers about this flooder has been sent */
 #define FLAGS_SERVICE       0x04000000 /**< Client/server is a network service */
+#define FLAGS_NO_JOIN       0x08000000 /**< client may not join/create channels */
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))

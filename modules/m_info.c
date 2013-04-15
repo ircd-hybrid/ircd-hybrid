@@ -37,10 +37,6 @@
 #include "modules.h"
 
 
-static void send_conf_options(struct Client *);
-static void send_birthdate_online_time(struct Client *);
-static void send_info_text(struct Client *);
-
 /*
  * jdc -- Structure for our configuration value table
  */
@@ -53,12 +49,12 @@ struct InfoStruct
 };
 
 /* Types for output_type in InfoStruct */
-#define OUTPUT_STRING     0x0001 /* Output option as %s w/ dereference  */
-#define OUTPUT_STRING_PTR 0x0002 /* Output option as %s w/out deference */
-#define OUTPUT_DECIMAL    0x0004 /* Output option as decimal (%d)       */
-#define OUTPUT_BOOLEAN    0x0008 /* Output option as "ON" or "OFF"      */
-#define OUTPUT_BOOLEAN_YN 0x0010 /* Output option as "YES" or "NO"      */
-#define OUTPUT_BOOLEAN2   0x0020 /* Output option as "YES/NO/MASKED"    */
+#define OUTPUT_STRING     0x0001  /* Output option as %s w/ dereference  */
+#define OUTPUT_STRING_PTR 0x0002  /* Output option as %s w/out deference */
+#define OUTPUT_DECIMAL    0x0004  /* Output option as decimal (%d)       */
+#define OUTPUT_BOOLEAN    0x0008  /* Output option as "ON" or "OFF"      */
+#define OUTPUT_BOOLEAN_YN 0x0010  /* Output option as "YES" or "NO"      */
+#define OUTPUT_BOOLEAN2   0x0020  /* Output option as "YES/NO/MASKED"    */
 
 static const struct InfoStruct info_table[] =
 {
@@ -496,7 +492,6 @@ static const struct InfoStruct info_table[] =
     &ConfigFileEntry.gline_time,
     "Expiry time for G-lines"
   },
-
   {
     "gline_request_duration",
     OUTPUT_DECIMAL,
@@ -513,113 +508,6 @@ static const struct InfoStruct info_table[] =
   }
 };
 
-/*
-** m_info()
-**  parv[0] = sender prefix
-**  parv[1] = servername
-*/
-static void
-m_info(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
-{
-  static time_t last_used = 0;
-
-  if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
-  {
-    /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
-    return;
-  }
-
-  last_used = CurrentTime;
-
-  if (!ConfigFileEntry.disable_remote)
-    if (hunt_server(client_p,source_p, ":%s INFO :%s", 1,
-                    parc, parv) != HUNTED_ISME)
-      return;
-
-  send_info_text(source_p);
-}
-
-/*
-** mo_info()
-**  parv[0] = sender prefix
-**  parv[1] = servername
-*/
-static void
-mo_info(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
-{
-  if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
-                  parc, parv) != HUNTED_ISME)
-    return;
-
-  send_info_text(source_p);
-}
-
-/*
-** ms_info()
-**  parv[0] = sender prefix
-**  parv[1] = servername
-*/
-static void
-ms_info(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
-{
-  if (!IsClient(source_p))
-      return;
-
-  if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
-                  parc, parv) != HUNTED_ISME)
-    return;
-
-  send_info_text(source_p);
-}
-
-/* send_info_text()
- *
- * inputs	- client pointer to send info text to
- * output	- NONE
- * side effects	- info text is sent to client
- */
-static void
-send_info_text(struct Client *source_p)
-{
-  const char **text = infotext;
-  char *source, *target;
-
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
-                       "INFO requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username,
-                       source_p->host, source_p->servptr->name);
-
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) &&
-      HasID(source_p))
-    source = me.id, target = source_p->id;
-  else
-    source = me.name, target = source_p->name;
-
-  while (*text)
-  {
-    const char *line = *text++;
-
-    if (*line == '\0')
-      line = " ";
-
-    sendto_one(source_p, form_str(RPL_INFO),
-               source, target, line);
-  }
-
-  if (HasUMode(source_p, UMODE_OPER))
-    send_conf_options(source_p);
-
-  send_birthdate_online_time(source_p);
-
-  sendto_one(source_p, form_str(RPL_ENDOFINFO),
-             me.name, source_p->name);
-}
-
 /* send_birthdate_online_time()
  *
  * inputs	- client pointer to send to
@@ -630,17 +518,13 @@ static void
 send_birthdate_online_time(struct Client *source_p)
 {
   if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
     sendto_one(source_p, ":%s %d %s :On-line since %s",
                me.id, RPL_INFO, source_p->id,
                myctime(me.localClient->firsttime));
-  }
   else
-  {
     sendto_one(source_p, ":%s %d %s :On-line since %s",
                me.name, RPL_INFO, source_p->name,
                myctime(me.localClient->firsttime));
-  }
 }
 
 /* send_conf_options()
@@ -727,7 +611,7 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as "YES" or "NO" */
       case OUTPUT_BOOLEAN_YN:
       {
-        int option = *((int *)iptr->option);
+        const int option = *((int *)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
                    from, RPL_INFO, to,
@@ -738,7 +622,7 @@ send_conf_options(struct Client *source_p)
 
       case OUTPUT_BOOLEAN2:
       {
-        int option = *((int *)iptr->option);
+        const int option = *((int *)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
                    from, RPL_INFO, to,
@@ -753,9 +637,100 @@ send_conf_options(struct Client *source_p)
              from, to, "");
 }
 
+/* send_info_text()
+ *
+ * inputs       - client pointer to send info text to
+ * output       - NONE
+ * side effects - info text is sent to client
+ */
+static void
+send_info_text(struct Client *source_p)
+{
+  const char **text = infotext;
+  char *source, *target;
+
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
+                       "INFO requested by %s (%s@%s) [%s]",
+                       source_p->name, source_p->username,
+                       source_p->host, source_p->servptr->name);
+
+  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) &&
+      HasID(source_p))
+    source = me.id, target = source_p->id;
+  else
+    source = me.name, target = source_p->name;
+
+  while (*text)
+  {
+    const char *line = *text++;
+
+    if (*line == '\0')
+      line = " ";
+
+    sendto_one(source_p, form_str(RPL_INFO),
+               source, target, line);
+  }
+
+  if (HasUMode(source_p, UMODE_OPER))
+    send_conf_options(source_p);
+
+  send_birthdate_online_time(source_p);
+
+  sendto_one(source_p, form_str(RPL_ENDOFINFO),
+             me.name, source_p->name);
+}
+
+/*
+** m_info()
+**  parv[0] = sender prefix
+**  parv[1] = servername
+*/
+static void
+m_info(struct Client *client_p, struct Client *source_p,
+       int parc, char *parv[])
+{
+  static time_t last_used = 0;
+
+  if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+  {
+    /* safe enough to give this on a local connect only */
+    sendto_one(source_p, form_str(RPL_LOAD2HI),
+               me.name, source_p->name);
+    return;
+  }
+
+  last_used = CurrentTime;
+
+  if (!ConfigFileEntry.disable_remote)
+    if (hunt_server(client_p,source_p, ":%s INFO :%s", 1,
+                    parc, parv) != HUNTED_ISME)
+      return;
+
+  send_info_text(source_p);
+}
+
+/*
+** ms_info()
+**  parv[0] = sender prefix
+**  parv[1] = servername
+*/
+static void
+ms_info(struct Client *client_p, struct Client *source_p,
+        int parc, char *parv[])
+{
+  if (!IsClient(source_p))
+      return;
+
+  if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
+                  parc, parv) != HUNTED_ISME)
+    return;
+
+  send_info_text(source_p);
+}
+
 static struct Message info_msgtab = {
   "INFO", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_info, ms_info, m_ignore, mo_info, m_ignore }
+  { m_unregistered, m_info, ms_info, m_ignore, ms_info, m_ignore }
 };
 
 static void

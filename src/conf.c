@@ -1287,11 +1287,8 @@ rehash(int sig)
   load_conf_modules();
 
   rehashed_klines = 1;
-/* XXX */
-  if (ConfigLoggingEntry.use_logging)
-    log_close_all();
 
-  return(0);
+  return 0;
 }
 
 /* set_default_conf()
@@ -1338,7 +1335,7 @@ set_default_conf(void)
   AdminInfo.email = NULL;
   AdminInfo.description = NULL;
 
-  log_close_all();
+  log_del_all();
 
   ConfigLoggingEntry.use_logging = 1;
 
@@ -1773,6 +1770,8 @@ read_conf_files(int cold)
 
   read_conf(conf_parser_ctx.conf_file);
   fclose(conf_parser_ctx.conf_file);
+
+  log_reopen_all();
 
   add_isupport("NICKLEN", NULL, ServerInfo.max_nick_length);
   add_isupport("NETWORK", ServerInfo.network_name, -1);

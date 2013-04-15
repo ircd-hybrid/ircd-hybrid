@@ -3777,7 +3777,7 @@ yyreduce:
     break;
 
   if (block_state.type.value && block_state.file.buf[0])
-    log_add_file(block_state.type.value, block_state.size.value,
+    log_set_file(block_state.type.value, block_state.size.value,
                  block_state.file.buf);
 }
     break;

@@ -534,7 +534,7 @@ main(int argc, char *argv[])
   eventInit();
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
-  log_add_file(LOG_TYPE_IRCD, 0, logFileName);
+  log_set_file(LOG_TYPE_IRCD, 0, logFileName);
   check_can_use_v6();
   init_comm();         /* This needs to be setup early ! -- adrian */
   /* Check if there is pidfile and daemon already running */

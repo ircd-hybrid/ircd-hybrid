@@ -48,7 +48,6 @@ mo_hash(struct Client *client_p, struct Client *source_p,
   struct Client *icl;
   struct Channel *ch;
   struct UserHost *ush;
-  struct MaskItem *rch;
 
   for (i = 0; i < HASHSIZE; ++i)
   {
@@ -89,29 +88,6 @@ mo_hash(struct Client *client_p, struct Client *source_p,
   }
 
   sendto_one(source_p, ":%s NOTICE %s :Channel: entries: %d buckets: %d "
-             "max chain: %d", me.name, source_p->name, count, buckets,
-             max_chain);
-
-  count     = 0;
-  buckets   = 0;
-  max_chain = 0;
-
-  for (i = 0; i < HASHSIZE; ++i)
-  {
-    if ((rch = hash_get_bucket(HASH_TYPE_RESERVED, i)) != NULL)
-    {
-      int len = 0;
-
-      ++buckets;
-      for (; rch != NULL; rch = rch->hnext)
-        ++len;
-      if (len > max_chain)
-        max_chain = len;
-      count += len;
-    }
-  }
-
-  sendto_one(source_p, ":%s NOTICE %s :Resv: entries: %d buckets: %d "
              "max chain: %d", me.name, source_p->name, count, buckets,
              max_chain);
 

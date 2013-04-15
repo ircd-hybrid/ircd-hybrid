@@ -42,6 +42,7 @@
 #include "memory.h"
 #include "mempool.h"
 #include "s_misc.h"
+#include "resv.h"
 
 struct config_channel_entry ConfigChannel;
 dlink_list global_channel_list = { NULL, NULL, 0 };
@@ -718,7 +719,7 @@ can_send(struct Channel *chptr, struct Client *source_p, struct Membership *ms)
 
   if (MyClient(source_p) && !IsExemptResv(source_p))
     if (!(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv))
-      if (!hash_find_resv(chptr->chname) == ConfigChannel.restrict_channels)
+      if (!match_find_resv(chptr->chname) == ConfigChannel.restrict_channels)
         return ERR_CANNOTSENDTOCHAN;
 
   if (ms != NULL || (ms = find_channel_link(source_p, chptr)))

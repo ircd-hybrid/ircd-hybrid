@@ -57,7 +57,6 @@ static struct Client *idTable[HASHSIZE];
 static struct Client *clientTable[HASHSIZE];
 static struct Channel *channelTable[HASHSIZE];
 static struct UserHost *userhostTable[HASHSIZE];
-static struct MaskItem *resvchannelTable[HASHSIZE];
 
 
 /* init_hash()
@@ -93,7 +92,7 @@ strhash(const char *name)
   const unsigned char *p = (const unsigned char *)name;
   unsigned int hval = FNV1_32_INIT;
 
-  if (*p == '\0')
+  if (EmptyString(p))
     return 0;
   for (; *p != '\0'; ++p)
   {
@@ -150,15 +149,6 @@ hash_add_channel(struct Channel *chptr)
 
   chptr->hnextch = channelTable[hashv];
   channelTable[hashv] = chptr;
-}
-
-void
-hash_add_resv(struct MaskItem *conf)
-{
-  unsigned int hashv = strhash(conf->name);
-
-  conf->hnext = resvchannelTable[hashv];
-  resvchannelTable[hashv] = conf;
 }
 
 void
@@ -300,31 +290,6 @@ hash_del_channel(struct Channel *chptr)
 
       tmp->hnextch = tmp->hnextch->hnextch;
       chptr->hnextch = chptr;
-    }
-  }
-}
-
-void
-hash_del_resv(struct MaskItem *chptr)
-{
-  unsigned int hashv = strhash(chptr->name);
-  struct MaskItem *tmp = resvchannelTable[hashv];
-
-  if (tmp != NULL)
-  {
-    if (tmp == chptr)
-    {
-      resvchannelTable[hashv] = chptr->hnext;
-      chptr->hnext = chptr;
-    }
-    else
-    {
-      while (tmp->hnext != chptr)
-        if ((tmp = tmp->hnext) == NULL)
-          return;
-
-      tmp->hnext = tmp->hnext->hnext;
-      chptr->hnext = chptr;
     }
   }
 }
@@ -493,50 +458,11 @@ hash_get_bucket(int type, unsigned int hashv)
     case HASH_TYPE_USERHOST:
       return userhostTable[hashv];
       break;
-    case HASH_TYPE_RESERVED:
-      return resvchannelTable[hashv];
-      break;
     default:
       assert(0);
   }
 
   return NULL;
-}
-
-/* hash_find_resv()
- *
- * inputs       - pointer to name
- * output       - NONE
- * side effects - New semantics: finds a reserved channel whose name is 'name',
- *                if can't find one returns NULL, if can find it moves
- *                it to the top of the list and returns it.
- */
-struct MaskItem *
-hash_find_resv(const char *name)
-{
-  unsigned int hashv = strhash(name);
-  struct MaskItem *chptr;
-
-  if ((chptr = resvchannelTable[hashv]) != NULL)
-  {
-    if (irccmp(name, chptr->name))
-    {
-      struct MaskItem *prev;
-
-      while (prev = chptr, (chptr = chptr->hnext) != NULL)
-      {
-        if (!irccmp(name, chptr->name))
-        {
-          prev->hnext = chptr->hnext;
-          chptr->hnext = resvchannelTable[hashv];
-          resvchannelTable[hashv] = chptr;
-          break;
-        }
-      }
-    }
-  }
-
-  return chptr;
 }
 
 struct UserHost *
@@ -781,7 +707,7 @@ exceeding_sendq(struct Client *to)
 void
 free_list_task(struct ListTask *lt, struct Client *source_p)
 {
-  dlink_node *dl, *dln;
+  dlink_node *dl = NULL, *dln = NULL;
 
   if ((dl = dlinkFindDelete(&listing_client_list, source_p)) != NULL)
     free_dlink_node(dl);
@@ -813,9 +739,9 @@ free_list_task(struct ListTask *lt, struct Client *source_p)
  * side effects -
  */
 static int
-list_allow_channel(const char *chname, struct ListTask *lt)
+list_allow_channel(const char *chname, const struct ListTask *lt)
 {
-  dlink_node *dl = NULL;
+  const dlink_node *dl = NULL;
 
   DLINK_FOREACH(dl, lt->show_mask.head)
     if (match(dl->data, chname) != 0)

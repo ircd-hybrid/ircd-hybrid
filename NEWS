@@ -6,11 +6,17 @@ o) Implemented new memory pool allocator which basically is based upon Tor's
 o) Major code cleanups
 o) Implemented new binary database storage for X-,D-,K-,G-Lines and RESVs.
    Temporary bans are now stored as well and will persist after a reboot
+o) Channel based resv{} blocks may now contain wildcards
 
 
 -- ircd-hybrid-8.0.7 Release Notes
-o) Added SVSHOST command handler which allows services to change the
-   hostname of a specific user
+o) Services may now set a channel topic without joining the channel first
+o) Fixed bug where /whois would send empty sockhost information on TS5
+   servers
+o) Remote server connection and split notices now go to new usermode +e.
+   These previously used usermode +x.
+o) Services may now change the host of a specific user
+   via "SVSMODE <timestamp> <target> +x <hostname>"
 
 
 -- ircd-hybrid-8.0.6 Release Notes

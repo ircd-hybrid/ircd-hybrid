@@ -213,21 +213,18 @@ show_lusers(struct Client *source_p)
     sendto_one(source_p, form_str(RPL_LUSERME),
                from, to, Count.local, Count.myserver);
     sendto_one(source_p, form_str(RPL_LOCALUSERS),
-               from, to, Count.local, Count.max_loc,
-               Count.local, Count.max_loc);
+               from, to, Count.local, Count.max_loc);
   }
   else
   {
     sendto_one(source_p, form_str(RPL_LUSERME),
                from, to, Count.total, 0);
     sendto_one(source_p, form_str(RPL_LOCALUSERS), 
-               from, to, Count.total, Count.max_tot,
-               Count.total, Count.max_tot);
+               from, to, Count.total, Count.max_tot);
   }
 
   sendto_one(source_p, form_str(RPL_GLOBALUSERS),
-             from, to, Count.total, Count.max_tot,
-             Count.total, Count.max_tot);
+             from, to, Count.total, Count.max_tot);
 
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
     sendto_one(source_p, form_str(RPL_STATSCONN), from, to,

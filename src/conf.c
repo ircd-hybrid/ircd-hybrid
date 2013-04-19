@@ -251,7 +251,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
     {
       conf = ptr->data;
 
-      sendto_one(source_p, RPL_STATSXLINE,
+      sendto_one(source_p, form_str(RPL_STATSXLINE),
 		 me.name, source_p->name, 
 		 conf->until ? "x": "X", conf->count,
 		 conf->name, conf->reason);
@@ -264,7 +264,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
     {
       conf = ptr->data;
 
-      sendto_one(source_p, RPL_STATSXLINE,
+      sendto_one(source_p, form_str(RPL_STATSXLINE),
                  me.name, source_p->name,
                  "XR", conf->count,
                  conf->name, conf->reason);
@@ -276,7 +276,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
     {
       conf = ptr->data;
 
-      sendto_one(source_p, RPL_STATSKLINE, me.name,
+      sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
                  source_p->name, "KR", conf->host, conf->user,
                  conf->reason);
     }
@@ -298,7 +298,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
         else
           *p++ = ToLower(shared->letter);
 
-      sendto_one(source_p, RPL_STATSULINE,
+      sendto_one(source_p, form_str(RPL_STATSULINE),
 		 me.name, source_p->name, conf->name,
                  conf->user?conf->user: "*",
 		 conf->host?conf->host: "*", buf);
@@ -318,7 +318,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
         else
           *p++ = ToLower(shared->letter);
 
-      sendto_one(source_p, RPL_STATSULINE,
+      sendto_one(source_p, form_str(RPL_STATSULINE),
                  me.name, source_p->name, conf->name,
                  "*", "*", buf);
     }
@@ -332,12 +332,12 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 
       /* Don't allow non opers to see oper privs */
       if (HasUMode(source_p, UMODE_OPER))
-	sendto_one(source_p, RPL_STATSOLINE,
+	sendto_one(source_p, form_str(RPL_STATSOLINE),
 		   me.name, source_p->name, 'O', conf->user, conf->host,
 		   conf->name, oper_privs_as_string(conf->port),
 		   conf->class ? conf->class->name : "<default>");
       else
-	sendto_one(source_p, RPL_STATSOLINE,
+	sendto_one(source_p, form_str(RPL_STATSOLINE),
 		   me.name, source_p->name, 'O', conf->user, conf->host,
                    conf->name, "0",
 		   conf->class ? conf->class->name : "<default>");
@@ -348,7 +348,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
     DLINK_FOREACH(ptr, class_get_list()->head)
     {
       class = ptr->data;
-      sendto_one(source_p, RPL_STATSYLINE,
+      sendto_one(source_p, form_str(RPL_STATSYLINE),
 		 me.name, source_p->name, 'Y',
 		 class->name, class->ping_freq,
 		 class->con_freq,
@@ -365,7 +365,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
     DLINK_FOREACH(ptr, service_items.head)
     {
       conf = ptr->data;
-      sendto_one(source_p, RPL_STATSSERVICE,
+      sendto_one(source_p, form_str(RPL_STATSSERVICE),
                  me.name, source_p->name, 'S', "*", conf->name, 0, 0);
     }
     break;
@@ -391,12 +391,12 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
        * Allow admins to see actual ips unless hide_server_ips is enabled
        */
       if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
-	sendto_one(source_p, RPL_STATSCLINE,
+	sendto_one(source_p, form_str(RPL_STATSCLINE),
 		   me.name, source_p->name, 'C', conf->host,
 		   buf, conf->name, conf->port,
 		   conf->class ? conf->class->name : "<default>");
         else
-          sendto_one(source_p, RPL_STATSCLINE,
+          sendto_one(source_p, form_str(RPL_STATSCLINE),
                      me.name, source_p->name, 'C',
 		     "*@127.0.0.1", buf, conf->name, conf->port,
 		     conf->class ? conf->class->name : "<default>");
@@ -409,7 +409,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       conf = ptr->data;
 
       DLINK_FOREACH(dptr, conf->hub_list.head)
-        sendto_one(source_p, RPL_STATSHLINE, me.name,
+        sendto_one(source_p, form_str(RPL_STATSHLINE), me.name,
                    source_p->name, 'H', dptr->data, conf->name, 0, "*");
     }
 
@@ -418,7 +418,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       conf = ptr->data;
 
       DLINK_FOREACH(dptr, conf->leaf_list.head)
-        sendto_one(source_p, RPL_STATSLLINE, me.name,
+        sendto_one(source_p, form_str(RPL_STATSLLINE), me.name,
                    source_p->name, 'L', dptr->data, conf->name, 0, "*");
     }
 
@@ -549,7 +549,7 @@ verify_access(struct Client *client_p)
     {
       if (IsConfRedir(conf))
       {
-        sendto_one(client_p, RPL_REDIR,
+        sendto_one(client_p, form_str(RPL_REDIR),
                    me.name, client_p->name,
                    conf->name ? conf->name : "",
                    conf->port);
@@ -2146,7 +2146,7 @@ parse_aline(const char *cmd, struct Client *source_p,
 
   if (parc == 0)
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, cmd);
     return -1;
   }
@@ -2181,14 +2181,14 @@ parse_aline(const char *cmd, struct Client *source_p,
 
       if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
       {
-        sendto_one(source_p, ERR_NOPRIVS,
+        sendto_one(source_p, form_str(ERR_NOPRIVS),
                    me.name, source_p->name, "remoteban");
         return -1;
       }
 
       if (parc == 0 || EmptyString(*parv))
       {
-	sendto_one(source_p, ERR_NEEDMOREPARAMS,
+	sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 		   me.name, source_p->name, cmd);
 	return -1;
       }

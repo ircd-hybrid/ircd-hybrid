@@ -77,7 +77,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(password))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "OPER");
     return;
   }
@@ -88,7 +88,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
   if ((conf = find_exact_name_conf(CONF_OPER, source_p, name, NULL, NULL)) == NULL)
   {
-    sendto_one(source_p, ERR_NOOPERHOST, me.name, source_p->name);
+    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
     conf = find_exact_name_conf(CONF_OPER, NULL, name, NULL, NULL);
     failed_oper_notice(source_p, name, (conf != NULL) ?
                        "host mismatch" : "no oper {} block");
@@ -112,7 +112,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
   }
   else
   {
-    sendto_one(source_p, ERR_PASSWDMISMATCH, me.name, source_p->name);
+    sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
     failed_oper_notice(source_p, name, "password mismatch");
   }
 }
@@ -127,7 +127,7 @@ static void
 mo_oper(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  sendto_one(source_p, RPL_YOUREOPER,
+  sendto_one(source_p, form_str(RPL_YOUREOPER),
              me.name, source_p->name);
 }
 

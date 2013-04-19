@@ -50,6 +50,8 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_svsmode.la   \
                       m_svsnick.la   \
                       m_tburst.la    \
+                      m_testline.la  \
+                      m_testmask.la  \
                       m_time.la      \
                       m_topic.la     \
                       m_trace.la     \
@@ -111,6 +113,8 @@ m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsmode_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsnick_la_LDFLAGS = $(MODULE_FLAGS)
 m_tburst_la_LDFLAGS = $(MODULE_FLAGS)
+m_testline_la_LDFLAGS = $(MODULE_FLAGS)
+m_testmask_la_LDFLAGS = $(MODULE_FLAGS)
 m_time_la_LDFLAGS = $(MODULE_FLAGS)
 m_topic_la_LDFLAGS = $(MODULE_FLAGS)
 m_trace_la_LDFLAGS = $(MODULE_FLAGS)
@@ -171,6 +175,8 @@ m_svinfo_la_SOURCES = m_svinfo.c
 m_svsmode_la_SOURCES = m_svsmode.c
 m_svsnick_la_SOURCES = m_svsnick.c
 m_tburst_la_SOURCES = m_tburst.c
+m_testline_la_SOURCES = m_testline.c
+m_testmask_la_SOURCES = m_testmask.c
 m_time_la_SOURCES = m_time.c
 m_topic_la_SOURCES = m_topic.c
 m_trace_la_SOURCES = m_trace.c

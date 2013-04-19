@@ -60,7 +60,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "CONNECT");
     return;
   }
@@ -69,7 +69,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
   {
     if (!HasOFlag(source_p, OPER_FLAG_REMOTE))
     {
-      sendto_one(source_p, ERR_NOPRIVS,
+      sendto_one(source_p, form_str(ERR_NOPRIVS),
                  me.name, source_p->name, "connect");
       return;
     }
@@ -189,7 +189,7 @@ ms_connect(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "CONNECT");
     return;
   }

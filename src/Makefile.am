@@ -38,6 +38,7 @@ ircd_SOURCES = channel.c         \
                modules.c         \
                motd.c            \
                rng_mt.c          \
+               numeric.c         \
                packet.c          \
                parse.c           \
                s_bsd_epoll.c     \

@@ -94,7 +94,7 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
     if (target_p && MyClient(target_p))
       report_this_status(source_p, target_p, full_etrace);
       
-    sendto_one(source_p, RPL_ENDOFTRACE, me.name, 
+    sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, 
                source_p->name, tname);
     return;
   }
@@ -112,7 +112,7 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
       report_this_status(source_p, target_p, full_etrace);
   }
 
-  sendto_one(source_p, RPL_ENDOFTRACE, me.name,
+  sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name,
              source_p->name, tname);
 }
 
@@ -144,7 +144,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
     if (full_etrace)
     {
       if (ConfigFileEntry.hide_spoof_ips)
-	sendto_one(source_p, RPL_ETRACE_FULL,
+	sendto_one(source_p, form_str(RPL_ETRACE_FULL),
 		   me.name,
 		   source_p->name,
 		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
@@ -157,7 +157,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		   IsIPSpoof(target_p) ? "<hidden>" : target_p->localClient->client_server,
 		   target_p->info);
       else
-        sendto_one(source_p, RPL_ETRACE_FULL,
+        sendto_one(source_p, form_str(RPL_ETRACE_FULL),
 		   me.name,
 		   source_p->name, 
 		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User", 
@@ -173,7 +173,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
     else
     {
       if (ConfigFileEntry.hide_spoof_ips)
-	sendto_one(source_p, RPL_ETRACE,
+	sendto_one(source_p, form_str(RPL_ETRACE),
 		   me.name,
 		   source_p->name,
 		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
@@ -184,7 +184,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		   IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
 		   target_p->info);
       else
-	sendto_one(source_p, RPL_ETRACE,
+	sendto_one(source_p, form_str(RPL_ETRACE),
 		   me.name,
 		   source_p->name, 
 		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User", 

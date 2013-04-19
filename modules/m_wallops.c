@@ -47,7 +47,7 @@ mo_wallops(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(message))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "WALLOPS");
     return;
   }

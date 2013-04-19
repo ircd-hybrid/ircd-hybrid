@@ -47,14 +47,14 @@ mo_globops(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_GLOBOPS))
   {
-    sendto_one(source_p, ERR_NOPRIVS,
+    sendto_one(source_p, form_str(ERR_NOPRIVS),
                me.name, source_p->name, "globops");
     return;
   }
 
   if (EmptyString(message))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "GLOBOPS");
     return;
   }

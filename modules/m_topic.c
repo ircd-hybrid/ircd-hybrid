@@ -51,7 +51,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "TOPIC");
     return;
   }
@@ -61,7 +61,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
-    sendto_one(source_p, ERR_NOSUCHCHANNEL,
+    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                me.name, source_p->name, parv[1]);
     return;
   }
@@ -73,7 +73,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
 
     if ((ms = find_channel_link(source_p, chptr)) == NULL)
     {
-      sendto_one(source_p, ERR_NOTONCHANNEL, me.name,
+      sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name,
                  source_p->name, parv[1]);
       return;
     }
@@ -103,7 +103,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
                            chptr->chname, chptr->topic);
     }
     else
-      sendto_one(source_p, ERR_CHANOPRIVSNEEDED,
+      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                  me.name, source_p->name, chptr->chname);
   }
   else /* only asking for topic */
@@ -111,21 +111,21 @@ m_topic(struct Client *client_p, struct Client *source_p,
     if (!SecretChannel(chptr) || IsMember(source_p, chptr))
     {
       if (chptr->topic[0] == '\0')
-        sendto_one(source_p, RPL_NOTOPIC,
+        sendto_one(source_p, form_str(RPL_NOTOPIC),
                    me.name, source_p->name, chptr->chname);
       else
       {
-        sendto_one(source_p, RPL_TOPIC,
+        sendto_one(source_p, form_str(RPL_TOPIC),
                    me.name, source_p->name,
                    chptr->chname, chptr->topic);
-        sendto_one(source_p, RPL_TOPICWHOTIME,
+        sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
                    me.name, source_p->name, chptr->chname,
                    chptr->topic_info,
                    chptr->topic_time);
       }
     }
     else
-      sendto_one(source_p, ERR_NOTONCHANNEL,
+      sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
                  me.name, source_p->name, chptr->chname);
   }
 }
@@ -146,14 +146,14 @@ ms_topic(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                from, to, "TOPIC");
     return;
   }
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
-    sendto_one(source_p, ERR_NOSUCHCHANNEL,
+    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                from, to, parv[1]);
     return;
   }

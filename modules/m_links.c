@@ -69,13 +69,13 @@ do_links(struct Client *source_p, int parc, char *parv[])
        * We just send the reply, as if they are here there's either no SHIDE,
        * or they're an oper..  
        */
-      sendto_one(source_p, RPL_LINKS,
+      sendto_one(source_p, form_str(RPL_LINKS),
                  me_name, nick,
                  target_p->name, target_p->servptr->name,
                  target_p->hopcount, target_p->info);
     }
   
-    sendto_one(source_p, RPL_ENDOFLINKS,
+    sendto_one(source_p, form_str(RPL_ENDOFLINKS),
                me_name, nick,
                EmptyString(mask) ? "*" : mask);
   }
@@ -85,12 +85,12 @@ do_links(struct Client *source_p, int parc, char *parv[])
      * Print our own info so at least it looks like a normal links
      * then print out the file (which may or may not be empty)
      */
-    sendto_one(source_p, RPL_LINKS,
+    sendto_one(source_p, form_str(RPL_LINKS),
                ID_or_name(&me, source_p->from),
                ID_or_name(source_p, source_p->from),
                me.name, me.name, 0, me.info);
     send_message_file(source_p, &ConfigFileEntry.linksfile);
-    sendto_one(source_p, RPL_ENDOFLINKS,
+    sendto_one(source_p, form_str(RPL_ENDOFLINKS),
                ID_or_name(&me, source_p->from),
                ID_or_name(source_p, source_p->from), "*");
   }
@@ -126,7 +126,7 @@ m_links(struct Client *client_p, struct Client *source_p,
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    sendto_one(source_p, RPL_LOAD2HI,
+    sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
     return;
   }

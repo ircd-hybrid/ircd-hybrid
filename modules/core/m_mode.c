@@ -56,7 +56,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "MODE");
     return;
   }
@@ -71,7 +71,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
-    sendto_one(source_p, ERR_NOSUCHCHANNEL,
+    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
 	       ID_or_name(&me, source_p->from),
 	       ID_or_name(source_p, source_p->from),
 	       parv[1]);
@@ -82,9 +82,9 @@ m_mode(struct Client *client_p, struct Client *source_p,
   if (parc < 3)
   {
     channel_modes(chptr, source_p, modebuf, parabuf);
-    sendto_one(source_p, RPL_CHANNELMODEIS,
+    sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
                me.name, source_p->name, chptr->chname, modebuf, parabuf);
-    sendto_one(source_p, RPL_CREATIONTIME,
+    sendto_one(source_p, form_str(RPL_CREATIONTIME),
                me.name, source_p->name, chptr->chname, chptr->channelts);
   }
   /* bounce all modes from people we deop on sjoin
@@ -133,7 +133,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
-    sendto_one(source_p, ERR_NOSUCHCHANNEL,
+    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                ID_or_name(&me, client_p), ID_or_name(source_p, client_p), parv[2]);
     return;
   }

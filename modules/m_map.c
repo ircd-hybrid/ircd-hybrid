@@ -76,7 +76,7 @@ dump_map(struct Client *client_p, const struct Client *root_p,
   sprintf(pb, " Users: %5d (%1.1f%%)", users,
           100 * (float)users / (float)Count.total);
 
-  sendto_one(client_p, RPL_MAP, me.name, client_p->name, buf);
+  sendto_one(client_p, form_str(RPL_MAP), me.name, client_p->name, buf);
 
   if (root_p->serv->server_list.head)
   {
@@ -133,7 +133,7 @@ m_map(struct Client *client_p, struct Client *source_p,
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
     /* safe enough to give this on a local connect only */
-    sendto_one(source_p, RPL_LOAD2HI,
+    sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
     return;
   }
@@ -141,7 +141,7 @@ m_map(struct Client *client_p, struct Client *source_p,
   last_used = CurrentTime;
 
   dump_map(source_p, &me, 0, buf);
-  sendto_one(source_p, RPL_MAPEND, me.name, source_p->name);
+  sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
 }
 
 /* mo_map()
@@ -152,7 +152,7 @@ mo_map(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
   dump_map(source_p, &me, 0, buf);
-  sendto_one(source_p, RPL_MAPEND, me.name, source_p->name);
+  sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
 }
 
 static struct Message map_msgtab = {

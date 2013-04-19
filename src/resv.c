@@ -133,7 +133,7 @@ report_resv(struct Client *source_p)
   DLINK_FOREACH(ptr, resv_channel_list.head)
   {
     conf = ptr->data;
-    sendto_one(source_p, RPL_STATSQLINE,
+    sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
 	       conf->until ? 'q' : 'Q', conf->count,
 	       conf->name, conf->reason);
@@ -142,7 +142,7 @@ report_resv(struct Client *source_p)
   DLINK_FOREACH(ptr, nresv_items.head)
   {
     conf = ptr->data;
-    sendto_one(source_p, RPL_STATSQLINE,
+    sendto_one(source_p, form_str(RPL_STATSQLINE),
                me.name, source_p->name,
 	       conf->until ? 'q' : 'Q', conf->count,
 	       conf->name, conf->reason);

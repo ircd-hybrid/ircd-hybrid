@@ -55,7 +55,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, ERR_NEEDMOREPARAMS,
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "SQUIT");
     return;
   }
@@ -81,14 +81,14 @@ mo_squit(struct Client *client_p, struct Client *source_p,
 
   if ((target_p == NULL) || IsMe(target_p))
   {
-    sendto_one(source_p, ERR_NOSUCHSERVER,
+    sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                me.name, source_p->name, server);
     return;
   }
 
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_REMOTE))
   {
-    sendto_one(source_p, ERR_NOPRIVILEGES,
+    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
                me.name, source_p->name);
     return;
   }

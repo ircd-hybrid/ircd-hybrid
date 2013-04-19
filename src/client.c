@@ -462,7 +462,7 @@ ban_them(struct Client *client_p, struct MaskItem *conf)
                        type_string, get_client_name(client_p, HIDE_IP));
 
   if (IsClient(client_p))
-    sendto_one(client_p, ERR_YOUREBANNEDCREEP,
+    sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
 	       me.name, client_p->name, user_reason);
 
   exit_client(client_p, &me, user_reason);
@@ -546,7 +546,7 @@ find_chasing(struct Client *client_p, struct Client *source_p, const char *user,
 			(time_t)ConfigFileEntry.kill_chase_time_limit))
 			 == NULL)
   {
-    sendto_one(source_p, ERR_NOSUCHNICK,
+    sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                me.name, source_p->name, user);
     return NULL;
   }

@@ -82,7 +82,7 @@ watch_count_memory(unsigned int *const count, uint64_t *const memory)
  * \param reply numeric to send. Either RPL_LOGON or RPL_LOGOFF
  */
 void
-watch_check_hash(struct Client *client_p, const char *reply)
+watch_check_hash(struct Client *client_p, int reply)
 {
   struct Watch *anptr = NULL;
   dlink_node *ptr = NULL;
@@ -97,8 +97,8 @@ watch_check_hash(struct Client *client_p, const char *reply)
   DLINK_FOREACH(ptr, anptr->watched_by.head)
   {
     struct Client *target_p = ptr->data;
-/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
-    sendto_one(target_p, reply,
+
+    sendto_one(target_p, form_str(reply),
                me.name, target_p->name, client_p->name,
                client_p->username, client_p->host,
                anptr->lasttime, client_p->info);

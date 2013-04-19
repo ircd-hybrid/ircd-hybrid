@@ -50,7 +50,7 @@ m_ping(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, ERR_NOORIGIN,
+    sendto_one(source_p, form_str(ERR_NOORIGIN),
                me.name, source_p->name);
     return;
   }
@@ -77,7 +77,7 @@ m_ping(struct Client *client_p, struct Client *source_p,
     }
     else
     {
-      sendto_one(source_p, ERR_NOSUCHSERVER,
+      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                  me.name, source_p->name, destination);
       return;
     }
@@ -96,7 +96,7 @@ ms_ping(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, ERR_NOORIGIN,
+    sendto_one(source_p, form_str(ERR_NOORIGIN),
                me.name, source_p->name);
     return;
   }
@@ -111,7 +111,7 @@ ms_ping(struct Client *client_p, struct Client *source_p,
 		 origin, destination);
     else
     {
-      sendto_one(source_p, ERR_NOSUCHSERVER,
+      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                  ID_or_name(&me, client_p), source_p->name, destination);
       return;
     }

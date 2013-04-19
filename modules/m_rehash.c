@@ -48,7 +48,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_REHASH))
   {
-    sendto_one(source_p, ERR_NOPRIVS,
+    sendto_one(source_p, form_str(ERR_NOPRIVS),
                me.name, source_p->name, "rehash");
     return;
   }
@@ -57,7 +57,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
   {
     if (irccmp(parv[1], "DNS") == 0)
     {
-      sendto_one(source_p, RPL_REHASHING, me.name, source_p->name, "DNS");
+      sendto_one(source_p, form_str(RPL_REHASHING), me.name, source_p->name, "DNS");
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s is rehashing DNS",
                            get_oper_name(source_p));
@@ -90,7 +90,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
   }
   else
   {
-    sendto_one(source_p, RPL_REHASHING,
+    sendto_one(source_p, form_str(RPL_REHASHING),
                me.name, source_p->name, ConfigFileEntry.configfile);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s is rehashing server config file",

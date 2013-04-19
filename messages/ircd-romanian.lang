@@ -1,0 +1,126 @@
+; ircd-hybrid-7 standard message file - for Romanian
+; Copyright (C) 2007 Bogdan Mintoi <bogdomania@yahoo.com>
+; $Id$
+; 
+
+RPL_WELCOME:		 :%s 001 %s :Bine ai venit pe reteaua ValceaNet %s
+RPL_YOURHOST:		 :%s 002 %s :Gazda ta este %s, ruland versiunea %s
+RPL_CREATED:		 :%s 003 %s :Acest server a fost creat la data/ora %s
+RPL_ISUPPORT:		 :%s 005 %s %s :sunt suportate de acest server
+RPL_REDIR:		 :%s 010 %s %s %d :Foloseste acest Server/Port in schimb
+RPL_MAPEND:		 :%s 017 %s :Sfarsitul /MAP
+RPL_YOURID:		 :%s 042 %s %s :ID tau unic
+RPL_TRACELINK:		 :%s 200 %s Link %s %s %s
+RPL_TRACECONNECTING:	 :%s 201 %s Try. %s %s
+RPL_TRACEHANDSHAKE:	 :%s 202 %s H.S. %s %s
+RPL_TRACEUNKNOWN:	 :%s 203 %s ???? %s %s (%s) %d
+RPL_TRACEOPERATOR:	 :%s 204 %s Oper %s %s (%s) %lu %lu
+RPL_TRACEUSER:		 :%s 205 %s User %s %s (%s) %lu %lu
+RPL_TRACESERVER:	 :%s 206 %s Serv %s %dS %dC %s %s!%s@%s %lu
+RPL_TRACENEWTYPE:	 :%s 208 %s <noultip> 0 %s
+RPL_TRACECLASS:		 :%s 209 %s Clasa %s %d
+RPL_ENDOFSTATS:		 :%s 219 %s %c :Sfarsitul /STATS report
+RPL_STATSUPTIME:	 :%s 242 %s :Server Up %d days, %d:%02d:%02d
+RPL_STATSCONN:		 :%s 250 %s :Numarul maxim de conexiuni: %d (%d clienti) (%llu conexiuni primite)
+RPL_LUSERCLIENT:	 :%s 251 %s :Exista %d utilizatori si %d invizibili pe %d servere
+RPL_LUSEROP:		 :%s 252 %s %d :IRC Operatori prezenti
+RPL_LUSERUNKNOWN:	 :%s 253 %s %d :conexiuni necunoscute
+RPL_LUSERCHANNELS:	 :%s 254 %s %d :canale formate
+RPL_LUSERME:		 :%s 255 %s :Exista %d clienti si %d servere
+RPL_ADMINME:		 :%s 256 %s :Informatii administrative despre %s
+RPL_ENDOFTRACE:		 :%s 262 %s %s :Sfarsitul TRACE
+RPL_LOAD2HI:		 :%s 263 %s :Serverul este momentan prea incarcat. Reancearca mai tarziu.
+RPL_LOCALUSERS:		 :%s 265 %s :Utilizatori locali actuali: %d  Max: %d
+RPL_GLOBALUSERS:	 :%s 266 %s :Utilizatori globali actuali: %d  Max: %d
+RPL_ENDOFACCEPT:	 :%s 282 %s :Sfarsitul listei /ACCEPT
+RPL_UNAWAY:		 :%s 305 %s :Nu mai esti marcat(a) ca fiind away.
+RPL_NOWAWAY:		 :%s 306 %s :Esti marcat(a) ca fiind away.
+RPL_WHOISADMIN:		 :%s 313 %s %s :este un Administrator de Server
+RPL_WHOISOPERATOR:	 :%s 313 %s %s :este un IRC Operator
+RPL_ENDOFWHO:		 :%s 315 %s %s :Sfarsitul listei /WHO
+RPL_WHOISIDLE:		 :%s 317 %s %s %d %d :seconds idle
+RPL_ENDOFWHOIS:		 :%s 318 %s %s :Sfarsitul listei /WHOIS
+RPL_LISTSTART:		 :%s 321 %s Canal :Useri  Nume
+RPL_LISTEND:		 :%s 323 %s :Sfarsitul /LIST
+RPL_NOTOPIC:		 :%s 331 %s %s :Nu este setat nici un topic.
+RPL_WHOISACTUALLY:	 :%s 338 %s %s %s :in prezent folosind host-ul
+RPL_ENDOFINVEXLIST:	 :%s 347 %s %s :Sfarsitul Liestei de Invite a Canalului
+RPL_ENDOFEXCEPTLIST:	 :%s 349 %s %s :Sfarsitul Listei de Exceptii a Canalului
+RPL_CLOSING:		 :%s 362 %s %s :Inchis. Status = %d
+RPL_CLOSEEND:		 :%s 363 %s %d: Conexiuni inchise
+RPL_ENDOFLINKS:		 :%s 365 %s %s :Sfarsitul listei /LINKS
+RPL_ENDOFNAMES:		 :%s 366 %s %s :Sfarsitul listei /NAMES
+RPL_ENDOFBANLIST:	 :%s 368 %s %s :Sfarsitul Listei de Ban-uri a Canalului
+RPL_ENDOFWHOWAS:	 :%s 369 %s %s :Sfarsitul WHOWAS
+RPL_INFOSTART:		 :%s 373 %s :Server INFO
+RPL_ENDOFINFO:		 :%s 374 %s :Sfarsitul listei /INFO
+RPL_MOTDSTART:		 :%s 375 %s :- %s Mesajul zilei - 
+RPL_ENDOFMOTD:		 :%s 376 %s :Sfarsitul /MOTD
+RPL_YOUREOPER:		 :%s 381 %s :Moduri setate-esti un IRCop
+RPL_REHASHING:		 :%s 382 %s %s :Se executa comanda Rehash
+RPL_HOSTHIDDEN:		 :%s 396 %s :este acum noul tau host
+ERR_NOSUCHNICK:		 :%s 401 %s %s :Nu exista acel nick sau canal
+ERR_NOSUCHSERVER:	 :%s 402 %s %s :Nu exista acel server
+ERR_NOSUCHCHANNEL:	 :%s 403 %s %s :Nu exista acel canal
+ERR_CANNOTSENDTOCHAN:	 :%s 404 %s %s :Nu poti trimite pe canal
+ERR_TOOMANYCHANNELS:	 :%s 405 %s %s :Te-ai alaturat prea multor canale
+ERR_WASNOSUCHNICK:	 :%s 406 %s %s :Nu a existat un asemenea nickname
+ERR_TOOMANYTARGETS:	 :%s 407 %s %s :Prea multe recipiente date. Doar %d procesate
+ERR_NOORIGIN:		 :%s 409 %s :Nu a fost specificata nici o origine
+ERR_NORECIPIENT:	 :%s 411 %s :Nu a fost specificat nici un recipient (%s)
+ERR_NOTEXTTOSEND:	 :%s 412 %s :Nu exista text de trimis
+ERR_NOTOPLEVEL:		 :%s 413 %s %s :Nici un domeniu TopLevel specificat
+ERR_WILDTOPLEVEL:	 :%s 414 %s %s :Wildcard in Domeniul TopLevel
+ERR_UNKNOWNCOMMAND:	 :%s 421 %s %s :Comanda nerecunoscuta
+ERR_NOMOTD:		 :%s 422 %s :Fisierul MOTD lipseste sau nu este activat
+ERR_NOADMININFO:	 :%s 423 %s %s :Nu este disponibila nici o informatie administrativa
+ERR_NONICKNAMEGIVEN:	 :%s 431 %s :Nici un nickname specificat
+ERR_ERRONEUSNICKNAME:	 :%s 432 %s %s :Nickname gresit
+ERR_NICKNAMEINUSE:	 :%s 433 %s %s :Nickname ales este deja folosit.Alege un alt nickname.
+ERR_NICKCOLLISION:	 :%s 436 %s %s :Coliziune de nickname - KILL
+ERR_UNAVAILRESOURCE:	 :%s 437 %s %s :Nickul sau canalul specificat este indisponibil temporar
+ERR_NICKTOOFAST:	 :%s 438 %s %s %s :Incercare de a schimba nick-ul prea rapida. Asteapta %d secunde.
+ERR_SERVICESDOWN:	 :%s 440 %s :Serviciile sunt dezactivate temporar.
+ERR_USERNOTINCHANNEL:	 :%s 441 %s %s %s :Nu se afla pe acel canal
+ERR_NOTONCHANNEL:	 :%s 442 %s %s :Nu te afli pe acel canal
+ERR_USERONCHANNEL:	 :%s 443 %s %s %s :este deja pe canal
+ERR_NOTREGISTERED:	 :%s 451 %s :Nu esti autentificat(a)
+ERR_ACCEPTFULL:		 :%s 456 %s :Lista de accepturi este plina
+ERR_ACCEPTEXIST:	 :%s 457 %s %s :se afla deja in lista ta de accepturi
+ERR_ACCEPTNOT:		 :%s 458 %s %s :nu se afla in lista ta de accepturi
+ERR_NEEDMOREPARAMS:	 :%s 461 %s %s :Parametri insuficienti
+ERR_ALREADYREGISTRED:	 :%s 462 %s :Esti deja autentificat(a)
+ERR_PASSWDMISMATCH:	 :%s 464 %s :Parola incorecta
+ERR_YOUREBANNEDCREEP:	 :%s 465 %s :Esti momentan banat(a) pe acest server- %s
+ERR_CHANNELISFULL:	 :%s 471 %s %s :Nu poti intra pe canal (+l)
+ERR_UNKNOWNMODE:	 :%s 472 %s %c :este un caracter nerecunoscut de sistem
+ERR_INVITEONLYCHAN:	 :%s 473 %s %s :Nu poti intra pe canal (+i)
+ERR_BANNEDFROMCHAN:	 :%s 474 %s %s :Nu poti intra pe canal (+b)
+ERR_BADCHANNELKEY:	 :%s 475 %s %s :Nu poti intra pe canal (+k)
+ERR_BANLISTFULL:	 :%s 478 %s %s %s :Lista de banuri a canalului este plina
+ERR_BADCHANNAME:	 :%s 479 %s %s :Nume de canal ilegal
+ERR_NOPRIVILEGES:	 :%s 481 %s :Imposibil de executat - Nu esti un IRCop
+ERR_CHANOPRIVSNEEDED:	 :%s 482 %s %s :Nu esti un operator de canal
+ERR_CANTKILLSERVER:	 :%s 483 %s :Nu poti efectua kill unui server!
+ERR_RESTRICTED:		 :%s 484 %s :parametri limitati pentru host-ul tau
+ERR_NOOPERHOST:		 :%s 491 %s :Incercare de autentificare ca IRCop esuata.
+ERR_UMODEUNKNOWNFLAG:	 :%s 501 %s :MODE necunoscut
+ERR_USERSDONTMATCH:	 :%s 502 %s :Nu se pot modifica modurile pentru alti utilizatori
+ERR_GHOSTEDCLIENT:	 :%s 503 %s :Mesajul nu a fost trimis catre %s
+ERR_USERNOTONSERV:	 :%s 504 %s %s :Userul nu se afla pe acest server
+ERR_WRONGPONG:		 :%s 513 %s :Pentru a te conecta tasteaza /QUOTE PONG %lu
+ERR_LISTSYNTAX:		 :%s 521 %s :Sintaxa eronata
+ERR_HELPNOTFOUND:	 :%s 524 %s %s :Help- nu a fost gasit
+RPL_WHOISSECURE:	 :%s 671 %s %s :este conectat prin SSL (conexiune securizata)
+RPL_ENDOFMODLIST:	 :%s 703 %s :Sfarsitul /MODLIST.
+RPL_ENDOFHELP:		 :%s 706 %s %s :Sfarsitul /HELP.
+RPL_KNOCK:		 :%s 710 %s %s %s!%s@%s :a cerut invite.
+RPL_KNOCKDLVR:		 :%s 711 %s %s :KNOCK-ul tau a fost livrat.
+ERR_TOOMANYKNOCK:	 :%s 712 %s %s :Prea multe KNOCK (%s).
+ERR_CHANOPEN:		 :%s 713 %s %s :Canalul este deschis.
+ERR_KNOCKONCHAN:	 :%s 714 %s %s :Te afli deja pe acel canal.
+RPL_TARGUMODEG:		 :%s 716 %s %s :se afla in modul +g (server side ignore)
+RPL_TARGNOTIFY:		 :%s 717 %s %s :has been informed that you messaged them.
+RPL_UMODEGMSG:		 :%s 718 %s %s :iti trimite mesaj,si tu ai setat umode +g.
+ERR_NOPRIVS:		 :%s 723 %s %s :privilegii de operator insuficiente.
+RPL_NOTESTLINE:		 :%s 726 %s %s :Nu exista potriviri

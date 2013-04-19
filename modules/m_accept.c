@@ -63,7 +63,7 @@ list_accepts(struct Client *source_p)
     if ((t - nicks) + masklen + len  > IRCD_BUFSIZE)
     {
       *(t - 1) = '\0';
-      sendto_one(source_p, form_str(RPL_ACCEPTLIST),
+      sendto_one(source_p, RPL_ACCEPTLIST,
                  me.name, source_p->name, nicks);
       t = nicks;
     }
@@ -76,11 +76,11 @@ list_accepts(struct Client *source_p)
   if (nicks[0] != '\0')
   {
     *(t - 1) = '\0';
-    sendto_one(source_p, form_str(RPL_ACCEPTLIST),
+    sendto_one(source_p, RPL_ACCEPTLIST,
                me.name, source_p->name, nicks);
   }
 
-  sendto_one(source_p, form_str(RPL_ENDOFACCEPT),
+  sendto_one(source_p, RPL_ENDOFACCEPT,
              me.name, source_p->name);
 }
 
@@ -153,7 +153,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
 
       if ((accept_p = find_accept(nick, user, host, source_p, 0)) == NULL)
       {
-        sendto_one(source_p, form_str(ERR_ACCEPTNOT),
+        sendto_one(source_p, ERR_ACCEPTNOT,
                    me.name, source_p->name, nick, user, host);
         continue;
       }
@@ -165,7 +165,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
       if (dlink_list_length(&source_p->localClient->acceptlist) >=
           ConfigFileEntry.max_accept)
       {
-        sendto_one(source_p, form_str(ERR_ACCEPTFULL),
+        sendto_one(source_p, ERR_ACCEPTFULL,
                    me.name, source_p->name);
         return;
       }
@@ -183,7 +183,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
 
       if ((accept_p = find_accept(nick, user, host, source_p, 0)) != NULL)
       {
-        sendto_one(source_p, form_str(ERR_ACCEPTEXIST),
+        sendto_one(source_p, ERR_ACCEPTEXIST,
                    me.name, source_p->name, nick, user, host);
         continue;
       }

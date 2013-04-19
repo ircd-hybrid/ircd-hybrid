@@ -94,7 +94,7 @@ mr_user(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[4]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name,
+    sendto_one(source_p, ERR_NEEDMOREPARAMS, me.name,
                source_p->name[0] ? source_p->name : "*", "USER");
     return;
   }

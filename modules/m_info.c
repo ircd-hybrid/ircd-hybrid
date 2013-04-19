@@ -633,7 +633,7 @@ send_conf_options(struct Client *source_p)
     }
   }
 
-  sendto_one(source_p, form_str(RPL_INFO),
+  sendto_one(source_p, RPL_INFO,
              from, to, "");
 }
 
@@ -667,7 +667,7 @@ send_info_text(struct Client *source_p)
     if (*line == '\0')
       line = " ";
 
-    sendto_one(source_p, form_str(RPL_INFO),
+    sendto_one(source_p, RPL_INFO,
                source, target, line);
   }
 
@@ -676,7 +676,7 @@ send_info_text(struct Client *source_p)
 
   send_birthdate_online_time(source_p);
 
-  sendto_one(source_p, form_str(RPL_ENDOFINFO),
+  sendto_one(source_p, RPL_ENDOFINFO,
              me.name, source_p->name);
 }
 
@@ -694,7 +694,7 @@ m_info(struct Client *client_p, struct Client *source_p,
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
     /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
+    sendto_one(source_p, RPL_LOAD2HI,
                me.name, source_p->name);
     return;
   }

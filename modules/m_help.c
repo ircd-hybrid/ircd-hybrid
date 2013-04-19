@@ -52,7 +52,7 @@ m_help(struct Client *client_p, struct Client *source_p,
   if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
   {
     /* safe enough to give this on a local connect only */
-    sendto_one(source_p,form_str(RPL_LOAD2HI),
+    sendto_one(source_p, RPL_LOAD2HI,
                me.name, source_p->name);
     return;
   }
@@ -101,14 +101,14 @@ dohelp(struct Client *source_p, const char *hpath, char *topic)
 
   if (strpbrk(topic, "/\\"))
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+    sendto_one(source_p, ERR_HELPNOTFOUND,
                me.name, source_p->name, topic);
     return;
   }
 
   if (strlen(hpath) + strlen(topic) + 1 > HYB_PATH_MAX)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+    sendto_one(source_p, ERR_HELPNOTFOUND,
                me.name, source_p->name, topic);
     return;
   }
@@ -117,14 +117,14 @@ dohelp(struct Client *source_p, const char *hpath, char *topic)
 
   if (stat(path, &sb) < 0)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+    sendto_one(source_p, ERR_HELPNOTFOUND,
                me.name, source_p->name, topic);
     return;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+    sendto_one(source_p, ERR_HELPNOTFOUND,
                me.name, source_p->name, topic);
     return;
   }
@@ -140,32 +140,32 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 
   if ((file = fopen(path, "r")) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+    sendto_one(source_p, ERR_HELPNOTFOUND,
                me.name, source_p->name, topic);
     return;
   }
 
   if (fgets(line, sizeof(line), file) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+    sendto_one(source_p, ERR_HELPNOTFOUND,
                me.name, source_p->name, topic);
     return;
   }
 
   line[strlen(line) - 1] = '\0';
-  sendto_one(source_p, form_str(RPL_HELPSTART),
+  sendto_one(source_p, RPL_HELPSTART,
              me.name, source_p->name, topic, line);
 
   while (fgets(line, sizeof(line), file))
   {
     line[strlen(line) - 1] = '\0';
 
-    sendto_one(source_p, form_str(RPL_HELPTXT),
+    sendto_one(source_p, RPL_HELPTXT,
                me.name, source_p->name, topic, line);
   }
 
   fclose(file);
-  sendto_one(source_p, form_str(RPL_ENDOFHELP),
+  sendto_one(source_p, RPL_ENDOFHELP,
              me.name, source_p->name, topic);
 }
 

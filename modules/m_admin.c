@@ -52,17 +52,17 @@ do_admin(struct Client *source_p)
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  sendto_one(source_p, form_str(RPL_ADMINME),
+  sendto_one(source_p, RPL_ADMINME,
              me_name, nick, me.name);
 
   if (AdminInfo.name != NULL)
-    sendto_one(source_p, form_str(RPL_ADMINLOC1),
+    sendto_one(source_p, RPL_ADMINLOC1,
                me_name, nick, AdminInfo.name);
   if (AdminInfo.description != NULL)
-    sendto_one(source_p, form_str(RPL_ADMINLOC2),
+    sendto_one(source_p, RPL_ADMINLOC2,
                me_name, nick, AdminInfo.description);
   if (AdminInfo.email != NULL)
-    sendto_one(source_p, form_str(RPL_ADMINEMAIL),
+    sendto_one(source_p, RPL_ADMINEMAIL,
                me_name, nick, AdminInfo.email);
 }
 
@@ -88,7 +88,7 @@ m_admin(struct Client *client_p, struct Client *source_p,
 
   if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
   {
-    sendto_one(source_p,form_str(RPL_LOAD2HI),
+    sendto_one(source_p, RPL_LOAD2HI,
                me.name, source_p->name);
     return;
   }

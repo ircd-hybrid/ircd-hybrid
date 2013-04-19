@@ -65,20 +65,20 @@ m_away(struct Client *client_p, struct Client *source_p,
                                    source_p->host);
     }
 
-    sendto_one(source_p, form_str(RPL_UNAWAY),
+    sendto_one(source_p, RPL_UNAWAY,
                me.name, source_p->name);
     return;
   }
 
   if ((CurrentTime - source_p->localClient->last_away) < ConfigFileEntry.pace_wait)
   {
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
+    sendto_one(source_p, RPL_LOAD2HI,
                me.name, source_p->name);
     return;
   }
 
   source_p->localClient->last_away = CurrentTime;
-  sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, source_p->name);
+  sendto_one(source_p, RPL_NOWAWAY, me.name, source_p->name);
 
   if (!strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
     return;

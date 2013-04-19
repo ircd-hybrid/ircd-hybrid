@@ -93,10 +93,10 @@
 #define HYB_PATH_MAX 4096
 #endif
 
-#if 0 && __GNUC__
+//#if 0 && __GNUC__
 #define AFP(a,b) __attribute__((format (printf, a, b)))
-#else
-#define AFP(a,b)
-#endif
+//#else
+//#define AFP(a,b)
+//#endif
 
 #endif

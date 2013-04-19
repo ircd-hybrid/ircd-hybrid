@@ -444,7 +444,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
 
   if (PubChannel(chptr) || is_member)
   {
-    t = lbuf + sprintf(lbuf, form_str(RPL_NAMREPLY),
+    t = lbuf + sprintf(lbuf, RPL_NAMREPLY,
                        me.name, source_p->name,
                        channel_pub_or_secret(chptr),
                        chptr->chname);
@@ -494,7 +494,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
   }
 
   if (show_eon)
-    sendto_one(source_p, form_str(RPL_ENDOFNAMES),
+    sendto_one(source_p, RPL_ENDOFNAMES,
                me.name, source_p->name, chptr->chname);
 }
 
@@ -648,7 +648,7 @@ is_banned(const struct Channel *chptr, const struct Client *who)
  * \return ERR_BANNEDFROMCHAN, ERR_INVITEONLYCHAN, ERR_CHANNELISFULL
  *         or 0 if allowed to join.
  */
-int
+const char *
 can_join(struct Client *source_p, struct Channel *chptr, const char *key)
 {
   if (is_banned(chptr, source_p))
@@ -677,7 +677,7 @@ can_join(struct Client *source_p, struct Channel *chptr, const char *key)
       chptr->mode.limit)
     return ERR_CHANNELISFULL;
 
-  return 0;
+  return NULL;
 }
 
 int
@@ -720,7 +720,7 @@ can_send(struct Channel *chptr, struct Client *source_p, struct Membership *ms)
   if (MyClient(source_p) && !IsExemptResv(source_p))
     if (!(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv))
       if (!match_find_resv(chptr->chname) == ConfigChannel.restrict_channels)
-        return ERR_CANNOTSENDTOCHAN;
+        return CAN_SEND_NO;
 
   if (ms != NULL || (ms = find_channel_link(source_p, chptr)))
   {
@@ -731,14 +731,14 @@ can_send(struct Channel *chptr, struct Client *source_p, struct Membership *ms)
     if (ConfigChannel.quiet_on_ban && MyClient(source_p))
     {
       if (ms->flags & CHFL_BAN_SILENCED)
-        return ERR_CANNOTSENDTOCHAN;
+        return CAN_SEND_NO;
 
       if (!(ms->flags & CHFL_BAN_CHECKED))
       {
         if (is_banned(chptr, source_p))
         {
           ms->flags |= (CHFL_BAN_CHECKED|CHFL_BAN_SILENCED);
-          return ERR_CANNOTSENDTOCHAN;
+          return CAN_SEND_NO;
         }
 
         ms->flags |= CHFL_BAN_CHECKED;
@@ -746,10 +746,10 @@ can_send(struct Channel *chptr, struct Client *source_p, struct Membership *ms)
     }
   }
   else if (chptr->mode.mode & MODE_NOPRIVMSGS)
-    return ERR_CANNOTSENDTOCHAN;
+    return CAN_SEND_NO;
 
   if (chptr->mode.mode & MODE_MODERATED)
-    return ERR_CANNOTSENDTOCHAN;
+    return CAN_SEND_NO;
 
   return CAN_SEND_NONOP;
 }

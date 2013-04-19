@@ -87,14 +87,14 @@ mo_kill(struct Client *client_p, struct Client *source_p,
 
   if (*user == '\0')
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                me.name, source_p->name, "KILL");
     return;
   }
 
   if (!HasOFlag(source_p, OPER_FLAG_GLOBAL_KILL|OPER_FLAG_K))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                me.name, source_p->name);
     return;
   }
@@ -118,7 +118,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
                                 == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+      sendto_one(source_p, ERR_NOSUCHNICK,
                  me.name, source_p->name, user);
       return;
     }
@@ -129,7 +129,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
 
   if (IsServer(target_p) || IsMe(target_p))
   {
-    sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
+    sendto_one(source_p, ERR_CANTKILLSERVER,
                me.name, source_p->name);
     return;
   }
@@ -195,7 +195,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                me.name, source_p->name, "KILL");
     return;
   }
@@ -234,7 +234,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
        == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+      sendto_one(source_p, ERR_NOSUCHNICK,
                  me.name, source_p->name, user);
       return;
     }
@@ -245,7 +245,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
 
   if (IsServer(target_p) || IsMe(target_p))
   {
-    sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
+    sendto_one(source_p, ERR_CANTKILLSERVER,
                me.name, source_p->name);
     return;
   }

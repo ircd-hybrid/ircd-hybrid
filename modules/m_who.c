@@ -63,7 +63,7 @@ m_who(struct Client *client_p, struct Client *source_p,
   if (EmptyString(mask))
   {
     who_global(source_p, mask, server_oper);
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+    sendto_one(source_p, RPL_ENDOFWHO,
                me.name, source_p->name, "*");
     return;
   }
@@ -81,7 +81,7 @@ m_who(struct Client *client_p, struct Client *source_p,
                         server_oper);
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+    sendto_one(source_p, RPL_ENDOFWHO,
                me.name, source_p->name, "*");
     return;
   }
@@ -98,7 +98,7 @@ m_who(struct Client *client_p, struct Client *source_p,
         do_who_on_channel(source_p, chptr, chptr->chname, 0, server_oper);
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+    sendto_one(source_p, RPL_ENDOFWHO,
                me.name, source_p->name, mask);
     return;
   }
@@ -120,7 +120,7 @@ m_who(struct Client *client_p, struct Client *source_p,
     else
       do_who(source_p, target_p, NULL, "");
 
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+    sendto_one(source_p, RPL_ENDOFWHO,
                me.name, source_p->name, mask);
     return;
   }
@@ -132,7 +132,7 @@ m_who(struct Client *client_p, struct Client *source_p,
     who_global(source_p, mask, server_oper);
 
   /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
-  sendto_one(source_p, form_str(RPL_ENDOFWHO),
+  sendto_one(source_p, RPL_ENDOFWHO,
              me.name, source_p->name, mask);
 }
 
@@ -213,7 +213,7 @@ who_global(struct Client *source_p, char *mask, int server_oper)
     if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
-      sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, source_p->name);
+      sendto_one(source_p, RPL_LOAD2HI, me.name, source_p->name);
       return;
     }
 
@@ -324,7 +324,7 @@ do_who(struct Client *source_p, struct Client *target_p,
 
   if (ConfigServerHide.hide_servers)
   {
-    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
+    sendto_one(source_p, RPL_WHOREPLY, me.name, source_p->name,
 	       (chname) ? (chname) : "*",
                target_p->username, target_p->host,
 	       HasUMode(source_p, UMODE_OPER) ? target_p->servptr->name : "*",
@@ -332,7 +332,7 @@ do_who(struct Client *source_p, struct Client *target_p,
   }
   else
   {
-    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
+    sendto_one(source_p, RPL_WHOREPLY, me.name, source_p->name,
 	       (chname) ? (chname) : "*", target_p->username,
 	       target_p->host, target_p->servptr->name, target_p->name,
 	       status, target_p->hopcount, target_p->info);

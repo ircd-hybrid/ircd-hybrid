@@ -72,7 +72,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[2]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                from, to, "KICK");
     return;
   }
@@ -95,7 +95,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
 
   if ((chptr = hash_find_channel(name)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+    sendto_one(source_p, ERR_NOSUCHCHANNEL,
                from, to, name);
     return;
   }
@@ -106,7 +106,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
     {
       if (MyConnect(source_p))
       {
-        sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
+        sendto_one(source_p, ERR_NOTONCHANNEL,
                    me.name, source_p->name, name);
         return;
       }
@@ -118,7 +118,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
       if (MyConnect(source_p))
       {
         /* user on _my_ server, with no chanops.. so go away */
-        sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+        sendto_one(source_p, ERR_CHANOPRIVSNEEDED,
                    me.name, source_p->name, name);
         return;
       }
@@ -126,7 +126,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
       if (chptr->channelts == 0)
       {
         /* If its a TS 0 channel, do it the old way */         
-        sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+        sendto_one(source_p, ERR_CHANOPRIVSNEEDED,
                    from, to, name);
         return;
       }
@@ -177,7 +177,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
       if (((chptr->mode.mode & MODE_PRIVATE) && has_member_flags(ms_target,
         CHFL_CHANOP|CHFL_HALFOP)) || has_member_flags(ms_target, CHFL_CHANOP))
       {
-        sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+        sendto_one(source_p, ERR_CHANOPRIVSNEEDED,
                    me.name, source_p->name, name);
         return;
       }
@@ -209,7 +209,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
     remove_user_from_channel(ms_target);
   }
   else
-    sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
+    sendto_one(source_p, ERR_USERNOTINCHANNEL,
                from, to, user, name);
 }
 

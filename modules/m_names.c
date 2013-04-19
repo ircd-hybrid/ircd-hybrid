@@ -74,7 +74,7 @@ names_non_public_non_secret(struct Client *source_p)
   char buf[IRCD_BUFSIZE];
   char *t;
 
-  mlen = snprintf(buf, sizeof(buf), form_str(RPL_NAMREPLY),
+  mlen = snprintf(buf, sizeof(buf), RPL_NAMREPLY,
                   me.name, source_p->name, "*", "*");
   cur_len = mlen;
   t = buf + mlen;
@@ -155,14 +155,14 @@ m_names(struct Client *client_p, struct Client *source_p,
     if ((chptr = hash_find_channel(para)) != NULL)
       channel_member_names(source_p, chptr, 1);
     else
-      sendto_one(source_p, form_str(RPL_ENDOFNAMES),
+      sendto_one(source_p, RPL_ENDOFNAMES,
                  me.name, source_p->name, para);
   }
   else
   {
     names_all_visible_channels(source_p);
     names_non_public_non_secret(source_p);
-    sendto_one(source_p, form_str(RPL_ENDOFNAMES),
+    sendto_one(source_p, RPL_ENDOFNAMES,
                me.name, source_p->name, "*");
   }
 }

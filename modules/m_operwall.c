@@ -48,14 +48,14 @@ mo_operwall(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_OPERWALL))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
+    sendto_one(source_p, ERR_NOPRIVS,
                me.name, source_p->name, "operwall");
     return;
   }
 
   if (EmptyString(message))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                me.name, source_p->name, "OPERWALL");
     return;
   }

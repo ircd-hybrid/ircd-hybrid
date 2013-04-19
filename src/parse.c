@@ -223,7 +223,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       if (*pbuffer != '\0')
       {
         if (IsClient(from))
-          sendto_one(from, form_str(ERR_UNKNOWNCOMMAND),
+          sendto_one(from, ERR_UNKNOWNCOMMAND,
                      me.name, from->name, ch);
       }
 
@@ -315,7 +315,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
   {
     if (!IsServer(client_p))
     {
-      sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS), me.name,
+      sendto_one(client_p, ERR_NEEDMOREPARAMS, me.name,
                  EmptyString(hpara[0]) ? "*" : hpara[0], mptr->cmd);
     }
     else
@@ -512,7 +512,7 @@ recurse_report_messages(struct Client *source_p, const struct MessageTree *mtree
   unsigned int i;
 
   if (mtree->msg != NULL)
-    sendto_one(source_p, form_str(RPL_STATSCOMMANDS),
+    sendto_one(source_p, RPL_STATSCOMMANDS,
                me.name, source_p->name, mtree->msg->cmd,
                mtree->msg->count, mtree->msg->bytes,
                mtree->msg->rcount);
@@ -723,7 +723,7 @@ void
 m_not_oper(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
-  sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+  sendto_one(source_p, ERR_NOPRIVILEGES,
              me.name, source_p->name);
 }
 
@@ -731,7 +731,7 @@ void
 m_unregistered(struct Client *client_p, struct Client *source_p,
                int parc, char *parv[])
 {
-  sendto_one(source_p, form_str(ERR_NOTREGISTERED), me.name,
+  sendto_one(source_p, ERR_NOTREGISTERED, me.name,
              source_p->name[0] ? source_p->name : "*");
 }
 
@@ -739,7 +739,7 @@ void
 m_registered(struct Client *client_p, struct Client *source_p,
              int parc, char *parv[])
 {
-  sendto_one(source_p, form_str(ERR_ALREADYREGISTRED),   
+  sendto_one(source_p, ERR_ALREADYREGISTRED,   
              me.name, source_p->name);
 }
 

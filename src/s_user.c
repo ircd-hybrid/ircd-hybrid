@@ -189,48 +189,48 @@ show_lusers(struct Client *source_p)
   }
 
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
-    sendto_one(source_p, form_str(RPL_LUSERCLIENT),
+    sendto_one(source_p, RPL_LUSERCLIENT,
                from, to, (Count.total-Count.invisi),
                Count.invisi, dlink_list_length(&global_serv_list));
   else
-    sendto_one(source_p, form_str(RPL_LUSERCLIENT), from, to,
+    sendto_one(source_p, RPL_LUSERCLIENT, from, to,
                (Count.total-Count.invisi), Count.invisi, 1);
 
   if (Count.oper > 0)
-    sendto_one(source_p, form_str(RPL_LUSEROP),
+    sendto_one(source_p, RPL_LUSEROP,
                from, to, Count.oper);
 
   if (dlink_list_length(&unknown_list) > 0)
-    sendto_one(source_p, form_str(RPL_LUSERUNKNOWN),
+    sendto_one(source_p, RPL_LUSERUNKNOWN,
                from, to, dlink_list_length(&unknown_list));
 
   if (dlink_list_length(&global_channel_list) > 0)
-    sendto_one(source_p, form_str(RPL_LUSERCHANNELS),
+    sendto_one(source_p, RPL_LUSERCHANNELS,
                from, to, dlink_list_length(&global_channel_list));
 
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
   {
-    sendto_one(source_p, form_str(RPL_LUSERME),
+    sendto_one(source_p, RPL_LUSERME,
                from, to, Count.local, Count.myserver);
-    sendto_one(source_p, form_str(RPL_LOCALUSERS),
+    sendto_one(source_p, RPL_LOCALUSERS,
                from, to, Count.local, Count.max_loc,
                Count.local, Count.max_loc);
   }
   else
   {
-    sendto_one(source_p, form_str(RPL_LUSERME),
+    sendto_one(source_p, RPL_LUSERME,
                from, to, Count.total, 0);
-    sendto_one(source_p, form_str(RPL_LOCALUSERS), 
+    sendto_one(source_p, RPL_LOCALUSERS, 
                from, to, Count.total, Count.max_tot,
                Count.total, Count.max_tot);
   }
 
-  sendto_one(source_p, form_str(RPL_GLOBALUSERS),
+  sendto_one(source_p, RPL_GLOBALUSERS,
              from, to, Count.total, Count.max_tot,
              Count.total, Count.max_tot);
 
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
-    sendto_one(source_p, form_str(RPL_STATSCONN), from, to,
+    sendto_one(source_p, RPL_STATSCONN, from, to,
                Count.max_loc_con, Count.max_loc_cli, Count.totalrestartcount);
 
   if (Count.local > Count.max_loc_cli)
@@ -358,7 +358,7 @@ register_local_user(struct Client *source_p)
     if (!match_conf_password(pass, conf))
     {
       ++ServerStats.is_ref;
-      sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
+      sendto_one(source_p, ERR_PASSWDMISMATCH,
                  me.name, source_p->name);
       exit_client(source_p, &me, "Bad Password");
       return;
@@ -841,14 +841,14 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
   if ((target_p = find_person(client_p, parv[1])) == NULL)
   {
     if (MyConnect(source_p))
-      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+      sendto_one(source_p, ERR_NOSUCHCHANNEL,
                  me.name, source_p->name, parv[1]);
     return;
   }
 
   if (source_p != target_p)
   {
-     sendto_one(source_p, form_str(ERR_USERSDONTMATCH),
+     sendto_one(source_p, ERR_USERSDONTMATCH,
                 me.name, source_p->name);
      return;
   }
@@ -863,7 +863,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
         *m++ = (char)i;
     *m = '\0';
 
-    sendto_one(source_p, form_str(RPL_UMODEIS),
+    sendto_one(source_p, RPL_UMODEIS,
                me.name, source_p->name, buf);
     return;
   }
@@ -954,7 +954,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
   }
 
   if (badflag)
-    sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG),
+    sendto_one(source_p, ERR_UMODEUNKNOWNFLAG,
                me.name, source_p->name);
 
   if (HasUMode(source_p, UMODE_NCHANGE) && !HasOFlag(source_p, OPER_FLAG_N))
@@ -1122,18 +1122,18 @@ user_welcome(struct Client *source_p)
                ssl_get_cipher(source_p->localClient->fd.ssl));
 #endif
 
-  sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, 
+  sendto_one(source_p, RPL_WELCOME, me.name, source_p->name, 
              ServerInfo.network_name, source_p->name);
-  sendto_one(source_p, form_str(RPL_YOURHOST), me.name, source_p->name,
+  sendto_one(source_p, RPL_YOURHOST, me.name, source_p->name,
              get_listener_name(source_p->localClient->listener), ircd_version);
-  sendto_one(source_p, form_str(RPL_CREATED),
+  sendto_one(source_p, RPL_CREATED,
              me.name, source_p->name, built_date);
-  sendto_one(source_p, form_str(RPL_MYINFO),
+  sendto_one(source_p, RPL_MYINFO,
              me.name, source_p->name, me.name, ircd_version, umode_buffer);
   show_isupport(source_p);
 
   if (source_p->id[0] != '\0')
-    sendto_one(source_p, form_str(RPL_YOURID), me.name,
+    sendto_one(source_p, RPL_YOURID, me.name,
                source_p->name, source_p->id);
 
   show_lusers(source_p);
@@ -1145,12 +1145,12 @@ user_welcome(struct Client *source_p)
     sendto_one(source_p,
                ":%s NOTICE %s :*** Notice -- Please read the motd if you haven't "
                "read it", me.name, source_p->name);
-    sendto_one(source_p, form_str(RPL_MOTDSTART),
+    sendto_one(source_p, RPL_MOTDSTART,
                me.name, source_p->name, me.name);
-    sendto_one(source_p, form_str(RPL_MOTD),
+    sendto_one(source_p, RPL_MOTD,
                me.name, source_p->name,
                "*** This is the short motd ***");
-    sendto_one(source_p, form_str(RPL_ENDOFMOTD),
+    sendto_one(source_p, RPL_ENDOFMOTD,
                me.name, source_p->name);
   }
   else  
@@ -1235,7 +1235,7 @@ oper_up(struct Client *source_p)
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
   send_umode_out(source_p, source_p, old);
-  sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
+  sendto_one(source_p, RPL_YOUREOPER, me.name, source_p->name);
 }
 
 static char new_uid[TOTALSIDUID + 1];     /* allow for \0 */
@@ -1443,7 +1443,7 @@ rebuild_isupport_message_line(void)
   int n = 0;
   int tokens = 0;
   size_t len = 0;
-  size_t reserve = strlen(me.name) + HOSTLEN + strlen(form_str(RPL_ISUPPORT));
+  size_t reserve = strlen(me.name) + HOSTLEN + strlen(RPL_ISUPPORT);
 
   destroy_MessageLine(isupportFile);
 

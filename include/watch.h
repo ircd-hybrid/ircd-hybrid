@@ -41,7 +41,7 @@ struct Watch
 extern void watch_init(void);
 extern void watch_add_to_hash_table(const char *, struct Client *);
 extern void watch_del_from_hash_table(const char *, struct Client *);
-extern void watch_check_hash(struct Client *, int);
+extern void watch_check_hash(struct Client *, const char *);
 extern void watch_del_watch_list(struct Client *);
 extern void watch_count_memory(unsigned int *const, uint64_t *const);
 extern struct Watch *watch_find_hash(const char *);

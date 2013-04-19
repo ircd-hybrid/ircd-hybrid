@@ -168,7 +168,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
 
     if (num_mask >= ConfigChannel.max_bans)
     {
-      sendto_one(client_p, form_str(ERR_BANLISTFULL),
+      sendto_one(client_p, ERR_BANLISTFULL,
                  me.name, client_p->name, chptr->chname, banid);
       return 0;
     }
@@ -546,7 +546,7 @@ chm_nosuch(struct Client *client_p, struct Client *source_p,
     return;
 
   *errors |= SM_ERR_UNKNOWN;
-  sendto_one(source_p, form_str(ERR_UNKNOWNMODE), me.name,
+  sendto_one(source_p, ERR_UNKNOWNMODE, me.name,
              source_p->name, c);
 }
 
@@ -563,8 +563,8 @@ chm_simple(struct Client *client_p, struct Client *source_p, struct Channel *chp
       ((mode_type == MODE_PRIVATE) && (alev < CHACCESS_CHANOP)))
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -625,8 +625,8 @@ chm_registered(struct Client *client_p, struct Client *source_p, struct Channel 
   if (!IsServer(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
   {
     if (!(*errors & SM_ERR_ONLYSERVER))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_ONLYSERVERSCANCHANGE),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_ONLYSERVERSCANCHANGE,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_ONLYSERVER;
     return;
@@ -687,8 +687,8 @@ chm_operonly(struct Client *client_p, struct Client *source_p, struct Channel *c
       ((mode_type == MODE_PRIVATE) && (alev < CHACCESS_CHANOP)))
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -698,10 +698,10 @@ chm_operonly(struct Client *client_p, struct Client *source_p, struct Channel *c
     if (!(*errors & SM_ERR_NOTOPER))
     {
       if (alev == CHACCESS_NOTONCHAN)
-        sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
+        sendto_one(source_p, ERR_NOTONCHANNEL,
                    me.name, source_p->name, chname);
       else
-        sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+        sendto_one(source_p, ERR_NOPRIVILEGES,
                    me.name, source_p->name);
     }
 
@@ -764,13 +764,13 @@ chm_ban(struct Client *client_p, struct Client *source_p,
     DLINK_FOREACH(ptr, chptr->banlist.head)
     {
       const struct Ban *banptr = ptr->data;
-      sendto_one(client_p, form_str(RPL_BANLIST),
+      sendto_one(client_p, RPL_BANLIST,
                  me.name, client_p->name, chname,
                  banptr->name, banptr->username, banptr->host,
 		 banptr->who, banptr->when);
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFBANLIST), me.name,
+    sendto_one(source_p, RPL_ENDOFBANLIST, me.name,
                source_p->name, chname);
     return;
   }
@@ -778,8 +778,8 @@ chm_ban(struct Client *client_p, struct Client *source_p,
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -830,8 +830,8 @@ chm_except(struct Client *client_p, struct Client *source_p,
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -849,13 +849,13 @@ chm_except(struct Client *client_p, struct Client *source_p,
     DLINK_FOREACH(ptr, chptr->exceptlist.head)
     {
       const struct Ban *banptr = ptr->data;
-      sendto_one(client_p, form_str(RPL_EXCEPTLIST),
+      sendto_one(client_p, RPL_EXCEPTLIST,
                  me.name, client_p->name, chname,
                  banptr->name, banptr->username, banptr->host,
 		 banptr->who, banptr->when);
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFEXCEPTLIST), me.name,
+    sendto_one(source_p, RPL_ENDOFEXCEPTLIST, me.name,
                source_p->name, chname);
     return;
   }
@@ -905,8 +905,8 @@ chm_invex(struct Client *client_p, struct Client *source_p,
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -924,13 +924,13 @@ chm_invex(struct Client *client_p, struct Client *source_p,
     DLINK_FOREACH(ptr, chptr->invexlist.head)
     {
       const struct Ban *banptr = ptr->data;
-      sendto_one(client_p, form_str(RPL_INVITELIST), me.name,
+      sendto_one(client_p, RPL_INVITELIST, me.name,
                  client_p->name, chname,
 		 banptr->name, banptr->username, banptr->host,
                  banptr->who, banptr->when);
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFINVITELIST), me.name,
+    sendto_one(source_p, RPL_ENDOFINVITELIST, me.name,
                source_p->name, chname);
     return;
   }
@@ -1014,8 +1014,8 @@ chm_op(struct Client *client_p, struct Client *source_p,
   if (alev < CHACCESS_CHANOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -1034,7 +1034,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
   if ((member = find_channel_link(targ_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
+      sendto_one(source_p, ERR_USERNOTINCHANNEL,
                  me.name, source_p->name, opnick, chname);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
@@ -1120,8 +1120,8 @@ chm_hop(struct Client *client_p, struct Client *source_p,
       ((chptr->mode.mode & MODE_PRIVATE) ? CHACCESS_CHANOP : CHACCESS_HALFOP))
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -1140,7 +1140,7 @@ chm_hop(struct Client *client_p, struct Client *source_p,
   if ((member = find_channel_link(targ_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
+      sendto_one(source_p, ERR_USERNOTINCHANNEL,
                  me.name, source_p->name, opnick, chname);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
@@ -1196,8 +1196,8 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -1216,7 +1216,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   if ((member = find_channel_link(targ_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
+      sendto_one(source_p, ERR_USERNOTINCHANNEL,
                  me.name, source_p->name, opnick, chname);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
@@ -1258,8 +1258,8 @@ chm_limit(struct Client *client_p, struct Client *source_p,
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -1323,8 +1323,8 @@ chm_key(struct Client *client_p, struct Client *source_p,
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
-      sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
-                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED),
+      sendto_one(source_p, alev == CHACCESS_NOTONCHAN ?
+                                    ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED,
                  me.name, source_p->name, chname);
     *errors |= SM_ERR_NOOPS;
     return;

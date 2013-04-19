@@ -215,7 +215,6 @@ max_number	{ return MAX_NUMBER; }
 max_nick_length { return MAX_NICK_LENGTH; }
 max_topic_length { return MAX_TOPIC_LENGTH; }
 max_watch       { return MAX_WATCH; }
-message_locale	{ return MESSAGE_LOCALE; }
 min_nonwildcard { return MIN_NONWILDCARD; }
 min_nonwildcard_simple	{ return MIN_NONWILDCARD_SIMPLE; }
 name		{ return NAME; }

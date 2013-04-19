@@ -74,20 +74,20 @@ send_message_file(struct Client *source_p, MessageFile *motdToPrint)
   {
     case USER_MOTD:
       if (motdToPrint->contentsOfFile == NULL)
-        sendto_one(source_p, form_str(ERR_NOMOTD), from, to);
+        sendto_one(source_p, ERR_NOMOTD, from, to);
       else
       {
-	sendto_one(source_p, form_str(RPL_MOTDSTART),
+	sendto_one(source_p, RPL_MOTDSTART,
 		   from, to, me.name);
 
 	for (linePointer = motdToPrint->contentsOfFile; linePointer;
 	     linePointer = linePointer->next)
 	{
-	  sendto_one(source_p, form_str(RPL_MOTD),
+	  sendto_one(source_p, RPL_MOTD,
 		     from, to, linePointer->line);
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFMOTD), from, to);
+	sendto_one(source_p, RPL_ENDOFMOTD, from, to);
       }
       break;
 
@@ -109,7 +109,7 @@ send_message_file(struct Client *source_p, MessageFile *motdToPrint)
 	for (linePointer = motdToPrint->contentsOfFile; linePointer;
 	     linePointer = linePointer->next)
 	{
-	  sendto_one(source_p, form_str(RPL_ISUPPORT),
+	  sendto_one(source_p, RPL_ISUPPORT,
 		     me.name, source_p->name, linePointer->line);
 	}
       }

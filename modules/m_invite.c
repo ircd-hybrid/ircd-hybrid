@@ -59,7 +59,7 @@ m_invite(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[2]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                me.name, source_p->name, "INVITE");
     return;
   }
@@ -69,46 +69,46 @@ m_invite(struct Client *client_p, struct Client *source_p,
 
   if ((target_p = find_person(client_p, parv[1])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+    sendto_one(source_p, ERR_NOSUCHNICK,
                me.name, source_p->name, parv[1]);
     return;
   }
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+    sendto_one(source_p, ERR_NOSUCHCHANNEL,
                me.name, source_p->name, parv[2]);
     return;
   }
 
   if (MyConnect(source_p) && (ms = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
+    sendto_one(source_p, ERR_NOTONCHANNEL,
                me.name, source_p->name, chptr->chname);
     return;
   }
 
   if (MyConnect(source_p) && !has_member_flags(ms, CHFL_CHANOP))
   {
-    sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+    sendto_one(source_p, ERR_CHANOPRIVSNEEDED,
                me.name, source_p->name, chptr->chname);
     return;
   }
 
   if (IsMember(target_p, chptr))
   {
-    sendto_one(source_p, form_str(ERR_USERONCHANNEL),
+    sendto_one(source_p, ERR_USERONCHANNEL,
                me.name, source_p->name, target_p->name, chptr->chname);
     return;
   }
 
   if (MyConnect(source_p))
   {
-    sendto_one(source_p, form_str(RPL_INVITING), me.name,
+    sendto_one(source_p, RPL_INVITING, me.name,
                source_p->name, target_p->name, chptr->chname);
 
     if (target_p->away[0])
-      sendto_one(source_p, form_str(RPL_AWAY),
+      sendto_one(source_p, RPL_AWAY,
                  me.name, source_p->name, target_p->name,
                  target_p->away);
   }

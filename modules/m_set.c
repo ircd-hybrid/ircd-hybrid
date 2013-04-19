@@ -58,7 +58,6 @@ static void quote_autoconnall(struct Client *, int);
 static void quote_floodcount(struct Client *, int);
 static void quote_identtimeout(struct Client *, int);
 static void quote_max(struct Client *, int);
-static void quote_msglocale(struct Client *, char *);
 static void quote_spamnum(struct Client *, int);
 static void quote_spamtime(struct Client *, int);
 static void quote_splitmode(struct Client *, char *);
@@ -85,7 +84,6 @@ static const struct SetStruct set_cmd_table[] =
   { "FLOODCOUNT",	quote_floodcount,	0,	1 },
   { "IDENTTIMEOUT",	quote_identtimeout,	0,	1 },
   { "MAX",		quote_max,		0,	1 },
-  { "MSGLOCALE",	quote_msglocale,	1,	0 },
   { "SPAMNUM",		quote_spamnum,		0,	1 },
   { "SPAMTIME",		quote_spamtime,		0,	1 },
   { "SPLITMODE",	quote_splitmode,	1,	0 },
@@ -208,7 +206,7 @@ quote_identtimeout(struct Client *source_p, int newval)
 {
   if (!HasUMode(source_p, UMODE_ADMIN))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
+    sendto_one(source_p, ERR_NOPRIVS,
                me.name, source_p->name, "set");
     return;
   }
@@ -256,22 +254,6 @@ quote_max(struct Client *source_p, int newval)
   else
     sendto_one(source_p, ":%s NOTICE %s :Current MAXCLIENTS = %d (%d)",
                me.name, source_p->name, ServerInfo.max_clients, Count.local);
-}
-
-/* SET MSGLOCALE */
-static void
-quote_msglocale(struct Client *source_p, char *locale)
-{
-  if (locale != NULL)
-  {
-    set_locale(locale);
-    rebuild_isupport_message_line();
-    sendto_one(source_p, ":%s NOTICE %s :Set MSGLOCALE to '%s'",
-               me.name, source_p->name, get_locale());
-  }
-  else
-    sendto_one(source_p, ":%s NOTICE %s :MSGLOCALE is currently '%s'",
-               me.name, source_p->name, get_locale());
 }
 
 /* SET SPAMNUM */
@@ -477,7 +459,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_SET))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
+    sendto_one(source_p, ERR_NOPRIVS,
                me.name, source_p->name, "set");
     return;
   }
@@ -521,7 +503,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
 
         if (!strcmp(tab->name, "AUTOCONN") && (parc < 4))
         {
-          sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+          sendto_one(source_p, ERR_NEEDMOREPARAMS,
                      me.name, source_p->name, "SET");
           return;
         }

@@ -58,7 +58,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
+    sendto_one(source_p, ERR_NONICKNAMEGIVEN,
                me.name, source_p->name);
     return;
   }
@@ -68,7 +68,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
     /* seeing as this is going across servers, we should limit it */
     if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
     {
-      sendto_one(source_p, form_str(RPL_LOAD2HI),
+      sendto_one(source_p, RPL_LOAD2HI,
                  me.name, source_p->name);
       return;
     }
@@ -103,7 +103,7 @@ mo_whois(struct Client *client_p, struct Client *source_p,
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
+    sendto_one(source_p, ERR_NONICKNAMEGIVEN,
                me.name, source_p->name);
     return;
   }
@@ -165,7 +165,7 @@ do_whois(struct Client *source_p, int parc, char *parv[])
     {
       if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
       {
-        sendto_one(source_p, form_str(RPL_LOAD2HI),
+        sendto_one(source_p, RPL_LOAD2HI,
                    me.name, source_p->name);
         return;
       }
@@ -181,11 +181,11 @@ do_whois(struct Client *source_p, int parc, char *parv[])
   if (!found)
   {
     if (!IsDigit(*nick))
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+      sendto_one(source_p, ERR_NOSUCHNICK,
 		 me.name, source_p->name, nick);
   }
 
-  sendto_one(source_p, form_str(RPL_ENDOFWHOIS),
+  sendto_one(source_p, RPL_ENDOFWHOIS,
              me.name, source_p->name, parv[1]);
 }
 
@@ -293,11 +293,11 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
   server_p = target_p->servptr;
 
-  sendto_one(source_p, form_str(RPL_WHOISUSER),
+  sendto_one(source_p, RPL_WHOISUSER,
              me.name, source_p->name, target_p->name,
              target_p->username, target_p->host, target_p->info);
 
-  cur_len = mlen = snprintf(buf, sizeof(buf), form_str(RPL_WHOISCHANNELS),
+  cur_len = mlen = snprintf(buf, sizeof(buf), RPL_WHOISCHANNELS,
                             me.name, source_p->name, target_p->name, "");
   t = buf + mlen;
 
@@ -330,32 +330,32 @@ whois_person(struct Client *source_p, struct Client *target_p)
   }
 
   if (HasUMode(source_p, UMODE_OPER) || !ConfigServerHide.hide_servers || target_p == source_p)
-    sendto_one(source_p, form_str(RPL_WHOISSERVER),
+    sendto_one(source_p, RPL_WHOISSERVER,
                me.name, source_p->name, target_p->name,
                server_p->name, server_p->info);
   else
-    sendto_one(source_p, form_str(RPL_WHOISSERVER),
+    sendto_one(source_p, RPL_WHOISSERVER,
 	       me.name, source_p->name, target_p->name,
                ConfigServerHide.hidden_name,
 	       ServerInfo.network_desc);
 
   if (HasUMode(target_p, UMODE_REGISTERED))
-    sendto_one(source_p, form_str(RPL_WHOISREGNICK),
+    sendto_one(source_p, RPL_WHOISREGNICK,
                me.name, source_p->name, target_p->name);
 
   if (target_p->away[0])
-    sendto_one(source_p, form_str(RPL_AWAY),
+    sendto_one(source_p, RPL_AWAY,
                me.name, source_p->name, target_p->name,
                target_p->away);
 
   if (HasUMode(target_p, UMODE_CALLERID) && !HasUMode(target_p, UMODE_SOFTCALLERID))
-    sendto_one(source_p, form_str(RPL_TARGUMODEG),
+    sendto_one(source_p, RPL_TARGUMODEG,
                me.name, source_p->name, target_p->name);
 
   if (HasUMode(target_p, UMODE_OPER))
     if (!HasUMode(target_p, UMODE_HIDDEN) || HasUMode(source_p, UMODE_OPER))
-      sendto_one(source_p, form_str(HasUMode(target_p, UMODE_ADMIN) ? RPL_WHOISADMIN :
-                 RPL_WHOISOPERATOR),
+      sendto_one(source_p, HasUMode(target_p, UMODE_ADMIN) ? RPL_WHOISADMIN :
+                 RPL_WHOISOPERATOR,
                  me.name, source_p->name, target_p->name);
 
   if (target_p->sockhost[0] && strcmp(target_p->sockhost, "0"))
@@ -367,7 +367,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
     else
       show_ip = 1;
 
-    sendto_one(source_p, form_str(RPL_WHOISACTUALLY),
+    sendto_one(source_p, RPL_WHOISACTUALLY,
                me.name, source_p->name, target_p->name,
                show_ip ? target_p->sockhost : "255.255.255.255");
   }
@@ -376,10 +376,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
   {
 #ifdef HAVE_LIBCRYPTO
     if (target_p->localClient->fd.ssl)
-      sendto_one(source_p, form_str(RPL_WHOISSECURE),
+      sendto_one(source_p, RPL_WHOISSECURE,
                  me.name, source_p->name, target_p->name);
 #endif
-    sendto_one(source_p, form_str(RPL_WHOISIDLE),
+    sendto_one(source_p, RPL_WHOISIDLE,
                me.name, source_p->name, target_p->name,
                idle_time_get(source_p, target_p),
                target_p->localClient->firsttime);

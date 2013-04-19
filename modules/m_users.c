@@ -46,7 +46,7 @@ m_users(struct Client *client_p, struct Client *source_p,
 
   if (last_used + ConfigFileEntry.pace_wait_simple > CurrentTime)
   {
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
+    sendto_one(source_p, RPL_LOAD2HI,
                me.name, source_p->name);
     return;
   }
@@ -58,13 +58,13 @@ m_users(struct Client *client_p, struct Client *source_p,
                     parc, parv) != HUNTED_ISME)
       return;
 
-  sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, source_p->name,
+  sendto_one(source_p, RPL_LOCALUSERS, me.name, source_p->name,
              ConfigServerHide.hide_servers ? Count.total : Count.local,
              ConfigServerHide.hide_servers ? Count.max_tot : Count.max_loc,
              ConfigServerHide.hide_servers ? Count.total : Count.local,
              ConfigServerHide.hide_servers ? Count.max_tot : Count.max_loc);
 
-  sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, source_p->name,
+  sendto_one(source_p, RPL_GLOBALUSERS, me.name, source_p->name,
              Count.total, Count.max_tot, Count.total, Count.max_tot);
 }
 
@@ -82,13 +82,13 @@ mo_users(struct Client *client_p, struct Client *source_p,
     return;
 
   if (!HasUMode(source_p, UMODE_OPER) && ConfigServerHide.hide_servers)
-    sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, source_p->name,
+    sendto_one(source_p, RPL_LOCALUSERS, me.name, source_p->name,
                Count.total, Count.max_tot, Count.total, Count.max_tot);
   else
-    sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, source_p->name,
+    sendto_one(source_p, RPL_LOCALUSERS, me.name, source_p->name,
                Count.local, Count.max_loc, Count.local, Count.max_loc);
 
-  sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, source_p->name,
+  sendto_one(source_p, RPL_GLOBALUSERS, me.name, source_p->name,
              Count.total, Count.max_tot, Count.total, Count.max_tot);
 }
 

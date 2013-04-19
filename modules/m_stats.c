@@ -411,7 +411,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
       if (conf->until)
         continue;
 
-      sendto_one(source_p, form_str(RPL_STATSDLINE),
+      sendto_one(source_p, RPL_STATSDLINE,
                  from, to, 'D', conf->host, conf->reason);
     }
   }
@@ -446,7 +446,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
       if (!conf->until)
         continue;
 
-      sendto_one(source_p, form_str(RPL_STATSDLINE),
+      sendto_one(source_p, RPL_STATSDLINE,
                  from, to, 'd', conf->host, conf->reason);
     }
   }
@@ -467,11 +467,10 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
 
   if (ConfigFileEntry.stats_e_disabled)
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                from, to);
     return;
   }
-
 
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -484,7 +483,7 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
 
       conf = arec->conf;
 
-      sendto_one(source_p, form_str(RPL_STATSDLINE),
+      sendto_one(source_p, RPL_STATSDLINE,
                  from, to, 'e', conf->host, conf->reason /* XXX */);
     }
   }
@@ -614,7 +613,7 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
       {
         const struct MaskItem *conf = arec->conf;
 
-        sendto_one(source_p, form_str(RPL_STATSKLINE),
+        sendto_one(source_p, RPL_STATSKLINE,
                    from, to, "G",
                    conf->host ? conf->host : "*",
                    conf->user ? conf->user : "*",
@@ -701,7 +700,7 @@ report_auth(struct Client *client_p, int parc, char *parv[])
        * sender, so prepare the strings for comparing --fl_
        */
       if (ConfigFileEntry.hide_spoof_ips)
-        sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
+        sendto_one(client_p, RPL_STATSILINE, me.name,
                    client_p->name, 'I',
                    conf->name == NULL ? "*" : conf->name,
                    show_iline_prefix(client_p, conf),
@@ -710,7 +709,7 @@ report_auth(struct Client *client_p, int parc, char *parv[])
                    conf->class ? conf->class->name : "<default>");
 
       else
-        sendto_one(client_p, form_str(RPL_STATSILINE), me.name,
+        sendto_one(client_p, RPL_STATSILINE, me.name,
                    client_p->name, 'I',
                    conf->name == NULL ? "*" : conf->name,
                    show_iline_prefix(client_p, conf),
@@ -725,7 +724,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
   if ((ConfigFileEntry.stats_i_oper_only == 2) && !HasUMode(source_p, UMODE_OPER))
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                from, to);
 
   /* If unopered, Only return matching auth blocks */
@@ -747,7 +746,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
     if (conf == NULL)
       return;
 
-    sendto_one(source_p, form_str(RPL_STATSILINE), from,
+    sendto_one(source_p, RPL_STATSILINE, from,
                to, 'I',
 	       "*", show_iline_prefix(source_p, conf),
 	       conf->host, conf->port,
@@ -794,11 +793,11 @@ report_Klines(struct Client *client_p, int tkline)
         continue;
 
       if (HasUMode(client_p, UMODE_OPER))
-        sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
+        sendto_one(client_p, RPL_STATSKLINE, me.name,
                    client_p->name, p, conf->host, conf->user,
                    conf->reason);
       else
-        sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
+        sendto_one(client_p, RPL_STATSKLINE, me.name,
                    client_p->name, p, conf->host, conf->user,
                    conf->reason);
     }
@@ -810,7 +809,7 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
   if ((ConfigFileEntry.stats_k_oper_only == 2) && !HasUMode(source_p, UMODE_OPER))
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                from, to);
 
   /* If unopered, Only return matching klines */
@@ -835,7 +834,7 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
     if (!conf->until)
       return;
 
-    sendto_one(source_p, form_str(RPL_STATSKLINE), from,
+    sendto_one(source_p, RPL_STATSKLINE, from,
                to, "k", conf->host, conf->user, conf->reason);
   }
   /* Theyre opered, or allowed to see all klines */
@@ -849,7 +848,7 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
   if ((ConfigFileEntry.stats_k_oper_only == 2) && !HasUMode(source_p, UMODE_OPER))
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                from, to);
 
   /* If unopered, Only return matching klines */
@@ -875,7 +874,7 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
     if (conf->until)
       return;
       
-    sendto_one(source_p, form_str(RPL_STATSKLINE), from,
+    sendto_one(source_p, RPL_STATSKLINE, from,
                to, "K", conf->host, conf->user, conf->reason);
   }
   /* Theyre opered, or allowed to see all klines */
@@ -895,7 +894,7 @@ static void
 stats_oper(struct Client *source_p, int parc, char *parv[])
 {
   if (!HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.stats_o_oper_only)
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                from, to);
   else
     report_confitem_types(source_p, CONF_OPER);
@@ -942,7 +941,7 @@ static void
 stats_ports(struct Client *source_p, int parc, char *parv[])
 {
   if (!HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.stats_P_oper_only)
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                from, to);
   else
     show_ports(source_p);
@@ -1036,11 +1035,11 @@ stats_uptime(struct Client *source_p, int parc, char *parv[])
 {
   time_t now = CurrentTime - me.localClient->since;
 
-  sendto_one(source_p, form_str(RPL_STATSUPTIME), from, to,
+  sendto_one(source_p, RPL_STATSUPTIME, from, to,
              now / 86400, (now / 3600) % 24, (now / 60) % 60, now % 60);
 
   if (!ConfigFileEntry.disable_remote || HasUMode(source_p, UMODE_OPER))
-     sendto_one(source_p, form_str(RPL_STATSCONN), from, to,
+     sendto_one(source_p, RPL_STATSCONN, from, to,
                 Count.max_loc_con, Count.max_loc_cli, Count.totalrestartcount);
 }
 
@@ -1097,7 +1096,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
 
   if (ConfigServerHide.flatten_links && !HasUMode(source_p, UMODE_OPER))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                from, to);
     return;
   }
@@ -1110,7 +1109,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
     recvB += target_p->localClient->recv.bytes;
 
     /* ":%s 211 %s %s %u %u %llu %u %llu :%u %u %s" */
-    sendto_one(source_p, form_str(RPL_STATSLINKINFO),
+    sendto_one(source_p, RPL_STATSLINKINFO,
                from, to,
                get_client_name(target_p, HasUMode(source_p, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
                dbuf_length(&target_p->localClient->buf_sendq),
@@ -1217,7 +1216,7 @@ stats_L_list(struct Client *source_p,char *name, int doall, int wilds,
        (!IsServer(target_p) && !HasUMode(target_p, UMODE_ADMIN) &&
        !IsHandshake(target_p) && !IsConnecting(target_p))))
     {
-      sendto_one(source_p, form_str(RPL_STATSLINKINFO),
+      sendto_one(source_p, RPL_STATSLINKINFO,
                  from, to,
                  (IsUpper(statchar)) ?
                  get_client_name(target_p, SHOW_IP) :
@@ -1236,7 +1235,7 @@ stats_L_list(struct Client *source_p,char *name, int doall, int wilds,
       /* If its a hidden ip, an admin, or a server, mask the real IP */
       if(IsIPSpoof(target_p) || IsServer(target_p) || HasUMode(target_p, UMODE_ADMIN)
          || IsHandshake(target_p) || IsConnecting(target_p))
-        sendto_one(source_p, form_str(RPL_STATSLINKINFO),
+        sendto_one(source_p, RPL_STATSLINKINFO,
                    from, to,
                    get_client_name(target_p, MASK_IP),
                    dbuf_length(&target_p->localClient->buf_sendq),
@@ -1248,7 +1247,7 @@ stats_L_list(struct Client *source_p,char *name, int doall, int wilds,
                    (CurrentTime > target_p->localClient->since) ? (unsigned)(CurrentTime - target_p->localClient->since):0,
                    IsServer(target_p) ? show_capabilities(target_p) : "-");
       else /* show the real IP */
-        sendto_one(source_p, form_str(RPL_STATSLINKINFO),
+        sendto_one(source_p, RPL_STATSLINKINFO,
                    from, to,
                    (IsUpper(statchar)) ?
                    get_client_name(target_p, SHOW_IP) :
@@ -1298,7 +1297,7 @@ stats_ltrace(struct Client *source_p, int parc, char *parv[])
     stats_L(source_p, name, doall, wilds, statchar);
   }
   else
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                from, to, "STATS");
 }
 
@@ -1363,7 +1362,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
 
   if (statchar == '\0')
   {
-    sendto_one(source_p, form_str(RPL_ENDOFSTATS),
+    sendto_one(source_p, RPL_ENDOFSTATS,
                from, to, '*');
     return;
   }
@@ -1376,7 +1375,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
       if ((tab->need_admin && !HasUMode(source_p, UMODE_ADMIN)) ||
           (tab->need_oper && !HasUMode(source_p, UMODE_OPER)))
       {
-        sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+        sendto_one(source_p, ERR_NOPRIVILEGES,
                    from, to);
         break;
       }
@@ -1390,7 +1389,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  sendto_one(source_p, form_str(RPL_ENDOFSTATS),
+  sendto_one(source_p, RPL_ENDOFSTATS,
              from, to, statchar);
 }
 
@@ -1429,7 +1428,7 @@ m_stats(struct Client *client_p, struct Client *source_p,
   /* Check the user is actually allowed to do /stats, and isnt flooding */
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    sendto_one(source_p,form_str(RPL_LOAD2HI),
+    sendto_one(source_p, RPL_LOAD2HI,
                from, to);
     return;
   }

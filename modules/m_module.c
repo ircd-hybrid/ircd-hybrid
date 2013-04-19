@@ -64,14 +64,14 @@ mo_module(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_MODULE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+    sendto_one(source_p, ERR_NOPRIVILEGES,
                me.name, source_p->name);
     return;
   }
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                me.name, source_p->name, "MODULE");
     return;
   }
@@ -80,7 +80,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(parv[2]))
     {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, ERR_NEEDMOREPARAMS,
                  me.name, source_p->name, "MODULE");
       return;
     }
@@ -100,7 +100,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(parv[2]))
     {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, ERR_NEEDMOREPARAMS,
                  me.name, source_p->name, "MODULE");
       return;
     }
@@ -138,7 +138,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(parv[2]))
     {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+      sendto_one(source_p, ERR_NEEDMOREPARAMS,
                  me.name, source_p->name, "MODULE");
       return;
     }
@@ -220,12 +220,12 @@ mo_module(struct Client *client_p, struct Client *source_p,
       if (!EmptyString(parv[2]) && match(parv[2], modp->name))
         continue;
 
-      sendto_one(source_p, form_str(RPL_MODLIST), me.name, source_p->name,
+      sendto_one(source_p, RPL_MODLIST, me.name, source_p->name,
                  modp->name, modp->handle,
                  modp->version, (modp->flags & MODULE_FLAG_CORE) ?"(core)":"");
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFMODLIST),
+    sendto_one(source_p, RPL_ENDOFMODLIST,
                me.name, source_p->name);
     return;
   }

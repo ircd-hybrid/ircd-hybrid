@@ -172,7 +172,7 @@ send_message_remote(struct Client *to, struct Client *from,
     AddFlag(to, FLAGS_KILLED);
 
     if (IsClient(from))
-      sendto_one(from, form_str(ERR_GHOSTEDCLIENT),
+      sendto_one(from, ERR_GHOSTEDCLIENT,
                  me.name, from->name, to->name, to->username,
                  to->host, to->from);
 

@@ -780,7 +780,7 @@ list_one_channel(struct Client *source_p, struct Channel *chptr,
 
   if (!list_allow_channel(chptr->chname, list_task))
     return;
-  sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
+  sendto_one(source_p, RPL_LIST, me.name, source_p->name,
              chptr->chname, dlink_list_length(&chptr->members),
              chptr->topic);
 }
@@ -831,6 +831,6 @@ safe_list_channels(struct Client *source_p, struct ListTask *list_task,
   }
 
   free_list_task(list_task, source_p);
-  sendto_one(source_p, form_str(RPL_LISTEND),
+  sendto_one(source_p, RPL_LISTEND,
              me.name, source_p->name);
 }

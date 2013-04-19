@@ -75,7 +75,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_K))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
+    sendto_one(source_p, ERR_NOPRIVS,
                me.name, source_p->name, "kline");
     return;
   }
@@ -308,14 +308,14 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_UNKLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
+    sendto_one(source_p, ERR_NOPRIVS,
                me.name, source_p->name, "unkline");
     return;
   }
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                me.name, source_p->name, "UNKLINE");
     return;
   }

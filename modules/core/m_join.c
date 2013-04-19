@@ -96,6 +96,7 @@ m_join(struct Client *client_p, struct Client *source_p,
   char *key_list = NULL;
   char *chan_list = NULL;
   char *chan = NULL;
+  const char *s = NULL;
   struct Channel *chptr = NULL;
   struct MaskItem *conf = NULL;
   int i = 0;
@@ -103,7 +104,7 @@ m_join(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+    sendto_one(source_p, ERR_NEEDMOREPARAMS,
                me.name, source_p->name, "JOIN");
     return;
   }
@@ -128,7 +129,7 @@ m_join(struct Client *client_p, struct Client *source_p,
 
     if (!check_channel_name(chan, 1))
     {
-      sendto_one(source_p, form_str(ERR_BADCHANNAME),
+      sendto_one(source_p, ERR_BADCHANNAME,
                  me.name, source_p->name, chan);
       continue;
     }
@@ -139,7 +140,7 @@ m_join(struct Client *client_p, struct Client *source_p,
     {
       if (conf)
         ++conf->count;
-      sendto_one(source_p, form_str(ERR_BADCHANNAME),
+      sendto_one(source_p, ERR_BADCHANNAME,
                  me.name, source_p->name, chan);
       sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                            "Forbidding reserved channel [%s] from user %s",
@@ -152,7 +153,7 @@ m_join(struct Client *client_p, struct Client *source_p,
          ConfigChannel.max_chans_per_oper :
          ConfigChannel.max_chans_per_user))
     {
-      sendto_one(source_p, form_str(ERR_TOOMANYCHANNELS),
+      sendto_one(source_p, ERR_TOOMANYCHANNELS,
                  me.name, source_p->name, chan);
       break;
     }
@@ -165,7 +166,7 @@ m_join(struct Client *client_p, struct Client *source_p,
       if (splitmode && !HasUMode(source_p, UMODE_OPER) &&
           ConfigChannel.no_join_on_split)
       {
-        sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+        sendto_one(source_p, ERR_UNAVAILRESOURCE,
                    me.name, source_p->name, chan);
         continue;
       }
@@ -173,9 +174,9 @@ m_join(struct Client *client_p, struct Client *source_p,
       /*
        * can_join checks for +i key, bans.
        */
-      if ((i = can_join(source_p, chptr, key)))
+      if ((s = can_join(source_p, chptr, key)))
       {
-        sendto_one(source_p, form_str(i), me.name,
+        sendto_one(source_p, s, me.name,
                    source_p->name, chptr->chname);
         continue;
       }
@@ -194,7 +195,7 @@ m_join(struct Client *client_p, struct Client *source_p,
       if (splitmode && !HasUMode(source_p, UMODE_OPER) &&
           (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))
       {
-        sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+        sendto_one(source_p, ERR_UNAVAILRESOURCE,
                    me.name, source_p->name, chan);
         continue;
       }
@@ -265,10 +266,10 @@ m_join(struct Client *client_p, struct Client *source_p,
 
     if (chptr->topic[0])
     {
-      sendto_one(source_p, form_str(RPL_TOPIC), me.name,
+      sendto_one(source_p, RPL_TOPIC, me.name,
                  source_p->name, chptr->chname, chptr->topic);
 
-      sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
+      sendto_one(source_p, RPL_TOPICWHOTIME,
                  me.name, source_p->name, chptr->chname,
                  chptr->topic_info, chptr->topic_time);
     }

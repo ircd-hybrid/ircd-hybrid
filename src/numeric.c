@@ -459,7 +459,7 @@ static const char *replies[] = {
 /* 429 */ NULL,
 /* 430 */ NULL,
 /* 431 ERR_NONICKNAMEGIVEN */ ":%s 431 %s :No nickname given",
-/* 432 ERR_ERRONEUSNICKNAME */ ":%s 432 %s %s :Erroneous Nickname",
+/* 432 ERR_ERRONEUSNICKNAME */ ":%s 432 %s %s :%s",
 /* 433 ERR_NICKNAMEINUSE */ ":%s 433 %s %s :Nickname is already in use.",
 /* 434 */ NULL,
 /* 435 */ NULL,

@@ -70,7 +70,7 @@ static const struct InfoStruct info_table[] =
     "DPATH",
     OUTPUT_STRING,
     &ConfigFileEntry.dpath,
-    "Directory containing configuration files"
+    "Root directory of installation"
   },
   {
     "DLPATH",
@@ -99,7 +99,7 @@ static const struct InfoStruct info_table[] =
   {
     "RESVPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.xlinefile,
+    &ConfigFileEntry.resvfile,
     "Path to resv database file"
   },
   {

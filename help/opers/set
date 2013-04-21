@@ -15,9 +15,6 @@ SET <option> <value>
   MAX         - Sets the number of max connections
                 to <value>. (This number cannot exceed
                 HARD_FDLIMIT in defaults.h)
-  MSGLOCALE   - Set the message locale
-                standard - Compiled in defaults
-                custom   - Old CUSTOM_ERR messages
   SPAMNUM     - Sets how many join/parts to channels
                 constitutes a possible spambot.
   SPAMTIME    - Below this time on a channel

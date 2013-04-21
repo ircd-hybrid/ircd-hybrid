@@ -6,7 +6,7 @@ In /VERSION one might see something like this:
 irc.corefailure.com hybrid-7beta5 oiwszcerkfydnxbaugl biklmnopstveIh bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
-arguments that are available to the user. It is hardcoded into src/messages.tab.
+arguments that are available to the user. It is hardcoded into src/numeric.c
 
 Here is a guide to the preceding modes:
 

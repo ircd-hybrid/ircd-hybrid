@@ -175,7 +175,6 @@ AC_CONFIG_FILES(              \
        Makefile               \
        src/Makefile           \
        libltdl/Makefile       \
-       messages/Makefile      \
        modules/Makefile       \
        modules/core/Makefile  \
        doc/Makefile           \

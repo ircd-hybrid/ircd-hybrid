@@ -13,8 +13,6 @@ ircd.8                  - The new revised manpage, read with the following
                           man -M . ircd
 kline.txt               - Outline of the remote K-line protocol for both
                           opers and servers
-messages.txt            - A general help file for users and admins to
-                          customize ircd's messages.
 modeg.txt               - An in depth description of the server side silence
                           user mode (+g)
 modes.txt               - A list of all user and channel modes

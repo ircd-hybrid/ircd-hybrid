@@ -512,7 +512,7 @@ static const char *replies[] = {
 /* 482 ERR_CHANOPRIVSNEEDED */ ":%s 482 %s %s :You're not channel operator",
 /* 483 ERR_CANTKILLSERVER */ ":%s 483 %s :You can't kill a server!",
 /* 484 ERR_RESTRICTED */ ":%s 484 %s :You are restricted",
-/* 485 */ NULL,
+/* 485 ERR_CHANBANREASON */ ":%s 485 %s %s :Cannot join channel (%s)",
 /* 486 ERR_NONONREG */ ":%s 486 %s %s :You must identify to a registered nick to private message that person",
 /* 487 */ NULL,
 /* 488 */ NULL,

@@ -236,6 +236,7 @@ extern const char *form_str(unsigned int);
 #define ERR_CHANOPRIVSNEEDED 482
 #define ERR_CANTKILLSERVER   483
 #define ERR_RESTRICTED       484
+#define ERR_CHANBANREASON    485
 #define ERR_NONONREG         486
 #define ERR_NOOPERHOST       491
 #define ERR_UMODEUNKNOWNFLAG 501

@@ -8,6 +8,8 @@ o) Implemented new binary database storage for X-,D-,K-,G-Lines and RESVs.
    Temporary bans are now stored as well and will persist after a reboot
 o) Channel based resv{} blocks may now contain wildcards
 o) Added support for "away-notify" client capability
+o) NICK/JOIN now shows the actual reason of reserved nick-/channelnames
+o) contrib/ and its content has been removed from the tree
 
 
 -- ircd-hybrid-8.0.7 Release Notes

@@ -152,7 +152,6 @@ struct split_nuh_item
 
 struct MaskItem
 {
-  struct MaskItem   *hnext;
   dlink_node         node;
   dlink_list         leaf_list;
   dlink_list         hub_list;

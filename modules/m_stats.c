@@ -484,8 +484,8 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
 
       conf = arec->conf;
 
-      sendto_one(source_p, form_str(RPL_STATSDLINE),
-                 from, to, 'e', conf->host, conf->reason /* XXX */);
+      sendto_one(source_p, form_str(RPL_STATSDLINE), from, to, 'e',
+                 conf->host, "");
     }
   }
 }
@@ -965,10 +965,9 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
 {
   const struct Client *target_p = NULL;
   const dlink_node *ptr = NULL;
-  struct ServerStatistics *sp;
   struct ServerStatistics tmp;
+  struct ServerStatistics *sp = &tmp;
 
-  sp = &tmp;
   memcpy(sp, &ServerStats, sizeof(struct ServerStatistics));
 
   /*

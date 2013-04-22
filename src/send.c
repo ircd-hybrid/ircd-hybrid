@@ -532,7 +532,7 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
 
   if (touser && MyConnect(user) && !IsDead(user) &&
       user->localClient->serial != current_serial)
-    if (HasCap(target_p, cap) == cap)
+    if (HasCap(user, cap) == cap)
       send_message(user, buffer, len);
 }
 

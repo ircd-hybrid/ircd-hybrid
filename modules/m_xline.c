@@ -325,17 +325,11 @@ static void
 write_xline(struct Client *source_p, char *gecos, char *reason,
 	    time_t tkline_time)
 {
-  struct MaskItem *conf;
-  const char *current_date;
-  time_t cur_time;
-
-  conf = conf_make(CONF_XLINE);
+  struct MaskItem *conf = conf_make(CONF_XLINE);
 
   collapse(gecos);
   conf->name = xstrdup(gecos);
   conf->reason = xstrdup(reason);
-  cur_time = CurrentTime;
-  current_date = smalldate(cur_time);
   conf->setat = CurrentTime;
 
   SetConfDatabase(conf);

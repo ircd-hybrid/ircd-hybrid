@@ -82,7 +82,7 @@ watch_count_memory(unsigned int *const count, uint64_t *const memory)
  * \param reply numeric to send. Either RPL_LOGON or RPL_LOGOFF
  */
 void
-watch_check_hash(struct Client *client_p, int reply)
+watch_check_hash(struct Client *client_p, unsigned int reply)
 {
   struct Watch *anptr = NULL;
   dlink_node *ptr = NULL;

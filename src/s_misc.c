@@ -50,7 +50,7 @@ static const char *weekdays[] =
   "Thursday", "Friday", "Saturday"
 };
 
-char *
+const char *
 date(time_t lclock) 
 {
   static char buf[80], plus;
@@ -114,7 +114,7 @@ smalldate(time_t lclock)
 }
 
 #ifdef HAVE_LIBCRYPTO
-char *
+const char *
 ssl_get_cipher(const SSL *ssl)
 {
   static char buffer[IRCD_BUFSIZE / 4];

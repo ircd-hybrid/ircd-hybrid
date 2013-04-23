@@ -114,11 +114,11 @@ struct Ban
 
 extern dlink_list global_channel_list;
 
-extern int check_channel_name(const char *, int);
+extern int check_channel_name(const char *, const int);
 extern int can_send(struct Channel *, struct Client *, struct Membership *);
 extern int is_banned(const struct Channel *, const struct Client *);
 extern int can_join(struct Client *, struct Channel *, const char *);
-extern int has_member_flags(struct Membership *, unsigned int);
+extern int has_member_flags(const struct Membership *, const unsigned int);
 
 extern void remove_ban(struct Ban *, dlink_list *);
 extern void channel_init(void);

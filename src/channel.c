@@ -154,19 +154,18 @@ static void
 send_members(struct Client *client_p, struct Channel *chptr,
              char *lmodebuf, char *lparabuf)
 {
-  struct Membership *ms;
-  dlink_node *ptr;
+  const dlink_node *ptr = NULL;
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
 
-  start = t = buf + sprintf(buf, ":%s SJOIN %lu %s %s %s:",
-                            ID_or_name(&me, client_p),
-                            (unsigned long)chptr->channelts,
-                            chptr->chname, lmodebuf, lparabuf);
+  start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %lu %s %s %s:",
+                             ID_or_name(&me, client_p),
+                             (unsigned long)chptr->channelts,
+                             chptr->chname, lmodebuf, lparabuf);
 
   DLINK_FOREACH(ptr, chptr->members.head)
   {
-    ms = ptr->data;
+    const struct Membership *ms = ptr->data;
 
     tlen = strlen(IsCapable(client_p, CAP_TS6) ?
       ID(ms->client_p) : ms->client_p->name) + 1;  /* nick + space */
@@ -219,11 +218,10 @@ send_members(struct Client *client_p, struct Channel *chptr,
  */
 static void
 send_mode_list(struct Client *client_p, struct Channel *chptr,
-               dlink_list *top, char flag)
+               const dlink_list *top, char flag)
 {
   int ts5 = !IsCapable(client_p, CAP_TS6);
-  dlink_node *lp;
-  struct Ban *banptr;
+  const dlink_node *lp = NULL;
   char pbuf[IRCD_BUFSIZE];
   int tlen, mlen, cur_len, count = 0;
   char *mp = NULL, *pp = pbuf;
@@ -232,9 +230,9 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
     return;
 
   if (ts5)
-    mlen = sprintf(buf, ":%s MODE %s +", me.name, chptr->chname);
+    mlen = snprintf(buf, sizeof(buf), ":%s MODE %s +", me.name, chptr->chname);
   else
-    mlen = sprintf(buf, ":%s BMASK %lu %s %c :", me.id,
+    mlen = snprintf(buf, sizeof(buf), ":%s BMASK %lu %s %c :", me.id,
                    (unsigned long)chptr->channelts, chptr->chname, flag);
 
   /* MODE needs additional one byte for space between buf and pbuf */
@@ -243,7 +241,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
 
   DLINK_FOREACH(lp, top->head)
   {
-    banptr = lp->data;
+    const struct Ban *banptr = lp->data;
 
     /* must add another b/e/I letter if we use MODE */
     tlen = banptr->len + 3 + ts5;
@@ -304,7 +302,7 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
  * \return 0 if invalid, 1 otherwise
  */
 int
-check_channel_name(const char *name, int local)
+check_channel_name(const char *name, const int local)
 {
   const char *p = name;
   const int max_length = local ? LOCAL_CHANNELLEN : CHANNELLEN;
@@ -433,9 +431,7 @@ void
 channel_member_names(struct Client *source_p, struct Channel *chptr,
                      int show_eon)
 {
-  struct Client *target_p = NULL;
-  struct Membership *ms = NULL;
-  dlink_node *ptr = NULL;
+  const dlink_node *ptr = NULL;
   char lbuf[IRCD_BUFSIZE + 1];
   char *t = NULL, *start = NULL;
   int tlen = 0;
@@ -444,21 +440,19 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
 
   if (PubChannel(chptr) || is_member)
   {
-    t = lbuf + sprintf(lbuf, form_str(RPL_NAMREPLY),
-                       me.name, source_p->name,
-                       channel_pub_or_secret(chptr),
-                       chptr->chname);
+    t = lbuf + snprintf(lbuf, sizeof(lbuf), form_str(RPL_NAMREPLY),
+                        me.name, source_p->name,
+                        channel_pub_or_secret(chptr), chptr->chname);
     start = t;
 
     DLINK_FOREACH(ptr, chptr->members.head)
     {
-      ms       = ptr->data;
-      target_p = ms->client_p;
+      const struct Membership *ms = ptr->data;
 
-      if (HasUMode(target_p, UMODE_INVISIBLE) && !is_member)
+      if (HasUMode(ms->client_p, UMODE_INVISIBLE) && !is_member)
         continue;
 
-      tlen = strlen(target_p->name) + 1;  /* nick + space */
+      tlen = strlen(ms->client_p->name) + 1;  /* nick + space */
 
       if (!multi_prefix)
       {
@@ -483,7 +477,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
       }
 
       t += sprintf(t, "%s%s ", get_member_status(ms, multi_prefix),
-                   target_p->name);
+                   ms->client_p->name);
     }
 
     if (tlen != 0)
@@ -681,7 +675,7 @@ can_join(struct Client *source_p, struct Channel *chptr, const char *key)
 }
 
 int
-has_member_flags(struct Membership *ms, unsigned int flags)
+has_member_flags(const struct Membership *ms, const unsigned int flags)
 {
   if (ms != NULL)
     return ms->flags & flags;

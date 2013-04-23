@@ -79,11 +79,9 @@ extern const char *form_str(unsigned int);
 
 #define RPL_STATSPLINE       220
 #define RPL_UMODEIS          221
-
 #define RPL_STATSFLINE       224
 #define RPL_STATSDLINE       225
 #define RPL_STATSALINE	     226
-
 #define RPL_STATSLLINE       241
 #define RPL_STATSUPTIME      242
 #define RPL_STATSOLINE       243
@@ -104,7 +102,6 @@ extern const char *form_str(unsigned int);
 #define RPL_ADMINLOC1        257
 #define RPL_ADMINLOC2        258
 #define RPL_ADMINEMAIL       259
-
 #define RPL_ENDOFTRACE       262
 #define RPL_LOAD2HI          263
 #define RPL_LOCALUSERS       265
@@ -119,19 +116,16 @@ extern const char *form_str(unsigned int);
 #define RPL_UNAWAY           305
 #define RPL_NOWAWAY          306
 #define RPL_WHOISREGNICK     307
-#define RPL_WHOISADMIN	     308	/* Numeric List: Dalnet */
+#define RPL_WHOISADMIN	     308
 
 #define RPL_WHOISUSER        311
 #define RPL_WHOISSERVER      312
 #define RPL_WHOISOPERATOR    313
 
 #define RPL_WHOWASUSER       314
-/* rpl_endofwho below (315) */
-#define RPL_ENDOFWHOWAS      369
-
+#define RPL_ENDOFWHO         315
 #define RPL_WHOISCHANOP      316 /* redundant and not needed but reserved */
 #define RPL_WHOISIDLE        317
-
 #define RPL_ENDOFWHOIS       318
 #define RPL_WHOISCHANNELS    319
 #define RPL_LISTSTART        321
@@ -142,29 +136,23 @@ extern const char *form_str(unsigned int);
 #define RPL_NOTOPIC          331
 #define RPL_TOPIC            332
 #define RPL_TOPICWHOTIME     333
-#define	RPL_WHOISACTUALLY    338	/* dalnet */
+#define	RPL_WHOISACTUALLY    338
 #define RPL_INVITING         341
 #define RPL_INVITELIST       346
-#define RPL_ENDOFINVITELIST  347	/* IRCnet, Undernet extension */
+#define RPL_ENDOFINVITELIST  347
 #define RPL_EXCEPTLIST       348
 #define RPL_ENDOFEXCEPTLIST  349
-
 #define RPL_VERSION          351
-
 #define RPL_WHOREPLY         352
-#define RPL_ENDOFWHO         315
 #define RPL_NAMREPLY         353
-#define RPL_ENDOFNAMES       366
-
 #define RPL_CLOSING          362
 #define RPL_CLOSEEND         363
 #define RPL_LINKS            364
 #define RPL_ENDOFLINKS       365
-/* rpl_endofnames above (366) */
+#define RPL_ENDOFNAMES       366
 #define RPL_BANLIST          367
 #define RPL_ENDOFBANLIST     368
-/* rpl_endofwhowas above (369) */
-
+#define RPL_ENDOFWHOWAS      369
 #define RPL_INFO             371
 #define RPL_MOTD             372
 #define RPL_INFOSTART        373

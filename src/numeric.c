@@ -413,7 +413,7 @@ static const char *replies[] = {
 /* 383 */ NULL,
 /* 384 */ NULL,
 /* 385 */ NULL,
-/* 386 */ NULL,
+/* 386 RPL_RSACHALLENGE */ ":%s 386 %s :%s",
 /* 387 */ NULL,
 /* 388 */ NULL,
 /* 389 */ NULL,

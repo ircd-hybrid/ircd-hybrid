@@ -186,6 +186,7 @@ hidden_name	{ return HIDDEN_NAME; }
 hide_idle_from_opers { return HIDE_IDLE_FROM_OPERS; }
 hide_server_ips	{ return HIDE_SERVER_IPS; }
 hide_servers	{ return HIDE_SERVERS; }
+hide_services   { return HIDE_SERVICES; }
 hide_spoof_ips	{ return HIDE_SPOOF_IPS; }
 host		{ return HOST; }
 hub		{ return HUB; }

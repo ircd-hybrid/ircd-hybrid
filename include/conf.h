@@ -276,6 +276,7 @@ struct config_server_hide
   char *hidden_name;
   int flatten_links;
   int hide_servers;
+  int hide_services;
   int links_delay;
   int links_disabled;
   int hidden;

@@ -190,6 +190,7 @@ reset_block_state(void)
 %token	HIDDEN_NAME
 %token  HIDE_SERVER_IPS
 %token  HIDE_SERVERS
+%token  HIDE_SERVICES
 %token	HIDE_SPOOF_IPS
 %token  HOST
 %token  HUB
@@ -2915,6 +2916,7 @@ serverhide_entry: SERVERHIDE
 
 serverhide_items:   serverhide_items serverhide_item | serverhide_item;
 serverhide_item:    serverhide_flatten_links | serverhide_hide_servers |
+		    serverhide_hide_services |
 		    serverhide_links_delay |
 		    serverhide_hidden | serverhide_hidden_name |
 		    serverhide_hide_server_ips |
@@ -2930,6 +2932,12 @@ serverhide_hide_servers: HIDE_SERVERS '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hide_servers = yylval.number;
+};
+
+serverhide_hide_services: HIDE_SERVICES '=' TBOOL ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    ConfigServerHide.hide_services = yylval.number;
 };
 
 serverhide_hidden_name: HIDDEN_NAME '=' QSTRING ';'

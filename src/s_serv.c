@@ -106,6 +106,9 @@ write_links_file(void* notused)
     if (IsHidden(target_p))
       continue;
 
+    if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+      continue;
+
     newMessageLine = MyMalloc(sizeof(MessageFileLine));
 
     /*

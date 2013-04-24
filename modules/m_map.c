@@ -31,88 +31,76 @@
 #include "ircd.h"
 #include "irc_string.h"
 #include "parse.h"
+#include "s_user.h"
 
 
-static char buf[IRCD_BUFSIZE];
 
-/* dump_map()
- *   dumps server map, called recursively.
- */
-static void
-dump_map(struct Client *client_p, const struct Client *root_p,
-         int start_len, char *pbuf)
+static void dump_map(struct Client *client,
+                     struct Client *server,
+                     unsigned int prompt_length)
 {
-  int cnt = 0, i = 0, l = 0, len = start_len;
-  int users, dashes;
-  const dlink_node *ptr = NULL;
-  char *pb;
+  dlink_node *ptr = NULL;
+  struct Client *target_p = NULL;
+  static char prompt[64];
+  char *p = prompt + prompt_length;
+  int cnt = 0;
 
-  *pbuf= '\0';
-  pb = pbuf;
+  *p = '\0';
 
-  l = sprintf(pb, "%s", root_p->name);
-  pb += l;
-  len += l;
-
-  if (root_p->id[0] != '\0')
+  if (prompt_length > 60)
+    sendto_one(client, form_str(RPL_MAPMORE), me.name,
+               client->name, prompt, server->name);
+  else
   {
-    l = sprintf(pb, "[%s]", root_p->id);
-    pb += l;
-    len += l;
+    char buf[IRC_MAXSID + 3] = ""; /* +3 for [, ], \0 */
+
+    if (HasUMode(client, UMODE_OPER) && server->id[0])
+      snprintf(buf, sizeof(buf), "[%s]", server->id);
+
+    sendto_one(client, form_str(RPL_MAP), me.name, client->name,
+               prompt, server->name, buf,
+               dlink_list_length(&server->serv->client_list),
+               dlink_list_length(&server->serv->client_list) * 100 / Count.total);
   }
 
-  *pb++ = ' ';
-  len++;
-  dashes = 50 - len;
-
-  for (i = 0; i < dashes; i++)
-    *pb++ = '-';
-
-  *pb++ = ' ';
-  *pb++ = '|';
-
-  users = dlink_list_length(&root_p->serv->client_list);
-
-  sprintf(pb, " Users: %5d (%1.1f%%)", users,
-          100 * (float)users / (float)Count.total);
-
-  sendto_one(client_p, form_str(RPL_MAP), me.name, client_p->name, buf);
-
-  if (root_p->serv->server_list.head)
+  if (prompt_length > 0)
   {
-    cnt += dlink_list_length(&root_p->serv->server_list);
+    *(p - 1) = ' ';
 
-    if (cnt)
-    {
-      if (pbuf > buf + 3)
-      {
-        pbuf[-2] = ' ';
-
-        if (pbuf[-3] == '`')
-          pbuf[-3] = ' ';
-      }
-    }
+    if (*(p - 2) == '`')
+      *(p - 2) = ' ';
   }
 
-  i = 1;
+  if (prompt_length > 60)
+    return;
+  strcpy(p, "|-");
 
-  DLINK_FOREACH(ptr, root_p->serv->server_list.head)
+  DLINK_FOREACH(ptr, server->serv->server_list.head)
   {
-    const struct Client *server_p = ptr->data;
+    target_p = ptr->data;
 
-    *pbuf = ' ';
+    if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+      if (!HasUMode(client, UMODE_OPER))
+        continue;
 
-    if (i < cnt)
-      *(pbuf + 1) = '|';
-    else
-      *(pbuf + 1) = '`';
-
-    *(pbuf + 2) = '-';
-    *(pbuf + 3) = ' ';
-    dump_map(client_p, server_p, start_len + 4, pbuf + 4);
- 
-    ++i;
+    ++cnt;
   }
+
+  DLINK_FOREACH(ptr, server->serv->server_list.head)
+  {
+    target_p = ptr->data;
+
+    if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+      if (!HasUMode(client, UMODE_OPER))
+        continue;
+
+    if (--cnt == 0)
+      *p = '`';
+    dump_map(client, target_p, prompt_length + 2);
+  }
+
+  if (prompt_length > 0)
+    *(p - 1) = '-';
 }
 
 /* m_map()
@@ -140,7 +128,7 @@ m_map(struct Client *client_p, struct Client *source_p,
 
   last_used = CurrentTime;
 
-  dump_map(source_p, &me, 0, buf);
+  dump_map(source_p, &me, 0);
   sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
 }
 
@@ -151,7 +139,7 @@ static void
 mo_map(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
-  dump_map(source_p, &me, 0, buf);
+  dump_map(source_p, &me, 0);
   sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
 }
 

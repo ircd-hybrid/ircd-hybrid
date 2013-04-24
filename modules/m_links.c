@@ -62,6 +62,10 @@ do_links(struct Client *source_p, int parc, char *parv[])
         if (!HasUMode(source_p, UMODE_OPER))
           continue;
 
+      if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+        if (!HasUMode(source_p, UMODE_OPER))
+          continue;
+
       if (!EmptyString(mask) && match(mask, target_p->name))
         continue;
 

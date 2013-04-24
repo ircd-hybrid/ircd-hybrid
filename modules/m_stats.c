@@ -1105,6 +1105,10 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   {
     struct Client *target_p = ptr->data;
 
+    if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+      if (!HasUMode(source_p, UMODE_OPER))
+        continue;
+
     sendB += target_p->localClient->send.bytes;
     recvB += target_p->localClient->recv.bytes;
 

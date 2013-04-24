@@ -319,6 +319,7 @@ reset_block_state(void)
 %token  T_LOCOPS
 %token  T_MAX_CLIENTS
 %token  T_NCHANGE
+%token  T_NONONREG
 %token  T_OPERWALL
 %token  T_RECVQ
 %token  T_REJ
@@ -1173,6 +1174,10 @@ oper_umodes_item:  T_BOTS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_LOCOPS;
+} | T_NONONREG
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.modes.value |= UMODE_REGONLY;
 };
 
 oper_flags: IRCD_FLAGS
@@ -2803,6 +2808,9 @@ umode_item:	T_BOTS
 } | T_LOCOPS
 {
   ConfigFileEntry.oper_only_umodes |= UMODE_LOCOPS;
+} | T_NONONREG
+{
+  ConfigFileEntry.oper_only_umodes |= UMODE_REGONLY;
 };
 
 general_min_nonwildcard: MIN_NONWILDCARD '=' NUMBER ';'

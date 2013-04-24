@@ -229,6 +229,7 @@ no_create_on_split { return NO_CREATE_ON_SPLIT; }
 no_join_on_split   { return NO_JOIN_ON_SPLIT; }
 no_oper_flood   { return NO_OPER_FLOOD; }
 no_tilde	{ return NO_TILDE; }
+nononreg        { return T_NONONREG; }
 number_per_cidr	{ return NUMBER_PER_CIDR; }
 number_per_ip	{ return NUMBER_PER_IP; }
 oper		{ return OPERATOR; }

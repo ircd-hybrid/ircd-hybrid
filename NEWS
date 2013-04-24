@@ -11,6 +11,7 @@ o) Added support for "away-notify" client capability
 o) NICK/JOIN now shows the actual reason of reserved nick-/channelnames
 o) contrib/ and its content has been removed from the tree
 o) Added serverhide::hide_services configuration option
+o) Added 'nononreg' (+R) to oper::umodes and general::oper_only_modes
 
 
 -- ircd-hybrid-8.0.7 Release Notes

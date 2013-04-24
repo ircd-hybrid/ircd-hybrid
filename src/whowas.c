@@ -36,7 +36,7 @@ dlink_list WHOWASHASH[HASHSIZE];
 
 
 void
-add_history(struct Client *client_p, int online)
+add_history(struct Client *client_p, const int online)
 {
   static unsigned int whowas_next = 0;
   struct Whowas *who = &WHOWAS[whowas_next];

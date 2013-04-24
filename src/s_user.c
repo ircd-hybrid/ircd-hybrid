@@ -826,7 +826,7 @@ change_simple_umode(va_list args)
  */
 void
 set_user_mode(struct Client *client_p, struct Client *source_p,
-              int parc, char *parv[])
+              const int parc, char *parv[])
 {
   unsigned int flag, setflags;
   char **p, *m, buf[IRCD_BUFSIZE];
@@ -1260,7 +1260,7 @@ valid_sid(const char *sid)
 void
 init_uid(void)
 {
-  int i;
+  unsigned int i;
 
   memset(new_uid, 0, sizeof(new_uid));
 

@@ -36,7 +36,7 @@ extern struct Callback *umode_cb;
 extern unsigned int user_modes[];
 
 extern void assemble_umode_buffer(void);
-extern void set_user_mode(struct Client *, struct Client *, int, char **);
+extern void set_user_mode(struct Client *, struct Client *, const int, char *[]);
 extern void send_umode(struct Client *, struct Client *,
                        unsigned int, unsigned int, char *);
 extern void send_umode_out(struct Client *, struct Client *, unsigned int);

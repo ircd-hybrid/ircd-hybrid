@@ -55,7 +55,7 @@ extern void whowas_init(void);
 **      usually called before changing to a new name (nick).
 **      Client must be a fully registered user.
 */
-extern void add_history(struct Client *, int);
+extern void add_history(struct Client *, const int);
 
 /*
 ** off_history

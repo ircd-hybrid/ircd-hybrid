@@ -161,7 +161,7 @@ write_links_file(void* notused)
  */
 int
 hunt_server(struct Client *client_p, struct Client *source_p, const char *command,
-            int server, int parc, char *parv[])
+            const int server, const int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   struct Client *target_tmp = NULL;

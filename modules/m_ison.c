@@ -34,7 +34,7 @@
 
 static void
 do_ison(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+        const int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   char *nick;

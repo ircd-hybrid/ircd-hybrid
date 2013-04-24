@@ -10,6 +10,7 @@ o) Channel based resv{} blocks may now contain wildcards
 o) Added support for "away-notify" client capability
 o) NICK/JOIN now shows the actual reason of reserved nick-/channelnames
 o) contrib/ and its content has been removed from the tree
+o) Added serverhide::hide_services configuration option
 
 
 -- ircd-hybrid-8.0.7 Release Notes

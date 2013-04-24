@@ -241,6 +241,12 @@ static const struct InfoStruct info_table[] =
     "Hide servernames from users"
   },
   {
+    "hide_services",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigServerHide.hide_services,
+    "Hides the location of services server"
+  },
+  {
     "hidden_name",
     OUTPUT_STRING,
     &ConfigServerHide.hidden_name,

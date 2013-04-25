@@ -53,6 +53,7 @@ dlink_list resv_channel_list = { NULL, NULL, 0 };
 struct MaskItem *
 create_resv(const char *name, const char *reason, const dlink_list *list)
 {
+  dlink_node *ptr = NULL;
   struct MaskItem *conf = NULL;
   enum maskitem_type type;
 
@@ -73,27 +74,25 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
 
   if (list)
   {
-    if (strlen(name) == 2 && IsAlpha(*(name + 1) && IsAlpha(*(name + 2))))
+    DLINK_FOREACH(ptr, list->head)
     {
-      struct exempt *exptr = MyMalloc(sizeof(*exptr));
+      char nick[NICKLEN + 1];
+      char user[USERLEN + 1];
+      char host[HOSTLEN + 1];
+      struct split_nuh_item nuh;
+      struct exempt *exptr = NULL;
+      char *s = ptr->data;
 
-      exptr->name = xstrdup(name);
-      exptr->coid = GeoIP_id_by_code(name);
-      dlinkAdd(exptr, &exptr->node, &conf->exempt_list);
-    }
-    else
-    {
-      dlink_node *ptr = NULL;
-
-      DLINK_FOREACH(ptr, list->head)
+      if (strlen(s) == 2 && IsAlpha(*(s + 1) && IsAlpha(*(s + 2))))
       {
-        char nick[NICKLEN + 1];
-        char user[USERLEN + 1];
-        char host[HOSTLEN + 1];
-        struct split_nuh_item nuh;
-        struct exempt *exptr = NULL;
-
-        nuh.nuhmask  = name;
+        exptr = MyMalloc(sizeof(*exptr));
+        exptr->name = xstrdup(s);
+        exptr->coid = GeoIP_id_by_code(s);
+        dlinkAdd(exptr, &exptr->node, &conf->exempt_list);
+      }
+      else
+      {
+        nuh.nuhmask  = s;
         nuh.nickptr  = nick;
         nuh.userptr  = user;
         nuh.hostptr  = host;
@@ -105,7 +104,7 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
         split_nuh(&nuh);
 
         exptr = MyMalloc(sizeof(*exptr));
-        exptr->name = xstrdup(name);
+        exptr->name = xstrdup(nick);
         exptr->user = xstrdup(user);
         exptr->host = xstrdup(host);
         exptr->type = parse_netmask(host, &exptr->addr, &exptr->bits);

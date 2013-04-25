@@ -208,6 +208,17 @@ conf_free(struct MaskItem *conf)
     free_dlink_node(ptr);
   }
 
+  DLINK_FOREACH_SAFE(ptr, ptr_next, conf->exempt_list.head)
+  {
+    struct exempt *exptr = ptr->data;
+
+    MyFree(exptr->name);
+    MyFree(exptr->user);
+    MyFree(exptr->host);
+    MyFree(exptr);
+    free_dlink_node(ptr);
+  }
+
   MyFree(conf);
 }
 
@@ -1340,7 +1351,6 @@ set_default_conf(void)
   ConfigLoggingEntry.use_logging = 1;
 
   ConfigChannel.disable_fake_channels = 0;
-  ConfigChannel.restrict_channels = 0;
   ConfigChannel.knock_delay = 300;
   ConfigChannel.knock_delay_channel = 60;
   ConfigChannel.max_chans_per_user = 25;

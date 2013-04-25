@@ -708,12 +708,14 @@ find_channel_link(struct Client *client_p, struct Channel *chptr)
 int
 can_send(struct Channel *chptr, struct Client *source_p, struct Membership *ms)
 {
+  struct MaskItem *conf = NULL;
+
   if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))
     return CAN_SEND_OPV;
 
   if (MyClient(source_p) && !IsExemptResv(source_p))
     if (!(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv))
-      if (!match_find_resv(chptr->chname) == ConfigChannel.restrict_channels)
+      if ((conf = match_find_resv(chptr->chname)) && !resv_find_exempt(source_p, conf))
         return ERR_CANNOTSENDTOCHAN;
 
   if (ms != NULL || (ms = find_channel_link(source_p, chptr)))

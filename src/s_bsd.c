@@ -302,6 +302,15 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
               sizeof(new_client->sockhost), NULL, 0, NI_NUMERICHOST);
   new_client->localClient->aftype = new_client->localClient->ip.ss.ss_family;
 
+#ifdef HAVE_LIBGEOIP
+  /* XXX IPV6 SUPPORT XXX */
+  if (irn->ss.ss_family == AF_INET && geoip_ctx)
+  {
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&new_client->localClient->ip;
+    new_client->localClient->country_id = GeoIP_id_by_ipnum(geoip_ctx, (unsigned long)ntohl(v4->sin_addr.s_addr));
+  }
+#endif
+
   if (new_client->sockhost[0] == ':' && new_client->sockhost[1] == ':')
   {
     strlcpy(new_client->host, "0", sizeof(new_client->host));

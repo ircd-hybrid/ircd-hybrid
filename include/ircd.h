@@ -88,6 +88,9 @@ struct ServerState_t
 };
 
 
+#ifdef HAVE_LIBGEOIP
+extern GeoIP *geoip_ctx;
+#endif
 extern char **myargv;
 extern const char *infotext[];
 extern const char *serno;

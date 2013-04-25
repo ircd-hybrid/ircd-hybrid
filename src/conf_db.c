@@ -907,24 +907,12 @@ load_resv_database(void)
     SAFE_READ(read_uint64(&tmp64_setat, f));
     SAFE_READ(read_uint64(&tmp64_hold, f));
 
-    if (IsChanPrefix(*name))
-    {
-      if ((conf = create_channel_resv(name, reason)) == NULL)
-        continue;
+    if ((conf = create_resv(name, reason, NULL)) == NULL)
+      continue;
 
-      conf->setat = tmp64_setat;
-      conf->until = tmp64_hold;
-      SetConfDatabase(conf);
-    }
-    else
-    {
-      if ((conf = create_nick_resv(name, reason)) == NULL)
-        continue;
-
-      conf->setat = tmp64_setat;
-      conf->until = tmp64_hold;
-      SetConfDatabase(conf);
-    }
+    conf->setat = tmp64_setat;
+    conf->until = tmp64_hold;
+    SetConfDatabase(conf);
 
     MyFree(name);
     MyFree(reason);

@@ -62,6 +62,10 @@
 #include "conf_db.h"
 #include "conf_class.h"
 
+
+#ifdef HAVE_LIBGEOIP
+GeoIP *geoip_ctx;
+#endif
 /* /quote set variables */
 struct SetOptions GlobalSetOptions;
 
@@ -559,6 +563,9 @@ main(int argc, char *argv[])
   initialize_server_capabs();   /* Set up default_server_capabs */
   initialize_global_set_options();
   channel_init();
+#ifdef HAVE_LIBGEOIP
+  geoip_ctx = GeoIP_new(GEOIP_MEMORY_CACHE);
+#endif
 
   if (EmptyString(ServerInfo.sid))
   {

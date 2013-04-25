@@ -221,7 +221,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
   {
     struct MaskItem *conf = NULL;
 
-    if ((conf = create_channel_resv(name, reason)) == NULL)
+    if ((conf = create_resv(name, reason, NULL)) == NULL)
     {
       sendto_one(source_p,
 	   ":%s NOTICE %s :A RESV has already been placed on channel: %s",
@@ -281,7 +281,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
       return;
     }
 
-    if ((conf = create_nick_resv(name, reason)) == NULL)
+    if ((conf = create_resv(name, reason, NULL)) == NULL)
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :A RESV has already been placed on nick %s",

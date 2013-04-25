@@ -208,6 +208,7 @@ reset_block_state(void)
 %token  LINKS_DELAY
 %token  LISTEN
 %token  T_LOG
+%token  MASK
 %token  MAX_ACCEPT
 %token  MAX_BANS
 %token  MAX_CHANS_PER_OPER
@@ -267,7 +268,6 @@ reset_block_state(void)
 %token  REHASH
 %token  REMOTE
 %token  REMOTEBAN
-%token  RESTRICT_CHANNELS
 %token  RSA_PRIVATE_KEY_FILE
 %token  RSA_PUBLIC_KEY_FILE
 %token  SSL_CERTIFICATE_FILE
@@ -1717,14 +1717,20 @@ resv_entry: RESV
   strlcpy(block_state.rpass.buf, CONF_NOREASON, sizeof(block_state.rpass.buf));
 } '{' resv_items '}' ';'
 {
-  if (IsChanPrefix(block_state.name.buf[0]))
-    create_channel_resv(block_state.name.buf, block_state.rpass.buf);
-  else if (block_state.name.buf[0])
-    create_nick_resv(block_state.name.buf, block_state.rpass.buf);
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  create_resv(block_state.name.buf, block_state.rpass.buf, &block_state.mask.list);
 };
 
 resv_items:	resv_items resv_item | resv_item;
-resv_item:	resv_reason | resv_channel | resv_nick | error ';' ;
+resv_item:	resv_mask | resv_reason | resv_exempt | error ';' ;
+
+resv_mask: MASK '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
+};
 
 resv_reason: REASON '=' QSTRING ';'
 {
@@ -1732,17 +1738,12 @@ resv_reason: REASON '=' QSTRING ';'
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
-resv_channel: CHANNEL '=' QSTRING ';'
+resv_exempt: EXEMPT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
+    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
 };
 
-resv_nick: NICK '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
-};
 
 /***************************************************************************
  *  section service
@@ -2841,7 +2842,7 @@ channel_item:       channel_max_bans |
                     channel_max_chans_per_user | channel_max_chans_per_oper |
                     channel_quiet_on_ban | channel_default_split_user_count |
                     channel_default_split_server_count |
-                    channel_no_create_on_split | channel_restrict_channels |
+                    channel_no_create_on_split |
                     channel_no_join_on_split |
                     channel_jflood_count | channel_jflood_time |
                     channel_disable_fake_channels | error;
@@ -2849,11 +2850,6 @@ channel_item:       channel_max_bans |
 channel_disable_fake_channels: DISABLE_FAKE_CHANNELS '=' TBOOL ';'
 {
   ConfigChannel.disable_fake_channels = yylval.number;
-};
-
-channel_restrict_channels: RESTRICT_CHANNELS '=' TBOOL ';'
-{
-  ConfigChannel.restrict_channels = yylval.number;
 };
 
 channel_knock_delay: KNOCK_DELAY '=' timespec ';'

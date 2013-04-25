@@ -135,10 +135,9 @@ m_join(struct Client *client_p, struct Client *source_p,
 
     if (!IsExemptResv(source_p) &&
         !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv) &&
-        (!(conf = match_find_resv(chan)) == ConfigChannel.restrict_channels))
+        ((conf = match_find_resv(chan)) && !resv_find_exempt(source_p, conf)))
     {
-      if (conf)
-        ++conf->count;
+      ++conf->count;
       sendto_one(source_p, form_str(ERR_CHANBANREASON), me.name, source_p->name,
                  chan, conf ? conf->reason : "Reserved channel");
       sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,

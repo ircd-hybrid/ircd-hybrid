@@ -151,12 +151,6 @@ static const struct InfoStruct info_table[] =
     "Forbids channels with special ASCII characters in their name"
   },
   {
-    "restrict_channels",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.restrict_channels,
-    "Only reserved channels are allowed"
-  },
-  {
     "knock_delay",
     OUTPUT_DECIMAL,
     &ConfigChannel.knock_delay,

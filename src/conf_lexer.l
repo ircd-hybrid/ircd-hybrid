@@ -205,6 +205,7 @@ kline_exempt	{ return KLINE_EXEMPT; }
 leaf_mask	{ return LEAF_MASK; }
 listen		{ return LISTEN; }
 log		{ return T_LOG; }
+mask            { return MASK; }
 masked		{ return TMASKED; }
 max_clients     { return T_MAX_CLIENTS; }
 max_ident	{ return MAX_IDENT; }
@@ -252,7 +253,6 @@ rehash		{ return REHASH; }
 remote		{ return REMOTE; }
 remoteban	{ return REMOTEBAN; }
 restart         { return T_RESTART; }
-restrict_channels { return RESTRICT_CHANNELS; }
 resv		{ return RESV; }
 resv_exempt     { return RESV_EXEMPT; }
 rsa_private_key_file		{ return RSA_PRIVATE_KEY_FILE; }

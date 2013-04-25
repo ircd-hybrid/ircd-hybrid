@@ -155,6 +155,7 @@ struct MaskItem
   dlink_node         node;
   dlink_list         leaf_list;
   dlink_list         hub_list;
+  dlink_list         exempt_list;
   enum maskitem_type type;
   unsigned int       dns_failed;
   unsigned int       dns_pending;
@@ -182,6 +183,20 @@ struct MaskItem
   void              *rsa_public_key;
   void              *regexuser;
   void              *regexhost;
+};
+
+struct exempt
+{
+  dlink_node node;
+  char *name;
+  char *user;
+  char *host;
+  size_t len;
+  time_t when;
+  struct irc_ssaddr addr;
+  int bits;
+  int type;
+  int coid;
 };
 
 struct CidrItem
@@ -258,7 +273,6 @@ struct config_file_entry
 struct config_channel_entry
 {
   int disable_fake_channels;
-  int restrict_channels;
   int knock_delay;
   int knock_delay_channel;
   unsigned int max_bans;

@@ -36,37 +36,13 @@
 #include "s_misc.h"
 #include "conf.h"
 #include "conf_db.h"
+#include "channel.h"
+#include "hostmask.h"
 
 dlink_list resv_channel_list = { NULL, NULL, 0 };
 
 
-/* create_channel_resv()
- *
- * inputs	- name of channel to create resv for
- *		- reason for resv
- *		- flag, 1 for from ircd.conf 0 from elsehwere
- * output	- pointer to struct ResvChannel
- * side effects	-
- */
-struct MaskItem *
-create_channel_resv(const char *name, const char *reason)
-{
-  struct MaskItem *conf = NULL;
-
-  if (name == NULL || reason == NULL)
-    return NULL;
-
-  if (find_exact_name_conf(CONF_CRESV, NULL, name, NULL, NULL))
-    return NULL;
-
-  conf = conf_make(CONF_CRESV);
-  conf->name = xstrdup(name);
-  conf->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
-
-  return conf;
-}
-
-/* create_nick_resv()
+/* create_resv()
  *
  * inputs	- name of nick to create resv for
  *		- reason for resv
@@ -75,21 +51,113 @@ create_channel_resv(const char *name, const char *reason)
  * side effects	-
  */
 struct MaskItem *
-create_nick_resv(const char *name, const char *reason)
+create_resv(const char *name, const char *reason, const dlink_list *list)
 {
   struct MaskItem *conf = NULL;
+  enum maskitem_type type;
 
   if (name == NULL || reason == NULL)
     return NULL;
 
-  if (find_exact_name_conf(CONF_NRESV, NULL, name, NULL, NULL))
+  if (IsChanPrefix(*name))
+    type = CONF_CRESV;
+  else
+    type = CONF_NRESV;
+
+  if (find_exact_name_conf(type, NULL, name, NULL, NULL))
     return NULL;
 
-  conf = conf_make(CONF_NRESV);
+  conf = conf_make(type);
   conf->name = xstrdup(name);
   conf->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
 
+  if (list)
+  {
+    if (strlen(name) == 2 && IsAlpha(*(name + 1) && IsAlpha(*(name + 2))))
+    {
+      struct exempt *exptr = MyMalloc(sizeof(*exptr));
+
+      exptr->name = xstrdup(name);
+      exptr->coid = GeoIP_id_by_code(name);
+      dlinkAdd(exptr, &exptr->node, &conf->exempt_list);
+    }
+    else
+    {
+      dlink_node *ptr = NULL;
+
+      DLINK_FOREACH(ptr, list->head)
+      {
+        char nick[NICKLEN + 1];
+        char user[USERLEN + 1];
+        char host[HOSTLEN + 1];
+        struct split_nuh_item nuh;
+        struct exempt *exptr = NULL;
+
+        nuh.nuhmask  = ptr->data;
+        nuh.nickptr  = nick;
+        nuh.userptr  = user;
+        nuh.hostptr  = host;
+
+        nuh.nicksize = sizeof(name);
+        nuh.usersize = sizeof(user);
+        nuh.hostsize = sizeof(host);
+
+        split_nuh(&nuh);
+
+        exptr = MyMalloc(sizeof(*exptr));
+        exptr->name = xstrdup(name);
+        exptr->user = xstrdup(user);
+        exptr->host = xstrdup(host);
+        exptr->type = parse_netmask(host, &exptr->addr, &exptr->bits);
+        dlinkAdd(exptr, &exptr->node, &conf->exempt_list);
+      }
+    }
+  }
+
   return conf;
+}
+
+int
+resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
+{
+  const dlink_node *ptr = NULL;
+
+  DLINK_FOREACH(ptr, conf->exempt_list.head)
+  {
+    const struct exempt *exptr = ptr->data;
+
+    if (exptr->coid)
+    {
+      if (exptr->coid == who->localClient->country_id)
+        return 1;
+    }
+    else if (!match(exptr->name, who->name) && !match(exptr->user, who->username))
+    {
+      switch (exptr->type)
+      {
+        case HM_HOST:
+          if (!match(exptr->host, who->host) || !match(exptr->host, who->sockhost))
+            return 1;
+          break;
+        case HM_IPV4:
+          if (who->localClient->aftype == AF_INET)
+            if (match_ipv4(&who->localClient->ip, &exptr->addr, exptr->bits))
+              return 1;
+          break;
+#ifdef IPV6
+        case HM_IPV6:
+          if (who->localClient->aftype == AF_INET6)
+            if (match_ipv6(&who->localClient->ip, &exptr->addr, exptr->bits))
+              return 1;
+          break;
+#endif
+        default:
+          assert(0);
+      }
+    }
+  }
+
+  return 0;
 }
 
 /* match_find_resv()

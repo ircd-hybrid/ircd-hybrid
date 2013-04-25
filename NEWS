@@ -189,7 +189,10 @@ o) Overall code cleanup and speed improvements
 
 --------------------------------------------------------------------------------
 
-BUGS: Major bugs in this release are listed in BUGS
+This is still BETA code. Run it at your own risk. By running this
+code you assume FULL responsibility for any problems it may cause.
+We do NOT recommend that you run BETA code on production IRC networks
+such as EFnet.
 
 BUG REPORTS: If you run this code and encounter problems, you must report
  the bug by EMAIL to bugs@ircd-hybrid.org
@@ -198,14 +201,14 @@ BUG REPORTS: If you run this code and encounter problems, you must report
  information masked).
 
 DISCUSSION: There is a mailing list for discussion of hybrid issues,
- including betas.  To subscribe, use this link:
+ including betas. To subscribe, use this link:
     https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
- This is the proper place to discuss new features, bugs, etc.  Posting here
+ This is the proper place to discuss new features, bugs, etc. Posting here
  is much more likely to get something done than ranting on #TZ.
 
 Questions/comments directed to bugs@ircd-hybrid.org
 
-Other files recommended for reading: BUGS, README, INSTALL
+Other files recommended for reading: README, INSTALL
 
 --------------------------------------------------------------------------------
 $Id$

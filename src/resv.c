@@ -93,12 +93,12 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
         struct split_nuh_item nuh;
         struct exempt *exptr = NULL;
 
-        nuh.nuhmask  = ptr->data;
+        nuh.nuhmask  = name;
         nuh.nickptr  = nick;
         nuh.userptr  = user;
         nuh.hostptr  = host;
 
-        nuh.nicksize = sizeof(name);
+        nuh.nicksize = sizeof(nick);
         nuh.usersize = sizeof(user);
         nuh.hostsize = sizeof(host);
 

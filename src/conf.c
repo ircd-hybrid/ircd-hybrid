@@ -216,7 +216,6 @@ conf_free(struct MaskItem *conf)
     MyFree(exptr->user);
     MyFree(exptr->host);
     MyFree(exptr);
-    free_dlink_node(ptr);
   }
 
   MyFree(conf);

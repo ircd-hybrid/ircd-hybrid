@@ -1,12 +1,13 @@
 -- ircd-hybrid-8.1.0beta1 Release Notes
 ########################################################################
-o) IMPORTANT: names/channels entries can't be stacked any longer within
+o) IMPORTANT: name/channel entries can't be stacked any longer within
    a single resv{} block. Each entry now requires its own resv{} block.
    Read doc/reference.conf for more details
 #######################################################################
 o) Added resv::exempt configuration option. Exempt can be either a
    ISO 3166 alpha-2 two letter country code, or a nick!user@host mask.
    CIDR is supported
+o) Removed channel::restrict_channels configuration option
 o) Preliminary libGeoIP support. Currently only used for exempt entries
    in resv{} blocks
 o) Improved WEBIRC authentication; added 'webirc' to auth::flags.
@@ -17,11 +18,11 @@ o) Major code cleanups
 o) Implemented new binary database storage for X-,D-,K-,G-Lines and RESVs.
    Temporary bans are now stored as well and will persist after a reboot
 o) Channel based resv{} blocks may now contain wildcards
-o) Added support for "away-notify" client capability
 o) NICK/JOIN now shows the actual reason of reserved nick-/channelnames
 o) contrib/ and its content has been removed from the tree
 o) Added serverhide::hide_services configuration option
 o) Added 'nononreg' (+R) to oper::umodes and general::oper_only_modes
+o) Added support for "away-notify" client capability
 
 
 -- ircd-hybrid-8.0.7 Release Notes

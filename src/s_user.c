@@ -792,13 +792,6 @@ report_and_set_user_flags(struct Client *source_p, const struct AccessItem *acon
                "protection, aren't you fearsome.",
                me.name, source_p->name);
   }
-
-  if (IsConfNoJoin(aconf))
-  {
-    AddFlag(source_p, FLAGS_NO_JOIN);
-    sendto_one(source_p, ":%s NOTICE %s :*** You have no permissions to join/create channels.",
-               me.name, source_p->name);
-  }
 }
 
 /* change_simple_umode()

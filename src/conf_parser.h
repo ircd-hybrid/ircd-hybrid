@@ -234,40 +234,38 @@ extern int yydebug;
      T_LOCOPS = 443,
      T_MAX_CLIENTS = 444,
      T_NCHANGE = 445,
-     T_NO_JOIN = 446,
-     T_OPERWALL = 447,
-     T_RECVQ = 448,
-     T_REJ = 449,
-     T_SERVER = 450,
-     T_SERVNOTICE = 451,
-     T_SET = 452,
-     T_SKILL = 453,
-     T_SPY = 454,
-     T_SSL = 455,
-     T_UMODES = 456,
-     T_UNAUTH = 457,
-     T_UNDLINE = 458,
-     T_UNLIMITED = 459,
-     T_UNRESV = 460,
-     T_UNXLINE = 461,
-     T_GLOBOPS = 462,
-     T_WALLOP = 463,
-     T_RESTART = 464,
-     T_SERVICE = 465,
-     T_SERVICES_NAME = 466,
-     THROTTLE_TIME = 467,
-     TRUE_NO_OPER_FLOOD = 468,
-     UNKLINE = 469,
-     USER = 470,
-     USE_EGD = 471,
-     USE_LOGGING = 472,
-     VHOST = 473,
-     VHOST6 = 474,
-     XLINE = 475,
-     WARN_NO_NLINE = 476,
-     T_SIZE = 477,
-     T_FILE = 478,
-     COUNTRY_CODE = 479
+     T_OPERWALL = 446,
+     T_RECVQ = 447,
+     T_REJ = 448,
+     T_SERVER = 449,
+     T_SERVNOTICE = 450,
+     T_SET = 451,
+     T_SKILL = 452,
+     T_SPY = 453,
+     T_SSL = 454,
+     T_UMODES = 455,
+     T_UNAUTH = 456,
+     T_UNDLINE = 457,
+     T_UNLIMITED = 458,
+     T_UNRESV = 459,
+     T_UNXLINE = 460,
+     T_GLOBOPS = 461,
+     T_WALLOP = 462,
+     T_RESTART = 463,
+     T_SERVICE = 464,
+     T_SERVICES_NAME = 465,
+     THROTTLE_TIME = 466,
+     TRUE_NO_OPER_FLOOD = 467,
+     UNKLINE = 468,
+     USER = 469,
+     USE_EGD = 470,
+     USE_LOGGING = 471,
+     VHOST = 472,
+     VHOST6 = 473,
+     XLINE = 474,
+     WARN_NO_NLINE = 475,
+     T_SIZE = 476,
+     T_FILE = 477
    };
 #endif
 /* Tokens.  */
@@ -459,40 +457,38 @@ extern int yydebug;
 #define T_LOCOPS 443
 #define T_MAX_CLIENTS 444
 #define T_NCHANGE 445
-#define T_NO_JOIN 446
-#define T_OPERWALL 447
-#define T_RECVQ 448
-#define T_REJ 449
-#define T_SERVER 450
-#define T_SERVNOTICE 451
-#define T_SET 452
-#define T_SKILL 453
-#define T_SPY 454
-#define T_SSL 455
-#define T_UMODES 456
-#define T_UNAUTH 457
-#define T_UNDLINE 458
-#define T_UNLIMITED 459
-#define T_UNRESV 460
-#define T_UNXLINE 461
-#define T_GLOBOPS 462
-#define T_WALLOP 463
-#define T_RESTART 464
-#define T_SERVICE 465
-#define T_SERVICES_NAME 466
-#define THROTTLE_TIME 467
-#define TRUE_NO_OPER_FLOOD 468
-#define UNKLINE 469
-#define USER 470
-#define USE_EGD 471
-#define USE_LOGGING 472
-#define VHOST 473
-#define VHOST6 474
-#define XLINE 475
-#define WARN_NO_NLINE 476
-#define T_SIZE 477
-#define T_FILE 478
-#define COUNTRY_CODE 479
+#define T_OPERWALL 446
+#define T_RECVQ 447
+#define T_REJ 448
+#define T_SERVER 449
+#define T_SERVNOTICE 450
+#define T_SET 451
+#define T_SKILL 452
+#define T_SPY 453
+#define T_SSL 454
+#define T_UMODES 455
+#define T_UNAUTH 456
+#define T_UNDLINE 457
+#define T_UNLIMITED 458
+#define T_UNRESV 459
+#define T_UNXLINE 460
+#define T_GLOBOPS 461
+#define T_WALLOP 462
+#define T_RESTART 463
+#define T_SERVICE 464
+#define T_SERVICES_NAME 465
+#define THROTTLE_TIME 466
+#define TRUE_NO_OPER_FLOOD 467
+#define UNKLINE 468
+#define USER 469
+#define USE_EGD 470
+#define USE_LOGGING 471
+#define VHOST 472
+#define VHOST6 473
+#define XLINE 474
+#define WARN_NO_NLINE 475
+#define T_SIZE 476
+#define T_FILE 477
 
 
 
@@ -507,7 +503,7 @@ typedef union YYSTYPE
 
 
 /* Line 2058 of yacc.c  */
-#line 511 "conf_parser.h"
+#line 507 "conf_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

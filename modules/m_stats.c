@@ -747,10 +747,10 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
 				   CONF_CLIENT,
 				   source_p->localClient->aftype,
 				   source_p->username,
-                                   source_p->localClient->passwd, 1, source_p->localClient->country_id);
+                                   source_p->localClient->passwd, 1);
     else
       aconf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT,
-                                   0, source_p->username, NULL, 1, source_p->localClient->country_id);
+                                   0, source_p->username, NULL, 1);
 
     if (aconf == NULL)
       return;
@@ -831,10 +831,10 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
                                    &source_p->localClient->ip,
 				   CONF_KLINE,
 				   source_p->localClient->aftype,
-				   source_p->username, NULL, 1, 0);
+				   source_p->username, NULL, 1);
     else
       aconf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
-                                   0, source_p->username, NULL, 1, 0);
+                                   0, source_p->username, NULL, 1);
 
     if (aconf == NULL)
       return;
@@ -871,10 +871,10 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
                                    &source_p->localClient->ip,
 				   CONF_KLINE,
 				   source_p->localClient->aftype,
-				   source_p->username, NULL, 0, 0);
+				   source_p->username, NULL, 0);
     else
       aconf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
-                                   0, source_p->username, NULL, 0, 0);
+                                   0, source_p->username, NULL, 0);
 
     if (aconf == NULL)
       return;

@@ -127,7 +127,7 @@ m_part(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (parc > 2)
+  if (parc > 2 && !EmptyString(parv[2]))
     strlcpy(reason, parv[2], sizeof(reason));
 
   /* Finish the flood grace period... */

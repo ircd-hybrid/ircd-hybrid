@@ -330,7 +330,7 @@ const unsigned int CharAttrs[] = {
 /* SP */     PRINT_C|SPACE_C,
 /* ! */      PRINT_C|KWILD_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* " */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C,
-/* # */      PRINT_C|KWILD_C|CHANPFX_C|CHAN_C|VCHAN_C|NONEOS_C,
+/* # */      PRINT_C|CHANPFX_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* $ */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C|USER_C,
 /* % */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* & */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C,

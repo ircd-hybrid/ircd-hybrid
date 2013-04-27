@@ -1343,6 +1343,7 @@ static const struct StatsStruct
   { 'Q',        stats_resv,             1,      0       },
   { 'r',        stats_usage,            1,      0       },
   { 'R',        stats_usage,            1,      0       },
+  { 's',        stats_service,          1,      0       },
   { 'S',        stats_service,          1,      0       },
   { 't',        stats_tstats,           1,      0       },
   { 'T',        stats_tstats,           1,      0       },

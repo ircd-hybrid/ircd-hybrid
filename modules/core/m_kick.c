@@ -80,7 +80,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
   if (MyClient(source_p) && !IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  comment = (EmptyString(parv[3])) ? parv[2] : parv[3];
+  comment = (EmptyString(parv[3])) ? source_p->name : parv[3];
   if (strlen(comment) > (size_t)KICKLEN)
     comment[KICKLEN] = '\0';
 

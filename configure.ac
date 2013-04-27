@@ -153,7 +153,7 @@ AS_IF([test "$assert" = "no"],
   [AC_DEFINE(NDEBUG, 1, [Define to disable assert() statements.])])
 
 
-AC_DEFINE([NICKNAMEHISTORYLENGTH], 16384, [Size of the WHOWAS array.])
+AC_DEFINE([NICKNAMEHISTORYLENGTH], 32768, [Size of the WHOWAS array.])
 AC_DEFINE([MP_CHUNK_SIZE_CHANNEL], 64*1024, [Size of the channel mempool chunk.])
 AC_DEFINE([MP_CHUNK_SIZE_MEMBER], 32*1024, [Size of the channel mempool chunk.])
 AC_DEFINE([MP_CHUNK_SIZE_BAN], 16*1024, [Size of the ban mempool chunk.])

@@ -1,5 +1,6 @@
 -- ircd-hybrid-8.1.0beta2 Release Notes
 o) "STATS s" now shows configured services{} blocks as well
+o) Fixed broken compile with libGeoIP disabled
 
 
 -- ircd-hybrid-8.1.0beta1 Release Notes

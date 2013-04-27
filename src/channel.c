@@ -547,11 +547,7 @@ const char *
 get_member_status(const struct Membership *ms, int combine)
 {
   static char buffer[4];
-  char *p = NULL;
-
-  if (ms == NULL)
-    return "";
-  p = buffer;
+  char *p = buffer;
 
   if (ms->flags & CHFL_CHANOP)
   {

@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.0.8 Release Notes
+o) "STATS s" now shows configured services{} blocks as well
+
+
 -- ircd-hybrid-8.0.7 Release Notes
 o) Services may now set a channel topic without joining the channel first
 o) Fixed bug where /whois would send empty sockhost information on TS5

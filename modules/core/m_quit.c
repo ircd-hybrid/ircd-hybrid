@@ -42,13 +42,12 @@ static void
 m_quit(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
-  char *comment = (parc > 1 && parv[1]) ? parv[1] : client_p->name;
   char reason[KICKLEN + 1] = "Quit: ";
 
-  if (*comment && (HasUMode(source_p, UMODE_OPER) ||
+  if (!EmptyString(parv[1]) && (HasUMode(source_p, UMODE_OPER) ||
       (source_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
       < CurrentTime))
-    strlcpy(reason+6, comment, sizeof(reason)-6);
+    strlcpy(reason + 6, parv[1], sizeof(reason) - 6);
 
   exit_client(source_p, source_p, reason);
 }
@@ -62,12 +61,14 @@ static void
 ms_quit(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  char *comment = (parc > 1 && parv[1]) ? parv[1] : client_p->name;
+  char reason[KICKLEN + 1] = { '\0' };
 
-  if (strlen(comment) > (size_t)KICKLEN)
-    comment[KICKLEN] = '\0';
+  if (!EmptyString(parv[1]))
+    strlcpy(reason, parv[1], sizeof(reason));
+  else
+    strlcpy(reason, client_p->name, sizeof(reason));
 
-  exit_client(source_p, source_p, comment);
+  exit_client(source_p, source_p, reason);
 }
 
 static struct Message quit_msgtab = {

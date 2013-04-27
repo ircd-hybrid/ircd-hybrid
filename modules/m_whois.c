@@ -40,9 +40,7 @@
 
 
 static void do_whois(struct Client *, int, char *[]);
-static int single_whois(struct Client *, struct Client *);
 static void whois_person(struct Client *, struct Client *);
-static int global_whois(struct Client *, const char *);
 
 
 /*
@@ -131,142 +129,23 @@ mo_whois(struct Client *client_p, struct Client *source_p,
 static void
 do_whois(struct Client *source_p, int parc, char *parv[])
 {
-  static time_t last_used = 0;
-  struct Client *target_p;
-  char *nick;
+  struct Client *target_p = NULL;
+  char *nick = parv[1];
   char *p = NULL;
-  int found = 0;
 
-  nick = parv[1];
-  while (*nick == ',')
-    nick++;
-  if ((p = strchr(nick,',')) != NULL)
+  if ((p = strchr(nick, ',')) != NULL)
     *p = '\0';
-
   if (*nick == '\0')
     return;
 
-  collapse(nick);
-
-  if (strpbrk(nick, "?#*") == NULL)
-  {
-    if ((target_p = hash_find_client(nick)) != NULL)
-    {
-      if (IsClient(target_p))
-      {
-        whois_person(source_p, target_p);
-        found = 1;
-      }
-    }
-  }
-  else /* wilds is true */
-  {
-    if (!HasUMode(source_p, UMODE_OPER))
-    {
-      if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
-      {
-        sendto_one(source_p, form_str(RPL_LOAD2HI),
-                   me.name, source_p->name);
-        return;
-      }
-      else
-        last_used = CurrentTime;
-  }
-
-    /* Oh-oh wilds is true so have to do it the hard expensive way */
-    if (MyClient(source_p))
-      found = global_whois(source_p, nick);
-  }
-
-  if (!found)
-  {
-    if (!IsDigit(*nick))
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-		 me.name, source_p->name, nick);
-  }
+  if ((target_p = hash_find_client(nick)) && IsClient(target_p))
+    whois_person(source_p, target_p);
+  else  if (!IsDigit(*nick))
+    sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+               me.name, source_p->name, nick);
 
   sendto_one(source_p, form_str(RPL_ENDOFWHOIS),
-             me.name, source_p->name, parv[1]);
-}
-
-/* global_whois()
- *
- * Inputs	- source_p client to report to
- *		- target_p client to report on
- * Output	- if found return 1
- * Side Effects	- do a single whois on given client
- * 		  writing results to source_p
- */
-static int
-global_whois(struct Client *source_p, const char *nick)
-{
-  dlink_node *ptr;
-  struct Client *target_p;
-  int found = 0;
-
-  DLINK_FOREACH(ptr, global_client_list.head)
-  {
-    target_p = ptr->data;
-
-    if (!IsClient(target_p))
-      continue;
-
-    if (match(nick, target_p->name))
-      continue;
-
-    assert(target_p->servptr != NULL);
-
-    /* 'Rules' established for sending a WHOIS reply:
-     *
-     *
-     * - if wildcards are being used dont send a reply if
-     *   the querier isnt any common channels and the
-     *   client in question is invisible and wildcards are
-     *   in use (allow exact matches only);
-     *
-     * - only send replies about common or public channels
-     *   the target user(s) are on;
-     */
-
-    found |= single_whois(source_p, target_p);
-  }
-
-  return found;
-}
-
-/* single_whois()
- *
- * Inputs	- source_p client to report to
- *		- target_p client to report on
- * Output	- if found return 1
- * Side Effects	- do a single whois on given client
- * 		  writing results to source_p
- */
-static int
-single_whois(struct Client *source_p, struct Client *target_p)
-{
-  dlink_node *ptr = NULL;
-
-  if (!HasUMode(target_p, UMODE_INVISIBLE) || target_p == source_p)
-  {
-    /* always show user if they are visible (no +i) */
-    whois_person(source_p, target_p);
-    return 1;
-  }
-
-  /* target_p is +i. Check if it is on any common channels with source_p */
-  DLINK_FOREACH(ptr, target_p->channel.head)
-  {
-    struct Channel *chptr = ((struct Membership *) ptr->data)->chptr;
-
-    if (IsMember(source_p, chptr))
-    {
-      whois_person(source_p, target_p);
-      return 1;
-    }
-  }
-
-  return 0;
+             me.name, source_p->name, nick);
 }
 
 /* whois_person()
@@ -280,21 +159,16 @@ static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
   char buf[IRCD_BUFSIZE];
-  dlink_node *lp;
-  struct Client *server_p;
-  struct Channel *chptr;
-  struct Membership *ms;
-  int cur_len = 0;
-  int mlen;
+  const dlink_node *lp = NULL;
   char *t = NULL;
-  int tlen;
-  int reply_to_send = 0;
+  int cur_len = 0;
   int show_ip = 0;
+  int mlen = 0;
+  int tlen = 0;
+  int reply_to_send = 0;
 
-  server_p = target_p->servptr;
-
-  sendto_one(source_p, form_str(RPL_WHOISUSER),
-             me.name, source_p->name, target_p->name,
+  sendto_one(source_p, form_str(RPL_WHOISUSER), me.name,
+             source_p->name, target_p->name,
              target_p->username, target_p->host, target_p->info);
 
   cur_len = mlen = snprintf(buf, sizeof(buf), form_str(RPL_WHOISCHANNELS),
@@ -303,12 +177,11 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
   DLINK_FOREACH(lp, target_p->channel.head)
   {
-    ms = lp->data;
-    chptr = ms->chptr;
+    const struct Membership *ms = lp->data;
 
-    if (ShowChannel(source_p, chptr))
+    if (ShowChannel(source_p, ms->chptr))
     {
-      if ((cur_len + 3 + strlen(chptr->chname) + 1) > (IRCD_BUFSIZE - 2))
+      if ((cur_len + 3 + strlen(ms->chptr->chname) + 1) > (IRCD_BUFSIZE - 2))
       {
 	*(t - 1) = '\0';
 	sendto_one(source_p, "%s", buf);
@@ -316,7 +189,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
 	t = buf + mlen;
       }
 
-      tlen = sprintf(t, "%s%s ", get_member_status(ms, 1), chptr->chname);
+      tlen = sprintf(t, "%s%s ", get_member_status(ms, 1), ms->chptr->chname);
       t += tlen;
       cur_len += tlen;
       reply_to_send = 1;
@@ -332,7 +205,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
   if (HasUMode(source_p, UMODE_OPER) || !ConfigServerHide.hide_servers || target_p == source_p)
     sendto_one(source_p, form_str(RPL_WHOISSERVER),
                me.name, source_p->name, target_p->name,
-               server_p->name, server_p->info);
+               target_p->servptr->name, target_p->servptr->info);
   else
     sendto_one(source_p, form_str(RPL_WHOISSERVER),
 	       me.name, source_p->name, target_p->name,

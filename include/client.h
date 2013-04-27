@@ -176,7 +176,7 @@
 #define OPER_FLAG_REMOTE       0x00000002 /**> Oper can do squits/connects */
 #define OPER_FLAG_UNKLINE      0x00000004 /**< Oper can use unkline        */
 #define OPER_FLAG_GLINE        0x00000008 /**< Oper can use gline          */
-#define OPER_FLAG_N            0x00000010 /**< Oper can umode n            */
+#define OPER_FLAG____          0x00000010 /**< */
 #define OPER_FLAG_K            0x00000020 /**< Oper can kill/kline         */
 #define OPER_FLAG_X            0x00000040 /**< Oper can xline              */
 #define OPER_FLAG_DIE          0x00000080 /**< Oper can die                */

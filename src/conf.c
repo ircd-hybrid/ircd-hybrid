@@ -1667,7 +1667,6 @@ static const struct oper_privs
   { OPER_FLAG_REHASH,      'H' },
   { OPER_FLAG_K,           'K' },
   { OPER_FLAG_OPERWALL,    'L' },
-  { OPER_FLAG_N,           'N' },
   { OPER_FLAG_GLOBAL_KILL, 'O' },
   { OPER_FLAG_REMOTE,      'R' },
   { OPER_FLAG_OPER_SPY,    'S' },

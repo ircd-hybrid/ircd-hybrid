@@ -50,9 +50,9 @@ m_mode(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  struct Membership *member;
-  static char modebuf[MODEBUFLEN];
-  static char parabuf[MODEBUFLEN];
+  struct Membership *member = NULL;
+  char modebuf[MODEBUFLEN];
+  char parabuf[MODEBUFLEN];
 
   if (EmptyString(parv[1]))
   {
@@ -86,18 +86,17 @@ m_mode(struct Client *client_p, struct Client *source_p,
                me.name, source_p->name, chptr->chname, modebuf, parabuf);
     sendto_one(source_p, form_str(RPL_CREATIONTIME),
                me.name, source_p->name, chptr->chname, chptr->channelts);
+    return;
   }
-  /* bounce all modes from people we deop on sjoin
+
+  /*
+   * bounce all modes from people we deop on sjoin
    * servers have always gotten away with murder,
    * including telnet servers *g* - Dianora
-   *
-   * XXX Is it worth the bother to make an ms_mode() ? - Dianora
    */
-  else if (IsServer(source_p))
-  {
+  if (IsServer(source_p))
     set_channel_mode(client_p, source_p, chptr, NULL, parc - 2, parv + 2,
                      chptr->chname);
-  }
   else
   {
     member = find_channel_link(source_p, chptr);
@@ -106,10 +105,8 @@ m_mode(struct Client *client_p, struct Client *source_p,
     {
       /* Finish the flood grace period... */
       if (MyClient(source_p) && !IsFloodDone(source_p))
-      {
         if (!((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0')))
           flood_endgrace(source_p);
-      }
 
       set_channel_mode(client_p, source_p, chptr, member, parc - 2, parv + 2,
                        chptr->chname);

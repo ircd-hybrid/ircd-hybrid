@@ -62,8 +62,6 @@ whowas_do(struct Client *client_p, struct Client *source_p,
       return;
 
   nick = parv[1];
-  while (*nick == ',')
-    nick++;
   if ((p = strchr(nick,',')) != NULL)
     *p = '\0';
   if (*nick == '\0')

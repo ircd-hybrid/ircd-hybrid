@@ -85,9 +85,6 @@ m_kick(struct Client *client_p, struct Client *source_p,
     comment[KICKLEN] = '\0';
 
   name = parv[1];
-  while (*name == ',')
-    name++;
-
   if ((p = strchr(name,',')) != NULL)
     *p = '\0';
   if (*name == '\0')
@@ -155,10 +152,6 @@ m_kick(struct Client *client_p, struct Client *source_p,
   }
 
   user = parv[2];
-
-  while (*user == ',')
-    user++;
-
   if ((p = strchr(user, ',')) != NULL)
     *p = '\0';
 

@@ -143,9 +143,6 @@ m_names(struct Client *client_p, struct Client *source_p,
 
   if (!EmptyString(para))
   {
-    while (*para == ',')
-      ++para;
-
     if ((s = strchr(para, ',')) != NULL)
       *s = '\0';
 

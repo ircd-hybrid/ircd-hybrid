@@ -87,7 +87,7 @@ extern int hunt_server(struct Client *, struct Client *,
                        const char *, const int, const int, char *[]);
 extern void add_capability(const char *, int, int);
 extern int delete_capability(const char *);
-extern int find_capability(const char *);
+extern int unsigned find_capability(const char *);
 extern void send_capabilities(struct Client *, int);
 extern void write_links_file(void *);
 extern void server_estab(struct Client *);

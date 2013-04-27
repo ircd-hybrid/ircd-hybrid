@@ -41,8 +41,8 @@ static void
 mr_capab(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  int i;
-  int cap;
+  int i = 0;
+  unsigned int cap = 0;
   char *p = NULL;
   char *s = NULL;
 

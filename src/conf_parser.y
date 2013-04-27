@@ -236,7 +236,6 @@ reset_block_state(void)
 %token  NETWORK_DESC
 %token  NETWORK_NAME
 %token  NICK
-%token  NICK_CHANGES
 %token  NO_CREATE_ON_SPLIT
 %token  NO_JOIN_ON_SPLIT
 %token  NO_OPER_FLOOD
@@ -1235,10 +1234,6 @@ oper_flags_item: GLOBAL_KILL
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_ADMIN;
-} | NICK_CHANGES
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_N;
 } | T_OPERWALL
 {
   if (conf_parser_ctx.pass == 2)

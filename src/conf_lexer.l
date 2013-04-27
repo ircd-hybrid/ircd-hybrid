@@ -224,7 +224,6 @@ need_password   { return NEED_PASSWORD; }
 network_desc    { return NETWORK_DESC; }
 network_name    { return NETWORK_NAME; }
 nick		{ return NICK; }
-nick_changes	{ return NICK_CHANGES; }
 no		{ yylval.number = 0; return TBOOL; }
 no_create_on_split { return NO_CREATE_ON_SPLIT; }
 no_join_on_split   { return NO_JOIN_ON_SPLIT; }

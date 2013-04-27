@@ -954,13 +954,6 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG),
                me.name, source_p->name);
 
-  if (HasUMode(source_p, UMODE_NCHANGE) && !HasOFlag(source_p, OPER_FLAG_N))
-  {
-    sendto_one(source_p, ":%s NOTICE %s :*** You have no nchange flag;",
-               me.name, source_p->name);
-    DelUMode(source_p, UMODE_NCHANGE);
-  }
-
   if (MyConnect(source_p) && HasUMode(source_p, UMODE_ADMIN) &&
       !HasOFlag(source_p, OPER_FLAG_ADMIN))
   {
@@ -1227,8 +1220,6 @@ oper_up(struct Client *source_p)
 
   if (HasOFlag(source_p, OPER_FLAG_ADMIN))
     AddUMode(source_p, UMODE_ADMIN);
-  if (!HasOFlag(source_p, OPER_FLAG_N))
-    DelUMode(source_p, UMODE_NCHANGE);
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));

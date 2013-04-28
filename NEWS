@@ -2,6 +2,7 @@
 o) "STATS s" now shows configured services{} blocks as well
 o) Fixed compile warnings, minor code cleanups and optimizations
 o) Increased nickname history length to 32768
+o) Unidentified/unregistered nicks may not speak in +R channels
 
 
 -- ircd-hybrid-8.0.7 Release Notes

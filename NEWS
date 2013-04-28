@@ -3,6 +3,8 @@ o) Fixed broken compile with libGeoIP disabled
 o) Code cleanups; working towards stabilization and improved performance
 o) Changed RPL_WELCOME to comply with rfc2812
 o) Removed operflag 'nick_changes'. Operators can now set +n at will
+o) Fixed shared{} blocks not working as expected
+o) Fixed spoofs not working as expected
 
 
 -- ircd-hybrid-8.1.0beta1 Release Notes

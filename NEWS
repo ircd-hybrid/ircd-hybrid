@@ -34,6 +34,12 @@ o) Added 'nononreg' (+R) to oper::umodes and general::oper_only_modes
 o) Added support for "away-notify" client capability
 
 
+-- ircd-hybrid-8.0.8 Release Notes
+o) "STATS s" now shows configured services{} blocks as well
+o) Fixed compile warnings, minor code cleanups and optimizations
+o) Increased nickname history length to 32768
+
+
 -- ircd-hybrid-8.0.7 Release Notes
 o) Services may now set a channel topic without joining the channel first
 o) Fixed bug where /whois would send empty sockhost information on TS5

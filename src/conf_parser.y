@@ -1574,7 +1574,7 @@ auth_entry: IRCD_AUTH
     if (block_state.rpass.buf[0])
       conf->passwd = xstrdup(block_state.rpass.buf);
     if (block_state.name.buf[0])
-      conf->passwd = xstrdup(block_state.name.buf);
+      conf->name = xstrdup(block_state.name.buf);
 
     conf->flags = block_state.flags.value;
     conf->port  = block_state.port.value;
@@ -1785,7 +1785,7 @@ shared_entry: T_SHARED
   conf->flags = block_state.flags.value;
   conf->name = xstrdup(block_state.name.buf);
   conf->user = xstrdup(block_state.user.buf);
-  conf->user = xstrdup(block_state.host.buf);
+  conf->host = xstrdup(block_state.host.buf);
 };
 
 shared_items: shared_items shared_item | shared_item;

@@ -331,6 +331,8 @@ struct logging_entry
 extern dlink_list server_items;
 extern dlink_list cluster_items;
 extern dlink_list xconf_items;
+extern dlink_list uconf_items;
+extern dlink_list oconf_items;
 extern dlink_list service_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct logging_entry ConfigLoggingEntry;
@@ -364,7 +366,6 @@ extern struct MaskItem *find_matching_name_conf(enum maskitem_type, const char *
 extern struct MaskItem *find_exact_name_conf(enum maskitem_type, const struct Client *, const char *,
                                              const char *, const char *);
 extern void conf_free(struct MaskItem *);
-extern void report_confitem_types(struct Client *, enum maskitem_type);
 extern void yyerror(const char *);
 extern void conf_error_report(const char *);
 extern void cleanup_tklines(void *);

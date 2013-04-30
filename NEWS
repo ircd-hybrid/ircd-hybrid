@@ -1,5 +1,7 @@
 -- ircd-hybrid-8.1.0beta3 Release Notes
 o) PCRE support has been dropped
+o) "STATS o" now shows how many times an oper{} block has been used.
+   Similar to STATS x|q"
 
 
 -- ircd-hybrid-8.1.0beta2 Release Notes

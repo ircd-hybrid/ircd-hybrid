@@ -116,17 +116,15 @@ enum maskitem_type
   CONF_DLINE    = 1 <<  4,
   CONF_EXEMPT   = 1 <<  5,
   CONF_CLUSTER  = 1 <<  6,
-  CONF_RKLINE   = 1 <<  7,
-  CONF_RXLINE   = 1 <<  8,
-  CONF_XLINE    = 1 <<  9,
-  CONF_ULINE    = 1 << 10,
-  CONF_GLINE    = 1 << 11,
-  CONF_CRESV    = 1 << 12,
-  CONF_NRESV    = 1 << 13,
-  CONF_SERVICE  = 1 << 14,
-  CONF_OPER     = 1 << 15,
-  CONF_HUB      = 1 << 16, /* XXX There are no separate hub/leaf configs anymore. This is just for /stats h */
-  CONF_CLASS    = 1 << 17  /* XXX Same here; just for /stats Y|y */
+  CONF_XLINE    = 1 <<  7,
+  CONF_ULINE    = 1 <<  8,
+  CONF_GLINE    = 1 <<  9,
+  CONF_CRESV    = 1 << 10,
+  CONF_NRESV    = 1 << 11,
+  CONF_SERVICE  = 1 << 12,
+  CONF_OPER     = 1 << 13,
+  CONF_HUB      = 1 << 14, /* XXX There are no separate hub/leaf configs anymore. This is just for /stats h */
+  CONF_CLASS    = 1 << 15  /* XXX Same here; just for /stats Y|y */
 };
 
 struct conf_parser_context
@@ -181,8 +179,6 @@ struct MaskItem
   char              *reason;
   char              *cipher_list;
   void              *rsa_public_key;
-  void              *regexuser;
-  void              *regexhost;
 };
 
 struct exempt
@@ -335,8 +331,6 @@ struct logging_entry
 extern dlink_list server_items;
 extern dlink_list cluster_items;
 extern dlink_list xconf_items;
-extern dlink_list rxconf_items;
-extern dlink_list rkconf_items;
 extern dlink_list service_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct logging_entry ConfigLoggingEntry;

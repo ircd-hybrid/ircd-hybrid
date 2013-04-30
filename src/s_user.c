@@ -1160,8 +1160,7 @@ check_xline(struct Client *source_p)
   struct MaskItem *conf = NULL;
   const char *reason = NULL;
 
-  if ((conf = find_matching_name_conf(CONF_XLINE, source_p->info, NULL, NULL, 0)) ||
-      (conf = find_matching_name_conf(CONF_RXLINE, source_p->info, NULL, NULL, 0)))
+  if ((conf = find_matching_name_conf(CONF_XLINE, source_p->info, NULL, NULL, 0)))
   {
     ++conf->count;
 

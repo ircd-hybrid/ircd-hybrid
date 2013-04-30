@@ -38,9 +38,6 @@ Feature Specific Requirements:
 - For encrypted oper and (optional) server passwords, a working DES and/or
   MD5 library
 
-- For regular expression based kline{} and gecos{} blocks, the
-  PCRE - Perl Compatible Regular Expressions library is required
-
 *******************************************************************************
 
 - See the INSTALL document for info on configuring and compiling

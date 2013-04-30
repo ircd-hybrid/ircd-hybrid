@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.1.0beta3 Release Notes
+o) PCRE support has been dropped
+
+
 -- ircd-hybrid-8.1.0beta2 Release Notes
 o) Fixed broken compile with libGeoIP disabled
 o) Code cleanups; working towards stabilization and improved performance

@@ -48,12 +48,6 @@ AC_CHECK_HEADERS_ONCE(crypt.h        \
 
 AC_SEARCH_LIBS(crypt, crypt)
 
-AC_ARG_ENABLE(libpcre,
-  [AS_HELP_STRING([--disable-libpcre],[Disable PCRE support])], [],
-    [AC_CHECK_HEADER(pcre.h,
-      [AC_SEARCH_LIBS(pcre_study, pcre,
-        [AC_DEFINE(HAVE_LIBPCRE, 1, [Define to 1 if libpcre (-lpcre) is available.])])])], [])
-
 AC_ARG_ENABLE(libGeoIP,
   [AS_HELP_STRING([--disable-libgeoip],[Disable GeoIP support])], [],
     [AC_CHECK_HEADER(GeoIP.h,

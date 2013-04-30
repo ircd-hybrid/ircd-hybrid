@@ -615,7 +615,7 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
         const struct MaskItem *conf = arec->conf;
 
         sendto_one(source_p, form_str(RPL_STATSKLINE),
-                   from, to, "G",
+                   from, to, 'G',
                    conf->host ? conf->host : "*",
                    conf->user ? conf->user : "*",
                    conf->reason ? conf->reason : CONF_NOREASON);
@@ -770,13 +770,13 @@ report_Klines(struct Client *client_p, int tkline)
 {
   struct MaskItem *conf = NULL;
   unsigned int i = 0;
-  const char *p = NULL;
+  char c = '\0';
   dlink_node *ptr = NULL;
 
   if (tkline)
-    p = "k";
+    c = 'k';
   else
-    p = "K";
+    c = 'K';
 
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -795,11 +795,11 @@ report_Klines(struct Client *client_p, int tkline)
 
       if (HasUMode(client_p, UMODE_OPER))
         sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
-                   client_p->name, p, conf->host, conf->user,
+                   client_p->name, c, conf->host, conf->user,
                    conf->reason);
       else
         sendto_one(client_p, form_str(RPL_STATSKLINE), me.name,
-                   client_p->name, p, conf->host, conf->user,
+                   client_p->name, c, conf->host, conf->user,
                    conf->reason);
     }
   }
@@ -836,7 +836,7 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
       return;
 
     sendto_one(source_p, form_str(RPL_STATSKLINE), from,
-               to, "k", conf->host, conf->user, conf->reason);
+               to, 'k', conf->host, conf->user, conf->reason);
   }
   /* Theyre opered, or allowed to see all klines */
   else {
@@ -876,13 +876,11 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
       return;
       
     sendto_one(source_p, form_str(RPL_STATSKLINE), from,
-               to, "K", conf->host, conf->user, conf->reason);
+               to, 'K', conf->host, conf->user, conf->reason);
   }
   /* Theyre opered, or allowed to see all klines */
-  else {
+  else
     report_Klines(source_p, 0);
-    report_confitem_types(source_p, CONF_RKLINE);
-  }
 }
 
 static void
@@ -1078,7 +1076,6 @@ static void
 stats_gecos(struct Client *source_p, int parc, char *parv[])
 {
   report_confitem_types(source_p, CONF_XLINE);
-  report_confitem_types(source_p, CONF_RXLINE);
 }
 
 static void

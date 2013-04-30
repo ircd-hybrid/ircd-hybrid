@@ -23,10 +23,6 @@
  */
 
 #include "config.h"
-#ifdef HAVE_LIBPCRE
-#include <pcre.h>
-#endif
-
 #include "stdinc.h"
 #include "irc_string.h"
 
@@ -237,26 +233,5 @@ strlcpy(char *dst, const char *src, size_t siz)
   }
 
   return s - src - 1; /* count does not include NUL */
-}
-#endif
-
-#ifdef HAVE_LIBPCRE
-void *
-ircd_pcre_compile(const char *pattern, const char **errptr)
-{
-  int erroroffset = 0;
-  int options = PCRE_EXTRA;
-
-  assert(pattern);
-
-  return pcre_compile(pattern, options, errptr, &erroroffset, NULL);
-}
-
-int
-ircd_pcre_exec(const void *code, const char *subject)
-{
-  assert(code && subject);
-
-  return pcre_exec(code, NULL, subject, strlen(subject), 0, 0, NULL, 0) < 0;
 }
 #endif

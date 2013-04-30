@@ -263,7 +263,6 @@ reset_block_state(void)
 %token  REASON
 %token  REDIRPORT
 %token  REDIRSERV
-%token  REGEX_T
 %token  REHASH
 %token  REMOTE
 %token  REMOTEBAN
@@ -2161,68 +2160,19 @@ kill_entry: KILL
       !block_state.host.buf[0])
     break;
 
+  conf = conf_make(CONF_KLINE);
+  conf->user = xstrdup(block_state.user.buf);
+  conf->host = xstrdup(block_state.host.buf);
 
-  if (block_state.port.value == 1)
-  {
-#ifdef HAVE_LIBPCRE
-    void *exp_user = NULL;
-    void *exp_host = NULL;
-    const char *errptr = NULL;
- 
-    if (!(exp_user = ircd_pcre_compile(block_state.user.buf, &errptr)) ||
-        !(exp_host = ircd_pcre_compile(block_state.host.buf, &errptr)))
-    {
-      ilog(LOG_TYPE_IRCD, "Failed to add regular expression based K-Line: %s",
-           errptr);
-      break;
-    }
-
-    conf = conf_make(CONF_RKLINE);
-    conf->regexuser = exp_user;
-    conf->regexhost = exp_host;
-
-    conf->user = xstrdup(block_state.user.buf);
-    conf->host = xstrdup(block_state.host.buf);
-
-    if (block_state.rpass.buf[0])
-      conf->reason = xstrdup(block_state.rpass.buf);
-    else
-      conf->reason = xstrdup(CONF_NOREASON);
-#else
-    ilog(LOG_TYPE_IRCD, "Failed to add regular expression based K-Line: no PCRE support");
-    break;
-#endif
-  }
+  if (block_state.rpass.buf[0])
+    conf->reason = xstrdup(block_state.rpass.buf);
   else
-  {
-    conf = conf_make(CONF_KLINE);
-
-    conf->user = xstrdup(block_state.user.buf);
-    conf->host = xstrdup(block_state.host.buf);
-
-    if (block_state.rpass.buf[0])
-      conf->reason = xstrdup(block_state.rpass.buf);
-    else
-      conf->reason = xstrdup(CONF_NOREASON);
-    add_conf_by_address(CONF_KLINE, conf);
-  }
+    conf->reason = xstrdup(CONF_NOREASON);
+  add_conf_by_address(CONF_KLINE, conf);
 }; 
 
-kill_type: TYPE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value = 0;
-} '='  kill_type_items ';';
-
-kill_type_items: kill_type_items ',' kill_type_item | kill_type_item;
-kill_type_item: REGEX_T
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value = 1;
-};
-
 kill_items:     kill_items kill_item | kill_item;
-kill_item:      kill_user | kill_reason | kill_type | error;
+kill_item:      kill_user | kill_reason | error;
 
 kill_user: USER '=' QSTRING ';'
 {
@@ -2334,29 +2284,7 @@ gecos_entry: GECOS
   if (!block_state.name.buf[0])
     break;
 
-  if (block_state.port.value == 1)
-  {
-#ifdef HAVE_LIBPCRE
-    void *exp_p = NULL;
-    const char *errptr = NULL;
-
-    if (!(exp_p = ircd_pcre_compile(block_state.name.buf, &errptr)))
-    {
-      ilog(LOG_TYPE_IRCD, "Failed to add regular expression based X-Line: %s",
-           errptr);
-      break;
-    }
-
-    conf = conf_make(CONF_RXLINE);
-    conf->regexuser = exp_p;
-#else
-    conf_error_report("Failed to add regular expression based X-Line: no PCRE support");
-    break;
-#endif
-  }
-  else
-    conf = conf_make(CONF_XLINE);
-
+  conf = conf_make(CONF_XLINE);
   conf->name = xstrdup(block_state.name.buf);
 
   if (block_state.rpass.buf[0])
@@ -2365,21 +2293,8 @@ gecos_entry: GECOS
     conf->reason = xstrdup(CONF_NOREASON);
 };
 
-gecos_flags: TYPE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value = 0;
-} '='  gecos_flags_items ';';
-
-gecos_flags_items: gecos_flags_items ',' gecos_flags_item | gecos_flags_item;
-gecos_flags_item: REGEX_T
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value = 1;
-};
-
 gecos_items: gecos_items gecos_item | gecos_item;
-gecos_item:  gecos_name | gecos_reason | gecos_flags | error;
+gecos_item:  gecos_name | gecos_reason | error;
 
 gecos_name: NAME '=' QSTRING ';' 
 {

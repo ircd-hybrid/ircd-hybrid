@@ -63,8 +63,6 @@ dlink_list cluster_items = { NULL, NULL, 0 };
 dlink_list oconf_items   = { NULL, NULL, 0 };
 dlink_list uconf_items   = { NULL, NULL, 0 };
 dlink_list xconf_items   = { NULL, NULL, 0 };
-dlink_list rxconf_items  = { NULL, NULL, 0 };
-dlink_list rkconf_items  = { NULL, NULL, 0 };
 dlink_list nresv_items   = { NULL, NULL, 0 };
 dlink_list temporary_resv = { NULL, NULL, 0 };
 
@@ -85,7 +83,6 @@ static int verify_access(struct Client *);
 static int attach_iline(struct Client *, struct MaskItem *);
 static struct ip_entry *find_or_add_ip(struct irc_ssaddr *);
 static dlink_list *map_to_list(enum maskitem_type);
-static struct MaskItem *find_regexp_kline(const char *[]);
 static int find_user_host(struct Client *, char *, char *, char *, unsigned int);
 
 
@@ -188,8 +185,6 @@ conf_free(struct MaskItem *conf)
   MyFree(conf->reason);
   MyFree(conf->user);
   MyFree(conf->host);
-  MyFree(conf->regexuser);
-  MyFree(conf->regexhost);
 #ifdef HAVE_LIBCRYPTO
   MyFree(conf->cipher_list);
 
@@ -263,35 +258,10 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 
       sendto_one(source_p, form_str(RPL_STATSXLINE),
 		 me.name, source_p->name, 
-		 conf->until ? "x": "X", conf->count,
+		 conf->until ? 'x': 'X', conf->count,
 		 conf->name, conf->reason);
     }
     break;
-
-#ifdef HAVE_LIBPCRE
-  case CONF_RXLINE:
-    DLINK_FOREACH(ptr, rxconf_items.head)
-    {
-      conf = ptr->data;
-
-      sendto_one(source_p, form_str(RPL_STATSXLINE),
-                 me.name, source_p->name,
-                 "XR", conf->count,
-                 conf->name, conf->reason);
-    }
-    break;
-
-  case CONF_RKLINE:
-    DLINK_FOREACH(ptr, rkconf_items.head)
-    {
-      conf = ptr->data;
-
-      sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
-                 source_p->name, "KR", conf->host, conf->user,
-                 conf->reason);
-    }
-    break;
-#endif
 
   case CONF_ULINE:
     shared = flag_table;
@@ -529,7 +499,6 @@ verify_access(struct Client *client_p)
 {
   struct MaskItem *conf = NULL, *rkconf = NULL;
   char non_ident[USERLEN + 1] = { '~', '\0' };
-  const char *uhi[3];
 
   if (IsGotId(client_p))
   {
@@ -547,15 +516,9 @@ verify_access(struct Client *client_p)
 	                     client_p->localClient->passwd);
   }
 
-  uhi[0] = IsGotId(client_p) ? client_p->username : non_ident;
-  uhi[1] = client_p->host;
-  uhi[2] = client_p->sockhost;
-
-  rkconf = find_regexp_kline(uhi);
-
   if (conf != NULL)
   {
-    if (IsConfClient(conf) && !rkconf)
+    if (IsConfClient(conf))
     {
       if (IsConfRedir(conf))
       {
@@ -582,10 +545,8 @@ verify_access(struct Client *client_p)
 
       return(attach_iline(client_p, conf));
     }
-    else if (rkconf || IsConfKill(conf) || (ConfigFileEntry.glines && IsConfGline(conf)))
+    else if (IsConfKill(conf) || (ConfigFileEntry.glines && IsConfGline(conf)))
     {
-      /* XXX */
-      conf = rkconf ? rkconf : conf;
       if (IsConfGline(conf))
         sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
                    client_p->name);
@@ -1031,12 +992,6 @@ map_to_list(enum maskitem_type type)
 {
   switch(type)
   {
-  case CONF_RKLINE:
-    return(&rkconf_items);
-    break;
-  case CONF_RXLINE:
-    return(&rxconf_items);
-    break;
   case CONF_XLINE:
     return(&xconf_items);
     break;
@@ -1085,18 +1040,6 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
 
   switch (type)
   {
-#ifdef HAVE_LIBPCRE
-  case CONF_RXLINE:
-      DLINK_FOREACH(ptr, list_p->head)
-      {
-        conf = ptr->data;
-        assert(conf->regexuser);
-
-        if (!ircd_pcre_exec(conf->regexuser, name))
-          return conf;
-      }
-      break;
-#endif
   case CONF_SERVICE:
     DLINK_FOREACH(ptr, list_p->head)
     {
@@ -1170,7 +1113,6 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
 
   switch(type)
   {
-  case CONF_RXLINE:
   case CONF_XLINE:
   case CONF_ULINE:
   case CONF_NRESV:
@@ -1533,28 +1475,6 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
   return 0;
 }
 
-static struct MaskItem *
-find_regexp_kline(const char *uhi[])
-{
-#ifdef HAVE_LIBPCRE
-  const dlink_node *ptr = NULL;
-
-  DLINK_FOREACH(ptr, rkconf_items.head)
-  {
-    struct MaskItem *aptr = ptr->data;
-
-    assert(aptr->regexuser);
-    assert(aptr->regexhost);
-
-    if (!ircd_pcre_exec(aptr->regexuser, uhi[0]) &&
-        (!ircd_pcre_exec(aptr->regexhost, uhi[1]) ||
-         !ircd_pcre_exec(aptr->regexhost, uhi[2])))
-      return aptr;
-  }
-#endif
-  return NULL;
-}
-
 /* find_kill()
  *
  * inputs	- pointer to client structure
@@ -1566,20 +1486,12 @@ struct MaskItem *
 find_kill(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
-  const char *uhi[3];
-
-  uhi[0] = client_p->username;
-  uhi[1] = client_p->host;
-  uhi[2] = client_p->sockhost;
 
   assert(client_p != NULL);
 
   conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
                               CONF_KLINE, client_p->localClient->aftype,
                               client_p->username, NULL, 1);
-  if (conf == NULL)
-    conf = find_regexp_kline(uhi);
-
   return conf;
 }
 
@@ -1820,7 +1732,7 @@ clear_out_old_conf(void)
   struct MaskItem *conf;
   dlink_list *free_items [] = {
     &server_items,   &oconf_items,
-     &uconf_items,   &xconf_items, &rxconf_items, &rkconf_items,
+     &uconf_items,   &xconf_items,
      &nresv_items, &cluster_items,  &service_items, &resv_channel_list, NULL
   };
 
@@ -1844,9 +1756,7 @@ clear_out_old_conf(void)
         if (!conf->ref_count)
 	  conf_free(conf);
       }
-      else if (conf->type == CONF_XLINE  ||
-               conf->type == CONF_RXLINE ||
-               conf->type == CONF_RKLINE)
+      else if (conf->type == CONF_XLINE)
       {
         if (!conf->until)
           conf_free(conf);

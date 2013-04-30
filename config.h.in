@@ -85,9 +85,6 @@
 /* Define to 1 if libGeoIP (-lGeoIP) is available. */
 #undef HAVE_LIBGEOIP
 
-/* Define to 1 if libpcre (-lpcre) is available. */
-#undef HAVE_LIBPCRE
-
 /* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 

@@ -391,9 +391,7 @@ check_conf_klines(void)
     }
 
     if ((conf = find_matching_name_conf(CONF_XLINE,  client_p->info,
-                                        NULL, NULL, 0)) != NULL ||
-        (conf = find_matching_name_conf(CONF_RXLINE, client_p->info,
-                                        NULL, NULL, 0)) != NULL)
+                                        NULL, NULL, 0)))
     {
       ban_them(client_p, conf);
       continue;
@@ -436,7 +434,6 @@ ban_them(struct Client *client_p, struct MaskItem *conf)
 
   switch (conf->type)
   {
-    case CONF_RKLINE:
     case CONF_KLINE:
       type_string = kline_string;
       break;
@@ -446,7 +443,6 @@ ban_them(struct Client *client_p, struct MaskItem *conf)
     case CONF_GLINE:
       type_string = gline_string;
       break;
-    case CONF_RXLINE:
     case CONF_XLINE:
       type_string = xline_string;
       ++conf->count;

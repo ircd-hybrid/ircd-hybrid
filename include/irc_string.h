@@ -29,8 +29,6 @@
 
 
 extern int has_wildcards(const char *);
-extern int ircd_pcre_exec(const void *, const char *);
-extern void *ircd_pcre_compile(const char *, const char **);
 extern int match(const char *, const char *);
 
 /*

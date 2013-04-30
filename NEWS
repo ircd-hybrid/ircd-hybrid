@@ -1,3 +1,18 @@
+-- ircd-hybrid-8.1.0beta3 Release Notes
+o) PCRE support has been dropped
+o) "STATS o" now shows how many times an oper{} block has been used.
+   Similar to STATS x|q"
+
+
+-- ircd-hybrid-8.1.0beta2 Release Notes
+o) Fixed broken compile with libGeoIP disabled
+o) Code cleanups; working towards stabilization and improved performance
+o) Changed RPL_WELCOME to comply with rfc2812
+o) Removed operflag 'nick_changes'. Operators can now set +n at will
+o) Fixed shared{} blocks not working as expected
+o) Fixed spoofs not working as expected
+
+
 -- ircd-hybrid-8.1.0beta1 Release Notes
 ########################################################################
 o) IMPORTANT: name/channel entries can't be stacked any longer within
@@ -23,6 +38,13 @@ o) contrib/ and its content has been removed from the tree
 o) Added serverhide::hide_services configuration option
 o) Added 'nononreg' (+R) to oper::umodes and general::oper_only_modes
 o) Added support for "away-notify" client capability
+
+
+-- ircd-hybrid-8.0.8 Release Notes
+o) "STATS s" now shows configured services{} blocks as well
+o) Fixed compile warnings, minor code cleanups and optimizations
+o) Increased nickname history length to 32768
+o) Unidentified/unregistered nicks may not speak in +R channels
 
 
 -- ircd-hybrid-8.0.7 Release Notes
@@ -203,8 +225,7 @@ BUG REPORTS: If you run this code and encounter problems, you must report
 DISCUSSION: There is a mailing list for discussion of hybrid issues,
  including betas. To subscribe, use this link:
     https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
- This is the proper place to discuss new features, bugs, etc. Posting here
- is much more likely to get something done than ranting on #TZ.
+ This is the proper place to discuss new features, bugs, etc.
 
 Questions/comments directed to bugs@ircd-hybrid.org
 

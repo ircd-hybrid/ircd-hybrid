@@ -245,6 +245,37 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
   }
 }
 
+/* report_resv()
+ *
+ * inputs       - pointer to client pointer to report to.
+ * output       - NONE
+ * side effects - report all resvs to client.
+ */
+static void
+report_resv(struct Client *source_p)
+{
+  dlink_node *ptr = NULL;
+  struct MaskItem *conf = NULL;
+
+  DLINK_FOREACH(ptr, resv_channel_list.head)
+  {
+    conf = ptr->data;
+    sendto_one(source_p, form_str(RPL_STATSQLINE),
+               me.name, source_p->name,
+               conf->until ? 'q' : 'Q', conf->count,
+               conf->name, conf->reason);
+  }
+
+  DLINK_FOREACH(ptr, nresv_items.head)
+  {
+    conf = ptr->data;
+    sendto_one(source_p, form_str(RPL_STATSQLINE),
+               me.name, source_p->name,
+               conf->until ? 'q' : 'Q', conf->count,
+               conf->name, conf->reason);
+  }
+}
+
 /*
  * This is part of the STATS replies. There is no offical numeric for this
  * since this isnt an official command, in much the same way as HASH isnt.

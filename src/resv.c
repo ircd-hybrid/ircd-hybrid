@@ -187,37 +187,6 @@ match_find_resv(const char *name)
   return NULL;
 }
 
-/* report_resv()
- *
- * inputs	- pointer to client pointer to report to.
- * output	- NONE
- * side effects	- report all resvs to client.
- */
-void
-report_resv(struct Client *source_p)
-{
-  dlink_node *ptr = NULL;
-  struct MaskItem *conf = NULL;
-
-  DLINK_FOREACH(ptr, resv_channel_list.head)
-  {
-    conf = ptr->data;
-    sendto_one(source_p, form_str(RPL_STATSQLINE),
-               me.name, source_p->name,
-	       conf->until ? 'q' : 'Q', conf->count,
-	       conf->name, conf->reason);
-  }
-
-  DLINK_FOREACH(ptr, nresv_items.head)
-  {
-    conf = ptr->data;
-    sendto_one(source_p, form_str(RPL_STATSQLINE),
-               me.name, source_p->name,
-	       conf->until ? 'q' : 'Q', conf->count,
-	       conf->name, conf->reason);
-  }
-}
-
 /* valid_wild_card_simple()
  *
  * inputs	- data to check for sufficient non-wildcard characters

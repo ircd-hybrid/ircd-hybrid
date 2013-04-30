@@ -2,7 +2,7 @@
 
    $Id$
 
-   Copyright (c) 2001-2012 by ircd-hybrid team
+   Copyright (c) 2001-2013 by ircd-hybrid team
 
      ----------------------------------------------------------------------
 
@@ -41,9 +41,7 @@
        | Flattened LINKS is needed for any network that uses the hidden hub |
        | option. See below for more details.                                |
        +--------------------------------------------------------------------+
-
         
-
      * Hidden server option: This option will hide the server from a
        flattened LINKS list on other servers. Opers will of course see the
        true routing of the network.
@@ -57,9 +55,6 @@
        | the (H) means hidden.                                              |
        +--------------------------------------------------------------------+
 
-     * The allow_hidden option is needed to allow servers to use the hidden
-       server option described above.
-
      * The hide_servers option forces the server to not be shown when a user
        issues WHOIS and other commands which may show what server a user is
        on.
@@ -72,8 +67,8 @@
        To be effective, this option must be used network wide.
 
      * The disable_remote_commands option takes care of most of the remaining
-       issues. These include, for example, ADMIN some.hub.server, VERSION
-       someuser, and similar commands. A server with this option enabled will
+       issues. These include, for example, "ADMIN some.hub.server", "VERSION
+       someuser", and similar commands. A server with this option enabled will
        only prevent local users from issuing remote commands. Remote users
        will not be affected.
 

@@ -76,7 +76,7 @@ part_one_client(struct Client *client_p, struct Client *source_p,
    *  only allow /part reasons in -m chans
    */
   if (reason[0] && (!MyConnect(source_p) ||
-      ((can_send(chptr, source_p, ms) &&
+      ((can_send(chptr, source_p, ms, reason) &&
        (source_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
         < CurrentTime))))
   {
@@ -127,7 +127,7 @@ m_part(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (parc > 2)
+  if (parc > 2 && !EmptyString(parv[2]))
     strlcpy(reason, parv[2], sizeof(reason));
 
   /* Finish the flood grace period... */

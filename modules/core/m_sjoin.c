@@ -122,6 +122,9 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   {
     switch (*s)
     {
+      case 'c':
+        mode.mode |= MODE_NOCTRL;
+        break;
       case 't':
         mode.mode |= MODE_TOPICLIMIT;
         break;

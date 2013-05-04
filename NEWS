@@ -2,6 +2,9 @@
 o) PCRE support has been dropped
 o) "STATS o" now shows how many times an oper{} block has been used.
    Similar to STATS x|q"
+o) Implemented channel mode +c. Known from other ircds, this mode basically
+   prevents users from sending messages including control codes to a channel
+   that has this mode set
 
 
 -- ircd-hybrid-8.1.0beta2 Release Notes

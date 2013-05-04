@@ -409,7 +409,7 @@ static void
 msg_channel(int p_or_n, const char *command, struct Client *client_p,
             struct Client *source_p, struct Channel *chptr, char *text)
 {
-  int result;
+  int result = 0;
 
   if (MyClient(source_p))
   {
@@ -419,7 +419,7 @@ msg_channel(int p_or_n, const char *command, struct Client *client_p,
   }
 
   /* chanops and voiced can flood their own channel with impunity */
-  if ((result = can_send(chptr, source_p, NULL)) < 0)
+  if ((result = can_send(chptr, source_p, NULL, text)) < 0)
   {
     if (result == CAN_SEND_OPV ||
         !flood_attack_channel(p_or_n, source_p, chptr))
@@ -429,9 +429,16 @@ msg_channel(int p_or_n, const char *command, struct Client *client_p,
   else
   {
     if (p_or_n != NOTICE)
-      sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
-                 ID_or_name(&me, client_p),
-                 ID_or_name(source_p, client_p), chptr->chname);
+    {
+      if (result == ERR_NOCTRLSONCHAN)
+        sendto_one(source_p, form_str(ERR_NOCTRLSONCHAN),
+                   ID_or_name(&me, client_p),
+                   ID_or_name(source_p, client_p), chptr->chname, text);
+      else
+        sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
+                   ID_or_name(&me, client_p),
+                   ID_or_name(source_p, client_p), chptr->chname);
+    }
   }
 }
 

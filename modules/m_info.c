@@ -250,7 +250,7 @@ static const struct InfoStruct info_table[] =
     "hide_server_ips",
     OUTPUT_BOOLEAN_YN,
     &ConfigServerHide.hide_server_ips,
-    "Prevent people from seeing server IPs"
+    "Prevent people from seeing server IP addresses"
   },
   {
     "gline_min_cidr",
@@ -280,7 +280,7 @@ static const struct InfoStruct info_table[] =
     "hide_spoof_ips",
     OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.hide_spoof_ips,
-    "Hide spoofed IP's"
+    "Hide spoofed IP addresses"
   },
   {
     "ignore_bogus_ts",

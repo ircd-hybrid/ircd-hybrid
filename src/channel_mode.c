@@ -321,6 +321,7 @@ del_id(struct Channel *chptr, char *banid, int type)
 }
 
 const struct mode_letter chan_modes[] = {
+  { MODE_NOCTRL,     'c' },
   { MODE_INVITEONLY, 'i' },
   { MODE_MODERATED,  'm' },
   { MODE_NOPRIVMSGS, 'n' },
@@ -1429,7 +1430,7 @@ static struct ChannelMode ModeTable[255] =
   {chm_nosuch, NULL},
   {chm_nosuch, NULL},				  /* a */
   {chm_ban, NULL},                                /* b */
-  {chm_nosuch, NULL},                             /* c */
+  {chm_simple, (void *) MODE_NOCTRL},             /* c */
   {chm_nosuch, NULL},                             /* d */
   {chm_except, NULL},                             /* e */
   {chm_nosuch, NULL},                             /* f */

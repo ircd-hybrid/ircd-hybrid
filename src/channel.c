@@ -693,6 +693,35 @@ find_channel_link(struct Client *client_p, struct Channel *chptr)
   return NULL;
 }
 
+/*
+ * Basically the same functionality as in bahamut
+ */
+static int
+msg_has_ctrls(const char *message)
+{
+  const unsigned char *p = (const unsigned char *)message;
+
+  for (; *p; ++p)
+  {
+    if (*p > 31 || *p == 1)
+      continue;
+
+    if (*p == 27)
+    {
+      if (*(p + 1) == '$' ||
+          *(p + 1) == '(')
+      {
+        ++p;
+        continue;
+      }
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
 /*!
  * \param chptr    pointer to Channel struct
  * \param source_p pointer to Client struct
@@ -702,7 +731,8 @@ find_channel_link(struct Client *client_p, struct Channel *chptr)
  *         ERR_CANNOTSENDTOCHAN or ERR_NEEDREGGEDNICK if they cannot send to channel\n
  */
 int
-can_send(struct Channel *chptr, struct Client *source_p, struct Membership *ms)
+can_send(struct Channel *chptr, struct Client *source_p,
+         struct Membership *ms, const char *message)
 {
   struct MaskItem *conf = NULL;
 
@@ -745,6 +775,9 @@ can_send(struct Channel *chptr, struct Client *source_p, struct Membership *ms)
 
   if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
+
+  if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
+    return ERR_NOCTRLSONCHAN;
 
   return CAN_SEND_NONOP;
 }

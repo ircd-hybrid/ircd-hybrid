@@ -40,6 +40,7 @@ User Modes:
 Channel Modes:
 
 +b - ban          - Channel ban on nick!user@host
++c - noctrls      - Prevent users from sending messages containing control codes to the channel
 +e - exempt       - Exemption from bans
 +I - invex        - Invite exceptions, nick!user@host does not need to be
                     explicitly INVITE'd into the channel before being able

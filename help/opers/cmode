@@ -10,6 +10,9 @@ MODE <channel> <+|-><modes> [parameters]
 NO PARAMETERS:
 --------------
 
+     +c     - 'No control codes'.  Prevent users from sending messages containing
+              control codes to the channel
+
      +n     - 'No external messages'.  This will prevent any user who
               isn't in the channel from sending messages to the channel.
 

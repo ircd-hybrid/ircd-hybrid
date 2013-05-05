@@ -746,6 +746,9 @@ can_send(struct Channel *chptr, struct Client *source_p,
 
   if (ms != NULL || (ms = find_channel_link(source_p, chptr)))
   {
+    if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
+      return ERR_NOCTRLSONCHAN;
+
     if (ms->flags & (CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
       return CAN_SEND_OPV;
 

@@ -241,7 +241,6 @@ ping_cookie	{ return PING_COOKIE; }
 ping_time	{ return PING_TIME; }
 port		{ return PORT; }
 quarantine	{ return RESV; }
-quiet_on_ban    { return QUIET_ON_BAN; }
 random_idle     { return RANDOM_IDLE; }
 reason		{ return REASON; }
 recvq           { return T_RECVQ; }

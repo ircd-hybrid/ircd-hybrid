@@ -276,7 +276,6 @@ struct config_channel_entry
   unsigned int max_chans_per_oper;
   int no_create_on_split;
   int no_join_on_split;
-  int quiet_on_ban;
   int default_split_server_count;
   int default_split_user_count;
 };

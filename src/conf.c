@@ -1103,7 +1103,6 @@ set_default_conf(void)
   ConfigChannel.knock_delay_channel = 60;
   ConfigChannel.max_chans_per_user = 25;
   ConfigChannel.max_chans_per_oper = 50;
-  ConfigChannel.quiet_on_ban = 1;
   ConfigChannel.max_bans = 25;
   ConfigChannel.default_split_user_count = 0;
   ConfigChannel.default_split_server_count = 0;

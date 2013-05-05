@@ -175,12 +175,6 @@ static const struct InfoStruct info_table[] =
     "Maximum number of channels an oper can join"
   },
   {
-    "quiet_on_ban",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.quiet_on_ban,
-    "Banned users may not send text to a channel"
-  },
-  {
     "max_bans",
     OUTPUT_DECIMAL,
     &ConfigChannel.max_bans,

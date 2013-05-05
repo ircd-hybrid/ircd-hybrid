@@ -259,7 +259,6 @@ reset_block_state(void)
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
-%token  QUIET_ON_BAN
 %token  REASON
 %token  REDIRPORT
 %token  REDIRSERV
@@ -2750,7 +2749,7 @@ channel_items:      channel_items channel_item | channel_item;
 channel_item:       channel_max_bans |
                     channel_knock_delay | channel_knock_delay_channel |
                     channel_max_chans_per_user | channel_max_chans_per_oper |
-                    channel_quiet_on_ban | channel_default_split_user_count |
+                    channel_default_split_user_count |
                     channel_default_split_server_count |
                     channel_no_create_on_split |
                     channel_no_join_on_split |
@@ -2780,11 +2779,6 @@ channel_max_chans_per_user: MAX_CHANS_PER_USER '=' NUMBER ';'
 channel_max_chans_per_oper: MAX_CHANS_PER_OPER '=' NUMBER ';'
 {
   ConfigChannel.max_chans_per_oper = $3;
-};
-
-channel_quiet_on_ban: QUIET_ON_BAN '=' TBOOL ';'
-{
-  ConfigChannel.quiet_on_ban = yylval.number;
 };
 
 channel_max_bans: MAX_BANS '=' NUMBER ';'

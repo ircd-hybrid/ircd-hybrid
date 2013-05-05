@@ -506,7 +506,7 @@ delete_capability(const char *capab_name)
  * output	- 0 if not found CAPAB otherwise
  * side effects	- none
  */
-int
+unsigned int
 find_capability(const char *capab)
 {
   const dlink_node *ptr = NULL;

@@ -744,19 +744,20 @@ can_send(struct Channel *chptr, struct Client *source_p,
       if ((conf = match_find_resv(chptr->chname)) && !resv_find_exempt(source_p, conf))
         return ERR_CANNOTSENDTOCHAN;
 
-  if (ms != NULL || (ms = find_channel_link(source_p, chptr)))
-  {
-    if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
-      return ERR_NOCTRLSONCHAN;
+  if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
+    return ERR_NOCTRLSONCHAN;
+  if (ms || (ms = find_channel_link(source_p, chptr)))
     if (ms->flags & (CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
       return CAN_SEND_OPV;
-    if (chptr->mode.mode & MODE_MODERATED)
-      return ERR_CANNOTSENDTOCHAN;
-    if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))
-      return ERR_NEEDREGGEDNICK;
+  if (chptr->mode.mode & MODE_MODERATED)
+    return ERR_CANNOTSENDTOCHAN;
+  if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))
+    return ERR_NEEDREGGEDNICK;
 
-    /* cache can send if quiet_on_ban and banned */
-    if (ConfigChannel.quiet_on_ban && MyClient(source_p))
+  /* cache can send if quiet_on_ban and banned */
+  if (MyClient(source_p))
+  {
+    if (ms)
     {
       if (ms->flags & CHFL_BAN_SILENCED)
         return ERR_CANNOTSENDTOCHAN;
@@ -772,17 +773,8 @@ can_send(struct Channel *chptr, struct Client *source_p,
         ms->flags |= CHFL_BAN_CHECKED;
       }
     }
-  }
-  else
-  {
-    if (chptr->mode.mode & MODE_NOPRIVMSGS)
+    else if (is_banned(chptr, source_p))
       return ERR_CANNOTSENDTOCHAN;
-    if (chptr->mode.mode & MODE_MODERATED)
-      return ERR_CANNOTSENDTOCHAN;
-    if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))
-      return ERR_NEEDREGGEDNICK;
-    if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
-      return ERR_NOCTRLSONCHAN;
   }
 
   return CAN_SEND_NONOP;

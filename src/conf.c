@@ -304,7 +304,7 @@ check_client(struct Client *source_p)
 static int
 verify_access(struct Client *client_p)
 {
-  struct MaskItem *conf = NULL, *rkconf = NULL;
+  struct MaskItem *conf = NULL;
   char non_ident[USERLEN + 1] = { '~', '\0' };
 
   if (IsGotId(client_p))

@@ -748,9 +748,12 @@ can_send(struct Channel *chptr, struct Client *source_p,
   {
     if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
       return ERR_NOCTRLSONCHAN;
-
     if (ms->flags & (CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
       return CAN_SEND_OPV;
+    if (chptr->mode.mode & MODE_MODERATED)
+      return ERR_CANNOTSENDTOCHAN;
+    if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))
+      return ERR_NEEDREGGEDNICK;
 
     /* cache can send if quiet_on_ban and banned */
     if (ConfigChannel.quiet_on_ban && MyClient(source_p))
@@ -770,17 +773,17 @@ can_send(struct Channel *chptr, struct Client *source_p,
       }
     }
   }
-  else if (chptr->mode.mode & MODE_NOPRIVMSGS)
-    return ERR_CANNOTSENDTOCHAN;
-
-  if (chptr->mode.mode & MODE_MODERATED)
-    return ERR_CANNOTSENDTOCHAN;
-
-  if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))
-    return ERR_NEEDREGGEDNICK;
-
-  if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
-    return ERR_NOCTRLSONCHAN;
+  else
+  {
+    if (chptr->mode.mode & MODE_NOPRIVMSGS)
+      return ERR_CANNOTSENDTOCHAN;
+    if (chptr->mode.mode & MODE_MODERATED)
+      return ERR_CANNOTSENDTOCHAN;
+    if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))
+      return ERR_NEEDREGGEDNICK;
+    if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
+      return ERR_NOCTRLSONCHAN;
+  }
 
   return CAN_SEND_NONOP;
 }

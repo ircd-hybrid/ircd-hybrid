@@ -754,7 +754,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
   if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
 
-  /* cache can send if quiet_on_ban and banned */
+  /* cache can send if banned */
   if (MyClient(source_p))
   {
     if (ms)

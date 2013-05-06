@@ -1,3 +1,8 @@
+-- ircd-hybrid-8.1.0beta4 Release Notes
+o) Implemented channel mode +M. Clients that haven't identified their
+   name with NickServ may not speak in a channel that has this mode set
+
+
 -- ircd-hybrid-8.1.0beta3 Release Notes
 o) PCRE support has been dropped
 o) "STATS o" now shows how many times an oper{} block has been used.

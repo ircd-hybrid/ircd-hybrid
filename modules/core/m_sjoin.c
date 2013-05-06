@@ -146,6 +146,9 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
       case 'r':
         mode.mode |= MODE_REGISTERED;
         break;
+      case 'M':
+        mode.mode |= MODE_MODREG;
+        break;
       case 'O':
         mode.mode |= MODE_OPERONLY;
         break;

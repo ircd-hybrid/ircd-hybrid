@@ -329,6 +329,7 @@ const struct mode_letter chan_modes[] = {
   { MODE_REGISTERED, 'r' },
   { MODE_SECRET,     's' },
   { MODE_TOPICLIMIT, 't' },
+  { MODE_MODREG,     'M' },
   { MODE_OPERONLY,   'O' },
   { MODE_REGONLY,    'R' },
   { MODE_SSLONLY,    'S' },
@@ -1408,7 +1409,7 @@ static struct ChannelMode ModeTable[255] =
   {chm_nosuch, NULL},                             /* J */
   {chm_nosuch, NULL},                             /* K */
   {chm_nosuch, NULL},                             /* L */
-  {chm_nosuch, NULL},                             /* M */
+  {chm_simple, (void *)MODE_MODREG},              /* M */
   {chm_nosuch, NULL},                             /* N */
   {chm_operonly, (void *) MODE_OPERONLY},         /* O */
   {chm_nosuch, NULL},                             /* P */

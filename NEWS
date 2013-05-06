@@ -10,6 +10,10 @@ o) "STATS o" now shows how many times an oper{} block has been used.
 o) Implemented channel mode +c. Known from other ircds, this mode basically
    prevents users from sending messages including control codes to a channel
    that has this mode set
+o) Fixed bug where bans were not checked against non-channel members when
+   sending messages to a channel
+o) Removed channel::quiet_on_ban configuration option. This feature is
+   now enabled by default
 
 
 -- ircd-hybrid-8.1.0beta2 Release Notes

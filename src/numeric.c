@@ -37,7 +37,7 @@ static const char *replies[] = {
 /* 007 */ NULL,
 /* 008 */ NULL,
 /* 009 */ NULL,
-/* 010 RPL_REDIR */ ":%s 010 %s %s %d :Please use this Server/Port instead",
+/* 010 RPL_REDIR */ ":%s 010 %s %s %u :Please use this Server/Port instead",
 /* 011 */ NULL,
 /* 012 */ NULL,
 /* 013 */ NULL,

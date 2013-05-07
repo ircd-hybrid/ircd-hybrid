@@ -1,6 +1,7 @@
 -- ircd-hybrid-8.1.0beta4 Release Notes
 o) Implemented channel mode +M. Clients that haven't identified their
    name with NickServ may not speak in a channel that has this mode set
+o) Fixed weird idletimes shown in /trace
 
 
 -- ircd-hybrid-8.1.0beta3 Release Notes

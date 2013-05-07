@@ -51,6 +51,7 @@ Channel Modes:
 +m - moderated    - Users without +v/h/o cannot send text to the channel
 +n - noexternal   - Users must be in the channel to send text to it
 +o - chanop       - Full operator status
++M - modreg       - Unregistered/unidentified clients cannot send text to the channel
 +O - operonly     - This mode will prevent anyone who hasn't obtained
                     IRCOp status from joining the channel. Can be set by an IRCOp
                     only

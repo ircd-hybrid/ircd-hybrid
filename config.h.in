@@ -237,11 +237,20 @@
 /* Size of the dns mempool chunk. */
 #undef MP_CHUNK_SIZE_DNS
 
+/* Size of the ip_entry mempool chunk. */
+#undef MP_CHUNK_SIZE_IP_ENTRY
+
 /* Size of the local client mempool chunk. */
 #undef MP_CHUNK_SIZE_LCLIENT
 
-/* Size of the channel mempool chunk. */
+/* Size of the channel-member mempool chunk. */
 #undef MP_CHUNK_SIZE_MEMBER
+
+/* Size of the namehost mempool chunk. */
+#undef MP_CHUNK_SIZE_NAMEHOST
+
+/* Size of the userhost mempool chunk. */
+#undef MP_CHUNK_SIZE_USERHOST
 
 /* Size of the watch mempool chunk. */
 #undef MP_CHUNK_SIZE_WATCH

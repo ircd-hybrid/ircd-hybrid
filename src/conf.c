@@ -432,8 +432,7 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
 void
 init_ip_hash_table(void)
 {
-  ip_entry_pool = mp_pool_new(sizeof(struct ip_entry),
-    2 * hard_fdlimit);
+  ip_entry_pool = mp_pool_new(sizeof(struct ip_entry), MP_CHUNK_SIZE_IP_ENTRY);
   memset(ip_hash_table, 0, sizeof(ip_hash_table));
 }
 

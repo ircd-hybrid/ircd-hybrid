@@ -2655,6 +2655,9 @@ umode_oitem:     T_BOTS
 } | T_LOCOPS
 {
   ConfigFileEntry.oper_umodes |= UMODE_LOCOPS;
+} | T_NONONREG
+{
+  ConfigFileEntry.oper_umodes |= UMODE_REGONLY;
 } | T_FARCONNECT
 {
   ConfigFileEntry.oper_umodes |= UMODE_FARCONNECT;

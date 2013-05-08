@@ -69,12 +69,8 @@ static struct UserHost *userhostTable[HASHSIZE];
 void
 hash_init(void)
 {
-  /* Default the userhost/namehost sizes to CLIENT_HEAP_SIZE for now,
-   * should be a good close approximation anyway
-   * - Dianora
-   */
-  userhost_pool = mp_pool_new(sizeof(struct UserHost), MP_CHUNK_SIZE_CLIENT);
-  namehost_pool = mp_pool_new(sizeof(struct NameHost), MP_CHUNK_SIZE_CLIENT);
+  userhost_pool = mp_pool_new(sizeof(struct UserHost), MP_CHUNK_SIZE_USERHOST);
+  namehost_pool = mp_pool_new(sizeof(struct NameHost), MP_CHUNK_SIZE_NAMEHOST);
 
   hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
 }

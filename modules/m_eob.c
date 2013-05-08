@@ -41,7 +41,6 @@ ms_eob(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
   assert(IsServer(source_p));
-  assert(client_p == source_p);
 
   AddFlag(source_p, FLAGS_EOB);
 

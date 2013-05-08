@@ -471,7 +471,7 @@ mp_pool_new(size_t item_size, size_t chunk_capacity)
   pool->next = mp_allocated_pools;
   mp_allocated_pools = pool;
 
-  ilog(LOG_TYPE_IRCD, "Capacity is %lu, item size is %lu, alloc size is %lu",
+  ilog(LOG_TYPE_DEBUG, "Capacity is %lu, item size is %lu, alloc size is %lu",
        (unsigned long)pool->new_chunk_capacity,
        (unsigned long)pool->item_alloc_size,
        (unsigned long)(pool->new_chunk_capacity*pool->item_alloc_size));

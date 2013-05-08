@@ -92,7 +92,7 @@ unsigned int user_modes[256] =
   UMODE_CCONN_FULL,   /* C */
   UMODE_DEAF,         /* D */
   0,                  /* E */
-  0,                  /* F */
+  UMODE_FARCONNECT,   /* F */
   UMODE_SOFTCALLERID, /* G */
   UMODE_HIDDEN,       /* H */
   0,                  /* I */
@@ -553,6 +553,13 @@ register_remote_user(struct Client *source_p,
   dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->client_list);
   add_user_host(source_p->username, source_p->host, 1);
   SetUserHost(source_p);
+
+  if (HasFlag(source_p->servptr, FLAGS_EOB))
+    sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
+                         "Client connecting at %s: %s (%s@%s) [%s] <%s>",
+                         source_p->servptr->name,
+                         source_p->name, source_p->username, source_p->host,
+                         source_p->info, source_p->id);
 
   introduce_client(source_p);
 }

@@ -158,6 +158,8 @@
 #define UMODE_HIDDEN       0x00200000 /**< Operator status is hidden */
 #define UMODE_OPER         0x00400000 /**< Operator */
 #define UMODE_ADMIN        0x00800000 /**< Admin on server */ 
+#define UMODE_FARCONNECT   0x01000000 /**< Can see remote client connects/exits */
+
 
 #define UMODE_ALL          UMODE_SERVNOTICE
 

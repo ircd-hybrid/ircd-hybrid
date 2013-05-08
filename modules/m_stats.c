@@ -317,7 +317,7 @@ stats_usage(struct Client *source_p, int parc, char *parv[])
     rup = 1;
 
   sendto_one(source_p,
-             ":%s %d %s R :CPU Secs %d:%d User %d:%d System %d:%d",
+             ":%s %d %s R :CPU Secs %d:%02d User %d:%02d System %d:%02d",
              me.name, RPL_STATSDEBUG, source_p->name, (int)(secs/60), (int)(secs%60),
              (int)(rus.ru_utime.tv_sec/60), (int)(rus.ru_utime.tv_sec%60),
              (int)(rus.ru_stime.tv_sec/60), (int)(rus.ru_stime.tv_sec%60));

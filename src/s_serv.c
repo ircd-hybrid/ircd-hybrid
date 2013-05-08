@@ -893,11 +893,17 @@ server_estab(struct Client *client_p)
         sendto_one(client_p, ":%s SERVER %s %d :%s%s",
                    ID(target_p->servptr), target_p->name, target_p->hopcount+1,
                    IsHidden(target_p) ? "(H) " : "", target_p->info);
+      if (HasFlag(target_p, FLAGS_EOB))
+        sendto_one(client_p, ":%s EOB", target_p->name);
     }
     else
+    {
       sendto_one(client_p, ":%s SERVER %s %d :%s%s", 
                  target_p->servptr->name, target_p->name, target_p->hopcount+1,
                  IsHidden(target_p) ? "(H) " : "", target_p->info);
+      if (HasFlag(target_p, FLAGS_EOB))
+        sendto_one(client_p, ":%s EOB", target_p->name);
+    }
   }
 
   server_burst(client_p);
@@ -968,10 +974,6 @@ burst_all(struct Client *client_p)
     DelFlag(target_p, FLAGS_BURSTED);
   }
 
-  /* We send the time we started the burst, and let the remote host determine an EOB time,
-  ** as otherwise we end up sending a EOB of 0   Sending here means it gets sent last -- fl
-  */
-  /* Its simpler to just send EOB and use the time its been connected.. --fl_ */
   if (IsCapable(client_p, CAP_EOB))
     sendto_one(client_p, ":%s EOB", ID_or_name(&me, client_p));
 }

@@ -28,6 +28,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
+#include "s_serv.h"
 
 
 /*
@@ -42,11 +43,12 @@ ms_eob(struct Client *client_p, struct Client *source_p,
   assert(IsServer(source_p));
   assert(client_p == source_p);
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                       "End of burst from %s (%u seconds)",
-                       source_p->name,
-                       (unsigned int)(CurrentTime - source_p->localClient->firsttime));
   AddFlag(source_p, FLAGS_EOB);
+
+  sendto_server(client_p, CAP_TS6, NOCAPS,
+                ":%s EOB", ID(source_p));
+  sendto_server(client_p, NOCAPS, CAP_TS6,
+                ":%s EOB", source_p->name);
 }
 
 static struct Message eob_msgtab = {

@@ -223,47 +223,48 @@ extern int yydebug;
      T_DEBUG = 432,
      T_DLINE = 433,
      T_EXTERNAL = 434,
-     T_FULL = 435,
-     T_INVISIBLE = 436,
-     T_IPV4 = 437,
-     T_IPV6 = 438,
-     T_LOCOPS = 439,
-     T_MAX_CLIENTS = 440,
-     T_NCHANGE = 441,
-     T_NONONREG = 442,
-     T_OPERWALL = 443,
-     T_RECVQ = 444,
-     T_REJ = 445,
-     T_SERVER = 446,
-     T_SERVNOTICE = 447,
-     T_SET = 448,
-     T_SKILL = 449,
-     T_SPY = 450,
-     T_SSL = 451,
-     T_UMODES = 452,
-     T_UNAUTH = 453,
-     T_UNDLINE = 454,
-     T_UNLIMITED = 455,
-     T_UNRESV = 456,
-     T_UNXLINE = 457,
-     T_GLOBOPS = 458,
-     T_WALLOP = 459,
-     T_WEBIRC = 460,
-     T_RESTART = 461,
-     T_SERVICE = 462,
-     T_SERVICES_NAME = 463,
-     THROTTLE_TIME = 464,
-     TRUE_NO_OPER_FLOOD = 465,
-     UNKLINE = 466,
-     USER = 467,
-     USE_EGD = 468,
-     USE_LOGGING = 469,
-     VHOST = 470,
-     VHOST6 = 471,
-     XLINE = 472,
-     WARN_NO_NLINE = 473,
-     T_SIZE = 474,
-     T_FILE = 475
+     T_FARCONNECT = 435,
+     T_FULL = 436,
+     T_INVISIBLE = 437,
+     T_IPV4 = 438,
+     T_IPV6 = 439,
+     T_LOCOPS = 440,
+     T_MAX_CLIENTS = 441,
+     T_NCHANGE = 442,
+     T_NONONREG = 443,
+     T_OPERWALL = 444,
+     T_RECVQ = 445,
+     T_REJ = 446,
+     T_SERVER = 447,
+     T_SERVNOTICE = 448,
+     T_SET = 449,
+     T_SKILL = 450,
+     T_SPY = 451,
+     T_SSL = 452,
+     T_UMODES = 453,
+     T_UNAUTH = 454,
+     T_UNDLINE = 455,
+     T_UNLIMITED = 456,
+     T_UNRESV = 457,
+     T_UNXLINE = 458,
+     T_GLOBOPS = 459,
+     T_WALLOP = 460,
+     T_WEBIRC = 461,
+     T_RESTART = 462,
+     T_SERVICE = 463,
+     T_SERVICES_NAME = 464,
+     THROTTLE_TIME = 465,
+     TRUE_NO_OPER_FLOOD = 466,
+     UNKLINE = 467,
+     USER = 468,
+     USE_EGD = 469,
+     USE_LOGGING = 470,
+     VHOST = 471,
+     VHOST6 = 472,
+     XLINE = 473,
+     WARN_NO_NLINE = 474,
+     T_SIZE = 475,
+     T_FILE = 476
    };
 #endif
 /* Tokens.  */
@@ -444,47 +445,48 @@ extern int yydebug;
 #define T_DEBUG 432
 #define T_DLINE 433
 #define T_EXTERNAL 434
-#define T_FULL 435
-#define T_INVISIBLE 436
-#define T_IPV4 437
-#define T_IPV6 438
-#define T_LOCOPS 439
-#define T_MAX_CLIENTS 440
-#define T_NCHANGE 441
-#define T_NONONREG 442
-#define T_OPERWALL 443
-#define T_RECVQ 444
-#define T_REJ 445
-#define T_SERVER 446
-#define T_SERVNOTICE 447
-#define T_SET 448
-#define T_SKILL 449
-#define T_SPY 450
-#define T_SSL 451
-#define T_UMODES 452
-#define T_UNAUTH 453
-#define T_UNDLINE 454
-#define T_UNLIMITED 455
-#define T_UNRESV 456
-#define T_UNXLINE 457
-#define T_GLOBOPS 458
-#define T_WALLOP 459
-#define T_WEBIRC 460
-#define T_RESTART 461
-#define T_SERVICE 462
-#define T_SERVICES_NAME 463
-#define THROTTLE_TIME 464
-#define TRUE_NO_OPER_FLOOD 465
-#define UNKLINE 466
-#define USER 467
-#define USE_EGD 468
-#define USE_LOGGING 469
-#define VHOST 470
-#define VHOST6 471
-#define XLINE 472
-#define WARN_NO_NLINE 473
-#define T_SIZE 474
-#define T_FILE 475
+#define T_FARCONNECT 435
+#define T_FULL 436
+#define T_INVISIBLE 437
+#define T_IPV4 438
+#define T_IPV6 439
+#define T_LOCOPS 440
+#define T_MAX_CLIENTS 441
+#define T_NCHANGE 442
+#define T_NONONREG 443
+#define T_OPERWALL 444
+#define T_RECVQ 445
+#define T_REJ 446
+#define T_SERVER 447
+#define T_SERVNOTICE 448
+#define T_SET 449
+#define T_SKILL 450
+#define T_SPY 451
+#define T_SSL 452
+#define T_UMODES 453
+#define T_UNAUTH 454
+#define T_UNDLINE 455
+#define T_UNLIMITED 456
+#define T_UNRESV 457
+#define T_UNXLINE 458
+#define T_GLOBOPS 459
+#define T_WALLOP 460
+#define T_WEBIRC 461
+#define T_RESTART 462
+#define T_SERVICE 463
+#define T_SERVICES_NAME 464
+#define THROTTLE_TIME 465
+#define TRUE_NO_OPER_FLOOD 466
+#define UNKLINE 467
+#define USER 468
+#define USE_EGD 469
+#define USE_LOGGING 470
+#define VHOST 471
+#define VHOST6 472
+#define XLINE 473
+#define WARN_NO_NLINE 474
+#define T_SIZE 475
+#define T_FILE 476
 
 
 
@@ -499,7 +501,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 503 "conf_parser.h"
+#line 505 "conf_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -2,6 +2,8 @@
 o) Implemented channel mode +M. Clients that haven't identified their
    name with NickServ may not speak in a channel that has this mode set
 o) Fixed weird idletimes shown in /trace
+o) Added 'nononreg' (+R) to general::oper_umodes
+o) Added user mode +F (can see remote client connect/exit notices)
 
 
 -- ircd-hybrid-8.1.0beta3 Release Notes

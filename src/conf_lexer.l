@@ -164,6 +164,7 @@ email		{ return EMAIL; }
 encrypted       { return ENCRYPTED; }
 exceed_limit    { return EXCEED_LIMIT; }
 exempt		{ return EXEMPT; }
+farconnect      { return T_FARCONNECT; }
 file            { return T_FILE; }
 flags           { return IRCD_FLAGS; }
 flatten_links	{ return FLATTEN_LINKS; }

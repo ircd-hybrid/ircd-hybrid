@@ -918,7 +918,7 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
     */
     close_connection(source_p);
   }
-  else if (IsClient(source_p))
+  else if (IsClient(source_p) && HasFlag(source_p->servptr, FLAGS_EOB))
     sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
                          "Client exiting at %s: %s (%s@%s) [%s]",
                          source_p->servptr->name, source_p->name,

@@ -247,7 +247,6 @@ reset_block_state(void)
 %token  OPERS_BYPASS_CALLERID
 %token  OPER_ONLY_UMODES
 %token  OPER_PASS_RESV
-%token  OPER_SPY_T
 %token  OPER_UMODES
 %token  JOIN_FLOOD_COUNT
 %token  JOIN_FLOOD_TIME
@@ -1245,10 +1244,6 @@ oper_flags_item: GLOBAL_KILL
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_GLOBOPS;
-} | OPER_SPY_T
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_OPER_SPY;
 } | REMOTEBAN
 {
   if (conf_parser_ctx.pass == 2)

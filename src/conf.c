@@ -1386,7 +1386,6 @@ static const struct oper_privs
   { OPER_FLAG_OPERWALL,    'L' },
   { OPER_FLAG_GLOBAL_KILL, 'O' },
   { OPER_FLAG_REMOTE,      'R' },
-  { OPER_FLAG_OPER_SPY,    'S' },
   { OPER_FLAG_UNKLINE,     'U' },
   { OPER_FLAG_X,           'X' },
   { 0, '\0' }

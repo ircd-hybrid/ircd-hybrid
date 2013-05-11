@@ -34,55 +34,42 @@
 
 #define HELPLEN 400
 
-static void dohelp(struct Client *, const char *, char *);
-static void sendhelpfile(struct Client *, const char *, const char *);
 
-
-/*
- * m_help - HELP message handler
- *      parv[0] = sender prefix
- */
 static void
-m_help(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 {
-  static time_t last_used = 0;
+  FILE *file;
+  char line[HELPLEN];
 
-  /* HELP is always local */
-  if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+  if ((file = fopen(path, "r")) == NULL)
   {
-    /* safe enough to give this on a local connect only */
-    sendto_one(source_p,form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+               me.name, source_p->name, topic);
     return;
   }
 
-  last_used = CurrentTime;
+  if (fgets(line, sizeof(line), file) == NULL)
+  {
+    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+               me.name, source_p->name, topic);
+    return;
+  }
 
-  dohelp(source_p, UHPATH, parv[1]);
-}
+  line[strlen(line) - 1] = '\0';
+  sendto_one(source_p, form_str(RPL_HELPSTART),
+             me.name, source_p->name, topic, line);
 
-/*
- * mo_help - HELP message handler
- *      parv[0] = sender prefix
- */
-static void
-mo_help(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
-{
-  dohelp(source_p, HPATH, parv[1]);
-}
+  while (fgets(line, sizeof(line), file))
+  {
+    line[strlen(line) - 1] = '\0';
 
-/*
- * mo_uhelp - HELP message handler
- * This is used so that opers can view the user help file without deopering
- *      parv[0] = sender prefix
- */
-static void
-mo_uhelp(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
-{
-  dohelp(source_p, UHPATH, parv[1]);
+    sendto_one(source_p, form_str(RPL_HELPTXT),
+               me.name, source_p->name, topic, line);
+  }
+
+  fclose(file);
+  sendto_one(source_p, form_str(RPL_ENDOFHELP),
+             me.name, source_p->name, topic);
 }
 
 static void
@@ -132,41 +119,51 @@ dohelp(struct Client *source_p, const char *hpath, char *topic)
   sendhelpfile(source_p, path, topic);
 }
 
-static void 
-sendhelpfile(struct Client *source_p, const char *path, const char *topic)
+/*
+ * m_help - HELP message handler
+ *      parv[0] = sender prefix
+ */
+static void
+m_help(struct Client *client_p, struct Client *source_p,
+       int parc, char *parv[])
 {
-  FILE *file;
-  char line[HELPLEN];
+  static time_t last_used = 0;
 
-  if ((file = fopen(path, "r")) == NULL)
+  /* HELP is always local */
+  if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    /* safe enough to give this on a local connect only */
+    sendto_one(source_p,form_str(RPL_LOAD2HI),
+               me.name, source_p->name);
     return;
   }
 
-  if (fgets(line, sizeof(line), file) == NULL)
-  {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
-    return;
-  }
+  last_used = CurrentTime;
 
-  line[strlen(line) - 1] = '\0';
-  sendto_one(source_p, form_str(RPL_HELPSTART),
-             me.name, source_p->name, topic, line);
+  dohelp(source_p, UHPATH, parv[1]);
+}
 
-  while (fgets(line, sizeof(line), file))
-  {
-    line[strlen(line) - 1] = '\0';
+/*
+ * mo_help - HELP message handler
+ *      parv[0] = sender prefix
+ */
+static void
+mo_help(struct Client *client_p, struct Client *source_p,
+        int parc, char *parv[])
+{
+  dohelp(source_p, HPATH, parv[1]);
+}
 
-    sendto_one(source_p, form_str(RPL_HELPTXT),
-               me.name, source_p->name, topic, line);
-  }
-
-  fclose(file);
-  sendto_one(source_p, form_str(RPL_ENDOFHELP),
-             me.name, source_p->name, topic);
+/*
+ * mo_uhelp - HELP message handler
+ * This is used so that opers can view the user help file without deopering
+ *      parv[0] = sender prefix
+ */
+static void
+mo_uhelp(struct Client *client_p, struct Client *source_p,
+         int parc, char *parv[])
+{
+  dohelp(source_p, UHPATH, parv[1]);
 }
 
 static struct Message help_msgtab = {

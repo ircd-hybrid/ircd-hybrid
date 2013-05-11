@@ -36,6 +36,15 @@ dlink_list WHOWASHASH[HASHSIZE];
 
 
 void
+whowas_init(void)
+{
+  unsigned int idx;
+
+  for (idx = 0; idx < NICKNAMEHISTORYLENGTH; ++idx)
+    WHOWAS[idx].hashv = -1;
+}
+
+void
 add_history(struct Client *client_p, const int online)
 {
   static unsigned int whowas_next = 0;
@@ -130,13 +139,4 @@ count_whowas_memory(unsigned int *wwu, uint64_t *wwum)
 
   *wwu = u;
   *wwum = um;
-}
-
-void
-whowas_init(void)
-{
-  unsigned int idx;
-
-  for (idx = 0; idx < NICKNAMEHISTORYLENGTH; ++idx)
-    WHOWAS[idx].hashv = -1;
 }

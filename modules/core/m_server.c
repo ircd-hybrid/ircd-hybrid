@@ -39,7 +39,29 @@
 #include "modules.h"
 
 
-static void set_server_gecos(struct Client *, const char *);
+/* set_server_gecos()
+ *
+ * input        - pointer to client
+ * output       - NONE
+ * side effects - servers gecos field is set
+ */
+static void
+set_server_gecos(struct Client *client_p, const char *info)
+{
+  const char *s = info;
+
+  /* check for (H) which is a hidden server */
+  if (!strncmp(s, "(H) ", 4))
+  {
+    SetHidden(client_p);
+    s = s + 4;
+  }
+
+  if (!EmptyString(s))
+    strlcpy(client_p->info, s, sizeof(client_p->info));
+  else
+    strlcpy(client_p->info, "(Unknown Location)", sizeof(client_p->info));
+}
 
 /* mr_server()
  *  parv[0] = sender prefix
@@ -567,30 +589,6 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
                        "Server %s being introduced by %s",
                        target_p->name, source_p->name);
-}
-
-/* set_server_gecos()
- *
- * input	- pointer to client
- * output	- NONE
- * side effects - servers gecos field is set
- */
-static void
-set_server_gecos(struct Client *client_p, const char *info)
-{
-  const char *s = info;
-
-  /* check for (H) which is a hidden server */
-  if (!strncmp(s, "(H) ", 4))
-  {
-    SetHidden(client_p);
-    s = s + 4;
-  }
-
-  if (!EmptyString(s))
-    strlcpy(client_p->info, s, sizeof(client_p->info));
-  else
-    strlcpy(client_p->info, "(Unknown Location)", sizeof(client_p->info));
 }
 
 static struct Message server_msgtab = {

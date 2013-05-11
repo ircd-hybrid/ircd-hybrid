@@ -39,8 +39,6 @@
 dlink_list pending_glines[GLINE_PENDING_ADD_TYPE + 1] = { { NULL, NULL, 0 },
                                                           { NULL, NULL, 0 } };
 
-static void expire_pending_glines(struct gline_pending *);
-
 
 struct MaskItem *
 find_is_glined(const char *host, const char *user)
@@ -65,19 +63,6 @@ find_is_glined(const char *host, const char *user)
 
   conf = find_conf_by_address(host, piphost, CONF_GLINE, aftype, user, NULL, 0);
   return conf;
-}
-
-/* cleanup_glines()
- *
- * inputs	- NONE
- * output	- NONE
- * side effects - expire gline lists
- *                This is an event started off in ircd.c
- */
-void
-cleanup_glines(void *unused)
-{
-  expire_pending_glines(unused);
 }
 
 /* expire_pending_glines()
@@ -109,4 +94,17 @@ expire_pending_glines(struct gline_pending *in)
       }
     }
   }
+}
+
+/* cleanup_glines()
+ *
+ * inputs       - NONE
+ * output       - NONE
+ * side effects - expire gline lists
+ *                This is an event started off in ircd.c
+ */
+void
+cleanup_glines(void *unused)
+{
+  expire_pending_glines(unused);
 }

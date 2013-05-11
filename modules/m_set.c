@@ -42,96 +42,6 @@
 #include "s_misc.h"
 
 
-/* Structure used for the SET table itself */
-struct SetStruct
-{
-  const char *name;
-  void (*handler)();
-  const int wants_char; /* 1 if it expects (char *, [int]) */
-  const int wants_int;  /* 1 if it expects ([char *], int) */
-  /* eg:  0, 1 == only an int arg
-   * eg:  1, 1 == char and int args */
-};
-
-static void quote_autoconn(struct Client *, const char *, int);
-static void quote_autoconnall(struct Client *, int);
-static void quote_floodcount(struct Client *, int);
-static void quote_identtimeout(struct Client *, int);
-static void quote_max(struct Client *, int);
-static void quote_spamnum(struct Client *, int);
-static void quote_spamtime(struct Client *, int);
-static void quote_splitmode(struct Client *, char *);
-static void quote_splitnum(struct Client *, int);
-static void quote_splitusers(struct Client *, int);
-static void list_quote_commands(struct Client *);
-static void quote_jfloodtime(struct Client *, int);
-static void quote_jfloodcount(struct Client *, int);
-
-/* 
- * If this ever needs to be expanded to more than one arg of each
- * type, want_char/want_int could be the count of the arguments,
- * instead of just a boolean flag...
- *
- * -davidt
- */
-
-static const struct SetStruct set_cmd_table[] =
-{
-  /* name		function        string arg  int arg */
-  /* -------------------------------------------------------- */
-  { "AUTOCONN",		quote_autoconn,		1,	1 },
-  { "AUTOCONNALL",	quote_autoconnall,	0,	1 },
-  { "FLOODCOUNT",	quote_floodcount,	0,	1 },
-  { "IDENTTIMEOUT",	quote_identtimeout,	0,	1 },
-  { "MAX",		quote_max,		0,	1 },
-  { "SPAMNUM",		quote_spamnum,		0,	1 },
-  { "SPAMTIME",		quote_spamtime,		0,	1 },
-  { "SPLITMODE",	quote_splitmode,	1,	0 },
-  { "SPLITNUM",		quote_splitnum,		0,	1 },
-  { "SPLITUSERS",	quote_splitusers,	0,	1 },
-  { "JFLOODTIME",	quote_jfloodtime,	0,	1 },
-  { "JFLOODCOUNT",	quote_jfloodcount,	0,	1 },
-  /* -------------------------------------------------------- */
-  { NULL,               NULL,                   0,      0 }
-};
-
-/*
- * list_quote_commands() sends the client all the available commands.
- * Four to a line for now.
- */
-static void
-list_quote_commands(struct Client *source_p)
-{
-  int j = 0;
-  const struct SetStruct *tab = set_cmd_table;
-  const char *names[4] = { "", "", "", "" };
-
-  sendto_one(source_p, ":%s NOTICE %s :Available QUOTE SET commands:",
-             me.name, source_p->name);
-
-  for (; tab->handler; ++tab)
-  {
-    names[j++] = tab->name;
-
-    if (j > 3)
-    {
-      sendto_one(source_p, ":%s NOTICE %s :%s %s %s %s",
-                 me.name, source_p->name,
-                 names[0], names[1], 
-                 names[2], names[3]);
-      j = 0;
-      names[0] = names[1] = names[2] = names[3] = "";
-    }
-
-  }
-
-  if (j)
-    sendto_one(source_p, ":%s NOTICE %s :%s %s %s %s",
-               me.name, source_p->name,
-               names[0], names[1], 
-               names[2], names[3]);
-}
-
 /* SET AUTOCONN */
 static void
 quote_autoconn(struct Client *source_p, const char *arg, int newval)
@@ -441,6 +351,81 @@ quote_jfloodcount(struct Client *source_p, int newval)
   else
     sendto_one(source_p, ":%s NOTICE %s :JFLOODCOUNT is currently %i", 
                me.name, source_p->name, GlobalSetOptions.joinfloodcount);
+}
+
+/* Structure used for the SET table itself */
+struct SetStruct
+{
+  const char *name;
+  void (*handler)();
+  const int wants_char; /* 1 if it expects (char *, [int]) */
+  const int wants_int;  /* 1 if it expects ([char *], int) */
+  /* eg:  0, 1 == only an int arg
+   * eg:  1, 1 == char and int args */
+};
+
+/*
+ * If this ever needs to be expanded to more than one arg of each
+ * type, want_char/want_int could be the count of the arguments,
+ * instead of just a boolean flag...
+ *
+ * -davidt
+ */
+static const struct SetStruct set_cmd_table[] =
+{
+  /* name               function        string arg  int arg */
+  /* -------------------------------------------------------- */
+  { "AUTOCONN",         quote_autoconn,         1,      1 },
+  { "AUTOCONNALL",      quote_autoconnall,      0,      1 },
+  { "FLOODCOUNT",       quote_floodcount,       0,      1 },
+  { "IDENTTIMEOUT",     quote_identtimeout,     0,      1 },
+  { "MAX",              quote_max,              0,      1 },
+  { "SPAMNUM",          quote_spamnum,          0,      1 },
+  { "SPAMTIME",         quote_spamtime,         0,      1 },
+  { "SPLITMODE",        quote_splitmode,        1,      0 },
+  { "SPLITNUM",         quote_splitnum,         0,      1 },
+  { "SPLITUSERS",       quote_splitusers,       0,      1 },
+  { "JFLOODTIME",       quote_jfloodtime,       0,      1 },
+  { "JFLOODCOUNT",      quote_jfloodcount,      0,      1 },
+  /* -------------------------------------------------------- */
+  { NULL,               NULL,                   0,      0 }
+};
+
+/*
+ * list_quote_commands() sends the client all the available commands.
+ * Four to a line for now.
+ */
+static void
+list_quote_commands(struct Client *source_p)
+{
+  int j = 0;
+  const struct SetStruct *tab = set_cmd_table;
+  const char *names[4] = { "", "", "", "" };
+
+  sendto_one(source_p, ":%s NOTICE %s :Available QUOTE SET commands:",
+             me.name, source_p->name);
+
+  for (; tab->handler; ++tab)
+  {
+    names[j++] = tab->name;
+
+    if (j > 3)
+    {
+      sendto_one(source_p, ":%s NOTICE %s :%s %s %s %s",
+                 me.name, source_p->name,
+                 names[0], names[1],
+                 names[2], names[3]);
+      j = 0;
+      names[0] = names[1] = names[2] = names[3] = "";
+    }
+
+  }
+
+  if (j)
+    sendto_one(source_p, ":%s NOTICE %s :%s %s %s %s",
+               me.name, source_p->name,
+               names[0], names[1],
+               names[2], names[3]);
 }
 
 /*

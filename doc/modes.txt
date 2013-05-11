@@ -19,6 +19,7 @@ User Modes:
 +d - debug        - See debugging notices
 +e - external     - See remote server connection and split notices
 +f - full         - See I: line full notices
++F - farconnect   - See remote client connection/quit notices
 +G - softcallerid - Server Side Ignore for users not on your channels
 +g - callerid     - Server Side Ignore (see modeg.txt)
 +h - hidden       - Hides operator status to other users

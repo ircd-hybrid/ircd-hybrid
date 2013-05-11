@@ -41,8 +41,10 @@
 
 dlink_list modules_list = { NULL, NULL, 0 };
 
-static const char *unknown_ver = "<unknown>";
+static dlink_list mod_paths = { NULL, NULL, 0 };
+static dlink_list conf_modules = { NULL, NULL, 0 };
 
+static const char *unknown_ver = "<unknown>";
 static const char *core_module_table[] =
 {
   "m_die.la",
@@ -60,9 +62,6 @@ static const char *core_module_table[] =
   "m_squit.la",
   NULL
 };
-
-static dlink_list mod_paths = { NULL, NULL, 0 };
-static dlink_list conf_modules = { NULL, NULL, 0 };
 
 int
 modules_valid_suffix(const char *name)

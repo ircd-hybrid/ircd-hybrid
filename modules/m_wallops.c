@@ -41,7 +41,7 @@
  */
 static void
 mo_wallops(struct Client *client_p, struct Client *source_p,
-	   int parc, char *parv[])
+           int parc, char *parv[])
 { 
   const char *message = parv[1];
 

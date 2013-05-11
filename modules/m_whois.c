@@ -39,115 +39,6 @@
 #include "modules.h"
 
 
-static void do_whois(struct Client *, int, char *[]);
-static void whois_person(struct Client *, struct Client *);
-
-
-/*
-** m_whois
-**      parv[0] = sender prefix
-**      parv[1] = nickname masklist
-*/
-static void
-m_whois(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
-{
-  static time_t last_used = 0;
-
-  if (parc < 2 || EmptyString(parv[1]))
-  {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-               me.name, source_p->name);
-    return;
-  }
-
-  if (parc > 2 && !EmptyString(parv[2]))
-  {
-    /* seeing as this is going across servers, we should limit it */
-    if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
-    {
-      sendto_one(source_p, form_str(RPL_LOAD2HI),
-                 me.name, source_p->name);
-      return;
-    }
-
-    last_used = CurrentTime;
-
-    /* if we have serverhide enabled, they can either ask the clients
-     * server, or our server.. I dont see why they would need to ask
-     * anything else for info about the client.. --fl_
-     */
-    if (ConfigFileEntry.disable_remote)
-      parv[1] = parv[2];
-
-    if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,
-                    parc, parv) != HUNTED_ISME)
-      return;
-
-    parv[1] = parv[2];
-  }
-
-  do_whois(source_p, parc, parv);
-}
-
-/*
-** mo_whois
-**      parv[0] = sender prefix
-**      parv[1] = nickname masklist
-*/
-static void
-mo_whois(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
-{
-  if (parc < 2 || EmptyString(parv[1]))
-  {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-               me.name, source_p->name);
-    return;
-  }
-
-  if (parc > 2 && !EmptyString(parv[2]))
-  {
-    if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,
-                    parc, parv) != HUNTED_ISME)
-      return;
-
-    parv[1] = parv[2];
-  }
-
-  do_whois(source_p, parc, parv);
-}
-
-/* do_whois()
- *
- * inputs	- pointer to /whois source
- *              - number of parameters
- *              - pointer to parameters array
- * output	- pointer to void
- * side effects - Does whois
- */
-static void
-do_whois(struct Client *source_p, int parc, char *parv[])
-{
-  struct Client *target_p = NULL;
-  char *nick = parv[1];
-  char *p = NULL;
-
-  if ((p = strchr(nick, ',')) != NULL)
-    *p = '\0';
-  if (*nick == '\0')
-    return;
-
-  if ((target_p = hash_find_client(nick)) && IsClient(target_p))
-    whois_person(source_p, target_p);
-  else  if (!IsDigit(*nick))
-    sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-               me.name, source_p->name, nick);
-
-  sendto_one(source_p, form_str(RPL_ENDOFWHOIS),
-             me.name, source_p->name, nick);
-}
-
 /* whois_person()
  *
  * inputs	- source_p client to report to
@@ -158,7 +49,7 @@ do_whois(struct Client *source_p, int parc, char *parv[])
 static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
-  char buf[IRCD_BUFSIZE];
+  char buf[IRCD_BUFSIZE] = { '\0' };
   const dlink_node *lp = NULL;
   char *t = NULL;
   int cur_len = 0;
@@ -245,7 +136,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
                show_ip ? target_p->sockhost : "255.255.255.255");
   }
 
-  if (MyConnect(target_p)) /* Can't do any of this if not local! db */
+  if (MyConnect(target_p))
   {
 #ifdef HAVE_LIBCRYPTO
     if (target_p->localClient->fd.ssl)
@@ -263,6 +154,112 @@ whois_person(struct Client *source_p, struct Client *target_p)
                    "a whois on you", me.name, target_p->name, source_p->name,
                    source_p->username, source_p->host, source_p->servptr->name);
   }
+}
+
+/* do_whois()
+ *
+ * inputs       - pointer to /whois source
+ *              - number of parameters
+ *              - pointer to parameters array
+ * output       - pointer to void
+ * side effects - Does whois
+ */
+static void
+do_whois(struct Client *source_p, int parc, char *parv[])
+{
+  struct Client *target_p = NULL;
+  char *nick = parv[1];
+  char *p = NULL;
+
+  if ((p = strchr(nick, ',')) != NULL)
+    *p = '\0';
+  if (*nick == '\0')
+    return;
+
+  if ((target_p = hash_find_client(nick)) && IsClient(target_p))
+    whois_person(source_p, target_p);
+  else  if (!IsDigit(*nick))
+    sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+               me.name, source_p->name, nick);
+
+  sendto_one(source_p, form_str(RPL_ENDOFWHOIS),
+             me.name, source_p->name, nick);
+}
+
+/*
+** m_whois
+**      parv[0] = sender prefix
+**      parv[1] = nickname masklist
+*/
+static void
+m_whois(struct Client *client_p, struct Client *source_p,
+        int parc, char *parv[])
+{
+  static time_t last_used = 0;
+
+  if (parc < 2 || EmptyString(parv[1]))
+  {
+    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
+               me.name, source_p->name);
+    return;
+  }
+
+  if (parc > 2 && !EmptyString(parv[2]))
+  {
+    /* seeing as this is going across servers, we should limit it */
+    if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+    {
+      sendto_one(source_p, form_str(RPL_LOAD2HI),
+                 me.name, source_p->name);
+      return;
+    }
+
+    last_used = CurrentTime;
+
+    /*
+     * if we have serverhide enabled, they can either ask the clients
+     * server, or our server.. I dont see why they would need to ask
+     * anything else for info about the client.. --fl_
+     */
+    if (ConfigFileEntry.disable_remote)
+      parv[1] = parv[2];
+
+    if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,
+                    parc, parv) != HUNTED_ISME)
+      return;
+
+    parv[1] = parv[2];
+  }
+
+  do_whois(source_p, parc, parv);
+}
+
+/*
+** mo_whois
+**      parv[0] = sender prefix
+**      parv[1] = nickname masklist
+*/
+static void
+mo_whois(struct Client *client_p, struct Client *source_p,
+         int parc, char *parv[])
+{
+  if (parc < 2 || EmptyString(parv[1]))
+  {
+    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
+               me.name, source_p->name);
+    return;
+  }
+
+  if (parc > 2 && !EmptyString(parv[2]))
+  {
+    if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,
+                    parc, parv) != HUNTED_ISME)
+      return;
+
+    parv[1] = parv[2];
+  }
+
+  do_whois(source_p, parc, parv);
 }
 
 static struct Message whois_msgtab = {

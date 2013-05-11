@@ -70,9 +70,7 @@ confopts(struct Client *source_p)
   /* might wanna hide this :P */
   if (ServerInfo.hub &&
       (!ConfigFileEntry.disable_remote || HasUMode(source_p, UMODE_OPER)))
-  {
     *p++ = 'H';
-  }
 
   *p++ = 'I'; /* invex */
   *p++ = 'K'; /* knock */
@@ -113,8 +111,8 @@ m_version(struct Client *client_p, struct Client *source_p,
                     1, parc, parv) != HUNTED_ISME)
       return;
 
-  sendto_one(source_p, form_str(RPL_VERSION),
-             me.name, source_p->name, ircd_version, serno,
+  sendto_one(source_p, form_str(RPL_VERSION), me.name,
+             source_p->name, ircd_version, serno,
              me.name, confopts(source_p), serveropts);
   show_isupport(source_p);
 }
@@ -134,9 +132,8 @@ mo_version(struct Client *client_p, struct Client *source_p,
     return;
 
   sendto_one(source_p, form_str(RPL_VERSION), me.name,
-             source_p->name, ircd_version, 
-  	     serno, me.name, confopts(source_p), serveropts);
-
+             source_p->name, ircd_version, serno,
+             me.name, confopts(source_p), serveropts);
   show_isupport(source_p);
 }
 
@@ -150,15 +147,15 @@ ms_version(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   if (hunt_server(client_p, source_p, ":%s VERSION :%s", 
-                  1, parc, parv) == HUNTED_ISME)
-  {
-    sendto_one(source_p, form_str(RPL_VERSION),
-               ID_or_name(&me, client_p),
-               ID_or_name(source_p, client_p),
-               ircd_version, serno,
-               me.name, confopts(source_p), serveropts);
-    show_isupport(source_p);
-  }
+                  1, parc, parv) != HUNTED_ISME)
+    return;
+
+  sendto_one(source_p, form_str(RPL_VERSION),
+             ID_or_name(&me, client_p),
+             ID_or_name(source_p, client_p),
+             ircd_version, serno,
+             me.name, confopts(source_p), serveropts);
+  show_isupport(source_p);
 }
 
 static struct Message version_msgtab = {

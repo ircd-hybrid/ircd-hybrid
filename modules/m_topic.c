@@ -143,6 +143,11 @@ ms_topic(struct Client *client_p, struct Client *source_p,
     from = me.id;
     to = source_p->id;
   }
+  else
+  {
+    from = me.name;
+    to = source_p->name;
+  }
 
   if (EmptyString(parv[1]))
   {

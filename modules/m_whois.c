@@ -178,7 +178,7 @@ do_whois(struct Client *source_p, int parc, char *parv[])
 
   if ((target_p = hash_find_client(nick)) && IsClient(target_p))
     whois_person(source_p, target_p);
-  else  if (!IsDigit(*nick))
+  else if (!IsDigit(*nick))
     sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                me.name, source_p->name, nick);
 

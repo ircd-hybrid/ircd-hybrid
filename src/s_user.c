@@ -53,9 +53,6 @@
 #include "watch.h"
 
 
-struct Callback *entering_umode_cb = NULL;
-struct Callback *umode_cb = NULL;
-
 static char umode_buffer[IRCD_BUFSIZE];
 
 static void user_welcome(struct Client *);
@@ -80,7 +77,7 @@ static dlink_list support_list = { NULL, NULL, 0 };
 MessageFile *isupportFile;
 
 /* memory is cheap. map 0-255 to equivalent mode */
-unsigned int user_modes[256] =
+const unsigned int user_modes[256] =
 {
   /* 0x00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x0F */
   /* 0x10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x1F */
@@ -798,32 +795,6 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   }
 }
 
-/* change_simple_umode()
- *
- * this callback can be hooked to allow special handling of
- * certain usermodes
- */
-static void *
-change_simple_umode(va_list args)
-{
-  struct Client *client_p;
-  struct Client *source_p;
-  int what;
-  unsigned int flag;
-
-  client_p = va_arg(args, struct Client *);
-  source_p = va_arg(args, struct Client *);
-  what = va_arg(args, int);
-  flag = va_arg(args, unsigned int);
-
-  if (what == MODE_ADD)
-    AddUMode(source_p, flag);
-  else
-    DelUMode(source_p, flag);
-
-  return NULL;
-}
-
 /* set_user_mode()
  *
  * added 15/10/91 By Darren Reed.
@@ -871,8 +842,6 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
                me.name, source_p->name, buf);
     return;
   }
-
-  execute_callback(entering_umode_cb, client_p, source_p);
 
   /* find flags already set for user */
   setflags = source_p->umodes;
@@ -925,8 +894,8 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
 
           break;
 
-        /* we may not get these,
-         * but they shouldnt be in default
+        /* 
+         * We may not get these, but they shouldnt be in default
          */
         case 'r':
         case ' ' :
@@ -940,11 +909,14 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
           {
             if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER) &&
                 (ConfigFileEntry.oper_only_umodes & flag))
-            {
               badflag = 1;
-            }
             else
-              execute_callback(umode_cb, client_p, source_p, what, flag);
+            {
+              if (what == MODE_ADD)
+                AddUMode(source_p, flag);
+              else
+                DelUMode(source_p, flag);
+            }
           }
           else
           {
@@ -1275,9 +1247,6 @@ init_uid(void)
    * -Dianora
    */
   memcpy(new_uid + IRC_MAXSID, "AAAAA@", IRC_MAXUID);
-
-  entering_umode_cb = register_callback("entering_umode", NULL);
-  umode_cb = register_callback("changing_umode", change_simple_umode);
 }
 
 /*

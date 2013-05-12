@@ -67,7 +67,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
 
   if (parc > 3)
   {
-    if (!HasOFlag(source_p, OPER_FLAG_REMOTE))
+    if (!HasOFlag(source_p, OPER_FLAG_CONNECT_REMOTE))
     {
       sendto_one(source_p, form_str(ERR_NOPRIVS),
                  me.name, source_p->name, "connect");
@@ -77,6 +77,12 @@ mo_connect(struct Client *client_p, struct Client *source_p,
     if (hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3,
                     parc, parv) != HUNTED_ISME)
       return;
+  }
+  else if (!HasOFlag(source_p, OPER_FLAG_CONNECT))
+  {
+    sendto_one(source_p, form_str(ERR_NOPRIVS),
+               me.name, source_p->name, "connect");
+    return;
   }
 
   if ((target_p = hash_find_server(parv[1])))

@@ -174,23 +174,27 @@
 
 
 /* oper priv flags */
-#define OPER_FLAG_GLOBAL_KILL  0x00000001 /**< Oper can global kill        */
-#define OPER_FLAG_REMOTE       0x00000002 /**> Oper can do squits/connects */
-#define OPER_FLAG_UNKLINE      0x00000004 /**< Oper can use unkline        */
-#define OPER_FLAG_GLINE        0x00000008 /**< Oper can use gline          */
-#define OPER_FLAG_K            0x00000010 /**< Oper can kill/kline         */
-#define OPER_FLAG_X            0x00000020 /**< Oper can xline              */
-#define OPER_FLAG_DIE          0x00000040 /**< Oper can die                */
-#define OPER_FLAG_REHASH       0x00000080 /**< Oper can rehash             */
-#define OPER_FLAG_ADMIN        0x00000100 /**< Oper can set umode +a       */
-#define OPER_FLAG_OPERWALL     0x00000200 /**< Oper can use OPERWALL command */
-#define OPER_FLAG_REMOTEBAN    0x00000400 /**< Oper can set remote bans */
-#define OPER_FLAG_GLOBOPS      0x00000800 /**< Oper can use GLOBOPS command */
-#define OPER_FLAG_MODULE       0x00001000 /**< Oper can use MODULE commands */
-#define OPER_FLAG_RESTART      0x00002000 /**< Oper can use RESTART command */
-#define OPER_FLAG_DLINE        0x00004000 /**< Oper can use DLINE command   */
-#define OPER_FLAG_UNDLINE      0x00008000 /**< Oper can use UNDLINE command */
-#define OPER_FLAG_SET          0x00010000 /**< Oper can use SET command */
+#define OPER_FLAG_KILL_REMOTE    0x00000001 /**< Oper can global kill        */
+#define OPER_FLAG_KILL           0x00000002 /**< Oper can do local KILL      */
+#define OPER_FLAG_UNKLINE        0x00000004 /**< Oper can use unkline        */
+#define OPER_FLAG_GLINE          0x00000008 /**< Oper can use gline          */
+#define OPER_FLAG_K              0x00000010 /**< Oper can kill/kline         */
+#define OPER_FLAG_X              0x00000020 /**< Oper can xline              */
+#define OPER_FLAG_DIE            0x00000040 /**< Oper can die                */
+#define OPER_FLAG_REHASH         0x00000080 /**< Oper can rehash             */
+#define OPER_FLAG_ADMIN          0x00000100 /**< Oper can set umode +a       */
+#define OPER_FLAG_OPERWALL       0x00000200 /**< Oper can use OPERWALL command */
+#define OPER_FLAG_REMOTEBAN      0x00000400 /**< Oper can set remote bans */
+#define OPER_FLAG_GLOBOPS        0x00000800 /**< Oper can use GLOBOPS command */
+#define OPER_FLAG_MODULE         0x00001000 /**< Oper can use MODULE commands */
+#define OPER_FLAG_RESTART        0x00002000 /**< Oper can use RESTART command */
+#define OPER_FLAG_DLINE          0x00004000 /**< Oper can use DLINE command   */
+#define OPER_FLAG_UNDLINE        0x00008000 /**< Oper can use UNDLINE command */
+#define OPER_FLAG_SET            0x00010000 /**< Oper can use SET command */
+#define OPER_FLAG_SQUIT          0x00020000 /**< Oper can do local SQUIT */
+#define OPER_FLAG_SQUIT_REMOTE   0x00040000 /**< Oper can do global SQUIT */
+#define OPER_FLAG_CONNECT        0x00080000 /**< Oper can do local CONNECT */
+#define OPER_FLAG_CONNECT_REMOTE 0x00100000 /**< Oper can do global CONNECT */
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->localClient->operflags & (y) : 0)
 #define AddOFlag(x, y) ((x)->localClient->operflags |=  (y))

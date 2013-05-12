@@ -92,13 +92,6 @@ mo_kill(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (!HasOFlag(source_p, OPER_FLAG_GLOBAL_KILL|OPER_FLAG_K))
-  {
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
-               me.name, source_p->name);
-    return;
-  }
-
   if (!EmptyString(reason))
   {
     if (strlen(reason) > (size_t)KILLLEN)
@@ -127,17 +120,18 @@ mo_kill(struct Client *client_p, struct Client *source_p,
                me.name, source_p->name, user, target_p->name);
   }
 
-  if (IsServer(target_p) || IsMe(target_p))
+  if ((!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL_REMOTE)) ||
+       (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL)))
   {
-    sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
+    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
                me.name, source_p->name);
     return;
   }
 
-  if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_GLOBAL_KILL))
+  if (IsServer(target_p) || IsMe(target_p))
   {
-    sendto_one(source_p, ":%s NOTICE %s :Nick %s isnt on your server",
-               me.name, source_p->name, target_p->name);
+    sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
+               me.name, source_p->name);
     return;
   }
 

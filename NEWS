@@ -1,3 +1,11 @@
+-- ircd-hybrid-8.1.0beta5 Release Notes
+o) Removed 'remote', and 'global_kill' oper flags, and added 'connect',
+   'squit', and 'kill' flags for better fine-tuning instead. Whether or
+   not a specific action is allowed on a remote server can be controlled
+   by appeding the ':remote' flag. For example: 'kill' allows only local
+   clients to be killed, whereas 'kill:remote' allows to issue a KILL for
+   remote clients
+
 -- ircd-hybrid-8.1.0beta4 Release Notes
 o) Implemented channel mode +M. Clients that haven't identified their
    name with NickServ may not speak in a channel that has this mode set

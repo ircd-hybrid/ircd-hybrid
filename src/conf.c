@@ -1377,17 +1377,21 @@ static const struct oper_privs
   const unsigned int flag;
   const unsigned char c;
 } flag_list[] = {
-  { OPER_FLAG_ADMIN,       'A' },
-  { OPER_FLAG_REMOTEBAN,   'B' },
-  { OPER_FLAG_DIE,         'D' },
-  { OPER_FLAG_GLINE,       'G' },
-  { OPER_FLAG_REHASH,      'H' },
-  { OPER_FLAG_K,           'K' },
-  { OPER_FLAG_OPERWALL,    'L' },
-  { OPER_FLAG_GLOBAL_KILL, 'O' },
-  { OPER_FLAG_REMOTE,      'R' },
-  { OPER_FLAG_UNKLINE,     'U' },
-  { OPER_FLAG_X,           'X' },
+  { OPER_FLAG_ADMIN,          'A' },
+  { OPER_FLAG_REMOTEBAN,      'B' },
+  { OPER_FLAG_DIE,            'D' },
+  { OPER_FLAG_GLINE,          'G' },
+  { OPER_FLAG_REHASH,         'H' },
+  { OPER_FLAG_K,              'K' },
+  { OPER_FLAG_OPERWALL,       'L' },
+  { OPER_FLAG_KILL,           'N' },
+  { OPER_FLAG_KILL_REMOTE,    'O' },
+  { OPER_FLAG_CONNECT,        'P' },
+  { OPER_FLAG_CONNECT_REMOTE, 'Q' },
+  { OPER_FLAG_SQUIT,          'R' },
+  { OPER_FLAG_SQUIT_REMOTE,   'S' },
+  { OPER_FLAG_UNKLINE,        'U' },
+  { OPER_FLAG_X,              'X' },
   { 0, '\0' }
 };
 

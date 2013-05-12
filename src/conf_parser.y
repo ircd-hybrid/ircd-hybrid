@@ -279,6 +279,7 @@ reset_block_state(void)
 %token  SEND_PASSWORD
 %token  SERVERHIDE
 %token  SERVERINFO
+%token  SQUIT
 %token  IRCD_SID
 %token	TKLINE_EXPIRE_NOTICES
 %token  T_SHARED
@@ -1188,14 +1189,30 @@ oper_flags: IRCD_FLAGS
 } '='  oper_flags_items ';';
 
 oper_flags_items: oper_flags_items ',' oper_flags_item | oper_flags_item;
-oper_flags_item: GLOBAL_KILL
+oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_GLOBAL_KILL;
-} | REMOTE
+    block_state.port.value |= OPER_FLAG_KILL_REMOTE;
+} | KILL
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_REMOTE;
+    block_state.port.value |= OPER_FLAG_KILL;
+} | CONNECT ':' REMOTE
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_CONNECT_REMOTE;
+} | CONNECT
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_CONNECT;
+} | SQUIT ':' REMOTE
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_SQUIT_REMOTE;
+} | SQUIT
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_SQUIT;
 } | KLINE
 {
   if (conf_parser_ctx.pass == 2)

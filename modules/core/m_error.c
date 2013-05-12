@@ -40,8 +40,8 @@
  *      parv[*] = parameters
  */
 static void
-m_error(struct Client *client_p, struct Client *source_p, 
-        int parc, char *parv[])
+mr_error(struct Client *client_p, struct Client *source_p, 
+         int parc, char *parv[])
 {
   const char *para = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
 
@@ -95,7 +95,7 @@ ms_error(struct Client *client_p, struct Client *source_p,
 
 static struct Message error_msgtab = {
  "ERROR", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
-  { m_error, m_ignore, ms_error, m_ignore, m_ignore, m_ignore }
+  { mr_error, m_ignore, ms_error, m_ignore, m_ignore, m_ignore }
 };
 
 static void

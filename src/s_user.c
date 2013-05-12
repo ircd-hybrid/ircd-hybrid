@@ -894,14 +894,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
 
           break;
 
-        /* 
-         * We may not get these, but they shouldnt be in default
-         */
-        case 'r':
-        case ' ' :
-        case '\n':
-        case '\r':
-        case '\t':
+        case 'r':  /* Only services may set +r */
           break;
 
         default:

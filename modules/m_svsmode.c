@@ -137,11 +137,6 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
 
         break;
 
-      case ' ':
-      case '\n':
-      case '\r':
-      case '\t':
-        break;
       default:
         if ((flag = user_modes[(unsigned char)*m]))
         {

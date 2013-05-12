@@ -29,6 +29,7 @@
 #include "modules.h"
 #include "log.h"
 #include "parse.h"
+#include "irc_string.h"
 
 
 /*
@@ -42,9 +43,12 @@ static void
 m_error(struct Client *client_p, struct Client *source_p, 
         int parc, char *parv[])
 {
-  const char *para;
+  const char *para = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
 
-  para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
+  assert(source_p == client_p);
+
+  if (!IsHandshake(source_p) && !IsConnecting(source_p))
+    return;
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        source_p->name, para);
@@ -67,18 +71,13 @@ m_error(struct Client *client_p, struct Client *source_p,
                          "ERROR :from %s via %s -- %s",
                          source_p->name, get_client_name(client_p, MASK_IP), para);
   }
-
-  if (MyClient(source_p))
-    exit_client(source_p, source_p, "ERROR");
 }
 
 static void
 ms_error(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  const char *para;
-
-  para = (parc > 1 && *parv[1] != '\0') ? parv[1] : "<>";
+  const char *para = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        source_p->name, para);

@@ -144,7 +144,13 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
         break;
       default:
         if ((flag = user_modes[(unsigned char)*m]))
-          execute_callback(umode_cb, client_p, target_p, what, flag);
+        {
+          if (what == MODE_ADD)
+            AddUMode(target_p, flag);
+          else
+            DelUMode(target_p, flag);
+        }
+
         break;
     }
   }

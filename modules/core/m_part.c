@@ -48,8 +48,7 @@
  * side effects	- remove ONE client given the channel name 
  */
 static void
-part_one_client(struct Client *client_p, struct Client *source_p,
-                const char *name, const char *reason)
+part_one_client(struct Client *source_p, const char *name, const char *reason)
 {
   struct Channel *chptr = NULL;
   struct Membership *ms = NULL;
@@ -80,10 +79,10 @@ part_one_client(struct Client *client_p, struct Client *source_p,
        (source_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
         < CurrentTime))))
   {
-    sendto_server(client_p, CAP_TS6, NOCAPS,
+    sendto_server(source_p->from, CAP_TS6, NOCAPS,
                   ":%s PART %s :%s", ID(source_p), chptr->chname,
                   reason);
-    sendto_server(client_p, NOCAPS, CAP_TS6,
+    sendto_server(source_p->from, NOCAPS, CAP_TS6,
                   ":%s PART %s :%s", source_p->name, chptr->chname,
                   reason);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s :%s",
@@ -92,9 +91,9 @@ part_one_client(struct Client *client_p, struct Client *source_p,
   }
   else
   {
-    sendto_server(client_p, CAP_TS6, NOCAPS,
+    sendto_server(source_p->from, CAP_TS6, NOCAPS,
                   ":%s PART %s", ID(source_p), chptr->chname);
-    sendto_server(client_p, NOCAPS, CAP_TS6,
+    sendto_server(source_p->from, NOCAPS, CAP_TS6,
                   ":%s PART %s", source_p->name, chptr->chname);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
@@ -136,7 +135,7 @@ m_part(struct Client *client_p, struct Client *source_p,
 
   for (name = strtoken(&p, parv[1], ","); name;
        name = strtoken(&p,    NULL, ","))
-    part_one_client(client_p, source_p, name, reason);
+    part_one_client(source_p, name, reason);
 }
 
 static struct Message part_msgtab = {

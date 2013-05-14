@@ -38,8 +38,8 @@
 static void
 sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 {
-  FILE *file;
-  char line[HELPLEN];
+  FILE *file = NULL;
+  char line[HELPLEN] = { '\0' };
 
   if ((file = fopen(path, "r")) == NULL)
   {
@@ -73,7 +73,7 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 }
 
 static void
-dohelp(struct Client *source_p, const char *hpath, char *topic)
+dohelp(struct Client *source_p, char *topic)
 {
   char h_index[] = "index";
   char path[HYB_PATH_MAX + 1];
@@ -93,14 +93,14 @@ dohelp(struct Client *source_p, const char *hpath, char *topic)
     return;
   }
 
-  if (strlen(hpath) + strlen(topic) + 1 > HYB_PATH_MAX)
+  if (strlen(HPATH) + strlen(topic) + 1 > HYB_PATH_MAX)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
     return;
   }
 
-  snprintf(path, sizeof(path), "%s/%s", hpath, topic);
+  snprintf(path, sizeof(path), "%s/%s", HPATH, topic);
 
   if (stat(path, &sb) < 0)
   {
@@ -140,7 +140,7 @@ m_help(struct Client *client_p, struct Client *source_p,
 
   last_used = CurrentTime;
 
-  dohelp(source_p, UHPATH, parv[1]);
+  dohelp(source_p, parv[1]);
 }
 
 /*
@@ -151,19 +151,7 @@ static void
 mo_help(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  dohelp(source_p, HPATH, parv[1]);
-}
-
-/*
- * mo_uhelp - HELP message handler
- * This is used so that opers can view the user help file without deopering
- *      parv[0] = sender prefix
- */
-static void
-mo_uhelp(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
-{
-  dohelp(source_p, UHPATH, parv[1]);
+  dohelp(source_p, parv[1]);
 }
 
 static struct Message help_msgtab = {
@@ -171,23 +159,16 @@ static struct Message help_msgtab = {
   {m_unregistered, m_help, m_ignore, m_ignore, mo_help, m_ignore}
 };
 
-static struct Message uhelp_msgtab = {
-  "UHELP", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_help, m_ignore, m_ignore, mo_uhelp, m_ignore}
-};
-
 static void
 module_init(void)
 {
   mod_add_cmd(&help_msgtab);
-  mod_add_cmd(&uhelp_msgtab);
 }
 
 static void
 module_exit(void)
 {
   mod_del_cmd(&help_msgtab);
-  mod_del_cmd(&uhelp_msgtab);
 }
 
 struct module module_entry = {

@@ -4,7 +4,7 @@
 AC_REVISION([$Id$])
 
 AC_PREREQ(2.69)
-AC_INIT([ircd-hybrid], [8.1beta4], [bugs@ircd-hybrid.org])
+AC_INIT([ircd-hybrid], [TRUNK], [bugs@ircd-hybrid.org])
 AM_INIT_AUTOMAKE(1.13.1)
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADER(config.h)
@@ -146,7 +146,6 @@ AC_ARG_ENABLE(assert, AS_HELP_STRING([--enable-assert],
 AS_IF([test "$assert" = "no"],
   [AC_DEFINE(NDEBUG, 1, [Define to disable assert() statements.])])
 
-
 AC_DEFINE([NICKNAMEHISTORYLENGTH], 32768, [Size of the WHOWAS array.])
 AC_DEFINE([MP_CHUNK_SIZE_CHANNEL], 1024*1024, [Size of the channel mempool chunk.])
 AC_DEFINE([MP_CHUNK_SIZE_MEMBER], 2048*1024, [Size of the channel-member mempool chunk.])
@@ -161,7 +160,6 @@ AC_DEFINE([MP_CHUNK_SIZE_WATCH], 8*1024, [Size of the watch mempool chunk.])
 AC_DEFINE([MP_CHUNK_SIZE_NAMEHOST], 64*1024, [Size of the namehost mempool chunk.])
 AC_DEFINE([MP_CHUNK_SIZE_USERHOST], 128*1024, [Size of the userhost mempool chunk.])
 AC_DEFINE([MP_CHUNK_SIZE_IP_ENTRY], 128*1024, [Size of the ip_entry mempool chunk.])
-
 
 # Argument processing.
 AX_ARG_ENABLE_IOLOOP_MECHANISM
@@ -183,8 +181,6 @@ AC_CONFIG_FILES(              \
        modules/core/Makefile  \
        doc/Makefile           \
        help/Makefile          \
-       help/opers/Makefile    \
-       help/users/Makefile    \
        tools/Makefile)
 
 AC_OUTPUT

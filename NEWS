@@ -5,6 +5,7 @@ o) Removed 'remote', and 'global_kill' oper flags, and added 'connect',
    by appeding the ':remote' flag. For example: 'kill' allows only local
    clients to be killed, whereas 'kill:remote' allows to issue a KILL for
    remote clients
+o) Improve/cleanup HELP system
 
 
 -- ircd-hybrid-8.1.0beta4 Release Notes

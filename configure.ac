@@ -181,8 +181,6 @@ AC_CONFIG_FILES(              \
        modules/core/Makefile  \
        doc/Makefile           \
        help/Makefile          \
-       help/opers/Makefile    \
-       help/users/Makefile    \
        tools/Makefile)
 
 AC_OUTPUT

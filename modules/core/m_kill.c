@@ -145,8 +145,11 @@ mo_kill(struct Client *client_p, struct Client *source_p,
    * that have been around for ever, for no reason..
    */
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                       "Received KILL message for %s. From %s Path: %s (%s)", 
-                       target_p->name, source_p->name, me.name, reason);
+                       "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s (%s)", 
+                       target_p->name, target_p->username, target_p->host,
+                       target_p->servptr->name,
+                       target_p->servptr->id[0] ? target_p->servptr->id : "<>",
+                       source_p->name, me.name, reason);
 
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%s)",
        source_p->name, target_p->name, me.name, reason);
@@ -272,13 +275,19 @@ ms_kill(struct Client *client_p, struct Client *source_p,
    */
   if (HasUMode(source_p, UMODE_OPER)) /* send it normally */
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "Received KILL message for %s. From %s Path: %s!%s!%s!%s %s",
-                         target_p->name, source_p->name, source_p->servptr->name, 
-                         source_p->host, source_p->username, source_p->name, reason);
+                         "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s!%s!%s!%s %s",
+                         target_p->name, target_p->username, target_p->host,
+                         target_p->servptr->name,
+                         target_p->servptr->id[0] ? target_p->servptr->id : "<>", source_p->name,
+                         source_p->servptr->name, source_p->host, source_p->username,
+                         source_p->name, reason);
   else
     sendto_realops_flags(UMODE_SKILL, L_ALL, SEND_NOTICE,
-                         "Received KILL message for %s. From %s %s",
-                         target_p->name, source_p->name, reason);
+                         "Received KILL message for %s!%s@%s[%s/%s]. From %s %s",
+                         target_p->name, target_p->username, target_p->host,
+                         target_p->servptr->name,
+                         target_p->servptr->id[0] ? target_p->servptr->id : "<>",
+                         source_p->name, reason);
 
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
        source_p->name, target_p->name, source_p->name, reason);

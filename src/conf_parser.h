@@ -249,22 +249,23 @@ extern int yydebug;
      T_UNXLINE = 458,
      T_GLOBOPS = 459,
      T_WALLOP = 460,
-     T_WEBIRC = 461,
-     T_RESTART = 462,
-     T_SERVICE = 463,
-     T_SERVICES_NAME = 464,
-     THROTTLE_TIME = 465,
-     TRUE_NO_OPER_FLOOD = 466,
-     UNKLINE = 467,
-     USER = 468,
-     USE_EGD = 469,
-     USE_LOGGING = 470,
-     VHOST = 471,
-     VHOST6 = 472,
-     XLINE = 473,
-     WARN_NO_NLINE = 474,
-     T_SIZE = 475,
-     T_FILE = 476
+     T_WALLOPS = 461,
+     T_WEBIRC = 462,
+     T_RESTART = 463,
+     T_SERVICE = 464,
+     T_SERVICES_NAME = 465,
+     THROTTLE_TIME = 466,
+     TRUE_NO_OPER_FLOOD = 467,
+     UNKLINE = 468,
+     USER = 469,
+     USE_EGD = 470,
+     USE_LOGGING = 471,
+     VHOST = 472,
+     VHOST6 = 473,
+     XLINE = 474,
+     WARN_NO_NLINE = 475,
+     T_SIZE = 476,
+     T_FILE = 477
    };
 #endif
 /* Tokens.  */
@@ -471,22 +472,23 @@ extern int yydebug;
 #define T_UNXLINE 458
 #define T_GLOBOPS 459
 #define T_WALLOP 460
-#define T_WEBIRC 461
-#define T_RESTART 462
-#define T_SERVICE 463
-#define T_SERVICES_NAME 464
-#define THROTTLE_TIME 465
-#define TRUE_NO_OPER_FLOOD 466
-#define UNKLINE 467
-#define USER 468
-#define USE_EGD 469
-#define USE_LOGGING 470
-#define VHOST 471
-#define VHOST6 472
-#define XLINE 473
-#define WARN_NO_NLINE 474
-#define T_SIZE 475
-#define T_FILE 476
+#define T_WALLOPS 461
+#define T_WEBIRC 462
+#define T_RESTART 463
+#define T_SERVICE 464
+#define T_SERVICES_NAME 465
+#define THROTTLE_TIME 466
+#define TRUE_NO_OPER_FLOOD 467
+#define UNKLINE 468
+#define USER 469
+#define USE_EGD 470
+#define USE_LOGGING 471
+#define VHOST 472
+#define VHOST6 473
+#define XLINE 474
+#define WARN_NO_NLINE 475
+#define T_SIZE 476
+#define T_FILE 477
 
 
 
@@ -501,7 +503,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 505 "conf_parser.h"
+#line 507 "conf_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

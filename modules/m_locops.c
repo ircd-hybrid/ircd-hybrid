@@ -48,6 +48,13 @@ mo_locops(struct Client *client_p, struct Client *source_p,
 {
   const char *message = parv[1];
 
+  if (!HasOFlag(source_p, OPER_FLAG_LOCOPS))
+  {
+    sendto_one(source_p, form_str(ERR_NOPRIVS),
+               me.name, source_p->name, "locops");
+    return;
+  }
+
   if (EmptyString(message))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),

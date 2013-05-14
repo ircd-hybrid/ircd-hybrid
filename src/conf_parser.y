@@ -335,6 +335,7 @@ reset_block_state(void)
 %token  T_UNXLINE
 %token  T_GLOBOPS
 %token  T_WALLOP
+%token  T_WALLOPS
 %token  T_WEBIRC
 %token  T_RESTART
 %token  T_SERVICE
@@ -1261,6 +1262,14 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_GLOBOPS;
+} | T_WALLOPS
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_WALLOPS;
+} | T_LOCOPS
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_LOCOPS;
 } | REMOTEBAN
 {
   if (conf_parser_ctx.pass == 2)

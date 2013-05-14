@@ -344,6 +344,7 @@ operwall                { return T_OPERWALL; }
 servnotice              { return T_SERVNOTICE; }
 invisible               { return T_INVISIBLE; }
 wallop                  { return T_WALLOP; }
+wallops                  { return T_WALLOPS; }
 callerid                { return T_CALLERID; }
 softcallerid            { return T_SOFTCALLERID; }
 locops                  { return T_LOCOPS; }

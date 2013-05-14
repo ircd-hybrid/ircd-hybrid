@@ -195,6 +195,8 @@
 #define OPER_FLAG_SQUIT_REMOTE   0x00040000 /**< Oper can do global SQUIT */
 #define OPER_FLAG_CONNECT        0x00080000 /**< Oper can do local CONNECT */
 #define OPER_FLAG_CONNECT_REMOTE 0x00100000 /**< Oper can do global CONNECT */
+#define OPER_FLAG_WALLOPS        0x00200000 /**< Oper can do WALLOPS */
+#define OPER_FLAG_LOCOPS         0x00400000 /**< Oper can do LOCOPS */
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->localClient->operflags & (y) : 0)
 #define AddOFlag(x, y) ((x)->localClient->operflags |=  (y))

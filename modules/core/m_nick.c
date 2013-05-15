@@ -264,7 +264,7 @@ change_local_nick(struct Client *source_p, const char *nick)
                   source_p->name, nick, (unsigned long)source_p->tsinfo);
 
     hash_del_client(source_p);
-    strcpy(source_p->name, nick);
+    strlcpy(source_p->name, nick, sizeof(source_p->name));
     hash_add_client(source_p);
 
     if (!samenick)
@@ -386,7 +386,7 @@ uid_from_server(struct Client *client_p, struct Client *source_p, int parc,
   strlcpy(source_p->svid, svsid, sizeof(source_p->svid));
 
   /* copy the nick in place */
-  strcpy(source_p->name, nick);
+  strlcpy(source_p->name, nick, sizeof(source_p->name));
   strlcpy(source_p->id, parv[8], sizeof(source_p->id));
   strlcpy(source_p->sockhost, parv[7], sizeof(source_p->sockhost));
   strlcpy(source_p->info, ugecos, sizeof(source_p->info));

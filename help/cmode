@@ -36,7 +36,7 @@ NO PARAMETERS:
      +r     - 'Registered'. Channel has been registered with ChanServ.
               This mode can be set by servers only.
 
-     +M      - 'Modreg". Unregistered/unidentified clients cannot send text to
+     +M      - 'Modreg'. Unregistered/unidentified clients cannot send text to
                the channel
 
      +O     - 'IRCOps only'. This will prevent anyone who hasn't obtained

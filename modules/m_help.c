@@ -75,16 +75,16 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 static void
 dohelp(struct Client *source_p, char *topic)
 {
+  char *p = topic;
   char h_index[] = "index";
   char path[HYB_PATH_MAX + 1];
   struct stat sb;
-  unsigned int i;
 
   if (EmptyString(topic))
     topic = h_index;
   else
-    for (i = 0; topic[i] != '\0'; ++i)
-      topic[i] = ToLower(topic[i]);
+    for (; *p; ++p)
+      *p = ToLower(*p);
 
   if (strpbrk(topic, "/\\"))
   {

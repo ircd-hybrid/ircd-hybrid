@@ -1,27 +1,21 @@
-Help topics available to opers only:
+Available HELP topics:
 
-CAPAB           CLOSE
-CONNECT         CRYPTLINK       DIE             DLINE
-DROP            EOB             ETRACE          GLINE
-HASH            KILL            KLINE           LOCOPS
-MODULE          NOTICE          OMOTD           OPERWALL
-POST            PRIVMSG         REHASH          RESTART
-RESV            SERVER          SET             SJOIN
-SQUIT           STATS           SVINFO          TESTGECOS
-TESTLINE        TESTMASK        TRACE           UHELP
-UMODE           UNDLINE         UNGLINE         UNKLINE
-UNRESV          UNXLINE         WALLOPS
-XLINE
-
-Help topics available to users:
-
-ACCEPT          ADMIN           AWAY            CHALLENGE
-CMODE           ERROR           HELP            INFO
-INVITE          ISON            JOIN            KICK
-KNOCK           LINKS           LIST            LUSERS
-MAP             MOTD            NAMES           NICK
-NOTICE          OPER            PART            PASS
-PING            PONG            PRIVMSG         QUIT
-STATS           TIME            TOPIC           UMODE
+ACCEPT          ADMIN           AWAY            CAPAB
+CHALLENGE       CLOSE           CMODE           CONNECT
+DIE             DLINE           EOB             ERROR
+ETRACE          GLINE           GUNGLINE        HASH
+HELP            INFO            INVITE          ISON
+JOIN            KICK            KILL            KLINE
+KNOCK           LINKS           LIST            LOCOPS
+LUSERS          MAP             MODULE          MOTD
+NAMES           NICK            NOTICE          OPER
+OPERWALL        PART            PASS            PING
+PONG            POST            PRIVMSG         QUIT
+REHASH          RESTART         RESV            SERVER
+SET             SJOIN           SQUIT           STATS
+SVINFO          TESTGECOS       TESTLINE        TESTMASK
+TIME            TOPIC           TRACE           UMODE
+UNDLINE         UNKLINE         UNRESV          UNXLINE
 USER            USERHOST        USERS           VERSION
-WHO             WHOIS           WHOWAS
+WALLOPS         WHO             WHOIS           WHOWAS
+XLINE

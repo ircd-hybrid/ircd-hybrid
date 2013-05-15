@@ -255,16 +255,80 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 helpfdir = $(pkgdatadir)/help
-dist_helpf_DATA = accept cmode etrace ison list map nick ping resv stats trace  \
-                 unxline whois admin connect gline gungline join locops module  \
-                 notice pong svinfo uhelp user whowas away hash                 \
-                 kick lusers post testgecos umode                               \
-                 userhost xline capab die help kill oper privmsg                \
-                 server testline undline users challenge dline index kline      \
-                 operwall quit set testmask version                             \
-                 eob info knock motd part rehash sjoin time unkline wallops     \
-                 close error invite links names pass restart squit topic        \
-                 unresv who
+dist_helpf_DATA = accept    \
+                  admin     \
+                  away      \
+                  capab     \
+                  challenge \
+                  close     \
+                  cmode     \
+                  connect   \
+                  die       \
+                  dline     \
+                  eob       \
+                  error     \
+                  etrace    \
+                  gline     \
+                  gungline  \
+                  hash      \
+                  help      \
+                  index     \
+                  info      \
+                  invite    \
+                  ison      \
+                  join      \
+                  kick      \
+                  kill      \
+                  kline     \
+                  knock     \
+                  links     \
+                  list      \
+                  locops    \
+                  lusers    \
+                  map       \
+                  module    \
+                  motd      \
+                  names     \
+                  nick      \
+                  notice    \
+                  oper      \
+                  operwall  \
+                  part      \
+                  pass      \
+                  ping      \
+                  pong      \
+                  post      \
+                  privmsg   \
+                  quit      \
+                  rehash    \
+                  restart   \
+                  resv      \
+                  server    \
+                  set       \
+                  sjoin     \
+                  squit     \
+                  stats     \
+                  svinfo    \
+                  testgecos \
+                  testline  \
+                  testmask  \
+                  time      \
+                  topic     \
+                  trace     \
+                  umode     \
+                  undline   \
+                  unkline   \
+                  unresv    \
+                  unxline   \
+                  user      \
+                  userhost  \
+                  users     \
+                  version   \
+                  wallops   \
+                  who       \
+                  whois     \
+                  whowas    \
+                  xline
 
 all: all-am
 

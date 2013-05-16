@@ -225,9 +225,6 @@ change_local_nick(struct Client *source_p, const char *nick)
       }
     }
 
-    /* XXX - the format of this notice should eventually be changed
-     * to either %s[%s@%s], or even better would be get_client_name() -bill
-     */
     sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
                          "Nick change: From %s to %s [%s@%s]",
                          source_p->name, nick, source_p->username, source_p->host);

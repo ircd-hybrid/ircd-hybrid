@@ -62,7 +62,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
 {
   struct Client *target_p = NULL;
   int what = MODE_ADD;
-  unsigned int flag = 0, setflags = 0;
+  unsigned int flag = 0, setmodes = 0;
   char *m = NULL, *modes = NULL, *extarg = NULL;
   time_t ts = 0;
 
@@ -87,7 +87,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   if (ts && (ts != target_p->tsinfo))
     return;
 
-  setflags = target_p->umodes;
+  setmodes = target_p->umodes;
 
   for (m = modes; *m; ++m)
   {
@@ -103,6 +103,11 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
       case 'd':
         if (!EmptyString(extarg))
           strlcpy(target_p->svid, extarg, sizeof(target_p->svid));
+        break;
+
+      case 'x':
+        if (what == MODE_ADD && extarg)
+          user_set_hostmask(target_p, extarg);
         break;
 
       case 'o':
@@ -173,11 +178,11 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
                   target_p->name, (unsigned long)target_p->tsinfo, modes);
   }
 
-  if (MyConnect(target_p) && (setflags != target_p->umodes))
+  if (MyConnect(target_p) && (setmodes != target_p->umodes))
   {
     char modebuf[IRCD_BUFSIZE];
 
-    send_umode(target_p, target_p, setflags, 0xffffffff, modebuf);
+    send_umode(target_p, target_p, setmodes, 0xffffffff, modebuf);
   }
 }
 

@@ -674,7 +674,7 @@ valid_hostname(const char *hostname)
  * style of username
  */
 int
-valid_username(const char *username)
+valid_username(const char *username, int local)
 {
   int dots      = 0;
   const char *p = username;
@@ -684,27 +684,37 @@ valid_username(const char *username)
   if (*p == '~')
     ++p;
 
-  /* reject usernames that don't start with an alphanum
+  /*
+   * Reject usernames that don't start with an alphanum
    * i.e. reject jokers who have '-@somehost' or '.@somehost'
    * or "-hi-@somehost", "h-----@somehost" would still be accepted.
    */
   if (!IsAlNum(*p))
     return 0;
 
-  while (*++p)
+  if (local)
   {
-    if ((*p == '.') && ConfigFileEntry.dots_in_ident)
+    while (*++p)
     {
-      if (++dots > ConfigFileEntry.dots_in_ident)
-        return 0;
-      if (!IsUserChar(*(p + 1)))
+      if ((*p == '.') && ConfigFileEntry.dots_in_ident)
+      {
+        if (++dots > ConfigFileEntry.dots_in_ident)
+          return 0;
+        if (!IsUserChar(*(p + 1)))
+          return 0;
+      }
+      else if (!IsUserChar(*p))
         return 0;
     }
-    else if (!IsUserChar(*p))
-      return 0;
+  }
+  else
+  {
+    while (*++p)
+      if (!IsUserChar(*p))
+        return 0;
   }
 
-  return 1;
+  return  p - username <= USERLEN;;
 }
 
 /* clean_nick_name()

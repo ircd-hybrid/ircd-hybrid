@@ -46,26 +46,6 @@
 #include "s_misc.h"
 
 
-/* clean_user_name()
- *
- * input        - username
- * output       - none
- * side effects - walks through the username, returning 0 if erroneous
- */
-static int
-clean_user_name(const char *user)
-{
-  const char *p = user;
-
-  assert(user && *user);
-
-  for (; *p; ++p)
-    if (!IsUserChar(*p))
-      return 0;
-
-  return p - user <= USERLEN;
-}
-
 /* check_clean_nick()
  *
  * input        - pointer to source
@@ -124,7 +104,7 @@ static int
 check_clean_user(struct Client *client_p, char *nick,
                  char *user, struct Client *server_p)
 {
-  if (!clean_user_name(user))
+  if (!valid_user_name(user, 0))
   {
     ++ServerStats.is_kill;
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,

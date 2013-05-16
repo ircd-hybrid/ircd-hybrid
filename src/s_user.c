@@ -390,7 +390,7 @@ register_local_user(struct Client *source_p)
   }
 
   /* valid user name check */
-  if (valid_username(source_p->username) == 0)
+  if (valid_username(source_p->username, 1) == 0)
   {
     char tmpstr2[IRCD_BUFSIZE];
 
@@ -674,7 +674,7 @@ valid_hostname(const char *hostname)
  * style of username
  */
 int
-valid_username(const char *username, int local)
+valid_username(const char *username, const int local)
 {
   int dots      = 0;
   const char *p = username;

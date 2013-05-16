@@ -11,8 +11,8 @@ RPL_MAPEND:              :%s 017 %s :Einde van /MAP
 RPL_YOURID:              :%s 042 %s %s :jouw unieke ID
 RPL_TRACELINK:           :%s 200 %s Link %s %s %s
 RPL_TRACECONNECTING:     :%s 201 %s Probeer. %s %s
-RPL_TRACEOPERATOR:       :%s 204 %s Operator %s %s (%s) %lu %lu
-RPL_TRACEUSER:           :%s 205 %s Gebruiker %s %s (%s) %lu %lu
+RPL_TRACEOPERATOR:       :%s 204 %s Operator %s %s (%s) %lu %u
+RPL_TRACEUSER:           :%s 205 %s Gebruiker %s %s (%s) %lu %u
 RPL_TRACESERVER:         :%s 206 %s Serv %s %dS %dC %s %s!%s@%s %lu
 RPL_TRACENEWTYPE:        :%s 208 %s <nieuwtype> 0 %s
 RPL_TRACECLASS:          :%s 209 %s Klasse %s %d

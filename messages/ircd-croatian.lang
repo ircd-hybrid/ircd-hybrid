@@ -9,7 +9,7 @@ RPL_CREATED:             :%s 003 %s :Ovaj server je postavljen %s
 RPL_ISUPPORT:            :%s 005 %s %s :su podr¾ani na ovom serveru
 RPL_REDIR:               :%s 010 %s %s %d :Molim Vas, koristite ovaj server/port
 RPL_TRACECONNECTING:     :%s 201 %s Poku¹ajte. %s %s
-RPL_TRACEUSER:           :%s 205 %s Korisnik %s %s (%s) %lu %lu
+RPL_TRACEUSER:           :%s 205 %s Korisnik %s %s (%s) %lu %u
 RPL_TRACESERVER:         :%s 206 %s Server %s %dS %dC %s %s!%s@%s %lu
 RPL_TRACENEWTYPE:        :%s 208 %s <novi tip> 0 %s
 RPL_TRACECLASS:          :%s 209 %s Klasa %s %d

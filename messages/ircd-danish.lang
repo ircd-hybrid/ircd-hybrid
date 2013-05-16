@@ -11,7 +11,7 @@ RPL_ISUPPORT:            :%s 005 %s %s :er supporteret af denne server
 RPL_REDIR:               :%s 010 %s %s %d :Brug venligst denne Server/Port isteddet
 RPL_TRACELINK:           :%s 200 %s Forbindelse %s %s %s
 RPL_TRACECONNECTING:     :%s 201 %s Pr›v. %s %s
-RPL_TRACEUSER:           :%s 205 %s Bruger %s %s (%s) %lu %lu
+RPL_TRACEUSER:           :%s 205 %s Bruger %s %s (%s) %lu %u
 RPL_TRACECLASS:          :%s 209 %s Klasse %s %d
 RPL_ENDOFSTATS:          :%s 219 %s %c :Slutningen p† /STATS rapporten
 RPL_STATSUPTIME:         :%s 242 %s :Server oppe %d dag(e), %d:%02d:%02d

@@ -17,8 +17,8 @@ RPL_REDIR:		 :%s 010 %s %s %d :Veuillez utiliser ce serveur
 RPL_MAPEND:		 :%s 017 %s :Fin de /MAP
 RPL_TRACELINK:		 :%s 200 %s Lien %s %s %s
 RPL_TRACECONNECTING:	 :%s 201 %s Essai. %s %s
-RPL_TRACEOPERATOR:	 :%s 204 %s Opér %s %s (%s) %lu %lu
-RPL_TRACEUSER:		 :%s 205 %s Client %s %s (%s) %lu %lu
+RPL_TRACEOPERATOR:	 :%s 204 %s Opér %s %s (%s) %lu %u
+RPL_TRACEUSER:		 :%s 205 %s Client %s %s (%s) %lu %u
 RPL_TRACESERVER:	 :%s 206 %s Serv. %s %dS %dC %s %s!%s@%s %lu
 RPL_TRACENEWTYPE:	 :%s 208 %s <nouvelletype> 0 %s
 RPL_TRACECLASS:		 :%s 209 %s Classe %s %d

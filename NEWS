@@ -1,3 +1,9 @@
+-- ircd-hybrid-8.0.9 Release Notes
+o) Fixed bug where ircd would sometimes drop a services link because
+   of a missing argument to the SVSMODE command
+o) Fixed weird idletimes shown in /trace
+
+
 -- ircd-hybrid-8.0.8 Release Notes
 o) "STATS s" now shows configured services{} blocks as well
 o) Fixed compile warnings, minor code cleanups and optimizations

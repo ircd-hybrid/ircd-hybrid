@@ -10,7 +10,7 @@ RPL_CREATED:             :%s 003 %s :Denna server skapades %s
 RPL_ISUPPORT:            :%s 005 %s %s :stödjs av denna server
 RPL_REDIR:               :%s 010 %s %s %d :Vänligen använd denna Server/Port i stället
 RPL_TRACECONNECTING:     :%s 201 %s Försök. %s %s
-RPL_TRACEUSER:           :%s 205 %s Användare %s %s (%s) %lu %lu
+RPL_TRACEUSER:           :%s 205 %s Användare %s %s (%s) %lu %u
 RPL_TRACENEWTYPE:        :%s 208 %s <nytyp> 0 %s
 RPL_TRACECLASS:          :%s 209 %s Klass %s %d
 RPL_ENDOFSTATS:          :%s 219 %s %c :Slut på /STATS rapport

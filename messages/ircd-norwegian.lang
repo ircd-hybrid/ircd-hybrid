@@ -10,7 +10,7 @@ RPL_ISUPPORT:            :%s 005 %s %s :er gyldig for denne serveren
 RPL_REDIR:               :%s 010 %s %s %d :Vennligst bruk Server/Port istedenfor
 RPL_TRACECONNECTING:     :%s 201 %s Prøv. %s %s
 RPL_TRACEHANDSHAKE:      :%s 202 %s T.S. %s %s
-RPL_TRACEUSER:           :%s 205 %s Bruker %s %s (%s) %lu %lu
+RPL_TRACEUSER:           :%s 205 %s Bruker %s %s (%s) %lu %u
 RPL_TRACENEWTYPE:        :%s 208 %s <nytype> 0 %s
 RPL_TRACECLASS:          :%s 209 %s Klasse %s %d
 RPL_STATSUPTIME:         :%s 242 %s :Serveren har vært oppe %d dager, %d:%02d:%02d

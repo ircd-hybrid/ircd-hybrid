@@ -24,8 +24,8 @@ RPL_TRACELINK:		 :%s 200 %s Link %s %s %s
 RPL_TRACECONNECTING:	 :%s 201 %s Try. %s %s
 RPL_TRACEHANDSHAKE:	 :%s 202 %s H.S. %s %s
 RPL_TRACEUNKNOWN:	 :%s 203 %s ???? %s %s (%s) %d
-RPL_TRACEOPERATOR:	 :%s 204 %s Oper %s %s (%s) %lu %lu
-RPL_TRACEUSER:		 :%s 205 %s User %s %s (%s) %lu %lu
+RPL_TRACEOPERATOR:	 :%s 204 %s Oper %s %s (%s) %lu %u
+RPL_TRACEUSER:		 :%s 205 %s User %s %s (%s) %lu %u
 RPL_TRACESERVER:	 :%s 206 %s Serv %s %dS %dC %s %s!%s@%s %lu
 RPL_TRACENEWTYPE:	 :%s 208 %s <newtype> 0 %s
 RPL_TRACECLASS:		 :%s 209 %s Class %s %d

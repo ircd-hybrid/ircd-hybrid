@@ -104,7 +104,7 @@ static int
 check_clean_user(struct Client *client_p, char *nick,
                  char *user, struct Client *server_p)
 {
-  if (!valid_user_name(user, 0))
+  if (!valid_username(user, 0))
   {
     ++ServerStats.is_kill;
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,

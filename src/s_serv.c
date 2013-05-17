@@ -192,7 +192,6 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
     if (target_p->from == source_p->from && !MyConnect(target_p))
       target_p = NULL;
 
-  collapse(parv[server]);
   wilds = has_wildcards(parv[server]);
 
   /* Again, if there are no wild cards involved in the server

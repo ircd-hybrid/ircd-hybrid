@@ -47,7 +47,7 @@ whowas_do(struct Client *client_p, struct Client *source_p,
   int max = -1;
   const dlink_node *ptr = NULL;
 
-  if (parc > 3 && !EmptyString(parv[3]))
+  if (parc > 3)
     if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
                     parc, parv) != HUNTED_ISME)
       return;

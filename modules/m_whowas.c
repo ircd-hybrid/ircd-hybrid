@@ -45,33 +45,22 @@ whowas_do(struct Client *client_p, struct Client *source_p,
 {
   int cur = 0;
   int max = -1;
-  char *p = NULL, *nick = NULL;
   const dlink_node *ptr = NULL;
 
-  if (parc > 2)
-  {
-    max = atoi(parv[2]);
-
-    if (!MyConnect(source_p) && max > 20)
-      max = 20;
-  }
-
-  if (parc > 3)
+  if (parc > 3 && !EmptyString(parv[3]))
     if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
                     parc, parv) != HUNTED_ISME)
       return;
 
-  nick = parv[1];
-  if ((p = strchr(nick,',')) != NULL)
-    *p = '\0';
-  if (*nick == '\0')
-    return;
+  if (parc > 2 && !EmptyString(parv[2]))
+    if ((max = atoi(parv[2])) > 20 && !MyConnect(source_p))
+      max = 20;
 
-  DLINK_FOREACH(ptr, WHOWASHASH[strhash(nick)].head)
+  DLINK_FOREACH(ptr, WHOWASHASH[strhash(parv[1])].head)
   {
     const struct Whowas *temp = ptr->data;
 
-    if (!irccmp(nick, temp->name))
+    if (!irccmp(parv[1], temp->name))
     {
       sendto_one(source_p, form_str(RPL_WHOWASUSER),
                  me.name, source_p->name, temp->name,
@@ -79,12 +68,12 @@ whowas_do(struct Client *client_p, struct Client *source_p,
                  temp->realname);
 
       if (ConfigServerHide.hide_servers && !HasUMode(source_p, UMODE_OPER))
-        sendto_one(source_p, form_str(RPL_WHOISSERVER),
-                   me.name, source_p->name, temp->name,
+        sendto_one(source_p, form_str(RPL_WHOISSERVER), me.name,
+                   source_p->name, temp->name,
                    ServerInfo.network_name, myctime(temp->logoff));
       else
-        sendto_one(source_p, form_str(RPL_WHOISSERVER),
-                   me.name, source_p->name, temp->name,
+        sendto_one(source_p, form_str(RPL_WHOISSERVER), me.name,
+                   source_p->name, temp->name,
                    temp->servername, myctime(temp->logoff));
       ++cur;
     }
@@ -95,7 +84,7 @@ whowas_do(struct Client *client_p, struct Client *source_p,
 
   if (!cur)
     sendto_one(source_p, form_str(ERR_WASNOSUCHNICK),
-               me.name, source_p->name, nick);
+               me.name, source_p->name, parv[1]);
 
   sendto_one(source_p, form_str(RPL_ENDOFWHOWAS),
              me.name, source_p->name, parv[1]);

@@ -33,7 +33,7 @@ const char *infotext[] =
   "IRC --",
   "Based on the original code written by Jarkko Oikarinen",
   "Copyright 1988, 1989, 1990, 1991 University of Oulu, Computing Center",
-  "Copyright (c) 1997-2012 Hybrid Development Team",
+  "Copyright (c) 1997-2013 Hybrid Development Team",
   "",
   "This program is free software; you can redistribute it and/or",
   "modify it under the terms of the GNU General Public License as",

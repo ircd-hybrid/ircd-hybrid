@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.1.0beta6 Release Notes
+o) Fixed broken spoofs
+
+
 -- ircd-hybrid-8.1.0beta5 Release Notes
 o) Removed 'remote', and 'global_kill' oper flags, and added 'connect',
    'squit', and 'kill' flags for better fine-tuning instead. Whether or

@@ -1645,7 +1645,7 @@ auth_encrypted: ENCRYPTED '=' TBOOL ';'
 auth_flags: IRCD_FLAGS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
+    block_state.flags.value &= (CONF_FLAGS_ENCRYPTED | CONF_FLAGS_SPOOF_IP);
 } '='  auth_flags_items ';';
 
 auth_flags_items: auth_flags_items ',' auth_flags_item | auth_flags_item;

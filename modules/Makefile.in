@@ -394,18 +394,6 @@ m_tburst_la_OBJECTS = $(am_m_tburst_la_OBJECTS)
 m_tburst_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_tburst_la_LDFLAGS) $(LDFLAGS) -o $@
-m_testline_la_LIBADD =
-am_m_testline_la_OBJECTS = m_testline.lo
-m_testline_la_OBJECTS = $(am_m_testline_la_OBJECTS)
-m_testline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_testline_la_LDFLAGS) $(LDFLAGS) -o $@
-m_testmask_la_LIBADD =
-am_m_testmask_la_OBJECTS = m_testmask.lo
-m_testmask_la_OBJECTS = $(am_m_testmask_la_OBJECTS)
-m_testmask_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_testmask_la_LDFLAGS) $(LDFLAGS) -o $@
 m_time_la_LIBADD =
 am_m_time_la_OBJECTS = m_time.lo
 m_time_la_OBJECTS = $(am_m_time_la_OBJECTS)
@@ -545,8 +533,7 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_services_la_SOURCES) $(m_set_la_SOURCES) \
 	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
 	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
-	$(m_tburst_la_SOURCES) $(m_testline_la_SOURCES) \
-	$(m_testmask_la_SOURCES) $(m_time_la_SOURCES) \
+	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
 	$(m_topic_la_SOURCES) $(m_trace_la_SOURCES) \
 	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
 	$(m_users_la_SOURCES) $(m_version_la_SOURCES) \
@@ -575,8 +562,7 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_services_la_SOURCES) $(m_set_la_SOURCES) \
 	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
 	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
-	$(m_tburst_la_SOURCES) $(m_testline_la_SOURCES) \
-	$(m_testmask_la_SOURCES) $(m_time_la_SOURCES) \
+	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
 	$(m_topic_la_SOURCES) $(m_trace_la_SOURCES) \
 	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
 	$(m_users_la_SOURCES) $(m_version_la_SOURCES) \
@@ -842,8 +828,6 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_svsmode.la   \
                       m_svsnick.la   \
                       m_tburst.la    \
-                      m_testline.la  \
-                      m_testmask.la  \
                       m_time.la      \
                       m_topic.la     \
                       m_trace.la     \
@@ -904,8 +888,6 @@ m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsmode_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsnick_la_LDFLAGS = $(MODULE_FLAGS)
 m_tburst_la_LDFLAGS = $(MODULE_FLAGS)
-m_testline_la_LDFLAGS = $(MODULE_FLAGS)
-m_testmask_la_LDFLAGS = $(MODULE_FLAGS)
 m_time_la_LDFLAGS = $(MODULE_FLAGS)
 m_topic_la_LDFLAGS = $(MODULE_FLAGS)
 m_trace_la_LDFLAGS = $(MODULE_FLAGS)
@@ -965,8 +947,6 @@ m_svinfo_la_SOURCES = m_svinfo.c
 m_svsmode_la_SOURCES = m_svsmode.c
 m_svsnick_la_SOURCES = m_svsnick.c
 m_tburst_la_SOURCES = m_tburst.c
-m_testline_la_SOURCES = m_testline.c
-m_testmask_la_SOURCES = m_testmask.c
 m_time_la_SOURCES = m_time.c
 m_topic_la_SOURCES = m_topic.c
 m_trace_la_SOURCES = m_trace.c
@@ -1186,12 +1166,6 @@ m_svsnick.la: $(m_svsnick_la_OBJECTS) $(m_svsnick_la_DEPENDENCIES) $(EXTRA_m_svs
 m_tburst.la: $(m_tburst_la_OBJECTS) $(m_tburst_la_DEPENDENCIES) $(EXTRA_m_tburst_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_tburst_la_LINK) -rpath $(modulesdir) $(m_tburst_la_OBJECTS) $(m_tburst_la_LIBADD) $(LIBS)
 
-m_testline.la: $(m_testline_la_OBJECTS) $(m_testline_la_DEPENDENCIES) $(EXTRA_m_testline_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_testline_la_LINK) -rpath $(modulesdir) $(m_testline_la_OBJECTS) $(m_testline_la_LIBADD) $(LIBS)
-
-m_testmask.la: $(m_testmask_la_OBJECTS) $(m_testmask_la_DEPENDENCIES) $(EXTRA_m_testmask_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_testmask_la_LINK) -rpath $(modulesdir) $(m_testmask_la_OBJECTS) $(m_testmask_la_LIBADD) $(LIBS)
-
 m_time.la: $(m_time_la_OBJECTS) $(m_time_la_DEPENDENCIES) $(EXTRA_m_time_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_time_la_LINK) -rpath $(modulesdir) $(m_time_la_OBJECTS) $(m_time_la_LIBADD) $(LIBS)
 
@@ -1285,8 +1259,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsmode.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsnick.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_tburst.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_testline.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_testmask.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_time.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_topic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_trace.Plo@am__quote@

@@ -261,9 +261,6 @@ extern const char *form_str(unsigned int);
 #define RPL_TARGNOTIFY       717
 #define RPL_UMODEGMSG        718
 #define ERR_NOPRIVS	     723
-#define RPL_TESTMASK	     724
-#define RPL_TESTLINE	     725
-#define RPL_NOTESTLINE	     726
 
 #define ERR_LAST_ERR_MSG     999
 

@@ -37,103 +37,41 @@
 #include "parse.h"
 #include "modules.h"
 
-static void who_global(struct Client *, char *, int);
-static void do_who(struct Client *, struct Client *,
-                   const char *, const char *);
-static void do_who_on_channel(struct Client *, struct Channel *,
-                              const char *, int, int);
 
-/*
-** m_who
-**      parv[0] = sender prefix
-**      parv[1] = nickname mask list
-**      parv[2] = additional selection flag, only 'o' for now.
-*/
+/* do_who()
+ *
+ * inputs       - pointer to client requesting who
+ *              - pointer to client to do who on
+ *              - The reported name
+ *              - channel flags
+ * output       - NONE
+ * side effects - do a who on given person
+ */
 static void
-m_who(struct Client *client_p, struct Client *source_p,
-      int parc, char *parv[])
+do_who(struct Client *source_p, struct Client *target_p,
+       const char *chname, const char *op_flags)
 {
-  struct Client *target_p;
-  char *mask = parv[1];
-  dlink_node *lp;
-  int server_oper = parc > 2 ? (*parv[2] == 'o') : 0; /* Show OPERS only */
-  struct Channel *chptr;
+  char status[7]; /* G*@%+\0 */
 
-  /* See if mask is there, collapse it or return if not there */
-  if (EmptyString(mask))
-  {
-    who_global(source_p, mask, server_oper);
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, "*");
-    return;
-  }
-
-  /* mask isn't NULL at this point. repeat after me... -db */
-  collapse(mask);
-
-  /* '/who *' */
-  if (!strcmp(mask, "*"))
-  {
-    if ((lp = source_p->channel.head) != NULL)
-    {
-      struct Channel *mychannel = ((struct Membership *)lp->data)->chptr;
-      do_who_on_channel(source_p, mychannel, mychannel->chname, 1,
-                        server_oper);
-    }
-
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, "*");
-    return;
-  }
-
-  /* '/who #some_channel' */
-  if (IsChanPrefix(*mask))
-  {
-    /* List all users on a given channel */
-    if ((chptr = hash_find_channel(mask)) != NULL)
-    {
-      if (IsMember(source_p, chptr))
-        do_who_on_channel(source_p, chptr, chptr->chname, 1, server_oper);
-      else if (!SecretChannel(chptr))
-        do_who_on_channel(source_p, chptr, chptr->chname, 0, server_oper);
-    }
-
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, mask);
-    return;
-  }
-
-  /* '/who nick' */
-  if (((target_p = hash_find_client(mask)) != NULL) &&
-      IsClient(target_p) && (!server_oper || HasUMode(target_p, UMODE_OPER)))
-  {
-    DLINK_FOREACH(lp, target_p->channel.head)
-    {
-      chptr = ((struct Membership *) lp->data)->chptr;
-      if (PubChannel(chptr) || IsMember(source_p, chptr))
-        break;
-    }
-
-    if (lp != NULL)
-      do_who(source_p, target_p, chptr->chname,
-             get_member_status(lp->data, !!HasCap(source_p, CAP_MULTI_PREFIX)));
-    else
-      do_who(source_p, target_p, NULL, "");
-
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, mask);
-    return;
-  }
-
-  /* '/who 0' */
-  if (!strcmp(mask, "0"))
-    who_global(source_p, NULL, server_oper);
+  if (HasUMode(source_p, UMODE_OPER))
+    snprintf(status, sizeof(status), "%c%s%s", target_p->away[0] ? 'G' : 'H',
+             HasUMode(target_p, UMODE_OPER) ? "*" : "", op_flags);
   else
-    who_global(source_p, mask, server_oper);
+    snprintf(status, sizeof(status), "%c%s%s", target_p->away[0] ? 'G' : 'H',
+             HasUMode(target_p, UMODE_OPER) &&
+             !HasUMode(target_p, UMODE_HIDDEN) ? "*" : "", op_flags);
 
-  /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
-  sendto_one(source_p, form_str(RPL_ENDOFWHO),
-             me.name, source_p->name, mask);
+  if (ConfigServerHide.hide_servers)
+    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
+               (chname) ? (chname) : "*",
+               target_p->username, target_p->host,
+               HasUMode(source_p, UMODE_OPER) ? target_p->servptr->name : "*",
+               target_p->name, status, 0, target_p->info);
+  else
+    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
+               (chname) ? (chname) : "*", target_p->username,
+               target_p->host, target_p->servptr->name, target_p->name,
+               status, target_p->hopcount, target_p->info);
 }
 
 /* who_common_channel
@@ -280,13 +218,11 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
                   const char *chname, int member, int server_oper)
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
-  struct Client *target_p;
-  struct Membership *ms;
 
   DLINK_FOREACH_SAFE(ptr, ptr_next, chptr->members.head)
   {
-    ms = ptr->data;
-    target_p = ms->client_p;
+    struct Membership *ms = ptr->data;
+    struct Client *target_p = ms->client_p;
 
     if (member || !HasUMode(target_p, UMODE_INVISIBLE))
     {
@@ -299,44 +235,97 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
   }
 }
 
-/* do_who()
- *
- * inputs	- pointer to client requesting who
- *		- pointer to client to do who on
- *		- The reported name
- *		- channel flags
- * output	- NONE
- * side effects - do a who on given person
- */
+/*
+** m_who
+**      parv[0] = sender prefix
+**      parv[1] = nickname mask list
+**      parv[2] = additional selection flag, only 'o' for now.
+*/
 static void
-do_who(struct Client *source_p, struct Client *target_p,
-       const char *chname, const char *op_flags)
+m_who(struct Client *client_p, struct Client *source_p,
+      int parc, char *parv[])
 {
-  char status[7]; /* G*@%+\0 */
+  struct Client *target_p = NULL;
+  struct Channel *chptr = NULL;
+  char *mask = parv[1];
+  dlink_node *lp = NULL;
+  int server_oper = parc > 2 ? (*parv[2] == 'o') : 0; /* Show OPERS only */
 
-  if (HasUMode(source_p, UMODE_OPER))
-    snprintf(status, sizeof(status), "%c%s%s", target_p->away[0] ? 'G' : 'H',
-             HasUMode(target_p, UMODE_OPER) ? "*" : "", op_flags);
-  else
-    snprintf(status, sizeof(status), "%c%s%s", target_p->away[0] ? 'G' : 'H',
-             HasUMode(target_p, UMODE_OPER) &&
-             !HasUMode(target_p, UMODE_HIDDEN) ? "*" : "", op_flags);
+  /* See if mask is there, collapse it or return if not there */
+  if (EmptyString(mask))
+  {
+    who_global(source_p, mask, server_oper);
+    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+               me.name, source_p->name, "*");
+    return;
+  }
 
-  if (ConfigServerHide.hide_servers)
+  /* mask isn't NULL at this point. repeat after me... -db */
+  collapse(mask);
+
+  /* '/who *' */
+  if (!strcmp(mask, "*"))
   {
-    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
-	       (chname) ? (chname) : "*",
-               target_p->username, target_p->host,
-	       HasUMode(source_p, UMODE_OPER) ? target_p->servptr->name : "*",
-	       target_p->name, status, 0, target_p->info);
+    if ((lp = source_p->channel.head) != NULL)
+    {
+      struct Channel *mychannel = ((struct Membership *)lp->data)->chptr;
+      do_who_on_channel(source_p, mychannel, mychannel->chname, 1,
+                        server_oper);
+    }
+
+    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+               me.name, source_p->name, "*");
+    return;
   }
+
+  /* '/who #some_channel' */
+  if (IsChanPrefix(*mask))
+  {
+    /* List all users on a given channel */
+    if ((chptr = hash_find_channel(mask)) != NULL)
+    {
+      if (IsMember(source_p, chptr))
+        do_who_on_channel(source_p, chptr, chptr->chname, 1, server_oper);
+      else if (!SecretChannel(chptr))
+        do_who_on_channel(source_p, chptr, chptr->chname, 0, server_oper);
+    }
+
+    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+               me.name, source_p->name, mask);
+    return;
+  }
+
+  /* '/who nick' */
+  if (((target_p = hash_find_client(mask)) != NULL) &&
+      IsClient(target_p) && (!server_oper || HasUMode(target_p, UMODE_OPER)))
+  {
+    DLINK_FOREACH(lp, target_p->channel.head)
+    {
+      chptr = ((struct Membership *) lp->data)->chptr;
+      if (PubChannel(chptr) || IsMember(source_p, chptr))
+        break;
+    }
+
+    if (lp != NULL)
+      do_who(source_p, target_p, chptr->chname,
+             get_member_status(lp->data, !!HasCap(source_p, CAP_MULTI_PREFIX)));
+    else
+      do_who(source_p, target_p, NULL, "");
+
+    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+               me.name, source_p->name, mask);
+    return;
+  }
+
+  /* '/who 0' */
+  if (!strcmp(mask, "0"))
+    who_global(source_p, NULL, server_oper);
   else
-  {
-    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
-	       (chname) ? (chname) : "*", target_p->username,
-	       target_p->host, target_p->servptr->name, target_p->name,
-	       status, target_p->hopcount, target_p->info);
-  }
+    who_global(source_p, mask, server_oper);
+
+  /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
+  sendto_one(source_p, form_str(RPL_ENDOFWHO),
+             me.name, source_p->name, mask);
 }
 
 static struct Message who_msgtab = {

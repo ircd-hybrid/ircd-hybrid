@@ -13,9 +13,8 @@ OPERWALL        PART            PASS            PING
 PONG            POST            PRIVMSG         QUIT
 REHASH          RESTART         RESV            SERVER
 SET             SJOIN           SQUIT           STATS
-SVINFO          TESTGECOS       TESTLINE        TESTMASK
-TIME            TOPIC           TRACE           UMODE
-UNDLINE         UNKLINE         UNRESV          UNXLINE
-USER            USERHOST        USERS           VERSION
-WALLOPS         WHO             WHOIS           WHOWAS
-XLINE
+SVINFO          TIME            TOPIC           TRACE
+UMODE           UNDLINE         UNKLINE         UNRESV
+UNXLINE         USER            USERHOST        USERS
+VERSION         WALLOPS         WHO             WHOIS
+WHOWAS          XLINE

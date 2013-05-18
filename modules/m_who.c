@@ -139,10 +139,7 @@ who_global(struct Client *source_p, char *mask, int server_oper)
 {
   struct Channel *chptr;
   struct Client *target_p;
-  dlink_node *lp;
-  dlink_node *lp_next;
-  dlink_node *gcptr;
-  dlink_node *gcptr_next;
+  dlink_node *lp = NULL, *gcptr = NULL;
   int maxmatches = 500;
   static time_t last_used = 0;
 
@@ -159,14 +156,14 @@ who_global(struct Client *source_p, char *mask, int server_oper)
   }
 
   /* first, list all matching invisible clients on common channels */
-  DLINK_FOREACH_SAFE(lp, lp_next, source_p->channel.head)
+  DLINK_FOREACH(lp, source_p->channel.head)
   {
     chptr = ((struct Membership *)lp->data)->chptr;
     who_common_channel(source_p, chptr, mask, server_oper, &maxmatches);
   }
 
   /* second, list all matching visible clients */
-  DLINK_FOREACH_SAFE(gcptr, gcptr_next, global_client_list.head)
+  DLINK_FOREACH(gcptr, global_client_list.head)
   {
     target_p = gcptr->data;
 
@@ -217,9 +214,9 @@ static void
 do_who_on_channel(struct Client *source_p, struct Channel *chptr,
                   const char *chname, int member, int server_oper)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *ptr = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, chptr->members.head)
+  DLINK_FOREACH(ptr, chptr->members.head)
   {
     struct Membership *ms = ptr->data;
     struct Client *target_p = ms->client_p;
@@ -263,21 +260,6 @@ m_who(struct Client *client_p, struct Client *source_p,
   /* mask isn't NULL at this point. repeat after me... -db */
   collapse(mask);
 
-  /* '/who *' */
-  if (!strcmp(mask, "*"))
-  {
-    if ((lp = source_p->channel.head) != NULL)
-    {
-      struct Channel *mychannel = ((struct Membership *)lp->data)->chptr;
-      do_who_on_channel(source_p, mychannel, mychannel->chname, 1,
-                        server_oper);
-    }
-
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, "*");
-    return;
-  }
-
   /* '/who #some_channel' */
   if (IsChanPrefix(*mask))
   {
@@ -314,6 +296,21 @@ m_who(struct Client *client_p, struct Client *source_p,
 
     sendto_one(source_p, form_str(RPL_ENDOFWHO),
                me.name, source_p->name, mask);
+    return;
+  }
+
+  /* '/who *' */
+  if (!strcmp(mask, "*"))
+  {
+    if ((lp = source_p->channel.head) != NULL)
+    {
+      struct Channel *mychannel = ((struct Membership *)lp->data)->chptr;
+      do_who_on_channel(source_p, mychannel, mychannel->chname, 1,
+                        server_oper);
+    }
+
+    sendto_one(source_p, form_str(RPL_ENDOFWHO),
+               me.name, source_p->name, "*");
     return;
   }
 

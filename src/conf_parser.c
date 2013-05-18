@@ -4878,7 +4878,7 @@ yyreduce:
 #line 1646 "conf_parser.y"
     {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
+    block_state.flags.value &= (CONF_FLAGS_ENCRYPTED | CONF_FLAGS_SPOOF_IP);
 }
     break;
 

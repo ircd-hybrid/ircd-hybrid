@@ -56,9 +56,6 @@ dist_helpf_DATA = accept    \
                   squit     \
                   stats     \
                   svinfo    \
-                  testgecos \
-                  testline  \
-                  testmask  \
                   time      \
                   topic     \
                   trace     \

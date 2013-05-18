@@ -1,5 +1,0 @@
-TESTLINE <user@host>|ip
-
--- Looks up given user@host or user@ip
-returns info on any found I line or K line for that user,
-or D-line on ip.

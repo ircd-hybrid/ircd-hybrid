@@ -1095,8 +1095,7 @@ user_welcome(struct Client *source_p)
 #endif
 
   sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, 
-             ServerInfo.network_name, source_p->name,
-             source_p->username, source_p->host);
+             ServerInfo.network_name, source_p->name);
   sendto_one(source_p, form_str(RPL_YOURHOST), me.name, source_p->name,
              get_listener_name(source_p->localClient->listener), ircd_version);
   sendto_one(source_p, form_str(RPL_CREATED),

@@ -32,9 +32,18 @@
 #include "modules.h"
 
 
+/*
+ * m_ison added by Darren Reed 13/8/91 to act as an efficent user indicator
+ * with respect to cpu/bandwidth used. Implemented for NOTIFY feature in
+ * clients. Designed to reduce number of whois requests. Can process
+ * nicknames in batches as long as the maximum buffer length.
+ *
+ * format:
+ * ISON :nicklist
+ */
 static void
-do_ison(struct Client *client_p, struct Client *source_p,
-        const int parc, char *parv[])
+m_ison(struct Client *client_p, struct Client *source_p,
+       int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   char *nick;
@@ -87,22 +96,6 @@ do_ison(struct Client *client_p, struct Client *source_p,
   *current_insert_point  = '\0';
 
   sendto_one(source_p, "%s", buf);
-}
-
-/*
- * m_ison added by Darren Reed 13/8/91 to act as an efficent user indicator
- * with respect to cpu/bandwidth used. Implemented for NOTIFY feature in
- * clients. Designed to reduce number of whois requests. Can process
- * nicknames in batches as long as the maximum buffer length.
- *
- * format:
- * ISON :nicklist
- */
-static void
-m_ison(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
-{
-  do_ison(client_p, source_p, parc, parv);
 }
 
 static struct Message ison_msgtab = {

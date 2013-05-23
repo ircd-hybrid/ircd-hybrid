@@ -62,9 +62,8 @@ mo_locops(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  sendto_wallops_flags(UMODE_LOCOPS, source_p, "LOCOPS - %s",
-                       message);
-
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_LOCOPS, "from: %s: %s",
+                       source_p->name, message);
   cluster_a_line(source_p, "LOCOPS", 0, SHARED_LOCOPS, message);
 }
 
@@ -83,7 +82,8 @@ ms_locops(struct Client *client_p, struct Client *source_p,
 
   if (find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               "*", "*", SHARED_LOCOPS))
-    sendto_wallops_flags(UMODE_LOCOPS, source_p, "SLOCOPS - %s", parv[2]);
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_LOCOPS, "from: %s: %s",
+                         source_p->name, parv[2]);
 }
 
 static struct Message locops_msgtab = {

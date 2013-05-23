@@ -4815,8 +4815,8 @@ yyreduce:
     split_nuh(&nuh);
 
     conf        = conf_make(CONF_CLIENT);
-    conf->user  = xstrdup(collapse(block_state.user.buf));
-    conf->host  = xstrdup(collapse(block_state.host.buf));
+    conf->user  = xstrdup(block_state.user.buf);
+    conf->host  = xstrdup(block_state.host.buf);
 
     if (block_state.rpass.buf[0])
       conf->passwd = xstrdup(block_state.rpass.buf);

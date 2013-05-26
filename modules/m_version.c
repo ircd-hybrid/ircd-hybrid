@@ -36,7 +36,6 @@
 
 /* Option string. */
 static const char serveropts[] = {
-  ' ',
   'T',
   'S',
 #ifdef TS_CURRENT
@@ -48,42 +47,6 @@ static const char serveropts[] = {
   'w',
   '\0'
 };
-
-/* confopts()
- *
- * input  - client pointer
- * output - ircd.conf option string
- * side effects - none
- */
-static char *
-confopts(struct Client *source_p)
-{
-  static char result[12];
-  char *p = result;
-
-  *p++ = 'e'; /* excepts */
-
-  if (ConfigFileEntry.glines)
-    *p++ = 'G';
-  *p++ = 'g';
-
-  /* might wanna hide this :P */
-  if (ServerInfo.hub &&
-      (!ConfigFileEntry.disable_remote || HasUMode(source_p, UMODE_OPER)))
-    *p++ = 'H';
-
-  *p++ = 'I'; /* invex */
-  *p++ = 'K'; /* knock */
-  *p++ = 'M';
-
-  if (ConfigFileEntry.ignore_bogus_ts)
-    *p++ = 'T';
-  *p++ = '6';
-
-  *p = '\0';
-
-  return result;
-}
 
 /*
  * m_version - VERSION command handler
@@ -113,7 +76,7 @@ m_version(struct Client *client_p, struct Client *source_p,
 
   sendto_one(source_p, form_str(RPL_VERSION), me.name,
              source_p->name, ircd_version, serno,
-             me.name, confopts(source_p), serveropts);
+             me.name, serveropts);
   show_isupport(source_p);
 }
 
@@ -133,7 +96,7 @@ mo_version(struct Client *client_p, struct Client *source_p,
 
   sendto_one(source_p, form_str(RPL_VERSION), me.name,
              source_p->name, ircd_version, serno,
-             me.name, confopts(source_p), serveropts);
+             me.name, serveropts);
   show_isupport(source_p);
 }
 
@@ -154,7 +117,7 @@ ms_version(struct Client *client_p, struct Client *source_p,
              ID_or_name(&me, client_p),
              ID_or_name(source_p, client_p),
              ircd_version, serno,
-             me.name, confopts(source_p), serveropts);
+             me.name, serveropts);
   show_isupport(source_p);
 }
 

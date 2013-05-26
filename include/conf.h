@@ -123,7 +123,6 @@ enum maskitem_type
   CONF_NRESV    = 1 << 11,
   CONF_SERVICE  = 1 << 12,
   CONF_OPER     = 1 << 13,
-  CONF_HUB      = 1 << 14, /* XXX There are no separate hub/leaf configs anymore. This is just for /stats h */
 };
 
 struct conf_parser_context

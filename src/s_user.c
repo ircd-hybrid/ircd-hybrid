@@ -757,7 +757,7 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   if (IsConfDoSpoofIp(conf))
   {
     sendto_one(source_p,
-               ":%s NOTICE %s :*** Spoofing your IP. congrats.",
+               ":%s NOTICE %s :*** Spoofing your IP. Congrats.",
                me.name, source_p->name);
   }
 
@@ -766,7 +766,7 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   {
     SetExemptKline(source_p);
     sendto_one(source_p,
-               ":%s NOTICE %s :*** You are exempt from K/D/G lines. congrats.",
+               ":%s NOTICE %s :*** You are exempt from K/D/G lines. Congrats.",
                me.name, source_p->name);
   }
 
@@ -776,14 +776,14 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   else if (IsConfExemptGline(conf))
   {
     SetExemptGline(source_p);
-    sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from G lines.",
+    sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from G lines. Congrats.",
                me.name, source_p->name);
   }
 
   if (IsConfExemptResv(conf))
   {
     SetExemptResv(source_p);
-    sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from resvs.",
+    sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from resvs. Congrats.",
                me.name, source_p->name);
   }
 
@@ -792,7 +792,7 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   {
     SetExemptLimits(source_p);
     sendto_one(source_p,
-               ":%s NOTICE %s :*** You are exempt from user limits. congrats.",
+               ":%s NOTICE %s :*** You are exempt from user limits. Congrats.",
                me.name,source_p->name);
   }
 

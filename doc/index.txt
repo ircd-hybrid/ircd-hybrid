@@ -18,5 +18,4 @@ modeg.txt               - An in depth description of the server side silence
                           user mode (+g)
 modes.txt               - A list of all user and channel modes
 resv.txt		- Outline of the RESV command.
-server-version-info     - Overview of the flags shown in /version
 serverhide.txt          - Information about the server hide options

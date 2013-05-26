@@ -201,27 +201,6 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
     }
     break;
 
-  case CONF_HUB:
-    DLINK_FOREACH(ptr, server_items.head)
-    {
-      conf = ptr->data;
-
-      DLINK_FOREACH(dptr, conf->hub_list.head)
-        sendto_one(source_p, form_str(RPL_STATSHLINE), me.name,
-                   source_p->name, 'H', dptr->data, conf->name, 0, "*");
-    }
-
-    DLINK_FOREACH(ptr, server_items.head)
-    {
-      conf = ptr->data;
-
-      DLINK_FOREACH(dptr, conf->leaf_list.head)
-        sendto_one(source_p, form_str(RPL_STATSLLINE), me.name,
-                   source_p->name, 'L', dptr->data, conf->name, 0, "*");
-    }
-
-    break;
-
   default:
     break;
   }
@@ -833,7 +812,25 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
 static void
 stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, CONF_HUB);
+  const dlink_node *ptr = NULL, *dptr = NULL;
+
+  DLINK_FOREACH(ptr, server_items.head)
+  {
+    const struct MaskItem *conf = ptr->data;
+
+    DLINK_FOREACH(dptr, conf->hub_list.head)
+      sendto_one(source_p, form_str(RPL_STATSHLINE), me.name,
+                 source_p->name, 'H', dptr->data, conf->name, 0, "*");
+  }
+
+  DLINK_FOREACH(ptr, server_items.head)
+  {
+    const struct MaskItem *conf = ptr->data;
+
+    DLINK_FOREACH(dptr, conf->leaf_list.head)
+      sendto_one(source_p, form_str(RPL_STATSLLINE), me.name,
+                 source_p->name, 'L', dptr->data, conf->name, 0, "*");
+  }
 }
 
 /*

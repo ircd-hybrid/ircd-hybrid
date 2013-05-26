@@ -80,7 +80,6 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 {
   dlink_node *ptr = NULL, *dptr = NULL;
   struct MaskItem *conf = NULL;
-  const struct ClassItem *class = NULL;
   const struct shared_flags *shared = NULL;
   char buf[12];
   char *p = NULL;
@@ -157,23 +156,6 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 		   me.name, source_p->name, 'O', conf->count, conf->user, conf->host,
                    conf->name, "0",
 		   conf->class ? conf->class->name : "<default>");
-    }
-    break;
-
-  case CONF_CLASS:
-    DLINK_FOREACH(ptr, class_get_list()->head)
-    {
-      class = ptr->data;
-      sendto_one(source_p, form_str(RPL_STATSYLINE),
-		 me.name, source_p->name, 'Y',
-		 class->name, class->ping_freq,
-		 class->con_freq,
-		 class->max_total, class->max_sendq,
-                 class->max_recvq,
-                 class->ref_count,
-                 class->number_per_cidr, class->cidr_bitlen_ipv4,
-                 class->number_per_cidr, class->cidr_bitlen_ipv6,
-                 class->active ? "active" : "disabled");
     }
     break;
 
@@ -1305,7 +1287,23 @@ stats_gecos(struct Client *source_p, int parc, char *parv[])
 static void
 stats_class(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, CONF_CLASS);
+  const dlink_node *ptr = NULL;
+
+  DLINK_FOREACH(ptr, class_get_list()->head)
+  {
+    const struct ClassItem *class = ptr->data;
+
+    sendto_one(source_p, form_str(RPL_STATSYLINE),
+               me.name, source_p->name, 'Y',
+               class->name, class->ping_freq,
+               class->con_freq,
+               class->max_total, class->max_sendq,
+               class->max_recvq,
+               class->ref_count,
+               class->number_per_cidr, class->cidr_bitlen_ipv4,
+               class->number_per_cidr, class->cidr_bitlen_ipv6,
+               class->active ? "active" : "disabled");
+  }
 }
 
 static void

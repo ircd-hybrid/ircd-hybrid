@@ -185,9 +185,6 @@ relay_xline(struct Client *source_p, char *parv[])
   int t_sec;
 
   t_sec = atoi(parv[3]);
-  /* XXX kludge! */
-  if (t_sec < 3)
-    t_sec = 0;
 
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
                      "XLINE %s %s %s :%s",

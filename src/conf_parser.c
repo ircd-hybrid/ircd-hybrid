@@ -5405,8 +5405,8 @@ yyreduce:
       !block_state.host.buf[0])
     break;
 
-  if (!(block_state.rpass.buf[0] ||
-        block_state.spass.buf[0]))
+  if (!block_state.rpass.buf[0] ||
+      !block_state.spass.buf[0])
     break;
 
   if (has_wildcards(block_state.name.buf) ||

@@ -56,9 +56,9 @@ binary_to_hex(unsigned char *bin, char *hex, int length)
   static const char trans[] = "0123456789ABCDEF";
   int i;
 
-  for (i = 0; i < length; i++)
+  for (i = 0; i < length; ++i)
   {
-    hex[i  << 1]      = trans[bin[i] >> 4];
+    hex[(i << 1)    ] = trans[bin[i] >> 4];
     hex[(i << 1) + 1] = trans[bin[i] & 0xf];
   }
 
@@ -68,18 +68,16 @@ binary_to_hex(unsigned char *bin, char *hex, int length)
 int
 get_randomness(unsigned char *buf, int length)
 {
-    /* Seed OpenSSL PRNG with EGD enthropy pool -kre */
-    if (ConfigFileEntry.use_egd &&
-        (ConfigFileEntry.egdpool_path != NULL))
-    {
-      if (RAND_egd(ConfigFileEntry.egdpool_path) == -1)
-            return -1;
-    }
+  /* Seed OpenSSL PRNG with EGD enthropy pool -kre */
+  if (ConfigFileEntry.use_egd &&
+      ConfigFileEntry.egdpool_path)
+    if (RAND_egd(ConfigFileEntry.egdpool_path) == -1)
+      return -1;
 
   if (RAND_status())
-    return (RAND_bytes(buf, length));
-  else /* XXX - abort? */
-    return (RAND_pseudo_bytes(buf, length));
+    return RAND_bytes(buf, length);
+  /* XXX - abort? */
+  return RAND_pseudo_bytes(buf, length);
 }
 
 int

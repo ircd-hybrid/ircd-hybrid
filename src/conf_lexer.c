@@ -383,171 +383,171 @@ static yyconst flex_int16_t yy_accept[1575] =
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,   71,    0,  241,    0,    0,    0,    0,    0,    0,
-        0,  246,    0,    0,    0,    0,    0,    0,    0,  102,
+        0,   81,    0,  241,    0,    0,    0,    0,    0,    0,
+        0,  246,    0,    0,    0,    0,    0,    0,    0,  220,
 
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,   12,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,  228,
-        0,    0,    0,    0,    0,   30,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,   37,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,   67,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,   76,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,   82,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,   96,    0,    0,    0,    0,    0,    0,    0,    0,
 
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,  209,
-        0,    0,    0,    0,    0,    0,  147,    0,    0,  150,
-        0,    0,    0,    0,  211,    0,  132,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,  156,
+        0,    0,    0,    0,    0,    0,  172,    0,    0,  175,
+        0,    0,    0,    0,  181,    0,  183,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,  170,
-        0,    0,    0,    0,    0,   13,    0,  201,  236,    0,
-        0,    0,    0,    0,    0,    0,    0,  227,  204,    0,
-        0,   28,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,   42,    0,    0,  206,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,  219,
+        0,    0,    0,    0,    0,   15,    0,   17,  236,    0,
+        0,    0,    0,    0,    0,    0,    0,  227,   30,    0,
+        0,   35,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,   51,    0,    0,   54,    0,    0,
 
-        0,    0,    0,    0,    0,   66,  230,    0,    0,    0,
-       72,   73,    0,    0,   76,    0,    0,    0,    0,    0,
-        0,    0,   83,    0,    0,    0,    0,    0,    0,    0,
-       97,    0,    0,    0,  101,    0,    0,    0,    0,    0,
-        0,  110,    0,    0,  195,    0,  117,    0,    0,    0,
-        0,    0,    0,    0,    0,  128,    0,    0,    0,    0,
-        0,    0,  151,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,  156,    0,    0,    0,
-        0,    0,    0,    0,  165,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,   75,  230,    0,    0,    0,
+       82,   83,    0,    0,   86,    0,    0,    0,    0,    0,
+        0,    0,   97,    0,    0,    0,    0,    0,    0,    0,
+      120,    0,    0,    0,  126,    0,    0,    0,    0,    0,
+        0,  134,    0,    0,  145,    0,  148,    0,    0,    0,
+        0,    0,    0,    0,    0,  160,    0,    0,    0,    0,
+        0,    0,  176,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,  201,    0,    0,    0,
+        0,    0,    0,    0,  211,    0,    0,    0,    0,    0,
       226,    0,  222,    0,    0,    9,    0,    0,    0,  235,
 
-        0,    0,  202,    0,    0,   21,    0,    0,  205,    0,
-        0,    0,   34,    0,    0,   37,    0,    0,    0,    0,
-        0,    0,   43,    0,   45,    0,   47,    0,    0,    0,
+        0,    0,   21,    0,    0,   26,    0,    0,   31,    0,
+        0,    0,   41,    0,    0,   44,    0,    0,    0,    0,
+        0,    0,   52,    0,   55,    0,   57,    0,    0,    0,
         0,    0,    0,  229,    0,    0,    0,    0,  240,    0,
-        0,   78,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,   88,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,  245,    0,    0,
         0,    0,    0,  224,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,  121,    0,    0,    0,    0,    0,    0,
-        0,  141,    0,    0,    0,    0,    0,    0,  207,    0,
+        0,    0,    0,  152,    0,    0,    0,    0,    0,    0,
+        0,  165,    0,    0,    0,    0,    0,    0,  177,    0,
 
-      152,  154,  138,    0,    0,    0,    0,    0,    0,  139,
+      179,  182,  189,    0,    0,    0,    0,    0,    0,  197,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,  166,    0,    0,    0,  225,  169,  221,    0,
+        0,    0,  212,    0,    0,    0,  225,  218,  221,    0,
         0,    0,   11,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-       40,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,   59,    0,    0,    0,    0,    0,    0,  239,    0,
-        0,    0,    0,    0,    0,   81,  220,   84,    0,    0,
+       47,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,   68,    0,    0,    0,    0,    0,    0,  239,    0,
+        0,    0,    0,    0,    0,   94,   95,   98,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-      244,    0,  232,    0,    0,  194,  223,    0,    0,    0,
+      244,    0,  232,    0,    0,  118,  223,    0,    0,    0,
 
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  113,    0,    0,    0,    0,    0,
-      120,    0,    0,  124,  125,    0,    0,    0,    0,  234,
-        0,  142,    0,    0,  148,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,  158,
-      210,    0,    0,    0,  198,    0,    0,    0,  167,  216,
-        0,  168,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,   18,    0,   22,   23,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,   46,    0,    0,
-        0,    0,    0,   54,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,  143,    0,    0,    0,    0,    0,
+      151,    0,    0,  155,  157,    0,    0,    0,    0,  234,
+        0,  166,    0,    0,  173,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,  202,
+      203,    0,    0,    0,  207,    0,    0,    0,  213,  214,
+        0,  217,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,   23,    0,   27,   28,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,   56,    0,    0,
+        0,    0,    0,   65,    0,    0,    0,    0,    0,    0,
 
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  231,    0,    0,  193,  208,    0,
+        0,    0,    0,    0,  231,    0,    0,  119,  121,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,  127,    0,    0,    0,  233,    0,    0,
-        0,  145,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,  159,    0,    0,    0,  233,    0,    0,
+        0,  169,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,  160,  159,    0,  197,  162,    0,  217,    0,    0,
-        0,    0,    0,    0,   14,  218,    0,    0,    0,    0,
+        0,  204,  205,    0,  208,  209,    0,  215,    0,    0,
+        0,    0,    0,    0,   16,   19,    0,    0,    0,    0,
 
-        0,    0,    0,    0,    0,    0,    0,    0,  212,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,   48,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,   68,    0,    0,    0,    0,  238,
-        0,    0,    0,    0,    0,  192,    0,    0,    0,    0,
-       87,    0,    0,    0,    0,    0,    0,  243,   88,    0,
-        0,    0,    0,  107,    0,    0,    0,  106,    0,  112,
-        0,  213,    0,    0,    0,    0,  114,    0,    0,    0,
+        0,    0,    0,    0,   77,    0,    0,    0,    0,  238,
+        0,    0,    0,    0,    0,  100,    0,    0,    0,    0,
+      106,    0,    0,    0,    0,    0,    0,  243,  115,    0,
+        0,    0,    0,  131,    0,    0,    0,  130,    0,  138,
+        0,  140,    0,    0,    0,    0,  144,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,   15,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,   38,    0,    0,    0,    0,    0,    0,
+        0,   20,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,   45,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,  215,    0,    0,  237,    0,    0,   80,    0,    0,
-        0,    0,    0,   86,   89,    0,    0,    0,    0,   94,
+        0,   79,    0,    0,  237,    0,    0,   92,    0,    0,
+        0,    0,    0,  105,  107,    0,    0,    0,    0,  114,
       242,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  188,    0,  116,    0,    0,  122,
-      123,  126,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,  141,    0,  147,    0,    0,  153,
+      154,  158,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 
-        0,    0,    0,    0,    0,    0,    0,    0,  161,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,  206,    0,
         0,    0,    1,    0,    1,    0,    0,    0,    0,    0,
-      203,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,   41,    0,    0,    0,    0,    0,    0,
-        0,    0,   56,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,  172,    0,    0,   90,    0,
-        0,    0,   91,    0,    0,    0,   57,    0,    0,    0,
+       22,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,   50,    0,    0,    0,    0,    0,    0,
+        0,    0,   66,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,   99,    0,    0,  104,    0,
+        0,    0,  111,    0,    0,    0,  122,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-      118,    0,    0,    0,    0,    0,  143,  144,    0,  214,
-      149,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+      149,    0,    0,    0,    0,    0,  167,  168,    0,  171,
+      174,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,   24,    0,    0,   29,
+        0,    0,    0,    0,    0,    0,   29,    0,    0,   36,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,   55,    0,   60,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,  190,  181,    0,   85,    0,
-        0,    0,  196,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,  200,    0,  115,  119,  129,
+        0,    0,    0,   64,    0,   69,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,   90,   93,    0,  103,    0,
+        0,    0,  112,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,  137,    0,  146,  150,  161,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,  163,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,  210,    0,    0,    0,    0,    0,    0,    0,    0,
 
-        0,   31,    0,    0,    0,   36,   39,    0,    0,    0,
-       48,   49,    0,    0,    0,    0,   63,    0,    0,    0,
-        0,    0,    0,    0,    0,   79,    0,    0,    0,    0,
-        0,    0,    0,    0,   99,  100,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    0,  219,
-      153,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  179,    0,    0,    0,   10,    0,
-        0,    0,    0,    0,    0,    0,    0,   35,    0,   44,
-        0,    0,    0,    0,    0,    0,   64,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,  176,    0,    0,
+        0,   38,    0,    0,    0,   43,   46,    0,    0,    0,
+       59,   60,    0,    0,    0,    0,   72,    0,    0,    0,
+        0,    0,    0,    0,    0,   89,    0,    0,    0,    0,
+        0,    0,    0,    0,  124,  125,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,  178,
+      180,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,  199,    0,    0,    0,   10,    0,
+        0,    0,    0,    0,    0,    0,    0,   42,    0,   53,
+        0,    0,    0,    0,    0,    0,   73,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,  110,    0,    0,
 
-       98,    0,    0,  105,    0,  109,    0,    0,    0,    0,
-        0,    0,  140,  146,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  164,    0,    0,  180,  182,    0,
-        0,    0,   16,    0,    0,    0,    0,    0,    0,   50,
-       52,    0,    0,    0,    0,   65,    0,    0,    0,    0,
+      123,    0,    0,  129,    0,  133,    0,    0,    0,    0,
+        0,    0,  164,  170,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,  195,    0,    0,  200,  216,    0,
+        0,    0,   18,    0,    0,    0,    0,    0,    0,   58,
+       61,    0,    0,    0,    0,   74,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,  111,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    8,  177,
-        0,    0,    0,    0,    0,    0,    0,    0,   53,    0,
-        0,    0,   62,   69,    0,    0,   75,    0,    0,    0,
+        0,    0,  136,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    8,   13,
+        0,    0,    0,    0,    0,    0,    0,    0,   62,    0,
+        0,    0,   71,   78,    0,    0,   85,    0,    0,    0,
 
-        0,    0,   92,    0,   95,    0,    0,  108,    0,    0,
-        0,    0,    0,    0,  137,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,   19,   20,    0,    0,
-        0,    0,    0,    0,    0,   58,    0,    0,   74,    0,
-        0,    0,    0,  173,   93,    0,    0,  104,    0,  199,
-      189,    0,    0,    0,    0,    0,    0,  183,    0,    0,
+        0,    0,  109,    0,  116,    0,    0,  132,    0,    0,
+        0,    0,    0,    0,  185,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,   24,   25,    0,    0,
+        0,    0,    0,    0,    0,   67,    0,    0,   84,    0,
+        0,    0,    0,  108,  113,    0,    0,  128,    0,  135,
+      142,    0,    0,    0,    0,    0,    0,  190,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  134,  136,  135,  186,  185,  184,
-      187,    0,    0,    0,   25,    0,    0,    0,    0,  171,
+        0,    0,    0,    0,  186,  187,  188,  191,  192,  193,
+      194,    0,    0,    0,   32,    0,    0,    0,    0,   49,
 
-        0,    0,    0,    0,    0,  174,  175,    0,  103,    0,
-        0,    0,    0,    0,  157,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,  191,    0,    0,    0,  131,    0,
-        0,    0,    0,    0,    0,    0,    0,   61,   70,    0,
-        0,    0,  130,  133,    0,    0,    0,    0,   32,    0,
-        0,   77,    0,   17,  155,    0,    0,    0,    0,   51,
-       96,    0,    0,    0,   33,    0,    0,   27,    0,    0,
-        0,   26,  178,    0
+        0,    0,    0,    0,    0,  101,  102,    0,  127,    0,
+        0,    0,    0,    0,  198,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,   91,    0,    0,    0,  163,    0,
+        0,    0,    0,    0,    0,    0,    0,   70,   80,    0,
+        0,    0,  162,  184,    0,    0,    0,    0,   39,    0,
+        0,   87,    0,  139,  196,    0,    0,    0,    0,   63,
+      117,    0,    0,    0,   40,    0,    0,   34,    0,    0,
+        0,   33,   14,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -2088,1190 +2088,1190 @@ YY_RULE_SETUP
 case 13:
 YY_RULE_SETUP
 #line 139 "conf_lexer.l"
-{ return IRCD_AUTH; }
+{ return ANTI_NICK_FLOOD; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 140 "conf_lexer.l"
-{ return AUTOCONN; }
+{ return ANTI_SPAM_EXIT_MESSAGE_TIME; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 141 "conf_lexer.l"
-{ return CAN_FLOOD; }
+{ return IRCD_AUTH; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 142 "conf_lexer.l"
-{ return CALLER_ID_WAIT; }
+{ return AUTOCONN; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 143 "conf_lexer.l"
-{ return OPERS_BYPASS_CALLERID; }
+{ return T_BOTS; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 144 "conf_lexer.l"
-{ return CHANNEL; }
+{ return CALLER_ID_WAIT; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 145 "conf_lexer.l"
-{ return CIDR_BITLEN_IPV4; }
+{ return T_CALLERID; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 146 "conf_lexer.l"
-{ return CIDR_BITLEN_IPV6; }
+{ return CAN_FLOOD; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 147 "conf_lexer.l"
-{ return CLASS; }
+{ return T_CCONN; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 148 "conf_lexer.l"
-{ return T_CLUSTER; }
+{ return T_CCONN_FULL; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 149 "conf_lexer.l"
-{ return CONNECT; }
+{ return CHANNEL; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 150 "conf_lexer.l"
-{ return CONNECTFREQ; }
+{ return CIDR_BITLEN_IPV4; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 151 "conf_lexer.l"
-{ return DEFAULT_FLOODCOUNT; }
+{ return CIDR_BITLEN_IPV6; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 152 "conf_lexer.l"
-{ return DEFAULT_SPLIT_SERVER_COUNT; }
+{ return CLASS; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 153 "conf_lexer.l"
-{ return DEFAULT_SPLIT_USER_COUNT; }
+{ return T_CLUSTER; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 154 "conf_lexer.l"
-{ return DENY; }
+{ return CONNECT; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 155 "conf_lexer.l"
-{ return DESCRIPTION; }
+{ return CONNECTFREQ; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 156 "conf_lexer.l"
-{ return DIE; }
+{ return T_DEAF; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 157 "conf_lexer.l"
-{ return DISABLE_AUTH; }
+{ return T_DEBUG; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 158 "conf_lexer.l"
-{ return DISABLE_FAKE_CHANNELS; }
+{ return DEFAULT_FLOODCOUNT; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 159 "conf_lexer.l"
-{ return DISABLE_REMOTE_COMMANDS; }
+{ return DEFAULT_SPLIT_SERVER_COUNT; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 160 "conf_lexer.l"
-{ return T_DLINE; }
+{ return DEFAULT_SPLIT_USER_COUNT; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 161 "conf_lexer.l"
-{ return DOTS_IN_IDENT; }
+{ return DENY; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 162 "conf_lexer.l"
-{ return EGDPOOL_PATH; }
+{ return DESCRIPTION; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
 #line 163 "conf_lexer.l"
-{ return EMAIL; }
+{ return DIE; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
 #line 164 "conf_lexer.l"
-{ return ENCRYPTED; }
+{ return DISABLE_AUTH; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 165 "conf_lexer.l"
-{ return EXCEED_LIMIT; }
+{ return DISABLE_FAKE_CHANNELS; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 166 "conf_lexer.l"
-{ return EXEMPT; }
+{ return DISABLE_REMOTE_COMMANDS; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 167 "conf_lexer.l"
-{ return T_FARCONNECT; }
+{ return T_DLINE; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 168 "conf_lexer.l"
-{ return T_FILE; }
+{ return DOTS_IN_IDENT; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
 #line 169 "conf_lexer.l"
-{ return IRCD_FLAGS; }
+{ return EGDPOOL_PATH; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 170 "conf_lexer.l"
-{ return FLATTEN_LINKS; }
+{ return EMAIL; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 #line 171 "conf_lexer.l"
-{ return GECOS; }
+{ return ENCRYPTED; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
 #line 172 "conf_lexer.l"
-{ return GENERAL; }
+{ return EXCEED_LIMIT; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 #line 173 "conf_lexer.l"
-{ return GLINE; }
+{ return EXEMPT; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 174 "conf_lexer.l"
-{ return GLINE_ENABLE; }
+{ return T_EXTERNAL; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
 #line 175 "conf_lexer.l"
-{ return GLINE_EXEMPT; }
+{ return FAILED_OPER_NOTICE; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 #line 176 "conf_lexer.l"
-{ return GLINE_DURATION; }
+{ return T_FARCONNECT; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 177 "conf_lexer.l"
-{ return GLINE_REQUEST_DURATION; }
+{ return T_FILE; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 178 "conf_lexer.l"
-{ return GLINE_MIN_CIDR; }
+{ return IRCD_FLAGS; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 179 "conf_lexer.l"
-{ return GLINE_MIN_CIDR6; }
+{ return FLATTEN_LINKS; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 180 "conf_lexer.l"
-{ return T_GLOBOPS; }
+{ return T_FULL; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
 #line 181 "conf_lexer.l"
-{ return GLOBAL_KILL; }
+{ return GECOS; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 182 "conf_lexer.l"
-{ return NEED_IDENT; }
+{ return GENERAL; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 183 "conf_lexer.l"
-{ return NEED_IDENT; }
+{ return GLINE; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 184 "conf_lexer.l"
-{ return HAVENT_READ_CONF; }
+{ return GLINE_DURATION; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 185 "conf_lexer.l"
-{ return HIDDEN; }
+{ return GLINE_ENABLE; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
 #line 186 "conf_lexer.l"
-{ return HIDDEN_NAME; }
+{ return GLINE_EXEMPT; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
 #line 187 "conf_lexer.l"
-{ return HIDE_IDLE_FROM_OPERS; }
+{ return GLINE_MIN_CIDR; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
 #line 188 "conf_lexer.l"
-{ return HIDE_SERVER_IPS; }
+{ return GLINE_MIN_CIDR6; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
 #line 189 "conf_lexer.l"
-{ return HIDE_SERVERS; }
+{ return GLINE_REQUEST_DURATION; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
 #line 190 "conf_lexer.l"
-{ return HIDE_SERVICES; }
+{ return GLOBAL_KILL; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
 #line 191 "conf_lexer.l"
-{ return HIDE_SPOOF_IPS; }
+{ return T_GLOBOPS; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
 #line 192 "conf_lexer.l"
-{ return HOST; }
+{ return NEED_IDENT; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
 #line 193 "conf_lexer.l"
-{ return HUB; }
+{ return HAVENT_READ_CONF; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
 #line 194 "conf_lexer.l"
-{ return HUB_MASK; }
+{ return HIDDEN; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
 #line 195 "conf_lexer.l"
-{ return IGNORE_BOGUS_TS; }
+{ return HIDDEN_NAME; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
 #line 196 "conf_lexer.l"
-{ return INVISIBLE_ON_CONNECT; }
+{ return HIDE_IDLE_FROM_OPERS; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
 #line 197 "conf_lexer.l"
-{ return IP; }
+{ return HIDE_SERVER_IPS; }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
 #line 198 "conf_lexer.l"
-{ return T_IPV4; }
+{ return HIDE_SERVERS; }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
 #line 199 "conf_lexer.l"
-{ return T_IPV6; }
+{ return HIDE_SERVICES; }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
 #line 200 "conf_lexer.l"
-{ return JOIN_FLOOD_COUNT; }
+{ return HIDE_SPOOF_IPS; }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
 #line 201 "conf_lexer.l"
-{ return JOIN_FLOOD_TIME; }
+{ return HOST; }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
 #line 202 "conf_lexer.l"
-{ return KILL; }
+{ return HUB; }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
 #line 203 "conf_lexer.l"
-{ return KILL_CHASE_TIME_LIMIT; }
+{ return HUB_MASK; }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
 #line 204 "conf_lexer.l"
-{ return KLINE; }
+{ return IGNORE_BOGUS_TS; }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
 #line 205 "conf_lexer.l"
-{ return KLINE_EXEMPT; }
+{ return T_INVISIBLE; }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
 #line 206 "conf_lexer.l"
-{ return LEAF_MASK; }
+{ return INVISIBLE_ON_CONNECT; }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
 #line 207 "conf_lexer.l"
-{ return LISTEN; }
+{ return IP; }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
 #line 208 "conf_lexer.l"
-{ return T_LOG; }
+{ return T_IPV4; }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
 #line 209 "conf_lexer.l"
-{ return MASK; }
+{ return T_IPV6; }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
 #line 210 "conf_lexer.l"
-{ return TMASKED; }
+{ return JOIN_FLOOD_COUNT; }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
 #line 211 "conf_lexer.l"
-{ return T_MAX_CLIENTS; }
+{ return JOIN_FLOOD_TIME; }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
 #line 212 "conf_lexer.l"
-{ return MAX_IDENT; }
+{ return KILL; }
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
 #line 213 "conf_lexer.l"
-{ return MAX_IDLE; }
+{ return KILL_CHASE_TIME_LIMIT; }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
 #line 214 "conf_lexer.l"
-{ return MIN_IDLE; }
+{ return KLINE; }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
 #line 215 "conf_lexer.l"
-{ return MAX_LOCAL; }
+{ return KLINE_EXEMPT; }
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
 #line 216 "conf_lexer.l"
-{ return MAX_GLOBAL; }
+{ return KNOCK_DELAY; }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
 #line 217 "conf_lexer.l"
-{ return MAX_NUMBER; }
+{ return KNOCK_DELAY_CHANNEL; }
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
 #line 218 "conf_lexer.l"
-{ return MAX_NICK_LENGTH; }
+{ return LEAF_MASK; }
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
 #line 219 "conf_lexer.l"
-{ return MAX_TOPIC_LENGTH; }
+{ return LINKS_DELAY; }
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
 #line 220 "conf_lexer.l"
-{ return MAX_WATCH; }
+{ return LISTEN; }
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
 #line 221 "conf_lexer.l"
-{ return MIN_NONWILDCARD; }
+{ return T_LOCOPS; }
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
 #line 222 "conf_lexer.l"
-{ return MIN_NONWILDCARD_SIMPLE; }
+{ return T_LOG; }
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
 #line 223 "conf_lexer.l"
-{ return NAME; }
+{ return MASK; }
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
 #line 224 "conf_lexer.l"
-{ return NEED_PASSWORD; }
+{ return TMASKED; }
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
 #line 225 "conf_lexer.l"
-{ return NETWORK_DESC; }
+{ return MAX_ACCEPT; }
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
 #line 226 "conf_lexer.l"
-{ return NETWORK_NAME; }
+{ return MAX_BANS; }
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
 #line 227 "conf_lexer.l"
-{ return NICK; }
+{ return MAX_CHANS_PER_OPER; }
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
 #line 228 "conf_lexer.l"
-{ yylval.number = 0; return TBOOL; }
+{ return MAX_CHANS_PER_USER; }
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
 #line 229 "conf_lexer.l"
-{ return NO_CREATE_ON_SPLIT; }
+{ return T_MAX_CLIENTS; }
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
 #line 230 "conf_lexer.l"
-{ return NO_JOIN_ON_SPLIT; }
+{ return MAX_GLOBAL; }
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
 #line 231 "conf_lexer.l"
-{ return NO_OPER_FLOOD; }
+{ return MAX_IDENT; }
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
 #line 232 "conf_lexer.l"
-{ return NO_TILDE; }
+{ return MAX_IDLE; }
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
 #line 233 "conf_lexer.l"
-{ return T_NONONREG; }
+{ return MAX_LOCAL; }
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
 #line 234 "conf_lexer.l"
-{ return NUMBER_PER_CIDR; }
+{ return MAX_NICK_CHANGES; }
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
 #line 235 "conf_lexer.l"
-{ return NUMBER_PER_IP; }
+{ return MAX_NICK_LENGTH; }
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
 #line 236 "conf_lexer.l"
-{ return OPERATOR; }
+{ return MAX_NICK_TIME; }
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
 #line 237 "conf_lexer.l"
-{ return OPER_PASS_RESV; }
+{ return MAX_NUMBER; }
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
 #line 238 "conf_lexer.l"
-{ return OPERATOR; }
+{ return MAX_TARGETS; }
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
 #line 239 "conf_lexer.l"
-{ return PASSWORD; }
+{ return MAX_TOPIC_LENGTH; }
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
 #line 240 "conf_lexer.l"
-{ return PASSWORD; }
+{ return MAX_WATCH; }
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
 #line 241 "conf_lexer.l"
-{ return PING_COOKIE; }
+{ return MIN_IDLE; }
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
 #line 242 "conf_lexer.l"
-{ return PING_TIME; }
+{ return MIN_NONWILDCARD; }
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
 #line 243 "conf_lexer.l"
-{ return PORT; }
+{ return MIN_NONWILDCARD_SIMPLE; }
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
 #line 244 "conf_lexer.l"
-{ return RESV; }
+{ return MODULE; }
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
 #line 245 "conf_lexer.l"
-{ return RANDOM_IDLE; }
+{ return MODULES; }
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
 #line 246 "conf_lexer.l"
-{ return REASON; }
+{ return NAME; }
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
 #line 247 "conf_lexer.l"
-{ return T_RECVQ; }
+{ return T_NCHANGE; }
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
 #line 248 "conf_lexer.l"
-{ return REDIRPORT; }
+{ return NEED_IDENT; }
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
 #line 249 "conf_lexer.l"
-{ return REDIRSERV; }
+{ return NEED_PASSWORD; }
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
 #line 250 "conf_lexer.l"
-{ return REHASH; }
+{ return NETWORK_DESC; }
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
 #line 251 "conf_lexer.l"
-{ return REMOTE; }
+{ return NETWORK_NAME; }
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
 #line 252 "conf_lexer.l"
-{ return REMOTEBAN; }
+{ return NICK; }
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
 #line 253 "conf_lexer.l"
-{ return T_RESTART; }
+{ return NO_CREATE_ON_SPLIT; }
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
 #line 254 "conf_lexer.l"
-{ return RESV; }
+{ return NO_JOIN_ON_SPLIT; }
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
 #line 255 "conf_lexer.l"
-{ return RESV_EXEMPT; }
+{ return NO_OPER_FLOOD; }
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
 #line 256 "conf_lexer.l"
-{ return RSA_PRIVATE_KEY_FILE; }
+{ return NO_TILDE; }
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
 #line 257 "conf_lexer.l"
-{ return RSA_PUBLIC_KEY_FILE; }
+{ return T_NONONREG; }
 	YY_BREAK
 case 132:
 YY_RULE_SETUP
 #line 258 "conf_lexer.l"
-{ return T_SSL; }
+{ return NUMBER_PER_CIDR; }
 	YY_BREAK
 case 133:
 YY_RULE_SETUP
 #line 259 "conf_lexer.l"
-{ return SSL_CERTIFICATE_FILE; }
+{ return NUMBER_PER_IP; }
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
 #line 260 "conf_lexer.l"
-{ return T_SSL_CLIENT_METHOD; }
+{ return OPERATOR; }
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
 #line 261 "conf_lexer.l"
-{ return T_SSL_SERVER_METHOD; }
+{ return OPER_ONLY_UMODES; }
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
 #line 262 "conf_lexer.l"
-{ return SSL_DH_PARAM_FILE; }
+{ return OPER_PASS_RESV; }
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
 #line 263 "conf_lexer.l"
-{ return T_SSL_CIPHER_LIST; }
+{ return OPER_UMODES; }
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
 #line 264 "conf_lexer.l"
-{ return T_SSLV3; }
+{ return OPERATOR; }
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
 #line 265 "conf_lexer.l"
-{ return T_TLSV1; }
+{ return OPERS_BYPASS_CALLERID; }
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
 #line 266 "conf_lexer.l"
-{ return SEND_PASSWORD; }
+{ return T_OPERWALL; }
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
 #line 267 "conf_lexer.l"
-{ return SENDQ; }
+{ return PACE_WAIT; }
 	YY_BREAK
 case 142:
 YY_RULE_SETUP
 #line 268 "conf_lexer.l"
-{ return T_SERVER; }
+{ return PACE_WAIT_SIMPLE; }
 	YY_BREAK
 case 143:
 YY_RULE_SETUP
 #line 269 "conf_lexer.l"
-{ return SERVERHIDE; }
+{ return PASSWORD; }
 	YY_BREAK
 case 144:
 YY_RULE_SETUP
 #line 270 "conf_lexer.l"
-{ return SERVERINFO; }
+{ return PASSWORD; }
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
 #line 271 "conf_lexer.l"
-{ return T_SERVICE; }
+{ return PATH; }
 	YY_BREAK
 case 146:
 YY_RULE_SETUP
 #line 272 "conf_lexer.l"
-{ return T_SERVICES_NAME; }
+{ return PING_COOKIE; }
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
 #line 273 "conf_lexer.l"
-{ return T_SET; }
+{ return PING_TIME; }
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
 #line 274 "conf_lexer.l"
-{ return T_SHARED; }
+{ return PORT; }
 	YY_BREAK
 case 149:
 YY_RULE_SETUP
 #line 275 "conf_lexer.l"
-{ return SHORT_MOTD; }
+{ return RESV; }
 	YY_BREAK
 case 150:
 YY_RULE_SETUP
 #line 276 "conf_lexer.l"
-{ return IRCD_SID; }
+{ return RANDOM_IDLE; }
 	YY_BREAK
 case 151:
 YY_RULE_SETUP
 #line 277 "conf_lexer.l"
-{ return T_SIZE; }
+{ return REASON; }
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
 #line 278 "conf_lexer.l"
-{ return SPOOF; }
+{ return T_RECVQ; }
 	YY_BREAK
 case 153:
 YY_RULE_SETUP
 #line 279 "conf_lexer.l"
-{ return SPOOF_NOTICE; }
+{ return REDIRPORT; }
 	YY_BREAK
 case 154:
 YY_RULE_SETUP
 #line 280 "conf_lexer.l"
-{ return SQUIT; }
+{ return REDIRSERV; }
 	YY_BREAK
 case 155:
 YY_RULE_SETUP
 #line 281 "conf_lexer.l"
-{ return TKLINE_EXPIRE_NOTICES; }
+{ return REHASH; }
 	YY_BREAK
 case 156:
 YY_RULE_SETUP
 #line 282 "conf_lexer.l"
-{ return TYPE; }
+{ return T_REJ; }
 	YY_BREAK
 case 157:
 YY_RULE_SETUP
 #line 283 "conf_lexer.l"
-{ return TRUE_NO_OPER_FLOOD; }
+{ return REMOTE; }
 	YY_BREAK
 case 158:
 YY_RULE_SETUP
 #line 284 "conf_lexer.l"
-{ return T_UMODES; }
+{ return REMOTEBAN; }
 	YY_BREAK
 case 159:
 YY_RULE_SETUP
 #line 285 "conf_lexer.l"
-{ return UNKLINE; }
+{ return T_RESTART; }
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
 #line 286 "conf_lexer.l"
-{ return T_UNDLINE; }
+{ return RESV; }
 	YY_BREAK
 case 161:
 YY_RULE_SETUP
 #line 287 "conf_lexer.l"
-{ return T_UNLIMITED; }
+{ return RESV_EXEMPT; }
 	YY_BREAK
 case 162:
 YY_RULE_SETUP
 #line 288 "conf_lexer.l"
-{ return USE_EGD; }
+{ return RSA_PRIVATE_KEY_FILE; }
 	YY_BREAK
 case 163:
 YY_RULE_SETUP
 #line 289 "conf_lexer.l"
-{ return USE_LOGGING; }
+{ return RSA_PUBLIC_KEY_FILE; }
 	YY_BREAK
 case 164:
 YY_RULE_SETUP
 #line 290 "conf_lexer.l"
-{ return THROTTLE_TIME; }
+{ return SEND_PASSWORD; }
 	YY_BREAK
 case 165:
 YY_RULE_SETUP
 #line 291 "conf_lexer.l"
-{ return USER; } 
+{ return SENDQ; }
 	YY_BREAK
 case 166:
 YY_RULE_SETUP
 #line 292 "conf_lexer.l"
-{ return VHOST; }
+{ return T_SERVER; }
 	YY_BREAK
 case 167:
 YY_RULE_SETUP
 #line 293 "conf_lexer.l"
-{ return VHOST6; }
+{ return SERVERHIDE; }
 	YY_BREAK
 case 168:
 YY_RULE_SETUP
 #line 294 "conf_lexer.l"
-{ return T_WEBIRC; }
+{ return SERVERINFO; }
 	YY_BREAK
 case 169:
 YY_RULE_SETUP
 #line 295 "conf_lexer.l"
-{ return XLINE; }
+{ return T_SERVICE; }
 	YY_BREAK
 case 170:
 YY_RULE_SETUP
 #line 296 "conf_lexer.l"
-{ yylval.number = 1; return TBOOL; }
+{ return T_SERVICES_NAME; }
 	YY_BREAK
 case 171:
 YY_RULE_SETUP
-#line 298 "conf_lexer.l"
-{ return FAILED_OPER_NOTICE; }
+#line 297 "conf_lexer.l"
+{ return T_SERVNOTICE; }
 	YY_BREAK
 case 172:
 YY_RULE_SETUP
-#line 299 "conf_lexer.l"
-{ return MAX_ACCEPT; }
+#line 298 "conf_lexer.l"
+{ return T_SET; }
 	YY_BREAK
 case 173:
 YY_RULE_SETUP
-#line 300 "conf_lexer.l"
-{ return MAX_NICK_CHANGES; }
+#line 299 "conf_lexer.l"
+{ return T_SHARED; }
 	YY_BREAK
 case 174:
 YY_RULE_SETUP
-#line 301 "conf_lexer.l"
-{ return MAX_CHANS_PER_OPER; }
+#line 300 "conf_lexer.l"
+{ return SHORT_MOTD; }
 	YY_BREAK
 case 175:
 YY_RULE_SETUP
-#line 302 "conf_lexer.l"
-{ return MAX_CHANS_PER_USER; }
+#line 301 "conf_lexer.l"
+{ return IRCD_SID; }
 	YY_BREAK
 case 176:
 YY_RULE_SETUP
-#line 303 "conf_lexer.l"
-{ return MAX_NICK_TIME; }
+#line 302 "conf_lexer.l"
+{ return T_SIZE; }
 	YY_BREAK
 case 177:
 YY_RULE_SETUP
-#line 304 "conf_lexer.l"
-{ return ANTI_NICK_FLOOD; }
+#line 303 "conf_lexer.l"
+{ return T_SKILL; }
 	YY_BREAK
 case 178:
 YY_RULE_SETUP
-#line 305 "conf_lexer.l"
-{ return ANTI_SPAM_EXIT_MESSAGE_TIME; }
+#line 304 "conf_lexer.l"
+{ return T_SOFTCALLERID; }
 	YY_BREAK
 case 179:
 YY_RULE_SETUP
-#line 306 "conf_lexer.l"
-{ return TS_MAX_DELTA; }
+#line 305 "conf_lexer.l"
+{ return SPOOF; }
 	YY_BREAK
 case 180:
 YY_RULE_SETUP
-#line 307 "conf_lexer.l"
-{ return TS_WARN_DELTA; }
+#line 306 "conf_lexer.l"
+{ return SPOOF_NOTICE; }
 	YY_BREAK
 case 181:
 YY_RULE_SETUP
-#line 308 "conf_lexer.l"
-{ return LINKS_DELAY; }
+#line 307 "conf_lexer.l"
+{ return T_SPY; }
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-#line 309 "conf_lexer.l"
-{ return WARN_NO_NLINE; }
+#line 308 "conf_lexer.l"
+{ return SQUIT; }
 	YY_BREAK
 case 183:
 YY_RULE_SETUP
-#line 311 "conf_lexer.l"
-{ return STATS_E_DISABLED; }
+#line 309 "conf_lexer.l"
+{ return T_SSL; }
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
-#line 312 "conf_lexer.l"
-{ return STATS_O_OPER_ONLY; }
+#line 310 "conf_lexer.l"
+{ return SSL_CERTIFICATE_FILE; }
 	YY_BREAK
 case 185:
 YY_RULE_SETUP
-#line 313 "conf_lexer.l"
-{ return STATS_K_OPER_ONLY; }
+#line 311 "conf_lexer.l"
+{ return T_SSL_CIPHER_LIST; }
 	YY_BREAK
 case 186:
 YY_RULE_SETUP
-#line 314 "conf_lexer.l"
-{ return STATS_I_OPER_ONLY; }
+#line 312 "conf_lexer.l"
+{ return T_SSL_CLIENT_METHOD; }
 	YY_BREAK
 case 187:
 YY_RULE_SETUP
-#line 315 "conf_lexer.l"
-{ return STATS_P_OPER_ONLY; }
+#line 313 "conf_lexer.l"
+{ return SSL_DH_PARAM_FILE; }
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-#line 316 "conf_lexer.l"
-{ return PACE_WAIT; }
+#line 314 "conf_lexer.l"
+{ return T_SSL_SERVER_METHOD; }
 	YY_BREAK
 case 189:
 YY_RULE_SETUP
-#line 317 "conf_lexer.l"
-{ return PACE_WAIT_SIMPLE; }
+#line 315 "conf_lexer.l"
+{ return T_SSLV3; }
 	YY_BREAK
 case 190:
 YY_RULE_SETUP
-#line 318 "conf_lexer.l"
-{ return KNOCK_DELAY; }
+#line 316 "conf_lexer.l"
+{ return STATS_E_DISABLED; }
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
-#line 319 "conf_lexer.l"
-{ return KNOCK_DELAY_CHANNEL; }
+#line 317 "conf_lexer.l"
+{ return STATS_I_OPER_ONLY; }
 	YY_BREAK
 case 192:
 YY_RULE_SETUP
-#line 320 "conf_lexer.l"
-{ return MAX_BANS; }
+#line 318 "conf_lexer.l"
+{ return STATS_K_OPER_ONLY; }
 	YY_BREAK
 case 193:
 YY_RULE_SETUP
-#line 321 "conf_lexer.l"
-{ return MODULES; }
+#line 319 "conf_lexer.l"
+{ return STATS_O_OPER_ONLY; }
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
-#line 322 "conf_lexer.l"
-{ return MODULE; }
+#line 320 "conf_lexer.l"
+{ return STATS_P_OPER_ONLY; }
 	YY_BREAK
 case 195:
 YY_RULE_SETUP
-#line 323 "conf_lexer.l"
-{ return PATH; }
+#line 321 "conf_lexer.l"
+{ return THROTTLE_TIME; }
 	YY_BREAK
 case 196:
 YY_RULE_SETUP
-#line 324 "conf_lexer.l"
-{ return MAX_TARGETS; }
+#line 322 "conf_lexer.l"
+{ return TKLINE_EXPIRE_NOTICES; }
 	YY_BREAK
 case 197:
 YY_RULE_SETUP
-#line 326 "conf_lexer.l"
-{ return T_UNXLINE; }
+#line 323 "conf_lexer.l"
+{ return T_TLSV1; }
 	YY_BREAK
 case 198:
 YY_RULE_SETUP
-#line 327 "conf_lexer.l"
-{ return T_UNRESV; }
+#line 324 "conf_lexer.l"
+{ return TRUE_NO_OPER_FLOOD; }
 	YY_BREAK
 case 199:
 YY_RULE_SETUP
-#line 329 "conf_lexer.l"
-{ return OPER_ONLY_UMODES; }
+#line 325 "conf_lexer.l"
+{ return TS_MAX_DELTA; }
 	YY_BREAK
 case 200:
 YY_RULE_SETUP
-#line 330 "conf_lexer.l"
-{ return OPER_UMODES; }
+#line 326 "conf_lexer.l"
+{ return TS_WARN_DELTA; }
 	YY_BREAK
 case 201:
 YY_RULE_SETUP
-#line 331 "conf_lexer.l"
-{ return T_BOTS; }
+#line 327 "conf_lexer.l"
+{ return TYPE; }
 	YY_BREAK
 case 202:
 YY_RULE_SETUP
-#line 332 "conf_lexer.l"
-{ return T_CCONN; }
+#line 328 "conf_lexer.l"
+{ return T_UMODES; }
 	YY_BREAK
 case 203:
 YY_RULE_SETUP
-#line 333 "conf_lexer.l"
-{ return T_CCONN_FULL; }
+#line 329 "conf_lexer.l"
+{ return T_UNAUTH; }
 	YY_BREAK
 case 204:
 YY_RULE_SETUP
-#line 334 "conf_lexer.l"
-{ return T_DEAF; }
+#line 330 "conf_lexer.l"
+{ return T_UNDLINE; }
 	YY_BREAK
 case 205:
 YY_RULE_SETUP
-#line 335 "conf_lexer.l"
-{ return T_DEBUG; }
+#line 331 "conf_lexer.l"
+{ return UNKLINE; }
 	YY_BREAK
 case 206:
 YY_RULE_SETUP
-#line 336 "conf_lexer.l"
-{ return T_FULL; }
+#line 332 "conf_lexer.l"
+{ return T_UNLIMITED; }
 	YY_BREAK
 case 207:
 YY_RULE_SETUP
-#line 337 "conf_lexer.l"
-{ return T_SKILL; }
+#line 333 "conf_lexer.l"
+{ return T_UNRESV; }
 	YY_BREAK
 case 208:
 YY_RULE_SETUP
-#line 338 "conf_lexer.l"
-{ return T_NCHANGE; }
+#line 334 "conf_lexer.l"
+{ return T_UNXLINE; }
 	YY_BREAK
 case 209:
 YY_RULE_SETUP
-#line 339 "conf_lexer.l"
-{ return T_REJ; }
+#line 335 "conf_lexer.l"
+{ return USE_EGD; }
 	YY_BREAK
 case 210:
 YY_RULE_SETUP
-#line 340 "conf_lexer.l"
-{ return T_UNAUTH; }
+#line 336 "conf_lexer.l"
+{ return USE_LOGGING; }
 	YY_BREAK
 case 211:
 YY_RULE_SETUP
-#line 341 "conf_lexer.l"
-{ return T_SPY; }
+#line 337 "conf_lexer.l"
+{ return USER; } 
 	YY_BREAK
 case 212:
 YY_RULE_SETUP
-#line 342 "conf_lexer.l"
-{ return T_EXTERNAL; }
+#line 338 "conf_lexer.l"
+{ return VHOST; }
 	YY_BREAK
 case 213:
 YY_RULE_SETUP
-#line 343 "conf_lexer.l"
-{ return T_OPERWALL; }
+#line 339 "conf_lexer.l"
+{ return VHOST6; }
 	YY_BREAK
 case 214:
 YY_RULE_SETUP
-#line 344 "conf_lexer.l"
-{ return T_SERVNOTICE; }
+#line 340 "conf_lexer.l"
+{ return T_WALLOP; }
 	YY_BREAK
 case 215:
 YY_RULE_SETUP
-#line 345 "conf_lexer.l"
-{ return T_INVISIBLE; }
+#line 341 "conf_lexer.l"
+{ return T_WALLOPS; }
 	YY_BREAK
 case 216:
 YY_RULE_SETUP
-#line 346 "conf_lexer.l"
-{ return T_WALLOP; }
+#line 342 "conf_lexer.l"
+{ return WARN_NO_NLINE; }
 	YY_BREAK
 case 217:
 YY_RULE_SETUP
-#line 347 "conf_lexer.l"
-{ return T_WALLOPS; }
+#line 343 "conf_lexer.l"
+{ return T_WEBIRC; }
 	YY_BREAK
 case 218:
 YY_RULE_SETUP
-#line 348 "conf_lexer.l"
-{ return T_CALLERID; }
+#line 344 "conf_lexer.l"
+{ return XLINE; }
 	YY_BREAK
 case 219:
 YY_RULE_SETUP
-#line 349 "conf_lexer.l"
-{ return T_SOFTCALLERID; }
+#line 346 "conf_lexer.l"
+{ yylval.number = 1; return TBOOL; }
 	YY_BREAK
 case 220:
 YY_RULE_SETUP
-#line 350 "conf_lexer.l"
-{ return T_LOCOPS; }
+#line 347 "conf_lexer.l"
+{ yylval.number = 0; return TBOOL; }
 	YY_BREAK
 case 221:
 YY_RULE_SETUP
-#line 352 "conf_lexer.l"
+#line 349 "conf_lexer.l"
 { return YEARS; }
 	YY_BREAK
 case 222:
 YY_RULE_SETUP
-#line 353 "conf_lexer.l"
+#line 350 "conf_lexer.l"
 { return YEARS; }
 	YY_BREAK
 case 223:
 YY_RULE_SETUP
-#line 354 "conf_lexer.l"
+#line 351 "conf_lexer.l"
 { return MONTHS; }
 	YY_BREAK
 case 224:
 YY_RULE_SETUP
-#line 355 "conf_lexer.l"
+#line 352 "conf_lexer.l"
 { return MONTHS; }
 	YY_BREAK
 case 225:
 YY_RULE_SETUP
-#line 356 "conf_lexer.l"
+#line 353 "conf_lexer.l"
 { return WEEKS; }
 	YY_BREAK
 case 226:
 YY_RULE_SETUP
-#line 357 "conf_lexer.l"
+#line 354 "conf_lexer.l"
 { return WEEKS; }
 	YY_BREAK
 case 227:
 YY_RULE_SETUP
-#line 358 "conf_lexer.l"
+#line 355 "conf_lexer.l"
 { return DAYS; }
 	YY_BREAK
 case 228:
 YY_RULE_SETUP
-#line 359 "conf_lexer.l"
+#line 356 "conf_lexer.l"
 { return DAYS; }
 	YY_BREAK
 case 229:
 YY_RULE_SETUP
-#line 360 "conf_lexer.l"
+#line 357 "conf_lexer.l"
 { return HOURS; }
 	YY_BREAK
 case 230:
 YY_RULE_SETUP
-#line 361 "conf_lexer.l"
+#line 358 "conf_lexer.l"
 { return HOURS; }
 	YY_BREAK
 case 231:
 YY_RULE_SETUP
-#line 362 "conf_lexer.l"
+#line 359 "conf_lexer.l"
 { return MINUTES; }
 	YY_BREAK
 case 232:
 YY_RULE_SETUP
-#line 363 "conf_lexer.l"
+#line 360 "conf_lexer.l"
 { return MINUTES; }
 	YY_BREAK
 case 233:
 YY_RULE_SETUP
-#line 364 "conf_lexer.l"
+#line 361 "conf_lexer.l"
 { return SECONDS; }
 	YY_BREAK
 case 234:
 YY_RULE_SETUP
-#line 365 "conf_lexer.l"
+#line 362 "conf_lexer.l"
 { return SECONDS; }
 	YY_BREAK
 case 235:
 YY_RULE_SETUP
-#line 367 "conf_lexer.l"
+#line 364 "conf_lexer.l"
 { return BYTES; }
 	YY_BREAK
 case 236:
 YY_RULE_SETUP
-#line 368 "conf_lexer.l"
+#line 365 "conf_lexer.l"
 { return BYTES; }
 	YY_BREAK
 case 237:
 YY_RULE_SETUP
-#line 369 "conf_lexer.l"
+#line 366 "conf_lexer.l"
 { return KBYTES; }
 	YY_BREAK
 case 238:
 YY_RULE_SETUP
-#line 370 "conf_lexer.l"
+#line 367 "conf_lexer.l"
 { return KBYTES; }
 	YY_BREAK
 case 239:
 YY_RULE_SETUP
-#line 371 "conf_lexer.l"
+#line 368 "conf_lexer.l"
 { return KBYTES; }
 	YY_BREAK
 case 240:
 YY_RULE_SETUP
-#line 372 "conf_lexer.l"
+#line 369 "conf_lexer.l"
 { return KBYTES; }
 	YY_BREAK
 case 241:
 YY_RULE_SETUP
-#line 373 "conf_lexer.l"
+#line 370 "conf_lexer.l"
 { return KBYTES; }
 	YY_BREAK
 case 242:
 YY_RULE_SETUP
-#line 374 "conf_lexer.l"
+#line 371 "conf_lexer.l"
 { return MBYTES; }
 	YY_BREAK
 case 243:
 YY_RULE_SETUP
-#line 375 "conf_lexer.l"
+#line 372 "conf_lexer.l"
 { return MBYTES; }
 	YY_BREAK
 case 244:
 YY_RULE_SETUP
-#line 376 "conf_lexer.l"
+#line 373 "conf_lexer.l"
 { return MBYTES; }
 	YY_BREAK
 case 245:
 YY_RULE_SETUP
-#line 377 "conf_lexer.l"
+#line 374 "conf_lexer.l"
 { return MBYTES; }
 	YY_BREAK
 case 246:
 YY_RULE_SETUP
-#line 378 "conf_lexer.l"
+#line 375 "conf_lexer.l"
 { return MBYTES; }
 	YY_BREAK
 case 247:
 YY_RULE_SETUP
-#line 379 "conf_lexer.l"
+#line 376 "conf_lexer.l"
 { return TWODOTS; }
 	YY_BREAK
 case 248:
 YY_RULE_SETUP
-#line 381 "conf_lexer.l"
+#line 378 "conf_lexer.l"
 { return yytext[0]; }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 382 "conf_lexer.l"
+#line 379 "conf_lexer.l"
 { if (ieof()) yyterminate(); }
 	YY_BREAK
 case 249:
 YY_RULE_SETUP
-#line 384 "conf_lexer.l"
+#line 381 "conf_lexer.l"
 ECHO;
 	YY_BREAK
 #line 3278 "conf_lexer.c"
@@ -4230,7 +4230,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 384 "conf_lexer.l"
+#line 381 "conf_lexer.l"
 
 
 

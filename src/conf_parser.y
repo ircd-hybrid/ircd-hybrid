@@ -150,8 +150,8 @@ reset_block_state(void)
 %token  CALLER_ID_WAIT
 %token  CAN_FLOOD
 %token  CHANNEL
-%token	CIDR_BITLEN_IPV4
-%token	CIDR_BITLEN_IPV6
+%token  CIDR_BITLEN_IPV4
+%token  CIDR_BITLEN_IPV6
 %token  CLASS
 %token  CONNECT
 %token  CONNECTFREQ
@@ -171,7 +171,6 @@ reset_block_state(void)
 %token  EXCEED_LIMIT
 %token  EXEMPT
 %token  FAILED_OPER_NOTICE
-%token  IRCD_FLAGS
 %token  FLATTEN_LINKS
 %token  GECOS
 %token  GENERAL
@@ -179,27 +178,31 @@ reset_block_state(void)
 %token  GLINE_DURATION
 %token  GLINE_ENABLE
 %token  GLINE_EXEMPT
-%token  GLINE_REQUEST_DURATION
 %token  GLINE_MIN_CIDR
 %token  GLINE_MIN_CIDR6
+%token  GLINE_REQUEST_DURATION
 %token  GLOBAL_KILL
-%token  IRCD_AUTH
-%token  NEED_IDENT
 %token  HAVENT_READ_CONF
 %token  HIDDEN
-%token	HIDDEN_NAME
+%token  HIDDEN_NAME
+%token  HIDE_IDLE_FROM_OPERS
 %token  HIDE_SERVER_IPS
 %token  HIDE_SERVERS
 %token  HIDE_SERVICES
-%token	HIDE_SPOOF_IPS
+%token  HIDE_SPOOF_IPS
 %token  HOST
 %token  HUB
 %token  HUB_MASK
 %token  IGNORE_BOGUS_TS
 %token  INVISIBLE_ON_CONNECT
 %token  IP
+%token  IRCD_AUTH
+%token  IRCD_FLAGS
+%token  IRCD_SID
+%token  JOIN_FLOOD_COUNT
+%token  JOIN_FLOOD_TIME
 %token  KILL
-%token	KILL_CHASE_TIME_LIMIT
+%token  KILL_CHASE_TIME_LIMIT
 %token  KLINE
 %token  KLINE_EXEMPT
 %token  KNOCK_DELAY
@@ -207,7 +210,6 @@ reset_block_state(void)
 %token  LEAF_MASK
 %token  LINKS_DELAY
 %token  LISTEN
-%token  T_LOG
 %token  MASK
 %token  MAX_ACCEPT
 %token  MAX_BANS
@@ -215,6 +217,7 @@ reset_block_state(void)
 %token  MAX_CHANS_PER_USER
 %token  MAX_GLOBAL
 %token  MAX_IDENT
+%token  MAX_IDLE
 %token  MAX_LOCAL
 %token  MAX_NICK_CHANGES
 %token  MAX_NICK_LENGTH
@@ -223,15 +226,13 @@ reset_block_state(void)
 %token  MAX_TARGETS
 %token  MAX_TOPIC_LENGTH
 %token  MAX_WATCH
+%token  MIN_IDLE
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
-%token  MIN_IDLE
-%token  MAX_IDLE
-%token  RANDOM_IDLE
-%token  HIDE_IDLE_FROM_OPERS
 %token  MODULE
 %token  MODULES
 %token  NAME
+%token  NEED_IDENT
 %token  NEED_PASSWORD
 %token  NETWORK_DESC
 %token  NETWORK_NAME
@@ -243,13 +244,11 @@ reset_block_state(void)
 %token  NUMBER
 %token  NUMBER_PER_CIDR
 %token  NUMBER_PER_IP
-%token  OPERATOR
-%token  OPERS_BYPASS_CALLERID
 %token  OPER_ONLY_UMODES
 %token  OPER_PASS_RESV
 %token  OPER_UMODES
-%token  JOIN_FLOOD_COUNT
-%token  JOIN_FLOOD_TIME
+%token  OPERATOR
+%token  OPERS_BYPASS_CALLERID
 %token  PACE_WAIT
 %token  PACE_WAIT_SIMPLE
 %token  PASSWORD
@@ -258,107 +257,108 @@ reset_block_state(void)
 %token  PING_TIME
 %token  PORT
 %token  QSTRING
+%token  RANDOM_IDLE
 %token  REASON
 %token  REDIRPORT
 %token  REDIRSERV
 %token  REHASH
 %token  REMOTE
 %token  REMOTEBAN
-%token  RSA_PRIVATE_KEY_FILE
-%token  RSA_PUBLIC_KEY_FILE
-%token  SSL_CERTIFICATE_FILE
-%token  SSL_DH_PARAM_FILE
-%token  T_SSL_CLIENT_METHOD
-%token  T_SSL_SERVER_METHOD
-%token  T_SSLV3
-%token  T_TLSV1
 %token  RESV
 %token  RESV_EXEMPT
+%token  RSA_PRIVATE_KEY_FILE
+%token  RSA_PUBLIC_KEY_FILE
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
-%token  SENDQ
 %token  SEND_PASSWORD
+%token  SENDQ
 %token  SERVERHIDE
 %token  SERVERINFO
-%token  SQUIT
-%token  IRCD_SID
-%token	TKLINE_EXPIRE_NOTICES
-%token  T_SHARED
-%token  T_CLUSTER
-%token  TYPE
 %token  SHORT_MOTD
 %token  SPOOF
 %token  SPOOF_NOTICE
+%token  SQUIT
+%token  SSL_CERTIFICATE_FILE
+%token  SSL_DH_PARAM_FILE
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
 %token  STATS_K_OPER_ONLY
 %token  STATS_O_OPER_ONLY
 %token  STATS_P_OPER_ONLY
-%token  TBOOL
-%token  TMASKED
-%token  TS_MAX_DELTA
-%token  TS_WARN_DELTA
-%token  TWODOTS
 %token  T_ALL
 %token  T_BOTS
-%token  T_SOFTCALLERID
 %token  T_CALLERID
 %token  T_CCONN
 %token  T_CCONN_FULL
-%token  T_SSL_CIPHER_LIST
+%token  T_CLUSTER
 %token  T_DEAF
 %token  T_DEBUG
 %token  T_DLINE
 %token  T_EXTERNAL
 %token  T_FARCONNECT
+%token  T_FILE
 %token  T_FULL
+%token  T_GLOBOPS
 %token  T_INVISIBLE
 %token  T_IPV4
 %token  T_IPV6
 %token  T_LOCOPS
+%token  T_LOG
 %token  T_MAX_CLIENTS
 %token  T_NCHANGE
 %token  T_NONONREG
 %token  T_OPERWALL
 %token  T_RECVQ
 %token  T_REJ
+%token  T_RESTART
 %token  T_SERVER
+%token  T_SERVICE
+%token  T_SERVICES_NAME
 %token  T_SERVNOTICE
 %token  T_SET
+%token  T_SHARED
+%token  T_SIZE
 %token  T_SKILL
+%token  T_SOFTCALLERID
 %token  T_SPY
 %token  T_SSL
+%token  T_SSL_CIPHER_LIST
+%token  T_SSL_CLIENT_METHOD
+%token  T_SSL_SERVER_METHOD
+%token  T_SSLV3
+%token  T_TLSV1
 %token  T_UMODES
 %token  T_UNAUTH
 %token  T_UNDLINE
 %token  T_UNLIMITED
 %token  T_UNRESV
 %token  T_UNXLINE
-%token  T_GLOBOPS
 %token  T_WALLOP
 %token  T_WALLOPS
 %token  T_WEBIRC
-%token  T_RESTART
-%token  T_SERVICE
-%token  T_SERVICES_NAME
+%token  TBOOL
 %token  THROTTLE_TIME
+%token  TKLINE_EXPIRE_NOTICES
+%token  TMASKED
 %token  TRUE_NO_OPER_FLOOD
+%token  TS_MAX_DELTA
+%token  TS_WARN_DELTA
+%token  TWODOTS
+%token  TYPE
 %token  UNKLINE
-%token  USER
 %token  USE_EGD
 %token  USE_LOGGING
+%token  USER
 %token  VHOST
 %token  VHOST6
-%token  XLINE
 %token  WARN_NO_NLINE
-%token  T_SIZE
-%token  T_FILE
+%token  XLINE
 
-%type <string> QSTRING
-%type <number> NUMBER
-%type <number> timespec
-%type <number> timespec_
-%type <number> sizespec
-%type <number> sizespec_
+%type  <string> QSTRING
+%type  <number> NUMBER
+%type  <number> timespec
+%type  <number> timespec_
+%type  <number> sizespec
+%type  <number> sizespec_
 
 %%
 conf:   
@@ -548,58 +548,58 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
 serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 1)
+  BIO *file = NULL;
+
+  if (conf_parser_ctx.pass != 1)
+    break;
+
+  if (ServerInfo.rsa_private_key)
   {
-    BIO *file;
+    RSA_free(ServerInfo.rsa_private_key);
+    ServerInfo.rsa_private_key = NULL;
+  }
 
-    if (ServerInfo.rsa_private_key)
-    {
-      RSA_free(ServerInfo.rsa_private_key);
-      ServerInfo.rsa_private_key = NULL;
-    }
+  if (ServerInfo.rsa_private_key_file)
+  {
+    MyFree(ServerInfo.rsa_private_key_file);
+    ServerInfo.rsa_private_key_file = NULL;
+  }
 
-    if (ServerInfo.rsa_private_key_file)
-    {
-      MyFree(ServerInfo.rsa_private_key_file);
-      ServerInfo.rsa_private_key_file = NULL;
-    }
+  ServerInfo.rsa_private_key_file = xstrdup(yylval.string);
 
-    ServerInfo.rsa_private_key_file = xstrdup(yylval.string);
+  if ((file = BIO_new_file(yylval.string, "r")) == NULL)
+  {
+    conf_error_report("File open failed, ignoring");
+    break;
+  }
 
-    if ((file = BIO_new_file(yylval.string, "r")) == NULL)
-    {
-      conf_error_report("File open failed, ignoring");
-      break;
-    }
+  ServerInfo.rsa_private_key = PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
 
-    ServerInfo.rsa_private_key = PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
+  BIO_set_close(file, BIO_CLOSE);
+  BIO_free(file);
 
-    BIO_set_close(file, BIO_CLOSE);
-    BIO_free(file);
+  if (ServerInfo.rsa_private_key == NULL)
+  {
+    conf_error_report("Couldn't extract key, ignoring");
+    break;
+  }
 
-    if (ServerInfo.rsa_private_key == NULL)
-    {
-      conf_error_report("Couldn't extract key, ignoring");
-      break;
-    }
+  if (!RSA_check_key(ServerInfo.rsa_private_key))
+  {
+    RSA_free(ServerInfo.rsa_private_key);
+    ServerInfo.rsa_private_key = NULL;
 
-    if (!RSA_check_key(ServerInfo.rsa_private_key))
-    {
-      RSA_free(ServerInfo.rsa_private_key);
-      ServerInfo.rsa_private_key = NULL;
+    conf_error_report("Invalid key, ignoring");
+    break;
+  }
 
-      conf_error_report("Invalid key, ignoring");
-      break;
-    }
+  /* require 2048 bit (256 byte) key */
+  if (RSA_size(ServerInfo.rsa_private_key) != 256)
+  {
+    RSA_free(ServerInfo.rsa_private_key);
+    ServerInfo.rsa_private_key = NULL;
 
-    /* require 2048 bit (256 byte) key */
-    if (RSA_size(ServerInfo.rsa_private_key) != 256)
-    {
-      RSA_free(ServerInfo.rsa_private_key);
-      ServerInfo.rsa_private_key = NULL;
-
-      conf_error_report("Not a 2048 bit key, ignoring");
-    }
+    conf_error_report("Not a 2048 bit key, ignoring");
   }
 #endif
 };
@@ -695,11 +695,11 @@ serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
 
 serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(ServerInfo.network_desc);
-    ServerInfo.network_desc = xstrdup(yylval.string);
-  }
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  MyFree(ServerInfo.network_desc);
+  ServerInfo.network_desc = xstrdup(yylval.string);
 };
 
 serverinfo_vhost: VHOST '=' QSTRING ';'
@@ -846,29 +846,29 @@ admin_item:  admin_name | admin_description |
 
 admin_name: NAME '=' QSTRING ';' 
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(AdminInfo.name);
-    AdminInfo.name = xstrdup(yylval.string);
-  }
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  MyFree(AdminInfo.name);
+  AdminInfo.name = xstrdup(yylval.string);
 };
 
 admin_email: EMAIL '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(AdminInfo.email);
-    AdminInfo.email = xstrdup(yylval.string);
-  }
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  MyFree(AdminInfo.email);
+  AdminInfo.email = xstrdup(yylval.string);
 };
 
 admin_description: DESCRIPTION '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(AdminInfo.description);
-    AdminInfo.description = xstrdup(yylval.string);
-  }
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  MyFree(AdminInfo.description);
+  AdminInfo.description = xstrdup(yylval.string);
 };
 
 /***************************************************************************
@@ -980,8 +980,8 @@ oper_entry: OPERATOR
   if (!block_state.name.buf[0])
     break;
 #ifdef HAVE_LIBCRYPTO
-  if (!(block_state.file.buf[0] ||
-        block_state.rpass.buf[0]))
+  if (!block_state.file.buf[0] &&
+      !block_state.rpass.buf[0])
     break;
 #else
   if (!block_state.rpass.buf[0])
@@ -1065,13 +1065,13 @@ oper_password: PASSWORD '=' QSTRING ';'
 
 oper_encrypted: ENCRYPTED '=' TBOOL ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    if (yylval.number)
-      block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
-    else
-      block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
-  }
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (yylval.number)
+    block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+  else
+    block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
 };
 
 oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
@@ -1774,13 +1774,13 @@ service_item:      service_name | error;
 
 service_name: NAME '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (valid_servname(yylval.string))
   {
-    if (valid_servname(yylval.string))
-    {
-      struct MaskItem *conf = conf_make(CONF_SERVICE);
-      conf->name = xstrdup(yylval.string);
-    }
+    struct MaskItem *conf = conf_make(CONF_SERVICE);
+    conf->name = xstrdup(yylval.string);
   }
 };
 

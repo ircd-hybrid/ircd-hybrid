@@ -1071,7 +1071,9 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
       break;
     case MODE_DEL:
       DelUMode(target_p, UMODE_HIDDENHOST);
-      DelFlag(target_p, FLAGS_IP_SPOOFING);
+
+      if (!HasFlag(target_p, FLAGS_AUTH_SPOOF));
+        DelFlag(target_p, FLAGS_IP_SPOOFING);
       break;
     default: break;
   }

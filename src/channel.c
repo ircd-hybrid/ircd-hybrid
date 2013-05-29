@@ -544,7 +544,7 @@ del_invite(struct Channel *chptr, struct Client *who)
  * (like in get_client_name)
  */
 const char *
-get_member_status(const struct Membership *ms, int combine)
+get_member_status(const struct Membership *ms, const int combine)
 {
   static char buffer[4];
   char *p = buffer;

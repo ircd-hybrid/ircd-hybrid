@@ -347,7 +347,7 @@ verify_access(struct Client *client_p)
                                "%s spoofing: %s as %s",
                                client_p->name, client_p->host, conf->name);
         strlcpy(client_p->host, conf->name, sizeof(client_p->host));
-        SetIPSpoof(client_p);
+        AddFlag(client_p, FLAGS_IP_SPOOFING | FLAGS_AUTH_SPOOF);
       }
 
       return(attach_iline(client_p, conf));

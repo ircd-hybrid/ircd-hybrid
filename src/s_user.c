@@ -755,11 +755,9 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
 {
   /* If this user is being spoofed, tell them so */
   if (IsConfDoSpoofIp(conf))
-  {
     sendto_one(source_p,
                ":%s NOTICE %s :*** Spoofing your IP. Congrats.",
                me.name, source_p->name);
-  }
 
   /* If this user is in the exception class, Set it "E lined" */
   if (IsConfExemptKline(conf))

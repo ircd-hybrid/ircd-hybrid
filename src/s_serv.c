@@ -251,12 +251,12 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
     sendto_one(target_p, command, parv[0],
                parv[1], parv[2], parv[3], parv[4],
                parv[5], parv[6], parv[7], parv[8]);
-    return(HUNTED_PASS);
+    return HUNTED_PASS;
   } 
 
   sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
              me.name, source_p->name, parv[server]);
-  return(HUNTED_NOSUCH);
+  return HUNTED_NOSUCH;
 }
 
 /* try_connections()
@@ -307,7 +307,7 @@ try_connections(void *unused)
     {
       confrq = conf->class->con_freq;
       if (confrq < MIN_CONN_FREQ)
-	confrq = MIN_CONN_FREQ;
+        confrq = MIN_CONN_FREQ;
     }
 
     conf->until = CurrentTime + confrq;
@@ -486,11 +486,10 @@ delete_capability(const char *capab_name)
     {
       if (irccmp(cap->name, capab_name) == 0)
       {
-	default_server_capabs &= ~(cap->cap);
-	dlinkDelete(ptr, &cap_list);
-	MyFree(cap->name);
-	cap->name = NULL;
-	MyFree(cap);
+        default_server_capabs &= ~(cap->cap);
+        dlinkDelete(ptr, &cap_list);
+        MyFree(cap->name);
+        MyFree(cap);
       }
     }
   }
@@ -724,12 +723,7 @@ server_estab(struct Client *client_p)
 
   if (IsUnknown(client_p))
   {
-    /* jdc -- 1.  Use EmptyString(), not [0] index reference.
-     *        2.  Check conf->spasswd, not conf->passwd.
-     */
-    if (!EmptyString(conf->spasswd))
-      sendto_one(client_p, "PASS %s TS %d %s",
-                 conf->spasswd, TS_CURRENT, me.id);
+    sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
 
     send_capabilities(client_p, 0);
 
@@ -954,7 +948,7 @@ burst_all(struct Client *client_p)
       send_channel_modes(client_p, chptr);
 
       if (IsCapable(client_p, CAP_TBURST))
-	send_tb(client_p, chptr);
+        send_tb(client_p, chptr);
     }
   }
 
@@ -1098,16 +1092,16 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   if ((client_p = hash_find_server(conf->name)) != NULL)
   { 
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-		         "Server %s already present from %s",
-		         conf->name, get_client_name(client_p, SHOW_IP));
+                         "Server %s already present from %s",
+                         conf->name, get_client_name(client_p, SHOW_IP));
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-		         "Server %s already present from %s",
-		         conf->name, get_client_name(client_p, MASK_IP));
+                         "Server %s already present from %s",
+                         conf->name, get_client_name(client_p, MASK_IP));
     if (by && IsClient(by) && !MyClient(by))
       sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
-	         me.name, by->name, conf->name,
-	         get_client_name(client_p, MASK_IP));
-    return (0);
+                 me.name, by->name, conf->name,
+                 get_client_name(client_p, MASK_IP));
+    return 0;
   }
     
   /* Create a local client */
@@ -1125,11 +1119,11 @@ serv_connect(struct MaskItem *conf, struct Client *by)
                 SOCK_STREAM, 0, NULL) < 0)
   {
     /* Eek, failure to create the socket */
-    report_error(L_ALL,
-		 "opening stream socket to %s: %s", conf->name, errno);
+    report_error(L_ALL, "opening stream socket to %s: %s",
+                 conf->name, errno);
     SetDead(client_p);
     exit_client(client_p, &me, "Connection failed");
-    return (0);
+    return 0;
   }
 
   /* servernames are always guaranteed under HOSTLEN chars */
@@ -1141,14 +1135,14 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   if (!attach_connect_block(client_p, conf->name, conf->host))
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-		         "Host %s is not enabled for connecting: no connect{} block",
-			 conf->name);
+                         "Host %s is not enabled for connecting: no connect{} block",
+                         conf->name);
     if (by && IsClient(by) && !MyClient(by))  
       sendto_one(by, ":%s NOTICE %s :Connect to host %s failed.",
-	         me.name, by->name, client_p->name);
+                 me.name, by->name, client_p->name);
     SetDead(client_p);
     exit_client(client_p, client_p, "Connection failed");
-    return (0);
+    return 0;
   }
 
   /* at this point we have a connection in progress and C/N lines
@@ -1184,10 +1178,10 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         ipn.ss.ss_family = AF_INET;
         ipn.ss_port = 0;
         memcpy(&ipn, &conf->bind, sizeof(struct irc_ssaddr));
-	comm_connect_tcp(&client_p->localClient->fd, conf->host, conf->port,
-			 (struct sockaddr *)&ipn, ipn.ss_len, 
-			 serv_connect_callback, client_p, conf->aftype,
-			 CONNECTTIMEOUT);
+        comm_connect_tcp(&client_p->localClient->fd, conf->host, conf->port,
+                         (struct sockaddr *)&ipn, ipn.ss_len, 
+                         serv_connect_callback, client_p, conf->aftype,
+                         CONNECTTIMEOUT);
       }
       else if (ServerInfo.specific_ipv4_vhost)
       {
@@ -1199,7 +1193,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         comm_connect_tcp(&client_p->localClient->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
                          serv_connect_callback, client_p, conf->aftype,
-			 CONNECTTIMEOUT);
+                         CONNECTTIMEOUT);
       }
       else
         comm_connect_tcp(&client_p->localClient->fd, conf->host, conf->port, 
@@ -1270,10 +1264,7 @@ finish_ssl_server_handshake(struct Client *client_p)
     return;
   }
 
-  /* jdc -- Check and send spasswd, not passwd. */
-  if (!EmptyString(conf->spasswd))
-    sendto_one(client_p, "PASS %s TS %d %s",
-               conf->spasswd, TS_CURRENT, me.id);
+  sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
 
   send_capabilities(client_p, 0);
 
@@ -1389,12 +1380,12 @@ serv_connect_callback(fde_t *fd, int status, void *data)
                             client_p->name, comm_errstr(status));
      else
        sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-	      		    "Error connecting to %s[%s]: %s", client_p->name,
-			    client_p->host, comm_errstr(status));
+                            "Error connecting to %s[%s]: %s", client_p->name,
+                            client_p->host, comm_errstr(status));
 
      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-			  "Error connecting to %s: %s",
-			  client_p->name, comm_errstr(status));
+                          "Error connecting to %s: %s",
+                          client_p->name, comm_errstr(status));
 
      /* If a fd goes bad, call dead_link() the socket is no
       * longer valid for reading or writing.
@@ -1406,13 +1397,13 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   /* COMM_OK, so continue the connection procedure */
   /* Get the C/N lines */
   conf = find_conf_name(&client_p->localClient->confs,
-			client_p->name, CONF_SERVER);
+                        client_p->name, CONF_SERVER);
   if (conf == NULL)
   {
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-	                 "Lost connect{} block for %s", get_client_name(client_p, HIDE_IP));
+                         "Lost connect{} block for %s", get_client_name(client_p, HIDE_IP));
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-		         "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
+                         "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
 
     exit_client(client_p, &me, "Lost connect{} block");
     return;
@@ -1429,16 +1420,12 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   }
 #endif
 
-  /* jdc -- Check and send spasswd, not passwd. */
-  if (!EmptyString(conf->spasswd))
-    sendto_one(client_p, "PASS %s TS %d %s",
-               conf->spasswd, TS_CURRENT, me.id);
+  sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
 
   send_capabilities(client_p, 0);
 
-  sendto_one(client_p, "SERVER %s 1 :%s%s",
-             me.name, ConfigServerHide.hidden ? "(H) " : "", 
-	     me.info);
+  sendto_one(client_p, "SERVER %s 1 :%s%s", me.name,
+             ConfigServerHide.hidden ? "(H) " : "", me.info);
 
   /* If we've been marked dead because a send failed, just exit
    * here now and save everyone the trouble of us ever existing.
@@ -1446,11 +1433,11 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   if (IsDead(client_p)) 
   {
       sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-			   "%s[%s] went dead during handshake",
+                           "%s[%s] went dead during handshake",
                            client_p->name,
-			   client_p->host);
+                           client_p->host);
       sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-			   "%s went dead during handshake", client_p->name);
+                           "%s went dead during handshake", client_p->name);
       return;
   }
 

@@ -29,7 +29,6 @@ extern dlink_list nresv_items;
 extern dlink_list resv_channel_list;
 
 extern struct MaskItem *create_resv(const char *, const char *, const dlink_list *);
-extern int valid_wild_card_simple(const char *);
 extern int resv_find_exempt(const struct Client *, const struct MaskItem *);
 extern struct MaskItem *match_find_resv(const char *);
 #endif  /* INCLUDED_resv_h */

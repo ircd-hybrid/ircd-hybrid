@@ -186,34 +186,3 @@ match_find_resv(const char *name)
 
   return NULL;
 }
-
-/* valid_wild_card_simple()
- *
- * inputs	- data to check for sufficient non-wildcard characters
- * outputs	- 1 if valid, else 0
- * side effects	- none
- */
-int
-valid_wild_card_simple(const char *data)
-{
-  const unsigned char *p = (const unsigned char *)data;
-  unsigned char tmpch = '\0';
-  int nonwild = 0;
-
-  while ((tmpch = *p++))
-  {
-    if (tmpch == '\\')
-    {
-      ++p;
-      if (++nonwild >= ConfigFileEntry.min_nonwildcard_simple)
-        return 1;
-    }
-    else if (!IsMWildChar(tmpch))
-    {
-      if (++nonwild >= ConfigFileEntry.min_nonwildcard_simple)
-        return 1;
-    }
-  }
-
-  return 0;
-}

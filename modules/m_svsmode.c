@@ -106,8 +106,8 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
         break;
 
       case 'x':
-        if (what == MODE_ADD && extarg)
-          user_set_hostmask(target_p, extarg);
+        if (!EmptyString(extarg) && valid_hostname(extarg))
+          user_set_hostmask(target_p, extarg, what);
         break;
 
       case 'o':

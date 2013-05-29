@@ -159,6 +159,7 @@
 #define UMODE_OPER         0x00400000 /**< Operator */
 #define UMODE_ADMIN        0x00800000 /**< Admin on server */ 
 #define UMODE_FARCONNECT   0x01000000 /**< Can see remote client connects/exits */
+#define UMODE_HIDDENHOST   0x02000000 /**< User's host is hidden */
 
 
 #define UMODE_ALL          UMODE_SERVNOTICE
@@ -257,6 +258,7 @@
 #define SetExemptResv(x)        ((x)->flags |= FLAGS_EXEMPTRESV)
 #define SetIPSpoof(x)           ((x)->flags |= FLAGS_IP_SPOOFING)
 #define IsIPSpoof(x)            ((x)->flags & FLAGS_IP_SPOOFING)
+#define DelIPSpoof(x)           ((x)->flags &= ~FLAGS_IP_SPOOFING)
 
 #define IsFloodDone(x)          ((x)->flags &  FLAGS_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags |= FLAGS_FLOODDONE)

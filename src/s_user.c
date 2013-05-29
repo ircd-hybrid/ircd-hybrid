@@ -135,7 +135,7 @@ const unsigned int user_modes[256] =
   UMODE_UNAUTH,       /* u */
   0,                  /* v */
   UMODE_WALLOP,       /* w */
-  0,                  /* x */
+  UMODE_HIDDENHOST,   /* x */
   UMODE_SPY,          /* y */
   UMODE_OPERWALL,     /* z      0x7A */
   0,0,0,0,0,          /* 0x7B - 0x7F */
@@ -903,6 +903,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
           break;
 
         case 'r':  /* Only services may set +r */
+        case 'x':  /* Only services may set +x */
           break;
 
         default:
@@ -1052,22 +1053,36 @@ send_umode_out(struct Client *client_p, struct Client *source_p,
 }
 
 void
-user_set_hostmask(struct Client *target_p, const char *hostname)
+user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
 {
-  if (!valid_hostname(hostname))
-    return;
-
   if (IsUserHostIp(target_p))
     delete_user_host(target_p->username, target_p->host, !MyConnect(target_p));
 
   strlcpy(target_p->host, hostname, sizeof(target_p->host));
-  SetIPSpoof(target_p);
 
   add_user_host(target_p->username, target_p->host, !MyConnect(target_p));
   SetUserHost(target_p);
 
+  switch (what)
+  {
+    case MODE_ADD:
+      AddUMode(target_p, UMODE_HIDDENHOST);
+      AddFlag(target_p, FLAGS_IP_SPOOFING);
+      break;
+    case MODE_DEL:
+      DelUMode(target_p, UMODE_HIDDENHOST);
+      DelFlag(target_p, FLAGS_IP_SPOOFING);
+      break;
+    default: break;
+  }
+
   if (MyClient(target_p))
+  {
+    sendto_one(target_p, form_str(RPL_NEWHOSTIS), me.name,
+               target_p->name, target_p->username,
+               target_p->host);
     clear_ban_cache_client(target_p);
+  }
 }
 
 /* user_welcome()

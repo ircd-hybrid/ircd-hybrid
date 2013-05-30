@@ -312,7 +312,7 @@ static const char *replies[] = {
 /* 282 RPL_ENDOFACCEPT */ ":%s 282 %s :End of /ACCEPT list.",
 /* 283 */ NULL,
 /* 284 */ NULL,
-/* 285 RPL_NEWHOSTIS */ ":%s 285 %s :Your new host is - [%s@%s]",
+/* 285 RPL_NEWHOSTIS */ ":%s 285 %s :Your new host is %s",
 /* 286 */ NULL,
 /* 287 */ NULL,
 /* 288 */ NULL,

@@ -107,7 +107,13 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
 
       case 'x':
         if (!EmptyString(extarg) && valid_hostname(extarg))
-          user_set_hostmask(target_p, extarg, what);
+        {
+          if (what == MODE_DEL &&  HasUMode(target_p, UMODE_HIDDENHOST))
+            user_set_hostmask(target_p, extarg, what);
+          if (what == MODE_ADD && !HasUMode(target_p, UMODE_HIDDENHOST))
+            user_set_hostmask(target_p, extarg, what);
+        }
+
         break;
 
       case 'o':

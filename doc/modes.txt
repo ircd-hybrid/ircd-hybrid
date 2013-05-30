@@ -35,6 +35,8 @@ User Modes:
 +s - servnotice   - See general server notices
 +u - unauth       - See unauthorized client notices
 +w - wallop       - See server generated WALLOPS
++x - hiddenhost   - User's host has been spoofed by services.
+                    This mode can be set by servers and services only.
 +y - spy          - See LINKS, STATS (if configured), TRACE notices
 +z - operwall     - See oper generated WALLOPS
 

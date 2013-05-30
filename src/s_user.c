@@ -1057,16 +1057,8 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
 {
   dlink_node *ptr = NULL;
 
-  sendto_common_channels_local(target_p, 0, 0, ":%s!%s@%s QUIT :Changing hostname",
-                               target_p->name, target_p->username, target_p->host);
-
-  if (IsUserHostIp(target_p))
-    delete_user_host(target_p->username, target_p->host, !MyConnect(target_p));
-
-  strlcpy(target_p->host, hostname, sizeof(target_p->host));
-
-  add_user_host(target_p->username, target_p->host, !MyConnect(target_p));
-  SetUserHost(target_p);
+  if (!strcmp(target_p->host, hostname))
+    return;
 
   switch (what)
   {
@@ -1080,14 +1072,24 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
       if (!HasFlag(target_p, FLAGS_AUTH_SPOOF))
         DelFlag(target_p, FLAGS_IP_SPOOFING);
       break;
-    default: break;
+    default: return;
   }
+
+  sendto_common_channels_local(target_p, 0, 0, ":%s!%s@%s QUIT :Changing hostname",
+                               target_p->name, target_p->username, target_p->host);
+
+  if (IsUserHostIp(target_p))
+    delete_user_host(target_p->username, target_p->host, !MyConnect(target_p));
+
+  strlcpy(target_p->host, hostname, sizeof(target_p->host));
+
+  add_user_host(target_p->username, target_p->host, !MyConnect(target_p));
+  SetUserHost(target_p);
 
   if (MyClient(target_p))
   {
     sendto_one(target_p, form_str(RPL_NEWHOSTIS), me.name,
-               target_p->name, target_p->username,
-               target_p->host);
+               target_p->name, target_p->host);
     clear_ban_cache_client(target_p);
   }
 

@@ -306,10 +306,6 @@ initialize_global_set_options(void)
 static void
 initialize_message_files(void)
 {
-  init_message_file(USER_LINKS, LIPATH, &ConfigFileEntry.linksfile);
-
-  read_message_file(&ConfigFileEntry.linksfile);
-
   init_isupport();
 }
 

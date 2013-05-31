@@ -54,6 +54,7 @@
 
 #define MIN_CONN_FREQ 300
 
+dlink_list flatten_links;
 static dlink_list cap_list = { NULL, NULL, 0 };
 static void server_burst(struct Client *);
 static void burst_all(struct Client *);
@@ -72,44 +73,35 @@ static void burst_members(struct Client *, struct Channel *);
  *		  but in no particular order.
  */
 void
-write_links_file(void* notused)
+write_links_file(void *notused)
 {
-  MessageFileLine *next_mptr = NULL;
-  MessageFileLine *mptr = NULL;
-  MessageFileLine *currentMessageLine = NULL;
-  MessageFileLine *newMessageLine = NULL;
-  MessageFile *MessageFileptr = &ConfigFileEntry.linksfile;
-  FILE *file;
-  char buff[512];
-  dlink_node *ptr;
+  FILE *file = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;;
+  char buff[IRCD_BUFSIZE] = { '\0' };
 
-  if ((file = fopen(MessageFileptr->fileName, "w")) == NULL)
+  if ((file = fopen(LIPATH, "w")) == NULL)
     return;
 
-  for (mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, flatten_links.head)
   {
-    next_mptr = mptr->next;
-    MyFree(mptr);
+    dlinkDelete(ptr, &flatten_links);
+    MyFree(ptr->data);
+    free_dlink_node(ptr);
   }
-
-  MessageFileptr->contentsOfFile = NULL;
 
   DLINK_FOREACH(ptr, global_serv_list.head)
   {
     const struct Client *target_p = ptr->data;
 
-    /* skip ourselves, we send ourselves in /links */
-    if (IsMe(target_p))
-      continue;
-
-    /* skip hidden servers */
-    if (IsHidden(target_p))
+    /*
+     * Skip hidden servers, aswell as ourselves, since we already send
+     * ourselves in /links
+     */
+    if (IsHidden(target_p) || IsMe(target_p))
       continue;
 
     if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       continue;
-
-    newMessageLine = MyMalloc(sizeof(MessageFileLine));
 
     /*
      * Attempt to format the file in such a way it follows the usual links output
@@ -117,23 +109,12 @@ write_links_file(void* notused)
      * Mostly for aesthetic reasons - makes it look pretty in mIRC ;)
      * - madmax
      */
-    snprintf(newMessageLine->line, sizeof(newMessageLine->line), "%s %s :1 %s",
-             target_p->name, me.name, target_p->info);
+    snprintf(buff, sizeof(buff), "%s %s :1 %s",   target_p->name,
+             me.name, target_p->info);
+    dlinkAdd(xstrdup(buff), make_dlink_node(), &flatten_links);
+    snprintf(buff, sizeof(buff), "%s %s :1 %s\n", target_p->name,
+             me.name, target_p->info);
 
-    if (MessageFileptr->contentsOfFile)
-    {
-      if (currentMessageLine)
-        currentMessageLine->next = newMessageLine;
-      currentMessageLine = newMessageLine;
-    }
-    else
-    {
-      MessageFileptr->contentsOfFile = newMessageLine;
-      currentMessageLine = newMessageLine;
-    }
-
-    snprintf(buff, sizeof(buff), "%s %s :1 %s\n",
-             target_p->name, me.name, target_p->info);
     fputs(buff, file);
   }
 

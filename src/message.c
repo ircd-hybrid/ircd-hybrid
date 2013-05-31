@@ -71,18 +71,6 @@ send_message_file(struct Client *source_p, MessageFile *motdToPrint)
 
   switch (msgType)
   {
-    case USER_LINKS:
-      if (motdToPrint->contentsOfFile != NULL)
-      {
-	for (linePointer = motdToPrint->contentsOfFile; linePointer;
-	     linePointer = linePointer->next)
-	{
-	  sendto_one(source_p, ":%s 364 %s %s", /* XXX */
-		     from, to, linePointer->line);
-	}
-      }
-      break;
-
   case ISSUPPORT:
       if (motdToPrint->contentsOfFile != NULL)
       {

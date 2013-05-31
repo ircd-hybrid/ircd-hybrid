@@ -38,7 +38,6 @@ struct MessageFileLine
 typedef struct MessageFileLine MessageFileLine;
 
 typedef enum {
-  USER_LINKS,
   ISSUPPORT
 } MessageType;
   

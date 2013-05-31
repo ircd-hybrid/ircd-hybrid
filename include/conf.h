@@ -215,8 +215,6 @@ struct config_file_entry
   char *egdpool_path;
   char *service_name;
 
-  MessageFile linksfile;
-
   int gline_min_cidr;
   int gline_min_cidr6;
   int dots_in_ident;
@@ -326,6 +324,7 @@ struct logging_entry
   unsigned int use_logging;
 };
 
+extern dlink_list flatten_links;
 extern dlink_list server_items;
 extern dlink_list cluster_items;
 extern dlink_list xconf_items;

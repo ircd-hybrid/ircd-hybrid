@@ -38,6 +38,8 @@
 static void
 do_links(struct Client *source_p, int parc, char *parv[])
 {
+  dlink_node *ptr = NULL;
+
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "LINKS requested by %s (%s@%s) [%s]",
                        source_p->name,
@@ -48,7 +50,6 @@ do_links(struct Client *source_p, int parc, char *parv[])
   {
     const char *mask = (parc > 2 ? parv[2] : parv[1]);
     const char *me_name, *nick;
-    dlink_node *ptr;
 
     me_name = ID_or_name(&me, source_p->from);
     nick = ID_or_name(source_p, source_p->from);
@@ -93,7 +94,12 @@ do_links(struct Client *source_p, int parc, char *parv[])
                ID_or_name(&me, source_p->from),
                ID_or_name(source_p, source_p->from),
                me.name, me.name, 0, me.info);
-    send_message_file(source_p, &ConfigFileEntry.linksfile);
+
+    DLINK_FOREACH(ptr, flatten_links.head)
+      sendto_one(source_p, ":%s %d %s %s",
+                 ID_or_name(&me, source_p->from), RPL_LINKS,
+                 ID_or_name(source_p, source_p->from),
+                 ptr->data);
     sendto_one(source_p, form_str(RPL_ENDOFLINKS),
                ID_or_name(&me, source_p->from),
                ID_or_name(source_p, source_p->from), "*");

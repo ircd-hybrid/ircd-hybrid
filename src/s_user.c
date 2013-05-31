@@ -51,7 +51,7 @@
 #include "s_misc.h"
 #include "parse.h"
 #include "watch.h"
-
+#include "message.h"
 
 static char umode_buffer[IRCD_BUFSIZE];
 
@@ -1171,24 +1171,7 @@ user_welcome(struct Client *source_p)
                source_p->name, source_p->id);
 
   show_lusers(source_p);
-
-  if (ConfigFileEntry.short_motd)
-  {
-    sendto_one(source_p, ":%s NOTICE %s :*** Notice -- motd was last changed at %s",
-               me.name, source_p->name, ConfigFileEntry.motd.lastChangedDate);
-    sendto_one(source_p,
-               ":%s NOTICE %s :*** Notice -- Please read the motd if you haven't "
-               "read it", me.name, source_p->name);
-    sendto_one(source_p, form_str(RPL_MOTDSTART),
-               me.name, source_p->name, me.name);
-    sendto_one(source_p, form_str(RPL_MOTD),
-               me.name, source_p->name,
-               "*** This is the short motd ***");
-    sendto_one(source_p, form_str(RPL_ENDOFMOTD),
-               me.name, source_p->name);
-  }
-  else  
-    send_message_file(source_p, &ConfigFileEntry.motd);
+  motd_signon(source_p);
 }
 
 /* check_xline()

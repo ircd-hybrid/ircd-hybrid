@@ -34,6 +34,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
+#include "motd.h"
 
 
 /*
@@ -68,9 +69,9 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     else if (irccmp(parv[1], "MOTD") == 0)
     {
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "%s is forcing re-reading of MOTD file",
+                           "%s is forcing re-reading of MOTD files",
                            get_oper_name(source_p));
-      read_message_file(&ConfigFileEntry.motd);
+      motd_recache();
       found = 1;
     }
 

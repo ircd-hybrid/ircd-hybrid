@@ -103,9 +103,9 @@ am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
 	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
 	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
 	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
-	modules.$(OBJEXT) motd.$(OBJEXT) rng_mt.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	message.$(OBJEXT) modules.$(OBJEXT) motd.$(OBJEXT) \
+	rng_mt.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
+	parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
 	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
 	s_bsd_select.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
 	rsa.$(OBJEXT) s_auth.$(OBJEXT) s_bsd.$(OBJEXT) \
@@ -374,6 +374,7 @@ ircd_SOURCES = channel.c         \
                match.c           \
                memory.c          \
                mempool.c         \
+               message.c         \
                modules.c         \
                motd.c            \
                rng_mt.c          \
@@ -522,6 +523,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/message.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@

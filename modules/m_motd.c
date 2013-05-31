@@ -42,7 +42,7 @@ do_motd(struct Client *source_p)
                        "MOTD requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
-  send_message_file(source_p, &ConfigFileEntry.motd);
+  motd_send(source_p);
 }
 
 /*

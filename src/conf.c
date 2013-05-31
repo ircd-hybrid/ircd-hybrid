@@ -53,6 +53,7 @@
 #include "s_misc.h"
 #include "conf_db.h"
 #include "conf_class.h"
+#include "motd.h"
 
 struct config_server_hide ConfigServerHide;
 
@@ -1573,6 +1574,8 @@ clear_out_old_conf(void)
         conf_free(conf);
     }
   }
+
+  motd_clear();
 
   /*
    * don't delete the class table, rather mark all entries

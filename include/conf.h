@@ -26,7 +26,7 @@
 #define INCLUDED_s_conf_h
 #include "config.h"
 #include "ircd_defs.h"
-#include "motd.h"               /* MessageFile */
+#include "message.h"               /* MessageFile */
 #include "client.h"
 #include "hook.h"
 #include "conf_class.h"
@@ -209,11 +209,12 @@ struct config_file_entry
   const char *xlinefile;
   const char *dlinefile;
   const char *resvfile;
+  char *mpath;
+  char *rpath;
 
   char *egdpool_path;
   char *service_name;
 
-  MessageFile motd;
   MessageFile linksfile;
 
   int gline_min_cidr;

@@ -48,6 +48,7 @@
 #include "whowas.h"
 #include "watch.h"
 #include "irc_res.h"
+#include "motd.h"
 
 
 const char *from, *to;
@@ -526,6 +527,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   totww = wwu * sizeof(struct Client) + wwm;
 
+  motd_memory_count(source_p);
   count_ip_hash(&number_ips_stored,&mem_ips_stored);
   sendto_one(source_p, ":%s %d %s z :iphash %u(%llu)",
              me.name, RPL_STATSDEBUG, source_p->name,
@@ -1562,7 +1564,7 @@ static const struct StatsStruct
   { 's',        stats_service,          1,      0       },
   { 'S',        stats_service,          1,      0       },
   { 't',        stats_tstats,           1,      0       },
-  { 'T',        stats_tstats,           1,      0       },
+  { 'T',        motd_report,            1,      0       },
   { 'u',        stats_uptime,           0,      0       },
   { 'U',        stats_shared,           1,      0       },
   { 'v',        stats_servers,          1,      0       },

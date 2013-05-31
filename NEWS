@@ -1,14 +1,37 @@
+-- ircd-hybrid-8.1.1 Release Notes
+o) Fixed bug where opers could see LOCOPS messages even if they don't have
+   the +l mode set
+o) Fixed bug where non-SSL clients could join +S channels on non-SSL servers
+o) "STATS T" shows configured MOTD files
+o) Implemented motd{} configuration blocks. See doc/reference.conf for more
+   information
+
+
+-- ircd-hybrid-8.1.0 Release Notes
+o) Minor code cleanups/performance improvements
+
+
+-- ircd-hybrid-8.1.0rc1 Release Notes
+o) Fixed broken spoofs
+
+
 -- ircd-hybrid-8.1.0beta5 Release Notes
 o) Removed 'remote', and 'global_kill' oper flags, and added 'connect',
    'squit', and 'kill' flags for better fine-tuning instead. Whether or
    not a specific action is allowed on a remote server can be controlled
-   by appeding the ':remote' flag. For example: 'kill' allows only local
+   by appending the ':remote' flag. For example: 'kill' allows only local
    clients to be killed, whereas 'kill:remote' allows to issue a KILL for
    remote clients
+o) Added 'locops' and 'wallops' to irc-operator flags
+o) Improve/cleanup HELP system
+
 
 -- ircd-hybrid-8.1.0beta4 Release Notes
 o) Implemented channel mode +M. Clients that haven't identified their
    name with NickServ may not speak in a channel that has this mode set
+o) Fixed weird idletimes shown in /trace
+o) Added 'nononreg' (+R) to general::oper_umodes
+o) Added user mode +F (can see remote client connect/exit notices)
 
 
 -- ircd-hybrid-8.1.0beta3 Release Notes
@@ -27,7 +50,6 @@ o) Removed channel::quiet_on_ban configuration option. This feature is
 -- ircd-hybrid-8.1.0beta2 Release Notes
 o) Fixed broken compile with libGeoIP disabled
 o) Code cleanups; working towards stabilization and improved performance
-o) Changed RPL_WELCOME to comply with rfc2812
 o) Removed operflag 'nick_changes'. Operators can now set +n at will
 o) Fixed shared{} blocks not working as expected
 o) Fixed spoofs not working as expected
@@ -58,6 +80,12 @@ o) contrib/ and its content has been removed from the tree
 o) Added serverhide::hide_services configuration option
 o) Added 'nononreg' (+R) to oper::umodes and general::oper_only_modes
 o) Added support for "away-notify" client capability
+
+
+-- ircd-hybrid-8.0.9 Release Notes
+o) Fixed bug where ircd would sometimes drop a services link because
+   of a missing argument to the SVSMODE command
+o) Fixed weird idletimes shown in /trace
 
 
 -- ircd-hybrid-8.0.8 Release Notes

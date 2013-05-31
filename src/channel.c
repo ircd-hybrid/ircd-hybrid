@@ -647,6 +647,9 @@ can_join(struct Client *source_p, struct Channel *chptr, const char *key)
 #ifdef HAVE_LIBCRYPTO
   if ((chptr->mode.mode & MODE_SSLONLY) && !source_p->localClient->fd.ssl)
     return ERR_SSLONLYCHAN;
+#else
+  if ((chptr->mode.mode & MODE_SSLONLY))
+    return ERR_SSLONLYCHAN;
 #endif
 
   if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(source_p, UMODE_REGISTERED))

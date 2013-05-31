@@ -272,7 +272,7 @@ static const char *replies[] = {
 /* 242 RPL_STATSUPTIME */ ":%s 242 %s :Server Up %d days, %d:%02d:%02d",
 /* 243 RPL_STATSOLINE */ ":%s 243 %s %c %u %s@%s * %s %s %s",
 /* 244 RPL_STATSHLINE */ ":%s 244 %s %c %s * %s %d %s",
-/* 245 */ NULL,
+/* 245 RPL_STATSTLINE */ ":%s 245 %s T %s %s",
 /* 246 RPL_STATSSERVICE */ ":%s 246 %s %c %s * %s %d %d",
 /* 247 RPL_STATSXLINE */ ":%s 247 %s %c %d %s :%s",
 /* 248 RPL_STATSULINE */ ":%s 248 %s U %s %s@%s %s",

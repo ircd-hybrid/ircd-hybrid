@@ -30,6 +30,7 @@ X h - Shows ircd callback statistics
 * q - Shows resv'd nicks and channels
 * r - Shows resource usage by ircd
 * s - Shows the server cache
+* T - Shows configured Message Of The Day files
 * t - Shows generic server stats
 * U - Shows shared blocks (Old U: lines)
   u - Shows server uptime

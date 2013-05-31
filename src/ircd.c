@@ -56,7 +56,7 @@
 #include "mempool.h"
 #include "hook.h"
 #include "ircd_getopt.h"
-#include "motd.h"
+#include "message.h"
 #include "supported.h"
 #include "watch.h"
 #include "conf_db.h"
@@ -251,9 +251,9 @@ io_loop(void)
     }
     if (doremotd)
     {
-      read_message_file(&ConfigFileEntry.motd);
+      motd_recache();
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Got signal SIGUSR1, reloading ircd motd file");
+                           "Got signal SIGUSR1, reloading motd files");
       doremotd = 0;
     }
   }
@@ -306,10 +306,8 @@ initialize_global_set_options(void)
 static void
 initialize_message_files(void)
 {
-  init_message_file(USER_MOTD, MPATH, &ConfigFileEntry.motd);
   init_message_file(USER_LINKS, LIPATH, &ConfigFileEntry.linksfile);
 
-  read_message_file(&ConfigFileEntry.motd);
   read_message_file(&ConfigFileEntry.linksfile);
 
   init_isupport();
@@ -563,6 +561,7 @@ main(int argc, char *argv[])
   initialize_server_capabs();   /* Set up default_server_capabs */
   initialize_global_set_options();
   channel_init();
+  motd_init();
 #ifdef HAVE_LIBGEOIP
   geoip_ctx = GeoIP_new(GEOIP_MEMORY_CACHE);
 #endif

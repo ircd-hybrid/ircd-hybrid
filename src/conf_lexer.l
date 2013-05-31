@@ -243,6 +243,7 @@ min_nonwildcard             { return MIN_NONWILDCARD; }
 min_nonwildcard_simple      { return MIN_NONWILDCARD_SIMPLE; }
 module                      { return MODULE; }
 modules                     { return MODULES; }
+motd                        { return MOTD; }
 name                        { return NAME; }
 nchange                     { return T_NCHANGE; }
 need_ident                  { return NEED_IDENT; }

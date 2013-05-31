@@ -86,8 +86,7 @@ extern const char *form_str(unsigned int);
 #define RPL_STATSUPTIME      242
 #define RPL_STATSOLINE       243
 #define RPL_STATSHLINE       244
-/* 245 No longer used in ircd-hybrid */
-#define RPL_STATSSLINE       245
+#define RPL_STATSTLINE       245
 #define RPL_STATSSERVICE     246
 #define RPL_STATSXLINE       247
 #define RPL_STATSULINE       248

@@ -47,6 +47,7 @@
 #include "resv.h"
 #include "numeric.h"
 #include "s_user.h"
+#include "motd.h"
 
 #ifdef HAVE_LIBCRYPTO
 #include <openssl/rsa.h>
@@ -231,6 +232,7 @@ reset_block_state(void)
 %token  MIN_NONWILDCARD_SIMPLE
 %token  MODULE
 %token  MODULES
+%token  MOTD
 %token  NAME
 %token  NEED_IDENT
 %token  NEED_PASSWORD
@@ -385,6 +387,7 @@ conf_item:        admin_entry
 		| general_entry
                 | gecos_entry
                 | modules_entry
+                | motd_entry
                 | error ';'
                 | error '}'
         ;
@@ -869,6 +872,42 @@ admin_description: DESCRIPTION '=' QSTRING ';'
 
   MyFree(AdminInfo.description);
   AdminInfo.description = xstrdup(yylval.string);
+};
+
+/***************************************************************************
+ * motd section
+ ***************************************************************************/
+motd_entry: MOTD 
+{
+  if (conf_parser_ctx.pass == 2)
+    reset_block_state();
+} '{' motd_items '}' ';'
+{
+  dlink_node *ptr = NULL;
+
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (!block_state.file.buf[0])
+    break;
+
+  DLINK_FOREACH(ptr, block_state.mask.list.head)
+    motd_add(ptr->data, block_state.file.buf);
+};
+
+motd_items: motd_items motd_item | motd_item;
+motd_item:  motd_mask | motd_file | error ';' ;
+
+motd_mask: MASK '=' QSTRING ';' 
+{
+  if (conf_parser_ctx.pass == 2)
+    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+};
+
+motd_file: T_FILE '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
 };
 
 /***************************************************************************

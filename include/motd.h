@@ -34,7 +34,8 @@ enum MotdType
 {
     MOTD_UNIVERSAL, /**< MOTD for all users */
     MOTD_HOSTMASK,  /**< MOTD selected by hostmask */
-    MOTD_IPMASK,    /**< MOTD selected by IP mask */
+    MOTD_IPMASKV4,  /**< MOTD selected by IP mask */
+    MOTD_IPMASKV6,  /**< MOTD selected by IP mask */
     MOTD_CLASS      /**< MOTD selected by connection class */
 };
 

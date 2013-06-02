@@ -37,6 +37,7 @@
 #include "memory.h"
 #include "log.h"
 #include "motd.h"
+#include "hostmask.h"
 
 
 /** Global list of messages of the day. */
@@ -63,7 +64,22 @@ motd_create(const char *hostmask, const char *path)
   else if (class_find(hostmask, 1))
     tmp->type = MOTD_CLASS;
   else
-    tmp->type = MOTD_HOSTMASK;
+  {
+    switch (parse_netmask(hostmask, &tmp->address, &tmp->addrbits))
+    {
+      case HM_IPV4:
+      tmp->type = MOTD_IPMASKV4;
+      break;
+#ifdef IPV6
+    case HM_IPV6:
+      tmp->type = MOTD_IPMASKV6;
+      break;
+#endif
+    default: /* HM_HOST */
+      tmp->type = MOTD_HOSTMASK;
+      break;
+    }
+  }
 
   if (hostmask != NULL)
     tmp->hostmask = xstrdup(hostmask);
@@ -231,9 +247,21 @@ motd_lookup(struct Client *client_p)
       case MOTD_CLASS:
         if (!match(motd->hostmask, class->name))
           return motd;
+        break;
       case MOTD_HOSTMASK:
         if (!match(motd->hostmask, client_p->host))
           return motd;
+        break;
+      case MOTD_IPMASKV4:
+          if (client_p->localClient->aftype == AF_INET)
+            if (match_ipv4(&client_p->localClient->ip, &motd->address, motd->addrbits))
+              return motd;
+        break;
+      case MOTD_IPMASKV6:
+          if (client_p->localClient->aftype == AF_INET6)
+            if (match_ipv6(&client_p->localClient->ip, &motd->address, motd->addrbits))
+              return motd;
+        break;
       default: break;
     }
   }

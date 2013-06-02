@@ -87,8 +87,8 @@ motd_cache(struct Motd *motd)
   struct MotdCache *cache = NULL;
   struct stat sb;
   char line[MOTD_LINESIZE + 2]; /* \r\n */
-  char *tmp = NULL;
-  int i;
+  char *tmp = line;
+  unsigned int i = 0;
   dlink_node *ptr = NULL;
 
   assert(motd);
@@ -135,8 +135,7 @@ motd_cache(struct Motd *motd)
   while (cache->count < cache->maxcount && fgets(line, sizeof(line), file))
   {
     /* copy over line, stopping when we overflow or hit line end */
-    for (tmp = line, i = 0; i < (MOTD_LINESIZE - 1) && *tmp &&
-                            *tmp != '\r' && *tmp != '\n'; tmp++, i++)
+    for (; i < (MOTD_LINESIZE - 1) && *tmp && *tmp != '\r' && *tmp != '\n'; ++tmp, ++i)
       cache->motd[cache->count][i] = *tmp;
     cache->motd[cache->count][i] = '\0';
 
@@ -174,7 +173,7 @@ motd_decache(struct Motd *motd)
 
   motd->cache = NULL; /* zero the cache */
 
-  if (!--cache->ref) /* reduce reference count... */
+  if (--cache->ref == 0) /* reduce reference count... */
   {
     dlinkDelete(&cache->node, &MotdList.cachelist);
     MyFree(cache->path); /* free path info... */
@@ -250,7 +249,7 @@ motd_lookup(struct Client *client_p)
 static void
 motd_forward(struct Client *source_p, const struct MotdCache *cache)
 {
-  int i;
+  unsigned int i = 0;
   const char *from = ID_or_name(&me, source_p->from);
   const char *to = ID_or_name(source_p, source_p->from);
 
@@ -266,7 +265,7 @@ motd_forward(struct Client *source_p, const struct MotdCache *cache)
   sendto_one(source_p, form_str(RPL_MOTDSTART),
              from, to, me.name);
 
-  for (i = 0; i < cache->count; i++)
+  for (; i < cache->count; ++i)
     sendto_one(source_p, form_str(RPL_MOTD),
                from, to, cache->motd[i]);
   sendto_one(source_p, form_str(RPL_ENDOFMOTD), from, to);

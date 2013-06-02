@@ -43,13 +43,13 @@ struct Motd
 {
   dlink_node         node; /**< Next MOTD in the linked list. */
   enum MotdType      type;     /**< Type of MOTD. */
+  char              *path;     /**< Pathname of MOTD file. */
   char              *hostmask; /**< Hostmask if type==MOTD_HOSTMASK,
                                        class name if type==MOTD_CLASS,
                                        text IP mask if type==MOTD_IPMASK. */
   struct irc_ssaddr  address;  /**< Address if type==MOTD_IPMASK. */
-  int                addrbits; /**< Number of bits checked in Motd::address. */
-  char              *path;     /**< Pathname of MOTD file. */
-  int                maxcount; /**< Number of lines for MOTD. */
+  unsigned int       addrbits; /**< Number of bits checked in Motd::address. */
+  unsigned int       maxcount; /**< Number of lines for MOTD. */
   struct MotdCache  *cache;    /**< MOTD cache entry. */
 };
 
@@ -62,13 +62,13 @@ struct Motd
 /** Cache entry for the contents of a MOTD file. */
 struct MotdCache
 {
-  dlink_node  node;     /**< Next MotdCache in list. */
-  int         ref;      /**< Number of references to this entry. */
-  char       *path;     /**< Pathname of file. */
-  int         maxcount; /**< Number of lines allocated for message. */
-  struct tm   modtime;  /**< Last modification time from file. */
-  int         count;    /**< Actual number of lines used in message. */
-  char        motd[1][MOTD_LINESIZE]; /**< Message body. */
+  dlink_node   node;     /**< Next MotdCache in list. */
+  char        *path;     /**< Pathname of file. */
+  unsigned int ref;      /**< Number of references to this entry. */
+  unsigned int maxcount; /**< Number of lines allocated for message. */
+  unsigned int count;    /**< Actual number of lines used in message. */
+  struct tm    modtime;  /**< Last modification time from file. */
+  char         motd[1][MOTD_LINESIZE]; /**< Message body. */
 };
 
 /* motd_send sends a MOTD off to a user */

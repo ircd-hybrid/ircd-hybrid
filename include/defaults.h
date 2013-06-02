@@ -120,8 +120,6 @@
 
 #define MAX_TARGETS_DEFAULT 4           /* default for max_targets */
 
-#define INIT_LOG_LEVEL L_NOTICE         /* default for log_level */
-
 #define CONNECTTIMEOUT  30      /* Recommended value: 30 */
 #define IDENT_TIMEOUT 10
 

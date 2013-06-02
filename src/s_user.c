@@ -51,7 +51,6 @@
 #include "s_misc.h"
 #include "parse.h"
 #include "watch.h"
-#include "message.h"
 
 static char umode_buffer[IRCD_BUFSIZE];
 
@@ -73,8 +72,8 @@ struct Isupport
   int number;
 };
 
-static dlink_list support_list = { NULL, NULL, 0 };
-MessageFile *isupportFile;
+static dlink_list support_list;
+static dlink_list support_list_lines;
 
 /* memory is cheap. map 0-255 to equivalent mode */
 const unsigned int user_modes[256] =
@@ -243,7 +242,11 @@ show_lusers(struct Client *source_p)
 void
 show_isupport(struct Client *source_p) 
 {
-  send_message_file(source_p, isupportFile);
+  const dlink_node *ptr = NULL;
+
+  DLINK_FOREACH(ptr, support_list_lines.head)
+    sendto_one(source_p, form_str(RPL_ISUPPORT), me.name,
+               source_p->name, ptr->data);
 }
 
 /*
@@ -1353,8 +1356,6 @@ uid_get(void)
 void
 init_isupport(void)
 {
-  isupportFile = init_MessageLine();
-
   add_isupport("CALLERID", NULL, -1);
   add_isupport("CASEMAPPING", CASEMAP, -1);
   add_isupport("DEAF", "D", -1);
@@ -1450,13 +1451,18 @@ rebuild_isupport_message_line(void)
 {
   char isupportbuffer[IRCD_BUFSIZE];
   char *p = isupportbuffer;
-  dlink_node *ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
   int n = 0;
   int tokens = 0;
   size_t len = 0;
   size_t reserve = strlen(me.name) + HOSTLEN + strlen(form_str(RPL_ISUPPORT));
 
-  destroy_MessageLine(isupportFile);
+  DLINK_FOREACH_SAFE(ptr, ptr_next, support_list_lines.head)
+  {
+    dlinkDelete(ptr, &support_list_lines);
+    MyFree(ptr->data);
+    free_dlink_node(ptr);
+  }
 
   DLINK_FOREACH(ptr, support_list.head)
   {
@@ -1486,7 +1492,7 @@ rebuild_isupport_message_line(void)
       if (*--p == ' ')
         *p = '\0';
 
-      addto_MessageLine(isupportFile, isupportbuffer);
+      dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &support_list_lines);
       p = isupportbuffer;
       len = 0;
       n = tokens = 0;
@@ -1497,6 +1503,6 @@ rebuild_isupport_message_line(void)
   {
     if (*--p == ' ')
       *p = '\0';
-    addto_MessageLine(isupportFile, isupportbuffer);
+    dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &support_list_lines);
   }
 }

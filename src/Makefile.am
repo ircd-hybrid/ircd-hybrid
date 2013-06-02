@@ -35,7 +35,6 @@ ircd_SOURCES = channel.c         \
                match.c           \
                memory.c          \
                mempool.c         \
-               message.c         \
                modules.c         \
                motd.c            \
                rng_mt.c          \

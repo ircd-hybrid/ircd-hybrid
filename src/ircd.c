@@ -56,7 +56,6 @@
 #include "mempool.h"
 #include "hook.h"
 #include "ircd_getopt.h"
-#include "message.h"
 #include "supported.h"
 #include "watch.h"
 #include "conf_db.h"
@@ -297,18 +296,6 @@ initialize_global_set_options(void)
   /* End of global set options */
 }
 
-/* initialize_message_files()
- *
- * inputs       - none
- * output       - none
- * side effects - Set up all message files needed, motd etc.
- */
-static void
-initialize_message_files(void)
-{
-  init_isupport();
-}
-
 /* initialize_server_capabs()
  *
  * inputs       - none
@@ -540,7 +527,7 @@ main(int argc, char *argv[])
 
   mp_pool_init();
   init_dlink_nodes();
-  initialize_message_files();
+  init_isupport();
   dbuf_init();
   hash_init();
   init_ip_hash_table();      /* client host ip hash table */

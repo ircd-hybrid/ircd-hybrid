@@ -26,7 +26,6 @@
 #define INCLUDED_s_conf_h
 #include "config.h"
 #include "ircd_defs.h"
-#include "message.h"               /* MessageFile */
 #include "client.h"
 #include "hook.h"
 #include "conf_class.h"

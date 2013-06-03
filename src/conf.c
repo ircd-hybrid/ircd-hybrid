@@ -1517,8 +1517,6 @@ read_conf_files(int cold)
   snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,imnprstORS");
   add_isupport("CHANNELLEN", NULL, LOCAL_CHANNELLEN);
   add_isupport("TOPICLEN", NULL, ServerInfo.max_topic_length);
-  add_isupport("EXCEPTS", "e", -1);
-  add_isupport("INVEX", "I", -1);
   add_isupport("CHANMODES", chanmodes, -1);
 
   /*
@@ -1631,9 +1629,6 @@ clear_out_old_conf(void)
   /* clean out general */
   MyFree(ConfigFileEntry.service_name);
   ConfigFileEntry.service_name = NULL;
-
-  delete_isupport("INVEX");
-  delete_isupport("EXCEPTS");
 }
 
 /* conf_add_class_to_conf()

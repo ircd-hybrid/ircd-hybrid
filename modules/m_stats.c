@@ -219,7 +219,7 @@ report_resv(struct Client *source_p)
   dlink_node *ptr = NULL;
   struct MaskItem *conf = NULL;
 
-  DLINK_FOREACH(ptr, resv_channel_list.head)
+  DLINK_FOREACH(ptr, cresv_items.head)
   {
     conf = ptr->data;
     sendto_one(source_p, form_str(RPL_STATSQLINE),
@@ -476,8 +476,8 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   sendto_one(source_p, ":%s %d %s z :Resv channels %u(%lu) nicks %u(%lu)",
              me.name, RPL_STATSDEBUG, source_p->name,
-             dlink_list_length(&resv_channel_list),
-             dlink_list_length(&resv_channel_list) * sizeof(struct MaskItem),
+             dlink_list_length(&cresv_items),
+             dlink_list_length(&cresv_items) * sizeof(struct MaskItem),
              dlink_list_length(&nresv_items),
              dlink_list_length(&nresv_items) * sizeof(struct MaskItem));
 

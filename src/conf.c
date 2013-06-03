@@ -65,7 +65,7 @@ dlink_list oconf_items   = { NULL, NULL, 0 };
 dlink_list uconf_items   = { NULL, NULL, 0 };
 dlink_list xconf_items   = { NULL, NULL, 0 };
 dlink_list nresv_items   = { NULL, NULL, 0 };
-dlink_list temporary_resv = { NULL, NULL, 0 };
+dlink_list cresv_items = { NULL, NULL, 0 };
 
 extern unsigned int lineno;
 extern char linebuf[];
@@ -809,7 +809,7 @@ map_to_list(enum maskitem_type type)
     return(&nresv_items);
     break;
   case CONF_CRESV:
-    return(&resv_channel_list);
+    return(&cresv_items);
   case CONF_OPER:
     return(&oconf_items);
     break;
@@ -1327,7 +1327,7 @@ cleanup_tklines(void *notused)
   hostmask_expire_temporary();
   expire_tklines(&xconf_items); 
   expire_tklines(&nresv_items);
-  expire_tklines(&resv_channel_list);
+  expire_tklines(&cresv_items);
 }
 
 /* expire_tklines()
@@ -1542,7 +1542,7 @@ clear_out_old_conf(void)
   dlink_list *free_items [] = {
     &server_items,   &oconf_items,
      &uconf_items,   &xconf_items,
-     &nresv_items, &cluster_items,  &service_items, &resv_channel_list, NULL
+     &nresv_items, &cluster_items,  &service_items, &cresv_items, NULL
   };
 
   dlink_list ** iterator = free_items; /* C is dumb */

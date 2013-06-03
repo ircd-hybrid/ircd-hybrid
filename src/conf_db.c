@@ -831,7 +831,7 @@ save_resv_database(void)
   if (!(f = open_db(RESVPATH, "w", KLINE_DB_VERSION)))
     return;
 
-  DLINK_FOREACH(ptr, resv_channel_list.head)
+  DLINK_FOREACH(ptr, cresv_items.head)
   {
     conf = ptr->data;
 
@@ -849,7 +849,7 @@ save_resv_database(void)
 
   SAFE_WRITE(write_uint32(records, f), RESVPATH);
 
-  DLINK_FOREACH(ptr, resv_channel_list.head)
+  DLINK_FOREACH(ptr, cresv_items.head)
   {
     conf = ptr->data;
 

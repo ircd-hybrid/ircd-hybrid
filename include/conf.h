@@ -330,6 +330,8 @@ extern dlink_list xconf_items;
 extern dlink_list uconf_items;
 extern dlink_list oconf_items;
 extern dlink_list service_items;
+extern dlink_list nresv_items;
+extern dlink_list cresv_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct logging_entry ConfigLoggingEntry;
 extern struct config_file_entry ConfigFileEntry;/* defined in ircd.c*/

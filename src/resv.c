@@ -39,8 +39,6 @@
 #include "channel.h"
 #include "hostmask.h"
 
-dlink_list resv_channel_list = { NULL, NULL, 0 };
-
 
 /* create_resv()
  *
@@ -176,7 +174,7 @@ match_find_resv(const char *name)
   if (EmptyString(name))
     return NULL;
 
-  DLINK_FOREACH(ptr, resv_channel_list.head)
+  DLINK_FOREACH(ptr, cresv_items.head)
   {
     struct MaskItem *conf = ptr->data;
 

@@ -84,8 +84,6 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
     tname = "*";
   }
 
-  full_etrace = 1; /* XXX */
-
   if (!wilds && !do_all)
   {
     target_p = hash_find_client(tname);

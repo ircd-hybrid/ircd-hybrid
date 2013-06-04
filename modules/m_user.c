@@ -58,10 +58,6 @@ do_local_user(struct Client *source_p,
 
   strlcpy(source_p->info, realname, sizeof(source_p->info));
 
-  /* stash for later */
-  strlcpy(source_p->localClient->client_host, host, sizeof(source_p->localClient->client_host));
-  strlcpy(source_p->localClient->client_server, server, sizeof(source_p->localClient->client_server));
-
   if (!IsGotId(source_p))
     strlcpy(source_p->username, username, sizeof(source_p->username));
 

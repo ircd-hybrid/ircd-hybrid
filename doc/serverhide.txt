@@ -80,7 +80,7 @@
        This feature is not tunable; and opers also do not see the real server
        setting the mode.
 
-   Each item is briefly described in the serverhide {} block in ircd.conf.
+   Each item is briefly described in the serverhide {} block in reference.conf.
 
      ----------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ Using Non-QS Compliant Hubs
    contain the real server names.
 
    The only way to prevent this leak on a network is to only use hubs
-   supporting the QS capability. Hybrid 6, Hybrid 7, and csircd all are
+   supporting the QS capability. Hybrid 6 (and above) and csircd all are
    currently running daemons that support QS. Hybrid 5 and 2.8.21+CSr servers
    do not support QS, and will leak server names (and therefore routing
    information) on splits.

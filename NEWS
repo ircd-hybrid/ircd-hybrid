@@ -1,7 +1,7 @@
 -- ircd-hybrid-8.1.1 Release Notes
 ########################################################################
 o) IMPORTANT: moved disable_remote_command configuration directive from
-   general{} block to serverhide{] block
+   general{} block to serverhide{} block
 ########################################################################
 o) Fixed bug where opers could see LOCOPS messages even if they don't have
    the +l mode set

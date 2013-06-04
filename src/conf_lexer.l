@@ -145,7 +145,6 @@ caller_id_wait              { return CALLER_ID_WAIT; }
 callerid                    { return T_CALLERID; }
 can_flood                   { return CAN_FLOOD; }
 cconn                       { return T_CCONN; }
-cconn_full                  { return T_CCONN_FULL; }
 channel                     { return CHANNEL; }
 cidr_bitlen_ipv4            { return CIDR_BITLEN_IPV4; }
 cidr_bitlen_ipv6            { return CIDR_BITLEN_IPV6; }

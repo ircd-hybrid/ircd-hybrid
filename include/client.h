@@ -154,14 +154,13 @@
 #define UMODE_UNAUTH       0x00008000 /**< show unauth connects here */
 #define UMODE_LOCOPS       0x00010000 /**< show locops */
 #define UMODE_DEAF         0x00020000 /**< don't receive channel messages */
-#define UMODE_CCONN_FULL   0x00040000 /**< add unused fields to connection monitoring */
-#define UMODE_REGISTERED   0x00080000 /**< User has identified for that nick. */
-#define UMODE_REGONLY      0x00100000 /**< Only registered nicks may PM */
-#define UMODE_HIDDEN       0x00200000 /**< Operator status is hidden */
-#define UMODE_OPER         0x00400000 /**< Operator */
-#define UMODE_ADMIN        0x00800000 /**< Admin on server */ 
-#define UMODE_FARCONNECT   0x01000000 /**< Can see remote client connects/exits */
-#define UMODE_HIDDENHOST   0x02000000 /**< User's host is hidden */
+#define UMODE_REGISTERED   0x00040000 /**< User has identified for that nick. */
+#define UMODE_REGONLY      0x00080000 /**< Only registered nicks may PM */
+#define UMODE_HIDDEN       0x00100000 /**< Operator status is hidden */
+#define UMODE_OPER         0x00200000 /**< Operator */
+#define UMODE_ADMIN        0x00400000 /**< Admin on server */ 
+#define UMODE_FARCONNECT   0x00800000 /**< Can see remote client connects/exits */
+#define UMODE_HIDDENHOST   0x01000000 /**< User's host is hidden */
 
 
 #define UMODE_ALL          UMODE_SERVNOTICE

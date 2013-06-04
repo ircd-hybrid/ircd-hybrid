@@ -863,14 +863,6 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
                            source_p->name, source_p->username, source_p->host, comment,
                            ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
                            "255.255.255.255" : source_p->sockhost);
-      sendto_realops_flags(UMODE_CCONN_FULL, L_ALL, SEND_NOTICE,
-                           "CLIEXIT: %s %s %s %s 0 %s",
-                           source_p->name,
-                           source_p->username,
-                           source_p->host,
-                           ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
-                           "255.255.255.255" : source_p->sockhost,
-                           comment);
       ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %llu/%llu",
            myctime(source_p->localClient->firsttime), (unsigned int)(on_for / 3600),
            (unsigned int)((on_for % 3600)/60), (unsigned int)(on_for % 60),

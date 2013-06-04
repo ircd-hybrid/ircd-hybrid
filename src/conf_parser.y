@@ -290,7 +290,6 @@ reset_block_state(void)
 %token  T_BOTS
 %token  T_CALLERID
 %token  T_CCONN
-%token  T_CCONN_FULL
 %token  T_CLUSTER
 %token  T_DEAF
 %token  T_DEBUG
@@ -1140,10 +1139,6 @@ oper_umodes_item:  T_BOTS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_CCONN;
-} | T_CCONN_FULL
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_CCONN_FULL;
 } | T_DEAF
 {
   if (conf_parser_ctx.pass == 2)
@@ -2661,9 +2656,6 @@ umode_oitem:     T_BOTS
 } | T_CCONN
 {
   ConfigFileEntry.oper_umodes |= UMODE_CCONN;
-} | T_CCONN_FULL
-{
-  ConfigFileEntry.oper_umodes |= UMODE_CCONN_FULL;
 } | T_DEAF
 {
   ConfigFileEntry.oper_umodes |= UMODE_DEAF;
@@ -2735,9 +2727,6 @@ umode_item:	T_BOTS
 } | T_CCONN
 {
   ConfigFileEntry.oper_only_umodes |= UMODE_CCONN;
-} | T_CCONN_FULL
-{
-  ConfigFileEntry.oper_only_umodes |= UMODE_CCONN_FULL;
 } | T_DEAF
 {
   ConfigFileEntry.oper_only_umodes |= UMODE_DEAF;

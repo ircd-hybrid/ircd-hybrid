@@ -69,7 +69,7 @@ m_version(struct Client *client_p, struct Client *source_p,
 
   last_used = CurrentTime;
 
-  if (!ConfigFileEntry.disable_remote)
+  if (!ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p, source_p, ":%s VERSION :%s",
                     1, parc, parv) != HUNTED_ISME)
       return;

@@ -2392,7 +2392,6 @@ general_item:       general_hide_spoof_ips | general_ignore_bogus_ts |
                     general_oper_umodes | general_caller_id_wait |
                     general_opers_bypass_callerid | general_default_floodcount |
                     general_min_nonwildcard | general_min_nonwildcard_simple |
-                    general_disable_remote_commands |
                     general_throttle_time | general_havent_read_conf |
                     general_ping_cookie |
                     general_disable_auth | 
@@ -2456,11 +2455,6 @@ general_hide_spoof_ips: HIDE_SPOOF_IPS '=' TBOOL ';'
 general_ignore_bogus_ts: IGNORE_BOGUS_TS '=' TBOOL ';'
 {
   ConfigFileEntry.ignore_bogus_ts = yylval.number;
-};
-
-general_disable_remote_commands: DISABLE_REMOTE_COMMANDS '=' TBOOL ';'
-{
-  ConfigFileEntry.disable_remote = yylval.number;
 };
 
 general_failed_oper_notice: FAILED_OPER_NOTICE '=' TBOOL ';'
@@ -2886,7 +2880,8 @@ serverhide_entry: SERVERHIDE
   '{' serverhide_items '}' ';';
 
 serverhide_items:   serverhide_items serverhide_item | serverhide_item;
-serverhide_item:    serverhide_flatten_links | serverhide_hide_servers |
+serverhide_item:    serverhide_flatten_links | serverhide_disable_remote_commands | 
+                    serverhide_hide_servers |
 		    serverhide_hide_services |
 		    serverhide_links_delay |
 		    serverhide_hidden | serverhide_hidden_name |
@@ -2897,6 +2892,12 @@ serverhide_flatten_links: FLATTEN_LINKS '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.flatten_links = yylval.number;
+};
+
+serverhide_disable_remote_commands: DISABLE_REMOTE_COMMANDS '=' TBOOL ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    ConfigServerHide.disable_remote_commands = yylval.number;
 };
 
 serverhide_hide_servers: HIDE_SERVERS '=' TBOOL ';'

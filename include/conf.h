@@ -259,7 +259,6 @@ struct config_file_entry
   int use_egd;
   int ping_cookie;
   int disable_auth;
-  int disable_remote;
 };
 
 struct config_channel_entry
@@ -280,6 +279,7 @@ struct config_server_hide
 {
   char *hidden_name;
   int flatten_links;
+  int disable_remote_commands;
   int hide_servers;
   int hide_services;
   int links_delay;

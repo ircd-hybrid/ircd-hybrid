@@ -1116,6 +1116,7 @@ set_default_conf(void)
   ConfigServerHide.hide_services = 0;
   ConfigServerHide.hidden_name = xstrdup(NETWORK_NAME_DEFAULT);
   ConfigServerHide.hide_server_ips = 0;
+  ConfigServerHide.disable_remote_commands = 0;
 
   
   ConfigFileEntry.service_name = xstrdup(SERVICE_NAME_DEFAULT);
@@ -1130,7 +1131,6 @@ set_default_conf(void)
   ConfigFileEntry.hide_spoof_ips = 1;
   ConfigFileEntry.ignore_bogus_ts = 0;
   ConfigFileEntry.disable_auth = 0;
-  ConfigFileEntry.disable_remote = 0;
   ConfigFileEntry.kill_chase_time_limit = 90;
   ConfigFileEntry.default_floodcount = 8;
   ConfigFileEntry.failed_oper_notice = 1;

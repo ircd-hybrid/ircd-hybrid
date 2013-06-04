@@ -59,7 +59,7 @@ m_lusers(struct Client *client_p, struct Client *source_p,
 
   last_used = CurrentTime;
 
-  if (parc > 2 && !ConfigFileEntry.disable_remote)
+  if (parc > 2 && !ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2,
                     parc, parv) != HUNTED_ISME)
       return;

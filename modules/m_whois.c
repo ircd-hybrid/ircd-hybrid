@@ -221,7 +221,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
      * server, or our server.. I dont see why they would need to ask
      * anything else for info about the client.. --fl_
      */
-    if (ConfigFileEntry.disable_remote)
+    if (ConfigServerHide.disable_remote_commands)
       parv[1] = parv[2];
 
     if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,

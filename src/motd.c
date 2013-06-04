@@ -126,18 +126,19 @@ motd_cache(struct Motd *motd)
     }
   }
 
+  /* need the file's modification time */
+  if (stat(motd->path, &sb) == -1)
+  {
+    ilog(LOG_TYPE_IRCD, "Couldn't stat \"%s\": %s", motd->path,
+         strerror(errno));
+    return 0;
+  }
+
   /* gotta read in the file, now */
   if ((file = fopen(motd->path, "r")) == NULL)
   {
     ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path,
          strerror(errno));
-    return 0;
-  }
-
-  /* need the file's modification time */
-  if (stat(motd->path, &sb) == -1)
-  {
-    fclose(file);
     return 0;
   }
 

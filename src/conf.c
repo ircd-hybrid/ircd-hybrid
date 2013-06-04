@@ -244,10 +244,10 @@ check_client(struct Client *source_p)
     case TOO_MANY:
       sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                            "Too many on IP for %s (%s).",
-			   get_client_name(source_p, SHOW_IP),
-			   source_p->sockhost);
+                           get_client_name(source_p, SHOW_IP),
+                           source_p->sockhost);
       ilog(LOG_TYPE_IRCD, "Too many connections on IP from %s.",
-	   get_client_name(source_p, SHOW_IP));
+           get_client_name(source_p, SHOW_IP));
       ++ServerStats.is_ref;
       exit_client(source_p, &me, "No more connections allowed on that IP");
       break;
@@ -255,13 +255,13 @@ check_client(struct Client *source_p)
     case I_LINE_FULL:
       sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                            "auth{} block is full for %s (%s).",
-			   get_client_name(source_p, SHOW_IP),
-			   source_p->sockhost);
+                           get_client_name(source_p, SHOW_IP),
+                           source_p->sockhost);
       ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
-	   get_client_name(source_p, SHOW_IP));
+           get_client_name(source_p, SHOW_IP));
       ++ServerStats.is_ref;
       exit_client(source_p, &me, 
-		"No more connections allowed in your connection class");
+                  "No more connections allowed in your connection class");
       break;
 
     case NOT_AUTHORIZED:
@@ -269,16 +269,16 @@ check_client(struct Client *source_p)
       /* jdc - lists server name & port connections are on */
       /*       a purely cosmetical change */
       sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
-			   "Unauthorized client connection from %s [%s] on [%s/%u].",
-			   get_client_name(source_p, SHOW_IP),
-			   source_p->sockhost,
-			   source_p->localClient->listener->name,
-			   source_p->localClient->listener->port);
+                           "Unauthorized client connection from %s [%s] on [%s/%u].",
+                           get_client_name(source_p, SHOW_IP),
+                           source_p->sockhost,
+                           source_p->localClient->listener->name,
+                           source_p->localClient->listener->port);
       ilog(LOG_TYPE_IRCD,
-	  "Unauthorized client connection from %s on [%s/%u].",
-	  get_client_name(source_p, SHOW_IP),
-	  source_p->localClient->listener->name,
-	  source_p->localClient->listener->port);
+           "Unauthorized client connection from %s on [%s/%u].",
+           get_client_name(source_p, SHOW_IP),
+           source_p->localClient->listener->name,
+           source_p->localClient->listener->port);
 
       exit_client(source_p, &me, "You are not authorized to use this server");
       break;
@@ -311,17 +311,17 @@ verify_access(struct Client *client_p)
   if (IsGotId(client_p))
   {
     conf = find_address_conf(client_p->host, client_p->username,
-			     &client_p->localClient->ip,
-			     client_p->localClient->aftype,
+                             &client_p->localClient->ip,
+                             client_p->localClient->aftype,
                              client_p->localClient->passwd);
   }
   else
   {
-    strlcpy(non_ident+1, client_p->username, sizeof(non_ident)-1);
+    strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
     conf = find_address_conf(client_p->host,non_ident,
-			     &client_p->localClient->ip,
-			     client_p->localClient->aftype,
-	                     client_p->localClient->passwd);
+                             &client_p->localClient->ip,
+                             client_p->localClient->aftype,
+                             client_p->localClient->passwd);
   }
 
   if (conf != NULL)
@@ -334,11 +334,11 @@ verify_access(struct Client *client_p)
                    me.name, client_p->name,
                    conf->name ? conf->name : "",
                    conf->port);
-        return(NOT_AUTHORIZED);
+        return NOT_AUTHORIZED;
       }
 
       if (IsConfDoIdentd(conf))
-	SetNeedId(client_p);
+        SetNeedId(client_p);
 
       /* Thanks for spoof idea amm */
       if (IsConfDoSpoofIp(conf))
@@ -351,7 +351,7 @@ verify_access(struct Client *client_p)
         AddFlag(client_p, FLAGS_IP_SPOOFING | FLAGS_AUTH_SPOOF);
       }
 
-      return(attach_iline(client_p, conf));
+      return attach_iline(client_p, conf);
     }
     else if (IsConfKill(conf) || (ConfigFileEntry.glines && IsConfGline(conf)))
     {
@@ -360,11 +360,11 @@ verify_access(struct Client *client_p)
                    client_p->name);
       sendto_one(client_p, ":%s NOTICE %s :*** Banned: %s", 
                  me.name, client_p->name, conf->reason);
-      return(BANNED_CLIENT);
+      return BANNED_CLIENT;
     }
   }
 
-  return(NOT_AUTHORIZED);
+  return NOT_AUTHORIZED;
 }
 
 /* attach_iline()
@@ -534,12 +534,12 @@ remove_one_ip(struct irc_ssaddr *ip_in)
     if (ptr->count > 0)
       ptr->count--;
     if (ptr->count == 0 &&
-	(CurrentTime-ptr->last_attempt) >= ConfigFileEntry.throttle_time)
+        (CurrentTime-ptr->last_attempt) >= ConfigFileEntry.throttle_time)
     {
       if (last_ptr != NULL)
-	last_ptr->next = ptr->next;
+        last_ptr->next = ptr->next;
       else
-	ip_hash_table[hash_index] = ptr->next;
+        ip_hash_table[hash_index] = ptr->next;
 
       mp_pool_release(ptr);
       ip_entries_count--;
@@ -868,17 +868,17 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
       conf = ptr->data;
 
       if (EmptyString(conf->name))
-	continue;
+        continue;
       if ((name != NULL) && !match(conf->name, name))
       {
-	if ((user == NULL && (host == NULL)))
-	  return conf;
-	if ((conf->flags & flags) != flags)
+        if ((user == NULL && (host == NULL)))
+          return conf;
+        if ((conf->flags & flags) != flags)
           continue;
-	if (EmptyString(conf->user) || EmptyString(conf->host))
-	  return conf;
-	if (!match(conf->user, user) && !match(conf->host, host))
-	  return conf;
+        if (EmptyString(conf->user) || EmptyString(conf->host))
+          return conf;
+        if (!match(conf->user, user) && !match(conf->host, host))
+          return conf;
       }
     }
       break;
@@ -930,16 +930,16 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
       conf = ptr->data;
 
       if (EmptyString(conf->name))
-	continue;
+        continue;
     
       if (irccmp(conf->name, name) == 0)
       {
-	if ((user == NULL && (host == NULL)))
-	  return (conf);
-	if (EmptyString(conf->user) || EmptyString(conf->host))
-	  return (conf);
-	if (!match(conf->user, user) && !match(conf->host, host))
-	  return (conf);
+        if ((user == NULL && (host == NULL)))
+          return conf;
+        if (EmptyString(conf->user) || EmptyString(conf->host))
+          return conf;
+        if (!match(conf->user, user) && !match(conf->host, host))
+          return conf;
       }
     }
     break;
@@ -996,26 +996,26 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
       conf = ptr->data;
 
       if (EmptyString(conf->name))
-	continue;
+        continue;
     
       if (name == NULL)
       {
-	if (EmptyString(conf->host))
-	  continue;
-	if (irccmp(conf->host, host) == 0)
-	  return(conf);
+        if (EmptyString(conf->host))
+          continue;
+        if (irccmp(conf->host, host) == 0)
+          return conf;
       }
       else if (irccmp(conf->name, name) == 0)
-      {
-	  return (conf);
-      }
+        return conf;
     }
+
     break;
 
   default:
     break;
   }
-  return(NULL);
+
+  return NULL;
 }
 
 /* rehash()
@@ -1201,7 +1201,7 @@ read_conf(FILE *file)
 
   set_default_conf(); /* Set default values prior to conf parsing */
   conf_parser_ctx.pass = 1;
-  yyparse();	      /* pick up the classes first */
+  yyparse();          /* pick up the classes first */
 
   rewind(file);
 
@@ -1437,9 +1437,9 @@ get_oper_name(const struct Client *client_p)
 
       if (IsConfOperator(conf))
       {
-	snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client_p->name,
+        snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client_p->name,
                  client_p->username, client_p->host, conf->name);
-	return buffer;
+        return buffer;
       }
     }
 
@@ -1450,7 +1450,7 @@ get_oper_name(const struct Client *client_p)
   }
 
   snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client_p->name,
-	   client_p->username, client_p->host, client_p->servptr->name);
+           client_p->username, client_p->host, client_p->servptr->name);
   return buffer;
 }
 
@@ -1489,8 +1489,8 @@ read_conf_files(int cold)
     else
     {
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "Unable to read configuration file '%s': %s",
-			   filename, strerror(errno));
+                           "Unable to read configuration file '%s': %s",
+                           filename, strerror(errno));
       return;
     }
   }
@@ -1561,7 +1561,7 @@ clear_out_old_conf(void)
       if (conf->type == CONF_SERVER || conf->type == CONF_OPER)
       {
         if (!conf->ref_count)
-	  conf_free(conf);
+          conf_free(conf);
       }
       else if (conf->type == CONF_XLINE)
       {
@@ -1646,12 +1646,12 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
 
     if (conf->type == CONF_CLIENT)
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "Warning *** Defaulting to default class for %s@%s",
-			   conf->user, conf->host);
+                           "Warning *** Defaulting to default class for %s@%s",
+                           conf->user, conf->host);
     else
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "Warning *** Defaulting to default class for %s",
-			   conf->name);
+                           "Warning *** Defaulting to default class for %s",
+                           conf->name);
   }
   else
     conf->class = class_find(class_name, 1);
@@ -1660,12 +1660,12 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
   {
     if (conf->type == CONF_CLIENT)
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "Warning *** Defaulting to default class for %s@%s",
-			   conf->user, conf->host);
+                           "Warning *** Defaulting to default class for %s@%s",
+                           conf->user, conf->host);
     else
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "Warning *** Defaulting to default class for %s",
-			   conf->name);
+                           "Warning *** Defaulting to default class for %s",
+                           conf->name);
     conf->class = class_default;
   }
 }
@@ -1726,7 +1726,7 @@ valid_tkline(const char *p, int minutes)
       return 0;
 
     result *= 10;
-    result += ((*p) & 0xF);
+    result += (*p & 0xF);
   }
 
   /*
@@ -1870,9 +1870,9 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
  */
 int
 parse_aline(const char *cmd, struct Client *source_p,
-	    int parc, char **parv,
-	    int parse_flags, char **up_p, char **h_p, time_t *tkline_time, 
-	    char **target_server, char **reason)
+            int parc, char **parv,
+            int parse_flags, char **up_p, char **h_p, time_t *tkline_time,
+            char **target_server, char **reason)
 {
   int found_tkline_time=0;
   static char def_reason[] = "No Reason";
@@ -1894,7 +1894,7 @@ parse_aline(const char *cmd, struct Client *source_p,
     else
     {
       sendto_one(source_p, ":%s NOTICE %s :temp_line not supported by %s",
-		 me.name, source_p->name, cmd);
+                 me.name, source_p->name, cmd);
       return -1;
     }
   }
@@ -1929,9 +1929,9 @@ parse_aline(const char *cmd, struct Client *source_p,
 
       if (target_server == NULL)
       {
-	sendto_one(source_p, ":%s NOTICE %s :ON server not supported by %s",
-		   me.name, source_p->name, cmd);
-	return -1;
+        sendto_one(source_p, ":%s NOTICE %s :ON server not supported by %s",
+                   me.name, source_p->name, cmd);
+        return -1;
       }
 
       if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
@@ -1943,9 +1943,9 @@ parse_aline(const char *cmd, struct Client *source_p,
 
       if (parc == 0 || EmptyString(*parv))
       {
-	sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-		   me.name, source_p->name, cmd);
-	return -1;
+        sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+                   me.name, source_p->name, cmd);
+        return -1;
       }
 
       *target_server = *parv;
@@ -1958,7 +1958,7 @@ parse_aline(const char *cmd, struct Client *source_p,
        * caller probably NULL'd it first, but no harm to do it again -db
        */
       if (target_server != NULL)
-	*target_server = NULL;
+        *target_server = NULL;
     }
   }
 
@@ -1984,7 +1984,7 @@ parse_aline(const char *cmd, struct Client *source_p,
     {
       *reason = *parv;
       if (!valid_comment(source_p, *reason, 1))
-	return -1;
+        return -1;
     }
     else
       *reason = def_reason;
@@ -2023,18 +2023,19 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
     {
       *(hostp++) = '\0';                       /* short and squat */
       if (*user_host_or_nick)
-	strlcpy(luser, user_host_or_nick, USERLEN*4 + 1); /* here is my user */
+        strlcpy(luser, user_host_or_nick, USERLEN*4 + 1); /* here is my user */
       else
-	strcpy(luser, "*");
+        strcpy(luser, "*");
+
       if (*hostp)
-	strlcpy(lhost, hostp, HOSTLEN + 1);    /* here is my host */
+        strlcpy(lhost, hostp, HOSTLEN + 1);    /* here is my host */
       else
-	strcpy(lhost, "*");
+        strcpy(lhost, "*");
     }
     else
     {
       luser[0] = '*';             /* no @ found, assume its *@somehost */
-      luser[1] = '\0';	  
+      luser[1] = '\0';
       strlcpy(lhost, user_host_or_nick, HOSTLEN*4 + 1);
     }
     
@@ -2051,9 +2052,9 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
     if (IsExemptKline(target_p))
     {
       if (!IsServer(source_p))
-	sendto_one(source_p,
-		   ":%s NOTICE %s :%s is E-lined",
-		   me.name, source_p->name, target_p->name);
+        sendto_one(source_p,
+                   ":%s NOTICE %s :%s is E-lined",
+                   me.name, source_p->name, target_p->name);
       return 0;
     }
 
@@ -2147,7 +2148,7 @@ cluster_a_line(struct Client *source_p, const char *command,
 
     if (conf->flags & cluster_type)
       sendto_match_servs(source_p, conf->name, CAP_CLUSTER|capab,
-			 "%s %s %s", command, conf->name, buffer);
+                         "%s %s %s", command, conf->name, buffer);
   }
 }
 

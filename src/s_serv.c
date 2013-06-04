@@ -186,7 +186,7 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
       {
         sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                    me.name, source_p->name, parv[server]);
-        return(HUNTED_NOSUCH);
+        return HUNTED_NOSUCH;
       }
     }
     else
@@ -391,7 +391,7 @@ check_server(const char *name, struct Client *client_p)
   }
 
   if (server_conf == NULL)
-    return(error);
+    return error;
 
   attach_conf(client_p, server_conf);
 
@@ -421,7 +421,7 @@ check_server(const char *name, struct Client *client_p)
     }
   }
 
-  return(0);
+  return 0;
 }
 
 /* add_capability()
@@ -1184,46 +1184,45 @@ serv_connect(struct MaskItem *conf, struct Client *by)
 #ifdef IPV6
     case AF_INET6:
       {
-	struct irc_ssaddr ipn;
-	struct sockaddr_in6 *v6;
-	struct sockaddr_in6 *v6conf;
+        struct irc_ssaddr ipn;
+        struct sockaddr_in6 *v6;
+        struct sockaddr_in6 *v6conf;
 
-	memset(&ipn, 0, sizeof(struct irc_ssaddr));
-	v6conf = (struct sockaddr_in6 *)&conf->bind;
-	v6 = (struct sockaddr_in6 *)&ipn;
+        memset(&ipn, 0, sizeof(struct irc_ssaddr));
+        v6conf = (struct sockaddr_in6 *)&conf->bind;
+        v6 = (struct sockaddr_in6 *)&ipn;
 
-	if (memcmp(&v6conf->sin6_addr, &v6->sin6_addr,
-		   sizeof(struct in6_addr)) != 0)
-	{
-	  memcpy(&ipn, &conf->bind, sizeof(struct irc_ssaddr));
-	  ipn.ss.ss_family = AF_INET6;
-	  ipn.ss_port = 0;
-	  comm_connect_tcp(&client_p->localClient->fd,
-			   conf->host, conf->port,
-			   (struct sockaddr *)&ipn, ipn.ss_len, 
-			   serv_connect_callback, client_p,
-			   conf->aftype, CONNECTTIMEOUT);
-	}
-	else if (ServerInfo.specific_ipv6_vhost)
+        if (memcmp(&v6conf->sin6_addr, &v6->sin6_addr, sizeof(struct in6_addr)) != 0)
         {
-	  memcpy(&ipn, &ServerInfo.ip6, sizeof(struct irc_ssaddr));
-	  ipn.ss.ss_family = AF_INET6;
-	  ipn.ss_port = 0;
-	  comm_connect_tcp(&client_p->localClient->fd,
-			   conf->host, conf->port,
-			   (struct sockaddr *)&ipn, ipn.ss_len,
-			   serv_connect_callback, client_p,
-			   conf->aftype, CONNECTTIMEOUT);
-	}
-	else
-	  comm_connect_tcp(&client_p->localClient->fd,
-			   conf->host, conf->port, 
-			   NULL, 0, serv_connect_callback, client_p,
-			   conf->aftype, CONNECTTIMEOUT);
+          memcpy(&ipn, &conf->bind, sizeof(struct irc_ssaddr));
+          ipn.ss.ss_family = AF_INET6;
+          ipn.ss_port = 0;
+          comm_connect_tcp(&client_p->localClient->fd,
+                           conf->host, conf->port,
+                           (struct sockaddr *)&ipn, ipn.ss_len, 
+                           serv_connect_callback, client_p,
+                           conf->aftype, CONNECTTIMEOUT);
+        }
+        else if (ServerInfo.specific_ipv6_vhost)
+        {
+          memcpy(&ipn, &ServerInfo.ip6, sizeof(struct irc_ssaddr));
+          ipn.ss.ss_family = AF_INET6;
+          ipn.ss_port = 0;
+          comm_connect_tcp(&client_p->localClient->fd,
+                           conf->host, conf->port,
+                           (struct sockaddr *)&ipn, ipn.ss_len,
+                           serv_connect_callback, client_p,
+                           conf->aftype, CONNECTTIMEOUT);
+        }
+        else
+          comm_connect_tcp(&client_p->localClient->fd,
+                           conf->host, conf->port, 
+                           NULL, 0, serv_connect_callback, client_p,
+                           conf->aftype, CONNECTTIMEOUT);
       }
 #endif
   }
-  return (1);
+  return 1;
 }
 
 #ifdef HAVE_LIBCRYPTO

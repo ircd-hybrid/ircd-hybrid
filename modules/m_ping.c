@@ -58,7 +58,7 @@ m_ping(struct Client *client_p, struct Client *source_p,
   origin = parv[1];
   destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
 
-  if (ConfigFileEntry.disable_remote && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigServerHide.disable_remote_commands && !HasUMode(source_p, UMODE_OPER))
   {
     sendto_one(source_p, ":%s PONG %s :%s", me.name,
               (destination) ? destination : me.name, origin);

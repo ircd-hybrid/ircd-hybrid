@@ -111,7 +111,7 @@ mo_links(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   if (parc > 2)
-    if (!ConfigFileEntry.disable_remote || HasUMode(source_p, UMODE_OPER))
+    if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
       if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1,
                       parc, parv) != HUNTED_ISME)
         return;

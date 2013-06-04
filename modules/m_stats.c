@@ -1241,7 +1241,7 @@ stats_uptime(struct Client *source_p, int parc, char *parv[])
   sendto_one(source_p, form_str(RPL_STATSUPTIME), from, to,
              now / 86400, (now / 3600) % 24, (now / 60) % 60, now % 60);
 
-  if (!ConfigFileEntry.disable_remote || HasUMode(source_p, UMODE_OPER))
+  if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
      sendto_one(source_p, form_str(RPL_STATSCONN), from, to,
                 Count.max_loc_con, Count.max_loc_cli, Count.totalrestartcount);
 }
@@ -1632,7 +1632,7 @@ m_stats(struct Client *client_p, struct Client *source_p,
   static time_t last_used = 0;
 
   /* Is the stats meant for us? */
-  if (!ConfigFileEntry.disable_remote)
+  if (!ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p, source_p, ":%s STATS %s :%s", 2,
                     parc, parv) != HUNTED_ISME)
       return;

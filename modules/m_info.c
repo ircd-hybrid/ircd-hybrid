@@ -291,7 +291,7 @@ static const struct InfoStruct info_table[] =
   {
     "disable_remote_commands",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.disable_remote,
+    &ConfigServerHide.disable_remote_commands,
     "Prevent users issuing commands on remote servers"
   },
   {
@@ -695,7 +695,7 @@ m_info(struct Client *client_p, struct Client *source_p,
 
   last_used = CurrentTime;
 
-  if (!ConfigFileEntry.disable_remote)
+  if (!ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p,source_p, ":%s INFO :%s", 1,
                     parc, parv) != HUNTED_ISME)
       return;

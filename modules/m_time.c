@@ -49,7 +49,7 @@ m_time(struct Client *client_p, struct Client *source_p,
     flood_endgrace(source_p);
 
   /* This is safe enough to use during non hidden server mode */
-  if (!ConfigFileEntry.disable_remote)
+  if (!ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
       return;
 

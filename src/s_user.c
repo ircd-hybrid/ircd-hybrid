@@ -85,7 +85,7 @@ const unsigned int user_modes[256] =
   0,                  /* @ */
   0,                  /* A */
   0,                  /* B */
-  UMODE_CCONN_FULL,   /* C */
+  0,                  /* C */
   UMODE_DEAF,         /* D */
   0,                  /* E */
   UMODE_FARCONNECT,   /* F */
@@ -423,19 +423,6 @@ register_local_user(struct Client *source_p)
                        "255.255.255.255" : source_p->sockhost,
                        get_client_class(&source_p->localClient->confs),
                        source_p->info, source_p->id);
-
-  sendto_realops_flags(UMODE_CCONN_FULL, L_ALL, SEND_NOTICE,
-                       "CLICONN %s %s %s %s %s %s %s 0 %s",
-                       source_p->name, source_p->username, source_p->host,
-                       ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
-                       "255.255.255.255" : source_p->sockhost,
-		       get_client_class(&source_p->localClient->confs),
-		       ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
-                           "<hidden>" : source_p->localClient->client_host,
-		       ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
-                           "<hidden>" : source_p->localClient->client_server,
-                       source_p->info);
-
 
   if (ConfigFileEntry.invisible_on_connect)
   {

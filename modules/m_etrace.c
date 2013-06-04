@@ -84,8 +84,7 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
     tname = "*";
   }
 
-  if (HasUMode(source_p, UMODE_CCONN_FULL))
-    full_etrace = 1;
+  full_etrace = 1; /* XXX */
 
   if (!wilds && !do_all)
   {

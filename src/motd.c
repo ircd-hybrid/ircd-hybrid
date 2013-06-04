@@ -210,7 +210,6 @@ motd_destroy(struct Motd *motd)
   if (motd->cache)  /* drop the cache */
     motd_decache(motd);
 
-  dlinkDelete(&motd->node, &MotdList.other);
   MyFree(motd->path);  /* we always must have a path */
   MyFree(motd->hostmask);
   MyFree(motd);
@@ -411,7 +410,10 @@ motd_clear(void)
   motd_decache(MotdList.remote);
 
   DLINK_FOREACH_SAFE(ptr, ptr_next, MotdList.other.head)  /* destroy other MOTDs */
+  {
+    dlinkDelete(ptr, &MotdList.other);
     motd_destroy(ptr->data);
+  }
 
   /* now recache local and remote MOTDs */
   motd_cache(MotdList.local);

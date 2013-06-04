@@ -735,7 +735,7 @@ static const char *replies[] = {
 /* 705 RPL_HELPTXT */ ":%s 705 %s %s :%s",
 /* 706 RPL_ENDOFHELP */ ":%s 706 %s %s :End of /HELP.",
 /* 707 */ NULL,
-/* 708 RPL_ETRACE_FULL */ ":%s 708 %s %s %s %s %s %s %s %s %s :%s",
+/* 708 */ NULL,
 /* 709 RPL_ETRACE */ ":%s 709 %s %s %s %s %s %s %s :%s",
 /* 710 RPL_KNOCK */ ":%s 710 %s %s %s!%s@%s :has asked for an invite.",
 /* 711 RPL_KNOCKDLVR */ ":%s 711 %s %s :Your KNOCK has been delivered.",

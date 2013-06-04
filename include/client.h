@@ -313,9 +313,6 @@ struct LocalUser
 {
   dlink_node   lclient_node;
 
-  char         client_host[HOSTLEN + 1];
-  char         client_server[HOSTLEN + 1];
-
   unsigned int registration;
   unsigned int cap_client;    /**< Client capabilities (from us) */
   unsigned int cap_active;    /**< Active capabilities (to us) */

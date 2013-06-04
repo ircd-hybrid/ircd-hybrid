@@ -69,7 +69,7 @@
  * Diane Bruce (Dianora), June 6 2003
  */
 
-#define MAXPTRLEN	32
+#define MAXPTRLEN 32
                                 /* Must be a power of 2, and
 				 * larger than 26 [a-z]|[A-Z]
 				 * its used to allocate the set
@@ -89,8 +89,8 @@
 struct MessageTree
 {
   int links; /* Count of all pointers (including msg) at this node 
-	      * used as reference count for deletion of _this_ node.
-	      */
+              * used as reference count for deletion of _this_ node.
+              */
   struct Message *msg;
   struct MessageTree *pointers[MAXPTRLEN];
 };

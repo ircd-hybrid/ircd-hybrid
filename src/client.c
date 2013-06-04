@@ -265,14 +265,14 @@ check_pings_list(dlink_list *list)
     {
       if (!IsPingSent(client_p))
       {
-	/*
-	 * if we havent PINGed the connection and we havent
-	 * heard from it in a while, PING it to make sure
-	 * it is still alive.
-	 */
-	SetPingSent(client_p);
-	client_p->localClient->lasttime = CurrentTime - ping;
-	sendto_one(client_p, "PING :%s", ID_or_name(&me, client_p));
+        /*
+         * if we havent PINGed the connection and we havent
+         * heard from it in a while, PING it to make sure
+         * it is still alive.
+         */
+        SetPingSent(client_p);
+        client_p->localClient->lasttime = CurrentTime - ping;
+        sendto_one(client_p, "PING :%s", ID_or_name(&me, client_p));
       }
       else
       {
@@ -283,16 +283,16 @@ check_pings_list(dlink_list *list)
            * and it has a ping time, then close its connection.
            */
           if (IsServer(client_p) || IsHandshake(client_p))
-	  {
-	    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-				 "No response from %s, closing link",
-				 get_client_name(client_p, HIDE_IP));
-	    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-				 "No response from %s, closing link",
-				 get_client_name(client_p, MASK_IP));
-	    ilog(LOG_TYPE_IRCD, "No response from %s, closing link",
-		 get_client_name(client_p, HIDE_IP));
-	  }
+          {
+            sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                                 "No response from %s, closing link",
+                                 get_client_name(client_p, HIDE_IP));
+            sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                                 "No response from %s, closing link",
+                                 get_client_name(client_p, MASK_IP));
+            ilog(LOG_TYPE_IRCD, "No response from %s, closing link",
+                 get_client_name(client_p, HIDE_IP));
+          }
 
           snprintf(scratch, sizeof(scratch), "Ping timeout: %d seconds",
                    (int)(CurrentTime - client_p->localClient->lasttime));
@@ -354,7 +354,7 @@ check_conf_klines(void)
                                   client_p->localClient->aftype)) != NULL)
     {
       if (conf->type == CONF_EXEMPT)
-	continue;
+        continue;
 
       ban_them(client_p, conf);
       continue; /* and go examine next fd/client_p */
@@ -425,7 +425,7 @@ check_conf_klines(void)
 static void
 ban_them(struct Client *client_p, struct MaskItem *conf)
 {
-  const char *user_reason = NULL;	/* What is sent to user */
+  const char *user_reason = NULL;  /* What is sent to user */
   const char *type_string = NULL;
   const char dline_string[] = "D-line";
   const char kline_string[] = "K-line";
@@ -459,7 +459,7 @@ ban_them(struct Client *client_p, struct MaskItem *conf)
 
   if (IsClient(client_p))
     sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
-	       me.name, client_p->name, user_reason);
+               me.name, client_p->name, user_reason);
 
   exit_client(client_p, &me, user_reason);
 }
@@ -539,8 +539,8 @@ find_chasing(struct Client *client_p, struct Client *source_p, const char *user,
     return NULL;
 
   if ((who = get_history(user,
-			(time_t)ConfigFileEntry.kill_chase_time_limit))
-			 == NULL)
+                         (time_t)ConfigFileEntry.kill_chase_time_limit))
+                         == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                me.name, source_p->name, user);
@@ -866,11 +866,11 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
       sendto_realops_flags(UMODE_CCONN_FULL, L_ALL, SEND_NOTICE,
                            "CLIEXIT: %s %s %s %s 0 %s",
                            source_p->name,
-			   source_p->username,
-			   source_p->host,
+                           source_p->username,
+                           source_p->host,
                            ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
                            "255.255.255.255" : source_p->sockhost,
-			   comment);
+                           comment);
       ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %llu/%llu",
            myctime(source_p->localClient->firsttime), (unsigned int)(on_for / 3600),
            (unsigned int)((on_for % 3600)/60), (unsigned int)(on_for % 60),
@@ -894,7 +894,7 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
       {
         /* for them, we are exiting the network */
         sendto_one(source_p, ":%s SQUIT %s :%s",
-	           ID_or_name(from, source_p), me.name, comment);
+                   ID_or_name(from, source_p), me.name, comment);
       }
 
       sendto_one(source_p, "ERROR :Closing Link: %s (%s)",
@@ -1021,31 +1021,31 @@ dead_link_on_read(struct Client *client_p, int error)
     {
       /* Admins get the real IP */
       sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-			   "Server %s closed the connection",
-			   get_client_name(client_p, SHOW_IP));
+                           "Server %s closed the connection",
+                           get_client_name(client_p, SHOW_IP));
 
       /* Opers get a masked IP */
       sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-			   "Server %s closed the connection",
-			   get_client_name(client_p, MASK_IP));
+                           "Server %s closed the connection",
+                           get_client_name(client_p, MASK_IP));
 
       ilog(LOG_TYPE_IRCD, "Server %s closed the connection",
-	   get_client_name(client_p, SHOW_IP));
+           get_client_name(client_p, SHOW_IP));
     }
     else
     {
       report_error(L_ADMIN, "Lost connection to %s: %s",
-		   get_client_name(client_p, SHOW_IP), current_error);
+                   get_client_name(client_p, SHOW_IP), current_error);
       report_error(L_OPER, "Lost connection to %s: %s",
-		   get_client_name(client_p, MASK_IP), current_error);
+                   get_client_name(client_p, MASK_IP), current_error);
     }
 
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			 "%s had been connected for %d day%s, %2d:%02d:%02d",
-			 client_p->name, connected/86400,
-			 (connected/86400 == 1) ? "" : "s",
-			 (connected % 86400) / 3600, (connected % 3600) / 60,
-			 connected % 60);
+                         "%s had been connected for %d day%s, %2d:%02d:%02d",
+                         client_p->name, connected/86400,
+                         (connected/86400 == 1) ? "" : "s",
+                         (connected % 86400) / 3600, (connected % 3600) / 60,
+                         connected % 60);
   }
 
   if (error == 0)

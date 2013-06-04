@@ -271,7 +271,7 @@ ssl_handshake(int fd, struct Client *client_p)
 	return;
     }
 
-  execute_callback(auth_cb, client_p);
+  start_auth(client_p);
 }
 #endif
 
@@ -342,7 +342,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   }
   else
 #endif
-    execute_callback(auth_cb, new_client);
+    start_auth(new_client);
 }
 
 /*

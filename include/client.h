@@ -34,6 +34,7 @@
 #include "ircd_defs.h"
 #include "dbuf.h"
 #include "channel.h"
+#include "s_auth.h"
 
 /*
  * status macros.
@@ -357,7 +358,7 @@ struct LocalUser
     uint64_t bytes;             /**< Statistics: total bytes sent/received */
   } recv, send;
 
-  struct AuthRequest *auth;
+  struct AuthRequest auth;
   struct Listener *listener;   /**< listener accepted from */
   dlink_list        acceptlist; /**< clients I'll allow to talk to me */
   dlink_list        watches;   /**< chain of Watch pointer blocks */

@@ -103,7 +103,7 @@ motd_cache(struct Motd *motd)
   struct MotdCache *cache = NULL;
   struct stat sb;
   char line[MOTD_LINESIZE + 2]; /* \r\n */
-  char *tmp = line;
+  char *tmp = NULL;
   unsigned int i = 0;
   dlink_node *ptr = NULL;
 
@@ -152,7 +152,7 @@ motd_cache(struct Motd *motd)
   while (cache->count < cache->maxcount && fgets(line, sizeof(line), file))
   {
     /* copy over line, stopping when we overflow or hit line end */
-    for (; i < (MOTD_LINESIZE - 1) && *tmp && *tmp != '\r' && *tmp != '\n'; ++tmp, ++i)
+    for (tmp = line, i = 0; i < (MOTD_LINESIZE - 1) && *tmp && *tmp != '\r' && *tmp != '\n'; ++tmp, ++i)
       cache->motd[cache->count][i] = *tmp;
     cache->motd[cache->count][i] = '\0';
 

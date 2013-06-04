@@ -25,8 +25,6 @@
 #ifndef INCLUDED_s_auth_h
 #define INCLUDED_s_auth_h
 
-#include "hook.h"
-
 /*
  * flag values for AuthRequest
  * NAMESPACE: AM_xxx - Authentication Module
@@ -53,9 +51,8 @@ struct AuthRequest
   time_t              timeout;   /* time when query expires */
 };
 
-extern struct Callback *auth_cb;
-
 extern void auth_init(void);
+extern void start_auth(struct Client *);
 extern void send_auth_query(struct AuthRequest *);
 extern void remove_auth_request(struct AuthRequest *);
 extern void delete_auth(struct AuthRequest *);

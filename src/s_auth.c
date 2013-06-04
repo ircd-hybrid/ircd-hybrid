@@ -76,16 +76,12 @@ enum {
 
 #define sendheader(c, i) sendto_one((c), HeaderMessages[(i)], me.name)
 
-static mp_pool_t *auth_pool = NULL;
 static dlink_list auth_doing_list = { NULL, NULL, 0 };
 
 static EVH timeout_auth_queries_event;
 
 static PF read_auth_reply;
 static CNCB auth_connect_callback;
-static CBFUNC start_auth;
-
-struct Callback *auth_cb = NULL;
 
 /* auth_init
  *
@@ -94,8 +90,6 @@ struct Callback *auth_cb = NULL;
 void
 auth_init(void)
 {
-  auth_pool = mp_pool_new(sizeof(struct AuthRequest), MP_CHUNK_SIZE_AUTH);
-  auth_cb = register_callback("start_auth", start_auth);
   eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 }
 
@@ -105,12 +99,12 @@ auth_init(void)
 static struct AuthRequest *
 make_auth_request(struct Client *client)
 {
-  struct AuthRequest *request = mp_pool_get(auth_pool);
+  struct AuthRequest *request = &client->localClient->auth;
 
   memset(request, 0, sizeof(*request));
-  client->localClient->auth = request;
-  request->client           = client;
-  request->timeout          = CurrentTime + CONNECTTIMEOUT;
+
+  request->client  = client;
+  request->timeout = CurrentTime + CONNECTTIMEOUT;
 
   return request;
 }
@@ -128,9 +122,8 @@ release_auth_client(struct AuthRequest *auth)
   if (IsDoingAuth(auth) || IsDNSPending(auth))
     return;
 
-  client->localClient->auth = NULL;
-  dlinkDelete(&auth->node, &auth_doing_list);
-  mp_pool_release(auth);
+  if (dlinkFind(&auth_doing_list, auth))
+    dlinkDelete(&auth->node, &auth_doing_list);
 
   /*
    * When a client has auth'ed, we want to start reading what it sends
@@ -363,10 +356,9 @@ GetValidIdent(char *buf)
  * output	- NONE
  * side effects	- starts auth (identd) and dns queries for a client
  */
-static void *
-start_auth(va_list args)
+void 
+start_auth(struct Client *client)
 {
-  struct Client *client = va_arg(args, struct Client *);
   struct AuthRequest *auth = NULL;
 
   assert(client != NULL);
@@ -385,8 +377,6 @@ start_auth(va_list args)
   }
 
   gethost_byaddr(auth_dns_callback, auth, &client->localClient->ip);
-
-  return NULL;
 }
 
 /*
@@ -594,6 +584,6 @@ delete_auth(struct AuthRequest *auth)
   if (IsDoingAuth(auth))
     fd_close(&auth->fd);
 
-  dlinkDelete(&auth->node, &auth_doing_list);
-  mp_pool_release(auth);
+  if (dlinkFind(&auth_doing_list, auth))
+    dlinkDelete(&auth->node, &auth_doing_list);
 }

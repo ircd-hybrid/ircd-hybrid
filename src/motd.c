@@ -374,13 +374,13 @@ motd_init(void)
   if (MotdList.local)  /* destroy old local... */
     motd_destroy(MotdList.local);
 
-  MotdList.local = motd_create(0, MPATH);
+  MotdList.local = motd_create(NULL, MPATH);
   motd_cache(MotdList.local);  /* init local and cache it */
 
   if (MotdList.remote)  /* destroy old remote... */
     motd_destroy(MotdList.remote);
 
-  MotdList.remote = motd_create(0, MPATH);
+  MotdList.remote = motd_create(NULL, MPATH);
   motd_cache(MotdList.remote);  /* init remote and cache it */
 }
 

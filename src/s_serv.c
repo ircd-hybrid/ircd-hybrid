@@ -111,7 +111,7 @@ write_links_file(void *notused)
      */
     snprintf(buff, sizeof(buff), "%s %s :1 %s",   target_p->name,
              me.name, target_p->info);
-    dlinkAdd(xstrdup(buff), make_dlink_node(), &flatten_links);
+    dlinkAddTail(xstrdup(buff), make_dlink_node(), &flatten_links);
     snprintf(buff, sizeof(buff), "%s %s :1 %s\n", target_p->name,
              me.name, target_p->info);
 

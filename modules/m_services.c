@@ -181,7 +181,7 @@ m_statserv(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-m_helpserv(struct Client *client_p, struct Client *source_p,
+m_hostserv(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   struct Client *target_p = NULL;
@@ -198,7 +198,7 @@ m_helpserv(struct Client *client_p, struct Client *source_p,
 
   if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
   {
-    sendto_one(target_p, ":%s PRIVMSG HelpServ@%s :%s",
+    sendto_one(target_p, ":%s PRIVMSG HostServ@%s :%s",
                source_p->name, ConfigFileEntry.service_name, parv[1]);
     return;
   }
@@ -267,7 +267,7 @@ static struct Message ss_msgtab = {
 
 static struct Message hs_msgtab = {
   "HS", 0, 0, 0, 1, MFLG_SLOW, 0,
-  {m_unregistered, m_helpserv, m_ignore, m_ignore, m_helpserv, m_ignore}
+  {m_unregistered, m_hostserv, m_ignore, m_ignore, m_hostserv, m_ignore}
 };
 
 static struct Message botserv_msgtab = {
@@ -300,9 +300,9 @@ static struct Message statserv_msgtab = {
   {m_unregistered, m_statserv, m_ignore, m_ignore, m_statserv, m_ignore}
 };
 
-static struct Message helpserv_msgtab = {
-  "HELPSERV", 0, 0, 0, 1, MFLG_SLOW, 0,
-  {m_unregistered, m_helpserv, m_ignore, m_ignore, m_helpserv, m_ignore}
+static struct Message hostserv_msgtab = {
+  "HOSTSERV", 0, 0, 0, 1, MFLG_SLOW, 0,
+  {m_unregistered, m_hostserv, m_ignore, m_ignore, m_hostserv, m_ignore}
 };
 
 
@@ -315,7 +315,7 @@ module_init(void)
   mod_add_cmd(&nickserv_msgtab);
   mod_add_cmd(&operserv_msgtab);
   mod_add_cmd(&statserv_msgtab);
-  mod_add_cmd(&helpserv_msgtab);
+  mod_add_cmd(&hostserv_msgtab);
   mod_add_cmd(&bs_msgtab);
   mod_add_cmd(&ns_msgtab);
   mod_add_cmd(&cs_msgtab);
@@ -334,7 +334,7 @@ module_exit(void)
   mod_del_cmd(&nickserv_msgtab);
   mod_del_cmd(&operserv_msgtab);
   mod_del_cmd(&statserv_msgtab);
-  mod_del_cmd(&helpserv_msgtab);
+  mod_del_cmd(&hostserv_msgtab);
   mod_del_cmd(&bs_msgtab);
   mod_del_cmd(&ns_msgtab);
   mod_del_cmd(&cs_msgtab);

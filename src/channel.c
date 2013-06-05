@@ -641,9 +641,6 @@ is_banned(const struct Channel *chptr, const struct Client *who)
 int
 can_join(struct Client *source_p, struct Channel *chptr, const char *key)
 {
-  if (is_banned(chptr, source_p))
-    return ERR_BANNEDFROMCHAN;
-
 #ifdef HAVE_LIBCRYPTO
   if ((chptr->mode.mode & MODE_SSLONLY) && !source_p->localClient->fd.ssl)
     return ERR_SSLONLYCHAN;
@@ -669,6 +666,9 @@ can_join(struct Client *source_p, struct Channel *chptr, const char *key)
   if (chptr->mode.limit && dlink_list_length(&chptr->members) >=
       chptr->mode.limit)
     return ERR_CHANNELISFULL;
+
+  if (is_banned(chptr, source_p))
+    return ERR_BANNEDFROMCHAN;
 
   return 0;
 }

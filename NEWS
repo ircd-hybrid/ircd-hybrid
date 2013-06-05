@@ -3,12 +3,13 @@
 o) IMPORTANT: moved disable_remote_command configuration directive from
    general{} block to serverhide{} block
 ########################################################################
+o) Minor code cleanups/performance improvements
 o) Fixed bug where opers could see LOCOPS messages even if they don't have
    the +l mode set
 o) Fixed bug where non-SSL clients could join +S channels on non-SSL servers
-o) "STATS T" shows configured MOTD files
 o) Implemented motd{} configuration blocks. See doc/reference.conf for more
    information
+o) "STATS T" shows configured MOTD files
 
 
 -- ircd-hybrid-8.1.0 Release Notes

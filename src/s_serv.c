@@ -76,7 +76,7 @@ void
 write_links_file(void *notused)
 {
   FILE *file = NULL;
-  dlink_node *ptr = NULL, *ptr_next = NULL;;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
   char buff[IRCD_BUFSIZE] = { '\0' };
 
   if ((file = fopen(LIPATH, "w")) == NULL)
@@ -116,6 +116,27 @@ write_links_file(void *notused)
              me.name, target_p->info);
 
     fputs(buff, file);
+  }
+
+  fclose(file);
+}
+
+void
+read_links_file(void)
+{
+  FILE *file = NULL;
+  char *p = NULL;
+  char buff[IRCD_BUFSIZE] = { '\0' };
+
+  if ((file = fopen(LIPATH, "r")) == NULL)
+    return;
+
+  while (fgets(buff, sizeof(buff), file))
+  {
+    if ((p = strchr(buff, '\n')) != NULL)
+      *p = '\0';
+
+    dlinkAddTail(xstrdup(buff), make_dlink_node(), &flatten_links);
   }
 
   fclose(file);

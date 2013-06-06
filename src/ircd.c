@@ -544,6 +544,7 @@ main(int argc, char *argv[])
   initialize_server_capabs();   /* Set up default_server_capabs */
   initialize_global_set_options();
   channel_init();
+  read_links_file();
   motd_init();
 #ifdef HAVE_LIBGEOIP
   geoip_ctx = GeoIP_new(GEOIP_MEMORY_CACHE);

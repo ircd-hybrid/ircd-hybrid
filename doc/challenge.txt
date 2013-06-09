@@ -154,7 +154,7 @@
    client.
 
    The respond source code is included with the ircd-hybrid source, in the
-   tools/rsa_respond directory.
+   tools/ directory.
 
    A copy of the source tar file is available on
    http://www.wohmart.com/ircd/pub/irc_tools/rsa/rsa_respond-src-hyb7.tar.gz
@@ -162,7 +162,7 @@
    For Windows platforms, there are two available RSA Respond tools. One is a
    text only port of the stock tool. The binary is available from
    http://www.wohmart.com/ircd/pub/irc_tools/rsa/rsa_respond-bin.tar.gz.
-   The other tool is a GUI enabled version[3]. The source tree[4] is available
+   The other tool is a GUI enabled version[1]. The source tree[2] is available
    from http://www.wohmart.com/ircd/pub/irc_tools/rsa/winrespond-src.tar.gz.
    A binary distribution is available from
    http://www.wohmart.com/ircd/pub/irc_tools/rsa/winrespond-bin.tar.gz.
@@ -198,11 +198,7 @@
 
                                        Notes
 
-   [1] Some platforms may require Makefile changes in order to link in the
-       OpenSSL library. This may change in the future.
-   [2] Platforms known to function include: Linux, FreeBSD, Solaris, and
-       Cygwin.
-   [3] A screenshot of the program is available on
+   [1] A screenshot of the program is available on
        http://www.wohmart.com/ircd/pub/irc_tools/rsa/winrespond.png .
-   [4] The winrespond source depends on a working, up to date, Cygwin
+   [2] The winrespond source depends on a working, up to date, Cygwin
        installation.

@@ -266,7 +266,7 @@ make_ext_salt_para(int rounds, const char *saltpara)
 {
   static char salt[10];
 
-  sprintf(salt, "_%s%s", int_to_base64(rounds), saltpara);
+  snprintf(salt, sizeof(salt), "_%s%s", int_to_base64(rounds), saltpara);
   return salt;
 }
 
@@ -277,11 +277,7 @@ make_sha256_salt_para(const char *saltpara)
 
   if (saltpara && (strlen(saltpara) <= 16))
   {
-    /*
-     * sprintf used because of portability requirements, the length
-     * is checked above, so it should not be too much of a concern
-     */
-    sprintf(salt, "$5$%s$", saltpara);
+    snprintf(salt, sizeof(salt), "$5$%s$", saltpara);
     return salt;
   }
 
@@ -322,11 +318,7 @@ make_sha512_salt_para(const char *saltpara)
 
   if (saltpara && (strlen(saltpara) <= 16))
   {
-    /*
-     * sprintf used because of portability requirements, the length
-     * is checked above, so it should not be too much of a concern
-     */
-    sprintf(salt, "$6$%s$", saltpara);
+    snprintf(salt, sizeof(salt), "$6$%s$", saltpara);
     return salt;
   }
 
@@ -367,11 +359,7 @@ make_md5_salt_para(const char *saltpara)
 
   if (saltpara && (strlen(saltpara) <= 16))
   {
-    /*
-     * sprintf used because of portability requirements, the length
-     * is checked above, so it should not be too much of a concern
-     */
-    sprintf(salt, "$1$%s$", saltpara);
+    snprintf(salt, sizeof(salt), "$1$%s$", saltpara);
     return salt;
   }
 
@@ -413,12 +401,8 @@ make_bf_salt_para(int rounds, const char *saltpara)
 
   if (saltpara && (strlen(saltpara) <= 22))
   {
-    /*
-     * sprintf used because of portability requirements, the length
-     * is checked above, so it should not be too much of a concern
-     */
-    sprintf(tbuf, "%02d", rounds);
-    sprintf(salt, "$2a$%s$%s$", tbuf, saltpara);
+    snprintf(tbuf, sizeof(tbuf), "%02d", rounds);
+    snprintf(salt, sizeof(salt), "$2a$%s$%s$", tbuf, saltpara);
     return salt;
   }
 
@@ -441,8 +425,8 @@ make_bf_salt(int rounds, int length)
     exit(0);
   }
 
-  sprintf(tbuf, "%02d", rounds);
-  sprintf(salt, "$2a$%s$", tbuf);
+  snprintf(tbuf, sizeof(tbuf), "%02d", rounds);
+  snprintf(salt, sizeof(salt), "$2a$%s$", tbuf);
 
   generate_random_salt(&salt[7], length);
 

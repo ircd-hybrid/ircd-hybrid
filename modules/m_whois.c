@@ -74,10 +74,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
     {
       if ((cur_len + 3 + strlen(ms->chptr->chname) + 1) > (IRCD_BUFSIZE - 2))
       {
-	*(t - 1) = '\0';
-	sendto_one(source_p, "%s", buf);
-	cur_len = mlen;
-	t = buf + mlen;
+        *(t - 1) = '\0';
+        sendto_one(source_p, "%s", buf);
+        cur_len = mlen;
+        t = buf + mlen;
       }
 
       tlen = sprintf(t, "%s%s ", get_member_status(ms, 1), ms->chptr->chname);
@@ -99,9 +99,9 @@ whois_person(struct Client *source_p, struct Client *target_p)
                target_p->servptr->name, target_p->servptr->info);
   else
     sendto_one(source_p, form_str(RPL_WHOISSERVER),
-	       me.name, source_p->name, target_p->name,
+               me.name, source_p->name, target_p->name,
                ConfigServerHide.hidden_name,
-	       ServerInfo.network_desc);
+               ServerInfo.network_desc);
 
   if (HasUMode(target_p, UMODE_REGISTERED))
     sendto_one(source_p, form_str(RPL_WHOISREGNICK),

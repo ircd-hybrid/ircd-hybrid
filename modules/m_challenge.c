@@ -94,14 +94,14 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     if (conf == NULL)
     {
       /* XXX: logging */
-      sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
       return;
     }
 
     if (attach_conf(source_p, conf) != 0)
     {
       sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
-		 me.name, source_p->name);   
+                 me.name, source_p->name);   
       failed_challenge_notice(source_p, conf->name, "can't attach conf!");
       return;
     }
@@ -110,8 +110,8 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     oper_up(source_p);
 
     ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s",
-	 source_p->localClient->auth_oper, source_p->name, source_p->username,
-	 source_p->host);
+         source_p->localClient->auth_oper, source_p->name, source_p->username,
+         source_p->host);
 
     MyFree(source_p->localClient->response);
     MyFree(source_p->localClient->auth_oper);
@@ -129,7 +129,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
   if (!conf)
   {
-    sendto_one (source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
     conf = find_exact_name_conf(CONF_OPER, NULL, parv[1], NULL, NULL);
     failed_challenge_notice(source_p, parv[1], (conf != NULL)
                             ? "host mismatch" : "no oper {} block");
@@ -138,9 +138,9 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
   if (conf->rsa_public_key == NULL)
   {
-    sendto_one (source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
-		"is not enabled for your oper{} block.", me.name,
-		source_p->name);
+    sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
+               "is not enabled for your oper{} block.", me.name,
+               source_p->name);
     return;
   }
 

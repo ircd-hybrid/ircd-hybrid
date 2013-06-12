@@ -108,7 +108,7 @@ ms_ping(struct Client *client_p, struct Client *source_p,
   {
     if ((target_p = hash_find_server(destination)))
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
-		 origin, destination);
+                 origin, destination);
     else
     {
       sendto_one(source_p, form_str(ERR_NOSUCHSERVER),

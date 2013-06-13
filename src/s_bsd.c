@@ -320,7 +320,7 @@ ssl_handshake(int fd, struct Client *client_p)
     {
       base16_encode(buf, sizeof(buf),
                     (const char *)cert->sha1_hash, sizeof(cert->sha1_hash));
-      client_p->certfp = xstrndup(buf, sizeof(buf));
+      client_p->certfp = xstrdup(buf);
     }
     else
       ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad SSL client certificate: %d",

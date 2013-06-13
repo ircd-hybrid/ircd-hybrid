@@ -105,6 +105,7 @@ extern const char *form_str(unsigned int);
 #define RPL_LOAD2HI          263
 #define RPL_LOCALUSERS       265
 #define RPL_GLOBALUSERS      266
+#define RPL_WHOISCERTFP      276
 #define RPL_ACCEPTLIST	     281
 #define RPL_ENDOFACCEPT      282
 #define RPL_NEWHOSTIS        285

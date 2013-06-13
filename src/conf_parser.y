@@ -77,6 +77,7 @@ static struct
     bind,
     file,
     ciph,
+    cert,
     rpass,
     spass,
     class;
@@ -297,6 +298,7 @@ reset_block_state(void)
 %token  T_EXTERNAL
 %token  T_FARCONNECT
 %token  T_FILE
+%token  T_FINGERPRINT
 %token  T_FULL
 %token  T_GLOBOPS
 %token  T_INVISIBLE
@@ -1040,10 +1042,13 @@ oper_entry: OPERATOR
     nuh.hostsize = sizeof(block_state.host.buf);
     split_nuh(&nuh);
 
-    conf        = conf_make(CONF_OPER);
-    conf->name  = xstrdup(block_state.name.buf);
-    conf->user  = xstrdup(block_state.user.buf);
-    conf->host  = xstrdup(block_state.host.buf);
+    conf         = conf_make(CONF_OPER);
+    conf->name   = xstrdup(block_state.name.buf);
+    conf->user   = xstrdup(block_state.user.buf);
+    conf->host   = xstrdup(block_state.host.buf);
+
+    if (block_state.cert.buf[0])
+      conf->certfp = xstrdup(block_state.cert.buf);
 
     if (block_state.rpass.buf[0])
       conf->passwd = xstrdup(block_state.rpass.buf);
@@ -1081,7 +1086,8 @@ oper_entry: OPERATOR
 oper_items:     oper_items oper_item | oper_item;
 oper_item:      oper_name | oper_user | oper_password |
                 oper_umodes | oper_class | oper_encrypted |
-		oper_rsa_public_key_file | oper_flags | error ';' ;
+		oper_rsa_public_key_file | oper_fingerprint |
+		oper_flags | error ';' ;
 
 oper_name: NAME '=' QSTRING ';'
 {
@@ -1116,6 +1122,13 @@ oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
+};
+
+oper_fingerprint: T_FINGERPRINT '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    if (strlen(yylval.string) == SHA_DIGEST_LENGTH * 2)
+      strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 };
 
 oper_class: CLASS '=' QSTRING ';'
@@ -2044,6 +2057,10 @@ connect_entry: CONNECT
   conf->name = xstrdup(block_state.name.buf);
   conf->passwd = xstrdup(block_state.rpass.buf);
   conf->spasswd = xstrdup(block_state.spass.buf);
+
+  if (block_state.cert.buf[0])
+    conf->certfp = xstrdup(block_state.cert.buf);
+
   conf->cipher_list = xstrdup(block_state.ciph.buf);
 
   dlinkMoveList(&block_state.leaf.list, &conf->leaf_list);
@@ -2076,7 +2093,7 @@ connect_entry: CONNECT
 
 connect_items:  connect_items connect_item | connect_item;
 connect_item:   connect_name | connect_host | connect_vhost |
-		connect_send_password | connect_accept_password |
+		connect_send_password | connect_accept_password | connect_fingerprint |
 		connect_aftype | connect_port | connect_ssl_cipher_list |
 		connect_flags | connect_hub_mask | connect_leaf_mask |
 		connect_class | connect_encrypted | 
@@ -2124,6 +2141,13 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
     conf_error_report("Server passwords cannot contain spaces");
   else
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
+};
+
+connect_fingerprint: T_FINGERPRINT '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    if (strlen(yylval.string) == SHA_DIGEST_LENGTH * 2)
+      strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 };
 
 connect_port: PORT '=' NUMBER ';'

@@ -95,6 +95,16 @@ m_oper(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  if (!EmptyString(conf->certfp))
+  {
+    if (source_p->certfp[0] == '\0' || strcasecmp(source_p->certfp, conf->certfp))
+    {
+      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      failed_oper_notice(source_p, name, "client certificate fingerprint mismatch");
+      return;
+    }
+  }
+
   if (match_conf_password(password, conf))
   {
     if (attach_conf(source_p, conf) != 0)

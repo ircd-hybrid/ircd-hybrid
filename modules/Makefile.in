@@ -153,6 +153,12 @@ m_capab_la_OBJECTS = $(am_m_capab_la_OBJECTS)
 m_capab_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_capab_la_LDFLAGS) $(LDFLAGS) -o $@
+m_certfp_la_LIBADD =
+am_m_certfp_la_OBJECTS = m_certfp.lo
+m_certfp_la_OBJECTS = $(am_m_certfp_la_OBJECTS)
+m_certfp_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_certfp_la_LDFLAGS) $(LDFLAGS) -o $@
 m_challenge_la_LIBADD =
 am_m_challenge_la_OBJECTS = m_challenge.lo
 m_challenge_la_OBJECTS = $(am_m_challenge_la_OBJECTS)
@@ -514,12 +520,12 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
-	$(m_challenge_la_SOURCES) $(m_close_la_SOURCES) \
-	$(m_connect_la_SOURCES) $(m_dline_la_SOURCES) \
-	$(m_encap_la_SOURCES) $(m_eob_la_SOURCES) \
-	$(m_etrace_la_SOURCES) $(m_gline_la_SOURCES) \
-	$(m_globops_la_SOURCES) $(m_hash_la_SOURCES) \
-	$(m_help_la_SOURCES) $(m_info_la_SOURCES) \
+	$(m_certfp_la_SOURCES) $(m_challenge_la_SOURCES) \
+	$(m_close_la_SOURCES) $(m_connect_la_SOURCES) \
+	$(m_dline_la_SOURCES) $(m_encap_la_SOURCES) \
+	$(m_eob_la_SOURCES) $(m_etrace_la_SOURCES) \
+	$(m_gline_la_SOURCES) $(m_globops_la_SOURCES) \
+	$(m_hash_la_SOURCES) $(m_help_la_SOURCES) $(m_info_la_SOURCES) \
 	$(m_invite_la_SOURCES) $(m_ison_la_SOURCES) \
 	$(m_kline_la_SOURCES) $(m_knock_la_SOURCES) \
 	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
@@ -543,12 +549,12 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
-	$(m_challenge_la_SOURCES) $(m_close_la_SOURCES) \
-	$(m_connect_la_SOURCES) $(m_dline_la_SOURCES) \
-	$(m_encap_la_SOURCES) $(m_eob_la_SOURCES) \
-	$(m_etrace_la_SOURCES) $(m_gline_la_SOURCES) \
-	$(m_globops_la_SOURCES) $(m_hash_la_SOURCES) \
-	$(m_help_la_SOURCES) $(m_info_la_SOURCES) \
+	$(m_certfp_la_SOURCES) $(m_challenge_la_SOURCES) \
+	$(m_close_la_SOURCES) $(m_connect_la_SOURCES) \
+	$(m_dline_la_SOURCES) $(m_encap_la_SOURCES) \
+	$(m_eob_la_SOURCES) $(m_etrace_la_SOURCES) \
+	$(m_gline_la_SOURCES) $(m_globops_la_SOURCES) \
+	$(m_hash_la_SOURCES) $(m_help_la_SOURCES) $(m_info_la_SOURCES) \
 	$(m_invite_la_SOURCES) $(m_ison_la_SOURCES) \
 	$(m_kline_la_SOURCES) $(m_knock_la_SOURCES) \
 	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
@@ -788,6 +794,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_away.la      \
                       m_capab.la     \
                       m_cap.la       \
+                      m_certfp.la    \
                       m_challenge.la \
                       m_close.la     \
                       m_connect.la   \
@@ -843,12 +850,13 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_whowas.la    \
                       m_xline.la
 
-m_challenge_la_LDFLAGS = $(MODULE_FLAGS)
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
 m_admin_la_LDFLAGS = $(MODULE_FLAGS)
 m_away_la_LDFLAGS = $(MODULE_FLAGS)
 m_capab_la_LDFLAGS = $(MODULE_FLAGS)
 m_cap_la_LDFLAGS = $(MODULE_FLAGS)
+m_certfp_la_LDFLAGS = $(MODULE_FLAGS)
+m_challenge_la_LDFLAGS = $(MODULE_FLAGS)
 m_close_la_LDFLAGS = $(MODULE_FLAGS)
 m_connect_la_LDFLAGS = $(MODULE_FLAGS)
 m_dline_la_LDFLAGS = $(MODULE_FLAGS)
@@ -907,6 +915,7 @@ m_admin_la_SOURCES = m_admin.c
 m_away_la_SOURCES = m_away.c
 m_capab_la_SOURCES = m_capab.c
 m_cap_la_SOURCES = m_cap.c
+m_certfp_la_SOURCES = m_certfp.c
 m_challenge_la_SOURCES = m_challenge.c
 m_close_la_SOURCES = m_close.c
 m_connect_la_SOURCES = m_connect.c
@@ -1045,6 +1054,9 @@ m_cap.la: $(m_cap_la_OBJECTS) $(m_cap_la_DEPENDENCIES) $(EXTRA_m_cap_la_DEPENDEN
 
 m_capab.la: $(m_capab_la_OBJECTS) $(m_capab_la_DEPENDENCIES) $(EXTRA_m_capab_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_capab_la_LINK) -rpath $(modulesdir) $(m_capab_la_OBJECTS) $(m_capab_la_LIBADD) $(LIBS)
+
+m_certfp.la: $(m_certfp_la_OBJECTS) $(m_certfp_la_DEPENDENCIES) $(EXTRA_m_certfp_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_certfp_la_LINK) -rpath $(modulesdir) $(m_certfp_la_OBJECTS) $(m_certfp_la_LIBADD) $(LIBS)
 
 m_challenge.la: $(m_challenge_la_OBJECTS) $(m_challenge_la_DEPENDENCIES) $(EXTRA_m_challenge_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_challenge_la_LINK) -rpath $(modulesdir) $(m_challenge_la_OBJECTS) $(m_challenge_la_LIBADD) $(LIBS)
@@ -1219,6 +1231,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_away.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_cap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_capab.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_certfp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_challenge.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_close.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_connect.Plo@am__quote@

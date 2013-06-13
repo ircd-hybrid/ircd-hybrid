@@ -243,6 +243,58 @@ close_connection(struct Client *client_p)
   client_p->from = NULL; /* ...this should catch them! >:) --msa */
 }
 
+/*  Base16 encoding is:
+ *  Copyright (c) 2001-2004, Roger Dingledine
+ *  Copyright (c) 2004-2007, Roger Dingledine, Nick Mathewson
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are
+ *  met:
+ *
+ *  Redistributions of source code must retain the above copyright
+ *  notice, this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the distribution.
+ *
+ * Neither the names of the copyright owners nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+static void
+base16_encode(char *dest, size_t destlen, const char *src, size_t srclen)
+{
+  const char *end;
+  char *cp;
+
+  assert(destlen >= srclen * 2 + 1);
+
+  cp = dest;
+  end = src + srclen;
+
+  while (src < end)
+  {
+    *cp++ = "0123456789ABCDEF"[(*(const uint8_t *)src) >>  4];
+    *cp++ = "0123456789ABCDEF"[(*(const uint8_t *)src) & 0xf];
+    ++src;
+  }
+
+  *cp = '\0';
+}
+
 #ifdef HAVE_LIBCRYPTO
 /*
  * ssl_handshake - let OpenSSL initialize the protocol. Register for
@@ -251,9 +303,29 @@ close_connection(struct Client *client_p)
 static void
 ssl_handshake(int fd, struct Client *client_p)
 {
+  X509 *cert = NULL;
   int ret = SSL_accept(client_p->localClient->fd.ssl);
+  int err = SSL_get_error(client_p->localClient->fd.ssl, ret);
+
+  ilog(LOG_TYPE_IRCD, "SSL Error %d %s", err, ERR_error_string(err, NULL));
+
+  if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
+  {
+    int res = SSL_get_verify_result(client_p->localClient->fd.ssl);
+
+    if (res == X509_V_OK || res == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
+        res == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE ||
+        res == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT)
+      base16_encode(client_p->certfp, sizeof(client_p->certfp),
+                    (const char *)cert->sha1_hash, sizeof(cert->sha1_hash));
+    else
+      ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad SSL client certificate: %d",
+           client_p->name, client_p->username, client_p->host, res);
+    X509_free(cert);
+  }
 
   if (ret <= 0)
+  {
     switch (SSL_get_error(client_p->localClient->fd.ssl, ret))
     {
       case SSL_ERROR_WANT_WRITE:
@@ -270,6 +342,7 @@ ssl_handshake(int fd, struct Client *client_p)
         exit_client(client_p, client_p, "Error during SSL handshake");
 	return;
     }
+  }
 
   start_auth(client_p);
 }

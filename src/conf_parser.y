@@ -1127,8 +1127,7 @@ oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
 oper_fingerprint: T_FINGERPRINT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    if (strlen(yylval.string) == SHA_DIGEST_LENGTH * 2)
-      strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
+    strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 };
 
 oper_class: CLASS '=' QSTRING ';'
@@ -2146,8 +2145,7 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
 connect_fingerprint: T_FINGERPRINT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    if (strlen(yylval.string) == SHA_DIGEST_LENGTH * 2)
-      strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
+    strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 };
 
 connect_port: PORT '=' NUMBER ';'

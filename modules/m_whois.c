@@ -136,18 +136,17 @@ whois_person(struct Client *source_p, struct Client *target_p)
                show_ip ? target_p->sockhost : "255.255.255.255");
   }
 
+  if (!EmptyString(target_p->certfp))
+    if (target_p == source_p || HasUMode(source_p, UMODE_OPER))
+      sendto_one(source_p, form_str(RPL_WHOISCERTFP), me.name,
+                 source_p->name, target_p->name, target_p->certfp);
+
   if (MyConnect(target_p))
   {
 #ifdef HAVE_LIBCRYPTO
     if (target_p->localClient->fd.ssl)
-    {
       sendto_one(source_p, form_str(RPL_WHOISSECURE),
                  me.name, source_p->name, target_p->name);
-      if (target_p->certfp[0])
-        if (target_p == source_p || HasUMode(source_p, UMODE_OPER))
-          sendto_one(source_p, form_str(RPL_WHOISCERTFP), me.name,
-                     source_p->name, target_p->name, target_p->certfp);
-    }
 #endif
     sendto_one(source_p, form_str(RPL_WHOISIDLE),
                me.name, source_p->name, target_p->name,

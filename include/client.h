@@ -436,7 +436,7 @@ struct Client
    */
   char              sockhost[HOSTIPLEN + 1]; /* This is the host name from the 
                                                 socket ip address as string */
-  char              certfp[SHA_DIGEST_LENGTH * 2 + 1];
+  char             *certfp;
 };
 
 

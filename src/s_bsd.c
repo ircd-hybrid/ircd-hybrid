@@ -312,12 +312,16 @@ ssl_handshake(int fd, struct Client *client_p)
   if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
   {
     int res = SSL_get_verify_result(client_p->localClient->fd.ssl);
+    char buf[SHA_DIGEST_LENGTH * 2 + 1] = { '\0' };
 
     if (res == X509_V_OK || res == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
         res == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE ||
         res == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT)
-      base16_encode(client_p->certfp, sizeof(client_p->certfp),
+    {
+      base16_encode(buf, sizeof(buf),
                     (const char *)cert->sha1_hash, sizeof(cert->sha1_hash));
+      client_p->certfp = xstrndup(buf, sizeof(buf));
+    }
     else
       ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad SSL client certificate: %d",
            client_p->name, client_p->username, client_p->host, res);

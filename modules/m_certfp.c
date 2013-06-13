@@ -34,7 +34,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "irc_string.h"
-
+#include "memory.h"
 
 
 /*! \brief CERTFP command handler (called by remotely connected clients)
@@ -57,7 +57,8 @@ ms_certfp(struct Client *source_p, struct Client *client_p,
   if (!IsClient(source_p))
     return;
 
-  strlcpy(source_p->certfp, parv[1], sizeof(source_p->certfp));
+  MyFree(source_p->certfp);
+  source_p->certfp = strdup(parv[1]);
 
   sendto_server(client_p, CAP_TS6, NOCAPS, ":%s CERTFP %s",
                 ID(source_p), parv[1]);

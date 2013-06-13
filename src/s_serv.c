@@ -408,7 +408,7 @@ check_server(const char *name, struct Client *client_p)
         return -2;
 
       if (!EmptyString(conf->certfp))
-        if (client_p->certfp[0] == '\0' || strcasecmp(client_p->certfp, conf->certfp))
+        if (EmptyString(client_p->certfp) || strcasecmp(client_p->certfp, conf->certfp))
           return -4;
 
       server_conf = conf;
@@ -620,7 +620,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
                  target_p->servptr->name, target_p->info);
   }
 
-  if (target_p->certfp[0])
+  if (!EmptyString(target_p->certfp))
     sendto_one(client_p, ":%s CERTFP %s",
                ID_or_name(target_p, client_p), target_p->certfp);
 

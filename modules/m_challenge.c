@@ -144,6 +144,16 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  if (!EmptyString(conf->certfp))
+  {
+    if (EmptyString(source_p->certfp) || strcasecmp(source_p->certfp, conf->certfp))
+    {
+      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      failed_challenge_notice(source_p, conf->name, "client certificate fingerprint mismatch");
+      return;
+    }
+  }
+
   if (!generate_challenge(&challenge, &(source_p->localClient->response),
                           conf->rsa_public_key))
     sendto_one(source_p, form_str(RPL_RSACHALLENGE),

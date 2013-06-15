@@ -281,6 +281,7 @@ reset_block_state(void)
 %token  SPOOF_NOTICE
 %token  SQUIT
 %token  SSL_CERTIFICATE_FILE
+%token  SSL_CERTIFICATE_FINGERPRINT
 %token  SSL_DH_PARAM_FILE
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
@@ -298,7 +299,6 @@ reset_block_state(void)
 %token  T_EXTERNAL
 %token  T_FARCONNECT
 %token  T_FILE
-%token  T_FINGERPRINT
 %token  T_FULL
 %token  T_GLOBOPS
 %token  T_INVISIBLE
@@ -1086,7 +1086,7 @@ oper_entry: OPERATOR
 oper_items:     oper_items oper_item | oper_item;
 oper_item:      oper_name | oper_user | oper_password |
                 oper_umodes | oper_class | oper_encrypted |
-		oper_rsa_public_key_file | oper_fingerprint |
+		oper_rsa_public_key_file | oper_ssl_certificate_fingerprint |
 		oper_flags | error ';' ;
 
 oper_name: NAME '=' QSTRING ';'
@@ -1124,7 +1124,7 @@ oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
     strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
 };
 
-oper_fingerprint: T_FINGERPRINT '=' QSTRING ';'
+oper_ssl_certificate_fingerprint: SSL_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
@@ -2092,7 +2092,8 @@ connect_entry: CONNECT
 
 connect_items:  connect_items connect_item | connect_item;
 connect_item:   connect_name | connect_host | connect_vhost |
-		connect_send_password | connect_accept_password | connect_fingerprint |
+		connect_send_password | connect_accept_password |
+		connect_ssl_certificate_fingerprint |
 		connect_aftype | connect_port | connect_ssl_cipher_list |
 		connect_flags | connect_hub_mask | connect_leaf_mask |
 		connect_class | connect_encrypted | 
@@ -2142,7 +2143,7 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
-connect_fingerprint: T_FINGERPRINT '=' QSTRING ';'
+connect_ssl_certificate_fingerprint: SSL_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));

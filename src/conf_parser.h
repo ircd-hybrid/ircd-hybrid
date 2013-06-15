@@ -193,24 +193,24 @@ extern int yydebug;
      SPOOF_NOTICE = 402,
      SQUIT = 403,
      SSL_CERTIFICATE_FILE = 404,
-     SSL_DH_PARAM_FILE = 405,
-     STATS_E_DISABLED = 406,
-     STATS_I_OPER_ONLY = 407,
-     STATS_K_OPER_ONLY = 408,
-     STATS_O_OPER_ONLY = 409,
-     STATS_P_OPER_ONLY = 410,
-     T_ALL = 411,
-     T_BOTS = 412,
-     T_CALLERID = 413,
-     T_CCONN = 414,
-     T_CLUSTER = 415,
-     T_DEAF = 416,
-     T_DEBUG = 417,
-     T_DLINE = 418,
-     T_EXTERNAL = 419,
-     T_FARCONNECT = 420,
-     T_FILE = 421,
-     T_FINGERPRINT = 422,
+     SSL_CERTIFICATE_FINGERPRINT = 405,
+     SSL_DH_PARAM_FILE = 406,
+     STATS_E_DISABLED = 407,
+     STATS_I_OPER_ONLY = 408,
+     STATS_K_OPER_ONLY = 409,
+     STATS_O_OPER_ONLY = 410,
+     STATS_P_OPER_ONLY = 411,
+     T_ALL = 412,
+     T_BOTS = 413,
+     T_CALLERID = 414,
+     T_CCONN = 415,
+     T_CLUSTER = 416,
+     T_DEAF = 417,
+     T_DEBUG = 418,
+     T_DLINE = 419,
+     T_EXTERNAL = 420,
+     T_FARCONNECT = 421,
+     T_FILE = 422,
      T_FULL = 423,
      T_GLOBOPS = 424,
      T_INVISIBLE = 425,
@@ -417,24 +417,24 @@ extern int yydebug;
 #define SPOOF_NOTICE 402
 #define SQUIT 403
 #define SSL_CERTIFICATE_FILE 404
-#define SSL_DH_PARAM_FILE 405
-#define STATS_E_DISABLED 406
-#define STATS_I_OPER_ONLY 407
-#define STATS_K_OPER_ONLY 408
-#define STATS_O_OPER_ONLY 409
-#define STATS_P_OPER_ONLY 410
-#define T_ALL 411
-#define T_BOTS 412
-#define T_CALLERID 413
-#define T_CCONN 414
-#define T_CLUSTER 415
-#define T_DEAF 416
-#define T_DEBUG 417
-#define T_DLINE 418
-#define T_EXTERNAL 419
-#define T_FARCONNECT 420
-#define T_FILE 421
-#define T_FINGERPRINT 422
+#define SSL_CERTIFICATE_FINGERPRINT 405
+#define SSL_DH_PARAM_FILE 406
+#define STATS_E_DISABLED 407
+#define STATS_I_OPER_ONLY 408
+#define STATS_K_OPER_ONLY 409
+#define STATS_O_OPER_ONLY 410
+#define STATS_P_OPER_ONLY 411
+#define T_ALL 412
+#define T_BOTS 413
+#define T_CALLERID 414
+#define T_CCONN 415
+#define T_CLUSTER 416
+#define T_DEAF 417
+#define T_DEBUG 418
+#define T_DLINE 419
+#define T_EXTERNAL 420
+#define T_FARCONNECT 421
+#define T_FILE 422
 #define T_FULL 423
 #define T_GLOBOPS 424
 #define T_INVISIBLE 425

@@ -174,6 +174,7 @@ external                    { return T_EXTERNAL; }
 failed_oper_notice          { return FAILED_OPER_NOTICE; }
 farconnect                  { return T_FARCONNECT; }
 file                        { return T_FILE; }
+fingerprint                 { return T_FINGERPRINT; }
 flags                       { return IRCD_FLAGS; }
 flatten_links               { return FLATTEN_LINKS; }
 full                        { return T_FULL; }

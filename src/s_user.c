@@ -623,6 +623,9 @@ introduce_client(struct Client *source_p)
                    ubuf, source_p->username, source_p->host,
                    source_p->servptr->name, source_p->info);
     }
+
+    if (!EmptyString(source_p->certfp))
+      sendto_one(server, ":%s CERTFP %s", ID(source_p), source_p->certfp);
   }
 }
 

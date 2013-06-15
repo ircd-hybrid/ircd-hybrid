@@ -251,9 +251,39 @@ close_connection(struct Client *client_p)
 static void
 ssl_handshake(int fd, struct Client *client_p)
 {
+  X509 *cert = NULL;
   int ret = SSL_accept(client_p->localClient->fd.ssl);
+  int err = SSL_get_error(client_p->localClient->fd.ssl, ret);
+
+  ilog(LOG_TYPE_IRCD, "SSL Error %d %s", err, ERR_error_string(err, NULL));
+
+  if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
+  {
+    int res = SSL_get_verify_result(client_p->localClient->fd.ssl);
+    char buf[EVP_MAX_MD_SIZE * 2 + 1] = { '\0' };
+    unsigned char md[EVP_MAX_MD_SIZE * 2 + 1] = { '\0' };
+
+    if (res == X509_V_OK || res == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
+        res == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE ||
+        res == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT)
+    {
+      unsigned int i = 0, n = 0;
+
+      if (X509_digest(cert, EVP_sha256(), md, &n))
+      {
+        for (; i < n; ++i)
+          snprintf(buf + 2 * i, 3, "%02X", md[i]);
+        client_p->certfp = xstrdup(buf);
+      }
+    }
+    else
+      ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad SSL client certificate: %d",
+           client_p->name, client_p->username, client_p->host, res);
+    X509_free(cert);
+  }
 
   if (ret <= 0)
+  {
     switch (SSL_get_error(client_p->localClient->fd.ssl, ret))
     {
       case SSL_ERROR_WANT_WRITE:
@@ -270,6 +300,7 @@ ssl_handshake(int fd, struct Client *client_p)
         exit_client(client_p, client_p, "Error during SSL handshake");
 	return;
     }
+  }
 
   start_auth(client_p);
 }

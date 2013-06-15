@@ -164,6 +164,7 @@ free_client(struct Client *client_p)
   assert(!IsServer(client_p) || (IsServer(client_p) && client_p->serv));
 
   MyFree(client_p->serv);
+  MyFree(client_p->certfp);
 
   if (MyConnect(client_p))
   {

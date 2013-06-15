@@ -410,6 +410,14 @@ setup_corefile(void)
 #endif
 }
 
+#ifdef HAVE_LIBCRYPTO
+static int
+always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
+{
+  return 1;
+}
+#endif
+
 /* init_ssl()
  *
  * inputs       - nothing
@@ -434,7 +442,8 @@ ssl_init(void)
 
   SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
   SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_TLS_ROLLBACK_BUG|SSL_OP_ALL);
-  SSL_CTX_set_verify(ServerInfo.server_ctx, SSL_VERIFY_NONE, NULL);
+  SSL_CTX_set_verify(ServerInfo.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
+                     always_accept_verify_cb);
 
   if ((ServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
   {
@@ -447,7 +456,8 @@ ssl_init(void)
 
   SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
   SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_TLS_ROLLBACK_BUG|SSL_OP_ALL);
-  SSL_CTX_set_verify(ServerInfo.client_ctx, SSL_VERIFY_NONE, NULL);
+    SSL_CTX_set_verify(ServerInfo.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
+                     always_accept_verify_cb);
 #endif /* HAVE_LIBCRYPTO */
 }
 

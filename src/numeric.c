@@ -303,7 +303,7 @@ static const char *replies[] = {
 /* 273 */ NULL,
 /* 274 */ NULL,
 /* 275 */ NULL,
-/* 276 */ NULL,
+/* 276 RPL_WHOISCERTFP */ ":%s 276 %s %s :has client certificate fingerprint %s",
 /* 277 */ NULL,
 /* 278 */ NULL,
 /* 279 */ NULL,

@@ -21,7 +21,7 @@
 
 /*! \file m_certfp.c
  * \brief Includes required functions for processing the CERTFP command.
- * \version $Id: m_certfp.c 2196 2013-06-04 18:30:12Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

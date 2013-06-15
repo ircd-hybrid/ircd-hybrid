@@ -174,7 +174,6 @@ external                    { return T_EXTERNAL; }
 failed_oper_notice          { return FAILED_OPER_NOTICE; }
 farconnect                  { return T_FARCONNECT; }
 file                        { return T_FILE; }
-fingerprint                 { return T_FINGERPRINT; }
 flags                       { return IRCD_FLAGS; }
 flatten_links               { return FLATTEN_LINKS; }
 full                        { return T_FULL; }
@@ -309,6 +308,7 @@ spy                         { return T_SPY; }
 squit                       { return SQUIT; }
 ssl                         { return T_SSL; }
 ssl_certificate_file        { return SSL_CERTIFICATE_FILE; }
+ssl_certificate_fingerprint { return SSL_CERTIFICATE_FINGERPRINT; }
 ssl_cipher_list             { return T_SSL_CIPHER_LIST; }
 ssl_client_method           { return T_SSL_CLIENT_METHOD; }
 ssl_dh_param_file           { return SSL_DH_PARAM_FILE; }

@@ -33,6 +33,7 @@ User Modes:
                     This mode can be set by servers and services only.
 +R - regonly      - Only registered clients may message you
 +s - servnotice   - See general server notices
++S - ssl          - Client is connected via SSL/TLS
 +u - unauth       - See unauthorized client notices
 +w - wallop       - See server generated WALLOPS
 +x - hiddenhost   - User's host has been spoofed by services.

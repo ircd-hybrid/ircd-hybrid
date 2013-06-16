@@ -368,6 +368,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
       return;
     }
 
+    AddFlag(new_client, FLAGS_SSL);
     SSL_set_fd(new_client->localClient->fd.ssl, fd);
     ssl_handshake(0, new_client);
   }

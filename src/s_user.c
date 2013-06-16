@@ -101,7 +101,7 @@ const unsigned int user_modes[256] =
   0,                  /* P */
   0,                  /* Q */
   UMODE_REGONLY,      /* R */
-  0,                  /* S */
+  UMODE_SSL,          /* S */
   0,                  /* T */
   0,                  /* U */
   0,                  /* V */
@@ -895,6 +895,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
 
           break;
 
+        case 'S':  /* Only servers may set +S in a burst */
         case 'r':  /* Only services may set +r */
         case 'x':  /* Only services may set +x */
           break;
@@ -1143,10 +1144,13 @@ user_welcome(struct Client *source_p)
 #endif
 
 #ifdef HAVE_LIBCRYPTO
-  if (source_p->localClient->fd.ssl != NULL)
+  if (HasFlag(source_p, FLAGS_SSL))
+  {
+    AddUMode(source_p, UMODE_SSL);
     sendto_one(source_p, ":%s NOTICE %s :*** Connected securely via %s",
                me.name, source_p->name,
                ssl_get_cipher(source_p->localClient->fd.ssl));
+  }
 #endif
 
   sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, 

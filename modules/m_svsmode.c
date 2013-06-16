@@ -146,6 +146,9 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
 
         break;
 
+      case 'S':  /* Only servers may set +S in a burst */
+        break;
+
       default:
         if ((flag = user_modes[(unsigned char)*m]))
         {

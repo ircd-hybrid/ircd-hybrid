@@ -128,6 +128,7 @@
 #define FLAGS_FLOOD_NOTICED  0x01000000 /**< Notice to opers about this flooder has been sent */
 #define FLAGS_SERVICE        0x02000000 /**< Client/server is a network service */
 #define FLAGS_AUTH_SPOOF     0x04000000 /**< user's hostname has been spoofed by an auth{} spoof*/
+#define FLAGS_SSL            0x08000000 /**< User is connected via TLS/SSL */
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
@@ -161,6 +162,7 @@
 #define UMODE_ADMIN        0x00400000 /**< Admin on server */ 
 #define UMODE_FARCONNECT   0x00800000 /**< Can see remote client connects/exits */
 #define UMODE_HIDDENHOST   0x01000000 /**< User's host is hidden */
+#define UMODE_SSL          0x02000000 /**< User is connected via TLS/SSL */
 
 
 #define UMODE_ALL          UMODE_SERVNOTICE
@@ -171,7 +173,7 @@
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP |\
                       UMODE_REGONLY | UMODE_REGISTERED | UMODE_ADMIN |\
-                      UMODE_HIDDEN)
+                      UMODE_HIDDEN | UMODE_SSL)
 
 
 

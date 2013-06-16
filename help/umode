@@ -10,7 +10,6 @@ Usermodes: (* designates that the umode is oper only)
        * +w     - Can see server wallops.
        * +z     - Can see oper wallops.
        * +l     - Can see oper locops (local wallops).
-       * +s     - Can see generic server messages and oper kills.
        * +c     - Can see client connections and exits.
        * +u     - Can see unauthorized client connections.
        * +j     - Can see 'rejected' client notices.
@@ -25,6 +24,8 @@ Usermodes: (* designates that the umode is oper only)
          +r     - User has been registered and identified for its nick.
                   This mode can be set by servers and services only.
          +R     - Only registered clients may message you.
+       * +s     - Can see generic server messages and oper kills.
+         +S     - Client is connected via SSL/TLS
        * +e     - Can see new server introduction and split messages.
        * +b     - Can see possible bot / join flood warnings.
        * +a     - Is marked as a server admin in stats p/o.

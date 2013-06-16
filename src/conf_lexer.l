@@ -311,6 +311,7 @@ ssl_certificate_file        { return SSL_CERTIFICATE_FILE; }
 ssl_certificate_fingerprint { return SSL_CERTIFICATE_FINGERPRINT; }
 ssl_cipher_list             { return T_SSL_CIPHER_LIST; }
 ssl_client_method           { return T_SSL_CLIENT_METHOD; }
+ssl_connection_required     { return SSL_CONNECTION_REQUIRED; }
 ssl_dh_param_file           { return SSL_DH_PARAM_FILE; }
 ssl_server_method           { return T_SSL_SERVER_METHOD; }
 sslv3                       { return T_SSLV3; }

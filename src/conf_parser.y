@@ -282,6 +282,7 @@ reset_block_state(void)
 %token  SQUIT
 %token  SSL_CERTIFICATE_FILE
 %token  SSL_CERTIFICATE_FINGERPRINT
+%token  SSL_CONNECTION_REQUIRED
 %token  SSL_DH_PARAM_FILE
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
@@ -1087,6 +1088,7 @@ oper_items:     oper_items oper_item | oper_item;
 oper_item:      oper_name | oper_user | oper_password |
                 oper_umodes | oper_class | oper_encrypted |
 		oper_rsa_public_key_file | oper_ssl_certificate_fingerprint |
+		oper_ssl_connection_required |
 		oper_flags | error ';' ;
 
 oper_name: NAME '=' QSTRING ';'
@@ -1128,6 +1130,17 @@ oper_ssl_certificate_fingerprint: SSL_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
+};
+
+oper_ssl_connection_required: SSL_CONNECTION_REQUIRED '=' TBOOL ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (yylval.number)
+    block_state.flags.value |= CONF_FLAGS_SSL;
+  else
+    block_state.flags.value &= ~CONF_FLAGS_SSL;
 };
 
 oper_class: CLASS '=' QSTRING ';'

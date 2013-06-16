@@ -144,6 +144,13 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     return;
   }
 
+  if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
+  {
+    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    failed_challenge_notice(source_p, conf->name, "requires SSL/TLS");
+    return;
+  }
+
   if (!EmptyString(conf->certfp))
   {
     if (EmptyString(source_p->certfp) || strcasecmp(source_p->certfp, conf->certfp))

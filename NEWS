@@ -1,3 +1,18 @@
+-- ircd-hybrid-8.1.2 Release Notes
+o) Added support for SHA-256 ssl certificate fingerprint based operator{}
+   and connect{} blocks.
+   In conjunction with Anope 1.9.x IRC-services, clients are now also able
+   to automatically identify for their nick with ssl certificate
+   fingerprints
+o) Added operator::ssl_connection_required configuration option. See
+   doc/reference.conf for more information
+o) Added usermode +S (client is connected via SSL/TLS). Allows services
+   to keep track of what users are connected via SSL, and allows to see
+   ssl-status of remote clients in a /whois
+o) Fixed a server name leak with server hiding enabled. Reported by
+   Adam <adam@anope.org>
+
+
 -- ircd-hybrid-8.1.1 Release Notes
 ########################################################################
 o) IMPORTANT: moved disable_remote_command configuration directive from

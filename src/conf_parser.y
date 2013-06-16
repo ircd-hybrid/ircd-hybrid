@@ -2073,7 +2073,8 @@ connect_entry: CONNECT
   if (block_state.cert.buf[0])
     conf->certfp = xstrdup(block_state.cert.buf);
 
-  conf->cipher_list = xstrdup(block_state.ciph.buf);
+  if (block_state.ciph.buf[0])
+    conf->cipher_list = xstrdup(block_state.ciph.buf);
 
   dlinkMoveList(&block_state.leaf.list, &conf->leaf_list);
   dlinkMoveList(&block_state.hub.list, &conf->hub_list);

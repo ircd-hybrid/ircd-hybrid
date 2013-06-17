@@ -36,8 +36,8 @@ Feature Specific Requirements:
   SSL/TLS server links, as well as SSL/TLS client connections,
   a working OpenSSL library is required
 
-- For encrypted oper and (optional) server passwords, a working DES and/or
-  MD5 library
+- For encrypted oper, server and auth passwords, a working DES, MD5, or
+  SHA library
 
 - For ISO 3166 alpha-2 two letter country code enabled resv{} blocks, a working	 
   libGeoIP is required

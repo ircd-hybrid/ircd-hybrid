@@ -7,7 +7,6 @@ CIDR.txt		- Description of CIDR in IPv4
 Tao-of-IRC.940110	- No comment...
 challenge.txt		- Overview of the challenge/response system for
                           obtaining operator status
-guidelines.txt		- Documentation guidelines
 index.txt		- This file
 ircd.8                  - The new revised manpage, read with the following
                           commands in the prefix directory:

@@ -233,7 +233,7 @@ static const char *replies[] = {
 /* 203 RPL_TRACEUNKNOWN */ ":%s 203 %s ???? %s %s (%s) %d",
 /* 204 RPL_TRACEOPERATOR */ ":%s 204 %s Oper %s %s (%s) %lu %u",
 /* 205 RPL_TRACEUSER */ ":%s 205 %s User %s %s (%s) %lu %u",
-/* 206 RPL_TRACESERVER */ ":%s 206 %s Serv %s %dS %dC %s %s!%s@%s %lu",
+/* 206 RPL_TRACESERVER */ ":%s 206 %s Serv %s %uS %uC %s %s!%s@%s %lu",
 /* 207 */ NULL,
 /* 208 RPL_TRACENEWTYPE */ ":%s 208 %s <newtype> 0 %s",
 /* 209 RPL_TRACECLASS */ ":%s 209 %s Class %s %d",

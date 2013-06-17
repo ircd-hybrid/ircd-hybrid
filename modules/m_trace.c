@@ -42,8 +42,8 @@ static void do_actual_trace(struct Client *, int, char *[]);
 static void report_this_status(struct Client *, struct Client *, int);
 
 static void
-trace_get_dependent(int *const server,
-                    int *const client, const struct Client *target_p)
+trace_get_dependent(unsigned int *const server,
+                    unsigned int *const client, const struct Client *target_p)
 {
   const dlink_node *ptr = NULL;
 
@@ -64,7 +64,7 @@ static void
 m_trace(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  const char *tname;
+  const char *tname = NULL;
 
   if (parc > 1)
     tname = parv[1];
@@ -74,7 +74,6 @@ m_trace(struct Client *client_p, struct Client *source_p,
   sendto_one(source_p, form_str(RPL_ENDOFTRACE),
              me.name, source_p->name, tname);
 }
-
 
 /* mo_trace()
  *      parv[0] = sender prefix
@@ -392,8 +391,8 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
       break;
     case STAT_SERVER:
     {
-      int clients = 0;
-      int servers = 0;
+      unsigned int clients = 0;
+      unsigned int servers = 0;
 
       trace_get_dependent(&servers, &clients, target_p);
 

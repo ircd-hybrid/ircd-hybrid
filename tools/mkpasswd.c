@@ -254,7 +254,8 @@ make_ext_salt(int rounds)
 {
   static char salt[10];
 
-  sprintf(salt, "_%s", int_to_base64(rounds));
+  snprintf(salt, sizeof(salt), "_%s", int_to_base64(rounds));
+
   generate_random_salt(&salt[5], 4);
   salt[9] = '\0';
 

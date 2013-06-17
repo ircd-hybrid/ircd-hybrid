@@ -456,7 +456,7 @@ ssl_init(void)
 
   SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
   SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_TLS_ROLLBACK_BUG|SSL_OP_ALL);
-    SSL_CTX_set_verify(ServerInfo.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
+  SSL_CTX_set_verify(ServerInfo.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);
 #endif /* HAVE_LIBCRYPTO */
 }
@@ -464,9 +464,7 @@ ssl_init(void)
 int
 main(int argc, char *argv[])
 {
-  /* Check to see if the user is running
-   * us as root, which is a nono
-   */
+  /* Check to see if the user is running us as root, which is a nono */
   if (geteuid() == 0)
   {
     fprintf(stderr, "Don't run ircd as root!!!\n");
@@ -483,7 +481,7 @@ main(int argc, char *argv[])
   init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
 
   me.localClient = &meLocalUser;
-  dlinkAdd(&me, &me.node, &global_client_list);	/* Pointer to beginning
+  dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
   /* Initialise the channel capability usage counts... */
   init_chcap_usage_counts();
@@ -527,11 +525,13 @@ main(int argc, char *argv[])
 
   /* Init the event subsystem */
   eventInit();
+
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
   log_set_file(LOG_TYPE_IRCD, 0, logFileName);
   check_can_use_v6();
   init_comm();         /* This needs to be setup early ! -- adrian */
+
   /* Check if there is pidfile and daemon already running */
   check_pidfile(pidFileName);
 

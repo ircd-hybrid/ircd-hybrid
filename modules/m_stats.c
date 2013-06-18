@@ -1236,7 +1236,7 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
 static void
 stats_uptime(struct Client *source_p, int parc, char *parv[])
 {
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.stats_P_oper_only)
+  if (!HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.stats_u_oper_only)
     sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
                from, to);
   else

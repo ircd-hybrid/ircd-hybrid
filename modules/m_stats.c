@@ -1236,14 +1236,20 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
 static void
 stats_uptime(struct Client *source_p, int parc, char *parv[])
 {
-  time_t now = CurrentTime - me.localClient->since;
+  if (!HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.stats_P_oper_only)
+    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
+               from, to);
+  else
+  {
+    time_t now = CurrentTime - me.localClient->since;
 
-  sendto_one(source_p, form_str(RPL_STATSUPTIME), from, to,
-             now / 86400, (now / 3600) % 24, (now / 60) % 60, now % 60);
+    sendto_one(source_p, form_str(RPL_STATSUPTIME), from, to,
+               now / 86400, (now / 3600) % 24, (now / 60) % 60, now % 60);
 
-  if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
-     sendto_one(source_p, form_str(RPL_STATSCONN), from, to,
-                Count.max_loc_con, Count.max_loc_cli, Count.totalrestartcount);
+    if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
+       sendto_one(source_p, form_str(RPL_STATSCONN), from, to,
+                  Count.max_loc_con, Count.max_loc_cli, Count.totalrestartcount);
+  }
 }
 
 static void

@@ -289,6 +289,7 @@ reset_block_state(void)
 %token  STATS_K_OPER_ONLY
 %token  STATS_O_OPER_ONLY
 %token  STATS_P_OPER_ONLY
+%token  STATS_U_OPER_ONLY
 %token  T_ALL
 %token  T_BOTS
 %token  T_CALLERID
@@ -2422,6 +2423,7 @@ general_item:       general_hide_spoof_ips | general_ignore_bogus_ts |
                     general_stats_o_oper_only | general_stats_k_oper_only |
                     general_pace_wait | general_stats_i_oper_only |
                     general_pace_wait_simple | general_stats_P_oper_only |
+                    general_stats_u_oper_only |
                     general_short_motd | general_no_oper_flood |
                     general_true_no_oper_flood | general_oper_pass_resv |
                     general_oper_only_umodes | general_max_targets |
@@ -2569,6 +2571,11 @@ general_stats_o_oper_only: STATS_O_OPER_ONLY '=' TBOOL ';'
 general_stats_P_oper_only: STATS_P_OPER_ONLY '=' TBOOL ';'
 {
   ConfigFileEntry.stats_P_oper_only = yylval.number;
+};
+
+general_stats_u_oper_only: STATS_U_OPER_ONLY '=' TBOOL ';'
+{
+  ConfigFileEntry.stats_u_oper_only = yylval.number;
 };
 
 general_stats_k_oper_only: STATS_K_OPER_ONLY '=' TBOOL ';'

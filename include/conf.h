@@ -234,6 +234,7 @@ struct config_file_entry
   int stats_k_oper_only;
   int stats_i_oper_only;
   int stats_P_oper_only;
+  int stats_u_oper_only;
   int short_motd;
   int no_oper_flood;
   int true_no_oper_flood;

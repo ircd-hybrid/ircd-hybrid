@@ -681,7 +681,7 @@ detach_conf(struct Client *client_p, enum maskitem_type type)
     dlinkDelete(ptr, &client_p->localClient->confs);
     free_dlink_node(ptr);
 
-    if (conf->type == CONF_CLIENT)
+    if (conf->type & CONF_CLIENT)
       remove_from_cidr_check(&client_p->localClient->ip, conf->class);
 
     if (--conf->class->ref_count == 0 && conf->class->active == 0)

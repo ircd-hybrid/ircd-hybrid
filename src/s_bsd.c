@@ -261,7 +261,7 @@ ssl_handshake(int fd, struct Client *client_p)
   {
     int res = SSL_get_verify_result(client_p->localClient->fd.ssl);
     char buf[EVP_MAX_MD_SIZE * 2 + 1] = { '\0' };
-    unsigned char md[EVP_MAX_MD_SIZE * 2 + 1] = { '\0' };
+    unsigned char md[EVP_MAX_MD_SIZE] = { '\0' };
 
     if (res == X509_V_OK || res == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
         res == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE ||

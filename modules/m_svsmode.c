@@ -28,7 +28,6 @@
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
-#include "numeric.h"
 #include "s_serv.h"
 #include "send.h"
 #include "channel_mode.h"
@@ -37,7 +36,6 @@
 #include "irc_string.h"
 #include "s_user.h"
 #include "conf.h"
-#include "hook.h"
 
 
 /*! \brief SVSMODE command handler (called by services)

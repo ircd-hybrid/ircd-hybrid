@@ -638,23 +638,22 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
  * side effects - build up string representing capabilities of server listed
  */
 const char *
-show_capabilities(struct Client *target_p)
+show_capabilities(const struct Client *target_p)
 {
-  static char msgbuf[IRCD_BUFSIZE];
-  char *t = msgbuf;
-  dlink_node *ptr;
-
-  t += sprintf(msgbuf, "TS ");
+  static char msgbuf[IRCD_BUFSIZE] = "TS";
+  const dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, cap_list.head)
   {
     const struct Capability *cap = ptr->data;
 
-    if (IsCapable(target_p, cap->cap))
-      t += sprintf(t, "%s ", cap->name);
+    if (!IsCapable(target_p, cap->cap))
+      continue;
+
+    strlcat(msgbuf,       " ", sizeof(msgbuf));
+    strlcat(msgbuf, cap->name, sizeof(msgbuf));
   }
 
-  *(t - 1) = '\0';
   return msgbuf;
 }
 

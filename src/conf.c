@@ -1122,6 +1122,7 @@ set_default_conf(void)
   
   ConfigFileEntry.service_name = xstrdup(SERVICE_NAME_DEFAULT);
   ConfigFileEntry.max_watch = WATCHSIZE_DEFAULT;
+  ConfigFileEntry.cycle_on_host_change = 1;
   ConfigFileEntry.glines = 0;
   ConfigFileEntry.gline_time = 12 * 3600;
   ConfigFileEntry.gline_request_time = GLINE_REQUEST_EXPIRE_DEFAULT;

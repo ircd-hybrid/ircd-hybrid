@@ -283,6 +283,12 @@ static const struct InfoStruct info_table[] =
     "Ignore bogus timestamps from other servers"
   },
   {
+    "cycle_on_host_change",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigFileEntry.cycle_on_host_change,
+    "Send a fake QUIT/JOIN combination on host change"
+  },
+  {
     "disable_auth",
     OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.disable_auth,

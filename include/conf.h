@@ -261,6 +261,7 @@ struct config_file_entry
   int use_egd;
   int ping_cookie;
   int disable_auth;
+  int cycle_on_host_change;
 };
 
 struct config_channel_entry

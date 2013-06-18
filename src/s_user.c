@@ -1087,6 +1087,9 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     clear_ban_cache_client(target_p);
   }
 
+  if (!ConfigFileEntry.cycle_on_host_change)
+    return;
+
   DLINK_FOREACH(ptr, target_p->channel.head)
   {
     char modebuf[4], nickbuf[NICKLEN * 3 + 3] = { '\0' };
@@ -1094,17 +1097,20 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     int len = 0;
     const struct Membership *ms = ptr->data;
 
-    if (has_member_flags(ms, CHFL_CHANOP)) {
+    if (has_member_flags(ms, CHFL_CHANOP))
+    {
       *p++ = 'o';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", target_p->name);
     }
 
-    if (has_member_flags(ms, CHFL_HALFOP)) {
+    if (has_member_flags(ms, CHFL_HALFOP))
+    {
       *p++ = 'h';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", target_p->name);
     }
 
-    if (has_member_flags(ms, CHFL_VOICE)) {
+    if (has_member_flags(ms, CHFL_VOICE))
+    {
       *p++ = 'v';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", target_p->name);
     }

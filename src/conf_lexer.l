@@ -152,6 +152,7 @@ class                       { return CLASS; }
 cluster                     { return T_CLUSTER; }
 connect                     { return CONNECT; }
 connectfreq                 { return CONNECTFREQ; }
+cycle_on_host_change        { return CYCLE_ON_HOST_CHANGE; }
 deaf                        { return T_DEAF; }
 debug                       { return T_DEBUG; }
 default_floodcount          { return DEFAULT_FLOODCOUNT; }

@@ -157,6 +157,7 @@ reset_block_state(void)
 %token  CLASS
 %token  CONNECT
 %token  CONNECTFREQ
+%token  CYCLE_ON_HOST_CHANGE
 %token  DEFAULT_FLOODCOUNT
 %token  DEFAULT_SPLIT_SERVER_COUNT
 %token  DEFAULT_SPLIT_USER_COUNT
@@ -2440,12 +2441,19 @@ general_item:       general_hide_spoof_ips | general_ignore_bogus_ts |
                     general_gline_min_cidr6 |
 		    general_stats_e_disabled |
 		    general_max_watch | general_services_name |
+		    general_cycle_on_host_change |
 		    error;
 
 
 general_max_watch: MAX_WATCH '=' NUMBER ';'
 {
   ConfigFileEntry.max_watch = $3;
+};
+
+general_cycle_on_host_change: CYCLE_ON_HOST_CHANGE '=' TBOOL ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    ConfigFileEntry.cycle_on_host_change = yylval.number;
 };
 
 general_gline_enable: GLINE_ENABLE '=' TBOOL ';'

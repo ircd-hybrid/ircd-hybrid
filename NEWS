@@ -1,4 +1,5 @@
 -- ircd-hybrid-8.1.2 Release Notes
+o) Added general::stats_u_oper_only configuration option
 o) Added support for SHA-256 ssl certificate fingerprint based operator{}
    and connect{} blocks.
    In conjunction with Anope 1.9.x IRC-services, clients are now also able

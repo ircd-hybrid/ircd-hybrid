@@ -201,73 +201,74 @@ extern int yydebug;
      STATS_K_OPER_ONLY = 410,
      STATS_O_OPER_ONLY = 411,
      STATS_P_OPER_ONLY = 412,
-     T_ALL = 413,
-     T_BOTS = 414,
-     T_CALLERID = 415,
-     T_CCONN = 416,
-     T_CLUSTER = 417,
-     T_DEAF = 418,
-     T_DEBUG = 419,
-     T_DLINE = 420,
-     T_EXTERNAL = 421,
-     T_FARCONNECT = 422,
-     T_FILE = 423,
-     T_FULL = 424,
-     T_GLOBOPS = 425,
-     T_INVISIBLE = 426,
-     T_IPV4 = 427,
-     T_IPV6 = 428,
-     T_LOCOPS = 429,
-     T_LOG = 430,
-     T_MAX_CLIENTS = 431,
-     T_NCHANGE = 432,
-     T_NONONREG = 433,
-     T_OPERWALL = 434,
-     T_RECVQ = 435,
-     T_REJ = 436,
-     T_RESTART = 437,
-     T_SERVER = 438,
-     T_SERVICE = 439,
-     T_SERVICES_NAME = 440,
-     T_SERVNOTICE = 441,
-     T_SET = 442,
-     T_SHARED = 443,
-     T_SIZE = 444,
-     T_SKILL = 445,
-     T_SOFTCALLERID = 446,
-     T_SPY = 447,
-     T_SSL = 448,
-     T_SSL_CIPHER_LIST = 449,
-     T_SSL_CLIENT_METHOD = 450,
-     T_SSL_SERVER_METHOD = 451,
-     T_SSLV3 = 452,
-     T_TLSV1 = 453,
-     T_UMODES = 454,
-     T_UNAUTH = 455,
-     T_UNDLINE = 456,
-     T_UNLIMITED = 457,
-     T_UNRESV = 458,
-     T_UNXLINE = 459,
-     T_WALLOP = 460,
-     T_WALLOPS = 461,
-     T_WEBIRC = 462,
-     TBOOL = 463,
-     THROTTLE_TIME = 464,
-     TKLINE_EXPIRE_NOTICES = 465,
-     TMASKED = 466,
-     TRUE_NO_OPER_FLOOD = 467,
-     TS_MAX_DELTA = 468,
-     TS_WARN_DELTA = 469,
-     TWODOTS = 470,
-     TYPE = 471,
-     UNKLINE = 472,
-     USE_EGD = 473,
-     USE_LOGGING = 474,
-     USER = 475,
-     VHOST = 476,
-     VHOST6 = 477,
-     WARN_NO_NLINE = 478,
-     XLINE = 479
+     STATS_U_OPER_ONLY = 413,
+     T_ALL = 414,
+     T_BOTS = 415,
+     T_CALLERID = 416,
+     T_CCONN = 417,
+     T_CLUSTER = 418,
+     T_DEAF = 419,
+     T_DEBUG = 420,
+     T_DLINE = 421,
+     T_EXTERNAL = 422,
+     T_FARCONNECT = 423,
+     T_FILE = 424,
+     T_FULL = 425,
+     T_GLOBOPS = 426,
+     T_INVISIBLE = 427,
+     T_IPV4 = 428,
+     T_IPV6 = 429,
+     T_LOCOPS = 430,
+     T_LOG = 431,
+     T_MAX_CLIENTS = 432,
+     T_NCHANGE = 433,
+     T_NONONREG = 434,
+     T_OPERWALL = 435,
+     T_RECVQ = 436,
+     T_REJ = 437,
+     T_RESTART = 438,
+     T_SERVER = 439,
+     T_SERVICE = 440,
+     T_SERVICES_NAME = 441,
+     T_SERVNOTICE = 442,
+     T_SET = 443,
+     T_SHARED = 444,
+     T_SIZE = 445,
+     T_SKILL = 446,
+     T_SOFTCALLERID = 447,
+     T_SPY = 448,
+     T_SSL = 449,
+     T_SSL_CIPHER_LIST = 450,
+     T_SSL_CLIENT_METHOD = 451,
+     T_SSL_SERVER_METHOD = 452,
+     T_SSLV3 = 453,
+     T_TLSV1 = 454,
+     T_UMODES = 455,
+     T_UNAUTH = 456,
+     T_UNDLINE = 457,
+     T_UNLIMITED = 458,
+     T_UNRESV = 459,
+     T_UNXLINE = 460,
+     T_WALLOP = 461,
+     T_WALLOPS = 462,
+     T_WEBIRC = 463,
+     TBOOL = 464,
+     THROTTLE_TIME = 465,
+     TKLINE_EXPIRE_NOTICES = 466,
+     TMASKED = 467,
+     TRUE_NO_OPER_FLOOD = 468,
+     TS_MAX_DELTA = 469,
+     TS_WARN_DELTA = 470,
+     TWODOTS = 471,
+     TYPE = 472,
+     UNKLINE = 473,
+     USE_EGD = 474,
+     USE_LOGGING = 475,
+     USER = 476,
+     VHOST = 477,
+     VHOST6 = 478,
+     WARN_NO_NLINE = 479,
+     XLINE = 480
    };
 #endif
 /* Tokens.  */
@@ -426,73 +427,74 @@ extern int yydebug;
 #define STATS_K_OPER_ONLY 410
 #define STATS_O_OPER_ONLY 411
 #define STATS_P_OPER_ONLY 412
-#define T_ALL 413
-#define T_BOTS 414
-#define T_CALLERID 415
-#define T_CCONN 416
-#define T_CLUSTER 417
-#define T_DEAF 418
-#define T_DEBUG 419
-#define T_DLINE 420
-#define T_EXTERNAL 421
-#define T_FARCONNECT 422
-#define T_FILE 423
-#define T_FULL 424
-#define T_GLOBOPS 425
-#define T_INVISIBLE 426
-#define T_IPV4 427
-#define T_IPV6 428
-#define T_LOCOPS 429
-#define T_LOG 430
-#define T_MAX_CLIENTS 431
-#define T_NCHANGE 432
-#define T_NONONREG 433
-#define T_OPERWALL 434
-#define T_RECVQ 435
-#define T_REJ 436
-#define T_RESTART 437
-#define T_SERVER 438
-#define T_SERVICE 439
-#define T_SERVICES_NAME 440
-#define T_SERVNOTICE 441
-#define T_SET 442
-#define T_SHARED 443
-#define T_SIZE 444
-#define T_SKILL 445
-#define T_SOFTCALLERID 446
-#define T_SPY 447
-#define T_SSL 448
-#define T_SSL_CIPHER_LIST 449
-#define T_SSL_CLIENT_METHOD 450
-#define T_SSL_SERVER_METHOD 451
-#define T_SSLV3 452
-#define T_TLSV1 453
-#define T_UMODES 454
-#define T_UNAUTH 455
-#define T_UNDLINE 456
-#define T_UNLIMITED 457
-#define T_UNRESV 458
-#define T_UNXLINE 459
-#define T_WALLOP 460
-#define T_WALLOPS 461
-#define T_WEBIRC 462
-#define TBOOL 463
-#define THROTTLE_TIME 464
-#define TKLINE_EXPIRE_NOTICES 465
-#define TMASKED 466
-#define TRUE_NO_OPER_FLOOD 467
-#define TS_MAX_DELTA 468
-#define TS_WARN_DELTA 469
-#define TWODOTS 470
-#define TYPE 471
-#define UNKLINE 472
-#define USE_EGD 473
-#define USE_LOGGING 474
-#define USER 475
-#define VHOST 476
-#define VHOST6 477
-#define WARN_NO_NLINE 478
-#define XLINE 479
+#define STATS_U_OPER_ONLY 413
+#define T_ALL 414
+#define T_BOTS 415
+#define T_CALLERID 416
+#define T_CCONN 417
+#define T_CLUSTER 418
+#define T_DEAF 419
+#define T_DEBUG 420
+#define T_DLINE 421
+#define T_EXTERNAL 422
+#define T_FARCONNECT 423
+#define T_FILE 424
+#define T_FULL 425
+#define T_GLOBOPS 426
+#define T_INVISIBLE 427
+#define T_IPV4 428
+#define T_IPV6 429
+#define T_LOCOPS 430
+#define T_LOG 431
+#define T_MAX_CLIENTS 432
+#define T_NCHANGE 433
+#define T_NONONREG 434
+#define T_OPERWALL 435
+#define T_RECVQ 436
+#define T_REJ 437
+#define T_RESTART 438
+#define T_SERVER 439
+#define T_SERVICE 440
+#define T_SERVICES_NAME 441
+#define T_SERVNOTICE 442
+#define T_SET 443
+#define T_SHARED 444
+#define T_SIZE 445
+#define T_SKILL 446
+#define T_SOFTCALLERID 447
+#define T_SPY 448
+#define T_SSL 449
+#define T_SSL_CIPHER_LIST 450
+#define T_SSL_CLIENT_METHOD 451
+#define T_SSL_SERVER_METHOD 452
+#define T_SSLV3 453
+#define T_TLSV1 454
+#define T_UMODES 455
+#define T_UNAUTH 456
+#define T_UNDLINE 457
+#define T_UNLIMITED 458
+#define T_UNRESV 459
+#define T_UNXLINE 460
+#define T_WALLOP 461
+#define T_WALLOPS 462
+#define T_WEBIRC 463
+#define TBOOL 464
+#define THROTTLE_TIME 465
+#define TKLINE_EXPIRE_NOTICES 466
+#define TMASKED 467
+#define TRUE_NO_OPER_FLOOD 468
+#define TS_MAX_DELTA 469
+#define TS_WARN_DELTA 470
+#define TWODOTS 471
+#define TYPE 472
+#define UNKLINE 473
+#define USE_EGD 474
+#define USE_LOGGING 475
+#define USER 476
+#define VHOST 477
+#define VHOST6 478
+#define WARN_NO_NLINE 479
+#define XLINE 480
 
 
 
@@ -507,7 +509,7 @@ typedef union YYSTYPE
 
 
 /* Line 2053 of yacc.c  */
-#line 511 "conf_parser.h"
+#line 513 "conf_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -107,7 +107,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
      * rewrite the KILL for this new nickname--this keeps
      * servers in synch when nick change and kill collide
      */
-    if ((target_p = get_history(user, 
+    if ((target_p = whowas_get_history(user, 
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
                                 == NULL)
     {
@@ -227,7 +227,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
      */
     if (IsDigit(*user))   /* Somehow an uid was not found in the hash ! */
       return;
-    if ((target_p = get_history(user,
+    if ((target_p = whowas_get_history(user,
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
        == NULL)
     {

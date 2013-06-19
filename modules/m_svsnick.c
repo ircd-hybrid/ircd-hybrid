@@ -102,7 +102,7 @@ ms_svsnick(struct Client *client_p, struct Client *source_p,
                                target_p->name, target_p->username,
                                target_p->host, parv[2]);
 
-  add_history(target_p, 1);
+  whowas_add_history(target_p, 1);
 
   sendto_server(NULL, CAP_TS6, NOCAPS,
                 ":%s NICK %s :%lu",

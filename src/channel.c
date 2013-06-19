@@ -271,7 +271,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
       *mp = '\0';
     }
 
-    pp += sprintf(pp, "%s!%s@%s ", banptr->name, banptr->username,
+    pp += sprintf(pp, "%s!%s@%s ", banptr->name, banptr->user,
                   banptr->host);
     cur_len += tlen;
   }
@@ -333,7 +333,7 @@ remove_ban(struct Ban *bptr, dlink_list *list)
   dlinkDelete(&bptr->node, list);
 
   MyFree(bptr->name);
-  MyFree(bptr->username);
+  MyFree(bptr->user);
   MyFree(bptr->host);
   MyFree(bptr->who);
 
@@ -587,7 +587,7 @@ find_bmask(const struct Client *who, const dlink_list *const list)
   {
     const struct Ban *bp = ptr->data;
 
-    if (!match(bp->name, who->name) && !match(bp->username, who->username))
+    if (!match(bp->name, who->name) && !match(bp->user, who->username))
     {
       switch (bp->type)
       {

@@ -102,7 +102,7 @@ struct Ban
 {
   dlink_node node;
   char *name;
-  char *username;
+  char *user;
   char *host;
   char *who;
   size_t len;

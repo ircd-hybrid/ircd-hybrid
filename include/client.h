@@ -173,7 +173,7 @@
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP |\
                       UMODE_REGONLY | UMODE_REGISTERED | UMODE_ADMIN |\
-                      UMODE_HIDDEN | UMODE_SSL)
+                      UMODE_HIDDEN | UMODE_HIDDENHOST | UMODE_SSL)
 
 
 

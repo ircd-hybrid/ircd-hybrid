@@ -640,8 +640,10 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
 const char *
 show_capabilities(const struct Client *target_p)
 {
-  static char msgbuf[IRCD_BUFSIZE] = "TS";
+  static char msgbuf[IRCD_BUFSIZE] = "";
   const dlink_node *ptr = NULL;
+
+  strlcpy(msgbuf, "TS", sizeof(msgbuf));
 
   DLINK_FOREACH(ptr, cap_list.head)
   {

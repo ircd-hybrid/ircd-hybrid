@@ -37,14 +37,14 @@
 #include "memory.h"
 
 
-static const char *months[] =
+static const char *const months[] =
 {
   "January",   "February", "March",   "April",
   "May",       "June",     "July",    "August",
   "September", "October",  "November","December"
 };
 
-static const char *weekdays[] =
+static const char *const weekdays[] =
 {
   "Sunday",   "Monday", "Tuesday", "Wednesday",
   "Thursday", "Friday", "Saturday"

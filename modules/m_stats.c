@@ -453,7 +453,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   /* count up all classes */
   class_count = dlink_list_length(class_get_list());
 
-  count_whowas_memory(&wwu, &wwm);
+  whowas_count_memory(&wwu, &wwm);
   watch_count_memory(&watch_list_headers, &watch_list_memory);
 
   sendto_one(source_p, ":%s %d %s z :WATCH headers %u(%llu) entries %d(%u)",

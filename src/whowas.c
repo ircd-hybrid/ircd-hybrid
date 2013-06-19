@@ -119,24 +119,17 @@ get_history(const char *nick, time_t timelimit)
 }
 
 void
-count_whowas_memory(unsigned int *wwu, uint64_t *wwum)
+whowas_count_memory(unsigned int *const count, uint64_t *const bytes)
 {
-  const struct Whowas *tmp;
-  int i;
-  unsigned int u = 0;
-  uint64_t um = 0;
+  const struct Whowas *tmp = &WHOWAS[0];
+  unsigned int i = 0;
 
-  /* count the number of used whowas structs in 'u'   */
-  /* count up the memory used of whowas structs in um */
-  for (i = 0, tmp = &WHOWAS[0]; i < NICKNAMEHISTORYLENGTH; ++i, ++tmp)
+  for (; i < NICKNAMEHISTORYLENGTH; ++i, ++tmp)
   {
     if (tmp->hashv != -1)
     {
-      ++u;
-      um += sizeof(struct Whowas);
+      (*count)++;
+      (*bytes) += sizeof(struct Whowas);
     }
   }
-
-  *wwu = u;
-  *wwum = um;
 }

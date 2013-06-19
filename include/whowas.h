@@ -50,29 +50,29 @@ struct Whowas
 extern void whowas_init(void);
 
 /*
-** add_history
+** whowas_add_history
 **      Add the currently defined name of the client to history.
 **      usually called before changing to a new name (nick).
 **      Client must be a fully registered user.
 */
-extern void add_history(struct Client *, const int);
+extern void whowas_add_history(struct Client *, const int);
 
 /*
-** off_history
+** whowas_off_history
 **      This must be called when the client structure is about to
 **      be released. History mechanism keeps pointers to client
 **      structures and it must know when they cease to exist. This
 **      also implicitly calls AddHistory.
 */
-extern void off_history(struct Client *);
+extern void whowas_off_history(struct Client *);
 
 /*
-** get_history
+** whowas_get_history
 **      Return the current client that was using the given
 **      nickname within the timelimit. Returns NULL, if no
 **      one found...
 */
-extern struct Client *get_history(const char *, time_t);
+extern struct Client *whowas_get_history(const char *, time_t);
 
 /*
 ** for debugging...counts related structures stored in whowas array.

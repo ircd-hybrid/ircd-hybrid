@@ -45,7 +45,7 @@ whowas_init(void)
 }
 
 void
-add_history(struct Client *client_p, const int online)
+whowas_add_history(struct Client *client_p, const int online)
 {
   static unsigned int whowas_next = 0;
   struct Whowas *who = &WHOWAS[whowas_next];
@@ -84,7 +84,7 @@ add_history(struct Client *client_p, const int online)
 }
 
 void
-off_history(struct Client *client_p)
+whowas_off_history(struct Client *client_p)
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
@@ -98,7 +98,7 @@ off_history(struct Client *client_p)
 }
 
 struct Client *
-get_history(const char *nick, time_t timelimit)
+whowas_get_history(const char *nick, time_t timelimit)
 {
   dlink_node *ptr = NULL;
 

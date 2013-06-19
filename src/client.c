@@ -539,7 +539,7 @@ find_chasing(struct Client *client_p, struct Client *source_p, const char *user,
   if (IsDigit(*user))
     return NULL;
 
-  if ((who = get_history(user,
+  if ((who = whowas_get_history(user,
                          (time_t)ConfigFileEntry.kill_chase_time_limit))
                          == NULL)
   {
@@ -662,8 +662,8 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
     DLINK_FOREACH_SAFE(lp, next_lp, source_p->channel.head)
       remove_user_from_channel(lp->data);
 
-    add_history(source_p, 0);
-    off_history(source_p);
+    whowas_add_history(source_p, 0);
+    whowas_off_history(source_p);
 
     watch_check_hash(source_p, RPL_LOGOFF);
 

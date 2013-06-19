@@ -215,7 +215,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
   {
     ban_p = ban->data;
     if (!irccmp(ban_p->name, name) &&
-        !irccmp(ban_p->username, user) &&
+        !irccmp(ban_p->user, user) &&
         !irccmp(ban_p->host, host))
     {
       return 0;
@@ -225,7 +225,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
   ban_p = mp_pool_get(ban_pool);
   memset(ban_p, 0, sizeof(*ban_p));
   ban_p->name = xstrdup(name);
-  ban_p->username = xstrdup(user);
+  ban_p->user = xstrdup(user);
   ban_p->host = xstrdup(host);
   ban_p->when = CurrentTime;
   ban_p->len = len - 2; /* -2 for @ and ! */
@@ -237,7 +237,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
                           strlen(client_p->username) +
                           strlen(client_p->host) + 3);
     sprintf(ban_p->who, "%s!%s@%s", client_p->name,
-               client_p->username, client_p->host);
+            client_p->username, client_p->host);
   }
   else if (IsHidden(client_p) || (IsServer(client_p) && ConfigServerHide.hide_servers))
     ban_p->who = xstrdup(me.name);
@@ -311,7 +311,7 @@ del_id(struct Channel *chptr, char *banid, int type)
     banptr = ban->data;
 
     if (!irccmp(name, banptr->name) &&
-        !irccmp(user, banptr->username) &&
+        !irccmp(user, banptr->user) &&
         !irccmp(host, banptr->host))
     {
       remove_ban(banptr, list);
@@ -770,7 +770,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
       const struct Ban *banptr = ptr->data;
       sendto_one(client_p, form_str(RPL_BANLIST),
                  me.name, client_p->name, chname,
-                 banptr->name, banptr->username, banptr->host,
+                 banptr->name, banptr->user, banptr->host,
 		 banptr->who, banptr->when);
     }
 
@@ -855,7 +855,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
       const struct Ban *banptr = ptr->data;
       sendto_one(client_p, form_str(RPL_EXCEPTLIST),
                  me.name, client_p->name, chname,
-                 banptr->name, banptr->username, banptr->host,
+                 banptr->name, banptr->user, banptr->host,
 		 banptr->who, banptr->when);
     }
 
@@ -930,7 +930,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
       const struct Ban *banptr = ptr->data;
       sendto_one(client_p, form_str(RPL_INVITELIST), me.name,
                  client_p->name, chname,
-		 banptr->name, banptr->username, banptr->host,
+		 banptr->name, banptr->user, banptr->host,
                  banptr->who, banptr->when);
     }
 

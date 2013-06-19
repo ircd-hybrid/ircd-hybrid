@@ -819,7 +819,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 
     *mbuf++ = c;
     cur_len += plen;
-    pbuf += sprintf(pbuf, "%s!%s@%s ", banptr->name, banptr->username,
+    pbuf += sprintf(pbuf, "%s!%s@%s ", banptr->name, banptr->user,
                     banptr->host);
     ++count;
 

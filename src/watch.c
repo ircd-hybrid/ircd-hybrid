@@ -66,14 +66,14 @@ watch_init(void)
 /*! \brief Counts up memory used by watch list headers
  */
 void
-watch_count_memory(unsigned int *const count, uint64_t *const memory)
+watch_count_memory(unsigned int *const count, uint64_t *const bytes)
 {
-  unsigned int idx;
+  unsigned int idx = 0;
 
-  for (idx = 0; idx < HASHSIZE; ++idx)
-    *count += dlink_list_length(&watchTable[idx]);
+  for (; idx < HASHSIZE; ++idx)
+    (*count) += dlink_list_length(&watchTable[idx]);
 
-  *memory = *count * sizeof(struct Watch);
+  (*bytes) = *count * sizeof(struct Watch);
 }
 
 /*! \brief Notifies all clients that have client_p's nick name on

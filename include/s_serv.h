@@ -65,6 +65,7 @@ struct Capability
 #define CAP_SVS         0x00008000 /* supports services                   */
 #define CAP_DLN         0x00010000 /* Can do DLINE message                */
 #define CAP_UNDLN       0x00020000 /* Can do UNDLINE message              */
+#define CAP_FAKEHOST    0x00040000 /* supports fake hosts                 */
 
 /*
  * Capability macros.

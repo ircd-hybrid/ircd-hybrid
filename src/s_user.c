@@ -1069,8 +1069,9 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     default: return;
   }
 
-  sendto_common_channels_local(target_p, 0, 0, ":%s!%s@%s QUIT :Changing hostname",
-                               target_p->name, target_p->username, target_p->host);
+  if (ConfigFileEntry.cycle_on_host_change)
+    sendto_common_channels_local(target_p, 0, 0, ":%s!%s@%s QUIT :Changing hostname",
+                                 target_p->name, target_p->username, target_p->host);
 
   if (IsUserHostIp(target_p))
     delete_user_host(target_p->username, target_p->host, !MyConnect(target_p));

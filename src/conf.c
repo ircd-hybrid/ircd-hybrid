@@ -383,12 +383,11 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
   int a_limit_reached = 0;
   unsigned int local = 0, global = 0, ident = 0;
 
+  assert(conf->class);
+
   ip_found = find_or_add_ip(&client_p->localClient->ip);
   ip_found->count++;
   SetIpHash(client_p);
-
-  if (conf->class == NULL)
-    return NOT_AUTHORIZED;  /* If class is missing, this is best */
 
   class = conf->class;
 

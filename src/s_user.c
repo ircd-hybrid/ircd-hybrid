@@ -287,7 +287,7 @@ register_local_user(struct Client *source_p)
 
   if (ConfigFileEntry.ping_cookie)
   {
-    if (!IsPingSent(source_p) && source_p->localClient->random_ping == 0)
+    if (!IsPingSent(source_p) && !source_p->localClient->random_ping)
     {
       do
         source_p->localClient->random_ping = genrand_int32();
@@ -310,7 +310,7 @@ register_local_user(struct Client *source_p)
   if (!check_client(source_p))
     return;
 
-  if (valid_hostname(source_p->host) == 0)
+  if (!valid_hostname(source_p->host))
   {
     sendto_one(source_p, ":%s NOTICE %s :*** Notice -- You have an illegal "
                "character in your hostname", me.name, source_p->name);
@@ -393,7 +393,7 @@ register_local_user(struct Client *source_p)
   }
 
   /* valid user name check */
-  if (valid_username(source_p->username, 1) == 0)
+  if (!valid_username(source_p->username, 1))
   {
     char tmpstr2[IRCD_BUFSIZE];
 
@@ -430,7 +430,7 @@ register_local_user(struct Client *source_p)
     ++Count.invisi;
   }
 
-  if ((++Count.local) > Count.max_loc)
+  if (++Count.local > Count.max_loc)
   {
     Count.max_loc = Count.local;
 
@@ -761,7 +761,8 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
                me.name, source_p->name);
   }
 
-  /* The else here is to make sure that G line exempt users
+  /*
+   * The else here is to make sure that G line exempt users
    * do not get noticed twice.
    */
   else if (IsConfExemptGline(conf))
@@ -834,7 +835,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
     m = buf;
     *m++ = '+';
 
-    for (i = 0; i < 128; i++)
+    for (i = 0; i < 128; ++i)
       if (HasUMode(source_p, user_modes[i]))
         *m++ = (char)i;
     *m = '\0';
@@ -848,9 +849,9 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
   setflags = source_p->umodes;
 
   /* parse mode change string(s) */
-  for (p = &parv[2]; p && *p; p++)
+  for (p = &parv[2]; p && *p; ++p)
   {
-    for (m = *p; *m; m++)
+    for (m = *p; *m; ++m)
     {
       switch (*m)
       {
@@ -882,7 +883,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
 
             if (MyConnect(source_p))
             {
-              dlink_node *dm;
+              dlink_node *dm = NULL;
 
               detach_conf(source_p, CONF_OPER);
               ClrOFlag(source_p);
@@ -914,11 +915,8 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
                 DelUMode(source_p, flag);
             }
           }
-          else
-          {
-            if (MyConnect(source_p))
-              badflag = 1;
-          }
+          else if (MyConnect(source_p))
+            badflag = 1;
 
           break;
       }
@@ -973,7 +971,7 @@ send_umode(struct Client *client_p, struct Client *source_p,
    * build a string in umode_buf to represent the change in the user's
    * mode between the new (source_p->umodes) and 'old'.
    */
-  for (i = 0; i < 128; i++)
+  for (i = 0; i < 128; ++i)
   {
     flag = user_modes[i];
     if (!flag)
@@ -1293,10 +1291,6 @@ init_uid(void)
       new_uid[i] = 'A';
 
   /* NOTE: if IRC_MAXUID != 6, this will have to be rewritten */
-  /* Yes nenolod, I have known it was off by one ever since I wrote it
-   * But *JUST* for you, though, it really doesn't look as *pretty*
-   * -Dianora
-   */
   memcpy(new_uid + IRC_MAXSID, "AAAAA@", IRC_MAXUID);
 }
 

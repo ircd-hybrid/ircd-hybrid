@@ -37,6 +37,7 @@ ircd_SOURCES = channel.c         \
                mempool.c         \
                modules.c         \
                motd.c            \
+               msgq.c            \
                rng_mt.c          \
                numeric.c         \
                packet.c          \
@@ -58,4 +59,5 @@ ircd_SOURCES = channel.c         \
                send.c            \
                version.c         \
                watch.c           \
-               whowas.c
+               whowas.c          \
+               xsnprintf.c

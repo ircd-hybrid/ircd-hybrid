@@ -24,6 +24,45 @@ LT_INIT([dlopen disable-static])
 LTDL_INIT([recursive convenience])
 LIBTOOL="$LIBTOOL --silent"
 
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(void *)
+AC_CHECK_SIZEOF(int64_t)
+AC_CHECK_SIZEOF(long long)
+
+if test "$ac_cv_sizeof_int" = 2 ; then
+  AC_CHECK_TYPE(int16_t, int)
+  AC_CHECK_TYPE(uint16_t, unsigned int)
+elif test "$ac_cv_sizeof_short" = 2 ; then
+  AC_CHECK_TYPE(int16_t, short)
+  AC_CHECK_TYPE(uint16_t, unsigned short)
+else
+  AC_MSG_ERROR([Cannot find a type with size of 16 bits])
+fi
+if test "$ac_cv_sizeof_int" = 4 ; then
+  AC_CHECK_TYPE(int32_t, int)
+  AC_CHECK_TYPE(uint32_t, unsigned int)
+elif test "$ac_cv_sizeof_short" = 4 ; then
+  AC_CHECK_TYPE(int32_t, short)
+  AC_CHECK_TYPE(uint32_t, unsigned short)
+elif test "$ac_cv_sizeof_long" = 4 ; then
+  AC_CHECK_TYPE(int32_t, long)
+  AC_CHECK_TYPE(uint32_t, unsigned long)
+else
+  AC_MSG_ERROR([Cannot find a type with size of 32 bits])
+fi
+if test "$ac_cv_sizeof_int64_t" = 8 ; then
+  AC_CHECK_TYPE(int64_t)
+  AC_CHECK_TYPE(uint64_t)
+elif test "$ac_cv_sizeof_long_long" = 8 ; then
+  AC_CHECK_TYPE(int64_t, long long)
+  AC_CHECK_TYPE(uint64_t, unsigned long long)
+else
+  AC_MSG_ERROR([Cannot find a type with size of 64 bits])
+fi
+
+
 # Checks for libraries.
 AX_CHECK_LIB_IPV4
 AX_CHECK_LIB_IPV6

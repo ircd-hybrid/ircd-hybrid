@@ -466,7 +466,7 @@ motd_memory_count(struct Client *source_p)
 
   DLINK_FOREACH(ptr, MotdList.other.head)
   {
-    const struct MotdCache *motd = ptr->data;
+    const struct Motd *motd = ptr->data;
 
     mt++;
     mtm += sizeof(struct Motd);

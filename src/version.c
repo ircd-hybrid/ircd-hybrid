@@ -71,7 +71,7 @@ const char *infotext[] =
   "bysin, Ben Kittridge <bkittridge@cfl.rr.com>",
   "cosine, Patrick Alken <wnder@uwns.underworld.net>",
   "David-T, David Taylor <davidt@yadt.co.uk>",
-  "Dominic, Dominic Hargreaves <dom@earth.li>",
+  "Dom, Dominic Hargreaves <dom@earth.li>",
   "fgeek, Henri Salo <henri@nerv.fi>",
   "fl, Lee Hardy <lee@leeh.co.uk>",
   "Garion, Joost Vunderink <garion@efnet.nl>",

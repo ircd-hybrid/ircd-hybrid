@@ -1,3 +1,9 @@
+-- ircd-hybrid-8.1.3 Release Notes
+o) Fixed possible core on "STATS z"
+o) Revised doc/reference.conf
+o) Fixed broken --disable-libgeoip switch
+
+
 -- ircd-hybrid-8.1.2 Release Notes
 o) Added general::cycle_on_host_change configuration option
 o) Added general::stats_u_oper_only configuration option

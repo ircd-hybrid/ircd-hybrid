@@ -87,7 +87,7 @@ AC_CHECK_HEADERS_ONCE(crypt.h        \
 
 AC_SEARCH_LIBS(crypt, crypt)
 
-AC_ARG_ENABLE(libGeoIP,
+AC_ARG_ENABLE(libgeoip,
   [AS_HELP_STRING([--disable-libgeoip],[Disable GeoIP support])], [],
     [AC_CHECK_HEADER(GeoIP.h,
       [AC_SEARCH_LIBS(GeoIP_id_by_ipnum_v6_gl, GeoIP,

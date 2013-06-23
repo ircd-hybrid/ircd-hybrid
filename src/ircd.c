@@ -308,7 +308,7 @@ initialize_server_capabs(void)
   add_capability("EOB", CAP_EOB, 1);
   add_capability("TS6", CAP_TS6, 0);
   add_capability("CLUSTER", CAP_CLUSTER, 1);
-  add_capability("FAKEHOST", CAP_FAKEHOST, 1);
+//  add_capability("FAKEHOST", CAP_FAKEHOST, 1);
   add_capability("SVS", CAP_SVS, 1);
 #ifdef HALFOPS
   add_capability("HOPS", CAP_HOPS, 1);

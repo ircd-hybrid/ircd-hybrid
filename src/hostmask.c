@@ -413,7 +413,7 @@ hash_text(const char *start)
   uint32_t h = 0;
 
   for (; *p; ++p)
-    h = (h << 4) - (h + (unsigned char)ToLower(*p));
+    h = (h << 4) - (h + ToLower(*p));
 
   return h & (ATABLE_SIZE - 1);
 }

@@ -47,13 +47,13 @@
 #define IDLEN           12 /* this is the maximum length, not the actual
                               generated length; DO NOT CHANGE! */
 #define REALLEN         50
-#define KILLLEN         90
 #define LOCAL_CHANNELLEN 50
 #define CHANNELLEN      200
 #define TOPICLEN        300
-#define REASONLEN       120
-#define KICKLEN         160
-#define AWAYLEN         160
+#define KILLLEN         180
+#define REASONLEN       180
+#define KICKLEN         180
+#define AWAYLEN         180
 #define KEYLEN          23
 
 #define USERHOST_REPLYLEN       (NICKLEN+HOSTLEN+USERLEN+5)

@@ -217,7 +217,7 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
                MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
                source_p->name, tkline_time/60, conf->user, conf->host);
     ilog(LOG_TYPE_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-         source_p->name, tkline_time/60,
+         get_oper_name(source_p), tkline_time/60,
          conf->user, conf->host, conf->reason);
   }
   else
@@ -230,7 +230,7 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
                MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
                  source_p->name, conf->user, conf->host);
     ilog(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
-         source_p->name, conf->user, conf->host, conf->reason);
+         get_oper_name(source_p), conf->user, conf->host, conf->reason);
   }
 
   conf->setat = CurrentTime;
@@ -347,7 +347,7 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
                          "%s has removed the K-Line for: [%s@%s]",
                          get_oper_name(source_p), user, host);
     ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-         source_p->name, user, host);
+         get_oper_name(source_p), user, host);
   }
   else
     sendto_one(source_p, ":%s NOTICE %s :No K-Line for [%s@%s] found", 
@@ -393,7 +393,7 @@ me_unkline(struct Client *client_p, struct Client *source_p,
                            "%s has removed the K-Line for: [%s@%s]",
                            get_oper_name(source_p), kuser, khost);
       ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-           source_p->name, kuser, khost);
+           get_oper_name(source_p), kuser, khost);
     }
     else
       sendto_one(source_p, ":%s NOTICE %s :No K-Line for [%s@%s] found",

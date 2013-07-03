@@ -78,7 +78,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     if (found)
     {
       ilog(LOG_TYPE_IRCD, "REHASH %s From %s",
-           parv[1], get_client_name(source_p, HIDE_IP));
+           parv[1], get_oper_name(source_p));
       return;
     }
     else
@@ -96,8 +96,8 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s is rehashing server config file",
                          get_oper_name(source_p));
-    ilog(LOG_TYPE_IRCD, "REHASH From %s[%s]",
-         get_oper_name(source_p), source_p->sockhost);
+    ilog(LOG_TYPE_IRCD, "REHASH From %s",
+         get_oper_name(source_p));
     rehash(0);
   }
 }

@@ -480,7 +480,7 @@ me_undline(struct Client *client_p, struct Client *source_p,
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the D-Line for: [%s]",
                            get_oper_name(source_p), addr);
-      ilog(LOG_TYPE_DLINE, "%s removed temporary D-Line for [%s]",
+      ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
            get_oper_name(source_p), addr);
     }
     else

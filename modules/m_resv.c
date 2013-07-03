@@ -357,6 +357,8 @@ remove_resv(struct Client *source_p, const char *name)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the RESV for channel: %s",
                          get_oper_name(source_p), name);
+    ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
+         get_oper_name(source_p), name);
   }
   else
   {
@@ -381,6 +383,8 @@ remove_resv(struct Client *source_p, const char *name)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the RESV for nick: %s",
                          get_oper_name(source_p), name);
+    ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
+         get_oper_name(source_p), name);
   }
 }
 

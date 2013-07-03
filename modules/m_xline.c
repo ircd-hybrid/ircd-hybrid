@@ -374,7 +374,7 @@ remove_xline(struct Client *source_p, char *gecos)
                          "%s has removed the X-Line for: [%s]",
                          get_oper_name(source_p), gecos);
     ilog(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
-         source_p->name, gecos);
+         get_oper_name(source_p), gecos);
   }
   else
     sendto_one(source_p, ":%s NOTICE %s :No X-Line for %s",

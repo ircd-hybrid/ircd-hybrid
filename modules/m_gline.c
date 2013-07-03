@@ -312,7 +312,7 @@ do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
                           "%s requesting G-Line for [%s@%s] [%s]",
                           get_oper_name(source_p),
                           user, host, reason);
-     ilog(LOG_TYPE_GLINE, "#gline for %s@%s [%s] requested by %s",
+     ilog(LOG_TYPE_GLINE, "G-Line for [%s@%s] [%s] requested by %s",
           user, host, reason, get_oper_name(source_p));
   }
 }
@@ -390,9 +390,8 @@ mo_gline(struct Client *client_p, struct Client *source_p,
                        "%s requesting G-Line for [%s@%s] [%s]",
                        get_oper_name(source_p),
                        user, host, reason);
-  ilog(LOG_TYPE_GLINE, "#gline for %s@%s [%s] requested by %s!%s@%s",
-       user, host, reason, source_p->name, source_p->username,
-       source_p->host);
+  ilog(LOG_TYPE_GLINE, "G-Line for [%s@%s] [%s] requested by %s",
+       user, host, reason, get_oper_name(source_p));
 
   /* 4 param version for hyb-7 servers */
   sendto_server(NULL, CAP_GLN|CAP_TS6, NOCAPS,
@@ -442,7 +441,7 @@ do_sungline(struct Client *source_p, const char *user,
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "%s requesting UNG-Line for [%s@%s] [%s]",
                        get_oper_name(source_p), user, host, reason);
-  ilog(LOG_TYPE_GLINE, "#ungline for %s@%s [%s] requested by %s",
+  ilog(LOG_TYPE_GLINE, "UNG-Line for [%s@%s] [%s] requested by %s",
        user, host, reason, get_oper_name(source_p));
 
   /* If at least 3 opers agree this user should be un G lined then do it */

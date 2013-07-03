@@ -1637,12 +1637,6 @@ m_stats(struct Client *client_p, struct Client *source_p,
 {
   static time_t last_used = 0;
 
-  /* Is the stats meant for us? */
-  if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s STATS %s :%s", 2,
-                    parc, parv) != HUNTED_ISME)
-      return;
-
   if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
   {
     from = me.id;
@@ -1663,6 +1657,12 @@ m_stats(struct Client *client_p, struct Client *source_p,
   }
 
   last_used = CurrentTime;
+
+  /* Is the stats meant for us? */
+  if (!ConfigServerHide.disable_remote_commands)
+    if (hunt_server(client_p, source_p, ":%s STATS %s :%s", 2,
+                    parc, parv) != HUNTED_ISME)
+      return;
 
   do_stats(source_p, parc, parv);
 }
@@ -1698,27 +1698,9 @@ mo_stats(struct Client *client_p, struct Client *source_p,
   do_stats(source_p, parc, parv);
 }
 
-/*
- * ms_stats - STATS message handler
- *      parv[0] = sender prefix
- *      parv[1] = statistics selector (defaults to Message frequency)
- *      parv[2] = server name (current server defaulted, if omitted)
- */
-static void
-ms_stats(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
-{
-  if (hunt_server(client_p, source_p, ":%s STATS %s :%s", 2,
-                  parc, parv) != HUNTED_ISME)
-    return;
-
-  if (IsClient(source_p))
-    mo_stats(client_p, source_p, parc, parv);
-}
-
 static struct Message stats_msgtab = {
   "STATS", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_stats, ms_stats, m_ignore, mo_stats, m_ignore }
+  { m_unregistered, m_stats, mo_stats, m_ignore, mo_stats, m_ignore }
 };
 
 static void

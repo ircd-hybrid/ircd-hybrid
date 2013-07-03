@@ -81,8 +81,7 @@ ms_lusers(struct Client *client_p, struct Client *source_p,
                     parc, parv) != HUNTED_ISME)
         return;
 
-  if (IsClient(source_p))
-    show_lusers(source_p);
+  show_lusers(source_p);
 }
 
 static struct Message lusers_msgtab = {

@@ -125,8 +125,7 @@ ms_admin(struct Client *client_p, struct Client *source_p,
                   parc, parv) != HUNTED_ISME)
     return;
 
-  if (IsClient(source_p))
-    do_admin(source_p);
+  do_admin(source_p);
 }
 
 static struct Message admin_msgtab = {

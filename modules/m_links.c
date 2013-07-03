@@ -169,8 +169,7 @@ ms_links(struct Client *client_p, struct Client *source_p,
                   parc, parv) != HUNTED_ISME)
     return;
 
-  if (IsClient(source_p))
-    m_links(client_p, source_p, parc, parv);
+  m_links(client_p, source_p, parc, parv);
 }
 
 static struct Message links_msgtab = {

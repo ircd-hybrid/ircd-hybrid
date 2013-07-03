@@ -99,9 +99,6 @@ static void
 ms_away(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  if (!IsClient(source_p))
-    return;
-
   if (parc < 2 || EmptyString(parv[1]))
   {
     /* Marking as not away */

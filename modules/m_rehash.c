@@ -37,6 +37,19 @@
 #include "motd.h"
 
 
+struct RehashStruct
+{
+  const char *name;
+  void (*handler)();
+};
+
+static const struct RehashStruct rehash_cmd_table[] =
+{
+  { "MOTD", rehash_motd },
+  { "DNS",  rehash_dns  },
+  { NULL,   NULL        }
+};
+
 /*
  * mo_rehash - REHASH message handler
  *
@@ -45,6 +58,7 @@ static void
 mo_rehash(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
+  const struct RehashStruct *tab = rehash_cmd_table;
   int found = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_REHASH))
@@ -54,7 +68,30 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if (!EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
+  {
+    sendto_one(source_p, form_str(RPL_REHASHING),
+               me.name, source_p->name, ConfigFileEntry.configfile);
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s is rehashing server config file",
+                         get_oper_name(source_p));
+    ilog(LOG_TYPE_IRCD, "REHASH From %s", get_oper_name(source_p));
+    rehash(0);
+    return;
+  }
+
+  for (; tab->handler; ++tab)
+  {
+    if (!irccmp(tab->name, parv[1]))
+    {
+
+
+
+
+
+
+
+
   {
     if (irccmp(parv[1], "DNS") == 0)
     {

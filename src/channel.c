@@ -633,7 +633,7 @@ is_banned(const struct Channel *chptr, const struct Client *who)
 
 /*!
  * \param source_p pointer to client attempting to join
- * \param chptr    pointer to channel 
+ * \param chptr    pointer to channel
  * \param key      key sent by client attempting to join if present
  * \return ERR_BANNEDFROMCHAN, ERR_INVITEONLYCHAN, ERR_CHANNELISFULL
  *         or 0 if allowed to join.
@@ -890,5 +890,5 @@ set_channel_topic(struct Channel *chptr, const char *topic,
     strlcpy(chptr->topic, topic, sizeof(chptr->topic));
 
   strlcpy(chptr->topic_info, topic_info, sizeof(chptr->topic_info));
-  chptr->topic_time = topicts; 
+  chptr->topic_time = topicts;
 }

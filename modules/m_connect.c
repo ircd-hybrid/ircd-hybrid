@@ -88,7 +88,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
   if ((target_p = hash_find_server(parv[1])))
   {
     sendto_one(source_p,
-	       ":%s NOTICE %s :Connect: Server %s already exists from %s.",
+               ":%s NOTICE %s :Connect: Server %s already exists from %s.",
                me.name, source_p->name, parv[1], target_p->from->name);
     return;
   }
@@ -107,7 +107,8 @@ mo_connect(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  /* Get port number from user, if given. If not specified,
+  /*
+   * Get port number from user, if given. If not specified,
    * use the default form configuration structure. If missing
    * from there, then use the precompiled default.
    */
@@ -144,7 +145,8 @@ mo_connect(struct Client *client_p, struct Client *source_p,
 
   conf->port = port;
 
-  /* at this point we should be calling connect_server with a valid
+  /*
+   * at this point we should be calling connect_server with a valid
    * C:line and a valid port in the C:line
    */
   if (serv_connect(conf, source_p))
@@ -163,7 +165,8 @@ mo_connect(struct Client *client_p, struct Client *source_p,
                me.name, source_p->name, conf->name, conf->port);
   }
 
-  /* client is either connecting with all the data it needs or has been
+  /*
+   * Client is either connecting with all the data it needs or has been
    * destroyed
    */
   conf->port = tmpport;
@@ -189,8 +192,8 @@ ms_connect(struct Client *client_p, struct Client *source_p,
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
 
-  if (hunt_server(client_p, source_p,
-                  ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
+  if (hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s",
+                  3, parc, parv) != HUNTED_ISME)
     return;
 
   if (EmptyString(parv[1]))
@@ -203,7 +206,7 @@ ms_connect(struct Client *client_p, struct Client *source_p,
   if ((target_p = hash_find_server(parv[1])))
   {
     sendto_one(source_p,
-	       ":%s NOTICE %s :Connect: Server %s already exists from %s.",
+               ":%s NOTICE %s :Connect: Server %s already exists from %s.",
                me.name, source_p->name, parv[1], target_p->from->name);
     return;
   }
@@ -222,7 +225,8 @@ ms_connect(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  /* Get port number from user, if given. If not specified,
+  /*
+   * Get port number from user, if given. If not specified,
    * use the default form configuration structure. If missing
    * from there, then use the precompiled default.
    */
@@ -232,7 +236,9 @@ ms_connect(struct Client *client_p, struct Client *source_p,
   {
     port = atoi(parv[2]);
 
-    /* if someone sends port 0, and we have a config port.. use it */
+    /*
+     * if someone sends port 0, and we have a config port.. use it
+     */
     if (port == 0 && conf->port)
       port = conf->port;
     else if (port <= 0)

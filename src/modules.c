@@ -370,7 +370,7 @@ load_core_modules(int warn)
  *
  * input        - pointer to path
  *		- flagged as core module or not
- * output       - -1 if error 
+ * output       - -1 if error
  * side effects - module is loaded if found.
  */
 int
@@ -390,7 +390,7 @@ load_one_module(const char *path)
       continue;
 
     if (strstr(modpath, "../") == NULL &&
-        strstr(modpath, "/..") == NULL) 
+        strstr(modpath, "/..") == NULL)
       if (!stat(modpath, &statbuf))
         if (S_ISREG(statbuf.st_mode))  /* Regular files only please */
           return load_a_module(modpath, 1);

@@ -64,7 +64,7 @@ static const char *uid_get(void);
  * used with init_isupport, add_isupport, delete_isupport
  */
 
-struct Isupport 
+struct Isupport
 {
   dlink_node node;
   char *name;
@@ -109,7 +109,7 @@ const unsigned int user_modes[256] =
   0,                  /* X */
   0,                  /* Y */
   0,                  /* Z 0x5A */
-  0, 0, 0, 0, 0,      /* 0x5F   */ 
+  0, 0, 0, 0, 0,      /* 0x5F   */
   0,                  /* 0x60   */
   UMODE_ADMIN,        /* a */
   UMODE_BOTS,         /* b */
@@ -169,7 +169,7 @@ assemble_umode_buffer(void)
  * side effects - display to client user counts etc.
  */
 void
-show_lusers(struct Client *source_p) 
+show_lusers(struct Client *source_p)
 {
   const char *from, *to;
 
@@ -215,7 +215,7 @@ show_lusers(struct Client *source_p)
   {
     sendto_one(source_p, form_str(RPL_LUSERME),
                from, to, Count.total, 0);
-    sendto_one(source_p, form_str(RPL_LOCALUSERS), 
+    sendto_one(source_p, form_str(RPL_LOCALUSERS),
                from, to, Count.total, Count.max_tot);
   }
 
@@ -230,7 +230,7 @@ show_lusers(struct Client *source_p)
     Count.max_loc_cli = Count.local;
 
   if ((Count.local + Count.myserver) > Count.max_loc_con)
-    Count.max_loc_con = Count.local + Count.myserver; 
+    Count.max_loc_con = Count.local + Count.myserver;
 }
 
 /* show_isupport()
@@ -240,7 +240,7 @@ show_lusers(struct Client *source_p)
  * side effects	- display to client what we support (for them)
  */
 void
-show_isupport(struct Client *source_p) 
+show_isupport(struct Client *source_p)
 {
   const dlink_node *ptr = NULL;
 
@@ -484,7 +484,7 @@ register_remote_user(struct Client *source_p,
   assert(source_p != NULL);
   assert(source_p->username != username);
 
-  strlcpy(source_p->host, host, sizeof(source_p->host)); 
+  strlcpy(source_p->host, host, sizeof(source_p->host));
   strlcpy(source_p->username, username, sizeof(source_p->username));
 
   /*
@@ -872,9 +872,6 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
           }
           else
           {
-            /* Only decrement the oper counts if an oper to begin with
-             * found by Pat Szuta, Perly , perly@xnet.com 
-             */
             if (!HasUMode(source_p, UMODE_OPER))
               break;
 
@@ -1158,7 +1155,7 @@ user_welcome(struct Client *source_p)
   }
 #endif
 
-  sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name, 
+  sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name,
              ServerInfo.network_name, source_p->name);
   sendto_one(source_p, form_str(RPL_YOURHOST), me.name, source_p->name,
              get_listener_name(source_p->localClient->listener), ircd_version);
@@ -1217,7 +1214,7 @@ check_xline(struct Client *source_p)
  * output	- NONE
  * side effects	- Blindly opers up given source_p, using conf info
  *                all checks on passwords have already been done.
- *                This could also be used by rsa oper routines. 
+ *                This could also be used by rsa oper routines.
  */
 void
 oper_up(struct Client *source_p)
@@ -1269,7 +1266,7 @@ valid_sid(const char *sid)
 
 /*
  * init_uid()
- * 
+ *
  * inputs	- NONE
  * output	- NONE
  * side effects	- new_uid is filled in with server id portion (sid)
@@ -1287,7 +1284,7 @@ init_uid(void)
     strlcpy(new_uid, ServerInfo.sid, sizeof(new_uid));
 
   for (i = 0; i < IRC_MAXSID; ++i)
-    if (new_uid[i] == '\0') 
+    if (new_uid[i] == '\0')
       new_uid[i] = 'A';
 
   /* NOTE: if IRC_MAXUID != 6, this will have to be rewritten */

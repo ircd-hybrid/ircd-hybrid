@@ -645,7 +645,7 @@ valid_hostname(const char *hostname)
 
   assert(p != NULL);
 
-  if (*p == '.' || *p == ':')
+  if (EmptyString(p) || *p == '.' || *p == ':')
     return 0;
 
   for (; *p; ++p)

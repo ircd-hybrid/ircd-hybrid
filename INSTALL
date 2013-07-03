@@ -24,7 +24,7 @@
    As of hybrid-4, the distribution uses GNU autoconf instead of the old
    Config script. You must run ./configure before you can (sanely) build
    ircd-hybrid.
-   
+
    1.  Read the NEWS file to find out about the exciting new features in
        this version. Other good reads are doc/reference.conf, and README.
 
@@ -35,8 +35,8 @@
 
        ./configure --prefix=/usr/local/ircd
 
-       The script will determine whichever of the following is best for 
-       your system, but you may (unsupported) force their usage with 
+       The script will determine whichever of the following is best for
+       your system, but you may (unsupported) force their usage with
        undefined results:
 
           * --enable-kqueue - Use the superior kqueue(2) system call as
@@ -70,7 +70,7 @@
 
 
        These are optional or have default values that may be overridden:
-   
+
           * --enable-assert - Enable use of numerous debugging checks. This
             should not be used on any production servers for maximum speed
             so as to prevent cores from things that shouldn't normally happen.
@@ -95,9 +95,9 @@
                                 HOW TO GET HELP
 
    - Send Check or Money Order to... just kidding! You're on your own for
-     support. Try asking other ircd-hybrid admins on EFnet if you can't 
+     support. Try asking other ircd-hybrid admins on EFnet if you can't
      fix it yourself. If you do fix anything, however, please send context
-     or unified diffs to bugs@ircd-hybrid.org so the fixes can be 
+     or unified diffs to bugs@ircd-hybrid.org so the fixes can be
      incorporated into the next release of ircd-hybrid. If hybrid crashes
      on you, PLEASE contact bugs@ircd-hybrid.org ASAP with a backtrace of
      the core. The Hybrid team can't fix bugs if no one tells us about them!

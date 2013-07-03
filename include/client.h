@@ -159,7 +159,7 @@
 #define UMODE_REGONLY      0x00080000 /**< Only registered nicks may PM */
 #define UMODE_HIDDEN       0x00100000 /**< Operator status is hidden */
 #define UMODE_OPER         0x00200000 /**< Operator */
-#define UMODE_ADMIN        0x00400000 /**< Admin on server */ 
+#define UMODE_ADMIN        0x00400000 /**< Admin on server */
 #define UMODE_FARCONNECT   0x00800000 /**< Can see remote client connects/exits */
 #define UMODE_HIDDENHOST   0x01000000 /**< User's host is hidden */
 #define UMODE_SSL          0x02000000 /**< User is connected via TLS/SSL */
@@ -329,13 +329,13 @@ struct LocalUser
   time_t       firsttime;  /**< time client was created */
   time_t       since;      /**< last time we parsed something */
   time_t       last_knock;    /**< time of last knock */
-  time_t       last_join_time;   /**< when this client last 
+  time_t       last_join_time;   /**< when this client last
                                     joined a channel */
-  time_t       last_leave_time;  /**< when this client last 
+  time_t       last_leave_time;  /**< when this client last
                                        * left a channel */
-  int          join_leave_count; /**< count of JOIN/LEAVE in less than 
+  int          join_leave_count; /**< count of JOIN/LEAVE in less than
                                          MIN_JOIN_LEAVE_TIME seconds */
-  int          oper_warn_count_down; /**< warn opers of this possible 
+  int          oper_warn_count_down; /**< warn opers of this possible
                                           spambot every time this gets to 0 */
   time_t       last_caller_id_time;
   time_t       first_received_message_time;
@@ -410,9 +410,9 @@ struct Client
                                 if dealing with timestamps */
   char id[IDLEN + 1];       /**< client ID, unique ID per client */
   /* 
-   * client->username is the username from ident or the USER message, 
-   * If the client is idented the USER message is ignored, otherwise 
-   * the username part of the USER message is put here prefixed with a 
+   * client->username is the username from ident or the USER message,
+   * If the client is idented the USER message is ignored, otherwise
+   * the username part of the USER message is put here prefixed with a
    * tilde depending on the auth{} block. Once a client has registered,
    * this field should be considered read-only.
    */
@@ -426,7 +426,7 @@ struct Client
   char              host[HOSTLEN + 1];     /* client's hostname */
 
   /*
-   * client->info for unix clients will normally contain the info from the 
+   * client->info for unix clients will normally contain the info from the
    * gcos field in /etc/passwd but anything can go here.
    */
   char              info[REALLEN + 1]; /* Free form additional client info */
@@ -436,7 +436,7 @@ struct Client
    * string, this field should be considered read-only once the connection
    * has been made. (set in s_bsd.c only)
    */
-  char              sockhost[HOSTIPLEN + 1]; /* This is the host name from the 
+  char              sockhost[HOSTIPLEN + 1]; /* This is the host name from the
                                                 socket ip address as string */
   char             *certfp;
 };

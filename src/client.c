@@ -170,7 +170,7 @@ free_client(struct Client *client_p)
   {
     assert(client_p->localClient->invited.head == NULL);
     assert(dlink_list_length(&client_p->localClient->invited) == 0);
-    assert(dlink_list_length(&client_p->localClient->watches) == 0); 
+    assert(dlink_list_length(&client_p->localClient->watches) == 0);
     assert(IsClosing(client_p) && IsDead(client_p));
 
     MyFree(client_p->localClient->response);
@@ -183,7 +183,7 @@ free_client(struct Client *client_p)
     {
       assert(0 < client_p->localClient->listener->ref_count);
       if (0 == --client_p->localClient->listener->ref_count &&
-          !client_p->localClient->listener->active) 
+          !client_p->localClient->listener->active)
         free_listener(client_p->localClient->listener);
     }
 
@@ -202,7 +202,7 @@ free_client(struct Client *client_p)
  *
  * inputs       - NOT USED (from event)
  * output       - next time_t when check_pings() should be called again
- * side effects - 
+ * side effects -
  *
  *
  * A PING can be sent to clients as necessary.
@@ -224,7 +224,7 @@ free_client(struct Client *client_p)
 
 static void
 check_pings(void *notused)
-{               
+{
   check_pings_list(&local_client_list);
   check_pings_list(&serv_list);
   check_unknowns_list();
@@ -234,7 +234,7 @@ check_pings(void *notused)
  *
  * inputs	- pointer to list to check
  * output	- NONE
- * side effects	- 
+ * side effects	-
  */
 static void
 check_pings_list(dlink_list *list)
@@ -254,7 +254,7 @@ check_pings_list(dlink_list *list)
     if (IsDead(client_p))
     {
       /* Ignore it, its been exited already */
-      continue; 
+      continue;
     }
 
     if (!IsRegistered(client_p))
@@ -335,9 +335,9 @@ check_unknowns_list(void)
  * side effects - Check all connections for a pending kline against the
  * 		  client, exit the client if a kline matches.
  */
-void 
+void
 check_conf_klines(void)
-{               
+{
   struct Client *client_p = NULL;       /* current local client_p being examined */
   struct MaskItem *conf = NULL;
   dlink_node *ptr, *next_ptr;
@@ -373,11 +373,11 @@ check_conf_klines(void)
       }
 
       ban_them(client_p, conf);
-      /* and go examine next fd/client_p */    
+      /* and go examine next fd/client_p */
       continue;
-    } 
+    }
 
-    if ((conf = find_kill(client_p)) != NULL) 
+    if ((conf = find_kill(client_p)) != NULL)
     {
       if (IsExemptKline(client_p))
       {
@@ -388,7 +388,7 @@ check_conf_klines(void)
       }
 
       ban_them(client_p, conf);
-      continue; 
+      continue;
     }
 
     if ((conf = find_matching_name_conf(CONF_XLINE,  client_p->info,
@@ -469,7 +469,7 @@ ban_them(struct Client *client_p, struct MaskItem *conf)
  *
  * input	- pointer to client
  * output	- NONE
- * side effects	- 
+ * side effects	-
  */
 static void
 update_client_exit_stats(struct Client *client_p)
@@ -520,8 +520,8 @@ find_person(const struct Client *client_p, const char *name)
 }
 
 /*
- * find_chasing - find the client structure for a nick name (user) 
- *      using history mechanism if necessary. If the client is not found, 
+ * find_chasing - find the client structure for a nick name (user)
+ *      using history mechanism if necessary. If the client is not found,
  *      an error message (NO SUCH NICK) is generated. If the client was found
  *      through the history, chasing will be 1 and otherwise 0.
  */
@@ -579,7 +579,7 @@ get_client_name(const struct Client *client, enum addr_mask_type type)
 
   assert(client != NULL);
 
-  if (!MyConnect(client)) 
+  if (!MyConnect(client))
     return client->name;
 
   if (IsServer(client) || IsConnecting(client) || IsHandshake(client))
@@ -623,7 +623,7 @@ void
 free_exited_clients(void)
 {
   dlink_node *ptr = NULL, *next = NULL;
-  
+
   DLINK_FOREACH_SAFE(ptr, next, dead_list.head)
   {
     free_client(ptr->data);
@@ -752,10 +752,10 @@ recurse_send_quits(struct Client *original_source_p, struct Client *source_p,
   }
 }
 
-/* 
+/*
  * Remove all clients that depend on source_p; assumes all (S)QUITs have
- * already been sent.  we make sure to exit a server's dependent clients 
- * and servers before the server itself; exit_one_client takes care of 
+ * already been sent.  we make sure to exit a server's dependent clients
+ * and servers before the server itself; exit_one_client takes care of
  * actually removing things off llists.   tweaked from +CSr31  -orabidoo
  */
 static void
@@ -922,7 +922,7 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
 
     if (ConfigServerHide.hide_servers)
       /*
-       * Set netsplit message to "*.net *.split" to still show 
+       * Set netsplit message to "*.net *.split" to still show
        * that its a split, but hide the servers splitting
        */
       strcpy(splitstr, "*.net *.split");
@@ -940,7 +940,7 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
                            source_p->localClient->send.bytes >> 10,
                            source_p->localClient->recv.bytes >> 10);
       ilog(LOG_TYPE_IRCD, "%s was connected for %d seconds.  %llu/%llu sendK/recvK.",
-           source_p->name, (int)(CurrentTime - source_p->localClient->firsttime), 
+           source_p->name, (int)(CurrentTime - source_p->localClient->firsttime),
            source_p->localClient->send.bytes >> 10,
            source_p->localClient->recv.bytes >> 10);
     }
@@ -1009,7 +1009,7 @@ dead_link_on_read(struct Client *client_p, int error)
   if (IsServer(client_p) || IsHandshake(client_p))
   {
     int connected = CurrentTime - client_p->localClient->firsttime;
-      
+
     if (error == 0)
     {
       /* Admins get the real IP */
@@ -1079,7 +1079,7 @@ exit_aborted_clients(void)
     else
       notice = "Write error: connection closed";
 
-    exit_client(target_p, &me, notice);  
+    exit_client(target_p, &me, notice);
     free_dlink_node(ptr);
   }
 }

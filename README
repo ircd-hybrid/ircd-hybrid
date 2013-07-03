@@ -40,7 +40,7 @@ Feature Specific Requirements:
 - For encrypted oper, server and auth passwords, a working DES, MD5, or
   SHA library
 
-- For ISO 3166 alpha-2 two letter country code enabled resv{} blocks, a working	 
+- For ISO 3166 alpha-2 two letter country code enabled resv{} blocks, a working
   libGeoIP is required
 
 *******************************************************************************

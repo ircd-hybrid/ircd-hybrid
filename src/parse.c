@@ -54,7 +54,7 @@
  *				 'i' -> [MessageTree *] -> 'e' and matches
  *
  * BUGS (Limitations!)
- * 
+ *
  * I designed this trie to parse ircd commands. Hence it currently
  * casefolds. This is trivial to fix by increasing MAXPTRLEN.
  * This trie also "folds" '{' etc. down. This means, the input to this
@@ -64,7 +64,7 @@
  * MAXPTRLEN 128.
  *
  * This is also not a patricia trie. On short ircd tokens, this is
- * not likely going to matter. 
+ * not likely going to matter.
  *
  * Diane Bruce (Dianora), June 6 2003
  */
@@ -88,7 +88,7 @@
 
 struct MessageTree
 {
-  int links; /* Count of all pointers (including msg) at this node 
+  int links; /* Count of all pointers (including msg) at this node
               * used as reference count for deletion of _this_ node.
               */
   struct Message *msg;
@@ -131,8 +131,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   assert(client_p->localClient->fd.flags.open);
   assert((bufend - pbuffer) < 512);
 
-  for (ch = pbuffer; *ch == ' '; ++ch) /* skip spaces */
-    /* null statement */ ;
+  for (ch = pbuffer; *ch == ' '; ++ch)  /* skip spaces */
+    /* null statement */  ;
 
   if (*ch == ':')
   {
@@ -153,11 +153,10 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       if ((from = find_person(client_p, sender)) == NULL)
         from = hash_find_server(sender);
 
-      /* Hmm! If the client corresponding to the
-       * prefix is not found--what is the correct
-       * action??? Now, I will ignore the message
-       * (old IRC just let it through as if the
-       * prefix just wasn't there...) --msa
+      /*
+       * Hmm! If the client corresponding to the prefix is not found--what is
+       * the correct action??? Now, I will ignore the message (old IRC just
+       * let it through as if the prefix just wasn't there...) --msa
        */
       if (from == NULL)
       {
@@ -184,9 +183,10 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
     return;
   }
 
-  /* Extract the command code from the packet.  Point s to the end
+  /*
+   * Extract the command code from the packet. Point s to the end
    * of the command code and calculate the length using pointer
-   * arithmetic.  Note: only need length for numerics and *all*
+   * arithmetic. Note: only need length for numerics and *all*
    * numerics must have parameters and thus a space after the command
    * code. -avalon
    */
@@ -196,13 +196,13 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)))
   {
     numeric = ch;
-    paramcount = 2; /* destination, and the rest of it */
+    paramcount = 2;  /* destination, and the rest of it */
     ++ServerStats.is_num;
     s = ch + 3;  /* I know this is ' ' from above if            */
-    *s++ = '\0'; /* blow away the ' ', and point s to next part */
+    *s++ = '\0';  /* blow away the ' ', and point s to next part */
   }
   else
-  { 
+  {
     unsigned int ii = 0;
 
     if ((s = strchr(ch, ' ')) != NULL)
@@ -210,7 +210,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
     if ((msg_ptr = find_command(ch)) == NULL)
     {
-      /* Note: Give error message *only* to recognized
+      /* 
+       * Note: Give error message *only* to recognized
        * persons. It's a nightmare situation to have
        * two programs sending "Unknown command"'s or
        * equivalent to each other at full blast....
@@ -265,7 +266,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
        if (*s == ':')
        {
          /* The rest is a single parameter */
-         para[++parc] = s + (!numeric); /* keep the colon if it's a numeric */
+         para[++parc] = s + (!numeric);  /* keep the colon if it's a numeric */
          break;
        }
 
@@ -367,12 +368,12 @@ add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
   }
   else
   {
-    /* *cmd & (MAXPTRLEN-1) 
+    /*
+     * *cmd & (MAXPTRLEN-1)
      * convert the char pointed to at *cmd from ASCII to an integer
      * between 0 and MAXPTRLEN.
      * Thus 'A' -> 0x1 'B' -> 0x2 'c' -> 0x3 etc.
      */
-
     if ((ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)]) == NULL)
     {
       ntree_p = MyMalloc(sizeof(struct MessageTree));
@@ -541,21 +542,23 @@ report_messages(struct Client *source_p)
 
 /* cancel_clients()
  *
- * inputs	- 
- * output	- 
- * side effects	- 
+ * inputs	-
+ * output	-
+ * side effects	-
  */
 static int
 cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
 {
-  /* kill all possible points that are causing confusion here,
+  /*
+   * Kill all possible points that are causing confusion here,
    * I'm not sure I've got this all right...
    * - avalon
    *
-   * knowing avalon, probably not.
+   * Knowing avalon, probably not.
    */
 
-  /* with TS, fake prefixes are a common thing, during the
+  /*
+   * With TS, fake prefixes are a common thing, during the
    * connect burst when there's a nick collision, and they
    * must be ignored rather than killed because one of the
    * two is surviving.. so we don't bother sending them to
@@ -564,7 +567,8 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
    * servers to be dropped though, as well as the ones from
    * non-TS servers -orabidoo
    */
-  /* Incorrect prefix for a server from some connection.  If it is a
+  /*
+   * Incorrect prefix for a server from some connection. If it is a
    * client trying to be annoying, just QUIT them, if it is a server
    * then the same deal.
    */
@@ -585,11 +589,13 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
     /* return exit_client(client_p, client_p, &me, "Fake Direction");*/
   }
 
-  /* Ok, someone is trying to impose as a client and things are
-   * confused.  If we got the wrong prefix from a server, send out a
+  /*
+   * Ok, someone is trying to impose as a client and things are
+   * confused. If we got the wrong prefix from a server, send out a
    * kill, else just exit the lame client.
    */
-  /* If the fake prefix is coming from a TS server, discard it
+  /*
+   * If the fake prefix is coming from a TS server, discard it
    * silently -orabidoo
    *
    * all servers must be TS these days --is
@@ -608,18 +614,20 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
 
 /* remove_unknown()
  *
- * inputs	- 
- * output	- 
- * side effects	- 
+ * inputs	-
+ * output	-
+ * side effects	-
  */
 static void
 remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
 {
-  /* Do kill if it came from a server because it means there is a ghost
+  /*
+   * Do kill if it came from a server because it means there is a ghost
    * user on the other server which needs to be removed. -avalon
    * Tell opers about this. -Taner
    */
-  /* '[0-9]something'  is an ID      (KILL/SQUIT depending on its length)
+  /*
+   * '[0-9]something'  is an ID      (KILL/SQUIT depending on its length)
    * 'nodots'          is a nickname (KILL)
    * 'no.dot.at.start' is a server   (SQUIT)
    */
@@ -668,16 +676,18 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
 
-  /* Avoid trash, we need it to come from a server and have a target  */
+  /*
+   * Avoid trash, we need it to come from a server and have a target
+   */
   if (parc < 2 || !IsServer(source_p))
     return;
 
   /*
    * Who should receive this message ? Will we do something with it ?
-   *  Note that we use findUser functions, so the target can't be neither
-   *  a server, nor a channel (?) nor a list of targets (?) .. u2.10
-   *  should never generate numeric replies to non-users anyway
-   *  Ahem... it can be a channel actually, csc bots use it :\ --Nem
+   * Note that we use findUser functions, so the target can't be neither
+   * a server, nor a channel (?) nor a list of targets (?) .. u2.10
+   * should never generate numeric replies to non-users anyway
+   * Ahem... it can be a channel actually, csc bots use it :\ --Nem
    */
   if (IsChanPrefix(*parv[1]))
     chptr = hash_find_channel(parv[1]);
@@ -691,10 +701,10 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
    * Remap low number numerics, not that I understand WHY.. --Nemesi
    */
   /*
-   * numerics below 100 talk about the current 'connection', you're not
+   * Numerics below 100 talk about the current 'connection', you're not
    * connected to a remote server so it doesn't make sense to send them
    * remotely - but the information they contain may be useful, so we
-   * remap them up.  Weird, but true.  -- Isomer
+   * remap them up. Weird, but true.  -- Isomer
    */
   if (numeric[0] == '0')
     numeric[0] = '1';
@@ -715,7 +725,7 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
 }
 
 /* m_not_oper()
- * inputs	- 
+ * inputs	-
  * output	-
  * side effects	- just returns a nastyogram to given user
  */
@@ -739,7 +749,7 @@ void
 m_registered(struct Client *client_p, struct Client *source_p,
              int parc, char *parv[])
 {
-  sendto_one(source_p, form_str(ERR_ALREADYREGISTRED),   
+  sendto_one(source_p, form_str(ERR_ALREADYREGISTRED),
              me.name, source_p->name);
 }
 

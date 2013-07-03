@@ -984,6 +984,14 @@ logging_file_type_item:  USER
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_GLINE;
+} | XLINE
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.type.value = LOG_TYPE_XLINE;
+} | RESV
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.type.value = LOG_TYPE_RESV;
 } | T_DLINE
 {
   if (conf_parser_ctx.pass == 2)

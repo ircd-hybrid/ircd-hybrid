@@ -245,7 +245,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 			   tkline_time/60,
 			   (MyClient(source_p) ? "local" : "remote"),
 			   conf->name, conf->reason);
-      ilog(LOG_TYPE_IRCD, "%s added temporary %d min. RESV for [%s] [%s]",
+      ilog(LOG_TYPE_RESV, "%s added temporary %d min. RESV for [%s] [%s]",
 	   source_p->name, (int)tkline_time/60,
 	   conf->name, conf->reason);
       conf->until = CurrentTime + tkline_time;
@@ -306,7 +306,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 			   tkline_time/60,
 			   (MyClient(source_p) ? "local" : "remote"),
 			   conf->name, conf->reason);
-      ilog(LOG_TYPE_IRCD, "%s added temporary %d min. RESV for [%s] [%s]",
+      ilog(LOG_TYPE_RESV, "%s added temporary %d min. RESV for [%s] [%s]",
 	   source_p->name, (int)tkline_time/60,
 	   conf->name, conf->reason);
       conf->until = CurrentTime + tkline_time;

@@ -41,7 +41,7 @@
        | Flattened LINKS is needed for any network that uses the hidden hub |
        | option. See below for more details.                                |
        +--------------------------------------------------------------------+
-        
+
      * Hidden server option: This option will hide the server from a
        flattened LINKS list on other servers. Opers will of course see the
        true routing of the network.

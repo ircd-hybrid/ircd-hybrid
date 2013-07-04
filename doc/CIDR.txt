@@ -274,7 +274,7 @@ Maintainer: BEST
   Note that the FreeBSD whois client has shortcuts for the most commonly
   used whois servers.  "whois -a <INFO>" is the shortcut for ARIN.
 
-  Also note that ARIN is not authoritative for all IP blocks on the 
+  Also note that ARIN is not authoritative for all IP blocks on the
   Internet.  Take for example 212.158.123.66.  A whois query to ARIN
   will return the following information:
 
@@ -306,11 +306,11 @@ country:     GB
 
   This tells us the actual IP block that the query was a part of.
 
-  Other whois servers that you may see blocks referred to are: 
+  Other whois servers that you may see blocks referred to are:
   whois.ripn.net for Russia, whois.apnic.net for Asia, Australia, and
   the Pacific, and whois.6bone.net for IPv6 blocks.
 
 Contributed by Jeremy Chadwick <jdc@best.net>
-Piotr Kucharski <chopin@sgh.waw.pl> 
+Piotr Kucharski <chopin@sgh.waw.pl>
 W. Campbell <wcampbel@botbay.net> and
 Ariel Biener <ariel@fireball.tau.ac.il>

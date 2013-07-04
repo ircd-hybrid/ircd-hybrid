@@ -151,7 +151,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
 
       split_nuh(&nuh);
 
-      if ((accept_p = find_accept(nick, user, host, source_p, 0)) == NULL)
+      if ((accept_p = find_accept(nick, user, host, source_p, irccmp)) == NULL)
       {
         sendto_one(source_p, form_str(ERR_ACCEPTNOT),
                    me.name, source_p->name, nick, user, host);
@@ -181,7 +181,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
 
       split_nuh(&nuh);
 
-      if ((accept_p = find_accept(nick, user, host, source_p, 0)) != NULL)
+      if ((accept_p = find_accept(nick, user, host, source_p, irccmp)) != NULL)
       {
         sendto_one(source_p, form_str(ERR_ACCEPTEXIST),
                    me.name, source_p->name, nick, user, host);

@@ -454,7 +454,8 @@ extern dlink_list oper_list;          /* our opers, duplicated in local_client_l
 extern int accept_message(struct Client *, struct Client *);
 extern unsigned int idle_time_get(const struct Client *, const struct Client *);
 extern struct split_nuh_item *find_accept(const char *, const char *,
-                                          const char *, struct Client *, int);
+                                          const char *, struct Client *,
+                                          int (*)(const char *, const char *));
 extern void del_accept(struct split_nuh_item *, struct Client *);
 extern void del_all_accepts(struct Client *);
 extern void exit_client(struct Client *, struct Client *, const char *);

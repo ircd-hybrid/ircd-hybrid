@@ -1107,11 +1107,10 @@ del_accept(struct split_nuh_item *accept_p, struct Client *client_p)
 
 struct split_nuh_item *
 find_accept(const char *nick, const char *user,
-            const char *host, struct Client *client_p, int do_match)
+            const char *host, struct Client *client_p,
+            int (*cmpfunc)(const char *, const char *))
 {
   dlink_node *ptr = NULL;
-  /* XXX We wouldn't need that if match() would return 0 on match */
-  int (*cmpfunc)(const char *, const char *) = do_match ? match : irccmp;
 
   DLINK_FOREACH(ptr, client_p->localClient->acceptlist.head)
   {
@@ -1140,7 +1139,7 @@ accept_message(struct Client *source,
   dlink_node *ptr = NULL;
 
   if (source == target || find_accept(source->name, source->username,
-                                      source->host, target, 1))
+                                      source->host, target, match))
     return 1;
 
   if (HasUMode(target, UMODE_SOFTCALLERID))

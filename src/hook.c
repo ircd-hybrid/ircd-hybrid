@@ -2,7 +2,7 @@
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *
  *  Copyright (C) 2003 Piotr Nizynski, Advanced IRC Services Project Team
- *  Copyright (C) 2005 Hybrid Development Team
+ *  Copyright (C) 2005-2013 Hybrid Development Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,7 +37,8 @@
 #include "send.h"
 #include "client.h"
 
-static dlink_list callback_list = { NULL, NULL, 0} ;
+static dlink_list callback_list;
+
 
 /*! \brief Creates a new callback.
  * \param name name used to identify the callback
@@ -69,6 +70,7 @@ register_callback(const char *name, CBFUNC *func)
   }
 
   cb = MyMalloc(sizeof(struct Callback));
+
   if (func != NULL)
     dlinkAdd(func, MyMalloc(sizeof(dlink_node)), &cb->chain);
 
@@ -89,7 +91,7 @@ register_callback(const char *name, CBFUNC *func)
 void *
 execute_callback(struct Callback *cb, ...)
 {
-  void *res;
+  void *res = NULL;
   va_list args;
 
   cb->called++;
@@ -99,7 +101,7 @@ execute_callback(struct Callback *cb, ...)
     return NULL;
 
   va_start(args, cb);
-  res = ((CBFUNC *) cb->chain.head->data)(args);
+  res = ((CBFUNC *)cb->chain.head->data)(args);
   va_end(args);
 
   return res;
@@ -114,14 +116,14 @@ execute_callback(struct Callback *cb, ...)
 void *
 pass_callback(dlink_node *this_hook, ...)
 {
-  void *res;
+  void *res = NULL;
   va_list args;
 
   if (this_hook->next == NULL)
     return NULL;  /* reached the last one */
 
   va_start(args, this_hook);
-  res = ((CBFUNC *) this_hook->next->data)(args);
+  res = ((CBFUNC *)this_hook->next->data)(args);
   va_end(args);
 
   return res;
@@ -134,7 +136,7 @@ pass_callback(dlink_node *this_hook, ...)
 struct Callback *
 find_callback(const char *name)
 {
-  dlink_node *ptr;
+  dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, callback_list.head)
   {
@@ -174,7 +176,7 @@ install_hook(struct Callback *cb, CBFUNC *hook)
 void
 uninstall_hook(struct Callback *cb, CBFUNC *hook)
 {
-  /* let it core if not found */
+  /* Let it core if not found */
   dlink_node *ptr = dlinkFind(&cb->chain, hook);
 
   dlinkDelete(ptr, &cb->chain);
@@ -188,8 +190,8 @@ uninstall_hook(struct Callback *cb, CBFUNC *hook)
 void
 stats_hooks(struct Client *source_p)
 {
-  dlink_node *ptr;
   char lastused[32];
+  const dlink_node *ptr = NULL;
 
   sendto_one(source_p, ":%s %d %s : %-20s %-20s Used     Hooks", me.name,
              RPL_STATSDEBUG, source_p->name, "Callback", "Last Execution");
@@ -198,7 +200,7 @@ stats_hooks(struct Client *source_p)
 
   DLINK_FOREACH(ptr, callback_list.head)
   {
-    struct Callback *cb = ptr->data;
+    const struct Callback *cb = ptr->data;
 
     if (cb->last != 0)
       snprintf(lastused, sizeof(lastused), "%d seconds ago",
@@ -208,7 +210,7 @@ stats_hooks(struct Client *source_p)
 
     sendto_one(source_p, ":%s %d %s : %-20s %-20s %-8u %d", me.name,
                RPL_STATSDEBUG, source_p->name, cb->name, lastused, cb->called,
-	       dlink_list_length(&cb->chain));
+               dlink_list_length(&cb->chain));
   }
 
   sendto_one(source_p, ":%s %d %s : ", me.name, RPL_STATSDEBUG,

@@ -187,6 +187,8 @@ set_initial_nick(struct Client *source_p, const char *nick)
 static void
 change_local_nick(struct Client *source_p, const char *nick)
 {
+  int samenick = 0;
+
   assert(source_p->name[0] && !EmptyString(nick));
   assert(MyConnect(source_p));
 
@@ -198,62 +200,63 @@ change_local_nick(struct Client *source_p, const char *nick)
   if ((source_p->localClient->last_nick_change +
        ConfigFileEntry.max_nick_time) < CurrentTime)
     source_p->localClient->number_of_nick_changes = 0;
-  source_p->localClient->last_nick_change = CurrentTime;
-  source_p->localClient->number_of_nick_changes++;
 
-  if ((ConfigFileEntry.anti_nick_flood &&
-      (source_p->localClient->number_of_nick_changes
-       <= ConfigFileEntry.max_nick_changes)) ||
-     !ConfigFileEntry.anti_nick_flood ||
-     (HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.no_oper_flood))
+  if (ConfigFileEntry.anti_nick_flood &&
+      !HasUMode(source_p, UMODE_OPER) &&
+      source_p->localClient->number_of_nick_changes >
+      ConfigFileEntry.max_nick_changes)
   {
-    int samenick = !irccmp(source_p->name, nick);
-
-    if (!samenick)
-    {
-      source_p->tsinfo = CurrentTime;
-      clear_ban_cache_client(source_p);
-      watch_check_hash(source_p, RPL_LOGOFF);
-
-      if (HasUMode(source_p, UMODE_REGISTERED))
-      {
-        unsigned int oldmodes = source_p->umodes;
-        char modebuf[IRCD_BUFSIZE] = { '\0' };
-
-        DelUMode(source_p, UMODE_REGISTERED);
-        send_umode(source_p, source_p, oldmodes, 0xffffffff, modebuf);
-      }
-    }
-
-    sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
-                         "Nick change: From %s to %s [%s@%s]",
-                         source_p->name, nick, source_p->username, source_p->host);
-    sendto_common_channels_local(source_p, 1, 0, ":%s!%s@%s NICK :%s",
-                                 source_p->name, source_p->username,
-                                 source_p->host, nick);
-    whowas_add_history(source_p, 1);
-
-    sendto_server(source_p, CAP_TS6, NOCAPS,
-                  ":%s NICK %s :%lu",
-                  ID(source_p), nick, (unsigned long)source_p->tsinfo);
-    sendto_server(source_p, NOCAPS, CAP_TS6,
-                  ":%s NICK %s :%lu",
-                  source_p->name, nick, (unsigned long)source_p->tsinfo);
-
-    hash_del_client(source_p);
-    strlcpy(source_p->name, nick, sizeof(source_p->name));
-    hash_add_client(source_p);
-
-    if (!samenick)
-      watch_check_hash(source_p, RPL_LOGON);
-
-    /* fd_desc is long enough */
-    fd_note(&source_p->localClient->fd, "Nick: %s", nick);
-  }
-  else
     sendto_one(source_p, form_str(ERR_NICKTOOFAST), me.name,
                source_p->name, source_p->name, nick,
                ConfigFileEntry.max_nick_time);
+    return;
+  }
+
+  source_p->localClient->last_nick_change = CurrentTime;
+  source_p->localClient->number_of_nick_changes++;
+
+  samenick = !irccmp(source_p->name, nick);
+
+  if (!samenick)
+  {
+    source_p->tsinfo = CurrentTime;
+    clear_ban_cache_client(source_p);
+    watch_check_hash(source_p, RPL_LOGOFF);
+
+    if (HasUMode(source_p, UMODE_REGISTERED))
+    {
+      unsigned int oldmodes = source_p->umodes;
+      char modebuf[IRCD_BUFSIZE] = { '\0' };
+
+      DelUMode(source_p, UMODE_REGISTERED);
+      send_umode(source_p, source_p, oldmodes, 0xffffffff, modebuf);
+    }
+  }
+
+  sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
+                       "Nick change: From %s to %s [%s@%s]",
+                       source_p->name, nick, source_p->username, source_p->host);
+  sendto_common_channels_local(source_p, 1, 0, ":%s!%s@%s NICK :%s",
+                               source_p->name, source_p->username,
+                               source_p->host, nick);
+  whowas_add_history(source_p, 1);
+
+  sendto_server(source_p, CAP_TS6, NOCAPS,
+                ":%s NICK %s :%lu",
+                ID(source_p), nick, (unsigned long)source_p->tsinfo);
+  sendto_server(source_p, NOCAPS, CAP_TS6,
+                ":%s NICK %s :%lu",
+                source_p->name, nick, (unsigned long)source_p->tsinfo);
+
+  hash_del_client(source_p);
+  strlcpy(source_p->name, nick, sizeof(source_p->name));
+  hash_add_client(source_p);
+
+  if (!samenick)
+    watch_check_hash(source_p, RPL_LOGON);
+
+  /* fd_desc is long enough */
+  fd_note(&source_p->localClient->fd, "Nick: %s", nick);
 }
 
 /*

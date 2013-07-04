@@ -169,25 +169,18 @@ whois_person(struct Client *source_p, struct Client *target_p)
  * side effects - Does whois
  */
 static void
-do_whois(struct Client *source_p, int parc, char *parv[])
+do_whois(struct Client *source_p, const char *name)
 {
   struct Client *target_p = NULL;
-  char *nick = parv[1];
-  char *p = NULL;
 
-  if ((p = strchr(nick, ',')) != NULL)
-    *p = '\0';
-  if (*nick == '\0')
-    return;
-
-  if ((target_p = hash_find_client(nick)) && IsClient(target_p))
+  if ((target_p = hash_find_client(name)) && IsClient(target_p))
     whois_person(source_p, target_p);
-  else if (!IsDigit(*nick))
+  else if (!IsDigit(*name))
     sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-               me.name, source_p->name, nick);
+               me.name, source_p->name, name);
 
   sendto_one(source_p, form_str(RPL_ENDOFWHOIS),
-             me.name, source_p->name, nick);
+             me.name, source_p->name, name);
 }
 
 /*
@@ -235,7 +228,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
     parv[1] = parv[2];
   }
 
-  do_whois(source_p, parc, parv);
+  do_whois(source_p, parv[1]);
 }
 
 /*
@@ -263,7 +256,7 @@ mo_whois(struct Client *client_p, struct Client *source_p,
     parv[1] = parv[2];
   }
 
-  do_whois(source_p, parc, parv);
+  do_whois(source_p, parv[1]);
 }
 
 static struct Message whois_msgtab = {

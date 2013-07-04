@@ -131,7 +131,6 @@ mo_xline(struct Client *client_p, struct Client *source_p,
 /* ms_xline()
  *
  * inputs	- oper, target server, xline, {type}, reason
- *		  deprecate {type} reserve for temp xlines later? XXX
  *
  * outputs	- none
  * side effects	- propagates xline, applies it if we are a target

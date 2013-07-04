@@ -336,8 +336,7 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
       /* added time -Taner */
       sendto_one(source_p, form_str(RPL_TRACEUNKNOWN),
                  from, to, class_name, name, target_p->sockhost,
-                 target_p->localClient->firsttime ? /* TBD: can't be 0 */
-                 CurrentTime - target_p->localClient->firsttime : -1);
+                 CurrentTime - target_p->localClient->firsttime);
       break;
     case STAT_CLIENT:
       /*

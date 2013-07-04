@@ -1,5 +1,5 @@
                         User and Channel Modes Guide
-			----------------------------
+                        ----------------------------
 
 In /VERSION one might see something like this:
 
@@ -64,12 +64,12 @@ Channel Modes:
                     set at the same time as +s.
 +r - registered   - Channel has been registered
 +R - regonly      - Only registered clients may join a channel with that mode set
-+s - secret       - The channel does not show up on NAMES or LIST or in the 
++s - secret       - The channel does not show up on NAMES or LIST or in the
                     WHOIS channel list unless you are a member of the channel
 +S - sslonly      - This mode will prevent anyone who isn't securely connected
                     via SSL/TLS from joining the channel.
 +t - topic        - Only chanops can change the topic
-+v - voice        - Can speak in a moderated channel, and is exempt from flood 
++v - voice        - Can speak in a moderated channel, and is exempt from flood
                     restrictions
 
 The third part of the 004 numeric lists channel modes that require arguments.

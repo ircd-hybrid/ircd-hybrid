@@ -1,6 +1,6 @@
 /* doc/kline.txt - Overview of the remote kline system
- * 
- * Copyright (C) 2005-2012 Hybrid Development Team
+ *
+ * Copyright (C) 2005-2013 Hybrid Development Team
  *
  * $Id$
  */
@@ -61,8 +61,8 @@ block in ircd.conf.
 The shared block contains two settings, a user@host mask of the oper
 who is allowed to K-Line, and a servername.
 
-- If both of these options are present, K-Lines will only be allowed 
-  from that specific user@host on that specific server. 
+- If both of these options are present, K-Lines will only be allowed
+  from that specific user@host on that specific server.
 - If only the servername is present, all K-Lines from opers on that
   server will be accepted.
 - If only the user@host is present, all K-Lines from that user@host on
@@ -70,11 +70,11 @@ who is allowed to K-Line, and a servername.
 - If neither are present, the shared block is invalid.
 
 shared {
-	/* The name of the server we allow K-Lines from */
-	name = "this.server.net";
+        /* The name of the server we allow K-Lines from */
+        name = "this.server.net";
 
-	/* the user@host allowed to K-Line */
-	user = "user@host.com";
+        /* the user@host allowed to K-Line */
+        user = "user@host.com";
 };
 
 Server to Server Protocol
@@ -87,15 +87,15 @@ without a KLN capability.
 Server to server messages are formatted like this:
 
   ":oper KLINE target.server duration user host :reason"
-    
+
 Note the difference between hybrid-6 GLINE which explicitly passed
 the oper user@host and server along. This was originally done to handle
-possible desync conditions, but is now shelved in favor of saving 
+possible desync conditions, but is now shelved in favor of saving
 some bandwidth.
 
-oper:		the nick of the oper performing the K-Line
-target.server:	the server(s) this K-Line is destined for
-duration:	the duration if a TK-Line, 0 if permanent.
-user:		the 'user' portion of the K-Line
-host:		the 'host' portion of the K-Line
-reason:		the reason for the K-Line.
+oper:           the nick of the oper performing the K-Line
+target.server:  the server(s) this K-Line is destined for
+duration:       the duration if a TK-Line, 0 if permanent.
+user:           the 'user' portion of the K-Line
+host:           the 'host' portion of the K-Line
+reason:         the reason for the K-Line.

@@ -1,7 +1,7 @@
                          User Mode +g Documentation
 
 Hybrid 7 includes a new and power feature that all users can take advantage
-of to help prevent flooding and unwanted messages.  This new feature is 
+of to help prevent flooding and unwanted messages.  This new feature is
 invoked by setting user mode +g.  When a client is set +g, that user will
 be in "Caller ID" mode.  Any user that messages a +g client will receive
 a numeric saying that they are in +g (server side ignore) mode.  The target
@@ -50,7 +50,7 @@ changed their nick.
 
 Viewing the accept list is also very easy.  Issue the raw command ACCEPT *.
 Removing a user from your accept list is also simple.  Issue the command
-ACCEPT -<nick>.  
+ACCEPT -<nick>.
 
                               Sample Session
 
@@ -118,15 +118,15 @@ Hwy-LL will now only accept messages from Hwy101 and services.
 --
 
 The nicks to be added can be in ANY order, however you cannot add or remove
-AND list.  
+AND list.
     /ACCEPT x,y,-z,f,-a would be acceptable.
     /ACCEPT x,y,-z,* would ignore the * and generate an invalid nick
                      response.
 
 Like Dalnet and Undernet's SILENCE system, the accept list only exists while
 you are connected to IRC.  In order for you to have the same accept list
-every time you come onto IRC, you must put the accept commands into your 
-client's auto-perform, or manually issue the commands each time.  
+every time you come onto IRC, you must put the accept commands into your
+client's auto-perform, or manually issue the commands each time.
 
 This system may seem similar to the SILENCE system, but it is actually a
 reverse SILENCE.  SILENCE ignores certain users and allows the rest.  Mode

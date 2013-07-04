@@ -1,5 +1,5 @@
 /*
- * doc/resv.txt - Overview of the resv system 
+ * doc/resv.txt - Overview of the resv system
  * Lee Hardy <lee@leeh.co.uk>
  *
  * Copyright (C) 2001 Hybrid Development Team
@@ -64,7 +64,7 @@
   then a /rehash, should do the trick.
 
   If the resv was made using /RESV, then use the unresv command:
-    
+
     Syntax: /quote unresv <#channel|nick>
 
 - Can I make a resv on all servers?
@@ -102,7 +102,7 @@
 
   Yes. It takes the same format as creating a resv on a normal channel:
     /resv &clones :no clonebots!
-    
+
 - Do you support wildcard channel resv's?
 
   No.  This is mainly for speed reasons.  When we are searching nicks, we

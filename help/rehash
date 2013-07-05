@@ -4,8 +4,7 @@ When no [option] is given, ircd will re-read the
 ircd.conf file.
 
 [option] can be one of the following:
-  DNS      - Re-read the /etc/resolv.conf file
-  MOTD     - Re-reads MOTD file
-  OMOTD    - Re-reads Oper MOTD file
+  DNS  - Re-read the /etc/resolv.conf file
+  MOTD - Re-reads MOTD file
 
 - Requires Oper Priv: H

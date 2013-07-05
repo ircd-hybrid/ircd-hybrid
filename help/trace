@@ -3,7 +3,7 @@ TRACE [server | nick]
 With no argument, TRACE gives a list of all clients connected
 to the local server, both users and operators.
 
-With one argument which is a server, TRACE displays the path 
+With one argument which is a server, TRACE displays the path
 to the specified server, and all clients on that server.
 
 With one argument which is a client, TRACE displays the

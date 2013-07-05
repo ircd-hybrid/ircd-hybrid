@@ -4,6 +4,7 @@ o) Added 'xline' and 'resv' logging types. See doc/reference.conf
 o) Fixed bug where remote /STATS requests were not rate limited
 o) Fixed core with empty auth::spoof entries
 o) Increased oper/auth/connect password length limit from 20 to 128
+o) Minor fixes to nickflood control code
 
 
 -- ircd-hybrid-8.1.3 Release Notes

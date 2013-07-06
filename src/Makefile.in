@@ -103,15 +103,15 @@ am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
 	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
 	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
 	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
-	modules.$(OBJEXT) motd.$(OBJEXT) msgq.$(OBJEXT) \
-	rng_mt.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
-	parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	modules.$(OBJEXT) motd.$(OBJEXT) rng_mt.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
 	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
 	s_bsd_select.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
 	rsa.$(OBJEXT) s_auth.$(OBJEXT) s_bsd.$(OBJEXT) \
 	s_gline.$(OBJEXT) s_misc.$(OBJEXT) s_serv.$(OBJEXT) \
 	s_user.$(OBJEXT) send.$(OBJEXT) version.$(OBJEXT) \
-	watch.$(OBJEXT) whowas.$(OBJEXT) xsnprintf.$(OBJEXT)
+	watch.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -376,7 +376,6 @@ ircd_SOURCES = channel.c         \
                mempool.c         \
                modules.c         \
                motd.c            \
-               msgq.c            \
                rng_mt.c          \
                numeric.c         \
                packet.c          \
@@ -398,8 +397,7 @@ ircd_SOURCES = channel.c         \
                send.c            \
                version.c         \
                watch.c           \
-               whowas.c          \
-               xsnprintf.c
+               whowas.c
 
 all: all-am
 
@@ -526,7 +524,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msgq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@
@@ -549,7 +546,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/watch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xsnprintf.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\

@@ -43,7 +43,7 @@ NO PARAMETERS:
               IRCOp status from joining your channel. Can be set by an IRCOp
               only.
 
-     +R     - 'Registered only'.- Only registered clients may join a channel
+     +R     - 'Registered only'. Only registered clients may join a channel
               with that mode set
 
      +S     - 'SSL only'. This will prevent anyone who isn't securely connected

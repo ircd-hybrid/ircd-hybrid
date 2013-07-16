@@ -585,7 +585,6 @@ mr_nick(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   char nick[NICKLEN + 1] = { '\0' };
-  char *s = NULL;
   struct Client *target_p = NULL;
   struct MaskItem *conf = NULL;
 
@@ -595,10 +594,6 @@ mr_nick(struct Client *client_p, struct Client *source_p,
                source_p->name[0] ? source_p->name : "*");
     return;
   }
-
-  /* Terminate the nick at the first ~ */
-  if ((s = strchr(parv[1], '~')) != NULL)
-    *s = '\0';
 
   /* Copy the nick and terminate it */
   strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ServerInfo.max_nick_length + 1));

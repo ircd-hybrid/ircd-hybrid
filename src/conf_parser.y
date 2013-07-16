@@ -2050,6 +2050,7 @@ connect_entry: CONNECT
     break;
 
   reset_block_state();
+  block_state.aftype.value = AF_INET;
   block_state.port.value = PORTNUM;
 } '{' connect_items '}' ';'
 {

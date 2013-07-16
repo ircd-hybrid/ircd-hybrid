@@ -1,3 +1,8 @@
+-- ircd-hybrid-8.1.5 Release Notes
+o) Fixed bug that would prevent servers from linking together
+   if connect::aftype isn't set
+
+
 -- ircd-hybrid-8.1.4 Release Notes
 o) Added 'xline' and 'resv' logging types. See doc/reference.conf
    for more information

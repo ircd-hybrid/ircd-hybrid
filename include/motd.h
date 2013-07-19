@@ -69,7 +69,7 @@ struct MotdCache
   unsigned int maxcount; /**< Number of lines allocated for message. */
   unsigned int count;    /**< Actual number of lines used in message. */
   struct tm    modtime;  /**< Last modification time from file. */
-  char         motd[1][MOTD_LINESIZE]; /**< Message body. */
+  char         motd[][MOTD_LINESIZE]; /**< Message body. */
 };
 
 /* motd_send sends a MOTD off to a user */

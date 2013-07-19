@@ -143,7 +143,7 @@ motd_cache(struct Motd *motd)
   }
 
   /* Ok, allocate a structure; we'll realloc later to trim memory */
-  cache = MyMalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * (MOTD_MAXLINES - 1)));
+  cache = MyMalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * MOTD_MAXLINES));
   cache->ref = 1;
   cache->path = xstrdup(motd->path);
   cache->maxcount = motd->maxcount;
@@ -163,9 +163,9 @@ motd_cache(struct Motd *motd)
 
   /* trim memory usage a little */
   motd->cache = MyMalloc(sizeof(struct MotdCache) +
-                         (MOTD_LINESIZE * (cache->count - 1)));
+                         (MOTD_LINESIZE * cache->count));
   memcpy(motd->cache, cache, sizeof(struct MotdCache) +
-         (MOTD_LINESIZE * (cache->count - 1)));
+         (MOTD_LINESIZE * cache->count));
   MyFree(cache);
 
   /* now link it in... */

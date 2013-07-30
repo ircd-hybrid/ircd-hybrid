@@ -253,9 +253,6 @@ ssl_handshake(int fd, struct Client *client_p)
 {
   X509 *cert = NULL;
   int ret = SSL_accept(client_p->localClient->fd.ssl);
-  int err = SSL_get_error(client_p->localClient->fd.ssl, ret);
-
-  ilog(LOG_TYPE_IRCD, "SSL Error %d %s", err, ERR_error_string(err, NULL));
 
   if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
   {

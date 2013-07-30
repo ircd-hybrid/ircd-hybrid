@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.1.6 Release Notes
+o) Fixed possible core with empty motd files
+
+
 -- ircd-hybrid-8.1.5 Release Notes
 o) Fixed bug that would prevent servers from linking together
    if connect::aftype isn't set

@@ -609,7 +609,7 @@ static struct Message server_msgtab = {
 
 static struct Message sid_msgtab = {
   "SID", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
-  {rfc1459_command_send_error, m_ignore, ms_sid, m_ignore, m_ignore, m_ignore}
+  {m_ignore, m_ignore, ms_sid, m_ignore, m_ignore, m_ignore}
 };
 
 static void

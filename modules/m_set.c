@@ -555,7 +555,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
 
 static struct Message set_msgtab = {
   "SET", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, rfc1459_command_send_error, m_ignore, mo_set, m_ignore}
+  {m_unregistered, m_not_oper, m_ignore, m_ignore, mo_set, m_ignore}
 };
 
 static void

@@ -156,7 +156,6 @@ extern struct Message *find_command(const char *);
 extern void report_messages(struct Client *);
 
 /* generic handlers */
-extern void rfc1459_command_send_error(struct Client *, struct Client *,int, char *[]);
 extern void m_ignore(struct Client *, struct Client *, int, char *[]);
 extern void m_not_oper(struct Client *, struct Client *, int, char *[]);
 extern void m_registered(struct Client *, struct Client *, int, char *[]);

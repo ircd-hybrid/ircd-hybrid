@@ -7,7 +7,7 @@ server parameter is given) for info corresponding to
        (X = Admin only.)
 LETTER (* = Oper only.)
 ------ (^ = Can be configured to be oper only.)
-X A - Shows the ADNS DNS servers in use
+X A - Shows the DNS servers in use
 * c - Shows connect blocks
 * d - Shows temporary D lines
 * D - Shows D lines
@@ -29,14 +29,13 @@ X h - Shows ircd callback statistics
   p - Shows opers connected and their idle times
 * q - Shows resv'd nicks and channels
 * r - Shows resource usage by ircd
-* s - Shows the server cache
+* s - Shows configured service {} blocks
 * T - Shows configured Message Of The Day files
 * t - Shows generic server stats
 * U - Shows shared blocks (Old U: lines)
-  u - Shows server uptime
+^ u - Shows server uptime
 * v - Shows connected servers and their idle times
 * x - Shows gecos bans (Old X: lines)
-* y - Shows Y lines
+* y - Shows configured class {} blocks
 * z - Shows memory stats
-* Z - Show ziplinks stats
 * ? - Shows connected servers and sendq info about them

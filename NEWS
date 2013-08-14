@@ -307,11 +307,6 @@ o) Overall code cleanup and speed improvements
 
 --------------------------------------------------------------------------------
 
-This is still BETA code. Run it at your own risk. By running this
-code you assume FULL responsibility for any problems it may cause.
-We do NOT recommend that you run BETA code on production IRC networks
-such as EFnet.
-
 BUG REPORTS: If you run this code and encounter problems, you must report
  the bug by EMAIL to bugs@ircd-hybrid.org
  Please include a gdb backtrace and a copy of your config.h and

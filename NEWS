@@ -1,3 +1,25 @@
+-- ircd-hybrid-8.1.7 Release Notes
+o) Fixed issue with channel mode +n having no functionality at all
+
+
+-- ircd-hybrid-8.1.6 Release Notes
+o) Fixed possible core with empty motd files
+
+
+-- ircd-hybrid-8.1.5 Release Notes
+o) Fixed bug that would prevent servers from linking together
+   if connect::aftype isn't set
+
+
+-- ircd-hybrid-8.1.4 Release Notes
+o) Added 'xline' and 'resv' logging types. See doc/reference.conf
+   for more information
+o) Fixed bug where remote /STATS requests were not rate limited
+o) Fixed core with empty auth::spoof entries
+o) Increased oper/auth/connect password length limit from 20 to 128
+o) Minor fixes to nickflood control code
+
+
 -- ircd-hybrid-8.1.3 Release Notes
 o) Fixed possible core on "STATS z"
 o) Revised doc/reference.conf
@@ -284,11 +306,6 @@ o) Added m_webirc.c to contrib/
 o) Overall code cleanup and speed improvements
 
 --------------------------------------------------------------------------------
-
-This is still BETA code. Run it at your own risk. By running this
-code you assume FULL responsibility for any problems it may cause.
-We do NOT recommend that you run BETA code on production IRC networks
-such as EFnet.
 
 BUG REPORTS: If you run this code and encounter problems, you must report
  the bug by EMAIL to bugs@ircd-hybrid.org

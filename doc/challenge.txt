@@ -2,7 +2,7 @@
 
    $Id$
 
-   Copyright (c) 2001-2012 by ircd-hybrid team
+   Copyright (c) 2001-2013 ircd-hybrid development team
 
      ----------------------------------------------------------------------
 
@@ -81,7 +81,7 @@
                           Using CHALLENGE and respond
 
      Note: All examples assume the use of the stock respond client included
-     with the ircd-hybrid-8 source, run on a UNIX(c) platform.
+     with the ircd-hybrid source, run on a UNIX(c) platform.
 
    The administrator of the server you oper on should remove the password in
    your oper {} block and replace it with an entry for your public key, so

@@ -3,10 +3,10 @@
 
 In /VERSION one might see something like this:
 
-irc.corefailure.com hybrid-7beta5 oiwszcerkfydnxbaugl biklmnopstveIh bkloveIh
+hades.arpa hybrid-8.1.7 DFGHRSabcdefgijklnorsuwxyz bciklmnoprstveIMORS bkloveI
 
 These describe the user modes, channel modes, and channel modes that require
-arguments that are available to the user. It is hardcoded into src/numeric.c
+arguments that are available to the user.
 
 Here is a guide to the preceding modes:
 
@@ -18,7 +18,7 @@ User Modes:
 +D - deaf         - Don't receive channel messages
 +d - debug        - See debugging notices
 +e - external     - See remote server connection and split notices
-+f - full         - See I: line full notices
++f - full         - See auth{} block full notices
 +F - farconnect   - See remote client connection/quit notices
 +G - softcallerid - Server Side Ignore for users not on your channels
 +g - callerid     - Server Side Ignore (see modeg.txt)

@@ -252,7 +252,27 @@ static void
 ssl_handshake(int fd, struct Client *client_p)
 {
   X509 *cert = NULL;
-  int ret = SSL_accept(client_p->localClient->fd.ssl);
+  int ret = 0;
+
+  if ((ret = SSL_accept(client_p->localClient->fd.ssl)) <= 0)
+  {
+    switch (SSL_get_error(client_p->localClient->fd.ssl, ret))
+    {
+      case SSL_ERROR_WANT_WRITE:
+        comm_setselect(&client_p->localClient->fd, COMM_SELECT_WRITE,
+	               (PF *) ssl_handshake, client_p, 0);
+        return;
+
+      case SSL_ERROR_WANT_READ:
+        comm_setselect(&client_p->localClient->fd, COMM_SELECT_READ,
+	               (PF *) ssl_handshake, client_p, 0);
+        return;
+
+      default:
+        exit_client(client_p, client_p, "Error during SSL handshake");
+	return;
+    }
+  }
 
   if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
   {
@@ -277,26 +297,6 @@ ssl_handshake(int fd, struct Client *client_p)
       ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad SSL client certificate: %d",
            client_p->name, client_p->username, client_p->host, res);
     X509_free(cert);
-  }
-
-  if (ret <= 0)
-  {
-    switch (SSL_get_error(client_p->localClient->fd.ssl, ret))
-    {
-      case SSL_ERROR_WANT_WRITE:
-        comm_setselect(&client_p->localClient->fd, COMM_SELECT_WRITE,
-	               (PF *) ssl_handshake, client_p, 0);
-        return;
-
-      case SSL_ERROR_WANT_READ:
-        comm_setselect(&client_p->localClient->fd, COMM_SELECT_READ,
-	               (PF *) ssl_handshake, client_p, 0);
-        return;
-
-      default:
-        exit_client(client_p, client_p, "Error during SSL handshake");
-	return;
-    }
   }
 
   start_auth(client_p);

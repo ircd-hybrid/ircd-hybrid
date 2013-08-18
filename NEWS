@@ -1,5 +1,7 @@
 -- ircd-hybrid-8.1.7 Release Notes
 o) Fixed issue with channel mode +n having no functionality at all
+o) Fixed SSL certificate fingerprint validation for outgoing server connects
+o) Updated several documentation files
 
 
 -- ircd-hybrid-8.1.6 Release Notes

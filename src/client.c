@@ -501,34 +501,34 @@ update_client_exit_stats(struct Client *client_p)
 struct Client *
 find_person(const struct Client *client_p, const char *name)
 {
-  struct Client *c2ptr = NULL;
+  struct Client *target_p = NULL;
 
   if (IsDigit(*name))
   {
-    if ((c2ptr = hash_find_id(name)) != NULL)
+    if ((target_p = hash_find_id(name)) != NULL)
     {
       /* invisible users shall not be found by UID guessing */
-      if (HasUMode(c2ptr, UMODE_INVISIBLE))
+      if (HasUMode(target_p, UMODE_INVISIBLE))
         if (!IsServer(client_p) && !HasFlag(client_p, FLAGS_SERVICE))
-          c2ptr = NULL;
+          target_p = NULL;
     }
   }
   else
-    c2ptr = hash_find_client(name);
+    target_p = hash_find_client(name);
 
-  return ((c2ptr != NULL && IsClient(c2ptr)) ? c2ptr : NULL);
+  return (target_p && IsClient(target_p)) ? target_p : NULL;
 }
 
 /*
- * find_chasing - find the client structure for a nick name (user)
+ * find_chasing - find the client structure for a nick name (name)
  *      using history mechanism if necessary. If the client is not found,
  *      an error message (NO SUCH NICK) is generated. If the client was found
  *      through the history, chasing will be 1 and otherwise 0.
  */
 struct Client *
-find_chasing(struct Client *client_p, struct Client *source_p, const char *user, int *chasing)
+find_chasing(struct Client *source_p, const char *name, int *const chasing)
 {
-  struct Client *who = find_person(client_p, user);
+  struct Client *who = find_person(source_p->from, name);
 
   if (chasing)
     *chasing = 0;
@@ -536,15 +536,15 @@ find_chasing(struct Client *client_p, struct Client *source_p, const char *user,
   if (who)
     return who;
 
-  if (IsDigit(*user))
+  if (IsDigit(*name))
     return NULL;
 
-  if ((who = whowas_get_history(user,
+  if ((who = whowas_get_history(name,
                          (time_t)ConfigFileEntry.kill_chase_time_limit))
                          == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-               me.name, source_p->name, user);
+               me.name, source_p->name, name);
     return NULL;
   }
 

@@ -158,7 +158,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
   if (*user == '\0')
     return;
 
-  if ((who = find_chasing(client_p, source_p, user, &chasing)) == NULL)
+  if ((who = find_chasing(source_p, user, &chasing)) == NULL)
     return;
 
   if ((ms_target = find_channel_link(who, chptr)) != NULL)

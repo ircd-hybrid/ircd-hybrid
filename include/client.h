@@ -466,7 +466,7 @@ extern void dead_link_on_read(struct Client *, int);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
 extern struct Client *make_client(struct Client *);
-extern struct Client *find_chasing(struct Client *, struct Client *, const char *, int *);
+extern struct Client *find_chasing(struct Client *, const char *, int *const);
 extern struct Client *find_person(const struct Client *const, const char *);
 extern const char *get_client_name(const struct Client *, enum addr_mask_type);
 

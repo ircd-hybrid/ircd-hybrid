@@ -342,7 +342,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
       }
     } while (valid_mode);
 
-    target_p = find_chasing(client_p, source_p, s, NULL);
+    target_p = find_chasing(source_p, s, NULL);
 
     /*
      * if the client doesnt exist, or if its fake direction/server, skip.

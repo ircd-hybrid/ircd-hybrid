@@ -2050,7 +2050,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
     /* Try to find user@host mask from nick */
     /* Okay to use source_p as the first param, because source_p == client_p */
     if ((target_p = 
-        find_chasing(source_p, source_p, user_host_or_nick, NULL)) == NULL)
+        find_chasing(source_p, user_host_or_nick, NULL)) == NULL)
       return 0;
 
     if (IsExemptKline(target_p))

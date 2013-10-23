@@ -83,6 +83,7 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(dist_sysconf_DATA)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/argz.m4 \
+	$(top_srcdir)/m4/ax_check_openssl.m4 \
 	$(top_srcdir)/m4/gcc_stack_protect.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltdl.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \

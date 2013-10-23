@@ -357,7 +357,7 @@ static const char *const replies[] = {
 /* 327 */ NULL,
 /* 328 */ NULL,
 /* 329 RPL_CREATIONTIME */ ":%s 329 %s %s %lu",
-/* 330 */ NULL,
+/* 330 RPL_WHOISACCOUNT */ ":%s 330 %s %s %s :is logged in as",
 /* 331 RPL_NOTOPIC */ ":%s 331 %s %s :No topic is set.",
 /* 332 RPL_TOPIC */ ":%s 332 %s %s :%s",
 /* 333 RPL_TOPICWHOTIME */ ":%s 333 %s %s %s %lu",

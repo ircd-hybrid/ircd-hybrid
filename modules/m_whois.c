@@ -107,6 +107,11 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one(source_p, form_str(RPL_WHOISREGNICK),
                me.name, source_p->name, target_p->name);
 
+  if (!IsDigit(target_p->svid[0]))
+    sendto_one(source_p, form_str(RPL_WHOISACCOUNT),
+               me.name, source_p->name, target_p->name,
+               target_p->svid);
+
   if (target_p->away[0])
     sendto_one(source_p, form_str(RPL_AWAY),
                me.name, source_p->name, target_p->name,

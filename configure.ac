@@ -7,6 +7,7 @@ AC_PREREQ(2.69)
 AC_INIT([ircd-hybrid], [TRUNK], [bugs@ircd-hybrid.org])
 AM_INIT_AUTOMAKE(1.13.1 subdir-objects)
 AM_MAINTAINER_MODE
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(src/ircd.c)
 
@@ -25,6 +26,8 @@ LTDL_INIT([recursive convenience])
 LIBTOOL="$LIBTOOL --silent"
 
 # Checks for libraries.
+GCC_STACK_PROTECT_CC
+
 AX_CHECK_LIB_IPV4
 AX_CHECK_LIB_IPV6
 

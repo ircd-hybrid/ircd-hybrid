@@ -6,6 +6,9 @@
 /* Set to datadir. */
 #undef DATADIR
 
+/* Define if SSP C support is enabled. */
+#undef ENABLE_SSP_CC
+
 /* Define to 1 if you want halfops support. */
 #undef HALFOPS
 

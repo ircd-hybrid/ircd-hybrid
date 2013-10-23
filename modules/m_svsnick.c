@@ -109,7 +109,7 @@ ms_svsnick(struct Client *client_p, struct Client *source_p,
                 ID(target_p), parv[2], (unsigned long)target_p->tsinfo);
   sendto_server(NULL, NOCAPS, CAP_TS6,
                 ":%s NICK %s :%lu",
-                target_p->name, parv[2], (unsigned long)source_p->tsinfo);
+                target_p->name, parv[2], (unsigned long)target_p->tsinfo);
 
   hash_del_client(target_p);
   strlcpy(target_p->name, parv[2], sizeof(target_p->name));

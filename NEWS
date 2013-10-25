@@ -6,7 +6,7 @@ o) Cleaned up/modernized build system
 o) Add -fstack-protector to CFLAGS if available. Basically checks for
    buffer overflows/stack-smashing attacks
 o) When using anope 1.9 services, /WHOIS now shows the account name
-   of a registered/identified client
+   of a registered/identified client (numeric 330)
 o) Administrators can now see +s channels in /LIST
 
 

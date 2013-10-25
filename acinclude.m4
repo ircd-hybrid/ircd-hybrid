@@ -147,7 +147,19 @@ dnl {{{ ax_arg_enable_warnings
 AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
   AC_ARG_ENABLE([warnings],[AS_HELP_STRING([--enable-warnings],[Enable compiler warnings.])],[warnings="$enableval"],[warnings="no"])
   if test "$warnings" = "yes" ; then
-    CFLAGS="-Wall -Wextra -Wno-unused -Wcast-qual -Wcast-align -Wbad-function-cast -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wredundant-decls -Wshadow -Wwrite-strings -Wundef"
+    AX_APPEND_COMPILE_FLAGS([-Wall])
+    AX_APPEND_COMPILE_FLAGS([-Wextra])
+    AX_APPEND_COMPILE_FLAGS([-Wno-unused])
+    AX_APPEND_COMPILE_FLAGS([-Wcast-qual])
+    AX_APPEND_COMPILE_FLAGS([-Wcast-align])
+    AX_APPEND_COMPILE_FLAGS([-Wbad-function-cast])
+    AX_APPEND_COMPILE_FLAGS([-Wmissing-declarations])
+    AX_APPEND_COMPILE_FLAGS([-Wmissing-prototypes])
+    AX_APPEND_COMPILE_FLAGS([-Wnested-externs])
+    AX_APPEND_COMPILE_FLAGS([-Wredundant-decls])
+    AX_APPEND_COMPILE_FLAGS([-Wshadow])
+    AX_APPEND_COMPILE_FLAGS([-Wwrite-strings])
+    AX_APPEND_COMPILE_FLAGS([-Wundef])
   fi
 ])dnl }}}
 dnl {{{ ac_define_dir

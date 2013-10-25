@@ -2,7 +2,8 @@
 o) Fixed bug that would lead to a desynchronized nick database
    throughout the entire network if using SVSNICK
 o) Modernized build system
-o) Add -fstack-protector to CFLAGS if available
+o) Add -fstack-protector to CFLAGS if available. Basically checks for
+   buffer overflows/stack-smashing attacks
 o) When using anope 1.9 services, /WHOIS now shows the account name
    of a registered/identified client
 

@@ -1,3 +1,15 @@
+-- ircd-hybrid-8.1.8 Release Notes
+o) Fixed bug that would lead to a desynchronized nick database
+   throughout the entire network if using services enforced
+   nick names (SVSNICK)
+o) Cleaned up/modernized build system
+o) Add -fstack-protector to CFLAGS if available. Basically checks for
+   buffer overflows/stack-smashing attacks
+o) When using anope 1.9 services, /WHOIS now shows the account name
+   of a registered/identified client (numeric 330)
+o) Administrators can now see +s channels in /LIST
+
+
 -- ircd-hybrid-8.1.7 Release Notes
 o) Fixed issue with channel mode +n having no functionality at all
 o) Fixed SSL certificate fingerprint validation for outgoing server connects

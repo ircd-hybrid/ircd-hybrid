@@ -61,7 +61,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   struct Client *target_p = NULL;
   int what = MODE_ADD;
   unsigned int flag = 0, setmodes = 0;
-  char *m = NULL, *modes = NULL, *extarg = NULL;
+  const char *m = NULL, *modes = NULL, *extarg = NULL;
   time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))

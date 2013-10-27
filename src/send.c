@@ -362,15 +362,14 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
   if (IsServer(from))
-    local_len = sprintf(local_buf, ":%s ",
+    local_len = snprintf(local_buf, sizeof(local_buf), ":%s ",
                         from->name);
   else
-    local_len = sprintf(local_buf, ":%s!%s@%s ",
-                        from->name, from->username, from->host);
-  remote_len = sprintf(remote_buf, ":%s ",
-                          from->name);
-  uid_len = sprintf(uid_buf, ":%s ",
-                    ID(from));
+    local_len = snprintf(local_buf, sizeof(local_buf), ":%s!%s@%s ",
+                         from->name, from->username, from->host);
+  remote_len = snprintf(remote_buf, sizeof(remote_buf), ":%s ",
+                        from->name);
+  uid_len = snprintf(uid_buf, sizeof(uid_buf), ":%s ", ID(from));
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
@@ -717,9 +716,10 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
   struct Client *client_p;
   dlink_node *ptr, *ptr_next;
   char local_buf[IRCD_BUFSIZE], remote_buf[IRCD_BUFSIZE];
-  int local_len = sprintf(local_buf, ":%s!%s@%s ", from->name,
-                          from->username, from->host);
-  int remote_len = sprintf(remote_buf, ":%s ", from->name);
+  int local_len = snprintf(local_buf, sizeof(local_buf), ":%s!%s@%s ",
+                           from->name, from->username, from->host);
+  int remote_len = snprintf(remote_buf, sizeof(remote_buf), ":%s ",
+                            from->name);
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
@@ -853,21 +853,21 @@ sendto_anywhere(struct Client *to, struct Client *from,
     if (IsServer(from))
     {
       if (IsCapable(to, CAP_TS6) && HasID(from))
-        len = sprintf(buffer, ":%s ", from->id);
+        len = snprintf(buffer, sizeof(buffer), ":%s ", from->id);
       else
-        len = sprintf(buffer, ":%s ", from->name);
+        len = snprintf(buffer, sizeof(buffer), ":%s ", from->name);
     }
     else
-      len = sprintf(buffer, ":%s!%s@%s ",
-                       from->name, from->username, from->host);
+      len = snprintf(buffer, sizeof(buffer), ":%s!%s@%s ",
+                     from->name, from->username, from->host);
   }
-  else len = sprintf(buffer, ":%s ", ID_or_name(from, send_to));
+  else len = snprintf(buffer, sizeof(buffer), ":%s ", ID_or_name(from, send_to));
 
   va_start(args, pattern);
   len += send_format(&buffer[len], IRCD_BUFSIZE - len, pattern, args);
   va_end(args);
 
-  if(MyClient(to))
+  if (MyClient(to))
     send_message(send_to, buffer, len);
   else
     send_message_remote(send_to, from, buffer, len);
@@ -945,10 +945,12 @@ sendto_wallops_flags(unsigned int flags, struct Client *source_p,
   int len;
 
   if (IsClient(source_p))
-    len = sprintf(buffer, ":%s!%s@%s WALLOPS :",
-                  source_p->name, source_p->username, source_p->host);
+    len = snprintf(buffer, sizeof(buffer), ":%s!%s@%s WALLOPS :",
+                   source_p->name, source_p->username, 
+                   source_p->host);
   else
-    len = sprintf(buffer, ":%s WALLOPS :", source_p->name);
+    len = snprintf(buffer, sizeof(buffer), ":%s WALLOPS :",
+                   source_p->name);
 
   va_start(args, pattern);
   len += send_format(&buffer[len], IRCD_BUFSIZE - len, pattern, args);
@@ -1026,8 +1028,9 @@ kill_client(struct Client *client_p, struct Client *diedie,
   if (IsDead(client_p))
     return;
 
-  len = sprintf(buffer, ":%s KILL %s :", ID_or_name(&me, client_p->from),
-                ID_or_name(diedie, client_p));
+  len = snprintf(buffer, sizeof(buffer), ":%s KILL %s :",
+                 ID_or_name(&me, client_p->from),
+                 ID_or_name(diedie, client_p));
 
   va_start(args, pattern);
   len += send_format(&buffer[len], IRCD_BUFSIZE - len, pattern, args);
@@ -1060,14 +1063,16 @@ kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
   {
     have_uid = 1;
     va_start(args, pattern);
-    len_uid = sprintf(buf_uid, ":%s KILL %s :", me.id, ID(source_p));
+    len_uid = snprintf(buf_uid, sizeof(buf_uid), ":%s KILL %s :",
+                       me.id, ID(source_p));
     len_uid += send_format(&buf_uid[len_uid], IRCD_BUFSIZE - len_uid, pattern,
                            args);
     va_end(args);
   }
 
   va_start(args, pattern);
-  len_nick = sprintf(buf_nick, ":%s KILL %s :", me.name, source_p->name);
+  len_nick = snprintf(buf_nick, sizeof(buf_nick), ":%s KILL %s :",
+                      me.name, source_p->name);
   len_nick += send_format(&buf_nick[len_nick], IRCD_BUFSIZE - len_nick, pattern,
                           args);
   va_end(args);

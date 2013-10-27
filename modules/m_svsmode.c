@@ -145,6 +145,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
         break;
 
       case 'S':  /* Only servers may set +S in a burst */
+      case 'W':  /* Only servers may set +W in a burst */
         break;
 
       default:

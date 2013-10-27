@@ -364,7 +364,7 @@ static const char *const replies[] = {
 /* 334 */ NULL,
 /* 335 */ NULL,
 /* 336 */ NULL,
-/* 337 */ NULL,
+/* 338 RPL_WHOISTEXT */ ":%s 337 %s %s :%s",
 /* 338 RPL_WHOISACTUALLY */ ":%s 338 %s %s %s :actually using host",
 /* 339 */ NULL,
 /* 340 */ NULL,

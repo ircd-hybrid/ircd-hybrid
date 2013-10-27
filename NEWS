@@ -1,3 +1,11 @@
+-- ircd-hybrid-8.1.9 Release Notes
+o) Added usermode +W. Users connected via a webirc gateway get this
+   mode set by servers.
+o) /WHOIS now shows if a client is connected via a webirc
+   gateway
+o) Admins may now see +s channels a user is in with /WHOIS
+
+
 -- ircd-hybrid-8.1.8 Release Notes
 o) Fixed bug that would lead to a desynchronized nick database
    throughout the entire network if using services enforced

@@ -69,10 +69,11 @@ whois_person(struct Client *source_p, struct Client *target_p)
   DLINK_FOREACH(lp, target_p->channel.head)
   {
     const struct Membership *ms = lp->data;
+    int show = ShowChannel(source_p, ms->chptr);
 
-    if (ShowChannel(source_p, ms->chptr))
+    if (show || HasUMode(source_p, UMODE_ADMIN))
     {
-      if ((cur_len + 3 + strlen(ms->chptr->chname) + 1) > (IRCD_BUFSIZE - 2))
+      if ((cur_len + 4 + strlen(ms->chptr->chname) + 1) > (IRCD_BUFSIZE - 2))
       {
         *(t - 1) = '\0';
         sendto_one(source_p, "%s", buf);
@@ -80,7 +81,8 @@ whois_person(struct Client *source_p, struct Client *target_p)
         t = buf + mlen;
       }
 
-      tlen = sprintf(t, "%s%s ", get_member_status(ms, 1), ms->chptr->chname);
+      tlen = sprintf(t, "%s%s%s ", show ? "" : "~", get_member_status(ms, 1),
+                     ms->chptr->chname);
       t += tlen;
       cur_len += tlen;
       reply_to_send = 1;

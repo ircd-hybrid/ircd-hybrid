@@ -163,6 +163,7 @@
 #define UMODE_FARCONNECT   0x00800000 /**< Can see remote client connects/exits */
 #define UMODE_HIDDENHOST   0x01000000 /**< User's host is hidden */
 #define UMODE_SSL          0x02000000 /**< User is connected via TLS/SSL */
+#define UMODE_WEBIRC       0x04000000 /**< User connected via a webirc gateway */
 
 
 #define UMODE_ALL          UMODE_SERVNOTICE
@@ -173,7 +174,8 @@
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP |\
                       UMODE_REGONLY | UMODE_REGISTERED | UMODE_ADMIN |\
-                      UMODE_HIDDEN | UMODE_HIDDENHOST | UMODE_SSL)
+                      UMODE_HIDDEN | UMODE_HIDDENHOST | UMODE_SSL |\
+                      UMODE_WEBIRC)
 
 
 

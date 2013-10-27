@@ -36,6 +36,7 @@ User Modes:
 +S - ssl          - Client is connected via SSL/TLS
 +u - unauth       - See unauthorized client notices
 +w - wallop       - See server generated WALLOPS
++W - webirc       - User is connected using a webirc gateway
 +x - hiddenhost   - User's host has been spoofed by services.
                     This mode can be set by servers and services only.
 +y - spy          - See LINKS, STATS (if configured), TRACE notices

@@ -8,6 +8,7 @@ Usermodes: (* designates that the umode is oper only)
                   Use the /oper command to attain this.
          +i     - Designates this client 'invisible'.
        * +w     - Can see server wallops.
+         +W     - User is connected using a webirc gateway.
        * +z     - Can see oper wallops.
        * +l     - Can see oper locops (local wallops).
        * +c     - Can see client connections and exits.

@@ -149,6 +149,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
     }
   }
 
+  AddUMode(source_p, UMODE_WEBIRC);
   sendto_one(source_p, ":%s NOTICE %s :CGI:IRC host/IP set to %s %s", me.name,
              source_p->name[0] ? source_p->name : "*", parv[3], parv[4]);
 }

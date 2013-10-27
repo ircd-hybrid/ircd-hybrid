@@ -105,7 +105,7 @@ const unsigned int user_modes[256] =
   0,                  /* T */
   0,                  /* U */
   0,                  /* V */
-  0,                  /* W */
+  UMODE_WEBIRC,       /* W */
   0,                  /* X */
   0,                  /* Y */
   0,                  /* Z 0x5A */
@@ -894,6 +894,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
           break;
 
         case 'S':  /* Only servers may set +S in a burst */
+        case 'W':  /* Only servers may set +W in a burst */
         case 'r':  /* Only services may set +r */
         case 'x':  /* Only services may set +x */
           break;

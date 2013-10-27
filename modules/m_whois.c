@@ -129,6 +129,11 @@ whois_person(struct Client *source_p, struct Client *target_p)
                  RPL_WHOISOPERATOR),
                  me.name, source_p->name, target_p->name);
 
+  if (HasUMode(target_p, UMODE_WEBIRC))
+    sendto_one(source_p, form_str(RPL_WHOISTEXT),
+               me.name, source_p->name, target_p->name,
+               "User connected using a webirc gateway");
+
   if (target_p->sockhost[0] && strcmp(target_p->sockhost, "0"))
   {
     if (HasUMode(source_p, UMODE_ADMIN) || source_p == target_p)

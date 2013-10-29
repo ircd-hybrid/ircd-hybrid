@@ -69,7 +69,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
   /* setting topic */
   if (parc > 2)
   {
-    struct Membership *ms;
+    const struct Membership *ms = NULL;
 
     if ((ms = find_channel_link(source_p, chptr)) == NULL)
     {

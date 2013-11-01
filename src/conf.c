@@ -1283,39 +1283,6 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
   return 0;
 }
 
-/* find_kill()
- *
- * inputs	- pointer to client structure
- * output	- pointer to struct MaskItem if found
- * side effects	- See if this user is klined already,
- *		  and if so, return struct MaskItem pointer
- */
-struct MaskItem *
-find_kill(struct Client *client_p)
-{
-  struct MaskItem *conf = NULL;
-
-  assert(client_p != NULL);
-
-  conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
-                              CONF_KLINE, client_p->localClient->aftype,
-                              client_p->username, NULL, 1);
-  return conf;
-}
-
-struct MaskItem *
-find_gline(struct Client *client_p)
-{
-  struct MaskItem *conf;
-
-  assert(client_p != NULL);
-
-  conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
-                              CONF_GLINE, client_p->localClient->aftype,
-                              client_p->username, NULL, 1);
-  return conf;
-}
-
 /* cleanup_tklines()
  *
  * inputs       - NONE

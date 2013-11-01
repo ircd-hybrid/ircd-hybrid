@@ -361,8 +361,13 @@ check_conf_klines(void)
       continue; /* and go examine next fd/client_p */
     }
 
-    if (ConfigFileEntry.glines && (conf = find_gline(client_p)))
+    if (ConfigFileEntry.glines)
     {
+      if (!(conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
+                                        CONF_GLINE, client_p->localClient->aftype,
+                                        client_p->username, NULL, 1)))
+        continue;
+
       if (IsExemptKline(client_p) ||
           IsExemptGline(client_p))
       {
@@ -377,7 +382,9 @@ check_conf_klines(void)
       continue;
     }
 
-    if ((conf = find_kill(client_p)) != NULL)
+    if ((conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
+                                     CONF_KLINE, client_p->localClient->aftype,
+                                     client_p->username, NULL, 1)) != NULL)
     {
       if (IsExemptKline(client_p))
       {

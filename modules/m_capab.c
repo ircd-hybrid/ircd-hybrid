@@ -57,8 +57,8 @@ mr_capab(struct Client *client_p, struct Client *source_p,
   for (i = 1; i < parc; ++i)
     for (s = strtoken(&p, parv[i], " "); s;
          s = strtoken(&p,    NULL, " "))
-        if ((cap = find_capability(s)))
-          SetCapable(client_p, cap);
+      if ((cap = find_capability(s)))
+        SetCapable(client_p, cap);
 }
 
 static struct Message capab_msgtab = {

@@ -119,7 +119,8 @@ load_a_module(const char *path, int warn)
   if (findmodule_byname((mod_basename = libio_basename(path))))
     return 1;
 
-  if (!(tmpptr = lt_dlopen(path))) {
+  if (!(tmpptr = lt_dlopen(path)))
+  {
     const char *err = ((err = lt_dlerror())) ? err : "<unknown>";
 
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,

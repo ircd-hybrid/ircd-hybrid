@@ -93,7 +93,8 @@ show_ports(struct Client *source_p)
     const struct Listener *listener = ptr->data;
     p = buf;
 
-    if (listener->flags & LISTENER_HIDDEN) {
+    if (listener->flags & LISTENER_HIDDEN)
+    {
       if (!HasUMode(source_p, UMODE_ADMIN))
         continue;
       *p++ = 'H';

@@ -2170,7 +2170,8 @@ split_nuh(struct split_nuh_item *const iptr)
     if (iptr->nickptr && *iptr->nuhmask != '\0')
       strlcpy(iptr->nickptr, iptr->nuhmask, iptr->nicksize);
 
-    if ((q = strchr(++p, '@'))) {
+    if ((q = strchr(++p, '@')))
+    {
       *q++ = '\0';
 
       if (*p != '\0')

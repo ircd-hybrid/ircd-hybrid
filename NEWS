@@ -3,9 +3,11 @@ o) Added usermode +W. Users connected via a webirc gateway get this
    mode set by servers.
 o) /WHOIS now shows if a client is connected via a webirc
    gateway
-o) Admins may now see +s channels a user is in with /WHOIS.
+o) Administrators may now see +s channels a user is in with /WHOIS.
    Secret channels are prepended with a tilde in the /WHOIS
    reply.
+o) Administrators are now able to see all the user modes a user has
+   set via /whois
 
 
 -- ircd-hybrid-8.1.8 Release Notes

@@ -337,7 +337,7 @@ static const char *const replies[] = {
 /* 307 RPL_WHOISREGNICK */ ":%s 307 %s %s :has identified for this nick",
 /* 308 RPL_WHOISADMIN */ ":%s 313 %s %s :is a Server Administrator",
 /* 309 */ NULL,
-/* 310 */ NULL,
+/* 310 RPL_WHOISMODES */ ":%s 310 %s %s :is using modes %s",
 /* 311 RPL_WHOISUSER */ ":%s 311 %s %s %s %s * :%s",
 /* 312 RPL_WHOISSERVER */ ":%s 312 %s %s %s :%s",
 /* 313 RPL_WHOISOPERATOR */ ":%s 313 %s %s :is an IRC Operator",

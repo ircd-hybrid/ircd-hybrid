@@ -33,6 +33,7 @@
 #include "conf.h"
 #include "s_misc.h"
 #include "s_serv.h"
+#include "s_user.h"
 #include "send.h"
 #include "irc_string.h"
 #include "parse.h"
@@ -133,6 +134,21 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one(source_p, form_str(RPL_WHOISTEXT),
                me.name, source_p->name, target_p->name,
                "User connected using a webirc gateway");
+
+  if (HasUMode(source_p, UMODE_ADMIN) || source_p == target_p)
+  {
+    unsigned int i = 0;
+    char *m = buf;
+    *m++ = '+';
+
+    for (i = 0; i < 128; ++i)
+      if (HasUMode(target_p, user_modes[i]))
+        *m++ = (char)i;
+    *m = '\0';
+
+    sendto_one(source_p, form_str(RPL_WHOISMODES), me.name,
+               source_p->name, target_p->name, buf);
+  }
 
   if (target_p->sockhost[0] && strcmp(target_p->sockhost, "0"))
   {

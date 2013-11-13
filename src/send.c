@@ -546,7 +546,7 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
  *		  locally connected to this server.
  */
 void
-sendto_channel_local(int type, int nodeaf, struct Channel *chptr,
+sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
                      const char *pattern, ...)
 {
   va_list args;
@@ -589,7 +589,7 @@ sendto_channel_local(int type, int nodeaf, struct Channel *chptr,
  * WARNING - +D clients are omitted
  */
 void       
-sendto_channel_local_butone(struct Client *one, int type, unsigned int cap,
+sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int cap,
 			    struct Channel *chptr, const char *pattern, ...)
 {
   va_list args;
@@ -634,7 +634,7 @@ sendto_channel_local_butone(struct Client *one, int type, unsigned int cap,
  *		  remote to this server.
  */
 void
-sendto_channel_remote(struct Client *one, struct Client *from, int type,
+sendto_channel_remote(struct Client *one, struct Client *from, unsigned int type,
                       const unsigned int caps, const unsigned int nocaps,
                       struct Channel *chptr, const char *pattern, ...)
 {
@@ -784,7 +784,7 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
  * side effects	- data sent to servers matching with capab
  */
 void
-sendto_match_servs(struct Client *source_p, const char *mask, int cap,
+sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
                    const char *pattern, ...)
 {
   va_list args;

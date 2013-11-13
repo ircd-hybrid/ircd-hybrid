@@ -40,20 +40,20 @@ static void
 mo_hash(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  int i;
-  int max_chain = 0;
-  int buckets   = 0;
-  int count     = 0;
-  struct Client *cl;
-  struct Client *icl;
-  struct Channel *ch;
-  struct UserHost *ush;
+  unsigned int i = 0;
+  unsigned int max_chain = 0;
+  unsigned int buckets   = 0;
+  unsigned int count     = 0;
+  const struct Client *cl = NULL;
+  const struct Client *icl = NULL;
+  const struct Channel *ch = NULL;
+  const struct UserHost *ush = NULL;
 
   for (i = 0; i < HASHSIZE; ++i)
   {
     if ((cl = hash_get_bucket(HASH_TYPE_CLIENT, i)) != NULL)
     {
-      int len = 0;
+      unsigned int len = 0;
 
       ++buckets;
       for (; cl != NULL; cl = cl->hnext)
@@ -64,8 +64,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Client: entries: %d buckets: %d "
-             "max chain: %d", me.name, source_p->name, count, buckets,
+  sendto_one(source_p, ":%s NOTICE %s :Client: entries: %u buckets: %u "
+             "max chain: %u", me.name, source_p->name, count, buckets,
              max_chain);
 
   count     = 0;
@@ -76,7 +76,7 @@ mo_hash(struct Client *client_p, struct Client *source_p,
   {
     if ((ch = hash_get_bucket(HASH_TYPE_CHANNEL, i)) != NULL)
     {
-      int len = 0;
+      unsigned int len = 0;
 
       ++buckets;
       for (; ch != NULL; ch = ch->hnextch)
@@ -87,8 +87,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Channel: entries: %d buckets: %d "
-             "max chain: %d", me.name, source_p->name, count, buckets,
+  sendto_one(source_p, ":%s NOTICE %s :Channel: entries: %u buckets: %u "
+             "max chain: %u", me.name, source_p->name, count, buckets,
              max_chain);
 
   count     = 0;
@@ -99,7 +99,7 @@ mo_hash(struct Client *client_p, struct Client *source_p,
   {
     if ((icl = hash_get_bucket(HASH_TYPE_ID, i)) != NULL)
     {
-      int len = 0;
+      unsigned int len = 0;
 
       ++buckets;
       for (; icl != NULL; icl = icl->idhnext)
@@ -110,8 +110,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Id: entries: %d buckets: %d "
-             "max chain: %d", me.name, source_p->name, count, buckets,
+  sendto_one(source_p, ":%s NOTICE %s :Id: entries: %u buckets: %u "
+             "max chain: %u", me.name, source_p->name, count, buckets,
              max_chain);
 
   count     = 0;
@@ -122,7 +122,7 @@ mo_hash(struct Client *client_p, struct Client *source_p,
   {
     if ((ush = hash_get_bucket(HASH_TYPE_USERHOST, i)) != NULL)
     {
-      int len = 0;
+      unsigned int len = 0;
 
       ++buckets;
       for (; ush != NULL; ush = ush->next)
@@ -133,8 +133,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :UserHost: entries: %d buckets: %d "
-             "max chain: %d", me.name, source_p->name, count, buckets,
+  sendto_one(source_p, ":%s NOTICE %s :UserHost: entries: %u buckets: %u "
+             "max chain: %u", me.name, source_p->name, count, buckets,
              max_chain);
 }
 

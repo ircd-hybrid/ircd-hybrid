@@ -1,3 +1,8 @@
+-- ircd-hybrid-8.1.10 Release Notes
+o) Changed WHOIS to show a client's certificate fingerprint
+   to administrators only
+
+
 -- ircd-hybrid-8.1.9 Release Notes
 o) Added usermode +W. Users connected via a webirc gateway get this
    mode set by servers.

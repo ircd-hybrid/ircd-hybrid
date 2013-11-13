@@ -169,7 +169,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
                source_p->name, target_p->name);
 
   if (!EmptyString(target_p->certfp))
-    if (target_p == source_p || HasUMode(source_p, UMODE_OPER))
+    if (target_p == source_p || HasUMode(source_p, UMODE_ADMIN))
       sendto_one(source_p, form_str(RPL_WHOISCERTFP), me.name,
                  source_p->name, target_p->name, target_p->certfp);
 

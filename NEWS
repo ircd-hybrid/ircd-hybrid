@@ -1,6 +1,8 @@
 -- ircd-hybrid-8.1.10 Release Notes
 o) Changed WHOIS to show a client's certificate fingerprint
    to administrators only
+o) The WHO reply now shows whether or not a nickname has
+   been registered with NickServ. ('r' status flag)
 
 
 -- ircd-hybrid-8.1.9 Release Notes

@@ -16,6 +16,7 @@ are listed below:
 
 H	-	The user is not away.
 G	-	The user is set away.
+r       -       The user is using a registered nickname.
 *	-	The user is an IRC operator.
 @	-	The user is a channel op in the channel listed
                 in the first field.

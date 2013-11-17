@@ -89,6 +89,6 @@ extern void sendto_anywhere(struct Client *, struct Client *,
                             const char *, ...) AFP(3,4);
 extern void kill_client(struct Client *, struct Client *,
                         const char *, ... ) AFP(3,4);
-extern void kill_client_ll_serv_butone(struct Client *, struct Client *,
-                                       const char *, ...) AFP(3,4);
+extern void kill_client_serv_butone(struct Client *, struct Client *,
+                                    const char *, ...) AFP(3,4);
 #endif /* INCLUDED_send_h */

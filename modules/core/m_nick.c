@@ -78,9 +78,9 @@ check_clean_nick(struct Client *client_p, struct Client *source_p,
     /* bad nick change */
     if (source_p != client_p)
     {
-      kill_client_ll_serv_butone(client_p, source_p,
-                                 "%s (Bad Nickname)",
-                                 me.name);
+      kill_client_serv_butone(client_p, source_p,
+                              "%s (Bad Nickname)",
+                              me.name);
       AddFlag(source_p, FLAGS_KILLED);
       exit_client(source_p, &me, "Bad Nickname");
     }
@@ -414,8 +414,8 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
         sendto_one(client_p, ":%s KILL %s :%s (Nick collision (new))",
                    me.id, uid, me.name);
 
-      kill_client_ll_serv_butone(NULL, target_p,
-                                 "%s (Nick collision (new))", me.name);
+      kill_client_serv_butone(NULL, target_p,
+                              "%s (Nick collision (new))", me.name);
       ++ServerStats.is_kill;
       sendto_one(target_p, form_str(ERR_NICKCOLLISION),
                  me.name, target_p->name, target_p->name);
@@ -463,8 +463,8 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
         /* if it came from a LL server, itd have been source_p,
          * so we dont need to mark target_p as known
          */
-        kill_client_ll_serv_butone(source_p, target_p,
-                                   "%s (Nick collision (new))", me.name);
+        kill_client_serv_butone(source_p, target_p,
+                                "%s (Nick collision (new))", me.name);
 
         AddFlag(target_p, FLAGS_KILLED);
         exit_client(target_p, &me, "Nick collision");
@@ -490,12 +490,12 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
                  target_p->name, target_p->name);
 
       ++ServerStats.is_kill;
-      kill_client_ll_serv_butone(NULL, source_p, "%s (Nick change collision)",
-                                 me.name);
+      kill_client_serv_butone(NULL, source_p, "%s (Nick change collision)",
+                              me.name);
 
       ++ServerStats.is_kill;
-      kill_client_ll_serv_butone(NULL, target_p, "%s (Nick change collision)",
-                                 me.name);
+      kill_client_serv_butone(NULL, target_p, "%s (Nick change collision)",
+                              me.name);
 
       AddFlag(target_p, FLAGS_KILLED);
       exit_client(target_p, &me, "Nick collision (new)");
@@ -524,8 +524,8 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
              client_p->name);
 
       ++ServerStats.is_kill;
-      kill_client_ll_serv_butone(client_p, source_p,
-                                 "%s (Nick change collision)", me.name);
+      kill_client_serv_butone(client_p, source_p,
+                              "%s (Nick change collision)", me.name);
       AddFlag(source_p, FLAGS_KILLED);
 
       if (sameuser)
@@ -547,8 +547,8 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
                              target_p->name, target_p->from->name,
                              client_p->name);
 
-      kill_client_ll_serv_butone(source_p, target_p,
-                                 "%s (Nick collision)", me.name);
+      kill_client_serv_butone(source_p, target_p,
+                              "%s (Nick collision)", me.name);
 
       ++ServerStats.is_kill;
       sendto_one(target_p, form_str(ERR_NICKCOLLISION),
@@ -886,8 +886,8 @@ ms_uid(struct Client *client_p, struct Client *source_p,
                          "ID collision on %s(%s <- %s)(both killed)",
                          target_p->name, target_p->from->name,
                          client_p->name);
-    kill_client_ll_serv_butone(NULL, target_p, "%s (ID collision)",
-                               me.name);
+    kill_client_serv_butone(NULL, target_p, "%s (ID collision)",
+                            me.name);
 
     ++ServerStats.is_kill;
     AddFlag(target_p, FLAGS_KILLED);

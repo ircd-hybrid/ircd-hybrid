@@ -1050,8 +1050,8 @@ kill_client(struct Client *client_p, struct Client *diedie,
  *		  client being unknown to leaf, as in lazylink...
  */
 void
-kill_client_ll_serv_butone(struct Client *one, struct Client *source_p,
-                           const char *pattern, ...)
+kill_client_serv_butone(struct Client *one, struct Client *source_p,
+                        const char *pattern, ...)
 {
   va_list args;
   int have_uid = 0;

@@ -1689,7 +1689,9 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
       mc = 0;
 
       if (IsServer(source_p))
-        mbl = sprintf(modebuf, ":%s MODE %s ", me.name, chname);
+        mbl = sprintf(modebuf, ":%s MODE %s ", (IsHidden(source_p) ||
+                      ConfigServerHide.hide_servers) ?
+                      me.name : source_p->name, chname);
       else
         mbl = sprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
                       source_p->username, source_p->host, chname);

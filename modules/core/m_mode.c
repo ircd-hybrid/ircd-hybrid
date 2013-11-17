@@ -212,7 +212,8 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
   /* only need to construct one buffer, for non-ts6 servers */
   mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s +",
-                  source_p->name, chptr->chname);
+                  (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
+                  chptr->chname);
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 

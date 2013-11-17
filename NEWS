@@ -3,6 +3,7 @@ o) Changed WHOIS to show a client's certificate fingerprint
    to administrators only
 o) The WHO reply now shows whether or not a nickname has
    been registered with NickServ. ('r' status flag)
+o) Fixed some flaws with server hiding
 
 
 -- ircd-hybrid-8.1.9 Release Notes

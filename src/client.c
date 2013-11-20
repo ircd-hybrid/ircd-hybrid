@@ -513,12 +513,8 @@ find_person(const struct Client *client_p, const char *name)
   if (IsDigit(*name))
   {
     if ((target_p = hash_find_id(name)) != NULL)
-    {
-      /* invisible users shall not be found by UID guessing */
-      if (HasUMode(target_p, UMODE_INVISIBLE))
-        if (!IsServer(client_p) && !HasFlag(client_p, FLAGS_SERVICE))
-          target_p = NULL;
-    }
+      if (!IsServer(client_p) && !HasFlag(client_p, FLAGS_SERVICE))
+        target_p = NULL;
   }
   else
     target_p = hash_find_client(name);

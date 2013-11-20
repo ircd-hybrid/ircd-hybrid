@@ -120,9 +120,15 @@ whois_person(struct Client *source_p, struct Client *target_p)
                me.name, source_p->name, target_p->name,
                target_p->away);
 
-  if (HasUMode(target_p, UMODE_CALLERID) && !HasUMode(target_p, UMODE_SOFTCALLERID))
+  if (HasUMode(target_p, UMODE_CALLERID|UMODE_SOFTCALLERID))
+  {
+    int callerid = !!HasUMode(target_p, UMODE_CALLERID);
     sendto_one(source_p, form_str(RPL_TARGUMODEG),
-               me.name, source_p->name, target_p->name);
+               me.name, source_p->name, target_p->name,
+               callerid ? "+g" : "+G",
+               callerid ? "server side ignore" :
+                          "server side ignore with the exception of common channels");
+  }
 
   if (HasUMode(target_p, UMODE_OPER))
     if (!HasUMode(target_p, UMODE_HIDDEN) || HasUMode(source_p, UMODE_OPER))

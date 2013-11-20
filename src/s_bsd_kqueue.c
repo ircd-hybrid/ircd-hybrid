@@ -85,7 +85,10 @@ kq_update_events(int fd, int filter, int what)
 
   if (++kqoff == KE_LENGTH)
   {
-    kevent(kqfd.fd, kq_fdlist, kqoff, NULL, 0, &zero_timespec);
+    int i;
+
+    for (i = 0; i < kqoff; ++i)
+      kevent(kqfd.fd, kq_fdlist[i], 1, NULL, 0, &zero_timespec);
     kqoff = 0;
   }
 }

@@ -545,11 +545,16 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
       }
       else
       {
+        int callerid = !!HasUMode(target_p, UMODE_CALLERID);
+
         /* check for accept, flag recipient incoming message */
         if (p_or_n != NOTICE)
 	  sendto_one(source_p, form_str(RPL_TARGUMODEG),
 		     ID_or_name(&me, source_p->from),
-		     ID_or_name(source_p, source_p->from), target_p->name);
+		     ID_or_name(source_p, source_p->from), target_p->name,
+                     callerid ? "+g" : "+G",
+                     callerid ? "server side ignore" :
+                                "server side ignore with the exception of common channels");
 
         if ((target_p->localClient->last_caller_id_time +
              ConfigFileEntry.caller_id_wait) < CurrentTime)
@@ -561,7 +566,8 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
 
           sendto_one(target_p, form_str(RPL_UMODEGMSG),
                      me.name, target_p->name,
-                     get_client_name(source_p, HIDE_IP));
+                     get_client_name(source_p, HIDE_IP),
+                     callerid ? "+g" : "+G");
 
           target_p->localClient->last_caller_id_time = CurrentTime;
 

@@ -28,6 +28,8 @@ LIBTOOL="$LIBTOOL --silent"
 # Checks for libraries.
 GCC_STACK_PROTECT_CC
 
+AX_APPEND_COMPILE_FLAGS([-fno-strict-aliasing])
+
 AX_CHECK_LIB_IPV4
 AX_CHECK_LIB_IPV6
 

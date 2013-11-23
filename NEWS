@@ -6,6 +6,7 @@ o) The WHO reply now shows whether or not a nickname has
 o) Fixed some flaws with server hiding
 o) Fixed bug where "STATS P" would leak ip addresses to remotely connected
    administrators, even if serverhide::hide_server_ips was set to 'yes'
+o) Services coders: added SVSKILL
 
 
 -- ircd-hybrid-8.1.9 Release Notes

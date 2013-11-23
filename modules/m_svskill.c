@@ -22,7 +22,7 @@
 
 /*! \file m_svskill.c
  * \brief Includes required functions for processing the SVSKILL command.
- * \version $Id: m_svskill.c 2511 2013-10-27 18:56:53Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -128,7 +128,7 @@ module_exit(void)
 struct module module_entry = {
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
-  .version = "$Revision: 2511 $",
+  .version = "$Revision$",
   .handle  = NULL,
   .modinit = module_init,
   .modexit = module_exit,

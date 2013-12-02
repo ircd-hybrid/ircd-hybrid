@@ -50,7 +50,6 @@
 static fde_t kqfd;
 static struct kevent kq_fdlist[KE_LENGTH];  /* kevent buffer */
 static int kqoff;      /* offset into the buffer */
-void init_netio(void);
 
 /*
  * init_netio
@@ -183,8 +182,8 @@ comm_select(void)
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
-	if (!F->flags.open)
-	  continue;
+        if (!F->flags.open)
+          continue;
       }
 
     if (ke[i].filter == EVFILT_WRITE)
@@ -192,8 +191,8 @@ comm_select(void)
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);
-	if (!F->flags.open)
-	  continue;
+        if (!F->flags.open)
+          continue;
       }
 
     comm_setselect(F, 0, NULL, NULL, 0);

@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.1.11 Release Notes
+o) Administrators may now see channel modes in /LIST
+
+
 -- ircd-hybrid-8.1.10 Release Notes
 o) Fixed bug with kqueue() where it occasionally dropped updates
 o) Changed WHOIS to show a client's certificate fingerprint

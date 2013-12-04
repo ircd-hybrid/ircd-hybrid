@@ -353,7 +353,7 @@ static const char *const replies[] = {
 /* 319 RPL_WHOISCHANNELS */ ":%s 319 %s %s :%s",
 /* 320 */ NULL,
 /* 321 RPL_LISTSTART */ ":%s 321 %s Channel :Users  Name",
-/* 322 RPL_LIST */ ":%s 322 %s %s %d :%s",
+/* 322 RPL_LIST */ ":%s 322 %s %s %d :%s%s",
 /* 323 RPL_LISTEND */ ":%s 323 %s :End of /LIST",
 /* 324 RPL_CHANNELMODEIS */ ":%s 324 %s %s %s %s",
 /* 325 */ NULL,

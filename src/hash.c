@@ -762,6 +762,10 @@ static void
 list_one_channel(struct Client *source_p, struct Channel *chptr,
                  struct ListTask *list_task)
 {
+  char listbuf[MODEBUFLEN] = "";
+  char modebuf[MODEBUFLEN] = "";
+  char parabuf[MODEBUFLEN] = "";
+
   if (SecretChannel(chptr) &&
       !(IsMember(source_p, chptr) || HasUMode(source_p, UMODE_ADMIN)))
     return;
@@ -777,8 +781,19 @@ list_one_channel(struct Client *source_p, struct Channel *chptr,
 
   if (!list_allow_channel(chptr->chname, list_task))
     return;
+
+  if (HasUMode(source_p, UMODE_ADMIN))
+  {
+    channel_modes(chptr, source_p, modebuf, parabuf);
+
+    if (chptr->topic[0])
+      snprintf(listbuf, sizeof(listbuf), "[%s] ", modebuf);
+    else
+      snprintf(listbuf, sizeof(listbuf), "[%s]",  modebuf);
+  }
+
   sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-             chptr->chname, dlink_list_length(&chptr->members),
+             chptr->chname, dlink_list_length(&chptr->members), listbuf,
              chptr->topic);
 }
 

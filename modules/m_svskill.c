@@ -81,7 +81,7 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
   if (ts && (ts != target_p->tsinfo))
     return;
 
-  if (MyClient(target_p))
+  if (MyConnect(target_p))
   {
     strlcpy(reason + 11, comment, sizeof(reason) - 11);
     exit_client(target_p, target_p, reason);

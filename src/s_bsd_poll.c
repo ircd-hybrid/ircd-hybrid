@@ -28,6 +28,7 @@
 #include <sys/poll.h>
 #include "fdlist.h"
 #include "list.h"
+#include "memory.h"
 #include "hook.h"
 #include "ircd.h"
 #include "s_bsd.h"

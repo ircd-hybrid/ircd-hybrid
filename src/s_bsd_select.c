@@ -41,23 +41,7 @@
 static fd_set select_readfds, tmpreadfds;
 static fd_set select_writefds, tmpwritefds;
 static int highest_fd = -1;
-static dlink_node *hookptr;
 
-/*
- * changing_fdlimit
- *
- * Make sure hard_fdlimit doesn't go too big.
- */
-static void *
-changing_fdlimit(va_list args)
-{
-  int fdmax = va_arg(args, int);
-
-  if (fdmax > FD_SETSIZE)
-    fdmax = FD_SETSIZE;
-
-  return pass_callback(hookptr, fdmax);
-}
 
 /*
  * init_netio
@@ -70,8 +54,6 @@ init_netio(void)
 {
   FD_ZERO(&select_readfds);
   FD_ZERO(&select_writefds);
-
-  hookptr = install_hook(fdlimit_cb, changing_fdlimit);
 }
 
 /*

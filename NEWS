@@ -1,5 +1,6 @@
 -- ircd-hybrid-8.1.11 Release Notes
 o) Administrators may now see channel modes in /LIST
+o) Fixed compile error on BSD systems when building with kqueue()
 
 
 -- ircd-hybrid-8.1.10 Release Notes

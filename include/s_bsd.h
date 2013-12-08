@@ -39,8 +39,6 @@ struct Client;
 struct MaskItem;
 struct Listener;
 
-extern struct Callback *setup_socket_cb;
-
 extern void add_connection(struct Listener *, struct irc_ssaddr *, int);
 extern void close_connection(struct Client *);
 extern void report_error(int, const char *, const char *, int);
@@ -61,7 +59,6 @@ extern int comm_accept(struct Listener *, struct irc_ssaddr *pn);
 /* These must be defined in the network IO loop code of your choice */
 extern void init_netio(void);
 extern void comm_setselect(fde_t *, unsigned int, PF *, void *, time_t);
-extern void init_comm(void);
 extern int read_message (time_t, unsigned char);
 extern void comm_select(void);
 extern void check_can_use_v6(void);

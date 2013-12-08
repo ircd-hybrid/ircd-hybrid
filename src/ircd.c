@@ -531,7 +531,7 @@ main(int argc, char *argv[])
   fdlist_init();
   log_set_file(LOG_TYPE_IRCD, 0, logFileName);
   check_can_use_v6();
-  init_comm();         /* This needs to be setup early ! -- adrian */
+  init_netio();         /* This needs to be setup early ! -- adrian */
 
   /* Check if there is pidfile and daemon already running */
   check_pidfile(pidFileName);

@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.1.12 Release Notes
+o) RPL_WHOISMODES now uses the 310 numeric
+
+
 -- ircd-hybrid-8.1.11 Release Notes
 o) Administrators may now see channel modes in /LIST
 o) Fixed compile error on BSD systems when building with kqueue()

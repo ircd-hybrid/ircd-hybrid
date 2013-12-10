@@ -94,7 +94,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
    * servers have always gotten away with murder,
    * including telnet servers *g* - Dianora
    */
-  if (IsServer(source_p))
+  if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))
     set_channel_mode(client_p, source_p, chptr, NULL, parc - 2, parv + 2,
                      chptr->chname);
   else
@@ -138,7 +138,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[
   if (atol(parv[1]) > chptr->channelts)
     return;
 
-  if (IsServer(source_p))
+  if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))
     set_channel_mode(client_p, source_p, chptr, NULL, parc - 3, parv + 3, chptr->chname);
   else
   {

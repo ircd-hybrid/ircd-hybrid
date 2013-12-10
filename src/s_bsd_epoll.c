@@ -198,22 +198,26 @@ comm_select(void)
       continue;
 
     if ((ep_fdlist[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR)))
+    {
       if ((hdl = F->read_handler) != NULL)
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
-	if (!F->flags.open)
-	  continue;
+        if (!F->flags.open)
+          continue;
       }
+    }
 
     if ((ep_fdlist[i].events & (EPOLLOUT | EPOLLHUP | EPOLLERR)))
+    {
       if ((hdl = F->write_handler) != NULL)
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);
-	if (!F->flags.open)
-	  continue;
+        if (!F->flags.open)
+          continue;
       }
+    }
 
     comm_setselect(F, 0, NULL, NULL, 0);
   }

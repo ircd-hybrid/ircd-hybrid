@@ -163,6 +163,7 @@ comm_select(void)
       continue;
 
     if ((dopoll.dp_fds[i].revents & POLLIN))
+    {
       if ((hdl = F->read_handler) != NULL)
       {
         F->read_handler = NULL;
@@ -170,8 +171,10 @@ comm_select(void)
         if (!F->flags.open)
           continue;
       }
+    }
 
     if ((dopoll.dp_fds[i].revents & POLLOUT))
+    {
       if ((hdl = F->write_handler) != NULL) 
       {
         F->write_handler = NULL;
@@ -179,6 +182,7 @@ comm_select(void)
         if (!F->flags.open)
           continue;
       }
+    }
 
     comm_setselect(F, 0, NULL, NULL, 0);
   }

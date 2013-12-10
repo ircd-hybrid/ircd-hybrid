@@ -117,7 +117,7 @@ comm_setselect(fde_t *F, unsigned int type, PF *handler,
   }
 
   new_events = (F->read_handler ? COMM_SELECT_READ : 0) |
-   (F->write_handler ? COMM_SELECT_WRITE : 0);
+               (F->write_handler ? COMM_SELECT_WRITE : 0);
 
   if (timeout != 0)
     F->timeout = CurrentTime + (timeout / 1000);
@@ -178,6 +178,7 @@ comm_select(void)
       continue;
 
     if (ke[i].filter == EVFILT_READ)
+    {
       if ((hdl = F->read_handler) != NULL)
       {
         F->read_handler = NULL;
@@ -185,8 +186,10 @@ comm_select(void)
         if (!F->flags.open)
           continue;
       }
+    }
 
     if (ke[i].filter == EVFILT_WRITE)
+    {
       if ((hdl = F->write_handler) != NULL)
       {
         F->write_handler = NULL;
@@ -194,6 +197,7 @@ comm_select(void)
         if (!F->flags.open)
           continue;
       }
+    }
 
     comm_setselect(F, 0, NULL, NULL, 0);
   }

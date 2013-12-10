@@ -81,7 +81,7 @@ comm_setselect(fde_t *F, unsigned int type, PF *handler,
   }
 
   new_events = (F->read_handler ? COMM_SELECT_READ : 0) |
-    (F->write_handler ? COMM_SELECT_WRITE : 0);
+               (F->write_handler ? COMM_SELECT_WRITE : 0);
 
   if (timeout != 0)
     F->timeout = CurrentTime + (timeout / 1000);
@@ -108,7 +108,7 @@ comm_setselect(fde_t *F, unsigned int type, PF *handler,
     {
       if (highest_fd == F->fd)
         while (highest_fd >= 0 && (FD_ISSET(highest_fd, &select_readfds) ||
-	                           FD_ISSET(highest_fd, &select_writefds)))
+                                   FD_ISSET(highest_fd, &select_writefds)))
           highest_fd--;
     }
     else if (F->evcache == 0)
@@ -154,6 +154,7 @@ comm_select(void)
   }
 
   for (fd = 0; fd <= highest_fd && num > 0; fd++)
+  {
     if (FD_ISSET(fd, &tmpreadfds) || FD_ISSET(fd, &tmpwritefds))
     {
       num--;
@@ -163,6 +164,7 @@ comm_select(void)
         continue;
 
       if (FD_ISSET(fd, &tmpreadfds))
+      {
         if ((hdl = F->read_handler) != NULL)
         {
           F->read_handler = NULL;
@@ -170,8 +172,10 @@ comm_select(void)
           if (!F->flags.open)
             continue;
         }
+      }
 
       if (FD_ISSET(fd, &tmpwritefds))
+      {
         if ((hdl = F->write_handler) != NULL)
         {
           F->write_handler = NULL;
@@ -179,8 +183,10 @@ comm_select(void)
           if (!F->flags.open)
             continue;
         }
+      }
 
       comm_setselect(F, 0, NULL, NULL, 0);
     }
+  }
 }
 #endif

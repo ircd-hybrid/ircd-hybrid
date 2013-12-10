@@ -109,7 +109,7 @@ comm_setselect(fde_t *F, unsigned int type, PF *handler,
   }
 
   new_events = (F->read_handler ? POLLRDNORM : 0) |
-    (F->write_handler ? POLLWRNORM : 0);
+               (F->write_handler ? POLLWRNORM : 0);
 
   if (timeout != 0)
     F->timeout = CurrentTime + (timeout / 1000);
@@ -123,18 +123,19 @@ comm_setselect(fde_t *F, unsigned int type, PF *handler,
 
       if (pollmax == F->comm_index)
         while (pollmax >= 0 && pollfds[pollmax].fd == -1)
-	  pollmax--;
+          pollmax--;
     }
     else
     {
       if (F->evcache == 0)
       {
         F->comm_index = poll_findslot();
-	if (F->comm_index > pollmax)
-	  pollmax = F->comm_index;
+        if (F->comm_index > pollmax)
+          pollmax = F->comm_index;
 
-	pollfds[F->comm_index].fd = F->fd;
+        pollfds[F->comm_index].fd = F->fd;
       }
+
       pollfds[F->comm_index].events = new_events;
       pollfds[F->comm_index].revents = 0;
     }
@@ -182,22 +183,26 @@ comm_select(void)
       continue;
 
     if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
+    {
       if ((hdl = F->read_handler) != NULL)
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
-	if (!F->flags.open)
-	  continue;
+        if (!F->flags.open)
+          continue;
       }
+    }
 
     if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
+    {
       if ((hdl = F->write_handler) != NULL)
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);
-	if (!F->flags.open)
-	  continue;
+        if (!F->flags.open)
+          continue;
       }
+    }
 
     comm_setselect(F, 0, NULL, NULL, 0);
   }

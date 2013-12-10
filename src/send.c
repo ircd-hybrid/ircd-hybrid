@@ -62,7 +62,7 @@ send_format(char *lsendbuf, int bufsize, const char *pattern, va_list args)
    *
    * IRC messages are always lines of characters terminated with a CR-LF
    * (Carriage Return - Line Feed) pair, and these messages shall not
-   * exceed 512 characters in length,  counting all characters 
+   * exceed 512 characters in length,  counting all characters
    * including the trailing CR-LF.
    * Thus, there are 510 characters maximum allowed
    * for the command and its parameters.  There is no provision for
@@ -102,7 +102,7 @@ send_message(struct Client *to, char *buf, int len)
     dead_link_on_write(to, 0);
     return;
   }
- 
+
   dbuf_put(&to->localClient->buf_sendq, buf, len);
 
   /*
@@ -136,8 +136,8 @@ send_message_remote(struct Client *to, struct Client *from,
   if (!MyConnect(to))
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			 "server send message to %s [%s] dropped from %s(Not local server)",
-			 to->name, to->from->name, from->name);
+                         "Server send message to %s [%s] dropped from %s(Not local server)",
+                         to->name, to->from->name, from->name);
     return;
   }
 
@@ -177,9 +177,8 @@ send_message_remote(struct Client *to, struct Client *from,
                  to->host, to->from);
 
     exit_client(to, &me, "Ghosted client");
-
     return;
-  } 
+  }
 
   send_message(to, buf, len);
 }
@@ -212,8 +211,8 @@ sendq_unblocked(fde_t *fd, struct Client *client_p)
 void
 send_queued_write(struct Client *to)
 {
-  int retlen;
-  struct dbuf_block *first;
+  int retlen = 0;
+  struct dbuf_block *first = NULL;
 
   /*
    ** Once socket is marked dead, we cannot start writing to it,
@@ -223,10 +222,10 @@ send_queued_write(struct Client *to)
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
-
   if (dbuf_length(&to->localClient->buf_sendq))
   {
-    do {
+    do
+    {
       first = to->localClient->buf_sendq.blocks.head->data;
 
 #ifdef HAVE_LIBCRYPTO
@@ -235,22 +234,23 @@ send_queued_write(struct Client *to)
         retlen = SSL_write(to->localClient->fd.ssl, first->data, first->size);
 
         /* translate openssl error codes, sigh */
-	if (retlen < 0)
-	  switch (SSL_get_error(to->localClient->fd.ssl, retlen))
-	  {
+        if (retlen < 0)
+        {
+          switch (SSL_get_error(to->localClient->fd.ssl, retlen))
+          {
             case SSL_ERROR_WANT_READ:
-	      return;  /* retry later, don't register for write events */
-
-	    case SSL_ERROR_WANT_WRITE:
-	      errno = EWOULDBLOCK;
+              return;  /* retry later, don't register for write events */
+            case SSL_ERROR_WANT_WRITE:
+              errno = EWOULDBLOCK;
             case SSL_ERROR_SYSCALL:
-	      break;
+              break;
             case SSL_ERROR_SSL:
               if (errno == EAGAIN)
                 break;
             default:
-	      retlen = errno = 0;  /* either an SSL-specific error or EOF */
-	  }
+              retlen = errno = 0;  /* either an SSL-specific error or EOF */
+          }
+        }
       }
       else
 #endif
@@ -296,13 +296,13 @@ send_queued_all(void)
    * a notice to opers, which is to be delivered by this function.
    */
   DLINK_FOREACH(ptr, serv_list.head)
-    send_queued_write((struct Client *) ptr->data);
+    send_queued_write(ptr->data);
 
   DLINK_FOREACH(ptr, unknown_list.head)
-    send_queued_write((struct Client *) ptr->data);
+    send_queued_write(ptr->data);
 
   DLINK_FOREACH(ptr, local_client_list.head)
-    send_queued_write((struct Client *) ptr->data);
+    send_queued_write(ptr->data);
 
   /* NOTE: This can still put clients on aborted_list; unfortunately,
    * exit_aborted_clients takes precedence over send_queued_all,
@@ -332,7 +332,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
     return; /* This socket has already been marked as dead */
 
   va_start(args, pattern);
-  len = send_format(buffer, IRCD_BUFSIZE, pattern, args);
+  len = send_format(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
   send_message(to, buffer, len);
@@ -442,7 +442,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
  * lazylinks, uids, etc.
  * -davidt
  */
-void 
+void
 sendto_server(struct Client *one,
               const unsigned int caps,
               const unsigned int nocaps,
@@ -454,7 +454,7 @@ sendto_server(struct Client *one,
   int len = 0;
 
   va_start(args, format);
-  len = send_format(buffer, IRCD_BUFSIZE, format, args);
+  len = send_format(buffer, sizeof(buffer), format, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, serv_list.head)
@@ -501,14 +501,14 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
   int len;
 
   va_start(args, pattern);
-  len = send_format(buffer, IRCD_BUFSIZE, pattern, args);
+  len = send_format(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
   ++current_serial;
 
   DLINK_FOREACH(cptr, user->channel.head)
   {
-    chptr = ((struct Membership *) cptr->data)->chptr;
+    chptr = ((struct Membership *)cptr->data)->chptr;
     assert(chptr != NULL);
 
     DLINK_FOREACH(uptr, chptr->members.head)
@@ -551,19 +551,17 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
 {
   va_list args;
   char buffer[IRCD_BUFSIZE];
-  int len;
-  dlink_node *ptr;
-  struct Membership *ms;
-  struct Client *target_p;
+  int len = 0;
+  dlink_node *ptr = NULL;
 
   va_start(args, pattern);
-  len = send_format(buffer, IRCD_BUFSIZE, pattern, args);
+  len = send_format(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, chptr->members.head)
   {
-    ms = ptr->data;
-    target_p = ms->client_p;
+    struct Membership *ms = ptr->data;
+    struct Client *target_p = ms->client_p;
 
     if (type != 0 && (ms->flags & type) == 0)
       continue;
@@ -588,25 +586,23 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
  *
  * WARNING - +D clients are omitted
  */
-void       
+void
 sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int cap,
-			    struct Channel *chptr, const char *pattern, ...)
+                            struct Channel *chptr, const char *pattern, ...)
 {
   va_list args;
   char buffer[IRCD_BUFSIZE];
-  int len;
-  struct Client *target_p;
-  struct Membership *ms;
-  dlink_node *ptr;
+  int len = 0;
+  dlink_node *ptr = NULL;
 
-  va_start(args, pattern); 
-  len = send_format(buffer, IRCD_BUFSIZE, pattern, args);
+  va_start(args, pattern);
+  len = send_format(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, chptr->members.head)       
-  {   
-    ms = ptr->data;
-    target_p = ms->client_p;
+  DLINK_FOREACH(ptr, chptr->members.head)
+  {
+    struct Membership *ms = ptr->data;
+    struct Client *target_p = ms->client_p;
 
     if (type != 0 && (ms->flags & type) == 0)
       continue;
@@ -616,7 +612,8 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
       continue;
 
     if (HasCap(target_p, cap) != cap)
-        continue;
+      continue;
+
     send_message(target_p, buffer, len);
   }
 }
@@ -640,39 +637,39 @@ sendto_channel_remote(struct Client *one, struct Client *from, unsigned int type
 {
   va_list args;
   char buffer[IRCD_BUFSIZE];
-  int len;
-  dlink_node *ptr;
-  struct Client *target_p;
-  struct Membership *ms;
+  int len = 0;
+  dlink_node *ptr = NULL;
 
   va_start(args, pattern);
-  len = send_format(buffer, IRCD_BUFSIZE, pattern, args);
+  len = send_format(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
   ++current_serial;
 
   DLINK_FOREACH(ptr, chptr->members.head)
   {
-    ms = ptr->data;
-    target_p = ms->client_p;
+    struct Membership *ms = ptr->data;
+    struct Client *target_p = ms->client_p;
 
     if (type != 0 && (ms->flags & type) == 0)
       continue;
 
     if (MyConnect(target_p))
       continue;
+
     target_p = target_p->from;
 
     if (target_p == one->from ||
         ((target_p->from->localClient->caps & caps) != caps) ||
         ((target_p->from->localClient->caps & nocaps) != 0))
       continue;
+
     if (target_p->from->localClient->serial != current_serial)
     {
       send_message(target_p, buffer, len);
       target_p->from->localClient->serial = current_serial;
     }
-  } 
+  }
 }
 
 /*
@@ -788,8 +785,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
                    const char *pattern, ...)
 {
   va_list args;
-  struct Client *target_p;
-  dlink_node *ptr;
+  dlink_node *ptr = NULL;
   char buffer[IRCD_BUFSIZE];
 
   va_start(args, pattern);
@@ -800,7 +796,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 
   DLINK_FOREACH(ptr, global_serv_list.head)
   {
-    target_p = ptr->data;
+    struct Client *target_p = ptr->data;
 
     /* Do not attempt to send to ourselves, or the source */
     if (IsMe(target_p) || target_p->from == source_p->from)
@@ -912,7 +908,7 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
      * If we're sending it to admins, and they're not, skip.
      */
     if (((level == L_ADMIN) && !HasUMode(client_p, UMODE_ADMIN)) ||
-	((level == L_OPER) && HasUMode(client_p, UMODE_ADMIN)))
+        ((level == L_OPER) && HasUMode(client_p, UMODE_ADMIN)))
       continue;
 
     if (HasUMode(client_p, flags))
@@ -940,7 +936,7 @@ sendto_wallops_flags(unsigned int flags, struct Client *source_p,
 
   if (IsClient(source_p))
     len = snprintf(buffer, sizeof(buffer), ":%s!%s@%s WALLOPS :",
-                   source_p->name, source_p->username, 
+                   source_p->name, source_p->username,
                    source_p->host);
   else
     len = snprintf(buffer, sizeof(buffer), ":%s WALLOPS :",
@@ -1059,16 +1055,14 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
     va_start(args, pattern);
     len_uid = snprintf(buf_uid, sizeof(buf_uid), ":%s KILL %s :",
                        me.id, ID(source_p));
-    len_uid += send_format(&buf_uid[len_uid], IRCD_BUFSIZE - len_uid, pattern,
-                           args);
+    len_uid += send_format(&buf_uid[len_uid], IRCD_BUFSIZE - len_uid, pattern, args);
     va_end(args);
   }
 
   va_start(args, pattern);
   len_nick = snprintf(buf_nick, sizeof(buf_nick), ":%s KILL %s :",
                       me.name, source_p->name);
-  len_nick += send_format(&buf_nick[len_nick], IRCD_BUFSIZE - len_nick, pattern,
-                          args);
+  len_nick += send_format(&buf_nick[len_nick], IRCD_BUFSIZE - len_nick, pattern, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, serv_list.head)
@@ -1085,4 +1079,4 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
     else
       send_message(client_p, buf_nick, len_nick);
   }
-} 
+}

@@ -851,17 +851,13 @@ sendto_anywhere(struct Client *to, struct Client *from,
   if (MyClient(to))
   {
     if (IsServer(from))
-    {
-      if (IsCapable(to, CAP_TS6) && HasID(from))
-        len = snprintf(buffer, sizeof(buffer), ":%s ", from->id);
-      else
-        len = snprintf(buffer, sizeof(buffer), ":%s ", from->name);
-    }
+      len = snprintf(buffer, sizeof(buffer), ":%s ", from->name);
     else
       len = snprintf(buffer, sizeof(buffer), ":%s!%s@%s ",
                      from->name, from->username, from->host);
   }
-  else len = snprintf(buffer, sizeof(buffer), ":%s ", ID_or_name(from, send_to));
+  else
+    len = snprintf(buffer, sizeof(buffer), ":%s ", ID_or_name(from, send_to));
 
   va_start(args, pattern);
   len += send_format(&buffer[len], IRCD_BUFSIZE - len, pattern, args);

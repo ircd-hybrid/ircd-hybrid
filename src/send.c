@@ -791,7 +791,6 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
   struct Client *target_p;
   dlink_node *ptr;
   char buffer[IRCD_BUFSIZE];
-  int found = 0;
 
   va_start(args, pattern);
   vsnprintf(buffer, sizeof(buffer), pattern, args);
@@ -817,7 +816,6 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
        * match() again, if !IsCapable()
        */
       target_p->from->localClient->serial = current_serial;
-      found++;
 
       if (!IsCapable(target_p->from, cap))
         continue;

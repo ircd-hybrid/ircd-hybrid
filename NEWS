@@ -1,5 +1,5 @@
 -- ircd-hybrid-8.1.12 Release Notes
-o) RPL_WHOISMODES now uses the 310 numeric
+o) RPL_WHOISMODES now uses the 379 numeric
 o) Serial number is now shown on start up
 o) Fixed possible channel mode desynch with services
 o) Fixed TS 6 support with LOCOPS

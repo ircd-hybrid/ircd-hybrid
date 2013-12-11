@@ -271,7 +271,7 @@ send_queued_write(struct Client *to)
       /* we have a non-fatal error, reschedule a write */
       SetSendqBlocked(to);
       comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE,
-                     (PF *)sendq_unblocked, (void *)to, 0);
+                     (PF *)sendq_unblocked, to, 0);
     }
     else if (retlen <= 0)
     {

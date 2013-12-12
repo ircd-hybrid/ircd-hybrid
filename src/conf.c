@@ -1798,7 +1798,10 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
          * break - no point in searching further.
          */
         if (++nonwild >= ConfigFileEntry.min_nonwildcard)
+        {
+          va_end(args);
           return 1;
+        }
       }
     }
   }
@@ -1806,6 +1809,7 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
   if (warn)
     sendto_one(source_p, ":%s NOTICE %s :Please include at least %d non-wildcard characters with the mask",
                me.name, source_p->name, ConfigFileEntry.min_nonwildcard);
+  va_end(args);
   return 0;
 }
 

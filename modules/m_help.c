@@ -52,6 +52,7 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
+    fclose(file);
     return;
   }
 

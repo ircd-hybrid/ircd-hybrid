@@ -4,6 +4,7 @@ o) Serial number is now shown on start up
 o) Fixed possible channel mode desynch with services
 o) Fixed TS 6 support with LOCOPS
 o) Minor code cleanups
+o) Fixed file descriptor leak with empty help files
 
 
 -- ircd-hybrid-8.1.11 Release Notes

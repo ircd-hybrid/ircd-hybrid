@@ -139,7 +139,7 @@ m_join(struct Client *client_p, struct Client *source_p,
     {
       ++conf->count;
       sendto_one(source_p, form_str(ERR_CHANBANREASON), me.name, source_p->name,
-                 chan, conf ? conf->reason : "Reserved channel");
+                 chan, conf->reason ? conf->reason : "Reserved channel");
       sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                            "Forbidding reserved channel [%s] from user %s",
                            chan, get_client_name(source_p, HIDE_IP));

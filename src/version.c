@@ -30,7 +30,7 @@ const char *serno = SERIALNUM;
 
 const char *infotext[] =
 {
-  "IRC --",
+  "ircd-hybrid --",
   "Based on the original code written by Jarkko Oikarinen",
   "Copyright 1988, 1989, 1990, 1991 University of Oulu, Computing Center",
   "Copyright (c) 1997-2013 Hybrid Development Team",

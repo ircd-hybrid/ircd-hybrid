@@ -212,7 +212,4 @@ stats_hooks(struct Client *source_p)
                RPL_STATSDEBUG, source_p->name, cb->name, lastused, cb->called,
                dlink_list_length(&cb->chain));
   }
-
-  sendto_one(source_p, ":%s %d %s : ", me.name, RPL_STATSDEBUG,
-             source_p->name);
 }

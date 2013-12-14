@@ -258,6 +258,7 @@ show_events(struct Client *source_p)
     me.name, RPL_STATSDEBUG, source_p->name);
 
   for (i = 0; i < MAX_EVENTS; i++)
+  {
     if (event_table[i].active)
     {
       sendto_one(source_p, ":%s %d %s : %-28s %-4d seconds",
@@ -265,9 +266,7 @@ show_events(struct Client *source_p)
                  event_table[i].name,
 		 (int)(event_table[i].when - CurrentTime));
     }
-
-  sendto_one(source_p, ":%s %d %s : ",
-    me.name, RPL_STATSDEBUG, source_p->name);
+  }
 }
 
 /*

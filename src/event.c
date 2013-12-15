@@ -58,6 +58,8 @@
 #include "memory.h"
 #include "log.h"
 #include "numeric.h"
+#include "rng_mt.h"
+
 
 static const char *last_event_ran = NULL;
 static struct ev_entry event_table[MAX_EVENTS];
@@ -132,10 +134,10 @@ eventDelete(EVH *func, void *arg)
 void
 eventAddIsh(const char *name, EVH *func, void *arg, time_t delta_ish)
 {
-  if (delta_ish >= 3.0)
+  if (delta_ish >= 3)
   {
     const time_t two_third = (2 * delta_ish) / 3;
-    delta_ish = two_third + ((rand() % 1000) * two_third) / 1000;
+    delta_ish = two_third + ((genrand_int32() % 1000) * two_third) / 1000;
       /*
        * XXX I hate the above magic, I don't even know if its right.
        * Grr. -- adrian

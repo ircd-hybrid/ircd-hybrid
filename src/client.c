@@ -52,6 +52,7 @@
 #include "userhost.h"
 #include "watch.h"
 #include "rng_mt.h"
+#include "parse.h"
 
 dlink_list listing_client_list = { NULL, NULL, 0 };
 /* Pointer to beginning of Client list */

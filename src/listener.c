@@ -84,7 +84,7 @@ get_listener_name(const struct Listener *const listener)
 void 
 show_ports(struct Client *source_p)
 {
-  char buf[6];
+  char buf[IRCD_BUFSIZE];
   char *p = NULL;
   dlink_node *ptr;
 

@@ -82,7 +82,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
   dlink_node *ptr = NULL;
   struct MaskItem *conf = NULL;
   const struct shared_flags *shared = NULL;
-  char buf[12];
+  char buf[IRCD_BUFSIZE];
   char *p = NULL;
 
   switch (type)

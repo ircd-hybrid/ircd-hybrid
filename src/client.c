@@ -240,7 +240,7 @@ check_pings(void *notused)
 static void
 check_pings_list(dlink_list *list)
 {
-  char scratch[32];        /* way too generous but... */
+  char scratch[IRCD_BUFSIZE];
   int ping = 0;      /* ping time value from client */
   dlink_node *ptr = NULL, *next_ptr = NULL;
 
@@ -998,7 +998,7 @@ dead_link_on_write(struct Client *client_p, int ierrno)
 void
 dead_link_on_read(struct Client *client_p, int error)
 {
-  char errmsg[255];
+  char errmsg[IRCD_BUFSIZE];
   int current_error;
 
   if (IsDefunct(client_p))

@@ -570,7 +570,7 @@ send_capabilities(struct Client *client_p, int cap_can_send)
 void
 sendnick_TS(struct Client *client_p, struct Client *target_p)
 {
-  char ubuf[66];
+  char ubuf[IRCD_BUFSIZE];
 
   if (!IsClient(target_p))
     return;

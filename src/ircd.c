@@ -173,7 +173,7 @@ static struct lgetopt myopts[] = {
 void
 set_time(void)
 {
-  static char to_send[200];
+  static char to_send[IRCD_BUFSIZE];
   struct timeval newtime;
   newtime.tv_sec  = 0;
   newtime.tv_usec = 0;
@@ -328,7 +328,7 @@ write_pidfile(const char *filename)
 
   if ((fb = fopen(filename, "w")))
   {
-    char buff[32];
+    char buff[IRCD_BUFSIZE];
     unsigned int pid = (unsigned int)getpid();
 
     snprintf(buff, sizeof(buff), "%u\n", pid);
@@ -357,7 +357,7 @@ static void
 check_pidfile(const char *filename)
 {
   FILE *fb;
-  char buff[32];
+  char buff[IRCD_BUFSIZE];
   pid_t pidfromfile;
 
   /* Don't do logging here, since we don't have log() initialised */

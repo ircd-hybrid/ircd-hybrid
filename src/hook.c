@@ -190,7 +190,7 @@ uninstall_hook(struct Callback *cb, CBFUNC *hook)
 void
 stats_hooks(struct Client *source_p)
 {
-  char lastused[32];
+  char lastused[IRCD_BUFSIZE];
   const dlink_node *ptr = NULL;
 
   sendto_one(source_p, ":%s %d %s : %-20s %-20s Used     Hooks", me.name,

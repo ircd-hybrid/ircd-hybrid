@@ -1368,7 +1368,7 @@ static const struct oper_privs
 char *
 oper_privs_as_string(const unsigned int port)
 {
-  static char privs_out[16];
+  static char privs_out[IRCD_BUFSIZE];
   char *privs_ptr = privs_out;
   const struct oper_privs *opriv = flag_list;
 
@@ -1433,8 +1433,8 @@ void
 read_conf_files(int cold)
 {
   const char *filename;
-  char chanmodes[32];
-  char chanlimit[32];
+  char chanmodes[IRCD_BUFSIZE];
+  char chanlimit[IRCD_BUFSIZE];
 
   conf_parser_ctx.boot = cold;
   filename = ConfigFileEntry.configfile;

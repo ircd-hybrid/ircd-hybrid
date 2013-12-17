@@ -563,7 +563,7 @@ static void
 introduce_client(struct Client *source_p)
 {
   dlink_node *server_node = NULL;
-  static char ubuf[12];
+  char ubuf[66];
 
   if (MyClient(source_p))
     send_umode(source_p, source_p, 0, SEND_UMODES, ubuf);
@@ -572,7 +572,7 @@ introduce_client(struct Client *source_p)
 
   watch_check_hash(source_p, RPL_LOGON);
 
-  if (*ubuf == '\0')
+  if (ubuf[0] == '\0')
   {
     ubuf[0] = '+';
     ubuf[1] = '\0';

@@ -5,6 +5,8 @@ o) Fixed possible channel mode desynch with services
 o) Fixed TS 6 support with LOCOPS
 o) Minor code cleanups
 o) Fixed file descriptor leak with empty help files
+o) Fixed issue with WEBIRC where hostnames were
+   not validated
 
 
 -- ircd-hybrid-8.1.11 Release Notes

@@ -34,29 +34,8 @@
 #include "modules.h"
 #include "conf.h"
 #include "hostmask.h"
+#include "s_user.h"
 
-
-static int
-invalid_hostname(const char *hostname)
-{
-  const char *p = hostname;
-  unsigned int has_sep = 0;
-
-  assert(p != NULL);
-
-  if (*p == '.' || *p == ':')
-    return 1;
-
-  for (; *p; ++p)
-  {
-    if (!IsHostChar(*p))
-      return 1;
-    if (*p == '.' || *p == ':')
-      ++has_sep;
-  }
-
-  return !has_sep;
-}
 
 /*
  * mr_webirc
@@ -74,9 +53,9 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
   assert(source_p == client_p);
 
-  if (invalid_hostname(parv[4]))
+  if (!valid_hostname(parv[3]))
   {
-    sendto_one(source_p, ":%s NOTICE %s :CGI:IRC: Invalid IP", me.name,
+    sendto_one(source_p, ":%s NOTICE %s :CGI:IRC: Invalid hostname", me.name,
                source_p->name[0] ? source_p->name : "*");
     return;
   }
@@ -132,11 +111,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
   freeaddrinfo(res);
 
   strlcpy(source_p->sockhost, parv[4], sizeof(source_p->sockhost));
-
-  if (strlen(parv[3]) <= HOSTLEN)
-    strlcpy(source_p->host, parv[3], sizeof(source_p->host));
-  else
-    strlcpy(source_p->host, source_p->sockhost, sizeof(source_p->host));
+  strlcpy(source_p->host, parv[3], sizeof(source_p->host));
 
   /* Check dlines now, k/glines will be checked on registration */
   if ((conf = find_dline_conf(&client_p->localClient->ip,

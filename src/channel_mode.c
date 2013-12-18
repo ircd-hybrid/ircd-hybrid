@@ -1767,10 +1767,6 @@ set_channel_mode(struct Client *client_p, struct Client *source_p, struct Channe
 
   for (; (c = *ml) != '\0'; ml++) 
   {
-#if 0
-    if(mode_count > 20)
-      break;
-#endif
     switch (c)
     {
       case '+':

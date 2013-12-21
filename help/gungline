@@ -13,4 +13,4 @@ will ungline the user at the unresolved ip.
 ip.ip.ip.ip can be in CIDR form i.e. 192.168.0.0/24
 or 192.168.0.* (which is converted to CIDR form internally)
 
-- Requires Oper Priv: G
+- Requires Oper Priv: gline

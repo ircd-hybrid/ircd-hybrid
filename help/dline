@@ -9,4 +9,4 @@ receive a message saying he/she is banned with reason [reason]
 In order to use <nick> rather than <ip>, <nick> must
 be on your server.
 
-- Requires Oper Priv: K
+- Requires Oper Priv: dline

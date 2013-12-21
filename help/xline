@@ -10,4 +10,4 @@ XLINE [time] <gecos> ON irc.server :[reason]
 will xline the gecos on irc.server if irc.server accepts
 remote xlines.
 
-- Requires Oper Priv: X
+- Requires Oper Priv: xline

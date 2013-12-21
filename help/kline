@@ -19,4 +19,4 @@ KLINE <user@host> ON irc.server :[reason]
 will kline the user on irc.server if irc.server accepts
 remote klines.
 
-- Requires Oper Priv: K
+- Requires Oper Priv: kline

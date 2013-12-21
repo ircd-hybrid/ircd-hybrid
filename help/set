@@ -28,3 +28,5 @@ SET <option> <value>
                 deactivate automatic splitmode.
   SPLITUSERS  - Sets the minimum amount of users needed to
                 deactivate automatic splitmode.
+
+- Requires Oper Priv: set

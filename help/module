@@ -20,3 +20,5 @@ MODULE <option> [module name]
             All modules are unloaded, then those in modules/autoload
             are loaded. If "*" has been specified as module name,
             all modules will be reloaded.
+
+- Requires Oper Priv: module

@@ -2,4 +2,4 @@ RESTART server.name :[reason]
 
 Restarts the IRC server.
 
-- Requires Oper Priv: D
+- Requires Oper Priv: restart

@@ -131,7 +131,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
 static struct Message webirc_msgtab = {
   "WEBIRC", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
-  { mr_webirc, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
+  { mr_webirc, m_registered, m_ignore, m_ignore, m_registered, m_ignore }
 };
 
 static void

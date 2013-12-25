@@ -905,7 +905,7 @@ server_estab(struct Client *client_p)
                  IsHidden(target_p) ? "(H) " : "", target_p->info);
 
     if (HasFlag(target_p, FLAGS_EOB))
-      sendto_one(client_p, ":%s EOB", ID_or_name(client_p, target_p));
+      sendto_one(client_p, ":%s EOB", ID_or_name(target_p, client_p));
   }
 
   server_burst(client_p);

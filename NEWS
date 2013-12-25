@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.1.13 Release Notes
+o) Fixed EOB not working for remote servers (resulted in fake direction notices)
+
+
 -- ircd-hybrid-8.1.12 Release Notes
 o) RPL_WHOISMODES now uses the 379 numeric
 o) Serial number is now shown on start up

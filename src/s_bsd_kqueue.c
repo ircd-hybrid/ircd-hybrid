@@ -120,7 +120,11 @@ comm_setselect(fde_t *F, unsigned int type, PF *handler,
                (F->write_handler ? COMM_SELECT_WRITE : 0);
 
   if (timeout != 0)
+  {
     F->timeout = CurrentTime + (timeout / 1000);
+    F->timeout_handler = handler;
+    F->timeout_data = client_data;
+  }
 
   diff = new_events ^ F->evcache;
 

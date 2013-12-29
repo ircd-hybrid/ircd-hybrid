@@ -132,9 +132,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
   if (HasUMode(target_p, UMODE_OPER))
     if (!HasUMode(target_p, UMODE_HIDDEN) || HasUMode(source_p, UMODE_OPER))
-      sendto_one(source_p, form_str(HasUMode(target_p, UMODE_ADMIN) ? RPL_WHOISADMIN :
-                 RPL_WHOISOPERATOR),
-                 me.name, source_p->name, target_p->name);
+      sendto_one(source_p, form_str(RPL_WHOISOPERATOR), me.name,
+                 source_p->name, target_p->name,
+                 HasUMode(target_p, UMODE_ADMIN) ? "is a Server Administrator" :
+                                                   "is an IRC Operator");
 
   if (HasUMode(target_p, UMODE_WEBIRC))
     sendto_one(source_p, form_str(RPL_WHOISTEXT),

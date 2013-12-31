@@ -1,6 +1,8 @@
 -- ircd-hybrid-8.1.13 Release Notes
 o) Fixed EOB not working for remote servers (resulted in fake
    direction notices)
+o) Fixed remote client connection notices for servers that are
+   more than one hop away
 o) Fixed bug where ircd didn't timeout SSL connections that
    haven't finished the SSL handshake
 
@@ -52,7 +54,7 @@ o) Fixed bug that would lead to a desynchronized nick database
 o) Cleaned up/modernized build system
 o) Add -fstack-protector to CFLAGS if available. Basically checks for
    buffer overflows/stack-smashing attacks
-o) When using anope 1.9 services, /WHOIS now shows the account name
+o) When using anope 1.9/2.0 services, /WHOIS now shows the account name
    of a registered/identified client (numeric 330)
 o) Administrators can now see +s channels in /LIST
 
@@ -92,7 +94,7 @@ o) Added general::cycle_on_host_change configuration option
 o) Added general::stats_u_oper_only configuration option
 o) Added support for SHA-256 ssl certificate fingerprint based operator{}
    and connect{} blocks.
-   In conjunction with Anope 1.9.x IRC-services, clients are now also able
+   In conjunction with Anope 1.9/2.0 IRC-services, clients are now also able
    to automatically identify for their nick with ssl certificate
    fingerprints
 o) Added operator::ssl_connection_required configuration option. See
@@ -280,8 +282,6 @@ o) Removed general::use_whois_actually configuration directive. This is
    now enabled by default
 o) Minor SQUIT handling fixes
 o) Fixed bancache not being updated on CHGHOST/CHGIDENT
-o) Fixed possible TBURST desynchronization with services
-o) Fixed TBURST sending server's name to clients if it's a hidden server
 
 
 -- ircd-hybrid-8rc1 Release Notes

@@ -2,7 +2,7 @@
 
    $Id$
 
-   Copyright (c) 2001-2013 ircd-hybrid development team
+   Copyright (c) 2001-2014 ircd-hybrid development team
 
      ----------------------------------------------------------------------
 

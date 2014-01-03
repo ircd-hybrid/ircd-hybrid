@@ -263,6 +263,8 @@ ssl_handshake(int fd, struct Client *client_p)
     }
   }
 
+  comm_settimeout(&client_p->localClient->fd, 0, NULL, NULL);
+
   if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
   {
     int res = SSL_get_verify_result(client_p->localClient->fd.ssl);

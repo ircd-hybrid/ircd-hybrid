@@ -196,12 +196,14 @@ conf_free(struct MaskItem *conf)
   DLINK_FOREACH_SAFE(ptr, ptr_next, conf->hub_list.head)
   {
     MyFree(ptr->data);
+    dlinkDelete(ptr, &conf->hub_list);
     free_dlink_node(ptr);
   }
 
   DLINK_FOREACH_SAFE(ptr, ptr_next, conf->leaf_list.head)
   {
     MyFree(ptr->data);
+    dlinkDelete(ptr, &conf->leaf_list);
     free_dlink_node(ptr);
   }
 
@@ -209,6 +211,7 @@ conf_free(struct MaskItem *conf)
   {
     struct exempt *exptr = ptr->data;
 
+    dlinkDelete(ptr, &conf->exempt_list);
     MyFree(exptr->name);
     MyFree(exptr->user);
     MyFree(exptr->host);

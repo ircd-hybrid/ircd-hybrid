@@ -364,28 +364,28 @@ check_conf_klines(void)
 
     if (ConfigFileEntry.glines)
     {
-      if (!(conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
-                                        CONF_GLINE, client_p->localClient->aftype,
-                                        client_p->username, NULL, 1)))
-        continue;
-
-      if (IsExemptKline(client_p) ||
-          IsExemptGline(client_p))
+      if ((conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
+                                       CONF_GLINE, client_p->localClient->aftype,
+                                       client_p->username, NULL, 1)))
       {
-        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                             "GLINE over-ruled for %s, client is %sline_exempt",
-                             get_client_name(client_p, HIDE_IP), IsExemptKline(client_p) ? "k" : "g");
+        if (IsExemptKline(client_p) ||
+            IsExemptGline(client_p))
+        {
+          sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                               "GLINE over-ruled for %s, client is %sline_exempt",
+                               get_client_name(client_p, HIDE_IP), IsExemptKline(client_p) ? "k" : "g");
+          continue;
+        }
+
+        ban_them(client_p, conf);
+        /* and go examine next fd/client_p */
         continue;
       }
-
-      ban_them(client_p, conf);
-      /* and go examine next fd/client_p */
-      continue;
     }
 
     if ((conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
                                      CONF_KLINE, client_p->localClient->aftype,
-                                     client_p->username, NULL, 1)) != NULL)
+                                     client_p->username, NULL, 1)))
     {
       if (IsExemptKline(client_p))
       {

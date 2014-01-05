@@ -96,15 +96,16 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one(source_p, "%s", buf);
   }
 
-  if (HasUMode(source_p, UMODE_OPER) || !ConfigServerHide.hide_servers || target_p == source_p)
-    sendto_one(source_p, form_str(RPL_WHOISSERVER),
-               me.name, source_p->name, target_p->name,
-               target_p->servptr->name, target_p->servptr->info);
-  else
+  if ((ConfigServerHide.hide_servers || IsHidden(target_p->servptr)) &&
+      !(HasUMode(source_p, UMODE_OPER) || target_p == source_p))
     sendto_one(source_p, form_str(RPL_WHOISSERVER),
                me.name, source_p->name, target_p->name,
                ConfigServerHide.hidden_name,
                ServerInfo.network_desc);
+  else
+    sendto_one(source_p, form_str(RPL_WHOISSERVER),
+               me.name, source_p->name, target_p->name,
+               target_p->servptr->name, target_p->servptr->info);
 
   if (HasUMode(target_p, UMODE_REGISTERED))
     sendto_one(source_p, form_str(RPL_WHOISREGNICK),

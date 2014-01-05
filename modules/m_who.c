@@ -63,7 +63,7 @@ do_who(struct Client *source_p, struct Client *target_p,
              HasUMode(target_p, UMODE_OPER) &&
              !HasUMode(target_p, UMODE_HIDDEN) ? "*" : "", op_flags);
 
-  if (ConfigServerHide.hide_servers)
+  if (ConfigServerHide.hide_servers || IsHidden(target_p->servptr))
     sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
                (chname) ? (chname) : "*",
                target_p->username, target_p->host,

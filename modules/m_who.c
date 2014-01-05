@@ -68,7 +68,8 @@ do_who(struct Client *source_p, struct Client *target_p,
                (chname) ? (chname) : "*",
                target_p->username, target_p->host,
                HasUMode(source_p, UMODE_OPER) ? target_p->servptr->name : "*",
-               target_p->name, status, 0, target_p->info);
+               target_p->name, status,
+               HasUMode(source_p, UMODE_OPER) ? target_p->hopcount : 0, target_p->info);
   else
     sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
                (chname) ? (chname) : "*", target_p->username,

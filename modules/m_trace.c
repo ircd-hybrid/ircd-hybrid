@@ -88,7 +88,7 @@ mo_trace(struct Client *client_p, struct Client *source_p,
   const char *from, *to;
 
   if (parc > 2)
-    if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv))
+    if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
       return;
 
   if (parc > 1)

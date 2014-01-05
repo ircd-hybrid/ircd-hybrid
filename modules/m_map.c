@@ -79,6 +79,9 @@ static void dump_map(struct Client *client,
   {
     target_p = ptr->data;
 
+    if (IsHidden(target_p) && !HasUMode(client, UMODE_OPER))
+      continue;
+
     if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (!HasUMode(client, UMODE_OPER))
         continue;
@@ -89,6 +92,9 @@ static void dump_map(struct Client *client,
   DLINK_FOREACH(ptr, server->serv->server_list.head)
   {
     target_p = ptr->data;
+
+    if (IsHidden(target_p) && !HasUMode(client, UMODE_OPER))
+      continue;
 
     if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (!HasUMode(client, UMODE_OPER))

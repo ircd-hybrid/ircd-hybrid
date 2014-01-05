@@ -692,7 +692,7 @@ delete_user_host(const char *user, const char *host, int global)
  * Sendq limit is fairly conservative at 1/2 (In original anyway)
  */
 static int
-exceeding_sendq(struct Client *to)
+exceeding_sendq(const struct Client *to)
 {
   if (dbuf_length(&to->localClient->buf_sendq) > (get_sendq(&to->localClient->confs) / 2))
     return 1;

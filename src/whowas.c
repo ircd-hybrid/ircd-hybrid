@@ -64,6 +64,7 @@ whowas_add_history(struct Client *client_p, const int online)
   }
 
   who->hashv = strhash(client_p->name);
+  who->shide = IsHidden(client_p->servptr) != 0;
   who->logoff = CurrentTime;
 
   strlcpy(who->name, client_p->name, sizeof(who->name));

@@ -67,7 +67,7 @@ whowas_do(struct Client *client_p, struct Client *source_p,
                  temp->username, temp->hostname,
                  temp->realname);
 
-      if (ConfigServerHide.hide_servers && !HasUMode(source_p, UMODE_OPER))
+      if ((temp->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
         sendto_one(source_p, form_str(RPL_WHOISSERVER), me.name,
                    source_p->name, temp->name,
                    ServerInfo.network_name, myctime(temp->logoff));

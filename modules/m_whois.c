@@ -201,7 +201,7 @@ do_whois(struct Client *source_p, const char *name)
 {
   struct Client *target_p = NULL;
 
-  if ((target_p = hash_find_client(name)) && IsClient(target_p))
+  if ((target_p = find_person(source_p->from, name)))
     whois_person(source_p, target_p);
   else if (!IsDigit(*name))
     sendto_one(source_p, form_str(ERR_NOSUCHNICK),

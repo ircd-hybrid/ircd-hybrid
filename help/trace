@@ -8,4 +8,3 @@ to the specified server, and all clients on that server.
 
 With one argument which is a client, TRACE displays the
 path to that client, and that client's information.
-

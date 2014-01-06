@@ -182,18 +182,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
                  source_p->name, target_p->name, target_p->certfp);
 
   if (MyConnect(target_p))
-  {
     sendto_one(source_p, form_str(RPL_WHOISIDLE),
                me.name, source_p->name, target_p->name,
                idle_time_get(source_p, target_p),
                target_p->localClient->firsttime);
-
-    if (HasUMode(target_p, UMODE_OPER) && target_p != source_p)
-      if (HasUMode(target_p, UMODE_SPY))
-        sendto_one(target_p, ":%s NOTICE %s :*** Notice -- %s (%s@%s) [%s] is doing "
-                   "a whois on you", me.name, target_p->name, source_p->name,
-                   source_p->username, source_p->host, source_p->servptr->name);
-  }
 }
 
 /* do_whois()

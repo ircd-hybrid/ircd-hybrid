@@ -39,12 +39,15 @@
 #include "packet.h"
 
 
-struct entity
+static struct entity
 {
   void *ptr;
   int type;
   int flags;
-};
+} targets[IRCD_BUFSIZE];
+
+static int ntargets = 0;
+
 
 static int build_target_list(int p_or_n, const char *command,
                              struct Client *client_p,
@@ -62,10 +65,7 @@ static struct Client* find_userhost (char *, char *, int *);
 #define ENTITY_CHANOPS_ON_CHANNEL 2
 #define ENTITY_CLIENT  3
 
-static struct entity targets[512];
-static int ntargets = 0;
-
-static int duplicate_ptr(void *);
+static int duplicate_ptr(const void *);
 
 static void m_message(int, const char *, struct Client *,
                       struct Client *, int, char **);
@@ -141,7 +141,7 @@ static void
 m_message(int p_or_n, const char *command, struct Client *client_p,
           struct Client *source_p, int parc, char *parv[])
 {
-  int i;
+  int i = 0;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -169,24 +169,21 @@ m_message(int p_or_n, const char *command, struct Client *client_p,
                         parv[2]) < 0)
     return;
 
-  for (i = 0; i < ntargets; i++)
+  for (i = 0; i < ntargets; ++i)
   {
     switch (targets[i].type)
     {
       case ENTITY_CHANNEL:
-        msg_channel(p_or_n, command, client_p, source_p,
-                    (struct Channel *)targets[i].ptr, parv[2]);
+        msg_channel(p_or_n, command, client_p, source_p, targets[i].ptr, parv[2]);
         break;
 
       case ENTITY_CHANOPS_ON_CHANNEL:
         msg_channel_flags(p_or_n, command, client_p, source_p,
-                          (struct Channel *)targets[i].ptr,
-                          targets[i].flags, parv[2]);
+                          targets[i].ptr, targets[i].flags, parv[2]);
         break;
 
       case ENTITY_CLIENT:
-        msg_client(p_or_n, command, source_p,
-                   (struct Client *)targets[i].ptr, parv[2]);
+        msg_client(p_or_n, command, source_p, targets[i].ptr, parv[2]);
         break;
     }
   }
@@ -244,7 +241,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		       ConfigFileEntry.max_targets);
             return (1);
           }
-          targets[ntargets].ptr = (void *)chptr;
+          targets[ntargets].ptr = chptr;
           targets[ntargets++].type = ENTITY_CHANNEL;
         }
       }
@@ -271,7 +268,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		       ConfigFileEntry.max_targets);
 	    return (1);
 	  }
-        targets[ntargets].ptr = (void *)target_p;
+        targets[ntargets].ptr = target_p;
         targets[ntargets].type = ENTITY_CLIENT;
         targets[ntargets++].flags = 0;
       }
@@ -337,7 +334,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		       ConfigFileEntry.max_targets);
             return(1);
           }
-          targets[ntargets].ptr = (void *)chptr;
+          targets[ntargets].ptr = chptr;
           targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
           targets[ntargets++].flags = type;
         }
@@ -382,17 +379,15 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
  * side effects	- NONE
  */
 static int
-duplicate_ptr(void *ptr)
+duplicate_ptr(const void *ptr)
 {
-  int i;
+  int i = 0;
 
-  for (i = 0; i < ntargets; i++)
-  {
+  for (; i < ntargets; ++i)
     if (targets[i].ptr == ptr)
-      return(1);
-  }
+      return 1;
 
-  return(0);
+  return 0;
 }
 
 /* msg_channel()

@@ -129,7 +129,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
     return;
 
   assert(client_p->localClient->fd.flags.open);
-  assert((bufend - pbuffer) < 512);
+  assert((bufend - pbuffer) < IRCD_BUFSIZE);
 
   for (ch = pbuffer; *ch == ' '; ++ch)  /* skip spaces */
     /* null statement */  ;

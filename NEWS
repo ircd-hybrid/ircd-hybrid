@@ -6,6 +6,7 @@ o) Fixed remote client connection notices for servers that are
 o) Fixed bug where ircd didn't timeout SSL connections that
    haven't finished the SSL handshake
 o) Fixed several bugs with server hiding
+o) Updated/fixed help files
 
 
 -- ircd-hybrid-8.1.12 Release Notes

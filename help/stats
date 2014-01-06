@@ -8,24 +8,23 @@ server parameter is given) for info corresponding to
 LETTER (* = Oper only.)
 ------ (^ = Can be configured to be oper only.)
 X A - Shows the DNS servers in use
-* c - Shows connect blocks
+* c - Shows configured connect {} blocks
 * d - Shows temporary D lines
 * D - Shows D lines
 * e - Shows exemptions to D lines
-X E - Shows Events
-X f - Shows File Descriptors
+X E - Shows I/O event engine
 * g - Shows pending G lines
 * G - Shows G lines
 X h - Shows ircd callback statistics
-* H - Shows H/L lines
-^ i - Shows I lines
+* H - Shows configured hub/leaf entries
+^ i - Shows configured auth {} blocks
 ^ K - Shows K lines (or matched klines)
 ^ k - Shows temporary K lines (or matched temp klines)
 * L - Shows IP and generic info about [nick]
 * l - Shows hostname and generic info about [nick]
   m - Shows commands and their usage
-^ o - Shows O/o lines
-* P - Shows configured ports
+^ o - Shows configured operator {} blocks
+* P - Shows configured listen {} blocks
   p - Shows opers connected and their idle times
 * q - Shows resv'd nicks and channels
 * r - Shows resource usage by ircd

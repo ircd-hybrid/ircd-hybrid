@@ -7,6 +7,7 @@ o) Fixed bug where ircd didn't timeout SSL connections that
    haven't finished the SSL handshake
 o) Fixed several bugs with server hiding
 o) Updated/fixed help files
+o) WHOIS no longer sends a notice to +y operators
 
 
 -- ircd-hybrid-8.1.12 Release Notes

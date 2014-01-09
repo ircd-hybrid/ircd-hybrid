@@ -133,6 +133,9 @@ static void
 send_message_remote(struct Client *to, struct Client *from,
                     char *buf, int len)
 {
+  if (to->from)
+    to = to->from;
+
   if (!MyConnect(to))
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -786,10 +789,21 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 {
   va_list args;
   dlink_node *ptr = NULL;
-  char buffer[IRCD_BUFSIZE];
+  char buff_suid[IRCD_BUFSIZE];
+  char buff_name[IRCD_BUFSIZE];
+  int len_suid = 0;
+  int len_name = 0;
 
   va_start(args, pattern);
-  vsnprintf(buffer, sizeof(buffer), pattern, args);
+  len_suid  = snprintf(buff_suid, sizeof(buff_suid), ":%s ", ID(source_p));
+  len_suid += send_format(&buff_suid[len_suid], sizeof(buff_suid) - len_suid,
+                          pattern, args);
+  va_end(args);
+
+  va_start(args, pattern);
+  len_name = snprintf(buff_name, sizeof(buff_name), ":%s ", source_p->name);
+  len_name += send_format(&buff_name[len_name], sizeof(buff_name) - len_name,
+                          pattern, args);
   va_end(args);
 
   ++current_serial;
@@ -816,7 +830,10 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
       if (!IsCapable(target_p->from, cap))
         continue;
 
-      sendto_anywhere(target_p, source_p, "%s", buffer);
+      if (HasID(target_p->from))
+        send_message_remote(target_p->from, source_p, buff_suid, len_suid);
+      else
+        send_message_remote(target_p->from, source_p, buff_name, len_name);
     }
   }
 }
@@ -832,35 +849,38 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
  */
 void
 sendto_anywhere(struct Client *to, struct Client *from,
+                const char *command,
                 const char *pattern, ...)
 {
   va_list args;
   char buffer[IRCD_BUFSIZE];
-  int len;
-  struct Client *send_to = (to->from != NULL ? to->from : to);
+  int len = 0;
 
-  if (IsDead(send_to))
+  if (IsDead(to->from))
     return;
 
   if (MyClient(to))
   {
     if (IsServer(from))
-      len = snprintf(buffer, sizeof(buffer), ":%s ", from->name);
+      len = snprintf(buffer, sizeof(buffer), ":%s %s %s ",
+                     from->name, command, to->name);
     else
-      len = snprintf(buffer, sizeof(buffer), ":%s!%s@%s ",
-                     from->name, from->username, from->host);
+      len = snprintf(buffer, sizeof(buffer), ":%s!%s@%s %s %s ",
+                     from->name, from->username, from->host, command, to->name);
   }
   else
-    len = snprintf(buffer, sizeof(buffer), ":%s ", ID_or_name(from, send_to));
+    len = snprintf(buffer, sizeof(buffer), ":%s %s %s ",
+                   ID_or_name(from, to), command,
+                   ID_or_name(to, to));
 
   va_start(args, pattern);
-  len += send_format(&buffer[len], IRCD_BUFSIZE - len, pattern, args);
+  len += send_format(&buffer[len], sizeof(buffer) - len, pattern, args);
   va_end(args);
 
   if (MyClient(to))
-    send_message(send_to, buffer, len);
+    send_message(to, buffer, len);
   else
-    send_message_remote(send_to, from, buffer, len);
+    send_message_remote(to, from, buffer, len);
 }
 
 /* sendto_realops_flags()

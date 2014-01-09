@@ -39,6 +39,14 @@
 #include "packet.h"
 
 
+#define PRIVMSG 0
+#define NOTICE  1
+
+#define ENTITY_NONE    0
+#define ENTITY_CHANNEL 1
+#define ENTITY_CHANOPS_ON_CHANNEL 2
+#define ENTITY_CLIENT  3
+
 static struct entity
 {
   void *ptr;
@@ -48,45 +56,6 @@ static struct entity
 
 static int ntargets = 0;
 
-
-static int build_target_list(int p_or_n, const char *command,
-                             struct Client *client_p,
-                             struct Client *source_p,
-                             char *nicks_channels, char *text);
-
-static int flood_attack_client(int p_or_n, struct Client *source_p,
-                               struct Client *target_p);
-static int flood_attack_channel(int p_or_n, struct Client *source_p,
-                                struct Channel *chptr);
-static struct Client* find_userhost (char *, char *, int *);
-
-#define ENTITY_NONE    0
-#define ENTITY_CHANNEL 1
-#define ENTITY_CHANOPS_ON_CHANNEL 2
-#define ENTITY_CLIENT  3
-
-static int duplicate_ptr(const void *);
-
-static void m_message(int, const char *, struct Client *,
-                      struct Client *, int, char **);
-
-static void msg_channel(int p_or_n, const char *command,
-                        struct Client *client_p,
-                        struct Client *source_p,
-                        struct Channel *chptr, char *text);
-
-static void msg_channel_flags(int p_or_n, const char *command,
-                              struct Client *client_p,
-                              struct Client *source_p,
-                              struct Channel *chptr, int flags, char *text);
-
-static void msg_client(int p_or_n, const char *command,
-                       struct Client *source_p, struct Client *target_p,
-                       char *text);
-
-static void handle_special(int p_or_n, const char *command,
-			   struct Client *client_p,
-			   struct Client *source_p, char *nick, char *text);
 
 /*
 ** m_privmsg
@@ -107,276 +76,14 @@ static void handle_special(int p_or_n, const char *command,
 **
 */
 
-#define PRIVMSG 0
-#define NOTICE  1
-
-static void
-m_privmsg(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
-{
-  /* servers have no reason to send privmsgs, yet sometimes there is cause
-   * for a notice.. (for example remote kline replies) --fl_
-   */
-  if (!IsClient(source_p))
-    return;
-
-  m_message(PRIVMSG, "PRIVMSG", client_p, source_p, parc, parv);
-}
-
-static void
-m_notice(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
-{
-  m_message(NOTICE, "NOTICE", client_p, source_p, parc, parv);
-}
-
-/*
- * inputs	- flag privmsg or notice
- * 		- pointer to command "PRIVMSG" or "NOTICE"
- *		- pointer to client_p
- *		- pointer to source_p
- *		- pointer to channel
- */
-static void
-m_message(int p_or_n, const char *command, struct Client *client_p,
-          struct Client *source_p, int parc, char *parv[])
-{
-  int i = 0;
-
-  if (parc < 2 || EmptyString(parv[1]))
-  {
-    if (p_or_n != NOTICE)
-      sendto_one(source_p, form_str(ERR_NORECIPIENT),
-                 ID_or_name(&me, client_p),
-                 ID_or_name(source_p, client_p), command);
-    return;
-  }
-
-  if (parc < 3 || EmptyString(parv[2]))
-  {
-    if (p_or_n != NOTICE)
-      sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
-                 ID_or_name(&me, client_p),
-                 ID_or_name(source_p, client_p));
-    return;
-  }
-
-  /* Finish the flood grace period... */
-  if (MyClient(source_p) && !IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
-  if (build_target_list(p_or_n, command, client_p, source_p, parv[1],
-                        parv[2]) < 0)
-    return;
-
-  for (i = 0; i < ntargets; ++i)
-  {
-    switch (targets[i].type)
-    {
-      case ENTITY_CHANNEL:
-        msg_channel(p_or_n, command, client_p, source_p, targets[i].ptr, parv[2]);
-        break;
-
-      case ENTITY_CHANOPS_ON_CHANNEL:
-        msg_channel_flags(p_or_n, command, client_p, source_p,
-                          targets[i].ptr, targets[i].flags, parv[2]);
-        break;
-
-      case ENTITY_CLIENT:
-        msg_client(p_or_n, command, source_p, targets[i].ptr, parv[2]);
-        break;
-    }
-  }
-}
-
-/* build_target_list()
- *
- * inputs	- pointer to given client_p (server)
- *		- pointer to given source (oper/client etc.)
- *		- pointer to list of nicks/channels
- *		- pointer to table to place results
- *		- pointer to text (only used if source_p is an oper)
- * output	- number of valid entities
- * side effects	- target_table is modified to contain a list of
- *		  pointers to channels or clients
- *		  if source client is an oper
- *		  all the classic old bizzare oper privmsg tricks
- *		  are parsed and sent as is, if prefixed with $
- *		  to disambiguate.
- *
- */
-static int
-build_target_list(int p_or_n, const char *command, struct Client *client_p,
-                  struct Client *source_p, char *nicks_channels, char *text)
-{
-  int type;
-  char *p = NULL, *nick, *target_list;
-  struct Channel *chptr = NULL;
-  struct Client *target_p = NULL;
-
-  target_list = nicks_channels;
-
-  ntargets = 0;
-
-  for (nick = strtoken(&p, target_list, ","); nick;
-       nick = strtoken(&p, NULL, ","))
-  {
-    char *with_prefix;
-    /*
-     * channels are privmsg'd a lot more than other clients, moved up
-     * here plain old channel msg?
-     */
-
-    if (IsChanPrefix(*nick))
-    {
-      if ((chptr = hash_find_channel(nick)) != NULL)
-      {
-        if (!duplicate_ptr(chptr))
-        {
-          if (ntargets >= ConfigFileEntry.max_targets)
-          {
-            sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
-                       ID_or_name(&me, client_p),
-                       ID_or_name(source_p, client_p), nick,
-		       ConfigFileEntry.max_targets);
-            return (1);
-          }
-          targets[ntargets].ptr = chptr;
-          targets[ntargets++].type = ENTITY_CHANNEL;
-        }
-      }
-      else
-      {
-        if (p_or_n != NOTICE)
-          sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-                     ID_or_name(&me, client_p),
-                     ID_or_name(source_p, client_p), nick);
-      }
-      continue;
-    }
-
-    /* look for a privmsg to another client */
-    if ((target_p = find_person(client_p, nick)) != NULL)
-    {
-      if (!duplicate_ptr(target_p))
-      {
-        if (ntargets >= ConfigFileEntry.max_targets)
-	  {
-	    sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
-                       ID_or_name(&me, client_p),
-                       ID_or_name(source_p, client_p), nick,
-		       ConfigFileEntry.max_targets);
-	    return (1);
-	  }
-        targets[ntargets].ptr = target_p;
-        targets[ntargets].type = ENTITY_CLIENT;
-        targets[ntargets++].flags = 0;
-      }
-      continue;
-    }
-    
-    /* @#channel or +#channel message ? */
-
-    type = 0;
-    with_prefix = nick;
-    /*  allow %+@ if someone wants to do that */
-    for (; ;)
-    {
-      if (*nick == '@')
-        type |= CHFL_CHANOP;
-#ifdef HALFOPS
-      else if (*nick == '%')
-        type |= CHFL_CHANOP | CHFL_HALFOP;
-#endif
-      else if (*nick == '+')
-        type |= CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE;
-      else
-        break;
-      nick++;
-    }
-
-    if (type != 0)
-    {
-      /* suggested by Mortiis */
-      if (*nick == '\0')      /* if its a '\0' dump it, there is no recipient */
-      {
-        sendto_one(source_p, form_str(ERR_NORECIPIENT),
-                   ID_or_name(&me, client_p),
-                   ID_or_name(source_p, client_p), command);
-        continue;
-      }
-
-      /* At this point, nick+1 should be a channel name i.e. #foo or &foo
-       * if the channel is found, fine, if not report an error
-       */
-
-      if ((chptr = hash_find_channel(nick)) != NULL)
-      {
-        if (IsClient(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
-        {
-          if (!has_member_flags(find_channel_link(source_p, chptr),
-                                CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
-          {
-            sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-                       ID_or_name(&me, client_p),
-                       ID_or_name(source_p, client_p), with_prefix);
-            return(-1);
-          }
-        }
-
-        if (!duplicate_ptr(chptr))
-        {
-          if (ntargets >= ConfigFileEntry.max_targets)
-          {
-	    sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
-                       ID_or_name(&me, client_p),
-                       ID_or_name(source_p, client_p), nick,
-		       ConfigFileEntry.max_targets);
-            return(1);
-          }
-          targets[ntargets].ptr = chptr;
-          targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
-          targets[ntargets++].flags = type;
-        }
-      }
-      else
-      {
-        if (p_or_n != NOTICE)
-          sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-                     ID_or_name(&me, client_p),
-                     ID_or_name(source_p, client_p), nick);
-      }
-      continue;
-    }
-
-    if ((*nick == '$') || strchr(nick, '@') != NULL)
-    {
-      handle_special(p_or_n, command, client_p, source_p, nick, text);
-    }
-    else
-    {
-      if (p_or_n != NOTICE)
-      {
-        if (!IsDigit(*nick) || MyClient(source_p))
-	  sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-		     ID_or_name(&me, client_p),
-		     ID_or_name(source_p, client_p), nick);
-      }
-    }
-    /* continue; */
-  }
-
-  return(1);
-}
-
 /* duplicate_ptr()
  *
- * inputs	- pointer to check
- *		- pointer to table of entities
- *		- number of valid entities so far
- * output	- YES if duplicate pointer in table, NO if not.
- *		  note, this does the canonize using pointers
- * side effects	- NONE
+ * inputs       - pointer to check
+ *              - pointer to table of entities
+ *              - number of valid entities so far
+ * output       - YES if duplicate pointer in table, NO if not.
+ *                note, this does the canonize using pointers
+ * side effects - NONE
  */
 static int
 duplicate_ptr(const void *ptr)
@@ -386,6 +93,164 @@ duplicate_ptr(const void *ptr)
   for (; i < ntargets; ++i)
     if (targets[i].ptr == ptr)
       return 1;
+
+  return 0;
+}
+
+/*
+ * find_userhost - find a user@host (server or user).
+ * inputs       - user name to look for
+ *              - host name to look for
+ *              - pointer to count of number of matches found
+ * outputs      - pointer to client if found
+ *              - count is updated
+ * side effects - none
+ *
+ */
+static struct Client *
+find_userhost(char *user, char *host, int *count)
+{
+  struct Client *res = NULL;
+  dlink_node *lc2ptr = NULL;
+
+  *count = 0;
+
+  if (collapse(user))
+  {
+    DLINK_FOREACH(lc2ptr, local_client_list.head)
+    {
+      struct Client *c2ptr = lc2ptr->data;
+
+      if (!IsClient(c2ptr))
+        continue;
+
+      if ((!host || !match(host, c2ptr->host)) &&
+          !irccmp(user, c2ptr->username))
+      {
+        (*count)++;
+        res = c2ptr;
+      }
+    }
+  }
+
+  return res;
+}
+
+/* flood_attack_client()
+ *
+ * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
+ *                say NOTICE must not auto reply
+ *              - pointer to source Client 
+ *              - pointer to target Client
+ * output       - 1 if target is under flood attack
+ * side effects - check for flood attack on target target_p
+ */
+static int
+flood_attack_client(int p_or_n, struct Client *source_p,
+                    struct Client *target_p)
+{
+  int delta;
+
+  if (GlobalSetOptions.floodcount && MyConnect(target_p) &&
+      IsClient(source_p) && !IsCanFlood(source_p))
+  {
+    if ((target_p->localClient->first_received_message_time + 1)
+        < CurrentTime)
+    {
+      delta =
+        CurrentTime - target_p->localClient->first_received_message_time;
+      target_p->localClient->received_number_of_privmsgs -= delta;
+      target_p->localClient->first_received_message_time = CurrentTime;
+
+      if (target_p->localClient->received_number_of_privmsgs <= 0)
+      {
+        target_p->localClient->received_number_of_privmsgs = 0;
+        DelFlag(target_p, FLAGS_FLOOD_NOTICED);
+      }
+    }
+
+    if ((target_p->localClient->received_number_of_privmsgs >=
+         GlobalSetOptions.floodcount) || HasFlag(target_p, FLAGS_FLOOD_NOTICED))
+    {
+      if (!HasFlag(target_p, FLAGS_FLOOD_NOTICED))
+      {
+        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
+                             "Possible Flooder %s on %s target: %s",
+                             get_client_name(source_p, HIDE_IP),
+                             source_p->servptr->name, target_p->name);
+        AddFlag(target_p, FLAGS_FLOOD_NOTICED);
+
+        /* Add a bit of penalty */
+        target_p->localClient->received_number_of_privmsgs += 2;
+      }
+
+      if (MyClient(source_p) && (p_or_n != NOTICE))
+        sendto_one(source_p,
+                   ":%s NOTICE %s :*** Message to %s throttled due to flooding",
+                   me.name, source_p->name, target_p->name);
+      return 1;
+    }
+    else
+      target_p->localClient->received_number_of_privmsgs++;
+  }
+
+  return 0;
+}
+
+/* flood_attack_channel()
+ *
+ * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
+ *                says NOTICE must not auto reply
+ *              - pointer to source Client 
+ *              - pointer to target channel
+ * output       - 1 if target is under flood attack
+ * side effects - check for flood attack on target chptr
+ */
+static int
+flood_attack_channel(int p_or_n, struct Client *source_p,
+                     struct Channel *chptr)
+{
+  int delta;
+
+  if (GlobalSetOptions.floodcount && !IsCanFlood(source_p))
+  {
+    if ((chptr->first_received_message_time + 1) < CurrentTime)
+    {
+      delta = CurrentTime - chptr->first_received_message_time;
+      chptr->received_number_of_privmsgs -= delta;
+      chptr->first_received_message_time = CurrentTime;
+
+      if (chptr->received_number_of_privmsgs <= 0)
+      {
+        chptr->received_number_of_privmsgs = 0;
+        ClearFloodNoticed(chptr);
+      }
+    }
+
+    if ((chptr->received_number_of_privmsgs >= GlobalSetOptions.floodcount) ||
+         IsSetFloodNoticed(chptr))
+    {
+      if (!IsSetFloodNoticed(chptr))
+      {
+        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
+                             "Possible Flooder %s on %s target: %s",
+                             get_client_name(source_p, HIDE_IP),
+                             source_p->servptr->name, chptr->chname);
+        SetFloodNoticed(chptr);
+
+        /* Add a bit of penalty */
+        chptr->received_number_of_privmsgs += 2;
+      }
+
+      if (MyClient(source_p) && (p_or_n != NOTICE))
+        sendto_one(source_p,
+                   ":%s NOTICE %s :*** Message to %s throttled due to flooding",
+                   me.name, source_p->name, chptr->chname);
+      return 1;
+    }
+    else
+      chptr->received_number_of_privmsgs++;
+  }
 
   return 0;
 }
@@ -408,12 +273,12 @@ msg_channel(int p_or_n, const char *command, struct Client *client_p,
 
   if (MyClient(source_p))
   {
-    /* idle time shouldnt be reset by notices --fl */
+    /* Idle time shouldnt be reset by notices --fl */
     if (p_or_n != NOTICE)
       source_p->localClient->last_privmsg = CurrentTime;
   }
 
-  /* chanops and voiced can flood their own channel with impunity */
+  /* Chanops and voiced can flood their own channel with impunity */
   if ((result = can_send(chptr, source_p, NULL, text)) < 0)
   {
     if (result == CAN_SEND_OPV ||
@@ -505,7 +370,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
   if (MyConnect(source_p))
   {
     /*
-     * reset idle time for message only if it's not a notice
+     * Reset idle time for message only if it's not a notice
      */
     if ((p_or_n != NOTICE))
       source_p->localClient->last_privmsg = CurrentTime;
@@ -544,9 +409,9 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
 
         /* check for accept, flag recipient incoming message */
         if (p_or_n != NOTICE)
-	  sendto_one(source_p, form_str(RPL_TARGUMODEG),
-		     ID_or_name(&me, source_p->from),
-		     ID_or_name(source_p, source_p->from), target_p->name,
+          sendto_one(source_p, form_str(RPL_TARGUMODEG),
+                     ID_or_name(&me, source_p->from),
+                     ID_or_name(source_p, source_p->from), target_p->name,
                      callerid ? "+g" : "+G",
                      callerid ? "server side ignore" :
                                 "server side ignore with the exception of common channels");
@@ -555,9 +420,9 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
              ConfigFileEntry.caller_id_wait) < CurrentTime)
         {
           if (p_or_n != NOTICE)
-	    sendto_one(source_p, form_str(RPL_TARGNOTIFY),
-		       ID_or_name(&me, source_p->from),
-		       ID_or_name(source_p, source_p->from), target_p->name);
+            sendto_one(source_p, form_str(RPL_TARGNOTIFY),
+                       ID_or_name(&me, source_p->from),
+                       ID_or_name(source_p, source_p->from), target_p->name);
 
           sendto_one(target_p, form_str(RPL_UMODEGMSG),
                      me.name, target_p->name,
@@ -567,145 +432,30 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
           target_p->localClient->last_caller_id_time = CurrentTime;
 
         }
+
         /* Only so opers can watch for floods */
         flood_attack_client(p_or_n, source_p, target_p);
       }
     }
     else
     {
-      /* If the client is remote, we dont perform a special check for
+      /*
+       * If the client is remote, we dont perform a special check for
        * flooding.. as we wouldnt block their message anyway.. this means
        * we dont give warnings.. we then check if theyre opered 
        * (to avoid flood warnings), lastly if theyre our client
-       * and flooding    -- fl */
+       * and flooding    -- fl
+       */
       if (!MyClient(source_p) || HasUMode(source_p, UMODE_OPER) ||
           (MyClient(source_p) &&
            !flood_attack_client(p_or_n, source_p, target_p)))
         sendto_anywhere(target_p, source_p, command, ":%s", text);
     }
   }
-  else
-    /* The target is a remote user.. same things apply  -- fl */
-  if (!MyClient(source_p) || HasUMode(source_p, UMODE_OPER) ||
-        (MyClient(source_p)
-           && !flood_attack_client(p_or_n, source_p, target_p)))
+  else if (!MyClient(source_p) || HasUMode(source_p, UMODE_OPER) ||
+           (MyClient(source_p) &&
+            !flood_attack_client(p_or_n, source_p, target_p)))
     sendto_anywhere(target_p, source_p, command, ":%s", text);
-}
-
-/* flood_attack_client()
- *
- * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
- *                say NOTICE must not auto reply
- *              - pointer to source Client 
- *		- pointer to target Client
- * output	- 1 if target is under flood attack
- * side effects	- check for flood attack on target target_p
- */
-static int
-flood_attack_client(int p_or_n, struct Client *source_p,
-                    struct Client *target_p)
-{
-  int delta;
-
-  if (GlobalSetOptions.floodcount && MyConnect(target_p)
-      && IsClient(source_p) && !IsCanFlood(source_p))
-  {
-    if ((target_p->localClient->first_received_message_time + 1)
-        < CurrentTime)
-    {
-      delta =
-        CurrentTime - target_p->localClient->first_received_message_time;
-      target_p->localClient->received_number_of_privmsgs -= delta;
-      target_p->localClient->first_received_message_time = CurrentTime;
-
-      if (target_p->localClient->received_number_of_privmsgs <= 0)
-      {
-        target_p->localClient->received_number_of_privmsgs = 0;
-        DelFlag(target_p, FLAGS_FLOOD_NOTICED);
-      }
-    }
-
-    if ((target_p->localClient->received_number_of_privmsgs >=
-         GlobalSetOptions.floodcount) || HasFlag(target_p, FLAGS_FLOOD_NOTICED))
-    {
-      if (!HasFlag(target_p, FLAGS_FLOOD_NOTICED))
-      {
-        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
-                             "Possible Flooder %s on %s target: %s",
-                             get_client_name(source_p, HIDE_IP),
-                             source_p->servptr->name, target_p->name);
-        AddFlag(target_p, FLAGS_FLOOD_NOTICED);
-        /* add a bit of penalty */
-        target_p->localClient->received_number_of_privmsgs += 2;
-      }
-
-      if (MyClient(source_p) && (p_or_n != NOTICE))
-        sendto_one(source_p,
-                   ":%s NOTICE %s :*** Message to %s throttled due to flooding",
-                   me.name, source_p->name, target_p->name);
-      return(1);
-    }
-    else
-      target_p->localClient->received_number_of_privmsgs++;
-  }
-
-  return(0);
-}
-
-/* flood_attack_channel()
- *
- * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
- *                says NOTICE must not auto reply
- *              - pointer to source Client 
- *		- pointer to target channel
- * output	- 1 if target is under flood attack
- * side effects	- check for flood attack on target chptr
- */
-static int
-flood_attack_channel(int p_or_n, struct Client *source_p,
-                     struct Channel *chptr)
-{
-  int delta;
-
-  if (GlobalSetOptions.floodcount && !IsCanFlood(source_p))
-  {
-    if ((chptr->first_received_message_time + 1) < CurrentTime)
-    {
-      delta = CurrentTime - chptr->first_received_message_time;
-      chptr->received_number_of_privmsgs -= delta;
-      chptr->first_received_message_time = CurrentTime;
-      if (chptr->received_number_of_privmsgs <= 0)
-      {
-        chptr->received_number_of_privmsgs = 0;
-        ClearFloodNoticed(chptr);
-      }
-    }
-
-    if ((chptr->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
-        || IsSetFloodNoticed(chptr))
-    {
-      if (!IsSetFloodNoticed(chptr))
-      {
-        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
-                             "Possible Flooder %s on %s target: %s",
-                             get_client_name(source_p, HIDE_IP),
-                             source_p->servptr->name, chptr->chname);
-        SetFloodNoticed(chptr);
-
-        /* Add a bit of penalty */
-        chptr->received_number_of_privmsgs += 2;
-      }
-      if (MyClient(source_p) && (p_or_n != NOTICE))
-        sendto_one(source_p,
-                   ":%s NOTICE %s :*** Message to %s throttled due to flooding",
-                   me.name, source_p->name, chptr->chname);
-      return(1);
-    }
-    else
-      chptr->received_number_of_privmsgs++;
-  }
-
-  return(0);
 }
 
 /* handle_special()
@@ -731,7 +481,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p,
  */
 static void
 handle_special(int p_or_n, const char *command, struct Client *client_p,
-	       struct Client *source_p, char *nick, char *text)
+               struct Client *source_p, char *nick, char *text)
 {
   struct Client *target_p;
   char *host;
@@ -742,7 +492,7 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
   /*
    * user[%host]@server addressed?
    */
-  if ((server = strchr(nick, '@')) != NULL)
+  if ((server = strchr(nick, '@')))
   {
     count = 0;
 
@@ -754,63 +504,63 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
       return;
     }
 
-    if ((target_p = hash_find_server(server + 1)) != NULL)
+    if ((target_p = hash_find_server(server + 1)))
     {
       if (!IsMe(target_p))
       {
-	/*
-	 * Not destined for a user on me :-(
-	 */
-	sendto_one(target_p, ":%s %s %s :%s",
+        /*
+         * Not destined for a user on me :-(
+         */
+        sendto_one(target_p, ":%s %s %s :%s",
                    ID_or_name(source_p, target_p->from),
-		   command, nick, text);
-	if ((p_or_n != NOTICE) && MyClient(source_p))
-	  source_p->localClient->last_privmsg = CurrentTime;
-	return;
+                   command, nick, text);
+        if ((p_or_n != NOTICE) && MyClient(source_p))
+          source_p->localClient->last_privmsg = CurrentTime;
+
+        return;
       }
 
       *server = '\0';
 
       if (host != NULL)
-	*host++ = '\0';
+        *host++ = '\0';
 
       /*
        * Look for users which match the destination host
        * (no host == wildcard) and if one and one only is
        * found connected to me, deliver message!
        */
-      target_p = find_userhost(nick, host, &count);
-
-      if (target_p != NULL)
+      if ((target_p = find_userhost(nick, host, &count)))
       {
-	if (server != NULL)
-	  *server = '@';
-	if (host != NULL)
-	  *--host = '%';
+        if (server != NULL)
+          *server = '@';
+        if (host != NULL)
+          *--host = '%';
 
-	if (count == 1)
-	{
-	  sendto_one(target_p, ":%s!%s@%s %s %s :%s",
-		     source_p->name, source_p->username, source_p->host,
-                     command, nick, text);
-	  if ((p_or_n != NOTICE) && MyClient(source_p))
-	    source_p->localClient->last_privmsg = CurrentTime;
-	}
-	else
-	  sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+        if (count == 1)
+        {
+          sendto_one(target_p, ":%s!%s@%s %s %s :%s",
+                     source_p->name, source_p->username,
+                     source_p->host, command, nick, text);
+
+          if ((p_or_n != NOTICE) && MyClient(source_p))
+            source_p->localClient->last_privmsg = CurrentTime;
+        }
+        else
+          sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
                      ID_or_name(&me, client_p),
                      ID_or_name(source_p, client_p), nick,
-		     ConfigFileEntry.max_targets);
+                     ConfigFileEntry.max_targets);
       }
     }
-    else if (server && *(server+1) && (target_p == NULL))
-	sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                   ID_or_name(&me, client_p),
-                   ID_or_name(source_p, client_p), server+1);
+    else if (server && *(server + 1) && (target_p == NULL))
+      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
+                 ID_or_name(&me, client_p),
+                 ID_or_name(source_p, client_p), server + 1);
     else if (server && (target_p == NULL))
-	sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-                   ID_or_name(&me, client_p),
-                   ID_or_name(source_p, client_p), nick);
+      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+                 ID_or_name(&me, client_p),
+                 ID_or_name(source_p, client_p), nick);
     return;
   }
 
@@ -823,20 +573,20 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
   }
 
   /*
-   * the following two cases allow masks in NOTICEs
+   * The following two cases allow masks in NOTICEs
    * (for OPERs only)
    *
    * Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
    */
   if (*nick == '$')
   {
-    if ((*(nick+1) == '$' || *(nick+1) == '#'))
-      nick++;
+    if ((*(nick + 1) == '$' || *(nick + 1) == '#'))
+      ++nick;
     else if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER))
     {
       sendto_one(source_p, 
                  ":%s NOTICE %s :The command %s %s is no longer supported, please use $%s",
-		 me.name, source_p->name, command, nick, nick);
+                 me.name, source_p->name, command, nick, nick);
       return;
     }
 
@@ -865,57 +615,280 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
 
     if ((p_or_n != NOTICE) && MyClient(source_p))
       source_p->localClient->last_privmsg = CurrentTime;
-
-    return;
   }
+}
+
+/* build_target_list()
+ *
+ * inputs	- pointer to given client_p (server)
+ *		- pointer to given source (oper/client etc.)
+ *		- pointer to list of nicks/channels
+ *		- pointer to table to place results
+ *		- pointer to text (only used if source_p is an oper)
+ * output	- number of valid entities
+ * side effects	- target_table is modified to contain a list of
+ *		  pointers to channels or clients
+ *		  if source client is an oper
+ *		  all the classic old bizzare oper privmsg tricks
+ *		  are parsed and sent as is, if prefixed with $
+ *		  to disambiguate.
+ *
+ */
+static int
+build_target_list(int p_or_n, const char *command, struct Client *client_p,
+                  struct Client *source_p, char *nicks_channels, char *text)
+{
+  int type = 0;
+  char *p = NULL, *nick = NULL;
+  char *target_list = NULL;
+  struct Channel *chptr = NULL;
+  struct Client *target_p = NULL;
+
+  target_list = nicks_channels;
+
+  ntargets = 0;
+
+  for (nick = strtoken(&p, target_list, ","); nick;
+       nick = strtoken(&p, NULL, ","))
+  {
+    char *with_prefix;
+
+    /*
+     * Channels are privmsg'd a lot more than other clients, moved up
+     * here plain old channel msg?
+     */
+    if (IsChanPrefix(*nick))
+    {
+      if ((chptr = hash_find_channel(nick)))
+      {
+        if (!duplicate_ptr(chptr))
+        {
+          if (ntargets >= ConfigFileEntry.max_targets)
+          {
+            sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+                       ID_or_name(&me, client_p),
+                       ID_or_name(source_p, client_p), nick,
+                       ConfigFileEntry.max_targets);
+            return 1;
+          }
+
+          targets[ntargets].ptr = chptr;
+          targets[ntargets++].type = ENTITY_CHANNEL;
+        }
+      }
+      else
+      {
+        if (p_or_n != NOTICE)
+          sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+                     ID_or_name(&me, client_p),
+                     ID_or_name(source_p, client_p), nick);
+      }
+
+      continue;
+    }
+
+    /* Look for a privmsg to another client */
+    if ((target_p = find_person(client_p, nick)))
+    {
+      if (!duplicate_ptr(target_p))
+      {
+        if (ntargets >= ConfigFileEntry.max_targets)
+        {
+          sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+                     ID_or_name(&me, client_p),
+                     ID_or_name(source_p, client_p), nick,
+                     ConfigFileEntry.max_targets);
+          return 1;
+        }
+
+        targets[ntargets].ptr = target_p;
+        targets[ntargets].type = ENTITY_CLIENT;
+        targets[ntargets++].flags = 0;
+      }
+
+      continue;
+    }
+    
+    /* @#channel or +#channel message ? */
+    type = 0;
+    with_prefix = nick;
+
+    /* Allow %+@ if someone wants to do that */
+    for (; ;)
+    {
+      if (*nick == '@')
+        type |= CHFL_CHANOP;
+#ifdef HALFOPS
+      else if (*nick == '%')
+        type |= CHFL_CHANOP | CHFL_HALFOP;
+#endif
+      else if (*nick == '+')
+        type |= CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE;
+      else
+        break;
+      ++nick;
+    }
+
+    if (type != 0)
+    {
+      if (*nick == '\0')      /* if its a '\0' dump it, there is no recipient */
+      {
+        sendto_one(source_p, form_str(ERR_NORECIPIENT),
+                   ID_or_name(&me, client_p),
+                   ID_or_name(source_p, client_p), command);
+        continue;
+      }
+
+      /*
+       * At this point, nick+1 should be a channel name i.e. #foo or &foo
+       * if the channel is found, fine, if not report an error
+       */
+      if ((chptr = hash_find_channel(nick)))
+      {
+        if (IsClient(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
+        {
+          if (!has_member_flags(find_channel_link(source_p, chptr),
+                                CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
+          {
+            sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+                       ID_or_name(&me, client_p),
+                       ID_or_name(source_p, client_p), with_prefix);
+            return -1;
+          }
+        }
+
+        if (!duplicate_ptr(chptr))
+        {
+          if (ntargets >= ConfigFileEntry.max_targets)
+          {
+            sendto_one(source_p, form_str(ERR_TOOMANYTARGETS),
+                       ID_or_name(&me, client_p),
+                       ID_or_name(source_p, client_p), nick,
+                       ConfigFileEntry.max_targets);
+            return 1; 
+          }
+
+          targets[ntargets].ptr = chptr;
+          targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
+          targets[ntargets++].flags = type;
+        }
+      }
+      else
+      {
+        if (p_or_n != NOTICE)
+          sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+                     ID_or_name(&me, client_p),
+                     ID_or_name(source_p, client_p), nick);
+      }
+
+      continue;
+    }
+
+    if (*nick == '$' || strchr(nick, '@'))
+      handle_special(p_or_n, command, client_p, source_p, nick, text);
+    else
+    {
+      if (p_or_n != NOTICE)
+      {
+        if (!IsDigit(*nick) || MyClient(source_p))
+          sendto_one(source_p, form_str(ERR_NOSUCHNICK),
+                     ID_or_name(&me, client_p),
+                     ID_or_name(source_p, client_p), nick);
+      }
+    }
+    /* continue; */
+  }
+
+  return 1;
 }
 
 /*
- * find_userhost - find a user@host (server or user).
- * inputs       - user name to look for
- *              - host name to look for
- *		- pointer to count of number of matches found
- * outputs	- pointer to client if found
- *		- count is updated
- * side effects	- none
- *
+ * inputs       - flag privmsg or notice
+ *              - pointer to command "PRIVMSG" or "NOTICE"
+ *              - pointer to client_p
+ *              - pointer to source_p
+ *              - pointer to channel
  */
-static struct Client *
-find_userhost(char *user, char *host, int *count)
+static void
+m_message(int p_or_n, const char *command, struct Client *client_p,
+          struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *c2ptr;
-  struct Client *res = NULL;
-  dlink_node *lc2ptr;
+  int i = 0;
 
-  *count = 0;
-
-  if (collapse(user) != NULL)
+  if (parc < 2 || EmptyString(parv[1]))
   {
-    DLINK_FOREACH(lc2ptr, local_client_list.head)
-    {
-      c2ptr = lc2ptr->data;
-
-      if (!IsClient(c2ptr)) /* something other than a client */
-        continue;
-
-      if ((!host || !match(host, c2ptr->host)) &&
-          irccmp(user, c2ptr->username) == 0)
-      {
-        (*count)++;
-        res = c2ptr;
-      }
-    }
+    if (p_or_n != NOTICE)
+      sendto_one(source_p, form_str(ERR_NORECIPIENT),
+                 ID_or_name(&me, client_p),
+                 ID_or_name(source_p, client_p), command);
+    return;
   }
 
-  return(res);
+  if (parc < 3 || EmptyString(parv[2]))
+  {
+    if (p_or_n != NOTICE)
+      sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
+                 ID_or_name(&me, client_p),
+                 ID_or_name(source_p, client_p));
+    return;
+  }
+
+  /* Finish the flood grace period... */
+  if (MyClient(source_p) && !IsFloodDone(source_p))
+    flood_endgrace(source_p);
+
+  if (build_target_list(p_or_n, command, client_p, source_p, parv[1], parv[2]) < 0)
+    return;
+
+  for (i = 0; i < ntargets; ++i)
+  {
+    switch (targets[i].type)
+    {
+      case ENTITY_CHANNEL:
+        msg_channel(p_or_n, command, client_p, source_p, targets[i].ptr, parv[2]);
+        break;
+
+      case ENTITY_CHANOPS_ON_CHANNEL:
+        msg_channel_flags(p_or_n, command, client_p, source_p,
+                          targets[i].ptr, targets[i].flags, parv[2]);
+        break;
+
+      case ENTITY_CLIENT:
+        msg_client(p_or_n, command, source_p, targets[i].ptr, parv[2]);
+        break;
+    }
+  }
 }
 
-static struct Message privmsg_msgtab = {
+static void
+m_privmsg(struct Client *client_p, struct Client *source_p,
+          int parc, char *parv[])
+{
+  /*
+   * Servers have no reason to send privmsgs, yet sometimes there is cause
+   * for a notice.. (for example remote kline replies) --fl_
+   */
+  if (!IsClient(source_p))
+    return;
+
+  m_message(PRIVMSG, "PRIVMSG", client_p, source_p, parc, parv);
+}
+
+static void
+m_notice(struct Client *client_p, struct Client *source_p,
+         int parc, char *parv[])
+{
+  m_message(NOTICE, "NOTICE", client_p, source_p, parc, parv);
+}
+
+static struct Message privmsg_msgtab =
+{
   "PRIVMSG", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   {m_unregistered, m_privmsg, m_privmsg, m_ignore, m_privmsg, m_ignore}
 };
 
-static struct Message notice_msgtab = {
+static struct Message notice_msgtab =
+{
   "NOTICE", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   {m_unregistered, m_notice, m_notice, m_ignore, m_notice, m_ignore}
 };
@@ -934,7 +907,8 @@ module_exit(void)
   mod_del_cmd(&notice_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

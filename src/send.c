@@ -856,7 +856,7 @@ sendto_anywhere(struct Client *to, struct Client *from,
   char buffer[IRCD_BUFSIZE];
   int len = 0;
 
-  if (IsDead(to))
+  if (IsDead(to->from))
     return;
 
   if (MyClient(to))

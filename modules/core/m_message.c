@@ -447,14 +447,12 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
        * and flooding    -- fl
        */
       if (!MyClient(source_p) || HasUMode(source_p, UMODE_OPER) ||
-          (MyClient(source_p) &&
-           !flood_attack_client(p_or_n, source_p, target_p)))
+          !flood_attack_client(p_or_n, source_p, target_p))
         sendto_anywhere(target_p, source_p, command, ":%s", text);
     }
   }
   else if (!MyClient(source_p) || HasUMode(source_p, UMODE_OPER) ||
-           (MyClient(source_p) &&
-            !flood_attack_client(p_or_n, source_p, target_p)))
+           !flood_attack_client(p_or_n, source_p, target_p))
     sendto_anywhere(target_p, source_p, command, ":%s", text);
 }
 

@@ -1,3 +1,55 @@
+-- ircd-hybrid-8.1.13 Release Notes
+o) Fixed EOB not working for remote servers (resulted in fake
+   direction notices)
+o) Fixed remote client connection notices for servers that are
+   more than one hop away
+o) Fixed bug where ircd didn't timeout SSL connections that
+   haven't finished the SSL handshake
+o) Fixed several bugs with server hiding
+o) Updated/fixed help files
+o) WHOIS no longer sends a notice to +y operators
+
+
+-- ircd-hybrid-8.1.12 Release Notes
+o) RPL_WHOISMODES now uses the 379 numeric
+o) Serial number is now shown on start up
+o) Fixed possible channel mode desynch with services
+o) Fixed TS 6 support with LOCOPS
+o) Minor code cleanups
+o) Fixed file descriptor leak with empty help files
+o) Fixed issue with WEBIRC where hostnames were
+   not validated
+
+
+-- ircd-hybrid-8.1.11 Release Notes
+o) Administrators may now see channel modes in /LIST
+o) Fixed compile error on BSD systems when building with kqueue()
+
+
+-- ircd-hybrid-8.1.10 Release Notes
+o) Fixed bug with kqueue() where it occasionally dropped updates
+o) Changed WHOIS to show a client's certificate fingerprint
+   to administrators only
+o) The WHO reply now shows whether or not a nickname has
+   been registered with NickServ. ('r' status flag)
+o) Fixed some flaws with server hiding
+o) Fixed bug where "STATS P" would leak ip addresses to remotely connected
+   administrators, even if serverhide::hide_server_ips was set to 'yes'
+o) Services coders: added SVSKILL
+
+
+-- ircd-hybrid-8.1.9 Release Notes
+o) Added usermode +W. Users connected via a webirc gateway get this
+   mode set by servers.
+o) /WHOIS now shows if a client is connected via a webirc
+   gateway
+o) Administrators may now see +s channels a user is in with /WHOIS.
+   Secret channels are prepended with a tilde in the /WHOIS
+   reply.
+o) Administrators are now able to see all the user modes a user has
+   set via /whois
+
+
 -- ircd-hybrid-8.1.8 Release Notes
 o) Fixed bug that would lead to a desynchronized nick database
    throughout the entire network if using services enforced
@@ -5,7 +57,7 @@ o) Fixed bug that would lead to a desynchronized nick database
 o) Cleaned up/modernized build system
 o) Add -fstack-protector to CFLAGS if available. Basically checks for
    buffer overflows/stack-smashing attacks
-o) When using anope 1.9 services, /WHOIS now shows the account name
+o) When using anope 1.9/2.0 services, /WHOIS now shows the account name
    of a registered/identified client (numeric 330)
 o) Administrators can now see +s channels in /LIST
 
@@ -45,7 +97,7 @@ o) Added general::cycle_on_host_change configuration option
 o) Added general::stats_u_oper_only configuration option
 o) Added support for SHA-256 ssl certificate fingerprint based operator{}
    and connect{} blocks.
-   In conjunction with Anope 1.9.x IRC-services, clients are now also able
+   In conjunction with Anope 1.9/2.0 IRC-services, clients are now also able
    to automatically identify for their nick with ssl certificate
    fingerprints
 o) Added operator::ssl_connection_required configuration option. See
@@ -233,8 +285,6 @@ o) Removed general::use_whois_actually configuration directive. This is
    now enabled by default
 o) Minor SQUIT handling fixes
 o) Fixed bancache not being updated on CHGHOST/CHGIDENT
-o) Fixed possible TBURST desynchronization with services
-o) Fixed TBURST sending server's name to clients if it's a hidden server
 
 
 -- ircd-hybrid-8rc1 Release Notes

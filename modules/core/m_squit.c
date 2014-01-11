@@ -86,11 +86,17 @@ mo_squit(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if ((!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT_REMOTE)) ||
-      (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT)))
+  if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT_REMOTE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
-               me.name, source_p->name);
+    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
+               source_p->name, "squit:remote");
+    return;
+  }
+
+  if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT))
+  {
+    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
+               source_p->name, "squit");
     return;
   }
 

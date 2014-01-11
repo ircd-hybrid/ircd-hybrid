@@ -120,11 +120,17 @@ mo_kill(struct Client *client_p, struct Client *source_p,
                me.name, source_p->name, user, target_p->name);
   }
 
-  if ((!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL_REMOTE)) ||
-       (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL)))
+  if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL_REMOTE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
-               me.name, source_p->name);
+    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
+               source_p->name, "kill:remote");
+    return;
+  }
+
+  if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL))
+  {
+    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
+               source_p->name, "kill");
     return;
   }
 

@@ -70,16 +70,16 @@ check_gline(struct AddressRec *arec)
       case HM_IPV4:
         if (client_p->localClient->aftype == AF_INET)
           if (match_ipv4(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            ban_them(client_p, arec->conf);
+            conf_try_ban(client_p, arec->conf);
         break;
       case HM_IPV6:
         if (client_p->localClient->aftype == AF_INET6)
           if (match_ipv6(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            ban_them(client_p, arec->conf);
+            conf_try_ban(client_p, arec->conf);
         break;
       default:  /* HM_HOST */
         if (!match(arec->Mask.hostname, client_p->host))
-          ban_them(client_p, arec->conf);
+          conf_try_ban(client_p, arec->conf);
         break;
     }
   }

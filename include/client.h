@@ -463,7 +463,7 @@ extern struct split_nuh_item *find_accept(const char *, const char *,
 extern void del_accept(struct split_nuh_item *, struct Client *);
 extern void del_all_accepts(struct Client *);
 extern void exit_client(struct Client *, struct Client *, const char *);
-extern void ban_them(struct Client *, struct MaskItem *);
+extern void conf_try_ban(struct Client *, struct MaskItem *);
 extern void check_conf_klines(void);
 extern void client_init(void);
 extern void dead_link_on_write(struct Client *, int);

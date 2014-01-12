@@ -357,7 +357,7 @@ check_conf_klines(void)
       if (conf->type == CONF_EXEMPT)
         continue;
 
-      ban_them(client_p, conf);
+      conf_try_ban(client_p, conf);
       continue; /* and go examine next fd/client_p */
     }
 
@@ -367,16 +367,7 @@ check_conf_klines(void)
                                        CONF_GLINE, client_p->localClient->aftype,
                                        client_p->username, NULL, 1)))
       {
-        if (IsExemptKline(client_p) ||
-            IsExemptGline(client_p))
-        {
-          sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                               "GLINE over-ruled for %s, client is %sline_exempt",
-                               get_client_name(client_p, HIDE_IP), IsExemptKline(client_p) ? "k" : "g");
-          continue;
-        }
-
-        ban_them(client_p, conf);
+        conf_try_ban(client_p, conf);
         /* and go examine next fd/client_p */
         continue;
       }
@@ -386,22 +377,14 @@ check_conf_klines(void)
                                      CONF_KLINE, client_p->localClient->aftype,
                                      client_p->username, NULL, 1)))
     {
-      if (IsExemptKline(client_p))
-      {
-        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                             "KLINE over-ruled for %s, client is kline_exempt",
-                             get_client_name(client_p, HIDE_IP));
-        continue;
-      }
-
-      ban_them(client_p, conf);
+      conf_try_ban(client_p, conf);
       continue;
     }
 
     if ((conf = find_matching_name_conf(CONF_XLINE,  client_p->info,
                                         NULL, NULL, 0)))
     {
-      ban_them(client_p, conf);
+      conf_try_ban(client_p, conf);
       continue;
     }
   }
@@ -423,7 +406,7 @@ check_conf_klines(void)
 }
 
 /*
- * ban_them
+ * conf_try_ban
  *
  * inputs	- pointer to client to ban
  * 		- pointer to MaskItem
@@ -431,7 +414,7 @@ check_conf_klines(void)
  * side effects	- given client_p is banned
  */
 void
-ban_them(struct Client *client_p, struct MaskItem *conf)
+conf_try_ban(struct Client *client_p, struct MaskItem *conf)
 {
   const char *user_reason = NULL;  /* What is sent to user */
   const char *type_string = NULL;

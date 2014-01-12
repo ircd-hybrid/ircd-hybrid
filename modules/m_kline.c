@@ -86,22 +86,9 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
   if (target_server != NULL)
   {
-    if (HasID(source_p))
-    {
-      sendto_server(NULL, CAP_KLN|CAP_TS6, NOCAPS,
-                    ":%s KLINE %s %lu %s %s :%s",
-                    source_p->id, target_server, (unsigned long)tkline_time,
-                    user, host, reason);
-      sendto_server(NULL, CAP_KLN, CAP_TS6,
-                    ":%s KLINE %s %lu %s %s :%s",
-                    source_p->name, target_server, (unsigned long)tkline_time,
-                    user, host, reason);
-    }
-    else
-      sendto_server(NULL, CAP_KLN, NOCAPS,
-                    ":%s KLINE %s %lu %s %s :%s",
-                    source_p->name, target_server, (unsigned long)tkline_time,
-                    user, host, reason);
+    sendto_match_servs(source_p, target_server, CAP_KLN, "KLINE %s %lu %s %s :%s",
+                       target_server, (unsigned long)tkline_time,
+                       user, host, reason);
 
     /* Allow ON to apply local kline as well if it matches */
     if (match(target_server, me.name))

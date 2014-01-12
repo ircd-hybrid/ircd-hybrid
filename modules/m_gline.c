@@ -59,7 +59,7 @@ check_gline(struct AddressRec *arec)
   {
     struct Client *client_p = ptr->data;
 
-    if (IsDead(client_p) || !IsClient(client_p))
+    if (IsDead(client_p))
       continue;
 
     if (match(arec->username, client_p->username))

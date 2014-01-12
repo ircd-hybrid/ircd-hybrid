@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_dline.c: Bans a user.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2002-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_dline.c
+ * \brief Includes required functions for processing the DLINE/UNDLINE command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -154,8 +156,8 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_DLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "dline");
+    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
+               source_p->name, "dline");
     return;
   }
 
@@ -192,9 +194,8 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
     if (IsExemptKline(target_p))
     {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :%s is E-lined", me.name,
-                 source_p->name, target_p->name);
+      sendto_one(source_p, ":%s NOTICE %s :%s is E-lined",
+                 me.name, source_p->name, target_p->name);
       return;
     }
 
@@ -226,14 +227,13 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   if ((conf = find_dline_conf(&daddr, aftype)) != NULL)
   {
     creason = conf->reason ? conf->reason : def_reason;
+
     if (IsConfExemptKline(conf))
-      sendto_one(source_p,
-		 ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
-		 me.name, source_p->name, dlhost, conf->host, creason);
+      sendto_one(source_p, ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
+                 me.name, source_p->name, dlhost, conf->host, creason);
     else
-      sendto_one(source_p,
-		 ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
-		 me.name, source_p->name, dlhost, conf->host, creason);
+      sendto_one(source_p, ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
+                 me.name, source_p->name, dlhost, conf->host, creason);
     return;
   }
 
@@ -290,7 +290,8 @@ ms_dline(struct Client *client_p, struct Client *source_p,
   dlhost = parv[3];
   reason = parv[4];
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+  if (HasFlag(source_p, FLAGS_SERVICE) ||
+      find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_DLINE))
   {
@@ -395,8 +396,8 @@ mo_undline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_UNDLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "undline");
+    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
+               source_p->name, "undline");
     return;
   }
 
@@ -426,8 +427,7 @@ mo_undline(struct Client *client_p, struct Client *source_p,
 
   if (remove_dline_match(addr))
   {
-    sendto_one(source_p,
-               ":%s NOTICE %s :D-Line for [%s] is removed",
+    sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
                me.name, source_p->name, addr);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the D-Line for: [%s]",
@@ -454,15 +454,14 @@ me_undline(struct Client *client_p, struct Client *source_p,
   if (!IsClient(source_p) || match(parv[1], me.name))
     return;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE,
-                                   source_p->servptr->name,
-                                   source_p->username, source_p->host,
-                                   SHARED_UNDLINE))
+  if (HasFlag(source_p, FLAGS_SERVICE) ||
+      find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+                              source_p->username, source_p->host,
+                              SHARED_UNDLINE))
   {
     if (remove_dline_match(addr))
     {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :D-Line for [%s] is removed",
+      sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
                  me.name, source_p->name, addr);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the D-Line for: [%s]",
@@ -490,14 +489,16 @@ ms_undline(struct Client *client_p, struct Client *source_p,
   me_undline(client_p, source_p, parc, parv);
 }
 
-static struct Message dline_msgtab = {
+static struct Message dline_msgtab =
+{
   "DLINE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-   {m_unregistered, m_not_oper, ms_dline, m_ignore, mo_dline, m_ignore}
+  { m_unregistered, m_not_oper, ms_dline, m_ignore, mo_dline, m_ignore }
 };
 
-static struct Message undline_msgtab = {
+static struct Message undline_msgtab =
+{
   "UNDLINE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-   {m_unregistered, m_not_oper, ms_undline, m_ignore, mo_undline, m_ignore}
+  { m_unregistered, m_not_oper, ms_undline, m_ignore, mo_undline, m_ignore }
 };
 
 static void
@@ -518,7 +519,8 @@ module_exit(void)
   delete_capability("DLN");
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

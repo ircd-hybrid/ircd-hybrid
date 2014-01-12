@@ -630,7 +630,7 @@ find_dline_conf(struct irc_ssaddr *addr, int aftype)
  * Output: None
  * Side-effects: Adds this entry to the hash table.
  */
-void
+struct AddressRec *
 add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 {
   const char *address;
@@ -674,6 +674,8 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
       dlinkAdd(arec, &arec->node, &atable[get_mask_hash(address)]);
       break;
   }
+
+  return arec;
 }
 
 /* void delete_one_address(const char*, struct MaskItem*)

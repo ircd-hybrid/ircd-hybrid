@@ -50,6 +50,41 @@
 #define GLINE_PLACED         1
 
 
+static void
+check_gline(struct AddressRec *arec)
+{
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+
+  DLINK_FOREACH_SAFE(ptr, ptr_next, local_client_list.head)
+  {
+    struct Client *client_p = ptr->data;
+
+    if (IsDead(client_p) || !IsClient(client_p))
+      continue;
+
+    if (match(arec->username, client_p->username))
+      continue;
+
+    switch (arec->masktype)
+    {
+      case HM_IPV4:
+        if (client_p->localClient->aftype == AF_INET)
+          if (match_ipv4(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+            ban_them(client_p, arec->conf);
+        break;
+      case HM_IPV6:
+        if (client_p->localClient->aftype == AF_INET6)
+          if (match_ipv6(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+            ban_them(client_p, arec->conf);
+        break;
+      default:  /* HM_HOST */
+        if (!match(arec->Mask.hostname, client_p->host))
+          ban_them(client_p, arec->conf);
+        break;
+    }
+  }
+}
+
 /*! \brief Adds a GLINE to the configuration subsystem.
  *
  * \param source_p Operator requesting gline
@@ -80,8 +115,7 @@ set_local_gline(const struct Client *source_p, const char *user,
   ilog(LOG_TYPE_GLINE, "%s added G-Line for [%s@%s] [%s]",
        get_oper_name(source_p), conf->user, conf->host, conf->reason);
 
-  add_conf_by_address(CONF_GLINE, conf);
-  rehashed_klines = 1;
+  check_gline(add_conf_by_address(CONF_GLINE, conf));
 }
 
 /*! \brief Removes a GLINE from the configuration subsystem.

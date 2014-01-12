@@ -165,22 +165,9 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
   if (target_server != NULL)
   {
-    if (HasID(source_p))
-    {
-      sendto_server(NULL, CAP_DLN|CAP_TS6, NOCAPS,
-                    ":%s DLINE %s %lu %s :%s",
-                    source_p->id, target_server, (unsigned long)tkline_time,
-                    dlhost, reason);
-      sendto_server(NULL, CAP_DLN, CAP_TS6,
-                    ":%s DLINE %s %lu %s :%s",
-                    source_p->name, target_server, (unsigned long)tkline_time,
-                    dlhost, reason);
-    }
-    else
-      sendto_server(NULL, CAP_DLN, NOCAPS,
-                    ":%s DLINE %s %lu %s :%s",
-                    source_p->name, target_server, (unsigned long)tkline_time,
-                    dlhost, reason);
+    sendto_match_servs(source_p, target_server, CAP_DLN, "DLINE %s %lu %s :%s",
+                       target_server, (unsigned long)tkline_time,
+                       dlhost, reason);
 
     /* Allow ON to apply local kline as well if it matches */
     if (match(target_server, me.name))

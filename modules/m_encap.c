@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_encap.c: encapsulated command propagation and parsing
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2003 by the past and present ircd coders, and others.
+ *  Copyright (c) 2003-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_encap.c
+ * \brief Includes required functions for processing the ENCAP command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -94,9 +96,12 @@ ms_encap(struct Client *client_p, struct Client *source_p,
   mptr->bytes += strlen(buffer);
 
   /*
-   * yes this is an ugly hack, but it is quicker than copying the entire array again
-   * note: this hack wouldnt be needed if parv[0] were set to the command name, rather
-   * than being derived from the prefix, as it should have been from the beginning.
+   * Yes this is an ugly hack, but it is quicker than copying the
+   * entire array again.
+   *
+   * Note: this hack wouldn't be needed if parv[0] were set to the
+   * command name, rather than being derived from the prefix, as
+   * it should have been from the beginning.
    */
   ptr = parv[0];
   parv += 2;
@@ -107,9 +112,10 @@ ms_encap(struct Client *client_p, struct Client *source_p,
     (*handler)(client_p, source_p, parc, parv);
 }
 
-static struct Message encap_msgtab = {
+static struct Message encap_msgtab =
+{
   "ENCAP", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  {m_ignore, m_ignore, ms_encap, m_ignore, m_ignore, m_ignore}
+  { m_ignore, m_ignore, ms_encap, m_ignore, m_ignore, m_ignore }
 };
 
 static void
@@ -126,7 +132,8 @@ module_exit(void)
   delete_capability("ENCAP");
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

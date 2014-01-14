@@ -72,7 +72,7 @@ extern int match_ipv4(const struct irc_ssaddr *, const struct irc_ssaddr *, int)
 
 extern void mask_addr(struct irc_ssaddr *, int);
 extern void init_host_hash(void);
-extern void add_conf_by_address(const unsigned int, struct MaskItem *);
+extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
 extern void delete_one_address_conf(const char *, struct MaskItem *);
 extern void clear_out_address_conf(void);
 extern void hostmask_expire_temporary(void);

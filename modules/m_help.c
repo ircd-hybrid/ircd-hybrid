@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_help.c: Provides help information to a user/operator.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1999-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_help.c
+ * \brief Includes required functions for processing the HELP command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -35,7 +37,7 @@
 #define HELPLEN 400
 
 
-static void
+static int
 sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 {
   FILE *file = NULL;
@@ -45,7 +47,7 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return;
+    return 0;
   }
 
   if (fgets(line, sizeof(line), file) == NULL)
@@ -53,7 +55,7 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
     fclose(file);
-    return;
+    return 0;
   }
 
   line[strlen(line) - 1] = '\0';
@@ -71,9 +73,10 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
   fclose(file);
   sendto_one(source_p, form_str(RPL_ENDOFHELP),
              me.name, source_p->name, topic);
+  return 0;
 }
 
-static void
+static int
 dohelp(struct Client *source_p, char *topic)
 {
   char *p = topic;
@@ -91,14 +94,14 @@ dohelp(struct Client *source_p, char *topic)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return;
+    return 0;
   }
 
   if (strlen(HPATH) + strlen(topic) + 1 > HYB_PATH_MAX)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return;
+    return 0;
   }
 
   snprintf(path, sizeof(path), "%s/%s", HPATH, topic);
@@ -107,24 +110,24 @@ dohelp(struct Client *source_p, char *topic)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return;
+    return 0;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return;
+    return 0;
   }
 
-  sendhelpfile(source_p, path, topic);
+  return sendhelpfile(source_p, path, topic);
 }
 
 /*
  * m_help - HELP message handler
  *      parv[0] = sender prefix
  */
-static void
+static int
 m_help(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -136,28 +139,29 @@ m_help(struct Client *client_p, struct Client *source_p,
     /* safe enough to give this on a local connect only */
     sendto_one(source_p,form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
 
-  dohelp(source_p, parv[1]);
+  return dohelp(source_p, parv[1]);
 }
 
 /*
  * mo_help - HELP message handler
  *      parv[0] = sender prefix
  */
-static void
+static int
 mo_help(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  dohelp(source_p, parv[1]);
+  return dohelp(source_p, parv[1]);
 }
 
-static struct Message help_msgtab = {
+static struct Message help_msgtab =
+{
   "HELP", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_help, m_ignore, m_ignore, mo_help, m_ignore}
+  { m_unregistered, m_help, m_ignore, m_ignore, mo_help, m_ignore }
 };
 
 static void
@@ -172,7 +176,8 @@ module_exit(void)
   mod_del_cmd(&help_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

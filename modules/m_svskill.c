@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 1999 by the Bahamut Development Team.
- *  Copyright (C) 2013 by the Hybrid Development Team.
+ *  Copyright (c) 1999 Bahamut development team.
+ *  Copyright (c) 2013-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@
  *      - parv[2] = TS
  *      - parv[3] = kill message
  */
-static void
+static int
 ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
@@ -62,10 +62,10 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
   time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
-    return;
+    return 0;
 
   if (EmptyString(parv[1]))
-    return;
+    return 0;
 
   if (parc > 3)
   {
@@ -76,16 +76,16 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
     comment = (parc > 2 && parv[2]) ? parv[2] : source_p->name;
 
   if ((target_p = find_person(client_p, parv[1])) == NULL)
-    return;
+    return 0;
 
   if (ts && (ts != target_p->tsinfo))
-    return;
+    return 0;
 
   if (MyConnect(target_p))
   {
     strlcpy(reason + 11, comment, sizeof(reason) - 11);
     exit_client(target_p, target_p, reason);
-    return;
+    return 0;
   }
 
   if (target_p->from == client_p)
@@ -95,7 +95,7 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
                          "for %s (behind %s) from %s",
                          target_p->name, client_p->name,
                          get_client_name(source_p, HIDE_IP));
-    return;
+    return 0;
   }
 
   if (ts == 0)
@@ -106,11 +106,13 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
     sendto_one(target_p, ":%s SVSKILL %s %lu :%s",
                ID_or_name(source_p, target_p->from),
                ID_or_name(target_p, target_p->from), ts, comment);
+  return 0;
 }
 
-static struct Message svskill_msgtab = {
+static struct Message svskill_msgtab =
+{
   "SVSKILL", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  {m_ignore, m_ignore, ms_svskill, m_ignore, m_ignore, m_ignore}
+  { m_ignore, m_ignore, ms_svskill, m_ignore, m_ignore, m_ignore }
 };
 
 static void
@@ -125,7 +127,8 @@ module_exit(void)
   mod_del_cmd(&svskill_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

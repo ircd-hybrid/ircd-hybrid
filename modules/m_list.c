@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_list.c: List channel given or all channels.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_list.c
+ * \brief Includes required functions for processing the LIST command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -172,14 +174,16 @@ do_list(struct Client *source_p, int parc, char *parv[])
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static void
+static int
 m_list(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   do_list(source_p, parc, parv);
+  return 0;
 }
 
-static struct Message list_msgtab = {
+static struct Message list_msgtab =
+{
   "LIST", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_list, m_ignore, m_ignore, m_list, m_ignore }
 };
@@ -200,7 +204,8 @@ module_exit(void)
   delete_isupport("SAFELIST");
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

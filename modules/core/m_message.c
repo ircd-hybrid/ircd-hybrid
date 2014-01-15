@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_message.c: Sends a (PRIVMSG|NOTICE) message to a user or channel.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_message.c
+ * \brief Includes required functions for processing the PRIVMSG/NOTICE command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -140,7 +142,7 @@ find_userhost(char *user, char *host, int *count)
  *
  * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
  *                say NOTICE must not auto reply
- *              - pointer to source Client 
+ *              - pointer to source Client
  *              - pointer to target Client
  * output       - 1 if target is under flood attack
  * side effects - check for flood attack on target target_p
@@ -201,7 +203,7 @@ flood_attack_client(int p_or_n, struct Client *source_p,
  *
  * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
  *                says NOTICE must not auto reply
- *              - pointer to source Client 
+ *              - pointer to source Client
  *              - pointer to target channel
  * output       - 1 if target is under flood attack
  * side effects - check for flood attack on target chptr
@@ -308,7 +310,7 @@ msg_channel(int p_or_n, const char *command, struct Client *client_p,
 
 /* msg_channel_flags()
  *
- * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC 
+ * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
  *		  say NOTICE must not auto reply
  *		- pointer to command, "PRIVMSG" or "NOTICE"
  *		- pointer to client_p
@@ -354,7 +356,7 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 
 /* msg_client()
  *
- * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC 
+ * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
  *		  say NOTICE must not auto reply
  *		- pointer to command, "PRIVMSG" or "NOTICE"
  * 		- pointer to source_p source (struct Client *)
@@ -442,7 +444,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
       /*
        * If the client is remote, we dont perform a special check for
        * flooding.. as we wouldnt block their message anyway.. this means
-       * we dont give warnings.. we then check if theyre opered 
+       * we dont give warnings.. we then check if theyre opered
        * (to avoid flood warnings), lastly if theyre our client
        * and flooding    -- fl
        */
@@ -582,7 +584,7 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
       ++nick;
     else if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER))
     {
-      sendto_one(source_p, 
+      sendto_one(source_p,
                  ":%s NOTICE %s :The command %s %s is no longer supported, please use $%s",
                  me.name, source_p->name, command, nick, nick);
       return;
@@ -606,7 +608,7 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
                  ID_or_name(source_p, client_p), nick);
       return;
     }
-    
+
     sendto_match_butone(IsServer(client_p) ? client_p : NULL, source_p,
                         nick + 1, (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
                         "%s $%s :%s", command, nick, text);
@@ -706,7 +708,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 
       continue;
     }
-    
+
     /* @#channel or +#channel message ? */
     type = 0;
     with_prefix = nick;
@@ -763,7 +765,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
                        ID_or_name(&me, client_p),
                        ID_or_name(source_p, client_p), nick,
                        ConfigFileEntry.max_targets);
-            return 1; 
+            return 1;
           }
 
           targets[ntargets].ptr = chptr;
@@ -858,7 +860,7 @@ m_message(int p_or_n, const char *command, struct Client *client_p,
   }
 }
 
-static void
+static int
 m_privmsg(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
@@ -867,28 +869,30 @@ m_privmsg(struct Client *client_p, struct Client *source_p,
    * for a notice.. (for example remote kline replies) --fl_
    */
   if (!IsClient(source_p))
-    return;
+    return 0;
 
   m_message(PRIVMSG, "PRIVMSG", client_p, source_p, parc, parv);
+  return 0;
 }
 
-static void
+static int
 m_notice(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   m_message(NOTICE, "NOTICE", client_p, source_p, parc, parv);
+  return 0;
 }
 
 static struct Message privmsg_msgtab =
 {
   "PRIVMSG", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_privmsg, m_privmsg, m_ignore, m_privmsg, m_ignore}
+  { m_unregistered, m_privmsg, m_privmsg, m_ignore, m_privmsg, m_ignore }
 };
 
 static struct Message notice_msgtab =
 {
   "NOTICE", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_notice, m_notice, m_ignore, m_notice, m_ignore}
+  { m_unregistered, m_notice, m_notice, m_ignore, m_notice, m_ignore }
 };
 
 static void

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_knock.c: Requests to be invited to a channel.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1998-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_knock.c
+ * \brief Includes required functions for processing the KNOCK command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -53,7 +55,7 @@
  *  of these conditions.  Concept by Dianora <db@db.net> and written by
  *  <anonymous>
  */
-static void
+static int
 m_knock(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -63,14 +65,14 @@ m_knock(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "KNOCK");
-    return;
+    return 0;
   }
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                me.name, source_p->name, parv[1]);
-    return;
+    return 0;
   }
 
   /* Normal channel, just be sure they aren't on it */
@@ -78,7 +80,7 @@ m_knock(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_KNOCKONCHAN), me.name,
                source_p->name, chptr->chname);
-    return;
+    return 0;
   }
 
   if (!((chptr->mode.mode & MODE_INVITEONLY) || (*chptr->mode.key) ||
@@ -87,7 +89,7 @@ m_knock(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_CHANOPEN), me.name,
                source_p->name, chptr->chname);
-    return;
+    return 0;
   }
 
   if (MyClient(source_p))
@@ -99,7 +101,7 @@ m_knock(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
                  me.name, source_p->name, chptr->chname);
-      return;
+      return 0;
     }
 
     /*
@@ -114,14 +116,14 @@ m_knock(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_TOOMANYKNOCK), me.name,
                  source_p->name, chptr->chname, "user");
-      return;
+      return 0;
     }
 
     if ((chptr->last_knock + ConfigChannel.knock_delay_channel) > CurrentTime)
     {
       sendto_one(source_p, form_str(ERR_TOOMANYKNOCK), me.name,
                  source_p->name, chptr->chname, "channel");
-      return;
+      return 0;
     }
 
     source_p->localClient->last_knock = CurrentTime;
@@ -143,9 +145,11 @@ m_knock(struct Client *client_p, struct Client *source_p,
                 ":%s KNOCK %s", ID(source_p), chptr->chname);
   sendto_server(client_p, CAP_KNOCK, CAP_TS6,
                 ":%s KNOCK %s", source_p->name, chptr->chname);
+  return 0;
 }
 
-static struct Message knock_msgtab = {
+static struct Message knock_msgtab =
+{
   "KNOCK", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_knock, m_knock, m_ignore, m_knock, m_ignore }
 };
@@ -166,7 +170,8 @@ module_exit(void)
   delete_isupport("KNOCK");
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

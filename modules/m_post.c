@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_post.c: Exits the user if unregistered, it is a web form.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2001-2002 Hybrid Development Team
+ *  Copyright (c) 2001-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_post.c
+ * \brief Includes required functions for processing the POST/GET/PUT command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -35,7 +37,7 @@
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-static void
+static int
 mr_dumb_proxy(struct Client *client_p, struct Client *source_p,
               int parc, char *parv[])
 {
@@ -43,21 +45,25 @@ mr_dumb_proxy(struct Client *client_p, struct Client *source_p,
                        "HTTP Proxy disconnected: [%s@%s]",
                        client_p->username, client_p->host);
   exit_client(source_p, source_p, "Client Exit");
+  return 0;
 }
 
-static struct Message post_msgtab = {
+static struct Message post_msgtab =
+{
   "POST", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore}
+  { mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
 };
 
-static struct Message get_msgtab = {
+static struct Message get_msgtab =
+{
   "GET", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore}
+  { mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
 };
 
-static struct Message put_msgtab = {
+static struct Message put_msgtab =
+{
   "PUT", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore}
+  { mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
 };
 
 static void
@@ -76,7 +82,8 @@ module_exit(void)
   mod_del_cmd(&put_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

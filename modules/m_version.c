@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_version.c: Shows ircd version information.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_version.c
+ * \brief Includes required functions for processing the VERSION command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -35,7 +37,8 @@
 
 
 /* Option string. */
-static const char serveropts[] = {
+static const char serveropts[] =
+{
   'T',
   'S',
 #ifdef TS_CURRENT
@@ -53,7 +56,7 @@ static const char serveropts[] = {
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void
+static int
 m_version(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
@@ -64,7 +67,7 @@ m_version(struct Client *client_p, struct Client *source_p,
     /* safe enough to give this on a local connect only */
     sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
@@ -72,12 +75,13 @@ m_version(struct Client *client_p, struct Client *source_p,
   if (!ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p, source_p, ":%s VERSION :%s",
                     1, parc, parv) != HUNTED_ISME)
-      return;
+      return 0;
 
   sendto_one(source_p, form_str(RPL_VERSION), me.name,
              source_p->name, ircd_version, serno,
              me.name, serveropts);
   show_isupport(source_p);
+  return 0;
 }
 
 /*
@@ -85,19 +89,20 @@ m_version(struct Client *client_p, struct Client *source_p,
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void
+static int
 mo_version(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
-  
-  if (hunt_server(client_p, source_p, ":%s VERSION :%s", 
+
+  if (hunt_server(client_p, source_p, ":%s VERSION :%s",
                   1, parc, parv) != HUNTED_ISME)
-    return;
+    return 0;
 
   sendto_one(source_p, form_str(RPL_VERSION), me.name,
              source_p->name, ircd_version, serno,
              me.name, serveropts);
   show_isupport(source_p);
+  return 0;
 }
 
 /*
@@ -105,13 +110,13 @@ mo_version(struct Client *client_p, struct Client *source_p,
  *      parv[0] = sender prefix
  *      parv[1] = remote server
  */
-static void
+static int
 ms_version(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s VERSION :%s", 
+  if (hunt_server(client_p, source_p, ":%s VERSION :%s",
                   1, parc, parv) != HUNTED_ISME)
-    return;
+    return 0;
 
   sendto_one(source_p, form_str(RPL_VERSION),
              ID_or_name(&me, client_p),
@@ -119,9 +124,11 @@ ms_version(struct Client *client_p, struct Client *source_p,
              ircd_version, serno,
              me.name, serveropts);
   show_isupport(source_p);
+  return 0;
 }
 
-static struct Message version_msgtab = {
+static struct Message version_msgtab =
+{
   "VERSION", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_version, ms_version, m_ignore, mo_version, m_ignore }
 };
@@ -138,7 +145,8 @@ module_exit(void)
   mod_del_cmd(&version_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

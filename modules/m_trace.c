@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_trace.c: Traces a path to a client/server.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_trace.c
+ * \brief Includes required functions for processing the TRACE command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -60,7 +62,7 @@ trace_get_dependent(unsigned int *const server,
  *	parv[0] = sender prefix
  *	parv[1] = target client/server to trace
  */
-static void
+static int
 m_trace(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -73,13 +75,14 @@ m_trace(struct Client *client_p, struct Client *source_p,
 
   sendto_one(source_p, form_str(RPL_ENDOFTRACE),
              me.name, source_p->name, tname);
+  return 0;
 }
 
 /* mo_trace()
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 mo_trace(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -89,7 +92,7 @@ mo_trace(struct Client *client_p, struct Client *source_p,
 
   if (parc > 2)
     if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
-      return;
+      return 0;
 
   if (parc > 1)
     tname = parv[1];
@@ -132,15 +135,17 @@ mo_trace(struct Client *client_p, struct Client *source_p,
       else
         sendto_one(source_p, form_str(RPL_TRACELINK), from, to,
                    ircd_version, tname, "ac2ptr_is_NULL!!");
-      return;
+      return 0;
     }
 
     case HUNTED_ISME:
       do_actual_trace(source_p, parc, parv);
       break;
     default:
-      return;
+      return 0;
   }
+
+  return 0;
 }
 
 /*
@@ -148,15 +153,16 @@ mo_trace(struct Client *client_p, struct Client *source_p,
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void
+static int
 ms_trace(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv))
-    return;
+    return 0;
 
   if (HasUMode(source_p, UMODE_OPER))
     mo_trace(client_p, source_p, parc, parv);
+  return 0;
 }
 
 static void
@@ -207,7 +213,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     const char *name;
     target_p = hash_find_client(tname);
 
-    if (target_p && IsClient(target_p)) 
+    if (target_p && IsClient(target_p))
     {
       name = get_client_name(target_p, HIDE_IP);
 
@@ -358,7 +364,7 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
           {
             if (ConfigFileEntry.hide_spoof_ips)
               sendto_one(source_p, form_str(RPL_TRACEOPERATOR),
-                         from, to, class_name, name, 
+                         from, to, class_name, name,
                          IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
                          CurrentTime - target_p->localClient->lasttime,
                          idle_time_get(source_p, target_p));
@@ -405,7 +411,7 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
                  me.name, CurrentTime - target_p->localClient->lasttime);
       break;
     }
-      
+
     default:  /* ...we actually shouldn't come here... --msa */
       sendto_one(source_p, form_str(RPL_TRACENEWTYPE),
                  from, to, name);
@@ -413,7 +419,8 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
   }
 }
 
-static struct Message trace_msgtab = {
+static struct Message trace_msgtab =
+{
   "TRACE", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_trace, ms_trace, m_ignore, mo_trace, m_ignore }
 };
@@ -430,7 +437,8 @@ module_exit(void)
   mod_del_cmd(&trace_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_close.c: Closes all unregistered connections.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_close.c
+ * \brief Includes required functions for processing the CLOSE command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -36,7 +38,7 @@
  * mo_close - CLOSE message handler
  *  - added by Darren Reed Jul 13 1992.
  */
-static void
+static int
 mo_close(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -52,7 +54,7 @@ mo_close(struct Client *client_p, struct Client *source_p,
                get_client_name(target_p, SHOW_IP), target_p->status);
 
     /*
-     * exit here is safe, because it is guaranteed not to be source_p
+     * Exit here is safe, because it is guaranteed not to be source_p
      * because it is unregistered and source_p is an oper.
      */
     exit_client(target_p, target_p, "Oper Closing");
@@ -60,9 +62,11 @@ mo_close(struct Client *client_p, struct Client *source_p,
 
   sendto_one(source_p, form_str(RPL_CLOSEEND),
              me.name, source_p->name, closed);
+  return 0;
 }
 
-static struct Message close_msgtab = {
+static struct Message close_msgtab =
+{
   "CLOSE", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_close, m_ignore }
 };
@@ -79,7 +83,8 @@ module_exit(void)
   mod_del_cmd(&close_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

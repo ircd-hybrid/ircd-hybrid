@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_user.c: Sends username information.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_user.c
+ * \brief Includes required functions for processing the USER command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -73,7 +75,7 @@ do_local_user(struct Client *source_p,
 **      parv[3] = server host name (used only from other servers)
 **      parv[4] = users real name info
 */
-static void
+static int
 mr_user(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -82,17 +84,17 @@ mr_user(struct Client *client_p, struct Client *source_p,
   if (source_p->localClient->listener->flags & LISTENER_SERVER)
   {
     exit_client(source_p, &me, "Use a different port");
-    return;
+    return 0;
   }
 
   if ((p = strchr(parv[1], '@')) != NULL)
-    *p = '\0'; 
+    *p = '\0';
 
   if (EmptyString(parv[4]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name,
                source_p->name[0] ? source_p->name : "*", "USER");
-    return;
+    return 0;
   }
 
   do_local_user(source_p,
@@ -100,9 +102,11 @@ mr_user(struct Client *client_p, struct Client *source_p,
                 parv[2], /* host     */
                 parv[3], /* server   */
                 parv[4]	 /* users real name */ );
+  return 0;
 }
 
-static struct Message user_msgtab = {
+static struct Message user_msgtab =
+{
   "USER", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
   { mr_user, m_registered, m_ignore, m_ignore, m_registered, m_ignore }
 };
@@ -119,7 +123,8 @@ module_exit(void)
   mod_del_cmd(&user_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

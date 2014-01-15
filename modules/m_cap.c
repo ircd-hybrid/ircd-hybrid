@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2004 Kevin L. Mitchell <klmitch@mit.edu>
- *  Copyright (C) 2006-2012 Hybrid Development Team
+ *  Copyright (c) 2004 Kevin L. Mitchell <klmitch@mit.edu>
+ *  Copyright (c) 2006-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,13 +18,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
  */
 
-/** @file
- * @brief Capability negotiation commands
- * @version $Id$
+/*! \file m_cap.c
+ * \brief Includes required functions for processing the CAP command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -76,8 +74,8 @@ capab_search(const char *key, const struct capabilities *cap)
 {
   const char *rb = cap->name;
 
-  while (ToLower(*key) == ToLower(*rb))  /* walk equivalent part of strings */
-    if (*key++ == '\0')  /* hit the end, all right... */
+  while (ToLower(*key) == ToLower(*rb))  /* Walk equivalent part of strings */
+    if (*key++ == '\0')  /* Hit the end, all right... */
       return 0;
     else    /* OK, let's move on... */
       rb++;
@@ -97,7 +95,7 @@ find_cap(const char **caplist_p, int *neg_p)
   const char *caplist = *caplist_p;
   struct capabilities *cap = NULL;
 
-  *neg_p = 0;  /* clear negative flag... */
+  *neg_p = 0;  /* Clear negative flag... */
 
   if (!inited)
   {
@@ -113,8 +111,8 @@ find_cap(const char **caplist_p, int *neg_p)
   /* We are now at the beginning of an element of the list; is it negative? */
   if (*caplist == '-')
   {
-    ++caplist;  /* yes; step past the flag... */
-    *neg_p = 1;  /* remember that it is negative... */
+    ++caplist;  /* Yes; step past the flag... */
+    *neg_p = 1;  /* Remember that it is negative... */
   }
 
   /* OK, now see if we can look up the capability... */
@@ -129,15 +127,15 @@ find_cap(const char **caplist_p, int *neg_p)
         ++caplist;
     }
     else
-      caplist += cap->namelen;  /* advance to end of capability name */
+      caplist += cap->namelen;  /* Advance to end of capability name */
   }
 
-  assert(caplist != *caplist_p || !*caplist);  /* we *must* advance */
+  assert(caplist != *caplist_p || !*caplist);  /* We *must* advance */
 
-  /* move ahead in capability list string--or zero pointer if we hit end */
+  /* Move ahead in capability list string--or zero pointer if we hit end */
   *caplist_p = *caplist ? caplist : 0;
 
-  return cap;    /* and return the capability (if any) */
+  return cap;  /* And return the capability (if any) */
 }
 
 /** Send a CAP \a subcmd list of capability changes to \a source_p.
@@ -156,7 +154,7 @@ send_caplist(struct Client *source_p, unsigned int set,
   char cmdbuf[IRCD_BUFSIZE] = "";
   unsigned int i, loc, len, flags, pfx_len, clen;
 
-  /* set up the buffer for the final LS message... */
+  /* Set up the buffer for the final LS message... */
   clen = snprintf(cmdbuf, sizeof(capbuf), ":%s CAP %s %s ", me.name,
                   source_p->name[0] ? source_p->name : "*", subcmd);
 
@@ -192,13 +190,13 @@ send_caplist(struct Client *source_p, unsigned int set,
 
     pfx[pfx_len] = '\0';
 
-    len = capab_list[i].namelen + pfx_len;  /* how much we'd add... */
+    len = capab_list[i].namelen + pfx_len;  /* How much we'd add... */
 
     if (sizeof(capbuf) < (clen + loc + len + 15))
     {
-      /* would add too much; must flush */
+      /* Would add too much; must flush */
       sendto_one(source_p, "%s* :%s", cmdbuf, capbuf);
-      capbuf[(loc = 0)] = '\0';  /* re-terminate the buffer... */
+      capbuf[(loc = 0)] = '\0';  /* Re-terminate the buffer... */
     }
 
     loc += snprintf(capbuf + loc, sizeof(capbuf) - loc,
@@ -207,16 +205,16 @@ send_caplist(struct Client *source_p, unsigned int set,
 
   sendto_one(source_p, "%s:%s", cmdbuf, capbuf);
 
-  return 0;  /* convenience return */
+  return 0;  /* Convenience return */
 }
 
 static int
 cap_ls(struct Client *source_p, const char *caplist)
 {
-  if (IsUnknown(source_p))  /* registration hasn't completed; suspend it... */
+  if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
     source_p->localClient->registration |= REG_NEED_CAP;
 
-  return send_caplist(source_p, 0, 0, "LS");  /* send list of capabilities */
+  return send_caplist(source_p, 0, 0, "LS");  /* Send list of capabilities */
 }
 
 static int
@@ -229,21 +227,21 @@ cap_req(struct Client *source_p, const char *caplist)
   unsigned int as = source_p->localClient->cap_active; /* active set */
   int neg = 0;
 
-  if (IsUnknown(source_p))  /* registration hasn't completed; suspend it... */
+  if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
     source_p->localClient->registration |= REG_NEED_CAP;
 
-  while (cl) {  /* walk through the capabilities list... */
-    if (!(cap = find_cap(&cl, &neg)) /* look up capability... */
-        || (!neg && (cap->flags & CAPFL_PROHIBIT))  /* is it prohibited? */
-        || (neg && (cap->flags & CAPFL_STICKY))) {  /* is it sticky? */
+  while (cl) {  /* Walk through the capabilities list... */
+    if (!(cap = find_cap(&cl, &neg)) /* Look up capability... */
+        || (!neg && (cap->flags & CAPFL_PROHIBIT))  /* Is it prohibited? */
+        || (neg && (cap->flags & CAPFL_STICKY))) {  /* Is it sticky? */
       sendto_one(source_p, ":%s CAP %s NAK :%s", me.name,
                  source_p->name[0] ? source_p->name : "*", caplist);
-      return 0;  /* can't complete requested op... */
+      return 0;  /* Can't complete requested op... */
     }
 
     if (neg)
     {
-      /* set or clear the capability... */
+      /* Set or clear the capability... */
       rem |=  cap->cap;
       set &= ~cap->cap;
       cs  &= ~cap->cap;
@@ -280,18 +278,18 @@ cap_ack(struct Client *source_p, const char *caplist)
 
   /*
    * Coming from the client, this generally indicates that the client
-   * is using a new backwards-incompatible protocol feature.  As such,
+   * is using a new backwards-incompatible protocol feature. As such,
    * it does not require further response from the server.
    */
   while (cl)
   {
-    /* walk through the capabilities list... */
-    if (!(cap = find_cap(&cl, &neg)) ||  /* look up capability... */
+    /* Walk through the capabilities list... */
+    if (!(cap = find_cap(&cl, &neg)) ||  /* Look up capability... */
         (neg ? (source_p->localClient->cap_active & cap->cap) :
               !(source_p->localClient->cap_active & cap->cap)))  /* uh... */
       continue;
 
-    if (neg)  /* set or clear the active capability... */
+    if (neg)  /* Set or clear the active capability... */
       source_p->localClient->cap_active &= ~cap->cap;
     else
       source_p->localClient->cap_active |=  cap->cap;
@@ -328,13 +326,13 @@ cap_clear(struct Client *source_p, const char *caplist)
 static int
 cap_end(struct Client *source_p, const char *caplist)
 {
-  if (!IsUnknown(source_p))  /* registration has completed... */
-    return 0;  /* so just ignore the message... */
+  if (!IsUnknown(source_p))  /* Registration has completed... */
+    return 0;  /* So just ignore the message... */
 
-  /* capability negotiation is now done... */
+  /* Capability negotiation is now done... */
   source_p->localClient->registration &= ~REG_NEED_CAP;
 
-  /* if client is now done... */
+  /* If client is now done... */
   if (!source_p->localClient->registration)
   {
     register_local_user(source_p);
@@ -377,36 +375,38 @@ subcmd_search(const char *cmd, const struct subcmd *elem)
  * \param parc     Number of arguments.
  * \param parv     Argument vector.
  */
-static void
+static int
 m_cap(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
   const char *subcmd = NULL, *caplist = NULL;
   struct subcmd *cmd = NULL;
 
-  if (EmptyString(parv[1]))  /* a subcommand is required */
-    return;
+  if (EmptyString(parv[1]))  /* A subcommand is required */
+    return 0;
 
   subcmd = parv[1];
 
-  if (parc > 2)  /* a capability list was provided */
+  if (parc > 2)  /* A capability list was provided */
     caplist = parv[2];
 
-  /* find the subcommand handler */
+  /* Find the subcommand handler */
   if (!(cmd = bsearch(subcmd, cmdlist,
                       sizeof(cmdlist) / sizeof(struct subcmd),
                       sizeof(struct subcmd), (bqcmp)subcmd_search)))
   {
     sendto_one(source_p, form_str(ERR_INVALIDCAPCMD), me.name,
                source_p->name[0] ? source_p->name : "*", subcmd);
-    return;
+    return 0;
   }
 
-  /* then execute it... */
+  /* Then execute it... */
   if (cmd->proc)
     (cmd->proc)(source_p, caplist);
+  return 0;
 }
 
-static struct Message cap_msgtab = {
+static struct Message cap_msgtab =
+{
   "CAP", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_cap, m_cap, m_ignore, m_ignore, m_cap, m_ignore }
 };
@@ -423,7 +423,8 @@ module_exit(void)
   mod_del_cmd(&cap_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

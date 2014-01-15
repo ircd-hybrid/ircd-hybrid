@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_resv.c: Reserves(jupes) a nickname or channel.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2001-2002 Hybrid Development Team
+ *  Copyright (c) 2001-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_resv.c
+ * \brief Includes required functions for processing the RESV/UNRESV command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -46,7 +48,7 @@ static void remove_resv(struct Client *, const char *);
  *   parv[0] = sender prefix
  *   parv[1] = channel/nick to forbid
  */
-static void
+static int
 mo_resv(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -58,24 +60,24 @@ mo_resv(struct Client *client_p, struct Client *source_p,
   /* RESV #channel ON irc.server.com :abuse
    * RESV kiddie ON irc.server.com :abuse
    */
-  if (parse_aline("RESV", source_p, parc, parv,
-		  AWILD, &resv, NULL, &tkline_time, &target_server, &reason) < 0)
-    return;
+  if (parse_aline("RESV", source_p, parc, parv, AWILD, &resv, NULL,
+                  &tkline_time, &target_server, &reason) < 0)
+    return 0;
 
   if (target_server != NULL)
   {
     /* if a given expire time is given, ENCAP it */
     if (tkline_time != 0)
       sendto_match_servs(source_p, target_server, CAP_ENCAP,
-			 "ENCAP %s RESV %d %s 0 :%s",
-			 target_server, (int)tkline_time, resv, reason);
+                         "ENCAP %s RESV %d %s 0 :%s",
+                         target_server, (int)tkline_time, resv, reason);
     else
       sendto_match_servs(source_p, target_server, CAP_CLUSTER,
-			 "RESV %s %s :%s",
-			 target_server, resv, reason);
+                         "RESV %s %s :%s",
+                         target_server, resv, reason);
     /* Allow ON to apply local resv as well if it matches */
     if (match(target_server, me.name))
-      return;
+      return 0;
   }
   else
   {
@@ -84,13 +86,14 @@ mo_resv(struct Client *client_p, struct Client *source_p,
      */
     if (tkline_time != 0)
       cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_RESV,
-		     "RESV %d %s 0 : %s", (int)tkline_time, resv, reason);
+                     "RESV %d %s 0 : %s", (int)tkline_time, resv, reason);
     else
       cluster_a_line(source_p, "RESV", CAP_KLN, SHARED_RESV,
-		     "%s : %s", resv, reason);
+                     "%s : %s", resv, reason);
   }
 
   parse_resv(source_p, resv, (int)tkline_time, reason);
+  return 0;
 }
 
 /* me_resv()
@@ -110,14 +113,15 @@ mo_resv(struct Client *client_p, struct Client *source_p,
  * outputs	- NONE
  * side effects -
  */
-static void
+static int
 me_resv(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   if (parc != 5 || !IsClient(source_p))
-    return;
+    return 0;
 
   parse_resv(source_p, parv[2], atoi(parv[1]), parv[4]);
+  return 0;
 }
 
 /* ms_resv()
@@ -126,31 +130,32 @@ me_resv(struct Client *client_p, struct Client *source_p,
  *   parv[2] = channel/nick to resv
  *   parv[3] = reason
  */
-static void
+static int
 ms_resv(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   if ((parc != 4) || EmptyString(parv[3]))
-    return;
+    return 0;
 
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
                      "RESV %s %s :%s",
                      parv[1], parv[2], parv[3]);
 
   if (!IsClient(source_p) || match(parv[1], me.name))
-    return;
+    return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_RESV))
     parse_resv(source_p, parv[2], 0, parv[3]);
+  return 0;
 }
 
 /* mo_unresv()
  *   parv[0] = sender prefix
  *   parv[1] = channel/nick to unforbid
  */
-static void
+static int
 mo_unresv(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
@@ -160,9 +165,9 @@ mo_unresv(struct Client *client_p, struct Client *source_p,
 
   /* UNRESV #channel ON irc.server.com */
   /* UNRESV kiddie ON irc.server.com */
-  if (parse_aline("UNRESV", source_p, parc, parv,
-		  0, &resv, NULL, NULL, &target_server, &reason) < 0)
-    return;
+  if (parse_aline("UNRESV", source_p, parc, parv, 0, &resv, NULL,
+                  NULL, &target_server, &reason) < 0)
+    return 0;
 
   if (target_server != NULL)
   {
@@ -172,12 +177,13 @@ mo_unresv(struct Client *client_p, struct Client *source_p,
 
     /* Allow ON to apply local unresv as well if it matches */
     if (match(target_server, me.name))
-      return;
+      return 0;
   }
-  else 
+  else
     cluster_a_line(source_p, "UNRESV", CAP_KLN, SHARED_UNRESV, resv);
 
   remove_resv(source_p, resv);
+  return 0;
 }
 
 /* ms_unresv()
@@ -185,24 +191,25 @@ mo_unresv(struct Client *client_p, struct Client *source_p,
  *     parv[1] = target server
  *     parv[2] = resv to remove
  */
-static void
+static int
 ms_unresv(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
   if ((parc != 3) || EmptyString(parv[2]))
-    return;
+    return 0;
 
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
                      "UNRESV %s %s",
                      parv[1], parv[2]);
 
   if (!IsClient(source_p) || match(parv[1], me.name))
-    return;
+    return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_UNRESV))
     remove_resv(source_p, parv[2]);
+  return 0;
 }
 
 /* parse_resv()
@@ -224,8 +231,8 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     if ((conf = create_resv(name, reason, NULL)) == NULL)
     {
       sendto_one(source_p,
-	   ":%s NOTICE %s :A RESV has already been placed on channel: %s",
-                   me.name, source_p->name, name);
+                 ":%s NOTICE %s :A RESV has already been placed on channel: %s",
+                 me.name, source_p->name, name);
       return;
     }
 
@@ -235,32 +242,31 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     if (tkline_time != 0)
     {
       sendto_one(source_p,
-		 ":%s NOTICE %s :A %d minute %s RESV has been placed on channel: %s",
-                 me.name, source_p->name,
-		 tkline_time/60,
+                 ":%s NOTICE %s :A %d minute %s RESV has been placed on channel: %s",
+                 me.name, source_p->name, tkline_time/60,
                  (MyClient(source_p) ? "local" : "remote"), name);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "%s has placed a %d minute %s RESV on channel: %s [%s]",
-			   get_oper_name(source_p),
-			   tkline_time/60,
-			   (MyClient(source_p) ? "local" : "remote"),
-			   conf->name, conf->reason);
+                           "%s has placed a %d minute %s RESV on channel: %s [%s]",
+                           get_oper_name(source_p),
+                           tkline_time/60,
+                           (MyClient(source_p) ? "local" : "remote"),
+                           conf->name, conf->reason);
       ilog(LOG_TYPE_RESV, "%s added temporary %d min. RESV for [%s] [%s]",
-	   source_p->name, (int)tkline_time/60,
-	   conf->name, conf->reason);
+           source_p->name, (int)tkline_time/60,
+           conf->name, conf->reason);
       conf->until = CurrentTime + tkline_time;
     }
     else
     {
       sendto_one(source_p,
-		 ":%s NOTICE %s :A %s RESV has been placed on channel %s",
+                 ":%s NOTICE %s :A %s RESV has been placed on channel %s",
                  me.name, source_p->name,
-                 (MyClient(source_p) ? "local" : "remote"), name);
+                (MyClient(source_p) ? "local" : "remote"), name);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "%s has placed a %s RESV on channel %s : [%s]",
-			   get_oper_name(source_p),
-			   (MyClient(source_p) ? "local" : "remote"),
-			   conf->name, conf->reason);
+                           "%s has placed a %s RESV on channel %s : [%s]",
+                           get_oper_name(source_p),
+                           (MyClient(source_p) ? "local" : "remote"),
+                           conf->name, conf->reason);
     }
   }
   else
@@ -295,34 +301,31 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     if (tkline_time != 0)
     {
       sendto_one(source_p,
-		 ":%s NOTICE %s :A %d minute %s RESV has been placed on nick %s : [%s]",
-                 me.name, source_p->name,
-		 tkline_time/60,
+                 ":%s NOTICE %s :A %d minute %s RESV has been placed on nick %s : [%s]",
+                 me.name, source_p->name,  tkline_time/60,
                  (MyClient(source_p) ? "local" : "remote"),
                  conf->name, conf->reason);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "%s has placed a %d minute %s RESV on nick %s : [%s]",
-			   get_oper_name(source_p),
-			   tkline_time/60,
-			   (MyClient(source_p) ? "local" : "remote"),
-			   conf->name, conf->reason);
+                           "%s has placed a %d minute %s RESV on nick %s : [%s]",
+                           get_oper_name(source_p), tkline_time/60,
+                           (MyClient(source_p) ? "local" : "remote"),
+                           conf->name, conf->reason);
       ilog(LOG_TYPE_RESV, "%s added temporary %d min. RESV for [%s] [%s]",
-	   source_p->name, (int)tkline_time/60,
-	   conf->name, conf->reason);
+           source_p->name, (int)tkline_time/60, conf->name, conf->reason);
       conf->until = CurrentTime + tkline_time;
     }
     else
     {
       sendto_one(source_p,
-		 ":%s NOTICE %s :A %s RESV has been placed on nick %s : [%s]",
+                 ":%s NOTICE %s :A %s RESV has been placed on nick %s : [%s]",
                  me.name, source_p->name,
                  (MyClient(source_p) ? "local" : "remote"),
                  conf->name, conf->reason);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-			   "%s has placed a %s RESV on nick %s : [%s]",
-			   get_oper_name(source_p),
-			   (MyClient(source_p) ? "local" : "remote"),
-			   conf->name, conf->reason);
+                           "%s has placed a %s RESV on nick %s : [%s]",
+                           get_oper_name(source_p),
+                           (MyClient(source_p) ? "local" : "remote"),
+                           conf->name, conf->reason);
     }
   }
 }
@@ -388,12 +391,14 @@ remove_resv(struct Client *source_p, const char *name)
   }
 }
 
-static struct Message resv_msgtab = {
+static struct Message resv_msgtab =
+{
   "RESV", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_not_oper, ms_resv, me_resv, mo_resv, m_ignore }
 };
 
-static struct Message unresv_msgtab = {
+static struct Message unresv_msgtab =
+{
   "UNRESV", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_not_oper, ms_unresv, m_ignore, mo_unresv, m_ignore }
 };
@@ -412,7 +417,8 @@ module_exit(void)
   mod_del_cmd(&unresv_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

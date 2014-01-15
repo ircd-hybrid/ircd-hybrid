@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_kick.c: Kicks a user from a channel.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_kick.c
+ * \brief Includes required functions for processing the KICK command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -44,7 +46,7 @@
  *  parv[2] = client to kick
  *  parv[3] = kick comment
  */
-static void 
+static int
 m_kick(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -74,7 +76,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                from, to, "KICK");
-    return;
+    return 0;
   }
 
   if (MyClient(source_p) && !IsFloodDone(source_p))
@@ -88,13 +90,13 @@ m_kick(struct Client *client_p, struct Client *source_p,
   if ((p = strchr(name,',')) != NULL)
     *p = '\0';
   if (*name == '\0')
-    return;
+    return 0;
 
   if ((chptr = hash_find_channel(name)) == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                from, to, name);
-    return;
+    return 0;
   }
 
   if (!IsServer(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
@@ -105,7 +107,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
       {
         sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
                    me.name, source_p->name, name);
-        return;
+        return 0;
       }
     }
 
@@ -117,15 +119,15 @@ m_kick(struct Client *client_p, struct Client *source_p,
         /* user on _my_ server, with no chanops.. so go away */
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                    me.name, source_p->name, name);
-        return;
+        return 0;
       }
 
       if (chptr->channelts == 0)
       {
-        /* If its a TS 0 channel, do it the old way */         
+        /* If its a TS 0 channel, do it the old way */
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                    from, to, name);
-        return;
+        return 0;
       }
 
       /* Its a user doing a kick, but is not showing as chanop locally
@@ -133,12 +135,12 @@ m_kick(struct Client *client_p, struct Client *source_p,
        * There are two cases we can get to this point then...
        *
        *     1) connect burst is happening, and for some reason a legit
-       *        op has sent a KICK, but the SJOIN hasn't happened yet or 
+       *        op has sent a KICK, but the SJOIN hasn't happened yet or
        *        been seen. (who knows.. due to lag...)
        *
        *     2) The channel is desynced. That can STILL happen with TS
-       *        
-       *     Now, the old code roger wrote, would allow the KICK to 
+       *
+       *     Now, the old code roger wrote, would allow the KICK to
        *     go through. Thats quite legit, but lets weird things like
        *     KICKS by users who appear not to be chanopped happen,
        *     or even neater, they appear not to be on the channel.
@@ -156,10 +158,10 @@ m_kick(struct Client *client_p, struct Client *source_p,
     *p = '\0';
 
   if (*user == '\0')
-    return;
+    return 0;
 
   if ((who = find_chasing(source_p, user, &chasing)) == NULL)
-    return;
+    return 0;
 
   if ((ms_target = find_channel_link(who, chptr)) != NULL)
   {
@@ -172,7 +174,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
       {
         sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                    me.name, source_p->name, name);
-        return;
+        return 0;
       }
     }
 #endif
@@ -204,11 +206,13 @@ m_kick(struct Client *client_p, struct Client *source_p,
   else
     sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
                from, to, user, name);
+  return 0;
 }
 
-static struct Message kick_msgtab = {
+static struct Message kick_msgtab =
+{
   "KICK", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_kick, m_kick, m_ignore, m_kick, m_ignore}
+  { m_unregistered, m_kick, m_kick, m_ignore, m_kick, m_ignore }
 };
 
 static void
@@ -223,7 +227,8 @@ module_exit(void)
   mod_del_cmd(&kick_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

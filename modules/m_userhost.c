@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_userhost.c: Shows a user's host.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_userhost.c
+ * \brief Includes required functions for processing the USERHOST command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -38,7 +40,7 @@
  * the need for complicated requests like WHOIS. It returns user/host
  * information only (no spurious AWAY labels or channels).
  */
-static void
+static int
 m_userhost(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
@@ -96,11 +98,13 @@ m_userhost(struct Client *client_p, struct Client *source_p,
   }
 
   sendto_one(source_p, "%s", buf);
+  return 0;
 }
 
-static struct Message userhost_msgtab = {
+static struct Message userhost_msgtab =
+{
   "USERHOST", 0, 0, 2, 1, MFLG_SLOW, 0,
-  {m_unregistered, m_userhost, m_userhost, m_ignore, m_userhost, m_ignore}
+  { m_unregistered, m_userhost, m_userhost, m_ignore, m_userhost, m_ignore }
 };
 
 static void
@@ -115,7 +119,8 @@ module_exit(void)
   mod_del_cmd(&userhost_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

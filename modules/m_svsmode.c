@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 1999 by the Bahamut Development Team.
- *  Copyright (C) 2011 by the Hybrid Development Team.
+ *  Copyright (c) 1999 Bahamut development team.
+ *  Copyright (c) 2011-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@
  *      - parv[3] = mode (or services id if old svs version)
  *      - parv[4] = optional argument (services id)
  */
-static void
+static int
 ms_svsmode(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
@@ -65,7 +65,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
-    return;
+    return 0;
 
   if ((parc >= 4) && ((*parv[3] == '+') || (*parv[3] == '-')))
   {
@@ -80,10 +80,10 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   }
 
   if ((target_p = find_person(client_p, parv[1])) == NULL)
-    return;
+    return 0;
 
   if (ts && (ts != target_p->tsinfo))
-    return;
+    return 0;
 
   setmodes = target_p->umodes;
 
@@ -121,9 +121,9 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
             detach_conf(target_p, CONF_OPER);
             ClrOFlag(target_p);
             DelUMode(target_p, ConfigFileEntry.oper_only_umodes);
- 
-           if ((dm = dlinkFindDelete(&oper_list, target_p)) != NULL)
-             free_dlink_node(dm);
+
+            if ((dm = dlinkFindDelete(&oper_list, target_p)))
+              free_dlink_node(dm);
           }
         }
 
@@ -186,11 +186,14 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
 
     send_umode(target_p, target_p, setmodes, 0xffffffff, modebuf);
   }
+
+  return 0;
 }
 
-static struct Message svsmode_msgtab = {
+static struct Message svsmode_msgtab =
+{
   "SVSMODE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  {m_ignore, m_ignore, ms_svsmode, m_ignore, m_ignore, m_ignore}
+  { m_ignore, m_ignore, ms_svsmode, m_ignore, m_ignore, m_ignore }
 };
 
 static void
@@ -205,7 +208,8 @@ module_exit(void)
   mod_del_cmd(&svsmode_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

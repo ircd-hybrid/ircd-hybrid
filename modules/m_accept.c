@@ -1,7 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -117,7 +117,7 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
  *      - parv[0] = sender prefix
  *      - parv[1] = list of masks to be accepted or removed (optional)
  */
-static void
+static int
 m_accept(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -132,7 +132,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
   if (EmptyString(parv[1]) || !irccmp(parv[1], "*"))
   {
     list_accepts(source_p);
-    return;
+    return 0;
   }
 
   for (mask = strtoken(&p, parv[1], ","); mask != NULL;
@@ -167,7 +167,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
       {
         sendto_one(source_p, form_str(ERR_ACCEPTFULL),
                    me.name, source_p->name);
-        return;
+        return 0;
       }
 
       nuh.nuhmask  = mask;
@@ -191,9 +191,12 @@ m_accept(struct Client *client_p, struct Client *source_p,
       add_accept(&nuh, source_p);
     }
   }
+
+  return 0;
 }
 
-static struct Message accept_msgtab = {
+static struct Message accept_msgtab =
+{
   "ACCEPT", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_accept, m_ignore, m_ignore, m_accept, m_ignore }
 };
@@ -210,7 +213,8 @@ module_exit(void)
   mod_del_cmd(&accept_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

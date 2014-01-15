@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_quit.c: Makes a user quit from IRC.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_quit.c
+ * \brief Includes required functions for processing the QUIT command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -38,7 +40,7 @@
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-static void
+static int
 m_quit(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -50,6 +52,7 @@ m_quit(struct Client *client_p, struct Client *source_p,
     strlcpy(reason + 6, parv[1], sizeof(reason) - 6);
 
   exit_client(source_p, source_p, reason);
+  return 0;
 }
 
 /*
@@ -57,7 +60,7 @@ m_quit(struct Client *client_p, struct Client *source_p,
 **      parv[0] = sender prefix
 **      parv[1] = comment
 */
-static void
+static int
 ms_quit(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -69,11 +72,13 @@ ms_quit(struct Client *client_p, struct Client *source_p,
     strlcpy(reason, client_p->name, sizeof(reason));
 
   exit_client(source_p, source_p, reason);
+  return 0;
 }
 
-static struct Message quit_msgtab = {
+static struct Message quit_msgtab =
+{
   "QUIT", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_quit, m_quit, ms_quit, m_ignore, m_quit, m_ignore}
+  { m_quit, m_quit, ms_quit, m_ignore, m_quit, m_ignore }
 };
 
 static void
@@ -88,7 +93,8 @@ module_exit(void)
   mod_del_cmd(&quit_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -1,10 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_webirc.c: Makes CGI:IRC users appear as coming from their real host
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
- *  Copyright (C) 2002-2006 ircd-ratbox development team
- *  Copyright (C) 1996-2012 Hybrid Development Team
+ *  Copyright (c) 2012-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_webirc.c
+ * \brief Includes required functions for processing the WEBIRC command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -42,10 +42,10 @@
  *      parv[0] = sender prefix
  *      parv[1] = password
  *      parv[2] = fake username (we ignore this)
- *      parv[3] = fake hostname 
+ *      parv[3] = fake hostname
  *      parv[4] = fake ip
  */
-static void
+static int
 mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
@@ -57,7 +57,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
   {
     sendto_one(source_p, ":%s NOTICE %s :CGI:IRC: Invalid hostname", me.name,
                source_p->name[0] ? source_p->name : "*");
-    return;
+    return 0;
   }
 
   conf = find_address_conf(source_p->host,
@@ -65,27 +65,27 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
                            &source_p->localClient->ip,
                            source_p->localClient->aftype, parv[1]);
   if (conf == NULL || !IsConfClient(conf))
-    return;
+    return 0;
 
   if (!IsConfWebIRC(conf))
   {
     sendto_one(source_p, ":%s NOTICE %s :Not a CGI:IRC auth block", me.name,
                source_p->name[0] ? source_p->name : "*");
-    return;
+    return 0;
   }
 
   if (EmptyString(conf->passwd))
   {
     sendto_one(source_p, ":%s NOTICE %s :CGI:IRC auth blocks must have a password",
                me.name, source_p->name[0] ? source_p->name : "*");
-    return;
+    return 0;
   }
 
   if (!match_conf_password(parv[1], conf))
   {
     sendto_one(source_p, ":%s NOTICE %s :CGI:IRC password incorrect",
                me.name, source_p->name[0] ? source_p->name : "*");
-    return;
+    return 0;
   }
 
   memset(&hints, 0, sizeof(hints));
@@ -99,7 +99,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
     sendto_one(source_p, ":%s NOTICE %s :Invalid CGI:IRC IP %s", me.name,
                source_p->name[0] ? source_p->name : "*", parv[4]);
-    return;
+    return 0;
   }
 
   assert(res != NULL);
@@ -120,16 +120,18 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
     if (!(conf->type == CONF_EXEMPT))
     {
       exit_client(client_p, &me, "D-lined");
-      return;
+      return 0;
     }
   }
 
   AddUMode(source_p, UMODE_WEBIRC);
   sendto_one(source_p, ":%s NOTICE %s :CGI:IRC host/IP set to %s %s", me.name,
              source_p->name[0] ? source_p->name : "*", parv[3], parv[4]);
+  return 0;
 }
 
-static struct Message webirc_msgtab = {
+static struct Message webirc_msgtab =
+{
   "WEBIRC", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
   { mr_webirc, m_registered, m_ignore, m_ignore, m_registered, m_ignore }
 };
@@ -146,7 +148,8 @@ module_exit(void)
   mod_del_cmd(&webirc_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

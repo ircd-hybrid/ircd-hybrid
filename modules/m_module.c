@@ -1,7 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@
  *      - parv[1] = action [LOAD, UNLOAD, RELOAD, LIST]
  *      - parv[2] = module name
  */
-static void
+static int
 mo_module(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
@@ -66,14 +66,14 @@ mo_module(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "module");
-    return;
+    return 0;
   }
 
   if (EmptyString(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "MODULE");
-    return;
+    return 0;
   }
 
   if (!irccmp(parv[1], "LOAD"))
@@ -82,18 +82,18 @@ mo_module(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, source_p->name, "MODULE");
-      return;
+      return 0;
     }
 
-    if (findmodule_byname((m_bn = libio_basename(parv[2]))) != NULL)
+    if (findmodule_byname((m_bn = libio_basename(parv[2]))))
     {
       sendto_one(source_p, ":%s NOTICE %s :Module %s is already loaded",
                  me.name, source_p->name, m_bn);
-      return;
+      return 0;
     }
 
     load_one_module(parv[2]);
-    return;
+    return 0;
   }
 
   if (!irccmp(parv[1], "UNLOAD"))
@@ -102,14 +102,14 @@ mo_module(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, source_p->name, "MODULE");
-      return;
+      return 0;
     }
 
     if ((modp = findmodule_byname((m_bn = libio_basename(parv[2])))) == NULL)
     {
       sendto_one(source_p, ":%s NOTICE %s :Module %s is not loaded",
                  me.name, source_p->name, m_bn);
-      return;
+      return 0;
     }
 
     if (modp->flags & MODULE_FLAG_CORE)
@@ -117,7 +117,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,
                  ":%s NOTICE %s :Module %s is a core module and may not be unloaded",
                  me.name, source_p->name, m_bn);
-      return;
+      return 0;
     }
 
     if (modp->flags & MODULE_FLAG_NOUNLOAD)
@@ -125,13 +125,13 @@ mo_module(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,
                  ":%s NOTICE %s :Module %s is a resident module and may not be unloaded",
                  me.name, source_p->name, m_bn);
-      return;
+      return 0;
     }
 
     if (unload_one_module(m_bn, 1) == -1)
       sendto_one(source_p, ":%s NOTICE %s :Module %s is not loaded",
                  me.name, source_p->name, m_bn);
-    return;
+    return 0;
   }
 
   if (!irccmp(parv[1], "RELOAD"))
@@ -140,7 +140,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                  me.name, source_p->name, "MODULE");
-      return;
+      return 0;
     }
 
     if (!strcmp(parv[2], "*"))
@@ -170,14 +170,14 @@ mo_module(struct Client *client_p, struct Client *source_p,
                            modnum, dlink_list_length(&modules_list));
       ilog(LOG_TYPE_IRCD, "Module Restart: %u modules unloaded, %u modules loaded",
            modnum, dlink_list_length(&modules_list));
-      return;
+      return 0;
     }
 
     if ((modp = findmodule_byname((m_bn = libio_basename(parv[2])))) == NULL)
     {
       sendto_one(source_p, ":%s NOTICE %s :Module %s is not loaded",
                me.name, source_p->name, m_bn);
-      return;
+      return 0;
     }
 
     if (modp->flags & MODULE_FLAG_NOUNLOAD)
@@ -185,7 +185,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,
                  ":%s NOTICE %s :Module %s is a resident module and may not be unloaded",
                  me.name, source_p->name, m_bn);
-      return;
+      return 0;
     }
 
     check_core = (modp->flags & MODULE_FLAG_CORE) != 0;
@@ -194,7 +194,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, ":%s NOTICE %s :Module %s is not loaded",
                  me.name, source_p->name, m_bn);
-      return;
+      return 0;
     }
 
     if ((load_one_module(parv[2]) == -1) && check_core)
@@ -206,7 +206,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
       exit(0);
     }
 
-    return;
+    return 0;
   }
 
   if (!irccmp(parv[1], "LIST"))
@@ -227,18 +227,20 @@ mo_module(struct Client *client_p, struct Client *source_p,
 
     sendto_one(source_p, form_str(RPL_ENDOFMODLIST),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   sendto_one(source_p, ":%s NOTICE %s :%s is not a valid option. "
              "Choose from LOAD, UNLOAD, RELOAD, LIST",
              me.name, source_p->name, parv[1]);
+  return 0;
 }
 
 
-static struct Message module_msgtab = {
- "MODULE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, m_ignore, mo_module, m_ignore}
+static struct Message module_msgtab =
+{
+  "MODULE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_module, m_ignore }
 };
 
 static void
@@ -253,7 +255,8 @@ module_exit(void)
   mod_del_cmd(&module_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

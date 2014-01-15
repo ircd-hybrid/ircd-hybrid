@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_operwall.c: Sends a message to all IRCOps.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_operwall.c
+ * \brief Includes required functions for processing the OPERWALL command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -40,7 +42,7 @@
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void
+static int
 mo_operwall(struct Client *client_p, struct Client *source_p,
             int parc, char *parv[])
 {
@@ -50,21 +52,22 @@ mo_operwall(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS),
                me.name, source_p->name, "operwall");
-    return;
+    return 0;
   }
 
   if (EmptyString(message))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "OPERWALL");
-    return;
+    return 0;
   }
 
-  sendto_server(NULL, CAP_TS6, NOCAPS,
-                ":%s OPERWALL :%s", ID(source_p), message);
-  sendto_server(NULL, NOCAPS, CAP_TS6,
-                ":%s OPERWALL :%s", source_p->name, message);
+  sendto_server(NULL, CAP_TS6, NOCAPS, ":%s OPERWALL :%s",
+                ID(source_p), message);
+  sendto_server(NULL, NOCAPS, CAP_TS6, ":%s OPERWALL :%s",
+                source_p->name, message);
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+  return 0;
 }
 
 /*
@@ -73,20 +76,21 @@ mo_operwall(struct Client *client_p, struct Client *source_p,
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void
+static int
 ms_operwall(struct Client *client_p, struct Client *source_p,
             int parc, char *parv[])
 {
   const char *message = parv[1];
 
   if (EmptyString(message))
-    return;
+    return 0;
 
   sendto_server(client_p, CAP_TS6, NOCAPS, ":%s OPERWALL :%s",
                 ID(source_p), message);
   sendto_server(client_p, NOCAPS, CAP_TS6, ":%s OPERWALL :%s",
                 source_p->name, message);
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+  return 0;
 }
 
 /*
@@ -97,21 +101,23 @@ ms_operwall(struct Client *client_p, struct Client *source_p,
  *
  * Lets ms_encap handle propagation.
  */
-static void
+static int
 me_operwall(struct Client *client_p, struct Client *source_p,
             int parc, char *parv[])
 {
   const char *message = parv[1];
 
   if (EmptyString(message))
-    return;
+    return 0;
 
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+  return 0;
 }
 
-static struct Message operwall_msgtab = {
+static struct Message operwall_msgtab =
+{
   "OPERWALL", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, ms_operwall, me_operwall, mo_operwall, m_ignore}
+  { m_unregistered, m_not_oper, ms_operwall, me_operwall, mo_operwall, m_ignore }
 };
 
 static void
@@ -126,7 +132,8 @@ module_exit(void)
   mod_del_cmd(&operwall_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_motd.c: Shows the current message of the day.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_motd.c
+ * \brief Includes required functions for processing the MOTD command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -35,7 +37,7 @@
 #include "conf.h"
 
 
-static void
+static int
 do_motd(struct Client *source_p)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
@@ -43,6 +45,7 @@ do_motd(struct Client *source_p)
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
   motd_send(source_p);
+  return 0;
 }
 
 /*
@@ -50,7 +53,7 @@ do_motd(struct Client *source_p)
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void
+static int
 m_motd(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -61,7 +64,7 @@ m_motd(struct Client *client_p, struct Client *source_p,
     /* safe enough to give this on a local connect only */
     sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
@@ -70,9 +73,9 @@ m_motd(struct Client *client_p, struct Client *source_p,
   if (!ConfigServerHide.disable_remote_commands && !ConfigServerHide.hide_servers)
     if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,
                     parc, parv) != HUNTED_ISME)
-      return;
+      return 0;
 
-  do_motd(source_p);
+  return do_motd(source_p);
 }
 
 /*
@@ -88,18 +91,19 @@ m_motd(struct Client *client_p, struct Client *source_p,
 **      parv[0] = sender prefix
 **      parv[1] = servername
 */
-static void
+static int
 mo_motd(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,
                   parc, parv) != HUNTED_ISME)
-    return;
+    return 0;
 
-  do_motd(source_p);
+  return do_motd(source_p);
 }
 
-static struct Message motd_msgtab = {
+static struct Message motd_msgtab =
+{
   "MOTD", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_motd, mo_motd, m_ignore, mo_motd, m_ignore }
 };
@@ -116,7 +120,8 @@ module_exit(void)
   mod_del_cmd(&motd_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

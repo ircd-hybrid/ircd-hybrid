@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_capab.c: Negotiates capabilities with a remote server.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1998-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_capab.c
+ * \brief Includes required functions for processing the CAPAB command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -37,7 +39,7 @@
  *      parv[1] = space-separated list of capabilities
  *
  */
-static void
+static int
 mr_capab(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -49,7 +51,7 @@ mr_capab(struct Client *client_p, struct Client *source_p,
   if (client_p->localClient->caps && !(IsCapable(client_p, CAP_TS6)))
   {
     exit_client(client_p, client_p, "CAPAB received twice");
-    return;
+    return 0;
   }
 
   SetCapable(client_p, CAP_CAP);
@@ -59,9 +61,12 @@ mr_capab(struct Client *client_p, struct Client *source_p,
          s = strtoken(&p,    NULL, " "))
       if ((cap = find_capability(s)))
         SetCapable(client_p, cap);
+
+  return 0;
 }
 
-static struct Message capab_msgtab = {
+static struct Message capab_msgtab =
+{
   "CAPAB", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { mr_capab, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
 };
@@ -78,7 +83,8 @@ module_exit(void)
   mod_del_cmd(&capab_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

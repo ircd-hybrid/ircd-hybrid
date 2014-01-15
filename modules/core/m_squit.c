@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_squit.c: Makes a server quit.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_squit.c
+ * \brief Includes required functions for processing the SQUIT command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -42,7 +44,7 @@
  *  parv[1] = server name
  *  parv[2] = comment
  */
-static void
+static int
 mo_squit(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -57,7 +59,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "SQUIT");
-    return;
+    return 0;
   }
 
   server = parv[1];
@@ -83,21 +85,21 @@ mo_squit(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                me.name, source_p->name, server);
-    return;
+    return 0;
   }
 
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT_REMOTE))
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "squit:remote");
-    return;
+    return 0;
   }
 
   if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT))
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "squit");
-    return;
+    return 0;
   }
 
   comment = (parc > 2 && parv[2]) ? parv[2] : def_reason;
@@ -115,6 +117,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
   }
 
   exit_client(target_p, source_p, comment);
+  return 0;
 }
 
 /** NOTE: I removed wildcard lookups here, because a wildcarded
@@ -126,7 +129,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
  *  parv[1] = server name
  *  parv[2] = comment
  */
-static void
+static int
 ms_squit(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -134,13 +137,13 @@ ms_squit(struct Client *client_p, struct Client *source_p,
   const char *comment = NULL;
 
   if (parc < 2 || EmptyString(parv[parc - 1]))
-    return;
+    return 0;
 
   if ((target_p = hash_find_server(parv[1])) == NULL)
-    return;
+    return 0;
 
   if (!IsServer(target_p) && !IsMe(target_p))
-    return;
+    return 0;
 
   if (IsMe(target_p))
     target_p = client_p;
@@ -159,14 +162,16 @@ ms_squit(struct Client *client_p, struct Client *source_p,
                   me.name, target_p->name, source_p->name, comment);
     ilog(LOG_TYPE_IRCD, "SQUIT From %s : %s (%s)", source_p->name,
          target_p->name, comment);
-   }
+  }
 
-   exit_client(target_p, source_p, comment);
+  exit_client(target_p, source_p, comment);
+  return 0;
 }
 
-static struct Message squit_msgtab = {
+static struct Message squit_msgtab =
+{
   "SQUIT", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, ms_squit, m_ignore, mo_squit, m_ignore}
+  { m_unregistered, m_not_oper, ms_squit, m_ignore, mo_squit, m_ignore }
 };
 
 static void
@@ -181,7 +186,8 @@ module_exit(void)
   mod_del_cmd(&squit_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_map.c: Sends an Undernet compatible map to a user.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2001-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_map.c
+ * \brief Includes required functions for processing the MAP command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -112,44 +114,44 @@ static void dump_map(struct Client *client,
 /* m_map()
  *      parv[0] = sender prefix
  */
-static void
+static int
 m_map(struct Client *client_p, struct Client *source_p,
       int parc, char *parv[])
 {
   static time_t last_used = 0;
 
   if (ConfigServerHide.flatten_links)
-  {
-    m_not_oper(client_p, source_p, parc, parv);
-    return;
-  }
+    return m_not_oper(client_p, source_p, parc, parv);
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
     /* safe enough to give this on a local connect only */
     sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
 
   dump_map(source_p, &me, 0);
   sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
+  return 0;
 }
 
 /* mo_map()
  *      parv[0] = sender prefix
  */
-static void
+static int
 mo_map(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
   dump_map(source_p, &me, 0);
   sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
+  return 0;
 }
 
-static struct Message map_msgtab = {
+static struct Message map_msgtab =
+{
   "MAP", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_map, m_ignore, m_ignore, mo_map, m_ignore }
 };
@@ -166,7 +168,8 @@ module_exit(void)
   mod_del_cmd(&map_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

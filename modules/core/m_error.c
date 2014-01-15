@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_error.c: Handles error messages from the other end.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_error.c
+ * \brief Includes required functions for processing the ERROR command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -39,8 +41,8 @@
  *      parv[0] = sender prefix
  *      parv[*] = parameters
  */
-static void
-mr_error(struct Client *client_p, struct Client *source_p, 
+static int
+mr_error(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   const char *para = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
@@ -48,7 +50,7 @@ mr_error(struct Client *client_p, struct Client *source_p,
   assert(source_p == client_p);
 
   if (!IsHandshake(source_p) && !IsConnecting(source_p))
-    return;
+    return 0;
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        source_p->name, para);
@@ -71,9 +73,11 @@ mr_error(struct Client *client_p, struct Client *source_p,
                          "ERROR :from %s via %s -- %s",
                          source_p->name, get_client_name(client_p, MASK_IP), para);
   }
+
+  return 0;
 }
 
-static void
+static int
 ms_error(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -91,10 +95,12 @@ ms_error(struct Client *client_p, struct Client *source_p,
                          "ERROR :from %s via %s -- %s",
                          source_p->name,
                          get_client_name(client_p, MASK_IP), para);
+  return 0;
 }
 
-static struct Message error_msgtab = {
- "ERROR", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
+static struct Message error_msgtab =
+{
+  "ERROR", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
   { mr_error, m_ignore, ms_error, m_ignore, m_ignore, m_ignore }
 };
 
@@ -110,7 +116,8 @@ module_exit(void)
   mod_del_cmd(&error_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

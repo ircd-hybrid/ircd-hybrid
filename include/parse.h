@@ -108,7 +108,7 @@ typedef enum HandlerType {
  * int            parc   - parameter count
  * char*          parv[] - parameter vector
  */
-typedef void (*MessageHandler)(struct Client *, struct Client *, int, char *[]);
+typedef int (*MessageHandler)(struct Client *, struct Client *, int, char *[]);
 
 /* 
  * Message table structure 
@@ -156,9 +156,9 @@ extern struct Message *find_command(const char *);
 extern void report_messages(struct Client *);
 
 /* generic handlers */
-extern void m_ignore(struct Client *, struct Client *, int, char *[]);
-extern void m_not_oper(struct Client *, struct Client *, int, char *[]);
-extern void m_registered(struct Client *, struct Client *, int, char *[]);
-extern void m_unregistered(struct Client *, struct Client *, int, char *[]);
+extern int m_ignore(struct Client *, struct Client *, int, char *[]);
+extern int m_not_oper(struct Client *, struct Client *, int, char *[]);
+extern int m_registered(struct Client *, struct Client *, int, char *[]);
+extern int m_unregistered(struct Client *, struct Client *, int, char *[]);
 
 #endif /* INCLUDED_parse_h */

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_join.c: Joins a channel.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_join.c
+ * \brief Includes required functions for processing the JOIN command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -88,7 +90,7 @@ last0(struct Client *client_p, struct Client *source_p, char *chanlist)
  *      parv[1] = channel
  *      parv[2] = channel password (key)
  */
-static void
+static int
 m_join(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -105,7 +107,7 @@ m_join(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "JOIN");
-    return;
+    return 0;
   }
 
   assert(client_p == source_p);
@@ -276,6 +278,8 @@ m_join(struct Client *client_p, struct Client *source_p,
 
     source_p->localClient->last_join_time = CurrentTime;
   }
+
+  return 0;
 }
 
 /* ms_join()
@@ -286,12 +290,12 @@ m_join(struct Client *client_p, struct Client *source_p,
  *		  parv[3] = modes (Deprecated)
  * output	- none
  * side effects	- handles remote JOIN's sent by servers. In TSora
- *		  remote clients are joined using SJOIN, hence a 
+ *		  remote clients are joined using SJOIN, hence a
  *		  JOIN sent by a server on behalf of a client is an error.
  *		  here, the initial code is in to take an extra parameter
  *		  and use it for the TimeStamp on a new channel.
  */
-static void 
+static int
 ms_join(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -307,18 +311,18 @@ ms_join(struct Client *client_p, struct Client *source_p,
   if (parc == 2 && !irccmp(parv[1], "0"))
   {
     do_join_0(client_p, source_p);
-    return;
+    return 0;
   }
 
   if (parc < 4)
-    return;
+    return 0;
 
   if (!check_channel_name(parv[2], 0))
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s: %s",
                          client_p->name, parv[2]);
-    return;
+    return 0;
   }
 
   mbuf = modebuf;
@@ -407,7 +411,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
                           me.name, chptr->chname, chptr->chname,
                          (unsigned long)oldts, (unsigned long)newts);
   }
-   
+
   if (*modebuf != '\0')
   {
     servername = (ConfigServerHide.hide_servers || IsHidden(source_p)) ?
@@ -439,6 +443,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
                 ":%s SJOIN %lu %s + :%s",
                 source_p->servptr->name, (unsigned long)chptr->channelts,
                 chptr->chname, source_p->name);
+  return 0;
 }
 
 /* do_join_0()

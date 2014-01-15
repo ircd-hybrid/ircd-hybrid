@@ -93,31 +93,10 @@ ms_operwall(struct Client *client_p, struct Client *source_p,
   return 0;
 }
 
-/*
- * me_operwall - OPERWALL message handler
- *  (write to *all* local opers currently online)
- *      parv[0] = sender prefix
- *      parv[1] = message text
- *
- * Lets ms_encap handle propagation.
- */
-static int
-me_operwall(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
-{
-  const char *message = parv[1];
-
-  if (EmptyString(message))
-    return 0;
-
-  sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
-  return 0;
-}
-
 static struct Message operwall_msgtab =
 {
   "OPERWALL", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_not_oper, ms_operwall, me_operwall, mo_operwall, m_ignore }
+  { m_unregistered, m_not_oper, ms_operwall, m_ignore, mo_operwall, m_ignore }
 };
 
 static void

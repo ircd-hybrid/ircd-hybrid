@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_whois.c: Shows who a user is.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2005 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_whois.c
+ * \brief Includes required functions for processing the WHOIS command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -216,7 +218,7 @@ do_whois(struct Client *source_p, const char *name)
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-static void
+static int
 m_whois(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -226,7 +228,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   if (parc > 2 && !EmptyString(parv[2]))
@@ -236,7 +238,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(RPL_LOAD2HI),
                  me.name, source_p->name);
-      return;
+      return 0;
     }
 
     last_used = CurrentTime;
@@ -251,12 +253,13 @@ m_whois(struct Client *client_p, struct Client *source_p,
 
     if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,
                     parc, parv) != HUNTED_ISME)
-      return;
+      return 0;
 
     parv[1] = parv[2];
   }
 
   do_whois(source_p, parv[1]);
+  return 0;
 }
 
 /*
@@ -264,7 +267,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
 **      parv[0] = sender prefix
 **      parv[1] = nickname masklist
 */
-static void
+static int
 mo_whois(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -272,22 +275,24 @@ mo_whois(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   if (parc > 2 && !EmptyString(parv[2]))
   {
     if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,
                     parc, parv) != HUNTED_ISME)
-      return;
+      return 0;
 
     parv[1] = parv[2];
   }
 
   do_whois(source_p, parv[1]);
+  return 0;
 }
 
-static struct Message whois_msgtab = {
+static struct Message whois_msgtab =
+{
   "WHOIS", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_whois, mo_whois, m_ignore, mo_whois, m_ignore }
 };
@@ -304,7 +309,8 @@ module_exit(void)
   mod_del_cmd(&whois_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

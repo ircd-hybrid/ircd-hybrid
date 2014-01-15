@@ -222,7 +222,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
  * output	-
  * side effects - k line is added
  */
-static void
+static int
 mo_kline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -240,12 +240,12 @@ mo_kline(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "kline");
-    return;
+    return 0;
   }
 
   if (parse_aline("KLINE", source_p, parc, parv, AWILD, &user, &host,
                   &tkline_time, &target_server, &reason) < 0)
-    return;
+    return 0;
 
   if (target_server != NULL)
   {
@@ -255,14 +255,14 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
     /* Allow ON to apply local kline as well if it matches */
     if (match(target_server, me.name))
-      return;
+      return 0;
   }
   else
     cluster_a_line(source_p, "KLINE", CAP_KLN, SHARED_KLINE,
                    "%d %s %s :%s", tkline_time, user, host, reason);
 
   if (already_placed_kline(source_p, user, host, 1))
-    return;
+    return 0;
 
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
@@ -279,10 +279,11 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
   conf->reason = xstrdup(buffer);
   m_kline_add_kline(source_p, conf, tkline_time);
+  return 0;
 }
 
 /* me_kline - handle remote kline. no propagation */
-static void
+static int
 me_kline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -294,10 +295,10 @@ me_kline(struct Client *client_p, struct Client *source_p,
   char *kuser, *khost, *kreason;
 
   if (parc != 6 || EmptyString(parv[5]))
-    return;
+    return 0;
 
   if (match(parv[1], me.name))
-    return;
+    return 0;
 
   tkline_time = valid_tkline(parv[2], TK_SECONDS);
   kuser = parv[3];
@@ -314,7 +315,7 @@ me_kline(struct Client *client_p, struct Client *source_p,
   {
     if (!IsClient(source_p) ||
         already_placed_kline(source_p, kuser, khost, 1))
-      return;
+      return 0;
 
     conf = conf_make(CONF_KLINE);
     conf->host = xstrdup(khost);
@@ -329,22 +330,23 @@ me_kline(struct Client *client_p, struct Client *source_p,
     conf->reason = xstrdup(buffer);
     m_kline_add_kline(source_p, conf, tkline_time);
   }
+
+  return 0;
 }
 
-static void
+static int
 ms_kline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   if (parc != 6 || EmptyString(parv[5]))
-    return;
+    return 0;
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
   /* oper     target_server  tkline_time  user     host     reason */
-  sendto_match_servs(source_p, parv[1], CAP_KLN,
-                     "KLINE %s %s %s %s :%s",
+  sendto_match_servs(source_p, parv[1], CAP_KLN, "KLINE %s %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4], parv[5]);
 
-  me_kline(client_p, source_p, parc, parv);
+  return me_kline(client_p, source_p, parc, parv);
 }
 
 /*
@@ -357,7 +359,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
 *
 *
 */
-static void
+static int
 mo_unkline(struct Client *client_p,struct Client *source_p,
            int parc, char *parv[])
 {
@@ -368,19 +370,19 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "unkline");
-    return;
+    return 0;
   }
 
   if (EmptyString(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "UNKLINE");
-    return;
+    return 0;
   }
 
   if (parse_aline("UNKLINE", source_p, parc, parv, 0, &user,
                   &host, NULL, &target_server, NULL) < 0)
-    return;
+    return 0;
 
   if (target_server != NULL)
   {
@@ -390,7 +392,7 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
 
     /* Allow ON to apply local unkline as well if it matches */
     if (match(target_server, me.name))
-      return;
+      return 0;
   }
   else
     cluster_a_line(source_p, "UNKLINE", CAP_UNKLN, SHARED_UNKLINE,
@@ -409,6 +411,7 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
   else
     sendto_one(source_p, ":%s NOTICE %s :No K-Line for [%s@%s] found", 
 	       me.name, source_p->name, user, host);
+  return 0;
 }
 
 /* me_unkline()
@@ -421,20 +424,20 @@ mo_unkline(struct Client *client_p,struct Client *source_p,
  * side effects	- if server is authorized, kline is removed
  *                does not propagate message
  */
-static void
+static int
 me_unkline(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   const char *kuser, *khost;
 
   if (parc != 4)
-    return;
+    return 0;
 
   kuser = parv[2];
   khost = parv[3];
 
   if (!IsClient(source_p) || match(parv[1], me.name))
-    return;
+    return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
@@ -455,21 +458,23 @@ me_unkline(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, ":%s NOTICE %s :No K-Line for [%s@%s] found",
                  me.name, source_p->name, kuser, khost);
   }
+
+  return 0;
 }
 
 /* ms_unkline - propagates and handles a remote unkline message */
-static void
+static int
 ms_unkline(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   if (parc != 4)
-    return;
+    return 0;
 
   sendto_match_servs(source_p, parv[1], CAP_UNKLN,
                      "UNKLINE %s %s %s",
                      parv[1], parv[2], parv[3]);
 
-  me_unkline(client_p, source_p, parc, parv);
+  return me_unkline(client_p, source_p, parc, parv);
 }
 
 static struct Message kline_msgtab =

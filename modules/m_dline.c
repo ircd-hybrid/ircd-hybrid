@@ -136,7 +136,7 @@ remove_dline_match(const char *host)
  * side effects - D line is added
  *
  */
-static void
+static int
 mo_dline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -158,12 +158,12 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "dline");
-    return;
+    return 0;
   }
 
   if (parse_aline("DLINE", source_p,  parc, parv, AWILD, &dlhost,
                   NULL, &tkline_time, &target_server, &reason) < 0)
-    return;
+    return 0;
 
   if (target_server != NULL)
   {
@@ -173,7 +173,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
     /* Allow ON to apply local kline as well if it matches */
     if (match(target_server, me.name))
-      return;
+      return 0;
   }
   else
     cluster_a_line(source_p, "DLINE", CAP_DLN, SHARED_DLINE,
@@ -182,21 +182,21 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   if ((t = parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
   {
     if ((target_p = find_chasing(source_p, dlhost, NULL)) == NULL)
-      return;
+      return 0;
 
     if (!MyConnect(target_p))
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :Can't DLINE nick on another server",
                  me.name, source_p->name);
-      return;
+      return 0;
     }
 
     if (IsExemptKline(target_p))
     {
       sendto_one(source_p, ":%s NOTICE %s :%s is E-lined",
                  me.name, source_p->name, target_p->name);
-      return;
+      return 0;
     }
 
     getnameinfo((struct sockaddr *)&target_p->localClient->ip,
@@ -212,7 +212,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p,
                ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
 #ifdef IPV6
@@ -234,14 +234,14 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     else
       sendto_one(source_p, ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
                  me.name, source_p->name, dlhost, conf->host, creason);
-    return;
+    return 0;
   }
 
   cur_time = CurrentTime;
   current_date = smalldate(cur_time);
 
   if (!valid_comment(source_p, reason, 1))
-    return;
+    return 0;
 
   conf = conf_make(CONF_DLINE);
   conf->host = xstrdup(dlhost);
@@ -255,9 +255,10 @@ mo_dline(struct Client *client_p, struct Client *source_p,
   conf->reason = xstrdup(buffer);
   apply_dline(source_p, conf, tkline_time);
   rehashed_klines = 1;
+  return 0;
 }
 
-static void
+static int
 ms_dline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -275,7 +276,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
   char buffer[IRCD_BUFSIZE];
 
   if (parc != 5 || EmptyString(parv[4]))
-    return;
+    return 0;
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4] */
   /* oper     target_server  tkline_time  host     reason  */
@@ -284,7 +285,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
                      parv[1], parv[2], parv[3], parv[4]);
 
   if (match(parv[1], me.name))
-    return;
+    return 0;
 
   tkline_time = valid_tkline(parv[2], TK_SECONDS);
   dlhost = parv[3];
@@ -296,18 +297,19 @@ ms_dline(struct Client *client_p, struct Client *source_p,
                               SHARED_DLINE))
   {
     if (!IsClient(source_p))
-      return;
+      return 0;
+
     if ((t = parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
     {
       if ((target_p = find_chasing(source_p, dlhost, NULL)) == NULL)
-        return;
+        return 0;
 
       if (!MyConnect(target_p))
       {
         sendto_one(source_p,
                    ":%s NOTICE %s :Can't DLINE nick on another server",
                    me.name, source_p->name);
-        return;
+        return 0;
       }
 
       if (IsExemptKline(target_p))
@@ -315,7 +317,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
         sendto_one(source_p,
                    ":%s NOTICE %s :%s is E-lined", me.name,
                    source_p->name, target_p->name);
-        return;
+        return 0;
       }
 
       getnameinfo((struct sockaddr *)&target_p->localClient->ip,
@@ -331,7 +333,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,
                  ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
                  me.name, source_p->name);
-      return;
+      return 0;
     }
 
 #ifdef IPV6
@@ -354,14 +356,14 @@ ms_dline(struct Client *client_p, struct Client *source_p,
         sendto_one(source_p,
                    ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
                    me.name, source_p->name, dlhost, conf->host, creason);
-      return;
+      return 0;
     }
 
     cur_time = CurrentTime;
     current_date = smalldate(cur_time);
 
     if (!valid_comment(source_p, reason, 1))
-      return;
+      return 0;
 
     conf = conf_make(CONF_DLINE);
     conf->host = xstrdup(dlhost);
@@ -376,6 +378,8 @@ ms_dline(struct Client *client_p, struct Client *source_p,
     apply_dline(source_p, conf, tkline_time);
     rehashed_klines = 1;
   }
+
+  return 0;
 }
 
 /*
@@ -387,7 +391,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
 **      parv[0] = sender nick
 **      parv[1] = dline to remove
 */
-static void
+static int
 mo_undline(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
@@ -398,19 +402,19 @@ mo_undline(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "undline");
-    return;
+    return 0;
   }
 
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "UNDLINE");
-    return;
+    return 0;
   }
 
   if (parse_aline("UNDLINE", source_p, parc, parv, 0, &user,
                   &addr, NULL, &target_server, NULL) < 0)
-    return;
+    return 0;
 
   if (target_server != NULL)
   {
@@ -419,7 +423,7 @@ mo_undline(struct Client *client_p, struct Client *source_p,
 
     /* Allow ON to apply local unkline as well if it matches */
     if (match(target_server, me.name))
-      return;
+      return 0;
   }
   else
     cluster_a_line(source_p, "UNDLINE", CAP_UNDLN, SHARED_UNDLINE,
@@ -438,21 +442,22 @@ mo_undline(struct Client *client_p, struct Client *source_p,
   else
     sendto_one(source_p, ":%s NOTICE %s :No D-Line for [%s] found",
                me.name, source_p->name, addr);
+  return 0;
 }
 
-static void
+static int
 me_undline(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   const char *addr = NULL;
 
   if (parc != 3 || EmptyString(parv[2]))
-    return;
+    return 0;
 
   addr = parv[2];
 
   if (!IsClient(source_p) || match(parv[1], me.name))
-    return;
+    return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
@@ -473,20 +478,22 @@ me_undline(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, ":%s NOTICE %s :No D-Line for [%s] found",
                  me.name, source_p->name, addr);
   }
+
+  return 0;
 }
 
-static void
+static int
 ms_undline(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   if (parc != 3 || EmptyString(parv[2]))
-    return;
+    return 0;
 
   sendto_match_servs(source_p, parv[1], CAP_UNDLN,
                      "UNDLINE %s %s",
                      parv[1], parv[2]);
 
-  me_undline(client_p, source_p, parc, parv);
+  return me_undline(client_p, source_p, parc, parv);
 }
 
 static struct Message dline_msgtab =

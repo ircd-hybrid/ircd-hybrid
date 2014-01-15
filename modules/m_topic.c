@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_topic.c: Sets a channel topic.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_topic.c
+ * \brief Includes required functions for processing the TOPIC command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -43,7 +45,7 @@
  *  parv[1] = channel name
  *  parv[2] = new topic, if setting topic
  */
-static void
+static int
 m_topic(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -53,7 +55,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "TOPIC");
-    return;
+    return 0;
   }
 
   if (!IsFloodDone(source_p))
@@ -63,7 +65,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                me.name, source_p->name, parv[1]);
-    return;
+    return 0;
   }
 
   /* setting topic */
@@ -75,13 +77,13 @@ m_topic(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name,
                  source_p->name, parv[1]);
-      return;
+      return 0;
     }
 
     if (!(chptr->mode.mode & MODE_TOPICLIMIT) ||
         has_member_flags(ms, CHFL_CHANOP|CHFL_HALFOP))
     {
-      char topic_info[USERHOST_REPLYLEN]; 
+      char topic_info[USERHOST_REPLYLEN];
 
       snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
                source_p->username, source_p->host);
@@ -128,9 +130,11 @@ m_topic(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
                  me.name, source_p->name, chptr->chname);
   }
+
+  return 0;
 }
 
-static void
+static int
 ms_topic(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -153,14 +157,14 @@ ms_topic(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                from, to, "TOPIC");
-    return;
+    return 0;
   }
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
                from, to, parv[1]);
-    return;
+    return 0;
   }
 
   if (!IsClient(source_p))
@@ -188,12 +192,14 @@ ms_topic(struct Client *client_p, struct Client *source_p,
                          source_p->username,
                          source_p->host,
                          chptr->chname, chptr->topic);
+  return 0;
 }
 
 
-static struct Message topic_msgtab = {
+static struct Message topic_msgtab =
+{
   "TOPIC", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_topic, ms_topic, m_ignore, m_topic, m_ignore}
+  { m_unregistered, m_topic, ms_topic, m_ignore, m_topic, m_ignore }
 };
 
 static void
@@ -208,7 +214,8 @@ module_exit(void)
   mod_del_cmd(&topic_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_away.c: Sets/removes away status on a user.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_away.c
+ * \brief Includes required functions for processing the AWAY command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -41,7 +43,7 @@
  *  parv[0] = sender prefix
  *  parv[1] = away message
  */
-static void
+static int
 m_away(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -67,21 +69,21 @@ m_away(struct Client *client_p, struct Client *source_p,
 
     sendto_one(source_p, form_str(RPL_UNAWAY),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   if ((CurrentTime - source_p->localClient->last_away) < ConfigFileEntry.pace_wait)
   {
     sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   source_p->localClient->last_away = CurrentTime;
   sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, source_p->name);
 
   if (!strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
-    return;
+    return 0;
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 
@@ -93,9 +95,10 @@ m_away(struct Client *client_p, struct Client *source_p,
                 ":%s AWAY :%s", ID(source_p), source_p->away);
   sendto_server(client_p, NOCAPS, CAP_TS6,
                 ":%s AWAY :%s", source_p->name, source_p->away);
+  return 0;
 }
 
-static void
+static int
 ms_away(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -116,11 +119,11 @@ ms_away(struct Client *client_p, struct Client *source_p,
                                    source_p->host);
     }
 
-    return;
+    return 0;
   }
 
   if (!strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
-    return;
+    return 0;
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 
@@ -132,9 +135,11 @@ ms_away(struct Client *client_p, struct Client *source_p,
                 ":%s AWAY :%s", ID(source_p), source_p->away);
   sendto_server(client_p, NOCAPS, CAP_TS6,
                 ":%s AWAY :%s", source_p->name, source_p->away);
+  return 0;
 }
 
-static struct Message away_msgtab = {
+static struct Message away_msgtab =
+{
   "AWAY", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_away, ms_away, m_ignore, m_away, m_ignore }
 };
@@ -153,7 +158,8 @@ module_exit(void)
   delete_isupport("AWAYLEN");
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

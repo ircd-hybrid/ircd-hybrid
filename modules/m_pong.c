@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_pong.c: The reply to a ping message.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,15 +17,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_pong.c
+ * \brief Includes required functions for processing the PONG command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
 #include "ircd.h"
 #include "s_user.h"
 #include "client.h"
-#include "hash.h"       /* for find_client() */
+#include "hash.h"
 #include "numeric.h"
 #include "conf.h"
 #include "send.h"
@@ -35,7 +37,7 @@
 #include "modules.h"
 
 
-static void
+static int
 ms_pong(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -46,7 +48,7 @@ ms_pong(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOORIGIN),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   origin = parv[1];
@@ -66,15 +68,14 @@ ms_pong(struct Client *client_p, struct Client *source_p,
       sendto_one(target_p, ":%s PONG %s %s",
                  source_p->name, origin, destination);
     else
-    {
       sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                  me.name, source_p->name, destination);
-      return;
-    }
   }
+
+  return 0;
 }
 
-static void
+static int
 mr_pong(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -94,22 +95,21 @@ mr_pong(struct Client *client_p, struct Client *source_p,
           register_local_user(source_p);
         }
         else
-        {
           sendto_one(source_p, form_str(ERR_WRONGPONG), me.name,
                      source_p->name, source_p->localClient->random_ping);
-          return;
-        }
       }
     }
   }
   else
     sendto_one(source_p, form_str(ERR_NOORIGIN),
                me.name, source_p->name);
+  return 0;
 }
 
-static struct Message pong_msgtab = {
+static struct Message pong_msgtab =
+{
   "PONG", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
-  {mr_pong, m_ignore, ms_pong, m_ignore, m_ignore, m_ignore}
+  { mr_pong, m_ignore, ms_pong, m_ignore, m_ignore, m_ignore }
 };
 
 static void
@@ -124,7 +124,8 @@ module_exit(void)
   mod_del_cmd(&pong_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

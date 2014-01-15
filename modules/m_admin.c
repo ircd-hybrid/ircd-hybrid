@@ -1,7 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@
  *
  * \param source_p Pointer to client to report to
  */
-static void
+static int
 do_admin(struct Client *source_p)
 {
   const char *me_name = ID_or_name(&me, source_p->from);
@@ -64,6 +64,7 @@ do_admin(struct Client *source_p)
   if (AdminInfo.email != NULL)
     sendto_one(source_p, form_str(RPL_ADMINEMAIL),
                me_name, nick, AdminInfo.email);
+  return 0;
 }
 
 /*! \brief NICK command handler (called by already registered,
@@ -80,7 +81,7 @@ do_admin(struct Client *source_p)
  *      - parv[0] = sender prefix
  *      - parv[1] = nickname/servername
  */
-static void
+static int
 m_admin(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -90,7 +91,7 @@ m_admin(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p,form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
@@ -98,9 +99,9 @@ m_admin(struct Client *client_p, struct Client *source_p,
   if (!ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p, source_p, ":%s ADMIN :%s", 1,
                     parc, parv) != HUNTED_ISME)
-      return;
+      return 0;
 
-  do_admin(source_p);
+  return do_admin(source_p);
 }
 
 /*! \brief ADMIN command handler (called by operators and
@@ -117,18 +118,19 @@ m_admin(struct Client *client_p, struct Client *source_p,
  *      - parv[0] = sender prefix
  *      - parv[1] = nickname/servername
  */
-static void
+static int
 ms_admin(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   if (hunt_server(client_p, source_p, ":%s ADMIN :%s", 1,
                   parc, parv) != HUNTED_ISME)
-    return;
+    return 0;
 
-  do_admin(source_p);
+  return do_admin(source_p);
 }
 
-static struct Message admin_msgtab = {
+static struct Message admin_msgtab =
+{
   "ADMIN", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_admin, ms_admin, m_ignore, ms_admin, m_ignore }
 };
@@ -145,7 +147,8 @@ module_exit(void)
   mod_del_cmd(&admin_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry = 
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

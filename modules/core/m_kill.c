@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_kill.c: Kills a user.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,14 +17,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_kill.c
+ * \brief Includes required functions for processing the KILL command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
 #include "list.h"
 #include "client.h"
-#include "hash.h"       /* for find_client() */
+#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "log.h"
@@ -72,7 +74,7 @@ relay_kill(struct Client *one, struct Client *source_p,
  *  parv[1] = kill victim
  *  parv[2] = kill path
  */
-static void
+static int
 mo_kill(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -89,7 +91,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "KILL");
-    return;
+    return 0;
   }
 
   if (!EmptyString(reason))
@@ -107,13 +109,13 @@ mo_kill(struct Client *client_p, struct Client *source_p,
      * rewrite the KILL for this new nickname--this keeps
      * servers in synch when nick change and kill collide
      */
-    if ((target_p = whowas_get_history(user, 
+    if ((target_p = whowas_get_history(user,
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
                                 == NULL)
     {
       sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                  me.name, source_p->name, user);
-      return;
+      return 0;
     }
 
     sendto_one(source_p, ":%s NOTICE %s :KILL changed from %s to %s",
@@ -124,25 +126,25 @@ mo_kill(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "kill:remote");
-    return;
+    return 0;
   }
 
   if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL))
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
                source_p->name, "kill");
-    return;
+    return 0;
   }
 
   if (IsServer(target_p) || IsMe(target_p))
   {
     sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   if (MyConnect(target_p))
-    sendto_one(target_p, ":%s!%s@%s KILL %s :%s", 
+    sendto_one(target_p, ":%s!%s@%s KILL %s :%s",
                source_p->name, source_p->username, source_p->host,
                target_p->name, reason);
 
@@ -151,7 +153,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
    * that have been around for ever, for no reason..
    */
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                       "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s (%s)", 
+                       "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s (%s)",
                        target_p->name, target_p->username, target_p->host,
                        target_p->servptr->name,
                        target_p->servptr->id[0] ? target_p->servptr->id : "<>",
@@ -179,6 +181,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
 
   snprintf(buf, sizeof(buf), "Killed (%s (%s))", source_p->name, reason);
   exit_client(target_p, source_p, buf);
+  return 0;
 }
 
 /* ms_kill()
@@ -186,7 +189,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
  *  parv[1] = kill victim
  *  parv[2] = kill path and reason
  */
-static void
+static int
 ms_kill(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -200,7 +203,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "KILL");
-    return;
+    return 0;
   }
 
   user = parv[1];
@@ -227,19 +230,19 @@ ms_kill(struct Client *client_p, struct Client *source_p,
   if ((target_p = find_person(client_p, user)) == NULL)
   {
     /*
-     * If the user has recently changed nick, but only if its 
+     * If the user has recently changed nick, but only if its
      * not an uid, automatically rewrite the KILL for this new nickname.
      * --this keeps servers in synch when nick change and kill collide
      */
     if (IsDigit(*user))   /* Somehow an uid was not found in the hash ! */
-      return;
+      return 0;
     if ((target_p = whowas_get_history(user,
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
        == NULL)
     {
       sendto_one(source_p, form_str(ERR_NOSUCHNICK),
                  me.name, source_p->name, user);
-      return;
+      return 0;
     }
 
     sendto_one(source_p,":%s NOTICE %s :KILL changed from %s to %s",
@@ -250,7 +253,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   if (MyConnect(target_p))
@@ -308,12 +311,14 @@ ms_kill(struct Client *client_p, struct Client *source_p,
     snprintf(buf, sizeof(buf), "Killed (%s %s)", source_p->name, reason);
 
   exit_client(target_p, source_p, buf);
+  return 0;
 }
 
 
-static struct Message kill_msgtab = {
+static struct Message kill_msgtab =
+{
   "KILL", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, ms_kill, m_ignore, mo_kill, m_ignore}
+  { m_unregistered, m_not_oper, ms_kill, m_ignore, mo_kill, m_ignore }
 };
 
 static void
@@ -328,7 +333,8 @@ module_exit(void)
   mod_del_cmd(&kill_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

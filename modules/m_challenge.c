@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_challenge.c: Allows an IRC Operator to securely authenticate.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_challenge.c
+ * \brief Includes required functions for processing the CHALLENGE command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -67,7 +69,7 @@ failed_challenge_notice(struct Client *source_p, const char *name,
  * parv[1] = operator to challenge for, or +response
  *
  */
-static void
+static int
 m_challenge(struct Client *client_p, struct Client *source_p,
             int parc, char *parv[])
 {
@@ -78,7 +80,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
   {
     /* Ignore it if we aren't expecting this... -A1kmm */
     if (source_p->localClient->response == NULL)
-      return;
+      return 0;
 
     if (irccmp(source_p->localClient->response, ++parv[1]))
     {
@@ -86,7 +88,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
                  source_p->name);
       failed_challenge_notice(source_p, source_p->localClient->auth_oper,
                               "challenge failed");
-      return;
+      return 0;
     }
     
     conf = find_exact_name_conf(CONF_OPER, source_p,
@@ -95,7 +97,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     {
       /* XXX: logging */
       sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
-      return;
+      return 0;
     }
 
     if (attach_conf(source_p, conf) != 0)
@@ -103,7 +105,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
                  me.name, source_p->name);   
       failed_challenge_notice(source_p, conf->name, "can't attach conf!");
-      return;
+      return 0;
     }
 
     ++conf->count;
@@ -117,7 +119,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     MyFree(source_p->localClient->auth_oper);
     source_p->localClient->response  = NULL;
     source_p->localClient->auth_oper = NULL;
-    return;
+    return 0;
   }
 
   MyFree(source_p->localClient->response);
@@ -133,7 +135,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     conf = find_exact_name_conf(CONF_OPER, NULL, parv[1], NULL, NULL);
     failed_challenge_notice(source_p, parv[1], (conf != NULL)
                             ? "host mismatch" : "no oper {} block");
-    return;
+    return 0;
   }
 
   if (conf->rsa_public_key == NULL)
@@ -141,14 +143,14 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
                "is not enabled for your oper{} block.", me.name,
                source_p->name);
-    return;
+    return 0;
   }
 
   if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
   {
     sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
     failed_challenge_notice(source_p, conf->name, "requires SSL/TLS");
-    return;
+    return 0;
   }
 
   if (!EmptyString(conf->certfp))
@@ -157,7 +159,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
       failed_challenge_notice(source_p, conf->name, "client certificate fingerprint mismatch");
-      return;
+      return 0;
     }
   }
 
@@ -168,17 +170,20 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
   source_p->localClient->auth_oper = xstrdup(conf->name);
   MyFree(challenge);
+  return 0;
 }
 
-static void
+static int
 mo_challenge(struct Client *client_p, struct Client *source_p,
              int parc, char *parv[])
 {
   sendto_one(source_p, form_str(RPL_YOUREOPER),
              me.name, source_p->name);
+  return 0;
 }
 
-static struct Message challenge_msgtab = {
+static struct Message challenge_msgtab =
+{
   "CHALLENGE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_challenge, m_ignore, m_ignore, mo_challenge, m_ignore }
 };
@@ -208,7 +213,8 @@ module_exit(void)
 }
 #endif
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

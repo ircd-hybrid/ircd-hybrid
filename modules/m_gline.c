@@ -1,7 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  */
 
 /*! \file m_gline.c
- * \brief Includes required functions for processing the GLINE command.
+ * \brief Includes required functions for processing the GLINE/GUNGLINE command.
  * \version $Id$
  */
 
@@ -366,7 +366,7 @@ do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
  *      - parv[1] = user\@host mask
  *      - parv[2] = reason
  */
-static void
+static int
 mo_gline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -379,19 +379,19 @@ mo_gline(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS),
                me.name, source_p->name, "gline");
-    return;
+    return 0;
   }
 
   if (!ConfigFileEntry.glines)
   {
     sendto_one(source_p, ":%s NOTICE %s :GLINE disabled",
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   if (parse_aline("GLINE", source_p, parc, parv, AWILD,
                   &user, &host, NULL, NULL, &reason) < 0)
-    return;
+    return 0;
 
   if ((p = strchr(host, '/')) != NULL)
   {
@@ -402,7 +402,7 @@ mo_gline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, ":%s NOTICE %s :Cannot set G-Lines with CIDR length < %d",
                  me.name, source_p->name, min_bitlen);
-      return;
+      return 0;
     }
   }
   
@@ -413,7 +413,7 @@ mo_gline(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p,
                ":%s NOTICE %s :This server or oper has already voted",
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   /*
@@ -434,6 +434,7 @@ mo_gline(struct Client *client_p, struct Client *source_p,
   sendto_server(NULL, CAP_GLN, CAP_TS6,
 		":%s GLINE %s %s :%s",
 		source_p->name, user, host, reason);
+  return 0;
 }
 
 /* ms_gline()
@@ -452,18 +453,20 @@ mo_gline(struct Client *client_p, struct Client *source_p,
  * ENCAP'd GLINES are propagated by encap code.
  */
 
-static void
+static int
 ms_gline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   do_sgline(source_p, parc, parv, 1);
+  return 0;
 }
 
-static void
+static int
 me_gline(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   do_sgline(source_p, parc, parv, 0);
+  return 0;
 }
 
 static void
@@ -511,12 +514,13 @@ do_sungline(struct Client *source_p, const char *user,
  *      - parv[2] = hostname
  *      - parv[3] = reason
  */
-static void
+static int
 me_gungline(struct Client *client_p, struct Client *source_p,
             int parc, char *parv[])
 {
   if (ConfigFileEntry.glines)
     do_sungline(source_p, parv[1], parv[2], parv[3], 0);
+  return 0;
 }
 
 /*! \brief GUNGLINE command handler (called by operators)
@@ -533,7 +537,7 @@ me_gungline(struct Client *client_p, struct Client *source_p,
  *      - parv[1] = user\@host mask
  *      - parv[2] = reason
  */
-static void
+static int
 mo_gungline(struct Client *client_p, struct Client *source_p,
             int parc, char *parv[])
 {
@@ -545,21 +549,22 @@ mo_gungline(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS),
                me.name, source_p->name, "gline");
-    return;
+    return 0;
   }
 
   if (!ConfigFileEntry.glines)
   {
     sendto_one(source_p, ":%s NOTICE %s :GUNGLINE disabled",
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   if (parse_aline("GUNGLINE", source_p, parc, parv, 0, &user,
                   &host, NULL, NULL, &reason) < 0)
-    return;
+    return 0;
 
   do_sungline(source_p, user, host, reason, 1);
+  return 0;
 }
 
 /*
@@ -567,12 +572,14 @@ mo_gungline(struct Client *client_p, struct Client *source_p,
  * a gline is not valid with "No reason"
  * -db
  */
-static struct Message gline_msgtab = {
+static struct Message gline_msgtab =
+{
   "GLINE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_gline, me_gline, mo_gline, m_ignore }
 };
 
-static struct Message ungline_msgtab = {
+static struct Message ungline_msgtab =
+{
   "GUNGLINE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, m_ignore, me_gungline, mo_gungline, m_ignore }
 };
@@ -593,7 +600,8 @@ module_exit(void)
   delete_capability("GLN");
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

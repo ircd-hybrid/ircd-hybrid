@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_info.c: Sends information about the server.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2005 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_info.c
+ * \brief Includes required functions for processing the INFO command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -649,7 +651,7 @@ send_conf_options(struct Client *source_p)
  * output       - NONE
  * side effects - info text is sent to client
  */
-static void
+static int
 send_info_text(struct Client *source_p)
 {
   const char **text = infotext;
@@ -684,6 +686,7 @@ send_info_text(struct Client *source_p)
 
   sendto_one(source_p, form_str(RPL_ENDOFINFO),
              me.name, source_p->name);
+  return 0;
 }
 
 /*
@@ -691,7 +694,7 @@ send_info_text(struct Client *source_p)
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-static void
+static int
 m_info(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -702,7 +705,7 @@ m_info(struct Client *client_p, struct Client *source_p,
     /* safe enough to give this on a local connect only */
     sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
@@ -710,9 +713,9 @@ m_info(struct Client *client_p, struct Client *source_p,
   if (!ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p,source_p, ":%s INFO :%s", 1,
                     parc, parv) != HUNTED_ISME)
-      return;
+      return 0;
 
-  send_info_text(source_p);
+  return send_info_text(source_p);
 }
 
 /*
@@ -720,18 +723,19 @@ m_info(struct Client *client_p, struct Client *source_p,
 **  parv[0] = sender prefix
 **  parv[1] = servername
 */
-static void
+static int
 ms_info(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
                   parc, parv) != HUNTED_ISME)
-    return;
+    return 0;
 
-  send_info_text(source_p);
+  return send_info_text(source_p);
 }
 
-static struct Message info_msgtab = {
+static struct Message info_msgtab =
+{
   "INFO", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_info, ms_info, m_ignore, ms_info, m_ignore }
 };
@@ -748,7 +752,8 @@ module_exit(void)
   mod_del_cmd(&info_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

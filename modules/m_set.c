@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_set.c: Sets a server parameter.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,11 +17,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
  */
 
-/* rewritten by jdc */
+/*! \file m_set.c
+ * \brief Includes required functions for processing the SET command.
+ * \version $Id$
+ */
 
 #include "stdinc.h"
 #include "client.h"
@@ -432,7 +432,7 @@ list_quote_commands(struct Client *source_p)
  * mo_set - SET command handler
  * set options while running
  */
-static void
+static int
 mo_set(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -446,7 +446,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS),
                me.name, source_p->name, "set");
-    return;
+    return 0;
   }
 
   if (parc > 1)
@@ -490,7 +490,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
         {
           sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                      me.name, source_p->name, "SET");
-          return;
+          return 0;
         }
 
         if (tab->wants_int && (parc > 2))
@@ -514,7 +514,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
                        me.name, source_p->name,
                        tab->name);
 
-            return;
+            return 0;
           }
         }
         else
@@ -526,7 +526,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
             tab->handler(source_p, arg, newval);
           else
             tab->handler(source_p, arg);
-          return;
+          return 0;
         }
         else
         {
@@ -536,7 +536,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
             /* Just in case someone actually wants a
              * set function that takes no args.. *shrug* */
             tab->handler(source_p);
-          return;
+          return 0;
         }
       }
     }
@@ -547,15 +547,17 @@ mo_set(struct Client *client_p, struct Client *source_p,
      */
     sendto_one(source_p, ":%s NOTICE %s :Variable not found.",
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   list_quote_commands(source_p);
+  return 0;
 }
 
-static struct Message set_msgtab = {
+static struct Message set_msgtab =
+{
   "SET", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, m_ignore, mo_set, m_ignore}
+  { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_set, m_ignore }
 };
 
 static void
@@ -570,7 +572,8 @@ module_exit(void)
   mod_del_cmd(&set_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

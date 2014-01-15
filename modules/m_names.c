@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_names.c: Shows the users who are online.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_names.c
+ * \brief Includes required functions for processing the NAMES command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -48,7 +50,7 @@ names_all_visible_channels(struct Client *source_p)
 {
   dlink_node *ptr = NULL;
 
-  /* 
+  /*
    * First, do all visible channels (public and the one user self is)
    */
   DLINK_FOREACH(ptr, global_channel_list.head)
@@ -93,7 +95,7 @@ names_non_public_non_secret(struct Client *source_p)
      * channels with source_p, they have not been shown yet. */
     DLINK_FOREACH(lp, c2ptr->channel.head)
     {
-      ch3ptr = ((struct Membership *) lp->data)->chptr;
+      ch3ptr = ((struct Membership *)lp->data)->chptr;
 
       if (IsMember(source_p, ch3ptr))
       {
@@ -133,7 +135,7 @@ names_non_public_non_secret(struct Client *source_p)
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static void
+static int
 m_names(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -147,7 +149,7 @@ m_names(struct Client *client_p, struct Client *source_p,
       *s = '\0';
 
     if (*para == '\0')
-      return;
+      return 0;
 
     if ((chptr = hash_find_channel(para)) != NULL)
       channel_member_names(source_p, chptr, 1);
@@ -162,11 +164,14 @@ m_names(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, form_str(RPL_ENDOFNAMES),
                me.name, source_p->name, "*");
   }
+
+  return 0;
 }
 
-static struct Message names_msgtab = {
+static struct Message names_msgtab =
+{
   "NAMES", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_names, m_ignore, m_ignore, m_names, m_ignore}
+  { m_unregistered, m_names, m_ignore, m_ignore, m_names, m_ignore }
 };
 
 static void
@@ -181,7 +186,8 @@ module_exit(void)
   mod_del_cmd(&names_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

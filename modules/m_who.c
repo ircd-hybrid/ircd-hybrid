@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_who.c: Shows who is on a channel.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_who.c
+ * \brief Includes required functions for processing the WHO command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -112,7 +114,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr,
 
     if ((mask == NULL) ||
       !match(mask, target_p->name) || !match(mask, target_p->username) ||
-      !match(mask, target_p->host) || 
+      !match(mask, target_p->host) ||
       ((!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER)) &&
        !match(mask, target_p->servptr->name)) ||
       !match(mask, target_p->info))
@@ -241,7 +243,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 **      parv[1] = nickname mask list
 **      parv[2] = additional selection flag, only 'o' for now.
 */
-static void
+static int
 m_who(struct Client *client_p, struct Client *source_p,
       int parc, char *parv[])
 {
@@ -257,7 +259,7 @@ m_who(struct Client *client_p, struct Client *source_p,
     who_global(source_p, mask, server_oper);
     sendto_one(source_p, form_str(RPL_ENDOFWHO),
                me.name, source_p->name, "*");
-    return;
+    return 0;
   }
 
   /* mask isn't NULL at this point. repeat after me... -db */
@@ -277,7 +279,7 @@ m_who(struct Client *client_p, struct Client *source_p,
 
     sendto_one(source_p, form_str(RPL_ENDOFWHO),
                me.name, source_p->name, mask);
-    return;
+    return 0;
   }
 
   /* '/who nick' */
@@ -299,7 +301,7 @@ m_who(struct Client *client_p, struct Client *source_p,
 
     sendto_one(source_p, form_str(RPL_ENDOFWHO),
                me.name, source_p->name, mask);
-    return;
+    return 0;
   }
 
   /* '/who *' */
@@ -314,7 +316,7 @@ m_who(struct Client *client_p, struct Client *source_p,
 
     sendto_one(source_p, form_str(RPL_ENDOFWHO),
                me.name, source_p->name, "*");
-    return;
+    return 0;
   }
 
   /* '/who 0' */
@@ -326,11 +328,13 @@ m_who(struct Client *client_p, struct Client *source_p,
   /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
   sendto_one(source_p, form_str(RPL_ENDOFWHO),
              me.name, source_p->name, mask);
+  return 0;
 }
 
-static struct Message who_msgtab = {
+static struct Message who_msgtab =
+{
   "WHO", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_who, m_ignore, m_ignore, m_who, m_ignore}
+  { m_unregistered, m_who, m_ignore, m_ignore, m_who, m_ignore }
 };
 
 static void
@@ -345,7 +349,8 @@ module_exit(void)
   mod_del_cmd(&who_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_whois.c: Shows who a user was.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_whowas.c
+ * \brief Includes required functions for processing the WHOWAS command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -95,7 +97,7 @@ whowas_do(struct Client *client_p, struct Client *source_p,
 **      parv[0] = sender prefix
 **      parv[1] = nickname queried
 */
-static void
+static int
 m_whowas(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -105,22 +107,23 @@ m_whowas(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
     sendto_one(source_p,form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
 
   whowas_do(client_p, source_p, parc, parv);
+  return 0;
 }
 
-static void
+static int
 mo_whowas(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
@@ -128,13 +131,15 @@ mo_whowas(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   whowas_do(client_p, source_p, parc, parv);
+  return 0;
 }
 
-static struct Message whowas_msgtab = {
+static struct Message whowas_msgtab =
+{
   "WHOWAS", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_whowas, mo_whowas, m_ignore, mo_whowas, m_ignore }
 };
@@ -151,7 +156,8 @@ module_exit(void)
   mod_del_cmd(&whowas_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

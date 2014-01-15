@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_wallops.c: Sends a message to all operators.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_wallops.c
+ * \brief Includes required functions for processing the WALLOPS command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -39,24 +41,24 @@
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void
+static int
 mo_wallops(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
-{ 
+{
   const char *message = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_WALLOPS))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "wallops");
-    return;
+    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
+               source_p->name, "wallops");
+    return 0;
   }
 
   if (EmptyString(message))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "WALLOPS");
-    return;
+    return 0;
   }
 
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
@@ -64,6 +66,7 @@ mo_wallops(struct Client *client_p, struct Client *source_p,
                 ":%s WALLOPS :%s", ID(source_p), message);
   sendto_server(NULL, NOCAPS, CAP_TS6,
                 ":%s WALLOPS :%s", source_p->name, message);
+  return 0;
 }
 
 /*
@@ -71,29 +74,31 @@ mo_wallops(struct Client *client_p, struct Client *source_p,
  *      parv[0] = sender prefix
  *      parv[1] = message text
  */
-static void
+static int
 ms_wallops(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
-{ 
+{
   const char *message = parv[1];
 
   if (EmptyString(message))
-    return;
+    return 0;
 
   if (IsClient(source_p))
     sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
   else
-    sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message); 
+    sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
 
   sendto_server(client_p, CAP_TS6, NOCAPS,
                 ":%s WALLOPS :%s", ID(source_p), message);
   sendto_server(client_p, NOCAPS, CAP_TS6,
                 ":%s WALLOPS :%s", source_p->name, message);
+  return 0;
 }
 
-static struct Message wallops_msgtab = {
+static struct Message wallops_msgtab =
+{
   "WALLOPS", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, ms_wallops, m_ignore, mo_wallops, m_ignore}
+  { m_unregistered, m_not_oper, ms_wallops, m_ignore, mo_wallops, m_ignore }
 };
 
 static void
@@ -108,7 +113,8 @@ module_exit(void)
   mod_del_cmd(&wallops_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

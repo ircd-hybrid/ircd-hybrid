@@ -40,7 +40,7 @@
  * output	- none
  * side effects	- propagates subcommand to locally connected servers
  */
-static void
+static int
 ms_encap(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -57,7 +57,7 @@ ms_encap(struct Client *client_p, struct Client *source_p,
     len = strlen(parv[i]) + 1;
 
     if ((cur_len + len) >= sizeof(buffer))
-      return;
+      return 0;
 
     snprintf(ptr, sizeof(buffer) - cur_len, "%s ", parv[i]);
     cur_len += len;
@@ -67,11 +67,10 @@ ms_encap(struct Client *client_p, struct Client *source_p,
   len = strlen(parv[i]);
 
   /*
-   * if the final parameter crosses our buffer size, should we bail, 
+   * If the final parameter crosses our buffer size, should we bail, 
    * like the rest, or should we truncate?  ratbox seems to think truncate,
    * so i'll do that for now until i can talk to lee.  -bill
    */
-
   if (parc == 3)
     snprintf(ptr, sizeof(buffer) - cur_len, "%s", parv[2]);
   else
@@ -84,10 +83,10 @@ ms_encap(struct Client *client_p, struct Client *source_p,
                      "ENCAP %s", buffer);
 
   if (match(parv[1], me.name))
-    return;
+    return 0;
 
   if ((mptr = find_command(parv[2])) == NULL)
-    return;
+    return 0;
 
 #ifdef NOT_USED_YET
   paramcount = mptr->parameters;
@@ -110,6 +109,7 @@ ms_encap(struct Client *client_p, struct Client *source_p,
 
   if ((handler = mptr->handlers[ENCAP_HANDLER]))
     (*handler)(client_p, source_p, parc, parv);
+  return 0;
 }
 
 static struct Message encap_msgtab =

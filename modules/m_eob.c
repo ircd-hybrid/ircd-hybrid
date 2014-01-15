@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_eob.c: Signifies the end of a server burst.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_eob.c
+ * \brief Includes required functions for processing the EOB command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -36,7 +38,7 @@
  *      parv[0] = sender prefix   
  *      parv[1] = servername   
  */
-static void
+static int
 ms_eob(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -54,11 +56,13 @@ ms_eob(struct Client *client_p, struct Client *source_p,
                 ":%s EOB", ID(source_p));
   sendto_server(client_p, NOCAPS, CAP_TS6,
                 ":%s EOB", source_p->name);
+  return 0;
 }
 
-static struct Message eob_msgtab = {
+static struct Message eob_msgtab =
+{
   "EOB", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, ms_eob, m_ignore, m_ignore, m_ignore}
+  { m_unregistered, m_ignore, ms_eob, m_ignore, m_ignore, m_ignore }
 };
 
 static void
@@ -73,7 +77,8 @@ module_exit(void)
   mod_del_cmd(&eob_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

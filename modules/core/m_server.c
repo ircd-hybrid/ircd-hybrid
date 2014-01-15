@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_server.c: Introduces a server.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,23 +17,26 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_server.c
+ * \brief Includes required functions for processing the SERVER/SID command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
 #include "list.h"
-#include "client.h"      /* client struct */
+#include "client.h"
 #include "event.h"
-#include "hash.h"        /* add_to_client_hash_table */
-#include "irc_string.h" 
-#include "ircd.h"        /* me */
-#include "numeric.h"     /* ERR_xxx */
-#include "conf.h"      /* struct MaskItem */
-#include "log.h"       /* log level defines */
-#include "s_serv.h"      /* server_estab, check_server */
+#include "hash.h"
+#include "irc_string.h"
+#include "ircd.h"
+#include "numeric.h"
+#include "conf.h"
+#include "log.h"
+#include "s_serv.h"
 #include "s_user.h"
-#include "send.h"        /* sendto_one */
+#include "send.h"
 #include "parse.h"
 #include "modules.h"
 
@@ -69,7 +71,7 @@ set_server_gecos(struct Client *client_p, const char *info)
  *  parv[2] = serverinfo/hopcount
  *  parv[3] = serverinfo
  */
-static void
+static int
 mr_server(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
@@ -81,7 +83,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(client_p, "ERROR :No servername");
     exit_client(client_p, client_p, "Wrong number of args");
-    return;
+    return 0;
   }
 
   name = parv[1];
@@ -99,7 +101,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
           "Unauthorized server connection attempt from %s: Non-TS server "
           "for server %s", get_client_name(client_p, MASK_IP), name);
     exit_client(client_p, client_p, "Non-TS server");
-    return;
+    return 0;
   }
 
   if (!valid_servname(name))
@@ -111,7 +113,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", get_client_name(client_p, MASK_IP), name);
     exit_client(client_p, client_p, "Bogus server name");
-    return;
+    return 0;
   }
 
   /* Now we just have to call check_server and everything should
@@ -132,7 +134,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
       }
 
       exit_client(client_p, client_p, "Invalid servername.");
-      return;
+      return 0;
       /* NOT REACHED */
       break;
 
@@ -146,7 +148,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
            "for server %s", get_client_name(client_p, MASK_IP), name);
 
       exit_client(client_p, client_p, "Invalid password.");
-      return;
+      return 0;
       /* NOT REACHED */
       break;
 
@@ -160,7 +162,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
            "for server %s", get_client_name(client_p, MASK_IP), name);
 
       exit_client(client_p, client_p, "Invalid host.");
-      return;
+      return 0;
     case -4:
       sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid certificate fingerprint "
@@ -171,7 +173,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
            "for server %s", get_client_name(client_p, MASK_IP), name);
 
       exit_client(client_p, client_p, "Invalid certificate fingerprint.");
-      return;
+      return 0;
       /* NOT REACHED */
       break;
   }
@@ -190,16 +192,16 @@ mr_server(struct Client *client_p, struct Client *source_p,
      * connect - A1kmm.
      */
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-			 "Attempt to re-introduce server %s SID %s from %s",
-                         name, client_p->id, 
-			 get_client_name(client_p, HIDE_IP));
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-			 "Attempt to re-introduce server %s SID %s from %s",
+                         "Attempt to re-introduce server %s SID %s from %s",
                          name, client_p->id,
-			 get_client_name(client_p, MASK_IP));
+                         get_client_name(client_p, HIDE_IP));
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "Attempt to re-introduce server %s SID %s from %s",
+                         name, client_p->id,
+                         get_client_name(client_p, MASK_IP));
     sendto_one(client_p, "ERROR :Server ID already exists.");
     exit_client(client_p, client_p, "Server ID Exists");
-    return;
+    return 0;
   }
 
   /* XXX If somehow there is a connect in progress and
@@ -217,6 +219,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
   set_server_gecos(client_p, parv[3]);
   client_p->hopcount = hop;
   server_estab(client_p);
+  return 0;
 }
 
 /* ms_server()
@@ -225,7 +228,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
  *  parv[2] = serverinfo/hopcount
  *  parv[3] = serverinfo
  */
-static void
+static int
 ms_server(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
@@ -239,12 +242,12 @@ ms_server(struct Client *client_p, struct Client *source_p,
 
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
-    return;
+    return 0;
 
   if (EmptyString(parv[3]))
   {
     sendto_one(client_p, "ERROR :No servername");
-    return;
+    return 0;
   }
 
   name = parv[1];
@@ -260,7 +263,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
                          get_client_name(client_p, MASK_IP), name);
     sendto_one(client_p, "ERROR :Bogus server name introduced");
     exit_client(client_p, &me, "Bogus server name intoduced");
-    return;
+    return 0;
   }
 
   if ((target_p = hash_find_server(name)))
@@ -280,17 +283,17 @@ ms_server(struct Client *client_p, struct Client *source_p,
      * that already exists, then sends you a client burst, you squit the
      * server, but you keep getting the burst of clients on a server that
      * doesnt exist, although ircd can handle it, its not a realistic
-     * solution.. --fl_ 
+     * solution.. --fl_
      */
     sendto_one(client_p, "ERROR :Server %s already exists", name);
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-			 "Link %s cancelled, server %s already exists",
+                         "Link %s cancelled, server %s already exists",
                          get_client_name(client_p, SHOW_IP), name);
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-			 "Link %s cancelled, server %s already exists",
+                         "Link %s cancelled, server %s already exists",
                          client_p->name, name);
     exit_client(client_p, &me, "Server Exists");
-    return;
+    return 0;
   }
 
   /* XXX If somehow there is a connect in progress and
@@ -329,7 +332,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
    *            name = "irc.bighub.net";
    *            hub_mask="*";
    *            ...
-   * 
+   *
    * That would allow "irc.bighub.net" to introduce anything it wanted..
    *
    * However
@@ -354,7 +357,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
                          "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, MASK_IP), name);
     exit_client(source_p, &me, "No matching hub_mask.");
-    return;
+    return 0;
   }
 
   /* Check for the new server being leafed behind this HUB */
@@ -362,10 +365,10 @@ ms_server(struct Client *client_p, struct Client *source_p,
   {
     /* OOOPs nope can't HUB this leaf */
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-			 "Link %s introduced leafed server %s.",
+                         "Link %s introduced leafed server %s.",
                          get_client_name(client_p, HIDE_IP), name);
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-			 "Link %s introduced leafed server %s.",
+                         "Link %s introduced leafed server %s.",
                          get_client_name(client_p, MASK_IP), name);
     /* If it is new, we are probably misconfigured, so split the
      * non-hub server introducing this. Otherwise, split the new
@@ -375,7 +378,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
      * larger networks, dont bother. --fl_
      */
     exit_client(client_p, &me, "Leafed Server.");
-    return;
+    return 0;
   }
 
   target_p = make_client(client_p);
@@ -404,6 +407,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
                        "Server %s being introduced by %s",
                        target_p->name, source_p->name);
+  return 0;
 }
 
 /* ms_sid()
@@ -413,7 +417,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
  *  parv[3] = sid of new server
  *  parv[4] = serverinfo
  */
-static void
+static int
 ms_sid(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -426,12 +430,12 @@ ms_sid(struct Client *client_p, struct Client *source_p,
 
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
-    return;
+    return 0;
 
   if (EmptyString(parv[4]))
   {
     sendto_one(client_p, "ERROR :No servername");
-    return;
+    return 0;
   }
 
   hop = atoi(parv[2]);
@@ -446,7 +450,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
                          get_client_name(client_p, MASK_IP), parv[1]);
     sendto_one(client_p, "ERROR :Bogus server name introduced");
     exit_client(client_p, &me, "Bogus server name intoduced");
-    return;
+    return 0;
   }
 
   if (!valid_sid(parv[3]))
@@ -459,7 +463,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
                          get_client_name(client_p, MASK_IP), parv[3]);
     sendto_one(client_p, "ERROR :Bogus server ID introduced");
     exit_client(client_p, &me, "Bogus server ID intoduced");
-    return;
+    return 0;
   }
 
   /* collision on SID? */
@@ -467,13 +471,13 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(client_p, "ERROR :SID %s already exists", parv[3]);
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-			 "Link %s cancelled, SID %s already exists",
+                         "Link %s cancelled, SID %s already exists",
                          get_client_name(client_p, SHOW_IP), parv[3]);
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-			 "Link %s cancelled, SID %s already exists",
+                         "Link %s cancelled, SID %s already exists",
                          client_p->name, parv[3]);
     exit_client(client_p, &me, "SID Exists");
-    return;
+    return 0;
   }
 
   /* collision on name? */
@@ -481,13 +485,13 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(client_p, "ERROR :Server %s already exists", parv[1]);
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-                         "Link %s cancelled, server %s already exists",   
+                         "Link %s cancelled, server %s already exists",
                          get_client_name(client_p, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-                         "Link %s cancelled, server %s already exists",   
+                         "Link %s cancelled, server %s already exists",
                          client_p->name, parv[1]);
     exit_client(client_p, &me, "Server Exists");
-    return;
+    return 0;
   }
 
   /* XXX If somehow there is a connect in progress and
@@ -527,7 +531,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
    *            name = "irc.bighub.net";
    *            hub_mask="*";
    *            ...
-   * 
+   *
    * That would allow "irc.bighub.net" to introduce anything it wanted..
    *
    * However
@@ -552,7 +556,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
                          "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, MASK_IP), parv[1]);
     exit_client(source_p, &me, "No matching hub_mask.");
-    return;
+    return 0;
   }
 
   /* Check for the new server being leafed behind this HUB */
@@ -560,13 +564,13 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   {
     /* OOOPs nope can't HUB this leaf */
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-			 "Link %s introduced leafed server %s.",
+                         "Link %s introduced leafed server %s.",
                          get_client_name(client_p, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-			 "Link %s introduced leafed server %s.",
+                         "Link %s introduced leafed server %s.",
                          get_client_name(client_p, MASK_IP), parv[1]);
     exit_client(client_p, &me, "Leafed Server.");
-    return;
+    return 0;
   }
 
   target_p = make_client(client_p);
@@ -600,16 +604,19 @@ ms_sid(struct Client *client_p, struct Client *source_p,
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
                        "Server %s being introduced by %s",
                        target_p->name, source_p->name);
+  return 0;
 }
 
-static struct Message server_msgtab = {
+static struct Message server_msgtab =
+{
   "SERVER", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
-  {mr_server, m_registered, ms_server, m_ignore, m_registered, m_ignore}
+  { mr_server, m_registered, ms_server, m_ignore, m_registered, m_ignore }
 };
 
-static struct Message sid_msgtab = {
+static struct Message sid_msgtab =
+{
   "SID", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
-  {m_ignore, m_ignore, ms_sid, m_ignore, m_ignore, m_ignore}
+  { m_ignore, m_ignore, ms_sid, m_ignore, m_ignore, m_ignore }
 };
 
 static void
@@ -626,7 +633,8 @@ module_exit(void)
   mod_del_cmd(&server_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

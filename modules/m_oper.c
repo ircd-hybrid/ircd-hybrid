@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_oper.c: Makes a user an IRC Operator.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_oper.c
+ * \brief Includes required functions for processing the OPER command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -67,7 +69,7 @@ failed_oper_notice(struct Client *source_p, const char *name,
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-static void
+static int
 m_oper(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -79,7 +81,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "OPER");
-    return;
+    return 0;
   }
 
   /* end the grace period */
@@ -92,14 +94,14 @@ m_oper(struct Client *client_p, struct Client *source_p,
     conf = find_exact_name_conf(CONF_OPER, NULL, name, NULL, NULL);
     failed_oper_notice(source_p, name, (conf != NULL) ?
                        "host mismatch" : "no oper {} block");
-    return;
+    return 0;
   }
 
   if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
   {
     sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
     failed_oper_notice(source_p, name, "requires SSL/TLS");
-    return;
+    return 0;
   }
 
   if (!EmptyString(conf->certfp))
@@ -108,7 +110,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
       failed_oper_notice(source_p, name, "client certificate fingerprint mismatch");
-      return;
+      return 0;
     }
   }
 
@@ -119,7 +121,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, ":%s NOTICE %s :Can't attach conf!",
                  me.name, source_p->name);
       failed_oper_notice(source_p, name, "can't attach conf!");
-      return;
+      return 0;
     }
 
     ++conf->count;
@@ -133,6 +135,8 @@ m_oper(struct Client *client_p, struct Client *source_p,
     sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
     failed_oper_notice(source_p, name, "password mismatch");
   }
+
+  return 0;
 }
 
 /*
@@ -141,15 +145,17 @@ m_oper(struct Client *client_p, struct Client *source_p,
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
-static void
+static int
 mo_oper(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   sendto_one(source_p, form_str(RPL_YOUREOPER),
              me.name, source_p->name);
+  return 0;
 }
 
-static struct Message oper_msgtab = {
+static struct Message oper_msgtab =
+{
   "OPER", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_oper, m_ignore, m_ignore, mo_oper, m_ignore }
 };
@@ -166,7 +172,8 @@ module_exit(void)
   mod_del_cmd(&oper_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

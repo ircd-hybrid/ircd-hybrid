@@ -1,7 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_hash.c
+ * \brief Includes required functions for processing the HASH command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -36,7 +39,7 @@
 #include "userhost.h"
 
 
-static void
+static int
 mo_hash(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -136,10 +139,12 @@ mo_hash(struct Client *client_p, struct Client *source_p,
   sendto_one(source_p, ":%s NOTICE %s :UserHost: entries: %u buckets: %u "
              "max chain: %u", me.name, source_p->name, count, buckets,
              max_chain);
+  return 0;
 }
 
-static struct Message hash_msgtab = {
- "HASH", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+static struct Message hash_msgtab =
+{
+  "HASH", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_hash, m_ignore }
 };
 
@@ -155,7 +160,8 @@ module_exit(void)
   mod_del_cmd(&hash_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

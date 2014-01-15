@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_part.c: Parts a user from a channel.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_part.c
+ * \brief Includes required functions for processing the PART command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -45,7 +47,7 @@
  * 		- pointer to source client to remove
  *		- char pointer of name of channel to remove from
  * output	- none
- * side effects	- remove ONE client given the channel name 
+ * side effects	- remove ONE client given the channel name
  */
 static void
 part_one_client(struct Client *source_p, const char *name, const char *reason)
@@ -109,7 +111,7 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
 **      parv[1] = channel
 **      parv[2] = reason
 */
-static void
+static int
 m_part(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
@@ -117,13 +119,13 @@ m_part(struct Client *client_p, struct Client *source_p,
   char reason[KICKLEN + 1] = { '\0' };
 
   if (IsServer(source_p))
-    return;
+    return 0;
 
   if (EmptyString(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
                me.name, source_p->name, "PART");
-    return;
+    return 0;
   }
 
   if (parc > 2 && !EmptyString(parv[2]))
@@ -136,9 +138,11 @@ m_part(struct Client *client_p, struct Client *source_p,
   for (name = strtoken(&p, parv[1], ","); name;
        name = strtoken(&p,    NULL, ","))
     part_one_client(source_p, name, reason);
+  return 0;
 }
 
-static struct Message part_msgtab = {
+static struct Message part_msgtab =
+{
   "PART", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_part, m_part, m_ignore, m_part, m_ignore }
 };
@@ -155,7 +159,8 @@ module_exit(void)
   mod_del_cmd(&part_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

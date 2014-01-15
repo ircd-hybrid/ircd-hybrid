@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_links.c: Shows what servers are currently connected.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_links.c
+ * \brief Includes required functions for processing the LINKS command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -72,7 +74,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
 
       /*
        * We just send the reply, as if they are here there's either no SHIDE,
-       * or they're an oper..  
+       * or they're an oper..
        */
       sendto_one(source_p, form_str(RPL_LINKS),
                  me_name, nick,
@@ -106,7 +108,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static void
+static int
 mo_links(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
@@ -114,9 +116,10 @@ mo_links(struct Client *client_p, struct Client *source_p,
     if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
       if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1,
                       parc, parv) != HUNTED_ISME)
-        return;
+        return 0;
 
   do_links(source_p, parc, parv);
+  return 0;
 }
 
 /*
@@ -125,10 +128,10 @@ mo_links(struct Client *client_p, struct Client *source_p,
  *      parv[1] = servername mask
  * or
  *      parv[0] = sender prefix
- *      parv[1] = server to query 
+ *      parv[1] = server to query
  *      parv[2] = servername mask
  */
-static void
+static int
 m_links(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -138,18 +141,16 @@ m_links(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
 
   if (!ConfigServerHide.flatten_links)
-  {
-    mo_links(client_p, source_p, parc, parv);
-    return;
-  }
+    return mo_links(client_p, source_p, parc, parv);
 
   do_links(source_p, parc, parv);
+  return 0;
 }
 
 /*
@@ -158,23 +159,24 @@ m_links(struct Client *client_p, struct Client *source_p,
  *      parv[1] = servername mask
  * or
  *      parv[0] = sender prefix
- *      parv[1] = server to query 
+ *      parv[1] = server to query
  *      parv[2] = servername mask
  */
-static void
+static int
 ms_links(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1,
                   parc, parv) != HUNTED_ISME)
-    return;
+    return 0;
 
-  m_links(client_p, source_p, parc, parv);
+  return m_links(client_p, source_p, parc, parv);
 }
 
-static struct Message links_msgtab = {
+static struct Message links_msgtab =
+{
   "LINKS", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_links, ms_links, m_ignore, mo_links, m_ignore}
+  { m_unregistered, m_links, ms_links, m_ignore, mo_links, m_ignore }
 };
 
 static void
@@ -189,7 +191,8 @@ module_exit(void)
   mod_del_cmd(&links_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

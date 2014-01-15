@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_etrace.c: Traces a path to a client/server.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2004-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_etrace.c
+ * \brief Includes required functions for processing the ETRACE command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -79,8 +81,8 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
 
     if (target_p && MyClient(target_p))
       report_this_status(source_p, target_p);
-      
-    sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name, 
+
+    sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name,
                source_p->name, tname);
     return;
   }
@@ -106,11 +108,12 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 mo_etrace(struct Client *client_p, struct Client *source_p,
           int parc, char *parv[])
 {
   do_etrace(source_p, parc, parv);
+  return 0;
 }
 
 /* report_this_status()
@@ -127,33 +130,34 @@ report_this_status(struct Client *source_p, struct Client *target_p)
   if (target_p->status == STAT_CLIENT)
   {
     if (ConfigFileEntry.hide_spoof_ips)
-	sendto_one(source_p, form_str(RPL_ETRACE),
-		   me.name,
-		   source_p->name,
-		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-		   get_client_class(&target_p->localClient->confs),
-		   target_p->name,
-		   target_p->username,
-		   target_p->host,
-		   IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
-		   target_p->info);
+      sendto_one(source_p, form_str(RPL_ETRACE),
+                 me.name,
+                 source_p->name,
+                 HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
+                 get_client_class(&target_p->localClient->confs),
+                 target_p->name,
+                 target_p->username,
+                 target_p->host,
+                 IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
+                 target_p->info);
     else
-	sendto_one(source_p, form_str(RPL_ETRACE),
-		   me.name,
-		   source_p->name, 
-		   HasUMode(target_p, UMODE_OPER) ? "Oper" : "User", 
-		   get_client_class(&target_p->localClient->confs),
-		   target_p->name,
-		   target_p->username,
-		   target_p->host,
-		   target_p->sockhost,
-		   target_p->info);
+      sendto_one(source_p, form_str(RPL_ETRACE),
+                 me.name,
+                 source_p->name,
+                 HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
+                 get_client_class(&target_p->localClient->confs),
+                 target_p->name,
+                 target_p->username,
+                 target_p->host,
+                 target_p->sockhost,
+                 target_p->info);
   }
 }
 
-static struct Message etrace_msgtab = {
+static struct Message etrace_msgtab =
+{
   "ETRACE", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, m_ignore, mo_etrace, m_ignore}
+  { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_etrace, m_ignore }
 };
 
 static void
@@ -168,7 +172,8 @@ module_exit(void)
   mod_del_cmd(&etrace_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

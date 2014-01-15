@@ -729,33 +729,36 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
  * output	-
  * side effects	- just returns a nastyogram to given user
  */
-void
+int
 m_not_oper(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   sendto_one(source_p, form_str(ERR_NOPRIVILEGES),
              me.name, source_p->name);
+  return 0;
 }
 
-void
+int
 m_unregistered(struct Client *client_p, struct Client *source_p,
                int parc, char *parv[])
 {
   sendto_one(source_p, form_str(ERR_NOTREGISTERED), me.name,
              source_p->name[0] ? source_p->name : "*");
+  return 0;
 }
 
-void
+int
 m_registered(struct Client *client_p, struct Client *source_p,
              int parc, char *parv[])
 {
   sendto_one(source_p, form_str(ERR_ALREADYREGISTRED),
              me.name, source_p->name);
+  return 0;
 }
 
-void
+int
 m_ignore(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  return;
+  return 0;
 }

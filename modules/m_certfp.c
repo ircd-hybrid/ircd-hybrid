@@ -1,7 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2013-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,12 +48,12 @@
  *      - parv[0] = sender prefix
  *      - parv[1] = certificate fingerprint
  */
-static void
+static int
 ms_certfp(struct Client *source_p, struct Client *client_p,
           int parc, char *parv[])
 {
   if (!IsClient(source_p))
-    return;
+    return 0;
 
   MyFree(source_p->certfp);
   source_p->certfp = strdup(parv[1]);
@@ -62,9 +62,11 @@ ms_certfp(struct Client *source_p, struct Client *client_p,
                 ID(source_p), parv[1]);
   sendto_server(client_p, NOCAPS, CAP_TS6, ":%s CERTFP %s",
                 source_p->name, parv[1]);
+  return 0;
 }
 
-static struct Message certfp_msgtab = {
+static struct Message certfp_msgtab =
+{
   "CERTFP", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_certfp, m_ignore, m_ignore, m_ignore }
 };
@@ -81,7 +83,8 @@ module_exit(void)
   mod_del_cmd(&certfp_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

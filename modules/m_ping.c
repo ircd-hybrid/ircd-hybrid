@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_ping.c: Requests that a PONG message be sent back.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_ping.c
+ * \brief Includes required functions for processing the PING command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -41,28 +43,28 @@
 **      parv[1] = origin
 **      parv[2] = destination
 */
-static void
+static int
 m_ping(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
   struct Client *target_p;
-  char  *origin, *destination;
+  char *origin, *destination;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one(source_p, form_str(ERR_NOORIGIN),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   origin = parv[1];
-  destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
+  destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
 
   if (ConfigServerHide.disable_remote_commands && !HasUMode(source_p, UMODE_OPER))
   {
     sendto_one(source_p, ":%s PONG %s :%s", me.name,
               (destination) ? destination : me.name, origin);
-    return;
+    return 0;
   }
 
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
@@ -70,24 +72,20 @@ m_ping(struct Client *client_p, struct Client *source_p,
     /* We're sending it across servers.. origin == client_p->name --fl_ */
     origin = client_p->name;
 
-    if ((target_p = hash_find_server(destination)) != NULL)
-    {
+    if ((target_p = hash_find_server(destination)))
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
                  origin, destination);
-    }
     else
-    {
       sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
                  me.name, source_p->name, destination);
-      return;
-    }
   }
   else
     sendto_one(source_p, ":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, origin);
+  return 0;
 }
 
-static void
+static int
 ms_ping(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -98,11 +96,11 @@ ms_ping(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(ERR_NOORIGIN),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   origin = source_p->name;
-  destination = parv[2]; /* Will get NULL or pointer (parc >= 2!!) */
+  destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
 
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0 && irccmp(destination, me.id) != 0)
   {
@@ -110,20 +108,19 @@ ms_ping(struct Client *client_p, struct Client *source_p,
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
                  origin, destination);
     else
-    {
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                 ID_or_name(&me, client_p), source_p->name, destination);
-      return;
-    }
+      sendto_one(source_p, form_str(ERR_NOSUCHSERVER), ID_or_name(&me, client_p),
+                 source_p->name, destination);
   }
   else
-    sendto_one(source_p, ":%s PONG %s :%s",
-               ID_or_name(&me, client_p), (destination) ? destination : me.name, origin);
+    sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, client_p),
+               (destination) ? destination : me.name, origin);
+  return 0;
 }
 
-static struct Message ping_msgtab = {
+static struct Message ping_msgtab =
+{
   "PING", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
-  {m_unregistered, m_ping, ms_ping, m_ignore, m_ping, m_ping}
+  { m_unregistered, m_ping, ms_ping, m_ignore, m_ping, m_ping }
 };
 
 static void

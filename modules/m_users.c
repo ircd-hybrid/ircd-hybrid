@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_users.c: Gives some basic user statistics.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_users.c
+ * \brief Includes required functions for processing the USERS command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -38,7 +40,7 @@
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 m_users(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
@@ -48,7 +50,7 @@ m_users(struct Client *client_p, struct Client *source_p,
   {
     sendto_one(source_p, form_str(RPL_LOAD2HI),
                me.name, source_p->name);
-    return;
+    return 0;
   }
 
   last_used = CurrentTime;
@@ -56,13 +58,14 @@ m_users(struct Client *client_p, struct Client *source_p,
   if (!ConfigServerHide.disable_remote_commands)
     if (hunt_server(client_p, source_p, ":%s USERS :%s", 1,
                     parc, parv) != HUNTED_ISME)
-      return;
+      return 0;
 
   sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, source_p->name,
              ConfigServerHide.hide_servers ? Count.total : Count.local,
              ConfigServerHide.hide_servers ? Count.max_tot : Count.max_loc);
   sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, source_p->name,
              Count.total, Count.max_tot);
+  return 0;
 }
 
 /*
@@ -70,13 +73,13 @@ m_users(struct Client *client_p, struct Client *source_p,
  *      parv[0] = sender prefix
  *      parv[1] = servername
  */
-static void
+static int
 mo_users(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
   if (hunt_server(client_p, source_p, ":%s USERS :%s", 1,
                   parc, parv) != HUNTED_ISME)
-    return;
+    return 0;
 
   if (!HasUMode(source_p, UMODE_OPER) && ConfigServerHide.hide_servers)
     sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, source_p->name,
@@ -87,9 +90,11 @@ mo_users(struct Client *client_p, struct Client *source_p,
 
   sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, source_p->name,
              Count.total, Count.max_tot);
+  return 0;
 }
 
-static struct Message users_msgtab = {
+static struct Message users_msgtab =
+{
   "USERS", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_users, mo_users, m_ignore, mo_users, m_ignore }
 };
@@ -106,7 +111,8 @@ module_exit(void)
   mod_del_cmd(&users_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

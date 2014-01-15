@@ -1,9 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  m_watch.c: Maintains notify list
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 1997 Jukka Santala (Donwulff)
- *  Copyright (C) 2005 by the Hybrid Development Team.
+ *  Copyright (c) 1997 Jukka Santala (Donwulff)
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +18,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file m_watch.c
+ * \brief Includes required functions for processing the WATCH command.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -63,7 +65,7 @@ show_watch(struct Client *client_p, const char *name,
  * parv[0] = sender prefix
  * parv[1] = watch options
  */
-static void
+static int
 m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *ptr = NULL;
@@ -236,9 +238,12 @@ m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
     /* Hmm.. unknown prefix character.. Ignore it. :-) */
   }
+
+  return 0;
 }
 
-static struct Message watch_msgtab = {
+static struct Message watch_msgtab =
+{
   "WATCH", 0, 0, 0, 1, MFLG_SLOW, 0,
   { m_unregistered, m_watch, m_ignore, m_ignore, m_watch, m_ignore }
 };
@@ -257,7 +262,8 @@ module_exit(void)
   delete_isupport("WATCH");
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -161,11 +161,10 @@ ms_xline(struct Client *client_p, struct Client *source_p,
  *		- parc number of arguments
  *		- parv list of arguments
  * via parv[]
- * parv[1] = target
- * parv[2] = server
- * parv[3] = xline
- * parv[4] = time
- * parv[5] = reason
+ * parv[1] = target server
+ * parv[2] = xline
+ * parv[3] = time
+ * parv[4] = reason
  *
  * outputs	- none
  * side effects	-

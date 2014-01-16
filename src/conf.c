@@ -1032,7 +1032,7 @@ rehash(int sig)
 {
   if (sig != 0)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "Got signal SIGHUP, reloading ircd.conf file");
+                         "Got signal SIGHUP, reloading configuration file(s)");
 
   restart_resolver();
 

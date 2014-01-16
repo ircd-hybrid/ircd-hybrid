@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  ircd_signal.c: responsible for ircd's signal handling
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,31 +17,32 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file ircd_signal.c.c
+ * \brief responsible for ircd's signal handling.
+ * \version $Id$
  */
 
 #include "stdinc.h"
-#include "list.h"
 #include "ircd_signal.h"
-#include "ircd.h"         /* dorehash */
-#include "restart.h"      /* server_die */
-#include "memory.h"
-#include "s_bsd.h"
+#include "ircd.h"
+#include "restart.h"
+
 
 /*
  * sigterm_handler - exit the server
  */
-static void 
-sigterm_handler(int sig)  
+static void
+sigterm_handler(int sig)
 {
   server_die("received signal SIGTERM", 0);
 }
 
-/* 
+/*
  * sighup_handler - reread the server configuration
  */
-static void 
+static void
 sighup_handler(int sig)
 {
   dorehash = 1;
@@ -58,7 +58,7 @@ sigusr1_handler(int sig)
 }
 
 /*
- * 
+ *
  * inputs	- nothing
  * output	- nothing
  * side effects - Reaps zombies periodically
@@ -77,7 +77,7 @@ sigchld_handler(int sig)
 /*
  * sigint_handler - restart the server
  */
-static void 
+static void
 sigint_handler(int sig)
 {
   server_die("SIGINT received", !server_state.foreground);
@@ -86,7 +86,7 @@ sigint_handler(int sig)
 /*
  * setup_signals - initialize signal handlers for server
  */
-void 
+void
 setup_signals(void)
 {
   struct sigaction act;

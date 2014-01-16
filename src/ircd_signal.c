@@ -95,44 +95,49 @@ setup_signals(void)
   act.sa_handler = SIG_IGN;
 
   sigemptyset(&act.sa_mask);
-  sigaddset(&act.sa_mask, SIGPIPE);
-  sigaddset(&act.sa_mask, SIGALRM);
-  sigaction(SIGALRM, &act, 0);
+#ifdef SIGXFSZ
+  sigaddset(&act.sa_mask, SIGXFSZ);
+#endif
+#ifdef SIGWINCH
+  sigaddset(&act.sa_mask, SIGWINCH);
+#endif
 #ifdef SIGTRAP
   sigaddset(&act.sa_mask, SIGTRAP);
 #endif
+  sigaddset(&act.sa_mask, SIGPIPE);
+  sigaddset(&act.sa_mask, SIGALRM);
+  sigaddset(&act.sa_mask, SIGHUP);
+  sigaddset(&act.sa_mask, SIGINT);
+  sigaddset(&act.sa_mask, SIGTERM);
+  sigaddset(&act.sa_mask, SIGUSR1);
+  sigaddset(&act.sa_mask, SIGCHLD);
+
 #ifdef SIGXFSZ
-  sigaddset(&act.sa_mask, SIGXFSZ);
   sigaction(SIGXFSZ, &act, 0);
 #endif
-
 #ifdef SIGWINCH
-  sigaddset(&act.sa_mask, SIGWINCH);
   sigaction(SIGWINCH, &act, 0);
 #endif
-  sigaction(SIGPIPE, &act, 0);
 #ifdef SIGTRAP
   sigaction(SIGTRAP, &act, 0);
 #endif
+  sigaction(SIGPIPE, &act, 0);
+  sigaction(SIGALRM, &act, 0);
 
   act.sa_handler = sighup_handler;
-  sigemptyset(&act.sa_mask);
-  sigaddset(&act.sa_mask, SIGHUP);
   sigaction(SIGHUP, &act, 0);
 
   act.sa_handler = sigint_handler;
-  sigaddset(&act.sa_mask, SIGINT);
   sigaction(SIGINT, &act, 0);
 
   act.sa_handler = sigterm_handler;
-  sigaddset(&act.sa_mask, SIGTERM);
   sigaction(SIGTERM, &act, 0);
 
   act.sa_handler = sigusr1_handler;
-  sigaddset(&act.sa_mask, SIGUSR1);
   sigaction(SIGUSR1, &act, 0);
 
   act.sa_handler = sigchld_handler;
-  sigaddset(&act.sa_mask, SIGCHLD);
   sigaction(SIGCHLD, &act, 0);
+
+  sigprocmask(SIG_UNBLOCK, &act.sa_mask, NULL);
 }

@@ -67,8 +67,11 @@ sigusr1_handler(int sig)
 static void
 sigchld_handler(int sig)
 {
-  int status;
-  waitpid(-1, &status, WNOHANG);
+  int status, errno_save = errno;
+
+  while (waitpid(-1, &status, WNOHANG) > 0)
+    ;
+  errno = errno_save;
 }
 
 /*

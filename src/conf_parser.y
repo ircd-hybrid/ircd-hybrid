@@ -600,13 +600,12 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
     break;
   }
 
-  /* require 2048 bit (256 byte) key */
-  if (RSA_size(ServerInfo.rsa_private_key) != 256)
+  if (RSA_size(ServerInfo.rsa_private_key) < 128)
   {
     RSA_free(ServerInfo.rsa_private_key);
     ServerInfo.rsa_private_key = NULL;
 
-    conf_error_report("Not a 2048 bit key, ignoring");
+    conf_error_report("Ignoring serverinfo::rsa_private_key_file -- need at least a 1024 bit key size");
   }
 #endif
 };

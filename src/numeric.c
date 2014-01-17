@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  numeric.c: Numeric handling functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,15 +17,19 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file numeric.c
+ * \brief Declarations of numeric replies.
+ * \version $Id$
  */
 
 #include "stdinc.h"
 #include "numeric.h"
 
 
-static const char *const replies[] = {
+static const char *const replies[] =
+{
 /* 000 */ NULL,
 /* 001 RPL_WELCOME */ ":%s 001 %s :Welcome to the %s Internet Relay Chat Network %s",
 /* 002 RPL_YOURHOST */ ":%s 002 %s :Your host is %s, running version %s",
@@ -1041,7 +1044,7 @@ static const char *const replies[] = {
  * side effects - NONE
  */
 const char *
-form_str(unsigned int numeric)
+form_str(enum irc_numerics numeric)
 {
   assert(numeric < ERR_LAST_ERR_MSG);
 

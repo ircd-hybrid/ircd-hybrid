@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  hook.h: A header for the hooks into parts of ircd.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2003 Piotr Nizynski, Advanced IRC Services Project Team
+ *  Copyright (c) 2005-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,14 +18,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file hook.h
+ * \brief Provides a generic event hooking interface.
+ * \version $Id$
  */
 
 #ifndef __HOOK_H_INCLUDED
 #define __HOOK_H_INCLUDED
 
-#define HOOK_V2
+#define is_callback_present(c) (!!dlink_list_length(&c->chain))
 
 typedef void *CBFUNC(va_list);
 
@@ -47,7 +50,4 @@ extern dlink_node *install_hook(struct Callback *, CBFUNC *);
 extern void uninstall_hook(struct Callback *, CBFUNC *);
 extern void *pass_callback(dlink_node *, ...);
 extern void stats_hooks(struct Client *);
-
-#define is_callback_present(c) (!!dlink_list_length(&c->chain))
-
 #endif

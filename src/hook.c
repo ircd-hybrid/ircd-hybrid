@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2003 Piotr Nizynski, Advanced IRC Services Project Team
- *  Copyright (C) 2005-2013 Hybrid Development Team
+ *  Copyright (c) 2003 Piotr Nizynski, Advanced IRC Services Project Team
+ *  Copyright (c) 2005-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
  */
 
 /*! \file hook.c
@@ -37,15 +35,16 @@
 #include "send.h"
 #include "client.h"
 
+
 static dlink_list callback_list;
 
 
 /*! \brief Creates a new callback.
- * \param name name used to identify the callback
+ * \param name Name used to identify the callback
  *            (can be NULL for anonymous callbacks)
- * \param func initial function attached to the chain
+ * \param func Initial function attached to the chain
  *            (can be NULL to create an empty chain)
- * \return pointer to Callback structure or NULL if already exists
+ * \return Pointer to Callback structure or NULL if already exists
  * \note Once registered, a callback should never be freed!
  * That's because there may be modules which depend on it
  * (even if no functions are attached). That's also why
@@ -84,9 +83,9 @@ register_callback(const char *name, CBFUNC *func)
 }
 
 /*! \brief Passes control down the callback hook chain.
- * \param cb  pointer to Callback structure
- * \param ... argument to pass
- * \return function return value
+ * \param cb  Pointer to Callback structure
+ * \param ... Argument to pass
+ * \return function Return value
  */
 void *
 execute_callback(struct Callback *cb, ...)
@@ -109,9 +108,9 @@ execute_callback(struct Callback *cb, ...)
 
 /*! \brief Called by a hook function to pass code flow further
  *         in the hook chain.
- * \param this_hook pointer to dlink_node of the current hook function
+ * \param this_hook Pointer to dlink_node of the current hook function
  * \param ...       (original or modified) arguments to be passed
- * \return callback return value
+ * \return callback Return value
  */
 void *
 pass_callback(dlink_node *this_hook, ...)
@@ -120,7 +119,7 @@ pass_callback(dlink_node *this_hook, ...)
   va_list args;
 
   if (this_hook->next == NULL)
-    return NULL;  /* reached the last one */
+    return NULL;  /* Reached the last one */
 
   va_start(args, this_hook);
   res = ((CBFUNC *)this_hook->next->data)(args);
@@ -130,8 +129,8 @@ pass_callback(dlink_node *this_hook, ...)
 }
 
 /*! \brief Finds a named callback.
- * \param name name of the callback
- * \return pointer to Callback structure or NULL if not found
+ * \param name Name of the callback
+ * \return Pointer to Callback structure or NULL if not found
  */
 struct Callback *
 find_callback(const char *name)
@@ -154,9 +153,9 @@ find_callback(const char *name)
  * The new hook is installed at the beginning of the chain,
  * so it has full control over functions installed earlier.
  *
- * \param cb   pointer to Callback structure
- * \param hook address of hook function
- * \return pointer to dlink_node of the hook (used when passing
+ * \param cb   Pointer to Callback structure
+ * \param hook Address of hook function
+ * \return Pointer to dlink_node of the hook (used when passing
  *         control to the next hook in the chain);
  *         valid till uninstall_hook() is called
  */
@@ -170,8 +169,8 @@ install_hook(struct Callback *cb, CBFUNC *hook)
 }
 
 /*! \brief Removes a specific hook for the given callback.
- * \param cb   pointer to Callback structure
- * \param hook address of hook function
+ * \param cb   Pointer to Callback structure
+ * \param hook Address of hook function
  */
 void
 uninstall_hook(struct Callback *cb, CBFUNC *hook)
@@ -185,7 +184,7 @@ uninstall_hook(struct Callback *cb, CBFUNC *hook)
 
 /*! \brief Displays registered callbacks and lengths of their hook chains.
  *         (This is the handler of /stats h)
- * \param source_p pointer to struct Client
+ * \param source_p Pointer to struct Client
  */
 void
 stats_hooks(struct Client *source_p)

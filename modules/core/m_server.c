@@ -133,7 +133,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
            "servername %s", get_client_name(client_p, MASK_IP), name);
       }
 
-      exit_client(client_p, client_p, "Invalid servername.");
+      exit_client(client_p, client_p, "No connect{} block.");
       return 0;
       /* NOT REACHED */
       break;

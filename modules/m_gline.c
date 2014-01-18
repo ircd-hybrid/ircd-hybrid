@@ -300,6 +300,7 @@ ms_gline(struct Client *client_p, struct Client *source_p,
   const char *reason = NULL;      /* reason for "victims" demise       */
   const char *user = NULL;
   const char *host = NULL;        /* user and host of GLINE "victim"   */
+  const char *p = NULL;
 
   if (!IsClient(source_p))
     return 0;
@@ -320,49 +321,43 @@ ms_gline(struct Client *client_p, struct Client *source_p,
                 ":%s GLINE %s %s :%s",
                 source_p->name, user, host, reason);
 
-  if (ConfigFileEntry.glines)
+  if (!ConfigFileEntry.glines)
+    return 0;
+
+  if (!valid_wild_card(source_p, 1, 2, user, host))
+    return 0;
+
+  if ((p = strchr(host, '/')))
   {
-    if (!valid_wild_card(source_p, 1, 2, user, host))
-      return 0;
-
-    if (IsClient(source_p))
-    {
-      const char *p = NULL;
-
-      if ((p = strchr(host, '/')))
-      {
-        int bitlen = strtol(++p, NULL, 10);
-        int min_bitlen = strchr(host, ':') ? ConfigFileEntry.gline_min_cidr6 :
+    int bitlen = strtol(++p, NULL, 10);
+    int min_bitlen = strchr(host, ':') ? ConfigFileEntry.gline_min_cidr6 :
                                              ConfigFileEntry.gline_min_cidr;
 
-        if (bitlen < min_bitlen)
-        {
-          sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                               "%s is requesting a GLINE with a CIDR mask < %d for [%s@%s] [%s]",
-                               get_oper_name(source_p), min_bitlen,
-                               user, host, reason);
-          return 0;
-        }
-      }
+    if (bitlen < min_bitlen)
+    {
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                           "%s is requesting a GLINE with a CIDR mask < %d for [%s@%s] [%s]",
+                           get_oper_name(source_p), min_bitlen,
+                           user, host, reason);
+      return 0;
     }
-
-     /* If at least 3 opers agree this user should be G lined then do it */
-     if (check_majority(source_p, user, host, reason, GLINE_PENDING_ADD_TYPE) ==
-         GLINE_ALREADY_VOTED)
-     {
-       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                            "oper or server has already voted");
-       return 0;
-     }
-
-     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                          "%s requesting G-Line for [%s@%s] [%s]",
-                          get_oper_name(source_p),
-                          user, host, reason);
-     ilog(LOG_TYPE_GLINE, "G-Line for [%s@%s] [%s] requested by %s",
-          user, host, reason, get_oper_name(source_p));
   }
 
+  /* If at least 3 opers agree this user should be G lined then do it */
+  if (check_majority(source_p, user, host, reason, GLINE_PENDING_ADD_TYPE) ==
+      GLINE_ALREADY_VOTED)
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "oper or server has already voted");
+    return 0;
+  }
+
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                        "%s requesting G-Line for [%s@%s] [%s]",
+                        get_oper_name(source_p),
+                        user, host, reason);
+  ilog(LOG_TYPE_GLINE, "G-Line for [%s@%s] [%s] requested by %s",
+       user, host, reason, get_oper_name(source_p));
   return 0;
 }
 

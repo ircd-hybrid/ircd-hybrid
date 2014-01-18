@@ -1301,7 +1301,11 @@ oper_flags_item: KILL ':' REMOTE
 } | XLINE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_X;
+    block_state.port.value |= OPER_FLAG_XLINE;
+} | T_UNXLINE
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_UNXLINE;
 } | GLINE
 {
   if (conf_parser_ctx.pass == 2)

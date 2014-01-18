@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 1997 Jukka Santala (Donwulff)
- *  Copyright (C) 2005 by the Hybrid Development Team.
+ *  Copyright (c) 1997 Jukka Santala (Donwulff)
+ *  Copyright (c) 2005-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,14 +28,15 @@
 #ifndef INCLUDED_watch_h
 #define INCLUDED_watch_h
 
+
 /*! \brief Watch structure */
 struct Watch
 {
-  dlink_node node; /**< Embedded dlink_node used to link into watchTable */
-  dlink_list watched_by; /**< list of clients that have this
+  dlink_node node;  /**< Embedded dlink_node used to link into watchTable */
+  dlink_list watched_by;  /**< List of clients that have this
                               entry on their watch list */
-  time_t lasttime; /**< last time the client was seen */
-  char nick[NICKLEN + 1]; /**< nick name of the client to watch */
+  time_t lasttime;  /**< Last time the client was seen */
+  char nick[NICKLEN + 1];  /**< Nick name of the client to watch */
 };
 
 extern void watch_init(void);

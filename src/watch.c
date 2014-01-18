@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 1997 Jukka Santala (Donwulff)
- *  Copyright (C) 2005 by the Hybrid Development Team.
+ *  Copyright (c) 1997 Jukka Santala (Donwulff)
+ *  Copyright (c) 2005-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -78,8 +78,8 @@ watch_count_memory(unsigned int *const count, uint64_t *const bytes)
 
 /*! \brief Notifies all clients that have client_p's nick name on
  *         their watch list.
- * \param client_p pointer to Client struct
- * \param reply numeric to send. Either RPL_LOGON or RPL_LOGOFF
+ * \param client_p Pointer to Client struct
+ * \param reply Numeric to send. Either RPL_LOGON or RPL_LOGOFF
  */
 void
 watch_check_hash(struct Client *client_p, const unsigned int reply)
@@ -88,7 +88,7 @@ watch_check_hash(struct Client *client_p, const unsigned int reply)
   dlink_node *ptr = NULL;
   assert(IsClient(client_p));
   if ((anptr = watch_find_hash(client_p->name)) == NULL)
-    return;    /* This nick isn't on watch */
+    return;  /* This nick isn't on watch */
 
   /* Update the time of last change to item */
   anptr->lasttime = CurrentTime;
@@ -106,7 +106,7 @@ watch_check_hash(struct Client *client_p, const unsigned int reply)
 }
 
 /*! \brief Looks up the watch table for a given nick
- * \param name nick name to look up
+ * \param name Nick name to look up
  */
 struct Watch *
 watch_find_hash(const char *name)
@@ -125,7 +125,7 @@ watch_find_hash(const char *name)
 }
 
 /*! \brief Adds a watch entry to client_p's watch list
- * \param nick     nick name to add
+ * \param nick     Nick name to add
  * \param client_p Pointer to Client struct
  */
 void
@@ -159,7 +159,7 @@ watch_add_to_hash_table(const char *nick, struct Client *client_p)
 }
 
 /*! \brief Removes a single entry from client_p's watch list
- * \param nick     nick name to remove
+ * \param nick     Nick name to remove
  * \param client_p Pointer to Client struct
  */
 void
@@ -169,10 +169,10 @@ watch_del_from_hash_table(const char *nick, struct Client *client_p)
   dlink_node *ptr = NULL;
 
   if ((anptr = watch_find_hash(nick)) == NULL)
-    return;    /* No header found for that nick. i.e. it's not being watched */
+    return;  /* No header found for that nick. i.e. it's not being watched */
 
   if ((ptr = dlinkFind(&anptr->watched_by, client_p)) == NULL)
-    return;    /* This nick isn't being watched by client_p */
+    return;  /* This nick isn't being watched by client_p */
 
   dlinkDelete(ptr, &anptr->watched_by);
   free_dlink_node(ptr);

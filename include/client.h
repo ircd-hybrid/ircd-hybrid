@@ -187,7 +187,7 @@ struct MaskItem;
 #define OPER_FLAG_UNKLINE        0x00000004 /**< Oper can use unkline        */
 #define OPER_FLAG_GLINE          0x00000008 /**< Oper can use gline          */
 #define OPER_FLAG_K              0x00000010 /**< Oper can kill/kline         */
-#define OPER_FLAG_X              0x00000020 /**< Oper can xline              */
+#define OPER_FLAG_XLINE          0x00000020 /**< Oper can xline              */
 #define OPER_FLAG_DIE            0x00000040 /**< Oper can die                */
 #define OPER_FLAG_REHASH         0x00000080 /**< Oper can rehash             */
 #define OPER_FLAG_ADMIN          0x00000100 /**< Oper can set umode +a       */
@@ -205,6 +205,8 @@ struct MaskItem;
 #define OPER_FLAG_CONNECT_REMOTE 0x00100000 /**< Oper can do global CONNECT */
 #define OPER_FLAG_WALLOPS        0x00200000 /**< Oper can do WALLOPS */
 #define OPER_FLAG_LOCOPS         0x00400000 /**< Oper can do LOCOPS */
+#define OPER_FLAG_UNXLINE        0x00800000 /**< Oper can unxline            */
+
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->localClient->operflags & (y) : 0)
 #define AddOFlag(x, y) ((x)->localClient->operflags |=  (y))

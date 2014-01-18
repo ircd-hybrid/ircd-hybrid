@@ -1364,7 +1364,7 @@ static const struct oper_privs
   { OPER_FLAG_SQUIT,          'R' },
   { OPER_FLAG_SQUIT_REMOTE,   'S' },
   { OPER_FLAG_UNKLINE,        'U' },
-  { OPER_FLAG_X,              'X' },
+  { OPER_FLAG_XLINE,          'X' },
   { 0, '\0' }
 };
 

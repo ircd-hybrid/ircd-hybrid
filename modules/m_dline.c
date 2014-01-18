@@ -446,15 +446,17 @@ mo_undline(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-me_undline(struct Client *client_p, struct Client *source_p,
+ms_undline(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
-  const char *addr = NULL;
+  const char *addr = parv[1];
 
   if (parc != 3 || EmptyString(parv[2]))
     return 0;
 
-  addr = parv[2];
+  sendto_match_servs(source_p, parv[1], CAP_UNDLN,
+                     "UNDLINE %s %s",
+                     parv[1], parv[2]);
 
   if (!IsClient(source_p) || match(parv[1], me.name))
     return 0;
@@ -480,20 +482,6 @@ me_undline(struct Client *client_p, struct Client *source_p,
   }
 
   return 0;
-}
-
-static int
-ms_undline(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
-{
-  if (parc != 3 || EmptyString(parv[2]))
-    return 0;
-
-  sendto_match_servs(source_p, parv[1], CAP_UNDLN,
-                     "UNDLINE %s %s",
-                     parv[1], parv[2]);
-
-  return me_undline(client_p, source_p, parc, parv);
 }
 
 static struct Message dline_msgtab =

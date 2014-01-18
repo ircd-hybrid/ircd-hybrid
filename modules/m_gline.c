@@ -281,18 +281,31 @@ check_majority(const struct Client *source_p, const char *user,
   return GLINE_NOT_PLACED;
 }
 
-static void
-do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
+/* ms_gline()
+ *
+ * inputs       - The usual for a m_ function
+ * output       -
+ * side effects -
+ *
+ * Place a G line if 3 opers agree on the identical user@host
+ *
+ * Allow this server to pass along GLINE if received and
+ * GLINES is not defined.
+ *
+ */
+static int
+ms_gline(struct Client *client_p, struct Client *source_p,
+         int parc, char *parv[])
 {
   const char *reason = NULL;      /* reason for "victims" demise       */
   const char *user = NULL;
   const char *host = NULL;        /* user and host of GLINE "victim"   */
 
   if (!IsClient(source_p))
-    return;
+    return 0;
 
   if (parc != 4 || EmptyString(parv[3]))
-    return;
+    return 0;
 
   assert(source_p->servptr != NULL);
 
@@ -310,7 +323,7 @@ do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
   if (ConfigFileEntry.glines)
   {
     if (!valid_wild_card(source_p, 1, 2, user, host))
-      return;
+      return 0;
 
     if (IsClient(source_p))
     {
@@ -328,7 +341,7 @@ do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
                                "%s is requesting a GLINE with a CIDR mask < %d for [%s@%s] [%s]",
                                get_oper_name(source_p), min_bitlen,
                                user, host, reason);
-          return;
+          return 0;
         }
       }
     }
@@ -339,7 +352,7 @@ do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
      {
        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                             "oper or server has already voted");
-       return;
+       return 0;
      }
 
      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -349,8 +362,9 @@ do_sgline(struct Client *source_p, int parc, char *parv[], int prop)
      ilog(LOG_TYPE_GLINE, "G-Line for [%s@%s] [%s] requested by %s",
           user, host, reason, get_oper_name(source_p));
   }
-}
 
+  return 0;
+}
 
 /*! \brief GLINE command handler (called by operators)
  *
@@ -434,38 +448,6 @@ mo_gline(struct Client *client_p, struct Client *source_p,
   sendto_server(NULL, CAP_GLN, CAP_TS6,
 		":%s GLINE %s %s :%s",
 		source_p->name, user, host, reason);
-  return 0;
-}
-
-/* ms_gline()
- * me_gline()
- * do_sgline()
- *
- * inputs       - The usual for a m_ function
- * output       -
- * side effects -
- *
- * Place a G line if 3 opers agree on the identical user@host
- * 
- * Allow this server to pass along GLINE if received and
- * GLINES is not defined.
- *
- * ENCAP'd GLINES are propagated by encap code.
- */
-
-static int
-ms_gline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
-{
-  do_sgline(source_p, parc, parv, 1);
-  return 0;
-}
-
-static int
-me_gline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
-{
-  do_sgline(source_p, parc, parv, 0);
   return 0;
 }
 
@@ -575,7 +557,7 @@ mo_gungline(struct Client *client_p, struct Client *source_p,
 static struct Message gline_msgtab =
 {
   "GLINE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_not_oper, ms_gline, me_gline, mo_gline, m_ignore }
+  { m_unregistered, m_not_oper, ms_gline, m_ignore, mo_gline, m_ignore }
 };
 
 static struct Message ungline_msgtab =

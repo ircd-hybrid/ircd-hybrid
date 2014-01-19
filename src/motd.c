@@ -224,7 +224,7 @@ motd_destroy(struct Motd *motd)
  * \return Pointer to first matching MOTD for the client.
  */
 static struct Motd *
-motd_lookup(struct Client *client_p)
+motd_lookup(const struct Client *client_p)
 {
   dlink_node *ptr = NULL;
   const struct ClassItem *class = NULL;

@@ -44,7 +44,6 @@ struct MaskItem *
 find_is_glined(const char *host, const char *user)
 {
   struct irc_ssaddr iphost, *piphost = NULL;
-  struct MaskItem *conf = NULL;
   int t = 0;
   int aftype = 0;
 
@@ -61,8 +60,7 @@ find_is_glined(const char *host, const char *user)
   else
     piphost = NULL;
 
-  conf = find_conf_by_address(host, piphost, CONF_GLINE, aftype, user, NULL, 0);
-  return conf;
+  return find_conf_by_address(host, piphost, CONF_GLINE, aftype, user, NULL, 0);
 }
 
 /* expire_pending_glines()

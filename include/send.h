@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  send.h: A header for the message sending functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file send.h
+ * \brief A header for the message sending functions.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_send_h
@@ -75,7 +77,7 @@ extern void sendto_channel_remote(struct Client *, struct Client *, unsigned int
 extern void sendto_server(struct Client *,
                           const unsigned int,
                           const unsigned int, const char *, ...) AFP(4,5);
-extern void sendto_match_butone(struct Client *, struct Client *, 
+extern void sendto_match_butone(struct Client *, struct Client *,
                                 char *, int, const char *, ...) AFP(5,6);
 extern void sendto_match_servs(struct Client *, const char *, unsigned int,
                                const char *, ...) AFP(4,5);
@@ -85,7 +87,7 @@ extern void sendto_wallops_flags(unsigned int, struct Client *,
                                  const char *, ...) AFP(3,4);
 extern void ts_warn(const char *, ...) AFP(1,2);
 
-extern void sendto_anywhere(struct Client *, struct Client *, 
+extern void sendto_anywhere(struct Client *, struct Client *,
                             const char *,
                             const char *, ...) AFP(4,5);
 extern void kill_client(struct Client *, struct Client *,

@@ -1,7 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,9 +53,9 @@ struct MaskItem;
 #define REG_NEED_CAP  0x4
 #define REG_INIT (REG_NEED_USER|REG_NEED_NICK)
 
-#define HasID(x)		((x)->id[0] != '\0')
-#define ID(x)			(HasID(x) ? (x)->id : (x)->name)
-#define ID_or_name(x,client_p)	((IsCapable(client_p->from, CAP_TS6) && HasID(x)) ? (x)->id : (x)->name)
+#define HasID(x)                ((x)->id[0] != '\0')
+#define ID(x)                   (HasID(x) ? (x)->id : (x)->name)
+#define ID_or_name(x,client_p)  ((IsCapable(client_p->from, CAP_TS6) && HasID(x)) ? (x)->id : (x)->name)
 
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
 #define IsConnecting(x)         ((x)->status == STAT_CONNECTING)
@@ -66,23 +66,23 @@ struct MaskItem;
 #define IsClient(x)             ((x)->status == STAT_CLIENT)
 
 #define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
-				 (x)->handler = UNREGISTERED_HANDLER; }
+                                 (x)->handler = UNREGISTERED_HANDLER; }
 
 #define SetHandshake(x)         {(x)->status = STAT_HANDSHAKE; \
-				 (x)->handler = UNREGISTERED_HANDLER; }
+                                 (x)->handler = UNREGISTERED_HANDLER; }
 
 #define SetMe(x)                {(x)->status = STAT_ME; \
-				 (x)->handler = UNREGISTERED_HANDLER; }
+                                 (x)->handler = UNREGISTERED_HANDLER; }
 
 #define SetUnknown(x)           {(x)->status = STAT_UNKNOWN; \
-				 (x)->handler = UNREGISTERED_HANDLER; }
+                                 (x)->handler = UNREGISTERED_HANDLER; }
 
 #define SetServer(x)            {(x)->status = STAT_SERVER; \
-				 (x)->handler = SERVER_HANDLER; }
+                                 (x)->handler = SERVER_HANDLER; }
 
 #define SetClient(x)            {(x)->status = STAT_CLIENT; \
-				 (x)->handler = HasUMode(x, UMODE_OPER) ? \
-					OPER_HANDLER : CLIENT_HANDLER; }
+                                 (x)->handler = HasUMode(x, UMODE_OPER) ? \
+                                 OPER_HANDLER : CLIENT_HANDLER; }
 
 #define MyConnect(x)            ((x)->localClient != NULL)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
@@ -219,25 +219,24 @@ struct MaskItem;
 #define IsAuthFinished(x)       ((x)->flags & FLAGS_FINISHED_AUTH)
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
 #define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
-#define IsClosing(x)		((x)->flags & FLAGS_CLOSING)
-#define SetClosing(x)		((x)->flags |= FLAGS_CLOSING)
-#define SetCanFlood(x)		((x)->flags |= FLAGS_CANFLOOD)
-#define IsCanFlood(x)		((x)->flags & FLAGS_CANFLOOD)
-#define IsDefunct(x)            ((x)->flags & (FLAGS_DEADSOCKET|FLAGS_CLOSING| \
-					       FLAGS_KILLED))
+#define IsClosing(x)            ((x)->flags & FLAGS_CLOSING)
+#define SetClosing(x)           ((x)->flags |= FLAGS_CLOSING)
+#define SetCanFlood(x)          ((x)->flags |= FLAGS_CANFLOOD)
+#define IsCanFlood(x)           ((x)->flags & FLAGS_CANFLOOD)
+#define IsDefunct(x)            ((x)->flags & (FLAGS_DEADSOCKET|FLAGS_CLOSING|FLAGS_KILLED))
 
 /* oper flags */
 #define MyOper(x)               (MyConnect(x) && HasUMode(x, UMODE_OPER))
 
 #define SetOper(x)              {(x)->umodes |= UMODE_OPER; \
-				 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
+                                 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
 
 #define ClearOper(x)            {(x)->umodes &= ~(UMODE_OPER|UMODE_ADMIN); \
-				 if (!HasUMode(x, UMODE_OPER) && !IsServer((x))) \
-				  (x)->handler = CLIENT_HANDLER; }
+                                 if (!HasUMode(x, UMODE_OPER) && !IsServer((x))) \
+                                  (x)->handler = CLIENT_HANDLER; }
 
-#define SetSendQExceeded(x)	((x)->flags |= FLAGS_SENDQEX)
-#define IsSendQExceeded(x)	((x)->flags &  FLAGS_SENDQEX)
+#define SetSendQExceeded(x)     ((x)->flags |= FLAGS_SENDQEX)
+#define IsSendQExceeded(x)      ((x)->flags &  FLAGS_SENDQEX)
 
 #define SetIpHash(x)            ((x)->flags |= FLAGS_IPHASH)
 #define ClearIpHash(x)          ((x)->flags &= ~FLAGS_IPHASH)
@@ -247,9 +246,9 @@ struct MaskItem;
 #define ClearUserHost(x)        ((x)->flags &= ~FLAGS_USERHOST)
 #define IsUserHostIp(x)         ((x)->flags & FLAGS_USERHOST)
 
-#define SetPingSent(x)		((x)->flags |= FLAGS_PINGSENT)
-#define IsPingSent(x)		((x)->flags & FLAGS_PINGSENT)
-#define ClearPingSent(x)	((x)->flags &= ~FLAGS_PINGSENT)
+#define SetPingSent(x)          ((x)->flags |= FLAGS_PINGSENT)
+#define IsPingSent(x)           ((x)->flags & FLAGS_PINGSENT)
+#define ClearPingSent(x)        ((x)->flags &= ~FLAGS_PINGSENT)
 
 #define SetNeedId(x)            ((x)->flags |= FLAGS_NEEDID)
 #define IsNeedId(x)             ((x)->flags & FLAGS_NEEDID)
@@ -415,7 +414,7 @@ struct Client
   char svid[HOSTLEN + 1]; /**< Services ID. XXX: Going with HOSTLEN for now. NICKLEN might be too small
                                 if dealing with timestamps */
   char id[IDLEN + 1];       /**< client ID, unique ID per client */
-  /* 
+  /*
    * client->username is the username from ident or the USER message,
    * If the client is idented the USER message is ignored, otherwise
    * the username part of the USER message is put here prefixed with a

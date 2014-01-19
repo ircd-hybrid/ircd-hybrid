@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  fdlist.h: The file descriptor list header.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file fdlist.h
+ * \brief The file descriptor list header.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_fdlist_h
@@ -29,14 +31,15 @@
 #include "ircd_defs.h"
 #define FD_DESC_SZ 128  /* hostlen + comment */
 
-enum {
-    COMM_OK,
-    COMM_ERR_BIND,
-    COMM_ERR_DNS,
-    COMM_ERR_TIMEOUT,
-    COMM_ERR_CONNECT,
-    COMM_ERROR,
-    COMM_ERR_MAX
+enum
+{
+  COMM_OK,
+  COMM_ERR_BIND,
+  COMM_ERR_DNS,
+  COMM_ERR_TIMEOUT,
+  COMM_ERR_CONNECT,
+  COMM_ERROR,
+  COMM_ERR_MAX
 };
 
 struct _fde;
@@ -49,14 +52,15 @@ typedef void PF(struct _fde *, void *);
 /* int fd, int status, void * */
 typedef void CNCB(struct _fde *, int, void *);
 
-typedef struct _fde {
+typedef struct _fde
+{
   /* New-school stuff, again pretty much ripped from squid */
   /*
    * Yes, this gives us only one pending read and one pending write per
    * filedescriptor. Think though: when do you think we'll need more?
    */
-  int fd;		/* So we can use the fde_t as a callback ptr */
-  int comm_index;	/* where in the poll list we live */
+  int fd;  /* So we can use the fde_t as a callback ptr */
+  int comm_index;  /* where in the poll list we live */
   int evcache;          /* current fd events as set up by the underlying I/O */
   char desc[FD_DESC_SZ];
   PF *read_handler;
@@ -70,7 +74,8 @@ typedef struct _fde {
   void *flush_data;
   time_t flush_timeout;
 
-  struct {
+  struct
+  {
     unsigned int open:1;
     unsigned int is_socket:1;
 #ifdef HAVE_LIBCRYPTO
@@ -78,7 +83,8 @@ typedef struct _fde {
 #endif
   } flags;
 
-  struct {
+  struct
+  {
     /* We don't need the host here ? */
     struct irc_ssaddr S;
     struct irc_ssaddr hostaddr;

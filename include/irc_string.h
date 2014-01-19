@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  irc_string.h: A header for the ircd string functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1999-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file irc_string.h
+ * \brief A header for the ircd string functions.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_irc_string_h
@@ -32,9 +34,9 @@ extern int has_wildcards(const char *);
 extern int match(const char *, const char *);
 
 /*
- * collapse - collapse a string in place, converts multiple adjacent *'s 
+ * collapse - collapse a string in place, converts multiple adjacent *'s
  * into a single *.
- * collapse - modifies the contents of pattern 
+ * collapse - modifies the contents of pattern
  */
 extern char *collapse(char *);
 
@@ -42,7 +44,7 @@ extern char *collapse(char *);
  * NOTE: The following functions are NOT the same as strcasecmp
  * and strncasecmp! These functions use the Finnish (RFC1459)
  * character set. Do not replace!
- * 
+ *
  * irccmp - case insensitive comparison of s1 and s2
  */
 extern int irccmp(const char *, const char *);
@@ -120,8 +122,8 @@ extern const unsigned int CharAttrs[];
 #define IsLower(c)      (IsAlpha((c)) && ((unsigned char)(c) > 0x5f))
 #define IsUpper(c)      (IsAlpha((c)) && ((unsigned char)(c) < 0x60))
 #define IsDigit(c)      (CharAttrs[(unsigned char)(c)] & DIGIT_C)
-#define IsXDigit(c) (IsDigit(c) || ('a' <= (c) && (c) <= 'f') || \
-        ('A' <= (c) && (c) <= 'F'))
+#define IsXDigit(c)     (IsDigit(c) || ('a' <= (c) && (c) <= 'f') || \
+                                       ('A' <= (c) && (c) <= 'F'))
 #define IsAlNum(c) (CharAttrs[(unsigned char)(c)] & (DIGIT_C | ALPHA_C))
 #define IsPrint(c) (CharAttrs[(unsigned char)(c)] & PRINT_C)
 #define IsAscii(c) ((unsigned char)(c) < 0x80)
@@ -131,5 +133,4 @@ extern const unsigned int CharAttrs[];
 
 #define IsNonEOS(c) (CharAttrs[(unsigned char)(c)] & NONEOS_C)
 #define IsEol(c) (CharAttrs[(unsigned char)(c)] & EOL_C)
-
 #endif /* INCLUDED_irc_string_h */

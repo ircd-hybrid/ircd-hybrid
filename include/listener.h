@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  listener.h: A header for the listener code.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file listener.h
+ * \brief A header for the listener code.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_listener_h
@@ -29,14 +31,14 @@
 #define LISTENER_HIDDEN 0x2
 #define LISTENER_SERVER 0x4
 
-#include "ircd_defs.h"  
+#include "ircd_defs.h"
 #include "fdlist.h"
 
 struct Client;
 
 struct Listener
 {
-  dlink_node	   node;      /* list node pointer */
+  dlink_node       node;      /* list node pointer */
   fde_t            fd;                 /* file descriptor */
   int              port;               /* listener IP port */
   int              ref_count;          /* number of connection references */

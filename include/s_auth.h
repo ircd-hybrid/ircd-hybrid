@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  s_auth.h: A header for the ident functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file s_auth.h
+ * \brief A header for the ident functions.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_s_auth_h
@@ -44,11 +46,11 @@ struct Client;
 
 struct AuthRequest
 {
-  dlink_node	      node;	 /* auth_doing_list */
-  int 		      flags;
-  struct Client*      client;    /* pointer to client struct for request */
-  fde_t               fd;        /* file descriptor for auth queries */
-  time_t              timeout;   /* time when query expires */
+  dlink_node     node;  /* auth_doing_list */
+  int            flags;
+  struct Client *client;    /* pointer to client struct for request */
+  fde_t          fd;        /* file descriptor for auth queries */
+  time_t         timeout;   /* time when query expires */
 };
 
 extern void auth_init(void);
@@ -57,5 +59,4 @@ extern void send_auth_query(struct AuthRequest *);
 extern void remove_auth_request(struct AuthRequest *);
 extern void delete_auth(struct AuthRequest *);
 extern void release_auth_client(struct AuthRequest *);
-
 #endif /* INCLUDED_s_auth_h */

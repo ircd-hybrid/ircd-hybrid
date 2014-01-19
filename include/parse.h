@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  parse.h: A header for the message parser.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file parse.h
+ * \brief A header for the message parser.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_parse_h
@@ -110,8 +112,8 @@ typedef enum HandlerType {
  */
 typedef int (*MessageHandler)(struct Client *, struct Client *, int, char *[]);
 
-/* 
- * Message table structure 
+/*
+ * Message table structure
  */
 struct Message
 {
@@ -119,8 +121,8 @@ struct Message
   unsigned int count;      /* number of times command used */
   unsigned int rcount;     /* number of times command used by server */
   unsigned int args_min; /* at least this many args must be passed
-                             * or an error will be sent to the user 
-                             * before the m_func is even called 
+                             * or an error will be sent to the user
+                             * before the m_func is even called
                              */
   unsigned int args_max;    /* maximum permitted parameters */
   unsigned int flags;      /* bit 0 set means that this command is allowed
@@ -145,7 +147,7 @@ struct Message
  * Constants
  */
 #define   MFLG_SLOW             0x001   /* Command can be executed roughly
-                                         * once per 2 seconds.                
+                                         * once per 2 seconds.
                                          */
 #define MAXPARA    15
 
@@ -160,5 +162,4 @@ extern int m_ignore(struct Client *, struct Client *, int, char *[]);
 extern int m_not_oper(struct Client *, struct Client *, int, char *[]);
 extern int m_registered(struct Client *, struct Client *, int, char *[]);
 extern int m_unregistered(struct Client *, struct Client *, int, char *[]);
-
 #endif /* INCLUDED_parse_h */

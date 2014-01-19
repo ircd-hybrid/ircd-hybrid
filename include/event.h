@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  event.h: The ircd event header.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file event.h
+ * \brief The ircd event header.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_event_h
@@ -28,9 +30,9 @@
 
 /*
  * How many event entries we need to allocate at a time in the block
- * allocator. 16 should be plenty at a time.
+ * allocator.
  */
-#define	MAX_EVENTS	50
+#define MAX_EVENTS 50
 
 
 typedef void EVH(void *);
@@ -54,5 +56,4 @@ extern void eventInit(void);
 extern void eventDelete(EVH *, void *);
 extern void set_back_events(time_t);
 extern void show_events(struct Client *);
-
 #endif /* INCLUDED_event_h */

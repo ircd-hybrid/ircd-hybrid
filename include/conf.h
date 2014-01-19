@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  conf.h: A header for the configuration functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2005 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file conf.h
+ * \brief A header for the configuration functions.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_s_conf_h
@@ -88,7 +90,7 @@
 #define SetConfDatabase(x)     ((x)->flags |= CONF_FLAGS_IN_DATABASE)
 
 
-/* shared/cluster server entry types 
+/* shared/cluster server entry types
  * These defines are used for both shared and cluster.
  */
 #define SHARED_KLINE            0x0001
@@ -376,9 +378,9 @@ extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 extern const char *get_oper_name(const struct Client *);
 
 /* XXX should the parse_aline stuff go into another file ?? */
-#define AWILD 0x1		/* check wild cards */
+#define AWILD 0x1  /* check wild cards */
 extern int parse_aline(const char *, struct Client *, int, char **,
-		       int, char **, char **, time_t *, char **, char **);
+                       int, char **, char **, time_t *, char **, char **);
 extern int valid_comment(struct Client *, char *, int);
 
 
@@ -395,6 +397,5 @@ extern int match_conf_password(const char *, const struct MaskItem *);
 
 #define CLEANUP_TKLINES_TIME 60
 
-extern void cluster_a_line(struct Client *,
-			   const char *, int, int, const char *,...);
+extern void cluster_a_line(struct Client *, const char *, int, int, const char *,...);
 #endif /* INCLUDED_s_conf_h */

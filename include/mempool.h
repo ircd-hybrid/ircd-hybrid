@@ -55,7 +55,8 @@ extern void mp_pool_garbage_collect(void *);
 
 #define MEMPOOL_STATS
 
-struct mp_pool_t {
+struct mp_pool_t
+{
   /** Next pool. A pool is usually linked into the mp_allocated_pools list. */
   mp_pool_t *next;
 

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  userhost.h: A header for global user limits.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2003-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file userhost.h
+ * \brief A header for global user limits.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_userhost_h
@@ -27,21 +29,21 @@
 
 struct NameHost
 {
-  dlink_node node;		/* point to other names on this hostname */
+  dlink_node node;  /* Point to other names on this hostname */
   char name[USERLEN + 1];
-  unsigned int icount;		/* number of =local= identd on this name*/
-  unsigned int gcount;		/* global user count on this name */
-  unsigned int lcount;		/* local user count on this name */
+  unsigned int icount;  /* Number of =local= identd on this name*/
+  unsigned int gcount;  /* Global user count on this name */
+  unsigned int lcount;  /* Local user count on this name */
 };
 
 struct UserHost
 {
-  dlink_list list;		/* list of names on this hostname */
+  dlink_list list;  /* List of names on this hostname */
   struct UserHost *next;
   char host[HOSTLEN + 1];
 };
 
 extern void count_user_host(const char *, const char *, unsigned int *, unsigned int *, unsigned int *);
 extern void add_user_host(const char *, const char *, int);
-extern void delete_user_host(const char *, const char *, int global);
+extern void delete_user_host(const char *, const char *, int);
 #endif  /* INCLUDED_userhost_h */

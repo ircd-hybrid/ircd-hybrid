@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  defaults.h: The ircd defaults header for values and paths.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file defaults.h
+ * \brief The ircd defaults header for values and paths.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_defaults_h
@@ -28,7 +30,7 @@
 /* Here are some default paths. Most except DPATH are
  * configurable at runtime. */
 
-/* 
+/*
  * Directory paths and filenames for UNIX systems.
  * PREFIX is set using ./configure --prefix, see INSTALL.
  * The other defaults should be fine.
@@ -48,29 +50,29 @@
  */
 
 /* dirs */
-#define DPATH       PREFIX                                                     
-#define SBINPATH    PREFIX "/sbin/"
-#define BINPATH     PREFIX "/bin/"
-#define	MSGPATH		  DATADIR "/" PACKAGE "/messages"
-#define MODPATH		  LIBDIR "/" PACKAGE "/modules/"
-#define HPATH		    DATADIR "/" PACKAGE "/help"
-#define AUTOMODPATH	MODPATH "/autoload/"
-#define ETCPATH     SYSCONFDIR
-#define	LOGPATH		  LOCALSTATEDIR "/log"
-#define RUNPATH           LOCALSTATEDIR "/run"
+#define DPATH        PREFIX
+#define SBINPATH     PREFIX "/sbin/"
+#define BINPATH      PREFIX "/bin/"
+#define MSGPATH      DATADIR "/" PACKAGE "/messages"
+#define MODPATH      LIBDIR "/" PACKAGE "/modules/"
+#define HPATH        DATADIR "/" PACKAGE "/help"
+#define AUTOMODPATH  MODPATH "/autoload/"
+#define ETCPATH      SYSCONFDIR
+#define LOGPATH      LOCALSTATEDIR "/log"
+#define RUNPATH      LOCALSTATEDIR "/run"
 
 /* files */
-#define SPATH   SBINPATH "/ircd"                /* ircd executable */
-#define CPATH   ETCPATH "/ircd.conf"            /* ircd.conf file */
-#define KPATH   ETCPATH "/kline.db"           /* kline file */
-#define RESVPATH ETCPATH "/resv.db" /* resv file */
-#define DLPATH  ETCPATH "/dline.db"           /* dline file */
-#define XPATH   ETCPATH "/xline.db"           /* xline file */
-#define GPATH  ETCPATH "/gline.db"           /* gline file */
-#define MPATH   ETCPATH "/ircd.motd"            /* MOTD file */
-#define LPATH   LOGPATH "/ircd.log"             /* ircd logfile */
-#define PPATH   RUNPATH "/ircd.pid"             /* pid file */
-#define LIPATH  ETCPATH "/links.txt"            /* cached links file */
+#define SPATH     SBINPATH "/ircd"  /* ircd executable */
+#define CPATH     ETCPATH "/ircd.conf"  /* ircd.conf file */
+#define KPATH     ETCPATH "/kline.db"  /* kline file */
+#define RESVPATH  ETCPATH "/resv.db"  /* resv file */
+#define DLPATH    ETCPATH "/dline.db"  /* dline file */
+#define XPATH     ETCPATH "/xline.db"  /* xline file */
+#define GPATH     ETCPATH "/gline.db"  /* gline file */
+#define MPATH     ETCPATH "/ircd.motd"  /* MOTD file */
+#define LPATH     LOGPATH "/ircd.log"  /* ircd logfile */
+#define PPATH     RUNPATH "/ircd.pid"  /* pid file */
+#define LIPATH    ETCPATH "/links.txt"  /* cached links file */
 
 /*
  * This file is included to supply default values for things which
@@ -78,7 +80,7 @@
  */
 
 #define HYBRID_SOMAXCONN 25
-#define MAX_TDKLINE_TIME	(24*60*360)
+#define MAX_TDKLINE_TIME  (24*60*360)
 
 /* tests show that about 7 fds are not registered by fdlist.c, these
  * include std* descriptors + some others (by OpenSSL etc.). Note this is
@@ -125,10 +127,9 @@
 
 #define MIN_JOIN_LEAVE_TIME  60
 #define MAX_JOIN_LEAVE_COUNT  25
-#define OPER_SPAM_COUNTDOWN   5 
+#define OPER_SPAM_COUNTDOWN   5
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
 
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
-
 #endif /* INCLUDED_defaults_h */

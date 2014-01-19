@@ -80,9 +80,12 @@ struct Capability
 /*
  * return values for hunt_server()
  */
-#define HUNTED_NOSUCH   (-1)    /* if the hunted server is not found */
-#define HUNTED_ISME     0       /* if this server should execute the command */
-#define HUNTED_PASS     1       /* if message passed onwards successfully */
+enum
+{
+  HUNTED_NOSUCH  = -1,  /* If the hunted server is not found */
+  HUNTED_ISME    =  0,  /* If this server should execute the command */
+  HUNTED_PASS    =  1   /* If message passed onwards successfully */
+};
 
 extern int valid_servname(const char *);
 extern int check_server(const char *, struct Client *);

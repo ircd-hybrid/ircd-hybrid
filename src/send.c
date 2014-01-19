@@ -693,7 +693,7 @@ sendto_channel_remote(struct Client *one, struct Client *from, unsigned int type
  * side effects	- NONE
  */
 static int
-match_it(const struct Client *one, const char *mask, int what)
+match_it(const struct Client *one, const char *mask, unsigned int what)
 {
   if (what == MATCH_HOST)
     return !match(mask, one->host);

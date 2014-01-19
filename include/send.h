@@ -29,27 +29,34 @@
 
 #include "fdlist.h"
 
+#define NOCAPS  0 /* no caps */
+
 #define ALL_MEMBERS  0
 #define NON_CHANOPS  1
 #define ONLY_CHANOPS_VOICED  2
 #define ONLY_CHANOPS 3
 #define ONLY_SERVERS 4 /* for channel_mode.c */
 
-#define L_ALL   0
-#define L_OPER  1
-#define L_ADMIN 2
+enum
+{
+  L_ALL   = 0,
+  L_OPER  = 1,
+  L_ADMIN = 2
+};
 
-#define SEND_NOTICE 1
-#define SEND_GLOBAL 2
-#define SEND_LOCOPS 3
-
-#define NOCAPS          0               /* no caps */
-#define NOFLAGS         0               /* no flags */
+enum
+{
+  SEND_NOTICE = 1,
+  SEND_GLOBAL = 2,
+  SEND_LOCOPS = 3
+};
 
 /* used when sending to #mask or $mask */
-#define MATCH_SERVER  1
-#define MATCH_HOST    2
-
+enum
+{
+  MATCH_SERVER = 1,
+  MATCH_HOST   = 2
+};
 
 /*
  * struct decls

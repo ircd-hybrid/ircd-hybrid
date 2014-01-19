@@ -157,7 +157,8 @@ static int
 ms_trace(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv))
+  if (hunt_server(client_p, source_p, ":%s TRACE %s :%s",
+                  2, parc, parv) != HUNTED_ISME)
     return 0;
 
   if (HasUMode(source_p, UMODE_OPER))

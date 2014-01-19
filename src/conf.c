@@ -55,7 +55,12 @@
 #include "conf_class.h"
 #include "motd.h"
 
+
 struct config_server_hide ConfigServerHide;
+struct config_file_entry ConfigFileEntry;
+struct logging_entry ConfigLoggingEntry = { .use_logging = 1 };
+struct server_info ServerInfo;
+struct admin_info AdminInfo;
 
 /* general conf items link list root, other than k lines etc. */
 dlink_list service_items = { NULL, NULL, 0 };

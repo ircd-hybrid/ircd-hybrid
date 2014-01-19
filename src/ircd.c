@@ -65,18 +65,11 @@
 #ifdef HAVE_LIBGEOIP
 GeoIP *geoip_ctx;
 #endif
+
 /* /quote set variables */
 struct SetOptions GlobalSetOptions;
-
-/* configuration set from ircd.conf */
-struct config_file_entry ConfigFileEntry; 
-/* server info set from ircd.conf */
-struct server_info ServerInfo;
-/* admin info set from ircd.conf */
-struct admin_info AdminInfo = { NULL, NULL, NULL };
-struct Counter Count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-struct ServerState_t server_state = { 0 };
-struct logging_entry ConfigLoggingEntry = { .use_logging = 1 };
+struct Counter Count;
+struct ServerState_t server_state;
 struct ServerStatistics ServerStats;
 struct timeval SystemTime;
 struct Client me;             /* That's me */

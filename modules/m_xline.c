@@ -54,6 +54,23 @@ static int remove_xline_match(const char *);
 
 static void relay_xline(struct Client *, char *[]);
 
+static void
+check_xline(struct MaskItem *conf)
+{
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+
+  DLINK_FOREACH_SAFE(ptr, ptr_next, local_client_list.head)
+  {
+    struct Client *client_p = ptr->data;
+
+    if (IsDead(client_p))
+      continue;
+
+    if (!match(conf->name, client_p->username))
+      conf_try_ban(client_p, conf);
+  }
+}
+
 /* mo_xline()
  *
  * inputs	- pointer to server
@@ -361,7 +378,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
          get_oper_name(source_p), conf->name, conf->reason);
   }
 
-  rehashed_klines = 1;
+  check_xline(conf);
 }
 
 static void

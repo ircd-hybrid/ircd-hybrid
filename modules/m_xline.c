@@ -248,7 +248,7 @@ mo_unxline(struct Client *client_p, struct Client *source_p,
   if (!HasOFlag(source_p, OPER_FLAG_UNXLINE))
   {
     sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "xline");
+               source_p->name, "unxline");
     return 0;
   }
 

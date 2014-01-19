@@ -1,3 +1,10 @@
+-- ircd-hybrid-8.1.14 Release Notes
+o) Added 'unxline' oper flag
+o) ircd now allows private rsa keys larger than 2048 bits
+o) Fixed bug where signals stopped from working after restaring
+   the ircd via SIGINT
+
+
 -- ircd-hybrid-8.1.13 Release Notes
 o) Fixed EOB not working for remote servers (resulted in fake
    direction notices)

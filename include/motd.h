@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2000 Kevin L. Mitchell <klmitch@mit.edu>
- *  Copyright (C) 2013 by the Hybrid Development Team.
+ *  Copyright (c) 2000 Kevin L. Mitchell <klmitch@mit.edu>
+ *  Copyright (c) 2013-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@ struct Client;
 /** Type of MOTD. */
 enum MotdType
 {
-    MOTD_UNIVERSAL, /**< MOTD for all users */
-    MOTD_HOSTMASK,  /**< MOTD selected by hostmask */
-    MOTD_IPMASKV4,  /**< MOTD selected by IP mask */
-    MOTD_IPMASKV6,  /**< MOTD selected by IP mask */
-    MOTD_CLASS      /**< MOTD selected by connection class */
+  MOTD_UNIVERSAL, /**< MOTD for all users */
+  MOTD_HOSTMASK,  /**< MOTD selected by hostmask */
+  MOTD_IPMASKV4,  /**< MOTD selected by IP mask */
+  MOTD_IPMASKV6,  /**< MOTD selected by IP mask */
+  MOTD_CLASS      /**< MOTD selected by connection class */
 };
 
 /** Entry for a single Message Of The Day (MOTD). */
@@ -95,5 +95,4 @@ extern void motd_clear(void);
 /* This is called to report T-lines */
 extern void motd_report(struct Client *);
 extern void motd_memory_count(struct Client *);
-
 #endif

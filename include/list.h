@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  list.h: A header for the code in list.c.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file list.h
+ * \brief A header for the list manipulation routines.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_list_h
@@ -68,6 +70,8 @@ struct _dlink_list
   unsigned int length;
 };
 
+extern void init_dlink_nodes(void);
+extern void free_dlink_node(dlink_node *);
 extern void dlinkAdd(void *, dlink_node *, dlink_list *);
 extern void dlinkAddBefore(dlink_node *, void *, dlink_node *, dlink_list *);
 extern void dlinkAddTail(void *, dlink_node *, dlink_list *);
@@ -76,8 +80,5 @@ extern void dlinkMoveList(dlink_list *, dlink_list *);
 extern void dlink_move_node(dlink_node *, dlink_list *, dlink_list *);
 extern dlink_node *dlinkFind(dlink_list *, void *);
 extern dlink_node *dlinkFindDelete(dlink_list *, void *);
-
-extern void init_dlink_nodes(void);
-extern void free_dlink_node(dlink_node *);
 extern dlink_node *make_dlink_node(void);
 #endif

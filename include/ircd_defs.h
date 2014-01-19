@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  ircd_defs.h: A header for ircd global definitions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,22 +17,21 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
  */
 
-/*
- * NOTE: NICKLEN and TOPICLEN do not live here anymore. Set it with configure
- * Otherwise there are no user servicable part here. 
- *
+/*! \file ircd_defs.h
+ * \brief A header for ircd global definitions.
+ * \version $Id$
  */
- /* ircd_defs.h - Global size definitions for record entries used
+
+/* ircd_defs.h - Global size definitions for record entries used
  * througout ircd. Please think 3 times before adding anything to this
  * file.
  */
 #ifndef INCLUDED_ircd_defs_h
 #define INCLUDED_ircd_defs_h
 #include "stdinc.h"
+
 /* Right out of the RFC */
 #define IRCD_BUFSIZE    512     /* WARNING: *DONT* CHANGE THIS!!!!         */
 #define HOSTLEN          63     /* Length of hostname. Updated to comply
@@ -58,10 +56,10 @@
 
 #define USERHOST_REPLYLEN       (NICKLEN+HOSTLEN+USERLEN+5)
 #define MAX_DATE_STRING 32      /* maximum string length for a date string */
-#define IRCD_MAXNS      3       /* Maximum number of nameservers in 
+#define IRCD_MAXNS      3       /* Maximum number of nameservers in
                                    /etc/resolv.conf we care about */
 
-#define LOWEST_SAFE_FD  4	/* skip stdin, stdout, stderr, and profiler */
+#define LOWEST_SAFE_FD  4  /* skip stdin, stdout, stderr, and profiler */
 
 /* This is to get around the fact that some implementations have ss_len and
  * others do not

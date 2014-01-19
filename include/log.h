@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  log.h: A header for the logger functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file log.h
+ * \brief A header for the logger functions.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_s_log_h
@@ -27,7 +29,8 @@
 
 #define LOG_BUFSIZE 1024
 
-enum log_type {
+enum log_type
+{
   LOG_TYPE_IRCD,
   LOG_TYPE_KILL,
   LOG_TYPE_KLINE,
@@ -45,5 +48,4 @@ extern void log_set_file(enum log_type, size_t, const char *);
 extern void log_del_all(void);
 extern void log_reopen_all(void);
 extern void ilog(enum log_type, const char *, ...) AFP(2,3);
-
 #endif /* INCLUDED_s_log_h */

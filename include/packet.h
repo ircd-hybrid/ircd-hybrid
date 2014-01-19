@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  packet.h: A header for the packet functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file packet.h
+ * \brief A header for the packet functions.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_packet_h
@@ -36,7 +38,7 @@
  * the network..
  *   -- adrian
  */
-/* MAX_FLOOD is the amount of lines in a 'burst' we allow from a client, 
+/* MAX_FLOOD is the amount of lines in a 'burst' we allow from a client,
  * anything beyond MAX_FLOOD is limited to about one line per second.
  *
  * MAX_FLOOD_CONN is the amount of lines we allow from a client who has
@@ -46,8 +48,7 @@
 #define MAX_FLOOD 5
 #define MAX_FLOOD_BURST MAX_FLOOD * 8
 
-PF read_packet;
-PF flood_recalc;
-void flood_endgrace(struct Client *);
-
+extern PF read_packet;
+extern PF flood_recalc;
+extern void flood_endgrace(struct Client *);
 #endif /* INCLUDED_packet_h */

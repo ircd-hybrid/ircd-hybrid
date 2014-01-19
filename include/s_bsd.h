@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  s_bsd.h: A header for the network subsystem.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,19 +17,22 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file s_bsd.h
+ * \brief A header for the network subsystem.
+ * \version $Id$
  */
 
 #ifndef INCLUDED_s_bsd_h
 #define INCLUDED_s_bsd_h
 
-#include "config.h"       
+#include "config.h"
 #include "fdlist.h"
 
 /* Type of IO */
-#define	COMM_SELECT_READ		1
-#define	COMM_SELECT_WRITE		2
+#define COMM_SELECT_READ  1
+#define COMM_SELECT_WRITE 2
 
 /* How long can comm_select() wait for network events [milliseconds] */
 #define SELECT_DELAY    500
@@ -49,11 +51,11 @@ extern int ignoreErrno(int);
 extern void comm_settimeout(fde_t *, time_t, PF *, void *);
 extern void comm_setflush(fde_t *, time_t, PF *, void *);
 extern void comm_checktimeouts(void *);
-extern void comm_connect_tcp(fde_t *, const char *, u_short,
-           		     struct sockaddr *, int, CNCB *, void *, int, int);
-extern const char * comm_errstr(int status);
+extern void comm_connect_tcp(fde_t *, const char *, unsigned short,
+                             struct sockaddr *, int, CNCB *, void *, int, int);
+extern const char *comm_errstr(int status);
 extern int comm_open(fde_t *F, int family, int sock_type, int proto,
-           	     const char *note);
+                     const char *note);
 extern int comm_accept(struct Listener *, struct irc_ssaddr *pn);
 
 /* These must be defined in the network IO loop code of your choice */
@@ -65,5 +67,4 @@ extern void check_can_use_v6(void);
 #ifdef IPV6
 extern void remove_ipv6_mapping(struct irc_ssaddr *);
 #endif
-
 #endif /* INCLUDED_s_bsd_h */

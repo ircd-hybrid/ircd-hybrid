@@ -78,9 +78,6 @@ typedef struct _fde
   {
     unsigned int open:1;
     unsigned int is_socket:1;
-#ifdef HAVE_LIBCRYPTO
-    unsigned int pending_read:1;
-#endif
   } flags;
 
   struct

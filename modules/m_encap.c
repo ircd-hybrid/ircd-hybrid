@@ -64,8 +64,6 @@ ms_encap(struct Client *client_p, struct Client *source_p,
     ptr += len;
   }
 
-  len = strlen(parv[i]);
-
   /*
    * If the final parameter crosses our buffer size, should we bail, 
    * like the rest, or should we truncate?  ratbox seems to think truncate,
@@ -75,9 +73,6 @@ ms_encap(struct Client *client_p, struct Client *source_p,
     snprintf(ptr, sizeof(buffer) - cur_len, "%s", parv[2]);
   else
     snprintf(ptr, sizeof(buffer) - cur_len, ":%s", parv[parc - 1]);
-
-  if ((cur_len + len) >= sizeof(buffer))
-    buffer[sizeof(buffer) - 1] = '\0';
 
   sendto_match_servs(source_p, parv[1], CAP_ENCAP,
                      "ENCAP %s", buffer);

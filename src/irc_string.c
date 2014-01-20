@@ -28,13 +28,20 @@
 
 
 int
-has_wildcards(const char *s)
+has_wildcards(const char *str)
 {
-  char c;
+  const unsigned char *p = (const unsigned char *)str;
 
-  while ((c = *s++))
-    if (IsMWildChar(c))
+  for (; *p; ++p)
+  {
+    if (*p == '\\')
+    {
+      if (*++p == '\0')
+        return 0;
+    }
+    else if (IsMWildChar(*p))
       return 1;
+  }
 
   return 0;
 }

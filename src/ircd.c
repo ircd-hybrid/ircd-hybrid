@@ -233,7 +233,6 @@ io_loop(void)
     comm_select();
     exit_aborted_clients();
     free_exited_clients();
-    send_queued_all();
 
     /* Check to see whether we have to rehash the configuration .. */
     if (dorehash)

@@ -45,7 +45,7 @@ const char *infotext[] =
   "",
   "",
   "The hybrid team is a group of ircd coders who were frustrated",
-  "with the instability and all-out dirtiness of the EFnet ircd's",
+  "with the instability and all-out dirtiness of the EFnet ircd",
   "available. hybrid is the name for the collective efforts of a group",
   "of people, all of us.",
   "",

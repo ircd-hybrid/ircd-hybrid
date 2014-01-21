@@ -53,8 +53,8 @@ do_links(struct Client *source_p, int parc, char *parv[])
     const char *mask = (parc > 2 ? parv[2] : parv[1]);
     const char *me_name, *nick;
 
-    me_name = ID_or_name(&me, source_p->from);
-    nick = ID_or_name(source_p, source_p->from);
+    me_name = ID_or_name(&me, source_p);
+    nick = ID_or_name(source_p, source_p);
 
     DLINK_FOREACH(ptr, global_serv_list.head)
     {
@@ -93,18 +93,18 @@ do_links(struct Client *source_p, int parc, char *parv[])
      * then print out the file (which may or may not be empty)
      */
     sendto_one(source_p, form_str(RPL_LINKS),
-               ID_or_name(&me, source_p->from),
-               ID_or_name(source_p, source_p->from),
+               ID_or_name(&me, source_p),
+               ID_or_name(source_p, source_p),
                me.name, me.name, 0, me.info);
 
     DLINK_FOREACH(ptr, flatten_links.head)
       sendto_one(source_p, ":%s %d %s %s",
-                 ID_or_name(&me, source_p->from), RPL_LINKS,
-                 ID_or_name(source_p, source_p->from),
+                 ID_or_name(&me, source_p), RPL_LINKS,
+                 ID_or_name(source_p, source_p),
                  ptr->data);
     sendto_one(source_p, form_str(RPL_ENDOFLINKS),
-               ID_or_name(&me, source_p->from),
-               ID_or_name(source_p, source_p->from), "*");
+               ID_or_name(&me, source_p),
+               ID_or_name(source_p, source_p), "*");
   }
 }
 

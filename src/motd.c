@@ -280,8 +280,8 @@ static void
 motd_forward(struct Client *source_p, const struct MotdCache *cache)
 {
   unsigned int i = 0;
-  const char *from = ID_or_name(&me, source_p->from);
-  const char *to = ID_or_name(source_p, source_p->from);
+  const char *from = ID_or_name(&me, source_p);
+  const char *to = ID_or_name(source_p, source_p);
 
   assert(source_p);
 

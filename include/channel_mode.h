@@ -27,17 +27,33 @@
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
 
-#include "ircd_defs.h"        /* buffer sizes */
-
 #define MODEBUFLEN    200
 
 /* Maximum mode changes allowed per client, per server is different */
 #define MAXMODEPARAMS 4
 
+enum
+{
+  MODE_QUERY =  0,
+  MODE_ADD   =  1,
+  MODE_DEL   = -1
+};
+
+enum
+{
+  CHACCESS_NOTONCHAN = -1,
+  CHACCESS_PEON      =  0,
+  CHACCESS_HALFOP    =  1,
+  CHACCESS_CHANOP    =  2
+};
+
 /* can_send results */
-#define CAN_SEND_NO	0
-#define CAN_SEND_NONOP  -1
-#define CAN_SEND_OPV	-2
+enum
+{
+  CAN_SEND_NO    =  0,
+  CAN_SEND_NONOP = -1,
+  CAN_SEND_OPV   = -2
+};
 
 
 /* Channel related flags */
@@ -66,15 +82,6 @@
 /* cache flags for silence on ban */
 #define CHFL_BAN_CHECKED  0x0080
 #define CHFL_BAN_SILENCED 0x0100
-
-#define MODE_QUERY  0
-#define MODE_ADD    1
-#define MODE_DEL   -1
-
-#define CHACCESS_NOTONCHAN  -1
-#define CHACCESS_PEON       0
-#define CHACCESS_HALFOP     1
-#define CHACCESS_CHANOP     2
 
 /* name invisible */
 #define SecretChannel(x)        (((x)->mode.mode & MODE_SECRET))

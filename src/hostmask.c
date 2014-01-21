@@ -71,6 +71,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr;
 
   for (p = text; (c = *p); p++)
+  {
     if (IsXDigit(c))
     {
       if (nyble == 0)
@@ -119,6 +120,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
     }
     else
       return HM_HOST;
+  }
 
   d[dp] = d[dp] >> 4 * nyble;
 
@@ -180,6 +182,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   digits[n++] = text;
 
   for (p = text; (c = *p); p++)
+  {
     if (c >= '0' && c <= '9')   /* empty */
       ;
     else if (c == '.')
@@ -211,6 +214,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
     }
     else
       return HM_HOST;
+  }
 
   if (n < 4 && bits == 0)
     bits = n * 8;

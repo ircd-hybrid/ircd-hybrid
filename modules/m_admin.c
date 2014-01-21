@@ -44,8 +44,8 @@
 static int
 do_admin(struct Client *source_p)
 {
-  const char *me_name = ID_or_name(&me, source_p->from);
-  const char *nick = ID_or_name(source_p, source_p->from);
+  const char *me_name = ID_or_name(&me, source_p);
+  const char *nick = ID_or_name(source_p, source_p);
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "ADMIN requested by %s (%s@%s) [%s]",

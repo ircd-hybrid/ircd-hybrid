@@ -101,7 +101,7 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
                          conf->user, conf->host,
                          conf->reason);
     sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line [%s@%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
                source_p->name, tkline_time/60, conf->user, conf->host);
     ilog(LOG_TYPE_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), tkline_time/60,
@@ -114,7 +114,7 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
                          get_oper_name(source_p),
                          conf->user, conf->host, conf->reason);
     sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
                source_p->name, conf->user, conf->host);
     ilog(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), conf->user, conf->host, conf->reason);

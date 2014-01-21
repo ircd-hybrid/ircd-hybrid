@@ -219,8 +219,8 @@ relay_xline(struct Client *source_p, char *parv[])
     if ((conf = find_matching_name_conf(CONF_XLINE, parv[2], NULL, NULL, 0)))
     {
       sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
-                 ID_or_name(&me, source_p->from),
-                 ID_or_name(source_p, source_p->from),
+                 ID_or_name(&me, source_p),
+                 ID_or_name(source_p, source_p),
                  parv[2], conf->name, conf->reason);
       return;
     }
@@ -358,7 +358,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
                          get_oper_name(source_p), (int)tkline_time/60,
                          conf->name, conf->reason);
     sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. X-Line [%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
                source_p->name, (int)tkline_time/60, conf->name);
     ilog(LOG_TYPE_XLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
          source_p->name, (int)tkline_time/60, conf->name, conf->reason);
@@ -372,7 +372,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
                          conf->reason);
     sendto_one(source_p,
                ":%s NOTICE %s :Added X-Line [%s] [%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
                source_p->name, conf->name, conf->reason);
     ilog(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
          get_oper_name(source_p), conf->name, conf->reason);

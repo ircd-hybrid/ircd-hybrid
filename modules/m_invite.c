@@ -138,8 +138,8 @@ m_invite(struct Client *client_p, struct Client *source_p,
   }
   else if (target_p->from != client_p)
     sendto_one(target_p, ":%s INVITE %s %s %lu",
-               ID_or_name(source_p, target_p->from),
-               ID_or_name(target_p, target_p->from),
+               ID_or_name(source_p, target_p),
+               ID_or_name(target_p, target_p),
                chptr->chname, (unsigned long)chptr->channelts);
   return 0;
 }

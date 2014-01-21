@@ -64,7 +64,7 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
                          get_oper_name(source_p), tkline_time/60,
                          conf->host, conf->reason);
     sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line [%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
                source_p->name, tkline_time/60, conf->host);
     ilog(LOG_TYPE_DLINE, "%s added temporary %d min. D-Line for [%s] [%s]",
          get_oper_name(source_p), tkline_time/60, conf->host, conf->reason);
@@ -75,7 +75,7 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
                          "%s added D-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->host, conf->reason);
     sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p->from),
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
                source_p->name, conf->host);
     ilog(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",
          get_oper_name(source_p), conf->host, conf->reason);

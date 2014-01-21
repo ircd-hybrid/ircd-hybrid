@@ -412,8 +412,8 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
         /* check for accept, flag recipient incoming message */
         if (p_or_n != NOTICE)
           sendto_one(source_p, form_str(RPL_TARGUMODEG),
-                     ID_or_name(&me, source_p->from),
-                     ID_or_name(source_p, source_p->from), target_p->name,
+                     ID_or_name(&me, source_p),
+                     ID_or_name(source_p, source_p), target_p->name,
                      callerid ? "+g" : "+G",
                      callerid ? "server side ignore" :
                                 "server side ignore with the exception of common channels");
@@ -423,8 +423,8 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
         {
           if (p_or_n != NOTICE)
             sendto_one(source_p, form_str(RPL_TARGNOTIFY),
-                       ID_or_name(&me, source_p->from),
-                       ID_or_name(source_p, source_p->from), target_p->name);
+                       ID_or_name(&me, source_p),
+                       ID_or_name(source_p, source_p), target_p->name);
 
           sendto_one(target_p, form_str(RPL_UMODEGMSG),
                      me.name, target_p->name,
@@ -512,7 +512,7 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
          * Not destined for a user on me :-(
          */
         sendto_one(target_p, ":%s %s %s :%s",
-                   ID_or_name(source_p, target_p->from),
+                   ID_or_name(source_p, target_p),
                    command, nick, text);
         if ((p_or_n != NOTICE) && MyClient(source_p))
           source_p->localClient->last_privmsg = CurrentTime;

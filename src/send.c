@@ -1028,7 +1028,7 @@ kill_client(struct Client *client_p, struct Client *diedie,
     return;
 
   len = snprintf(buffer, sizeof(buffer), ":%s KILL %s :",
-                 ID_or_name(&me, client_p->from),
+                 ID_or_name(&me, client_p),
                  ID_or_name(diedie, client_p));
 
   va_start(args, pattern);

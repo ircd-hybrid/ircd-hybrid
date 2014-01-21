@@ -74,8 +74,8 @@ m_mode(struct Client *client_p, struct Client *source_p,
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               ID_or_name(&me, source_p->from),
-               ID_or_name(source_p, source_p->from),
+               ID_or_name(&me, source_p),
+               ID_or_name(source_p, source_p),
                parv[1]);
     return 0;
   }

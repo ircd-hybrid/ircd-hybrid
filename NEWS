@@ -1,4 +1,6 @@
 -- ircd-hybrid-8.1.14 Release Notes
+o) Improved TS6 inter-server communication
+o) Minor code cleanups and speed enhancements
 o) Added 'unxline' oper flag
 o) ircd now allows private rsa keys larger than 2048 bits
 o) Fixed bug where signals stopped from working after restaring

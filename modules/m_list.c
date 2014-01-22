@@ -48,7 +48,7 @@ do_list(struct Client *source_p, int parc, char *parv[])
   struct ListTask *lt = NULL;
   int no_masked_channels = 1;
 
-  if (source_p->localClient->list_task != NULL)
+  if (source_p->localClient->list_task)
   {
     free_list_task(source_p->localClient->list_task, source_p);
     sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
@@ -67,21 +67,23 @@ do_list(struct Client *source_p, int parc, char *parv[])
     dlink_list *list = NULL;
     int i = 0, errors = 0;
 
-    for (opt = strtoken(&save, parv[1], ","); opt != NULL;
-         opt = strtoken(&save, NULL, ","))
+    for (opt = strtoken(&save, parv[1], ","); opt;
+         opt = strtoken(&save,    NULL, ","))
     {
       switch (*opt)
       {
-        case '<': if ((i = atoi(opt + 1)) > 0)
-                    lt->users_max = (unsigned int) i - 1;
-                  else
-                    errors = 1;
-                  break;
-        case '>': if ((i = atoi(opt + 1)) >= 0)
-                    lt->users_min = (unsigned int) i + 1;
-                  else
-                    errors = 1;
-                  break;
+        case '<':
+          if ((i = atoi(opt + 1)) > 0)
+            lt->users_max = (unsigned int)i - 1;
+          else
+            errors = 1;
+          break;
+        case '>':
+          if ((i = atoi(opt + 1)) >= 0)
+            lt->users_min = (unsigned int)i + 1;
+          else
+            errors = 1;
+          break;
         case '-': break;
         case 'C':
         case 'c':
@@ -89,13 +91,13 @@ do_list(struct Client *source_p, int parc, char *parv[])
           {
             case '<':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->created_max = (unsigned int) (CurrentTime - 60 * i);
+                lt->created_max = (unsigned int)(CurrentTime - 60 * i);
               else
                 errors = 1;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->created_min = (unsigned int) (CurrentTime - 60 * i);
+                lt->created_min = (unsigned int)(CurrentTime - 60 * i);
               else
                 errors = 1;
               break;
@@ -111,13 +113,13 @@ do_list(struct Client *source_p, int parc, char *parv[])
           {
             case '<':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_min = (unsigned int) (CurrentTime - 60 * i);
+                lt->topicts_min = (unsigned int)(CurrentTime - 60 * i);
               else
                 errors = 1;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_max = (unsigned int) (CurrentTime - 60 * i);
+                lt->topicts_max = (unsigned int)(CurrentTime - 60 * i);
               else
                 errors = 1;
               break;
@@ -143,12 +145,9 @@ do_list(struct Client *source_p, int parc, char *parv[])
           }
           else if (!IsChanPrefix(*opt))
             errors = 1;
-          if (!errors)
-          {
-            char *s = xstrdup(opt);
 
-            dlinkAdd(s, make_dlink_node(), list);
-          }
+          if (!errors)
+            dlinkAdd(xstrdup(opt), make_dlink_node(), list);
       }
     }
 

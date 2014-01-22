@@ -361,11 +361,11 @@ init_host_hash(void)
  * Side effects: None
  */
 static uint32_t
-hash_ipv4(struct irc_ssaddr *addr, int bits)
+hash_ipv4(const struct irc_ssaddr *addr, int bits)
 {
   if (bits != 0)
   {
-    struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr;
     uint32_t av = ntohl(v4->sin_addr.s_addr) & ~((1 << (32 - bits)) - 1);
 
     return (av ^ (av >> 12) ^ (av >> 24)) & (ATABLE_SIZE - 1);
@@ -381,10 +381,10 @@ hash_ipv4(struct irc_ssaddr *addr, int bits)
  */
 #ifdef IPV6
 static uint32_t
-hash_ipv6(struct irc_ssaddr *addr, int bits)
+hash_ipv6(const struct irc_ssaddr *addr, int bits)
 {
   uint32_t v = 0, n;
-  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr;
+  const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
 
   for (n = 0; n < 16; n++)
   {

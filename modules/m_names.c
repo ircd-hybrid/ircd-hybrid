@@ -69,7 +69,7 @@ names_non_public_non_secret(struct Client *source_p)
 {
   int mlen, tlen, cur_len;
   int reply_to_send = 0;
-  int shown_already;
+  int dont_show = 0;
   dlink_node *gc2ptr, *lp;
   struct Client *c2ptr;
   struct Channel *ch3ptr = NULL;
@@ -89,22 +89,25 @@ names_non_public_non_secret(struct Client *source_p)
     if (!IsClient(c2ptr) || HasUMode(c2ptr, UMODE_INVISIBLE))
       continue;
 
-    shown_already = 0;
+    dont_show = 0;
 
-    /* We already know the user is not +i. If they are on no common
-     * channels with source_p, they have not been shown yet. */
+    /*
+     * Don't show a client if they are on a secret channel or they
+     * are on a channel source_p is on since they have already
+     * been show earlier. -avalon
+     */    
     DLINK_FOREACH(lp, c2ptr->channel.head)
     {
       ch3ptr = ((struct Membership *)lp->data)->chptr;
 
-      if (IsMember(source_p, ch3ptr))
+      if ((ch3ptr->mode.mode & (MODE_PRIVATE|MODE_SECRET)) || IsMember(source_p, ch3ptr))
       {
-        shown_already = 1;
+        dont_show = 1;
         break;
       }
     }
 
-    if (shown_already)
+    if (dont_show)
       continue;
 
     tlen = strlen(c2ptr->name);

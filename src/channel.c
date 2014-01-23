@@ -437,6 +437,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
   int tlen = 0;
   int is_member = IsMember(source_p, chptr);
   int multi_prefix = HasCap(source_p, CAP_MULTI_PREFIX) != 0;
+  int uhnames = HasCap(source_p, CAP_UHNAMES) != 0;
 
   if (PubChannel(chptr) || is_member)
   {
@@ -452,7 +453,11 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
       if (HasUMode(ms->client_p, UMODE_INVISIBLE) && !is_member)
         continue;
 
-      tlen = strlen(ms->client_p->name) + 1;  /* nick + space */
+      if (!uhnames)
+        tlen = strlen(ms->client_p->name) + 1;  /* nick + space */
+      else
+        tlen = strlen(ms->client_p->name) + strlen(ms->client_p->username) +
+               strlen(ms->client_p->host) + 3;
 
       if (!multi_prefix)
       {
@@ -476,8 +481,13 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
         t = start;
       }
 
-      t += sprintf(t, "%s%s ", get_member_status(ms, multi_prefix),
-                   ms->client_p->name);
+      if (!uhnames)
+        t += sprintf(t, "%s%s ", get_member_status(ms, multi_prefix),
+                     ms->client_p->name);
+      else
+        t += sprintf(t, "%s%s!%s@%s ", get_member_status(ms, multi_prefix),
+                     ms->client_p->name, ms->client_p->username,
+                     ms->client_p->host);
     }
 
     if (tlen != 0)
@@ -488,8 +498,8 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
   }
 
   if (show_eon)
-    sendto_one(source_p, form_str(RPL_ENDOFNAMES),
-               me.name, source_p->name, chptr->chname);
+    sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name,
+               source_p->name, chptr->chname);
 }
 
 /*! \brief adds client to invite list

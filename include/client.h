@@ -99,8 +99,10 @@ struct MaskItem;
 
 #define CAP_MULTI_PREFIX  0x00000001
 #define CAP_AWAY_NOTIFY   0x00000002
+#define CAP_UHNAMES       0x00000004
 
 #define HasCap(x, y) ((x)->localClient->cap_active & (y))
+
 
 /* housekeeping flags */
 #define FLAGS_PINGSENT       0x00000001 /**< Unreplied ping sent */

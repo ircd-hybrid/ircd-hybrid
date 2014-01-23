@@ -39,100 +39,6 @@
 #include "modules.h"
 
 
-/* names_all_visible_channels()
- *
- * inputs       - pointer to client struct requesting names
- * output       - none
- * side effects - lists all visible channels whee!
- */
-static void
-names_all_visible_channels(struct Client *source_p)
-{
-  dlink_node *ptr = NULL;
-
-  /*
-   * First, do all visible channels (public and the one user self is)
-   */
-  DLINK_FOREACH(ptr, global_channel_list.head)
-    /* Find users on same channel (defined by chptr) */
-    channel_member_names(source_p, ptr->data, 0);
-}
-
-/* names_non_public_non_secret()
- *
- * inputs       - pointer to client struct requesting names
- * output       - none
- * side effects - lists all non public non secret channels
- */
-static void
-names_non_public_non_secret(struct Client *source_p)
-{
-  int mlen, tlen, cur_len;
-  int reply_to_send = 0;
-  int dont_show = 0;
-  dlink_node *gc2ptr, *lp;
-  struct Client *c2ptr;
-  struct Channel *ch3ptr = NULL;
-  char buf[IRCD_BUFSIZE];
-  char *t;
-
-  mlen = snprintf(buf, sizeof(buf), form_str(RPL_NAMREPLY),
-                  me.name, source_p->name, "*", "*");
-  cur_len = mlen;
-  t = buf + mlen;
-
-  /* Second, do all non-public, non-secret channels in one big sweep */
-  DLINK_FOREACH(gc2ptr, global_client_list.head)
-  {
-    c2ptr = gc2ptr->data;
-
-    if (!IsClient(c2ptr) || HasUMode(c2ptr, UMODE_INVISIBLE))
-      continue;
-
-    dont_show = 0;
-
-    /*
-     * Don't show a client if they are on a secret channel or they
-     * are on a channel source_p is on since they have already
-     * been show earlier. -avalon
-     */    
-    DLINK_FOREACH(lp, c2ptr->channel.head)
-    {
-      ch3ptr = ((struct Membership *)lp->data)->chptr;
-
-      if ((ch3ptr->mode.mode & (MODE_PRIVATE|MODE_SECRET)) || IsMember(source_p, ch3ptr))
-      {
-        dont_show = 1;
-        break;
-      }
-    }
-
-    if (dont_show)
-      continue;
-
-    tlen = strlen(c2ptr->name);
-    if (cur_len + tlen + 1 > IRCD_BUFSIZE - 2)
-    {
-      sendto_one(source_p, "%s", buf);
-      cur_len = mlen;
-      t = buf + mlen;
-    }
-
-    strcpy(t, c2ptr->name);
-    t += tlen;
-
-    *t++ = ' ';
-    *t = 0;
-
-    cur_len += tlen + 1;
-
-    reply_to_send = 1;
-  }
-
-  if (reply_to_send)
-    sendto_one(source_p, "%s", buf);
-}
-
 /*
 ** m_names
 **      parv[0] = sender prefix
@@ -143,31 +49,26 @@ m_names(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  char *s;
+  char *s = NULL;
   char *para = parc > 1 ? parv[1] : NULL;
 
   if (!EmptyString(para))
   {
-    if ((s = strchr(para, ',')) != NULL)
+    if ((s = strchr(para, ',')))
       *s = '\0';
 
     if (*para == '\0')
       return 0;
 
-    if ((chptr = hash_find_channel(para)) != NULL)
+    if ((chptr = hash_find_channel(para)))
       channel_member_names(source_p, chptr, 1);
     else
       sendto_one(source_p, form_str(RPL_ENDOFNAMES),
                  me.name, source_p->name, para);
   }
   else
-  {
-    names_all_visible_channels(source_p);
-    names_non_public_non_secret(source_p);
     sendto_one(source_p, form_str(RPL_ENDOFNAMES),
                me.name, source_p->name, "*");
-  }
-
   return 0;
 }
 

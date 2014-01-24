@@ -421,6 +421,8 @@ static void
 ssl_init(void)
 {
 #ifdef HAVE_LIBCRYPTO
+  const unsigned char session_id[] = "ircd-hybrid";
+
   SSL_load_error_strings();
   SSLeay_add_ssl_algorithms();
 
@@ -437,6 +439,7 @@ ssl_init(void)
   SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_TLS_ROLLBACK_BUG|SSL_OP_ALL);
   SSL_CTX_set_verify(ServerInfo.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);
+  SSL_CTX_set_session_id_context(ServerInfo.server_ctx, session_id, sizeof(session_id) - 1);
 
   if ((ServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
   {

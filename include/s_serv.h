@@ -26,7 +26,7 @@
 
 #ifndef INCLUDED_serv_h
 #define INCLUDED_serv_h
-#include "config.h"
+
 
 struct MaskItem;
 

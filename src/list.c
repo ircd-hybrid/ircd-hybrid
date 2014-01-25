@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  list.c: Various assorted functions for various structures.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,13 +17,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file list.c
+ * \brief Maintains doubly-linked lists.
+ * \version $Id$
  */
 
 #include "stdinc.h"
 #include "list.h"
 #include "mempool.h"
+
 
 static mp_pool_t *dnode_pool;
 
@@ -60,7 +63,7 @@ make_dlink_node(void)
  *
  * inputs       - pointer to dlink_node
  * output       - NONE
- * side effects	- free given dlink_node 
+ * side effects	- free given dlink_node
  */
 void
 free_dlink_node(dlink_node *ptr)

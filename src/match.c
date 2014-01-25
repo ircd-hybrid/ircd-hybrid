@@ -1,23 +1,27 @@
-/************************************************************************
- *   IRC - Internet Relay Chat, src/match.c
- *   Copyright (C) 1990 Jarkko Oikarinen
+/*
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 1, or (at your option)
- *   any later version.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * $Id$
- *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ */
+
+/*! \file match.c
+ * \brief Functions to match/compare strings.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -190,7 +194,7 @@ irccmp(const char *s1, const char *s2)
 
   assert(s1 != NULL);
   assert(s2 != NULL);
-  
+
   for (; ToUpper(*str1) == ToUpper(*str2); ++str1, ++str2)
     if (*str1 == '\0')
       return 0;
@@ -218,7 +222,8 @@ ircncmp(const char *s1, const char *s2, size_t n)
   return 1;
 }
 
-const unsigned char ToLowerTab[] = { 
+const unsigned char ToLowerTab[] =
+{
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
   0xb, 0xc, 0xd, 0xe, 0xf, 0x10, 0x11, 0x12, 0x13, 0x14,
   0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d,
@@ -253,7 +258,8 @@ const unsigned char ToLowerTab[] = {
   0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
 };
 
-const unsigned char ToUpperTab[] = { 
+const unsigned char ToUpperTab[] =
+{
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
   0xb, 0xc, 0xd, 0xe, 0xf, 0x10, 0x11, 0x12, 0x13, 0x14,
   0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d,
@@ -285,7 +291,7 @@ const unsigned char ToUpperTab[] = {
   0xe0, 0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9,
   0xea, 0xeb, 0xec, 0xed, 0xee, 0xef,
   0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9,
-  0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff 
+  0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
 };
 
 /*
@@ -294,7 +300,8 @@ const unsigned char ToUpperTab[] = {
  * NOTE: RFC 1459 sez: anything but a ^G, comma, or space is allowed
  * for channel names
  */
-const unsigned int CharAttrs[] = {
+const unsigned int CharAttrs[] =
+{
 /* 0  */     CNTRL_C,
 /* 1  */     CNTRL_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* 2  */     CNTRL_C|CHAN_C|NONEOS_C,

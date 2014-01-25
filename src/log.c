@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  log.c: Logger functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,12 +17,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file log.c
+ * \brief Logger functions.
+ * \version $Id$
  */
 
 #include "stdinc.h"
-
 #include "log.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -31,7 +32,8 @@
 #include "s_misc.h"
 
 
-static struct {
+static struct
+{
   char path[HYB_PATH_MAX + 1];
   size_t size;
   FILE *file;
@@ -89,7 +91,7 @@ log_exceed_size(unsigned int type)
   return (size_t)sb.st_size > log_type_table[type].size;
 }
 
-static void 
+static void
 log_write(enum log_type type, const char *message)
 {
   char buf[IRCD_BUFSIZE];

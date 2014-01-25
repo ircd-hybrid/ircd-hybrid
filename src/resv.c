@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  resv.c: Functions to reserve(jupe) a nick/channel.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2001-2002 Hybrid Development Team
+ *  Copyright (c) 2001-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,15 +17,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file resv.c
+ * \brief Functions to reserve(jupe) a nick/channel.
+ * \version $Id$
  */
 
 #include "stdinc.h"
 #include "list.h"
 #include "ircd.h"
 #include "send.h"
-#include "client.h"   
+#include "client.h"
 #include "memory.h"
 #include "numeric.h"
 #include "resv.h"

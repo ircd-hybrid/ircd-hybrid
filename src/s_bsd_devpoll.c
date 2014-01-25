@@ -1,9 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  s_bsd_devpoll.c: /dev/poll compatible network routines.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Originally by Adrian Chadd <adrian@creative.net.au>
- *  Copyright (C) 2002 Hybrid Development Team
+ *  Copyright (c) 2001-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file s_bsd_devpoll.c
+ * \brief /dev/poll compatible network routines.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -179,7 +180,7 @@ comm_select(void)
 
     if ((dopoll.dp_fds[i].revents & POLLOUT))
     {
-      if ((hdl = F->write_handler) != NULL) 
+      if ((hdl = F->write_handler) != NULL)
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);

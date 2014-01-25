@@ -1,8 +1,8 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2000 Kevin L. Mitchell <klmitch@mit.edu>
- *  Copyright (C) 2013 by the Hybrid Development Team.
+ *  Copyright (c) 2000 Kevin L. Mitchell <klmitch@mit.edu>
+ *  Copyright (c) 2013-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

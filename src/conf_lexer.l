@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  conf_lexer.l: Scans the ircd configuration file for tokens.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file ircd_lexer.l
+ * \brief Scans the ircd configuration file for tokens.
+ * \version $Id$
  */
 
 %option case-insensitive
@@ -38,7 +40,7 @@
 #define YY_FATAL_ERROR(msg) conf_yy_fatal_error(msg)
 #define YY_INPUT(buf,result,max_size) \
   if (!(result = conf_yy_input(buf, max_size))) \
-    YY_FATAL_ERROR("input in flex scanner failed"); 
+    YY_FATAL_ERROR("input in flex scanner failed");
 #define MAX_INCLUDE_DEPTH 10
 
 
@@ -77,9 +79,9 @@ include   \.include{WS}(\<.*\>|\".*\")
 
 %%
 {include}       { cinclude(); }
-"/*"	        { ccomment(); }
+"/*"            { ccomment(); }
 
-\n.*	        { strlcpy(linebuf, yytext+1, sizeof(linebuf)); ++lineno; yyless(1); }
+\n.*            { strlcpy(linebuf, yytext+1, sizeof(linebuf)); ++lineno; yyless(1); }
 
 {WS}            ;
 {COMMENT}       ;
@@ -101,9 +103,9 @@ include   \.include{WS}(\<.*\>|\".*\")
 			  int i,j;
 
 			  yylval.string[yyleng-2] = '\0'; /* remove close
-							   *  quote 
+							   *  quote
 							   */
-			  
+
 			  for (j=i=0 ;yylval.string[i] != '\0'; i++,j++)
 			    {
 			      if (yylval.string[i] != '\\')
@@ -113,7 +115,7 @@ include   \.include{WS}(\<.*\>|\".*\")
 			      else
 				{
 				  i++;
-				  if (yylval.string[i] == '\0') /* XXX 
+				  if (yylval.string[i] == '\0') /* XXX
 								 * should not
 								 * happen
 								 */
@@ -338,7 +340,7 @@ unresv                      { return T_UNRESV; }
 unxline                     { return T_UNXLINE; }
 use_egd                     { return USE_EGD; }
 use_logging                 { return USE_LOGGING; }
-user                        { return USER; } 
+user                        { return USER; }
 vhost                       { return VHOST; }
 vhost6                      { return VHOST6; }
 wallop                      { return T_WALLOP; }
@@ -412,7 +414,7 @@ ccomment(void)
       YY_FATAL_ERROR("EOF in comment");
       /* XXX hack alert this disables
        * the stupid unused function warning
-       * gcc generates 
+       * gcc generates
        */
       if (1 == 0)
         yy_fatal_error("EOF in comment");
@@ -435,7 +437,7 @@ cinclude(void)
 
   /* log(L_NOTICE, "got include %s!", c); */
 
-  /* do stacking and co. */ 
+  /* do stacking and co. */
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
     ilog(LOG_TYPE_IRCD, "Includes nested too deep in %s", p);
   else
@@ -449,7 +451,7 @@ cinclude(void)
       snprintf(filenamebuf, sizeof(filenamebuf), "%s/%s", ETCPATH, p);
 
     tmp_fbfile_in = fopen(filenamebuf, "r");
-    
+
     if (tmp_fbfile_in == NULL)
     {
       ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
@@ -492,7 +494,7 @@ ieof(void)
   yy_delete_buffer(YY_CURRENT_BUFFER);
   lineno = lineno_stack[include_stack_ptr];
   conf_parser_ctx.conf_file = inc_fbfile_in[include_stack_ptr];
-  strlcpy(conffilebuf, conffile_stack[include_stack_ptr], sizeof(conffilebuf)); 
+  strlcpy(conffilebuf, conffile_stack[include_stack_ptr], sizeof(conffilebuf));
   yy_switch_to_buffer(include_stack[include_stack_ptr]);
 
   return 0;

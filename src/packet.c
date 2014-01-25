@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  packet.c: Packet handlers.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,9 +17,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
  */
+
+/*! \file packet.c
+ * \brief Packet handlers.
+ * \version $Id$
+ */
+
 #include "stdinc.h"
 #include "list.h"
 #include "s_bsd.h"
@@ -116,7 +119,7 @@ extract_one_line(struct dbuf_queue *qptr, char *buffer)
  */
 static void
 parse_client_queued(struct Client *client_p)
-{ 
+{
   int dolen = 0;
   int checkflood = 1;
   struct LocalUser *lclient_p = client_p->localClient;
@@ -125,10 +128,10 @@ parse_client_queued(struct Client *client_p)
   {
     int i = 0;
 
-    for(;;)
+    for (; ;)
     {
       if (IsDefunct(client_p))
-	return;
+        return;
 
       /* rate unknown clients at MAX_FLOOD per loop */
       if (i >= MAX_FLOOD)
@@ -136,7 +139,7 @@ parse_client_queued(struct Client *client_p)
 
       dolen = extract_one_line(&lclient_p->buf_recvq, readBuf);
       if (dolen == 0)
-	break;
+        break;
 
       client_dopacket(client_p, readBuf, dolen);
       i++;
@@ -176,10 +179,10 @@ parse_client_queued(struct Client *client_p)
      * messages in this loop, we simply drop out of the loop prematurely.
      *   -- adrian
      */
-    for (;;)
+    for (; ;)
     {
       if (IsDefunct(client_p))
-	break;
+        break;
 
       /* This flood protection works as follows:
        *
@@ -199,7 +202,7 @@ parse_client_queued(struct Client *client_p)
         if(lclient_p->sent_parsed >= lclient_p->allow_read)
           break;
       }
-      
+
       /* allow opers 4 times the amount of messages as users. why 4?
        * why not. :) --fl_
        */
@@ -246,7 +249,7 @@ flood_recalc(fde_t *fd, void *data)
 {
   struct Client *client_p = data;
   struct LocalUser *lclient_p = client_p->localClient;
- 
+
   /* allow a bursting client their allocation per second, allow
    * a client whos flooding an extra 2 per second
    */
@@ -254,12 +257,12 @@ flood_recalc(fde_t *fd, void *data)
     lclient_p->sent_parsed -= 2;
   else
     lclient_p->sent_parsed = 0;
-  
+
   if (lclient_p->sent_parsed < 0)
     lclient_p->sent_parsed = 0;
-  
+
   parse_client_queued(client_p);
-  
+
   /* And now, try flushing .. */
   if (!IsDead(client_p))
   {
@@ -285,7 +288,8 @@ read_packet(fde_t *fd, void *data)
    * I personally think it makes the code too hairy to make sane.
    *     -- adrian
    */
-  do {
+  do
+  {
 #ifdef HAVE_LIBCRYPTO
     if (fd->ssl)
     {
@@ -379,13 +383,13 @@ read_packet(fde_t *fd, void *data)
 static void
 client_dopacket(struct Client *client_p, char *buffer, size_t length)
 {
-  /* 
+  /*
    * Update messages received
    */
   ++me.localClient->recv.messages;
   ++client_p->localClient->recv.messages;
 
-  /* 
+  /*
    * Update bytes received
    */
   client_p->localClient->recv.bytes += length;

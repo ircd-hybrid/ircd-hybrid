@@ -1,9 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  s_bsd_poll.c: POSIX poll() compatible network routines.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Originally by Adrian Chadd <adrian@creative.net.au>
- *  Copyright (C) 2002 Hybrid Development Team
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file s_bsd_poll.c
+ * \brief POSIX poll() compatible network routines.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -93,7 +94,7 @@ poll_findslot(void)
 void
 comm_setselect(fde_t *F, unsigned int type, PF *handler,
                void *client_data, time_t timeout)
-{  
+{
   int new_events;
 
   if ((type & COMM_SELECT_READ))
@@ -147,7 +148,7 @@ comm_setselect(fde_t *F, unsigned int type, PF *handler,
     F->evcache = new_events;
   }
 }
- 
+
 /*
  * comm_select
  *

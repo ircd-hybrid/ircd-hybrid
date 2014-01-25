@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  irc_string.c: IRC string functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file irc_string.c
+ * \brief IRC string functions.
+ * \version $Id$
  */
 
 #include "config.h"
@@ -56,7 +58,7 @@ has_wildcards(const char *str)
  *   might break things in other places...)
  *
  *
- * Thu Nov 24 18:22:48 1986 
+ * Thu Nov 24 18:22:48 1986
  */
 const char *
 myctime(time_t value)
@@ -98,7 +100,6 @@ strip_tabs(char *dest, const char *src, size_t len)
  *
  */
 #ifndef HAVE_STRTOK_R
-
 char *
 strtoken(char** save, char* str, const char* fs)
 {
@@ -150,7 +151,7 @@ libio_basename(const char *path)
 
 /*
  * strlcat and strlcpy were ripped from openssh 2.5.1p2
- * They had the following Copyright info: 
+ * They had the following Copyright info:
  *
  *
  * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
@@ -161,9 +162,9 @@ libio_basename(const char *path)
  * are met:
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright    
- *    notice, this list of conditions and the following disclaimer in the  
- *    documentation and/or other materials provided with the distribution. 
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
  *    derived from this software without specific prior written permission.
  *
@@ -178,7 +179,7 @@ libio_basename(const char *path)
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #ifndef HAVE_STRLCAT
 size_t
 strlcat(char *dst, const char *src, size_t siz)

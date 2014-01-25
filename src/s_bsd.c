@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  s_bsd.c: Network functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file s_bsd.c
+ * \brief Network functions.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -104,7 +106,7 @@ get_sockerr(int fd)
 }
 
 /*
- * report_error - report an error from an errno. 
+ * report_error - report an error from an errno.
  * Record error to log and also send a copy to all *LOCAL* opers online.
  *
  *        text        is a *format* string for outputing error. It must
@@ -118,12 +120,12 @@ get_sockerr(int fd)
  * Cannot use perror() within daemon. stderr is closed in
  * ircd and cannot be used. And, worse yet, it might have
  * been reassigned to a normal connection...
- * 
+ *
  * Actually stderr is still there IFF ircd was run with -s --Rodder
  */
 
 void
-report_error(int level, const char* text, const char* who, int error) 
+report_error(int level, const char* text, const char* who, int error)
 {
   who = (who) ? who : "";
 
@@ -219,7 +221,7 @@ close_connection(struct Client *client_p)
 
   dbuf_clear(&client_p->localClient->buf_sendq);
   dbuf_clear(&client_p->localClient->buf_recvq);
-  
+
   MyFree(client_p->localClient->passwd);
   detach_conf(client_p, CONF_CLIENT|CONF_OPER|CONF_SERVER);
   client_p->from = NULL; /* ...this should catch them! >:) --msa */
@@ -248,17 +250,17 @@ ssl_handshake(int fd, struct Client *client_p)
     {
       case SSL_ERROR_WANT_WRITE:
         comm_setselect(&client_p->localClient->fd, COMM_SELECT_WRITE,
-	               (PF *) ssl_handshake, client_p, 30);
+                       (PF *)ssl_handshake, client_p, 30);
         return;
 
       case SSL_ERROR_WANT_READ:
         comm_setselect(&client_p->localClient->fd, COMM_SELECT_READ,
-	               (PF *) ssl_handshake, client_p, 30);
+                       (PF *)ssl_handshake, client_p, 30);
         return;
 
       default:
         exit_client(client_p, client_p, "Error during SSL handshake");
-	return;
+        return;
     }
   }
 
@@ -294,7 +296,7 @@ ssl_handshake(int fd, struct Client *client_p)
 #endif
 
 /*
- * add_connection - creates a client which has just connected to us on 
+ * add_connection - creates a client which has just connected to us on
  * the given fd. The sockhost field is initialized with the ip# of the host.
  * An unique id is calculated now, in case it is needed for auth.
  * The client is sent to the auth module for verification, and not put in
@@ -307,7 +309,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 
   fd_open(&new_client->localClient->fd, fd, 1,
           (listener->flags & LISTENER_SSL) ?
-	  "Incoming SSL connection" : "Incoming connection");
+          "Incoming SSL connection" : "Incoming connection");
 
   /*
    * copy address to 'sockhost' as a string, copy it to host too
@@ -316,7 +318,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   memcpy(&new_client->localClient->ip, irn, sizeof(struct irc_ssaddr));
 
   getnameinfo((struct sockaddr *)&new_client->localClient->ip,
-              new_client->localClient->ip.ss_len, new_client->sockhost, 
+              new_client->localClient->ip.ss_len, new_client->sockhost,
               sizeof(new_client->sockhost), NULL, 0, NI_NUMERICHOST);
   new_client->localClient->aftype = new_client->localClient->ip.ss.ss_family;
 
@@ -416,7 +418,7 @@ comm_settimeout(fde_t *fd, time_t timeout, PF *callback, void *cbdata)
  * flush functions, and when comm_close() is implemented correctly
  * with close functions, we _actually_ don't call comm_close() here ..
  * -- originally Adrian's notes
- * comm_close() is replaced with fd_close() in fdlist.c 
+ * comm_close() is replaced with fd_close() in fdlist.c
  */
 void
 comm_setflush(fde_t *fd, time_t timeout, PF *callback, void *cbdata)
@@ -508,7 +510,7 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port,
    *   -- adrian
    */
   if ((clocal != NULL) && (bind(fd->fd, clocal, socklen) < 0))
-  { 
+  {
     /* Failure, call the callback with COMM_ERR_BIND */
     comm_connect_callback(fd, COMM_ERR_BIND);
     /* ... and quit */
@@ -605,7 +607,7 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
   /* Copy over the DNS reply info so we can use it in the connect() */
   /*
    * Note we don't fudge the refcount here, because we aren't keeping
-   * the DNS record around, and the DNS cache is gone anyway.. 
+   * the DNS record around, and the DNS cache is gone anyway..
    *     -- adrian
    */
   memcpy(&F->connect.hostaddr, addr, addr->ss_len);
@@ -636,7 +638,7 @@ comm_connect_tryconnect(fde_t *fd, void *notused)
     return;
 
   /* Try the connect() */
-  retval = connect(fd->fd, (struct sockaddr *) &fd->connect.hostaddr, 
+  retval = connect(fd->fd, (struct sockaddr *) &fd->connect.hostaddr,
     fd->connect.hostaddr.ss_len);
 
   /* Error? */
@@ -749,11 +751,11 @@ comm_accept(struct Listener *lptr, struct irc_ssaddr *pn)
   return newfd;
 }
 
-/* 
+/*
  * remove_ipv6_mapping() - Removes IPv4-In-IPv6 mapping from an address
  * OSes with IPv6 mapping listening on both
  * AF_INET and AF_INET6 map AF_INET connections inside AF_INET6 structures
- * 
+ *
  */
 #ifdef IPV6
 void
@@ -763,7 +765,7 @@ remove_ipv6_mapping(struct irc_ssaddr *addr)
   {
     if (IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)addr)->sin6_addr))
     {
-      struct sockaddr_in6 v6; 
+      struct sockaddr_in6 v6;
       struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
 
       memcpy(&v6, addr, sizeof(v6));
@@ -773,10 +775,10 @@ remove_ipv6_mapping(struct irc_ssaddr *addr)
       addr->ss.ss_family = AF_INET;
       addr->ss_len = sizeof(struct sockaddr_in);
     }
-    else 
+    else
       addr->ss_len = sizeof(struct sockaddr_in6);
   }
   else
     addr->ss_len = sizeof(struct sockaddr_in);
-} 
+}
 #endif

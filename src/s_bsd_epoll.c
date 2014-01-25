@@ -1,9 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  s_bsd_epoll.c: Linux epoll() compatible network routines.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002-2005 Hybrid Development Team
- *  Based also on work of Adrian Chadd, Aaron Sethman and others.
+ *  Copyright (c) 2005-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file s_bsd_epoll.c
+ * \brief Linux epoll() compatible network routines.
+ * \version $Id$
  */
 
 #include "stdinc.h"

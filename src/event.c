@@ -2,8 +2,8 @@
  *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
  *  event.c: Event functions.
  *
- *  Copyright (C) 1998-2000 Regents of the University of California
- *  Copyright (C) 2001-2002 Hybrid Development Team
+ *  Copyright (c) 1998-2000 Regents of the University of California
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  Code borrowed from the squid web cache by Adrian Chadd.
  *  Original header:
@@ -78,7 +78,7 @@ void
 eventAdd(const char *name, EVH *func, void *arg, time_t when)
 {
   int i;
-  
+
   /* find first inactive index, or use next index */
   for (i = 0; i < MAX_EVENTS; i++)
   {
@@ -88,11 +88,11 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
       event_table[i].name = name;
       event_table[i].arg = arg;
       event_table[i].when = CurrentTime + when;
-      event_table[i].frequency = when; 
+      event_table[i].frequency = when;
       event_table[i].active = 1;
 
       if ((event_table[i].when < event_time_min) || (event_time_min == -1))
-	event_time_min = event_table[i].when;
+        event_time_min = event_table[i].when;
 
       return;
     }
@@ -122,7 +122,7 @@ eventDelete(EVH *func, void *arg)
   event_table[i].active = 0;
 }
 
-/* 
+/*
  * void eventAddIsh(const char *name, EVH *func, void *arg, time_t delta_isa)
  *
  * Input: Name of event, function to call, arguments to pass, and frequency
@@ -173,7 +173,7 @@ eventRun(void)
 
 /*
  * time_t eventNextTime(void)
- * 
+ *
  * Input: None
  * Output: Specifies the next time eventRun() should be run
  * Side Effects: None
@@ -192,7 +192,7 @@ eventNextTime(void)
     }
   }
 
-  return(event_time_min);
+  return event_time_min;
 }
 
 /*
@@ -200,7 +200,7 @@ eventNextTime(void)
  *
  * Input: None
  * Output: None
- * Side Effects: Initializes the event system. 
+ * Side Effects: Initializes the event system.
  */
 void
 eventInit(void)
@@ -222,14 +222,13 @@ eventFind(EVH *func, void *arg)
   int i;
 
   for (i = 0; i < MAX_EVENTS; i++)
-  {
     if ((event_table[i].func == func) &&
         (event_table[i].arg == arg) &&
          event_table[i].active)
-      return(i);
+      return i;
   }
 
-  return(-1);
+  return -1;
 }
 
 /*
@@ -266,7 +265,7 @@ show_events(struct Client *source_p)
       sendto_one(source_p, ":%s %d %s : %-28s %-4d seconds",
                  me.name, RPL_STATSDEBUG, source_p->name,
                  event_table[i].name,
-		 (int)(event_table[i].when - CurrentTime));
+                 (int)(event_table[i].when - CurrentTime));
     }
   }
 }
@@ -292,4 +291,3 @@ set_back_events(time_t by)
       event_table[i].when = 0;
   }
 }
-

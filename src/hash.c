@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  hash.c: Maintains hashtables.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file hash.c
+ * \brief Hash table management.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -50,7 +52,7 @@ static unsigned int hashf_xor_key = 0;
 
 /* The actual hash tables, They MUST be of the same HASHSIZE, variable
  * size tables could be supported but the rehash routine should also
- * rebuild the transformation maps, I kept the tables of equal size 
+ * rebuild the transformation maps, I kept the tables of equal size
  * so that I can use one hash function.
  */
 static struct Client *idTable[HASHSIZE];
@@ -391,7 +393,7 @@ hash_find_server(const char *name)
  *
  * inputs       - pointer to name
  * output       - NONE
- * side effects - New semantics: finds a channel whose name is 'name', 
+ * side effects - New semantics: finds a channel whose name is 'name',
  *                if can't find one returns NULL, if can find it moves
  *                it to the top of the list and returns it.
  */

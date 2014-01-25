@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2007-2012, The Tor Project, Inc.
+ * Copyright (c) 2012-2014 ircd-hybrid development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

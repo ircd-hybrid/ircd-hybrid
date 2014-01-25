@@ -68,6 +68,7 @@ const char *infotext[] =
   "recent releases of Hybrid, in nick alphabetical order:",
   "",
   "A1kmm, Andrew Miller <a1kmm@mware.virtualave.net>",
+  "Adam, Adam <Adam@anope.org>",
   "adx, Piotr Nizynski <nizynski@sysplex.pl>",
   "AndroSyn, Aaron Sethman <androsyn@ratbox.org>",
   "bane, Dragan Dosen <bane@idolnet.org>",

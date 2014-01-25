@@ -126,8 +126,11 @@ release_auth_client(struct AuthRequest *auth)
   if (IsDoingAuth(auth) || IsDNSPending(auth))
     return;
 
-  if (dlinkFind(&auth_doing_list, auth))
+  if (IsInAuth(auth))
+  {
     dlinkDelete(&auth->node, &auth_doing_list);
+    ClearInAuth(auth);
+  }
 
   /*
    * When a client has auth'ed, we want to start reading what it sends
@@ -368,7 +371,8 @@ start_auth(struct Client *client)
   assert(client != NULL);
 
   auth = make_auth_request(client);
-  dlinkAdd(auth, &auth->node, &auth_doing_list);
+  SetInAuth(auth);
+  dlinkAddTail(auth, &auth->node, &auth_doing_list);
 
   sendheader(client, REPORT_DO_DNS);
 
@@ -397,7 +401,7 @@ timeout_auth_queries_event(void *notused)
     struct AuthRequest *auth = ptr->data;
 
     if (auth->timeout > CurrentTime)
-      continue;
+      break;
 
     if (IsDoingAuth(auth))
     {
@@ -588,6 +592,9 @@ delete_auth(struct AuthRequest *auth)
   if (IsDoingAuth(auth))
     fd_close(&auth->fd);
 
-  if (dlinkFind(&auth_doing_list, auth))
+  if (IsInAuth(auth))
+  {
     dlinkDelete(&auth->node, &auth_doing_list);
+    ClearInAuth(auth);
+  }
 }

@@ -226,7 +226,6 @@ eventFind(EVH *func, void *arg)
         (event_table[i].arg == arg) &&
          event_table[i].active)
       return i;
-  }
 
   return -1;
 }

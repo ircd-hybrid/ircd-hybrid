@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  hostmask.c: Code to efficiently find IP & hostmask based configs.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2005 by the past and present ircd coders, and others.
+ *  Copyright (c) 2001-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file hostmask.c
+ * \brief Code to efficiently find IP & hostmask based configs.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -51,7 +53,7 @@
  * Side effects: None
  * Comments: Called from parse_netmask
  */
-/* Fixed so ::/0 (any IPv6 address) is valid 
+/* Fixed so ::/0 (any IPv6 address) is valid
    Also a bug in DigitParse above.
    -Gozem 2002-07-19 gozem@linux.nu
 */
@@ -477,7 +479,7 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
       {
         DLINK_FOREACH(ptr, atable[hash_ipv6(addr, b)].head)
         {
-          arec = ptr->data; 
+          arec = ptr->data;
 
           if (arec->type == (type & ~0x1) &&
               arec->precedence > hprecv &&
@@ -485,8 +487,8 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
               match_ipv6(addr, &arec->Mask.ipa.addr,
                          arec->Mask.ipa.bits) &&
               (type & 0x1 || !cmpfunc(arec->username, username)) &&
-	      (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
-	       match_conf_password(password, arec->conf)))
+              (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
+               match_conf_password(password, arec->conf)))
           {
             hprecv = arec->precedence;
             hprec = arec->conf;
@@ -510,8 +512,8 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
               match_ipv4(addr, &arec->Mask.ipa.addr,
                          arec->Mask.ipa.bits) &&
               (type & 0x1 || !cmpfunc(arec->username, username)) &&
-	      (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
-	       match_conf_password(password, arec->conf)))
+              (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
+               match_conf_password(password, arec->conf)))
           {
             hprecv = arec->precedence;
             hprec = arec->conf;
@@ -630,7 +632,7 @@ find_dline_conf(struct irc_ssaddr *addr, int aftype)
 }
 
 /* void add_conf_by_address(int, struct MaskItem *aconf)
- * Input: 
+ * Input:
  * Output: None
  * Side-effects: Adds this entry to the hash table.
  */
@@ -737,14 +739,14 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
  * Output: None
  * Side effects: Clears out all address records in the hash table,
  *               frees them, and frees the MaskItems if nothing references
- *               them, otherwise sets them as illegal.   
+ *               them, otherwise sets them as illegal.
  */
 void
 clear_out_address_conf(void)
 {
   unsigned int i = 0;
   dlink_node *ptr = NULL, *ptr_next = NULL;
- 
+
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH_SAFE(ptr, ptr_next, atable[i].head)
@@ -788,7 +790,7 @@ hostmask_send_expiration(struct AddressRec *arec)
       break;
     default: break;
   }
-  
+
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "Temporary %c-line for [%s@%s] expired", ban_type,
                        (arec->conf->user) ? arec->conf->user : "*",

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  getopt.c: Uses getopt to fetch the command line options.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 2001-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file getopt.c
+ * \brief Uses getopt to fetch the command line options.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -65,7 +67,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
     (*argv)[0]++;
 
     /* search through our argument list, and see if it matches */
-    for (i = 0; opts[i].opt; i++) 
+    for (i = 0; opts[i].opt; i++)
     {
       if (!strcmp(opts[i].opt, (*argv)[0]))
       {
@@ -85,7 +87,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
                       OPTCHAR, opts[i].opt);
               usage((*argv)[0], opts);
             }
-		  
+
             *((int *)opts[i].argloc) = atoi((*argv)[1]);
             (*argc)--;
             (*argv)++;

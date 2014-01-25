@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  conf_parser.y: Parses the ircd configuration file.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2005 by the past and present ircd coders, and others.
+ *  Copyright (c) 2000-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,9 +17,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
  */
+
+/*! \file conf_parser.y
+ * \brief Parses the ircd configuration file.
+ * \version $Id$
+ */
+
 
 %{
 
@@ -367,7 +370,7 @@ reset_block_state(void)
 %type  <number> sizespec_
 
 %%
-conf:   
+conf:
         | conf conf_item
         ;
 
@@ -375,7 +378,7 @@ conf_item:        admin_entry
                 | logging_entry
                 | oper_entry
 		| channel_entry
-                | class_entry 
+                | class_entry
                 | listen_entry
                 | auth_entry
                 | serverinfo_entry
@@ -513,7 +516,7 @@ server_method_type_item: T_SSLV3
 serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx) 
+  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
   {
     if (!ServerInfo.rsa_private_key_file)
     {
@@ -646,7 +649,7 @@ serverinfo_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
 #endif
 };
 
-serverinfo_name: NAME '=' QSTRING ';' 
+serverinfo_name: NAME '=' QSTRING ';'
 {
   /* this isn't rehashable */
   if (conf_parser_ctx.pass == 2 && !ServerInfo.name)
@@ -661,7 +664,7 @@ serverinfo_name: NAME '=' QSTRING ';'
   }
 };
 
-serverinfo_sid: IRCD_SID '=' QSTRING ';' 
+serverinfo_sid: IRCD_SID '=' QSTRING ';'
 {
   /* this isn't rehashable */
   if (conf_parser_ctx.pass == 2 && !ServerInfo.sid)
@@ -835,7 +838,7 @@ serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
     ServerInfo.max_topic_length = $3;
 };
 
-serverinfo_hub: HUB '=' TBOOL ';' 
+serverinfo_hub: HUB '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
     ServerInfo.hub = yylval.number;
@@ -850,7 +853,7 @@ admin_items: admin_items admin_item | admin_item;
 admin_item:  admin_name | admin_description |
              admin_email | error ';' ;
 
-admin_name: NAME '=' QSTRING ';' 
+admin_name: NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -880,7 +883,7 @@ admin_description: DESCRIPTION '=' QSTRING ';'
 /***************************************************************************
  * motd section
  ***************************************************************************/
-motd_entry: MOTD 
+motd_entry: MOTD
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
@@ -901,7 +904,7 @@ motd_entry: MOTD
 motd_items: motd_items motd_item | motd_item;
 motd_item:  motd_mask | motd_file | error ';' ;
 
-motd_mask: MASK '=' QSTRING ';' 
+motd_mask: MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
@@ -1013,7 +1016,7 @@ logging_file_type_item:  USER
 /***************************************************************************
  * section oper
  ***************************************************************************/
-oper_entry: OPERATOR 
+oper_entry: OPERATOR
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -1438,7 +1441,7 @@ class_item:     class_name |
                 class_flags |
 		error ';' ;
 
-class_name: NAME '=' QSTRING ';' 
+class_name: NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 1)
     strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
@@ -1678,7 +1681,7 @@ auth_entry: IRCD_AUTH
     conf_add_class_to_conf(conf, block_state.class.buf);
     add_conf_by_address(CONF_CLIENT, conf);
   }
-}; 
+};
 
 auth_items:     auth_items auth_item | auth_item;
 auth_item:      auth_user | auth_passwd | auth_class | auth_flags |
@@ -1763,7 +1766,7 @@ auth_flags_item: SPOOF_NOTICE
     block_state.flags.value |= CONF_FLAGS_NEED_PASSWORD;
 };
 
-auth_spoof: SPOOF '=' QSTRING ';' 
+auth_spoof: SPOOF '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -2046,7 +2049,7 @@ cluster_type_item: KLINE
 /***************************************************************************
  *  section connect
  ***************************************************************************/
-connect_entry: CONNECT   
+connect_entry: CONNECT
 {
 
   if (conf_parser_ctx.pass != 2)
@@ -2124,7 +2127,7 @@ connect_item:   connect_name | connect_host | connect_vhost |
 		connect_ssl_certificate_fingerprint |
 		connect_aftype | connect_port | connect_ssl_cipher_list |
 		connect_flags | connect_hub_mask | connect_leaf_mask |
-		connect_class | connect_encrypted | 
+		connect_class | connect_encrypted |
                 error ';' ;
 
 connect_name: NAME '=' QSTRING ';'
@@ -2133,18 +2136,18 @@ connect_name: NAME '=' QSTRING ';'
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 };
 
-connect_host: HOST '=' QSTRING ';' 
+connect_host: HOST '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.host.buf, yylval.string, sizeof(block_state.host.buf));
 };
 
-connect_vhost: VHOST '=' QSTRING ';' 
+connect_vhost: VHOST '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.bind.buf, yylval.string, sizeof(block_state.bind.buf));
 };
- 
+
 connect_send_password: SEND_PASSWORD '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass != 2)
@@ -2222,13 +2225,13 @@ connect_encrypted: ENCRYPTED '=' TBOOL ';'
   }
 };
 
-connect_hub_mask: HUB_MASK '=' QSTRING ';' 
+connect_hub_mask: HUB_MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.hub.list);
 };
 
-connect_leaf_mask: LEAF_MASK '=' QSTRING ';' 
+connect_leaf_mask: LEAF_MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.leaf.list);
@@ -2279,7 +2282,7 @@ kill_entry: KILL
   else
     conf->reason = xstrdup(CONF_NOREASON);
   add_conf_by_address(CONF_KLINE, conf);
-}; 
+};
 
 kill_items:     kill_items kill_item | kill_item;
 kill_item:      kill_user | kill_reason | error;
@@ -2304,7 +2307,7 @@ kill_user: USER '=' QSTRING ';'
   }
 };
 
-kill_reason: REASON '=' QSTRING ';' 
+kill_reason: REASON '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
@@ -2313,7 +2316,7 @@ kill_reason: REASON '=' QSTRING ';'
 /***************************************************************************
  *  section deny
  ***************************************************************************/
-deny_entry: DENY 
+deny_entry: DENY
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
@@ -2338,7 +2341,7 @@ deny_entry: DENY
       conf->reason = xstrdup(CONF_NOREASON);
     add_conf_by_address(CONF_DLINE, conf);
   }
-}; 
+};
 
 deny_items:     deny_items deny_item | deny_item;
 deny_item:      deny_ip | deny_reason | error;
@@ -2349,7 +2352,7 @@ deny_ip: IP '=' QSTRING ';'
     strlcpy(block_state.addr.buf, yylval.string, sizeof(block_state.addr.buf));
 };
 
-deny_reason: REASON '=' QSTRING ';' 
+deny_reason: REASON '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
@@ -2406,13 +2409,13 @@ gecos_entry: GECOS
 gecos_items: gecos_items gecos_item | gecos_item;
 gecos_item:  gecos_name | gecos_reason | error;
 
-gecos_name: NAME '=' QSTRING ';' 
+gecos_name: NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 };
 
-gecos_reason: REASON '=' QSTRING ';' 
+gecos_reason: REASON '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
@@ -2446,7 +2449,7 @@ general_item:       general_hide_spoof_ips | general_ignore_bogus_ts |
                     general_min_nonwildcard | general_min_nonwildcard_simple |
                     general_throttle_time | general_havent_read_conf |
                     general_ping_cookie |
-                    general_disable_auth | 
+                    general_disable_auth |
 		    general_tkline_expire_notices | general_gline_enable |
                     general_gline_duration | general_gline_request_duration |
                     general_gline_min_cidr |
@@ -2528,7 +2531,7 @@ general_anti_nick_flood: ANTI_NICK_FLOOD '=' TBOOL ';'
 
 general_max_nick_time: MAX_NICK_TIME '=' timespec ';'
 {
-  ConfigFileEntry.max_nick_time = $3; 
+  ConfigFileEntry.max_nick_time = $3;
 };
 
 general_max_nick_changes: MAX_NICK_CHANGES '=' NUMBER ';'
@@ -2638,7 +2641,7 @@ general_short_motd: SHORT_MOTD '=' TBOOL ';'
 {
   ConfigFileEntry.short_motd = yylval.number;
 };
-  
+
 general_no_oper_flood: NO_OPER_FLOOD '=' TBOOL ';'
 {
   ConfigFileEntry.no_oper_flood = yylval.number;
@@ -2773,13 +2776,13 @@ umode_oitem:     T_BOTS
   ConfigFileEntry.oper_umodes |= UMODE_FARCONNECT;
 };
 
-general_oper_only_umodes: OPER_ONLY_UMODES 
+general_oper_only_umodes: OPER_ONLY_UMODES
 {
   ConfigFileEntry.oper_only_umodes = 0;
 } '='  umode_items ';' ;
 
 umode_items:	umode_items ',' umode_item | umode_item;
-umode_item:	T_BOTS 
+umode_item:	T_BOTS
 {
   ConfigFileEntry.oper_only_umodes |= UMODE_BOTS;
 } | T_CCONN
@@ -2792,7 +2795,7 @@ umode_item:	T_BOTS
 {
   ConfigFileEntry.oper_only_umodes |= UMODE_DEBUG;
 } | T_FULL
-{ 
+{
   ConfigFileEntry.oper_only_umodes |= UMODE_FULL;
 } | T_SKILL
 {
@@ -2944,7 +2947,7 @@ serverhide_entry: SERVERHIDE
   '{' serverhide_items '}' ';';
 
 serverhide_items:   serverhide_items serverhide_item | serverhide_item;
-serverhide_item:    serverhide_flatten_links | serverhide_disable_remote_commands | 
+serverhide_item:    serverhide_flatten_links | serverhide_disable_remote_commands |
                     serverhide_hide_servers |
 		    serverhide_hide_services |
 		    serverhide_links_delay |

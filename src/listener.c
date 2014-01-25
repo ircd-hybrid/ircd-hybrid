@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  listener.c: Listens on a port.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1999-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file listener.c
+ * \brief Implementation for handling listening sockets.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -81,7 +83,7 @@ get_listener_name(const struct Listener *const listener)
  * output       - none
  * side effects - send port listing to a client
  */
-void 
+void
 show_ports(struct Client *source_p)
 {
   char buf[IRCD_BUFSIZE];
@@ -135,7 +137,7 @@ show_ports(struct Client *source_p)
 #define HYBRID_SOMAXCONN SOMAXCONN
 #endif
 
-static int 
+static int
 inetport(struct Listener *listener)
 {
   struct irc_ssaddr lsin;
@@ -225,7 +227,7 @@ find_listener(int port, struct irc_ssaddr *addr)
  * vhost_ip - if non-null must contain a valid IP address string in
  * the format "255.255.255.255"
  */
-void 
+void
 add_listener(int port, const char *vhost_ip, unsigned int flags)
 {
   struct Listener *listener;
@@ -343,7 +345,7 @@ close_listener(struct Listener *listener)
 /*
  * close_listeners - close and free all listeners that are not being used
  */
-void 
+void
 close_listeners(void)
 {
   dlink_node *ptr = NULL, *next_ptr = NULL;
@@ -356,7 +358,7 @@ close_listeners(void)
 #define TOOFAST_WARNING "ERROR :Trying to reconnect too fast.\r\n"
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
 
-static void 
+static void
 accept_connection(fde_t *pfd, void *data)
 {
   static time_t last_oper_notice = 0;

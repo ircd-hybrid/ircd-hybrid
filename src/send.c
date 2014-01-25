@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  send.c: Functions for sending messages.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file send.c
+ * \brief Functions for sending messages.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -125,7 +127,7 @@ send_message(struct Client *to, char *buf, int len)
  * output	- none
  * side effects	- Despite the function name, this only sends to directly
  *		  connected clients.
- * 
+ *
  */
 static void
 send_message_remote(struct Client *to, struct Client *from,
@@ -417,7 +419,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 }
 
 /* sendto_server()
- * 
+ *
  * inputs       - pointer to client to NOT send to
  *              - pointer to channel
  *              - caps or'd together which must ALL be present
@@ -428,7 +430,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
  * side effects - Send a message to all connected servers, except the
  *                client 'one' (if non-NULL), as long as the servers
  *                support ALL capabs in 'caps', and NO capabs in 'nocaps'.
- *            
+ *
  * This function was written in an attempt to merge together the other
  * billion sendto_*serv*() functions, which sprung up with capabs,
  * lazylinks, uids, etc.
@@ -476,7 +478,7 @@ sendto_server(struct Client *one,
  *		- pattern to send
  * output	- NONE
  * side effects	- Sends a message to all people on local server who are
- * 		  in same channel with user. 
+ * 		  in same channel with user.
  *		  used by m_nick.c and exit_one_client.
  */
 void

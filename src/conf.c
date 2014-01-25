@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  conf.c: Configuration file functions.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file conf.c
+ * \brief Configuration file functions.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -243,9 +245,9 @@ int
 check_client(struct Client *source_p)
 {
   int i;
- 
+
   if ((i = verify_access(source_p)))
-    ilog(LOG_TYPE_IRCD, "Access denied: %s[%s]", 
+    ilog(LOG_TYPE_IRCD, "Access denied: %s[%s]",
          source_p->name, source_p->sockhost);
 
   switch (i)
@@ -269,7 +271,7 @@ check_client(struct Client *source_p)
       ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
            get_client_name(source_p, SHOW_IP));
       ++ServerStats.is_ref;
-      exit_client(source_p, &me, 
+      exit_client(source_p, &me,
                   "No more connections allowed in your connection class");
       break;
 
@@ -367,7 +369,7 @@ verify_access(struct Client *client_p)
       if (IsConfGline(conf))
         sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name,
                    client_p->name);
-      sendto_one(client_p, ":%s NOTICE %s :*** Banned: %s", 
+      sendto_one(client_p, ":%s NOTICE %s :*** Banned: %s",
                  me.name, client_p->name, conf->reason);
       return BANNED_CLIENT;
     }
@@ -584,8 +586,8 @@ hash_ip(struct irc_ssaddr *addr)
     uint32_t *ip = (uint32_t *)&v6->sin6_addr.s6_addr;
 
     hash  = ip[0] ^ ip[3];
-    hash ^= hash >> 16;  
-    hash ^= hash >> 8;   
+    hash ^= hash >> 16;
+    hash ^= hash >> 8;
     hash  = hash & (IP_HASH_SIZE - 1);
     return hash;
   }
@@ -596,7 +598,7 @@ hash_ip(struct irc_ssaddr *addr)
 
 /* count_ip_hash()
  *
- * inputs        - pointer to counter of number of ips hashed 
+ * inputs        - pointer to counter of number of ips hashed
  *               - pointer to memory used for ip hash
  * output        - returned via pointers input
  * side effects  - NONE
@@ -784,7 +786,7 @@ find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
   DLINK_FOREACH(ptr, list->head)
   {
     conf = ptr->data;
-    
+
     if (conf->type == type)
     {
       if (conf->name && (irccmp(conf->name, name) == 0 ||
@@ -902,7 +904,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
         return conf;
     }
     break;
-  
+
   default:
     break;
   }
@@ -939,7 +941,7 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
 
       if (EmptyString(conf->name))
         continue;
-    
+
       if (irccmp(conf->name, name) == 0)
       {
         if ((user == NULL && (host == NULL)))
@@ -1005,7 +1007,7 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
 
       if (EmptyString(conf->name))
         continue;
-    
+
       if (name == NULL)
       {
         if (EmptyString(conf->host))
@@ -1126,7 +1128,6 @@ set_default_conf(void)
   ConfigServerHide.hide_server_ips = 0;
   ConfigServerHide.disable_remote_commands = 0;
 
-  
   ConfigFileEntry.service_name = xstrdup(SERVICE_NAME_DEFAULT);
   ConfigFileEntry.max_watch = WATCHSIZE_DEFAULT;
   ConfigFileEntry.cycle_on_host_change = 1;
@@ -1198,7 +1199,7 @@ validate_conf(void)
   ConfigFileEntry.max_watch = IRCD_MAX(ConfigFileEntry.max_watch, WATCHSIZE_MIN);
 }
 
-/* read_conf() 
+/* read_conf()
  *
  * inputs       - file descriptor pointing to config file to use
  * output       - None
@@ -1302,7 +1303,7 @@ void
 cleanup_tklines(void *notused)
 {
   hostmask_expire_temporary();
-  expire_tklines(&xconf_items); 
+  expire_tklines(&xconf_items);
   expire_tklines(&nresv_items);
   expire_tklines(&cresv_items);
 }
@@ -1420,7 +1421,7 @@ get_oper_name(const struct Client *client_p)
       }
     }
 
-    /* Probably should assert here for now. If there is an oper out there 
+    /* Probably should assert here for now. If there is an oper out there
      * with no oper{} conf attached, it would be good for us to know...
      */
     assert(0); /* Oper without oper conf! */
@@ -1451,7 +1452,7 @@ read_conf_files(int cold)
      FIXME: The full path is in conffilenamebuf first time since we
              dont know anything else
 
-     - Gozem 2002-07-21 
+     - Gozem 2002-07-21
   */
   strlcpy(conffilebuf, filename, sizeof(conffilebuf));
 
@@ -1525,7 +1526,7 @@ clear_out_old_conf(void)
   /* We only need to free anything allocated by yyparse() here.
    * Resetting structs, etc, is taken care of by set_default_conf().
    */
-  
+
   for (; *iterator != NULL; iterator++)
   {
     DLINK_FOREACH_SAFE(ptr, next_ptr, (*iterator)->head)
@@ -1612,12 +1613,12 @@ clear_out_old_conf(void)
  *
  * inputs       - pointer to config item
  * output       - NONE
- * side effects - Add a class pointer to a conf 
+ * side effects - Add a class pointer to a conf
  */
 void
 conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
 {
-  if (class_name == NULL) 
+  if (class_name == NULL)
   {
     conf->class = class_default;
 
@@ -1684,7 +1685,7 @@ conf_error_report(const char *msg)
 
 /*
  * valid_tkline()
- * 
+ *
  * inputs       - pointer to ascii string to check
  *              - whether the specified time is in seconds or minutes
  * output       - -1 not enough parameters
@@ -1709,19 +1710,19 @@ valid_tkline(const char *data, const int minutes)
   }
 
   /*
-   * In the degenerate case where oper does a /quote kline 0 user@host :reason 
+   * In the degenerate case where oper does a /quote kline 0 user@host :reason
    * i.e. they specifically use 0, I am going to return 1 instead
    * as a return value of non-zero is used to flag it as a temporary kline
    */
   if (result == 0)
     result = 1;
 
-  /* 
+  /*
    * If the incoming time is in seconds convert it to minutes for the purpose
    * of this calculation
    */
   if (!minutes)
-    result = result / 60; 
+    result = result / 60;
 
   if (result > MAX_TDKLINE_TIME)
     result = MAX_TDKLINE_TIME;
@@ -1831,7 +1832,7 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
  *		- parse_flags bit map of things to test
  *		- pointer to user or string to parse into
  *              - pointer to host or NULL to parse into if non NULL
- *              - pointer to optional tkline time or NULL 
+ *              - pointer to optional tkline time or NULL
  *              - pointer to target_server to parse into if non NULL
  *              - pointer to reason to parse into
  *
@@ -1899,7 +1900,7 @@ parse_aline(const char *cmd, struct Client *source_p,
     *up_p = user;
     *h_p = host;
   }
- 
+
   parc--;
   parv++;
 
@@ -2021,14 +2022,14 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
       luser[1] = '\0';
       strlcpy(lhost, user_host_or_nick, HOSTLEN*4 + 1);
     }
-    
+
     return 1;
   }
   else
   {
     /* Try to find user@host mask from nick */
     /* Okay to use source_p as the first param, because source_p == client_p */
-    if ((target_p = 
+    if ((target_p =
         find_chasing(source_p, user_host_or_nick, NULL)) == NULL)
       return 0;
 

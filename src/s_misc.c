@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  s_misc.c: Yet another miscellaneous functions file.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file s_misc.c
+ * \brief Yet another miscellaneous functions file.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -51,14 +53,14 @@ static const char *const weekdays[] =
 };
 
 const char *
-date(time_t lclock) 
+date(time_t lclock)
 {
   static char buf[80], plus;
   struct tm *lt, *gm;
   struct tm gmbuf;
   int minswest;
 
-  if (!lclock) 
+  if (!lclock)
     lclock = CurrentTime;
   gm = gmtime(&lclock);
   memcpy(&gmbuf, gm, sizeof(gmbuf));
@@ -103,9 +105,9 @@ smalldate(time_t lclock)
 
   gm = gmtime(&lclock);
   memcpy(&gmbuf, gm, sizeof(gmbuf));
-  gm = &gmbuf; 
+  gm = &gmbuf;
   lt = localtime(&lclock);
-  
+
   snprintf(buf, sizeof(buf), "%d/%d/%d %02d.%02d",
            lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday,
            lt->tm_hour, lt->tm_min);
@@ -124,7 +126,6 @@ ssl_get_cipher(const SSL *ssl)
 
   snprintf(buffer, sizeof(buffer), "%s %s-%d", SSL_get_version(ssl),
            SSL_get_cipher(ssl), bits);
-  
   return buffer;
 }
 #endif

@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  s_auth.c: Functions for querying a users ident.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file s_auth.c
+ * \brief Functions for querying a users ident.
+ * \version $Id$
  */
 
 /*
@@ -52,7 +54,8 @@
 #include "mempool.h"
 
 
-static const char *HeaderMessages[] = {
+static const char *HeaderMessages[] =
+{
   ":%s NOTICE AUTH :*** Looking up your hostname...",
   ":%s NOTICE AUTH :*** Found your hostname",
   ":%s NOTICE AUTH :*** Couldn't look up your hostname",
@@ -63,7 +66,8 @@ static const char *HeaderMessages[] = {
   ":%s NOTICE AUTH :*** Your hostname is too long, ignoring hostname"
 };
 
-enum {
+enum
+{
   REPORT_DO_DNS,
   REPORT_FIN_DNS,
   REPORT_FAIL_DNS,
@@ -142,7 +146,7 @@ release_auth_client(struct AuthRequest *auth)
 
   read_packet(&client->localClient->fd, client);
 }
- 
+
 /*
  * auth_dns_callback - called when resolver query finishes
  * if the query resulted in a successful search, name will contain
@@ -190,7 +194,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
     if (good && strlen(name) <= HOSTLEN)
     {
       strlcpy(auth->client->host, name,
-	      sizeof(auth->client->host));
+              sizeof(auth->client->host));
       sendheader(auth->client, REPORT_FIN_DNS);
     }
     else if (strlen(name) > HOSTLEN)
@@ -220,7 +224,7 @@ auth_error(struct AuthRequest *auth)
 }
 
 /*
- * start_auth_query - Flag the client to show that an attempt to 
+ * start_auth_query - Flag the client to show that an attempt to
  * contact the ident server on
  * the client's host.  The connect and subsequently the socket are all put
  * into 'non-blocking' mode.  Should the connect or any later phase of the
@@ -242,8 +246,8 @@ start_auth_query(struct AuthRequest *auth)
   if (comm_open(&auth->fd, auth->client->localClient->ip.ss.ss_family,
                 SOCK_STREAM, 0, "ident") == -1)
   {
-    report_error(L_ALL, "creating auth stream socket %s:%s", 
-        get_client_name(auth->client, SHOW_IP), errno);
+    report_error(L_ALL, "creating auth stream socket %s:%s",
+                 get_client_name(auth->client, SHOW_IP), errno);
     ilog(LOG_TYPE_IRCD, "Unable to create auth socket for %s",
         get_client_name(auth->client, SHOW_IP));
     ++ServerStats.is_abad;
@@ -252,7 +256,7 @@ start_auth_query(struct AuthRequest *auth)
 
   sendheader(auth->client, REPORT_DO_ID);
 
-  /* 
+  /*
    * get the local address of the client and bind to that to
    * make the auth request.  This used to be done only for
    * ifdef VIRTUAL_HOST, but needs to be done for all clients
@@ -274,16 +278,16 @@ start_auth_query(struct AuthRequest *auth)
 #endif
   localaddr.ss_port = htons(0);
 
-  comm_connect_tcp(&auth->fd, auth->client->sockhost, 113, 
-      (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback, 
-      auth, auth->client->localClient->ip.ss.ss_family, 
+  comm_connect_tcp(&auth->fd, auth->client->sockhost, 113,
+      (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
+      auth, auth->client->localClient->ip.ss.ss_family,
       GlobalSetOptions.ident_timeout);
   return 1; /* We suceed here for now */
 }
 
 /*
  * GetValidIdent - parse ident query reply from identd server
- * 
+ *
  * Inputs        - pointer to ident buf
  * Output        - NULL if no valid ident found, otherwise pointer to name
  * Side effects  -
@@ -316,7 +320,7 @@ GetValidIdent(char *buf)
 
   /* All this to get rid of a sscanf() fun. */
   remotePortString = buf;
-  
+
   if ((colon1Ptr = strchr(remotePortString,':')) == NULL)
     return 0;
   *colon1Ptr = '\0';
@@ -326,7 +330,7 @@ GetValidIdent(char *buf)
     return 0;
   *colon2Ptr = '\0';
   colon2Ptr++;
-  
+
   if ((commaPtr = strchr(remotePortString, ',')) == NULL)
     return 0;
   *commaPtr = '\0';
@@ -334,7 +338,7 @@ GetValidIdent(char *buf)
 
   if ((remp = atoi(remotePortString)) == 0)
     return 0;
-              
+
   if ((locp = atoi(commaPtr)) == 0)
     return 0;
 
@@ -350,13 +354,13 @@ GetValidIdent(char *buf)
 }
 
 /*
- * start_auth 
+ * start_auth
  *
  * inputs	- pointer to client to auth
  * output	- NONE
  * side effects	- starts auth (identd) and dns queries for a client
  */
-void 
+void
 start_auth(struct Client *client)
 {
   struct AuthRequest *auth = NULL;
@@ -396,7 +400,7 @@ timeout_auth_queries_event(void *notused)
       continue;
 
     if (IsDoingAuth(auth))
-    {  
+    {
       ++ServerStats.is_abad;
       fd_close(&auth->fd);
       ClearAuth(auth);
@@ -475,7 +479,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
   us.ss_len = ulen;
   them.ss_len = tlen;
 #endif
-  
+
   snprintf(authbuf, sizeof(authbuf), "%u , %u\r\n", tport, uport);
 
   if (send(fd->fd, authbuf, strlen(authbuf), 0) == -1)
@@ -488,7 +492,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
 }
 
 /*
- * read_auth_reply - read the reply (if any) from the ident server 
+ * read_auth_reply - read the reply (if any) from the ident server
  * we connected to.
  * We only give it one shot, if the reply isn't good the first time
  * fail the authentication entirely. --Bleep
@@ -575,7 +579,7 @@ read_auth_reply(fde_t *fd, void *data)
 /*
  * delete_auth()
  */
-void 
+void
 delete_auth(struct AuthRequest *auth)
 {
   if (IsDNSPending(auth))

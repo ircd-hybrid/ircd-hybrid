@@ -1,4 +1,30 @@
 /*
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
+ *
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ */
+
+/*! \file irc_res.c
+ * \brief ircd resolver functions
+ * \version $Id$
+ */
+
+/*
  * A rewrite of Darren Reeds original res.c As there is nothing
  * left of Darrens original code, this is now licensed by the hybrid group.
  * (Well, some of the function names are the same, and bits of the structs..)
@@ -14,7 +40,7 @@
  *     --Bleep (Thomas Helvey <tomh@inxpress.net>)
  *
  * This was all needlessly complicated for irc. Simplified. No more hostent
- * All we really care about is the IP -> hostname mappings. Thats all. 
+ * All we really care about is the IP -> hostname mappings. Thats all.
  *
  * Apr 28, 2003 --cryogen and Dianora
  */
@@ -38,7 +64,7 @@
 #include "irc_reslib.h"
 
 #if (CHAR_BIT != 8)
-#error this code needs to be able to address individual octets 
+#error this code needs to be able to address individual octets
 #endif
 
 static PF res_readreply;
@@ -58,7 +84,7 @@ static PF res_readreply;
 #define RDLENGTH_SIZE     (size_t)2
 #define ANSWER_FIXED_SIZE (TYPE_SIZE + CLASS_SIZE + TTL_SIZE + RDLENGTH_SIZE)
 
-typedef enum 
+typedef enum
 {
   REQ_IDLE,  /* We're doing not much at all */
   REQ_PTR,   /* Looking up a PTR */
@@ -69,7 +95,7 @@ typedef enum
   REQ_CNAME  /* We got a CNAME in response, we better get a real answer next */
 } request_state;
 
-struct reslist 
+struct reslist
 {
   dlink_node node;
   int id;
@@ -118,14 +144,14 @@ static struct reslist *find_id(int);
  *      revised for ircd, cryogen(stu) may03
  */
 static int
-res_ourserver(const struct irc_ssaddr *inp) 
+res_ourserver(const struct irc_ssaddr *inp)
 {
 #ifdef IPV6
   const struct sockaddr_in6 *v6;
   const struct sockaddr_in6 *v6in = (const struct sockaddr_in6 *)inp;
 #endif
   const struct sockaddr_in *v4;
-  const struct sockaddr_in *v4in = (const struct sockaddr_in *)inp; 
+  const struct sockaddr_in *v4in = (const struct sockaddr_in *)inp;
   int ns;
 
   for (ns = 0; ns < irc_nscount; ++ns)
@@ -166,7 +192,7 @@ res_ourserver(const struct irc_ssaddr *inp)
 }
 
 /*
- * timeout_query_list - Remove queries from the list which have been 
+ * timeout_query_list - Remove queries from the list which have been
  * there too long without being resolved.
  */
 static time_t
@@ -260,8 +286,8 @@ restart_resolver(void)
 }
 
 /*
- * rem_request - remove a request from the list. 
- * This must also free any memory that has been allocated for 
+ * rem_request - remove a request from the list.
+ * This must also free any memory that has been allocated for
  * temporary storage of DNS results.
  */
 static void
@@ -295,7 +321,7 @@ make_request(dns_callback_fnc callback, void *ctx)
 }
 
 /*
- * delete_resolver_queries - cleanup outstanding queries 
+ * delete_resolver_queries - cleanup outstanding queries
  * for which there no longer exist clients or conf lines.
  */
 void
@@ -316,7 +342,7 @@ delete_resolver_queries(const void *vptr)
  * send_res_msg - sends msg to all nameservers found in the "_res" structure.
  * This should reflect /etc/resolv.conf. We will get responses
  * which arent needed but is easier than checking to see if nameserver
- * isnt present. Returns number of messages successfully sent to 
+ * isnt present. Returns number of messages successfully sent to
  * nameservers or -1 if no successful sends.
  */
 static int
@@ -334,9 +360,9 @@ send_res_msg(const char *msg, int len, int rcount)
 
   for (i = 0; i < max_queries; i++)
   {
-    if (sendto(ResolverFileDescriptor.fd, msg, len, 0, 
-        (struct sockaddr*)&(irc_nsaddr_list[i]), 
-        irc_nsaddr_list[i].ss_len) == len) 
+    if (sendto(ResolverFileDescriptor.fd, msg, len, 0,
+        (struct sockaddr*)&(irc_nsaddr_list[i]),
+        irc_nsaddr_list[i].ss_len) == len)
       ++sent;
   }
 
@@ -362,7 +388,7 @@ find_id(int id)
   return NULL;
 }
 
-/* 
+/*
  * gethost_byname_type - get host address from name
  *
  */
@@ -494,7 +520,7 @@ query_name(const char *name, int query_class, int type,
 
   memset(buf, 0, sizeof(buf));
 
-  if ((request_len = irc_res_mkquery(name, query_class, type, 
+  if ((request_len = irc_res_mkquery(name, query_class, type,
       (unsigned char *)buf, sizeof(buf))) > 0)
   {
     HEADER *header = (HEADER *)buf;
@@ -603,8 +629,8 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
     rd_length = irc_ns_get16(current);
     current += RDLENGTH_SIZE;
 
-    /* 
-     * Wait to set request->type until we verify this structure 
+    /*
+     * Wait to set request->type until we verify this structure
      */
     switch (type)
     {
@@ -651,9 +677,9 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
         strlcpy(request->name, hostbuf, HOSTLEN + 1);
         return 1;
         break;
-      case T_CNAME: /* first check we already havent started looking 
+      case T_CNAME: /* first check we already havent started looking
                        into a cname */
-        if (request->type != T_PTR) 
+        if (request->type != T_PTR)
           return 0;
 
         if (request->state == REQ_CNAME)
@@ -669,7 +695,7 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
         request->state = REQ_CNAME;
         current += rd_length;
         break;
-        
+
       default:
         /* XXX I'd rather just throw away the entire bogus thing
          * but its possible its just a broken nameserver with still
@@ -690,13 +716,13 @@ static void
 res_readreply(fde_t *fd, void *data)
 {
   char buf[sizeof(HEADER) + MAXPACKET]
-	/* Sparc and alpha need 16bit-alignment for accessing header->id 
-	 * (which is uint16_t). Because of the header = (HEADER*) buf; 
+	/* Sparc and alpha need 16bit-alignment for accessing header->id
+	 * (which is uint16_t). Because of the header = (HEADER*) buf;
 	 * lateron, this is neeeded. --FaUl
 	 */
-#if defined(__sparc__) || defined(__alpha__)  
+#if defined(__sparc__) || defined(__alpha__)
 	  __attribute__((aligned (16)))
-#endif 
+#endif
 	  ;
   HEADER *header;
   struct reslist *request = NULL;
@@ -751,7 +777,7 @@ res_readreply(fde_t *fd, void *data)
 #ifdef IPV6
     else
     {
-      /* 
+      /*
        * If we havent already tried this, and we're looking up AAAA, try A
        * now
        */
@@ -767,7 +793,7 @@ res_readreply(fde_t *fd, void *data)
   }
 
   /*
-   * If this fails there was an error decoding the received packet, 
+   * If this fails there was an error decoding the received packet,
    * try it again and hope it works the next time.
    */
   if (proc_answer(request, header, buf, buf + rc))
@@ -787,7 +813,7 @@ res_readreply(fde_t *fd, void *data)
 
       /*
        * Lookup the 'authoritative' name that we were given for the
-       * ip#. 
+       * ip#.
        *
        */
 #ifdef IPV6
@@ -831,6 +857,6 @@ report_dns_servers(struct Client *source_p)
                 irc_nsaddr_list[i].ss_len, ipaddr,
                 sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
     sendto_one(source_p, form_str(RPL_STATSALINE),
-               me.name, source_p->name, ipaddr); 
+               me.name, source_p->name, ipaddr);
   }
 }

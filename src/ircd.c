@@ -1,8 +1,7 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
- *  ircd.c: Starts up and runs the ircd.
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (C) 2002 by the past and present ircd coders, and others.
+ *  Copyright (c) 1997-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,8 +17,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  *  USA
- *
- *  $Id$
+ */
+
+/*! \file ircd.c
+ * \brief Starts up and runs the ircd.
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -139,25 +141,25 @@ make_daemon(void)
 static int printVersion = 0;
 
 static struct lgetopt myopts[] = {
-  {"configfile", &ConfigFileEntry.configfile, 
+  {"configfile", &ConfigFileEntry.configfile,
    STRING, "File to use for ircd.conf"},
   {"glinefile",  &ConfigFileEntry.glinefile,
    STRING, "File to use for gline database"},
-  {"klinefile",  &ConfigFileEntry.klinefile, 
+  {"klinefile",  &ConfigFileEntry.klinefile,
    STRING, "File to use for kline database"},
   {"dlinefile",  &ConfigFileEntry.dlinefile,
    STRING, "File to use for dline database"},
-  {"xlinefile",  &ConfigFileEntry.xlinefile, 
+  {"xlinefile",  &ConfigFileEntry.xlinefile,
    STRING, "File to use for xline database"},
   {"resvfile",  &ConfigFileEntry.resvfile,
    STRING, "File to use for resv database"},
-  {"logfile",    &logFileName, 
+  {"logfile",    &logFileName,
    STRING, "File to use for ircd.log"},
   {"pidfile",    &pidFileName,
    STRING, "File to use for process ID"},
-  {"foreground", &server_state.foreground, 
+  {"foreground", &server_state.foreground,
    YESNO, "Run in foreground (don't detach)"},
-  {"version",    &printVersion, 
+  {"version",    &printVersion,
    YESNO, "Print version and exit"},
   {"help", NULL, USAGE, "Print this text"},
   {NULL, NULL, STRING, NULL},
@@ -201,7 +203,7 @@ io_loop(void)
   {
     /*
      * Maybe we want a flags word?
-     * ie. if (REHASHED_KLINES(global_flags)) 
+     * ie. if (REHASHED_KLINES(global_flags))
      * SET_REHASHED_KLINES(global_flags)
      * CLEAR_REHASHED_KLINES(global_flags)
      *
@@ -254,7 +256,7 @@ io_loop(void)
  *
  * inputs       - none
  * output       - none
- * side effects - This sets all global set options needed 
+ * side effects - This sets all global set options needed
  */
 static void
 initialize_global_set_options(void)
@@ -592,7 +594,7 @@ main(int argc, char *argv[])
 
   hash_add_id(&me);
   hash_add_client(&me);
-  
+
   /* add ourselves to global_serv_list */
   dlinkAdd(&me, make_dlink_node(), &global_serv_list);
 

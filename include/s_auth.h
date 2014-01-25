@@ -27,12 +27,16 @@
 #ifndef INCLUDED_s_auth_h
 #define INCLUDED_s_auth_h
 
-/*
- * flag values for AuthRequest
- * NAMESPACE: AM_xxx - Authentication Module
- */
-#define AM_DOING_AUTH        0x1
-#define AM_DNS_PENDING       0x2
+enum
+{
+  AM_IN_AUTH     = 1 << 0,
+  AM_DOING_AUTH  = 1 << 1,
+  AM_DNS_PENDING = 1 << 2
+};
+
+#define SetInAuth(x)         ((x)->flags |= AM_IN_AUTH)
+#define ClearInAuth(x)       ((x)->flags &= ~AM_IN_AUTH)
+#define IsInAuth(x)          ((x)->flags &  AM_IN_AUTH)
 
 #define SetDNSPending(x)     ((x)->flags |= AM_DNS_PENDING)
 #define ClearDNSPending(x)   ((x)->flags &= ~AM_DNS_PENDING)

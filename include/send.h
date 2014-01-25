@@ -29,13 +29,16 @@
 
 #include "fdlist.h"
 
-#define NOCAPS  0 /* no caps */
+enum { NOCAPS = 0 };
 
-#define ALL_MEMBERS  0
-#define NON_CHANOPS  1
-#define ONLY_CHANOPS_VOICED  2
-#define ONLY_CHANOPS 3
-#define ONLY_SERVERS 4 /* for channel_mode.c */
+enum
+{
+  ALL_MEMBERS         = 0,
+  NON_CHANOPS         = 1,
+  ONLY_CHANOPS_VOICED = 2,
+  ONLY_CHANOPS        = 3,
+  ONLY_SERVERS        = 4
+};
 
 enum
 {

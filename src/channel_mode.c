@@ -1599,7 +1599,8 @@ static struct ChannelMode ModeTable[256] =
  * side effects - NONE
  */
 static int
-get_channel_access(struct Client *source_p, struct Membership *member)
+get_channel_access(const struct Client *source_p,
+                   const struct Membership *member)
 {
   /* Let hacked servers in for now... */
   if (!MyClient(source_p))

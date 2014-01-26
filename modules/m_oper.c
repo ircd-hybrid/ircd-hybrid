@@ -124,7 +124,6 @@ m_oper(struct Client *client_p, struct Client *source_p,
       return 0;
     }
 
-    ++conf->count;
     oper_up(source_p);
 
     ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s",

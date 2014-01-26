@@ -151,12 +151,12 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       /* Don't allow non opers to see oper privs */
       if (HasUMode(source_p, UMODE_OPER))
         sendto_one(source_p, form_str(RPL_STATSOLINE),
-                   me.name, source_p->name, 'O', conf->count, conf->user, conf->host,
+                   me.name, source_p->name, 'O', conf->user, conf->host,
                    conf->name, oper_privs_as_string(conf->port),
                    conf->class ? conf->class->name : "<default>");
       else
         sendto_one(source_p, form_str(RPL_STATSOLINE),
-                   me.name, source_p->name, 'O', conf->count, conf->user, conf->host,
+                   me.name, source_p->name, 'O', conf->user, conf->host,
                    conf->name, "0",
                    conf->class ? conf->class->name : "<default>");
     }

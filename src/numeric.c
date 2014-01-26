@@ -277,7 +277,7 @@ static const char *const replies[] =
 /* 240 */ NULL,
 /* 241 RPL_STATSLLINE */ ":%s 241 %s %c %s * %s %d %s",
 /* 242 RPL_STATSUPTIME */ ":%s 242 %s :Server Up %d days, %d:%02d:%02d",
-/* 243 RPL_STATSOLINE */ ":%s 243 %s %c %u %s@%s * %s %s %s",
+/* 243 RPL_STATSOLINE */ ":%s 243 %s %c %s@%s * %s %s %s",
 /* 244 RPL_STATSHLINE */ ":%s 244 %s %c %s * %s %d %s",
 /* 245 RPL_STATSTLINE */ ":%s 245 %s T %s %s",
 /* 246 RPL_STATSSERVICE */ ":%s 246 %s %c %s * %s %d %d",

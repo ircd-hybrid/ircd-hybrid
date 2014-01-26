@@ -36,7 +36,6 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "s_serv.h"
-#include "s_user.h"
 #include "send.h"
 #include "event.h"
 #include "memory.h"

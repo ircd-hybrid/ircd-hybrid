@@ -1326,71 +1326,268 @@ struct ChannelMode
   unsigned int d;
 };
 
-static struct ChannelMode ModeTable[255] =
+static struct ChannelMode ModeTable[256] =
 {
-  {chm_nosuch, 0},
-  {chm_nosuch, 0},                             /* A */
-  {chm_nosuch, 0},                             /* B */
-  {chm_nosuch, 0},                             /* C */
-  {chm_nosuch, 0},                             /* D */
-  {chm_nosuch, 0},                             /* E */
-  {chm_nosuch, 0},                             /* F */
-  {chm_nosuch, 0},                             /* G */
-  {chm_nosuch, 0},                             /* H */
-  {chm_invex, 0},                              /* I */
-  {chm_nosuch, 0},                             /* J */
-  {chm_nosuch, 0},                             /* K */
-  {chm_nosuch, 0},                             /* L */
-  {chm_simple, MODE_MODREG},                   /* M */
-  {chm_nosuch, 0},                             /* N */
-  {chm_operonly, MODE_OPERONLY},               /* O */
-  {chm_nosuch, 0},                             /* P */
-  {chm_nosuch, 0},                             /* Q */
-  {chm_simple, MODE_REGONLY},                  /* R */
-  {chm_simple, MODE_SSLONLY},                  /* S */
-  {chm_nosuch, 0},                             /* T */
-  {chm_nosuch, 0},                             /* U */
-  {chm_nosuch, 0},                             /* V */
-  {chm_nosuch, 0},                             /* W */
-  {chm_nosuch, 0},                             /* X */
-  {chm_nosuch, 0},                             /* Y */
-  {chm_nosuch, 0},                             /* Z */
-  {chm_nosuch, 0},
-  {chm_nosuch, 0},
-  {chm_nosuch, 0},
-  {chm_nosuch, 0},
-  {chm_nosuch, 0},
-  {chm_nosuch, 0},
-  {chm_nosuch, 0},                                /* a */
-  {chm_ban, 0},                                   /* b */
-  {chm_simple, MODE_NOCTRL},                      /* c */
-  {chm_nosuch, 0},                                /* d */
-  {chm_except, 0},                                /* e */
-  {chm_nosuch, 0},                                /* f */
-  {chm_nosuch, 0},                                /* g */
+  { chm_nosuch,  0 },			/* 0x00 */
+  { chm_nosuch,  0 },			/* 0x01 */
+  { chm_nosuch,  0 },			/* 0x02 */
+  { chm_nosuch,  0 },			/* 0x03 */
+  { chm_nosuch,  0 },			/* 0x04 */
+  { chm_nosuch,  0 },			/* 0x05 */
+  { chm_nosuch,  0 },			/* 0x06 */
+  { chm_nosuch,  0 },			/* 0x07 */
+  { chm_nosuch,  0 },			/* 0x08 */
+  { chm_nosuch,  0 },			/* 0x09 */
+  { chm_nosuch,  0 },			/* 0x0a */
+  { chm_nosuch,  0 },			/* 0x0b */
+  { chm_nosuch,  0 },			/* 0x0c */
+  { chm_nosuch,  0 },			/* 0x0d */
+  { chm_nosuch,  0 },			/* 0x0e */
+  { chm_nosuch,  0 },			/* 0x0f */
+  { chm_nosuch,  0 },			/* 0x10 */
+  { chm_nosuch,  0 },			/* 0x11 */
+  { chm_nosuch,  0 },			/* 0x12 */
+  { chm_nosuch,  0 },			/* 0x13 */
+  { chm_nosuch,  0 },			/* 0x14 */
+  { chm_nosuch,  0 },			/* 0x15 */
+  { chm_nosuch,  0 },			/* 0x16 */
+  { chm_nosuch,  0 },			/* 0x17 */
+  { chm_nosuch,  0 },			/* 0x18 */
+  { chm_nosuch,  0 },			/* 0x19 */
+  { chm_nosuch,  0 },			/* 0x1a */
+  { chm_nosuch,  0 },			/* 0x1b */
+  { chm_nosuch,  0 },			/* 0x1c */
+  { chm_nosuch,  0 },			/* 0x1d */
+  { chm_nosuch,  0 },			/* 0x1e */
+  { chm_nosuch,  0 },			/* 0x1f */
+  { chm_nosuch,  0 },			/* 0x20 */
+  { chm_nosuch,  0 },			/* 0x21 */
+  { chm_nosuch,  0 },			/* 0x22 */
+  { chm_nosuch,  0 },			/* 0x23 */
+  { chm_nosuch,  0 },			/* 0x24 */
+  { chm_nosuch,  0 },			/* 0x25 */
+  { chm_nosuch,  0 },			/* 0x26 */
+  { chm_nosuch,  0 },			/* 0x27 */
+  { chm_nosuch,  0 },			/* 0x28 */
+  { chm_nosuch,  0 },			/* 0x29 */
+  { chm_nosuch,  0 },			/* 0x2a */
+  { chm_nosuch,  0 },			/* 0x2b */
+  { chm_nosuch,  0 },			/* 0x2c */
+  { chm_nosuch,  0 },			/* 0x2d */
+  { chm_nosuch,  0 },			/* 0x2e */
+  { chm_nosuch,  0 },			/* 0x2f */
+  { chm_nosuch,  0 },			/* 0x30 */
+  { chm_nosuch,  0 },			/* 0x31 */
+  { chm_nosuch,  0 },			/* 0x32 */
+  { chm_nosuch,  0 },			/* 0x33 */
+  { chm_nosuch,  0 },			/* 0x34 */
+  { chm_nosuch,  0 },			/* 0x35 */
+  { chm_nosuch,  0 },			/* 0x36 */
+  { chm_nosuch,  0 },			/* 0x37 */
+  { chm_nosuch,  0 },			/* 0x38 */
+  { chm_nosuch,  0 },			/* 0x39 */
+  { chm_nosuch,  0 },			/* 0x3a */
+  { chm_nosuch,  0 },			/* 0x3b */
+  { chm_nosuch,  0 },			/* 0x3c */
+  { chm_nosuch,  0 },			/* 0x3d */
+  { chm_nosuch,  0 },			/* 0x3e */
+  { chm_nosuch,  0 },			/* 0x3f */
+  { chm_nosuch,  0 },                   /* @ */
+  { chm_nosuch,  0 },                   /* A */
+  { chm_nosuch,  0 },                   /* B */
+  { chm_nosuch,  0 },                   /* C */
+  { chm_nosuch,  0 },                   /* D */
+  { chm_nosuch,  0 },                   /* E */
+  { chm_nosuch,  0 },                   /* F */
+  { chm_nosuch,  0 },                   /* G */
+  { chm_nosuch,  0 },                   /* H */
+  { chm_invex,   0 },                   /* I */
+  { chm_nosuch,  0 },                   /* J */
+  { chm_nosuch,  0 },                   /* K */
+  { chm_nosuch,  0 },                   /* L */
+  { chm_simple, MODE_MODREG},           /* M */
+  { chm_nosuch,  0 },                   /* N */
+  { chm_operonly, MODE_OPERONLY},       /* O */
+  { chm_nosuch,  0 },                   /* P */
+  { chm_nosuch,  0 },                   /* Q */
+  { chm_simple, MODE_REGONLY},          /* R */
+  { chm_simple, MODE_SSLONLY},          /* S */
+  { chm_nosuch,  0 },                   /* T */
+  { chm_nosuch,  0 },                   /* U */
+  { chm_nosuch,  0 },                   /* V */
+  { chm_nosuch,  0 },                   /* W */
+  { chm_nosuch,  0 },                   /* X */
+  { chm_nosuch,  0 },                   /* Y */
+  { chm_nosuch,  0 },                   /* Z */
+  { chm_nosuch,  0 },
+  { chm_nosuch,  0 },
+  { chm_nosuch,  0 },
+  { chm_nosuch,  0 },
+  { chm_nosuch,  0 },
+  { chm_nosuch,  0 },
+  { chm_nosuch,  0 },                   /* a */
+  { chm_ban,     0 },                   /* b */
+  { chm_simple, MODE_NOCTRL},           /* c */
+  { chm_nosuch,  0 },                   /* d */
+  { chm_except,  0 },                   /* e */
+  { chm_nosuch,  0 },                   /* f */
+  { chm_nosuch,  0 },                   /* g */
 #ifdef HALFOPS
-  {chm_hop, 0},                                   /* h */
+  { chm_hop,     0 },                   /* h */
 #else
-  {chm_nosuch, 0},                                /* h */
+  { chm_nosuch,  0 },                   /* h */
 #endif
-  {chm_simple, MODE_INVITEONLY},                  /* i */
-  {chm_nosuch, 0},                                /* j */
-  {chm_key, 0},                                   /* k */
-  {chm_limit, 0},                                 /* l */
-  {chm_simple, MODE_MODERATED},                   /* m */
-  {chm_simple, MODE_NOPRIVMSGS},                  /* n */
-  {chm_op, 0},                                    /* o */
-  {chm_simple,  MODE_PRIVATE},                    /* p */
-  {chm_nosuch, 0},                                /* q */
-  {chm_registered, MODE_REGISTERED},              /* r */
-  {chm_simple, MODE_SECRET},                      /* s */
-  {chm_simple, MODE_TOPICLIMIT},                  /* t */
-  {chm_nosuch, 0},                                /* u */
-  {chm_voice, 0},                                 /* v */
-  {chm_nosuch, 0},                                /* w */
-  {chm_nosuch, 0},                                /* x */
-  {chm_nosuch, 0},                                /* y */
-  {chm_nosuch, 0},                                /* z */
+  { chm_simple,     MODE_INVITEONLY },  /* i */
+  { chm_nosuch,     0               },  /* j */
+  { chm_key,        0               },  /* k */
+  { chm_limit,      0               },  /* l */
+  { chm_simple,     MODE_MODERATED  },  /* m */
+  { chm_simple,     MODE_NOPRIVMSGS },  /* n */
+  { chm_op,         0               },  /* o */
+  { chm_simple,     MODE_PRIVATE    },  /* p */
+  { chm_nosuch,     0               },  /* q */
+  { chm_registered, MODE_REGISTERED },  /* r */
+  { chm_simple,     MODE_SECRET     },  /* s */
+  { chm_simple,     MODE_TOPICLIMIT },  /* t */
+  { chm_nosuch,     0               },  /* u */
+  { chm_voice,      0               },  /* v */
+  { chm_nosuch,     0               },  /* w */
+  { chm_nosuch,     0               },  /* x */
+  { chm_nosuch,     0               },  /* y */
+  { chm_nosuch,     0               },  /* z */
+  { chm_nosuch,  0 },			/* 0x7b */
+  { chm_nosuch,  0 },			/* 0x7c */
+  { chm_nosuch,  0 },			/* 0x7d */
+  { chm_nosuch,  0 },			/* 0x7e */
+  { chm_nosuch,  0 },			/* 0x7f */
+  { chm_nosuch,  0 },			/* 0x80 */
+  { chm_nosuch,  0 },			/* 0x81 */
+  { chm_nosuch,  0 },			/* 0x82 */
+  { chm_nosuch,  0 },			/* 0x83 */
+  { chm_nosuch,  0 },			/* 0x84 */
+  { chm_nosuch,  0 },			/* 0x85 */
+  { chm_nosuch,  0 },			/* 0x86 */
+  { chm_nosuch,  0 },			/* 0x87 */
+  { chm_nosuch,  0 },			/* 0x88 */
+  { chm_nosuch,  0 },			/* 0x89 */
+  { chm_nosuch,  0 },			/* 0x8a */
+  { chm_nosuch,  0 },			/* 0x8b */
+  { chm_nosuch,  0 },			/* 0x8c */
+  { chm_nosuch,  0 },			/* 0x8d */
+  { chm_nosuch,  0 },			/* 0x8e */
+  { chm_nosuch,  0 },			/* 0x8f */
+  { chm_nosuch,  0 },			/* 0x90 */
+  { chm_nosuch,  0 },			/* 0x91 */
+  { chm_nosuch,  0 },			/* 0x92 */
+  { chm_nosuch,  0 },			/* 0x93 */
+  { chm_nosuch,  0 },			/* 0x94 */
+  { chm_nosuch,  0 },			/* 0x95 */
+  { chm_nosuch,  0 },			/* 0x96 */
+  { chm_nosuch,  0 },			/* 0x97 */
+  { chm_nosuch,  0 },			/* 0x98 */
+  { chm_nosuch,  0 },			/* 0x99 */
+  { chm_nosuch,  0 },			/* 0x9a */
+  { chm_nosuch,  0 },			/* 0x9b */
+  { chm_nosuch,  0 },			/* 0x9c */
+  { chm_nosuch,  0 },			/* 0x9d */
+  { chm_nosuch,  0 },			/* 0x9e */
+  { chm_nosuch,  0 },			/* 0x9f */
+  { chm_nosuch,  0 },			/* 0xa0 */
+  { chm_nosuch,  0 },			/* 0xa1 */
+  { chm_nosuch,  0 },			/* 0xa2 */
+  { chm_nosuch,  0 },			/* 0xa3 */
+  { chm_nosuch,  0 },			/* 0xa4 */
+  { chm_nosuch,  0 },			/* 0xa5 */
+  { chm_nosuch,  0 },			/* 0xa6 */
+  { chm_nosuch,  0 },			/* 0xa7 */
+  { chm_nosuch,  0 },			/* 0xa8 */
+  { chm_nosuch,  0 },			/* 0xa9 */
+  { chm_nosuch,  0 },			/* 0xaa */
+  { chm_nosuch,  0 },			/* 0xab */
+  { chm_nosuch,  0 },			/* 0xac */
+  { chm_nosuch,  0 },			/* 0xad */
+  { chm_nosuch,  0 },			/* 0xae */
+  { chm_nosuch,  0 },			/* 0xaf */
+  { chm_nosuch,  0 },			/* 0xb0 */
+  { chm_nosuch,  0 },			/* 0xb1 */
+  { chm_nosuch,  0 },			/* 0xb2 */
+  { chm_nosuch,  0 },			/* 0xb3 */
+  { chm_nosuch,  0 },			/* 0xb4 */
+  { chm_nosuch,  0 },			/* 0xb5 */
+  { chm_nosuch,  0 },			/* 0xb6 */
+  { chm_nosuch,  0 },			/* 0xb7 */
+  { chm_nosuch,  0 },			/* 0xb8 */
+  { chm_nosuch,  0 },			/* 0xb9 */
+  { chm_nosuch,  0 },			/* 0xba */
+  { chm_nosuch,  0 },			/* 0xbb */
+  { chm_nosuch,  0 },			/* 0xbc */
+  { chm_nosuch,  0 },			/* 0xbd */
+  { chm_nosuch,  0 },			/* 0xbe */
+  { chm_nosuch,  0 },			/* 0xbf */
+  { chm_nosuch,  0 },			/* 0xc0 */
+  { chm_nosuch,  0 },			/* 0xc1 */
+  { chm_nosuch,  0 },			/* 0xc2 */
+  { chm_nosuch,  0 },			/* 0xc3 */
+  { chm_nosuch,  0 },			/* 0xc4 */
+  { chm_nosuch,  0 },			/* 0xc5 */
+  { chm_nosuch,  0 },			/* 0xc6 */
+  { chm_nosuch,  0 },			/* 0xc7 */
+  { chm_nosuch,  0 },			/* 0xc8 */
+  { chm_nosuch,  0 },			/* 0xc9 */
+  { chm_nosuch,  0 },			/* 0xca */
+  { chm_nosuch,  0 },			/* 0xcb */
+  { chm_nosuch,  0 },			/* 0xcc */
+  { chm_nosuch,  0 },			/* 0xcd */
+  { chm_nosuch,  0 },			/* 0xce */
+  { chm_nosuch,  0 },			/* 0xcf */
+  { chm_nosuch,  0 },			/* 0xd0 */
+  { chm_nosuch,  0 },			/* 0xd1 */
+  { chm_nosuch,  0 },			/* 0xd2 */
+  { chm_nosuch,  0 },			/* 0xd3 */
+  { chm_nosuch,  0 },			/* 0xd4 */
+  { chm_nosuch,  0 },			/* 0xd5 */
+  { chm_nosuch,  0 },			/* 0xd6 */
+  { chm_nosuch,  0 },			/* 0xd7 */
+  { chm_nosuch,  0 },			/* 0xd8 */
+  { chm_nosuch,  0 },			/* 0xd9 */
+  { chm_nosuch,  0 },			/* 0xda */
+  { chm_nosuch,  0 },			/* 0xdb */
+  { chm_nosuch,  0 },			/* 0xdc */
+  { chm_nosuch,  0 },			/* 0xdd */
+  { chm_nosuch,  0 },			/* 0xde */
+  { chm_nosuch,  0 },			/* 0xdf */
+  { chm_nosuch,  0 },			/* 0xe0 */
+  { chm_nosuch,  0 },			/* 0xe1 */
+  { chm_nosuch,  0 },			/* 0xe2 */
+  { chm_nosuch,  0 },			/* 0xe3 */
+  { chm_nosuch,  0 },			/* 0xe4 */
+  { chm_nosuch,  0 },			/* 0xe5 */
+  { chm_nosuch,  0 },			/* 0xe6 */
+  { chm_nosuch,  0 },			/* 0xe7 */
+  { chm_nosuch,  0 },			/* 0xe8 */
+  { chm_nosuch,  0 },			/* 0xe9 */
+  { chm_nosuch,  0 },			/* 0xea */
+  { chm_nosuch,  0 },			/* 0xeb */
+  { chm_nosuch,  0 },			/* 0xec */
+  { chm_nosuch,  0 },			/* 0xed */
+  { chm_nosuch,  0 },			/* 0xee */
+  { chm_nosuch,  0 },			/* 0xef */
+  { chm_nosuch,  0 },			/* 0xf0 */
+  { chm_nosuch,  0 },			/* 0xf1 */
+  { chm_nosuch,  0 },			/* 0xf2 */
+  { chm_nosuch,  0 },			/* 0xf3 */
+  { chm_nosuch,  0 },			/* 0xf4 */
+  { chm_nosuch,  0 },			/* 0xf5 */
+  { chm_nosuch,  0 },			/* 0xf6 */
+  { chm_nosuch,  0 },			/* 0xf7 */
+  { chm_nosuch,  0 },			/* 0xf8 */
+  { chm_nosuch,  0 },			/* 0xf9 */
+  { chm_nosuch,  0 },			/* 0xfa */
+  { chm_nosuch,  0 },			/* 0xfb */
+  { chm_nosuch,  0 },			/* 0xfc */
+  { chm_nosuch,  0 },			/* 0xfd */
+  { chm_nosuch,  0 },			/* 0xfe */
+  { chm_nosuch,  0 },			/* 0xff */
 };
 
 /* get_channel_access()
@@ -1684,7 +1881,6 @@ set_channel_mode(struct Client *client_p, struct Client *source_p, struct Channe
   int parn = 1;
   int alevel, errors = 0;
   char *ml = parv[0], c;
-  int table_position;
 
   mode_count = 0;
   mode_limit = 0;
@@ -1692,7 +1888,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p, struct Channe
 
   alevel = get_channel_access(source_p, member);
 
-  for (; (c = *ml) != '\0'; ml++)
+  for (; (c = *ml); ++ml)
   {
     switch (c)
     {
@@ -1706,15 +1902,13 @@ set_channel_mode(struct Client *client_p, struct Client *source_p, struct Channe
         dir = MODE_QUERY;
         break;
       default:
-        if (c < 'A' || c > 'z')
-          table_position = 0;
-        else
-          table_position = c - 'A' + 1;
-        ModeTable[table_position].func(client_p, source_p, chptr,
-                                       parc, &parn,
-                                       parv, &errors, alevel, dir, c,
-                                       ModeTable[table_position].d);
+      {
+        struct ChannelMode *tptr = &ModeTable[(unsigned char)c];
+
+        tptr->func(client_p, source_p, chptr, parc, &parn,
+                   parv, &errors, alevel, dir, c, tptr->d);
         break;
+      }
     }
   }
 

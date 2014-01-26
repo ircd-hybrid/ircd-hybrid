@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "irc_string.h"
-#include "ircd.h"
 
 
 /*! \brief Check a string against a mask.

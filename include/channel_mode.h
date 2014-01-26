@@ -116,9 +116,10 @@ struct mode_letter
 };
 
 extern const struct mode_letter chan_modes[];
+
 extern int add_id(struct Client *, struct Channel *, char *, int);
 extern void set_channel_mode(struct Client *, struct Client *, struct Channel *,
-                             struct Membership *, int, char **, char *);
+                             struct Membership *, int, char **);
 extern void clear_ban_cache(struct Channel *);
 extern void clear_ban_cache_client(struct Client *);
 extern void init_chcap_usage_counts(void);

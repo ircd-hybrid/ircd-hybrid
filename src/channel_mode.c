@@ -944,16 +944,15 @@ clear_ban_cache_client(struct Client *client_p)
 }
 
 static void
-chm_op(struct Client *client_p, struct Client *source_p,
-       struct Channel *chptr, int parc, int *parn,
-       char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_voice(struct Client *client_p, struct Client *source_p,
+          struct Channel *chptr, int parc, int *parn,
+          char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
   struct Client *targ_p;
   struct Membership *member;
-  int caps = 0;
 
-  if (alev < CHACCESS_CHANOP)
+  if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
@@ -963,7 +962,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if ((dir == MODE_QUERY) || (parc <= *parn))
+  if ((dir == MODE_QUERY) || parc <= *parn)
     return;
 
   opnick = parv[(*parn)++];
@@ -976,8 +975,8 @@ chm_op(struct Client *client_p, struct Client *source_p,
   if ((member = find_channel_link(targ_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
-                 source_p->name, opnick, chptr->chname);
+      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
+                 me.name, source_p->name, opnick, chptr->chname);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -986,39 +985,14 @@ chm_op(struct Client *client_p, struct Client *source_p,
     return;
 
   /* no redundant mode changes */
-  if (dir == MODE_ADD &&  has_member_flags(member, CHFL_CHANOP))
+  if (dir == MODE_ADD &&  has_member_flags(member, CHFL_VOICE))
     return;
-  if (dir == MODE_DEL && !has_member_flags(member, CHFL_CHANOP))
-  {
-#ifdef HALFOPS
-    if (has_member_flags(member, CHFL_HALFOP))
-    {
-      --*parn;
-      chm_hop(client_p, source_p, chptr, parc, parn, parv, errors, alev,
-              dir, c, d);
-    }
-#endif
+  if (dir == MODE_DEL && !has_member_flags(member, CHFL_VOICE))
     return;
-  }
 
-#ifdef HALFOPS
-  if (dir == MODE_ADD && has_member_flags(member, CHFL_HALFOP))
-  {
-    /* promoting from % to @ is visible only to CAP_HOPS servers */
-    mode_changes[mode_count].letter = 'h';
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].caps = caps = CAP_HOPS;
-    mode_changes[mode_count].nocaps = 0;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].arg = targ_p->name;
-    mode_changes[mode_count++].client = targ_p;
-  }
-#endif
-
-  mode_changes[mode_count].letter = 'o';
+  mode_changes[mode_count].letter = 'v';
   mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].caps = caps;
+  mode_changes[mode_count].caps = 0;
   mode_changes[mode_count].nocaps = 0;
   mode_changes[mode_count].mems = ALL_MEMBERS;
   mode_changes[mode_count].id = targ_p->id;
@@ -1026,12 +1000,9 @@ chm_op(struct Client *client_p, struct Client *source_p,
   mode_changes[mode_count++].client = targ_p;
 
   if (dir == MODE_ADD)
-  {
-    AddMemberFlag(member, CHFL_CHANOP);
-    DelMemberFlag(member, CHFL_DEOPPED | CHFL_HALFOP);
-  }
+    AddMemberFlag(member, CHFL_VOICE);
   else
-    DelMemberFlag(member, CHFL_CHANOP);
+    DelMemberFlag(member, CHFL_VOICE);
 }
 
 #ifdef HALFOPS
@@ -1125,15 +1096,16 @@ chm_hop(struct Client *client_p, struct Client *source_p,
 #endif
 
 static void
-chm_voice(struct Client *client_p, struct Client *source_p,
-          struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_op(struct Client *client_p, struct Client *source_p,
+       struct Channel *chptr, int parc, int *parn,
+       char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
   struct Client *targ_p;
   struct Membership *member;
+  int caps = 0;
 
-  if (alev < CHACCESS_HALFOP)
+  if (alev < CHACCESS_CHANOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?
@@ -1143,7 +1115,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  if ((dir == MODE_QUERY) || parc <= *parn)
+  if ((dir == MODE_QUERY) || (parc <= *parn))
     return;
 
   opnick = parv[(*parn)++];
@@ -1156,8 +1128,8 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   if ((member = find_channel_link(targ_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL),
-                 me.name, source_p->name, opnick, chptr->chname);
+      sendto_one(source_p, form_str(ERR_USERNOTINCHANNEL), me.name,
+                 source_p->name, opnick, chptr->chname);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -1166,14 +1138,39 @@ chm_voice(struct Client *client_p, struct Client *source_p,
     return;
 
   /* no redundant mode changes */
-  if (dir == MODE_ADD &&  has_member_flags(member, CHFL_VOICE))
+  if (dir == MODE_ADD &&  has_member_flags(member, CHFL_CHANOP))
     return;
-  if (dir == MODE_DEL && !has_member_flags(member, CHFL_VOICE))
+  if (dir == MODE_DEL && !has_member_flags(member, CHFL_CHANOP))
+  {
+#ifdef HALFOPS
+    if (has_member_flags(member, CHFL_HALFOP))
+    {
+      --*parn;
+      chm_hop(client_p, source_p, chptr, parc, parn, parv, errors, alev,
+              dir, c, d);
+    }
+#endif
     return;
+  }
 
-  mode_changes[mode_count].letter = 'v';
+#ifdef HALFOPS
+  if (dir == MODE_ADD && has_member_flags(member, CHFL_HALFOP))
+  {
+    /* promoting from % to @ is visible only to CAP_HOPS servers */
+    mode_changes[mode_count].letter = 'h';
+    mode_changes[mode_count].dir = MODE_DEL;
+    mode_changes[mode_count].caps = caps = CAP_HOPS;
+    mode_changes[mode_count].nocaps = 0;
+    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count].arg = targ_p->name;
+    mode_changes[mode_count++].client = targ_p;
+  }
+#endif
+
+  mode_changes[mode_count].letter = 'o';
   mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].caps = 0;
+  mode_changes[mode_count].caps = caps;
   mode_changes[mode_count].nocaps = 0;
   mode_changes[mode_count].mems = ALL_MEMBERS;
   mode_changes[mode_count].id = targ_p->id;
@@ -1181,9 +1178,12 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   mode_changes[mode_count++].client = targ_p;
 
   if (dir == MODE_ADD)
-    AddMemberFlag(member, CHFL_VOICE);
+  {
+    AddMemberFlag(member, CHFL_CHANOP);
+    DelMemberFlag(member, CHFL_DEOPPED | CHFL_HALFOP);
+  }
   else
-    DelMemberFlag(member, CHFL_VOICE);
+    DelMemberFlag(member, CHFL_CHANOP);
 }
 
 static void

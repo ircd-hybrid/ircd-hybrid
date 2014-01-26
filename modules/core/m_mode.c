@@ -97,8 +97,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
    * including telnet servers *g* - Dianora
    */
   if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))
-    set_channel_mode(client_p, source_p, chptr, NULL, parc - 2, parv + 2,
-                     chptr->chname);
+    set_channel_mode(client_p, source_p, chptr, NULL, parc - 2, parv + 2);
   else
   {
     member = find_channel_link(source_p, chptr);
@@ -110,8 +109,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
         if (!((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0')))
           flood_endgrace(source_p);
 
-      set_channel_mode(client_p, source_p, chptr, member, parc - 2, parv + 2,
-                       chptr->chname);
+      set_channel_mode(client_p, source_p, chptr, member, parc - 2, parv + 2);
     }
   }
 
@@ -143,7 +141,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[
     return 0;
 
   if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))
-    set_channel_mode(client_p, source_p, chptr, NULL, parc - 3, parv + 3, chptr->chname);
+    set_channel_mode(client_p, source_p, chptr, NULL, parc - 3, parv + 3);
   else
   {
     member = find_channel_link(source_p, chptr);
@@ -152,7 +150,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[
     if (has_member_flags(member, CHFL_DEOPPED))
       return 0;
 
-    set_channel_mode(client_p, source_p, chptr, member, parc - 3, parv + 3, chptr->chname);
+    set_channel_mode(client_p, source_p, chptr, member, parc - 3, parv + 3);
   }
 
   return 0;

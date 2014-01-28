@@ -47,7 +47,7 @@ extern void oper_up(struct Client *);
 extern void register_local_user(struct Client *);
 extern void register_remote_user(struct Client *,
                                  const char *, const char *,
-                                 const char *, const char *);
+                                 const char *);
 extern void init_uid(void);
 extern int valid_sid(const char *);
 extern int valid_hostname(const char *);

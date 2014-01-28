@@ -81,9 +81,6 @@ extern void sendto_channel_local(unsigned int, int, struct Channel *,
                                  const char *, ...) AFP(4,5);
 extern void sendto_channel_local_butone(struct Client *, unsigned int, unsigned int, struct Channel *,
                                         const char *, ...) AFP(5,6);
-extern void sendto_channel_remote(struct Client *, struct Client *, unsigned int,
-                                  const unsigned int, const unsigned int,
-                                  struct Channel *, const char *, ...) AFP(7,8);
 extern void sendto_server(struct Client *,
                           const unsigned int,
                           const unsigned int, const char *, ...) AFP(4,5);

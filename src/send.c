@@ -612,60 +612,6 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
   }
 }
 
-
-/* sendto_channel_remote()
- *
- * inputs	- Client not to send towards
- *		- Client from whom message is from
- *		- member status mask, e.g. CHFL_CHANOP | CHFL_VOICE
- *              - pointer to channel to send to
- *              - var args pattern
- * output	- NONE
- * side effects - Send a message to all members of a channel that are
- *		  remote to this server.
- */
-void
-sendto_channel_remote(struct Client *one, struct Client *from, unsigned int type,
-                      const unsigned int caps, const unsigned int nocaps,
-                      struct Channel *chptr, const char *pattern, ...)
-{
-  va_list args;
-  char buffer[IRCD_BUFSIZE];
-  int len = 0;
-  dlink_node *ptr = NULL;
-
-  va_start(args, pattern);
-  len = send_format(buffer, sizeof(buffer), pattern, args);
-  va_end(args);
-
-  ++current_serial;
-
-  DLINK_FOREACH(ptr, chptr->members.head)
-  {
-    struct Membership *ms = ptr->data;
-    struct Client *target_p = ms->client_p;
-
-    if (type != 0 && (ms->flags & type) == 0)
-      continue;
-
-    if (MyConnect(target_p))
-      continue;
-
-    target_p = target_p->from;
-
-    if (target_p == one->from ||
-        ((target_p->from->localClient->caps & caps) != caps) ||
-        ((target_p->from->localClient->caps & nocaps) != 0))
-      continue;
-
-    if (target_p->from->localClient->serial != current_serial)
-    {
-      send_message(target_p, buffer, len);
-      target_p->from->localClient->serial = current_serial;
-    }
-  }
-}
-
 /*
  ** match_it() and sendto_match_butone() ARE only used
  ** to send a msg to all ppl on servers/hosts that match a specified mask

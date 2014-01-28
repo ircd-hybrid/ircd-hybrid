@@ -47,8 +47,8 @@ struct module_path
   char path[HYB_PATH_MAX + 1];
 };
 
-extern dlink_list modules_list;
 
+extern dlink_list *modules_get_list(void);
 /* add a path */
 extern void mod_add_path(const char *);
 extern void mod_clear_paths(void);

@@ -41,10 +41,9 @@
 #include "memory.h"
 
 
-dlink_list modules_list = { NULL, NULL, 0 };
-
-static dlink_list mod_paths = { NULL, NULL, 0 };
-static dlink_list conf_modules = { NULL, NULL, 0 };
+static dlink_list modules_list;
+static dlink_list modules_path;
+static dlink_list modules_conf;
 
 static const char *unknown_ver = "<unknown>";
 static const char *core_module_table[] =
@@ -64,6 +63,13 @@ static const char *core_module_table[] =
   "m_squit.la",
   NULL
 };
+
+
+dlink_list *
+modules_get_list(void)
+{
+  return &modules_list;
+}
 
 int
 modules_valid_suffix(const char *name)
@@ -194,9 +200,9 @@ modules_init(void)
 static struct module_path *
 mod_find_path(const char *path)
 {
-  dlink_node *ptr;
+  dlink_node *ptr = NULL;
 
-  DLINK_FOREACH(ptr, mod_paths.head)
+  DLINK_FOREACH(ptr, modules_path.head)
   {
     struct module_path *mpath = ptr->data;
 
@@ -224,7 +230,7 @@ mod_add_path(const char *path)
   pathst = MyMalloc(sizeof(struct module_path));
 
   strlcpy(pathst->path, path, sizeof(pathst->path));
-  dlinkAdd(pathst, &pathst->node, &mod_paths);
+  dlinkAdd(pathst, &pathst->node, &modules_path);
 }
 
 /* add_conf_module
@@ -241,7 +247,7 @@ add_conf_module(const char *name)
   pathst = MyMalloc(sizeof(struct module_path));
 
   strlcpy(pathst->path, name, sizeof(pathst->path));
-  dlinkAdd(pathst, &pathst->node, &conf_modules);
+  dlinkAdd(pathst, &pathst->node, &modules_conf);
 }
 
 /* mod_clear_paths()
@@ -255,15 +261,15 @@ mod_clear_paths(void)
 {
   dlink_node *ptr = NULL, *next_ptr = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, mod_paths.head)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, modules_path.head)
   {
-    dlinkDelete(ptr, &mod_paths);
+    dlinkDelete(ptr, &modules_path);
     MyFree(ptr->data);
   }
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, conf_modules.head)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, modules_conf.head)
   {
-    dlinkDelete(ptr, &conf_modules);
+    dlinkDelete(ptr, &modules_conf);
     MyFree(ptr->data);
   }
 }
@@ -334,7 +340,7 @@ load_conf_modules(void)
 {
   dlink_node *ptr = NULL;
 
-  DLINK_FOREACH(ptr, conf_modules.head)
+  DLINK_FOREACH(ptr, modules_conf.head)
   {
     struct module_path *mpath = ptr->data;
 
@@ -383,7 +389,7 @@ load_one_module(const char *path)
   char modpath[HYB_PATH_MAX + 1];
   struct stat statbuf;
 
-  DLINK_FOREACH(ptr, mod_paths.head)
+  DLINK_FOREACH(ptr, modules_path.head)
   {
     const struct module_path *mpath = ptr->data;
 

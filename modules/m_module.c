@@ -151,9 +151,9 @@ mo_module(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, ":%s NOTICE %s :Reloading all modules",
                  me.name, source_p->name);
 
-      modnum = dlink_list_length(&modules_list);
+      modnum = dlink_list_length(modules_get_list());
 
-      DLINK_FOREACH_SAFE(ptr, ptr_next, modules_list.head)
+      DLINK_FOREACH_SAFE(ptr, ptr_next, modules_get_list()->head)
       {
         modp = ptr->data;
 
@@ -167,9 +167,9 @@ mo_module(struct Client *client_p, struct Client *source_p,
 
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Module Restart: %u modules unloaded, %u modules loaded",
-                           modnum, dlink_list_length(&modules_list));
+                           modnum, dlink_list_length(modules_get_list()));
       ilog(LOG_TYPE_IRCD, "Module Restart: %u modules unloaded, %u modules loaded",
-           modnum, dlink_list_length(&modules_list));
+           modnum, dlink_list_length(modules_get_list()));
       return 0;
     }
 
@@ -213,7 +213,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
   {
     const dlink_node *ptr = NULL;
 
-    DLINK_FOREACH(ptr, modules_list.head)
+    DLINK_FOREACH(ptr, modules_get_list()->head)
     {
       modp = ptr->data;
 

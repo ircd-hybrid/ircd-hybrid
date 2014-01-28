@@ -309,8 +309,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
         source_p->umodes |= flag & SEND_UMODES;
       }
 
-      register_remote_user(source_p, parv[5], parv[6],
-                           parv[7], ngecos);
+      register_remote_user(source_p, parv[5], parv[6], parv[7]);
       return;
     }
   }
@@ -389,8 +388,7 @@ uid_from_server(struct Client *client_p, struct Client *source_p, int parc,
     source_p->umodes |= flag & SEND_UMODES;
   }
 
-  register_remote_user(source_p, parv[5], parv[6],
-                       servername, ugecos);
+  register_remote_user(source_p, parv[5], parv[6], servername);
 }
 
 static void

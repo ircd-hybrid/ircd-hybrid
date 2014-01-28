@@ -471,15 +471,13 @@ register_local_user(struct Client *source_p)
  *              - username to register as
  *              - host name to register as
  *              - server name
- *              - realname (gecos)
  * output	- NONE
  * side effects	- This function is called when a remote client
  *		  is introduced by a server.
  */
 void
-register_remote_user(struct Client *source_p,
-                     const char *username, const char *host, const char *server,
-                     const char *realname)
+register_remote_user(struct Client *source_p, const char *username,
+                     const char *host, const char *server)
 {
   struct Client *target_p = NULL;
 

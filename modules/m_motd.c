@@ -37,7 +37,7 @@
 #include "conf.h"
 
 
-static int
+static void
 do_motd(struct Client *source_p)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,

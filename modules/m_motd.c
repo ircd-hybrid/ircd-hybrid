@@ -45,7 +45,6 @@ do_motd(struct Client *source_p)
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
   motd_send(source_p);
-  return 0;
 }
 
 /*
@@ -75,7 +74,8 @@ m_motd(struct Client *client_p, struct Client *source_p,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  return do_motd(source_p);
+  do_motd(source_p);
+  return 0;
 }
 
 /*
@@ -99,7 +99,8 @@ mo_motd(struct Client *client_p, struct Client *source_p,
                   parc, parv) != HUNTED_ISME)
     return 0;
 
-  return do_motd(source_p);
+  do_motd(source_p);
+  return 0;
 }
 
 static struct Message motd_msgtab =

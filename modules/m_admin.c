@@ -41,7 +41,7 @@
  *
  * \param source_p Pointer to client to report to
  */
-static int
+static void
 do_admin(struct Client *source_p)
 {
   const char *me_name = ID_or_name(&me, source_p);
@@ -64,7 +64,6 @@ do_admin(struct Client *source_p)
   if (AdminInfo.email != NULL)
     sendto_one(source_p, form_str(RPL_ADMINEMAIL),
                me_name, nick, AdminInfo.email);
-  return 0;
 }
 
 /*! \brief NICK command handler (called by already registered,
@@ -101,7 +100,8 @@ m_admin(struct Client *client_p, struct Client *source_p,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  return do_admin(source_p);
+  do_admin(source_p);
+  return 0;
 }
 
 /*! \brief ADMIN command handler (called by operators and
@@ -126,7 +126,8 @@ ms_admin(struct Client *client_p, struct Client *source_p,
                   parc, parv) != HUNTED_ISME)
     return 0;
 
-  return do_admin(source_p);
+  do_admin(source_p);
+  return 0;
 }
 
 static struct Message admin_msgtab =

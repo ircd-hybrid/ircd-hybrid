@@ -31,9 +31,6 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "fdlist.h"
-#include "s_bsd.h"
-#include "s_serv.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
@@ -41,7 +38,43 @@
 #include "conf_class.h"
 
 
-static void report_this_status(struct Client *, struct Client *);
+/* report_this_status()
+ *
+ * inputs       - pointer to client to report to
+ *              - pointer to client to report about
+ *              - flag full etrace or not
+ * output       - NONE
+ * side effects - NONE
+ */
+static void
+report_this_status(struct Client *source_p, struct Client *target_p)
+{
+  if (target_p->status == STAT_CLIENT)
+  {
+    if (ConfigFileEntry.hide_spoof_ips)
+      sendto_one(source_p, form_str(RPL_ETRACE),
+                 me.name,
+                 source_p->name,
+                 HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
+                 get_client_class(&target_p->localClient->confs),
+                 target_p->name,
+                 target_p->username,
+                 target_p->host,
+                 IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
+                 target_p->info);
+    else
+      sendto_one(source_p, form_str(RPL_ETRACE),
+                 me.name,
+                 source_p->name,
+                 HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
+                 get_client_class(&target_p->localClient->confs),
+                 target_p->name,
+                 target_p->username,
+                 target_p->host,
+                 target_p->sockhost,
+                 target_p->info);
+  }
+}
 
 /*
  * do_etrace()
@@ -114,44 +147,6 @@ mo_etrace(struct Client *client_p, struct Client *source_p,
 {
   do_etrace(source_p, parc, parv);
   return 0;
-}
-
-/* report_this_status()
- *
- * inputs	- pointer to client to report to
- * 		- pointer to client to report about
- *		- flag full etrace or not
- * output	- NONE
- * side effects - NONE
- */
-static void
-report_this_status(struct Client *source_p, struct Client *target_p)
-{
-  if (target_p->status == STAT_CLIENT)
-  {
-    if (ConfigFileEntry.hide_spoof_ips)
-      sendto_one(source_p, form_str(RPL_ETRACE),
-                 me.name,
-                 source_p->name,
-                 HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-                 get_client_class(&target_p->localClient->confs),
-                 target_p->name,
-                 target_p->username,
-                 target_p->host,
-                 IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
-                 target_p->info);
-    else
-      sendto_one(source_p, form_str(RPL_ETRACE),
-                 me.name,
-                 source_p->name,
-                 HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-                 get_client_class(&target_p->localClient->confs),
-                 target_p->name,
-                 target_p->username,
-                 target_p->host,
-                 target_p->sockhost,
-                 target_p->info);
-  }
 }
 
 static struct Message etrace_msgtab =

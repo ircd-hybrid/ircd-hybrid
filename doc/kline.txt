@@ -1,6 +1,6 @@
 /* doc/kline.txt - Overview of the remote kline system
  *
- * Copyright (C) 2005-2014 Hybrid Development Team
+ * Copyright (c) 2005-2014 ircd-hybrid development team
  *
  * $Id$
  */

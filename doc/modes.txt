@@ -39,7 +39,7 @@ User Modes:
 +W - webirc       - User is connected using a webirc gateway
 +x - hiddenhost   - User's host has been spoofed by services.
                     This mode can be set by servers and services only.
-+y - spy          - See LINKS, STATS (if configured), TRACE notices
++y - spy          - See ADMIN, LINKS, MOTD, STATS, TRACE notices
 +z - operwall     - See oper generated WALLOPS
 
 Channel Modes:
@@ -55,12 +55,11 @@ Channel Modes:
 +k - key          - Key/password for the channel
 +l - limit        - Limit the number of users in a channel
 +m - moderated    - Users without +v/h/o cannot send text to the channel
++M - modreg       - Unregistered/unidentified clients cannot send text to the channel
 +n - noexternal   - Users must be in the channel to send text to it
 +o - chanop       - Full operator status
-+M - modreg       - Unregistered/unidentified clients cannot send text to the channel
-+O - operonly     - This mode will prevent anyone who hasn't obtained
-                    IRCOp status from joining the channel. Can be set by an IRCOp
-                    only
++O - operonly     - This mode will prevent anyone who hasn't obtained IRC operator
+                    status from joining the channel. Can only be set by an IRC operator
 +p - private      - Private is obsolete, this now restricts KNOCK, and can be
                     set at the same time as +s.
 +r - registered   - Channel has been registered

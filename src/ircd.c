@@ -169,9 +169,7 @@ void
 set_time(void)
 {
   static char to_send[IRCD_BUFSIZE];
-  struct timeval newtime;
-  newtime.tv_sec  = 0;
-  newtime.tv_usec = 0;
+  struct timeval newtime = { .tv_sec = 0, .tv_usec = 0 };
 
   if (gettimeofday(&newtime, NULL) == -1)
   {

@@ -33,6 +33,7 @@
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "numeric.h"
+#include "s_misc.h"
 #include "s_serv.h"
 #include "s_user.h"
 #include "send.h"

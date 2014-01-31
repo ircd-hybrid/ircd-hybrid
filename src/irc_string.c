@@ -49,31 +49,6 @@ has_wildcards(const char *str)
 }
 
 /*
- * myctime - This is like standard ctime()-function, but it zaps away
- *   the newline from the end of that string. Also, it takes
- *   the time value as parameter, instead of pointer to it.
- *   Note that it is necessary to copy the string to alternate
- *   buffer (who knows how ctime() implements it, maybe it statically
- *   has newline there and never 'refreshes' it -- zapping that
- *   might break things in other places...)
- *
- *
- * Thu Nov 24 18:22:48 1986
- */
-const char *
-myctime(time_t value)
-{
-  static char buf[32];
-  char *p;
-
-  strlcpy(buf, ctime(&value), sizeof(buf));
-
-  if ((p = strchr(buf, '\n')) != NULL)
-    *p = '\0';
-  return buf;
-}
-
-/*
  * strip_tabs(dst, src, length)
  *
  *   Copies src to dst, while converting all \t (tabs) into spaces.

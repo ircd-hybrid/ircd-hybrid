@@ -168,7 +168,6 @@ static struct lgetopt myopts[] = {
 void
 set_time(void)
 {
-  static char to_send[IRCD_BUFSIZE];
   struct timeval newtime = { .tv_sec = 0, .tv_usec = 0 };
 
   if (gettimeofday(&newtime, NULL) == -1)
@@ -183,10 +182,12 @@ set_time(void)
 
   if (newtime.tv_sec < CurrentTime)
   {
-    snprintf(to_send, sizeof(to_send),
-             "System clock is running backwards - (%lu < %lu)",
-             (unsigned long)newtime.tv_sec, (unsigned long)CurrentTime);
-    report_error(L_ALL, to_send, me.name, 0);
+    ilog(LOG_TYPE_IRCD, "System clock is running backwards - (%lu < %lu)",
+         (unsigned long)newtime.tv_sec, (unsigned long)CurrentTime);
+    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+                         "System clock is running backwards - (%lu < %lu)",
+                         (unsigned long)newtime.tv_sec,
+                         (unsigned long)CurrentTime);
     set_back_events(CurrentTime - newtime.tv_sec);
   }
 

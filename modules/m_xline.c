@@ -26,33 +26,19 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "channel.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "conf.h"
-#include "hostmask.h"
 #include "numeric.h"
-#include "fdlist.h"
-#include "s_bsd.h"
 #include "log.h"
-#include "s_misc.h"
 #include "send.h"
-#include "hash.h"
 #include "s_serv.h"
 #include "parse.h"
 #include "modules.h"
-#include "resv.h"
 #include "conf_db.h"
 #include "memory.h"
 
-
-static int valid_xline(struct Client *, char *, char *, int);
-static void write_xline(struct Client *, char *, char *, time_t);
-static void remove_xline(struct Client *, char *);
-static int remove_xline_match(const char *);
-
-static void relay_xline(struct Client *, char *[]);
 
 static void
 check_xline(struct MaskItem *conf)
@@ -68,6 +54,163 @@ check_xline(struct MaskItem *conf)
 
     if (!match(conf->name, client_p->username))
       conf_try_ban(client_p, conf);
+  }
+}
+
+/* static int remove_tkline_match(const char *host, const char *user)
+ *
+ * Inputs:      gecos
+ * Output:      returns YES on success, NO if no tkline removed.
+ * Side effects: Any matching tklines are removed.
+ */
+static int
+remove_xline_match(const char *gecos)
+{
+  dlink_node *ptr = NULL, *next_ptr = NULL;
+
+  DLINK_FOREACH_SAFE(ptr, next_ptr, xconf_items.head)
+  {
+    struct MaskItem *conf = ptr->data;
+
+    if (!IsConfDatabase(conf))
+      continue;
+
+    if (!irccmp(gecos, conf->name))
+    {
+      conf_free(conf);
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static void
+remove_xline(struct Client *source_p, const char *gecos)
+{
+  if (remove_xline_match(gecos))
+  {
+    sendto_one(source_p,
+               ":%s NOTICE %s :X-Line for [%s] is removed",
+               me.name, source_p->name, gecos);
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s has removed the X-Line for: [%s]",
+                         get_oper_name(source_p), gecos);
+    ilog(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
+         get_oper_name(source_p), gecos);
+  }
+  else
+    sendto_one(source_p, ":%s NOTICE %s :No X-Line for %s",
+               me.name, source_p->name, gecos);
+}
+
+/* valid_xline()
+ *
+ * inputs       - client to complain to, gecos, reason, whether to complain
+ * outputs      - 1 for valid, else 0
+ * side effects - complains to client, when warn != 0
+ */
+static int
+valid_xline(struct Client *source_p, const char *gecos, const char *reason, int warn)
+{
+  if (EmptyString(reason))
+  {
+    if (warn)
+      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, source_p->name, "XLINE");
+    return 0;
+  }
+
+  if (!valid_wild_card_simple(gecos))
+  {
+    if (warn)
+      sendto_one(source_p, ":%s NOTICE %s :Please include at least %d non-wildcard characters with the xline",
+                 me.name, source_p->name, ConfigFileEntry.min_nonwildcard_simple);
+
+    return 0;
+  }
+
+  return 1;
+}
+
+/* write_xline()
+ *
+ * inputs       - client taking credit for xline, gecos, reason, xline type
+ * outputs      - none
+ * side effects - when successful, adds an xline to the conf
+ */
+static void
+write_xline(struct Client *source_p, char *gecos, char *reason,
+            time_t tkline_time)
+{
+  struct MaskItem *conf = conf_make(CONF_XLINE);
+
+  collapse(gecos);
+  conf->name = xstrdup(gecos);
+  conf->reason = xstrdup(reason);
+  conf->setat = CurrentTime;
+
+  SetConfDatabase(conf);
+
+  if (tkline_time != 0)
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s added temporary %d min. X-Line for [%s] [%s]",
+                         get_oper_name(source_p), (int)tkline_time/60,
+                         conf->name, conf->reason);
+    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. X-Line [%s]",
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
+               source_p->name, (int)tkline_time/60, conf->name);
+    ilog(LOG_TYPE_XLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
+         source_p->name, (int)tkline_time/60, conf->name, conf->reason);
+    conf->until = CurrentTime + tkline_time;
+  }
+  else
+  {
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s added X-Line for [%s] [%s]",
+                         get_oper_name(source_p), conf->name,
+                         conf->reason);
+    sendto_one(source_p,
+               ":%s NOTICE %s :Added X-Line [%s] [%s]",
+               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
+               source_p->name, conf->name, conf->reason);
+    ilog(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
+         get_oper_name(source_p), conf->name, conf->reason);
+  }
+
+  check_xline(conf);
+}
+
+static void
+relay_xline(struct Client *source_p, char *parv[])
+{
+  struct MaskItem *conf = NULL;
+  int t_sec;
+
+  t_sec = atoi(parv[3]);
+
+  sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
+                     "XLINE %s %s %s :%s",
+                     parv[1], parv[2], parv[3], parv[4]);
+
+  if (match(parv[1], me.name))
+    return;
+
+  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+                              source_p->username, source_p->host,
+                              SHARED_XLINE))
+  {
+    if ((conf = find_matching_name_conf(CONF_XLINE, parv[2], NULL, NULL, 0)))
+    {
+      sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
+                 ID_or_name(&me, source_p),
+                 ID_or_name(source_p, source_p),
+                 parv[2], conf->name, conf->reason);
+      return;
+    }
+
+    write_xline(source_p, parv[2], parv[4], t_sec);
   }
 }
 
@@ -197,38 +340,6 @@ me_xline(struct Client *client_p, struct Client *source_p,
   return 0;
 }
 
-static void
-relay_xline(struct Client *source_p, char *parv[])
-{
-  struct MaskItem *conf = NULL;
-  int t_sec;
-
-  t_sec = atoi(parv[3]);
-
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
-                     "XLINE %s %s %s :%s",
-                     parv[1], parv[2], parv[3], parv[4]);
-
-  if (match(parv[1], me.name))
-    return;
-
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_XLINE))
-  {
-    if ((conf = find_matching_name_conf(CONF_XLINE, parv[2], NULL, NULL, 0)))
-    {
-      sendto_one(source_p, ":%s NOTICE %s :[%s] already X-Lined by [%s] - %s",
-                 ID_or_name(&me, source_p),
-                 ID_or_name(source_p, source_p),
-                 parv[2], conf->name, conf->reason);
-      return;
-    }
-
-    write_xline(source_p, parv[2], parv[4], t_sec);
-  }
-}
-
 /* mo_unxline()
  *
  * inputs	- pointer to server
@@ -300,131 +411,6 @@ ms_unxline(struct Client *client_p, struct Client *source_p,
                               source_p->username, source_p->host,
                               SHARED_UNXLINE))
     remove_xline(source_p, parv[2]);
-  return 0;
-}
-
-/* valid_xline()
- *
- * inputs	- client to complain to, gecos, reason, whether to complain
- * outputs	- 1 for valid, else 0
- * side effects	- complains to client, when warn != 0
- */
-static int
-valid_xline(struct Client *source_p, char *gecos, char *reason, int warn)
-{
-  if (EmptyString(reason))
-  {
-    if (warn)
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, source_p->name, "XLINE");
-    return 0;
-  }
-
-  if (!valid_wild_card_simple(gecos))
-  {
-    if (warn)
-      sendto_one(source_p, ":%s NOTICE %s :Please include at least %d non-wildcard characters with the xline",
-                 me.name, source_p->name, ConfigFileEntry.min_nonwildcard_simple);
-
-    return 0;
-  }
-
-  return 1;
-}
-
-/* write_xline()
- *
- * inputs	- client taking credit for xline, gecos, reason, xline type
- * outputs	- none
- * side effects	- when successful, adds an xline to the conf
- */
-static void
-write_xline(struct Client *source_p, char *gecos, char *reason,
-            time_t tkline_time)
-{
-  struct MaskItem *conf = conf_make(CONF_XLINE);
-
-  collapse(gecos);
-  conf->name = xstrdup(gecos);
-  conf->reason = xstrdup(reason);
-  conf->setat = CurrentTime;
-
-  SetConfDatabase(conf);
-
-  if (tkline_time != 0)
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s added temporary %d min. X-Line for [%s] [%s]",
-                         get_oper_name(source_p), (int)tkline_time/60,
-                         conf->name, conf->reason);
-    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. X-Line [%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
-               source_p->name, (int)tkline_time/60, conf->name);
-    ilog(LOG_TYPE_XLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
-         source_p->name, (int)tkline_time/60, conf->name, conf->reason);
-    conf->until = CurrentTime + tkline_time;
-  }
-  else
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s added X-Line for [%s] [%s]",
-                         get_oper_name(source_p), conf->name,
-                         conf->reason);
-    sendto_one(source_p,
-               ":%s NOTICE %s :Added X-Line [%s] [%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
-               source_p->name, conf->name, conf->reason);
-    ilog(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
-         get_oper_name(source_p), conf->name, conf->reason);
-  }
-
-  check_xline(conf);
-}
-
-static void
-remove_xline(struct Client *source_p, char *gecos)
-{
-  if (remove_xline_match(gecos))
-  {
-    sendto_one(source_p,
-               ":%s NOTICE %s :X-Line for [%s] is removed",
-               me.name, source_p->name, gecos);
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has removed the X-Line for: [%s]",
-                         get_oper_name(source_p), gecos);
-    ilog(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
-         get_oper_name(source_p), gecos);
-  }
-  else
-    sendto_one(source_p, ":%s NOTICE %s :No X-Line for %s",
-               me.name, source_p->name, gecos);
-}
-
-/* static int remove_tkline_match(const char *host, const char *user)
- *
- * Inputs:	gecos
- * Output:	returns YES on success, NO if no tkline removed.
- * Side effects: Any matching tklines are removed.
- */
-static int
-remove_xline_match(const char *gecos)
-{
-  dlink_node *ptr = NULL, *next_ptr = NULL;
-
-  DLINK_FOREACH_SAFE(ptr, next_ptr, xconf_items.head)
-  {
-    struct MaskItem *conf = ptr->data;
-
-    if (!IsConfDatabase(conf))
-      continue;
-
-    if (!irccmp(gecos, conf->name))
-    {
-      conf_free(conf);
-      return 1;
-    }
-  }
-
   return 0;
 }
 

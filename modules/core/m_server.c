@@ -178,8 +178,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
       break;
   }
 
-  if ((client_p->id[0] && (target_p = hash_find_id(client_p->id)))
-      || (target_p = hash_find_server(name)))
+  if ((target_p = hash_find_server(name)))
   {
     /* This link is trying feed me a server that I already have
      * access through another path -- multiple paths not accepted
@@ -192,6 +191,19 @@ mr_server(struct Client *client_p, struct Client *source_p,
      * connect - A1kmm.
      */
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "Attempt to re-introduce server %s from %s",
+                         name, get_client_name(client_p, HIDE_IP));
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "Attempt to re-introduce server %s from %s",
+                         name, get_client_name(client_p, MASK_IP));
+    sendto_one(client_p, "ERROR :Server already exists.");
+    exit_client(client_p, client_p, "Server already exists");
+    return 0;
+  }
+
+  if ((client_p->id[0] && (target_p = hash_find_id(client_p->id))))
+  {
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
                          name, client_p->id,
                          get_client_name(client_p, HIDE_IP));
@@ -200,7 +212,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
                          name, client_p->id,
                          get_client_name(client_p, MASK_IP));
     sendto_one(client_p, "ERROR :Server ID already exists.");
-    exit_client(client_p, client_p, "Server ID Exists");
+    exit_client(client_p, client_p, "Server ID already exists");
     return 0;
   }
 

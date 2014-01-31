@@ -37,7 +37,7 @@
 #define HELPLEN 400
 
 
-static int
+static void
 sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 {
   FILE *file = NULL;
@@ -47,7 +47,7 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return 0;
+    return;
   }
 
   if (fgets(line, sizeof(line), file) == NULL)
@@ -55,7 +55,7 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
     fclose(file);
-    return 0;
+    return;
   }
 
   line[strlen(line) - 1] = '\0';
@@ -73,11 +73,10 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
   fclose(file);
   sendto_one(source_p, form_str(RPL_ENDOFHELP),
              me.name, source_p->name, topic);
-  return 0;
 }
 
-static int
-dohelp(struct Client *source_p, char *topic)
+static void
+do_help(struct Client *source_p, char *topic)
 {
   char *p = topic;
   char h_index[] = "index";
@@ -94,14 +93,14 @@ dohelp(struct Client *source_p, char *topic)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return 0;
+    return;
   }
 
   if (strlen(HPATH) + strlen(topic) + 1 > HYB_PATH_MAX)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return 0;
+    return;
   }
 
   snprintf(path, sizeof(path), "%s/%s", HPATH, topic);
@@ -110,17 +109,17 @@ dohelp(struct Client *source_p, char *topic)
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return 0;
+    return;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
     sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
                me.name, source_p->name, topic);
-    return 0;
+    return;
   }
 
-  return sendhelpfile(source_p, path, topic);
+  sendhelpfile(source_p, path, topic);
 }
 
 /*
@@ -144,7 +143,8 @@ m_help(struct Client *client_p, struct Client *source_p,
 
   last_used = CurrentTime;
 
-  return dohelp(source_p, parv[1]);
+  do_help(source_p, parv[1]);
+  return 0;
 }
 
 /*
@@ -155,7 +155,8 @@ static int
 mo_help(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  return dohelp(source_p, parv[1]);
+  do_help(source_p, parv[1]);
+  return 0;
 }
 
 static struct Message help_msgtab =

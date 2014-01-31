@@ -70,8 +70,6 @@ extern const char *libio_basename(const char *);
  */
 extern void strip_tabs(char *, const char *, size_t);
 
-const char *myctime(time_t);
-
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
 #ifndef HAVE_STRTOK_R

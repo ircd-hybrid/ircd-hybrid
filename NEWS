@@ -1,4 +1,5 @@
 -- ircd-hybrid-8.1.14 Release Notes
+o) WHOWAS now honors serverhide::disable_remote_commands
 o) Improved TS6 inter-server communication
 o) Minor code cleanups and speed enhancements
 o) Added 'unxline' oper flag

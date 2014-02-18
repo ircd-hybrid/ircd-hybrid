@@ -50,11 +50,6 @@ whowas_do(struct Client *client_p, struct Client *source_p,
   int max = -1;
   const dlink_node *ptr = NULL;
 
-  if (parc > 3)
-    if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
-                    parc, parv) != HUNTED_ISME)
-      return;
-
   if (parc > 2 && !EmptyString(parv[2]))
     if ((max = atoi(parv[2])) > 20 && !MyConnect(source_p))
       max = 20;
@@ -120,6 +115,11 @@ m_whowas(struct Client *client_p, struct Client *source_p,
 
   last_used = CurrentTime;
 
+  if (parc > 3 && !ConfigServerHide.disable_remote_commands)
+    if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
+                    parc, parv) != HUNTED_ISME)
+      return 0;
+
   whowas_do(client_p, source_p, parc, parv);
   return 0;
 }
@@ -134,6 +134,11 @@ mo_whowas(struct Client *client_p, struct Client *source_p,
                me.name, source_p->name);
     return 0;
   }
+
+  if (parc > 3)
+    if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
+                    parc, parv) != HUNTED_ISME)
+      return 0;
 
   whowas_do(client_p, source_p, parc, parv);
   return 0;

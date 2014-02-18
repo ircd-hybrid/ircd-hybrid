@@ -464,8 +464,6 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
   int b;
   int (*cmpfunc)(const char *, const char *) = do_match ? match : irccmp;
 
-  if (username == NULL)
-    username = "";
   if (password == NULL)
     password = "";
 

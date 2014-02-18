@@ -114,7 +114,7 @@ remove_dline_match(const char *host)
   else
     piphost = NULL;
 
-  if ((conf = find_conf_by_address(host, piphost, CONF_DLINE | 1, aftype, NULL, NULL, 0)))
+  if ((conf = find_conf_by_address(host, piphost, CONF_DLINE, aftype, NULL, NULL, 0)))
   {
     if (IsConfDatabase(conf))
     {

@@ -44,8 +44,10 @@ static void dump_map(struct Client *client,
   dlink_node *ptr = NULL;
   struct Client *target_p = NULL;
   static char prompt[64];
+  static char buf[IRCD_BUFSIZE];
   char *p = prompt + prompt_length;
   int cnt = 0;
+  int bufpos = 0;
 
   *p = '\0';
 
@@ -54,15 +56,26 @@ static void dump_map(struct Client *client,
                client->name, prompt, server->name);
   else
   {
-    char buf[IRC_MAXSID + 3] = ""; /* +3 for [, ], \0 */
+    int dashes;
+
+    bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, "%s", server->name);
 
     if (HasUMode(client, UMODE_OPER) && server->id[0])
-      snprintf(buf, sizeof(buf), "[%s]", server->id);
+      bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, "[%s]", server->id);
 
+    buf[bufpos++] = ' ';
+    dashes = 50 - bufpos - prompt_length;
+    for (; dashes > 0; --dashes)
+      buf[bufpos++] = '-';
+    buf[bufpos++] = ' ';
+    buf[bufpos++] = '|';
+
+    bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users %5d (%1.2f%%)",
+                       dlink_list_length(&server->serv->client_list), 100 *
+                       (float)dlink_list_length(&server->serv->client_list) /
+                       (float)Count.total);
     sendto_one(client, form_str(RPL_MAP), me.name, client->name,
-               prompt, server->name, buf,
-               dlink_list_length(&server->serv->client_list),
-               dlink_list_length(&server->serv->client_list) * 100 / Count.total);
+               prompt, buf);
   }
 
   if (prompt_length > 0)

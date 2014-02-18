@@ -66,7 +66,7 @@ do_admin(struct Client *source_p)
                me_name, nick, AdminInfo.email);
 }
 
-/*! \brief NICK command handler (called by already registered,
+/*! \brief ADMIN command handler (called by already registered,
  *         locally connected clients)
  *
  * \param client_p Pointer to allocated Client struct with physical connection

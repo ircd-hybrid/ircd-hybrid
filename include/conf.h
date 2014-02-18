@@ -110,20 +110,19 @@
 
 enum maskitem_type
 {
-  CONF_RESERVED = 1 <<  0, /* XXX */
-  CONF_CLIENT   = 1 <<  1,
-  CONF_SERVER   = 1 <<  2,
-  CONF_KLINE    = 1 <<  3,
-  CONF_DLINE    = 1 <<  4,
-  CONF_EXEMPT   = 1 <<  5,
-  CONF_CLUSTER  = 1 <<  6,
-  CONF_XLINE    = 1 <<  7,
-  CONF_ULINE    = 1 <<  8,
-  CONF_GLINE    = 1 <<  9,
-  CONF_CRESV    = 1 << 10,
-  CONF_NRESV    = 1 << 11,
-  CONF_SERVICE  = 1 << 12,
-  CONF_OPER     = 1 << 13,
+  CONF_CLIENT   = 1 <<  0,
+  CONF_SERVER   = 1 <<  1,
+  CONF_KLINE    = 1 <<  2,
+  CONF_DLINE    = 1 <<  3,
+  CONF_EXEMPT   = 1 <<  4,
+  CONF_CLUSTER  = 1 <<  5,
+  CONF_XLINE    = 1 <<  6,
+  CONF_ULINE    = 1 <<  7,
+  CONF_GLINE    = 1 <<  8,
+  CONF_CRESV    = 1 <<  9,
+  CONF_NRESV    = 1 << 10,
+  CONF_SERVICE  = 1 << 11,
+  CONF_OPER     = 1 << 12,
 };
 
 struct conf_parser_context

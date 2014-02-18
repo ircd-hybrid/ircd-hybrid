@@ -49,7 +49,7 @@ static const char *const replies[] =
 /* 012 */ NULL,
 /* 013 */ NULL,
 /* 014 */ NULL,
-/* 015 RPL_MAP */ ":%s 015 %s :%s%s%s [%u clients] (%u%%)",
+/* 015 RPL_MAP */ ":%s 015 %s :%s%s",
 /* 016 RPL_MAPMORE */ ":%s 016 %s :%s%s --> *more*",
 /* 017 RPL_MAPEND */ ":%s 017 %s :End of /MAP",
 /* 018 */ NULL,

@@ -481,12 +481,12 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
         {
           arec = ptr->data;
 
-          if (arec->type == (type & ~0x1) &&
+          if ((arec->type == type) &&
               arec->precedence > hprecv &&
               arec->masktype == HM_IPV6 &&
               match_ipv6(addr, &arec->Mask.ipa.addr,
                          arec->Mask.ipa.bits) &&
-              (type & 0x1 || !cmpfunc(arec->username, username)) &&
+              (!username || !cmpfunc(arec->username, username)) &&
               (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
                match_conf_password(password, arec->conf)))
           {
@@ -506,12 +506,12 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
         {
           arec = ptr->data;
 
-          if (arec->type == (type & ~0x1) &&
+          if ((arec->type == type) &&
               arec->precedence > hprecv &&
               arec->masktype == HM_IPV4 &&
               match_ipv4(addr, &arec->Mask.ipa.addr,
                          arec->Mask.ipa.bits) &&
-              (type & 0x1 || !cmpfunc(arec->username, username)) &&
+              (!username || !cmpfunc(arec->username, username)) &&
               (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
                match_conf_password(password, arec->conf)))
           {
@@ -532,11 +532,11 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
         DLINK_FOREACH(ptr, atable[hash_text(p)].head)
         {
           arec = ptr->data;
-          if ((arec->type == (type & ~0x1)) &&
+          if ((arec->type == type) &&
             arec->precedence > hprecv &&
             (arec->masktype == HM_HOST) &&
             !cmpfunc(arec->Mask.hostname, name) &&
-            (type & 0x1 || !cmpfunc(arec->username, username)) &&
+            (!username || !cmpfunc(arec->username, username)) &&
             (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
              match_conf_password(password, arec->conf)))
         {
@@ -554,11 +554,11 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
     {
       arec = ptr->data;
 
-      if (arec->type == (type & ~0x1) &&
+      if (arec->type == type &&
           arec->precedence > hprecv &&
           arec->masktype == HM_HOST &&
           !cmpfunc(arec->Mask.hostname, name) &&
-          (type & 0x1 || !cmpfunc(arec->username, username)) &&
+          (!username || !cmpfunc(arec->username, username)) &&
           (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
            match_conf_password(password, arec->conf)))
       {
@@ -623,12 +623,11 @@ find_dline_conf(struct irc_ssaddr *addr, int aftype)
 {
   struct MaskItem *eline;
 
-  eline = find_conf_by_address(NULL, addr, CONF_EXEMPT | 1, aftype,
-                               NULL, NULL, 1);
+  eline = find_conf_by_address(NULL, addr, CONF_EXEMPT, aftype, NULL, NULL, 1);
   if (eline != NULL)
     return eline;
 
-  return find_conf_by_address(NULL, addr, CONF_DLINE | 1, aftype, NULL, NULL, 1);
+  return find_conf_by_address(NULL, addr, CONF_DLINE, aftype, NULL, NULL, 1);
 }
 
 /* void add_conf_by_address(int, struct MaskItem *aconf)

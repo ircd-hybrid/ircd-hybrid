@@ -636,22 +636,16 @@ find_dline_conf(struct irc_ssaddr *addr, int aftype)
 struct AddressRec *
 add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 {
-  const char *address;
-  const char *username;
+  const char *hostname = conf->host;
+  const char *username = conf->user;
   static unsigned int prec_value = 0xFFFFFFFF;
   int bits = 0;
-  struct AddressRec *arec;
+  struct AddressRec *arec = NULL;
 
-  address = conf->host;
-  username = conf->user;
-
-  assert(type);
-
-  if (EmptyString(address))
-    address = "/NOMATCH!/";
+  assert(type && hostname);
 
   arec = MyMalloc(sizeof(struct AddressRec));
-  arec->masktype = parse_netmask(address, &arec->Mask.ipa.addr, &bits);
+  arec->masktype = parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
   arec->Mask.ipa.bits = bits;
   arec->username = username;
   arec->conf = conf;
@@ -673,8 +667,8 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
       break;
 #endif
     default: /* HM_HOST */
-      arec->Mask.hostname = address;
-      dlinkAdd(arec, &arec->node, &atable[get_mask_hash(address)]);
+      arec->Mask.hostname = hostname;
+      dlinkAdd(arec, &arec->node, &atable[get_mask_hash(hostname)]);
       break;
   }
 

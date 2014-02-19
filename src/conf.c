@@ -1403,7 +1403,7 @@ oper_privs_as_string(const unsigned int port)
 const char *
 get_oper_name(const struct Client *client_p)
 {
-  dlink_node *cnode = NULL;
+  const dlink_node *cnode = NULL;
   /* +5 for !,@,{,} and null */
   static char buffer[NICKLEN + USERLEN + HOSTLEN + HOSTLEN + 5];
 
@@ -1411,7 +1411,7 @@ get_oper_name(const struct Client *client_p)
   {
     if ((cnode = client_p->localClient->confs.head))
     {
-      struct MaskItem *conf = cnode->data;
+      const struct MaskItem *conf = cnode->data;
 
       if (IsConfOperator(conf))
       {

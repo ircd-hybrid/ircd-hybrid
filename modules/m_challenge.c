@@ -95,8 +95,10 @@ m_challenge(struct Client *client_p, struct Client *source_p,
                                 source_p->localClient->auth_oper, NULL, NULL);
     if (conf == NULL)
     {
-      /* XXX: logging */
       sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      conf = find_exact_name_conf(CONF_OPER, NULL, source_p->localClient->auth_oper, NULL, NULL);
+      failed_challenge_notice(source_p, source_p->localClient->auth_oper, (conf != NULL) ?
+                              "host mismatch" : "no oper {} block");
       return 0;
     }
 

@@ -642,7 +642,7 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
   int bits = 0;
   struct AddressRec *arec = NULL;
 
-  assert(type && hostname);
+  assert(type && !EmptyString(hostname));
 
   arec = MyMalloc(sizeof(struct AddressRec));
   arec->masktype = parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);

@@ -163,7 +163,6 @@ enum irc_numerics
   RPL_USERS                = 393,
   RPL_ENDOFUSERS           = 394,
   RPL_NOUSERS              = 395,
-  RPL_HOSTHIDDEN           = 396,
 
   /*
    * Errors are in the range from 400-599 currently and are grouped by what

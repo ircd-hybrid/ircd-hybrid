@@ -76,7 +76,6 @@ enum irc_numerics
    */
   RPL_STATSPLINE           = 220,
   RPL_UMODEIS              = 221,
-  RPL_STATSFLINE           = 224,
   RPL_STATSDLINE           = 225,
   RPL_STATSALINE           = 226,
   RPL_STATSLLINE           = 241,
@@ -117,7 +116,6 @@ enum irc_numerics
   RPL_WHOISOPERATOR        = 313,
   RPL_WHOWASUSER           = 314,
   RPL_ENDOFWHO             = 315,
-  RPL_WHOISCHANOP          = 316,  /* Redundant and not needed but reserved */
   RPL_WHOISIDLE            = 317,
   RPL_ENDOFWHOIS           = 318,
   RPL_WHOISCHANNELS        = 319,
@@ -159,10 +157,6 @@ enum irc_numerics
   RPL_REHASHING            = 382,
   RPL_RSACHALLENGE         = 386,
   RPL_TIME                 = 391,
-  RPL_USERSSTART           = 392,
-  RPL_USERS                = 393,
-  RPL_ENDOFUSERS           = 394,
-  RPL_NOUSERS              = 395,
 
   /*
    * Errors are in the range from 400-599 currently and are grouped by what
@@ -227,7 +221,6 @@ enum irc_numerics
   ERR_USERNOTONSERV        = 504,
   ERR_TOOMANYWATCH         = 512,
   ERR_WRONGPONG            = 513,
-  ERR_LONGMASK             = 518,
   ERR_LISTSYNTAX           = 521,
   ERR_HELPNOTFOUND         = 524,
   RPL_LOGON                = 600,

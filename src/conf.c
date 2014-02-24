@@ -58,6 +58,7 @@
 #include "motd.h"
 
 
+struct config_channel_entry ConfigChannel;
 struct config_server_hide ConfigServerHide;
 struct config_file_entry ConfigFileEntry;
 struct logging_entry ConfigLoggingEntry = { .use_logging = 1 };

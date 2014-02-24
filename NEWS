@@ -5,10 +5,10 @@ o) Minor code cleanups and speed enhancements
 o) Added 'unxline' oper flag
 o) Added support for "userhost-in-names" client capability
 o) ircd now allows private rsa keys larger than 2048 bits
-o) Fixed bug where signals stopped from working after restaring
+o) Fixed bug where signals stopped from working after restarting
    the ircd via SIGINT
 o) Fixed bug where certain irc clients could not reconnect via TLS/SSL
-o) Fixed long-standing bug where +p channels have been show
+o) Fixed long-standing bug where +p channels have been shown
    in the /whois reply
 
 

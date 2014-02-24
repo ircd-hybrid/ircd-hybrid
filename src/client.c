@@ -508,7 +508,7 @@ update_client_exit_stats(struct Client *client_p)
  * side effects - find person by (nick)name
  */
 struct Client *
-find_person(const struct Client *client_p, const char *name)
+find_person(const struct Client *const client_p, const char *name)
 {
   struct Client *target_p = NULL;
 

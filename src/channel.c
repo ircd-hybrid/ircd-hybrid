@@ -43,7 +43,6 @@
 #include "s_misc.h"
 #include "resv.h"
 
-struct config_channel_entry ConfigChannel;
 dlink_list global_channel_list = { NULL, NULL, 0 };
 mp_pool_t *ban_pool;    /*! \todo ban_pool shouldn't be a global var */
 

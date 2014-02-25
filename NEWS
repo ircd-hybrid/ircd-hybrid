@@ -1,3 +1,17 @@
+-- ircd-hybrid-8.1.14 Release Notes
+o) WHOWAS now honors serverhide::disable_remote_commands
+o) Improved TS6 inter-server communication
+o) Minor code cleanups and speed enhancements
+o) Added 'unxline' oper flag
+o) Added support for "userhost-in-names" client capability
+o) ircd now allows private rsa keys larger than 2048 bits
+o) Fixed bug where signals stopped from working after restarting
+   the ircd via SIGINT
+o) Fixed bug where certain irc clients could not reconnect via TLS/SSL
+o) Fixed long-standing bug where +p channels have been shown
+   in the /whois reply
+
+
 -- ircd-hybrid-8.1.13 Release Notes
 o) Fixed EOB not working for remote servers (resulted in fake
    direction notices)
@@ -14,7 +28,7 @@ o) WHOIS no longer sends a notice to +y operators
 o) RPL_WHOISMODES now uses the 379 numeric
 o) Serial number is now shown on start up
 o) Fixed possible channel mode desynch with services
-o) Fixed TS 6 support with LOCOPS
+o) Fixed TS6 support with LOCOPS
 o) Minor code cleanups
 o) Fixed file descriptor leak with empty help files
 o) Fixed issue with WEBIRC where hostnames were

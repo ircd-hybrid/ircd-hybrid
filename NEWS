@@ -1,3 +1,7 @@
+-- ircd-hybrid-8.1.15 Release Notes
+o) ircd binary is now again placed in /bin instead of /sbin
+
+
 -- ircd-hybrid-8.1.14 Release Notes
 o) WHOWAS now honors serverhide::disable_remote_commands
 o) Improved TS6 inter-server communication

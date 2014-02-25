@@ -55,9 +55,9 @@ static int mode_count;
 static int mode_limit;  /* number of modes set other than simple */
 static int simple_modes_mask;  /* bit mask of simple modes already set */
 #ifdef HALFOPS
-static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6, CAP_HOPS };
+static int channel_capabs[] = { CAP_TS6, CAP_HOPS };
 #else
-static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6 };
+static int channel_capabs[] = { CAP_TS6 };
 #endif
 static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
 extern mp_pool_t *ban_pool;

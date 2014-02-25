@@ -574,6 +574,7 @@ mp_pool_clean(mp_pool_t *pool, int n_to_keep, int keep_recently_used)
   *first_to_free = NULL;
 }
 
+#if 0
 /** Helper: Given a list of chunks, free all the chunks in the list. */
 static void
 destroy_chunks(mp_chunk_t *chunk)
@@ -587,6 +588,7 @@ destroy_chunks(mp_chunk_t *chunk)
     chunk = next;
   }
 }
+#endif
 
 /** Helper: make sure that a given chunk list is not corrupt. */
 static int

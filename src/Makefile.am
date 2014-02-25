@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-sbin_PROGRAMS = ircd
+bin_PROGRAMS = ircd
 
 AM_YFLAGS = -d
 

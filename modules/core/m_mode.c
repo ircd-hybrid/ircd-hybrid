@@ -180,7 +180,6 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
   long mode_type;
   int mlen, tlen;
   int modecount = 0;
-  int needcap = NOCAPS;
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
     return 0;
@@ -197,12 +196,10 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
     case 'e':
       mode_type = CHFL_EXCEPTION;
-      needcap = CAP_EX;
       break;
 
     case 'I':
       mode_type = CHFL_INVEX;
-      needcap = CAP_IE;
       break;
 
     /* maybe we should just blindly propagate this? */
@@ -242,7 +239,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
         sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s",
                              modebuf, parabuf);
-        sendto_server(client_p, needcap, CAP_TS6,
+        sendto_server(client_p, NOCAPS, CAP_TS6,
                       "%s %s", modebuf, parabuf);
 
         mbuf = modebuf + mlen;
@@ -262,12 +259,12 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
   {
     *mbuf = *(pbuf - 1) = '\0';
     sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", modebuf, parabuf);
-    sendto_server(client_p, needcap, CAP_TS6,
+    sendto_server(client_p, NOCAPS, CAP_TS6,
                   "%s %s", modebuf, parabuf);
   }
 
   /* assumption here is that since the server sent BMASK, they are TS6, so they have an ID */
-  sendto_server(client_p, CAP_TS6|needcap, NOCAPS, ":%s BMASK %lu %s %s :%s",
+  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s BMASK %lu %s %s :%s",
                 source_p->id, (unsigned long)chptr->channelts, chptr->chname,
                 parv[3], parv[4]);
   return 0;

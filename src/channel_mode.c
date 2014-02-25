@@ -1661,11 +1661,11 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
   parptr = parabuf;
 
   if ((cap & CAP_TS6) && source_p->id[0] != '\0')
-    mbl = sprintf(modebuf, ":%s TMODE %lu %s ", source_p->id,
-                  (unsigned long)chptr->channelts, chptr->chname);
+    mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
+                   (unsigned long)chptr->channelts, chptr->chname);
   else
-    mbl = sprintf(modebuf, ":%s MODE %s ", source_p->name,
-                  chptr->chname);
+    mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", source_p->name,
+                   chptr->chname);
 
   /* loop the list of - modes we have */
   for (i = 0; i < mode_count; i++)
@@ -1708,11 +1708,11 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       mc = 0;
 
       if ((cap & CAP_TS6) && source_p->id[0] != '\0')
-        mbl = sprintf(modebuf, ":%s MODE %s ", source_p->id,
-                      chptr->chname);
+        mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", source_p->id,
+                       chptr->chname);
       else
-        mbl = sprintf(modebuf, ":%s MODE %s ", source_p->name,
-                      chptr->chname);
+        mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", source_p->name,
+                       chptr->chname);
 
       pbl = 0;
       parabuf[0] = '\0';
@@ -1772,12 +1772,12 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
     return;
 
   if (IsServer(source_p))
-    mbl = sprintf(modebuf, ":%s MODE %s ", (IsHidden(source_p) ||
-                  ConfigServerHide.hide_servers) ?
-                  me.name : source_p->name, chptr->chname);
+    mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
+                   ConfigServerHide.hide_servers) ?
+                   me.name : source_p->name, chptr->chname);
   else
-    mbl = sprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
-                  source_p->username, source_p->host, chptr->chname);
+    mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
+                   source_p->username, source_p->host, chptr->chname);
 
   mc = 0;
   nc = 0;
@@ -1813,12 +1813,12 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
       mc = 0;
 
       if (IsServer(source_p))
-        mbl = sprintf(modebuf, ":%s MODE %s ", (IsHidden(source_p) ||
-                      ConfigServerHide.hide_servers) ?
-                      me.name : source_p->name, chptr->chname);
+        mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
+                       ConfigServerHide.hide_servers) ?
+                       me.name : source_p->name, chptr->chname);
       else
-        mbl = sprintf(modebuf, ":%s!%s@%s MODE %s ", source_p->name,
-                      source_p->username, source_p->host, chptr->chname);
+        mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
+                       source_p->username, source_p->host, chptr->chname);
 
       pbl = 0;
       parabuf[0] = '\0';

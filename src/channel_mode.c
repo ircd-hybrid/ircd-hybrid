@@ -101,7 +101,7 @@ check_string(char *s)
  */
 
 int
-add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
+add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int type)
 {
   dlink_list *list = NULL;
   dlink_node *ban = NULL;
@@ -210,7 +210,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
  * side effects	-
  */
 static int
-del_id(struct Channel *chptr, char *banid, int type)
+del_id(struct Channel *chptr, char *banid, unsigned int type)
 {
   dlink_list *list;
   dlink_node *ban;

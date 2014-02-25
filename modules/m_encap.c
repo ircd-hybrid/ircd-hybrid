@@ -64,11 +64,7 @@ ms_encap(struct Client *client_p, struct Client *source_p,
     ptr += len;
   }
 
-  /*
-   * If the final parameter crosses our buffer size, should we bail, 
-   * like the rest, or should we truncate?  ratbox seems to think truncate,
-   * so i'll do that for now until i can talk to lee.  -bill
-   */
+  /* If it's a command without parameters, don't prepend a ':' */
   if (parc == 3)
     snprintf(ptr, sizeof(buffer) - cur_len, "%s", parv[2]);
   else

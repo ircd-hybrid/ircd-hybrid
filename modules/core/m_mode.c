@@ -177,7 +177,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
   char banbuf[IRCD_BUFSIZE];
   struct Channel *chptr;
   char *s, *t, *mbuf, *pbuf;
-  long mode_type;
+  unsigned int mode_type = 0;
   int mlen, tlen;
   int modecount = 0;
 

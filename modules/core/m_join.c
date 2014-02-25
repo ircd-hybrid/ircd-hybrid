@@ -116,9 +116,9 @@ m_join(struct Client *client_p, struct Client *source_p,
   chan_list = last0(client_p, source_p, parv[1]);
 
   for (chan = strtoken(&p, chan_list, ","); chan;
-       chan = strtoken(&p, NULL,      ","))
+       chan = strtoken(&p,      NULL, ","))
   {
-    char *key = NULL;
+    const char *key = NULL;
 
     /* If we have any more keys, take the first for this channel. */
     if (!EmptyString(key_list) && (key_list = strchr(key = key_list, ',')))

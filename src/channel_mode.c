@@ -1708,8 +1708,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       mc = 0;
 
       if ((cap & CAP_TS6) && source_p->id[0] != '\0')
-        mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", source_p->id,
-                       chptr->chname);
+        mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
+                       (unsigned long)chptr->channelts, chptr->chname);
       else
         mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", source_p->name,
                        chptr->chname);

@@ -1,4 +1,10 @@
--- ircd-hybrid-8.1.14 Release Notes
+-- Noteworthy changes in version 8.1.15 (????-??-??)
+########################################################################
+o) IMPORTANT: ircd binary is now again placed into bin/ instead of sbin/
+########################################################################
+
+
+-- Noteworthy changes in version 8.1.14 (2014-02-25)
 o) WHOWAS now honors serverhide::disable_remote_commands
 o) Improved TS6 inter-server communication
 o) Minor code cleanups and speed enhancements
@@ -12,7 +18,7 @@ o) Fixed long-standing bug where +p channels have been shown
    in the /whois reply
 
 
--- ircd-hybrid-8.1.13 Release Notes
+-- Noteworthy changes in version 8.1.13 (2014-01-07)
 o) Fixed EOB not working for remote servers (resulted in fake
    direction notices)
 o) Fixed remote client connection notices for servers that are
@@ -24,7 +30,7 @@ o) Updated/fixed help files
 o) WHOIS no longer sends a notice to +y operators
 
 
--- ircd-hybrid-8.1.12 Release Notes
+-- Noteworthy changes in version 8.1.12 (2013-12-22)
 o) RPL_WHOISMODES now uses the 379 numeric
 o) Serial number is now shown on start up
 o) Fixed possible channel mode desynch with services
@@ -35,12 +41,12 @@ o) Fixed issue with WEBIRC where hostnames were
    not validated
 
 
--- ircd-hybrid-8.1.11 Release Notes
+-- Noteworthy changes in version 8.1.11 (2013-12-06)
 o) Administrators may now see channel modes in /LIST
 o) Fixed compile error on BSD systems when building with kqueue()
 
 
--- ircd-hybrid-8.1.10 Release Notes
+-- Noteworthy changes in version 8.1.10 (2013-11-25)
 o) Fixed bug with kqueue() where it occasionally dropped updates
 o) Changed WHOIS to show a client's certificate fingerprint
    to administrators only
@@ -52,7 +58,7 @@ o) Fixed bug where "STATS P" would leak ip addresses to remotely connected
 o) Services coders: added SVSKILL
 
 
--- ircd-hybrid-8.1.9 Release Notes
+-- Noteworthy changes in version 8.1.9 (2013-11-08)
 o) Added usermode +W. Users connected via a webirc gateway get this
    mode set by servers.
 o) /WHOIS now shows if a client is connected via a webirc
@@ -64,7 +70,7 @@ o) Administrators are now able to see all the user modes a user has
    set via /whois
 
 
--- ircd-hybrid-8.1.8 Release Notes
+-- Noteworthy changes in version 8.1.8 (2013-10-25)
 o) Fixed bug that would lead to a desynchronized nick database
    throughout the entire network if using services enforced
    nick names (SVSNICK)
@@ -76,22 +82,22 @@ o) When using anope 1.9/2.0 services, /WHOIS now shows the account name
 o) Administrators can now see +s channels in /LIST
 
 
--- ircd-hybrid-8.1.7 Release Notes
+-- Noteworthy changes in version 8.1.7 (2013-08-18)
 o) Fixed issue with channel mode +n having no functionality at all
 o) Fixed SSL certificate fingerprint validation for outgoing server connects
 o) Updated several documentation files
 
 
--- ircd-hybrid-8.1.6 Release Notes
+-- Noteworthy changes in version 8.1.6 (2013-08-02)
 o) Fixed possible core with empty motd files
 
 
--- ircd-hybrid-8.1.5 Release Notes
+-- Noteworthy changes in version 8.1.5 (2013-07-16)
 o) Fixed bug that would prevent servers from linking together
    if connect::aftype isn't set
 
 
--- ircd-hybrid-8.1.4 Release Notes
+-- Noteworthy changes in version 8.1.4 (2013-07-05)
 o) Added 'xline' and 'resv' logging types. See doc/reference.conf
    for more information
 o) Fixed bug where remote /STATS requests were not rate limited
@@ -100,13 +106,13 @@ o) Increased oper/auth/connect password length limit from 20 to 128
 o) Minor fixes to nickflood control code
 
 
--- ircd-hybrid-8.1.3 Release Notes
+-- Noteworthy changes in version 8.1.3 (2013-06-23)
 o) Fixed possible core on "STATS z"
 o) Revised doc/reference.conf
 o) Fixed broken --disable-libgeoip switch
 
 
--- ircd-hybrid-8.1.2 Release Notes
+-- Noteworthy changes in version 8.1.2 (2013-06-20)
 o) Added general::cycle_on_host_change configuration option
 o) Added general::stats_u_oper_only configuration option
 o) Added support for SHA-256 ssl certificate fingerprint based operator{}
@@ -123,7 +129,7 @@ o) Fixed a server name leak with server hiding enabled. Reported by
    Adam <adam@anope.org>
 
 
--- ircd-hybrid-8.1.1 Release Notes
+-- Noteworthy changes in version 8.1.1 (2013-06-06)
 ########################################################################
 o) IMPORTANT: moved disable_remote_command configuration directive from
    general{} block to serverhide{} block
@@ -137,15 +143,15 @@ o) Implemented motd{} configuration blocks. See doc/reference.conf for more
 o) "STATS T" shows configured MOTD files
 
 
--- ircd-hybrid-8.1.0 Release Notes
+-- Noteworthy changes in version 8.1.0 (2013-05-23)
 o) Minor code cleanups/performance improvements
 
 
--- ircd-hybrid-8.1.0rc1 Release Notes
+-- Noteworthy changes in version 8.1.0rc1 (2013-05-19)
 o) Fixed broken spoofs
 
 
--- ircd-hybrid-8.1.0beta5 Release Notes
+-- Noteworthy changes in version 8.1.0beta5 (2013-05-15)
 o) Removed 'remote', and 'global_kill' oper flags, and added 'connect',
    'squit', and 'kill' flags for better fine-tuning instead. Whether or
    not a specific action is allowed on a remote server can be controlled
@@ -156,7 +162,7 @@ o) Added 'locops' and 'wallops' to irc-operator flags
 o) Improve/cleanup HELP system
 
 
--- ircd-hybrid-8.1.0beta4 Release Notes
+-- Noteworthy changes in version 8.1.0beta4 (2013-05-09)
 o) Implemented channel mode +M. Clients that haven't identified their
    name with NickServ may not speak in a channel that has this mode set
 o) Fixed weird idletimes shown in /trace
@@ -164,7 +170,7 @@ o) Added 'nononreg' (+R) to general::oper_umodes
 o) Added user mode +F (can see remote client connect/exit notices)
 
 
--- ircd-hybrid-8.1.0beta3 Release Notes
+-- Noteworthy changes in version 8.1.0beta3 (2013-05-05)
 o) PCRE support has been dropped
 o) "STATS o" now shows how many times an oper{} block has been used.
    Similar to STATS x|q"
@@ -177,7 +183,7 @@ o) Removed channel::quiet_on_ban configuration option. This feature is
    now enabled by default
 
 
--- ircd-hybrid-8.1.0beta2 Release Notes
+-- Noteworthy changes in version 8.1.0beta2 (2013-04-28)
 o) Fixed broken compile with libGeoIP disabled
 o) Code cleanups; working towards stabilization and improved performance
 o) Removed operflag 'nick_changes'. Operators can now set +n at will
@@ -185,7 +191,7 @@ o) Fixed shared{} blocks not working as expected
 o) Fixed spoofs not working as expected
 
 
--- ircd-hybrid-8.1.0beta1 Release Notes
+-- Noteworthy changes in version 8.1.0beta1 (2013-04-25)
 ########################################################################
 o) IMPORTANT: name/channel entries can't be stacked any longer within
    a single resv{} block. Each entry now requires its own resv{} block.
@@ -212,20 +218,20 @@ o) Added 'nononreg' (+R) to oper::umodes and general::oper_only_modes
 o) Added support for "away-notify" client capability
 
 
--- ircd-hybrid-8.0.9 Release Notes
+-- Noteworthy changes in version 8.0.9 (2013-05-16)
 o) Fixed bug where ircd would sometimes drop a services link because
    of a missing argument to the SVSMODE command
 o) Fixed weird idletimes shown in /trace
 
 
--- ircd-hybrid-8.0.8 Release Notes
+-- Noteworthy changes in version 8.0.8 (2013-04-28)
 o) "STATS s" now shows configured services{} blocks as well
 o) Fixed compile warnings, minor code cleanups and optimizations
 o) Increased nickname history length to 32768
 o) Unidentified/unregistered nicks may not speak in +R channels
 
 
--- ircd-hybrid-8.0.7 Release Notes
+-- Noteworthy changes in version 8.0.7 (2013-04-12)
 o) Services may now set a channel topic without joining the channel first
 o) Fixed bug where /whois would send empty sockhost information on TS5
    servers
@@ -235,13 +241,13 @@ o) Services may now change the host of a specific user
    via "SVSMODE <timestamp> <target> +x <hostname>"
 
 
--- ircd-hybrid-8.0.6 Release Notes
+-- Noteworthy changes in version 8.0.6 (2013-01-28)
 o) Fix bug where idle time sometimes is 0 even if the client didn't
    send any private message
 o) Fixed possible core in try_parse_v4_netmask()
 
 
--- ircd-hybrid-8.0.5 Release Notes
+-- Noteworthy changes in version 8.0.5 (2013-01-24)
 ########################################################################
 o) IMPORTANT: nick and topic lengths are now configurable via ircd.conf.
    A max_nick_length, as well as a max_topic_length configuration option
@@ -264,18 +270,18 @@ o) /whois, /stats p, and /trace may now show fake idle times depending on
 o) The configuration parser now does support 'year' and 'month' units
 
 
--- ircd-hybrid-8.0.4 Release Notes
+-- Noteworthy changes in version 8.0.4 (2013-01-02)
 o) Fixed possible core on USERHOST/ISON with optimization enabled
 o) Fixed bug where can_flood sometimes didn't work as expected
 
 
--- ircd-hybrid-8.0.3 Release Notes
+-- Noteworthy changes in version 8.0.3 (2012-12-24)
 o) Fixed core on UNDLINE
 o) XLINE/KLINE/RESV/DLINE/SQUIT and KILL now have the same default reason
    if a reason hasn't been specified
 
 
--- ircd-hybrid-8.0.2 Release Notes
+-- Noteworthy changes in version 8.0.2 (2012-12-20)
 o) Minor updates to the build system
 o) Fixed broken --enable-assert configure switch
 o) Fixed bug where timed events stopped from working if the system's
@@ -285,14 +291,14 @@ o) Fixed contributed WEBIRC module
 o) IRC operators may now again see server generated nick rejection notices
 
 
--- ircd-hybrid-8.0.1 Release Notes
+-- Noteworthy changes in version 8.0.1 (2012-11-04)
 o) Fixed broken CIDR support for CHALLENGE based irc operator logins
 o) Fixed class limits not properly applying to oper{} blocks
 o) Fixed possible TBURST desynchronization with services
 o) Fixed TBURST sending server's name to clients if it's a hidden server
 
 
--- ircd-hybrid-8.0.0 Release Notes
+-- Noteworthy changes in version 8.0.0 (2012-10-18)
 o) Fixed an off-by-one with spoofs. Spoofs are now also checked for
    invalid characters
 o) Removed general::use_whois_actually configuration directive. This is
@@ -301,7 +307,7 @@ o) Minor SQUIT handling fixes
 o) Fixed bancache not being updated on CHGHOST/CHGIDENT
 
 
--- ircd-hybrid-8rc1 Release Notes
+-- Noteworthy changes in version 8.0.0rc1 (2012-09-28)
 o) Removed general::client_flood configuration option and added the
    new 'recvq' configuration directive to class{} blocks.
    The max size of a receive queue can be seen in "STATS Y"
@@ -309,7 +315,7 @@ o) Removed general::client_flood configuration option and added the
 o) Allow the '[' and ']' characters in server description
 
 
--- ircd-hybrid-8beta3 Release Notes
+-- Noteworthy changes in version 8.0.0beta3 (2012-08-24)
 o) Fixed wrong syntax in several language files
 o) Removed &localchannels
 o) PRIVMSG to opers@some.server is no longer supported
@@ -320,7 +326,7 @@ o) Removed use_invex, use_except and use_knock configuration options.
    These features are now enabled by default
 
 
--- ircd-hybrid-8beta2 Release Notes
+-- Noteworthy changes in version 8.0.0beta2 (2012-07-21)
 o) channel::disable_fake_channels now also disables ascii 29 (mIRC italic)
    when set to yes
 o) Added channel::max_chans_per_oper configuration directive. The old way
@@ -337,7 +343,7 @@ o) Improved TS6 support
 o) Channel keys/passwords are now case sensitive
 
 
--- ircd-hybrid-8beta1 Release Notes
+-- Noteworthy changes in version 8.0.0beta1 (2012-05-28)
 o) Implemented full services support, including but not limited to the
    following changes:
    - Added SVSNICK, and SVSMODE command handlers

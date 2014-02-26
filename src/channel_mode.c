@@ -51,9 +51,9 @@ static char nuh_mask[MAXPARA][IRCD_BUFSIZE];
 static char modebuf[IRCD_BUFSIZE];
 static char parabuf[MODEBUFLEN];
 static struct ChModeChange mode_changes[IRCD_BUFSIZE];
-static int mode_count;
-static int mode_limit;  /* number of modes set other than simple */
-static int simple_modes_mask;  /* bit mask of simple modes already set */
+static unsigned int mode_count;
+static unsigned int mode_limit;  /* number of modes set other than simple */
+static unsigned int simple_modes_mask;  /* bit mask of simple modes already set */
 #ifdef HALFOPS
 static int channel_capabs[] = { CAP_TS6, CAP_HOPS };
 #else
@@ -1191,7 +1191,8 @@ chm_limit(struct Client *client_p, struct Client *source_p,
           struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  int i, limit;
+  unsigned int i;
+  int limit;
   char *lstr;
 
   if (alev < CHACCESS_HALFOP)
@@ -1253,7 +1254,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
         struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  int i;
+  unsigned int i;
   char *key;
 
   if (alev < CHACCESS_HALFOP)
@@ -1647,7 +1648,8 @@ static void
 send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
                       struct Channel *chptr, unsigned int cap, unsigned int nocap)
 {
-  int i, mbl, pbl, arglen, nc, mc;
+  unsigned int i;
+  int mbl, pbl, arglen, nc, mc;
   int len;
   const char *arg = NULL;
   char *parptr;
@@ -1761,7 +1763,8 @@ static void
 send_mode_changes(struct Client *client_p, struct Client *source_p,
                   struct Channel *chptr)
 {
-  int i, mbl, pbl, arglen, nc, mc;
+  unsigned int i;
+  int mbl, pbl, arglen, nc, mc;
   int len;
   const char *arg = NULL;
   char *parptr;

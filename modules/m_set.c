@@ -66,7 +66,7 @@ quote_autoconn(struct Client *source_p, const char *arg, int newval)
     }
     else
     {
-      sendto_one(source_p, ":%s NOTICE %s :Can't find %s",
+      sendto_one(source_p, ":%s NOTICE %s :Cannot find %s",
                  me.name, source_p->name, arg);
     }
   }

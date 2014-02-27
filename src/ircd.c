@@ -245,7 +245,7 @@ io_loop(void)
     {
       motd_recache();
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Got signal SIGUSR1, reloading motd files");
+                           "Got signal SIGUSR1, reloading motd file(s)");
       doremotd = 0;
     }
   }

@@ -60,9 +60,9 @@ int
 main(int argc, char *argv[])
 {
   const char *plaintext = NULL;
+  const char *saltpara = NULL;
+  const char *salt = NULL;
   int c;
-  char *saltpara = NULL;
-  char *salt;
   int flag = 0;
   int length = 0; /* Not Set */
   int rounds = 0; /* Not set, since extended DES needs 25 and blowfish needs

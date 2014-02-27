@@ -80,7 +80,7 @@ sigchld_handler(int sig)
 static void
 sigint_handler(int sig)
 {
-  server_die("SIGINT received", !server_state.foreground);
+  server_die("received signal SIGINT", !server_state.foreground);
 }
 
 /*

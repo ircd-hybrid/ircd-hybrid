@@ -104,7 +104,7 @@ open_db_read(const char *filename)
     int errno_save = errno;
 
     if (errno != ENOENT)
-      ilog(LOG_TYPE_IRCD, "Can't read database file %s", f->filename);
+      ilog(LOG_TYPE_IRCD, "Cannot read database file %s", f->filename);
 
     MyFree(f);
     errno = errno_save;
@@ -156,11 +156,11 @@ open_db_write(const char *filename, uint32_t version)
 
     if (!walloped++)
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Can't create temporary database file %s",
+                           "Cannot create temporary database file %s",
                            f->tempname);
 
     errno = errno_save;
-    ilog(LOG_TYPE_IRCD, "Can't create temporary database file %s",
+    ilog(LOG_TYPE_IRCD, "Cannot create temporary database file %s",
         f->tempname);
 
     if (f->fp)

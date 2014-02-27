@@ -5,7 +5,7 @@
 # for use with cryptlinks.
 #
 # (C) 2003 Joshua Kwan and the IRCD-Hybrid team
-# See LICENSE for the terms of copying.
+# See COPYING for the terms of copying.
 
 if test -f rsa.key; then
 	echo Moving old key out of the way to rsa.key.old

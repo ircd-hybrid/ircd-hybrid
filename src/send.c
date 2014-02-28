@@ -921,7 +921,7 @@ sendto_wallops_flags(unsigned int flags, struct Client *source_p,
  *		  (at most 5 warnings every 5 seconds)
  */
 void
-ts_warn(const char *pattern, ...)
+sendto_realops_flags_ratelimited(const char *pattern, ...)
 {
   va_list args;
   char buffer[IRCD_BUFSIZE];

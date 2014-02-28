@@ -283,7 +283,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
     else
     {
       newts = source_p->tsinfo = CurrentTime;
-      ts_warn("Remote nick %s (%s) introduced without a TS", nick, parv[0]);
+      sendto_realops_flags_ratelimited("Remote nick %s (%s) introduced without a TS", nick, parv[0]);
     }
 
     strlcpy(source_p->svid, svsid, sizeof(source_p->svid));

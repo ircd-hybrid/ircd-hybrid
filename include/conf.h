@@ -121,6 +121,15 @@ enum maskitem_type
   CONF_OPER     = 1 << 12,
 };
 
+enum
+{
+  NOT_AUTHORIZED = -1,
+  I_LINE_FULL    = -2,
+  TOO_MANY       = -3,
+  BANNED_CLIENT  = -4,
+  TOO_FAST       = -5
+};
+
 struct conf_parser_context
 {
   unsigned int boot;
@@ -383,12 +392,6 @@ extern int valid_comment(struct Client *, char *, int);
 #define TK_MINUTES 1
 extern time_t valid_tkline(const char *, const int);
 extern int match_conf_password(const char *, const struct MaskItem *);
-
-#define NOT_AUTHORIZED    (-1)
-#define I_LINE_FULL       (-2)
-#define TOO_MANY          (-3)
-#define BANNED_CLIENT     (-4)
-#define TOO_FAST          (-5)
 
 #define CLEANUP_TKLINES_TIME 60
 

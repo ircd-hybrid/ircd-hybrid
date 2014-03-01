@@ -27,8 +27,11 @@
 #ifndef INCLUDED_modules_h
 #define INCLUDED_modules_h
 
-#define MODULE_FLAG_CORE     0x1
-#define MODULE_FLAG_NOUNLOAD 0x2
+enum
+{
+  MODULE_FLAG_CORE     = 1 << 0,
+  MODULE_FLAG_NOUNLOAD = 1 << 1
+};
 
 struct module
 {

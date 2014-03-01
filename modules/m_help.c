@@ -124,7 +124,7 @@ do_help(struct Client *source_p, char *topic)
 
 /*
  * m_help - HELP message handler
- *      parv[0] = sender prefix
+ *      parv[0] = command
  */
 static int
 m_help(struct Client *client_p, struct Client *source_p,
@@ -149,7 +149,7 @@ m_help(struct Client *client_p, struct Client *source_p,
 
 /*
  * mo_help - HELP message handler
- *      parv[0] = sender prefix
+ *      parv[0] = command
  */
 static int
 mo_help(struct Client *client_p, struct Client *source_p,

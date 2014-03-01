@@ -39,7 +39,7 @@
 
 /*
  * mr_webirc
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = password
  *      parv[2] = fake username (we ignore this)
  *      parv[3] = fake hostname

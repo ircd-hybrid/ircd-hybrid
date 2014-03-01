@@ -1618,7 +1618,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
 
 /*
  * m_stats()
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = stat letter/command
  *      parv[2] = (if present) server/mask in stats L
  *
@@ -1664,7 +1664,7 @@ m_stats(struct Client *client_p, struct Client *source_p,
 
 /*
  * mo_stats()
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = stat letter/command
  *      parv[2] = (if present) server/mask in stats L, or target
  *

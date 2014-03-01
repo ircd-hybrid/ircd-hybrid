@@ -86,7 +86,7 @@ last0(struct Client *client_p, struct Client *source_p, char *chanlist)
 }
 
 /* m_join()
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = channel
  *      parv[2] = channel password (key)
  */
@@ -284,7 +284,7 @@ m_join(struct Client *client_p, struct Client *source_p,
 
 /* ms_join()
  *
- * inputs	- parv[0] = uid
+ * inputs	- parv[0] = command
  *		  parv[1] = ts
  *		  parv[2] = channel name
  *		  parv[3] = modes (Deprecated)

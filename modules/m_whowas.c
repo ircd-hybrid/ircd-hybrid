@@ -90,7 +90,7 @@ whowas_do(struct Client *client_p, struct Client *source_p,
 
 /*
 ** m_whowas
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = nickname queried
 */
 static int

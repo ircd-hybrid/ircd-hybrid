@@ -40,7 +40,7 @@
 
 
 /* mo_squit - SQUIT message handler
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = server name
  *  parv[2] = comment
  */
@@ -125,7 +125,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
  **/
 
 /* ms_squit - SQUIT message handler
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = server name
  *  parv[2] = comment
  */

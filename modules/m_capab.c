@@ -35,7 +35,7 @@
 
 /*
  * mr_capab - CAPAB message handler
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = space-separated list of capabilities
  *
  */

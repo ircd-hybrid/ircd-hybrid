@@ -53,7 +53,7 @@ static const char serveropts[] =
 
 /*
  * m_version - VERSION command handler
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = remote server
  */
 static int
@@ -86,7 +86,7 @@ m_version(struct Client *client_p, struct Client *source_p,
 
 /*
  * mo_version - VERSION command handler
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = remote server
  */
 static int
@@ -107,7 +107,7 @@ mo_version(struct Client *client_p, struct Client *source_p,
 
 /*
  * ms_version - VERSION command handler
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = remote server
  */
 static int

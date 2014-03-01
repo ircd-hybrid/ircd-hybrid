@@ -45,7 +45,7 @@ static void remove_resv(struct Client *, const char *);
 
 
 /* mo_resv()
- *   parv[0] = sender prefix
+ *   parv[0] = command
  *   parv[1] = channel/nick to forbid
  */
 static int
@@ -103,7 +103,7 @@ mo_resv(struct Client *client_p, struct Client *source_p,
  *		- parc number of arguments
  *		- parv list of arguments
  * via parv[]
- * parv[0] = client name applying resv
+ * parv[0] = command
  * parv[1] = tkline_time
  * parv[2] = name
  * parv[3] = 0
@@ -125,7 +125,7 @@ me_resv(struct Client *client_p, struct Client *source_p,
 }
 
 /* ms_resv()
- *   parv[0] = sender prefix
+ *   parv[0] = command
  *   parv[1] = target server
  *   parv[2] = channel/nick to resv
  *   parv[3] = reason
@@ -152,7 +152,7 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 }
 
 /* mo_unresv()
- *   parv[0] = sender prefix
+ *   parv[0] = command
  *   parv[1] = channel/nick to unforbid
  */
 static int
@@ -187,7 +187,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p,
 }
 
 /* ms_unresv()
- *     parv[0] = sender prefix
+ *     parv[0] = command
  *     parv[1] = target server
  *     parv[2] = resv to remove
  */

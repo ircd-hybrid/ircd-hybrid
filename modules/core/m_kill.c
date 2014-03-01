@@ -70,7 +70,7 @@ relay_kill(struct Client *one, struct Client *source_p,
 }
 
 /* mo_kill()
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = kill victim
  *  parv[2] = kill path
  */
@@ -185,7 +185,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
 }
 
 /* ms_kill()
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = kill victim
  *  parv[2] = kill path and reason
  */

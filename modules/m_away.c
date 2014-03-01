@@ -40,7 +40,7 @@
 
 /*
  * m_away
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = away message
  */
 static int

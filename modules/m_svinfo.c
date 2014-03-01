@@ -37,7 +37,7 @@
 
 /*
  * ms_svinfo - SVINFO message handler
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = TS_CURRENT for the server
  *      parv[2] = TS_MIN for the server
  *      parv[3] = server is standalone or connected to non-TS only

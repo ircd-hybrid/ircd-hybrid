@@ -39,7 +39,7 @@
 /*
  * mo_operwall - OPERWALL message handler
  *  (write to *all* local opers currently online)
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = message text
  */
 static int
@@ -73,7 +73,7 @@ mo_operwall(struct Client *client_p, struct Client *source_p,
 /*
  * ms_operwall - OPERWALL message handler
  *  (write to *all* local opers currently online)
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = message text
  */
 static int

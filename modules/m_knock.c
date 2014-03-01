@@ -42,7 +42,7 @@
 
 
 /* m_knock
- *    parv[0] = sender prefix
+ *    parv[0] = command
  *    parv[1] = channel
  *
  *  The KNOCK command has the following syntax:

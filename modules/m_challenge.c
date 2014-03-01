@@ -65,7 +65,7 @@ failed_challenge_notice(struct Client *source_p, const char *name,
 
 /*
  * m_challenge - generate RSA challenge for wouldbe oper
- * parv[0] = sender prefix
+ * parv[0] = command
  * parv[1] = operator to challenge for, or +response
  *
  */

@@ -36,7 +36,7 @@
 
 /*
 ** m_quit
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = comment
 */
 static int
@@ -56,7 +56,7 @@ m_quit(struct Client *client_p, struct Client *source_p,
 
 /*
 ** ms_quit
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = comment
 */
 static int

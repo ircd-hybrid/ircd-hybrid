@@ -125,7 +125,7 @@ static void dump_map(struct Client *client,
 }
 
 /* m_map()
- *      parv[0] = sender prefix
+ *      parv[0] = command
  */
 static int
 m_map(struct Client *client_p, struct Client *source_p,
@@ -152,7 +152,7 @@ m_map(struct Client *client_p, struct Client *source_p,
 }
 
 /* mo_map()
- *      parv[0] = sender prefix
+ *      parv[0] = command
  */
 static int
 mo_map(struct Client *client_p, struct Client *source_p,

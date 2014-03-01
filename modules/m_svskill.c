@@ -48,7 +48,7 @@
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
  *                 pointers.
  * \note Valid arguments for this command are:
- *      - parv[0] = sender prefix
+ *      - parv[0] = command
  *      - parv[1] = nickname
  *      - parv[2] = TS
  *      - parv[3] = kill message

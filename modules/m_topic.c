@@ -41,7 +41,7 @@
 
 
 /* m_topic()
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = channel name
  *  parv[2] = new topic, if setting topic
  */

@@ -38,7 +38,7 @@
  * Note: At least at protocol level ERROR has only one parameter.
  * --msa
  *
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[*] = parameters
  */
 static int

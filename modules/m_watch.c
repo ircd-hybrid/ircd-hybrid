@@ -62,7 +62,7 @@ show_watch(struct Client *client_p, const char *name,
 /*
  * m_watch()
  *
- * parv[0] = sender prefix
+ * parv[0] = command
  * parv[1] = watch options
  */
 static int

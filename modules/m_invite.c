@@ -43,7 +43,7 @@
 
 /*
 ** m_invite
-**      parv[0] - sender prefix
+**      parv[0] - command
 **      parv[1] - user to invite
 **      parv[2] - channel name
 **      parv[3] - invite timestamp

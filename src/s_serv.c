@@ -246,13 +246,7 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
     if (match(target_p->name, parv[server]))
       parv[server] = target_p->name;
 
-    /* This is a little kludgy but should work... */
-    if (IsClient(source_p) &&
-        ((MyConnect(target_p) && IsCapable(target_p, CAP_TS6)) ||
-         (!MyConnect(target_p) && IsCapable(target_p->from, CAP_TS6))))
-      parv[0] = ID(source_p);
-
-    sendto_one(target_p, command, parv[0],
+    sendto_one(target_p, command, ID_or_name(source_p, target_p),
                parv[1], parv[2], parv[3], parv[4],
                parv[5], parv[6], parv[7], parv[8]);
     return HUNTED_PASS;

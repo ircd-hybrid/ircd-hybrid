@@ -103,8 +103,7 @@ static struct MessageTree msg_tree;
 /*
  * NOTE: parse() should not be called recursively by other functions!
  */
-static char *sender;
-static char *para[MAXPARA + 2]; /* <prefix> + <params> + NULL */
+static char *para[MAXPARA + 2]; /* <command> + <params> + NULL */
 
 static int cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
@@ -143,7 +142,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
      * Copy the prefix to 'sender' assuming it terminates
      * with SPACE (or NULL, which is an error, though).
      */
-    sender = ++ch;
+    char *sender = ++ch;
 
     if ((s = strchr(ch, ' ')) != NULL)
     {
@@ -251,7 +250,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
   /* Note initially true: s==NULL || *(s-1) == '\0' !! */
 
-  para[parc] = from->name;
+  para[parc] = ch;
 
   if (s)
   {

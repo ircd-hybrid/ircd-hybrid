@@ -272,6 +272,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
 
   if (IsServer(source_p))
   {
+    const char *server = source_p->name;
     /* A server introducing a new client, change source */
     source_p = make_client(client_p);
     dlinkAdd(source_p, &source_p->node, &global_client_list);
@@ -283,7 +284,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
     else
     {
       newts = source_p->tsinfo = CurrentTime;
-      sendto_realops_flags_ratelimited("Remote nick %s (%s) introduced without a TS", nick, parv[0]);
+      sendto_realops_flags_ratelimited("Remote nick %s (%s) introduced without a TS", nick, server);
     }
 
     strlcpy(source_p->svid, svsid, sizeof(source_p->svid));
@@ -575,7 +576,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
  *                 pointers.
  * \note Valid arguments for this command are:
- *      - parv[0] = sender prefix
+ *      - parv[0] = command
  *      - parv[1] = nickname
  */
 static int
@@ -637,7 +638,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
  *                 pointers.
  * \note Valid arguments for this command are:
- *      - parv[0] = sender prefix
+ *      - parv[0] = command
  *      - parv[1] = nickname
  */
 static int
@@ -726,12 +727,12 @@ m_nick(struct Client *client_p, struct Client *source_p,
  * \note Valid arguments for this command are:
  *
  * server -> server nick change
- *  - parv[0] = sender prefix
+ *  - parv[0] = command
  *  - parv[1] = nickname
  *  - parv[2] = TS when nick change
  *
  * server introducing new nick (without services support)
- *  - parv[0] = sender prefix
+ *  - parv[0] = command
  *  - parv[1] = nickname
  *  - parv[2] = hop count
  *  - parv[3] = TS
@@ -742,7 +743,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
  *  - parv[8] = ircname
  *
  * server introducing new nick (with services support)
- *  - parv[0] = sender prefix
+ *  - parv[0] = command
  *  - parv[1] = nickname
  *  - parv[2] = hop count
  *  - parv[3] = TS
@@ -833,7 +834,7 @@ ms_nick(struct Client *client_p, struct Client *source_p,
  * \note Valid arguments for this command are:
  *
  * server introducing new nick (without services support)
- *  - parv[0] = sender prefix
+ *  - parv[0] = command
  *  - parv[1] = nickname
  *  - parv[2] = hop count
  *  - parv[3] = TS
@@ -845,7 +846,7 @@ ms_nick(struct Client *client_p, struct Client *source_p,
  *  - parv[9] = ircname (gecos)
  *
  * server introducing new nick (with services support)
- *  - parv[ 0] = sender prefix
+ *  - parv[ 0] = command
  *  - parv[ 1] = nickname
  *  - parv[ 2] = hop count
  *  - parv[ 3] = TS

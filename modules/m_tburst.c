@@ -37,7 +37,7 @@
 
 /* ms_tburst()
  *
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = channel timestamp
  *      parv[2] = channel
  *      parv[3] = topic timestamp

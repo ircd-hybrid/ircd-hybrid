@@ -34,7 +34,7 @@
 
 /*
 ** mr_dumb_proxy
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = comment
 */
 static int

@@ -44,7 +44,7 @@
 
 /*
  * m_mode - MODE command handler
- * parv[0] - sender
+ * parv[0] - command
  * parv[1] - channel
  */
 static int
@@ -119,7 +119,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
 /*
  * ms_tmode()
  *
- * inputs	- parv[0] = UID
+ * inputs	- parv[0] = command
  *		  parv[1] = TS
  *		  parv[2] = channel name
  *		  parv[3] = modestring
@@ -159,7 +159,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 /*
  * ms_bmask()
  *
- * inputs	- parv[0] = SID
+ * inputs	- parv[0] = command
  *		  parv[1] = TS
  *		  parv[2] = channel name
  *		  parv[3] = type of ban to add ('b' 'I' or 'e')

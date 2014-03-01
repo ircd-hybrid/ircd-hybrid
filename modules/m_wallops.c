@@ -38,7 +38,7 @@
 
 /*
  * mo_wallops (write to *all* opers currently online)
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = message text
  */
 static int
@@ -71,7 +71,7 @@ mo_wallops(struct Client *client_p, struct Client *source_p,
 
 /*
  * ms_wallops (write to *all* opers currently online)
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = message text
  */
 static int

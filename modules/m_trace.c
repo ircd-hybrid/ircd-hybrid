@@ -59,7 +59,7 @@ trace_get_dependent(unsigned int *const server,
 /*
  * m_trace()
  *
- *	parv[0] = sender prefix
+ *	parv[0] = command
  *	parv[1] = target client/server to trace
  */
 static int
@@ -79,7 +79,7 @@ m_trace(struct Client *client_p, struct Client *source_p,
 }
 
 /* mo_trace()
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = servername
  */
 static int
@@ -150,7 +150,7 @@ mo_trace(struct Client *client_p, struct Client *source_p,
 
 /*
 ** ms_trace
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = servername
 */
 static int

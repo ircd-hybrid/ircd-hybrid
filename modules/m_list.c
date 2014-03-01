@@ -170,7 +170,7 @@ do_list(struct Client *source_p, int parc, char *parv[])
 
 /*
 ** mo_list
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = channel
 */
 static int

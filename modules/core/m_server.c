@@ -66,7 +66,7 @@ set_server_gecos(struct Client *client_p, const char *info)
 }
 
 /* mr_server()
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = servername
  *  parv[2] = serverinfo/hopcount
  *  parv[3] = serverinfo
@@ -235,7 +235,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
 }
 
 /* ms_server()
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = servername
  *  parv[2] = serverinfo/hopcount
  *  parv[3] = serverinfo
@@ -423,7 +423,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
 }
 
 /* ms_sid()
- *  parv[0] = sender prefix
+ *  parv[0] = command
  *  parv[1] = servername
  *  parv[2] = serverinfo/hopcount
  *  parv[3] = sid of new server

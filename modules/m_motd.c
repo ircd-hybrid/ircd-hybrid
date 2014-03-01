@@ -49,7 +49,7 @@ do_motd(struct Client *source_p)
 
 /*
 ** m_motd
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = servername
 */
 static int
@@ -88,7 +88,7 @@ m_motd(struct Client *client_p, struct Client *source_p,
 
 /*
 ** mo_motd
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = servername
 */
 static int

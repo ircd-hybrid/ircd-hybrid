@@ -65,7 +65,7 @@ failed_oper_notice(struct Client *source_p, const char *name,
 
 /*
 ** m_oper
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = oper name
 **      parv[2] = oper password
 */
@@ -140,7 +140,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
 /*
 ** mo_oper
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = oper name
 **      parv[2] = oper password
 */

@@ -138,7 +138,7 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
 }
 
 /* mo_etrace()
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = servername
  */
 static int

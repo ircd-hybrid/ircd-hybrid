@@ -239,7 +239,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 
 /*
 ** m_who
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = nickname mask list
 **      parv[2] = additional selection flag, only 'o' for now.
 */

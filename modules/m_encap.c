@@ -85,18 +85,8 @@ ms_encap(struct Client *client_p, struct Client *source_p,
 #endif
   mptr->bytes += strlen(buffer);
 
-  /*
-   * Yes this is an ugly hack, but it is quicker than copying the
-   * entire array again.
-   *
-   * Note: this hack wouldn't be needed if parv[0] were set to the
-   * command name, rather than being derived from the prefix, as
-   * it should have been from the beginning.
-   */
-  ptr = parv[0];
   parv += 2;
   parc -= 2;
-  parv[0] = ptr;
 
   if ((handler = mptr->handlers[ENCAP_HANDLER]))
     (*handler)(client_p, source_p, parc, parv);

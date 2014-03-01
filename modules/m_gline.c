@@ -371,7 +371,7 @@ ms_gline(struct Client *client_p, struct Client *source_p,
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
  *                 pointers.
  * \note Valid arguments for this command are:
- *      - parv[0] = sender prefix
+ *      - parv[0] = command
  *      - parv[1] = user\@host mask
  *      - parv[2] = reason
  */
@@ -486,7 +486,7 @@ do_sungline(struct Client *source_p, const char *user,
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
  *                 pointers.
  * \note Valid arguments for this command are:
- *      - parv[0] = sender prefix
+ *      - parv[0] = command
  *      - parv[1] = username
  *      - parv[2] = hostname
  *      - parv[3] = reason
@@ -510,7 +510,7 @@ me_gungline(struct Client *client_p, struct Client *source_p,
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
  *                 pointers.
  * \note Valid arguments for this command are:
- *      - parv[0] = sender prefix
+ *      - parv[0] = command
  *      - parv[1] = user\@host mask
  *      - parv[2] = reason
  */

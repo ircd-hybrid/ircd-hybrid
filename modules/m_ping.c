@@ -39,7 +39,7 @@
 
 /*
 ** m_ping
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = origin
 **      parv[2] = destination
 */

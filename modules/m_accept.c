@@ -114,7 +114,7 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
  *                 pointers.
  * \note Valid arguments for this command are:
- *      - parv[0] = sender prefix
+ *      - parv[0] = command
  *      - parv[1] = list of masks to be accepted or removed (optional)
  */
 static int

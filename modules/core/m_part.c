@@ -105,7 +105,7 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
 
 /*
 ** m_part
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = channel
 **      parv[2] = reason
 */

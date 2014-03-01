@@ -37,7 +37,7 @@
 
 /*
  * m_users
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = servername
  */
 static int
@@ -70,7 +70,7 @@ m_users(struct Client *client_p, struct Client *source_p,
 
 /*
  * mo_users
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = servername
  */
 static int

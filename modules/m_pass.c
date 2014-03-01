@@ -43,7 +43,7 @@
  *
  *
  * mr_pass - PASS message handler
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = password
  *      parv[2] = optional extra version information
  */

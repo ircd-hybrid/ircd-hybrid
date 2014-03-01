@@ -354,7 +354,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
 ** Added Aug 31, 1997 
 ** common (Keith Fralick) fralick@gate.net
 **
-**      parv[0] = sender
+**      parv[0] = command
 **      parv[1] = address to remove
 *
 *

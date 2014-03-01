@@ -39,7 +39,7 @@
 /*
  * mo_locops - LOCOPS message handler
  * (write to *all* local opers currently online)
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = message text
  */
 static int

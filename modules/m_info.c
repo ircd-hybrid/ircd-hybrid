@@ -692,7 +692,7 @@ send_info_text(struct Client *source_p)
 
 /*
 ** m_info()
-**  parv[0] = sender prefix
+**  parv[0] = command
 **  parv[1] = servername
 */
 static int
@@ -721,7 +721,7 @@ m_info(struct Client *client_p, struct Client *source_p,
 
 /*
 ** ms_info()
-**  parv[0] = sender prefix
+**  parv[0] = command
 **  parv[1] = servername
 */
 static int

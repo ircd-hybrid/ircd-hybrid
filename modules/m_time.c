@@ -39,7 +39,7 @@
 
 /*
  * m_time
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = servername
  */
 static int
@@ -62,7 +62,7 @@ m_time(struct Client *client_p, struct Client *source_p,
 
 /*
  * mo_time
- *      parv[0] = sender prefix
+ *      parv[0] = command
  *      parv[1] = servername
  */
 static int

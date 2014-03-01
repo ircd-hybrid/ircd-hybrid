@@ -69,7 +69,7 @@ do_local_user(struct Client *source_p,
 
 /*
 ** mr_user
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = username (login name, account)
 **      parv[2] = client host name (used only from other servers)
 **      parv[3] = server host name (used only from other servers)

@@ -215,7 +215,7 @@ do_whois(struct Client *source_p, const char *name)
 
 /*
 ** m_whois
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = nickname masklist
 */
 static int
@@ -264,7 +264,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
 
 /*
 ** mo_whois
-**      parv[0] = sender prefix
+**      parv[0] = command
 **      parv[1] = nickname masklist
 */
 static int

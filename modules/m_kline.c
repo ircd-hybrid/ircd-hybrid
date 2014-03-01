@@ -360,7 +360,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
 *
 */
 static int
-mo_unkline(struct Client *client_p,struct Client *source_p,
+mo_unkline(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
   char *target_server = NULL;

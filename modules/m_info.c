@@ -712,7 +712,7 @@ m_info(struct Client *client_p, struct Client *source_p,
   last_used = CurrentTime;
 
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p,source_p, ":%s INFO :%s", 1,
+    if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
                     parc, parv) != HUNTED_ISME)
       return 0;
 

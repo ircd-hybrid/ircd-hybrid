@@ -510,7 +510,7 @@ mp_pool_sort_used_chunks(mp_pool_t *pool)
 
   chunks = MyMalloc(sizeof(mp_chunk_t *) * n);
 
-  for (i=0,chunk = pool->used_chunks; chunk; chunk = chunk->next)
+  for (i = 0, chunk = pool->used_chunks; chunk; chunk = chunk->next)
     chunks[i++] = chunk;
 
   qsort(chunks, n, sizeof(mp_chunk_t *), mp_pool_sort_used_chunks_helper);

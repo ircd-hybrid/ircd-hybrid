@@ -27,14 +27,17 @@
 #ifndef INCLUDED_listener_h
 #define INCLUDED_listener_h
 
-#define LISTENER_SSL    0x1
-#define LISTENER_HIDDEN 0x2
-#define LISTENER_SERVER 0x4
-
 #include "ircd_defs.h"
 #include "fdlist.h"
 
 struct Client;
+
+enum
+{
+  LISTENER_SSL    = 1 << 0,
+  LISTENER_HIDDEN = 1 << 1,
+  LISTENER_SERVER = 1 << 2
+};
 
 struct Listener
 {

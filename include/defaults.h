@@ -42,7 +42,6 @@
  * PREFIX = prefix for all directories
  * DPATH       = root directory of installation
  * BINPATH     = directory for binary files
- * MSGPATH     = directory for language files
  * ETCPATH     = directory for configuration files
  * LOGPATH     = directory for logfiles
  * MODPATH     = directory for modules
@@ -52,7 +51,6 @@
 /* dirs */
 #define DPATH        PREFIX
 #define BINPATH      PREFIX "/bin/"
-#define MSGPATH      DATADIR "/" PACKAGE "/messages"
 #define MODPATH      LIBDIR "/" PACKAGE "/modules/"
 #define HPATH        DATADIR "/" PACKAGE "/help"
 #define AUTOMODPATH  MODPATH "/autoload/"

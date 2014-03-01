@@ -326,15 +326,13 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
     }
 
     sendto_common_channels_local(source_p, 1, 0, ":%s!%s@%s NICK :%s",
-                                 source_p->name,source_p->username,
+                                 source_p->name, source_p->username,
                                  source_p->host, nick);
 
     whowas_add_history(source_p, 1);
-    sendto_server(client_p, CAP_TS6, NOCAPS,
-                  ":%s NICK %s :%lu",
+    sendto_server(client_p, CAP_TS6, NOCAPS, ":%s NICK %s :%lu",
                   ID(source_p), nick, (unsigned long)source_p->tsinfo);
-    sendto_server(client_p, NOCAPS, CAP_TS6,
-                  ":%s NICK %s :%lu",
+    sendto_server(client_p, NOCAPS, CAP_TS6, ":%s NICK %s :%lu",
                   source_p->name, nick, (unsigned long)source_p->tsinfo);
   }
 

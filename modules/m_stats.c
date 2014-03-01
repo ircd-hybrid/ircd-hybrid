@@ -1410,8 +1410,8 @@ parse_stats_args(int parc, char *parv[], int *doall, int *wilds)
 }
 
 static void
-stats_L_list(struct Client *source_p,char *name, int doall, int wilds,
-             dlink_list *list,char statchar)
+stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
+             dlink_list *list, char statchar)
 {
   dlink_node *ptr;
   struct Client *target_p;
@@ -1500,8 +1500,8 @@ stats_L_list(struct Client *source_p,char *name, int doall, int wilds,
  * side effects -
  */
 static void
-stats_L(struct Client *source_p,char *name,int doall,
-        int wilds,char statchar)
+stats_L(struct Client *source_p, char *name,int doall,
+        int wilds, char statchar)
 {
   stats_L_list(source_p, name, doall, wilds, &unknown_list, statchar);
   stats_L_list(source_p, name, doall, wilds, &local_client_list, statchar);

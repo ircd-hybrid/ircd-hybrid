@@ -856,16 +856,12 @@ show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
     *prefix_ptr++ = '<';
   if (IsNoTilde(conf))
     *prefix_ptr++ = '-';
-  if (IsLimitIp(conf))
-    *prefix_ptr++ = '!';
   if (IsNeedIdentd(conf))
     *prefix_ptr++ = '+';
   if (!IsNeedPassword(conf))
     *prefix_ptr++ = '&';
   if (IsConfExemptResv(conf))
     *prefix_ptr++ = '$';
-  if (IsNoMatchIp(conf))
-    *prefix_ptr++ = '%';
   if (IsConfDoSpoofIp(conf))
     *prefix_ptr++ = '=';
   if (MyOper(sptr) && IsConfExemptKline(conf))

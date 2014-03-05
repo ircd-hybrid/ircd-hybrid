@@ -100,9 +100,6 @@ struct MessageTree
 
 static struct MessageTree msg_tree;
 
-/*
- * NOTE: parse() should not be called recursively by other functions!
- */
 static char *sender;
 static char *para[MAXPARA + 2]; /* <prefix> + <params> + NULL */
 

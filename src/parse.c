@@ -319,7 +319,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
     if (!IsServer(client_p))
     {
       sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS), me.name,
-                 EmptyString(hpara[0]) ? "*" : hpara[0], mptr->cmd);
+                 client_p->name[0] ? client_p->name : "*", mptr->cmd);
     }
     else
     {

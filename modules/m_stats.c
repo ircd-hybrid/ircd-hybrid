@@ -53,8 +53,6 @@
 #include "motd.h"
 
 
-const char *from, *to;
-
 static const struct shared_flags
 {
   const unsigned int type;
@@ -1075,7 +1073,7 @@ stats_oper(struct Client *source_p, int parc, char *parv[])
 static void
 stats_operedup(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *ptr;
+  dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, oper_list.head)
   {
@@ -1086,21 +1084,21 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
 
     if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER))
       sendto_one(source_p, ":%s %d %s p :[%c][%s] %s (%s@%s) Idle: %u",
-                 from, RPL_STATSDEBUG, to,
+                 ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
                  HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
                  oper_privs_as_string(target_p->localClient->operflags),
                  target_p->name, target_p->username, target_p->host,
                  idle_time_get(source_p, target_p));
     else
       sendto_one(source_p, ":%s %d %s p :[%c] %s (%s@%s) Idle: %u",
-                 from, RPL_STATSDEBUG, to,
+                 ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
                  HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
                   target_p->name, target_p->username, target_p->host,
                  idle_time_get(source_p, target_p));
   }
 
   sendto_one(source_p, ":%s %d %s p :%u OPER(s)",
-             from, RPL_STATSDEBUG, to, dlink_list_length(&oper_list));
+             ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p), dlink_list_length(&oper_list));
 }
 
 static void
@@ -1234,13 +1232,15 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
     const struct Client *target_p = ptr->data;
 
     sendto_one(source_p, ":%s %d %s v :%s (%s!%s@%s) Idle: %d",
-               from, RPL_STATSDEBUG, to, target_p->name,
+               ID_or_name(&me, source_p), RPL_STATSDEBUG,
+               ID_or_name(source_p, source_p), target_p->name,
                (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
                "*", "*", (int)(CurrentTime - target_p->localClient->lasttime));
   }
 
-  sendto_one(source_p, ":%s %d %s v :%u Server(s)",
-             from, RPL_STATSDEBUG, to, dlink_list_length(&serv_list));
+  sendto_one(source_p, ":%s %d %s v :%u Server(s)", ID_or_name(&me, source_p),
+             RPL_STATSDEBUG, ID_or_name(source_p, source_p),
+             dlink_list_length(&serv_list));
 }
 
 static void
@@ -1311,24 +1311,24 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   recvB >>= 10;
 
   sendto_one(source_p, ":%s %d %s ? :%u total server(s)",
-             from, RPL_STATSDEBUG, to, dlink_list_length(&serv_list));
+             ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p), dlink_list_length(&serv_list));
   sendto_one(source_p, ":%s %d %s ? :Sent total : %7.2f %s",
-             from, RPL_STATSDEBUG, to,
+             ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
              _GMKv(sendB), _GMKs(sendB));
   sendto_one(source_p, ":%s %d %s ? :Recv total : %7.2f %s",
-             from, RPL_STATSDEBUG, to,
+             ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
              _GMKv(recvB), _GMKs(recvB));
 
   uptime = (CurrentTime - me.localClient->since);
 
   sendto_one(source_p, ":%s %d %s ? :Server send: %7.2f %s (%4.1f K/s)",
-             from, RPL_STATSDEBUG, to,
+             ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
              _GMKv((me.localClient->send.bytes>>10)),
              _GMKs((me.localClient->send.bytes>>10)),
              (float)((float)((me.localClient->send.bytes) >> 10) /
              (float)uptime));
   sendto_one(source_p, ":%s %d %s ? :Server recv: %7.2f %s (%4.1f K/s)",
-             from, RPL_STATSDEBUG, to,
+             ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
              _GMKv((me.localClient->recv.bytes>>10)),
              _GMKs((me.localClient->recv.bytes>>10)),
              (float)((float)((me.localClient->recv.bytes) >> 10) /
@@ -1347,7 +1347,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
  *
  */
 static char *
-parse_stats_args(int parc, char *parv[], int *doall, int *wilds)
+parse_stats_args(struct Client *source_p, int parc, char *parv[], int *doall, int *wilds)
 {
   char *name;
 
@@ -1355,9 +1355,9 @@ parse_stats_args(int parc, char *parv[], int *doall, int *wilds)
   {
     name = parv[2];
 
-    if (!irccmp(name, from))
+    if (!irccmp(name, ID_or_name(&me, source_p)))
       *doall = 2;
-    else if (!match(name, from))
+    else if (!match(name, ID_or_name(&me, source_p)))
       *doall = 1;
 
     *wilds = has_wildcards(name);
@@ -1472,7 +1472,7 @@ stats_ltrace(struct Client *source_p, int parc, char *parv[])
   char *name = NULL;
   char statchar;
 
-  if ((name = parse_stats_args(parc, parv, &doall, &wilds)) != NULL)
+  if ((name = parse_stats_args(source_p, parc, parv, &doall, &wilds)) != NULL)
   {
     statchar = parv[1][0];
 
@@ -1587,17 +1587,6 @@ m_stats(struct Client *client_p, struct Client *source_p,
 {
   static time_t last_used = 0;
 
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
-    from = me.id;
-    to = source_p->id;
-  }
-  else
-  {
-    from = me.name;
-    to = source_p->name;
-  }
-
   /* Check the user is actually allowed to do /stats, and isnt flooding */
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
@@ -1633,17 +1622,6 @@ mo_stats(struct Client *client_p, struct Client *source_p,
   if (hunt_server(client_p, source_p, ":%s STATS %s :%s", 2,
                   parc, parv) != HUNTED_ISME)
      return 0;
-
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
-    from = me.id;
-    to = source_p->id;
-  }
-  else
-  {
-    from = me.name;
-    to = source_p->name;
-  }
 
   do_stats(source_p, parc, parv);
   return 0;

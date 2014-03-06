@@ -47,12 +47,11 @@ struct dbuf_queue
 };
 
 extern void dbuf_init(void);
-extern void dbuf_add(struct dbuf_queue *, struct dbuf_block *);
-extern void dbuf_delete(struct dbuf_queue *, size_t);
-
 extern struct dbuf_block *dbuf_alloc(void);
 extern void dbuf_ref_free(struct dbuf_block *);
-extern void dbuf_put(struct dbuf_block *, const char *, ...);
+extern void dbuf_add(struct dbuf_queue *, struct dbuf_block *);
+extern void dbuf_delete(struct dbuf_queue *, size_t);
+extern void dbuf_put_fmt(struct dbuf_block *, const char *, ...);
 extern void dbuf_put_args(struct dbuf_block *, const char *, va_list);
-extern void dbuf_put_raw(struct dbuf_queue *, const char *, size_t);
+extern void dbuf_put(struct dbuf_queue *, const char *, size_t);
 #endif

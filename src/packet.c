@@ -334,7 +334,7 @@ read_packet(fde_t *fd, void *data)
       return;
     }
 
-    dbuf_put_raw(&client_p->localClient->buf_recvq, readBuf, length);
+    dbuf_put(&client_p->localClient->buf_recvq, readBuf, length);
 
     if (client_p->localClient->lasttime < CurrentTime)
       client_p->localClient->lasttime = CurrentTime;

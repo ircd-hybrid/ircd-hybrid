@@ -202,7 +202,6 @@ void
 send_queued_write(struct Client *to)
 {
   int retlen = 0;
-  struct dbuf_queue *sendq = &to->localClient->buf_sendq;
 
   /*
    ** Once socket is marked dead, we cannot start writing to it,
@@ -212,16 +211,16 @@ send_queued_write(struct Client *to)
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
-  if (dbuf_length(sendq))
+  if (dbuf_length(&to->localClient->buf_sendq))
   {
     do
     {
-      struct dbuf_block *first = sendq->blocks.head->data;
+      struct dbuf_block *first = to->localClient->buf_sendq.blocks.head->data;
 
 #ifdef HAVE_LIBCRYPTO
       if (to->localClient->fd.ssl)
       {
-        retlen = SSL_write(to->localClient->fd.ssl, first->data + sendq->pos, first->size - sendq->pos);
+        retlen = SSL_write(to->localClient->fd.ssl, first->data + to->localClient->buf_sendq.pos, first->size - to->localClient->buf_sendq.pos);
 
         /* translate openssl error codes, sigh */
         if (retlen < 0)
@@ -244,7 +243,7 @@ send_queued_write(struct Client *to)
       }
       else
 #endif
-        retlen = send(to->localClient->fd.fd, first->data + sendq->pos, first->size - sendq->pos, 0);
+        retlen = send(to->localClient->fd.fd, first->data + to->localClient->buf_sendq.pos, first->size - to->localClient->buf_sendq.pos, 0);
 
       if (retlen <= 0)
         break;
@@ -259,7 +258,8 @@ send_queued_write(struct Client *to)
     if ((retlen < 0) && (ignoreErrno(errno)))
     {
       /* we have a non-fatal error, reschedule a write */
-      comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE, (PF *)sendq_unblocked, to, 0);
+      comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE,
+                     (PF *)sendq_unblocked, to, 0);
     }
     else if (retlen <= 0)
     {
@@ -347,7 +347,7 @@ sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics num
 
   buffer = dbuf_alloc();
 
-  dbuf_put(buffer, ":%s %03d %s ", ID_or_name(from, to), numeric, dest);
+  dbuf_put_fmt(buffer, ":%s %03d %s ", ID_or_name(from, to), numeric, dest);
 
   va_start(args, numeric);
   send_format(buffer, numeric_form(numeric), args);
@@ -376,7 +376,7 @@ sendto_one_notice(struct Client *to, struct Client *from, const char *pattern, .
 
   buffer = dbuf_alloc();
 
-  dbuf_put(buffer, ":%s NOTICE %s ", ID_or_name(from, to), dest);
+  dbuf_put_fmt(buffer, ":%s NOTICE %s ", ID_or_name(from, to), dest);
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
@@ -410,12 +410,12 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc(), uid_buf = dbuf_alloc();
 
   if (IsServer(from))
-    dbuf_put(local_buf, ":%s ", from->name);
+    dbuf_put_fmt(local_buf, ":%s ", from->name);
   else
-    dbuf_put(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
+    dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
 
-  dbuf_put(remote_buf, ":%s ", from->name);
-  dbuf_put(uid_buf, ":%s ", ID(from));
+  dbuf_put_fmt(remote_buf, ":%s ", from->name);
+  dbuf_put_fmt(uid_buf, ":%s ", ID(from));
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
@@ -703,8 +703,8 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
 
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
 
-  dbuf_put(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
-  dbuf_put(remote_buf, ":%s ", from->name);
+  dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
+  dbuf_put_fmt(remote_buf, ":%s ", from->name);
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
@@ -780,12 +780,12 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
   buff_suid = dbuf_alloc(), buff_name = dbuf_alloc();
 
   va_start(args, pattern);
-  dbuf_put(buff_suid, ":%s ", ID(source_p));
+  dbuf_put_fmt(buff_suid, ":%s ", ID(source_p));
   dbuf_put_args(buff_suid, pattern, args);
   va_end(args);
 
   va_start(args, pattern);
-  dbuf_put(buff_name, ":%s ", source_p->name);
+  dbuf_put_fmt(buff_name, ":%s ", source_p->name);
   dbuf_put_args(buff_name, pattern, args);
   va_end(args);
 
@@ -849,12 +849,12 @@ sendto_anywhere(struct Client *to, struct Client *from,
   if (MyClient(to))
   {
     if (IsServer(from))
-      dbuf_put(buffer, ":%s %s %s ", from->name, command, to->name);
+      dbuf_put_fmt(buffer, ":%s %s %s ", from->name, command, to->name);
     else
-      dbuf_put(buffer, ":%s!%s@%s %s %s ", from->name, from->username, from->host, command, to->name);
+      dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ", from->name, from->username, from->host, command, to->name);
   }
   else
-    dbuf_put(buffer, ":%s %s %s ", ID_or_name(from, to), command, ID_or_name(to, to));
+    dbuf_put_fmt(buffer, ":%s %s %s ", ID_or_name(from, to), command, ID_or_name(to, to));
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
@@ -941,9 +941,9 @@ sendto_wallops_flags(unsigned int flags, struct Client *source_p,
   buffer = dbuf_alloc();
 
   if (IsClient(source_p))
-    dbuf_put(buffer, ":%s!%s@%s WALLOPS :", source_p->name, source_p->username, source_p->host);
+    dbuf_put_fmt(buffer, ":%s!%s@%s WALLOPS :", source_p->name, source_p->username, source_p->host);
   else
-    dbuf_put(buffer, ":%s WALLOPS :", source_p->name);
+    dbuf_put_fmt(buffer, ":%s WALLOPS :", source_p->name);
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
@@ -1024,9 +1024,9 @@ kill_client(struct Client *client_p, struct Client *diedie,
 
   buffer = dbuf_alloc();
 
-  dbuf_put(buffer, ":%s KILL %s :",
-           ID_or_name(&me, client_p),
-           ID_or_name(diedie, client_p));
+  dbuf_put_fmt(buffer, ":%s KILL %s :",
+               ID_or_name(&me, client_p),
+               ID_or_name(diedie, client_p));
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
@@ -1062,13 +1062,13 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
   {
     have_uid = 1;
     va_start(args, pattern);
-    dbuf_put(uid_buffer, ":%s KILL %s :", me.id, ID(source_p));
+    dbuf_put_fmt(uid_buffer, ":%s KILL %s :", me.id, ID(source_p));
     send_format(uid_buffer, pattern, args);
     va_end(args);
   }
 
   va_start(args, pattern);
-  dbuf_put(nick_buffer, ":%s KILL %s :", me.name, source_p->name);
+  dbuf_put_fmt(nick_buffer, ":%s KILL %s :", me.name, source_p->name);
   send_format(nick_buffer, pattern, args);
   va_end(args);
 

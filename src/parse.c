@@ -719,8 +719,8 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
                  numeric, ID_or_name(target_p, target_p), parv[2]);
   }
   else
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s %s %s %s",
-                         source_p->name, numeric, chptr->chname, parv[2]);
+    sendto_channel_butone(source_p, source_p, chptr, 0, "%s %s %s",
+                          numeric, chptr->chname, parv[2]);
 }
 
 /* m_not_oper()

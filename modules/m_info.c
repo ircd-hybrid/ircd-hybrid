@@ -642,8 +642,7 @@ send_conf_options(struct Client *source_p)
     }
   }
 
-  sendto_one(source_p, form_str(RPL_INFO),
-             from, to, "");
+  sendto_one_numeric(source_p, &me, RPL_INFO, "");
 }
 
 /* send_info_text()
@@ -656,18 +655,11 @@ static int
 send_info_text(struct Client *source_p)
 {
   const char **text = infotext;
-  char *source, *target;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "INFO requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
-
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) &&
-      HasID(source_p))
-    source = me.id, target = source_p->id;
-  else
-    source = me.name, target = source_p->name;
 
   while (*text)
   {
@@ -676,8 +668,7 @@ send_info_text(struct Client *source_p)
     if (*line == '\0')
       line = " ";
 
-    sendto_one(source_p, form_str(RPL_INFO),
-               source, target, line);
+    sendto_one_numeric(source_p, &me, RPL_INFO, line);
   }
 
   if (HasUMode(source_p, UMODE_OPER))
@@ -685,8 +676,7 @@ send_info_text(struct Client *source_p)
 
   send_birthdate_online_time(source_p);
 
-  sendto_one(source_p, form_str(RPL_ENDOFINFO),
-             me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFINFO);
   return 0;
 }
 
@@ -704,8 +694,7 @@ m_info(struct Client *client_p, struct Client *source_p,
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
     /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 

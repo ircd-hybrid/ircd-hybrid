@@ -79,8 +79,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(password))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "OPER");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "OPER");
     return 0;
   }
 
@@ -90,7 +89,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
   if ((conf = find_exact_name_conf(CONF_OPER, source_p, name, NULL, NULL)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     conf = find_exact_name_conf(CONF_OPER, NULL, name, NULL, NULL);
     failed_oper_notice(source_p, name, (conf != NULL) ?
                        "host mismatch" : "no oper {} block");
@@ -99,7 +98,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
   if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
   {
-    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     failed_oper_notice(source_p, name, "requires SSL/TLS");
     return 0;
   }
@@ -108,7 +107,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(source_p->certfp) || strcasecmp(source_p->certfp, conf->certfp))
     {
-      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
       failed_oper_notice(source_p, name, "client certificate fingerprint mismatch");
       return 0;
     }
@@ -131,7 +130,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
   }
   else
   {
-    sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
     failed_oper_notice(source_p, name, "password mismatch");
   }
 
@@ -148,8 +147,7 @@ static int
 mo_oper(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  sendto_one(source_p, form_str(RPL_YOUREOPER),
-             me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
   return 0;
 }
 

@@ -47,8 +47,7 @@ mo_die(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_DIE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "die");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "die");
     return 0;
   }
 

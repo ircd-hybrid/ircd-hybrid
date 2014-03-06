@@ -208,9 +208,8 @@ change_local_nick(struct Client *source_p, const char *nick)
       source_p->localClient->number_of_nick_changes >
       ConfigFileEntry.max_nick_changes)
   {
-    sendto_one(source_p, form_str(ERR_NICKTOOFAST), me.name,
-               source_p->name, source_p->name, nick,
-               ConfigFileEntry.max_nick_time);
+    sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST, source_p->name, nick,
+                       ConfigFileEntry.max_nick_time);
     return;
   }
 
@@ -416,8 +415,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
       kill_client_serv_butone(NULL, target_p,
                               "%s (Nick collision (new))", me.name);
       ++ServerStats.is_kill;
-      sendto_one(target_p, form_str(ERR_NICKCOLLISION),
-                 me.name, target_p->name, target_p->name);
+      sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
 
       AddFlag(target_p, FLAGS_KILLED);
       exit_client(target_p, &me, "Nick collision (new)");
@@ -456,8 +454,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
                                client_p->name);
 
         ++ServerStats.is_kill;
-        sendto_one(target_p, form_str(ERR_NICKCOLLISION),
-                   me.name, target_p->name, target_p->name);
+        sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
 
         /* if it came from a LL server, itd have been source_p,
          * so we dont need to mark target_p as known
@@ -485,10 +482,9 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
                  source_p->name, target_p->name, target_p->from->name,
                  client_p->name);
 
-      sendto_one(target_p, form_str(ERR_NICKCOLLISION), me.name,
-                 target_p->name, target_p->name);
-
+      sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
       ++ServerStats.is_kill;
+
       kill_client_serv_butone(NULL, source_p, "%s (Nick change collision)",
                               me.name);
 
@@ -550,8 +546,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
                               "%s (Nick collision)", me.name);
 
       ++ServerStats.is_kill;
-      sendto_one(target_p, form_str(ERR_NICKCOLLISION),
-                 me.name, target_p->name, target_p->name);
+      sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
 
       AddFlag(target_p, FLAGS_KILLED);
       exit_client(target_p, &me, "Nick collision");
@@ -589,8 +584,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name,
-               source_p->name[0] ? source_p->name : "*");
+    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return 0;
   }
 
@@ -600,9 +594,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
   /* Check the nickname is ok */
   if (!valid_nickname(nick, 1))
   {
-    sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name,
-               source_p->name[0] ? source_p->name : "*", parv[1],
-               "Erroneous Nickname");
+    sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, parv[1], "Erroneous Nickname");
     return 0;
   }
 
@@ -610,8 +602,7 @@ mr_nick(struct Client *client_p, struct Client *source_p,
   if ((conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
   {
     ++conf->count;
-    sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name,
-               source_p->name[0] ? source_p->name : "*", nick, conf->reason);
+    sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, conf->reason);
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Forbidding reserved nick %s from user %s",
                          nick, get_client_name(client_p, HIDE_IP));
@@ -623,7 +614,8 @@ mr_nick(struct Client *client_p, struct Client *source_p,
   else if (source_p == target_p)
     strlcpy(source_p->name, nick, sizeof(source_p->name));
   else
-    sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
+    sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, nick);
+
   return 0;
 }
 
@@ -653,8 +645,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return 0;
   }
 
@@ -668,8 +659,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
   /* check the nickname is ok */
   if (!valid_nickname(nick, 1))
   {
-    sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name,
-               source_p->name, nick, "Erroneous Nickname");
+    sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, "Erroneous Nickname");
     return 0;
   }
 
@@ -678,8 +668,7 @@ m_nick(struct Client *client_p, struct Client *source_p,
       (conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
   {
     ++conf->count;
-    sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
-               me.name, source_p->name, nick, conf->reason);
+    sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, conf->reason);
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Forbidding reserved nick %s from user %s",
                          nick, get_client_name(client_p, HIDE_IP));
@@ -709,8 +698,8 @@ m_nick(struct Client *client_p, struct Client *source_p,
     change_local_nick(source_p, nick);
   }
   else
-    sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name,
-               source_p->name, nick);
+    sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, nick);
+
   return 0;
 }
 

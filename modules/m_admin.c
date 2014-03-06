@@ -44,26 +44,19 @@
 static void
 do_admin(struct Client *source_p)
 {
-  const char *me_name = ID_or_name(&me, source_p);
-  const char *nick = ID_or_name(source_p, source_p);
-
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "ADMIN requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  sendto_one(source_p, form_str(RPL_ADMINME),
-             me_name, nick, me.name);
+  sendto_one_numeric(source_p, &me, RPL_ADMINME, me.name);
 
   if (AdminInfo.name != NULL)
-    sendto_one(source_p, form_str(RPL_ADMINLOC1),
-               me_name, nick, AdminInfo.name);
+    sendto_one_numeric(source_p, &me, RPL_ADMINLOC1, AdminInfo.name);
   if (AdminInfo.description != NULL)
-    sendto_one(source_p, form_str(RPL_ADMINLOC2),
-               me_name, nick, AdminInfo.description);
+    sendto_one_numeric(source_p, &me, RPL_ADMINLOC2, AdminInfo.description);
   if (AdminInfo.email != NULL)
-    sendto_one(source_p, form_str(RPL_ADMINEMAIL),
-               me_name, nick, AdminInfo.email);
+    sendto_one_numeric(source_p, &me, RPL_ADMINEMAIL, AdminInfo.email);
 }
 
 /*! \brief ADMIN command handler (called by already registered,
@@ -88,8 +81,7 @@ m_admin(struct Client *client_p, struct Client *source_p,
 
   if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
   {
-    sendto_one(source_p,form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 

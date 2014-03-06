@@ -89,8 +89,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
 
   if (*user == '\0')
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "KILL");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
     return 0;
   }
 
@@ -113,8 +112,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
                                 == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-                 me.name, source_p->name, user);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, user);
       return 0;
     }
 
@@ -124,22 +122,19 @@ mo_kill(struct Client *client_p, struct Client *source_p,
 
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL_REMOTE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "kill:remote");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "kill:remote");
     return 0;
   }
 
   if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "kill");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "kill");
     return 0;
   }
 
   if (IsServer(target_p) || IsMe(target_p))
   {
-    sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_CANTKILLSERVER);
     return 0;
   }
 
@@ -201,8 +196,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "KILL");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
     return 0;
   }
 
@@ -240,8 +234,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
        == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-                 me.name, source_p->name, user);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, user);
       return 0;
     }
 
@@ -251,8 +244,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
 
   if (IsServer(target_p) || IsMe(target_p))
   {
-    sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_CANTKILLSERVER);
     return 0;
   }
 

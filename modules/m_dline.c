@@ -156,8 +156,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_DLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "dline");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "dline");
     return 0;
   }
 
@@ -400,15 +399,13 @@ mo_undline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_UNDLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "undline");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "undline");
     return 0;
   }
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "UNDLINE");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "UNDLINE");
     return 0;
   }
 

@@ -55,8 +55,7 @@ m_time(struct Client *client_p, struct Client *source_p,
     if (hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
       return 0;
 
-  sendto_one(source_p, form_str(RPL_TIME), me.name,
-             source_p->name, me.name, date(0));
+  sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
   return 0;
 }
 
@@ -70,8 +69,8 @@ mo_time(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
   if (hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
-    sendto_one(source_p, form_str(RPL_TIME), me.name,
-               source_p->name, me.name, date(0));
+    sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
+
   return 0;
 }
 

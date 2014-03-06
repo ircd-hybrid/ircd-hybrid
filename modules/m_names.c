@@ -62,12 +62,11 @@ m_names(struct Client *client_p, struct Client *source_p,
     if ((chptr = hash_find_channel(para)))
       channel_member_names(source_p, chptr, 1);
     else
-      sendto_one(source_p, form_str(RPL_ENDOFNAMES),
-                 me.name, source_p->name, para);
+      sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, para);
   }
   else
-    sendto_one(source_p, form_str(RPL_ENDOFNAMES),
-               me.name, source_p->name, "*");
+    sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, "*");
+
   return 0;
 }
 

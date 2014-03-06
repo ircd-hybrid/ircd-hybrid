@@ -856,7 +856,6 @@ report_dns_servers(struct Client *source_p)
     getnameinfo((struct sockaddr *)&(irc_nsaddr_list[i]),
                 irc_nsaddr_list[i].ss_len, ipaddr,
                 sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
-    sendto_one(source_p, form_str(RPL_STATSALINE),
-               me.name, source_p->name, ipaddr);
+    sendto_one_numeric(source_p, &me, RPL_STATSALINE, ipaddr);
   }
 }

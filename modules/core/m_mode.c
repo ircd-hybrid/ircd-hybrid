@@ -58,8 +58,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "MODE");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODE");
     return 0;
   }
 
@@ -73,10 +72,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               ID_or_name(&me, source_p),
-               ID_or_name(source_p, source_p),
-               parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return 0;
   }
 
@@ -84,10 +80,8 @@ m_mode(struct Client *client_p, struct Client *source_p,
   if (parc < 3)
   {
     channel_modes(chptr, source_p, modebuf, parabuf);
-    sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
-               me.name, source_p->name, chptr->chname, modebuf, parabuf);
-    sendto_one(source_p, form_str(RPL_CREATIONTIME),
-               me.name, source_p->name, chptr->chname, chptr->channelts);
+    sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS, chptr->chname, modebuf, parabuf);
+    sendto_one_numeric(source_p, &me, RPL_CREATIONTIME, chptr->chname, chptr->channelts);
     return 0;
   }
 
@@ -132,8 +126,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               ID_or_name(&me, client_p), ID_or_name(source_p, client_p), parv[2]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return 0;
   }
 

@@ -49,15 +49,13 @@ mo_wallops(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_WALLOPS))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "wallops");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "wallops");
     return 0;
   }
 
   if (EmptyString(message))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "WALLOPS");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "WALLOPS");
     return 0;
   }
 

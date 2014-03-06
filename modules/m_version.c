@@ -65,8 +65,7 @@ m_version(struct Client *client_p, struct Client *source_p,
   if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
   {
     /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
@@ -77,9 +76,8 @@ m_version(struct Client *client_p, struct Client *source_p,
                     1, parc, parv) != HUNTED_ISME)
       return 0;
 
-  sendto_one(source_p, form_str(RPL_VERSION), me.name,
-             source_p->name, ircd_version, serno,
-             me.name, serveropts);
+  sendto_one_numeric(source_p, &me, RPL_VERSION, ircd_version, serno,
+                     me.name, serveropts);
   show_isupport(source_p);
   return 0;
 }
@@ -93,14 +91,13 @@ static int
 mo_version(struct Client *client_p, struct Client *source_p,
            int parc, char *parv[])
 {
-
   if (hunt_server(client_p, source_p, ":%s VERSION :%s",
                   1, parc, parv) != HUNTED_ISME)
     return 0;
 
-  sendto_one(source_p, form_str(RPL_VERSION), me.name,
-             source_p->name, ircd_version, serno,
-             me.name, serveropts);
+
+  sendto_one_numeric(source_p, &me, RPL_VERSION, ircd_version, serno,
+                     me.name, serveropts);
   show_isupport(source_p);
   return 0;
 }
@@ -118,11 +115,8 @@ ms_version(struct Client *client_p, struct Client *source_p,
                   1, parc, parv) != HUNTED_ISME)
     return 0;
 
-  sendto_one(source_p, form_str(RPL_VERSION),
-             ID_or_name(&me, client_p),
-             ID_or_name(source_p, client_p),
-             ircd_version, serno,
-             me.name, serveropts);
+  sendto_one_numeric(source_p, &me, RPL_VERSION, ircd_version, serno,
+                     me.name, serveropts);
   show_isupport(source_p);
   return 0;
 }

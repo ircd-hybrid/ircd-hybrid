@@ -52,7 +52,7 @@ m_userhost(struct Client *client_p, struct Client *source_p,
   int cur_len;
   int rl;
 
-  cur_len = snprintf(buf, sizeof(buf), form_str(RPL_USERHOST), me.name, source_p->name, "");
+  cur_len = snprintf(buf, sizeof(buf), numeric_form(RPL_USERHOST), me.name, source_p->name, "");
   t = buf + cur_len;
 
   for (nick = strtoken(&p, parv[1], " "); nick && i++ < 5;

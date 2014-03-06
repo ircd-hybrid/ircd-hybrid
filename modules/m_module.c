@@ -64,15 +64,13 @@ mo_module(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_MODULE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "module");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "module");
     return 0;
   }
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "MODULE");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
     return 0;
   }
 
@@ -80,8 +78,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(parv[2]))
     {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, source_p->name, "MODULE");
+      sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
       return 0;
     }
 
@@ -100,8 +97,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(parv[2]))
     {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, source_p->name, "MODULE");
+      sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
       return 0;
     }
 
@@ -138,8 +134,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(parv[2]))
     {
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, source_p->name, "MODULE");
+      sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
       return 0;
     }
 
@@ -220,13 +215,12 @@ mo_module(struct Client *client_p, struct Client *source_p,
       if (!EmptyString(parv[2]) && match(parv[2], modp->name))
         continue;
 
-      sendto_one(source_p, form_str(RPL_MODLIST), me.name, source_p->name,
+      sendto_one_numeric(source_p, &me, RPL_MODLIST,
                  modp->name, modp->handle,
                  modp->version, (modp->flags & MODULE_FLAG_CORE) ?"(core)":"");
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFMODLIST),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFMODLIST);
     return 0;
   }
 
@@ -235,7 +229,6 @@ mo_module(struct Client *client_p, struct Client *source_p,
              me.name, source_p->name, parv[1]);
   return 0;
 }
-
 
 static struct Message module_msgtab =
 {

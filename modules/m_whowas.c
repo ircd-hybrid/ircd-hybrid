@@ -60,19 +60,16 @@ whowas_do(struct Client *client_p, struct Client *source_p,
 
     if (!irccmp(parv[1], temp->name))
     {
-      sendto_one(source_p, form_str(RPL_WHOWASUSER),
-                 me.name, source_p->name, temp->name,
-                 temp->username, temp->hostname,
-                 temp->realname);
+      sendto_one_numeric(source_p, &me, RPL_WHOWASUSER, temp->name,
+                         temp->username, temp->hostname,
+                         temp->realname);
 
       if ((temp->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
-        sendto_one(source_p, form_str(RPL_WHOISSERVER), me.name,
-                   source_p->name, temp->name,
-                   ServerInfo.network_name, myctime(temp->logoff));
+        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
+                           ServerInfo.network_name, myctime(temp->logoff));
       else
-        sendto_one(source_p, form_str(RPL_WHOISSERVER), me.name,
-                   source_p->name, temp->name,
-                   temp->servername, myctime(temp->logoff));
+        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
+                           temp->servername, myctime(temp->logoff));
       ++cur;
     }
 
@@ -81,11 +78,9 @@ whowas_do(struct Client *client_p, struct Client *source_p,
   }
 
   if (!cur)
-    sendto_one(source_p, form_str(ERR_WASNOSUCHNICK),
-               me.name, source_p->name, parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_WASNOSUCHNICK, parv[1]);
 
-  sendto_one(source_p, form_str(RPL_ENDOFWHOWAS),
-             me.name, source_p->name, parv[1]);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFWHOWAS, parv[1]);
 }
 
 /*
@@ -101,15 +96,13 @@ m_whowas(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return 0;
   }
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    sendto_one(source_p,form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
@@ -130,8 +123,7 @@ mo_whowas(struct Client *client_p, struct Client *source_p,
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return 0;
   }
 

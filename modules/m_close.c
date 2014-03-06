@@ -50,8 +50,9 @@ mo_close(struct Client *client_p, struct Client *source_p,
   {
     struct Client *target_p = ptr->data;
 
-    sendto_one(source_p, form_str(RPL_CLOSING), me.name, source_p->name,
-               get_client_name(target_p, SHOW_IP), target_p->status);
+    sendto_one_numeric(source_p, &me, RPL_CLOSING,
+                       get_client_name(target_p, SHOW_IP),
+                       target_p->status);
 
     /*
      * Exit here is safe, because it is guaranteed not to be source_p
@@ -60,8 +61,7 @@ mo_close(struct Client *client_p, struct Client *source_p,
     exit_client(target_p, target_p, "Oper Closing");
   }
 
-  sendto_one(source_p, form_str(RPL_CLOSEEND),
-             me.name, source_p->name, closed);
+  sendto_one_numeric(source_p, &me, RPL_CLOSEEND, closed);
   return 0;
 }
 

@@ -52,8 +52,7 @@ m_ping(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOORIGIN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
     return 0;
   }
 
@@ -76,8 +75,7 @@ m_ping(struct Client *client_p, struct Client *source_p,
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
                  origin, destination);
     else
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                 me.name, source_p->name, destination);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
   else
     sendto_one(source_p, ":%s PONG %s :%s", me.name,
@@ -94,8 +92,7 @@ ms_ping(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOORIGIN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
     return 0;
   }
 
@@ -108,8 +105,7 @@ ms_ping(struct Client *client_p, struct Client *source_p,
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
                  origin, destination);
     else
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER), ID_or_name(&me, client_p),
-                 source_p->name, destination);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
   else
     sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, client_p),

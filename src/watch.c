@@ -82,7 +82,7 @@ watch_count_memory(unsigned int *const count, uint64_t *const bytes)
  * \param reply Numeric to send. Either RPL_LOGON or RPL_LOGOFF
  */
 void
-watch_check_hash(struct Client *client_p, const unsigned int reply)
+watch_check_hash(struct Client *client_p, const enum irc_numerics reply)
 {
   struct Watch *anptr = NULL;
   dlink_node *ptr = NULL;
@@ -95,14 +95,9 @@ watch_check_hash(struct Client *client_p, const unsigned int reply)
 
   /* Send notifies out to everybody on the list in header */
   DLINK_FOREACH(ptr, anptr->watched_by.head)
-  {
-    struct Client *target_p = ptr->data;
-
-    sendto_one(target_p, form_str(reply),
-               me.name, target_p->name, client_p->name,
-               client_p->username, client_p->host,
-               anptr->lasttime, client_p->info);
-  }
+    sendto_one_numeric(ptr->data, &me, reply, client_p->name,
+                       client_p->username, client_p->host,
+                       anptr->lasttime, client_p->info);
 }
 
 /*! \brief Looks up the watch table for a given nick

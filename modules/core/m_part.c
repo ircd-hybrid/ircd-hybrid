@@ -57,15 +57,13 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
 
   if ((chptr = hash_find_channel(name)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               me.name, source_p->name, name);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
   if ((ms = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
-               me.name, source_p->name, name);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, name);
     return;
   }
 
@@ -118,8 +116,7 @@ m_part(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "PART");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "PART");
     return 0;
   }
 

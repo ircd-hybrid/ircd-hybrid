@@ -116,8 +116,7 @@ quote_identtimeout(struct Client *source_p, int newval)
 {
   if (!HasUMode(source_p, UMODE_ADMIN))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "set");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "set");
     return;
   }
 
@@ -444,8 +443,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_SET))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "set");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "set");
     return 0;
   }
 
@@ -488,8 +486,7 @@ mo_set(struct Client *client_p, struct Client *source_p,
 
         if (!strcmp(tab->name, "AUTOCONN") && (parc < 4))
         {
-          sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                     me.name, source_p->name, "SET");
+          sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "SET");
           return 0;
         }
 

@@ -50,15 +50,13 @@ mo_locops(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_LOCOPS))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "locops");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "locops");
     return 0;
   }
 
   if (EmptyString(message))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "LOCOPS");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "LOCOPS");
     return 0;
   }
 

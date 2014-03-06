@@ -438,7 +438,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
 
   if (PubChannel(chptr) || is_member)
   {
-    t = lbuf + snprintf(lbuf, sizeof(lbuf), form_str(RPL_NAMREPLY),
+    t = lbuf + snprintf(lbuf, sizeof(lbuf), numeric_form(RPL_NAMREPLY),
                         me.name, source_p->name,
                         channel_pub_or_secret(chptr), chptr->chname);
     start = t;
@@ -495,8 +495,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
   }
 
   if (show_eon)
-    sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name,
-               source_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, chptr->chname);
 }
 
 /*! \brief adds client to invite list

@@ -111,16 +111,14 @@ show_ports(struct Client *source_p)
 
     if (HasUMode(source_p, UMODE_ADMIN) &&
         (MyClient(source_p) || !ConfigServerHide.hide_server_ips))
-      sendto_one(source_p, form_str(RPL_STATSPLINE),
-                 me.name, source_p->name, 'P', listener->port,
-                 listener->name,
-                 listener->ref_count, buf,
-                 listener->active ? "active" : "disabled");
+      sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
+                         listener->name,
+                         listener->ref_count, buf,
+                         listener->active ? "active" : "disabled");
     else
-      sendto_one(source_p, form_str(RPL_STATSPLINE),
-                 me.name, source_p->name, 'P', listener->port,
-                 me.name, listener->ref_count, buf,
-                 listener->active ? "active" : "disabled");
+      sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
+                         me.name, listener->ref_count, buf,
+                         listener->active ? "active" : "disabled");
   }
 }
 

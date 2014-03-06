@@ -55,8 +55,7 @@ mr_pass(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name,
-               source_p->name[0] ? source_p->name : "*", "PASS");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "PASS");
     return 0;
   }
 

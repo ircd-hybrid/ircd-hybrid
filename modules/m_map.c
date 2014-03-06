@@ -52,8 +52,7 @@ static void dump_map(struct Client *client,
   *p = '\0';
 
   if (prompt_length > 60)
-    sendto_one(client, form_str(RPL_MAPMORE), me.name,
-               client->name, prompt, server->name);
+    sendto_one_numeric(client, &me, RPL_MAPMORE, prompt, server->name);
   else
   {
     int dashes;
@@ -74,8 +73,7 @@ static void dump_map(struct Client *client,
                        dlink_list_length(&server->serv->client_list), 100 *
                        (float)dlink_list_length(&server->serv->client_list) /
                        (float)Count.total);
-    sendto_one(client, form_str(RPL_MAP), me.name, client->name,
-               prompt, buf);
+    sendto_one_numeric(client, &me, RPL_MAP, prompt, buf);
   }
 
   if (prompt_length > 0)
@@ -139,15 +137,14 @@ m_map(struct Client *client_p, struct Client *source_p,
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
     /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
   last_used = CurrentTime;
 
   dump_map(source_p, &me, 0);
-  sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_MAPEND);
   return 0;
 }
 
@@ -159,7 +156,7 @@ mo_map(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
   dump_map(source_p, &me, 0);
-  sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_MAPEND);
   return 0;
 }
 

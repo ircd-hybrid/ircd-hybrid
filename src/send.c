@@ -172,9 +172,8 @@ send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *b
     AddFlag(to, FLAGS_KILLED);
 
     if (IsClient(from))
-      sendto_one(from, form_str(ERR_GHOSTEDCLIENT),
-                 me.name, from->name, to->name, to->username,
-                 to->host, to->from);
+      sendto_one_numeric(from, &me, ERR_GHOSTEDCLIENT, to->name,
+                         to->username, to->host, to->from);
 
     exit_client(to, &me, "Ghosted client");
     return;
@@ -324,6 +323,35 @@ sendto_one(struct Client *to, const char *pattern, ...)
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
+  va_end(args);
+
+  send_message(to, buffer);
+
+  dbuf_ref_free(buffer);
+}
+
+void
+sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics numeric, ...)
+{
+  struct dbuf_block *buffer;
+  va_list args;
+  const char *dest;
+
+  if (to->from != NULL)
+    to = to->from;
+  if (IsDead(to))
+    return;
+
+  dest = ID_or_name(to, to);
+  if (EmptyString(dest))
+    dest = "*";
+
+  buffer = dbuf_alloc();
+
+  dbuf_put(buffer, ":%s %03d %s ", ID_or_name(from, to), numeric, dest);
+
+  va_start(args, numeric);
+  send_format(buffer, numeric_form(numeric), args);
   va_end(args);
 
   send_message(to, buffer);

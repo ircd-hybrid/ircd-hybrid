@@ -51,10 +51,6 @@ do_links(struct Client *source_p, int parc, char *parv[])
   if (HasUMode(source_p, UMODE_OPER) || !ConfigServerHide.flatten_links)
   {
     const char *mask = (parc > 2 ? parv[2] : parv[1]);
-    const char *me_name, *nick;
-
-    me_name = ID_or_name(&me, source_p);
-    nick = ID_or_name(source_p, source_p);
 
     DLINK_FOREACH(ptr, global_serv_list.head)
     {
@@ -76,15 +72,13 @@ do_links(struct Client *source_p, int parc, char *parv[])
        * We just send the reply, as if they are here there's either no SHIDE,
        * or they're an oper..
        */
-      sendto_one(source_p, form_str(RPL_LINKS),
-                 me_name, nick,
-                 target_p->name, target_p->servptr->name,
-                 target_p->hopcount, target_p->info);
+      sendto_one_numeric(source_p, &me, RPL_LINKS,
+                         target_p->name, target_p->servptr->name,
+                         target_p->hopcount, target_p->info);
     }
-  
-    sendto_one(source_p, form_str(RPL_ENDOFLINKS),
-               me_name, nick,
-               EmptyString(mask) ? "*" : mask);
+
+    sendto_one_numeric(source_p, &me, RPL_ENDOFLINKS,
+                       EmptyString(mask) ? "*" : mask);
   }
   else
   {
@@ -92,9 +86,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
      * Print our own info so at least it looks like a normal links
      * then print out the file (which may or may not be empty)
      */
-    sendto_one(source_p, form_str(RPL_LINKS),
-               ID_or_name(&me, source_p),
-               ID_or_name(source_p, source_p),
+    sendto_one_numeric(source_p, &me, RPL_LINKS,
                me.name, me.name, 0, me.info);
 
     DLINK_FOREACH(ptr, flatten_links.head)
@@ -102,9 +94,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
                  ID_or_name(&me, source_p), RPL_LINKS,
                  ID_or_name(source_p, source_p),
                  ptr->data);
-    sendto_one(source_p, form_str(RPL_ENDOFLINKS),
-               ID_or_name(&me, source_p),
-               ID_or_name(source_p, source_p), "*");
+    sendto_one_numeric(source_p, &me, RPL_ENDOFLINKS, "*");
   }
 }
 
@@ -139,8 +129,7 @@ m_links(struct Client *client_p, struct Client *source_p,
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 

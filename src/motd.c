@@ -280,25 +280,21 @@ static void
 motd_forward(struct Client *source_p, const struct MotdCache *cache)
 {
   unsigned int i = 0;
-  const char *from = ID_or_name(&me, source_p);
-  const char *to = ID_or_name(source_p, source_p);
 
   assert(source_p);
 
   if (!cache)  /* no motd to send */
   {
-    sendto_one(source_p, form_str(ERR_NOMOTD), from, to);
+    sendto_one_numeric(source_p, &me, ERR_NOMOTD);
     return;
   }
 
   /* send the motd */
-  sendto_one(source_p, form_str(RPL_MOTDSTART),
-             from, to, me.name);
+  sendto_one_numeric(source_p, &me, RPL_MOTDSTART, me.name);
 
   for (; i < cache->count; ++i)
-    sendto_one(source_p, form_str(RPL_MOTD),
-               from, to, cache->motd[i]);
-  sendto_one(source_p, form_str(RPL_ENDOFMOTD), from, to);
+    sendto_one_numeric(source_p, &me, RPL_MOTD, cache->motd[i]);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFMOTD);
 }
 
 /*! \brief Find the MOTD for a client and send it.
@@ -336,13 +332,11 @@ motd_signon(struct Client *source_p)
     sendto_one(source_p,
                ":%s NOTICE %s :*** Notice -- Please read the motd if you haven't "
                "read it", me.name, source_p->name);
-    sendto_one(source_p, form_str(RPL_MOTDSTART),
-               me.name, source_p->name, me.name);
-    sendto_one(source_p, form_str(RPL_MOTD),
-               me.name, source_p->name,
-               "*** This is the short motd ***");
-    sendto_one(source_p, form_str(RPL_ENDOFMOTD),
-               me.name, source_p->name);
+
+    sendto_one_numeric(source_p, &me, RPL_MOTDSTART, me.name);
+    sendto_one_numeric(source_p, &me, RPL_MOTD,
+                       "*** This is the short motd ***");
+    sendto_one_numeric(source_p, &me, RPL_ENDOFMOTD);
   }
 }
 
@@ -432,9 +426,8 @@ motd_report(struct Client *source_p)
   {
     const struct Motd *motd = ptr->data;
 
-    sendto_one(source_p, form_str(RPL_STATSTLINE),
-               me.name, source_p->name,
-               motd->hostmask, motd->path);
+    sendto_one_numeric(source_p, &me, RPL_STATSTLINE,
+                       motd->hostmask, motd->path);
   }
 }
 

@@ -45,34 +45,29 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 
   if ((file = fopen(path, "r")) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   if (fgets(line, sizeof(line), file) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     fclose(file);
     return;
   }
 
   line[strlen(line) - 1] = '\0';
-  sendto_one(source_p, form_str(RPL_HELPSTART),
-             me.name, source_p->name, topic, line);
+  sendto_one_numeric(source_p, &me, RPL_HELPSTART, topic, line);
 
   while (fgets(line, sizeof(line), file))
   {
     line[strlen(line) - 1] = '\0';
 
-    sendto_one(source_p, form_str(RPL_HELPTXT),
-               me.name, source_p->name, topic, line);
+    sendto_one_numeric(source_p, &me, RPL_HELPTXT, topic, line);
   }
 
   fclose(file);
-  sendto_one(source_p, form_str(RPL_ENDOFHELP),
-             me.name, source_p->name, topic);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFHELP, topic);
 }
 
 static void
@@ -91,15 +86,13 @@ do_help(struct Client *source_p, char *topic)
 
   if (strpbrk(topic, "/\\"))
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   if (strlen(HPATH) + strlen(topic) + 1 > HYB_PATH_MAX)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
@@ -107,15 +100,13 @@ do_help(struct Client *source_p, char *topic)
 
   if (stat(path, &sb) < 0)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
@@ -136,8 +127,7 @@ m_help(struct Client *client_p, struct Client *source_p,
   if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
   {
     /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 

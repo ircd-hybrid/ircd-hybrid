@@ -28,6 +28,7 @@
 #define INCLUDED_send_h
 
 #include "fdlist.h"
+#include "numeric.h"
 
 enum { NOCAPS = 0 };
 
@@ -72,6 +73,7 @@ extern void sendq_unblocked(fde_t *, struct Client *);
 extern void send_queued_write(struct Client *);
 extern void send_queued_all(void);
 extern void sendto_one(struct Client *, const char *, ...) AFP(2,3);
+extern void sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics numeric, ...);
 extern void sendto_channel_butone(struct Client *, struct Client *,
                                   struct Channel *, unsigned int,
                                   const char *, ...) AFP(5,6);

@@ -173,60 +173,38 @@ assemble_umode_buffer(void)
 void
 show_lusers(struct Client *source_p)
 {
-  const char *from, *to;
-
-  if (!MyConnect(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
-    from = me.id;
-    to = source_p->id;
-  }
-  else
-  {
-    from = me.name;
-    to = source_p->name;
-  }
-
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
-    sendto_one(source_p, form_str(RPL_LUSERCLIENT),
-               from, to, (Count.total-Count.invisi),
-               Count.invisi, dlink_list_length(&global_serv_list));
+    sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT, (Count.total-Count.invisi),
+                       Count.invisi, dlink_list_length(&global_serv_list));
   else
-    sendto_one(source_p, form_str(RPL_LUSERCLIENT), from, to,
-               (Count.total-Count.invisi), Count.invisi, 1);
+    sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT,
+                       (Count.total-Count.invisi), Count.invisi, 1);
 
   if (Count.oper > 0)
-    sendto_one(source_p, form_str(RPL_LUSEROP),
-               from, to, Count.oper);
+    sendto_one_numeric(source_p, &me, RPL_LUSEROP, Count.oper);
 
   if (dlink_list_length(&unknown_list) > 0)
-    sendto_one(source_p, form_str(RPL_LUSERUNKNOWN),
-               from, to, dlink_list_length(&unknown_list));
+    sendto_one_numeric(source_p, &me, RPL_LUSERUNKNOWN, dlink_list_length(&unknown_list));
 
   if (dlink_list_length(&global_channel_list) > 0)
-    sendto_one(source_p, form_str(RPL_LUSERCHANNELS),
-               from, to, dlink_list_length(&global_channel_list));
+    sendto_one_numeric(source_p, &me, RPL_LUSERCHANNELS, dlink_list_length(&global_channel_list));
 
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
   {
-    sendto_one(source_p, form_str(RPL_LUSERME),
-               from, to, Count.local, Count.myserver);
-    sendto_one(source_p, form_str(RPL_LOCALUSERS),
-               from, to, Count.local, Count.max_loc);
+    sendto_one_numeric(source_p, &me, RPL_LUSERME, Count.local, Count.myserver);
+    sendto_one_numeric(source_p, &me, RPL_LOCALUSERS, Count.local, Count.max_loc);
   }
   else
   {
-    sendto_one(source_p, form_str(RPL_LUSERME),
-               from, to, Count.total, 0);
-    sendto_one(source_p, form_str(RPL_LOCALUSERS),
-               from, to, Count.total, Count.max_tot);
+    sendto_one_numeric(source_p, &me, RPL_LUSERME, Count.total, 0);
+    sendto_one_numeric(source_p, &me, RPL_LOCALUSERS, Count.total, Count.max_tot);
   }
 
-  sendto_one(source_p, form_str(RPL_GLOBALUSERS),
-             from, to, Count.total, Count.max_tot);
+  sendto_one_numeric(source_p, &me, RPL_GLOBALUSERS, Count.total, Count.max_tot);
 
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
-    sendto_one(source_p, form_str(RPL_STATSCONN), from, to,
-               Count.max_loc_con, Count.max_loc_cli, Count.totalrestartcount);
+    sendto_one_numeric(source_p, &me, RPL_STATSCONN, Count.max_loc_con,
+                       Count.max_loc_cli, Count.totalrestartcount);
 
   if (Count.local > Count.max_loc_cli)
     Count.max_loc_cli = Count.local;
@@ -247,8 +225,7 @@ show_isupport(struct Client *source_p)
   const dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, support_list_lines.head)
-    sendto_one(source_p, form_str(RPL_ISUPPORT), me.name,
-               source_p->name, ptr->data);
+    sendto_one_numeric(source_p, &me, RPL_ISUPPORT, ptr->data);
 }
 
 /*
@@ -357,8 +334,8 @@ register_local_user(struct Client *source_p)
     if (!match_conf_password(pass, conf))
     {
       ++ServerStats.is_ref;
-      sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
-                 me.name, source_p->name);
+
+      sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
       exit_client(source_p, &me, "Bad Password");
       return;
     }
@@ -818,15 +795,13 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
   if ((target_p = find_person(client_p, parv[1])) == NULL)
   {
     if (MyConnect(source_p))
-      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-                 me.name, source_p->name, parv[1]);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
   }
 
   if (source_p != target_p)
   {
-     sendto_one(source_p, form_str(ERR_USERSDONTMATCH),
-                me.name, source_p->name);
+     sendto_one_numeric(source_p, &me, ERR_USERSDONTMATCH);
      return;
   }
 
@@ -840,8 +815,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
         *m++ = (char)i;
     *m = '\0';
 
-    sendto_one(source_p, form_str(RPL_UMODEIS),
-               me.name, source_p->name, buf);
+    sendto_one_numeric(source_p, &me, RPL_UMODEIS, buf);
     return;
   }
 
@@ -922,8 +896,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
   }
 
   if (badflag)
-    sendto_one(source_p, form_str(ERR_UMODEUNKNOWNFLAG),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_UMODEUNKNOWNFLAG);
 
   if (MyConnect(source_p) && HasUMode(source_p, UMODE_ADMIN) &&
       !HasOFlag(source_p, OPER_FLAG_ADMIN))
@@ -1079,8 +1052,7 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
 
   if (MyClient(target_p))
   {
-    sendto_one(target_p, form_str(RPL_NEWHOSTIS), me.name,
-               target_p->name, target_p->host);
+    sendto_one_numeric(target_p, &me, RPL_NEWHOSTIS, target_p->host);
     clear_ban_cache_client(target_p);
   }
 
@@ -1156,19 +1128,16 @@ user_welcome(struct Client *source_p)
   }
 #endif
 
-  sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name,
-             ServerInfo.network_name, source_p->name);
-  sendto_one(source_p, form_str(RPL_YOURHOST), me.name, source_p->name,
-             get_listener_name(source_p->localClient->listener), ircd_version);
-  sendto_one(source_p, form_str(RPL_CREATED),
-             me.name, source_p->name, built_date);
-  sendto_one(source_p, form_str(RPL_MYINFO),
-             me.name, source_p->name, me.name, ircd_version, umode_buffer);
+  sendto_one_numeric(source_p, &me, RPL_WELCOME, ServerInfo.network_name,
+                     source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_YOURHOST,
+                     get_listener_name(source_p->localClient->listener), ircd_version);
+  sendto_one_numeric(source_p, &me, RPL_CREATED, built_date);
+  sendto_one_numeric(source_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
   show_isupport(source_p);
 
   if (source_p->id[0] != '\0')
-    sendto_one(source_p, form_str(RPL_YOURID), me.name,
-               source_p->name, source_p->id);
+    sendto_one_numeric(source_p, &me, RPL_YOURID, source_p->id);
 
   show_lusers(source_p);
   motd_signon(source_p);
@@ -1249,7 +1218,7 @@ oper_up(struct Client *source_p)
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
   send_umode_out(source_p, source_p, old);
-  sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
 }
 
 static char new_uid[TOTALSIDUID + 1];     /* allow for \0 */
@@ -1450,7 +1419,7 @@ rebuild_isupport_message_line(void)
   int n = 0;
   int tokens = 0;
   size_t len = 0;
-  size_t reserve = strlen(me.name) + HOSTLEN + strlen(form_str(RPL_ISUPPORT));
+  size_t reserve = strlen(me.name) + HOSTLEN + strlen(numeric_form(RPL_ISUPPORT));
 
   DLINK_FOREACH_SAFE(ptr, ptr_next, support_list_lines.head)
   {

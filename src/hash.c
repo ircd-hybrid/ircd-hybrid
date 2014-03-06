@@ -794,9 +794,9 @@ list_one_channel(struct Client *source_p, struct Channel *chptr,
       snprintf(listbuf, sizeof(listbuf), "[%s]",  modebuf);
   }
 
-  sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-             chptr->chname, dlink_list_length(&chptr->members), listbuf,
-             chptr->topic);
+  sendto_one_numeric(source_p, &me, RPL_LIST, chptr->chname,
+                     dlink_list_length(&chptr->members),
+                     listbuf, chptr->topic);
 }
 
 /* safe_list_channels()
@@ -845,6 +845,5 @@ safe_list_channels(struct Client *source_p, struct ListTask *list_task,
   }
 
   free_list_task(list_task, source_p);
-  sendto_one(source_p, form_str(RPL_LISTEND),
-             me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_LISTEND);
 }

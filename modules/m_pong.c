@@ -46,8 +46,7 @@ ms_pong(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOORIGIN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
     return 0;
   }
 
@@ -68,8 +67,7 @@ ms_pong(struct Client *client_p, struct Client *source_p,
       sendto_one(target_p, ":%s PONG %s %s",
                  source_p->name, origin, destination);
     else
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                 me.name, source_p->name, destination);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
 
   return 0;
@@ -95,14 +93,14 @@ mr_pong(struct Client *client_p, struct Client *source_p,
           register_local_user(source_p);
         }
         else
-          sendto_one(source_p, form_str(ERR_WRONGPONG), me.name,
-                     source_p->name, source_p->localClient->random_ping);
+          sendto_one_numeric(source_p, &me, ERR_WRONGPONG,
+                             source_p->localClient->random_ping);
       }
     }
   }
   else
-    sendto_one(source_p, form_str(ERR_NOORIGIN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
+
   return 0;
 }
 

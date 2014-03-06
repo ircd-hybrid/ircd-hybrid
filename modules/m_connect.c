@@ -62,8 +62,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "CONNECT");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CONNECT");
     return 0;
   }
 
@@ -71,8 +70,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
   {
     if (!HasOFlag(source_p, OPER_FLAG_CONNECT_REMOTE))
     {
-      sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-                 source_p->name, "connect:remote");
+      sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "connect:remote");
       return 0;
     }
 
@@ -82,8 +80,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
   }
   else if (!HasOFlag(source_p, OPER_FLAG_CONNECT))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "connect");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "connect");
     return 0;
   }
 
@@ -201,8 +198,7 @@ ms_connect(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "CONNECT");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CONNECT");
     return 0;
   }
 

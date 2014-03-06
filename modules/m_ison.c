@@ -56,7 +56,7 @@ m_ison(struct Client *client_p, struct Client *source_p,
   int i;
   int done = 0;
 
-  len = snprintf(buf, sizeof(buf), form_str(RPL_ISON), me.name, source_p->name);
+  len = snprintf(buf, sizeof(buf), numeric_form(RPL_ISON), me.name, source_p->name);
   current_insert_point = buf + len;
 
   /*

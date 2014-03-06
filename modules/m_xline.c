@@ -116,8 +116,7 @@ valid_xline(struct Client *source_p, const char *gecos, const char *reason, int 
   if (EmptyString(reason))
   {
     if (warn)
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, source_p->name, "XLINE");
+      sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "XLINE");
     return 0;
   }
 
@@ -236,8 +235,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_XLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "xline");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "xline");
     return 0;
   }
 
@@ -358,8 +356,7 @@ mo_unxline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_UNXLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "unxline");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "unxline");
     return 0;
   }
 

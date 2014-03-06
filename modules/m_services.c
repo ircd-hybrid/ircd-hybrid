@@ -55,8 +55,7 @@ m_nickserv(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
     return 0;
   }
 
@@ -67,8 +66,7 @@ m_nickserv(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_one(source_p, form_str(ERR_SERVICESDOWN),
-             me.name, source_p->name, "NickServ");
+  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "NickServ");
   return 0;
 }
 
@@ -83,8 +81,7 @@ m_chanserv(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
     return 0;
   }
 
@@ -95,8 +92,7 @@ m_chanserv(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_one(source_p, form_str(ERR_SERVICESDOWN),
-             me.name, source_p->name, "ChanServ");
+  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "ChanServ");
   return 0;
 }
 
@@ -111,8 +107,7 @@ m_memoserv(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
     return 0;
   }
 
@@ -123,8 +118,7 @@ m_memoserv(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_one(source_p, form_str(ERR_SERVICESDOWN),
-             me.name, source_p->name, "MemoServ");
+  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "MemoServ");
   return 0;
 }
 
@@ -139,8 +133,7 @@ m_operserv(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
     return 0;
   }
 
@@ -151,8 +144,7 @@ m_operserv(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_one(source_p, form_str(ERR_SERVICESDOWN),
-             me.name, source_p->name, "OperServ");
+  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "OperServ");
   return 0;
 }
 
@@ -167,8 +159,7 @@ m_statserv(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
     return 0;
   }
 
@@ -179,8 +170,7 @@ m_statserv(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_one(source_p, form_str(ERR_SERVICESDOWN),
-             me.name, source_p->name, "StatServ");
+  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "StatServ");
   return 0;
 }
 
@@ -195,8 +185,7 @@ m_hostserv(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
     return 0;
   }
 
@@ -207,8 +196,7 @@ m_hostserv(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_one(source_p, form_str(ERR_SERVICESDOWN),
-             me.name, source_p->name, "HelpServ");
+  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "HostServ");
   return 0;
 }
 
@@ -223,8 +211,7 @@ m_botserv(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOTEXTTOSEND),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
     return 0;
   }
 
@@ -235,8 +222,7 @@ m_botserv(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_one(source_p, form_str(ERR_SERVICESDOWN),
-             me.name, source_p->name, "BotServ");
+  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "BotServ");
   return 0;
 }
 

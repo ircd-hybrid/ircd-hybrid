@@ -66,14 +66,14 @@ do_who(struct Client *source_p, struct Client *target_p,
              !HasUMode(target_p, UMODE_HIDDEN) ? "*" : "", op_flags);
 
   if (ConfigServerHide.hide_servers || IsHidden(target_p->servptr))
-    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
+    sendto_one_numeric(source_p, &me, RPL_WHOREPLY,
                (chname) ? (chname) : "*",
                target_p->username, target_p->host,
                HasUMode(source_p, UMODE_OPER) ? target_p->servptr->name : "*",
                target_p->name, status,
                HasUMode(source_p, UMODE_OPER) ? target_p->hopcount : 0, target_p->info);
   else
-    sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
+    sendto_one_numeric(source_p, &me, RPL_WHOREPLY,
                (chname) ? (chname) : "*", target_p->username,
                target_p->host, target_p->servptr->name, target_p->name,
                status, target_p->hopcount, target_p->info);
@@ -153,7 +153,7 @@ who_global(struct Client *source_p, char *mask, int server_oper)
     if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
       /* safe enough to give this on a local connect only */
-      sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, source_p->name);
+      sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
       return;
     }
 
@@ -257,8 +257,7 @@ m_who(struct Client *client_p, struct Client *source_p,
   if (EmptyString(mask))
   {
     who_global(source_p, mask, server_oper);
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, "*");
+    sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, "*");
     return 0;
   }
 
@@ -277,8 +276,7 @@ m_who(struct Client *client_p, struct Client *source_p,
         do_who_on_channel(source_p, chptr, chptr->chname, 0, server_oper);
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, mask);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
     return 0;
   }
 
@@ -299,8 +297,7 @@ m_who(struct Client *client_p, struct Client *source_p,
     else
       do_who(source_p, target_p, NULL, "");
 
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, mask);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
     return 0;
   }
 
@@ -314,8 +311,7 @@ m_who(struct Client *client_p, struct Client *source_p,
                         server_oper);
     }
 
-    sendto_one(source_p, form_str(RPL_ENDOFWHO),
-               me.name, source_p->name, "*");
+    sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, "*");
     return 0;
   }
 
@@ -326,8 +322,7 @@ m_who(struct Client *client_p, struct Client *source_p,
     who_global(source_p, mask, server_oper);
 
   /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
-  sendto_one(source_p, form_str(RPL_ENDOFWHO),
-             me.name, source_p->name, mask);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
   return 0;
 }
 

@@ -394,27 +394,10 @@ sendto_channel_butone(struct Client *one, struct Client *from,
       continue;
 
     if (MyConnect(target_p))
-    {
-      if (target_p->localClient->serial != current_serial)
-      {
-        send_message(target_p, local_buf, local_len);
-        target_p->localClient->serial = current_serial;
-      }
-    }
-    else
-    {
-      /* Now check whether a message has been sent to this
-       * remote link already
-       */
-      if (target_p->from->localClient->serial != current_serial)
-      {
-        if (IsCapable(target_p->from, CAP_TS6))
-          send_message_remote(target_p->from, from, uid_buf, uid_len);
-        else
-          send_message_remote(target_p->from, from, remote_buf, remote_len);
-        target_p->from->localClient->serial = current_serial;
-      }
-    }
+      send_message(target_p, local_buf);
+    else if (target_p->from->localClient->serial != current_serial)
+      send_message_remote(target_p->from, from, remote_buf);
+    target_p->from->localClient->serial = current_serial;
   }
 }
 

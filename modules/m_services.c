@@ -208,7 +208,7 @@ m_hostserv(struct Client *client_p, struct Client *source_p,
   }
 
   sendto_one(source_p, form_str(ERR_SERVICESDOWN),
-             me.name, source_p->name, "HelpServ");
+             me.name, source_p->name, "HostServ");
   return 0;
 }
 

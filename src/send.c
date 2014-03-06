@@ -54,11 +54,9 @@ static unsigned int current_serial = 0;
  * output	- number of bytes formatted output
  * side effects	- modifies sendbuf
  */
-static inline int
-send_format(char *lsendbuf, int bufsize, const char *pattern, va_list args)
+static void
+send_format(struct dbuf_block *buffer, const char *pattern, va_list args)
 {
-  int len;
-
   /*
    * from rfc1459
    *
@@ -71,13 +69,13 @@ send_format(char *lsendbuf, int bufsize, const char *pattern, va_list args)
    * continuation message lines.  See section 7 for more details about
    * current implementations.
    */
-  len = vsnprintf(lsendbuf, bufsize - 1, pattern, args);
-  if (len > bufsize - 2)
-    len = bufsize - 2;  /* required by some versions of vsnprintf */
+  dbuf_put_args(buffer, pattern, args);
 
-  lsendbuf[len++] = '\r';
-  lsendbuf[len++] = '\n';
-  return len;
+  if (buffer->size > sizeof(buffer->data) - 2)
+    buffer->size = sizeof(buffer->data) - 2;
+
+  buffer->data[buffer->size++] = '\r';
+  buffer->data[buffer->size++] = '\n';
 }
 
 /*
@@ -86,18 +84,18 @@ send_format(char *lsendbuf, int bufsize, const char *pattern, va_list args)
  **      sendq.
  */
 static void
-send_message(struct Client *to, char *buf, int len)
+send_message(struct Client *to, struct dbuf_block *buf)
 {
   assert(!IsMe(to));
   assert(to != &me);
 
-  if (dbuf_length(&to->localClient->buf_sendq) + len > get_sendq(&to->localClient->confs))
+  if (dbuf_length(&to->localClient->buf_sendq) + buf->size > get_sendq(&to->localClient->confs))
   {
     if (IsServer(to))
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Max SendQ limit exceeded for %s: %lu > %u",
                            get_client_name(to, HIDE_IP),
-                           (unsigned long)(dbuf_length(&to->localClient->buf_sendq) + len),
+                           (unsigned long)(dbuf_length(&to->localClient->buf_sendq) + buf->size),
                            get_sendq(&to->localClient->confs));
     if (IsClient(to))
       SetSendQExceeded(to);
@@ -105,7 +103,7 @@ send_message(struct Client *to, char *buf, int len)
     return;
   }
 
-  dbuf_put(&to->localClient->buf_sendq, buf, len);
+  dbuf_add(&to->localClient->buf_sendq, buf);
 
   /*
    ** Update statistics. The following is slightly incorrect
@@ -130,8 +128,7 @@ send_message(struct Client *to, char *buf, int len)
  *
  */
 static void
-send_message_remote(struct Client *to, struct Client *from,
-                    char *buf, int len)
+send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *buf)
 {
   if (to->from)
     to = to->from;
@@ -183,7 +180,7 @@ send_message_remote(struct Client *to, struct Client *from,
     return;
   }
 
-  send_message(to, buf, len);
+  send_message(to, buf);
 }
 
 /*
@@ -207,7 +204,7 @@ void
 send_queued_write(struct Client *to)
 {
   int retlen = 0;
-  struct dbuf_block *first = NULL;
+  struct dbuf_queue *sendq = &to->localClient->buf_sendq;
 
   /*
    ** Once socket is marked dead, we cannot start writing to it,
@@ -217,16 +214,16 @@ send_queued_write(struct Client *to)
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
-  if (dbuf_length(&to->localClient->buf_sendq))
+  if (dbuf_length(sendq))
   {
     do
     {
-      first = to->localClient->buf_sendq.blocks.head->data;
+      struct dbuf_block *first = sendq->blocks.head->data;
 
 #ifdef HAVE_LIBCRYPTO
       if (to->localClient->fd.ssl)
       {
-        retlen = SSL_write(to->localClient->fd.ssl, first->data, first->size);
+        retlen = SSL_write(to->localClient->fd.ssl, first->data + sendq->pos, first->size - sendq->pos);
 
         /* translate openssl error codes, sigh */
         if (retlen < 0)
@@ -249,7 +246,7 @@ send_queued_write(struct Client *to)
       }
       else
 #endif
-        retlen = send(to->localClient->fd.fd, first->data, first->size, 0);
+        retlen = send(to->localClient->fd.fd, first->data + sendq->pos, first->size - sendq->pos, 0);
 
       if (retlen <= 0)
         break;
@@ -264,8 +261,7 @@ send_queued_write(struct Client *to)
     if ((retlen < 0) && (ignoreErrno(errno)))
     {
       /* we have a non-fatal error, reschedule a write */
-      comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE,
-                     (PF *)sendq_unblocked, to, 0);
+      comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE, (PF *)sendq_unblocked, to, 0);
     }
     else if (retlen <= 0)
     {
@@ -317,19 +313,22 @@ void
 sendto_one(struct Client *to, const char *pattern, ...)
 {
   va_list args;
-  char buffer[IRCD_BUFSIZE];
-  int len;
+  struct dbuf_block *buffer;
 
   if (to->from != NULL)
     to = to->from;
   if (IsDead(to))
-    return; /* This socket has already been marked as dead */
+    return;  /* This socket has already been marked as dead */
+
+  buffer = dbuf_alloc();
 
   va_start(args, pattern);
-  len = send_format(buffer, sizeof(buffer), pattern, args);
+  send_format(buffer, pattern, args);
   va_end(args);
 
-  send_message(to, buffer, len);
+  send_message(to, buffer);
+
+  dbuf_ref_free(buffer);
 }
 
 /* sendto_channel_butone()
@@ -349,31 +348,25 @@ sendto_channel_butone(struct Client *one, struct Client *from,
                       const char *pattern, ...)
 {
   va_list alocal, aremote, auid;
-  char local_buf[IRCD_BUFSIZE];
-  char remote_buf[IRCD_BUFSIZE];
-  char uid_buf[IRCD_BUFSIZE];
-  int local_len, remote_len, uid_len;
+  struct dbuf_block *local_buf, *remote_buf, *uid_buf;
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
+  local_buf = dbuf_alloc(), remote_buf = dbuf_alloc(), uid_buf = dbuf_alloc();
+
   if (IsServer(from))
-    local_len = snprintf(local_buf, sizeof(local_buf), ":%s ",
-                        from->name);
+    dbuf_put(local_buf, ":%s ", from->name);
   else
-    local_len = snprintf(local_buf, sizeof(local_buf), ":%s!%s@%s ",
-                         from->name, from->username, from->host);
-  remote_len = snprintf(remote_buf, sizeof(remote_buf), ":%s ",
-                        from->name);
-  uid_len = snprintf(uid_buf, sizeof(uid_buf), ":%s ", ID(from));
+    dbuf_put(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
+
+  dbuf_put(remote_buf, ":%s ", from->name);
+  dbuf_put(uid_buf, ":%s ", ID(from));
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
   va_start(auid, pattern);
-  local_len += send_format(&local_buf[local_len], IRCD_BUFSIZE - local_len,
-                           pattern, alocal);
-  remote_len += send_format(&remote_buf[remote_len], IRCD_BUFSIZE - remote_len,
-                            pattern, aremote);
-  uid_len += send_format(&uid_buf[uid_len], IRCD_BUFSIZE - uid_len, pattern,
-                         auid);
+  send_format(local_buf, pattern, alocal);
+  send_format(remote_buf, pattern, aremote);
+  send_format(uid_buf, pattern, auid);
   va_end(auid);
   va_end(aremote);
   va_end(alocal);
@@ -399,6 +392,10 @@ sendto_channel_butone(struct Client *one, struct Client *from,
       send_message_remote(target_p->from, from, remote_buf);
     target_p->from->localClient->serial = current_serial;
   }
+
+  dbuf_ref_free(local_buf);
+  dbuf_ref_free(remote_buf);
+  dbuf_ref_free(uid_buf);
 }
 
 /* sendto_server()
@@ -427,11 +424,12 @@ sendto_server(struct Client *one,
 {
   va_list args;
   dlink_node *ptr = NULL;
-  char buffer[IRCD_BUFSIZE];
-  int len = 0;
+  struct dbuf_block *buffer;
+
+  buffer = dbuf_alloc();
 
   va_start(args, format);
-  len = send_format(buffer, sizeof(buffer), format, args);
+  send_format(buffer, format, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, serv_list.head)
@@ -451,8 +449,10 @@ sendto_server(struct Client *one,
     if ((client_p->localClient->caps & nocaps) != 0)
       continue;
 
-    send_message(client_p, buffer, len);
+    send_message(client_p, buffer);
   }
+
+  dbuf_ref_free(buffer);
 }
 
 /* sendto_common_channels_local()
@@ -474,11 +474,12 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
   struct Channel *chptr;
   struct Membership *ms;
   struct Client *target_p;
-  char buffer[IRCD_BUFSIZE];
-  int len;
+  struct dbuf_block *buffer;
+
+  buffer = dbuf_alloc();
 
   va_start(args, pattern);
-  len = send_format(buffer, sizeof(buffer), pattern, args);
+  send_format(buffer, pattern, args);
   va_end(args);
 
   ++current_serial;
@@ -502,14 +503,16 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
         continue;
 
       target_p->localClient->serial = current_serial;
-      send_message(target_p, buffer, len);
+      send_message(target_p, buffer);
     }
   }
 
   if (touser && MyConnect(user) && !IsDead(user) &&
       user->localClient->serial != current_serial)
     if (HasCap(user, cap) == cap)
-      send_message(user, buffer, len);
+      send_message(user, buffer);
+
+  dbuf_ref_free(buffer);
 }
 
 /* sendto_channel_local()
@@ -527,12 +530,13 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
                      const char *pattern, ...)
 {
   va_list args;
-  char buffer[IRCD_BUFSIZE];
-  int len = 0;
   dlink_node *ptr = NULL;
+  struct dbuf_block *buffer;
+
+  buffer = dbuf_alloc();
 
   va_start(args, pattern);
-  len = send_format(buffer, sizeof(buffer), pattern, args);
+  send_format(buffer, pattern, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, chptr->members.head)
@@ -547,8 +551,10 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
         (nodeaf && HasUMode(target_p, UMODE_DEAF)))
       continue;
 
-    send_message(target_p, buffer, len);
+    send_message(target_p, buffer);
   }
+
+  dbuf_ref_free(buffer);
 }
 
 /* sendto_channel_local_butone()
@@ -568,12 +574,13 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
                             struct Channel *chptr, const char *pattern, ...)
 {
   va_list args;
-  char buffer[IRCD_BUFSIZE];
-  int len = 0;
   dlink_node *ptr = NULL;
+  struct dbuf_block *buffer;
+
+  buffer = dbuf_alloc();
 
   va_start(args, pattern);
-  len = send_format(buffer, sizeof(buffer), pattern, args);
+  send_format(buffer, pattern, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, chptr->members.head)
@@ -591,8 +598,10 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
     if (HasCap(target_p, cap) != cap)
       continue;
 
-    send_message(target_p, buffer, len);
+    send_message(target_p, buffer);
   }
+
+  dbuf_ref_free(buffer);
 }
 
 /*
@@ -633,37 +642,35 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
                     int what, const char *pattern, ...)
 {
   va_list alocal, aremote;
-  struct Client *client_p;
-  dlink_node *ptr, *ptr_next;
-  char local_buf[IRCD_BUFSIZE], remote_buf[IRCD_BUFSIZE];
-  int local_len = snprintf(local_buf, sizeof(local_buf), ":%s!%s@%s ",
-                           from->name, from->username, from->host);
-  int remote_len = snprintf(remote_buf, sizeof(remote_buf), ":%s ",
-                            from->name);
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+  struct dbuf_block *local_buf, *remote_buf;
+
+  local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
+
+  dbuf_put(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
+  dbuf_put(remote_buf, ":%s ", from->name);
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
-  local_len += send_format(&local_buf[local_len], IRCD_BUFSIZE - local_len,
-                           pattern, alocal);
-  remote_len += send_format(&remote_buf[remote_len], IRCD_BUFSIZE - remote_len,
-                            pattern, aremote);
+  send_format(local_buf, pattern, alocal);
+  send_format(remote_buf, pattern, aremote);
   va_end(aremote);
   va_end(alocal);
 
   /* scan the local clients */
   DLINK_FOREACH(ptr, local_client_list.head)
   {
-    client_p = ptr->data;
+    struct Client *client_p = ptr->data;
 
     if (client_p != one && !IsDefunct(client_p) &&
         match_it(client_p, mask, what))
-      send_message(client_p, local_buf, local_len);
+      send_message(client_p, local_buf);
   }
 
   /* Now scan servers */
   DLINK_FOREACH_SAFE(ptr, ptr_next, serv_list.head)
   {
-    client_p = ptr->data;
+    struct Client *client_p = ptr->data;
 
     /*
      * The old code looped through every client on the
@@ -690,8 +697,11 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
      * -wnder
      */
     if (client_p != one && !IsDefunct(client_p))
-      send_message_remote(client_p, from, remote_buf, remote_len);
+      send_message_remote(client_p, from, remote_buf);
   }
+
+  dbuf_ref_free(local_buf);
+  dbuf_ref_free(remote_buf);
 }
 
 /* sendto_match_servs()
@@ -709,21 +719,18 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 {
   va_list args;
   dlink_node *ptr = NULL;
-  char buff_suid[IRCD_BUFSIZE];
-  char buff_name[IRCD_BUFSIZE];
-  int len_suid = 0;
-  int len_name = 0;
+  struct dbuf_block *buff_suid, *buff_name;
+
+  buff_suid = dbuf_alloc(), buff_name = dbuf_alloc();
 
   va_start(args, pattern);
-  len_suid  = snprintf(buff_suid, sizeof(buff_suid), ":%s ", ID(source_p));
-  len_suid += send_format(&buff_suid[len_suid], sizeof(buff_suid) - len_suid,
-                          pattern, args);
+  dbuf_put(buff_suid, ":%s ", ID(source_p));
+  dbuf_put_args(buff_suid, pattern, args);
   va_end(args);
 
   va_start(args, pattern);
-  len_name = snprintf(buff_name, sizeof(buff_name), ":%s ", source_p->name);
-  len_name += send_format(&buff_name[len_name], sizeof(buff_name) - len_name,
-                          pattern, args);
+  dbuf_put(buff_name, ":%s ", source_p->name);
+  dbuf_put_args(buff_name, pattern, args);
   va_end(args);
 
   ++current_serial;
@@ -751,11 +758,14 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
         continue;
 
       if (HasID(target_p->from))
-        send_message_remote(target_p->from, source_p, buff_suid, len_suid);
+        send_message_remote(target_p->from, source_p, buff_suid);
       else
-        send_message_remote(target_p->from, source_p, buff_name, len_name);
+        send_message_remote(target_p->from, source_p, buff_name);
     }
   }
+
+  dbuf_ref_free(buff_suid);
+  dbuf_ref_free(buff_name);
 }
 
 /* sendto_anywhere()
@@ -773,34 +783,33 @@ sendto_anywhere(struct Client *to, struct Client *from,
                 const char *pattern, ...)
 {
   va_list args;
-  char buffer[IRCD_BUFSIZE];
-  int len = 0;
+  struct dbuf_block *buffer;
 
   if (IsDead(to->from))
     return;
 
+  buffer = dbuf_alloc();
+
   if (MyClient(to))
   {
     if (IsServer(from))
-      len = snprintf(buffer, sizeof(buffer), ":%s %s %s ",
-                     from->name, command, to->name);
+      dbuf_put(buffer, ":%s %s %s ", from->name, command, to->name);
     else
-      len = snprintf(buffer, sizeof(buffer), ":%s!%s@%s %s %s ",
-                     from->name, from->username, from->host, command, to->name);
+      dbuf_put(buffer, ":%s!%s@%s %s %s ", from->name, from->username, from->host, command, to->name);
   }
   else
-    len = snprintf(buffer, sizeof(buffer), ":%s %s %s ",
-                   ID_or_name(from, to), command,
-                   ID_or_name(to, to));
+    dbuf_put(buffer, ":%s %s %s ", ID_or_name(from, to), command, ID_or_name(to, to));
 
   va_start(args, pattern);
-  len += send_format(&buffer[len], sizeof(buffer) - len, pattern, args);
+  send_format(buffer, pattern, args);
   va_end(args);
 
   if (MyClient(to))
-    send_message(to, buffer, len);
+    send_message(to, buffer);
   else
-    send_message_remote(to, from, buffer, len);
+    send_message_remote(to, from, buffer);
+
+  dbuf_ref_free(buffer);
 }
 
 /* sendto_realops_flags()
@@ -871,19 +880,17 @@ sendto_wallops_flags(unsigned int flags, struct Client *source_p,
 {
   dlink_node *ptr = NULL;
   va_list args;
-  char buffer[IRCD_BUFSIZE];
-  int len;
+  struct dbuf_block *buffer;
+
+  buffer = dbuf_alloc();
 
   if (IsClient(source_p))
-    len = snprintf(buffer, sizeof(buffer), ":%s!%s@%s WALLOPS :",
-                   source_p->name, source_p->username,
-                   source_p->host);
+    dbuf_put(buffer, ":%s!%s@%s WALLOPS :", source_p->name, source_p->username, source_p->host);
   else
-    len = snprintf(buffer, sizeof(buffer), ":%s WALLOPS :",
-                   source_p->name);
+    dbuf_put(buffer, ":%s WALLOPS :", source_p->name);
 
   va_start(args, pattern);
-  len += send_format(&buffer[len], IRCD_BUFSIZE - len, pattern, args);
+  send_format(buffer, pattern, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, oper_list.head)
@@ -892,8 +899,10 @@ sendto_wallops_flags(unsigned int flags, struct Client *source_p,
     assert(client_p->umodes & UMODE_OPER);
 
     if (HasUMode(client_p, flags) && !IsDefunct(client_p))
-      send_message(client_p, buffer, len);
+      send_message(client_p, buffer);
   }
+
+  dbuf_ref_free(buffer);
 }
 
 /* ts_warn()
@@ -950,23 +959,26 @@ kill_client(struct Client *client_p, struct Client *diedie,
             const char *pattern, ...)
 {
   va_list args;
-  char buffer[IRCD_BUFSIZE];
-  int len;
+  struct dbuf_block *buffer;
 
   if (client_p->from != NULL)
     client_p = client_p->from;
   if (IsDead(client_p))
     return;
 
-  len = snprintf(buffer, sizeof(buffer), ":%s KILL %s :",
-                 ID_or_name(&me, client_p),
-                 ID_or_name(diedie, client_p));
+  buffer = dbuf_alloc();
+
+  dbuf_put(buffer, ":%s KILL %s :",
+           ID_or_name(&me, client_p),
+           ID_or_name(diedie, client_p));
 
   va_start(args, pattern);
-  len += send_format(&buffer[len], IRCD_BUFSIZE - len, pattern, args);
+  send_format(buffer, pattern, args);
   va_end(args);
 
-  send_message(client_p, buffer, len);
+  send_message(client_p, buffer);
+
+  dbuf_ref_free(buffer);
 }
 
 /* kill_client_ll_serv_butone()
@@ -986,23 +998,22 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
   va_list args;
   int have_uid = 0;
   dlink_node *ptr = NULL;
-  char buf_uid[IRCD_BUFSIZE], buf_nick[IRCD_BUFSIZE];
-  int len_uid = 0, len_nick = 0;
+  struct dbuf_block *uid_buffer, *nick_buffer;
+
+  uid_buffer = dbuf_alloc(), nick_buffer = dbuf_alloc();
 
   if (HasID(source_p))
   {
     have_uid = 1;
     va_start(args, pattern);
-    len_uid = snprintf(buf_uid, sizeof(buf_uid), ":%s KILL %s :",
-                       me.id, ID(source_p));
-    len_uid += send_format(&buf_uid[len_uid], IRCD_BUFSIZE - len_uid, pattern, args);
+    dbuf_put(uid_buffer, ":%s KILL %s :", me.id, ID(source_p));
+    send_format(uid_buffer, pattern, args);
     va_end(args);
   }
 
   va_start(args, pattern);
-  len_nick = snprintf(buf_nick, sizeof(buf_nick), ":%s KILL %s :",
-                      me.name, source_p->name);
-  len_nick += send_format(&buf_nick[len_nick], IRCD_BUFSIZE - len_nick, pattern, args);
+  dbuf_put(nick_buffer, ":%s KILL %s :", me.name, source_p->name);
+  send_format(nick_buffer, pattern, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, serv_list.head)
@@ -1015,8 +1026,11 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
       continue;
 
     if (have_uid && IsCapable(client_p, CAP_TS6))
-      send_message(client_p, buf_uid, len_uid);
+      send_message(client_p, uid_buffer);
     else
-      send_message(client_p, buf_nick, len_nick);
+      send_message(client_p, nick_buffer);
   }
+
+  dbuf_ref_free(uid_buffer);
+  dbuf_ref_free(nick_buffer);
 }

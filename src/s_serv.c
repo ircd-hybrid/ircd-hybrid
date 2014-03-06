@@ -33,7 +33,6 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "dbuf.h"
 #include "event.h"
 #include "fdlist.h"
 #include "hash.h"

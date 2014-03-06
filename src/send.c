@@ -130,8 +130,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
 static void
 send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *buf)
 {
-  if (to->from)
-    to = to->from;
+  to = to->from;
 
   if (!MyConnect(to))
   {
@@ -314,8 +313,8 @@ sendto_one(struct Client *to, const char *pattern, ...)
   va_list args;
   struct dbuf_block *buffer;
 
-  if (to->from != NULL)
-    to = to->from;
+  to = to->from;
+
   if (IsDead(to))
     return;  /* This socket has already been marked as dead */
 
@@ -337,8 +336,8 @@ sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics num
   va_list args;
   const char *dest;
 
-  if (to->from != NULL)
-    to = to->from;
+  to = to->from;
+
   if (IsDead(to))
     return;
 
@@ -366,8 +365,8 @@ sendto_one_notice(struct Client *to, struct Client *from, const char *pattern, .
   va_list args;
   const char *dest;
 
-  if (to->from != NULL)
-    to = to->from;
+  to = to->from;
+
   if (IsDead(to))
     return;
 

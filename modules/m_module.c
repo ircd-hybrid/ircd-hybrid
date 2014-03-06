@@ -84,8 +84,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
 
     if (findmodule_byname((m_bn = libio_basename(parv[2]))))
     {
-      sendto_one(source_p, ":%s NOTICE %s :Module %s is already loaded",
-                 me.name, source_p->name, m_bn);
+      sendto_one_notice(source_p, &me, ":Module %s is already loaded", m_bn);
       return 0;
     }
 
@@ -103,30 +102,26 @@ mo_module(struct Client *client_p, struct Client *source_p,
 
     if ((modp = findmodule_byname((m_bn = libio_basename(parv[2])))) == NULL)
     {
-      sendto_one(source_p, ":%s NOTICE %s :Module %s is not loaded",
-                 me.name, source_p->name, m_bn);
+      sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
       return 0;
     }
 
     if (modp->flags & MODULE_FLAG_CORE)
     {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :Module %s is a core module and may not be unloaded",
-                 me.name, source_p->name, m_bn);
+      sendto_one_notice(source_p, &me, ":Module %s is a core module and may not be unloaded",
+                        m_bn);
       return 0;
     }
 
     if (modp->flags & MODULE_FLAG_NOUNLOAD)
     {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :Module %s is a resident module and may not be unloaded",
-                 me.name, source_p->name, m_bn);
+      sendto_one_notice(source_p, &me, ":Module %s is a resident module and may not be unloaded",
+                        m_bn);
       return 0;
     }
 
     if (unload_one_module(m_bn, 1) == -1)
-      sendto_one(source_p, ":%s NOTICE %s :Module %s is not loaded",
-                 me.name, source_p->name, m_bn);
+      sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
     return 0;
   }
 
@@ -143,8 +138,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
       unsigned int modnum = 0;
       dlink_node *ptr = NULL, *ptr_next = NULL;
 
-      sendto_one(source_p, ":%s NOTICE %s :Reloading all modules",
-                 me.name, source_p->name);
+      sendto_one_notice(source_p, &me, ":Reloading all modules");
 
       modnum = dlink_list_length(modules_get_list());
 
@@ -170,16 +164,14 @@ mo_module(struct Client *client_p, struct Client *source_p,
 
     if ((modp = findmodule_byname((m_bn = libio_basename(parv[2])))) == NULL)
     {
-      sendto_one(source_p, ":%s NOTICE %s :Module %s is not loaded",
-               me.name, source_p->name, m_bn);
+      sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
       return 0;
     }
 
     if (modp->flags & MODULE_FLAG_NOUNLOAD)
     {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :Module %s is a resident module and may not be unloaded",
-                 me.name, source_p->name, m_bn);
+      sendto_one_notice(source_p, &me, ":Module %s is a resident module and may not be unloaded",
+                        m_bn);
       return 0;
     }
 
@@ -187,8 +179,7 @@ mo_module(struct Client *client_p, struct Client *source_p,
 
     if (unload_one_module(m_bn, 1) == -1)
     {
-      sendto_one(source_p, ":%s NOTICE %s :Module %s is not loaded",
-                 me.name, source_p->name, m_bn);
+      sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
       return 0;
     }
 
@@ -224,9 +215,9 @@ mo_module(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :%s is not a valid option. "
-             "Choose from LOAD, UNLOAD, RELOAD, LIST",
-             me.name, source_p->name, parv[1]);
+  sendto_one_notice(source_p, &me, ":%s is not a valid option. "
+                    "Choose from LOAD, UNLOAD, RELOAD, LIST",
+                    parv[1]);
   return 0;
 }
 

@@ -116,8 +116,8 @@ mo_kill(struct Client *client_p, struct Client *source_p,
       return 0;
     }
 
-    sendto_one(source_p, ":%s NOTICE %s :KILL changed from %s to %s",
-               me.name, source_p->name, user, target_p->name);
+    sendto_one_notice(source_p, &me, ":KILL changed from %s to %s",
+                      user, target_p->name);
   }
 
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL_REMOTE))
@@ -238,8 +238,8 @@ ms_kill(struct Client *client_p, struct Client *source_p,
       return 0;
     }
 
-    sendto_one(source_p,":%s NOTICE %s :KILL changed from %s to %s",
-               me.name, source_p->name, user, target_p->name);
+    sendto_one_notice(source_p, &me, ":KILL changed from %s to %s",
+                      user, target_p->name);
   }
 
   if (IsServer(target_p) || IsMe(target_p))

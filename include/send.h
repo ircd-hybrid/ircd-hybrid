@@ -73,7 +73,8 @@ extern void sendq_unblocked(fde_t *, struct Client *);
 extern void send_queued_write(struct Client *);
 extern void send_queued_all(void);
 extern void sendto_one(struct Client *, const char *, ...) AFP(2,3);
-extern void sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics numeric, ...);
+extern void sendto_one_numeric(struct Client *, struct Client *, enum irc_numerics, ...);
+extern void sendto_one_notice(struct Client *, struct Client *, const char *, ...);
 extern void sendto_channel_butone(struct Client *, struct Client *,
                                   struct Channel *, unsigned int,
                                   const char *, ...) AFP(5,6);

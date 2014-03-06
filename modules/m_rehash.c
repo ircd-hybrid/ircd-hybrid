@@ -80,9 +80,8 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
       ilog(LOG_TYPE_IRCD, "REHASH %s From %s",
            parv[1], get_oper_name(source_p));
     else
-      sendto_one(source_p, ":%s NOTICE %s :%s is not a valid option. "
-                 "Choose from DNS, MOTD",
-                 me.name, source_p->name, parv[1]);
+      sendto_one_notice(source_p, &me, ":%s is not a valid option. "
+                        "Choose from DNS, MOTD", parv[1]);
   }
   else
   {

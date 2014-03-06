@@ -359,6 +359,35 @@ sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics num
   dbuf_ref_free(buffer);
 }
 
+void
+sendto_one_notice(struct Client *to, struct Client *from, const char *pattern, ...)
+{
+  struct dbuf_block *buffer;
+  va_list args;
+  const char *dest;
+
+  if (to->from != NULL)
+    to = to->from;
+  if (IsDead(to))
+    return;
+
+  dest = ID_or_name(to, to);
+  if (EmptyString(dest))
+    dest = "*";
+
+  buffer = dbuf_alloc();
+
+  dbuf_put(buffer, ":%s NOTICE %s ", ID_or_name(from, to), dest);
+
+  va_start(args, pattern);
+  send_format(buffer, pattern, args);
+  va_end(args);
+
+  send_message(to, buffer);
+
+  dbuf_ref_free(buffer);
+}
+
 /* sendto_channel_butone()
  *
  * inputs	- pointer to client(server) to NOT send message to

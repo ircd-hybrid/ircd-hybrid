@@ -291,8 +291,8 @@ register_local_user(struct Client *source_p)
 
   if (!valid_hostname(source_p->host))
   {
-    sendto_one(source_p, ":%s NOTICE %s :*** Notice -- You have an illegal "
-               "character in your hostname", me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** Notice -- You have an illegal "
+                      "character in your hostname");
     strlcpy(source_p->host, source_p->sockhost,
             sizeof(source_p->host));
   }
@@ -308,8 +308,8 @@ register_local_user(struct Client *source_p)
     if (IsNeedIdentd(conf))
     {
       ++ServerStats.is_ref;
-      sendto_one(source_p, ":%s NOTICE %s :*** Notice -- You need to install "
-                 "identd to use this server", me.name, source_p->name);
+      sendto_one_notice(source_p, &me, ":*** Notice -- You need to install "
+                        "identd to use this server");
       exit_client(source_p, &me, "Install identd");
       return;
     }
@@ -725,17 +725,13 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
 {
   /* If this user is being spoofed, tell them so */
   if (IsConfDoSpoofIp(conf))
-    sendto_one(source_p,
-               ":%s NOTICE %s :*** Spoofing your IP. Congrats.",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** Spoofing your IP. Congrats.");
 
   /* If this user is in the exception class, Set it "E lined" */
   if (IsConfExemptKline(conf))
   {
     SetExemptKline(source_p);
-    sendto_one(source_p,
-               ":%s NOTICE %s :*** You are exempt from K/D/G lines. Congrats.",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D/G lines. Congrats.");
   }
 
   /*
@@ -745,32 +741,27 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   else if (IsConfExemptGline(conf))
   {
     SetExemptGline(source_p);
-    sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from G lines. Congrats.",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from G lines. Congrats.");
   }
 
   if (IsConfExemptResv(conf))
   {
     SetExemptResv(source_p);
-    sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from resvs. Congrats.",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from resvs. Congrats.");
   }
 
   /* If this user is exempt from user limits set it "F lined" */
   if (IsConfExemptLimits(conf))
   {
     SetExemptLimits(source_p);
-    sendto_one(source_p,
-               ":%s NOTICE %s :*** You are exempt from user limits. Congrats.",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from user limits. Congrats.");
   }
 
   if (IsConfCanFlood(conf))
   {
     SetCanFlood(source_p);
-    sendto_one(source_p, ":%s NOTICE %s :*** You are exempt from flood "
-               "protection, aren't you fearsome.",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from flood "
+                      "protection, aren't you fearsome.");
   }
 }
 
@@ -901,8 +892,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
   if (MyConnect(source_p) && HasUMode(source_p, UMODE_ADMIN) &&
       !HasOFlag(source_p, OPER_FLAG_ADMIN))
   {
-    sendto_one(source_p, ":%s NOTICE %s :*** You have no admin flag;",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** You have no admin flag;");
     DelUMode(source_p, UMODE_ADMIN);
   }
 
@@ -1122,9 +1112,8 @@ user_welcome(struct Client *source_p)
   if (HasFlag(source_p, FLAGS_SSL))
   {
     AddUMode(source_p, UMODE_SSL);
-    sendto_one(source_p, ":%s NOTICE %s :*** Connected securely via %s",
-               me.name, source_p->name,
-               ssl_get_cipher(source_p->localClient->fd.ssl));
+    sendto_one_notice(source_p, &me, ":*** Connected securely via %s",
+                      ssl_get_cipher(source_p->localClient->fd.ssl));
   }
 #endif
 

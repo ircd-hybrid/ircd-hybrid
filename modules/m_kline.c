@@ -100,9 +100,8 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
                          get_oper_name(source_p), tkline_time/60,
                          conf->user, conf->host,
                          conf->reason);
-    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. K-Line [%s@%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
-               source_p->name, tkline_time/60, conf->user, conf->host);
+    sendto_one_notice(source_p, &me, ":Added temporary %d min. K-Line [%s@%s]",
+                      tkline_time/60, conf->user, conf->host);
     ilog(LOG_TYPE_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), tkline_time/60,
          conf->user, conf->host, conf->reason);
@@ -113,9 +112,8 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
                          "%s added K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p),
                          conf->user, conf->host, conf->reason);
-    sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
-               source_p->name, conf->user, conf->host);
+    sendto_one_notice(source_p, &me, ":Added K-Line [%s@%s]",
+                      conf->user, conf->host);
     ilog(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), conf->user, conf->host, conf->reason);
   }
@@ -201,10 +199,8 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
     if (warn)
     {
       reason = conf->reason ? conf->reason : CONF_NOREASON;
-      sendto_one(source_p,
-                 ":%s NOTICE %s :[%s@%s] already K-Lined by [%s@%s] - %s",
-                 me.name, source_p->name, luser, lhost, conf->user,
-                 conf->host, reason);
+      sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
+                        luser, lhost, conf->user, conf->host, reason);
     }
 
     return 1;
@@ -397,8 +393,8 @@ mo_unkline(struct Client *client_p, struct Client *source_p,
 
   if (remove_kline_match(host, user))
   {
-    sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed",
-               me.name, source_p->name, user, host);
+    sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
+                      user, host);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the K-Line for: [%s@%s]",
                          get_oper_name(source_p), user, host);
@@ -406,8 +402,8 @@ mo_unkline(struct Client *client_p, struct Client *source_p,
          get_oper_name(source_p), user, host);
   }
   else
-    sendto_one(source_p, ":%s NOTICE %s :No K-Line for [%s@%s] found", 
-	       me.name, source_p->name, user, host);
+    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", 
+	              user, host);
   return 0;
 }
 
@@ -443,8 +439,8 @@ me_unkline(struct Client *client_p, struct Client *source_p,
   {
     if (remove_kline_match(khost, kuser))
     {
-      sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed",
-                 me.name, source_p->name, kuser, khost);
+      sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
+                        kuser, khost);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the K-Line for: [%s@%s]",
                            get_oper_name(source_p), kuser, khost);
@@ -452,8 +448,8 @@ me_unkline(struct Client *client_p, struct Client *source_p,
            get_oper_name(source_p), kuser, khost);
     }
     else
-      sendto_one(source_p, ":%s NOTICE %s :No K-Line for [%s@%s] found",
-                 me.name, source_p->name, kuser, khost);
+      sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found",
+                        kuser, khost);
   }
 
   return 0;

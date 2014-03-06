@@ -103,8 +103,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
     if (attach_conf(source_p, conf) != 0)
     {
-      sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
-                 me.name, source_p->name);   
+      sendto_one_notice(source_p, &me, ":Can't attach conf!");   
       failed_challenge_notice(source_p, conf->name, "can't attach conf!");
       return 0;
     }
@@ -140,9 +139,8 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
   if (conf->rsa_public_key == NULL)
   {
-    sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
-               "is not enabled for your oper{} block.", me.name,
-               source_p->name);
+    sendto_one_notice(source_p, &me, ":I'm sorry, PK authentication "
+                      "is not enabled for your oper{} block.");
     return 0;
   }
 

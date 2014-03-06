@@ -67,9 +67,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Client: entries: %u buckets: %u "
-             "max chain: %u", me.name, source_p->name, count, buckets,
-             max_chain);
+  sendto_one_notice(source_p, &me, "Client: entries: %u buckets: %u "
+                    "max chain: %u", count, buckets, max_chain);
 
   count     = 0;
   buckets   = 0;
@@ -90,9 +89,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Channel: entries: %u buckets: %u "
-             "max chain: %u", me.name, source_p->name, count, buckets,
-             max_chain);
+  sendto_one_notice(source_p, &me, "Channel: entries: %u buckets: %u "
+                    "max chain: %u", count, buckets, max_chain);
 
   count     = 0;
   buckets   = 0;
@@ -113,9 +111,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Id: entries: %u buckets: %u "
-             "max chain: %u", me.name, source_p->name, count, buckets,
-             max_chain);
+  sendto_one_notice(source_p, &me, "Id: entries: %u buckets: %u "
+                    "max chain: %u", count, buckets, max_chain);
 
   count     = 0;
   buckets   = 0;
@@ -136,9 +133,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :UserHost: entries: %u buckets: %u "
-             "max chain: %u", me.name, source_p->name, count, buckets,
-             max_chain);
+  sendto_one_notice(source_p, &me, "UserHost: entries: %u buckets: %u "
+                    "max chain: %u", count, buckets, max_chain);
   return 0;
 }
 

@@ -54,15 +54,13 @@ mo_restart(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, ":%s NOTICE %s :Need server name /restart %s",
-               me.name, source_p->name, me.name);
+    sendto_one_notice(source_p, &me, ":Need server name /restart %s", me.name);
     return 0;
   }
 
   if (irccmp(parv[1], me.name))
   {
-    sendto_one(source_p, ":%s NOTICE %s :Mismatch on /restart %s",
-               me.name, source_p->name, me.name);
+    sendto_one_notice(source_p, &me, ":Mismatch on /restart %s", me.name);
     return 0;
   }
 

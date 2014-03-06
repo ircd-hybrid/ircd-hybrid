@@ -117,8 +117,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
   {
     if (attach_conf(source_p, conf) != 0)
     {
-      sendto_one(source_p, ":%s NOTICE %s :Can't attach conf!",
-                 me.name, source_p->name);
+      sendto_one_notice(source_p, &me, ":Can't attach conf!");
       failed_oper_notice(source_p, name, "can't attach conf!");
       return 0;
     }

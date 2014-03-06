@@ -55,8 +55,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
   if (!valid_hostname(parv[3]))
   {
-    sendto_one(source_p, ":%s NOTICE %s :CGI:IRC: Invalid hostname", me.name,
-               source_p->name[0] ? source_p->name : "*");
+    sendto_one_notice(source_p, &me, ":CGI:IRC: Invalid hostname");
     return 0;
   }
 
@@ -69,22 +68,19 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
   if (!IsConfWebIRC(conf))
   {
-    sendto_one(source_p, ":%s NOTICE %s :Not a CGI:IRC auth block", me.name,
-               source_p->name[0] ? source_p->name : "*");
+    sendto_one_notice(source_p, &me, ":Not a CGI:IRC auth block");
     return 0;
   }
 
   if (EmptyString(conf->passwd))
   {
-    sendto_one(source_p, ":%s NOTICE %s :CGI:IRC auth blocks must have a password",
-               me.name, source_p->name[0] ? source_p->name : "*");
+    sendto_one_notice(source_p, &me, ":CGI:IRC auth blocks must have a password");
     return 0;
   }
 
   if (!match_conf_password(parv[1], conf))
   {
-    sendto_one(source_p, ":%s NOTICE %s :CGI:IRC password incorrect",
-               me.name, source_p->name[0] ? source_p->name : "*");
+    sendto_one_notice(source_p, &me, ":CGI:IRC password incorrect");
     return 0;
   }
 
@@ -96,9 +92,7 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
   if (getaddrinfo(parv[4], NULL, &hints, &res))
   {
-
-    sendto_one(source_p, ":%s NOTICE %s :Invalid CGI:IRC IP %s", me.name,
-               source_p->name[0] ? source_p->name : "*", parv[4]);
+    sendto_one_notice(source_p, &me, ":Invalid CGI:IRC IP %s", parv[4]);
     return 0;
   }
 
@@ -125,8 +119,8 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
   }
 
   AddUMode(source_p, UMODE_WEBIRC);
-  sendto_one(source_p, ":%s NOTICE %s :CGI:IRC host/IP set to %s %s", me.name,
-             source_p->name[0] ? source_p->name : "*", parv[3], parv[4]);
+  sendto_one_notice(source_p, &me, ":CGI:IRC host/IP set to %s %s",
+                    parv[3], parv[4]);
   return 0;
 }
 

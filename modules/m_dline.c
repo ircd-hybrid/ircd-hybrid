@@ -63,9 +63,8 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
                          "%s added temporary %d min. D-Line for [%s] [%s]",
                          get_oper_name(source_p), tkline_time/60,
                          conf->host, conf->reason);
-    sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line [%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
-               source_p->name, tkline_time/60, conf->host);
+    sendto_one_notice(source_p, &me, ":Added temporary %d min. D-Line [%s]",
+                      tkline_time/60, conf->host);
     ilog(LOG_TYPE_DLINE, "%s added temporary %d min. D-Line for [%s] [%s]",
          get_oper_name(source_p), tkline_time/60, conf->host, conf->reason);
   }
@@ -74,9 +73,7 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added D-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->host, conf->reason);
-    sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s]",
-               MyConnect(source_p) ? me.name : ID_or_name(&me, source_p),
-               source_p->name, conf->host);
+    sendto_one_notice(source_p, &me, ":Added D-Line [%s]", conf->host);
     ilog(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",
          get_oper_name(source_p), conf->host, conf->reason);
 
@@ -185,16 +182,14 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
     if (!MyConnect(target_p))
     {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :Can't DLINE nick on another server",
-                 me.name, source_p->name);
+      sendto_one_notice(source_p, &me, ":Can't DLINE nick on another server");
       return 0;
     }
 
     if (IsExemptKline(target_p))
     {
-      sendto_one(source_p, ":%s NOTICE %s :%s is E-lined",
-                 me.name, source_p->name, target_p->name);
+      sendto_one_notice(source_p, &me, ":%s is E-lined",
+                        target_p->name);
       return 0;
     }
 
@@ -208,9 +203,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
   if (bits < 8)
   {
-    sendto_one(source_p,
-               ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":For safety, bitmasks less than 8 require conf access.");
     return 0;
   }
 
@@ -228,11 +221,11 @@ mo_dline(struct Client *client_p, struct Client *source_p,
     creason = conf->reason ? conf->reason : def_reason;
 
     if (IsConfExemptKline(conf))
-      sendto_one(source_p, ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
-                 me.name, source_p->name, dlhost, conf->host, creason);
+      sendto_one_notice(source_p, &me, ":[%s] is (E)d-lined by [%s] - %s",
+                        dlhost, conf->host, creason);
     else
-      sendto_one(source_p, ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
-                 me.name, source_p->name, dlhost, conf->host, creason);
+      sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
+                        dlhost, conf->host, creason);
     return 0;
   }
 
@@ -305,17 +298,13 @@ ms_dline(struct Client *client_p, struct Client *source_p,
 
       if (!MyConnect(target_p))
       {
-        sendto_one(source_p,
-                   ":%s NOTICE %s :Can't DLINE nick on another server",
-                   me.name, source_p->name);
+        sendto_one_notice(source_p, &me, ":Can't DLINE nick on another server");
         return 0;
       }
 
       if (IsExemptKline(target_p))
       {
-        sendto_one(source_p,
-                   ":%s NOTICE %s :%s is E-lined", me.name,
-                   source_p->name, target_p->name);
+        sendto_one_notice(source_p, &me, ":%s is E-lined", target_p->name);
         return 0;
       }
 
@@ -329,9 +318,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
 
     if (bits < 8)
     {
-      sendto_one(source_p,
-                 ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
-                 me.name, source_p->name);
+      sendto_one_notice(source_p, &me, ":For safety, bitmasks less than 8 require conf access.");
       return 0;
     }
 
@@ -348,13 +335,11 @@ ms_dline(struct Client *client_p, struct Client *source_p,
     {
       creason = conf->reason ? conf->reason : def_reason;
       if (IsConfExemptKline(conf))
-        sendto_one(source_p,
-                   ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
-                   me.name, source_p->name, dlhost, conf->host, creason);
+        sendto_one_notice(source_p, &me, ":[%s] is (E)d-lined by [%s] - %s",
+                          dlhost, conf->host, creason);
       else
-        sendto_one(source_p,
-                   ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
-                   me.name, source_p->name, dlhost, conf->host, creason);
+        sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
+                          dlhost, conf->host, creason);
       return 0;
     }
 
@@ -428,8 +413,7 @@ mo_undline(struct Client *client_p, struct Client *source_p,
 
   if (remove_dline_match(addr))
   {
-    sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
-               me.name, source_p->name, addr);
+    sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", addr);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the D-Line for: [%s]",
                          get_oper_name(source_p), addr);
@@ -437,8 +421,7 @@ mo_undline(struct Client *client_p, struct Client *source_p,
          get_oper_name(source_p), addr);
   }
   else
-    sendto_one(source_p, ":%s NOTICE %s :No D-Line for [%s] found",
-               me.name, source_p->name, addr);
+    sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", addr);
   return 0;
 }
 
@@ -465,8 +448,7 @@ ms_undline(struct Client *client_p, struct Client *source_p,
   {
     if (remove_dline_match(addr))
     {
-      sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
-                 me.name, source_p->name, addr);
+      sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", addr);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the D-Line for: [%s]",
                            get_oper_name(source_p), addr);
@@ -474,8 +456,7 @@ ms_undline(struct Client *client_p, struct Client *source_p,
            get_oper_name(source_p), addr);
     }
     else
-      sendto_one(source_p, ":%s NOTICE %s :No D-Line for [%s] found",
-                 me.name, source_p->name, addr);
+      sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", addr);
   }
 
   return 0;

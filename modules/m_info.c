@@ -526,14 +526,10 @@ static const struct InfoStruct info_table[] =
 static void
 send_birthdate_online_time(struct Client *source_p)
 {
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-    sendto_one(source_p, ":%s %d %s :On-line since %s",
-               me.id, RPL_INFO, source_p->id,
-               myctime(me.localClient->firsttime));
-  else
-    sendto_one(source_p, ":%s %d %s :On-line since %s",
-               me.name, RPL_INFO, source_p->name,
-               myctime(me.localClient->firsttime));
+  sendto_one(source_p, ":%s %d %s :On-line since %s",
+             ID_or_name(&me, source_p), RPL_INFO,
+             ID_or_name(source_p, source_p),
+             myctime(me.localClient->firsttime));
 }
 
 /* send_conf_options()
@@ -545,22 +541,7 @@ send_birthdate_online_time(struct Client *source_p)
 static void
 send_conf_options(struct Client *source_p)
 {
-  const char *from, *to;
   const struct InfoStruct *iptr = NULL;
-
-  /* Now send them a list of all our configuration options
-   * (mostly from defaults.h and config.h)
-   */
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
-    from = me.id;
-    to = source_p->id;
-  }
-  else
-  {
-    from = me.name;
-    to = source_p->name;
-  }
 
   /*
    * Parse the info_table[] and do the magic.
@@ -575,7 +556,7 @@ send_conf_options(struct Client *source_p)
         const char *option = *((char **)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? option : "NONE",
                    iptr->desc ? iptr->desc : "<none>");
         break;
@@ -587,7 +568,7 @@ send_conf_options(struct Client *source_p)
         const char *option = iptr->option;
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? option : "NONE",
                    iptr->desc ? iptr->desc : "<none>");
         break;
@@ -599,7 +580,7 @@ send_conf_options(struct Client *source_p)
         const int option = *((int *)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5d [%-30s]",
-                   from, RPL_INFO, to, iptr->name,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    option, iptr->desc ? iptr->desc : "<none>");
         break;
       }
@@ -610,7 +591,7 @@ send_conf_options(struct Client *source_p)
         const int option = *((int *)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? "ON" : "OFF",
                    iptr->desc ? iptr->desc : "<none>");
 
@@ -623,7 +604,7 @@ send_conf_options(struct Client *source_p)
         const int option = *((int *)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? "YES" : "NO",
                    iptr->desc ? iptr->desc : "<none>");
         break;
@@ -634,7 +615,7 @@ send_conf_options(struct Client *source_p)
         const int option = *((int *)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? ((option == 1) ? "MASK" : "YES") : "NO",
                    iptr->desc ? iptr->desc : "<none>");
         break;

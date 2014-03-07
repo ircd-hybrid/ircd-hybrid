@@ -56,7 +56,7 @@ static void remove_ban_list(struct Channel *, struct Client *, dlink_list *, cha
 
 /* ms_sjoin()
  *
- * parv[0] - sender
+ * parv[0] - command
  * parv[1] - TS
  * parv[2] - channel
  * parv[3] - modes + n arguments (key and/or limit)

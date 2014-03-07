@@ -369,7 +369,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
 ** based totally on m_unkline
 ** added to hybrid-7 7/11/2000 --is
 **
-**      parv[0] = sender nick
+**      parv[0] = command
 **      parv[1] = dline to remove
 */
 static int

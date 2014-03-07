@@ -47,8 +47,8 @@ static unsigned int current_serial = 0;
 
 /* send_format()
  *
- * inputs	- buffer to format into
- *              - size of the buffer
+ * inputs
+ *		- buffer
  *		- format pattern to use
  *		- var args
  * output	- number of bytes formatted output
@@ -120,8 +120,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
  *
  * inputs	- pointer to client from message is being sent
  * 		- pointer to client to send to
- *		- pointer to preformatted buffer
- *		- length of input buffer
+ *		- pointer to buffer
  * output	- none
  * side effects	- Despite the function name, this only sends to directly
  *		  connected clients.
@@ -1017,8 +1016,8 @@ kill_client(struct Client *client_p, struct Client *diedie,
   va_list args;
   struct dbuf_block *buffer;
 
-  if (client_p->from != NULL)
-    client_p = client_p->from;
+  client_p = client_p->from;
+
   if (IsDead(client_p))
     return;
 
@@ -1062,7 +1061,7 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
   {
     have_uid = 1;
     va_start(args, pattern);
-    dbuf_put_fmt(uid_buffer, ":%s KILL %s :", me.id, ID(source_p));
+    dbuf_put_fmt(uid_buffer, ":%s KILL %s :", ID(&me), ID(source_p));
     send_format(uid_buffer, pattern, args);
     va_end(args);
   }

@@ -30,11 +30,9 @@
 #include "ircd.h"
 #include "s_serv.h"
 #include "send.h"
-#include "channel_mode.h"
 #include "parse.h"
 #include "modules.h"
 #include "irc_string.h"
-#include "s_user.h"
 #include "conf.h"
 
 

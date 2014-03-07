@@ -30,7 +30,6 @@
 #include "irc_string.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_user.h"
 #include "parse.h"
 #include "modules.h"
 #include "s_serv.h"

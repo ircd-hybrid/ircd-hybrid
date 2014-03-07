@@ -33,8 +33,6 @@
 #include "ircd.h"
 #include "irc_string.h"
 #include "parse.h"
-#include "s_user.h"
-
 
 
 static void dump_map(struct Client *client,

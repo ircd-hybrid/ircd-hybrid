@@ -27,7 +27,7 @@
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
-#include "channel_mode.h"
+//#include "channel_mode.h"
 #include "numeric.h"
 #include "conf.h"
 #include "s_serv.h"

@@ -179,7 +179,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
     if (!MyConnect(target_p))
     {
-      sendto_one_notice(source_p, &me, ":Can't DLINE nick on another server");
+      sendto_one_notice(source_p, &me, ":Cannot DLINE nick on another server");
       return 0;
     }
 
@@ -295,7 +295,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
 
       if (!MyConnect(target_p))
       {
-        sendto_one_notice(source_p, &me, ":Can't DLINE nick on another server");
+        sendto_one_notice(source_p, &me, ":Cannot DLINE nick on another server");
         return 0;
       }
 

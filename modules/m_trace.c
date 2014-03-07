@@ -85,9 +85,8 @@ static int
 mo_trace(struct Client *client_p, struct Client *source_p,
          int parc, char *parv[])
 {
-  dlink_node *ptr;
-  const char *tname;
-  const char *from, *to;
+  dlink_node *ptr = NULL;
+  const char *tname = NULL;
 
   if (parc > 2)
     if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
@@ -97,17 +96,6 @@ mo_trace(struct Client *client_p, struct Client *source_p,
     tname = parv[1];
   else
     tname = me.name;
-
-  if (!MyConnect(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
-    from = me.id;
-    to = source_p->id;
-  }
-  else
-  {
-    from = me.name;
-    to = source_p->name;
-  }
 
   switch (hunt_server(client_p, source_p, ":%s TRACE :%s", 1, parc, parv))
   {

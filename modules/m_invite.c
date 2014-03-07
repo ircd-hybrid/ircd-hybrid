@@ -103,9 +103,7 @@ m_invite(struct Client *client_p, struct Client *source_p,
     sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->chname);
 
     if (target_p->away[0])
-      sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name,
-                 target_p->away);
-
+      sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
   }
   else if (parc > 3 && IsDigit(*parv[3]))
     if (atoi(parv[3]) > chptr->channelts)

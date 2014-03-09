@@ -19,7 +19,7 @@
 
 /*! \file respond.c
  * \brief A simple RSA authentification challenge response generator for the ircd-hybrid CHALLENGE command.
- * \version $Id: m_admin.c 3109 2014-03-06 19:25:12Z michael $
+ * \version $Id$
  */
 
 #include <stdio.h>

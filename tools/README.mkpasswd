@@ -20,9 +20,8 @@ Options:
 -R - Specify a raw salt passed directly to crypt()
 -h - Get help
 
-Without the presence of any parameters, it'll behave like the old mkpasswd,
-creating a DES password with a randomly generated salt and prompting for
-the password (without echo).
+If no parameter is given, it will create an MD5 password with a randomly
+generated salt and prompting for the password (without echo).
 
 A DES salt is a pair of alphanumeric characters ('.' and '/' are permitted
 as well), such as 'a4' or 'Td'.
@@ -35,7 +34,7 @@ Known bugs:
 Blowfish (on OpenBSD) is not yet supported
 The encryption algorithms supported depend on your system's crypt()
   implementation.
-The maximum length of an MD5 salt is limited to your systems crypt()
+The maximum length of an MD5 salt is limited to your system's crypt()
   implementation, typically 8.
 
 Supported Platforms (Known and tested):

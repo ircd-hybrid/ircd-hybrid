@@ -2,6 +2,8 @@
 ########################################################################
 o) IMPORTANT: ircd binary is now again placed into bin/ instead of sbin/
 ########################################################################
+o) mkpasswd in tools/ now defaults to MD5 instead of DES
+o) USERS command has been removed
 
 
 -- Noteworthy changes in version 8.1.14 (2014-02-25)

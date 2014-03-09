@@ -66,7 +66,6 @@ dist_helpf_DATA = accept    \
                   unxline   \
                   user      \
                   userhost  \
-                  users     \
                   version   \
                   wallops   \
                   who       \

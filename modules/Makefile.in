@@ -445,12 +445,6 @@ m_userhost_la_OBJECTS = $(am_m_userhost_la_OBJECTS)
 m_userhost_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_userhost_la_LDFLAGS) $(LDFLAGS) -o $@
-m_users_la_LIBADD =
-am_m_users_la_OBJECTS = m_users.lo
-m_users_la_OBJECTS = $(am_m_users_la_OBJECTS)
-m_users_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_users_la_LDFLAGS) $(LDFLAGS) -o $@
 m_version_la_LIBADD =
 am_m_version_la_OBJECTS = m_version.lo
 m_version_la_OBJECTS = $(am_m_version_la_OBJECTS)
@@ -557,11 +551,11 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_svsnick_la_SOURCES) $(m_tburst_la_SOURCES) \
 	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
 	$(m_trace_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_users_la_SOURCES) \
-	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
-	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
-	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
-	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
+	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
+	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
+	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
+	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
+	$(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
 	$(m_certfp_la_SOURCES) $(m_challenge_la_SOURCES) \
@@ -586,11 +580,11 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_svsnick_la_SOURCES) $(m_tburst_la_SOURCES) \
 	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
 	$(m_trace_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_users_la_SOURCES) \
-	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
-	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
-	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
-	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
+	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
+	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
+	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
+	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
+	$(m_xline_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -856,7 +850,6 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_trace.la     \
                       m_user.la      \
                       m_userhost.la  \
-                      m_users.la     \
                       m_version.la   \
                       m_wallops.la   \
                       m_watch.la     \
@@ -918,7 +911,6 @@ m_topic_la_LDFLAGS = $(MODULE_FLAGS)
 m_trace_la_LDFLAGS = $(MODULE_FLAGS)
 m_user_la_LDFLAGS = $(MODULE_FLAGS)
 m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
-m_users_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
 m_wallops_la_LDFLAGS = $(MODULE_FLAGS)
 m_watch_la_LDFLAGS = $(MODULE_FLAGS)
@@ -979,7 +971,6 @@ m_topic_la_SOURCES = m_topic.c
 m_trace_la_SOURCES = m_trace.c
 m_user_la_SOURCES = m_user.c
 m_userhost_la_SOURCES = m_userhost.c
-m_users_la_SOURCES = m_users.c
 m_version_la_SOURCES = m_version.c
 m_wallops_la_SOURCES = m_wallops.c
 m_watch_la_SOURCES = m_watch.c
@@ -1214,9 +1205,6 @@ m_user.la: $(m_user_la_OBJECTS) $(m_user_la_DEPENDENCIES) $(EXTRA_m_user_la_DEPE
 m_userhost.la: $(m_userhost_la_OBJECTS) $(m_userhost_la_DEPENDENCIES) $(EXTRA_m_userhost_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_userhost_la_LINK) -rpath $(modulesdir) $(m_userhost_la_OBJECTS) $(m_userhost_la_LIBADD) $(LIBS)
 
-m_users.la: $(m_users_la_OBJECTS) $(m_users_la_DEPENDENCIES) $(EXTRA_m_users_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_users_la_LINK) -rpath $(modulesdir) $(m_users_la_OBJECTS) $(m_users_la_LIBADD) $(LIBS)
-
 m_version.la: $(m_version_la_OBJECTS) $(m_version_la_DEPENDENCIES) $(EXTRA_m_version_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_version_la_LINK) -rpath $(modulesdir) $(m_version_la_OBJECTS) $(m_version_la_LIBADD) $(LIBS)
 
@@ -1299,7 +1287,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_trace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_user.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_userhost.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_users.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_version.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_wallops.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_watch.Plo@am__quote@

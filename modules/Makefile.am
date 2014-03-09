@@ -57,7 +57,6 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_trace.la     \
                       m_user.la      \
                       m_userhost.la  \
-                      m_users.la     \
                       m_version.la   \
                       m_wallops.la   \
                       m_watch.la     \
@@ -120,7 +119,6 @@ m_topic_la_LDFLAGS = $(MODULE_FLAGS)
 m_trace_la_LDFLAGS = $(MODULE_FLAGS)
 m_user_la_LDFLAGS = $(MODULE_FLAGS)
 m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
-m_users_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
 m_wallops_la_LDFLAGS = $(MODULE_FLAGS)
 m_watch_la_LDFLAGS = $(MODULE_FLAGS)
@@ -182,7 +180,6 @@ m_topic_la_SOURCES = m_topic.c
 m_trace_la_SOURCES = m_trace.c
 m_user_la_SOURCES = m_user.c
 m_userhost_la_SOURCES = m_userhost.c
-m_users_la_SOURCES = m_users.c
 m_version_la_SOURCES = m_version.c
 m_wallops_la_SOURCES = m_wallops.c
 m_watch_la_SOURCES = m_watch.c

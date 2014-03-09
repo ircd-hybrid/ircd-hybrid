@@ -1,9 +1,6 @@
 /*
- * tools/rsa_respond/respond.c
- * A simple RSA authentification challenge response generator for the
- * ircd-hybrid CHALLENGE command.
- *  This code is Copyright(C)2001 by the past and present ircd-hybrid
- *  developers.
+ *  Copyright (c) 2001-2014 ircd-hybrid development team
+ *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +13,13 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *  $Id: respond.c 33 2005-10-02 20:50:00Z knight $
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ *  USA
+ */
+
+/*! \file respond.c
+ * \brief A simple RSA authentification challenge response generator for the ircd-hybrid CHALLENGE command.
+ * \version $Id: m_admin.c 3109 2014-03-06 19:25:12Z michael $
  */
 
 #include <stdio.h>

@@ -129,14 +129,20 @@ main(int argc, char *argv[])
     }
   }
 
-  if (flag & FLAG_MD5)
+  if (flag & FLAG_DES)
   {
-    if (length == 0)
-      length = 8;
     if (flag & FLAG_SALT)
-      salt = make_md5_salt_para(saltpara);
+    {
+      if ((strlen(saltpara) == 2))
+        salt = saltpara;
+      else
+      {
+        printf("Invalid salt, please enter 2 alphanumeric characters\n");
+        exit(1);
+      }
+    }
     else
-      salt = make_md5_salt(length);
+      salt = make_des_salt();
   }
   else if (flag & FLAG_SHA256)
   {
@@ -189,24 +195,14 @@ main(int argc, char *argv[])
   {
     salt = saltpara;
   }
-  else /* Default to DES */
+  else /* Default to MD5 */
   {
+    if (length == 0)
+      length = 8;
     if (flag & FLAG_SALT)
-    {
-      if ((strlen(saltpara) == 2))
-      {
-        salt = saltpara;
-      }
-      else
-      {
-        printf("Invalid salt, please enter 2 alphanumeric characters\n");
-        exit(1);
-      }
-    }
+      salt = make_md5_salt_para(saltpara);
     else
-    {
-      salt = make_des_salt();
-    }
+      salt = make_md5_salt(length);
   }
 
   if (flag & FLAG_PASS)

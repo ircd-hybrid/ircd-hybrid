@@ -296,7 +296,7 @@ make_sha256_salt(int length)
 
   if (length > 16)
   {
-    printf("SHA256 salt length too long\n");
+    printf("SHA-256 salt length too long\n");
     exit(0);
   }
 
@@ -337,7 +337,7 @@ make_sha512_salt(int length)
 
   if (length > 16)
   {
-    printf("SHA512 salt length too long\n");
+    printf("SHA-512 salt length too long\n");
     exit(0);
   }
 

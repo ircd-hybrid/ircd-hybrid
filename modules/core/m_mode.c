@@ -232,9 +232,6 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
         sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s",
                              modebuf, parabuf);
-        sendto_server(client_p, NOCAPS, CAP_TS6,
-                      "%s %s", modebuf, parabuf);
-
         mbuf = modebuf + mlen;
         pbuf = parabuf;
         modecount = 0;
@@ -252,12 +249,10 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
   {
     *mbuf = *(pbuf - 1) = '\0';
     sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", modebuf, parabuf);
-    sendto_server(client_p, NOCAPS, CAP_TS6,
-                  "%s %s", modebuf, parabuf);
   }
 
   /* assumption here is that since the server sent BMASK, they are TS6, so they have an ID */
-  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s BMASK %lu %s %s :%s",
+  sendto_server(client_p, NOCAPS, NOCAPS, ":%s BMASK %lu %s %s :%s",
                 source_p->id, (unsigned long)chptr->channelts, chptr->chname,
                 parv[3], parv[4]);
   return 0;

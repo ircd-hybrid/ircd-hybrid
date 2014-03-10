@@ -96,7 +96,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
    */
   if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
   {
-    if  (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
+    if (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
     {
       sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
       return 0;
@@ -206,7 +206,7 @@ ms_connect(struct Client *client_p, struct Client *source_p,
    */
   if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
   { 
-    if  (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
+    if (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
     {
       sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
       return 0;
@@ -253,10 +253,7 @@ ms_connect(struct Client *client_p, struct Client *source_p,
    */
   sendto_wallops_flags(UMODE_WALLOP, &me, "Remote CONNECT %s %d from %s",
                        parv[1], port, source_p->name);
-  sendto_server(NULL, NOCAPS, CAP_TS6,
-                ":%s WALLOPS :Remote CONNECT %s %d from %s",
-                me.name, parv[1], port, source_p->name);
-  sendto_server(NULL, CAP_TS6, NOCAPS,
+  sendto_server(NULL, NOCAPS, NOCAPS,
                 ":%s WALLOPS :Remote CONNECT %s %d from %s",
                 me.id, parv[1], port, source_p->name);
 

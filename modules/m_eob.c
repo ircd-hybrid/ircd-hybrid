@@ -52,10 +52,7 @@ ms_eob(struct Client *client_p, struct Client *source_p,
 
   AddFlag(source_p, FLAGS_EOB);
 
-  sendto_server(client_p, CAP_TS6, NOCAPS,
-                ":%s EOB", ID(source_p));
-  sendto_server(client_p, NOCAPS, CAP_TS6,
-                ":%s EOB", source_p->name);
+  sendto_server(client_p, NOCAPS, NOCAPS, ":%s EOB", ID(source_p));
   return 0;
 }
 

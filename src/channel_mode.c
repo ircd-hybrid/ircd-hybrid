@@ -1651,12 +1651,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
   parabuf[0] = '\0';
   parptr = parabuf;
 
-  if ((cap & CAP_TS6) && source_p->id[0] != '\0')
-    mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
-                   (unsigned long)chptr->channelts, chptr->chname);
-  else
-    mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", source_p->name,
-                   chptr->chname);
+  mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
+                 (unsigned long)chptr->channelts, chptr->chname);
 
   /* loop the list of - modes we have */
   for (i = 0; i < mode_count; i++)
@@ -1670,12 +1666,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
         ((nocap & mode_changes[i].nocaps) != mode_changes[i].nocaps))
       continue;
 
-    arg = "";
-
-    if ((cap & CAP_TS6) && mode_changes[i].id)
-      arg = mode_changes[i].id;
-    if (*arg == '\0')
-      arg = mode_changes[i].arg;
+    arg = mode_changes[i].id;
 
     /* if we're creeping past the buf size, we need to send it and make
      * another line for the other modes
@@ -1698,12 +1689,8 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
       nc = 0;
       mc = 0;
 
-      if ((cap & CAP_TS6) && source_p->id[0] != '\0')
-        mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
-                       (unsigned long)chptr->channelts, chptr->chname);
-      else
-        mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", source_p->name,
-                       chptr->chname);
+      mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
+                     (unsigned long)chptr->channelts, chptr->chname);
 
       pbl = 0;
       parabuf[0] = '\0';

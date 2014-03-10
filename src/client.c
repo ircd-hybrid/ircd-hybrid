@@ -948,12 +948,8 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
     }
   }
   else if (IsClient(source_p) && !HasFlag(source_p, FLAGS_KILLED))
-  {
-    sendto_server(from->from, CAP_TS6, NOCAPS,
-                  ":%s QUIT :%s", ID(source_p), comment);
-    sendto_server(from->from, NOCAPS, CAP_TS6,
-                  ":%s QUIT :%s", source_p->name, comment);
-  }
+    sendto_server(from->from, NOCAPS, NOCAPS, ":%s QUIT :%s",
+                  ID(source_p), comment);
 
   /* The client *better* be off all of the lists */
   assert(dlinkFind(&unknown_list, source_p) == NULL);

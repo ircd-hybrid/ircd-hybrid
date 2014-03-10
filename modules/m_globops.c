@@ -59,11 +59,8 @@ mo_globops(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_server(NULL, CAP_TS6, NOCAPS, ":%s GLOBOPS :%s",
+  sendto_server(NULL, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
                 ID(source_p), message);
-  sendto_server(NULL, NOCAPS, CAP_TS6, ":%s GLOBOPS :%s",
-                source_p->name, message);
-
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from: %s: %s",
                        source_p->name, message);
   return 0;
@@ -76,11 +73,8 @@ ms_globops(struct Client *client_p, struct Client *source_p,
   if (EmptyString(parv[1]))
     return 0;
 
-  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s GLOBOPS :%s",
+  sendto_server(client_p, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
                 ID(source_p), parv[1]);
-  sendto_server(client_p, NOCAPS, CAP_TS6, ":%s GLOBOPS :%s",
-                source_p->name, parv[1]);
-
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from: %s: %s",
                        source_p->name, parv[1]);
   return 0;

@@ -311,12 +311,9 @@ ms_gline(struct Client *client_p, struct Client *source_p,
   host   = parv[2];
   reason = parv[3];
 
-  sendto_server(source_p->from, CAP_GLN|CAP_TS6, NOCAPS,
+  sendto_server(source_p->from, CAP_GLN, NOCAPS,
                 ":%s GLINE %s %s :%s",
                 ID(source_p), user, host, reason);
-  sendto_server(source_p->from, CAP_GLN, CAP_TS6,
-                ":%s GLINE %s %s :%s",
-                source_p->name, user, host, reason);
 
   if (!ConfigFileEntry.glines)
     return 0;
@@ -430,12 +427,8 @@ mo_gline(struct Client *client_p, struct Client *source_p,
        user, host, reason, get_oper_name(source_p));
 
   /* 4 param version for hyb-7 servers */
-  sendto_server(NULL, CAP_GLN|CAP_TS6, NOCAPS,
-		":%s GLINE %s %s :%s",
+  sendto_server(NULL, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
 		ID(source_p), user, host, reason);
-  sendto_server(NULL, CAP_GLN, CAP_TS6,
-		":%s GLINE %s %s :%s",
-		source_p->name, user, host, reason);
   return 0;
 }
 
@@ -459,12 +452,9 @@ do_sungline(struct Client *source_p, const char *user,
 
   if (prop)
   {
-    sendto_server(source_p->from, CAP_ENCAP|CAP_TS6, NOCAPS,
+    sendto_server(source_p->from, CAP_ENCAP, NOCAPS,
                   ":%s ENCAP * GUNGLINE %s %s :%s",
                   ID(source_p), user, host, reason);
-    sendto_server(source_p->from, CAP_ENCAP, CAP_TS6,
-                  ":%s ENCAP * GUNGLINE %s %s :%s",
-                  source_p->name, user, host, reason);
   }
 }
 

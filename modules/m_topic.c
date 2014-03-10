@@ -86,13 +86,8 @@ m_topic(struct Client *client_p, struct Client *source_p,
                source_p->username, source_p->host);
       set_channel_topic(chptr, parv[2], topic_info, CurrentTime, 1);
 
-      sendto_server(client_p, CAP_TS6, NOCAPS,
-                    ":%s TOPIC %s :%s",
+      sendto_server(client_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
                     ID(source_p), chptr->chname,
-                    chptr->topic);
-      sendto_server(client_p, NOCAPS, CAP_TS6,
-                    ":%s TOPIC %s :%s",
-                    source_p->name, chptr->chname,
                     chptr->topic);
       sendto_channel_local(ALL_MEMBERS, 0,
                            chptr, ":%s!%s@%s TOPIC %s :%s",
@@ -152,11 +147,8 @@ ms_topic(struct Client *client_p, struct Client *source_p,
              source_p->username, source_p->host);
   set_channel_topic(chptr, parv[2], topic_info, CurrentTime, 0);
 
-  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s TOPIC %s :%s",
+  sendto_server(client_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
                 ID(source_p), chptr->chname,
-                chptr->topic);
-  sendto_server(client_p, NOCAPS, CAP_TS6, ":%s TOPIC %s :%s",
-                source_p->name, chptr->chname,
                 chptr->topic);
 
   if (!IsClient(source_p))

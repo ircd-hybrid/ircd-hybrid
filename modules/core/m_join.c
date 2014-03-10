@@ -212,14 +212,10 @@ m_join(struct Client *client_p, struct Client *source_p,
       chptr->mode.mode |= MODE_TOPICLIMIT;
       chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-      sendto_server(client_p, CAP_TS6, NOCAPS,
+      sendto_server(client_p, NOCAPS, NOCAPS,
                     ":%s SJOIN %lu %s +nt :@%s",
                     me.id, (unsigned long)chptr->channelts,
                     chptr->chname, source_p->id);
-      sendto_server(client_p, NOCAPS, CAP_TS6,
-                    ":%s SJOIN %lu %s +nt :@%s",
-                    me.name, (unsigned long)chptr->channelts,
-                    chptr->chname, source_p->name);
       /*
        * notify all other users on the new channel
        */
@@ -236,14 +232,10 @@ m_join(struct Client *client_p, struct Client *source_p,
     }
     else
     {
-      sendto_server(client_p, CAP_TS6, NOCAPS,
+      sendto_server(client_p, NOCAPS, NOCAPS,
                     ":%s JOIN %lu %s +",
                     source_p->id, (unsigned long)chptr->channelts,
                     chptr->chname);
-      sendto_server(client_p, NOCAPS, CAP_TS6,
-                    ":%s SJOIN %lu %s + :%s",
-                    me.name, (unsigned long)chptr->channelts,
-                    chptr->chname, source_p->name);
 
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            source_p->name, source_p->username,
@@ -427,13 +419,9 @@ ms_join(struct Client *client_p, struct Client *source_p,
                                   source_p->host, source_p->away);
   }
 
-  sendto_server(client_p, CAP_TS6, NOCAPS,
+  sendto_server(client_p, NOCAPS, NOCAPS,
                 ":%s JOIN %lu %s +",
                 ID(source_p), (unsigned long)chptr->channelts, chptr->chname);
-  sendto_server(client_p, NOCAPS, CAP_TS6,
-                ":%s SJOIN %lu %s + :%s",
-                source_p->servptr->name, (unsigned long)chptr->channelts,
-                chptr->chname, source_p->name);
   return 0;
 }
 
@@ -460,10 +448,8 @@ do_join_0(struct Client *client_p, struct Client *source_p)
   {
     chptr = ((struct Membership *)ptr->data)->chptr;
 
-    sendto_server(client_p, CAP_TS6, NOCAPS,
+    sendto_server(client_p, NOCAPS, NOCAPS,
                   ":%s PART %s", ID(source_p), chptr->chname);
-    sendto_server(client_p, NOCAPS, CAP_TS6,
-                  ":%s PART %s", source_p->name, chptr->chname);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname);

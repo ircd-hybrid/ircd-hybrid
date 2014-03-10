@@ -81,10 +81,8 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   char           keep_new_modes = 1;
   char           have_many_nicks = 0;
   int            lcount;
-  char           nick_prefix[4];
   char           uid_prefix[4];
-  char           *np, *up;
-  int            len_nick = 0;
+  char           *up = NULL;
   int            len_uid = 0;
   int            isnew = 0;
   int            buflen = 0;
@@ -92,9 +90,8 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   unsigned       int fl;
   char           *s;
   char           *sptr;
-  char nick_buf[IRCD_BUFSIZE]; /* buffer for modes and prefix */
-  char uid_buf[IRCD_BUFSIZE];  /* buffer for modes/prefixes for CAP_TS6 servers */
-  char           *nick_ptr, *uid_ptr;      /* pointers used for making the two mode/prefix buffers */
+  char uid_buf[IRCD_BUFSIZE];  /* buffer for modes/prefixes */
+  char           *uid_ptr;
   char           *p; /* pointer used making sjbuf */
   dlink_node     *m;
   const char *servername = (ConfigServerHide.hide_servers || IsHidden(source_p)) ?
@@ -268,19 +265,12 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   }
 
   if (parv[3][0] != '0' && keep_new_modes)
-  {
     channel_modes(chptr, source_p, modebuf, parabuf);
-  }
   else
   {
     modebuf[0] = '0';
     modebuf[1] = '\0';
   }
-
-  buflen = snprintf(nick_buf, sizeof(nick_buf), ":%s SJOIN %lu %s %s %s:",
-                    source_p->name, (unsigned long)tstosend,
-                    chptr->chname, modebuf, parabuf);
-  nick_ptr = nick_buf + buflen;
 
   buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
                     ID(source_p), (unsigned long)tstosend,
@@ -359,35 +349,26 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
       goto nextnick;
     }
 
-    len_nick = strlen(target_p->name);
     len_uid = strlen(ID(target_p));
-
-    np = nick_prefix;
     up = uid_prefix;
 
     if (keep_new_modes)
     {
       if (fl & CHFL_CHANOP)
       {
-        *np++ = '@';
         *up++  = '@';
-        len_nick++;
         len_uid++;
       }
 #ifdef HALFOPS
       if (fl & CHFL_HALFOP)
       {
-        *np++ = '%';
         *up++  = '%';
-        len_nick++;
         len_uid++;
       }
 #endif
       if (fl & CHFL_VOICE)
       {
-        *np++ = '+';
         *up++  = '+';
-        len_nick++;
         len_uid++;
       }
     }
@@ -398,23 +379,11 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
       else
         fl = 0;
     }
-    *np = *up = '\0';
-
-    if ((nick_ptr - nick_buf + len_nick) > (IRCD_BUFSIZE  - 2))
-    {
-      sendto_server(client_p, 0, CAP_TS6, "%s", nick_buf);
-
-      buflen = snprintf(nick_buf, sizeof(nick_buf), ":%s SJOIN %lu %s %s %s:",
-                        source_p->name, (unsigned long)tstosend,
-                        chptr->chname, modebuf, parabuf);
-      nick_ptr = nick_buf + buflen;
-    }
-
-    nick_ptr += sprintf(nick_ptr, "%s%s ", nick_prefix, target_p->name);
+    *up = '\0';
 
     if ((uid_ptr - uid_buf + len_uid) > (IRCD_BUFSIZE - 2))
     {
-      sendto_server(client_p, CAP_TS6, 0, "%s", uid_buf);
+      sendto_server(client_p, NOCAPS, NOCAPS, "%s", uid_buf);
 
       buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
                         ID(source_p), (unsigned long)tstosend,
@@ -535,7 +504,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   }
 
   *mbuf = '\0';
-  *(nick_ptr - 1) = '\0';
   *(uid_ptr - 1) = '\0';
 
   /*
@@ -581,16 +549,11 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   {
     target_p = m->data;
 
-    if (target_p == client_p)
-      continue;
-
-    if (IsCapable(target_p, CAP_TS6))
+    if (target_p != client_p)
       sendto_one(target_p, "%s", uid_buf);
-    else
-      sendto_one(target_p, "%s", nick_buf);
   }
 
-  if (HasID(source_p) && !keep_our_modes)
+  if (!keep_our_modes)
   {
     if (dlink_list_length(&chptr->banlist) > 0)
       remove_ban_list(chptr, client_p, &chptr->banlist, 'b');
@@ -773,8 +736,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
  *
  * inputs	- channel, source, list to remove, char of mode
  * outputs	- none
- * side effects	- given ban list is removed, modes are sent to local clients and
- *		  non-ts6 servers linked through another uplink other than source_p
+ * side effects	- given ban list is removed, modes are sent to local clients
  */
 static void
 remove_ban_list(struct Channel *chptr, struct Client *source_p,
@@ -804,10 +766,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
     {
       /* NUL-terminate and remove trailing space */
       *mbuf = *(pbuf - 1) = '\0';
-      sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s",
-               lmodebuf, lparabuf);
-      sendto_server(source_p, NOCAPS, CAP_TS6, "%s %s", lmodebuf, lparabuf);
-
+      sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", lmodebuf, lparabuf);
       cur_len = mlen;
       mbuf = lmodebuf + mlen;
       pbuf = lparabuf;
@@ -825,7 +784,6 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 
   *mbuf = *(pbuf - 1) = '\0';
   sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", lmodebuf, lparabuf);
-  sendto_server(source_p, NOCAPS, CAP_TS6, "%s %s", lmodebuf, lparabuf);
 }
 
 static struct Message sjoin_msgtab =

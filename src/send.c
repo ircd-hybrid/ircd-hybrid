@@ -158,13 +158,9 @@ send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *b
                          from->name, from->username, from->host,
                          to->from->name);
 
-    sendto_server(NULL, CAP_TS6, NOCAPS,
+    sendto_server(NULL, NOCAPS, NOCAPS,
                   ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
                   me.id, to->name, me.name, to->name,
-                  to->username, to->host, to->from->name);
-    sendto_server(NULL, NOCAPS, CAP_TS6,
-                  ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
-                  me.name, to->name, me.name, to->name,
                   to->username, to->host, to->from->name);
 
     AddFlag(to, FLAGS_KILLED);
@@ -774,18 +770,13 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 {
   va_list args;
   dlink_node *ptr = NULL;
-  struct dbuf_block *buff_suid, *buff_name;
+  struct dbuf_block *buff_suid;
 
-  buff_suid = dbuf_alloc(), buff_name = dbuf_alloc();
+  buff_suid = dbuf_alloc();
 
   va_start(args, pattern);
   dbuf_put_fmt(buff_suid, ":%s ", ID(source_p));
   dbuf_put_args(buff_suid, pattern, args);
-  va_end(args);
-
-  va_start(args, pattern);
-  dbuf_put_fmt(buff_name, ":%s ", source_p->name);
-  dbuf_put_args(buff_name, pattern, args);
   va_end(args);
 
   ++current_serial;
@@ -812,15 +803,11 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
       if (!IsCapable(target_p->from, cap))
         continue;
 
-      if (HasID(target_p->from))
-        send_message_remote(target_p->from, source_p, buff_suid);
-      else
-        send_message_remote(target_p->from, source_p, buff_name);
+      send_message_remote(target_p->from, source_p, buff_suid);
     }
   }
 
   dbuf_ref_free(buff_suid);
-  dbuf_ref_free(buff_name);
 }
 
 /* sendto_anywhere()
@@ -1051,24 +1038,12 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
                         const char *pattern, ...)
 {
   va_list args;
-  int have_uid = 0;
   dlink_node *ptr = NULL;
-  struct dbuf_block *uid_buffer, *nick_buffer;
-
-  uid_buffer = dbuf_alloc(), nick_buffer = dbuf_alloc();
-
-  if (HasID(source_p))
-  {
-    have_uid = 1;
-    va_start(args, pattern);
-    dbuf_put_fmt(uid_buffer, ":%s KILL %s :", ID(&me), ID(source_p));
-    send_format(uid_buffer, pattern, args);
-    va_end(args);
-  }
+  struct dbuf_block *uid_buffer = dbuf_alloc();
 
   va_start(args, pattern);
-  dbuf_put_fmt(nick_buffer, ":%s KILL %s :", me.name, source_p->name);
-  send_format(nick_buffer, pattern, args);
+  dbuf_put_fmt(uid_buffer, ":%s KILL %s :", ID(&me), ID(source_p));
+  send_format(uid_buffer, pattern, args);
   va_end(args);
 
   DLINK_FOREACH(ptr, serv_list.head)
@@ -1080,12 +1055,8 @@ kill_client_serv_butone(struct Client *one, struct Client *source_p,
     if (IsDefunct(client_p))
       continue;
 
-    if (have_uid && IsCapable(client_p, CAP_TS6))
-      send_message(client_p, uid_buffer);
-    else
-      send_message(client_p, nick_buffer);
+    send_message(client_p, uid_buffer);
   }
 
   dbuf_ref_free(uid_buffer);
-  dbuf_ref_free(nick_buffer);
 }

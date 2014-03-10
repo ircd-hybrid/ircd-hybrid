@@ -59,10 +59,8 @@ mo_wallops(struct Client *client_p, struct Client *source_p,
   }
 
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
-  sendto_server(NULL, CAP_TS6, NOCAPS,
-                ":%s WALLOPS :%s", ID(source_p), message);
-  sendto_server(NULL, NOCAPS, CAP_TS6,
-                ":%s WALLOPS :%s", source_p->name, message);
+  sendto_server(NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s",
+                ID(source_p), message);
   return 0;
 }
 
@@ -85,10 +83,8 @@ ms_wallops(struct Client *client_p, struct Client *source_p,
   else
     sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
 
-  sendto_server(client_p, CAP_TS6, NOCAPS,
-                ":%s WALLOPS :%s", ID(source_p), message);
-  sendto_server(client_p, NOCAPS, CAP_TS6,
-                ":%s WALLOPS :%s", source_p->name, message);
+  sendto_server(client_p, NOCAPS, NOCAPS, ":%s WALLOPS :%s",
+                ID(source_p), message);
   return 0;
 }
 

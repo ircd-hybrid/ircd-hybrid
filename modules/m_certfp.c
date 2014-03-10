@@ -58,10 +58,8 @@ ms_certfp(struct Client *source_p, struct Client *client_p,
   MyFree(source_p->certfp);
   source_p->certfp = strdup(parv[1]);
 
-  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s CERTFP %s",
+  sendto_server(client_p, NOCAPS, NOCAPS, ":%s CERTFP %s",
                 ID(source_p), parv[1]);
-  sendto_server(client_p, NOCAPS, CAP_TS6, ":%s CERTFP %s",
-                source_p->name, parv[1]);
   return 0;
 }
 

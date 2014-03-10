@@ -576,41 +576,22 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   }
 
   if (IsCapable(client_p, CAP_SVS))
-  {
-    if (HasID(target_p) && IsCapable(client_p, CAP_TS6))
-      sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s %s :%s",
-                 target_p->servptr->id,
-                 target_p->name, target_p->hopcount + 1,
-                 (unsigned long) target_p->tsinfo,
-                 ubuf, target_p->username, target_p->host,
-                 (MyClient(target_p) && IsIPSpoof(target_p)) ?
-                 "0" : target_p->sockhost, target_p->id,
-                 target_p->svid, target_p->info);
-    else
-      sendto_one(client_p, "NICK %s %d %lu %s %s %s %s %s :%s",
-                 target_p->name, target_p->hopcount + 1,
-                 (unsigned long) target_p->tsinfo,
-                 ubuf, target_p->username, target_p->host,
-                 target_p->servptr->name, target_p->svid,
-                 target_p->info);
-  }
+    sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s %s :%s",
+               target_p->servptr->id,
+               target_p->name, target_p->hopcount + 1,
+               (unsigned long) target_p->tsinfo,
+               ubuf, target_p->username, target_p->host,
+               (MyClient(target_p) && IsIPSpoof(target_p)) ?
+               "0" : target_p->sockhost, target_p->id,
+               target_p->svid, target_p->info);
   else
-  {
-    if (HasID(target_p) && IsCapable(client_p, CAP_TS6))
-      sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s :%s",
-                 target_p->servptr->id,
-                 target_p->name, target_p->hopcount + 1,
-                 (unsigned long) target_p->tsinfo,
-                 ubuf, target_p->username, target_p->host,
-                 (MyClient(target_p) && IsIPSpoof(target_p)) ?
-                 "0" : target_p->sockhost, target_p->id, target_p->info);
-    else
-      sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
-                 target_p->name, target_p->hopcount + 1,
-                 (unsigned long) target_p->tsinfo,
-                 ubuf, target_p->username, target_p->host,
-                 target_p->servptr->name, target_p->info);
-  }
+    sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s :%s",
+               target_p->servptr->id,
+               target_p->name, target_p->hopcount + 1,
+               (unsigned long) target_p->tsinfo,
+               ubuf, target_p->username, target_p->host,
+               (MyClient(target_p) && IsIPSpoof(target_p)) ?
+               "0" : target_p->sockhost, target_p->id, target_p->info);
 
   if (!EmptyString(target_p->certfp))
     sendto_one(client_p, ":%s CERTFP %s",
@@ -737,8 +718,7 @@ server_estab(struct Client *client_p)
   sendto_one(client_p, "SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN,
              (unsigned long)CurrentTime);
 
-  /* assumption here is if they passed the correct TS version, they also passed an SID */
-  if (IsCapable(client_p, CAP_TS6))
+  if (HasID(client_p))
     hash_add_id(client_p);
 
   /* XXX Does this ever happen? I don't think so -db */
@@ -840,16 +820,10 @@ server_estab(struct Client *client_p)
     if (target_p == client_p)
       continue;
 
-    if (IsCapable(target_p, CAP_TS6) && HasID(client_p))
-      sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
-                 me.id, client_p->name, client_p->id,
-                 IsHidden(client_p) ? "(H) " : "",
-                 client_p->info);
-    else
-      sendto_one(target_p,":%s SERVER %s 2 :%s%s",
-                 me.name, client_p->name,
-                 IsHidden(client_p) ? "(H) " : "",
-                 client_p->info);
+    sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
+               me.id, client_p->name, client_p->id,
+               IsHidden(client_p) ? "(H) " : "",
+               client_p->info);
   }
 
   /*
@@ -879,22 +853,10 @@ server_estab(struct Client *client_p)
     if (IsMe(target_p) || target_p->from == client_p)
       continue;
 
-    if (IsCapable(client_p, CAP_TS6))
-    {
-      if (HasID(target_p))
-        sendto_one(client_p, ":%s SID %s %d %s :%s%s",
-                   ID(target_p->servptr), target_p->name, target_p->hopcount+1,
-                   target_p->id, IsHidden(target_p) ? "(H) " : "",
-                   target_p->info);
-      else  /* introducing non-ts6 server */
-        sendto_one(client_p, ":%s SERVER %s %d :%s%s",
-                   ID(target_p->servptr), target_p->name, target_p->hopcount+1,
-                   IsHidden(target_p) ? "(H) " : "", target_p->info);
-    }
-    else
-      sendto_one(client_p, ":%s SERVER %s %d :%s%s",
-                 target_p->servptr->name, target_p->name, target_p->hopcount+1,
-                 IsHidden(target_p) ? "(H) " : "", target_p->info);
+    sendto_one(client_p, ":%s SID %s %d %s :%s%s",
+               ID(target_p->servptr), target_p->name, target_p->hopcount+1,
+               target_p->id, IsHidden(target_p) ? "(H) " : "",
+               target_p->info);
 
     if (HasFlag(target_p, FLAGS_EOB))
       sendto_one(client_p, ":%s EOB", ID_or_name(target_p, client_p));

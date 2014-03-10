@@ -92,12 +92,9 @@ ms_tburst(struct Client *client_p, struct Client *source_p,
 
     set_channel_topic(chptr, topic, setby, remote_topic_ts, !!MyClient(source_p));
 
-    sendto_server(source_p, CAP_TBURST|CAP_TS6, NOCAPS,
+    sendto_server(source_p, CAP_TBURST, NOCAPS,
                   ":%s TBURST %s %s %s %s :%s",
                   ID(source_p), parv[1], parv[2], parv[3], setby, topic);
-    sendto_server(source_p, CAP_TBURST, CAP_TS6,
-                  ":%s TBURST %s %s %s %s :%s",
-                  source_p->name, parv[1], parv[2], parv[3], setby, topic);
 
     if (topic_differs)
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :%s",

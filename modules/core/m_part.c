@@ -78,20 +78,16 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
        (source_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
         < CurrentTime))))
   {
-    sendto_server(source_p->from, CAP_TS6, NOCAPS, ":%s PART %s :%s",
+    sendto_server(source_p->from, NOCAPS, NOCAPS, ":%s PART %s :%s",
                   ID(source_p), chptr->chname, reason);
-    sendto_server(source_p->from, NOCAPS, CAP_TS6, ":%s PART %s :%s",
-                  source_p->name, chptr->chname, reason);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s :%s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname, reason);
   }
   else
   {
-    sendto_server(source_p->from, CAP_TS6, NOCAPS, ":%s PART %s",
+    sendto_server(source_p->from, NOCAPS, NOCAPS, ":%s PART %s",
                   ID(source_p), chptr->chname);
-    sendto_server(source_p->from, NOCAPS, CAP_TS6, ":%s PART %s",
-                  source_p->name, chptr->chname);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname);

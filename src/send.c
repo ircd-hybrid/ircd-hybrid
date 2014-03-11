@@ -398,27 +398,24 @@ sendto_channel_butone(struct Client *one, struct Client *from,
                       struct Channel *chptr, unsigned int type,
                       const char *pattern, ...)
 {
-  va_list alocal, aremote, auid;
-  struct dbuf_block *local_buf, *remote_buf, *uid_buf;
+  va_list alocal, aremote;
+  struct dbuf_block *local_buf, *remote_buf;
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  local_buf = dbuf_alloc(), remote_buf = dbuf_alloc(), uid_buf = dbuf_alloc();
+  local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
 
   if (IsServer(from))
     dbuf_put_fmt(local_buf, ":%s ", from->name);
   else
     dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
 
-  dbuf_put_fmt(remote_buf, ":%s ", from->name);
-  dbuf_put_fmt(uid_buf, ":%s ", ID(from));
+  dbuf_put_fmt(remote_buf, ":%s ", ID(from));
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
-  va_start(auid, pattern);
   send_format(local_buf, pattern, alocal);
   send_format(remote_buf, pattern, aremote);
-  send_format(uid_buf, pattern, auid);
-  va_end(auid);
+
   va_end(aremote);
   va_end(alocal);
 
@@ -446,7 +443,6 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
   dbuf_ref_free(local_buf);
   dbuf_ref_free(remote_buf);
-  dbuf_ref_free(uid_buf);
 }
 
 /* sendto_server()
@@ -699,7 +695,7 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
 
   dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
-  dbuf_put_fmt(remote_buf, ":%s ", from->name);
+  dbuf_put_fmt(remote_buf, ":%s ", ID(from));
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
@@ -1023,7 +1019,7 @@ kill_client(struct Client *client_p, struct Client *diedie,
   dbuf_ref_free(buffer);
 }
 
-/* kill_client_ll_serv_butone()
+/* kill_client_serv_butone()
  *
  * inputs	- pointer to client to not send to
  *		- pointer to client to kill

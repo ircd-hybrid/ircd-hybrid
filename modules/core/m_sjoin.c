@@ -544,14 +544,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   if (parv[4 + args][0] == '\0')
     return 0;
 
-  /* relay the SJOIN to other servers */
-  DLINK_FOREACH(m, serv_list.head)
-  {
-    target_p = m->data;
-
-    if (target_p != client_p)
-      sendto_one(target_p, "%s", uid_buf);
-  }
+  sendto_server(client_p, NOCAPS, NOCAPS, "%s", uid_buf);
 
   if (!keep_our_modes)
   {

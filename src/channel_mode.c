@@ -55,9 +55,9 @@ static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
 static unsigned int simple_modes_mask;  /* bit mask of simple modes already set */
 #ifdef HALFOPS
-static int channel_capabs[] = { CAP_TS6, CAP_HOPS };
+static int channel_capabs[] = { CAP_HOPS };
 #else
-static int channel_capabs[] = { CAP_TS6 };
+static int channel_capabs[] = { 0 };
 #endif
 static struct ChCapCombo chcap_combos[NCHCAP_COMBOS];
 extern mp_pool_t *ban_pool;
@@ -1668,17 +1668,11 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 
     arg = mode_changes[i].id;
 
-    /* if we're creeping past the buf size, we need to send it and make
+    /*
+     * If we're creeping past the buf size, we need to send it and make
      * another line for the other modes
-     * XXX - this could give away server topology with uids being
-     * different lengths, but not much we can do, except possibly break
-     * them as if they were the longest of the nick or uid at all times,
-     * which even then won't work as we don't always know the uid -A1kmm.
      */
-    if (arg != NULL)
-      arglen = strlen(arg);
-    else
-      arglen = 0;
+    arglen = strlen(arg);
 
     if ((mc == MAXMODEPARAMS) ||
         ((arglen + mbl + pbl + 2) > IRCD_BUFSIZE) ||

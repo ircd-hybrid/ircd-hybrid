@@ -243,6 +243,7 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
     if (match(target_p->name, parv[server]))
       parv[server] = target_p->name;
 
+    /* This is a little kludgy but should work... */
     sendto_one(target_p, command, ID_or_name(source_p, target_p),
                parv[1], parv[2], parv[3], parv[4],
                parv[5], parv[6], parv[7], parv[8]);
@@ -809,22 +810,9 @@ server_estab(struct Client *client_p)
 
   fd_note(&client_p->localClient->fd, "Server: %s", client_p->name);
 
-  /* Old sendto_serv_but_one() call removed because we now
-  ** need to send different names to different servers
-  ** (domain name matching) Send new server to other servers.
-  */
-  DLINK_FOREACH(ptr, serv_list.head)
-  {
-    target_p = ptr->data;
-
-    if (target_p == client_p)
-      continue;
-
-    sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
-               me.id, client_p->name, client_p->id,
-               IsHidden(client_p) ? "(H) " : "",
-               client_p->info);
-  }
+  sendto_server(client_p, NOCAPS, NOCAPS, ":%s SID %s 2 %s :%s%s",
+                me.id, client_p->name, client_p->id,
+                IsHidden(client_p) ? "(H) " : "", client_p->info);
 
   /*
    * Pass on my client information to the new server

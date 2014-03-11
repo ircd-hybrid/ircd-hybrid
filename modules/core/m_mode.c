@@ -158,9 +158,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  *		  parv[3] = type of ban to add ('b' 'I' or 'e')
  *		  parv[4] = space delimited list of masks to add
  * outputs	- none
- * side effects	- propagates unchanged bmask line to CAP_TS6 servers,
- *		  sends plain modes to the others.  nothing is sent
- *		  to the server the issuing server is connected through
+ * side effects	- propagates unchanged bmask line to servers,
  */
 static int
 ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[])

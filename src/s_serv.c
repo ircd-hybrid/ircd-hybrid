@@ -658,7 +658,6 @@ make_server(struct Client *client_p)
 void
 server_estab(struct Client *client_p)
 {
-  struct Client *target_p;
   struct MaskItem *conf = NULL;
   char *host;
   const char *inpath;
@@ -835,7 +834,7 @@ server_estab(struct Client *client_p)
 
   DLINK_FOREACH_PREV(ptr, global_serv_list.tail)
   {
-    target_p = ptr->data;
+    struct Client *target_p = ptr->data;
 
     /* target_p->from == target_p for target_p == client_p */
     if (IsMe(target_p) || target_p->from == client_p)

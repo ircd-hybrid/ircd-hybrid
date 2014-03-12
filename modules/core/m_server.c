@@ -68,7 +68,7 @@ set_server_gecos(struct Client *client_p, const char *info)
 /* mr_server()
  *  parv[0] = command
  *  parv[1] = servername
- *  parv[2] = serverinfo/hopcount
+ *  parv[2] = hopcount
  *  parv[3] = serverinfo
  */
 static int
@@ -237,7 +237,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
 /* ms_sid()
  *  parv[0] = command
  *  parv[1] = servername
- *  parv[2] = serverinfo/hopcount
+ *  parv[2] = hopcount
  *  parv[3] = sid of new server
  *  parv[4] = serverinfo
  */
@@ -245,12 +245,12 @@ static int
 ms_sid(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
-  struct Client *target_p;
-  struct MaskItem *conf = NULL;
+  dlink_node *ptr = NULL;
+  struct Client *target_p = NULL;
+  const struct MaskItem *conf = NULL;
   int hlined = 0;
   int llined = 0;
-  dlink_node *ptr = NULL;
-  int hop;
+  int hop = 0;
 
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
@@ -332,19 +332,22 @@ ms_sid(struct Client *client_p, struct Client *source_p,
    * leaf. If so, close the link.
    */
   DLINK_FOREACH(ptr, conf->leaf_list.head)
+  {
     if (!match(ptr->data, parv[1]))
     {
       llined = 1;
       break;
     }
+  }
 
   DLINK_FOREACH(ptr, conf->hub_list.head)
+  {
     if (!match(ptr->data, parv[1]))
     {
       hlined = 1;
       break;
     }
-
+  }
 
   /* Ok, this way this works is
    *

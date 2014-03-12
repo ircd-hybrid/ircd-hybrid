@@ -817,7 +817,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
-  struct Client *targ_p;
+  struct Client *target_p;
   struct Membership *member;
 
   if (alev < CHACCESS_HALFOP)
@@ -835,12 +835,12 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 
   opnick = parv[(*parn)++];
 
-  if ((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
+  if ((target_p = find_chasing(source_p, opnick, NULL)) == NULL)
     return;
-  if (!IsClient(targ_p))
+  if (!IsClient(target_p))
     return;
 
-  if ((member = find_channel_link(targ_p, chptr)) == NULL)
+  if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
       sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, opnick, chptr->chname);
@@ -860,9 +860,9 @@ chm_voice(struct Client *client_p, struct Client *source_p,
   mode_changes[mode_count].letter = 'v';
   mode_changes[mode_count].dir = dir;
   mode_changes[mode_count].mems = ALL_MEMBERS;
-  mode_changes[mode_count].id = targ_p->id;
-  mode_changes[mode_count].arg = targ_p->name;
-  mode_changes[mode_count++].client = targ_p;
+  mode_changes[mode_count].id = target_p->id;
+  mode_changes[mode_count].arg = target_p->name;
+  mode_changes[mode_count++].client = target_p;
 
   if (dir == MODE_ADD)
     AddMemberFlag(member, CHFL_VOICE);
@@ -877,7 +877,7 @@ chm_hop(struct Client *client_p, struct Client *source_p,
        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
-  struct Client *targ_p;
+  struct Client *target_p;
   struct Membership *member;
 
   /* *sigh* - dont allow halfops to set +/-h, they could fully control a
@@ -909,12 +909,12 @@ chm_hop(struct Client *client_p, struct Client *source_p,
 
   opnick = parv[(*parn)++];
 
-  if ((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
+  if ((target_p = find_chasing(source_p, opnick, NULL)) == NULL)
     return;
-  if (!IsClient(targ_p))
+  if (!IsClient(target_p))
     return;
 
-  if ((member = find_channel_link(targ_p, chptr)) == NULL)
+  if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
       sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, opnick, chptr->chname);
@@ -934,9 +934,9 @@ chm_hop(struct Client *client_p, struct Client *source_p,
   mode_changes[mode_count].letter = 'h';
   mode_changes[mode_count].dir = dir;
   mode_changes[mode_count].mems = ALL_MEMBERS;
-  mode_changes[mode_count].id = targ_p->id;
-  mode_changes[mode_count].arg = targ_p->name;
-  mode_changes[mode_count++].client = targ_p;
+  mode_changes[mode_count].id = target_p->id;
+  mode_changes[mode_count].arg = target_p->name;
+  mode_changes[mode_count++].client = target_p;
 
   if (dir == MODE_ADD)
   {
@@ -954,7 +954,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
-  struct Client *targ_p;
+  struct Client *target_p;
   struct Membership *member;
   int caps = 0;
 
@@ -973,12 +973,12 @@ chm_op(struct Client *client_p, struct Client *source_p,
 
   opnick = parv[(*parn)++];
 
-  if ((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
+  if ((target_p = find_chasing(source_p, opnick, NULL)) == NULL)
     return;
-  if (!IsClient(targ_p))
+  if (!IsClient(target_p))
     return;
 
-  if ((member = find_channel_link(targ_p, chptr)) == NULL)
+  if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
       sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, opnick, chptr->chname);
@@ -998,9 +998,9 @@ chm_op(struct Client *client_p, struct Client *source_p,
   mode_changes[mode_count].letter = 'o';
   mode_changes[mode_count].dir = dir;
   mode_changes[mode_count].mems = ALL_MEMBERS;
-  mode_changes[mode_count].id = targ_p->id;
-  mode_changes[mode_count].arg = targ_p->name;
-  mode_changes[mode_count++].client = targ_p;
+  mode_changes[mode_count].id = target_p->id;
+  mode_changes[mode_count].arg = target_p->name;
+  mode_changes[mode_count++].client = target_p;
 
   if (dir == MODE_ADD)
   {

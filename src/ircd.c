@@ -479,9 +479,6 @@ main(int argc, char *argv[])
   me.localClient = &meLocalUser;
   dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
-  /* Initialise the channel capability usage counts... */
-  init_chcap_usage_counts();
-
   ConfigFileEntry.dpath      = DPATH;
   ConfigFileEntry.configfile = CPATH;    /* Server configuration file */
   ConfigFileEntry.klinefile  = KPATH;    /* Server kline file         */

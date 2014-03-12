@@ -169,7 +169,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
     if (ms->flags & CHFL_CHANOP)
       tlen++;
 #ifdef HALFOPS
-    else if (ms->flags & CHFL_HALFOP)
+    if (ms->flags & CHFL_HALFOP)
       tlen++;
 #endif
     if (ms->flags & CHFL_VOICE)
@@ -185,10 +185,11 @@ send_members(struct Client *client_p, struct Channel *chptr,
       t = start;
     }
 
-    if ((ms->flags & (CHFL_CHANOP | CHFL_HALFOP)))
-      *t++ = (!(ms->flags & CHFL_CHANOP) && IsCapable(client_p, CAP_HOPS)) ?
-        '%' : '@';
-    if ((ms->flags & CHFL_VOICE))
+    if (ms->flags & CHFL_CHANOP)
+      *t++ = '@';
+    if (ms->flags & CHFL_HALFOP)
+      *t++ = '%';
+    if (ms->flags & CHFL_VOICE)
       *t++ = '+';
 
     strcpy(t, ID(ms->client_p));

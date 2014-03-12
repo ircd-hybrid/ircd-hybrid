@@ -218,16 +218,14 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
   const dlink_node *lp = NULL;
   char pbuf[IRCD_BUFSIZE];
   int tlen, mlen, cur_len, count = 0;
-  char *mp = NULL, *pp = pbuf;
+  char *pp = pbuf;
 
   if (top == NULL || top->length == 0)
     return;
 
   mlen = snprintf(buf, sizeof(buf), ":%s BMASK %lu %s %c :", me.id,
                   (unsigned long)chptr->channelts, chptr->chname, flag);
-
   cur_len = mlen;
-  mp = buf + mlen;
 
   DLINK_FOREACH(lp, top->head)
   {
@@ -246,7 +244,6 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
       sendto_one(client_p, "%s%s", buf, pbuf);
 
       cur_len = mlen;
-      mp = buf + mlen;
       pp = pbuf;
       count = 0;
     }

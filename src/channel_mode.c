@@ -956,7 +956,6 @@ chm_op(struct Client *client_p, struct Client *source_p,
   const char *opnick = NULL;
   struct Client *target_p;
   struct Membership *member;
-  int caps = 0;
 
   if (alev < CHACCESS_CHANOP)
   {

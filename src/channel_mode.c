@@ -42,9 +42,6 @@
 
 /* 10 is a magic number in hybrid 6 NFI where it comes from -db */
 #define BAN_FUDGE       10
-#define NCHCAPS         (sizeof(channel_capabs)/sizeof(int))
-#define NCHCAP_COMBOS   (1 << NCHCAPS)
-
 
 static char nuh_mask[MAXPARA][IRCD_BUFSIZE];
 /* some buffers for rebuilding channel/nick lists with ,'s */

@@ -1495,14 +1495,21 @@ send_mode_changes_server(struct Client *client_p, struct Client *source_p,
     if (mode_changes[i].letter == 0) /* XXX: can it ever happen? */
       continue;
 
-    arg = mode_changes[i].id;
+    if (mode_changes[i].id)
+      arg = mode_changes[i].id;
+    else
+      arg = mode_changes[i].arg;
+
+    if (arg != NULL)
+      arglen = strlen(arg);
+    else
+      arglen = 0;
+
 
     /*
      * If we're creeping past the buf size, we need to send it and make
      * another line for the other modes
      */
-    arglen = strlen(arg);
-
     if ((mc == MAXMODEPARAMS) ||
         ((arglen + mbl + pbl + 2) > IRCD_BUFSIZE) ||
         (pbl + arglen + BAN_FUDGE) >= MODEBUFLEN)

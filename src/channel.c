@@ -50,8 +50,6 @@ static mp_pool_t *member_pool = NULL;
 static mp_pool_t *channel_pool = NULL;
 
 static char buf[IRCD_BUFSIZE];
-static char modebuf[MODEBUFLEN];
-static char parabuf[MODEBUFLEN];
 
 
 /*! \brief Initializes the channel blockheap, adds known channel CAPAB
@@ -149,7 +147,7 @@ remove_user_from_channel(struct Membership *member)
  */
 static void
 send_members(struct Client *client_p, struct Channel *chptr,
-             char *lmodebuf, char *lparabuf)
+             char *modebuf, char *parabuf)
 {
   const dlink_node *ptr = NULL;
   int tlen;              /* length of text to append */
@@ -158,7 +156,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
   start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %lu %s %s %s:",
                              ID_or_name(&me, client_p),
                              (unsigned long)chptr->channelts,
-                             chptr->chname, lmodebuf, lparabuf);
+                             chptr->chname, modebuf, parabuf);
 
   DLINK_FOREACH(ptr, chptr->members.head)
   {
@@ -265,7 +263,9 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
 void
 send_channel_modes(struct Client *client_p, struct Channel *chptr)
 {
-  *modebuf = *parabuf = '\0';
+  char modebuf[MODEBUFLEN] = "";
+  char parabuf[MODEBUFLEN] = "";
+
   channel_modes(chptr, client_p, modebuf, parabuf);
   send_members(client_p, chptr, modebuf, parabuf);
 

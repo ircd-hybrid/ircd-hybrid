@@ -804,7 +804,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
         case 'o':
           if (what == MODE_ADD)
           {
-            if (IsServer(source_p->from) && !HasUMode(source_p, UMODE_OPER))
+            if (!MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
             {
               ++Count.oper;
               SetOper(source_p);

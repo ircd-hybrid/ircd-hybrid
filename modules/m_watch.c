@@ -45,17 +45,17 @@
  * ERR_TOOMANYWATCH - Take a guess :>  Too many WATCH entries.
  */
 static void
-show_watch(struct Client *client_p, const char *name,
+show_watch(struct Client *source_p, const char *name,
            enum irc_numerics rpl1, enum irc_numerics rpl2)
 {
   const struct Client *target_p = NULL;
 
-  if ((target_p = find_person(client_p, name)))
-    sendto_one_numeric(client_p, &me, rpl1,
+  if ((target_p = find_person(source_p, name)))
+    sendto_one_numeric(source_p, &me, rpl1,
                        target_p->name, target_p->username,
                        target_p->host, target_p->tsinfo);
   else
-    sendto_one_numeric(client_p, &me, rpl2, name, "*", "*", 0);
+    sendto_one_numeric(source_p, &me, rpl2, name, "*", "*", 0);
 }
 
 /*
@@ -65,7 +65,7 @@ show_watch(struct Client *client_p, const char *name,
  * parv[1] = watch options
  */
 static int
-m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_watch(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *ptr = NULL;
   char *s = NULL;

@@ -136,8 +136,7 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
  *      parv[1] = servername
  */
 static int
-mo_etrace(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+mo_etrace(struct Client *source_p, int parc, char *parv[])
 {
   do_etrace(source_p, parc, parv);
   return 0;

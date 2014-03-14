@@ -44,8 +44,6 @@
 
 /*! \brief SVSNICK command handler (called by services)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -58,19 +56,18 @@
  *      - parv[3] = timestamp
  */
 static int
-ms_svsnick(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_svsnick(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL, *exists_p = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE) || !valid_nickname(parv[2], 1))
     return 0;
 
-  if (hunt_server(client_p, source_p, ":%s SVSNICK %s %s :%s",
+  if (hunt_server(source_p, ":%s SVSNICK %s %s :%s",
                   1, parc, parv) != HUNTED_ISME)
     return 0;
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
   assert(MyClient(target_p));

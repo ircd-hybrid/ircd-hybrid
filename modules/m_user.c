@@ -76,8 +76,7 @@ do_local_user(struct Client *source_p,
 **      parv[4] = users real name info
 */
 static int
-mr_user(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mr_user(struct Client *source_p, int parc, char *parv[])
 {
   char *p = NULL;
 

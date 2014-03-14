@@ -103,8 +103,6 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
 
 /*! \brief ACCEPT command handler
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -115,8 +113,7 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
  *      - parv[1] = list of masks to be accepted or removed (optional)
  */
 static int
-m_accept(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_accept(struct Client *source_p, int parc, char *parv[])
 {
   char *mask = NULL;
   char *p = NULL;

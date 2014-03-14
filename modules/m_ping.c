@@ -44,8 +44,7 @@
 **      parv[2] = destination
 */
 static int
-m_ping(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_ping(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
   char *origin, *destination;
@@ -68,8 +67,8 @@ m_ping(struct Client *client_p, struct Client *source_p,
 
   if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
   {
-    /* We're sending it across servers.. origin == client_p->name --fl_ */
-    origin = client_p->name;
+    /* We're sending it across servers.. origin == source_p->name --fl_ */
+    origin = source_p->name;
 
     if ((target_p = hash_find_server(destination)))
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
@@ -84,8 +83,7 @@ m_ping(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-ms_ping(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_ping(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
   const char *origin, *destination;
@@ -108,7 +106,7 @@ ms_ping(struct Client *client_p, struct Client *source_p,
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
   else
-    sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, client_p),
+    sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, source_p),
                (destination) ? destination : me.name, origin);
   return 0;
 }

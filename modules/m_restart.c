@@ -41,8 +41,7 @@
  *
  */
 static int
-mo_restart(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_restart(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
 

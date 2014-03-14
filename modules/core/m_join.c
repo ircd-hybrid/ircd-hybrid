@@ -41,7 +41,7 @@
 #include "resv.h"
 
 
-static void do_join_0(struct Client *, struct Client *);
+static void do_join_0(struct Client *);
 
 static void set_final_mode(struct Mode *, struct Mode *);
 static void remove_our_modes(struct Channel *, struct Client *);
@@ -54,7 +54,7 @@ static char *mbuf;
 
 /* last0() stolen from ircu */
 static char *
-last0(struct Client *client_p, struct Client *source_p, char *chanlist)
+last0(struct Client *source_p, char *chanlist)
 {
   char *p;
   int join0 = 0;
@@ -80,7 +80,7 @@ last0(struct Client *client_p, struct Client *source_p, char *chanlist)
   }
 
   if (join0)
-    do_join_0(client_p, source_p);
+    do_join_0(source_p);
 
   return chanlist;
 }
@@ -91,8 +91,7 @@ last0(struct Client *client_p, struct Client *source_p, char *chanlist)
  *      parv[2] = channel password (key)
  */
 static int
-m_join(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_join(struct Client *source_p, int parc, char *parv[])
 {
   char *p = NULL;
   char *key_list = NULL;
@@ -109,10 +108,8 @@ m_join(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  assert(client_p == source_p);
-
   key_list = parv[2];
-  chan_list = last0(client_p, source_p, parv[1]);
+  chan_list = last0(source_p, parv[1]);
 
   for (chan = strtoken(&p, chan_list, ","); chan;
        chan = strtoken(&p,      NULL, ","))
@@ -212,7 +209,7 @@ m_join(struct Client *client_p, struct Client *source_p,
       chptr->mode.mode |= MODE_TOPICLIMIT;
       chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-      sendto_server(client_p, NOCAPS, NOCAPS,
+      sendto_server(source_p, NOCAPS, NOCAPS,
                     ":%s SJOIN %lu %s +nt :@%s",
                     me.id, (unsigned long)chptr->channelts,
                     chptr->chname, source_p->id);
@@ -232,7 +229,7 @@ m_join(struct Client *client_p, struct Client *source_p,
     }
     else
     {
-      sendto_server(client_p, NOCAPS, NOCAPS,
+      sendto_server(source_p, NOCAPS, NOCAPS,
                     ":%s JOIN %lu %s +",
                     source_p->id, (unsigned long)chptr->channelts,
                     chptr->chname);
@@ -279,8 +276,7 @@ m_join(struct Client *client_p, struct Client *source_p,
  *		  and use it for the TimeStamp on a new channel.
  */
 static int
-ms_join(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_join(struct Client *source_p, int parc, char *parv[])
 {
   time_t newts = 0;
   time_t oldts = 0;
@@ -293,7 +289,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
 
   if (parc == 2 && !irccmp(parv[1], "0"))
   {
-    do_join_0(client_p, source_p);
+    do_join_0(source_p);
     return 0;
   }
 
@@ -304,7 +300,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s: %s",
-                         client_p->name, parv[2]);
+                         source_p->from->name, parv[2]);
     return 0;
   }
 
@@ -329,7 +325,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
       sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                            "*** Bogus TS %lu on %s ignored from %s",
                            (unsigned long)newts, chptr->chname,
-                           client_p->name);
+                           source_p->from->name);
 
       newts = (oldts == 0) ? 0 : 800000000;
     }
@@ -419,7 +415,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
                                   source_p->host, source_p->away);
   }
 
-  sendto_server(client_p, NOCAPS, NOCAPS,
+  sendto_server(source_p, NOCAPS, NOCAPS,
                 ":%s JOIN %lu %s +",
                 ID(source_p), (unsigned long)chptr->channelts, chptr->chname);
   return 0;
@@ -435,7 +431,7 @@ ms_join(struct Client *client_p, struct Client *source_p,
  * 		  anti spambot code.
  */
 static void
-do_join_0(struct Client *client_p, struct Client *source_p)
+do_join_0(struct Client *source_p)
 {
   struct Channel *chptr = NULL;
   dlink_node *ptr = NULL, *ptr_next = NULL;
@@ -448,7 +444,7 @@ do_join_0(struct Client *client_p, struct Client *source_p)
   {
     chptr = ((struct Membership *)ptr->data)->chptr;
 
-    sendto_server(client_p, NOCAPS, NOCAPS,
+    sendto_server(source_p, NOCAPS, NOCAPS,
                   ":%s PART %s", ID(source_p), chptr->chname);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,

@@ -46,8 +46,7 @@
  *  parv[2] = new topic, if setting topic
  */
 static int
-m_topic(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_topic(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
 
@@ -86,7 +85,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
                source_p->username, source_p->host);
       set_channel_topic(chptr, parv[2], topic_info, CurrentTime, 1);
 
-      sendto_server(client_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
                     ID(source_p), chptr->chname,
                     chptr->topic);
       sendto_channel_local(ALL_MEMBERS, 0,
@@ -122,8 +121,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-ms_topic(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_topic(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   char topic_info[USERHOST_REPLYLEN];
@@ -147,7 +145,7 @@ ms_topic(struct Client *client_p, struct Client *source_p,
              source_p->username, source_p->host);
   set_channel_topic(chptr, parv[2], topic_info, CurrentTime, 0);
 
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
                 ID(source_p), chptr->chname,
                 chptr->topic);
 

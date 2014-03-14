@@ -744,13 +744,12 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
 /* set_user_mode()
  *
  * added 15/10/91 By Darren Reed.
- * parv[0] - sender
+ * parv[0] - command
  * parv[1] - username to change mode for
  * parv[2] - modes to change
  */
 void
-set_user_mode(struct Client *client_p, struct Client *source_p,
-              const int parc, char *parv[])
+set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
   unsigned int flag, setflags;
   char **p, *m, buf[IRCD_BUFSIZE];
@@ -759,7 +758,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
 
   assert(!(parc < 2));
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
     if (MyConnect(source_p))
       sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
@@ -805,7 +804,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
         case 'o':
           if (what == MODE_ADD)
           {
-            if (IsServer(client_p) && !HasUMode(source_p, UMODE_OPER))
+            if (IsServer(source_p->from) && !HasUMode(source_p, UMODE_OPER))
             {
               ++Count.oper;
               SetOper(source_p);
@@ -881,7 +880,7 @@ set_user_mode(struct Client *client_p, struct Client *source_p,
    * compare new flags with old flags and send string which
    * will cause servers to update correctly.
    */
-  send_umode_out(client_p, source_p, setflags);
+  send_umode_out(source_p, source_p, setflags);
 }
 
 /* send_umode()

@@ -44,8 +44,7 @@
  *  parv[1] = away message
  */
 static int
-m_away(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_away(struct Client *source_p, int parc, char *parv[])
 {
   if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
@@ -57,7 +56,7 @@ m_away(struct Client *client_p, struct Client *source_p,
     {
       source_p->away[0] = '\0';
       /* we now send this only if they were away before --is */
-      sendto_server(client_p, NOCAPS, NOCAPS, ":%s AWAY", ID(source_p));
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY", ID(source_p));
       sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
                                    ":%s!%s@%s AWAY",
                                    source_p->name, source_p->username,
@@ -86,14 +85,13 @@ m_away(struct Client *client_p, struct Client *source_p,
                                ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,
                                source_p->host, source_p->away);
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s AWAY :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY :%s",
                 ID(source_p), source_p->away);
   return 0;
 }
 
 static int
-ms_away(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_away(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -102,7 +100,7 @@ ms_away(struct Client *client_p, struct Client *source_p,
     {
       source_p->away[0] = '\0';
       /* we now send this only if they were away before --is */
-      sendto_server(client_p, NOCAPS, NOCAPS, ":%s AWAY", ID(source_p));
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY", ID(source_p));
       sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
                                    ":%s!%s@%s AWAY",
                                    source_p->name, source_p->username,
@@ -121,7 +119,7 @@ ms_away(struct Client *client_p, struct Client *source_p,
                                ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,
                                source_p->host, source_p->away);
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s AWAY :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY :%s",
                 ID(source_p), source_p->away);
   return 0;
 }

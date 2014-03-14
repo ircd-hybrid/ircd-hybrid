@@ -40,8 +40,7 @@
 
 
 static int
-mo_hash(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_hash(struct Client *source_p, int parc, char *parv[])
 {
   unsigned int i = 0;
   unsigned int max_chain = 0;

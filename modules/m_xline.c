@@ -216,8 +216,7 @@ relay_xline(struct Client *source_p, char *parv[])
  *
  */
 static int
-mo_xline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_xline(struct Client *source_p, int parc, char *parv[])
 {
   char *reason = NULL;
   char *gecos = NULL;
@@ -287,8 +286,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
  * side effects	- propagates xline, applies it if we are a target
  */
 static int
-ms_xline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_xline(struct Client *source_p, int parc, char *parv[])
 {
   if (parc != 5 || EmptyString(parv[4]))
     return 0;
@@ -319,8 +317,7 @@ ms_xline(struct Client *client_p, struct Client *source_p,
  * side effects	-
  */
 static int
-me_xline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+me_xline(struct Client *source_p, int parc, char *parv[])
 {
   if (!IsClient(source_p) || parc != 5)
     return 0;
@@ -339,8 +336,7 @@ me_xline(struct Client *client_p, struct Client *source_p,
  * side effects - removes a xline
  */
 static int
-mo_unxline(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_unxline(struct Client *source_p, int parc, char *parv[])
 {
   char *gecos = NULL;
   char *target_server = NULL;
@@ -380,8 +376,7 @@ mo_unxline(struct Client *client_p, struct Client *source_p,
  * side effects	- propagates unxline, applies it if we are a target
  */
 static int
-ms_unxline(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_unxline(struct Client *source_p, int parc, char *parv[])
 {
   if (parc != 3)
     return 0;

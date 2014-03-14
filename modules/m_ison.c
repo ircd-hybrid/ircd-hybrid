@@ -44,8 +44,7 @@
  * ISON :nicklist
  */
 static int
-m_ison(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_ison(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   char *nick;
@@ -68,7 +67,7 @@ m_ison(struct Client *client_p, struct Client *source_p,
     for (nick = strtoken(&p, parv[i], " "); nick;
          nick = strtoken(&p,    NULL, " "))
     {
-      if ((target_p = find_person(client_p, nick)))
+      if ((target_p = find_person(source_p, nick)))
       {
         len = strlen(target_p->name);
 

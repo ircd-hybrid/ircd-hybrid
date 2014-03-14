@@ -99,12 +99,11 @@ do_links(struct Client *source_p, int parc, char *parv[])
 }
 
 static int
-mo_links(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_links(struct Client *source_p, int parc, char *parv[])
 {
   if (parc > 2)
     if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
-      if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1,
+      if (hunt_server(source_p, ":%s LINKS %s :%s", 1,
                       parc, parv) != HUNTED_ISME)
         return 0;
 
@@ -122,8 +121,7 @@ mo_links(struct Client *client_p, struct Client *source_p,
  *      parv[2] = servername mask
  */
 static int
-m_links(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_links(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -136,7 +134,7 @@ m_links(struct Client *client_p, struct Client *source_p,
   last_used = CurrentTime;
 
   if (!ConfigServerHide.flatten_links)
-    return mo_links(client_p, source_p, parc, parv);
+    return mo_links(source_p, parc, parv);
 
   do_links(source_p, parc, parv);
   return 0;
@@ -152,14 +150,13 @@ m_links(struct Client *client_p, struct Client *source_p,
  *      parv[2] = servername mask
  */
 static int
-ms_links(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_links(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1,
+  if (hunt_server(source_p, ":%s LINKS %s :%s", 1,
                   parc, parv) != HUNTED_ISME)
     return 0;
 
-  return m_links(client_p, source_p, parc, parv);
+  return m_links(source_p, parc, parv);
 }
 
 static struct Message links_msgtab =

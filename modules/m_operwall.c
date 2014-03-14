@@ -42,8 +42,7 @@
  *      parv[1] = message text
  */
 static int
-mo_operwall(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+mo_operwall(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
@@ -59,7 +58,7 @@ mo_operwall(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_server(NULL, NOCAPS, NOCAPS, ":%s OPERWALL :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s OPERWALL :%s",
                 ID(source_p), message);
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
   return 0;
@@ -72,15 +71,14 @@ mo_operwall(struct Client *client_p, struct Client *source_p,
  *      parv[1] = message text
  */
 static int
-ms_operwall(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+ms_operwall(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
   if (EmptyString(message))
     return 0;
 
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s OPERWALL :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s OPERWALL :%s",
                 ID(source_p), message);
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
   return 0;

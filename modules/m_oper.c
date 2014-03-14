@@ -70,8 +70,7 @@ failed_oper_notice(struct Client *source_p, const char *name,
 **      parv[2] = oper password
 */
 static int
-m_oper(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_oper(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
   const char *name = parv[1];
@@ -143,8 +142,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 **      parv[2] = oper password
 */
 static int
-mo_oper(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_oper(struct Client *source_p, int parc, char *parv[])
 {
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
   return 0;

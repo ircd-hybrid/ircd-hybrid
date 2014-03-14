@@ -42,12 +42,11 @@
  *      parv[*] = parameters
  */
 static int
-mr_error(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mr_error(struct Client *source_p, int parc, char *parv[])
 {
   const char *para = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
 
-  assert(source_p == client_p);
+  assert(MyConnect(source_p));
 
   if (!IsHandshake(source_p) && !IsConnecting(source_p))
     return 0;
@@ -55,46 +54,33 @@ mr_error(struct Client *client_p, struct Client *source_p,
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        source_p->name, para);
 
-  if (client_p == source_p)
-  {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-                         "ERROR :from %s -- %s",
-                         get_client_name(client_p, HIDE_IP), para);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-                         "ERROR :from %s -- %s",
-                         get_client_name(client_p, MASK_IP), para);
-  }
-  else
-  {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-                         "ERROR :from %s via %s -- %s",
-                         source_p->name, get_client_name(client_p, HIDE_IP), para);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-                         "ERROR :from %s via %s -- %s",
-                         source_p->name, get_client_name(client_p, MASK_IP), para);
-  }
+  sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                       "ERROR :from %s -- %s",
+                       get_client_name(source_p, HIDE_IP), para);
+  sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                       "ERROR :from %s -- %s",
+                       get_client_name(source_p, MASK_IP), para);
 
   return 0;
 }
 
 static int
-ms_error(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_error(struct Client *source_p, int parc, char *parv[])
 {
   const char *para = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        source_p->name, para);
 
-  if (client_p == source_p)
+  if (MyConnect(source_p))
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "ERROR :from %s -- %s",
-                         get_client_name(client_p, MASK_IP), para);
+                         get_client_name(source_p->from, MASK_IP), para);
   else
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "ERROR :from %s via %s -- %s",
                          source_p->name,
-                         get_client_name(client_p, MASK_IP), para);
+                         get_client_name(source_p->from, MASK_IP), para);
   return 0;
 }
 

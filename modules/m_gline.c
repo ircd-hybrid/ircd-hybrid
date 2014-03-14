@@ -291,8 +291,7 @@ check_majority(const struct Client *source_p, const char *user,
  *
  */
 static int
-ms_gline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_gline(struct Client *source_p, int parc, char *parv[])
 {
   const char *reason = NULL;      /* reason for "victims" demise       */
   const char *user = NULL;
@@ -357,8 +356,6 @@ ms_gline(struct Client *client_p, struct Client *source_p,
 
 /*! \brief GLINE command handler (called by operators)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -370,8 +367,7 @@ ms_gline(struct Client *client_p, struct Client *source_p,
  *      - parv[2] = reason
  */
 static int
-mo_gline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_gline(struct Client *source_p, int parc, char *parv[])
 {
   char *user = NULL;
   char *host = NULL;
@@ -461,8 +457,6 @@ do_sungline(struct Client *source_p, const char *user,
 /*! \brief GUNGLINE command handler (called in response to an encapsulated
  *                  GUNGLINE command)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -475,8 +469,7 @@ do_sungline(struct Client *source_p, const char *user,
  *      - parv[3] = reason
  */
 static int
-me_gungline(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+me_gungline(struct Client *source_p, int parc, char *parv[])
 {
   if (ConfigFileEntry.glines)
     do_sungline(source_p, parv[1], parv[2], parv[3], 0);
@@ -485,8 +478,6 @@ me_gungline(struct Client *client_p, struct Client *source_p,
 
 /*! \brief GUNGLINE command handler (called by operators)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -498,8 +489,7 @@ me_gungline(struct Client *client_p, struct Client *source_p,
  *      - parv[2] = reason
  */
 static int
-mo_gungline(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+mo_gungline(struct Client *source_p, int parc, char *parv[])
 {
   char *user = NULL;
   char *host = NULL;

@@ -368,13 +368,12 @@ subcmd_search(const char *cmd, const struct subcmd *elem)
 }
 
 /** Handle a capability request or response from a client.
- * \param client_p Client that sent us the message.
  * \param source_p Original source of message.
  * \param parc     Number of arguments.
  * \param parv     Argument vector.
  */
 static int
-m_cap(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_cap(struct Client *source_p, int parc, char *parv[])
 {
   const char *subcmd = NULL, *caplist = NULL;
   struct subcmd *cmd = NULL;

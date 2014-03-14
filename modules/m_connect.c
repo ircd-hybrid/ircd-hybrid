@@ -52,8 +52,7 @@
  *      parv[3] = remote server
  */
 static int
-mo_connect(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_connect(struct Client *source_p, int parc, char *parv[])
 {
   int port;
   int tmpport;
@@ -74,7 +73,7 @@ mo_connect(struct Client *client_p, struct Client *source_p,
       return 0;
     }
 
-    if (hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s", 3,
+    if (hunt_server(source_p, ":%s CONNECT %s %s :%s", 3,
                     parc, parv) != HUNTED_ISME)
       return 0;
   }
@@ -176,15 +175,14 @@ mo_connect(struct Client *client_p, struct Client *source_p,
  *      parv[3] = remote server
  */
 static int
-ms_connect(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_connect(struct Client *source_p, int parc, char *parv[])
 {
   int port;
   int tmpport;
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
 
-  if (hunt_server(client_p, source_p, ":%s CONNECT %s %s :%s",
+  if (hunt_server(source_p, ":%s CONNECT %s %s :%s",
                   3, parc, parv) != HUNTED_ISME)
     return 0;
 

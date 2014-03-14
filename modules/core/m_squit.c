@@ -45,8 +45,7 @@
  *  parv[2] = comment
  */
 static int
-mo_squit(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_squit(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   struct Client *p;
@@ -126,8 +125,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
  *  parv[2] = comment
  */
 static int
-ms_squit(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_squit(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
@@ -142,15 +140,15 @@ ms_squit(struct Client *client_p, struct Client *source_p,
     return 0;
 
   if (IsMe(target_p))
-    target_p = client_p;
+    target_p = source_p->from;
 
-  comment = (parc > 2 && parv[parc - 1]) ? parv[parc - 1] : client_p->name;
+  comment = (parc > 2 && parv[parc - 1]) ? parv[parc - 1] : source_p->name;
 
   if (MyConnect(target_p))
   {
     sendto_wallops_flags(UMODE_WALLOP, &me, "Remote SQUIT %s from %s (%s)",
                          target_p->name, source_p->name, comment);
-    sendto_server(NULL, NOCAPS, NOCAPS,
+    sendto_server(source_p, NOCAPS, NOCAPS,
                   ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
                   me.id, target_p->name, source_p->name, comment);
     ilog(LOG_TYPE_IRCD, "SQUIT From %s : %s (%s)", source_p->name,

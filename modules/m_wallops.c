@@ -41,8 +41,7 @@
  *      parv[1] = message text
  */
 static int
-mo_wallops(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_wallops(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
@@ -59,7 +58,7 @@ mo_wallops(struct Client *client_p, struct Client *source_p,
   }
 
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
-  sendto_server(NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s WALLOPS :%s",
                 ID(source_p), message);
   return 0;
 }
@@ -70,8 +69,7 @@ mo_wallops(struct Client *client_p, struct Client *source_p,
  *      parv[1] = message text
  */
 static int
-ms_wallops(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_wallops(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
@@ -83,7 +81,7 @@ ms_wallops(struct Client *client_p, struct Client *source_p,
   else
     sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
 
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s WALLOPS :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s WALLOPS :%s",
                 ID(source_p), message);
   return 0;
 }

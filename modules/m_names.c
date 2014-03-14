@@ -43,8 +43,7 @@
 **      parv[1] = channel
 */
 static int
-m_names(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_names(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   char *s = NULL;

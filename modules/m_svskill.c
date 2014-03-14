@@ -38,8 +38,6 @@
 
 /*! \brief SVSKILL command handler (called by services)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -52,7 +50,7 @@
  *      - parv[3] = kill message
  */
 static int
-ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
@@ -73,7 +71,7 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
   else
     comment = (parc > 2 && parv[2]) ? parv[2] : source_p->name;
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
   if (ts && (ts != target_p->tsinfo))
@@ -86,12 +84,12 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
     return 0;
   }
 
-  if (target_p->from == client_p)
+  if (target_p->from == source_p->from)
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "Received wrong-direction SVSKILL "
                          "for %s (behind %s) from %s",
-                         target_p->name, client_p->name,
+                         target_p->name, source_p->from->name,
                          get_client_name(source_p, HIDE_IP));
     return 0;
   }

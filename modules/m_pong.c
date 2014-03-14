@@ -38,8 +38,7 @@
 
 
 static int
-ms_pong(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_pong(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
   const char *origin, *destination;
@@ -74,10 +73,9 @@ ms_pong(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-mr_pong(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mr_pong(struct Client *source_p, int parc, char *parv[])
 {
-  assert(source_p == client_p);
+  assert(MyConnect(source_p));
 
   if (parc == 2 && *parv[1] != '\0')
   {

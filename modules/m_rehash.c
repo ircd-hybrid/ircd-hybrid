@@ -44,8 +44,7 @@
  *
  */
 static int
-mo_rehash(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+mo_rehash(struct Client *source_p, int parc, char *parv[])
 {
   int found = 0;
 

@@ -216,8 +216,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
  * side effects - k line is added
  */
 static int
-mo_kline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_kline(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE];
   char *reason = NULL;
@@ -276,8 +275,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
 /* me_kline - handle remote kline. no propagation */
 static int
-me_kline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+me_kline(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE];
   struct MaskItem *conf = NULL;
@@ -327,8 +325,7 @@ me_kline(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-ms_kline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_kline(struct Client *source_p, int parc, char *parv[])
 {
   if (parc != 6 || EmptyString(parv[5]))
     return 0;
@@ -338,7 +335,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
   sendto_match_servs(source_p, parv[1], CAP_KLN, "KLINE %s %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4], parv[5]);
 
-  return me_kline(client_p, source_p, parc, parv);
+  return me_kline(source_p, parc, parv);
 }
 
 /*
@@ -352,8 +349,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
 *
 */
 static int
-mo_unkline(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_unkline(struct Client *source_p, int parc, char *parv[])
 {
   char *target_server = NULL;
   char *user, *host;
@@ -415,8 +411,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p,
  *                does not propagate message
  */
 static int
-me_unkline(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+me_unkline(struct Client *source_p, int parc, char *parv[])
 {
   const char *kuser, *khost;
 
@@ -454,8 +449,7 @@ me_unkline(struct Client *client_p, struct Client *source_p,
 
 /* ms_unkline - propagates and handles a remote unkline message */
 static int
-ms_unkline(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_unkline(struct Client *source_p, int parc, char *parv[])
 {
   if (parc != 4)
     return 0;
@@ -464,7 +458,7 @@ ms_unkline(struct Client *client_p, struct Client *source_p,
                      "UNKLINE %s %s %s",
                      parv[1], parv[2], parv[3]);
 
-  return me_unkline(client_p, source_p, parc, parv);
+  return me_unkline(source_p, parc, parv);
 }
 
 static struct Message kline_msgtab =

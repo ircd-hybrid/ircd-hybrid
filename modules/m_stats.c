@@ -853,7 +853,7 @@ show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
 }
 
 static void
-report_auth(struct Client *client_p, int parc, char *parv[])
+report_auth(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
   dlink_node *ptr = NULL;
@@ -871,24 +871,24 @@ report_auth(struct Client *client_p, int parc, char *parv[])
 
       conf = arec->conf;
 
-      if (!MyOper(client_p) && IsConfDoSpoofIp(conf))
+      if (!MyOper(source_p) && IsConfDoSpoofIp(conf))
         continue;
 
       /* We are doing a partial list, based on what matches the u@h of the
        * sender, so prepare the strings for comparing --fl_
        */
       if (ConfigFileEntry.hide_spoof_ips)
-        sendto_one_numeric(client_p, &me, RPL_STATSILINE, 'I',
+        sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
                            conf->name == NULL ? "*" : conf->name,
-                           show_iline_prefix(client_p, conf),
+                           show_iline_prefix(source_p, conf),
                            IsConfDoSpoofIp(conf) ? "255.255.255.255" :
                            conf->host, conf->port,
                            conf->class ? conf->class->name : "<default>");
 
       else
-        sendto_one_numeric(client_p, &me, RPL_STATSILINE, 'I',
+        sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
                            conf->name == NULL ? "*" : conf->name,
-                           show_iline_prefix(client_p, conf),
+                           show_iline_prefix(source_p, conf),
                            conf->host, conf->port,
                            conf->class ? conf->class->name : "<default>");
     }
@@ -935,10 +935,10 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
  *         type(==0 for perm, !=0 for temporary)
  *         mask
  * Output: None
- * Side effects: Reports configured K(or k)-lines to client_p.
+ * Side effects: Reports configured K(or k)-lines to source_p.
  */
 static void
-report_Klines(struct Client *client_p, int tkline)
+report_Klines(struct Client *source_p, int tkline)
 {
   struct MaskItem *conf = NULL;
   unsigned int i = 0;
@@ -965,11 +965,11 @@ report_Klines(struct Client *client_p, int tkline)
           (tkline && !conf->until))
         continue;
 
-      if (HasUMode(client_p, UMODE_OPER))
-        sendto_one_numeric(client_p, &me, RPL_STATSKLINE, c, conf->host, conf->user,
+      if (HasUMode(source_p, UMODE_OPER))
+        sendto_one_numeric(source_p, &me, RPL_STATSKLINE, c, conf->host, conf->user,
                            conf->reason);
       else
-        sendto_one_numeric(client_p, &me, RPL_STATSKLINE, c, conf->host, conf->user,
+        sendto_one_numeric(source_p, &me, RPL_STATSKLINE, c, conf->host, conf->user,
                            conf->reason);
     }
   }
@@ -1582,8 +1582,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
  * if found execute it.
  */
 static int
-m_stats(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_stats(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -1598,7 +1597,7 @@ m_stats(struct Client *client_p, struct Client *source_p,
 
   /* Is the stats meant for us? */
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s STATS %s :%s", 2,
+    if (hunt_server(source_p, ":%s STATS %s :%s", 2,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
@@ -1616,10 +1615,9 @@ m_stats(struct Client *client_p, struct Client *source_p,
  * if found execute it.
  */
 static int
-mo_stats(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_stats(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s STATS %s :%s", 2,
+  if (hunt_server(source_p, ":%s STATS %s :%s", 2,
                   parc, parv) != HUNTED_ISME)
      return 0;
 

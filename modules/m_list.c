@@ -172,8 +172,7 @@ do_list(struct Client *source_p, int parc, char *parv[])
 **      parv[1] = channel
 */
 static int
-m_list(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_list(struct Client *source_p, int parc, char *parv[])
 {
   do_list(source_p, parc, parv);
   return 0;

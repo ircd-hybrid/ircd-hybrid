@@ -629,7 +629,7 @@ send_conf_options(struct Client *source_p)
  * output       - NONE
  * side effects - info text is sent to client
  */
-static int
+static void
 send_info_text(struct Client *source_p)
 {
   const char **text = infotext;
@@ -655,7 +655,6 @@ send_info_text(struct Client *source_p)
   send_birthdate_online_time(source_p);
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFINFO);
-  return 0;
 }
 
 /*
@@ -664,8 +663,7 @@ send_info_text(struct Client *source_p)
 **  parv[1] = servername
 */
 static int
-m_info(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_info(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -679,11 +677,12 @@ m_info(struct Client *client_p, struct Client *source_p,
   last_used = CurrentTime;
 
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
+    if (hunt_server(source_p, ":%s INFO :%s", 1,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  return send_info_text(source_p);
+  send_info_text(source_p);
+  return 0;
 }
 
 /*
@@ -692,14 +691,14 @@ m_info(struct Client *client_p, struct Client *source_p,
 **  parv[1] = servername
 */
 static int
-ms_info(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_info(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
+  if (hunt_server(source_p, ":%s INFO :%s", 1,
                   parc, parv) != HUNTED_ISME)
     return 0;
 
-  return send_info_text(source_p);
+  send_info_text(source_p);
+  return 0;
 }
 
 static struct Message info_msgtab =

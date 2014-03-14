@@ -70,8 +70,7 @@ failed_challenge_notice(struct Client *source_p, const char *name,
  *
  */
 static int
-m_challenge(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+m_challenge(struct Client *source_p, int parc, char *parv[])
 {
   char *challenge = NULL;
   struct MaskItem *conf = NULL;
@@ -171,8 +170,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-mo_challenge(struct Client *client_p, struct Client *source_p,
-             int parc, char *parv[])
+mo_challenge(struct Client *source_p, int parc, char *parv[])
 {
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
   return 0;

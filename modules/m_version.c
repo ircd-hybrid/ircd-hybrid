@@ -57,8 +57,7 @@ static const char serveropts[] =
  *      parv[1] = remote server
  */
 static int
-m_version(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+m_version(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -72,7 +71,7 @@ m_version(struct Client *client_p, struct Client *source_p,
   last_used = CurrentTime;
 
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s VERSION :%s",
+    if (hunt_server(source_p, ":%s VERSION :%s",
                     1, parc, parv) != HUNTED_ISME)
       return 0;
 
@@ -88,10 +87,9 @@ m_version(struct Client *client_p, struct Client *source_p,
  *      parv[1] = remote server
  */
 static int
-mo_version(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_version(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s VERSION :%s",
+  if (hunt_server(source_p, ":%s VERSION :%s",
                   1, parc, parv) != HUNTED_ISME)
     return 0;
 
@@ -108,10 +106,9 @@ mo_version(struct Client *client_p, struct Client *source_p,
  *      parv[1] = remote server
  */
 static int
-ms_version(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_version(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s VERSION :%s",
+  if (hunt_server(source_p, ":%s VERSION :%s",
                   1, parc, parv) != HUNTED_ISME)
     return 0;
 

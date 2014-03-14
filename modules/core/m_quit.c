@@ -40,8 +40,7 @@
 **      parv[1] = comment
 */
 static int
-m_quit(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_quit(struct Client *source_p, int parc, char *parv[])
 {
   char reason[KICKLEN + 1] = "Quit: ";
 
@@ -60,15 +59,14 @@ m_quit(struct Client *client_p, struct Client *source_p,
 **      parv[1] = comment
 */
 static int
-ms_quit(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_quit(struct Client *source_p, int parc, char *parv[])
 {
   char reason[KICKLEN + 1] = { '\0' };
 
   if (!EmptyString(parv[1]))
     strlcpy(reason, parv[1], sizeof(reason));
   else
-    strlcpy(reason, client_p->name, sizeof(reason));
+    strlcpy(reason, source_p->name, sizeof(reason));
 
   exit_client(source_p, source_p, reason);
   return 0;

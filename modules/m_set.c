@@ -421,8 +421,7 @@ list_quote_commands(struct Client *source_p)
  * set options while running
  */
 static int
-mo_set(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+mo_set(struct Client *source_p, int parc, char *parv[])
 {
   int n;
   int newval;

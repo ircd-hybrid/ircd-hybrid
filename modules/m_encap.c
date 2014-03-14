@@ -41,8 +41,7 @@
  * side effects	- propagates subcommand to locally connected servers
  */
 static int
-ms_encap(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_encap(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE], *ptr = buffer;
   unsigned int cur_len = 0, len, i;
@@ -89,7 +88,7 @@ ms_encap(struct Client *client_p, struct Client *source_p,
   parc -= 2;
 
   if ((handler = mptr->handlers[ENCAP_HANDLER]))
-    (*handler)(client_p, source_p, parc, parv);
+    (*handler)(source_p, parc, parv);
   return 0;
 }
 

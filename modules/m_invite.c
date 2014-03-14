@@ -49,8 +49,7 @@
 **      parv[3] - invite timestamp
 */
 static int
-m_invite(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_invite(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
@@ -68,7 +67,7 @@ m_invite(struct Client *client_p, struct Client *source_p,
   if (MyClient(source_p) && !IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
     return 0;
@@ -127,7 +126,7 @@ m_invite(struct Client *client_p, struct Client *source_p,
       add_invite(chptr, target_p);
     }
   }
-  else if (target_p->from != client_p)
+  else if (target_p->from != source_p->from)
     sendto_one(target_p, ":%s INVITE %s %s %lu",
                ID_or_name(source_p, target_p),
                ID_or_name(target_p, target_p),

@@ -131,8 +131,7 @@ remove_dline_match(const char *host)
  *
  */
 static int
-mo_dline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_dline(struct Client *source_p, int parc, char *parv[])
 {
   char def_reason[] = CONF_NOREASON;
   char *dlhost = NULL, *reason = NULL;
@@ -248,8 +247,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-ms_dline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_dline(struct Client *source_p, int parc, char *parv[])
 {
   char def_reason[] = CONF_NOREASON;
   char *dlhost, *reason;
@@ -373,8 +371,7 @@ ms_dline(struct Client *client_p, struct Client *source_p,
 **      parv[1] = dline to remove
 */
 static int
-mo_undline(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_undline(struct Client *source_p, int parc, char *parv[])
 {
   char *addr = NULL, *user = NULL;
   char *target_server = NULL;
@@ -423,8 +420,7 @@ mo_undline(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-ms_undline(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_undline(struct Client *source_p, int parc, char *parv[])
 {
   const char *addr = parv[1];
 

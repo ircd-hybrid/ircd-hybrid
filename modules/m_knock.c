@@ -56,8 +56,7 @@
  *  <anonymous>
  */
 static int
-m_knock(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_knock(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
 
@@ -132,8 +131,7 @@ m_knock(struct Client *client_p, struct Client *source_p,
                        source_p->username,
                        source_p->host);
 
-  sendto_server(client_p, CAP_KNOCK, NOCAPS, ":%s KNOCK %s",
-                ID(source_p), chptr->chname);
+  sendto_server(source_p, CAP_KNOCK, NOCAPS, ":%s KNOCK %s", ID(source_p), chptr->chname);
   return 0;
 }
 

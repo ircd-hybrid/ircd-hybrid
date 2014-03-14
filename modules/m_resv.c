@@ -48,8 +48,7 @@ static void remove_resv(struct Client *, const char *);
  *   parv[1] = channel/nick to forbid
  */
 static int
-mo_resv(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_resv(struct Client *source_p, int parc, char *parv[])
 {
   char *resv = NULL;
   char *reason = NULL;
@@ -113,8 +112,7 @@ mo_resv(struct Client *client_p, struct Client *source_p,
  * side effects -
  */
 static int
-me_resv(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+me_resv(struct Client *source_p, int parc, char *parv[])
 {
   if (parc != 5 || !IsClient(source_p))
     return 0;
@@ -130,8 +128,7 @@ me_resv(struct Client *client_p, struct Client *source_p,
  *   parv[3] = reason
  */
 static int
-ms_resv(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_resv(struct Client *source_p, int parc, char *parv[])
 {
   if ((parc != 4) || EmptyString(parv[3]))
     return 0;
@@ -155,8 +152,7 @@ ms_resv(struct Client *client_p, struct Client *source_p,
  *   parv[1] = channel/nick to unforbid
  */
 static int
-mo_unresv(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+mo_unresv(struct Client *source_p, int parc, char *parv[])
 {
   char *resv = NULL;
   char *reason = NULL;
@@ -191,8 +187,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p,
  *     parv[2] = resv to remove
  */
 static int
-ms_unresv(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_unresv(struct Client *source_p, int parc, char *parv[])
 {
   if ((parc != 3) || EmptyString(parv[2]))
     return 0;

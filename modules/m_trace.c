@@ -62,8 +62,7 @@ trace_get_dependent(unsigned int *const server,
  *	parv[1] = target client/server to trace
  */
 static int
-m_trace(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_trace(struct Client *source_p, int parc, char *parv[])
 {
   const char *tname = NULL;
 
@@ -81,14 +80,13 @@ m_trace(struct Client *client_p, struct Client *source_p,
  *      parv[1] = servername
  */
 static int
-mo_trace(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_trace(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *ptr = NULL;
   const char *tname = NULL;
 
   if (parc > 2)
-    if (hunt_server(client_p, source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
+    if (hunt_server(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
       return 0;
 
   if (parc > 1)
@@ -96,7 +94,7 @@ mo_trace(struct Client *client_p, struct Client *source_p,
   else
     tname = me.name;
 
-  switch (hunt_server(client_p, source_p, ":%s TRACE :%s", 1, parc, parv))
+  switch (hunt_server(source_p, ":%s TRACE :%s", 1, parc, parv))
   {
     case HUNTED_PASS: /* note: gets here only if parv[1] exists */
     {
@@ -140,15 +138,14 @@ mo_trace(struct Client *client_p, struct Client *source_p,
 **      parv[1] = servername
 */
 static int
-ms_trace(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_trace(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s TRACE %s :%s",
+  if (hunt_server(source_p, ":%s TRACE %s :%s",
                   2, parc, parv) != HUNTED_ISME)
     return 0;
 
   if (HasUMode(source_p, UMODE_OPER))
-    mo_trace(client_p, source_p, parc, parv);
+    return mo_trace(source_p, parc, parv);
   return 0;
 }
 

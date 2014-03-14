@@ -45,13 +45,9 @@
  */
 
 static int
-m_nickserv(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+m_nickserv(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-
-  assert(client_p && source_p);
-  assert(client_p == source_p);
 
   if (EmptyString(parv[1]))
   {
@@ -71,13 +67,9 @@ m_nickserv(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-m_chanserv(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+m_chanserv(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-
-  assert(client_p && source_p);
-  assert(client_p == source_p);
 
   if (EmptyString(parv[1]))
   {
@@ -97,13 +89,9 @@ m_chanserv(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-m_memoserv(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+m_memoserv(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-
-  assert(client_p && source_p);
-  assert(client_p == source_p);
 
   if (EmptyString(parv[1]))
   {
@@ -123,13 +111,9 @@ m_memoserv(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-m_operserv(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+m_operserv(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-
-  assert(client_p && source_p);
-  assert(client_p == source_p);
 
   if (EmptyString(parv[1]))
   {
@@ -149,13 +133,9 @@ m_operserv(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-m_statserv(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+m_statserv(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-
-  assert(client_p && source_p);
-  assert(client_p == source_p);
 
   if (EmptyString(parv[1]))
   {
@@ -175,13 +155,9 @@ m_statserv(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-m_hostserv(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+m_hostserv(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-
-  assert(client_p && source_p);
-  assert(client_p == source_p);
 
   if (EmptyString(parv[1]))
   {
@@ -201,13 +177,9 @@ m_hostserv(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-m_botserv(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+m_botserv(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-
-  assert(client_p && source_p);
-  assert(client_p == source_p);
 
   if (EmptyString(parv[1]))
   {

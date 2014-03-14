@@ -329,7 +329,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
     }
   }
   else
-    (*handler)(client_p, from, i, hpara);
+    (*handler)(from, i, hpara);
 }
 
 /* add_msg_element()
@@ -727,32 +727,28 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
  * side effects	- just returns a nastyogram to given user
  */
 int
-m_not_oper(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+m_not_oper(struct Client *source_p, int parc, char *parv[])
 {
   sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
   return 0;
 }
 
 int
-m_unregistered(struct Client *client_p, struct Client *source_p,
-               int parc, char *parv[])
+m_unregistered(struct Client *source_p, int parc, char *parv[])
 {
   sendto_one_numeric(source_p, &me, ERR_NOTREGISTERED);
   return 0;
 }
 
 int
-m_registered(struct Client *client_p, struct Client *source_p,
-             int parc, char *parv[])
+m_registered(struct Client *source_p, int parc, char *parv[])
 {
   sendto_one_numeric(source_p, &me, ERR_ALREADYREGISTRED);
   return 0;
 }
 
 int
-m_ignore(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_ignore(struct Client *source_p, int parc, char *parv[])
 {
   return 0;
 }

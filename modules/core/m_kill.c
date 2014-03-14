@@ -43,7 +43,7 @@
 static char buf[IRCD_BUFSIZE];
 
 static void
-relay_kill(struct Client *one, struct Client *source_p,
+relay_kill(struct Client *source_p,
            struct Client *target_p, const char *inpath,
            const char *reason)
 {
@@ -53,7 +53,7 @@ relay_kill(struct Client *one, struct Client *source_p,
   {
     struct Client *client_p = ptr->data;
 
-    if (client_p == one)
+    if (client_p == source_p->from)
       continue;
 
     if (MyClient(source_p))
@@ -75,11 +75,9 @@ relay_kill(struct Client *one, struct Client *source_p,
  *  parv[2] = kill path
  */
 static int
-mo_kill(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_kill(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
-  const char *inpath = client_p->name;
   char *user;
   char *reason;
   char def_reason[] = CONF_NOREASON;
@@ -165,7 +163,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
    */
   if (!MyConnect(target_p))
   {
-    relay_kill(client_p, source_p, target_p, inpath, reason);
+    relay_kill(source_p, target_p, source_p->from->name, reason);
       /*
        * Set FLAGS_KILLED. This prevents exit_one_client from sending
        * the unnecessary QUIT for this. (This flag should never be
@@ -185,8 +183,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
  *  parv[2] = kill path and reason
  */
 static int
-ms_kill(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_kill(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
   char *user;
@@ -221,7 +218,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
     path = parv[2];
   }
 
-  if ((target_p = find_person(client_p, user)) == NULL)
+  if ((target_p = find_person(source_p, user)) == NULL)
   {
     /*
      * If the user has recently changed nick, but only if its
@@ -293,7 +290,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
        source_p->name, target_p->name, source_p->name, reason);
 
-  relay_kill(client_p, source_p, target_p, path, reason);
+  relay_kill(source_p, target_p, path, reason);
   AddFlag(target_p, FLAGS_KILLED);
 
   /* reason comes supplied with its own ()'s */

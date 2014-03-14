@@ -46,12 +46,12 @@
  *      parv[4] = fake ip
  */
 static int
-mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_webirc(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
   struct addrinfo hints, *res;
 
-  assert(source_p == client_p);
+  assert(MyConnect(source_p));
 
   if (!valid_hostname(parv[3]))
   {
@@ -108,12 +108,12 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
   strlcpy(source_p->host, parv[3], sizeof(source_p->host));
 
   /* Check dlines now, k/glines will be checked on registration */
-  if ((conf = find_dline_conf(&client_p->localClient->ip,
-                               client_p->localClient->aftype)))
+  if ((conf = find_dline_conf(&source_p->localClient->ip,
+                               source_p->localClient->aftype)))
   {
     if (!(conf->type == CONF_EXEMPT))
     {
-      exit_client(client_p, &me, "D-lined");
+      exit_client(source_p, &me, "D-lined");
       return 0;
     }
   }

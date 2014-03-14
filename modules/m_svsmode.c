@@ -40,8 +40,6 @@
 
 /*! \brief SVSMODE command handler (called by services)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -55,8 +53,7 @@
  *      - parv[4] = optional argument (services id)
  */
 static int
-ms_svsmode(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_svsmode(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   int what = MODE_ADD;
@@ -79,7 +76,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
     extarg = (parc > 3) ? parv[3] : NULL;
   }
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
   if (ts && (ts != target_p->tsinfo))
@@ -162,11 +159,11 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   }
 
   if (extarg)
-    sendto_server(client_p, NOCAPS, NOCAPS, ":%s SVSMODE %s %lu %s %s",
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s SVSMODE %s %lu %s %s",
                   ID(source_p),
                   ID(target_p), (unsigned long)target_p->tsinfo, modes, extarg);
   else
-    sendto_server(client_p, NOCAPS, NOCAPS, ":%s SVSMODE %s %lu %s",
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s SVSMODE %s %lu %s",
                   ID(source_p),
                   ID(target_p), (unsigned long)target_p->tsinfo, modes);
 

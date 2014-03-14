@@ -40,8 +40,7 @@
  * mo_die - DIE command handler
  */
 static int
-mo_die(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+mo_die(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
 

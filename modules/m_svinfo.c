@@ -44,8 +44,7 @@
  *      parv[4] = server's idea of UTC time
  */
 static int
-ms_svinfo(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_svinfo(struct Client *source_p, int parc, char *parv[])
 {
   time_t deltat;
   time_t theirtime;

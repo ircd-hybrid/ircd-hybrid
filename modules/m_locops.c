@@ -43,8 +43,7 @@
  *      parv[1] = message text
  */
 static int
-mo_locops(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+mo_locops(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
@@ -67,8 +66,7 @@ mo_locops(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-ms_locops(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_locops(struct Client *source_p, int parc, char *parv[])
 {
   if (parc != 3 || EmptyString(parv[2]))
     return 0;

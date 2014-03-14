@@ -48,10 +48,9 @@
  *      parv[2] = optional extra version information
  */
 static int
-mr_pass(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mr_pass(struct Client *source_p, int parc, char *parv[])
 {
-  assert(client_p == source_p);
+  assert(MyConnect(source_p));
 
   if (EmptyString(parv[1]))
   {

@@ -45,8 +45,7 @@
  *      parv[5] = topic
  */
 static int
-ms_tburst(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_tburst(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   int accept_remote = 0;

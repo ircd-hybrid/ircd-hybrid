@@ -42,8 +42,6 @@
 
 /*! \brief MODULE command handler (called by operators)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -55,8 +53,7 @@
  *      - parv[2] = module name
  */
 static int
-mo_module(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+mo_module(struct Client *source_p, int parc, char *parv[])
 {
   const char *m_bn = NULL;
   struct module *modp = NULL;

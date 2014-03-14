@@ -206,8 +206,7 @@ do_whois(struct Client *source_p, const char *name)
 **      parv[1] = nickname masklist
 */
 static int
-m_whois(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_whois(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -236,7 +235,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
     if (ConfigServerHide.disable_remote_commands)
       parv[1] = parv[2];
 
-    if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,
+    if (hunt_server(source_p, ":%s WHOIS %s :%s", 1,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
@@ -253,8 +252,7 @@ m_whois(struct Client *client_p, struct Client *source_p,
 **      parv[1] = nickname masklist
 */
 static int
-mo_whois(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_whois(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -264,7 +262,7 @@ mo_whois(struct Client *client_p, struct Client *source_p,
 
   if (parc > 2 && !EmptyString(parv[2]))
   {
-    if (hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1,
+    if (hunt_server(source_p, ":%s WHOIS %s :%s", 1,
                     parc, parv) != HUNTED_ISME)
       return 0;
 

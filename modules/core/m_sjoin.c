@@ -67,8 +67,7 @@ static void remove_ban_list(struct Channel *, struct Client *, dlink_list *, cha
  * all the specified users while sending JOIN/MODEs to local clients
  */
 static int
-ms_sjoin(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_sjoin(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   struct Client  *target_p = NULL;
@@ -104,7 +103,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s: %s",
-                         client_p->name, parv[2]);
+                         source_p->name, parv[2]);
     return 0;
   }
 
@@ -188,7 +187,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
       sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                            "*** Bogus TS %lu on %s ignored from %s",
                            (unsigned long)newts, chptr->chname,
-                           client_p->name);
+                           source_p->name);
 
       newts = (oldts == 0) ? 0 : 800000000;
     }
@@ -284,7 +283,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                         "Long SJOIN from server: %s(via %s) (ignored)",
-                        source_p->name, client_p->name);
+                        source_p->name, source_p->from->name);
     return 0;
   }
 
@@ -335,6 +334,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
     } while (valid_mode);
 
     target_p = find_chasing(source_p, s, NULL);
+    assert(IsClient(target_p));
 
     /*
      * if the client doesnt exist, or if its fake direction/server, skip.
@@ -342,12 +342,8 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
      * lookup the nick, and its better to never send the numeric than only
      * sometimes.
      */
-    if (target_p == NULL ||
-        target_p->from != client_p ||
-        !IsClient(target_p))
-    {
+    if (target_p == NULL || target_p->from != source_p->from)
       goto nextnick;
-    }
 
     len_uid = strlen(ID(target_p));
     up = uid_prefix;
@@ -383,7 +379,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
 
     if ((uid_ptr - uid_buf + len_uid) > (IRCD_BUFSIZE - 2))
     {
-      sendto_server(client_p, NOCAPS, NOCAPS, "%s", uid_buf);
+      sendto_server(source_p, NOCAPS, NOCAPS, "%s", uid_buf);
 
       buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
                         ID(source_p), (unsigned long)tstosend,
@@ -544,18 +540,18 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   if (parv[4 + args][0] == '\0')
     return 0;
 
-  sendto_server(client_p, NOCAPS, NOCAPS, "%s", uid_buf);
+  sendto_server(source_p, NOCAPS, NOCAPS, "%s", uid_buf);
 
   if (!keep_our_modes)
   {
     if (dlink_list_length(&chptr->banlist) > 0)
-      remove_ban_list(chptr, client_p, &chptr->banlist, 'b');
+      remove_ban_list(chptr, source_p, &chptr->banlist, 'b');
 
     if (dlink_list_length(&chptr->exceptlist) > 0)
-      remove_ban_list(chptr, client_p, &chptr->exceptlist, 'e');
+      remove_ban_list(chptr, source_p, &chptr->exceptlist, 'e');
 
     if (dlink_list_length(&chptr->invexlist) > 0)
-      remove_ban_list(chptr, client_p, &chptr->invexlist, 'I');
+      remove_ban_list(chptr, source_p, &chptr->invexlist, 'I');
     clear_ban_cache(chptr);
   }
 

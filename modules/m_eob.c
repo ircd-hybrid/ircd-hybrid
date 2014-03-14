@@ -39,12 +39,11 @@
  *      parv[1] = servername   
  */
 static int
-ms_eob(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+ms_eob(struct Client *source_p, int parc, char *parv[])
 {
   assert(IsServer(source_p));
 
-  if (client_p == source_p)
+  if (MyConnect(source_p))
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "End of burst from %s (%u seconds)",
                          source_p->name,
@@ -52,7 +51,7 @@ ms_eob(struct Client *client_p, struct Client *source_p,
 
   AddFlag(source_p, FLAGS_EOB);
 
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s EOB", ID(source_p));
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s EOB", ID(source_p));
   return 0;
 }
 

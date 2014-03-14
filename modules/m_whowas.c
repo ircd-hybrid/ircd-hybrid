@@ -43,8 +43,7 @@
 
 
 static void
-whowas_do(struct Client *client_p, struct Client *source_p,
-          const int parc, char *parv[])
+whowas_do(struct Client *source_p, const int parc, char *parv[])
 {
   int cur = 0;
   int max = -1;
@@ -89,8 +88,7 @@ whowas_do(struct Client *client_p, struct Client *source_p,
 **      parv[1] = nickname queried
 */
 static int
-m_whowas(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_whowas(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -109,17 +107,16 @@ m_whowas(struct Client *client_p, struct Client *source_p,
   last_used = CurrentTime;
 
   if (parc > 3 && !ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
+    if (hunt_server(source_p, ":%s WHOWAS %s %s :%s", 3,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  whowas_do(client_p, source_p, parc, parv);
+  whowas_do(source_p, parc, parv);
   return 0;
 }
 
 static int
-mo_whowas(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+mo_whowas(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -128,11 +125,11 @@ mo_whowas(struct Client *client_p, struct Client *source_p,
   }
 
   if (parc > 3)
-    if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
+    if (hunt_server(source_p, ":%s WHOWAS %s %s :%s", 3,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  whowas_do(client_p, source_p, parc, parv);
+  whowas_do(source_p, parc, parv);
   return 0;
 }
 

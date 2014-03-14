@@ -124,13 +124,12 @@ static void dump_map(struct Client *client,
  *      parv[0] = command
  */
 static int
-m_map(struct Client *client_p, struct Client *source_p,
-      int parc, char *parv[])
+m_map(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
   if (ConfigServerHide.flatten_links)
-    return m_not_oper(client_p, source_p, parc, parv);
+    return m_not_oper(source_p, parc, parv);
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
@@ -150,8 +149,7 @@ m_map(struct Client *client_p, struct Client *source_p,
  *      parv[0] = command
  */
 static int
-mo_map(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+mo_map(struct Client *source_p, int parc, char *parv[])
 {
   dump_map(source_p, &me, 0);
   sendto_one_numeric(source_p, &me, RPL_MAPEND);

@@ -62,8 +62,6 @@ do_admin(struct Client *source_p)
 /*! \brief ADMIN command handler (called by already registered,
  *         locally connected clients)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -74,8 +72,7 @@ do_admin(struct Client *source_p)
  *      - parv[1] = nickname/servername
  */
 static int
-m_admin(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_admin(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -88,7 +85,7 @@ m_admin(struct Client *client_p, struct Client *source_p,
   last_used = CurrentTime;
 
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s ADMIN :%s", 1,
+    if (hunt_server(source_p, ":%s ADMIN :%s", 1,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
@@ -99,8 +96,6 @@ m_admin(struct Client *client_p, struct Client *source_p,
 /*! \brief ADMIN command handler (called by operators and
  *         remotely connected clients)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -111,10 +106,9 @@ m_admin(struct Client *client_p, struct Client *source_p,
  *      - parv[1] = nickname/servername
  */
 static int
-ms_admin(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_admin(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s ADMIN :%s", 1,
+  if (hunt_server(source_p, ":%s ADMIN :%s", 1,
                   parc, parv) != HUNTED_ISME)
     return 0;
 

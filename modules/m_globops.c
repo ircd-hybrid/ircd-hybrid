@@ -42,8 +42,7 @@
  *      parv[1] = message text
  */
 static int
-mo_globops(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_globops(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
@@ -59,7 +58,7 @@ mo_globops(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  sendto_server(NULL, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
                 ID(source_p), message);
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from: %s: %s",
                        source_p->name, message);
@@ -67,13 +66,12 @@ mo_globops(struct Client *client_p, struct Client *source_p,
 }
 
 static int
-ms_globops(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_globops(struct Client *source_p, int parc, char *parv[])
 {
   if (EmptyString(parv[1]))
     return 0;
 
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
                 ID(source_p), parv[1]);
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from: %s: %s",
                        source_p->name, parv[1]);

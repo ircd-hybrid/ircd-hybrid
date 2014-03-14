@@ -47,8 +47,7 @@
  *  parv[3] = kick comment
  */
 static int
-m_kick(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_kick(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *who;
   struct Channel *chptr;
@@ -176,7 +175,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
                            source_p->name, source_p->username,
                            source_p->host, name, who->name, comment);
 
-    sendto_server(client_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
                   ID(source_p), chptr->chname, ID(who), comment);
     remove_user_from_channel(ms_target);
   }

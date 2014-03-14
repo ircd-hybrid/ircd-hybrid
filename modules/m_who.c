@@ -244,8 +244,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 **      parv[2] = additional selection flag, only 'o' for now.
 */
 static int
-m_who(struct Client *client_p, struct Client *source_p,
-      int parc, char *parv[])
+m_who(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;

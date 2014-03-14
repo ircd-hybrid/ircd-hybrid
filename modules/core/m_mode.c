@@ -48,8 +48,7 @@
  * parv[1] - channel
  */
 static int
-m_mode(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_mode(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   struct Membership *member = NULL;
@@ -66,7 +65,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
   if (!IsChanPrefix(*parv[1]))
   {
     /* if here, it has to be a non-channel name */
-    set_user_mode(client_p, source_p, parc, parv);
+    set_user_mode(source_p, parc, parv);
     return 0;
   }
 
@@ -119,7 +118,7 @@ m_mode(struct Client *client_p, struct Client *source_p,
  *		  parv[3] = modestring
  */
 static int
-ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_tmode(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   struct Membership *member = NULL;
@@ -161,7 +160,7 @@ ms_tmode(struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * side effects	- propagates unchanged bmask line to servers,
  */
 static int
-ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_bmask(struct Client *source_p, int parc, char *parv[])
 {
   char modebuf[IRCD_BUFSIZE];
   char parabuf[IRCD_BUFSIZE];
@@ -250,7 +249,7 @@ ms_bmask(struct Client *client_p, struct Client *source_p, int parc, char *parv[
   }
 
   /* assumption here is that since the server sent BMASK, they are TS6, so they have an ID */
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s BMASK %lu %s %s :%s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s BMASK %lu %s %s :%s",
                 source_p->id, (unsigned long)chptr->channelts, chptr->chname,
                 parv[3], parv[4]);
   return 0;

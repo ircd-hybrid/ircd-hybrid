@@ -39,8 +39,7 @@
  *  - added by Darren Reed Jul 13 1992.
  */
 static int
-mo_close(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_close(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
   unsigned int closed = dlink_list_length(&unknown_list);

@@ -163,7 +163,7 @@ read_links_file(void)
  *      returns: (see #defines)
  */
 int
-hunt_server(struct Client *client_p, struct Client *source_p, const char *command,
+hunt_server(struct Client *source_p, const char *command,
             const int server, const int parc, char *parv[])
 {
   struct Client *target_p = NULL;
@@ -185,7 +185,7 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
   if (MyClient(source_p))
     target_p = hash_find_client(parv[server]);
   else
-    target_p = find_person(client_p, parv[server]);
+    target_p = find_person(source_p, parv[server]);
 
   if (target_p)
     if (target_p->from == source_p->from && !MyConnect(target_p))
@@ -222,7 +222,7 @@ hunt_server(struct Client *client_p, struct Client *source_p, const char *comman
             continue;
           target_p = ptr->data;
 
-          if (IsRegistered(target_p) && (target_p != client_p))
+          if (IsRegistered(target_p) && (target_p != source_p->from))
             break;
         }
       }

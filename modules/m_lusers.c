@@ -47,8 +47,7 @@
  * 2003 hacked parv[1] back in, by request of efnet admins/opers -Dianora
  */
 static int
-m_lusers(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_lusers(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
@@ -62,7 +61,7 @@ m_lusers(struct Client *client_p, struct Client *source_p,
   last_used = CurrentTime;
 
   if (parc > 2 && !ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2,
+    if (hunt_server(source_p, ":%s LUSERS %s :%s", 2,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
@@ -76,11 +75,10 @@ m_lusers(struct Client *client_p, struct Client *source_p,
  * parv[2] = server to query
  */
 static int
-ms_lusers(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_lusers(struct Client *source_p, int parc, char *parv[])
 {
   if (parc > 2)
-    if (hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2,
+    if (hunt_server(source_p, ":%s LUSERS %s :%s", 2,
                     parc, parv) != HUNTED_ISME)
         return 0;
 

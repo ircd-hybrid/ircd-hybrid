@@ -259,14 +259,13 @@ flood_attack_channel(int p_or_n, struct Client *source_p,
  *
  * inputs	- flag privmsg or notice
  * 		- pointer to command "PRIVMSG" or "NOTICE"
- *		- pointer to client_p
  *		- pointer to source_p
  *		- pointer to channel
  * output	- NONE
  * side effects	- message given channel
  */
 static void
-msg_channel(int p_or_n, const char *command, struct Client *client_p,
+msg_channel(int p_or_n, const char *command,
             struct Client *source_p, struct Channel *chptr, char *text)
 {
   int result = 0;
@@ -283,7 +282,7 @@ msg_channel(int p_or_n, const char *command, struct Client *client_p,
   {
     if (result == CAN_SEND_OPV ||
         !flood_attack_channel(p_or_n, source_p, chptr))
-      sendto_channel_butone(client_p, source_p, chptr, 0, "%s %s :%s",
+      sendto_channel_butone(source_p->from, source_p, chptr, 0, "%s %s :%s",
                             command, chptr->chname, text);
   }
   else
@@ -308,7 +307,6 @@ msg_channel(int p_or_n, const char *command, struct Client *client_p,
  * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
  *		  say NOTICE must not auto reply
  *		- pointer to command, "PRIVMSG" or "NOTICE"
- *		- pointer to client_p
  *		- pointer to source_p
  *		- pointer to channel
  *		- flags
@@ -317,7 +315,7 @@ msg_channel(int p_or_n, const char *command, struct Client *client_p,
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
+msg_channel_flags(int p_or_n, const char *command,
                   struct Client *source_p, struct Channel *chptr,
                   int flags, char *text)
 {
@@ -345,7 +343,7 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
   if (MyClient(source_p) && p_or_n != NOTICE)
     source_p->localClient->last_privmsg = CurrentTime;
 
-  sendto_channel_butone(client_p, source_p, chptr, type, "%s %c%s :%s",
+  sendto_channel_butone(source_p->from, source_p, chptr, type, "%s %c%s :%s",
                         command, c, chptr->chname, text);
 }
 
@@ -469,7 +467,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
  *		- Dianora
  */
 static void
-handle_special(int p_or_n, const char *command, struct Client *client_p,
+handle_special(int p_or_n, const char *command,
                struct Client *source_p, char *nick, char *text)
 {
   struct Client *target_p;
@@ -584,7 +582,7 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
       return;
     }
 
-    sendto_match_butone(IsServer(client_p) ? client_p : NULL, source_p,
+    sendto_match_butone(IsServer(source_p->from) ? source_p->from : NULL, source_p,
                         nick + 1, (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
                         "%s $%s :%s", command, nick, text);
 
@@ -610,7 +608,7 @@ handle_special(int p_or_n, const char *command, struct Client *client_p,
  *
  */
 static int
-build_target_list(int p_or_n, const char *command, struct Client *client_p,
+build_target_list(int p_or_n, const char *command,
                   struct Client *source_p, char *nicks_channels, char *text)
 {
   int type = 0;
@@ -659,7 +657,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
     }
 
     /* Look for a privmsg to another client */
-    if ((target_p = find_person(client_p, nick)))
+    if ((target_p = find_person(source_p, nick)))
     {
       if (!duplicate_ptr(target_p))
       {
@@ -746,7 +744,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
     }
 
     if (*nick == '$' || strchr(nick, '@'))
-      handle_special(p_or_n, command, client_p, source_p, nick, text);
+      handle_special(p_or_n, command, source_p, nick, text);
     else
     {
       if (p_or_n != NOTICE)
@@ -764,12 +762,11 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 /*
  * inputs       - flag privmsg or notice
  *              - pointer to command "PRIVMSG" or "NOTICE"
- *              - pointer to client_p
  *              - pointer to source_p
  *              - pointer to channel
  */
 static void
-m_message(int p_or_n, const char *command, struct Client *client_p,
+m_message(int p_or_n, const char *command,
           struct Client *source_p, int parc, char *parv[])
 {
   int i = 0;
@@ -792,7 +789,7 @@ m_message(int p_or_n, const char *command, struct Client *client_p,
   if (MyClient(source_p) && !IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  if (build_target_list(p_or_n, command, client_p, source_p, parv[1], parv[2]) < 0)
+  if (build_target_list(p_or_n, command, source_p, parv[1], parv[2]) < 0)
     return;
 
   for (i = 0; i < ntargets; ++i)
@@ -800,11 +797,11 @@ m_message(int p_or_n, const char *command, struct Client *client_p,
     switch (targets[i].type)
     {
       case ENTITY_CHANNEL:
-        msg_channel(p_or_n, command, client_p, source_p, targets[i].ptr, parv[2]);
+        msg_channel(p_or_n, command, source_p, targets[i].ptr, parv[2]);
         break;
 
       case ENTITY_CHANOPS_ON_CHANNEL:
-        msg_channel_flags(p_or_n, command, client_p, source_p,
+        msg_channel_flags(p_or_n, command, source_p,
                           targets[i].ptr, targets[i].flags, parv[2]);
         break;
 
@@ -816,8 +813,7 @@ m_message(int p_or_n, const char *command, struct Client *client_p,
 }
 
 static int
-m_privmsg(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+m_privmsg(struct Client *source_p, int parc, char *parv[])
 {
   /*
    * Servers have no reason to send privmsgs, yet sometimes there is cause
@@ -826,15 +822,14 @@ m_privmsg(struct Client *client_p, struct Client *source_p,
   if (!IsClient(source_p))
     return 0;
 
-  m_message(PRIVMSG, "PRIVMSG", client_p, source_p, parc, parv);
+  m_message(PRIVMSG, "PRIVMSG", source_p, parc, parv);
   return 0;
 }
 
 static int
-m_notice(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_notice(struct Client *source_p, int parc, char *parv[])
 {
-  m_message(NOTICE, "NOTICE", client_p, source_p, parc, parv);
+  m_message(NOTICE, "NOTICE", source_p, parc, parv);
   return 0;
 }
 

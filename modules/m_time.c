@@ -43,8 +43,7 @@
  *      parv[1] = servername
  */
 static int
-m_time(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_time(struct Client *source_p, int parc, char *parv[])
 {
   /* this is not rate limited, so end the grace period */
   if (!IsFloodDone(source_p))
@@ -52,7 +51,7 @@ m_time(struct Client *client_p, struct Client *source_p,
 
   /* This is safe enough to use during non hidden server mode */
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
+    if (hunt_server(source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
       return 0;
 
   sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
@@ -65,10 +64,9 @@ m_time(struct Client *client_p, struct Client *source_p,
  *      parv[1] = servername
  */
 static int
-mo_time(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_time(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
+  if (hunt_server(source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
     sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
 
   return 0;

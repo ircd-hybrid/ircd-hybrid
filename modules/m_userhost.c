@@ -41,8 +41,7 @@
  * information only (no spurious AWAY labels or channels).
  */
 static int
-m_userhost(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+m_userhost(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
   char buf[IRCD_BUFSIZE];
@@ -58,7 +57,7 @@ m_userhost(struct Client *client_p, struct Client *source_p,
   for (nick = strtoken(&p, parv[1], " "); nick && i++ < 5;
        nick = strtoken(&p,    NULL, " "))
   {
-    if ((target_p = find_person(client_p, nick)) != NULL)
+    if ((target_p = find_person(source_p, nick)) != NULL)
     {
       /*
        * Show real IP for USERHOST on yourself.

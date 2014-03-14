@@ -37,8 +37,6 @@
 
 /*! \brief CERTFP command handler (called by remotely connected clients)
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -49,8 +47,7 @@
  *      - parv[1] = certificate fingerprint
  */
 static int
-ms_certfp(struct Client *source_p, struct Client *client_p,
-          int parc, char *parv[])
+ms_certfp(struct Client *source_p, int parc, char *parv[])
 {
   if (!IsClient(source_p))
     return 0;
@@ -58,7 +55,7 @@ ms_certfp(struct Client *source_p, struct Client *client_p,
   MyFree(source_p->certfp);
   source_p->certfp = strdup(parv[1]);
 
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s CERTFP %s",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s CERTFP %s",
                 ID(source_p), parv[1]);
   return 0;
 }

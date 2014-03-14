@@ -1035,7 +1035,7 @@ chm_limit(struct Client *source_p,
   {
     char *lstr = parv[(*parn)++];
 
-    if ((limit = atoi(lstr)) <= 0)
+    if (EmptyString(lstr) || (limit = atoi(lstr)) <= 0)
       return;
 
     sprintf(lstr, "%d", limit);
@@ -1097,7 +1097,7 @@ chm_key(struct Client *source_p,
     else
       fix_key_old(key);
 
-    if (*key == '\0')
+    if (EmptyString(key))
       return;
 
     assert(key[0] != ' ');

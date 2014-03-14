@@ -1193,7 +1193,6 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 {
   unsigned int i;
   int limit;
-  char *lstr;
 
   if (alev < CHACCESS_HALFOP)
   {
@@ -1210,9 +1209,9 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 
   if ((dir == MODE_ADD) && parc > *parn)
   {
-    lstr = parv[(*parn)++];
+    char *lstr = parv[(*parn)++];
 
-    if ((limit = atoi(lstr)) <= 0)
+    if (EmptyString(lstr) || (limit = atoi(lstr)) <= 0)
       return;
 
     sprintf(lstr, "%d", limit);
@@ -1255,7 +1254,6 @@ chm_key(struct Client *client_p, struct Client *source_p,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   unsigned int i;
-  char *key;
 
   if (alev < CHACCESS_HALFOP)
   {
@@ -1272,14 +1270,14 @@ chm_key(struct Client *client_p, struct Client *source_p,
 
   if ((dir == MODE_ADD) && parc > *parn)
   {
-    key = parv[(*parn)++];
+    char *key = parv[(*parn)++];
 
     if (MyClient(source_p))
       fix_key(key);
     else
       fix_key_old(key);
 
-    if (*key == '\0')
+    if (EmptyString(key))
       return;
 
     assert(key[0] != ' ');

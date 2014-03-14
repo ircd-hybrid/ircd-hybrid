@@ -1015,9 +1015,8 @@ chm_limit(struct Client *source_p,
           struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  unsigned int i;
-  int limit;
-  char *lstr;
+  unsigned int i = 0;
+  int limit = 0;
 
   if (alev < CHACCESS_HALFOP)
   {
@@ -1034,15 +1033,15 @@ chm_limit(struct Client *source_p,
 
   if ((dir == MODE_ADD) && parc > *parn)
   {
-    lstr = parv[(*parn)++];
+    char *lstr = parv[(*parn)++];
 
     if ((limit = atoi(lstr)) <= 0)
       return;
 
     sprintf(lstr, "%d", limit);
 
-    /* if somebody sets MODE #channel +ll 1 2, accept latter --fl */
-    for (i = 0; i < mode_count; i++)
+    /* If somebody sets MODE #channel +ll 1 2, accept latter --fl */
+    for (i = 0; i < mode_count; ++i)
       if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
 
@@ -1074,8 +1073,7 @@ chm_key(struct Client *source_p,
         struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  unsigned int i;
-  char *key;
+  unsigned int i = 0;
 
   if (alev < CHACCESS_HALFOP)
   {
@@ -1092,7 +1090,7 @@ chm_key(struct Client *source_p,
 
   if ((dir == MODE_ADD) && parc > *parn)
   {
-    key = parv[(*parn)++];
+    char *key = parv[(*parn)++];
 
     if (MyClient(source_p))
       fix_key(key);
@@ -1105,8 +1103,8 @@ chm_key(struct Client *source_p,
     assert(key[0] != ' ');
     strlcpy(chptr->mode.key, key, sizeof(chptr->mode.key));
 
-    /* if somebody does MODE #channel +kk a b, accept latter --fl */
-    for (i = 0; i < mode_count; i++)
+    /* If somebody does MODE #channel +kk a b, accept latter --fl */
+    for (i = 0; i < mode_count; ++i)
       if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
 
@@ -1439,40 +1437,22 @@ get_channel_access(const struct Client *source_p,
   return CHACCESS_PEON;
 }
 
-/* void send_cap_mode_changes(struct Client *client_p,
- *                        struct Client *source_p,
- *                        struct Channel *chptr, int cap, int nocap)
+/* send_mode_changes_server()
  * Input: The client sending(client_p), the source client(source_p),
  *        the channel to send mode changes for(chptr)
  * Output: None.
- * Side-effects: Sends the appropriate mode changes to capable servers.
+ * Side-effects: Sends the appropriate mode changes to servers.
  *
- * send_cap_mode_changes() will loop the server list itself, because
- * at this point in time we have 4 capabs for channels, CAP_IE, CAP_EX,
- * and a server could support any number of these..
- * so we make the modebufs per server, tailoring them to each servers
- * specific demand.  Its not very pretty, but its one of the few realistic
- * ways to handle having this many capabs for channel modes.. --fl_
- *
- * Reverted back to my original design, except that we now keep a count
- * of the number of servers which each combination as an optimisation, so
- * the capabs combinations which are not needed are not worked out. -A1kmm
  */
-/* rewritten to ensure parabuf < MODEBUFLEN -db */
-
 static void
 send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 {
   unsigned int i;
-  int mbl, pbl, arglen, nc, mc;
-  int len;
+  int mbl = 0, pbl = 0, arglen = 0, nc = 0, mc = 0;
+  int len = 0;
   const char *arg = NULL;
   char *parptr;
   int dir = MODE_QUERY;
-
-  mc = 0;
-  nc = 0;
-  pbl = 0;
 
   parabuf[0] = '\0';
   parptr = parabuf;
@@ -1480,13 +1460,9 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
   mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
                  (unsigned long)chptr->channelts, chptr->chname);
 
-  /* loop the list of - modes we have */
+  /* loop the list of modes we have */
   for (i = 0; i < mode_count; ++i)
   {
-    /* if they dont support the cap we need, or they do support a cap they
-     * cant have, then dont add it to the modebuf.. that way they wont see
-     * the mode
-     */
     if (mode_changes[i].letter == 0) /* XXX: can it ever happen? */
       continue;
 
@@ -1499,7 +1475,6 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
       arglen = strlen(arg);
     else
       arglen = 0;
-
 
     /*
      * If we're creeping past the buf size, we need to send it and make
@@ -1564,13 +1539,13 @@ static void
 send_mode_changes(struct Client *source_p, struct Channel *chptr)
 {
   unsigned int i;
-  int mbl, pbl, arglen, nc, mc;
-  int len;
+  int mbl = 0, pbl = 0, arglen = 0, nc = 0, mc = 0;
+  int len = 0;
   const char *arg = NULL;
   char *parptr;
   int dir = MODE_QUERY;
 
-  /* bail out if we have nothing to do... */
+  /* Bail out if we have nothing to do... */
   if (!mode_count)
     return;
 
@@ -1581,10 +1556,6 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
   else
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
                    source_p->username, source_p->host, chptr->chname);
-
-  mc = 0;
-  nc = 0;
-  pbl = 0;
 
   parabuf[0] = '\0';
   parptr = parabuf;
@@ -1653,9 +1624,6 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
 
   if (nc != 0)
     sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", modebuf, parabuf);
-
-  nc = 0;
-  mc = 0;
 
   send_mode_changes_server(source_p, chptr);
 }

@@ -965,17 +965,8 @@ send_umode_out(struct Client *client_p, struct Client *source_p,
   send_umode(NULL, source_p, old, SEND_UMODES, buf);
 
   if (buf[0])
-  {
-    DLINK_FOREACH(ptr, serv_list.head)
-    {
-      struct Client *target_p = ptr->data;
-
-      if ((target_p != client_p) && (target_p != source_p))
-        sendto_one(target_p, ":%s MODE %s :%s",
-                   ID_or_name(source_p, target_p),
-                   ID_or_name(source_p, target_p), buf);
-    }
-  }
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s MODE %s :%s",
+                  ID(source_p), ID(source_p), buf);
 
   if (client_p && MyClient(client_p))
     send_umode(client_p, source_p, old, 0xffffffff, buf);

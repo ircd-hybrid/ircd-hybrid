@@ -421,7 +421,7 @@ clear_ban_cache_client(struct Client *client_p)
 
 /* Mode functions handle mode changes for a particular mode... */
 static void
-chm_nosuch(struct Client *client_p, struct Client *source_p,
+chm_nosuch(struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
@@ -433,7 +433,7 @@ chm_nosuch(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-chm_simple(struct Client *client_p, struct Client *source_p, struct Channel *chptr,
+chm_simple(struct Client *source_p, struct Channel *chptr,
            int parc, int *parn, char **parv, int *errors, int alev, int dir,
            char c, unsigned int d)
 {
@@ -487,9 +487,9 @@ chm_simple(struct Client *client_p, struct Client *source_p, struct Channel *chp
 }
 
 static void
-chm_registered(struct Client *client_p, struct Client *source_p, struct Channel *chptr,
-           int parc, int *parn, char **parv, int *errors, int alev, int dir,
-           char c, unsigned int d)
+chm_registered(struct Client *source_p, struct Channel *chptr,
+               int parc, int *parn, char **parv, int *errors, int alev, int dir,
+               char c, unsigned int d)
 {
   if (!IsServer(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
   {
@@ -540,9 +540,9 @@ chm_registered(struct Client *client_p, struct Client *source_p, struct Channel 
 }
 
 static void
-chm_operonly(struct Client *client_p, struct Client *source_p, struct Channel *chptr,
-            int parc, int *parn, char **parv, int *errors, int alev, int dir,
-            char c, unsigned int d)
+chm_operonly(struct Client *source_p, struct Channel *chptr,
+             int parc, int *parn, char **parv, int *errors, int alev, int dir,
+             char c, unsigned int d)
 {
   if ((alev < CHACCESS_HALFOP) ||
       ((d == MODE_PRIVATE) && (alev < CHACCESS_CHANOP)))
@@ -600,7 +600,7 @@ chm_operonly(struct Client *client_p, struct Client *source_p, struct Channel *c
 }
 
 static void
-chm_ban(struct Client *client_p, struct Client *source_p,
+chm_ban(struct Client *source_p,
         struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
@@ -644,7 +644,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++*parn;
 
-  if (IsServer(client_p))
+  if (!MyConnect(source_p))
     if (strchr(mask, ' '))
       return;
 
@@ -670,7 +670,7 @@ chm_ban(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-chm_except(struct Client *client_p, struct Client *source_p,
+chm_except(struct Client *source_p,
            struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
@@ -715,7 +715,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++*parn;
 
-  if (IsServer(client_p))
+  if (!MyConnect(source_p))
     if (strchr(mask, ' '))
       return;
 
@@ -741,7 +741,7 @@ chm_except(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-chm_invex(struct Client *client_p, struct Client *source_p,
+chm_invex(struct Client *source_p,
           struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
@@ -786,7 +786,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++*parn;
 
-  if (IsServer(client_p))
+  if (!MyConnect(source_p))
     if (strchr(mask, ' '))
       return;
 
@@ -812,7 +812,7 @@ chm_invex(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-chm_voice(struct Client *client_p, struct Client *source_p,
+chm_voice(struct Client *source_p,
           struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
@@ -872,9 +872,9 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 
 #ifdef HALFOPS
 static void
-chm_hop(struct Client *client_p, struct Client *source_p,
-       struct Channel *chptr, int parc, int *parn,
-       char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_hop(struct Client *source_p,
+        struct Channel *chptr, int parc, int *parn,
+        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
   struct Client *target_p;
@@ -949,7 +949,7 @@ chm_hop(struct Client *client_p, struct Client *source_p,
 #endif
 
 static void
-chm_op(struct Client *client_p, struct Client *source_p,
+chm_op(struct Client *source_p,
        struct Channel *chptr, int parc, int *parn,
        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
@@ -1011,7 +1011,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-chm_limit(struct Client *client_p, struct Client *source_p,
+chm_limit(struct Client *source_p,
           struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
@@ -1070,7 +1070,7 @@ chm_limit(struct Client *client_p, struct Client *source_p,
 }
 
 static void
-chm_key(struct Client *client_p, struct Client *source_p,
+chm_key(struct Client *source_p,
         struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
@@ -1136,7 +1136,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
 
 struct ChannelMode
 {
-  void (*func)(struct Client *, struct Client *,
+  void (*func)(struct Client *,
                struct Channel *, int, int *, char **,
                int *, int, int, char, unsigned int);
   unsigned int d;
@@ -1461,8 +1461,7 @@ get_channel_access(const struct Client *source_p,
 /* rewritten to ensure parabuf < MODEBUFLEN -db */
 
 static void
-send_mode_changes_server(struct Client *client_p, struct Client *source_p,
-                         struct Channel *chptr)
+send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 {
   unsigned int i;
   int mbl, pbl, arglen, nc, mc;
@@ -1511,7 +1510,7 @@ send_mode_changes_server(struct Client *client_p, struct Client *source_p,
         (pbl + arglen + BAN_FUDGE) >= MODEBUFLEN)
     {
       if (nc != 0)
-        sendto_server(client_p, NOCAPS, NOCAPS, "%s %s", modebuf, parabuf);
+        sendto_server(source_p, NOCAPS, NOCAPS, "%s %s", modebuf, parabuf);
       nc = 0;
       mc = 0;
 
@@ -1547,7 +1546,7 @@ send_mode_changes_server(struct Client *client_p, struct Client *source_p,
     parabuf[pbl - 1] = '\0';
 
   if (nc != 0)
-    sendto_server(client_p, NOCAPS, NOCAPS, "%s %s", modebuf, parabuf);
+    sendto_server(source_p, NOCAPS, NOCAPS, "%s %s", modebuf, parabuf);
 }
 
 /* void send_mode_changes(struct Client *client_p,
@@ -1562,8 +1561,7 @@ send_mode_changes_server(struct Client *client_p, struct Client *source_p,
  */
 /* ensure parabuf < MODEBUFLEN -db */
 static void
-send_mode_changes(struct Client *client_p, struct Client *source_p,
-                  struct Channel *chptr)
+send_mode_changes(struct Client *source_p, struct Channel *chptr)
 {
   unsigned int i;
   int mbl, pbl, arglen, nc, mc;
@@ -1659,7 +1657,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   nc = 0;
   mc = 0;
 
-  send_mode_changes_server(client_p, source_p, chptr);
+  send_mode_changes_server(source_p, chptr);
 }
 
 /* void set_channel_mode(struct Client *client_p, struct Client *source_p,
@@ -1674,7 +1672,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
  *               clients.
  */
 void
-set_channel_mode(struct Client *client_p, struct Client *source_p, struct Channel *chptr,
+set_channel_mode(struct Client *source_p, struct Channel *chptr,
                  struct Membership *member, int parc, char *parv[])
 {
   int dir = MODE_ADD;
@@ -1705,12 +1703,12 @@ set_channel_mode(struct Client *client_p, struct Client *source_p, struct Channe
       {
         struct ChannelMode *tptr = &ModeTable[(unsigned char)c];
 
-        tptr->func(client_p, source_p, chptr, parc, &parn,
-                   parv, &errors, alevel, dir, c, tptr->d);
+        tptr->func(source_p, chptr, parc, &parn, parv,
+                   &errors, alevel, dir, c, tptr->d);
         break;
       }
     }
   }
 
-  send_mode_changes(client_p, source_p, chptr);
+  send_mode_changes(source_p, chptr);
 }

@@ -77,7 +77,12 @@ ms_svsnick(struct Client *client_p, struct Client *source_p,
 
   if ((exists_p = hash_find_client(parv[2])))
   {
-    if (IsUnknown(exists_p))
+    if (target_p == exists_p)
+    {
+      if (!strcmp(target_p->name, parv[2]))
+        return 0;
+    }
+    else if (IsUnknown(exists_p))
       exit_client(exists_p, &me, "SVSNICK Override");
     else
     {

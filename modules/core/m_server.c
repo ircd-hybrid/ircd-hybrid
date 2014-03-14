@@ -116,6 +116,19 @@ mr_server(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
+  if (!valid_sid(client_p->id))
+  {
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "Link %s introduced server with bogus server ID %s",
+                         get_client_name(client_p, SHOW_IP), client_p->id);
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "Link %s introduced server with bogus server ID %s",
+                         get_client_name(client_p, MASK_IP), client_p->id);
+    sendto_one(client_p, "ERROR :Bogus server ID introduced");
+    exit_client(client_p, &me, "Bogus server ID intoduced");
+    return 0;
+  }
+
   /* Now we just have to call check_server and everything should
    * be check for us... -A1kmm.
    */
@@ -201,7 +214,7 @@ mr_server(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  if ((client_p->id[0] && (target_p = hash_find_id(client_p->id))))
+  if ((target_p = hash_find_id(client_p->id)))
   {
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",

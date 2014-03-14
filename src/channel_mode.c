@@ -53,6 +53,23 @@ static unsigned int mode_limit;  /* number of modes set other than simple */
 static unsigned int simple_modes_mask;  /* bit mask of simple modes already set */
 extern mp_pool_t *ban_pool;
 
+const struct mode_letter chan_modes[] =
+{
+  { MODE_NOCTRL,     'c' },
+  { MODE_INVITEONLY, 'i' },
+  { MODE_MODERATED,  'm' },
+  { MODE_NOPRIVMSGS, 'n' },
+  { MODE_PRIVATE,    'p' },
+  { MODE_REGISTERED, 'r' },
+  { MODE_SECRET,     's' },
+  { MODE_TOPICLIMIT, 't' },
+  { MODE_MODREG,     'M' },
+  { MODE_OPERONLY,   'O' },
+  { MODE_REGONLY,    'R' },
+  { MODE_SSLONLY,    'S' },
+  { 0, '\0' }
+};
+
 
 /* check_string()
  *
@@ -263,23 +280,6 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
   return 0;
 }
 
-const struct mode_letter chan_modes[] =
-{
-  { MODE_NOCTRL,     'c' },
-  { MODE_INVITEONLY, 'i' },
-  { MODE_MODERATED,  'm' },
-  { MODE_NOPRIVMSGS, 'n' },
-  { MODE_PRIVATE,    'p' },
-  { MODE_REGISTERED, 'r' },
-  { MODE_SECRET,     's' },
-  { MODE_TOPICLIMIT, 't' },
-  { MODE_MODREG,     'M' },
-  { MODE_OPERONLY,   'O' },
-  { MODE_REGONLY,    'R' },
-  { MODE_SSLONLY,    'S' },
-  { 0, '\0' }
-};
-
 /* channel_modes()
  *
  * inputs       - pointer to channel
@@ -335,7 +335,7 @@ fix_key(char *arg)
 {
   unsigned char *s, *t, c;
 
-  for (s = t = (unsigned char *)arg; (c = *s); s++)
+  for (s = t = (unsigned char *)arg; (c = *s); ++s)
   {
     c &= 0x7f;
 
@@ -361,7 +361,7 @@ fix_key_old(char *arg)
 {
   unsigned char *s, *t, c;
 
-  for (s = t = (unsigned char *)arg; (c = *s); s++)
+  for (s = t = (unsigned char *)arg; (c = *s); ++s)
   {
     c &= 0x7f;
 
@@ -372,6 +372,37 @@ fix_key_old(char *arg)
 
   *t = '\0';
   return arg;
+}
+
+/*
+ * inputs       - pointer to channel
+ * output       - none
+ * side effects - clear ban cache
+ */
+void
+clear_ban_cache(struct Channel *chptr)
+{
+  dlink_node *ptr = NULL;
+
+  DLINK_FOREACH(ptr, chptr->members.head)
+  {
+    struct Membership *ms = ptr->data;
+
+    if (MyConnect(ms->client_p))
+      ms->flags &= ~(CHFL_BAN_SILENCED|CHFL_BAN_CHECKED);
+  }
+}
+
+void
+clear_ban_cache_client(struct Client *client_p)
+{
+  dlink_node *ptr = NULL;
+
+  DLINK_FOREACH(ptr, client_p->channel.head)
+  {
+    struct Membership *ms = ptr->data;
+    ms->flags &= ~(CHFL_BAN_SILENCED|CHFL_BAN_CHECKED);
+  }
 }
 
 /* bitmasks for various error returns that set_channel_mode should only return
@@ -778,37 +809,6 @@ chm_invex(struct Client *client_p, struct Client *source_p,
   mode_changes[mode_count].mems = ONLY_CHANOPS;
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count++].arg = mask;
-}
-
-/*
- * inputs	- pointer to channel
- * output	- none
- * side effects	- clear ban cache
- */
-void
-clear_ban_cache(struct Channel *chptr)
-{
-  dlink_node *ptr = NULL;
-
-  DLINK_FOREACH(ptr, chptr->members.head)
-  {
-    struct Membership *ms = ptr->data;
-
-    if (MyConnect(ms->client_p))
-      ms->flags &= ~(CHFL_BAN_SILENCED|CHFL_BAN_CHECKED);
-  }
-}
-
-void
-clear_ban_cache_client(struct Client *client_p)
-{
-  dlink_node *ptr = NULL;
-
-  DLINK_FOREACH(ptr, client_p->channel.head)
-  {
-    struct Membership *ms = ptr->data;
-    ms->flags &= ~(CHFL_BAN_SILENCED|CHFL_BAN_CHECKED);
-  }
 }
 
 static void
@@ -1544,7 +1544,7 @@ send_mode_changes_server(struct Client *client_p, struct Client *source_p,
   }
 
   if (pbl && parabuf[pbl - 1] == ' ')
-    parabuf[pbl - 1] = 0;
+    parabuf[pbl - 1] = '\0';
 
   if (nc != 0)
     sendto_server(client_p, NOCAPS, NOCAPS, "%s %s", modebuf, parabuf);
@@ -1651,7 +1651,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
   }
 
   if (pbl && parabuf[pbl - 1] == ' ')
-    parabuf[pbl - 1] = 0;
+    parabuf[pbl - 1] = '\0';
 
   if (nc != 0)
     sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", modebuf, parabuf);

@@ -73,12 +73,7 @@ server_die(const char *mesg, int rboot)
                me.name, target_p->name, buffer);
   }
 
-  DLINK_FOREACH(ptr, serv_list.head)
-  {
-    target_p = ptr->data;
-
-    sendto_one(target_p, ":%s ERROR :%s", me.name, buffer);
-  }
+  sendto_server(NULL, NOCAPS, NOCAPS, ":%s ERROR :%s", ID(&me), buffer);
 
   ilog(LOG_TYPE_IRCD, "%s", buffer);
 

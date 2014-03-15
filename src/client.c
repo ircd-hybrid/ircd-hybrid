@@ -513,7 +513,7 @@ find_person(const struct Client *const client_p, const char *name)
 
   if (IsDigit(*name))
   {
-    if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE))
+    if (IsServer(client_p->from) || HasFlag(client_p->from, FLAGS_SERVICE))
       target_p = hash_find_id(name);
   }
   else
@@ -531,7 +531,7 @@ find_person(const struct Client *const client_p, const char *name)
 struct Client *
 find_chasing(struct Client *source_p, const char *name, int *const chasing)
 {
-  struct Client *who = find_person(source_p->from, name);
+  struct Client *who = find_person(source_p, name);
 
   if (chasing)
     *chasing = 0;

@@ -27,6 +27,5 @@
 #ifndef INCLUDED_restart_h
 #define INCLUDED_restart_h
 
-extern void restart(const char *);
 extern void server_die(const char *, int);
 #endif

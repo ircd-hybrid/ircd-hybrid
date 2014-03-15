@@ -37,18 +37,7 @@
 #include "conf_db.h"
 
 void
-restart(const char *mesg)
-{
-  static int was_here = 0; /* redundant due to restarting flag below */
-
-  if (was_here++)
-    abort();
-
-  server_die(mesg, 1);
-}
-
-void
-server_die(const char *mesg, int rboot)
+server_die(const char *message, int rboot)
 {
   char buffer[IRCD_BUFSIZE] = "";
   dlink_node *ptr = NULL;
@@ -57,12 +46,12 @@ server_die(const char *mesg, int rboot)
   if (rboot && was_here++)
     abort();
 
-  if (EmptyString(mesg))
+  if (EmptyString(message))
     snprintf(buffer, sizeof(buffer), "Server %s",
              rboot ? "Restarting" : "Terminating");
   else
     snprintf(buffer, sizeof(buffer), "Server %s: %s",
-             rboot ? "Restarting" : "Terminating", mesg);
+             rboot ? "Restarting" : "Terminating", message);
 
   DLINK_FOREACH(ptr, local_client_list.head)
     sendto_one_notice(ptr->data, &me, ":%s", buffer);

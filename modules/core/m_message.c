@@ -447,8 +447,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
 
 /* handle_special()
  *
- * inputs	- server pointer
- *		- client pointer
+ * inputs	- client pointer
  *		- nick stuff to grok for opers
  *		- text to send if grok
  * output	- none
@@ -467,8 +466,8 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
  *		- Dianora
  */
 static void
-handle_special(int p_or_n, const char *command,
-               struct Client *source_p, char *nick, char *text)
+handle_special(int p_or_n, const char *command, struct Client *source_p,
+               char *nick, char *text)
 {
   struct Client *target_p;
   char *host;
@@ -593,8 +592,7 @@ handle_special(int p_or_n, const char *command,
 
 /* build_target_list()
  *
- * inputs	- pointer to given client_p (server)
- *		- pointer to given source (oper/client etc.)
+ * inputs	- pointer to given source (oper/client etc.)
  *		- pointer to list of nicks/channels
  *		- pointer to table to place results
  *		- pointer to text (only used if source_p is an oper)
@@ -608,8 +606,8 @@ handle_special(int p_or_n, const char *command,
  *
  */
 static int
-build_target_list(int p_or_n, const char *command,
-                  struct Client *source_p, char *nicks_channels, char *text)
+build_target_list(int p_or_n, const char *command, struct Client *source_p,
+                  char *nicks_channels, char *text)
 {
   int type = 0;
   char *p = NULL, *nick = NULL;
@@ -766,8 +764,8 @@ build_target_list(int p_or_n, const char *command,
  *              - pointer to channel
  */
 static void
-m_message(int p_or_n, const char *command,
-          struct Client *source_p, int parc, char *parv[])
+m_message(int p_or_n, const char *command, struct Client *source_p,
+          int parc, char *parv[])
 {
   int i = 0;
 

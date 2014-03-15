@@ -1432,7 +1432,7 @@ get_channel_access(const struct Client *source_p,
 }
 
 /* send_mode_changes_server()
- * Input: The client sending(client_p), the source client(source_p),
+ * Input: the source client(source_p),
  *        the channel to send mode changes for(chptr)
  * Output: None.
  * Side-effects: Sends the appropriate mode changes to servers.
@@ -1622,10 +1622,8 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
   send_mode_changes_server(source_p, chptr);
 }
 
-/* void set_channel_mode(struct Client *client_p, struct Client *source_p,
- *               struct Channel *chptr, int parc, char **parv,
- *               char *chname)
- * Input: The client we received this from, the client this originated
+/* 
+ * Input: The the client this originated
  *        from, the channel, the parameter count starting at the modes,
  *        the parameters, the channel name.
  * Output: None.

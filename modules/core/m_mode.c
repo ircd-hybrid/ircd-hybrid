@@ -157,7 +157,7 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
  *		  parv[3] = type of ban to add ('b' 'I' or 'e')
  *		  parv[4] = space delimited list of masks to add
  * outputs	- none
- * side effects	- propagates unchanged bmask line to servers,
+ * side effects	- propagates unchanged bmask line to servers
  */
 static int
 ms_bmask(struct Client *source_p, int parc, char *parv[])
@@ -248,7 +248,6 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", modebuf, parabuf);
   }
 
-  /* assumption here is that since the server sent BMASK, they are TS6, so they have an ID */
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s BMASK %lu %s %s :%s",
                 source_p->id, (unsigned long)chptr->channelts, chptr->chname,
                 parv[3], parv[4]);

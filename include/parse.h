@@ -32,67 +32,31 @@ struct Client;
 
 /*
  * m_functions execute protocol messages on this server:
- * int m_func(struct Client* client_p, struct Client* source_p, int parc, char* parv[]);
+ * int m_func(struct Client *source_p, int parc, char *parv[]);
  *
- *    client_p    is always NON-NULL, pointing to a *LOCAL* client
- *            structure (with an open socket connected!). This
- *            identifies the physical socket where the message
- *            originated (or which caused the m_function to be
- *            executed--some m_functions may call others...).
+ * source_p is the source of the message, defined by the
+ * prefix part of the message if present. If not
+ * then it is the client of the physical connection.
+ * Note that prefixes are only taken from servers.
  *
- *    source_p    is the source of the message, defined by the
- *            prefix part of the message if present. If not
- *            or prefix not found, then source_p==client_p.
+ * parc   number of variable parameter strings (if zero,
+ *        parv is allowed to be NULL)
  *
- *            (!IsServer(client_p)) => (client_p == source_p), because
- *            prefixes are taken *only* from servers...
+ * parv   a NULL terminated list of parameter pointers,
  *
- *            (IsServer(client_p))
- *                    (source_p == client_p) => the message didn't
- *                    have the prefix.
+ *          parv[0] command
+ *          parv[1]...parv[parc - 1] pointers to additional parameters
+ *          parv[parc] == NULL, *always*
  *
- *                    (source_p != client_p && IsServer(source_p) means
- *                    the prefix specified servername. (?)
- *
- *                    (source_p != client_p && !IsServer(source_p) means
- *                    that message originated from a remote
- *                    user (not local).
- *
- *
- *            combining
- *
- *            (!IsServer(source_p)) means that, source_p can safely
- *            taken as defining the target structure of the
- *            message in this server.
- *
- *    *Always* true (if 'parse' and others are working correct):
- *
- *    1)      source_p->from == client_p  (note: client_p->from == client_p)
- *
- *    2)      MyConnect(source_p) <=> source_p == client_p (e.g. source_p
- *            *cannot* be a local connection, unless it's
- *            actually client_p!). [MyConnect(x) should probably
- *            be defined as (x == x->from) --msa ]
- *
- *    parc    number of variable parameter strings (if zero,
- *            parv is allowed to be NULL)
- *
- *    parv    a NULL terminated list of parameter pointers,
- *
- *                    parv[0], sender (prefix string), if not present
- *                            this points to an empty string.
- *                    parv[1]...parv[parc-1]
- *                            pointers to additional parameters
- *                    parv[parc] == NULL, *always*
- *
- *            note:   it is guaranteed that parv[0]..parv[parc-1] are all
- *                    non-NULL pointers.
+ * note: it is guaranteed that parv[0]..parv[parc - 1] are all
+ * non-NULL pointers.
  */
 
 /*
  * MessageHandler
  */
-typedef enum HandlerType {
+typedef enum HandlerType
+{
   UNREGISTERED_HANDLER,
   CLIENT_HANDLER,
   SERVER_HANDLER,
@@ -105,7 +69,6 @@ typedef enum HandlerType {
 /*
  * MessageHandler function
  * Params:
- * struct Client* client_p   - connection message originated from
  * struct Client* source_p   - source of message, may be different from client_p
  * int            parc   - parameter count
  * char*          parv[] - parameter vector
@@ -131,12 +94,6 @@ struct Message
                              */
   uint64_t bytes;  /* bytes received for this message */
 
-  /*
-   * client_p = Connected client ptr
-   * source_p = Source client ptr
-   * parc = parameter count
-   * parv = parameter variable array
-   */
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, DUMMY, LAST
    */

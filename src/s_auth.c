@@ -56,14 +56,14 @@
 
 static const char *HeaderMessages[] =
 {
-  ":%s NOTICE AUTH :*** Looking up your hostname...",
-  ":%s NOTICE AUTH :*** Found your hostname",
-  ":%s NOTICE AUTH :*** Couldn't look up your hostname",
-  ":%s NOTICE AUTH :*** Checking Ident",
-  ":%s NOTICE AUTH :*** Got Ident response",
-  ":%s NOTICE AUTH :*** No Ident response",
-  ":%s NOTICE AUTH :*** Your forward and reverse DNS do not match, ignoring hostname.",
-  ":%s NOTICE AUTH :*** Your hostname is too long, ignoring hostname"
+  ":*** Looking up your hostname...",
+  ":*** Found your hostname",
+  ":*** Couldn't look up your hostname",
+  ":*** Checking Ident",
+  ":*** Got Ident response",
+  ":*** No Ident response",
+  ":*** Your forward and reverse DNS do not match, ignoring hostname.",
+  ":*** Your hostname is too long, ignoring hostname"
 };
 
 enum
@@ -78,7 +78,7 @@ enum
   REPORT_HOST_TOOLONG
 };
 
-#define sendheader(c, i) sendto_one((c), HeaderMessages[(i)], me.name)
+#define sendheader(c, i) sendto_one_notice((c), &me, HeaderMessages[(i)])
 
 static dlink_list auth_doing_list = { NULL, NULL, 0 };
 

@@ -605,7 +605,6 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
                        "Message for %s[%s@%s!%s] from %s (TS, ignored)",
                        source_p->name, source_p->username, source_p->host,
                        source_p->from->name, get_client_name(client_p, MASK_IP));
-
   return 0;
 }
 

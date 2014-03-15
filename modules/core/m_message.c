@@ -282,7 +282,7 @@ msg_channel(int p_or_n, const char *command,
   {
     if (result == CAN_SEND_OPV ||
         !flood_attack_channel(p_or_n, source_p, chptr))
-      sendto_channel_butone(source_p->from, source_p, chptr, 0, "%s %s :%s",
+      sendto_channel_butone(source_p, source_p, chptr, 0, "%s %s :%s",
                             command, chptr->chname, text);
   }
   else
@@ -343,7 +343,7 @@ msg_channel_flags(int p_or_n, const char *command,
   if (MyClient(source_p) && p_or_n != NOTICE)
     source_p->localClient->last_privmsg = CurrentTime;
 
-  sendto_channel_butone(source_p->from, source_p, chptr, type, "%s %c%s :%s",
+  sendto_channel_butone(source_p, source_p, chptr, type, "%s %c%s :%s",
                         command, c, chptr->chname, text);
 }
 

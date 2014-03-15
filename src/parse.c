@@ -104,8 +104,8 @@ static char *para[MAXPARA + 2]; /* <command> + <params> + NULL */
 
 static int cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
-static void handle_numeric(char[], struct Client *, struct Client *, int, char *[]);
-static void handle_command(struct Message *, struct Client *, struct Client *, unsigned int, char *[]);
+static void handle_numeric(char[], struct Client *, int, char *[]);
+static void handle_command(struct Message *, struct Client *, unsigned int, char *[]);
 
 
 /*
@@ -281,9 +281,9 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   para[++parc] = NULL;
 
   if (msg_ptr != NULL)
-    handle_command(msg_ptr, client_p, from, parc, para);
+    handle_command(msg_ptr, from, parc, para);
   else
-    handle_numeric(numeric, client_p, from, parc, para);
+    handle_numeric(numeric, from, parc, para);
 }
 
 /* handle_command()
@@ -297,39 +297,19 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
  * side effects	-
  */
 static void
-handle_command(struct Message *mptr, struct Client *client_p,
-               struct Client *from, unsigned int i, char *hpara[])
+handle_command(struct Message *mptr, struct Client *source_p,
+               unsigned int i, char *hpara[])
 {
-  MessageHandler handler = 0;
-
-  if (IsServer(client_p))
+  if (IsServer(source_p->from))
     mptr->rcount++;
 
   mptr->count++;
 
-  handler = mptr->handlers[client_p->handler];
-
   /* check right amount of params is passed... --is */
   if (i < mptr->args_min)
-  {
-    if (!IsServer(client_p))
-    {
-      sendto_one_numeric(client_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
-    }
-    else
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Dropping server %s due to (invalid) command '%s' "
-                           "with only %d arguments (expecting %d).",
-                           client_p->name, mptr->cmd, i, mptr->args_min);
-      ilog(LOG_TYPE_IRCD, "Insufficient parameters (%d) for command '%s' from %s.",
-           i, mptr->cmd, client_p->name);
-      exit_client(client_p, client_p,
-                  "Not enough arguments to server command.");
-    }
-  }
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
   else
-    (*handler)(from, i, hpara);
+    mptr->handlers[source_p->from->handler](source_p, i, hpara);
 }
 
 /* add_msg_element()
@@ -666,8 +646,7 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
  * the savvy approach is NEVER generate an error in response to an... error :)
  */
 static void
-handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
-               int parc, char *parv[])
+handle_numeric(char numeric[], struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
@@ -688,9 +667,9 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
   if (IsChanPrefix(*parv[1]))
     chptr = hash_find_channel(parv[1]);
   else
-    target_p = find_person(client_p, parv[1]);
+    target_p = find_person(source_p, parv[1]);
 
-  if (((!target_p) || (target_p->from == client_p)) && !chptr)
+  if (((!target_p) || (target_p->from == source_p->from)) && !chptr)
     return;
 
   /*
@@ -716,7 +695,7 @@ handle_numeric(char numeric[], struct Client *client_p, struct Client *source_p,
                  numeric, ID_or_name(target_p, target_p), parv[2]);
   }
   else
-    sendto_channel_butone(client_p, source_p, chptr, 0, "%s %s %s",
+    sendto_channel_butone(source_p, source_p, chptr, 0, "%s %s %s",
                           numeric, chptr->chname, parv[2]);
 }
 

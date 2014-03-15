@@ -50,9 +50,8 @@ restart(const char *mesg)
 void
 server_die(const char *mesg, int rboot)
 {
-  char buffer[IRCD_BUFSIZE];
+  char buffer[IRCD_BUFSIZE] = "";
   dlink_node *ptr = NULL;
-  struct Client *target_p = NULL;
   static int was_here = 0;
 
   if (rboot && was_here++)
@@ -66,12 +65,7 @@ server_die(const char *mesg, int rboot)
              rboot ? "Restarting" : "Terminating", mesg);
 
   DLINK_FOREACH(ptr, local_client_list.head)
-  {
-    target_p = ptr->data;
-
-    sendto_one(target_p, ":%s NOTICE %s :%s",
-               me.name, target_p->name, buffer);
-  }
+    sendto_one_notice(ptr->data, &me, ":%s", buffer);
 
   sendto_server(NULL, NOCAPS, NOCAPS, ":%s ERROR :%s", ID(&me), buffer);
 

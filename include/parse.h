@@ -66,13 +66,6 @@ typedef enum HandlerType
   LAST_HANDLER_TYPE
 } HandlerType;
 
-/*
- * MessageHandler function
- * Params:
- * struct Client* source_p   - source of message, may be different from client_p
- * int            parc   - parameter count
- * char*          parv[] - parameter vector
- */
 typedef int (*MessageHandler)(struct Client *, int, char *[]);
 
 /*

@@ -88,7 +88,7 @@ extern void sendto_server(struct Client *,
                           const unsigned int,
                           const unsigned int, const char *, ...) AFP(4,5);
 extern void sendto_match_butone(struct Client *, struct Client *,
-                                char *, int, const char *, ...) AFP(5,6);
+                                const char *, int, const char *, ...) AFP(5,6);
 extern void sendto_match_servs(struct Client *, const char *, unsigned int,
                                const char *, ...) AFP(4,5);
 extern void sendto_realops_flags(unsigned int, int, int,

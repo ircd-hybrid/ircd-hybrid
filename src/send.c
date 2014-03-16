@@ -639,8 +639,10 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
     if (type != 0 && (ms->flags & type) == 0)
       continue;
 
-    if (!MyConnect(target_p) || target_p == one ||
-        IsDefunct(target_p) || HasUMode(target_p, UMODE_DEAF))
+    if (!MyConnect(target_p) || (one && target_p == one->from))
+      continue;
+
+    if (IsDefunct(target_p) || HasUMode(target_p, UMODE_DEAF))
       continue;
 
     if (HasCap(target_p, cap) != cap)
@@ -686,7 +688,7 @@ match_it(const struct Client *one, const char *mask, unsigned int what)
  * ugh. ONLY used by m_message.c to send an "oper magic" message. ugh.
  */
 void
-sendto_match_butone(struct Client *one, struct Client *from, char *mask,
+sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
                     int what, const char *pattern, ...)
 {
   va_list alocal, aremote;
@@ -710,7 +712,7 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
   {
     struct Client *client_p = ptr->data;
 
-    if (client_p != one && !IsDefunct(client_p) &&
+    if ((!one || client_p != one->from)&& !IsDefunct(client_p) &&
         match_it(client_p, mask, what))
       send_message(client_p, local_buf);
   }
@@ -744,7 +746,7 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
      * server deal with it.
      * -wnder
      */
-    if (client_p != one && !IsDefunct(client_p))
+    if ((!one || client_p != one->from) && !IsDefunct(client_p))
       send_message_remote(client_p, from, remote_buf);
   }
 

@@ -185,9 +185,9 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     if (newts < 800000000)
     {
       sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                           "*** Bogus TS %lu on %s ignored from %s",
+                           "*** Bogus TS %lu on %s ignored from %s(via %s)",
                            (unsigned long)newts, chptr->chname,
-                           source_p->name);
+                           source_p->name, source_p->from->name);
 
       newts = (oldts == 0) ? 0 : 800000000;
     }

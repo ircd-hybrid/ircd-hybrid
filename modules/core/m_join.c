@@ -209,8 +209,7 @@ m_join(struct Client *source_p, int parc, char *parv[])
       chptr->mode.mode |= MODE_TOPICLIMIT;
       chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-      sendto_server(source_p, NOCAPS, NOCAPS,
-                    ":%s SJOIN %lu %s +nt :@%s",
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s SJOIN %lu %s +nt :@%s",
                     me.id, (unsigned long)chptr->channelts,
                     chptr->chname, source_p->id);
       /*
@@ -229,8 +228,7 @@ m_join(struct Client *source_p, int parc, char *parv[])
     }
     else
     {
-      sendto_server(source_p, NOCAPS, NOCAPS,
-                    ":%s JOIN %lu %s +",
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
                     source_p->id, (unsigned long)chptr->channelts,
                     chptr->chname);
 
@@ -323,9 +321,9 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     if (newts < 800000000)
     {
       sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                           "*** Bogus TS %lu on %s ignored from %s",
+                           "*** Bogus TS %lu on %s ignored from %s(via %s)",
                            (unsigned long)newts, chptr->chname,
-                           source_p->from->name);
+                           source_p->name, source_p->from->name);
 
       newts = (oldts == 0) ? 0 : 800000000;
     }
@@ -415,8 +413,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                                   source_p->host, source_p->away);
   }
 
-  sendto_server(source_p, NOCAPS, NOCAPS,
-                ":%s JOIN %lu %s +",
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
                 ID(source_p), (unsigned long)chptr->channelts, chptr->chname);
   return 0;
 }
@@ -444,8 +441,8 @@ do_join_0(struct Client *source_p)
   {
     chptr = ((struct Membership *)ptr->data)->chptr;
 
-    sendto_server(source_p, NOCAPS, NOCAPS,
-                  ":%s PART %s", ID(source_p), chptr->chname);
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
+                  ID(source_p), chptr->chname);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname);

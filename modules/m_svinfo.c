@@ -48,7 +48,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
 {
   time_t deltat = 0, theirtime = 0;
 
-  if (!IsServer(source_p) || !MyConnect(source_p) || parc < 5)
+  if (!IsServer(source_p) || !MyConnect(source_p))
     return 0;
 
   if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MIN)
@@ -111,7 +111,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svinfo_msgtab =
 {
-  "SVINFO", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
+  "SVINFO", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_ignore, ms_svinfo, m_ignore, m_ignore, m_ignore }
 };
 

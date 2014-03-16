@@ -57,7 +57,7 @@ mo_close(struct Client *source_p, int parc, char *parv[])
      * Exit here is safe, because it is guaranteed not to be source_p
      * because it is unregistered and source_p is an oper.
      */
-    exit_client(target_p, target_p, "Oper Closing");
+    exit_client(target_p, "Oper Closing");
   }
 
   sendto_one_numeric(source_p, &me, RPL_CLOSEEND, closed);

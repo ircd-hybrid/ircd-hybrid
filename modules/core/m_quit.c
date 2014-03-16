@@ -49,7 +49,7 @@ m_quit(struct Client *source_p, int parc, char *parv[])
       < CurrentTime))
     strlcpy(reason + 6, parv[1], sizeof(reason) - 6);
 
-  exit_client(source_p, source_p, reason);
+  exit_client(source_p, reason);
   return 0;
 }
 
@@ -68,7 +68,7 @@ ms_quit(struct Client *source_p, int parc, char *parv[])
   else
     strlcpy(reason, source_p->name, sizeof(reason));
 
-  exit_client(source_p, source_p, reason);
+  exit_client(source_p, reason);
   return 0;
 }
 

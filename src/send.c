@@ -169,7 +169,7 @@ send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *b
       sendto_one_numeric(from, &me, ERR_GHOSTEDCLIENT, to->name,
                          to->username, to->host, to->from);
 
-    exit_client(to, &me, "Ghosted client");
+    exit_client(to, "Ghosted client");
     return;
   }
 

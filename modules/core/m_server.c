@@ -81,7 +81,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[3]))
   {
     sendto_one(source_p, "ERROR :No servername");
-    exit_client(source_p, source_p, "Wrong number of args");
+    exit_client(source_p, "Wrong number of args");
     return 0;
   }
 
@@ -99,7 +99,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Non-TS server "
           "for server %s", get_client_name(source_p, MASK_IP), name);
-    exit_client(source_p, source_p, "Non-TS server");
+    exit_client(source_p, "Non-TS server");
     return 0;
   }
 
@@ -111,7 +111,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", get_client_name(source_p, MASK_IP), name);
-    exit_client(source_p, source_p, "Bogus server name");
+    exit_client(source_p, "Bogus server name");
     return 0;
   }
 
@@ -124,7 +124,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(source_p, MASK_IP), source_p->id);
     sendto_one(source_p, "ERROR :Bogus server ID introduced");
-    exit_client(source_p, &me, "Bogus server ID intoduced");
+    exit_client(source_p, "Bogus server ID intoduced");
     return 0;
   }
 
@@ -145,7 +145,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
            "servername %s", get_client_name(source_p, MASK_IP), name);
       }
 
-      exit_client(source_p, source_p, "No connect{} block.");
+      exit_client(source_p, "No connect{} block.");
       return 0;
       /* NOT REACHED */
       break;
@@ -159,7 +159,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
            "Unauthorized server connection attempt from %s: Bad password "
            "for server %s", get_client_name(source_p, MASK_IP), name);
 
-      exit_client(source_p, source_p, "Invalid password.");
+      exit_client(source_p, "Invalid password.");
       return 0;
       /* NOT REACHED */
       break;
@@ -173,7 +173,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
            "Unauthorized server connection attempt from %s: Invalid host "
            "for server %s", get_client_name(source_p, MASK_IP), name);
 
-      exit_client(source_p, source_p, "Invalid host.");
+      exit_client(source_p, "Invalid host.");
       return 0;
     case -4:
       sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
@@ -184,7 +184,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
            "Unauthorized server connection attempt from %s: Invalid certificate fingerprint "
            "for server %s", get_client_name(source_p, MASK_IP), name);
 
-      exit_client(source_p, source_p, "Invalid certificate fingerprint.");
+      exit_client(source_p, "Invalid certificate fingerprint.");
       return 0;
       /* NOT REACHED */
       break;
@@ -209,7 +209,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
                          "Attempt to re-introduce server %s from %s",
                          name, get_client_name(source_p, MASK_IP));
     sendto_one(source_p, "ERROR :Server already exists.");
-    exit_client(source_p, source_p, "Server already exists");
+    exit_client(source_p, "Server already exists");
     return 0;
   }
 
@@ -224,7 +224,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
                          name, source_p->id,
                          get_client_name(source_p, MASK_IP));
     sendto_one(source_p, "ERROR :Server ID already exists.");
-    exit_client(source_p, source_p, "Server ID already exists");
+    exit_client(source_p, "Server ID already exists");
     return 0;
   }
 
@@ -234,7 +234,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    */
   if ((target_p = find_servconn_in_progress(name)))
     if (target_p != source_p)
-      exit_client(target_p, &me, "Overridden");
+      exit_client(target_p, "Overridden");
 
   /* if we are connecting (Handshake), we already have the name from the
    * connect{} block in source_p->name
@@ -285,7 +285,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, MASK_IP), parv[1]);
     sendto_one(client_p, "ERROR :Bogus server name introduced");
-    exit_client(client_p, &me, "Bogus server name intoduced");
+    exit_client(client_p, "Bogus server name intoduced");
     return 0;
   }
 
@@ -298,7 +298,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(client_p, MASK_IP), parv[3]);
     sendto_one(client_p, "ERROR :Bogus server ID introduced");
-    exit_client(client_p, &me, "Bogus server ID intoduced");
+    exit_client(client_p, "Bogus server ID intoduced");
     return 0;
   }
 
@@ -312,7 +312,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, SID %s already exists",
                          client_p->name, parv[3]);
-    exit_client(client_p, &me, "SID Exists");
+    exit_client(client_p, "SID Exists");
     return 0;
   }
 
@@ -326,7 +326,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
                          client_p->name, parv[1]);
-    exit_client(client_p, &me, "Server Exists");
+    exit_client(client_p, "Server Exists");
     return 0;
   }
 
@@ -336,7 +336,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    */
   if ((target_p = find_servconn_in_progress(parv[1])))
     if (target_p != client_p)
-      exit_client(target_p, &me, "Overridden");
+      exit_client(target_p, "Overridden");
 
   conf = client_p->localClient->confs.head->data;
 
@@ -394,7 +394,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, MASK_IP), parv[1]);
-    exit_client(source_p, &me, "No matching hub_mask.");
+    exit_client(source_p, "No matching hub_mask.");
     return 0;
   }
 
@@ -408,7 +408,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link %s introduced leafed server %s.",
                          get_client_name(client_p, MASK_IP), parv[1]);
-    exit_client(client_p, &me, "Leafed Server.");
+    exit_client(client_p, "Leafed Server.");
     return 0;
   }
 

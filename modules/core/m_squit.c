@@ -109,9 +109,21 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
                          target_p->name, get_client_name(source_p, HIDE_IP), comment);
     ilog(LOG_TYPE_IRCD, "Received SQUIT %s from %s (%s)",
          target_p->name, get_client_name(source_p, HIDE_IP), comment);
-  }
 
-  exit_client(target_p, source_p, comment);
+    /* To them, we are exiting */
+    sendto_one(target_p, ":%s SQUIT %s :%s", ID(source_p), ID(&me), comment);
+    /* Send to everything but target */
+    sendto_server(target_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+                  ID(source_p), ID(target_p), comment);
+  }
+  else
+    /* Send to everything */
+    sendto_server(NULL, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+                  ID(source_p), ID(target_p), comment);
+
+  AddFlag(target_p, FLAGS_SQUIT);
+
+  exit_client(target_p, comment);
   return 0;
 }
 
@@ -129,6 +141,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
+  dlink_node *ptr;
 
   if (parc < 2 || EmptyString(parv[parc - 1]))
     return 0;
@@ -153,9 +166,30 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
                   me.id, target_p->name, source_p->name, comment);
     ilog(LOG_TYPE_IRCD, "SQUIT From %s : %s (%s)", source_p->name,
          target_p->name, comment);
-  }
 
-  exit_client(target_p, source_p, comment);
+    /* To them, we are exiting */
+    sendto_one(target_p, ":%s SQUIT %s :%s", ID(source_p), ID(&me), comment);
+
+    /* Send to everything but target and source */
+    DLINK_FOREACH(ptr, serv_list.head)
+    {
+      struct Client *client_p = ptr->data;
+
+      if (client_p == target_p || client_p == source_p->from)
+        continue;
+
+      sendto_one(client_p, ":%s SQUIT %s :%s",
+                 ID(source_p), ID(target_p), comment);
+    }
+  }
+  else
+    /* Send to everything but source */
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+                  ID(source_p), ID(target_p), comment);
+
+  AddFlag(target_p, FLAGS_SQUIT);
+
+  exit_client(target_p, comment);
   return 0;
 }
 

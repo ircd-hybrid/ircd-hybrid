@@ -82,7 +82,7 @@ mr_user(struct Client *source_p, int parc, char *parv[])
 
   if (source_p->localClient->listener->flags & LISTENER_SERVER)
   {
-    exit_client(source_p, &me, "Use a different port");
+    exit_client(source_p, "Use a different port");
     return 0;
   }
 

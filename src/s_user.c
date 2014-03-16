@@ -306,7 +306,7 @@ register_local_user(struct Client *source_p)
       ++ServerStats.is_ref;
       sendto_one_notice(source_p, &me, ":*** Notice -- You need to install "
                         "identd to use this server");
-      exit_client(source_p, &me, "Install identd");
+      exit_client(source_p, "Install identd");
       return;
     }
 
@@ -332,7 +332,7 @@ register_local_user(struct Client *source_p)
       ++ServerStats.is_ref;
 
       sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
-      exit_client(source_p, &me, "Bad Password");
+      exit_client(source_p, "Bad Password");
       return;
     }
   }
@@ -363,7 +363,7 @@ register_local_user(struct Client *source_p)
                          "Too many clients, rejecting %s[%s].",
                          source_p->name, source_p->host);
     ++ServerStats.is_ref;
-    exit_client(source_p, &me, "Sorry, server is full - try later");
+    exit_client(source_p, "Sorry, server is full - try later");
     return;
   }
 
@@ -378,7 +378,7 @@ register_local_user(struct Client *source_p)
     ++ServerStats.is_ref;
     snprintf(tmpstr2, sizeof(tmpstr2), "Invalid username [%s]",
              source_p->username);
-    exit_client(source_p, &me, tmpstr2);
+    exit_client(source_p, tmpstr2);
     return;
   }
 
@@ -479,7 +479,7 @@ register_remote_user(struct Client *source_p, const char *username,
     kill_client(source_p->from, source_p, "%s (Server doesn't exist)", me.name);
 
     AddFlag(source_p, FLAGS_KILLED);
-    exit_client(source_p, &me, "Ghosted Client");
+    exit_client(source_p, "Ghosted Client");
     return;
   }
 
@@ -494,7 +494,7 @@ register_remote_user(struct Client *source_p, const char *username,
                 "%s (NICK from wrong direction (%s != %s))",
                 me.name, source_p->servptr->name, target_p->from->name);
     AddFlag(source_p, FLAGS_KILLED);
-    exit_client(source_p, &me, "USER server wrong direction");
+    exit_client(source_p, "USER server wrong direction");
     return;
   }
 
@@ -1126,7 +1126,7 @@ check_xline(struct Client *source_p)
                          source_p->sockhost);
 
     ++ServerStats.is_ref;
-    exit_client(source_p, &me, "Bad user info");
+    exit_client(source_p, "Bad user info");
     return 1;
   }
 

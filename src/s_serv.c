@@ -681,7 +681,7 @@ server_estab(struct Client *client_p)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Warning: Lost connect{} block "
                          "for server %s(this shouldn't happen)!", host);
-    exit_client(client_p, &me, "Lost connect{} block!");
+    exit_client(client_p, "Lost connect{} block!");
     return;
   }
 
@@ -700,7 +700,7 @@ server_estab(struct Client *client_p)
     {
       ++ServerStats.is_ref;
       sendto_one(client_p, "ERROR :I'm a leaf not a hub");
-      exit_client(client_p, &me, "I'm a leaf");
+      exit_client(client_p, "I'm a leaf");
       return;
     }
   }
@@ -1071,7 +1071,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     report_error(L_ALL, "opening stream socket to %s: %s",
                  conf->name, errno);
     SetDead(client_p);
-    exit_client(client_p, &me, "Connection failed");
+    exit_client(client_p, "Connection failed");
     return 0;
   }
 
@@ -1090,7 +1090,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
       sendto_one_notice(by, &me, ":Connect to host %s failed.", client_p->name);
 
     SetDead(client_p);
-    exit_client(client_p, client_p, "Connection failed");
+    exit_client(client_p, "Connection failed");
     return 0;
   }
 
@@ -1208,7 +1208,7 @@ finish_ssl_server_handshake(struct Client *client_p)
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
 
-    exit_client(client_p, &me, "Lost connect{} block");
+    exit_client(client_p, "Lost connect{} block");
     return;
   }
 
@@ -1263,7 +1263,7 @@ ssl_server_handshake(fde_t *fd, struct Client *client_p)
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                              "Error connecting to %s: %s", client_p->name,
                              sslerr ? sslerr : "unknown SSL error");
-        exit_client(client_p, client_p, "Error during SSL handshake");
+        exit_client(client_p, "Error during SSL handshake");
         return;
       }
     }
@@ -1305,7 +1305,7 @@ ssl_connect_init(struct Client *client_p, struct MaskItem *conf, fde_t *fd)
     ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
          ERR_error_string(ERR_get_error(), NULL));
     SetDead(client_p);
-    exit_client(client_p, client_p, "SSL_new failed");
+    exit_client(client_p, "SSL_new failed");
     return;
   }
 
@@ -1376,7 +1376,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
 
-    exit_client(client_p, &me, "Lost connect{} block");
+    exit_client(client_p, "Lost connect{} block");
     return;
   }
 

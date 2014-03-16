@@ -46,14 +46,7 @@
 static int
 ms_svinfo(struct Client *source_p, int parc, char *parv[])
 {
-  time_t deltat;
-  time_t theirtime;
-
-  if (MyConnect(source_p) && IsUnknown(source_p))
-  {
-    exit_client(source_p, source_p, "Need SERVER before SVINFO");
-    return 0;
-  }
+  time_t deltat = 0, theirtime = 0;
 
   if (!IsServer(source_p) || !MyConnect(source_p) || parc < 5)
     return 0;
@@ -71,7 +64,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                  "Link %s dropped, wrong TS protocol version (%s,%s)",
                  get_client_name(source_p, MASK_IP), parv[1], parv[2]);
-    exit_client(source_p, source_p, "Incompatible TS version");
+    exit_client(source_p, "Incompatible TS version");
     return 0;
   }
 
@@ -102,7 +95,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
          (unsigned long) CurrentTime,
          (unsigned long) theirtime,
          (int) deltat);
-    exit_client(source_p, source_p, "Excessive TS delta");
+    exit_client(source_p, "Excessive TS delta");
     return 0;
   }
 

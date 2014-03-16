@@ -355,7 +355,7 @@ read_packet(fde_t *fd, void *data)
     {
       if (!(ConfigFileEntry.no_oper_flood && HasUMode(client_p, UMODE_OPER)))
       {
-        exit_client(client_p, client_p, "Excess Flood");
+        exit_client(client_p, "Excess Flood");
         return;
       }
     }

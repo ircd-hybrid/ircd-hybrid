@@ -173,7 +173,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   }
 
   snprintf(buf, sizeof(buf), "Killed (%s (%s))", source_p->name, reason);
-  exit_client(target_p, source_p, buf);
+  exit_client(target_p, buf);
   return 0;
 }
 
@@ -299,7 +299,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   else
     snprintf(buf, sizeof(buf), "Killed (%s %s)", source_p->name, reason);
 
-  exit_client(target_p, source_p, buf);
+  exit_client(target_p, buf);
   return 0;
 }
 

@@ -133,6 +133,7 @@ struct MaskItem;
 #define FLAGS_SERVICE        0x02000000 /**< Client/server is a network service */
 #define FLAGS_AUTH_SPOOF     0x04000000 /**< user's hostname has been spoofed by an auth{} spoof*/
 #define FLAGS_SSL            0x08000000 /**< User is connected via TLS/SSL */
+#define FLAGS_SQUIT          0x10000000
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
@@ -460,7 +461,7 @@ extern struct split_nuh_item *find_accept(const char *, const char *,
                                           int (*)(const char *, const char *));
 extern void del_accept(struct split_nuh_item *, struct Client *);
 extern void del_all_accepts(struct Client *);
-extern void exit_client(struct Client *, struct Client *, const char *);
+extern void exit_client(struct Client *, const char *);
 extern void conf_try_ban(struct Client *, struct MaskItem *);
 extern void check_conf_klines(void);
 extern void client_init(void);

@@ -113,7 +113,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   {
     if (!(conf->type == CONF_EXEMPT))
     {
-      exit_client(source_p, &me, "D-lined");
+      exit_client(source_p, "D-lined");
       return 0;
     }
   }

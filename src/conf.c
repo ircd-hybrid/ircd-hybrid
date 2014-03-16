@@ -261,7 +261,7 @@ check_client(struct Client *source_p)
       ilog(LOG_TYPE_IRCD, "Too many connections on IP from %s.",
            get_client_name(source_p, SHOW_IP));
       ++ServerStats.is_ref;
-      exit_client(source_p, &me, "No more connections allowed on that IP");
+      exit_client(source_p, "No more connections allowed on that IP");
       break;
 
     case I_LINE_FULL:
@@ -272,8 +272,7 @@ check_client(struct Client *source_p)
       ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
            get_client_name(source_p, SHOW_IP));
       ++ServerStats.is_ref;
-      exit_client(source_p, &me,
-                  "No more connections allowed in your connection class");
+      exit_client(source_p, "No more connections allowed in your connection class");
       break;
 
     case NOT_AUTHORIZED:
@@ -292,11 +291,11 @@ check_client(struct Client *source_p)
            source_p->localClient->listener->name,
            source_p->localClient->listener->port);
 
-      exit_client(source_p, &me, "You are not authorized to use this server");
+      exit_client(source_p, "You are not authorized to use this server");
       break;
 
    case BANNED_CLIENT:
-     exit_client(source_p, &me, "Banned");
+     exit_client(source_p, "Banned");
      ++ServerStats.is_ref;
      break;
 

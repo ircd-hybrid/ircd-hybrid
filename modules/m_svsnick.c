@@ -80,10 +80,10 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
         return 0;
     }
     else if (IsUnknown(exists_p))
-      exit_client(exists_p, &me, "SVSNICK Override");
+      exit_client(exists_p, "SVSNICK Override");
     else
     {
-      exit_client(target_p, &me, "SVSNICK Collide");
+      exit_client(target_p, "SVSNICK Collide");
       return 0;
     }
   }

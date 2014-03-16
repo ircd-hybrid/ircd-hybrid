@@ -80,7 +80,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
   if (MyConnect(target_p))
   {
     strlcpy(reason + 11, comment, sizeof(reason) - 11);
-    exit_client(target_p, target_p, reason);
+    exit_client(target_p, reason);
     return 0;
   }
 

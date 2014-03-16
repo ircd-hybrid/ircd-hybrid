@@ -299,7 +299,7 @@ check_pings_list(dlink_list *list)
 
           snprintf(scratch, sizeof(scratch), "Ping timeout: %d seconds",
                    (int)(CurrentTime - client_p->localClient->lasttime));
-          exit_client(client_p, &me, scratch);
+          exit_client(client_p, scratch);
         }
       }
     }
@@ -326,7 +326,7 @@ check_unknowns_list(void)
      * for > 30s, close them.
      */
     if (IsAuthFinished(client_p) && (CurrentTime - client_p->localClient->firsttime) > 30)
-      exit_client(client_p, &me, "Registration timed out");
+      exit_client(client_p, "Registration timed out");
   }
 }
 
@@ -402,7 +402,7 @@ check_conf_klines(void)
       if (conf->type == CONF_EXEMPT)
         continue;
 
-      exit_client(client_p, &me, "D-lined");
+      exit_client(client_p, "D-lined");
     }
   }
 }
@@ -470,7 +470,7 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
   if (IsClient(client_p))
     sendto_one_numeric(client_p, &me, ERR_YOUREBANNEDCREEP, user_reason);
 
-  exit_client(client_p, &me, user_reason);
+  exit_client(client_p, user_reason);
 }
 
 /* update_client_exit_stats()
@@ -699,7 +699,7 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
    * NOTE: source_p->node.next cannot be NULL if the client is added
    *       to global_client_list (there is always &me at its end)
    */
-  if (source_p != NULL && source_p->node.next != NULL)
+  if (source_p->node.next != NULL) /* XXX: not needed? */
     dlinkDelete(&source_p->node, &global_client_list);
 
   update_client_exit_stats(source_p);
@@ -710,48 +710,6 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
   /* add to dead client dlist */
   SetDead(source_p);
   dlinkAdd(source_p, make_dlink_node(), &dead_list);
-}
-
-/* Recursively send QUITs and SQUITs for source_p and all its dependent clients
- * and servers to those servers that need them.  A server needs the client
- * QUITs if it can't figure them out from the SQUIT (ie pre-TS4) or if it
- * isn't getting the SQUIT because of @#(*&@)# hostmasking.  With TS4, once
- * a link gets a SQUIT, it doesn't need any QUIT/SQUITs for clients depending
- * on that one -orabidoo
- *
- * This is now called on each local server -adx
- */
-static void
-recurse_send_quits(struct Client *original_source_p, struct Client *source_p,
-                   struct Client *from, struct Client *to, const char *comment,
-                   const char *splitstr)
-{
-  dlink_node *ptr, *next;
-  struct Client *target_p;
-
-  assert(to != source_p);  /* should be already removed from serv_list */
-
-  /* If this server can handle quit storm (QS) removal
-   * of dependents, just send the SQUIT
-   */
-  if (!IsCapable(to, CAP_QS))
-    DLINK_FOREACH_SAFE(ptr, next, source_p->serv->client_list.head)
-    {
-      target_p = ptr->data;
-      sendto_one(to, ":%s QUIT :%s", target_p->name, splitstr);
-    }
-
-  DLINK_FOREACH_SAFE(ptr, next, source_p->serv->server_list.head)
-    recurse_send_quits(original_source_p, ptr->data, from, to,
-                       comment, splitstr);
-
-  if ((source_p == original_source_p && to != from) ||
-                  !IsCapable(to, CAP_QS))
-  {
-    /* don't use a prefix here - we have to be 100% sure the message
-     * will be accepted without Unknown prefix etc.. */
-    sendto_one(to, "SQUIT %s :%s", ID_or_name(source_p, to), comment);
-  }
 }
 
 /*
@@ -776,45 +734,28 @@ recurse_remove_clients(struct Client *source_p, const char *quitmsg)
 }
 
 /*
-** Remove *everything* that depends on source_p, from all lists, and sending
-** all necessary QUITs and SQUITs.  source_p itself is still on the lists,
-** and its SQUITs have been sent except for the upstream one  -orabidoo
-*/
-static void
-remove_dependents(struct Client *source_p, struct Client *from,
-                  const char *comment, const char *splitstr)
-{
-  dlink_node *ptr = NULL;
-
-  DLINK_FOREACH(ptr, serv_list.head)
-    recurse_send_quits(source_p, source_p, from, ptr->data,
-                       comment, splitstr);
-
-  recurse_remove_clients(source_p, splitstr);
-}
-
-/*
  * exit_client - exit a client of any type. Generally, you can use
  * this on any struct Client, regardless of its state.
  *
  * Note, you shouldn't exit remote _users_ without first doing
  * AddFlag(x, FLAGS_KILLED) and propagating a kill or similar message.
+ *
  * However, it is perfectly correct to call exit_client to force a _server_
  * quit (either local or remote one).
  *
+ *
  * inputs:       - a client pointer that is going to be exited
- *               - for servers, the second argument is a pointer to who
- *                 is firing the server. This side won't get any generated
- *                 messages. NEVER NULL!
  * output:       none
  * side effects: the client is delinked from all lists, disconnected,
  *               and the rest of IRC network is notified of the exit.
  *               Client memory is scheduled to be freed
  */
 void
-exit_client(struct Client *source_p, struct Client *from, const char *comment)
+exit_client(struct Client *source_p, const char *comment)
 {
   dlink_node *m = NULL;
+  /* Store the direction to source_p, close_connection sets it to NULL */
+  struct Client *client_p = source_p->from;
 
   if (MyConnect(source_p))
   {
@@ -886,9 +827,12 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
     {
       if (IsServer(source_p))
       {
-        /* for them, we are exiting the network */
-        sendto_one(source_p, ":%s SQUIT %s :%s",
-                   ID_or_name(from, source_p), me.name, comment);
+        if (!HasFlag(source_p, FLAGS_SQUIT))
+        {
+          /* for them, we are exiting the network */
+          sendto_one(source_p, ":%s SQUIT %s :%s",
+                     ID(&me), ID(&me), comment);
+        }
       }
 
       sendto_one(source_p, "ERROR :Closing Link: %s (%s)",
@@ -916,7 +860,7 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
 
   if (IsServer(source_p))
   {
-    char splitstr[HOSTLEN + HOSTLEN + 2];
+    char splitstr[HOSTLEN + HOSTLEN + 2] = "";
 
     /* This shouldn't ever happen */
     assert(source_p->serv != NULL && source_p->servptr != NULL);
@@ -926,12 +870,17 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
        * Set netsplit message to "*.net *.split" to still show
        * that its a split, but hide the servers splitting
        */
-      strcpy(splitstr, "*.net *.split");
+      strlcpy(splitstr, "*.net *.split", sizeof(splitstr));
     else
       snprintf(splitstr, sizeof(splitstr), "%s %s",
                source_p->servptr->name, source_p->name);
 
-    remove_dependents(source_p, from->from, comment, splitstr);
+    /* Send SQUIT for source_p in every direction. source_p is already off of serv_list here */
+    if (!HasFlag(source_p, FLAGS_SQUIT))
+      sendto_server(NULL, NOCAPS, NOCAPS, "SQUIT %s :%s", ID(source_p), comment);
+
+    /* Now exit the clients internally */
+    recurse_remove_clients(source_p, splitstr);
 
     if (source_p->servptr == &me)
     {
@@ -947,7 +896,7 @@ exit_client(struct Client *source_p, struct Client *from, const char *comment)
     }
   }
   else if (IsClient(source_p) && !HasFlag(source_p, FLAGS_KILLED))
-    sendto_server(from->from, NOCAPS, NOCAPS, ":%s QUIT :%s",
+    sendto_server(client_p, NOCAPS, NOCAPS, ":%s QUIT :%s",
                   ID(source_p), comment);
 
   /* The client *better* be off all of the lists */
@@ -1045,7 +994,7 @@ dead_link_on_read(struct Client *client_p, int error)
     snprintf(errmsg, sizeof(errmsg), "Read error: %s",
              strerror(current_error));
 
-  exit_client(client_p, &me, errmsg);
+  exit_client(client_p, errmsg);
 }
 
 void
@@ -1076,7 +1025,7 @@ exit_aborted_clients(void)
     else
       notice = "Write error: connection closed";
 
-    exit_client(target_p, &me, notice);
+    exit_client(target_p, notice);
     free_dlink_node(ptr);
   }
 }

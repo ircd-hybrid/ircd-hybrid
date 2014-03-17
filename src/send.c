@@ -160,7 +160,7 @@ send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *b
 
     sendto_server(NULL, NOCAPS, NOCAPS,
                   ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
-                  me.id, to->name, me.name, to->name,
+                  me.id, to->id, me.name, to->name,
                   to->username, to->host, to->from->name);
 
     AddFlag(to, FLAGS_KILLED);
@@ -712,7 +712,7 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
   {
     struct Client *client_p = ptr->data;
 
-    if ((!one || client_p != one->from)&& !IsDefunct(client_p) &&
+    if ((!one || client_p != one->from) && !IsDefunct(client_p) &&
         match_it(client_p, mask, what))
       send_message(client_p, local_buf);
   }

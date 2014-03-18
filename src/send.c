@@ -165,7 +165,7 @@ send_message_remote(struct Client *to, struct Client *from,
 
     sendto_server(NULL, CAP_TS6, NOCAPS,
                   ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",
-                  me.id, to->name, me.name, to->name,
+                  me.id, ID(&to), me.name, to->name,
                   to->username, to->host, to->from->name);
     sendto_server(NULL, NOCAPS, CAP_TS6,
                   ":%s KILL %s :%s (%s[%s@%s] Ghosted %s)",

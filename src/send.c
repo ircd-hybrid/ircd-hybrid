@@ -987,41 +987,6 @@ sendto_realops_flags_ratelimited(const char *pattern, ...)
   ilog(LOG_TYPE_IRCD, "%s", buffer);
 }
 
-/* kill_client()
- *
- * inputs	- client to send kill towards
- * 		- pointer to client to kill
- * 		- reason for kill
- * output	- NONE
- * side effects	- NONE
- */
-void
-kill_client(struct Client *client_p, struct Client *diedie,
-            const char *pattern, ...)
-{
-  va_list args;
-  struct dbuf_block *buffer;
-
-  client_p = client_p->from;
-
-  if (IsDead(client_p))
-    return;
-
-  buffer = dbuf_alloc();
-
-  dbuf_put_fmt(buffer, ":%s KILL %s :",
-               ID_or_name(&me, client_p),
-               ID_or_name(diedie, client_p));
-
-  va_start(args, pattern);
-  send_format(buffer, pattern, args);
-  va_end(args);
-
-  send_message(client_p, buffer);
-
-  dbuf_ref_free(buffer);
-}
-
 /* kill_client_serv_butone()
  *
  * inputs	- pointer to client to not send to

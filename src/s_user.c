@@ -476,7 +476,9 @@ register_remote_user(struct Client *source_p, const char *username,
                          "No server %s for user %s[%s@%s] from %s",
                          server, source_p->name, source_p->username,
                          source_p->host, source_p->from->name);
-    kill_client(source_p->from, source_p, "%s (Server doesn't exist)", me.name);
+    sendto_one(source_p->from,
+               ":%s KILL %s :%s (Ghosted, server %s doesn't exist)",
+               ID(&me), ID(source_p), me.name, server);
 
     AddFlag(source_p, FLAGS_KILLED);
     exit_client(source_p, "Ghosted Client");
@@ -490,9 +492,11 @@ register_remote_user(struct Client *source_p, const char *username,
                          source_p->from->name, source_p->name, source_p->username,
                          source_p->host, source_p->servptr->name,
                          target_p->name, target_p->from->name);
-    kill_client(source_p->from, source_p,
-                "%s (NICK from wrong direction (%s != %s))",
-                me.name, source_p->servptr->name, target_p->from->name);
+    sendto_one(source_p->from,
+               ":%s KILL %s :%s (NICK from wrong direction (%s != %s))",
+               ID(&me), ID(source_p), me.name, source_p->servptr->name,
+               target_p->from->name);
+
     AddFlag(source_p, FLAGS_KILLED);
     exit_client(source_p, "USER server wrong direction");
     return;

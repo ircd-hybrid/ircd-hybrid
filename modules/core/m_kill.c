@@ -40,35 +40,6 @@
 #include "modules.h"
 
 
-static char buf[IRCD_BUFSIZE];
-
-static void
-relay_kill(struct Client *source_p,
-           struct Client *target_p, const char *inpath,
-           const char *reason)
-{
-  dlink_node *ptr = NULL;
-
-  DLINK_FOREACH(ptr, serv_list.head)
-  {
-    struct Client *client_p = ptr->data;
-
-    if (client_p == source_p->from)
-      continue;
-
-    if (MyClient(source_p))
-      sendto_one(client_p, ":%s KILL %s :%s!%s!%s!%s (%s)",
-                 ID_or_name(source_p, client_p),
-                 ID_or_name(target_p, client_p),
-                 me.name, source_p->host, source_p->username,
-                 source_p->name, reason);
-    else
-      sendto_one(client_p, ":%s KILL %s :%s %s",
-                 ID_or_name(source_p, client_p),
-                 ID_or_name(target_p, client_p), inpath, reason);
-  }
-}
-
 /* mo_kill()
  *  parv[0] = command
  *  parv[1] = kill victim
@@ -77,6 +48,7 @@ relay_kill(struct Client *source_p,
 static int
 mo_kill(struct Client *source_p, int parc, char *parv[])
 {
+  char buf[IRCD_BUFSIZE] = "";
   struct Client *target_p;
   char *user;
   char *reason;
@@ -163,12 +135,14 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
    */
   if (!MyConnect(target_p))
   {
-    relay_kill(source_p, target_p, source_p->from->name, reason);
-      /*
-       * Set FLAGS_KILLED. This prevents exit_one_client from sending
-       * the unnecessary QUIT for this. (This flag should never be
-       * set in any other place)
-       */
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s!%s!%s!%s (%s)",
+                  source_p->id, target_p->id, me.name, source_p->host,
+                  source_p->username, source_p->name, reason);
+    /*
+     * Set FLAGS_KILLED. This prevents exit_one_client from sending
+     * the unnecessary QUIT for this. (This flag should never be
+     * set in any other place)
+     */
     AddFlag(target_p, FLAGS_KILLED);
   }
 
@@ -185,6 +159,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
 static int
 ms_kill(struct Client *source_p, int parc, char *parv[])
 {
+  char buf[IRCD_BUFSIZE] = "";
   struct Client *target_p;
   char *user;
   char *reason;
@@ -290,7 +265,8 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
        source_p->name, target_p->name, source_p->name, reason);
 
-  relay_kill(source_p, target_p, path, reason);
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s %s",
+                source_p->id, target_p->id, path, reason);
   AddFlag(target_p, FLAGS_KILLED);
 
   /* reason comes supplied with its own ()'s */

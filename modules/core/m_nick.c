@@ -79,9 +79,8 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
     /* bad nick change */
     if (!MyConnect(source_p))
     {
-      kill_client_serv_butone(source_p, source_p,
-                              "%s (Bad Nickname)",
-                              me.name);
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s (Bad Nickname)",
+                    me.id, source_p->id, me.name);
       AddFlag(source_p, FLAGS_KILLED);
       exit_client(source_p, "Bad Nickname");
     }
@@ -405,8 +404,9 @@ perform_nick_collides(struct Client *source_p,
         sendto_one(source_p, ":%s KILL %s :%s (Nick collision (new))",
                    me.id, uid, me.name);
 
-      kill_client_serv_butone(NULL, target_p,
-                              "%s (Nick collision (new))", me.name);
+      sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision (new))",
+                    me.id, target_p->id, me.name);
+
       ++ServerStats.is_kill;
       sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
 
@@ -449,8 +449,8 @@ perform_nick_collides(struct Client *source_p,
         ++ServerStats.is_kill;
         sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
 
-        kill_client_serv_butone(NULL, target_p,
-                                "%s (Nick collision (new))", me.name);
+        sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision (new))",
+                      me.id, target_p->id, me.name);
 
         AddFlag(target_p, FLAGS_KILLED);
         exit_client(target_p, "Nick collision");
@@ -475,12 +475,14 @@ perform_nick_collides(struct Client *source_p,
       sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
       ++ServerStats.is_kill;
 
-      kill_client_serv_butone(NULL, source_p, "%s (Nick change collision)",
-                              me.name);
+
+      sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick change collision)",
+                    me.id, source_p->id, me.name);
 
       ++ServerStats.is_kill;
-      kill_client_serv_butone(NULL, target_p, "%s (Nick change collision)",
-                              me.name);
+
+      sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick change collision)",
+                    me.id, target_p->id, me.name);
 
       AddFlag(target_p, FLAGS_KILLED);
       exit_client(target_p, "Nick collision (new)");
@@ -509,8 +511,9 @@ perform_nick_collides(struct Client *source_p,
              source_p->from->name);
 
       ++ServerStats.is_kill;
-      kill_client_serv_butone(NULL, source_p,
-                              "%s (Nick change collision)", me.name);
+
+      sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick change collision)",
+                    me.id, source_p->id, me.name);
       AddFlag(source_p, FLAGS_KILLED);
 
       if (sameuser)
@@ -532,7 +535,8 @@ perform_nick_collides(struct Client *source_p,
                              target_p->name, target_p->from->name,
                              source_p->from->name);
 
-      kill_client_serv_butone(NULL, target_p, "%s (Nick collision)", me.name);
+      sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision)",
+                    me.id, target_p->id, me.name);
 
       ++ServerStats.is_kill;
       sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
@@ -803,8 +807,9 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
                          "ID collision on %s(%s <- %s)(both killed)",
                          target_p->name, target_p->from->name,
                          source_p->from->name);
-    kill_client_serv_butone(NULL, target_p, "%s (ID collision)",
-                            me.name);
+
+    sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (ID collision)",
+                  me.id, target_p->id, me.name);
 
     ++ServerStats.is_kill;
     AddFlag(target_p, FLAGS_KILLED);

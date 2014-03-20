@@ -50,7 +50,7 @@ Feature Specific Requirements:
 
 - Please read doc/index.txt to get an overview of the current documentation.
 
-- TESTED PLATFORMS:  The code has been tested on the following platforms, and
+- TESTED PLATFORMS: The code has been tested on the following platforms, and
   is known to run properly.
   (FIXME: this list is out of date)
   CentOS 5.8

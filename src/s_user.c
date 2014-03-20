@@ -1121,7 +1121,7 @@ check_xline(struct Client *source_p)
     if (conf->reason != NULL)
       reason = conf->reason;
     else
-      reason = "No Reason";
+      reason = CONF_NOREASON;
 
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "X-line Rejecting [%s] [%s], user %s [%s]",

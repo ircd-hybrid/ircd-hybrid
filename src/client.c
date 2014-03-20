@@ -687,7 +687,7 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
   }
 
   /* Remove source_p from the client lists */
-  if (HasID(source_p))
+  if (source_p->id[0])
     hash_del_id(source_p);
   if (source_p->name[0])
     hash_del_client(source_p);

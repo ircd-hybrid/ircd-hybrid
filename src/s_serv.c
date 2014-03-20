@@ -716,9 +716,6 @@ server_estab(struct Client *client_p)
   sendto_one(client_p, "SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN,
              (unsigned long)CurrentTime);
 
-  if (HasID(client_p))
-    hash_add_id(client_p);
-
   /* XXX Does this ever happen? I don't think so -db */
   detach_conf(client_p, CONF_OPER);
 
@@ -752,6 +749,7 @@ server_estab(struct Client *client_p)
 
   dlinkAdd(client_p, make_dlink_node(), &global_serv_list);
   hash_add_client(client_p);
+  hash_add_id(client_p);
 
   /* doesnt duplicate client_p->serv if allocated this struct already */
   make_server(client_p);

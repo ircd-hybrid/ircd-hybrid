@@ -595,12 +595,10 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
                "0" : target_p->sockhost, target_p->id, target_p->info);
 
   if (!EmptyString(target_p->certfp))
-    sendto_one(client_p, ":%s CERTFP %s",
-               ID_or_name(target_p, client_p), target_p->certfp);
+    sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->certfp);
 
   if (target_p->away[0])
-    sendto_one(client_p, ":%s AWAY :%s", ID_or_name(target_p, client_p),
-               target_p->away);
+    sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
 
 }
 
@@ -843,7 +841,7 @@ server_estab(struct Client *client_p)
                target_p->info);
 
     if (HasFlag(target_p, FLAGS_EOB))
-      sendto_one(client_p, ":%s EOB", ID_or_name(target_p, client_p));
+      sendto_one(client_p, ":%s EOB", target_p->id, client_p);
   }
 
   server_burst(client_p);
@@ -874,7 +872,7 @@ server_burst(struct Client *client_p)
 
   /* EOB stuff is now in burst_all */
   /* Always send a PING after connect burst is done */
-  sendto_one(client_p, "PING :%s", ID_or_name(&me, client_p));
+  sendto_one(client_p, "PING :%s", me.id);
 }
 
 /* burst_all()
@@ -915,7 +913,7 @@ burst_all(struct Client *client_p)
   }
 
   if (IsCapable(client_p, CAP_EOB))
-    sendto_one(client_p, ":%s EOB", ID_or_name(&me, client_p));
+    sendto_one(client_p, ":%s EOB", me.id);
 }
 
 /*
@@ -944,8 +942,7 @@ send_tb(struct Client *client_p, struct Channel *chptr)
    * for further information   -Michael
    */
   if (chptr->topic_time != 0)
-    sendto_one(client_p, ":%s TBURST %lu %s %lu %s :%s",
-               ID_or_name(&me, client_p),
+    sendto_one(client_p, ":%s TBURST %lu %s %lu %s :%s", me.id,
                (unsigned long)chptr->channelts, chptr->chname,
                (unsigned long)chptr->topic_time,
                chptr->topic_info,

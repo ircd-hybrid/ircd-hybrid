@@ -95,13 +95,11 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
   }
 
   if (ts == 0)
-    sendto_one(target_p, ":%s SVSKILL %s :%s",
-               ID_or_name(source_p, target_p),
-               ID_or_name(target_p, target_p), comment);
+    sendto_one(target_p, ":%s SVSKILL %s :%s", source_p->id,
+               target_p->id, comment);
   else
-    sendto_one(target_p, ":%s SVSKILL %s %lu :%s",
-               ID_or_name(source_p, target_p),
-               ID_or_name(target_p, target_p), ts, comment);
+    sendto_one(target_p, ":%s SVSKILL %s %lu :%s", source_p->id,
+               target_p->id, ts, comment);
   return 0;
 }
 

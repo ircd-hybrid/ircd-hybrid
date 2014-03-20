@@ -31,7 +31,6 @@
 #include "send.h"
 #include "conf.h"
 #include "ircd.h"
-#include "irc_string.h"
 #include "parse.h"
 
 

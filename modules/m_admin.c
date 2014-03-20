@@ -33,7 +33,6 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "irc_string.h"
 
 
 

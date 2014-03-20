@@ -434,7 +434,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   hash_add_id(target_p);
 
   sendto_server(client_p, NOCAPS, NOCAPS, ":%s SID %s %d %s :%s%s",
-                ID_or_name(source_p, client_p), target_p->name, hop + 1,
+                source_p->id, target_p->name, hop + 1,
                 target_p->id, IsHidden(target_p) ? "(H) " : "", target_p->info);
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
                        "Server %s being introduced by %s",

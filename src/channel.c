@@ -154,8 +154,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
   char *t, *start;       /* temp char pointer */
 
   start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %lu %s %s %s:",
-                             ID_or_name(&me, client_p),
-                             (unsigned long)chptr->channelts,
+                             me.id, (unsigned long)chptr->channelts,
                              chptr->chname, modebuf, parabuf);
 
   DLINK_FOREACH(ptr, chptr->members.head)

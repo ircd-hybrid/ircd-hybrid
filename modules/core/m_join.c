@@ -414,7 +414,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
-                ID(source_p), (unsigned long)chptr->channelts, chptr->chname);
+                source_p->id, (unsigned long)chptr->channelts, chptr->chname);
   return 0;
 }
 
@@ -442,7 +442,7 @@ do_join_0(struct Client *source_p)
     chptr = ((struct Membership *)ptr->data)->chptr;
 
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
-                  ID(source_p), chptr->chname);
+                  source_p->id, chptr->chname);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname);

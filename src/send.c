@@ -409,7 +409,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   else
     dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
 
-  dbuf_put_fmt(remote_buf, ":%s ", ID(from));
+  dbuf_put_fmt(remote_buf, ":%s ", from->id);
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
@@ -698,7 +698,7 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
 
   dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
-  dbuf_put_fmt(remote_buf, ":%s ", ID(from));
+  dbuf_put_fmt(remote_buf, ":%s ", from->id);
 
   va_start(alocal, pattern);
   va_start(aremote, pattern);
@@ -774,7 +774,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
   buff_suid = dbuf_alloc();
 
   va_start(args, pattern);
-  dbuf_put_fmt(buff_suid, ":%s ", ID(source_p));
+  dbuf_put_fmt(buff_suid, ":%s ", source_p->id);
   dbuf_put_args(buff_suid, pattern, args);
   va_end(args);
 

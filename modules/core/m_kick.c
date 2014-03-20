@@ -176,7 +176,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
                            source_p->host, name, who->name, comment);
 
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
-                  ID(source_p), chptr->chname, ID(who), comment);
+                  source_p->id, chptr->chname, who->id, comment);
     remove_user_from_channel(ms_target);
   }
   else

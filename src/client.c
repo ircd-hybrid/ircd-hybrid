@@ -831,7 +831,7 @@ exit_client(struct Client *source_p, const char *comment)
         {
           /* for them, we are exiting the network */
           sendto_one(source_p, ":%s SQUIT %s :%s",
-                     ID(&me), ID(&me), comment);
+                     me.id, me.id, comment);
         }
       }
 
@@ -877,7 +877,7 @@ exit_client(struct Client *source_p, const char *comment)
 
     /* Send SQUIT for source_p in every direction. source_p is already off of serv_list here */
     if (!HasFlag(source_p, FLAGS_SQUIT))
-      sendto_server(NULL, NOCAPS, NOCAPS, "SQUIT %s :%s", ID(source_p), comment);
+      sendto_server(NULL, NOCAPS, NOCAPS, "SQUIT %s :%s", source_p->id, comment);
 
     /* Now exit the clients internally */
     recurse_remove_clients(source_p, splitstr);
@@ -897,7 +897,7 @@ exit_client(struct Client *source_p, const char *comment)
   }
   else if (IsClient(source_p) && !HasFlag(source_p, FLAGS_KILLED))
     sendto_server(client_p, NOCAPS, NOCAPS, ":%s QUIT :%s",
-                  ID(source_p), comment);
+                  source_p->id, comment);
 
   /* The client *better* be off all of the lists */
   assert(dlinkFind(&unknown_list, source_p) == NULL);

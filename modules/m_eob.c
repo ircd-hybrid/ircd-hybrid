@@ -51,7 +51,7 @@ ms_eob(struct Client *source_p, int parc, char *parv[])
 
   AddFlag(source_p, FLAGS_EOB);
 
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s EOB", ID(source_p));
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s EOB", source_p->id);
   return 0;
 }
 

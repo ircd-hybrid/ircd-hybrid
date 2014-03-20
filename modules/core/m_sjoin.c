@@ -272,7 +272,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
 
   buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
-                    ID(source_p), (unsigned long)tstosend,
+                    source_p->id, (unsigned long)tstosend,
                     chptr->chname, modebuf, parabuf);
   uid_ptr = uid_buf + buflen;
 
@@ -345,7 +345,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     if (target_p == NULL || target_p->from != source_p->from)
       goto nextnick;
 
-    len_uid = strlen(ID(target_p));
+    len_uid = strlen(target_p->id);
     up = uid_prefix;
 
     if (keep_new_modes)
@@ -382,12 +382,12 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       sendto_server(source_p, NOCAPS, NOCAPS, "%s", uid_buf);
 
       buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
-                        ID(source_p), (unsigned long)tstosend,
+                        source_p->id, (unsigned long)tstosend,
                         chptr->chname, modebuf, parabuf);
       uid_ptr = uid_buf + buflen;
     }
 
-    uid_ptr += sprintf(uid_ptr,  "%s%s ", uid_prefix, ID(target_p));
+    uid_ptr += sprintf(uid_ptr,  "%s%s ", uid_prefix, target_p->id);
 
     if (!IsMember(target_p, chptr))
     {

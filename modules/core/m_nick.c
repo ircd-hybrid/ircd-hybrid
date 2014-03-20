@@ -241,7 +241,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   whowas_add_history(source_p, 1);
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s NICK %s :%lu",
-                ID(source_p), nick, (unsigned long)source_p->tsinfo);
+                source_p->id, nick, (unsigned long)source_p->tsinfo);
 
   hash_del_client(source_p);
   strlcpy(source_p->name, nick, sizeof(source_p->name));
@@ -325,7 +325,7 @@ nick_from_server(struct Client *source_p, int parc,
 
     whowas_add_history(source_p, 1);
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s NICK %s :%lu",
-                  ID(source_p), nick, (unsigned long)source_p->tsinfo);
+                  source_p->id, nick, (unsigned long)source_p->tsinfo);
   }
 
   /* set the new nick name */

@@ -111,15 +111,15 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
          target_p->name, get_client_name(source_p, HIDE_IP), comment);
 
     /* To them, we are exiting */
-    sendto_one(target_p, ":%s SQUIT %s :%s", ID(source_p), ID(&me), comment);
+    sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
     /* Send to everything but target */
     sendto_server(target_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
-                  ID(source_p), ID(target_p), comment);
+                  source_p->id, target_p->id, comment);
   }
   else
     /* Send to everything */
     sendto_server(NULL, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
-                  ID(source_p), ID(target_p), comment);
+                  source_p->id, target_p->id, comment);
 
   AddFlag(target_p, FLAGS_SQUIT);
 
@@ -168,7 +168,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
          target_p->name, comment);
 
     /* To them, we are exiting */
-    sendto_one(target_p, ":%s SQUIT %s :%s", ID(source_p), ID(&me), comment);
+    sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
 
     /* Send to everything but target and source */
     DLINK_FOREACH(ptr, serv_list.head)
@@ -179,13 +179,13 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
         continue;
 
       sendto_one(client_p, ":%s SQUIT %s :%s",
-                 ID(source_p), ID(target_p), comment);
+                 source_p->id, target_p->id, comment);
     }
   }
   else
     /* Send to everything but source */
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
-                  ID(source_p), ID(target_p), comment);
+                  source_p->id, target_p->id, comment);
 
   AddFlag(target_p, FLAGS_SQUIT);
 

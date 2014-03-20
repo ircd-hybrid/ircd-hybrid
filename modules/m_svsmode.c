@@ -160,12 +160,12 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
   if (extarg)
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s SVSMODE %s %lu %s %s",
-                  ID(source_p),
-                  ID(target_p), (unsigned long)target_p->tsinfo, modes, extarg);
+                  source_p->id,
+                  target_p->id, (unsigned long)target_p->tsinfo, modes, extarg);
   else
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s SVSMODE %s %lu %s",
-                  ID(source_p),
-                  ID(target_p), (unsigned long)target_p->tsinfo, modes);
+                  source_p->id,
+                  target_p->id, (unsigned long)target_p->tsinfo, modes);
 
   if (MyConnect(target_p) && (setmodes != target_p->umodes))
   {

@@ -54,7 +54,6 @@ struct MaskItem;
 #define REG_INIT (REG_NEED_USER|REG_NEED_NICK)
 
 #define HasID(x)                ((x)->id[0] != '\0')
-#define ID(x)                   (HasID(x) ? (x)->id : (x)->name)
 #define ID_or_name(x,client_p)  ((IsCapable(client_p->from, CAP_TS6) && HasID(x)) ? (x)->id : (x)->name)
 
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)

@@ -93,7 +93,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
 
     sendto_server(source_p, CAP_TBURST, NOCAPS,
                   ":%s TBURST %s %s %s %s :%s",
-                  ID(source_p), parv[1], parv[2], parv[3], setby, topic);
+                  source_p->id, parv[1], parv[2], parv[3], setby, topic);
 
     if (topic_differs)
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :%s",

@@ -312,7 +312,7 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(source_p->from, CAP_GLN, NOCAPS,
                 ":%s GLINE %s %s :%s",
-                ID(source_p), user, host, reason);
+                source_p->id, user, host, reason);
 
   if (!ConfigFileEntry.glines)
     return 0;
@@ -424,7 +424,7 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
 
   /* 4 param version for hyb-7 servers */
   sendto_server(NULL, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
-		ID(source_p), user, host, reason);
+		source_p->id, user, host, reason);
   return 0;
 }
 
@@ -450,7 +450,7 @@ do_sungline(struct Client *source_p, const char *user,
   {
     sendto_server(source_p->from, CAP_ENCAP, NOCAPS,
                   ":%s ENCAP * GUNGLINE %s %s :%s",
-                  ID(source_p), user, host, reason);
+                  source_p->id, user, host, reason);
   }
 }
 

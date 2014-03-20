@@ -478,7 +478,7 @@ register_remote_user(struct Client *source_p, const char *username,
                          source_p->host, source_p->from->name);
     sendto_one(source_p->from,
                ":%s KILL %s :%s (Ghosted, server %s doesn't exist)",
-               ID(&me), ID(source_p), me.name, server);
+               me.id, source_p->id, me.name, server);
 
     AddFlag(source_p, FLAGS_KILLED);
     exit_client(source_p, "Ghosted Client");
@@ -494,7 +494,7 @@ register_remote_user(struct Client *source_p, const char *username,
                          target_p->name, target_p->from->name);
     sendto_one(source_p->from,
                ":%s KILL %s :%s (NICK from wrong direction (%s != %s))",
-               ID(&me), ID(source_p), me.name, source_p->servptr->name,
+               me.id, source_p->id, me.name, source_p->servptr->name,
                target_p->from->name);
 
     AddFlag(source_p, FLAGS_KILLED);
@@ -582,7 +582,7 @@ introduce_client(struct Client *source_p)
                  "0" : source_p->sockhost, source_p->id, source_p->info);
 
     if (!EmptyString(source_p->certfp))
-      sendto_one(server, ":%s CERTFP %s", ID(source_p), source_p->certfp);
+      sendto_one(server, ":%s CERTFP %s", source_p->id, source_p->certfp);
   }
 }
 
@@ -969,7 +969,7 @@ send_umode_out(struct Client *client_p, struct Client *source_p,
 
   if (buf[0])
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s MODE %s :%s",
-                  ID(source_p), ID(source_p), buf);
+                  source_p->id, source_p->id, buf);
 
   if (client_p && MyClient(client_p))
     send_umode(client_p, source_p, old, 0xffffffff, buf);

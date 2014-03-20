@@ -161,7 +161,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
   {
     const struct Membership *ms = ptr->data;
 
-    tlen = strlen(ID(ms->client_p)) + 1;  /* nick + space */
+    tlen = strlen(ms->client_p->id) + 1;  /* nick + space */
 
     if (ms->flags & CHFL_CHANOP)
       tlen++;
@@ -189,7 +189,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
     if (ms->flags & CHFL_VOICE)
       *t++ = '+';
 
-    strcpy(t, ID(ms->client_p));
+    strcpy(t, ms->client_p->id);
 
     t += strlen(t);
     *t++ = ' ';

@@ -79,7 +79,7 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
         < CurrentTime))))
   {
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s :%s",
-                  ID(source_p), chptr->chname, reason);
+                  source_p->id, chptr->chname, reason);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s :%s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname, reason);
@@ -87,7 +87,7 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
   else
   {
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
-                  ID(source_p), chptr->chname);
+                  source_p->id, chptr->chname);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname);

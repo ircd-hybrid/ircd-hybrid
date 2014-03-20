@@ -59,7 +59,7 @@ mo_operwall(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s OPERWALL :%s",
-                ID(source_p), message);
+                source_p->id, message);
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
   return 0;
 }
@@ -79,7 +79,7 @@ ms_operwall(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s OPERWALL :%s",
-                ID(source_p), message);
+                source_p->id, message);
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
   return 0;
 }

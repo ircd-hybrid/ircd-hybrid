@@ -306,11 +306,9 @@ void
 sendto_one(struct Client *to, const char *pattern, ...)
 {
   va_list args;
-  struct dbuf_block *buffer;
+  struct dbuf_block *buffer = NULL;
 
-  to = to->from;
-
-  if (IsDead(to))
+  if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
 
   buffer = dbuf_alloc();
@@ -319,7 +317,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
   send_format(buffer, pattern, args);
   va_end(args);
 
-  send_message(to, buffer);
+  send_message(to->from, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -327,13 +325,11 @@ sendto_one(struct Client *to, const char *pattern, ...)
 void
 sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics numeric, ...)
 {
-  struct dbuf_block *buffer;
+  struct dbuf_block *buffer = NULL;
+  const char *dest = NULL;
   va_list args;
-  const char *dest;
 
-  to = to->from;
-
-  if (IsDead(to))
+  if (IsDead(to->from))
     return;
 
   dest = ID_or_name(to, to);
@@ -348,7 +344,7 @@ sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics num
   send_format(buffer, numeric_form(numeric), args);
   va_end(args);
 
-  send_message(to, buffer);
+  send_message(to->from, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -356,13 +352,11 @@ sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics num
 void
 sendto_one_notice(struct Client *to, struct Client *from, const char *pattern, ...)
 {
-  struct dbuf_block *buffer;
+  struct dbuf_block *buffer = NULL;
+  const char *dest = NULL;
   va_list args;
-  const char *dest;
 
-  to = to->from;
-
-  if (IsDead(to))
+  if (IsDead(to->from))
     return;
 
   dest = ID_or_name(to, to);
@@ -377,7 +371,7 @@ sendto_one_notice(struct Client *to, struct Client *from, const char *pattern, .
   send_format(buffer, pattern, args);
   va_end(args);
 
-  send_message(to, buffer);
+  send_message(to->from, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -824,22 +818,19 @@ sendto_anywhere(struct Client *to, struct Client *from,
                 const char *pattern, ...)
 {
   va_list args;
-  struct dbuf_block *buffer;
+  struct dbuf_block *buffer = NULL;
 
   if (IsDead(to->from))
     return;
 
   buffer = dbuf_alloc();
 
-  if (MyClient(to))
-  {
-    if (IsServer(from))
-      dbuf_put_fmt(buffer, ":%s %s %s ", from->name, command, to->name);
-    else
-      dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ", from->name, from->username, from->host, command, to->name);
-  }
+  if (MyClient(to) && IsClient(from))
+    dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ", from->name, from->username,
+                 from->host, command, to->name);
   else
-    dbuf_put_fmt(buffer, ":%s %s %s ", ID_or_name(from, to), command, ID_or_name(to, to));
+    dbuf_put_fmt(buffer, ":%s %s %s ", ID_or_name(from, to),
+                 command, ID_or_name(to, to));
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);

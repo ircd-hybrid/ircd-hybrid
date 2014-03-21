@@ -76,7 +76,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 {
   char *name;
   struct Client *target_p;
-  int hop;
 
   if (EmptyString(parv[3]))
   {
@@ -86,7 +85,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   }
 
   name = parv[1];
-  hop  = atoi(parv[2]);
 
   /*
    * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
@@ -241,7 +239,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    */
   strlcpy(source_p->name, name, sizeof(source_p->name));
   set_server_gecos(source_p, parv[3]);
-  source_p->hopcount = hop;
+  source_p->hopcount = atoi(parv[2]);
   server_estab(source_p);
   return 0;
 }
@@ -262,7 +260,6 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   const struct MaskItem *conf = NULL;
   int hlined = 0;
   int llined = 0;
-  int hop = 0;
 
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
@@ -273,8 +270,6 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     sendto_one(client_p, "ERROR :No servername");
     return 0;
   }
-
-  hop = atoi(parv[2]);
 
   if (!valid_servname(parv[1]))
   {
@@ -414,7 +409,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   target_p = make_client(client_p);
   make_server(target_p);
-  target_p->hopcount = hop;
+  target_p->hopcount = atoi(parv[2]);
   target_p->servptr = source_p;
 
   strlcpy(target_p->name, parv[1], sizeof(target_p->name));

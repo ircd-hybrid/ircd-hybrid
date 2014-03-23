@@ -49,7 +49,7 @@
 static int
 m_kick(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *who;
+  struct Client *target_p = NULL;
   struct Channel *chptr;
   char *comment;
   char *name;
@@ -141,10 +141,10 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   if (*user == '\0')
     return 0;
 
-  if ((who = find_chasing(source_p, user)) == NULL)
+  if ((target_p = find_chasing(source_p, user)) == NULL)
     return 0;
 
-  if ((ms_target = find_channel_link(who, chptr)) != NULL)
+  if ((ms_target = find_channel_link(target_p, chptr)) != NULL)
   {
 #ifdef HALFOPS
     /* half ops cannot kick other halfops on private channels */
@@ -168,14 +168,14 @@ m_kick(struct Client *source_p, int parc, char *parv[])
      */
     if (IsServer(source_p))
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s KICK %s %s :%s",
-                           source_p->name, name, who->name, comment);
+                           source_p->name, name, target_p->name, comment);
     else
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s KICK %s %s :%s",
                            source_p->name, source_p->username,
-                           source_p->host, name, who->name, comment);
+                           source_p->host, name, target_p->name, comment);
 
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
-                  source_p->id, chptr->chname, who->id, comment);
+                  source_p->id, chptr->chname, target_p->id, comment);
     remove_user_from_channel(ms_target);
   }
   else

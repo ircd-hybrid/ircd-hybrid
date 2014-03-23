@@ -196,7 +196,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   if ((target_p = hash_find_id(user)) == NULL)
   {
 /* XXX: should be doing this the ircu way?  sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, user); */
-    return ;
+    return 0;
   }
 
   if (IsServer(target_p) || IsMe(target_p))

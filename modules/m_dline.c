@@ -173,7 +173,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
   if ((t = parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
   {
-    if ((target_p = find_chasing(source_p, dlhost, NULL)) == NULL)
+    if ((target_p = find_chasing(source_p, dlhost)) == NULL)
       return 0;
 
     if (!MyConnect(target_p))
@@ -288,7 +288,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
 
     if ((t = parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
     {
-      if ((target_p = find_chasing(source_p, dlhost, NULL)) == NULL)
+      if ((target_p = find_chasing(source_p, dlhost)) == NULL)
         return 0;
 
       if (!MyConnect(target_p))

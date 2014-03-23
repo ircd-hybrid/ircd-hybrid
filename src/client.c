@@ -526,16 +526,12 @@ find_person(const struct Client *const client_p, const char *name)
 /*
  * find_chasing - find the client structure for a nick name (name)
  *      using history mechanism if necessary. If the client is not found,
- *      an error message (NO SUCH NICK) is generated. If the client was found
- *      through the history, chasing will be 1 and otherwise 0.
+ *      an error message (NO SUCH NICK) is generated.
  */
 struct Client *
-find_chasing(struct Client *source_p, const char *name, int *const chasing)
+find_chasing(struct Client *source_p, const char *name)
 {
   struct Client *who = find_person(source_p->from, name);
-
-  if (chasing)
-    *chasing = 0;
 
   if (who)
     return who;
@@ -551,9 +547,6 @@ find_chasing(struct Client *source_p, const char *name, int *const chasing)
                me.name, source_p->name, name);
     return NULL;
   }
-
-  if (chasing)
-    *chasing = 1;
 
   return who;
 }

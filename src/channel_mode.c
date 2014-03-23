@@ -967,7 +967,7 @@ chm_voice(struct Client *client_p, struct Client *source_p,
 
   opnick = parv[(*parn)++];
 
-  if ((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
+  if ((targ_p = find_chasing(source_p, opnick)) == NULL)
     return;
   if (!IsClient(targ_p))
     return;
@@ -1044,7 +1044,7 @@ chm_hop(struct Client *client_p, struct Client *source_p,
 
   opnick = parv[(*parn)++];
 
-  if ((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
+  if ((targ_p = find_chasing(source_p, opnick)) == NULL)
     return;
   if (!IsClient(targ_p))
     return;
@@ -1120,7 +1120,7 @@ chm_op(struct Client *client_p, struct Client *source_p,
 
   opnick = parv[(*parn)++];
 
-  if ((targ_p = find_chasing(source_p, opnick, NULL)) == NULL)
+  if ((targ_p = find_chasing(source_p, opnick)) == NULL)
     return;
   if (!IsClient(targ_p))
     return;

@@ -52,7 +52,6 @@ m_kick(struct Client *client_p, struct Client *source_p,
 {
   struct Client *who;
   struct Channel *chptr;
-  int chasing = 0;
   char *comment;
   char *name;
   char *p = NULL;
@@ -160,7 +159,7 @@ m_kick(struct Client *client_p, struct Client *source_p,
   if (*user == '\0')
     return 0;
 
-  if ((who = find_chasing(source_p, user, &chasing)) == NULL)
+  if ((who = find_chasing(source_p, user)) == NULL)
     return 0;
 
   if ((ms_target = find_channel_link(who, chptr)) != NULL)

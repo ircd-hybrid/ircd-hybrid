@@ -160,7 +160,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     remove_user_from_channel(ms_target);
   }
   else
-    sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, chptr->chname, target_p->name);
+    sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->chname);
 
   return 0;
 }

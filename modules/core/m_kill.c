@@ -193,25 +193,10 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
     path = parv[2];
   }
 
-  if ((target_p = find_person(source_p, user)) == NULL)
+  if ((target_p = hash_find_id(user)) == NULL)
   {
-    /*
-     * If the user has recently changed nick, but only if its
-     * not an uid, automatically rewrite the KILL for this new nickname.
-     * --this keeps servers in synch when nick change and kill collide
-     */
-    if (IsDigit(*user))   /* Somehow an uid was not found in the hash ! */
-      return 0;
-    if ((target_p = whowas_get_history(user,
-                                (time_t)ConfigFileEntry.kill_chase_time_limit))
-       == NULL)
-    {
-      sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, user);
-      return 0;
-    }
-
-    sendto_one_notice(source_p, &me, ":KILL changed from %s to %s",
-                      user, target_p->name);
+/* XXX: should be doing this the ircu way?  sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, user); */
+    return ;
   }
 
   if (IsServer(target_p) || IsMe(target_p))

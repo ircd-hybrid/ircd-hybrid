@@ -49,14 +49,11 @@
 static int
 m_kick(struct Client *source_p, int parc, char *parv[])
 {
+  char reason[KICKLEN + 1] = "";
   struct Client *target_p = NULL;
-  struct Channel *chptr;
-  char *comment;
-  char *name;
-  char *p = NULL;
-  char *user;
-  struct Membership *ms = NULL;
-  struct Membership *ms_target;
+  struct Channel *chptr = NULL;
+  struct Membership *ms_source = NULL;
+  struct Membership *ms_target = NULL;
 
   if (EmptyString(parv[2]))
   {
@@ -67,47 +64,42 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   if (MyClient(source_p) && !IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  comment = (EmptyString(parv[3])) ? source_p->name : parv[3];
-  if (strlen(comment) > (size_t)KICKLEN)
-    comment[KICKLEN] = '\0';
+  if (!EmptyString(parv[3]))
+    strlcpy(reason, parv[3], sizeof(reason));
+  else
+    strlcpy(reason, source_p->name, sizeof(reason));
 
-  name = parv[1];
-  if ((p = strchr(name,',')) != NULL)
-    *p = '\0';
-  if (*name == '\0')
-    return 0;
-
-  if ((chptr = hash_find_channel(name)) == NULL)
+  if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return 0;
   }
 
   if (!IsServer(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
   {
-    if ((ms = find_channel_link(source_p, chptr)) == NULL)
+    if ((ms_source = find_channel_link(source_p, chptr)) == NULL)
     {
       if (MyConnect(source_p))
       {
-        sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, name);
+        sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
         return 0;
       }
     }
 
-    if (!has_member_flags(ms, CHFL_CHANOP|CHFL_HALFOP))
+    if (!has_member_flags(ms_source, CHFL_CHANOP|CHFL_HALFOP))
     {
       /* was a user, not a server, and user isn't seen as a chanop here */
       if (MyConnect(source_p))
       {
         /* user on _my_ server, with no chanops.. so go away */
-        sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, name);
+        sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
         return 0;
       }
 
       if (chptr->channelts == 0)
       {
         /* If its a TS 0 channel, do it the old way */
-        sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, name);
+        sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
         return 0;
       }
 
@@ -134,52 +126,41 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  user = parv[2];
-  if ((p = strchr(user, ',')) != NULL)
-    *p = '\0';
-
-  if (*user == '\0')
-    return 0;
-
-  if ((target_p = find_chasing(source_p, user)) == NULL)
+  if ((target_p = find_chasing(source_p, parv[2])) == NULL)
     return 0;
 
   if ((ms_target = find_channel_link(target_p, chptr)) != NULL)
   {
 #ifdef HALFOPS
     /* half ops cannot kick other halfops on private channels */
-    if (has_member_flags(ms, CHFL_HALFOP) && !has_member_flags(ms, CHFL_CHANOP))
+    if (has_member_flags(ms_source, CHFL_HALFOP) && !has_member_flags(ms_source, CHFL_CHANOP))
     {
       if (((chptr->mode.mode & MODE_PRIVATE) && has_member_flags(ms_target,
         CHFL_CHANOP|CHFL_HALFOP)) || has_member_flags(ms_target, CHFL_CHANOP))
       {
-        sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, name);
+        sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
         return 0;
       }
     }
 #endif
 
-    /* jdc
-     * - In the case of a server kicking a user (i.e. CLEARCHAN),
-     *   the kick should show up as coming from the server which did
-     *   the kick.
-     * - Personally, flame and I believe that server kicks shouldn't
-     *   be sent anyways.  Just waiting for some oper to abuse it...
-     */
     if (IsServer(source_p))
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s KICK %s %s :%s",
-                           source_p->name, name, target_p->name, comment);
+                           source_p->name, chptr->chname,
+                           target_p->name, reason);
     else
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s KICK %s %s :%s",
                            source_p->name, source_p->username,
-                           source_p->host, name, target_p->name, comment);
+                           source_p->host, chptr->chname,
+                           target_p->name, reason);
 
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
-                  source_p->id, chptr->chname, target_p->id, comment);
+                  source_p->id, chptr->chname,
+                  target_p->id, reason);
     remove_user_from_channel(ms_target);
   }
   else
-    sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, user, name);
+    sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, chptr->chname, target_p->name);
 
   return 0;
 }

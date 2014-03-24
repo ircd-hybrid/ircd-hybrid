@@ -160,44 +160,23 @@ static int
 ms_kill(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
-  struct Client *target_p;
-  char *user;
-  char *reason;
-  const char *path;
   char def_reason[] = CONF_NOREASON;
+  struct Client *target_p = NULL;
+  char *reason = NULL;
 
-  if (EmptyString(parv[1]))
+  if (EmptyString(parv[2]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
     return 0;
   }
 
-  user = parv[1];
-
-  if (EmptyString(parv[2]))
-  {
+  if ((reason = strchr(parv[2], ' ')))
+    *reason++ = '\0';
+  else
     reason = def_reason;
 
-    /* hyb6 takes the nick of the killer from the path *sigh* --fl_ */
-    path = source_p->name;
-  }
-  else
-  {
-    reason = strchr(parv[2], ' ');
-
-    if (reason != NULL)
-      *reason++ = '\0';
-    else
-      reason = def_reason;
-
-    path = parv[2];
-  }
-
-  if ((target_p = hash_find_id(user)) == NULL)
-  {
-/* XXX: should be doing this the ircu way?  sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, user); */
+  if ((target_p = hash_find_id(parv[1])) == NULL)
     return 0;
-  }
 
   if (IsServer(target_p) || IsMe(target_p))
   {
@@ -251,7 +230,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
        source_p->name, target_p->name, source_p->name, reason);
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s %s",
-                source_p->id, target_p->id, path, reason);
+                source_p->id, target_p->id, parv[2], reason);
   AddFlag(target_p, FLAGS_KILLED);
 
   /* reason comes supplied with its own ()'s */

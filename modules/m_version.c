@@ -82,25 +82,6 @@ m_version(struct Client *source_p, int parc, char *parv[])
 }
 
 /*
- * mo_version - VERSION command handler
- *      parv[0] = command
- *      parv[1] = remote server
- */
-static int
-mo_version(struct Client *source_p, int parc, char *parv[])
-{
-  if (hunt_server(source_p, ":%s VERSION :%s",
-                  1, parc, parv) != HUNTED_ISME)
-    return 0;
-
-
-  sendto_one_numeric(source_p, &me, RPL_VERSION, ircd_version, serno,
-                     me.name, serveropts);
-  show_isupport(source_p);
-  return 0;
-}
-
-/*
  * ms_version - VERSION command handler
  *      parv[0] = command
  *      parv[1] = remote server
@@ -121,7 +102,7 @@ ms_version(struct Client *source_p, int parc, char *parv[])
 static struct Message version_msgtab =
 {
   "VERSION", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_version, ms_version, m_ignore, mo_version, m_ignore }
+  { m_unregistered, m_version, ms_version, m_ignore, ms_version, m_ignore }
 };
 
 static void

@@ -49,19 +49,17 @@ static int
 mo_kill(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
-  struct Client *target_p;
-  char *user;
-  char *reason;
   char def_reason[] = CONF_NOREASON;
+  struct Client *target_p = NULL;
+  char *reason = NULL;
 
-  user   = parv[1];
-  reason = parv[2]; /* Either defined or NULL (parc >= 2!!) */
-
-  if (*user == '\0')
+  if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
     return 0;
   }
+
+  reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
 
   if (!EmptyString(reason))
   {
@@ -71,23 +69,23 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   else
     reason = def_reason;
 
-  if ((target_p = hash_find_client(user)) == NULL)
+  if ((target_p = hash_find_client(parv[1])) == NULL)
   {
     /*
      * If the user has recently changed nick, automatically
      * rewrite the KILL for this new nickname--this keeps
      * servers in synch when nick change and kill collide
      */
-    if ((target_p = whowas_get_history(user,
+    if ((target_p = whowas_get_history(parv[1],
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
                                 == NULL)
     {
-      sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, user);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
       return 0;
     }
 
     sendto_one_notice(source_p, &me, ":KILL changed from %s to %s",
-                      user, target_p->name);
+                      parv[1], target_p->name);
   }
 
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL_REMOTE))
@@ -121,7 +119,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
                        "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s (%s)",
                        target_p->name, target_p->username, target_p->host,
                        target_p->servptr->name,
-                       target_p->servptr->id[0] ? target_p->servptr->id : "<>",
+                       target_p->servptr->id,
                        source_p->name, me.name, reason);
 
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%s)",
@@ -138,6 +136,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s!%s!%s!%s (%s)",
                   source_p->id, target_p->id, me.name, source_p->host,
                   source_p->username, source_p->name, reason);
+
     /*
      * Set FLAGS_KILLED. This prevents exit_one_client from sending
      * the unnecessary QUIT for this. (This flag should never be
@@ -164,19 +163,19 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
   char *reason = NULL;
 
-  if (EmptyString(parv[2]))
+  if (parc < 3 || EmptyString(parv[2]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
     return 0;
   }
 
+  if ((target_p = hash_find_id(parv[1])) == NULL)
+    return 0;
+
   if ((reason = strchr(parv[2], ' ')))
     *reason++ = '\0';
   else
     reason = def_reason;
-
-  if ((target_p = hash_find_id(parv[1])) == NULL)
-    return 0;
 
   if (IsServer(target_p) || IsMe(target_p))
   {
@@ -215,7 +214,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
                          "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s!%s!%s!%s %s",
                          target_p->name, target_p->username, target_p->host,
                          target_p->servptr->name,
-                         target_p->servptr->id[0] ? target_p->servptr->id : "<>", source_p->name,
+                         target_p->servptr->id, source_p->name,
                          source_p->servptr->name, source_p->host, source_p->username,
                          source_p->name, reason);
   else
@@ -223,7 +222,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
                          "Received KILL message for %s!%s@%s[%s/%s]. From %s %s",
                          target_p->name, target_p->username, target_p->host,
                          target_p->servptr->name,
-                         target_p->servptr->id[0] ? target_p->servptr->id : "<>",
+                         target_p->servptr->id,
                          source_p->name, reason);
 
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",

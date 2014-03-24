@@ -642,8 +642,7 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
 
   if (IsClient(source_p))
   {
-    if (source_p->servptr->serv != NULL)
-      dlinkDelete(&source_p->lnode, &source_p->servptr->serv->client_list);
+    dlinkDelete(&source_p->lnode, &source_p->servptr->serv->client_list);
 
     /*
      * If a person is on a channel, send a QUIT notice

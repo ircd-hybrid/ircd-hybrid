@@ -86,14 +86,14 @@ mr_user(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((p = strchr(parv[1], '@')) != NULL)
-    *p = '\0';
-
   if (EmptyString(parv[4]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "USER");
     return 0;
   }
+
+  if ((p = strchr(parv[1], '@')))
+    *p = '\0';
 
   do_local_user(source_p,
                 parv[1], /* username */

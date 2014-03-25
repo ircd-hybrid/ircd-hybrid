@@ -87,15 +87,15 @@ mr_user(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  if ((p = strchr(parv[1], '@')) != NULL)
-    *p = '\0';
-
   if (EmptyString(parv[4]))
   {
     sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name,
                source_p->name[0] ? source_p->name : "*", "USER");
     return 0;
   }
+
+  if ((p = strchr(parv[1], '@')))
+    *p = '\0';
 
   do_local_user(source_p,
                 parv[1], /* username */

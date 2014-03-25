@@ -187,8 +187,8 @@ m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
           count = strlen(source_p->name) + strlen(me.name) + 10;
         }
 
-        strcat(buf, " ");
-        strcat(buf, anptr->nick);
+        strlcat(buf, " ", sizeof(buf));
+        strlcat(buf, anptr->nick, sizeof(buf));
         count += (strlen(anptr->nick) + 1);
       }
 

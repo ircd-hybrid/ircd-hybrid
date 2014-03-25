@@ -226,7 +226,6 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   char *target_server = NULL;
   struct MaskItem *conf;
   time_t tkline_time = 0;
-  time_t cur_time;
 
   if (!HasOFlag(source_p, OPER_FLAG_K))
   {
@@ -255,8 +254,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   if (already_placed_kline(source_p, user, host, 1))
     return 0;
 
-  cur_time = CurrentTime;
-  current_date = smalldate(cur_time);
+  current_date = smalldate(0);
   conf = conf_make(CONF_KLINE);
 
   conf->host = xstrdup(host);
@@ -281,7 +279,6 @@ me_kline(struct Client *source_p, int parc, char *parv[])
   struct MaskItem *conf = NULL;
   int tkline_time = 0;
   const char *current_date;
-  time_t cur_time;
   char *kuser, *khost, *kreason;
 
   if (parc != 6 || EmptyString(parv[5]))
@@ -295,8 +292,7 @@ me_kline(struct Client *source_p, int parc, char *parv[])
   khost = parv[4];
   kreason = parv[5];
 
-  cur_time = CurrentTime;
-  current_date = smalldate(cur_time);
+  current_date = smalldate(0);
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,

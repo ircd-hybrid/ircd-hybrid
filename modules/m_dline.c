@@ -143,7 +143,6 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   time_t tkline_time=0;
   int bits = 0, aftype = 0, t = 0;
   const char *current_date = NULL;
-  time_t cur_time;
   char hostip[HOSTIPLEN + 1];
   char buffer[IRCD_BUFSIZE];
 
@@ -225,8 +224,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  cur_time = CurrentTime;
-  current_date = smalldate(cur_time);
+  current_date = smalldate(0);
 
   if (!valid_comment(source_p, reason, 1))
     return 0;
@@ -258,7 +256,6 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   time_t tkline_time=0;
   int bits = 0, aftype = 0, t = 0;
   const char *current_date = NULL;
-  time_t cur_time;
   char hostip[HOSTIPLEN + 1];
   char buffer[IRCD_BUFSIZE];
 
@@ -338,8 +335,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    cur_time = CurrentTime;
-    current_date = smalldate(cur_time);
+    current_date = smalldate(0);
 
     if (!valid_comment(source_p, reason, 1))
       return 0;

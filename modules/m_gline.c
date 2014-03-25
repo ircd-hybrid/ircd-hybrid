@@ -96,7 +96,7 @@ set_local_gline(const struct Client *source_p, const char *user,
   char buffer[IRCD_BUFSIZE];
   struct MaskItem *conf = conf_make(CONF_GLINE);
 
-  snprintf(buffer, sizeof(buffer), "%s (%s)", reason, smalldate(CurrentTime));
+  snprintf(buffer, sizeof(buffer), "%s (%s)", reason, smalldate(0));
   conf->reason = xstrdup(buffer);
   conf->user = xstrdup(user);
   conf->host = xstrdup(host);

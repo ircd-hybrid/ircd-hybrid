@@ -44,7 +44,7 @@
  */
 static void
 do_local_user(struct Client *source_p,
-              const char *username, const char *host, const char *server,
+              const char *username,
               const char *realname)
 {
   assert(source_p != NULL);
@@ -97,8 +97,6 @@ mr_user(struct Client *source_p, int parc, char *parv[])
 
   do_local_user(source_p,
                 parv[1], /* username */
-                parv[2], /* host     */
-                parv[3], /* server   */
                 parv[4]	 /* users real name */ );
   return 0;
 }

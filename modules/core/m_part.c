@@ -62,7 +62,7 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
 
   if ((ms = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, name);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
     return;
   }
 
@@ -106,7 +106,7 @@ static int
 m_part(struct Client *source_p, int parc, char *parv[])
 {
   char *p = NULL, *name = NULL;
-  char reason[KICKLEN + 1] = { '\0' };
+  char reason[KICKLEN + 1] = "";
 
   if (EmptyString(parv[1]))
   {

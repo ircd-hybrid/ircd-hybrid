@@ -116,9 +116,9 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
   size_t len = 0;
   struct Ban *ban_p = NULL;
   unsigned int num_mask;
-  char name[NICKLEN + 1];
-  char user[USERLEN + 1];
-  char host[HOSTLEN + 1];
+  char name[NICKLEN + 1] = "";
+  char user[USERLEN + 1] = "";
+  char host[HOSTLEN + 1] = "";
   struct split_nuh_item nuh;
 
   /* dont let local clients overflow the b/e/I lists */
@@ -221,10 +221,9 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
 {
   dlink_list *list;
   dlink_node *ban;
-  struct Ban *banptr;
-  char name[NICKLEN + 1];
-  char user[USERLEN + 1];
-  char host[HOSTLEN + 1];
+  char name[NICKLEN + 1] = "";
+  char user[USERLEN + 1] = "";
+  char host[HOSTLEN + 1] = "";
   struct split_nuh_item nuh;
 
   assert(banid);
@@ -266,7 +265,7 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
 
   DLINK_FOREACH(ban, list->head)
   {
-    banptr = ban->data;
+    struct Ban *banptr = ban->data;
 
     if (!irccmp(name, banptr->name) &&
         !irccmp(user, banptr->user) &&
@@ -1465,7 +1464,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
     else
       arg = mode_changes[i].arg;
 
-    if (arg != NULL)
+    if (arg)
       arglen = strlen(arg);
     else
       arglen = 0;
@@ -1478,8 +1477,9 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
         ((arglen + mbl + pbl + 2) > IRCD_BUFSIZE) ||
         (pbl + arglen + BAN_FUDGE) >= MODEBUFLEN)
     {
-      if (nc != 0)
+      if (nc)
         sendto_server(source_p, NOCAPS, NOCAPS, "%s %s", modebuf, parabuf);
+
       nc = 0;
       mc = 0;
 
@@ -1502,7 +1502,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
     modebuf[mbl] = '\0';
     nc++;
 
-    if (arg != NULL)
+    if (arg)
     {
       len = sprintf(parptr, "%s ", arg);
       pbl += len;
@@ -1514,7 +1514,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
   if (pbl && parabuf[pbl - 1] == ' ')
     parabuf[pbl - 1] = '\0';
 
-  if (nc != 0)
+  if (nc)
     sendto_server(source_p, NOCAPS, NOCAPS, "%s %s", modebuf, parabuf);
 }
 
@@ -1562,7 +1562,7 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
       continue;
 
     arg = mode_changes[i].arg;
-    if (arg != NULL)
+    if (arg)
       arglen = strlen(arg);
     else
       arglen = 0;
@@ -1574,7 +1574,7 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
       if (mbl && modebuf[mbl - 1] == '-')
         modebuf[mbl - 1] = '\0';
 
-      if (nc != 0)
+      if (nc)
         sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", modebuf, parabuf);
 
       nc = 0;
@@ -1604,7 +1604,7 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
     modebuf[mbl] = '\0';
     nc++;
 
-    if (arg != NULL)
+    if (arg)
     {
       len = sprintf(parptr, "%s ", arg);
       pbl += len;
@@ -1616,7 +1616,7 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
   if (pbl && parabuf[pbl - 1] == ' ')
     parabuf[pbl - 1] = '\0';
 
-  if (nc != 0)
+  if (nc)
     sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", modebuf, parabuf);
 
   send_mode_changes_server(source_p, chptr);

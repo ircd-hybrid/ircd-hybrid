@@ -72,7 +72,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   short dc[8];
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr;
 
-  for (p = text; (c = *p); p++)
+  for (p = text; (c = *p); ++p)
   {
     if (IsXDigit(c))
     {
@@ -111,7 +111,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
       char *after;
 
       d[dp] = d[dp] >> 4 * nyble;
-      dp++;
+      ++dp;
       bits = strtoul(p + 1, &after, 10);
 
       if (bits < 0 || *after)
@@ -127,7 +127,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   d[dp] = d[dp] >> 4 * nyble;
 
   if (c == 0)
-    dp++;
+    ++dp;
   if (finsert < 0 && bits == 0)
     bits = dp * 16;
 
@@ -135,7 +135,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   deficit = bits / 16 + ((bits % 16) ? 1 : 0) - dp;
 
   /* Now fill in the gaps(from ::) in the copied table... -A1kmm */
-  for (dp = 0, nyble = 0; dp < 8; dp++)
+  for (dp = 0, nyble = 0; dp < 8; ++dp)
   {
     if (nyble == finsert && deficit)
     {
@@ -149,16 +149,16 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   /* Set unused bits to 0... -A1kmm */
   if (bits < 128 && (bits % 16 != 0))
     dc[bits / 16] &= ~((1 << (15 - bits % 16)) - 1);
-  for (dp = bits / 16 + (bits % 16 ? 1 : 0); dp < 8; dp++)
+  for (dp = bits / 16 + (bits % 16 ? 1 : 0); dp < 8; ++dp)
     dc[dp] = 0;
 
   /* And assign... -A1kmm */
   if (addr)
-    for (dp = 0; dp < 8; dp++)
+    for (dp = 0; dp < 8; ++dp)
       /* The cast is a kludge to make netbsd work. */
       ((unsigned short *)&v6->sin6_addr)[dp] = htons(dc[dp]);
 
-  if (b != NULL)
+  if (b)
     *b = bits;
   return HM_IPV6;
 }
@@ -183,7 +183,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 
   digits[n++] = text;
 
-  for (p = text; (c = *p); p++)
+  for (p = text; (c = *p); ++p)
   {
     if (c >= '0' && c <= '9')   /* empty */
       ;
@@ -224,7 +224,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
     while (n < 4)
       digits[n++] = "0";
 
-  for (n = 0; n < 4; n++)
+  for (n = 0; n < 4; ++n)
     addb[n] = strtoul(digits[n], NULL, 10);
 
   if (bits == 0)
@@ -233,12 +233,12 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   /* Set unused bits to 0... -A1kmm */
   if (bits < 32 && bits % 8)
     addb[bits / 8] &= ~((1 << (8 - bits % 8)) - 1);
-  for (n = bits / 8 + (bits % 8 ? 1 : 0); n < 4; n++)
+  for (n = bits / 8 + (bits % 8 ? 1 : 0); n < 4; ++n)
     addb[n] = 0;
   if (addr)
     v4->sin_addr.s_addr =
       htonl(addb[0] << 24 | addb[1] << 16 | addb[2] << 8 | addb[3]);
-  if (b != NULL)
+  if (b)
     *b = bits;
   return HM_IPV4;
 }
@@ -276,9 +276,10 @@ match_ipv6(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bit
   const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
   const struct sockaddr_in6 *v6mask = (const struct sockaddr_in6 *)mask;
 
-  for (i = 0; i < n; i++)
+  for (i = 0; i < n; ++i)
     if (v6->sin6_addr.s6_addr[i] != v6mask->sin6_addr.s6_addr[i])
       return 0;
+
   if ((m = bits % 8) == 0)
     return -1;
   if ((v6->sin6_addr.s6_addr[n] & ~((1 << (8 - m)) - 1)) ==
@@ -388,7 +389,7 @@ hash_ipv6(const struct irc_ssaddr *addr, int bits)
   uint32_t v = 0, n;
   const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
 
-  for (n = 0; n < 16; n++)
+  for (n = 0; n < 16; ++n)
   {
     if (bits >= 8)
     {
@@ -435,7 +436,7 @@ get_mask_hash(const char *text)
 {
   const char *hp = "", *p;
 
-  for (p = text + strlen(text) - 1; p >= text; p--)
+  for (p = text + strlen(text) - 1; p >= text; --p)
     if (IsMWildChar(*p))
       return hash_text(hp);
     else if (*p == '.')
@@ -518,7 +519,7 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
     }
   }
 
-  if (name != NULL)
+  if (name)
   {
     const char *p = name;
 
@@ -539,10 +540,10 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
           hprec = arec->conf;
         }
       }
-      p = strchr(p, '.');
-      if (p == NULL)
+
+      if ((p = strchr(p, '.')) == NULL)
         break;
-      p++;
+      ++p;
     }
 
     DLINK_FOREACH(ptr, atable[0].head)
@@ -594,14 +595,14 @@ find_address_conf(const char *host, const char *user,
    * If they are K-lined, return the K-line. Otherwise, return the
    * auth{} block. -A1kmm
    */
-  if (killcnf != NULL)
+  if (killcnf)
     return killcnf;
 
   if (IsConfExemptGline(authcnf))
     return authcnf;
 
   killcnf = find_conf_by_address(host, ip, CONF_GLINE, aftype, user, NULL, 1);
-  if (killcnf != NULL)
+  if (killcnf)
     return killcnf;
 
   return authcnf;
@@ -619,7 +620,7 @@ find_dline_conf(struct irc_ssaddr *addr, int aftype)
   struct MaskItem *eline;
 
   eline = find_conf_by_address(NULL, addr, CONF_EXEMPT, aftype, NULL, NULL, 1);
-  if (eline != NULL)
+  if (eline)
     return eline;
 
   return find_conf_by_address(NULL, addr, CONF_DLINE, aftype, NULL, NULL, 1);

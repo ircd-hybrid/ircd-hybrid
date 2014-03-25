@@ -140,7 +140,8 @@ make_daemon(void)
 
 static int printVersion = 0;
 
-static struct lgetopt myopts[] = {
+static struct lgetopt myopts[] =
+{
   {"configfile", &ConfigFileEntry.configfile,
    STRING, "File to use for ircd.conf"},
   {"glinefile",  &ConfigFileEntry.glinefile,
@@ -198,7 +199,7 @@ set_time(void)
 static void
 io_loop(void)
 {
-  while (1 == 1)
+  while (1)
   {
     /*
      * Maybe we want a flags word?
@@ -241,6 +242,7 @@ io_loop(void)
       rehash(1);
       dorehash = 0;
     }
+
     if (doremotd)
     {
       motd_recache();

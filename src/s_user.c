@@ -297,7 +297,7 @@ register_local_user(struct Client *source_p)
 
   if (!IsGotId(source_p))
   {
-    char username[USERLEN + 1];
+    char username[USERLEN + 1] = "";
     const char *p = username;
     unsigned int i = 0;
 
@@ -370,7 +370,7 @@ register_local_user(struct Client *source_p)
   /* valid user name check */
   if (!valid_username(source_p->username, 1))
   {
-    char tmpstr2[IRCD_BUFSIZE];
+    char tmpstr2[IRCD_BUFSIZE] = "";
 
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Invalid username: %s (%s@%s)",
@@ -385,7 +385,7 @@ register_local_user(struct Client *source_p)
   if (check_xline(source_p))
     return;
 
-  while (hash_find_id((id = uid_get())) != NULL)
+  while (hash_find_id((id = uid_get())))
     ;
 
   strlcpy(source_p->id, id, sizeof(source_p->id));
@@ -540,7 +540,7 @@ static void
 introduce_client(struct Client *source_p)
 {
   dlink_node *server_node = NULL;
-  char ubuf[IRCD_BUFSIZE];
+  char ubuf[IRCD_BUFSIZE] = "";
 
   if (MyClient(source_p))
     send_umode(source_p, source_p, 0, SEND_UMODES, ubuf);
@@ -756,7 +756,7 @@ void
 set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
   unsigned int flag, setflags;
-  char **p, *m, buf[IRCD_BUFSIZE];
+  char **p, *m, buf[IRCD_BUFSIZE] = "";
   struct Client *target_p;
   int what = MODE_ADD, badflag = 0, i;
 
@@ -962,7 +962,7 @@ void
 send_umode_out(struct Client *client_p, struct Client *source_p,
                unsigned int old)
 {
-  char buf[IRCD_BUFSIZE] = { '\0' };
+  char buf[IRCD_BUFSIZE] = "";
   dlink_node *ptr = NULL;
 
   send_umode(NULL, source_p, old, SEND_UMODES, buf);
@@ -1021,7 +1021,7 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
 
   DLINK_FOREACH(ptr, target_p->channel.head)
   {
-    char modebuf[4], nickbuf[NICKLEN * 3 + 3] = { '\0' };
+    char modebuf[4], nickbuf[NICKLEN * 3 + 3] = "";
     char *p = modebuf;
     int len = 0;
     const struct Membership *ms = ptr->data;
@@ -1095,7 +1095,7 @@ user_welcome(struct Client *source_p)
   sendto_one_numeric(source_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
   show_isupport(source_p);
 
-  if (source_p->id[0] != '\0')
+  if (source_p->id[0])
     sendto_one_numeric(source_p, &me, RPL_YOURID, source_p->id);
 
   show_lusers(source_p);
@@ -1118,7 +1118,7 @@ check_xline(struct Client *source_p)
   {
     ++conf->count;
 
-    if (conf->reason != NULL)
+    if (conf->reason)
       reason = conf->reason;
     else
       reason = CONF_NOREASON;

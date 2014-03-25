@@ -52,7 +52,7 @@
 static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
-  char buf[IRCD_BUFSIZE] = { '\0' };
+  char buf[IRCD_BUFSIZE] = "";
   const dlink_node *lp = NULL;
   char *t = NULL;
   int cur_len = 0;

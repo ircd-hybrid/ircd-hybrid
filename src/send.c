@@ -99,6 +99,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
                            get_sendq(&to->localClient->confs));
     if (IsClient(to))
       SetSendQExceeded(to);
+
     dead_link_on_write(to, 0);
     return;
   }
@@ -106,9 +107,9 @@ send_message(struct Client *to, struct dbuf_block *buf)
   dbuf_add(&to->localClient->buf_sendq, buf);
 
   /*
-   ** Update statistics. The following is slightly incorrect
-   ** because it counts messages even if queued, but bytes
-   ** only really sent. Queued bytes get updated in SendQueued.
+   * Update statistics. The following is slightly incorrect because
+   * it counts messages even if queued, but bytes only really sent.
+   * Queued bytes get updated in send_queued_write().
    */
   ++to->localClient->send.messages;
   ++me.localClient->send.messages;
@@ -857,7 +858,7 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
 {
   const char *ntype = NULL;
   dlink_node *ptr = NULL;
-  char nbuf[IRCD_BUFSIZE];
+  char nbuf[IRCD_BUFSIZE] = "";
   va_list args;
 
   va_start(args, pattern);
@@ -898,6 +899,47 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
   }
 }
 
+/* ts_warn()
+ *
+ * inputs       - var args message
+ * output       - NONE
+ * side effects - Call sendto_realops_flags, with some flood checking
+ *                (at most 5 warnings every 5 seconds)
+ */
+void
+sendto_realops_flags_ratelimited(const char *pattern, ...)
+{
+  va_list args;
+  char buffer[IRCD_BUFSIZE] = "";
+  static time_t last = 0;
+  static int warnings = 0;
+
+  /*
+   ** if we're running with TS_WARNINGS enabled and someone does
+   ** something silly like (remotely) connecting a nonTS server,
+   ** we'll get a ton of warnings, so we make sure we don't send
+   ** more than 5 every 5 seconds.  -orabidoo
+   */
+
+  if (CurrentTime - last < 5)
+  {
+    if (++warnings > 5)
+      return;
+  }
+  else
+  {
+    last = CurrentTime;
+    warnings = 0;
+  }
+
+  va_start(args, pattern);
+  vsnprintf(buffer, sizeof(buffer), pattern, args);
+  va_end(args);
+
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s", buffer);
+  ilog(LOG_TYPE_IRCD, "%s", buffer);
+}
+
 /* sendto_wallops_flags()
  *
  * inputs       - flag types of messages to show to real opers
@@ -935,45 +977,4 @@ sendto_wallops_flags(unsigned int flags, struct Client *source_p,
   }
 
   dbuf_ref_free(buffer);
-}
-
-/* ts_warn()
- *
- * inputs	- var args message
- * output	- NONE
- * side effects	- Call sendto_realops_flags, with some flood checking
- *		  (at most 5 warnings every 5 seconds)
- */
-void
-sendto_realops_flags_ratelimited(const char *pattern, ...)
-{
-  va_list args;
-  char buffer[IRCD_BUFSIZE];
-  static time_t last = 0;
-  static int warnings = 0;
-
-  /*
-   ** if we're running with TS_WARNINGS enabled and someone does
-   ** something silly like (remotely) connecting a nonTS server,
-   ** we'll get a ton of warnings, so we make sure we don't send
-   ** more than 5 every 5 seconds.  -orabidoo
-   */
-
-  if (CurrentTime - last < 5)
-  {
-    if (++warnings > 5)
-      return;
-  }
-  else
-  {
-    last = CurrentTime;
-    warnings = 0;
-  }
-
-  va_start(args, pattern);
-  vsnprintf(buffer, sizeof(buffer), pattern, args);
-  va_end(args);
-
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s", buffer);
-  ilog(LOG_TYPE_IRCD, "%s", buffer);
 }

@@ -43,7 +43,7 @@
 static int
 ms_encap(struct Client *source_p, int parc, char *parv[])
 {
-  char buffer[IRCD_BUFSIZE], *ptr = buffer;
+  char buffer[IRCD_BUFSIZE] = "", *ptr = buffer;
   unsigned int cur_len = 0, len, i;
 #ifdef NOT_USED_YET
   int paramcount, mpara = 0;
@@ -51,7 +51,7 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   struct Message *mptr = NULL;
   MessageHandler handler = 0;
 
-  for (i = 1; i < (unsigned int)parc - 1; i++)
+  for (i = 1; i < (unsigned int)parc - 1; ++i)
   {
     len = strlen(parv[i]) + 1;
 

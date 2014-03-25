@@ -94,7 +94,7 @@ log_exceed_size(unsigned int type)
 static void
 log_write(enum log_type type, const char *message)
 {
-  char buf[IRCD_BUFSIZE];
+  char buf[IRCD_BUFSIZE] = "";
 
   strftime(buf, sizeof(buf), "[%FT%H:%M:%S%z]", localtime(&CurrentTime));
 
@@ -105,7 +105,7 @@ log_write(enum log_type type, const char *message)
 void
 ilog(enum log_type type, const char *fmt, ...)
 {
-  char buf[LOG_BUFSIZE];
+  char buf[LOG_BUFSIZE] = "";
   va_list args;
 
   if (!log_type_table[type].file || !ConfigLoggingEntry.use_logging)

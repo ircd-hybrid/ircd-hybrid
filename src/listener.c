@@ -86,9 +86,9 @@ get_listener_name(const struct Listener *const listener)
 void
 show_ports(struct Client *source_p)
 {
-  char buf[IRCD_BUFSIZE];
+  char buf[IRCD_BUFSIZE] = "";
   char *p = NULL;
-  dlink_node *ptr;
+  const dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, ListenerPollList.head)
   {

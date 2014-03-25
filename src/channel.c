@@ -213,11 +213,11 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
                const dlink_list *top, char flag)
 {
   const dlink_node *lp = NULL;
-  char pbuf[IRCD_BUFSIZE];
+  char pbuf[IRCD_BUFSIZE] = "";
   int tlen, mlen, cur_len, count = 0;
   char *pp = pbuf;
 
-  if (top == NULL || top->length == 0)
+  if (top->length == 0)
     return;
 
   mlen = snprintf(buf, sizeof(buf), ":%s BMASK %lu %s %c :", me.id,
@@ -409,7 +409,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
                      int show_eon)
 {
   const dlink_node *ptr = NULL;
-  char lbuf[IRCD_BUFSIZE + 1];
+  char lbuf[IRCD_BUFSIZE + 1] = "";
   char *t = NULL, *start = NULL;
   int tlen = 0;
   int is_member = IsMember(source_p, chptr);
@@ -467,7 +467,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
                      ms->client_p->host);
     }
 
-    if (tlen != 0)
+    if (tlen)
     {
       *(t - 1) = '\0';
       sendto_one(source_p, "%s", lbuf);
@@ -657,9 +657,7 @@ can_join(struct Client *source_p, struct Channel *chptr, const char *key)
 int
 has_member_flags(const struct Membership *ms, const unsigned int flags)
 {
-  if (ms != NULL)
-    return ms->flags & flags;
-  return 0;
+  return ms && (ms->flags & flags);
 }
 
 struct Membership *
@@ -833,7 +831,7 @@ check_spambot_warning(struct Client *source_p, const char *name)
       }
     }
 
-    if (name != NULL)
+    if (name)
       source_p->localClient->last_join_time = CurrentTime;
     else
       source_p->localClient->last_leave_time = CurrentTime;

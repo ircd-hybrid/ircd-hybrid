@@ -317,7 +317,7 @@ static int
 verify_access(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
-  char non_ident[USERLEN + 1] = { '~', '\0' };
+  char non_ident[USERLEN + 1] = "~";
 
   if (IsGotId(client_p))
   {
@@ -335,7 +335,7 @@ verify_access(struct Client *client_p)
                              client_p->localClient->passwd);
   }
 
-  if (conf != NULL)
+  if (conf)
   {
     if (IsConfClient(conf))
     {

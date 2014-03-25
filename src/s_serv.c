@@ -78,7 +78,7 @@ write_links_file(void *notused)
 {
   FILE *file = NULL;
   dlink_node *ptr = NULL, *ptr_next = NULL;
-  char buff[IRCD_BUFSIZE] = { '\0' };
+  char buff[IRCD_BUFSIZE] = "";
 
   if ((file = fopen(LIPATH, "w")) == NULL)
     return;
@@ -127,7 +127,7 @@ read_links_file(void)
 {
   FILE *file = NULL;
   char *p = NULL;
-  char buff[IRCD_BUFSIZE] = { '\0' };
+  char buff[IRCD_BUFSIZE] = "";
 
   if ((file = fopen(LIPATH, "r")) == NULL)
     return;

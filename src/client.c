@@ -513,7 +513,7 @@ find_person(const struct Client *const source_p, const char *name)
 
   if (IsDigit(*name))
   {
-    if (IsServer(source_p->from) || HasFlag(source_p->from, FLAGS_SERVICE))
+    if (IsServer(source_p->from))
       target_p = hash_find_id(name);
   }
   else

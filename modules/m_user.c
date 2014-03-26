@@ -36,16 +36,16 @@
 #include "listener.h"
 
 
-/* do_local_user()
+/* do_user()
  *
  * inputs       -
  * output       - NONE
  * side effects -
  */
 static void
-do_local_user(struct Client *source_p,
-              const char *username,
-              const char *realname)
+do_user(struct Client *source_p,
+        const char *username,
+        const char *realname)
 {
   assert(source_p != NULL);
   assert(source_p->username != username);
@@ -71,9 +71,9 @@ do_local_user(struct Client *source_p,
 ** mr_user
 **      parv[0] = command
 **      parv[1] = username (login name, account)
-**      parv[2] = client host name (used only from other servers)
-**      parv[3] = server host name (used only from other servers)
-**      parv[4] = users real name info
+**      parv[2] = client host name (ignored)
+**      parv[3] = server host name (ignored)
+**      parv[4] = user's real name info
 */
 static int
 mr_user(struct Client *source_p, int parc, char *parv[])
@@ -95,9 +95,7 @@ mr_user(struct Client *source_p, int parc, char *parv[])
   if ((p = strchr(parv[1], '@')))
     *p = '\0';
 
-  do_local_user(source_p,
-                parv[1], /* username */
-                parv[4]	 /* users real name */ );
+  do_user(source_p, parv[1], parv[4]);
   return 0;
 }
 

@@ -1606,7 +1606,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
 }
 
 /*
- * mo_stats()
+ * ms_stats()
  *      parv[0] = command
  *      parv[1] = stat letter/command
  *      parv[2] = (if present) server/mask in stats L, or target
@@ -1615,7 +1615,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
  * if found execute it.
  */
 static int
-mo_stats(struct Client *source_p, int parc, char *parv[])
+ms_stats(struct Client *source_p, int parc, char *parv[])
 {
   if (hunt_server(source_p, ":%s STATS %s :%s", 2,
                   parc, parv) != HUNTED_ISME)
@@ -1628,7 +1628,7 @@ mo_stats(struct Client *source_p, int parc, char *parv[])
 static struct Message stats_msgtab =
 {
   "STATS", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_stats, mo_stats, m_ignore, mo_stats, m_ignore }
+  { m_unregistered, m_stats, ms_stats, m_ignore, ms_stats, m_ignore }
 };
 
 static void

@@ -57,11 +57,11 @@ register_callback(const char *name, CBFUNC *func)
 {
   struct Callback *cb = NULL;
 
-  if (name != NULL)
+  if (name)
   {
-    if ((cb = find_callback(name)) != NULL)
+    if ((cb = find_callback(name)))
     {
-      if (func != NULL)
+      if (func)
         dlinkAddTail(func, MyMalloc(sizeof(dlink_node)), &cb->chain);
 
       return cb;
@@ -70,10 +70,10 @@ register_callback(const char *name, CBFUNC *func)
 
   cb = MyMalloc(sizeof(struct Callback));
 
-  if (func != NULL)
+  if (func)
     dlinkAdd(func, MyMalloc(sizeof(dlink_node)), &cb->chain);
 
-  if (name != NULL)
+  if (name)
   {
     cb->name = xstrdup(name);
     dlinkAdd(cb, &cb->node, &callback_list);
@@ -138,12 +138,8 @@ find_callback(const char *name)
   dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, callback_list.head)
-  {
-    struct Callback *cb = ptr->data;
-
-    if (!irccmp(cb->name, name))
-      return cb;
-  }
+    if (!irccmp(((struct Callback *)ptr->data)->name, name))
+      return ptr->data;
 
   return NULL;
 }
@@ -189,7 +185,7 @@ uninstall_hook(struct Callback *cb, CBFUNC *hook)
 void
 stats_hooks(struct Client *source_p)
 {
-  char lastused[IRCD_BUFSIZE];
+  char lastused[IRCD_BUFSIZE] = "";
   const dlink_node *ptr = NULL;
 
   sendto_one(source_p, ":%s %d %s : %-20s %-20s Used     Hooks", me.name,
@@ -201,9 +197,9 @@ stats_hooks(struct Client *source_p)
   {
     const struct Callback *cb = ptr->data;
 
-    if (cb->last != 0)
+    if (cb->last)
       snprintf(lastused, sizeof(lastused), "%d seconds ago",
-               (int) (CurrentTime - cb->last));
+               (int)(CurrentTime - cb->last));
     else
       strcpy(lastused, "NEVER");
 

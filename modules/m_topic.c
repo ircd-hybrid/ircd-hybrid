@@ -72,7 +72,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
 
     if ((ms = find_channel_link(source_p, chptr)) == NULL)
     {
-      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, parv[1]);
+      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
       return 0;
     }
 

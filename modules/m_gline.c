@@ -448,7 +448,7 @@ do_sungline(struct Client *source_p, const char *user,
 
   if (prop)
   {
-    sendto_server(source_p->from, CAP_ENCAP, NOCAPS,
+    sendto_server(source_p, CAP_ENCAP, NOCAPS,
                   ":%s ENCAP * GUNGLINE %s %s :%s",
                   source_p->id, user, host, reason);
   }

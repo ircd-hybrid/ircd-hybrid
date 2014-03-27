@@ -310,8 +310,7 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
   host   = parv[2];
   reason = parv[3];
 
-  sendto_server(source_p->from, CAP_GLN, NOCAPS,
-                ":%s GLINE %s %s :%s",
+  sendto_server(source_p, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
                 source_p->id, user, host, reason);
 
   if (!ConfigFileEntry.glines)

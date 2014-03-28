@@ -1312,10 +1312,10 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
 
   sendto_one(source_p, ":%s %d %s ? :%u total server(s)",
              ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p), dlink_list_length(&serv_list));
-  sendto_one(source_p, ":%s %d %s ? :Sent total : %7.2f %s",
+  sendto_one(source_p, ":%s %d %s ? :Sent total: %7.2f %s",
              ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
              _GMKv(sendB), _GMKs(sendB));
-  sendto_one(source_p, ":%s %d %s ? :Recv total : %7.2f %s",
+  sendto_one(source_p, ":%s %d %s ? :Recv total: %7.2f %s",
              ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
              _GMKv(recvB), _GMKs(recvB));
 

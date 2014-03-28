@@ -76,7 +76,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
     if ((ms = find_channel_link(source_p, chptr)) == NULL)
     {
       sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name,
-                 source_p->name, parv[1]);
+                 source_p->name, chptr->chname);
       return 0;
     }
 

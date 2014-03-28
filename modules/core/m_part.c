@@ -64,8 +64,8 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
 
   if ((ms = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
-               me.name, source_p->name, name);
+    sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name,
+               source_p->name, chptr->chname);
     return;
   }
 

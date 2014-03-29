@@ -61,16 +61,16 @@ static const struct InfoStruct info_table[] =
   /* --[  START OF TABLE  ]-------------------------------------------- */
 
   {
-    "CPATH",
-    OUTPUT_STRING,
-    &ConfigFileEntry.configfile,
-    "Path to main configuration file"
-  },
-  {
     "DPATH",
     OUTPUT_STRING,
     &ConfigFileEntry.dpath,
     "Root directory of installation"
+  },
+  {
+    "CPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.configfile,
+    "Path to main configuration file"
   },
   {
     "DLPATH",

@@ -259,15 +259,15 @@ add_conf_module(const char *name)
 void
 mod_clear_paths(void)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, modules_path.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, modules_path.head)
   {
     dlinkDelete(ptr, &modules_path);
     MyFree(ptr->data);
   }
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, modules_conf.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, modules_conf.head)
   {
     dlinkDelete(ptr, &modules_conf);
     MyFree(ptr->data);
@@ -289,7 +289,7 @@ findmodule_byname(const char *name)
   {
     struct module *modp = ptr->data;
 
-    if (strcmp(modp->name, name) == 0)
+    if (!strcmp(modp->name, name))
       return modp;
   }
 
@@ -316,7 +316,7 @@ load_all_modules(int warn)
     return;
   }
 
-  while ((ldirent = readdir(system_module_dir)) != NULL)
+  while ((ldirent = readdir(system_module_dir)))
   {
     if (modules_valid_suffix(ldirent->d_name))
     {
@@ -359,9 +359,8 @@ void
 load_core_modules(int warn)
 {
   char module_name[HYB_PATH_MAX + 1];
-  int i = 0;
 
-  for (; core_module_table[i]; ++i)
+  for (unsigned int i = 0; core_module_table[i]; ++i)
   {
     snprintf(module_name, sizeof(module_name), "%s%s",
              MODPATH, core_module_table[i]);

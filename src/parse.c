@@ -141,7 +141,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
      */
     char *sender = ++ch;
 
-    if ((s = strchr(ch, ' ')) != NULL)
+    if ((s = strchr(ch, ' ')))
     {
       *s = '\0';
       ch = ++s;
@@ -204,7 +204,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   {
     unsigned int ii = 0;
 
-    if ((s = strchr(ch, ' ')) != NULL)
+    if ((s = strchr(ch, ' ')))
       *s++ = '\0';
 
     if ((msg_ptr = find_command(ch)) == NULL)
@@ -230,7 +230,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       return;
     }
 
-    assert(msg_ptr->cmd != NULL);
+    assert(msg_ptr->cmd);
 
     paramcount = msg_ptr->args_max;
     ii = bufend - ((s) ? s : ch);
@@ -280,7 +280,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
   para[++parc] = NULL;
 
-  if (msg_ptr != NULL)
+  if (msg_ptr)
     handle_command(msg_ptr, from, parc, para);
   else
     handle_numeric(numeric, from, parc, para);
@@ -396,14 +396,14 @@ del_msg_element(struct MessageTree *mtree_p, const char *cmd)
    * check that there is a msg pointer here, else links-- goes -ve
    * -db
    */
-  if ((*cmd == '\0') && (mtree_p->msg != NULL))
+  if (*cmd == '\0' && mtree_p->msg)
   {
     mtree_p->msg = NULL;
     mtree_p->links--;
   }
   else
   {
-    if ((ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)]) != NULL)
+    if ((ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)]))
     {
       del_msg_element(ntree_p, cmd + 1);
 
@@ -487,16 +487,14 @@ find_command(const char *cmd)
 static void
 recurse_report_messages(struct Client *source_p, const struct MessageTree *mtree)
 {
-  unsigned int i;
-
-  if (mtree->msg != NULL)
+  if (mtree->msg)
     sendto_one_numeric(source_p, &me, RPL_STATSCOMMANDS,
                        mtree->msg->cmd,
                        mtree->msg->count, mtree->msg->bytes,
                        mtree->msg->rcount);
 
-  for (i = 0; i < MAXPTRLEN; ++i)
-    if (mtree->pointers[i] != NULL)
+  for (unsigned int i = 0; i < MAXPTRLEN; ++i)
+    if (mtree->pointers[i])
       recurse_report_messages(source_p, mtree->pointers[i]);
 }
 
@@ -510,10 +508,9 @@ void
 report_messages(struct Client *source_p)
 {
   const struct MessageTree *mtree = &msg_tree;
-  unsigned int i;
 
-  for (i = 0; i < MAXPTRLEN; ++i)
-    if (mtree->pointers[i] != NULL)
+  for (unsigned int i = 0; i < MAXPTRLEN; ++i)
+    if (mtree->pointers[i])
       recurse_report_messages(source_p, mtree->pointers[i]);
 }
 
@@ -608,7 +605,7 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
    * 'no.dot.at.start' is a server   (SQUIT)
    */
   if ((IsDigit(*lsender) && strlen(lsender) <= IRC_MAXSID) ||
-      strchr(lsender, '.') != NULL)
+      strchr(lsender, '.'))
   {
     sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",

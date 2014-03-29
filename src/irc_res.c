@@ -115,8 +115,8 @@ struct reslist
 };
 
 static fde_t ResolverFileDescriptor;
-static dlink_list request_list = { NULL, NULL, 0 };
-static mp_pool_t *dns_pool = NULL;
+static dlink_list request_list;
+static mp_pool_t *dns_pool;
 
 static void rem_request(struct reslist *);
 static struct reslist *make_request(dns_callback_fnc, void *);
@@ -152,11 +152,10 @@ res_ourserver(const struct irc_ssaddr *inp)
 #endif
   const struct sockaddr_in *v4;
   const struct sockaddr_in *v4in = (const struct sockaddr_in *)inp;
-  int ns;
 
-  for (ns = 0; ns < irc_nscount; ++ns)
+  for (int i = 0; i < irc_nscount; ++i)
   {
-    const struct irc_ssaddr *srv = &irc_nsaddr_list[ns];
+    const struct irc_ssaddr *srv = &irc_nsaddr_list[i];
 #ifdef IPV6
     v6 = (const struct sockaddr_in6 *)srv;
 #endif
@@ -198,13 +197,12 @@ res_ourserver(const struct irc_ssaddr *inp)
 static time_t
 timeout_query_list(time_t now)
 {
-  dlink_node *ptr;
-  dlink_node *next_ptr;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
   struct reslist *request;
   time_t next_time = 0;
   time_t timeout   = 0;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, request_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, request_list.head)
   {
     request = ptr->data;
     timeout = request->sentat + request->timeout;
@@ -327,9 +325,9 @@ make_request(dns_callback_fnc callback, void *ctx)
 void
 delete_resolver_queries(const void *vptr)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, request_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, request_list.head)
   {
     struct reslist *request = ptr->data;
 
@@ -348,7 +346,6 @@ delete_resolver_queries(const void *vptr)
 static int
 send_res_msg(const char *msg, int len, int rcount)
 {
-  int i;
   int sent = 0;
   int max_queries = IRCD_MIN(irc_nscount, rcount);
 
@@ -358,7 +355,7 @@ send_res_msg(const char *msg, int len, int rcount)
   if (max_queries == 0)
     max_queries = 1;
 
-  for (i = 0; i < max_queries; i++)
+  for (int i = 0; i < max_queries; ++i)
   {
     if (sendto(ResolverFileDescriptor.fd, msg, len, 0,
         (struct sockaddr*)&(irc_nsaddr_list[i]),
@@ -395,7 +392,7 @@ find_id(int id)
 void
 gethost_byname_type(dns_callback_fnc callback, void *ctx, const char *name, int type)
 {
-  assert(name != NULL);
+  assert(name);
   do_query_name(callback, ctx, name, NULL, type);
 }
 
@@ -848,10 +845,9 @@ res_readreply(fde_t *fd, void *data)
 void
 report_dns_servers(struct Client *source_p)
 {
-  int i;
-  char ipaddr[HOSTIPLEN + 1];
+  char ipaddr[HOSTIPLEN + 1] = "";
 
-  for (i = 0; i < irc_nscount; i++)
+  for (int i = 0; i < irc_nscount; ++i)
   {
     getnameinfo((struct sockaddr *)&(irc_nsaddr_list[i]),
                 irc_nsaddr_list[i].ss_len, ipaddr,

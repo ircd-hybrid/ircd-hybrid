@@ -131,7 +131,7 @@ conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
 
   conf->dns_pending = 0;
 
-  if (addr != NULL)
+  if (addr)
     memcpy(&conf->addr, addr, sizeof(conf->addr));
   else
     conf->dns_failed = 1;
@@ -182,9 +182,9 @@ conf_free(struct MaskItem *conf)
 
   if (conf->dns_pending)
     delete_resolver_queries(conf);
-  if (conf->passwd != NULL)
+  if (conf->passwd)
     memset(conf->passwd, 0, strlen(conf->passwd));
-  if (conf->spasswd != NULL)
+  if (conf->spasswd)
     memset(conf->spasswd, 0, strlen(conf->spasswd));
 
   conf->class = NULL;
@@ -670,9 +670,9 @@ garbage_collect_ip_entries(void)
 void
 detach_conf(struct Client *client_p, enum maskitem_type type)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->localClient->confs.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->localClient->confs.head)
   {
     struct MaskItem *conf = ptr->data;
 
@@ -713,7 +713,7 @@ detach_conf(struct Client *client_p, enum maskitem_type type)
 int
 attach_conf(struct Client *client_p, struct MaskItem *conf)
 {
-  if (dlinkFind(&client_p->localClient->confs, conf) != NULL)
+  if (dlinkFind(&client_p->localClient->confs, conf))
     return 1;
 
   if (conf->type == CONF_CLIENT)
@@ -1033,7 +1033,7 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
 int
 rehash(int sig)
 {
-  if (sig != 0)
+  if (sig)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Got signal SIGHUP, reloading configuration file(s)");
 
@@ -1046,7 +1046,7 @@ rehash(int sig)
 
   read_conf_files(0);
 
-  if (ServerInfo.description != NULL)
+  if (ServerInfo.description)
     strlcpy(me.info, ServerInfo.description, sizeof(me.info));
 
   load_conf_modules();
@@ -1246,7 +1246,7 @@ lookup_confhost(struct MaskItem *conf)
     return;
   }
 
-  assert(res != NULL);
+  assert(res);
 
   memcpy(&conf->addr, res->ai_addr, res->ai_addrlen);
   conf->addr.ss_len = res->ai_addrlen;
@@ -1272,7 +1272,7 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
   if (conf && (conf->type == CONF_EXEMPT))
     return 0;
 
-  if (conf != NULL)
+  if (conf)
     return BANNED_CLIENT;
 
   ip_found = find_or_add_ip(addr);
@@ -1313,11 +1313,10 @@ cleanup_tklines(void *notused)
 static void
 expire_tklines(dlink_list *tklist)
 {
-  dlink_node *ptr;
-  dlink_node *next_ptr;
-  struct MaskItem *conf;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+  struct MaskItem *conf = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, tklist->head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, tklist->head)
   {
     conf = ptr->data;
 
@@ -1570,7 +1569,7 @@ clear_out_old_conf(void)
   MyFree(ConfigFileEntry.egdpool_path);
   ConfigFileEntry.egdpool_path = NULL;
 #ifdef HAVE_LIBCRYPTO
-  if (ServerInfo.rsa_private_key != NULL)
+  if (ServerInfo.rsa_private_key)
   {
     RSA_free(ServerInfo.rsa_private_key);
     ServerInfo.rsa_private_key = NULL;

@@ -43,7 +43,8 @@
 #include "s_misc.h"
 #include "resv.h"
 
-dlink_list global_channel_list = { NULL, NULL, 0 };
+
+dlink_list global_channel_list;
 mp_pool_t *ban_pool;    /*! \todo ban_pool shouldn't be a global var */
 
 static mp_pool_t *member_pool = NULL;
@@ -196,7 +197,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
   }
 
   /* should always be non-NULL unless we have a kind of persistent channels */
-  if (chptr->members.head != NULL)
+  if (chptr->members.head)
     t--;  /* take the space out */
   *t = '\0';
   sendto_one(client_p, "%s", buf);
@@ -797,7 +798,7 @@ check_spambot_warning(struct Client *source_p, const char *name)
     if (source_p->localClient->oper_warn_count_down == 0)
     {
       /* Its already known as a possible spambot */
-      if (name != NULL)
+      if (name)
         sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "User %s (%s@%s) trying to join %s is a possible spambot",
                              source_p->name, source_p->username,

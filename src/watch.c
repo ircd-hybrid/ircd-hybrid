@@ -178,7 +178,7 @@ watch_del_from_hash_table(const char *nick, struct Client *client_p)
   /* In case this header is now empty of notices, remove it */
   if (anptr->watched_by.head == NULL)
   {
-    assert(dlinkFind(&watchTable[strhash(nick)], anptr) != NULL);
+    assert(dlinkFind(&watchTable[strhash(nick)], anptr));
     dlinkDelete(&anptr->node, &watchTable[strhash(nick)]);
     mp_pool_release(anptr);
   }
@@ -200,14 +200,14 @@ watch_del_watch_list(struct Client *client_p)
 
     assert(anptr);
 
-    assert(dlinkFind(&anptr->watched_by, client_p) != NULL);
+    assert(dlinkFind(&anptr->watched_by, client_p));
     if ((tmp = dlinkFindDelete(&anptr->watched_by, client_p)))
       free_dlink_node(tmp);
 
     /* If this leaves a header without notifies, remove it. */
     if (anptr->watched_by.head == NULL)
     {
-      assert(dlinkFind(&watchTable[strhash(anptr->nick)], anptr) != NULL);
+      assert(dlinkFind(&watchTable[strhash(anptr->nick)], anptr));
       dlinkDelete(&anptr->node, &watchTable[strhash(anptr->nick)]);
 
       mp_pool_release(anptr);

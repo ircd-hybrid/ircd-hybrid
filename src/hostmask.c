@@ -733,10 +733,9 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 void
 clear_out_address_conf(void)
 {
-  unsigned int i = 0;
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH_SAFE(ptr, ptr_next, atable[i].head)
     {
@@ -789,10 +788,9 @@ hostmask_send_expiration(struct AddressRec *arec)
 void
 hostmask_expire_temporary(void)
 {
-  unsigned int i = 0;
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH_SAFE(ptr, ptr_next, atable[i].head)
     {

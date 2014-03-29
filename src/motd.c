@@ -81,7 +81,7 @@ motd_create(const char *hostmask, const char *path)
     }
   }
 
-  if (hostmask != NULL)
+  if (hostmask)
     tmp->hostmask = xstrdup(hostmask);
 
   tmp->path = xstrdup(path);
@@ -279,10 +279,6 @@ motd_lookup(const struct Client *client_p)
 static void
 motd_forward(struct Client *source_p, const struct MotdCache *cache)
 {
-  unsigned int i = 0;
-
-  assert(source_p);
-
   if (!cache)  /* no motd to send */
   {
     sendto_one_numeric(source_p, &me, ERR_NOMOTD);
@@ -292,7 +288,7 @@ motd_forward(struct Client *source_p, const struct MotdCache *cache)
   /* send the motd */
   sendto_one_numeric(source_p, &me, RPL_MOTDSTART, me.name);
 
-  for (; i < cache->count; ++i)
+  for (unsigned int i = 0; i < cache->count; ++i)
     sendto_one_numeric(source_p, &me, RPL_MOTD, cache->motd[i]);
   sendto_one_numeric(source_p, &me, RPL_ENDOFMOTD);
 }

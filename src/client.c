@@ -119,7 +119,7 @@ make_client(struct Client *from)
 
   memset(client_p, 0, sizeof(*client_p));
 
-  if (from == NULL)
+  if (!from)
   {
     client_p->from                      = client_p; /* 'from' of local client is self! */
     client_p->localClient               = mp_pool_get(lclient_pool);
@@ -156,7 +156,7 @@ make_client(struct Client *from)
 static void
 free_client(struct Client *client_p)
 {
-  assert(client_p != NULL);
+  assert(client_p);
   assert(client_p != &me);
   assert(client_p->hnext == client_p);
   assert(client_p->idhnext == client_p);
@@ -315,9 +315,9 @@ check_pings_list(dlink_list *list)
 static void
 check_unknowns_list(void)
 {
-  dlink_node *ptr, *next_ptr;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, unknown_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
   {
     struct Client *client_p = ptr->data;
 
@@ -354,7 +354,7 @@ check_conf_klines(void)
       continue;
 
     if ((conf = find_dline_conf(&client_p->localClient->ip,
-                                  client_p->localClient->aftype)) != NULL)
+                                  client_p->localClient->aftype)))
     {
       if (conf->type == CONF_EXEMPT)
         continue;
@@ -568,25 +568,25 @@ find_chasing(struct Client *source_p, const char *name)
  *        to modify what it points!!!
  */
 const char *
-get_client_name(const struct Client *client, enum addr_mask_type type)
+get_client_name(const struct Client *client_p, enum addr_mask_type type)
 {
   static char nbuf[HOSTLEN * 2 + USERLEN + 5];
 
-  assert(client != NULL);
+  assert(client_p);
 
-  if (!MyConnect(client))
-    return client->name;
+  if (!MyConnect(client_p))
+    return client_p->name;
 
-  if (IsServer(client) || IsConnecting(client) || IsHandshake(client))
+  if (IsServer(client_p) || IsConnecting(client_p) || IsHandshake(client_p))
   {
-    if (!irccmp(client->name, client->host))
-      return client->name;
+    if (!irccmp(client_p->name, client_p->host))
+      return client_p->name;
     else if (ConfigServerHide.hide_server_ips)
       type = MASK_IP;
   }
 
   if (ConfigFileEntry.hide_spoof_ips)
-    if (type == SHOW_IP && IsIPSpoof(client))
+    if (type == SHOW_IP && IsIPSpoof(client_p))
       type = MASK_IP;
 
   /* And finally, let's get the host information, ip or name */
@@ -594,21 +594,21 @@ get_client_name(const struct Client *client, enum addr_mask_type type)
   {
     case SHOW_IP:
       snprintf(nbuf, sizeof(nbuf), "%s[%s@%s]",
-               client->name,
-               client->username, client->sockhost);
+               client_p->name,
+               client_p->username, client_p->sockhost);
       break;
     case MASK_IP:
-      if (client->localClient->aftype == AF_INET)
+      if (client_p->localClient->aftype == AF_INET)
         snprintf(nbuf, sizeof(nbuf), "%s[%s@255.255.255.255]",
-                 client->name, client->username);
+                 client_p->name, client_p->username);
       else
         snprintf(nbuf, sizeof(nbuf), "%s[%s@ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]",
-                 client->name, client->username);
+                 client_p->name, client_p->username);
       break;
     default:
       snprintf(nbuf, sizeof(nbuf), "%s[%s@%s]",
-               client->name,
-               client->username, client->host);
+               client_p->name,
+               client_p->username, client_p->host);
   }
 
   return nbuf;
@@ -636,7 +636,7 @@ free_exited_clients(void)
 static void
 exit_one_client(struct Client *source_p, const char *quitmsg)
 {
-  dlink_node *lp = NULL, *next_lp = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
   assert(!IsMe(source_p));
 
@@ -653,8 +653,8 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
     sendto_common_channels_local(source_p, 0, 0, ":%s!%s@%s QUIT :%s",
                                  source_p->name, source_p->username,
                                  source_p->host, quitmsg);
-    DLINK_FOREACH_SAFE(lp, next_lp, source_p->channel.head)
-      remove_user_from_channel(lp->data);
+    DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->channel.head)
+      remove_user_from_channel(ptr->data);
 
     whowas_add_history(source_p, 0);
     whowas_off_history(source_p);
@@ -664,8 +664,8 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
     if (MyConnect(source_p))
     {
       /* Clean up invitefield */
-      DLINK_FOREACH_SAFE(lp, next_lp, source_p->localClient->invited.head)
-        del_invite(lp->data, source_p);
+      DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->localClient->invited.head)
+        del_invite(ptr->data, source_p);
 
       del_all_accepts(source_p);
     }
@@ -674,8 +674,8 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
   {
     dlinkDelete(&source_p->lnode, &source_p->servptr->serv->server_list);
 
-    if ((lp = dlinkFindDelete(&global_serv_list, source_p)) != NULL)
-      free_dlink_node(lp);
+    if ((ptr = dlinkFindDelete(&global_serv_list, source_p)))
+      free_dlink_node(ptr);
   }
 
   /* Remove source_p from the client lists */
@@ -691,7 +691,7 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
    * NOTE: source_p->node.next cannot be NULL if the client is added
    *       to global_client_list (there is always &me at its end)
    */
-  if (source_p->node.next != NULL) /* XXX: not needed? */
+  if (source_p->node.next) /* XXX: not needed? */
     dlinkDelete(&source_p->node, &global_client_list);
 
   update_client_exit_stats(source_p);
@@ -713,12 +713,12 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
 static void
 recurse_remove_clients(struct Client *source_p, const char *quitmsg)
 {
-  dlink_node *ptr, *next;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next, source_p->serv->client_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->client_list.head)
     exit_one_client(ptr->data, quitmsg);
 
-  DLINK_FOREACH_SAFE(ptr, next, source_p->serv->server_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->server_list.head)
   {
     recurse_remove_clients(ptr->data, quitmsg);
     exit_one_client(ptr->data, quitmsg);
@@ -784,13 +784,13 @@ exit_client(struct Client *source_p, const char *comment)
       Count.local--;
 
       if (HasUMode(source_p, UMODE_OPER))
-        if ((m = dlinkFindDelete(&oper_list, source_p)) != NULL)
+        if ((m = dlinkFindDelete(&oper_list, source_p)))
           free_dlink_node(m);
 
       assert(dlinkFind(&local_client_list, source_p));
       dlinkDelete(&source_p->localClient->lclient_node, &local_client_list);
 
-      if (source_p->localClient->list_task != NULL)
+      if (source_p->localClient->list_task)
         free_list_task(source_p->localClient->list_task, source_p);
 
       watch_del_watch_list(source_p);
@@ -855,7 +855,7 @@ exit_client(struct Client *source_p, const char *comment)
     char splitstr[HOSTLEN + HOSTLEN + 2] = "";
 
     /* This shouldn't ever happen */
-    assert(source_p->serv != NULL && source_p->servptr != NULL);
+    assert(source_p->serv && source_p->servptr);
 
     if (ConfigServerHide.hide_servers)
       /*
@@ -1097,9 +1097,9 @@ accept_message(struct Client *source,
 void
 del_all_accepts(struct Client *client_p)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->localClient->acceptlist.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->localClient->acceptlist.head)
     del_accept(ptr->data, client_p);
 }
 
@@ -1128,7 +1128,7 @@ idle_time_get(const struct Client *source_p, const struct Client *target_p)
   else
     idle = CurrentTime - target_p->localClient->last_privmsg;
 
-  if (max_idle == 0)
+  if (!max_idle)
     idle = 0;
   else
     idle %= max_idle;

@@ -253,7 +253,6 @@ register_local_user(struct Client *source_p)
   const char *id = NULL;
   const struct MaskItem *conf = NULL;
 
-  assert(source_p != NULL);
   assert(source_p == source_p->from);
   assert(MyConnect(source_p));
   assert(!source_p->localClient->registration);
@@ -454,7 +453,6 @@ register_remote_user(struct Client *source_p, const char *username,
 {
   struct Client *target_p = NULL;
 
-  assert(source_p != NULL);
   assert(source_p->username != username);
 
   strlcpy(source_p->host, host, sizeof(source_p->host));
@@ -539,7 +537,7 @@ register_remote_user(struct Client *source_p, const char *username,
 static void
 introduce_client(struct Client *source_p)
 {
-  dlink_node *server_node = NULL;
+  dlink_node *ptr = NULL;
   char ubuf[IRCD_BUFSIZE] = "";
 
   if (MyClient(source_p))
@@ -555,12 +553,12 @@ introduce_client(struct Client *source_p)
     ubuf[1] = '\0';
   }
 
-  DLINK_FOREACH(server_node, serv_list.head)
+  DLINK_FOREACH(ptr, serv_list.head)
   {
-    struct Client *server = server_node->data;
+    struct Client *server = ptr->data;
 
     if (server == source_p->from)
-        continue;
+      continue;
 
     if (IsCapable(server, CAP_SVS))
       sendto_one(server, ":%s UID %s %d %lu %s %s %s %s %s %s :%s",
@@ -600,7 +598,7 @@ valid_hostname(const char *hostname)
 {
   const char *p = hostname;
 
-  assert(p != NULL);
+  assert(p);
 
   if (EmptyString(p) || *p == '.' || *p == ':')
     return 0;
@@ -629,7 +627,7 @@ valid_username(const char *username, const int local)
   int dots      = 0;
   const char *p = username;
 
-  assert(p != NULL);
+  assert(p);
 
   if (*p == '~')
     ++p;
@@ -679,6 +677,8 @@ valid_nickname(const char *nickname, const int local)
 {
   const char *p = nickname;
   assert(nickname && *nickname);
+
+  assert(p);
 
   /* nicks can't start with a digit or - or be 0 length */
   /* This closer duplicates behaviour of hybrid-6 */
@@ -824,14 +824,14 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
             if (MyConnect(source_p))
             {
-              dlink_node *dm = NULL;
+              dlink_node *ptr = NULL;
 
               detach_conf(source_p, CONF_OPER);
               ClrOFlag(source_p);
               DelUMode(source_p, ConfigFileEntry.oper_only_umodes);
 
-              if ((dm = dlinkFindDelete(&oper_list, source_p)) != NULL)
-                free_dlink_node(dm);
+              if ((ptr = dlinkFindDelete(&oper_list, source_p)))
+                free_dlink_node(ptr);
             }
           }
 
@@ -1205,14 +1205,12 @@ valid_sid(const char *sid)
 void
 init_uid(void)
 {
-  unsigned int i;
-
   memset(new_uid, 0, sizeof(new_uid));
 
   if (!EmptyString(ServerInfo.sid))
     strlcpy(new_uid, ServerInfo.sid, sizeof(new_uid));
 
-  for (i = 0; i < IRC_MAXSID; ++i)
+  for (unsigned int i = 0; i < IRC_MAXSID; ++i)
     if (new_uid[i] == '\0')
       new_uid[i] = 'A';
 

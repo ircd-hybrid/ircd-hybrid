@@ -1413,7 +1413,7 @@ get_channel_access(const struct Client *source_p,
   if (!MyClient(source_p))
     return CHACCESS_CHANOP;
 
-  if (member == NULL)
+  if (!member)
     return CHACCESS_NOTONCHAN;
 
   /* just to be sure.. */

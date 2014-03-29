@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.1.15 (????-??-??)
+-- Noteworthy changes in version 8.1.15 (2014-03-29)
 ########################################################################
 o) IMPORTANT: ircd binary is now again placed into bin/ instead of sbin/
 ########################################################################

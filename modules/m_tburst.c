@@ -89,7 +89,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
     int topic_differs = strncmp(chptr->topic, topic, sizeof(chptr->topic) - 1);
     int hidden_server = (ConfigServerHide.hide_servers || IsHidden(source_p));
 
-    set_channel_topic(chptr, topic, setby, remote_topic_ts, !!MyClient(source_p));
+    set_channel_topic(chptr, topic, setby, remote_topic_ts, 0);
 
     sendto_server(source_p, CAP_TBURST, NOCAPS,
                   ":%s TBURST %s %s %s %s :%s",

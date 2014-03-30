@@ -92,7 +92,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   char uid_buf[IRCD_BUFSIZE];  /* buffer for modes/prefixes */
   char           *uid_ptr;
   char           *p; /* pointer used making sjbuf */
-  dlink_node     *m;
   const char *servername = (ConfigServerHide.hide_servers || IsHidden(source_p)) ?
                             me.name : source_p->name;
 

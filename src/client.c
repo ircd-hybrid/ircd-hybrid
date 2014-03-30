@@ -829,13 +829,6 @@ exit_client(struct Client *source_p, const char *comment)
                  source_p->host, comment);
     }
 
-    /*
-    ** Currently only server connections can have
-    ** depending remote clients here, but it does no
-    ** harm to check for all local clients. In
-    ** future some other clients than servers might
-    ** have remotes too...
-    */
     close_connection(source_p);
   }
   else if (IsClient(source_p) && HasFlag(source_p->servptr, FLAGS_EOB))

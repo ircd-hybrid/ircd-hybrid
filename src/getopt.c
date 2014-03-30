@@ -50,10 +50,9 @@ usage(const char *name, const struct lgetopt *opts)
 void
 parseargs(int *argc, char ***argv, struct lgetopt *opts)
 {
-  unsigned int i;
   const char *progname = (*argv)[0];
 
-  /* loop through each argument */
+  /* Loop through each argument */
   while (1)
   {
     int found = 0;
@@ -66,12 +65,12 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 
     (*argv)[0]++;
 
-    /* search through our argument list, and see if it matches */
-    for (i = 0; opts[i].opt; i++)
+    /* Search through our argument list, and see if it matches */
+    for (unsigned int i = 0; opts[i].opt; ++i)
     {
       if (!strcmp(opts[i].opt, (*argv)[0]))
       {
-        /* found our argument */
+        /* Found our argument */
         found = 1;
 
         switch (opts[i].argtype)

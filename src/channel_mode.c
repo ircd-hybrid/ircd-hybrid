@@ -113,9 +113,9 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
 {
   dlink_list *list = NULL;
   dlink_node *ban = NULL;
-  size_t len = 0;
   struct Ban *ban_p = NULL;
   unsigned int num_mask;
+  size_t len = 0;
   char name[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
   char host[HOSTLEN + 1] = "";
@@ -1638,7 +1638,7 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
   int dir = MODE_ADD;
   int parn = 1;
   int alevel, errors = 0;
-  char *ml = parv[0], c;
+  char *ml = parv[0];
 
   mode_count = 0;
   mode_limit = 0;
@@ -1646,9 +1646,9 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
 
   alevel = get_channel_access(source_p, member);
 
-  for (; (c = *ml); ++ml)
+  for (; *ml; ++ml)
   {
-    switch (c)
+    switch (*ml)
     {
       case '+':
         dir = MODE_ADD;
@@ -1661,10 +1661,10 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
         break;
       default:
       {
-        struct ChannelMode *tptr = &ModeTable[(unsigned char)c];
+        struct ChannelMode *tptr = &ModeTable[(unsigned char)*ml];
 
         tptr->func(source_p, chptr, parc, &parn, parv,
-                   &errors, alevel, dir, c, tptr->d);
+                   &errors, alevel, dir, *ml, tptr->d);
         break;
       }
     }

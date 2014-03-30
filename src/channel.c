@@ -47,9 +47,7 @@
 dlink_list global_channel_list;
 mp_pool_t *ban_pool;    /*! \todo ban_pool shouldn't be a global var */
 
-static mp_pool_t *member_pool = NULL;
-static mp_pool_t *channel_pool = NULL;
-
+static mp_pool_t *member_pool, *channel_pool;
 static char buf[IRCD_BUFSIZE];
 
 
@@ -82,7 +80,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who,
   if (GlobalSetOptions.joinfloodtime > 0)
   {
     if (flood_ctrl)
-      chptr->number_joined++;
+      ++chptr->number_joined;
 
     chptr->number_joined -= (CurrentTime - chptr->last_join_time) *
       (((float)GlobalSetOptions.joinfloodcount) /
@@ -165,20 +163,21 @@ send_members(struct Client *client_p, struct Channel *chptr,
     tlen = strlen(ms->client_p->id) + 1;  /* nick + space */
 
     if (ms->flags & CHFL_CHANOP)
-      tlen++;
+      ++tlen;
 #ifdef HALFOPS
     if (ms->flags & CHFL_HALFOP)
-      tlen++;
+      ++tlen;
 #endif
     if (ms->flags & CHFL_VOICE)
-      tlen++;
+      ++tlen;
 
-    /* space will be converted into CR, but we also need space for LF..
-     * That's why we use '- 1' here
-     * -adx */
+    /*
+     * Space will be converted into CR, but we also need space for LF..
+     * That's why we use '- 1' here -adx 
+     */
     if (t + tlen - buf > IRCD_BUFSIZE - 1)
     {
-      *(t - 1) = '\0';  /* kill the space and terminate the string */
+      *(t - 1) = '\0';  /* Kill the space and terminate the string */
       sendto_one(client_p, "%s", buf);
       t = start;
     }
@@ -196,9 +195,9 @@ send_members(struct Client *client_p, struct Channel *chptr,
     *t++ = ' ';
   }
 
-  /* should always be non-NULL unless we have a kind of persistent channels */
+  /* Should always be non-NULL unless we have a kind of persistent channels */
   if (chptr->members.head)
-    t--;  /* take the space out */
+    t--;  /* Take the space out */
   *t = '\0';
   sendto_one(client_p, "%s", buf);
 }
@@ -213,7 +212,7 @@ static void
 send_mode_list(struct Client *client_p, struct Channel *chptr,
                const dlink_list *top, char flag)
 {
-  const dlink_node *lp = NULL;
+  const dlink_node *ptr = NULL;
   char pbuf[IRCD_BUFSIZE] = "";
   int tlen, mlen, cur_len, count = 0;
   char *pp = pbuf;
@@ -225,20 +224,20 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
                   (unsigned long)chptr->channelts, chptr->chname, flag);
   cur_len = mlen;
 
-  DLINK_FOREACH(lp, top->head)
+  DLINK_FOREACH(ptr, top->head)
   {
-    const struct Ban *banptr = lp->data;
+    const struct Ban *banptr = ptr->data;
 
     tlen = banptr->len + 3;
 
     /*
-     * send buffer and start over if we cannot fit another ban,
+     * Send buffer and start over if we cannot fit another ban,
      * or if the target is non-ts6 and we have too many modes in
      * in this line.
      */
     if (cur_len + (tlen - 1) > IRCD_BUFSIZE - 2)
     {
-      *(pp - 1) = '\0';  /* get rid of trailing space on buffer */
+      *(pp - 1) = '\0';  /* Get rid of trailing space on buffer */
       sendto_one(client_p, "%s%s", buf, pbuf);
 
       cur_len = mlen;
@@ -252,7 +251,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
     cur_len += tlen;
   }
 
-  *(pp - 1) = '\0';  /* get rid of trailing space on buffer */
+  *(pp - 1) = '\0';  /* Get rid of trailing space on buffer */
   sendto_one(client_p, "%s%s", buf, pbuf);
 }
 
@@ -327,9 +326,9 @@ remove_ban(struct Ban *bptr, dlink_list *list)
 void
 free_channel_list(dlink_list *list)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, list->head)
     remove_ban(ptr->data, list);
 
   assert(list->tail == NULL && list->head == NULL);

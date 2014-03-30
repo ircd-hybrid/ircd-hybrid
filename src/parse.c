@@ -221,10 +221,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
        * code has been found ?? -Armin
        */
       if (*pbuffer != '\0')
-      {
         if (IsClient(from))
           sendto_one_numeric(from, &me, ERR_UNKNOWNCOMMAND, ch);
-      }
 
       ++ServerStats.is_unco;
       return;
@@ -244,7 +242,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
    * this last parameter (about same effect as ":" has...) --msa
    */
 
-  /* Note initially true: s==NULL || *(s-1) == '\0' !! */
+  /* Note initially true: s == NULL || *(s - 1) == '\0' !! */
 
   para[parc] = ch;
 
@@ -264,7 +262,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
        if (*s == ':')
        {
          /* The rest is a single parameter */
-         para[++parc] = s + (!numeric);  /* keep the colon if it's a numeric */
+         para[++parc] = s + (!numeric);  /* Keep the colon if it's a numeric */
          break;
        }
 
@@ -305,7 +303,7 @@ handle_command(struct Message *mptr, struct Client *source_p,
 
   mptr->count++;
 
-  /* check right amount of params is passed... --is */
+  /* Check right amount of params is passed... --is */
   if (i < mptr->args_min)
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
   else
@@ -437,6 +435,7 @@ static struct Message *
 msg_tree_parse(const char *cmd)
 {
   struct MessageTree *mtree = &msg_tree;
+
   assert(cmd && *cmd);
 
   while (IsAlpha(*cmd) && (mtree = mtree->pointers[*cmd & (MAXPTRLEN - 1)]))
@@ -459,7 +458,7 @@ mod_add_cmd(struct Message *msg)
 {
   assert(msg && msg->cmd);
 
-  /* command already added? */
+  /* Command already added? */
   if (msg_tree_parse(msg->cmd))
     return;
 
@@ -613,8 +612,7 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
    * 'nodots'          is a nickname (KILL)
    * 'no.dot.at.start' is a server   (SQUIT)
    */
-  if ((IsDigit(*lsender) && strlen(lsender) <= IRC_MAXSID) ||
-      strchr(lsender, '.'))
+  if ((IsDigit(*lsender) && strlen(lsender) <= IRC_MAXSID) || strchr(lsender, '.'))
   {
     sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",

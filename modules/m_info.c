@@ -67,6 +67,18 @@ static const struct InfoStruct info_table[] =
     "Root directory of installation"
   },
   {
+    "SPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.spath,
+    "Path to server executable"
+  },
+  {
+    "MPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.mpath,
+    "Path to main motd (Message of the Day) file"
+  },
+  {
     "CPATH",
     OUTPUT_STRING,
     &ConfigFileEntry.configfile,

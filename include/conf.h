@@ -209,14 +209,14 @@ struct CidrItem
 struct config_file_entry
 {
   const char *dpath;          /* DPATH if set from command line */
+  const char *mpath;
+  const char *spath;
   const char *configfile;
   const char *klinefile;
   const char *glinefile;
   const char *xlinefile;
   const char *dlinefile;
   const char *resvfile;
-  char *mpath;
-  char *rpath;
 
   char *egdpool_path;
   char *service_name;

@@ -482,6 +482,8 @@ main(int argc, char *argv[])
   dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
   ConfigFileEntry.dpath      = DPATH;
+  ConfigFileEntry.spath      = SPATH;
+  ConfigFileEntry.mpath      = MPATH;
   ConfigFileEntry.configfile = CPATH;    /* Server configuration file */
   ConfigFileEntry.klinefile  = KPATH;    /* Server kline file         */
   ConfigFileEntry.glinefile  = GPATH;    /* Server gline file         */

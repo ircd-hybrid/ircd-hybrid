@@ -168,11 +168,12 @@ close_connection(struct Client *client_p)
 
   if (!IsDead(client_p))
   {
-    /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
-    /* there is still a chance that we might send data to this socket
-     * even if it is marked as blocked (COMM_SELECT_READ handler is called
-     * before COMM_SELECT_WRITE). Let's try, nothing to lose.. -adx
+    /*
+     * Flush pending write buffer, if any, but first clear the
+     * cork as it no longer matters, this connection is being
+     * closed now
      */
+    DelFlag(client_p, FLAGS_CORK);
     send_queued_write(client_p);
   }
 

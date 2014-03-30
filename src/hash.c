@@ -179,7 +179,7 @@ hash_del_id(struct Client *client_p)
   unsigned int hashv = strhash(client_p->id);
   struct Client *tmp = idTable[hashv];
 
-  if (tmp != NULL)
+  if (tmp)
   {
     if (tmp == client_p)
     {
@@ -210,7 +210,7 @@ hash_del_client(struct Client *client_p)
   unsigned int hashv = strhash(client_p->name);
   struct Client *tmp = clientTable[hashv];
 
-  if (tmp != NULL)
+  if (tmp)
   {
     if (tmp == client_p)
     {
@@ -241,7 +241,7 @@ hash_del_userhost(struct UserHost *userhost)
   unsigned int hashv = strhash(userhost->host);
   struct UserHost *tmp = userhostTable[hashv];
 
-  if (tmp != NULL)
+  if (tmp)
   {
     if (tmp == userhost)
     {
@@ -273,7 +273,7 @@ hash_del_channel(struct Channel *chptr)
   unsigned int hashv = strhash(chptr->chname);
   struct Channel *tmp = channelTable[hashv];
 
-  if (tmp != NULL)
+  if (tmp)
   {
     if (tmp == chptr)
     {
@@ -306,13 +306,13 @@ hash_find_client(const char *name)
   unsigned int hashv = strhash(name);
   struct Client *client_p;
 
-  if ((client_p = clientTable[hashv]) != NULL)
+  if ((client_p = clientTable[hashv]))
   {
     if (irccmp(name, client_p->name))
     {
       struct Client *prev;
 
-      while (prev = client_p, (client_p = client_p->hnext) != NULL)
+      while (prev = client_p, (client_p = client_p->hnext))
       {
         if (!irccmp(name, client_p->name))
         {

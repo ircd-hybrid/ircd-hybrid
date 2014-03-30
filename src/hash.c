@@ -334,13 +334,13 @@ hash_find_id(const char *name)
   unsigned int hashv = strhash(name);
   struct Client *client_p;
 
-  if ((client_p = idTable[hashv]) != NULL)
+  if ((client_p = idTable[hashv]))
   {
     if (strcmp(name, client_p->id))
     {
       struct Client *prev;
 
-      while (prev = client_p, (client_p = client_p->idhnext) != NULL)
+      while (prev = client_p, (client_p = client_p->idhnext))
       {
         if (!strcmp(name, client_p->id))
         {
@@ -365,14 +365,14 @@ hash_find_server(const char *name)
   if (IsDigit(*name) && strlen(name) == IRC_MAXSID)
     return hash_find_id(name);
 
-  if ((client_p = clientTable[hashv]) != NULL)
+  if ((client_p = clientTable[hashv]))
   {
     if ((!IsServer(client_p) && !IsMe(client_p)) ||
         irccmp(name, client_p->name))
     {
       struct Client *prev;
 
-      while (prev = client_p, (client_p = client_p->hnext) != NULL)
+      while (prev = client_p, (client_p = client_p->hnext))
       {
         if ((IsServer(client_p) || IsMe(client_p)) &&
             !irccmp(name, client_p->name))
@@ -403,13 +403,13 @@ hash_find_channel(const char *name)
   unsigned int hashv = strhash(name);
   struct Channel *chptr = NULL;
 
-  if ((chptr = channelTable[hashv]) != NULL)
+  if ((chptr = channelTable[hashv]))
   {
     if (irccmp(name, chptr->chname))
     {
       struct Channel *prev;
 
-      while (prev = chptr, (chptr = chptr->hnextch) != NULL)
+      while (prev = chptr, (chptr = chptr->hnextch))
       {
         if (!irccmp(name, chptr->chname))
         {
@@ -475,7 +475,7 @@ hash_find_userhost(const char *host)
     {
       struct UserHost *prev;
 
-      while (prev = userhost, (userhost = userhost->next) != NULL)
+      while (prev = userhost, (userhost = userhost->next))
       {
         if (!irccmp(host, userhost->host))
         {
@@ -519,11 +519,11 @@ count_user_host(const char *user, const char *host, unsigned int *global_p,
 
     if (!irccmp(user, nameh->name))
     {
-      if (global_p != NULL)
+      if (global_p)
         *global_p = nameh->gcount;
-      if (local_p != NULL)
+      if (local_p)
         *local_p  = nameh->lcount;
-      if (icount_p != NULL)
+      if (icount_p)
         *icount_p = nameh->icount;
       return;
     }
@@ -539,9 +539,9 @@ count_user_host(const char *user, const char *host, unsigned int *global_p,
 static struct UserHost *
 find_or_add_userhost(const char *host)
 {
-  struct UserHost *userhost;
+  struct UserHost *userhost = NULL;
 
-  if ((userhost = hash_find_userhost(host)) != NULL)
+  if ((userhost = hash_find_userhost(host)))
     return userhost;
 
   userhost = mp_pool_get(userhost_pool);
@@ -705,21 +705,21 @@ exceeding_sendq(const struct Client *to)
 void
 free_list_task(struct ListTask *lt, struct Client *source_p)
 {
-  dlink_node *dl = NULL, *dln = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  if ((dl = dlinkFindDelete(&listing_client_list, source_p)) != NULL)
-    free_dlink_node(dl);
+  if ((ptr = dlinkFindDelete(&listing_client_list, source_p)))
+    free_dlink_node(ptr);
 
-  DLINK_FOREACH_SAFE(dl, dln, lt->show_mask.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, lt->show_mask.head)
   {
-    MyFree(dl->data);
-    free_dlink_node(dl);
+    MyFree(ptr->data);
+    free_dlink_node(ptr);
   }
 
-  DLINK_FOREACH_SAFE(dl, dln, lt->hide_mask.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, lt->hide_mask.head)
   {
-    MyFree(dl->data);
-    free_dlink_node(dl);
+    MyFree(ptr->data);
+    free_dlink_node(ptr);
   }
 
   MyFree(lt);
@@ -739,14 +739,14 @@ free_list_task(struct ListTask *lt, struct Client *source_p)
 static int
 list_allow_channel(const char *chname, const struct ListTask *lt)
 {
-  const dlink_node *dl = NULL;
+  const dlink_node *ptr = NULL;
 
-  DLINK_FOREACH(dl, lt->show_mask.head)
-    if (match(dl->data, chname) != 0)
+  DLINK_FOREACH(ptr, lt->show_mask.head)
+    if (match(ptr->data, chname) != 0)
       return 0;
 
-  DLINK_FOREACH(dl, lt->hide_mask.head)
-    if (match(dl->data, chname) == 0)
+  DLINK_FOREACH(ptr, lt->hide_mask.head)
+    if (match(ptr->data, chname) == 0)
       return 0;
 
   return 1;
@@ -821,9 +821,7 @@ safe_list_channels(struct Client *source_p, struct ListTask *list_task,
 
   if (!only_unmasked_channels)
   {
-    unsigned int i;
-
-    for (i = list_task->hash_index; i < HASHSIZE; ++i)
+    for (unsigned int i = list_task->hash_index; i < HASHSIZE; ++i)
     {
       if (exceeding_sendq(source_p->from))
       {
@@ -837,10 +835,10 @@ safe_list_channels(struct Client *source_p, struct ListTask *list_task,
   }
   else
   {
-    dlink_node *dl;
+    dlink_node *ptr;
 
-    DLINK_FOREACH(dl, list_task->show_mask.head)
-      if ((chptr = hash_find_channel(dl->data)) != NULL)
+    DLINK_FOREACH(ptr, list_task->show_mask.head)
+      if ((chptr = hash_find_channel(ptr->data)))
         list_one_channel(source_p, chptr, list_task);
   }
 

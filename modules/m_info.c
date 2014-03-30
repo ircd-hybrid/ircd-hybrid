@@ -578,7 +578,7 @@ send_conf_options(struct Client *source_p)
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5d [%-30s]",
                    ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
-                   option, iptr->desc ? iptr->desc : "<none>");
+                   iptr->name, option, iptr->desc ? iptr->desc : "<none>");
         break;
       }
 

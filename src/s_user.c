@@ -963,7 +963,6 @@ send_umode_out(struct Client *client_p, struct Client *source_p,
                unsigned int old)
 {
   char buf[IRCD_BUFSIZE] = "";
-  dlink_node *ptr = NULL;
 
   send_umode(NULL, source_p, old, SEND_UMODES, buf);
 

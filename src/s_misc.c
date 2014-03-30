@@ -62,6 +62,7 @@ date(time_t lclock)
 
   if (!lclock)
     lclock = CurrentTime;
+
   gm = gmtime(&lclock);
   memcpy(&gmbuf, gm, sizeof(gmbuf));
   gm = &gmbuf;
@@ -135,7 +136,7 @@ myctime(time_t value)
 
   strlcpy(buf, ctime(&value), sizeof(buf));
 
-  if ((p = strchr(buf, '\n')) != NULL)
+  if ((p = strchr(buf, '\n')))
     *p = '\0';
   return buf;
 }

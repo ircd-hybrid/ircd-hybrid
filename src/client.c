@@ -835,10 +835,6 @@ exit_client(struct Client *source_p, const char *comment)
     ** harm to check for all local clients. In
     ** future some other clients than servers might
     ** have remotes too...
-    **
-    ** Close the Client connection first and mark it
-    ** so that no messages are attempted to send to it.
-    ** Remember it makes source_p->from == NULL.
     */
     close_connection(source_p);
   }

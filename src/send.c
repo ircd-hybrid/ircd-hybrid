@@ -469,7 +469,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
         (one && target_p->from == one->from))
       continue;
 
-    if (type != 0 && (ms->flags & type) == 0)
+    if (type && (ms->flags & type) == 0)
       continue;
 
     if (MyConnect(target_p))
@@ -525,13 +525,13 @@ sendto_server(struct Client *one,
     if (IsDead(client_p))
       continue;
     /* check against 'one' */
-    if (one != NULL && (client_p == one->from))
+    if (one && (client_p == one->from))
       continue;
     /* check we have required capabs */
     if ((client_p->localClient->caps & caps) != caps)
       continue;
     /* check we don't have any forbidden capabs */
-    if ((client_p->localClient->caps & nocaps) != 0)
+    if ((client_p->localClient->caps & nocaps))
       continue;
 
     send_message(client_p, buffer);
@@ -572,13 +572,11 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
   DLINK_FOREACH(cptr, user->channel.head)
   {
     chptr = ((struct Membership *)cptr->data)->chptr;
-    assert(chptr != NULL);
 
     DLINK_FOREACH(uptr, chptr->members.head)
     {
       ms = uptr->data;
       target_p = ms->client_p;
-      assert(target_p != NULL);
 
       if (!MyConnect(target_p) || target_p == user || IsDefunct(target_p) ||
           target_p->localClient->serial == current_serial)
@@ -629,7 +627,7 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
     struct Membership *ms = ptr->data;
     struct Client *target_p = ms->client_p;
 
-    if (type != 0 && (ms->flags & type) == 0)
+    if (type && (ms->flags & type) == 0)
       continue;
 
     if (!MyConnect(target_p) || IsDefunct(target_p) ||
@@ -673,7 +671,7 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
     struct Membership *ms = ptr->data;
     struct Client *target_p = ms->client_p;
 
-    if (type != 0 && (ms->flags & type) == 0)
+    if (type && (ms->flags & type) == 0)
       continue;
 
     if (!MyConnect(target_p) || (one && target_p == one->from))

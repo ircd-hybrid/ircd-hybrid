@@ -225,7 +225,6 @@ close_connection(struct Client *client_p)
 
   MyFree(client_p->localClient->passwd);
   detach_conf(client_p, CONF_CLIENT|CONF_OPER|CONF_SERVER);
-  client_p->from = NULL; /* ...this should catch them! >:) --msa */
 }
 
 #ifdef HAVE_LIBCRYPTO

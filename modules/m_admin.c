@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "client.h"
+#include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"
@@ -50,11 +51,11 @@ do_admin(struct Client *source_p)
 
   sendto_one_numeric(source_p, &me, RPL_ADMINME, me.name);
 
-  if (AdminInfo.name != NULL)
+  if (!EmptyString(AdminInfo.name))
     sendto_one_numeric(source_p, &me, RPL_ADMINLOC1, AdminInfo.name);
-  if (AdminInfo.description != NULL)
+  if (!EmptyString(AdminInfo.description))
     sendto_one_numeric(source_p, &me, RPL_ADMINLOC2, AdminInfo.description);
-  if (AdminInfo.email != NULL)
+  if (!EmptyString(AdminInfo.email))
     sendto_one_numeric(source_p, &me, RPL_ADMINEMAIL, AdminInfo.email);
 }
 

@@ -113,7 +113,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
         }
      }
 
-      if (ac2ptr != NULL)
+      if (ac2ptr)
         sendto_one_numeric(source_p, &me, RPL_TRACELINK,
                            ircd_version, tname, ac2ptr->from->name);
       else

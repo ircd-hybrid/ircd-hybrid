@@ -57,7 +57,7 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
   for (nick = strtoken(&p, parv[1], " "); nick && i++ < 5;
        nick = strtoken(&p,    NULL, " "))
   {
-    if ((target_p = find_person(source_p, nick)) != NULL)
+    if ((target_p = find_person(source_p, nick)))
     {
       /*
        * Show real IP for USERHOST on yourself.

@@ -59,8 +59,8 @@ strip_tabs(char *dest, const char *src, size_t len)
   char *d = dest;
 
   /* Sanity check; we don't want anything nasty... */
-  assert(dest != NULL);
-  assert(src  != NULL);
+  assert(dest);
+  assert(src);
   assert(len > 0);
 
   for (; --len && *src; ++src)
@@ -84,7 +84,7 @@ strtoken(char** save, char* str, const char* fs)
   if (str)
     pos = str;    /* new string scan */
 
-  while (pos && *pos && strchr(fs, *pos) != NULL)
+  while (pos && *pos && strchr(fs, *pos))
     ++pos;        /* skip leading separators */
 
   if (!pos || !*pos)

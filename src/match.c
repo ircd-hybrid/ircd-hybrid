@@ -171,7 +171,7 @@ collapse(char *mask)
       else
       {
         if ((*m == '\\') && ((m[1] == '*') || (m[1] == '?')))
-          m++;
+          ++m;
       }
     } while (*m++);
   }
@@ -191,8 +191,8 @@ irccmp(const char *s1, const char *s2)
   const unsigned char *str1 = (const unsigned char *)s1;
   const unsigned char *str2 = (const unsigned char *)s2;
 
-  assert(s1 != NULL);
-  assert(s2 != NULL);
+  assert(s1);
+  assert(s2);
 
   for (; ToUpper(*str1) == ToUpper(*str2); ++str1, ++str2)
     if (*str1 == '\0')
@@ -207,8 +207,8 @@ ircncmp(const char *s1, const char *s2, size_t n)
   const unsigned char *str1 = (const unsigned char *)s1;
   const unsigned char *str2 = (const unsigned char *)s2;
 
-  assert(s1 != NULL);
-  assert(s2 != NULL);
+  assert(s1);
+  assert(s2);
   assert(n > 0);
 
   if (n == 0)

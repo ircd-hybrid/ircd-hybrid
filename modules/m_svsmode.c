@@ -58,7 +58,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
   int what = MODE_ADD;
   unsigned int flag = 0, setmodes = 0;
-  const char *m = NULL, *modes = NULL, *extarg = NULL;
+  const char *modes = NULL, *extarg = NULL;
   time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
@@ -84,7 +84,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
   setmodes = target_p->umodes;
 
-  for (m = modes; *m; ++m)
+  for (const char *m = modes; *m; ++m)
   {
     switch (*m)
     {

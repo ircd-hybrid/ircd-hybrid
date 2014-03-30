@@ -240,7 +240,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     }
 
     s = t;
-  } while (s != NULL);
+  } while (s);
 
   if (modecount)
   {

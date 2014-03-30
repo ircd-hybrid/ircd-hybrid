@@ -569,12 +569,10 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
 static void
 stats_deny(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf;
+  struct MaskItem *conf = NULL;
   dlink_node *ptr = NULL;
-  unsigned int i = 0;
 
-
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
@@ -605,10 +603,8 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
   dlink_node *ptr = NULL;
-  unsigned int i = 0;
 
-
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
@@ -639,7 +635,6 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf;
   dlink_node *ptr = NULL;
-  unsigned int i = 0;
 
   if (ConfigFileEntry.stats_e_disabled)
   {
@@ -647,8 +642,7 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
@@ -680,7 +674,7 @@ stats_pending_glines(struct Client *source_p, int parc, char *parv[])
 {
   const dlink_node *dn_ptr = NULL;
   const struct gline_pending *glp_ptr = NULL;
-  char timebuffer[MAX_DATE_STRING] = { '\0' };
+  char timebuffer[MAX_DATE_STRING] = "";
   struct tm *tmptr = NULL;
 
   if (!ConfigFileEntry.glines)
@@ -689,7 +683,7 @@ stats_pending_glines(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (dlink_list_length(&pending_glines[GLINE_PENDING_ADD_TYPE]) > 0)
+  if (dlink_list_length(&pending_glines[GLINE_PENDING_ADD_TYPE]))
     sendto_one_notice(source_p, &me, ":Pending G-lines");
 
   DLINK_FOREACH(dn_ptr, pending_glines[GLINE_PENDING_ADD_TYPE].head)
@@ -704,7 +698,7 @@ stats_pending_glines(struct Client *source_p, int parc, char *parv[])
                       glp_ptr->vote_1.oper_server, timebuffer,
                       glp_ptr->user, glp_ptr->host, glp_ptr->vote_1.reason);
 
-    if (glp_ptr->vote_2.oper_nick[0] != '\0')
+    if (glp_ptr->vote_2.oper_nick[0])
     {
       tmptr = localtime(&glp_ptr->vote_2.time_request);
       strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
@@ -719,7 +713,7 @@ stats_pending_glines(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_notice(source_p, &me, ":End of Pending G-lines");
 
-  if (dlink_list_length(&pending_glines[GLINE_PENDING_DEL_TYPE]) > 0)
+  if (dlink_list_length(&pending_glines[GLINE_PENDING_DEL_TYPE]))
     sendto_one_notice(source_p, &me, ":Pending UNG-lines");
 
   DLINK_FOREACH(dn_ptr, pending_glines[GLINE_PENDING_DEL_TYPE].head)
@@ -734,7 +728,7 @@ stats_pending_glines(struct Client *source_p, int parc, char *parv[])
                       glp_ptr->vote_1.oper_server, timebuffer,
                       glp_ptr->user, glp_ptr->host, glp_ptr->vote_1.reason);
 
-    if (glp_ptr->vote_2.oper_nick[0] != '\0')
+    if (glp_ptr->vote_2.oper_nick[0])
     {
       tmptr = localtime(&glp_ptr->vote_2.time_request);
       strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
@@ -761,7 +755,6 @@ static void
 stats_glines(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *ptr = NULL;
-  unsigned int i = 0;
 
   if (!ConfigFileEntry.glines)
   {
@@ -769,7 +762,7 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
@@ -857,10 +850,8 @@ report_auth(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
   dlink_node *ptr = NULL;
-  unsigned int i;
 
-
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
@@ -941,16 +932,15 @@ static void
 report_Klines(struct Client *source_p, int tkline)
 {
   struct MaskItem *conf = NULL;
-  unsigned int i = 0;
-  char c = '\0';
   dlink_node *ptr = NULL;
+  char c = '\0';
 
   if (tkline)
     c = 'k';
   else
     c = 'K';
 
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
@@ -1472,10 +1462,9 @@ stats_ltrace(struct Client *source_p, int parc, char *parv[])
   char *name = NULL;
   char statchar;
 
-  if ((name = parse_stats_args(source_p, parc, parv, &doall, &wilds)) != NULL)
+  if ((name = parse_stats_args(source_p, parc, parv, &doall, &wilds)))
   {
-    statchar = parv[1][0];
-
+    statchar = *parv[1];
     stats_L(source_p, name, doall, wilds, statchar);
   }
   else
@@ -1577,9 +1566,6 @@ do_stats(struct Client *source_p, int parc, char *parv[])
  *      parv[0] = command
  *      parv[1] = stat letter/command
  *      parv[2] = (if present) server/mask in stats L
- *
- * This will search the tables for the appropriate stats letter/command,
- * if found execute it.
  */
 static int
 m_stats(struct Client *source_p, int parc, char *parv[])
@@ -1610,9 +1596,6 @@ m_stats(struct Client *source_p, int parc, char *parv[])
  *      parv[0] = command
  *      parv[1] = stat letter/command
  *      parv[2] = (if present) server/mask in stats L, or target
- *
- * This will search the tables for the appropriate stats letter,
- * if found execute it.
  */
 static int
 ms_stats(struct Client *source_p, int parc, char *parv[])

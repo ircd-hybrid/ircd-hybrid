@@ -506,7 +506,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
 
       *server = '\0';
 
-      if (host != NULL)
+      if (host)
         *host++ = '\0';
 
       /*
@@ -516,9 +516,9 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
        */
       if ((target_p = find_userhost(nick, host, &count)))
       {
-        if (server != NULL)
+        if (server)
           *server = '@';
-        if (host != NULL)
+        if (host)
           *--host = '%';
 
         if (count == 1)
@@ -620,7 +620,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
   ntargets = 0;
 
   for (nick = strtoken(&p, target_list, ","); nick;
-       nick = strtoken(&p, NULL, ","))
+       nick = strtoken(&p,        NULL, ","))
   {
     char *with_prefix;
 
@@ -694,7 +694,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
       ++nick;
     }
 
-    if (type != 0)
+    if (type)
     {
       if (*nick == '\0')      /* if its a '\0' dump it, there is no recipient */
       {
@@ -767,8 +767,6 @@ static void
 m_message(int p_or_n, const char *command, struct Client *source_p,
           int parc, char *parv[])
 {
-  int i = 0;
-
   if (parc < 2 || EmptyString(parv[1]))
   {
     if (p_or_n != NOTICE)
@@ -790,7 +788,7 @@ m_message(int p_or_n, const char *command, struct Client *source_p,
   if (build_target_list(p_or_n, command, source_p, parv[1], parv[2]) < 0)
     return;
 
-  for (i = 0; i < ntargets; ++i)
+  for (int i = 0; i < ntargets; ++i)
   {
     switch (targets[i].type)
     {

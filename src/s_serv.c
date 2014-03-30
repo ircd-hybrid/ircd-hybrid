@@ -134,7 +134,7 @@ read_links_file(void)
 
   while (fgets(buff, sizeof(buff), file))
   {
-    if ((p = strchr(buff, '\n')) != NULL)
+    if ((p = strchr(buff, '\n')))
       *p = '\0';
 
     dlinkAddTail(xstrdup(buff), make_dlink_node(), &flatten_links);
@@ -229,9 +229,9 @@ hunt_server(struct Client *source_p, const char *command,
     }
   }
 
-  if (target_p != NULL)
+  if (target_p)
   {
-    if(!IsRegistered(target_p))
+    if (!IsRegistered(target_p))
     {
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, parv[server]);
       return HUNTED_NOSUCH;
@@ -307,16 +307,17 @@ try_connections(void *unused)
 
     conf->until = CurrentTime + confrq;
 
-    /* Found a CONNECT config with port specified, scan clients
+    /*
+     * Found a CONNECT config with port specified, scan clients
      * and see if this server is already connected?
      */
-    if (hash_find_server(conf->name) != NULL)
+    if (hash_find_server(conf->name))
       continue;
 
     if (conf->class->ref_count < conf->class->max_total)
     {
       /* Go to the end of the list, if not already last */
-      if (ptr->next != NULL)
+      if (ptr->next)
       {
         dlinkDelete(ptr, &server_items);
         dlinkAddTail(conf, &conf->node, &server_items);
@@ -325,7 +326,8 @@ try_connections(void *unused)
       if (find_servconn_in_progress(conf->name))
         return;
 
-      /* We used to only print this if serv_connect() actually
+      /*
+       * We used to only print this if serv_connect() actually
        * succeeded, but since comm_tcp_connect() can call the callback
        * immediately if there is an error, we were getting error messages
        * in the wrong order. SO, we just print out the activated line,
@@ -367,7 +369,7 @@ valid_servname(const char *name)
       ++dots;
   }
 
-  return dots != 0 && length <= HOSTLEN;
+  return dots && length <= HOSTLEN;
 }
 
 int
@@ -378,7 +380,7 @@ check_server(const char *name, struct Client *client_p)
   struct MaskItem *server_conf = NULL;
   int error = -1;
 
-  assert(client_p != NULL);
+  assert(client_p);
 
   /* loop through looking for all possible connect items that might work */
   DLINK_FOREACH(ptr, server_items.head)
@@ -414,7 +416,7 @@ check_server(const char *name, struct Client *client_p)
   attach_conf(client_p, server_conf);
 
 
-  if (server_conf != NULL)
+  if (server_conf)
   {
     struct sockaddr_in *v4;
 #ifdef IPV6
@@ -530,17 +532,14 @@ find_capability(const char *capab)
 void
 send_capabilities(struct Client *client_p, int cap_can_send)
 {
-  struct Capability *cap=NULL;
-  char msgbuf[IRCD_BUFSIZE];
-  char *t;
+  char msgbuf[IRCD_BUFSIZE] = "";
+  char *t = msgbuf;
   int tl;
-  dlink_node *ptr;
-
-  t = msgbuf;
+  dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, cap_list.head)
   {
-    cap = ptr->data;
+    struct Capability *cap = ptr->data;
 
     if (cap->cap & (cap_can_send|default_server_capabs))
     {
@@ -563,7 +562,7 @@ send_capabilities(struct Client *client_p, int cap_can_send)
 void
 sendnick_TS(struct Client *client_p, struct Client *target_p)
 {
-  char ubuf[IRCD_BUFSIZE];
+  char ubuf[IRCD_BUFSIZE] = "";
 
   if (!IsClient(target_p))
     return;
@@ -665,7 +664,7 @@ server_estab(struct Client *client_p)
   const COMP_METHOD *compression = NULL, *expansion = NULL;
 #endif
 
-  assert(client_p != NULL);
+  assert(client_p);
 
   strlcpy(inpath_ip, get_client_name(client_p, SHOW_IP), sizeof(inpath_ip));
 
@@ -888,7 +887,7 @@ burst_all(struct Client *client_p)
   {
     struct Channel *chptr = ptr->data;
 
-    if (dlink_list_length(&chptr->members) != 0)
+    if (dlink_list_length(&chptr->members))
     {
       burst_members(client_p, chptr);
       send_channel_modes(client_p, chptr);
@@ -939,7 +938,7 @@ send_tb(struct Client *client_p, struct Channel *chptr)
    * it to their old topic they had before.  Read m_tburst.c:ms_tburst
    * for further information   -Michael
    */
-  if (chptr->topic_time != 0)
+  if (chptr->topic_time)
     sendto_one(client_p, ":%s TBURST %lu %s %lu %s :%s", me.id,
                (unsigned long)chptr->channelts, chptr->chname,
                (unsigned long)chptr->topic_time,
@@ -1000,14 +999,14 @@ burst_members(struct Client *client_p, struct Channel *chptr)
 int
 serv_connect(struct MaskItem *conf, struct Client *by)
 {
-  struct Client *client_p;
-  char buf[HOSTIPLEN + 1];
+  struct Client *client_p = NULL;
+  char buf[HOSTIPLEN + 1] = "";
 
   /* conversion structs */
   struct sockaddr_in *v4;
-  /* Make sure conf is useful */
-  assert(conf != NULL);
 
+  /* Make sure conf is useful */
+  assert(conf);
 
   getnameinfo((struct sockaddr *)&conf->addr, conf->addr.ss_len,
               buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
@@ -1020,7 +1019,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} in progress.",
                          conf->name);
-    return (0);
+    return 0;
   }
 
   if (conf->dns_failed)
@@ -1028,13 +1027,13 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} failed.",
                          conf->name);
-    return (0);
+    return 0;
   }
 
   /* Make sure this server isn't already connected
    * Note: conf should ALWAYS be a valid C: line
    */
-  if ((client_p = hash_find_server(conf->name)) != NULL)
+  if ((client_p = hash_find_server(conf->name)))
   {
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Server %s already present from %s",
@@ -1115,7 +1114,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   {
     case AF_INET:
       v4 = (struct sockaddr_in*)&conf->bind;
-      if (v4->sin_addr.s_addr != 0)
+      if (v4->sin_addr.s_addr)
       {
         struct irc_ssaddr ipn;
         memset(&ipn, 0, sizeof(struct irc_ssaddr));
@@ -1155,7 +1154,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         v6conf = (struct sockaddr_in6 *)&conf->bind;
         v6 = (struct sockaddr_in6 *)&ipn;
 
-        if (memcmp(&v6conf->sin6_addr, &v6->sin6_addr, sizeof(struct in6_addr)) != 0)
+        if (memcmp(&v6conf->sin6_addr, &v6->sin6_addr, sizeof(struct in6_addr)))
         {
           memcpy(&ipn, &conf->bind, sizeof(struct irc_ssaddr));
           ipn.ss.ss_family = AF_INET6;
@@ -1328,12 +1327,13 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   struct MaskItem *conf = NULL;
 
   /* First, make sure its a real client! */
-  assert(client_p != NULL);
+  assert(client_p);
   assert(&client_p->localClient->fd == fd);
 
   /* Next, for backward purposes, record the ip of the server */
   memcpy(&client_p->localClient->ip, &fd->connect.hostaddr,
          sizeof(struct irc_ssaddr));
+
   /* Check the status */
   if (status != COMM_OK)
   {

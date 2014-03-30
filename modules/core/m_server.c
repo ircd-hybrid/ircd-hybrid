@@ -74,8 +74,8 @@ set_server_gecos(struct Client *client_p, const char *info)
 static int
 mr_server(struct Client *source_p, int parc, char *parv[])
 {
-  char *name;
-  struct Client *target_p;
+  char *name = NULL;
+  struct Client *target_p = NULL;
 
   if (EmptyString(parv[3]))
   {

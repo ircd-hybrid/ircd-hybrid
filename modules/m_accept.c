@@ -47,7 +47,7 @@ static void
 list_accepts(struct Client *source_p)
 {
   int len = 0;
-  char nicks[IRCD_BUFSIZE] = { '\0' };
+  char nicks[IRCD_BUFSIZE] = "";
   char *t = nicks;
   const dlink_node *ptr = NULL;
 
@@ -72,7 +72,7 @@ list_accepts(struct Client *source_p)
                  accept_p->userptr, accept_p->hostptr);
   }
 
-  if (nicks[0] != '\0')
+  if (nicks[0])
   {
     *(t - 1) = '\0';
     sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, nicks);
@@ -117,9 +117,9 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 {
   char *mask = NULL;
   char *p = NULL;
-  char nick[NICKLEN + 1];
-  char user[USERLEN + 1];
-  char host[HOSTLEN + 1];
+  char nick[NICKLEN + 1] = "";
+  char user[USERLEN + 1] = "";
+  char host[HOSTLEN + 1] = "";
   struct split_nuh_item nuh;
   struct split_nuh_item *accept_p = NULL;
 
@@ -129,7 +129,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  for (mask = strtoken(&p, parv[1], ","); mask != NULL;
+  for (mask = strtoken(&p, parv[1], ","); mask;
        mask = strtoken(&p,    NULL, ","))
   {
     if (*mask == '-' && *++mask != '\0')
@@ -173,7 +173,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 
       split_nuh(&nuh);
 
-      if ((accept_p = find_accept(nick, user, host, source_p, irccmp)) != NULL)
+      if ((accept_p = find_accept(nick, user, host, source_p, irccmp)))
       {
         sendto_one_numeric(source_p, &me, ERR_ACCEPTEXIST, nick, user, host);
         continue;

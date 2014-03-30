@@ -95,7 +95,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   if (HasUMode(target_p, UMODE_REGISTERED))
   {
     unsigned int oldmodes = target_p->umodes;
-    char modebuf[IRCD_BUFSIZE] = { '\0' };
+    char modebuf[IRCD_BUFSIZE] = "";
 
     DelUMode(target_p, UMODE_REGISTERED);
     send_umode(target_p, target_p, oldmodes, 0xffffffff, modebuf);

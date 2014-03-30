@@ -96,7 +96,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  assert(res != NULL);
+  assert(res);
 
   memcpy(&source_p->localClient->ip, res->ai_addr, res->ai_addrlen);
   source_p->localClient->ip.ss_len = res->ai_addrlen;

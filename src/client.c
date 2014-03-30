@@ -746,8 +746,6 @@ void
 exit_client(struct Client *source_p, const char *comment)
 {
   dlink_node *m = NULL;
-  /* Store the direction to source_p, close_connection sets it to NULL */
-  struct Client *client_p = source_p->from;
 
   if (MyConnect(source_p))
   {
@@ -874,7 +872,7 @@ exit_client(struct Client *source_p, const char *comment)
     /* Now exit the clients internally */
     recurse_remove_clients(source_p, splitstr);
 
-    if (source_p->servptr == &me)
+    if (MyConnect(source_p))
     {
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s was connected for %d seconds.  %llu/%llu sendK/recvK.",
@@ -888,7 +886,7 @@ exit_client(struct Client *source_p, const char *comment)
     }
   }
   else if (IsClient(source_p) && !HasFlag(source_p, FLAGS_KILLED))
-    sendto_server(client_p, NOCAPS, NOCAPS, ":%s QUIT :%s",
+    sendto_server(source_p->from, NOCAPS, NOCAPS, ":%s QUIT :%s",
                   source_p->id, comment);
 
   /* The client *better* be off all of the lists */

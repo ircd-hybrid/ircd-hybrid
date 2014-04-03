@@ -2100,7 +2100,7 @@ match_conf_password(const char *password, const struct MaskItem *conf)
   else
     encr = password;
 
-  return !strcmp(encr, conf->passwd);
+  return encr && !strcmp(encr, conf->passwd);
 }
 
 /*

@@ -35,10 +35,16 @@
 #include "s_serv.h"
 
 
-/*
- * mo_wallops (write to *all* opers currently online)
- *      parv[0] = command
- *      parv[1] = message text
+/*! \brief WALLOPS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = message text
  */
 static int
 mo_wallops(struct Client *source_p, int parc, char *parv[])
@@ -63,10 +69,16 @@ mo_wallops(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*
- * ms_wallops (write to *all* opers currently online)
- *      parv[0] = command
- *      parv[1] = message text
+/*! \brief WALLOPS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = message text
  */
 static int
 ms_wallops(struct Client *source_p, int parc, char *parv[])

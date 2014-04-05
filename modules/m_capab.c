@@ -33,11 +33,16 @@
 #include "modules.h"
 
 
-/*
- * mr_capab - CAPAB message handler
- *      parv[0] = command
- *      parv[1] = space-separated list of capabilities
+/*! \brief CAPAB command handler
  *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = space-separated list of capabilities
  */
 static int
 mr_capab(struct Client *source_p, int parc, char *parv[])

@@ -32,10 +32,16 @@
 #include "modules.h"
 
 
-/*
-** mr_dumb_proxy
-**      parv[0] = command
-*/
+/*! \brief GET/POST/PUT command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ */
 static int
 mr_dumb_proxy(struct Client *source_p, int parc, char *parv[])
 {

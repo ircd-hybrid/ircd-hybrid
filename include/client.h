@@ -88,8 +88,8 @@ struct MaskItem;
 /*
  * ts stuff
  */
-#define TS_CURRENT      6       /**< current TS protocol version */
-#define TS_MIN          6       /**< minimum supported TS protocol version */
+#define TS_CURRENT      6       /**< Current TS protocol version */
+#define TS_MIN          6       /**< Minimum supported TS protocol version */
 #define TS_DOESTS       0x20000000
 #define DoesTS(x)       ((x)->tsinfo == TS_DOESTS)
 
@@ -184,15 +184,15 @@ struct MaskItem;
 
 
 /* oper priv flags */
-#define OPER_FLAG_KILL_REMOTE    0x00000001 /**< Oper can global kill        */
-#define OPER_FLAG_KILL           0x00000002 /**< Oper can do local KILL      */
-#define OPER_FLAG_UNKLINE        0x00000004 /**< Oper can use unkline        */
-#define OPER_FLAG_GLINE          0x00000008 /**< Oper can use gline          */
-#define OPER_FLAG_K              0x00000010 /**< Oper can kill/kline         */
-#define OPER_FLAG_XLINE          0x00000020 /**< Oper can xline              */
-#define OPER_FLAG_DIE            0x00000040 /**< Oper can die                */
-#define OPER_FLAG_REHASH         0x00000080 /**< Oper can rehash             */
-#define OPER_FLAG_ADMIN          0x00000100 /**< Oper can set umode +a       */
+#define OPER_FLAG_KILL_REMOTE    0x00000001 /**< Oper can global KILL */
+#define OPER_FLAG_KILL           0x00000002 /**< Oper can do local KILL */
+#define OPER_FLAG_UNKLINE        0x00000004 /**< Oper can use unkline*/
+#define OPER_FLAG_GLINE          0x00000008 /**< Oper can use gline */
+#define OPER_FLAG_K              0x00000010 /**< Oper can kline */
+#define OPER_FLAG_XLINE          0x00000020 /**< Oper can xline */
+#define OPER_FLAG_DIE            0x00000040 /**< Oper can die*/
+#define OPER_FLAG_REHASH         0x00000080 /**< Oper can rehash */
+#define OPER_FLAG_ADMIN          0x00000100 /**< Oper can set umode +a*/
 #define OPER_FLAG_OPERWALL       0x00000200 /**< Oper can use OPERWALL command */
 #define OPER_FLAG_REMOTEBAN      0x00000400 /**< Oper can set remote bans */
 #define OPER_FLAG_GLOBOPS        0x00000800 /**< Oper can use GLOBOPS command */
@@ -207,7 +207,7 @@ struct MaskItem;
 #define OPER_FLAG_CONNECT_REMOTE 0x00100000 /**< Oper can do global CONNECT */
 #define OPER_FLAG_WALLOPS        0x00200000 /**< Oper can do WALLOPS */
 #define OPER_FLAG_LOCOPS         0x00400000 /**< Oper can do LOCOPS */
-#define OPER_FLAG_UNXLINE        0x00800000 /**< Oper can unxline            */
+#define OPER_FLAG_UNXLINE        0x00800000 /**< Oper can unxline*/
 
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->localClient->operflags & (y) : 0)
@@ -291,16 +291,16 @@ struct Server
 {
   dlink_list server_list; /**< Servers on this server */
   dlink_list client_list; /**< Clients on this server */
-  char by[NICKLEN + 1];   /**< who activated this connection */
+  char by[NICKLEN + 1];   /**< Who activated this connection */
 };
 
 /*! \brief ListTask structure */
 struct ListTask
 {
-  dlink_list show_mask; /**< show these channels.. */
-  dlink_list hide_mask; /**< ..and hide these ones */
+  dlink_list show_mask; /**< Channels to show */
+  dlink_list hide_mask; /**< Channels to hide */
 
-  unsigned int hash_index; /**< the bucket we are currently in */
+  unsigned int hash_index; /**< The hash bucket we are currently in */
   unsigned int users_min;
   unsigned int users_max;
   unsigned int created_min;

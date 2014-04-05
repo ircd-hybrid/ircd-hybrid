@@ -304,6 +304,7 @@ initialize_server_capabs(void)
   add_capability("TS6", CAP_TS6, 0);
   add_capability("CLUSTER", CAP_CLUSTER, 1);
   add_capability("SVS", CAP_SVS, 1);
+  add_capability("CHW", CAP_CHW, 1);
 #ifdef HALFOPS
   add_capability("HOPS", CAP_HOPS, 1);
 #endif

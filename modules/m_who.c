@@ -271,7 +271,7 @@ m_who(struct Client *client_p, struct Client *source_p,
     /* List all users on a given channel */
     if ((chptr = hash_find_channel(mask)) != NULL)
     {
-      if (IsMember(source_p, chptr))
+      if (IsMember(source_p, chptr) || HasUMode(source_p, UMODE_ADMIN))
         do_who_on_channel(source_p, chptr, chptr->chname, 1, server_oper);
       else if (!SecretChannel(chptr))
         do_who_on_channel(source_p, chptr, chptr->chname, 0, server_oper);

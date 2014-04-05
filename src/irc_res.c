@@ -307,7 +307,7 @@ make_request(dns_callback_fnc callback, void *ctx)
 
   memset(request, 0, sizeof(*request));
   request->sentat       = CurrentTime;
-  request->retries      = 3;
+  request->retries      = 2;
   request->resend       = 1;
   request->timeout      = 4;    /* start at 4 and exponential inc. */
   request->state        = REQ_IDLE;

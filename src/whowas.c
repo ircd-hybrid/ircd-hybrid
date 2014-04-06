@@ -48,9 +48,9 @@ void
 whowas_add_history(struct Client *client_p, const int online)
 {
   static unsigned int whowas_next = 0;
-  struct Whowas *who = &WHOWAS[whowas_next];
+  struct Whowas *const who = &WHOWAS[whowas_next];
 
-  assert(client_p && client_p->servptr);
+  assert(IsClient(client_p));
 
   if (++whowas_next == NICKNAMEHISTORYLENGTH)
     whowas_next = 0;

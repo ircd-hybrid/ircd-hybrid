@@ -53,26 +53,31 @@ tor_log2(uint64_t u64)
     u64 >>= 32;
     r = 32;
   }
+
   if (u64 >= (1LLU << 16))
   {
     u64 >>= 16;
     r += 16;
   }
+
   if (u64 >= (1LLU <<  8))
   {
     u64 >>= 8;
     r += 8;
   }
+
   if (u64 >= (1LLU <<  4))
   {
     u64 >>= 4;
     r += 4;
   }
+
   if (u64 >= (1LLU <<  2))
   {
     u64 >>= 2;
     r += 2;
   }
+
   if (u64 >= (1LLU <<  1))
   {
     u64 >>= 1;
@@ -171,13 +176,15 @@ typedef struct mp_allocated_t mp_allocated_t;
 typedef struct mp_chunk_t mp_chunk_t;
 
 /** Holds a single allocated item, allocated as part of a chunk. */
-struct mp_allocated_t {
+struct mp_allocated_t
+{
   /** The chunk that this item is allocated in.  This adds overhead to each
    * allocated item, thus making this implementation inappropriate for
    * very small items. */
   mp_chunk_t *in_chunk;
 
-  union {
+  union
+  {
     /** If this item is free, the next item on the free list. */
     mp_allocated_t *next_free;
 
@@ -194,7 +201,8 @@ struct mp_allocated_t {
 #define MP_CHUNK_MAGIC 0x09870123
 
 /** A chunk of memory.  Chunks come from malloc; we use them  */
-struct mp_chunk_t {
+struct mp_chunk_t
+{
   uint32_t magic; /**< Must be MP_CHUNK_MAGIC if this chunk is valid. */
   mp_chunk_t *next; /**< The next free, used, or full chunk in sequence. */
   mp_chunk_t *prev; /**< The previous free, used, or full chunk in sequence. */
@@ -269,7 +277,8 @@ mp_pool_get(mp_pool_t *pool)
   mp_chunk_t *chunk;
   mp_allocated_t *allocated;
 
-  if (pool->used_chunks != NULL) {
+  if (pool->used_chunks)
+  {
     /*
      * Common case: there is some chunk that is neither full nor empty. Use
      * that one. (We can't use the full ones, obviously, and we should fill
@@ -277,7 +286,9 @@ mp_pool_get(mp_pool_t *pool)
      */
     chunk = pool->used_chunks;
 
-  } else if (pool->empty_chunks) {
+  }
+  else if (pool->empty_chunks)
+  {
     /*
      * We have no used chunks, but we have an empty chunk that we haven't
      * freed yet: use that. (We pull from the front of the list, which should
@@ -297,7 +308,9 @@ mp_pool_get(mp_pool_t *pool)
     --pool->n_empty_chunks;
     if (pool->n_empty_chunks < pool->min_empty_chunks)
       pool->min_empty_chunks = pool->n_empty_chunks;
-  } else {
+  }
+  else
+  {
     /* We have no used or empty chunks: allocate a new chunk. */
     chunk = mp_chunk_new(pool);
 
@@ -307,13 +320,16 @@ mp_pool_get(mp_pool_t *pool)
 
   assert(chunk->n_allocated < chunk->capacity);
 
-  if (chunk->first_free) {
+  if (chunk->first_free)
+  {
     /* If there's anything on the chunk's freelist, unlink it and use it. */
     allocated = chunk->first_free;
     chunk->first_free = allocated->u.next_free;
     allocated->u.next_free = NULL; /* For debugging; not really needed. */
     assert(allocated->in_chunk == chunk);
-  } else {
+  }
+  else
+  {
     /* Otherwise, the chunk had better have some free space left on it. */
     assert(chunk->next_mem + pool->item_alloc_size <=
            chunk->mem + chunk->mem_size);
@@ -331,7 +347,8 @@ mp_pool_get(mp_pool_t *pool)
   ++pool->total_items_allocated;
 #endif
 
-  if (chunk->n_allocated == chunk->capacity) {
+  if (chunk->n_allocated == chunk->capacity)
+  {
     /* This chunk just became full. */
     assert(chunk == pool->used_chunks);
     assert(chunk->prev == NULL);
@@ -365,7 +382,8 @@ mp_pool_release(void *item)
   allocated->u.next_free = chunk->first_free;
   chunk->first_free = allocated;
 
-  if (chunk->n_allocated == chunk->capacity) {
+  if (chunk->n_allocated == chunk->capacity)
+  {
     /* This chunk was full and is about to be used. */
     mp_pool_t *pool = chunk->pool;
     /* unlink from the full list  */
@@ -379,10 +397,13 @@ mp_pool_release(void *item)
     /* link to the used list. */
     chunk->next = pool->used_chunks;
     chunk->prev = NULL;
+
     if (chunk->next)
       chunk->next->prev = chunk;
     pool->used_chunks = chunk;
-  } else if (chunk->n_allocated == 1) {
+  }
+  else if (chunk->n_allocated == 1)
+  {
     /* This was used and is about to be empty. */
     mp_pool_t *pool = chunk->pool;
 
@@ -438,11 +459,11 @@ mp_pool_new(size_t item_size, size_t chunk_capacity)
     alloc_size = sizeof(mp_allocated_t);
 
   /* If we're not an even multiple of ALIGNMENT, round up. */
-  if (alloc_size % ALIGNMENT) {
+  if (alloc_size % ALIGNMENT)
     alloc_size = alloc_size + ALIGNMENT - (alloc_size % ALIGNMENT);
-  }
   if (alloc_size < ALIGNMENT)
     alloc_size = ALIGNMENT;
+
   assert((alloc_size % ALIGNMENT) == 0);
 
   /*
@@ -458,6 +479,7 @@ mp_pool_new(size_t item_size, size_t chunk_capacity)
    * handing out. 512K-1 byte is a lot better than 512K+1 byte.
    */
   chunk_capacity = (size_t) round_to_power_of_2(chunk_capacity);
+
   while (chunk_capacity < alloc_size * 2 + CHUNK_OVERHEAD)
     chunk_capacity *= 2;
   if (chunk_capacity < MIN_CHUNK)
@@ -499,7 +521,8 @@ mp_pool_sort_used_chunks(mp_pool_t *pool)
   int i, n = 0, inverted = 0;
   mp_chunk_t **chunks, *chunk;
 
-  for (chunk = pool->used_chunks; chunk; chunk = chunk->next) {
+  for (chunk = pool->used_chunks; chunk; chunk = chunk->next)
+  {
     ++n;
     if (chunk->next && chunk->next->n_allocated > chunk->n_allocated)
       ++inverted;
@@ -517,7 +540,8 @@ mp_pool_sort_used_chunks(mp_pool_t *pool)
   pool->used_chunks = chunks[0];
   chunks[0]->prev = NULL;
 
-  for (i = 1; i < n; ++i) {
+  for (i = 1; i < n; ++i)
+  {
     chunks[i - 1]->next = chunks[i];
     chunks[i]->prev = chunks[i - 1];
   }
@@ -540,8 +564,10 @@ mp_pool_clean(mp_pool_t *pool, int n_to_keep, int keep_recently_used)
   mp_pool_sort_used_chunks(pool);
   assert(n_to_keep >= 0);
 
-  if (keep_recently_used) {
+  if (keep_recently_used)
+  {
     int n_recently_used = pool->n_empty_chunks - pool->min_empty_chunks;
+
     if (n_to_keep < n_recently_used)
       n_to_keep = n_recently_used;
   }
@@ -549,17 +575,23 @@ mp_pool_clean(mp_pool_t *pool, int n_to_keep, int keep_recently_used)
   assert(n_to_keep >= 0);
 
   first_to_free = &pool->empty_chunks;
-  while (*first_to_free && n_to_keep > 0) {
+
+  while (*first_to_free && n_to_keep > 0)
+  {
     first_to_free = &(*first_to_free)->next;
     --n_to_keep;
   }
-  if (!*first_to_free) {
+
+  if (!*first_to_free)
+  {
     pool->min_empty_chunks = pool->n_empty_chunks;
     return;
   }
 
   chunk = *first_to_free;
-  while (chunk) {
+
+  while (chunk)
+  {
     mp_chunk_t *next = chunk->next;
     chunk->magic = 0xdeadbeef;
     MyFree(chunk);
@@ -600,14 +632,16 @@ assert_chunks_ok(mp_pool_t *pool, mp_chunk_t *chunk, int empty, int full)
   if (chunk)
     assert(chunk->prev == NULL);
 
-  while (chunk) {
+  while (chunk)
+  {
     n++;
     assert(chunk->magic == MP_CHUNK_MAGIC);
     assert(chunk->pool == pool);
+
     for (allocated = chunk->first_free; allocated;
-         allocated = allocated->u.next_free) {
+         allocated = allocated->u.next_free)
       assert(allocated->in_chunk == chunk);
-    }
+
     if (empty)
       assert(chunk->n_allocated == 0);
     else if (full)
@@ -672,7 +706,8 @@ mp_pool_log_status(mp_pool_t *pool)
 
   ilog(LOG_TYPE_DEBUG, "%llu bytes in %d empty chunks",
        bytes_allocated, pool->n_empty_chunks);
-  for (chunk = pool->used_chunks; chunk; chunk = chunk->next) {
+  for (chunk = pool->used_chunks; chunk; chunk = chunk->next)
+  {
     ++n_used;
     bu += chunk->n_allocated * pool->item_alloc_size;
     ba += chunk->mem_size;
@@ -687,7 +722,8 @@ mp_pool_log_status(mp_pool_t *pool)
   bytes_allocated += ba;
   bu = ba = 0;
 
-  for (chunk = pool->full_chunks; chunk; chunk = chunk->next) {
+  for (chunk = pool->full_chunks; chunk; chunk = chunk->next)
+  {
     ++n_full;
     bu += chunk->n_allocated * pool->item_alloc_size;
     ba += chunk->mem_size;

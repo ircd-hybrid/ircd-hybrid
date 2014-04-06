@@ -48,7 +48,7 @@
 #include "send.h"
 #include "memory.h"
 #include "s_user.h"
-#include "hook.h"
+
 
 static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
   "Error during DNS lookup", "connect timeout", "Error during connect()",

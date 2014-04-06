@@ -29,7 +29,6 @@
 #include "config.h"
 #include "ircd_defs.h"
 #include "client.h"
-#include "hook.h"
 #include "conf_class.h"
 
 

@@ -323,7 +323,7 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
   {
     int bitlen = strtol(++p, NULL, 10);
     int min_bitlen = strchr(host, ':') ? ConfigFileEntry.gline_min_cidr6 :
-                                             ConfigFileEntry.gline_min_cidr;
+                                         ConfigFileEntry.gline_min_cidr;
 
     if (bitlen < min_bitlen)
     {

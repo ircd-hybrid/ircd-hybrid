@@ -51,17 +51,11 @@
 #include "watch.h"
 
 static char umode_buffer[IRCD_BUFSIZE];
-
-static void user_welcome(struct Client *);
-static void report_and_set_user_flags(struct Client *, const struct MaskItem *);
-static int check_xline(struct Client *);
-static void introduce_client(struct Client *);
 static const char *uid_get(void);
 
 /* Used for building up the isupport string,
  * used with init_isupport, add_isupport, delete_isupport
  */
-
 struct Isupport
 {
   dlink_node node;
@@ -222,6 +216,192 @@ show_isupport(struct Client *source_p)
 
   DLINK_FOREACH(ptr, support_list_lines.head)
     sendto_one_numeric(source_p, &me, RPL_ISUPPORT, ptr->data);
+}
+
+
+/* report_and_set_user_flags()
+ *
+ * inputs       - pointer to source_p
+ *              - pointer to conf for this user
+ * output       - NONE
+ * side effects - Report to user any special flags
+ *                they are getting, and set them.
+ */
+static void
+report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
+{
+  /* If this user is being spoofed, tell them so */
+  if (IsConfDoSpoofIp(conf))
+    sendto_one_notice(source_p, &me, ":*** Spoofing your IP. Congrats.");
+
+  /* If this user is in the exception class, Set it "E lined" */
+  if (IsConfExemptKline(conf))
+  {
+    SetExemptKline(source_p);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D/G lines. Congrats.");
+  }
+
+  /*
+   * The else here is to make sure that G line exempt users
+   * do not get noticed twice.
+   */
+  else if (IsConfExemptGline(conf))
+  {
+    SetExemptGline(source_p);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from G lines. Congrats.");
+  }
+
+  if (IsConfExemptResv(conf))
+  {
+    SetExemptResv(source_p);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from resvs. Congrats.");
+  }
+
+  /* If this user is exempt from user limits set it "F lined" */
+  if (IsConfExemptLimits(conf))
+  {
+    SetExemptLimits(source_p);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from user limits. Congrats.");
+  }
+
+  if (IsConfCanFlood(conf))
+  {
+    SetCanFlood(source_p);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from flood "
+                      "protection, aren't you fearsome.");
+  }
+}
+
+/* introduce_client()
+ *
+ * inputs       - source_p
+ * output       - NONE
+ * side effects - This common function introduces a client to the rest
+ *                of the net, either from a local client connect or
+ *                from a remote connect.
+ */
+static void
+introduce_client(struct Client *source_p)
+{
+  dlink_node *ptr = NULL;
+  char ubuf[IRCD_BUFSIZE] = "";
+
+  if (MyClient(source_p))
+    send_umode(source_p, source_p, 0, SEND_UMODES, ubuf);
+  else
+    send_umode(NULL, source_p, 0, SEND_UMODES, ubuf);
+
+  watch_check_hash(source_p, RPL_LOGON);
+
+  if (ubuf[0] == '\0')
+  {
+    ubuf[0] = '+';
+    ubuf[1] = '\0';
+  }
+
+  DLINK_FOREACH(ptr, serv_list.head)
+  {
+    struct Client *server = ptr->data;
+
+    if (server == source_p->from)
+      continue;
+
+    if (IsCapable(server, CAP_SVS))
+      sendto_one(server, ":%s UID %s %d %lu %s %s %s %s %s %s :%s",
+                 source_p->servptr->id,
+                 source_p->name, source_p->hopcount+1,
+                 (unsigned long)source_p->tsinfo,
+                 ubuf, source_p->username, source_p->host,
+                 (MyClient(source_p) && IsIPSpoof(source_p)) ?
+                 "0" : source_p->sockhost, source_p->id,
+                 source_p->svid,
+                 source_p->info);
+    else
+      sendto_one(server, ":%s UID %s %d %lu %s %s %s %s %s :%s",
+                 source_p->servptr->id,
+                 source_p->name, source_p->hopcount+1,
+                 (unsigned long)source_p->tsinfo,
+                 ubuf, source_p->username, source_p->host,
+                 (MyClient(source_p) && IsIPSpoof(source_p)) ?
+                 "0" : source_p->sockhost, source_p->id, source_p->info);
+
+    if (!EmptyString(source_p->certfp))
+      sendto_one(server, ":%s CERTFP %s", source_p->id, source_p->certfp);
+  }
+}
+
+/* user_welcome()
+ *
+ * inputs       - client pointer to client to welcome
+ * output       - NONE
+ * side effects -
+ */
+static void
+user_welcome(struct Client *source_p)
+{
+#if defined(__TIME__) && defined(__DATE__)
+  static const char built_date[] = __DATE__ " at " __TIME__;
+#else
+  static const char built_date[] = "unknown";
+#endif
+
+#ifdef HAVE_LIBCRYPTO
+  if (HasFlag(source_p, FLAGS_SSL))
+  {
+    AddUMode(source_p, UMODE_SSL);
+    sendto_one_notice(source_p, &me, ":*** Connected securely via %s",
+                      ssl_get_cipher(source_p->localClient->fd.ssl));
+  }
+#endif
+
+  sendto_one_numeric(source_p, &me, RPL_WELCOME, ServerInfo.network_name,
+                     source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_YOURHOST,
+                     get_listener_name(source_p->localClient->listener), ircd_version);
+  sendto_one_numeric(source_p, &me, RPL_CREATED, built_date);
+  sendto_one_numeric(source_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
+  show_isupport(source_p);
+
+  if (source_p->id[0])
+    sendto_one_numeric(source_p, &me, RPL_YOURID, source_p->id);
+
+  show_lusers(source_p);
+  motd_signon(source_p);
+}
+
+/* check_xline()
+ *
+ * inputs       - pointer to client to test
+ * outupt       - 1 if exiting 0 if ok
+ * side effects -
+ */
+static int
+check_xline(struct Client *source_p)
+{
+  struct MaskItem *conf = NULL;
+  const char *reason = NULL;
+
+  if ((conf = find_matching_name_conf(CONF_XLINE, source_p->info, NULL, NULL, 0)))
+  {
+    ++conf->count;
+
+    if (conf->reason)
+      reason = conf->reason;
+    else
+      reason = CONF_NOREASON;
+
+    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
+                         "X-line Rejecting [%s] [%s], user %s [%s]",
+                         source_p->info, reason,
+                         get_client_name(source_p, HIDE_IP),
+                         source_p->sockhost);
+
+    ++ServerStats.is_ref;
+    exit_client(source_p, "Bad user info");
+    return 1;
+  }
+
+  return 0;
 }
 
 /*
@@ -526,64 +706,6 @@ register_remote_user(struct Client *source_p, const char *username,
   introduce_client(source_p);
 }
 
-/* introduce_client()
- *
- * inputs	- source_p
- * output	- NONE
- * side effects - This common function introduces a client to the rest
- *		  of the net, either from a local client connect or
- *		  from a remote connect.
- */
-static void
-introduce_client(struct Client *source_p)
-{
-  dlink_node *ptr = NULL;
-  char ubuf[IRCD_BUFSIZE] = "";
-
-  if (MyClient(source_p))
-    send_umode(source_p, source_p, 0, SEND_UMODES, ubuf);
-  else
-    send_umode(NULL, source_p, 0, SEND_UMODES, ubuf);
-
-  watch_check_hash(source_p, RPL_LOGON);
-
-  if (ubuf[0] == '\0')
-  {
-    ubuf[0] = '+';
-    ubuf[1] = '\0';
-  }
-
-  DLINK_FOREACH(ptr, serv_list.head)
-  {
-    struct Client *server = ptr->data;
-
-    if (server == source_p->from)
-      continue;
-
-    if (IsCapable(server, CAP_SVS))
-      sendto_one(server, ":%s UID %s %d %lu %s %s %s %s %s %s :%s",
-                 source_p->servptr->id,
-                 source_p->name, source_p->hopcount+1,
-                 (unsigned long)source_p->tsinfo,
-                 ubuf, source_p->username, source_p->host,
-                 (MyClient(source_p) && IsIPSpoof(source_p)) ?
-                 "0" : source_p->sockhost, source_p->id,
-                 source_p->svid,
-                 source_p->info);
-    else
-      sendto_one(server, ":%s UID %s %d %lu %s %s %s %s %s :%s",
-                 source_p->servptr->id,
-                 source_p->name, source_p->hopcount+1,
-                 (unsigned long)source_p->tsinfo,
-                 ubuf, source_p->username, source_p->host,
-                 (MyClient(source_p) && IsIPSpoof(source_p)) ?
-                 "0" : source_p->sockhost, source_p->id, source_p->info);
-
-    if (!EmptyString(source_p->certfp))
-      sendto_one(server, ":%s CERTFP %s", source_p->id, source_p->certfp);
-  }
-}
-
 /* valid_hostname()
  *
  * Inputs       - pointer to hostname
@@ -690,59 +812,6 @@ valid_nickname(const char *nickname, const int local)
       return 0;
 
   return p - nickname <= NICKLEN;
-}
-
-/* report_and_set_user_flags()
- *
- * inputs       - pointer to source_p
- *              - pointer to conf for this user
- * output       - NONE
- * side effects - Report to user any special flags
- *                they are getting, and set them.
- */
-static void
-report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
-{
-  /* If this user is being spoofed, tell them so */
-  if (IsConfDoSpoofIp(conf))
-    sendto_one_notice(source_p, &me, ":*** Spoofing your IP. Congrats.");
-
-  /* If this user is in the exception class, Set it "E lined" */
-  if (IsConfExemptKline(conf))
-  {
-    SetExemptKline(source_p);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D/G lines. Congrats.");
-  }
-
-  /*
-   * The else here is to make sure that G line exempt users
-   * do not get noticed twice.
-   */
-  else if (IsConfExemptGline(conf))
-  {
-    SetExemptGline(source_p);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from G lines. Congrats.");
-  }
-
-  if (IsConfExemptResv(conf))
-  {
-    SetExemptResv(source_p);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from resvs. Congrats.");
-  }
-
-  /* If this user is exempt from user limits set it "F lined" */
-  if (IsConfExemptLimits(conf))
-  {
-    SetExemptLimits(source_p);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from user limits. Congrats.");
-  }
-
-  if (IsConfCanFlood(conf))
-  {
-    SetCanFlood(source_p);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from flood "
-                      "protection, aren't you fearsome.");
-  }
 }
 
 /* set_user_mode()
@@ -1060,80 +1129,6 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
                                  ":%s!%s@%s AWAY :%s",
                                  target_p->name, target_p->username,
                                  target_p->host, target_p->away);
-}
-
-/* user_welcome()
- *
- * inputs	- client pointer to client to welcome
- * output	- NONE
- * side effects	-
- */
-static void
-user_welcome(struct Client *source_p)
-{
-#if defined(__TIME__) && defined(__DATE__)
-  static const char built_date[] = __DATE__ " at " __TIME__;
-#else
-  static const char built_date[] = "unknown";
-#endif
-
-#ifdef HAVE_LIBCRYPTO
-  if (HasFlag(source_p, FLAGS_SSL))
-  {
-    AddUMode(source_p, UMODE_SSL);
-    sendto_one_notice(source_p, &me, ":*** Connected securely via %s",
-                      ssl_get_cipher(source_p->localClient->fd.ssl));
-  }
-#endif
-
-  sendto_one_numeric(source_p, &me, RPL_WELCOME, ServerInfo.network_name,
-                     source_p->name);
-  sendto_one_numeric(source_p, &me, RPL_YOURHOST,
-                     get_listener_name(source_p->localClient->listener), ircd_version);
-  sendto_one_numeric(source_p, &me, RPL_CREATED, built_date);
-  sendto_one_numeric(source_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
-  show_isupport(source_p);
-
-  if (source_p->id[0])
-    sendto_one_numeric(source_p, &me, RPL_YOURID, source_p->id);
-
-  show_lusers(source_p);
-  motd_signon(source_p);
-}
-
-/* check_xline()
- *
- * inputs       - pointer to client to test
- * outupt       - 1 if exiting 0 if ok
- * side effects -
- */
-static int
-check_xline(struct Client *source_p)
-{
-  struct MaskItem *conf = NULL;
-  const char *reason = NULL;
-
-  if ((conf = find_matching_name_conf(CONF_XLINE, source_p->info, NULL, NULL, 0)))
-  {
-    ++conf->count;
-
-    if (conf->reason)
-      reason = conf->reason;
-    else
-      reason = CONF_NOREASON;
-
-    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                         "X-line Rejecting [%s] [%s], user %s [%s]",
-                         source_p->info, reason,
-                         get_client_name(source_p, HIDE_IP),
-                         source_p->sockhost);
-
-    ++ServerStats.is_ref;
-    exit_client(source_p, "Bad user info");
-    return 1;
-  }
-
-  return 0;
 }
 
 /* oper_up()

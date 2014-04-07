@@ -459,7 +459,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
         if ((n - 1) > parc)
         {
           if (parc > 2)
-            sendto_one_notice(source_p, &me, ":SET %s expects (\"%s%s\") args",
+            sendto_one_notice(source_p, &me, ":SET %s expects (\"%s%s\") args", tab->name,
                               (tab->wants_char ? "string, " : ""),
                               (tab->wants_char ? "int" : ""));
         }

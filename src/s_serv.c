@@ -834,7 +834,7 @@ server_estab(struct Client *client_p)
                target_p->info);
 
     if (HasFlag(target_p, FLAGS_EOB))
-      sendto_one(client_p, ":%s EOB", target_p->id, client_p);
+      sendto_one(client_p, ":%s EOB", target_p->id);
   }
 
   server_burst(client_p);

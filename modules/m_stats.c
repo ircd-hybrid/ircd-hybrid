@@ -99,7 +99,6 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
     break;
 
   case CONF_ULINE:
-    shared = flag_table;
     DLINK_FOREACH(ptr, uconf_items.head)
     {
       conf = ptr->data;
@@ -107,18 +106,19 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       p = buf;
 
       *p++ = 'c';
-      for (; shared->type; ++shared)
+      for (shared = flag_table; shared->type; ++shared)
         if (shared->type & conf->flags)
           *p++ = shared->letter;
         else
           *p++ = ToLower(shared->letter);
+
+      *p = '\0';
 
       sendto_one_numeric(source_p, &me, RPL_STATSULINE, conf->name,
                  conf->user?conf->user: "*",
                  conf->host?conf->host: "*", buf);
     }
 
-    shared = flag_table;
     DLINK_FOREACH(ptr, cluster_items.head)
     {
       conf = ptr->data;
@@ -126,11 +126,13 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       p = buf;
 
       *p++ = 'C';
-      for (; shared->type; ++shared)
+      for (shared = flag_table; shared->type; ++shared)
         if (shared->type & conf->flags)
           *p++ = shared->letter;
         else
           *p++ = ToLower(shared->letter);
+
+      *p = '\0';
 
       sendto_one_numeric(source_p, &me, RPL_STATSULINE, conf->name,
                  "*", "*", buf);

@@ -42,7 +42,6 @@
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name
  */
 static int
 ms_eob(struct Client *source_p, int parc, char *parv[])

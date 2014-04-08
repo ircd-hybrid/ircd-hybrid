@@ -255,7 +255,7 @@ struct config_file_entry
   int gline_request_time;
   int oper_only_umodes;
   int oper_umodes;
-  int max_targets;
+  unsigned int max_targets;
   int caller_id_wait;
   int min_nonwildcard;
   int min_nonwildcard_simple;

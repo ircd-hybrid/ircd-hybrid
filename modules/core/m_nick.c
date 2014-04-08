@@ -288,10 +288,8 @@ nick_from_server(struct Client *source_p, int parc,
 
     if (parc > 8)
     {
-      const char *m;
-
       /* parse usermodes */
-      for (m = &parv[4][1]; *m; ++m)
+      for (const char *m = &parv[4][1]; *m; ++m)
       {
         unsigned int flag = user_modes[(unsigned char)*m];
 
@@ -346,7 +344,6 @@ static void
 uid_from_server(struct Client *source_p, int parc,
                 char *parv[], time_t newts, const char *svsid, char *nick, char *ugecos)
 {
-  const char *m = NULL;
   const char *servername = source_p->name;
 
   source_p = make_client(source_p->from);
@@ -366,7 +363,7 @@ uid_from_server(struct Client *source_p, int parc,
   hash_add_id(source_p);
 
   /* parse usermodes */
-  for (m = &parv[4][1]; *m; ++m)
+  for (const char *m = &parv[4][1]; *m; ++m)
   {
     unsigned int flag = user_modes[(unsigned char)*m];
 

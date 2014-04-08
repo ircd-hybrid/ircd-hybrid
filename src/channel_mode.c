@@ -1638,7 +1638,6 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
   int dir = MODE_ADD;
   int parn = 1;
   int alevel, errors = 0;
-  char *ml = parv[0];
 
   mode_count = 0;
   mode_limit = 0;
@@ -1646,7 +1645,7 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
 
   alevel = get_channel_access(source_p, member);
 
-  for (; *ml; ++ml)
+  for (const char *ml = parv[0]; *ml; ++ml)
   {
     switch (*ml)
     {

@@ -56,7 +56,7 @@ static struct entity
   int flags;
 } targets[IRCD_BUFSIZE];
 
-static int ntargets = 0;
+static int unsigned ntargets = 0;
 
 
 /*
@@ -90,9 +90,7 @@ static int ntargets = 0;
 static int
 duplicate_ptr(const void *ptr)
 {
-  int i = 0;
-
-  for (; i < ntargets; ++i)
+  for (unsigned int i = 0; i < ntargets; ++i)
     if (targets[i].ptr == ptr)
       return 1;
 
@@ -788,7 +786,7 @@ m_message(int p_or_n, const char *command, struct Client *source_p,
   if (build_target_list(p_or_n, command, source_p, parv[1], parv[2]) < 0)
     return;
 
-  for (int i = 0; i < ntargets; ++i)
+  for (unsigned int i = 0; i < ntargets; ++i)
   {
     switch (targets[i].type)
     {

@@ -389,13 +389,12 @@ static const struct SetStruct set_cmd_table[] =
 static void
 list_quote_commands(struct Client *source_p)
 {
-  int j = 0;
-  const struct SetStruct *tab = set_cmd_table;
+  unsigned int j = 0;
   const char *names[4] = { "", "", "", "" };
 
   sendto_one_notice(source_p, &me, ":Available QUOTE SET commands:");
 
-  for (; tab->handler; ++tab)
+  for (const struct SetStruct *tab = set_cmd_table; tab->handler; ++tab)
   {
     names[j++] = tab->name;
 
@@ -427,7 +426,6 @@ mo_set(struct Client *source_p, int parc, char *parv[])
   int newval;
   const char *arg    = NULL;
   const char *intarg = NULL;
-  const struct SetStruct *tab = set_cmd_table;
 
   if (!HasOFlag(source_p, OPER_FLAG_SET))
   {
@@ -441,7 +439,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
      * Go through all the commands in set_cmd_table, until one is
      * matched.
      */
-    for (; tab->handler; ++tab)
+    for (const struct SetStruct *tab = set_cmd_table; tab->handler; ++tab)
     {
       if (!irccmp(tab->name, parv[1]))
       {

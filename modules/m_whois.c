@@ -140,11 +140,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
   if (HasUMode(source_p, UMODE_ADMIN) || source_p == target_p)
   {
-    unsigned int i = 0;
     char *m = buf;
     *m++ = '+';
 
-    for (i = 0; i < 128; ++i)
+    for (unsigned int i = 0; i < 128; ++i)
       if (HasUMode(target_p, user_modes[i]))
         *m++ = (char)i;
     *m = '\0';

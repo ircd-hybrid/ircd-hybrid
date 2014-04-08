@@ -1528,7 +1528,6 @@ static const struct StatsStruct
 static void
 do_stats(struct Client *source_p, int parc, char *parv[])
 {
-  const struct StatsStruct *tab = stats_cmd_table;
   const char statchar = *parv[1];
 
   if (statchar == '\0')
@@ -1537,7 +1536,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  for (; tab->handler; ++tab)
+  for (const struct StatsStruct *tab = stats_cmd_table; tab->handler; ++tab)
   {
     if (tab->letter == statchar)
     {

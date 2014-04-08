@@ -1373,9 +1373,8 @@ oper_privs_as_string(const unsigned int port)
 {
   static char privs_out[IRCD_BUFSIZE];
   char *privs_ptr = privs_out;
-  const struct oper_privs *opriv = flag_list;
 
-  for (; opriv->flag; ++opriv)
+  for (const struct oper_privs *opriv = flag_list; opriv->flag; ++opriv)
   {
     if (port & opriv->flag)
       *privs_ptr++ = opriv->c;

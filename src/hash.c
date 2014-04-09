@@ -702,8 +702,9 @@ exceeding_sendq(const struct Client *to)
 }
 
 void
-free_list_task(struct ListTask *lt, struct Client *source_p)
+free_list_task(struct Client *source_p)
 {
+  struct ListTask *lt = source_p->localClient->list_task;
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
   if ((ptr = dlinkFindDelete(&listing_client_list, source_p)))
@@ -841,6 +842,6 @@ safe_list_channels(struct Client *source_p, int only_unmasked_channels)
         list_one_channel(source_p, chptr);
   }
 
-  free_list_task(lt, source_p);
+  free_list_task(source_p);
   sendto_one_numeric(source_p, &me, RPL_LISTEND);
 }

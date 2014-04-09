@@ -783,7 +783,7 @@ exit_client(struct Client *source_p, const char *comment)
       dlinkDelete(&source_p->localClient->lclient_node, &local_client_list);
 
       if (source_p->localClient->list_task)
-        free_list_task(source_p->localClient->list_task, source_p);
+        free_list_task(source_p);
 
       watch_del_watch_list(source_p);
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,

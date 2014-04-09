@@ -61,7 +61,7 @@ extern struct Client *hash_find_server(const char *);
 extern struct Channel *hash_find_channel(const char *);
 extern void *hash_get_bucket(int, unsigned int);
 
-extern void free_list_task(struct ListTask *, struct Client *);
+extern void free_list_task(struct Client *);
 extern void safe_list_channels(struct Client *, int);
 
 extern unsigned int strhash(const char *);

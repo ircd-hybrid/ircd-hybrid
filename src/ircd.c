@@ -214,11 +214,7 @@ io_loop(void)
     {
       dlink_node *ptr = NULL, *ptr_next = NULL;
       DLINK_FOREACH_SAFE(ptr, ptr_next, listing_client_list.head)
-      {
-        struct Client *client_p = ptr->data;
-        assert(client_p->localClient->list_task);
-        safe_list_channels(client_p, client_p->localClient->list_task, 0);
-      }
+        safe_list_channels(ptr->data, 0);
     }
 
     /* Run pending events, then get the number of seconds to the next

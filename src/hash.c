@@ -760,9 +760,9 @@ list_allow_channel(const char *chname, const struct ListTask *lt)
  * side effects -
  */
 static void
-list_one_channel(struct Client *source_p, struct Channel *chptr,
-                 struct ListTask *list_task)
+list_one_channel(struct Client *source_p, struct Channel *chptr)
 {
+  struct ListTask *lt = source_p->localClient->list_task;
   char listbuf[MODEBUFLEN] = "";
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
@@ -770,17 +770,17 @@ list_one_channel(struct Client *source_p, struct Channel *chptr,
   if (SecretChannel(chptr) &&
       !(IsMember(source_p, chptr) || HasUMode(source_p, UMODE_ADMIN)))
     return;
-  if (dlink_list_length(&chptr->members) < list_task->users_min ||
-      dlink_list_length(&chptr->members) > list_task->users_max ||
+  if (dlink_list_length(&chptr->members) < lt->users_min ||
+      dlink_list_length(&chptr->members) > lt->users_max ||
       (chptr->channelts != 0 &&
-       ((unsigned int)chptr->channelts < list_task->created_min ||
-        (unsigned int)chptr->channelts > list_task->created_max)) ||
-      (unsigned int)chptr->topic_time < list_task->topicts_min ||
+       ((unsigned int)chptr->channelts < lt->created_min ||
+        (unsigned int)chptr->channelts > lt->created_max)) ||
+      (unsigned int)chptr->topic_time < lt->topicts_min ||
       (chptr->topic_time ? (unsigned int)chptr->topic_time : UINT_MAX) >
-      list_task->topicts_max)
+      lt->topicts_max)
     return;
 
-  if (!list_allow_channel(chptr->chname, list_task))
+  if (!list_allow_channel(chptr->chname, lt))
     return;
 
   if (HasUMode(source_p, UMODE_ADMIN))
@@ -813,34 +813,34 @@ list_one_channel(struct Client *source_p, struct Channel *chptr,
  * - Dianora
  */
 void
-safe_list_channels(struct Client *source_p, struct ListTask *list_task,
-                   int only_unmasked_channels)
+safe_list_channels(struct Client *source_p, int only_unmasked_channels)
 {
+  struct ListTask *lt = source_p->localClient->list_task;
   struct Channel *chptr = NULL;
 
   if (!only_unmasked_channels)
   {
-    for (unsigned int i = list_task->hash_index; i < HASHSIZE; ++i)
+    for (unsigned int i = lt->hash_index; i < HASHSIZE; ++i)
     {
       if (exceeding_sendq(source_p->from))
       {
-        list_task->hash_index = i;
-        return;    /* still more to do */
+        lt->hash_index = i;
+        return;  /* Still more to do */
       }
 
       for (chptr = channelTable[i]; chptr; chptr = chptr->hnextch)
-        list_one_channel(source_p, chptr, list_task);
+        list_one_channel(source_p, chptr);
     }
   }
   else
   {
-    dlink_node *ptr;
+    dlink_node *ptr = NULL;
 
-    DLINK_FOREACH(ptr, list_task->show_mask.head)
+    DLINK_FOREACH(ptr, lt->show_mask.head)
       if ((chptr = hash_find_channel(ptr->data)))
-        list_one_channel(source_p, chptr, list_task);
+        list_one_channel(source_p, chptr);
   }
 
-  free_list_task(list_task, source_p);
+  free_list_task(lt, source_p);
   sendto_one_numeric(source_p, &me, RPL_LISTEND);
 }

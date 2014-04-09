@@ -68,6 +68,7 @@ get_file_version(struct dbFILE *f)
 
 /*! \brief Write the current version number to the file.
  * \param f dbFile Struct Member
+ * \param version Database version
  * \return 0 on error, 1 on success.
  */
 int
@@ -84,7 +85,6 @@ write_file_version(struct dbFILE *f, uint32_t version)
 }
 
 /*! \brief Open the database for reading
- * \param service If error whom to return the error as
  * \param filename File to open as the database
  * \return dbFile struct
  */
@@ -117,7 +117,7 @@ open_db_read(const char *filename)
 
 /*! \brief Open the database for writting
  * \param filename File to open as the database
- * \param version Database Version
+ * \param version Database version
  * \return dbFile struct
  */
 static struct dbFILE *
@@ -186,7 +186,7 @@ open_db_write(const char *filename, uint32_t version)
  *
  * \param filename File to open as the database
  * \param mode Mode for writting or reading
- * \param version Database Version
+ * \param version Database version
  * \return dbFile struct
  */
 struct dbFILE *
@@ -232,6 +232,7 @@ restore_db(struct dbFILE *f)
  * fails.
  *
  * \param dbFile struct
+ * \return -1 on error, 0 on success.
  */
 int
 close_db(struct dbFILE *f)
@@ -301,7 +302,7 @@ read_uint8(uint8_t*ret, struct dbFILE *f)
 
 /*! \brief Write a 8bit integer
  *
- * \param ret 8bit integer to write
+ * \param val 8bit integer to write
  * \param dbFile struct
  * \return -1 on error, 0 otherwise.
  */
@@ -316,7 +317,7 @@ write_uint8(uint8_t val, struct dbFILE *f)
 
 /*! \brief Read a unsigned 8bit integer
  *
- * \param ret 8bit integer to read
+ * \param ret 16bit integer to read
  * \param dbFile struct
  * \return -1 on error, 0 otherwise.
  */
@@ -335,7 +336,7 @@ read_uint16(uint16_t *ret, struct dbFILE *f)
 
 /*! \brief Write a unsigned 16bit integer
  *
- * \param ret 16bit integer to write
+ * \param val 16bit integer to write
  * \param dbFile struct
  * \return -1 on error, 0 otherwise.
  */
@@ -373,7 +374,7 @@ read_uint32(uint32_t *ret, struct dbFILE *f)
 
 /*! \brief Write a unsigned 32bit integer
  *
- * \param ret unsigned 32bit integer to write
+ * \param val unsigned 32bit integer to write
  * \param dbFile struct
  * \return -1 on error, 0 otherwise.
  */
@@ -421,7 +422,7 @@ read_uint64(uint64_t *ret, struct dbFILE *f)
 
 /*! \brief Write a unsigned 64bit integer
  *
- * \param ret unsigned 64bit integer to write
+ * \param val unsigned 64bit integer to write
  * \param dbFile struct
  * \return -1 on error, 0 otherwise.
  */
@@ -468,7 +469,7 @@ read_ptr(void **ret, struct dbFILE *f)
 
 /*! \brief Write Pointer
  *
- * \param ret pointer to write
+ * \param ptr pointer to write
  * \param dbFile struct
  * \return -1 on error, 0 otherwise.
  */
@@ -515,7 +516,7 @@ read_string(char **ret, struct dbFILE *f)
 
 /*! \brief Write String
  *
- * \param ret string
+ * \param s string
  * \param dbFile struct
  * \return -1 on error, 0 otherwise.
  */

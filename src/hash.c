@@ -624,10 +624,9 @@ add_user_host(const char *user, const char *host, int global)
 void
 delete_user_host(const char *user, const char *host, int global)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
-  struct UserHost *found_userhost;
-  struct NameHost *nameh;
-  int hasident = 1;
+  dlink_node *ptr = NULL;
+  struct UserHost *found_userhost = NULL;
+  unsigned int hasident = 1;
 
   if (*user == '~')
   {
@@ -638,9 +637,9 @@ delete_user_host(const char *user, const char *host, int global)
   if ((found_userhost = hash_find_userhost(host)) == NULL)
     return;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, found_userhost->list.head)
+  DLINK_FOREACH(ptr, found_userhost->list.head)
   {
-    nameh = ptr->data;
+    struct NameHost *nameh = ptr->data;
 
     if (!irccmp(user, nameh->name))
     {

@@ -823,7 +823,7 @@ safe_list_channels(struct Client *source_p, int only_unmasked_channels)
   {
     for (unsigned int i = lt->hash_index; i < HASHSIZE; ++i)
     {
-      if (exceeding_sendq(source_p->from))
+      if (exceeding_sendq(source_p))
       {
         lt->hash_index = i;
         return;  /* Still more to do */

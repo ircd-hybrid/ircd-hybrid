@@ -53,7 +53,6 @@ m_kick(struct Client *client_p, struct Client *source_p,
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
   char *comment = NULL;
-  char *p = NULL;
   const char *from, *to;
   struct Membership *ms_source = NULL;
   struct Membership *ms_target = NULL;

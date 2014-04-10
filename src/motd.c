@@ -231,7 +231,7 @@ motd_lookup(const struct Client *client_p)
 
   assert(client_p);
 
-  if (!MyClient(client_p))  /* Not my user, always return remote motd */
+  if (!MyConnect(client_p))  /* Not my user, always return remote motd */
     return MotdList.remote;
 
   class = get_class_ptr(&client_p->localClient->confs);

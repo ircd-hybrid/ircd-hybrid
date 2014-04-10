@@ -31,7 +31,7 @@
 #include "ircd.h"
 #include "send.h"
 #include "numeric.h"
-#include "s_serv.h"     /* hunt_server */
+#include "s_serv.h"
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
@@ -47,11 +47,17 @@ do_motd(struct Client *source_p)
   motd_send(source_p);
 }
 
-/*
-** m_motd
-**      parv[0] = command
-**      parv[1] = servername
-*/
+/*! \brief MOTD command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/servername
+ */
 static int
 m_motd(struct Client *source_p, int parc, char *parv[])
 {
@@ -76,19 +82,17 @@ m_motd(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*
- * note regarding mo_motd being used twice:
- * this is not a kludge.  any rate limiting, shide, or whatever
- * other access restrictions should be done by the source's server.
- * for security's sake, still check that the source is an oper
- * for 'oper only' information in the mo_ function(s).
+/*! \brief MOTD command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/servername
  */
-
-/*
-** mo_motd
-**      parv[0] = command
-**      parv[1] = servername
-*/
 static int
 mo_motd(struct Client *source_p, int parc, char *parv[])
 {

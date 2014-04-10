@@ -58,11 +58,16 @@ show_watch(struct Client *source_p, const char *name,
     sendto_one_numeric(source_p, &me, rpl2, name, "*", "*", 0);
 }
 
-/*
- * m_watch()
+/*! \brief WATCH command handler
  *
- * parv[0] = command
- * parv[1] = watch options
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = watch options
  */
 static int
 m_watch(struct Client *source_p, int parc, char *parv[])
@@ -131,7 +136,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
 
     /*
      * Now comes the fun stuff, "S" or "s" returns a status report of
-     * their WATCH list.  I imagine this could be CPU intensive if
+     * their WATCH list. I imagine this could be CPU intensive if
      * it's done alot, perhaps an auto-lag on this?
      */
     if (*s == 'S' || *s == 's')
@@ -156,7 +161,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
                  dlink_list_length(&source_p->localClient->watches), count);
 
       /*
-       * Send a list of everybody in their WATCH list.  Be careful
+       * Send a list of everybody in their WATCH list. Be careful
        * not to buffer overflow.
        */
       if ((ptr = source_p->localClient->watches.head) == NULL)

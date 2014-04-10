@@ -46,7 +46,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = TS
+ *      - parv[2] = timestamp
  *      - parv[3] = kill message
  */
 static int

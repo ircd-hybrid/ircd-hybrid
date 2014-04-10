@@ -52,11 +52,7 @@ do_user(struct Client *source_p,
   assert(IsUnknown(source_p));
 
   source_p->localClient->registration &= ~REG_NEED_USER;
-
-  /*
-   * don't take the clients word for it, ever
-   */
-  source_p->servptr = &me;
+  source_p->servptr = &me;  /* Don't take the clients word for it, ever */
 
   strlcpy(source_p->info, realname, sizeof(source_p->info));
 
@@ -67,14 +63,20 @@ do_user(struct Client *source_p,
     register_local_user(source_p);
 }
 
-/*
-** mr_user
-**      parv[0] = command
-**      parv[1] = username (login name, account)
-**      parv[2] = client host name (ignored)
-**      parv[3] = server host name (ignored)
-**      parv[4] = user's real name info
-*/
+/*! \brief USER command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = username (login name, account)
+ *      - parv[2] = client host name (ignored)
+ *      - parv[3] = server host name (ignored)
+ *      - parv[4] = user's real name info
+ */
 static int
 mr_user(struct Client *source_p, int parc, char *parv[])
 {

@@ -40,12 +40,18 @@
 #include "packet.h"
 
 
-/*
-** m_invite
-**      parv[0] - command
-**      parv[1] - user to invite
-**      parv[2] - channel name
-*/
+/*! \brief INVITE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] - command
+ *      - parv[1] - user to invite
+ *      - parv[2] - channel name
+ */
 static int
 m_invite(struct Client *source_p, int parc, char *parv[])
 {
@@ -122,13 +128,19 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*
-** ms_invite
-**      parv[0] - command
-**      parv[1] - user to invite
-**      parv[2] - channel name
-**      parv[3] - invite timestamp
-*/
+/*! \brief INVITE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] - command
+ *      - parv[1] - user to invite
+ *      - parv[2] - channel name
+ *      - parv[3] - channel timestamp
+ */
 static int
 ms_invite(struct Client *source_p, int parc, char *parv[])
 {

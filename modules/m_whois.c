@@ -199,11 +199,18 @@ do_whois(struct Client *source_p, const char *name)
   sendto_one_numeric(source_p, &me, RPL_ENDOFWHOIS, name);
 }
 
-/*
-** m_whois
-**      parv[0] = command
-**      parv[1] = nickname masklist
-*/
+/*! \brief WHOIS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/servername
+ *      - parv[2] = nickname
+ */
 static int
 m_whois(struct Client *source_p, int parc, char *parv[])
 {
@@ -245,11 +252,18 @@ m_whois(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*
-** mo_whois
-**      parv[0] = command
-**      parv[1] = nickname masklist
-*/
+/*! \brief WHOIS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/servername
+ *      - parv[2] = nickname
+ */
 static int
 mo_whois(struct Client *source_p, int parc, char *parv[])
 {

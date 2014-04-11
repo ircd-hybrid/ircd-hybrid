@@ -89,7 +89,7 @@
 /* $Id$ */
 
 struct irc_ssaddr irc_nsaddr_list[IRCD_MAXNS];
-int irc_nscount = 0;
+unsigned int irc_nscount = 0;
 
 static const char digits[] = "0123456789";
 static const char digitvalue[256] = {

@@ -46,7 +46,7 @@
 }
 
 extern struct irc_ssaddr irc_nsaddr_list[];
-extern int irc_nscount;
+extern unsigned int irc_nscount;
 extern void irc_res_init(void);
 extern int irc_dn_expand(const unsigned char *msg, const unsigned char *eom, const unsigned char *src, char *dst, int dstsiz);
 extern int irc_dn_skipname(const unsigned char *ptr, const unsigned char *eom);

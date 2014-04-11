@@ -104,7 +104,7 @@ struct reslist
   time_t ttl;
   char type;
   char retries;            /* retry counter */
-  char sends;              /* number of sends (>1 means resent) */
+  unsigned int sends;      /* number of sends (>1 means resent) */
   char resend;             /* send flag. 0 == dont resend */
   time_t sentat;
   time_t timeout;
@@ -126,7 +126,7 @@ static void do_query_number(dns_callback_fnc, void *,
                             const struct irc_ssaddr *,
                             struct reslist *);
 static void query_name(const char *, int, int, struct reslist *);
-static int send_res_msg(const char *, int, int);
+static int send_res_msg(const char *, int, unsigned int);
 static void resend_query(struct reslist *);
 static int proc_answer(struct reslist *, HEADER *, char *, char *);
 static struct reslist *find_id(int);
@@ -153,7 +153,7 @@ res_ourserver(const struct irc_ssaddr *inp)
   const struct sockaddr_in *v4;
   const struct sockaddr_in *v4in = (const struct sockaddr_in *)inp;
 
-  for (int i = 0; i < irc_nscount; ++i)
+  for (unsigned int i = 0; i < irc_nscount; ++i)
   {
     const struct irc_ssaddr *srv = &irc_nsaddr_list[i];
 #ifdef IPV6
@@ -344,10 +344,10 @@ delete_resolver_queries(const void *vptr)
  * nameservers or -1 if no successful sends.
  */
 static int
-send_res_msg(const char *msg, int len, int rcount)
+send_res_msg(const char *msg, int len, unsigned int rcount)
 {
   int sent = 0;
-  int max_queries = IRCD_MIN(irc_nscount, rcount);
+  unsigned int max_queries = IRCD_MIN(irc_nscount, rcount);
 
   /* RES_PRIMARY option is not implemented
    * if (res.options & RES_PRIMARY || 0 == max_queries)
@@ -355,7 +355,7 @@ send_res_msg(const char *msg, int len, int rcount)
   if (max_queries == 0)
     max_queries = 1;
 
-  for (int i = 0; i < max_queries; ++i)
+  for (unsigned int i = 0; i < max_queries; ++i)
   {
     if (sendto(ResolverFileDescriptor.fd, msg, len, 0,
         (struct sockaddr*)&(irc_nsaddr_list[i]),
@@ -847,7 +847,7 @@ report_dns_servers(struct Client *source_p)
 {
   char ipaddr[HOSTIPLEN + 1] = "";
 
-  for (int i = 0; i < irc_nscount; ++i)
+  for (unsigned int i = 0; i < irc_nscount; ++i)
   {
     getnameinfo((struct sockaddr *)&(irc_nsaddr_list[i]),
                 irc_nsaddr_list[i].ss_len, ipaddr,

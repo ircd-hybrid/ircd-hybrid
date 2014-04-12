@@ -204,8 +204,8 @@ mo_module(struct Client *source_p, int parc, char *parv[])
         continue;
 
       sendto_one_numeric(source_p, &me, RPL_MODLIST,
-                 modp->name, modp->handle,
-                 modp->version, (modp->flags & MODULE_FLAG_CORE) ?"(core)":"");
+                         modp->name, modp->handle,
+                         modp->version, (modp->flags & MODULE_FLAG_CORE) ? "(core)" : "");
     }
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFMODLIST);

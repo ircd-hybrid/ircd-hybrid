@@ -421,7 +421,6 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
   ilog(LOG_TYPE_GLINE, "G-Line for [%s@%s] [%s] requested by %s",
        user, host, reason, get_oper_name(source_p));
 
-  /* 4 param version for hyb-7 servers */
   sendto_server(NULL, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
 		source_p->id, user, host, reason);
   return 0;

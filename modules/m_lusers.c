@@ -36,15 +36,17 @@
 #include "modules.h"
 
 
-/* m_lusers - LUSERS message handler
- * parv[0] = command
- * parv[1] = host/server mask.
- * parv[2] = server to query
- * 
- * 199970918 JRL hacked to ignore parv[1] completely and require parc > 3
- * to cause a force
+/*! \brief LUSERS command handler
  *
- * 2003 hacked parv[1] back in, by request of efnet admins/opers -Dianora
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = ignored
+ *      - parv[2] = nickname/servername
  */
 static int
 m_lusers(struct Client *source_p, int parc, char *parv[])
@@ -69,10 +71,17 @@ m_lusers(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/* ms_lusers - LUSERS message handler for servers and opers
- * parv[0] = command
- * parv[1] = host/server mask.
- * parv[2] = server to query
+/*! \brief LUSERS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = ignored
+ *      - parv[2] = nickname/servername
  */
 static int
 ms_lusers(struct Client *source_p, int parc, char *parv[])

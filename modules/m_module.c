@@ -40,7 +40,7 @@
 
 
 
-/*! \brief MODULE command handler (called by operators)
+/*! \brief MODULE command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.

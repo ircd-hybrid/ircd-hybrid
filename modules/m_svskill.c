@@ -36,7 +36,7 @@
 #include "conf.h"
 
 
-/*! \brief SVSKILL command handler (called by services)
+/*! \brief SVSKILL command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.

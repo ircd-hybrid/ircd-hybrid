@@ -678,7 +678,7 @@ send_info_text(struct Client *source_p)
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name
+ *      - parv[1] = nickname/servername
  */
 static int
 m_info(struct Client *source_p, int parc, char *parv[])
@@ -687,7 +687,6 @@ m_info(struct Client *source_p, int parc, char *parv[])
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    /* safe enough to give this on a local connect only */
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
@@ -712,7 +711,7 @@ m_info(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name
+ *      - parv[1] = nickname/servername
  */
 static int
 ms_info(struct Client *source_p, int parc, char *parv[])

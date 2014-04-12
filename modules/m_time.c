@@ -46,12 +46,12 @@
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name
+ *      - parv[1] = nickname/servername
  */
 static int
 m_time(struct Client *source_p, int parc, char *parv[])
 {
-  /* this is not rate limited, so end the grace period */
+  /* This is not rate limited, so end the grace period */
   if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
 
@@ -73,7 +73,7 @@ m_time(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name
+ *      - parv[1] = nickname/servername
  */
 static int
 mo_time(struct Client *source_p, int parc, char *parv[])

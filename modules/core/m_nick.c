@@ -550,8 +550,7 @@ perform_nick_collides(struct Client *source_p,
   nick_from_server(source_p, parc, parv, newts, svsid, nick, gecos);
 }
 
-/*! \brief NICK command handler (called by unregistered,
- *         locally connected clients)
+/*! \brief NICK command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -606,8 +605,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*! \brief NICK command handler (called by already registered,
- *         locally connected clients)
+/*! \brief NICK command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -687,8 +685,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*! \brief NICK command handler (called by servers and remotely
- *         connected clients)
+/*! \brief NICK command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -698,10 +695,9 @@ m_nick(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *
  * server -> server nick change
- *  - parv[0] = command
- *  - parv[1] = nickname
- *  - parv[2] = TS when nick change
- *
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ *      - parv[2] = TS when nick change
  */
 static int
 ms_nick(struct Client *source_p, int parc, char *parv[])
@@ -741,7 +737,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*! \brief UID command handler (called by servers)
+/*! \brief UID command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -751,29 +747,29 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *
  * server introducing new nick (without services support)
- *  - parv[0] = command
- *  - parv[1] = nickname
- *  - parv[2] = hop count
- *  - parv[3] = TS
- *  - parv[4] = umode
- *  - parv[5] = username
- *  - parv[6] = hostname
- *  - parv[7] = ip
- *  - parv[8] = uid
- *  - parv[9] = ircname (gecos)
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ *      - parv[2] = hop count
+ *      - parv[3] = TS
+ *      - parv[4] = umode
+ *      - parv[5] = username
+ *      - parv[6] = hostname
+ *      - parv[7] = ip
+ *      - parv[8] = uid
+ *      - parv[9] = ircname (gecos)
  *
  * server introducing new nick (with services support)
- *  - parv[ 0] = command
- *  - parv[ 1] = nickname
- *  - parv[ 2] = hop count
- *  - parv[ 3] = TS
- *  - parv[ 4] = umode
- *  - parv[ 5] = username
- *  - parv[ 6] = hostname
- *  - parv[ 7] = ip
- *  - parv[ 8] = uid
- *  - parv[ 9] = services id (timestamp)
- *  - parv[10] = ircname (gecos)
+ *      - parv[ 0] = command
+ *      - parv[ 1] = nickname
+ *      - parv[ 2] = hop count
+ *      - parv[ 3] = TS
+ *      - parv[ 4] = umode
+ *      - parv[ 5] = username
+ *      - parv[ 6] = hostname
+ *      - parv[ 7] = ip
+ *      - parv[ 8] = uid
+ *      - parv[ 9] = services id (timestamp)
+ *      - parv[10] = ircname (gecos)
  */
 static int
 ms_uid(struct Client *source_p, int parc, char *parv[])

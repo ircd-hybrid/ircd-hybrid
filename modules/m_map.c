@@ -139,7 +139,6 @@ m_map(struct Client *source_p, int parc, char *parv[])
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    /* safe enough to give this on a local connect only */
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }

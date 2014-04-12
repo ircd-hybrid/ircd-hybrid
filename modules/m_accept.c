@@ -109,7 +109,7 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = list of masks to be accepted or removed (optional)
+ *      - parv[1] = comma-separated list of masks to be accepted or removed
  */
 static int
 m_accept(struct Client *source_p, int parc, char *parv[])

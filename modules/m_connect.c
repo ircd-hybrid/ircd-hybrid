@@ -40,16 +40,18 @@
 #include "modules.h"
 
 
-/*
- * mo_connect - CONNECT command handler
- * 
- * Added by Jto 11 Feb 1989
+/*! \brief CONNECT command handler
  *
- * m_connect
- *      parv[0] = command
- *      parv[1] = servername
- *      parv[2] = port number
- *      parv[3] = remote server
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = target server
+ *      - parv[2] = port number
+ *      - parv[3] = nickname/servername
  */
 static int
 mo_connect(struct Client *source_p, int parc, char *parv[])
@@ -140,7 +142,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 
   /*
    * At this point we should be calling connect_server with a valid
-   * C:line and a valid port in the C:line
+   * connect{} block and a valid port in the connect{} block
    */
   if (serv_connect(conf, source_p))
   {
@@ -163,16 +165,18 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*
- * ms_connect - CONNECT command handler
- * 
- * Added by Jto 11 Feb 1989
+/*! \brief CONNECT command handler
  *
- * m_connect
- *      parv[0] = command
- *      parv[1] = servername
- *      parv[2] = port number
- *      parv[3] = remote server
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = target server
+ *      - parv[2] = port number
+ *      - parv[3] = nickname/servername
  */
 static int
 ms_connect(struct Client *source_p, int parc, char *parv[])
@@ -262,7 +266,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 
   /*
    * At this point we should be calling connect_server with a valid
-   * C:line and a valid port in the C:line
+   * connect{} block and a valid port in the connect{} block
    */
   if (serv_connect(conf, source_p))
     sendto_one_notice(source_p, &me, ":*** Connecting to %s.%d",

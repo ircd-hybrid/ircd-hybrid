@@ -353,7 +353,7 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*! \brief GLINE command handler (called by operators)
+/*! \brief GLINE command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -452,8 +452,7 @@ do_sungline(struct Client *source_p, const char *user,
   }
 }
 
-/*! \brief GUNGLINE command handler (called in response to an encapsulated
- *                  GUNGLINE command)
+/*! \brief GUNGLINE command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -474,7 +473,7 @@ me_gungline(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*! \brief GUNGLINE command handler (called by operators)
+/*! \brief GUNGLINE command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.

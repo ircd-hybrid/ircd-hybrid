@@ -59,8 +59,7 @@ do_admin(struct Client *source_p)
     sendto_one_numeric(source_p, &me, RPL_ADMINEMAIL, AdminInfo.email);
 }
 
-/*! \brief ADMIN command handler (called by already registered,
- *         locally connected clients)
+/*! \brief ADMIN command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -93,8 +92,7 @@ m_admin(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*! \brief ADMIN command handler (called by operators and
- *         remotely connected clients)
+/*! \brief ADMIN command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.

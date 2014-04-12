@@ -42,7 +42,7 @@
 #include "whowas.h"
 
 
-/*! \brief SVSNICK command handler (called by services)
+/*! \brief SVSNICK command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.

@@ -60,7 +60,7 @@ static const char serveropts[] =
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name
+ *      - parv[1] = nickname/servername
  */
 static int
 m_version(struct Client *source_p, int parc, char *parv[])
@@ -96,7 +96,7 @@ m_version(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name
+ *      - parv[1] = nickname/servername
  */
 static int
 ms_version(struct Client *source_p, int parc, char *parv[])

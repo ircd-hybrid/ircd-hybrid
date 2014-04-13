@@ -34,12 +34,391 @@
 #include "numeric.h"
 #include "conf.h"
 #include "log.h"
+#include "s_misc.h"
 #include "s_serv.h"
 #include "s_user.h"
 #include "send.h"
 #include "parse.h"
+#include "memory.h"
 #include "modules.h"
 
+
+/*
+ * send_tb
+ *
+ * inputs       - pointer to Client
+ *              - pointer to channel
+ * output       - NONE
+ * side effects - Called on a server burst when
+ *                server is CAP_TBURST capable
+ */
+static void
+send_tb(struct Client *client_p, struct Channel *chptr)
+{
+  /*
+   * We may also send an empty topic here, but only if topic_time isn't 0,
+   * i.e. if we had a topic that got unset.  This is required for syncing
+   * topics properly.
+   *
+   * Imagine the following scenario: Our downlink introduces a channel
+   * to us with a TS that is equal to ours, but the channel topic on
+   * their side got unset while the servers were in splitmode, which means
+   * their 'topic' is newer.  They simply wanted to unset it, so we have to
+   * deal with it in a more sophisticated fashion instead of just resetting
+   * it to their old topic they had before.  Read m_tburst.c:ms_tburst
+   * for further information   -Michael
+   */
+  if (chptr->topic_time)
+    sendto_one(client_p, ":%s TBURST %lu %s %lu %s :%s", me.id,
+               (unsigned long)chptr->channelts, chptr->chname,
+               (unsigned long)chptr->topic_time,
+               chptr->topic_info,
+               chptr->topic);
+}
+
+/* sendnick_TS()
+ *
+ * inputs       - client (server) to send nick towards
+ *          - client to send nick for
+ * output       - NONE
+ * side effects - NICK message is sent towards given client_p
+ */
+void
+sendnick_TS(struct Client *client_p, struct Client *target_p)
+{
+  char ubuf[IRCD_BUFSIZE] = "";
+
+  if (!IsClient(target_p))
+    return;
+
+  send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
+
+  if (ubuf[0] == '\0')
+  {
+    ubuf[0] = '+';
+    ubuf[1] = '\0';
+  }
+
+  if (IsCapable(client_p, CAP_SVS))
+    sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s %s :%s",
+               target_p->servptr->id,
+               target_p->name, target_p->hopcount + 1,
+               (unsigned long) target_p->tsinfo,
+               ubuf, target_p->username, target_p->host,
+               (MyClient(target_p) && IsIPSpoof(target_p)) ?
+               "0" : target_p->sockhost, target_p->id,
+               target_p->svid, target_p->info);
+  else
+    sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s :%s",
+               target_p->servptr->id,
+               target_p->name, target_p->hopcount + 1,
+               (unsigned long) target_p->tsinfo,
+               ubuf, target_p->username, target_p->host,
+               (MyClient(target_p) && IsIPSpoof(target_p)) ?
+               "0" : target_p->sockhost, target_p->id, target_p->info);
+
+  if (!EmptyString(target_p->certfp))
+    sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->certfp);
+
+  if (target_p->away[0])
+    sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
+
+}
+
+/* burst_members()
+ *
+ * inputs       - pointer to server to send members to
+ *              - dlink_list pointer to membership list to send
+ * output       - NONE
+ * side effects -
+ */
+static void
+burst_members(struct Client *client_p, struct Channel *chptr)
+{
+  struct Client *target_p;
+  struct Membership *ms;
+  dlink_node *ptr;
+
+  DLINK_FOREACH(ptr, chptr->members.head)
+  {
+    ms       = ptr->data;
+    target_p = ms->client_p;
+
+    if (!HasFlag(target_p, FLAGS_BURSTED))
+    {
+      AddFlag(target_p, FLAGS_BURSTED);
+
+      if (target_p->from != client_p)
+        sendnick_TS(client_p, target_p);
+    }
+  }
+}
+
+/* burst_all()
+ *
+ * inputs       - pointer to server to send burst to
+ * output       - NONE
+ * side effects - complete burst of channels/nicks is sent to client_p
+ */
+static void
+burst_all(struct Client *client_p)
+{
+  dlink_node *ptr = NULL;
+
+  DLINK_FOREACH(ptr, global_channel_list.head)
+  {
+    struct Channel *chptr = ptr->data;
+
+    if (dlink_list_length(&chptr->members))
+    {
+      burst_members(client_p, chptr);
+      send_channel_modes(client_p, chptr);
+
+      if (IsCapable(client_p, CAP_TBURST))
+        send_tb(client_p, chptr);
+    }
+  }
+
+  /* also send out those that are not on any channel
+   */
+  DLINK_FOREACH(ptr, global_client_list.head)
+  {
+    struct Client *target_p = ptr->data;
+
+    if (!HasFlag(target_p, FLAGS_BURSTED) && target_p->from != client_p)
+      sendnick_TS(client_p, target_p);
+
+    DelFlag(target_p, FLAGS_BURSTED);
+  }
+
+  if (IsCapable(client_p, CAP_EOB))
+    sendto_one(client_p, ":%s EOB", me.id);
+}
+
+/* server_burst()
+ *
+ * inputs       - struct Client pointer server
+ *              -
+ * output       - none
+ * side effects - send a server burst
+ * bugs         - still too long
+ */
+static void
+server_burst(struct Client *client_p)
+{
+  /* Send it in the shortened format with the TS, if
+  ** it's a TS server; walk the list of channels, sending
+  ** all the nicks that haven't been sent yet for each
+  ** channel, then send the channel itself -- it's less
+  ** obvious than sending all nicks first, but on the
+  ** receiving side memory will be allocated more nicely
+  ** saving a few seconds in the handling of a split
+  ** -orabidoo
+  */
+
+  burst_all(client_p);
+
+  /* EOB stuff is now in burst_all */
+  /* Always send a PING after connect burst is done */
+  sendto_one(client_p, "PING :%s", me.id);
+}
+
+/* server_estab()
+ *
+ * inputs       - pointer to a struct Client
+ * output       -
+ * side effects -
+ */
+void
+server_estab(struct Client *client_p)
+{
+  struct MaskItem *conf = NULL;
+  char *host;
+  const char *inpath;
+  static char inpath_ip[HOSTLEN * 2 + USERLEN + 6];
+  dlink_node *ptr;
+#ifdef HAVE_LIBCRYPTO
+  const COMP_METHOD *compression = NULL, *expansion = NULL;
+#endif
+
+  assert(client_p);
+
+  strlcpy(inpath_ip, get_client_name(client_p, SHOW_IP), sizeof(inpath_ip));
+
+  inpath = get_client_name(client_p, MASK_IP); /* "refresh" inpath with host */
+  host   = client_p->name;
+
+  if ((conf = find_conf_name(&client_p->localClient->confs, host, CONF_SERVER))
+      == NULL)
+  {
+    /* This shouldn't happen, better tell the ops... -A1kmm */
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Warning: Lost connect{} block "
+                         "for server %s(this shouldn't happen)!", host);
+    exit_client(client_p, "Lost connect{} block!");
+    return;
+  }
+
+  MyFree(client_p->localClient->passwd);
+  client_p->localClient->passwd = NULL;
+
+  /* Its got identd, since its a server */
+  SetGotId(client_p);
+
+  /* If there is something in the serv_list, it might be this
+   * connecting server..
+   */
+  if (!ServerInfo.hub && serv_list.head)
+  {
+    if (client_p != serv_list.head->data || serv_list.head->next)
+    {
+      ++ServerStats.is_ref;
+      sendto_one(client_p, "ERROR :I'm a leaf not a hub");
+      exit_client(client_p, "I'm a leaf");
+      return;
+    }
+  }
+
+  if (IsUnknown(client_p))
+  {
+    sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
+
+    send_capabilities(client_p, 0);
+
+    sendto_one(client_p, "SERVER %s 1 :%s%s",
+               me.name, ConfigServerHide.hidden ? "(H) " : "", me.info);
+  }
+
+  sendto_one(client_p, "SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN,
+             (unsigned long)CurrentTime);
+
+  /* XXX Does this ever happen? I don't think so -db */
+  detach_conf(client_p, CONF_OPER);
+
+  /* *WARNING*
+  **    In the following code in place of plain server's
+  **    name we send what is returned by get_client_name
+  **    which may add the "sockhost" after the name. It's
+  **    *very* *important* that there is a SPACE between
+  **    the name and sockhost (if present). The receiving
+  **    server will start the information field from this
+  **    first blank and thus puts the sockhost into info.
+  **    ...a bit tricky, but you have been warned, besides
+  **    code is more neat this way...  --msa
+  */
+  client_p->servptr = &me;
+
+  if (IsClosing(client_p))
+    return;
+
+  SetServer(client_p);
+
+  /* Some day, all these lists will be consolidated *sigh* */
+  dlinkAdd(client_p, &client_p->lnode, &me.serv->server_list);
+
+  assert(dlinkFind(&unknown_list, client_p));
+
+  dlink_move_node(&client_p->localClient->lclient_node,
+                  &unknown_list, &serv_list);
+
+  Count.myserver++;
+
+  dlinkAdd(client_p, make_dlink_node(), &global_serv_list);
+  hash_add_client(client_p);
+  hash_add_id(client_p);
+
+  /* doesnt duplicate client_p->serv if allocated this struct already */
+  make_server(client_p);
+
+  /* fixing eob timings.. -gnp */
+  client_p->localClient->firsttime = CurrentTime;
+
+  if (find_matching_name_conf(CONF_SERVICE, client_p->name, NULL, NULL, 0))
+    AddFlag(client_p, FLAGS_SERVICE);
+
+  /* Show the real host/IP to admins */
+#ifdef HAVE_LIBCRYPTO
+  if (client_p->localClient->fd.ssl)
+  {
+    compression = SSL_get_current_compression(client_p->localClient->fd.ssl);
+    expansion   = SSL_get_current_expansion(client_p->localClient->fd.ssl);
+
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
+                         inpath_ip, ssl_get_cipher(client_p->localClient->fd.ssl),
+                         compression ? SSL_COMP_get_name(compression) : "NONE",
+                         expansion ? SSL_COMP_get_name(expansion) : "NONE",
+                         show_capabilities(client_p));
+    /* Now show the masked hostname/IP to opers */
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
+                         inpath, ssl_get_cipher(client_p->localClient->fd.ssl),
+                         compression ? SSL_COMP_get_name(compression) : "NONE",
+                         expansion ? SSL_COMP_get_name(expansion) : "NONE",
+                         show_capabilities(client_p));
+    ilog(LOG_TYPE_IRCD, "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
+         inpath_ip, ssl_get_cipher(client_p->localClient->fd.ssl),
+         compression ? SSL_COMP_get_name(compression) : "NONE",
+         expansion ? SSL_COMP_get_name(expansion) : "NONE",
+         show_capabilities(client_p));
+  }
+  else
+#endif
+  {
+    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+                         "Link with %s established: (Capabilities: %s)",
+                         inpath_ip, show_capabilities(client_p));
+    /* Now show the masked hostname/IP to opers */
+    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+                         "Link with %s established: (Capabilities: %s)",
+                         inpath, show_capabilities(client_p));
+    ilog(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
+         inpath_ip, show_capabilities(client_p));
+  }
+
+  fd_note(&client_p->localClient->fd, "Server: %s", client_p->name);
+
+  sendto_server(client_p, NOCAPS, NOCAPS, ":%s SID %s 2 %s :%s%s",
+                me.id, client_p->name, client_p->id,
+                IsHidden(client_p) ? "(H) " : "", client_p->info);
+
+  /*
+   * Pass on my client information to the new server
+   *
+   * First, pass only servers (idea is that if the link gets
+   * cancelled beacause the server was already there,
+   * there are no NICK's to be cancelled...). Of course,
+   * if cancellation occurs, all this info is sent anyway,
+   * and I guess the link dies when a read is attempted...? --msa
+   *
+   * Note: Link cancellation to occur at this point means
+   * that at least two servers from my fragment are building
+   * up connection this other fragment at the same time, it's
+   * a race condition, not the normal way of operation...
+   *
+   * ALSO NOTE: using the get_client_name for server names--
+   *    see previous *WARNING*!!! (Also, original inpath
+   *    is destroyed...)
+   */
+  DLINK_FOREACH_PREV(ptr, global_serv_list.tail)
+  {
+    struct Client *target_p = ptr->data;
+
+    /* target_p->from == target_p for target_p == client_p */
+    if (IsMe(target_p) || target_p->from == client_p)
+      continue;
+
+    sendto_one(client_p, ":%s SID %s %d %s :%s%s",
+               target_p->servptr->id, target_p->name, target_p->hopcount+1,
+               target_p->id, IsHidden(target_p) ? "(H) " : "",
+               target_p->info);
+
+    if (HasFlag(target_p, FLAGS_EOB))
+      sendto_one(client_p, ":%s EOB", target_p->id);
+  }
+
+  server_burst(client_p);
+}
 
 /* set_server_gecos()
  *

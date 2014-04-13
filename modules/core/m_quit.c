@@ -63,12 +63,10 @@ static int
 ms_quit(struct Client *client_p, struct Client *source_p,
         int parc, char *parv[])
 {
-  char reason[KICKLEN + 1] = { '\0' };
+  char reason[KICKLEN + 1] = "";
 
   if (!EmptyString(parv[1]))
     strlcpy(reason, parv[1], sizeof(reason));
-  else
-    strlcpy(reason, client_p->name, sizeof(reason));
 
   exit_client(source_p, source_p, reason);
   return 0;

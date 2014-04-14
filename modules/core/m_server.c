@@ -51,10 +51,10 @@
  * output       - NONE
  * side effects - NICK message is sent towards given client_p
  */
-void
+static void
 sendnick_TS(struct Client *client_p, struct Client *target_p)
 {
-  char ubuf[IRCD_BUFSIZE];
+  char ubuf[IRCD_BUFSIZE] = "";
 
   if (!IsClient(target_p))
     return;
@@ -111,7 +111,6 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   if (target_p->away[0])
     sendto_one(client_p, ":%s AWAY :%s", ID_or_name(target_p, client_p),
                target_p->away);
-
 }
 
 /*
@@ -252,7 +251,7 @@ server_burst(struct Client *client_p)
  * output       -
  * side effects -
  */
-void
+static void
 server_estab(struct Client *client_p)
 {
   struct Client *target_p;

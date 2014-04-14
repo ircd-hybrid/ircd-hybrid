@@ -83,7 +83,7 @@ send_tb(struct Client *client_p, struct Channel *chptr)
  * output       - NONE
  * side effects - NICK message is sent towards given client_p
  */
-void
+static void
 sendnick_TS(struct Client *client_p, struct Client *target_p)
 {
   char ubuf[IRCD_BUFSIZE] = "";
@@ -229,7 +229,7 @@ server_burst(struct Client *client_p)
  * output       -
  * side effects -
  */
-void
+static void
 server_estab(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;

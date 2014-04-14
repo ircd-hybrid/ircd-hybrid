@@ -64,12 +64,12 @@ channel_init(void)
   member_pool = mp_pool_new(sizeof(struct Membership), MP_CHUNK_SIZE_MEMBER);
 }
 
-/*! \brief adds a user to a channel by adding another link to the
+/*! \brief Adds a user to a channel by adding another link to the
  *         channels member chain.
- * \param chptr      pointer to channel to add client to
- * \param who        pointer to client (who) to add
- * \param flags      flags for chanops etc
- * \param flood_ctrl whether to count this join in flood calculations
+ * \param chptr      Pointer to channel to add client to
+ * \param who        Pointer to client (who) to add
+ * \param flags      Flags for chanops etc
+ * \param flood_ctrl Whether to count this join in flood calculations
  */
 void
 add_user_to_channel(struct Channel *chptr, struct Client *who,
@@ -119,9 +119,9 @@ add_user_to_channel(struct Channel *chptr, struct Client *who,
   dlinkAdd(ms, &ms->usernode, &who->channel);
 }
 
-/*! \brief deletes an user from a channel by removing a link in the
+/*! \brief Deletes an user from a channel by removing a link in the
  *         channels member chain.
- * \param member pointer to Membership struct
+ * \param member Pointer to Membership struct
  */
 void
 remove_user_from_channel(struct Membership *member)
@@ -202,11 +202,11 @@ send_members(struct Client *client_p, struct Channel *chptr,
   sendto_one(client_p, "%s", buf);
 }
 
-/*! \brief sends +b/+e/+I
- * \param client_p client pointer to server
- * \param chptr    pointer to channel
- * \param top      pointer to top of mode link list to send
- * \param flag     char flag flagging type of mode. Currently this can be 'b', e' or 'I'
+/*! \brief Sends +b/+e/+I
+ * \param client_p Client pointer to server
+ * \param chptr    Pointer to channel
+ * \param top      Pointer to top of mode link list to send
+ * \param flag     Char flag flagging type of mode. Currently this can be 'b', e' or 'I'
  */
 static void
 send_mode_list(struct Client *client_p, struct Channel *chptr,
@@ -255,9 +255,9 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
   sendto_one(client_p, "%s%s", buf, pbuf);
 }
 
-/*! \brief send "client_p" a full list of the modes for channel chptr
- * \param client_p pointer to client client_p
- * \param chptr    pointer to channel pointer
+/*! \brief Send "client_p" a full list of the modes for channel chptr
+ * \param client_p Pointer to client client_p
+ * \param chptr    Pointer to channel pointer
  */
 void
 send_channel_modes(struct Client *client_p, struct Channel *chptr)
@@ -273,9 +273,9 @@ send_channel_modes(struct Client *client_p, struct Channel *chptr)
   send_mode_list(client_p, chptr, &chptr->invexlist, 'I');
 }
 
-/*! \brief check channel name for invalid characters
- * \param name pointer to channel name string
- * \param local indicates whether it's a local or remote creation
+/*! \brief Check channel name for invalid characters
+ * \param name Pointer to channel name string
+ * \param local Indicates whether it's a local or remote creation
  * \return 0 if invalid, 1 otherwise
  */
 int
@@ -336,8 +336,8 @@ free_channel_list(dlink_list *list)
 
 /*! \brief Get Channel block for chname (and allocate a new channel
  *         block, if it didn't exist before)
- * \param chname channel name
- * \return channel block
+ * \param chname Channel name
+ * \return Channel block
  */
 struct Channel *
 make_channel(const char *chname)
@@ -350,7 +350,7 @@ make_channel(const char *chname)
 
   memset(chptr, 0, sizeof(*chptr));
 
-  /* doesn't hurt to set it here */
+  /* Doesn't hurt to set it here */
   chptr->channelts = CurrentTime;
   chptr->last_join_time = CurrentTime;
 
@@ -362,8 +362,8 @@ make_channel(const char *chname)
   return chptr;
 }
 
-/*! \brief walk through this channel, and destroy it.
- * \param chptr channel pointer
+/*! \brief Walk through this channel, and destroy it.
+ * \param chptr Channel pointer
  */
 void
 destroy_channel(struct Channel *chptr)
@@ -373,7 +373,7 @@ destroy_channel(struct Channel *chptr)
   DLINK_FOREACH_SAFE(ptr, ptr_next, chptr->invites.head)
     del_invite(chptr, ptr->data);
 
-  /* free ban/exception/invex lists */
+  /* Free ban/exception/invex lists */
   free_channel_list(&chptr->banlist);
   free_channel_list(&chptr->exceptlist);
   free_channel_list(&chptr->invexlist);
@@ -385,8 +385,8 @@ destroy_channel(struct Channel *chptr)
 }
 
 /*!
- * \param chptr pointer to channel
- * \return string pointer "=" if public, "@" if secret else "*"
+ * \param chptr Pointer to channel
+ * \return String pointer "=" if public, "@" if secret else "*"
  */
 static const char *
 channel_pub_or_secret(const struct Channel *chptr)
@@ -399,9 +399,9 @@ channel_pub_or_secret(const struct Channel *chptr)
 }
 
 /*! \brief lists all names on given channel
- * \param source_p pointer to client struct requesting names
- * \param chptr    pointer to channel block
- * \param show_eon show ENDOFNAMES numeric or not
+ * \param source_p Pointer to client struct requesting names
+ * \param chptr    Pointer to channel block
+ * \param show_eon Show RPL_ENDOFNAMES numeric or not
  *                 (don't want it with /names with no params)
  */
 void
@@ -478,9 +478,9 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
     sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, chptr->chname);
 }
 
-/*! \brief adds client to invite list
- * \param chptr pointer to channel block
- * \param who   pointer to client to add invite to
+/*! \brief Adds client to invite list
+ * \param chptr Pointer to channel block
+ * \param who   Pointer to client to add invite to
  */
 void
 add_invite(struct Channel *chptr, struct Client *who)
@@ -488,23 +488,23 @@ add_invite(struct Channel *chptr, struct Client *who)
   del_invite(chptr, who);
 
   /*
-   * delete last link in chain if the list is max length
+   * Delete last link in chain if the list is max length
    */
   if (dlink_list_length(&who->localClient->invited) >=
       ConfigChannel.max_chans_per_user)
     del_invite(who->localClient->invited.tail->data, who);
 
-  /* add client to channel invite list */
+  /* Add client to channel invite list */
   dlinkAdd(who, make_dlink_node(), &chptr->invites);
 
-  /* add channel to the end of the client invite list */
+  /* Add channel to the end of the client invite list */
   dlinkAdd(chptr, make_dlink_node(), &who->localClient->invited);
 }
 
 /*! \brief Delete Invite block from channel invite list
  *         and client invite list
- * \param chptr pointer to Channel struct
- * \param who   pointer to client to remove invites from
+ * \param chptr Pointer to Channel struct
+ * \param who   Pointer to client to remove invites from
  */
 void
 del_invite(struct Channel *chptr, struct Client *who)
@@ -559,8 +559,8 @@ get_member_status(const struct Membership *ms, const int combine)
 }
 
 /*!
- * \param who  pointer to Client to check
- * \param list pointer to ban list to search
+ * \param who  Pointer to Client to check
+ * \param list Pointer to ban list to search
  * \return 1 if ban found for given n!u\@h mask, 0 otherwise
  *
  */
@@ -603,8 +603,8 @@ find_bmask(const struct Client *who, const dlink_list *const list)
 }
 
 /*!
- * \param chptr pointer to channel block
- * \param who   pointer to client to check access fo
+ * \param chptr Pointer to channel block
+ * \param who   Pointer to client to check access fo
  * \return 0 if not banned, 1 otherwise
  */
 int
@@ -617,10 +617,10 @@ is_banned(const struct Channel *chptr, const struct Client *who)
   return 0;
 }
 
-/*!
- * \param source_p pointer to client attempting to join
- * \param chptr    pointer to channel
- * \param key      key sent by client attempting to join if present
+/*! Tests if a client can join a certain channel
+ * \param source_p Pointer to client attempting to join
+ * \param chptr    Pointer to channel
+ * \param key      Key sent by client attempting to join if present
  * \return ERR_BANNEDFROMCHAN, ERR_INVITEONLYCHAN, ERR_CHANNELISFULL
  *         or 0 if allowed to join.
  */
@@ -713,10 +713,11 @@ msg_has_ctrls(const char *message)
   return 0;
 }
 
-/*!
- * \param chptr    pointer to Channel struct
- * \param source_p pointer to Client struct
- * \param ms       pointer to Membership struct (can be NULL)
+/*! Tests if a client can send to a channel
+ * \param chptr    Pointer to Channel struct
+ * \param source_p Pointer to Client struct
+ * \param ms       Pointer to Membership struct (can be NULL)
+ * \param message  The actual message string the client wants to send
  * \return CAN_SEND_OPV if op or voiced on channel\n
  *         CAN_SEND_NONOP if can send to channel but is not an op\n
  *         ERR_CANNOTSENDTOCHAN or ERR_NEEDREGGEDNICK if they cannot send to channel\n
@@ -747,7 +748,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
   if ((chptr->mode.mode & MODE_MODREG) && !HasUMode(source_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
 
-  /* cache can send if banned */
+  /* Cache can send if banned */
   if (MyClient(source_p))
   {
     if (ms)
@@ -776,8 +777,8 @@ can_send(struct Channel *chptr, struct Client *source_p,
 /*! \brief Updates the client's oper_warn_count_down, warns the
  *         IRC operators if necessary, and updates
  *         join_leave_countdown as needed.
- * \param source_p pointer to struct Client to check
- * \param name     channel name or NULL if this is a part.
+ * \param source_p Pointer to struct Client to check
+ * \param name     Channel name or NULL if this is a part.
  */
 void
 check_spambot_warning(struct Client *source_p, const char *name)
@@ -796,7 +797,7 @@ check_spambot_warning(struct Client *source_p, const char *name)
 
     if (source_p->localClient->oper_warn_count_down == 0)
     {
-      /* Its already known as a possible spambot */
+      /* It's already known as a possible spambot */
       if (name)
         sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "User %s (%s@%s) trying to join %s is a possible spambot",
@@ -825,10 +826,7 @@ check_spambot_warning(struct Client *source_p, const char *name)
     {
       if ((CurrentTime - (source_p->localClient->last_join_time)) <
           GlobalSetOptions.spam_time)
-      {
-        /* oh, its a possible spambot */
-        source_p->localClient->join_leave_count++;
-      }
+        source_p->localClient->join_leave_count++;  /* It's a possible spambot */
     }
 
     if (name)
@@ -838,7 +836,7 @@ check_spambot_warning(struct Client *source_p, const char *name)
   }
 }
 
-/*! \brief compares usercount and servercount against their split
+/*! \brief Compares usercount and servercount against their split
  *         values and adjusts splitmode accordingly
  * \param unused Unused address pointer
  */
@@ -869,11 +867,12 @@ check_splitmode(void *unused)
   }
 }
 
-/*! \brief Sets the channel topic for chptr
+/*! \brief Sets the channel topic for a certain channel
  * \param chptr      Pointer to struct Channel
  * \param topic      The topic string
  * \param topic_info n!u\@h formatted string of the topic setter
- * \param topicts    timestamp on the topic
+ * \param topicts    Timestamp on the topic
+ * \param local      Whether the topic is set by a local client
  */
 void
 set_channel_topic(struct Channel *chptr, const char *topic,

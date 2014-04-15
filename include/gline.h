@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_gline.h
+/*! \file gline.h
  * \brief A header for the gline functions.
  * \version $Id$
  */

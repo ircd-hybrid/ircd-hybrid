@@ -34,7 +34,7 @@
 #include "ircd_defs.h"
 #include "dbuf.h"
 #include "channel.h"
-#include "s_auth.h"
+#include "auth.h"
 
 struct MaskItem;
 

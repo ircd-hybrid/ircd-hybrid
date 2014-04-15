@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_auth.c
+/*! \file auth.c
  * \brief Functions for querying a users ident.
  * \version $Id$
  */
@@ -39,7 +39,7 @@
 #include "list.h"
 #include "ircd_defs.h"
 #include "fdlist.h"
-#include "s_auth.h"
+#include "auth.h"
 #include "conf.h"
 #include "client.h"
 #include "event.h"

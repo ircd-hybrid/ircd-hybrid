@@ -9,7 +9,8 @@ ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
 
-ircd_SOURCES = channel.c         \
+ircd_SOURCES = auth.c            \
+               channel.c         \
                channel_mode.c    \
                client.c          \
                conf.c            \
@@ -50,7 +51,6 @@ ircd_SOURCES = channel.c         \
                resv.c            \
                rng_mt.c          \
                rsa.c             \
-               s_auth.c          \
                s_bsd.c           \
                s_misc.c          \
                s_serv.c          \

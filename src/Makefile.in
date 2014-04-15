@@ -103,21 +103,21 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
-	client.$(OBJEXT) conf.$(OBJEXT) conf_class.$(OBJEXT) \
-	conf_db.$(OBJEXT) conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) \
-	dbuf.$(OBJEXT) event.$(OBJEXT) fdlist.$(OBJEXT) \
-	getopt.$(OBJEXT) gline.$(OBJEXT) hash.$(OBJEXT) hook.$(OBJEXT) \
-	hostmask.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_signal.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
-	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) \
-	mempool.$(OBJEXT) modules.$(OBJEXT) motd.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
-	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
-	s_bsd_select.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
-	restart.$(OBJEXT) resv.$(OBJEXT) rng_mt.$(OBJEXT) \
-	rsa.$(OBJEXT) s_auth.$(OBJEXT) s_bsd.$(OBJEXT) \
+am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
+	channel_mode.$(OBJEXT) client.$(OBJEXT) conf.$(OBJEXT) \
+	conf_class.$(OBJEXT) conf_db.$(OBJEXT) conf_parser.$(OBJEXT) \
+	conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) event.$(OBJEXT) \
+	fdlist.$(OBJEXT) getopt.$(OBJEXT) gline.$(OBJEXT) \
+	hash.$(OBJEXT) hook.$(OBJEXT) hostmask.$(OBJEXT) \
+	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
+	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
+	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
+	modules.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
+	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
+	s_bsd_kqueue.$(OBJEXT) s_bsd_select.$(OBJEXT) res.$(OBJEXT) \
+	reslib.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
+	rng_mt.$(OBJEXT) rsa.$(OBJEXT) s_bsd.$(OBJEXT) \
 	s_misc.$(OBJEXT) s_serv.$(OBJEXT) s_user.$(OBJEXT) \
 	send.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
 	whowas.$(OBJEXT)
@@ -357,7 +357,8 @@ AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include
 ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
-ircd_SOURCES = channel.c         \
+ircd_SOURCES = auth.c            \
+               channel.c         \
                channel_mode.c    \
                client.c          \
                conf.c            \
@@ -398,7 +399,6 @@ ircd_SOURCES = channel.c         \
                resv.c            \
                rng_mt.c          \
                rsa.c             \
-               s_auth.c          \
                s_bsd.c           \
                s_misc.c          \
                s_serv.c          \
@@ -505,6 +505,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/auth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
@@ -541,7 +542,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_auth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_devpoll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_epoll.Po@am__quote@

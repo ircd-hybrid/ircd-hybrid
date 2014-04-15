@@ -43,7 +43,7 @@
 #include "res.h"
 #include "restart.h"
 #include "rng_mt.h"
-#include "s_auth.h"
+#include "auth.h"
 #include "s_bsd.h"
 #include "log.h"
 #include "s_serv.h"      /* try_connections */

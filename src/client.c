@@ -32,7 +32,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_auth.h"
+#include "auth.h"
 #include "s_bsd.h"
 #include "conf.h"
 #include "log.h"

@@ -21,7 +21,7 @@
 
 /*! \file m_svspart.c
  * \brief Includes required functions for processing the SVSPART command.
- * \version $Id: m_svspart.c 3274 2014-04-06 12:22:23Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -173,7 +173,7 @@ struct module module_entry =
 {
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
-  .version = "$Revision: 3274 $",
+  .version = "$Revision$",
   .handle  = NULL,
   .modinit = module_init,
   .modexit = module_exit,

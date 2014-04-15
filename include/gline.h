@@ -24,8 +24,8 @@
  * \version $Id$
  */
 
-#ifndef INCLUDED_s_gline_h
-#define INCLUDED_s_gline_h
+#ifndef INCLUDED_gline_h
+#define INCLUDED_gline_h
 
 #include "ircd_defs.h"
 
@@ -59,4 +59,4 @@ struct gline_pending
 };
 
 extern dlink_list pending_glines[];
-#endif /* INCLUDED_s_gline_h */
+#endif

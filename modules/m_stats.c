@@ -30,7 +30,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
-#include "s_gline.h"
+#include "gline.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "hostmask.h"

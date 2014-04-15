@@ -35,7 +35,7 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
-#include "s_gline.h"
+#include "gline.h"
 #include "motd.h"
 #include "conf.h"
 #include "hostmask.h"

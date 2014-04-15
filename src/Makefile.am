@@ -21,6 +21,7 @@ ircd_SOURCES = channel.c         \
                event.c           \
                fdlist.c          \
                getopt.c          \
+               gline.c           \
                hash.c            \
                hook.c            \
                hostmask.c        \
@@ -51,7 +52,6 @@ ircd_SOURCES = channel.c         \
                rsa.c             \
                s_auth.c          \
                s_bsd.c           \
-               s_gline.c         \
                s_misc.c          \
                s_serv.c          \
                s_user.c          \

@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "s_gline.h"
+#include "gline.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"

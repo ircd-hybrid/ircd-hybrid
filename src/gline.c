@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_gline.c
+/*! \file gline.c
  * \brief GLine global ban functions.
  * \version $Id$
  */
@@ -31,7 +31,7 @@
 #include "ircd.h"
 #include "conf.h"
 #include "hostmask.h"
-#include "s_gline.h"
+#include "gline.h"
 #include "memory.h"
 
 

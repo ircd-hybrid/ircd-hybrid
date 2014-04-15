@@ -107,7 +107,7 @@ am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
 	client.$(OBJEXT) conf.$(OBJEXT) conf_class.$(OBJEXT) \
 	conf_db.$(OBJEXT) conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) \
 	dbuf.$(OBJEXT) event.$(OBJEXT) fdlist.$(OBJEXT) \
-	getopt.$(OBJEXT) hash.$(OBJEXT) hook.$(OBJEXT) \
+	getopt.$(OBJEXT) gline.$(OBJEXT) hash.$(OBJEXT) hook.$(OBJEXT) \
 	hostmask.$(OBJEXT) irc_res.$(OBJEXT) irc_reslib.$(OBJEXT) \
 	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
 	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
@@ -118,9 +118,9 @@ am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
 	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
 	s_bsd_select.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
 	rsa.$(OBJEXT) s_auth.$(OBJEXT) s_bsd.$(OBJEXT) \
-	s_gline.$(OBJEXT) s_misc.$(OBJEXT) s_serv.$(OBJEXT) \
-	s_user.$(OBJEXT) send.$(OBJEXT) version.$(OBJEXT) \
-	watch.$(OBJEXT) whowas.$(OBJEXT)
+	s_misc.$(OBJEXT) s_serv.$(OBJEXT) s_user.$(OBJEXT) \
+	send.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -369,6 +369,7 @@ ircd_SOURCES = channel.c         \
                event.c           \
                fdlist.c          \
                getopt.c          \
+               gline.c           \
                hash.c            \
                hook.c            \
                hostmask.c        \
@@ -399,7 +400,6 @@ ircd_SOURCES = channel.c         \
                rsa.c             \
                s_auth.c          \
                s_bsd.c           \
-               s_gline.c         \
                s_misc.c          \
                s_serv.c          \
                s_user.c          \
@@ -517,6 +517,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask.Po@am__quote@
@@ -547,7 +548,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_kqueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_poll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_select.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_gline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_serv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_user.Po@am__quote@

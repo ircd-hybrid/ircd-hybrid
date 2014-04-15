@@ -132,7 +132,6 @@ struct MaskItem;
 #define FLAGS_AUTH_SPOOF     0x04000000 /**< user's hostname has been spoofed by an auth{} spoof*/
 #define FLAGS_SSL            0x08000000 /**< User is connected via TLS/SSL */
 #define FLAGS_SQUIT          0x10000000
-#define FLAGS_CORK           0x20000000
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))

@@ -307,16 +307,7 @@ handle_command(struct Message *mptr, struct Client *source_p,
   if (i < mptr->args_min)
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
   else
-  {
-    AddFlag(source_p->from, FLAGS_CORK);
     mptr->handlers[source_p->from->handler](source_p, i, hpara);
-
-    if (HasFlag(source_p->from, FLAGS_CORK))
-    {
-      DelFlag(source_p->from, FLAGS_CORK);
-      send_queued_write(source_p->from);
-    }
-  }
 }
 
 /* add_msg_element()

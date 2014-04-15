@@ -26,17 +26,8 @@
 
 #include "stdinc.h"
 #include "s_misc.h"
-#include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "numeric.h"
-#include "irc_res.h"
-#include "fdlist.h"
-#include "s_bsd.h"
-#include "conf.h"
-#include "s_serv.h"
-#include "send.h"
-#include "memory.h"
 
 
 static const char *const months[] =

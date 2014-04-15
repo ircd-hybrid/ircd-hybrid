@@ -30,7 +30,6 @@
 #include "ircd.h"
 #include "conf.h"
 #include "send.h"
-#include "s_serv.h"
 #include "numeric.h"
 #include "client.h"
 #include "irc_string.h"

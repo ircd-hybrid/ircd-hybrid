@@ -31,11 +31,7 @@
 #include "ircd.h"
 #include "conf.h"
 #include "hostmask.h"
-#include "s_misc.h"
-#include "send.h"
-#include "s_serv.h"
 #include "s_gline.h"
-#include "event.h"
 #include "memory.h"
 
 

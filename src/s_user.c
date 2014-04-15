@@ -27,7 +27,6 @@
 #include "stdinc.h"
 #include "list.h"
 #include "s_user.h"
-#include "s_misc.h"
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"

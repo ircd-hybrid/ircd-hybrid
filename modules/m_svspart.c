@@ -137,7 +137,7 @@ ms_svspart(struct Client *source_p, int parc, char *parv[])
       sendto_one(target_p, ":%s SVSPART %s %s", source_p->id,
                  target_p->id, parv[2]);
     else
-      sendto_one(target_p, ":%s SVSPART %s %s %s", source_p->id,
+      sendto_one(target_p, ":%s SVSPART %s %s :%s", source_p->id,
                  target_p->id, parv[2], parv[3]);
     return 0;
   }

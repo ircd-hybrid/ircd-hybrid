@@ -405,28 +405,21 @@ check_xline(struct Client *source_p)
 }
 
 /*
-** register_local_user
-**      This function is called when both NICK and USER messages
-**      have been accepted for the client, in whatever order. Only
-**      after this, is the USER message propagated.
-**
-**      NICK's must be propagated at once when received, although
-**      it would be better to delay them too until full info is
-**      available. Doing it is not so simple though, would have
-**      to implement the following:
-**
-**      (actually it has been implemented already for a while) -orabidoo
-**
-**      1) user telnets in and gives only "NICK foobar" and waits
-**      2) another user far away logs in normally with the nick
-**         "foobar" (quite legal, as this server didn't propagate
-**         it).
-**      3) now this server gets nick "foobar" from outside, but
-**         has alread the same defined locally. Current server
-**         would just issue "KILL foobar" to clean out dups. But,
-**         this is not fair. It should actually request another
-**         nick from local user or kill him/her...
-*/
+ * register_local_user
+ *      This function is called when both NICK and USER messages
+ *      have been accepted for the client, in whatever order. Only
+ *      after this, is the UID message propagated.
+ *
+ *      1) user telnets in and gives only "NICK foobar" and waits
+ *      2) another user far away logs in normally with the nick
+ *         "foobar" (quite legal, as this server didn't propagate
+ *         it).
+ *      3) now this server gets nick "foobar" from outside, but
+ *         has alread the same defined locally. Current server
+ *         would just issue "KILL foobar" to clean out dups. But,
+ *         this is not fair. It should actually request another
+ *         nick from local user or kill him/her...
+ */
 void
 register_local_user(struct Client *source_p)
 {

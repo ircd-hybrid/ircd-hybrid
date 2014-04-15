@@ -45,7 +45,7 @@
 #include "send.h"
 #include "memory.h"
 #include "mempool.h"
-#include "irc_res.h"
+#include "res.h"
 #include "userhost.h"
 #include "s_user.h"
 #include "channel_mode.h"

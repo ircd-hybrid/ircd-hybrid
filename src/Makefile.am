@@ -25,8 +25,6 @@ ircd_SOURCES = channel.c         \
                hash.c            \
                hook.c            \
                hostmask.c        \
-               irc_res.c         \
-               irc_reslib.c      \
                irc_string.c      \
                ircd.c            \
                ircd_signal.c     \
@@ -38,7 +36,6 @@ ircd_SOURCES = channel.c         \
                mempool.c         \
                modules.c         \
                motd.c            \
-               rng_mt.c          \
                numeric.c         \
                packet.c          \
                parse.c           \
@@ -47,8 +44,11 @@ ircd_SOURCES = channel.c         \
                s_bsd_devpoll.c   \
                s_bsd_kqueue.c    \
                s_bsd_select.c    \
+               res.c             \
+               reslib.c          \
                restart.c         \
                resv.c            \
+               rng_mt.c          \
                rsa.c             \
                s_auth.c          \
                s_bsd.c           \

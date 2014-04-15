@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file irc_res.c
+/*! \file res.c
  * \brief ircd resolver functions
  * \version $Id$
  */
@@ -60,8 +60,8 @@
 #include "send.h"
 #include "memory.h"
 #include "mempool.h"
-#include "irc_res.h"
-#include "irc_reslib.h"
+#include "res.h"
+#include "reslib.h"
 
 #if (CHAR_BIT != 8)
 #error this code needs to be able to address individual octets

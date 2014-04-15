@@ -40,7 +40,7 @@
 #include "conf.h"
 #include "hostmask.h"
 #include "parse.h"
-#include "irc_res.h"
+#include "res.h"
 #include "restart.h"
 #include "rng_mt.h"
 #include "s_auth.h"

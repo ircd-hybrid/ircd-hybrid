@@ -39,7 +39,7 @@
 #include "listener.h"
 #include "numeric.h"
 #include "packet.h"
-#include "irc_res.h"
+#include "res.h"
 #include "restart.h"
 #include "s_auth.h"
 #include "conf.h"

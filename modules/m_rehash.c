@@ -30,7 +30,7 @@
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"
-#include "irc_res.h"
+#include "res.h"
 #include "conf.h"
 #include "log.h"
 #include "send.h"

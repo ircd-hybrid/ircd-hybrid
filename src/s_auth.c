@@ -46,7 +46,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "packet.h"
-#include "irc_res.h"
+#include "res.h"
 #include "s_bsd.h"
 #include "log.h"
 #include "send.h"

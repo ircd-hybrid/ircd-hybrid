@@ -49,7 +49,7 @@
 #include "resv.h"
 #include "whowas.h"
 #include "watch.h"
-#include "irc_res.h"
+#include "res.h"
 #include "motd.h"
 
 

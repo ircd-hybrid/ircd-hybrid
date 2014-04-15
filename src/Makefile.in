@@ -108,15 +108,15 @@ am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
 	conf_db.$(OBJEXT) conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) \
 	dbuf.$(OBJEXT) event.$(OBJEXT) fdlist.$(OBJEXT) \
 	getopt.$(OBJEXT) gline.$(OBJEXT) hash.$(OBJEXT) hook.$(OBJEXT) \
-	hostmask.$(OBJEXT) irc_res.$(OBJEXT) irc_reslib.$(OBJEXT) \
-	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
-	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
-	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
-	modules.$(OBJEXT) motd.$(OBJEXT) rng_mt.$(OBJEXT) \
+	hostmask.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_signal.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
+	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) \
+	mempool.$(OBJEXT) modules.$(OBJEXT) motd.$(OBJEXT) \
 	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
 	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
 	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
-	s_bsd_select.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
+	s_bsd_select.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
+	restart.$(OBJEXT) resv.$(OBJEXT) rng_mt.$(OBJEXT) \
 	rsa.$(OBJEXT) s_auth.$(OBJEXT) s_bsd.$(OBJEXT) \
 	s_misc.$(OBJEXT) s_serv.$(OBJEXT) s_user.$(OBJEXT) \
 	send.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
@@ -373,8 +373,6 @@ ircd_SOURCES = channel.c         \
                hash.c            \
                hook.c            \
                hostmask.c        \
-               irc_res.c         \
-               irc_reslib.c      \
                irc_string.c      \
                ircd.c            \
                ircd_signal.c     \
@@ -386,7 +384,6 @@ ircd_SOURCES = channel.c         \
                mempool.c         \
                modules.c         \
                motd.c            \
-               rng_mt.c          \
                numeric.c         \
                packet.c          \
                parse.c           \
@@ -395,8 +392,11 @@ ircd_SOURCES = channel.c         \
                s_bsd_devpoll.c   \
                s_bsd_kqueue.c    \
                s_bsd_select.c    \
+               res.c             \
+               reslib.c          \
                restart.c         \
                resv.c            \
+               rng_mt.c          \
                rsa.c             \
                s_auth.c          \
                s_bsd.c           \
@@ -521,8 +521,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_res.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_reslib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@
@@ -537,6 +535,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/res.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Po@am__quote@

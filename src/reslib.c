@@ -78,8 +78,8 @@
 
 #include "stdinc.h"
 #include "ircd_defs.h"
-#include "irc_res.h"
-#include "irc_reslib.h"
+#include "res.h"
+#include "reslib.h"
 #include "irc_string.h"
 
 #define NS_TYPE_ELT             0x40 /* EDNS0 extended label type */

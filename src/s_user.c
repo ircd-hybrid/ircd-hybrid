@@ -404,21 +404,10 @@ check_xline(struct Client *source_p)
   return 0;
 }
 
-/*
- * register_local_user
- *      This function is called when both NICK and USER messages
+/*! \brief This function is called when both NICK and USER messages
  *      have been accepted for the client, in whatever order. Only
  *      after this, is the UID message propagated.
- *
- *      1) user telnets in and gives only "NICK foobar" and waits
- *      2) another user far away logs in normally with the nick
- *         "foobar" (quite legal, as this server didn't propagate
- *         it).
- *      3) now this server gets nick "foobar" from outside, but
- *         has alread the same defined locally. Current server
- *         would just issue "KILL foobar" to clean out dups. But,
- *         this is not fair. It should actually request another
- *         nick from local user or kill him/her...
+ * \param source_p Pointer to given client to introduce
  */
 void
 register_local_user(struct Client *source_p)
@@ -494,7 +483,7 @@ register_local_user(struct Client *source_p)
     source_p->username[i] = '\0';
   }
 
-  /* password check */
+  /* Password check */
   if (!EmptyString(conf->passwd))
   {
     const char *pass = source_p->localClient->passwd;
@@ -509,25 +498,28 @@ register_local_user(struct Client *source_p)
     }
   }
 
-  /* don't free source_p->localClient->passwd here - it can be required
+  /*
+   * Don't free source_p->localClient->passwd here - it can be required
    * by masked /stats I if there are auth{} blocks with need_password = no;
    * --adx
    */
 
-  /* report if user has &^>= etc. and set flags as needed in source_p */
+  /*
+   * Report if user has &^>= etc. and set flags as needed in source_p
+   */
   report_and_set_user_flags(source_p, conf);
 
   if (IsDead(source_p))
     return;
 
-  /* Limit clients -
+  /*
+   * Limit clients -
    * We want to be able to have servers and F-line clients
    * connect, so save room for "buffer" connections.
    * Smaller servers may want to decrease this, and it should
    * probably be just a percentage of the MAXCLIENTS...
    *   -Taner
    */
-  /* Except "F:" clients */
   if ((Count.local >= ServerInfo.max_clients + MAX_BUFFER) ||
       (Count.local >= ServerInfo.max_clients && !IsExemptLimits(source_p)))
   {
@@ -539,7 +531,6 @@ register_local_user(struct Client *source_p)
     return;
   }
 
-  /* valid user name check */
   if (!valid_username(source_p->username, 1))
   {
     char tmpstr2[IRCD_BUFSIZE] = "";
@@ -587,7 +578,6 @@ register_local_user(struct Client *source_p)
                            Count.max_loc);
   }
 
-  /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
   ++Count.totalrestartcount;
@@ -632,7 +622,7 @@ register_remote_user(struct Client *source_p, const char *username,
   strlcpy(source_p->username, username, sizeof(source_p->username));
 
   /*
-   * coming from another server, take the servers word for it
+   * Coming from another server, take the servers word for it
    */
   source_p->servptr = hash_find_server(server);
 
@@ -680,7 +670,6 @@ register_remote_user(struct Client *source_p, const char *username,
   if (HasFlag(source_p->servptr, FLAGS_SERVICE))
     AddFlag(source_p, FLAGS_SERVICE);
 
-  /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
 
@@ -795,8 +784,9 @@ valid_nickname(const char *nickname, const int local)
 
   assert(p);
 
-  /* nicks can't start with a digit or - or be 0 length */
-  /* This closer duplicates behaviour of hybrid-6 */
+  /*
+   * Nicks can't start with a digit or - or be 0 length.
+   */
   if (*p == '-' || (IsDigit(*p) && local) || *p == '\0')
     return 0;
 
@@ -828,7 +818,7 @@ send_umode(struct Client *client_p, struct Client *source_p,
   unsigned int flag;
 
   /*
-   * build a string in umode_buf to represent the change in the user's
+   * Build a string in umode_buf to represent the change in the user's
    * mode between the new (source_p->umodes) and 'old'.
    */
   for (i = 0; i < 128; ++i)
@@ -982,13 +972,9 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
                                  target_p->host, target_p->away);
 }
 
-/* oper_up()
- *
- * inputs	- pointer to given client to oper
- * output	- NONE
- * side effects	- Blindly opers up given source_p, using conf info
- *                all checks on passwords have already been done.
- *                This could also be used by rsa oper routines.
+/*! \brief Blindly opers up given source_p, using conf info.
+ *         All checks on passwords have already been done.
+ * \param source_p Pointer to given client to oper
  */
 void
 oper_up(struct Client *source_p)

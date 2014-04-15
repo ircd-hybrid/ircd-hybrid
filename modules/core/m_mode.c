@@ -53,9 +53,9 @@ static void
 set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
   unsigned int flag, setflags;
-  char **p, *m, buf[IRCD_BUFSIZE] = "";
-  struct Client *target_p;
-  int what = MODE_ADD, badflag = 0, i;
+  char buf[IRCD_BUFSIZE] = "";
+  struct Client *target_p = NULL;
+  int what = MODE_ADD, badflag = 0;
 
   assert(!(parc < 2));
 
@@ -74,10 +74,10 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
   if (parc < 3)
   {
-    m = buf;
+    char *m = buf;
     *m++ = '+';
 
-    for (i = 0; i < 128; ++i)
+    for (unsigned int i = 0; i < 128; ++i)
       if (HasUMode(source_p, user_modes[i]))
         *m++ = (char)i;
     *m = '\0';
@@ -90,9 +90,9 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
   setflags = source_p->umodes;
 
   /* parse mode change string(s) */
-  for (p = &parv[2]; p && *p; ++p)
+  for (char **p = &parv[2]; p && *p; ++p)
   {
-    for (m = *p; *m; ++m)
+    for (const char *m = *p; *m; ++m)
     {
       switch (*m)
       {

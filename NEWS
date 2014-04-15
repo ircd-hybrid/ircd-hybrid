@@ -1,7 +1,12 @@
--- Noteworthy changes in version 8.1.15 (????-??-??)
+-- Noteworthy changes in version 8.1.15 (2014-03-29)
 ########################################################################
 o) IMPORTANT: ircd binary is now again placed into bin/ instead of sbin/
 ########################################################################
+o) mkpasswd in tools/ now defaults to MD5 instead of DES
+o) USERS command has been removed
+o) Fixed issue with SVSNICK where clients self-collided when changing
+   just the case of the nick name, i.e. somenick -> SomeNicK
+o) Minor code cleanups and cosmetical fixes
 
 
 -- Noteworthy changes in version 8.1.14 (2014-02-25)

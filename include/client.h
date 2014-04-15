@@ -121,7 +121,7 @@ struct MaskItem;
 #define FLAGS_FLOODDONE      0x00008000 /**< Flood grace period has been ended. */
 #define FLAGS_EOB            0x00010000 /**< server has sent us an EOB */
 #define FLAGS_HIDDEN         0x00020000 /**< a hidden server. not shown in /links */
-#define FLAGS_UNUSED___      0x00040000 /**<  */
+#define FLAGS_BLOCKED        0x00040000 /**< must wait for COMM_SELECT_WRITE */
 #define FLAGS_USERHOST       0x00080000 /**< client is in userhost hash */
 #define FLAGS_BURSTED        0x00100000 /**< user was already bursted */
 #define FLAGS_EXEMPTRESV     0x00200000 /**< client is exempt from RESV */

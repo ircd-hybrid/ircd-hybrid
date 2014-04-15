@@ -185,6 +185,8 @@ void
 sendq_unblocked(fde_t *fd, struct Client *client_p)
 {
   assert(fd == &client_p->localClient->fd);
+
+  DelFlag(client_p, FLAGS_BLOCKED);
   send_queued_write(client_p);
 }
 
@@ -203,7 +205,7 @@ send_queued_write(struct Client *to)
    ** Once socket is marked dead, we cannot start writing to it,
    ** even if the error is removed...
    */
-  if (IsDead(to))
+  if (IsDead(to) || HasFlag(to, FLAGS_BLOCKED))
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
@@ -253,6 +255,7 @@ send_queued_write(struct Client *to)
 
     if ((retlen < 0) && (ignoreErrno(errno)))
     {
+      AddFlag(to, FLAGS_BLOCKED);
       /* we have a non-fatal error, reschedule a write */
       comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE,
                      (PF *)sendq_unblocked, to, 0);

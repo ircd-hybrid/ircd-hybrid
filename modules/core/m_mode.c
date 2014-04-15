@@ -57,8 +57,6 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
   struct Client *target_p = NULL;
   int what = MODE_ADD, badflag = 0;
 
-  assert(!(parc < 2));
-
   if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
     if (MyConnect(source_p))

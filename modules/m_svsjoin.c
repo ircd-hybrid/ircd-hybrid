@@ -21,7 +21,7 @@
 
 /*! \file m_svsjoin.c
  * \brief Includes required functions for processing the SVSJOIN command.
- * \version $Id: m_svsjoin.c 3186 2014-03-20 18:09:34Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -325,7 +325,7 @@ module_exit(void)
 struct module module_entry = {
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
-  .version = "$Revision: 3186 $",
+  .version = "$Revision$",
   .handle  = NULL,
   .modinit = module_init,
   .modexit = module_exit,

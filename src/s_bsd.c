@@ -173,6 +173,7 @@ close_connection(struct Client *client_p)
      * even if it is marked as blocked (COMM_SELECT_READ handler is called
      * before COMM_SELECT_WRITE). Let's try, nothing to lose.. -adx
      */
+    DelFlag(client_p, FLAGS_BLOCKED);
     send_queued_write(client_p);
   }
 

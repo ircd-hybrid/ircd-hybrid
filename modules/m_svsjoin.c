@@ -329,5 +329,5 @@ struct module module_entry = {
   .handle  = NULL,
   .modinit = module_init,
   .modexit = module_exit,
-  .flags   = MODULE_FLAG_CORE
+  .flags   = 0
 };

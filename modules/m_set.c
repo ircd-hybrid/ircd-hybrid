@@ -30,13 +30,10 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_serv.h"
 #include "send.h"
-#include "channel.h"
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_user.h"
 #include "s_misc.h"
 
 

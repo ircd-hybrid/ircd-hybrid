@@ -42,7 +42,6 @@
 #include "conf.h"
 #include "s_serv.h"
 #include "log.h"
-//#include "s_misc.h"
 #include "s_user.h"
 #include "send.h"
 #include "memory.h"

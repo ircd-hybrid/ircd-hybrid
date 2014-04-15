@@ -43,7 +43,6 @@
 #include "fdlist.h"
 #include "log.h"
 #include "send.h"
-#include "s_gline.h"
 #include "memory.h"
 #include "mempool.h"
 #include "irc_res.h"

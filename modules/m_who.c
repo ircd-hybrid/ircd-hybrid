@@ -150,7 +150,6 @@ who_global(struct Client *source_p, char *mask, int server_oper)
   {
     if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
     {
-      /* safe enough to give this on a local connect only */
       sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
       return;
     }

@@ -129,10 +129,8 @@ m_help(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  /* HELP is always local */
   if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
   {
-    /* safe enough to give this on a local connect only */
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }

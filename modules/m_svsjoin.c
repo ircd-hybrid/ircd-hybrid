@@ -305,7 +305,8 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-static struct Message svsjoin_msgtab = {
+static struct Message svsjoin_msgtab =
+{
   "SVSJOIN", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_ignore, ms_svsjoin, m_ignore, m_ignore, m_ignore }
 };
@@ -322,7 +323,8 @@ module_exit(void)
   mod_del_cmd(&svsjoin_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

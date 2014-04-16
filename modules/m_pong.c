@@ -77,7 +77,7 @@ mr_pong(struct Client *source_p, int parc, char *parv[])
 {
   assert(MyConnect(source_p));
 
-  if (parc == 2 && *parv[1] != '\0')
+  if (parc == 2 && !EmptyString(parv[1]))
   {
     if (ConfigFileEntry.ping_cookie && !source_p->localClient->registration)
     {

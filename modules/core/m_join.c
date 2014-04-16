@@ -645,7 +645,8 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
   }
 }
 
-static struct Message join_msgtab = {
+static struct Message join_msgtab =
+{
   "JOIN", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_join, ms_join, m_ignore, m_join, m_ignore }
 };
@@ -662,7 +663,8 @@ module_exit(void)
   mod_del_cmd(&join_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

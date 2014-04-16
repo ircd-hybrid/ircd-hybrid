@@ -65,7 +65,7 @@ m_ping(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
+  if (!EmptyString(destination) && irccmp(destination, me.name))
   {
     /* We're sending it across servers.. origin == source_p->name --fl_ */
     origin = source_p->name;
@@ -97,7 +97,7 @@ ms_ping(struct Client *source_p, int parc, char *parv[])
   origin = source_p->name;
   destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
 
-  if (!EmptyString(destination) && irccmp(destination, me.name) != 0 && irccmp(destination, me.id) != 0)
+  if (!EmptyString(destination) && irccmp(destination, me.name) && irccmp(destination, me.id))
   {
     if ((target_p = hash_find_server(destination)))
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
@@ -129,7 +129,8 @@ module_exit(void)
   mod_del_cmd(&ping_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -201,7 +201,7 @@ stats_hooks(struct Client *source_p)
       snprintf(lastused, sizeof(lastused), "%d seconds ago",
                (int)(CurrentTime - cb->last));
     else
-      strcpy(lastused, "NEVER");
+      strlcpy(lastused, "NEVER", sizeof(lastused));
 
     sendto_one(source_p, ":%s %d %s : %-20s %-20s %-8u %d", me.name,
                RPL_STATSDEBUG, source_p->name, cb->name, lastused, cb->called,

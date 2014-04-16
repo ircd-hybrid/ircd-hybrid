@@ -230,7 +230,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     if (oldmode->limit > mode.limit)
       mode.limit = oldmode->limit;
     if (strcmp(mode.key, oldmode->key) < 0)
-      strcpy(mode.key, oldmode->key);
+      strlcpy(mode.key, oldmode->key, sizeof(mode.key));
   }
 
   set_final_mode(&mode, oldmode);

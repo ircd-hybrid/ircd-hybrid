@@ -39,10 +39,17 @@
 #include "packet.h"
 
 
-/* m_topic()
- *  parv[0] = command
- *  parv[1] = channel name
- *  parv[2] = new topic, if setting topic
+/*! \brief TOPIC command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
+ *      - parv[2] = topic text, if setting topic
  */
 static int
 m_topic(struct Client *source_p, int parc, char *parv[])
@@ -119,6 +126,19 @@ m_topic(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
+
+/*! \brief TOPIC command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
+ *      - parv[2] = topic text
+ */
 static int
 ms_topic(struct Client *source_p, int parc, char *parv[])
 {

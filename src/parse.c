@@ -220,7 +220,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
        * Hm, when is the buffer empty -- if a command
        * code has been found ?? -Armin
        */
-      if (*pbuffer != '\0')
+      if (*pbuffer)
         if (IsClient(from))
           sendto_one_numeric(from, &me, ERR_UNKNOWNCOMMAND, ch);
 
@@ -299,9 +299,9 @@ handle_command(struct Message *mptr, struct Client *source_p,
                unsigned int i, char *hpara[])
 {
   if (IsServer(source_p->from))
-    mptr->rcount++;
+    ++mptr->rcount;
 
-  mptr->count++;
+  ++mptr->count;
 
   /* Check right amount of params is passed... --is */
   if (i < mptr->args_min)

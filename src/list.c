@@ -84,7 +84,7 @@ dlinkAdd(void *data, dlink_node *m, dlink_list *list)
   m->next = list->head;
 
   /* Assumption: If list->tail != NULL, list->head != NULL */
-  if (list->head != NULL)
+  if (list->head)
     list->head->prev = m;
   else if (list->tail == NULL)
     list->tail = m;
@@ -118,7 +118,7 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
   m->prev = list->tail;
 
   /* Assumption: If list->tail != NULL, list->head != NULL */
-  if (list->tail != NULL)
+  if (list->tail)
     list->tail->next = m;
   else if (list->head == NULL)
     list->head = m;

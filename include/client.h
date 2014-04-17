@@ -353,7 +353,8 @@ struct LocalUser
   struct dbuf_queue buf_sendq;
   struct dbuf_queue buf_recvq;
 
-  struct {
+  struct
+  {
     unsigned int messages;      /**< Statistics: protocol messages sent/received */
     uint64_t bytes;             /**< Statistics: total bytes sent/received */
   } recv, send;
@@ -410,6 +411,7 @@ struct Client
   char name[HOSTLEN + 1]; /**< unique name for a client nick or host */
   char svid[SVIDLEN + 1]; /**< Services ID. */
   char id[IDLEN + 1];       /**< client ID, unique ID per client */
+
   /*
    * client->username is the username from ident or the USER message,
    * If the client is idented the USER message is ignored, otherwise
@@ -418,6 +420,7 @@ struct Client
    * this field should be considered read-only.
    */
   char              username[USERLEN + 1]; /* client's username */
+
   /*
    * client->host contains the resolved name or ip address
    * as a string for the user, it may be fiddled with for oper spoofing etc.

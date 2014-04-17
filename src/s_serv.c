@@ -258,8 +258,7 @@ void
 try_connections(void *unused)
 {
   dlink_node *ptr = NULL;
-  struct MaskItem *conf;
-  int confrq;
+  int confrq = 0;
 
   /* TODO: change this to set active flag to 0 when added to event! --Habeeb */
   if (GlobalSetOptions.autoconn == 0)
@@ -267,7 +266,7 @@ try_connections(void *unused)
 
   DLINK_FOREACH(ptr, server_items.head)
   {
-    conf = ptr->data;
+    struct MaskItem *conf = ptr->data;
 
     assert(conf->type == CONF_SERVER);
 
@@ -465,17 +464,15 @@ add_capability(const char *capab_name, int cap_flag, int add_to_default)
 int
 delete_capability(const char *capab_name)
 {
-  dlink_node *ptr;
-  dlink_node *next_ptr;
-  struct Capability *cap;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, cap_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, cap_list.head)
   {
-    cap = ptr->data;
+    struct Capability *cap = ptr->data;
 
-    if (cap->cap != 0)
+    if (cap->cap)
     {
-      if (irccmp(cap->name, capab_name) == 0)
+      if (!irccmp(cap->name, capab_name))
       {
         default_server_capabs &= ~(cap->cap);
         dlinkDelete(ptr, &cap_list);
@@ -670,12 +667,11 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 
   /* create a socket for the server connection */
-  if (comm_open(&client_p->localClient->fd, conf->addr.ss.ss_family,
-                SOCK_STREAM, 0, NULL) < 0)
+  if (comm_open(&client_p->localClient->fd, conf->addr.ss.ss_family, SOCK_STREAM, 0, NULL) < 0)
   {
     /* Eek, failure to create the socket */
-    report_error(L_ALL, "opening stream socket to %s: %s",
-                 conf->name, errno);
+    report_error(L_ALL, "opening stream socket to %s: %s", conf->name, errno);
+
     SetDead(client_p);
     exit_client(client_p, "Connection failed");
     return 0;
@@ -715,7 +711,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
 
   SetConnecting(client_p);
   dlinkAdd(client_p, &client_p->node, &global_client_list);
-  /* from def_fam */
+
   client_p->localClient->aftype = conf->aftype;
 
   /* Now, initiate the connection */

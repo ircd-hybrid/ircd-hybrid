@@ -253,9 +253,10 @@ send_queued_write(struct Client *to)
       me.localClient->send.bytes += retlen;
     } while (dbuf_length(&to->localClient->buf_sendq));
 
-    if ((retlen < 0) && (ignoreErrno(errno)))
+    if (retlen < 0 && ignoreErrno(errno))
     {
       AddFlag(to, FLAGS_BLOCKED);
+
       /* we have a non-fatal error, reschedule a write */
       comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE,
                      (PF *)sendq_unblocked, to, 0);
@@ -337,6 +338,7 @@ sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics num
     return;
 
   dest = ID_or_name(to, to);
+
   if (EmptyString(dest))
     dest = "*";
 
@@ -364,6 +366,7 @@ sendto_one_notice(struct Client *to, struct Client *from, const char *pattern, .
     return;
 
   dest = ID_or_name(to, to);
+
   if (EmptyString(dest))
     dest = "*";
 
@@ -914,13 +917,6 @@ sendto_realops_flags_ratelimited(const char *pattern, ...)
   char buffer[IRCD_BUFSIZE] = "";
   static time_t last = 0;
   static int warnings = 0;
-
-  /*
-   ** if we're running with TS_WARNINGS enabled and someone does
-   ** something silly like (remotely) connecting a nonTS server,
-   ** we'll get a ton of warnings, so we make sure we don't send
-   ** more than 5 every 5 seconds.  -orabidoo
-   */
 
   if (CurrentTime - last < 5)
   {

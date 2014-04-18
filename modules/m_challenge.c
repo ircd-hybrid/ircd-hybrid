@@ -40,13 +40,11 @@
 
 
 #ifdef HAVE_LIBCRYPTO
-/* failed_challenge_notice()
+/*! \brief Notices all opers of the failed challenge attempt if enabled
  *
- * inputs       - pointer to client doing /oper ...
- *              - pointer to nick they tried to oper as
- *              - pointer to reason they have failed
- * output       - nothing
- * side effects - notices all opers of the failed oper attempt if enabled
+ * \param source_p Client doing /challenge ...
+ * \param name     The nick they tried to oper as
+ * \param reason   The reason why they have failed
  */
 static void
 failed_challenge_notice(struct Client *source_p, const char *name,

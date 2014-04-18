@@ -37,13 +37,19 @@
 #include "s_user.h"
 
 
-/*
- * mr_webirc
- *      parv[0] = command
- *      parv[1] = password
- *      parv[2] = fake username (we ignore this)
- *      parv[3] = fake hostname
- *      parv[4] = fake ip
+/*! \brief WEBIRC command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = password
+ *      - parv[2] = fake username (we ignore this)
+ *      - parv[3] = fake hostname
+ *      - parv[4] = fake ip
  */
 static int
 mr_webirc(struct Client *source_p, int parc, char *parv[])

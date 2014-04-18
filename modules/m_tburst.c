@@ -73,12 +73,14 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
 
   /*
    * The logic for accepting and rejecting channel topics was
-   * always a bit hairy, so now we got exactly 2 cases where
-   * we would accept a bursted topic
+   * always a bit hairy, so now we got exactly 3 cases where
+   * we would accept a topic
    *
    * Case 1:
-   *        The TS of the remote channel is older than ours
+   *        A services client/server wants to set a topic
    * Case 2:
+   *        The TS of the remote channel is older than ours
+   * Case 3:
    *        The TS of the remote channel is equal to ours AND
    *        the TS of the remote topic is newer than ours
    */

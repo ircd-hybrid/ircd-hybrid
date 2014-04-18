@@ -1,7 +1,7 @@
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (c) 2014 ircd-hybrid development team
+ *  Copyright (c) 2014-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,13 +39,10 @@
 #include "packet.h"
 
 
-/* part_one_client()
- *
- * inputs	- pointer to server
- * 		- pointer to source client to remove
- *		- char pointer of name of channel to remove from
- * output	- none
- * side effects	- remove ONE client given the channel name
+/*! \brief Removes a client from a specific channel
+ * \param source_p Pointer to source client to remove
+ * \param name     Name of channel to remove from
+ * \param reason   Part reason to show
  */
 static void
 part_one_client(struct Client *target_p, const char *name, const char *reason)

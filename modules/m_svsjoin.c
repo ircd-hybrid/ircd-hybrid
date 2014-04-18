@@ -1,7 +1,7 @@
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (c) 2014 ircd-hybrid development team
+ *  Copyright (c) 2014-2014 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -202,7 +202,7 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
       break;
     }
 
-    if ((chptr = hash_find_channel(chan)) != NULL)
+    if ((chptr = hash_find_channel(chan)))
     {
       if (IsMember(target_p, chptr))
         continue;
@@ -250,7 +250,7 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
     /*
      *  Set timestamp if appropriate, and propagate
      */
-    if (flags & CHFL_CHANOP)
+    if (flags == CHFL_CHANOP)
     {
       chptr->channelts = CurrentTime;
       chptr->mode.mode |= MODE_TOPICLIMIT;
@@ -260,13 +260,14 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
                     me.id, (unsigned long)chptr->channelts,
                     chptr->chname, target_p->id);
       /*
-       * notify all other users on the new channel
+       * Notify all other users on the new channel
        */
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            target_p->name, target_p->username,
                            target_p->host, chptr->chname);
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s +nt",
                            me.name, chptr->chname);
+
       if (target_p->away[0])
         sendto_channel_local_butone(target_p, 0, CAP_AWAY_NOTIFY, chptr,
                                     ":%s!%s@%s AWAY :%s",
@@ -278,7 +279,6 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
       sendto_server(target_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
                     target_p->id, (unsigned long)chptr->channelts,
                     chptr->chname);
-
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            target_p->name, target_p->username,
                            target_p->host, chptr->chname);

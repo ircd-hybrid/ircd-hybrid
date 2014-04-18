@@ -85,10 +85,17 @@ last0(struct Client *source_p, char *chanlist)
   return chanlist;
 }
 
-/* m_join()
- *      parv[0] = command
- *      parv[1] = channel
- *      parv[2] = channel password (key)
+/*! \brief JOIN command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel
+ *      - parv[2] = channel password (key)
  */
 static int
 m_join(struct Client *source_p, int parc, char *parv[])
@@ -152,7 +159,7 @@ m_join(struct Client *source_p, int parc, char *parv[])
       break;
     }
 
-    if ((chptr = hash_find_channel(chan)) != NULL)
+    if ((chptr = hash_find_channel(chan)))
     {
       if (IsMember(source_p, chptr))
         continue;
@@ -203,7 +210,7 @@ m_join(struct Client *source_p, int parc, char *parv[])
     /*
      *  Set timestamp if appropriate, and propagate
      */
-    if (flags & CHFL_CHANOP)
+    if (flags == CHFL_CHANOP)
     {
       chptr->channelts = CurrentTime;
       chptr->mode.mode |= MODE_TOPICLIMIT;
@@ -213,13 +220,14 @@ m_join(struct Client *source_p, int parc, char *parv[])
                     me.id, (unsigned long)chptr->channelts,
                     chptr->chname, source_p->id);
       /*
-       * notify all other users on the new channel
+       * Notify all other users on the new channel
        */
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            source_p->name, source_p->username,
                            source_p->host, chptr->chname);
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s +nt",
                            me.name, chptr->chname);
+
       if (source_p->away[0])
         sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
                                     ":%s!%s@%s AWAY :%s",
@@ -231,7 +239,6 @@ m_join(struct Client *source_p, int parc, char *parv[])
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
                     source_p->id, (unsigned long)chptr->channelts,
                     chptr->chname);
-
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            source_p->name, source_p->username,
                            source_p->host, chptr->chname);
@@ -626,7 +633,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
     }
   }
 
-  if (count != 0)
+  if (count)
   {
     *mbuf = '\0';
     for (lcount = 0; lcount < MAXMODEPARAMS; lcount++)
@@ -637,6 +644,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
       strlcat(sendbuf, " ", sizeof(sendbuf));
       strlcat(sendbuf, lpara[lcount], sizeof(sendbuf));
     }
+
     sendto_channel_local(ALL_MEMBERS, 0, chptr,
                          ":%s MODE %s %s%s",
                          (IsHidden(source_p) || ConfigServerHide.hide_servers) ?

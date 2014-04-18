@@ -42,7 +42,7 @@
 
 
 static void
-whowas_do(struct Client *source_p, const int parc, char *parv[])
+do_whowas(struct Client *source_p, const int parc, char *parv[])
 {
   int cur = 0;
   int max = -1;
@@ -118,7 +118,7 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  whowas_do(source_p, parc, parv);
+  do_whowas(source_p, parc, parv);
   return 0;
 }
 
@@ -149,7 +149,7 @@ mo_whowas(struct Client *source_p, int parc, char *parv[])
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  whowas_do(source_p, parc, parv);
+  do_whowas(source_p, parc, parv);
   return 0;
 }
 

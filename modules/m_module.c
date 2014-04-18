@@ -41,35 +41,35 @@
  *         Attempts to load a module, throwing an error if
  *         the module has already been loaded
  * \param source_p Pointer to client issuing the command
- * \param parv     Argument vector 
+ * \param arg      Additional argument which might be needed by this handler
  */
 static void
-module_load(struct Client *source_p, char *parv[])
+module_load(struct Client *source_p, const char *arg)
 {
   const char *m_bn = NULL;
 
-  if (findmodule_byname((m_bn = libio_basename(parv[2]))))
+  if (findmodule_byname((m_bn = libio_basename(arg))))
   {
     sendto_one_notice(source_p, &me, ":Module %s is already loaded", m_bn);
     return;
   }
 
-  load_one_module(parv[2]);
+  load_one_module(arg);
 }
 
 /*! \brief UNLOAD subcommand handler
  *         Attempts to unload a module, throwing an error if
  *         the module could not be found
  * \param source_p Pointer to client issuing the command
- * \param parv     Argument vector
+ * \param arg      Additional argument which might be needed by this handler
  */
 static void
-module_unload(struct Client *source_p, char *parv[])
+module_unload(struct Client *source_p, const char *arg)
 {
   const char *m_bn = NULL;
   const struct module *modp = NULL;
 
-  if ((modp = findmodule_byname((m_bn = libio_basename(parv[2])))) == NULL)
+  if ((modp = findmodule_byname((m_bn = libio_basename(arg)))) == NULL)
   {
     sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
     return;
@@ -97,16 +97,16 @@ module_unload(struct Client *source_p, char *parv[])
  *         Attempts to reload a module, throwing an error if
  *         the module could not be found or loaded
  * \param source_p Pointer to client issuing the command
- * \param parv     Argument vector
+ * \param arg      Additional argument which might be needed by this handler
  */
 static void
-module_reload(struct Client *source_p, char *parv[])
+module_reload(struct Client *source_p, const char *arg)
 {
   const char *m_bn = NULL;
   struct module *modp = NULL;
   int check_core = 0;
 
-  if (!strcmp(parv[2], "*"))
+  if (!strcmp(arg, "*"))
   {
     unsigned int modnum = 0;
     dlink_node *ptr = NULL, *ptr_next = NULL;
@@ -135,7 +135,7 @@ module_reload(struct Client *source_p, char *parv[])
     return;
   }
 
-  if ((modp = findmodule_byname((m_bn = libio_basename(parv[2])))) == NULL)
+  if ((modp = findmodule_byname((m_bn = libio_basename(arg)))) == NULL)
   {
     sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
     return;
@@ -156,12 +156,12 @@ module_reload(struct Client *source_p, char *parv[])
     return;
   }
 
-  if ((load_one_module(parv[2]) == -1) && check_core)
+  if ((load_one_module(arg) == -1) && check_core)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Error reloading core "
-                         "module: %s: terminating ircd", parv[2]);
-    ilog(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", parv[2]);
+                         "module: %s: terminating ircd", arg);
+    ilog(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
     exit(0);
   }
 }
@@ -169,10 +169,10 @@ module_reload(struct Client *source_p, char *parv[])
 /*! \brief LIST subcommand handler
  *         Shows a list of loaded modules
  * \param source_p Pointer to client issuing the command
- * \param parv     Argument vector
+ * \param arg      Additional argument which might be needed by this handler
  */
 static void
-module_list(struct Client *source_p, char *parv[])
+module_list(struct Client *source_p, const char *arg)
 {
   const dlink_node *ptr = NULL;
 
@@ -180,7 +180,7 @@ module_list(struct Client *source_p, char *parv[])
   {
     const struct module *modp = ptr->data;
 
-    if (!EmptyString(parv[2]) && match(parv[2], modp->name))
+    if (!EmptyString(arg) && match(arg, modp->name))
       continue;
 
     sendto_one_numeric(source_p, &me, RPL_MODLIST,
@@ -194,7 +194,7 @@ module_list(struct Client *source_p, char *parv[])
 struct ModuleStruct
 {
   const char *cmd;
-  void (*handler)(struct Client *, char *[]);
+  void (*handler)(struct Client *, const char *);
   const int arg_required;
 };
 
@@ -245,7 +245,7 @@ mo_module(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    tab->handler(source_p, parv);
+    tab->handler(source_p, parv[2]);
     return 0;
   }
 

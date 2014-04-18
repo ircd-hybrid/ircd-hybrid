@@ -93,7 +93,7 @@ m_motd(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static int
-mo_motd(struct Client *source_p, int parc, char *parv[])
+ms_motd(struct Client *source_p, int parc, char *parv[])
 {
   if (hunt_server(source_p, ":%s MOTD :%s", 1,
                   parc, parv) != HUNTED_ISME)
@@ -106,7 +106,7 @@ mo_motd(struct Client *source_p, int parc, char *parv[])
 static struct Message motd_msgtab =
 {
   "MOTD", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_motd, mo_motd, m_ignore, mo_motd, m_ignore }
+  { m_unregistered, m_motd, ms_motd, m_ignore, ms_motd, m_ignore }
 };
 
 static void

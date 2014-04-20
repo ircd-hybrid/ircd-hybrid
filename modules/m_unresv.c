@@ -21,7 +21,7 @@
 
 /*! \file m_unresv.c
  * \brief Includes required functions for processing the UNRESV command.
- * \version $Id: m_unresv.c 3347 2014-04-20 14:03:06Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -175,7 +175,7 @@ struct module module_entry =
 {
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
-  .version = "$Revision: 3347 $",
+  .version = "$Revision$",
   .handle  = NULL,
   .modinit = module_init,
   .modexit = module_exit,

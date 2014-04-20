@@ -33,9 +33,9 @@
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "packet.h"
-#include "s_user.h"
+#include "user.h"
 
 
 /*! \brief AWAY command handler

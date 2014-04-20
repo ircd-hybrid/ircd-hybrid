@@ -32,7 +32,7 @@
 #include "numeric.h"
 #include "conf.h"
 #include "log.h"
-#include "s_user.h"
+#include "user.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"

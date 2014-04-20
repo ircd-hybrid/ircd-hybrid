@@ -35,6 +35,7 @@ ircd_SOURCES = auth.c            \
                match.c           \
                memory.c          \
                mempool.c         \
+               misc.c            \
                modules.c         \
                motd.c            \
                numeric.c         \
@@ -52,10 +53,9 @@ ircd_SOURCES = auth.c            \
                rng_mt.c          \
                rsa.c             \
                s_bsd.c           \
-               s_misc.c          \
-               s_serv.c          \
-               s_user.c          \
                send.c            \
+               server.c          \
+               user.c            \
                version.c         \
                watch.c           \
                whowas.c

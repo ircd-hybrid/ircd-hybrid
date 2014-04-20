@@ -35,7 +35,7 @@
 #include "send.h"
 #include "memory.h"
 #include "numeric.h"
-#include "s_misc.h"
+#include "misc.h"
 #include "res.h"
 
 fde_t *fd_hash[FD_HASH_SIZE];

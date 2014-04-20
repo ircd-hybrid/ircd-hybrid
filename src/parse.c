@@ -36,8 +36,8 @@
 #include "send.h"
 #include "conf.h"
 #include "memory.h"
-#include "s_user.h"
-#include "s_serv.h"
+#include "user.h"
+#include "server.h"
 
 
 /*

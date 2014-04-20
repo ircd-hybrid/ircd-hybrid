@@ -35,7 +35,7 @@
 #include "parse.h"
 #include "irc_string.h"
 #include "log.h"
-#include "s_user.h"
+#include "user.h"
 #include "memory.h"
 
 

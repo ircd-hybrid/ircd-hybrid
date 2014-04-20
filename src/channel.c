@@ -35,12 +35,12 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "event.h"
 #include "memory.h"
 #include "mempool.h"
-#include "s_misc.h"
+#include "misc.h"
 #include "resv.h"
 
 

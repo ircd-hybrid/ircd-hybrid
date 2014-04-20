@@ -37,7 +37,7 @@
 #include "parse.h"
 #include "hash.h"
 #include "packet.h"
-#include "s_serv.h"
+#include "server.h"
 
 
 /* m_kick()

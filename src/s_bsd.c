@@ -44,10 +44,10 @@
 #include "auth.h"
 #include "conf.h"
 #include "log.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "memory.h"
-#include "s_user.h"
+#include "user.h"
 
 
 static const char *comm_err_str[] = { "Comm OK", "Error during bind()",

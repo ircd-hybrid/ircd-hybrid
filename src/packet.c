@@ -28,7 +28,7 @@
 #include "list.h"
 #include "s_bsd.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "client.h"
 #include "ircd.h"
 #include "parse.h"
@@ -37,7 +37,7 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "send.h"
-#include "s_misc.h"
+#include "misc.h"
 
 #define READBUF_SIZE 16384
 

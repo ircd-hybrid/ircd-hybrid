@@ -27,7 +27,7 @@
 
 #include "channel.h"
 #include "ircd_defs.h"
-#include "s_serv.h"
+#include "server.h"
 
 #define CASEMAP "rfc1459"
 

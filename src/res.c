@@ -56,7 +56,7 @@
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "log.h"
-#include "s_misc.h"
+#include "misc.h"
 #include "send.h"
 #include "memory.h"
 #include "mempool.h"

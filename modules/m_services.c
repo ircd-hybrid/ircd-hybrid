@@ -30,12 +30,12 @@
 //#include "channel_mode.h"
 #include "numeric.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
 #include "irc_string.h"
-#include "s_user.h"
+#include "user.h"
 #include "hash.h"
 
 

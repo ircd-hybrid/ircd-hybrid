@@ -112,14 +112,14 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
 	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
 	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
-	modules.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
-	packet.$(OBJEXT) parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
-	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
-	s_bsd_kqueue.$(OBJEXT) s_bsd_select.$(OBJEXT) res.$(OBJEXT) \
-	reslib.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
-	rng_mt.$(OBJEXT) rsa.$(OBJEXT) s_bsd.$(OBJEXT) \
-	s_misc.$(OBJEXT) s_serv.$(OBJEXT) s_user.$(OBJEXT) \
-	send.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
+	misc.$(OBJEXT) modules.$(OBJEXT) motd.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
+	s_bsd_select.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
+	restart.$(OBJEXT) resv.$(OBJEXT) rng_mt.$(OBJEXT) \
+	rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	user.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
 	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -383,6 +383,7 @@ ircd_SOURCES = auth.c            \
                match.c           \
                memory.c          \
                mempool.c         \
+               misc.c            \
                modules.c         \
                motd.c            \
                numeric.c         \
@@ -400,10 +401,9 @@ ircd_SOURCES = auth.c            \
                rng_mt.c          \
                rsa.c             \
                s_bsd.c           \
-               s_misc.c          \
-               s_serv.c          \
-               s_user.c          \
                send.c            \
+               server.c          \
+               user.c            \
                version.c         \
                watch.c           \
                whowas.c
@@ -531,6 +531,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@
@@ -548,10 +549,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_kqueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_poll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_select.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_misc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_serv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_user.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/watch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@

@@ -31,7 +31,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "parse.h"
 #include "modules.h"
 

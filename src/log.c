@@ -29,7 +29,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "conf.h"
-#include "s_misc.h"
+#include "misc.h"
 
 
 static struct

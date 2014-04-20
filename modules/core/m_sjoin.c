@@ -36,9 +36,9 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_serv.h"
+#include "server.h"
 #include "conf.h"
-#include "s_misc.h"
+#include "misc.h"
 
 
 static char modebuf[MODEBUFLEN];

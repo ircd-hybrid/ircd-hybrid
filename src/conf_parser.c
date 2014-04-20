@@ -81,13 +81,13 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "modules.h"
-#include "s_serv.h"
+#include "server.h"
 #include "hostmask.h"
 #include "send.h"
 #include "listener.h"
 #include "resv.h"
 #include "numeric.h"
-#include "s_user.h"
+#include "user.h"
 #include "motd.h"
 
 #ifdef HAVE_LIBCRYPTO

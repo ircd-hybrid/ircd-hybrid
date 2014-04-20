@@ -19,13 +19,13 @@
  *  USA
  */
 
-/*! \file s_misc.h
+/*! \file misc.h
  * \brief A header for the miscellaneous functions.
  * \version $Id$
  */
 
-#ifndef INCLUDED_s_misc_h
-#define INCLUDED_s_misc_h
+#ifndef INCLUDED_misc_h
+#define INCLUDED_misc_h
 
 extern const char *date(time_t);
 extern const char *smalldate(time_t);

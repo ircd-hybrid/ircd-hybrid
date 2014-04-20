@@ -25,7 +25,7 @@
  */
 
 #include "stdinc.h"
-#include "s_misc.h"
+#include "misc.h"
 #include "irc_string.h"
 #include "ircd.h"
 

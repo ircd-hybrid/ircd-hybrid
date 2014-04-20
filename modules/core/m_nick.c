@@ -33,9 +33,9 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"
-#include "s_user.h"
+#include "user.h"
 #include "whowas.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -45,7 +45,7 @@
 #include "modules.h"
 #include "packet.h"
 #include "watch.h"
-#include "s_misc.h"
+#include "misc.h"
 
 
 /* check_clean_nick()

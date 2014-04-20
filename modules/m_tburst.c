@@ -30,7 +30,7 @@
 #include "send.h"
 #include "modules.h"
 #include "hash.h"
-#include "s_serv.h"
+#include "server.h"
 #include "conf.h"
 #include "parse.h"
 

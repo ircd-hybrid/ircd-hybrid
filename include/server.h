@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_serv.h
+/*! \file server.h
  * \brief A header for the server functions.
  * \version $Id$
  */
@@ -100,4 +100,4 @@ extern void try_connections(void *);
 extern int serv_connect(struct MaskItem *, struct Client *);
 extern struct Client *find_servconn_in_progress(const char *);
 extern struct Server *make_server(struct Client *);
-#endif /* INCLUDED_s_serv_h */
+#endif /* INCLUDED_server.h */

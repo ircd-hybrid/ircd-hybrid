@@ -25,7 +25,7 @@
  */
 
 #include "stdinc.h"
-#include "s_user.h"
+#include "user.h"
 #include "list.h"
 #include "ircd.h"
 #include "channel.h"
@@ -46,7 +46,7 @@
 #include "auth.h"
 #include "s_bsd.h"
 #include "log.h"
-#include "s_serv.h"      /* try_connections */
+#include "server.h"      /* try_connections */
 #include "send.h"
 #include "whowas.h"
 #include "modules.h"

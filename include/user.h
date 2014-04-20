@@ -19,13 +19,13 @@
  *  USA
  */
 
-/*! \file s_user.h
+/*! \file user.h
  * \brief A header for the user functions.
  * \version $Id$
  */
 
-#ifndef INCLUDED_s_user_h
-#define INCLUDED_s_user_h
+#ifndef INCLUDED_user_h
+#define INCLUDED_user_h
 
 #define IRC_MAXSID 3
 #define IRC_MAXUID 6

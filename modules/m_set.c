@@ -34,7 +34,7 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_misc.h"
+#include "misc.h"
 
 
 /* SET AUTOCONN */

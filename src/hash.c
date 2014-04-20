@@ -42,7 +42,7 @@
 #include "memory.h"
 #include "mempool.h"
 #include "dbuf.h"
-#include "s_user.h"
+#include "user.h"
 
 
 static mp_pool_t *userhost_pool = NULL;

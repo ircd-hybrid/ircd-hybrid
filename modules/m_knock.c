@@ -37,8 +37,8 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_serv.h"
-#include "s_user.h"
+#include "server.h"
+#include "user.h"
 
 
 /*! \brief KNOCK command handler

@@ -32,9 +32,9 @@
 #include "ircd.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_serv.h"
-#include "s_user.h"
-#include "s_misc.h"
+#include "server.h"
+#include "user.h"
+#include "misc.h"
 #include "memory.h"
 
 

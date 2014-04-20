@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "ircd.h"
-#include "s_user.h"
+#include "user.h"
 #include "client.h"
 #include "hash.h"
 #include "numeric.h"

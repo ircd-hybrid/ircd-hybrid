@@ -35,7 +35,7 @@
 #include "numeric.h"
 #include "fdlist.h"
 #include "s_bsd.h"
-#include "s_serv.h"
+#include "server.h"
 #include "conf.h"
 #include "log.h"
 #include "memory.h"

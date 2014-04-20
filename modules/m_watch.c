@@ -34,7 +34,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_user.h"
+#include "user.h"
 #include "watch.h"
 
 

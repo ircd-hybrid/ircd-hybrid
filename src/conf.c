@@ -28,7 +28,7 @@
 #include "list.h"
 #include "ircd_defs.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "resv.h"
 #include "channel.h"
 #include "client.h"
@@ -47,10 +47,10 @@
 #include "mempool.h"
 #include "res.h"
 #include "userhost.h"
-#include "s_user.h"
+#include "user.h"
 #include "channel_mode.h"
 #include "parse.h"
-#include "s_misc.h"
+#include "misc.h"
 #include "conf_db.h"
 #include "conf_class.h"
 #include "motd.h"
@@ -2092,7 +2092,7 @@ match_conf_password(const char *password, const struct MaskItem *conf)
  *
  * inputs	- client sending the cluster
  *		- command name "KLINE" "XLINE" etc.
- *		- capab -- CAP_KLN etc. from s_serv.h
+ *		- capab -- CAP_KLN etc. from server.h
  *		- cluster type -- CLUSTER_KLINE etc. from conf.h
  *		- pattern and args to send along
  * output	- none

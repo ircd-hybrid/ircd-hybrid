@@ -30,7 +30,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_serv.h"
+#include "server.h"
 
 
 /*! \brief EOB command handler

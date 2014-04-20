@@ -34,7 +34,7 @@
 #include "modules.h"
 #include "conf.h"
 #include "hostmask.h"
-#include "s_user.h"
+#include "user.h"
 
 
 /*! \brief WEBIRC command handler

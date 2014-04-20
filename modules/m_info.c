@@ -43,8 +43,8 @@
 struct InfoStruct
 {
   const char *name;         /* Displayed variable name           */
-  unsigned int output_type; /* See below #defines                */
-  void *option;             /* Pointer reference to the value    */
+  const unsigned int output_type; /* See below #defines                */
+  const void *option;             /* Pointer reference to the value    */
   const char *desc;         /* ASCII description of the variable */
 };
 
@@ -562,7 +562,7 @@ send_conf_options(struct Client *source_p)
       /* For "char *" references */
       case OUTPUT_STRING:
       {
-        const char *option = *((char **)iptr->option);
+        const char *option = *((const char *const *)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
                    ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
@@ -586,7 +586,7 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as a decimal value. */
       case OUTPUT_DECIMAL:
       {
-        const int option = *((int *)iptr->option);
+        const int option = *((const int *const)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5d [%-30s]",
                    ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
@@ -597,7 +597,7 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as "ON" or "OFF" */
       case OUTPUT_BOOLEAN:
       {
-        const int option = *((int *)iptr->option);
+        const int option = *((const int *const)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
                    ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
@@ -610,7 +610,7 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as "YES" or "NO" */
       case OUTPUT_BOOLEAN_YN:
       {
-        const int option = *((int *)iptr->option);
+        const int option = *((const int *const)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
                    ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
@@ -621,7 +621,7 @@ send_conf_options(struct Client *source_p)
 
       case OUTPUT_BOOLEAN2:
       {
-        const int option = *((int *)iptr->option);
+        const int option = *((const int *const)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
                    ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),

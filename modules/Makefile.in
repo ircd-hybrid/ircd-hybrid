@@ -457,6 +457,12 @@ m_unkline_la_OBJECTS = $(am_m_unkline_la_OBJECTS)
 m_unkline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_unkline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_unxline_la_LIBADD =
+am_m_unxline_la_OBJECTS = m_unxline.lo
+m_unxline_la_OBJECTS = $(am_m_unxline_la_OBJECTS)
+m_unxline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_unxline_la_LDFLAGS) $(LDFLAGS) -o $@
 m_user_la_LIBADD =
 am_m_user_la_OBJECTS = m_user.lo
 m_user_la_OBJECTS = $(am_m_user_la_OBJECTS)
@@ -576,12 +582,12 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_svspart_la_SOURCES) $(m_tburst_la_SOURCES) \
 	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
 	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
-	$(m_unkline_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_unkline_la_SOURCES) $(m_unxline_la_SOURCES) \
+	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
+	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
+	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
+	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
+	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
 	$(m_certfp_la_SOURCES) $(m_challenge_la_SOURCES) \
@@ -607,12 +613,12 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_svspart_la_SOURCES) $(m_tburst_la_SOURCES) \
 	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
 	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
-	$(m_unkline_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_unkline_la_SOURCES) $(m_unxline_la_SOURCES) \
+	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
+	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
+	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
+	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
+	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -880,6 +886,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_trace.la     \
                       m_undline.la   \
                       m_unkline.la   \
+                      m_unxline.la   \
                       m_user.la      \
                       m_userhost.la  \
                       m_version.la   \
@@ -945,6 +952,7 @@ m_topic_la_LDFLAGS = $(MODULE_FLAGS)
 m_trace_la_LDFLAGS = $(MODULE_FLAGS)
 m_undline_la_LDFLAGS = $(MODULE_FLAGS)
 m_unkline_la_LDFLAGS = $(MODULE_FLAGS)
+m_unxline_la_LDFLAGS = $(MODULE_FLAGS)
 m_user_la_LDFLAGS = $(MODULE_FLAGS)
 m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1009,6 +1017,7 @@ m_topic_la_SOURCES = m_topic.c
 m_trace_la_SOURCES = m_trace.c
 m_undline_la_SOURCES = m_undline.c
 m_unkline_la_SOURCES = m_unkline.c
+m_unxline_la_SOURCES = m_unxline.c
 m_user_la_SOURCES = m_user.c
 m_userhost_la_SOURCES = m_userhost.c
 m_version_la_SOURCES = m_version.c
@@ -1251,6 +1260,9 @@ m_undline.la: $(m_undline_la_OBJECTS) $(m_undline_la_DEPENDENCIES) $(EXTRA_m_und
 m_unkline.la: $(m_unkline_la_OBJECTS) $(m_unkline_la_DEPENDENCIES) $(EXTRA_m_unkline_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_unkline_la_LINK) -rpath $(modulesdir) $(m_unkline_la_OBJECTS) $(m_unkline_la_LIBADD) $(LIBS)
 
+m_unxline.la: $(m_unxline_la_OBJECTS) $(m_unxline_la_DEPENDENCIES) $(EXTRA_m_unxline_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_unxline_la_LINK) -rpath $(modulesdir) $(m_unxline_la_OBJECTS) $(m_unxline_la_LIBADD) $(LIBS)
+
 m_user.la: $(m_user_la_OBJECTS) $(m_user_la_DEPENDENCIES) $(EXTRA_m_user_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_user_la_LINK) -rpath $(modulesdir) $(m_user_la_OBJECTS) $(m_user_la_LIBADD) $(LIBS)
 
@@ -1341,6 +1353,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_trace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_undline.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_unkline.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_unxline.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_user.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_userhost.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_version.Plo@am__quote@

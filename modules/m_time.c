@@ -76,7 +76,7 @@ m_time(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static int
-mo_time(struct Client *source_p, int parc, char *parv[])
+ms_time(struct Client *source_p, int parc, char *parv[])
 {
   if (hunt_server(source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
     sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
@@ -87,7 +87,7 @@ mo_time(struct Client *source_p, int parc, char *parv[])
 static struct Message time_msgtab =
 {
   "TIME", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_time, mo_time, m_ignore, mo_time, m_ignore }
+  { m_unregistered, m_time, ms_time, m_ignore, ms_time, m_ignore }
 };
 
 static void

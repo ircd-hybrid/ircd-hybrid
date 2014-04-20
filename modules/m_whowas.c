@@ -136,7 +136,7 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static int
-mo_whowas(struct Client *source_p, int parc, char *parv[])
+ms_whowas(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -156,7 +156,7 @@ mo_whowas(struct Client *source_p, int parc, char *parv[])
 static struct Message whowas_msgtab =
 {
   "WHOWAS", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_whowas, mo_whowas, m_ignore, mo_whowas, m_ignore }
+  { m_unregistered, m_whowas, ms_whowas, m_ignore, ms_whowas, m_ignore }
 };
 
 static void

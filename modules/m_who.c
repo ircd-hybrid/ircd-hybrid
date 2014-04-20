@@ -157,14 +157,14 @@ who_global(struct Client *source_p, char *mask, int server_oper)
     last_used = CurrentTime;
   }
 
-  /* first, list all matching invisible clients on common channels */
+  /* First, list all matching invisible clients on common channels */
   DLINK_FOREACH(lp, source_p->channel.head)
   {
     chptr = ((struct Membership *)lp->data)->chptr;
     who_common_channel(source_p, chptr, mask, server_oper, &maxmatches);
   }
 
-  /* second, list all matching visible clients */
+  /* Second, list all matching visible clients */
   DLINK_FOREACH(gcptr, global_client_list.head)
   {
     target_p = gcptr->data;
@@ -232,12 +232,18 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
   }
 }
 
-/*
-** m_who
-**      parv[0] = command
-**      parv[1] = nickname mask list
-**      parv[2] = additional selection flag, only 'o' for now.
-*/
+/*! \brief WHO command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/channelname
+ *      - parv[2] = additional selection flag, only 'o' for now
+ */
 static int
 m_who(struct Client *source_p, int parc, char *parv[])
 {
@@ -255,7 +261,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /* mask isn't NULL at this point. repeat after me... -db */
+  /* Mask isn't NULL at this point. repeat after me... -db */
   collapse(mask);
 
   /* '/who #some_channel' */

@@ -37,6 +37,18 @@
 #include "modules.h"
 
 
+/*! \brief PONG command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = origin
+ *      - parv[2] = destination
+ */
 static int
 ms_pong(struct Client *source_p, int parc, char *parv[])
 {
@@ -72,6 +84,17 @@ ms_pong(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
+/*! \brief PONG command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = origin/ping cookie
+ */
 static int
 mr_pong(struct Client *source_p, int parc, char *parv[])
 {

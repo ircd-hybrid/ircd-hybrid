@@ -57,6 +57,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_time.la      \
                       m_topic.la     \
                       m_trace.la     \
+                      m_undline.la   \
                       m_user.la      \
                       m_userhost.la  \
                       m_version.la   \
@@ -121,6 +122,7 @@ m_tburst_la_LDFLAGS = $(MODULE_FLAGS)
 m_time_la_LDFLAGS = $(MODULE_FLAGS)
 m_topic_la_LDFLAGS = $(MODULE_FLAGS)
 m_trace_la_LDFLAGS = $(MODULE_FLAGS)
+m_undline_la_LDFLAGS = $(MODULE_FLAGS)
 m_user_la_LDFLAGS = $(MODULE_FLAGS)
 m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
@@ -184,6 +186,7 @@ m_tburst_la_SOURCES = m_tburst.c
 m_time_la_SOURCES = m_time.c
 m_topic_la_SOURCES = m_topic.c
 m_trace_la_SOURCES = m_trace.c
+m_undline_la_SOURCES = m_undline.c
 m_user_la_SOURCES = m_user.c
 m_userhost_la_SOURCES = m_userhost.c
 m_version_la_SOURCES = m_version.c

@@ -5,6 +5,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 modulesdir = $(pkglibdir)/modules
 
 
+m_bmask_la_LDFLAGS = $(MODULE_FLAGS)
 m_die_la_LDFLAGS = $(MODULE_FLAGS)
 m_error_la_LDFLAGS = $(MODULE_FLAGS)
 m_join_la_LDFLAGS = $(MODULE_FLAGS)
@@ -18,7 +19,9 @@ m_quit_la_LDFLAGS = $(MODULE_FLAGS)
 m_server_la_LDFLAGS = $(MODULE_FLAGS)
 m_sjoin_la_LDFLAGS = $(MODULE_FLAGS)
 m_squit_la_LDFLAGS = $(MODULE_FLAGS)
+m_tmode_la_LDFLAGS = $(MODULE_FLAGS)
 
+m_bmask_la_SOURCES = m_bmask.c
 m_die_la_SOURCES = m_die.c
 m_error_la_SOURCES = m_error.c
 m_join_la_SOURCES = m_join.c
@@ -32,8 +35,10 @@ m_quit_la_SOURCES = m_quit.c
 m_server_la_SOURCES = m_server.c
 m_sjoin_la_SOURCES = m_sjoin.c
 m_squit_la_SOURCES = m_squit.c
+m_tmode_la_SOURCES = m_tmode.c
 
-modules_LTLIBRARIES = m_die.la     \
+modules_LTLIBRARIES = m_bmask.la   \
+                      m_die.la     \
                       m_error.la   \
                       m_join.la    \
                       m_kick.la    \
@@ -45,7 +50,8 @@ modules_LTLIBRARIES = m_die.la     \
                       m_quit.la    \
                       m_server.la  \
                       m_sjoin.la   \
-                      m_squit.la
+                      m_squit.la   \
+                      m_tmode.la
 
 modules: $(modules_LTLIBRARIES)
 

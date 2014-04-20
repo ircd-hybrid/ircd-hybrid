@@ -48,6 +48,7 @@ static dlink_list modules_conf;
 static const char *unknown_ver = "<unknown>";
 static const char *core_module_table[] =
 {
+  "m_bmask.la",
   "m_die.la",
   "m_error.la",
   "m_join.la",
@@ -61,6 +62,7 @@ static const char *core_module_table[] =
   "m_server.la",
   "m_sjoin.la",
   "m_squit.la",
+  "m_tmode.la",
   NULL
 };
 

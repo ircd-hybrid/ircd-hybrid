@@ -41,19 +41,16 @@
 #include "s_user.h"
 
 
-/* m_knock
- *    parv[0] = command
- *    parv[1] = channel
+/*! \brief KNOCK command handler
  *
- *  The KNOCK command has the following syntax:
- *   :<sender> KNOCK <channel>
- *
- *  If a user is not banned from the channel they can use the KNOCK
- *  command to have the server NOTICE the channel operators notifying
- *  they would like to join.  Helpful if the channel is invite-only, the
- *  key is forgotten, or the channel is full (INVITE can bypass each one
- *  of these conditions.  Concept by Dianora <db@db.net> and written by
- *  <anonymous>
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
  */
 static int
 m_knock(struct Client *source_p, int parc, char *parv[])

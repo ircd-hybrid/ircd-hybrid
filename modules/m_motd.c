@@ -37,6 +37,11 @@
 #include "conf.h"
 
 
+/*! \brief Sends the "message of the day" and notifies irc-operators
+ *         about the MOTD request
+ *
+ * \param source_p Pointer to client to report to
+ */
 static void
 do_motd(struct Client *source_p)
 {

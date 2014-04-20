@@ -37,6 +37,11 @@
 #include "modules.h"
 
 
+/*! \brief Shows a list of linked servers and notifies irc-operators
+ *         about the LINKS request
+ *
+ * \param source_p Pointer to client to report to
+ */
 static void
 do_links(struct Client *source_p, int parc, char *parv[])
 {

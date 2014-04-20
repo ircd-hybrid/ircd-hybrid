@@ -119,6 +119,21 @@ static void dump_map(struct Client *client,
     *(p - 1) = '-';
 }
 
+/*! \brief Sends a network topology map and notifies irc-operators
+ *         about the MAP request
+ *
+ * \param source_p Pointer to client to report to
+ */
+static void
+do_map(struct Client *source_p)
+{
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
+                       "MAP requested by %s (%s@%s) [%s]",
+                       source_p->name, source_p->username,
+                       source_p->host, source_p->servptr->name);
+  dump_map(source_p, &me, 0);
+}
+
 /*! \brief MAP command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
@@ -145,7 +160,7 @@ m_map(struct Client *source_p, int parc, char *parv[])
 
   last_used = CurrentTime;
 
-  dump_map(source_p, &me, 0);
+  do_map(source_p);
   sendto_one_numeric(source_p, &me, RPL_MAPEND);
   return 0;
 }
@@ -163,7 +178,7 @@ m_map(struct Client *source_p, int parc, char *parv[])
 static int
 mo_map(struct Client *source_p, int parc, char *parv[])
 {
-  dump_map(source_p, &me, 0);
+  do_map(source_p);
   sendto_one_numeric(source_p, &me, RPL_MAPEND);
   return 0;
 }

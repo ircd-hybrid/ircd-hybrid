@@ -198,7 +198,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
                   &tkline_time, &target_server, &reason) < 0)
     return 0;
 
-  if (target_server != NULL)
+  if (target_server)
   {
     sendto_match_servs(source_p, target_server, CAP_KLN, "KLINE %s %lu %s %s :%s",
                        target_server, (unsigned long)tkline_time,
@@ -221,7 +221,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   conf->host = xstrdup(host);
   conf->user = xstrdup(user);
 
-  if (tkline_time != 0)
+  if (tkline_time)
     snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %s (%s)",
              (int)(tkline_time/60), reason, current_date);
   else
@@ -268,7 +268,7 @@ me_kline(struct Client *source_p, int parc, char *parv[])
     conf->host = xstrdup(khost);
     conf->user = xstrdup(kuser);
 
-    if (tkline_time != 0)
+    if (tkline_time)
       snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %s (%s)",
                (int)(tkline_time/60), kreason, current_date);
     else

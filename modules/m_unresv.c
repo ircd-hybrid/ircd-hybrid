@@ -60,8 +60,7 @@ remove_resv(struct Client *source_p, const char *name)
     }
 
     conf_free(conf);
-    sendto_one_notice(source_p, &me, ":The RESV has been removed on channel: %s",
-                      name);
+    sendto_one_notice(source_p, &me, ":The RESV has been removed on channel: %s", name);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the RESV for channel: %s",
                          get_oper_name(source_p), name);
@@ -72,8 +71,7 @@ remove_resv(struct Client *source_p, const char *name)
   {
     if ((conf = find_exact_name_conf(CONF_NRESV, NULL, name, NULL, NULL)) == NULL)
     {
-      sendto_one_notice(source_p, &me, ":A RESV does not exist for nick: %s",
-                        name);
+      sendto_one_notice(source_p, &me, ":A RESV does not exist for nick: %s", name);
       return;
     }
 
@@ -120,7 +118,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
                   NULL, &target_server, &reason) < 0)
     return 0;
 
-  if (target_server != NULL)
+  if (target_server)
   {
     sendto_match_servs(source_p, target_server, CAP_CLUSTER,
                        "UNRESV %s %s",
@@ -152,7 +150,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
 static int
 ms_unresv(struct Client *source_p, int parc, char *parv[])
 {
-  if ((parc != 3) || EmptyString(parv[2]))
+  if (parc != 3 || EmptyString(parv[2]))
     return 0;
 
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
@@ -162,7 +160,8 @@ ms_unresv(struct Client *source_p, int parc, char *parv[])
   if (!IsClient(source_p) || match(parv[1], me.name))
     return 0;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+  if (HasFlag(source_p, FLAGS_SERVICE) ||
+      find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_UNRESV))
     remove_resv(source_p, parv[2]);

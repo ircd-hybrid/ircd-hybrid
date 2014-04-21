@@ -104,7 +104,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
 
   SetConfDatabase(conf);
 
-  if (tkline_time != 0)
+  if (tkline_time)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. X-Line for [%s] [%s]",
@@ -194,10 +194,10 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
                   &tkline_time, &target_server, &reason) < 0)
     return 0;
 
-  if (target_server != NULL)
+  if (target_server)
   {
     /* if a given expire time is given, ENCAP it */
-    if (tkline_time != 0)
+    if (tkline_time)
       sendto_match_servs(source_p, target_server, CAP_ENCAP,
                          "ENCAP %s XLINE %d %s 0 :%s",
                          target_server, (int)tkline_time, gecos, reason);
@@ -212,7 +212,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
   }
   else
   {
-    if (tkline_time != 0)
+    if (tkline_time)
       cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_XLINE,
                      "XLINE %d %s 0 :%s", (int)tkline_time, gecos, reason);
     else

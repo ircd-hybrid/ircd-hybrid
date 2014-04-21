@@ -116,7 +116,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
                   &addr, NULL, &target_server, NULL) < 0)
     return 0;
 
-  if (target_server != NULL)
+  if (target_server)
   {
     sendto_match_servs(source_p, target_server, CAP_UNDLN,
                        "UNDLINE %s %s", target_server, addr);
@@ -126,8 +126,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNDLINE", CAP_UNDLN, SHARED_UNDLINE,
-                   "%s", addr);
+    cluster_a_line(source_p, "UNDLINE", CAP_UNDLN, SHARED_UNDLINE, "%s", addr);
 
   if (remove_dline_match(addr))
   {
@@ -140,6 +139,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
   }
   else
     sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", addr);
+
   return 0;
 }
 
@@ -163,8 +163,7 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
   if (parc != 3 || EmptyString(parv[2]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_UNDLN,
-                     "UNDLINE %s %s",
+  sendto_match_servs(source_p, parv[1], CAP_UNDLN, "UNDLINE %s %s",
                      parv[1], parv[2]);
 
   if (!IsClient(source_p) || match(parv[1], me.name))

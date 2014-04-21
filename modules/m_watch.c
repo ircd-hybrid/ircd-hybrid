@@ -97,7 +97,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
      */
     if (*s == '+')
     {
-      if (*(s + 1) != '\0')
+      if (*(s + 1))
       {
         if (dlink_list_length(&source_p->localClient->watches) >=
             ConfigFileEntry.max_watch)

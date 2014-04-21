@@ -61,10 +61,10 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
                   &tkline_time, &target_server, &reason) < 0)
     return 0;
 
-  if (target_server != NULL)
+  if (target_server)
   {
     /* if a given expire time is given, ENCAP it */
-    if (tkline_time != 0)
+    if (tkline_time)
       sendto_match_servs(source_p, target_server, CAP_ENCAP,
                          "ENCAP %s RESV %d %s 0 :%s",
                          target_server, (int)tkline_time, resv, reason);
@@ -81,7 +81,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
     /* RESV #channel :abuse
      * RESV kiddie :abuse
      */
-    if (tkline_time != 0)
+    if (tkline_time)
       cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_RESV,
                      "RESV %d %s 0 : %s", (int)tkline_time, resv, reason);
     else
@@ -129,7 +129,7 @@ me_resv(struct Client *source_p, int parc, char *parv[])
 static int
 ms_resv(struct Client *source_p, int parc, char *parv[])
 {
-  if ((parc != 4) || EmptyString(parv[3]))
+  if (parc != 4 || EmptyString(parv[3]))
     return 0;
 
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
@@ -172,7 +172,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     conf->setat = CurrentTime;
     SetConfDatabase(conf);
 
-    if (tkline_time != 0)
+    if (tkline_time)
     {
       sendto_one_notice(source_p, &me, ":A %d minute %s RESV has been placed on channel: %s",
                         tkline_time/60, (MyClient(source_p) ? "local" : "remote"), name);
@@ -225,7 +225,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     conf->setat = CurrentTime;
     SetConfDatabase(conf);
 
-    if (tkline_time != 0)
+    if (tkline_time)
     {
       sendto_one_notice(source_p, &me, ":A %d minute %s RESV has been placed on nick %s : [%s]",
                         tkline_time/60, (MyClient(source_p) ? "local" : "remote"),

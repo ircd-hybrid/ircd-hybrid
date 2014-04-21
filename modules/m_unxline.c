@@ -114,7 +114,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
                   NULL, NULL, &target_server, NULL) < 0)
     return 0;
 
-  if (target_server != NULL)
+  if (target_server)
   {
     sendto_match_servs(source_p, target_server, CAP_CLUSTER,
                        "UNXLINE %s %s", target_server, gecos);
@@ -152,13 +152,14 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
   if (!IsClient(source_p) || EmptyString(parv[2]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
-                     "UNXLINE %s %s", parv[1], parv[2]);
+  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "UNXLINE %s %s",
+                     parv[1], parv[2]);
 
   if (match(parv[1], me.name))
     return 0;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+  if (HasFlag(source_p, FLAGS_SERVICE) ||
+      find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_UNXLINE))
     remove_xline(source_p, parv[2]);

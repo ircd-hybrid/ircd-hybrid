@@ -116,7 +116,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
                   &host, NULL, &target_server, NULL) < 0)
     return 0;
 
-  if (target_server != NULL)
+  if (target_server)
   {
      sendto_match_servs(source_p, target_server, CAP_UNKLN,
                         "UNKLINE %s %s %s",
@@ -132,8 +132,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
 
   if (remove_kline_match(host, user))
   {
-    sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
-                      user, host);
+    sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed", user, host);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the K-Line for: [%s@%s]",
                          get_oper_name(source_p), user, host);

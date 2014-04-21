@@ -225,7 +225,7 @@ parse_resvconf(void)
     if ((p = strpbrk(arg, " \t")) != NULL)
       *p = '\0';  /* take the first word */
 
-    if (!irccmp(opt, "nameserver"))
+    if (!strcasecmp(opt, "nameserver"))
       add_nameserver(arg);
   }
 

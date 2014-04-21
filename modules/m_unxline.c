@@ -49,9 +49,9 @@
 static int
 remove_xline_match(const char *gecos)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, xconf_items.head)
+  DLINK_FOREACH(ptr, xconf_items.head)
   {
     struct MaskItem *conf = ptr->data;
 

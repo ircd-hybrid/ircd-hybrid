@@ -434,7 +434,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
      */
     for (const struct SetStruct *tab = set_cmd_table; tab->handler; ++tab)
     {
-      if (!irccmp(tab->name, parv[1]))
+      if (irccmp(tab->name, parv[1]))
         continue;
 
       /*
@@ -449,9 +449,9 @@ mo_set(struct Client *source_p, int parc, char *parv[])
         intarg = parv[n++];
 
       if ((n - 1) > parc)
-          sendto_one_notice(source_p, &me, ":SET %s expects (\"%s%s\") args", tab->name,
-                            (tab->wants_char ? "string, " : ""),
-                            (tab->wants_int ? "int" : ""));
+        sendto_one_notice(source_p, &me, ":SET %s expects (\"%s%s\") args", tab->name,
+                          (tab->wants_char ? "string, " : ""),
+                          (tab->wants_int ? "int" : ""));
 
       if (parc <= 2)
       {

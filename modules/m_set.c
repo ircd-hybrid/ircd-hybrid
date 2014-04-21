@@ -41,11 +41,11 @@
 static void
 quote_autoconn(struct Client *source_p, const char *arg, int newval)
 {
-  if (arg != NULL)
+  if (arg)
   {
     struct MaskItem *conf = find_exact_name_conf(CONF_SERVER, NULL, arg, NULL, NULL);
 
-    if (conf != NULL)
+    if (conf)
     {
       if (newval)
         SetConfAllowAutoConn(conf);
@@ -59,19 +59,15 @@ quote_autoconn(struct Client *source_p, const char *arg, int newval)
                         arg, newval);
     }
     else
-    {
       sendto_one_notice(source_p, &me, ":Cannot find %s", arg);
-    }
   }
   else
-  {
     sendto_one_notice(source_p, &me, ":Please specify a server name!");
-  }
 }
 
 /* SET AUTOCONNALL */
 static void
-quote_autoconnall(struct Client *source_p, int newval)
+quote_autoconnall(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
@@ -88,7 +84,7 @@ quote_autoconnall(struct Client *source_p, int newval)
 
 /* SET FLOODCOUNT */
 static void
-quote_floodcount(struct Client *source_p, int newval)
+quote_floodcount(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
@@ -104,7 +100,7 @@ quote_floodcount(struct Client *source_p, int newval)
 
 /* SET IDENTTIMEOUT */
 static void
-quote_identtimeout(struct Client *source_p, int newval)
+quote_identtimeout(struct Client *source_p, const char *arg, int newval)
 {
   if (!HasUMode(source_p, UMODE_ADMIN))
   {
@@ -126,7 +122,7 @@ quote_identtimeout(struct Client *source_p, int newval)
 
 /* SET MAX */
 static void
-quote_max(struct Client *source_p, int newval)
+quote_max(struct Client *source_p, const char *arg, int newval)
 {
   if (newval > 0)
   {
@@ -157,7 +153,7 @@ quote_max(struct Client *source_p, int newval)
 
 /* SET SPAMNUM */
 static void
-quote_spamnum(struct Client *source_p, int newval)
+quote_spamnum(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
@@ -181,7 +177,7 @@ quote_spamnum(struct Client *source_p, int newval)
 
 /* SET SPAMTIME */
 static void
-quote_spamtime(struct Client *source_p, int newval)
+quote_spamtime(struct Client *source_p, const char *arg, int newval)
 {
   if (newval > 0)
   {
@@ -216,14 +212,14 @@ static const char *splitmode_status[] =
 
 /* SET SPLITMODE */
 static void
-quote_splitmode(struct Client *source_p, char *charval)
+quote_splitmode(struct Client *source_p, const char *charval, int val)
 {
   if (charval)
   {
     int newval;
 
     for (newval = 0; splitmode_values[newval]; ++newval)
-      if (irccmp(splitmode_values[newval], charval) == 0)
+      if (!irccmp(splitmode_values[newval], charval))
         break;
 
     /* OFF */
@@ -273,7 +269,7 @@ quote_splitmode(struct Client *source_p, char *charval)
 
 /* SET SPLITNUM */
 static void
-quote_splitnum(struct Client *source_p, int newval)
+quote_splitnum(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
@@ -292,7 +288,7 @@ quote_splitnum(struct Client *source_p, int newval)
 
 /* SET SPLITUSERS */
 static void
-quote_splitusers(struct Client *source_p, int newval)
+quote_splitusers(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
@@ -311,7 +307,7 @@ quote_splitusers(struct Client *source_p, int newval)
 
 /* SET JFLOODTIME */
 static void
-quote_jfloodtime(struct Client *source_p, int newval)
+quote_jfloodtime(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
@@ -327,7 +323,7 @@ quote_jfloodtime(struct Client *source_p, int newval)
 
 /* SET JFLOODCOUNT */
 static void
-quote_jfloodcount(struct Client *source_p, int newval)
+quote_jfloodcount(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
@@ -345,7 +341,7 @@ quote_jfloodcount(struct Client *source_p, int newval)
 struct SetStruct
 {
   const char *name;
-  void (*handler)();
+  void (*handler)(struct Client *, const char *, int);
   const int wants_char; /* 1 if it expects (char *, [int]) */
   const int wants_int;  /* 1 if it expects ([char *], int) */
   /* eg:  0, 1 == only an int arg
@@ -421,7 +417,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
 {
   int n;
   int newval;
-  const char *arg    = NULL;
+  const char *strarg = NULL;
   const char *intarg = NULL;
 
   if (!HasOFlag(source_p, OPER_FLAG_SET))
@@ -439,82 +435,62 @@ mo_set(struct Client *source_p, int parc, char *parv[])
     for (const struct SetStruct *tab = set_cmd_table; tab->handler; ++tab)
     {
       if (!irccmp(tab->name, parv[1]))
+        continue;
+
+      /*
+       * Command found; now execute the code
+       */
+      n = 2;
+
+      if (tab->wants_char)
+        strarg = parv[n++];
+
+      if (tab->wants_int)
+        intarg = parv[n++];
+
+      if ((n - 1) > parc)
+          sendto_one_notice(source_p, &me, ":SET %s expects (\"%s%s\") args", tab->name,
+                            (tab->wants_char ? "string, " : ""),
+                            (tab->wants_int ? "int" : ""));
+
+      if (parc <= 2)
       {
-        /*
-         * Command found; now execute the code
-         */
-        n = 2;
+        strarg = NULL;
+        intarg = NULL;
+      }
+/* XXX */
+      if (!strcmp(tab->name, "AUTOCONN") && parc < 4)
+      {
+        sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "SET");
+        return 0;
+      }
 
-        if (tab->wants_char)
-          arg = parv[n++];
-
-        if (tab->wants_int)
-          intarg = parv[n++];
-
-        if ((n - 1) > parc)
+      if (tab->wants_int && parc > 2)
+      {
+        if (intarg)
         {
-          if (parc > 2)
-            sendto_one_notice(source_p, &me, ":SET %s expects (\"%s%s\") args", tab->name,
-                              (tab->wants_char ? "string, " : ""),
-                              (tab->wants_char ? "int" : ""));
-        }
-
-        if (parc <= 2)
-        {
-          arg = NULL;
-          intarg = NULL;
-        }
-
-        if (!strcmp(tab->name, "AUTOCONN") && (parc < 4))
-        {
-          sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "SET");
-          return 0;
-        }
-
-        if (tab->wants_int && (parc > 2))
-        {
-          if (intarg)
-          {
-            if (irccmp(intarg, "yes") == 0 || irccmp(intarg, "on") == 0)
-              newval = 1;
-            else if (irccmp(intarg, "no") == 0|| irccmp(intarg, "off") == 0)
-              newval = 0;
-            else
-              newval = atoi(intarg);
-          }
+          if (!irccmp(intarg, "yes") || !irccmp(intarg, "on"))
+            newval = 1;
+          else if (!irccmp(intarg, "no")|| !irccmp(intarg, "off"))
+            newval = 0;
           else
-            newval = -1;
-
-          if (newval < 0)
-          {
-            sendto_one_notice(source_p, &me, ":Value less than 0 illegal for %s",
-                              tab->name);
-
-            return 0;
-          }
+            newval = atoi(intarg);
         }
         else
           newval = -1;
 
-        if (tab->wants_char)
+        if (newval < 0)
         {
-          if (tab->wants_int)
-            tab->handler(source_p, arg, newval);
-          else
-            tab->handler(source_p, arg);
-          return 0;
-        }
-        else
-        {
-          if (tab->wants_int)
-            tab->handler(source_p, newval);
-          else
-            /* Just in case someone actually wants a
-             * set function that takes no args.. *shrug* */
-            tab->handler(source_p);
+          sendto_one_notice(source_p, &me, ":Value less than 0 illegal for %s",
+                            tab->name);
           return 0;
         }
       }
+      else
+        newval = -1;
+
+      tab->handler(source_p, strarg, newval);
+      return 0;
     }
 
     /*

@@ -93,7 +93,7 @@ remove_xline(struct Client *source_p, const char *gecos)
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = gecos to UNXLINE
+ *      - parv[1] = gecos
  *      - parv[2] = "ON"
  *      - parv[3] = target server
  */
@@ -141,7 +141,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = target server
- *      - parv[2] = gecos to UNXLINE
+ *      - parv[2] = gecos 
  */
 static int
 ms_unxline(struct Client *source_p, int parc, char *parv[])

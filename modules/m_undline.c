@@ -90,7 +90,7 @@ remove_dline_match(const char *host)
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = IP address to UNDLINE
+ *      - parv[1] = IP address
  *      - parv[2] = "ON"
  *      - parv[3] = target server
  */
@@ -153,7 +153,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = target server
- *      - parv[2] = IP address to UNDLINE
+ *      - parv[2] = IP address
  */
 static int
 ms_undline(struct Client *source_p, int parc, char *parv[])

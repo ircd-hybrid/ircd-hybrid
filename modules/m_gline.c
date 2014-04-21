@@ -278,17 +278,18 @@ check_majority(const struct Client *source_p, const char *user,
   return GLINE_NOT_PLACED;
 }
 
-/* ms_gline()
+/*! \brief UNGLINE command handler
  *
- * inputs       - The usual for a m_ function
- * output       -
- * side effects -
- *
- * Place a G line if 3 opers agree on the identical user@host
- *
- * Allow this server to pass along GLINE if received and
- * GLINES is not defined.
- *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = user mask
+ *      - parv[2] = host mask
+ *      - parv[3] = reason
  */
 static int
 ms_gline(struct Client *source_p, int parc, char *parv[])
@@ -461,8 +462,8 @@ do_sungline(struct Client *source_p, const char *user,
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = username
- *      - parv[2] = hostname
+ *      - parv[1] = user mask
+ *      - parv[2] = host mask
  *      - parv[3] = reason
  */
 static int

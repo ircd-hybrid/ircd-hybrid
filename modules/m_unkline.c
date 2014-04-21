@@ -90,7 +90,7 @@ remove_kline_match(const char *host, const char *user)
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = user\@host mask to UNKLINE
+ *      - parv[1] = user\@host mask
  *      - parv[2] = "ON"
  *      - parv[3] = target server
  */
@@ -156,8 +156,8 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = target server
- *      - parv[2] = user mask to UNKLINE
- *      - parv[3] = host mask to UNKLINE
+ *      - parv[2] = user mask
+ *      - parv[3] = host mask
  */
 static int
 me_unkline(struct Client *source_p, int parc, char *parv[])
@@ -206,8 +206,8 @@ me_unkline(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = target server
- *      - parv[2] = user mask to UNKLINE
- *      - parv[3] = host mask to UNKLINE
+ *      - parv[2] = user mask
+ *      - parv[3] = host mask
  */
 static int
 ms_unkline(struct Client *source_p, int parc, char *parv[])

@@ -1,5 +1,12 @@
-UNDLINE <ip>
+UNDLINE <IP address>
 
-Will attempt to undline the given <ip>
+Will attempt to undline the given <IP address>
+If the dline is conf based, the dline will not be removed.
+
+UNDLINE <IP address> ON irc.server
+
+Will undline the given <IP address> on irc.server if irc.server accepts
+remote undlines. If the dline is conf based, the dline will
+not be removed.
 
 - Requires Oper Priv: undline

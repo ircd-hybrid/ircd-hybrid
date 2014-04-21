@@ -84,14 +84,18 @@ remove_xline(struct Client *source_p, const char *gecos)
     sendto_one_notice(source_p, &me, ":No X-Line for %s", gecos);
 }
 
-/* mo_unxline()
+/*! \brief UNXLINE command handler
  *
- * inputs	- pointer to server
- *		- pointer to client
- *		- parameter count
- *		- parameter list
- * output	-
- * side effects - removes a xline
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = gecos to UNXLINE
+ *      - parv[2] = "ON"
+ *      - parv[3] = target server
  */
 static int
 mo_unxline(struct Client *source_p, int parc, char *parv[])
@@ -127,11 +131,17 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/* ms_unxline()
+/*! \brief UNXLINE command handler
  *
- * inputs	- oper, target server, gecos
- * outputs	- none
- * side effects	- propagates unxline, applies it if we are a target
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = target server
+ *      - parv[2] = gecos to UNXLINE
  */
 static int
 ms_unxline(struct Client *source_p, int parc, char *parv[])

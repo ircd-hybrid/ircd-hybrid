@@ -122,7 +122,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
   struct split_nuh_item nuh;
   struct split_nuh_item *accept_p = NULL;
 
-  if (EmptyString(parv[1]) || !irccmp(parv[1], "*"))
+  if (EmptyString(parv[1]) || !strcmp(parv[1], "*"))
   {
     list_accepts(source_p);
     return 0;

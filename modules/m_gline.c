@@ -278,7 +278,7 @@ check_majority(const struct Client *source_p, const char *user,
   return GLINE_NOT_PLACED;
 }
 
-/*! \brief UNGLINE command handler
+/*! \brief GLINE command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.

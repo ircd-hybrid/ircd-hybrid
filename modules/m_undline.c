@@ -121,7 +121,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
     sendto_match_servs(source_p, target_server, CAP_UNDLN,
                        "UNDLINE %s %s", target_server, addr);
 
-    /* Allow ON to apply local unkline as well if it matches */
+    /* Allow ON to apply local undline as well if it matches */
     if (match(target_server, me.name))
       return 0;
   }

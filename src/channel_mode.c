@@ -121,7 +121,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
   char host[HOSTLEN + 1] = "";
   struct split_nuh_item nuh;
 
-  /* dont let local clients overflow the b/e/I lists */
+  /* Don't let local clients overflow the b/e/I lists */
   if (MyClient(client_p))
   {
     num_mask = dlink_list_length(&chptr->banlist) +
@@ -219,8 +219,8 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
 static int
 del_id(struct Channel *chptr, char *banid, unsigned int type)
 {
-  dlink_list *list;
-  dlink_node *ban;
+  dlink_list *list = NULL;
+  dlink_node *ban = NULL;
   char name[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
   char host[HOSTLEN + 1] = "";
@@ -420,8 +420,7 @@ clear_ban_cache_client(struct Client *client_p)
 
 /* Mode functions handle mode changes for a particular mode... */
 static void
-chm_nosuch(struct Client *source_p,
-           struct Channel *chptr, int parc, int *parn,
+chm_nosuch(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   if (*errors & SM_ERR_UNKNOWN)
@@ -432,9 +431,8 @@ chm_nosuch(struct Client *source_p,
 }
 
 static void
-chm_simple(struct Client *source_p, struct Channel *chptr,
-           int parc, int *parn, char **parv, int *errors, int alev, int dir,
-           char c, unsigned int d)
+chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
+           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   if ((alev < CHACCESS_HALFOP) ||
       ((d == MODE_PRIVATE) && (alev < CHACCESS_CHANOP)))
@@ -486,9 +484,8 @@ chm_simple(struct Client *source_p, struct Channel *chptr,
 }
 
 static void
-chm_registered(struct Client *source_p, struct Channel *chptr,
-               int parc, int *parn, char **parv, int *errors, int alev, int dir,
-               char c, unsigned int d)
+chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
+               char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   if (!IsServer(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
   {
@@ -599,8 +596,7 @@ chm_operonly(struct Client *source_p, struct Channel *chptr,
 }
 
 static void
-chm_ban(struct Client *source_p,
-        struct Channel *chptr, int parc, int *parn,
+chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   char *mask = NULL;
@@ -669,8 +665,7 @@ chm_ban(struct Client *source_p,
 }
 
 static void
-chm_except(struct Client *source_p,
-           struct Channel *chptr, int parc, int *parn,
+chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   char *mask = NULL;
@@ -740,8 +735,7 @@ chm_except(struct Client *source_p,
 }
 
 static void
-chm_invex(struct Client *source_p,
-          struct Channel *chptr, int parc, int *parn,
+chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   char *mask = NULL;
@@ -811,8 +805,7 @@ chm_invex(struct Client *source_p,
 }
 
 static void
-chm_voice(struct Client *source_p,
-          struct Channel *chptr, int parc, int *parn,
+chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
@@ -869,8 +862,7 @@ chm_voice(struct Client *source_p,
 
 #ifdef HALFOPS
 static void
-chm_hop(struct Client *source_p,
-        struct Channel *chptr, int parc, int *parn,
+chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
@@ -944,8 +936,7 @@ chm_hop(struct Client *source_p,
 #endif
 
 static void
-chm_op(struct Client *source_p,
-       struct Channel *chptr, int parc, int *parn,
+chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   const char *opnick = NULL;
@@ -1004,8 +995,7 @@ chm_op(struct Client *source_p,
 }
 
 static void
-chm_limit(struct Client *source_p,
-          struct Channel *chptr, int parc, int *parn,
+chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   unsigned int i = 0;
@@ -1062,8 +1052,7 @@ chm_limit(struct Client *source_p,
 }
 
 static void
-chm_key(struct Client *source_p,
-        struct Channel *chptr, int parc, int *parn,
+chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   unsigned int i = 0;
@@ -1416,7 +1405,7 @@ get_channel_access(const struct Client *source_p,
   if (!member)
     return CHACCESS_NOTONCHAN;
 
-  /* just to be sure.. */
+  /* Just to be sure.. */
   assert(source_p == member->client_p);
 
   if (has_member_flags(member, CHFL_CHANOP))
@@ -1453,7 +1442,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
   mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
                  (unsigned long)chptr->channelts, chptr->chname);
 
-  /* loop the list of modes we have */
+  /* Loop the list of modes we have */
   for (i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0) /* XXX: can it ever happen? */

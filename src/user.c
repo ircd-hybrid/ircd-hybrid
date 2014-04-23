@@ -167,15 +167,15 @@ show_lusers(struct Client *source_p)
                        Count.invisi, dlink_list_length(&global_serv_list));
   else
     sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT,
-                       (Count.total-Count.invisi), Count.invisi, 1);
+                       (Count.total - Count.invisi), Count.invisi, 1);
 
-  if (Count.oper > 0)
+  if (Count.oper)
     sendto_one_numeric(source_p, &me, RPL_LUSEROP, Count.oper);
 
-  if (dlink_list_length(&unknown_list) > 0)
+  if (dlink_list_length(&unknown_list))
     sendto_one_numeric(source_p, &me, RPL_LUSERUNKNOWN, dlink_list_length(&unknown_list));
 
-  if (dlink_list_length(&global_channel_list) > 0)
+  if (dlink_list_length(&global_channel_list))
     sendto_one_numeric(source_p, &me, RPL_LUSERCHANNELS, dlink_list_length(&global_channel_list));
 
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
@@ -532,15 +532,14 @@ register_local_user(struct Client *source_p)
 
   if (!valid_username(source_p->username, 1))
   {
-    char tmpstr2[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE] = "";
 
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Invalid username: %s (%s@%s)",
                          source_p->name, source_p->username, source_p->host);
     ++ServerStats.is_ref;
-    snprintf(tmpstr2, sizeof(tmpstr2), "Invalid username [%s]",
-             source_p->username);
-    exit_client(source_p, tmpstr2);
+    snprintf(buf, sizeof(buf), "Invalid username [%s]", source_p->username);
+    exit_client(source_p, buf);
     return;
   }
 
@@ -812,16 +811,15 @@ send_umode(struct Client *client_p, struct Client *source_p,
 {
   char *m = umode_buf;
   int what = 0;
-  unsigned int i;
-  unsigned int flag;
 
   /*
    * Build a string in umode_buf to represent the change in the user's
    * mode between the new (source_p->umodes) and 'old'.
    */
-  for (i = 0; i < 128; ++i)
+  for (unsigned int i = 0; i < 128; ++i)
   {
-    flag = user_modes[i];
+    unsigned int flag = user_modes[i];
+
     if (!flag)
       continue;
 
@@ -1009,7 +1007,7 @@ oper_up(struct Client *source_p)
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
 }
 
-static char new_uid[TOTALSIDUID + 1];     /* allow for \0 */
+static char new_uid[TOTALSIDUID + 1];  /* Allow for \0 */
 
 int
 valid_sid(const char *sid)
@@ -1058,7 +1056,7 @@ init_uid(void)
 static void
 add_one_to_uid(int i)
 {
-  if (i != IRC_MAXSID)    /* Not reached server SID portion yet? */
+  if (i != IRC_MAXSID)  /* Not reached server SID portion yet? */
   {
     if (new_uid[i] == 'Z')
       new_uid[i] = '0';
@@ -1090,7 +1088,7 @@ add_one_to_uid(int i)
 static const char *
 uid_get(void)
 {
-  add_one_to_uid(TOTALSIDUID - 1);    /* index from 0 */
+  add_one_to_uid(TOTALSIDUID - 1);  /* Index from 0 */
   return new_uid;
 }
 
@@ -1153,7 +1151,7 @@ add_isupport(const char *name, const char *options, int n)
   }
 
   support->name = xstrdup(name);
-  if (options != NULL)
+  if (options)
     support->options = xstrdup(options);
   support->number = n;
 
@@ -1221,7 +1219,7 @@ rebuild_isupport_message_line(void)
     p += (n = sprintf(p, "%s", support->name));
     len += n;
 
-    if (support->options != NULL)
+    if (support->options)
     {
       p += (n = sprintf(p, "=%s", support->options));
       len += n;
@@ -1249,7 +1247,7 @@ rebuild_isupport_message_line(void)
     }
   }
 
-  if (len != 0)
+  if (len)
   {
     if (*--p == ' ')
       *p = '\0';

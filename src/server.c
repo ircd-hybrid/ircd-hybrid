@@ -874,18 +874,18 @@ ssl_server_handshake(fde_t *fd, struct Client *client_p)
   if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
   {
     int res = SSL_get_verify_result(client_p->localClient->fd.ssl);
-    char buf[EVP_MAX_MD_SIZE * 2 + 1] = { '\0' };
-    unsigned char md[EVP_MAX_MD_SIZE] = { '\0' };
+    char buf[EVP_MAX_MD_SIZE * 2 + 1] = "";
+    unsigned char md[EVP_MAX_MD_SIZE] = "";
 
     if (res == X509_V_OK || res == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
         res == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE ||
         res == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT)
     {
-      unsigned int i = 0, n = 0;
+      unsigned int n = 0;
 
       if (X509_digest(cert, EVP_sha256(), md, &n))
       {
-        for (; i < n; ++i)
+        for (unsigned int i = 0; i < n; ++i)
           snprintf(buf + 2 * i, 3, "%02X", md[i]);
         client_p->certfp = xstrdup(buf);
       }

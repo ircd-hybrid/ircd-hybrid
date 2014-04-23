@@ -403,15 +403,15 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
    * setting a_limit_reached if any limit is reached.
    * - Dianora
    */
-  if (class->max_total != 0 && class->ref_count >= class->max_total)
+  if (class->max_total && class->ref_count >= class->max_total)
     a_limit_reached = 1;
-  else if (class->max_perip != 0 && ip_found->count > class->max_perip)
+  else if (class->max_perip && ip_found->count > class->max_perip)
     a_limit_reached = 1;
-  else if (class->max_local != 0 && local >= class->max_local)
+  else if (class->max_local && local >= class->max_local)
     a_limit_reached = 1;
-  else if (class->max_global != 0 && global >= class->max_global)
+  else if (class->max_global && global >= class->max_global)
     a_limit_reached = 1;
-  else if (class->max_ident != 0 && ident >= class->max_ident &&
+  else if (class->max_ident && ident >= class->max_ident &&
            client_p->username[0] != '~')
     a_limit_reached = 1;
 
@@ -604,12 +604,11 @@ void
 count_ip_hash(unsigned int *number_ips_stored, uint64_t *mem_ips_stored)
 {
   struct ip_entry *ptr;
-  int i;
 
   *number_ips_stored = 0;
   *mem_ips_stored    = 0;
 
-  for (i = 0; i < IP_HASH_SIZE; i++)
+  for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
   {
     for (ptr = ip_hash_table[i]; ptr; ptr = ptr->next)
     {
@@ -631,9 +630,8 @@ garbage_collect_ip_entries(void)
   struct ip_entry *ptr;
   struct ip_entry *last_ptr;
   struct ip_entry *next_ptr;
-  int i;
 
-  for (i = 0; i < IP_HASH_SIZE; i++)
+  for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
   {
     last_ptr = NULL;
 
@@ -783,7 +781,7 @@ find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
 
     if (conf->type == type)
     {
-      if (conf->name && (irccmp(conf->name, name) == 0 ||
+      if (conf->name && (!irccmp(conf->name, name) ||
                          !match(conf->name, name)))
       return conf;
     }
@@ -1150,8 +1148,8 @@ set_default_conf(void)
   ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
   ConfigFileEntry.warn_no_nline = 1;
   ConfigFileEntry.stats_o_oper_only = 0;
-  ConfigFileEntry.stats_k_oper_only = 1;  /* masked */
-  ConfigFileEntry.stats_i_oper_only = 1;  /* masked */
+  ConfigFileEntry.stats_k_oper_only = 1;  /* 1 = masked */
+  ConfigFileEntry.stats_i_oper_only = 1;  /* 1 = masked */
   ConfigFileEntry.stats_P_oper_only = 0;
   ConfigFileEntry.stats_u_oper_only = 0;
   ConfigFileEntry.caller_id_wait = 60;
@@ -1204,17 +1202,17 @@ read_conf(FILE *file)
 {
   lineno = 0;
 
-  set_default_conf(); /* Set default values prior to conf parsing */
+  set_default_conf();  /* Set default values prior to conf parsing */
   conf_parser_ctx.pass = 1;
-  yyparse();          /* pick up the classes first */
+  yyparse();  /* Pick up the classes first */
 
   rewind(file);
 
   conf_parser_ctx.pass = 2;
-  yyparse();          /* Load the values from the conf */
-  validate_conf();    /* Check to make sure some values are still okay. */
-                      /* Some global values are also loaded here. */
-  class_delete_marked();      /* Make sure classes are valid */
+  yyparse();  /* Load the values from the conf */
+  validate_conf();  /* Check to make sure some values are still okay. */
+                    /* Some global values are also loaded here. */
+  class_delete_marked();  /* Delete unused classes that are marked for deletion */
 }
 
 /* lookup_confhost()
@@ -1227,7 +1225,8 @@ lookup_confhost(struct MaskItem *conf)
 {
   struct addrinfo hints, *res;
 
-  /* Do name lookup now on hostnames given and store the
+  /*
+   * Do name lookup now on hostnames given and store the
    * ip numbers in conf structure.
    */
   memset(&hints, 0, sizeof(hints));
@@ -1433,9 +1432,9 @@ get_oper_name(const struct Client *client_p)
 void
 read_conf_files(int cold)
 {
-  const char *filename;
-  char chanmodes[IRCD_BUFSIZE];
-  char chanlimit[IRCD_BUFSIZE];
+  const char *filename = NULL;
+  char chanmodes[IRCD_BUFSIZE] = "";
+  char chanlimit[IRCD_BUFSIZE] = "";
 
   conf_parser_ctx.boot = cold;
   filename = ConfigFileEntry.configfile;
@@ -2104,7 +2103,7 @@ cluster_a_line(struct Client *source_p, const char *command,
                int capab, int cluster_type, const char *pattern, ...)
 {
   va_list args;
-  char buffer[IRCD_BUFSIZE];
+  char buffer[IRCD_BUFSIZE] = "";
   const dlink_node *ptr = NULL;
 
   va_start(args, pattern);
@@ -2165,22 +2164,22 @@ split_nuh(struct split_nuh_item *const iptr)
   {
     *p = '\0';
 
-    if (iptr->nickptr && *iptr->nuhmask != '\0')
+    if (iptr->nickptr && *iptr->nuhmask)
       strlcpy(iptr->nickptr, iptr->nuhmask, iptr->nicksize);
 
     if ((q = strchr(++p, '@')))
     {
       *q++ = '\0';
 
-      if (*p != '\0')
+      if (*p)
         strlcpy(iptr->userptr, p, iptr->usersize);
 
-      if (*q != '\0')
+      if (*q)
         strlcpy(iptr->hostptr, q, iptr->hostsize);
     }
     else
     {
-      if (*p != '\0')
+      if (*p)
         strlcpy(iptr->userptr, p, iptr->usersize);
     }
   }
@@ -2192,10 +2191,10 @@ split_nuh(struct split_nuh_item *const iptr)
       /* if found a @ */
       *p++ = '\0';
 
-      if (*iptr->nuhmask != '\0')
+      if (*iptr->nuhmask)
         strlcpy(iptr->userptr, iptr->nuhmask, iptr->usersize);
 
-      if (*p != '\0')
+      if (*p)
         strlcpy(iptr->hostptr, p, iptr->hostsize);
     }
     else

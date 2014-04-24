@@ -28,20 +28,16 @@
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
-#include "channel_mode.h"
 #include "parse.h"
 #include "modules.h"
 #include "irc_string.h"
-#include "s_user.h"
 #include "conf.h"
 
 
-/*! \brief SVSKILL command handler (called by services)
+/*! \brief SVSKILL command handler
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -50,11 +46,11 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = TS
+ *      - parv[2] = timestamp
  *      - parv[3] = kill message
  */
 static int
-ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
@@ -75,7 +71,7 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
   else
     comment = (parc > 2 && parv[2]) ? parv[2] : source_p->name;
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
   if (ts && (ts != target_p->tsinfo))
@@ -84,28 +80,26 @@ ms_svskill(struct Client *client_p, struct Client *source_p, int parc, char *par
   if (MyConnect(target_p))
   {
     strlcpy(reason + 11, comment, sizeof(reason) - 11);
-    exit_client(target_p, target_p, reason);
+    exit_client(target_p, reason);
     return 0;
   }
 
-  if (target_p->from == client_p)
+  if (target_p->from == source_p->from)
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "Received wrong-direction SVSKILL "
                          "for %s (behind %s) from %s",
-                         target_p->name, client_p->name,
+                         target_p->name, source_p->from->name,
                          get_client_name(source_p, HIDE_IP));
     return 0;
   }
 
   if (ts == 0)
-    sendto_one(target_p, ":%s SVSKILL %s :%s",
-               ID_or_name(source_p, target_p),
-               ID_or_name(target_p, target_p), comment);
+    sendto_one(target_p, ":%s SVSKILL %s :%s", source_p->id,
+               target_p->id, comment);
   else
-    sendto_one(target_p, ":%s SVSKILL %s %lu :%s",
-               ID_or_name(source_p, target_p),
-               ID_or_name(target_p, target_p), ts, comment);
+    sendto_one(target_p, ":%s SVSKILL %s %lu :%s", source_p->id,
+               target_p->id, ts, comment);
   return 0;
 }
 

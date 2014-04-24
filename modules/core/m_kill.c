@@ -31,7 +31,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "log.h"
-#include "s_serv.h"
+#include "server.h"
 #include "conf.h"
 #include "send.h"
 #include "whowas.h"
@@ -40,59 +40,26 @@
 #include "modules.h"
 
 
-static char buf[IRCD_BUFSIZE];
-
-static void
-relay_kill(struct Client *one, struct Client *source_p,
-           struct Client *target_p, const char *inpath,
-           const char *reason)
-{
-  dlink_node *ptr = NULL;
-
-  DLINK_FOREACH(ptr, serv_list.head)
-  {
-    struct Client *client_p = ptr->data;
-
-    if (client_p == one)
-      continue;
-
-    if (MyClient(source_p))
-      sendto_one(client_p, ":%s KILL %s :%s!%s!%s!%s (%s)",
-                 ID_or_name(source_p, client_p),
-                 ID_or_name(target_p, client_p),
-                 me.name, source_p->host, source_p->username,
-                 source_p->name, reason);
-    else
-      sendto_one(client_p, ":%s KILL %s :%s %s",
-                 ID_or_name(source_p, client_p),
-                 ID_or_name(target_p, client_p), inpath, reason);
-  }
-}
-
 /* mo_kill()
  *  parv[0] = command
  *  parv[1] = kill victim
  *  parv[2] = kill path
  */
 static int
-mo_kill(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_kill(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p;
-  const char *inpath = client_p->name;
-  char *user;
-  char *reason;
+  char buf[IRCD_BUFSIZE] = "";
   char def_reason[] = CONF_NOREASON;
+  struct Client *target_p = NULL;
+  char *reason = NULL;
 
-  user   = parv[1];
-  reason = parv[2]; /* Either defined or NULL (parc >= 2!!) */
-
-  if (*user == '\0')
+  if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "KILL");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
     return 0;
   }
+
+  reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
 
   if (!EmptyString(reason))
   {
@@ -102,44 +69,40 @@ mo_kill(struct Client *client_p, struct Client *source_p,
   else
     reason = def_reason;
 
-  if ((target_p = hash_find_client(user)) == NULL)
+  if ((target_p = hash_find_client(parv[1])) == NULL)
   {
     /*
      * If the user has recently changed nick, automatically
      * rewrite the KILL for this new nickname--this keeps
      * servers in synch when nick change and kill collide
      */
-    if ((target_p = whowas_get_history(user,
+    if ((target_p = whowas_get_history(parv[1],
                                 (time_t)ConfigFileEntry.kill_chase_time_limit))
                                 == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-                 me.name, source_p->name, user);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
       return 0;
     }
 
-    sendto_one(source_p, ":%s NOTICE %s :KILL changed from %s to %s",
-               me.name, source_p->name, user, target_p->name);
+    sendto_one_notice(source_p, &me, ":KILL changed from %s to %s",
+                      parv[1], target_p->name);
   }
 
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL_REMOTE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "kill:remote");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "kill:remote");
     return 0;
   }
 
   if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "kill");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "kill");
     return 0;
   }
 
   if (IsServer(target_p) || IsMe(target_p))
   {
-    sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_CANTKILLSERVER);
     return 0;
   }
 
@@ -156,7 +119,7 @@ mo_kill(struct Client *client_p, struct Client *source_p,
                        "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s (%s)",
                        target_p->name, target_p->username, target_p->host,
                        target_p->servptr->name,
-                       target_p->servptr->id[0] ? target_p->servptr->id : "<>",
+                       target_p->servptr->id,
                        source_p->name, me.name, reason);
 
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%s)",
@@ -170,17 +133,20 @@ mo_kill(struct Client *client_p, struct Client *source_p,
    */
   if (!MyConnect(target_p))
   {
-    relay_kill(client_p, source_p, target_p, inpath, reason);
-      /*
-       * Set FLAGS_KILLED. This prevents exit_one_client from sending
-       * the unnecessary QUIT for this. (This flag should never be
-       * set in any other place)
-       */
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s!%s!%s!%s (%s)",
+                  source_p->id, target_p->id, me.name, source_p->host,
+                  source_p->username, source_p->name, reason);
+
+    /*
+     * Set FLAGS_KILLED. This prevents exit_one_client from sending
+     * the unnecessary QUIT for this. (This flag should never be
+     * set in any other place)
+     */
     AddFlag(target_p, FLAGS_KILLED);
   }
 
   snprintf(buf, sizeof(buf), "Killed (%s (%s))", source_p->name, reason);
-  exit_client(target_p, source_p, buf);
+  exit_client(target_p, buf);
   return 0;
 }
 
@@ -190,69 +156,30 @@ mo_kill(struct Client *client_p, struct Client *source_p,
  *  parv[2] = kill path and reason
  */
 static int
-ms_kill(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_kill(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p;
-  char *user;
-  char *reason;
-  const char *path;
+  char buf[IRCD_BUFSIZE] = "";
   char def_reason[] = CONF_NOREASON;
+  struct Client *target_p = NULL;
+  char *reason = NULL;
 
-  if (EmptyString(parv[1]))
+  if (parc < 3 || EmptyString(parv[2]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "KILL");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
     return 0;
   }
 
-  user = parv[1];
+  if ((target_p = hash_find_id(parv[1])) == NULL)
+    return 0;
 
-  if (EmptyString(parv[2]))
-  {
-    reason = def_reason;
-
-    /* hyb6 takes the nick of the killer from the path *sigh* --fl_ */
-    path = source_p->name;
-  }
+  if ((reason = strchr(parv[2], ' ')))
+    *reason++ = '\0';
   else
-  {
-    reason = strchr(parv[2], ' ');
-
-    if (reason != NULL)
-      *reason++ = '\0';
-    else
-      reason = def_reason;
-
-    path = parv[2];
-  }
-
-  if ((target_p = find_person(client_p, user)) == NULL)
-  {
-    /*
-     * If the user has recently changed nick, but only if its
-     * not an uid, automatically rewrite the KILL for this new nickname.
-     * --this keeps servers in synch when nick change and kill collide
-     */
-    if (IsDigit(*user))   /* Somehow an uid was not found in the hash ! */
-      return 0;
-    if ((target_p = whowas_get_history(user,
-                                (time_t)ConfigFileEntry.kill_chase_time_limit))
-       == NULL)
-    {
-      sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-                 me.name, source_p->name, user);
-      return 0;
-    }
-
-    sendto_one(source_p,":%s NOTICE %s :KILL changed from %s to %s",
-               me.name, source_p->name, user, target_p->name);
-  }
+    reason = def_reason;
 
   if (IsServer(target_p) || IsMe(target_p))
   {
-    sendto_one(source_p, form_str(ERR_CANTKILLSERVER),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_CANTKILLSERVER);
     return 0;
   }
 
@@ -287,7 +214,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
                          "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s!%s!%s!%s %s",
                          target_p->name, target_p->username, target_p->host,
                          target_p->servptr->name,
-                         target_p->servptr->id[0] ? target_p->servptr->id : "<>", source_p->name,
+                         target_p->servptr->id, source_p->name,
                          source_p->servptr->name, source_p->host, source_p->username,
                          source_p->name, reason);
   else
@@ -295,13 +222,14 @@ ms_kill(struct Client *client_p, struct Client *source_p,
                          "Received KILL message for %s!%s@%s[%s/%s]. From %s %s",
                          target_p->name, target_p->username, target_p->host,
                          target_p->servptr->name,
-                         target_p->servptr->id[0] ? target_p->servptr->id : "<>",
+                         target_p->servptr->id,
                          source_p->name, reason);
 
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
        source_p->name, target_p->name, source_p->name, reason);
 
-  relay_kill(client_p, source_p, target_p, path, reason);
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s %s",
+                source_p->id, target_p->id, parv[2], reason);
   AddFlag(target_p, FLAGS_KILLED);
 
   /* reason comes supplied with its own ()'s */
@@ -310,7 +238,7 @@ ms_kill(struct Client *client_p, struct Client *source_p,
   else
     snprintf(buf, sizeof(buf), "Killed (%s %s)", source_p->name, reason);
 
-  exit_client(target_p, source_p, buf);
+  exit_client(target_p, buf);
   return 0;
 }
 

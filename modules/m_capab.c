@@ -27,40 +27,42 @@
 #include "stdinc.h"
 #include "client.h"
 #include "irc_string.h"
-#include "s_serv.h"
+#include "server.h"
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
 
 
-/*
- * mr_capab - CAPAB message handler
- *      parv[0] = command
- *      parv[1] = space-separated list of capabilities
+/*! \brief CAPAB command handler
  *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = space-separated list of capabilities
  */
 static int
-mr_capab(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mr_capab(struct Client *source_p, int parc, char *parv[])
 {
-  int i = 0;
   unsigned int cap = 0;
   char *p = NULL;
   char *s = NULL;
 
-  if (client_p->localClient->caps && !IsCapable(client_p, CAP_TS6))
+  if (source_p->localClient->caps && !IsCapable(source_p, CAP_TS6))
   {
-    exit_client(client_p, client_p, "CAPAB received twice");
+    exit_client(source_p, "CAPAB received twice");
     return 0;
   }
 
-  SetCapable(client_p, CAP_CAP);
+  SetCapable(source_p, CAP_CAP);
 
-  for (i = 1; i < parc; ++i)
-    for (s = strtoken(&p, parv[i], " "); s;
-         s = strtoken(&p,    NULL, " "))
-      if ((cap = find_capability(s)))
-        SetCapable(client_p, cap);
+  for (s = strtoken(&p, parv[1], " "); s;
+       s = strtoken(&p,    NULL, " "))
+    if ((cap = find_capability(s)))
+      SetCapable(source_p, cap);
 
   return 0;
 }

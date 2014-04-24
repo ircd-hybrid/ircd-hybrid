@@ -34,18 +34,19 @@
 #include "modules.h"
 
 
-/*
- * m_ison added by Darren Reed 13/8/91 to act as an efficent user indicator
- * with respect to cpu/bandwidth used. Implemented for NOTIFY feature in
- * clients. Designed to reduce number of whois requests. Can process
- * nicknames in batches as long as the maximum buffer length.
+/*! \brief ISON command handler
  *
- * format:
- * ISON :nicklist
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = space-separated list of nicknames
  */
 static int
-m_ison(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_ison(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   char *nick;
@@ -56,7 +57,7 @@ m_ison(struct Client *client_p, struct Client *source_p,
   int i;
   int done = 0;
 
-  len = snprintf(buf, sizeof(buf), form_str(RPL_ISON), me.name, source_p->name);
+  len = snprintf(buf, sizeof(buf), numeric_form(RPL_ISON), me.name, source_p->name);
   current_insert_point = buf + len;
 
   /*
@@ -68,7 +69,7 @@ m_ison(struct Client *client_p, struct Client *source_p,
     for (nick = strtoken(&p, parv[i], " "); nick;
          nick = strtoken(&p,    NULL, " "))
     {
-      if ((target_p = find_person(client_p, nick)))
+      if ((target_p = find_person(source_p, nick)))
       {
         len = strlen(target_p->name);
 

@@ -128,13 +128,19 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(modulesdir)"
 LTLIBRARIES = $(modules_LTLIBRARIES)
-m_die_la_LIBADD =
-am_m_die_la_OBJECTS = m_die.lo
-m_die_la_OBJECTS = $(am_m_die_la_OBJECTS)
+m_bmask_la_LIBADD =
+am_m_bmask_la_OBJECTS = m_bmask.lo
+m_bmask_la_OBJECTS = $(am_m_bmask_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+m_bmask_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_bmask_la_LDFLAGS) $(LDFLAGS) -o $@
+m_die_la_LIBADD =
+am_m_die_la_OBJECTS = m_die.lo
+m_die_la_OBJECTS = $(am_m_die_la_OBJECTS)
 m_die_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_die_la_LDFLAGS) $(LDFLAGS) -o $@
@@ -210,6 +216,12 @@ m_squit_la_OBJECTS = $(am_m_squit_la_OBJECTS)
 m_squit_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_squit_la_LDFLAGS) $(LDFLAGS) -o $@
+m_tmode_la_LIBADD =
+am_m_tmode_la_OBJECTS = m_tmode.lo
+m_tmode_la_OBJECTS = $(am_m_tmode_la_OBJECTS)
+m_tmode_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_tmode_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -244,18 +256,20 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(m_die_la_SOURCES) $(m_error_la_SOURCES) \
-	$(m_join_la_SOURCES) $(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
+SOURCES = $(m_bmask_la_SOURCES) $(m_die_la_SOURCES) \
+	$(m_error_la_SOURCES) $(m_join_la_SOURCES) \
+	$(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
 	$(m_message_la_SOURCES) $(m_mode_la_SOURCES) \
 	$(m_nick_la_SOURCES) $(m_part_la_SOURCES) $(m_quit_la_SOURCES) \
 	$(m_server_la_SOURCES) $(m_sjoin_la_SOURCES) \
-	$(m_squit_la_SOURCES)
-DIST_SOURCES = $(m_die_la_SOURCES) $(m_error_la_SOURCES) \
-	$(m_join_la_SOURCES) $(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
+	$(m_squit_la_SOURCES) $(m_tmode_la_SOURCES)
+DIST_SOURCES = $(m_bmask_la_SOURCES) $(m_die_la_SOURCES) \
+	$(m_error_la_SOURCES) $(m_join_la_SOURCES) \
+	$(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
 	$(m_message_la_SOURCES) $(m_mode_la_SOURCES) \
 	$(m_nick_la_SOURCES) $(m_part_la_SOURCES) $(m_quit_la_SOURCES) \
 	$(m_server_la_SOURCES) $(m_sjoin_la_SOURCES) \
-	$(m_squit_la_SOURCES)
+	$(m_squit_la_SOURCES) $(m_tmode_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -426,6 +440,7 @@ AUTOMAKE_OPTIONS = foreign
 MODULE_FLAGS = -module -avoid-version
 AM_CPPFLAGS = -I$(top_srcdir)/include
 modulesdir = $(pkglibdir)/modules
+m_bmask_la_LDFLAGS = $(MODULE_FLAGS)
 m_die_la_LDFLAGS = $(MODULE_FLAGS)
 m_error_la_LDFLAGS = $(MODULE_FLAGS)
 m_join_la_LDFLAGS = $(MODULE_FLAGS)
@@ -439,6 +454,8 @@ m_quit_la_LDFLAGS = $(MODULE_FLAGS)
 m_server_la_LDFLAGS = $(MODULE_FLAGS)
 m_sjoin_la_LDFLAGS = $(MODULE_FLAGS)
 m_squit_la_LDFLAGS = $(MODULE_FLAGS)
+m_tmode_la_LDFLAGS = $(MODULE_FLAGS)
+m_bmask_la_SOURCES = m_bmask.c
 m_die_la_SOURCES = m_die.c
 m_error_la_SOURCES = m_error.c
 m_join_la_SOURCES = m_join.c
@@ -452,7 +469,9 @@ m_quit_la_SOURCES = m_quit.c
 m_server_la_SOURCES = m_server.c
 m_sjoin_la_SOURCES = m_sjoin.c
 m_squit_la_SOURCES = m_squit.c
-modules_LTLIBRARIES = m_die.la     \
+m_tmode_la_SOURCES = m_tmode.c
+modules_LTLIBRARIES = m_bmask.la   \
+                      m_die.la     \
                       m_error.la   \
                       m_join.la    \
                       m_kick.la    \
@@ -464,7 +483,8 @@ modules_LTLIBRARIES = m_die.la     \
                       m_quit.la    \
                       m_server.la  \
                       m_sjoin.la   \
-                      m_squit.la
+                      m_squit.la   \
+                      m_tmode.la
 
 all: all-am
 
@@ -536,6 +556,9 @@ clean-modulesLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
+m_bmask.la: $(m_bmask_la_OBJECTS) $(m_bmask_la_DEPENDENCIES) $(EXTRA_m_bmask_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_bmask_la_LINK) -rpath $(modulesdir) $(m_bmask_la_OBJECTS) $(m_bmask_la_LIBADD) $(LIBS)
+
 m_die.la: $(m_die_la_OBJECTS) $(m_die_la_DEPENDENCIES) $(EXTRA_m_die_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_die_la_LINK) -rpath $(modulesdir) $(m_die_la_OBJECTS) $(m_die_la_LIBADD) $(LIBS)
 
@@ -575,12 +598,16 @@ m_sjoin.la: $(m_sjoin_la_OBJECTS) $(m_sjoin_la_DEPENDENCIES) $(EXTRA_m_sjoin_la_
 m_squit.la: $(m_squit_la_OBJECTS) $(m_squit_la_DEPENDENCIES) $(EXTRA_m_squit_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_squit_la_LINK) -rpath $(modulesdir) $(m_squit_la_OBJECTS) $(m_squit_la_LIBADD) $(LIBS)
 
+m_tmode.la: $(m_tmode_la_OBJECTS) $(m_tmode_la_DEPENDENCIES) $(EXTRA_m_tmode_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_tmode_la_LINK) -rpath $(modulesdir) $(m_tmode_la_OBJECTS) $(m_tmode_la_LIBADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_bmask.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_die.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_join.Plo@am__quote@
@@ -594,6 +621,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_server.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_sjoin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_squit.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_tmode.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\

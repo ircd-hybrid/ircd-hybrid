@@ -29,7 +29,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "conf.h"
 #include "motd.h"
@@ -37,6 +37,11 @@
 #include "modules.h"
 
 
+/*! \brief Shows a list of linked servers and notifies irc-operators
+ *         about the LINKS request
+ *
+ * \param source_p Pointer to client to report to
+ */
 static void
 do_links(struct Client *source_p, int parc, char *parv[])
 {
@@ -51,10 +56,6 @@ do_links(struct Client *source_p, int parc, char *parv[])
   if (HasUMode(source_p, UMODE_OPER) || !ConfigServerHide.flatten_links)
   {
     const char *mask = (parc > 2 ? parv[2] : parv[1]);
-    const char *me_name, *nick;
-
-    me_name = ID_or_name(&me, source_p);
-    nick = ID_or_name(source_p, source_p);
 
     DLINK_FOREACH(ptr, global_serv_list.head)
     {
@@ -76,15 +77,13 @@ do_links(struct Client *source_p, int parc, char *parv[])
        * We just send the reply, as if they are here there's either no SHIDE,
        * or they're an oper..
        */
-      sendto_one(source_p, form_str(RPL_LINKS),
-                 me_name, nick,
-                 target_p->name, target_p->servptr->name,
-                 target_p->hopcount, target_p->info);
+      sendto_one_numeric(source_p, &me, RPL_LINKS,
+                         target_p->name, target_p->servptr->name,
+                         target_p->hopcount, target_p->info);
     }
-  
-    sendto_one(source_p, form_str(RPL_ENDOFLINKS),
-               me_name, nick,
-               EmptyString(mask) ? "*" : mask);
+
+    sendto_one_numeric(source_p, &me, RPL_ENDOFLINKS,
+                       EmptyString(mask) ? "*" : mask);
   }
   else
   {
@@ -92,9 +91,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
      * Print our own info so at least it looks like a normal links
      * then print out the file (which may or may not be empty)
      */
-    sendto_one(source_p, form_str(RPL_LINKS),
-               ID_or_name(&me, source_p),
-               ID_or_name(source_p, source_p),
+    sendto_one_numeric(source_p, &me, RPL_LINKS,
                me.name, me.name, 0, me.info);
 
     DLINK_FOREACH(ptr, flatten_links.head)
@@ -102,19 +99,16 @@ do_links(struct Client *source_p, int parc, char *parv[])
                  ID_or_name(&me, source_p), RPL_LINKS,
                  ID_or_name(source_p, source_p),
                  ptr->data);
-    sendto_one(source_p, form_str(RPL_ENDOFLINKS),
-               ID_or_name(&me, source_p),
-               ID_or_name(source_p, source_p), "*");
+    sendto_one_numeric(source_p, &me, RPL_ENDOFLINKS, "*");
   }
 }
 
 static int
-mo_links(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_links(struct Client *source_p, int parc, char *parv[])
 {
   if (parc > 2)
     if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
-      if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1,
+      if (hunt_server(source_p, ":%s LINKS %s :%s", 1,
                       parc, parv) != HUNTED_ISME)
         return 0;
 
@@ -122,55 +116,64 @@ mo_links(struct Client *client_p, struct Client *source_p,
   return 0;
 }
 
-/*
- * m_links - LINKS message handler
- *      parv[0] = command
- *      parv[1] = servername mask
+/*! \brief LINKS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = servername mask
  * or
- *      parv[0] = command
- *      parv[1] = server to query
- *      parv[2] = servername mask
+ *      - parv[0] = command
+ *      - parv[1] = server to query
+ *      - parv[2] = servername mask
  */
 static int
-m_links(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_links(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
   last_used = CurrentTime;
 
   if (!ConfigServerHide.flatten_links)
-    return mo_links(client_p, source_p, parc, parv);
+    return mo_links(source_p, parc, parv);
 
   do_links(source_p, parc, parv);
   return 0;
 }
 
-/*
- * ms_links - LINKS message handler
- *      parv[0] = command
- *      parv[1] = servername mask
+/*! \brief LINKS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = servername mask
  * or
- *      parv[0] = command
- *      parv[1] = server to query
- *      parv[2] = servername mask
+ *      - parv[0] = command
+ *      - parv[1] = server to query
+ *      - parv[2] = servername mask
  */
 static int
-ms_links(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_links(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s LINKS %s :%s", 1,
+  if (hunt_server(source_p, ":%s LINKS %s :%s", 1,
                   parc, parv) != HUNTED_ISME)
     return 0;
 
-  return m_links(client_p, source_p, parc, parv);
+  return m_links(source_p, parc, parv);
 }
 
 static struct Message links_msgtab =

@@ -32,7 +32,7 @@
 #include "numeric.h"
 #include "conf.h"
 #include "log.h"
-#include "s_user.h"
+#include "user.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
@@ -40,13 +40,11 @@
 
 
 
-/* failed_oper_notice()
+/*! \brief Notices all opers of the failed oper attempt if enabled
  *
- * inputs       - pointer to client doing /oper ...
- *              - pointer to nick they tried to oper as
- *              - pointer to reason they have failed
- * output       - nothing
- * side effects - notices all opers of the failed oper attempt if enabled
+ * \param source_p Client doing /oper ...
+ * \param name     The nick they tried to oper as
+ * \param reason   The reason why they have failed
  */
 static void
 failed_oper_notice(struct Client *source_p, const char *name,
@@ -63,15 +61,20 @@ failed_oper_notice(struct Client *source_p, const char *name,
        source_p->host, reason);
 }
 
-/*
-** m_oper
-**      parv[0] = command
-**      parv[1] = oper name
-**      parv[2] = oper password
-*/
+/*! \brief OPER command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = oper name
+ *      - parv[2] = oper password
+ */
 static int
-m_oper(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_oper(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
   const char *name = parv[1];
@@ -79,8 +82,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
   if (EmptyString(password))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "OPER");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "OPER");
     return 0;
   }
 
@@ -90,7 +92,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
   if ((conf = find_exact_name_conf(CONF_OPER, source_p, name, NULL, NULL)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     conf = find_exact_name_conf(CONF_OPER, NULL, name, NULL, NULL);
     failed_oper_notice(source_p, name, (conf != NULL) ?
                        "host mismatch" : "no oper {} block");
@@ -99,7 +101,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
 
   if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
   {
-    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     failed_oper_notice(source_p, name, "requires SSL/TLS");
     return 0;
   }
@@ -108,7 +110,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(source_p->certfp) || strcasecmp(source_p->certfp, conf->certfp))
     {
-      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
       failed_oper_notice(source_p, name, "client certificate fingerprint mismatch");
       return 0;
     }
@@ -118,8 +120,7 @@ m_oper(struct Client *client_p, struct Client *source_p,
   {
     if (attach_conf(source_p, conf) != 0)
     {
-      sendto_one(source_p, ":%s NOTICE %s :Can't attach conf!",
-                 me.name, source_p->name);
+      sendto_one_notice(source_p, &me, ":Can't attach conf!");
       failed_oper_notice(source_p, name, "can't attach conf!");
       return 0;
     }
@@ -131,25 +132,29 @@ m_oper(struct Client *client_p, struct Client *source_p,
   }
   else
   {
-    sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
     failed_oper_notice(source_p, name, "password mismatch");
   }
 
   return 0;
 }
 
-/*
-** mo_oper
-**      parv[0] = command
-**      parv[1] = oper name
-**      parv[2] = oper password
-*/
+/*! \brief OPER command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = oper name
+ *      - parv[2] = oper password
+ */
 static int
-mo_oper(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_oper(struct Client *source_p, int parc, char *parv[])
 {
-  sendto_one(source_p, form_str(RPL_YOUREOPER),
-             me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
   return 0;
 }
 

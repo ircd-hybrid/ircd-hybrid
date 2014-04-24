@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_auth.h
+/*! \file auth.h
  * \brief A header for the ident functions.
  * \version $Id$
  */

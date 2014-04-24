@@ -30,7 +30,6 @@
 #include "ircd.h"
 #include "conf.h"
 #include "send.h"
-#include "s_serv.h"
 #include "numeric.h"
 #include "client.h"
 #include "irc_string.h"
@@ -43,10 +42,10 @@
 /** Global list of messages of the day. */
 static struct
 {
-  struct Motd *local;     /**< Local MOTD. */
-  struct Motd *remote;    /**< Remote MOTD. */
-  dlink_list other;       /**< MOTDs specified in configuration file. */
-  dlink_list cachelist;   /**< List of MotdCache entries. */
+  struct Motd *local;    /**< Local MOTD. */
+  struct Motd *remote;   /**< Remote MOTD. */
+  dlink_list other;      /**< MOTDs specified in configuration file. */
+  dlink_list cachelist;  /**< List of MotdCache entries. */
 } MotdList;
 
 
@@ -81,7 +80,7 @@ motd_create(const char *hostmask, const char *path)
     }
   }
 
-  if (hostmask != NULL)
+  if (hostmask)
     tmp->hostmask = xstrdup(hostmask);
 
   tmp->path = xstrdup(path);
@@ -102,7 +101,7 @@ motd_cache(struct Motd *motd)
   FILE *file = NULL;
   struct MotdCache *cache = NULL;
   struct stat sb;
-  char line[MOTD_LINESIZE + 2]; /* \r\n */
+  char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
   char *tmp = NULL;
   unsigned int i = 0;
   dlink_node *ptr = NULL;
@@ -113,20 +112,20 @@ motd_cache(struct Motd *motd)
   if (motd->cache)
     return motd->cache;
 
-  /* try to find it in the list of cached files... */
+  /* Try to find it in the list of cached files... */
   DLINK_FOREACH(ptr, MotdList.cachelist.head)
   {
     cache = ptr->data;
 
     if (!strcmp(cache->path, motd->path) && cache->maxcount == motd->maxcount)
     {
-      cache->ref++; /* increase reference count... */
-      motd->cache = cache; /* remember cache... */
-      return motd->cache; /* return it */
+      cache->ref++;  /* Increase reference count... */
+      motd->cache = cache;  /* Remember cache... */
+      return motd->cache;  /* Return it */
     }
   }
 
-  /* need the file's modification time */
+  /* Need the file's modification time */
   if (stat(motd->path, &sb) == -1)
   {
     ilog(LOG_TYPE_IRCD, "Couldn't stat \"%s\": %s", motd->path,
@@ -134,7 +133,7 @@ motd_cache(struct Motd *motd)
     return 0;
   }
 
-  /* gotta read in the file, now */
+  /* Gotta read in the file, now */
   if ((file = fopen(motd->path, "r")) == NULL)
   {
     ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path,
@@ -151,7 +150,7 @@ motd_cache(struct Motd *motd)
 
   while (cache->count < cache->maxcount && fgets(line, sizeof(line), file))
   {
-    /* copy over line, stopping when we overflow or hit line end */
+    /* Copy over line, stopping when we overflow or hit line end */
     for (tmp = line, i = 0; i < (MOTD_LINESIZE - 1) && *tmp && *tmp != '\r' && *tmp != '\n'; ++tmp, ++i)
       cache->motd[cache->count][i] = *tmp;
     cache->motd[cache->count][i] = '\0';
@@ -159,16 +158,16 @@ motd_cache(struct Motd *motd)
     cache->count++;
   }
 
-  fclose(file); /* close the file */
+  fclose(file);  /* Close the file */
 
-  /* trim memory usage a little */
+  /* Trim memory usage a little */
   motd->cache = MyMalloc(sizeof(struct MotdCache) +
                          (MOTD_LINESIZE * cache->count));
   memcpy(motd->cache, cache, sizeof(struct MotdCache) +
          (MOTD_LINESIZE * cache->count));
   MyFree(cache);
 
-  /* now link it in... */
+  /* Now link it in... */
   dlinkAdd(motd->cache, &motd->cache->node, &MotdList.cachelist);
 
   return motd->cache;
@@ -185,16 +184,16 @@ motd_decache(struct Motd *motd)
 
   assert(motd);
 
-  if ((cache = motd->cache) == NULL) /* we can be called for records with no cache */
+  if ((cache = motd->cache) == NULL)  /* We can be called for records with no cache */
     return;
 
-  motd->cache = NULL; /* zero the cache */
+  motd->cache = NULL;  /* Zero the cache */
 
-  if (--cache->ref == 0) /* reduce reference count... */
+  if (--cache->ref == 0)  /* Reduce reference count... */
   {
     dlinkDelete(&cache->node, &MotdList.cachelist);
-    MyFree(cache->path); /* free path info... */
-    MyFree(cache); /* very simple for a reason... */
+    MyFree(cache->path);  /* Free path info... */
+    MyFree(cache);  /* Very simple for a reason... */
   }
 }
 
@@ -207,10 +206,10 @@ motd_destroy(struct Motd *motd)
 {
   assert(motd);
 
-  if (motd->cache)  /* drop the cache */
+  if (motd->cache)  /* Drop the cache */
     motd_decache(motd);
 
-  MyFree(motd->path);  /* we always must have a path */
+  MyFree(motd->path);  /* We always must have a path */
   MyFree(motd->hostmask);
   MyFree(motd);
 }
@@ -231,13 +230,13 @@ motd_lookup(const struct Client *client_p)
 
   assert(client_p);
 
-  if (!MyClient(client_p)) /* not my user, always return remote motd */
+  if (!MyConnect(client_p))  /* Not my user, always return remote motd */
     return MotdList.remote;
 
   class = get_class_ptr(&client_p->localClient->confs);
   assert(class);
 
-  /* check the motd blocks first */
+  /* Check the motd blocks first */
   DLINK_FOREACH(ptr, MotdList.other.head)
   {
     struct Motd *motd = ptr->data;
@@ -268,7 +267,7 @@ motd_lookup(const struct Client *client_p)
     }
   }
 
-  return MotdList.local; /* Ok, return the default motd */
+  return MotdList.local;  /* Ok, return the default motd */
 }
 
 /*! \brief Send the content of a MotdCache to a user.
@@ -279,26 +278,18 @@ motd_lookup(const struct Client *client_p)
 static void
 motd_forward(struct Client *source_p, const struct MotdCache *cache)
 {
-  unsigned int i = 0;
-  const char *from = ID_or_name(&me, source_p);
-  const char *to = ID_or_name(source_p, source_p);
-
-  assert(source_p);
-
-  if (!cache)  /* no motd to send */
+  if (!cache)  /* No motd to send */
   {
-    sendto_one(source_p, form_str(ERR_NOMOTD), from, to);
+    sendto_one_numeric(source_p, &me, ERR_NOMOTD);
     return;
   }
 
-  /* send the motd */
-  sendto_one(source_p, form_str(RPL_MOTDSTART),
-             from, to, me.name);
+  /* Send the motd */
+  sendto_one_numeric(source_p, &me, RPL_MOTDSTART, me.name);
 
-  for (; i < cache->count; ++i)
-    sendto_one(source_p, form_str(RPL_MOTD),
-               from, to, cache->motd[i]);
-  sendto_one(source_p, form_str(RPL_ENDOFMOTD), from, to);
+  for (unsigned int i = 0; i < cache->count; ++i)
+    sendto_one_numeric(source_p, &me, RPL_MOTD, cache->motd[i]);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFMOTD);
 }
 
 /*! \brief Find the MOTD for a client and send it.
@@ -313,8 +304,8 @@ motd_send(struct Client *client_p)
 }
 
 /*! \brief Send the signon MOTD to a user.
- * If FEAT_NODEFAULTMOTD is true and a matching MOTD exists for the
- * user, direct the client to type /MOTD to read it.  Otherwise, call
+ * If general::short_motd is true and a matching MOTD exists for the
+ * user, direct the client to type /MOTD to read it. Otherwise, call
  * motd_forward() for the user.
  * \param source_p Client that has just connected.
  */
@@ -327,22 +318,17 @@ motd_signon(struct Client *source_p)
     motd_forward(source_p, cache);
   else
   {
-    sendto_one(source_p, ":%s NOTICE %s :*** Notice -- motd was last changed at %d/%d/%d %d:%02d",
-               me.name, source_p->name, cache->modtime.tm_year + 1900,
-               cache->modtime.tm_mon + 1,
-               cache->modtime.tm_mday,
-               cache->modtime.tm_hour,
-               cache->modtime.tm_min);
-    sendto_one(source_p,
-               ":%s NOTICE %s :*** Notice -- Please read the motd if you haven't "
-               "read it", me.name, source_p->name);
-    sendto_one(source_p, form_str(RPL_MOTDSTART),
-               me.name, source_p->name, me.name);
-    sendto_one(source_p, form_str(RPL_MOTD),
-               me.name, source_p->name,
-               "*** This is the short motd ***");
-    sendto_one(source_p, form_str(RPL_ENDOFMOTD),
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":*** Notice -- motd was last changed at %d/%d/%d %d:%02d",
+                      cache->modtime.tm_year + 1900,
+                      cache->modtime.tm_mon + 1,
+                      cache->modtime.tm_mday,
+                      cache->modtime.tm_hour,
+                      cache->modtime.tm_min);
+    sendto_one_notice(source_p, &me, ":*** Notice -- Please read the motd if you haven't read it");
+    sendto_one_numeric(source_p, &me, RPL_MOTDSTART, me.name);
+    sendto_one_numeric(source_p, &me, RPL_MOTD,
+                       "*** This is the short motd ***");
+    sendto_one_numeric(source_p, &me, RPL_ENDOFMOTD);
   }
 }
 
@@ -354,10 +340,10 @@ motd_recache(void)
 {
   dlink_node *ptr = NULL;
 
-  motd_decache(MotdList.local); /* decache local and remote MOTDs */
+  motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
   motd_decache(MotdList.remote);
 
-  DLINK_FOREACH(ptr, MotdList.other.head)  /* now all the others */
+  DLINK_FOREACH(ptr, MotdList.other.head)  /* Now all the others */
     motd_decache(ptr->data);
 
   /* now recache local and remote MOTDs */
@@ -371,17 +357,17 @@ motd_recache(void)
 void
 motd_init(void)
 {
-  if (MotdList.local)  /* destroy old local... */
+  if (MotdList.local)  /* Destroy old local... */
     motd_destroy(MotdList.local);
 
   MotdList.local = motd_create(NULL, MPATH);
-  motd_cache(MotdList.local);  /* init local and cache it */
+  motd_cache(MotdList.local);  /* Init local and cache it */
 
-  if (MotdList.remote)  /* destroy old remote... */
+  if (MotdList.remote)  /* Destroy old remote... */
     motd_destroy(MotdList.remote);
 
   MotdList.remote = motd_create(NULL, MPATH);
-  motd_cache(MotdList.remote);  /* init remote and cache it */
+  motd_cache(MotdList.remote);  /* Init remote and cache it */
 }
 
 /* \brief Add a new MOTD.
@@ -406,10 +392,10 @@ motd_clear(void)
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  motd_decache(MotdList.local);  /* decache local and remote MOTDs */
+  motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
   motd_decache(MotdList.remote);
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, MotdList.other.head)  /* destroy other MOTDs */
+  DLINK_FOREACH_SAFE(ptr, ptr_next, MotdList.other.head)  /* Destroy other MOTDs */
   {
     dlinkDelete(ptr, &MotdList.other);
     motd_destroy(ptr->data);
@@ -432,9 +418,8 @@ motd_report(struct Client *source_p)
   {
     const struct Motd *motd = ptr->data;
 
-    sendto_one(source_p, form_str(RPL_STATSTLINE),
-               me.name, source_p->name,
-               motd->hostmask, motd->path);
+    sendto_one_numeric(source_p, &me, RPL_STATSTLINE,
+                       motd->hostmask, motd->path);
   }
 }
 

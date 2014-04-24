@@ -29,34 +29,30 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_user.h"
+#include "user.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
 #include "listener.h"
 
 
-/* do_local_user()
+/* do_user()
  *
  * inputs       -
  * output       - NONE
  * side effects -
  */
 static void
-do_local_user(struct Client *source_p,
-              const char *username, const char *host, const char *server,
-              const char *realname)
+do_user(struct Client *source_p,
+        const char *username,
+        const char *realname)
 {
   assert(source_p != NULL);
   assert(source_p->username != username);
   assert(IsUnknown(source_p));
 
   source_p->localClient->registration &= ~REG_NEED_USER;
-
-  /*
-   * don't take the clients word for it, ever
-   */
-  source_p->servptr = &me;
+  source_p->servptr = &me;  /* Don't take the clients word for it, ever */
 
   strlcpy(source_p->info, realname, sizeof(source_p->info));
 
@@ -67,41 +63,41 @@ do_local_user(struct Client *source_p,
     register_local_user(source_p);
 }
 
-/*
-** mr_user
-**      parv[0] = command
-**      parv[1] = username (login name, account)
-**      parv[2] = client host name (used only from other servers)
-**      parv[3] = server host name (used only from other servers)
-**      parv[4] = users real name info
-*/
+/*! \brief USER command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = username (login name, account)
+ *      - parv[2] = client host name (ignored)
+ *      - parv[3] = server host name (ignored)
+ *      - parv[4] = user's real name info
+ */
 static int
-mr_user(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mr_user(struct Client *source_p, int parc, char *parv[])
 {
   char *p = NULL;
 
   if (source_p->localClient->listener->flags & LISTENER_SERVER)
   {
-    exit_client(source_p, &me, "Use a different port");
+    exit_client(source_p, "Use a different port");
     return 0;
   }
-
-  if ((p = strchr(parv[1], '@')) != NULL)
-    *p = '\0';
 
   if (EmptyString(parv[4]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name,
-               source_p->name[0] ? source_p->name : "*", "USER");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "USER");
     return 0;
   }
 
-  do_local_user(source_p,
-                parv[1], /* username */
-                parv[2], /* host     */
-                parv[3], /* server   */
-                parv[4]	 /* users real name */ );
+  if ((p = strchr(parv[1], '@')))
+    *p = '\0';
+
+  do_user(source_p, parv[1], parv[4]);
   return 0;
 }
 

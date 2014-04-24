@@ -40,7 +40,7 @@
 
 static PF accept_connection;
 
-static dlink_list ListenerPollList = { NULL, NULL, 0 };
+static dlink_list ListenerPollList;
 static void close_listener(struct Listener *listener);
 
 static struct Listener *
@@ -57,7 +57,7 @@ make_listener(int port, struct irc_ssaddr *addr)
 void
 free_listener(struct Listener *listener)
 {
-  assert(listener != NULL);
+  assert(listener);
 
   dlinkDelete(&listener->node, &ListenerPollList);
   MyFree(listener);
@@ -86,9 +86,9 @@ get_listener_name(const struct Listener *const listener)
 void
 show_ports(struct Client *source_p)
 {
-  char buf[IRCD_BUFSIZE];
+  char buf[IRCD_BUFSIZE] = "";
   char *p = NULL;
-  dlink_node *ptr;
+  const dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, ListenerPollList.head)
   {
@@ -111,16 +111,14 @@ show_ports(struct Client *source_p)
 
     if (HasUMode(source_p, UMODE_ADMIN) &&
         (MyClient(source_p) || !ConfigServerHide.hide_server_ips))
-      sendto_one(source_p, form_str(RPL_STATSPLINE),
-                 me.name, source_p->name, 'P', listener->port,
-                 listener->name,
-                 listener->ref_count, buf,
-                 listener->active ? "active" : "disabled");
+      sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
+                         listener->name,
+                         listener->ref_count, buf,
+                         listener->active ? "active" : "disabled");
     else
-      sendto_one(source_p, form_str(RPL_STATSPLINE),
-                 me.name, source_p->name, 'P', listener->port,
-                 me.name, listener->ref_count, buf,
-                 listener->active ? "active" : "disabled");
+      sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
+                         me.name, listener->ref_count, buf,
+                         listener->active ? "active" : "disabled");
   }
 }
 
@@ -284,7 +282,7 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
     if (getaddrinfo(vhost_ip, portname, &hints, &res))
       return;
 
-    assert(res != NULL);
+    assert(res);
 
     memcpy((struct sockaddr*)&vaddr, res->ai_addr, res->ai_addrlen);
     vaddr.ss_port = port;
@@ -304,6 +302,7 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
   if ((listener = find_listener(port, &vaddr)))
   {
     listener->flags = flags;
+
     if (listener->fd.flags.open)
       return;
   }
@@ -348,10 +347,10 @@ close_listener(struct Listener *listener)
 void
 close_listeners(void)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
   /* close all 'extra' listening ports we have */
-  DLINK_FOREACH_SAFE(ptr, next_ptr, ListenerPollList.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, ListenerPollList.head)
     close_listener(ptr->data);
 }
 
@@ -369,7 +368,7 @@ accept_connection(fde_t *pfd, void *data)
 
   memset(&addr, 0, sizeof(addr));
 
-  assert(listener != NULL);
+  assert(listener);
 
   /* There may be many reasons for error return, but
    * in otherwise correctly working environment the
@@ -412,11 +411,12 @@ accept_connection(fde_t *pfd, void *data)
      * Do an initial check we aren't connecting too fast or with too many
      * from this IP...
      */
-    if ((pe = conf_connect_allowed(&addr, addr.ss.ss_family)) != 0)
+    if ((pe = conf_connect_allowed(&addr, addr.ss.ss_family)))
     {
       ++ServerStats.is_ref;
 
       if (!(listener->flags & LISTENER_SSL))
+      {
         switch (pe)
         {
           case BANNED_CLIENT:
@@ -426,6 +426,7 @@ accept_connection(fde_t *pfd, void *data)
             send(fd, TOOFAST_WARNING, sizeof(TOOFAST_WARNING)-1, 0);
             break;
         }
+      }
 
       close(fd);
       continue;    /* drop the one and keep on clearing the queue */

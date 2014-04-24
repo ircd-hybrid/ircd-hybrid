@@ -27,7 +27,7 @@
 #include "stdinc.h"
 #include "client.h"
 #include "parse.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "modules.h"
 #include "irc_string.h"
@@ -41,10 +41,9 @@
  * side effects	- propagates subcommand to locally connected servers
  */
 static int
-ms_encap(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_encap(struct Client *source_p, int parc, char *parv[])
 {
-  char buffer[IRCD_BUFSIZE], *ptr = buffer;
+  char buffer[IRCD_BUFSIZE] = "", *ptr = buffer;
   unsigned int cur_len = 0, len, i;
 #ifdef NOT_USED_YET
   int paramcount, mpara = 0;
@@ -52,7 +51,7 @@ ms_encap(struct Client *client_p, struct Client *source_p,
   struct Message *mptr = NULL;
   MessageHandler handler = 0;
 
-  for (i = 1; i < (unsigned int)parc - 1; i++)
+  for (i = 1; i < (unsigned int)parc - 1; ++i)
   {
     len = strlen(parv[i]) + 1;
 
@@ -89,7 +88,7 @@ ms_encap(struct Client *client_p, struct Client *source_p,
   parc -= 2;
 
   if ((handler = mptr->handlers[ENCAP_HANDLER]))
-    (*handler)(client_p, source_p, parc, parv);
+    (*handler)(source_p, parc, parv);
   return 0;
 }
 

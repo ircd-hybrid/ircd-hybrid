@@ -48,16 +48,21 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_services.la  \
                       m_stats.la     \
                       m_svinfo.la    \
+                      m_svsjoin.la   \
                       m_svskill.la   \
                       m_svsmode.la   \
                       m_svsnick.la   \
+                      m_svspart.la   \
                       m_tburst.la    \
                       m_time.la      \
                       m_topic.la     \
                       m_trace.la     \
+                      m_undline.la   \
+                      m_unkline.la   \
+                      m_unresv.la    \
+                      m_unxline.la   \
                       m_user.la      \
                       m_userhost.la  \
-                      m_users.la     \
                       m_version.la   \
                       m_wallops.la   \
                       m_watch.la     \
@@ -111,16 +116,21 @@ m_set_la_LDFLAGS = $(MODULE_FLAGS)
 m_services_la_LDFLAGS = $(MODULE_FLAGS)
 m_stats_la_LDFLAGS = $(MODULE_FLAGS)
 m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
+m_svsjoin_la_LDFLAGS = $(MODULE_FLAGS)
 m_svskill_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsmode_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsnick_la_LDFLAGS = $(MODULE_FLAGS)
+m_svspart_la_LDFLAGS = $(MODULE_FLAGS)
 m_tburst_la_LDFLAGS = $(MODULE_FLAGS)
 m_time_la_LDFLAGS = $(MODULE_FLAGS)
 m_topic_la_LDFLAGS = $(MODULE_FLAGS)
 m_trace_la_LDFLAGS = $(MODULE_FLAGS)
+m_undline_la_LDFLAGS = $(MODULE_FLAGS)
+m_unkline_la_LDFLAGS = $(MODULE_FLAGS)
+m_unresv_la_LDFLAGS = $(MODULE_FLAGS)
+m_unxline_la_LDFLAGS = $(MODULE_FLAGS)
 m_user_la_LDFLAGS = $(MODULE_FLAGS)
 m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
-m_users_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
 m_wallops_la_LDFLAGS = $(MODULE_FLAGS)
 m_watch_la_LDFLAGS = $(MODULE_FLAGS)
@@ -173,16 +183,21 @@ m_set_la_SOURCES = m_set.c
 m_services_la_SOURCES = m_services.c
 m_stats_la_SOURCES = m_stats.c
 m_svinfo_la_SOURCES = m_svinfo.c
+m_svsjoin_la_SOURCES = m_svsjoin.c
 m_svskill_la_SOURCES = m_svskill.c
 m_svsmode_la_SOURCES = m_svsmode.c
 m_svsnick_la_SOURCES = m_svsnick.c
+m_svspart_la_SOURCES = m_svspart.c
 m_tburst_la_SOURCES = m_tburst.c
 m_time_la_SOURCES = m_time.c
 m_topic_la_SOURCES = m_topic.c
 m_trace_la_SOURCES = m_trace.c
+m_undline_la_SOURCES = m_undline.c
+m_unkline_la_SOURCES = m_unkline.c
+m_unresv_la_SOURCES = m_unresv.c
+m_unxline_la_SOURCES = m_unxline.c
 m_user_la_SOURCES = m_user.c
 m_userhost_la_SOURCES = m_userhost.c
-m_users_la_SOURCES = m_users.c
 m_version_la_SOURCES = m_version.c
 m_wallops_la_SOURCES = m_wallops.c
 m_watch_la_SOURCES = m_watch.c

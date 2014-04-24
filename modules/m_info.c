@@ -26,14 +26,11 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "channel.h"
 #include "client.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "s_misc.h"
-#include "s_serv.h"
-#include "s_user.h"
+#include "misc.h"
+#include "server.h"
 #include "send.h"
 #include "conf.h"
 #include "parse.h"
@@ -46,8 +43,8 @@
 struct InfoStruct
 {
   const char *name;         /* Displayed variable name           */
-  unsigned int output_type; /* See below #defines                */
-  void *option;             /* Pointer reference to the value    */
+  const unsigned int output_type; /* See below #defines                */
+  const void *option;             /* Pointer reference to the value    */
   const char *desc;         /* ASCII description of the variable */
 };
 
@@ -64,16 +61,28 @@ static const struct InfoStruct info_table[] =
   /* --[  START OF TABLE  ]-------------------------------------------- */
 
   {
-    "CPATH",
-    OUTPUT_STRING,
-    &ConfigFileEntry.configfile,
-    "Path to main configuration file"
-  },
-  {
     "DPATH",
     OUTPUT_STRING,
     &ConfigFileEntry.dpath,
     "Root directory of installation"
+  },
+  {
+    "SPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.spath,
+    "Path to server executable"
+  },
+  {
+    "MPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.mpath,
+    "Path to main motd (Message of the Day) file"
+  },
+  {
+    "CPATH",
+    OUTPUT_STRING,
+    &ConfigFileEntry.configfile,
+    "Path to main configuration file"
   },
   {
     "DLPATH",
@@ -526,14 +535,10 @@ static const struct InfoStruct info_table[] =
 static void
 send_birthdate_online_time(struct Client *source_p)
 {
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-    sendto_one(source_p, ":%s %d %s :On-line since %s",
-               me.id, RPL_INFO, source_p->id,
-               myctime(me.localClient->firsttime));
-  else
-    sendto_one(source_p, ":%s %d %s :On-line since %s",
-               me.name, RPL_INFO, source_p->name,
-               myctime(me.localClient->firsttime));
+  sendto_one(source_p, ":%s %d %s :On-line since %s",
+             ID_or_name(&me, source_p), RPL_INFO,
+             ID_or_name(source_p, source_p),
+             myctime(me.localClient->firsttime));
 }
 
 /* send_conf_options()
@@ -545,22 +550,7 @@ send_birthdate_online_time(struct Client *source_p)
 static void
 send_conf_options(struct Client *source_p)
 {
-  const char *from, *to;
   const struct InfoStruct *iptr = NULL;
-
-  /* Now send them a list of all our configuration options
-   * (mostly from defaults.h and config.h)
-   */
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
-    from = me.id;
-    to = source_p->id;
-  }
-  else
-  {
-    from = me.name;
-    to = source_p->name;
-  }
 
   /*
    * Parse the info_table[] and do the magic.
@@ -572,10 +562,10 @@ send_conf_options(struct Client *source_p)
       /* For "char *" references */
       case OUTPUT_STRING:
       {
-        const char *option = *((char **)iptr->option);
+        const char *option = *((const char *const *)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? option : "NONE",
                    iptr->desc ? iptr->desc : "<none>");
         break;
@@ -587,7 +577,7 @@ send_conf_options(struct Client *source_p)
         const char *option = iptr->option;
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? option : "NONE",
                    iptr->desc ? iptr->desc : "<none>");
         break;
@@ -596,21 +586,21 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as a decimal value. */
       case OUTPUT_DECIMAL:
       {
-        const int option = *((int *)iptr->option);
+        const int option = *((const int *const)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5d [%-30s]",
-                   from, RPL_INFO, to, iptr->name,
-                   option, iptr->desc ? iptr->desc : "<none>");
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
+                   iptr->name, option, iptr->desc ? iptr->desc : "<none>");
         break;
       }
 
       /* Output info_table[i].option as "ON" or "OFF" */
       case OUTPUT_BOOLEAN:
       {
-        const int option = *((int *)iptr->option);
+        const int option = *((const int *const)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? "ON" : "OFF",
                    iptr->desc ? iptr->desc : "<none>");
 
@@ -620,10 +610,10 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as "YES" or "NO" */
       case OUTPUT_BOOLEAN_YN:
       {
-        const int option = *((int *)iptr->option);
+        const int option = *((const int *const)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? "YES" : "NO",
                    iptr->desc ? iptr->desc : "<none>");
         break;
@@ -631,10 +621,10 @@ send_conf_options(struct Client *source_p)
 
       case OUTPUT_BOOLEAN2:
       {
-        const int option = *((int *)iptr->option);
+        const int option = *((const int *const)iptr->option);
 
         sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
-                   from, RPL_INFO, to,
+                   ID_or_name(&me, source_p), RPL_INFO, ID_or_name(source_p, source_p),
                    iptr->name, option ? ((option == 1) ? "MASK" : "YES") : "NO",
                    iptr->desc ? iptr->desc : "<none>");
         break;
@@ -642,8 +632,7 @@ send_conf_options(struct Client *source_p)
     }
   }
 
-  sendto_one(source_p, form_str(RPL_INFO),
-             from, to, "");
+  sendto_one_numeric(source_p, &me, RPL_INFO, "");
 }
 
 /* send_info_text()
@@ -652,22 +641,15 @@ send_conf_options(struct Client *source_p)
  * output       - NONE
  * side effects - info text is sent to client
  */
-static int
+static void
 send_info_text(struct Client *source_p)
 {
   const char **text = infotext;
-  char *source, *target;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "INFO requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
-
-  if (!MyClient(source_p) && IsCapable(source_p->from, CAP_TS6) &&
-      HasID(source_p))
-    source = me.id, target = source_p->id;
-  else
-    source = me.name, target = source_p->name;
 
   while (*text)
   {
@@ -676,8 +658,7 @@ send_info_text(struct Client *source_p)
     if (*line == '\0')
       line = " ";
 
-    sendto_one(source_p, form_str(RPL_INFO),
-               source, target, line);
+    sendto_one_numeric(source_p, &me, RPL_INFO, line);
   }
 
   if (HasUMode(source_p, UMODE_OPER))
@@ -685,54 +666,62 @@ send_info_text(struct Client *source_p)
 
   send_birthdate_online_time(source_p);
 
-  sendto_one(source_p, form_str(RPL_ENDOFINFO),
-             me.name, source_p->name);
-  return 0;
+  sendto_one_numeric(source_p, &me, RPL_ENDOFINFO);
 }
 
-/*
-** m_info()
-**  parv[0] = command
-**  parv[1] = servername
-*/
+/*! \brief INFO command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/servername
+ */
 static int
-m_info(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_info(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
   last_used = CurrentTime;
 
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
+    if (hunt_server(source_p, ":%s INFO :%s", 1,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  return send_info_text(source_p);
+  send_info_text(source_p);
+  return 0;
 }
 
-/*
-** ms_info()
-**  parv[0] = command
-**  parv[1] = servername
-*/
+/*! \brief INFO command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/servername
+ */
 static int
-ms_info(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_info(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s INFO :%s", 1,
+  if (hunt_server(source_p, ":%s INFO :%s", 1,
                   parc, parv) != HUNTED_ISME)
     return 0;
 
-  return send_info_text(source_p);
+  send_info_text(source_p);
+  return 0;
 }
 
 static struct Message info_msgtab =

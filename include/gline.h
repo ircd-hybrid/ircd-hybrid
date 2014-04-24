@@ -19,31 +19,44 @@
  *  USA
  */
 
-/*! \file s_misc.h
- * \brief A header for the miscellaneous functions.
+/*! \file gline.h
+ * \brief A header for the gline functions.
  * \version $Id$
  */
 
-#ifndef INCLUDED_s_misc_h
-#define INCLUDED_s_misc_h
+#ifndef INCLUDED_gline_h
+#define INCLUDED_gline_h
 
-extern const char *date(time_t);
-extern const char *smalldate(time_t);
-extern const char *myctime(time_t);
-#ifdef HAVE_LIBCRYPTO
-extern const char *ssl_get_cipher(const SSL *);
-#endif
+#include "ircd_defs.h"
 
-/* Just blindly define our own MIN/MAX macro */
-#define IRCD_MAX(a, b)  ((a) > (b) ? (a) : (b))
-#define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
+#define GLINE_PENDING_DEL_TYPE 0
+#define GLINE_PENDING_ADD_TYPE 1
 
-#define _1MEG     (1024.0f)
-#define _1GIG     (1024.0f*1024.0f)
-#define _1TER     (1024.0f*1024.0f*1024.0f)
-#define _GMKs(x)  (((x) > _1TER) ? "Terabytes" : (((x) > _1GIG) ? "Gigabytes" :\
-                  (((x) > _1MEG) ? "Megabytes" : "Kilobytes")))
-#define _GMKv(x)  (((x) > _1TER) ? (float)((x)/_1TER) : (((x) > _1GIG) ? \
-                   (float)((x)/_1GIG) : (((x) > _1MEG) ? (float)((x)/_1MEG) : \
-                   (float)(x))))
+#define CLEANUP_GLINES_TIME  300
+
+struct MaskItem;
+
+extern void cleanup_glines(void *);
+extern struct MaskItem *find_is_glined(const char *, const char *);
+
+struct gline_pending
+{
+  dlink_node node;
+
+  struct
+  {
+    char oper_nick[NICKLEN + 1];
+    char oper_user[USERLEN + 1];
+    char oper_host[HOSTLEN + 1];
+    char oper_server[HOSTLEN + 1];
+    char reason[REASONLEN + 1];
+    time_t time_request;
+  } vote_1, vote_2;
+
+  time_t last_gline_time;       /* for expiring entry */
+  char user[USERLEN * 2 + 2];
+  char host[HOSTLEN * 2 + 2];
+};
+
+extern dlink_list pending_glines[];
 #endif

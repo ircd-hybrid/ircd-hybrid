@@ -33,19 +33,24 @@
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "packet.h"
-#include "s_user.h"
+#include "user.h"
 
 
-/*
- * m_away
- *  parv[0] = command
- *  parv[1] = away message
+/*! \brief AWAY command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = away message
  */
 static int
-m_away(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_away(struct Client *source_p, int parc, char *parv[])
 {
   if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
@@ -57,30 +62,25 @@ m_away(struct Client *client_p, struct Client *source_p,
     {
       source_p->away[0] = '\0';
       /* we now send this only if they were away before --is */
-      sendto_server(client_p, CAP_TS6, NOCAPS,
-                    ":%s AWAY", ID(source_p));
-      sendto_server(client_p, NOCAPS, CAP_TS6,
-                    ":%s AWAY", source_p->name);
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY", source_p->id);
       sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
                                    ":%s!%s@%s AWAY",
                                    source_p->name, source_p->username,
                                    source_p->host);
     }
 
-    sendto_one(source_p, form_str(RPL_UNAWAY),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_UNAWAY);
     return 0;
   }
 
   if ((CurrentTime - source_p->localClient->last_away) < ConfigFileEntry.pace_wait)
   {
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
   source_p->localClient->last_away = CurrentTime;
-  sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
 
   if (!strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
     return 0;
@@ -91,16 +91,24 @@ m_away(struct Client *client_p, struct Client *source_p,
                                ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,
                                source_p->host, source_p->away);
-  sendto_server(client_p, CAP_TS6, NOCAPS,
-                ":%s AWAY :%s", ID(source_p), source_p->away);
-  sendto_server(client_p, NOCAPS, CAP_TS6,
-                ":%s AWAY :%s", source_p->name, source_p->away);
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY :%s",
+                source_p->id, source_p->away);
   return 0;
 }
 
+/*! \brief AWAY command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = away message
+ */
 static int
-ms_away(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_away(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -109,10 +117,7 @@ ms_away(struct Client *client_p, struct Client *source_p,
     {
       source_p->away[0] = '\0';
       /* we now send this only if they were away before --is */
-      sendto_server(client_p, CAP_TS6, NOCAPS,
-                    ":%s AWAY", ID(source_p));
-      sendto_server(client_p, NOCAPS, CAP_TS6,
-                    ":%s AWAY", source_p->name);
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY", source_p->id);
       sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
                                    ":%s!%s@%s AWAY",
                                    source_p->name, source_p->username,
@@ -131,10 +136,8 @@ ms_away(struct Client *client_p, struct Client *source_p,
                                ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,
                                source_p->host, source_p->away);
-  sendto_server(client_p, CAP_TS6, NOCAPS,
-                ":%s AWAY :%s", ID(source_p), source_p->away);
-  sendto_server(client_p, NOCAPS, CAP_TS6,
-                ":%s AWAY :%s", source_p->name, source_p->away);
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY :%s",
+                source_p->id, source_p->away);
   return 0;
 }
 

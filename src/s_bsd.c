@@ -39,16 +39,16 @@
 #include "listener.h"
 #include "numeric.h"
 #include "packet.h"
-#include "irc_res.h"
+#include "res.h"
 #include "restart.h"
-#include "s_auth.h"
+#include "auth.h"
 #include "conf.h"
 #include "log.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "memory.h"
-#include "s_user.h"
-#include "hook.h"
+#include "user.h"
+
 
 static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
   "Error during DNS lookup", "connect timeout", "Error during connect()",
@@ -173,6 +173,7 @@ close_connection(struct Client *client_p)
      * even if it is marked as blocked (COMM_SELECT_READ handler is called
      * before COMM_SELECT_WRITE). Let's try, nothing to lose.. -adx
      */
+    DelFlag(client_p, FLAGS_BLOCKED);
     send_queued_write(client_p);
   }
 
@@ -224,7 +225,6 @@ close_connection(struct Client *client_p)
 
   MyFree(client_p->localClient->passwd);
   detach_conf(client_p, CONF_CLIENT|CONF_OPER|CONF_SERVER);
-  client_p->from = NULL; /* ...this should catch them! >:) --msa */
 }
 
 #ifdef HAVE_LIBCRYPTO
@@ -242,7 +242,7 @@ ssl_handshake(int fd, struct Client *client_p)
   {
     if ((CurrentTime - client_p->localClient->firsttime) > 30)
     {
-      exit_client(client_p, client_p, "Timeout during SSL handshake");
+      exit_client(client_p, "Timeout during SSL handshake");
       return;
     }
 
@@ -259,7 +259,7 @@ ssl_handshake(int fd, struct Client *client_p)
         return;
 
       default:
-        exit_client(client_p, client_p, "Error during SSL handshake");
+        exit_client(client_p, "Error during SSL handshake");
         return;
     }
   }
@@ -269,18 +269,18 @@ ssl_handshake(int fd, struct Client *client_p)
   if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
   {
     int res = SSL_get_verify_result(client_p->localClient->fd.ssl);
-    char buf[EVP_MAX_MD_SIZE * 2 + 1] = { '\0' };
-    unsigned char md[EVP_MAX_MD_SIZE] = { '\0' };
+    char buf[EVP_MAX_MD_SIZE * 2 + 1] = "";
+    unsigned char md[EVP_MAX_MD_SIZE] = "";
 
     if (res == X509_V_OK || res == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
         res == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE ||
         res == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT)
     {
-      unsigned int i = 0, n = 0;
+      unsigned int n = 0;
 
       if (X509_digest(cert, EVP_sha256(), md, &n))
       {
-        for (; i < n; ++i)
+        for (unsigned int i = 0; i < n; ++i)
           snprintf(buf + 2 * i, 3, "%02X", md[i]);
         client_p->certfp = xstrdup(buf);
       }
@@ -305,9 +305,9 @@ ssl_handshake(int fd, struct Client *client_p)
 void
 add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 {
-  struct Client *new_client = make_client(NULL);
+  struct Client *client_p = make_client(NULL);
 
-  fd_open(&new_client->localClient->fd, fd, 1,
+  fd_open(&client_p->localClient->fd, fd, 1,
           (listener->flags & LISTENER_SSL) ?
           "Incoming SSL connection" : "Incoming connection");
 
@@ -315,55 +315,55 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
    * copy address to 'sockhost' as a string, copy it to host too
    * so we have something valid to put into error messages...
    */
-  memcpy(&new_client->localClient->ip, irn, sizeof(struct irc_ssaddr));
+  memcpy(&client_p->localClient->ip, irn, sizeof(struct irc_ssaddr));
 
-  getnameinfo((struct sockaddr *)&new_client->localClient->ip,
-              new_client->localClient->ip.ss_len, new_client->sockhost,
-              sizeof(new_client->sockhost), NULL, 0, NI_NUMERICHOST);
-  new_client->localClient->aftype = new_client->localClient->ip.ss.ss_family;
+  getnameinfo((struct sockaddr *)&client_p->localClient->ip,
+              client_p->localClient->ip.ss_len, client_p->sockhost,
+              sizeof(client_p->sockhost), NULL, 0, NI_NUMERICHOST);
+  client_p->localClient->aftype = client_p->localClient->ip.ss.ss_family;
 
 #ifdef HAVE_LIBGEOIP
   /* XXX IPV6 SUPPORT XXX */
   if (irn->ss.ss_family == AF_INET && geoip_ctx)
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&new_client->localClient->ip;
-    new_client->localClient->country_id = GeoIP_id_by_ipnum(geoip_ctx, (unsigned long)ntohl(v4->sin_addr.s_addr));
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&client_p->localClient->ip;
+    client_p->localClient->country_id = GeoIP_id_by_ipnum(geoip_ctx, (unsigned long)ntohl(v4->sin_addr.s_addr));
   }
 #endif
 
-  if (new_client->sockhost[0] == ':' && new_client->sockhost[1] == ':')
+  if (client_p->sockhost[0] == ':' && client_p->sockhost[1] == ':')
   {
-    strlcpy(new_client->host, "0", sizeof(new_client->host));
-    strlcpy(new_client->host+1, new_client->sockhost, sizeof(new_client->host)-1);
-    memmove(new_client->sockhost+1, new_client->sockhost, sizeof(new_client->sockhost)-1);
-    new_client->sockhost[0] = '0';
+    strlcpy(client_p->host, "0", sizeof(client_p->host));
+    strlcpy(client_p->host+1, client_p->sockhost, sizeof(client_p->host)-1);
+    memmove(client_p->sockhost+1, client_p->sockhost, sizeof(client_p->sockhost)-1);
+    client_p->sockhost[0] = '0';
   }
   else
-    strlcpy(new_client->host, new_client->sockhost, sizeof(new_client->host));
+    strlcpy(client_p->host, client_p->sockhost, sizeof(client_p->host));
 
-  new_client->localClient->listener = listener;
+  client_p->localClient->listener = listener;
   ++listener->ref_count;
 
 #ifdef HAVE_LIBCRYPTO
   if (listener->flags & LISTENER_SSL)
   {
-    if ((new_client->localClient->fd.ssl = SSL_new(ServerInfo.server_ctx)) == NULL)
+    if ((client_p->localClient->fd.ssl = SSL_new(ServerInfo.server_ctx)) == NULL)
     {
       ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
            ERR_error_string(ERR_get_error(), NULL));
 
-      SetDead(new_client);
-      exit_client(new_client, new_client, "SSL_new failed");
+      SetDead(client_p);
+      exit_client(client_p, "SSL_new failed");
       return;
     }
 
-    AddFlag(new_client, FLAGS_SSL);
-    SSL_set_fd(new_client->localClient->fd.ssl, fd);
-    ssl_handshake(0, new_client);
+    AddFlag(client_p, FLAGS_SSL);
+    SSL_set_fd(client_p->localClient->fd.ssl, fd);
+    ssl_handshake(0, client_p);
   }
   else
 #endif
-    start_auth(new_client);
+    start_auth(client_p);
 }
 
 /*

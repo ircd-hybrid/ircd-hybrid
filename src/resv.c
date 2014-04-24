@@ -35,7 +35,7 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd_defs.h"
-#include "s_misc.h"
+#include "misc.h"
 #include "conf.h"
 #include "conf_db.h"
 #include "channel.h"

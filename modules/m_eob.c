@@ -30,21 +30,25 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_serv.h"
+#include "server.h"
 
 
-/*
- * ms_eob - EOB command handler
- *      parv[0] = command   
- *      parv[1] = servername   
+/*! \brief EOB command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
  */
 static int
-ms_eob(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+ms_eob(struct Client *source_p, int parc, char *parv[])
 {
   assert(IsServer(source_p));
 
-  if (client_p == source_p)
+  if (MyConnect(source_p))
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "End of burst from %s (%u seconds)",
                          source_p->name,
@@ -52,10 +56,7 @@ ms_eob(struct Client *client_p, struct Client *source_p,
 
   AddFlag(source_p, FLAGS_EOB);
 
-  sendto_server(client_p, CAP_TS6, NOCAPS,
-                ":%s EOB", ID(source_p));
-  sendto_server(client_p, NOCAPS, CAP_TS6,
-                ":%s EOB", source_p->name);
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s EOB", source_p->id);
   return 0;
 }
 

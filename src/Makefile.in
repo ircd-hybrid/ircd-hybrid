@@ -103,24 +103,24 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ircd_OBJECTS = channel.$(OBJEXT) channel_mode.$(OBJEXT) \
-	client.$(OBJEXT) conf.$(OBJEXT) conf_class.$(OBJEXT) \
-	conf_db.$(OBJEXT) conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) \
-	dbuf.$(OBJEXT) event.$(OBJEXT) fdlist.$(OBJEXT) \
-	getopt.$(OBJEXT) hash.$(OBJEXT) hook.$(OBJEXT) \
-	hostmask.$(OBJEXT) irc_res.$(OBJEXT) irc_reslib.$(OBJEXT) \
+am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
+	channel_mode.$(OBJEXT) client.$(OBJEXT) conf.$(OBJEXT) \
+	conf_class.$(OBJEXT) conf_db.$(OBJEXT) conf_parser.$(OBJEXT) \
+	conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) event.$(OBJEXT) \
+	fdlist.$(OBJEXT) getopt.$(OBJEXT) gline.$(OBJEXT) \
+	hash.$(OBJEXT) hook.$(OBJEXT) hostmask.$(OBJEXT) \
 	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
 	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
 	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
-	modules.$(OBJEXT) motd.$(OBJEXT) rng_mt.$(OBJEXT) \
+	misc.$(OBJEXT) modules.$(OBJEXT) motd.$(OBJEXT) \
 	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
 	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
 	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
-	s_bsd_select.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
-	rsa.$(OBJEXT) s_auth.$(OBJEXT) s_bsd.$(OBJEXT) \
-	s_gline.$(OBJEXT) s_misc.$(OBJEXT) s_serv.$(OBJEXT) \
-	s_user.$(OBJEXT) send.$(OBJEXT) version.$(OBJEXT) \
-	watch.$(OBJEXT) whowas.$(OBJEXT)
+	s_bsd_select.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
+	restart.$(OBJEXT) resv.$(OBJEXT) rng_mt.$(OBJEXT) \
+	rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	user.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -357,7 +357,8 @@ AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include
 ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
-ircd_SOURCES = channel.c         \
+ircd_SOURCES = auth.c            \
+               channel.c         \
                channel_mode.c    \
                client.c          \
                conf.c            \
@@ -369,11 +370,10 @@ ircd_SOURCES = channel.c         \
                event.c           \
                fdlist.c          \
                getopt.c          \
+               gline.c           \
                hash.c            \
                hook.c            \
                hostmask.c        \
-               irc_res.c         \
-               irc_reslib.c      \
                irc_string.c      \
                ircd.c            \
                ircd_signal.c     \
@@ -383,9 +383,9 @@ ircd_SOURCES = channel.c         \
                match.c           \
                memory.c          \
                mempool.c         \
+               misc.c            \
                modules.c         \
                motd.c            \
-               rng_mt.c          \
                numeric.c         \
                packet.c          \
                parse.c           \
@@ -394,16 +394,16 @@ ircd_SOURCES = channel.c         \
                s_bsd_devpoll.c   \
                s_bsd_kqueue.c    \
                s_bsd_select.c    \
+               res.c             \
+               reslib.c          \
                restart.c         \
                resv.c            \
+               rng_mt.c          \
                rsa.c             \
-               s_auth.c          \
                s_bsd.c           \
-               s_gline.c         \
-               s_misc.c          \
-               s_serv.c          \
-               s_user.c          \
                send.c            \
+               server.c          \
+               user.c            \
                version.c         \
                watch.c           \
                whowas.c
@@ -505,6 +505,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/auth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
@@ -517,11 +518,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_res.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_reslib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@
@@ -531,27 +531,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/res.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_auth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_devpoll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_epoll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_kqueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_poll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_select.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_gline.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_misc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_serv.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_user.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/watch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@

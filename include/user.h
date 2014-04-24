@@ -19,13 +19,13 @@
  *  USA
  */
 
-/*! \file s_user.h
+/*! \file user.h
  * \brief A header for the user functions.
  * \version $Id$
  */
 
-#ifndef INCLUDED_s_user_h
-#define INCLUDED_s_user_h
+#ifndef INCLUDED_user_h
+#define INCLUDED_user_h
 
 #define IRC_MAXSID 3
 #define IRC_MAXUID 6
@@ -36,7 +36,6 @@ struct Client;
 extern const unsigned int user_modes[];
 
 extern void assemble_umode_buffer(void);
-extern void set_user_mode(struct Client *, struct Client *, const int, char *[]);
 extern void send_umode(struct Client *, struct Client *,
                        unsigned int, unsigned int, char *);
 extern void send_umode_out(struct Client *, struct Client *, unsigned int);

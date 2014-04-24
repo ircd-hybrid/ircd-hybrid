@@ -38,78 +38,109 @@ dbuf_init(void)
   dbuf_pool = mp_pool_new(sizeof(struct dbuf_block), MP_CHUNK_SIZE_DBUF);
 }
 
-static struct dbuf_block *
-dbuf_alloc(struct dbuf_queue *qptr)
+struct dbuf_block *
+dbuf_alloc(void)
 {
   struct dbuf_block *block = mp_pool_get(dbuf_pool);
 
   memset(block, 0, sizeof(*block));
-  dlinkAddTail(block, make_dlink_node(), &qptr->blocks);
+
+  ++block->refs;
   return block;
 }
 
 void
-dbuf_put(struct dbuf_queue *qptr, char *data, size_t count)
+dbuf_ref_free(struct dbuf_block *block)
 {
-  struct dbuf_block *last;
-  size_t amount;
-
-  assert(count > 0);
-  if (qptr->blocks.tail == NULL)
-    dbuf_alloc(qptr);
-
-  do {
-    last = qptr->blocks.tail->data;
-
-    amount = DBUF_BLOCK_SIZE - last->size;
-    if (!amount)
-    {
-      last = dbuf_alloc(qptr);
-      amount = DBUF_BLOCK_SIZE;
-    }
-    if (amount > count)
-      amount = count;
-
-    memcpy((void *) &last->data[last->size], data, amount);
-    count -= amount;
-    last->size += amount;
-    qptr->total_size += amount;
-
-    data += amount;
-
-  } while (count > 0);
+  if (--block->refs <= 0)
+    mp_pool_release(block);
 }
 
 void
-dbuf_delete(struct dbuf_queue *qptr, size_t count)
+dbuf_add(struct dbuf_queue *queue, struct dbuf_block *block)
 {
-  dlink_node *ptr;
-  struct dbuf_block *first;
-
-  assert(qptr->total_size >= count);
-  if (count == 0)
-    return;
-
-  /* free whole blocks first.. */
-  while (1)
-  {
-    if (!count)
-      return;
-    ptr = qptr->blocks.head;
-    first = ptr->data;
-    if (count < first->size)
-      break;
-
-    qptr->total_size -= first->size;
-    count -= first->size;
-    dlinkDelete(ptr, &qptr->blocks);
-    free_dlink_node(ptr);
-    mp_pool_release(first);
-  }
-
-  /* ..then remove data from the beginning of the queue */
-  first->size -= count;
-  qptr->total_size -= count;
-  memmove((void *) &first->data, (void *) &first->data[count], first->size);
+  block->refs++;
+  dlinkAddTail(block, make_dlink_node(), &queue->blocks);
+  queue->total_size += block->size;
 }
 
+void
+dbuf_delete(struct dbuf_queue *queue, size_t count)
+{
+  while (count > 0 && dbuf_length(queue) > 0)
+  {
+    dlink_node *node = queue->blocks.head;
+    struct dbuf_block *block = node->data;
+    size_t avail = block->size - queue->pos;
+
+    if (count >= avail)
+    {
+      count -= avail;
+      queue->total_size -= avail;
+
+      dbuf_ref_free(block);
+
+      dlinkDelete(node, &queue->blocks);
+      free_dlink_node(node);
+
+      queue->pos = 0;
+    }
+    else
+    {
+      queue->pos += count;
+
+      queue->total_size -= count;
+      count -= count;
+    }
+  }
+}
+
+void
+dbuf_put_fmt(struct dbuf_block *dbuf, const char *pattern, ...)
+{
+  va_list args;
+
+  assert(dbuf->refs == 1);
+
+  va_start(args, pattern);
+  dbuf_put_args(dbuf, pattern, args);
+  va_end(args);
+}
+
+void
+dbuf_put_args(struct dbuf_block *dbuf, const char *data, va_list args)
+{
+  assert(dbuf->refs == 1);
+
+  dbuf->size += vsnprintf(dbuf->data + dbuf->size, sizeof(dbuf->data) - dbuf->size, data, args);
+  if (dbuf->size > sizeof(dbuf->data))
+    dbuf->size = sizeof(dbuf->data); /* required by some versions of vsnprintf */
+}
+
+void
+dbuf_put(struct dbuf_queue *queue, const char *buf, size_t sz)
+{
+  while (sz > 0)
+  {
+    size_t avail;
+    struct dbuf_block *block = dbuf_length(queue) ? queue->blocks.tail->data : NULL;
+
+    if (block == NULL || sizeof(block->data) - block->size == 0)
+    {
+      block = dbuf_alloc();
+      dlinkAddTail(block, make_dlink_node(), &queue->blocks);
+    }
+
+    avail = sizeof(block->data) - block->size;
+    if (avail > sz)
+      avail = sz;
+
+    memcpy(&block->data[block->size], buf, avail);
+    block->size += avail;
+
+    queue->total_size += avail;
+
+    sz -= avail;
+    buf += avail;
+  }
+}

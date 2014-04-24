@@ -33,9 +33,8 @@
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "numeric.h"
-#include "s_misc.h"
-#include "s_serv.h"
-#include "s_user.h"
+#include "misc.h"
+#include "server.h"
 #include "send.h"
 #include "conf.h"
 #include "parse.h"
@@ -43,8 +42,7 @@
 
 
 static void
-whowas_do(struct Client *client_p, struct Client *source_p,
-          const int parc, char *parv[])
+do_whowas(struct Client *source_p, const int parc, char *parv[])
 {
   int cur = 0;
   int max = -1;
@@ -60,19 +58,16 @@ whowas_do(struct Client *client_p, struct Client *source_p,
 
     if (!irccmp(parv[1], temp->name))
     {
-      sendto_one(source_p, form_str(RPL_WHOWASUSER),
-                 me.name, source_p->name, temp->name,
-                 temp->username, temp->hostname,
-                 temp->realname);
+      sendto_one_numeric(source_p, &me, RPL_WHOWASUSER, temp->name,
+                         temp->username, temp->hostname,
+                         temp->realname);
 
       if ((temp->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
-        sendto_one(source_p, form_str(RPL_WHOISSERVER), me.name,
-                   source_p->name, temp->name,
-                   ServerInfo.network_name, myctime(temp->logoff));
+        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
+                           ServerInfo.network_name, myctime(temp->logoff));
       else
-        sendto_one(source_p, form_str(RPL_WHOISSERVER), me.name,
-                   source_p->name, temp->name,
-                   temp->servername, myctime(temp->logoff));
+        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
+                           temp->servername, myctime(temp->logoff));
       ++cur;
     }
 
@@ -81,73 +76,87 @@ whowas_do(struct Client *client_p, struct Client *source_p,
   }
 
   if (!cur)
-    sendto_one(source_p, form_str(ERR_WASNOSUCHNICK),
-               me.name, source_p->name, parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_WASNOSUCHNICK, parv[1]);
 
-  sendto_one(source_p, form_str(RPL_ENDOFWHOWAS),
-             me.name, source_p->name, parv[1]);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFWHOWAS, parv[1]);
 }
 
-/*
-** m_whowas
-**      parv[0] = command
-**      parv[1] = nickname queried
-*/
+/*! \brief WHOWAS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ *      - parv[2] = count
+ *      - parv[3] = nickname/servername
+ */
 static int
-m_whowas(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_whowas(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return 0;
   }
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    sendto_one(source_p,form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
   last_used = CurrentTime;
 
   if (parc > 3 && !ConfigServerHide.disable_remote_commands)
-    if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
+    if (hunt_server(source_p, ":%s WHOWAS %s %s :%s", 3,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  whowas_do(client_p, source_p, parc, parv);
+  do_whowas(source_p, parc, parv);
   return 0;
 }
 
+/*! \brief WHOWAS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ *      - parv[2] = count
+ *      - parv[3] = nickname/servername
+ */
 static int
-mo_whowas(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_whowas(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return 0;
   }
 
   if (parc > 3)
-    if (hunt_server(client_p, source_p, ":%s WHOWAS %s %s :%s", 3,
+    if (hunt_server(source_p, ":%s WHOWAS %s %s :%s", 3,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
-  whowas_do(client_p, source_p, parc, parv);
+  do_whowas(source_p, parc, parv);
   return 0;
 }
 
 static struct Message whowas_msgtab =
 {
   "WHOWAS", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_whowas, mo_whowas, m_ignore, mo_whowas, m_ignore }
+  { m_unregistered, m_whowas, ms_whowas, m_ignore, ms_whowas, m_ignore }
 };
 
 static void

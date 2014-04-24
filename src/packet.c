@@ -28,7 +28,7 @@
 #include "list.h"
 #include "s_bsd.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "client.h"
 #include "ircd.h"
 #include "parse.h"
@@ -36,9 +36,8 @@
 #include "packet.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "hook.h"
 #include "send.h"
-#include "s_misc.h"
+#include "misc.h"
 
 #define READBUF_SIZE 16384
 
@@ -55,12 +54,9 @@ static void client_dopacket(struct Client *, char *, size_t);
 static int
 extract_one_line(struct dbuf_queue *qptr, char *buffer)
 {
-  struct dbuf_block *block;
   int line_bytes = 0, empty_bytes = 0, phase = 0;
-  unsigned int idx;
-
-  char c;
-  dlink_node *ptr;
+  unsigned int idx = 0;
+  dlink_node *ptr = NULL;
 
   /*
    * Phase 0: "empty" characters before the line
@@ -76,14 +72,20 @@ extract_one_line(struct dbuf_queue *qptr, char *buffer)
    */
   DLINK_FOREACH(ptr, qptr->blocks.head)
   {
-    block = ptr->data;
+    struct dbuf_block *block = ptr->data;
 
-    for (idx = 0; idx < block->size; idx++)
+    if (ptr == qptr->blocks.head)
+      idx = qptr->pos;
+    else
+      idx = 0;
+
+    for (; idx < block->size; ++idx)
     {
-      c = block->data[idx];
+      char c = block->data[idx];
+
       if (IsEol(c) || (c == ' ' && phase != 1))
       {
-        empty_bytes++;
+        ++empty_bytes;
         if (phase == 1)
           phase = 2;
       }
@@ -113,7 +115,6 @@ extract_one_line(struct dbuf_queue *qptr, char *buffer)
   dbuf_delete(qptr, line_bytes + empty_bytes);
   return IRCD_MIN(line_bytes, IRCD_BUFSIZE - 2);
 }
-
 /*
  * parse_client_queued - parse client queued messages
  */
@@ -353,7 +354,7 @@ read_packet(fde_t *fd, void *data)
     {
       if (!(ConfigFileEntry.no_oper_flood && HasUMode(client_p, UMODE_OPER)))
       {
-        exit_client(client_p, client_p, "Excess Flood");
+        exit_client(client_p, "Excess Flood");
         return;
       }
     }

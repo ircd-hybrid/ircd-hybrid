@@ -31,34 +31,36 @@
 #include "numeric.h"
 #include "send.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "parse.h"
 #include "modules.h"
 
 
-/*
- * mo_locops - LOCOPS message handler
- * (write to *all* local opers currently online)
- *      parv[0] = command
- *      parv[1] = message text
+/*! \brief LOCOPS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = message text
  */
 static int
-mo_locops(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+mo_locops(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_LOCOPS))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "locops");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "locops");
     return 0;
   }
 
   if (EmptyString(message))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "LOCOPS");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "LOCOPS");
     return 0;
   }
 
@@ -68,9 +70,20 @@ mo_locops(struct Client *client_p, struct Client *source_p,
   return 0;
 }
 
+/*! \brief LOCOPS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = target server
+ *      - parv[2] = message text
+ */
 static int
-ms_locops(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_locops(struct Client *source_p, int parc, char *parv[])
 {
   if (parc != 3 || EmptyString(parv[2]))
     return 0;
@@ -78,7 +91,7 @@ ms_locops(struct Client *client_p, struct Client *source_p,
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "LOCOPS %s :%s",
                      parv[1], parv[2]);
 
-  if (!IsClient(source_p) || match(parv[1], me.name))
+  if (match(parv[1], me.name))
     return 0;
 
   if (find_matching_name_conf(CONF_ULINE, source_p->servptr->name,

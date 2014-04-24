@@ -30,59 +30,65 @@
 #include "irc_string.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_serv.h"
+#include "server.h"
 #include "parse.h"
 #include "modules.h"
 
 
-/*
- * mo_globops - GLOBOPS message handler
- * (write to *all* local opers currently online)
- *      parv[0] = command
- *      parv[1] = message text
+/*! \brief GLOBOPS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = message text
  */
 static int
-mo_globops(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+mo_globops(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_GLOBOPS))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "globops");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "globops");
     return 0;
   }
 
   if (EmptyString(message))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "GLOBOPS");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "GLOBOPS");
     return 0;
   }
 
-  sendto_server(NULL, CAP_TS6, NOCAPS, ":%s GLOBOPS :%s",
-                ID(source_p), message);
-  sendto_server(NULL, NOCAPS, CAP_TS6, ":%s GLOBOPS :%s",
-                source_p->name, message);
-
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
+                source_p->id, message);
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from: %s: %s",
                        source_p->name, message);
   return 0;
 }
 
+/*! \brief GLOBOPS command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = message text
+ */
 static int
-ms_globops(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_globops(struct Client *source_p, int parc, char *parv[])
 {
   if (EmptyString(parv[1]))
     return 0;
 
-  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s GLOBOPS :%s",
-                ID(source_p), parv[1]);
-  sendto_server(client_p, NOCAPS, CAP_TS6, ":%s GLOBOPS :%s",
-                source_p->name, parv[1]);
-
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
+                source_p->id, parv[1]);
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from: %s: %s",
                        source_p->name, parv[1]);
   return 0;

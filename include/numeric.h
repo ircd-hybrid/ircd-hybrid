@@ -250,5 +250,5 @@ enum irc_numerics
   ERR_LAST_ERR_MSG         = 999
 };
 
-extern const char *form_str(enum irc_numerics);
+extern const char *numeric_form(enum irc_numerics);
 #endif /* INCLUDED_numeric_h */

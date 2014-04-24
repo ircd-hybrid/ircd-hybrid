@@ -25,18 +25,9 @@
  */
 
 #include "stdinc.h"
-#include "s_misc.h"
-#include "client.h"
+#include "misc.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "numeric.h"
-#include "irc_res.h"
-#include "fdlist.h"
-#include "s_bsd.h"
-#include "conf.h"
-#include "s_serv.h"
-#include "send.h"
-#include "memory.h"
 
 
 static const char *const months[] =
@@ -62,6 +53,7 @@ date(time_t lclock)
 
   if (!lclock)
     lclock = CurrentTime;
+
   gm = gmtime(&lclock);
   memcpy(&gmbuf, gm, sizeof(gmbuf));
   gm = &gmbuf;
@@ -135,7 +127,7 @@ myctime(time_t value)
 
   strlcpy(buf, ctime(&value), sizeof(buf));
 
-  if ((p = strchr(buf, '\n')) != NULL)
+  if ((p = strchr(buf, '\n')))
     *p = '\0';
   return buf;
 }

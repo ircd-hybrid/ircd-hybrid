@@ -31,21 +31,19 @@
 #include "ircd.h"
 #include "channel_mode.h"
 #include "numeric.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
 #include "irc_string.h"
-#include "s_user.h"
+#include "user.h"
 #include "hash.h"
 #include "watch.h"
 #include "whowas.h"
 
 
-/*! \brief SVSNICK command handler (called by services)
+/*! \brief SVSNICK command handler
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -58,30 +56,34 @@
  *      - parv[3] = timestamp
  */
 static int
-ms_svsnick(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_svsnick(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL, *exists_p = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE) || !valid_nickname(parv[2], 1))
     return 0;
 
-  if (hunt_server(client_p, source_p, ":%s SVSNICK %s %s :%s",
+  if (hunt_server(source_p, ":%s SVSNICK %s %s :%s",
                   1, parc, parv) != HUNTED_ISME)
     return 0;
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
   assert(MyClient(target_p));
 
   if ((exists_p = hash_find_client(parv[2])))
   {
-    if (IsUnknown(exists_p))
-      exit_client(exists_p, &me, "SVSNICK Override");
+    if (target_p == exists_p)
+    {
+      if (!strcmp(target_p->name, parv[2]))
+        return 0;
+    }
+    else if (IsUnknown(exists_p))
+      exit_client(exists_p, "SVSNICK Override");
     else
     {
-      exit_client(target_p, &me, "SVSNICK Collide");
+      exit_client(target_p, "SVSNICK Collide");
       return 0;
     }
   }
@@ -93,7 +95,7 @@ ms_svsnick(struct Client *client_p, struct Client *source_p,
   if (HasUMode(target_p, UMODE_REGISTERED))
   {
     unsigned int oldmodes = target_p->umodes;
-    char modebuf[IRCD_BUFSIZE] = { '\0' };
+    char modebuf[IRCD_BUFSIZE] = "";
 
     DelUMode(target_p, UMODE_REGISTERED);
     send_umode(target_p, target_p, oldmodes, 0xffffffff, modebuf);
@@ -105,11 +107,8 @@ ms_svsnick(struct Client *client_p, struct Client *source_p,
 
   whowas_add_history(target_p, 1);
 
-  sendto_server(NULL, CAP_TS6, NOCAPS, ":%s NICK %s :%lu",
-                ID(target_p), parv[2], (unsigned long)target_p->tsinfo);
-  sendto_server(NULL, NOCAPS, CAP_TS6, ":%s NICK %s :%lu",
-                target_p->name, parv[2], (unsigned long)target_p->tsinfo);
-
+  sendto_server(NULL, NOCAPS, NOCAPS, ":%s NICK %s :%lu",
+                target_p->id, parv[2], (unsigned long)target_p->tsinfo);
   hash_del_client(target_p);
   strlcpy(target_p->name, parv[2], sizeof(target_p->name));
   hash_add_client(target_p);

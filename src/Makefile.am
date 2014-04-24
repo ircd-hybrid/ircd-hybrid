@@ -9,7 +9,8 @@ ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
 
-ircd_SOURCES = channel.c         \
+ircd_SOURCES = auth.c            \
+               channel.c         \
                channel_mode.c    \
                client.c          \
                conf.c            \
@@ -21,11 +22,10 @@ ircd_SOURCES = channel.c         \
                event.c           \
                fdlist.c          \
                getopt.c          \
+               gline.c           \
                hash.c            \
                hook.c            \
                hostmask.c        \
-               irc_res.c         \
-               irc_reslib.c      \
                irc_string.c      \
                ircd.c            \
                ircd_signal.c     \
@@ -35,9 +35,9 @@ ircd_SOURCES = channel.c         \
                match.c           \
                memory.c          \
                mempool.c         \
+               misc.c            \
                modules.c         \
                motd.c            \
-               rng_mt.c          \
                numeric.c         \
                packet.c          \
                parse.c           \
@@ -46,16 +46,16 @@ ircd_SOURCES = channel.c         \
                s_bsd_devpoll.c   \
                s_bsd_kqueue.c    \
                s_bsd_select.c    \
+               res.c             \
+               reslib.c          \
                restart.c         \
                resv.c            \
+               rng_mt.c          \
                rsa.c             \
-               s_auth.c          \
                s_bsd.c           \
-               s_gline.c         \
-               s_misc.c          \
-               s_serv.c          \
-               s_user.c          \
                send.c            \
+               server.c          \
+               user.c            \
                version.c         \
                watch.c           \
                whowas.c

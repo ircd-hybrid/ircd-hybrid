@@ -30,65 +30,66 @@
 #include "irc_string.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_user.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_serv.h"
+#include "server.h"
 
 
-/*
- * mo_operwall - OPERWALL message handler
- *  (write to *all* local opers currently online)
- *      parv[0] = command
- *      parv[1] = message text
+/*! \brief OPERWALL command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = message text
  */
 static int
-mo_operwall(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+mo_operwall(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_OPERWALL))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "operwall");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "operwall");
     return 0;
   }
 
   if (EmptyString(message))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "OPERWALL");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "OPERWALL");
     return 0;
   }
 
-  sendto_server(NULL, CAP_TS6, NOCAPS, ":%s OPERWALL :%s",
-                ID(source_p), message);
-  sendto_server(NULL, NOCAPS, CAP_TS6, ":%s OPERWALL :%s",
-                source_p->name, message);
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s OPERWALL :%s",
+                source_p->id, message);
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
   return 0;
 }
 
-/*
- * ms_operwall - OPERWALL message handler
- *  (write to *all* local opers currently online)
- *      parv[0] = command
- *      parv[1] = message text
+/*! \brief OPERWALL command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = message text
  */
 static int
-ms_operwall(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+ms_operwall(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = parv[1];
 
   if (EmptyString(message))
     return 0;
 
-  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s OPERWALL :%s",
-                ID(source_p), message);
-  sendto_server(client_p, NOCAPS, CAP_TS6, ":%s OPERWALL :%s",
-                source_p->name, message);
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s OPERWALL :%s",
+                source_p->id, message);
   sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
   return 0;
 }

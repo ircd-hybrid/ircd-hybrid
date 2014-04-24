@@ -34,11 +34,11 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_user.h"
+#include "user.h"
 #include "memory.h"
 
 
@@ -50,8 +50,8 @@ do_list(struct Client *source_p, int parc, char *parv[])
 
   if (source_p->localClient->list_task)
   {
-    free_list_task(source_p->localClient->list_task, source_p);
-    sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
+    free_list_task(source_p);
+    sendto_one_numeric(source_p, &me, RPL_LISTEND);
     return;
   }
 
@@ -153,29 +153,31 @@ do_list(struct Client *source_p, int parc, char *parv[])
 
     if (errors)
     {
-      free_list_task(lt, source_p);
-      sendto_one(source_p, form_str(ERR_LISTSYNTAX),
-                 me.name, source_p->name);
+      free_list_task(source_p);
+      sendto_one_numeric(source_p, &me, ERR_LISTSYNTAX);
       return;
     }
   }
 
   dlinkAdd(source_p, make_dlink_node(), &listing_client_list);
 
-  sendto_one(source_p, form_str(RPL_LISTSTART),
-             me.name, source_p->name);
-  safe_list_channels(source_p, lt, no_masked_channels &&
-                     lt->show_mask.head != NULL);
+  sendto_one_numeric(source_p, &me, RPL_LISTSTART);
+  safe_list_channels(source_p, no_masked_channels && lt->show_mask.head != NULL);
 }
 
-/*
-** mo_list
-**      parv[0] = command
-**      parv[1] = channel
-*/
+/*! \brief LIST command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name/list options
+ */
 static int
-m_list(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_list(struct Client *source_p, int parc, char *parv[])
 {
   do_list(source_p, parc, parv);
   return 0;

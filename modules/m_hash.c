@@ -28,20 +28,26 @@
 #include "list.h"
 #include "client.h"
 #include "hash.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_user.h"
-#include "conf.h"
 #include "userhost.h"
 
 
+/*! \brief HASH command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ */
 static int
-mo_hash(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_hash(struct Client *source_p, int parc, char *parv[])
 {
   unsigned int i = 0;
   unsigned int max_chain = 0;
@@ -67,9 +73,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Client: entries: %u buckets: %u "
-             "max chain: %u", me.name, source_p->name, count, buckets,
-             max_chain);
+  sendto_one_notice(source_p, &me, ":Client: entries: %u buckets: %u "
+                    "max chain: %u", count, buckets, max_chain);
 
   count     = 0;
   buckets   = 0;
@@ -90,9 +95,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Channel: entries: %u buckets: %u "
-             "max chain: %u", me.name, source_p->name, count, buckets,
-             max_chain);
+  sendto_one_notice(source_p, &me, ":Channel: entries: %u buckets: %u "
+                    "max chain: %u", count, buckets, max_chain);
 
   count     = 0;
   buckets   = 0;
@@ -113,9 +117,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :Id: entries: %u buckets: %u "
-             "max chain: %u", me.name, source_p->name, count, buckets,
-             max_chain);
+  sendto_one_notice(source_p, &me, ":Id: entries: %u buckets: %u "
+                    "max chain: %u", count, buckets, max_chain);
 
   count     = 0;
   buckets   = 0;
@@ -136,9 +139,8 @@ mo_hash(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_one(source_p, ":%s NOTICE %s :UserHost: entries: %u buckets: %u "
-             "max chain: %u", me.name, source_p->name, count, buckets,
-             max_chain);
+  sendto_one_notice(source_p, &me, ":UserHost: entries: %u buckets: %u "
+                    "max chain: %u", count, buckets, max_chain);
   return 0;
 }
 

@@ -34,7 +34,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_user.h"
+#include "user.h"
 #include "watch.h"
 
 
@@ -45,28 +45,32 @@
  * ERR_TOOMANYWATCH - Take a guess :>  Too many WATCH entries.
  */
 static void
-show_watch(struct Client *client_p, const char *name,
-           unsigned int rpl1, unsigned int rpl2)
+show_watch(struct Client *source_p, const char *name,
+           enum irc_numerics rpl1, enum irc_numerics rpl2)
 {
   const struct Client *target_p = NULL;
 
-  if ((target_p = find_person(client_p, name)))
-    sendto_one(client_p, form_str(rpl1), me.name, client_p->name,
-               target_p->name, target_p->username,
-               target_p->host, target_p->tsinfo);
+  if ((target_p = find_person(source_p, name)))
+    sendto_one_numeric(source_p, &me, rpl1,
+                       target_p->name, target_p->username,
+                       target_p->host, target_p->tsinfo);
   else
-    sendto_one(client_p, form_str(rpl2), me.name, client_p->name,
-               name, "*", "*", 0);
+    sendto_one_numeric(source_p, &me, rpl2, name, "*", "*", 0);
 }
 
-/*
- * m_watch()
+/*! \brief WATCH command handler
  *
- * parv[0] = command
- * parv[1] = watch options
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = watch options
  */
 static int
-m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_watch(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *ptr = NULL;
   char *s = NULL;
@@ -93,13 +97,12 @@ m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
      */
     if (*s == '+')
     {
-      if (*(s + 1) != '\0')
+      if (*(s + 1))
       {
         if (dlink_list_length(&source_p->localClient->watches) >=
             ConfigFileEntry.max_watch)
         {
-          sendto_one(source_p, form_str(ERR_TOOMANYWATCH), me.name,
-                     source_p->name, s + 1, ConfigFileEntry.max_watch);
+          sendto_one_numeric(source_p, &me, ERR_TOOMANYWATCH, s + 1, ConfigFileEntry.max_watch);
           continue;
         }
 
@@ -133,12 +136,12 @@ m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
     /*
      * Now comes the fun stuff, "S" or "s" returns a status report of
-     * their WATCH list.  I imagine this could be CPU intensive if
+     * their WATCH list. I imagine this could be CPU intensive if
      * it's done alot, perhaps an auto-lag on this?
      */
     if (*s == 'S' || *s == 's')
     {
-      char buf[IRCD_BUFSIZE] = { '\0' };
+      char buf[IRCD_BUFSIZE] = "";
       const struct Watch *anptr = NULL;
       unsigned int count = 0;
 
@@ -154,18 +157,16 @@ m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
       if ((anptr = watch_find_hash(source_p->name)))
         count = dlink_list_length(&anptr->watched_by);
 
-      sendto_one(source_p, form_str(RPL_WATCHSTAT),
-                 me.name, source_p->name,
+      sendto_one_numeric(source_p, &me, RPL_WATCHSTAT,
                  dlink_list_length(&source_p->localClient->watches), count);
 
       /*
-       * Send a list of everybody in their WATCH list.  Be careful
+       * Send a list of everybody in their WATCH list. Be careful
        * not to buffer overflow.
        */
       if ((ptr = source_p->localClient->watches.head) == NULL)
       {
-        sendto_one(source_p, form_str(RPL_ENDOFWATCHLIST),
-                   me.name, source_p->name, *s);
+        sendto_one_numeric(source_p, &me, RPL_ENDOFWATCHLIST, *s);
         continue;
       }
 
@@ -181,21 +182,18 @@ m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
         if (count + strlen(anptr->nick) + 1 > IRCD_BUFSIZE - 2)
         {
-          sendto_one(source_p, form_str(RPL_WATCHLIST),
-                     me.name, source_p->name, buf);
+          sendto_one_numeric(source_p, &me, RPL_WATCHLIST, buf);
           buf[0] = '\0';
           count = strlen(source_p->name) + strlen(me.name) + 10;
         }
 
-        strcat(buf, " ");
-        strcat(buf, anptr->nick);
+        strlcat(buf, " ", sizeof(buf));
+        strlcat(buf, anptr->nick, sizeof(buf));
         count += (strlen(anptr->nick) + 1);
       }
 
-      sendto_one(source_p, form_str(RPL_WATCHLIST),
-                 me.name, source_p->name, buf);
-      sendto_one(source_p, form_str(RPL_ENDOFWATCHLIST),
-                 me.name, source_p->name, *s);
+      sendto_one_numeric(source_p, &me, RPL_WATCHLIST, buf);
+      sendto_one_numeric(source_p, &me, RPL_ENDOFWATCHLIST, *s);
       continue;
     }
 
@@ -218,21 +216,20 @@ m_watch(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
         const struct Watch *anptr = ptr->data;
 
         if ((target_p = find_person(source_p, anptr->nick)))
-          sendto_one(source_p, form_str(RPL_NOWON), me.name, source_p->name,
-                     target_p->name, target_p->username,
-                     target_p->host, target_p->tsinfo);
+          sendto_one_numeric(source_p, &me, RPL_NOWON,
+                             target_p->name, target_p->username,
+                             target_p->host, target_p->tsinfo);
+
         /*
          * But actually, only show them offline if it's a capital
          * 'L' (full list wanted).
          */
         else if (*s == 'L')
-          sendto_one(source_p, form_str(RPL_NOWOFF), me.name,
-                     source_p->name, anptr->nick,
-                     "*", "*", anptr->lasttime);
+          sendto_one_numeric(source_p, &me, RPL_NOWOFF, anptr->nick,
+                             "*", "*", anptr->lasttime);
       }
 
-      sendto_one(source_p, form_str(RPL_ENDOFWATCHLIST),
-                 me.name, source_p->name, *s);
+      sendto_one_numeric(source_p, &me, RPL_ENDOFWATCHLIST, *s);
       continue;
     }
 

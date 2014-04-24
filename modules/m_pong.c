@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "ircd.h"
-#include "s_user.h"
+#include "user.h"
 #include "client.h"
 #include "hash.h"
 #include "numeric.h"
@@ -37,17 +37,27 @@
 #include "modules.h"
 
 
+/*! \brief PONG command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = origin
+ *      - parv[2] = destination
+ */
 static int
-ms_pong(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_pong(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
   const char *origin, *destination;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOORIGIN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
     return 0;
   }
 
@@ -68,20 +78,29 @@ ms_pong(struct Client *client_p, struct Client *source_p,
       sendto_one(target_p, ":%s PONG %s %s",
                  source_p->name, origin, destination);
     else
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                 me.name, source_p->name, destination);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
 
   return 0;
 }
 
+/*! \brief PONG command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = origin/ping cookie
+ */
 static int
-mr_pong(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mr_pong(struct Client *source_p, int parc, char *parv[])
 {
-  assert(source_p == client_p);
+  assert(MyConnect(source_p));
 
-  if (parc == 2 && *parv[1] != '\0')
+  if (parc == 2 && !EmptyString(parv[1]))
   {
     if (ConfigFileEntry.ping_cookie && !source_p->localClient->registration)
     {
@@ -95,14 +114,14 @@ mr_pong(struct Client *client_p, struct Client *source_p,
           register_local_user(source_p);
         }
         else
-          sendto_one(source_p, form_str(ERR_WRONGPONG), me.name,
-                     source_p->name, source_p->localClient->random_ping);
+          sendto_one_numeric(source_p, &me, ERR_WRONGPONG,
+                             source_p->localClient->random_ping);
       }
     }
   }
   else
-    sendto_one(source_p, form_str(ERR_NOORIGIN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
+
   return 0;
 }
 

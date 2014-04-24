@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_gline.c
+/*! \file gline.c
  * \brief GLine global ban functions.
  * \version $Id$
  */
@@ -31,16 +31,11 @@
 #include "ircd.h"
 #include "conf.h"
 #include "hostmask.h"
-#include "s_misc.h"
-#include "send.h"
-#include "s_serv.h"
-#include "s_gline.h"
-#include "event.h"
+#include "gline.h"
 #include "memory.h"
 
-dlink_list pending_glines[GLINE_PENDING_ADD_TYPE + 1] = { { NULL, NULL, 0 },
-                                                          { NULL, NULL, 0 } };
 
+dlink_list pending_glines[GLINE_PENDING_ADD_TYPE + 1];
 
 struct MaskItem *
 find_is_glined(const char *host, const char *user)
@@ -77,19 +72,18 @@ find_is_glined(const char *host, const char *user)
 static void
 expire_pending_glines(struct gline_pending *in)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
-  unsigned int idx = 0;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  for (; idx < GLINE_PENDING_ADD_TYPE + 1; ++idx)
+  for (unsigned int i = 0; i < GLINE_PENDING_ADD_TYPE + 1; ++i)
   {
-    DLINK_FOREACH_SAFE(ptr, next_ptr, pending_glines[idx].head)
+    DLINK_FOREACH_SAFE(ptr, ptr_next, pending_glines[i].head)
     {
       struct gline_pending *glp_ptr = ptr->data;
 
       if ((glp_ptr->last_gline_time + ConfigFileEntry.gline_request_time) <= CurrentTime ||
           glp_ptr == in)
       {
-        dlinkDelete(&glp_ptr->node, &pending_glines[idx]);
+        dlinkDelete(&glp_ptr->node, &pending_glines[i]);
         MyFree(glp_ptr);
       }
     }

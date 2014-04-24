@@ -34,29 +34,34 @@
 #include "modules.h"
 #include "conf.h"
 #include "hostmask.h"
-#include "s_user.h"
+#include "user.h"
 
 
-/*
- * mr_webirc
- *      parv[0] = command
- *      parv[1] = password
- *      parv[2] = fake username (we ignore this)
- *      parv[3] = fake hostname
- *      parv[4] = fake ip
+/*! \brief WEBIRC command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = password
+ *      - parv[2] = fake username (we ignore this)
+ *      - parv[3] = fake hostname
+ *      - parv[4] = fake ip
  */
 static int
-mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_webirc(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
   struct addrinfo hints, *res;
 
-  assert(source_p == client_p);
+  assert(MyConnect(source_p));
 
   if (!valid_hostname(parv[3]))
   {
-    sendto_one(source_p, ":%s NOTICE %s :CGI:IRC: Invalid hostname", me.name,
-               source_p->name[0] ? source_p->name : "*");
+    sendto_one_notice(source_p, &me, ":CGI:IRC: Invalid hostname");
     return 0;
   }
 
@@ -69,22 +74,19 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
   if (!IsConfWebIRC(conf))
   {
-    sendto_one(source_p, ":%s NOTICE %s :Not a CGI:IRC auth block", me.name,
-               source_p->name[0] ? source_p->name : "*");
+    sendto_one_notice(source_p, &me, ":Not a CGI:IRC auth block");
     return 0;
   }
 
   if (EmptyString(conf->passwd))
   {
-    sendto_one(source_p, ":%s NOTICE %s :CGI:IRC auth blocks must have a password",
-               me.name, source_p->name[0] ? source_p->name : "*");
+    sendto_one_notice(source_p, &me, ":CGI:IRC auth blocks must have a password");
     return 0;
   }
 
   if (!match_conf_password(parv[1], conf))
   {
-    sendto_one(source_p, ":%s NOTICE %s :CGI:IRC password incorrect",
-               me.name, source_p->name[0] ? source_p->name : "*");
+    sendto_one_notice(source_p, &me, ":CGI:IRC password incorrect");
     return 0;
   }
 
@@ -96,13 +98,11 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
 
   if (getaddrinfo(parv[4], NULL, &hints, &res))
   {
-
-    sendto_one(source_p, ":%s NOTICE %s :Invalid CGI:IRC IP %s", me.name,
-               source_p->name[0] ? source_p->name : "*", parv[4]);
+    sendto_one_notice(source_p, &me, ":Invalid CGI:IRC IP %s", parv[4]);
     return 0;
   }
 
-  assert(res != NULL);
+  assert(res);
 
   memcpy(&source_p->localClient->ip, res->ai_addr, res->ai_addrlen);
   source_p->localClient->ip.ss_len = res->ai_addrlen;
@@ -114,19 +114,19 @@ mr_webirc(struct Client *client_p, struct Client *source_p, int parc, char *parv
   strlcpy(source_p->host, parv[3], sizeof(source_p->host));
 
   /* Check dlines now, k/glines will be checked on registration */
-  if ((conf = find_dline_conf(&client_p->localClient->ip,
-                               client_p->localClient->aftype)))
+  if ((conf = find_dline_conf(&source_p->localClient->ip,
+                               source_p->localClient->aftype)))
   {
     if (!(conf->type == CONF_EXEMPT))
     {
-      exit_client(client_p, &me, "D-lined");
+      exit_client(source_p, "D-lined");
       return 0;
     }
   }
 
   AddUMode(source_p, UMODE_WEBIRC);
-  sendto_one(source_p, ":%s NOTICE %s :CGI:IRC host/IP set to %s %s", me.name,
-             source_p->name[0] ? source_p->name : "*", parv[3], parv[4]);
+  sendto_one_notice(source_p, &me, ":CGI:IRC host/IP set to %s %s",
+                    parv[3], parv[4]);
   return 0;
 }
 

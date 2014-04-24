@@ -31,10 +31,7 @@
 #include "send.h"
 #include "conf.h"
 #include "ircd.h"
-#include "irc_string.h"
 #include "parse.h"
-#include "s_user.h"
-
 
 
 static void dump_map(struct Client *client,
@@ -52,8 +49,7 @@ static void dump_map(struct Client *client,
   *p = '\0';
 
   if (prompt_length > 60)
-    sendto_one(client, form_str(RPL_MAPMORE), me.name,
-               client->name, prompt, server->name);
+    sendto_one_numeric(client, &me, RPL_MAPMORE, prompt, server->name);
   else
   {
     int dashes;
@@ -74,8 +70,7 @@ static void dump_map(struct Client *client,
                        dlink_list_length(&server->serv->client_list), 100 *
                        (float)dlink_list_length(&server->serv->client_list) /
                        (float)Count.total);
-    sendto_one(client, form_str(RPL_MAP), me.name, client->name,
-               prompt, buf);
+    sendto_one_numeric(client, &me, RPL_MAP, prompt, buf);
   }
 
   if (prompt_length > 0)
@@ -124,42 +119,67 @@ static void dump_map(struct Client *client,
     *(p - 1) = '-';
 }
 
-/* m_map()
- *      parv[0] = command
+/*! \brief Sends a network topology map and notifies irc-operators
+ *         about the MAP request
+ *
+ * \param source_p Pointer to client to report to
+ */
+static void
+do_map(struct Client *source_p)
+{
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
+                       "MAP requested by %s (%s@%s) [%s]",
+                       source_p->name, source_p->username,
+                       source_p->host, source_p->servptr->name);
+  dump_map(source_p, &me, 0);
+}
+
+/*! \brief MAP command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
  */
 static int
-m_map(struct Client *client_p, struct Client *source_p,
-      int parc, char *parv[])
+m_map(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
   if (ConfigServerHide.flatten_links)
-    return m_not_oper(client_p, source_p, parc, parv);
+    return m_not_oper(source_p, parc, parv);
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
   last_used = CurrentTime;
 
-  dump_map(source_p, &me, 0);
-  sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
+  do_map(source_p);
+  sendto_one_numeric(source_p, &me, RPL_MAPEND);
   return 0;
 }
 
-/* mo_map()
- *      parv[0] = command
+/*! \brief MAP command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
  */
 static int
-mo_map(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+mo_map(struct Client *source_p, int parc, char *parv[])
 {
-  dump_map(source_p, &me, 0);
-  sendto_one(source_p, form_str(RPL_MAPEND), me.name, source_p->name);
+  do_map(source_p);
+  sendto_one_numeric(source_p, &me, RPL_MAPEND);
   return 0;
 }
 

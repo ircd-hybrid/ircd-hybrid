@@ -34,26 +34,30 @@
 #include "modules.h"
 #include "hash.h"
 #include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 
 
-/*
-** m_ping
-**      parv[0] = command
-**      parv[1] = origin
-**      parv[2] = destination
-*/
+/*! \brief PING command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = origin
+ *      - parv[2] = destination
+ */
 static int
-m_ping(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_ping(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
   char *origin, *destination;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOORIGIN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
     return 0;
   }
 
@@ -67,17 +71,16 @@ m_ping(struct Client *client_p, struct Client *source_p,
     return 0;
   }
 
-  if (!EmptyString(destination) && irccmp(destination, me.name) != 0)
+  if (!EmptyString(destination) && irccmp(destination, me.name))
   {
-    /* We're sending it across servers.. origin == client_p->name --fl_ */
-    origin = client_p->name;
+    /* We're sending it across servers.. origin == source_p->name --fl_ */
+    origin = source_p->name;
 
     if ((target_p = hash_find_server(destination)))
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
                  origin, destination);
     else
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-                 me.name, source_p->name, destination);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
   else
     sendto_one(source_p, ":%s PONG %s :%s", me.name,
@@ -85,34 +88,43 @@ m_ping(struct Client *client_p, struct Client *source_p,
   return 0;
 }
 
+/*! \brief PING command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = origin
+ *      - parv[2] = destination
+ */
 static int
-ms_ping(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_ping(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
   const char *origin, *destination;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NOORIGIN),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
     return 0;
   }
 
   origin = source_p->name;
   destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
 
-  if (!EmptyString(destination) && irccmp(destination, me.name) != 0 && irccmp(destination, me.id) != 0)
+  if (!EmptyString(destination) && irccmp(destination, me.name) && irccmp(destination, me.id))
   {
     if ((target_p = hash_find_server(destination)))
       sendto_one(target_p, ":%s PING %s :%s", source_p->name,
                  origin, destination);
     else
-      sendto_one(source_p, form_str(ERR_NOSUCHSERVER), ID_or_name(&me, client_p),
-                 source_p->name, destination);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
   else
-    sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, client_p),
+    sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, source_p),
                (destination) ? destination : me.name, origin);
   return 0;
 }
@@ -135,7 +147,8 @@ module_exit(void)
   mod_del_cmd(&ping_msgtab);
 }
 
-struct module module_entry = {
+struct module module_entry =
+{
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
   .version = "$Revision$",

@@ -25,38 +25,33 @@
  */
 
 #include "stdinc.h"
-#include "s_user.h"
+#include "user.h"
 #include "list.h"
 #include "ircd.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
 #include "event.h"
 #include "fdlist.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
-#include "s_gline.h"
+#include "gline.h"
 #include "motd.h"
 #include "conf.h"
 #include "hostmask.h"
-#include "numeric.h"
-#include "packet.h"
 #include "parse.h"
-#include "irc_res.h"
+#include "res.h"
 #include "restart.h"
 #include "rng_mt.h"
-#include "s_auth.h"
+#include "auth.h"
 #include "s_bsd.h"
 #include "log.h"
-#include "s_misc.h"
-#include "s_serv.h"      /* try_connections */
+#include "server.h"      /* try_connections */
 #include "send.h"
 #include "whowas.h"
 #include "modules.h"
 #include "memory.h"
 #include "mempool.h"
-#include "hook.h"
 #include "ircd_getopt.h"
 #include "supported.h"
 #include "watch.h"
@@ -140,7 +135,8 @@ make_daemon(void)
 
 static int printVersion = 0;
 
-static struct lgetopt myopts[] = {
+static struct lgetopt myopts[] =
+{
   {"configfile", &ConfigFileEntry.configfile,
    STRING, "File to use for ircd.conf"},
   {"glinefile",  &ConfigFileEntry.glinefile,
@@ -177,7 +173,7 @@ set_time(void)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Clock Failure (%s), TS can be corrupted",
                          strerror(errno));
-    restart("Clock Failure");
+    server_die("Clock Failure", 1);
   }
 
   if (newtime.tv_sec < CurrentTime)
@@ -198,7 +194,7 @@ set_time(void)
 static void
 io_loop(void)
 {
-  while (1 == 1)
+  while (1)
   {
     /*
      * Maybe we want a flags word?
@@ -218,11 +214,7 @@ io_loop(void)
     {
       dlink_node *ptr = NULL, *ptr_next = NULL;
       DLINK_FOREACH_SAFE(ptr, ptr_next, listing_client_list.head)
-      {
-        struct Client *client_p = ptr->data;
-        assert(client_p->localClient->list_task);
-        safe_list_channels(client_p, client_p->localClient->list_task, 0);
-      }
+        safe_list_channels(ptr->data, 0);
     }
 
     /* Run pending events, then get the number of seconds to the next
@@ -241,6 +233,7 @@ io_loop(void)
       rehash(1);
       dorehash = 0;
     }
+
     if (doremotd)
     {
       motd_recache();
@@ -302,6 +295,7 @@ initialize_server_capabs(void)
   add_capability("TS6", CAP_TS6, 0);
   add_capability("CLUSTER", CAP_CLUSTER, 1);
   add_capability("SVS", CAP_SVS, 1);
+  add_capability("CHW", CAP_CHW, 1);
 #ifdef HALFOPS
   add_capability("HOPS", CAP_HOPS, 1);
 #endif
@@ -479,10 +473,9 @@ main(int argc, char *argv[])
   me.localClient = &meLocalUser;
   dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
-  /* Initialise the channel capability usage counts... */
-  init_chcap_usage_counts();
-
   ConfigFileEntry.dpath      = DPATH;
+  ConfigFileEntry.spath      = SPATH;
+  ConfigFileEntry.mpath      = MPATH;
   ConfigFileEntry.configfile = CPATH;    /* Server configuration file */
   ConfigFileEntry.klinefile  = KPATH;    /* Server kline file         */
   ConfigFileEntry.glinefile  = GPATH;    /* Server gline file         */

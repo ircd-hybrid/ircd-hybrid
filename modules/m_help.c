@@ -45,34 +45,29 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 
   if ((file = fopen(path, "r")) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   if (fgets(line, sizeof(line), file) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     fclose(file);
     return;
   }
 
   line[strlen(line) - 1] = '\0';
-  sendto_one(source_p, form_str(RPL_HELPSTART),
-             me.name, source_p->name, topic, line);
+  sendto_one_numeric(source_p, &me, RPL_HELPSTART, topic, line);
 
   while (fgets(line, sizeof(line), file))
   {
     line[strlen(line) - 1] = '\0';
 
-    sendto_one(source_p, form_str(RPL_HELPTXT),
-               me.name, source_p->name, topic, line);
+    sendto_one_numeric(source_p, &me, RPL_HELPTXT, topic, line);
   }
 
   fclose(file);
-  sendto_one(source_p, form_str(RPL_ENDOFHELP),
-             me.name, source_p->name, topic);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFHELP, topic);
 }
 
 static void
@@ -91,15 +86,13 @@ do_help(struct Client *source_p, char *topic)
 
   if (strpbrk(topic, "/\\"))
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   if (strlen(HPATH) + strlen(topic) + 1 > HYB_PATH_MAX)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
@@ -107,37 +100,38 @@ do_help(struct Client *source_p, char *topic)
 
   if (stat(path, &sb) < 0)
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
-    sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
-               me.name, source_p->name, topic);
+    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   sendhelpfile(source_p, path, topic);
 }
 
-/*
- * m_help - HELP message handler
- *      parv[0] = command
+/*! \brief HELP command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = help topic
  */
 static int
-m_help(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_help(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  /* HELP is always local */
   if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
   {
-    /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
@@ -147,13 +141,19 @@ m_help(struct Client *client_p, struct Client *source_p,
   return 0;
 }
 
-/*
- * mo_help - HELP message handler
- *      parv[0] = command
+/*! \brief HELP command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = help topic
  */
 static int
-mo_help(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+mo_help(struct Client *source_p, int parc, char *parv[])
 {
   do_help(source_p, parv[1]);
   return 0;

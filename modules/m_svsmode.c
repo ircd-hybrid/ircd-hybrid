@@ -28,20 +28,18 @@
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "channel_mode.h"
 #include "parse.h"
 #include "modules.h"
 #include "irc_string.h"
-#include "s_user.h"
+#include "user.h"
 #include "conf.h"
 
 
-/*! \brief SVSMODE command handler (called by services)
+/*! \brief SVSMODE command handler
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -55,13 +53,12 @@
  *      - parv[4] = optional argument (services id)
  */
 static int
-ms_svsmode(struct Client *client_p, struct Client *source_p,
-           int parc, char *parv[])
+ms_svsmode(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   int what = MODE_ADD;
   unsigned int flag = 0, setmodes = 0;
-  const char *m = NULL, *modes = NULL, *extarg = NULL;
+  const char *modes = NULL, *extarg = NULL;
   time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
@@ -79,7 +76,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
     extarg = (parc > 3) ? parv[3] : NULL;
   }
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
   if (ts && (ts != target_p->tsinfo))
@@ -87,7 +84,7 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
 
   setmodes = target_p->umodes;
 
-  for (m = modes; *m; ++m)
+  for (const char *m = modes; *m; ++m)
   {
     switch (*m)
     {
@@ -162,27 +159,17 @@ ms_svsmode(struct Client *client_p, struct Client *source_p,
   }
 
   if (extarg)
-  {
-    sendto_server(client_p, CAP_TS6, NOCAPS,
-                  ":%s SVSMODE %s %lu %s %s", ID(source_p),
-                  ID(target_p), (unsigned long)target_p->tsinfo, modes, extarg);
-    sendto_server(client_p, NOCAPS, CAP_TS6,
-                  ":%s SVSMODE %s %lu %s %s", source_p->name,
-                  target_p->name, (unsigned long)target_p->tsinfo, modes, extarg);
-  }
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s SVSMODE %s %lu %s %s",
+                  source_p->id,
+                  target_p->id, (unsigned long)target_p->tsinfo, modes, extarg);
   else
-  {
-    sendto_server(client_p, CAP_TS6, NOCAPS,
-                  ":%s SVSMODE %s %lu %s", ID(source_p),
-                  ID(target_p), (unsigned long)target_p->tsinfo, modes);
-    sendto_server(client_p, NOCAPS, CAP_TS6,
-                  ":%s SVSMODE %s %lu %s", source_p->name,
-                  target_p->name, (unsigned long)target_p->tsinfo, modes);
-  }
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s SVSMODE %s %lu %s",
+                  source_p->id,
+                  target_p->id, (unsigned long)target_p->tsinfo, modes);
 
   if (MyConnect(target_p) && (setmodes != target_p->umodes))
   {
-    char modebuf[IRCD_BUFSIZE];
+    char modebuf[IRCD_BUFSIZE] = "";
 
     send_umode(target_p, target_p, setmodes, 0xffffffff, modebuf);
   }

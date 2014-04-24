@@ -35,34 +35,32 @@
 #include "modules.h"
 
 
-/*
- * ms_svinfo - SVINFO message handler
- *      parv[0] = command
- *      parv[1] = TS_CURRENT for the server
- *      parv[2] = TS_MIN for the server
- *      parv[3] = server is standalone or connected to non-TS only
- *      parv[4] = server's idea of UTC time
+/*! \brief SVINFO command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = TS_CURRENT for the server
+ *      - parv[2] = TS_MIN for the server
+ *      - parv[3] = server is standalone or connected to non-TS only
+ *      - parv[4] = server's idea of UTC time
  */
 static int
-ms_svinfo(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_svinfo(struct Client *source_p, int parc, char *parv[])
 {
-  time_t deltat;
-  time_t theirtime;
+  time_t deltat = 0, theirtime = 0;
 
-  if (MyConnect(source_p) && IsUnknown(source_p))
-  {
-    exit_client(source_p, source_p, "Need SERVER before SVINFO");
-    return 0;
-  }
-
-  if (!IsServer(source_p) || !MyConnect(source_p) || parc < 5)
+  if (!IsServer(source_p) || !MyConnect(source_p))
     return 0;
 
   if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MIN)
   {
     /*
-     * a server with the wrong TS version connected; since we're
+     * A server with the wrong TS version connected; since we're
      * TS_ONLY we can't fall back to the non-TS protocol so
      * we drop the link  -orabidoo
      */
@@ -72,14 +70,15 @@ ms_svinfo(struct Client *client_p, struct Client *source_p,
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                  "Link %s dropped, wrong TS protocol version (%s,%s)",
                  get_client_name(source_p, MASK_IP), parv[1], parv[2]);
-    exit_client(source_p, source_p, "Incompatible TS version");
+    exit_client(source_p, "Incompatible TS version");
     return 0;
   }
 
   /*
-   * since we're here, might as well set CurrentTime while we're at it
+   * Since we're here, might as well set CurrentTime while we're at it
    */
   set_time();
+
   theirtime = atol(parv[4]);
   deltat = abs(theirtime - CurrentTime);
 
@@ -103,7 +102,7 @@ ms_svinfo(struct Client *client_p, struct Client *source_p,
          (unsigned long) CurrentTime,
          (unsigned long) theirtime,
          (int) deltat);
-    exit_client(source_p, source_p, "Excessive TS delta");
+    exit_client(source_p, "Excessive TS delta");
     return 0;
   }
 
@@ -119,7 +118,7 @@ ms_svinfo(struct Client *client_p, struct Client *source_p,
 
 static struct Message svinfo_msgtab =
 {
-  "SVINFO", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
+  "SVINFO", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_ignore, ms_svinfo, m_ignore, m_ignore, m_ignore }
 };
 

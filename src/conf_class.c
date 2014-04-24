@@ -35,7 +35,7 @@
 
 struct ClassItem *class_default;
 
-static dlink_list class_list = { NULL, NULL, 0 };
+static dlink_list class_list;
 
 
 const dlink_list *
@@ -357,7 +357,7 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 void
 rebuild_cidr_list(struct ClassItem *class)
 {
-  dlink_node *ptr;
+  dlink_node *ptr = NULL;
 
   destroy_cidr_class(class);
 
@@ -382,9 +382,9 @@ rebuild_cidr_list(struct ClassItem *class)
 static void
 destroy_cidr_list(dlink_list *list)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, list->head)
   {
     dlinkDelete(ptr, list);
     MyFree(ptr->data);

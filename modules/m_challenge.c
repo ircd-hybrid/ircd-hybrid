@@ -35,18 +35,16 @@
 #include "parse.h"
 #include "irc_string.h"
 #include "log.h"
-#include "s_user.h"
+#include "user.h"
 #include "memory.h"
 
 
 #ifdef HAVE_LIBCRYPTO
-/* failed_challenge_notice()
+/*! \brief Notices all opers of the failed challenge attempt if enabled
  *
- * inputs       - pointer to client doing /oper ...
- *              - pointer to nick they tried to oper as
- *              - pointer to reason they have failed
- * output       - nothing
- * side effects - notices all opers of the failed oper attempt if enabled
+ * \param source_p Client doing /challenge ...
+ * \param name     The nick they tried to oper as
+ * \param reason   The reason why they have failed
  */
 static void
 failed_challenge_notice(struct Client *source_p, const char *name,
@@ -63,15 +61,19 @@ failed_challenge_notice(struct Client *source_p, const char *name,
        source_p->username, source_p->host, reason);
 }
 
-/*
- * m_challenge - generate RSA challenge for wouldbe oper
- * parv[0] = command
- * parv[1] = operator to challenge for, or +response
+/*! \brief CHALLENGE command handler
  *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = operator to challenge for, or +response
  */
 static int
-m_challenge(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+m_challenge(struct Client *source_p, int parc, char *parv[])
 {
   char *challenge = NULL;
   struct MaskItem *conf = NULL;
@@ -84,8 +86,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
     if (irccmp(source_p->localClient->response, ++parv[1]))
     {
-      sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name,
-                 source_p->name);
+      sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
       failed_challenge_notice(source_p, source_p->localClient->auth_oper,
                               "challenge failed");
       return 0;
@@ -95,7 +96,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
                                 source_p->localClient->auth_oper, NULL, NULL);
     if (conf == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
       conf = find_exact_name_conf(CONF_OPER, NULL, source_p->localClient->auth_oper, NULL, NULL);
       failed_challenge_notice(source_p, source_p->localClient->auth_oper, (conf != NULL) ?
                               "host mismatch" : "no oper {} block");
@@ -104,8 +105,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
     if (attach_conf(source_p, conf) != 0)
     {
-      sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
-                 me.name, source_p->name);   
+      sendto_one_notice(source_p, &me, ":Can't attach conf!");   
       failed_challenge_notice(source_p, conf->name, "can't attach conf!");
       return 0;
     }
@@ -132,7 +132,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
   if (!conf)
   {
-    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     conf = find_exact_name_conf(CONF_OPER, NULL, parv[1], NULL, NULL);
     failed_challenge_notice(source_p, parv[1], (conf != NULL)
                             ? "host mismatch" : "no oper {} block");
@@ -141,15 +141,14 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
   if (conf->rsa_public_key == NULL)
   {
-    sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
-               "is not enabled for your oper{} block.", me.name,
-               source_p->name);
+    sendto_one_notice(source_p, &me, ":I'm sorry, PK authentication "
+                      "is not enabled for your oper{} block.");
     return 0;
   }
 
   if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
   {
-    sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     failed_challenge_notice(source_p, conf->name, "requires SSL/TLS");
     return 0;
   }
@@ -158,7 +157,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
   {
     if (EmptyString(source_p->certfp) || strcasecmp(source_p->certfp, conf->certfp))
     {
-      sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+      sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
       failed_challenge_notice(source_p, conf->name, "client certificate fingerprint mismatch");
       return 0;
     }
@@ -166,20 +165,28 @@ m_challenge(struct Client *client_p, struct Client *source_p,
 
   if (!generate_challenge(&challenge, &(source_p->localClient->response),
                           conf->rsa_public_key))
-    sendto_one(source_p, form_str(RPL_RSACHALLENGE),
-               me.name, source_p->name, challenge);
+    sendto_one_numeric(source_p, &me, RPL_RSACHALLENGE, challenge);
 
   source_p->localClient->auth_oper = xstrdup(conf->name);
   MyFree(challenge);
   return 0;
 }
 
+/*! \brief CHALLENGE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = operator to challenge for, or +response
+ */
 static int
-mo_challenge(struct Client *client_p, struct Client *source_p,
-             int parc, char *parv[])
+mo_challenge(struct Client *source_p, int parc, char *parv[])
 {
-  sendto_one(source_p, form_str(RPL_YOUREOPER),
-             me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
   return 0;
 }
 

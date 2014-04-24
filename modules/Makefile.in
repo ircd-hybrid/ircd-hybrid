@@ -391,6 +391,12 @@ m_svinfo_la_OBJECTS = $(am_m_svinfo_la_OBJECTS)
 m_svinfo_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_svinfo_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svsjoin_la_LIBADD =
+am_m_svsjoin_la_OBJECTS = m_svsjoin.lo
+m_svsjoin_la_OBJECTS = $(am_m_svsjoin_la_OBJECTS)
+m_svsjoin_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_svsjoin_la_LDFLAGS) $(LDFLAGS) -o $@
 m_svskill_la_LIBADD =
 am_m_svskill_la_OBJECTS = m_svskill.lo
 m_svskill_la_OBJECTS = $(am_m_svskill_la_OBJECTS)
@@ -409,6 +415,12 @@ m_svsnick_la_OBJECTS = $(am_m_svsnick_la_OBJECTS)
 m_svsnick_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_svsnick_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svspart_la_LIBADD =
+am_m_svspart_la_OBJECTS = m_svspart.lo
+m_svspart_la_OBJECTS = $(am_m_svspart_la_OBJECTS)
+m_svspart_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_svspart_la_LDFLAGS) $(LDFLAGS) -o $@
 m_tburst_la_LIBADD =
 am_m_tburst_la_OBJECTS = m_tburst.lo
 m_tburst_la_OBJECTS = $(am_m_tburst_la_OBJECTS)
@@ -433,6 +445,30 @@ m_trace_la_OBJECTS = $(am_m_trace_la_OBJECTS)
 m_trace_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_trace_la_LDFLAGS) $(LDFLAGS) -o $@
+m_undline_la_LIBADD =
+am_m_undline_la_OBJECTS = m_undline.lo
+m_undline_la_OBJECTS = $(am_m_undline_la_OBJECTS)
+m_undline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_undline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_unkline_la_LIBADD =
+am_m_unkline_la_OBJECTS = m_unkline.lo
+m_unkline_la_OBJECTS = $(am_m_unkline_la_OBJECTS)
+m_unkline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_unkline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_unresv_la_LIBADD =
+am_m_unresv_la_OBJECTS = m_unresv.lo
+m_unresv_la_OBJECTS = $(am_m_unresv_la_OBJECTS)
+m_unresv_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_unresv_la_LDFLAGS) $(LDFLAGS) -o $@
+m_unxline_la_LIBADD =
+am_m_unxline_la_OBJECTS = m_unxline.lo
+m_unxline_la_OBJECTS = $(am_m_unxline_la_OBJECTS)
+m_unxline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_unxline_la_LDFLAGS) $(LDFLAGS) -o $@
 m_user_la_LIBADD =
 am_m_user_la_OBJECTS = m_user.lo
 m_user_la_OBJECTS = $(am_m_user_la_OBJECTS)
@@ -445,12 +481,6 @@ m_userhost_la_OBJECTS = $(am_m_userhost_la_OBJECTS)
 m_userhost_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_userhost_la_LDFLAGS) $(LDFLAGS) -o $@
-m_users_la_LIBADD =
-am_m_users_la_OBJECTS = m_users.lo
-m_users_la_OBJECTS = $(am_m_users_la_OBJECTS)
-m_users_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_users_la_LDFLAGS) $(LDFLAGS) -o $@
 m_version_la_LIBADD =
 am_m_version_la_OBJECTS = m_version.lo
 m_version_la_OBJECTS = $(am_m_version_la_OBJECTS)
@@ -553,15 +583,18 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
 	$(m_services_la_SOURCES) $(m_set_la_SOURCES) \
 	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
-	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
-	$(m_svsnick_la_SOURCES) $(m_tburst_la_SOURCES) \
+	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
+	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
+	$(m_svspart_la_SOURCES) $(m_tburst_la_SOURCES) \
 	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
-	$(m_trace_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_users_la_SOURCES) \
-	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
-	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
-	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
-	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
+	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
+	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
+	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
+	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
+	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
+	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
+	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
+	$(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
 	$(m_certfp_la_SOURCES) $(m_challenge_la_SOURCES) \
@@ -582,15 +615,18 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
 	$(m_services_la_SOURCES) $(m_set_la_SOURCES) \
 	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
-	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
-	$(m_svsnick_la_SOURCES) $(m_tburst_la_SOURCES) \
+	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
+	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
+	$(m_svspart_la_SOURCES) $(m_tburst_la_SOURCES) \
 	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
-	$(m_trace_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_users_la_SOURCES) \
-	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
-	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
-	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
-	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
+	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
+	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
+	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
+	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
+	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
+	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
+	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
+	$(m_xline_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -847,16 +883,21 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_services.la  \
                       m_stats.la     \
                       m_svinfo.la    \
+                      m_svsjoin.la   \
                       m_svskill.la   \
                       m_svsmode.la   \
                       m_svsnick.la   \
+                      m_svspart.la   \
                       m_tburst.la    \
                       m_time.la      \
                       m_topic.la     \
                       m_trace.la     \
+                      m_undline.la   \
+                      m_unkline.la   \
+                      m_unresv.la    \
+                      m_unxline.la   \
                       m_user.la      \
                       m_userhost.la  \
-                      m_users.la     \
                       m_version.la   \
                       m_wallops.la   \
                       m_watch.la     \
@@ -909,16 +950,21 @@ m_set_la_LDFLAGS = $(MODULE_FLAGS)
 m_services_la_LDFLAGS = $(MODULE_FLAGS)
 m_stats_la_LDFLAGS = $(MODULE_FLAGS)
 m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
+m_svsjoin_la_LDFLAGS = $(MODULE_FLAGS)
 m_svskill_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsmode_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsnick_la_LDFLAGS = $(MODULE_FLAGS)
+m_svspart_la_LDFLAGS = $(MODULE_FLAGS)
 m_tburst_la_LDFLAGS = $(MODULE_FLAGS)
 m_time_la_LDFLAGS = $(MODULE_FLAGS)
 m_topic_la_LDFLAGS = $(MODULE_FLAGS)
 m_trace_la_LDFLAGS = $(MODULE_FLAGS)
+m_undline_la_LDFLAGS = $(MODULE_FLAGS)
+m_unkline_la_LDFLAGS = $(MODULE_FLAGS)
+m_unresv_la_LDFLAGS = $(MODULE_FLAGS)
+m_unxline_la_LDFLAGS = $(MODULE_FLAGS)
 m_user_la_LDFLAGS = $(MODULE_FLAGS)
 m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
-m_users_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
 m_wallops_la_LDFLAGS = $(MODULE_FLAGS)
 m_watch_la_LDFLAGS = $(MODULE_FLAGS)
@@ -970,16 +1016,21 @@ m_set_la_SOURCES = m_set.c
 m_services_la_SOURCES = m_services.c
 m_stats_la_SOURCES = m_stats.c
 m_svinfo_la_SOURCES = m_svinfo.c
+m_svsjoin_la_SOURCES = m_svsjoin.c
 m_svskill_la_SOURCES = m_svskill.c
 m_svsmode_la_SOURCES = m_svsmode.c
 m_svsnick_la_SOURCES = m_svsnick.c
+m_svspart_la_SOURCES = m_svspart.c
 m_tburst_la_SOURCES = m_tburst.c
 m_time_la_SOURCES = m_time.c
 m_topic_la_SOURCES = m_topic.c
 m_trace_la_SOURCES = m_trace.c
+m_undline_la_SOURCES = m_undline.c
+m_unkline_la_SOURCES = m_unkline.c
+m_unresv_la_SOURCES = m_unresv.c
+m_unxline_la_SOURCES = m_unxline.c
 m_user_la_SOURCES = m_user.c
 m_userhost_la_SOURCES = m_userhost.c
-m_users_la_SOURCES = m_users.c
 m_version_la_SOURCES = m_version.c
 m_wallops_la_SOURCES = m_wallops.c
 m_watch_la_SOURCES = m_watch.c
@@ -1187,6 +1238,9 @@ m_stats.la: $(m_stats_la_OBJECTS) $(m_stats_la_DEPENDENCIES) $(EXTRA_m_stats_la_
 m_svinfo.la: $(m_svinfo_la_OBJECTS) $(m_svinfo_la_DEPENDENCIES) $(EXTRA_m_svinfo_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_svinfo_la_LINK) -rpath $(modulesdir) $(m_svinfo_la_OBJECTS) $(m_svinfo_la_LIBADD) $(LIBS)
 
+m_svsjoin.la: $(m_svsjoin_la_OBJECTS) $(m_svsjoin_la_DEPENDENCIES) $(EXTRA_m_svsjoin_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_svsjoin_la_LINK) -rpath $(modulesdir) $(m_svsjoin_la_OBJECTS) $(m_svsjoin_la_LIBADD) $(LIBS)
+
 m_svskill.la: $(m_svskill_la_OBJECTS) $(m_svskill_la_DEPENDENCIES) $(EXTRA_m_svskill_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_svskill_la_LINK) -rpath $(modulesdir) $(m_svskill_la_OBJECTS) $(m_svskill_la_LIBADD) $(LIBS)
 
@@ -1195,6 +1249,9 @@ m_svsmode.la: $(m_svsmode_la_OBJECTS) $(m_svsmode_la_DEPENDENCIES) $(EXTRA_m_svs
 
 m_svsnick.la: $(m_svsnick_la_OBJECTS) $(m_svsnick_la_DEPENDENCIES) $(EXTRA_m_svsnick_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_svsnick_la_LINK) -rpath $(modulesdir) $(m_svsnick_la_OBJECTS) $(m_svsnick_la_LIBADD) $(LIBS)
+
+m_svspart.la: $(m_svspart_la_OBJECTS) $(m_svspart_la_DEPENDENCIES) $(EXTRA_m_svspart_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_svspart_la_LINK) -rpath $(modulesdir) $(m_svspart_la_OBJECTS) $(m_svspart_la_LIBADD) $(LIBS)
 
 m_tburst.la: $(m_tburst_la_OBJECTS) $(m_tburst_la_DEPENDENCIES) $(EXTRA_m_tburst_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_tburst_la_LINK) -rpath $(modulesdir) $(m_tburst_la_OBJECTS) $(m_tburst_la_LIBADD) $(LIBS)
@@ -1208,14 +1265,23 @@ m_topic.la: $(m_topic_la_OBJECTS) $(m_topic_la_DEPENDENCIES) $(EXTRA_m_topic_la_
 m_trace.la: $(m_trace_la_OBJECTS) $(m_trace_la_DEPENDENCIES) $(EXTRA_m_trace_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_trace_la_LINK) -rpath $(modulesdir) $(m_trace_la_OBJECTS) $(m_trace_la_LIBADD) $(LIBS)
 
+m_undline.la: $(m_undline_la_OBJECTS) $(m_undline_la_DEPENDENCIES) $(EXTRA_m_undline_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_undline_la_LINK) -rpath $(modulesdir) $(m_undline_la_OBJECTS) $(m_undline_la_LIBADD) $(LIBS)
+
+m_unkline.la: $(m_unkline_la_OBJECTS) $(m_unkline_la_DEPENDENCIES) $(EXTRA_m_unkline_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_unkline_la_LINK) -rpath $(modulesdir) $(m_unkline_la_OBJECTS) $(m_unkline_la_LIBADD) $(LIBS)
+
+m_unresv.la: $(m_unresv_la_OBJECTS) $(m_unresv_la_DEPENDENCIES) $(EXTRA_m_unresv_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_unresv_la_LINK) -rpath $(modulesdir) $(m_unresv_la_OBJECTS) $(m_unresv_la_LIBADD) $(LIBS)
+
+m_unxline.la: $(m_unxline_la_OBJECTS) $(m_unxline_la_DEPENDENCIES) $(EXTRA_m_unxline_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_unxline_la_LINK) -rpath $(modulesdir) $(m_unxline_la_OBJECTS) $(m_unxline_la_LIBADD) $(LIBS)
+
 m_user.la: $(m_user_la_OBJECTS) $(m_user_la_DEPENDENCIES) $(EXTRA_m_user_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_user_la_LINK) -rpath $(modulesdir) $(m_user_la_OBJECTS) $(m_user_la_LIBADD) $(LIBS)
 
 m_userhost.la: $(m_userhost_la_OBJECTS) $(m_userhost_la_DEPENDENCIES) $(EXTRA_m_userhost_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_userhost_la_LINK) -rpath $(modulesdir) $(m_userhost_la_OBJECTS) $(m_userhost_la_LIBADD) $(LIBS)
-
-m_users.la: $(m_users_la_OBJECTS) $(m_users_la_DEPENDENCIES) $(EXTRA_m_users_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_users_la_LINK) -rpath $(modulesdir) $(m_users_la_OBJECTS) $(m_users_la_LIBADD) $(LIBS)
 
 m_version.la: $(m_version_la_OBJECTS) $(m_version_la_DEPENDENCIES) $(EXTRA_m_version_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_version_la_LINK) -rpath $(modulesdir) $(m_version_la_OBJECTS) $(m_version_la_LIBADD) $(LIBS)
@@ -1290,16 +1356,21 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_stats.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svinfo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsjoin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svskill.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsmode.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsnick.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svspart.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_tburst.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_time.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_topic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_trace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_undline.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_unkline.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_unresv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_unxline.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_user.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_userhost.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_users.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_version.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_wallops.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_watch.Plo@am__quote@

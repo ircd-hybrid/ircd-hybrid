@@ -30,23 +30,28 @@
 #include "send.h"
 #include "modules.h"
 #include "hash.h"
-#include "s_serv.h"
+#include "server.h"
 #include "conf.h"
 #include "parse.h"
 
 
-/* ms_tburst()
+/*! \brief TBURST command handler
  *
- *      parv[0] = command
- *      parv[1] = channel timestamp
- *      parv[2] = channel
- *      parv[3] = topic timestamp
- *      parv[4] = topic setter
- *      parv[5] = topic
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel timestamp
+ *      - parv[2] = channel name
+ *      - parv[3] = topic timestamp
+ *      - parv[4] = topic setter
+ *      - parv[5] = topic
  */
 static int
-ms_tburst(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+ms_tburst(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   int accept_remote = 0;
@@ -68,12 +73,14 @@ ms_tburst(struct Client *client_p, struct Client *source_p,
 
   /*
    * The logic for accepting and rejecting channel topics was
-   * always a bit hairy, so now we got exactly 2 cases where
-   * we would accept a bursted topic
+   * always a bit hairy, so now we got exactly 3 cases where
+   * we would accept a topic
    *
    * Case 1:
-   *        The TS of the remote channel is older than ours
+   *        A services client/server wants to set a topic
    * Case 2:
+   *        The TS of the remote channel is older than ours
+   * Case 3:
    *        The TS of the remote channel is equal to ours AND
    *        the TS of the remote topic is newer than ours
    */
@@ -90,14 +97,11 @@ ms_tburst(struct Client *client_p, struct Client *source_p,
     int topic_differs = strncmp(chptr->topic, topic, sizeof(chptr->topic) - 1);
     int hidden_server = (ConfigServerHide.hide_servers || IsHidden(source_p));
 
-    set_channel_topic(chptr, topic, setby, remote_topic_ts, !!MyClient(source_p));
+    set_channel_topic(chptr, topic, setby, remote_topic_ts, 0);
 
-    sendto_server(source_p, CAP_TBURST|CAP_TS6, NOCAPS,
+    sendto_server(source_p, CAP_TBURST, NOCAPS,
                   ":%s TBURST %s %s %s %s :%s",
-                  ID(source_p), parv[1], parv[2], parv[3], setby, topic);
-    sendto_server(source_p, CAP_TBURST, CAP_TS6,
-                  ":%s TBURST %s %s %s %s :%s",
-                  source_p->name, parv[1], parv[2], parv[3], setby, topic);
+                  source_p->id, parv[1], parv[2], parv[3], setby, topic);
 
     if (topic_differs)
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :%s",

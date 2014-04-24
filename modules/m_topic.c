@@ -34,27 +34,31 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_serv.h"
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"
 
 
-/* m_topic()
- *  parv[0] = command
- *  parv[1] = channel name
- *  parv[2] = new topic, if setting topic
+/*! \brief TOPIC command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
+ *      - parv[2] = topic text, if setting topic
  */
 static int
-m_topic(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_topic(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "TOPIC");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "TOPIC");
     return 0;
   }
 
@@ -63,8 +67,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               me.name, source_p->name, parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return 0;
   }
 
@@ -75,8 +78,7 @@ m_topic(struct Client *client_p, struct Client *source_p,
 
     if ((ms = find_channel_link(source_p, chptr)) == NULL)
     {
-      sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name,
-                 source_p->name, parv[1]);
+      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
       return 0;
     }
 
@@ -89,13 +91,8 @@ m_topic(struct Client *client_p, struct Client *source_p,
                source_p->username, source_p->host);
       set_channel_topic(chptr, parv[2], topic_info, CurrentTime, 1);
 
-      sendto_server(client_p, CAP_TS6, NOCAPS,
-                    ":%s TOPIC %s :%s",
-                    ID(source_p), chptr->chname,
-                    chptr->topic);
-      sendto_server(client_p, NOCAPS, CAP_TS6,
-                    ":%s TOPIC %s :%s",
-                    source_p->name, chptr->chname,
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
+                    source_p->id, chptr->chname,
                     chptr->topic);
       sendto_channel_local(ALL_MEMBERS, 0,
                            chptr, ":%s!%s@%s TOPIC %s :%s",
@@ -105,65 +102,58 @@ m_topic(struct Client *client_p, struct Client *source_p,
                            chptr->chname, chptr->topic);
     }
     else
-      sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-                 me.name, source_p->name, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
   }
   else /* only asking for topic */
   {
     if (!SecretChannel(chptr) || IsMember(source_p, chptr))
     {
       if (chptr->topic[0] == '\0')
-        sendto_one(source_p, form_str(RPL_NOTOPIC),
-                   me.name, source_p->name, chptr->chname);
+        sendto_one_numeric(source_p, &me, RPL_NOTOPIC, chptr->chname);
       else
       {
-        sendto_one(source_p, form_str(RPL_TOPIC),
-                   me.name, source_p->name,
-                   chptr->chname, chptr->topic);
-        sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
-                   me.name, source_p->name, chptr->chname,
-                   chptr->topic_info,
-                   chptr->topic_time);
+        sendto_one_numeric(source_p, &me, RPL_TOPIC,
+                           chptr->chname, chptr->topic);
+        sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME, chptr->chname,
+                           chptr->topic_info,
+                           chptr->topic_time);
       }
     }
     else
-      sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
-                 me.name, source_p->name, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
   }
 
   return 0;
 }
 
+
+/*! \brief TOPIC command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
+ *      - parv[2] = topic text
+ */
 static int
-ms_topic(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_topic(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  const char *from, *to;
   char topic_info[USERHOST_REPLYLEN];
-
-  if (IsCapable(source_p->from, CAP_TS6) && HasID(source_p))
-  {
-    from = me.id;
-    to = source_p->id;
-  }
-  else
-  {
-    from = me.name;
-    to = source_p->name;
-  }
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               from, to, "TOPIC");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "TOPIC");
     return 0;
   }
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               from, to, parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return 0;
   }
 
@@ -174,11 +164,8 @@ ms_topic(struct Client *client_p, struct Client *source_p,
              source_p->username, source_p->host);
   set_channel_topic(chptr, parv[2], topic_info, CurrentTime, 0);
 
-  sendto_server(client_p, CAP_TS6, NOCAPS, ":%s TOPIC %s :%s",
-                ID(source_p), chptr->chname,
-                chptr->topic);
-  sendto_server(client_p, NOCAPS, CAP_TS6, ":%s TOPIC %s :%s",
-                source_p->name, chptr->chname,
+  sendto_server(source_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
+                source_p->id, chptr->chname,
                 chptr->topic);
 
   if (!IsClient(source_p))

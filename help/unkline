@@ -1,11 +1,11 @@
 UNKLINE <user@host>
 
 Will attempt to unkline the given <user@host>
-Will unkline a temporary kline.
 If the kline is conf based, the kline will not be removed.
 
 UNKLINE <user@host> ON irc.server
-will unkline the user on irc.server if irc.server accepts
+
+Will unkline the user on irc.server if irc.server accepts
 remote unklines. If the kline is conf based, the kline will
 not be removed.
 

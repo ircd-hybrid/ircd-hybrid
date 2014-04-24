@@ -33,7 +33,7 @@
 #include "numeric.h"
 #include "conf.h"
 #include "log.h"
-#include "s_serv.h"
+#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
@@ -45,8 +45,7 @@
  *  parv[2] = comment
  */
 static int
-mo_squit(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_squit(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   struct Client *p;
@@ -57,8 +56,7 @@ mo_squit(struct Client *client_p, struct Client *source_p,
 
   if (parc < 2 || EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "SQUIT");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "SQUIT");
     return 0;
   }
 
@@ -83,22 +81,19 @@ mo_squit(struct Client *client_p, struct Client *source_p,
 
   if ((target_p == NULL) || IsMe(target_p))
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHSERVER),
-               me.name, source_p->name, server);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server);
     return 0;
   }
 
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT_REMOTE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "squit:remote");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "squit:remote");
     return 0;
   }
 
   if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS), me.name,
-               source_p->name, "squit");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "squit");
     return 0;
   }
 
@@ -114,9 +109,21 @@ mo_squit(struct Client *client_p, struct Client *source_p,
                          target_p->name, get_client_name(source_p, HIDE_IP), comment);
     ilog(LOG_TYPE_IRCD, "Received SQUIT %s from %s (%s)",
          target_p->name, get_client_name(source_p, HIDE_IP), comment);
-  }
 
-  exit_client(target_p, source_p, comment);
+    /* To them, we are exiting */
+    sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
+    /* Send to everything but target */
+    sendto_server(target_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+                  source_p->id, target_p->id, comment);
+  }
+  else
+    /* Send to everything */
+    sendto_server(NULL, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+                  source_p->id, target_p->id, comment);
+
+  AddFlag(target_p, FLAGS_SQUIT);
+
+  exit_client(target_p, comment);
   return 0;
 }
 
@@ -130,11 +137,11 @@ mo_squit(struct Client *client_p, struct Client *source_p,
  *  parv[2] = comment
  */
 static int
-ms_squit(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_squit(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
+  dlink_node *ptr;
 
   if (parc < 2 || EmptyString(parv[parc - 1]))
     return 0;
@@ -146,25 +153,43 @@ ms_squit(struct Client *client_p, struct Client *source_p,
     return 0;
 
   if (IsMe(target_p))
-    target_p = client_p;
+    target_p = source_p->from;
 
-  comment = (parc > 2 && parv[parc - 1]) ? parv[parc - 1] : client_p->name;
+  comment = (parc > 2 && parv[parc - 1]) ? parv[parc - 1] : source_p->name;
 
   if (MyConnect(target_p))
   {
     sendto_wallops_flags(UMODE_WALLOP, &me, "Remote SQUIT %s from %s (%s)",
                          target_p->name, source_p->name, comment);
-    sendto_server(NULL, CAP_TS6, NOCAPS,
+    sendto_server(source_p, NOCAPS, NOCAPS,
                   ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
                   me.id, target_p->name, source_p->name, comment);
-    sendto_server(NULL, NOCAPS, CAP_TS6,
-                  ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
-                  me.name, target_p->name, source_p->name, comment);
     ilog(LOG_TYPE_IRCD, "SQUIT From %s : %s (%s)", source_p->name,
          target_p->name, comment);
-  }
 
-  exit_client(target_p, source_p, comment);
+    /* To them, we are exiting */
+    sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
+
+    /* Send to everything but target and source */
+    DLINK_FOREACH(ptr, serv_list.head)
+    {
+      struct Client *client_p = ptr->data;
+
+      if (client_p == target_p || client_p == source_p->from)
+        continue;
+
+      sendto_one(client_p, ":%s SQUIT %s :%s",
+                 source_p->id, target_p->id, comment);
+    }
+  }
+  else
+    /* Send to everything but source */
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+                  source_p->id, target_p->id, comment);
+
+  AddFlag(target_p, FLAGS_SQUIT);
+
+  exit_client(target_p, comment);
   return 0;
 }
 

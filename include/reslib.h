@@ -1,5 +1,5 @@
 /*
- * include/irc_reslib.h (C)opyright 1992 Darren Reed.
+ * include/reslib.h (C)opyright 1992 Darren Reed.
  *
  * $Id$
  */
@@ -46,7 +46,7 @@
 }
 
 extern struct irc_ssaddr irc_nsaddr_list[];
-extern int irc_nscount;
+extern unsigned int irc_nscount;
 extern void irc_res_init(void);
 extern int irc_dn_expand(const unsigned char *msg, const unsigned char *eom, const unsigned char *src, char *dst, int dstsiz);
 extern int irc_dn_skipname(const unsigned char *ptr, const unsigned char *eom);
@@ -56,4 +56,3 @@ extern void irc_ns_put16(unsigned int src, unsigned char *dst);
 extern void irc_ns_put32(unsigned long src, unsigned char *dst);
 extern int irc_res_mkquery(const char *dname, int class, int type, unsigned char *buf, int buflen);
 #endif /* INCLUDED_res_h */
-

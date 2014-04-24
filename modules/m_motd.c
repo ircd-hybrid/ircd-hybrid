@@ -31,12 +31,17 @@
 #include "ircd.h"
 #include "send.h"
 #include "numeric.h"
-#include "s_serv.h"     /* hunt_server */
+#include "server.h"
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
 
 
+/*! \brief Sends the "message of the day" and notifies irc-operators
+ *         about the MOTD request
+ *
+ * \param source_p Pointer to client to report to
+ */
 static void
 do_motd(struct Client *source_p)
 {
@@ -47,22 +52,25 @@ do_motd(struct Client *source_p)
   motd_send(source_p);
 }
 
-/*
-** m_motd
-**      parv[0] = command
-**      parv[1] = servername
-*/
+/*! \brief MOTD command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/servername
+ */
 static int
-m_motd(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_motd(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
-    /* safe enough to give this on a local connect only */
-    sendto_one(source_p, form_str(RPL_LOAD2HI),
-               me.name, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;
   }
 
@@ -70,7 +78,7 @@ m_motd(struct Client *client_p, struct Client *source_p,
 
   /* This is safe enough to use during non hidden server mode */
   if (!ConfigServerHide.disable_remote_commands && !ConfigServerHide.hide_servers)
-    if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,
+    if (hunt_server(source_p, ":%s MOTD :%s", 1,
                     parc, parv) != HUNTED_ISME)
       return 0;
 
@@ -78,24 +86,21 @@ m_motd(struct Client *client_p, struct Client *source_p,
   return 0;
 }
 
-/*
- * note regarding mo_motd being used twice:
- * this is not a kludge.  any rate limiting, shide, or whatever
- * other access restrictions should be done by the source's server.
- * for security's sake, still check that the source is an oper
- * for 'oper only' information in the mo_ function(s).
+/*! \brief MOTD command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname/servername
  */
-
-/*
-** mo_motd
-**      parv[0] = command
-**      parv[1] = servername
-*/
 static int
-mo_motd(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+ms_motd(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,
+  if (hunt_server(source_p, ":%s MOTD :%s", 1,
                   parc, parv) != HUNTED_ISME)
     return 0;
 
@@ -106,7 +111,7 @@ mo_motd(struct Client *client_p, struct Client *source_p,
 static struct Message motd_msgtab =
 {
   "MOTD", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_motd, mo_motd, m_ignore, mo_motd, m_ignore }
+  { m_unregistered, m_motd, ms_motd, m_ignore, ms_motd, m_ignore }
 };
 
 static void

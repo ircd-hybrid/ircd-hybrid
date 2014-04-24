@@ -37,49 +37,42 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "s_serv.h"
-#include "s_user.h"
+#include "server.h"
+#include "user.h"
 
 
-/* m_knock
- *    parv[0] = command
- *    parv[1] = channel
+/*! \brief KNOCK command handler
  *
- *  The KNOCK command has the following syntax:
- *   :<sender> KNOCK <channel>
- *
- *  If a user is not banned from the channel they can use the KNOCK
- *  command to have the server NOTICE the channel operators notifying
- *  they would like to join.  Helpful if the channel is invite-only, the
- *  key is forgotten, or the channel is full (INVITE can bypass each one
- *  of these conditions.  Concept by Dianora <db@db.net> and written by
- *  <anonymous>
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
  */
 static int
-m_knock(struct Client *client_p, struct Client *source_p,
-        int parc, char *parv[])
+m_knock(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "KNOCK");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KNOCK");
     return 0;
   }
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               me.name, source_p->name, parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return 0;
   }
 
   /* Normal channel, just be sure they aren't on it */
   if (IsMember(source_p, chptr))
   {
-    sendto_one(source_p, form_str(ERR_KNOCKONCHAN), me.name,
-               source_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, chptr->chname);
     return 0;
   }
 
@@ -87,8 +80,7 @@ m_knock(struct Client *client_p, struct Client *source_p,
         (chptr->mode.limit && dlink_list_length(&chptr->members) >=
          chptr->mode.limit)))
   {
-    sendto_one(source_p, form_str(ERR_CHANOPEN), me.name,
-               source_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_CHANOPEN, chptr->chname);
     return 0;
   }
 
@@ -99,8 +91,7 @@ m_knock(struct Client *client_p, struct Client *source_p,
      */
     if (PrivateChannel(chptr) || is_banned(chptr, source_p))
     {
-      sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
-                 me.name, source_p->name, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, chptr->chname);
       return 0;
     }
 
@@ -114,22 +105,18 @@ m_knock(struct Client *client_p, struct Client *source_p,
     if ((source_p->localClient->last_knock + ConfigChannel.knock_delay) >
         CurrentTime)
     {
-      sendto_one(source_p, form_str(ERR_TOOMANYKNOCK), me.name,
-                 source_p->name, chptr->chname, "user");
+      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->chname, "user");
       return 0;
     }
 
     if ((chptr->last_knock + ConfigChannel.knock_delay_channel) > CurrentTime)
     {
-      sendto_one(source_p, form_str(ERR_TOOMANYKNOCK), me.name,
-                 source_p->name, chptr->chname, "channel");
+      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->chname, "channel");
       return 0;
     }
 
     source_p->localClient->last_knock = CurrentTime;
-
-    sendto_one(source_p, form_str(RPL_KNOCKDLVR), me.name,
-               source_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, chptr->chname);
   }
 
   chptr->last_knock = CurrentTime;
@@ -141,10 +128,8 @@ m_knock(struct Client *client_p, struct Client *source_p,
                        source_p->username,
                        source_p->host);
 
-  sendto_server(client_p, CAP_KNOCK|CAP_TS6, NOCAPS,
-                ":%s KNOCK %s", ID(source_p), chptr->chname);
-  sendto_server(client_p, CAP_KNOCK, CAP_TS6,
-                ":%s KNOCK %s", source_p->name, chptr->chname);
+  sendto_server(source_p, CAP_KNOCK, NOCAPS, ":%s KNOCK %s",
+                source_p->id, chptr->chname);
   return 0;
 }
 

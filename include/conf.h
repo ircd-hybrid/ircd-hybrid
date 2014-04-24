@@ -29,7 +29,6 @@
 #include "config.h"
 #include "ircd_defs.h"
 #include "client.h"
-#include "hook.h"
 #include "conf_class.h"
 
 
@@ -209,14 +208,14 @@ struct CidrItem
 struct config_file_entry
 {
   const char *dpath;          /* DPATH if set from command line */
+  const char *mpath;
+  const char *spath;
   const char *configfile;
   const char *klinefile;
   const char *glinefile;
   const char *xlinefile;
   const char *dlinefile;
   const char *resvfile;
-  char *mpath;
-  char *rpath;
 
   char *egdpool_path;
   char *service_name;
@@ -256,7 +255,7 @@ struct config_file_entry
   int gline_request_time;
   int oper_only_umodes;
   int oper_umodes;
-  int max_targets;
+  unsigned int max_targets;
   int caller_id_wait;
   int min_nonwildcard;
   int min_nonwildcard_simple;

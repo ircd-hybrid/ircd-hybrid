@@ -31,7 +31,6 @@
 #include "list.h"
 #include "numeric.h"
 #include "conf.h"
-#include "s_serv.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
@@ -47,7 +46,7 @@ static void
 list_accepts(struct Client *source_p)
 {
   int len = 0;
-  char nicks[IRCD_BUFSIZE] = { '\0' };
+  char nicks[IRCD_BUFSIZE] = "";
   char *t = nicks;
   const dlink_node *ptr = NULL;
 
@@ -63,8 +62,7 @@ list_accepts(struct Client *source_p)
     if ((t - nicks) + masklen + len  > IRCD_BUFSIZE)
     {
       *(t - 1) = '\0';
-      sendto_one(source_p, form_str(RPL_ACCEPTLIST),
-                 me.name, source_p->name, nicks);
+      sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, nicks);
       t = nicks;
     }
 
@@ -73,15 +71,13 @@ list_accepts(struct Client *source_p)
                  accept_p->userptr, accept_p->hostptr);
   }
 
-  if (nicks[0] != '\0')
+  if (nicks[0])
   {
     *(t - 1) = '\0';
-    sendto_one(source_p, form_str(RPL_ACCEPTLIST),
-               me.name, source_p->name, nicks);
+    sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, nicks);
   }
 
-  sendto_one(source_p, form_str(RPL_ENDOFACCEPT),
-             me.name, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFACCEPT);
 }
 
 /*! \brief Allocates and adds a split_nuh_item holding a nick!user\@host
@@ -106,8 +102,6 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
 
 /*! \brief ACCEPT command handler
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -115,27 +109,26 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = list of masks to be accepted or removed (optional)
+ *      - parv[1] = comma-separated list of masks to be accepted or removed
  */
 static int
-m_accept(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_accept(struct Client *source_p, int parc, char *parv[])
 {
   char *mask = NULL;
   char *p = NULL;
-  char nick[NICKLEN + 1];
-  char user[USERLEN + 1];
-  char host[HOSTLEN + 1];
+  char nick[NICKLEN + 1] = "";
+  char user[USERLEN + 1] = "";
+  char host[HOSTLEN + 1] = "";
   struct split_nuh_item nuh;
   struct split_nuh_item *accept_p = NULL;
 
-  if (EmptyString(parv[1]) || !irccmp(parv[1], "*"))
+  if (EmptyString(parv[1]) || !strcmp(parv[1], "*"))
   {
     list_accepts(source_p);
     return 0;
   }
 
-  for (mask = strtoken(&p, parv[1], ","); mask != NULL;
+  for (mask = strtoken(&p, parv[1], ","); mask;
        mask = strtoken(&p,    NULL, ","))
   {
     if (*mask == '-' && *++mask != '\0')
@@ -153,8 +146,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
 
       if ((accept_p = find_accept(nick, user, host, source_p, irccmp)) == NULL)
       {
-        sendto_one(source_p, form_str(ERR_ACCEPTNOT),
-                   me.name, source_p->name, nick, user, host);
+        sendto_one_numeric(source_p, &me, ERR_ACCEPTNOT, nick, user, host);
         continue;
       }
 
@@ -165,8 +157,7 @@ m_accept(struct Client *client_p, struct Client *source_p,
       if (dlink_list_length(&source_p->localClient->acceptlist) >=
           ConfigFileEntry.max_accept)
       {
-        sendto_one(source_p, form_str(ERR_ACCEPTFULL),
-                   me.name, source_p->name);
+        sendto_one_numeric(source_p, &me, ERR_ACCEPTFULL);
         return 0;
       }
 
@@ -181,10 +172,9 @@ m_accept(struct Client *client_p, struct Client *source_p,
 
       split_nuh(&nuh);
 
-      if ((accept_p = find_accept(nick, user, host, source_p, irccmp)) != NULL)
+      if ((accept_p = find_accept(nick, user, host, source_p, irccmp)))
       {
-        sendto_one(source_p, form_str(ERR_ACCEPTEXIST),
-                   me.name, source_p->name, nick, user, host);
+        sendto_one_numeric(source_p, &me, ERR_ACCEPTEXIST, nick, user, host);
         continue;
       }
 

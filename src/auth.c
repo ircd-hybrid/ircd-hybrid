@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_auth.c
+/*! \file auth.c
  * \brief Functions for querying a users ident.
  * \version $Id$
  */
@@ -39,15 +39,14 @@
 #include "list.h"
 #include "ircd_defs.h"
 #include "fdlist.h"
-#include "s_auth.h"
+#include "auth.h"
 #include "conf.h"
 #include "client.h"
 #include "event.h"
-#include "hook.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "packet.h"
-#include "irc_res.h"
+#include "res.h"
 #include "s_bsd.h"
 #include "log.h"
 #include "send.h"
@@ -56,14 +55,14 @@
 
 static const char *HeaderMessages[] =
 {
-  ":%s NOTICE AUTH :*** Looking up your hostname...",
-  ":%s NOTICE AUTH :*** Found your hostname",
-  ":%s NOTICE AUTH :*** Couldn't look up your hostname",
-  ":%s NOTICE AUTH :*** Checking Ident",
-  ":%s NOTICE AUTH :*** Got Ident response",
-  ":%s NOTICE AUTH :*** No Ident response",
-  ":%s NOTICE AUTH :*** Your forward and reverse DNS do not match, ignoring hostname.",
-  ":%s NOTICE AUTH :*** Your hostname is too long, ignoring hostname"
+  ":*** Looking up your hostname...",
+  ":*** Found your hostname",
+  ":*** Couldn't look up your hostname",
+  ":*** Checking Ident",
+  ":*** Got Ident response",
+  ":*** No Ident response",
+  ":*** Your forward and reverse DNS do not match, ignoring hostname.",
+  ":*** Your hostname is too long, ignoring hostname"
 };
 
 enum
@@ -78,7 +77,7 @@ enum
   REPORT_HOST_TOOLONG
 };
 
-#define sendheader(c, i) sendto_one((c), HeaderMessages[(i)], me.name)
+#define sendheader(c, i) sendto_one_notice((c), &me, HeaderMessages[(i)])
 
 static dlink_list auth_doing_list = { NULL, NULL, 0 };
 
@@ -164,7 +163,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
 
   ClearDNSPending(auth);
 
-  if (name != NULL)
+  if (name)
   {
     const struct sockaddr_in *v4, *v4dns;
 #ifdef IPV6
@@ -177,6 +176,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
     {
       v6 = (const struct sockaddr_in6 *)&auth->client->localClient->ip;
       v6dns = (const struct sockaddr_in6 *)addr;
+
       if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)) != 0)
       {
         sendheader(auth->client, REPORT_IP_MISMATCH);
@@ -188,12 +188,14 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
     {
       v4 = (const struct sockaddr_in *)&auth->client->localClient->ip;
       v4dns = (const struct sockaddr_in *)addr;
-      if(v4->sin_addr.s_addr != v4dns->sin_addr.s_addr)
+
+      if (v4->sin_addr.s_addr != v4dns->sin_addr.s_addr)
       {
         sendheader(auth->client, REPORT_IP_MISMATCH);
         good = 0;
       }
     }
+
     if (good && strlen(name) <= HOSTLEN)
     {
       strlcpy(auth->client->host, name,
@@ -364,17 +366,17 @@ GetValidIdent(char *buf)
  * side effects	- starts auth (identd) and dns queries for a client
  */
 void
-start_auth(struct Client *client)
+start_auth(struct Client *client_p)
 {
   struct AuthRequest *auth = NULL;
 
-  assert(client != NULL);
+  assert(client_p);
 
-  auth = make_auth_request(client);
+  auth = make_auth_request(client_p);
   SetInAuth(auth);
   dlinkAddTail(auth, &auth->node, &auth_doing_list);
 
-  sendheader(client, REPORT_DO_DNS);
+  sendheader(client_p, REPORT_DO_DNS);
 
   SetDNSPending(auth);
 
@@ -384,7 +386,7 @@ start_auth(struct Client *client)
     start_auth_query(auth);
   }
 
-  gethost_byaddr(auth_dns_callback, auth, &client->localClient->ip);
+  gethost_byaddr(auth_dns_callback, auth, &client_p->localClient->ip);
 }
 
 /*
@@ -394,9 +396,9 @@ start_auth(struct Client *client)
 static void
 timeout_auth_queries_event(void *notused)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, auth_doing_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, auth_doing_list.head)
   {
     struct AuthRequest *auth = ptr->data;
 
@@ -457,13 +459,11 @@ auth_connect_callback(fde_t *fd, int error, void *data)
     return;
   }
 
-  if (getsockname(auth->client->localClient->fd.fd, (struct sockaddr *)&us,
-      &ulen) ||
-      getpeername(auth->client->localClient->fd.fd, (struct sockaddr *)&them,
-      &tlen))
+  if (getsockname(auth->client->localClient->fd.fd, (struct sockaddr *)&us, &ulen) ||
+      getpeername(auth->client->localClient->fd.fd, (struct sockaddr *)&them, &tlen))
   {
     ilog(LOG_TYPE_IRCD, "auth get{sock,peer}name error for %s",
-        get_client_name(auth->client, SHOW_IP));
+         get_client_name(auth->client, SHOW_IP));
     auth_error(auth);
     return;
   }

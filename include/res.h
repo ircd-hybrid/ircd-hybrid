@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file irc_res.h
+/*! \file res.h
  * \brief ircd resolver functions
  * \version $Id$
  */

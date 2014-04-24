@@ -30,7 +30,7 @@
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"
-#include "irc_res.h"
+#include "res.h"
 #include "conf.h"
 #include "log.h"
 #include "send.h"
@@ -39,20 +39,25 @@
 #include "motd.h"
 
 
-/*
- * mo_rehash - REHASH message handler
+/*! \brief REHASH command handler
  *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = additional option
  */
 static int
-mo_rehash(struct Client *client_p, struct Client *source_p,
-          int parc, char *parv[])
+mo_rehash(struct Client *source_p, int parc, char *parv[])
 {
   int found = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_REHASH))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "rehash");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "rehash");
     return 0;
   }
 
@@ -60,7 +65,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
   {
     if (irccmp(parv[1], "DNS") == 0)
     {
-      sendto_one(source_p, form_str(RPL_REHASHING), me.name, source_p->name, "DNS");
+      sendto_one_numeric(source_p, &me, RPL_REHASHING, "DNS");
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s is rehashing DNS",
                            get_oper_name(source_p));
@@ -81,14 +86,12 @@ mo_rehash(struct Client *client_p, struct Client *source_p,
       ilog(LOG_TYPE_IRCD, "REHASH %s From %s",
            parv[1], get_oper_name(source_p));
     else
-      sendto_one(source_p, ":%s NOTICE %s :%s is not a valid option. "
-                 "Choose from DNS, MOTD",
-                 me.name, source_p->name, parv[1]);
+      sendto_one_notice(source_p, &me, ":%s is not a valid option. "
+                        "Choose from DNS, MOTD", parv[1]);
   }
   else
   {
-    sendto_one(source_p, form_str(RPL_REHASHING),
-               me.name, source_p->name, ConfigFileEntry.configfile);
+    sendto_one_numeric(source_p, &me, RPL_REHASHING, ConfigFileEntry.configfile);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s is rehashing configuration file(s)",
                          get_oper_name(source_p));

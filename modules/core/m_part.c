@@ -27,27 +27,22 @@
 #include "stdinc.h"
 #include "list.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "s_serv.h"
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
 #include "packet.h"
 
 
-/* part_one_client()
- *
- * inputs	- pointer to server
- * 		- pointer to source client to remove
- *		- char pointer of name of channel to remove from
- * output	- none
- * side effects	- remove ONE client given the channel name
+/*! \brief Removes a client from a specific channel
+ * \param source_p Pointer to source client to remove
+ * \param name     Name of channel to remove from
+ * \param reason   Part reason to show
  */
 static void
 part_one_client(struct Client *source_p, const char *name, const char *reason)
@@ -57,15 +52,13 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
 
   if ((chptr = hash_find_channel(name)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               me.name, source_p->name, name);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
   if ((ms = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
-               me.name, source_p->name, name);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
     return;
   }
 
@@ -81,20 +74,16 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
        (source_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
         < CurrentTime))))
   {
-    sendto_server(source_p->from, CAP_TS6, NOCAPS, ":%s PART %s :%s",
-                  ID(source_p), chptr->chname, reason);
-    sendto_server(source_p->from, NOCAPS, CAP_TS6, ":%s PART %s :%s",
-                  source_p->name, chptr->chname, reason);
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s :%s",
+                  source_p->id, chptr->chname, reason);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s :%s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname, reason);
   }
   else
   {
-    sendto_server(source_p->from, CAP_TS6, NOCAPS, ":%s PART %s",
-                  ID(source_p), chptr->chname);
-    sendto_server(source_p->from, NOCAPS, CAP_TS6, ":%s PART %s",
-                  source_p->name, chptr->chname);
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
+                  source_p->id, chptr->chname);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->chname);
@@ -103,23 +92,27 @@ part_one_client(struct Client *source_p, const char *name, const char *reason)
   remove_user_from_channel(ms);
 }
 
-/*
-** m_part
-**      parv[0] = command
-**      parv[1] = channel
-**      parv[2] = reason
-*/
+/*! \brief PART command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
+ *      - parv[2] = part message
+ */
 static int
-m_part(struct Client *client_p, struct Client *source_p,
-       int parc, char *parv[])
+m_part(struct Client *source_p, int parc, char *parv[])
 {
   char *p = NULL, *name = NULL;
-  char reason[KICKLEN + 1] = { '\0' };
+  char reason[KICKLEN + 1] = "";
 
   if (EmptyString(parv[1]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "PART");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "PART");
     return 0;
   }
 

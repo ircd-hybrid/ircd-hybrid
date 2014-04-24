@@ -34,7 +34,7 @@
 #include "ircd_defs.h"
 #include "dbuf.h"
 #include "channel.h"
-#include "s_auth.h"
+#include "auth.h"
 
 struct MaskItem;
 
@@ -48,14 +48,12 @@ struct MaskItem;
 #define STAT_SERVER             0x10
 #define STAT_CLIENT             0x20
 
-#define REG_NEED_USER 0x1
-#define REG_NEED_NICK 0x2
-#define REG_NEED_CAP  0x4
+#define REG_NEED_USER 0x1  /**< User must send USER command */
+#define REG_NEED_NICK 0x2  /**< User must send NICK command */
+#define REG_NEED_CAP  0x4  /**< In middle of CAP negotiations */
 #define REG_INIT (REG_NEED_USER|REG_NEED_NICK)
 
-#define HasID(x)                ((x)->id[0] != '\0')
-#define ID(x)                   (HasID(x) ? (x)->id : (x)->name)
-#define ID_or_name(x,client_p)  ((IsCapable(client_p->from, CAP_TS6) && HasID(x)) ? (x)->id : (x)->name)
+#define ID_or_name(x,client_p)  ((IsCapable(client_p->from, CAP_TS6) && (x)->id[0]) ? (x)->id : (x)->name)
 
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
 #define IsConnecting(x)         ((x)->status == STAT_CONNECTING)
@@ -90,8 +88,8 @@ struct MaskItem;
 /*
  * ts stuff
  */
-#define TS_CURRENT      6       /**< current TS protocol version */
-#define TS_MIN          5       /**< minimum supported TS protocol version */
+#define TS_CURRENT      6       /**< Current TS protocol version */
+#define TS_MIN          6       /**< Minimum supported TS protocol version */
 #define TS_DOESTS       0x20000000
 #define DoesTS(x)       ((x)->tsinfo == TS_DOESTS)
 
@@ -123,7 +121,7 @@ struct MaskItem;
 #define FLAGS_FLOODDONE      0x00008000 /**< Flood grace period has been ended. */
 #define FLAGS_EOB            0x00010000 /**< server has sent us an EOB */
 #define FLAGS_HIDDEN         0x00020000 /**< a hidden server. not shown in /links */
-#define FLAGS_UNUSED___      0x00040000 /**<  */
+#define FLAGS_BLOCKED        0x00040000 /**< must wait for COMM_SELECT_WRITE */
 #define FLAGS_USERHOST       0x00080000 /**< client is in userhost hash */
 #define FLAGS_BURSTED        0x00100000 /**< user was already bursted */
 #define FLAGS_EXEMPTRESV     0x00200000 /**< client is exempt from RESV */
@@ -133,6 +131,7 @@ struct MaskItem;
 #define FLAGS_SERVICE        0x02000000 /**< Client/server is a network service */
 #define FLAGS_AUTH_SPOOF     0x04000000 /**< user's hostname has been spoofed by an auth{} spoof*/
 #define FLAGS_SSL            0x08000000 /**< User is connected via TLS/SSL */
+#define FLAGS_SQUIT          0x10000000
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
@@ -184,15 +183,15 @@ struct MaskItem;
 
 
 /* oper priv flags */
-#define OPER_FLAG_KILL_REMOTE    0x00000001 /**< Oper can global kill        */
-#define OPER_FLAG_KILL           0x00000002 /**< Oper can do local KILL      */
-#define OPER_FLAG_UNKLINE        0x00000004 /**< Oper can use unkline        */
-#define OPER_FLAG_GLINE          0x00000008 /**< Oper can use gline          */
-#define OPER_FLAG_K              0x00000010 /**< Oper can kill/kline         */
-#define OPER_FLAG_XLINE          0x00000020 /**< Oper can xline              */
-#define OPER_FLAG_DIE            0x00000040 /**< Oper can die                */
-#define OPER_FLAG_REHASH         0x00000080 /**< Oper can rehash             */
-#define OPER_FLAG_ADMIN          0x00000100 /**< Oper can set umode +a       */
+#define OPER_FLAG_KILL_REMOTE    0x00000001 /**< Oper can global KILL */
+#define OPER_FLAG_KILL           0x00000002 /**< Oper can do local KILL */
+#define OPER_FLAG_UNKLINE        0x00000004 /**< Oper can use unkline*/
+#define OPER_FLAG_GLINE          0x00000008 /**< Oper can use gline */
+#define OPER_FLAG_K              0x00000010 /**< Oper can kline */
+#define OPER_FLAG_XLINE          0x00000020 /**< Oper can xline */
+#define OPER_FLAG_DIE            0x00000040 /**< Oper can die*/
+#define OPER_FLAG_REHASH         0x00000080 /**< Oper can rehash */
+#define OPER_FLAG_ADMIN          0x00000100 /**< Oper can set umode +a*/
 #define OPER_FLAG_OPERWALL       0x00000200 /**< Oper can use OPERWALL command */
 #define OPER_FLAG_REMOTEBAN      0x00000400 /**< Oper can set remote bans */
 #define OPER_FLAG_GLOBOPS        0x00000800 /**< Oper can use GLOBOPS command */
@@ -207,7 +206,7 @@ struct MaskItem;
 #define OPER_FLAG_CONNECT_REMOTE 0x00100000 /**< Oper can do global CONNECT */
 #define OPER_FLAG_WALLOPS        0x00200000 /**< Oper can do WALLOPS */
 #define OPER_FLAG_LOCOPS         0x00400000 /**< Oper can do LOCOPS */
-#define OPER_FLAG_UNXLINE        0x00800000 /**< Oper can unxline            */
+#define OPER_FLAG_UNXLINE        0x00800000 /**< Oper can unxline*/
 
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->localClient->operflags & (y) : 0)
@@ -291,16 +290,16 @@ struct Server
 {
   dlink_list server_list; /**< Servers on this server */
   dlink_list client_list; /**< Clients on this server */
-  char by[NICKLEN + 1];   /**< who activated this connection */
+  char by[NICKLEN + 1];   /**< Who activated this connection */
 };
 
 /*! \brief ListTask structure */
 struct ListTask
 {
-  dlink_list show_mask; /**< show these channels.. */
-  dlink_list hide_mask; /**< ..and hide these ones */
+  dlink_list show_mask; /**< Channels to show */
+  dlink_list hide_mask; /**< Channels to hide */
 
-  unsigned int hash_index; /**< the bucket we are currently in */
+  unsigned int hash_index; /**< The hash bucket we are currently in */
   unsigned int users_min;
   unsigned int users_max;
   unsigned int created_min;
@@ -354,7 +353,8 @@ struct LocalUser
   struct dbuf_queue buf_sendq;
   struct dbuf_queue buf_recvq;
 
-  struct {
+  struct
+  {
     unsigned int messages;      /**< Statistics: protocol messages sent/received */
     uint64_t bytes;             /**< Statistics: total bytes sent/received */
   } recv, send;
@@ -411,6 +411,7 @@ struct Client
   char name[HOSTLEN + 1]; /**< unique name for a client nick or host */
   char svid[SVIDLEN + 1]; /**< Services ID. */
   char id[IDLEN + 1];       /**< client ID, unique ID per client */
+
   /*
    * client->username is the username from ident or the USER message,
    * If the client is idented the USER message is ignored, otherwise
@@ -419,6 +420,7 @@ struct Client
    * this field should be considered read-only.
    */
   char              username[USERLEN + 1]; /* client's username */
+
   /*
    * client->host contains the resolved name or ip address
    * as a string for the user, it may be fiddled with for oper spoofing etc.
@@ -460,7 +462,7 @@ extern struct split_nuh_item *find_accept(const char *, const char *,
                                           int (*)(const char *, const char *));
 extern void del_accept(struct split_nuh_item *, struct Client *);
 extern void del_all_accepts(struct Client *);
-extern void exit_client(struct Client *, struct Client *, const char *);
+extern void exit_client(struct Client *, const char *);
 extern void conf_try_ban(struct Client *, struct MaskItem *);
 extern void check_conf_klines(void);
 extern void client_init(void);
@@ -469,7 +471,7 @@ extern void dead_link_on_read(struct Client *, int);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
 extern struct Client *make_client(struct Client *);
-extern struct Client *find_chasing(struct Client *, const char *, int *const);
+extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *const, const char *);
 extern const char *get_client_name(const struct Client *, enum addr_mask_type);
 

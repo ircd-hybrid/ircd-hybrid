@@ -26,19 +26,16 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "s_gline.h"
-#include "channel.h"
+#include "gline.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "conf.h"
 #include "hostmask.h"
 #include "numeric.h"
-#include "s_bsd.h"
-#include "s_misc.h"
+#include "misc.h"
 #include "send.h"
-#include "s_serv.h"
-#include "hash.h"
+#include "server.h"
 #include "parse.h"
 #include "modules.h"
 #include "log.h"
@@ -99,7 +96,7 @@ set_local_gline(const struct Client *source_p, const char *user,
   char buffer[IRCD_BUFSIZE];
   struct MaskItem *conf = conf_make(CONF_GLINE);
 
-  snprintf(buffer, sizeof(buffer), "%s (%s)", reason, smalldate(CurrentTime));
+  snprintf(buffer, sizeof(buffer), "%s (%s)", reason, smalldate(0));
   conf->reason = xstrdup(buffer);
   conf->user = xstrdup(user);
   conf->host = xstrdup(host);
@@ -281,21 +278,21 @@ check_majority(const struct Client *source_p, const char *user,
   return GLINE_NOT_PLACED;
 }
 
-/* ms_gline()
+/*! \brief GLINE command handler
  *
- * inputs       - The usual for a m_ function
- * output       -
- * side effects -
- *
- * Place a G line if 3 opers agree on the identical user@host
- *
- * Allow this server to pass along GLINE if received and
- * GLINES is not defined.
- *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = user mask
+ *      - parv[2] = host mask
+ *      - parv[3] = reason
  */
 static int
-ms_gline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+ms_gline(struct Client *source_p, int parc, char *parv[])
 {
   const char *reason = NULL;      /* reason for "victims" demise       */
   const char *user = NULL;
@@ -314,12 +311,8 @@ ms_gline(struct Client *client_p, struct Client *source_p,
   host   = parv[2];
   reason = parv[3];
 
-  sendto_server(source_p->from, CAP_GLN|CAP_TS6, NOCAPS,
-                ":%s GLINE %s %s :%s",
-                ID(source_p), user, host, reason);
-  sendto_server(source_p->from, CAP_GLN, CAP_TS6,
-                ":%s GLINE %s %s :%s",
-                source_p->name, user, host, reason);
+  sendto_server(source_p, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
+                source_p->id, user, host, reason);
 
   if (!ConfigFileEntry.glines)
     return 0;
@@ -331,7 +324,7 @@ ms_gline(struct Client *client_p, struct Client *source_p,
   {
     int bitlen = strtol(++p, NULL, 10);
     int min_bitlen = strchr(host, ':') ? ConfigFileEntry.gline_min_cidr6 :
-                                             ConfigFileEntry.gline_min_cidr;
+                                         ConfigFileEntry.gline_min_cidr;
 
     if (bitlen < min_bitlen)
     {
@@ -361,10 +354,8 @@ ms_gline(struct Client *client_p, struct Client *source_p,
   return 0;
 }
 
-/*! \brief GLINE command handler (called by operators)
+/*! \brief GLINE command handler
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -376,8 +367,7 @@ ms_gline(struct Client *client_p, struct Client *source_p,
  *      - parv[2] = reason
  */
 static int
-mo_gline(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_gline(struct Client *source_p, int parc, char *parv[])
 {
   char *user = NULL;
   char *host = NULL;
@@ -386,15 +376,13 @@ mo_gline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_GLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "gline");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "gline");
     return 0;
   }
 
   if (!ConfigFileEntry.glines)
   {
-    sendto_one(source_p, ":%s NOTICE %s :GLINE disabled",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":GLINE disabled");
     return 0;
   }
 
@@ -409,8 +397,8 @@ mo_gline(struct Client *client_p, struct Client *source_p,
                                          ConfigFileEntry.gline_min_cidr;
     if (bitlen < min_bitlen)
     {
-      sendto_one(source_p, ":%s NOTICE %s :Cannot set G-Lines with CIDR length < %d",
-                 me.name, source_p->name, min_bitlen);
+      sendto_one_notice(source_p, &me, ":Cannot set G-Lines with CIDR length < %d",
+                        min_bitlen);
       return 0;
     }
   }
@@ -419,9 +407,7 @@ mo_gline(struct Client *client_p, struct Client *source_p,
   if (check_majority(source_p, user, host, reason, GLINE_PENDING_ADD_TYPE) ==
       GLINE_ALREADY_VOTED)
   {
-    sendto_one(source_p,
-               ":%s NOTICE %s :This server or oper has already voted",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":This server or oper has already voted");
     return 0;
   }
 
@@ -436,13 +422,8 @@ mo_gline(struct Client *client_p, struct Client *source_p,
   ilog(LOG_TYPE_GLINE, "G-Line for [%s@%s] [%s] requested by %s",
        user, host, reason, get_oper_name(source_p));
 
-  /* 4 param version for hyb-7 servers */
-  sendto_server(NULL, CAP_GLN|CAP_TS6, NOCAPS,
-		":%s GLINE %s %s :%s",
-		ID(source_p), user, host, reason);
-  sendto_server(NULL, CAP_GLN, CAP_TS6,
-		":%s GLINE %s %s :%s",
-		source_p->name, user, host, reason);
+  sendto_server(NULL, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
+		source_p->id, user, host, reason);
   return 0;
 }
 
@@ -466,20 +447,14 @@ do_sungline(struct Client *source_p, const char *user,
 
   if (prop)
   {
-    sendto_server(source_p->from, CAP_ENCAP|CAP_TS6, NOCAPS,
+    sendto_server(source_p, CAP_ENCAP, NOCAPS,
                   ":%s ENCAP * GUNGLINE %s %s :%s",
-                  ID(source_p), user, host, reason);
-    sendto_server(source_p->from, CAP_ENCAP, CAP_TS6,
-                  ":%s ENCAP * GUNGLINE %s %s :%s",
-                  source_p->name, user, host, reason);
+                  source_p->id, user, host, reason);
   }
 }
 
-/*! \brief GUNGLINE command handler (called in response to an encapsulated
- *                  GUNGLINE command)
+/*! \brief GUNGLINE command handler
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -487,23 +462,20 @@ do_sungline(struct Client *source_p, const char *user,
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = username
- *      - parv[2] = hostname
+ *      - parv[1] = user mask
+ *      - parv[2] = host mask
  *      - parv[3] = reason
  */
 static int
-me_gungline(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+me_gungline(struct Client *source_p, int parc, char *parv[])
 {
   if (ConfigFileEntry.glines)
     do_sungline(source_p, parv[1], parv[2], parv[3], 0);
   return 0;
 }
 
-/*! \brief GUNGLINE command handler (called by operators)
+/*! \brief GUNGLINE command handler
  *
- * \param client_p Pointer to allocated Client struct with physical connection
- *                 to this server, i.e. with an open socket connected.
  * \param source_p Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
@@ -515,8 +487,7 @@ me_gungline(struct Client *client_p, struct Client *source_p,
  *      - parv[2] = reason
  */
 static int
-mo_gungline(struct Client *client_p, struct Client *source_p,
-            int parc, char *parv[])
+mo_gungline(struct Client *source_p, int parc, char *parv[])
 {
   char *user = NULL;
   char *host = NULL;
@@ -524,15 +495,13 @@ mo_gungline(struct Client *client_p, struct Client *source_p,
 
   if (!HasOFlag(source_p, OPER_FLAG_GLINE))
   {
-    sendto_one(source_p, form_str(ERR_NOPRIVS),
-               me.name, source_p->name, "gline");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "gline");
     return 0;
   }
 
   if (!ConfigFileEntry.glines)
   {
-    sendto_one(source_p, ":%s NOTICE %s :GUNGLINE disabled",
-               me.name, source_p->name);
+    sendto_one_notice(source_p, &me, ":GUNGLINE disabled");
     return 0;
   }
 

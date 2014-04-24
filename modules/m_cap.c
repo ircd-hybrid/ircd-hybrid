@@ -30,13 +30,10 @@
 #include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "conf.h"
-#include "s_user.h"
-#include "s_serv.h"
+#include "user.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 #include "irc_string.h"
 
 
@@ -370,14 +367,20 @@ subcmd_search(const char *cmd, const struct subcmd *elem)
   return strcasecmp(cmd, elem->cmd);
 }
 
-/** Handle a capability request or response from a client.
- * \param client_p Client that sent us the message.
- * \param source_p Original source of message.
- * \param parc     Number of arguments.
- * \param parv     Argument vector.
+/*! \brief CAP command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = CAP subcommand
+ *      - parv[2] = space-separated list of capabilities
  */
 static int
-m_cap(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_cap(struct Client *source_p, int parc, char *parv[])
 {
   const char *subcmd = NULL, *caplist = NULL;
   struct subcmd *cmd = NULL;
@@ -395,8 +398,7 @@ m_cap(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
                       sizeof(cmdlist) / sizeof(struct subcmd),
                       sizeof(struct subcmd), (bqcmp)subcmd_search)))
   {
-    sendto_one(source_p, form_str(ERR_INVALIDCAPCMD), me.name,
-               source_p->name[0] ? source_p->name : "*", subcmd);
+    sendto_one_numeric(source_p, &me, ERR_INVALIDCAPCMD, subcmd);
     return 0;
   }
 

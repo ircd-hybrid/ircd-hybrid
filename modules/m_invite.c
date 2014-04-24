@@ -34,87 +34,132 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "conf.h"
-#include "s_serv.h"
+#include "server.h"
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"
 
 
-/*
-** m_invite
-**      parv[0] - command
-**      parv[1] - user to invite
-**      parv[2] - channel name
-**      parv[3] - invite timestamp
-*/
+/*! \brief INVITE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = user to invite
+ *      - parv[2] = channel name
+ */
 static int
-m_invite(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+m_invite(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
   struct Membership *ms = NULL;
 
-  if (IsServer(source_p))
-    return 0;
-
   if (EmptyString(parv[2]))
   {
-    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-               me.name, source_p->name, "INVITE");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "INVITE");
     return 0;
   }
 
-  if (MyClient(source_p) && !IsFloodDone(source_p))
+  if (IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  if ((target_p = find_person(client_p, parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHNICK),
-               me.name, source_p->name, parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
     return 0;
   }
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
-               me.name, source_p->name, parv[2]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return 0;
   }
 
-  if (MyConnect(source_p) && (ms = find_channel_link(source_p, chptr)) == NULL)
+  if ((ms = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
-               me.name, source_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
     return 0;
   }
 
-  if (MyConnect(source_p) && !has_member_flags(ms, CHFL_CHANOP))
+  if (!has_member_flags(ms, CHFL_CHANOP))
   {
-    sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
-               me.name, source_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
     return 0;
   }
 
   if (IsMember(target_p, chptr))
   {
-    sendto_one(source_p, form_str(ERR_USERONCHANNEL), me.name,
-               source_p->name, target_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_USERONCHANNEL, target_p->name, chptr->chname);
     return 0;
   }
 
-  if (MyConnect(source_p))
-  {
-    sendto_one(source_p, form_str(RPL_INVITING), me.name,
-               source_p->name, target_p->name, chptr->chname);
+  sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->chname);
 
-    if (target_p->away[0])
-      sendto_one(source_p, form_str(RPL_AWAY),
-                 me.name, source_p->name, target_p->name,
-                 target_p->away);
+  if (target_p->away[0])
+    sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
+
+  if (MyConnect(target_p))
+  {
+    sendto_one(target_p, ":%s!%s@%s INVITE %s :%s",
+               source_p->name, source_p->username,
+               source_p->host,
+               target_p->name, chptr->chname);
+
+    if (chptr->mode.mode & MODE_INVITEONLY)
+    {
+      sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP,
+                            "NOTICE @%s :%s is inviting %s to %s.",
+                            chptr->chname, source_p->name,
+                            target_p->name, chptr->chname);
+
+      /* Add the invite if channel is +i */
+      add_invite(chptr, target_p);
+    }
   }
-  else if (parc > 3 && IsDigit(*parv[3]))
+  else if (target_p->from != source_p->from)
+    sendto_one(target_p, ":%s INVITE %s %s %lu",
+               source_p->id, target_p->id,
+               chptr->chname, (unsigned long)chptr->channelts);
+  return 0;
+}
+
+/*! \brief INVITE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = user to invite
+ *      - parv[2] = channel name
+ *      - parv[3] = channel timestamp
+ */
+static int
+ms_invite(struct Client *source_p, int parc, char *parv[])
+{
+  struct Client *target_p = NULL;
+  struct Channel *chptr = NULL;
+
+  if (EmptyString(parv[2]))
+    return 0;
+
+  if ((target_p = hash_find_id(parv[1])) == NULL || !IsClient(target_p))
+    return 0;
+
+  if ((chptr = hash_find_channel(parv[2])) == NULL)
+    return 0;
+
+  if (IsMember(target_p, chptr))
+    return 0;
+
+  if (parc > 3 && IsDigit(*parv[3]))
     if (atoi(parv[3]) > chptr->channelts)
       return 0;
 
@@ -136,18 +181,18 @@ m_invite(struct Client *client_p, struct Client *source_p,
       add_invite(chptr, target_p);
     }
   }
-  else if (target_p->from != client_p)
+  else if (target_p->from != source_p->from)
     sendto_one(target_p, ":%s INVITE %s %s %lu",
-               ID_or_name(source_p, target_p),
-               ID_or_name(target_p, target_p),
+               source_p->id, target_p->id,
                chptr->chname, (unsigned long)chptr->channelts);
   return 0;
 }
 
+
 static struct Message invite_msgtab =
 {
   "INVITE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_invite, m_invite, m_ignore, m_invite, m_ignore }
+  { m_unregistered, m_invite, ms_invite, m_ignore, m_invite, m_ignore }
 };
 
 static void

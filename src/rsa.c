@@ -71,8 +71,7 @@ int
 get_randomness(unsigned char *buf, int length)
 {
   /* Seed OpenSSL PRNG with EGD enthropy pool -kre */
-  if (ConfigFileEntry.use_egd &&
-      ConfigFileEntry.egdpool_path)
+  if (ConfigFileEntry.use_egd && ConfigFileEntry.egdpool_path)
     if (RAND_egd(ConfigFileEntry.egdpool_path) == -1)
       return -1;
 
@@ -85,8 +84,8 @@ get_randomness(unsigned char *buf, int length)
 int
 generate_challenge(char **r_challenge, char **r_response, RSA *rsa)
 {
-  unsigned char secret[32], *tmp;
-  unsigned long length;
+  unsigned char secret[32], *tmp = NULL;
+  unsigned long length = 0;
   int ret = -1;
 
   if (!rsa)
@@ -102,7 +101,7 @@ generate_challenge(char **r_challenge, char **r_response, RSA *rsa)
 
   *r_challenge = MyMalloc((length << 1) + 1);
   binary_to_hex( tmp, *r_challenge, length);
-  (*r_challenge)[length<<1] = 0;
+  (*r_challenge)[length << 1] = 0;
   MyFree(tmp);
 
   if (ret < 0)

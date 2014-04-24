@@ -34,13 +34,18 @@
 #include "modules.h"
 
 
-/*
- * mo_close - CLOSE message handler
- *  - added by Darren Reed Jul 13 1992.
+/*! \brief CLOSE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
  */
 static int
-mo_close(struct Client *client_p, struct Client *source_p,
-         int parc, char *parv[])
+mo_close(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
   unsigned int closed = dlink_list_length(&unknown_list);
@@ -50,18 +55,18 @@ mo_close(struct Client *client_p, struct Client *source_p,
   {
     struct Client *target_p = ptr->data;
 
-    sendto_one(source_p, form_str(RPL_CLOSING), me.name, source_p->name,
-               get_client_name(target_p, SHOW_IP), target_p->status);
+    sendto_one_numeric(source_p, &me, RPL_CLOSING,
+                       get_client_name(target_p, SHOW_IP),
+                       target_p->status);
 
     /*
      * Exit here is safe, because it is guaranteed not to be source_p
      * because it is unregistered and source_p is an oper.
      */
-    exit_client(target_p, target_p, "Oper Closing");
+    exit_client(target_p, "Oper Closing");
   }
 
-  sendto_one(source_p, form_str(RPL_CLOSEEND),
-             me.name, source_p->name, closed);
+  sendto_one_numeric(source_p, &me, RPL_CLOSEEND, closed);
   return 0;
 }
 

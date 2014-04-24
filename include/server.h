@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_serv.h
+/*! \file server.h
  * \brief A header for the server functions.
  * \version $Id$
  */
@@ -66,6 +66,7 @@ struct Capability
 #define CAP_SVS         0x00004000 /* supports services                   */
 #define CAP_DLN         0x00008000 /* Can do DLINE message                */
 #define CAP_UNDLN       0x00010000 /* Can do UNDLINE message              */
+#define CAP_CHW         0x00020000 /* Can do channel wall @#              */
 
 /*
  * Capability macros.
@@ -87,20 +88,16 @@ enum
 
 extern int valid_servname(const char *);
 extern int check_server(const char *, struct Client *);
-extern int hunt_server(struct Client *, struct Client *,
-                       const char *, const int, const int, char *[]);
+extern int hunt_server(struct Client *, const char *, const int, const int, char *[]);
 extern void add_capability(const char *, int, int);
 extern int delete_capability(const char *);
 extern int unsigned find_capability(const char *);
 extern void send_capabilities(struct Client *, int);
 extern void write_links_file(void *);
 extern void read_links_file(void);
-extern void server_estab(struct Client *);
 extern const char *show_capabilities(const struct Client *);
 extern void try_connections(void *);
-extern void burst_channel(struct Client *client_p, struct Channel *);
-extern void sendnick_TS(struct Client *, struct Client *);
 extern int serv_connect(struct MaskItem *, struct Client *);
 extern struct Client *find_servconn_in_progress(const char *);
 extern struct Server *make_server(struct Client *);
-#endif /* INCLUDED_s_serv_h */
+#endif /* INCLUDED_server.h */

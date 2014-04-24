@@ -78,8 +78,8 @@
 
 #include "stdinc.h"
 #include "ircd_defs.h"
-#include "irc_res.h"
-#include "irc_reslib.h"
+#include "res.h"
+#include "reslib.h"
 #include "irc_string.h"
 
 #define NS_TYPE_ELT             0x40 /* EDNS0 extended label type */
@@ -89,7 +89,7 @@
 /* $Id$ */
 
 struct irc_ssaddr irc_nsaddr_list[IRCD_MAXNS];
-int irc_nscount = 0;
+unsigned int irc_nscount = 0;
 
 static const char digits[] = "0123456789";
 static const char digitvalue[256] = {
@@ -225,7 +225,7 @@ parse_resvconf(void)
     if ((p = strpbrk(arg, " \t")) != NULL)
       *p = '\0';  /* take the first word */
 
-    if (!irccmp(opt, "nameserver"))
+    if (!strcasecmp(opt, "nameserver"))
       add_nameserver(arg);
   }
 

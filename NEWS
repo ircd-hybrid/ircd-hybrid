@@ -1,3 +1,11 @@
+-- Noteworthy changes in version 8.1.16 (2014-04-20)
+o) Fixed undefined behaviour with crypt() returning NULL
+   since glibc2.17 in certain cases
+o) Admins may now see all channel members via "WHO #channel"
+   regardless of channel mode +s
+o) Fixed corrupted "STATS U" output
+
+
 -- Noteworthy changes in version 8.1.15 (2014-03-29)
 ########################################################################
 o) IMPORTANT: ircd binary is now again placed into bin/ instead of sbin/

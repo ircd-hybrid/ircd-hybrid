@@ -46,7 +46,7 @@
 static void
 quote_autoconn(struct Client *source_p, const char *arg, int newval)
 {
-  if (arg != NULL)
+  if (!EmptyString(arg))
   {
     struct MaskItem *conf = find_exact_name_conf(CONF_SERVER, NULL, arg, NULL, NULL);
 
@@ -471,26 +471,16 @@ mo_set(struct Client *client_p, struct Client *source_p,
           intarg = parv[n++];
 
         if ((n - 1) > parc)
-        {
-          if (parc > 2)
             sendto_one(source_p,
                        ":%s NOTICE %s :SET %s expects (\"%s%s\") args",
                        me.name, source_p->name, tab->name,
                        (tab->wants_char ? "string, " : ""),
-                       (tab->wants_char ? "int" : ""));
-        }
+                       (tab->wants_int ? "int" : ""));
 
         if (parc <= 2)
         {
           arg = NULL;
           intarg = NULL;
-        }
-
-        if (!strcmp(tab->name, "AUTOCONN") && (parc < 4))
-        {
-          sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                     me.name, source_p->name, "SET");
-          return 0;
         }
 
         if (tab->wants_int && (parc > 2))

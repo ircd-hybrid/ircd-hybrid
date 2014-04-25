@@ -2,8 +2,9 @@
 o) TS6 is now mandatory. ircd is no longer backwards compatible with TS5
    and below.
 o) SVSJOIN and SVSPART has been added
-o) Major code cleanups and refactoring. Improved overall preformance
+o) Major code cleanups and refactoring. Improved overall performance
 o) /info now also reports MPATH and SPATH
+o) Updated several help files
 
 
 -- Noteworthy changes in version 8.1.16 (2014-04-20)

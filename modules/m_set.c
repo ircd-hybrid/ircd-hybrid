@@ -41,7 +41,7 @@
 static void
 quote_autoconn(struct Client *source_p, const char *arg, int newval)
 {
-  if (arg)
+  if (!EmptyString(arg))
   {
     struct MaskItem *conf = find_exact_name_conf(CONF_SERVER, NULL, arg, NULL, NULL);
 
@@ -457,12 +457,6 @@ mo_set(struct Client *source_p, int parc, char *parv[])
       {
         strarg = NULL;
         intarg = NULL;
-      }
-/* XXX */
-      if (!strcmp(tab->name, "AUTOCONN") && parc < 4)
-      {
-        sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "SET");
-        return 0;
       }
 
       if (tab->wants_int && parc > 2)

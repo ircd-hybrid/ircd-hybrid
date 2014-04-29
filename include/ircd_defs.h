@@ -46,8 +46,7 @@
 #define IDLEN           12 /* this is the maximum length, not the actual
                               generated length; DO NOT CHANGE! */
 #define REALLEN         50
-#define LOCAL_CHANNELLEN 50
-#define CHANNELLEN      200
+#define CHANNELLEN      50
 #define TOPICLEN        300
 #define KILLLEN         180
 #define REASONLEN       180

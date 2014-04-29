@@ -282,7 +282,7 @@ int
 check_channel_name(const char *name, const int local)
 {
   const char *p = name;
-  const int max_length = local ? LOCAL_CHANNELLEN : CHANNELLEN;
+
   assert(name != NULL);
 
   if (!IsChanPrefix(*p))
@@ -301,7 +301,7 @@ check_channel_name(const char *name, const int local)
         return 0;
   }
 
-  return p - name <= max_length;
+  return p - name <= CHANNELLEN;
 }
 
 void

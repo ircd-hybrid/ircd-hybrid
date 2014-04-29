@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.0beta1 (????-??-??)
+-- Noteworthy changes in version 8.2.0beta1 (2014-04-29)
 o) TS6 is now mandatory. ircd is no longer backwards compatible with TS5
    and below.
 o) SVSJOIN and SVSPART has been added

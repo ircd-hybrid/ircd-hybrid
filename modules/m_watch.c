@@ -106,7 +106,8 @@ m_watch(struct Client *source_p, int parc, char *parv[])
           continue;
         }
 
-        watch_add_to_hash_table(s + 1, source_p);
+        if (valid_nickname(s + 1, 1))
+          watch_add_to_hash_table(s + 1, source_p);
       }
 
       show_watch(source_p, s + 1, RPL_NOWON, RPL_NOWOFF);

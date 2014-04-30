@@ -137,7 +137,7 @@ watch_add_to_hash_table(const char *nick, struct Client *client_p)
     anptr->lasttime = CurrentTime;
     strlcpy(anptr->nick, nick, sizeof(anptr->nick));
 
-    dlinkAdd(anptr, &anptr->node, &watchTable[strhash(nick)]);
+    dlinkAdd(anptr, &anptr->node, &watchTable[strhash(anptr->nick)]);
   }
   else
   {
@@ -178,8 +178,8 @@ watch_del_from_hash_table(const char *nick, struct Client *client_p)
   /* In case this header is now empty of notices, remove it */
   if (anptr->watched_by.head == NULL)
   {
-    assert(dlinkFind(&watchTable[strhash(nick)], anptr));
-    dlinkDelete(&anptr->node, &watchTable[strhash(nick)]);
+    assert(dlinkFind(&watchTable[strhash(anptr->nick)], anptr));
+    dlinkDelete(&anptr->node, &watchTable[strhash(anptr->nick)]);
     mp_pool_release(anptr);
   }
 }

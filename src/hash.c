@@ -763,7 +763,7 @@ list_allow_channel(const char *chname, const struct ListTask *lt)
 static void
 list_one_channel(struct Client *source_p, struct Channel *chptr)
 {
-  struct ListTask *lt = source_p->localClient->list_task;
+  const struct ListTask *lt = source_p->localClient->list_task;
   char listbuf[MODEBUFLEN] = "";
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";

@@ -5948,7 +5948,7 @@ yyreduce:
   case 556:
 #line 2704 "conf_parser.y" /* yacc.c:1646  */
     {
-  ConfigFileEntry.throttle_time = yylval.number;
+  ConfigFileEntry.throttle_time = (yyvsp[-1].number);
 }
 #line 5954 "conf_parser.c" /* yacc.c:1646  */
     break;
@@ -6420,7 +6420,7 @@ yyreduce:
   case 637:
 #line 2939 "conf_parser.y" /* yacc.c:1646  */
     {
-  GlobalSetOptions.joinfloodtime = yylval.number;
+  GlobalSetOptions.joinfloodtime = (yyvsp[-1].number);
 }
 #line 6426 "conf_parser.c" /* yacc.c:1646  */
     break;

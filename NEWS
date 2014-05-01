@@ -1,3 +1,10 @@
+-- Noteworthy changes in version 8.1.17 (2014-05-01)
+o) Fixed possible WATCH core
+o) Fixed bug where the configuration parser wouldn't take time units
+   into consideration for the join_flood_time and throttle_time
+   configuration options
+
+
 -- Noteworthy changes in version 8.1.16 (2014-04-20)
 o) Fixed undefined behaviour with crypt() returning NULL
    since glibc2.17 in certain cases

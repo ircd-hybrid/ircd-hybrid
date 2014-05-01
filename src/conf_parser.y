@@ -43,13 +43,13 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "modules.h"
-#include "s_serv.h"
+#include "server.h"
 #include "hostmask.h"
 #include "send.h"
 #include "listener.h"
 #include "resv.h"
 #include "numeric.h"
-#include "s_user.h"
+#include "user.h"
 #include "motd.h"
 
 #ifdef HAVE_LIBCRYPTO
@@ -2702,7 +2702,7 @@ general_disable_auth: DISABLE_AUTH '=' TBOOL ';'
 
 general_throttle_time: THROTTLE_TIME '=' timespec ';'
 {
-  ConfigFileEntry.throttle_time = yylval.number;
+  ConfigFileEntry.throttle_time = $3;
 };
 
 general_oper_umodes: OPER_UMODES
@@ -2937,7 +2937,7 @@ channel_jflood_count: JOIN_FLOOD_COUNT '=' NUMBER ';'
 
 channel_jflood_time: JOIN_FLOOD_TIME '=' timespec ';'
 {
-  GlobalSetOptions.joinfloodtime = yylval.number;
+  GlobalSetOptions.joinfloodtime = $3;
 };
 
 /***************************************************************************

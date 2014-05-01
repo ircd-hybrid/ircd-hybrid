@@ -86,6 +86,7 @@ extract_one_line(struct dbuf_queue *qptr, char *buffer)
       if (IsEol(c) || (c == ' ' && phase != 1))
       {
         ++empty_bytes;
+
         if (phase == 1)
           phase = 2;
       }
@@ -129,7 +130,7 @@ parse_client_queued(struct Client *client_p)
   {
     int i = 0;
 
-    for (; ;)
+    while (1)
     {
       if (IsDefunct(client_p))
         return;
@@ -148,7 +149,7 @@ parse_client_queued(struct Client *client_p)
       /* if they've dropped out of the unknown state, break and move
        * to the parsing for their appropriate status.  --fl
        */
-      if(!IsUnknown(client_p))
+      if (!IsUnknown(client_p))
         break;
     }
   }
@@ -159,9 +160,9 @@ parse_client_queued(struct Client *client_p)
     {
       if (IsDefunct(client_p))
         return;
-      if ((dolen = extract_one_line(&lclient_p->buf_recvq,
-                                    readBuf)) == 0)
+      if ((dolen = extract_one_line(&lclient_p->buf_recvq, readBuf)) == 0)
         break;
+
       client_dopacket(client_p, readBuf, dolen);
     }
   }
@@ -180,7 +181,7 @@ parse_client_queued(struct Client *client_p)
      * messages in this loop, we simply drop out of the loop prematurely.
      *   -- adrian
      */
-    for (; ;)
+    while (1)
     {
       if (IsDefunct(client_p))
         break;
@@ -200,15 +201,14 @@ parse_client_queued(struct Client *client_p)
        */
       if (checkflood > 0)
       {
-        if(lclient_p->sent_parsed >= lclient_p->allow_read)
+        if (lclient_p->sent_parsed >= lclient_p->allow_read)
           break;
       }
 
       /* allow opers 4 times the amount of messages as users. why 4?
        * why not. :) --fl_
        */
-      else if (lclient_p->sent_parsed >= (4 * lclient_p->allow_read) &&
-               checkflood != -1)
+      else if (lclient_p->sent_parsed >= (4 * lclient_p->allow_read) && checkflood != -1)
         break;
 
       dolen = extract_one_line(&lclient_p->buf_recvq, readBuf);
@@ -294,7 +294,7 @@ read_packet(fde_t *fd, void *data)
 #ifdef HAVE_LIBCRYPTO
     if (fd->ssl)
     {
-      length = SSL_read(fd->ssl, readBuf, READBUF_SIZE);
+      length = SSL_read(fd->ssl, readBuf, sizeof(readBuf));
 
       /* translate openssl error codes, sigh */
       if (length < 0)
@@ -317,7 +317,7 @@ read_packet(fde_t *fd, void *data)
     else
 #endif
     {
-      length = recv(fd->fd, readBuf, READBUF_SIZE, 0);
+      length = recv(fd->fd, readBuf, sizeof(readBuf), 0);
     }
 
     if (length <= 0)
@@ -339,6 +339,7 @@ read_packet(fde_t *fd, void *data)
       client_p->localClient->lasttime = CurrentTime;
     if (client_p->localClient->lasttime > client_p->localClient->since)
       client_p->localClient->since = CurrentTime;
+
     ClearPingSent(client_p);
 
     /* Attempt to parse what we have */

@@ -681,7 +681,7 @@ serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
   {
     char *p;
 
-    if ((p = strchr(yylval.string, ' ')) != NULL)
+    if ((p = strchr(yylval.string, ' ')))
       p = '\0';
 
     MyFree(ServerInfo.network_name);
@@ -714,7 +714,7 @@ serverinfo_vhost: VHOST '=' QSTRING ';'
       ilog(LOG_TYPE_IRCD, "Invalid netmask for server vhost(%s)", yylval.string);
     else
     {
-      assert(res != NULL);
+      assert(res);
 
       memcpy(&ServerInfo.ip, res->ai_addr, res->ai_addrlen);
       ServerInfo.ip.ss.ss_family = res->ai_family;
@@ -743,7 +743,7 @@ serverinfo_vhost6: VHOST6 '=' QSTRING ';'
       ilog(LOG_TYPE_IRCD, "Invalid netmask for server vhost6(%s)", yylval.string);
     else
     {
-      assert(res != NULL);
+      assert(res);
 
       memcpy(&ServerInfo.ip6, res->ai_addr, res->ai_addrlen);
       ServerInfo.ip6.ss.ss_family = res->ai_family;
@@ -763,7 +763,7 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
 
   if ($3 < MAXCLIENTS_MIN)
   {
-    char buf[IRCD_BUFSIZE];
+    char buf[IRCD_BUFSIZE] = "";
 
     snprintf(buf, sizeof(buf), "MAXCLIENTS too low, setting to %d", MAXCLIENTS_MIN);
     conf_error_report(buf);
@@ -771,7 +771,7 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
   }
   else if ($3 > MAXCLIENTS_MAX)
   {
-    char buf[IRCD_BUFSIZE];
+    char buf[IRCD_BUFSIZE] = "";
 
     snprintf(buf, sizeof(buf), "MAXCLIENTS too high, setting to %d", MAXCLIENTS_MAX);
     conf_error_report(buf);
@@ -793,7 +793,7 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
   }
   else if ($3 > NICKLEN)
   {
-    char buf[IRCD_BUFSIZE];
+    char buf[IRCD_BUFSIZE] = "";
 
     snprintf(buf, sizeof(buf), "max_nick_length too high, setting to %d", NICKLEN);
     conf_error_report(buf);
@@ -815,7 +815,7 @@ serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
   }
   else if ($3 > TOPICLEN)
   {
-    char buf[IRCD_BUFSIZE];
+    char buf[IRCD_BUFSIZE] = "";
 
     snprintf(buf, sizeof(buf), "max_topic_length too high, setting to %d", TOPICLEN);
     conf_error_report(buf);
@@ -2108,7 +2108,7 @@ connect_entry: CONNECT
       ilog(LOG_TYPE_IRCD, "Invalid netmask for server vhost(%s)", block_state.bind.buf);
     else
     {
-      assert(res != NULL);
+      assert(res);
 
       memcpy(&conf->bind, res->ai_addr, res->ai_addrlen);
       conf->bind.ss.ss_family = res->ai_family;
@@ -2163,7 +2163,7 @@ connect_send_password: SEND_PASSWORD '=' QSTRING ';'
 
   if ($3[0] == ':')
     conf_error_report("Server passwords cannot begin with a colon");
-  else if (strchr($3, ' ') != NULL)
+  else if (strchr($3, ' '))
     conf_error_report("Server passwords cannot contain spaces");
   else
     strlcpy(block_state.spass.buf, yylval.string, sizeof(block_state.spass.buf));
@@ -2176,7 +2176,7 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
 
   if ($3[0] == ':')
     conf_error_report("Server passwords cannot begin with a colon");
-  else if (strchr($3, ' ') != NULL)
+  else if (strchr($3, ' '))
     conf_error_report("Server passwords cannot contain spaces");
   else
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));

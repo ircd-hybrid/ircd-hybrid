@@ -769,8 +769,9 @@ list_one_channel(struct Client *source_p, struct Channel *chptr,
   char parabuf[MODEBUFLEN] = "";
 
   if (SecretChannel(chptr) &&
-      !(IsMember(source_p, chptr) || HasUMode(source_p, UMODE_ADMIN)))
+      !(HasUMode(source_p, UMODE_ADMIN) || IsMember(source_p, chptr)))
     return;
+
   if (dlink_list_length(&chptr->members) < list_task->users_min ||
       dlink_list_length(&chptr->members) > list_task->users_max ||
       (chptr->channelts != 0 &&

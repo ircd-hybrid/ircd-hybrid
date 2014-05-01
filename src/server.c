@@ -159,7 +159,6 @@ hunt_server(struct Client *source_p, const char *command,
   struct Client *target_p = NULL;
   struct Client *target_tmp = NULL;
   dlink_node *ptr;
-  int wilds;
 
   /* Assume it's me, if no server */
   if (parc <= server || EmptyString(parv[server]))
@@ -185,14 +184,12 @@ hunt_server(struct Client *source_p, const char *command,
     if (target_p->from == source_p->from && !MyConnect(target_p))
       target_p = NULL;
 
-  wilds = has_wildcards(parv[server]);
-
   /* Again, if there are no wild cards involved in the server
    * name, use the hash lookup
    */
   if (target_p == NULL)
   {
-    if (!wilds)
+    if (!has_wildcards(parv[server]))
     {
       if (!(target_p = hash_find_server(parv[server])))
       {

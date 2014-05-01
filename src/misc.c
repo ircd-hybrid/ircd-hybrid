@@ -136,7 +136,7 @@ myctime(time_t value)
 const char *
 ssl_get_cipher(const SSL *ssl)
 {
-  static char buffer[IRCD_BUFSIZE / 4];
+  static char buffer[IRCD_BUFSIZE];
   int bits = 0;
 
   SSL_CIPHER_get_bits(SSL_get_current_cipher(ssl), &bits);

@@ -340,8 +340,7 @@ try_connections(void *unused)
 int
 valid_servname(const char *name)
 {
-  unsigned int length = 0;
-  unsigned int dots   = 0;
+  unsigned int dots = 0;
   const char *p = name;
 
   for (; *p; ++p)
@@ -349,13 +348,11 @@ valid_servname(const char *name)
     if (!IsServChar(*p))
       return 0;
 
-    ++length;
-
     if (*p == '.')
       ++dots;
   }
 
-  return dots && length <= HOSTLEN;
+  return dots && (p - name) <= HOSTLEN;
 }
 
 int

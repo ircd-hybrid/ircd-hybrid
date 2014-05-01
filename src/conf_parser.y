@@ -65,13 +65,15 @@ int yylex(void);
 
 static struct
 {
-  struct {
+  struct
+  {
     dlink_list list;
   } mask,
     leaf,
     hub;
 
-  struct {
+  struct
+  {
     char buf[IRCD_BUFSIZE];
   } name,
     user,
@@ -85,7 +87,8 @@ static struct
     spass,
     class;
 
-  struct {
+  struct
+  {
     unsigned int value;
   } flags,
     modes,
@@ -377,21 +380,21 @@ conf:
 conf_item:        admin_entry
                 | logging_entry
                 | oper_entry
-		| channel_entry
+                | channel_entry
                 | class_entry
                 | listen_entry
                 | auth_entry
                 | serverinfo_entry
-		| serverhide_entry
+                | serverhide_entry
                 | resv_entry
                 | service_entry
                 | shared_entry
-		| cluster_entry
+                | cluster_entry
                 | connect_entry
                 | kill_entry
                 | deny_entry
-		| exempt_entry
-		| general_entry
+                | exempt_entry
+                | general_entry
                 | gecos_entry
                 | modules_entry
                 | motd_entry
@@ -401,46 +404,22 @@ conf_item:        admin_entry
 
 
 timespec_: { $$ = 0; } | timespec;
-timespec:	NUMBER timespec_
-		{
-			$$ = $1 + $2;
-		}
-		| NUMBER SECONDS timespec_
-		{
-			$$ = $1 + $3;
-		}
-		| NUMBER MINUTES timespec_
-		{
-			$$ = $1 * 60 + $3;
-		}
-		| NUMBER HOURS timespec_
-		{
-			$$ = $1 * 60 * 60 + $3;
-		}
-		| NUMBER DAYS timespec_
-		{
-			$$ = $1 * 60 * 60 * 24 + $3;
-		}
-		| NUMBER WEEKS timespec_
-		{
-			$$ = $1 * 60 * 60 * 24 * 7 + $3;
-		}
-                | NUMBER MONTHS timespec_
-                {
-                        $$ = $1 * 60 * 60 * 24 * 7 * 4 + $3;
-                }
-                | NUMBER YEARS timespec_
-                {
-                        $$ = $1 * 60 * 60 * 24 * 365 + $3;
-                }
-		;
+timespec:  NUMBER timespec_         { $$ = $1 + $2; } |
+           NUMBER SECONDS timespec_ { $$ = $1 + $3; } |
+           NUMBER MINUTES timespec_ { $$ = $1 * 60 + $3; } |
+           NUMBER HOURS timespec_   { $$ = $1 * 60 * 60 + $3; } |
+           NUMBER DAYS timespec_    { $$ = $1 * 60 * 60 * 24 + $3; } |
+           NUMBER WEEKS timespec_   { $$ = $1 * 60 * 60 * 24 * 7 + $3; } |
+           NUMBER MONTHS timespec_  { $$ = $1 * 60 * 60 * 24 * 7 * 4 + $3; } |
+           NUMBER YEARS timespec_   { $$ = $1 * 60 * 60 * 24 * 365 + $3; }
+           ;
 
-sizespec_:	{ $$ = 0; } | sizespec;
-sizespec:	NUMBER sizespec_ { $$ = $1 + $2; }
-		| NUMBER BYTES sizespec_ { $$ = $1 + $3; }
-		| NUMBER KBYTES sizespec_ { $$ = $1 * 1024 + $3; }
-		| NUMBER MBYTES sizespec_ { $$ = $1 * 1024 * 1024 + $3; }
-		;
+sizespec_:  { $$ = 0; } | sizespec;
+sizespec:   NUMBER sizespec_ { $$ = $1 + $2; } |
+            NUMBER BYTES sizespec_ { $$ = $1 + $3; } |
+            NUMBER KBYTES sizespec_ { $$ = $1 * 1024 + $3; } |
+            NUMBER MBYTES sizespec_ { $$ = $1 * 1024 * 1024 + $3; }
+            ;
 
 
 /***************************************************************************
@@ -468,16 +447,24 @@ modules_path: PATH '=' QSTRING ';'
 serverinfo_entry: SERVERINFO '{' serverinfo_items '}' ';';
 
 serverinfo_items:       serverinfo_items serverinfo_item | serverinfo_item ;
-serverinfo_item:        serverinfo_name | serverinfo_vhost |
-                        serverinfo_hub | serverinfo_description |
-                        serverinfo_network_name | serverinfo_network_desc |
-                        serverinfo_max_clients | serverinfo_max_nick_length |
-                        serverinfo_max_topic_length | serverinfo_ssl_dh_param_file |
-                        serverinfo_rsa_private_key_file | serverinfo_vhost6 |
-                        serverinfo_sid | serverinfo_ssl_certificate_file |
-                        serverinfo_ssl_client_method | serverinfo_ssl_server_method |
+serverinfo_item:        serverinfo_name |
+                        serverinfo_vhost |
+                        serverinfo_hub |
+                        serverinfo_description |
+                        serverinfo_network_name |
+                        serverinfo_network_desc |
+                        serverinfo_max_clients |
+                        serverinfo_max_nick_length |
+                        serverinfo_max_topic_length |
+                        serverinfo_ssl_dh_param_file |
+                        serverinfo_rsa_private_key_file |
+                        serverinfo_vhost6 |
+                        serverinfo_sid |
+                        serverinfo_ssl_certificate_file |
+                        serverinfo_ssl_client_method |
+                        serverinfo_ssl_server_method |
                         serverinfo_ssl_cipher_list |
-			error ';' ;
+                        error ';' ;
 
 
 serverinfo_ssl_client_method: T_SSL_CLIENT_METHOD '=' client_method_types ';' ;
@@ -850,8 +837,10 @@ serverinfo_hub: HUB '=' TBOOL ';'
 admin_entry: ADMIN  '{' admin_items '}' ';' ;
 
 admin_items: admin_items admin_item | admin_item;
-admin_item:  admin_name | admin_description |
-             admin_email | error ';' ;
+admin_item:  admin_name |
+             admin_description |
+             admin_email |
+             error ';' ;
 
 admin_name: NAME '=' QSTRING ';'
 {
@@ -922,8 +911,8 @@ motd_file: T_FILE '=' QSTRING ';'
 logging_entry:          T_LOG  '{' logging_items '}' ';' ;
 logging_items:          logging_items logging_item | logging_item ;
 
-logging_item:   	logging_use_logging | logging_file_entry |
-			error ';' ;
+logging_item:           logging_use_logging | logging_file_entry |
+                        error ';' ;
 
 logging_use_logging: USE_LOGGING '=' TBOOL ';'
 {
@@ -1097,11 +1086,17 @@ oper_entry: OPERATOR
 };
 
 oper_items:     oper_items oper_item | oper_item;
-oper_item:      oper_name | oper_user | oper_password |
-                oper_umodes | oper_class | oper_encrypted |
-		oper_rsa_public_key_file | oper_ssl_certificate_fingerprint |
-		oper_ssl_connection_required |
-		oper_flags | error ';' ;
+oper_item:      oper_name |
+                oper_user |
+                oper_password |
+                oper_umodes |
+                oper_class |
+                oper_encrypted |
+                oper_rsa_public_key_file |
+                oper_ssl_certificate_fingerprint |
+                oper_ssl_connection_required |
+                oper_flags |
+                error ';' ;
 
 oper_name: NAME '=' QSTRING ';'
 {
@@ -1426,20 +1421,21 @@ class_entry: CLASS
 
 class_items:    class_items class_item | class_item;
 class_item:     class_name |
-		class_cidr_bitlen_ipv4 | class_cidr_bitlen_ipv6 |
+                class_cidr_bitlen_ipv4 |
+                class_cidr_bitlen_ipv6 |
                 class_ping_time |
-		class_number_per_cidr |
+                class_number_per_cidr |
                 class_number_per_ip |
                 class_connectfreq |
                 class_max_number |
-		class_max_global |
-		class_max_local |
-		class_max_ident |
+                class_max_global |
+                class_max_local |
+                class_max_ident |
                 class_sendq | class_recvq |
                 class_min_idle |
                 class_max_idle |
                 class_flags |
-		error ';' ;
+                error ';' ;
 
 class_name: NAME '=' QSTRING ';'
 {
@@ -1602,7 +1598,7 @@ port_item: NUMBER
 #endif
       {
         conf_error_report("SSL not available - port closed");
-	break;
+        break;
       }
     add_listener($1, block_state.addr.buf, block_state.flags.value);
   }
@@ -1610,18 +1606,16 @@ port_item: NUMBER
 {
   if (conf_parser_ctx.pass == 2)
   {
-    int i;
-
     if (block_state.flags.value & LISTENER_SSL)
 #ifdef HAVE_LIBCRYPTO
       if (!ServerInfo.server_ctx)
 #endif
       {
         conf_error_report("SSL not available - port closed");
-	break;
+        break;
       }
 
-    for (i = $1; i <= $3; ++i)
+    for (int i = $1; i <= $3; ++i)
       add_listener(i, block_state.addr.buf, block_state.flags.value);
   }
 };
@@ -1684,9 +1678,15 @@ auth_entry: IRCD_AUTH
 };
 
 auth_items:     auth_items auth_item | auth_item;
-auth_item:      auth_user | auth_passwd | auth_class | auth_flags |
-                auth_spoof | auth_redir_serv | auth_redir_port |
-                auth_encrypted | error ';' ;
+auth_item:      auth_user |
+                auth_passwd |
+                auth_class |
+                auth_flags |
+                auth_spoof |
+                auth_redir_serv 
+                auth_redir_port |
+                auth_encrypted |
+                error ';' ;
 
 auth_user: USER '=' QSTRING ';'
 {
@@ -1817,8 +1817,8 @@ resv_entry: RESV
   create_resv(block_state.name.buf, block_state.rpass.buf, &block_state.mask.list);
 };
 
-resv_items:	resv_items resv_item | resv_item;
-resv_item:	resv_mask | resv_reason | resv_exempt | error ';' ;
+resv_items:     resv_items resv_item | resv_item;
+resv_item:      resv_mask | resv_reason | resv_exempt | error ';' ;
 
 resv_mask: MASK '=' QSTRING ';'
 {
@@ -1988,8 +1988,8 @@ cluster_entry: T_CLUSTER
   conf->name = xstrdup(block_state.name.buf);
 };
 
-cluster_items:	cluster_items cluster_item | cluster_item;
-cluster_item:	cluster_name | cluster_type | error ';' ;
+cluster_items:  cluster_items cluster_item | cluster_item;
+cluster_item:   cluster_name | cluster_type | error ';' ;
 
 cluster_name: NAME '=' QSTRING ';'
 {
@@ -2003,7 +2003,7 @@ cluster_type: TYPE
     block_state.flags.value = 0;
 } '=' cluster_types ';' ;
 
-cluster_types:	cluster_types ',' cluster_type_item | cluster_type_item;
+cluster_types:  cluster_types ',' cluster_type_item | cluster_type_item;
 cluster_type_item: KLINE
 {
   if (conf_parser_ctx.pass == 2)
@@ -2122,12 +2122,20 @@ connect_entry: CONNECT
 };
 
 connect_items:  connect_items connect_item | connect_item;
-connect_item:   connect_name | connect_host | connect_vhost |
-		connect_send_password | connect_accept_password |
-		connect_ssl_certificate_fingerprint |
-		connect_aftype | connect_port | connect_ssl_cipher_list |
-		connect_flags | connect_hub_mask | connect_leaf_mask |
-		connect_class | connect_encrypted |
+connect_item:   connect_name |
+                connect_host |
+                connect_vhost |
+                connect_send_password |
+                connect_accept_password |
+                connect_ssl_certificate_fingerprint |
+                connect_aftype |
+                connect_port |
+                connect_ssl_cipher_list |
+                connect_flags |
+                connect_hub_mask |
+                connect_leaf_mask |
+                connect_class |
+                connect_encrypted |
                 error ';' ;
 
 connect_name: NAME '=' QSTRING ';'
@@ -2428,36 +2436,56 @@ general_entry: GENERAL
   '{' general_items '}' ';';
 
 general_items:      general_items general_item | general_item;
-general_item:       general_hide_spoof_ips | general_ignore_bogus_ts |
-		    general_failed_oper_notice | general_anti_nick_flood |
-		    general_max_nick_time | general_max_nick_changes |
-		    general_max_accept | general_anti_spam_exit_message_time |
-                    general_ts_warn_delta | general_ts_max_delta |
+general_item:       general_hide_spoof_ips |
+                    general_ignore_bogus_ts |
+                    general_failed_oper_notice |
+                    general_anti_nick_flood |
+                    general_max_nick_time |
+                    general_max_nick_changes |
+                    general_max_accept |
+                    general_anti_spam_exit_message_time |
+                    general_ts_warn_delta |
+                    general_ts_max_delta |
                     general_kill_chase_time_limit |
                     general_invisible_on_connect |
-                    general_warn_no_nline | general_dots_in_ident |
-                    general_stats_o_oper_only | general_stats_k_oper_only |
-                    general_pace_wait | general_stats_i_oper_only |
-                    general_pace_wait_simple | general_stats_P_oper_only |
+                    general_warn_no_nline |
+                    general_dots_in_ident |
+                    general_stats_o_oper_only |
+                    general_stats_k_oper_only |
+                    general_pace_wait |
+                    general_stats_i_oper_only |
+                    general_pace_wait_simple |
+                    general_stats_P_oper_only |
                     general_stats_u_oper_only |
-                    general_short_motd | general_no_oper_flood |
-                    general_true_no_oper_flood | general_oper_pass_resv |
-                    general_oper_only_umodes | general_max_targets |
-                    general_use_egd | general_egdpool_path |
-                    general_oper_umodes | general_caller_id_wait |
-                    general_opers_bypass_callerid | general_default_floodcount |
-                    general_min_nonwildcard | general_min_nonwildcard_simple |
-                    general_throttle_time | general_havent_read_conf |
+                    general_short_motd |
+                    general_no_oper_flood |
+                    general_true_no_oper_flood |
+                    general_oper_pass_resv |
+                    general_oper_only_umodes |
+                    general_max_targets |
+                    general_use_egd |
+                    general_egdpool_path |
+                    general_oper_umodes |
+                    general_caller_id_wait |
+                    general_opers_bypass_callerid |
+                    general_default_floodcount |
+                    general_min_nonwildcard |
+                    general_min_nonwildcard_simple |
+                    general_throttle_time |
+                    general_havent_read_conf |
                     general_ping_cookie |
                     general_disable_auth |
-		    general_tkline_expire_notices | general_gline_enable |
-                    general_gline_duration | general_gline_request_duration |
+                    general_tkline_expire_notices |
+                    general_gline_enable |
+                    general_gline_duration |
+                    general_gline_request_duration |
                     general_gline_min_cidr |
                     general_gline_min_cidr6 |
-		    general_stats_e_disabled |
-		    general_max_watch | general_services_name |
-		    general_cycle_on_host_change |
-		    error;
+                    general_stats_e_disabled |
+                    general_max_watch |
+                    general_services_name |
+                    general_cycle_on_host_change |
+                    error;
 
 
 general_max_watch: MAX_WATCH '=' NUMBER ';'
@@ -2781,8 +2809,8 @@ general_oper_only_umodes: OPER_ONLY_UMODES
   ConfigFileEntry.oper_only_umodes = 0;
 } '='  umode_items ';' ;
 
-umode_items:	umode_items ',' umode_item | umode_item;
-umode_item:	T_BOTS
+umode_items:  umode_items ',' umode_item | umode_item;
+umode_item:   T_BOTS
 {
   ConfigFileEntry.oper_only_umodes |= UMODE_BOTS;
 } | T_CCONN
@@ -2871,14 +2899,18 @@ channel_entry: CHANNEL
 
 channel_items:      channel_items channel_item | channel_item;
 channel_item:       channel_max_bans |
-                    channel_knock_delay | channel_knock_delay_channel |
-                    channel_max_chans_per_user | channel_max_chans_per_oper |
+                    channel_knock_delay |
+                    channel_knock_delay_channel |
+                    channel_max_chans_per_user |
+                    channel_max_chans_per_oper |
                     channel_default_split_user_count |
                     channel_default_split_server_count |
                     channel_no_create_on_split |
                     channel_no_join_on_split |
-                    channel_jflood_count | channel_jflood_time |
-                    channel_disable_fake_channels | error;
+                    channel_jflood_count |
+                    channel_jflood_time |
+                    channel_disable_fake_channels |
+                    error;
 
 channel_disable_fake_channels: DISABLE_FAKE_CHANNELS '=' TBOOL ';'
 {
@@ -2947,12 +2979,14 @@ serverhide_entry: SERVERHIDE
   '{' serverhide_items '}' ';';
 
 serverhide_items:   serverhide_items serverhide_item | serverhide_item;
-serverhide_item:    serverhide_flatten_links | serverhide_disable_remote_commands |
+serverhide_item:    serverhide_flatten_links |
+                    serverhide_disable_remote_commands |
                     serverhide_hide_servers |
-		    serverhide_hide_services |
-		    serverhide_links_delay |
-		    serverhide_hidden | serverhide_hidden_name |
-		    serverhide_hide_server_ips |
+                    serverhide_hide_services |
+                    serverhide_links_delay |
+                    serverhide_hidden |
+                    serverhide_hidden_name |
+                    serverhide_hide_server_ips |
                     error;
 
 serverhide_flatten_links: FLATTEN_LINKS '=' TBOOL ';'

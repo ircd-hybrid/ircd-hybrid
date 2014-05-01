@@ -550,12 +550,10 @@ send_birthdate_online_time(struct Client *source_p)
 static void
 send_conf_options(struct Client *source_p)
 {
-  const struct InfoStruct *iptr = NULL;
-
   /*
    * Parse the info_table[] and do the magic.
    */
-  for (iptr = info_table; iptr->name; ++iptr)
+  for (const struct InfoStruct *iptr = info_table; iptr->name; ++iptr)
   {
     switch (iptr->output_type)
     {

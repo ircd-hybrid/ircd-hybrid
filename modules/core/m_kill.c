@@ -169,7 +169,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((target_p = hash_find_id(parv[1])) == NULL)
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
   if ((reason = strchr(parv[2], ' ')))

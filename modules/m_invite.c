@@ -150,7 +150,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[2]))
     return 0;
 
-  if ((target_p = hash_find_id(parv[1])) == NULL || !IsClient(target_p))
+  if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)

@@ -1683,7 +1683,7 @@ auth_item:      auth_user |
                 auth_class |
                 auth_flags |
                 auth_spoof |
-                auth_redir_serv 
+                auth_redir_serv |
                 auth_redir_port |
                 auth_encrypted |
                 error ';' ;
@@ -1771,7 +1771,7 @@ auth_spoof: SPOOF '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (strlen(yylval.string) <= HOSTLEN && valid_hostname(yylval.string))
+  if (valid_hostname(yylval.string))
   {
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
     block_state.flags.value |= CONF_FLAGS_SPOOF_IP;

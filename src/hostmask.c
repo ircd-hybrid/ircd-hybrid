@@ -61,7 +61,6 @@
 static int
 try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 {
-  const char *p;
   char c;
   int d[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
   int dp = 0;
@@ -72,7 +71,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   short dc[8];
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr;
 
-  for (p = text; (c = *p); ++p)
+  for (const char *p = text; (c = *p); ++p)
   {
     if (IsXDigit(c))
     {
@@ -174,7 +173,6 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 static int
 try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 {
-  const char *p;
   const char *digits[4];
   unsigned char addb[4];
   int n = 0, bits = 0;
@@ -183,7 +181,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 
   digits[n++] = text;
 
-  for (p = text; (c = *p); ++p)
+  for (const char *p = text; (c = *p); ++p)
   {
     if (c >= '0' && c <= '9')   /* empty */
       ;
@@ -416,10 +414,9 @@ hash_ipv6(const struct irc_ssaddr *addr, int bits)
 static uint32_t
 hash_text(const char *start)
 {
-  const char *p = start;
   uint32_t h = 0;
 
-  for (; *p; ++p)
+  for (const char *p = start; *p; ++p)
     h = (h << 4) - (h + ToLower(*p));
 
   return h & (ATABLE_SIZE - 1);

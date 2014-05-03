@@ -97,7 +97,6 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
 {
   struct MaskItem *conf = conf_make(CONF_XLINE);
 
-  collapse(gecos);
   conf->name = xstrdup(gecos);
   conf->reason = xstrdup(reason);
   conf->setat = CurrentTime;

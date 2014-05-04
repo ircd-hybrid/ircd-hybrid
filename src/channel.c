@@ -184,8 +184,10 @@ send_members(struct Client *client_p, struct Channel *chptr,
 
     if (ms->flags & CHFL_CHANOP)
       *t++ = '@';
+#ifdef HALFOPS
     if (ms->flags & CHFL_HALFOP)
       *t++ = '%';
+#endif
     if (ms->flags & CHFL_VOICE)
       *t++ = '+';
 

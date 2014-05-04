@@ -267,7 +267,7 @@ extern int yydebug;
     USER = 477,
     VHOST = 478,
     VHOST6 = 479,
-    WARN_NO_NLINE = 480,
+    WARN_NO_CONNECT_BLOCK = 480,
     XLINE = 481
   };
 #endif
@@ -494,7 +494,7 @@ extern int yydebug;
 #define USER 477
 #define VHOST 478
 #define VHOST6 479
-#define WARN_NO_NLINE 480
+#define WARN_NO_CONNECT_BLOCK 480
 #define XLINE 481
 
 /* Value type.  */
@@ -502,7 +502,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 143 "conf_parser.y" /* yacc.c:1909  */
+#line 146 "conf_parser.y" /* yacc.c:1909  */
 
   int number;
   char *string;

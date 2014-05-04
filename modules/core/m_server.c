@@ -511,7 +511,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   switch (check_server(name, source_p))
   {
     case -1:
-      if (ConfigFileEntry.warn_no_nline)
+      if (ConfigFileEntry.warn_no_connect_block)
       {
         sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: No entry for "

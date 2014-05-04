@@ -391,10 +391,10 @@ static const struct InfoStruct info_table[] =
     "Maximum permitted TS delta from another server"
   },
   {
-    "warn_no_nline",
+    "warn_no_connect_block",
     OUTPUT_BOOLEAN,
-    &ConfigFileEntry.warn_no_nline,
-    "Display warning if connecting server lacks N-line"
+    &ConfigFileEntry.warn_no_connect_block,
+    "Display warning if connecting server lacks a connect{} block"
   },
   {
     "stats_e_disabled",

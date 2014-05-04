@@ -1146,7 +1146,7 @@ set_default_conf(void)
   ConfigFileEntry.anti_spam_exit_message_time = 0;
   ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
   ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
-  ConfigFileEntry.warn_no_nline = 1;
+  ConfigFileEntry.warn_no_connect_block = 1;
   ConfigFileEntry.stats_o_oper_only = 0;
   ConfigFileEntry.stats_k_oper_only = 1;  /* 1 = masked */
   ConfigFileEntry.stats_i_oper_only = 1;  /* 1 = masked */

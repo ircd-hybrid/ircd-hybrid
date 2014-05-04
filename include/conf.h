@@ -232,7 +232,7 @@ struct config_file_entry
   int ts_max_delta;
   int ts_warn_delta;
   int anti_nick_flood;
-  int warn_no_nline;
+  int warn_no_connect_block;
   int invisible_on_connect;
   int stats_e_disabled;
   int stats_o_oper_only;

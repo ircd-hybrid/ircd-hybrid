@@ -345,7 +345,7 @@ vhost                       { return VHOST; }
 vhost6                      { return VHOST6; }
 wallop                      { return T_WALLOP; }
 wallops                     { return T_WALLOPS; }
-warn_no_nline               { return WARN_NO_NLINE; }
+warn_no_connect_block       { return WARN_NO_CONNECT_BLOCK; }
 webirc                      { return T_WEBIRC; }
 xline                       { return XLINE; }
 

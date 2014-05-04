@@ -362,7 +362,7 @@ reset_block_state(void)
 %token  USER
 %token  VHOST
 %token  VHOST6
-%token  WARN_NO_NLINE
+%token  WARN_NO_CONNECT_BLOCK
 %token  XLINE
 
 %type  <string> QSTRING
@@ -2448,7 +2448,7 @@ general_item:       general_hide_spoof_ips |
                     general_ts_max_delta |
                     general_kill_chase_time_limit |
                     general_invisible_on_connect |
-                    general_warn_no_nline |
+                    general_warn_no_connect_block |
                     general_dots_in_ident |
                     general_stats_o_oper_only |
                     general_stats_k_oper_only |
@@ -2604,9 +2604,9 @@ general_invisible_on_connect: INVISIBLE_ON_CONNECT '=' TBOOL ';'
   ConfigFileEntry.invisible_on_connect = yylval.number;
 };
 
-general_warn_no_nline: WARN_NO_NLINE '=' TBOOL ';'
+general_warn_no_connect_block: WARN_NO_CONNECT_BLOCK '=' TBOOL ';'
 {
-  ConfigFileEntry.warn_no_nline = yylval.number;
+  ConfigFileEntry.warn_no_connect_block = yylval.number;
 };
 
 general_stats_e_disabled: STATS_E_DISABLED '=' TBOOL ';'

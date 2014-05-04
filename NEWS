@@ -1,3 +1,10 @@
+-- Noteworthy changes in version 8.2.0beta2 (????-??-??)
+########################################################################
+o) IMPORTANT: renamed general::warn_no_nline configuration directive to
+   general::warn_no_connect_block
+########################################################################
+
+
 -- Noteworthy changes in version 8.2.0beta1 (2014-04-29)
 o) TS6 is now mandatory. ircd is no longer backwards compatible with TS5
    and below.

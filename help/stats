@@ -31,10 +31,10 @@ X h - Shows ircd callback statistics
 * s - Shows configured service {} blocks
 * T - Shows configured Message Of The Day files
 * t - Shows generic server stats
-* U - Shows shared blocks (Old U: lines)
+* U - Shows shared{} blocks
 ^ u - Shows server uptime
 * v - Shows connected servers and their idle times
-* x - Shows gecos bans (Old X: lines)
+* x - Shows gecos bans
 * y - Shows configured class {} blocks
 * z - Shows memory stats
 * ? - Shows connected servers and sendq info about them

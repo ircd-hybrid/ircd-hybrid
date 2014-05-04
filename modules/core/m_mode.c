@@ -115,7 +115,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
               break;
 
             ClearOper(source_p);
-            Count.oper--;
+            --Count.oper;
 
             if (MyConnect(source_p))
             {

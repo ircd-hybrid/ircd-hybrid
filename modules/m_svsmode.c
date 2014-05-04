@@ -109,7 +109,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
         if (what == MODE_DEL && HasUMode(target_p, UMODE_OPER))
         {
           ClearOper(target_p);
-          Count.oper--;
+          --Count.oper;
 
           if (MyConnect(target_p))
           {

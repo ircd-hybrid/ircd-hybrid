@@ -50,7 +50,7 @@
 static int
 mo_restart(struct Client *source_p, int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE];
+  char buf[IRCD_BUFSIZE] = "";
 
   if (!HasOFlag(source_p, OPER_FLAG_RESTART))
   {

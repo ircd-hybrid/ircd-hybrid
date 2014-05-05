@@ -43,7 +43,7 @@ static int
 mo_die(struct Client *client_p, struct Client *source_p,
        int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE];
+  char buf[IRCD_BUFSIZE] = "";
 
   if (!HasOFlag(source_p, OPER_FLAG_DIE))
   {
@@ -67,7 +67,7 @@ mo_die(struct Client *client_p, struct Client *source_p,
   }
 
   snprintf(buf, sizeof(buf), "received DIE command from %s",
-           get_oper_name(source_p));
+           get_client_name(source_p, HIDE_IP));
   server_die(buf, 0);
   return 0;
 }

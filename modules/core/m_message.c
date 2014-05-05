@@ -493,8 +493,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
         /*
          * Not destined for a user on me :-(
          */
-        sendto_one(target_p, ":%s %s %s :%s",
-                   ID_or_name(source_p, target_p),
+        sendto_one(target_p, ":%s %s %s :%s", ID_or_name(source_p, target_p),
                    command, nick, text);
         if ((p_or_n != NOTICE) && MyClient(source_p))
           source_p->localClient->last_privmsg = CurrentTime;
@@ -554,7 +553,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
    */
   if (*nick == '$')
   {
-    if ((*(nick + 1) == '$' || *(nick + 1) == '#'))
+    if (*(nick + 1) == '$' || *(nick + 1) == '#')
       ++nick;
     else if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER))
     {
@@ -677,7 +676,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
     with_prefix = nick;
 
     /* Allow %+@ if someone wants to do that */
-    for (; ;)
+    while (1)
     {
       if (*nick == '@')
         type |= CHFL_CHANOP;

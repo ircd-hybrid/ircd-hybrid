@@ -76,7 +76,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!((chptr->mode.mode & MODE_INVITEONLY) || (*chptr->mode.key) ||
+  if (!((chptr->mode.mode & MODE_INVITEONLY) || chptr->mode.key[0] ||
         (chptr->mode.limit && dlink_list_length(&chptr->members) >=
          chptr->mode.limit)))
   {

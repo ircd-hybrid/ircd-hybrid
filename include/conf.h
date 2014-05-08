@@ -337,11 +337,12 @@ extern dlink_list nresv_items;
 extern dlink_list cresv_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct logging_entry ConfigLoggingEntry;
-extern struct config_file_entry ConfigFileEntry;/* defined in ircd.c*/
-extern struct config_channel_entry ConfigChannel;/* defined in channel.c*/
-extern struct config_server_hide ConfigServerHide; /* defined in s_conf.c */
-extern struct server_info ServerInfo;       /* defined in ircd.c */
-extern struct admin_info AdminInfo;        /* defined in ircd.c */
+extern struct config_file_entry ConfigFileEntry;
+extern struct config_channel_entry ConfigChannel;
+extern struct config_server_hide ConfigServerHide;
+extern struct server_info ServerInfo;
+extern struct admin_info AdminInfo;
+
 extern int valid_wild_card_simple(const char *);
 extern int valid_wild_card(struct Client *, int, int, ...);
 /* End GLOBAL section */

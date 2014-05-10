@@ -439,7 +439,7 @@ check_server(const char *name, struct Client *client_p)
 void
 add_capability(const char *capab_name, int cap_flag, int add_to_default)
 {
-  struct Capability *cap = MyMalloc(sizeof(*cap));
+  struct Capability *cap = MyCalloc(sizeof(*cap));
 
   cap->name = xstrdup(capab_name);
   cap->cap = cap_flag;
@@ -573,7 +573,7 @@ struct Server *
 make_server(struct Client *client_p)
 {
   if (client_p->serv == NULL)
-    client_p->serv = MyMalloc(sizeof(struct Server));
+    client_p->serv = MyCalloc(sizeof(struct Server));
 
   return client_p->serv;
 }

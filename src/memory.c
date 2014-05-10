@@ -33,10 +33,10 @@
 
 
 /*
- * MyMalloc - allocate memory, call outofmemory on failure
+ * MyCalloc - allocate memory, call outofmemory on failure
  */
 void *
-MyMalloc(size_t size)
+MyCalloc(size_t size)
 {
   void *ret = calloc(1, size);
 

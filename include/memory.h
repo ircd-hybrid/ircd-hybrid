@@ -30,7 +30,7 @@
 #include "ircd_defs.h"
 
 extern void outofmemory(void);
-extern void *MyMalloc(size_t);
+extern void *MyCalloc(size_t);
 extern void *MyRealloc(void *, size_t);
 extern void MyFree(void *);
 extern void *xstrdup(const char *);

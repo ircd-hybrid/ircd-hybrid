@@ -47,7 +47,7 @@ class_get_list(void)
 struct ClassItem *
 class_make(void)
 {
-  struct ClassItem *class = MyMalloc(sizeof(*class));
+  struct ClassItem *class = MyCalloc(sizeof(*class));
 
   class->active    = 1;
   class->con_freq  = DEFAULT_CONNECTFREQUENCY;
@@ -258,7 +258,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
       }
     }
 
-    cidr = MyMalloc(sizeof(struct CidrItem));
+    cidr = MyCalloc(sizeof(struct CidrItem));
     cidr->number_on_this_cidr = 1;
     cidr->mask = *ip;
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv4);
@@ -281,7 +281,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
       }
     }
 
-    cidr = MyMalloc(sizeof(struct CidrItem));
+    cidr = MyCalloc(sizeof(struct CidrItem));
     cidr->number_on_this_cidr = 1;
     cidr->mask = *ip;
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv6);

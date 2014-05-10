@@ -91,7 +91,7 @@ write_file_version(struct dbFILE *f, uint32_t version)
 static struct dbFILE *
 open_db_read(const char *filename)
 {
-  struct dbFILE *f = MyMalloc(sizeof(*f));
+  struct dbFILE *f = MyCalloc(sizeof(*f));
   FILE *fp = NULL;
 
   strlcpy(f->filename, filename, sizeof(f->filename));
@@ -123,7 +123,7 @@ open_db_read(const char *filename)
 static struct dbFILE *
 open_db_write(const char *filename, uint32_t version)
 {
-  struct dbFILE *f = MyMalloc(sizeof(*f));
+  struct dbFILE *f = MyCalloc(sizeof(*f));
   int fd = 0;
 
   strlcpy(f->filename, filename, sizeof(f->filename));
@@ -502,7 +502,7 @@ read_string(char **ret, struct dbFILE *f)
     return 0;
   }
 
-  s = MyMalloc(len);
+  s = MyCalloc(len);
 
   if (len != fread(s, 1, len, f->fp))
   {

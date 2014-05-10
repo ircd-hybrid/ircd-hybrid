@@ -431,7 +431,7 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
   if (request == NULL)
   {
     request       = make_request(callback, ctx);
-    request->name = MyMalloc(strlen(host_name) + 1);
+    request->name = MyCalloc(strlen(host_name) + 1);
     request->type = type;
     strcpy(request->name, host_name);
 #ifdef IPV6
@@ -497,7 +497,7 @@ do_query_number(dns_callback_fnc callback, void *ctx,
     request       = make_request(callback, ctx);
     request->type = T_PTR;
     memcpy(&request->addr, addr, sizeof(struct irc_ssaddr));
-    request->name = MyMalloc(HOSTLEN + 1);
+    request->name = MyCalloc(HOSTLEN + 1);
   }
 
   query_name(ipbuf, C_IN, T_PTR, request);

@@ -92,14 +92,14 @@ generate_challenge(char **r_challenge, char **r_response, RSA *rsa)
     return -1;
 
   get_randomness(secret, 32);
-  *r_response = MyMalloc(65);
+  *r_response = MyCalloc(65);
   binary_to_hex(secret, *r_response, 32);
 
   length = RSA_size(rsa);
-  tmp = MyMalloc(length);
+  tmp = MyCalloc(length);
   ret = RSA_public_encrypt(32, secret, tmp, rsa, RSA_PKCS1_PADDING);
 
-  *r_challenge = MyMalloc((length << 1) + 1);
+  *r_challenge = MyCalloc((length << 1) + 1);
   binary_to_hex( tmp, *r_challenge, length);
   (*r_challenge)[length << 1] = 0;
   MyFree(tmp);

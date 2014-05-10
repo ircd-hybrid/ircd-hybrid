@@ -170,7 +170,7 @@ static void
 add_new_majority(const struct Client *source_p, const char *user,
                  const char *host, const char *reason, const unsigned int type)
 {
-  struct gline_pending *pending = MyMalloc(sizeof(struct gline_pending));
+  struct gline_pending *pending = MyCalloc(sizeof(struct gline_pending));
 
   strlcpy(pending->vote_1.oper_nick, source_p->name, sizeof(pending->vote_1.oper_nick));
   strlcpy(pending->vote_1.oper_user, source_p->username, sizeof(pending->vote_1.oper_user));

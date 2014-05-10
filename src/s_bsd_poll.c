@@ -57,7 +57,7 @@ init_netio(void)
 {
   int fd;
 
-  pollfds = MyMalloc(sizeof(struct pollfd) * hard_fdlimit);
+  pollfds = MyCalloc(sizeof(struct pollfd) * hard_fdlimit);
 
   for (fd = 0; fd < hard_fdlimit; fd++)
     pollfds[fd].fd = -1;

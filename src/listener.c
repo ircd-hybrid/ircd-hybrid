@@ -46,7 +46,7 @@ static void close_listener(struct Listener *listener);
 static struct Listener *
 make_listener(int port, struct irc_ssaddr *addr)
 {
-  struct Listener *listener = MyMalloc(sizeof(struct Listener));
+  struct Listener *listener = MyCalloc(sizeof(struct Listener));
 
   listener->port = port;
   memcpy(&listener->addr, addr, sizeof(struct irc_ssaddr));

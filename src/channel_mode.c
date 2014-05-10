@@ -193,7 +193,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
 
   if (IsClient(client_p))
   {
-    ban_p->who = MyMalloc(strlen(client_p->name) +
+    ban_p->who = MyCalloc(strlen(client_p->name) +
                           strlen(client_p->username) +
                           strlen(client_p->host) + 3);
     sprintf(ban_p->who, "%s!%s@%s", client_p->name,

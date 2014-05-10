@@ -157,7 +157,7 @@ free_client(struct Client *client_p)
   assert(client_p->channel.head == NULL);
   assert(dlink_list_length(&client_p->channel) == 0);
   assert(dlink_list_length(&client_p->whowas) == 0);
-  assert(!IsServer(client_p) || (IsServer(client_p) && client_p->serv));
+  assert(!IsServer(client_p) || client_p->serv);
 
   MyFree(client_p->serv);
   MyFree(client_p->certfp);

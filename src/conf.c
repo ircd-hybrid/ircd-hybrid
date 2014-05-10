@@ -1851,7 +1851,7 @@ parse_aline(const char *cmd, struct Client *source_p,
             char **target_server, char **reason)
 {
   int found_tkline_time=0;
-  static char def_reason[] = "No Reason";
+  static char def_reason[] = CONF_NOREASON;
   static char user[USERLEN*4+1];
   static char host[HOSTLEN*4+1];
 

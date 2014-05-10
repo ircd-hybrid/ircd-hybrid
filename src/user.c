@@ -1146,7 +1146,7 @@ add_isupport(const char *name, const char *options, int n)
 
   if (ptr == NULL)
   {
-    support = MyMalloc(sizeof(*support));
+    support = MyCalloc(sizeof(*support));
     dlinkAddTail(support, &support->node, &support_list);
   }
 

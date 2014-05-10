@@ -154,7 +154,7 @@ conf_dns_lookup(struct MaskItem *conf)
 struct MaskItem *
 conf_make(enum maskitem_type type)
 {
-  struct MaskItem *conf = MyMalloc(sizeof(*conf));
+  struct MaskItem *conf = MyCalloc(sizeof(*conf));
   dlink_list *list = NULL;
 
   conf->type   = type;

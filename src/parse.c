@@ -351,7 +351,7 @@ add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
      */
     if ((ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)]) == NULL)
     {
-      ntree_p = MyMalloc(sizeof(struct MessageTree));
+      ntree_p = MyCalloc(sizeof(struct MessageTree));
       mtree_p->pointers[*cmd & (MAXPTRLEN - 1)] = ntree_p;
 
       mtree_p->links++;  /* Have new pointer, so up ref count */

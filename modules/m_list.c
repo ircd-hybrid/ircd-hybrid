@@ -55,7 +55,7 @@ do_list(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  lt = MyMalloc(sizeof(struct ListTask));
+  lt = MyCalloc(sizeof(struct ListTask));
   lt->users_max = UINT_MAX;
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;

@@ -62,16 +62,16 @@ register_callback(const char *name, CBFUNC *func)
     if ((cb = find_callback(name)))
     {
       if (func)
-        dlinkAddTail(func, MyMalloc(sizeof(dlink_node)), &cb->chain);
+        dlinkAddTail(func, MyCalloc(sizeof(dlink_node)), &cb->chain);
 
       return cb;
     }
   }
 
-  cb = MyMalloc(sizeof(struct Callback));
+  cb = MyCalloc(sizeof(struct Callback));
 
   if (func)
-    dlinkAdd(func, MyMalloc(sizeof(dlink_node)), &cb->chain);
+    dlinkAdd(func, MyCalloc(sizeof(dlink_node)), &cb->chain);
 
   if (name)
   {
@@ -158,7 +158,7 @@ find_callback(const char *name)
 dlink_node *
 install_hook(struct Callback *cb, CBFUNC *hook)
 {
-  dlink_node *node = MyMalloc(sizeof(dlink_node));
+  dlink_node *node = MyCalloc(sizeof(dlink_node));
 
   dlinkAdd(hook, node, &cb->chain);
   return node;

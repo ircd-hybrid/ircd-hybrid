@@ -56,7 +56,7 @@ static struct
 static struct Motd *
 motd_create(const char *hostmask, const char *path)
 {
-  struct Motd *tmp = MyMalloc(sizeof(struct Motd));
+  struct Motd *tmp = MyCalloc(sizeof(struct Motd));
 
   if (EmptyString(hostmask))
     tmp->type = MOTD_UNIVERSAL;
@@ -142,7 +142,7 @@ motd_cache(struct Motd *motd)
   }
 
   /* Ok, allocate a structure; we'll realloc later to trim memory */
-  cache = MyMalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * MOTD_MAXLINES));
+  cache = MyCalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * MOTD_MAXLINES));
   cache->ref = 1;
   cache->path = xstrdup(motd->path);
   cache->maxcount = motd->maxcount;
@@ -161,7 +161,7 @@ motd_cache(struct Motd *motd)
   fclose(file);  /* Close the file */
 
   /* Trim memory usage a little */
-  motd->cache = MyMalloc(sizeof(struct MotdCache) +
+  motd->cache = MyCalloc(sizeof(struct MotdCache) +
                          (MOTD_LINESIZE * cache->count));
   memcpy(motd->cache, cache, sizeof(struct MotdCache) +
          (MOTD_LINESIZE * cache->count));

@@ -86,7 +86,7 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
       if (strlen(s) == 2 && IsAlpha(*(s + 1) && IsAlpha(*(s + 2))))
       {
 #ifdef HAVE_LIBGEOIP
-        exptr = MyMalloc(sizeof(*exptr));
+        exptr = MyCalloc(sizeof(*exptr));
         exptr->name = xstrdup(s);
         exptr->coid = GeoIP_id_by_code(s);
         dlinkAdd(exptr, &exptr->node, &conf->exempt_list);
@@ -105,7 +105,7 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
 
         split_nuh(&nuh);
 
-        exptr = MyMalloc(sizeof(*exptr));
+        exptr = MyCalloc(sizeof(*exptr));
         exptr->name = xstrdup(nick);
         exptr->user = xstrdup(user);
         exptr->host = xstrdup(host);

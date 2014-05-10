@@ -1,3 +1,7 @@
+-- Noteworthy changes in version 8.1.18 (????-??-??)
+o) Fixed CAP issue for certain clients
+
+
 -- Noteworthy changes in version 8.1.17 (2014-05-01)
 o) Fixed possible WATCH core
 o) Fixed bug where the configuration parser wouldn't take time units

@@ -126,6 +126,10 @@ find_cap(const char **caplist_p, int *neg_p)
     }
     else
       caplist += cap->namelen;  /* Advance to end of capability name */
+
+    /* Strip trailing spaces */
+    while (*caplist && IsSpace(*caplist))
+      ++caplist;
   }
 
   assert(caplist != *caplist_p || !*caplist);  /* We *must* advance */

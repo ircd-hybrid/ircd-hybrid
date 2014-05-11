@@ -1066,6 +1066,7 @@ static void
 stats_operedup(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *ptr = NULL;
+  unsigned int opercount = 0;
 
   DLINK_FOREACH(ptr, oper_list.head)
   {
@@ -1085,12 +1086,13 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
       sendto_one(source_p, ":%s %d %s p :[%c] %s (%s@%s) Idle: %u",
                  ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p),
                  HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
-                  target_p->name, target_p->username, target_p->host,
+                 target_p->name, target_p->username, target_p->host,
                  idle_time_get(source_p, target_p));
+    ++opercount;
   }
 
   sendto_one(source_p, ":%s %d %s p :%u OPER(s)",
-             ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p), dlink_list_length(&oper_list));
+             ID_or_name(&me, source_p), RPL_STATSDEBUG, ID_or_name(source_p, source_p), opercount);
 }
 
 static void

@@ -1,5 +1,7 @@
 -- Noteworthy changes in version 8.1.18 (????-??-??)
 o) Fixed CAP issue for certain clients
+o) Fixed bug where "STATS p" would show an invalid amount of irc-operators
+   in case there are +H opers
 
 
 -- Noteworthy changes in version 8.1.17 (2014-05-01)

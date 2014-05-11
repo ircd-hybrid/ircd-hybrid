@@ -167,6 +167,7 @@ struct MaskItem;
 #define UMODE_HIDDENHOST   0x01000000 /**< User's host is hidden */
 #define UMODE_SSL          0x02000000 /**< User is connected via TLS/SSL */
 #define UMODE_WEBIRC       0x04000000 /**< User connected via a webirc gateway */
+#define UMODE_HIDEIDLE     0x08000000 /**< Hides idle and signon time in WHOIS */
 
 
 #define UMODE_ALL          UMODE_SERVNOTICE

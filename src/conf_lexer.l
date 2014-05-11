@@ -195,6 +195,7 @@ have_ident                  { return NEED_IDENT; }
 havent_read_conf            { return HAVENT_READ_CONF; }
 hidden                      { return HIDDEN; }
 hidden_name                 { return HIDDEN_NAME; }
+hideidle                    { return HIDE_IDLE; }
 hide_idle_from_opers        { return HIDE_IDLE_FROM_OPERS; }
 hide_server_ips             { return HIDE_SERVER_IPS; }
 hide_servers                { return HIDE_SERVERS; }

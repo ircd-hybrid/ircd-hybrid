@@ -173,9 +173,11 @@ whois_person(struct Client *source_p, struct Client *target_p)
       sendto_one_numeric(source_p, &me, RPL_WHOISCERTFP, target_p->name, target_p->certfp);
 
   if (MyConnect(target_p))
-    sendto_one_numeric(source_p, &me, RPL_WHOISIDLE, target_p->name,
-                       idle_time_get(source_p, target_p),
-                       target_p->localClient->firsttime);
+    if (!HasUMode(target_p, UMODE_HIDEIDLE) || HasUMode(source_p, UMODE_OPER) ||
+        source_p == target_p)
+      sendto_one_numeric(source_p, &me, RPL_WHOISIDLE, target_p->name,
+                         idle_time_get(source_p, target_p),
+                         target_p->localClient->firsttime);
 }
 
 /* do_whois()

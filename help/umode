@@ -16,12 +16,13 @@ Usermodes: (* designates that the umode is oper only)
        * +j     - Can see 'rejected' client notices.
        * +k     - Can see server kill messages.
        * +f     - Can see 'I-line is full' notices.
-       * +F     - Can see remote client connection/quit notices
+       * +F     - Can see remote client connection/quit notices.
          +x     - User's host has been spoofed by services.
                   This mode can be set by servers and services only.
        * +y     - Can see stats/links/admin requests to name a few.
        * +d     - Can see server debug messages.
        * +n     - Can see client nick changes.
+         +q     - Hides idle and signon time in WHOIS.
          +r     - User has been registered and identified for its nick.
                   This mode can be set by servers and services only.
          +R     - Only registered clients may message you.
@@ -30,8 +31,8 @@ Usermodes: (* designates that the umode is oper only)
        * +e     - Can see new server introduction and split messages.
        * +b     - Can see possible bot / join flood warnings.
        * +a     - Is marked as a server admin in stats p/o.
-         +D     - "deaf": don't receive channel messages
+         +D     - "deaf": don't receive channel messages.
          +G     - "soft caller id": block private messages from people not on
-                  any common channels with you (unless they are /accept'ed)
-         +g     - "caller id" mode: only allow /accept clients to message you
+                  any common channels with you (unless they are /accept'ed).
+         +g     - "caller id" mode: only allow /accept clients to message you.
        * +H     - Operator status is hidden to other users.

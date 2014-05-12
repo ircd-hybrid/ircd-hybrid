@@ -88,8 +88,8 @@ struct MaskItem;
 /*
  * ts stuff
  */
-#define TS_CURRENT      6       /**< Current TS protocol version */
-#define TS_MIN          6       /**< Minimum supported TS protocol version */
+#define TS_CURRENT      6  /**< Current TS protocol version */
+#define TS_MIN          6  /**< Minimum supported TS protocol version */
 #define TS_DOESTS       0x20000000
 #define DoesTS(x)       ((x)->tsinfo == TS_DOESTS)
 
@@ -103,34 +103,34 @@ struct MaskItem;
 
 
 /* housekeeping flags */
-#define FLAGS_PINGSENT       0x00000001 /**< Unreplied ping sent */
-#define FLAGS_DEADSOCKET     0x00000002 /**< Local socket is dead--Exiting soon */
-#define FLAGS_KILLED         0x00000004 /**< Prevents "QUIT" from being sent for this */
-#define FLAGS_CLOSING        0x00000008 /**< set when closing to suppress errors */
-#define FLAGS_GOTID          0x00000010 /**< successful ident lookup achieved */
-#define FLAGS_NEEDID         0x00000020 /**< auth{} block say must use ident return */
-#define FLAGS_SENDQEX        0x00000040 /**< Sendq exceeded */
-#define FLAGS_IPHASH         0x00000080 /**< iphashed this client */
-#define FLAGS_MARK           0x00000100 /**< marked client */
-#define FLAGS_CANFLOOD       0x00000200 /**< client has the ability to flood */
-#define FLAGS_EXEMPTGLINE    0x00000400 /**< client can't be G-lined */
-#define FLAGS_EXEMPTKLINE    0x00000800 /**< client is exempt from kline */
-#define FLAGS_NOLIMIT        0x00001000 /**< client is exempt from limits */
-#define FLAGS_PING_COOKIE    0x00002000 /**< PING Cookie */
-#define FLAGS_IP_SPOOFING    0x00004000 /**< client IP is spoofed */
-#define FLAGS_FLOODDONE      0x00008000 /**< Flood grace period has been ended. */
-#define FLAGS_EOB            0x00010000 /**< server has sent us an EOB */
-#define FLAGS_HIDDEN         0x00020000 /**< a hidden server. not shown in /links */
-#define FLAGS_BLOCKED        0x00040000 /**< must wait for COMM_SELECT_WRITE */
-#define FLAGS_USERHOST       0x00080000 /**< client is in userhost hash */
-#define FLAGS_BURSTED        0x00100000 /**< user was already bursted */
-#define FLAGS_EXEMPTRESV     0x00200000 /**< client is exempt from RESV */
-#define FLAGS_GOTUSER        0x00400000 /**< if we received a USER command */
-#define FLAGS_FINISHED_AUTH  0x00800000 /**< Client has been released from auth */
-#define FLAGS_FLOOD_NOTICED  0x01000000 /**< Notice to opers about this flooder has been sent */
-#define FLAGS_SERVICE        0x02000000 /**< Client/server is a network service */
-#define FLAGS_AUTH_SPOOF     0x04000000 /**< user's hostname has been spoofed by an auth{} spoof*/
-#define FLAGS_SSL            0x08000000 /**< User is connected via TLS/SSL */
+#define FLAGS_PINGSENT       0x00000001  /**< Unreplied ping sent */
+#define FLAGS_DEADSOCKET     0x00000002  /**< Local socket is dead--Exiting soon */
+#define FLAGS_KILLED         0x00000004  /**< Prevents "QUIT" from being sent for this */
+#define FLAGS_CLOSING        0x00000008  /**< Set when closing to suppress errors */
+#define FLAGS_GOTID          0x00000010  /**< Successful ident lookup achieved */
+#define FLAGS_NEEDID         0x00000020  /**< auth{} block say must use ident return */
+#define FLAGS_SENDQEX        0x00000040  /**< Sendq exceeded */
+#define FLAGS_IPHASH         0x00000080  /**< Iphashed this client */
+#define FLAGS_MARK           0x00000100  /**< Marked client */
+#define FLAGS_CANFLOOD       0x00000200  /**< Client has the ability to flood */
+#define FLAGS_EXEMPTGLINE    0x00000400  /**< Client can't be G-lined */
+#define FLAGS_EXEMPTKLINE    0x00000800  /**< Client is exempt from kline */
+#define FLAGS_NOLIMIT        0x00001000  /**< Client is exempt from limits */
+#define FLAGS_PING_COOKIE    0x00002000  /**< PING Cookie */
+#define FLAGS_IP_SPOOFING    0x00004000  /**< Client IP is spoofed */
+#define FLAGS_FLOODDONE      0x00008000  /**< Flood grace period has been ended. */
+#define FLAGS_EOB            0x00010000  /**< Server has sent us an EOB */
+#define FLAGS_HIDDEN         0x00020000  /**< A hidden server. Not shown in /links */
+#define FLAGS_BLOCKED        0x00040000  /**< Must wait for COMM_SELECT_WRITE */
+#define FLAGS_USERHOST       0x00080000  /**< Client is in userhost hash */
+#define FLAGS_BURSTED        0x00100000  /**< User was already bursted */
+#define FLAGS_EXEMPTRESV     0x00200000  /**< Client is exempt from RESV */
+#define FLAGS_GOTUSER        0x00400000  /**< If we received a USER command */
+#define FLAGS_FINISHED_AUTH  0x00800000  /**< Client has been released from auth */
+#define FLAGS_FLOOD_NOTICED  0x01000000  /**< Notice to opers about this flooder has been sent */
+#define FLAGS_SERVICE        0x02000000  /**< Client/server is a network service */
+#define FLAGS_AUTH_SPOOF     0x04000000  /**< User's hostname has been spoofed by an auth{} spoof */
+#define FLAGS_SSL            0x08000000  /**< User is connected via TLS/SSL */
 #define FLAGS_SQUIT          0x10000000
 
 #define HasFlag(x, y) ((x)->flags &   (y))
@@ -140,24 +140,24 @@ struct MaskItem;
 
 
 /* umodes, settable flags */
-#define UMODE_SERVNOTICE   0x00000001 /**< server notices such as kill */
+#define UMODE_SERVNOTICE   0x00000001 /**< Server notices such as kill */
 #define UMODE_CCONN        0x00000002 /**< Client Connections */
 #define UMODE_REJ          0x00000004 /**< Bot Rejections */
 #define UMODE_SKILL        0x00000008 /**< Server Killed */
 #define UMODE_FULL         0x00000010 /**< Full messages */
-#define UMODE_SPY          0x00000020 /**< see STATS / LINKS */
+#define UMODE_SPY          0x00000020 /**< See STATS / LINKS */
 #define UMODE_DEBUG        0x00000040 /**< 'debugging' info */
 #define UMODE_NCHANGE      0x00000080 /**< Nick change notice */
-#define UMODE_WALLOP       0x00000100 /**< send wallops to them */
+#define UMODE_WALLOP       0x00000100 /**< Send wallops to them */
 #define UMODE_OPERWALL     0x00000200 /**< Operwalls */
-#define UMODE_INVISIBLE    0x00000400 /**< makes user invisible */
-#define UMODE_BOTS         0x00000800 /**< shows bots */
-#define UMODE_EXTERNAL     0x00001000 /**< show servers introduced and splitting */
-#define UMODE_CALLERID     0x00002000 /**< block unless caller id's */
-#define UMODE_SOFTCALLERID 0x00004000 /**< block unless on common channel */
-#define UMODE_UNAUTH       0x00008000 /**< show unauth connects here */
-#define UMODE_LOCOPS       0x00010000 /**< show locops */
-#define UMODE_DEAF         0x00020000 /**< don't receive channel messages */
+#define UMODE_INVISIBLE    0x00000400 /**< Makes user invisible */
+#define UMODE_BOTS         0x00000800 /**< Shows bots */
+#define UMODE_EXTERNAL     0x00001000 /**< Show servers introduced and splitting */
+#define UMODE_CALLERID     0x00002000 /**< Block unless caller id's */
+#define UMODE_SOFTCALLERID 0x00004000 /**< Block unless on common channel */
+#define UMODE_UNAUTH       0x00008000 /**< Show unauth connects here */
+#define UMODE_LOCOPS       0x00010000 /**< Show locops */
+#define UMODE_DEAF         0x00020000 /**< Don't receive channel messages */
 #define UMODE_REGISTERED   0x00040000 /**< User has identified for that nick. */
 #define UMODE_REGONLY      0x00080000 /**< Only registered nicks may PM */
 #define UMODE_HIDDEN       0x00100000 /**< Operator status is hidden */
@@ -168,7 +168,7 @@ struct MaskItem;
 #define UMODE_SSL          0x02000000 /**< User is connected via TLS/SSL */
 #define UMODE_WEBIRC       0x04000000 /**< User connected via a webirc gateway */
 #define UMODE_HIDEIDLE     0x08000000 /**< Hides idle and signon time in WHOIS */
-#define UMODE_HIDECHANS    0x10000000 /**< Hides channel list in /whois */
+#define UMODE_HIDECHANS    0x10000000 /**< Hides channel list in WHOIS */
 
 #define UMODE_ALL          UMODE_SERVNOTICE
 
@@ -185,30 +185,30 @@ struct MaskItem;
 
 
 /* oper priv flags */
-#define OPER_FLAG_KILL_REMOTE    0x00000001 /**< Oper can global KILL */
-#define OPER_FLAG_KILL           0x00000002 /**< Oper can do local KILL */
-#define OPER_FLAG_UNKLINE        0x00000004 /**< Oper can use unkline*/
-#define OPER_FLAG_GLINE          0x00000008 /**< Oper can use gline */
-#define OPER_FLAG_K              0x00000010 /**< Oper can kline */
-#define OPER_FLAG_XLINE          0x00000020 /**< Oper can xline */
-#define OPER_FLAG_DIE            0x00000040 /**< Oper can die*/
-#define OPER_FLAG_REHASH         0x00000080 /**< Oper can rehash */
-#define OPER_FLAG_ADMIN          0x00000100 /**< Oper can set umode +a*/
-#define OPER_FLAG_OPERWALL       0x00000200 /**< Oper can use OPERWALL command */
-#define OPER_FLAG_REMOTEBAN      0x00000400 /**< Oper can set remote bans */
-#define OPER_FLAG_GLOBOPS        0x00000800 /**< Oper can use GLOBOPS command */
-#define OPER_FLAG_MODULE         0x00001000 /**< Oper can use MODULE commands */
-#define OPER_FLAG_RESTART        0x00002000 /**< Oper can use RESTART command */
-#define OPER_FLAG_DLINE          0x00004000 /**< Oper can use DLINE command   */
-#define OPER_FLAG_UNDLINE        0x00008000 /**< Oper can use UNDLINE command */
-#define OPER_FLAG_SET            0x00010000 /**< Oper can use SET command */
-#define OPER_FLAG_SQUIT          0x00020000 /**< Oper can do local SQUIT */
-#define OPER_FLAG_SQUIT_REMOTE   0x00040000 /**< Oper can do global SQUIT */
-#define OPER_FLAG_CONNECT        0x00080000 /**< Oper can do local CONNECT */
-#define OPER_FLAG_CONNECT_REMOTE 0x00100000 /**< Oper can do global CONNECT */
-#define OPER_FLAG_WALLOPS        0x00200000 /**< Oper can do WALLOPS */
-#define OPER_FLAG_LOCOPS         0x00400000 /**< Oper can do LOCOPS */
-#define OPER_FLAG_UNXLINE        0x00800000 /**< Oper can unxline*/
+#define OPER_FLAG_KILL_REMOTE    0x00000001  /**< Oper can global KILL */
+#define OPER_FLAG_KILL           0x00000002  /**< Oper can do local KILL */
+#define OPER_FLAG_UNKLINE        0x00000004  /**< Oper can use use UNKLINE command */
+#define OPER_FLAG_GLINE          0x00000008  /**< Oper can use GLINE command */
+#define OPER_FLAG_K              0x00000010  /**< Oper can use KLINE command */
+#define OPER_FLAG_XLINE          0x00000020  /**< Oper can use XLINE command */
+#define OPER_FLAG_DIE            0x00000040  /**< Oper can use DIE command */
+#define OPER_FLAG_REHASH         0x00000080  /**< Oper can use REHASH command */
+#define OPER_FLAG_ADMIN          0x00000100  /**< Oper can set user mode +a*/
+#define OPER_FLAG_OPERWALL       0x00000200  /**< Oper can use OPERWALL command */
+#define OPER_FLAG_REMOTEBAN      0x00000400  /**< Oper can set remote bans */
+#define OPER_FLAG_GLOBOPS        0x00000800  /**< Oper can use GLOBOPS command */
+#define OPER_FLAG_MODULE         0x00001000  /**< Oper can use MODULE commands */
+#define OPER_FLAG_RESTART        0x00002000  /**< Oper can use RESTART command */
+#define OPER_FLAG_DLINE          0x00004000  /**< Oper can use DLINE command */
+#define OPER_FLAG_UNDLINE        0x00008000  /**< Oper can use UNDLINE command */
+#define OPER_FLAG_SET            0x00010000  /**< Oper can use SET command */
+#define OPER_FLAG_SQUIT          0x00020000  /**< Oper can do local SQUIT */
+#define OPER_FLAG_SQUIT_REMOTE   0x00040000  /**< Oper can do global SQUIT */
+#define OPER_FLAG_CONNECT        0x00080000  /**< Oper can do local CONNECT */
+#define OPER_FLAG_CONNECT_REMOTE 0x00100000  /**< Oper can do global CONNECT */
+#define OPER_FLAG_WALLOPS        0x00200000  /**< Oper can use WALLOPS command */
+#define OPER_FLAG_LOCOPS         0x00400000  /**< Oper can use LOCOPS command */
+#define OPER_FLAG_UNXLINE        0x00800000  /**< Oper can use UNXLINE command */
 
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->localClient->operflags & (y) : 0)
@@ -242,11 +242,9 @@ struct MaskItem;
 #define IsSendQExceeded(x)      ((x)->flags &  FLAGS_SENDQEX)
 
 #define SetIpHash(x)            ((x)->flags |= FLAGS_IPHASH)
-#define ClearIpHash(x)          ((x)->flags &= ~FLAGS_IPHASH)
 #define IsIpHash(x)             ((x)->flags & FLAGS_IPHASH)
 
 #define SetUserHost(x)          ((x)->flags |= FLAGS_USERHOST)
-#define ClearUserHost(x)        ((x)->flags &= ~FLAGS_USERHOST)
 #define IsUserHostIp(x)         ((x)->flags & FLAGS_USERHOST)
 
 #define SetPingSent(x)          ((x)->flags |= FLAGS_PINGSENT)
@@ -269,7 +267,6 @@ struct MaskItem;
 #define SetExemptResv(x)        ((x)->flags |= FLAGS_EXEMPTRESV)
 #define SetIPSpoof(x)           ((x)->flags |= FLAGS_IP_SPOOFING)
 #define IsIPSpoof(x)            ((x)->flags & FLAGS_IP_SPOOFING)
-#define DelIPSpoof(x)           ((x)->flags &= ~FLAGS_IP_SPOOFING)
 
 #define IsFloodDone(x)          ((x)->flags &  FLAGS_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags |= FLAGS_FLOODDONE)
@@ -320,32 +317,30 @@ struct LocalUser
   dlink_node   lclient_node;
 
   unsigned int registration;
-  unsigned int cap_client;    /**< Client capabilities (from us) */
-  unsigned int cap_active;    /**< Active capabilities (to us) */
-  unsigned int       caps;       /**< capabilities bit-field */
+  unsigned int cap_client;  /**< Client capabilities (from us) */
+  unsigned int cap_active;  /**< Active capabilities (to us) */
+  unsigned int       caps;  /**< Capabilities bit-field */
 
   unsigned int operflags;     /**< IRC Operator privilege flags */
   unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
 
-  unsigned int serial;     /**< used to enforce 1 send per nick */
+  unsigned int serial;     /**< Used to enforce 1 send per nick */
 
   time_t       lasttime;   /**< ...should be only LOCAL clients? --msa */
-  time_t       firsttime;  /**< time client was created */
-  time_t       since;      /**< last time we parsed something */
-  time_t       last_knock;    /**< time of last knock */
-  time_t       last_join_time;   /**< when this client last
-                                    joined a channel */
-  time_t       last_leave_time;  /**< when this client last
-                                       * left a channel */
-  int          join_leave_count; /**< count of JOIN/LEAVE in less than
+  time_t       firsttime;  /**< Time client was created */
+  time_t       since;      /**< Last time we parsed something */
+  time_t       last_knock;    /**< Time of last knock */
+  time_t       last_join_time;   /**< When this client last joined a channel */
+  time_t       last_leave_time;  /**< When this client last left a channel */
+  int          join_leave_count; /**< Count of JOIN/LEAVE in less than
                                          MIN_JOIN_LEAVE_TIME seconds */
-  int          oper_warn_count_down; /**< warn opers of this possible
+  int          oper_warn_count_down; /**< Warn opers of this possible
                                           spambot every time this gets to 0 */
   time_t       last_caller_id_time;
   time_t       first_received_message_time;
   time_t       last_nick_change;
-  time_t       last_privmsg; /**< Last time we got a PRIVMSG */
-  time_t       last_away; /**< Away since... */
+  time_t       last_privmsg;  /**< Last time we got a PRIVMSG */
+  time_t       last_away;  /**< Away since... */
 
   int          received_number_of_privmsgs;
   unsigned int number_of_nick_changes;
@@ -362,11 +357,11 @@ struct LocalUser
   } recv, send;
 
   struct AuthRequest auth;
-  struct Listener *listener;   /**< listener accepted from */
-  dlink_list        acceptlist; /**< clients I'll allow to talk to me */
-  dlink_list        watches;   /**< chain of Watch pointer blocks */
+  struct Listener *listener;   /**< Listener accepted from */
+  dlink_list        acceptlist; /**< Clients I'll allow to talk to me */
+  dlink_list        watches;   /**< Chain of Watch pointer blocks */
   dlink_list        confs;     /**< Configuration record associated */
-  dlink_list        invited;   /**< chain of invite pointer blocks */
+  dlink_list        invited;   /**< Chain of invite pointer blocks */
   struct irc_ssaddr ip;
   int               aftype;    /**< Makes life easier for DNS res in IPV6 */
   int               country_id; /**< ID corresponding to a ISO 3166 country code */
@@ -378,11 +373,11 @@ struct LocalUser
    * decay to avoid flooding.
    *   -- adrian
    */
-  int allow_read;       /**< how many we're allowed to read in this second */
-  int sent_parsed;      /**< how many messages we've parsed in this second */
+  int allow_read;       /**< How many we're allowed to read in this second */
+  int sent_parsed;      /**< How many messages we've parsed in this second */
 
-  char*          response;  /**< expected response from client */
-  char*          auth_oper; /**< Operator to become if they supply the response.*/
+  char*          response;  /**< Expected CHALLENGE response from client */
+  char*          auth_oper; /**< Operator to become if they supply the response */
 };
 
 /*! \brief Client structure */
@@ -400,19 +395,19 @@ struct Client
 
   time_t            tsinfo;     /**< TS on the nick, SVINFO on server */
 
-  unsigned int      flags;      /**< client flags */
-  unsigned int      umodes;     /**< opers, normal users subset */
-  unsigned int      hopcount;   /**< number of servers to this 0 = local */
+  unsigned int      flags;      /**< Client flags */
+  unsigned int      umodes;     /**< Opers, normal users subset */
+  unsigned int      hopcount;   /**< Number of servers to this 0 = local */
   unsigned int      status;     /**< Client type */
   unsigned int      handler;    /**< Handler index */
 
   dlink_list        whowas;
-  dlink_list        channel;   /**< chain of channel pointer blocks */
+  dlink_list        channel;   /**< Chain of channel pointer blocks */
 
   char away[AWAYLEN + 1]; /**< Client's AWAY message. Can be set/unset via AWAY command */
-  char name[HOSTLEN + 1]; /**< unique name for a client nick or host */
-  char svid[SVIDLEN + 1]; /**< Services ID. */
-  char id[IDLEN + 1];       /**< client ID, unique ID per client */
+  char name[HOSTLEN + 1]; /**< Unique name for a client nick or host */
+  char svid[SVIDLEN + 1]; /**< Services ID */
+  char id[IDLEN + 1];       /**< Client ID, unique ID per client */
 
   /*
    * client->username is the username from ident or the USER message,

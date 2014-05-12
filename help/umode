@@ -22,6 +22,7 @@ Usermodes: (* designates that the umode is oper only)
        * +y     - Can see stats/links/admin requests to name a few.
        * +d     - Can see server debug messages.
        * +n     - Can see client nick changes.
+         +p     - Hides channel list in WHOIS.
          +q     - Hides idle and signon time in WHOIS.
          +r     - User has been registered and identified for its nick.
                   This mode can be set by servers and services only.

@@ -29,6 +29,7 @@ User Modes:
 +l - locops       - See LOCOPS messages
 +n - nchange      - See client nick changes
 +o - oper         - Operator status
++p - hidechans    - Hides channel list in WHOIS
 +q - hideidle     - Hides idle and signon time in WHOIS
 +r - registered   - User has been registered and identified for its nick.
                     This mode can be set by servers and services only.

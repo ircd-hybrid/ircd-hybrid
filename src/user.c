@@ -117,7 +117,7 @@ const unsigned int user_modes[256] =
   0,                  /* m */
   UMODE_NCHANGE,      /* n */
   UMODE_OPER,         /* o */
-  0,                  /* p */
+  UMODE_HIDECHANS,    /* p */
   UMODE_HIDEIDLE,     /* q */
   UMODE_REGISTERED,   /* r */
   UMODE_SERVNOTICE,   /* s */

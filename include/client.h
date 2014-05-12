@@ -168,7 +168,7 @@ struct MaskItem;
 #define UMODE_SSL          0x02000000 /**< User is connected via TLS/SSL */
 #define UMODE_WEBIRC       0x04000000 /**< User connected via a webirc gateway */
 #define UMODE_HIDEIDLE     0x08000000 /**< Hides idle and signon time in WHOIS */
-
+#define UMODE_HIDECHANS    0x10000000 /**< Hides channel list in /whois */
 
 #define UMODE_ALL          UMODE_SERVNOTICE
 
@@ -179,7 +179,8 @@ struct MaskItem;
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP |\
                       UMODE_REGONLY | UMODE_REGISTERED | UMODE_ADMIN |\
                       UMODE_HIDDEN | UMODE_HIDDENHOST | UMODE_SSL |\
-                      UMODE_WEBIRC | UMODE_CALLERID | UMODE_SOFTCALLERID)
+                      UMODE_WEBIRC | UMODE_CALLERID | UMODE_SOFTCALLERID|\
+                      UMODE_HIDECHANS)
 
 
 

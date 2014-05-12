@@ -5,6 +5,7 @@ o) IMPORTANT: renamed general::warn_no_nline configuration directive to
 ########################################################################
 o) Fixed bug with /whois not showing a list of channel names as expected
 o) Added usermode +q which hides idle and signon time in WHOIS
+o) Added usermode +p which hides channel list in WHOIS
 
 
 -- Noteworthy changes in version 8.2.0beta1 (2014-04-29)

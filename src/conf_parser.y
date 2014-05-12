@@ -194,6 +194,7 @@ reset_block_state(void)
 %token  HAVENT_READ_CONF
 %token  HIDDEN
 %token  HIDDEN_NAME
+%token  HIDE_CHANS
 %token  HIDE_IDLE
 %token  HIDE_IDLE_FROM_OPERS
 %token  HIDE_SERVER_IPS
@@ -1188,6 +1189,10 @@ oper_umodes_item:  T_BOTS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_HIDDEN;
+} | HIDE_CHANS
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.modes.value |= UMODE_HIDECHANS;
 } | HIDE_IDLE
 {
   if (conf_parser_ctx.pass == 2)
@@ -2762,6 +2767,9 @@ umode_oitem:     T_BOTS
 } | HIDDEN
 {
   ConfigFileEntry.oper_umodes |= UMODE_HIDDEN;
+} | HIDE_CHANS
+{
+  ConfigFileEntry.oper_umodes |= UMODE_HIDECHANS;
 } | HIDE_IDLE
 {
   ConfigFileEntry.oper_umodes |= UMODE_HIDEIDLE;

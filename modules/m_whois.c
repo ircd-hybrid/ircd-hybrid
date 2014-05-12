@@ -42,6 +42,22 @@
 #include "modules.h"
 
 
+static int
+whois_can_see_channels(struct Channel *chptr,
+                       struct Client *source_p,
+                       struct Client *target_p)
+{
+  if (PubChannel(chptr) && !HasUMode(target_p, UMODE_HIDECHANS))
+    return 1;
+
+  if (source_p == target_p || IsMember(source_p, chptr))
+    return 1;
+
+  if (HasUMode(source_p, UMODE_ADMIN))
+    return 2;
+  return 0;
+}
+
 /* whois_person()
  *
  * inputs	- source_p client to report to
@@ -72,9 +88,9 @@ whois_person(struct Client *source_p, struct Client *target_p)
   DLINK_FOREACH(lp, target_p->channel.head)
   {
     const struct Membership *ms = lp->data;
-    int show = ShowChannel(source_p, ms->chptr);
+    int show = whois_can_see_channels(ms->chptr, source_p, target_p);
 
-    if (show || HasUMode(source_p, UMODE_ADMIN))
+    if (show)
     {
       if ((cur_len + 4 + strlen(ms->chptr->chname) + 1) > (IRCD_BUFSIZE - 2))
       {
@@ -84,7 +100,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
         t = buf + mlen;
       }
 
-      tlen = sprintf(t, "%s%s%s ", show ? "" : "~", get_member_status(ms, 1),
+      tlen = sprintf(t, "%s%s%s ", show == 2 ? "~" : "", get_member_status(ms, 1),
                      ms->chptr->chname);
       t += tlen;
       cur_len += tlen;

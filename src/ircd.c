@@ -457,7 +457,7 @@ main(int argc, char *argv[])
   /* Check to see if the user is running us as root, which is a nono */
   if (geteuid() == 0)
   {
-    fprintf(stderr, "Don't run ircd as root!!!\n");
+    fprintf(stderr, "ERROR: This server won't run as root/superuser\n");
     return -1;
   }
 

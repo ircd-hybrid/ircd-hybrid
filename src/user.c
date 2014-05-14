@@ -485,9 +485,7 @@ register_local_user(struct Client *source_p)
   /* Password check */
   if (!EmptyString(conf->passwd))
   {
-    const char *pass = source_p->localClient->passwd;
-
-    if (!match_conf_password(pass, conf))
+    if (!match_conf_password(source_p->localClient->passwd, conf))
     {
       ++ServerStats.is_ref;
 

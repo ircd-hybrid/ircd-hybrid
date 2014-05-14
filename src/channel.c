@@ -216,7 +216,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
 {
   const dlink_node *ptr = NULL;
   char pbuf[IRCD_BUFSIZE] = "";
-  int tlen, mlen, cur_len, count = 0;
+  int tlen, mlen, cur_len;
   char *pp = pbuf;
 
   if (top->length == 0)
@@ -244,10 +244,8 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
 
       cur_len = mlen;
       pp = pbuf;
-      count = 0;
     }
 
-    count++;
     pp += sprintf(pp, "%s!%s@%s ", banptr->name, banptr->user,
                   banptr->host);
     cur_len += tlen;

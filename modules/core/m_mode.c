@@ -52,10 +52,10 @@
 static void
 set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
-  unsigned int flag, setflags;
+  unsigned int mode = 0, setmodes = 0;
   char buf[IRCD_BUFSIZE] = "";
   struct Client *target_p = NULL;
-  int what = MODE_ADD, badflag = 0;
+  int what = MODE_ADD, badmode = 0;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
@@ -84,8 +84,8 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     return;
   }
 
-  /* find flags already set for user */
-  setflags = source_p->umodes;
+  /* Find modes already set for user */
+  setmodes = source_p->umodes;
 
   /* parse mode change string(s) */
   for (char **p = &parv[2]; p && *p; ++p)
@@ -139,28 +139,28 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
           break;
 
         default:
-          if ((flag = user_modes[(unsigned char)*m]))
+          if ((mode = user_modes[(unsigned char)*m]))
           {
             if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER) &&
-                (ConfigFileEntry.oper_only_umodes & flag))
-              badflag = 1;
+                (ConfigFileEntry.oper_only_umodes & mode))
+              badmode = 1;
             else
             {
               if (what == MODE_ADD)
-                AddUMode(source_p, flag);
+                AddUMode(source_p, mode);
               else
-                DelUMode(source_p, flag);
+                DelUMode(source_p, mode);
             }
           }
           else if (MyConnect(source_p))
-            badflag = 1;
+            badmode = 1;
 
           break;
       }
     }
   }
 
-  if (badflag)
+  if (badmode)
     sendto_one_numeric(source_p, &me, ERR_UMODEUNKNOWNFLAG);
 
   if (MyConnect(source_p) && HasUMode(source_p, UMODE_ADMIN) &&
@@ -170,16 +170,16 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     DelUMode(source_p, UMODE_ADMIN);
   }
 
-  if (!(setflags & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
+  if (!(setmodes & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
     ++Count.invisi;
-  if ((setflags & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
+  if ((setmodes & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
     --Count.invisi;
 
   /*
-   * compare new flags with old flags and send string which
+   * Compare new modes with old modes and send string which
    * will cause servers to update correctly.
    */
-  send_umode_out(source_p, source_p, setflags);
+  send_umode_out(source_p, source_p, setmodes);
 }
 
 /*

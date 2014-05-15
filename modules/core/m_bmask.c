@@ -56,13 +56,13 @@
 static int
 ms_bmask(struct Client *source_p, int parc, char *parv[])
 {
-  char modebuf[IRCD_BUFSIZE];
-  char parabuf[IRCD_BUFSIZE];
-  char banbuf[IRCD_BUFSIZE];
-  struct Channel *chptr;
+  char modebuf[IRCD_BUFSIZE] = "";
+  char parabuf[IRCD_BUFSIZE] = "";
+  char banbuf[IRCD_BUFSIZE] = "";
+  struct Channel *chptr = NULL;
   char *s, *t, *mbuf, *pbuf;
   unsigned int mode_type = 0;
-  int mlen, tlen;
+  int mlen = 0, tlen = 0;
   int modecount = 0;
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
@@ -77,25 +77,19 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     case 'b':
       mode_type = CHFL_BAN;
       break;
-
     case 'e':
       mode_type = CHFL_EXCEPTION;
       break;
-
     case 'I':
       mode_type = CHFL_INVEX;
       break;
-
-    /* maybe we should just blindly propagate this? */
     default:
       return 0;
   }
 
-  parabuf[0] = '\0';
+  strlcpy(banbuf, parv[4], sizeof(banbuf));
   s = banbuf;
-  strlcpy(s, parv[4], sizeof(banbuf));
 
-  /* only need to construct one buffer, for non-ts6 servers */
   mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s +",
                   (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
                   chptr->chname);
@@ -118,19 +112,17 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       if (mbuf - modebuf + 2 + pbuf - parabuf + tlen > IRCD_BUFSIZE - 2 ||
           modecount >= MAXMODEPARAMS)
       {
-        *mbuf = '\0';
-        *(pbuf - 1) = '\0';
+        *mbuf = *(pbuf - 1) = '\0';
 
-        sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s",
-                             modebuf, parabuf);
+        sendto_channel_local(ALL_MEMBERS, 0, chptr, "%s %s", modebuf, parabuf);
         mbuf = modebuf + mlen;
         pbuf = parabuf;
         modecount = 0;
       }
 
-      *mbuf++ = parv[3][0];
+      *mbuf++ = *parv[3];
       pbuf += sprintf(pbuf, "%s ", s);
-      modecount++;
+      ++modecount;
     }
 
     s = t;

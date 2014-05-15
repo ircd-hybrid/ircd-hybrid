@@ -681,7 +681,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 {
   int bits = 0;
   uint32_t hv = 0;
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *ptr = NULL;
   struct irc_ssaddr addr;
 
   switch (parse_netmask(address, &addr, &bits))
@@ -703,7 +703,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
       break;
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, atable[hv].head)
+  DLINK_FOREACH(ptr, atable[hv].head)
   {
     struct AddressRec *arec = ptr->data;
 

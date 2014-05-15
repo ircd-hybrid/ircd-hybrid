@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.0beta2 (????-??-??)
+-- Noteworthy changes in version 8.2.0beta2 (2014-05-15)
 ########################################################################
 o) IMPORTANT: renamed general::warn_no_nline configuration directive to
    general::warn_no_connect_block

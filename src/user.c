@@ -1050,7 +1050,7 @@ init_uid(void)
  *		  note this is a recursive function
  */
 static void
-add_one_to_uid(int i)
+add_one_to_uid(unsigned int i)
 {
   if (i != IRC_MAXSID)  /* Not reached server SID portion yet? */
   {
@@ -1059,7 +1059,7 @@ add_one_to_uid(int i)
     else if (new_uid[i] == '9')
     {
       new_uid[i] = 'A';
-      add_one_to_uid(i-1);
+      add_one_to_uid(i - 1);
     }
     else
       ++new_uid[i];

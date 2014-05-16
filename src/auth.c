@@ -53,7 +53,7 @@
 #include "mempool.h"
 
 
-static const char *HeaderMessages[] =
+static const char *const HeaderMessages[] =
 {
   ":*** Looking up your hostname...",
   ":*** Found your hostname",

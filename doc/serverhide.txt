@@ -59,7 +59,7 @@
        issues WHOIS and other commands which may show what server a user is
        on.
 
-       Local user counts, as normally displayed in LUSERS, USERS, and the 255
+       Local user counts, as normally displayed in LUSERS, and the 255
        numeric, will be shown with the same values as the global counts.
        Displaying it this way will help protect servers and avoid breaking
        scripts that depend on the 265 and 266 numerics on connect.

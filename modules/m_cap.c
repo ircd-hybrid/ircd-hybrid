@@ -135,7 +135,7 @@ find_cap(const char **caplist_p, int *neg_p)
   assert(caplist != *caplist_p || !*caplist);  /* We *must* advance */
 
   /* Move ahead in capability list string--or zero pointer if we hit end */
-  *caplist_p = *caplist ? caplist : 0;
+  *caplist_p = *caplist ? caplist : NULL;
 
   return cap;  /* And return the capability (if any) */
 }
@@ -304,10 +304,9 @@ static int
 cap_clear(struct Client *source_p, const char *caplist)
 {
   struct capabilities *cap = NULL;
-  unsigned int ii;
   unsigned int cleared = 0;
 
-  for (ii = 0; ii < CAPAB_LIST_LEN; ++ii)
+  for (unsigned int ii = 0; ii < CAPAB_LIST_LEN; ++ii)
   {
     cap = &capab_list[ii];
 

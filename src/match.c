@@ -60,14 +60,14 @@ match(const char *mask, const char *name)
           return 1;
         break;
       case '\\':
-        m++;
+        ++m;
         /* allow escaping to force capitalization */
         if (*m++ != *n++)
           goto backtrack;
         break;
       case '*':
       case '?':
-        for (star = 0; ; m++)
+        for (star = 0; ; ++m)
         {
           if (*m == '*')
             star = 1;
@@ -89,13 +89,13 @@ match(const char *mask, const char *name)
             m_tmp = ++m;
             if (!*m)
               return 1;
-            for (n_tmp = n; *n && *n != *m; n++)
+            for (n_tmp = n; *n && *n != *m; ++n)
               ;
           }
           else
           {
             m_tmp = m;
-            for (n_tmp = n; *n && ToLower(*n) != ToLower(*m); n++)
+            for (n_tmp = n; *n && (ToLower(*n) != ToLower(*m)); ++n)
               ;
           }
         }
@@ -105,8 +105,8 @@ match(const char *mask, const char *name)
           return *m != '\0';
         if (ToLower(*m) != ToLower(*n))
           goto backtrack;
-        m++;
-        n++;
+        ++m;
+        ++n;
         break;
     }
   }
@@ -143,7 +143,7 @@ collapse(char *mask)
   {
     do
     {
-      if ((*m == '*') && ((m[1] == '*') || (m[1] == '?')))
+      if ((*m == '*') && (*(m + 1) == '*' || *(m + 1) == '?'))
       {
         b = m;
 
@@ -161,7 +161,7 @@ collapse(char *mask)
 
             *b++ = *m;
 
-            if ((*m == '\\') && ((m[1] == '*') || (m[1] == '?')))
+            if ((*m == '\\') && (*(m + 1) == '*' || *(m + 1) == '?'))
               *b++ = *++m;
           }
         } while (*m++);
@@ -170,7 +170,7 @@ collapse(char *mask)
       }
       else
       {
-        if ((*m == '\\') && ((m[1] == '*') || (m[1] == '?')))
+        if ((*m == '\\') && (*(m + 1) == '*' || *(m + 1) == '?'))
           ++m;
       }
     } while (*m++);

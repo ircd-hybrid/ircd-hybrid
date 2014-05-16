@@ -326,7 +326,7 @@ static const struct InfoStruct info_table[] =
   },
   {
     "failed_oper_notice",
-    OUTPUT_BOOLEAN,
+    OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.failed_oper_notice,
     "Inform opers if someone tries to /oper with the wrong password"
   },
@@ -356,7 +356,7 @@ static const struct InfoStruct info_table[] =
   },
   {
     "anti_nick_flood",
-    OUTPUT_BOOLEAN,
+    OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.anti_nick_flood,
     "NICK flood protection"
   },
@@ -392,7 +392,7 @@ static const struct InfoStruct info_table[] =
   },
   {
     "warn_no_connect_block",
-    OUTPUT_BOOLEAN,
+    OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.warn_no_connect_block,
     "Display warning if connecting server lacks a connect{} block"
   },
@@ -464,19 +464,19 @@ static const struct InfoStruct info_table[] =
   },
   {
     "ping_cookie",
-    OUTPUT_BOOLEAN,
+    OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.ping_cookie,
     "Require ping cookies to connect"
   },
   {
     "no_oper_flood",
-    OUTPUT_BOOLEAN,
+    OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.no_oper_flood,
     "Reduce flood control for operators"
   },
   {
     "true_no_oper_flood",
-    OUTPUT_BOOLEAN,
+    OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.true_no_oper_flood,
     "Completely disable flood control for operators"
   },
@@ -499,8 +499,8 @@ static const struct InfoStruct info_table[] =
     "Minimum time between client reconnects"
   },
   {
-    "glines",
-    OUTPUT_BOOLEAN,
+    "gline_enable",
+    OUTPUT_BOOLEAN_YN,
     &ConfigFileEntry.glines,
     "G-line (network-wide K-line) support"
   },

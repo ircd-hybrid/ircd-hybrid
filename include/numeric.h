@@ -27,6 +27,9 @@
 #ifndef INCLUDED_numeric_h
 #define INCLUDED_numeric_h
 
+
+#define SND_EXPLICIT 0x40000000  /**< First argument is a pattern to use */
+
 /*
  * Reserve numerics 000-099 for server-client connections where the client
  * is local to the server. If any server is passed a numeric in this range

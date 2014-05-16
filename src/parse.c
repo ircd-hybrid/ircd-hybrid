@@ -104,7 +104,7 @@ static char *para[MAXPARA + 2]; /* <command> + <params> + NULL */
 
 static int cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
-static void handle_numeric(char[], struct Client *, int, char *[]);
+static void handle_numeric(unsigned int, struct Client *, int, char *[]);
 static void handle_command(struct Message *, struct Client *, unsigned int, char *[]);
 
 
@@ -120,7 +120,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   struct Message *msg_ptr = NULL;
   char *ch = NULL;
   char *s = NULL;
-  char *numeric = NULL;
+  unsigned int numeric = 0;
   unsigned int parc = 0;
   unsigned int paramcount;
 
@@ -194,7 +194,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   if (*(ch + 3) == ' ' && /* ok, lets see if its a possible numeric.. */
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)))
   {
-    numeric = ch;
+    numeric = (*ch - '0') * 100 + (*(ch + 1) - '0') * 10 + (*(ch + 2) - '0');
     paramcount = 2;  /* destination, and the rest of it */
     ++ServerStats.is_num;
     s = ch + 3;  /* I know this is ' ' from above if            */
@@ -641,7 +641,7 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
  * the savvy approach is NEVER generate an error in response to an... error :)
  */
 static void
-handle_numeric(char numeric[], struct Client *source_p, int parc, char *parv[])
+handle_numeric(unsigned int numeric, struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
@@ -676,21 +676,20 @@ handle_numeric(char numeric[], struct Client *source_p, int parc, char *parv[])
    * remotely - but the information they contain may be useful, so we
    * remap them up. Weird, but true.  -- Isomer
    */
-  if (numeric[0] == '0')
-    numeric[0] = '1';
+  if (numeric < 100)
+    numeric =+ 100;
 
   if (target_p)
   {
     /* Fake it for server hiding, if its our client */
     if (ConfigServerHide.hide_servers && MyClient(target_p) &&
         !HasUMode(target_p, UMODE_OPER))
-      sendto_one(target_p, ":%s %s %s %s", me.name, numeric, target_p->name, parv[2]);
+      sendto_one_numeric(target_p, &me, numeric|SND_EXPLICIT, "%s", parv[2]);
     else
-      sendto_one(target_p, ":%s %s %s %s", ID_or_name(source_p, target_p),
-                 numeric, ID_or_name(target_p, target_p), parv[2]);
+      sendto_one_numeric(target_p, source_p, numeric|SND_EXPLICIT, "%s", parv[2]);
   }
   else
-    sendto_channel_butone(source_p, source_p, chptr, 0, "%s %s %s",
+    sendto_channel_butone(source_p, source_p, chptr, 0, "%u %s %s",
                           numeric, chptr->chname, parv[2]);
 }
 

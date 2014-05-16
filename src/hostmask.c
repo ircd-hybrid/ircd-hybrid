@@ -571,8 +571,8 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
  * Side-effects: None
  */
 struct MaskItem *
-find_address_conf(const char *host, const char *user,
-                  struct irc_ssaddr *ip, int aftype, char *password)
+find_address_conf(const char *host, const char *user, struct irc_ssaddr *ip,
+                  int aftype, const char *password)
 {
   struct MaskItem *authcnf = NULL, *killcnf = NULL;
 

@@ -48,9 +48,9 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = TS (or mode, depending on svs version)
- *      - parv[3] = mode (or services id if old svs version)
- *      - parv[4] = optional argument (services id)
+ *      - parv[2] = TS
+ *      - parv[3] = mode
+ *      - parv[4] = optional argument (services id, vhost)
  */
 static int
 ms_svsmode(struct Client *source_p, int parc, char *parv[])
@@ -64,17 +64,9 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
 
-  if ((parc >= 4) && ((*parv[3] == '+') || (*parv[3] == '-')))
-  {
-    ts     = atol(parv[2]);
-    modes  = parv[3];
-    extarg = (parc > 4) ? parv[4] : NULL;
-  }
-  else
-  {
-    modes  = parv[2];
-    extarg = (parc > 3) ? parv[3] : NULL;
-  }
+  ts     = atol(parv[2]);
+  modes  = parv[3];
+  extarg = (parc > 4) ? parv[4] : NULL;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
@@ -179,7 +171,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svsmode_msgtab =
 {
-  "SVSMODE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "SVSMODE", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_svsmode, m_ignore, m_ignore, m_ignore }
 };
 

@@ -62,7 +62,6 @@ enum irc_numerics
   RPL_STATSLINKINFO        = 211,
   RPL_STATSCOMMANDS        = 212,
   RPL_STATSCLINE           = 213,
-  RPL_STATSNLINE           = 214,
   RPL_STATSILINE           = 215,
   RPL_STATSKLINE           = 216,
   RPL_STATSQLINE           = 217,

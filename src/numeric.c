@@ -248,7 +248,7 @@ static const char *const replies[] =
 /* 211 RPL_STATSLINKINFO */ "%s %u %u %llu %u %llu :%u %u %s",
 /* 212 RPL_STATSCOMMANDS */ "%s %u %llu :%u",
 /* 213 RPL_STATSCLINE */ "%c %s %s %s %d %s",
-/* 214 RPL_STATSNLINE */ "%c %s * %s %d %s",
+/* 214 */ NULL,
 /* 215 RPL_STATSILINE */ "%c %s * %s@%s %d %s",
 /* 216 RPL_STATSKLINE */ "%c %s * %s :%s",
 /* 217 RPL_STATSQLINE */ "%c %u %s :%s",

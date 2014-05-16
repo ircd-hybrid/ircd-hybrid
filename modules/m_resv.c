@@ -39,113 +39,6 @@
 #include "hash.h"
 
 
-static void parse_resv(struct Client *, char *, int, char *);
-
-
-/* mo_resv()
- *   parv[0] = command
- *   parv[1] = channel/nick to forbid
- */
-static int
-mo_resv(struct Client *source_p, int parc, char *parv[])
-{
-  char *resv = NULL;
-  char *reason = NULL;
-  char *target_server = NULL;
-  time_t tkline_time = 0;
-
-  /* RESV #channel ON irc.server.com :abuse
-   * RESV kiddie ON irc.server.com :abuse
-   */
-  if (parse_aline("RESV", source_p, parc, parv, AWILD, &resv, NULL,
-                  &tkline_time, &target_server, &reason) < 0)
-    return 0;
-
-  if (target_server)
-  {
-    /* if a given expire time is given, ENCAP it */
-    if (tkline_time)
-      sendto_match_servs(source_p, target_server, CAP_ENCAP,
-                         "ENCAP %s RESV %d %s 0 :%s",
-                         target_server, (int)tkline_time, resv, reason);
-    else
-      sendto_match_servs(source_p, target_server, CAP_CLUSTER,
-                         "RESV %s %s :%s",
-                         target_server, resv, reason);
-    /* Allow ON to apply local resv as well if it matches */
-    if (match(target_server, me.name))
-      return 0;
-  }
-  else
-  {
-    /* RESV #channel :abuse
-     * RESV kiddie :abuse
-     */
-    if (tkline_time)
-      cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_RESV,
-                     "RESV %d %s 0 : %s", (int)tkline_time, resv, reason);
-    else
-      cluster_a_line(source_p, "RESV", CAP_KLN, SHARED_RESV,
-                     "%s : %s", resv, reason);
-  }
-
-  parse_resv(source_p, resv, (int)tkline_time, reason);
-  return 0;
-}
-
-/* me_resv()
- *
- * inputs	- server
- *		- client (oper)
- *		- parc number of arguments
- *		- parv list of arguments
- * via parv[]
- * parv[0] = command
- * parv[1] = tkline_time
- * parv[2] = name
- * parv[3] = 0
- * parv[4] = reason
- * parc should be 5
- *
- * outputs	- NONE
- * side effects -
- */
-static int
-me_resv(struct Client *source_p, int parc, char *parv[])
-{
-  if (parc != 5 || !IsClient(source_p))
-    return 0;
-
-  parse_resv(source_p, parv[2], atoi(parv[1]), parv[4]);
-  return 0;
-}
-
-/* ms_resv()
- *   parv[0] = command
- *   parv[1] = target server
- *   parv[2] = channel/nick to resv
- *   parv[3] = reason
- */
-static int
-ms_resv(struct Client *source_p, int parc, char *parv[])
-{
-  if (parc != 4 || EmptyString(parv[3]))
-    return 0;
-
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
-                     "RESV %s %s :%s",
-                     parv[1], parv[2], parv[3]);
-
-  if (!IsClient(source_p) || match(parv[1], me.name))
-    return 0;
-
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_RESV))
-    parse_resv(source_p, parv[2], 0, parv[3]);
-  return 0;
-}
-
 /* parse_resv()
  *
  * inputs	- source_p, NULL supported
@@ -250,6 +143,110 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
                            conf->name, conf->reason);
     }
   }
+}
+
+/* mo_resv()
+ *   parv[0] = command
+ *   parv[1] = channel/nick to forbid
+ */
+static int
+mo_resv(struct Client *source_p, int parc, char *parv[])
+{
+  char *resv = NULL;
+  char *reason = NULL;
+  char *target_server = NULL;
+  time_t tkline_time = 0;
+
+  /* RESV #channel ON irc.server.com :abuse
+   * RESV kiddie ON irc.server.com :abuse
+   */
+  if (parse_aline("RESV", source_p, parc, parv, AWILD, &resv, NULL,
+                  &tkline_time, &target_server, &reason) < 0)
+    return 0;
+
+  if (target_server)
+  {
+    /* if a given expire time is given, ENCAP it */
+    if (tkline_time)
+      sendto_match_servs(source_p, target_server, CAP_ENCAP,
+                         "ENCAP %s RESV %d %s 0 :%s",
+                         target_server, (int)tkline_time, resv, reason);
+    else
+      sendto_match_servs(source_p, target_server, CAP_CLUSTER,
+                         "RESV %s %s :%s",
+                         target_server, resv, reason);
+    /* Allow ON to apply local resv as well if it matches */
+    if (match(target_server, me.name))
+      return 0;
+  }
+  else
+  {
+    /* RESV #channel :abuse
+     * RESV kiddie :abuse
+     */
+    if (tkline_time)
+      cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_RESV,
+                     "RESV %d %s 0 : %s", (int)tkline_time, resv, reason);
+    else
+      cluster_a_line(source_p, "RESV", CAP_KLN, SHARED_RESV,
+                     "%s : %s", resv, reason);
+  }
+
+  parse_resv(source_p, resv, (int)tkline_time, reason);
+  return 0;
+}
+
+/* me_resv()
+ *
+ * inputs	- server
+ *		- client (oper)
+ *		- parc number of arguments
+ *		- parv list of arguments
+ * via parv[]
+ * parv[0] = command
+ * parv[1] = tkline_time
+ * parv[2] = name
+ * parv[3] = 0
+ * parv[4] = reason
+ * parc should be 5
+ *
+ * outputs	- NONE
+ * side effects -
+ */
+static int
+me_resv(struct Client *source_p, int parc, char *parv[])
+{
+  if (parc != 5 || !IsClient(source_p))
+    return 0;
+
+  parse_resv(source_p, parv[2], atoi(parv[1]), parv[4]);
+  return 0;
+}
+
+/* ms_resv()
+ *   parv[0] = command
+ *   parv[1] = target server
+ *   parv[2] = channel/nick to resv
+ *   parv[3] = reason
+ */
+static int
+ms_resv(struct Client *source_p, int parc, char *parv[])
+{
+  if (parc != 4 || EmptyString(parv[3]))
+    return 0;
+
+  sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
+                     "RESV %s %s :%s",
+                     parv[1], parv[2], parv[3]);
+
+  if (!IsClient(source_p) || match(parv[1], me.name))
+    return 0;
+
+  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+                              source_p->username, source_p->host,
+                              SHARED_RESV))
+    parse_resv(source_p, parv[2], 0, parv[3]);
+  return 0;
 }
 
 static struct Message resv_msgtab =

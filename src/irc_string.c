@@ -78,8 +78,8 @@ strip_tabs(char *dest, const char *src, size_t len)
 char *
 strtoken(char** save, char* str, const char* fs)
 {
-  char* pos = *save;  /* keep last position across calls */
-  char* tmp;
+  char *pos = *save;  /* keep last position across calls */
+  char *tmp = NULL;
 
   if (str)
     pos = str;    /* new string scan */

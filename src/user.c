@@ -742,7 +742,7 @@ valid_username(const char *username, const int local)
   {
     while (*++p)
     {
-      if ((*p == '.') && ConfigFileEntry.dots_in_ident)
+      if (*p == '.' && ConfigFileEntry.dots_in_ident)
       {
         if (++dots > ConfigFileEntry.dots_in_ident)
           return 0;

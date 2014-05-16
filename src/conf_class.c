@@ -64,7 +64,7 @@ class_make(void)
 void
 class_free(struct ClassItem *class)
 {
-  assert(class);
+  assert(class != class_default);
   assert(class->active    == 0);
   assert(class->ref_count == 0);
 

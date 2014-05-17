@@ -19,19 +19,19 @@ X h - Shows ircd callback statistics
 * H - Shows configured hub/leaf entries
 ^ i - Shows configured auth {} blocks
 ^ K - Shows K lines (or matched klines)
-^ k - Shows temporary K lines (or matched temp klines)
+^ k - Shows temporary K lines (or matched temporary klines)
 * L - Shows IP and generic info about [nick]
 * l - Shows hostname and generic info about [nick]
   m - Shows commands and their usage
 ^ o - Shows configured operator {} blocks
-* P - Shows configured listen {} blocks
+^ P - Shows configured listen {} blocks
   p - Shows opers connected and their idle times
 * q - Shows resv'd nicks and channels
 * r - Shows resource usage by ircd
 * s - Shows configured service {} blocks
-* T - Shows configured Message Of The Day files
+* T - Shows configured motd {} blocks
 * t - Shows generic server stats
-* U - Shows shared{} blocks
+* U - Shows shared {} blocks
 ^ u - Shows server uptime
 * v - Shows connected servers and their idle times
 * x - Shows gecos bans

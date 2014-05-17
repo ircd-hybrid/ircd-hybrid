@@ -1,4 +1,4 @@
-RESTART server.name :[reason]
+RESTART <server.name>
 
 Restarts the IRC server.
 

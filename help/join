@@ -2,7 +2,7 @@ JOIN <#channel1[,#channel2,#channel3...]> [key]
 
 The JOIN command allows you to enter a public chat area known as
 a channel. You can join more than one channel at a time,
-separating their names with comma's (',').
+separating their names with commas (',').
 
 If the channel has a key set, the second argument must be
 given to enter. This allows channels to be password protected.

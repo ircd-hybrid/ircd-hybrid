@@ -1,6 +1,5 @@
-DIE server.name :[reason]
+DIE <server.name>
 
-Terminates the IRC server with optional reason
-[reason]
+Terminates the IRC server.
 
 - Requires Oper Priv: die

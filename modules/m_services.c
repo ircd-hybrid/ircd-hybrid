@@ -115,6 +115,7 @@ static int
 m_botserv(struct Client *source_p, int parc, char *parv[])
 {
   do_service_alias(source_p, "BotServ", parv[1]);
+  return 0;
 }
 
 

@@ -1,7 +1,9 @@
-PART <#channel> :[part message]
+PART <#channel1[,#channel2,#channel3...]> :[part message]
 
 PART requires at least a channel argument to be given. It will
 exit the client from the specified channel.
+You can part more than one channel at a time,
+separating their names with commas (',').
 
 An optional part message may be given to be displayed to the
 channel.

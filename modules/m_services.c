@@ -44,158 +44,77 @@
  * Configureable aliases will get implemented.
  */
 
+static void
+do_service_alias(struct Client *source_p, const char *name, const char *msg)
+{
+  struct Client *target_p = NULL;
+  struct Client *server_p = NULL;
+
+  if (EmptyString(msg))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
+    return;
+  }
+
+  target_p = find_person(source_p, name);
+  server_p = hash_find_server(ConfigFileEntry.service_name);
+
+  if (target_p && server_p && (target_p->servptr == server_p))
+  {
+    sendto_one(target_p, ":%s PRIVMSG %s :%s",
+               source_p->id, target_p->id, msg);
+    return;
+  }
+
+  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, name);
+}
+
 static int
 m_nickserv(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
-    return 0;
-  }
-
-  if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
-  {
-    sendto_one(target_p, ":%s PRIVMSG NickServ@%s :%s",
-               source_p->id, ConfigFileEntry.service_name, parv[1]);
-    return 0;
-  }
-
-  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "NickServ");
+  do_service_alias(source_p, "NickServ", parv[1]);
   return 0;
 }
 
 static int
 m_chanserv(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
-    return 0;
-  }
-
-  if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
-  {
-    sendto_one(target_p, ":%s PRIVMSG ChanServ@%s :%s",
-               source_p->id, ConfigFileEntry.service_name, parv[1]);
-    return 0;
-  }
-
-  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "ChanServ");
+  do_service_alias(source_p, "ChanServ", parv[1]);
   return 0;
 }
 
 static int
 m_memoserv(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
-    return 0;
-  }
-
-  if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
-  {
-    sendto_one(target_p, ":%s PRIVMSG MemoServ@%s :%s",
-               source_p->id, ConfigFileEntry.service_name, parv[1]);
-    return 0;
-  }
-
-  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "MemoServ");
+  do_service_alias(source_p, "MemoServ", parv[1]);
   return 0;
 }
 
 static int
 m_operserv(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
-    return 0;
-  }
-
-  if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
-  {
-    sendto_one(target_p, ":%s PRIVMSG OperServ@%s :%s",
-               source_p->id, ConfigFileEntry.service_name, parv[1]);
-    return 0;
-  }
-
-  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "OperServ");
+  do_service_alias(source_p, "OperServ", parv[1]);
   return 0;
 }
 
 static int
 m_statserv(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
-    return 0;
-  }
-
-  if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
-  {
-    sendto_one(target_p, ":%s PRIVMSG StatServ@%s :%s",
-               source_p->id, ConfigFileEntry.service_name, parv[1]);
-    return 0;
-  }
-
-  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "StatServ");
+  do_service_alias(source_p, "StatServ", parv[1]);
   return 0;
 }
 
 static int
 m_hostserv(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
-    return 0;
-  }
-
-  if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
-  {
-    sendto_one(target_p, ":%s PRIVMSG HostServ@%s :%s",
-               source_p->id, ConfigFileEntry.service_name, parv[1]);
-    return 0;
-  }
-
-  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "HostServ");
+  do_service_alias(source_p, "HostServ", parv[1]);
   return 0;
 }
 
 static int
 m_botserv(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
-    return 0;
-  }
-
-  if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
-  {
-    sendto_one(target_p, ":%s PRIVMSG BotServ@%s :%s",
-               source_p->id, ConfigFileEntry.service_name, parv[1]);
-    return 0;
-  }
-
-  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, "BotServ");
-  return 0;
+  do_service_alias(source_p, "BotServ", parv[1]);
 }
 
 

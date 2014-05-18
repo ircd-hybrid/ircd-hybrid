@@ -1,4 +1,4 @@
-KILL <nick> [reason]
+KILL <nick> :[reason]
 
 Disconnects user <nick> from the IRC server he/she
 is connected to with reason [reason].

@@ -58,7 +58,7 @@ m_nickserv(struct Client *source_p, int parc, char *parv[])
   if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
   {
     sendto_one(target_p, ":%s PRIVMSG NickServ@%s :%s",
-               source_p->name, ConfigFileEntry.service_name, parv[1]);
+               source_p->id, ConfigFileEntry.service_name, parv[1]);
     return 0;
   }
 
@@ -80,7 +80,7 @@ m_chanserv(struct Client *source_p, int parc, char *parv[])
   if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
   {
     sendto_one(target_p, ":%s PRIVMSG ChanServ@%s :%s",
-               source_p->name, ConfigFileEntry.service_name, parv[1]);
+               source_p->id, ConfigFileEntry.service_name, parv[1]);
     return 0;
   }
 
@@ -102,7 +102,7 @@ m_memoserv(struct Client *source_p, int parc, char *parv[])
   if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
   {
     sendto_one(target_p, ":%s PRIVMSG MemoServ@%s :%s",
-               source_p->name, ConfigFileEntry.service_name, parv[1]);
+               source_p->id, ConfigFileEntry.service_name, parv[1]);
     return 0;
   }
 
@@ -124,7 +124,7 @@ m_operserv(struct Client *source_p, int parc, char *parv[])
   if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
   {
     sendto_one(target_p, ":%s PRIVMSG OperServ@%s :%s",
-               source_p->name, ConfigFileEntry.service_name, parv[1]);
+               source_p->id, ConfigFileEntry.service_name, parv[1]);
     return 0;
   }
 
@@ -146,7 +146,7 @@ m_statserv(struct Client *source_p, int parc, char *parv[])
   if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
   {
     sendto_one(target_p, ":%s PRIVMSG StatServ@%s :%s",
-               source_p->name, ConfigFileEntry.service_name, parv[1]);
+               source_p->id, ConfigFileEntry.service_name, parv[1]);
     return 0;
   }
 
@@ -168,7 +168,7 @@ m_hostserv(struct Client *source_p, int parc, char *parv[])
   if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
   {
     sendto_one(target_p, ":%s PRIVMSG HostServ@%s :%s",
-               source_p->name, ConfigFileEntry.service_name, parv[1]);
+               source_p->id, ConfigFileEntry.service_name, parv[1]);
     return 0;
   }
 
@@ -190,7 +190,7 @@ m_botserv(struct Client *source_p, int parc, char *parv[])
   if ((target_p = hash_find_server(ConfigFileEntry.service_name)))
   {
     sendto_one(target_p, ":%s PRIVMSG BotServ@%s :%s",
-               source_p->name, ConfigFileEntry.service_name, parv[1]);
+               source_p->id, ConfigFileEntry.service_name, parv[1]);
     return 0;
   }
 

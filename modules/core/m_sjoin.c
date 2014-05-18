@@ -336,7 +336,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     } while (valid_mode);
 
     target_p = find_chasing(source_p, s);
-    assert(IsClient(target_p));
 
     /*
      * if the client doesnt exist, or if its fake direction/server, skip.

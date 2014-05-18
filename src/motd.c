@@ -466,7 +466,7 @@ motd_memory_count(struct Client *source_p)
     mtcm += sizeof(struct MotdCache) + (MOTD_LINESIZE * (cache->count - 1));
   }
 
-  sendto_one(source_p, ":%s %d %s z :Motds %u(%u) Cache %u(%u)",
-             me.name, RPL_STATSDEBUG, source_p->name,
-             mt, mtm, mtc, mtcm);
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+                     "z :Motds %u(%u) Cache %u(%u)",
+                     mt, mtm, mtc, mtcm);
 }

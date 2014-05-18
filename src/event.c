@@ -240,33 +240,26 @@ eventFind(EVH *func, void *arg)
 void
 show_events(struct Client *source_p)
 {
-  int i;
-
   if (last_event_ran)
   {
-    sendto_one(source_p, ":%s %d %s :Last event to run: %s",
-               me.name, RPL_STATSDEBUG, source_p->name, last_event_ran);
-    sendto_one(source_p, ":%s %d %s : ",
-      me.name, RPL_STATSDEBUG, source_p->name);
+    sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+                       "E :Last event to run: %s",
+                       last_event_ran);
+    sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+                       "E : ");
   }
 
-  sendto_one(source_p,
-    ":%s %d %s : Operation                    Next Execution",
-    me.name, RPL_STATSDEBUG, source_p->name);
-  sendto_one(source_p,
-    ":%s %d %s : -------------------------------------------",
-    me.name, RPL_STATSDEBUG, source_p->name);
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+                     "E :Operation                    Next Execution");
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+                     "E :-------------------------------------------");
 
-  for (i = 0; i < MAX_EVENTS; i++)
-  {
+  for (unsigned i = 0; i < MAX_EVENTS; ++i)
     if (event_table[i].active)
-    {
-      sendto_one(source_p, ":%s %d %s : %-28s %-4d seconds",
-                 me.name, RPL_STATSDEBUG, source_p->name,
-                 event_table[i].name,
-                 (int)(event_table[i].when - CurrentTime));
-    }
-  }
+      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+                         "E :%-28s %-4d seconds",
+                         event_table[i].name,
+                         (int)(event_table[i].when - CurrentTime));
 }
 
 /*

@@ -105,8 +105,10 @@ fd_open(fde_t *F, int fd, int is_socket, const char *desc)
 
   F->fd = fd;
   F->comm_index = -1;
+
   if (desc)
     strlcpy(F->desc, desc, sizeof(F->desc));
+
   /* Note: normally we'd have to clear the other flags,
    * but currently F is always cleared before calling us.. */
   F->flags.open = 1;
@@ -138,7 +140,8 @@ fd_close(fde_t *F)
 
   if (fd_hash[hashv] == F)
     fd_hash[hashv] = F->hnext;
-  else {
+  else
+  {
     fde_t *prev;
 
     /* let it core if not found */
@@ -206,7 +209,7 @@ void
 close_fds(fde_t *one)
 {
   for (unsigned int i = 0; i < FD_HASH_SIZE; ++i)
-    for (fde_t *F = fd_hash[i]; F != NULL; F = F->hnext)
+    for (fde_t *F = fd_hash[i]; F; F = F->hnext)
       if (F != one)
         close(F->fd);
 }

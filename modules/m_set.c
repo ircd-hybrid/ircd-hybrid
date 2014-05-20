@@ -399,7 +399,6 @@ list_quote_commands(struct Client *source_p)
       j = 0;
       names[0] = names[1] = names[2] = names[3] = "";
     }
-
   }
 
   if (j)

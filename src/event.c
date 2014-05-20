@@ -64,7 +64,26 @@
 static const char *last_event_ran = NULL;
 static struct ev_entry event_table[MAX_EVENTS];
 static time_t event_time_min = -1;
-static int eventFind(EVH *func, void *arg);
+
+
+/*
+ * int eventFind(EVH *func, void *arg)
+ *
+ * Input: Event function and the argument passed to it
+ * Output: Index to the slow in the event_table
+ * Side Effects: None
+ */
+static int
+eventFind(EVH *func, void *arg)
+{
+  for (unsigned int i = 0; i < MAX_EVENTS; ++i)
+    if ((event_table[i].func == func) &&
+        (event_table[i].arg == arg) &&
+         event_table[i].active)
+      return i;
+
+  return -1;
+}
 
 /*
  * void eventAdd(const char *name, EVH *func, void *arg, time_t when)
@@ -77,10 +96,8 @@ static int eventFind(EVH *func, void *arg);
 void
 eventAdd(const char *name, EVH *func, void *arg, time_t when)
 {
-  int i;
-
   /* find first inactive index, or use next index */
-  for (i = 0; i < MAX_EVENTS; i++)
+  for (unsigned int i = 0; i < MAX_EVENTS; ++i)
   {
     if (event_table[i].active == 0)
     {
@@ -97,8 +114,6 @@ eventAdd(const char *name, EVH *func, void *arg, time_t when)
       return;
     }
   }
-  /* XXX if reach here, its an error */
-  ilog(LOG_TYPE_IRCD, "Event table is full! (%d)", i);
 }
 
 /*
@@ -157,9 +172,7 @@ eventAddIsh(const char *name, EVH *func, void *arg, time_t delta_ish)
 void
 eventRun(void)
 {
-  int i;
-
-  for (i = 0; i < MAX_EVENTS; i++)
+  for (unsigned int i = 0; i < MAX_EVENTS; ++i)
   {
     if (event_table[i].active && (event_table[i].when <= CurrentTime))
     {
@@ -181,16 +194,10 @@ eventRun(void)
 time_t
 eventNextTime(void)
 {
-  int i;
-
   if (event_time_min == -1)
-  {
-    for (i = 0; i < MAX_EVENTS; i++)
-    {
+    for (unsigned int i = 0; i < MAX_EVENTS; ++i)
       if (event_table[i].active && ((event_table[i].when < event_time_min) || (event_time_min == -1)))
         event_time_min = event_table[i].when;
-    }
-  }
 
   return event_time_min;
 }
@@ -207,27 +214,6 @@ eventInit(void)
 {
   last_event_ran = NULL;
   memset(event_table, 0, sizeof(event_table));
-}
-
-/*
- * int eventFind(EVH *func, void *arg)
- *
- * Input: Event function and the argument passed to it
- * Output: Index to the slow in the event_table
- * Side Effects: None
- */
-static int
-eventFind(EVH *func, void *arg)
-{
-  int i;
-
-  for (i = 0; i < MAX_EVENTS; i++)
-    if ((event_table[i].func == func) &&
-        (event_table[i].arg == arg) &&
-         event_table[i].active)
-      return i;
-
-  return -1;
 }
 
 /*
@@ -271,11 +257,9 @@ show_events(struct Client *source_p)
 void
 set_back_events(time_t by)
 {
-  int i;
-
   event_time_min = -1;
 
-  for (i = 0; i < MAX_EVENTS; i++)
+  for (unsigned int i = 0; i < MAX_EVENTS; ++i)
   {
     if (event_table[i].when > by)
       event_table[i].when -= by;

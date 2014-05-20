@@ -57,7 +57,7 @@ list_accepts(struct Client *source_p)
     const struct split_nuh_item *accept_p = ptr->data;
     size_t masklen = strlen(accept_p->nickptr) +
                      strlen(accept_p->userptr) +
-                     strlen(accept_p->hostptr) + 2 /* !@ */ ;
+                     strlen(accept_p->hostptr) + 2 /* +2 for !@ */ ;
 
     if ((t - nicks) + masklen + len  > IRCD_BUFSIZE)
     {
@@ -131,7 +131,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
   for (mask = strtoken(&p, parv[1], ","); mask;
        mask = strtoken(&p,    NULL, ","))
   {
-    if (*mask == '-' && *++mask != '\0')
+    if (*mask == '-' && *++mask)
     {
       nuh.nuhmask  = mask;
       nuh.nickptr  = nick;
@@ -152,7 +152,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 
       del_accept(accept_p, source_p);
     }
-    else if (*mask != '\0')
+    else if (*mask)
     {
       if (dlink_list_length(&source_p->localClient->acceptlist) >=
           ConfigFileEntry.max_accept)

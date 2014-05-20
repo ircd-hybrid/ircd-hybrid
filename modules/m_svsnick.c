@@ -122,7 +122,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
 static struct Message svsnick_msgtab =
 {
   "SVSNICK", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
-  {m_ignore, m_ignore, ms_svsnick, m_ignore, m_ignore, m_ignore}
+  { m_ignore, m_ignore, ms_svsnick, m_ignore, m_ignore, m_ignore }
 };
 
 static void

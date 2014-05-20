@@ -177,7 +177,7 @@ fd_note(fde_t *F, const char *format, ...)
 {
   va_list args;
 
-  if (format != NULL)
+  if (format)
   {
     va_start(args, format);
     vsnprintf(F->desc, sizeof(F->desc), format, args);
@@ -193,11 +193,10 @@ fd_note(fde_t *F, const char *format, ...)
 void
 close_standard_fds(void)
 {
-  int i;
-
-  for (i = 0; i < LOWEST_SAFE_FD; i++)
+  for (unsigned int i = 0; i < LOWEST_SAFE_FD; ++i)
   {
     close(i);
+
     if (open("/dev/null", O_RDWR) < 0)
       exit(-1); /* we're hosed if we can't even open /dev/null */
   }
@@ -206,11 +205,8 @@ close_standard_fds(void)
 void
 close_fds(fde_t *one)
 {
-  int i;
-  fde_t *F;
-
-  for (i = 0; i < FD_HASH_SIZE; i++)
-    for (F = fd_hash[i]; F != NULL; F = F->hnext)
+  for (unsigned int i = 0; i < FD_HASH_SIZE; ++i)
+    for (fde_t *F = fd_hash[i]; F != NULL; F = F->hnext)
       if (F != one)
         close(F->fd);
 }

@@ -308,6 +308,9 @@ ms_join(struct Client *client_p, struct Client *source_p,
   struct Channel *chptr = NULL;
   struct Mode mode, *oldmode;
 
+  if (!IsClient(source_p))
+    return;
+
   if (parc == 2 && !irccmp(parv[1], "0"))
   {
     do_join_0(client_p, source_p);

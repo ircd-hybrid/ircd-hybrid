@@ -677,7 +677,7 @@ handle_numeric(unsigned int numeric, struct Client *source_p, int parc, char *pa
    * remap them up. Weird, but true.  -- Isomer
    */
   if (numeric < 100)
-    numeric =+ 100;
+    numeric += 100;
 
   if (target_p)
   {

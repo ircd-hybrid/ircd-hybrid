@@ -292,6 +292,9 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   struct Channel *chptr = NULL;
   struct Mode mode, *oldmode;
 
+  if (!IsClient(source_p))
+    return;
+
   if (parc == 2 && !strcmp(parv[1], "0"))
   {
     do_join_0(source_p);

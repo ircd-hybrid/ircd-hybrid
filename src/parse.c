@@ -100,7 +100,7 @@ struct MessageTree
 
 static struct MessageTree msg_tree;
 
-static char *para[MAXPARA + 2]; /* <command> + <params> + NULL */
+static char *para[MAXPARA + 2]; /* <command> + <parameters> + NULL */
 
 static int cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
@@ -130,8 +130,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   assert(client_p->localClient->fd.flags.open);
   assert((bufend - pbuffer) < IRCD_BUFSIZE);
 
-  for (ch = pbuffer; *ch == ' '; ++ch)  /* skip spaces */
-    /* null statement */  ;
+  for (ch = pbuffer; *ch == ' '; ++ch)  /* Skip spaces */
+    ;
 
   if (*ch == ':')
   {
@@ -190,15 +190,15 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
    * code. -avalon
    */
 
-  /* EOB is 3 chars long but is not a numeric */
-  if (*(ch + 3) == ' ' && /* ok, lets see if its a possible numeric.. */
+  /* EOB is 3 characters long but is not a numeric */
+  if (*(ch + 3) == ' ' &&  /* Ok, lets see if its a possible numeric.. */
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)))
   {
     numeric = (*ch - '0') * 100 + (*(ch + 1) - '0') * 10 + (*(ch + 2) - '0');
-    paramcount = 2;  /* destination, and the rest of it */
+    paramcount = 2;  /* Destination, and the rest of it */
     ++ServerStats.is_num;
-    s = ch + 3;  /* I know this is ' ' from above if            */
-    *s++ = '\0';  /* blow away the ' ', and point s to next part */
+    s = ch + 3;  /* I know this is ' ' from above if */
+    *s++ = '\0';  /* Blow away the ' ', and point s to next part */
   }
   else
   {
@@ -303,7 +303,7 @@ handle_command(struct Message *mptr, struct Client *source_p,
 
   ++mptr->count;
 
-  /* Check right amount of params is passed... --is */
+  /* Check right amount of parameters is passed... --is */
   if (i < mptr->args_min)
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
   else

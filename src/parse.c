@@ -612,11 +612,11 @@ remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
                          "Unknown prefix (%s) from %s, Squitting %s",
                          lbuffer, client_p->name, lsender);
     sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
-               me.name, lsender, lbuffer, client_p->name);
+               me.id, lsender, lbuffer, client_p->name);
   }
   else
     sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)",
-               me.name, lsender, me.name);
+               me.id, lsender, me.name);
 }
 
 /*

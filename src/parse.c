@@ -468,6 +468,9 @@ mod_del_cmd(struct Message *msg)
 {
   assert(msg && msg->cmd);
 
+  if (!msg_tree_parse(msg->cmd))
+    return;
+
   del_msg_element(&msg_tree, msg->cmd);
 }
 

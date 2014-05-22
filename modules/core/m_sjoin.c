@@ -100,7 +100,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p,
   const char *servername = (ConfigServerHide.hide_servers || IsHidden(source_p)) ?
                             me.name : source_p->name;
 
-  if (IsClient(source_p) || parc < 5)
+  if (!IsServer(source_p) || parc < 5)
     return 0;
 
   if (!check_channel_name(parv[2], 0))

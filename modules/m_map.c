@@ -43,8 +43,8 @@ static void dump_map(struct Client *client,
   static char prompt[64];
   static char buf[IRCD_BUFSIZE];
   char *p = prompt + prompt_length;
-  int cnt = 0;
-  int bufpos = 0;
+  unsigned int cnt = 0;
+  unsigned int bufpos = 0;
 
   *p = '\0';
 

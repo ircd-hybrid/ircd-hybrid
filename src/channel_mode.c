@@ -404,19 +404,21 @@ clear_ban_cache_client(struct Client *client_p)
   }
 }
 
-/* bitmasks for various error returns that set_channel_mode should only return
+/*
+ * Bitmasks for various error returns that set_channel_mode should only return
  * once per call  -orabidoo
  */
-
-#define SM_ERR_NOTS         0x00000001 /* No TS on channel  */
-#define SM_ERR_NOOPS        0x00000002 /* No chan ops       */
-#define SM_ERR_UNKNOWN      0x00000004
-#define SM_ERR_RPL_B        0x00000008
-#define SM_ERR_RPL_E        0x00000010
-#define SM_ERR_NOTONCHANNEL 0x00000020 /* Not on channel    */
-#define SM_ERR_RPL_I        0x00000040
-#define SM_ERR_NOTOPER      0x00000080
-#define SM_ERR_ONLYSERVER   0x00000100
+enum
+{
+  SM_ERR_NOOPS        = 1 << 0,  /* No chan ops */
+  SM_ERR_UNKNOWN      = 1 << 1,
+  SM_ERR_RPL_B        = 1 << 2,
+  SM_ERR_RPL_E        = 1 << 3,
+  SM_ERR_RPL_I        = 1 << 4,
+  SM_ERR_NOTONCHANNEL = 1 << 5,  /* Client is not on channel */
+  SM_ERR_NOTOPER      = 1 << 6,
+  SM_ERR_ONLYSERVER   = 1 << 7
+};
 
 /* Mode functions handle mode changes for a particular mode... */
 static void

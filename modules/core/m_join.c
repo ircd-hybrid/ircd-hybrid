@@ -293,7 +293,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   struct Mode mode, *oldmode;
 
   if (!IsClient(source_p))
-    return;
+    return 0;
 
   if (parc == 2 && !strcmp(parv[1], "0"))
   {

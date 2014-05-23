@@ -684,8 +684,8 @@ handle_numeric(unsigned int numeric, struct Client *source_p, int parc, char *pa
 
   if (target_p)
   {
-    /* Fake it for server hiding, if its our client */
-    if (ConfigServerHide.hide_servers && MyClient(target_p) &&
+    /* Fake it for server hiding, if it's our client */
+    if (ConfigServerHide.hide_servers && MyConnect(target_p) &&
         !HasUMode(target_p, UMODE_OPER))
       sendto_one_numeric(target_p, &me, numeric|SND_EXPLICIT, "%s", parv[2]);
     else

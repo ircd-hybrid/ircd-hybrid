@@ -671,7 +671,6 @@ chm_operonly(struct Client *client_p, struct Client *source_p, struct Channel *c
     mode_changes[mode_count].nocaps = 0;
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
     mode_changes[mode_count++].arg = NULL;
   }
   else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */

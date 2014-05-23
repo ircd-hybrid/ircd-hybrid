@@ -100,8 +100,6 @@ struct MessageTree
 
 static struct MessageTree msg_tree;
 
-static char *para[MAXPARA + 2]; /* <command> + <parameters> + NULL */
-
 static int cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
 static void handle_numeric(unsigned int, struct Client *, int, char *[]);
@@ -118,6 +116,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 {
   struct Client *from = client_p;
   struct Message *msg_ptr = NULL;
+  char *para[MAXPARA + 2];  /* <command> + <parameters> + NULL */
   char *ch = NULL;
   char *s = NULL;
   unsigned int numeric = 0;
@@ -296,7 +295,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
  */
 static void
 handle_command(struct Message *mptr, struct Client *source_p,
-               unsigned int i, char *hpara[])
+               unsigned int i, char *para[])
 {
   if (IsServer(source_p->from))
     ++mptr->rcount;
@@ -307,7 +306,7 @@ handle_command(struct Message *mptr, struct Client *source_p,
   if (i < mptr->args_min)
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
   else
-    mptr->handlers[source_p->from->handler](source_p, i, hpara);
+    mptr->handlers[source_p->from->handler](source_p, i, para);
 }
 
 /* add_msg_element()

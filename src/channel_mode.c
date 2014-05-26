@@ -542,25 +542,21 @@ chm_operonly(struct Client *source_p, struct Channel *chptr,
              int parc, int *parn, char **parv, int *errors, int alev, int dir,
              char c, unsigned int d)
 {
-  if ((alev < CHACCESS_HALFOP) ||
-      ((d == MODE_PRIVATE) && (alev < CHACCESS_CHANOP)))
+  if ((alev < CHACCESS_HALFOP) || ((d == MODE_PRIVATE) && (alev < CHACCESS_CHANOP)))
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, chptr->chname);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
-  else if (MyClient(source_p) && !HasUMode(source_p, UMODE_OPER))
+
+  if (MyClient(source_p) && !HasUMode(source_p, UMODE_OPER))
   {
     if (!(*errors & SM_ERR_NOTOPER))
-    {
-      if (alev == CHACCESS_NOTONCHAN)
-        sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
-      else
-        sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
-    }
+      sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
 
     *errors |= SM_ERR_NOTOPER;
     return;

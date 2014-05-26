@@ -89,11 +89,7 @@ do_etrace(struct Client *source_p, const char *arg)
   if (!EmptyString(arg))
   {
     tname = arg;
-
-    if (tname)
-      wilds = has_wildcards(tname);
-    else
-      tname = "*";
+    wilds = has_wildcards(tname);
   }
   else
   {

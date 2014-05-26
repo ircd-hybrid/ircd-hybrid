@@ -1,3 +1,7 @@
+-- Noteworthy changes in version 8.2.0beta3 (2014-05-26)
+o) Code cleanups/performance improvements
+
+
 -- Noteworthy changes in version 8.2.0beta2 (2014-05-15)
 ########################################################################
 o) IMPORTANT: renamed general::warn_no_nline configuration directive to

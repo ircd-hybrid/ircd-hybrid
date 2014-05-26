@@ -100,6 +100,4 @@ extern void sendto_realops_flags_ratelimited(const char *, ...) AFP(1,2);
 extern void sendto_anywhere(struct Client *, struct Client *,
                             const char *,
                             const char *, ...) AFP(4,5);
-extern void kill_client_serv_butone(struct Client *, struct Client *,
-                                    const char *, ...) AFP(3,4);
 #endif /* INCLUDED_send_h */

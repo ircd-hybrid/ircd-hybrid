@@ -1186,7 +1186,7 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
                      "T :Client Server");
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     ":%s %d %s T :connected %u %u",
+                     "T :connected %u %u",
                      (unsigned int)sp->is_cl,
                      (unsigned int)sp->is_sv);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,

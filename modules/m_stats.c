@@ -1402,10 +1402,10 @@ stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
 
     /* This basically shows ips for our opers if its not a server/admin, or
      * its one of our admins.  */
-    if(MyClient(source_p) && HasUMode(source_p, UMODE_OPER) &&
-       (HasUMode(source_p, UMODE_ADMIN) ||
-       (!IsServer(target_p) && !HasUMode(target_p, UMODE_ADMIN) &&
-       !IsHandshake(target_p) && !IsConnecting(target_p))))
+    if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER) &&
+        (HasUMode(source_p, UMODE_ADMIN) ||
+        (!IsServer(target_p) && !HasUMode(target_p, UMODE_ADMIN) &&
+        !IsHandshake(target_p) && !IsConnecting(target_p))))
     {
       sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
                  (IsUpper(statchar)) ?
@@ -1423,8 +1423,8 @@ stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
     else
     {
       /* If its a hidden ip, an admin, or a server, mask the real IP */
-      if(IsIPSpoof(target_p) || IsServer(target_p) || HasUMode(target_p, UMODE_ADMIN)
-         || IsHandshake(target_p) || IsConnecting(target_p))
+      if (IsIPSpoof(target_p) || IsServer(target_p) || HasUMode(target_p, UMODE_ADMIN) ||
+          IsHandshake(target_p) || IsConnecting(target_p))
         sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
                    get_client_name(target_p, MASK_IP),
                    dbuf_length(&target_p->localClient->buf_sendq),

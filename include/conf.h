@@ -112,7 +112,7 @@ enum maskitem_type
   CONF_CRESV    = 1 <<  9,
   CONF_NRESV    = 1 << 10,
   CONF_SERVICE  = 1 << 11,
-  CONF_OPER     = 1 << 12,
+  CONF_OPER     = 1 << 12
 };
 
 enum

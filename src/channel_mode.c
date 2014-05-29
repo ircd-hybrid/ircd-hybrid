@@ -819,7 +819,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     return;
   }
 
-  if ((dir == MODE_QUERY) || parc <= *parn)
+  if (dir == MODE_QUERY || parc <= *parn)
     return;
 
   opnick = parv[(*parn)++];
@@ -890,7 +890,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     return;
   }
 
-  if ((dir == MODE_QUERY) || (parc <= *parn))
+  if (dir == MODE_QUERY || parc <= *parn)
     return;
 
   opnick = parv[(*parn)++];
@@ -950,7 +950,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     return;
   }
 
-  if ((dir == MODE_QUERY) || (parc <= *parn))
+  if (dir == MODE_QUERY || parc <= *parn)
     return;
 
   opnick = parv[(*parn)++];
@@ -995,7 +995,6 @@ static void
 chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  unsigned int i = 0;
   int limit = 0;
 
   if (alev < CHACCESS_HALFOP)
@@ -1011,7 +1010,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_QUERY)
     return;
 
-  if ((dir == MODE_ADD) && parc > *parn)
+  if (dir == MODE_ADD && parc > *parn)
   {
     char *lstr = parv[(*parn)++];
 
@@ -1021,7 +1020,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     sprintf(lstr, "%d", limit);
 
     /* If somebody sets MODE #channel +ll 1 2, accept latter --fl */
-    for (i = 0; i < mode_count; ++i)
+    for (unsigned int i = 0; i < mode_count; ++i)
       if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
 
@@ -1052,8 +1051,6 @@ static void
 chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  unsigned int i = 0;
-
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
@@ -1067,7 +1064,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_QUERY)
     return;
 
-  if ((dir == MODE_ADD) && parc > *parn)
+  if (dir == MODE_ADD && parc > *parn)
   {
     char *key = parv[(*parn)++];
 
@@ -1083,7 +1080,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     strlcpy(chptr->mode.key, key, sizeof(chptr->mode.key));
 
     /* If somebody does MODE #channel +kk a b, accept latter --fl */
-    for (i = 0; i < mode_count; ++i)
+    for (unsigned int i = 0; i < mode_count; ++i)
       if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
 
@@ -1426,12 +1423,11 @@ get_channel_access(const struct Client *source_p,
 static void
 send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 {
-  unsigned int i;
   int mbl = 0, pbl = 0, arglen = 0, nc = 0, mc = 0;
   int len = 0;
-  const char *arg = NULL;
-  char *parptr;
   int dir = MODE_QUERY;
+  const char *arg = NULL;
+  char *parptr = NULL;
 
   parabuf[0] = '\0';
   parptr = parabuf;
@@ -1440,7 +1436,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
                  (unsigned long)chptr->channelts, chptr->chname);
 
   /* Loop the list of modes we have */
-  for (i = 0; i < mode_count; ++i)
+  for (unsigned i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0)
       continue;
@@ -1518,12 +1514,11 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 static void
 send_mode_changes(struct Client *source_p, struct Channel *chptr)
 {
-  unsigned int i;
   int mbl = 0, pbl = 0, arglen = 0, nc = 0, mc = 0;
   int len = 0;
-  const char *arg = NULL;
-  char *parptr;
   int dir = MODE_QUERY;
+  const char *arg = NULL;
+  char *parptr = NULL;
 
   /* Bail out if we have nothing to do... */
   if (!mode_count)
@@ -1540,7 +1535,7 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
   parabuf[0] = '\0';
   parptr = parabuf;
 
-  for (i = 0; i < mode_count; ++i)
+  for (unsigned int i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0 ||
         mode_changes[i].mems == NON_CHANOPS ||
@@ -1608,7 +1603,7 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
   send_mode_changes_server(source_p, chptr);
 }
 
-/* 
+/*
  * Input: The the client this originated
  *        from, the channel, the parameter count starting at the modes,
  *        the parameters, the channel name.
@@ -1623,7 +1618,7 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
 {
   int dir = MODE_ADD;
   int parn = 1;
-  int alevel, errors = 0;
+  int alevel = 0, errors = 0;
 
   mode_count = 0;
   mode_limit = 0;

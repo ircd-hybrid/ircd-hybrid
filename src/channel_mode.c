@@ -318,7 +318,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
     *mbuf++ = 'l';
 
     if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE) || IsMember(client_p, chptr))
-      pbuf += sprintf(pbuf, "%d ", chptr->mode.limit);
+      pbuf += sprintf(pbuf, " %d", chptr->mode.limit);
   }
 
   if (chptr->mode.key[0])
@@ -326,7 +326,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
     *mbuf++ = 'k';
 
     if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE) || IsMember(client_p, chptr))
-      sprintf(pbuf, "%s ", chptr->mode.key);
+      sprintf(pbuf, " %s", chptr->mode.key);
   }
 
   *mbuf = '\0';

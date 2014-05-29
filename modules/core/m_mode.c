@@ -192,8 +192,6 @@ m_mode(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   struct Membership *member = NULL;
-  char modebuf[MODEBUFLEN];
-  char parabuf[MODEBUFLEN];
 
   if (EmptyString(parv[1]))
   {
@@ -218,6 +216,9 @@ m_mode(struct Client *source_p, int parc, char *parv[])
   /* Now known the channel exists */
   if (parc < 3)
   {
+    char modebuf[MODEBUFLEN] = "";
+    char parabuf[MODEBUFLEN] = "";
+
     channel_modes(chptr, source_p, modebuf, parabuf);
     sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS, chptr->chname, modebuf, parabuf);
     sendto_one_numeric(source_p, &me, RPL_CREATIONTIME, chptr->chname, chptr->channelts);

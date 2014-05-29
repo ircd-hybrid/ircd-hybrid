@@ -290,24 +290,24 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
  * chptr onto buffer mbuf with the parameters in pbuf.
  */
 void
-channel_modes(struct Channel *chptr, struct Client *client_p,
-              char *mbuf, char *pbuf)
+channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
 {
-  const struct mode_letter *tab = chan_modes;
+  int previous_mode = 0;
 
   *mbuf++ = '+';
   *pbuf = '\0';
 
-  for (; tab->mode; ++tab)
+  for (const struct mode_letter *tab = chan_modes; tab->mode; ++tab)
     if (chptr->mode.mode & tab->mode)
       *mbuf++ = tab->letter;
 
   if (chptr->mode.limit)
   {
+    previous_mode = 1;
     *mbuf++ = 'l';
 
     if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE) || IsMember(client_p, chptr))
-      pbuf += sprintf(pbuf, "%d", chptr->mode.limit);
+      sprintf(pbuf, "%u", chptr->mode.limit);
   }
 
   if (chptr->mode.key[0])
@@ -315,7 +315,11 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
     *mbuf++ = 'k';
 
     if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE) || IsMember(client_p, chptr))
-      sprintf(pbuf, *pbuf ? " %s" : "%s", chptr->mode.key);
+    {
+      if (previous_mode)
+        strcat(pbuf, " ");
+      strcat(pbuf, chptr->mode.key);
+    }
   }
 
   *mbuf = '\0';

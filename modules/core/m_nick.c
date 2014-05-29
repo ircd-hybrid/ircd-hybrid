@@ -225,7 +225,7 @@ change_local_nick(struct Client *source_p, const char *nick)
     if (HasUMode(source_p, UMODE_REGISTERED))
     {
       unsigned int oldmodes = source_p->umodes;
-      char modebuf[IRCD_BUFSIZE] = { '\0' };
+      char modebuf[IRCD_BUFSIZE] = "";
 
       DelUMode(source_p, UMODE_REGISTERED);
       send_umode(source_p, source_p, oldmodes, 0xffffffff, modebuf);
@@ -564,7 +564,7 @@ perform_nick_collides(struct Client *source_p,
 static int
 mr_nick(struct Client *source_p, int parc, char *parv[])
 {
-  char nick[NICKLEN + 1] = { '\0' };
+  char nick[NICKLEN + 1] = "";
   struct Client *target_p = NULL;
   struct MaskItem *conf = NULL;
 
@@ -619,7 +619,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
 static int
 m_nick(struct Client *source_p, int parc, char *parv[])
 {
-  char nick[NICKLEN + 1] = { '\0' };
+  char nick[NICKLEN + 1] = "";
   struct Client *target_p = NULL;
   struct MaskItem *conf = NULL;
 
@@ -709,8 +709,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (IsServer(source_p))
-    /* Servers can't change nicks.. */
-    return 0;
+    return 0;  /* Servers can't change nicks.. */
 
   if (check_clean_nick(source_p, parv[1], source_p->servptr))
     return 0;
@@ -778,7 +777,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
   time_t newts = 0;
   const char *svsid = "0";
 
-  if (parc < 10 || EmptyString(parv[parc-1]))
+  if (parc < 10 || EmptyString(parv[parc - 1]))
     return 0;
 
   if (check_clean_nick(source_p, parv[1], source_p) ||
@@ -794,7 +793,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
    * This may generate 401's, but it ensures that both clients always
    * go, even if the other server refuses to do the right thing.
    */
-  if ((target_p = hash_find_id(parv[8])) != NULL)
+  if ((target_p = hash_find_id(parv[8])))
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "ID collision on %s(%s <- %s)(both killed)",

@@ -370,12 +370,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       }
     }
     else
-    {
-      if (fl & (CHFL_CHANOP|CHFL_HALFOP))
-        fl = CHFL_DEOPPED;
-      else
-        fl = 0;
-    }
+      fl = 0;
+
     *up = '\0';
 
     if ((uid_ptr - uid_buf + len_uid) > (IRCD_BUFSIZE - 2))

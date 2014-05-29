@@ -760,7 +760,7 @@ valid_username(const char *username, const int local)
         return 0;
   }
 
-  return p - username <= USERLEN;;
+  return p - username <= USERLEN;
 }
 
 /* clean_nick_name()

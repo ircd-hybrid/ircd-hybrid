@@ -805,7 +805,6 @@ static void
 chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  const char *opnick = NULL;
   struct Client *target_p;
   struct Membership *member;
 
@@ -822,15 +821,13 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_QUERY || parc <= *parn)
     return;
 
-  opnick = parv[(*parn)++];
-
-  if ((target_p = find_chasing(source_p, opnick)) == NULL)
+  if ((target_p = find_chasing(source_p, parv[(*parn)++])) == NULL)
     return;
 
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, opnick, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->chname);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -862,7 +859,6 @@ static void
 chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  const char *opnick = NULL;
   struct Client *target_p;
   struct Membership *member;
 
@@ -893,15 +889,13 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_QUERY || parc <= *parn)
     return;
 
-  opnick = parv[(*parn)++];
-
-  if ((target_p = find_chasing(source_p, opnick)) == NULL)
+  if ((target_p = find_chasing(source_p, parv[(*parn)++])) == NULL)
     return;
 
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, opnick, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->chname);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -936,7 +930,6 @@ static void
 chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  const char *opnick = NULL;
   struct Client *target_p;
   struct Membership *member;
 
@@ -953,15 +946,13 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_QUERY || parc <= *parn)
     return;
 
-  opnick = parv[(*parn)++];
-
-  if ((target_p = find_chasing(source_p, opnick)) == NULL)
+  if ((target_p = find_chasing(source_p, parv[(*parn)++])) == NULL)
     return;
 
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, opnick, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->chname);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }

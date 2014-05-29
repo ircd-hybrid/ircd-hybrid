@@ -53,7 +53,6 @@ static void
 set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
   unsigned int mode = 0, setmodes = 0;
-  char buf[IRCD_BUFSIZE] = "";
   struct Client *target_p = NULL;
   int what = MODE_ADD, badmode = 0;
 
@@ -72,6 +71,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
   if (parc < 3)
   {
+    char buf[IRCD_BUFSIZE] = "";
     char *m = buf;
     *m++ = '+';
 

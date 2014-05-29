@@ -248,8 +248,8 @@ struct config_file_entry
   int pace_wait_simple;
   int gline_time;
   int gline_request_time;
-  int oper_only_umodes;
-  int oper_umodes;
+  unsigned int oper_only_umodes;
+  unsigned int oper_umodes;
   unsigned int max_targets;
   int caller_id_wait;
   int min_nonwildcard;

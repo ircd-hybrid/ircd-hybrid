@@ -191,7 +191,6 @@ static int
 m_mode(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  struct Membership *member = NULL;
 
   if (EmptyString(parv[1]))
   {
@@ -234,17 +233,14 @@ m_mode(struct Client *source_p, int parc, char *parv[])
     set_channel_mode(source_p, chptr, NULL, parc - 2, parv + 2);
   else
   {
-    member = find_channel_link(source_p, chptr);
+    struct Membership *member = find_channel_link(source_p, chptr);
 
-    if (!has_member_flags(member, CHFL_DEOPPED))
-    {
-      /* Finish the flood grace period... */
-      if (MyClient(source_p) && !IsFloodDone(source_p))
-        if (!((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0')))
-          flood_endgrace(source_p);
+    /* Finish the flood grace period... */
+    if (MyClient(source_p) && !IsFloodDone(source_p))
+      if (!((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0')))
+        flood_endgrace(source_p);
 
-      set_channel_mode(source_p, chptr, member, parc - 2, parv + 2);
-    }
+    set_channel_mode(source_p, chptr, member, parc - 2, parv + 2);
   }
 
   return 0;

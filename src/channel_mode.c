@@ -914,10 +914,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count++].client = target_p;
 
   if (dir == MODE_ADD)
-  {
     AddMemberFlag(member, CHFL_HALFOP);
-    DelMemberFlag(member, CHFL_DEOPPED);
-  }
   else
     DelMemberFlag(member, CHFL_HALFOP);
 }
@@ -971,10 +968,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count++].client = target_p;
 
   if (dir == MODE_ADD)
-  {
     AddMemberFlag(member, CHFL_CHANOP);
-    DelMemberFlag(member, CHFL_DEOPPED);
-  }
   else
     DelMemberFlag(member, CHFL_CHANOP);
 }

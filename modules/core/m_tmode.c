@@ -54,7 +54,6 @@ static int
 ms_tmode(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  struct Membership *member = NULL;
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
@@ -69,11 +68,7 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
     set_channel_mode(source_p, chptr, NULL, parc - 3, parv + 3);
   else
   {
-    member = find_channel_link(source_p, chptr);
-
-    /* XXX are we sure we just want to bail here? */
-    if (has_member_flags(member, CHFL_DEOPPED))
-      return 0;
+    struct Membership *member = find_channel_link(source_p, chptr);
 
     set_channel_mode(source_p, chptr, member, parc - 3, parv + 3);
   }

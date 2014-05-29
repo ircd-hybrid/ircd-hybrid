@@ -60,10 +60,9 @@ enum
 #define CHFL_CHANOP     0x0001 /* Channel operator   */
 #define CHFL_HALFOP     0x0002 /* Channel half op    */
 #define CHFL_VOICE      0x0004 /* the power to speak */
-#define CHFL_DEOPPED    0x0008 /* deopped by us, modes need to be bounced */
-#define CHFL_BAN        0x0010 /* ban channel flag */
-#define CHFL_EXCEPTION  0x0020 /* exception to ban channel flag */
-#define CHFL_INVEX      0x0040
+#define CHFL_BAN        0x0008 /* ban channel flag */
+#define CHFL_EXCEPTION  0x0010 /* exception to ban channel flag */
+#define CHFL_INVEX      0x0020
 
 /* channel modes ONLY */
 #define MODE_PRIVATE    0x0001  /**< */

@@ -768,7 +768,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
  *      - parv[ 6] = hostname
  *      - parv[ 7] = ip
  *      - parv[ 8] = uid
- *      - parv[ 9] = services id (timestamp)
+ *      - parv[ 9] = services id (account name)
  *      - parv[10] = ircname (gecos)
  */
 static int

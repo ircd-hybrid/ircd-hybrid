@@ -1442,7 +1442,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
   /* Loop the list of modes we have */
   for (i = 0; i < mode_count; ++i)
   {
-    if (mode_changes[i].letter == 0) /* XXX: can it ever happen? */
+    if (mode_changes[i].letter == 0)
       continue;
 
     if (mode_changes[i].id)

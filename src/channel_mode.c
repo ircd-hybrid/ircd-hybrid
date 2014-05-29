@@ -292,8 +292,6 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
 void
 channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
 {
-  int previous_mode = 0;
-
   *mbuf++ = '+';
   *pbuf = '\0';
 
@@ -303,11 +301,10 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
 
   if (chptr->mode.limit)
   {
-    previous_mode = 1;
     *mbuf++ = 'l';
 
     if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE) || IsMember(client_p, chptr))
-      sprintf(pbuf, "%u", chptr->mode.limit);
+      pbuf += sprintf(pbuf, "%d ", chptr->mode.limit);
   }
 
   if (chptr->mode.key[0])
@@ -315,11 +312,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
     *mbuf++ = 'k';
 
     if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE) || IsMember(client_p, chptr))
-    {
-      if (previous_mode)
-        strcat(pbuf, " ");
-      strcat(pbuf, chptr->mode.key);
-    }
+      sprintf(pbuf, "%s ", chptr->mode.key);
   }
 
   *mbuf = '\0';

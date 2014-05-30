@@ -538,7 +538,7 @@ static void
 chm_operonly(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
              char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  if (alev < CHACCESS_HALFOP)
+  if (alev < CHACCESS_CHANOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,

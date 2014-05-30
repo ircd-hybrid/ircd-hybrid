@@ -112,9 +112,8 @@ int
 add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int type)
 {
   dlink_list *list = NULL;
-  dlink_node *ban = NULL;
-  struct Ban *ban_p = NULL;
-  unsigned int num_mask;
+  dlink_node *ptr = NULL;
+  struct Ban *banptr = NULL;
   size_t len = 0;
   char name[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
@@ -124,9 +123,9 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
   /* Don't let local clients overflow the b/e/I lists */
   if (MyClient(client_p))
   {
-    num_mask = dlink_list_length(&chptr->banlist) +
-               dlink_list_length(&chptr->exceptlist) +
-               dlink_list_length(&chptr->invexlist);
+    unsigned int num_mask = dlink_list_length(&chptr->banlist) +
+                            dlink_list_length(&chptr->exceptlist) +
+                            dlink_list_length(&chptr->invexlist);
 
     if (num_mask >= ConfigChannel.max_bans)
     {
@@ -172,39 +171,40 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
       return 0;
   }
 
-  DLINK_FOREACH(ban, list->head)
+  DLINK_FOREACH(ptr, list->head)
   {
-    ban_p = ban->data;
+    banptr = ptr->data;
 
-    if (!irccmp(ban_p->name, name) &&
-        !irccmp(ban_p->user, user) &&
-        !irccmp(ban_p->host, host))
+    if (!irccmp(banptr->name, name) &&
+        !irccmp(banptr->user, user) &&
+        !irccmp(banptr->host, host))
       return 0;
   }
 
-  ban_p = mp_pool_get(ban_pool);
-  memset(ban_p, 0, sizeof(*ban_p));
-  ban_p->name = xstrdup(name);
-  ban_p->user = xstrdup(user);
-  ban_p->host = xstrdup(host);
-  ban_p->when = CurrentTime;
-  ban_p->len = len - 2;  /* -2 for @ and ! */
-  ban_p->type = parse_netmask(host, &ban_p->addr, &ban_p->bits);
+  banptr = mp_pool_get(ban_pool);
+  memset(banptr, 0, sizeof(*banptr));
+
+  banptr->name = xstrdup(name);
+  banptr->user = xstrdup(user);
+  banptr->host = xstrdup(host);
+  banptr->when = CurrentTime;
+  banptr->len = len - 2;  /* -2 for @ and ! */
+  banptr->type = parse_netmask(host, &banptr->addr, &banptr->bits);
 
   if (IsClient(client_p))
   {
-    ban_p->who = MyCalloc(strlen(client_p->name) +
-                          strlen(client_p->username) +
-                          strlen(client_p->host) + 3);
-    sprintf(ban_p->who, "%s!%s@%s", client_p->name,
+    banptr->who = MyCalloc(strlen(client_p->name) +
+                           strlen(client_p->username) +
+                           strlen(client_p->host) + 3);
+    sprintf(banptr->who, "%s!%s@%s", client_p->name,
             client_p->username, client_p->host);
   }
   else if (IsHidden(client_p) || (IsServer(client_p) && ConfigServerHide.hide_servers))
-    ban_p->who = xstrdup(me.name);
+    banptr->who = xstrdup(me.name);
   else
-    ban_p->who = xstrdup(client_p->name);
+    banptr->who = xstrdup(client_p->name);
 
-  dlinkAdd(ban_p, &ban_p->node, list);
+  dlinkAdd(banptr, &banptr->node, list);
 
   return 1;
 }
@@ -220,7 +220,7 @@ static int
 del_id(struct Channel *chptr, char *banid, unsigned int type)
 {
   dlink_list *list = NULL;
-  dlink_node *ban = NULL;
+  dlink_node *ptr = NULL;
   char name[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
   char host[HOSTLEN + 1] = "";
@@ -263,9 +263,9 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
       return 0;
   }
 
-  DLINK_FOREACH(ban, list->head)
+  DLINK_FOREACH(ptr, list->head)
   {
-    struct Ban *banptr = ban->data;
+    struct Ban *banptr = ptr->data;
 
     if (!irccmp(name, banptr->name) &&
         !irccmp(user, banptr->user) &&
@@ -535,9 +535,8 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
 }
 
 static void
-chm_operonly(struct Client *source_p, struct Channel *chptr,
-             int parc, int *parn, char **parv, int *errors, int alev, int dir,
-             char c, unsigned int d)
+chm_operonly(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
+             char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   if (alev < CHACCESS_HALFOP)
   {

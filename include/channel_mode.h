@@ -85,8 +85,7 @@ enum
 /* name invisible */
 #define SecretChannel(x)        (((x)->mode.mode & MODE_SECRET))
 #define PubChannel(x)           (((x)->mode.mode & (MODE_PRIVATE | MODE_SECRET)) == 0)
-/* knock is forbidden, halfops can't kick/deop other halfops.
- * +pi means paranoid and will generate notices on each invite */
+/* knock is forbidden, halfops can't kick/deop other halfops. */
 #define PrivateChannel(x)       (((x)->mode.mode & MODE_PRIVATE))
 
 struct ChModeChange

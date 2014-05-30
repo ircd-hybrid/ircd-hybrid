@@ -3,6 +3,7 @@ o) Fixed CAP issue for certain clients
 o) Fixed bug where "STATS p" would show an invalid amount of irc-operators
    in case there are +H opers
 o) irc-operators may now no longer set a channel +O if they are only halfops (%)
+o) Channel halfops (%) may now no longer (de)halfop other channel members
 
 
 -- Noteworthy changes in version 8.1.17 (2014-05-01)

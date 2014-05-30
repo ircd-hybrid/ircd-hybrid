@@ -857,21 +857,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   struct Client *target_p;
   struct Membership *member;
 
-  /* *sigh* - dont allow halfops to set +/-h, they could fully control a
-   * channel if there were no ops - it doesnt solve anything.. MODE_PRIVATE
-   * when used with MODE_SECRET is paranoid - cant use +p
-   *
-   * it needs to be optional per channel - but not via +p, that or remove
-   * paranoid.. -- fl_
-   *
-   * +p means paranoid, it is useless for anything else on modern IRC, as
-   * list isn't really usable. If you want to have a private channel these
-   * days, you set it +s. Halfops can no longer remove simple modes when
-   * +p is set (although they can set +p) so it is safe to use this to
-   * control whether they can (de)halfop...
-   */
-  if (alev <
-      ((chptr->mode.mode & MODE_PRIVATE) ? CHACCESS_CHANOP : CHACCESS_HALFOP))
+  if (alev < CHACCESS_CHANOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,

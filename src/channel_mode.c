@@ -433,8 +433,7 @@ static void
 chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  if ((alev < CHACCESS_HALFOP) ||
-      ((d == MODE_PRIVATE) && (alev < CHACCESS_CHANOP)))
+  if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,

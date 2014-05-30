@@ -145,7 +145,6 @@ m_kick(struct Client *client_p, struct Client *source_p,
   if ((ms_target = find_channel_link(target_p, chptr)) != NULL)
   {
 #ifdef HALFOPS
-    /* half ops cannot kick other halfops on private channels */
     if (has_member_flags(ms_source, CHFL_HALFOP) && !has_member_flags(ms_source, CHFL_CHANOP))
     {
       if (has_member_flags(ms_target, CHFL_CHANOP|CHFL_HALFOP))

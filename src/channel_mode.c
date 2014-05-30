@@ -629,7 +629,7 @@ chm_operonly(struct Client *client_p, struct Client *source_p, struct Channel *c
             int parc, int *parn, char **parv, int *errors, int alev, int dir,
             char c, unsigned int d)
 {
-  if (alev < CHACCESS_HALFOP)
+  if (alev < CHACCESS_CHANOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one(source_p, form_str(alev == CHACCESS_NOTONCHAN ?

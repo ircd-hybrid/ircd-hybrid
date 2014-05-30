@@ -841,8 +841,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count].dir = dir;
   mode_changes[mode_count].mems = ALL_MEMBERS;
   mode_changes[mode_count].id = target_p->id;
-  mode_changes[mode_count].arg = target_p->name;
-  mode_changes[mode_count++].client = target_p;
+  mode_changes[mode_count++].arg = target_p->name;
 
   if (dir == MODE_ADD)
     AddMemberFlag(member, CHFL_VOICE);
@@ -909,8 +908,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count].dir = dir;
   mode_changes[mode_count].mems = ALL_MEMBERS;
   mode_changes[mode_count].id = target_p->id;
-  mode_changes[mode_count].arg = target_p->name;
-  mode_changes[mode_count++].client = target_p;
+  mode_changes[mode_count++].arg = target_p->name;
 
   if (dir == MODE_ADD)
     AddMemberFlag(member, CHFL_HALFOP);
@@ -963,8 +961,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count].dir = dir;
   mode_changes[mode_count].mems = ALL_MEMBERS;
   mode_changes[mode_count].id = target_p->id;
-  mode_changes[mode_count].arg = target_p->name;
-  mode_changes[mode_count++].client = target_p;
+  mode_changes[mode_count++].arg = target_p->name;
 
   if (dir == MODE_ADD)
     AddMemberFlag(member, CHFL_CHANOP);

@@ -96,7 +96,6 @@ struct ChModeChange
   const char *id;
   int dir;
   int mems;
-  struct Client *client;
 };
 
 struct mode_letter

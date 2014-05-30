@@ -1519,7 +1519,6 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
   for (unsigned int i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0 ||
-        mode_changes[i].mems == NON_CHANOPS ||
         mode_changes[i].mems == ONLY_SERVERS)
       continue;
 

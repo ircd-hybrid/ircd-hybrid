@@ -95,8 +95,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   /* half ops cannot kick other halfops on private channels */
   if (has_member_flags(ms_source, CHFL_HALFOP) && !has_member_flags(ms_source, CHFL_CHANOP))
   {
-    if (((chptr->mode.mode & MODE_PRIVATE) && has_member_flags(ms_target,
-         CHFL_CHANOP|CHFL_HALFOP)) || has_member_flags(ms_target, CHFL_CHANOP))
+    if (has_member_flags(ms_target, CHFL_CHANOP|CHFL_HALFOP))
     {
       sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
       return 0;

@@ -34,11 +34,9 @@ enum { NOCAPS = 0 };
 
 enum
 {
-  ALL_MEMBERS         = 0,
-  NON_CHANOPS         = 1,
-  ONLY_CHANOPS_VOICED = 2,
-  ONLY_CHANOPS        = 3,
-  ONLY_SERVERS        = 4
+  ALL_MEMBERS  = 0,
+  ONLY_CHANOPS = 1,
+  ONLY_SERVERS = 2
 };
 
 enum

@@ -524,29 +524,6 @@ report_messages(struct Client *source_p)
 static void
 cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
 {
-  /*
-   * Kill all possible points that are causing confusion here,
-   * I'm not sure I've got this all right...
-   * - avalon
-   *
-   * Knowing avalon, probably not.
-   */
-
-  /*
-   * With TS, fake prefixes are a common thing, during the
-   * connect burst when there's a nick collision, and they
-   * must be ignored rather than killed because one of the
-   * two is surviving.. so we don't bother sending them to
-   * all ops everytime, as this could send 'private' stuff
-   * from lagged clients. we do send the ones that cause
-   * servers to be dropped though, as well as the ones from
-   * non-TS servers -orabidoo
-   */
-  /*
-   * Incorrect prefix for a server from some connection. If it is a
-   * client trying to be annoying, just QUIT them, if it is a server
-   * then the same deal.
-   */
   if (IsServer(source_p) || IsMe(source_p))
   {
     sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
@@ -563,17 +540,6 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
     return;
   }
 
-  /*
-   * Ok, someone is trying to impose as a client and things are
-   * confused. If we got the wrong prefix from a server, send out a
-   * kill, else just exit the lame client.
-   */
-  /*
-   * If the fake prefix is coming from a TS server, discard it
-   * silently -orabidoo
-   *
-   * all servers must be TS these days --is
-   */
   sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                        "Message for %s[%s@%s!%s] from %s (TS, ignored)",
                        source_p->name, source_p->username, source_p->host,

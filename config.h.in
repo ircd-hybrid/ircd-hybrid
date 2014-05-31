@@ -9,9 +9,6 @@
 /* Define if SSP C support is enabled. */
 #undef ENABLE_SSP_CC
 
-/* Define to 1 if you want halfops support. */
-#undef HALFOPS
-
 /* Define to 1 if you have the `argz_add' function. */
 #undef HAVE_ARGZ_ADD
 

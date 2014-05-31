@@ -1103,13 +1103,8 @@ init_isupport(void)
   add_isupport("DEAF", "D", -1);
   add_isupport("KICKLEN", NULL, KICKLEN);
   add_isupport("MODES", NULL, MAXMODEPARAMS);
-#ifdef HALFOPS
   add_isupport("PREFIX", "(ohv)@%+", -1);
   add_isupport("STATUSMSG", "@%+", -1);
-#else
-  add_isupport("PREFIX", "(ov)@+", -1);
-  add_isupport("STATUSMSG", "@+", -1);
-#endif
   add_isupport("EXCEPTS", "e", -1);
   add_isupport("INVEX", "I", -1);
 }

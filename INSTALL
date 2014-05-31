@@ -79,11 +79,6 @@
             with proper settings that are required for debugging purposes.
             This switch basically sets CFLAGS to "-g -O0".
 
-          * --enable-halfops - Enable halfops (%, mode +h) usage. Halfops
-            are similar to plain ops, but can't kick/deop plain ops. Halfops
-            may or may not kick/deop other halfops depending on if (+p) is
-            set. Halfops may not set (+/-p).
-
 
    3.  Run 'make'; this should build the ircd.
 

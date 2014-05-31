@@ -164,10 +164,8 @@ send_members(struct Client *client_p, struct Channel *chptr,
 
     if (ms->flags & CHFL_CHANOP)
       ++tlen;
-#ifdef HALFOPS
     if (ms->flags & CHFL_HALFOP)
       ++tlen;
-#endif
     if (ms->flags & CHFL_VOICE)
       ++tlen;
 
@@ -184,10 +182,8 @@ send_members(struct Client *client_p, struct Channel *chptr,
 
     if (ms->flags & CHFL_CHANOP)
       *t++ = '@';
-#ifdef HALFOPS
     if (ms->flags & CHFL_HALFOP)
       *t++ = '%';
-#endif
     if (ms->flags & CHFL_VOICE)
       *t++ = '+';
 
@@ -542,14 +538,12 @@ get_member_status(const struct Membership *ms, const int combine)
     *p++ = '@';
   }
 
-#ifdef HALFOPS
   if (ms->flags & CHFL_HALFOP)
   {
     if (!combine)
       return "%";
     *p++ = '%';
   }
-#endif
 
   if (ms->flags & CHFL_VOICE)
     *p++ = '+';

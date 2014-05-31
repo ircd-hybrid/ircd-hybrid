@@ -129,13 +129,6 @@ _syscall1(int, epoll_create, int, size)
   AC_DEFINE_UNQUOTED([USE_IOPOLL_MECHANISM],[$use_iopoll_mechanism],[use this iopoll mechanism])
   dnl }}}
 ])dnl }}}
-dnl {{{ ax_arg_enable_halfops
-AC_DEFUN([AX_ARG_ENABLE_HALFOPS],[
-  AC_ARG_ENABLE([halfops],[AS_HELP_STRING([--enable-halfops],[Enable halfops support.])],[halfops="$enableval"],[halfops="no"])
-  if test "$halfops" = "yes" ; then
-    AC_DEFINE([HALFOPS],[1],[Define to 1 if you want halfops support.])
-  fi
-])dnl }}}
 dnl {{{ ax_arg_enable_debugging
 AC_DEFUN([AX_ARG_ENABLE_DEBUGGING],[
   AC_ARG_ENABLE([debugging],[AS_HELP_STRING([--enable-debugging],[Enable debugging.])],[debugging="$enableval"],[debugging="no"])

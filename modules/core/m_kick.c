@@ -91,7 +91,6 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-#ifdef HALFOPS
   if (has_member_flags(ms_source, CHFL_HALFOP) && !has_member_flags(ms_source, CHFL_CHANOP))
   {
     if (has_member_flags(ms_target, CHFL_CHANOP|CHFL_HALFOP))
@@ -100,7 +99,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
   }
-#endif
+
   if (!EmptyString(parv[3]))
     strlcpy(reason, parv[3], sizeof(reason));
   else

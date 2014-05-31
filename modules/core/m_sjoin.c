@@ -319,12 +319,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         fl |= CHFL_CHANOP;
         s++;
         break;
-#ifdef HALFOPS
       case '%':
         fl |= CHFL_HALFOP;
         s++;
         break;
-#endif
       case '+':
         fl |= CHFL_VOICE;
         s++;
@@ -356,13 +354,13 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         *up++  = '@';
         len_uid++;
       }
-#ifdef HALFOPS
+
       if (fl & CHFL_HALFOP)
       {
         *up++  = '%';
         len_uid++;
       }
-#endif
+
       if (fl & CHFL_VOICE)
       {
         *up++  = '+';
@@ -433,7 +431,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         pargs = 0;
       }
     }
-#ifdef HALFOPS
+
     if (fl & CHFL_HALFOP)
     {
       *mbuf++ = 'h';
@@ -460,7 +458,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         pargs = 0;
       }
     }
-#endif
+
     if (fl & CHFL_VOICE)
     {
       *mbuf++ = 'v';
@@ -642,9 +640,7 @@ static void
 remove_our_modes(struct Channel *chptr, struct Client *source_p)
 {
   remove_a_mode(chptr, source_p, CHFL_CHANOP, 'o');
-#ifdef HALFOPS
   remove_a_mode(chptr, source_p, CHFL_HALFOP, 'h');
-#endif
   remove_a_mode(chptr, source_p, CHFL_VOICE, 'v');
 }
 

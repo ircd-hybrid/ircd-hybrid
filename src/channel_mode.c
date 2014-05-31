@@ -848,7 +848,6 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     DelMemberFlag(member, CHFL_VOICE);
 }
 
-#ifdef HALFOPS
 static void
 chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
@@ -900,7 +899,6 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   else
     DelMemberFlag(member, CHFL_HALFOP);
 }
-#endif
 
 static void
 chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
@@ -1185,11 +1183,7 @@ static struct ChannelMode ModeTable[256] =
   { chm_except,  0 },                   /* e */
   { chm_nosuch,  0 },                   /* f */
   { chm_nosuch,  0 },                   /* g */
-#ifdef HALFOPS
   { chm_hop,     0 },                   /* h */
-#else
-  { chm_nosuch,  0 },                   /* h */
-#endif
   { chm_simple,     MODE_INVITEONLY },  /* i */
   { chm_nosuch,     0               },  /* j */
   { chm_key,        0               },  /* k */
@@ -1368,10 +1362,8 @@ get_channel_access(const struct Client *source_p,
   if (has_member_flags(member, CHFL_CHANOP))
     return CHACCESS_CHANOP;
 
-#ifdef HALFOPS
   if (has_member_flags(member, CHFL_HALFOP))
     return CHACCESS_HALFOP;
-#endif
 
   return CHACCESS_PEON;
 }

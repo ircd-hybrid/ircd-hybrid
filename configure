@@ -813,7 +813,6 @@ enable_epoll
 enable_devpoll
 enable_poll
 enable_select
-enable_halfops
 enable_debugging
 enable_warnings
 '
@@ -1470,7 +1469,6 @@ Optional Features:
   --enable-devpoll        Force devpoll usage.
   --enable-poll           Force poll usage.
   --enable-select         Force select usage.
-  --enable-halfops        Enable halfops support.
   --enable-debugging      Enable debugging.
   --enable-warnings       Enable compiler warnings.
 
@@ -14598,20 +14596,6 @@ cat >>confdefs.h <<_ACEOF
 #define USE_IOPOLL_MECHANISM $use_iopoll_mechanism
 _ACEOF
 
-
-
-  # Check whether --enable-halfops was given.
-if test "${enable_halfops+set}" = set; then :
-  enableval=$enable_halfops; halfops="$enableval"
-else
-  halfops="no"
-fi
-
-  if test "$halfops" = "yes" ; then
-
-$as_echo "#define HALFOPS 1" >>confdefs.h
-
-  fi
 
 
   # Check whether --enable-debugging was given.

@@ -100,7 +100,7 @@ struct MessageTree
 
 static struct MessageTree msg_tree;
 
-static int cancel_clients(struct Client *, struct Client *, char *);
+static void cancel_clients(struct Client *, struct Client *, char *);
 static void remove_unknown(struct Client *, char *, char *);
 static void handle_numeric(unsigned int, struct Client *, int, char *[]);
 static void handle_command(struct Message *, struct Client *, unsigned int, char *[]);
@@ -521,7 +521,7 @@ report_messages(struct Client *source_p)
  * output	-
  * side effects	-
  */
-static int
+static void
 cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
 {
   /*
@@ -560,8 +560,7 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "Not dropping server %s (%s) for Fake Direction",
                          client_p->name, source_p->name);
-    return -1;
-    /* return exit_client(client_p, client_p, &me, "Fake Direction");*/
+    return;
   }
 
   /*
@@ -583,7 +582,6 @@ cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
                        "Message for %s[%s@%s!%s] from %s (TS, ignored)",
                        source_p->name, source_p->username, source_p->host,
                        source_p->from->name, get_client_name(client_p, MASK_IP));
-  return 0;
 }
 
 /* remove_unknown()

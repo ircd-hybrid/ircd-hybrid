@@ -580,7 +580,7 @@ get_client_name(const struct Client *client_p, enum addr_mask_type type)
   }
 
   if (ConfigFileEntry.hide_spoof_ips)
-    if (type == SHOW_IP && IsIPSpoof(client_p))
+    if (IsIPSpoof(client_p) && type == SHOW_IP)
       type = MASK_IP;
 
   /* And finally, let's get the host information, ip or name */

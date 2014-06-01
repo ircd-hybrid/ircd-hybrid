@@ -330,6 +330,7 @@ struct LocalUser
   time_t       firsttime;  /**< Time client was created */
   time_t       since;      /**< Last time we parsed something */
   time_t       last_knock;    /**< Time of last knock */
+  time_t       last_invite;    /**< Time of last INVITE */
   time_t       last_join_time;   /**< When this client last joined a channel */
   time_t       last_leave_time;  /**< When this client last left a channel */
   int          join_leave_count; /**< Count of JOIN/LEAVE in less than

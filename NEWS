@@ -2,6 +2,7 @@
 o) Channel halfops are now an integral part of ircd-hybrid
    and can't be disabled anymore
 o) Many code cleanups and improvements
+o) Added flood control for the INVITE command
 
 
 -- Noteworthy changes in version 8.2.0beta3 (2014-05-26)

@@ -206,6 +206,8 @@ reset_block_state(void)
 %token  HUB_MASK
 %token  IGNORE_BOGUS_TS
 %token  INVISIBLE_ON_CONNECT
+%token  INVITE_DELAY
+%token  INVITE_DELAY_CHANNEL
 %token  IP
 %token  IRCD_AUTH
 %token  IRCD_FLAGS
@@ -2915,6 +2917,8 @@ channel_entry: CHANNEL
 
 channel_items:      channel_items channel_item | channel_item;
 channel_item:       channel_max_bans |
+                    channel_invite_delay |
+                    channel_invite_delay_channel |
                     channel_knock_delay |
                     channel_knock_delay_channel |
                     channel_max_chans_per_user |
@@ -2941,6 +2945,16 @@ channel_knock_delay: KNOCK_DELAY '=' timespec ';'
 channel_knock_delay_channel: KNOCK_DELAY_CHANNEL '=' timespec ';'
 {
   ConfigChannel.knock_delay_channel = $3;
+};
+
+channel_invite_delay: INVITE_DELAY '=' timespec ';'
+{
+  ConfigChannel.invite_delay = $3;
+};
+
+channel_invite_delay_channel: INVITE_DELAY_CHANNEL '=' timespec ';'
+{
+  ConfigChannel.invite_delay_channel = $3;
 };
 
 channel_max_chans_per_user: MAX_CHANS_PER_USER '=' NUMBER ';'

@@ -72,6 +72,7 @@ struct Channel
   time_t topic_time;
   time_t last_knock; /*!< don't allow knock to flood */
   time_t last_join_time;
+  time_t last_invite; /*!< don't allow INVITE to flood */
   time_t first_received_message_time; /*!< channel flood control */
   unsigned int flags;
   int received_number_of_privmsgs;

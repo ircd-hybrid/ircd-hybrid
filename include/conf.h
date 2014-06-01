@@ -267,6 +267,8 @@ struct config_file_entry
 struct config_channel_entry
 {
   int disable_fake_channels;
+  int invite_delay;
+  int invite_delay_channel;
   int knock_delay;
   int knock_delay_channel;
   unsigned int max_bans;

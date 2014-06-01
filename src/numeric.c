@@ -745,7 +745,7 @@ static const char *const replies[] =
 /* 712 ERR_TOOMANYKNOCK */ "%s :Too many KNOCKs (%s).",
 /* 713 ERR_CHANOPEN */ "%s :Channel is open.",
 /* 714 ERR_KNOCKONCHAN */ "%s :You are already on that channel.",
-/* 715 */ NULL,
+/* 715 ERR_TOOMANYINVITE */ "%s :Too many INVITEs (%s).",
 /* 716 RPL_TARGUMODEG */ "%s :is in %s mode (%s)",
 /* 717 RPL_TARGNOTIFY */ "%s :has been informed that you messaged them.",
 /* 718 RPL_UMODEGMSG */ "%s :is messaging you, and you are umode %s.",

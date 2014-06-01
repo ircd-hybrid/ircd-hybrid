@@ -245,6 +245,7 @@ enum irc_numerics
   ERR_TOOMANYKNOCK         = 712,
   ERR_CHANOPEN             = 713,
   ERR_KNOCKONCHAN          = 714,
+  ERR_TOOMANYINVITE        = 715,
   RPL_TARGUMODEG           = 716,
   RPL_TARGNOTIFY           = 717,
   RPL_UMODEGMSG            = 718,

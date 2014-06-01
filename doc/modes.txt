@@ -3,7 +3,7 @@
 
 In /VERSION one might see something like this:
 
-hades.arpa hybrid-8.1.7 DFGHRSabcdefgijklnorsuwxyz bciklmnoprstveIMORS bkloveI
+irc.ircd-hybrid.org hybrid-8.2.0 DFGHRSWabcdefgijklnopqrsuwxyz bciklmnoprstveIMORS bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -70,7 +70,7 @@ Channel Modes:
                     WHOIS channel list unless you are a member of the channel
 +S - sslonly      - This mode will prevent anyone who isn't securely connected
                     via SSL/TLS from joining the channel.
-+t - topic        - Only chanops can change the topic
++t - topic        - Only chanops and halfops can change the topic
 +v - voice        - Can speak in a moderated channel, and is exempt from flood
                     restrictions
 

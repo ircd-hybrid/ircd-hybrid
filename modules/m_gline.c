@@ -228,7 +228,7 @@ check_majority(const struct Client *source_p, const char *user,
         !irccmp(gp_ptr->vote_1.oper_server, source_p->servptr->name))
       return GLINE_ALREADY_VOTED;
 
-    if (gp_ptr->vote_2.oper_user[0] != '\0')
+    if (gp_ptr->vote_2.oper_user[0])
     {
       /* if two other opers on two different servers have voted yes */
       if ((!irccmp(gp_ptr->vote_2.oper_user, source_p->username) &&
@@ -304,8 +304,6 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
 
   if (parc != 4 || EmptyString(parv[3]))
     return 0;
-
-  assert(source_p->servptr != NULL);
 
   user   = parv[1];
   host   = parv[2];
@@ -390,7 +388,7 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
                   &user, &host, NULL, NULL, &reason) < 0)
     return 0;
 
-  if ((p = strchr(host, '/')) != NULL)
+  if ((p = strchr(host, '/')))
   {
     int bitlen = strtol(++p, NULL, 10);
     int min_bitlen = strchr(host, ':') ? ConfigFileEntry.gline_min_cidr6 :
@@ -431,8 +429,6 @@ static void
 do_sungline(struct Client *source_p, const char *user,
             const char *host, const char *reason, int prop)
 {
-  assert(source_p->servptr != NULL);
-
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                        "%s requesting UNG-Line for [%s@%s] [%s]",
                        get_oper_name(source_p), user, host, reason);

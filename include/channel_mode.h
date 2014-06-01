@@ -112,7 +112,7 @@ struct mode_letter
 };
 
 extern const struct mode_letter chan_modes[];
-extern struct ChannelMode ModeTable[];
+extern const struct ChannelMode ModeTable[];
 
 extern int add_id(struct Client *, struct Channel *, char *, unsigned int);
 extern void set_channel_mode(struct Client *, struct Channel *,

@@ -435,10 +435,10 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     chptr->mode.mode |= d;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count++].arg = NULL;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
   else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
   {
@@ -447,10 +447,10 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     chptr->mode.mode &= ~d;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = NULL;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
 }
 
@@ -487,10 +487,10 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
     chptr->mode.mode |= d;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count++].arg = NULL;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
   else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
   {
@@ -499,10 +499,10 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
     chptr->mode.mode &= ~d;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = NULL;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
 }
 
@@ -541,10 +541,10 @@ chm_operonly(struct Client *source_p, struct Channel *chptr, int parc, int *parn
     chptr->mode.mode |= d;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
+    mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
-    mode_changes[mode_count++].arg = NULL;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
   else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
   {
@@ -553,10 +553,10 @@ chm_operonly(struct Client *source_p, struct Channel *chptr, int parc, int *parn
     chptr->mode.mode &= ~d;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = NULL;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
 }
 
@@ -623,10 +623,10 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 
   mode_changes[mode_count].letter = c;
-  mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].mems = ALL_MEMBERS;
+  mode_changes[mode_count].arg = mask;
   mode_changes[mode_count].id = NULL;
-  mode_changes[mode_count++].arg = mask;
+  mode_changes[mode_count].dir = dir;
+  mode_changes[mode_count++].mems = ALL_MEMBERS;
 }
 
 static void
@@ -693,10 +693,10 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 
   mode_changes[mode_count].letter = c;
-  mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].mems = ONLY_CHANOPS;
+  mode_changes[mode_count].arg = mask;
   mode_changes[mode_count].id = NULL;
-  mode_changes[mode_count++].arg = mask;
+  mode_changes[mode_count].dir = dir;
+  mode_changes[mode_count++].mems = ONLY_CHANOPS;
 }
 
 static void
@@ -763,10 +763,10 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 
   mode_changes[mode_count].letter = c;
-  mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].mems = ONLY_CHANOPS;
+  mode_changes[mode_count].arg = mask;
   mode_changes[mode_count].id = NULL;
-  mode_changes[mode_count++].arg = mask;
+  mode_changes[mode_count].dir = dir;
+  mode_changes[mode_count++].mems = ONLY_CHANOPS;
 }
 
 static void
@@ -809,11 +809,11 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_DEL && !has_member_flags(member, CHFL_VOICE))
     return;
 
-  mode_changes[mode_count].letter = 'v';
-  mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].mems = ALL_MEMBERS;
+  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
-  mode_changes[mode_count++].arg = target_p->name;
+  mode_changes[mode_count].dir = dir;
+  mode_changes[mode_count++].mems = ALL_MEMBERS;
 
   if (dir == MODE_ADD)
     AddMemberFlag(member, CHFL_VOICE);
@@ -861,11 +861,11 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_DEL && !has_member_flags(member, CHFL_HALFOP))
     return;
 
-  mode_changes[mode_count].letter = 'h';
-  mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].mems = ALL_MEMBERS;
+  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
-  mode_changes[mode_count++].arg = target_p->name;
+  mode_changes[mode_count].dir = dir;
+  mode_changes[mode_count++].mems = ALL_MEMBERS;
 
   if (dir == MODE_ADD)
     AddMemberFlag(member, CHFL_HALFOP);
@@ -913,11 +913,11 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_DEL && !has_member_flags(member, CHFL_CHANOP))
     return;
 
-  mode_changes[mode_count].letter = 'o';
-  mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count].mems = ALL_MEMBERS;
+  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
-  mode_changes[mode_count++].arg = target_p->name;
+  mode_changes[mode_count].dir = dir;
+  mode_changes[mode_count++].mems = ALL_MEMBERS;
 
   if (dir == MODE_ADD)
     AddMemberFlag(member, CHFL_CHANOP);
@@ -959,10 +959,10 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         mode_changes[i].letter = 0;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].arg = lstr;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = lstr;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
 
     chptr->mode.limit = limit;
   }
@@ -974,10 +974,10 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     chptr->mode.limit = 0;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = NULL;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
 }
 
@@ -1014,10 +1014,10 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         mode_changes[i].letter = 0;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_ADD;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].arg = chptr->mode.key;
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = chptr->mode.key;
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
   else if (dir == MODE_DEL)
   {
@@ -1030,10 +1030,10 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     chptr->mode.key[0] = '\0';
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].dir = MODE_DEL;
-    mode_changes[mode_count].mems = ALL_MEMBERS;
+    mode_changes[mode_count].arg = "*";
     mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].arg = "*";
+    mode_changes[mode_count].dir = dir;
+    mode_changes[mode_count++].mems = ALL_MEMBERS;
   }
 }
 

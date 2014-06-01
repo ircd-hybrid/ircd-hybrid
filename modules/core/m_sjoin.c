@@ -119,39 +119,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   {
     switch (*modes)
     {
-      case 'c':
-        mode.mode |= MODE_NOCTRL;
-        break;
-      case 'i':
-        mode.mode |= MODE_INVITEONLY;
-        break;
-      case 'm':
-        mode.mode |= MODE_MODERATED;
-        break;
-      case 'n':
-        mode.mode |= MODE_NOPRIVMSGS;
-        break;
-      case 'p':
-        mode.mode |= MODE_PRIVATE;
-        break;
-      case 'r':
-        mode.mode |= MODE_REGISTERED;
-        break;
-      case 's':
-        mode.mode |= MODE_SECRET;
-        break;
-      case 't':
-        mode.mode |= MODE_TOPICLIMIT;
-        break;
-      case 'M':
-        mode.mode |= MODE_MODREG;
-        break;
-      case 'O':
-        mode.mode |= MODE_OPERONLY;
-        break;
-      case 'S':
-        mode.mode |= MODE_SSLONLY;
-        break;
       case 'k':
         strlcpy(mode.key, parv[4 + args], sizeof(mode.key));
         ++args;
@@ -159,12 +126,17 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         if (parc < 5 + args)
           return 0;
         break;
+
       case 'l':
         mode.limit = atoi(parv[4 + args]);
         ++args;
 
         if (parc < 5 + args)
           return 0;
+        break;
+
+      default:
+        mode.mode |= ModeTable[(unsigned char)*modes].d;
         break;
     }
   }

@@ -1037,15 +1037,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 }
 
-struct ChannelMode
-{
-  void (*func)(struct Client *,
-               struct Channel *, int, int *, char **,
-               int *, int, int, char, unsigned int);
-  unsigned int d;
-};
-
-static struct ChannelMode ModeTable[256] =
+struct ChannelMode ModeTable[256] =
 {
   { chm_nosuch,  0 },			/* 0x00 */
   { chm_nosuch,  0 },			/* 0x01 */

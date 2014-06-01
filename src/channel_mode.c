@@ -1037,7 +1037,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 }
 
-struct ChannelMode ModeTable[256] =
+const struct ChannelMode ModeTable[256] =
 {
   { chm_nosuch,  0 },			/* 0x00 */
   { chm_nosuch,  0 },			/* 0x01 */
@@ -1555,7 +1555,7 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
         break;
       default:
       {
-        struct ChannelMode *tptr = &ModeTable[(unsigned char)*ml];
+        const struct ChannelMode *tptr = &ModeTable[(unsigned char)*ml];
 
         tptr->func(source_p, chptr, parc, &parn, parv,
                    &errors, alevel, dir, *ml, tptr->d);

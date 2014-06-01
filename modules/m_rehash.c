@@ -63,17 +63,16 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
 
   if (!EmptyString(parv[1]))
   {
-    if (irccmp(parv[1], "DNS") == 0)
+    if (!irccmp(parv[1], "DNS"))
     {
       sendto_one_numeric(source_p, &me, RPL_REHASHING, "DNS");
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s is rehashing DNS",
                            get_oper_name(source_p));
-      restart_resolver();   /* re-read /etc/resolv.conf AGAIN?
-                               and close/re-open res socket */
+      restart_resolver();
       found = 1;
     }
-    else if (irccmp(parv[1], "MOTD") == 0)
+    else if (!irccmp(parv[1], "MOTD"))
     {
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s is forcing re-reading of MOTD files",

@@ -29,6 +29,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "conf.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -98,6 +99,21 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  if ((source_p->localClient->last_invite + ConfigChannel.invite_delay) > CurrentTime)
+  {
+    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->chname, "user");
+    return 0;
+  }
+
+  if ((chptr->last_invite + ConfigChannel.invite_delay_channel) > CurrentTime)
+  {
+    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->chname, "channel");
+    return 0;
+  }
+
+  source_p->localClient->last_invite = CurrentTime;
+  chptr->last_invite = CurrentTime;
+
   sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->chname);
 
   if (target_p->away[0])
@@ -162,6 +178,8 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   if (parc > 3 && IsDigit(*parv[3]))
     if (atoi(parv[3]) > chptr->channelts)
       return 0;
+
+  chptr->last_invite = CurrentTime;
 
   if (MyConnect(target_p))
   {

@@ -208,6 +208,8 @@ hub_mask                    { return HUB_MASK; }
 ignore_bogus_ts             { return IGNORE_BOGUS_TS; }
 invisible                   { return T_INVISIBLE; }
 invisible_on_connect        { return INVISIBLE_ON_CONNECT; }
+invite_delay                { return INVITE_DELAY; }
+invite_delay_channel        { return INVITE_DELAY_CHANNEL; }
 ip                          { return IP; }
 ipv4                        { return T_IPV4; }
 ipv6                        { return T_IPV6; }

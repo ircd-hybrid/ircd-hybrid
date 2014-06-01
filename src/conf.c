@@ -1101,6 +1101,9 @@ set_default_conf(void)
   ConfigLoggingEntry.use_logging = 1;
 
   ConfigChannel.disable_fake_channels = 0;
+
+  ConfigChannel.invite_delay = 300;
+  ConfigChannel.invite_delay_channel = 60;
   ConfigChannel.knock_delay = 300;
   ConfigChannel.knock_delay_channel = 60;
   ConfigChannel.max_chans_per_user = 25;

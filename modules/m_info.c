@@ -166,6 +166,18 @@ static const struct InfoStruct info_table[] =
     "Forbids channels with special ASCII characters in their name"
   },
   {
+    "invite_delay",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.invite_delay,
+    "Delay between a users INVITE attempts"
+  },
+  {
+    "invite_delay_channel",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.invite_delay_channel,
+    "Delay between INVITE attempts to a channel"
+  },
+  {
     "knock_delay",
     OUTPUT_DECIMAL,
     &ConfigChannel.knock_delay,

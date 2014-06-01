@@ -728,12 +728,12 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     {
       const struct Ban *banptr = ptr->data;
 
-      sendto_one_numeric(source_p, &me, RPL_INVITELIST, chptr->chname,
+      sendto_one_numeric(source_p, &me, RPL_INVEXLIST, chptr->chname,
                          banptr->name, banptr->user, banptr->host,
                          banptr->who, banptr->when);
     }
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFINVITELIST, chptr->chname);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFINVEXLIST, chptr->chname);
     return;
   }
 

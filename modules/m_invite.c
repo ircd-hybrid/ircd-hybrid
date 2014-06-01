@@ -60,7 +60,18 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   struct Channel *chptr = NULL;
   struct Membership *ms = NULL;
 
-  if (EmptyString(parv[2]))
+  if (parc < 2)
+  {
+    const dlink_node *ptr = NULL;
+
+    DLINK_FOREACH(ptr, source_p->localClient->invited.head)
+      sendto_one_numeric(source_p, &me, RPL_INVITELIST,
+                         ((struct Channel *)ptr->data)->chname);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFINVITELIST);
+    return 0;
+  }
+
+  if (parc < 3 || EmptyString(parv[2]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "INVITE");
     return 0;
@@ -163,7 +174,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
 
-  if (EmptyString(parv[2]))
+  if (parc < 3 || EmptyString(parv[2]))
     return 0;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
@@ -209,7 +220,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
 
 static struct Message invite_msgtab =
 {
-  "INVITE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "INVITE", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_invite, ms_invite, m_ignore, m_invite, m_ignore }
 };
 

@@ -740,8 +740,8 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
   int cur_len, mlen, plen;
 
   pbuf = lparabuf;
-  cur_len = mlen = sprintf(lmodebuf, ":%s MODE %s -",
-                           source_p->name, chptr->chname);
+  cur_len = mlen = snprintf(lmodebuf, , sizeof(lmodebuf), ":%s MODE %s -",
+                            source_p->name, chptr->chname);
   mbuf = lmodebuf + mlen;
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)

@@ -54,7 +54,6 @@ m_ison(struct Client *source_p, int parc, char *parv[])
   char *current_insert_point = NULL;
   char buf[IRCD_BUFSIZE];
   int len;
-  int i;
   int done = 0;
 
   len = snprintf(buf, sizeof(buf), numeric_form(RPL_ISON), me.name, source_p->name);
@@ -64,7 +63,7 @@ m_ison(struct Client *source_p, int parc, char *parv[])
    * rfc1459 is ambigious about how to handle ISON
    * this should handle both interpretations.
    */
-  for (i = 1; i < parc; i++)
+  for (int i = 1; i < parc; ++i)
   {
     for (nick = strtoken(&p, parv[i], " "); nick;
          nick = strtoken(&p,    NULL, " "))

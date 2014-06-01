@@ -326,10 +326,12 @@ mask_addr(struct irc_ssaddr *ip, int bits)
   if (ip->ss.ss_family != AF_INET6)
 #endif
   {
+    uint32_t tmp = 0;
     v4_base_ip = (struct sockaddr_in *)ip;
 
     mask = ~((1 << (32 - bits)) - 1);
-    v4_base_ip->sin_addr.s_addr = htonl(ntohl(v4_base_ip->sin_addr.s_addr) & mask);
+    tmp = ntohl(v4_base_ip->sin_addr.s_addr);
+    v4_base_ip->sin_addr.s_addr = htonl(tmp & mask);
   }
 #ifdef IPV6
   else

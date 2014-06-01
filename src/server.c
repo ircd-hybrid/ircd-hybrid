@@ -513,24 +513,22 @@ find_capability(const char *capab)
 void
 send_capabilities(struct Client *client_p, int cap_can_send)
 {
-  char msgbuf[IRCD_BUFSIZE] = "";
-  char *t = msgbuf;
-  int tl;
-  dlink_node *ptr = NULL;
+  char buf[IRCD_BUFSIZE] = "";
+  const dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, cap_list.head)
   {
-    struct Capability *cap = ptr->data;
+    const struct Capability *cap = ptr->data;
 
     if (cap->cap & (cap_can_send|default_server_capabs))
     {
-      tl = sprintf(t, "%s ", cap->name);
-      t += tl;
+      strlcat(buf, cap->name, sizeof(buf));
+      if (ptr->next)
+        strlcat(buf, " ", sizeof(buf));
     }
   }
 
-  *(t - 1) = '\0';
-  sendto_one(client_p, "CAPAB :%s", msgbuf);
+  sendto_one(client_p, "CAPAB :%s", buf);
 }
 
 /*

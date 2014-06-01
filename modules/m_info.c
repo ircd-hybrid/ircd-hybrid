@@ -37,24 +37,27 @@
 #include "modules.h"
 
 
+/* Types for output_type in InfoStruct */
+enum
+{
+  OUTPUT_STRING     = 1 << 0,  /* Output option as %s w/ dereference  */
+  OUTPUT_STRING_PTR = 1 << 1,  /* Output option as %s w/out deference */
+  OUTPUT_DECIMAL    = 1 << 2,  /* Output option as decimal (%d) */
+  OUTPUT_BOOLEAN    = 1 << 3,  /* Output option as "ON" or "OFF" */
+  OUTPUT_BOOLEAN_YN = 1 << 4,  /* Output option as "YES" or "NO" */
+  OUTPUT_BOOLEAN2   = 1 << 5   /* Output option as "YES/NO/MASKED" */
+};
+
 /*
  * jdc -- Structure for our configuration value table
  */
 struct InfoStruct
 {
-  const char *name;         /* Displayed variable name           */
-  const unsigned int output_type; /* See below #defines                */
-  const void *option;             /* Pointer reference to the value    */
-  const char *desc;         /* ASCII description of the variable */
+  const char *name;  /* Displayed variable name */
+  const unsigned int output_type;  /* Type of output. See enum above */
+  const void *option;  /* Pointer reference to the value */
+  const char *desc;  /* ASCII description of the variable */
 };
-
-/* Types for output_type in InfoStruct */
-#define OUTPUT_STRING     0x0001  /* Output option as %s w/ dereference  */
-#define OUTPUT_STRING_PTR 0x0002  /* Output option as %s w/out deference */
-#define OUTPUT_DECIMAL    0x0004  /* Output option as decimal (%d)       */
-#define OUTPUT_BOOLEAN    0x0008  /* Output option as "ON" or "OFF"      */
-#define OUTPUT_BOOLEAN_YN 0x0010  /* Output option as "YES" or "NO"      */
-#define OUTPUT_BOOLEAN2   0x0020  /* Output option as "YES/NO/MASKED"    */
 
 static const struct InfoStruct info_table[] =
 {

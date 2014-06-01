@@ -790,7 +790,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     return;
 
   if ((target_p = find_chasing(source_p, parv[(*parn)++])) == NULL)
-    return;
+    return;  /* find_chasing sends ERR_NOSUCHNICK */
 
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
@@ -842,7 +842,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     return;
 
   if ((target_p = find_chasing(source_p, parv[(*parn)++])) == NULL)
-    return;
+    return;  /* find_chasing sends ERR_NOSUCHNICK */
 
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
@@ -894,7 +894,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     return;
 
   if ((target_p = find_chasing(source_p, parv[(*parn)++])) == NULL)
-    return;
+    return;  /* find_chasing sends ERR_NOSUCHNICK */
 
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {

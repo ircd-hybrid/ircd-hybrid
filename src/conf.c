@@ -2017,7 +2017,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
     /* Okay to use source_p as the first param, because source_p == client_p */
     if ((target_p =
         find_chasing(source_p, user_host_or_nick)) == NULL)
-      return 0;
+      return 0;  /* find_chasing sends ERR_NOSUCHNICK */
 
     if (IsExemptKline(target_p))
     {

@@ -343,33 +343,6 @@ fix_key(char *arg)
   return arg;
 }
 
-/* fix_key_old()
- *
- * inputs       - pointer to key to clean up
- * output       - pointer to cleaned up key
- * side effects - input string is modifed
- *
- * Here we attempt to be compatible with older non-hybrid servers.
- * We can't back down from the ':' issue however.  --Rodder
- */
-static char *
-fix_key_old(char *arg)
-{
-  unsigned char *s, *t, c;
-
-  for (s = t = (unsigned char *)arg; (c = *s); ++s)
-  {
-    c &= 0x7f;
-
-    if ((c != 0x0a) && (c != ':') &&
-        (c != 0x0d) && (c != ','))
-      *t++ = c;
-  }
-
-  *t = '\0';
-  return arg;
-}
-
 /*
  * inputs       - pointer to channel
  * output       - none
@@ -1027,12 +1000,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
   if (dir == MODE_ADD && parc > *parn)
   {
-    char *key = parv[(*parn)++];
-
-    if (MyClient(source_p))
-      fix_key(key);
-    else
-      fix_key_old(key);
+    char *key = fix_key(parv[(*parn)++]);
 
     if (EmptyString(key))
       return;

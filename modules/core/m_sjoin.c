@@ -115,33 +115,33 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   mode.limit = 0;
   mode.key[0] = '\0';
 
-  for (s = parv[3]; *s; ++s)
+  for (const char *modes = parv[3]; *modes; ++modes)
   {
-    switch (*s)
+    switch (*modes)
     {
       case 'c':
         mode.mode |= MODE_NOCTRL;
         break;
-      case 't':
-        mode.mode |= MODE_TOPICLIMIT;
-        break;
-      case 'n':
-        mode.mode |= MODE_NOPRIVMSGS;
-        break;
-      case 's':
-        mode.mode |= MODE_SECRET;
+      case 'i':
+        mode.mode |= MODE_INVITEONLY;
         break;
       case 'm':
         mode.mode |= MODE_MODERATED;
         break;
-      case 'i':
-        mode.mode |= MODE_INVITEONLY;
+      case 'n':
+        mode.mode |= MODE_NOPRIVMSGS;
         break;
       case 'p':
         mode.mode |= MODE_PRIVATE;
         break;
       case 'r':
         mode.mode |= MODE_REGISTERED;
+        break;
+      case 's':
+        mode.mode |= MODE_SECRET;
+        break;
+      case 't':
+        mode.mode |= MODE_TOPICLIMIT;
         break;
       case 'M':
         mode.mode |= MODE_MODREG;
@@ -154,14 +154,14 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         break;
       case 'k':
         strlcpy(mode.key, parv[4 + args], sizeof(mode.key));
-        args++;
+        ++args;
 
         if (parc < 5 + args)
           return 0;
         break;
       case 'l':
         mode.limit = atoi(parv[4 + args]);
-        args++;
+        ++args;
 
         if (parc < 5 + args)
           return 0;
@@ -277,7 +277,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                     chptr->chname, modebuf, parabuf);
   uid_ptr = uid_buf + buflen;
 
-  /* check we can fit a nick on the end, as well as \r\n and a prefix "
+  /*
+   * Check we can fit a nick on the end, as well as \r\n and a prefix "
    * @%+", and a space.
    */
   if (buflen >= (IRCD_BUFSIZE - IRCD_MAX(NICKLEN, IDLEN) - 2 - 3 - 1))
@@ -296,13 +297,14 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   s = parv[args + 4];
   while (*s == ' ')
-    s++;
+    ++s;
 
   if ((p = strchr(s, ' ')))
   {
     *p++ = '\0';
+
     while (*p == ' ')
-      p++;
+      ++p;
     have_many_nicks = *p;
   }
 
@@ -315,25 +317,23 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     {
       switch (*s)
       {
-      case '@':
-        fl |= CHFL_CHANOP;
-        s++;
-        break;
-      case '%':
-        fl |= CHFL_HALFOP;
-        s++;
-        break;
-      case '+':
-        fl |= CHFL_VOICE;
-        s++;
-        break;
-      default:
-        valid_mode = 0;
-        break;
+        case '@':
+          fl |= CHFL_CHANOP;
+          ++s;
+          break;
+        case '%':
+          fl |= CHFL_HALFOP;
+          ++s;
+          break;
+        case '+':
+          fl |= CHFL_VOICE;
+          ++s;
+          break;
+        default:
+          valid_mode = 0;
+          break;
       }
     } while (valid_mode);
-
-    target_p = find_chasing(source_p, s);
 
     /*
      * if the client doesnt exist, or if its fake direction/server, skip.
@@ -341,7 +341,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
      * lookup the nick, and its better to never send the numeric than only
      * sometimes.
      */
-    if (target_p == NULL || target_p->from != source_p->from)
+    if ((target_p = find_chasing(source_p, s)) == NULL || target_p->from != source_p->from)
       goto nextnick;
 
     len_uid = strlen(target_p->id);
@@ -574,13 +574,12 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 static void
 set_final_mode(struct Mode *mode, struct Mode *oldmode)
 {
-  const struct mode_letter *tab;
   char *pbuf = parabuf;
-  int len;
+  int len = 0;
 
   *mbuf++ = '-';
 
-  for (tab = chan_modes; tab->letter; ++tab)
+  for (const struct mode_letter *tab = chan_modes; tab->letter; ++tab)
     if ((tab->mode & oldmode->mode) &&
         !(tab->mode & mode->mode))
       *mbuf++ = tab->letter;
@@ -601,7 +600,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
   else
     *mbuf++ = '+';
 
-  for (tab = chan_modes; tab->letter; ++tab)
+  for (const struct mode_letter *tab = chan_modes; tab->letter; ++tab)
     if ((tab->mode & mode->mode) &&
         !(tab->mode & oldmode->mode))
       *mbuf++ = tab->letter;
@@ -661,9 +660,8 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
   char lmodebuf[MODEBUFLEN];
   char *sp = sendbuf;
   const char *lpara[MAXMODEPARAMS];
-  int count = 0;
-  int i;
-  int l;
+  unsigned int count = 0;
+  int l = 0;
 
   mbuf = lmodebuf;
   *mbuf++ = '-';
@@ -684,7 +682,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
 
     if (count >= MAXMODEPARAMS)
     {
-      for (i = 0; i < MAXMODEPARAMS; ++i)
+      for (unsigned int i = 0; i < MAXMODEPARAMS; ++i)
       {
         l = sprintf(sp, " %s", lpara[i]);
         sp += l;
@@ -707,7 +705,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
   {
     *mbuf = '\0';
 
-    for (i = 0; i < count; ++i)
+    for (unsigned int i = 0; i < count; ++i)
     {
       l = sprintf(sp, " %s", lpara[i]);
       sp += l;
@@ -732,21 +730,19 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 {
   char lmodebuf[MODEBUFLEN];
   char lparabuf[IRCD_BUFSIZE];
-  struct Ban *banptr = NULL;
-  dlink_node *ptr = NULL;
-  dlink_node *next_ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
   char *pbuf = NULL;
   int count = 0;
   int cur_len, mlen, plen;
 
   pbuf = lparabuf;
-  cur_len = mlen = snprintf(lmodebuf, , sizeof(lmodebuf), ":%s MODE %s -",
+  cur_len = mlen = snprintf(lmodebuf, sizeof(lmodebuf), ":%s MODE %s -",
                             source_p->name, chptr->chname);
   mbuf = lmodebuf + mlen;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, list->head)
   {
-    banptr = ptr->data;
+    struct Ban *banptr = ptr->data;
 
     plen = banptr->len + 4;  /* another +b and "!@ " */
 

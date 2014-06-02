@@ -49,7 +49,7 @@ static void
 report_this_status(struct Client *source_p, const struct Client *target_p)
 {
   if (target_p->status != STAT_CLIENT)
-    return;  
+    return;
 
   if (ConfigFileEntry.hide_spoof_ips)
     sendto_one_numeric(source_p, &me, RPL_ETRACE,

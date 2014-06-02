@@ -42,16 +42,19 @@
 #include "packet.h"
 
 
-/*
- * ms_bmask()
+/*! \brief BMASK command handler
  *
- * inputs	- parv[0] = command
- *		  parv[1] = TS
- *		  parv[2] = channel name
- *		  parv[3] = type of ban to add ('b' 'I' or 'e')
- *		  parv[4] = space delimited list of masks to add
- * outputs	- none
- * side effects	- propagates unchanged bmask line to servers
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = timestamp
+ *      - parv[2] = channel name
+ *      - parv[3] = type of ban to add ('b' 'I' or 'e')
+ *      - parv[4] = space delimited list of masks to add
  */
 static int
 ms_bmask(struct Client *source_p, int parc, char *parv[])

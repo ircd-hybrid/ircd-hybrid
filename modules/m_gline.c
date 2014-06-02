@@ -196,7 +196,7 @@ add_new_majority(const struct Client *source_p, const char *user,
  * \param host     Hostname covered by the gline
  * \param reason   Reason for the gline
  * \param type     Valid values are either GLINE_PENDING_ADD_TYPE, or
- *                 GLINE_PENDING_DEL_TYPE 
+ *                 GLINE_PENDING_DEL_TYPE
  *
  * \return
  *         - GLINE_ALREADY_VOTED  returned if oper/server has already voted
@@ -400,7 +400,7 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
   }
-  
+
   /* If at least 3 opers agree this user should be G lined then do it */
   if (check_majority(source_p, user, host, reason, GLINE_PENDING_ADD_TYPE) ==
       GLINE_ALREADY_VOTED)

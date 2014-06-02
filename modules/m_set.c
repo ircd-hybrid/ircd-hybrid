@@ -259,11 +259,11 @@ quote_splitmode(struct Client *source_p, const char *charval, int val)
     }
   }
   else
-    /* if we add splitchecking to splitmode*2 we get a unique table to 
+    /* if we add splitchecking to splitmode*2 we get a unique table to
      * pull values back out of, splitmode can be four states - but you can
      * only set to three, which means we cant use the same table --fl_
      */
-    sendto_one_notice(source_p, &me, ":SPLITMODE is currently %s", 
+    sendto_one_notice(source_p, &me, ":SPLITMODE is currently %s",
                       splitmode_status[(splitchecking + (splitmode * 2))]);
 }
 
@@ -274,7 +274,7 @@ quote_splitnum(struct Client *source_p, const char *arg, int newval)
   if (newval >= 0)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has changed SPLITNUM to %i", 
+                         "%s has changed SPLITNUM to %i",
                          get_oper_name(source_p), newval);
     split_servers = newval;
 
@@ -282,7 +282,7 @@ quote_splitnum(struct Client *source_p, const char *arg, int newval)
       check_splitmode(NULL);
   }
   else
-    sendto_one_notice(source_p, &me, ":SPLITNUM is currently %i", 
+    sendto_one_notice(source_p, &me, ":SPLITNUM is currently %i",
                       split_servers);
 }
 
@@ -293,7 +293,7 @@ quote_splitusers(struct Client *source_p, const char *arg, int newval)
   if (newval >= 0)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has changed SPLITUSERS to %i", 
+                         "%s has changed SPLITUSERS to %i",
                          get_oper_name(source_p), newval);
     split_users = newval;
 
@@ -301,7 +301,7 @@ quote_splitusers(struct Client *source_p, const char *arg, int newval)
       check_splitmode(NULL);
   }
   else
-    sendto_one_notice(source_p, &me, ":SPLITUSERS is currently %i", 
+    sendto_one_notice(source_p, &me, ":SPLITUSERS is currently %i",
                       split_users);
 }
 
@@ -312,12 +312,12 @@ quote_jfloodtime(struct Client *source_p, const char *arg, int newval)
   if (newval >= 0)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has changed JFLOODTIME to %i", 
+                         "%s has changed JFLOODTIME to %i",
                          get_oper_name(source_p), newval);
     GlobalSetOptions.joinfloodtime = newval;
   }
   else
-    sendto_one_notice(source_p, &me, ":JFLOODTIME is currently %i", 
+    sendto_one_notice(source_p, &me, ":JFLOODTIME is currently %i",
                       GlobalSetOptions.joinfloodtime);
 }
 
@@ -328,12 +328,12 @@ quote_jfloodcount(struct Client *source_p, const char *arg, int newval)
   if (newval >= 0)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has changed JFLOODCOUNT to %i", 
+                         "%s has changed JFLOODCOUNT to %i",
                          get_oper_name(source_p), newval);
     GlobalSetOptions.joinfloodcount = newval;
   }
   else
-    sendto_one_notice(source_p, &me, ":JFLOODCOUNT is currently %i", 
+    sendto_one_notice(source_p, &me, ":JFLOODCOUNT is currently %i",
                       GlobalSetOptions.joinfloodcount);
 }
 

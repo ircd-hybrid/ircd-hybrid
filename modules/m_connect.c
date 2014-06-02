@@ -135,7 +135,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Notify all operators about remote connect requests
    */
-  ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %s", 
+  ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %s",
        source_p->name, parv[1], parv[2] ? parv[2] : "");
 
   conf->port = port;
@@ -207,7 +207,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
    * Try to find the name, then host, if both fail notify ops and bail
    */
   if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
-  { 
+  {
     if (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
     {
       sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
@@ -259,7 +259,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
                 ":%s WALLOPS :Remote CONNECT %s %d from %s",
                 me.id, parv[1], port, source_p->name);
 
-  ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %d", 
+  ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %d",
        source_p->name, parv[1], port);
 
   conf->port = port;

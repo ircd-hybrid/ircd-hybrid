@@ -171,7 +171,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
 
     /*
      * Space will be converted into CR, but we also need space for LF..
-     * That's why we use '- 1' here -adx 
+     * That's why we use '- 1' here -adx
      */
     if (t + tlen - buf > IRCD_BUFSIZE - 1)
     {

@@ -132,7 +132,7 @@ module_exit(void)
   mod_del_cmd(&admin_msgtab);
 }
 
-struct module module_entry = 
+struct module module_entry =
 {
   .node    = { NULL, NULL, NULL },
   .name    = NULL,

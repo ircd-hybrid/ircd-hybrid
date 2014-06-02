@@ -140,7 +140,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
          get_oper_name(source_p), user, host);
   }
   else
-    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", 
+    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found",
 	              user, host);
   return 0;
 }

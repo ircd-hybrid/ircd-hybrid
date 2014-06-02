@@ -91,7 +91,7 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
                               "challenge failed");
       return 0;
     }
-    
+
     conf = find_exact_name_conf(CONF_OPER, source_p,
                                 source_p->localClient->auth_oper, NULL, NULL);
     if (conf == NULL)
@@ -105,7 +105,7 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
 
     if (attach_conf(source_p, conf) != 0)
     {
-      sendto_one_notice(source_p, &me, ":Can't attach conf!");   
+      sendto_one_notice(source_p, &me, ":Can't attach conf!");
       failed_challenge_notice(source_p, conf->name, "can't attach conf!");
       return 0;
     }

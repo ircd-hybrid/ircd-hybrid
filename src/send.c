@@ -728,7 +728,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
                    const char *pattern, ...)
 {
   va_list args;
-  dlink_node *ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
   char buff_suid[IRCD_BUFSIZE];
   char buff_name[IRCD_BUFSIZE];
   int len_suid = 0;
@@ -748,7 +748,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 
   ++current_serial;
 
-  DLINK_FOREACH(ptr, global_serv_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, global_serv_list.head)
   {
     struct Client *target_p = ptr->data;
 

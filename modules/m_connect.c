@@ -256,7 +256,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   sendto_wallops_flags(UMODE_WALLOP, &me, "Remote CONNECT %s %d from %s",
                        parv[1], port, source_p->name);
   sendto_server(NULL, NOCAPS, NOCAPS,
-                ":%s WALLOPS :Remote CONNECT %s %d from %s",
+                ":%s GLOBOPS :Remote CONNECT %s %d from %s",
                 me.id, parv[1], port, source_p->name);
 
   ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %d",

@@ -162,7 +162,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
     sendto_wallops_flags(UMODE_WALLOP, &me, "Remote SQUIT %s from %s (%s)",
                          target_p->name, source_p->name, comment);
     sendto_server(source_p, NOCAPS, NOCAPS,
-                  ":%s WALLOPS :Remote SQUIT %s from %s (%s)",
+                  ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
                   me.id, target_p->name, source_p->name, comment);
     ilog(LOG_TYPE_IRCD, "SQUIT From %s : %s (%s)", source_p->name,
          target_p->name, comment);

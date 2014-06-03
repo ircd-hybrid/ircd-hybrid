@@ -150,6 +150,7 @@ AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
     AX_APPEND_COMPILE_FLAGS([-Wmissing-include-dirs])
     AX_APPEND_COMPILE_FLAGS([-Wmissing-prototypes])
     AX_APPEND_COMPILE_FLAGS([-Wnested-externs])
+    AX_APPEND_COMPILE_FLAGS([-Wpointer-arith])
     AX_APPEND_COMPILE_FLAGS([-Wredundant-decls])
     AX_APPEND_COMPILE_FLAGS([-Wshadow])
     AX_APPEND_COMPILE_FLAGS([-Wwrite-strings])

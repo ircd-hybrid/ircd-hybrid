@@ -147,6 +147,7 @@ AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
     AX_APPEND_COMPILE_FLAGS([-Wcast-align])
     AX_APPEND_COMPILE_FLAGS([-Wbad-function-cast])
     AX_APPEND_COMPILE_FLAGS([-Wmissing-declarations])
+    AX_APPEND_COMPILE_FLAGS([-Wmissing-include-dirs])
     AX_APPEND_COMPILE_FLAGS([-Wmissing-prototypes])
     AX_APPEND_COMPILE_FLAGS([-Wnested-externs])
     AX_APPEND_COMPILE_FLAGS([-Wredundant-decls])

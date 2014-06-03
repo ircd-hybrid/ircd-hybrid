@@ -410,10 +410,10 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
 
-  if (IsServer(from))
-    dbuf_put_fmt(local_buf, ":%s ", from->name);
-  else
+  if (IsClient(from))
     dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
+  else
+    dbuf_put_fmt(local_buf, ":%s ", from->name);
 
   dbuf_put_fmt(remote_buf, ":%s ", from->id);
 

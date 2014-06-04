@@ -15,6 +15,7 @@ addons:
     project:
       name: "ircd-hybrid/ircd-hybrid"
       description: "A lightweight, high-performance internet relay chat daemon."
+    notification_email: bugs@ircd-hybrid.org
     build_command_prepend: ./configure
     build_command: make
     branch_pattern: coverity_scan

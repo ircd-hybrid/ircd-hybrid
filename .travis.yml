@@ -26,5 +26,7 @@ script:
  - sudo make install
 
 notifications:
+ email:
+  - bugs@ircd-hybrid.org
  irc:
   - "irc.ircd-hybrid.org#ircd-coders"

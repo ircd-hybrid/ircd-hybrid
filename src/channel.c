@@ -166,7 +166,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
       ++tlen;
     if (ms->flags & CHFL_HALFOP)
       ++tlen;
-    if (ms->flags & CHFL_VOICE)
+    ifs (ms->flags & CHFL_VOICE)
       ++tlen;
 
     /*

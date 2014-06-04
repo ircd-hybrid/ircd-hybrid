@@ -11,12 +11,13 @@ compiler:
  - clang
 
 addons:
- coverity_scan:
-  name: "ircd-hybrid/ircd-hybrid"
-  description: "A lightweight, high-performance internet relay chat daemon."
- build_command_prepend: ./configure
- build_command: make
- branch_pattern: coverity_scan
+  coverity_scan:
+    project:
+      name: "ircd-hybrid/ircd-hybrid"
+      description: "A lightweight, high-performance internet relay chat daemon."
+    build_command_prepend: ./configure
+    build_command: make
+    branch_pattern: coverity_scan
 
 script:
  - ./configure

@@ -21,7 +21,7 @@ addons:
     branch_pattern: coverity_scan
 
 script:
- - ./configure --enable-warnings
+ - ./configure
  - make
  - sudo make install
 

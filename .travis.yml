@@ -1,0 +1,28 @@
+# $Id$
+
+language: c
+
+env:
+ global:
+  - secure: "Cq1iFAKxQ2S/LUz41BaS00+HdqTZt0hqPVlcmF4uIFRSjRocz+mKoroV2Iidbly8uuokOu5yY+ZRw8Yrjc2w8qKM+qsRHo9KNQGPx/jLe06DI2RuPcT3IxnGrElLDUUs2qJ6drjGCrOEFP2eowMdytqLDJfKW5OGLOFsmoSIwD0="
+
+compiler:
+ - gcc
+ - clang
+
+addons:
+ coverity_scan:
+  name: "ircd-hybrid/ircd-hybrid"
+  description: "A lightweight, high-performance internet relay chat daemon."
+ build_command_prepend: ./configure
+ build_command: make
+ branch_pattern: coverity_scan
+
+script:
+ - ./configure
+ - make
+ - sudo make install
+
+notifications:
+ irc:
+  - "irc.ircd-hybrid.org#ircd-coders"

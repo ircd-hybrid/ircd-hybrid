@@ -323,7 +323,6 @@ reset_block_state(void)
 %token  T_MAX_CLIENTS
 %token  T_NCHANGE
 %token  T_NONONREG
-%token  T_OPERWALL
 %token  T_RECVQ
 %token  T_REJ
 %token  T_RESTART
@@ -1224,10 +1223,6 @@ oper_umodes_item:  T_BOTS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_EXTERNAL;
-} | T_OPERWALL
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_OPERWALL;
 } | T_SERVNOTICE
 {
   if (conf_parser_ctx.pass == 2)
@@ -1337,10 +1332,6 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_ADMIN;
-} | T_OPERWALL
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_OPERWALL;
 } | T_GLOBOPS
 {
   if (conf_parser_ctx.pass == 2)
@@ -2794,9 +2785,6 @@ umode_oitem:     T_BOTS
 } | T_EXTERNAL
 {
   ConfigFileEntry.oper_umodes |= UMODE_EXTERNAL;
-} | T_OPERWALL
-{
-  ConfigFileEntry.oper_umodes |= UMODE_OPERWALL;
 } | T_SERVNOTICE
 {
   ConfigFileEntry.oper_umodes |= UMODE_SERVNOTICE;
@@ -2865,9 +2853,6 @@ umode_item:   T_BOTS
 } | T_EXTERNAL
 {
   ConfigFileEntry.oper_only_umodes |= UMODE_EXTERNAL;
-} | T_OPERWALL
-{
-  ConfigFileEntry.oper_only_umodes |= UMODE_OPERWALL;
 } | T_SERVNOTICE
 {
   ConfigFileEntry.oper_only_umodes |= UMODE_SERVNOTICE;

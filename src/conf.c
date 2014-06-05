@@ -1167,8 +1167,7 @@ set_default_conf(void)
   ConfigFileEntry.oper_pass_resv = 1;
   ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
   ConfigFileEntry.oper_only_umodes = UMODE_DEBUG;
-  ConfigFileEntry.oper_umodes = UMODE_BOTS | UMODE_LOCOPS | UMODE_SERVNOTICE |
-    UMODE_OPERWALL | UMODE_WALLOP;
+  ConfigFileEntry.oper_umodes = UMODE_BOTS | UMODE_LOCOPS | UMODE_SERVNOTICE | UMODE_WALLOP;
   ConfigFileEntry.use_egd = 0;
   ConfigFileEntry.egdpool_path = NULL;
   ConfigFileEntry.throttle_time = 10;
@@ -1358,7 +1357,6 @@ static const struct oper_privs
   { OPER_FLAG_GLINE,          'G' },
   { OPER_FLAG_REHASH,         'H' },
   { OPER_FLAG_K,              'K' },
-  { OPER_FLAG_OPERWALL,       'L' },
   { OPER_FLAG_KILL,           'N' },
   { OPER_FLAG_KILL_REMOTE,    'O' },
   { OPER_FLAG_CONNECT,        'P' },

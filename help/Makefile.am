@@ -39,7 +39,6 @@ dist_helpf_DATA = accept    \
                   nick      \
                   notice    \
                   oper      \
-                  operwall  \
                   part      \
                   pass      \
                   ping      \

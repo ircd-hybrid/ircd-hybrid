@@ -149,26 +149,25 @@ struct MaskItem;
 #define UMODE_DEBUG        0x00000040 /**< 'debugging' info */
 #define UMODE_NCHANGE      0x00000080 /**< Nick change notice */
 #define UMODE_WALLOP       0x00000100 /**< Send wallops to them */
-#define UMODE_OPERWALL     0x00000200 /**< Operwalls */
-#define UMODE_INVISIBLE    0x00000400 /**< Makes user invisible */
-#define UMODE_BOTS         0x00000800 /**< Shows bots */
-#define UMODE_EXTERNAL     0x00001000 /**< Show servers introduced and splitting */
-#define UMODE_CALLERID     0x00002000 /**< Block unless caller id's */
-#define UMODE_SOFTCALLERID 0x00004000 /**< Block unless on common channel */
-#define UMODE_UNAUTH       0x00008000 /**< Show unauth connects here */
-#define UMODE_LOCOPS       0x00010000 /**< Show locops */
-#define UMODE_DEAF         0x00020000 /**< Don't receive channel messages */
-#define UMODE_REGISTERED   0x00040000 /**< User has identified for that nick. */
-#define UMODE_REGONLY      0x00080000 /**< Only registered nicks may PM */
-#define UMODE_HIDDEN       0x00100000 /**< Operator status is hidden */
-#define UMODE_OPER         0x00200000 /**< Operator */
-#define UMODE_ADMIN        0x00400000 /**< Admin on server */
-#define UMODE_FARCONNECT   0x00800000 /**< Can see remote client connects/exits */
-#define UMODE_HIDDENHOST   0x01000000 /**< User's host is hidden */
-#define UMODE_SSL          0x02000000 /**< User is connected via TLS/SSL */
-#define UMODE_WEBIRC       0x04000000 /**< User connected via a webirc gateway */
-#define UMODE_HIDEIDLE     0x08000000 /**< Hides idle and signon time in WHOIS */
-#define UMODE_HIDECHANS    0x10000000 /**< Hides channel list in WHOIS */
+#define UMODE_INVISIBLE    0x00000200 /**< Makes user invisible */
+#define UMODE_BOTS         0x00000400 /**< Shows bots */
+#define UMODE_EXTERNAL     0x00000800 /**< Show servers introduced and splitting */
+#define UMODE_CALLERID     0x00001000 /**< Block unless caller id's */
+#define UMODE_SOFTCALLERID 0x00002000 /**< Block unless on common channel */
+#define UMODE_UNAUTH       0x00004000 /**< Show unauth connects here */
+#define UMODE_LOCOPS       0x00008000 /**< Show locops */
+#define UMODE_DEAF         0x00010000 /**< Don't receive channel messages */
+#define UMODE_REGISTERED   0x00020000 /**< User has identified for that nick. */
+#define UMODE_REGONLY      0x00040000 /**< Only registered nicks may PM */
+#define UMODE_HIDDEN       0x00080000 /**< Operator status is hidden */
+#define UMODE_OPER         0x00100000 /**< Operator */
+#define UMODE_ADMIN        0x00200000 /**< Admin on server */
+#define UMODE_FARCONNECT   0x00400000 /**< Can see remote client connects/exits */
+#define UMODE_HIDDENHOST   0x00800000 /**< User's host is hidden */
+#define UMODE_SSL          0x01000000 /**< User is connected via TLS/SSL */
+#define UMODE_WEBIRC       0x02000000 /**< User connected via a webirc gateway */
+#define UMODE_HIDEIDLE     0x04000000 /**< Hides idle and signon time in WHOIS */
+#define UMODE_HIDECHANS    0x08000000 /**< Hides channel list in WHOIS */
 
 #define UMODE_ALL          UMODE_SERVNOTICE
 
@@ -194,21 +193,20 @@ struct MaskItem;
 #define OPER_FLAG_DIE            0x00000040  /**< Oper can use DIE command */
 #define OPER_FLAG_REHASH         0x00000080  /**< Oper can use REHASH command */
 #define OPER_FLAG_ADMIN          0x00000100  /**< Oper can set user mode +a*/
-#define OPER_FLAG_OPERWALL       0x00000200  /**< Oper can use OPERWALL command */
-#define OPER_FLAG_REMOTEBAN      0x00000400  /**< Oper can set remote bans */
-#define OPER_FLAG_GLOBOPS        0x00000800  /**< Oper can use GLOBOPS command */
-#define OPER_FLAG_MODULE         0x00001000  /**< Oper can use MODULE commands */
-#define OPER_FLAG_RESTART        0x00002000  /**< Oper can use RESTART command */
-#define OPER_FLAG_DLINE          0x00004000  /**< Oper can use DLINE command */
-#define OPER_FLAG_UNDLINE        0x00008000  /**< Oper can use UNDLINE command */
-#define OPER_FLAG_SET            0x00010000  /**< Oper can use SET command */
-#define OPER_FLAG_SQUIT          0x00020000  /**< Oper can do local SQUIT */
-#define OPER_FLAG_SQUIT_REMOTE   0x00040000  /**< Oper can do global SQUIT */
-#define OPER_FLAG_CONNECT        0x00080000  /**< Oper can do local CONNECT */
-#define OPER_FLAG_CONNECT_REMOTE 0x00100000  /**< Oper can do global CONNECT */
-#define OPER_FLAG_WALLOPS        0x00200000  /**< Oper can use WALLOPS command */
-#define OPER_FLAG_LOCOPS         0x00400000  /**< Oper can use LOCOPS command */
-#define OPER_FLAG_UNXLINE        0x00800000  /**< Oper can use UNXLINE command */
+#define OPER_FLAG_REMOTEBAN      0x00000200  /**< Oper can set remote bans */
+#define OPER_FLAG_GLOBOPS        0x00000400  /**< Oper can use GLOBOPS command */
+#define OPER_FLAG_MODULE         0x00000800  /**< Oper can use MODULE commands */
+#define OPER_FLAG_RESTART        0x00001000  /**< Oper can use RESTART command */
+#define OPER_FLAG_DLINE          0x00002000  /**< Oper can use DLINE command */
+#define OPER_FLAG_UNDLINE        0x00004000  /**< Oper can use UNDLINE command */
+#define OPER_FLAG_SET            0x00008000  /**< Oper can use SET command */
+#define OPER_FLAG_SQUIT          0x00010000  /**< Oper can do local SQUIT */
+#define OPER_FLAG_SQUIT_REMOTE   0x00020000  /**< Oper can do global SQUIT */
+#define OPER_FLAG_CONNECT        0x00040000  /**< Oper can do local CONNECT */
+#define OPER_FLAG_CONNECT_REMOTE 0x00080000  /**< Oper can do global CONNECT */
+#define OPER_FLAG_WALLOPS        0x00100000  /**< Oper can use WALLOPS command */
+#define OPER_FLAG_LOCOPS         0x00200000  /**< Oper can use LOCOPS command */
+#define OPER_FLAG_UNXLINE        0x00400000  /**< Oper can use UNXLINE command */
 
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->localClient->operflags & (y) : 0)

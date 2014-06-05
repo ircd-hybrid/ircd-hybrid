@@ -159,8 +159,8 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
 
   if (MyConnect(target_p))
   {
-    sendto_wallops_flags(UMODE_WALLOP, &me, "Remote SQUIT %s from %s (%s)",
-                         target_p->name, source_p->name, comment);
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
+                         me.name, target_p->name, source_p->name, comment);
     sendto_server(source_p, NOCAPS, NOCAPS,
                   ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
                   me.id, target_p->name, source_p->name, comment);

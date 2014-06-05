@@ -342,8 +342,8 @@ struct SetStruct
 {
   const char *name;
   void (*handler)(struct Client *, const char *, int);
-  const int wants_char; /* 1 if it expects (char *, [int]) */
-  const int wants_int;  /* 1 if it expects ([char *], int) */
+  const unsigned int wants_char;  /* 1 if it expects (char *, [int]) */
+  const unsigned int wants_int;  /* 1 if it expects ([char *], int) */
   /* eg:  0, 1 == only an int arg
    * eg:  1, 1 == char and int args */
 };

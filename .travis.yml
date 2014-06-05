@@ -20,6 +20,9 @@ addons:
     build_command: make
     branch_pattern: coverity_scan
 
+before_script:
+  - sudo apt-get install libgeoip-dev
+
 script:
  - ./configure
  - make

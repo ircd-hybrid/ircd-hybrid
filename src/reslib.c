@@ -184,10 +184,10 @@ parse_resvconf(void)
   if ((file = fopen("/etc/resolv.conf", "r")) == NULL)
     return;
 
-  while (fgets(input, sizeof(input), file) != NULL)
+  while (fgets(input, sizeof(input), file))
   {
     /* blow away any newline */
-    if ((p = strpbrk(input, "\r\n")) != NULL)
+    if ((p = strpbrk(input, "\r\n")))
       *p = '\0';
 
     p = input;
@@ -222,7 +222,7 @@ parse_resvconf(void)
     /* Now arg should be right where p is pointing */
     arg = p;
 
-    if ((p = strpbrk(arg, " \t")) != NULL)
+    if ((p = strpbrk(arg, " \t")))
       *p = '\0';  /* take the first word */
 
     if (!strcasecmp(opt, "nameserver"))
@@ -259,8 +259,8 @@ irc_dn_expand(const unsigned char *msg, const unsigned char *eom,
 
   if (n > 0 && dst[0] == '.')
     dst[0] = '\0';
-  return(n);
-} /*2*/
+  return n;
+}
 
 /*
  * irc_ns_name_uncompress(msg, eom, src, dst, dstsiz)
@@ -278,11 +278,11 @@ irc_ns_name_uncompress(const unsigned char *msg, const unsigned char *eom,
   int n;
 
   if ((n = irc_ns_name_unpack(msg, eom, src, tmp, sizeof tmp)) == -1)
-    return(-1);
+    return -1;
   if (irc_ns_name_ntop(tmp, dst, dstsiz) == -1)
-    return(-1);
-  return(n);
-} /*2*/
+    return -1;
+  return n;
+}
 
 /*
  * irc_ns_name_unpack(msg, eom, src, dst, dstsiz)
@@ -295,75 +295,97 @@ irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
                    const unsigned char *src, unsigned char *dst,
                    size_t dstsiz)
 {
-	const unsigned char *srcp, *dstlim;
-	unsigned char *dstp;
-	int n, len, checked, l;
+  const unsigned char *srcp, *dstlim;
+  unsigned char *dstp;
+  int n, len, checked, l;
 
-	len = -1;
-	checked = 0;
-	dstp = dst;
-	srcp = src;
-	dstlim = dst + dstsiz;
-	if (srcp < msg || srcp >= eom) {
-		errno = EMSGSIZE;
-		return (-1);
-	}
-	/* Fetch next label in domain name. */
-	while ((n = *srcp++) != 0) {
-		/* Check for indirection. */
-		switch (n & NS_CMPRSFLGS) {
-		case 0:
-		case NS_TYPE_ELT:
-			/* Limit checks. */
-			if ((l = labellen(srcp - 1)) < 0) {
-				errno = EMSGSIZE;
-				return(-1);
-			}
-			if (dstp + l + 1 >= dstlim || srcp + l >= eom) {
-				errno = EMSGSIZE;
-				return (-1);
-			}
-			checked += l + 1;
-			*dstp++ = n;
-			memcpy(dstp, srcp, l);
-			dstp += l;
-			srcp += l;
-			break;
+  len = -1;
+  checked = 0;
+  dstp = dst;
+  srcp = src;
+  dstlim = dst + dstsiz;
 
-		case NS_CMPRSFLGS:
-			if (srcp >= eom) {
-				errno = EMSGSIZE;
-				return (-1);
-			}
-			if (len < 0)
-				len = srcp - src + 1;
-			srcp = msg + (((n & 0x3f) << 8) | (*srcp & 0xff));
-			if (srcp < msg || srcp >= eom) {  /* Out of range. */
-				errno = EMSGSIZE;
-				return (-1);
-			}
-			checked += 2;
-			/*
-			 * Check for loops in the compressed name;
-			 * if we've looked at the whole message,
-			 * there must be a loop.
-			 */
-			if (checked >= eom - msg) {
-				errno = EMSGSIZE;
-				return (-1);
-			}
-			break;
+  if (srcp < msg || srcp >= eom)
+  {
+    errno = EMSGSIZE;
+    return -1;
+  }
 
-		default:
-			errno = EMSGSIZE;
-			return (-1);			/* flag error */
-		}
-	}
-	*dstp = '\0';
-	if (len < 0)
-		len = srcp - src;
-	return (len);
-} /*2*/
+  /* Fetch next label in domain name. */
+  while ((n = *srcp++) != 0)
+  {
+    /* Check for indirection. */
+    switch (n & NS_CMPRSFLGS)
+    {
+      case 0:
+      case NS_TYPE_ELT:
+        /* Limit checks. */
+        if ((l = labellen(srcp - 1)) < 0)
+        {
+          errno = EMSGSIZE;
+          return -1;
+        }
+
+        if (dstp + l + 1 >= dstlim || srcp + l >= eom)
+        {
+          errno = EMSGSIZE;
+          return -1;
+        }
+
+        checked += l + 1;
+        *dstp++ = n;
+        memcpy(dstp, srcp, l);
+
+        dstp += l;
+        srcp += l;
+        break;
+
+      case NS_CMPRSFLGS:
+        if (srcp >= eom)
+        {
+          errno = EMSGSIZE;
+          return -1;
+        }
+
+        if (len < 0)
+          len = srcp - src + 1;
+        srcp = msg + (((n & 0x3f) << 8) | (*srcp & 0xff));
+
+        if (srcp < msg || srcp >= eom)
+        { 
+          /* Out of range. */
+          errno = EMSGSIZE;
+          return -1;
+        }
+
+        checked += 2;
+
+        /*
+         * Check for loops in the compressed name;
+         * if we've looked at the whole message,
+         * there must be a loop.
+         */
+        if (checked >= eom - msg)
+        {
+          errno = EMSGSIZE;
+          return -1;
+        }
+
+        break;
+
+      default:
+        errno = EMSGSIZE;
+        return -1; /* Flag error */
+    }
+  }
+
+  *dstp = '\0';
+
+  if (len < 0)
+    len = srcp - src;
+
+  return len;
+}
 
 /*
  * irc_ns_name_ntop(src, dst, dstsiz)
@@ -470,13 +492,14 @@ irc_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
  * Skip over a compressed domain name. Return the size or -1.
  */
 int
-irc_dn_skipname(const unsigned char *ptr, const unsigned char *eom) {
+irc_dn_skipname(const unsigned char *ptr, const unsigned char *eom)
+{
   const unsigned char *saveptr = ptr;
 
   if (irc_ns_name_skip(&ptr, eom) == -1)
-    return(-1);
-  return(ptr - saveptr);
-} /*2*/
+    return -1;
+  return ptr - saveptr;
+}
 
 /*
  * ns_name_skip(ptrptr, eom)
@@ -498,24 +521,24 @@ irc_ns_name_skip(const unsigned char **ptrptr, const unsigned char *eom)
     /* Check for indirection. */
     switch (n & NS_CMPRSFLGS)
     {
-      case 0: /* normal case, n == len */
+      case 0:  /* Normal case, n == len */
         cp += n;
         continue;
-      case NS_TYPE_ELT: /* EDNS0 extended label */
+      case NS_TYPE_ELT:  /* EDNS0 extended label */
         if ((l = labellen(cp - 1)) < 0)
         {
-          errno = EMSGSIZE; /* XXX */
-          return(-1);
+          errno = EMSGSIZE;  /* XXX */
+          return -1;
         }
 
         cp += l;
         continue;
-      case NS_CMPRSFLGS: /* indirection */
+      case NS_CMPRSFLGS:  /* Indirection */
         cp++;
         break;
-      default: /* illegal type */
+      default:  /* Illegal type */
         errno = EMSGSIZE;
-        return(-1);
+        return -1;
     }
 
     break;
@@ -524,12 +547,12 @@ irc_ns_name_skip(const unsigned char **ptrptr, const unsigned char *eom)
   if (cp > eom)
   {
     errno = EMSGSIZE;
-    return (-1);
+    return -1;
   }
 
   *ptrptr = cp;
-  return(0);
-} /*2*/
+  return 0;
+}
 
 unsigned int
 irc_ns_get16(const unsigned char *src)
@@ -537,7 +560,7 @@ irc_ns_get16(const unsigned char *src)
   unsigned int dst;
 
   IRC_NS_GET16(dst, src);
-  return(dst);
+  return dst;
 }
 
 unsigned long
@@ -546,7 +569,7 @@ irc_ns_get32(const unsigned char *src)
   unsigned long dst;
 
   IRC_NS_GET32(dst, src);
-  return(dst);
+  return dst;
 }
 
 void
@@ -575,20 +598,20 @@ special(int ch)
 {
   switch (ch)
   {
-    case 0x22: /* '"'  */
-    case 0x2E: /* '.'  */
-    case 0x3B: /* ';'  */
-    case 0x5C: /* '\\' */
-    case 0x28: /* '('  */
-    case 0x29: /* ')'  */
+    case 0x22:  /* '"'  */
+    case 0x2E:  /* '.'  */
+    case 0x3B:  /* ';'  */
+    case 0x5C:  /* '\\' */
+    case 0x28:  /* '('  */
+    case 0x29:  /* ')'  */
     /* Special modifiers in zone files. */
-    case 0x40: /* '@'  */
-    case 0x24: /* '$'  */
-      return(1);
+    case 0x40:  /* '@'  */
+    case 0x24:  /* '$'  */
+      return 1;
     default:
-      return(0);
+      return 0;
   }
-} /*2*/
+}
 
 static int
 labellen(const unsigned char *lp)
@@ -598,8 +621,8 @@ labellen(const unsigned char *lp)
 
   if ((l & NS_CMPRSFLGS) == NS_CMPRSFLGS)
   {
-    /* should be avoided by the caller */
-    return(-1);
+    /* Should be avoided by the caller */
+    return -1;
   }
 
   if ((l & NS_CMPRSFLGS) == NS_TYPE_ELT)
@@ -608,14 +631,14 @@ labellen(const unsigned char *lp)
     {
       if ((bitlen = *(lp + 1)) == 0)
         bitlen = 256;
-      return((bitlen + 7 ) / 8 + 1);
+      return (bitlen + 7 ) / 8 + 1;
     }
 
-    return(-1); /* unknwon ELT */
+    return -1;  /* Unknwon ELT */
   }
 
-  return(l);
-} /*2*/
+  return l;
+}
 
 
 /*
@@ -628,8 +651,8 @@ labellen(const unsigned char *lp)
 static int
 printable(int ch)
 {
-  return(ch > 0x20 && ch < 0x7f);
-} /*2*/
+  return ch > 0x20 && ch < 0x7f;
+}
 
 static int
 irc_decode_bitstring(const unsigned char **cpp, char *dn, const char *eom)
@@ -833,84 +856,103 @@ irc_ns_name_pack(const unsigned char *src, unsigned char *dst, int dstsiz,
   dstp = dst;
   eob = dstp + dstsiz;
   lpp = cpp = NULL;
-  if (dnptrs != NULL) {
-    if ((msg = *dnptrs++) != NULL) {
+
+  if (dnptrs != NULL)
+  {
+    if ((msg = *dnptrs++))
+    {
       for (cpp = dnptrs; *cpp != NULL; cpp++)
-        (void)NULL;
-      lpp = cpp;  /* end of list to search */
+        ;
+      lpp = cpp;  /* End of list to search */
     }
-  } else
+  }
+  else
     msg = NULL;
 
-  /* make sure the domain we are about to add is legal */
+  /* Make sure the domain we are about to add is legal */
   l = 0;
-  do {
+  do
+  {
     int l0;
 
     n = *srcp;
-    if ((n & NS_CMPRSFLGS) == NS_CMPRSFLGS) {
+    if ((n & NS_CMPRSFLGS) == NS_CMPRSFLGS)
+    {
       errno = EMSGSIZE;
-      return (-1);
+      return -1;
     }
-    if ((l0 = labellen(srcp)) < 0) {
+
+    if ((l0 = labellen(srcp)) < 0)
+    {
       errno = EINVAL;
-      return(-1);
+      return -1;
     }
+
     l += l0 + 1;
-    if (l > NS_MAXCDNAME) {
+    if (l > NS_MAXCDNAME)
+    {
       errno = EMSGSIZE;
-      return (-1);
+      return -1;
     }
+
     srcp += l0 + 1;
   } while (n != 0);
 
-  /* from here on we need to reset compression pointer array on error */
+  /* From here on we need to reset compression pointer array on error */
   srcp = src;
-  do {
+  do
+  {
     /* Look to see if we can use pointers. */
     n = *srcp;
-    if (n != 0 && msg != NULL) {
-      l = irc_dn_find(srcp, msg, (const unsigned char * const *)dnptrs,
-            (const unsigned char * const *)lpp);
-      if (l >= 0) {
-        if (dstp + 1 >= eob) {
+
+    if (n != 0 && msg != NULL)
+    {
+      l = irc_dn_find(srcp, msg, (const unsigned char *const *)dnptrs,
+                      (const unsigned char *const *)lpp);
+
+      if (l >= 0)
+      {
+        if (dstp + 1 >= eob)
           goto cleanup;
-        }
+
         *dstp++ = (l >> 8) | NS_CMPRSFLGS;
         *dstp++ = l % 256;
-        return (dstp - dst);
+        return dstp - dst;
       }
+
       /* Not found, save it. */
-      if (lastdnptr != NULL && cpp < lastdnptr - 1 &&
-          (dstp - msg) < 0x4000 && first) {
+      if (lastdnptr != NULL && cpp < lastdnptr - 1 && (dstp - msg) < 0x4000 && first)
+      {
         *cpp++ = dstp;
         *cpp = NULL;
         first = 0;
       }
     }
-    /* copy label to buffer */
-    if ((n & NS_CMPRSFLGS) == NS_CMPRSFLGS) {
-      /* Should not happen. */
-      goto cleanup;
-    }
+
+    /* Copy label to buffer */
+    if ((n & NS_CMPRSFLGS) == NS_CMPRSFLGS)
+      goto cleanup;  /* Should not happen. */
+
     n = labellen(srcp);
-    if (dstp + 1 + n >= eob) {
+    if (dstp + 1 + n >= eob)
       goto cleanup;
-    }
+
     memcpy(dstp, srcp, n + 1);
     srcp += n + 1;
     dstp += n + 1;
   } while (n != 0);
 
-  if (dstp > eob) {
+  if (dstp > eob)
+  {
 cleanup:
     if (msg != NULL)
       *lpp = NULL;
     errno = EMSGSIZE;
-    return (-1);
+    return -1;
   }
-  return(dstp - dst);
-} /*2*/
+
+  return dstp - dst;
+}
 
 static int
 irc_ns_name_compress(const char *src, unsigned char *dst, size_t dstsiz,
@@ -919,8 +961,8 @@ irc_ns_name_compress(const char *src, unsigned char *dst, size_t dstsiz,
   unsigned char tmp[NS_MAXCDNAME];
 
   if (irc_ns_name_pton(src, tmp, sizeof tmp) == -1)
-    return(-1);
-  return(irc_ns_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr));
+    return -1;
+  return irc_ns_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr);
 }
 
 static int

@@ -329,8 +329,6 @@ struct LocalUser
   time_t       lasttime;   /**< ...should be only LOCAL clients? --msa */
   time_t       firsttime;  /**< Time client was created */
   time_t       since;      /**< Last time we parsed something */
-  time_t       last_knock;    /**< Time of last knock */
-  time_t       last_invite;    /**< Time of last INVITE */
   time_t       last_join_time;   /**< When this client last joined a channel */
   time_t       last_leave_time;  /**< When this client last left a channel */
   int          join_leave_count; /**< Count of JOIN/LEAVE in less than
@@ -356,6 +354,12 @@ struct LocalUser
     unsigned int messages;      /**< Statistics: protocol messages sent/received */
     uint64_t bytes;             /**< Statistics: total bytes sent/received */
   } recv, send;
+
+  struct
+  {
+    unsigned int count;  /**< How many INVITE/KNOCK requests client has send */
+    time_t last_attempt;  /**< Las time the INVITE/KNOCK request was issued */
+  } invite, knock;
 
   struct AuthRequest auth;
   struct Listener *listener;   /**< Listener accepted from */

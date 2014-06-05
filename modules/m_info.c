@@ -166,22 +166,29 @@ static const struct InfoStruct info_table[] =
     "Forbids channels with special ASCII characters in their name"
   },
   {
-    "invite_delay",
+    "invite_client_count",
     OUTPUT_DECIMAL,
-    &ConfigChannel.invite_delay,
-    "Delay between a users INVITE attempts"
+    &ConfigChannel.invite_client_count,
+    "How many INVITE attempts are permitted in invite_client_time"
+  },
+
+  {
+    "invite_client_time",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.invite_client_time,
+    "How many INVITE attempts are permitted in invite_client_time"
   },
   {
-    "invite_delay_channel",
+    "knock_client_count",
     OUTPUT_DECIMAL,
-    &ConfigChannel.invite_delay_channel,
-    "Delay between INVITE attempts to a channel"
+    &ConfigChannel.knock_client_count,
+    "How many KNOCK attempts are permitted in invite_client_time"
   },
   {
-    "knock_delay",
+    "knock_client_time",
     OUTPUT_DECIMAL,
-    &ConfigChannel.knock_delay,
-    "Delay between a users KNOCK attempts"
+    &ConfigChannel.knock_client_time,
+    "How many KNOCK attempts are permitted in invite_client_time"
   },
   {
     "knock_delay_channel",

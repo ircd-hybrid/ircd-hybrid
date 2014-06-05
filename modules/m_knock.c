@@ -95,15 +95,12 @@ m_knock(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    /*
-     * flood protection:
-     * allow one knock per user per knock_delay
-     * allow one knock per channel per knock_delay_channel
-     *
-     * we only limit local requests..
-     */
-    if ((source_p->localClient->last_knock + ConfigChannel.knock_delay) >
-        CurrentTime)
+    if ((source_p->localClient->knock.last_attempt + ConfigChannel.knock_client_time) > CurrentTime)
+      source_p->localClient->knock.count = 0;
+    source_p->localClient->knock.last_attempt = CurrentTime;
+    source_p->localClient->knock.count++;
+
+    if (source_p->localClient->knock.count > ConfigChannel.knock_client_count)
     {
       sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->chname, "user");
       return 0;
@@ -115,7 +112,6 @@ m_knock(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    source_p->localClient->last_knock = CurrentTime;
     sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, chptr->chname);
   }
 

@@ -2,7 +2,8 @@
 o) Channel halfops are now an integral part of ircd-hybrid
    and can't be disabled anymore
 o) Many code cleanups and improvements
-o) Added flood control for the INVITE command
+o) Added flood control for the INVITE command. See channel{} block in reference.conf
+o) Changed flood control logic for the KNOCK command. See channel{} block in reference.conf
 o) /INVITE without any parameters now shows a list of channels a client is invited to
 
 

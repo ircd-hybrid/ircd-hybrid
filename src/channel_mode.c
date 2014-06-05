@@ -635,16 +635,6 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 {
   char *mask = NULL;
 
-  if (alev < CHACCESS_HALFOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(source_p, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
-
   if (dir == MODE_QUERY || parc <= *parn)
   {
     dlink_node *ptr = NULL;
@@ -664,6 +654,16 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     }
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFEXCEPTLIST, chptr->chname);
+    return;
+  }
+
+  if (alev < CHACCESS_HALFOP)
+  {
+    if (!(*errors & SM_ERR_NOOPS))
+      sendto_one_numeric(source_p, &me,
+                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+    *errors |= SM_ERR_NOOPS;
     return;
   }
 
@@ -696,7 +696,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count].arg = mask;
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count++].mems = ONLY_CHANOPS;
+  mode_changes[mode_count++].mems = ALL_MEMBERS;
 }
 
 static void
@@ -704,16 +704,6 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   char *mask = NULL;
-
-  if (alev < CHACCESS_HALFOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(source_p, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
 
   if (dir == MODE_QUERY || parc <= *parn)
   {
@@ -734,6 +724,16 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     }
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFINVEXLIST, chptr->chname);
+    return;
+  }
+
+  if (alev < CHACCESS_HALFOP)
+  {
+    if (!(*errors & SM_ERR_NOOPS))
+      sendto_one_numeric(source_p, &me,
+                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+    *errors |= SM_ERR_NOOPS;
     return;
   }
 
@@ -766,7 +766,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count].arg = mask;
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count].dir = dir;
-  mode_changes[mode_count++].mems = ONLY_CHANOPS;
+  mode_changes[mode_count++].mems = ALL_MEMBERS;
 }
 
 static void

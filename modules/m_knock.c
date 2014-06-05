@@ -95,7 +95,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    if ((source_p->localClient->knock.last_attempt + ConfigChannel.knock_client_time) > CurrentTime)
+    if ((source_p->localClient->knock.last_attempt + ConfigChannel.knock_client_time) < CurrentTime)
       source_p->localClient->knock.count = 0;
     source_p->localClient->knock.last_attempt = CurrentTime;
     source_p->localClient->knock.count++;

@@ -110,7 +110,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((source_p->localClient->invite.last_attempt + ConfigChannel.invite_client_time) > CurrentTime)
+  if ((source_p->localClient->invite.last_attempt + ConfigChannel.invite_client_time) < CurrentTime)
     source_p->localClient->invite.count = 0;
   source_p->localClient->invite.last_attempt = CurrentTime;
   source_p->localClient->invite.count++;

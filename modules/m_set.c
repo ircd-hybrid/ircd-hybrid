@@ -464,7 +464,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
         {
           if (!irccmp(intarg, "yes") || !irccmp(intarg, "on"))
             newval = 1;
-          else if (!irccmp(intarg, "no")|| !irccmp(intarg, "off"))
+          else if (!irccmp(intarg, "no") || !irccmp(intarg, "off"))
             newval = 0;
           else
             newval = atoi(intarg);

@@ -52,7 +52,7 @@ enum
   SEND_LOCOPS = 3
 };
 
-/* used when sending to #mask or $mask */
+/* Used when sending to $#mask or $$mask */
 enum
 {
   MATCH_SERVER = 1,

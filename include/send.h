@@ -35,8 +35,7 @@ enum { NOCAPS = 0 };
 enum
 {
   ALL_MEMBERS  = 0,
-  ONLY_CHANOPS = 1,
-  ONLY_SERVERS = 2
+  ONLY_SERVERS = 1
 };
 
 enum

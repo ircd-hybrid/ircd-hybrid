@@ -13215,62 +13215,7 @@ $as_echo "#define ENABLE_SSP_CC 1" >>confdefs.h
   fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts " >&5
-$as_echo_n "checking whether C compiler accepts ... " >&6; }
-if ${ax_cv_check_cflags__+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
 
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  "
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_check_cflags__=yes
-else
-  ax_cv_check_cflags__=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags__" >&5
-$as_echo "$ax_cv_check_cflags__" >&6; }
-if test x"$ax_cv_check_cflags__" = xyes; then :
-  :
-else
-  :
-fi
-
-if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
-    *"  "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains "; } >&5
-  (: CFLAGS already contains ) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \""; } >&5
-  (: CFLAGS="$CFLAGS ") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      CFLAGS="$CFLAGS "
-      ;;
-   esac
-else
-  CFLAGS=""
-fi
 
 
 
@@ -14620,6 +14565,8 @@ fi
   if test "$warnings" = "yes" ; then
 
 
+
+
 for flag in -Wall; do
   as_CACHEVAR=`$as_echo "ax_cv_check_cflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
@@ -14680,6 +14627,8 @@ else
 fi
 
 done
+
+
 
 
 
@@ -14746,6 +14695,8 @@ done
 
 
 
+
+
 for flag in -Wno-unused; do
   as_CACHEVAR=`$as_echo "ax_cv_check_cflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
@@ -14806,6 +14757,8 @@ else
 fi
 
 done
+
+
 
 
 
@@ -14872,6 +14825,8 @@ done
 
 
 
+
+
 for flag in -Wcast-align; do
   as_CACHEVAR=`$as_echo "ax_cv_check_cflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
@@ -14932,6 +14887,8 @@ else
 fi
 
 done
+
+
 
 
 
@@ -14998,6 +14955,8 @@ done
 
 
 
+
+
 for flag in -Wlogical-op; do
   as_CACHEVAR=`$as_echo "ax_cv_check_cflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
@@ -15058,6 +15017,8 @@ else
 fi
 
 done
+
+
 
 
 
@@ -15124,6 +15085,8 @@ done
 
 
 
+
+
 for flag in -Wmissing-include-dirs; do
   as_CACHEVAR=`$as_echo "ax_cv_check_cflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
@@ -15184,6 +15147,8 @@ else
 fi
 
 done
+
+
 
 
 
@@ -15250,6 +15215,8 @@ done
 
 
 
+
+
 for flag in -Wnested-externs; do
   as_CACHEVAR=`$as_echo "ax_cv_check_cflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
@@ -15310,6 +15277,8 @@ else
 fi
 
 done
+
+
 
 
 
@@ -15376,6 +15345,8 @@ done
 
 
 
+
+
 for flag in -Wredundant-decls; do
   as_CACHEVAR=`$as_echo "ax_cv_check_cflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
@@ -15436,6 +15407,8 @@ else
 fi
 
 done
+
+
 
 
 
@@ -15502,6 +15475,8 @@ done
 
 
 
+
+
 for flag in -Wwrite-strings; do
   as_CACHEVAR=`$as_echo "ax_cv_check_cflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $flag" >&5
@@ -15562,6 +15537,8 @@ else
 fi
 
 done
+
+
 
 
 

@@ -9,12 +9,11 @@ JOIN            KICK            KILL            KLINE
 KNOCK           LINKS           LIST            LOCOPS
 LUSERS          MAP             MODULE          MOTD
 NAMES           NICK            NOTICE          OPER
-OPERWALL        PART            PASS            PING
-PONG            POST            PRIVMSG         QUIT
-REHASH          RESTART         RESV            SERVER
-SET             SJOIN           SQUIT           STATS
-SVINFO          TIME            TOPIC           TRACE
-UMODE           UNDLINE         UNKLINE         UNRESV
-UNXLINE         USER            USERHOST        VERSION
-WALLOPS         WHO             WHOIS           WHOWAS
-XLINE
+PART            PASS            PING            PONG
+POST            PRIVMSG         QUIT            REHASH
+RESTART         RESV            SERVER          SET
+SJOIN           SQUIT           STATS           SVINFO
+TIME            TOPIC           TRACE           UMODE
+UNDLINE         UNKLINE         UNRESV          UNXLINE
+USER            USERHOST        VERSION         WALLOPS
+WHO             WHOIS           WHOWAS          XLINE

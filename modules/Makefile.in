@@ -320,12 +320,6 @@ m_oper_la_OBJECTS = $(am_m_oper_la_OBJECTS)
 m_oper_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_oper_la_LDFLAGS) $(LDFLAGS) -o $@
-m_operwall_la_LIBADD =
-am_m_operwall_la_OBJECTS = m_operwall.lo
-m_operwall_la_OBJECTS = $(am_m_operwall_la_OBJECTS)
-m_operwall_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_operwall_la_LDFLAGS) $(LDFLAGS) -o $@
 m_pass_la_LIBADD =
 am_m_pass_la_OBJECTS = m_pass.lo
 m_pass_la_OBJECTS = $(am_m_pass_la_OBJECTS)
@@ -578,24 +572,23 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
 	$(m_map_la_SOURCES) $(m_module_la_SOURCES) \
 	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
-	$(m_oper_la_SOURCES) $(m_operwall_la_SOURCES) \
-	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
-	$(m_post_la_SOURCES) $(m_rehash_la_SOURCES) \
-	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
-	$(m_services_la_SOURCES) $(m_set_la_SOURCES) \
-	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
-	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
-	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
-	$(m_svspart_la_SOURCES) $(m_tburst_la_SOURCES) \
-	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
-	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
-	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
-	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
+	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
+	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
+	$(m_resv_la_SOURCES) $(m_services_la_SOURCES) \
+	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_svinfo_la_SOURCES) $(m_svsjoin_la_SOURCES) \
+	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
+	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
+	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
+	$(m_topic_la_SOURCES) $(m_trace_la_SOURCES) \
+	$(m_undline_la_SOURCES) $(m_unkline_la_SOURCES) \
+	$(m_unresv_la_SOURCES) $(m_unxline_la_SOURCES) \
+	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
+	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
+	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
+	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
+	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
 	$(m_certfp_la_SOURCES) $(m_challenge_la_SOURCES) \
@@ -610,24 +603,23 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
 	$(m_map_la_SOURCES) $(m_module_la_SOURCES) \
 	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
-	$(m_oper_la_SOURCES) $(m_operwall_la_SOURCES) \
-	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
-	$(m_post_la_SOURCES) $(m_rehash_la_SOURCES) \
-	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
-	$(m_services_la_SOURCES) $(m_set_la_SOURCES) \
-	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
-	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
-	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
-	$(m_svspart_la_SOURCES) $(m_tburst_la_SOURCES) \
-	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
-	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
-	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
-	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
+	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
+	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
+	$(m_resv_la_SOURCES) $(m_services_la_SOURCES) \
+	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_svinfo_la_SOURCES) $(m_svsjoin_la_SOURCES) \
+	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
+	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
+	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
+	$(m_topic_la_SOURCES) $(m_trace_la_SOURCES) \
+	$(m_undline_la_SOURCES) $(m_unkline_la_SOURCES) \
+	$(m_unresv_la_SOURCES) $(m_unxline_la_SOURCES) \
+	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
+	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
+	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
+	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
+	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -872,7 +864,6 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_motd.la      \
                       m_names.la     \
                       m_oper.la      \
-                      m_operwall.la  \
                       m_pass.la      \
                       m_ping.la      \
                       m_pong.la      \
@@ -939,7 +930,6 @@ m_module_la_LDFLAGS = $(MODULE_FLAGS)
 m_motd_la_LDFLAGS = $(MODULE_FLAGS)
 m_names_la_LDFLAGS = $(MODULE_FLAGS)
 m_oper_la_LDFLAGS = $(MODULE_FLAGS)
-m_operwall_la_LDFLAGS = $(MODULE_FLAGS)
 m_pass_la_LDFLAGS = $(MODULE_FLAGS)
 m_ping_la_LDFLAGS = $(MODULE_FLAGS)
 m_pong_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1005,7 +995,6 @@ m_module_la_SOURCES = m_module.c
 m_motd_la_SOURCES = m_motd.c
 m_names_la_SOURCES = m_names.c
 m_oper_la_SOURCES = m_oper.c
-m_operwall_la_SOURCES = m_operwall.c
 m_pass_la_SOURCES = m_pass.c
 m_ping_la_SOURCES = m_ping.c
 m_pong_la_SOURCES = m_pong.c
@@ -1203,9 +1192,6 @@ m_names.la: $(m_names_la_OBJECTS) $(m_names_la_DEPENDENCIES) $(EXTRA_m_names_la_
 m_oper.la: $(m_oper_la_OBJECTS) $(m_oper_la_DEPENDENCIES) $(EXTRA_m_oper_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_oper_la_LINK) -rpath $(modulesdir) $(m_oper_la_OBJECTS) $(m_oper_la_LIBADD) $(LIBS)
 
-m_operwall.la: $(m_operwall_la_OBJECTS) $(m_operwall_la_DEPENDENCIES) $(EXTRA_m_operwall_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_operwall_la_LINK) -rpath $(modulesdir) $(m_operwall_la_OBJECTS) $(m_operwall_la_LIBADD) $(LIBS)
-
 m_pass.la: $(m_pass_la_OBJECTS) $(m_pass_la_DEPENDENCIES) $(EXTRA_m_pass_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_pass_la_LINK) -rpath $(modulesdir) $(m_pass_la_OBJECTS) $(m_pass_la_LIBADD) $(LIBS)
 
@@ -1345,7 +1331,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_motd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_names.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_oper.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_operwall.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_pass.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_ping.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_pong.Plo@am__quote@

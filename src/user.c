@@ -127,7 +127,7 @@ const unsigned int user_modes[256] =
   UMODE_WALLOP,       /* w */
   UMODE_HIDDENHOST,   /* x */
   UMODE_SPY,          /* y */
-  UMODE_OPERWALL,     /* z      0x7A */
+  0,                  /* z      0x7A */
   0,0,0,0,0,          /* 0x7B - 0x7F */
 
   /* 0x80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x8F */

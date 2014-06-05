@@ -63,7 +63,7 @@ mo_wallops(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+  sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s WALLOPS :%s",
                 source_p->id, message);
   return 0;
@@ -88,11 +88,7 @@ ms_wallops(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(message))
     return 0;
 
-  if (IsClient(source_p))
-    sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
-  else
-    sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
-
+  sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s WALLOPS :%s",
                 source_p->id, message);
   return 0;

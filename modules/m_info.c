@@ -176,7 +176,7 @@ static const struct InfoStruct info_table[] =
     "invite_client_time",
     OUTPUT_DECIMAL,
     &ConfigChannel.invite_client_time,
-    "How many INVITE attempts are permitted in invite_client_time"
+    "How many invite_client_count invites are allowed in this time"
   },
   {
     "knock_client_count",
@@ -188,7 +188,7 @@ static const struct InfoStruct info_table[] =
     "knock_client_time",
     OUTPUT_DECIMAL,
     &ConfigChannel.knock_client_time,
-    "How many KNOCK attempts are permitted in knock_client_time"
+    "How many kknock_client_count knocks are allowed in this time"
   },
   {
     "knock_delay_channel",

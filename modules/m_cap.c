@@ -75,7 +75,7 @@ capab_search(const char *key, const struct capabilities *cap)
   while (ToLower(*key) == ToLower(*rb))  /* Walk equivalent part of strings */
     if (*key++ == '\0')  /* Hit the end, all right... */
       return 0;
-    else    /* OK, let's move on... */
+    else  /* OK, let's move on... */
       rb++;
 
   /*
@@ -233,7 +233,7 @@ cap_req(struct Client *source_p, const char *caplist)
     source_p->localClient->registration |= REG_NEED_CAP;
 
   while (cl) {  /* Walk through the capabilities list... */
-    if (!(cap = find_cap(&cl, &neg)) /* Look up capability... */
+    if (!(cap = find_cap(&cl, &neg))  /* Look up capability... */
         || (!neg && (cap->flags & CAPFL_PROHIBIT))  /* Is it prohibited? */
         || (neg && (cap->flags & CAPFL_STICKY))) {  /* Is it sticky? */
       sendto_one(source_p, ":%s CAP %s NAK :%s", me.name,

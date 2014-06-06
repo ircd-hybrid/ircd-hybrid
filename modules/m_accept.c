@@ -57,7 +57,7 @@ list_accepts(struct Client *source_p)
     const struct split_nuh_item *accept_p = ptr->data;
     size_t masklen = strlen(accept_p->nickptr) +
                      strlen(accept_p->userptr) +
-                     strlen(accept_p->hostptr) + 2 /* +2 for !@ */ ;
+                     strlen(accept_p->hostptr) + 2;  /* +2 for !@ */
 
     if ((t - nicks) + masklen + len  > IRCD_BUFSIZE)
     {

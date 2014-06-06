@@ -7,6 +7,8 @@ o) Channel halfops (%) may now no longer (de)halfop other channel members
 o) Channel halfops (%) may now no longer KICK other channel halfops
 o) Make sure general::stats_e_disabled gets reset via /rehash
 o) Fixed compile warnings; code cleanups
+o) Fixed bug where the configuration parser wouldn't truncate the network name
+   if general::network_name contains spaces
 
 
 -- Noteworthy changes in version 8.1.17 (2014-05-01)

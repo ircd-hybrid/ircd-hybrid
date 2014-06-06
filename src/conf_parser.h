@@ -257,22 +257,23 @@ extern int yydebug;
     T_WALLOPS = 467,
     T_WEBIRC = 468,
     TBOOL = 469,
-    THROTTLE_TIME = 470,
-    TKLINE_EXPIRE_NOTICES = 471,
-    TMASKED = 472,
-    TRUE_NO_OPER_FLOOD = 473,
-    TS_MAX_DELTA = 474,
-    TS_WARN_DELTA = 475,
-    TWODOTS = 476,
-    TYPE = 477,
-    UNKLINE = 478,
-    USE_EGD = 479,
-    USE_LOGGING = 480,
-    USER = 481,
-    VHOST = 482,
-    VHOST6 = 483,
-    WARN_NO_CONNECT_BLOCK = 484,
-    XLINE = 485
+    THROTTLE_COUNT = 470,
+    THROTTLE_TIME = 471,
+    TKLINE_EXPIRE_NOTICES = 472,
+    TMASKED = 473,
+    TRUE_NO_OPER_FLOOD = 474,
+    TS_MAX_DELTA = 475,
+    TS_WARN_DELTA = 476,
+    TWODOTS = 477,
+    TYPE = 478,
+    UNKLINE = 479,
+    USE_EGD = 480,
+    USE_LOGGING = 481,
+    USER = 482,
+    VHOST = 483,
+    VHOST6 = 484,
+    WARN_NO_CONNECT_BLOCK = 485,
+    XLINE = 486
   };
 #endif
 /* Tokens.  */
@@ -488,22 +489,23 @@ extern int yydebug;
 #define T_WALLOPS 467
 #define T_WEBIRC 468
 #define TBOOL 469
-#define THROTTLE_TIME 470
-#define TKLINE_EXPIRE_NOTICES 471
-#define TMASKED 472
-#define TRUE_NO_OPER_FLOOD 473
-#define TS_MAX_DELTA 474
-#define TS_WARN_DELTA 475
-#define TWODOTS 476
-#define TYPE 477
-#define UNKLINE 478
-#define USE_EGD 479
-#define USE_LOGGING 480
-#define USER 481
-#define VHOST 482
-#define VHOST6 483
-#define WARN_NO_CONNECT_BLOCK 484
-#define XLINE 485
+#define THROTTLE_COUNT 470
+#define THROTTLE_TIME 471
+#define TKLINE_EXPIRE_NOTICES 472
+#define TMASKED 473
+#define TRUE_NO_OPER_FLOOD 474
+#define TS_MAX_DELTA 475
+#define TS_WARN_DELTA 476
+#define TWODOTS 477
+#define TYPE 478
+#define UNKLINE 479
+#define USE_EGD 480
+#define USE_LOGGING 481
+#define USER 482
+#define VHOST 483
+#define VHOST6 484
+#define WARN_NO_CONNECT_BLOCK 485
+#define XLINE 486
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -515,7 +517,7 @@ union YYSTYPE
   int number;
   char *string;
 
-#line 519 "conf_parser.h" /* yacc.c:1909  */
+#line 521 "conf_parser.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

@@ -515,6 +515,12 @@ static const struct InfoStruct info_table[] =
     "The maximum number of PRIVMSG/NOTICE targets"
   },
   {
+    "throttle_count",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.throttle_count,
+    "Number of connects in throttle_time before connections are blocked"
+  },
+  {
     "throttle_time",
     OUTPUT_DECIMAL,
     &ConfigFileEntry.throttle_time,

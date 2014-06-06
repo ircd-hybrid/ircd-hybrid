@@ -352,6 +352,7 @@ reset_block_state(void)
 %token  T_WALLOPS
 %token  T_WEBIRC
 %token  TBOOL
+%token  THROTTLE_COUNT
 %token  THROTTLE_TIME
 %token  TKLINE_EXPIRE_NOTICES
 %token  TMASKED
@@ -2475,6 +2476,7 @@ general_item:       general_hide_spoof_ips |
                     general_default_floodcount |
                     general_min_nonwildcard |
                     general_min_nonwildcard_simple |
+                    general_throttle_count |
                     general_throttle_time |
                     general_havent_read_conf |
                     general_ping_cookie |
@@ -2730,6 +2732,11 @@ general_ping_cookie: PING_COOKIE '=' TBOOL ';'
 general_disable_auth: DISABLE_AUTH '=' TBOOL ';'
 {
   ConfigFileEntry.disable_auth = yylval.number;
+};
+
+general_throttle_count: THROTTLE_COUNT '=' NUMBER ';'
+{
+  ConfigFileEntry.throttle_count = $3;
 };
 
 general_throttle_time: THROTTLE_TIME '=' timespec ';'

@@ -354,7 +354,7 @@ close_listeners(void)
     close_listener(ptr->data);
 }
 
-#define TOOFAST_WARNING "ERROR :Trying to reconnect too fast.\r\n"
+#define TOOFAST_WARNING "ERROR :Your host is trying to (re)connect too fast -- throttled.\r\n"
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
 
 static void

@@ -257,6 +257,7 @@ struct config_file_entry
   unsigned int kill_chase_time_limit;
   unsigned int default_floodcount;
   /* 0 == don't use throttle... */
+  unsigned int throttle_count;
   unsigned int throttle_time;
   unsigned int use_egd;
   unsigned int ping_cookie;

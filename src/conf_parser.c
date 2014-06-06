@@ -3203,7 +3203,7 @@ yyreduce:
     char *p;
 
     if ((p = strchr(yylval.string, ' ')))
-      p = '\0';
+      *p = '\0';
 
     MyFree(ServerInfo.network_name);
     ServerInfo.network_name = xstrdup(yylval.string);

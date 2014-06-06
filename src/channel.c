@@ -678,8 +678,9 @@ find_channel_link(struct Client *client_p, struct Channel *chptr)
   return NULL;
 }
 
-/*
- * Basically the same functionality as in bahamut
+/*! Tests if a client can send to a channel
+ * \param message The actual message string the client wants to send
+ * \return 1 if the message does contain any control codes, 0 otherwise
  */
 static int
 msg_has_ctrls(const char *message)
@@ -689,10 +690,11 @@ msg_has_ctrls(const char *message)
   for (; *p; ++p)
   {
     if (*p > 31 || *p == 1)
-      continue;
+      continue;  /* CTCP or no control code */
 
-    if (*p == 27)
+    if (*p == 27)  /* Escape */
     {
+      /* ISO 2022 charset shift sequence */
       if (*(p + 1) == '$' ||
           *(p + 1) == '(')
       {
@@ -701,7 +703,7 @@ msg_has_ctrls(const char *message)
       }
     }
 
-    return 1;
+    return 1;  /* Control code */
   }
 
   return 0;

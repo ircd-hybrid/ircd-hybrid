@@ -1,12 +1,12 @@
-/* 
+/*
    A C-program for MT19937, with initialization improved 2002/1/26.
    Coded by Takuji Nishimura and Makoto Matsumoto.
 
-   Before using, initialize the state by using init_genrand(seed)  
+   Before using, initialize the state by using init_genrand(seed)
    or init_by_array(init_key, key_length).
 
    Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
-   All rights reserved.                          
+   All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
@@ -19,8 +19,8 @@
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
 
-     3. The names of its contributors may not be used to endorse or promote 
-        products derived from this software without specific prior written 
+     3. The names of its contributors may not be used to endorse or promote
+        products derived from this software without specific prior written
         permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -46,7 +46,7 @@
 #include "stdinc.h"
 #include "rng_mt.h"
 
-/* Period parameters */  
+/* Period parameters */
 #define N 624
 #define M 397
 #define MATRIX_A 0x9908b0dfU   /* constant vector a         */
@@ -119,7 +119,7 @@ init_by_array(uint32_t init_key[], int key_length)
     }
   }
 
-  mt[0] = 0x80000000U; /* MSB is 1; assuring non-zero initial array */ 
+  mt[0] = 0x80000000U; /* MSB is 1; assuring non-zero initial array */
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
@@ -127,7 +127,7 @@ uint32_t
 genrand_int32(void)
 {
   uint32_t y;
-  static uint32_t mag01[2]={ 0x0U, MATRIX_A };
+  static uint32_t mag01[2] = { 0x0U, MATRIX_A };
   /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
   if (mti >= N)
@@ -154,7 +154,7 @@ genrand_int32(void)
 
     mti = 0;
   }
-  
+
   y = mt[mti++];
 
   /* Tempering */

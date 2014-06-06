@@ -83,7 +83,7 @@ int doremotd = 0;
 /* Set to zero because it should be initialized later using
  * initialize_server_capabs
  */
-int default_server_capabs = 0;
+unsigned int default_server_capabs;
 unsigned int splitmode;
 unsigned int splitchecking;
 unsigned int split_users;

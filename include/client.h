@@ -356,7 +356,7 @@ struct LocalUser
   struct
   {
     unsigned int count;  /**< How many INVITE/KNOCK requests client has send */
-    time_t last_attempt;  /**< Las time the INVITE/KNOCK request was issued */
+    time_t last_attempt;  /**< Last time the INVITE/KNOCK request was issued */
   } invite, knock;
 
   struct AuthRequest auth;

@@ -440,8 +440,6 @@ msg_tree_parse(const char *cmd)
  * inputs	- pointer to struct Message
  * output	- none
  * side effects - load this one command name
- *		  msg->count msg->bytes is modified in place, in
- *		  modules address space. Might not want to do that...
  */
 void
 mod_add_cmd(struct Message *msg)
@@ -453,7 +451,6 @@ mod_add_cmd(struct Message *msg)
     return;
 
   add_msg_element(&msg_tree, msg, msg->cmd);
-  msg->count = msg->rcount = msg->bytes = 0;
 }
 
 /* mod_del_cmd()

@@ -669,16 +669,14 @@ send_conf_options(struct Client *source_p)
 static void
 send_info_text(struct Client *source_p)
 {
-  const char **text = infotext;
-
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "INFO requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  while (*text)
+  for (const char **text = infotext; *text; *text++)
   {
-    const char *line = *text++;
+    const char *line = *text;
 
     if (*line == '\0')
       line = " ";

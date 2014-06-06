@@ -1122,7 +1122,7 @@ void
 add_isupport(const char *name, const char *options, int n)
 {
   dlink_node *ptr;
-  struct Isupport *support;
+  struct Isupport *support = NULL;
 
   DLINK_FOREACH(ptr, support_list.head)
   {

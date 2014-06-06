@@ -34,13 +34,13 @@
 
 struct SetOptions
 {
-  int autoconn;      /* autoconn enabled for all servers? */
-  int floodcount;    /* Number of messages in 1 second    */
-  int joinfloodtime;
-  int joinfloodcount;
-  int ident_timeout; /* timeout for identd lookups        */
-  int spam_num;
-  int spam_time;
+  unsigned int autoconn;      /* autoconn enabled for all servers? */
+  unsigned int floodcount;    /* Number of messages in 1 second    */
+  unsigned int joinfloodtime;
+  unsigned int joinfloodcount;
+  unsigned int ident_timeout; /* timeout for identd lookups        */
+  unsigned int spam_num;
+  unsigned int spam_time;
 };
 
 /*
@@ -87,7 +87,7 @@ struct Counter
 
 struct ServerState_t
 {
-  int foreground;
+  unsigned int foreground;
 };
 
 

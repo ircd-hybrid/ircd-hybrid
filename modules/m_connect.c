@@ -56,8 +56,7 @@
 static int
 mo_connect(struct Client *source_p, int parc, char *parv[])
 {
-  int port;
-  int tmpport;
+  int port = 0, tmpport = 0;
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
 
@@ -181,8 +180,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 static int
 ms_connect(struct Client *source_p, int parc, char *parv[])
 {
-  int port;
-  int tmpport;
+  int port = 0, tmpport = 0;
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
 

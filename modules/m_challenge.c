@@ -103,7 +103,7 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    if (attach_conf(source_p, conf) != 0)
+    if (attach_conf(source_p, conf))
     {
       sendto_one_notice(source_p, &me, ":Can't attach conf!");
       failed_challenge_notice(source_p, conf->name, "can't attach conf!");

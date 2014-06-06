@@ -61,10 +61,10 @@ m_away(struct Client *source_p, int parc, char *parv[])
     if (source_p->away[0])
     {
       source_p->away[0] = '\0';
-      /* we now send this only if they were away before --is */
+
+      /* We now send this only if they were away before --is */
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY", source_p->id);
-      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
-                                   ":%s!%s@%s AWAY",
+      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY",
                                    source_p->name, source_p->username,
                                    source_p->host);
     }
@@ -87,8 +87,7 @@ m_away(struct Client *source_p, int parc, char *parv[])
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 
-  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
-                               ":%s!%s@%s AWAY :%s",
+  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,
                                source_p->host, source_p->away);
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY :%s",
@@ -116,10 +115,10 @@ ms_away(struct Client *source_p, int parc, char *parv[])
     if (source_p->away[0])
     {
       source_p->away[0] = '\0';
-      /* we now send this only if they were away before --is */
+
+      /* We now send this only if they were away before --is */
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY", source_p->id);
-      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
-                                   ":%s!%s@%s AWAY",
+      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY",
                                    source_p->name, source_p->username,
                                    source_p->host);
     }
@@ -132,8 +131,7 @@ ms_away(struct Client *source_p, int parc, char *parv[])
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 
-  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY,
-                               ":%s!%s@%s AWAY :%s",
+  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,
                                source_p->host, source_p->away);
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s AWAY :%s",

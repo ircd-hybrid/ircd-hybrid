@@ -674,7 +674,7 @@ send_info_text(struct Client *source_p)
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  for (const char **text = infotext; *text; *text++)
+  for (const char **text = infotext; *text; ++text)
   {
     const char *line = *text;
 

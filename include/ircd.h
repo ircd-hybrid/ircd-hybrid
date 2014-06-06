@@ -108,7 +108,7 @@ extern struct SetOptions GlobalSetOptions; /* defined in ircd.c */
 extern struct ServerState_t server_state;
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec
-extern int default_server_capabs;
+extern int unsigned default_server_capabs;
 extern unsigned int splitmode;
 extern unsigned int splitchecking;
 extern unsigned int split_users;

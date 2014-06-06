@@ -42,7 +42,7 @@ match(const char *mask, const char *name)
 {
   const char *m = mask, *n = name;
   const char *m_tmp = mask, *n_tmp = name;
-  int star = 0;
+  unsigned int star = 0;
 
   while (1)
   {
@@ -135,7 +135,7 @@ match(const char *mask, const char *name)
 char *
 collapse(char *mask)
 {
-  int star = 0;
+  unsigned int star = 0;
   char *m = mask;
   char *b = NULL;
 

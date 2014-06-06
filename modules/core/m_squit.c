@@ -47,12 +47,11 @@
 static int
 mo_squit(struct Client *source_p, int parc, char *parv[])
 {
+  char comment[REASONLEN + 1] = "";
   struct Client *target_p = NULL;
   struct Client *p;
   dlink_node *ptr;
-  char *comment;
   const char *server;
-  char def_reason[] = CONF_NOREASON;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -97,10 +96,10 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  comment = (parc > 2 && parv[2]) ? parv[2] : def_reason;
-
-  if (strlen(comment) > (size_t)REASONLEN)
-    comment[REASONLEN] = '\0';
+  if (!EmptyString(parv[2]))
+    strlcpy(comment, parv[2], sizeof(comment));
+  else
+    strlcpy(comment, CONF_NOREASON, sizeof(comment));
 
   if (MyConnect(target_p))
   {

@@ -195,7 +195,7 @@ struct ModuleStruct
 {
   const char *cmd;
   void (*handler)(struct Client *, const char *);
-  const int arg_required;
+  const unsigned int arg_required;
 };
 
 static const struct ModuleStruct module_cmd_table[] =

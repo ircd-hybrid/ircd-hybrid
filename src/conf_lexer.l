@@ -328,6 +328,7 @@ stats_k_oper_only           { return STATS_K_OPER_ONLY; }
 stats_o_oper_only           { return STATS_O_OPER_ONLY; }
 stats_P_oper_only           { return STATS_P_OPER_ONLY; }
 stats_u_oper_only           { return STATS_U_OPER_ONLY; }
+throttle_count              { return THROTTLE_COUNT; }
 throttle_time               { return THROTTLE_TIME; }
 tkline_expire_notices       { return TKLINE_EXPIRE_NOTICES; }
 tlsv1                       { return T_TLSV1; }

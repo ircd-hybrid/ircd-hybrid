@@ -102,8 +102,9 @@ static int find_user_host(struct Client *, char *, char *, char *, unsigned int)
 struct ip_entry
 {
   struct irc_ssaddr ip;
-  unsigned int count;
-  time_t last_attempt;
+  unsigned int count;  /**< Number of registered users using this IP */
+  unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
+  time_t last_attempt;  /**< The last time someone connected from this IP */
   struct ip_entry *next;
 };
 
@@ -1170,6 +1171,7 @@ set_default_conf(void)
   ConfigFileEntry.oper_umodes = UMODE_BOTS | UMODE_LOCOPS | UMODE_SERVNOTICE | UMODE_WALLOP;
   ConfigFileEntry.use_egd = 0;
   ConfigFileEntry.egdpool_path = NULL;
+  ConfigFileEntry.throttle_count = 0;
   ConfigFileEntry.throttle_time = 10;
 }
 
@@ -1265,7 +1267,7 @@ lookup_confhost(struct MaskItem *conf)
 int
 conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
 {
-  struct ip_entry *ip_found;
+  struct ip_entry *ip_found = NULL;
   struct MaskItem *conf = find_dline_conf(addr, aftype);
 
   /* DLINE exempt also gets you out of static limits/pacing... */
@@ -1276,13 +1278,18 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
     return BANNED_CLIENT;
 
   ip_found = find_or_add_ip(addr);
+  ++ip_found->connection_count;
 
-  if ((CurrentTime - ip_found->last_attempt) <
-      ConfigFileEntry.throttle_time)
+  if ((CurrentTime - ip_found->last_attempt) < ConfigFileEntry.throttle_time)
   {
-    ip_found->last_attempt = CurrentTime;
-    return TOO_FAST;
+    if (ip_found->connection_count >= ConfigFileEntry.throttle_count)
+    {
+      ip_found->last_attempt = CurrentTime;
+      return TOO_FAST;
+    }
   }
+  else
+    ip_found->connection_count = 1;
 
   ip_found->last_attempt = CurrentTime;
   return 0;

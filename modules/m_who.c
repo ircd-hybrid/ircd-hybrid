@@ -91,8 +91,8 @@ do_who(struct Client *source_p, struct Client *target_p,
  *
  */
 static void
-who_common_channel(struct Client *source_p, struct Channel *chptr,
-                   char *mask, int server_oper, int *maxmatches)
+who_common_channel(struct Client *source_p, struct Channel *chptr, char *mask,
+                   int server_oper, unsigned int *maxmatches)
 {
   dlink_node *ptr = NULL;
 
@@ -143,7 +143,7 @@ who_global(struct Client *source_p, char *mask, int server_oper)
   struct Channel *chptr;
   struct Client *target_p;
   dlink_node *lp = NULL, *gcptr = NULL;
-  int maxmatches = 500;
+  unsigned int maxmatches = 500;
   static time_t last_used = 0;
 
   if (!HasUMode(source_p, UMODE_OPER))

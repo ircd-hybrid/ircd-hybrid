@@ -118,7 +118,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
 
   if (match_conf_password(password, conf))
   {
-    if (attach_conf(source_p, conf) != 0)
+    if (attach_conf(source_p, conf))
     {
       sendto_one_notice(source_p, &me, ":Can't attach conf!");
       failed_oper_notice(source_p, name, "can't attach conf!");

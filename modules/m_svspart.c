@@ -39,56 +39,6 @@
 #include "packet.h"
 
 
-/*! \brief Removes a client from a specific channel
- * \param source_p Pointer to source client to remove
- * \param name     Name of channel to remove from
- * \param reason   Part reason to show
- */
-static void
-part_one_client(struct Client *target_p, const char *name, const char *reason)
-{
-  struct Channel *chptr = NULL;
-  struct Membership *ms = NULL;
-
-  if ((chptr = hash_find_channel(name)) == NULL)
-  {
-    sendto_one_numeric(target_p, &me, ERR_NOSUCHCHANNEL, name);
-    return;
-  }
-
-  if ((ms = find_channel_link(target_p, chptr)) == NULL)
-  {
-    sendto_one_numeric(target_p, &me, ERR_NOTONCHANNEL, chptr->chname);
-    return;
-  }
-
-  /*
-   * Remove user from the old channel (if any)
-   * only allow /part reasons in -m chans
-   */
-  if (*reason && (!MyConnect(target_p) ||
-      ((can_send(chptr, target_p, ms, reason) &&
-       (target_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
-        < CurrentTime))))
-  {
-    sendto_server(target_p, NOCAPS, NOCAPS, ":%s PART %s :%s",
-                  target_p->id, chptr->chname, reason);
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s :%s",
-                         target_p->name, target_p->username,
-                         target_p->host, chptr->chname, reason);
-  }
-  else
-  {
-    sendto_server(target_p, NOCAPS, NOCAPS, ":%s PART %s",
-                  target_p->id, chptr->chname);
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
-                         target_p->name, target_p->username,
-                         target_p->host, chptr->chname);
-  }
-
-  remove_user_from_channel(ms);
-}
-
 /*! \brief SVSPART command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
@@ -106,8 +56,6 @@ static int
 ms_svspart(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-  char *p = NULL, *name = NULL;
-  char reason[KICKLEN + 1] = "";
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
@@ -117,6 +65,12 @@ ms_svspart(struct Client *source_p, int parc, char *parv[])
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
+
+  if (MyConnect(target_p))
+  {
+    channel_do_part(source_p, parv);
+    return 0;
+  }
 
   if (target_p->from == source_p->from)
   {
@@ -128,23 +82,12 @@ ms_svspart(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!MyConnect(target_p))
-  {
-    if (parc == 3)
-      sendto_one(target_p, ":%s SVSPART %s %s", source_p->id,
-                 target_p->id, parv[2]);
-    else
-      sendto_one(target_p, ":%s SVSPART %s %s :%s", source_p->id,
-                 target_p->id, parv[2], parv[3]);
-    return 0;
-  }
-
-  if (parc > 3 && !EmptyString(parv[3]))
-    strlcpy(reason, parv[3], sizeof(reason));
-
-  for (name = strtoken(&p, parv[2], ","); name;
-       name = strtoken(&p,    NULL, ","))
-    part_one_client(target_p, name, reason);
+  if (parc == 3)
+    sendto_one(target_p, ":%s SVSPART %s %s", source_p->id,
+               target_p->id, parv[2]);
+  else
+    sendto_one(target_p, ":%s SVSPART %s %s :%s", source_p->id,
+               target_p->id, parv[2], parv[3]);
   return 0;
 }
 

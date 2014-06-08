@@ -882,3 +882,296 @@ set_channel_topic(struct Channel *chptr, const char *topic,
   strlcpy(chptr->topic_info, topic_info, sizeof(chptr->topic_info));
   chptr->topic_time = topicts;
 }
+
+/* do_join_0()
+ *
+ * inputs	- pointer to client doing join 0
+ * output	- NONE
+ * side effects	- Use has decided to join 0. This is legacy
+ *		  from the days when channels were numbers not names. *sigh*
+ *		  There is a bunch of evilness necessary here due to
+ * 		  anti spambot code.
+ */
+void
+channel_do_join_0(struct Client *source_p)
+{
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+
+  if (source_p->channel.head)
+    if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
+      check_spambot_warning(source_p, NULL);
+
+  DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->channel.head)
+  {
+    struct Channel *chptr = ((struct Membership *)ptr->data)->chptr;
+
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
+                  source_p->id, chptr->chname);
+    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
+                         source_p->name, source_p->username,
+                         source_p->host, chptr->chname);
+
+    remove_user_from_channel(ptr->data);
+  }
+}
+
+static char *
+channel_find_last0(struct Client *source_p, char *chanlist)
+{
+  int join0 = 0;
+
+  for (char *p = chanlist; *p; ++p)  /* Find last "JOIN 0" */
+  {
+    if (*p == '0' && (*(p + 1) == ',' || *(p + 1) == '\0'))
+    {
+      if ((*p + 1) == ',')
+        ++p;
+
+      chanlist = p + 1;
+      join0 = 1;
+    }
+    else
+    {
+      while (*p != ',' && *p != '\0')  /* Skip past channel name */
+        ++p;
+
+      if (*p == '\0')  /* Hit the end */
+        break;
+    }
+  }
+
+  if (join0)
+    channel_do_join_0(source_p);
+
+  return chanlist;
+}
+
+void
+channel_do_join(struct Client *source_p, char *parv[])
+{
+  char *p = NULL;
+  char *key_list = NULL;
+  char *chan_list = NULL;
+  char *chan = NULL;
+  struct Channel *chptr = NULL;
+  struct MaskItem *conf = NULL;
+  int i = 0;
+  unsigned int flags = 0;
+
+  key_list = parv[2];
+  chan_list = channel_find_last0(source_p, parv[1]);
+
+  for (chan = strtoken(&p, chan_list, ","); chan;
+       chan = strtoken(&p,      NULL, ","))
+  {
+    const char *key = NULL;
+
+    /* If we have any more keys, take the first for this channel. */
+    if (!EmptyString(key_list) && (key_list = strchr(key = key_list, ',')))
+      *key_list++ = '\0';
+
+    /* Empty keys are the same as no keys. */
+    if (key && *key == '\0')
+      key = NULL;
+
+    if (!check_channel_name(chan, 1))
+    {
+      sendto_one_numeric(source_p, &me, ERR_BADCHANNAME, chan);
+      continue;
+    }
+
+    if (!IsExemptResv(source_p) &&
+        !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv) &&
+        ((conf = match_find_resv(chan)) && !resv_find_exempt(source_p, conf)))
+    {
+      ++conf->count;
+      sendto_one_numeric(source_p, &me, ERR_CHANBANREASON,
+                         chan, conf->reason ? conf->reason : "Reserved channel");
+      sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
+                           "Forbidding reserved channel %s from user %s",
+                           chan, get_client_name(source_p, HIDE_IP));
+      continue;
+    }
+
+    if (dlink_list_length(&source_p->channel) >=
+        (HasUMode(source_p, UMODE_OPER) ?
+         ConfigChannel.max_chans_per_oper :
+         ConfigChannel.max_chans_per_user))
+    {
+      sendto_one_numeric(source_p, &me, ERR_TOOMANYCHANNELS, chan);
+      break;
+    }
+
+    if ((chptr = hash_find_channel(chan)))
+    {
+      if (IsMember(source_p, chptr))
+        continue;
+
+      if (splitmode && !HasUMode(source_p, UMODE_OPER) &&
+          ConfigChannel.no_join_on_split)
+      {
+        sendto_one_numeric(source_p, &me, ERR_UNAVAILRESOURCE, chan);
+        continue;
+      }
+
+      /*
+       * can_join checks for +i key, bans.
+       */
+      if ((i = can_join(source_p, chptr, key)))
+      {
+        sendto_one_numeric(source_p, &me, i, chptr->chname);
+        continue;
+      }
+
+      /*
+       * This should never be the case unless there is some sort of
+       * persistant channels.
+       */
+      if (dlink_list_length(&chptr->members) == 0)
+        flags = CHFL_CHANOP;
+      else
+        flags = 0;
+    }
+    else
+    {
+      if (splitmode && !HasUMode(source_p, UMODE_OPER) &&
+          (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))
+      {
+        sendto_one_numeric(source_p, &me, ERR_UNAVAILRESOURCE, chan);
+        continue;
+      }
+
+      flags = CHFL_CHANOP;
+      chptr = make_channel(chan);
+    }
+
+    if (!HasUMode(source_p, UMODE_OPER))
+      check_spambot_warning(source_p, chptr->chname);
+
+    add_user_to_channel(chptr, source_p, flags, 1);
+
+    /*
+     *  Set timestamp if appropriate, and propagate
+     */
+    if (flags == CHFL_CHANOP)
+    {
+      chptr->channelts = CurrentTime;
+      chptr->mode.mode |= MODE_TOPICLIMIT;
+      chptr->mode.mode |= MODE_NOPRIVMSGS;
+
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s SJOIN %lu %s +nt :@%s",
+                    me.id, (unsigned long)chptr->channelts,
+                    chptr->chname, source_p->id);
+
+      /*
+       * Notify all other users on the new channel
+       */
+      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
+                           source_p->name, source_p->username,
+                           source_p->host, chptr->chname);
+      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s +nt",
+                           me.name, chptr->chname);
+
+      if (source_p->away[0])
+        sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
+                                    ":%s!%s@%s AWAY :%s",
+                                    source_p->name, source_p->username,
+                                    source_p->host, source_p->away);
+    }
+    else
+    {
+      sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
+                    source_p->id, (unsigned long)chptr->channelts,
+                    chptr->chname);
+      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
+                           source_p->name, source_p->username,
+                           source_p->host, chptr->chname);
+
+      if (source_p->away[0])
+        sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
+                                    ":%s!%s@%s AWAY :%s",
+                                    source_p->name, source_p->username,
+                                    source_p->host, source_p->away);
+    }
+
+    del_invite(chptr, source_p);
+
+    if (chptr->topic[0])
+    {
+      sendto_one_numeric(source_p, &me, RPL_TOPIC, chptr->chname, chptr->topic);
+      sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME, chptr->chname,
+                         chptr->topic_info, chptr->topic_time);
+    }
+
+    channel_member_names(source_p, chptr, 1);
+
+    source_p->localClient->last_join_time = CurrentTime;
+  }
+}
+
+/*! \brief Removes a client from a specific channel
+ * \param source_p Pointer to source client to remove
+ * \param name     Name of channel to remove from
+ * \param reason   Part reason to show
+ */
+static void
+channel_part_one_client(struct Client *source_p, const char *name, const char *reason)
+{
+  struct Channel *chptr = NULL;
+  struct Membership *ms = NULL;
+
+  if ((chptr = hash_find_channel(name)) == NULL)
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
+    return;
+  }
+
+  if ((ms = find_channel_link(source_p, chptr)) == NULL)
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
+    return;
+  }
+
+  if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
+    check_spambot_warning(source_p, NULL);
+
+  /*
+   * Remove user from the old channel (if any)
+   * only allow /part reasons in -m chans
+   */
+  if (*reason && (!MyConnect(source_p) ||
+      ((can_send(chptr, source_p, ms, reason) &&
+       (source_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
+        < CurrentTime))))
+  {
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s :%s",
+                  source_p->id, chptr->chname, reason);
+    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s :%s",
+                         source_p->name, source_p->username,
+                         source_p->host, chptr->chname, reason);
+  }
+  else
+  {
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
+                  source_p->id, chptr->chname);
+    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
+                         source_p->name, source_p->username,
+                         source_p->host, chptr->chname);
+  }
+
+  remove_user_from_channel(ms);
+}
+
+void
+channel_do_part(struct Client *source_p, char *parv[])
+{
+  char *p = NULL, *name = NULL;
+  char reason[KICKLEN + 1] = "";
+
+  if (!EmptyString(parv[2]))
+    strlcpy(reason, parv[2], sizeof(reason));
+
+  for (name = strtoken(&p, parv[1], ","); name;
+       name = strtoken(&p,    NULL, ","))
+    channel_part_one_client(source_p, name, reason);
+}

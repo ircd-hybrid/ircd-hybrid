@@ -35,11 +35,11 @@
 struct SetOptions
 {
   unsigned int autoconn;      /* autoconn enabled for all servers? */
-  unsigned int floodcount;    /* Number of messages in 1 second    */
+  int floodcount;    /* Number of messages in 1 second    */
   unsigned int joinfloodtime;
   unsigned int joinfloodcount;
   unsigned int ident_timeout; /* timeout for identd lookups        */
-  unsigned int spam_num;
+  int spam_num;
   unsigned int spam_time;
 };
 

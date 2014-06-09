@@ -487,7 +487,7 @@ add_invite(struct Channel *chptr, struct Client *who)
    * Delete last link in chain if the list is max length
    */
   if (dlink_list_length(&who->localClient->invited) >=
-      ConfigChannel.max_chans_per_user)
+      ConfigChannel.max_channels)
     del_invite(who->localClient->invited.tail->data, who);
 
   /* Add client to channel invite list */
@@ -955,6 +955,7 @@ channel_do_join(struct Client *source_p, char *parv[])
   char *chan = NULL;
   struct Channel *chptr = NULL;
   struct MaskItem *conf = NULL;
+  const struct ClassItem *class = get_class_ptr(&source_p->localClient->confs);
   int i = 0;
   unsigned int flags = 0;
 
@@ -994,9 +995,7 @@ channel_do_join(struct Client *source_p, char *parv[])
     }
 
     if (dlink_list_length(&source_p->channel) >=
-        (HasUMode(source_p, UMODE_OPER) ?
-         ConfigChannel.max_chans_per_oper :
-         ConfigChannel.max_chans_per_user))
+        ((class->max_channels) ? class->max_channels : ConfigChannel.max_channels))
     {
       sendto_one_numeric(source_p, &me, ERR_TOOMANYCHANNELS, chan);
       break;

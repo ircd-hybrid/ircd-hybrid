@@ -89,19 +89,6 @@ unsigned int splitchecking;
 unsigned int split_users;
 unsigned int split_servers;
 
-/* Do klines the same way hybrid-6 did them, i.e. at the
- * top of the next io_loop instead of in the same loop as
- * the klines are being applied.
- *
- * This should fix strange CPU starvation as very indirectly reported.
- * (Why do you people not email bug reports? WHY? WHY?)
- *
- * - Dianora
- */
-
-int rehashed_klines = 0;
-
-
 /*
  * print_startup - print startup information
  */
@@ -196,20 +183,6 @@ io_loop(void)
 {
   while (1)
   {
-    /*
-     * Maybe we want a flags word?
-     * ie. if (REHASHED_KLINES(global_flags))
-     * SET_REHASHED_KLINES(global_flags)
-     * CLEAR_REHASHED_KLINES(global_flags)
-     *
-     * - Dianora
-     */
-    if (rehashed_klines)
-    {
-      check_conf_klines();
-      rehashed_klines = 0;
-    }
-
     if (listing_client_list.head)
     {
       dlink_node *ptr = NULL, *ptr_next = NULL;

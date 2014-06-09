@@ -53,6 +53,7 @@ struct ClassItem
   unsigned int max_perip;
   unsigned int min_idle;
   unsigned int max_idle;
+  unsigned int max_channels;
   unsigned int cidr_bitlen_ipv4;
   unsigned int cidr_bitlen_ipv6;
   unsigned int number_per_cidr;

@@ -107,6 +107,7 @@ static struct
     max_ident,
     max_sendq,
     max_recvq,
+    max_channels,
     cidr_bitlen_ipv4,
     cidr_bitlen_ipv6,
     number_per_cidr;
@@ -227,8 +228,7 @@ reset_block_state(void)
 %token  MASK
 %token  MAX_ACCEPT
 %token  MAX_BANS
-%token  MAX_CHANS_PER_OPER
-%token  MAX_CHANS_PER_USER
+%token  MAX_CHANNELS
 %token  MAX_GLOBAL
 %token  MAX_IDENT
 %token  MAX_IDLE
@@ -1400,6 +1400,7 @@ class_entry: CLASS
   class->max_ident = block_state.max_ident.value;
   class->max_sendq = block_state.max_sendq.value;
   class->max_recvq = block_state.max_recvq.value;
+  class->max_channels = block_state.max_channels.value;
 
   if (block_state.min_idle.value > block_state.max_idle.value)
   {
@@ -1432,6 +1433,7 @@ class_item:     class_name |
                 class_number_per_cidr |
                 class_number_per_ip |
                 class_connectfreq |
+                class_max_channels |
                 class_max_number |
                 class_max_global |
                 class_max_local |
@@ -1464,6 +1466,12 @@ class_connectfreq: CONNECTFREQ '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 1)
     block_state.con_freq.value = $3;
+};
+
+class_max_channels: MAX_CHANNELS '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass == 1)
+    block_state.max_channels.value = $3;
 };
 
 class_max_number: MAX_NUMBER '=' NUMBER ';'
@@ -2915,8 +2923,7 @@ channel_item:       channel_max_bans |
                     channel_knock_client_count |
                     channel_knock_client_time |
                     channel_knock_delay_channel |
-                    channel_max_chans_per_user |
-                    channel_max_chans_per_oper |
+                    channel_max_channels |
                     channel_default_split_user_count |
                     channel_default_split_server_count |
                     channel_no_create_on_split |
@@ -2930,7 +2937,6 @@ channel_disable_fake_channels: DISABLE_FAKE_CHANNELS '=' TBOOL ';'
 {
   ConfigChannel.disable_fake_channels = yylval.number;
 };
-
 
 channel_invite_client_count: INVITE_CLIENT_COUNT '=' NUMBER ';'
 {
@@ -2957,14 +2963,9 @@ channel_knock_delay_channel: KNOCK_DELAY_CHANNEL '=' timespec ';'
   ConfigChannel.knock_delay_channel = $3;
 };
 
-channel_max_chans_per_user: MAX_CHANS_PER_USER '=' NUMBER ';'
+channel_max_channels: MAX_CHANNELS '=' NUMBER ';'
 {
-  ConfigChannel.max_chans_per_user = $3;
-};
-
-channel_max_chans_per_oper: MAX_CHANS_PER_OPER '=' NUMBER ';'
-{
-  ConfigChannel.max_chans_per_oper = $3;
+  ConfigChannel.max_channels = $3;
 };
 
 channel_max_bans: MAX_BANS '=' NUMBER ';'

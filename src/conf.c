@@ -1106,8 +1106,7 @@ set_default_conf(void)
   ConfigChannel.knock_client_count = 1;
   ConfigChannel.knock_client_time = 300;
   ConfigChannel.knock_delay_channel = 60;
-  ConfigChannel.max_chans_per_user = 25;
-  ConfigChannel.max_chans_per_oper = 50;
+  ConfigChannel.max_channels = 25;
   ConfigChannel.max_bans = 25;
   ConfigChannel.default_split_user_count = 0;
   ConfigChannel.default_split_server_count = 0;
@@ -1489,7 +1488,7 @@ read_conf_files(int cold)
   add_isupport("CHANTYPES", "#", -1);
 
   snprintf(chanlimit, sizeof(chanlimit), "#:%d",
-           ConfigChannel.max_chans_per_user);
+           ConfigChannel.max_channels);
   add_isupport("CHANLIMIT", chanlimit, -1);
   snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,imnprstORS");
   add_isupport("CHANNELLEN", NULL, CHANNELLEN);

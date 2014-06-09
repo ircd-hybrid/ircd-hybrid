@@ -231,8 +231,7 @@ mask                        { return MASK; }
 masked                      { return TMASKED; }
 max_accept                  { return MAX_ACCEPT; }
 max_bans                    { return MAX_BANS; }
-max_chans_per_oper          { return MAX_CHANS_PER_OPER; }
-max_chans_per_user          { return MAX_CHANS_PER_USER; }
+max_channels                { return MAX_CHANNELS; }
 max_clients                 { return T_MAX_CLIENTS; }
 max_global                  { return MAX_GLOBAL; }
 max_ident                   { return MAX_IDENT; }

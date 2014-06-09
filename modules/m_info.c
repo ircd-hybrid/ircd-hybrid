@@ -197,16 +197,10 @@ static const struct InfoStruct info_table[] =
     "Delay between KNOCK attempts to a channel"
   },
   {
-    "max_chans_per_user",
+    "max_channels",
     OUTPUT_DECIMAL,
-    &ConfigChannel.max_chans_per_user,
+    &ConfigChannel.max_channels,
     "Maximum number of channels a user can join"
-  },
-  {
-    "max_chans_per_oper",
-    OUTPUT_DECIMAL,
-    &ConfigChannel.max_chans_per_oper,
-    "Maximum number of channels an oper can join"
   },
   {
     "max_bans",

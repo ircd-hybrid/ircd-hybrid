@@ -274,8 +274,7 @@ struct config_channel_entry
   unsigned int knock_client_time;
   unsigned int knock_delay_channel;
   unsigned int max_bans;
-  unsigned int max_chans_per_user;
-  unsigned int max_chans_per_oper;
+  unsigned int max_channels;
   unsigned int no_create_on_split;
   unsigned int no_join_on_split;
   unsigned int default_split_server_count;

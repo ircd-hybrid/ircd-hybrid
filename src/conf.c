@@ -1773,7 +1773,7 @@ valid_wild_card_simple(const char *data)
 int
 valid_wild_card(struct Client *source_p, int warn, int count, ...)
 {
-  char tmpch = '\0';
+  unsigned char tmpch = '\0';
   unsigned int nonwild = 0;
   va_list args;
 
@@ -1793,7 +1793,7 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
 
   while (count--)
   {
-    const char *p = va_arg(args, const char *);
+    const unsigned char *p = va_arg(args, const unsigned char *);
     if (p == NULL)
       continue;
 

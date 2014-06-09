@@ -31,6 +31,27 @@ o) /info now also reports MPATH and SPATH
 o) Updated several help files
 
 
+-- Noteworthy changes in version 8.1.18 (2014-06-09)
+o) Fixed CAP issue for certain clients
+o) Fixed bug where "STATS p" would show an invalid amount of irc-operators
+   in case there are any +H opers
+o) irc-operators may now no longer set a channel +O if they are only halfops (%)
+o) Channel halfops (%) may now no longer (de)halfop other channel members
+o) Channel halfops (%) may now no longer KICK other channel halfops
+o) Make sure general::stats_e_disabled gets reset via /rehash
+o) Fixed compile warnings; code cleanups
+o) Fixed bug where the configuration parser wouldn't truncate the network name
+   if general::network_name contains spaces
+
+
+-- Noteworthy changes in version 8.1.17 (2014-05-01)
+o) Fixed possible WATCH core
+o) Fixed bug where the configuration parser wouldn't take time units
+   into consideration for the join_flood_time and throttle_time
+   configuration options
+o) Minor /list optimization
+
+
 -- Noteworthy changes in version 8.1.16 (2014-04-20)
 o) Fixed undefined behaviour with crypt() returning NULL
    since glibc2.17 in certain cases

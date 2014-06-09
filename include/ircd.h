@@ -114,6 +114,5 @@ extern unsigned int splitchecking;
 extern unsigned int split_users;
 extern unsigned int split_servers;
 
-extern int rehashed_klines;
 extern void set_time(void);
 #endif

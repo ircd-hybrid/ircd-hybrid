@@ -1047,8 +1047,7 @@ rehash(int sig)
     strlcpy(me.info, ServerInfo.description, sizeof(me.info));
 
   load_conf_modules();
-
-  rehashed_klines = 1;
+  check_conf_klines();
 
   return 0;
 }

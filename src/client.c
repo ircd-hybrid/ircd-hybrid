@@ -334,25 +334,21 @@ check_unknowns_list(void)
 void
 check_conf_klines(void)
 {
-  struct Client *client_p = NULL;       /* current local client_p being examined */
   struct MaskItem *conf = NULL;
-  dlink_node *ptr, *next_ptr;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next_ptr, local_client_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, local_client_list.head)
   {
-    client_p = ptr->data;
+    struct Client *client_p = ptr->data;
 
     /* If a client is already being exited
      */
     if (IsDead(client_p) || !IsClient(client_p))
       continue;
 
-    if ((conf = find_dline_conf(&client_p->localClient->ip,
-                                  client_p->localClient->aftype)))
+    if ((conf = find_conf_by_address(NULL, &client_p->localClient->ip, CONF_DLINE,
+                                     client_p->localClient->aftype, NULL, NULL, 1)))
     {
-      if (conf->type == CONF_EXEMPT)
-        continue;
-
       conf_try_ban(client_p, conf);
       continue; /* and go examine next fd/client_p */
     }
@@ -386,17 +382,15 @@ check_conf_klines(void)
   }
 
   /* also check the unknowns list for new dlines */
-  DLINK_FOREACH_SAFE(ptr, next_ptr, unknown_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
   {
-    client_p = ptr->data;
+    struct Client *client_p = ptr->data;
 
-    if ((conf = find_dline_conf(&client_p->localClient->ip,
-                                 client_p->localClient->aftype)))
+    if ((conf = find_conf_by_address(NULL, &client_p->localClient->ip, CONF_DLINE,
+                                     client_p->localClient->aftype, NULL, NULL, 1)))
     {
-      if (conf->type == CONF_EXEMPT)
-        continue;
-
-      exit_client(client_p, "D-lined");
+      conf_try_ban(client_p, conf);
+      continue; /* and go examine next fd/client_p */
     }
   }
 }
@@ -433,6 +427,9 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
       type_string = kline_string;
       break;
     case CONF_DLINE:
+      if (find_conf_by_address(NULL, &client_p->localClient->ip, CONF_EXEMPT,
+                               client_p->localClient->aftype, NULL, NULL, 1))
+        return;
       type_string = dline_string;
       break;
     case CONF_GLINE:

@@ -43,6 +43,59 @@
 #include "memory.h"
 
 
+static void
+check_dline(struct AddressRec *arec)
+{
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+
+  DLINK_FOREACH_SAFE(ptr, ptr_next, local_client_list.head)
+  {
+    struct Client *client_p = ptr->data;
+
+    if (IsDead(client_p))
+      continue;
+
+    switch (arec->masktype)
+    {
+      case HM_IPV4:
+        if (client_p->localClient->aftype == AF_INET)
+          if (match_ipv4(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+            conf_try_ban(client_p, arec->conf);
+        break;
+      case HM_IPV6:
+        if (client_p->localClient->aftype == AF_INET6)
+          if (match_ipv6(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+            conf_try_ban(client_p, arec->conf);
+        break;
+      default: break;
+    }
+  }
+
+  DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
+  {
+    struct Client *client_p = ptr->data;
+
+    if (IsDead(client_p))
+      continue;
+
+    switch (arec->masktype)
+    {
+      case HM_IPV4:
+        if (client_p->localClient->aftype == AF_INET)
+          if (match_ipv4(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+            conf_try_ban(client_p, arec->conf);
+        break;
+      case HM_IPV6:
+        if (client_p->localClient->aftype == AF_INET6)
+          if (match_ipv6(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+            conf_try_ban(client_p, arec->conf);
+        break;
+      default: break;
+    }
+  }
+}
+
+
 /* apply_tdline()
  *
  * inputs	-
@@ -78,8 +131,7 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
 
   SetConfDatabase(conf);
   conf->setat = CurrentTime;
-  add_conf_by_address(CONF_DLINE, conf);
-  rehashed_klines = 1;
+  check_dline(add_conf_by_address(CONF_DLINE, conf));
 }
 
 /* mo_dline()
@@ -202,7 +254,6 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
   conf->reason = xstrdup(buffer);
   apply_dline(source_p, conf, tkline_time);
-  rehashed_klines = 1;
   return 0;
 }
 
@@ -313,7 +364,6 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
 
     conf->reason = xstrdup(buffer);
     apply_dline(source_p, conf, tkline_time);
-    rehashed_klines = 1;
   }
 
   return 0;

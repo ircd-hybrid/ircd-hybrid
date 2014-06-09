@@ -238,7 +238,7 @@ me_kline(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE];
   struct MaskItem *conf = NULL;
-  int tkline_time = 0;
+  time_t tkline_time = 0;
   const char *current_date;
   char *kuser, *khost, *kreason;
 
@@ -269,8 +269,8 @@ me_kline(struct Client *source_p, int parc, char *parv[])
     conf->user = xstrdup(kuser);
 
     if (tkline_time)
-      snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %s (%s)",
-               (int)(tkline_time/60), kreason, current_date);
+      snprintf(buffer, sizeof(buffer), "Temporary K-line %u min. - %s (%s)",
+               (unsigned int)(tkline_time/60), kreason, current_date);
     else
       snprintf(buffer, sizeof(buffer), "%s (%s)", kreason, current_date);
 

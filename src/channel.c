@@ -871,7 +871,7 @@ check_splitmode(void *unused)
  * \param local      Whether the topic is set by a local client
  */
 void
-set_channel_topic(struct Channel *chptr, const char *topic,
+channel_set_topic(struct Channel *chptr, const char *topic,
                   const char *topic_info, time_t topicts, int local)
 {
   if (local)

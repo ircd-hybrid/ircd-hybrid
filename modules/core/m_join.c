@@ -71,7 +71,7 @@ m_join(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  channel_do_join(source_p, parv);
+  channel_do_join(source_p, parv[1], parv[2]);
   return 0;
 }
 

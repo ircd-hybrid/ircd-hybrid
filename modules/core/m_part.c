@@ -64,7 +64,7 @@ m_part(struct Client *source_p, int parc, char *parv[])
   if (MyClient(source_p) && !IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  channel_do_part(source_p, parv);
+  channel_do_part(source_p, parv[1], parv[2]);
   return 0;
 }
 

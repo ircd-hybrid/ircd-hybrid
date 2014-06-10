@@ -947,20 +947,18 @@ channel_find_last0(struct Client *source_p, char *chanlist)
 }
 
 void
-channel_do_join(struct Client *source_p, char *parv[])
+channel_do_join(struct Client *source_p, char *channel, char *key_list)
 {
   char *p = NULL;
-  char *key_list = NULL;
-  char *chan_list = NULL;
   char *chan = NULL;
+  char *chan_list = NULL;
   struct Channel *chptr = NULL;
   struct MaskItem *conf = NULL;
   const struct ClassItem *class = get_class_ptr(&source_p->localClient->confs);
   int i = 0;
   unsigned int flags = 0;
 
-  key_list = parv[2];
-  chan_list = channel_find_last0(source_p, parv[1]);
+  chan_list = channel_find_last0(source_p, channel);
 
   for (chan = strtoken(&p, chan_list, ","); chan;
        chan = strtoken(&p,      NULL, ","))
@@ -1162,15 +1160,15 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
 }
 
 void
-channel_do_part(struct Client *source_p, char *parv[])
+channel_do_part(struct Client *source_p, char *channel, char *reason)
 {
   char *p = NULL, *name = NULL;
-  char reason[KICKLEN + 1] = "";
+  char reasonbuf[KICKLEN + 1] = "";
 
-  if (!EmptyString(parv[2]))
-    strlcpy(reason, parv[2], sizeof(reason));
+  if (!EmptyString(reason))
+    strlcpy(reasonbuf, reason, sizeof(reasonbuf));
 
-  for (name = strtoken(&p, parv[1], ","); name;
+  for (name = strtoken(&p, channel, ","); name;
        name = strtoken(&p,    NULL, ","))
-    channel_part_one_client(source_p, name, reason);
+    channel_part_one_client(source_p, name, reasonbuf);
 }

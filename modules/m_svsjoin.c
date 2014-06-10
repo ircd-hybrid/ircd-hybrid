@@ -70,7 +70,7 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
 
   if (MyConnect(target_p))
   {
-    channel_do_join(target_p, parv);
+    channel_do_join(target_p, parv[2], parv[3]);
     return 0;
   }
 

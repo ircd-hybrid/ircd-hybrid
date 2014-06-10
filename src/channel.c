@@ -1007,7 +1007,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       if (splitmode && !HasUMode(source_p, UMODE_OPER) &&
           ConfigChannel.no_join_on_split)
       {
-        sendto_one_numeric(source_p, &me, ERR_UNAVAILRESOURCE, chan);
+        sendto_one_numeric(source_p, &me, ERR_UNAVAILRESOURCE, chptr->chname);
         continue;
       }
 

@@ -6,6 +6,7 @@ o) Added flood control for the INVITE command. See channel{} block in reference.
 o) Changed flood control logic for the KNOCK command. See channel{} block in reference.conf
 o) /INVITE without any parameters now shows a list of channels a client is invited to
 o) The OPERWALL command has been removed. Use GLOBOPS instead
+o) Added max_channels to class{} blocks
 
 
 -- Noteworthy changes in version 8.2.0beta3 (2014-05-26)

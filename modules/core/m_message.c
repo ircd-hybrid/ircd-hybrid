@@ -103,44 +103,6 @@ duplicate_ptr(const void *ptr)
   return 0;
 }
 
-/*
- * find_userhost - find a user@host (server or user).
- * inputs       - user name to look for
- *              - host name to look for
- *              - pointer to count of number of matches found
- * outputs      - pointer to client if found
- *              - count is updated
- * side effects - none
- *
- */
-static struct Client *
-find_userhost(char *user, char *host, int *count)
-{
-  struct Client *res = NULL;
-  dlink_node *ptr = NULL;
-
-  *count = 0;
-
-  if (collapse(user))
-  {
-    DLINK_FOREACH(ptr, local_client_list.head)
-    {
-      struct Client *c2ptr = ptr->data;
-
-      if (!IsClient(c2ptr))
-        continue;
-
-      if ((!host || !match(host, c2ptr->host)) && !irccmp(user, c2ptr->username))
-      {
-        (*count)++;
-        res = c2ptr;
-      }
-    }
-  }
-
-  return res;
-}
-
 /* flood_attack_client()
  *
  * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
@@ -468,74 +430,36 @@ static void
 handle_special(int p_or_n, const char *command, struct Client *source_p,
                char *nick, char *text)
 {
-  struct Client *target_p;
-  char *host;
-  char *server;
-  char *s;
-  int count = 0;
+  struct Client *target_p = NULL;
+  const char *server = NULL, *s = NULL;
 
   /*
    * user[%host]@server addressed?
    */
   if ((server = strchr(nick, '@')))
   {
-    if ((host = strchr(nick, '%')) && !HasUMode(source_p, UMODE_OPER))
+    if ((target_p = hash_find_server(server + 1)))
     {
-      sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server + 1);
       return;
     }
 
-    if ((target_p = hash_find_server(server + 1)))
+    if (!HasUMode(source_p, UMODE_OPER) && strchr(nick, '%'))
     {
-      if (!IsMe(target_p))
-      {
-        /*
-         * Not destined for a user on me :-(
-         */
-        sendto_one(target_p, ":%s %s %s :%s", ID_or_name(source_p, target_p),
-                   command, nick, text);
-
-        if (p_or_n != NOTICE && MyClient(source_p))
-          source_p->localClient->last_privmsg = CurrentTime;
-
-        return;
-      }
-
-      *server = '\0';
-
-      if (host)
-        *host++ = '\0';
-
-      /*
-       * Look for users which match the destination host
-       * (no host == wildcard) and if one and one only is
-       * found connected to me, deliver message!
-       */
-      if ((target_p = find_userhost(nick, host, &count)))
-      {
-        if (server)
-          *server = '@';
-        if (host)
-          *--host = '%';
-
-        if (count == 1)
-        {
-          sendto_one(target_p, ":%s!%s@%s %s %s :%s",
-                     source_p->name, source_p->username,
-                     source_p->host, command, nick, text);
-
-          if (p_or_n != NOTICE && MyClient(source_p))
-            source_p->localClient->last_privmsg = CurrentTime;
-        }
-        else
-          sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS, nick,
-                             ConfigFileEntry.max_targets);
-      }
-    }
-    else if (server && *(server + 1) && !target_p)
-      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server + 1);
-    else if (server && !target_p)
       sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, nick);
+      return;
+    }
+
+    if (!IsMe(target_p))
+    {
+      sendto_one(target_p, ":%s %s %s :%s", source_p->id, command, nick, text);
+
+      if (p_or_n != NOTICE && MyClient(source_p))
+        source_p->localClient->last_privmsg = CurrentTime;
+      return;
+    }
+
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, nick);
     return;
   }
 

@@ -428,7 +428,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
  */
 static void
 handle_special(int p_or_n, const char *command, struct Client *source_p,
-               char *nick, char *text)
+               const char *nick, const char *text)
 {
   struct Client *target_p = NULL;
   const char *server = NULL, *s = NULL;

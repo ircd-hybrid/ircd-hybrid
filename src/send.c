@@ -773,13 +773,13 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 {
   va_list args;
   dlink_node *ptr = NULL, *ptr_next = NULL;
-  struct dbuf_block *buff_suid;
+  struct dbuf_block *buffer;
 
-  buff_suid = dbuf_alloc();
+  buffer = dbuf_alloc();
 
+  dbuf_put_fmt(buffer, ":%s ", source_p->id);
   va_start(args, pattern);
-  dbuf_put_fmt(buff_suid, ":%s ", source_p->id);
-  send_format(buff_suid, pattern, args);
+  send_format(buffer, pattern, args);
   va_end(args);
 
   ++current_serial;
@@ -806,11 +806,11 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
       if (!IsCapable(target_p->from, cap))
         continue;
 
-      send_message_remote(target_p->from, source_p, buff_suid);
+      send_message_remote(target_p->from, source_p, buffer);
     }
   }
 
-  dbuf_ref_free(buff_suid);
+  dbuf_ref_free(buffer);
 }
 
 /* sendto_anywhere()

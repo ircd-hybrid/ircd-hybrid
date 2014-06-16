@@ -371,9 +371,9 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Count up all channels, ban lists, except lists, Invex lists */
-  channel_memory = dlink_list_length(&global_channel_list) *
+  channel_memory = dlink_list_length(&channel_list) *
                    sizeof(struct Channel);
-  DLINK_FOREACH(gptr, global_channel_list.head)
+  DLINK_FOREACH(gptr, channel_list.head)
   {
     const struct Ban *actualBan;
     const struct Channel *chptr = gptr->data;
@@ -486,7 +486,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
                      "z :Channels %u(%llu) Topics %u(%u)",
-                     dlink_list_length(&global_channel_list),
+                     dlink_list_length(&channel_list),
                      channel_memory, topic_count, topic_count *
                      (TOPICLEN + 1 + USERHOST_REPLYLEN));
 

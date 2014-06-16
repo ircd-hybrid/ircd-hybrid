@@ -165,7 +165,7 @@ burst_all(struct Client *client_p)
 {
   dlink_node *ptr = NULL;
 
-  DLINK_FOREACH(ptr, global_channel_list.head)
+  DLINK_FOREACH(ptr, channel_list.head)
   {
     struct Channel *chptr = ptr->data;
 

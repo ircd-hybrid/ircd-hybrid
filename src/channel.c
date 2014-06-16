@@ -430,7 +430,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
         tlen = strlen(ms->client_p->name) + 1;  /* nick + space */
       else
         tlen = strlen(ms->client_p->name) + strlen(ms->client_p->username) +
-               strlen(ms->client_p->host) + 3;
+               strlen(ms->client_p->host) + 3;  /* nick + ! + user + @ + host + space */
 
       if (!multi_prefix)
       {
@@ -690,7 +690,7 @@ msg_has_ctrls(const char *message)
   for (; *p; ++p)
   {
     if (*p > 31 || *p == 1)
-      continue;  /* CTCP or no control code */
+      continue;  /* No control code or CTCP */
 
     if (*p == 27)  /* Escape */
     {

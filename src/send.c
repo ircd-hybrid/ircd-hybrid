@@ -779,7 +779,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 
   va_start(args, pattern);
   dbuf_put_fmt(buff_suid, ":%s ", source_p->id);
-  dbuf_put_args(buff_suid, pattern, args);
+  send_format(buff_suid, pattern, args);
   va_end(args);
 
   ++current_serial;

@@ -44,7 +44,7 @@
 #include "resv.h"
 
 
-dlink_list global_channel_list;
+dlink_list channel_list;
 mp_pool_t *ban_pool;    /*! \todo ban_pool shouldn't be a global var */
 
 static mp_pool_t *member_pool, *channel_pool;
@@ -351,7 +351,7 @@ make_channel(const char *chname)
   chptr->last_join_time = CurrentTime;
 
   strlcpy(chptr->chname, chname, sizeof(chptr->chname));
-  dlinkAdd(chptr, &chptr->node, &global_channel_list);
+  dlinkAdd(chptr, &chptr->node, &channel_list);
 
   hash_add_channel(chptr);
 
@@ -374,7 +374,7 @@ destroy_channel(struct Channel *chptr)
   free_channel_list(&chptr->exceptlist);
   free_channel_list(&chptr->invexlist);
 
-  dlinkDelete(&chptr->node, &global_channel_list);
+  dlinkDelete(&chptr->node, &channel_list);
   hash_del_channel(chptr);
 
   mp_pool_release(chptr);

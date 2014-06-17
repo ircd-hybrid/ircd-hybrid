@@ -24,12 +24,12 @@ addons:
     build_command: make
     branch_pattern: coverity_scan
 
-#before_script:
-#  - sudo apt-get update -qq
-#  - sudo apt-get install libgeoip-dev
-
 script:
- - ./configure
+ - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+     ./configure --disable-openssl
+   else
+     ./configure
+   fi
  - make
  - sudo make install
 

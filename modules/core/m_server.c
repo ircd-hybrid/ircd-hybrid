@@ -412,9 +412,6 @@ server_estab(struct Client *client_p)
                target_p->servptr->id, target_p->name, target_p->hopcount+1,
                target_p->id, IsHidden(target_p) ? "(H) " : "",
                target_p->info);
-
-    if (HasFlag(target_p, FLAGS_EOB))
-      sendto_one(client_p, ":%s EOB", target_p->id);
   }
 
   server_burst(client_p);

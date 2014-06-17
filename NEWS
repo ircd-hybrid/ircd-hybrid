@@ -1,3 +1,7 @@
+-- Noteworthy changes in version 8.1.19 (????-??-??)
+o) Fixed EOB logic for remote servers
+
+
 -- Noteworthy changes in version 8.1.18 (2014-06-09)
 o) Fixed CAP issue for certain clients
 o) Fixed bug where "STATS p" would show an invalid amount of irc-operators

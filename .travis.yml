@@ -2,6 +2,10 @@
 
 language: c
 
+os:
+  - linux
+  - osx
+
 env:
  global:
   - secure: "Cq1iFAKxQ2S/LUz41BaS00+HdqTZt0hqPVlcmF4uIFRSjRocz+mKoroV2Iidbly8uuokOu5yY+ZRw8Yrjc2w8qKM+qsRHo9KNQGPx/jLe06DI2RuPcT3IxnGrElLDUUs2qJ6drjGCrOEFP2eowMdytqLDJfKW5OGLOFsmoSIwD0="
@@ -20,12 +24,8 @@ addons:
     build_command: make
     branch_pattern: coverity_scan
 
-before_script:
-  - sudo apt-get update -qq
-  - sudo apt-get install libgeoip-dev
-
 script:
- - ./configure
+ - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --disable-openssl; else ./configure; fi
  - make
  - sudo make install
 

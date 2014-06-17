@@ -25,11 +25,7 @@ addons:
     branch_pattern: coverity_scan
 
 script:
- - if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-     ./configure --disable-openssl
-   else
-     ./configure
-   fi
+ - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --disable-openssl; else ./configure; fi
  - make
  - sudo make install
 

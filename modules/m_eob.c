@@ -33,6 +33,19 @@
 #include "s_serv.h"
 
 
+static void
+server_eob(struct Client *server)
+{
+  dlink_node *ptr = NULL;
+
+  assert(IsServer(source_p));
+
+  AddFlag(server, FLAGS_EOB);
+
+  DLINK_FOREACH(ptr, server->serv->server_list.head)
+    server_eob(ptr->data);
+}
+
 /*
  * ms_eob - EOB command handler
  *      parv[0] = sender prefix   
@@ -50,7 +63,7 @@ ms_eob(struct Client *client_p, struct Client *source_p,
                          source_p->name,
                          (unsigned int)(CurrentTime - source_p->localClient->firsttime));
 
-  AddFlag(source_p, FLAGS_EOB);
+  server_eob(source_p);
 
   sendto_server(client_p, CAP_TS6, NOCAPS,
                 ":%s EOB", ID(source_p));

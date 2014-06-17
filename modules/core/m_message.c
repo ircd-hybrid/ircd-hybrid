@@ -479,7 +479,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
   {
     if (*(nick + 1) == '$' || *(nick + 1) == '#')
       ++nick;
-    else if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER))
+    else if (MyClient(source_p))
     {
       sendto_one_notice(source_p, &me, ":The command %s %s is no longer supported, please use $%s",
                         command, nick, nick);

@@ -63,14 +63,25 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   if (!HasFlag(source_p, FLAGS_SERVICE) || !valid_nickname(parv[2], 1))
     return 0;
 
-  if (hunt_server(source_p, ":%s SVSNICK %s %s :%s",
-                  1, parc, parv) != HUNTED_ISME)
-    return 0;
-
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
-  assert(MyClient(target_p));
+  if (!MyConnect(target_p))
+  {
+    if (target_p->from == source_p->from)
+    {
+      sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+                           "Received wrong-direction SVSNICK "
+                           "for %s (behind %s) from %s",
+                           target_p->name, source_p->from->name,
+                           get_client_name(source_p, HIDE_IP));
+      return 0;
+    }
+
+    sendto_one(target_p, ":%s SVSNICK %s %s %s", source_p->id,
+               target_p->id, parv[2], parv[3]);
+    return 0;
+  }
 
   if ((exists_p = hash_find_client(parv[2])))
   {

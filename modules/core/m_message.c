@@ -233,13 +233,6 @@ msg_channel(int p_or_n, const char *command,
 {
   int result = 0;
 
-  if (MyClient(source_p))
-  {
-    /* Idle time shouldnt be reset by notices --fl */
-    if (p_or_n != NOTICE)
-      source_p->localClient->last_privmsg = CurrentTime;
-  }
-
   /* Chanops and voiced can flood their own channel with impunity */
   if ((result = can_send(chptr, source_p, NULL, text)) < 0)
   {
@@ -301,9 +294,6 @@ msg_channel_flags(int p_or_n, const char *command,
     c = '@';
   }
 
-  if (MyClient(source_p) && p_or_n != NOTICE)
-    source_p->localClient->last_privmsg = CurrentTime;
-
   sendto_channel_butone(source_p, source_p, chptr, type, "%s %c%s :%s",
                         command, c, chptr->chname, text);
 }
@@ -325,12 +315,6 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
 {
   if (MyConnect(source_p))
   {
-    /*
-     * Reset idle time for message only if it's not a notice
-     */
-    if (p_or_n != NOTICE)
-      source_p->localClient->last_privmsg = CurrentTime;
-
     if (p_or_n != NOTICE && target_p->away[0])
       sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
 
@@ -453,9 +437,6 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
     if (!IsMe(target_p))
     {
       sendto_one(target_p, ":%s %s %s :%s", source_p->id, command, nick, text);
-
-      if (p_or_n != NOTICE && MyClient(source_p))
-        source_p->localClient->last_privmsg = CurrentTime;
       return;
     }
 
@@ -505,9 +486,6 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
     sendto_match_butone(IsServer(source_p->from) ? source_p->from : NULL, source_p,
                         nick + 1, (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
                         "%s $%s :%s", command, nick, text);
-
-    if (p_or_n != NOTICE && MyClient(source_p))
-      source_p->localClient->last_privmsg = CurrentTime;
   }
 }
 
@@ -735,6 +713,9 @@ m_privmsg(struct Client *source_p, int parc, char *parv[])
    */
   if (!IsClient(source_p))
     return 0;
+
+  if (MyConnect(source_p))
+    source_p->localClient->last_privmsg = CurrentTime;
 
   m_message(PRIVMSG, "PRIVMSG", source_p, parc, parv);
   return 0;

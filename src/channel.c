@@ -226,7 +226,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
   {
     const struct Ban *banptr = ptr->data;
 
-    tlen = banptr->len + 3;
+    tlen = banptr->len + 3;  /* +3 for ! + @ + space */
 
     /*
      * Send buffer and start over if we cannot fit another ban

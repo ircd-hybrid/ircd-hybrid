@@ -313,7 +313,7 @@ static void
 msg_client(int p_or_n, const char *command, struct Client *source_p,
            struct Client *target_p, char *text)
 {
-  if (MyConnect(source_p))
+  if (MyClient(source_p))
   {
     if (p_or_n != NOTICE && target_p->away[0])
       sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);

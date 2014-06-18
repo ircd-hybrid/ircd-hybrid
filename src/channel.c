@@ -229,9 +229,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
     tlen = banptr->len + 3;
 
     /*
-     * Send buffer and start over if we cannot fit another ban,
-     * or if the target is non-ts6 and we have too many modes in
-     * in this line.
+     * Send buffer and start over if we cannot fit another ban
      */
     if (cur_len + (tlen - 1) > IRCD_BUFSIZE - 2)
     {

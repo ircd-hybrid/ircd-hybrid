@@ -506,7 +506,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
  */
 static int
 build_target_list(int p_or_n, const char *command, struct Client *source_p,
-                  char *nicks_channels, char *text)
+                  char *nicks_channels, const char *text)
 {
   int type = 0;
   char *p = NULL, *nick = NULL;

@@ -521,7 +521,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
   for (nick = strtoken(&p, target_list, ","); nick;
        nick = strtoken(&p,        NULL, ","))
   {
-    char *with_prefix = NULL;
+    const char *with_prefix = NULL;
 
     /*
      * Channels are privmsg'd a lot more than other clients, moved up
@@ -593,7 +593,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
 
     if (type)
     {
-      if (*nick == '\0')  /* If its a '\0' dump it, there is no recipient */
+      if (EmptyString(nick))  /* If its a '\0' dump it, there is no recipient */
       {
         sendto_one_numeric(source_p, &me, ERR_NORECIPIENT, command);
         continue;

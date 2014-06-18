@@ -60,6 +60,7 @@ Feature Specific Requirements:
   OpenBSD 5.2
   Arch Linux 2012.12.01
   Debian GNU/Hurd 0.3
+  Mac OS X 10.9 (Mavericks)
 
 - /etc/resolv.conf must exist for the resolver to work.
 

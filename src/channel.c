@@ -203,26 +203,26 @@ send_members(struct Client *client_p, struct Channel *chptr,
 /*! \brief Sends +b/+e/+I
  * \param client_p Client pointer to server
  * \param chptr    Pointer to channel
- * \param top      Pointer to top of mode link list to send
+ * \param list     Pointer to list of modes to send
  * \param flag     Char flag flagging type of mode. Currently this can be 'b', e' or 'I'
  */
 static void
 send_mode_list(struct Client *client_p, struct Channel *chptr,
-               const dlink_list *top, char flag)
+               const dlink_list *list, char flag)
 {
   const dlink_node *ptr = NULL;
   char pbuf[IRCD_BUFSIZE] = "";
   int tlen, mlen, cur_len;
   char *pp = pbuf;
 
-  if (top->length == 0)
+  if (list->length == 0)
     return;
 
   mlen = snprintf(buf, sizeof(buf), ":%s BMASK %lu %s %c :", me.id,
                   (unsigned long)chptr->channelts, chptr->chname, flag);
   cur_len = mlen;
 
-  DLINK_FOREACH(ptr, top->head)
+  DLINK_FOREACH(ptr, list->head)
   {
     const struct Ban *banptr = ptr->data;
 

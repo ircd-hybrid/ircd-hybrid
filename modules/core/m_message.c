@@ -438,7 +438,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
    */
   if ((server = strchr(nick, '@')))
   {
-    if ((target_p = hash_find_server(server + 1)))
+    if ((target_p = hash_find_server(server + 1)) == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server + 1);
       return;

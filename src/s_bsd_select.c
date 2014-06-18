@@ -28,7 +28,6 @@
 #if USE_IOPOLL_MECHANISM == __IOPOLL_MECHANISM_SELECT
 #include "list.h"
 #include "fdlist.h"
-#include "hook.h"
 #include "ircd.h"
 #include "s_bsd.h"
 #include "log.h"

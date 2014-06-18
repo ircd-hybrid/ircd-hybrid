@@ -369,7 +369,7 @@ static void
 msg_client(int p_or_n, const char *command, struct Client *source_p,
            struct Client *target_p, char *text)
 {
-  if (MyConnect(source_p))
+  if (MyClient(source_p))
   {
     /*
      * Reset idle time for message only if it's not a notice

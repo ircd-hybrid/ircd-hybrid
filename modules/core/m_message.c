@@ -113,8 +113,7 @@ duplicate_ptr(const void *ptr)
  * side effects - check for flood attack on target target_p
  */
 static int
-flood_attack_client(int p_or_n, struct Client *source_p,
-                    struct Client *target_p)
+flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p)
 {
   int delta;
 
@@ -172,8 +171,7 @@ flood_attack_client(int p_or_n, struct Client *source_p,
  * side effects - check for flood attack on target chptr
  */
 static int
-flood_attack_channel(int p_or_n, struct Client *source_p,
-                     struct Channel *chptr)
+flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
 {
   int delta;
 
@@ -228,8 +226,8 @@ flood_attack_channel(int p_or_n, struct Client *source_p,
  * side effects	- message given channel
  */
 static void
-msg_channel(int p_or_n, const char *command,
-            struct Client *source_p, struct Channel *chptr, char *text)
+msg_channel(int p_or_n, const char *command, struct Client *source_p,
+            struct Channel *chptr, const char *text)
 {
   int result = 0;
 
@@ -271,9 +269,8 @@ msg_channel(int p_or_n, const char *command,
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_channel_flags(int p_or_n, const char *command,
-                  struct Client *source_p, struct Channel *chptr,
-                  int flags, char *text)
+msg_channel_flags(int p_or_n, const char *command, struct Client *source_p,
+                  struct Channel *chptr, int flags, const char *text)
 {
   unsigned int type;
   char c;
@@ -311,7 +308,7 @@ msg_channel_flags(int p_or_n, const char *command,
  */
 static void
 msg_client(int p_or_n, const char *command, struct Client *source_p,
-           struct Client *target_p, char *text)
+           struct Client *target_p, const char *text)
 {
   if (MyClient(source_p))
   {
@@ -660,8 +657,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
  *              - pointer to channel
  */
 static void
-m_message(int p_or_n, const char *command, struct Client *source_p,
-          int parc, char *parv[])
+m_message(int p_or_n, const char *command, struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -697,8 +693,8 @@ m_message(int p_or_n, const char *command, struct Client *source_p,
         break;
 
       case ENTITY_CHANOPS_ON_CHANNEL:
-        msg_channel_flags(p_or_n, command, source_p,
-                          targets[i].ptr, targets[i].flags, parv[2]);
+        msg_channel_flags(p_or_n, command, source_p, targets[i].ptr,
+                          targets[i].flags, parv[2]);
         break;
     }
   }

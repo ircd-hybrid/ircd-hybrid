@@ -289,7 +289,7 @@ server_estab(struct Client *client_p)
                me.name, ConfigServerHide.hidden ? "(H) " : "", me.info);
   }
 
-  sendto_one(client_p, "SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN,
+  sendto_one(client_p, ":%s SVINFO %d %d 0 :%lu", me.id, TS_CURRENT, TS_MIN,
              (unsigned long)CurrentTime);
 
   /* XXX Does this ever happen? I don't think so -db */

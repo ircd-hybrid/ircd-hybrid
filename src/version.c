@@ -77,6 +77,7 @@ const char *infotext[] =
   "cosine, Patrick Alken <wnder@uwns.underworld.net>",
   "David-T, David Taylor <davidt@yadt.co.uk>",
   "Dom, Dominic Hargreaves <dom@earth.li>",
+  "Fawkes, Christoph Ostermeier <fawkes@phat-net.de>",
   "fgeek, Henri Salo <henri@nerv.fi>",
   "fl, Lee Hardy <lee@leeh.co.uk>",
   "Garion, Joost Vunderink <garion@efnet.nl>",

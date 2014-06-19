@@ -49,7 +49,6 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   int paramcount, mpara = 0;
 #endif
   struct Message *mptr = NULL;
-  MessageHandler handler = 0;
 
   for (i = 1; i < (unsigned int)parc - 1; ++i)
   {
@@ -87,8 +86,7 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   parv += 2;
   parc -= 2;
 
-  if ((handler = mptr->handlers[ENCAP_HANDLER]))
-    (*handler)(source_p, parc, parv);
+  mptr->handlers[ENCAP_HANDLER](source_p, parc, parv);
   return 0;
 }
 

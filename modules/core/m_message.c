@@ -331,7 +331,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
     if (!IsServer(source_p) && HasUMode(target_p, UMODE_CALLERID|UMODE_SOFTCALLERID))
     {
       /* Here is the anti-flood bot/spambot code -db */
-      if (accept_message(source_p, target_p) || HasFlag(source_p, FLAGS_SERVICE) ||
+      if (HasFlag(source_p, FLAGS_SERVICE) || accept_message(source_p, target_p) ||
          (HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.opers_bypass_callerid))
       {
         sendto_one(target_p, ":%s!%s@%s %s %s :%s",

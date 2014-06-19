@@ -50,8 +50,8 @@ list_accepts(struct Client *source_p)
   char *t = nicks;
   const dlink_node *ptr = NULL;
 
-  /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@2 ...\r\n */ 
-  /* 1       23456              78                    9 10 */
+  /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */ 
+  /* 1       23456              78                     9 10 */
   len = strlen(me.name) + strlen(source_p->name) + 10;
 
   DLINK_FOREACH(ptr, source_p->localClient->acceptlist.head)
@@ -61,7 +61,7 @@ list_accepts(struct Client *source_p)
                      strlen(accept_p->userptr) +
                      strlen(accept_p->hostptr) + 2;  /* +2 for !@ */
 
-    if ((t - nicks) + masklen + len  > IRCD_BUFSIZE)
+    if ((t - nicks) + masklen + len > IRCD_BUFSIZE)
     {
       *(t - 1) = '\0';
       sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, nicks);

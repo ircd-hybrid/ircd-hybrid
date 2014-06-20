@@ -188,7 +188,7 @@ struct MaskItem;
 #define OPER_FLAG_KILL           0x00000002U  /**< Oper can KILL local users */
 #define OPER_FLAG_UNKLINE        0x00000004U  /**< Oper can use UNKLINE command */
 #define OPER_FLAG_GLINE          0x00000008U  /**< Oper can use GLINE command */
-#define OPER_FLAG_K              0x00000010U  /**< Oper can use KLINE command */
+#define OPER_FLAG_KLINE          0x00000010U  /**< Oper can use KLINE command */
 #define OPER_FLAG_XLINE          0x00000020U  /**< Oper can use XLINE command */
 #define OPER_FLAG_DIE            0x00000040U  /**< Oper can use DIE command */
 #define OPER_FLAG_REHASH         0x00000080U  /**< Oper can use REHASH command */

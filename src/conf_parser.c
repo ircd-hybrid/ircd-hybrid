@@ -4044,7 +4044,7 @@ yyreduce:
 #line 1293 "conf_parser.y" /* yacc.c:1646  */
     {
   if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_K;
+    block_state.port.value |= OPER_FLAG_KLINE;
 }
 #line 4050 "conf_parser.c" /* yacc.c:1646  */
     break;

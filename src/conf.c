@@ -1361,7 +1361,7 @@ static const struct oper_privs
   { OPER_FLAG_DIE,            'D' },
   { OPER_FLAG_GLINE,          'G' },
   { OPER_FLAG_REHASH,         'H' },
-  { OPER_FLAG_K,              'K' },
+  { OPER_FLAG_KLINE,          'K' },
   { OPER_FLAG_KILL,           'N' },
   { OPER_FLAG_KILL_REMOTE,    'O' },
   { OPER_FLAG_CONNECT,        'P' },

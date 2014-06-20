@@ -184,26 +184,26 @@ struct MaskItem;
 
 
 /* oper priv flags */
-#define OPER_FLAG_KILL_REMOTE    0x00000001U  /**< Oper can global KILL */
-#define OPER_FLAG_KILL           0x00000002U  /**< Oper can do local KILL */
-#define OPER_FLAG_UNKLINE        0x00000004U  /**< Oper can use use UNKLINE command */
+#define OPER_FLAG_KILL_REMOTE    0x00000001U  /**< Oper can KILL remote users */
+#define OPER_FLAG_KILL           0x00000002U  /**< Oper can KILL local users */
+#define OPER_FLAG_UNKLINE        0x00000004U  /**< Oper can use UNKLINE command */
 #define OPER_FLAG_GLINE          0x00000008U  /**< Oper can use GLINE command */
 #define OPER_FLAG_K              0x00000010U  /**< Oper can use KLINE command */
 #define OPER_FLAG_XLINE          0x00000020U  /**< Oper can use XLINE command */
 #define OPER_FLAG_DIE            0x00000040U  /**< Oper can use DIE command */
 #define OPER_FLAG_REHASH         0x00000080U  /**< Oper can use REHASH command */
-#define OPER_FLAG_ADMIN          0x00000100U  /**< Oper can set user mode +a*/
+#define OPER_FLAG_ADMIN          0x00000100U  /**< Oper can set user mode +a */
 #define OPER_FLAG_REMOTEBAN      0x00000200U  /**< Oper can set remote bans */
 #define OPER_FLAG_GLOBOPS        0x00000400U  /**< Oper can use GLOBOPS command */
-#define OPER_FLAG_MODULE         0x00000800U  /**< Oper can use MODULE commands */
+#define OPER_FLAG_MODULE         0x00000800U  /**< Oper can use MODULE command */
 #define OPER_FLAG_RESTART        0x00001000U  /**< Oper can use RESTART command */
 #define OPER_FLAG_DLINE          0x00002000U  /**< Oper can use DLINE command */
 #define OPER_FLAG_UNDLINE        0x00004000U  /**< Oper can use UNDLINE command */
 #define OPER_FLAG_SET            0x00008000U  /**< Oper can use SET command */
 #define OPER_FLAG_SQUIT          0x00010000U  /**< Oper can do local SQUIT */
-#define OPER_FLAG_SQUIT_REMOTE   0x00020000U  /**< Oper can do global SQUIT */
+#define OPER_FLAG_SQUIT_REMOTE   0x00020000U  /**< Oper can do remote SQUIT */
 #define OPER_FLAG_CONNECT        0x00040000U  /**< Oper can do local CONNECT */
-#define OPER_FLAG_CONNECT_REMOTE 0x00080000U  /**< Oper can do global CONNECT */
+#define OPER_FLAG_CONNECT_REMOTE 0x00080000U  /**< Oper can do remote CONNECT */
 #define OPER_FLAG_WALLOPS        0x00100000U  /**< Oper can use WALLOPS command */
 #define OPER_FLAG_LOCOPS         0x00200000U  /**< Oper can use LOCOPS command */
 #define OPER_FLAG_UNXLINE        0x00400000U  /**< Oper can use UNXLINE command */

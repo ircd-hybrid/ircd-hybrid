@@ -109,7 +109,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
     char modebuf[IRCD_BUFSIZE] = "";
 
     DelUMode(target_p, UMODE_REGISTERED);
-    send_umode(target_p, target_p, oldmodes, 0xffffffff, modebuf);
+    send_umode(target_p, target_p, oldmodes, modebuf);
   }
 
   sendto_common_channels_local(target_p, 1, 0, ":%s!%s@%s NICK :%s",

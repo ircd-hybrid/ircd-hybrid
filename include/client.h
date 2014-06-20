@@ -175,13 +175,6 @@ struct MaskItem;
 #define AddUMode(x, y) ((x)->umodes |=  (y))
 #define DelUMode(x, y) ((x)->umodes &= ~(y))
 
-#define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP |\
-                      UMODE_REGONLY | UMODE_REGISTERED | UMODE_ADMIN |\
-                      UMODE_HIDDEN | UMODE_HIDDENHOST | UMODE_SSL |\
-                      UMODE_WEBIRC | UMODE_CALLERID | UMODE_SOFTCALLERID|\
-                      UMODE_HIDECHANS)
-
-
 
 /* oper priv flags */
 #define OPER_FLAG_KILL_REMOTE    0x00000001U  /**< Oper can KILL remote users */

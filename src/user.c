@@ -286,9 +286,9 @@ introduce_client(struct Client *source_p)
   char ubuf[IRCD_BUFSIZE] = "";
 
   if (MyClient(source_p))
-    send_umode(source_p, source_p, 0, SEND_UMODES, ubuf);
+    send_umode(source_p, source_p, 0, ubuf);
   else
-    send_umode(NULL, source_p, 0, SEND_UMODES, ubuf);
+    send_umode(NULL, source_p, 0, ubuf);
 
   watch_check_hash(source_p, RPL_LOGON);
 
@@ -803,7 +803,7 @@ valid_nickname(const char *nickname, const int local)
  */
 void
 send_umode(struct Client *client_p, struct Client *source_p,
-           unsigned int old, unsigned int sendmask, char *umode_buf)
+           unsigned int old, char *umode_buf)
 {
   char *m = umode_buf;
   int what = 0;
@@ -817,9 +817,6 @@ send_umode(struct Client *client_p, struct Client *source_p,
     unsigned int flag = user_modes[i];
 
     if (!flag)
-      continue;
-
-    if (MyClient(source_p) && !(flag & sendmask))
       continue;
 
     if ((flag & old) && !HasUMode(source_p, flag))
@@ -866,14 +863,14 @@ send_umode_out(struct Client *client_p, struct Client *source_p,
 {
   char buf[IRCD_BUFSIZE] = "";
 
-  send_umode(NULL, source_p, old, SEND_UMODES, buf);
+  send_umode(NULL, source_p, old, buf);
 
   if (buf[0])
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s MODE %s :%s",
                   source_p->id, source_p->id, buf);
 
   if (client_p && MyClient(client_p))
-    send_umode(client_p, source_p, old, 0xffffffff, buf);
+    send_umode(client_p, source_p, old, buf);
 }
 
 void

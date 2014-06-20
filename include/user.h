@@ -37,7 +37,7 @@ extern const unsigned int user_modes[];
 
 extern void assemble_umode_buffer(void);
 extern void send_umode(struct Client *, struct Client *,
-                       unsigned int, unsigned int, char *);
+                       unsigned int, char *);
 extern void send_umode_out(struct Client *, struct Client *, unsigned int);
 extern void show_lusers(struct Client *);
 extern void show_isupport(struct Client *);

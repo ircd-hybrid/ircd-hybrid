@@ -228,7 +228,7 @@ change_local_nick(struct Client *source_p, const char *nick)
       char modebuf[IRCD_BUFSIZE] = "";
 
       DelUMode(source_p, UMODE_REGISTERED);
-      send_umode(source_p, source_p, oldmodes, 0xffffffff, modebuf);
+      send_umode(source_p, source_p, oldmodes, modebuf);
     }
   }
 
@@ -298,7 +298,7 @@ nick_from_server(struct Client *source_p, int parc,
         if ((flag & UMODE_OPER) && !HasUMode(source_p, UMODE_OPER))
           ++Count.oper;
 
-        source_p->umodes |= flag & SEND_UMODES;
+        AddUMode(source_p, flag);
       }
 
       register_remote_user(source_p, parv[5], parv[6], parv[7]);
@@ -372,7 +372,7 @@ uid_from_server(struct Client *source_p, int parc,
     if ((flag & UMODE_OPER) && !HasUMode(source_p, UMODE_OPER))
       ++Count.oper;
 
-    source_p->umodes |= flag & SEND_UMODES;
+    AddUMode(source_p, flag);
   }
 
   register_remote_user(source_p, parv[5], parv[6], servername);

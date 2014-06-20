@@ -328,12 +328,10 @@ struct LocalUser
                                           spambot every time this gets to 0 */
   time_t       last_caller_id_time;
   time_t       first_received_message_time;
-  time_t       last_nick_change;
   time_t       last_privmsg;  /**< Last time we got a PRIVMSG */
   time_t       last_away;  /**< Away since... */
 
   int          received_number_of_privmsgs;
-  unsigned int number_of_nick_changes;
 
   struct ListTask  *list_task;
 
@@ -348,9 +346,9 @@ struct LocalUser
 
   struct
   {
-    unsigned int count;  /**< How many INVITE/KNOCK requests client has send */
-    time_t last_attempt;  /**< Last time the INVITE/KNOCK request was issued */
-  } invite, knock;
+    unsigned int count;  /**< How many INVITE/KNOCK/NICK requests client has send */
+    time_t last_attempt;  /**< Last time the INVITE/KNOCK/NICK request was issued */
+  } invite, knock, nick;
 
   struct AuthRequest auth;
   struct Listener *listener;   /**< Listener accepted from */

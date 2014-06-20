@@ -197,13 +197,13 @@ change_local_nick(struct Client *source_p, const char *nick)
    * on a channel, send note of change to all clients
    * on that channel. Propagate notice to other servers.
    */
-  if ((source_p->localClient->last_nick_change +
+  if ((source_p->localClient->nick.last_attempt +
        ConfigFileEntry.max_nick_time) < CurrentTime)
-    source_p->localClient->number_of_nick_changes = 0;
+    source_p->localClient->nick.count = 0;
 
   if (ConfigFileEntry.anti_nick_flood &&
       !HasUMode(source_p, UMODE_OPER) &&
-      source_p->localClient->number_of_nick_changes >
+      source_p->localClient->nick.count >
       ConfigFileEntry.max_nick_changes)
   {
     sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST, source_p->name, nick,
@@ -211,8 +211,8 @@ change_local_nick(struct Client *source_p, const char *nick)
     return;
   }
 
-  source_p->localClient->last_nick_change = CurrentTime;
-  source_p->localClient->number_of_nick_changes++;
+  source_p->localClient->nick.last_attempt = CurrentTime;
+  source_p->localClient->nick.count++;
 
   samenick = !irccmp(source_p->name, nick);
 

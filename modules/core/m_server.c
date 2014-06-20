@@ -91,7 +91,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   if (!IsClient(target_p))
     return;
 
-  send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
+  send_umode(NULL, target_p, 0, ubuf);
 
   if (ubuf[0] == '\0')
   {

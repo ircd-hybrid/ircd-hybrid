@@ -282,14 +282,11 @@ try_connections(void *unused)
     if (conf->until > CurrentTime)
       continue;
 
-    if (conf->class == NULL)
-      confrq = DEFAULT_CONNECTFREQUENCY;
-    else
-    {
-      confrq = conf->class->con_freq;
-      if (confrq < MIN_CONN_FREQ)
-        confrq = MIN_CONN_FREQ;
-    }
+    assert(conf->class);
+
+    confrq = conf->class->con_freq;
+    if (confrq < MIN_CONN_FREQ)
+      confrq = MIN_CONN_FREQ;
 
     conf->until = CurrentTime + confrq;
 

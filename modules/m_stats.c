@@ -149,11 +149,11 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       if (HasUMode(source_p, UMODE_OPER))
         sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
                    conf->name, oper_privs_as_string(conf->port),
-                   conf->class ? conf->class->name : "<default>");
+                   conf->class->name);
       else
         sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
                    conf->name, "0",
-                   conf->class ? conf->class->name : "<default>");
+                   conf->class->name);
     }
     break;
 
@@ -188,11 +188,11 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
         sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C', conf->host,
                    buf, conf->name, conf->port,
-                   conf->class ? conf->class->name : "<default>");
+                   conf->class->name);
         else
           sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C',
                      "*@127.0.0.1", buf, conf->name, conf->port,
-                     conf->class ? conf->class->name : "<default>");
+                     conf->class->name);
     }
     break;
 
@@ -882,14 +882,14 @@ report_auth(struct Client *source_p, int parc, char *parv[])
                            show_iline_prefix(source_p, conf),
                            IsConfDoSpoofIp(conf) ? "255.255.255.255" :
                            conf->host, conf->port,
-                           conf->class ? conf->class->name : "<default>");
+                           conf->class->name);
 
       else
         sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
                            conf->name == NULL ? "*" : conf->name,
                            show_iline_prefix(source_p, conf),
                            conf->host, conf->port,
-                           conf->class ? conf->class->name : "<default>");
+                           conf->class->name);
     }
   }
 }

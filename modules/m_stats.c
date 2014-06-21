@@ -79,8 +79,8 @@ static const struct shared_flags
 static void
 report_confitem_types(struct Client *source_p, enum maskitem_type type)
 {
-  dlink_node *ptr = NULL;
-  struct MaskItem *conf = NULL;
+  const dlink_node *ptr = NULL;
+  const struct MaskItem *conf = NULL;
   const struct shared_flags *shared = NULL;
   char buf[IRCD_BUFSIZE];
   char *p = NULL;
@@ -210,11 +210,11 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 static void
 report_resv(struct Client *source_p)
 {
-  dlink_node *ptr = NULL;
+  const dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, cresv_items.head)
   {
-    struct MaskItem *conf = ptr->data;
+    const struct MaskItem *conf = ptr->data;
 
     sendto_one_numeric(source_p, &me, RPL_STATSQLINE,
                        conf->until ? 'q' : 'Q', conf->count,
@@ -223,7 +223,7 @@ report_resv(struct Client *source_p)
 
   DLINK_FOREACH(ptr, nresv_items.head)
   {
-    struct MaskItem *conf = ptr->data;
+    const struct MaskItem *conf = ptr->data;
 
     sendto_one_numeric(source_p, &me, RPL_STATSQLINE,
                        conf->until ? 'q' : 'Q', conf->count,
@@ -350,7 +350,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   DLINK_FOREACH(gptr, global_client_list.head)
   {
-    struct Client *target_p = gptr->data;
+    const struct Client *target_p = gptr->data;
 
     if (MyConnect(target_p))
     {
@@ -577,14 +577,14 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
 static void
 stats_deny(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf = NULL;
-  dlink_node *ptr = NULL;
+  const struct MaskItem *conf = NULL;
+  const dlink_node *ptr = NULL;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
-      struct AddressRec *arec = ptr->data;
+      const struct AddressRec *arec = ptr->data;
 
       if (arec->type != CONF_DLINE)
         continue;
@@ -609,14 +609,14 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_tdeny(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf = NULL;
-  dlink_node *ptr = NULL;
+  const struct MaskItem *conf = NULL;
+  const dlink_node *ptr = NULL;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
-      struct AddressRec *arec = ptr->data;
+      const struct AddressRec *arec = ptr->data;
 
       if (arec->type != CONF_DLINE)
         continue;
@@ -641,8 +641,8 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_exempt(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf;
-  dlink_node *ptr = NULL;
+  const struct MaskItem *conf;
+  const dlink_node *ptr = NULL;
 
   if (ConfigFileEntry.stats_e_disabled)
   {
@@ -654,7 +654,7 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
-      struct AddressRec *arec = ptr->data;
+      const struct AddressRec *arec = ptr->data;
 
       if (arec->type != CONF_EXEMPT)
         continue;
@@ -762,7 +762,7 @@ stats_pending_glines(struct Client *source_p, int parc, char *parv[])
 static void
 stats_glines(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *ptr = NULL;
+  const dlink_node *ptr = NULL;
 
   if (!ConfigFileEntry.glines)
   {
@@ -856,14 +856,14 @@ show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
 static void
 report_auth(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf = NULL;
-  dlink_node *ptr = NULL;
+  const struct MaskItem *conf = NULL;
+  const dlink_node *ptr = NULL;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
-      struct AddressRec *arec = ptr->data;
+      const struct AddressRec *arec = ptr->data;
 
       if (arec->type != CONF_CLIENT)
         continue;
@@ -904,7 +904,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
   /* If unopered, Only return matching auth blocks */
   else if ((ConfigFileEntry.stats_i_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
   {
-    struct MaskItem *conf;
+    const struct MaskItem *conf;
 
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
@@ -939,8 +939,8 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
 static void
 report_Klines(struct Client *source_p, int tkline)
 {
-  struct MaskItem *conf = NULL;
-  dlink_node *ptr = NULL;
+  const struct MaskItem *conf = NULL;
+  const dlink_node *ptr = NULL;
   char c = '\0';
 
   if (tkline)
@@ -952,7 +952,7 @@ report_Klines(struct Client *source_p, int tkline)
   {
     DLINK_FOREACH(ptr, atable[i].head)
     {
-      struct AddressRec *arec = ptr->data;
+      const struct AddressRec *arec = ptr->data;
 
       if (arec->type != CONF_KLINE)
         continue;
@@ -983,7 +983,7 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
   /* If unopered, Only return matching klines */
   else if ((ConfigFileEntry.stats_k_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
   {
-    struct MaskItem *conf = NULL;
+    const struct MaskItem *conf = NULL;
 
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
@@ -1020,7 +1020,7 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
   /* If unopered, Only return matching klines */
   else if ((ConfigFileEntry.stats_k_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
   {
-    struct MaskItem *conf = NULL;
+    const struct MaskItem *conf = NULL;
 
     /* search for a kline */
     if (MyConnect(source_p))
@@ -1071,7 +1071,7 @@ stats_oper(struct Client *source_p, int parc, char *parv[])
 static void
 stats_operedup(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *ptr = NULL;
+  const dlink_node *ptr = NULL;
   unsigned int opercount = 0;
   char buf[IRCD_BUFSIZE] = "";
 
@@ -1234,7 +1234,7 @@ stats_shared(struct Client *source_p, int parc, char *parv[])
 static void
 stats_servers(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *ptr = NULL;
+  const dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, serv_list.head)
   {

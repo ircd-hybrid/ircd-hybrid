@@ -1162,37 +1162,37 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
   sp->is_ni += dlink_list_length(&unknown_list);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :accepts %u refused %u",
+                     "t :accepts %u refused %u",
                      sp->is_ac, sp->is_ref);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :unknown commands %u prefixes %u",
+                     "t :unknown commands %u prefixes %u",
                      sp->is_unco, sp->is_unpf);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :nick collisions %u unknown closes %u",
+                     "t :nick collisions %u unknown closes %u",
                      sp->is_kill, sp->is_ni);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :wrong direction %u empty %u",
+                     "t :wrong direction %u empty %u",
                      sp->is_wrdi, sp->is_empt);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :numerics seen %u",
+                     "t :numerics seen %u",
                      sp->is_num);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :auth successes %u fails %u",
+                     "t :auth successes %u fails %u",
                      sp->is_asuc, sp->is_abad);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :Client Server");
+                     "t :Client Server");
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :connected %u %u",
+                     "t :connected %u %u",
                      (unsigned int)sp->is_cl,
                      (unsigned int)sp->is_sv);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :bytes sent %llu %llu",
+                     "t :bytes sent %llu %llu",
                      sp->is_cbs, sp->is_sbs);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :bytes recv %llu %llu",
+                     "t :bytes recv %llu %llu",
                      sp->is_cbr, sp->is_sbr);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "T :time connected %u %u",
+                     "t :time connected %u %u",
                      (unsigned int)sp->is_cti,
                      (unsigned int)sp->is_sti);
 }

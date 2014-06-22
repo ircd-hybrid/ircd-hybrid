@@ -526,7 +526,7 @@ del_invite(struct Channel *chptr, struct Client *who)
 const char *
 get_member_status(const struct Membership *ms, const int combine)
 {
-  static char buffer[4];
+  static char buffer[4];  /* 4 for @%+\0 */
   char *p = buffer;
 
   if (ms->flags & CHFL_CHANOP)

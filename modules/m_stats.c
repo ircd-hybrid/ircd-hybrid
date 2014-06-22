@@ -81,123 +81,123 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 {
   const dlink_node *ptr = NULL;
   const struct MaskItem *conf = NULL;
-  const struct shared_flags *shared = NULL;
   char buf[IRCD_BUFSIZE];
   char *p = NULL;
 
   switch (type)
   {
-  case CONF_XLINE:
-    DLINK_FOREACH(ptr, xconf_items.head)
-    {
-      conf = ptr->data;
+    case CONF_XLINE:
+      DLINK_FOREACH(ptr, xconf_items.head)
+      {
+        conf = ptr->data;
+        sendto_one_numeric(source_p, &me, RPL_STATSXLINE,
+                           conf->until ? 'x': 'X', conf->count,
+                           conf->name, conf->reason);
+      }
 
-      sendto_one_numeric(source_p, &me, RPL_STATSXLINE,
-                 conf->until ? 'x': 'X', conf->count,
-                 conf->name, conf->reason);
-    }
-    break;
+      break;
 
-  case CONF_ULINE:
-    DLINK_FOREACH(ptr, uconf_items.head)
-    {
-      conf = ptr->data;
+    case CONF_ULINE:
+      DLINK_FOREACH(ptr, uconf_items.head)
+      {
+        conf = ptr->data;
+        p = buf;
 
-      p = buf;
+        *p++ = 'c';
 
-      *p++ = 'c';
-      for (shared = flag_table; shared->type; ++shared)
-        if (shared->type & conf->flags)
-          *p++ = shared->letter;
+        for (const struct shared_flags *shared = flag_table; shared->type; ++shared)
+          if (shared->type & conf->flags)
+            *p++ = shared->letter;
+          else
+            *p++ = ToLower(shared->letter);
+
+        *p = '\0';
+
+        sendto_one_numeric(source_p, &me, RPL_STATSULINE, conf->name,
+                           conf->user ? conf->user: "*",
+                           conf->host ? conf->host: "*", buf);
+      }
+
+      DLINK_FOREACH(ptr, cluster_items.head)
+      {
+        conf = ptr->data;
+        p = buf;
+
+        *p++ = 'C';
+
+        for (const struct shared_flags *shared = flag_table; shared->type; ++shared)
+          if (shared->type & conf->flags)
+            *p++ = shared->letter;
+          else
+            *p++ = ToLower(shared->letter);
+
+        *p = '\0';
+
+        sendto_one_numeric(source_p, &me, RPL_STATSULINE, conf->name, "*", "*", buf);
+      }
+
+      break;
+
+    case CONF_OPER:
+      DLINK_FOREACH(ptr, oconf_items.head)
+      {
+        conf = ptr->data;
+
+        /* Don't allow non opers to see oper privs */
+        if (HasUMode(source_p, UMODE_OPER))
+          sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
+                             conf->name, oper_privs_as_string(conf->port),
+                             conf->class->name);
         else
-          *p++ = ToLower(shared->letter);
+          sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
+                             conf->name, "0", conf->class->name);
+      }
 
-      *p = '\0';
+      break;
 
-      sendto_one_numeric(source_p, &me, RPL_STATSULINE, conf->name,
-                 conf->user?conf->user: "*",
-                 conf->host?conf->host: "*", buf);
-    }
+    case CONF_SERVICE:
+      DLINK_FOREACH(ptr, service_items.head)
+      {
+        conf = ptr->data;
+        sendto_one_numeric(source_p, &me, RPL_STATSSERVICE, 'S', "*", conf->name, 0, 0);
+      }
 
-    DLINK_FOREACH(ptr, cluster_items.head)
-    {
-      conf = ptr->data;
+      break;
 
-      p = buf;
+    case CONF_SERVER:
+      DLINK_FOREACH(ptr, server_items.head)
+      {
+        p = buf;
+        conf = ptr->data;
 
-      *p++ = 'C';
-      for (shared = flag_table; shared->type; ++shared)
-        if (shared->type & conf->flags)
-          *p++ = shared->letter;
-        else
-          *p++ = ToLower(shared->letter);
+        buf[0] = '\0';
 
-      *p = '\0';
+        if (IsConfAllowAutoConn(conf))
+          *p++ = 'A';
+        if (IsConfSSL(conf))
+          *p++ = 'S';
+        if (buf[0] == '\0')
+          *p++ = '*';
 
-      sendto_one_numeric(source_p, &me, RPL_STATSULINE, conf->name,
-                 "*", "*", buf);
-    }
+        *p = '\0';
 
-    break;
-
-  case CONF_OPER:
-    DLINK_FOREACH(ptr, oconf_items.head)
-    {
-      conf = ptr->data;
-
-      /* Don't allow non opers to see oper privs */
-      if (HasUMode(source_p, UMODE_OPER))
-        sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
-                   conf->name, oper_privs_as_string(conf->port),
-                   conf->class->name);
-      else
-        sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
-                   conf->name, "0",
-                   conf->class->name);
-    }
-    break;
-
-  case CONF_SERVICE:
-    DLINK_FOREACH(ptr, service_items.head)
-    {
-      conf = ptr->data;
-      sendto_one_numeric(source_p, &me, RPL_STATSSERVICE, 'S', "*", conf->name, 0, 0);
-    }
-    break;
-
-  case CONF_SERVER:
-    DLINK_FOREACH(ptr, server_items.head)
-    {
-      p = buf;
-      conf = ptr->data;
-
-      buf[0] = '\0';
-
-      if (IsConfAllowAutoConn(conf))
-        *p++ = 'A';
-      if (IsConfSSL(conf))
-        *p++ = 'S';
-      if (buf[0] == '\0')
-        *p++ = '*';
-
-      *p = '\0';
-
-      /*
-       * Allow admins to see actual ips unless hide_server_ips is enabled
-       */
-      if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
-        sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C', conf->host,
-                   buf, conf->name, conf->port,
-                   conf->class->name);
+        /*
+         * Allow admins to see actual ips unless hide_server_ips is enabled
+         */
+        if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
+          sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C', conf->host,
+                             buf, conf->name, conf->port,
+                             conf->class->name);
         else
           sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C',
-                     "*@127.0.0.1", buf, conf->name, conf->port,
-                     conf->class->name);
-    }
-    break;
+                             "*@127.0.0.1", buf, conf->name, conf->port,
+                             conf->class->name);
+      }
 
-  default:
-    break;
+      break;
+
+    default:
+      break;
   }
 }
 
@@ -591,7 +591,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
 
       conf = arec->conf;
 
-      /* dont report a tdline as a dline */
+      /* Don't report a tdline as a dline */
       if (conf->until)
         continue;
 
@@ -623,7 +623,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 
       conf = arec->conf;
 
-      /* dont report a permanent dline as a tdline */
+      /* Don't report a permanent dline as a tdline */
       if (!conf->until)
         continue;
 
@@ -641,7 +641,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_exempt(struct Client *source_p, int parc, char *parv[])
 {
-  const struct MaskItem *conf;
+  const struct MaskItem *conf = NULL;
   const dlink_node *ptr = NULL;
 
   if (ConfigFileEntry.stats_e_disabled)
@@ -898,13 +898,13 @@ static void
 stats_auth(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if ((ConfigFileEntry.stats_i_oper_only == 2) && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigFileEntry.stats_i_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
 
-  /* If unopered, Only return matching auth blocks */
-  else if ((ConfigFileEntry.stats_i_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
+  /* If unopered, only return matching auth blocks */
+  else if (ConfigFileEntry.stats_i_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
-    const struct MaskItem *conf;
+    const struct MaskItem *conf = NULL;
 
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
@@ -913,8 +913,8 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
                                   source_p->username,
                                   source_p->localClient->passwd, 1);
     else
-      conf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT,
-                                   0, source_p->username, NULL, 1);
+      conf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT, 0,
+                                  source_p->username, NULL, 1);
 
     if (conf == NULL)
       return;
@@ -924,8 +924,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
                        conf->host, conf->port,
                        conf->class ? conf->class->name : "<default>");
   }
-  /* They are opered, or allowed to see all auth blocks */
-  else
+  else  /* They are opered, or allowed to see all auth blocks */
     report_auth(source_p, 0, NULL);
 }
 
@@ -977,11 +976,11 @@ static void
 stats_tklines(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if ((ConfigFileEntry.stats_k_oper_only == 2) && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigFileEntry.stats_k_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
 
-  /* If unopered, Only return matching klines */
-  else if ((ConfigFileEntry.stats_k_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
+  /* If unopered, only return matching klines */
+  else if (ConfigFileEntry.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
     const struct MaskItem *conf = NULL;
 
@@ -991,59 +990,56 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
                                   source_p->localClient->aftype,
                                   source_p->username, NULL, 1);
     else
-      conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
-                                   0, source_p->username, NULL, 1);
+      conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE, 0,
+                                  source_p->username, NULL, 1);
 
     if (!conf)
       return;
 
-    /* dont report a permanent kline as a tkline */
+    /* Don't report a permanent kline as a tkline */
     if (!conf->until)
       return;
 
     sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'k',
                        conf->host, conf->user, conf->reason);
   }
-  /* Theyre opered, or allowed to see all klines */
-  else {
+  else  /* They are opered, or allowed to see all klines */
     report_Klines(source_p, 1);
-  }
 }
 
 static void
 stats_klines(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if ((ConfigFileEntry.stats_k_oper_only == 2) && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigFileEntry.stats_k_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
 
-  /* If unopered, Only return matching klines */
-  else if ((ConfigFileEntry.stats_k_oper_only == 1) && !HasUMode(source_p, UMODE_OPER))
+  /* If unopered, only return matching klines */
+  else if (ConfigFileEntry.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
     const struct MaskItem *conf = NULL;
 
-    /* search for a kline */
+    /* Search for a kline */
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
                                   &source_p->localClient->ip, CONF_KLINE,
                                   source_p->localClient->aftype,
                                   source_p->username, NULL, 0);
     else
-      conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
-                                   0, source_p->username, NULL, 0);
+      conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE, 0,
+                                  source_p->username, NULL, 0);
 
     if (!conf)
       return;
 
-    /* dont report a tkline as a kline */
+    /* Don't report a tkline as a kline */
     if (conf->until)
       return;
 
     sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'K',
                        conf->host, conf->user, conf->reason);
   }
-  /* Theyre opered, or allowed to see all klines */
-  else
+  else  /* They are opered, or allowed to see all klines */
     report_Klines(source_p, 0);
 }
 
@@ -1311,7 +1307,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
                target_p->localClient->recv.messages,
                target_p->localClient->recv.bytes >> 10,
                (unsigned)(CurrentTime - target_p->localClient->firsttime),
-               (CurrentTime > target_p->localClient->since) ? (unsigned)(CurrentTime - target_p->localClient->since): 0,
+               (CurrentTime > target_p->localClient->since) ? (unsigned)(CurrentTime - target_p->localClient->since) : 0,
                HasUMode(source_p, UMODE_OPER) ? show_capabilities(target_p) : "TS");
   }
 
@@ -1355,11 +1351,9 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
 static char *
 parse_stats_args(struct Client *source_p, int parc, char *parv[], int *doall, int *wilds)
 {
-  char *name;
-
   if (parc > 2)
   {
-    name = parv[2];
+    char *name = parv[2];
 
     if (!irccmp(name, ID_or_name(&me, source_p)))
       *doall = 2;
@@ -1378,30 +1372,33 @@ static void
 stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
              dlink_list *list, char statchar)
 {
-  dlink_node *ptr;
-  struct Client *target_p;
+  dlink_node *ptr = NULL;
 
   /*
-   * send info about connections which match, or all if the
-   * mask matches from.  Only restrictions are on those who
+   * Send info about connections which match, or all if the
+   * mask matches from. Only restrictions are on those who
    * are invisible not being visible to 'foreigners' who use
    * a wild card based search to list it.
    */
   DLINK_FOREACH(ptr, list->head)
   {
-    target_p = ptr->data;
+    struct Client *target_p = ptr->data;
 
     if (HasUMode(target_p, UMODE_INVISIBLE) && (doall || wilds) &&
         !(MyConnect(source_p) && HasUMode(source_p, UMODE_OPER)) &&
         !HasUMode(target_p, UMODE_OPER) && (target_p != source_p))
       continue;
+
     if (!doall && wilds && match(name, target_p->name))
       continue;
+
     if (!(doall || wilds) && irccmp(name, target_p->name))
       continue;
 
-    /* This basically shows ips for our opers if its not a server/admin, or
-     * its one of our admins.  */
+    /*
+     * This basically shows ips for our opers if it's not a server/admin, or
+     * its one of our admins.
+     */
     if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER) &&
         (HasUMode(source_p, UMODE_ADMIN) ||
         (!IsServer(target_p) && !HasUMode(target_p, UMODE_ADMIN) &&
@@ -1417,7 +1414,7 @@ stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
                  target_p->localClient->recv.messages,
                  target_p->localClient->recv.bytes>>10,
                  (unsigned)(CurrentTime - target_p->localClient->firsttime),
-                 (CurrentTime > target_p->localClient->since) ? (unsigned)(CurrentTime - target_p->localClient->since):0,
+                 (CurrentTime > target_p->localClient->since) ? (unsigned)(CurrentTime - target_p->localClient->since) : 0,
                  IsServer(target_p) ? show_capabilities(target_p) : "-");
     }
     else
@@ -1494,51 +1491,51 @@ static const struct StatsStruct
   const unsigned int need_oper;
   const unsigned int need_admin;
 } stats_cmd_table[] = {
-  /* letter     function            need_oper need_admin */
-  { 'a',        stats_dns_servers,      1,      1       },
-  { 'A',        stats_dns_servers,      1,      1       },
-  { 'c',        stats_connect,          1,      0       },
-  { 'C',        stats_connect,          1,      0       },
-  { 'd',        stats_tdeny,            1,      0       },
-  { 'D',        stats_deny,             1,      0       },
-  { 'e',        stats_exempt,           1,      0       },
-  { 'E',        stats_events,           1,      1       },
-  { 'f',        fd_dump,                1,      1       },
-  { 'F',        fd_dump,                1,      1       },
-  { 'g',        stats_pending_glines,   1,      0       },
-  { 'G',        stats_glines,           1,      0       },
-  { 'h',        stats_hooks,            1,      1       },
-  { 'H',        stats_hubleaf,          1,      0       },
-  { 'i',        stats_auth,             0,      0       },
-  { 'I',        stats_auth,             0,      0       },
-  { 'k',        stats_tklines,          0,      0       },
-  { 'K',        stats_klines,           0,      0       },
-  { 'l',        stats_ltrace,           1,      0       },
-  { 'L',        stats_ltrace,           1,      0       },
-  { 'm',        stats_messages,         0,      0       },
-  { 'M',        stats_messages,         0,      0       },
-  { 'o',        stats_oper,             0,      0       },
-  { 'O',        stats_oper,             0,      0       },
-  { 'p',        stats_operedup,         0,      0       },
-  { 'P',        stats_ports,            0,      0       },
-  { 'q',        stats_resv,             1,      0       },
-  { 'Q',        stats_resv,             1,      0       },
-  { 'r',        stats_usage,            1,      0       },
-  { 'R',        stats_usage,            1,      0       },
-  { 's',        stats_service,          1,      0       },
-  { 'S',        stats_service,          1,      0       },
-  { 't',        stats_tstats,           1,      0       },
-  { 'T',        motd_report,            1,      0       },
-  { 'u',        stats_uptime,           0,      0       },
-  { 'U',        stats_shared,           1,      0       },
-  { 'v',        stats_servers,          1,      0       },
-  { 'x',        stats_gecos,            1,      0       },
-  { 'X',        stats_gecos,            1,      0       },
-  { 'y',        stats_class,            1,      0       },
-  { 'Y',        stats_class,            1,      0       },
-  { 'z',        stats_memory,           1,      0       },
-  { '?',        stats_servlinks,        0,      0       },
-  { '\0',       NULL,                   0,      0       }
+  /* letter  function          need_oper need_admin */
+  { 'a',     stats_dns_servers,    1,      1 },
+  { 'A',     stats_dns_servers,    1,      1 },
+  { 'c',     stats_connect,        1,      0 },
+  { 'C',     stats_connect,        1,      0 },
+  { 'd',     stats_tdeny,          1,      0 },
+  { 'D',     stats_deny,           1,      0 },
+  { 'e',     stats_exempt,         1,      0 },
+  { 'E',     stats_events,         1,      1 },
+  { 'f',     fd_dump,              1,      1 },
+  { 'F',     fd_dump,              1,      1 },
+  { 'g',     stats_pending_glines, 1,      0 },
+  { 'G',     stats_glines,         1,      0 },
+  { 'h',     stats_hooks,          1,      1 },
+  { 'H',     stats_hubleaf,        1,      0 },
+  { 'i',     stats_auth,           0,      0 },
+  { 'I',     stats_auth,           0,      0 },
+  { 'k',     stats_tklines,        0,      0 },
+  { 'K',     stats_klines,         0,      0 },
+  { 'l',     stats_ltrace,         1,      0 },
+  { 'L',     stats_ltrace,         1,      0 },
+  { 'm',     stats_messages,       0,      0 },
+  { 'M',     stats_messages,       0,      0 },
+  { 'o',     stats_oper,           0,      0 },
+  { 'O',     stats_oper,           0,      0 },
+  { 'p',     stats_operedup,       0,      0 },
+  { 'P',     stats_ports,          0,      0 },
+  { 'q',     stats_resv,           1,      0 },
+  { 'Q',     stats_resv,           1,      0 },
+  { 'r',     stats_usage,          1,      0 },
+  { 'R',     stats_usage,          1,      0 },
+  { 's',     stats_service,        1,      0 },
+  { 'S',     stats_service,        1,      0 },
+  { 't',     stats_tstats,         1,      0 },
+  { 'T',     motd_report,          1,      0 },
+  { 'u',     stats_uptime,         0,      0 },
+  { 'U',     stats_shared,         1,      0 },
+  { 'v',     stats_servers,        1,      0 },
+  { 'x',     stats_gecos,          1,      0 },
+  { 'X',     stats_gecos,          1,      0 },
+  { 'y',     stats_class,          1,      0 },
+  { 'Y',     stats_class,          1,      0 },
+  { 'z',     stats_memory,         1,      0 },
+  { '?',     stats_servlinks,      0,      0 },
+  { '\0',    NULL,                 0,      0 }
 };
 
 static void
@@ -1598,8 +1595,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
 
   /* Is the stats meant for us? */
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(source_p, ":%s STATS %s :%s", 2,
-                    parc, parv) != HUNTED_ISME)
+    if (hunt_server(source_p, ":%s STATS %s :%s", 2, parc, parv) != HUNTED_ISME)
       return 0;
 
   do_stats(source_p, parc, parv);
@@ -1615,8 +1611,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
 static int
 ms_stats(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(source_p, ":%s STATS %s :%s", 2,
-                  parc, parv) != HUNTED_ISME)
+  if (hunt_server(source_p, ":%s STATS %s :%s", 2, parc, parv) != HUNTED_ISME)
      return 0;
 
   do_stats(source_p, parc, parv);

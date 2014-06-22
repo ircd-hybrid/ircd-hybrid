@@ -188,7 +188,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
   banptr->user = xstrdup(user);
   banptr->host = xstrdup(host);
   banptr->when = CurrentTime;
-  banptr->len = len - 2;  /* -2 for @ and ! */
+  banptr->len = len - 2;  /* -2 for ! + @ */
   banptr->type = parse_netmask(host, &banptr->addr, &banptr->bits);
 
   if (IsClient(client_p))

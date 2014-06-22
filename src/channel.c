@@ -160,7 +160,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
   {
     const struct Membership *ms = ptr->data;
 
-    tlen = strlen(ms->client_p->id) + 1;  /* nick + space */
+    tlen = strlen(ms->client_p->id) + 1;  /* +1 for space */
 
     if (ms->flags & CHFL_CHANOP)
       ++tlen;
@@ -425,10 +425,10 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
         continue;
 
       if (!uhnames)
-        tlen = strlen(ms->client_p->name) + 1;  /* nick + space */
+        tlen = strlen(ms->client_p->name) + 1;  /* +1 for space */
       else
         tlen = strlen(ms->client_p->name) + strlen(ms->client_p->username) +
-               strlen(ms->client_p->host) + 3;  /* nick + ! + user + @ + host + space */
+               strlen(ms->client_p->host) + 3;  /* +3 for ! + @ + space */
 
       if (!multi_prefix)
       {

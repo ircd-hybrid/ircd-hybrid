@@ -97,7 +97,7 @@ remove_dline_match(const char *host)
 static int
 mo_undline(struct Client *source_p, int parc, char *parv[])
 {
-  char *addr = NULL, *user = NULL;
+  char *addr = NULL;
   char *target_server = NULL;
 
   if (!HasOFlag(source_p, OPER_FLAG_UNDLINE))
@@ -112,8 +112,8 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (parse_aline("UNDLINE", source_p, parc, parv, 0, &user,
-                  &addr, NULL, &target_server, NULL) < 0)
+  if (parse_aline("UNDLINE", source_p, parc, parv, 0, &addr,
+                  NULL, NULL, &target_server, NULL) < 0)
     return 0;
 
   if (target_server)

@@ -922,7 +922,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, RPL_STATSILINE,
                        'I', "*", show_iline_prefix(source_p, conf),
                        conf->host, conf->port,
-                       conf->class ? conf->class->name : "<default>");
+                       conf->class->name);
   }
   else  /* They are opered, or allowed to see all auth blocks */
     report_auth(source_p, 0, NULL);

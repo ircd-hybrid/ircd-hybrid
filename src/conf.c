@@ -1276,15 +1276,13 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
     return BANNED_CLIENT;
 
   ip_found = find_or_add_ip(addr);
-  ++ip_found->connection_count;
 
   if ((CurrentTime - ip_found->last_attempt) < ConfigFileEntry.throttle_time)
   {
     if (ip_found->connection_count >= ConfigFileEntry.throttle_count)
-    {
-      ip_found->last_attempt = CurrentTime;
       return TOO_FAST;
-    }
+
+    ++ip_found->connection_count;
   }
   else
     ip_found->connection_count = 1;

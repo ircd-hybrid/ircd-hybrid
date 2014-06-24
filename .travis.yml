@@ -20,12 +20,12 @@ addons:
       name: "ircd-hybrid/ircd-hybrid"
       description: "A lightweight, high-performance internet relay chat daemon."
     notification_email: bugs@ircd-hybrid.org
-    build_command_prepend: ./configure
+    build_command_prepend: ./configure --enable-halfops
     build_command: make
     branch_pattern: coverity_scan
 
 script:
- - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --disable-openssl; else ./configure; fi
+ - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --disable-openssl --enable-halfops; else ./configure --enable-halfops; fi
  - make
  - sudo make install
 

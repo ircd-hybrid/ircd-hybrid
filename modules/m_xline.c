@@ -76,7 +76,7 @@ valid_xline(struct Client *source_p, const char *gecos, const char *reason, int 
   if (!valid_wild_card_simple(gecos))
   {
     if (warn)
-      sendto_one_notice(source_p, &me, ":Please include at least %d non-wildcard characters with the xline",
+      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
                         ConfigFileEntry.min_nonwildcard_simple);
 
     return 0;

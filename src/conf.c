@@ -1813,7 +1813,7 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
 
   if (warn)
     sendto_one_notice(source_p, &me,
-                      ":Please include at least %d non-wildcard characters with the mask",
+                      ":Please include at least %u non-wildcard characters with the mask",
                       ConfigFileEntry.min_nonwildcard);
   va_end(args);
   return 0;

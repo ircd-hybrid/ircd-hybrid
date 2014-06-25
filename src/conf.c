@@ -1169,8 +1169,8 @@ set_default_conf(void)
   ConfigFileEntry.oper_umodes = UMODE_BOTS | UMODE_LOCOPS | UMODE_SERVNOTICE | UMODE_WALLOP;
   ConfigFileEntry.use_egd = 0;
   ConfigFileEntry.egdpool_path = NULL;
-  ConfigFileEntry.throttle_count = 0;
-  ConfigFileEntry.throttle_time = 10;
+  ConfigFileEntry.throttle_count = 1;
+  ConfigFileEntry.throttle_time = 1;
 }
 
 static void

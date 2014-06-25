@@ -38,7 +38,7 @@ server_eob(struct Client *server)
 {
   dlink_node *ptr = NULL;
 
-  assert(IsServer(source_p));
+  assert(IsServer(server));
 
   AddFlag(server, FLAGS_EOB);
 

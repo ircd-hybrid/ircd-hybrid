@@ -401,7 +401,7 @@ ssl_init(void)
   }
 
   SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
-  SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_TLS_ROLLBACK_BUG|SSL_OP_ALL);
+  SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_TLS_ROLLBACK_BUG);
   SSL_CTX_set_verify(ServerInfo.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);
   SSL_CTX_set_session_id_context(ServerInfo.server_ctx, session_id, sizeof(session_id) - 1);
@@ -430,7 +430,7 @@ ssl_init(void)
   }
 
   SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
-  SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_TLS_ROLLBACK_BUG|SSL_OP_ALL);
+  SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_TLS_ROLLBACK_BUG);
   SSL_CTX_set_verify(ServerInfo.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);
 #endif /* HAVE_LIBCRYPTO */

@@ -295,6 +295,7 @@ reset_block_state(void)
 %token  SSL_CERTIFICATE_FILE
 %token  SSL_CERTIFICATE_FINGERPRINT
 %token  SSL_CONNECTION_REQUIRED
+%token  SSL_DH_ELLIPTIC_CURVE
 %token  SSL_DH_PARAM_FILE
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
@@ -462,6 +463,7 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_max_nick_length |
                         serverinfo_max_topic_length |
                         serverinfo_ssl_dh_param_file |
+                        serverinfo_ssl_dh_elliptic_curve |
                         serverinfo_rsa_private_key_file |
                         serverinfo_vhost6 |
                         serverinfo_sid |
@@ -638,6 +640,34 @@ serverinfo_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
 #ifdef HAVE_LIBCRYPTO
   if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
     SSL_CTX_set_cipher_list(ServerInfo.server_ctx, yylval.string);
+#endif
+};
+
+serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
+{
+#ifdef HAVE_LIBCRYPTO
+#if OPENSSL_VERSION_NUMBER >= 0x1000005FL && !defined(OPENSSL_NO_ECDH)
+  int nid = 0;
+  EC_KEY *key = NULL;
+
+  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
+  {
+    if ((nid = OBJ_sn2nid(yylval.string)) == 0)
+    {
+        conf_error_report("Ignoring serverinfo::serverinfo_ssl_dh_elliptic_curve -- unknown curve name");
+        break;
+    }
+
+    if ((key = EC_KEY_new_by_curve_name(nid)) == NULL)
+    {
+      conf_error_report("Ignoring serverinfo::serverinfo_ssl_dh_elliptic_curve -- could not create curve");
+      break;
+    }
+
+    SSL_CTX_set_tmp_ecdh(ServerInfo.server_ctx, key);
+    EC_KEY_free(key);
+}
+#endif
 #endif
 };
 

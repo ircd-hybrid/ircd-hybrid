@@ -4,6 +4,7 @@ o) Fixed bug where opers that have the +g/+G/+R umodes set won't receive server
    notices for remote CONNECT/KLINE/DLINE/XLINE/RESV attempts
 o) Sending messages to user@server to local targets is now no longer possible,
    as this was an easy way to bypass +R/+G/+g user modes.
+o) Fixed splicode logic so SPLITNUM now works as expected
 
 
 -- Noteworthy changes in version 8.1.18 (2014-06-09)

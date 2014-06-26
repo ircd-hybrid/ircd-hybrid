@@ -406,6 +406,20 @@ ssl_init(void)
                      always_accept_verify_cb);
   SSL_CTX_set_session_id_context(ServerInfo.server_ctx, session_id, sizeof(session_id) - 1);
 
+#if OPENSSL_VERSION_NUMBER >= 0x1000005FL && !defined(OPENSSL_NO_ECDH)
+  {
+    EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+
+    if (key)
+    {
+      SSL_CTX_set_tmp_ecdh(ServerInfo.server_ctx, key);
+      EC_KEY_free(key);
+    }
+  }
+
+  SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_SINGLE_ECDH_USE);
+#endif
+
   if ((ServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
   {
     const char *s;

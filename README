@@ -52,7 +52,8 @@ Feature Specific Requirements:
 
 - TESTED PLATFORMS: The code has been tested on the following platforms, and
   is known to run properly.
-  (FIXME: this list is out of date)
+  (If you want to help us to keep this list up to date, please send us an
+   email to bugs@ircd-hybrid.org with some info about the operating system)
   CentOS 5.8
   Red Hat Linux 9
   Ubuntu 12.04

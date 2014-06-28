@@ -55,7 +55,7 @@ enum
   ENTITY_CLIENT             = 3
 };
 
-static struct entity
+static struct
 {
   void *ptr;
   int type;
@@ -94,7 +94,7 @@ static int unsigned ntargets = 0;
  * side effects - NONE
  */
 static int
-duplicate_ptr(const void *ptr)
+duplicate_ptr(const void *const ptr)
 {
   for (unsigned int i = 0; i < ntargets; ++i)
     if (targets[i].ptr == ptr)
@@ -115,7 +115,7 @@ duplicate_ptr(const void *ptr)
 static int
 flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p)
 {
-  int delta;
+  int delta = 0;
 
   if (GlobalSetOptions.floodcount && MyConnect(target_p) &&
       IsClient(source_p) && !IsCanFlood(source_p))
@@ -173,7 +173,7 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
 static int
 flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
 {
-  int delta;
+  int delta = 0;
 
   if (GlobalSetOptions.floodcount && !IsCanFlood(source_p))
   {
@@ -272,8 +272,8 @@ static void
 msg_channel_flags(int p_or_n, const char *command, struct Client *source_p,
                   struct Channel *chptr, int flags, const char *text)
 {
-  unsigned int type;
-  char c;
+  unsigned int type = 0;
+  char c = '\0';
 
   if (flags & CHFL_VOICE)
   {

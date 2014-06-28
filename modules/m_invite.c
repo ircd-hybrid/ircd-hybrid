@@ -112,14 +112,15 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
   if ((source_p->localClient->invite.last_attempt + ConfigChannel.invite_client_time) < CurrentTime)
     source_p->localClient->invite.count = 0;
-  source_p->localClient->invite.last_attempt = CurrentTime;
-  source_p->localClient->invite.count++;
 
   if (source_p->localClient->invite.count > ConfigChannel.invite_client_count)
   {
     sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->chname, "user");
     return 0;
   }
+
+  source_p->localClient->invite.last_attempt = CurrentTime;
+  source_p->localClient->invite.count++;
 
   sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->chname);
 

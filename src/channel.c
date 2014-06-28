@@ -109,8 +109,6 @@ add_user_to_channel(struct Channel *chptr, struct Client *who,
   }
 
   ms = mp_pool_get(member_pool);
-  memset(ms, 0, sizeof(*ms));
-
   ms->client_p = who;
   ms->chptr = chptr;
   ms->flags = flags;
@@ -341,8 +339,6 @@ make_channel(const char *chname)
   assert(!EmptyString(chname));
 
   chptr = mp_pool_get(channel_pool);
-
-  memset(chptr, 0, sizeof(*chptr));
 
   /* Doesn't hurt to set it here */
   chptr->channelts = CurrentTime;

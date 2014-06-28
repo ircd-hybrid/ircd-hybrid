@@ -458,6 +458,7 @@ main(int argc, char *argv[])
   me.localClient = &meLocalUser;
   dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
+  ConfigLoggingEntry.use_logging = 1;
   ConfigFileEntry.dpath      = DPATH;
   ConfigFileEntry.spath      = SPATH;
   ConfigFileEntry.mpath      = MPATH;

@@ -56,13 +56,6 @@
 #include "motd.h"
 
 
-struct config_channel_entry ConfigChannel;
-struct config_server_hide ConfigServerHide;
-struct config_file_entry ConfigFileEntry;
-struct logging_entry ConfigLoggingEntry = { .use_logging = 1 };
-struct server_info ServerInfo;
-struct admin_info AdminInfo;
-
 /* general conf items link list root, other than k lines etc. */
 dlink_list service_items = { NULL, NULL, 0 };
 dlink_list server_items  = { NULL, NULL, 0 };
@@ -71,14 +64,12 @@ dlink_list oconf_items   = { NULL, NULL, 0 };
 dlink_list uconf_items   = { NULL, NULL, 0 };
 dlink_list xconf_items   = { NULL, NULL, 0 };
 dlink_list nresv_items   = { NULL, NULL, 0 };
-dlink_list cresv_items = { NULL, NULL, 0 };
+dlink_list cresv_items   = { NULL, NULL, 0 };
 
 extern unsigned int lineno;
 extern char linebuf[];
 extern char conffilebuf[IRCD_BUFSIZE];
 extern int yyparse(); /* defined in y.tab.c */
-
-struct conf_parser_context conf_parser_ctx = { 0, 0, NULL };
 
 /* internally defined functions */
 static void read_conf(FILE *);

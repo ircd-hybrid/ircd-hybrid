@@ -124,13 +124,6 @@ enum
   TOO_FAST       = -5
 };
 
-struct conf_parser_context
-{
-  unsigned int boot;
-  unsigned int pass;
-  FILE *conf_file;
-};
-
 struct split_nuh_item
 {
   dlink_node node;
@@ -200,7 +193,14 @@ struct CidrItem
   unsigned int number_on_this_cidr;
 };
 
-struct config_file_entry
+struct
+{
+  unsigned int boot;
+  unsigned int pass;
+  FILE *conf_file;
+} conf_parser_ctx;
+
+struct
 {
   const char *dpath;          /* DPATH if set from command line */
   const char *mpath;
@@ -256,16 +256,15 @@ struct config_file_entry
   unsigned int min_nonwildcard_simple;
   unsigned int kill_chase_time_limit;
   unsigned int default_floodcount;
-  /* 0 == don't use throttle... */
   unsigned int throttle_count;
   unsigned int throttle_time;
   unsigned int use_egd;
   unsigned int ping_cookie;
   unsigned int disable_auth;
   unsigned int cycle_on_host_change;
-};
+} ConfigFileEntry;
 
-struct config_channel_entry
+struct
 {
   unsigned int disable_fake_channels;
   unsigned int invite_client_count;
@@ -279,9 +278,9 @@ struct config_channel_entry
   unsigned int no_join_on_split;
   unsigned int default_split_server_count;
   unsigned int default_split_user_count;
-};
+} ConfigChannel;
 
-struct config_server_hide
+struct
 {
   char *hidden_name;
   unsigned int flatten_links;
@@ -292,9 +291,9 @@ struct config_server_hide
   unsigned int links_disabled;
   unsigned int hidden;
   unsigned int hide_server_ips;
-};
+} ConfigServerHide;
 
-struct server_info
+struct
 {
   char *sid;
   char *name;
@@ -315,19 +314,19 @@ struct server_info
   unsigned int specific_ipv6_vhost;
   struct sockaddr_in dns_host;
   unsigned int can_use_v6;
-};
+} ServerInfo;
 
-struct admin_info
+struct
 {
   char *name;
   char *description;
   char *email;
-};
+} AdminInfo;
 
-struct logging_entry
+struct
 {
   unsigned int use_logging;
-};
+} ConfigLoggingEntry;
 
 extern dlink_list flatten_links;
 extern dlink_list server_items;
@@ -338,13 +337,6 @@ extern dlink_list oconf_items;
 extern dlink_list service_items;
 extern dlink_list nresv_items;
 extern dlink_list cresv_items;
-extern struct conf_parser_context conf_parser_ctx;
-extern struct logging_entry ConfigLoggingEntry;
-extern struct config_file_entry ConfigFileEntry;
-extern struct config_channel_entry ConfigChannel;
-extern struct config_server_hide ConfigServerHide;
-extern struct server_info ServerInfo;
-extern struct admin_info AdminInfo;
 
 extern int valid_wild_card_simple(const char *);
 extern int valid_wild_card(struct Client *, int, int, ...);

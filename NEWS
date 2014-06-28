@@ -31,7 +31,8 @@ o) TS6 is now mandatory. ircd is no longer backwards compatible with TS5
    and below.
 o) SVSJOIN and SVSPART has been added
 o) Major code cleanups and refactoring. Improved overall performance
-o) /info now also reports MPATH and SPATH
+o) /INFO now also reports MPATH (path to main motd (Message of the Day) file)
+   and SPATH (Path to server executable)
 o) Updated several help files
 
 

@@ -97,8 +97,6 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 
     if ((source_p->localClient->knock.last_attempt + ConfigChannel.knock_client_time) < CurrentTime)
       source_p->localClient->knock.count = 0;
-    source_p->localClient->knock.last_attempt = CurrentTime;
-    source_p->localClient->knock.count++;
 
     if (source_p->localClient->knock.count > ConfigChannel.knock_client_count)
     {
@@ -111,6 +109,9 @@ m_knock(struct Client *source_p, int parc, char *parv[])
       sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->chname, "channel");
       return 0;
     }
+
+    source_p->localClient->knock.last_attempt = CurrentTime;
+    source_p->localClient->knock.count++;
 
     sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, chptr->chname);
   }

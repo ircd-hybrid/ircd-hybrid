@@ -605,40 +605,9 @@ register_local_user(struct Client *source_p)
  *		  is introduced by a server.
  */
 void
-register_remote_user(struct Client *source_p, const char *username,
-                     const char *host, const char *server)
+register_remote_user(struct Client *source_p)
 {
   struct Client *target_p = NULL;
-
-  assert(source_p->username != username);
-
-  strlcpy(source_p->host, host, sizeof(source_p->host));
-  strlcpy(source_p->username, username, sizeof(source_p->username));
-
-  /*
-   * Coming from another server, take the servers word for it
-   */
-  source_p->servptr = hash_find_server(server);
-
-  /*
-   * Super GhostDetect:
-   * If we can't find the server the user is supposed to be on,
-   * then simply blow the user away.        -Taner
-   */
-  if (source_p->servptr == NULL)
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "No server %s for user %s[%s@%s] from %s",
-                         server, source_p->name, source_p->username,
-                         source_p->host, source_p->from->name);
-    sendto_one(source_p->from,
-               ":%s KILL %s :%s (Ghosted, server %s doesn't exist)",
-               me.id, source_p->id, me.name, server);
-
-    AddFlag(source_p, FLAGS_KILLED);
-    exit_client(source_p, "Ghosted Client");
-    return;
-  }
 
   if ((target_p = source_p->servptr) && target_p->from != source_p->from)
   {

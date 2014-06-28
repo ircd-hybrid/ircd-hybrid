@@ -347,67 +347,65 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   assert(IsClient(target_p));
 
   /* Server introducing new nick */
-  if (IsServer(source_p))  /* TBD: can be removed after some testing */
+
+  /* If we don't have a TS, or their TS's are the same, kill both */
+  if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))
   {
-    /* If we don't have a TS, or their TS's are the same, kill both */
-    if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Nick collision on %s(%s <- %s)(both killed)",
-                           target_p->name, target_p->from->name,
-                           source_p->from->name);
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Nick collision on %s(%s <- %s)(both killed)",
+                         target_p->name, target_p->from->name,
+                         source_p->from->name);
 
-      sendto_one(source_p, ":%s KILL %s :%s (Nick collision (new))",
-                 me.id, uid, me.name);
-      sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision (new))",
-                    me.id, target_p->id, me.name);
-
-      ++ServerStats.is_kill;
-      sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
-
-      AddFlag(target_p, FLAGS_KILLED);
-      exit_client(target_p, "Nick collision (new)");
-      return;
-    }
-
-    /* The timestamps are different */
-    sameuser = !irccmp(target_p->username, parv[5]) && !irccmp(target_p->host, parv[6]);
-
-    /*
-     * If the users are the same (loaded a client on a different server)
-     * and the new users ts is older, or the users are different and the
-     * new users ts is newer, ignore the new client and let it do the kill
-     */
-    if ((sameuser && newts < target_p->tsinfo) ||
-        (!sameuser && newts > target_p->tsinfo))
-    {
-      sendto_one(source_p, ":%s KILL %s :%s (Nick collision (new))",
-                 me.id, uid, me.name);
-      return;
-    }
-
-    if (sameuser)
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Nick collision on %s(%s <- %s)(older killed)",
-                           target_p->name, target_p->from->name,
-                           source_p->from->name);
-    else
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Nick collision on %s(%s <- %s)(newer killed)",
-                           target_p->name, target_p->from->name,
-                           source_p->from->name);
+    sendto_one(source_p, ":%s KILL %s :%s (Nick collision (new))",
+               me.id, uid, me.name);
+    sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision (new))",
+                  me.id, target_p->id, me.name);
 
     ++ServerStats.is_kill;
     sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
 
-    sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision (new))",
-                  me.id, target_p->id, me.name);
-
     AddFlag(target_p, FLAGS_KILLED);
-    exit_client(target_p, "Nick collision");
-
-    uid_from_server(source_p, parv, newts, svsid, nick, gecos);
+    exit_client(target_p, "Nick collision (new)");
+    return;
   }
+
+  /* The timestamps are different */
+  sameuser = !irccmp(target_p->username, parv[5]) && !irccmp(target_p->host, parv[6]);
+
+  /*
+   * If the users are the same (loaded a client on a different server)
+   * and the new users ts is older, or the users are different and the
+   * new users ts is newer, ignore the new client and let it do the kill
+   */
+  if ((sameuser && newts < target_p->tsinfo) ||
+      (!sameuser && newts > target_p->tsinfo))
+  {
+    sendto_one(source_p, ":%s KILL %s :%s (Nick collision (new))",
+               me.id, uid, me.name);
+    return;
+  }
+
+  if (sameuser)
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Nick collision on %s(%s <- %s)(older killed)",
+                         target_p->name, target_p->from->name,
+                         source_p->from->name);
+  else
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Nick collision on %s(%s <- %s)(newer killed)",
+                         target_p->name, target_p->from->name,
+                         source_p->from->name);
+
+  ++ServerStats.is_kill;
+  sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
+
+  sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision (new))",
+                me.id, target_p->id, me.name);
+
+  AddFlag(target_p, FLAGS_KILLED);
+  exit_client(target_p, "Nick collision");
+
+  uid_from_server(source_p, parv, newts, svsid, nick, gecos);
 }
 
 static void

@@ -546,7 +546,6 @@ find_or_add_userhost(const char *host)
 
   userhost = mp_pool_get(userhost_pool);
 
-  memset(userhost, 0, sizeof(*userhost));
   strlcpy(userhost->host, host, sizeof(userhost->host));
   hash_add_userhost(userhost);
 
@@ -598,7 +597,7 @@ add_user_host(const char *user, const char *host, int global)
   }
 
   nameh = mp_pool_get(namehost_pool);
-  memset(nameh, 0, sizeof(*nameh));
+
   strlcpy(nameh->name, user, sizeof(nameh->name));
 
   nameh->gcount = 1;

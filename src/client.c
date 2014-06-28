@@ -111,15 +111,10 @@ make_client(struct Client *from)
 {
   struct Client *client_p = mp_pool_get(client_pool);
 
-  memset(client_p, 0, sizeof(*client_p));
-
   if (!from)
   {
     client_p->from                      = client_p; /* 'from' of local client is self! */
     client_p->localClient               = mp_pool_get(lclient_pool);
-
-    memset(client_p->localClient, 0, sizeof(*client_p->localClient));
-
     client_p->localClient->since        = CurrentTime;
     client_p->localClient->lasttime     = CurrentTime;
     client_p->localClient->firsttime    = CurrentTime;

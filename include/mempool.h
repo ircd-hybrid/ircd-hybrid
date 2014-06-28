@@ -84,6 +84,9 @@ struct mp_pool_t
   /** Size of each chunk (in items). */
   int new_chunk_capacity;
 
+  /** Size of each item */
+  size_t item_size;
+
   /** Size to allocate for each item, including overhead and alignment
    * padding. */
   size_t item_alloc_size;

@@ -479,7 +479,7 @@ find_or_add_ip(struct irc_ssaddr *ip_in)
     garbage_collect_ip_entries();
 
   newptr = mp_pool_get(ip_entry_pool);
-  memset(newptr, 0, sizeof(*newptr));
+
   ip_entries_count++;
   memcpy(&newptr->ip, ip_in, sizeof(struct irc_ssaddr));
 

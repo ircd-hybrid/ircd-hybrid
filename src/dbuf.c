@@ -43,8 +43,6 @@ dbuf_alloc(void)
 {
   struct dbuf_block *block = mp_pool_get(dbuf_pool);
 
-  memset(block, 0, sizeof(*block));
-
   ++block->refs;
   return block;
 }

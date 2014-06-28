@@ -302,7 +302,6 @@ make_request(dns_callback_fnc callback, void *ctx)
 {
   struct reslist *request = mp_pool_get(dns_pool);
 
-  memset(request, 0, sizeof(*request));
   request->sentat       = CurrentTime;
   request->retries      = 2;
   request->resend       = 1;

@@ -55,7 +55,6 @@ make_dlink_node(void)
 {
   dlink_node *ptr = mp_pool_get(dnode_pool);
 
-  memset(ptr, 0, sizeof(*ptr));
   return ptr;
 }
 

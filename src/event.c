@@ -88,7 +88,7 @@ event_run(void)
   {
     struct event *e = events.head->data;
 
-    if (e->when > CurrentTime)
+    if (e->next > CurrentTime)
       break;
 
     event_delete(e);

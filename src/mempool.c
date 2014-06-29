@@ -239,7 +239,7 @@ mp_pool_init(void)
   {
     .name = "mp_pool_garbage_collect",
     .handler = mp_pool_garbage_collect,
-    .when = 119
+    .when = 187
   };
 
   event_add(&event_mp_gc, NULL);

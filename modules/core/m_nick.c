@@ -63,7 +63,8 @@
 static int
 check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
 {
-  /* the old code did some wacky stuff here, if the nick is invalid, kill it
+  /*
+   * The old code did some wacky stuff here, if the nick is invalid, kill it
    * and dont bother messing at all
    */
   if (!valid_nickname(nick, 0))
@@ -76,7 +77,7 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
     sendto_one(source_p, ":%s KILL %s :%s (Bad Nickname)",
                me.name, nick, me.name);
 
-    /* bad nick change */
+    /* Bad nick change */
     if (!MyConnect(source_p))
     {
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s (Bad Nickname)",
@@ -254,8 +255,18 @@ change_local_nick(struct Client *source_p, const char *nick)
   fd_note(&source_p->localClient->fd, "Nick: %s", nick);
 }
 
-/*
- * nick_from_server()
+/*!
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ *      - parv[2] = timestamp
  */
 static void
 change_remote_nick(struct Client *source_p, char *parv[])
@@ -283,7 +294,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s NICK %s :%lu",
                 source_p->id, parv[1], (unsigned long)source_p->tsinfo);
 
-  /* set the new nick name */
+  /* Set the new nick name */
   hash_del_client(source_p);
   strlcpy(source_p->name, parv[1], sizeof(source_p->name));
   hash_add_client(source_p);
@@ -292,8 +303,39 @@ change_remote_nick(struct Client *source_p, char *parv[])
     watch_check_hash(source_p, RPL_LOGON);
 }
 
-/*
- * client_from_server()
+/*!
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *
+ * server introducing new nick/UID (without services support)
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ *      - parv[2] = hop count
+ *      - parv[3] = TS
+ *      - parv[4] = umode
+ *      - parv[5] = username
+ *      - parv[6] = hostname
+ *      - parv[7] = ip
+ *      - parv[8] = uid
+ *      - parv[9] = ircname (gecos)
+ *
+ * server introducing new nick/UID (with services support)
+ *      - parv[ 0] = command
+ *      - parv[ 1] = nickname
+ *      - parv[ 2] = hop count
+ *      - parv[ 3] = TS
+ *      - parv[ 4] = umode
+ *      - parv[ 5] = username
+ *      - parv[ 6] = hostname
+ *      - parv[ 7] = ip
+ *      - parv[ 8] = uid
+ *      - parv[ 9] = services id (account name)
+ *      - parv[10] = ircname (gecos)
  */
 static void
 uid_from_server(struct Client *source_p, int parc, char *parv[])
@@ -306,9 +348,8 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   source_p->servptr = source_p;
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = atol(parv[3]);
-  strlcpy(client_p->svid, (parc == 11 ? parv[9] : "0"), sizeof(client_p->svid));
 
-  /* copy the nick in place */
+  strlcpy(client_p->svid, (parc == 11 ? parv[9] : "0"), sizeof(client_p->svid));
   strlcpy(client_p->name, parv[1], sizeof(client_p->name));
   strlcpy(client_p->id, parv[8], sizeof(client_p->id));
   strlcpy(client_p->sockhost, parv[7], sizeof(client_p->sockhost));
@@ -319,7 +360,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   hash_add_client(client_p);
   hash_add_id(client_p);
 
-  /* parse usermodes */
+  /* Parse usermodes */
   for (const char *m = &parv[4][1]; *m; ++m)
   {
     unsigned int flag = user_modes[(unsigned char)*m];
@@ -335,6 +376,40 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   register_remote_user(client_p);
 }
 
+/*!
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *
+ * server introducing new nick/UID (without services support)
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ *      - parv[2] = hop count
+ *      - parv[3] = TS
+ *      - parv[4] = umode
+ *      - parv[5] = username
+ *      - parv[6] = hostname
+ *      - parv[7] = ip
+ *      - parv[8] = uid
+ *      - parv[9] = ircname (gecos)
+ *
+ * server introducing new nick/UID (with services support)
+ *      - parv[ 0] = command
+ *      - parv[ 1] = nickname
+ *      - parv[ 2] = hop count
+ *      - parv[ 3] = TS
+ *      - parv[ 4] = umode
+ *      - parv[ 5] = username
+ *      - parv[ 6] = hostname
+ *      - parv[ 7] = ip
+ *      - parv[ 8] = uid
+ *      - parv[ 9] = services id (account name)
+ *      - parv[10] = ircname (gecos)
+ */
 static int
 perform_uid_introduction_collides(struct Client *source_p, struct Client *target_p,
                                   int parc, char *parv[])
@@ -408,6 +483,19 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   return 1;
 }
 
+/*!
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ *      - parv[2] = timestamp
+ */
 static int
 perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
                              int parc, char *parv[])
@@ -581,14 +669,14 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /* mark end of grace period, to prevent nickflooding */
+  /* Mark end of grace period, to prevent nickflooding */
   if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  /* terminate nick to NICKLEN */
+  /* Terminate nick to NICKLEN */
   strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ServerInfo.max_nick_length + 1));
 
-  /* check the nickname is ok */
+  /* Check the nickname is ok */
   if (!valid_nickname(nick, 1))
   {
     sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, "Erroneous Nickname");
@@ -626,7 +714,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
      * If the client that has the nick isn't registered yet (nick but no
      * user) then drop the unregged client
      */
-    exit_client(target_p, "Overridden");
+    exit_client(target_p, "Overridden by other sign on");
     change_local_nick(source_p, nick);
   }
   else
@@ -647,7 +735,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
  * server -> server nick change
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = TS when nick change
+ *      - parv[2] = timestamp
  */
 static int
 ms_nick(struct Client *source_p, int parc, char *parv[])
@@ -672,7 +760,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
   else if (IsUnknown(target_p))
   {
     /* We're not living in the past anymore, an unknown client is local only. */
-    exit_client(target_p, "Overridden");
+    exit_client(target_p, "Overridden by other sign on");
     change_remote_nick(source_p, parv);
   }
   else if (target_p == source_p)
@@ -694,7 +782,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *
- * server introducing new nick (without services support)
+ * server introducing new nick/UID (without services support)
  *      - parv[0] = command
  *      - parv[1] = nickname
  *      - parv[2] = hop count
@@ -706,7 +794,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
  *      - parv[8] = uid
  *      - parv[9] = ircname (gecos)
  *
- * server introducing new nick (with services support)
+ * server introducing new nick/UID (with services support)
  *      - parv[ 0] = command
  *      - parv[ 1] = nickname
  *      - parv[ 2] = hop count
@@ -757,7 +845,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
     uid_from_server(source_p, parc, parv);
   else if (IsUnknown(target_p))
   {
-    exit_client(target_p, "Overridden");
+    exit_client(target_p, "Overridden by other sign on");
     uid_from_server(source_p, parc, parv);
   }
   else if (perform_uid_introduction_collides(source_p, target_p, parc, parv))

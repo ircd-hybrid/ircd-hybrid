@@ -1177,7 +1177,7 @@ set_default_conf(void)
     UMODE_OPERWALL | UMODE_WALLOP;
   ConfigFileEntry.use_egd = 0;
   ConfigFileEntry.egdpool_path = NULL;
-  ConfigFileEntry.throttle_time = 10;
+  ConfigFileEntry.throttle_time = 1;
 }
 
 static void

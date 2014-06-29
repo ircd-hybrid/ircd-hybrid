@@ -89,6 +89,54 @@ unsigned int splitchecking;
 unsigned int split_users;
 unsigned int split_servers;
 
+static struct event event_cleanup_glines =
+{
+  .name = "cleanup_glines",
+  .handler = cleanup_glines,
+  .when = CLEANUP_GLINES_TIME
+};
+
+static struct event event_cleanup_tklines =
+{
+  .name = "cleanup_tklines",
+  .handler = cleanup_tklines,
+  .when = CLEANUP_TKLINES_TIME
+};
+
+static struct event event_try_connections =
+{
+  .name = "try_connections",
+  .handler = try_connections,
+  .when = STARTUP_CONNECTIONS_TIME
+};
+
+static struct event event_comm_checktimeouts =
+{
+  .name = "comm_checktimeouts",
+  .handler = comm_checktimeouts,
+  .when = 1
+};
+
+static struct event event_save_all_databases =
+{
+  .name = "save_all_databases",
+  .handler = save_all_databases,
+  .when = DATABASE_UPDATE_TIMEOUT
+};
+
+struct event event_write_links_file =
+{
+  .name = "write_links_file",
+  .handler = write_links_file,
+};
+
+struct event event_check_splitmode =
+{
+  .name = "check_splitmode",
+  .handler = check_splitmode,
+  .when = 60
+};
+
 /*
  * print_startup - print startup information
  */
@@ -190,11 +238,8 @@ io_loop(void)
         safe_list_channels(ptr->data, 0);
     }
 
-    /* Run pending events, then get the number of seconds to the next
-     * event
-     */
-    while (eventNextTime() <= CurrentTime)
-      eventRun();
+    /* Run pending events */
+    event_run();
 
     comm_select();
     exit_aborted_clients();
@@ -498,9 +543,6 @@ main(int argc, char *argv[])
 
   setup_signals();
 
-  /* Init the event subsystem */
-  eventInit();
-
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
   log_set_file(LOG_TYPE_IRCD, 0, logFileName);
@@ -608,25 +650,28 @@ main(int argc, char *argv[])
 
   ilog(LOG_TYPE_IRCD, "Server Ready");
 
-  eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
-  eventAddIsh("cleanup_tklines", cleanup_tklines, NULL, CLEANUP_TKLINES_TIME);
+  event_addish(&event_cleanup_glines, NULL);
+  event_addish(&event_cleanup_tklines, NULL);
 
   /* We want try_connections to be called as soon as possible now! -- adrian */
   /* No, 'cause after a restart it would cause all sorts of nick collides */
-  eventAddIsh("try_connections", try_connections, NULL, STARTUP_CONNECTIONS_TIME);
+  event_addish(&event_try_connections, NULL);
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
-  eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
+  event_addish(&event_comm_checktimeouts, NULL);
 
-  eventAddIsh("save_all_databases", save_all_databases, NULL, DATABASE_UPDATE_TIMEOUT);
+  event_addish(&event_save_all_databases, NULL);
 
   if (ConfigServerHide.links_delay > 0)
-    eventAddIsh("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
+  {
+    event_write_links_file.when = ConfigServerHide.links_delay;
+    event_addish(&event_write_links_file, NULL);
+  }
   else
     ConfigServerHide.links_disabled = 1;
 
   if (splitmode)
-    eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
+    event_addish(&event_check_splitmode, NULL);
 
   io_loop();
   return 0;

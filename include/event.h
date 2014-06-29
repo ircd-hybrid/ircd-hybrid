@@ -26,34 +26,33 @@
 
 #ifndef INCLUDED_event_h
 #define INCLUDED_event_h
-#include "client.h"
 
-/*
- * How many event entries we need to allocate at a time in the block
- * allocator.
- */
-#define MAX_EVENTS 50
+#include "list.h"
 
+struct Client;
+struct event;
 
-typedef void EVH(void *);
+typedef void (*event_handler)(void *);
 
-/* The list of event processes */
-struct ev_entry
+struct event
 {
-  EVH *func;
-  void *arg;
+  /* public */
   const char *name;
-  time_t frequency;
+  event_handler handler;
   time_t when;
-  int active;
+  unsigned short oneshot;
+
+  /* private */
+  time_t next;
+  void *data;
+  unsigned short enabled;
+  dlink_node node;
 };
 
-extern void eventAdd(const char *, EVH *, void *, time_t);
-extern void eventAddIsh(const char *, EVH *, void *, time_t);
-extern void eventRun(void);
-extern time_t eventNextTime(void);
-extern void eventInit(void);
-extern void eventDelete(EVH *, void *);
+extern void event_add(struct event *ev, void *data);
+extern void event_addish(struct event *ev, void *data);
+extern void event_delete(struct event *ev);
+extern void event_run(void);
 extern void set_back_events(time_t);
 extern void show_events(struct Client *);
 #endif /* INCLUDED_event_h */

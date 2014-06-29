@@ -1309,7 +1309,7 @@ get_channel_access(const struct Client *source_p,
 {
   /* Let hacked servers in for now... */
   if (!MyClient(source_p))
-    return CHACCESS_CHANOP;
+    return CHACCESS_REMOTE;
 
   if (!member)
     return CHACCESS_NOTONCHAN;

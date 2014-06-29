@@ -44,7 +44,8 @@ enum
   CHACCESS_NOTONCHAN = -1,
   CHACCESS_PEON      =  0,
   CHACCESS_HALFOP    =  1,
-  CHACCESS_CHANOP    =  2
+  CHACCESS_CHANOP    =  2,
+  CHACCESS_REMOTE    =  3
 };
 
 /* can_send results */

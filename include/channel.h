@@ -113,6 +113,7 @@ struct Ban
 };
 
 extern dlink_list channel_list;
+extern struct event splitmode_event;
 
 extern int check_channel_name(const char *, const int);
 extern int can_send(struct Channel *, struct Client *, struct Membership *, const char *);

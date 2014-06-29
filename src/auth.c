@@ -81,7 +81,7 @@ enum
 
 static dlink_list auth_doing_list = { NULL, NULL, 0 };
 
-static EVH timeout_auth_queries_event;
+static void timeout_auth_queries_event(void *);
 
 static PF read_auth_reply;
 static CNCB auth_connect_callback;
@@ -93,7 +93,14 @@ static CNCB auth_connect_callback;
 void
 auth_init(void)
 {
-  eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
+  static struct event timeout_auth_queries =
+  {
+    .name = "timeout_auth_queries_event",
+    .handler = timeout_auth_queries_event,
+    .when = 1
+  };
+
+  event_add(&timeout_auth_queries, NULL);
 }
 
 /*

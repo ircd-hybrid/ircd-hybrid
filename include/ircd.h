@@ -102,6 +102,7 @@ extern const char *logFileName;
 extern const char *pidFileName;
 extern int dorehash;
 extern int doremotd;
+extern struct event event_write_links_file;
 extern struct Counter Count;
 extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions; /* defined in ircd.c */

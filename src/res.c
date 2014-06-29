@@ -254,7 +254,6 @@ start_resolver(void)
 
     /* At the moment, the resolver FD data is global .. */
     comm_setselect(&ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
-    eventAdd("timeout_resolver", timeout_resolver, NULL, 1);
   }
 }
 
@@ -264,9 +263,18 @@ start_resolver(void)
 void
 init_resolver(void)
 {
+  static struct event event_timeout_resolver =
+  {
+    .name = "timeout_resolver",
+    .handler = timeout_resolver,
+    .when = 1
+  };
+
   dns_pool = mp_pool_new(sizeof(struct reslist), MP_CHUNK_SIZE_DNS);
   memset(&ResolverFileDescriptor, 0, sizeof(fde_t));
   start_resolver();
+
+  event_add(&event_timeout_resolver, NULL);
 }
 
 /*
@@ -276,7 +284,6 @@ void
 restart_resolver(void)
 {
   fd_close(&ResolverFileDescriptor);
-  eventDelete(timeout_resolver, NULL);
   start_resolver();
 }
 

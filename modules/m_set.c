@@ -232,7 +232,7 @@ quote_splitmode(struct Client *source_p, const char *charval, int val)
       splitmode = 0;
       splitchecking = 0;
 
-      eventDelete(check_splitmode, NULL);
+      event_delete(&splitmode_event);
     }
     /* ON */
     else if (newval == 1)
@@ -245,7 +245,7 @@ quote_splitmode(struct Client *source_p, const char *charval, int val)
       splitchecking = 0;
 
       /* we might be deactivating an automatic splitmode, so pull the event */
-      eventDelete(check_splitmode, NULL);
+      event_delete(&splitmode_event);
     }
     /* AUTO */
     else if (newval == 2)

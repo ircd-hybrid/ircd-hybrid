@@ -235,7 +235,14 @@ static mp_pool_t *mp_allocated_pools = NULL;
 void
 mp_pool_init(void)
 {
-  eventAdd("mp_pool_garbage_collect", &mp_pool_garbage_collect, NULL, 119);
+  static struct event event_mp_gc =
+  {
+    .name = "mp_pool_garbage_collect",
+    .handler = mp_pool_garbage_collect,
+    .when = 119
+  };
+
+  event_add(&event_mp_gc, NULL);
 }
 
 /** Helper: Allocate and return a new memory chunk for <b>pool</b>.  Does not

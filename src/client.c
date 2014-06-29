@@ -60,7 +60,7 @@ dlink_list serv_list = {NULL, NULL, 0};
 dlink_list global_serv_list = {NULL, NULL, 0};
 dlink_list oper_list = {NULL, NULL, 0};
 
-static EVH check_pings;
+static void check_pings(void *);
 
 static mp_pool_t *client_pool  = NULL;
 static mp_pool_t *lclient_pool = NULL;
@@ -83,12 +83,16 @@ static void check_unknowns_list(void);
 void
 client_init(void)
 {
-  /* start off the check ping event ..  -- adrian
-   * Every 30 seconds is plenty -- db
-   */
+  static struct event event_ping =
+  {
+    .name = "check_pings",
+    .handler = check_pings,
+    .when = 5
+  };
+
   client_pool = mp_pool_new(sizeof(struct Client), MP_CHUNK_SIZE_CLIENT);
   lclient_pool = mp_pool_new(sizeof(struct LocalUser), MP_CHUNK_SIZE_LCLIENT);
-  eventAdd("check_pings", check_pings, NULL, 5);
+  event_add(&event_ping, NULL);
 }
 
 /*

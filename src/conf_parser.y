@@ -3089,7 +3089,8 @@ serverhide_links_delay: LINKS_DELAY '=' timespec ';'
   {
     if (($3 > 0) && ConfigServerHide.links_disabled == 1)
     {
-      eventAddIsh("write_links_file", write_links_file, NULL, $3);
+      event_write_links_file.when = $3;
+      event_addish(&event_write_links_file, NULL);
       ConfigServerHide.links_disabled = 0;
     }
 

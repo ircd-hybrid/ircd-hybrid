@@ -1089,7 +1089,7 @@ static const yytype_uint16 yyrline[] =
     2961,  2962,  2963,  2964,  2966,  2971,  2976,  2981,  2986,  2991,
     2996,  3001,  3006,  3011,  3016,  3021,  3026,  3031,  3039,  3042,
     3042,  3043,  3044,  3045,  3046,  3047,  3048,  3049,  3050,  3051,
-    3053,  3059,  3065,  3071,  3077,  3086,  3100,  3106
+    3053,  3059,  3065,  3071,  3077,  3086,  3101,  3107
 };
 #endif
 
@@ -6562,36 +6562,37 @@ yyreduce:
   {
     if (((yyvsp[-1].number) > 0) && ConfigServerHide.links_disabled == 1)
     {
-      eventAddIsh("write_links_file", write_links_file, NULL, (yyvsp[-1].number));
+      event_write_links_file.when = (yyvsp[-1].number);
+      event_addish(&event_write_links_file, NULL);
       ConfigServerHide.links_disabled = 0;
     }
 
     ConfigServerHide.links_delay = (yyvsp[-1].number);
   }
 }
-#line 6573 "conf_parser.c" /* yacc.c:1646  */
+#line 6574 "conf_parser.c" /* yacc.c:1646  */
     break;
 
   case 666:
-#line 3101 "conf_parser.y" /* yacc.c:1646  */
+#line 3102 "conf_parser.y" /* yacc.c:1646  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hidden = yylval.number;
 }
-#line 6582 "conf_parser.c" /* yacc.c:1646  */
+#line 6583 "conf_parser.c" /* yacc.c:1646  */
     break;
 
   case 667:
-#line 3107 "conf_parser.y" /* yacc.c:1646  */
+#line 3108 "conf_parser.y" /* yacc.c:1646  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hide_server_ips = yylval.number;
 }
-#line 6591 "conf_parser.c" /* yacc.c:1646  */
+#line 6592 "conf_parser.c" /* yacc.c:1646  */
     break;
 
 
-#line 6595 "conf_parser.c" /* yacc.c:1646  */
+#line 6596 "conf_parser.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

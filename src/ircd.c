@@ -53,7 +53,6 @@
 #include "memory.h"
 #include "mempool.h"
 #include "ircd_getopt.h"
-#include "supported.h"
 #include "watch.h"
 #include "conf_db.h"
 #include "conf_class.h"

@@ -40,7 +40,6 @@
 #include "log.h"
 #include "server.h"
 #include "send.h"
-#include "supported.h"
 #include "memory.h"
 #include "packet.h"
 #include "rng_mt.h"
@@ -1065,7 +1064,7 @@ void
 init_isupport(void)
 {
   add_isupport("CALLERID", NULL, -1);
-  add_isupport("CASEMAPPING", CASEMAP, -1);
+  add_isupport("CASEMAPPING", "rfc1459", -1);
   add_isupport("DEAF", "D", -1);
   add_isupport("KICKLEN", NULL, KICKLEN);
   add_isupport("MODES", NULL, MAXMODEPARAMS);

@@ -62,10 +62,6 @@
 GeoIP *geoip_ctx;
 #endif
 
-/* /quote set variables */
-struct SetOptions GlobalSetOptions;
-struct Counter Count;
-struct ServerState_t server_state;
 struct ServerStatistics ServerStats;
 struct timeval SystemTime;
 struct Client me;             /* That's me */

@@ -32,7 +32,7 @@
 #include "config.h"
 
 
-struct SetOptions
+struct
 {
   unsigned int autoconn;      /* autoconn enabled for all servers? */
   int floodcount;    /* Number of messages in 1 second    */
@@ -41,7 +41,7 @@ struct SetOptions
   unsigned int ident_timeout; /* timeout for identd lookups        */
   int spam_num;
   unsigned int spam_time;
-};
+} GlobalSetOptions;
 
 /*
  * statistics structures
@@ -83,12 +83,12 @@ struct Counter
   unsigned int max_tot;       /* MAX global clients  */
   unsigned int max_loc_con;   /* MAX local connection count (clients + server) */
   unsigned int max_loc_cli;   /* XXX This is redundant - Max local client count */
-};
+} Count;
 
-struct ServerState_t
+struct
 {
   unsigned int foreground;
-};
+} server_state;
 
 
 #ifdef HAVE_LIBGEOIP
@@ -103,10 +103,7 @@ extern const char *pidFileName;
 extern int dorehash;
 extern int doremotd;
 extern struct event event_write_links_file;
-extern struct Counter Count;
 extern struct ServerStatistics ServerStats;
-extern struct SetOptions GlobalSetOptions; /* defined in ircd.c */
-extern struct ServerState_t server_state;
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec
 extern int unsigned default_server_capabs;

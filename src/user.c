@@ -475,8 +475,7 @@ register_local_user(struct Client *source_p)
       source_p->username[i++] = '~';
 
     for (; *p && i < USERLEN; ++p)
-      if (*p != '[')
-        source_p->username[i++] = *p;
+      source_p->username[i++] = *p;
 
     source_p->username[i] = '\0';
   }

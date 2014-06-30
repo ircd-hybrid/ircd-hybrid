@@ -557,7 +557,7 @@ read_auth_reply(fde_t *fd, void *data)
       {
         if (*s == '@')
           break;
-        if (!IsSpace(*s) && *s != ':' && *s != '[')
+        if (!IsSpace(*s) && *s != ':')
         {
           *t++ = *s;
           count--;

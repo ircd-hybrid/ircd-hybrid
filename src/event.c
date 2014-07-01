@@ -14,8 +14,6 @@
 #include "event.h"
 #include "client.h"
 #include "send.h"
-#include "memory.h"
-#include "log.h"
 #include "numeric.h"
 #include "rng_mt.h"
 

@@ -281,7 +281,7 @@ ssl_handshake(int fd, struct Client *client_p)
     {
       unsigned int n = 0;
 
-      if (X509_digest(cert, EVP_sha256(), md, &n))
+      if (X509_digest(cert, ServerInfo.message_digest_algorithm, md, &n))
       {
         binary_to_hex(md, buf, n);
         client_p->certfp = xstrdup(buf);

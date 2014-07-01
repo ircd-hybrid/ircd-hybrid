@@ -1061,6 +1061,7 @@ set_default_conf(void)
   assert(class_default == class_get_list()->tail->data);
 
 #ifdef HAVE_LIBCRYPTO
+  ServerInfo.message_digest_algorithm = EVP_sha256();
   ServerInfo.rsa_private_key = NULL;
   ServerInfo.rsa_private_key_file = NULL;
 #endif

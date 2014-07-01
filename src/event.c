@@ -76,7 +76,6 @@ void
 event_run(void)
 {
   static time_t last = 0;
-  dlink_node *node = NULL;
   size_t len = 0;
 
   if (last == CurrentTime)

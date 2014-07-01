@@ -125,12 +125,6 @@ struct event event_write_links_file =
   .handler = write_links_file,
 };
 
-struct event event_check_splitmode =
-{
-  .name = "check_splitmode",
-  .handler = check_splitmode,
-  .when = 60
-};
 
 /*
  * print_startup - print startup information
@@ -664,7 +658,7 @@ main(int argc, char *argv[])
     ConfigServerHide.links_disabled = 1;
 
   if (splitmode)
-    event_addish(&event_check_splitmode, NULL);
+    event_addish(&splitmode_event, NULL);
 
   io_loop();
   return 0;

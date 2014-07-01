@@ -51,7 +51,7 @@ struct event splitmode_event =
 {
   .name = "check_splitmode",
   .handler = check_splitmode,
-  .when = 10
+  .when = 5
 };
 
 static mp_pool_t *member_pool, *channel_pool;

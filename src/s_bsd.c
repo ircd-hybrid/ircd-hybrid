@@ -25,6 +25,9 @@
  */
 
 #include "stdinc.h"
+#ifdef HAVE_LIBCRYPTO
+#include "rsa.h"
+#endif
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
@@ -280,8 +283,7 @@ ssl_handshake(int fd, struct Client *client_p)
 
       if (X509_digest(cert, EVP_sha256(), md, &n))
       {
-        for (unsigned int i = 0; i < n; ++i)
-          snprintf(buf + 2 * i, 3, "%02X", md[i]);
+        binary_to_hex(md, buf, n);
         client_p->certfp = xstrdup(buf);
       }
     }

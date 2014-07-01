@@ -52,7 +52,7 @@ report_crypto_errors(void)
     ilog(LOG_TYPE_IRCD, "SSL error: %s", ERR_error_string(e, 0));
 }
 
-static void
+void
 binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
 {
   static const char trans[] = "0123456789ABCDEF";

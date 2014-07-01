@@ -320,6 +320,7 @@ ssl_client_method           { return T_SSL_CLIENT_METHOD; }
 ssl_connection_required     { return SSL_CONNECTION_REQUIRED; }
 ssl_dh_elliptic_curve       { return SSL_DH_ELLIPTIC_CURVE; }
 ssl_dh_param_file           { return SSL_DH_PARAM_FILE; }
+ssl_message_digest_algorithm { return SSL_MESSAGE_DIGEST_ALGORITHM; }
 ssl_server_method           { return T_SSL_SERVER_METHOD; }
 sslv3                       { return T_SSLV3; }
 stats_e_disabled            { return STATS_E_DISABLED; }

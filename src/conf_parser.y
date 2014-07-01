@@ -297,6 +297,7 @@ reset_block_state(void)
 %token  SSL_CONNECTION_REQUIRED
 %token  SSL_DH_ELLIPTIC_CURVE
 %token  SSL_DH_PARAM_FILE
+%token  SSL_MESSAGE_DIGEST_ALGORITHM
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
 %token  STATS_K_OPER_ONLY
@@ -471,6 +472,7 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_ssl_client_method |
                         serverinfo_ssl_server_method |
                         serverinfo_ssl_cipher_list |
+                        serverinfo_ssl_message_digest_algorithm |
                         error ';' ;
 
 
@@ -642,6 +644,19 @@ serverinfo_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
     SSL_CTX_set_cipher_list(ServerInfo.server_ctx, yylval.string);
 #endif
 };
+
+serverinfo_ssl_message_digest_algorithm: SSL_MESSAGE_DIGEST_ALGORITHM '=' QSTRING ';'
+{
+#ifdef HAVE_LIBCRYPTO
+  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
+  {
+    if ((ServerInfo.message_digest_algorithm = EVP_get_digestbyname(yylval.string)) == NULL)
+      conf_error_report("Ignoring serverinfo::ssl_message_digest_algorithm -- unknown message digest algorithm");
+    else 
+      ServerInfo.message_digest_algorithm = EVP_sha256();
+  }
+#endif
+}
 
 serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
 {

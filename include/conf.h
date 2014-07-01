@@ -295,6 +295,9 @@ struct
 
 struct
 {
+#ifdef HAVE_LIBCRYPTO
+  const EVP_MD *message_digest_algorithm;
+#endif
   char *sid;
   char *name;
   char *description;

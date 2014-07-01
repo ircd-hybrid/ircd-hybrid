@@ -651,9 +651,10 @@ serverinfo_ssl_message_digest_algorithm: SSL_MESSAGE_DIGEST_ALGORITHM '=' QSTRIN
   if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
   {
     if ((ServerInfo.message_digest_algorithm = EVP_get_digestbyname(yylval.string)) == NULL)
-      conf_error_report("Ignoring serverinfo::ssl_message_digest_algorithm -- unknown message digest algorithm");
-    else 
+    {
       ServerInfo.message_digest_algorithm = EVP_sha256();
+      conf_error_report("Ignoring serverinfo::ssl_message_digest_algorithm -- unknown message digest algorithm");
+    }
   }
 #endif
 }

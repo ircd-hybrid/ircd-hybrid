@@ -76,7 +76,7 @@ void
 event_run(void)
 {
   static time_t last = 0;
-  size_t len = 0;
+  unsigned int len = 0;
 
   if (last == CurrentTime)
     return;

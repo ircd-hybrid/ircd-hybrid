@@ -50,11 +50,8 @@ event_addish(struct event *ev, void *data)
   if (ev->when >= 3)
   {
     const time_t two_third = (2 * ev->when) / 3;
+
     ev->when = two_third + ((genrand_int32() % 1000) * two_third) / 1000;
-      /*
-       * XXX I hate the above magic, I don't even know if its right.
-       * Grr. -- adrian
-       */
   }
 
   event_add(ev, data);

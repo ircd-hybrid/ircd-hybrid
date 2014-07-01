@@ -20,7 +20,7 @@
  */
 
 /*! \file event.h
- * \brief The ircd event header.
+ * \brief Timer based event execution
  * \version $Id$
  */
 

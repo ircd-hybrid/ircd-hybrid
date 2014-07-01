@@ -433,10 +433,9 @@ ssl_init(void)
 
   if ((ServerInfo.server_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL)
   {
-    const char *s;
+    const char *s = ERR_lib_error_string(ERR_get_error());
 
-    fprintf(stderr, "ERROR: Could not initialize the SSL Server context -- %s\n",
-            s = ERR_lib_error_string(ERR_get_error()));
+    fprintf(stderr, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
   }
 
@@ -462,10 +461,9 @@ ssl_init(void)
 
   if ((ServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
   {
-    const char *s;
+    const char *s = ERR_lib_error_string(ERR_get_error());
 
-    fprintf(stderr, "ERROR: Could not initialize the SSL Client context -- %s\n",
-            s = ERR_lib_error_string(ERR_get_error()));
+    fprintf(stderr, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
   }
 

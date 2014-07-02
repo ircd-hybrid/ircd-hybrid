@@ -12,7 +12,8 @@ X A - Shows the DNS servers in use
 * d - Shows temporary D lines
 * D - Shows D lines
 * e - Shows exemptions to D lines
-X E - Shows I/O event engine
+X E - Shows active timer/events
+X f - Shows file descriptors
 * g - Shows pending G lines
 * G - Shows G lines
 * H - Shows configured hub/leaf entries

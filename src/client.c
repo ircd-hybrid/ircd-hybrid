@@ -677,12 +677,8 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
   if (IsUserHostIp(source_p))
     delete_user_host(source_p->username, source_p->host, !MyConnect(source_p));
 
-  /* remove from global client list
-   * NOTE: source_p->node.next cannot be NULL if the client is added
-   *       to global_client_list (there is always &me at its end)
-   */
-  if (source_p->node.next) /* XXX: not needed? */
-    dlinkDelete(&source_p->node, &global_client_list);
+  assert(source_p->node.next);
+  dlinkDelete(&source_p->node, &global_client_list);
 
   update_client_exit_stats(source_p);
 

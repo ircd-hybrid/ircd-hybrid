@@ -36,7 +36,6 @@
 #include "packet.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "hook.h"
 #include "send.h"
 #include "s_misc.h"
 

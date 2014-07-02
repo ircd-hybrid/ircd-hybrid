@@ -49,7 +49,6 @@
 #include "packet.h"
 #include "rng_mt.h"
 #include "userhost.h"
-#include "hook.h"
 #include "s_misc.h"
 #include "parse.h"
 #include "watch.h"

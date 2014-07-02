@@ -33,7 +33,6 @@
 #include "channel.h"
 #include "client.h"
 #include "event.h"
-#include "hook.h"
 #include "irc_string.h"
 #include "s_bsd.h"
 #include "ircd.h"

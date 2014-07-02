@@ -43,7 +43,6 @@
 #include "conf.h"
 #include "client.h"
 #include "event.h"
-#include "hook.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "packet.h"

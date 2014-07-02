@@ -56,7 +56,6 @@
 #include "modules.h"
 #include "memory.h"
 #include "mempool.h"
-#include "hook.h"
 #include "ircd_getopt.h"
 #include "supported.h"
 #include "watch.h"

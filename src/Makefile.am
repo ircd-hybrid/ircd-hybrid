@@ -22,7 +22,6 @@ ircd_SOURCES = channel.c         \
                fdlist.c          \
                getopt.c          \
                hash.c            \
-               hook.c            \
                hostmask.c        \
                irc_res.c         \
                irc_reslib.c      \

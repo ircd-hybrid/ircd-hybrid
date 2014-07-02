@@ -345,7 +345,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   client_p = make_client(source_p->from);
   dlinkAdd(client_p, &client_p->node, &global_client_list);
 
-  source_p->servptr = source_p;
+  client_p->servptr = source_p;
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = atol(parv[3]);
 

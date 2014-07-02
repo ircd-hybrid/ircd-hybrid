@@ -43,7 +43,6 @@
 #include "user.h"
 #include "event.h"
 #include "dbuf.h"
-#include "hook.h"
 #include "parse.h"
 #include "modules.h"
 #include "resv.h"
@@ -1504,7 +1503,7 @@ static const struct StatsStruct
   { 'F',     fd_dump,              1,      1 },
   { 'g',     stats_pending_glines, 1,      0 },
   { 'G',     stats_glines,         1,      0 },
-  { 'h',     stats_hooks,          1,      1 },
+  { 'h',     stats_hubleaf,        1,      1 },
   { 'H',     stats_hubleaf,        1,      0 },
   { 'i',     stats_auth,           0,      0 },
   { 'I',     stats_auth,           0,      0 },

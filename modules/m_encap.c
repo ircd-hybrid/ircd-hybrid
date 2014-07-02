@@ -86,7 +86,8 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   parv += 2;
   parc -= 2;
 
-  mptr->handlers[ENCAP_HANDLER](source_p, parc, parv);
+  if ((unsigned int)parc >= mptr->args_min)
+    mptr->handlers[ENCAP_HANDLER](source_p, parc, parv);
   return 0;
 }
 

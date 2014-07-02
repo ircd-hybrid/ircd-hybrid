@@ -24,7 +24,6 @@ ircd_SOURCES = auth.c            \
                getopt.c          \
                gline.c           \
                hash.c            \
-               hook.c            \
                hostmask.c        \
                irc_string.c      \
                ircd.c            \

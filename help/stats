@@ -10,15 +10,15 @@ LETTER (* = Oper only.)
 X A - Shows the DNS servers in use
 * c - Shows configured connect {} blocks
 * d - Shows temporary D lines
-* D - Shows D lines
+* D - Shows permanent D lines
 * e - Shows exemptions to D lines
-X E - Shows active timer/events
+X E - Shows active timers/events
 X f - Shows file descriptors
 * g - Shows pending G lines
 * G - Shows G lines
 * H - Shows configured hub/leaf entries
 ^ i - Shows configured auth {} blocks
-^ K - Shows K lines (or matched klines)
+^ K - Shows permanent K lines (or matched permanent klines)
 ^ k - Shows temporary K lines (or matched temporary klines)
 * L - Shows IP and generic info about [nick]
 * l - Shows hostname and generic info about [nick]
@@ -31,7 +31,7 @@ X f - Shows file descriptors
 * s - Shows configured service {} blocks
 * T - Shows configured motd {} blocks
 * t - Shows generic server stats
-* U - Shows shared {} blocks
+* U - Shows configured shared {} and cluster {} blocks
 ^ u - Shows server uptime
 * v - Shows connected servers and their idle times
 * x - Shows gecos bans

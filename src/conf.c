@@ -1570,15 +1570,6 @@ clear_out_old_conf(void)
 
   MyFree(ServerInfo.rsa_private_key_file);
   ServerInfo.rsa_private_key_file = NULL;
-
-  if (ServerInfo.server_ctx)
-    SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_NO_SSLv2|
-                                               SSL_OP_NO_SSLv3|
-                                               SSL_OP_NO_TLSv1);
-  if (ServerInfo.client_ctx)
-    SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_NO_SSLv2|
-                                               SSL_OP_NO_SSLv3|
-                                               SSL_OP_NO_TLSv1);
 #endif
 
   /* clean out AdminInfo */

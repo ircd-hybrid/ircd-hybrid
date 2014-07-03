@@ -340,10 +340,6 @@ reset_block_state(void)
 %token  T_SPY
 %token  T_SSL
 %token  T_SSL_CIPHER_LIST
-%token  T_SSL_CLIENT_METHOD
-%token  T_SSL_SERVER_METHOD
-%token  T_SSLV3
-%token  T_TLSV1
 %token  T_UMODES
 %token  T_UNAUTH
 %token  T_UNDLINE
@@ -469,45 +465,10 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_vhost6 |
                         serverinfo_sid |
                         serverinfo_ssl_certificate_file |
-                        serverinfo_ssl_client_method |
-                        serverinfo_ssl_server_method |
                         serverinfo_ssl_cipher_list |
                         serverinfo_ssl_message_digest_algorithm |
                         error ';' ;
 
-
-serverinfo_ssl_client_method: T_SSL_CLIENT_METHOD '=' client_method_types ';' ;
-serverinfo_ssl_server_method: T_SSL_SERVER_METHOD '=' server_method_types ';' ;
-
-client_method_types: client_method_types ',' client_method_type_item | client_method_type_item;
-client_method_type_item: T_SSLV3
-{
-#ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.client_ctx)
-    SSL_CTX_clear_options(ServerInfo.client_ctx, SSL_OP_NO_SSLv3);
-#endif
-} | T_TLSV1
-{
-#ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.client_ctx)
-    SSL_CTX_clear_options(ServerInfo.client_ctx, SSL_OP_NO_TLSv1);
-#endif
-};
-
-server_method_types: server_method_types ',' server_method_type_item | server_method_type_item;
-server_method_type_item: T_SSLV3
-{
-#ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
-    SSL_CTX_clear_options(ServerInfo.server_ctx, SSL_OP_NO_SSLv3);
-#endif
-} | T_TLSV1
-{
-#ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
-    SSL_CTX_clear_options(ServerInfo.server_ctx, SSL_OP_NO_TLSv1);
-#endif
-};
 
 serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
 {

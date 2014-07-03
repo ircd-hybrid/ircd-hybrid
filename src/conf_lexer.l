@@ -316,13 +316,10 @@ ssl                         { return T_SSL; }
 ssl_certificate_file        { return SSL_CERTIFICATE_FILE; }
 ssl_certificate_fingerprint { return SSL_CERTIFICATE_FINGERPRINT; }
 ssl_cipher_list             { return T_SSL_CIPHER_LIST; }
-ssl_client_method           { return T_SSL_CLIENT_METHOD; }
 ssl_connection_required     { return SSL_CONNECTION_REQUIRED; }
 ssl_dh_elliptic_curve       { return SSL_DH_ELLIPTIC_CURVE; }
 ssl_dh_param_file           { return SSL_DH_PARAM_FILE; }
 ssl_message_digest_algorithm { return SSL_MESSAGE_DIGEST_ALGORITHM; }
-ssl_server_method           { return T_SSL_SERVER_METHOD; }
-sslv3                       { return T_SSLV3; }
 stats_e_disabled            { return STATS_E_DISABLED; }
 stats_i_oper_only           { return STATS_I_OPER_ONLY; }
 stats_k_oper_only           { return STATS_K_OPER_ONLY; }
@@ -332,7 +329,6 @@ stats_u_oper_only           { return STATS_U_OPER_ONLY; }
 throttle_count              { return THROTTLE_COUNT; }
 throttle_time               { return THROTTLE_TIME; }
 tkline_expire_notices       { return TKLINE_EXPIRE_NOTICES; }
-tlsv1                       { return T_TLSV1; }
 true_no_oper_flood          { return TRUE_NO_OPER_FLOOD; }
 ts_max_delta                { return TS_MAX_DELTA; }
 ts_warn_delta               { return TS_WARN_DELTA; }

@@ -244,37 +244,33 @@ extern int yydebug;
     T_SPY = 454,
     T_SSL = 455,
     T_SSL_CIPHER_LIST = 456,
-    T_SSL_CLIENT_METHOD = 457,
-    T_SSL_SERVER_METHOD = 458,
-    T_SSLV3 = 459,
-    T_TLSV1 = 460,
-    T_UMODES = 461,
-    T_UNAUTH = 462,
-    T_UNDLINE = 463,
-    T_UNLIMITED = 464,
-    T_UNRESV = 465,
-    T_UNXLINE = 466,
-    T_WALLOP = 467,
-    T_WALLOPS = 468,
-    T_WEBIRC = 469,
-    TBOOL = 470,
-    THROTTLE_COUNT = 471,
-    THROTTLE_TIME = 472,
-    TKLINE_EXPIRE_NOTICES = 473,
-    TMASKED = 474,
-    TRUE_NO_OPER_FLOOD = 475,
-    TS_MAX_DELTA = 476,
-    TS_WARN_DELTA = 477,
-    TWODOTS = 478,
-    TYPE = 479,
-    UNKLINE = 480,
-    USE_EGD = 481,
-    USE_LOGGING = 482,
-    USER = 483,
-    VHOST = 484,
-    VHOST6 = 485,
-    WARN_NO_CONNECT_BLOCK = 486,
-    XLINE = 487
+    T_UMODES = 457,
+    T_UNAUTH = 458,
+    T_UNDLINE = 459,
+    T_UNLIMITED = 460,
+    T_UNRESV = 461,
+    T_UNXLINE = 462,
+    T_WALLOP = 463,
+    T_WALLOPS = 464,
+    T_WEBIRC = 465,
+    TBOOL = 466,
+    THROTTLE_COUNT = 467,
+    THROTTLE_TIME = 468,
+    TKLINE_EXPIRE_NOTICES = 469,
+    TMASKED = 470,
+    TRUE_NO_OPER_FLOOD = 471,
+    TS_MAX_DELTA = 472,
+    TS_WARN_DELTA = 473,
+    TWODOTS = 474,
+    TYPE = 475,
+    UNKLINE = 476,
+    USE_EGD = 477,
+    USE_LOGGING = 478,
+    USER = 479,
+    VHOST = 480,
+    VHOST6 = 481,
+    WARN_NO_CONNECT_BLOCK = 482,
+    XLINE = 483
   };
 #endif
 /* Tokens.  */
@@ -477,37 +473,33 @@ extern int yydebug;
 #define T_SPY 454
 #define T_SSL 455
 #define T_SSL_CIPHER_LIST 456
-#define T_SSL_CLIENT_METHOD 457
-#define T_SSL_SERVER_METHOD 458
-#define T_SSLV3 459
-#define T_TLSV1 460
-#define T_UMODES 461
-#define T_UNAUTH 462
-#define T_UNDLINE 463
-#define T_UNLIMITED 464
-#define T_UNRESV 465
-#define T_UNXLINE 466
-#define T_WALLOP 467
-#define T_WALLOPS 468
-#define T_WEBIRC 469
-#define TBOOL 470
-#define THROTTLE_COUNT 471
-#define THROTTLE_TIME 472
-#define TKLINE_EXPIRE_NOTICES 473
-#define TMASKED 474
-#define TRUE_NO_OPER_FLOOD 475
-#define TS_MAX_DELTA 476
-#define TS_WARN_DELTA 477
-#define TWODOTS 478
-#define TYPE 479
-#define UNKLINE 480
-#define USE_EGD 481
-#define USE_LOGGING 482
-#define USER 483
-#define VHOST 484
-#define VHOST6 485
-#define WARN_NO_CONNECT_BLOCK 486
-#define XLINE 487
+#define T_UMODES 457
+#define T_UNAUTH 458
+#define T_UNDLINE 459
+#define T_UNLIMITED 460
+#define T_UNRESV 461
+#define T_UNXLINE 462
+#define T_WALLOP 463
+#define T_WALLOPS 464
+#define T_WEBIRC 465
+#define TBOOL 466
+#define THROTTLE_COUNT 467
+#define THROTTLE_TIME 468
+#define TKLINE_EXPIRE_NOTICES 469
+#define TMASKED 470
+#define TRUE_NO_OPER_FLOOD 471
+#define TS_MAX_DELTA 472
+#define TS_WARN_DELTA 473
+#define TWODOTS 474
+#define TYPE 475
+#define UNKLINE 476
+#define USE_EGD 477
+#define USE_LOGGING 478
+#define USER 479
+#define VHOST 480
+#define VHOST6 481
+#define WARN_NO_CONNECT_BLOCK 482
+#define XLINE 483
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -519,7 +511,7 @@ union YYSTYPE
   int number;
   char *string;
 
-#line 523 "conf_parser.h" /* yacc.c:1909  */
+#line 515 "conf_parser.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

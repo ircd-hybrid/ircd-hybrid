@@ -433,7 +433,7 @@ ssl_init(void)
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
   }
 
-  SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
+  SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
   SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_SINGLE_DH_USE);
   SSL_CTX_set_verify(ServerInfo.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);
@@ -461,7 +461,7 @@ ssl_init(void)
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
   }
 
-  SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
+  SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
   SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_SINGLE_DH_USE);
   SSL_CTX_set_verify(ServerInfo.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);

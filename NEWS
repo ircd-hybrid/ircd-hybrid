@@ -10,6 +10,9 @@ o) Added 'max_channels' to class{} blocks
 o) Added 'throttle_count' configuration option to the general{} block
 o) Added support for Elliptic Curve Diffie-Hellman (ECDH). Also an elliptic curve can be
    specified via the serverinfo::ssl_dh_elliptic_curve configuration option
+o) Removed ssl_server_method and ssl_client_method configuration options.
+   ircd now only allows TLSv1, TLSv1.1 and TLSv1.2 protocols depending
+   on the OpenSSL version. SSLv3 is no longer supported.
 
 
 -- Noteworthy changes in version 8.2.0beta3 (2014-05-26)

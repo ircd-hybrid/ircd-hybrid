@@ -25,7 +25,7 @@ addons:
     branch_pattern: coverity_scan
 
 script:
- - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --disable-openssl --enable-halfops; else ./configure --enable-halfops; fi
+ - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --disable-openssl --enable-halfops --enable-assert; else ./configure --enable-halfops --enable-assert; fi
  - make
  - sudo make install
 

@@ -50,7 +50,6 @@ ms_encap(struct Client *client_p, struct Client *source_p,
   int paramcount, mpara = 0;
 #endif
   struct Message *mptr = NULL;
-  MessageHandler handler = 0;
 
   for (i = 1; i < (unsigned int)parc - 1; i++)
   {

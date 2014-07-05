@@ -542,12 +542,12 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
   {
     chptr = ((struct Membership *)cptr->data)->chptr;
 
-    DLINK_FOREACH(uptr, chptr->members.head)
+    DLINK_FOREACH(uptr, chptr->locmembers.head)
     {
       ms = uptr->data;
       target_p = ms->client_p;
 
-      if (!MyConnect(target_p) || target_p == user || IsDefunct(target_p) ||
+      if (target_p == user || IsDefunct(target_p) ||
           target_p->localClient->serial == current_serial)
         continue;
 
@@ -591,7 +591,7 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
   send_format(buffer, pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, chptr->members.head)
+  DLINK_FOREACH(ptr, chptr->locmembers.head)
   {
     struct Membership *ms = ptr->data;
     struct Client *target_p = ms->client_p;
@@ -599,7 +599,7 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
     if (type && (ms->flags & type) == 0)
       continue;
 
-    if (!MyConnect(target_p) || IsDefunct(target_p) ||
+    if (IsDefunct(target_p) ||
         (nodeaf && HasUMode(target_p, UMODE_DEAF)))
       continue;
 
@@ -635,7 +635,7 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
   send_format(buffer, pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, chptr->members.head)
+  DLINK_FOREACH(ptr, chptr->locmembers.head)
   {
     struct Membership *ms = ptr->data;
     struct Client *target_p = ms->client_p;
@@ -643,7 +643,7 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
     if (type && (ms->flags & type) == 0)
       continue;
 
-    if (!MyConnect(target_p) || (one && target_p == one->from))
+    if (one && target_p == one->from)
       continue;
 
     if (IsDefunct(target_p) || HasUMode(target_p, UMODE_DEAF))

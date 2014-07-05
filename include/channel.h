@@ -76,6 +76,7 @@ struct Channel
   unsigned int flags;
   int received_number_of_privmsgs;
 
+  dlink_list locmembers;  /*!< local members are here too */
   dlink_list members;
   dlink_list invites;
   dlink_list banlist;
@@ -90,6 +91,7 @@ struct Channel
 /*! \brief Membership structure */
 struct Membership
 {
+  dlink_node locchannode;  /*!< link to chptr->locmembers */
   dlink_node channode;     /*!< link to chptr->members    */
   dlink_node usernode;     /*!< link to source_p->channel */
   struct Channel *chptr;   /*!< Channel pointer */

@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.0beta4 (????-??-??)
+-- Noteworthy changes in version 8.2.0beta4 (2014-07-06)
 o) Channel halfops are now an integral part of ircd-hybrid
    and can't be disabled anymore
 o) Many code cleanups and improvements

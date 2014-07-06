@@ -677,8 +677,8 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
   if (IsUserHostIp(source_p))
     delete_user_host(source_p->username, source_p->host, !MyConnect(source_p));
 
-  assert(source_p->node.next);
-  dlinkDelete(&source_p->node, &global_client_list);
+  if (source_p->node.next)
+    dlinkDelete(&source_p->node, &global_client_list);
 
   update_client_exit_stats(source_p);
 

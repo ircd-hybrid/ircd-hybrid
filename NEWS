@@ -8,6 +8,8 @@ o) /INVITE without any parameters now shows a list of channels a client is invit
 o) The OPERWALL command has been removed. Use GLOBOPS instead
 o) Added 'max_channels' to class{} blocks
 o) Added 'throttle_count' configuration option to the general{} block
+o) Added 'ssl_message_digest_algorithm' configuration option to serverinfo{} block.
+   See doc/reference.conf for more information.
 o) Added support for Elliptic Curve Diffie-Hellman (ECDH). Also an elliptic curve can be
    specified via the serverinfo::ssl_dh_elliptic_curve configuration option
 o) Removed ssl_server_method and ssl_client_method configuration options.
@@ -37,6 +39,16 @@ o) Major code cleanups and refactoring. Improved overall performance
 o) /INFO now also reports MPATH (path to main motd (Message of the Day) file)
    and SPATH (Path to server executable)
 o) Updated several help files
+
+
+-- Noteworthy changes in version 8.1.19 (2014-07-05)
+o) Fixed EOB logic for remote servers
+o) Fixed bug where opers that have the +g/+G/+R umodes set won't receive server
+   notices for remote CONNECT/KLINE/DLINE/XLINE/RESV attempts
+o) Sending messages to user@server to local targets is now no longer possible,
+   as this was an easy way to bypass +R/+G/+g user modes.
+o) Fixed splicode logic so SPLITNUM now works as expected
+o) Fixed UNDLINE not to require the IP address to be prepended with *@ 
 
 
 -- Noteworthy changes in version 8.1.18 (2014-06-09)

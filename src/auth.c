@@ -146,8 +146,6 @@ release_auth_client(struct AuthRequest *auth)
   client->localClient->allow_read = MAX_FLOOD;
   comm_setflush(&client->localClient->fd, 1000, flood_recalc, client);
 
-  dlinkAdd(client, &client->node, &global_client_list);
-
   client->localClient->since     = CurrentTime;
   client->localClient->lasttime  = CurrentTime;
   client->localClient->firsttime = CurrentTime;

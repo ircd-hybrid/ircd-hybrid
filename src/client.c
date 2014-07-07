@@ -633,6 +633,7 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
   if (IsClient(source_p))
   {
     dlinkDelete(&source_p->lnode, &source_p->servptr->serv->client_list);
+    dlinkDelete(&source_p->node, &global_client_list);
 
     /*
      * If a person is on a channel, send a QUIT notice
@@ -663,6 +664,7 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
   else if (IsServer(source_p))
   {
     dlinkDelete(&source_p->lnode, &source_p->servptr->serv->server_list);
+    dlinkDelete(&source_p->node, &global_client_list);
 
     if ((ptr = dlinkFindDelete(&global_serv_list, source_p)))
       free_dlink_node(ptr);
@@ -676,9 +678,6 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
 
   if (IsUserHostIp(source_p))
     delete_user_host(source_p->username, source_p->host, !MyConnect(source_p));
-
-  if (source_p->node.next)
-    dlinkDelete(&source_p->node, &global_client_list);
 
   update_client_exit_stats(source_p);
 

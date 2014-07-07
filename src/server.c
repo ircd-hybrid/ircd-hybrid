@@ -699,8 +699,6 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     strlcpy(client_p->serv->by, "AutoConn.", sizeof(client_p->serv->by));
 
   SetConnecting(client_p);
-  dlinkAdd(client_p, &client_p->node, &global_client_list);
-
   client_p->localClient->aftype = conf->aftype;
 
   /* Now, initiate the connection */

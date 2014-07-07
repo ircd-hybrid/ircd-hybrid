@@ -579,6 +579,7 @@ register_local_user(struct Client *source_p)
   assert(source_p->servptr == &me);
   SetClient(source_p);
   dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->client_list);
+  dlinkAdd(source_p, &source_p->node, &global_client_list);
 
   assert(dlinkFind(&unknown_list, source_p));
 
@@ -636,6 +637,7 @@ register_remote_user(struct Client *source_p)
 
   SetClient(source_p);
   dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->client_list);
+  dlinkAdd(source_p, &source_p->node, &global_client_list);
   add_user_host(source_p->username, source_p->host, 1);
   SetUserHost(source_p);
 

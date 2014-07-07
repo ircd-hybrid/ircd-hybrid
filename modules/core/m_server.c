@@ -323,6 +323,7 @@ server_estab(struct Client *client_p)
 
   Count.myserver++;
 
+  dlinkAdd(client_p, &client_p->node, &global_client_list);
   dlinkAdd(client_p, make_dlink_node(), &global_serv_list);
   hash_add_client(client_p);
   hash_add_id(client_p);

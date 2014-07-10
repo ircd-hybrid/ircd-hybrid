@@ -343,8 +343,6 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   struct Client *client_p = NULL;
 
   client_p = make_client(source_p->from);
-  dlinkAdd(client_p, &client_p->node, &global_client_list);
-
   client_p->servptr = source_p;
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = atol(parv[3]);
@@ -741,7 +739,6 @@ static int
 ms_nick(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-  time_t newts = 0;
 
   if (parc != 3 || EmptyString(parv[parc - 1]))
     return 0;
@@ -751,8 +748,6 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
 
   if (check_clean_nick(source_p, parv[1], source_p->servptr))
     return 0;
-
-  newts = atol(parv[2]);
 
   /* If the nick doesnt exist, allow it and process like normal */
   if ((target_p = hash_find_client(parv[1])) == NULL)

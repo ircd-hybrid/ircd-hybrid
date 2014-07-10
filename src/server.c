@@ -269,7 +269,7 @@ try_connections(void *unused)
 
     /* Also when already connecting! (update holdtimes) --SRB
      */
-    if (!conf->port ||!IsConfAllowAutoConn(conf))
+    if (!conf->port || !IsConfAllowAutoConn(conf))
       continue;
 
 

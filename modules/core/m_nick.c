@@ -514,21 +514,17 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
                source_p->from->name);
 
     sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
-    ++ServerStats.is_kill;
+    ServerStats.is_kill += 2;
 
     sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick change collision)",
                   me.id, source_p->id, me.name);
-
-    ++ServerStats.is_kill;
-
     sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick change collision)",
                   me.id, target_p->id, me.name);
 
-    AddFlag(target_p, FLAGS_KILLED);
-    exit_client(target_p, "Nick collision (new)");
-
     AddFlag(source_p, FLAGS_KILLED);
+    AddFlag(target_p, FLAGS_KILLED);
     exit_client(source_p, "Nick collision (old)");
+    exit_client(target_p, "Nick collision (new)");
     return 0;
   }
 

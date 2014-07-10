@@ -260,8 +260,6 @@ io_loop(void)
 static void
 initialize_global_set_options(void)
 {
-  memset(&GlobalSetOptions, 0, sizeof(GlobalSetOptions));
-
   GlobalSetOptions.autoconn  = 1;
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num  = MAX_JOIN_LEAVE_COUNT;
@@ -286,7 +284,6 @@ initialize_global_set_options(void)
   }
 
   GlobalSetOptions.ident_timeout = IDENT_TIMEOUT;
-  /* End of global set options */
 }
 
 /* initialize_server_capabs()

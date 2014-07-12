@@ -1,4 +1,4 @@
-LUSERS [mask] [remoteserver]
+LUSERS [mask] [servername/nickname]
 
 LUSERS will display client count statistics
 for the specified mask, or all users if a

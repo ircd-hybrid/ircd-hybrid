@@ -1,4 +1,4 @@
-LINKS [mask] [remote]
+LINKS [mask] [servername/nickname]
 
 LINKS shows a list of all servers linked to the host server.
 

@@ -163,7 +163,7 @@ show_lusers(struct Client *source_p)
 {
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
     sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT, (Count.total-Count.invisi),
-                       Count.invisi, dlink_list_length(&global_serv_list));
+                       Count.invisi, dlink_list_length(&global_server_list));
   else
     sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT,
                        (Count.total - Count.invisi), Count.invisi, 1);

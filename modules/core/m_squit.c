@@ -64,7 +64,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   /* The following allows wild cards in SQUIT. Only
    * useful when the command is issued by an oper.
    */
-  DLINK_FOREACH(ptr, global_serv_list.head)
+  DLINK_FOREACH(ptr, global_server_list.head)
   {
     p = ptr->data;
 

@@ -324,7 +324,7 @@ server_estab(struct Client *client_p)
   Count.myserver++;
 
   dlinkAdd(client_p, &client_p->node, &global_client_list);
-  dlinkAdd(client_p, make_dlink_node(), &global_serv_list);
+  dlinkAdd(client_p, make_dlink_node(), &global_server_list);
   hash_add_client(client_p);
   hash_add_id(client_p);
 
@@ -401,7 +401,7 @@ server_estab(struct Client *client_p)
    *    see previous *WARNING*!!! (Also, original inpath
    *    is destroyed...)
    */
-  DLINK_FOREACH_PREV(ptr, global_serv_list.tail)
+  DLINK_FOREACH_PREV(ptr, global_server_list.tail)
   {
     struct Client *target_p = ptr->data;
 
@@ -799,7 +799,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     AddFlag(target_p, FLAGS_SERVICE);
 
   dlinkAdd(target_p, &target_p->node, &global_client_list);
-  dlinkAdd(target_p, make_dlink_node(), &global_serv_list);
+  dlinkAdd(target_p, make_dlink_node(), &global_server_list);
   dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->server_list);
 
   hash_add_client(target_p);

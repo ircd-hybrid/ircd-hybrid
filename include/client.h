@@ -440,10 +440,10 @@ struct Client
 extern struct Client me;
 extern dlink_list listing_client_list;
 extern dlink_list global_client_list;
+extern dlink_list global_server_list;   /* global servers on the network              */
 extern dlink_list unknown_list;       /* unknown clients ON this server only        */
 extern dlink_list local_client_list;  /* local clients only ON this server          */
 extern dlink_list serv_list;          /* local servers to this server ONLY          */
-extern dlink_list global_serv_list;   /* global servers on the network              */
 extern dlink_list oper_list;          /* our opers, duplicated in local_client_list */
 
 extern int accept_message(struct Client *, struct Client *);

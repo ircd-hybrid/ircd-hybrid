@@ -80,7 +80,7 @@ write_links_file(void *notused)
     free_dlink_node(ptr);
   }
 
-  DLINK_FOREACH(ptr, global_serv_list.head)
+  DLINK_FOREACH(ptr, global_server_list.head)
   {
     const struct Client *target_p = ptr->data;
 

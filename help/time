@@ -1,4 +1,4 @@
-TIME [server]
+TIME [servername/nickname]
 
 The TIME command will return the server's local date and time.
 

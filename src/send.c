@@ -784,7 +784,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 
   ++current_serial;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, global_serv_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, global_server_list.head)
   {
     struct Client *target_p = ptr->data;
 

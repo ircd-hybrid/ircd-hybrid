@@ -57,7 +57,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
   {
     const char *mask = (parc > 2 ? parv[2] : parv[1]);
 
-    DLINK_FOREACH(ptr, global_serv_list.head)
+    DLINK_FOREACH(ptr, global_server_list.head)
     {
       struct Client *target_p = ptr->data;
 

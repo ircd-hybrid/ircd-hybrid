@@ -57,7 +57,7 @@ dlink_list global_client_list = {NULL, NULL, 0};
 dlink_list unknown_list = {NULL, NULL, 0};
 dlink_list local_client_list = {NULL, NULL, 0};
 dlink_list serv_list = {NULL, NULL, 0};
-dlink_list global_serv_list = {NULL, NULL, 0};
+dlink_list global_server_list = {NULL, NULL, 0};
 dlink_list oper_list = {NULL, NULL, 0};
 
 static void check_pings(void *);
@@ -666,7 +666,7 @@ exit_one_client(struct Client *source_p, const char *quitmsg)
     dlinkDelete(&source_p->lnode, &source_p->servptr->serv->server_list);
     dlinkDelete(&source_p->node, &global_client_list);
 
-    if ((ptr = dlinkFindDelete(&global_serv_list, source_p)))
+    if ((ptr = dlinkFindDelete(&global_server_list, source_p)))
       free_dlink_node(ptr);
   }
 

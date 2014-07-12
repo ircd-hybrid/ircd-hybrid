@@ -598,8 +598,7 @@ main(int argc, char *argv[])
   hash_add_id(&me);
   hash_add_client(&me);
 
-  /* add ourselves to global_serv_list */
-  dlinkAdd(&me, make_dlink_node(), &global_serv_list);
+  dlinkAdd(&me, make_dlink_node(), &global_server_list);
 
   load_kline_database();
   load_dline_database();

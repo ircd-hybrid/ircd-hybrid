@@ -186,10 +186,9 @@ hunt_server(struct Client *source_p, const char *command,
       {
         if (tmp->from == source_p->from && !MyConnect(tmp))
           continue;
-        target_p = ptr->data;
 
-        if (target_p != source_p->from)  /* TBV: is this needed? */
-          break;
+        target_p = ptr->data;
+        break;
       }
     }
   }

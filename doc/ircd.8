@@ -1,6 +1,6 @@
 .\" @(#)ircd.8 7b10 25 Oct 2001
 .\" $Id$
-.TH IRCD 8 "1 April 2013" "ircd-hybrid-8"
+.TH IRCD 8 "14 July 2014" "ircd-hybrid-8"
 .SH NAME
 ircd \- The IRCD-Hybrid Internet Relay Chat server
 .SH SYNOPSIS
@@ -12,9 +12,9 @@ ircd \- The IRCD-Hybrid Internet Relay Chat server
 .SH DESCRIPTION
 .LP
 \fIircd\fP is the server (daemon) program for the Internet Relay Chat
-Program.  The \fIircd\fP is a server in that its function is to "serve"
+Program. The \fIircd\fP is a server in that its function is to "serve"
 the client program \fIirc(1)\fP and other compatible programs with
-messages and commands.  All commands and user messages are passed
+messages and commands. All commands and user messages are passed
 directly to the \fIircd\fP for processing and relaying to other IRC
 servers.
 
@@ -52,10 +52,10 @@ Makes \fIircd\fP print its version, and exit.
 If you plan to connect your \fIircd\fP server to an existing IRC network,
 you will need to alter your local IRC configuration file (typically named
 "ircd.conf") so that it will accept and make connections to other \fIIRC\fP
-servers.  This file contains the hostnames, IP addresses, and sometimes
+servers. This file contains the hostnames, IP addresses, and sometimes
 passwords for connections to other ircds around the world.
 
-The example ircd.conf in the etc/ directory documents itself. Read it 
+The example reference.conf in the etc/ directory documents itself. Read it 
 carefully or you may expose a risk on your network simply by having your 
 ircd running!
 .LP

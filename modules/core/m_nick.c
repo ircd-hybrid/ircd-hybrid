@@ -74,7 +74,7 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
                me.name, nick, me.name);
 
     /* Bad nick change */
-    if (!MyConnect(source_p))
+    if (IsClient(source_p) && !MyConnect(source_p))
     {
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s (Bad Nickname)",
                     me.id, source_p->id, me.name);

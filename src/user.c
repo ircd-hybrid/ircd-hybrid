@@ -359,9 +359,7 @@ user_welcome(struct Client *source_p)
   sendto_one_numeric(source_p, &me, RPL_CREATED, built_date);
   sendto_one_numeric(source_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
   show_isupport(source_p);
-
-  if (source_p->id[0])
-    sendto_one_numeric(source_p, &me, RPL_YOURID, source_p->id);
+  sendto_one_numeric(source_p, &me, RPL_YOURID, source_p->id);
 
   show_lusers(source_p);
   motd_signon(source_p);

@@ -604,7 +604,7 @@ register_local_user(struct Client *source_p)
 void
 register_remote_user(struct Client *source_p)
 {
-  struct Client *target_p = NULL;
+  const struct Client *target_p = NULL;
 
   if ((target_p = source_p->servptr) && target_p->from != source_p->from)
   {

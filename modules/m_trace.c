@@ -228,7 +228,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     report_this_status(source_p, target_p, dow);
   }
 
-  DLINK_FOREACH(ptr, serv_list.head)
+  DLINK_FOREACH(ptr, local_server_list.head)
   {
     target_p = ptr->data;
 

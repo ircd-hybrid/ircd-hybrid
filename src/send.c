@@ -283,7 +283,7 @@ send_queued_all(void)
   /* Servers are processed first, mainly because this can generate
    * a notice to opers, which is to be delivered by this function.
    */
-  DLINK_FOREACH(ptr, serv_list.head)
+  DLINK_FOREACH(ptr, local_server_list.head)
     send_queued_write(ptr->data);
 
   DLINK_FOREACH(ptr, unknown_list.head)
@@ -486,7 +486,7 @@ sendto_server(struct Client *one,
   send_format(buffer, format, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, serv_list.head)
+  DLINK_FOREACH(ptr, local_server_list.head)
   {
     struct Client *client_p = ptr->data;
 
@@ -722,7 +722,7 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
   }
 
   /* Now scan servers */
-  DLINK_FOREACH_SAFE(ptr, ptr_next, serv_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, local_server_list.head)
   {
     struct Client *client_p = ptr->data;
 

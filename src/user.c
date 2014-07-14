@@ -297,7 +297,7 @@ introduce_client(struct Client *source_p)
     ubuf[1] = '\0';
   }
 
-  DLINK_FOREACH(ptr, serv_list.head)
+  DLINK_FOREACH(ptr, local_server_list.head)
   {
     struct Client *server = ptr->data;
 

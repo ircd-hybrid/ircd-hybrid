@@ -50,24 +50,19 @@
 #include "rng_mt.h"
 #include "parse.h"
 
-dlink_list listing_client_list = { NULL, NULL, 0 };
-/* Pointer to beginning of Client list */
-dlink_list global_client_list = {NULL, NULL, 0};
-/* unknown/client pointer lists */
-dlink_list unknown_list = {NULL, NULL, 0};
-dlink_list local_client_list = {NULL, NULL, 0};
-dlink_list serv_list = {NULL, NULL, 0};
-dlink_list global_server_list = {NULL, NULL, 0};
-dlink_list oper_list = {NULL, NULL, 0};
+
+dlink_list listing_client_list;
+dlink_list unknown_list;
+dlink_list local_client_list;
+dlink_list local_server_list;
+dlink_list global_client_list;
+dlink_list global_server_list;
+dlink_list oper_list;
 
 static void check_pings(void *);
 
-static mp_pool_t *client_pool  = NULL;
-static mp_pool_t *lclient_pool = NULL;
-
-static dlink_list dead_list  = { NULL, NULL, 0};
-static dlink_list abort_list = { NULL, NULL, 0};
-
+static mp_pool_t *client_pool, *lclient_pool;
+static dlink_list dead_list, abort_list;
 static dlink_node *eac_next;  /* next aborted client to exit */
 
 static void check_pings_list(dlink_list *);
@@ -221,7 +216,7 @@ static void
 check_pings(void *notused)
 {
   check_pings_list(&local_client_list);
-  check_pings_list(&serv_list);
+  check_pings_list(&local_server_list);
   check_unknowns_list();
 }
 
@@ -794,8 +789,8 @@ exit_client(struct Client *source_p, const char *comment)
       assert(Count.myserver > 0);
       --Count.myserver;
 
-      assert(dlinkFind(&serv_list, source_p));
-      dlinkDelete(&source_p->localClient->lclient_node, &serv_list);
+      assert(dlinkFind(&local_server_list, source_p));
+      dlinkDelete(&source_p->localClient->lclient_node, &local_server_list);
     }
 
     if (!IsDead(source_p))
@@ -839,7 +834,7 @@ exit_client(struct Client *source_p, const char *comment)
       snprintf(splitstr, sizeof(splitstr), "%s %s",
                source_p->servptr->name, source_p->name);
 
-    /* Send SQUIT for source_p in every direction. source_p is already off of serv_list here */
+    /* Send SQUIT for source_p in every direction. source_p is already off of local_server_list here */
     if (!HasFlag(source_p, FLAGS_SQUIT))
       sendto_server(NULL, NOCAPS, NOCAPS, "SQUIT %s :%s", source_p->id, comment);
 
@@ -866,7 +861,7 @@ exit_client(struct Client *source_p, const char *comment)
   /* The client *better* be off all of the lists */
   assert(dlinkFind(&unknown_list, source_p) == NULL);
   assert(dlinkFind(&local_client_list, source_p) == NULL);
-  assert(dlinkFind(&serv_list, source_p) == NULL);
+  assert(dlinkFind(&local_server_list, source_p) == NULL);
   assert(dlinkFind(&oper_list, source_p) == NULL);
 
   exit_one_client(source_p, comment);

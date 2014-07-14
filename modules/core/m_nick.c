@@ -628,7 +628,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   else if (source_p == target_p)
     strlcpy(source_p->name, nick, sizeof(source_p->name));
   else
-    sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, nick);
+    sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, target_p->name);
 
   return 0;
 }
@@ -708,7 +708,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     change_local_nick(source_p, nick);
   }
   else
-    sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, nick);
+    sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, target_p->name);
 
   return 0;
 }

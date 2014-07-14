@@ -268,9 +268,9 @@ server_estab(struct Client *client_p)
   /* If there is something in the serv_list, it might be this
    * connecting server..
    */
-  if (!ServerInfo.hub && serv_list.head)
+  if (!ServerInfo.hub && local_server_list.head)
   {
-    if (client_p != serv_list.head->data || serv_list.head->next)
+    if (client_p != local_server_list.head->data || local_server_list.head->next)
     {
       ++ServerStats.is_ref;
       sendto_one(client_p, "ERROR :I'm a leaf not a hub");
@@ -319,7 +319,7 @@ server_estab(struct Client *client_p)
   assert(dlinkFind(&unknown_list, client_p));
 
   dlink_move_node(&client_p->localClient->lclient_node,
-                  &unknown_list, &serv_list);
+                  &unknown_list, &local_server_list);
 
   Count.myserver++;
 

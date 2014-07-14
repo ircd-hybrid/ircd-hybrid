@@ -170,7 +170,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
     sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
 
     /* Send to everything but target and source */
-    DLINK_FOREACH(ptr, serv_list.head)
+    DLINK_FOREACH(ptr, local_server_list.head)
     {
       struct Client *client_p = ptr->data;
 

@@ -1136,9 +1136,9 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
    * active server connections. Note the incrementation in
    * s_bsd.c:close_connection.
    */
-  sp->is_sv += dlink_list_length(&serv_list);
+  sp->is_sv += dlink_list_length(&local_server_list);
 
-  DLINK_FOREACH(ptr, serv_list.head)
+  DLINK_FOREACH(ptr, local_server_list.head)
   {
     target_p = ptr->data;
 
@@ -1231,7 +1231,7 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
 {
   const dlink_node *ptr = NULL;
 
-  DLINK_FOREACH(ptr, serv_list.head)
+  DLINK_FOREACH(ptr, local_server_list.head)
   {
     const struct Client *target_p = ptr->data;
 
@@ -1243,7 +1243,8 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
-                     "v :%u Server(s)", dlink_list_length(&serv_list));
+                     "v :%u Server(s)",
+                     dlink_list_length(&local_server_list));
 }
 
 static void
@@ -1286,7 +1287,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  DLINK_FOREACH(ptr, serv_list.head)
+  DLINK_FOREACH(ptr, local_server_list.head)
   {
     struct Client *target_p = ptr->data;
 
@@ -1314,7 +1315,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   recvB >>= 10;
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT, "? :%u total server(s)",
-                     dlink_list_length(&serv_list));
+                     dlink_list_length(&local_server_list));
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT, "? :Sent total: %7.2f %s",
                      _GMKv(sendB), _GMKs(sendB));
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT, "? :Recv total: %7.2f %s",
@@ -1463,7 +1464,7 @@ stats_L(struct Client *source_p, char *name,int doall,
 {
   stats_L_list(source_p, name, doall, wilds, &unknown_list, statchar);
   stats_L_list(source_p, name, doall, wilds, &local_client_list, statchar);
-  stats_L_list(source_p, name, doall, wilds, &serv_list, statchar);
+  stats_L_list(source_p, name, doall, wilds, &local_server_list, statchar);
 }
 
 static void

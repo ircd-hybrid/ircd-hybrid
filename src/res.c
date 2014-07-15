@@ -741,6 +741,12 @@ res_readreply(fde_t *fd, void *data)
     return;
 
   /*
+   * Check against possibly fake replies
+   */
+  if (!res_ourserver(&lsin))
+    return;
+
+  /*
    * Convert DNS reply reader from Network byte order to CPU byte order.
    */
   header = (HEADER *)buf;
@@ -748,12 +754,6 @@ res_readreply(fde_t *fd, void *data)
   header->qdcount = ntohs(header->qdcount);
   header->nscount = ntohs(header->nscount);
   header->arcount = ntohs(header->arcount);
-
-  /*
-   * Check against possibly fake replies
-   */
-  if (!res_ourserver(&lsin))
-    return;
 
   /*
    * Response for an id which we have already received an answer for

@@ -193,10 +193,10 @@ res_ourserver(const struct irc_ssaddr *inp)
  * there too long without being resolved.
  */
 static time_t
-timeout_query_list(time_t now)
+timeout_query_list(void)
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
-  struct reslist *request;
+  struct reslist *request = NULL;
   time_t next_time = 0;
   time_t timeout   = 0;
 
@@ -205,7 +205,7 @@ timeout_query_list(time_t now)
     request = ptr->data;
     timeout = request->sentat + request->timeout;
 
-    if (now >= timeout)
+    if (CurrentTime >= timeout)
     {
       if (--request->retries <= 0)
       {
@@ -215,7 +215,7 @@ timeout_query_list(time_t now)
       }
       else
       {
-        request->sentat = now;
+        request->sentat = CurrentTime;
         request->timeout += request->timeout;
         resend_query(request);
       }
@@ -225,7 +225,7 @@ timeout_query_list(time_t now)
       next_time = timeout;
   }
 
-  return (next_time > now) ? next_time : (now + AR_TTL);
+  return (next_time > CurrentTime) ? next_time : (CurrentTime + AR_TTL);
 }
 
 /*
@@ -234,7 +234,7 @@ timeout_query_list(time_t now)
 static void
 timeout_resolver(void *notused)
 {
-  timeout_query_list(CurrentTime);
+  timeout_query_list();
 }
 
 /*

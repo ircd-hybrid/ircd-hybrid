@@ -714,15 +714,7 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
 static void
 res_readreply(fde_t *fd, void *data)
 {
-  char buf[sizeof(HEADER) + MAXPACKET]
-	/* Sparc and alpha need 16bit-alignment for accessing header->id
-	 * (which is uint16_t). Because of the header = (HEADER*) buf;
-	 * lateron, this is neeeded. --FaUl
-	 */
-#if defined(__sparc__) || defined(__alpha__)
-	  __attribute__((aligned (16)))
-#endif
-	  ;
+  char buf[sizeof(HEADER) + MAXPACKET];
   HEADER *header;
   struct reslist *request = NULL;
   int rc;

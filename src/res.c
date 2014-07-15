@@ -837,6 +837,7 @@ res_readreply(fde_t *fd, void *data)
      */
     assert(0);
 
+    (*request->callback)(request->callback_ctx, NULL, NULL);
     /* XXX don't leak it */
     rem_request(request);
   }

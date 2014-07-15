@@ -72,39 +72,198 @@
  * Diane Bruce (Dianora), June 6 2003
  */
 
+/*
+ * Must be a power of 2, and larger than 26 [a-z]|[A-Z]. It's used to allocate
+ * the set of pointers at each node of the tree.
+ * There are MAXPTRLEN pointers at each node. Obviously, there have to be more
+ * pointers than ASCII letters. 32 is a nice number since there is then no need
+ * to shift 'A'/'a' to base 0 index, at the expense of a few never used
+ * pointers.
+ * For a small parser like this, this is a good compromise and does
+ * make it somewhat faster. - Dianora
+ */
 #define MAXPTRLEN 32
-                                /* Must be a power of 2, and
-				 * larger than 26 [a-z]|[A-Z]
-				 * its used to allocate the set
-				 * of pointers at each node of the tree
-				 * There are MAXPTRLEN pointers at each node.
-				 * Obviously, there have to be more pointers
-				 * Than ASCII letters. 32 is a nice number
-				 * since there is then no need to shift
-				 * 'A'/'a' to base 0 index, at the expense
-				 * of a few never used pointers. For a small
-				 * parser like this, this is a good compromise
-				 * and does make it somewhat faster.
-				 *
-				 * - Dianora
-				 */
 
-struct MessageTree
+
+static struct MessageTree
 {
   int links; /* Count of all pointers (including msg) at this node
               * used as reference count for deletion of _this_ node.
               */
   struct Message *msg;
   struct MessageTree *pointers[MAXPTRLEN];
-};
+} msg_tree;
 
-static struct MessageTree msg_tree;
 
-static void cancel_clients(struct Client *, struct Client *, char *);
-static void remove_unknown(struct Client *, char *, char *);
-static void handle_numeric(unsigned int, struct Client *, int, char *[]);
-static void handle_command(struct Message *, struct Client *, unsigned int, char *[]);
+/* remove_unknown()
+ *
+ * inputs       -
+ * output       -
+ * side effects -
+ */
+static void
+parse_remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
+{
+  /*
+   * Do kill if it came from a server because it means there is a ghost
+   * user on the other server which needs to be removed. -avalon
+   * Tell opers about this. -Taner
+   */
+  /*
+   * '[0-9]something'  is an ID      (KILL/SQUIT depending on its length)
+   * 'nodots'          is a nickname (KILL)
+   * 'no.dot.at.start' is a server   (SQUIT)
+   */
+  if ((IsDigit(*lsender) && strlen(lsender) <= IRC_MAXSID) || strchr(lsender, '.'))
+  {
+    sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
+                         "Unknown prefix (%s) from %s, Squitting %s",
+                         lbuffer, get_client_name(client_p, SHOW_IP), lsender);
+    sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
+                         "Unknown prefix (%s) from %s, Squitting %s",
+                         lbuffer, client_p->name, lsender);
+    sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
+               me.id, lsender, lbuffer, client_p->name);
+  }
+  else
+    sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)",
+               me.id, lsender, me.name);
+}
 
+/* cancel_clients()
+ *
+ * inputs       -
+ * output       -
+ * side effects -
+ */
+static void
+parse_cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
+{
+  if (IsServer(source_p) || IsMe(source_p))
+  {
+    sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
+                         "Message for %s[%s] from %s",
+                         source_p->name, source_p->from->name,
+                         get_client_name(client_p, SHOW_IP));
+    sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
+                         "Message for %s[%s] from %s",
+                         source_p->name, source_p->from->name,
+                         get_client_name(client_p, MASK_IP));
+    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+                         "Not dropping server %s (%s) for Fake Direction",
+                         client_p->name, source_p->name);
+    return;
+  }
+
+  sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
+                       "Message for %s[%s@%s!%s] from %s (TS, ignored)",
+                       source_p->name, source_p->username, source_p->host,
+                       source_p->from->name, get_client_name(client_p, SHOW_IP));
+  sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
+                       "Message for %s[%s@%s!%s] from %s (TS, ignored)",
+                       source_p->name, source_p->username, source_p->host,
+                       source_p->from->name, get_client_name(client_p, MASK_IP));
+}
+
+/*
+ *
+ *      parc    number of arguments ('sender' counted as one!)
+ *      parv[0] pointer to 'sender' (may point to empty string) (not used)
+ *      parv[1]..parv[parc-1]
+ *              pointers to additional parameters, this is a NULL
+ *              terminated list (parv[parc] == NULL).
+ *
+ * *WARNING*
+ *      Numerics are mostly error reports. If there is something
+ *      wrong with the message, just *DROP* it! Don't even think of
+ *      sending back a neat error message -- big danger of creating
+ *      a ping pong error message...
+ *
+ * Rewritten by Nemesi, Jan 1999, to support numeric nicks in parv[1]
+ *
+ * Called when we get a numeric message from a remote _server_ and we are
+ * supposed to forward it somewhere. Note that we always ignore numerics sent
+ * to 'me' and simply drop the message if we can't handle with this properly:
+ * the savvy approach is NEVER generate an error in response to an... error :)
+ */
+static void
+parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, char *parv[])
+{
+  struct Client *target_p = NULL;
+  struct Channel *chptr = NULL;
+
+  /*
+   * Avoid trash, we need it to come from a server and have a target
+   */
+  if (parc < 2 || !IsServer(source_p))
+    return;
+
+  /*
+   * Who should receive this message ? Will we do something with it ?
+   * Note that we use findUser functions, so the target can't be neither
+   * a server, nor a channel (?) nor a list of targets (?) .. u2.10
+   * should never generate numeric replies to non-users anyway
+   * Ahem... it can be a channel actually, csc bots use it :\ --Nem
+   */
+  if (IsChanPrefix(*parv[1]))
+    chptr = hash_find_channel(parv[1]);
+  else
+    target_p = find_person(source_p, parv[1]);
+
+  if (((!target_p) || (target_p->from == source_p->from)) && !chptr)
+    return;
+
+  /*
+   * Remap low number numerics, not that I understand WHY.. --Nemesi
+   */
+  /*
+   * Numerics below 100 talk about the current 'connection', you're not
+   * connected to a remote server so it doesn't make sense to send them
+   * remotely - but the information they contain may be useful, so we
+   * remap them up. Weird, but true.  -- Isomer
+   */
+  if (numeric < 100)
+    numeric += 100;
+
+  if (target_p)
+  {
+    /* Fake it for server hiding, if it's our client */
+    if ((ConfigServerHide.hide_servers || IsHidden(source_p)) && MyConnect(target_p) &&
+        !HasUMode(target_p, UMODE_OPER))
+      sendto_one_numeric(target_p, &me, numeric|SND_EXPLICIT, "%s", parv[2]);
+    else
+      sendto_one_numeric(target_p, source_p, numeric|SND_EXPLICIT, "%s", parv[2]);
+  }
+  else
+    sendto_channel_butone(source_p, source_p, chptr, 0, "%u %s %s",
+                          numeric, chptr->chname, parv[2]);
+}
+
+/* handle_command()
+ *
+ * inputs       - pointer to message block
+ *              - pointer to client
+ *              - pointer to client message is from
+ *              - count of number of args
+ *              - pointer to argv[] array
+ * output       - -1 if error from server
+ * side effects -
+ */
+static void
+parse_handle_command(struct Message *mptr, struct Client *source_p,
+                     unsigned int i, char *para[])
+{
+  if (IsServer(source_p->from))
+    ++mptr->rcount;
+
+  ++mptr->count;
+
+  /* Check right amount of parameters is passed... --is */
+  if (i < mptr->args_min)
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
+  else
+    mptr->handlers[source_p->from->handler](source_p, i, para);
+}
 
 /*
  * parse a buffer.
@@ -159,14 +318,14 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       if (from == NULL)
       {
         ++ServerStats.is_unpf;
-        remove_unknown(client_p, sender, pbuffer);
+        parse_remove_unknown(client_p, sender, pbuffer);
         return;
       }
 
       if (from->from != client_p)
       {
         ++ServerStats.is_wrdi;
-        cancel_clients(client_p, from, pbuffer);
+        parse_cancel_clients(client_p, from, pbuffer);
         return;
       }
     }
@@ -190,7 +349,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
    */
 
   /* EOB is 3 characters long but is not a numeric */
-  if (*(ch + 3) == ' ' &&  /* Ok, lets see if its a possible numeric.. */
+  if (*(ch + 3) == ' ' &&  /* Ok, let's see if its a possible numeric */
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)))
   {
     numeric = (*ch - '0') * 100 + (*(ch + 1) - '0') * 10 + (*(ch + 2) - '0');
@@ -278,35 +437,9 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   para[++parc] = NULL;
 
   if (msg_ptr)
-    handle_command(msg_ptr, from, parc, para);
+    parse_handle_command(msg_ptr, from, parc, para);
   else
-    handle_numeric(numeric, from, parc, para);
-}
-
-/* handle_command()
- *
- * inputs	- pointer to message block
- *		- pointer to client
- *		- pointer to client message is from
- *		- count of number of args
- *		- pointer to argv[] array
- * output	- -1 if error from server
- * side effects	-
- */
-static void
-handle_command(struct Message *mptr, struct Client *source_p,
-               unsigned int i, char *para[])
-{
-  if (IsServer(source_p->from))
-    ++mptr->rcount;
-
-  ++mptr->count;
-
-  /* Check right amount of parameters is passed... --is */
-  if (i < mptr->args_min)
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
-  else
-    mptr->handlers[source_p->from->handler](source_p, i, para);
+    parse_handle_numeric(numeric, from, parc, para);
 }
 
 /* add_msg_element()
@@ -510,150 +643,6 @@ report_messages(struct Client *source_p)
   for (unsigned int i = 0; i < MAXPTRLEN; ++i)
     if (mtree->pointers[i])
       recurse_report_messages(source_p, mtree->pointers[i]);
-}
-
-/* cancel_clients()
- *
- * inputs	-
- * output	-
- * side effects	-
- */
-static void
-cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
-{
-  if (IsServer(source_p) || IsMe(source_p))
-  {
-    sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
-                         "Message for %s[%s] from %s",
-                         source_p->name, source_p->from->name,
-                         get_client_name(client_p, SHOW_IP));
-    sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
-                         "Message for %s[%s] from %s",
-                         source_p->name, source_p->from->name,
-                         get_client_name(client_p, MASK_IP));
-    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                         "Not dropping server %s (%s) for Fake Direction",
-                         client_p->name, source_p->name);
-    return;
-  }
-
-  sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
-                       "Message for %s[%s@%s!%s] from %s (TS, ignored)",
-                       source_p->name, source_p->username, source_p->host,
-                       source_p->from->name, get_client_name(client_p, SHOW_IP));
-  sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
-                       "Message for %s[%s@%s!%s] from %s (TS, ignored)",
-                       source_p->name, source_p->username, source_p->host,
-                       source_p->from->name, get_client_name(client_p, MASK_IP));
-}
-
-/* remove_unknown()
- *
- * inputs	-
- * output	-
- * side effects	-
- */
-static void
-remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
-{
-  /*
-   * Do kill if it came from a server because it means there is a ghost
-   * user on the other server which needs to be removed. -avalon
-   * Tell opers about this. -Taner
-   */
-  /*
-   * '[0-9]something'  is an ID      (KILL/SQUIT depending on its length)
-   * 'nodots'          is a nickname (KILL)
-   * 'no.dot.at.start' is a server   (SQUIT)
-   */
-  if ((IsDigit(*lsender) && strlen(lsender) <= IRC_MAXSID) || strchr(lsender, '.'))
-  {
-    sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
-                         "Unknown prefix (%s) from %s, Squitting %s",
-                         lbuffer, get_client_name(client_p, SHOW_IP), lsender);
-    sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
-                         "Unknown prefix (%s) from %s, Squitting %s",
-                         lbuffer, client_p->name, lsender);
-    sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
-               me.id, lsender, lbuffer, client_p->name);
-  }
-  else
-    sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)",
-               me.id, lsender, me.name);
-}
-
-/*
- *
- *      parc    number of arguments ('sender' counted as one!)
- *      parv[0] pointer to 'sender' (may point to empty string) (not used)
- *      parv[1]..parv[parc-1]
- *              pointers to additional parameters, this is a NULL
- *              terminated list (parv[parc] == NULL).
- *
- * *WARNING*
- *      Numerics are mostly error reports. If there is something
- *      wrong with the message, just *DROP* it! Don't even think of
- *      sending back a neat error message -- big danger of creating
- *      a ping pong error message...
- *
- * Rewritten by Nemesi, Jan 1999, to support numeric nicks in parv[1]
- *
- * Called when we get a numeric message from a remote _server_ and we are
- * supposed to forward it somewhere. Note that we always ignore numerics sent
- * to 'me' and simply drop the message if we can't handle with this properly:
- * the savvy approach is NEVER generate an error in response to an... error :)
- */
-static void
-handle_numeric(unsigned int numeric, struct Client *source_p, int parc, char *parv[])
-{
-  struct Client *target_p = NULL;
-  struct Channel *chptr = NULL;
-
-  /*
-   * Avoid trash, we need it to come from a server and have a target
-   */
-  if (parc < 2 || !IsServer(source_p))
-    return;
-
-  /*
-   * Who should receive this message ? Will we do something with it ?
-   * Note that we use findUser functions, so the target can't be neither
-   * a server, nor a channel (?) nor a list of targets (?) .. u2.10
-   * should never generate numeric replies to non-users anyway
-   * Ahem... it can be a channel actually, csc bots use it :\ --Nem
-   */
-  if (IsChanPrefix(*parv[1]))
-    chptr = hash_find_channel(parv[1]);
-  else
-    target_p = find_person(source_p, parv[1]);
-
-  if (((!target_p) || (target_p->from == source_p->from)) && !chptr)
-    return;
-
-  /*
-   * Remap low number numerics, not that I understand WHY.. --Nemesi
-   */
-  /*
-   * Numerics below 100 talk about the current 'connection', you're not
-   * connected to a remote server so it doesn't make sense to send them
-   * remotely - but the information they contain may be useful, so we
-   * remap them up. Weird, but true.  -- Isomer
-   */
-  if (numeric < 100)
-    numeric += 100;
-
-  if (target_p)
-  {
-    /* Fake it for server hiding, if it's our client */
-    if ((ConfigServerHide.hide_servers || IsHidden(source_p)) && MyConnect(target_p) &&
-        !HasUMode(target_p, UMODE_OPER))
-      sendto_one_numeric(target_p, &me, numeric|SND_EXPLICIT, "%s", parv[2]);
-    else
-      sendto_one_numeric(target_p, source_p, numeric|SND_EXPLICIT, "%s", parv[2]);
-  }
-  else
-    sendto_channel_butone(source_p, source_p, chptr, 0, "%u %s %s",
-                          numeric, chptr->chname, parv[2]);
 }
 
 /* m_not_oper()

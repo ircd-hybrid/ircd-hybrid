@@ -52,7 +52,7 @@ check_xline(struct MaskItem *conf)
     if (IsDead(client_p))
       continue;
 
-    if (!match(conf->name, client_p->username))
+    if (!match(conf->name, client_p->info))
       conf_try_ban(client_p, conf);
   }
 }

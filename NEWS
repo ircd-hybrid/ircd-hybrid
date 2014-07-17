@@ -1,3 +1,8 @@
+-- Noteworthy changes in version 8.1.20 (2014-??-??)
+o) Fixed XLINE not working as expected
+o) Fixed build with LibreSSL which hasn't compression support
+
+
 -- Noteworthy changes in version 8.1.19 (2014-07-05)
 o) Fixed EOB logic for remote servers
 o) Fixed bug where opers that have the +g/+G/+R umodes set won't receive server

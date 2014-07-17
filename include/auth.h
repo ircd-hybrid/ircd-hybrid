@@ -59,8 +59,6 @@ struct AuthRequest
 
 extern void auth_init(void);
 extern void start_auth(struct Client *);
-extern void send_auth_query(struct AuthRequest *);
-extern void remove_auth_request(struct AuthRequest *);
 extern void delete_auth(struct AuthRequest *);
 extern void release_auth_client(struct AuthRequest *);
 #endif /* INCLUDED_s_auth_h */

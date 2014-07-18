@@ -52,47 +52,42 @@ report_crypto_errors(void)
     ilog(LOG_TYPE_IRCD, "SSL error: %s", ERR_error_string(e, 0));
 }
 
-static void
-binary_to_hex(unsigned char *bin, char *hex, int length)
+void
+binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
 {
   static const char trans[] = "0123456789ABCDEF";
-  int i;
 
-  for (i = 0; i < length; ++i)
+  for (const unsigned char *end = bin + length; bin < end; ++bin)
   {
-    hex[(i << 1)    ] = trans[bin[i] >> 4];
-    hex[(i << 1) + 1] = trans[bin[i] & 0xf];
+    *hex++ = trans[*bin >>  4];
+    *hex++ = trans[*bin & 0xf];
   }
 
-  hex[i << 1] = '\0';
+  *hex = '\0';
 }
 
 int
 get_randomness(unsigned char *buf, int length)
 {
-  /* Seed OpenSSL PRNG with EGD enthropy pool -kre */
-  if (ConfigFileEntry.use_egd &&
-      ConfigFileEntry.egdpool_path)
-    if (RAND_egd(ConfigFileEntry.egdpool_path) == -1)
-      return -1;
-
-  if (RAND_status())
-    return RAND_bytes(buf, length);
-  /* XXX - abort? */
-  return RAND_pseudo_bytes(buf, length);
+  return RAND_bytes(buf, length);
 }
 
 int
 generate_challenge(char **r_challenge, char **r_response, RSA *rsa)
 {
-  unsigned char secret[32], *tmp;
-  unsigned long length;
+  unsigned char secret[32], *tmp = NULL;
+  unsigned long length = 0;
   int ret = -1;
 
   if (!rsa)
     return -1;
 
-  get_randomness(secret, 32);
+  if (!get_randomness(secret, 32))
+  {
+    report_crypto_errors();
+    return -1;
+  }
+
   *r_response = MyMalloc(65);
   binary_to_hex(secret, *r_response, 32);
 
@@ -101,8 +96,7 @@ generate_challenge(char **r_challenge, char **r_response, RSA *rsa)
   ret = RSA_public_encrypt(32, secret, tmp, rsa, RSA_PKCS1_PADDING);
 
   *r_challenge = MyMalloc((length << 1) + 1);
-  binary_to_hex( tmp, *r_challenge, length);
-  (*r_challenge)[length<<1] = 0;
+  binary_to_hex(tmp, *r_challenge, length);
   MyFree(tmp);
 
   if (ret < 0)

@@ -217,7 +217,6 @@ struct config_file_entry
   char *mpath;
   char *rpath;
 
-  char *egdpool_path;
   char *service_name;
 
   int gline_min_cidr;
@@ -263,7 +262,6 @@ struct config_file_entry
   int default_floodcount;
   /* 0 == don't use throttle... */
   int throttle_time;
-  int use_egd;
   int ping_cookie;
   int disable_auth;
   int cycle_on_host_change;

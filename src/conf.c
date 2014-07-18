@@ -1174,8 +1174,6 @@ set_default_conf(void)
   ConfigFileEntry.oper_only_umodes = UMODE_DEBUG;
   ConfigFileEntry.oper_umodes = UMODE_BOTS | UMODE_LOCOPS | UMODE_SERVNOTICE |
     UMODE_OPERWALL | UMODE_WALLOP;
-  ConfigFileEntry.use_egd = 0;
-  ConfigFileEntry.egdpool_path = NULL;
   ConfigFileEntry.throttle_time = 1;
 }
 
@@ -1572,8 +1570,6 @@ clear_out_old_conf(void)
   ServerInfo.network_name = NULL;
   MyFree(ServerInfo.network_desc);
   ServerInfo.network_desc = NULL;
-  MyFree(ConfigFileEntry.egdpool_path);
-  ConfigFileEntry.egdpool_path = NULL;
 #ifdef HAVE_LIBCRYPTO
   if (ServerInfo.rsa_private_key != NULL)
   {

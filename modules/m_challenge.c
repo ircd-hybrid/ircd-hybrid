@@ -163,11 +163,13 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (!generate_challenge(&challenge, &(source_p->localClient->response),
+  if (!generate_challenge(&challenge, &source_p->localClient->response,
                           conf->rsa_public_key))
+  {
     sendto_one_numeric(source_p, &me, RPL_RSACHALLENGE, challenge);
+    source_p->localClient->auth_oper = xstrdup(conf->name);
+  }
 
-  source_p->localClient->auth_oper = xstrdup(conf->name);
   MyFree(challenge);
   return 0;
 }

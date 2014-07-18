@@ -615,7 +615,6 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 
 serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
 {
-/* TBD - XXX: error reporting */
 #ifdef HAVE_LIBCRYPTO
   if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
   {
@@ -637,6 +636,8 @@ serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
         DH_free(dh);
       }
     }
+    else
+      conf_error_report("Ignoring serverinfo::ssl_dh_param_file -- could not open/read Diffie-Hellman parameter file");
   }
 #endif
 };

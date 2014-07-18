@@ -69,15 +69,7 @@ binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
 int
 get_randomness(unsigned char *buf, int length)
 {
-  /* Seed OpenSSL PRNG with EGD enthropy pool -kre */
-  if (ConfigFileEntry.use_egd && ConfigFileEntry.egdpool_path)
-    if (RAND_egd(ConfigFileEntry.egdpool_path) == -1)
-      return -1;
-
-  if (RAND_status())
-    return RAND_bytes(buf, length);
-  /* XXX - abort? */
-  return RAND_pseudo_bytes(buf, length);
+  return RAND_bytes(buf, length);
 }
 
 int
@@ -90,7 +82,12 @@ generate_challenge(char **r_challenge, char **r_response, RSA *rsa)
   if (!rsa)
     return -1;
 
-  get_randomness(secret, 32);
+  if (!get_randomness(secret, 32))
+  {
+    report_crypto_errors();
+    return -1;
+  }
+
   *r_response = MyCalloc(65);
   binary_to_hex(secret, *r_response, 32);
 
@@ -99,8 +96,7 @@ generate_challenge(char **r_challenge, char **r_response, RSA *rsa)
   ret = RSA_public_encrypt(32, secret, tmp, rsa, RSA_PKCS1_PADDING);
 
   *r_challenge = MyCalloc((length << 1) + 1);
-  binary_to_hex( tmp, *r_challenge, length);
-  (*r_challenge)[length << 1] = 0;
+  binary_to_hex(tmp, *r_challenge, length);
   MyFree(tmp);
 
   if (ret < 0)

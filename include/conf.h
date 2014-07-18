@@ -212,7 +212,6 @@ struct
   const char *dlinefile;
   const char *resvfile;
 
-  char *egdpool_path;
   char *service_name;
 
   unsigned int gline_min_cidr;
@@ -258,7 +257,6 @@ struct
   unsigned int default_floodcount;
   unsigned int throttle_count;
   unsigned int throttle_time;
-  unsigned int use_egd;
   unsigned int ping_cookie;
   unsigned int disable_auth;
   unsigned int cycle_on_host_change;

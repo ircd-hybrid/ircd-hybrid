@@ -1087,9 +1087,13 @@ oper_entry: OPERATOR
       }
 
       if ((pkey = PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL)) == NULL)
-        conf_error_report("Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
+        conf_error_report("Ignoring rsa_public_key_file -- key invalid; check key syntax.");
 
-      conf->rsa_public_key = pkey;
+      if (RSA_size(ServerInfo.rsa_private_key) > 128)
+        conf_error_report("Ignoring rsa_public_key_file -- key size must be 1024 or below");
+      else
+        conf->rsa_public_key = pkey;
+
       BIO_set_close(file, BIO_CLOSE);
       BIO_free(file);
     }
@@ -2483,8 +2487,6 @@ general_item:       general_hide_spoof_ips |
                     general_oper_pass_resv |
                     general_oper_only_umodes |
                     general_max_targets |
-                    general_use_egd |
-                    general_egdpool_path |
                     general_oper_umodes |
                     general_caller_id_wait |
                     general_opers_bypass_callerid |
@@ -2714,20 +2716,6 @@ general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
 general_max_targets: MAX_TARGETS '=' NUMBER ';'
 {
   ConfigFileEntry.max_targets = $3;
-};
-
-general_use_egd: USE_EGD '=' TBOOL ';'
-{
-  ConfigFileEntry.use_egd = yylval.number;
-};
-
-general_egdpool_path: EGDPOOL_PATH '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(ConfigFileEntry.egdpool_path);
-    ConfigFileEntry.egdpool_path = xstrdup(yylval.string);
-  }
 };
 
 general_services_name: T_SERVICES_NAME '=' QSTRING ';'

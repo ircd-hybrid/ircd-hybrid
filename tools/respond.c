@@ -74,18 +74,17 @@ pass_cb(char *buf, int size, int rwflag, void *u)
 }
 
 static void
-binary_to_hex(unsigned char *bin, char *hex, int length)
+binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
 {
   static const char trans[] = "0123456789ABCDEF";
-  int i;
 
-  for (i = 0; i < length; ++i)
+  for (const unsigned char *end = bin + length; bin < end; ++bin)
   {
-    hex[(i << 1)    ] = trans[bin[i] >> 4];
-    hex[(i << 1) + 1] = trans[bin[i] & 0xf];
+    *hex++ = trans[*bin >>  4];
+    *hex++ = trans[*bin & 0xf];
   }
 
-  hex[i << 1] = '\0';
+  *hex = '\0';
 }
 
 static int

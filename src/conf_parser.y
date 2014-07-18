@@ -1082,15 +1082,15 @@ oper_entry: OPERATOR
 
       if ((file = BIO_new_file(block_state.file.buf, "r")) == NULL)
       {
-        conf_error_report("Ignoring rsa_public_key_file -- file doesn't exist");
+        ilog(LOG_TYPE_IRCD, "Ignoring rsa_public_key_file -- file doesn't exist");
         break;
       }
 
       if ((pkey = PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL)) == NULL)
-        conf_error_report("Ignoring rsa_public_key_file -- key invalid; check key syntax.");
+        ilog(LOG_TYPE_IRCD, "Ignoring rsa_public_key_file -- key invalid; check key syntax");
 
-      if (RSA_size(ServerInfo.rsa_private_key) > 128)
-        conf_error_report("Ignoring rsa_public_key_file -- key size must be 1024 or below");
+      if (RSA_size(pkey) > 128)
+        ilog(LOG_TYPE_IRCD, "Ignoring rsa_public_key_file -- key size must be 1024 or below");
       else
         conf->rsa_public_key = pkey;
 

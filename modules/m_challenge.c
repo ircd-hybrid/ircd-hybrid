@@ -105,7 +105,7 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
       sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
       conf = find_exact_name_conf(CONF_OPER, NULL, source_p->localClient->auth_oper, NULL, NULL);
       failed_challenge_notice(source_p, source_p->localClient->auth_oper, (conf != NULL) ?
-                              "host mismatch" : "no oper {} block");
+                              "host mismatch" : "no operator {} block");
       return 0;
     }
 
@@ -118,7 +118,7 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
 
     oper_up(source_p);
 
-    ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s",
+    ilog(LOG_TYPE_OPER, "CHALLENGE %s by %s!%s@%s",
          source_p->localClient->auth_oper, source_p->name, source_p->username,
          source_p->host);
 
@@ -141,7 +141,7 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     conf = find_exact_name_conf(CONF_OPER, NULL, parv[1], NULL, NULL);
     failed_challenge_notice(source_p, parv[1], (conf != NULL)
-                            ? "host mismatch" : "no oper {} block");
+                            ? "host mismatch" : "no operator {} block");
     return 0;
   }
 

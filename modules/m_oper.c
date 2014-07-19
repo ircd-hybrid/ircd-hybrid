@@ -95,7 +95,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     conf = find_exact_name_conf(CONF_OPER, NULL, name, NULL, NULL);
     failed_oper_notice(source_p, name, (conf != NULL) ?
-                       "host mismatch" : "no oper {} block");
+                       "host mismatch" : "no operator {} block");
     return 0;
   }
 

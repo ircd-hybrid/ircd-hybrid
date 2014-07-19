@@ -64,21 +64,18 @@ check_xline(struct MaskItem *conf)
  * side effects - complains to client, when warn != 0
  */
 static int
-valid_xline(struct Client *source_p, const char *gecos, const char *reason, int warn)
+valid_xline(struct Client *source_p, const char *gecos, const char *reason)
 {
   if (EmptyString(reason))
   {
-    if (warn)
-      sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "XLINE");
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "XLINE");
     return 0;
   }
 
   if (!valid_wild_card_simple(gecos))
   {
-    if (warn)
-      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
-                        ConfigFileEntry.min_nonwildcard_simple);
-
+    sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
+                      ConfigFileEntry.min_nonwildcard_simple);
     return 0;
   }
 
@@ -189,7 +186,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
    * XLINE <gecos> <time> ON <mask> :<reason>
    * XLINE <gecos> ON <mask> :<reason>
    */
-  if (parse_aline("XLINE", source_p, parc, parv, AWILD, &gecos, NULL,
+  if (parse_aline("XLINE", source_p, parc, parv, 0, &gecos, NULL,
                   &tkline_time, &target_server, &reason) < 0)
     return 0;
 
@@ -219,7 +216,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
                      "%s 0 :%s", gecos, reason);
   }
 
-  if (!valid_xline(source_p, gecos, reason, 0))
+  if (!valid_xline(source_p, gecos, reason))
     return 0;
 
   if ((conf = find_matching_name_conf(CONF_XLINE, gecos, NULL, NULL, 0)))
@@ -249,7 +246,7 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   if (!IsClient(source_p))
     return 0;
 
-  if (!valid_xline(source_p, parv[2], parv[4], 0))
+  if (!valid_xline(source_p, parv[2], parv[4]))
     return 0;
 
   relay_xline(source_p, parv);

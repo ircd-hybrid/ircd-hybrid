@@ -10,8 +10,8 @@
 
    In an effort to reduce the damage caused to a network by a hacked O-line,
    Hybrid supports an OpenSSL based challenge-response system. This new
-   system allows the admin to remove all oper block passwords from the conf
-   file. Authentication is done through a public/private key.
+   system allows the admin to remove all operator {} block passwords from
+   the conf file. Authentication is done through a public/private key.
 
      ----------------------------------------------------------------------
 
@@ -21,7 +21,7 @@
    If configure detects a working openssl library, --enable-openssl is
    implicitly enabled.
 
-   oper {} blocks should not have normal passwords, but should contain the
+   operator {} blocks should not have normal passwords, but should contain the
    the name of the private key file. However it is possible for the user to
    use both challenge and normal passwords, but this would defeat the purpose
    of the challenge system.
@@ -42,7 +42,7 @@
    public key file to their admin(s).
 
    The admin will place an entry for the public key file into a field called
-   rsa_public_key_file of each oper's oper {} block in the conf file.
+   rsa_public_key_file of each oper's operator {} block in the conf file.
 
    The oper wishes to obtain their operator status, and issues the CHALLENGE
    command.
@@ -84,8 +84,8 @@
      with the ircd-hybrid source, run on a UNIX(c) platform.
 
    The administrator of the server you oper on should remove the password in
-   your oper {} block and replace it with an entry for your public key, so
-   that /oper will be disabled.
+   your operator {} block and replace it with an entry for your public key,
+   so that /oper will be disabled.
 
      Note: The public key is a VERY long string.
 

@@ -41,7 +41,7 @@ static void
 sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 {
   FILE *file = NULL;
-  char line[HELPLEN] = { '\0' };
+  char line[HELPLEN] = "";
 
   if ((file = fopen(path, "r")) == NULL)
   {
@@ -73,7 +73,6 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 static void
 do_help(struct Client *source_p, char *topic)
 {
-  char *p = topic;
   char h_index[] = "index";
   char path[HYB_PATH_MAX + 1];
   struct stat sb;
@@ -81,7 +80,7 @@ do_help(struct Client *source_p, char *topic)
   if (EmptyString(topic))
     topic = h_index;
   else
-    for (; *p; ++p)
+    for (char *p = topic; *p; ++p)
       *p = ToLower(*p);
 
   if (strpbrk(topic, "/\\"))

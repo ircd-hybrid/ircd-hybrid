@@ -78,6 +78,12 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
   char *challenge = NULL;
   struct MaskItem *conf = NULL;
 
+  if (EmptyString(parv[1]))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CHALLENGE");
+    return 0;
+  }
+
   if (*parv[1] == '+')
   {
     /* Ignore it if we aren't expecting this... -A1kmm */

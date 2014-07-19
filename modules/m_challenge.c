@@ -142,7 +142,7 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
   if (conf->rsa_public_key == NULL)
   {
     sendto_one_notice(source_p, &me, ":I'm sorry, PK authentication "
-                      "is not enabled for your oper{} block.");
+                      "is not enabled for your operator {} block.");
     return 0;
   }
 

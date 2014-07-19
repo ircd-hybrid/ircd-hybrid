@@ -142,7 +142,7 @@ m_challenge(struct Client *client_p, struct Client *source_p,
   if (conf->rsa_public_key == NULL)
   {
     sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
-               "is not enabled for your oper{} block.", me.name,
+               "is not enabled for your operator {} block.", me.name,
                source_p->name);
     return 0;
   }

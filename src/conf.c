@@ -1722,7 +1722,7 @@ valid_wild_card_simple(const char *data)
 
   while ((tmpch = *p++))
   {
-    if (tmpch == '\\')
+    if (tmpch == '\\' && *p)
     {
       ++p;
       if (++nonwild >= ConfigFileEntry.min_nonwildcard_simple)

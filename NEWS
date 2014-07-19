@@ -2,6 +2,7 @@
 o) Fixed XLINE not working as expected
 o) Fixed build with LibreSSL which hasn't compression support
 o) Miscellaneous stabilization and cosmetical fixes
+o) EGD support has been dropped
 
 
 -- Noteworthy changes in version 8.1.19 (2014-07-05)

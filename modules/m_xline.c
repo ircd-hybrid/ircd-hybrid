@@ -111,22 +111,19 @@ remove_xline(struct Client *source_p, const char *gecos)
  * side effects - complains to client, when warn != 0
  */
 static int
-valid_xline(struct Client *source_p, const char *gecos, const char *reason, int warn)
+valid_xline(struct Client *source_p, const char *gecos, const char *reason)
 {
   if (EmptyString(reason))
   {
-    if (warn)
-      sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, source_p->name, "XLINE");
+    sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+               me.name, source_p->name, "XLINE");
     return 0;
   }
 
   if (!valid_wild_card_simple(gecos))
   {
-    if (warn)
-      sendto_one(source_p, ":%s NOTICE %s :Please include at least %d non-wildcard characters with the xline",
-                 me.name, source_p->name, ConfigFileEntry.min_nonwildcard_simple);
-
+    sendto_one(source_p, ":%s NOTICE %s :Please include at least %d non-wildcard characters with the xline",
+               me.name, source_p->name, ConfigFileEntry.min_nonwildcard_simple);
     return 0;
   }
 
@@ -245,7 +242,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
    * XLINE <gecos> <time> ON <mask> :<reason>
    * XLINE <gecos> ON <mask> :<reason>
    */
-  if (parse_aline("XLINE", source_p, parc, parv, AWILD, &gecos, NULL,
+  if (parse_aline("XLINE", source_p, parc, parv, 0, &gecos, NULL,
                   &tkline_time, &target_server, &reason) < 0)
     return 0;
 
@@ -275,7 +272,7 @@ mo_xline(struct Client *client_p, struct Client *source_p,
                      "%s 0 :%s", gecos, reason);
   }
 
-  if (!valid_xline(source_p, gecos, reason, 0))
+  if (!valid_xline(source_p, gecos, reason))
     return 0;
 
   if ((conf = find_matching_name_conf(CONF_XLINE, gecos, NULL, NULL, 0)))
@@ -307,7 +304,7 @@ ms_xline(struct Client *client_p, struct Client *source_p,
   if (!IsClient(source_p))
     return 0;
 
-  if (!valid_xline(source_p, parv[2], parv[4], 0))
+  if (!valid_xline(source_p, parv[2], parv[4]))
     return 0;
 
   relay_xline(source_p, parv);

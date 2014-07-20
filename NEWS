@@ -1,5 +1,7 @@
 -- Noteworthy changes in version 8.2.0rc1 (2014-07-20)
 o) Miscellaneous code cleanups and stabilization fixes
+o) ./configure now requires OpenSSL 0.9.8o or above in order
+   to enable TLS/SSL support
 
 
 -- Noteworthy changes in version 8.2.0beta4 (2014-07-06)

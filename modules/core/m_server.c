@@ -262,7 +262,7 @@ server_estab(struct Client *client_p)
   MyFree(client_p->localClient->passwd);
   client_p->localClient->passwd = NULL;
 
-  /* Its got identd, since its a server */
+  /* Its got identd, since it's a server */
   SetGotId(client_p);
 
   /* If there is something in the serv_list, it might be this

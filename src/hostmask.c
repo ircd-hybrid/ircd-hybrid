@@ -349,7 +349,7 @@ mask_addr(struct irc_ssaddr *ip, int bits)
 #endif
 }
 
-/* Hashtable stuff...now external as its used in m_stats.c */
+/* Hashtable stuff...now external as it's used in m_stats.c */
 dlink_list atable[ATABLE_SIZE];
 
 void

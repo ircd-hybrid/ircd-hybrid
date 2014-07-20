@@ -349,7 +349,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
    */
 
   /* EOB is 3 characters long but is not a numeric */
-  if (*(ch + 3) == ' ' &&  /* Ok, let's see if its a possible numeric */
+  if (*(ch + 3) == ' ' &&  /* Ok, let's see if it's a possible numeric */
       IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)))
   {
     numeric = (*ch - '0') * 100 + (*(ch + 1) - '0') * 10 + (*(ch + 2) - '0');
@@ -511,7 +511,7 @@ add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
  *
  * Then it pops up the recurse stack. As it comes back up the recurse
  * The code checks to see if the child now has no pointers or msg
- * i.e. the links count has gone to zero. If its no longer used, the
+ * i.e. the links count has gone to zero. If it's no longer used, the
  * child struct MessageTree can be deleted. The parent reference
  * to this child is then removed and the parents link count goes down.
  * Thus, we continue to go back up removing all unused MessageTree(s)

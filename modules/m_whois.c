@@ -253,7 +253,7 @@ m_whois(struct Client *source_p, int parc, char *parv[])
 
     /*
      * if we have serverhide enabled, they can either ask the clients
-     * server, or our server.. I dont see why they would need to ask
+     * server, or our server.. I don't see why they would need to ask
      * anything else for info about the client.. --fl_
      */
     if (ConfigServerHide.disable_remote_commands)

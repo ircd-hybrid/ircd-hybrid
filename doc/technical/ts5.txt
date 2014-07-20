@@ -50,7 +50,7 @@ remains opless.  ServerC receives HubD's modes, and it notices HubD has a
 lower TS of channel #broken.  It removes UserC's ops, removes the channel
 modes on #broken, and accepts HubD's status.
 
-The network version of #broken hasnt changed.  It is still opless, with a TS
+The network version of #broken hasn't changed.  It is still opless, with a TS
 of 800000000.
 
 
@@ -78,7 +78,7 @@ Example2:
 As per Example2 above, except the rest of the network is TS3.  ServerC is
 TS5.  ServerC would remove its modes and ops, therefore UserC would not be
 opped on ServerC, therefore it could not send any mode changes to the
-channel.  Although it is opped elsewhere, it isnt opped locally, so the
+channel.  Although it is opped elsewhere, it isn't opped locally, so the
 desync cannot be abused.
 
 As you can see, the desync's that can occur can either be resynced, or are

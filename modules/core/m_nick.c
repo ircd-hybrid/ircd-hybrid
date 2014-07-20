@@ -61,7 +61,7 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
 {
   /*
    * The old code did some wacky stuff here, if the nick is invalid, kill it
-   * and dont bother messing at all
+   * and don't bother messing at all
    */
   if (!valid_nickname(nick, 0))
   {

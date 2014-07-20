@@ -80,58 +80,50 @@ include   \.include{WS}(\<.*\>|\".*\")
 %%
 {include}       { cinclude(); }
 "/*"            { ccomment(); }
-
-\n.*            { strlcpy(linebuf, yytext+1, sizeof(linebuf)); ++lineno; yyless(1); }
-
+\n.*            { strlcpy(linebuf, yytext + 1, sizeof(linebuf)); ++lineno; yyless(1); }
 {WS}            ;
 {COMMENT}       ;
-
 {DIGIT}         { yylval.number = atoi(yytext); return NUMBER; }
+{qstring}       { if (yytext[yyleng - 2] == '\\')
+                  {
+                    yyless(yyleng - 1);  /* Return last quote */
+                    yymore();  /* Append next string */
+                  }
+                  else
+                  {
+                    yylval.string = yytext + 1;
 
-{qstring}	{ if (yytext[yyleng-2] == '\\')
-		    {
-		      yyless(yyleng-1); /* return last quote */
-		      yymore();		/* append next string */
-		    }
-		  else
-		    {
-		      yylval.string = yytext+1;
-		      if(yylval.string[yyleng-2] != '"')
-			ilog(LOG_TYPE_IRCD, "Unterminated character string");
-		      else
-			{
-			  int i,j;
+                    if (yylval.string[yyleng - 2] != '"')
+                      ilog(LOG_TYPE_IRCD, "Unterminated character string");
+                    else
+                    {
+                      unsigned int i = 0, j = 0;
 
-			  yylval.string[yyleng-2] = '\0'; /* remove close
-							   *  quote
-							   */
+                      yylval.string[yyleng - 2] = '\0';  /* Remove close quote */
 
-			  for (j=i=0 ;yylval.string[i] != '\0'; i++,j++)
-			    {
-			      if (yylval.string[i] != '\\')
-				{
-				  yylval.string[j] = yylval.string[i];
-				}
-			      else
-				{
-				  i++;
-				  if (yylval.string[i] == '\0') /* XXX
-								 * should not
-								 * happen
-								 */
-				    {
-				      ilog(LOG_TYPE_IRCD,
-					   "Unterminated character string");
-				      break;
-				    }
-				  yylval.string[j] = yylval.string[i];
-				}
-			    }
-			  yylval.string[j] = '\0';
-			  return QSTRING;
-			}
-		    }
-		}
+                      for (; yylval.string[i] != '\0'; ++i, ++j)
+                      {
+                        if (yylval.string[i] != '\\')
+                          yylval.string[j] = yylval.string[i];
+                        else
+                        {
+                          ++i;
+
+                          if (yylval.string[i] == '\0')  /* XXX: should not happen */
+                          {
+                            ilog(LOG_TYPE_IRCD, "Unterminated character string");
+                            break;
+                          }
+
+                          yylval.string[j] = yylval.string[i];
+                        }
+                      }
+
+                      yylval.string[j] = '\0';
+                      return QSTRING;
+                    }
+                  }
+                }
 
 accept_password             { return ACCEPT_PASSWORD; }
 admin                       { return ADMIN; }

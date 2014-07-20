@@ -77,7 +77,7 @@ static int unsigned ntargets = 0;
 ** in the original 2.8.2 code base, they were the same function
 ** "m_message.c." When we did the great cleanup in conjuncton with bleep
 ** of ircu fame, we split m_privmsg.c and m_notice.c.
-** I don't see the point of that now. Its harder to maintain, its
+** I don't see the point of that now. It's harder to maintain, it's
 ** easier to introduce bugs into one version and not the other etc.
 ** Really, the penalty of an extra function call isn't that big a deal folks.
 ** -db Nov 13, 2000
@@ -372,7 +372,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
     {
       /*
        * If the client is remote, we dont perform a special check for
-       * flooding.. as we wouldnt block their message anyway.. this means
+       * flooding.. as we wouldn't block their message anyway.. this means
        * we dont give warnings.. we then check if theyre opered
        * (to avoid flood warnings), lastly if theyre our client
        * and flooding    -- fl
@@ -590,7 +590,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
 
     if (type)
     {
-      if (EmptyString(nick))  /* If its a '\0' dump it, there is no recipient */
+      if (EmptyString(nick))  /* If it's a '\0' dump it, there is no recipient */
       {
         sendto_one_numeric(source_p, &me, ERR_NORECIPIENT, command);
         continue;

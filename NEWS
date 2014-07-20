@@ -1,4 +1,5 @@
--- Noteworthy changes in version 8.2.0beta5 (2014-??-??)
+-- Noteworthy changes in version 8.2.0beta5 (2014-07-20)
+o) Miscellaneous code cleanups and stabilization fixes
 
 
 -- Noteworthy changes in version 8.2.0beta4 (2014-07-06)
@@ -42,6 +43,13 @@ o) Major code cleanups and refactoring. Improved overall performance
 o) /INFO now also reports MPATH (path to main motd (Message of the Day) file)
    and SPATH (Path to server executable)
 o) Updated several help files
+
+
+-- Noteworthy changes in version 8.1.20 (2014-07-20)
+o) Fixed XLINE not working as expected
+o) Fixed build with LibreSSL which hasn't compression support
+o) Miscellaneous stabilization and cosmetical fixes
+o) EGD support has been dropped
 
 
 -- Noteworthy changes in version 8.1.19 (2014-07-05)

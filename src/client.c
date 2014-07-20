@@ -190,7 +190,7 @@ check_pings_list(dlink_list *list)
       if (!IsPingSent(client_p))
       {
         /*
-         * If we havent PINGed the connection and we havent
+         * If we haven't PINGed the connection and we haven't
          * heard from it in a while, PING it to make sure
          * it is still alive.
          */

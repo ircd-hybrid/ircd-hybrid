@@ -889,7 +889,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   struct Client *client_p = data;
   struct MaskItem *conf = NULL;
 
-  /* First, make sure its a real client! */
+  /* First, make sure it's a real client! */
   assert(client_p);
   assert(&client_p->localClient->fd == fd);
 

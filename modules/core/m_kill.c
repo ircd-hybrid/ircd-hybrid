@@ -187,7 +187,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   {
     if (IsServer(source_p))
     {
-      /* dont send clients kills from a hidden server */
+      /* Don't send clients kills from a hidden server */
       if ((IsHidden(source_p) || ConfigServerHide.hide_servers) && !HasUMode(target_p, UMODE_OPER))
         sendto_one(target_p, ":%s KILL %s :%s",
                    me.name, target_p->name, reason);
@@ -203,10 +203,10 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
 
   /*
    * Be warned, this message must be From %s, or it confuses clients
-   * so dont change it to From: or the case or anything! -- fl -- db
+   * so don't change it to From: or the case or anything! -- fl -- db
    */
   /*
-   * path must contain at least 2 !'s, or bitchx falsely declares it
+   * Path must contain at least 2 !'s, or bitchx falsely declares it
    * local --fl
    */
   if (HasUMode(source_p, UMODE_OPER)) /* send it normally */
@@ -232,7 +232,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
                 source_p->id, target_p->id, parv[2], reason);
   AddFlag(target_p, FLAGS_KILLED);
 
-  /* reason comes supplied with its own ()'s */
+  /* Reason comes supplied with its own ()'s */
   if (IsServer(source_p) && (IsHidden(source_p) || ConfigServerHide.hide_servers))
     snprintf(buf, sizeof(buf), "Killed (%s %s)", me.name, reason);
   else

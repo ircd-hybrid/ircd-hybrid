@@ -308,9 +308,9 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     } while (valid_mode);
 
     /*
-     * if the client doesnt exist, or if its fake direction/server, skip.
-     * we cannot send ERR_NOSUCHNICK here because if its a UID, we cannot
-     * lookup the nick, and its better to never send the numeric than only
+     * If the client doesnt exist, or if it's fake direction/server, skip.
+     * we cannot send ERR_NOSUCHNICK here because if it's a UID, we cannot
+     * lookup the nick, and it's better to never send the numeric than only
      * sometimes.
      */
     if ((target_p = find_chasing(source_p, s)) == NULL || target_p->from != source_p->from)
@@ -499,13 +499,13 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                          servername, chptr->chname, modebuf, sendbuf);
   }
 
-  /* If this happens, its the result of a malformed SJOIN
+  /*
+   * If this happens, it's the result of a malformed SJOIN
    * a remnant from the old persistent channel code. *sigh*
    * Or it could be the result of a client just leaving
    * and leaving us with a channel formed just as the client parts.
    * - Dianora
    */
-
   if (!dlink_list_length(&chptr->members) && isnew)
   {
     destroy_channel(chptr);

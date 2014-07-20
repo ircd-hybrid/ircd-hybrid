@@ -103,7 +103,7 @@ struct reslist
   char type;
   char retries;            /* retry counter */
   unsigned int sends;      /* number of sends (>1 means resent) */
-  char resend;             /* send flag. 0 == dont resend */
+  char resend;             /* send flag. 0 == don't resend */
   time_t sentat;
   time_t timeout;
   struct irc_ssaddr addr;
@@ -343,7 +343,7 @@ delete_resolver_queries(const void *vptr)
  * send_res_msg - sends msg to all nameservers found in the "_res" structure.
  * This should reflect /etc/resolv.conf. We will get responses
  * which arent needed but is easier than checking to see if nameserver
- * isnt present. Returns number of messages successfully sent to
+ * isn't present. Returns number of messages successfully sent to
  * nameservers or -1 if no successful sends.
  */
 static int
@@ -556,8 +556,7 @@ resend_query(struct reslist *request)
       do_query_name(NULL, NULL, request->name, request, request->type);
       break;
 #ifdef IPV6
-    case T_AAAA:
-      /* didnt work, try A */
+    case T_AAAA:  /* Didn't work, try A */
       if (request->state == REQ_AAAA)
         do_query_name(NULL, NULL, request->name, request, T_A);
 #endif
@@ -593,7 +592,7 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
   }
 
   /*
-   * process each answer sent to us blech.
+   * Process each answer sent to us blech.
    */
   while (header->ancount > 0 && (char *)current < eob)
   {
@@ -602,12 +601,13 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
     n = irc_dn_expand((unsigned char *)buf, (unsigned char *)eob, current,
         hostbuf, sizeof(hostbuf));
 
-    if (n < 0 /* Broken message */ || n == 0 /* No more answers left */)
+    if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
       return 0;
 
     hostbuf[HOSTLEN] = '\0';
 
-    /* With Address arithmetic you have to be very anal
+    /*
+     * With Address arithmetic you have to be very anal
      * this code was not working on alpha due to that
      * (spotted by rodder/jailbird/dianora)
      */
@@ -670,14 +670,13 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
 
         n = irc_dn_expand((unsigned char *)buf, (unsigned char *)eob,
                           current, hostbuf, sizeof(hostbuf));
-        if (n < 0 /* Broken message */ || n == 0 /* No more answers left */)
+        if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
           return 0;
 
         strlcpy(request->name, hostbuf, HOSTLEN + 1);
         return 1;
         break;
-      case T_CNAME: /* first check we already havent started looking
-                       into a cname */
+      case T_CNAME:  /* First check we already haven't started looking into a cname */
         if (request->type != T_PTR)
           return 0;
 

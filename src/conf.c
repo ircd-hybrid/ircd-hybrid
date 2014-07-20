@@ -1381,7 +1381,7 @@ oper_privs_as_string(const unsigned int port)
 }
 
 /*
- * Input: A client to find the active oper{} name for.
+ * Input: A client to find the active operator {} name for.
  * Output: The nick!user@host{oper} of the oper.
  *         "oper" is server name for remote opers
  * Side effects: None.
@@ -1407,10 +1407,11 @@ get_oper_name(const struct Client *client_p)
       }
     }
 
-    /* Probably should assert here for now. If there is an oper out there
-     * with no oper{} conf attached, it would be good for us to know...
+    /*
+     * Probably should assert here for now. If there is an oper out there
+     * with no operator {} conf attached, it would be good for us to know...
      */
-    assert(0); /* Oper without oper conf! */
+    assert(0);  /* Oper without oper conf! */
   }
 
   snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client_p->name,
@@ -1436,7 +1437,7 @@ read_conf_files(int cold)
 
   /* We need to know the initial filename for the yyerror() to report
      FIXME: The full path is in conffilenamebuf first time since we
-             dont know anything else
+             don't know anything else
 
      - Gozem 2002-07-21
   */

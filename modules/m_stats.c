@@ -232,7 +232,7 @@ report_resv(struct Client *source_p)
 
 /*
  * This is part of the STATS replies. There is no offical numeric for this
- * since this isnt an official command, in much the same way as HASH isnt.
+ * since this isn't an official command, in much the same way as HASH isn't.
  * It is also possible that some systems wont support this call or have
  * different field names for "struct rusage".
  * -avalon
@@ -1397,7 +1397,7 @@ stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
 
     /*
      * This basically shows ips for our opers if it's not a server/admin, or
-     * its one of our admins.
+     * it's one of our admins.
      */
     if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER) &&
         (HasUMode(source_p, UMODE_ADMIN) ||
@@ -1419,7 +1419,7 @@ stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
     }
     else
     {
-      /* If its a hidden ip, an admin, or a server, mask the real IP */
+      /* If it's a hidden ip, an admin, or a server, mask the real IP */
       if (IsIPSpoof(target_p) || IsServer(target_p) || HasUMode(target_p, UMODE_ADMIN) ||
           IsHandshake(target_p) || IsConnecting(target_p))
         sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
@@ -1584,7 +1584,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  /* Check the user is actually allowed to do /stats, and isnt flooding */
+  /* Check the user is actually allowed to do /stats, and isn't flooding */
   if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);

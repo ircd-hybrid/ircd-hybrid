@@ -64,8 +64,8 @@
             and/or SSL/TLS server links, as well as SSL/TLS client connections.
 
             On systems where the configure script can automatically detect
-            OpenSSL, this option is not necessary. If configure cannot find
-            OpenSSL, you must specify a path with this option
+            LibreSSL or OpenSSL, this option is not necessary. If configure cannot
+            find LibreSSL or OpenSSL, you must specify a path with this option
             (--enable-openssl=/path/to/openssl)
 
 

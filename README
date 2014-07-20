@@ -35,7 +35,7 @@ Feature Specific Requirements:
 
 - For the SSL Challenge controlled OPER feature, compressed and/or
   SSL/TLS server links, as well as SSL/TLS client connections,
-  a working OpenSSL library is required
+  a working LibreSSL or OpenSSL library is required
 
 - For encrypted oper, server and auth passwords, a working DES, MD5, or
   SHA library

@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.1.20 (2014-??-??)
+-- Noteworthy changes in version 8.1.20 (2014-07-20)
 o) Fixed XLINE not working as expected
 o) Fixed build with LibreSSL which hasn't compression support
 o) Miscellaneous stabilization and cosmetical fixes

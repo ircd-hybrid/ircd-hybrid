@@ -716,7 +716,7 @@ res_readreply(fde_t *fd, void *data)
   char buf[sizeof(HEADER) + MAXPACKET];
   HEADER *header;
   struct reslist *request = NULL;
-  int rc;
+  ssize_t rc = 0;
   socklen_t len = sizeof(struct irc_ssaddr);
   struct irc_ssaddr lsin;
 
@@ -727,8 +727,7 @@ res_readreply(fde_t *fd, void *data)
    */
   comm_setselect(fd, COMM_SELECT_READ, res_readreply, NULL, 0);
 
-  /* Better to cast the sizeof instead of rc */
-  if (rc <= (int)(sizeof(HEADER)))
+  if (rc <= (ssize_t)sizeof(HEADER))
     return;
 
   /*

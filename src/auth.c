@@ -55,13 +55,13 @@
 
 static const char *const HeaderMessages[] =
 {
-  ":*** Looking up your hostname...",
+  ":*** Looking up your hostname",
   ":*** Found your hostname",
   ":*** Couldn't look up your hostname",
   ":*** Checking Ident",
   ":*** Got Ident response",
   ":*** No Ident response",
-  ":*** Your forward and reverse DNS do not match, ignoring hostname.",
+  ":*** Your forward and reverse DNS do not match, ignoring hostname",
   ":*** Your hostname is too long, ignoring hostname"
 };
 
@@ -79,29 +79,10 @@ enum
 
 #define sendheader(c, i) sendto_one_notice((c), &me, HeaderMessages[(i)])
 
-static dlink_list auth_doing_list = { NULL, NULL, 0 };
-
-static void timeout_auth_queries_event(void *);
-
+static dlink_list auth_pending_list;
 static PF read_auth_reply;
 static CNCB auth_connect_callback;
 
-/* auth_init
- *
- * Initialise the auth code
- */
-void
-auth_init(void)
-{
-  static struct event timeout_auth_queries =
-  {
-    .name = "timeout_auth_queries_event",
-    .handler = timeout_auth_queries_event,
-    .when = 1
-  };
-
-  event_add(&timeout_auth_queries, NULL);
-}
 
 /*
  * make_auth_request - allocate a new auth request
@@ -134,7 +115,7 @@ release_auth_client(struct AuthRequest *auth)
 
   if (IsInAuth(auth))
   {
-    dlinkDelete(&auth->node, &auth_doing_list);
+    dlinkDelete(&auth->node, &auth_pending_list);
     ClearInAuth(auth);
   }
 
@@ -288,79 +269,11 @@ start_auth_query(struct AuthRequest *auth)
 #endif
   localaddr.ss_port = htons(0);
 
-  comm_connect_tcp(&auth->fd, auth->client->sockhost, 113,
+  comm_connect_tcp(&auth->fd, auth->client->sockhost, RFC1413_PORT,
       (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
       auth, auth->client->localClient->ip.ss.ss_family,
       GlobalSetOptions.ident_timeout);
   return 1; /* We suceed here for now */
-}
-
-/*
- * GetValidIdent - parse ident query reply from identd server
- *
- * Inputs        - pointer to ident buf
- * Output        - NULL if no valid ident found, otherwise pointer to name
- * Side effects  -
- */
-/*
- * A few questions have been asked about this mess, obviously
- * it should have been commented better the first time.
- * The original idea was to remove all references to libc from ircd-hybrid.
- * Instead of having to write a replacement for sscanf(), I did a
- * rather gruseome parser here so we could remove this function call.
- * Note, that I had also removed a few floating point printfs as well (though
- * now we are still stuck with a few...)
- * Remember, we have a replacement ircd sprintf, we have bleeps fputs lib
- * it would have been nice to remove some unneeded code.
- * Oh well. If we don't remove libc stuff totally, then it would be
- * far cleaner to use sscanf()
- *
- * - Dianora
- */
-static char *
-GetValidIdent(char *buf)
-{
-  int   remp = 0;
-  int   locp = 0;
-  char* colon1Ptr;
-  char* colon2Ptr;
-  char* colon3Ptr;
-  char* commaPtr;
-  char* remotePortString;
-
-  /* All this to get rid of a sscanf() fun. */
-  remotePortString = buf;
-
-  if ((colon1Ptr = strchr(remotePortString,':')) == NULL)
-    return 0;
-  *colon1Ptr = '\0';
-  colon1Ptr++;
-
-  if ((colon2Ptr = strchr(colon1Ptr,':')) == NULL)
-    return 0;
-  *colon2Ptr = '\0';
-  colon2Ptr++;
-
-  if ((commaPtr = strchr(remotePortString, ',')) == NULL)
-    return 0;
-  *commaPtr = '\0';
-  commaPtr++;
-
-  if ((remp = atoi(remotePortString)) == 0)
-    return 0;
-
-  if ((locp = atoi(commaPtr)) == 0)
-    return 0;
-
-  /* look for USERID bordered by first pair of colons */
-  if (strstr(colon1Ptr, "USERID") == NULL)
-    return 0;
-
-  if ((colon3Ptr = strchr(colon2Ptr,':')) == NULL)
-    return 0;
-  *colon3Ptr = '\0';
-  colon3Ptr++;
-  return (colon3Ptr);
 }
 
 /*
@@ -379,7 +292,7 @@ start_auth(struct Client *client_p)
 
   auth = make_auth_request(client_p);
   SetInAuth(auth);
-  dlinkAddTail(auth, &auth->node, &auth_doing_list);
+  dlinkAddTail(auth, &auth->node, &auth_pending_list);
 
   sendheader(client_p, REPORT_DO_DNS);
 
@@ -403,7 +316,7 @@ timeout_auth_queries_event(void *notused)
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, auth_doing_list.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, auth_pending_list.head)
   {
     struct AuthRequest *auth = ptr->data;
 
@@ -489,7 +402,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
   them.ss_len = tlen;
 #endif
 
-  snprintf(authbuf, sizeof(authbuf), "%u , %u\r\n", tport, uport);
+  snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
 
   if (send(fd->fd, authbuf, strlen(authbuf), 0) == -1)
   {
@@ -497,7 +410,97 @@ auth_connect_callback(fde_t *fd, int error, void *data)
     return;
   }
 
-  read_auth_reply(&auth->fd, auth);
+  comm_setselect(fd, COMM_SELECT_READ, read_auth_reply, auth, 0);
+}
+
+/** Enum used to index ident reply fields in a human-readable way. */
+enum IdentReplyFields
+{
+  IDENT_PORT_NUMBERS,
+  IDENT_REPLY_TYPE,
+  IDENT_OS_TYPE,
+  IDENT_INFO,
+  USERID_TOKEN_COUNT
+};
+
+/** Parse an ident reply line and extract the userid from it.
+ * \param reply The ident reply line.
+ * \return The userid, or NULL on parse failure.
+ */
+static const char *
+check_ident_reply(char *reply)
+{
+  char *token = NULL, *end = NULL;
+  char *vector[USERID_TOKEN_COUNT];
+  int count = token_vector(reply, ':', vector, USERID_TOKEN_COUNT);
+
+  if (USERID_TOKEN_COUNT != count)
+    return NULL;
+
+  /*
+   * Second token is the reply type
+   */
+  token = vector[IDENT_REPLY_TYPE];
+
+  if (EmptyString(token))
+    return NULL;
+
+  while (IsSpace(*token))
+    ++token;
+
+  if (strncmp(token, "USERID", 6))
+    return NULL;
+
+  /*
+   * Third token is the os type
+   */
+  token = vector[IDENT_OS_TYPE];
+
+  if (EmptyString(token))
+    return NULL;
+
+  while (IsSpace(*token))
+   ++token;
+
+  /*
+   * Unless "OTHER" is specified as the operating system type, the server
+   * is expected to return the "normal" user identification of the owner
+   * of this connection. "Normal" in this context may be taken to mean a
+   * string of characters which uniquely identifies the connection owner
+   * such as a user identifier assigned by the system administrator and
+   * used by such user as a mail identifier, or as the "user" part of a
+   * user/password pair used to gain access to system resources. When an
+   * operating system is specified (e.g., anything but "OTHER"), the user
+   * identifier is expected to be in a more or less immediately useful
+   * form - e.g., something that could be used as an argument to "finger"
+   * or as a mail address.
+   */
+  if (!strncmp(token, "OTHER", 5))
+    return NULL;
+
+  /*
+   * Fourth token is the username
+   */
+  token = vector[IDENT_INFO];
+
+  if (EmptyString(token))
+    return NULL;
+
+  while (IsSpace(*token))
+    ++token;
+
+  while (*token == '~' || *token == '^')
+    ++token;
+
+  /*
+   * Look for the end of the username, terminators are '\0, @, <SPACE>, :'
+   */
+  for (end = token; *end; ++end)
+    if (IsSpace(*end) || '@' == *end || ':' == *end)
+      break;
+  *end = '\0';
+
+  return token;
 }
 
 /*
@@ -506,77 +509,32 @@ auth_connect_callback(fde_t *fd, int error, void *data)
  * We only give it one shot, if the reply isn't good the first time
  * fail the authentication entirely. --Bleep
  */
-#define AUTH_BUFSIZ 128
-
 static void
 read_auth_reply(fde_t *fd, void *data)
 {
   struct AuthRequest *auth = data;
-  char *s = NULL;
-  char *t = NULL;
-  int len;
-  int count;
-  char buf[AUTH_BUFSIZ + 1]; /* buffer to read auth reply into */
+  const char *username = NULL;
+  ssize_t len = 0;
+  char buf[RFC1413_BUFSIZ + 1];
 
-  /* Why?
-   * Well, recv() on many POSIX systems is a per-packet operation,
-   * and we do not necessarily want this, because on lowspec machines,
-   * the ident response may come back fragmented, thus resulting in an
-   * invalid ident response, even if the ident response was really OK.
-   *
-   * So PLEASE do not change this code to recv without being aware of the
-   * consequences.
-   *
-   *    --nenolod
-   */
-  len = read(fd->fd, buf, AUTH_BUFSIZ);
-
-  if (len < 0)
-  {
-    if (ignoreErrno(errno))
-      comm_setselect(fd, COMM_SELECT_READ, read_auth_reply, auth, 0);
-    else
-      auth_error(auth);
-    return;
-  }
-
-  if (len > 0)
+  if ((len = recv(fd->fd, buf, RFC1413_BUFSIZ, 0)) > 0)
   {
     buf[len] = '\0';
-
-    if ((s = GetValidIdent(buf)))
-    {
-      t = auth->client->username;
-
-      while (*s == '~' || *s == '^')
-        s++;
-
-      for (count = USERLEN; *s && count; s++)
-      {
-        if (*s == '@')
-          break;
-        if (!IsSpace(*s) && *s != ':')
-        {
-          *t++ = *s;
-          count--;
-        }
-      }
-
-      *t = '\0';
-    }
+    username = check_ident_reply(buf);
   }
 
   fd_close(fd);
 
   ClearAuth(auth);
 
-  if (s == NULL)
+  if (EmptyString(username))
   {
     sendheader(auth->client, REPORT_FAIL_ID);
     ++ServerStats.is_abad;
   }
   else
   {
+    strlcpy(auth->client->username, username, sizeof(auth->client->username));
     sendheader(auth->client, REPORT_FIN_ID);
     ++ServerStats.is_asuc;
     SetGotId(auth->client);
@@ -599,7 +557,24 @@ delete_auth(struct AuthRequest *auth)
 
   if (IsInAuth(auth))
   {
-    dlinkDelete(&auth->node, &auth_doing_list);
+    dlinkDelete(&auth->node, &auth_pending_list);
     ClearInAuth(auth);
   }
+}
+
+/* auth_init
+ *
+ * Initialise the auth code
+ */
+void
+auth_init(void)
+{
+  static struct event timeout_auth_queries =
+  {
+    .name = "timeout_auth_queries_event",
+    .handler = timeout_auth_queries_event,
+    .when = 1
+  };
+
+  event_add(&timeout_auth_queries, NULL);
 }

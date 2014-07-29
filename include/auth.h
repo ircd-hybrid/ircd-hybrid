@@ -27,12 +27,12 @@
 #ifndef INCLUDED_s_auth_h
 #define INCLUDED_s_auth_h
 
-enum
-{
-  AM_IN_AUTH     = 1 << 0,
-  AM_DOING_AUTH  = 1 << 1,
-  AM_DNS_PENDING = 1 << 2
-};
+#define RFC1413_BUFSIZ  512  /*!< rfc1413 says we MUST accept 512 bytes */
+#define RFC1413_PORT    113  /*!< As defined per rfc1413, IDENT server listens on TCP port 113 */
+
+#define AM_IN_AUTH      0x00000001U
+#define AM_DOING_AUTH   0x00000002U
+#define AM_DNS_PENDING  0x00000004U
 
 #define SetInAuth(x)         ((x)->flags |= AM_IN_AUTH)
 #define ClearInAuth(x)       ((x)->flags &= ~AM_IN_AUTH)
@@ -48,17 +48,18 @@ enum
 
 struct Client;
 
+/** Stores state of the DNS and RFC 1413 ident lookups for a client. */
 struct AuthRequest
 {
-  dlink_node     node;  /* auth_doing_list */
-  unsigned int   flags;
-  struct Client *client;    /* pointer to client struct for request */
-  fde_t          fd;        /* file descriptor for auth queries */
-  time_t         timeout;   /* time when query expires */
+  dlink_node node;  /*!< auth_doing_list */
+  unsigned int flags;  /*!< Current state of request */
+  struct Client *client;  /*!< Pointer to Client structure for request */
+  fde_t fd;  /*!< File descriptor for auth queries */
+  time_t timeout;  /*!< Time when query expires */
 };
 
 extern void auth_init(void);
 extern void start_auth(struct Client *);
 extern void delete_auth(struct AuthRequest *);
 extern void release_auth_client(struct AuthRequest *);
-#endif /* INCLUDED_s_auth_h */
+#endif

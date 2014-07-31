@@ -630,111 +630,109 @@ res_readreply(fde_t *fd, void *data)
   socklen_t len = sizeof(struct irc_ssaddr);
   struct irc_ssaddr lsin;
 
-  rc = recvfrom(fd->fd, buf, sizeof(buf), 0, (struct sockaddr *)&lsin, &len);
-
-  /*
-   * Re-schedule a read *after* recvfrom, or we'll be registering
-   * interest where it'll instantly be ready for read :-) -- adrian
-   */
-  comm_setselect(fd, COMM_SELECT_READ, res_readreply, NULL, 0);
-
-  if (rc <= (ssize_t)sizeof(HEADER))
-    return;
-
-  /*
-   * Check against possibly fake replies
-   */
-  if (!res_ourserver(&lsin))
-    return;
-
-  /*
-   * Convert DNS reply reader from Network byte order to CPU byte order.
-   */
-  header = (HEADER *)buf;
-  header->ancount = ntohs(header->ancount);
-  header->qdcount = ntohs(header->qdcount);
-  header->nscount = ntohs(header->nscount);
-  header->arcount = ntohs(header->arcount);
-
-  /*
-   * Response for an id which we have already received an answer for
-   * just ignore this response.
-   */
-  if ((request = find_id(header->id)) == NULL)
-    return;
-
-  if ((header->rcode != NO_ERRORS) || (header->ancount == 0))
+  while ((rc = recvfrom(fd->fd, buf, sizeof(buf), 0, (struct sockaddr *)&lsin, &len)) != -1)
   {
-    if (header->rcode == SERVFAIL || header->rcode == NXDOMAIN)
+    if (rc <= (ssize_t)sizeof(HEADER))
+      continue;
+
+    /*
+     * Check against possibly fake replies
+     */
+    if (!res_ourserver(&lsin))
+      continue;
+
+    /*
+     * Convert DNS reply reader from Network byte order to CPU byte order.
+     */
+    header = (HEADER *)buf;
+    header->ancount = ntohs(header->ancount);
+    header->qdcount = ntohs(header->qdcount);
+    header->nscount = ntohs(header->nscount);
+    header->arcount = ntohs(header->arcount);
+
+    /*
+     * Response for an id which we have already received an answer for
+     * just ignore this response.
+     */
+    if ((request = find_id(header->id)) == NULL)
+      continue;
+
+    if ((header->rcode != NO_ERRORS) || (header->ancount == 0))
     {
-      /*
-       * If a bad error was returned, stop here and don't
-       * send any more (no retries granted).
-       */
-      (*request->callback)(request->callback_ctx, NULL, NULL);
-      rem_request(request);
-    }
-#ifdef IPV6
-    else
-    {
-      /*
-       * If we havent already tried this, and we're looking up AAAA, try A now.
-       */
-      if (request->state == REQ_AAAA && request->type == T_AAAA)
+      if (header->rcode == SERVFAIL || header->rcode == NXDOMAIN)
       {
-        request->timeout += 4;
-        resend_query(request);
+        /*
+         * If a bad error was returned, stop here and don't
+         * send any more (no retries granted).
+         */
+        (*request->callback)(request->callback_ctx, NULL, NULL);
+        rem_request(request);
       }
-    }
+#ifdef IPV6
+      else
+      {
+        /*
+         * If we havent already tried this, and we're looking up AAAA, try A now.
+         */
+        if (request->state == REQ_AAAA && request->type == T_AAAA)
+        {
+          request->timeout += 4;
+          resend_query(request);
+        }
+      }
 #endif
+      continue;
+    }
 
-    return;
-  }
-
-  /*
-   * If this fails there was an error decoding the received packet.
-   * We only give it one shot. If it fails, just leave the client
-   * unresolved.
-   */
-  if (!proc_answer(request, header, buf, buf + rc))
-  {
-    (*request->callback)(request->callback_ctx, NULL, NULL);
-    rem_request(request);
-    return;
-  }
-
-  if (request->type == T_PTR)
-  {
-    if (request->name == NULL)
+    /*
+     * If this fails there was an error decoding the received packet.
+     * We only give it one shot. If it fails, just leave the client
+     * unresolved.
+     */
+    if (!proc_answer(request, header, buf, buf + rc))
     {
-      /*
-       * Got a PTR response with no name, something bogus is happening
-       * don't bother trying again, the client address doesn't resolve
-       */
       (*request->callback)(request->callback_ctx, NULL, NULL);
       rem_request(request);
-      return;
+      continue;
     }
 
-    /*
-     * Lookup the 'authoritative' name that we were given for the ip#.
-     */
+    if (request->type == T_PTR)
+    {
+      if (request->name == NULL)
+      {
+        /*
+         * Got a PTR response with no name, something bogus is happening
+         * don't bother trying again, the client address doesn't resolve
+         */
+        (*request->callback)(request->callback_ctx, NULL, NULL);
+        rem_request(request);
+        continue;
+      }
+
+      /*
+       * Lookup the 'authoritative' name that we were given for the ip#.
+       */
 #ifdef IPV6
-    if (request->addr.ss.ss_family == AF_INET6)
-      gethost_byname_type(request->callback, request->callback_ctx, request->name, T_AAAA);
-    else
+      if (request->addr.ss.ss_family == AF_INET6)
+        gethost_byname_type(request->callback, request->callback_ctx, request->name, T_AAAA);
+      else
 #endif
-    gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);
-    rem_request(request);
+      gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);
+      rem_request(request);
+    }
+    else
+    {
+      /*
+       * Got a name and address response, client resolved
+       */
+      (*request->callback)(request->callback_ctx, &request->addr, request->name);
+      rem_request(request);
+    }
+
+    continue;
   }
-  else
-  {
-    /*
-     * Got a name and address response, client resolved
-     */
-    (*request->callback)(request->callback_ctx, &request->addr, request->name);
-    rem_request(request);
-  }
+
+  comm_setselect(fd, COMM_SELECT_READ, res_readreply, NULL, 0);
 }
 
 void

@@ -692,53 +692,47 @@ res_readreply(fde_t *fd, void *data)
   }
 
   /*
-   * If this fails there was an error decoding the received packet,
-   * try it again and hope it works the next time.
+   * If this fails there was an error decoding the received packet.
+   * We only give it one shot. If it fails, just leave the client
+   * unresolved.
    */
-  if (proc_answer(request, header, buf, buf + rc))
+  if (!proc_answer(request, header, buf, buf + rc))
   {
-    if (request->type == T_PTR)
-    {
-      if (request->name == NULL)
-      {
-        /*
-         * Got a PTR response with no name, something bogus is happening
-         * don't bother trying again, the client address doesn't resolve
-         */
-        (*request->callback)(request->callback_ctx, NULL, NULL);
-        rem_request(request);
-        return;
-      }
-
-      /*
-       * Lookup the 'authoritative' name that we were given for the ip#.
-       */
-#ifdef IPV6
-      if (request->addr.ss.ss_family == AF_INET6)
-        gethost_byname_type(request->callback, request->callback_ctx, request->name, T_AAAA);
-      else
-#endif
-      gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);
-      rem_request(request);
-    }
-    else
-    {
-      /*
-       * Got a name and address response, client resolved
-       */
-      (*request->callback)(request->callback_ctx, &request->addr, request->name);
-      rem_request(request);
-    }
-  }
-  else if (!request->sent)
-  {
-    /* XXX - we got a response for a query we didn't send with a valid id?
-     * this should never happen, bail here and leave the client unresolved
-     */
-    assert(0);
-
     (*request->callback)(request->callback_ctx, NULL, NULL);
-    /* XXX don't leak it */
+    rem_request(request);
+    return;
+  }
+
+  if (request->type == T_PTR)
+  {
+    if (request->name == NULL)
+    {
+      /*
+       * Got a PTR response with no name, something bogus is happening
+       * don't bother trying again, the client address doesn't resolve
+       */
+      (*request->callback)(request->callback_ctx, NULL, NULL);
+      rem_request(request);
+      return;
+    }
+
+    /*
+     * Lookup the 'authoritative' name that we were given for the ip#.
+     */
+#ifdef IPV6
+    if (request->addr.ss.ss_family == AF_INET6)
+      gethost_byname_type(request->callback, request->callback_ctx, request->name, T_AAAA);
+    else
+#endif
+    gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);
+    rem_request(request);
+  }
+  else
+  {
+    /*
+     * Got a name and address response, client resolved
+     */
+    (*request->callback)(request->callback_ctx, &request->addr, request->name);
     rem_request(request);
   }
 }

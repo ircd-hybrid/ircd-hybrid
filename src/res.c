@@ -25,22 +25,20 @@
  */
 
 /*
- * A rewrite of Darren Reeds original res.c As there is nothing
- * left of Darrens original code, this is now licensed by the hybrid group.
+ * A rewrite of Darren Reed's original res.c As there is nothing
+ * left of Darren's original code, this is now licensed by the hybrid group.
  * (Well, some of the function names are the same, and bits of the structs..)
  * You can use it where it is useful, free even. Buy us a beer and stuff.
  *
  * The authors takes no responsibility for any damage or loss
  * of property which results from the use of this software.
  *
- * $Id$
- *
  * July 1999 - Rewrote a bunch of stuff here. Change hostent builder code,
  *     added callbacks and reference counting of returned hostents.
  *     --Bleep (Thomas Helvey <tomh@inxpress.net>)
  *
  * This was all needlessly complicated for irc. Simplified. No more hostent
- * All we really care about is the IP -> hostname mappings. Thats all.
+ * All we really care about is the IP -> hostname mappings. That's all.
  *
  * Apr 28, 2003 --cryogen and Dianora
  */
@@ -69,12 +67,13 @@
 
 static PF res_readreply;
 
-#define MAXPACKET      1024  /* rfc sez 512 but we expand names so ... */
-#define AR_TTL         600   /* TTL in seconds for dns cache entries */
+#define MAXPACKET      1024  /**< rfc says 512 but we expand names so ... */
+#define AR_TTL         600   /**< TTL in seconds for dns cache entries */
 
-/* RFC 1104/1105 wasn't very helpful about what these fields
+/*
+ * RFC 1104/1105 wasn't very helpful about what these fields
  * should be named, so for now, we'll just name them this way.
- * we probably should look at what named calls them or something.
+ * We probably should look at what named calls them or something.
  */
 #define TYPE_SIZE         (size_t)2
 #define CLASS_SIZE        (size_t)2
@@ -84,208 +83,37 @@ static PF res_readreply;
 
 typedef enum
 {
-  REQ_IDLE,  /* We're doing not much at all */
-  REQ_PTR,   /* Looking up a PTR */
-  REQ_A,     /* Looking up an A, possibly because AAAA failed */
+  REQ_IDLE,  /**< We're doing not much at all */
+  REQ_PTR,   /**< Looking up a PTR */
+  REQ_A,     /**< Looking up an A, possibly because AAAA failed */
 #ifdef IPV6
-  REQ_AAAA,  /* Looking up an AAAA */
+  REQ_AAAA,  /**< Looking up an AAAA */
 #endif
-  REQ_CNAME  /* We got a CNAME in response, we better get a real answer next */
+  REQ_CNAME  /**< We got a CNAME in response, we better get a real answer next */
 } request_state;
 
 struct reslist
 {
-  dlink_node node;
-  int id;
-  int sent;                /* number of requests sent */
-  request_state state;     /* State the resolver machine is in */
-  time_t ttl;
-  char type;
-  char retries;            /* retry counter */
-  unsigned int sends;      /* number of sends (>1 means resent) */
-  char resend;             /* send flag. 0 == don't resend */
-  time_t sentat;
-  time_t timeout;
-  struct irc_ssaddr addr;
-  char *name;
-  dns_callback_fnc callback;
-  void *callback_ctx;
+  dlink_node node;            /**< Doubly linked list node. */
+  int id;                     /**< Request ID (from request header). */
+  int sent;                   /**< Number of requests sent */
+  request_state state;        /**< State the resolver machine is in */
+  char type;                  /**< Current request type. */
+  char retries;               /**< Retry counter */
+  unsigned int sends;         /**< Number of sends (>1 means resent). */
+  char resend;                /**< Send flag; 0 == don't resend. */
+  time_t sentat;              /**< Timestamp we last sent this request. */
+  time_t timeout;             /**< When this request times out. */
+  struct irc_ssaddr addr;     /**< Address for this request. */
+  char *name;                 /**< Hostname for this request. */
+  dns_callback_fnc callback;  /**< Callback function on completion. */
+  void *callback_ctx;         /**< Context pointer for callback. */
 };
 
 static fde_t ResolverFileDescriptor;
 static dlink_list request_list;
 static mp_pool_t *dns_pool;
 
-static void rem_request(struct reslist *);
-static struct reslist *make_request(dns_callback_fnc, void *);
-static void do_query_name(dns_callback_fnc, void *,
-                          const char *, struct reslist *, int);
-static void do_query_number(dns_callback_fnc, void *,
-                            const struct irc_ssaddr *,
-                            struct reslist *);
-static void query_name(const char *, int, int, struct reslist *);
-static int send_res_msg(const char *, int, unsigned int);
-static void resend_query(struct reslist *);
-static int proc_answer(struct reslist *, HEADER *, char *, char *);
-static struct reslist *find_id(int);
-
-
-/*
- * int
- * res_ourserver(inp)
- *      looks up "inp" in irc_nsaddr_list[]
- * returns:
- *      0  : not found
- *      >0 : found
- * author:
- *      paul vixie, 29may94
- *      revised for ircd, cryogen(stu) may03
- */
-static int
-res_ourserver(const struct irc_ssaddr *inp)
-{
-#ifdef IPV6
-  const struct sockaddr_in6 *v6;
-  const struct sockaddr_in6 *v6in = (const struct sockaddr_in6 *)inp;
-#endif
-  const struct sockaddr_in *v4;
-  const struct sockaddr_in *v4in = (const struct sockaddr_in *)inp;
-
-  for (unsigned int i = 0; i < irc_nscount; ++i)
-  {
-    const struct irc_ssaddr *srv = &irc_nsaddr_list[i];
-#ifdef IPV6
-    v6 = (const struct sockaddr_in6 *)srv;
-#endif
-    v4 = (const struct sockaddr_in *)srv;
-
-    /* could probably just memcmp(srv, inp, srv.ss_len) here
-     * but we'll air on the side of caution - stu
-     *
-     */
-    switch (srv->ss.ss_family)
-    {
-#ifdef IPV6
-      case AF_INET6:
-        if (srv->ss.ss_family == inp->ss.ss_family)
-          if (v6->sin6_port == v6in->sin6_port)
-            if (!memcmp(&v6->sin6_addr.s6_addr, &v6in->sin6_addr.s6_addr,
-                        sizeof(struct in6_addr)))
-              return 1;
-        break;
-#endif
-      case AF_INET:
-        if (srv->ss.ss_family == inp->ss.ss_family)
-          if (v4->sin_port == v4in->sin_port)
-            if (v4->sin_addr.s_addr == v4in->sin_addr.s_addr)
-              return 1;
-        break;
-      default:
-        break;
-    }
-  }
-
-  return 0;
-}
-
-/*
- * timeout_query_list - Remove queries from the list which have been
- * there too long without being resolved.
- */
-static time_t
-timeout_query_list(void)
-{
-  dlink_node *ptr = NULL, *ptr_next = NULL;
-  struct reslist *request = NULL;
-  time_t next_time = 0;
-  time_t timeout   = 0;
-
-  DLINK_FOREACH_SAFE(ptr, ptr_next, request_list.head)
-  {
-    request = ptr->data;
-    timeout = request->sentat + request->timeout;
-
-    if (CurrentTime >= timeout)
-    {
-      if (--request->retries <= 0)
-      {
-        (*request->callback)(request->callback_ctx, NULL, NULL);
-        rem_request(request);
-        continue;
-      }
-      else
-      {
-        request->sentat = CurrentTime;
-        request->timeout += request->timeout;
-        resend_query(request);
-      }
-    }
-
-    if ((next_time == 0) || timeout < next_time)
-      next_time = timeout;
-  }
-
-  return (next_time > CurrentTime) ? next_time : (CurrentTime + AR_TTL);
-}
-
-/*
- * timeout_resolver - check request list
- */
-static void
-timeout_resolver(void *notused)
-{
-  timeout_query_list();
-}
-
-/*
- * start_resolver - do everything we need to read the resolv.conf file
- * and initialize the resolver file descriptor if needed
- */
-static void
-start_resolver(void)
-{
-  irc_res_init();
-
-  if (!ResolverFileDescriptor.flags.open)
-  {
-    if (comm_open(&ResolverFileDescriptor, irc_nsaddr_list[0].ss.ss_family,
-                  SOCK_DGRAM, 0, "Resolver socket") == -1)
-      return;
-
-    /* At the moment, the resolver FD data is global .. */
-    comm_setselect(&ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
-  }
-}
-
-/*
- * init_resolver - initialize resolver and resolver library
- */
-void
-init_resolver(void)
-{
-  static struct event event_timeout_resolver =
-  {
-    .name = "timeout_resolver",
-    .handler = timeout_resolver,
-    .when = 1
-  };
-
-  dns_pool = mp_pool_new(sizeof(struct reslist), MP_CHUNK_SIZE_DNS);
-  memset(&ResolverFileDescriptor, 0, sizeof(fde_t));
-  start_resolver();
-
-  event_add(&event_timeout_resolver, NULL);
-}
-
-/*
- * restart_resolver - reread resolv.conf, reopen socket
- */
-void
-restart_resolver(void)
-{
-  fd_close(&ResolverFileDescriptor);
-  start_resolver();
-}
 
 /*
  * rem_request - remove a request from the list.
@@ -319,6 +147,94 @@ make_request(dns_callback_fnc callback, void *ctx)
 
   dlinkAdd(request, &request->node, &request_list);
   return request;
+}
+
+/*
+ * int
+ * res_ourserver(inp)
+ *      looks up "inp" in irc_nsaddr_list[]
+ * returns:
+ *      0  : not found
+ *      >0 : found
+ * author:
+ *      paul vixie, 29may94
+ *      revised for ircd, cryogen(stu) may03
+ */
+static int
+res_ourserver(const struct irc_ssaddr *inp)
+{
+#ifdef IPV6
+  const struct sockaddr_in6 *v6;
+  const struct sockaddr_in6 *v6in = (const struct sockaddr_in6 *)inp;
+#endif
+  const struct sockaddr_in *v4;
+  const struct sockaddr_in *v4in = (const struct sockaddr_in *)inp;
+
+  for (unsigned int i = 0; i < irc_nscount; ++i)
+  {
+    const struct irc_ssaddr *srv = &irc_nsaddr_list[i];
+#ifdef IPV6
+    v6 = (const struct sockaddr_in6 *)srv;
+#endif
+    v4 = (const struct sockaddr_in *)srv;
+
+    /*
+     * Could probably just memcmp(srv, inp, srv.ss_len) here
+     * but we'll air on the side of caution - stu
+     */
+    switch (srv->ss.ss_family)
+    {
+#ifdef IPV6
+      case AF_INET6:
+        if (srv->ss.ss_family == inp->ss.ss_family)
+          if (v6->sin6_port == v6in->sin6_port)
+            if (!memcmp(&v6->sin6_addr.s6_addr, &v6in->sin6_addr.s6_addr,
+                        sizeof(struct in6_addr)))
+              return 1;
+        break;
+#endif
+      case AF_INET:
+        if (srv->ss.ss_family == inp->ss.ss_family)
+          if (v4->sin_port == v4in->sin_port)
+            if (v4->sin_addr.s_addr == v4in->sin_addr.s_addr)
+              return 1;
+        break;
+      default:
+        break;
+    }
+  }
+
+  return 0;
+}
+
+/*
+ * start_resolver - do everything we need to read the resolv.conf file
+ * and initialize the resolver file descriptor if needed
+ */
+static void
+start_resolver(void)
+{
+  irc_res_init();
+
+  if (!ResolverFileDescriptor.flags.open)
+  {
+    if (comm_open(&ResolverFileDescriptor, irc_nsaddr_list[0].ss.ss_family,
+                  SOCK_DGRAM, 0, "Resolver socket") == -1)
+      return;
+
+    /* At the moment, the resolver FD data is global .. */
+    comm_setselect(&ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
+  }
+}
+
+/*
+ * restart_resolver - reread resolv.conf, reopen socket
+ */
+void
+restart_resolver(void)
+{
+  fd_close(&ResolverFileDescriptor);
+  start_resolver();
 }
 
 /*
@@ -389,36 +305,37 @@ find_id(int id)
 }
 
 /*
- * gethost_byname_type - get host address from name
- *
+ * query_name - generate a query based on class, type and name.
  */
-void
-gethost_byname_type(dns_callback_fnc callback, void *ctx, const char *name, int type)
+static void
+query_name(const char *name, int query_class, int type,
+           struct reslist *request)
 {
-  assert(name);
-  do_query_name(callback, ctx, name, NULL, type);
-}
+  char buf[MAXPACKET];
+  int request_len = 0;
 
-/*
- * gethost_byname - wrapper for _type - send T_AAAA first if IPV6 supported
- */
-void
-gethost_byname(dns_callback_fnc callback, void *ctx, const char *name)
-{
-#ifdef IPV6
-  gethost_byname_type(callback, ctx, name, T_AAAA);
-#else
-  gethost_byname_type(callback, ctx, name, T_A);
-#endif
-}
+  memset(buf, 0, sizeof(buf));
 
-/*
- * gethost_byaddr - get host name from address
- */
-void
-gethost_byaddr(dns_callback_fnc callback, void *ctx, const struct irc_ssaddr *addr)
-{
-  do_query_number(callback, ctx, addr, NULL);
+  if ((request_len = irc_res_mkquery(name, query_class, type,
+      (unsigned char *)buf, sizeof(buf))) > 0)
+  {
+    HEADER *header = (HEADER *)buf;
+
+    /*
+     * Generate an unique id.
+     * NOTE: we don't have to worry about converting this to and from
+     * network byte order, the nameserver does not interpret this value
+     * and returns it unchanged.
+     */
+    do
+      header->id = (header->id + genrand_int32()) & 0xFFFF;
+    while (find_id(header->id));
+
+    request->id = header->id;
+    ++request->sends;
+
+    request->sent += send_res_msg(buf, request_len, request->sends);
+  }
 }
 
 /*
@@ -508,37 +425,36 @@ do_query_number(dns_callback_fnc callback, void *ctx,
 }
 
 /*
- * query_name - generate a query based on class, type and name.
+ * gethost_byname_type - get host address from name
+ *
  */
-static void
-query_name(const char *name, int query_class, int type,
-           struct reslist *request)
+void
+gethost_byname_type(dns_callback_fnc callback, void *ctx, const char *name, int type)
 {
-  char buf[MAXPACKET];
-  int request_len = 0;
+  assert(name);
+  do_query_name(callback, ctx, name, NULL, type);
+}
 
-  memset(buf, 0, sizeof(buf));
+/*
+ * gethost_byname - wrapper for _type - send T_AAAA first if IPV6 supported
+ */
+void
+gethost_byname(dns_callback_fnc callback, void *ctx, const char *name)
+{
+#ifdef IPV6
+  gethost_byname_type(callback, ctx, name, T_AAAA);
+#else
+  gethost_byname_type(callback, ctx, name, T_A);
+#endif
+}
 
-  if ((request_len = irc_res_mkquery(name, query_class, type,
-      (unsigned char *)buf, sizeof(buf))) > 0)
-  {
-    HEADER *header = (HEADER *)buf;
-
-    /*
-     * generate an unique id
-     * NOTE: we don't have to worry about converting this to and from
-     * network byte order, the nameserver does not interpret this value
-     * and returns it unchanged
-     */
-    do
-      header->id = (header->id + genrand_int32()) & 0xffff;
-    while (find_id(header->id));
-
-    request->id = header->id;
-    ++request->sends;
-
-    request->sent += send_res_msg(buf, request_len, request->sends);
-  }
+/*
+ * gethost_byaddr - get host name from address
+ */
+void
+gethost_byaddr(dns_callback_fnc callback, void *ctx, const struct irc_ssaddr *addr)
+{
+  do_query_number(callback, ctx, addr, NULL);
 }
 
 static void
@@ -573,7 +489,6 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
 {
   char hostbuf[HOSTLEN + 100]; /* working buffer */
   unsigned char *current;      /* current position in buf */
-  int query_class;             /* answer class */
   int type;                    /* answer type */
   int n;                       /* temp count */
   int rd_length;
@@ -618,13 +533,8 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
 
     type = irc_ns_get16(current);
     current += TYPE_SIZE;
-
-    query_class = irc_ns_get16(current);
     current += CLASS_SIZE;
-
-    request->ttl = irc_ns_get32(current);
     current += TTL_SIZE;
-
     rd_length = irc_ns_get16(current);
     current += RDLENGTH_SIZE;
 
@@ -722,7 +632,8 @@ res_readreply(fde_t *fd, void *data)
 
   rc = recvfrom(fd->fd, buf, sizeof(buf), 0, (struct sockaddr *)&lsin, &len);
 
-  /* Re-schedule a read *after* recvfrom, or we'll be registering
+  /*
+   * Re-schedule a read *after* recvfrom, or we'll be registering
    * interest where it'll instantly be ready for read :-) -- adrian
    */
   comm_setselect(fd, COMM_SELECT_READ, res_readreply, NULL, 0);
@@ -749,7 +660,7 @@ res_readreply(fde_t *fd, void *data)
    * Response for an id which we have already received an answer for
    * just ignore this response.
    */
-  if (!(request = find_id(header->id)))
+  if ((request = find_id(header->id)) == NULL)
     return;
 
   if ((header->rcode != NO_ERRORS) || (header->ancount == 0))
@@ -767,8 +678,7 @@ res_readreply(fde_t *fd, void *data)
     else
     {
       /*
-       * If we havent already tried this, and we're looking up AAAA, try A
-       * now
+       * If we havent already tried this, and we're looking up AAAA, try A now.
        */
       if (request->state == REQ_AAAA && request->type == T_AAAA)
       {
@@ -845,4 +755,73 @@ report_dns_servers(struct Client *source_p)
                 sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
     sendto_one_numeric(source_p, &me, RPL_STATSALINE, ipaddr);
   }
+}
+
+/*
+ * timeout_query_list - Remove queries from the list which have been
+ * there too long without being resolved.
+ */
+static time_t
+timeout_query_list(void)
+{
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+  struct reslist *request = NULL;
+  time_t next_time = 0;
+  time_t timeout   = 0;
+
+  DLINK_FOREACH_SAFE(ptr, ptr_next, request_list.head)
+  {
+    request = ptr->data;
+    timeout = request->sentat + request->timeout;
+
+    if (CurrentTime >= timeout)
+    {
+      if (--request->retries <= 0)
+      {
+        (*request->callback)(request->callback_ctx, NULL, NULL);
+        rem_request(request);
+        continue;
+      }
+      else
+      {
+        request->sentat = CurrentTime;
+        request->timeout += request->timeout;
+        resend_query(request);
+      }
+    }
+
+    if (next_time == 0 || timeout < next_time)
+      next_time = timeout;
+  }
+
+  return (next_time > CurrentTime) ? next_time : (CurrentTime + AR_TTL);
+}
+
+/*
+ * timeout_resolver - check request list
+ */
+static void
+timeout_resolver(void *notused)
+{
+  timeout_query_list();
+}
+
+/*
+ * init_resolver - initialize resolver and resolver library
+ */
+void
+init_resolver(void)
+{
+  static struct event event_timeout_resolver =
+  {
+    .name = "timeout_resolver",
+    .handler = timeout_resolver,
+    .when = 1
+  };
+
+  dns_pool = mp_pool_new(sizeof(struct reslist), MP_CHUNK_SIZE_DNS);
+  memset(&ResolverFileDescriptor, 0, sizeof(fde_t));
+  start_resolver();
+
+  event_add(&event_timeout_resolver, NULL);
 }

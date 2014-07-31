@@ -1080,10 +1080,10 @@ set_default_conf(void)
   ServerInfo.max_clients = MAXCLIENTS_MAX;
   ServerInfo.max_nick_length = 9;
   ServerInfo.max_topic_length = 80;
-
   ServerInfo.hub = 0;
   ServerInfo.dns_host.sin_addr.s_addr = 0;
   ServerInfo.dns_host.sin_port = 0;
+
   AdminInfo.name = NULL;
   AdminInfo.email = NULL;
   AdminInfo.description = NULL;
@@ -1114,6 +1114,8 @@ set_default_conf(void)
   ConfigServerHide.hide_server_ips = 0;
   ConfigServerHide.disable_remote_commands = 0;
 
+  ConfigFileEntry.away_count = 2;
+  ConfigFileEntry.away_time = 10;
   ConfigFileEntry.service_name = xstrdup(SERVICE_NAME_DEFAULT);
   ConfigFileEntry.max_watch = WATCHSIZE_DEFAULT;
   ConfigFileEntry.cycle_on_host_change = 1;

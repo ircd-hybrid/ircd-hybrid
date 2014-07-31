@@ -221,6 +221,8 @@ struct
   unsigned int anti_spam_exit_message_time;
   unsigned int max_accept;
   unsigned int max_watch;
+  unsigned int away_time;
+  unsigned int away_count;
   unsigned int max_nick_time;
   unsigned int max_nick_changes;
   unsigned int ts_max_delta;

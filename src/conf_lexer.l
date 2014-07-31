@@ -134,6 +134,8 @@ anti_nick_flood             { return ANTI_NICK_FLOOD; }
 anti_spam_exit_message_time { return ANTI_SPAM_EXIT_MESSAGE_TIME; }
 auth                        { return IRCD_AUTH; }
 autoconn                    { return AUTOCONN; }
+away_count                  { return AWAY_COUNT; }
+away_time                   { return AWAY_TIME; }
 bots                        { return T_BOTS; }
 caller_id_wait              { return CALLER_ID_WAIT; }
 callerid                    { return T_CALLERID; }

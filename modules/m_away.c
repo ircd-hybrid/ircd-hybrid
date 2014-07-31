@@ -73,20 +73,21 @@ m_away(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((CurrentTime - source_p->localClient->last_away) < ConfigFileEntry.pace_wait)
+  if ((source_p->localClient->away.last_attempt + ConfigFileEntry.away_time) < CurrentTime)
+    source_p->localClient->away.count = 0;
+
+  if (source_p->localClient->away.count > ConfigFileEntry.away_count)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
+    sendto_one_numeric(source_p, &me, ERR_TOOMANYAWAY);
     return 0;
   }
 
-  source_p->localClient->last_away = CurrentTime;
-  sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
-
-  if (!strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
-    return 0;
+  source_p->localClient->away.last_attempt = CurrentTime;
+  source_p->localClient->away.count++;
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 
+  sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
   sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,
                                source_p->host, source_p->away);
@@ -125,9 +126,6 @@ ms_away(struct Client *source_p, int parc, char *parv[])
 
     return 0;
   }
-
-  if (!strncmp(source_p->away, parv[1], sizeof(source_p->away) - 1))
-    return 0;
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 

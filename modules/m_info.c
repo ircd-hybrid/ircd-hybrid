@@ -188,7 +188,7 @@ static const struct InfoStruct info_table[] =
     "knock_client_time",
     OUTPUT_DECIMAL,
     &ConfigChannel.knock_client_time,
-    "How many kknock_client_count knocks are allowed in this time"
+    "How many knock_client_count knocks are allowed in this time"
   },
   {
     "knock_delay_channel",
@@ -273,6 +273,18 @@ static const struct InfoStruct info_table[] =
     OUTPUT_BOOLEAN_YN,
     &ConfigServerHide.hide_server_ips,
     "Prevent people from seeing server IP addresses"
+  },
+  {
+    "away_count",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.away_count,
+    "How many AWAY attempts are permitted in away_time"
+  },
+  {
+    "away_time",
+    OUTPUT_DECIMAL,
+    &ConfigFileEntry.away_time,
+    "How many away_count aways are allowed in this time"
   },
   {
     "gline_min_cidr",

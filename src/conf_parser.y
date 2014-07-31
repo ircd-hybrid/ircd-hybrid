@@ -155,6 +155,8 @@ reset_block_state(void)
 %token  ANTI_NICK_FLOOD
 %token  ANTI_SPAM_EXIT_MESSAGE_TIME
 %token  AUTOCONN
+%token  AWAY_COUNT
+%token  AWAY_TIME
 %token  BYTES KBYTES MBYTES
 %token  CALLER_ID_WAIT
 %token  CAN_FLOOD
@@ -2463,7 +2465,9 @@ general_entry: GENERAL
   '{' general_items '}' ';';
 
 general_items:      general_items general_item | general_item;
-general_item:       general_hide_spoof_ips |
+general_item:       general_away_count |
+                    general_away_time |
+                    general_hide_spoof_ips |
                     general_ignore_bogus_ts |
                     general_failed_oper_notice |
                     general_anti_nick_flood |
@@ -2513,6 +2517,16 @@ general_item:       general_hide_spoof_ips |
                     general_cycle_on_host_change |
                     error;
 
+
+general_away_count: AWAY_COUNT '=' NUMBER ';'
+{
+  ConfigFileEntry.away_count = $3;
+};
+
+general_away_time: AWAY_TIME '=' timespec ';'
+{
+  ConfigFileEntry.away_time = $3;
+};
 
 general_max_watch: MAX_WATCH '=' NUMBER ';'
 {

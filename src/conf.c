@@ -609,11 +609,11 @@ count_ip_hash(unsigned int *number_ips_stored, uint64_t *mem_ips_stored)
 static void
 ipcache_remove_expired_entries(void *unused)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *ptr = NULL, *ptr_next = NULL;
 
   for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
   {
-    DLINK_FOREACH(ptr, ip_hash_table[i].head)
+    DLINK_FOREACH_SAFE(ptr, ptr_next, ip_hash_table[i].head)
     {
       struct ip_entry *iptr = ptr->data;
 

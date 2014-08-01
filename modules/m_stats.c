@@ -317,7 +317,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   unsigned int wwu = 0;                  /* whowas users */
   unsigned int class_count = 0;          /* classes */
   unsigned int aways_counted = 0;
-  unsigned int number_ips_stored;        /* number of ip addresses hashed */
+  unsigned int number_ips_stored = 0;        /* number of ip addresses hashed */
 
   uint64_t channel_memory = 0;
   uint64_t channel_ban_memory = 0;
@@ -329,7 +329,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   uint64_t wwm = 0;               /* whowas array memory used       */
   uint64_t conf_memory = 0;       /* memory used by conf lines      */
-  uint64_t mem_ips_stored;        /* memory used by ip address hash */
+  uint64_t mem_ips_stored = 0;        /* memory used by ip address hash */
 
   uint64_t total_channel_memory = 0;
   uint64_t totww = 0;

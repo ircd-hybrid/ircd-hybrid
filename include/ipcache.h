@@ -21,7 +21,7 @@
 
 /*! \file ipcache.h
  * \brief Routines to count connections from particular IP addresses.
- * \version $Id: ipcache.h 4324 2014-08-01 16:59:35Z michael $
+ * \version $Id$
  */
 
 #ifndef INCLUDED_ipcache_h

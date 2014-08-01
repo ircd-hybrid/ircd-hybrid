@@ -352,18 +352,14 @@ verify_access(struct Client *client_p)
 static int
 attach_iline(struct Client *client_p, struct MaskItem *conf)
 {
-  struct ClassItem *class = NULL;
+  const struct ClassItem *class = conf->class;
   struct ip_entry *ip_found;
   int a_limit_reached = 0;
   unsigned int local = 0, global = 0, ident = 0;
 
-  assert(conf->class);
-
   ip_found = ipcache_find_or_add_address(&client_p->localClient->ip);
   ip_found->count++;
   SetIpHash(client_p);
-
-  class = conf->class;
 
   count_user_host(client_p->username, client_p->host,
                   &global, &local, &ident);

@@ -50,6 +50,7 @@
 #include "watch.h"
 #include "res.h"
 #include "motd.h"
+#include "ipcache.h"
 
 
 static const struct shared_flags
@@ -526,7 +527,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   totww = wwu * sizeof(struct Client) + wwm;
 
   motd_memory_count(source_p);
-  count_ip_hash(&number_ips_stored,&mem_ips_stored);
+  ipcache_get_stats(&number_ips_stored, &mem_ips_stored);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
                      "z :iphash %u(%llu)",
                      number_ips_stored, mem_ips_stored);

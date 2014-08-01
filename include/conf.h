@@ -345,9 +345,6 @@ extern int valid_wild_card_simple(const char *);
 extern int valid_wild_card(struct Client *, int, int, ...);
 /* End GLOBAL section */
 
-extern void ipcache_init(void);
-extern void count_ip_hash(unsigned int *, uint64_t *);
-extern void remove_one_ip(struct irc_ssaddr *);
 extern struct MaskItem *conf_make(enum maskitem_type);
 extern void read_conf_files(int);
 extern int attach_conf(struct Client *, struct MaskItem *);

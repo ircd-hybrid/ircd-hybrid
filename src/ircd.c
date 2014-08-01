@@ -56,6 +56,7 @@
 #include "watch.h"
 #include "conf_db.h"
 #include "conf_class.h"
+#include "ipcache.h"
 
 
 #ifdef HAVE_LIBGEOIP

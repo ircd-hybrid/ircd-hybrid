@@ -49,6 +49,7 @@
 #include "watch.h"
 #include "rng_mt.h"
 #include "parse.h"
+#include "ipcache.h"
 
 
 dlink_list listing_client_list;
@@ -709,7 +710,7 @@ exit_client(struct Client *source_p, const char *comment)
     SetClosing(source_p);
 
     if (IsIpHash(source_p))
-      remove_one_ip(&source_p->localClient->ip);
+      ipcache_remove_address(&source_p->localClient->ip);
 
     delete_auth(&source_p->localClient->auth);
 

@@ -25,6 +25,7 @@ ircd_SOURCES = auth.c            \
                gline.c           \
                hash.c            \
                hostmask.c        \
+               ipcache.c         \
                irc_string.c      \
                ircd.c            \
                ircd_signal.c     \

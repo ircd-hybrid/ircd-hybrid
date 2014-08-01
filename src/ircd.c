@@ -541,7 +541,7 @@ main(int argc, char *argv[])
   init_isupport();
   dbuf_init();
   hash_init();
-  init_ip_hash_table();      /* client host ip hash table */
+  ipcache_init();
   init_host_hash();          /* Host-hashtable. */
   client_init();
   class_init();

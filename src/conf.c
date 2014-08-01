@@ -75,8 +75,8 @@ extern int yyparse(); /* defined in y.tab.c */
 static void read_conf(FILE *);
 static void clear_out_old_conf(void);
 static void expire_tklines(dlink_list *);
-static void garbage_collect_ip_entries(void);
-static int hash_ip(struct irc_ssaddr *);
+static void ipcache_remove_expired_entries(void *);
+static uint32_t hash_ip(const struct irc_ssaddr *);
 static int verify_access(struct Client *);
 static int attach_iline(struct Client *, struct MaskItem *);
 static struct ip_entry *find_or_add_ip(struct irc_ssaddr *);
@@ -92,16 +92,15 @@ static int find_user_host(struct Client *, char *, char *, char *, unsigned int)
 
 struct ip_entry
 {
+  dlink_node node;                /**< Doubly linked list node. */
   struct irc_ssaddr ip;
-  unsigned int count;  /**< Number of registered users using this IP */
+  unsigned int count;             /**< Number of registered users using this IP */
   unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
-  time_t last_attempt;  /**< The last time someone connected from this IP */
-  struct ip_entry *next;
+  time_t last_attempt;            /**< The last time someone connected from this IP */
 };
 
-static struct ip_entry *ip_hash_table[IP_HASH_SIZE];
+static dlink_list ip_hash_table[IP_HASH_SIZE];
 static mp_pool_t *ip_entry_pool = NULL;
-static int ip_entries_count = 0;
 
 
 /* conf_dns_callback()
@@ -427,10 +426,17 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
  *			- clear the ip hash table
  */
 void
-init_ip_hash_table(void)
+ipcache_init(void)
 {
+  static struct event event_expire_ipcache =
+  {
+    .name = "ipcache_remove_expired_entries",
+    .handler = ipcache_remove_expired_entries,
+    .when = 123
+  };
+
+  event_add(&event_expire_ipcache, NULL);
   ip_entry_pool = mp_pool_new(sizeof(struct ip_entry), MP_CHUNK_SIZE_IP_ENTRY);
-  memset(ip_hash_table, 0, sizeof(ip_hash_table));
 }
 
 /* find_or_add_ip()
@@ -443,50 +449,46 @@ init_ip_hash_table(void)
  * count set to 0.
  */
 static struct ip_entry *
-find_or_add_ip(struct irc_ssaddr *ip_in)
+find_or_add_ip(struct irc_ssaddr *addr)
 {
-  struct ip_entry *ptr, *newptr;
-  int hash_index = hash_ip(ip_in), res;
-  struct sockaddr_in *v4 = (struct sockaddr_in *)ip_in, *ptr_v4;
+  dlink_node *ptr = NULL;
+  struct ip_entry *iptr = NULL;
+  uint32_t hash_index = hash_ip(addr);
+  int res = 0;
+  struct sockaddr_in *v4 = (struct sockaddr_in *)addr, *ptr_v4;
 #ifdef IPV6
-  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)ip_in, *ptr_v6;
+  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr, *ptr_v6;
 #endif
 
-  for (ptr = ip_hash_table[hash_index]; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, ip_hash_table[hash_index].head)
   {
+    iptr = ptr->data;
 #ifdef IPV6
-    if (ptr->ip.ss.ss_family != ip_in->ss.ss_family)
+    if (iptr->ip.ss.ss_family != addr->ss.ss_family)
       continue;
-    if (ip_in->ss.ss_family == AF_INET6)
+
+    if (addr->ss.ss_family == AF_INET6)
     {
-      ptr_v6 = (struct sockaddr_in6 *)&ptr->ip;
+      ptr_v6 = (struct sockaddr_in6 *)&iptr->ip;
       res = memcmp(&v6->sin6_addr, &ptr_v6->sin6_addr, sizeof(struct in6_addr));
     }
     else
 #endif
     {
-      ptr_v4 = (struct sockaddr_in *)&ptr->ip;
+      ptr_v4 = (struct sockaddr_in *)&iptr->ip;
       res = memcmp(&v4->sin_addr, &ptr_v4->sin_addr, sizeof(struct in_addr));
     }
+
     if (res == 0)
-    {
-      /* Found entry already in hash, return it. */
-      return ptr;
-    }
+      return iptr;  /* Found entry already in hash, return it. */
   }
 
-  if (ip_entries_count >= 2 * hard_fdlimit)
-    garbage_collect_ip_entries();
+  iptr = mp_pool_get(ip_entry_pool);
+  memcpy(&iptr->ip, addr, sizeof(struct irc_ssaddr));
 
-  newptr = mp_pool_get(ip_entry_pool);
+  dlinkAdd(iptr, &iptr->node, &atable[hash_index]);
 
-  ip_entries_count++;
-  memcpy(&newptr->ip, ip_in, sizeof(struct irc_ssaddr));
-
-  newptr->next = ip_hash_table[hash_index];
-  ip_hash_table[hash_index] = newptr;
-
-  return newptr;
+  return iptr;
 }
 
 /* remove_one_ip()
@@ -499,49 +501,45 @@ find_or_add_ip(struct irc_ssaddr *ip_in)
  *		   the struct ip_entry is returned to the ip_entry_heap
  */
 void
-remove_one_ip(struct irc_ssaddr *ip_in)
+remove_one_ip(struct irc_ssaddr *addr)
 {
-  struct ip_entry *ptr;
-  struct ip_entry *last_ptr = NULL;
-  int hash_index = hash_ip(ip_in), res;
-  struct sockaddr_in *v4 = (struct sockaddr_in *)ip_in, *ptr_v4;
+  dlink_node *ptr = NULL;
+  uint32_t hash_index = hash_ip(addr);
+  int res = 0;
+  struct sockaddr_in *v4 = (struct sockaddr_in *)addr, *ptr_v4;
 #ifdef IPV6
-  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)ip_in, *ptr_v6;
+  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr, *ptr_v6;
 #endif
 
-  for (ptr = ip_hash_table[hash_index]; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, ip_hash_table[hash_index].head)
   {
+    struct ip_entry *iptr = ptr->data;
 #ifdef IPV6
-    if (ptr->ip.ss.ss_family != ip_in->ss.ss_family)
+    if (iptr->ip.ss.ss_family != addr->ss.ss_family)
       continue;
-    if (ip_in->ss.ss_family == AF_INET6)
+    if (addr->ss.ss_family == AF_INET6)
     {
-      ptr_v6 = (struct sockaddr_in6 *)&ptr->ip;
+      ptr_v6 = (struct sockaddr_in6 *)&iptr->ip;
       res = memcmp(&v6->sin6_addr, &ptr_v6->sin6_addr, sizeof(struct in6_addr));
     }
     else
 #endif
     {
-      ptr_v4 = (struct sockaddr_in *)&ptr->ip;
+      ptr_v4 = (struct sockaddr_in *)&iptr->ip;
       res = memcmp(&v4->sin_addr, &ptr_v4->sin_addr, sizeof(struct in_addr));
     }
+
     if (res)
       continue;
-    if (ptr->count > 0)
-      ptr->count--;
-    if (ptr->count == 0 &&
-        (CurrentTime-ptr->last_attempt) >= ConfigFileEntry.throttle_time)
-    {
-      if (last_ptr != NULL)
-        last_ptr->next = ptr->next;
-      else
-        ip_hash_table[hash_index] = ptr->next;
+    assert(iptr->count > 0);
 
-      mp_pool_release(ptr);
-      ip_entries_count--;
+    if (--iptr->count == 0 &&
+        (CurrentTime - iptr->last_attempt) >= ConfigFileEntry.throttle_time)
+    {
+      dlinkDelete(&iptr->node, &ip_hash_table[hash_index]);
+      mp_pool_release(iptr);
       return;
     }
-    last_ptr = ptr;
   }
 }
 
@@ -551,25 +549,22 @@ remove_one_ip(struct irc_ssaddr *ip_in)
  * output       - integer value used as index into hash table
  * side effects - hopefully, none
  */
-static int
-hash_ip(struct irc_ssaddr *addr)
+static uint32_t
+hash_ip(const struct irc_ssaddr *addr)
 {
   if (addr->ss.ss_family == AF_INET)
   {
-    struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
-    int hash;
-    uint32_t ip;
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr;
+    uint32_t hash = 0, ip = ntohl(v4->sin_addr.s_addr);
 
-    ip   = ntohl(v4->sin_addr.s_addr);
-    hash = ((ip >> 12) + ip) & (IP_HASH_SIZE-1);
+    hash = ((ip >> 12) + ip) & (IP_HASH_SIZE - 1);
     return hash;
   }
 #ifdef IPV6
   else
   {
-    int hash;
-    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr;
-    uint32_t *ip = (uint32_t *)&v6->sin6_addr.s6_addr;
+    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
+    uint32_t hash = 0, *ip = (uint32_t *)&v6->sin6_addr.s6_addr;
 
     hash  = ip[0] ^ ip[3];
     hash ^= hash >> 16;
@@ -595,18 +590,13 @@ hash_ip(struct irc_ssaddr *addr)
 void
 count_ip_hash(unsigned int *number_ips_stored, uint64_t *mem_ips_stored)
 {
-  struct ip_entry *ptr;
-
   *number_ips_stored = 0;
   *mem_ips_stored    = 0;
 
   for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
   {
-    for (ptr = ip_hash_table[i]; ptr; ptr = ptr->next)
-    {
-      *number_ips_stored += 1;
-      *mem_ips_stored += sizeof(struct ip_entry);
-    }
+    *number_ips_stored += dlink_list_length(&ip_hash_table[i]);
+    *mem_ips_stored += dlink_list_length(&ip_hash_table[i]) * sizeof(struct ip_entry);
   }
 }
 
@@ -617,32 +607,22 @@ count_ip_hash(unsigned int *number_ips_stored, uint64_t *mem_ips_stored)
  * side effects	- free up all ip entries with no connections
  */
 static void
-garbage_collect_ip_entries(void)
+ipcache_remove_expired_entries(void *unused)
 {
-  struct ip_entry *ptr;
-  struct ip_entry *last_ptr;
-  struct ip_entry *next_ptr;
+  dlink_node *ptr = NULL;
 
   for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
   {
-    last_ptr = NULL;
-
-    for (ptr = ip_hash_table[i]; ptr; ptr = next_ptr)
+    DLINK_FOREACH(ptr, ip_hash_table[i].head)
     {
-      next_ptr = ptr->next;
+      struct ip_entry *iptr = ptr->data;
 
-      if (ptr->count == 0 &&
-          (CurrentTime - ptr->last_attempt) >= ConfigFileEntry.throttle_time)
+      if (iptr->count == 0 &&
+          (CurrentTime - iptr->last_attempt) >= ConfigFileEntry.throttle_time)
       {
-        if (last_ptr != NULL)
-          last_ptr->next = ptr->next;
-        else
-          ip_hash_table[i] = ptr->next;
-        mp_pool_release(ptr);
-        ip_entries_count--;
+        dlinkDelete(&iptr->node, &ip_hash_table[i]);
+        mp_pool_release(iptr);
       }
-      else
-        last_ptr = ptr;
     }
   }
 }

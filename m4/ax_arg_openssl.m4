@@ -1,10 +1,10 @@
 AC_DEFUN([AX_ARG_OPENSSL], [
 AC_ARG_ENABLE(openssl,
-[  --enable-openssl[=DIR]       Enable OpenSSL support (DIR optional).
-  --disable-openssl            Disable OpenSSL support. ],
+[  --enable-openssl[=DIR]       Enable LibreSSL/OpenSSL support (DIR optional).
+  --disable-openssl            Disable LibreSSL/OpenSSL support. ],
 [ cf_enable_openssl=$enableval ],
 [ cf_enable_openssl="auto" ])
-AC_MSG_CHECKING([for OpenSSL])
+AC_MSG_CHECKING([for LibreSSL/OpenSSL])
 if test "$cf_enable_openssl" != "no"; then
   cf_openssl_basedir=""
   if test "$cf_enable_openssl" != "auto" &&
@@ -61,7 +61,7 @@ else
 fi
 
 AS_IF([test "$cf_enable_openssl" != "no"],
- [AC_MSG_CHECKING(for OpenSSL 0.9.8o or above)
+ [AC_MSG_CHECKING(for LibreSSL or OpenSSL 0.9.8o and above)
   AC_RUN_IFELSE([
     AC_LANG_PROGRAM([
     #include <openssl/opensslv.h>
@@ -77,7 +77,7 @@ AS_IF([test "$cf_enable_openssl" != "no"],
     AC_CHECK_LIB(crypto, RSA_free)
     AS_IF([test "$ac_cv_lib_crypto_RSA_free" = "yes"],
       [AC_CHECK_LIB(ssl, SSL_connect)])
-    ],[AC_MSG_RESULT(no - OpenSSL support disabled)
+    ],[AC_MSG_RESULT(no - LibreSSL/OpenSSL support disabled)
     cf_enable_openssl="no"])])
 
 AM_CONDITIONAL(ENABLE_SSL, [test "$ac_cv_lib_ssl_SSL_connect" = yes])

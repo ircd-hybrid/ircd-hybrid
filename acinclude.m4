@@ -39,37 +39,7 @@ AC_DEFUN([AX_ARG_ENABLE_IOLOOP_MECHANISM],[
   dnl {{{ check for epoll oechanism support
   iopoll_mechanism_epoll=2
   AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_EPOLL],[$iopoll_mechanism_epoll],[epoll mechanism])
-  AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/epoll.h>
-#include <sys/syscall.h>
-#if defined(__stub_epoll_create) || defined(__stub___epoll_create) || defined(EPOLL_NEED_BODY)
-#if !defined(__NR_epoll_create)
-#if defined(__ia64__)
-#define __NR_epoll_create 1243
-#elif defined(__x86_64__)
-#define __NR_epoll_create 214
-#elif defined(__sparc64__) || defined(__sparc__)
-#define __NR_epoll_create 193
-#elif defined(__s390__) || defined(__m68k__)
-#define __NR_epoll_create 249
-#elif defined(__ppc64__) || defined(__ppc__)
-#define __NR_epoll_create 236
-#elif defined(__parisc__) || defined(__arm26__) || defined(__arm__)
-#define __NR_epoll_create 224
-#elif defined(__alpha__)
-#define __NR_epoll_create 407
-#elif defined(__sh64__)
-#define __NR_epoll_create 282
-#elif defined(__i386__) || defined(__sh__) || defined(__m32r__) || defined(__h8300__) || defined(__frv__)
-#define __NR_epoll_create 254
-#else
-#error No system call numbers defined for epoll family.
-#endif
-#endif
-_syscall1(int, epoll_create, int, size)
-#endif
-]], [[ return epoll_create(256) == -1 ? 1 : 0 ]])],
-  [is_epoll_mechanism_available="yes"],[is_epoll_mechanism_available="no"])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [epoll_create(256);])], [is_epoll_mechanism_available="yes"],[is_epoll_mechanism_available="no"])
   dnl }}}
   dnl {{{ check for devpoll mechanism support
   iopoll_mechanism_devpoll=3

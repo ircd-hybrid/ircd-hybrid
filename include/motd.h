@@ -34,8 +34,8 @@ enum MotdType
 {
   MOTD_UNIVERSAL, /**< MOTD for all users */
   MOTD_HOSTMASK,  /**< MOTD selected by hostmask */
-  MOTD_IPMASKV4,  /**< MOTD selected by IP mask */
-  MOTD_IPMASKV6,  /**< MOTD selected by IP mask */
+  MOTD_IPMASKV4,  /**< MOTD selected by IPv4 mask */
+  MOTD_IPMASKV6,  /**< MOTD selected by IPv6 mask */
   MOTD_CLASS      /**< MOTD selected by connection class */
 };
 
@@ -92,7 +92,7 @@ extern void motd_add(const char *, const char *);
 /* This routine clears the list of MOTDs */
 extern void motd_clear(void);
 
-/* This is called to report T-lines */
+/* This is called to report motd {} blocks */
 extern void motd_report(struct Client *);
 extern void motd_memory_count(struct Client *);
 #endif

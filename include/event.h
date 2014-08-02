@@ -49,9 +49,9 @@ struct event
   dlink_node node;
 };
 
-extern void event_add(struct event *ev, void *data);
-extern void event_addish(struct event *ev, void *data);
-extern void event_delete(struct event *ev);
+extern void event_add(struct event *, void *);
+extern void event_addish(struct event *, void *);
+extern void event_delete(struct event *);
 extern void event_run(void);
 extern void set_back_events(time_t);
 extern void show_events(struct Client *);

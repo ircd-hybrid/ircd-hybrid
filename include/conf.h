@@ -315,7 +315,6 @@ struct
   unsigned int max_topic_length;
   unsigned int specific_ipv4_vhost;
   unsigned int specific_ipv6_vhost;
-  struct sockaddr_in dns_host;
   unsigned int can_use_v6;
 } ConfigServerInfo;
 

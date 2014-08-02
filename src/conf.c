@@ -826,8 +826,6 @@ set_default_conf(void)
   ConfigServerInfo.max_nick_length = 9;
   ConfigServerInfo.max_topic_length = 80;
   ConfigServerInfo.hub = 0;
-  ConfigServerInfo.dns_host.sin_addr.s_addr = 0;
-  ConfigServerInfo.dns_host.sin_port = 0;
 
   ConfigAdminInfo.name = NULL;
   ConfigAdminInfo.email = NULL;

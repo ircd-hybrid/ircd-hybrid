@@ -40,12 +40,12 @@ struct event
   const char *name;
   event_handler handler;
   time_t when;
-  unsigned short oneshot;
+  unsigned int oneshot;
 
   /* private */
   time_t next;
   void *data;
-  unsigned short enabled;
+  unsigned int enabled;
   dlink_node node;
 };
 

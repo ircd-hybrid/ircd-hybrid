@@ -7,6 +7,4 @@ AC_DEFUN([AX_LIBRARY_NET],[
    #include <sys/socket.h>
    #include <netdb.h>
   ])
-  AC_CHECK_MEMBERS([struct sockaddr_in.sin_len],,,[#include <sys/types.h>
-  <sys/socket.h>])
 ])

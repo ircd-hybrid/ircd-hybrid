@@ -45,7 +45,7 @@ struct Motd
   dlink_node         node; /**< Next MOTD in the linked list. */
   enum MotdType      type;     /**< Type of MOTD. */
   char              *path;     /**< Pathname of MOTD file. */
-  char              *hostmask; /**< Hostmask if type==MOTD_HOSTMASK,
+  char              *mask; /**< Hostmask if type==MOTD_HOSTMASK,
                                        class name if type==MOTD_CLASS,
                                        text IP mask if type==MOTD_IPMASK. */
   struct irc_ssaddr  address;  /**< Address if type==MOTD_IPMASK. */

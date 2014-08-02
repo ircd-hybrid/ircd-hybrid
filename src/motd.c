@@ -50,21 +50,21 @@ static struct
 
 
 /*! \brief Create a struct Motd and initialize it.
- * \param hostmask Hostmask (or connection class name) to filter on.
+ * \param mask Hostmask (or connection class name) to filter on.
  * \param path Path to MOTD file.
  */
 static struct Motd *
-motd_create(const char *hostmask, const char *path)
+motd_create(const char *mask, const char *path)
 {
   struct Motd *tmp = MyCalloc(sizeof(struct Motd));
 
-  if (EmptyString(hostmask))
+  if (EmptyString(mask))
     tmp->type = MOTD_UNIVERSAL;
-  else if (class_find(hostmask, 1))
+  else if (class_find(mask, 1))
     tmp->type = MOTD_CLASS;
   else
   {
-    switch (parse_netmask(hostmask, &tmp->address, &tmp->addrbits))
+    switch (parse_netmask(mask, &tmp->address, &tmp->addrbits))
     {
       case HM_IPV4:
       tmp->type = MOTD_IPMASKV4;
@@ -80,8 +80,8 @@ motd_create(const char *hostmask, const char *path)
     }
   }
 
-  if (hostmask)
-    tmp->hostmask = xstrdup(hostmask);
+  if (mask)
+    tmp->mask = xstrdup(mask);
 
   tmp->path = xstrdup(path);
   tmp->maxcount = MOTD_MAXLINES;
@@ -210,7 +210,7 @@ motd_destroy(struct Motd *motd)
     motd_decache(motd);
 
   MyFree(motd->path);  /* We always must have a path */
-  MyFree(motd->hostmask);
+  MyFree(motd->mask);
   MyFree(motd);
 }
 
@@ -244,11 +244,11 @@ motd_lookup(const struct Client *client_p)
     switch (motd->type)
     {
       case MOTD_CLASS:
-        if (!match(motd->hostmask, class->name))
+        if (!match(motd->mask, class->name))
           return motd;
         break;
       case MOTD_HOSTMASK:
-        if (!match(motd->hostmask, client_p->host))
+        if (!match(motd->mask, client_p->host))
           return motd;
         break;
       case MOTD_IPMASKV4:
@@ -371,13 +371,13 @@ motd_init(void)
 }
 
 /* \brief Add a new MOTD.
- * \param hostmask Hostmask (or connection class name) to send this to.
+ * \param mask Hostmask (or connection class name) to send this to.
  * \param path Pathname of file to send.
  */
 void
-motd_add(const char *hostmask, const char *path)
+motd_add(const char *mask, const char *path)
 {
-  struct Motd *motd = motd_create(hostmask, path);  /* Create the motd */
+  struct Motd *motd = motd_create(mask, path);  /* Create the motd */
 
   dlinkAdd(motd, &motd->node, &MotdList.other);
 }
@@ -419,7 +419,7 @@ motd_report(struct Client *source_p)
     const struct Motd *motd = ptr->data;
 
     sendto_one_numeric(source_p, &me, RPL_STATSTLINE,
-                       motd->hostmask, motd->path);
+                       motd->mask, motd->path);
   }
 }
 

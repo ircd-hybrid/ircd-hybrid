@@ -102,7 +102,7 @@ set_local_gline(const struct Client *source_p, const char *user,
   conf->host = xstrdup(host);
 
   conf->setat = CurrentTime;
-  conf->until = CurrentTime + ConfigFileEntry.gline_time;
+  conf->until = CurrentTime + ConfigGeneral.gline_time;
   SetConfDatabase(conf);
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -312,7 +312,7 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
                 source_p->id, user, host, reason);
 
-  if (!ConfigFileEntry.glines)
+  if (!ConfigGeneral.glines)
     return 0;
 
   if (!valid_wild_card(source_p, 1, 2, user, host))
@@ -321,8 +321,8 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
   if ((p = strchr(host, '/')))
   {
     int bitlen = strtol(++p, NULL, 10);
-    int min_bitlen = strchr(host, ':') ? ConfigFileEntry.gline_min_cidr6 :
-                                         ConfigFileEntry.gline_min_cidr;
+    int min_bitlen = strchr(host, ':') ? ConfigGeneral.gline_min_cidr6 :
+                                         ConfigGeneral.gline_min_cidr;
 
     if (bitlen < min_bitlen)
     {
@@ -378,7 +378,7 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!ConfigFileEntry.glines)
+  if (!ConfigGeneral.glines)
   {
     sendto_one_notice(source_p, &me, ":GLINE disabled");
     return 0;
@@ -391,8 +391,8 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
   if ((p = strchr(host, '/')))
   {
     int bitlen = strtol(++p, NULL, 10);
-    int min_bitlen = strchr(host, ':') ? ConfigFileEntry.gline_min_cidr6 :
-                                         ConfigFileEntry.gline_min_cidr;
+    int min_bitlen = strchr(host, ':') ? ConfigGeneral.gline_min_cidr6 :
+                                         ConfigGeneral.gline_min_cidr;
     if (bitlen < min_bitlen)
     {
       sendto_one_notice(source_p, &me, ":Cannot set G-Lines with CIDR length < %d",
@@ -465,7 +465,7 @@ do_sungline(struct Client *source_p, const char *user,
 static int
 me_gungline(struct Client *source_p, int parc, char *parv[])
 {
-  if (ConfigFileEntry.glines)
+  if (ConfigGeneral.glines)
     do_sungline(source_p, parv[1], parv[2], parv[3], 0);
   return 0;
 }
@@ -495,7 +495,7 @@ mo_gungline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!ConfigFileEntry.glines)
+  if (!ConfigGeneral.glines)
   {
     sendto_one_notice(source_p, &me, ":GUNGLINE disabled");
     return 0;

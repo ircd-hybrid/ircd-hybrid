@@ -737,7 +737,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
     return CAN_SEND_OPV;
 
   if (MyClient(source_p) && !IsExemptResv(source_p))
-    if (!(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv))
+    if (!(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv))
       if ((conf = match_find_resv(chptr->chname)) && !resv_find_exempt(source_p, conf))
         return ERR_CANNOTSENDTOCHAN;
 
@@ -884,7 +884,7 @@ channel_set_topic(struct Channel *chptr, const char *topic,
                   const char *topic_info, time_t topicts, int local)
 {
   if (local)
-    strlcpy(chptr->topic, topic, IRCD_MIN(sizeof(chptr->topic), ServerInfo.max_topic_length + 1));
+    strlcpy(chptr->topic, topic, IRCD_MIN(sizeof(chptr->topic), ConfigServerInfo.max_topic_length + 1));
   else
     strlcpy(chptr->topic, topic, sizeof(chptr->topic));
 
@@ -989,7 +989,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
     }
 
     if (!IsExemptResv(source_p) &&
-        !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv) &&
+        !(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv) &&
         ((conf = match_find_resv(chan)) && !resv_find_exempt(source_p, conf)))
     {
       ++conf->count;
@@ -1147,7 +1147,7 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
    */
   if (*reason && (!MyConnect(source_p) ||
       ((can_send(chptr, source_p, ms, reason) &&
-       (source_p->localClient->firsttime + ConfigFileEntry.anti_spam_exit_message_time)
+       (source_p->localClient->firsttime + ConfigGeneral.anti_spam_exit_message_time)
         < CurrentTime))))
   {
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s :%s",

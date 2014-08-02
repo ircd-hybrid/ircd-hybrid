@@ -51,12 +51,12 @@ do_admin(struct Client *source_p)
 
   sendto_one_numeric(source_p, &me, RPL_ADMINME, me.name);
 
-  if (!EmptyString(AdminInfo.name))
-    sendto_one_numeric(source_p, &me, RPL_ADMINLOC1, AdminInfo.name);
-  if (!EmptyString(AdminInfo.description))
-    sendto_one_numeric(source_p, &me, RPL_ADMINLOC2, AdminInfo.description);
-  if (!EmptyString(AdminInfo.email))
-    sendto_one_numeric(source_p, &me, RPL_ADMINEMAIL, AdminInfo.email);
+  if (!EmptyString(ConfigAdminInfo.name))
+    sendto_one_numeric(source_p, &me, RPL_ADMINLOC1, ConfigAdminInfo.name);
+  if (!EmptyString(ConfigAdminInfo.description))
+    sendto_one_numeric(source_p, &me, RPL_ADMINLOC2, ConfigAdminInfo.description);
+  if (!EmptyString(ConfigAdminInfo.email))
+    sendto_one_numeric(source_p, &me, RPL_ADMINEMAIL, ConfigAdminInfo.email);
 }
 
 /*! \brief ADMIN command handler
@@ -75,7 +75,7 @@ m_admin(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+  if ((last_used + ConfigGeneral.pace_wait_simple) > CurrentTime)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;

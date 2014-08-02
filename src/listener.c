@@ -253,7 +253,7 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
   hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
 
 #ifdef IPV6
-  if (ServerInfo.can_use_v6)
+  if (ConfigServerInfo.can_use_v6)
   {
     snprintf(portname, sizeof(portname), "%d", port);
     getaddrinfo("::", portname, &hints, &res);
@@ -290,7 +290,7 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
     freeaddrinfo(res);
   }
 #ifdef IPV6
-  else if (pass == 0 && ServerInfo.can_use_v6)
+  else if (pass == 0 && ConfigServerInfo.can_use_v6)
   {
     /* add the ipv4 listener if we havent already */
     pass = 1;

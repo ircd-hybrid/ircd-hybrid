@@ -66,97 +66,97 @@ static const struct InfoStruct info_table[] =
   {
     "DPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.dpath,
+    &ConfigGeneral.dpath,
     "Root directory of installation"
   },
   {
     "SPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.spath,
+    &ConfigGeneral.spath,
     "Path to server executable"
   },
   {
     "MPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.mpath,
+    &ConfigGeneral.mpath,
     "Path to main motd (Message of the Day) file"
   },
   {
     "CPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.configfile,
+    &ConfigGeneral.configfile,
     "Path to main configuration file"
   },
   {
     "DLPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.dlinefile,
+    &ConfigGeneral.dlinefile,
     "Path to D-line database file"
   },
   {
     "KPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.klinefile,
+    &ConfigGeneral.klinefile,
     "Path to K-line database file"
   },
   {
     "GPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.glinefile,
+    &ConfigGeneral.glinefile,
     "Path to G-line database file"
   },
   {
     "XPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.xlinefile,
+    &ConfigGeneral.xlinefile,
     "Path to X-line database file"
   },
   {
     "RESVPATH",
     OUTPUT_STRING,
-    &ConfigFileEntry.resvfile,
+    &ConfigGeneral.resvfile,
     "Path to resv database file"
   },
   {
     "network_name",
     OUTPUT_STRING,
-    &ServerInfo.network_name,
+    &ConfigServerInfo.network_name,
     "Network name"
   },
   {
     "network_desc",
     OUTPUT_STRING,
-    &ServerInfo.network_desc,
+    &ConfigServerInfo.network_desc,
     "Network description"
   },
   {
     "hub",
     OUTPUT_BOOLEAN_YN,
-    &ServerInfo.hub,
+    &ConfigServerInfo.hub,
     "Server is a hub"
   },
   {
     "max_clients",
     OUTPUT_DECIMAL,
-    &ServerInfo.max_clients,
+    &ConfigServerInfo.max_clients,
     "Maximum number of clients permitted simultaneously on this server"
   },
   {
     "max_nick_length",
     OUTPUT_DECIMAL,
-    &ServerInfo.max_nick_length,
+    &ConfigServerInfo.max_nick_length,
     "Maximum nickname length"
   },
   {
     "max_topic_length",
     OUTPUT_DECIMAL,
-    &ServerInfo.max_topic_length,
+    &ConfigServerInfo.max_topic_length,
     "Maximum topic length"
   },
   {
     "use_logging",
     OUTPUT_BOOLEAN_YN,
-    &ConfigLoggingEntry.use_logging,
+    &ConfigLog.use_logging,
     "Enable logging"
   },
   {
@@ -277,61 +277,61 @@ static const struct InfoStruct info_table[] =
   {
     "away_count",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.away_count,
+    &ConfigGeneral.away_count,
     "How many AWAY attempts are permitted in away_time"
   },
   {
     "away_time",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.away_time,
+    &ConfigGeneral.away_time,
     "How many away_count aways are allowed in this time"
   },
   {
     "gline_min_cidr",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.gline_min_cidr,
+    &ConfigGeneral.gline_min_cidr,
     "Minimum required length of a CIDR bitmask for IPv4 G-Lines"
   },
   {
     "gline_min_cidr6",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.gline_min_cidr6,
+    &ConfigGeneral.gline_min_cidr6,
     "Minimum required length of a CIDR bitmask for IPv6 G-Lines"
   },
   {
     "invisible_on_connect",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.invisible_on_connect,
+    &ConfigGeneral.invisible_on_connect,
     "Automatically set mode +i on connecting users"
   },
   {
     "kill_chase_time_limit",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.kill_chase_time_limit,
+    &ConfigGeneral.kill_chase_time_limit,
     "Nick Change Tracker for KILL"
   },
   {
     "hide_spoof_ips",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.hide_spoof_ips,
+    &ConfigGeneral.hide_spoof_ips,
     "Hide spoofed IP addresses"
   },
   {
     "ignore_bogus_ts",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.ignore_bogus_ts,
+    &ConfigGeneral.ignore_bogus_ts,
     "Ignore bogus timestamps from other servers"
   },
   {
     "cycle_on_host_change",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.cycle_on_host_change,
+    &ConfigGeneral.cycle_on_host_change,
     "Send a fake QUIT/JOIN combination on host change"
   },
   {
     "disable_auth",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.disable_auth,
+    &ConfigGeneral.disable_auth,
     "Completely disable ident lookups"
   },
   {
@@ -343,211 +343,211 @@ static const struct InfoStruct info_table[] =
   {
     "tkline_expire_notices",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.tkline_expire_notices,
+    &ConfigGeneral.tkline_expire_notices,
     "Show temporary kline/xline expire notices"
   },
   {
     "default_floodcount",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.default_floodcount,
+    &ConfigGeneral.default_floodcount,
     "Startup value of FLOODCOUNT"
   },
   {
     "failed_oper_notice",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.failed_oper_notice,
+    &ConfigGeneral.failed_oper_notice,
     "Inform opers if someone tries to /oper with the wrong password"
   },
   {
     "dots_in_ident",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.dots_in_ident,
+    &ConfigGeneral.dots_in_ident,
     "Number of permissable dots in an ident"
   },
   {
     "min_nonwildcard",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.min_nonwildcard,
+    &ConfigGeneral.min_nonwildcard,
     "Minimum non-wildcard chars in K/G lines"
   },
   {
     "min_nonwildcard_simple",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.min_nonwildcard_simple,
+    &ConfigGeneral.min_nonwildcard_simple,
     "Minimum non-wildcards in gecos bans"
   },
   {
     "max_accept",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.max_accept,
+    &ConfigGeneral.max_accept,
     "Maximum nicknames on accept list"
   },
   {
     "anti_nick_flood",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.anti_nick_flood,
+    &ConfigGeneral.anti_nick_flood,
     "NICK flood protection"
   },
   {
     "max_nick_time",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.max_nick_time,
+    &ConfigGeneral.max_nick_time,
     "NICK flood protection time interval"
   },
   {
     "max_nick_changes",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.max_nick_changes,
+    &ConfigGeneral.max_nick_changes,
     "NICK change threshhold setting"
   },
   {
     "anti_spam_exit_message_time",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.anti_spam_exit_message_time,
+    &ConfigGeneral.anti_spam_exit_message_time,
     "Duration a client must be connected for to have an exit message"
   },
   {
     "ts_warn_delta",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.ts_warn_delta,
+    &ConfigGeneral.ts_warn_delta,
     "Maximum permitted TS delta before displaying a warning"
   },
   {
     "ts_max_delta",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.ts_max_delta,
+    &ConfigGeneral.ts_max_delta,
     "Maximum permitted TS delta from another server"
   },
   {
     "warn_no_connect_block",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.warn_no_connect_block,
+    &ConfigGeneral.warn_no_connect_block,
     "Display warning if connecting server lacks a connect{} block"
   },
   {
     "stats_e_disabled",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.stats_e_disabled,
+    &ConfigGeneral.stats_e_disabled,
     "Whether or not STATS e is disabled"
   },
   {
     "stats_o_oper_only",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.stats_o_oper_only,
+    &ConfigGeneral.stats_o_oper_only,
     "STATS O output is only shown to operators"
   },
   {
     "stats_P_oper_only",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.stats_P_oper_only,
+    &ConfigGeneral.stats_P_oper_only,
     "STATS P is only shown to operators"
   },
   {
     "stats_u_oper_only",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.stats_u_oper_only,
+    &ConfigGeneral.stats_u_oper_only,
     "STATS u is only shown to operators"
   },
   {
     "stats_i_oper_only",
     OUTPUT_BOOLEAN2,
-    &ConfigFileEntry.stats_i_oper_only,
+    &ConfigGeneral.stats_i_oper_only,
     "STATS I output is only shown to operators"
   },
   {
     "stats_k_oper_only",
     OUTPUT_BOOLEAN2,
-    &ConfigFileEntry.stats_k_oper_only,
+    &ConfigGeneral.stats_k_oper_only,
     "STATS K output is only shown to operators"
   },
   {
     "caller_id_wait",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.caller_id_wait,
+    &ConfigGeneral.caller_id_wait,
     "Minimum delay between notifying UMODE +g users of messages"
   },
   {
     "opers_bypass_callerid",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.opers_bypass_callerid,
+    &ConfigGeneral.opers_bypass_callerid,
     "Allows IRC operators to message users who are +g (callerid)"
   },
   {
     "pace_wait_simple",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.pace_wait_simple,
+    &ConfigGeneral.pace_wait_simple,
     "Minimum delay between less intensive commands"
   },
   {
     "pace_wait",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.pace_wait,
+    &ConfigGeneral.pace_wait,
     "Minimum delay between uses of certain commands"
   },
   {
     "short_motd",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.short_motd,
+    &ConfigGeneral.short_motd,
     "Do not show MOTD; only tell clients they should read it"
   },
   {
     "ping_cookie",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.ping_cookie,
+    &ConfigGeneral.ping_cookie,
     "Require ping cookies to connect"
   },
   {
     "no_oper_flood",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.no_oper_flood,
+    &ConfigGeneral.no_oper_flood,
     "Reduce flood control for operators"
   },
   {
     "true_no_oper_flood",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.true_no_oper_flood,
+    &ConfigGeneral.true_no_oper_flood,
     "Completely disable flood control for operators"
   },
   {
     "oper_pass_resv",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.oper_pass_resv,
+    &ConfigGeneral.oper_pass_resv,
     "Opers can over-ride RESVs"
   },
   {
     "max_targets",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.max_targets,
+    &ConfigGeneral.max_targets,
     "The maximum number of PRIVMSG/NOTICE targets"
   },
   {
     "throttle_count",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.throttle_count,
+    &ConfigGeneral.throttle_count,
     "Number of connects in throttle_time before connections are blocked"
   },
   {
     "throttle_time",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.throttle_time,
+    &ConfigGeneral.throttle_time,
     "Minimum time between client reconnects"
   },
   {
     "gline_enable",
     OUTPUT_BOOLEAN_YN,
-    &ConfigFileEntry.glines,
+    &ConfigGeneral.glines,
     "G-line (network-wide K-line) support"
   },
   {
     "gline_duration",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.gline_time,
+    &ConfigGeneral.gline_time,
     "Expiry time for G-lines"
   },
   {
     "gline_request_duration",
     OUTPUT_DECIMAL,
-    &ConfigFileEntry.gline_request_time,
+    &ConfigGeneral.gline_request_time,
     "Expiry time for pending G-lines"
   },
 
@@ -714,7 +714,7 @@ m_info(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+  if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;

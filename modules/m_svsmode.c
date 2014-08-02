@@ -109,7 +109,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
             detach_conf(target_p, CONF_OPER);
             ClrOFlag(target_p);
-            DelUMode(target_p, ConfigFileEntry.oper_only_umodes);
+            DelUMode(target_p, ConfigGeneral.oper_only_umodes);
 
             if ((dm = dlinkFindDelete(&oper_list, target_p)))
               free_dlink_node(dm);

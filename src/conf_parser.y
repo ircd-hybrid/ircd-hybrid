@@ -475,17 +475,17 @@ serverinfo_item:        serverinfo_name |
 serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
   {
-    if (!ServerInfo.rsa_private_key_file)
+    if (!ConfigServerInfo.rsa_private_key_file)
     {
       conf_error_report("No rsa_private_key_file specified, SSL disabled");
       break;
     }
 
-    if (SSL_CTX_use_certificate_file(ServerInfo.server_ctx, yylval.string,
+    if (SSL_CTX_use_certificate_file(ConfigServerInfo.server_ctx, yylval.string,
                                      SSL_FILETYPE_PEM) <= 0 ||
-        SSL_CTX_use_certificate_file(ServerInfo.client_ctx, yylval.string,
+        SSL_CTX_use_certificate_file(ConfigServerInfo.client_ctx, yylval.string,
                                      SSL_FILETYPE_PEM) <= 0)
     {
       report_crypto_errors();
@@ -493,9 +493,9 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
       break;
     }
 
-    if (SSL_CTX_use_PrivateKey_file(ServerInfo.server_ctx, ServerInfo.rsa_private_key_file,
+    if (SSL_CTX_use_PrivateKey_file(ConfigServerInfo.server_ctx, ConfigServerInfo.rsa_private_key_file,
                                     SSL_FILETYPE_PEM) <= 0 ||
-        SSL_CTX_use_PrivateKey_file(ServerInfo.client_ctx, ServerInfo.rsa_private_key_file,
+        SSL_CTX_use_PrivateKey_file(ConfigServerInfo.client_ctx, ConfigServerInfo.rsa_private_key_file,
                                     SSL_FILETYPE_PEM) <= 0)
     {
       report_crypto_errors();
@@ -503,8 +503,8 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
       break;
     }
 
-    if (!SSL_CTX_check_private_key(ServerInfo.server_ctx) ||
-        !SSL_CTX_check_private_key(ServerInfo.client_ctx))
+    if (!SSL_CTX_check_private_key(ConfigServerInfo.server_ctx) ||
+        !SSL_CTX_check_private_key(ConfigServerInfo.client_ctx))
     {
       report_crypto_errors();
       conf_error_report("Could not read RSA private key");
@@ -522,19 +522,19 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
   if (conf_parser_ctx.pass != 1)
     break;
 
-  if (ServerInfo.rsa_private_key)
+  if (ConfigServerInfo.rsa_private_key)
   {
-    RSA_free(ServerInfo.rsa_private_key);
-    ServerInfo.rsa_private_key = NULL;
+    RSA_free(ConfigServerInfo.rsa_private_key);
+    ConfigServerInfo.rsa_private_key = NULL;
   }
 
-  if (ServerInfo.rsa_private_key_file)
+  if (ConfigServerInfo.rsa_private_key_file)
   {
-    MyFree(ServerInfo.rsa_private_key_file);
-    ServerInfo.rsa_private_key_file = NULL;
+    MyFree(ConfigServerInfo.rsa_private_key_file);
+    ConfigServerInfo.rsa_private_key_file = NULL;
   }
 
-  ServerInfo.rsa_private_key_file = xstrdup(yylval.string);
+  ConfigServerInfo.rsa_private_key_file = xstrdup(yylval.string);
 
   if ((file = BIO_new_file(yylval.string, "r")) == NULL)
   {
@@ -542,30 +542,30 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
     break;
   }
 
-  ServerInfo.rsa_private_key = PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
+  ConfigServerInfo.rsa_private_key = PEM_read_bio_RSAPrivateKey(file, NULL, 0, NULL);
 
   BIO_set_close(file, BIO_CLOSE);
   BIO_free(file);
 
-  if (ServerInfo.rsa_private_key == NULL)
+  if (ConfigServerInfo.rsa_private_key == NULL)
   {
     conf_error_report("Couldn't extract key, ignoring");
     break;
   }
 
-  if (!RSA_check_key(ServerInfo.rsa_private_key))
+  if (!RSA_check_key(ConfigServerInfo.rsa_private_key))
   {
-    RSA_free(ServerInfo.rsa_private_key);
-    ServerInfo.rsa_private_key = NULL;
+    RSA_free(ConfigServerInfo.rsa_private_key);
+    ConfigServerInfo.rsa_private_key = NULL;
 
     conf_error_report("Invalid key, ignoring");
     break;
   }
 
-  if (RSA_size(ServerInfo.rsa_private_key) < 128)
+  if (RSA_size(ConfigServerInfo.rsa_private_key) < 128)
   {
-    RSA_free(ServerInfo.rsa_private_key);
-    ServerInfo.rsa_private_key = NULL;
+    RSA_free(ConfigServerInfo.rsa_private_key);
+    ConfigServerInfo.rsa_private_key = NULL;
 
     conf_error_report("Ignoring serverinfo::rsa_private_key_file -- need at least a 1024 bit key size");
   }
@@ -575,7 +575,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
   {
     BIO *file = BIO_new_file(yylval.string, "r");
 
@@ -590,7 +590,7 @@ serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
         if (DH_size(dh) < 128)
           conf_error_report("Ignoring serverinfo::ssl_dh_param_file -- need at least a 1024 bit DH prime size");
         else
-          SSL_CTX_set_tmp_dh(ServerInfo.server_ctx, dh);
+          SSL_CTX_set_tmp_dh(ConfigServerInfo.server_ctx, dh);
 
         DH_free(dh);
       }
@@ -604,19 +604,19 @@ serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
 serverinfo_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
-    SSL_CTX_set_cipher_list(ServerInfo.server_ctx, yylval.string);
+  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
+    SSL_CTX_set_cipher_list(ConfigServerInfo.server_ctx, yylval.string);
 #endif
 };
 
 serverinfo_ssl_message_digest_algorithm: SSL_MESSAGE_DIGEST_ALGORITHM '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
   {
-    if ((ServerInfo.message_digest_algorithm = EVP_get_digestbyname(yylval.string)) == NULL)
+    if ((ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(yylval.string)) == NULL)
     {
-      ServerInfo.message_digest_algorithm = EVP_sha256();
+      ConfigServerInfo.message_digest_algorithm = EVP_sha256();
       conf_error_report("Ignoring serverinfo::ssl_message_digest_algorithm -- unknown message digest algorithm");
     }
   }
@@ -630,7 +630,7 @@ serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
   int nid = 0;
   EC_KEY *key = NULL;
 
-  if (conf_parser_ctx.pass == 2 && ServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
   {
     if ((nid = OBJ_sn2nid(yylval.string)) == 0)
     {
@@ -644,7 +644,7 @@ serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
       break;
     }
 
-    SSL_CTX_set_tmp_ecdh(ServerInfo.server_ctx, key);
+    SSL_CTX_set_tmp_ecdh(ConfigServerInfo.server_ctx, key);
     EC_KEY_free(key);
 }
 #endif
@@ -654,10 +654,10 @@ serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
 serverinfo_name: NAME '=' QSTRING ';'
 {
   /* this isn't rehashable */
-  if (conf_parser_ctx.pass == 2 && !ServerInfo.name)
+  if (conf_parser_ctx.pass == 2 && !ConfigServerInfo.name)
   {
     if (valid_servname(yylval.string))
-      ServerInfo.name = xstrdup(yylval.string);
+      ConfigServerInfo.name = xstrdup(yylval.string);
     else
     {
       conf_error_report("Ignoring serverinfo::name -- invalid name. Aborting.");
@@ -669,10 +669,10 @@ serverinfo_name: NAME '=' QSTRING ';'
 serverinfo_sid: IRCD_SID '=' QSTRING ';'
 {
   /* this isn't rehashable */
-  if (conf_parser_ctx.pass == 2 && !ServerInfo.sid)
+  if (conf_parser_ctx.pass == 2 && !ConfigServerInfo.sid)
   {
     if (valid_sid(yylval.string))
-      ServerInfo.sid = xstrdup(yylval.string);
+      ConfigServerInfo.sid = xstrdup(yylval.string);
     else
     {
       conf_error_report("Ignoring serverinfo::sid -- invalid SID. Aborting.");
@@ -685,8 +685,8 @@ serverinfo_description: DESCRIPTION '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    MyFree(ServerInfo.description);
-    ServerInfo.description = xstrdup(yylval.string);
+    MyFree(ConfigServerInfo.description);
+    ConfigServerInfo.description = xstrdup(yylval.string);
   }
 };
 
@@ -699,8 +699,8 @@ serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
     if ((p = strchr(yylval.string, ' ')))
       *p = '\0';
 
-    MyFree(ServerInfo.network_name);
-    ServerInfo.network_name = xstrdup(yylval.string);
+    MyFree(ConfigServerInfo.network_name);
+    ConfigServerInfo.network_name = xstrdup(yylval.string);
   }
 };
 
@@ -709,8 +709,8 @@ serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  MyFree(ServerInfo.network_desc);
-  ServerInfo.network_desc = xstrdup(yylval.string);
+  MyFree(ConfigServerInfo.network_desc);
+  ConfigServerInfo.network_desc = xstrdup(yylval.string);
 };
 
 serverinfo_vhost: VHOST '=' QSTRING ';'
@@ -731,12 +731,12 @@ serverinfo_vhost: VHOST '=' QSTRING ';'
     {
       assert(res);
 
-      memcpy(&ServerInfo.ip, res->ai_addr, res->ai_addrlen);
-      ServerInfo.ip.ss.ss_family = res->ai_family;
-      ServerInfo.ip.ss_len = res->ai_addrlen;
+      memcpy(&ConfigServerInfo.ip, res->ai_addr, res->ai_addrlen);
+      ConfigServerInfo.ip.ss.ss_family = res->ai_family;
+      ConfigServerInfo.ip.ss_len = res->ai_addrlen;
       freeaddrinfo(res);
 
-      ServerInfo.specific_ipv4_vhost = 1;
+      ConfigServerInfo.specific_ipv4_vhost = 1;
     }
   }
 };
@@ -760,12 +760,12 @@ serverinfo_vhost6: VHOST6 '=' QSTRING ';'
     {
       assert(res);
 
-      memcpy(&ServerInfo.ip6, res->ai_addr, res->ai_addrlen);
-      ServerInfo.ip6.ss.ss_family = res->ai_family;
-      ServerInfo.ip6.ss_len = res->ai_addrlen;
+      memcpy(&ConfigServerInfo.ip6, res->ai_addr, res->ai_addrlen);
+      ConfigServerInfo.ip6.ss.ss_family = res->ai_family;
+      ConfigServerInfo.ip6.ss_len = res->ai_addrlen;
       freeaddrinfo(res);
 
-      ServerInfo.specific_ipv6_vhost = 1;
+      ConfigServerInfo.specific_ipv6_vhost = 1;
     }
   }
 #endif
@@ -782,7 +782,7 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "MAXCLIENTS too low, setting to %d", MAXCLIENTS_MIN);
     conf_error_report(buf);
-    ServerInfo.max_clients = MAXCLIENTS_MIN;
+    ConfigServerInfo.max_clients = MAXCLIENTS_MIN;
   }
   else if ($3 > MAXCLIENTS_MAX)
   {
@@ -790,10 +790,10 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "MAXCLIENTS too high, setting to %d", MAXCLIENTS_MAX);
     conf_error_report(buf);
-    ServerInfo.max_clients = MAXCLIENTS_MAX;
+    ConfigServerInfo.max_clients = MAXCLIENTS_MAX;
   }
   else
-    ServerInfo.max_clients = $3;
+    ConfigServerInfo.max_clients = $3;
 };
 
 serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
@@ -804,7 +804,7 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
   if ($3 < 9)
   {
     conf_error_report("max_nick_length too low, setting to 9");
-    ServerInfo.max_nick_length = 9;
+    ConfigServerInfo.max_nick_length = 9;
   }
   else if ($3 > NICKLEN)
   {
@@ -812,10 +812,10 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "max_nick_length too high, setting to %d", NICKLEN);
     conf_error_report(buf);
-    ServerInfo.max_nick_length = NICKLEN;
+    ConfigServerInfo.max_nick_length = NICKLEN;
   }
   else
-    ServerInfo.max_nick_length = $3;
+    ConfigServerInfo.max_nick_length = $3;
 };
 
 serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
@@ -826,7 +826,7 @@ serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
   if ($3 < 80)
   {
     conf_error_report("max_topic_length too low, setting to 80");
-    ServerInfo.max_topic_length = 80;
+    ConfigServerInfo.max_topic_length = 80;
   }
   else if ($3 > TOPICLEN)
   {
@@ -834,16 +834,16 @@ serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "max_topic_length too high, setting to %d", TOPICLEN);
     conf_error_report(buf);
-    ServerInfo.max_topic_length = TOPICLEN;
+    ConfigServerInfo.max_topic_length = TOPICLEN;
   }
   else
-    ServerInfo.max_topic_length = $3;
+    ConfigServerInfo.max_topic_length = $3;
 };
 
 serverinfo_hub: HUB '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ServerInfo.hub = yylval.number;
+    ConfigServerInfo.hub = yylval.number;
 };
 
 /***************************************************************************
@@ -862,8 +862,8 @@ admin_name: NAME '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  MyFree(AdminInfo.name);
-  AdminInfo.name = xstrdup(yylval.string);
+  MyFree(ConfigAdminInfo.name);
+  ConfigAdminInfo.name = xstrdup(yylval.string);
 };
 
 admin_email: EMAIL '=' QSTRING ';'
@@ -871,8 +871,8 @@ admin_email: EMAIL '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  MyFree(AdminInfo.email);
-  AdminInfo.email = xstrdup(yylval.string);
+  MyFree(ConfigAdminInfo.email);
+  ConfigAdminInfo.email = xstrdup(yylval.string);
 };
 
 admin_description: DESCRIPTION '=' QSTRING ';'
@@ -880,8 +880,8 @@ admin_description: DESCRIPTION '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  MyFree(AdminInfo.description);
-  AdminInfo.description = xstrdup(yylval.string);
+  MyFree(ConfigAdminInfo.description);
+  ConfigAdminInfo.description = xstrdup(yylval.string);
 };
 
 /***************************************************************************
@@ -932,7 +932,7 @@ logging_item:           logging_use_logging | logging_file_entry |
 logging_use_logging: USE_LOGGING '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigLoggingEntry.use_logging = yylval.number;
+    ConfigLog.use_logging = yylval.number;
 };
 
 logging_file_entry:
@@ -1623,7 +1623,7 @@ port_item: NUMBER
   {
     if (block_state.flags.value & LISTENER_SSL)
 #ifdef HAVE_LIBCRYPTO
-      if (!ServerInfo.server_ctx)
+      if (!ConfigServerInfo.server_ctx)
 #endif
       {
         conf_error_report("SSL not available - port closed");
@@ -1637,7 +1637,7 @@ port_item: NUMBER
   {
     if (block_state.flags.value & LISTENER_SSL)
 #ifdef HAVE_LIBCRYPTO
-      if (!ServerInfo.server_ctx)
+      if (!ConfigServerInfo.server_ctx)
 #endif
       {
         conf_error_report("SSL not available - port closed");
@@ -2520,112 +2520,112 @@ general_item:       general_away_count |
 
 general_away_count: AWAY_COUNT '=' NUMBER ';'
 {
-  ConfigFileEntry.away_count = $3;
+  ConfigGeneral.away_count = $3;
 };
 
 general_away_time: AWAY_TIME '=' timespec ';'
 {
-  ConfigFileEntry.away_time = $3;
+  ConfigGeneral.away_time = $3;
 };
 
 general_max_watch: MAX_WATCH '=' NUMBER ';'
 {
-  ConfigFileEntry.max_watch = $3;
+  ConfigGeneral.max_watch = $3;
 };
 
 general_cycle_on_host_change: CYCLE_ON_HOST_CHANGE '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigFileEntry.cycle_on_host_change = yylval.number;
+    ConfigGeneral.cycle_on_host_change = yylval.number;
 };
 
 general_gline_enable: GLINE_ENABLE '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigFileEntry.glines = yylval.number;
+    ConfigGeneral.glines = yylval.number;
 };
 
 general_gline_duration: GLINE_DURATION '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigFileEntry.gline_time = $3;
+    ConfigGeneral.gline_time = $3;
 };
 
 general_gline_request_duration: GLINE_REQUEST_DURATION '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigFileEntry.gline_request_time = $3;
+    ConfigGeneral.gline_request_time = $3;
 };
 
 general_gline_min_cidr: GLINE_MIN_CIDR '=' NUMBER ';'
 {
-  ConfigFileEntry.gline_min_cidr = $3;
+  ConfigGeneral.gline_min_cidr = $3;
 };
 
 general_gline_min_cidr6: GLINE_MIN_CIDR6 '=' NUMBER ';'
 {
-  ConfigFileEntry.gline_min_cidr6 = $3;
+  ConfigGeneral.gline_min_cidr6 = $3;
 };
 
 general_tkline_expire_notices: TKLINE_EXPIRE_NOTICES '=' TBOOL ';'
 {
-  ConfigFileEntry.tkline_expire_notices = yylval.number;
+  ConfigGeneral.tkline_expire_notices = yylval.number;
 };
 
 general_kill_chase_time_limit: KILL_CHASE_TIME_LIMIT '=' timespec ';'
 {
-  ConfigFileEntry.kill_chase_time_limit = $3;
+  ConfigGeneral.kill_chase_time_limit = $3;
 };
 
 general_hide_spoof_ips: HIDE_SPOOF_IPS '=' TBOOL ';'
 {
-  ConfigFileEntry.hide_spoof_ips = yylval.number;
+  ConfigGeneral.hide_spoof_ips = yylval.number;
 };
 
 general_ignore_bogus_ts: IGNORE_BOGUS_TS '=' TBOOL ';'
 {
-  ConfigFileEntry.ignore_bogus_ts = yylval.number;
+  ConfigGeneral.ignore_bogus_ts = yylval.number;
 };
 
 general_failed_oper_notice: FAILED_OPER_NOTICE '=' TBOOL ';'
 {
-  ConfigFileEntry.failed_oper_notice = yylval.number;
+  ConfigGeneral.failed_oper_notice = yylval.number;
 };
 
 general_anti_nick_flood: ANTI_NICK_FLOOD '=' TBOOL ';'
 {
-  ConfigFileEntry.anti_nick_flood = yylval.number;
+  ConfigGeneral.anti_nick_flood = yylval.number;
 };
 
 general_max_nick_time: MAX_NICK_TIME '=' timespec ';'
 {
-  ConfigFileEntry.max_nick_time = $3;
+  ConfigGeneral.max_nick_time = $3;
 };
 
 general_max_nick_changes: MAX_NICK_CHANGES '=' NUMBER ';'
 {
-  ConfigFileEntry.max_nick_changes = $3;
+  ConfigGeneral.max_nick_changes = $3;
 };
 
 general_max_accept: MAX_ACCEPT '=' NUMBER ';'
 {
-  ConfigFileEntry.max_accept = $3;
+  ConfigGeneral.max_accept = $3;
 };
 
 general_anti_spam_exit_message_time: ANTI_SPAM_EXIT_MESSAGE_TIME '=' timespec ';'
 {
-  ConfigFileEntry.anti_spam_exit_message_time = $3;
+  ConfigGeneral.anti_spam_exit_message_time = $3;
 };
 
 general_ts_warn_delta: TS_WARN_DELTA '=' timespec ';'
 {
-  ConfigFileEntry.ts_warn_delta = $3;
+  ConfigGeneral.ts_warn_delta = $3;
 };
 
 general_ts_max_delta: TS_MAX_DELTA '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigFileEntry.ts_max_delta = $3;
+    ConfigGeneral.ts_max_delta = $3;
 };
 
 general_havent_read_conf: HAVENT_READ_CONF '=' NUMBER ';'
@@ -2641,284 +2641,284 @@ general_havent_read_conf: HAVENT_READ_CONF '=' NUMBER ';'
 
 general_invisible_on_connect: INVISIBLE_ON_CONNECT '=' TBOOL ';'
 {
-  ConfigFileEntry.invisible_on_connect = yylval.number;
+  ConfigGeneral.invisible_on_connect = yylval.number;
 };
 
 general_warn_no_connect_block: WARN_NO_CONNECT_BLOCK '=' TBOOL ';'
 {
-  ConfigFileEntry.warn_no_connect_block = yylval.number;
+  ConfigGeneral.warn_no_connect_block = yylval.number;
 };
 
 general_stats_e_disabled: STATS_E_DISABLED '=' TBOOL ';'
 {
-  ConfigFileEntry.stats_e_disabled = yylval.number;
+  ConfigGeneral.stats_e_disabled = yylval.number;
 };
 
 general_stats_o_oper_only: STATS_O_OPER_ONLY '=' TBOOL ';'
 {
-  ConfigFileEntry.stats_o_oper_only = yylval.number;
+  ConfigGeneral.stats_o_oper_only = yylval.number;
 };
 
 general_stats_P_oper_only: STATS_P_OPER_ONLY '=' TBOOL ';'
 {
-  ConfigFileEntry.stats_P_oper_only = yylval.number;
+  ConfigGeneral.stats_P_oper_only = yylval.number;
 };
 
 general_stats_u_oper_only: STATS_U_OPER_ONLY '=' TBOOL ';'
 {
-  ConfigFileEntry.stats_u_oper_only = yylval.number;
+  ConfigGeneral.stats_u_oper_only = yylval.number;
 };
 
 general_stats_k_oper_only: STATS_K_OPER_ONLY '=' TBOOL ';'
 {
-  ConfigFileEntry.stats_k_oper_only = 2 * yylval.number;
+  ConfigGeneral.stats_k_oper_only = 2 * yylval.number;
 } | STATS_K_OPER_ONLY '=' TMASKED ';'
 {
-  ConfigFileEntry.stats_k_oper_only = 1;
+  ConfigGeneral.stats_k_oper_only = 1;
 };
 
 general_stats_i_oper_only: STATS_I_OPER_ONLY '=' TBOOL ';'
 {
-  ConfigFileEntry.stats_i_oper_only = 2 * yylval.number;
+  ConfigGeneral.stats_i_oper_only = 2 * yylval.number;
 } | STATS_I_OPER_ONLY '=' TMASKED ';'
 {
-  ConfigFileEntry.stats_i_oper_only = 1;
+  ConfigGeneral.stats_i_oper_only = 1;
 };
 
 general_pace_wait: PACE_WAIT '=' timespec ';'
 {
-  ConfigFileEntry.pace_wait = $3;
+  ConfigGeneral.pace_wait = $3;
 };
 
 general_caller_id_wait: CALLER_ID_WAIT '=' timespec ';'
 {
-  ConfigFileEntry.caller_id_wait = $3;
+  ConfigGeneral.caller_id_wait = $3;
 };
 
 general_opers_bypass_callerid: OPERS_BYPASS_CALLERID '=' TBOOL ';'
 {
-  ConfigFileEntry.opers_bypass_callerid = yylval.number;
+  ConfigGeneral.opers_bypass_callerid = yylval.number;
 };
 
 general_pace_wait_simple: PACE_WAIT_SIMPLE '=' timespec ';'
 {
-  ConfigFileEntry.pace_wait_simple = $3;
+  ConfigGeneral.pace_wait_simple = $3;
 };
 
 general_short_motd: SHORT_MOTD '=' TBOOL ';'
 {
-  ConfigFileEntry.short_motd = yylval.number;
+  ConfigGeneral.short_motd = yylval.number;
 };
 
 general_no_oper_flood: NO_OPER_FLOOD '=' TBOOL ';'
 {
-  ConfigFileEntry.no_oper_flood = yylval.number;
+  ConfigGeneral.no_oper_flood = yylval.number;
 };
 
 general_true_no_oper_flood: TRUE_NO_OPER_FLOOD '=' TBOOL ';'
 {
-  ConfigFileEntry.true_no_oper_flood = yylval.number;
+  ConfigGeneral.true_no_oper_flood = yylval.number;
 };
 
 general_oper_pass_resv: OPER_PASS_RESV '=' TBOOL ';'
 {
-  ConfigFileEntry.oper_pass_resv = yylval.number;
+  ConfigGeneral.oper_pass_resv = yylval.number;
 };
 
 general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
 {
-  ConfigFileEntry.dots_in_ident = $3;
+  ConfigGeneral.dots_in_ident = $3;
 };
 
 general_max_targets: MAX_TARGETS '=' NUMBER ';'
 {
-  ConfigFileEntry.max_targets = $3;
+  ConfigGeneral.max_targets = $3;
 };
 
 general_services_name: T_SERVICES_NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2 && valid_servname(yylval.string))
   {
-    MyFree(ConfigFileEntry.service_name);
-    ConfigFileEntry.service_name = xstrdup(yylval.string);
+    MyFree(ConfigGeneral.service_name);
+    ConfigGeneral.service_name = xstrdup(yylval.string);
   }
 };
 
 general_ping_cookie: PING_COOKIE '=' TBOOL ';'
 {
-  ConfigFileEntry.ping_cookie = yylval.number;
+  ConfigGeneral.ping_cookie = yylval.number;
 };
 
 general_disable_auth: DISABLE_AUTH '=' TBOOL ';'
 {
-  ConfigFileEntry.disable_auth = yylval.number;
+  ConfigGeneral.disable_auth = yylval.number;
 };
 
 general_throttle_count: THROTTLE_COUNT '=' NUMBER ';'
 {
-  ConfigFileEntry.throttle_count = $3;
+  ConfigGeneral.throttle_count = $3;
 };
 
 general_throttle_time: THROTTLE_TIME '=' timespec ';'
 {
-  ConfigFileEntry.throttle_time = $3;
+  ConfigGeneral.throttle_time = $3;
 };
 
 general_oper_umodes: OPER_UMODES
 {
-  ConfigFileEntry.oper_umodes = 0;
+  ConfigGeneral.oper_umodes = 0;
 } '='  umode_oitems ';' ;
 
 umode_oitems:    umode_oitems ',' umode_oitem | umode_oitem;
 umode_oitem:     T_BOTS
 {
-  ConfigFileEntry.oper_umodes |= UMODE_BOTS;
+  ConfigGeneral.oper_umodes |= UMODE_BOTS;
 } | T_CCONN
 {
-  ConfigFileEntry.oper_umodes |= UMODE_CCONN;
+  ConfigGeneral.oper_umodes |= UMODE_CCONN;
 } | T_DEAF
 {
-  ConfigFileEntry.oper_umodes |= UMODE_DEAF;
+  ConfigGeneral.oper_umodes |= UMODE_DEAF;
 } | T_DEBUG
 {
-  ConfigFileEntry.oper_umodes |= UMODE_DEBUG;
+  ConfigGeneral.oper_umodes |= UMODE_DEBUG;
 } | T_FULL
 {
-  ConfigFileEntry.oper_umodes |= UMODE_FULL;
+  ConfigGeneral.oper_umodes |= UMODE_FULL;
 } | HIDDEN
 {
-  ConfigFileEntry.oper_umodes |= UMODE_HIDDEN;
+  ConfigGeneral.oper_umodes |= UMODE_HIDDEN;
 } | HIDE_CHANS
 {
-  ConfigFileEntry.oper_umodes |= UMODE_HIDECHANS;
+  ConfigGeneral.oper_umodes |= UMODE_HIDECHANS;
 } | HIDE_IDLE
 {
-  ConfigFileEntry.oper_umodes |= UMODE_HIDEIDLE;
+  ConfigGeneral.oper_umodes |= UMODE_HIDEIDLE;
 } | T_SKILL
 {
-  ConfigFileEntry.oper_umodes |= UMODE_SKILL;
+  ConfigGeneral.oper_umodes |= UMODE_SKILL;
 } | T_NCHANGE
 {
-  ConfigFileEntry.oper_umodes |= UMODE_NCHANGE;
+  ConfigGeneral.oper_umodes |= UMODE_NCHANGE;
 } | T_REJ
 {
-  ConfigFileEntry.oper_umodes |= UMODE_REJ;
+  ConfigGeneral.oper_umodes |= UMODE_REJ;
 } | T_UNAUTH
 {
-  ConfigFileEntry.oper_umodes |= UMODE_UNAUTH;
+  ConfigGeneral.oper_umodes |= UMODE_UNAUTH;
 } | T_SPY
 {
-  ConfigFileEntry.oper_umodes |= UMODE_SPY;
+  ConfigGeneral.oper_umodes |= UMODE_SPY;
 } | T_EXTERNAL
 {
-  ConfigFileEntry.oper_umodes |= UMODE_EXTERNAL;
+  ConfigGeneral.oper_umodes |= UMODE_EXTERNAL;
 } | T_SERVNOTICE
 {
-  ConfigFileEntry.oper_umodes |= UMODE_SERVNOTICE;
+  ConfigGeneral.oper_umodes |= UMODE_SERVNOTICE;
 } | T_INVISIBLE
 {
-  ConfigFileEntry.oper_umodes |= UMODE_INVISIBLE;
+  ConfigGeneral.oper_umodes |= UMODE_INVISIBLE;
 } | T_WALLOP
 {
-  ConfigFileEntry.oper_umodes |= UMODE_WALLOP;
+  ConfigGeneral.oper_umodes |= UMODE_WALLOP;
 } | T_SOFTCALLERID
 {
-  ConfigFileEntry.oper_umodes |= UMODE_SOFTCALLERID;
+  ConfigGeneral.oper_umodes |= UMODE_SOFTCALLERID;
 } | T_CALLERID
 {
-  ConfigFileEntry.oper_umodes |= UMODE_CALLERID;
+  ConfigGeneral.oper_umodes |= UMODE_CALLERID;
 } | T_LOCOPS
 {
-  ConfigFileEntry.oper_umodes |= UMODE_LOCOPS;
+  ConfigGeneral.oper_umodes |= UMODE_LOCOPS;
 } | T_NONONREG
 {
-  ConfigFileEntry.oper_umodes |= UMODE_REGONLY;
+  ConfigGeneral.oper_umodes |= UMODE_REGONLY;
 } | T_FARCONNECT
 {
-  ConfigFileEntry.oper_umodes |= UMODE_FARCONNECT;
+  ConfigGeneral.oper_umodes |= UMODE_FARCONNECT;
 };
 
 general_oper_only_umodes: OPER_ONLY_UMODES
 {
-  ConfigFileEntry.oper_only_umodes = 0;
+  ConfigGeneral.oper_only_umodes = 0;
 } '='  umode_items ';' ;
 
 umode_items:  umode_items ',' umode_item | umode_item;
 umode_item:   T_BOTS
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_BOTS;
+  ConfigGeneral.oper_only_umodes |= UMODE_BOTS;
 } | T_CCONN
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_CCONN;
+  ConfigGeneral.oper_only_umodes |= UMODE_CCONN;
 } | T_DEAF
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_DEAF;
+  ConfigGeneral.oper_only_umodes |= UMODE_DEAF;
 } | T_DEBUG
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_DEBUG;
+  ConfigGeneral.oper_only_umodes |= UMODE_DEBUG;
 } | T_FULL
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_FULL;
+  ConfigGeneral.oper_only_umodes |= UMODE_FULL;
 } | T_SKILL
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_SKILL;
+  ConfigGeneral.oper_only_umodes |= UMODE_SKILL;
 } | HIDDEN
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_HIDDEN;
+  ConfigGeneral.oper_only_umodes |= UMODE_HIDDEN;
 } | T_NCHANGE
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_NCHANGE;
+  ConfigGeneral.oper_only_umodes |= UMODE_NCHANGE;
 } | T_REJ
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_REJ;
+  ConfigGeneral.oper_only_umodes |= UMODE_REJ;
 } | T_UNAUTH
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_UNAUTH;
+  ConfigGeneral.oper_only_umodes |= UMODE_UNAUTH;
 } | T_SPY
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_SPY;
+  ConfigGeneral.oper_only_umodes |= UMODE_SPY;
 } | T_EXTERNAL
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_EXTERNAL;
+  ConfigGeneral.oper_only_umodes |= UMODE_EXTERNAL;
 } | T_SERVNOTICE
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_SERVNOTICE;
+  ConfigGeneral.oper_only_umodes |= UMODE_SERVNOTICE;
 } | T_INVISIBLE
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_INVISIBLE;
+  ConfigGeneral.oper_only_umodes |= UMODE_INVISIBLE;
 } | T_WALLOP
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_WALLOP;
+  ConfigGeneral.oper_only_umodes |= UMODE_WALLOP;
 } | T_SOFTCALLERID
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_SOFTCALLERID;
+  ConfigGeneral.oper_only_umodes |= UMODE_SOFTCALLERID;
 } | T_CALLERID
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_CALLERID;
+  ConfigGeneral.oper_only_umodes |= UMODE_CALLERID;
 } | T_LOCOPS
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_LOCOPS;
+  ConfigGeneral.oper_only_umodes |= UMODE_LOCOPS;
 } | T_NONONREG
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_REGONLY;
+  ConfigGeneral.oper_only_umodes |= UMODE_REGONLY;
 } | T_FARCONNECT
 {
-  ConfigFileEntry.oper_only_umodes |= UMODE_FARCONNECT;
+  ConfigGeneral.oper_only_umodes |= UMODE_FARCONNECT;
 };
 
 general_min_nonwildcard: MIN_NONWILDCARD '=' NUMBER ';'
 {
-  ConfigFileEntry.min_nonwildcard = $3;
+  ConfigGeneral.min_nonwildcard = $3;
 };
 
 general_min_nonwildcard_simple: MIN_NONWILDCARD_SIMPLE '=' NUMBER ';'
 {
-  ConfigFileEntry.min_nonwildcard_simple = $3;
+  ConfigGeneral.min_nonwildcard_simple = $3;
 };
 
 general_default_floodcount: DEFAULT_FLOODCOUNT '=' NUMBER ';'
 {
-  ConfigFileEntry.default_floodcount = $3;
+  ConfigGeneral.default_floodcount = $3;
 };
 
 

@@ -195,16 +195,16 @@ change_local_nick(struct Client *source_p, const char *nick)
    * on that channel. Propagate notice to other servers.
    */
   if ((source_p->localClient->nick.last_attempt +
-       ConfigFileEntry.max_nick_time) < CurrentTime)
+       ConfigGeneral.max_nick_time) < CurrentTime)
     source_p->localClient->nick.count = 0;
 
-  if (ConfigFileEntry.anti_nick_flood &&
+  if (ConfigGeneral.anti_nick_flood &&
       !HasUMode(source_p, UMODE_OPER) &&
       source_p->localClient->nick.count >
-      ConfigFileEntry.max_nick_changes)
+      ConfigGeneral.max_nick_changes)
   {
     sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST, source_p->name, nick,
-                       ConfigFileEntry.max_nick_time);
+                       ConfigGeneral.max_nick_time);
     return;
   }
 
@@ -603,7 +603,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Copy the nick and terminate it */
-  strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ServerInfo.max_nick_length + 1));
+  strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
   if (!valid_nickname(nick, 1))
@@ -664,7 +664,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     flood_endgrace(source_p);
 
   /* Terminate nick to NICKLEN */
-  strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ServerInfo.max_nick_length + 1));
+  strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
   if (!valid_nickname(nick, 1))
@@ -674,7 +674,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   }
 
   if (!IsExemptResv(source_p) &&
-      !(HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.oper_pass_resv) &&
+      !(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv) &&
       (conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
   {
     ++conf->count;

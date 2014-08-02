@@ -82,7 +82,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   theirtime = atol(parv[4]);
   deltat = abs(theirtime - CurrentTime);
 
-  if (deltat > ConfigFileEntry.ts_max_delta)
+  if (deltat > ConfigGeneral.ts_max_delta)
   {
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
           "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
@@ -106,7 +106,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (deltat > ConfigFileEntry.ts_warn_delta)
+  if (deltat > ConfigGeneral.ts_warn_delta)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                 "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
                 source_p->name,

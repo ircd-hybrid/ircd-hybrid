@@ -690,13 +690,13 @@ serv_connect(struct MaskItem *conf, struct Client *by)
                          serv_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       }
-      else if (ServerInfo.specific_ipv4_vhost)
+      else if (ConfigServerInfo.specific_ipv4_vhost)
       {
         struct irc_ssaddr ipn;
         memset(&ipn, 0, sizeof(struct irc_ssaddr));
         ipn.ss.ss_family = AF_INET;
         ipn.ss_port = 0;
-        memcpy(&ipn, &ServerInfo.ip, sizeof(struct irc_ssaddr));
+        memcpy(&ipn, &ConfigServerInfo.ip, sizeof(struct irc_ssaddr));
         comm_connect_tcp(&client_p->localClient->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
                          serv_connect_callback, client_p, conf->aftype,
@@ -729,9 +729,9 @@ serv_connect(struct MaskItem *conf, struct Client *by)
                            serv_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
         }
-        else if (ServerInfo.specific_ipv6_vhost)
+        else if (ConfigServerInfo.specific_ipv6_vhost)
         {
-          memcpy(&ipn, &ServerInfo.ip6, sizeof(struct irc_ssaddr));
+          memcpy(&ipn, &ConfigServerInfo.ip6, sizeof(struct irc_ssaddr));
           ipn.ss.ss_family = AF_INET6;
           ipn.ss_port = 0;
           comm_connect_tcp(&client_p->localClient->fd,
@@ -839,7 +839,7 @@ ssl_server_handshake(fde_t *fd, struct Client *client_p)
     {
       unsigned int n = 0;
 
-      if (X509_digest(cert, ServerInfo.message_digest_algorithm, md, &n))
+      if (X509_digest(cert, ConfigServerInfo.message_digest_algorithm, md, &n))
       {
         binary_to_hex(md, buf, n);
         client_p->certfp = xstrdup(buf);
@@ -857,7 +857,7 @@ ssl_server_handshake(fde_t *fd, struct Client *client_p)
 static void
 ssl_connect_init(struct Client *client_p, struct MaskItem *conf, fde_t *fd)
 {
-  if ((client_p->localClient->fd.ssl = SSL_new(ServerInfo.client_ctx)) == NULL)
+  if ((client_p->localClient->fd.ssl = SSL_new(ConfigServerInfo.client_ctx)) == NULL)
   {
     ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
          ERR_error_string(ERR_get_error(), NULL));

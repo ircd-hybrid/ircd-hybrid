@@ -57,7 +57,7 @@ do_service_alias(struct Client *source_p, const char *name, const char *msg)
   }
 
   target_p = find_person(source_p, name);
-  server_p = hash_find_server(ConfigFileEntry.service_name);
+  server_p = hash_find_server(ConfigGeneral.service_name);
 
   if (target_p && server_p && (target_p->servptr == server_p))
   {

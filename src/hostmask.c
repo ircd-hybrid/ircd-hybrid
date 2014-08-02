@@ -761,7 +761,7 @@ hostmask_send_expiration(struct AddressRec *arec)
 {
   char ban_type = '\0';
 
-  if (!ConfigFileEntry.tkline_expire_notices)
+  if (!ConfigGeneral.tkline_expire_notices)
     return;
 
   switch (arec->type)

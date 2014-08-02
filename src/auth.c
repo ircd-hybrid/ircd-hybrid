@@ -298,7 +298,7 @@ start_auth(struct Client *client_p)
 
   SetDNSPending(auth);
 
-  if (ConfigFileEntry.disable_auth == 0)
+  if (ConfigGeneral.disable_auth == 0)
   {
     SetDoingAuth(auth);
     start_auth_query(auth);

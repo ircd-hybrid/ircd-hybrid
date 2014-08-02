@@ -151,7 +151,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   oldts = chptr->channelts;
   oldmode = &chptr->mode;
 
-  if (ConfigFileEntry.ignore_bogus_ts)
+  if (ConfigGeneral.ignore_bogus_ts)
   {
     if (newts < 800000000)
     {

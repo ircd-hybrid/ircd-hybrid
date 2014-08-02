@@ -268,7 +268,7 @@ server_estab(struct Client *client_p)
   /* If there is something in the serv_list, it might be this
    * connecting server..
    */
-  if (!ServerInfo.hub && local_server_list.head)
+  if (!ConfigServerInfo.hub && local_server_list.head)
   {
     if (client_p != local_server_list.head->data || local_server_list.head->next)
     {
@@ -522,7 +522,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   switch (check_server(name, source_p))
   {
     case -1:
-      if (ConfigFileEntry.warn_no_connect_block)
+      if (ConfigGeneral.warn_no_connect_block)
       {
         sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: No entry for "

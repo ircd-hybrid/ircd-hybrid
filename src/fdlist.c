@@ -31,7 +31,7 @@
 #include "ircd.h"    /* GlobalSetOptions */
 #include "irc_string.h"
 #include "s_bsd.h"   /* comm_setselect */
-#include "conf.h"  /* ServerInfo */
+#include "conf.h"  /* ConfigServerInfo */
 #include "send.h"
 #include "memory.h"
 #include "numeric.h"

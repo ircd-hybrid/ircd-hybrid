@@ -352,7 +352,7 @@ user_welcome(struct Client *source_p)
   }
 #endif
 
-  sendto_one_numeric(source_p, &me, RPL_WELCOME, ServerInfo.network_name,
+  sendto_one_numeric(source_p, &me, RPL_WELCOME, ConfigServerInfo.network_name,
                      source_p->name);
   sendto_one_numeric(source_p, &me, RPL_YOURHOST,
                      get_listener_name(source_p->localClient->listener), ircd_version);
@@ -417,7 +417,7 @@ register_local_user(struct Client *source_p)
 
   ClearCap(source_p, CAP_TS6);
 
-  if (ConfigFileEntry.ping_cookie)
+  if (ConfigGeneral.ping_cookie)
   {
     if (!IsPingSent(source_p) && !source_p->localClient->random_ping)
     {
@@ -513,8 +513,8 @@ register_local_user(struct Client *source_p)
    * probably be just a percentage of the MAXCLIENTS...
    *   -Taner
    */
-  if ((Count.local >= ServerInfo.max_clients + MAX_BUFFER) ||
-      (Count.local >= ServerInfo.max_clients && !IsExemptLimits(source_p)))
+  if ((Count.local >= ConfigServerInfo.max_clients + MAX_BUFFER) ||
+      (Count.local >= ConfigServerInfo.max_clients && !IsExemptLimits(source_p)))
   {
     sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                          "Too many clients, rejecting %s[%s].",
@@ -549,12 +549,12 @@ register_local_user(struct Client *source_p)
   sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                        "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
                        source_p->name, source_p->username, source_p->host,
-                       ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
+                       ConfigGeneral.hide_spoof_ips && IsIPSpoof(source_p) ?
                        "255.255.255.255" : source_p->sockhost,
                        get_client_class(&source_p->localClient->confs),
                        source_p->info, source_p->id);
 
-  if (ConfigFileEntry.invisible_on_connect)
+  if (ConfigGeneral.invisible_on_connect)
   {
     AddUMode(source_p, UMODE_INVISIBLE);
     ++Count.invisi;
@@ -709,9 +709,9 @@ valid_username(const char *username, const int local)
   {
     while (*++p)
     {
-      if (*p == '.' && ConfigFileEntry.dots_in_ident)
+      if (*p == '.' && ConfigGeneral.dots_in_ident)
       {
-        if (++dots > ConfigFileEntry.dots_in_ident)
+        if (++dots > ConfigGeneral.dots_in_ident)
           return 0;
         if (!IsUserChar(*(p + 1)))
           return 0;
@@ -863,7 +863,7 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     default: return;
   }
 
-  if (ConfigFileEntry.cycle_on_host_change)
+  if (ConfigGeneral.cycle_on_host_change)
     sendto_common_channels_local(target_p, 0, 0, ":%s!%s@%s QUIT :Changing hostname",
                                  target_p->name, target_p->username, target_p->host);
 
@@ -881,7 +881,7 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     clear_ban_cache_client(target_p);
   }
 
-  if (!ConfigFileEntry.cycle_on_host_change)
+  if (!ConfigGeneral.cycle_on_host_change)
     return;
 
   DLINK_FOREACH(ptr, target_p->channel.head)
@@ -945,8 +945,8 @@ oper_up(struct Client *source_p)
 
   if (conf->modes)
     AddUMode(source_p, conf->modes);
-  else if (ConfigFileEntry.oper_umodes)
-    AddUMode(source_p, ConfigFileEntry.oper_umodes);
+  else if (ConfigGeneral.oper_umodes)
+    AddUMode(source_p, ConfigGeneral.oper_umodes);
 
   if (!(old & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
     ++Count.invisi;
@@ -994,8 +994,8 @@ init_uid(void)
 {
   memset(new_uid, 0, sizeof(new_uid));
 
-  if (!EmptyString(ServerInfo.sid))
-    strlcpy(new_uid, ServerInfo.sid, sizeof(new_uid));
+  if (!EmptyString(ConfigServerInfo.sid))
+    strlcpy(new_uid, ConfigServerInfo.sid, sizeof(new_uid));
 
   for (unsigned int i = 0; i < IRC_MAXSID; ++i)
     if (new_uid[i] == '\0')

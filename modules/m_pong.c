@@ -102,7 +102,7 @@ mr_pong(struct Client *source_p, int parc, char *parv[])
 
   if (parc == 2 && !EmptyString(parv[1]))
   {
-    if (ConfigFileEntry.ping_cookie && !source_p->localClient->registration)
+    if (ConfigGeneral.ping_cookie && !source_p->localClient->registration)
     {
       unsigned int incoming_ping = strtoul(parv[1], NULL, 10);
 

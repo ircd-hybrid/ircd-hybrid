@@ -644,7 +644,7 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
   const struct MaskItem *conf = NULL;
   const dlink_node *ptr = NULL;
 
-  if (ConfigFileEntry.stats_e_disabled)
+  if (ConfigGeneral.stats_e_disabled)
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
     return;
@@ -685,7 +685,7 @@ stats_pending_glines(struct Client *source_p, int parc, char *parv[])
   char timebuffer[MAX_DATE_STRING] = "";
   struct tm *tmptr = NULL;
 
-  if (!ConfigFileEntry.glines)
+  if (!ConfigGeneral.glines)
   {
     sendto_one_notice(source_p, &me, ":This server does not support G-Lines");
     return;
@@ -764,7 +764,7 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
 {
   const dlink_node *ptr = NULL;
 
-  if (!ConfigFileEntry.glines)
+  if (!ConfigGeneral.glines)
   {
     sendto_one_notice(source_p, &me, ":This server does not support G-Lines");
     return;
@@ -876,7 +876,7 @@ report_auth(struct Client *source_p, int parc, char *parv[])
       /* We are doing a partial list, based on what matches the u@h of the
        * sender, so prepare the strings for comparing --fl_
        */
-      if (ConfigFileEntry.hide_spoof_ips)
+      if (ConfigGeneral.hide_spoof_ips)
         sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
                            conf->name == NULL ? "*" : conf->name,
                            show_iline_prefix(source_p, conf),
@@ -898,11 +898,11 @@ static void
 stats_auth(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigFileEntry.stats_i_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigGeneral.stats_i_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
 
   /* If unopered, only return matching auth blocks */
-  else if (ConfigFileEntry.stats_i_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
+  else if (ConfigGeneral.stats_i_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
     const struct MaskItem *conf = NULL;
 
@@ -976,11 +976,11 @@ static void
 stats_tklines(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigFileEntry.stats_k_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
 
   /* If unopered, only return matching klines */
-  else if (ConfigFileEntry.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
+  else if (ConfigGeneral.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
     const struct MaskItem *conf = NULL;
 
@@ -1011,11 +1011,11 @@ static void
 stats_klines(struct Client *source_p, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigFileEntry.stats_k_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
 
   /* If unopered, only return matching klines */
-  else if (ConfigFileEntry.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
+  else if (ConfigGeneral.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
     const struct MaskItem *conf = NULL;
 
@@ -1052,7 +1052,7 @@ stats_messages(struct Client *source_p, int parc, char *parv[])
 static void
 stats_oper(struct Client *source_p, int parc, char *parv[])
 {
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.stats_o_oper_only)
+  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_o_oper_only)
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
   else
     report_confitem_types(source_p, CONF_OPER);
@@ -1104,7 +1104,7 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
 static void
 stats_ports(struct Client *source_p, int parc, char *parv[])
 {
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.stats_P_oper_only)
+  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_P_oper_only)
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
   else
     show_ports(source_p);
@@ -1200,7 +1200,7 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
 static void
 stats_uptime(struct Client *source_p, int parc, char *parv[])
 {
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.stats_u_oper_only)
+  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_u_oper_only)
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
   else
   {
@@ -1586,7 +1586,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
   static time_t last_used = 0;
 
   /* Check the user is actually allowed to do /stats, and isn't flooding */
-  if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+  if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;

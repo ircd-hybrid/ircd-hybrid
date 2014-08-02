@@ -53,11 +53,9 @@
 
           * --enable-poll - Use POSIX poll(2).
 
-          * --enable-select - Use POSIX select(2).
-
           Incidentally, the order of listing above is the order of auto-
           detection in configure. So if you do have kqueue but wish to
-          enable select(2) instead (bad idea), you must use --enable-select.
+          enable poll(2) instead (bad idea), you must use --enable-poll.
 
           * --enable-openssl - Enable the openssl dependent crypto functions.
             Required for the SSL Challenge controlled OPER feature, compressed

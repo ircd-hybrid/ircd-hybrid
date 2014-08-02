@@ -146,7 +146,7 @@ motd_cache(struct Motd *motd)
   cache->ref = 1;
   cache->path = xstrdup(motd->path);
   cache->maxcount = motd->maxcount;
-  cache->modtime = *localtime((time_t *)&sb.st_mtime); /* store modtime */
+  cache->modtime = *localtime((const time_t *)&sb.st_mtime); /* store modtime */
 
   while (cache->count < cache->maxcount && fgets(line, sizeof(line), file))
   {

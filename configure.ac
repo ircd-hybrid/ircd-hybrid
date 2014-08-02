@@ -30,9 +30,7 @@ GCC_STACK_PROTECT_CC
 GCC_STACK_PROTECT_LIB
 
 AX_APPEND_COMPILE_FLAGS([-fno-strict-aliasing])
-
-AX_CHECK_LIB_IPV4
-AX_CHECK_LIB_IPV6
+AX_LIBRARY_NET
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
@@ -85,7 +83,7 @@ AC_DEFINE([MP_CHUNK_SIZE_USERHOST], 128*1024, [Size of the userhost mempool chun
 AC_DEFINE([MP_CHUNK_SIZE_IP_ENTRY], 128*1024, [Size of the ip_entry mempool chunk.])
 
 # Argument processing.
-AX_ARG_ENABLE_IOLOOP_MECHANISM
+AX_ARG_IOLOOP_MECHANISM
 AX_ARG_ENABLE_DEBUGGING
 AX_ARG_ENABLE_WARNINGS
 

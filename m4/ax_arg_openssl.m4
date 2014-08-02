@@ -1,4 +1,4 @@
-AC_DEFUN([AX_CHECK_OPENSSL], [
+AC_DEFUN([AX_ARG_OPENSSL], [
 AC_ARG_ENABLE(openssl,
 [  --enable-openssl[=DIR]       Enable OpenSSL support (DIR optional).
   --disable-openssl            Disable OpenSSL support. ],

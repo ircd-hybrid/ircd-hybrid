@@ -58,8 +58,6 @@ AC_ARG_ENABLE(libgeoip,
       [AC_SEARCH_LIBS(GeoIP_id_by_ipnum_v6_gl, GeoIP,
         [AC_DEFINE(HAVE_LIBGEOIP, 1, [Define to 1 if libGeoIP (-lGeoIP) is available.])])])], [])
 
-AX_CHECK_OPENSSL
-
 AC_ARG_ENABLE(assert, AS_HELP_STRING([--enable-assert], 
                                      [Enable assert() statements]),
   [assert=$enableval], [assert=no])
@@ -86,6 +84,7 @@ AC_DEFINE([MP_CHUNK_SIZE_IP_ENTRY], 128*1024, [Size of the ip_entry mempool chun
 AX_ARG_IOLOOP_MECHANISM
 AX_ARG_ENABLE_DEBUGGING
 AX_ARG_ENABLE_WARNINGS
+AX_ARG_OPENSSL
 
 AC_DEFINE_DIR([PREFIX],[prefix],[Set to prefix.])
 AC_DEFINE_DIR([SYSCONFDIR],[sysconfdir],[Set to sysconfdir.])

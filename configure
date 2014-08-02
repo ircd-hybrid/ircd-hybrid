@@ -14291,7 +14291,7 @@ _ACEOF
 int
 main ()
 {
-epoll_create(256);
+epol_create(256);
   ;
   return 0;
 }

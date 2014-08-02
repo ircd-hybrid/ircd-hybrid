@@ -36,7 +36,7 @@ AC_DEFUN([AX_ARG_ENABLE_IOLOOP_MECHANISM],[
   AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_KQUEUE],[$iopoll_mechanism_kqueue],[kqueue mechanism])
   AC_LINK_IFELSE([AC_LANG_FUNC_LINK_TRY([kevent])],[is_kqueue_mechanism_available="yes"],[is_kqueue_mechanism_available="no"])
   dnl }}}
-  dnl {{{ check for epoll oechanism support
+  dnl {{{ check for epoll mechanism support
   iopoll_mechanism_epoll=2
   AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_EPOLL],[$iopoll_mechanism_epoll],[epoll mechanism])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [epoll_create(256);])], [is_epoll_mechanism_available="yes"],[is_epoll_mechanism_available="no"])

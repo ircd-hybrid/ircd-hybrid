@@ -331,9 +331,6 @@
 /* poll mechanism */
 #undef __IOPOLL_MECHANISM_POLL
 
-/* select mechanism */
-#undef __IOPOLL_MECHANISM_SELECT
-
 /* Define so that glibc/gnulib argp.h does not typedef error_t. */
 #undef __error_t_defined
 

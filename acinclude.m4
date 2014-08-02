@@ -25,7 +25,6 @@ AC_DEFUN([AX_ARG_ENABLE_IOLOOP_MECHANISM],[
   AC_ARG_ENABLE([epoll],  [AS_HELP_STRING([--enable-epoll],  [Force epoll usage.])],  [desired_iopoll_mechanism="epoll"])
   AC_ARG_ENABLE([devpoll],[AS_HELP_STRING([--enable-devpoll],[Force devpoll usage.])],[desired_iopoll_mechanism="devpoll"])
   AC_ARG_ENABLE([poll],   [AS_HELP_STRING([--enable-poll],   [Force poll usage.])],   [desired_iopoll_mechanism="poll"]) 
-  AC_ARG_ENABLE([select], [AS_HELP_STRING([--enable-select], [Force select usage.])], [desired_iopoll_mechanism="select"])
   dnl }}}
   dnl {{{ preamble
   AC_MSG_CHECKING([for optimal/desired iopoll mechanism])
@@ -89,14 +88,9 @@ _syscall1(int, epoll_create, int, size)
   AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_POLL],[$iopoll_mechanism_poll],[poll mechanism])
   AC_LINK_IFELSE([AC_LANG_FUNC_LINK_TRY([poll])],[is_poll_mechanism_available="yes"],[is_poll_mechanism_available="no"])
   dnl }}}
-  dnl {{{ check for select mechanism support
-  iopoll_mechanism_select=5
-  AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_SELECT],[$iopoll_mechanism_select],[select mechanism])
-  AC_LINK_IFELSE([AC_LANG_FUNC_LINK_TRY([select])],[is_select_mechanism_available="yes"],[is_select_mechanism_available="no"])
-  dnl }}}
   dnl {{{ determine the optimal mechanism
   optimal_iopoll_mechanism="none"
-  for mechanism in "kqueue" "epoll" "devpoll" "poll" "select" ; do # order is important
+  for mechanism in "kqueue" "epoll" "devpoll" "poll" ; do # order is important
     eval "is_optimal_iopoll_mechanism_available=\$is_${mechanism}_mechanism_available"
     if test "$is_optimal_iopoll_mechanism_available" = "yes" ; then
       optimal_iopoll_mechanism="$mechanism"

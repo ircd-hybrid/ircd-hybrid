@@ -812,7 +812,6 @@ enable_kqueue
 enable_epoll
 enable_devpoll
 enable_poll
-enable_select
 enable_debugging
 enable_warnings
 '
@@ -1468,7 +1467,6 @@ Optional Features:
   --enable-epoll          Force epoll usage.
   --enable-devpoll        Force devpoll usage.
   --enable-poll           Force poll usage.
-  --enable-select         Force select usage.
   --enable-debugging      Enable debugging.
   --enable-warnings       Enable compiler warnings.
 
@@ -14219,11 +14217,6 @@ if test "${enable_poll+set}" = set; then :
   enableval=$enable_poll; desired_iopoll_mechanism="poll"
 fi
 
-  # Check whether --enable-select was given.
-if test "${enable_select+set}" = set; then :
-  enableval=$enable_select; desired_iopoll_mechanism="select"
-fi
-
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for optimal/desired iopoll mechanism" >&5
 $as_echo_n "checking for optimal/desired iopoll mechanism... " >&6; }
   iopoll_mechanism_none=0
@@ -14451,62 +14444,8 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-      iopoll_mechanism_select=5
-
-cat >>confdefs.h <<_ACEOF
-#define __IOPOLL_MECHANISM_SELECT $iopoll_mechanism_select
-_ACEOF
-
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-/* Define select to an innocuous variant, in case <limits.h> declares select.
-   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define select innocuous_select
-
-/* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char select (); below.
-    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-    <limits.h> exists even on freestanding compilers.  */
-
-#ifdef __STDC__
-# include <limits.h>
-#else
-# include <assert.h>
-#endif
-
-#undef select
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char select ();
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined __stub_select || defined __stub___select
-choke me
-#endif
-
-int
-main ()
-{
-return select ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  is_select_mechanism_available="yes"
-else
-  is_select_mechanism_available="no"
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
       optimal_iopoll_mechanism="none"
-  for mechanism in "kqueue" "epoll" "devpoll" "poll" "select" ; do # order is important
+  for mechanism in "kqueue" "epoll" "devpoll" "poll" ; do # order is important
     eval "is_optimal_iopoll_mechanism_available=\$is_${mechanism}_mechanism_available"
     if test "$is_optimal_iopoll_mechanism_available" = "yes" ; then
       optimal_iopoll_mechanism="$mechanism"

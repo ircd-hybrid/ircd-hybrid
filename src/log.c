@@ -108,7 +108,7 @@ ilog(enum log_type type, const char *fmt, ...)
   char buf[LOG_BUFSIZE] = "";
   va_list args;
 
-  if (!log_type_table[type].file || !ConfigLoggingEntry.use_logging)
+  if (!log_type_table[type].file || !ConfigLog.use_logging)
     return;
 
   va_start(args, fmt);

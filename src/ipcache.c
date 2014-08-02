@@ -167,7 +167,7 @@ ipcache_remove_address(struct irc_ssaddr *addr)
     assert(iptr->count > 0);
 
     if (--iptr->count == 0 &&
-        (CurrentTime - iptr->last_attempt) >= ConfigFileEntry.throttle_time)
+        (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
     {
       dlinkDelete(&iptr->node, &ip_hash_table[hash_index]);
       mp_pool_release(iptr);
@@ -194,7 +194,7 @@ ipcache_remove_expired_entries(void *unused)
       struct ip_entry *iptr = ptr->data;
 
       if (iptr->count == 0 &&
-          (CurrentTime - iptr->last_attempt) >= ConfigFileEntry.throttle_time)
+          (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
       {
         dlinkDelete(&iptr->node, &ip_hash_table[i]);
         mp_pool_release(iptr);

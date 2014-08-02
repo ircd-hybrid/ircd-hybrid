@@ -105,7 +105,7 @@
 #define TS_WARN_DELTA_MIN     10        /* min value for ts_warn_delta */
 #define TS_WARN_DELTA_DEFAULT 30        /* default for ts_warn_delta */
 
-/* ServerInfo default values */
+/* ConfigServerInfo default values */
 #define NETWORK_NAME_DEFAULT "EFnet"             /* default for network_name */
 #define NETWORK_DESC_DEFAULT "Eris Free Network" /* default for network_desc */
 #define SERVICE_NAME_DEFAULT "service.someserver"

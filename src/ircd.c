@@ -136,7 +136,7 @@ print_startup(int pid)
   printf("ircd: version %s(%s)\n", ircd_version, serno);
   printf("ircd: pid %d\n", pid);
   printf("ircd: running in %s mode from %s\n", !server_state.foreground ? "background"
-         : "foreground", ConfigFileEntry.dpath);
+         : "foreground", ConfigGeneral.dpath);
 }
 
 static void
@@ -162,17 +162,17 @@ static int printVersion = 0;
 
 static struct lgetopt myopts[] =
 {
-  {"configfile", &ConfigFileEntry.configfile,
+  {"configfile", &ConfigGeneral.configfile,
    STRING, "File to use for ircd.conf"},
-  {"glinefile",  &ConfigFileEntry.glinefile,
+  {"glinefile",  &ConfigGeneral.glinefile,
    STRING, "File to use for gline database"},
-  {"klinefile",  &ConfigFileEntry.klinefile,
+  {"klinefile",  &ConfigGeneral.klinefile,
    STRING, "File to use for kline database"},
-  {"dlinefile",  &ConfigFileEntry.dlinefile,
+  {"dlinefile",  &ConfigGeneral.dlinefile,
    STRING, "File to use for dline database"},
-  {"xlinefile",  &ConfigFileEntry.xlinefile,
+  {"xlinefile",  &ConfigGeneral.xlinefile,
    STRING, "File to use for xline database"},
-  {"resvfile",  &ConfigFileEntry.resvfile,
+  {"resvfile",  &ConfigGeneral.resvfile,
    STRING, "File to use for resv database"},
   {"logfile",    &logFileName,
    STRING, "File to use for ircd.log"},
@@ -265,8 +265,8 @@ initialize_global_set_options(void)
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num  = MAX_JOIN_LEAVE_COUNT;
 
-  if (ConfigFileEntry.default_floodcount)
-    GlobalSetOptions.floodcount = ConfigFileEntry.default_floodcount;
+  if (ConfigGeneral.default_floodcount)
+    GlobalSetOptions.floodcount = ConfigGeneral.default_floodcount;
   else
     GlobalSetOptions.floodcount = 10;
 
@@ -423,7 +423,7 @@ ssl_init(void)
   SSL_load_error_strings();
   SSLeay_add_ssl_algorithms();
 
-  if ((ServerInfo.server_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL)
+  if ((ConfigServerInfo.server_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
@@ -431,11 +431,11 @@ ssl_init(void)
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
   }
 
-  SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
-  SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_SINGLE_DH_USE);
-  SSL_CTX_set_verify(ServerInfo.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
+  SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
+  SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_SINGLE_DH_USE);
+  SSL_CTX_set_verify(ConfigServerInfo.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);
-  SSL_CTX_set_session_id_context(ServerInfo.server_ctx, session_id, sizeof(session_id) - 1);
+  SSL_CTX_set_session_id_context(ConfigServerInfo.server_ctx, session_id, sizeof(session_id) - 1);
 
 #if OPENSSL_VERSION_NUMBER >= 0x1000005FL && !defined(OPENSSL_NO_ECDH)
   {
@@ -443,15 +443,15 @@ ssl_init(void)
 
     if (key)
     {
-      SSL_CTX_set_tmp_ecdh(ServerInfo.server_ctx, key);
+      SSL_CTX_set_tmp_ecdh(ConfigServerInfo.server_ctx, key);
       EC_KEY_free(key);
     }
   }
 
-  SSL_CTX_set_options(ServerInfo.server_ctx, SSL_OP_SINGLE_ECDH_USE);
+  SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_SINGLE_ECDH_USE);
 #endif
 
-  if ((ServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
+  if ((ConfigServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
@@ -459,9 +459,9 @@ ssl_init(void)
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
   }
 
-  SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
-  SSL_CTX_set_options(ServerInfo.client_ctx, SSL_OP_SINGLE_DH_USE);
-  SSL_CTX_set_verify(ServerInfo.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
+  SSL_CTX_set_options(ConfigServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
+  SSL_CTX_set_options(ConfigServerInfo.client_ctx, SSL_OP_SINGLE_DH_USE);
+  SSL_CTX_set_verify(ConfigServerInfo.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);
 #endif /* HAVE_LIBCRYPTO */
 }
@@ -488,16 +488,16 @@ main(int argc, char *argv[])
   me.localClient = &meLocalUser;
   dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
-  ConfigLoggingEntry.use_logging = 1;
-  ConfigFileEntry.dpath      = DPATH;
-  ConfigFileEntry.spath      = SPATH;
-  ConfigFileEntry.mpath      = MPATH;
-  ConfigFileEntry.configfile = CPATH;    /* Server configuration file */
-  ConfigFileEntry.klinefile  = KPATH;    /* Server kline file         */
-  ConfigFileEntry.glinefile  = GPATH;    /* Server gline file         */
-  ConfigFileEntry.xlinefile  = XPATH;    /* Server xline file         */
-  ConfigFileEntry.dlinefile  = DLPATH;   /* dline file                */
-  ConfigFileEntry.resvfile   = RESVPATH; /* resv file                 */
+  ConfigLog.use_logging = 1;
+  ConfigGeneral.dpath      = DPATH;
+  ConfigGeneral.spath      = SPATH;
+  ConfigGeneral.mpath      = MPATH;
+  ConfigGeneral.configfile = CPATH;    /* Server configuration file */
+  ConfigGeneral.klinefile  = KPATH;    /* Server kline file         */
+  ConfigGeneral.glinefile  = GPATH;    /* Server gline file         */
+  ConfigGeneral.xlinefile  = XPATH;    /* Server xline file         */
+  ConfigGeneral.dlinefile  = DLPATH;   /* dline file                */
+  ConfigGeneral.resvfile   = RESVPATH; /* resv file                 */
 
   myargv = argv;
   umask(077);                /* better safe than sorry --SRB */
@@ -510,7 +510,7 @@ main(int argc, char *argv[])
     exit(EXIT_SUCCESS);
   }
 
-  if (chdir(ConfigFileEntry.dpath))
+  if (chdir(ConfigGeneral.dpath))
   {
     perror("chdir");
     exit(EXIT_FAILURE);
@@ -562,30 +562,30 @@ main(int argc, char *argv[])
   geoip_ctx = GeoIP_new(GEOIP_MEMORY_CACHE);
 #endif
 
-  if (EmptyString(ServerInfo.sid))
+  if (EmptyString(ConfigServerInfo.sid))
   {
     ilog(LOG_TYPE_IRCD, "ERROR: No server id specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 
-  strlcpy(me.id, ServerInfo.sid, sizeof(me.id));
+  strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
 
-  if (EmptyString(ServerInfo.name))
+  if (EmptyString(ConfigServerInfo.name))
   {
     ilog(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 
-  strlcpy(me.name, ServerInfo.name, sizeof(me.name));
+  strlcpy(me.name, ConfigServerInfo.name, sizeof(me.name));
 
   /* serverinfo{} description must exist.  If not, error out.*/
-  if (EmptyString(ServerInfo.description))
+  if (EmptyString(ConfigServerInfo.description))
   {
     ilog(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 
-  strlcpy(me.info, ServerInfo.description, sizeof(me.info));
+  strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
   me.from                   = &me;
   me.servptr                = &me;
@@ -618,7 +618,7 @@ main(int argc, char *argv[])
   load_core_modules(1);
 
   /* Go back to DPATH after checking to see if we can chdir to MODPATH */
-  if (chdir(ConfigFileEntry.dpath))
+  if (chdir(ConfigGeneral.dpath))
   {
     perror("chdir");
     exit(EXIT_FAILURE);

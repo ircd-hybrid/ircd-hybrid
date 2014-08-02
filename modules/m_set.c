@@ -129,26 +129,26 @@ quote_max(struct Client *source_p, const char *arg, int newval)
     if (newval > MAXCLIENTS_MAX)
     {
       sendto_one_notice(source_p, &me, ":You cannot set MAXCLIENTS to > %d, restoring to %d",
-                        MAXCLIENTS_MAX, ServerInfo.max_clients);
+                        MAXCLIENTS_MAX, ConfigServerInfo.max_clients);
       return;
     }
 
     if (newval < MAXCLIENTS_MIN)
     {
       sendto_one_notice(source_p, &me, ":You cannot set MAXCLIENTS to < %d, restoring to %d",
-                        MAXCLIENTS_MIN, ServerInfo.max_clients);
+                        MAXCLIENTS_MIN, ConfigServerInfo.max_clients);
       return;
     }
 
-    ServerInfo.max_clients = newval;
+    ConfigServerInfo.max_clients = newval;
 
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
         "%s set new MAXCLIENTS to %d (%d current)",
-        get_oper_name(source_p), ServerInfo.max_clients, Count.local);
+        get_oper_name(source_p), ConfigServerInfo.max_clients, Count.local);
   }
   else
     sendto_one_notice(source_p, &me, ":Current MAXCLIENTS = %d (%d)",
-                      ServerInfo.max_clients, Count.local);
+                      ConfigServerInfo.max_clients, Count.local);
 }
 
 /* SET SPAMNUM */

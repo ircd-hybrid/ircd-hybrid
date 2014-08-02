@@ -157,7 +157,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
     else if (*mask)
     {
       if (dlink_list_length(&source_p->localClient->acceptlist) >=
-          ConfigFileEntry.max_accept)
+          ConfigGeneral.max_accept)
       {
         sendto_one_numeric(source_p, &me, ERR_ACCEPTFULL);
         return 0;

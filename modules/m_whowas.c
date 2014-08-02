@@ -64,7 +64,7 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
 
       if ((temp->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
         sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
-                           ServerInfo.network_name, myctime(temp->logoff));
+                           ConfigServerInfo.network_name, myctime(temp->logoff));
       else
         sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
                            temp->servername, myctime(temp->logoff));
@@ -105,7 +105,7 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+  if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;

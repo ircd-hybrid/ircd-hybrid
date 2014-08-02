@@ -314,7 +314,7 @@ motd_signon(struct Client *source_p)
 {
   const struct MotdCache *cache = motd_cache(motd_lookup(source_p));
 
-  if (!ConfigFileEntry.short_motd || !cache)
+  if (!ConfigGeneral.short_motd || !cache)
     motd_forward(source_p, cache);
   else
   {

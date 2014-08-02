@@ -98,7 +98,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     if (!valid_wild_card_simple(name))
     {
       sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the resv",
-                        ConfigFileEntry.min_nonwildcard_simple);
+                        ConfigGeneral.min_nonwildcard_simple);
       return;
     }
 

@@ -73,14 +73,14 @@ check_can_use_v6(void)
   int v6;
 
   if ((v6 = socket(AF_INET6, SOCK_STREAM, 0)) < 0)
-    ServerInfo.can_use_v6 = 0;
+    ConfigServerInfo.can_use_v6 = 0;
   else
   {
-    ServerInfo.can_use_v6 = 1;
+    ConfigServerInfo.can_use_v6 = 1;
     close(v6);
   }
 #else
-  ServerInfo.can_use_v6 = 0;
+  ConfigServerInfo.can_use_v6 = 0;
 #endif
 }
 
@@ -281,7 +281,7 @@ ssl_handshake(int fd, struct Client *client_p)
     {
       unsigned int n = 0;
 
-      if (X509_digest(cert, ServerInfo.message_digest_algorithm, md, &n))
+      if (X509_digest(cert, ConfigServerInfo.message_digest_algorithm, md, &n))
       {
         binary_to_hex(md, buf, n);
         client_p->certfp = xstrdup(buf);
@@ -349,7 +349,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 #ifdef HAVE_LIBCRYPTO
   if (listener->flags & LISTENER_SSL)
   {
-    if ((client_p->localClient->fd.ssl = SSL_new(ServerInfo.server_ctx)) == NULL)
+    if ((client_p->localClient->fd.ssl = SSL_new(ConfigServerInfo.server_ctx)) == NULL)
     {
       ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
            ERR_error_string(ERR_get_error(), NULL));

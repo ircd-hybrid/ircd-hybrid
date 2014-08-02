@@ -80,7 +80,7 @@ expire_pending_glines(struct gline_pending *in)
     {
       struct gline_pending *glp_ptr = ptr->data;
 
-      if ((glp_ptr->last_gline_time + ConfigFileEntry.gline_request_time) <= CurrentTime ||
+      if ((glp_ptr->last_gline_time + ConfigGeneral.gline_request_time) <= CurrentTime ||
           glp_ptr == in)
       {
         dlinkDelete(&glp_ptr->node, &pending_glines[i]);

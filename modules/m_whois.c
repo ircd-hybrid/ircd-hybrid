@@ -118,7 +118,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
       !(HasUMode(source_p, UMODE_OPER) || target_p == source_p))
     sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, target_p->name,
                        ConfigServerHide.hidden_name,
-                       ServerInfo.network_desc);
+                       ConfigServerInfo.network_desc);
   else
     sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, target_p->name,
                        target_p->servptr->name, target_p->servptr->info);
@@ -172,7 +172,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
     if (HasUMode(source_p, UMODE_ADMIN) || source_p == target_p)
       show_ip = 1;
     else if (IsIPSpoof(target_p))
-      show_ip = (HasUMode(source_p, UMODE_OPER) && !ConfigFileEntry.hide_spoof_ips);
+      show_ip = (HasUMode(source_p, UMODE_OPER) && !ConfigGeneral.hide_spoof_ips);
     else
       show_ip = 1;
 
@@ -243,7 +243,7 @@ m_whois(struct Client *source_p, int parc, char *parv[])
   if (parc > 2 && !EmptyString(parv[2]))
   {
     /* seeing as this is going across servers, we should limit it */
-    if ((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
+    if ((last_used + ConfigGeneral.pace_wait_simple) > CurrentTime)
     {
       sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
       return 0;

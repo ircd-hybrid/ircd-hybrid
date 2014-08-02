@@ -68,7 +68,7 @@ m_motd(struct Client *source_p, int parc, char *parv[])
 {
   static time_t last_used = 0;
 
-  if ((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+  if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
     return 0;

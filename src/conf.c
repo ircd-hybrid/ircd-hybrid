@@ -320,7 +320,7 @@ verify_access(struct Client *client_p)
       /* Thanks for spoof idea amm */
       if (IsConfDoSpoofIp(conf))
       {
-        if (!ConfigFileEntry.hide_spoof_ips && IsConfSpoofNotice(conf))
+        if (!ConfigGeneral.hide_spoof_ips && IsConfSpoofNotice(conf))
           sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                                "%s spoofing: %s as %s",
                                client_p->name, client_p->host, conf->name);
@@ -330,7 +330,7 @@ verify_access(struct Client *client_p)
 
       return attach_iline(client_p, conf);
     }
-    else if (IsConfKill(conf) || (ConfigFileEntry.glines && IsConfGline(conf)))
+    else if (IsConfKill(conf) || (ConfigGeneral.glines && IsConfGline(conf)))
     {
       if (IsConfGline(conf))
         sendto_one_notice(client_p, &me, ":*** G-lined");
@@ -779,8 +779,8 @@ rehash(int sig)
 
   read_conf_files(0);
 
-  if (ServerInfo.description)
-    strlcpy(me.info, ServerInfo.description, sizeof(me.info));
+  if (ConfigServerInfo.description)
+    strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
   load_conf_modules();
   check_conf_klines();
@@ -806,36 +806,36 @@ set_default_conf(void)
   assert(class_default == class_get_list()->tail->data);
 
 #ifdef HAVE_LIBCRYPTO
-  ServerInfo.message_digest_algorithm = EVP_sha256();
-  ServerInfo.rsa_private_key = NULL;
-  ServerInfo.rsa_private_key_file = NULL;
+  ConfigServerInfo.message_digest_algorithm = EVP_sha256();
+  ConfigServerInfo.rsa_private_key = NULL;
+  ConfigServerInfo.rsa_private_key_file = NULL;
 #endif
 
-  /* ServerInfo.name is not rehashable */
-  /* ServerInfo.name = ServerInfo.name; */
-  ServerInfo.description = NULL;
-  ServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
-  ServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
+  /* ConfigServerInfo.name is not rehashable */
+  /* ConfigServerInfo.name = ConfigServerInfo.name; */
+  ConfigServerInfo.description = NULL;
+  ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
+  ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
 
-  memset(&ServerInfo.ip, 0, sizeof(ServerInfo.ip));
-  ServerInfo.specific_ipv4_vhost = 0;
-  memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
-  ServerInfo.specific_ipv6_vhost = 0;
+  memset(&ConfigServerInfo.ip, 0, sizeof(ConfigServerInfo.ip));
+  ConfigServerInfo.specific_ipv4_vhost = 0;
+  memset(&ConfigServerInfo.ip6, 0, sizeof(ConfigServerInfo.ip6));
+  ConfigServerInfo.specific_ipv6_vhost = 0;
 
-  ServerInfo.max_clients = MAXCLIENTS_MAX;
-  ServerInfo.max_nick_length = 9;
-  ServerInfo.max_topic_length = 80;
-  ServerInfo.hub = 0;
-  ServerInfo.dns_host.sin_addr.s_addr = 0;
-  ServerInfo.dns_host.sin_port = 0;
+  ConfigServerInfo.max_clients = MAXCLIENTS_MAX;
+  ConfigServerInfo.max_nick_length = 9;
+  ConfigServerInfo.max_topic_length = 80;
+  ConfigServerInfo.hub = 0;
+  ConfigServerInfo.dns_host.sin_addr.s_addr = 0;
+  ConfigServerInfo.dns_host.sin_port = 0;
 
-  AdminInfo.name = NULL;
-  AdminInfo.email = NULL;
-  AdminInfo.description = NULL;
+  ConfigAdminInfo.name = NULL;
+  ConfigAdminInfo.email = NULL;
+  ConfigAdminInfo.description = NULL;
 
   log_del_all();
 
-  ConfigLoggingEntry.use_logging = 1;
+  ConfigLog.use_logging = 1;
 
   ConfigChannel.disable_fake_channels = 0;
   ConfigChannel.invite_client_count = 10;
@@ -859,76 +859,76 @@ set_default_conf(void)
   ConfigServerHide.hide_server_ips = 0;
   ConfigServerHide.disable_remote_commands = 0;
 
-  ConfigFileEntry.away_count = 2;
-  ConfigFileEntry.away_time = 10;
-  ConfigFileEntry.service_name = xstrdup(SERVICE_NAME_DEFAULT);
-  ConfigFileEntry.max_watch = WATCHSIZE_DEFAULT;
-  ConfigFileEntry.cycle_on_host_change = 1;
-  ConfigFileEntry.glines = 0;
-  ConfigFileEntry.gline_time = 12 * 3600;
-  ConfigFileEntry.gline_request_time = GLINE_REQUEST_EXPIRE_DEFAULT;
-  ConfigFileEntry.gline_min_cidr = 16;
-  ConfigFileEntry.gline_min_cidr6 = 48;
-  ConfigFileEntry.invisible_on_connect = 1;
-  ConfigFileEntry.tkline_expire_notices = 1;
-  ConfigFileEntry.hide_spoof_ips = 1;
-  ConfigFileEntry.ignore_bogus_ts = 0;
-  ConfigFileEntry.disable_auth = 0;
-  ConfigFileEntry.kill_chase_time_limit = 90;
-  ConfigFileEntry.default_floodcount = 8;
-  ConfigFileEntry.failed_oper_notice = 1;
-  ConfigFileEntry.dots_in_ident = 0;
-  ConfigFileEntry.min_nonwildcard = 4;
-  ConfigFileEntry.min_nonwildcard_simple = 3;
-  ConfigFileEntry.max_accept = 20;
-  ConfigFileEntry.anti_nick_flood = 0;
-  ConfigFileEntry.max_nick_time = 20;
-  ConfigFileEntry.max_nick_changes = 5;
-  ConfigFileEntry.anti_spam_exit_message_time = 0;
-  ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
-  ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
-  ConfigFileEntry.warn_no_connect_block = 1;
-  ConfigFileEntry.stats_e_disabled = 0;
-  ConfigFileEntry.stats_o_oper_only = 0;
-  ConfigFileEntry.stats_k_oper_only = 1;  /* 1 = masked */
-  ConfigFileEntry.stats_i_oper_only = 1;  /* 1 = masked */
-  ConfigFileEntry.stats_P_oper_only = 0;
-  ConfigFileEntry.stats_u_oper_only = 0;
-  ConfigFileEntry.caller_id_wait = 60;
-  ConfigFileEntry.opers_bypass_callerid = 0;
-  ConfigFileEntry.pace_wait = 10;
-  ConfigFileEntry.pace_wait_simple = 1;
-  ConfigFileEntry.short_motd = 0;
-  ConfigFileEntry.ping_cookie = 0;
-  ConfigFileEntry.no_oper_flood = 0;
-  ConfigFileEntry.true_no_oper_flood = 0;
-  ConfigFileEntry.oper_pass_resv = 1;
-  ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
-  ConfigFileEntry.oper_only_umodes = UMODE_DEBUG;
-  ConfigFileEntry.oper_umodes = UMODE_BOTS | UMODE_LOCOPS | UMODE_SERVNOTICE | UMODE_WALLOP;
-  ConfigFileEntry.throttle_count = 1;
-  ConfigFileEntry.throttle_time = 1;
+  ConfigGeneral.away_count = 2;
+  ConfigGeneral.away_time = 10;
+  ConfigGeneral.service_name = xstrdup(SERVICE_NAME_DEFAULT);
+  ConfigGeneral.max_watch = WATCHSIZE_DEFAULT;
+  ConfigGeneral.cycle_on_host_change = 1;
+  ConfigGeneral.glines = 0;
+  ConfigGeneral.gline_time = 12 * 3600;
+  ConfigGeneral.gline_request_time = GLINE_REQUEST_EXPIRE_DEFAULT;
+  ConfigGeneral.gline_min_cidr = 16;
+  ConfigGeneral.gline_min_cidr6 = 48;
+  ConfigGeneral.invisible_on_connect = 1;
+  ConfigGeneral.tkline_expire_notices = 1;
+  ConfigGeneral.hide_spoof_ips = 1;
+  ConfigGeneral.ignore_bogus_ts = 0;
+  ConfigGeneral.disable_auth = 0;
+  ConfigGeneral.kill_chase_time_limit = 90;
+  ConfigGeneral.default_floodcount = 8;
+  ConfigGeneral.failed_oper_notice = 1;
+  ConfigGeneral.dots_in_ident = 0;
+  ConfigGeneral.min_nonwildcard = 4;
+  ConfigGeneral.min_nonwildcard_simple = 3;
+  ConfigGeneral.max_accept = 20;
+  ConfigGeneral.anti_nick_flood = 0;
+  ConfigGeneral.max_nick_time = 20;
+  ConfigGeneral.max_nick_changes = 5;
+  ConfigGeneral.anti_spam_exit_message_time = 0;
+  ConfigGeneral.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
+  ConfigGeneral.ts_max_delta = TS_MAX_DELTA_DEFAULT;
+  ConfigGeneral.warn_no_connect_block = 1;
+  ConfigGeneral.stats_e_disabled = 0;
+  ConfigGeneral.stats_o_oper_only = 0;
+  ConfigGeneral.stats_k_oper_only = 1;  /* 1 = masked */
+  ConfigGeneral.stats_i_oper_only = 1;  /* 1 = masked */
+  ConfigGeneral.stats_P_oper_only = 0;
+  ConfigGeneral.stats_u_oper_only = 0;
+  ConfigGeneral.caller_id_wait = 60;
+  ConfigGeneral.opers_bypass_callerid = 0;
+  ConfigGeneral.pace_wait = 10;
+  ConfigGeneral.pace_wait_simple = 1;
+  ConfigGeneral.short_motd = 0;
+  ConfigGeneral.ping_cookie = 0;
+  ConfigGeneral.no_oper_flood = 0;
+  ConfigGeneral.true_no_oper_flood = 0;
+  ConfigGeneral.oper_pass_resv = 1;
+  ConfigGeneral.max_targets = MAX_TARGETS_DEFAULT;
+  ConfigGeneral.oper_only_umodes = UMODE_DEBUG;
+  ConfigGeneral.oper_umodes = UMODE_BOTS | UMODE_LOCOPS | UMODE_SERVNOTICE | UMODE_WALLOP;
+  ConfigGeneral.throttle_count = 1;
+  ConfigGeneral.throttle_time = 1;
 }
 
 static void
 validate_conf(void)
 {
-  if (ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN)
-    ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
+  if (ConfigGeneral.ts_warn_delta < TS_WARN_DELTA_MIN)
+    ConfigGeneral.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
 
-  if (ConfigFileEntry.ts_max_delta < TS_MAX_DELTA_MIN)
-    ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
+  if (ConfigGeneral.ts_max_delta < TS_MAX_DELTA_MIN)
+    ConfigGeneral.ts_max_delta = TS_MAX_DELTA_DEFAULT;
 
-  if (ServerInfo.network_name == NULL)
-    ServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
+  if (ConfigServerInfo.network_name == NULL)
+    ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
 
-  if (ServerInfo.network_desc == NULL)
-    ServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
+  if (ConfigServerInfo.network_desc == NULL)
+    ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
 
-  if (ConfigFileEntry.service_name == NULL)
-    ConfigFileEntry.service_name = xstrdup(SERVICE_NAME_DEFAULT);
+  if (ConfigGeneral.service_name == NULL)
+    ConfigGeneral.service_name = xstrdup(SERVICE_NAME_DEFAULT);
 
-  ConfigFileEntry.max_watch = IRCD_MAX(ConfigFileEntry.max_watch, WATCHSIZE_MIN);
+  ConfigGeneral.max_watch = IRCD_MAX(ConfigGeneral.max_watch, WATCHSIZE_MIN);
 }
 
 /* read_conf()
@@ -1014,9 +1014,9 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
 
   ip_found = ipcache_find_or_add_address(addr);
 
-  if ((CurrentTime - ip_found->last_attempt) < ConfigFileEntry.throttle_time)
+  if ((CurrentTime - ip_found->last_attempt) < ConfigGeneral.throttle_time)
   {
-    if (ip_found->connection_count >= ConfigFileEntry.throttle_count)
+    if (ip_found->connection_count >= ConfigGeneral.throttle_count)
       return TOO_FAST;
 
     ++ip_found->connection_count;
@@ -1065,14 +1065,14 @@ expire_tklines(dlink_list *tklist)
 
     if (conf->type == CONF_XLINE)
     {
-      if (ConfigFileEntry.tkline_expire_notices)
+      if (ConfigGeneral.tkline_expire_notices)
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary X-line for [%s] expired", conf->name);
       conf_free(conf);
     }
     else if (conf->type == CONF_NRESV || conf->type == CONF_CRESV)
     {
-      if (ConfigFileEntry.tkline_expire_notices)
+      if (ConfigGeneral.tkline_expire_notices)
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                                "Temporary RESV for [%s] expired", conf->name);
       conf_free(conf);
@@ -1180,7 +1180,7 @@ read_conf_files(int cold)
   char chanlimit[IRCD_BUFSIZE] = "";
 
   conf_parser_ctx.boot = cold;
-  filename = ConfigFileEntry.configfile;
+  filename = ConfigGeneral.configfile;
 
   /* We need to know the initial filename for the yyerror() to report
      FIXME: The full path is in conffilenamebuf first time since we
@@ -1215,12 +1215,12 @@ read_conf_files(int cold)
 
   log_reopen_all();
 
-  add_isupport("NICKLEN", NULL, ServerInfo.max_nick_length);
-  add_isupport("NETWORK", ServerInfo.network_name, -1);
+  add_isupport("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
+  add_isupport("NETWORK", ConfigServerInfo.network_name, -1);
 
   snprintf(chanmodes, sizeof(chanmodes), "beI:%d", ConfigChannel.max_bans);
   add_isupport("MAXLIST", chanmodes, -1);
-  add_isupport("MAXTARGETS", NULL, ConfigFileEntry.max_targets);
+  add_isupport("MAXTARGETS", NULL, ConfigGeneral.max_targets);
   add_isupport("CHANTYPES", "#", -1);
 
   snprintf(chanlimit, sizeof(chanlimit), "#:%d",
@@ -1228,7 +1228,7 @@ read_conf_files(int cold)
   add_isupport("CHANLIMIT", chanlimit, -1);
   snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstMORS");
   add_isupport("CHANNELLEN", NULL, CHANNELLEN);
-  add_isupport("TOPICLEN", NULL, ServerInfo.max_topic_length);
+  add_isupport("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
   add_isupport("CHANMODES", chanmodes, -1);
 
   /*
@@ -1298,38 +1298,38 @@ clear_out_old_conf(void)
   /* clean out module paths */
   mod_clear_paths();
 
-  /* clean out ServerInfo */
-  MyFree(ServerInfo.description);
-  ServerInfo.description = NULL;
-  MyFree(ServerInfo.network_name);
-  ServerInfo.network_name = NULL;
-  MyFree(ServerInfo.network_desc);
-  ServerInfo.network_desc = NULL;
+  /* clean out ConfigServerInfo */
+  MyFree(ConfigServerInfo.description);
+  ConfigServerInfo.description = NULL;
+  MyFree(ConfigServerInfo.network_name);
+  ConfigServerInfo.network_name = NULL;
+  MyFree(ConfigServerInfo.network_desc);
+  ConfigServerInfo.network_desc = NULL;
 #ifdef HAVE_LIBCRYPTO
-  if (ServerInfo.rsa_private_key)
+  if (ConfigServerInfo.rsa_private_key)
   {
-    RSA_free(ServerInfo.rsa_private_key);
-    ServerInfo.rsa_private_key = NULL;
+    RSA_free(ConfigServerInfo.rsa_private_key);
+    ConfigServerInfo.rsa_private_key = NULL;
   }
 
-  MyFree(ServerInfo.rsa_private_key_file);
-  ServerInfo.rsa_private_key_file = NULL;
+  MyFree(ConfigServerInfo.rsa_private_key_file);
+  ConfigServerInfo.rsa_private_key_file = NULL;
 #endif
 
-  /* clean out AdminInfo */
-  MyFree(AdminInfo.name);
-  AdminInfo.name = NULL;
-  MyFree(AdminInfo.email);
-  AdminInfo.email = NULL;
-  MyFree(AdminInfo.description);
-  AdminInfo.description = NULL;
+  /* clean out ConfigAdminInfo */
+  MyFree(ConfigAdminInfo.name);
+  ConfigAdminInfo.name = NULL;
+  MyFree(ConfigAdminInfo.email);
+  ConfigAdminInfo.email = NULL;
+  MyFree(ConfigAdminInfo.description);
+  ConfigAdminInfo.description = NULL;
 
   /* clean out listeners */
   close_listeners();
 
   /* clean out general */
-  MyFree(ConfigFileEntry.service_name);
-  ConfigFileEntry.service_name = NULL;
+  MyFree(ConfigGeneral.service_name);
+  ConfigGeneral.service_name = NULL;
 }
 
 /* conf_add_class_to_conf()
@@ -1473,12 +1473,12 @@ valid_wild_card_simple(const char *data)
     if (tmpch == '\\' && *p)
     {
       ++p;
-      if (++nonwild >= ConfigFileEntry.min_nonwildcard_simple)
+      if (++nonwild >= ConfigGeneral.min_nonwildcard_simple)
         return 1;
     }
     else if (!IsMWildChar(tmpch))
     {
-      if (++nonwild >= ConfigFileEntry.min_nonwildcard_simple)
+      if (++nonwild >= ConfigGeneral.min_nonwildcard_simple)
         return 1;
     }
   }
@@ -1529,7 +1529,7 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
          * If we find enough non-wild characters, we can
          * break - no point in searching further.
          */
-        if (++nonwild >= ConfigFileEntry.min_nonwildcard)
+        if (++nonwild >= ConfigGeneral.min_nonwildcard)
         {
           va_end(args);
           return 1;
@@ -1541,7 +1541,7 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
   if (warn)
     sendto_one_notice(source_p, &me,
                       ":Please include at least %u non-wildcard characters with the mask",
-                      ConfigFileEntry.min_nonwildcard);
+                      ConfigGeneral.min_nonwildcard);
   va_end(args);
   return 0;
 }

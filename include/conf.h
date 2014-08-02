@@ -59,25 +59,25 @@
 #define CONF_FLAGS_WEBIRC               0x00020000U
 
 /* Macros for struct MaskItem */
-#define IsConfWebIRC(x)         ((x)->flags & CONF_FLAGS_WEBIRC)
-#define IsNoTilde(x)            ((x)->flags & CONF_FLAGS_NO_TILDE)
-#define IsConfCanFlood(x)       ((x)->flags & CONF_FLAGS_CAN_FLOOD)
-#define IsNeedPassword(x)       ((x)->flags & CONF_FLAGS_NEED_PASSWORD)
-#define IsNeedIdentd(x)         ((x)->flags & CONF_FLAGS_NEED_IDENTD)
-#define IsConfExemptKline(x)    ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
-#define IsConfExemptLimits(x)   ((x)->flags & CONF_FLAGS_NOLIMIT)
-#define IsConfExemptGline(x)    ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
-#define IsConfExemptResv(x)     ((x)->flags & CONF_FLAGS_EXEMPTRESV)
-#define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
-#define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#define IsConfSpoofNotice(x)    ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
-#define IsConfAllowAutoConn(x)  ((x)->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
-#define SetConfAllowAutoConn(x) ((x)->flags |= CONF_FLAGS_ALLOW_AUTO_CONN)
+#define IsConfWebIRC(x)           ((x)->flags & CONF_FLAGS_WEBIRC)
+#define IsNoTilde(x)              ((x)->flags & CONF_FLAGS_NO_TILDE)
+#define IsConfCanFlood(x)         ((x)->flags & CONF_FLAGS_CAN_FLOOD)
+#define IsNeedPassword(x)         ((x)->flags & CONF_FLAGS_NEED_PASSWORD)
+#define IsNeedIdentd(x)           ((x)->flags & CONF_FLAGS_NEED_IDENTD)
+#define IsConfExemptKline(x)      ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
+#define IsConfExemptLimits(x)     ((x)->flags & CONF_FLAGS_NOLIMIT)
+#define IsConfExemptGline(x)      ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
+#define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
+#define IsConfDoIdentd(x)         ((x)->flags & CONF_FLAGS_DO_IDENTD)
+#define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)
+#define IsConfSpoofNotice(x)      ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
+#define IsConfAllowAutoConn(x)    ((x)->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
+#define SetConfAllowAutoConn(x)   ((x)->flags |= CONF_FLAGS_ALLOW_AUTO_CONN)
 #define ClearConfAllowAutoConn(x) ((x)->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN)
-#define IsConfRedir(x)          ((x)->flags & CONF_FLAGS_REDIR)
-#define IsConfSSL(x)      ((x)->flags & CONF_FLAGS_SSL)
-#define IsConfDatabase(x)      ((x)->flags & CONF_FLAGS_IN_DATABASE)
-#define SetConfDatabase(x)     ((x)->flags |= CONF_FLAGS_IN_DATABASE)
+#define IsConfRedir(x)            ((x)->flags & CONF_FLAGS_REDIR)
+#define IsConfSSL(x)              ((x)->flags & CONF_FLAGS_SSL)
+#define IsConfDatabase(x)         ((x)->flags & CONF_FLAGS_IN_DATABASE)
+#define SetConfDatabase(x)        ((x)->flags |= CONF_FLAGS_IN_DATABASE)
 
 
 /* shared/cluster server entry types
@@ -202,7 +202,7 @@ struct
 
 struct
 {
-  const char *dpath;          /* DPATH if set from command line */
+  const char *dpath;
   const char *mpath;
   const char *spath;
   const char *configfile;
@@ -262,7 +262,7 @@ struct
   unsigned int ping_cookie;
   unsigned int disable_auth;
   unsigned int cycle_on_host_change;
-} ConfigFileEntry;
+} ConfigGeneral;
 
 struct
 {
@@ -317,19 +317,19 @@ struct
   unsigned int specific_ipv6_vhost;
   struct sockaddr_in dns_host;
   unsigned int can_use_v6;
-} ServerInfo;
+} ConfigServerInfo;
 
 struct
 {
   char *name;
   char *description;
   char *email;
-} AdminInfo;
+} ConfigAdminInfo;
 
 struct
 {
   unsigned int use_logging;
-} ConfigLoggingEntry;
+} ConfigLog;
 
 extern dlink_list flatten_links;
 extern dlink_list server_items;

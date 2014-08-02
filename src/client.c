@@ -315,7 +315,7 @@ check_conf_klines(void)
       continue; /* and go examine next fd/client_p */
     }
 
-    if (ConfigFileEntry.glines)
+    if (ConfigGeneral.glines)
     {
       if ((conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
                                        CONF_GLINE, client_p->localClient->aftype,
@@ -492,7 +492,7 @@ find_chasing(struct Client *source_p, const char *name)
     return NULL;
 
   if ((who = whowas_get_history(name,
-                         (time_t)ConfigFileEntry.kill_chase_time_limit))
+                         (time_t)ConfigGeneral.kill_chase_time_limit))
                          == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
@@ -538,7 +538,7 @@ get_client_name(const struct Client *client_p, enum addr_mask_type type)
       type = MASK_IP;
   }
 
-  if (ConfigFileEntry.hide_spoof_ips)
+  if (ConfigGeneral.hide_spoof_ips)
     if (IsIPSpoof(client_p) && type == SHOW_IP)
       type = MASK_IP;
 
@@ -747,7 +747,7 @@ exit_client(struct Client *source_p, const char *comment)
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                            "Client exiting: %s (%s@%s) [%s] [%s]",
                            source_p->name, source_p->username, source_p->host, comment,
-                           ConfigFileEntry.hide_spoof_ips && IsIPSpoof(source_p) ?
+                           ConfigGeneral.hide_spoof_ips && IsIPSpoof(source_p) ?
                            "255.255.255.255" : source_p->sockhost);
       ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %llu/%llu",
            myctime(source_p->localClient->firsttime), (unsigned int)(on_for / 3600),

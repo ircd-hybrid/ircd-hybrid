@@ -332,7 +332,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
     {
       /* Here is the anti-flood bot/spambot code -db */
       if (HasFlag(source_p, FLAGS_SERVICE) || accept_message(source_p, target_p) ||
-         (HasUMode(source_p, UMODE_OPER) && ConfigFileEntry.opers_bypass_callerid))
+         (HasUMode(source_p, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
       {
         sendto_one(target_p, ":%s!%s@%s %s %s :%s",
                    source_p->name, source_p->username,
@@ -351,7 +351,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
                                         "server side ignore with the exception of common channels");
 
         if ((target_p->localClient->last_caller_id_time +
-             ConfigFileEntry.caller_id_wait) < CurrentTime)
+             ConfigGeneral.caller_id_wait) < CurrentTime)
         {
           if (p_or_n != NOTICE)
             sendto_one_numeric(source_p, &me, RPL_TARGNOTIFY, target_p->name);
@@ -530,10 +530,10 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
       {
         if (!duplicate_ptr(chptr))
         {
-          if (ntargets >= ConfigFileEntry.max_targets)
+          if (ntargets >= ConfigGeneral.max_targets)
           {
             sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
-                               nick, ConfigFileEntry.max_targets);
+                               nick, ConfigGeneral.max_targets);
             return 1;
           }
 
@@ -555,10 +555,10 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
     {
       if (!duplicate_ptr(target_p))
       {
-        if (ntargets >= ConfigFileEntry.max_targets)
+        if (ntargets >= ConfigGeneral.max_targets)
         {
           sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
-                             nick, ConfigFileEntry.max_targets);
+                             nick, ConfigGeneral.max_targets);
           return 1;
         }
 
@@ -614,10 +614,10 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
 
         if (!duplicate_ptr(chptr))
         {
-          if (ntargets >= ConfigFileEntry.max_targets)
+          if (ntargets >= ConfigGeneral.max_targets)
           {
             sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
-                               nick, ConfigFileEntry.max_targets);
+                               nick, ConfigGeneral.max_targets);
             return 1;
           }
 

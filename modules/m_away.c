@@ -73,10 +73,10 @@ m_away(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((source_p->localClient->away.last_attempt + ConfigFileEntry.away_time) < CurrentTime)
+  if ((source_p->localClient->away.last_attempt + ConfigGeneral.away_time) < CurrentTime)
     source_p->localClient->away.count = 0;
 
-  if (source_p->localClient->away.count > ConfigFileEntry.away_count)
+  if (source_p->localClient->away.count > ConfigGeneral.away_count)
   {
     sendto_one_numeric(source_p, &me, ERR_TOOMANYAWAY);
     return 0;

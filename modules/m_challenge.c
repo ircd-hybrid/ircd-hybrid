@@ -50,7 +50,7 @@ static void
 failed_challenge_notice(struct Client *source_p, const char *name,
                         const char *reason)
 {
-  if (ConfigFileEntry.failed_oper_notice)
+  if (ConfigGeneral.failed_oper_notice)
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Failed CHALLENGE attempt as %s "
                          "by %s (%s@%s) - %s", name, source_p->name,

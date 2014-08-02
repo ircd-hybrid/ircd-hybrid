@@ -100,9 +100,9 @@ m_watch(struct Client *source_p, int parc, char *parv[])
       if (*(s + 1))
       {
         if (dlink_list_length(&source_p->localClient->watches) >=
-            ConfigFileEntry.max_watch)
+            ConfigGeneral.max_watch)
         {
-          sendto_one_numeric(source_p, &me, ERR_TOOMANYWATCH, s + 1, ConfigFileEntry.max_watch);
+          sendto_one_numeric(source_p, &me, ERR_TOOMANYWATCH, s + 1, ConfigGeneral.max_watch);
           continue;
         }
 
@@ -250,7 +250,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&watch_msgtab);
-  add_isupport("WATCH", NULL, ConfigFileEntry.max_watch);
+  add_isupport("WATCH", NULL, ConfigGeneral.max_watch);
 }
 
 static void

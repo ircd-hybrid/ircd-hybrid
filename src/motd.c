@@ -112,15 +112,15 @@ motd_cache(struct Motd *motd)
   if (motd->cache)
     return motd->cache;
 
-  /* Try to find it in the list of cached files... */
+  /* Try to find it in the list of cached files */
   DLINK_FOREACH(ptr, MotdList.cachelist.head)
   {
     cache = ptr->data;
 
     if (!strcmp(cache->path, motd->path) && cache->maxcount == motd->maxcount)
     {
-      cache->ref++;  /* Increase reference count... */
-      motd->cache = cache;  /* Remember cache... */
+      cache->ref++;  /* Increase reference count */
+      motd->cache = cache;  /* Remember cache */
       return motd->cache;  /* Return it */
     }
   }
@@ -146,7 +146,7 @@ motd_cache(struct Motd *motd)
   cache->ref = 1;
   cache->path = xstrdup(motd->path);
   cache->maxcount = motd->maxcount;
-  cache->modtime = *localtime((const time_t *)&sb.st_mtime); /* store modtime */
+  cache->modtime = *localtime((const time_t *)&sb.st_mtime);  /* Store modtime */
 
   while (cache->count < cache->maxcount && fgets(line, sizeof(line), file))
   {
@@ -167,7 +167,7 @@ motd_cache(struct Motd *motd)
          (MOTD_LINESIZE * cache->count));
   MyFree(cache);
 
-  /* Now link it in... */
+  /* Now link it in */
   dlinkAdd(motd->cache, &motd->cache->node, &MotdList.cachelist);
 
   return motd->cache;
@@ -189,11 +189,11 @@ motd_decache(struct Motd *motd)
 
   motd->cache = NULL;  /* Zero the cache */
 
-  if (--cache->ref == 0)  /* Reduce reference count... */
+  if (--cache->ref == 0)  /* Reduce reference count */
   {
     dlinkDelete(&cache->node, &MotdList.cachelist);
-    MyFree(cache->path);  /* Free path info... */
-    MyFree(cache);  /* Very simple for a reason... */
+    MyFree(cache->path);  /* Free path info */
+    MyFree(cache);  /* Very simple for a reason */
   }
 }
 
@@ -346,7 +346,7 @@ motd_recache(void)
   DLINK_FOREACH(ptr, MotdList.other.head)  /* Now all the others */
     motd_decache(ptr->data);
 
-  /* now recache local and remote MOTDs */
+  /* Now recache local and remote MOTDs */
   motd_cache(MotdList.local);
   motd_cache(MotdList.remote);
 }
@@ -357,17 +357,17 @@ motd_recache(void)
 void
 motd_init(void)
 {
-  if (MotdList.local)  /* Destroy old local... */
+  if (MotdList.local)  /* Destroy old local MOTD */
     motd_destroy(MotdList.local);
 
   MotdList.local = motd_create(NULL, MPATH);
-  motd_cache(MotdList.local);  /* Init local and cache it */
+  motd_cache(MotdList.local);  /* Initialize local MOTD and cache it */
 
-  if (MotdList.remote)  /* Destroy old remote... */
+  if (MotdList.remote)  /* Destroy old remote MOTD */
     motd_destroy(MotdList.remote);
 
   MotdList.remote = motd_create(NULL, MPATH);
-  motd_cache(MotdList.remote);  /* Init remote and cache it */
+  motd_cache(MotdList.remote);  /* Initialize remote MOTD and cache it */
 }
 
 /* \brief Add a new MOTD.
@@ -377,7 +377,7 @@ motd_init(void)
 void
 motd_add(const char *hostmask, const char *path)
 {
-  struct Motd *motd = motd_create(hostmask, path);  /* create the motd */
+  struct Motd *motd = motd_create(hostmask, path);  /* Create the motd */
 
   dlinkAdd(motd, &motd->node, &MotdList.other);
 }
@@ -401,7 +401,7 @@ motd_clear(void)
     motd_destroy(ptr->data);
   }
 
-  /* now recache local and remote MOTDs */
+  /* Now recache local and remote MOTDs */
   motd_cache(MotdList.local);
   motd_cache(MotdList.remote);
 }
@@ -430,10 +430,10 @@ void
 motd_memory_count(struct Client *source_p)
 {
   const dlink_node *ptr = NULL;
-  unsigned int mt  = 0;  /* motd count */
-  unsigned int mtc = 0;  /* motd cache count */
-  size_t mtm  = 0;  /* memory consumed by motd */
-  size_t mtcm = 0;  /* memory consumed by motd cache */
+  unsigned int mt  = 0;  /* Motd count */
+  unsigned int mtc = 0;  /* Motd cache count */
+  size_t mtm  = 0;  /* Memory consumed by motd */
+  size_t mtcm = 0;  /* Memory consumed by motd cache */
 
   if (MotdList.local)
   {

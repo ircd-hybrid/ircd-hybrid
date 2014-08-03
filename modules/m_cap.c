@@ -89,18 +89,10 @@ capab_search(const char *key, const struct capabilities *cap)
 static struct capabilities *
 find_cap(const char **caplist_p, int *neg_p)
 {
-  static int inited = 0;
   const char *caplist = *caplist_p;
   struct capabilities *cap = NULL;
 
   *neg_p = 0;  /* Clear negative flag... */
-
-  if (!inited)
-  {
-    /* First, let's sort the array... */
-    qsort(capab_list, CAPAB_LIST_LEN, sizeof(struct capabilities), (bqcmp)capab_sort);
-    ++inited;
-  }
 
   /* Next, find first non-whitespace character... */
   while (*caplist && IsSpace(*caplist))
@@ -420,6 +412,8 @@ static struct Message cap_msgtab =
 static void
 module_init(void)
 {
+  /* First, let's sort the array */
+  qsort(capab_list, CAPAB_LIST_LEN, sizeof(struct capabilities), (bqcmp)capab_sort);
   mod_add_cmd(&cap_msgtab);
 }
 

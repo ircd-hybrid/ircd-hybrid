@@ -203,7 +203,7 @@ change_local_nick(struct Client *source_p, const char *nick)
       source_p->localClient->nick.count >
       ConfigGeneral.max_nick_changes)
   {
-    sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST, source_p->name, nick,
+    sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST, nick,
                        ConfigGeneral.max_nick_time);
     return;
   }

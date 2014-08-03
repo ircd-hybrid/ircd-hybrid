@@ -459,7 +459,7 @@ static const char *const replies[] =
 /* 426 */ NULL,
 /* 427 */ NULL,
 /* 428 */ NULL,
-/* 429 ERR_TOOMANYAWAY */ ":%s 429 %s :Too many aways - Flood protection activated",
+/* 429 ERR_TOOMANYAWAY */ ":Too many aways - Flood protection activated",
 /* 430 */ NULL,
 /* 431 ERR_NONICKNAMEGIVEN */ ":No nickname given",
 /* 432 ERR_ERRONEUSNICKNAME */ "%s :%s",

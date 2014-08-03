@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.0rc2 (2014-??-??)
+-- Noteworthy changes in version 8.2.0rc2 (2014-08-03)
 o) Improved AWAY throttling to allow for better fine-tuning
 o) Support for the select() I/O event notification has been dropped
 o) Minor code cleanups and improvements

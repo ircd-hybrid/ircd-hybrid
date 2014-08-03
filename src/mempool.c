@@ -695,9 +695,7 @@ mp_pool_assert_ok(mp_pool_t *pool)
 void
 mp_pool_garbage_collect(void *arg)
 {
-  mp_pool_t *pool = mp_allocated_pools;
-
-  for (; pool; pool = pool->next)
+  for (mp_pool_t *pool = mp_allocated_pools; pool; pool = pool->next)
     mp_pool_clean(pool, 0, 1);
 }
 

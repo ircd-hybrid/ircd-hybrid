@@ -54,13 +54,15 @@ Feature Specific Requirements:
   is known to run properly.
   (If you want to help us to keep this list up to date, please send us an
    email to bugs@ircd-hybrid.org with some info about the operating system)
-  CentOS 5.8
+  CentOS 5.8, 7.0
   Red Hat Linux 9
-  Ubuntu 12.04
+  Ubuntu 12.04, 14.04
   FreeBSD 9.1
   OpenBSD 5.2
   Arch Linux 2012.12.01
+  Debian GNU/Linux 7.6
   Debian GNU/Hurd 0.3
+  openSUSE 13.1
   Mac OS X 10.9 (Mavericks)
 
 - /etc/resolv.conf must exist for the resolver to work.

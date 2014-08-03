@@ -55,7 +55,6 @@ struct event splitmode_event =
 };
 
 static mp_pool_t *member_pool, *channel_pool;
-static char buf[IRCD_BUFSIZE];
 
 
 /*! \brief Initializes the channel blockheap, adds known channel CAPAB
@@ -161,6 +160,7 @@ static void
 send_members(struct Client *client_p, struct Channel *chptr,
              char *modebuf, char *parabuf)
 {
+  char buf[IRCD_BUFSIZE] = "";
   const dlink_node *ptr = NULL;
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
@@ -224,6 +224,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
                const dlink_list *list, char flag)
 {
   const dlink_node *ptr = NULL;
+  char mbuf[IRCD_BUFSIZE] = "";
   char pbuf[IRCD_BUFSIZE] = "";
   int tlen, mlen, cur_len;
   char *pp = pbuf;
@@ -231,7 +232,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
   if (list->length == 0)
     return;
 
-  mlen = snprintf(buf, sizeof(buf), ":%s BMASK %lu %s %c :", me.id,
+  mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %lu %s %c :", me.id,
                   (unsigned long)chptr->channelts, chptr->chname, flag);
   cur_len = mlen;
 
@@ -247,7 +248,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
     if (cur_len + (tlen - 1) > IRCD_BUFSIZE - 2)
     {
       *(pp - 1) = '\0';  /* Get rid of trailing space on buffer */
-      sendto_one(client_p, "%s%s", buf, pbuf);
+      sendto_one(client_p, "%s%s", mbuf, pbuf);
 
       cur_len = mlen;
       pp = pbuf;
@@ -259,7 +260,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
   }
 
   *(pp - 1) = '\0';  /* Get rid of trailing space on buffer */
-  sendto_one(client_p, "%s%s", buf, pbuf);
+  sendto_one(client_p, "%s%s", mbuf, pbuf);
 }
 
 /*! \brief Send "client_p" a full list of the modes for channel chptr
@@ -414,7 +415,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
                      int show_eon)
 {
   const dlink_node *ptr = NULL;
-  char lbuf[IRCD_BUFSIZE + 1] = "";
+  char buf[IRCD_BUFSIZE + 1] = "";
   char *t = NULL, *start = NULL;
   int tlen = 0;
   int is_member = IsMember(source_p, chptr);
@@ -423,9 +424,9 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
 
   if (PubChannel(chptr) || is_member)
   {
-    t = lbuf + snprintf(lbuf, sizeof(lbuf), numeric_form(RPL_NAMREPLY),
-                        me.name, source_p->name,
-                        channel_pub_or_secret(chptr), chptr->chname);
+    t = buf + snprintf(buf, sizeof(buf), numeric_form(RPL_NAMREPLY),
+                       me.name, source_p->name,
+                       channel_pub_or_secret(chptr), chptr->chname);
     start = t;
 
     DLINK_FOREACH(ptr, chptr->members.head)
@@ -456,10 +457,10 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
           ++tlen;
       }
 
-      if (t + tlen - lbuf > IRCD_BUFSIZE - 2)
+      if (t + tlen - buf > IRCD_BUFSIZE - 2)
       {
         *(t - 1) = '\0';
-        sendto_one(source_p, "%s", lbuf);
+        sendto_one(source_p, "%s", buf);
         t = start;
       }
 
@@ -475,7 +476,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
     if (tlen)
     {
       *(t - 1) = '\0';
-      sendto_one(source_p, "%s", lbuf);
+      sendto_one(source_p, "%s", buf);
     }
   }
 

@@ -187,7 +187,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   int samenick = 0;
 
   assert(source_p->name[0] && !EmptyString(nick));
-  assert(MyConnect(source_p));
+  assert(MyClient(source_p));
 
   /*
    * Client just changing his/her nick. If he/she is

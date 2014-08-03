@@ -41,7 +41,7 @@
 
           * --enable-kqueue - Use the superior kqueue(2) system call as
             opposed to the default poll(2). This is currently only available
-            on FreeBSD 4.1 or higher.
+            on FreeBSD, OpenBSD, NetBSD, and Mac OS X
 
           * --enable-devpoll - Enable the superior /dev/poll support on
             Solaris. Linux /dev/poll is broken and will not work with this
@@ -57,7 +57,7 @@
           detection in configure. So if you do have kqueue but wish to
           enable poll(2) instead (bad idea), you must use --enable-poll.
 
-          * --enable-openssl - Enable the openssl dependent crypto functions.
+          * --enable-openssl - Enable the LibreSSL/OpenSSL dependent crypto functions.
             Required for the SSL Challenge controlled OPER feature, compressed
             and/or SSL/TLS server links, as well as SSL/TLS client connections.
 

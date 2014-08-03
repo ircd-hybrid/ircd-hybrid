@@ -70,7 +70,7 @@ free_listener(struct Listener *listener)
 const char *
 get_listener_name(const struct Listener *const listener)
 {
-  static char buf[HOSTLEN + HOSTLEN + PORTNAMELEN + 4];
+  static char buf[HOSTLEN + HOSTIPLEN + PORTNAMELEN + 4];  /* +4 for [,/,],\0 */
 
   snprintf(buf, sizeof(buf), "%s[%s/%u]", me.name,
            listener->name, listener->port);

@@ -41,14 +41,14 @@ enum
 
 struct Listener
 {
-  dlink_node       node;      /* list node pointer */
-  fde_t            fd;                 /* file descriptor */
-  int              port;               /* listener IP port */
-  int              ref_count;          /* number of connection references */
-  int              active;             /* current state of listener */
-  struct irc_ssaddr addr;              /* virtual address or INADDR_ANY */
-  char              name[HOSTLEN + 1]; /* virtual name of listener */
-  unsigned int      flags;
+  dlink_node node;           /**< Doubly linked list node */
+  fde_t fd;                  /**< Describe socket to event system */
+  int port;                  /**< Listener IP port */
+  int ref_count;             /**< Number of connection references */
+  int active;                /**< Current state of listener */
+  struct irc_ssaddr addr;    /**< Holds an IPv6 or IPv4 address */
+  char name[HOSTIPLEN + 1];  /**< Holds an IPv6 or IPv4 address in string representation*/
+  unsigned int flags;        /**< Listener flags (ssl, hidden, server) */
 };
 
 extern void add_listener(int, const char *, unsigned int);
@@ -56,4 +56,4 @@ extern void close_listeners(void);
 extern const char *get_listener_name(const struct Listener *const);
 extern void show_ports(struct Client *);
 extern void free_listener(struct Listener *);
-#endif /* INCLUDED_listener_h */
+#endif

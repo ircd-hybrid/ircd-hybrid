@@ -468,7 +468,7 @@ static const char *const replies[] =
 /* 435 */ NULL,
 /* 436 ERR_NICKCOLLISION */ "%s :Nickname collision KILL",
 /* 437 ERR_UNAVAILRESOURCE */ "%s :Nick/channel is temporarily unavailable",
-/* 438 ERR_NICKTOOFAST */ "%s %s :Nick change too fast. Please wait %d seconds.",
+/* 438 ERR_NICKTOOFAST */ "%s :Nick change too fast. Please wait %d seconds.",
 /* 439 */ NULL,
 /* 440 ERR_SERVICESDOWN */ "%s :Services is currently down.",
 /* 441 ERR_USERNOTINCHANNEL */ "%s %s :They aren't on that channel",

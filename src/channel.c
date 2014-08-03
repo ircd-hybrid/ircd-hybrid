@@ -221,7 +221,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
  */
 static void
 send_mode_list(struct Client *client_p, struct Channel *chptr,
-               const dlink_list *list, char flag)
+               const dlink_list *list, const char flag)
 {
   const dlink_node *ptr = NULL;
   char mbuf[IRCD_BUFSIZE] = "";

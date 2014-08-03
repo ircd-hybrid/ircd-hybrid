@@ -28,7 +28,8 @@
 #define INCLUDED_ipcache_h
 #include "ircd_defs.h"
 
-/* usually, with hash tables, you use a prime number...
+/*
+ * Usually, with hash tables, you use a prime number...
  * but in this case I am dealing with ip addresses,
  * not ascii strings.
  */
@@ -36,8 +37,8 @@
 
 struct ip_entry
 {
-  dlink_node node;                /**< Doubly linked list node. */
-  struct irc_ssaddr ip;
+  dlink_node node;                /**< Doubly linked list node */
+  struct irc_ssaddr ip;           /**< Holds an IPv6 or IPv4 address */
   unsigned int count;             /**< Number of registered users using this IP */
   unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
   time_t last_attempt;            /**< The last time someone connected from this IP */

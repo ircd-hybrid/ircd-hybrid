@@ -642,7 +642,7 @@ main(int argc, char *argv[])
   event_addish(&event_try_connections, NULL);
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
-  event_addish(&event_comm_checktimeouts, NULL);
+  event_add(&event_comm_checktimeouts, NULL);
 
   event_addish(&event_save_all_databases, NULL);
 

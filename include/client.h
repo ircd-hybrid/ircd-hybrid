@@ -232,9 +232,6 @@ struct MaskItem;
 #define SetSendQExceeded(x)     ((x)->flags |= FLAGS_SENDQEX)
 #define IsSendQExceeded(x)      ((x)->flags &  FLAGS_SENDQEX)
 
-#define SetIpHash(x)            ((x)->flags |= FLAGS_IPHASH)
-#define IsIpHash(x)             ((x)->flags & FLAGS_IPHASH)
-
 #define SetUserHost(x)          ((x)->flags |= FLAGS_USERHOST)
 #define IsUserHostIp(x)         ((x)->flags & FLAGS_USERHOST)
 

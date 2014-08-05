@@ -359,7 +359,7 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
 
   ip_found = ipcache_find_or_add_address(&client_p->localClient->ip);
   ip_found->count++;
-  SetIpHash(client_p);
+  AddFlag(client_p, FLAGS_IPHASH);
 
   count_user_host(client_p->username, client_p->host,
                   &global, &local, &ident);

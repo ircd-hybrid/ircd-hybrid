@@ -709,8 +709,11 @@ exit_client(struct Client *source_p, const char *comment)
 
     SetClosing(source_p);
 
-    if (IsIpHash(source_p))
+    if (HasFlag(source_p, FLAGS_IPHASH))
+    {
+      DelFlag(source_p, FLAGS_IPHASH);
       ipcache_remove_address(&source_p->localClient->ip);
+    }
 
     delete_auth(&source_p->localClient->auth);
 

@@ -366,8 +366,6 @@ accept_connection(fde_t *pfd, void *data)
   int pe;
   struct Listener *listener = data;
 
-  memset(&addr, 0, sizeof(addr));
-
   assert(listener);
 
   /* There may be many reasons for error return, but

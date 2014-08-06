@@ -721,7 +721,7 @@ comm_open(fde_t *F, int family, int sock_type, int proto, const char *note)
  * fd_open (this function no longer does it).
  */
 int
-comm_accept(struct Listener *lptr, struct irc_ssaddr *pn)
+comm_accept(struct Listener *lptr, struct irc_ssaddr *addr)
 {
   int newfd;
   socklen_t addrlen = sizeof(struct irc_ssaddr);
@@ -732,19 +732,21 @@ comm_accept(struct Listener *lptr, struct irc_ssaddr *pn)
     return -1;
   }
 
+  memset(&addr, 0, sizeof(struct irc_ssaddr));
+
   /*
    * Next, do the accept(). if we get an error, we should drop the
    * reserved fd limit, but we can deal with that when comm_open()
    * also does it. XXX -- adrian
    */
-  newfd = accept(lptr->fd.fd, (struct sockaddr *)pn, &addrlen);
+  newfd = accept(lptr->fd.fd, (struct sockaddr *)addr, &addrlen);
   if (newfd < 0)
     return -1;
 
 #ifdef IPV6
-  remove_ipv6_mapping(pn);
+  remove_ipv6_mapping(addr);
 #else
-  pn->ss_len = addrlen;
+  addr->ss_len = addrlen;
 #endif
 
   setup_socket(newfd);

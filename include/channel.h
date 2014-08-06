@@ -52,9 +52,9 @@ struct Client;
 /*! \brief Mode structure for channels */
 struct Mode
 {
-  unsigned int mode;   /*!< simple modes */
-  unsigned int limit;  /*!< +l userlimit */
-  char key[KEYLEN + 1];    /*!< +k key */
+  unsigned int mode;   /**< simple modes */
+  unsigned int limit;  /**< +l userlimit */
+  char key[KEYLEN + 1];    /**< +k key */
 };
 
 /*! \brief Channel structure */
@@ -70,7 +70,7 @@ struct Channel
 
   time_t channelts;
   time_t topic_time;
-  time_t last_knock; /*!< don't allow knock to flood */
+  time_t last_knock;  /**< Don't allow knock to flood */
   time_t last_join_time;
   time_t first_received_message_time; /*!< channel flood control */
   unsigned int flags;
@@ -91,15 +91,15 @@ struct Channel
 /*! \brief Membership structure */
 struct Membership
 {
-  dlink_node locchannode;  /*!< link to chptr->locmembers */
-  dlink_node channode;     /*!< link to chptr->members    */
-  dlink_node usernode;     /*!< link to source_p->channel */
-  struct Channel *chptr;   /*!< Channel pointer */
-  struct Client *client_p; /*!< Client pointer */
-  unsigned int flags;      /*!< user/channel flags, e.g. CHFL_CHANOP */
+  dlink_node locchannode;  /**< link to chptr->locmembers */
+  dlink_node channode;     /**< link to chptr->members    */
+  dlink_node usernode;     /**< link to source_p->channel */
+  struct Channel *chptr;   /**< Channel pointer */
+  struct Client *client_p; /**< Client pointer */
+  unsigned int flags;      /**< user/channel flags, e.g. CHFL_CHANOP */
 };
 
-/*! \brief Ban structure.  Used for b/e/I n!u\@h masks */
+/*! \brief Ban structure. Used for b/e/I n!u\@h masks */
 struct Ban
 {
   dlink_node node;
@@ -128,8 +128,7 @@ extern void channel_do_join_0(struct Client *);
 extern void channel_do_part(struct Client *, char *, char *);
 extern void remove_ban(struct Ban *, dlink_list *);
 extern void channel_init(void);
-extern void add_user_to_channel(struct Channel *, struct Client *,
-                                unsigned int, int);
+extern void add_user_to_channel(struct Channel *, struct Client *, unsigned int, int);
 extern void remove_user_from_channel(struct Membership *);
 extern void channel_member_names(struct Client *, struct Channel *, int);
 extern void add_invite(struct Channel *, struct Client *);
@@ -146,4 +145,4 @@ extern const char *get_member_status(const struct Membership *, const int);
 
 extern struct Channel *make_channel(const char *);
 extern struct Membership *find_channel_link(struct Client *, struct Channel *);
-#endif  /* INCLUDED_channel_h */
+#endif

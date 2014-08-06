@@ -31,6 +31,8 @@
 
 struct Client; /* XXX */
 
+
+#define RFC1035_MAX_DOMAIN_LENGTH 255
 /* Here we define some values lifted from nameser.h */
 #define NS_NOTIFY_OP 4
 #define NS_INT16SZ 2
@@ -94,7 +96,7 @@ typedef struct
   unsigned  arcount :16; /* number of resource entries */
 } HEADER;
 
-typedef void (*dns_callback_fnc)(void *, const struct irc_ssaddr *, const char *);
+typedef void (*dns_callback_fnc)(void *, const struct irc_ssaddr *, const char *, size_t);
 
 extern void init_resolver(void);
 extern void restart_resolver(void);

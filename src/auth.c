@@ -143,21 +143,18 @@ release_auth_client(struct AuthRequest *auth)
  * of success of failure
  */
 static void
-auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
+auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
 {
   struct AuthRequest *auth = vptr;
 
   ClearDNSPending(auth);
 
-  if (name)
+  if (!EmptyString(name))
   {
     const struct sockaddr_in *v4, *v4dns;
 #ifdef IPV6
     const struct sockaddr_in6 *v6, *v6dns;
-#endif
-    int good = 1;
 
-#ifdef IPV6
     if (auth->client->localClient->ip.ss.ss_family == AF_INET6)
     {
       v6 = (const struct sockaddr_in6 *)&auth->client->localClient->ip;
@@ -166,7 +163,8 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
       if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)) != 0)
       {
         sendheader(auth->client, REPORT_IP_MISMATCH);
-        good = 0;
+        release_auth_client(auth);
+        return;
       }
     }
     else
@@ -178,18 +176,18 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
       if (v4->sin_addr.s_addr != v4dns->sin_addr.s_addr)
       {
         sendheader(auth->client, REPORT_IP_MISMATCH);
-        good = 0;
+        release_auth_client(auth);
+        return;
       }
     }
 
-    if (good && strlen(name) <= HOSTLEN)
+    if (namelength > HOSTLEN)
+      sendheader(auth->client, REPORT_HOST_TOOLONG);
+    else
     {
-      strlcpy(auth->client->host, name,
-              sizeof(auth->client->host));
+      strlcpy(auth->client->host, name, sizeof(auth->client->host));
       sendheader(auth->client, REPORT_FIN_DNS);
     }
-    else if (strlen(name) > HOSTLEN)
-      sendheader(auth->client, REPORT_HOST_TOOLONG);
   }
   else
     sendheader(auth->client, REPORT_FAIL_DNS);

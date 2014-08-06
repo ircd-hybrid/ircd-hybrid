@@ -59,7 +59,7 @@ static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
 
 static void comm_connect_callback(fde_t *, int);
 static PF comm_connect_timeout;
-static void comm_connect_dns_callback(void *, const struct irc_ssaddr *, const char *);
+static void comm_connect_dns_callback(void *, const struct irc_ssaddr *, const char *, size_t);
 static PF comm_connect_tryconnect;
 
 
@@ -593,11 +593,11 @@ comm_connect_timeout(fde_t *fd, void *notused)
  * otherwise we initiate the connect()
  */
 static void
-comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
+comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
 {
   fde_t *F = vptr;
 
-  if (name == NULL)
+  if (EmptyString(name) || namelength > HOSTLEN)
   {
     comm_connect_callback(F, COMM_ERR_DNS);
     return;

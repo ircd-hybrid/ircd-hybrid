@@ -92,11 +92,14 @@ static int find_user_host(struct Client *, char *, char *, char *, unsigned int)
  * if successful save hp in the conf item it was called with
  */
 static void
-conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name)
+conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
 {
   struct MaskItem *conf = vptr;
 
   conf->dns_pending = 0;
+
+  if (EmptyString(name) || namelength > HOSTLEN)
+    return;
 
   if (addr)
     memcpy(&conf->addr, addr, sizeof(conf->addr));

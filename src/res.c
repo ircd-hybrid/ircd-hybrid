@@ -94,20 +94,21 @@ typedef enum
 
 struct reslist
 {
-  dlink_node node;            /**< Doubly linked list node. */
-  int id;                     /**< Request ID (from request header). */
-  int sent;                   /**< Number of requests sent */
-  request_state state;        /**< State the resolver machine is in */
-  char type;                  /**< Current request type. */
-  char retries;               /**< Retry counter */
-  unsigned int sends;         /**< Number of sends (>1 means resent). */
-  char resend;                /**< Send flag; 0 == don't resend. */
-  time_t sentat;              /**< Timestamp we last sent this request. */
-  time_t timeout;             /**< When this request times out. */
-  struct irc_ssaddr addr;     /**< Address for this request. */
-  char *name;                 /**< Hostname for this request. */
-  dns_callback_fnc callback;  /**< Callback function on completion. */
-  void *callback_ctx;         /**< Context pointer for callback. */
+  dlink_node node;                       /**< Doubly linked list node. */
+  int id;                                /**< Request ID (from request header). */
+  int sent;                              /**< Number of requests sent */
+  request_state state;                   /**< State the resolver machine is in */
+  char type;                             /**< Current request type. */
+  char retries;                          /**< Retry counter */
+  unsigned int sends;                    /**< Number of sends (>1 means resent). */
+  char resend;                           /**< Send flag; 0 == don't resend. */
+  time_t sentat;                         /**< Timestamp we last sent this request. */
+  time_t timeout;                        /**< When this request times out. */
+  struct irc_ssaddr addr;                /**< Address for this request. */
+  char name[RFC1035_MAX_DOMAIN_LENGTH];  /**< Hostname for this request. */
+  size_t namelength;                     /**< Actual hostname length. */
+  dns_callback_fnc callback;             /**< Callback function on completion. */
+  void *callback_ctx;                    /**< Context pointer for callback. */
 };
 
 static fde_t ResolverFileDescriptor;
@@ -124,8 +125,6 @@ static void
 rem_request(struct reslist *request)
 {
   dlinkDelete(&request->node, &request_list);
-
-  MyFree(request->name);
   mp_pool_release(request);
 }
 
@@ -345,16 +344,15 @@ static void
 do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
               struct reslist *request, int type)
 {
-  char host_name[HOSTLEN + 1];
+  char host_name[RFC1035_MAX_DOMAIN_LENGTH + 1];
 
   strlcpy(host_name, name, sizeof(host_name));
 
   if (request == NULL)
   {
-    request       = make_request(callback, ctx);
-    request->name = MyCalloc(strlen(host_name) + 1);
-    request->type = type;
-    strcpy(request->name, host_name);
+    request             = make_request(callback, ctx);
+    request->type       = type;
+    request->namelength = strlcpy(request->name, host_name, sizeof(request->name));
 #ifdef IPV6
     if (type != T_A)
       request->state = REQ_AAAA;
@@ -418,7 +416,6 @@ do_query_number(dns_callback_fnc callback, void *ctx,
     request       = make_request(callback, ctx);
     request->type = T_PTR;
     memcpy(&request->addr, addr, sizeof(struct irc_ssaddr));
-    request->name = MyCalloc(HOSTLEN + 1);
   }
 
   query_name(ipbuf, C_IN, T_PTR, request);
@@ -487,7 +484,7 @@ resend_query(struct reslist *request)
 static int
 proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
 {
-  char hostbuf[HOSTLEN + 100]; /* working buffer */
+  char hostbuf[RFC1035_MAX_DOMAIN_LENGTH + 100]; /* working buffer */
   unsigned char *current;      /* current position in buf */
   int type;                    /* answer type */
   int n;                       /* temp count */
@@ -519,7 +516,7 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
     if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
       return 0;
 
-    hostbuf[HOSTLEN] = '\0';
+    hostbuf[RFC1035_MAX_DOMAIN_LENGTH] = '\0';
 
     /*
      * With Address arithmetic you have to be very anal
@@ -583,7 +580,7 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
         if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
           return 0;
 
-        strlcpy(request->name, hostbuf, HOSTLEN + 1);
+        request->namelength = strlcpy(request->name, hostbuf, sizeof(request->name));
         return 1;
         break;
       case T_CNAME:  /* First check we already haven't started looking into a cname */
@@ -665,7 +662,7 @@ res_readreply(fde_t *fd, void *data)
          * If a bad error was returned, stop here and don't
          * send any more (no retries granted).
          */
-        (*request->callback)(request->callback_ctx, NULL, NULL);
+        (*request->callback)(request->callback_ctx, NULL, NULL, 0);
         rem_request(request);
       }
 #ifdef IPV6
@@ -691,20 +688,20 @@ res_readreply(fde_t *fd, void *data)
      */
     if (!proc_answer(request, header, buf, buf + rc))
     {
-      (*request->callback)(request->callback_ctx, NULL, NULL);
+      (*request->callback)(request->callback_ctx, NULL, NULL, 0);
       rem_request(request);
       continue;
     }
 
     if (request->type == T_PTR)
     {
-      if (request->name == NULL)
+      if (request->namelength == 0)
       {
         /*
          * Got a PTR response with no name, something bogus is happening
          * don't bother trying again, the client address doesn't resolve
          */
-        (*request->callback)(request->callback_ctx, NULL, NULL);
+        (*request->callback)(request->callback_ctx, NULL, NULL, 0);
         rem_request(request);
         continue;
       }
@@ -725,7 +722,7 @@ res_readreply(fde_t *fd, void *data)
       /*
        * Got a name and address response, client resolved
        */
-      (*request->callback)(request->callback_ctx, &request->addr, request->name);
+      (*request->callback)(request->callback_ctx, &request->addr, request->name, request->namelength);
       rem_request(request);
     }
 
@@ -770,7 +767,7 @@ timeout_query_list(void)
     {
       if (--request->retries <= 0)
       {
-        (*request->callback)(request->callback_ctx, NULL, NULL);
+        (*request->callback)(request->callback_ctx, NULL, NULL, 0);
         rem_request(request);
         continue;
       }

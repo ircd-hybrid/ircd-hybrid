@@ -98,9 +98,6 @@ conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
   conf->dns_pending = 0;
 
-  if (EmptyString(name) || namelength > HOSTLEN)
-    return;
-
   if (addr)
     memcpy(&conf->addr, addr, sizeof(conf->addr));
   else

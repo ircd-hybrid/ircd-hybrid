@@ -597,7 +597,7 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
 {
   fde_t *F = vptr;
 
-  if (EmptyString(name) || namelength > HOSTLEN)
+  if (!addr)
   {
     comm_connect_callback(F, COMM_ERR_DNS);
     return;
@@ -614,8 +614,7 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
    */
   memcpy(&F->connect.hostaddr, addr, addr->ss_len);
   /* The cast is hacky, but safe - port offset is same on v4 and v6 */
-  ((struct sockaddr_in *) &F->connect.hostaddr)->sin_port =
-    F->connect.hostaddr.ss_port;
+  ((struct sockaddr_in *) &F->connect.hostaddr)->sin_port = F->connect.hostaddr.ss_port;
   F->connect.hostaddr.ss_len = addr->ss_len;
 
   /* Now, call the tryconnect() routine to try a connect() */

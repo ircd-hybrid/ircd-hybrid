@@ -1,4 +1,3 @@
-:q
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
@@ -40,9 +39,7 @@
 #include "memory.h"
 
 static PF accept_connection;
-
 static dlink_list ListenerPollList;
-static void close_listener(struct Listener *listener);
 
 static struct Listener *
 make_listener(const int port, const struct irc_ssaddr *addr)
@@ -221,6 +218,41 @@ find_listener(int port, struct irc_ssaddr *addr)
 }
 
 /*
+ * close_listener - close a single listener
+ */
+static void
+close_listener(struct Listener *listener)
+{
+  assert(listener != NULL);
+
+  if (listener == NULL)
+    return;
+
+  if (listener->fd.flags.open)
+    fd_close(&listener->fd);
+
+  listener->active = 0;
+
+  if (listener->ref_count)
+    return;
+
+  free_listener(listener);
+}
+
+/*
+ * close_listeners - close and free all listeners that are not being used
+ */
+void
+close_listeners(void)
+{
+  dlink_node *ptr = NULL, *ptr_next = NULL;
+
+  /* close all 'extra' listening ports we have */
+  DLINK_FOREACH_SAFE(ptr, ptr_next, ListenerPollList.head)
+    close_listener(ptr->data);
+}
+
+/*
  * add_listener- create a new listener
  * port - the port number to listen on
  * vhost_ip - if non-null must contain a valid IP address string in
@@ -313,41 +345,6 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
     listener->active = 1;
   else
     close_listener(listener);
-}
-
-/*
- * close_listener - close a single listener
- */
-static void
-close_listener(struct Listener *listener)
-{
-  assert(listener != NULL);
-
-  if (listener == NULL)
-    return;
-
-  if (listener->fd.flags.open)
-    fd_close(&listener->fd);
-
-  listener->active = 0;
-
-  if (listener->ref_count)
-    return;
-
-  free_listener(listener);
-}
-
-/*
- * close_listeners - close and free all listeners that are not being used
- */
-void
-close_listeners(void)
-{
-  dlink_node *ptr = NULL, *ptr_next = NULL;
-
-  /* close all 'extra' listening ports we have */
-  DLINK_FOREACH_SAFE(ptr, ptr_next, ListenerPollList.head)
-    close_listener(ptr->data);
 }
 
 #define TOOFAST_WARNING "ERROR :Your host is trying to (re)connect too fast -- throttled.\r\n"

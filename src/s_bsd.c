@@ -731,7 +731,7 @@ comm_accept(struct Listener *lptr, struct irc_ssaddr *addr)
     return -1;
   }
 
-  memset(&addr, 0, sizeof(struct irc_ssaddr));
+  memset(addr, 0, sizeof(struct irc_ssaddr));
 
   /*
    * Next, do the accept(). if we get an error, we should drop the

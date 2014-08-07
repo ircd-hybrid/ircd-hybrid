@@ -152,7 +152,6 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
   if (!EmptyString(name))
   {
     const struct sockaddr_in *v4, *v4dns;
-#ifdef IPV6
     const struct sockaddr_in6 *v6, *v6dns;
 
     if (auth->client->localClient->ip.ss.ss_family == AF_INET6)
@@ -168,7 +167,6 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
       }
     }
     else
-#endif
     {
       v4 = (const struct sockaddr_in *)&auth->client->localClient->ip;
       v4dns = (const struct sockaddr_in *)addr;
@@ -225,11 +223,7 @@ start_auth_query(struct AuthRequest *auth)
 {
   struct irc_ssaddr localaddr;
   socklen_t locallen = sizeof(struct irc_ssaddr);
-#ifdef IPV6
   struct sockaddr_in6 *v6;
-#else
-  struct sockaddr_in *v4;
-#endif
 
   /* open a socket of the same type as the client socket */
   if (comm_open(&auth->fd, auth->client->localClient->ip.ss.ss_family,
@@ -256,15 +250,9 @@ start_auth_query(struct AuthRequest *auth)
   getsockname(auth->client->localClient->fd.fd, (struct sockaddr*)&localaddr,
       &locallen);
 
-#ifdef IPV6
   remove_ipv6_mapping(&localaddr);
   v6 = (struct sockaddr_in6 *)&localaddr;
   v6->sin6_port = htons(0);
-#else
-  localaddr.ss_len = locallen;
-  v4 = (struct sockaddr_in *)&localaddr;
-  v4->sin_port = htons(0);
-#endif
   localaddr.ss_port = htons(0);
 
   comm_connect_tcp(&auth->fd, auth->client->sockhost, RFC1413_PORT,
@@ -363,11 +351,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
   socklen_t ulen = sizeof(struct irc_ssaddr);
   socklen_t tlen = sizeof(struct irc_ssaddr);
   uint16_t uport, tport;
-#ifdef IPV6
   struct sockaddr_in6 *v6;
-#else
-  struct sockaddr_in *v4;
-#endif
 
   if (error != COMM_OK)
   {
@@ -384,21 +368,12 @@ auth_connect_callback(fde_t *fd, int error, void *data)
     return;
   }
 
-#ifdef IPV6
   v6 = (struct sockaddr_in6 *)&us;
   uport = ntohs(v6->sin6_port);
   v6 = (struct sockaddr_in6 *)&them;
   tport = ntohs(v6->sin6_port);
   remove_ipv6_mapping(&us);
   remove_ipv6_mapping(&them);
-#else
-  v4 = (struct sockaddr_in *)&us;
-  uport = ntohs(v4->sin_port);
-  v4 = (struct sockaddr_in *)&them;
-  tport = ntohs(v4->sin_port);
-  us.ss_len = ulen;
-  them.ss_len = tlen;
-#endif
 
   snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
 

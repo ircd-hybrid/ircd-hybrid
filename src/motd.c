@@ -69,11 +69,9 @@ motd_create(const char *mask, const char *path)
       case HM_IPV4:
       tmp->type = MOTD_IPMASKV4;
       break;
-#ifdef IPV6
     case HM_IPV6:
       tmp->type = MOTD_IPMASKV6;
       break;
-#endif
     default: /* HM_HOST */
       tmp->type = MOTD_HOSTMASK;
       break;
@@ -256,13 +254,11 @@ motd_lookup(const struct Client *client_p)
             if (match_ipv4(&client_p->localClient->ip, &motd->address, motd->addrbits))
               return motd;
         break;
-#ifdef IPV6
       case MOTD_IPMASKV6:
           if (client_p->localClient->aftype == AF_INET6)
             if (match_ipv6(&client_p->localClient->ip, &motd->address, motd->addrbits))
               return motd;
         break;
-#endif
       default: break;
     }
   }

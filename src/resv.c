@@ -145,13 +145,11 @@ resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
             if (match_ipv4(&who->localClient->ip, &exptr->addr, exptr->bits))
               return 1;
           break;
-#ifdef IPV6
         case HM_IPV6:
           if (who->localClient->aftype == AF_INET6)
             if (match_ipv6(&who->localClient->ip, &exptr->addr, exptr->bits))
               return 1;
           break;
-#endif
         default:
           assert(0);
       }

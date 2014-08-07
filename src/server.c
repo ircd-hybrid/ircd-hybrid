@@ -368,19 +368,16 @@ check_server(const char *name, struct Client *client_p)
   if (server_conf)
   {
     struct sockaddr_in *v4;
-#ifdef IPV6
     struct sockaddr_in6 *v6;
-#endif
+
     switch (server_conf->aftype)
     {
-#ifdef IPV6
       case AF_INET6:
         v6 = (struct sockaddr_in6 *)&server_conf->addr;
 
         if (IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr))
           memcpy(&server_conf->addr, &client_p->localClient->ip, sizeof(struct irc_ssaddr));
         break;
-#endif
       case AF_INET:
         v4 = (struct sockaddr_in *)&server_conf->addr;
 
@@ -707,7 +704,6 @@ serv_connect(struct MaskItem *conf, struct Client *by)
                          NULL, 0, serv_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       break;
-#ifdef IPV6
     case AF_INET6:
       {
         struct irc_ssaddr ipn;
@@ -746,8 +742,8 @@ serv_connect(struct MaskItem *conf, struct Client *by)
                            NULL, 0, serv_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
       }
-#endif
   }
+
   return 1;
 }
 

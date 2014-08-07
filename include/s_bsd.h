@@ -62,8 +62,5 @@ extern int comm_accept(struct Listener *, struct irc_ssaddr *pn);
 extern void init_netio(void);
 extern void comm_setselect(fde_t *, unsigned int, PF *, void *, time_t);
 extern void comm_select(void);
-extern void check_can_use_v6(void);
-#ifdef IPV6
 extern void remove_ipv6_mapping(struct irc_ssaddr *);
-#endif
 #endif /* INCLUDED_s_bsd_h */

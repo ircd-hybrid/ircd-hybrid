@@ -313,7 +313,6 @@ struct
   unsigned int max_topic_length;
   unsigned int specific_ipv4_vhost;
   unsigned int specific_ipv6_vhost;
-  unsigned int can_use_v6;
   struct irc_ssaddr ip;
   struct irc_ssaddr ip6;
 } ConfigServerInfo;

@@ -712,14 +712,12 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
                   if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                     return conf;
               break;
-#ifdef IPV6
             case HM_IPV6:
               if (who->localClient->aftype == AF_INET6)
                 if (match_ipv6(&who->localClient->ip, &conf->addr, conf->bits))
                   if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                     return conf;
               break;
-#endif
             default:
               assert(0);
           }
@@ -773,9 +771,6 @@ rehash(int sig)
   restart_resolver();
 
   /* don't close listeners until we know we can go ahead with the rehash */
-
-  /* Check to see if we magically got(or lost) IPv6 support */
-  check_can_use_v6();
 
   read_conf_files(0);
 

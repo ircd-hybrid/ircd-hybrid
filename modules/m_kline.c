@@ -141,11 +141,9 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 
   if ((t = parse_netmask(lhost, &iphost, NULL)) != HM_HOST)
   {
-#ifdef IPV6
     if (t == HM_IPV6)
       aftype = AF_INET6;
     else
-#endif
       aftype = AF_INET;
     piphost = &iphost;
   }

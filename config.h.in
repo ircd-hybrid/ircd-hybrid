@@ -133,15 +133,6 @@
 /* Define to 1 if you have the `strtok_r' function. */
 #undef HAVE_STRTOK_R
 
-/* Define to 1 if the system has the type `struct addrinfo'. */
-#undef HAVE_STRUCT_ADDRINFO
-
-/* Define to 1 if the system has the type `struct sockaddr_in'. */
-#undef HAVE_STRUCT_SOCKADDR_IN
-
-/* Define to 1 if the system has the type `struct sockaddr_storage'. */
-#undef HAVE_STRUCT_SOCKADDR_STORAGE
-
 /* Define to 1 if you have the <sys/devpoll.h> header file. */
 #undef HAVE_SYS_DEVPOLL_H
 
@@ -177,9 +168,6 @@
 
 /* This value is set to 1 to indicate that the system argz facility works */
 #undef HAVE_WORKING_ARGZ
-
-/* Define to 1 if you have IPv6 support. */
-#undef IPV6
 
 /* Set to libdir. */
 #undef LIBDIR

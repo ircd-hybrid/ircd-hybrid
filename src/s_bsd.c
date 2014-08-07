@@ -63,27 +63,6 @@ static void comm_connect_dns_callback(void *, const struct irc_ssaddr *, const c
 static PF comm_connect_tryconnect;
 
 
-/* check_can_use_v6()
- *  Check if the system can open AF_INET6 sockets
- */
-void
-check_can_use_v6(void)
-{
-#ifdef IPV6
-  int v6;
-
-  if ((v6 = socket(AF_INET6, SOCK_STREAM, 0)) < 0)
-    ConfigServerInfo.can_use_v6 = 0;
-  else
-  {
-    ConfigServerInfo.can_use_v6 = 1;
-    close(v6);
-  }
-#else
-  ConfigServerInfo.can_use_v6 = 0;
-#endif
-}
-
 /* get_sockerr - get the error value from the socket or the current errno
  *
  * Get the *real* error from the socket (well try to anyway..).
@@ -742,11 +721,7 @@ comm_accept(struct Listener *lptr, struct irc_ssaddr *addr)
   if (newfd < 0)
     return -1;
 
-#ifdef IPV6
   remove_ipv6_mapping(addr);
-#else
-  addr->ss_len = addrlen;
-#endif
 
   setup_socket(newfd);
 
@@ -760,7 +735,6 @@ comm_accept(struct Listener *lptr, struct irc_ssaddr *addr)
  * AF_INET and AF_INET6 map AF_INET connections inside AF_INET6 structures
  *
  */
-#ifdef IPV6
 void
 remove_ipv6_mapping(struct irc_ssaddr *addr)
 {
@@ -784,4 +758,3 @@ remove_ipv6_mapping(struct irc_ssaddr *addr)
   else
     addr->ss_len = sizeof(struct sockaddr_in);
 }
-#endif

@@ -46,11 +46,9 @@ find_is_glined(const char *host, const char *user)
 
   if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
   {
-#ifdef IPV6
     if (t == HM_IPV6)
       aftype = AF_INET6;
     else
-#endif
       aftype = AF_INET;
     piphost = &iphost;
   }

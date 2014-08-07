@@ -86,9 +86,7 @@ typedef enum
   REQ_IDLE,  /**< We're doing not much at all */
   REQ_PTR,   /**< Looking up a PTR */
   REQ_A,     /**< Looking up an A, possibly because AAAA failed */
-#ifdef IPV6
   REQ_AAAA,  /**< Looking up an AAAA */
-#endif
   REQ_CNAME  /**< We got a CNAME in response, we better get a real answer next */
 } request_state;
 
@@ -162,19 +160,15 @@ make_request(dns_callback_fnc callback, void *ctx)
 static int
 res_ourserver(const struct irc_ssaddr *inp)
 {
-#ifdef IPV6
   const struct sockaddr_in6 *v6;
   const struct sockaddr_in6 *v6in = (const struct sockaddr_in6 *)inp;
-#endif
   const struct sockaddr_in *v4;
   const struct sockaddr_in *v4in = (const struct sockaddr_in *)inp;
 
   for (unsigned int i = 0; i < irc_nscount; ++i)
   {
     const struct irc_ssaddr *srv = &irc_nsaddr_list[i];
-#ifdef IPV6
     v6 = (const struct sockaddr_in6 *)srv;
-#endif
     v4 = (const struct sockaddr_in *)srv;
 
     /*
@@ -183,7 +177,6 @@ res_ourserver(const struct irc_ssaddr *inp)
      */
     switch (srv->ss.ss_family)
     {
-#ifdef IPV6
       case AF_INET6:
         if (srv->ss.ss_family == inp->ss.ss_family)
           if (v6->sin6_port == v6in->sin6_port)
@@ -191,7 +184,6 @@ res_ourserver(const struct irc_ssaddr *inp)
                         sizeof(struct in6_addr)))
               return 1;
         break;
-#endif
       case AF_INET:
         if (srv->ss.ss_family == inp->ss.ss_family)
           if (v4->sin_port == v4in->sin_port)
@@ -353,12 +345,11 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
     request             = make_request(callback, ctx);
     request->type       = type;
     request->namelength = strlcpy(request->name, host_name, sizeof(request->name));
-#ifdef IPV6
+
     if (type != T_A)
       request->state = REQ_AAAA;
     else
-#endif
-    request->state = REQ_A;
+      request->state = REQ_A;
   }
 
   request->type = type;
@@ -384,7 +375,6 @@ do_query_number(dns_callback_fnc callback, void *ctx,
              (unsigned int)(cp[3]), (unsigned int)(cp[2]),
              (unsigned int)(cp[1]), (unsigned int)(cp[0]));
   }
-#ifdef IPV6
   else if (addr->ss.ss_family == AF_INET6)
   {
     const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
@@ -410,7 +400,7 @@ do_query_number(dns_callback_fnc callback, void *ctx,
              (unsigned int)(cp[1] & 0xf), (unsigned int)(cp[1] >> 4),
              (unsigned int)(cp[0] & 0xf), (unsigned int)(cp[0] >> 4));
   }
-#endif
+
   if (request == NULL)
   {
     request       = make_request(callback, ctx);
@@ -438,11 +428,7 @@ gethost_byname_type(dns_callback_fnc callback, void *ctx, const char *name, int 
 void
 gethost_byname(dns_callback_fnc callback, void *ctx, const char *name)
 {
-#ifdef IPV6
   gethost_byname_type(callback, ctx, name, T_AAAA);
-#else
-  gethost_byname_type(callback, ctx, name, T_A);
-#endif
 }
 
 /*
@@ -468,11 +454,9 @@ resend_query(struct reslist *request)
     case T_A:
       do_query_name(NULL, NULL, request->name, request, request->type);
       break;
-#ifdef IPV6
     case T_AAAA:  /* Didn't work, try A */
       if (request->state == REQ_AAAA)
         do_query_name(NULL, NULL, request->name, request, T_A);
-#endif
     default:
       break;
   }
@@ -490,9 +474,8 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
   int n;                       /* temp count */
   int rd_length;
   struct sockaddr_in *v4;      /* conversion */
-#ifdef IPV6
   struct sockaddr_in6 *v6;
-#endif
+
   current = (unsigned char *)buf + sizeof(HEADER);
 
   for (; header->qdcount > 0; --header->qdcount)
@@ -556,7 +539,6 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
         memcpy(&v4->sin_addr, current, sizeof(struct in_addr));
         return 1;
         break;
-#ifdef IPV6
       case T_AAAA:
         if (request->type != T_AAAA)
           return 0;
@@ -570,7 +552,6 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
         memcpy(&v6->sin6_addr, current, sizeof(struct in6_addr));
         return 1;
         break;
-#endif
       case T_PTR:
         if (request->type != T_PTR)
           return 0;
@@ -665,7 +646,6 @@ res_readreply(fde_t *fd, void *data)
         (*request->callback)(request->callback_ctx, NULL, NULL, 0);
         rem_request(request);
       }
-#ifdef IPV6
       else
       {
         /*
@@ -677,7 +657,7 @@ res_readreply(fde_t *fd, void *data)
           resend_query(request);
         }
       }
-#endif
+
       continue;
     }
 
@@ -709,12 +689,10 @@ res_readreply(fde_t *fd, void *data)
       /*
        * Lookup the 'authoritative' name that we were given for the ip#.
        */
-#ifdef IPV6
       if (request->addr.ss.ss_family == AF_INET6)
         gethost_byname_type(request->callback, request->callback_ctx, request->name, T_AAAA);
       else
-#endif
-      gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);
+        gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);
       rem_request(request);
     }
     else

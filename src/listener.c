@@ -1,3 +1,4 @@
+:q
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
@@ -44,7 +45,7 @@ static dlink_list ListenerPollList;
 static void close_listener(struct Listener *listener);
 
 static struct Listener *
-make_listener(int port, struct irc_ssaddr *addr)
+make_listener(const int port, const struct irc_ssaddr *addr)
 {
   struct Listener *listener = MyCalloc(sizeof(struct Listener));
 

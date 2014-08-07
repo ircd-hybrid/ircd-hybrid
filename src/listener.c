@@ -252,6 +252,15 @@ close_listeners(void)
     close_listener(ptr->data);
 }
 
+void
+listener_release(struct Listener *listener)
+{
+  assert(listener->ref_count > 0);
+
+  if (--listener->ref_count == 0 && !listener->active)
+    close_listener(listener);
+}
+
 /*
  * add_listener- create a new listener
  * port - the port number to listen on

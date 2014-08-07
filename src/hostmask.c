@@ -57,7 +57,6 @@
    Also a bug in DigitParse above.
    -Gozem 2002-07-19 gozem@linux.nu
 */
-#ifdef IPV6
 static int
 try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 {
@@ -161,7 +160,6 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
     *b = bits;
   return HM_IPV6;
 }
-#endif
 
 /* int try_parse_v4_netmask(const char *, struct irc_ssaddr *, int *);
  * Input: A possible IPV4 address as a string.
@@ -253,10 +251,9 @@ parse_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 {
   if (strchr(text, '.'))
     return try_parse_v4_netmask(text, addr, b);
-#ifdef IPV6
   if (strchr(text, ':'))
     return try_parse_v6_netmask(text, addr, b);
-#endif
+
   return HM_HOST;
 }
 
@@ -266,7 +263,6 @@ parse_netmask(const char *text, struct irc_ssaddr *addr, int *b)
  * Output: if match, -1 else 0
  * Side effects: None
  */
-#ifdef IPV6
 int
 match_ipv6(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bits)
 {
@@ -285,7 +281,6 @@ match_ipv6(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bit
     return -1;
   return 0;
 }
-#endif
 
 /* int match_ipv4(struct irc_ssaddr *, struct irc_ssaddr *, int)
  * Input: An IP address, an IP mask, the number of bits in the mask.
@@ -316,15 +311,11 @@ void
 mask_addr(struct irc_ssaddr *ip, int bits)
 {
   int mask;
-#ifdef IPV6
   struct sockaddr_in6 *v6_base_ip;
   int i, m, n;
-#endif
   struct sockaddr_in *v4_base_ip;
 
-#ifdef IPV6
-  if (ip->ss.ss_family != AF_INET6)
-#endif
+  if (ip->ss.ss_family == AF_INET)
   {
     uint32_t tmp = 0;
     v4_base_ip = (struct sockaddr_in *)ip;
@@ -333,7 +324,6 @@ mask_addr(struct irc_ssaddr *ip, int bits)
     tmp = ntohl(v4_base_ip->sin_addr.s_addr);
     v4_base_ip->sin_addr.s_addr = htonl(tmp & mask);
   }
-#ifdef IPV6
   else
   {
     n = bits / 8;
@@ -346,7 +336,6 @@ mask_addr(struct irc_ssaddr *ip, int bits)
     for (i = n + 1; i < 16; i++)
       v6_base_ip->sin6_addr.s6_addr[i] = 0;
   }
-#endif
 }
 
 /* Hashtable stuff...now external as it's used in m_stats.c */
@@ -382,7 +371,6 @@ hash_ipv4(const struct irc_ssaddr *addr, int bits)
  * Output: A hash value of the IP address.
  * Side effects: None
  */
-#ifdef IPV6
 static uint32_t
 hash_ipv6(const struct irc_ssaddr *addr, int bits)
 {
@@ -404,9 +392,9 @@ hash_ipv6(const struct irc_ssaddr *addr, int bits)
     else
       return v & (ATABLE_SIZE - 1);
   }
+
   return v & (ATABLE_SIZE - 1);
 }
-#endif
 
 /* int hash_text(const char *start)
  * Input: The start of the text to hash.
@@ -467,7 +455,6 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
   if (addr)
   {
     /* Check for IPV6 matches... */
-#ifdef IPV6
     if (fam == AF_INET6)
     {
       for (b = 128; b >= 0; b -= 16)
@@ -491,9 +478,7 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
         }
       }
     }
-    else
-#endif
-    if (fam == AF_INET)
+    else if (fam == AF_INET)
     {
       for (b = 32; b >= 0; b -= 8)
       {
@@ -656,13 +641,11 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
       bits -= bits % 8;
       dlinkAdd(arec, &arec->node, &atable[hash_ipv4(&arec->Mask.ipa.addr, bits)]);
       break;
-#ifdef IPV6
     case HM_IPV6:
       /* We have to do this, since we do not re-hash for every bit -A1kmm. */
       bits -= bits % 16;
       dlinkAdd(arec, &arec->node, &atable[hash_ipv6(&arec->Mask.ipa.addr, bits)]);
       break;
-#endif
     default: /* HM_HOST */
       arec->Mask.hostname = hostname;
       dlinkAdd(arec, &arec->node, &atable[get_mask_hash(hostname)]);
@@ -693,13 +676,11 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
       bits -= bits % 8;
       hv = hash_ipv4(&addr, bits);
       break;
-#ifdef IPV6
     case HM_IPV6:
       /* We have to do this, since we do not re-hash for every bit -A1kmm. */
       bits -= bits % 16;
       hv = hash_ipv6(&addr, bits);
       break;
-#endif
     default: /* HM_HOST */
       hv = get_mask_hash(address);
       break;

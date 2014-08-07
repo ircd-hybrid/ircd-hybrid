@@ -216,11 +216,9 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-#ifdef IPV6
   if (t == HM_IPV6)
     aftype = AF_INET6;
   else
-#endif
     aftype = AF_INET;
 
   parse_netmask(dlhost, &daddr, NULL);
@@ -327,11 +325,9 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-#ifdef IPV6
     if (t == HM_IPV6)
       aftype= AF_INET6;
     else
-#endif
       aftype = AF_INET;
 
     parse_netmask(dlhost, &daddr, NULL);

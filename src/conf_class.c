@@ -264,7 +264,6 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv4);
     dlinkAdd(cidr, &cidr->node, &class->list_ipv4);
   }
-#ifdef IPV6
   else if (class->cidr_bitlen_ipv6 > 0)
   {
     DLINK_FOREACH(ptr, class->list_ipv6.head)
@@ -287,7 +286,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv6);
     dlinkAdd(cidr, &cidr->node, &class->list_ipv6);
   }
-#endif
+
   return 0;
 }
 
@@ -331,7 +330,6 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
       }
     }
   }
-#ifdef IPV6
   else if (aclass->cidr_bitlen_ipv6 > 0)
   {
     DLINK_FOREACH_SAFE(ptr, next_ptr, aclass->list_ipv6.head)
@@ -351,7 +349,6 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
       }
     }
   }
-#endif
 }
 
 void

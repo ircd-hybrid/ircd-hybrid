@@ -55,7 +55,6 @@ ipcache_hash_address(const struct irc_ssaddr *addr)
     hash = ((ip >> 12) + ip) & (IP_HASH_SIZE - 1);
     return hash;
   }
-#ifdef IPV6
   else
   {
     const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
@@ -67,9 +66,6 @@ ipcache_hash_address(const struct irc_ssaddr *addr)
     hash  = hash & (IP_HASH_SIZE - 1);
     return hash;
   }
-#else
-  return 0;
-#endif
 }
 
 /* ipcache_find_or_add_address()
@@ -88,14 +84,12 @@ ipcache_find_or_add_address(struct irc_ssaddr *addr)
   struct ip_entry *iptr = NULL;
   uint32_t hash_index = ipcache_hash_address(addr);
   struct sockaddr_in *v4 = (struct sockaddr_in *)addr, *ptr_v4;
-#ifdef IPV6
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr, *ptr_v6;
-#endif
 
   DLINK_FOREACH(ptr, ip_hash_table[hash_index].head)
   {
     iptr = ptr->data;
-#ifdef IPV6
+
     if (iptr->ip.ss.ss_family != addr->ss.ss_family)
       continue;
 
@@ -106,7 +100,6 @@ ipcache_find_or_add_address(struct irc_ssaddr *addr)
         return iptr;  /* Found entry already in hash, return it. */
     }
     else
-#endif
     {
       ptr_v4 = (struct sockaddr_in *)&iptr->ip;
       if (!memcmp(&v4->sin_addr, &ptr_v4->sin_addr, sizeof(struct in_addr)))
@@ -137,14 +130,12 @@ ipcache_remove_address(struct irc_ssaddr *addr)
   dlink_node *ptr = NULL;
   uint32_t hash_index = ipcache_hash_address(addr);
   struct sockaddr_in *v4 = (struct sockaddr_in *)addr, *ptr_v4;
-#ifdef IPV6
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr, *ptr_v6;
-#endif
 
   DLINK_FOREACH(ptr, ip_hash_table[hash_index].head)
   {
     struct ip_entry *iptr = ptr->data;
-#ifdef IPV6
+
     if (iptr->ip.ss.ss_family != addr->ss.ss_family)
       continue;
 
@@ -155,7 +146,6 @@ ipcache_remove_address(struct irc_ssaddr *addr)
         continue;
     }
     else
-#endif
     {
       ptr_v4 = (struct sockaddr_in *)&iptr->ip;
       if (memcmp(&v4->sin_addr, &ptr_v4->sin_addr, sizeof(struct in_addr)))

@@ -787,8 +787,7 @@ init_resolver(void)
   };
 
   dns_pool = mp_pool_new(sizeof(struct reslist), MP_CHUNK_SIZE_DNS);
-  memset(&ResolverFileDescriptor, 0, sizeof(fde_t));
-  start_resolver();
 
+  start_resolver();
   event_add(&event_timeout_resolver, NULL);
 }

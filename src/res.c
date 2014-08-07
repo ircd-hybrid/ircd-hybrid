@@ -92,21 +92,21 @@ typedef enum
 
 struct reslist
 {
-  dlink_node node;                       /**< Doubly linked list node. */
-  int id;                                /**< Request ID (from request header). */
-  int sent;                              /**< Number of requests sent */
-  request_state state;                   /**< State the resolver machine is in */
-  char type;                             /**< Current request type. */
-  char retries;                          /**< Retry counter */
-  unsigned int sends;                    /**< Number of sends (>1 means resent). */
-  char resend;                           /**< Send flag; 0 == don't resend. */
-  time_t sentat;                         /**< Timestamp we last sent this request. */
-  time_t timeout;                        /**< When this request times out. */
-  struct irc_ssaddr addr;                /**< Address for this request. */
-  char name[RFC1035_MAX_DOMAIN_LENGTH];  /**< Hostname for this request. */
-  size_t namelength;                     /**< Actual hostname length. */
-  dns_callback_fnc callback;             /**< Callback function on completion. */
-  void *callback_ctx;                    /**< Context pointer for callback. */
+  dlink_node node;                           /**< Doubly linked list node. */
+  int id;                                    /**< Request ID (from request header). */
+  int sent;                                  /**< Number of requests sent */
+  request_state state;                       /**< State the resolver machine is in */
+  char type;                                 /**< Current request type. */
+  char retries;                              /**< Retry counter */
+  unsigned int sends;                        /**< Number of sends (>1 means resent). */
+  char resend;                               /**< Send flag; 0 == don't resend. */
+  time_t sentat;                             /**< Timestamp we last sent this request. */
+  time_t timeout;                            /**< When this request times out. */
+  struct irc_ssaddr addr;                    /**< Address for this request. */
+  char name[RFC1035_MAX_DOMAIN_LENGTH + 1];  /**< Hostname for this request. */
+  size_t namelength;                         /**< Actual hostname length. */
+  dns_callback_fnc callback;                 /**< Callback function on completion. */
+  void *callback_ctx;                        /**< Context pointer for callback. */
 };
 
 static fde_t ResolverFileDescriptor;

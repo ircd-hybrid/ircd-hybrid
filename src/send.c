@@ -916,23 +916,14 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
  *                (at most 5 warnings every 5 seconds)
  */
 void
-sendto_realops_flags_ratelimited(const char *pattern, ...)
+sendto_realops_flags_ratelimited(time_t *rate, const char *pattern, ...)
 {
   va_list args;
   char buffer[IRCD_BUFSIZE] = "";
-  static time_t last = 0;
-  static int warnings = 0;
 
-  if (CurrentTime - last < 5)
-  {
-    if (++warnings > 5)
-      return;
-  }
-  else
-  {
-    last = CurrentTime;
-    warnings = 0;
-  }
+  if ((CurrentTime - *rate) < 20)
+    return;
+  *rate = CurrentTime;
 
   va_start(args, pattern);
   vsnprintf(buffer, sizeof(buffer), pattern, args);

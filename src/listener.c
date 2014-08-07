@@ -362,7 +362,7 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
 static void
 accept_connection(fde_t *pfd, void *data)
 {
-  static time_t last_oper_notice = 0;
+  static time_t rate = 0;
   struct irc_ssaddr addr;
   int fd;
   int pe;
@@ -388,17 +388,8 @@ accept_connection(fde_t *pfd, void *data)
     if (number_fd > hard_fdlimit - 10)
     {
       ++ServerStats.is_ref;
-
-      /*
-       * slow down the whining to opers bit
-       */
-      if ((last_oper_notice + 20) <= CurrentTime)
-      {
-        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                             "All connections in use. (%s)",
-                             get_listener_name(listener));
-        last_oper_notice = CurrentTime;
-      }
+      sendto_realops_flags_ratelimited(&rate, "All connections in use. (%s)",
+                                       get_listener_name(listener));
 
       if (!(listener->flags & LISTENER_SSL))
         send(fd, "ERROR :All connections in use\r\n", 32, 0);

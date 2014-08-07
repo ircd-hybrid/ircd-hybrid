@@ -74,7 +74,7 @@ m_ison(struct Client *source_p, int parc, char *parv[])
 
         if ((current_insert_point + (len + 5)) < (buf + sizeof(buf)))
         {
-          memcpy(current_insert_point, target_p->name, len);
+          strlcpy(current_insert_point, target_p->name, len);
           current_insert_point += len;
           *current_insert_point++ = ' ';
         }

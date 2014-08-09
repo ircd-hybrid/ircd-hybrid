@@ -210,7 +210,7 @@ start_resolver(void)
   if (!ResolverFileDescriptor.flags.open)
   {
     if (comm_open(&ResolverFileDescriptor, irc_nsaddr_list[0].ss.ss_family,
-                  SOCK_DGRAM, 0, "Resolver socket") == -1)
+                  SOCK_DGRAM, 0, "UDP resolver socket") == -1)
       return;
 
     /* At the moment, the resolver FD data is global .. */

@@ -64,7 +64,7 @@ static CNCB serv_connect_callback;
  *		  but in no particular order.
  */
 void
-write_links_file(void *notused)
+write_links_file(void *unused)
 {
   FILE *file = NULL;
   dlink_node *ptr = NULL, *ptr_next = NULL;
@@ -348,7 +348,7 @@ check_server(const char *name, struct Client *client_p)
     {
       error = -2;
 
-      if (!match_conf_password(client_p->localClient->passwd, conf))
+      if (!match_conf_password(client_p->localClient->password, conf))
         return -2;
 
       if (!EmptyString(conf->certfp))

@@ -356,8 +356,8 @@ struct LocalUser
   int               aftype;    /**< Makes life easier for DNS res in IPV6 */
   int               country_id; /**< ID corresponding to a ISO 3166 country code */
 
-  char              *passwd;
   fde_t             fd;
+
   /* Anti-flood stuff. We track how many messages were parsed and how
    * many we were allowed in the current second, and apply a simple
    * decay to avoid flooding.
@@ -366,8 +366,9 @@ struct LocalUser
   int allow_read;       /**< How many we're allowed to read in this second */
   int sent_parsed;      /**< How many messages we've parsed in this second */
 
-  char*          response;  /**< Expected CHALLENGE response from client */
-  char*          auth_oper; /**< Operator to become if they supply the response */
+  char *password;  /**< Password supplied by the client/server */
+  char *challenge_response;  /**< Expected CHALLENGE response from client */
+  char *challenge_operator;  /**< Operator to become if they supply the response */
 };
 
 /*! \brief Client structure */

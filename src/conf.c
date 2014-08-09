@@ -291,7 +291,7 @@ verify_access(struct Client *client_p)
     conf = find_address_conf(client_p->host, client_p->username,
                              &client_p->localClient->ip,
                              client_p->localClient->aftype,
-                             client_p->localClient->passwd);
+                             client_p->localClient->password);
   }
   else
   {
@@ -299,7 +299,7 @@ verify_access(struct Client *client_p)
     conf = find_address_conf(client_p->host,non_ident,
                              &client_p->localClient->ip,
                              client_p->localClient->aftype,
-                             client_p->localClient->passwd);
+                             client_p->localClient->password);
   }
 
   if (conf)
@@ -1029,7 +1029,7 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
  *                This is an event started off in ircd.c
  */
 void
-cleanup_tklines(void *notused)
+cleanup_tklines(void *unused)
 {
   hostmask_expire_temporary();
   expire_tklines(&xconf_items);

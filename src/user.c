@@ -481,7 +481,7 @@ register_local_user(struct Client *source_p)
   /* Password check */
   if (!EmptyString(conf->passwd))
   {
-    if (!match_conf_password(source_p->localClient->passwd, conf))
+    if (!match_conf_password(source_p->localClient->password, conf))
     {
       ++ServerStats.is_ref;
 
@@ -492,7 +492,7 @@ register_local_user(struct Client *source_p)
   }
 
   /*
-   * Don't free source_p->localClient->passwd here - it can be required
+   * Don't free source_p->localClient->password here - it can be required
    * by masked /stats I if there are auth{} blocks with need_password = no;
    * --adx
    */

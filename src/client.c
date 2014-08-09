@@ -138,8 +138,10 @@ free_client(struct Client *client_p)
     assert(dlink_list_length(&client_p->localClient->watches) == 0);
     assert(IsClosing(client_p) && IsDead(client_p));
 
-    MyFree(client_p->localClient->response);
-    MyFree(client_p->localClient->auth_oper);
+    MyFree(client_p->localClient->challenge_response);
+    MyFree(client_p->localClient->challenge_operator);
+    client_p->localClient->challenge_response = NULL;
+    client_p->localClient->challenge_operator = NULL;
 
     /*
      * clean up extra sockets from P-lines which have been discarded.
@@ -277,7 +279,7 @@ check_unknowns_list(void)
  */
 
 static void
-check_pings(void *notused)
+check_pings(void *unused)
 {
   check_pings_list(&local_client_list);
   check_pings_list(&local_server_list);

@@ -768,7 +768,7 @@ timeout_query_list(void)
  * timeout_resolver - check request list
  */
 static void
-timeout_resolver(void *notused)
+timeout_resolver(void *unused)
 {
   timeout_query_list();
 }

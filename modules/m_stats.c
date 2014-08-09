@@ -911,7 +911,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
                                   &source_p->localClient->ip, CONF_CLIENT,
                                   source_p->localClient->aftype,
                                   source_p->username,
-                                  source_p->localClient->passwd, 1);
+                                  source_p->localClient->password, 1);
     else
       conf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT, 0,
                                   source_p->username, NULL, 1);

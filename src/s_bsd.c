@@ -205,7 +205,9 @@ close_connection(struct Client *client_p)
   dbuf_clear(&client_p->localClient->buf_sendq);
   dbuf_clear(&client_p->localClient->buf_recvq);
 
-  MyFree(client_p->localClient->passwd);
+  MyFree(client_p->localClient->password);
+  client_p->localClient->password = NULL;
+
   detach_conf(client_p, CONF_CLIENT|CONF_OPER|CONF_SERVER);
 }
 
@@ -419,7 +421,7 @@ comm_setflush(fde_t *fd, time_t timeout, PF *callback, void *cbdata)
  * this will happen.
  */
 void
-comm_checktimeouts(void *notused)
+comm_checktimeouts(void *unused)
 {
   int i;
   fde_t *F;
@@ -559,7 +561,7 @@ comm_connect_callback(fde_t *fd, int status)
  * called ..
  */
 static void
-comm_connect_timeout(fde_t *fd, void *notused)
+comm_connect_timeout(fde_t *fd, void *unused)
 {
   /* error! */
   comm_connect_callback(fd, COMM_ERR_TIMEOUT);
@@ -600,7 +602,7 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
   comm_connect_tryconnect(F, NULL);
 }
 
-/* static void comm_connect_tryconnect(int fd, void *notused)
+/* static void comm_connect_tryconnect(int fd, void *unused)
  * Input: The fd, the handler data(unused).
  * Output: None.
  * Side-effects: Try and connect with pending connect data for the FD. If
@@ -609,7 +611,7 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
  *               to select for a write event on this FD.
  */
 static void
-comm_connect_tryconnect(fde_t *fd, void *notused)
+comm_connect_tryconnect(fde_t *fd, void *unused)
 {
   int retval;
 

@@ -259,8 +259,8 @@ server_estab(struct Client *client_p)
     return;
   }
 
-  MyFree(client_p->localClient->passwd);
-  client_p->localClient->passwd = NULL;
+  MyFree(client_p->localClient->password);
+  client_p->localClient->password = NULL;
 
   /* Its got identd, since it's a server */
   SetGotId(client_p);

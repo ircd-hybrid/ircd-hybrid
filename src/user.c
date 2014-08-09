@@ -963,6 +963,8 @@ oper_up(struct Client *source_p)
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
+  sendto_server(NULL, NOCAPS, NOCAPS, ":%s GLOBOPS :%s is now an operator",
+                me.id, get_oper_name(source_p));
   send_umode_out(source_p, source_p, old);
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
 }

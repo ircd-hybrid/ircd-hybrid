@@ -99,7 +99,6 @@ struct reslist
   char type;                                 /**< Current request type. */
   char retries;                              /**< Retry counter */
   unsigned int sends;                        /**< Number of sends (>1 means resent). */
-  char resend;                               /**< Send flag; 0 == don't resend. */
   time_t sentat;                             /**< Timestamp we last sent this request. */
   time_t timeout;                            /**< When this request times out. */
   struct irc_ssaddr addr;                    /**< Address for this request. */
@@ -136,7 +135,6 @@ make_request(dns_callback_fnc callback, void *ctx)
 
   request->sentat       = CurrentTime;
   request->retries      = 2;
-  request->resend       = 1;
   request->timeout      = 4;  /* Start at 4 and exponential inc. */
   request->state        = REQ_IDLE;
   request->callback     = callback;
@@ -345,11 +343,6 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
     request             = make_request(callback, ctx);
     request->type       = type;
     request->namelength = strlcpy(request->name, host_name, sizeof(request->name));
-
-    if (type != T_A)
-      request->state = REQ_AAAA;
-    else
-      request->state = REQ_A;
   }
 
   request->type = type;
@@ -443,20 +436,15 @@ gethost_byaddr(dns_callback_fnc callback, void *ctx, const struct irc_ssaddr *ad
 static void
 resend_query(struct reslist *request)
 {
-  if (request->resend == 0)
-    return;
-
   switch (request->type)
   {
     case T_PTR:
       do_query_number(NULL, NULL, &request->addr, request);
       break;
     case T_A:
+    case T_AAAA:
       do_query_name(NULL, NULL, request->name, request, request->type);
       break;
-    case T_AAAA:  /* Didn't work, try A */
-      if (request->state == REQ_AAAA)
-        do_query_name(NULL, NULL, request->name, request, T_A);
     default:
       break;
   }
@@ -635,29 +623,14 @@ res_readreply(fde_t *fd, void *data)
     if ((request = find_id(header->id)) == NULL)
       continue;
 
-    if ((header->rcode != NO_ERRORS) || (header->ancount == 0))
+    if (header->rcode != NO_ERRORS || header->ancount == 0)
     {
-      if (header->rcode == SERVFAIL || header->rcode == NXDOMAIN)
-      {
-        /*
-         * If a bad error was returned, stop here and don't
-         * send any more (no retries granted).
-         */
-        (*request->callback)(request->callback_ctx, NULL, NULL, 0);
-        rem_request(request);
-      }
-      else
-      {
-        /*
-         * If we havent already tried this, and we're looking up AAAA, try A now.
-         */
-        if (request->state == REQ_AAAA && request->type == T_AAAA)
-        {
-          request->timeout += 4;
-          resend_query(request);
-        }
-      }
-
+      /*
+       * If a bad error was returned, stop here and don't
+       * send any more (no retries granted).
+       */
+      (*request->callback)(request->callback_ctx, NULL, NULL, 0);
+      rem_request(request);
       continue;
     }
 

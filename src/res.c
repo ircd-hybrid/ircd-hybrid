@@ -443,21 +443,19 @@ resend_query(struct reslist *request)
  * proc_answer - process name server reply
  */
 static int
-proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
+proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigned char *eob)
 {
   char hostbuf[RFC1035_MAX_DOMAIN_LENGTH + 100]; /* working buffer */
-  unsigned char *current;      /* current position in buf */
+  unsigned char *current = buf + sizeof(HEADER); /* current position in buf */
   unsigned int type = 0;       /* answer type */
   unsigned int rd_length = 0;
   int n;                       /* temp count */
   struct sockaddr_in *v4;      /* conversion */
   struct sockaddr_in6 *v6;
 
-  current = (unsigned char *)buf + sizeof(HEADER);
-
   for (; header->qdcount > 0; --header->qdcount)
   {
-    if ((n = irc_dn_skipname(current, (unsigned char *)eob)) < 0)
+    if ((n = irc_dn_skipname(current, eob)) < 0)
       break;
 
     current += (size_t)n + QFIXEDSZ;
@@ -466,12 +464,11 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
   /*
    * Process each answer sent to us blech.
    */
-  while (header->ancount > 0 && (char *)current < eob)
+  while (header->ancount > 0 && current < eob)
   {
     header->ancount--;
 
-    n = irc_dn_expand((unsigned char *)buf, (unsigned char *)eob, current,
-        hostbuf, sizeof(hostbuf));
+    n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
 
     if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
       return 0;
@@ -485,7 +482,7 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
      */
     current += (size_t)n;
 
-    if (!(((char *)current + ANSWER_FIXED_SIZE) < eob))
+    if (!((current + ANSWER_FIXED_SIZE) < eob))
       break;
 
     type = irc_ns_get16(current);
@@ -533,8 +530,7 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
         if (request->type != T_PTR)
           return 0;
 
-        n = irc_dn_expand((unsigned char *)buf, (unsigned char *)eob,
-                          current, hostbuf, sizeof(hostbuf));
+        n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
         if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
           return 0;
 
@@ -564,7 +560,7 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
 static void
 res_readreply(fde_t *fd, void *data)
 {
-  char buf[sizeof(HEADER) + MAXPACKET];
+  unsigned char buf[sizeof(HEADER) + MAXPACKET];
   HEADER *header;
   struct reslist *request = NULL;
   ssize_t rc = 0;

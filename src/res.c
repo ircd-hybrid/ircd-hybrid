@@ -447,9 +447,9 @@ proc_answer(struct reslist *request, HEADER *header, char *buf, char *eob)
 {
   char hostbuf[RFC1035_MAX_DOMAIN_LENGTH + 100]; /* working buffer */
   unsigned char *current;      /* current position in buf */
-  int type;                    /* answer type */
+  unsigned int type = 0;       /* answer type */
+  unsigned int rd_length = 0;
   int n;                       /* temp count */
-  int rd_length;
   struct sockaddr_in *v4;      /* conversion */
   struct sockaddr_in6 *v6;
 

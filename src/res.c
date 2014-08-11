@@ -81,21 +81,11 @@ static PF res_readreply;
 #define RDLENGTH_SIZE     (size_t)2
 #define ANSWER_FIXED_SIZE (TYPE_SIZE + CLASS_SIZE + TTL_SIZE + RDLENGTH_SIZE)
 
-typedef enum
-{
-  REQ_IDLE,  /**< We're doing not much at all */
-  REQ_PTR,   /**< Looking up a PTR */
-  REQ_A,     /**< Looking up an A, possibly because AAAA failed */
-  REQ_AAAA,  /**< Looking up an AAAA */
-  REQ_CNAME  /**< We got a CNAME in response, we better get a real answer next */
-} request_state;
-
 struct reslist
 {
   dlink_node node;                           /**< Doubly linked list node. */
   int id;                                    /**< Request ID (from request header). */
   int sent;                                  /**< Number of requests sent */
-  request_state state;                       /**< State the resolver machine is in */
   char type;                                 /**< Current request type. */
   char retries;                              /**< Retry counter */
   unsigned int sends;                        /**< Number of sends (>1 means resent). */
@@ -136,7 +126,6 @@ make_request(dns_callback_fnc callback, void *ctx)
   request->sentat       = CurrentTime;
   request->retries      = 2;
   request->timeout      = 4;  /* Start at 4 and exponential inc. */
-  request->state        = REQ_IDLE;
   request->callback     = callback;
   request->callback_ctx = ctx;
 

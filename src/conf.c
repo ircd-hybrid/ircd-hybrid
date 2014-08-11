@@ -116,7 +116,11 @@ conf_dns_lookup(struct MaskItem *conf)
   if (!conf->dns_pending)
   {
     conf->dns_pending = 1;
-    gethost_byname(conf_dns_callback, conf, conf->host);
+
+    if (conf->aftype == AF_INET)
+      gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
+    else
+      gethost_byname_type(conf_dns_callback, conf, conf->host, T_AAAA);
   }
 }
 

@@ -405,15 +405,6 @@ gethost_byname_type(dns_callback_fnc callback, void *ctx, const char *name, int 
 }
 
 /*
- * gethost_byname - wrapper for _type - send T_AAAA first if IPV6 supported
- */
-void
-gethost_byname(dns_callback_fnc callback, void *ctx, const char *name)
-{
-  gethost_byname_type(callback, ctx, name, T_AAAA);
-}
-
-/*
  * gethost_byaddr - get host name from address
  */
 void

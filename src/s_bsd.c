@@ -472,9 +472,9 @@ comm_checktimeouts(void *unused)
  *               may be called now, or it may be called later.
  */
 void
-comm_connect_tcp(fde_t *fd, const char *host, unsigned short port,
-                 struct sockaddr *clocal, int socklen, CNCB *callback,
-                 void *data, int aftype, int timeout)
+comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockaddr *clocal,
+                 int socklen, void (*callback)(fde_t *, int, void *), void *data,
+                 int aftype, int timeout)
 {
   struct addrinfo hints, *res;
   char portname[PORTNAMELEN + 1];
@@ -539,7 +539,7 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port,
 static void
 comm_connect_callback(fde_t *fd, int status)
 {
-  CNCB *hdl;
+  void (*hdl)(fde_t *, int, void *);
 
   /* This check is gross..but probably necessary */
   if (fd->connect.callback == NULL)

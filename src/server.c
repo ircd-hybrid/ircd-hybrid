@@ -52,7 +52,7 @@
 
 dlink_list flatten_links;
 static dlink_list cap_list = { NULL, NULL, 0 };
-static CNCB serv_connect_callback;
+static void serv_connect_callback(fde_t *, int, void *);
 
 
 /*

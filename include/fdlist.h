@@ -45,10 +45,6 @@ enum
 struct _fde;
 struct Client;
 
-/* Callback for completed connections */
-/* int fd, int status, void * */
-typedef void CNCB(struct _fde *, int, void *);
-
 typedef struct _fde
 {
   /* New-school stuff, again pretty much ripped from squid */
@@ -82,7 +78,7 @@ typedef struct _fde
     /* We don't need the host here ? */
     struct irc_ssaddr S;
     struct irc_ssaddr hostaddr;
-    CNCB *callback;
+    void (*callback)(struct _fde *, int, void *);
     void *data;
     /* We'd also add the retry count here when we get to that -- adrian */
   } connect;

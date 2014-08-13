@@ -81,7 +81,7 @@ enum
 
 static dlink_list auth_pending_list;
 static void read_auth_reply(fde_t *, void *);
-static CNCB auth_connect_callback;
+static void auth_connect_callback(fde_t *, int, void *);
 
 
 /*

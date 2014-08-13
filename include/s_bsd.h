@@ -51,8 +51,8 @@ extern int ignoreErrno(int);
 extern void comm_settimeout(fde_t *, time_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, time_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
-extern void comm_connect_tcp(fde_t *, const char *, unsigned short,
-                             struct sockaddr *, int, CNCB *, void *, int, int);
+extern void comm_connect_tcp(fde_t *, const char *, unsigned short, struct sockaddr *, int,
+                             void (struct _fde *, int, void *), void *, int, int);
 extern const char *comm_errstr(int status);
 extern int comm_open(fde_t *F, int family, int sock_type, int proto,
                      const char *note);

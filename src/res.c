@@ -531,18 +531,13 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
       case T_CNAME:
         current += rd_length;
         break;
-
       default:
-        /* XXX I'd rather just throw away the entire bogus thing
-         * but its possible its just a broken nameserver with still
-         * valid answers. But lets do some rudimentary logging for now...
-         */
-        ilog(LOG_TYPE_IRCD, "irc_res.c bogus type %d", type);
+        return 0;
         break;
     }
   }
 
-  return 1;
+  return 0;
 }
 
 /*

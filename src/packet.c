@@ -301,7 +301,7 @@ read_packet(fde_t *fd, void *data)
         switch (SSL_get_error(fd->ssl, length))
         {
           case SSL_ERROR_WANT_WRITE:
-            comm_setselect(fd, COMM_SELECT_WRITE, (PF *)sendq_unblocked, client_p, 0);
+            comm_setselect(fd, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);
             return;
           case SSL_ERROR_WANT_READ:
               errno = EWOULDBLOCK;

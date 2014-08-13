@@ -65,7 +65,7 @@
 #error this code needs to be able to address individual octets
 #endif
 
-static PF res_readreply;
+static void res_readreply(fde_t *, void *);
 
 #define MAXPACKET      1024  /**< rfc says 512 but we expand names so ... */
 #define AR_TTL         600   /**< TTL in seconds for dns cache entries */

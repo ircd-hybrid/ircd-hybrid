@@ -794,8 +794,9 @@ finish_ssl_server_handshake(struct Client *client_p)
 }
 
 static void
-ssl_server_handshake(fde_t *fd, struct Client *client_p)
+ssl_server_handshake(fde_t *fd, void *data)
 {
+  struct Client *client_p = data;
   X509 *cert = NULL;
   int ret = 0;
 
@@ -805,11 +806,11 @@ ssl_server_handshake(fde_t *fd, struct Client *client_p)
     {
       case SSL_ERROR_WANT_WRITE:
         comm_setselect(&client_p->localClient->fd, COMM_SELECT_WRITE,
-                       (PF *)ssl_server_handshake, client_p, 0);
+                       ssl_server_handshake, client_p, 0);
         return;
       case SSL_ERROR_WANT_READ:
         comm_setselect(&client_p->localClient->fd, COMM_SELECT_READ,
-                       (PF *)ssl_server_handshake, client_p, 0);
+                       ssl_server_handshake, client_p, 0);
         return;
       default:
       {

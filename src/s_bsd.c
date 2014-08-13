@@ -58,9 +58,9 @@ static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
   "Comm Error" };
 
 static void comm_connect_callback(fde_t *, int);
-static PF comm_connect_timeout;
+static void comm_connect_timeout(fde_t *, void *);
 static void comm_connect_dns_callback(void *, const struct irc_ssaddr *, const char *, size_t);
-static PF comm_connect_tryconnect;
+static void comm_connect_tryconnect(fde_t *, void *);
 
 
 /* get_sockerr - get the error value from the socket or the current errno
@@ -217,8 +217,9 @@ close_connection(struct Client *client_p)
  * read/write events if necessary.
  */
 static void
-ssl_handshake(int fd, struct Client *client_p)
+ssl_handshake(fde_t *fd, void *data)
 {
+  struct Client *client_p = data;
   X509 *cert = NULL;
   int ret = 0;
 
@@ -234,12 +235,12 @@ ssl_handshake(int fd, struct Client *client_p)
     {
       case SSL_ERROR_WANT_WRITE:
         comm_setselect(&client_p->localClient->fd, COMM_SELECT_WRITE,
-                       (PF *)ssl_handshake, client_p, 30);
+                       ssl_handshake, client_p, 30);
         return;
 
       case SSL_ERROR_WANT_READ:
         comm_setselect(&client_p->localClient->fd, COMM_SELECT_READ,
-                       (PF *)ssl_handshake, client_p, 30);
+                       ssl_handshake, client_p, 30);
         return;
 
       default:
@@ -342,7 +343,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 
     AddFlag(client_p, FLAGS_SSL);
     SSL_set_fd(client_p->localClient->fd.ssl, fd);
-    ssl_handshake(0, client_p);
+    ssl_handshake(NULL, client_p);
   }
   else
 #endif
@@ -382,7 +383,7 @@ ignoreErrno(int ierrno)
  * Set the timeout for the fd
  */
 void
-comm_settimeout(fde_t *fd, time_t timeout, PF *callback, void *cbdata)
+comm_settimeout(fde_t *fd, time_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
   assert(fd->flags.open);
 
@@ -404,7 +405,7 @@ comm_settimeout(fde_t *fd, time_t timeout, PF *callback, void *cbdata)
  * comm_close() is replaced with fd_close() in fdlist.c
  */
 void
-comm_setflush(fde_t *fd, time_t timeout, PF *callback, void *cbdata)
+comm_setflush(fde_t *fd, time_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
   assert(fd->flags.open);
 
@@ -425,7 +426,7 @@ comm_checktimeouts(void *unused)
 {
   int i;
   fde_t *F;
-  PF *hdl;
+  void (*hdl)(fde_t *, void *);
   void *data;
 
   for (i = 0; i < FD_HASH_SIZE; i++)

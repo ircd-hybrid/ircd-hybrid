@@ -64,7 +64,7 @@ init_netio(void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(fde_t *F, unsigned int type, PF *handler,
+comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
                void *client_data, time_t timeout)
 {
   int new_events, op;
@@ -125,7 +125,7 @@ comm_select(void)
 {
   struct epoll_event ep_fdlist[128];
   int num, i;
-  PF *hdl;
+  void (*hdl)(fde_t *, void *);
   fde_t *F;
 
   num = epoll_wait(efd.fd, ep_fdlist, 128, SELECT_DELAY);

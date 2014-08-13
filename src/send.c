@@ -182,8 +182,9 @@ send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *b
  **      Called when a socket is ready for writing.
  */
 void
-sendq_unblocked(fde_t *fd, struct Client *client_p)
+sendq_unblocked(fde_t *fd, void *data)
 {
+  struct Client *client_p = data;
   assert(fd == &client_p->localClient->fd);
 
   DelFlag(client_p, FLAGS_BLOCKED);
@@ -259,7 +260,7 @@ send_queued_write(struct Client *to)
 
       /* we have a non-fatal error, reschedule a write */
       comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE,
-                     (PF *)sendq_unblocked, to, 0);
+                     sendq_unblocked, to, 0);
     }
     else if (retlen <= 0)
     {

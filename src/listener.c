@@ -38,7 +38,7 @@
 #include "send.h"
 #include "memory.h"
 
-static PF accept_connection;
+static void accept_connection(fde_t *, void *);
 static dlink_list ListenerPollList;
 
 static struct Listener *

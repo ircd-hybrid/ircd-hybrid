@@ -91,7 +91,7 @@ poll_findslot(void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(fde_t *F, unsigned int type, PF *handler,
+comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
                void *client_data, time_t timeout)
 {
   int new_events;
@@ -160,7 +160,7 @@ void
 comm_select(void)
 {
   int num, ci, revents;
-  PF *hdl;
+  void (*hdl)(fde_t *, void *);
   fde_t *F;
 
   /* XXX kill that +1 later ! -- adrian */

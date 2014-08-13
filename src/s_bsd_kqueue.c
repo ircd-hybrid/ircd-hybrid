@@ -87,7 +87,7 @@ kq_update_events(int fd, int filter, int what)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(fde_t *F, unsigned int type, PF *handler,
+comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
                void *client_data, time_t timeout)
 {
   int new_events, diff;
@@ -140,7 +140,7 @@ comm_select(void)
   int num, i;
   static struct kevent ke[KE_LENGTH];
   struct timespec poll_time;
-  PF *hdl;
+  void (*hdl)(fde_t *, void *);
   fde_t *F;
 
   /*

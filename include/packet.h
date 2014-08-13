@@ -48,7 +48,7 @@
 #define MAX_FLOOD 5
 #define MAX_FLOOD_BURST MAX_FLOOD * 8
 
-extern PF read_packet;
-extern PF flood_recalc;
+extern void read_packet(fde_t *, void *);
+extern void flood_recalc(fde_t *, void *);
 extern void flood_endgrace(struct Client *);
 #endif /* INCLUDED_packet_h */

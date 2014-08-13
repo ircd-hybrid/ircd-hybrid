@@ -45,9 +45,6 @@ enum
 struct _fde;
 struct Client;
 
-/* Callback for completed IO events */
-typedef void PF(struct _fde *, void *);
-
 /* Callback for completed connections */
 /* int fd, int status, void * */
 typedef void CNCB(struct _fde *, int, void *);
@@ -63,14 +60,14 @@ typedef struct _fde
   int comm_index;  /* where in the poll list we live */
   int evcache;          /* current fd events as set up by the underlying I/O */
   char desc[FD_DESC_SZ];
-  PF *read_handler;
+  void (*read_handler)(struct _fde *, void *);
   void *read_data;
-  PF *write_handler;
+  void (*write_handler)(struct _fde *, void *);
   void *write_data;
-  PF *timeout_handler;
+  void (*timeout_handler)(struct _fde *, void *);
   void *timeout_data;
   time_t timeout;
-  PF *flush_handler;
+  void (*flush_handler)(struct _fde *, void *);
   void *flush_data;
   time_t flush_timeout;
 

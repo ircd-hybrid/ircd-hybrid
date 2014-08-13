@@ -80,7 +80,7 @@ enum
 #define sendheader(c, i) sendto_one_notice((c), &me, HeaderMessages[(i)])
 
 static dlink_list auth_pending_list;
-static PF read_auth_reply;
+static void read_auth_reply(fde_t *, void *);
 static CNCB auth_connect_callback;
 
 

@@ -241,7 +241,7 @@ delete_resolver_queries(const void *vptr)
  * nameservers or -1 if no successful sends.
  */
 static int
-send_res_msg(const char *msg, int len, unsigned int rcount)
+send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 {
   int sent = 0;
   unsigned int max_queries = IRCD_MIN(irc_nscount, rcount);
@@ -286,16 +286,14 @@ find_id(int id)
  * query_name - generate a query based on class, type and name.
  */
 static void
-query_name(const char *name, int query_class, int type,
-           struct reslist *request)
+query_name(const char *name, int query_class, int type, struct reslist *request)
 {
-  char buf[MAXPACKET];
+  unsigned char buf[MAXPACKET];
   int request_len = 0;
 
   memset(buf, 0, sizeof(buf));
 
-  if ((request_len = irc_res_mkquery(name, query_class, type,
-      (unsigned char *)buf, sizeof(buf))) > 0)
+  if ((request_len = irc_res_mkquery(name, query_class, type, buf, sizeof(buf))) > 0)
   {
     HEADER *header = (HEADER *)buf;
 

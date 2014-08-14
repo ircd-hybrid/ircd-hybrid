@@ -1,5 +1,7 @@
 -- Noteworthy changes in version 8.2.0 (2014-??-??)
 o) Successful operator logins are now announced globally via GLOBOPS
+o) Cleanups and improvements to the resolver code
+o) Cleanups and improvements to the poll() I/O event notification support
 
 
 -- Noteworthy changes in version 8.2.0rc2 (2014-08-03)

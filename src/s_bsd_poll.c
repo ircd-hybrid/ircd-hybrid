@@ -42,8 +42,9 @@
 #define POLLWRNORM POLLOUT
 #endif
 
+static int pollfds_size;
 static struct pollfd *pollfds;
-static int pollmax = -1;  /* highest FD number */
+static int pollnum;
 
 
 /*
@@ -55,33 +56,8 @@ static int pollmax = -1;  /* highest FD number */
 void
 init_netio(void)
 {
-  int fd;
-
-  pollfds = MyCalloc(sizeof(struct pollfd) * hard_fdlimit);
-
-  for (fd = 0; fd < hard_fdlimit; fd++)
-    pollfds[fd].fd = -1;
-}
-
-/*
- * find a spare slot in the fd list. We can optimise this out later!
- *   -- adrian
- */
-static inline int
-poll_findslot(void)
-{
-  int i;
-
-  for (i = 0; i < hard_fdlimit; i++)
-    if (pollfds[i].fd == -1)
-    {
-      /* MATCH!!#$*&$ */
-      return i;
-    }
-
-  assert(1 == 0);
-  /* NOTREACHED */
-  return -1;
+  pollfds_size = hard_fdlimit;
+  pollfds = MyCalloc(sizeof(struct pollfd) * pollfds_size);
 }
 
 /*
@@ -122,21 +98,32 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
   {
     if (new_events == 0)
     {
-      pollfds[F->comm_index].fd = -1;
-      pollfds[F->comm_index].revents = 0;
+      if (F->comm_index != pollnum - 1)
+      {
+        fde_t *other = lookup_fd(pollfds[pollnum - 1].fd);
 
-      if (pollmax == F->comm_index)
-        while (pollmax >= 0 && pollfds[pollmax].fd == -1)
-          pollmax--;
+        pollfds[F->comm_index].fd = pollfds[pollnum - 1].fd;
+        pollfds[F->comm_index].events = pollfds[pollnum - 1].events;
+        pollfds[F->comm_index].revents = pollfds[pollnum - 1].revents;
+
+        assert(other);
+        other->comm_index = F->comm_index;
+      }
+
+      F->comm_index = -1;
+      --pollnum;
     }
     else
     {
       if (F->evcache == 0)
       {
-        F->comm_index = poll_findslot();
-        if (F->comm_index > pollmax)
-          pollmax = F->comm_index;
+        if (pollnum >= pollfds_size)
+        {
+          pollfds_size *= 2;
+          pollfds = MyRealloc(pollfds, sizeof(struct pollfd) * pollfds_size);
+        }
 
+        F->comm_index = pollnum++;
         pollfds[F->comm_index].fd = F->fd;
       }
 
@@ -159,12 +146,11 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 void
 comm_select(void)
 {
-  int num, ci, revents;
+  int num, ci;
   void (*hdl)(fde_t *, void *);
   fde_t *F;
 
-  /* XXX kill that +1 later ! -- adrian */
-  num = poll(pollfds, pollmax + 1, SELECT_DELAY);
+  num = poll(pollfds, pollnum, SELECT_DELAY);
 
   set_time();
 
@@ -176,14 +162,17 @@ comm_select(void)
     return;
   }
 
-  for (ci = 0; ci <= pollmax && num > 0; ci++)
+  for (ci = 0; ci < pollnum && num > 0; ci++)
   {
-    if ((revents = pollfds[ci].revents) == 0 || pollfds[ci].fd == -1)
+    int revents = pollfds[ci].revents;
+
+    if (revents == 0)
       continue;
     num--;
 
     F = lookup_fd(pollfds[ci].fd);
-    if (F == NULL || !F->flags.open)
+    assert(F);
+    if (!F->flags.open)
       continue;
 
     if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))

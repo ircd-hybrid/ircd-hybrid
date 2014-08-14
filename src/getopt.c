@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "ircd_getopt.h"
+#include "memory.h"
 
 #define OPTCHAR '-'
 
@@ -56,6 +57,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
   while (1)
   {
     int found = 0;
+    const char *opt = NULL;
 
     (*argc)--;
     (*argv)++;
@@ -63,12 +65,12 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
     if (*argc < 1 || (*argv)[0][0] != OPTCHAR)
       return;
 
-    (*argv)[0]++;
+    opt = &(*argv)[0][1];
 
     /* Search through our argument list, and see if it matches */
     for (unsigned int i = 0; opts[i].opt; ++i)
     {
-      if (!strcmp(opts[i].opt, (*argv)[0]))
+      if (!strcmp(opts[i].opt, opt))
       {
         /* Found our argument */
         found = 1;
@@ -100,8 +102,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
               usage(progname, opts);
             }
 
-            *((char**)opts[i].argloc) = malloc(strlen((*argv)[1]) + 1);
-            strcpy(*((char**)opts[i].argloc), (*argv)[1]);
+            *((char **)opts[i].argloc) = xstrdup((*argv)[1]);
             (*argc)--;
             (*argv)++;
             break;
@@ -121,7 +122,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
     if (!found)
     {
       fprintf(stderr, "error: unknown argument '%c%s'\n",
-              OPTCHAR, (*argv)[0]);
+              OPTCHAR, opt);
       usage(progname, opts);
     }
   }

@@ -54,7 +54,7 @@ MyRealloc(void *x, size_t y)
 {
   void *ret = realloc(x, y);
 
-  if (ret == NULL)
+  if (y && ret == NULL)
     outofmemory();
 
   return ret;

@@ -32,13 +32,11 @@
 struct Client;
 struct event;
 
-typedef void (*event_handler)(void *);
-
 struct event
 {
   /* public */
   const char *name;
-  event_handler handler;
+  void (*handler)(void *);
   time_t when;
   unsigned int oneshot;
 

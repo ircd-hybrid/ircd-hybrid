@@ -557,7 +557,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 }
 
 static void
-stats_dns_servers(struct Client *source_p)
+stats_dns_servers(struct Client *source_p, int parc, char *parv[])
 {
   report_dns_servers(source_p);
 }
@@ -1488,7 +1488,7 @@ stats_ltrace(struct Client *source_p, int parc, char *parv[])
 static const struct StatsStruct
 {
   const unsigned char letter;
-  void (*handler)();
+  void (*handler)(struct Client *, int, char *[]);
   const unsigned int need_oper;
   const unsigned int need_admin;
 } stats_cmd_table[] = {

@@ -93,6 +93,6 @@ extern void motd_add(const char *, const char *);
 extern void motd_clear(void);
 
 /* This is called to report motd {} blocks */
-extern void motd_report(struct Client *);
+extern void motd_report(struct Client *, int, char *[]);
 extern void motd_memory_count(struct Client *);
 #endif

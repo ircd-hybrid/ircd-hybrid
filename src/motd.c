@@ -406,7 +406,7 @@ motd_clear(void)
  * \param source_p Client requesting statistics.
  */
 void
-motd_report(struct Client *source_p)
+motd_report(struct Client *source_p, int parc, char *parv[])
 {
   const dlink_node *ptr = NULL;
 

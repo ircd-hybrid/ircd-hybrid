@@ -161,7 +161,7 @@ fd_close(fde_t *F)
  * fd_dump() - dump the list of active filedescriptors
  */
 void
-fd_dump(struct Client *source_p)
+fd_dump(struct Client *source_p, int parc, char *parv[])
 {
   for (unsigned int i = 0; i < FD_HASH_SIZE; ++i)
     for (fde_t *F = fd_hash[i]; F; F = F->hnext)

@@ -147,16 +147,14 @@ make_request(dns_callback_fnc callback, void *ctx)
 static int
 res_ourserver(const struct irc_ssaddr *inp)
 {
-  const struct sockaddr_in6 *v6;
   const struct sockaddr_in6 *v6in = (const struct sockaddr_in6 *)inp;
-  const struct sockaddr_in *v4;
   const struct sockaddr_in *v4in = (const struct sockaddr_in *)inp;
 
   for (unsigned int i = 0; i < irc_nscount; ++i)
   {
     const struct irc_ssaddr *srv = &irc_nsaddr_list[i];
-    v6 = (const struct sockaddr_in6 *)srv;
-    v4 = (const struct sockaddr_in *)srv;
+    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)srv;
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)srv;
 
     /*
      * Could probably just memcmp(srv, inp, srv.ss_len) here
@@ -496,8 +494,8 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         if (rd_length != sizeof(struct in_addr))
           return 0;
 
-        v4 = (struct sockaddr_in *)&request->addr;
         request->addr.ss_len = sizeof(struct sockaddr_in);
+        v4 = (struct sockaddr_in *)&request->addr;
         v4->sin_family = AF_INET;
         memcpy(&v4->sin_addr, current, sizeof(struct in_addr));
         return 1;

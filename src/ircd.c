@@ -429,6 +429,7 @@ ssl_init(void)
 
     fprintf(stderr, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
+    exit(EXIT_FAILURE);
   }
 
   SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
@@ -457,6 +458,7 @@ ssl_init(void)
 
     fprintf(stderr, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
+    exit(EXIT_FAILURE);
   }
 
   SSL_CTX_set_options(ConfigServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);

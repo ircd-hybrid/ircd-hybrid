@@ -475,7 +475,7 @@ serverinfo_item:        serverinfo_name |
 serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2)
   {
     if (!ConfigServerInfo.rsa_private_key_file)
     {
@@ -575,7 +575,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2)
   {
     BIO *file = BIO_new_file(yylval.string, "r");
 
@@ -604,7 +604,7 @@ serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
 serverinfo_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2)
     SSL_CTX_set_cipher_list(ConfigServerInfo.server_ctx, yylval.string);
 #endif
 };
@@ -612,7 +612,7 @@ serverinfo_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
 serverinfo_ssl_message_digest_algorithm: SSL_MESSAGE_DIGEST_ALGORITHM '=' QSTRING ';'
 {
 #ifdef HAVE_LIBCRYPTO
-  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2)
   {
     if ((ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(yylval.string)) == NULL)
     {
@@ -630,7 +630,7 @@ serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
   int nid = 0;
   EC_KEY *key = NULL;
 
-  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.server_ctx)
+  if (conf_parser_ctx.pass == 2)
   {
     if ((nid = OBJ_sn2nid(yylval.string)) == 0)
     {
@@ -1619,28 +1619,26 @@ port_item: NUMBER
 {
   if (conf_parser_ctx.pass == 2)
   {
+#ifndef HAVE_LIBCRYPTO
     if (block_state.flags.value & LISTENER_SSL)
-#ifdef HAVE_LIBCRYPTO
-      if (!ConfigServerInfo.server_ctx)
+    {
+      conf_error_report("SSL not available - port closed");
+      break;
+    }
 #endif
-      {
-        conf_error_report("SSL not available - port closed");
-        break;
-      }
     add_listener($1, block_state.addr.buf, block_state.flags.value);
   }
 } | NUMBER TWODOTS NUMBER
 {
   if (conf_parser_ctx.pass == 2)
   {
+#ifndef HAVE_LIBCRYPTO
     if (block_state.flags.value & LISTENER_SSL)
-#ifdef HAVE_LIBCRYPTO
-      if (!ConfigServerInfo.server_ctx)
+    {
+      conf_error_report("SSL not available - port closed");
+      break;
+    }
 #endif
-      {
-        conf_error_report("SSL not available - port closed");
-        break;
-      }
 
     for (int i = $1; i <= $3; ++i)
       add_listener(i, block_state.addr.buf, block_state.flags.value);

@@ -805,6 +805,20 @@ set_default_conf(void)
   assert(class_default == class_get_list()->tail->data);
 
 #ifdef HAVE_LIBCRYPTO
+#if OPENSSL_VERSION_NUMBER >= 0x1000005FL && !defined(OPENSSL_NO_ECDH)
+  {
+    EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+
+    if (key)
+    {
+      SSL_CTX_set_tmp_ecdh(ConfigServerInfo.server_ctx, key);
+      EC_KEY_free(key);
+    }
+  }
+
+  SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_SINGLE_ECDH_USE);
+#endif
+
   ConfigServerInfo.message_digest_algorithm = EVP_sha256();
   ConfigServerInfo.rsa_private_key = NULL;
   ConfigServerInfo.rsa_private_key_file = NULL;

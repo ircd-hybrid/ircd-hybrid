@@ -123,6 +123,10 @@ do_list(struct Client *source_p, int parc, char *parv[])
               else
                 errors = 1;
               break;
+            case ':':
+              if (strlcpy(lt->topic, opt + 1, sizeof(lt->topic)) == 0)
+                errors = 1;
+              break;
             default:
               errors = 1;
           }

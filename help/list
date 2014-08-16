@@ -4,7 +4,7 @@ Without any arguments, LIST will give an entire list of all
 channels which are not set as secret (+s). The list will be in
 the form:
 
-  <#channel> <amount of users> :[topic]
+  <#channel> <amount of users> :[modes] [topic]
 
 If you want to use a specific filter, you can pass one or more
 options separated by commas (','). Recognized options are:
@@ -18,6 +18,8 @@ options separated by commas (','). Recognized options are:
            than <num> minutes
   T<num    Limit matches to those channels whose topics have been
            changed within last <num> minutes
+  T:mask   Limit matches to those channels whose topics match the
+           given mask
 
 To stop a running LIST request, use /LIST command again.
 

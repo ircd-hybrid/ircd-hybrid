@@ -780,6 +780,9 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
       lt->topicts_max)
     return;
 
+  if (lt->topic[0] && match(lt->topic, chptr->topic))
+    return;
+
   if (!list_allow_channel(chptr->chname, lt))
     return;
 

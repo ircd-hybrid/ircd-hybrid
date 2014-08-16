@@ -293,6 +293,7 @@ struct ListTask
   unsigned int created_max;
   unsigned int topicts_min;
   unsigned int topicts_max;
+  char topic[TOPICLEN + 1];
 };
 
 /*! \brief LocalUser structure

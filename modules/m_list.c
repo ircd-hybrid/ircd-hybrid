@@ -84,7 +84,6 @@ do_list(struct Client *source_p, int parc, char *parv[])
           else
             errors = 1;
           break;
-        case '-': break;
         case 'C':
         case 'c':
           switch (*++opt)

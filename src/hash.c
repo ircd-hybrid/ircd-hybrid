@@ -783,15 +783,12 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
   if (!list_allow_channel(chptr->chname, lt))
     return;
 
-  if (HasUMode(source_p, UMODE_ADMIN))
-  {
-    channel_modes(chptr, source_p, modebuf, parabuf);
+  channel_modes(chptr, source_p, modebuf, parabuf);
 
-    if (chptr->topic[0])
-      snprintf(listbuf, sizeof(listbuf), "[%s] ", modebuf);
-    else
-      snprintf(listbuf, sizeof(listbuf), "[%s]",  modebuf);
-  }
+  if (chptr->topic[0])
+    snprintf(listbuf, sizeof(listbuf), "[%s] ", modebuf);
+  else
+    snprintf(listbuf, sizeof(listbuf), "[%s]",  modebuf);
 
   sendto_one_numeric(source_p, &me, RPL_LIST, chptr->chname,
                      dlink_list_length(&chptr->members),

@@ -807,9 +807,6 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
  * Walk the channel buckets, ensure all pointers in a bucket are
  * traversed before blocking on a sendq. This means, no locking is needed.
  *
- * N.B. This code is "remote" safe, but is not currently used for
- * remote clients.
- *
  * - Dianora
  */
 void

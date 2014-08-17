@@ -34,4 +34,6 @@ notifications:
  email:
   - bugs@ircd-hybrid.org
  irc:
+  channels:
   - "irc.ircd-hybrid.org#ircd-coders"
+  skip_join: true

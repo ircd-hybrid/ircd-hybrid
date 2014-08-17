@@ -39,7 +39,7 @@
 #include "memory.h"
 
 static void accept_connection(fde_t *, void *);
-static dlink_list ListenerPollList;
+static dlink_list listener_list;
 
 static struct Listener *
 make_listener(const int port, const struct irc_ssaddr *addr)
@@ -57,7 +57,7 @@ free_listener(struct Listener *listener)
 {
   assert(listener);
 
-  dlinkDelete(&listener->node, &ListenerPollList);
+  dlinkDelete(&listener->node, &listener_list);
   MyFree(listener);
 }
 
@@ -88,7 +88,7 @@ show_ports(struct Client *source_p)
   char *p = NULL;
   const dlink_node *ptr = NULL;
 
-  DLINK_FOREACH(ptr, ListenerPollList.head)
+  DLINK_FOREACH(ptr, listener_list.head)
   {
     const struct Listener *listener = ptr->data;
     p = buf;
@@ -199,7 +199,7 @@ find_listener(int port, struct irc_ssaddr *addr)
   struct Listener *listener    = NULL;
   struct Listener *last_closed = NULL;
 
-  DLINK_FOREACH(ptr, ListenerPollList.head)
+  DLINK_FOREACH(ptr, listener_list.head)
   {
     listener = ptr->data;
 
@@ -248,7 +248,7 @@ close_listeners(void)
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
   /* close all 'extra' listening ports we have */
-  DLINK_FOREACH_SAFE(ptr, ptr_next, ListenerPollList.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, listener_list.head)
     close_listener(ptr->data);
 }
 
@@ -346,7 +346,7 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
   else
   {
     listener = make_listener(port, &vaddr);
-    dlinkAdd(listener, &listener->node, &ListenerPollList);
+    dlinkAdd(listener, &listener->node, &listener_list);
     listener->flags = flags;
   }
 

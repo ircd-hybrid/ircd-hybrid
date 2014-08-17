@@ -687,6 +687,7 @@ serverinfo_description: DESCRIPTION '=' QSTRING ';'
   {
     MyFree(ConfigServerInfo.description);
     ConfigServerInfo.description = xstrdup(yylval.string);
+    strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
   }
 };
 

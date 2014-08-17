@@ -145,9 +145,10 @@ conf_free(struct MaskItem *conf)
   dlink_node *ptr = NULL, *ptr_next = NULL;
   dlink_list *list = NULL;
 
-  if (conf->node.next)
-    if ((list = map_to_list(conf->type)))
-      dlinkDelete(&conf->node, list);
+  assert(conf->node.data);
+
+  if ((list = map_to_list(conf->type)))
+    dlinkDelete(&conf->node, list);
 
   MyFree(conf->name);
 

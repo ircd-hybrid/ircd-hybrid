@@ -553,7 +553,7 @@ static const char *const replies[] =
 /* 520 */ NULL,
 /* 521 ERR_LISTSYNTAX */ ":Bad list syntax, type /QUOTE HELP LIST",
 /* 522 */ NULL,
-/* 523 */ NULL,
+/* 523 ERR_WHOLIMEXCEED */ "%u :%s search limit exceeded.",
 /* 524 ERR_HELPNOTFOUND */ "%s :Help not found",
 /* 525 */ NULL,
 /* 526 */ NULL,

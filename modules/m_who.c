@@ -40,6 +40,9 @@
 #include "modules.h"
 
 
+#define WHO_MAXREPLIES 500
+
+
 /* do_who()
  *
  * inputs       - pointer to client requesting who
@@ -122,7 +125,10 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, char *mask,
       if (*maxmatches > 0)
       {
         if (--(*maxmatches) == 0)
+        {
+          sendto_one_numeric(source_p, &me, ERR_WHOLIMEXCEED, WHO_MAXREPLIES, "WHO");
           return;
+        }
       }
     }
   }
@@ -143,7 +149,7 @@ who_global(struct Client *source_p, char *mask, int server_oper)
   struct Channel *chptr;
   struct Client *target_p;
   dlink_node *lp = NULL, *gcptr = NULL;
-  unsigned int maxmatches = 500;
+  unsigned int maxmatches = WHO_MAXREPLIES;
   static time_t last_used = 0;
 
   if (!HasUMode(source_p, UMODE_OPER))
@@ -193,7 +199,10 @@ who_global(struct Client *source_p, char *mask, int server_oper)
       if (maxmatches > 0)
       {
         if (--maxmatches == 0)
+        {
+          sendto_one_numeric(source_p, &me, ERR_WHOLIMEXCEED, WHO_MAXREPLIES, "WHO");
           return;
+        }
       }
     }
   }

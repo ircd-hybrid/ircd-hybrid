@@ -227,6 +227,7 @@ enum irc_numerics
   ERR_TOOMANYWATCH         = 512,
   ERR_WRONGPONG            = 513,
   ERR_LISTSYNTAX           = 521,
+  ERR_WHOLIMEXCEED         = 523,
   ERR_HELPNOTFOUND         = 524,
   RPL_LOGON                = 600,
   RPL_LOGOFF               = 601,

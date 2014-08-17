@@ -7,7 +7,9 @@ o) All users may now see channel modes in the /list reply
 
 
 -- Noteworthy changes in version 8.2.0rc2 (2014-08-03)
-o) Improved AWAY throttling to allow for better fine-tuning
+o) Improved AWAY throttling to allow for better fine-tuning. See the
+   newly added 'away_count' and 'away_time' configuration directives
+   in the general {} block
 o) Support for the select() I/O event notification has been dropped
 o) Minor code cleanups and improvements
 
@@ -22,13 +24,13 @@ o) ./configure now requires OpenSSL 0.9.8o or above in order
 o) Channel halfops are now an integral part of ircd-hybrid
    and can't be disabled anymore
 o) Many code cleanups and improvements
-o) Added flood control for the INVITE command. See channel{} block in reference.conf
-o) Changed flood control logic for the KNOCK command. See channel{} block in reference.conf
+o) Added flood control for the INVITE command. See channel {} block in reference.conf
+o) Changed flood control logic for the KNOCK command. See channel {} block in reference.conf
 o) INVITE without any parameters now shows a list of channels a client is invited to
 o) The OPERWALL command has been removed. Use GLOBOPS instead
-o) Added 'max_channels' to class{} blocks
-o) Added 'throttle_count' configuration option to the general{} block
-o) Added 'ssl_message_digest_algorithm' configuration option to serverinfo{} block.
+o) Added 'max_channels' to class {} blocks
+o) Added 'throttle_count' configuration option to the general {} block
+o) Added 'ssl_message_digest_algorithm' configuration option to serverinfo {} block.
    See doc/reference.conf for more information.
 o) Added support for Elliptic Curve Diffie-Hellman (ECDH). Also an elliptic curve can be
    specified via the serverinfo::ssl_dh_elliptic_curve configuration option.

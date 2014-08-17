@@ -779,9 +779,6 @@ rehash(int sig)
 
   read_conf_files(0);
 
-  if (ConfigServerInfo.description)
-    strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
-
   load_conf_modules();
   check_conf_klines();
 

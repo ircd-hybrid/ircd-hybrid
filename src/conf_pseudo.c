@@ -38,7 +38,7 @@
 #include "server.h"
 #include "conf_pseudo.h"
 
-static struct pseudo_cmd
+struct pseudo_cmd
 {
   dlink_node node;
   struct Message *msg;
@@ -134,6 +134,7 @@ pseudo_clear(void)
     assert(find_command(pseudo->cmmd));
 
     mod_del_cmd(pseudo->msg);
+    dlinkDelete(&pseudo->node, &pseudo_cmd_list);
     MyFree(pseudo->msg);
     MyFree(pseudo);
   }

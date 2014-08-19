@@ -221,7 +221,7 @@ who_global(struct Client *source_p, char *mask, int server_oper)
  */
 static void
 do_who_on_channel(struct Client *source_p, struct Channel *chptr,
-                  const char *chname, int member, int server_oper)
+                  int member, int server_oper)
 {
   dlink_node *ptr = NULL;
 
@@ -236,7 +236,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
         if (!HasUMode(target_p, UMODE_OPER) ||
             (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
           continue;
-      do_who(source_p, target_p, chname, get_member_status(ms, !!HasCap(source_p, CAP_MULTI_PREFIX)));
+      do_who(source_p, target_p, chptr->chname, get_member_status(ms, !!HasCap(source_p, CAP_MULTI_PREFIX)));
     }
   }
 }
@@ -280,9 +280,9 @@ m_who(struct Client *source_p, int parc, char *parv[])
     if ((chptr = hash_find_channel(mask)))
     {
       if (IsMember(source_p, chptr) || HasUMode(source_p, UMODE_ADMIN))
-        do_who_on_channel(source_p, chptr, chptr->chname, 1, server_oper);
+        do_who_on_channel(source_p, chptr, 1, server_oper);
       else if (!SecretChannel(chptr))
-        do_who_on_channel(source_p, chptr, chptr->chname, 0, server_oper);
+        do_who_on_channel(source_p, chptr, 0, server_oper);
     }
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
@@ -316,8 +316,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     if ((ptr = source_p->channel.head))
     {
       chptr = ((struct Membership *)ptr->data)->chptr;
-      do_who_on_channel(source_p, chptr, chptr->chname, 1,
-                        server_oper);
+      do_who_on_channel(source_p, chptr, 1, server_oper);
     }
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, "*");

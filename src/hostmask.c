@@ -729,6 +729,7 @@ clear_out_address_conf(void)
         continue;
 
       dlinkDelete(&arec->node, &atable[i]);
+      arec->conf->active = 0;
 
       if (!arec->conf->ref_count)
         conf_free(arec->conf);

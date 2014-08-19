@@ -404,6 +404,14 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
   para[parc] = ch;
 
+  if (msg_ptr->flags & MFLG_EXTRA)
+  {
+    /*
+     * XXX: This will have to go away after the command handler rewrite
+     */
+    para[++parc] = msg_ptr->extra;
+  }
+
   if (s)
   {
     if (paramcount > MAXPARA)

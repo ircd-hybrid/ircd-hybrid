@@ -16,6 +16,7 @@ ircd_SOURCES = auth.c            \
                conf.c            \
                conf_class.c      \
                conf_db.c         \
+               conf_pseudo.c     \
                conf_parser.y     \
                conf_lexer.l      \
                dbuf.c            \

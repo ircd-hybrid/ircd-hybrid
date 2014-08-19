@@ -37,6 +37,7 @@
 #include "list.h"
 #include "conf.h"
 #include "conf_class.h"
+#include "conf_pseudo.h"
 #include "event.h"
 #include "log.h"
 #include "client.h"	/* for UMODE_ALL only */
@@ -76,6 +77,7 @@ static struct
   {
     char buf[IRCD_BUFSIZE];
   } name,
+    nick,
     user,
     host,
     addr,
@@ -85,7 +87,10 @@ static struct
     cert,
     rpass,
     spass,
-    class;
+    class,
+    target,
+    prepend,
+    command;
 
   struct
   {
@@ -310,6 +315,7 @@ reset_block_state(void)
 %token  T_BOTS
 %token  T_CALLERID
 %token  T_CCONN
+%token  T_COMMAND
 %token  T_CLUSTER
 %token  T_DEAF
 %token  T_DEBUG
@@ -327,12 +333,13 @@ reset_block_state(void)
 %token  T_MAX_CLIENTS
 %token  T_NCHANGE
 %token  T_NONONREG
+%token  T_PREPEND
+%token  T_PSEUDO
 %token  T_RECVQ
 %token  T_REJ
 %token  T_RESTART
 %token  T_SERVER
 %token  T_SERVICE
-%token  T_SERVICES_NAME
 %token  T_SERVNOTICE
 %token  T_SET
 %token  T_SHARED
@@ -342,6 +349,7 @@ reset_block_state(void)
 %token  T_SPY
 %token  T_SSL
 %token  T_SSL_CIPHER_LIST
+%token  T_TARGET
 %token  T_UMODES
 %token  T_UNAUTH
 %token  T_UNDLINE
@@ -403,6 +411,7 @@ conf_item:        admin_entry
                 | gecos_entry
                 | modules_entry
                 | motd_entry
+                | pseudo_entry
                 | error ';'
                 | error '}'
         ;
@@ -917,6 +926,63 @@ motd_file: T_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
+};
+
+/***************************************************************************
+ * pseudo section
+ ***************************************************************************/
+pseudo_entry: T_PSEUDO
+{
+  if (conf_parser_ctx.pass == 2)
+    reset_block_state();
+} '{' pseudo_items '}' ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (!block_state.command.buf[0] ||
+      !block_state.name.buf[0] ||
+      !block_state.nick.buf[0] ||
+      !block_state.host.buf[0])
+    break;
+
+  pseudo_register(block_state.name.buf, block_state.nick.buf, block_state.host.buf,
+                  block_state.prepend.buf, block_state.command.buf);
+};
+
+pseudo_items: pseudo_items pseudo_item | pseudo_item;
+pseudo_item:  pseudo_command | pseudo_prepend | pseudo_target | error ';' ;
+
+pseudo_command: T_COMMAND '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    strlcpy(block_state.command.buf, yylval.string, sizeof(block_state.command.buf));
+};
+
+pseudo_prepend: T_PREPEND '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    strlcpy(block_state.prepend.buf, yylval.string, sizeof(block_state.prepend.buf));
+};
+
+pseudo_target: T_TARGET '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+  {
+    struct split_nuh_item nuh;
+
+    nuh.nuhmask  = yylval.string;
+    nuh.nickptr  = NULL;
+    nuh.userptr  = block_state.user.buf;
+    nuh.hostptr  = block_state.host.buf;
+    nuh.nicksize = 0;
+    nuh.usersize = sizeof(block_state.nick.buf);
+    nuh.hostsize = sizeof(block_state.host.buf);
+    split_nuh(&nuh);
+
+    strlcpy(block_state.nick.buf, nuh.userptr, sizeof(block_state.nick.buf));
+    strlcpy(block_state.host.buf, nuh.hostptr, sizeof(block_state.host.buf));
+  }
 };
 
 /***************************************************************************
@@ -2508,7 +2574,6 @@ general_item:       general_away_count |
                     general_gline_min_cidr6 |
                     general_stats_e_disabled |
                     general_max_watch |
-                    general_services_name |
                     general_cycle_on_host_change |
                     error;
 
@@ -2728,15 +2793,6 @@ general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
 general_max_targets: MAX_TARGETS '=' NUMBER ';'
 {
   ConfigGeneral.max_targets = $3;
-};
-
-general_services_name: T_SERVICES_NAME '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2 && valid_servname(yylval.string))
-  {
-    MyFree(ConfigGeneral.service_name);
-    ConfigGeneral.service_name = xstrdup(yylval.string);
-  }
 };
 
 general_ping_cookie: PING_COOKIE '=' TBOOL ';'

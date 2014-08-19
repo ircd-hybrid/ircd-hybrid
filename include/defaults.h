@@ -108,7 +108,6 @@
 /* ConfigServerInfo default values */
 #define NETWORK_NAME_DEFAULT "EFnet"             /* default for network_name */
 #define NETWORK_DESC_DEFAULT "Eris Free Network" /* default for network_desc */
-#define SERVICE_NAME_DEFAULT "service.someserver"
 
 #define GLINE_REQUEST_EXPIRE_DEFAULT 600
 

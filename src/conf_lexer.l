@@ -146,6 +146,7 @@ cidr_bitlen_ipv4            { return CIDR_BITLEN_IPV4; }
 cidr_bitlen_ipv6            { return CIDR_BITLEN_IPV6; }
 class                       { return CLASS; }
 cluster                     { return T_CLUSTER; }
+command                     { return T_COMMAND; }
 connect                     { return CONNECT; }
 connectfreq                 { return CONNECTFREQ; }
 cycle_on_host_change        { return CYCLE_ON_HOST_CHANGE; }
@@ -272,6 +273,8 @@ path                        { return PATH; }
 ping_cookie                 { return PING_COOKIE; }
 ping_time                   { return PING_TIME; }
 port                        { return PORT; }
+prepend                     { return T_PREPEND; }
+pseudo                      { return T_PSEUDO; }
 quarantine                  { return RESV; }
 random_idle                 { return RANDOM_IDLE; }
 reason                      { return REASON; }
@@ -293,7 +296,6 @@ server                      { return T_SERVER; }
 serverhide                  { return SERVERHIDE; }
 serverinfo                  { return SERVERINFO; }
 service                     { return T_SERVICE; }
-services_name               { return T_SERVICES_NAME; }
 servnotice                  { return T_SERVNOTICE; }
 set                         { return T_SET; }
 shared                      { return T_SHARED; }
@@ -320,6 +322,7 @@ stats_k_oper_only           { return STATS_K_OPER_ONLY; }
 stats_o_oper_only           { return STATS_O_OPER_ONLY; }
 stats_P_oper_only           { return STATS_P_OPER_ONLY; }
 stats_u_oper_only           { return STATS_U_OPER_ONLY; }
+target                      { return T_TARGET; }
 throttle_count              { return THROTTLE_COUNT; }
 throttle_time               { return THROTTLE_TIME; }
 tkline_expire_notices       { return TKLINE_EXPIRE_NOTICES; }

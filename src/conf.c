@@ -28,6 +28,7 @@
 #include "list.h"
 #include "ircd_defs.h"
 #include "conf.h"
+#include "conf_pseudo.h"
 #include "server.h"
 #include "resv.h"
 #include "channel.h"
@@ -868,7 +869,6 @@ set_default_conf(void)
 
   ConfigGeneral.away_count = 2;
   ConfigGeneral.away_time = 10;
-  ConfigGeneral.service_name = xstrdup(SERVICE_NAME_DEFAULT);
   ConfigGeneral.max_watch = WATCHSIZE_DEFAULT;
   ConfigGeneral.cycle_on_host_change = 1;
   ConfigGeneral.glines = 0;
@@ -931,9 +931,6 @@ validate_conf(void)
 
   if (ConfigServerInfo.network_desc == NULL)
     ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
-
-  if (ConfigGeneral.service_name == NULL)
-    ConfigGeneral.service_name = xstrdup(SERVICE_NAME_DEFAULT);
 
   ConfigGeneral.max_watch = IRCD_MAX(ConfigGeneral.max_watch, WATCHSIZE_MIN);
 }
@@ -1305,6 +1302,8 @@ clear_out_old_conf(void)
   /* clean out module paths */
   mod_clear_paths();
 
+  pseudo_clear();
+
   /* clean out ConfigServerInfo */
   MyFree(ConfigServerInfo.description);
   ConfigServerInfo.description = NULL;
@@ -1333,10 +1332,6 @@ clear_out_old_conf(void)
 
   /* clean out listeners */
   close_listeners();
-
-  /* clean out general */
-  MyFree(ConfigGeneral.service_name);
-  ConfigGeneral.service_name = NULL;
 }
 
 /* conf_add_class_to_conf()

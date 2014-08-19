@@ -91,6 +91,7 @@ struct Message
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, DUMMY, LAST
    */
   MessageHandler handlers[LAST_HANDLER_TYPE];
+  void *extra;
 };
 
 /*
@@ -99,6 +100,7 @@ struct Message
 #define   MFLG_SLOW             0x001   /* Command can be executed roughly
                                          * once per 2 seconds.
                                          */
+#define MFLG_EXTRA 0x002
 #define MAXPARA    15
 
 extern void parse(struct Client *, char *, char *);

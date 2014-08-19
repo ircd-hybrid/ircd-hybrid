@@ -366,12 +366,6 @@ m_resv_la_OBJECTS = $(am_m_resv_la_OBJECTS)
 m_resv_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_resv_la_LDFLAGS) $(LDFLAGS) -o $@
-m_services_la_LIBADD =
-am_m_services_la_OBJECTS = m_services.lo
-m_services_la_OBJECTS = $(am_m_services_la_OBJECTS)
-m_services_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_services_la_LDFLAGS) $(LDFLAGS) -o $@
 m_set_la_LIBADD =
 am_m_set_la_OBJECTS = m_set.lo
 m_set_la_OBJECTS = $(am_m_set_la_OBJECTS)
@@ -579,8 +573,7 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
 	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
-	$(m_resv_la_SOURCES) $(m_services_la_SOURCES) \
-	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_svsjoin_la_SOURCES) \
 	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
 	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
@@ -610,8 +603,7 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
 	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
-	$(m_resv_la_SOURCES) $(m_services_la_SOURCES) \
-	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_svsjoin_la_SOURCES) \
 	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
 	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
@@ -876,7 +868,6 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_restart.la   \
                       m_resv.la      \
                       m_set.la       \
-                      m_services.la  \
                       m_stats.la     \
                       m_svinfo.la    \
                       m_svsjoin.la   \
@@ -942,7 +933,6 @@ m_rehash_la_LDFLAGS = $(MODULE_FLAGS)
 m_restart_la_LDFLAGS = $(MODULE_FLAGS)
 m_resv_la_LDFLAGS = $(MODULE_FLAGS)
 m_set_la_LDFLAGS = $(MODULE_FLAGS)
-m_services_la_LDFLAGS = $(MODULE_FLAGS)
 m_stats_la_LDFLAGS = $(MODULE_FLAGS)
 m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsjoin_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1007,7 +997,6 @@ m_rehash_la_SOURCES = m_rehash.c
 m_restart_la_SOURCES = m_restart.c
 m_resv_la_SOURCES = m_resv.c
 m_set_la_SOURCES = m_set.c
-m_services_la_SOURCES = m_services.c
 m_stats_la_SOURCES = m_stats.c
 m_svinfo_la_SOURCES = m_svinfo.c
 m_svsjoin_la_SOURCES = m_svsjoin.c
@@ -1217,9 +1206,6 @@ m_restart.la: $(m_restart_la_OBJECTS) $(m_restart_la_DEPENDENCIES) $(EXTRA_m_res
 m_resv.la: $(m_resv_la_OBJECTS) $(m_resv_la_DEPENDENCIES) $(EXTRA_m_resv_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_resv_la_LINK) -rpath $(modulesdir) $(m_resv_la_OBJECTS) $(m_resv_la_LIBADD) $(LIBS)
 
-m_services.la: $(m_services_la_OBJECTS) $(m_services_la_DEPENDENCIES) $(EXTRA_m_services_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_services_la_LINK) -rpath $(modulesdir) $(m_services_la_OBJECTS) $(m_services_la_LIBADD) $(LIBS)
-
 m_set.la: $(m_set_la_OBJECTS) $(m_set_la_DEPENDENCIES) $(EXTRA_m_set_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_set_la_LINK) -rpath $(modulesdir) $(m_set_la_OBJECTS) $(m_set_la_LIBADD) $(LIBS)
 
@@ -1342,7 +1328,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_rehash.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_restart.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_resv.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_services.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_stats.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svinfo.Plo@am__quote@

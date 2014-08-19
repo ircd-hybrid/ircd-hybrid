@@ -146,9 +146,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, char *mask,
 static void
 who_global(struct Client *source_p, char *mask, int server_oper)
 {
-  struct Channel *chptr;
-  struct Client *target_p;
-  dlink_node *lp = NULL, *gcptr = NULL;
+  dlink_node *ptr = NULL;
   unsigned int maxmatches = WHO_MAXREPLIES;
   static time_t last_used = 0;
 
@@ -164,16 +162,16 @@ who_global(struct Client *source_p, char *mask, int server_oper)
   }
 
   /* First, list all matching invisible clients on common channels */
-  DLINK_FOREACH(lp, source_p->channel.head)
+  DLINK_FOREACH(ptr, source_p->channel.head)
   {
-    chptr = ((struct Membership *)lp->data)->chptr;
+    struct Channel *chptr = ((struct Membership *)ptr->data)->chptr;
     who_common_channel(source_p, chptr, mask, server_oper, &maxmatches);
   }
 
   /* Second, list all matching visible clients */
-  DLINK_FOREACH(gcptr, global_client_list.head)
+  DLINK_FOREACH(ptr, global_client_list.head)
   {
-    target_p = gcptr->data;
+    struct Client *target_p = ptr->data;
 
     if (!IsClient(target_p))
       continue;

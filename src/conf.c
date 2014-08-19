@@ -173,10 +173,8 @@ conf_free(struct MaskItem *conf)
   dlink_node *ptr = NULL, *ptr_next = NULL;
   dlink_list *list = NULL;
 
-  assert(conf->node.data);
-
   if ((list = map_to_list(conf->type)))
-    dlinkDelete(&conf->node, list);
+    dlinkFindDelete(list, conf);
 
   MyFree(conf->name);
 
@@ -1532,6 +1530,7 @@ clear_out_old_conf(void)
     DLINK_FOREACH_SAFE(ptr, next_ptr, (*iterator)->head)
     {
       conf = ptr->data;
+      conf->active = 0;
 
       dlinkDelete(&conf->node, map_to_list(conf->type));
 

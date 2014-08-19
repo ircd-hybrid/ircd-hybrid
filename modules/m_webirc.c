@@ -61,7 +61,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   if (!valid_hostname(parv[3]))
   {
-    sendto_one_notice(source_p, &me, ":CGI:IRC: Invalid hostname");
+    sendto_one_notice(source_p, &me, ":WEBIRC: Invalid hostname");
     return 0;
   }
 
@@ -74,19 +74,19 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   if (!IsConfWebIRC(conf))
   {
-    sendto_one_notice(source_p, &me, ":Not a CGI:IRC auth block");
+    sendto_one_notice(source_p, &me, ":Not a WEBIRC auth {} block");
     return 0;
   }
 
   if (EmptyString(conf->passwd))
   {
-    sendto_one_notice(source_p, &me, ":CGI:IRC auth blocks must have a password");
+    sendto_one_notice(source_p, &me, ":WEBIRC auth {} blocks must have a password");
     return 0;
   }
 
   if (!match_conf_password(parv[1], conf))
   {
-    sendto_one_notice(source_p, &me, ":CGI:IRC password incorrect");
+    sendto_one_notice(source_p, &me, ":WEBIRC password incorrect");
     return 0;
   }
 
@@ -98,7 +98,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   if (getaddrinfo(parv[4], NULL, &hints, &res))
   {
-    sendto_one_notice(source_p, &me, ":Invalid CGI:IRC IP %s", parv[4]);
+    sendto_one_notice(source_p, &me, ":Invalid WEBIRC IP %s", parv[4]);
     return 0;
   }
 
@@ -125,7 +125,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   }
 
   AddUMode(source_p, UMODE_WEBIRC);
-  sendto_one_notice(source_p, &me, ":CGI:IRC host/IP set to %s %s",
+  sendto_one_notice(source_p, &me, ":WEBIRC host/IP set to %s %s",
                     parv[3], parv[4]);
   return 0;
 }

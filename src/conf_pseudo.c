@@ -75,7 +75,7 @@ m_pseudo(struct Client *source_p, int parc, char *parv[])
   target_p = find_person(source_p, pseudo->nick);
   server_p = hash_find_server(pseudo->serv);
 
-  if (target_p && server_p && (target_p->servptr == server_p))
+  if (target_p && server_p && (target_p->servptr == server_p) && !IsMe(server_p))
   {
     sendto_one(target_p, ":%s PRIVMSG %s :%s",
                source_p->id, target_p->id, msg);

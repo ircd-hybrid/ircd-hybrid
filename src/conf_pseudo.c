@@ -112,7 +112,7 @@ pseudo_register(const char *name, const char *nick,
   msg->args_max = 2;
   msg->flags = MFLG_EXTRA|MFLG_SLOW;
   msg->extra = pseudo;
-  msg->handlers[UNREGISTERED_HANDLER] = m_ignore;
+  msg->handlers[UNREGISTERED_HANDLER] = m_unregistered;
   msg->handlers[CLIENT_HANDLER] = m_pseudo;
   msg->handlers[SERVER_HANDLER] = m_ignore;
   msg->handlers[ENCAP_HANDLER] = m_ignore;

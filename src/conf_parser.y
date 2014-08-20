@@ -951,12 +951,18 @@ pseudo_entry: T_PSEUDO
 };
 
 pseudo_items: pseudo_items pseudo_item | pseudo_item;
-pseudo_item:  pseudo_command | pseudo_prepend | pseudo_target | error ';' ;
+pseudo_item:  pseudo_command | pseudo_prepend | pseudo_name | pseudo_target | error ';' ;
 
 pseudo_command: T_COMMAND '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.command.buf, yylval.string, sizeof(block_state.command.buf));
+};
+
+pseudo_name: NAME '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 };
 
 pseudo_prepend: T_PREPEND '=' QSTRING ';'

@@ -41,12 +41,12 @@
 struct pseudo_cmd
 {
   dlink_node node;
-  struct Message *msg;
-  char name[NICKLEN + 1];
-  char nick[NICKLEN + 1];
-  char serv[HOSTLEN + 1];
-  char prep[IRCD_BUFSIZE];
-  char cmmd[IRCD_BUFSIZE];
+  struct Message msg;
+  char *name;
+  char *nick;
+  char *serv;
+  char *prep;
+  char *command;
 };
 
 static dlink_list pseudo_cmd_list;
@@ -55,7 +55,7 @@ static int
 m_pseudo(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE] = "";
-  struct pseudo_cmd *pseudo = NULL;
+  const struct pseudo_cmd *pseudo = (const struct pseudo_cmd *)parv[1];
   struct Client *target_p = NULL;
   struct Client *server_p = NULL;
   const char *msg = parv[parc - 1];
@@ -66,9 +66,7 @@ m_pseudo(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  pseudo = (struct pseudo_cmd *)parv[1];
-
-  if (pseudo->prep[0])
+  if (!EmptyString(pseudo->prep))
   {
     snprintf(buffer, sizeof(buffer), "%s%s", pseudo->prep, msg);
     msg = buffer;
@@ -91,36 +89,33 @@ m_pseudo(struct Client *source_p, int parc, char *parv[])
 void
 pseudo_register(const char *name, const char *nick,
                 const char *serv, const char *prep,
-                const char *cmmd)
+                const char *command)
 {
-  struct Message *msg = NULL;
-  struct pseudo_cmd *pseudo = NULL;
+  struct pseudo_cmd *cmd = NULL;
 
-  if (find_command(cmmd))
+  if (find_command(command))
     return;
 
-  pseudo = MyCalloc(sizeof(struct pseudo_cmd));
-  strlcpy(pseudo->name, name, sizeof(pseudo->name));
-  strlcpy(pseudo->nick, nick, sizeof(pseudo->nick));
-  strlcpy(pseudo->serv, serv, sizeof(pseudo->serv));
-  strlcpy(pseudo->prep, prep, sizeof(pseudo->prep));
-  strlcpy(pseudo->cmmd, cmmd, sizeof(pseudo->cmmd));
-  dlinkAdd(pseudo, &pseudo->node, &pseudo_cmd_list);
+  cmd = MyCalloc(sizeof(*cmd));
+  cmd->name = xstrdup(name);
+  cmd->nick = xstrdup(nick);
+  cmd->serv = xstrdup(serv);
+  cmd->prep = xstrdup(prep);
+  cmd->command = xstrdup(command);
 
-  msg = MyCalloc(sizeof(struct Message));
-  msg->cmd = pseudo->cmmd;
-  msg->args_max = 2;
-  msg->flags = MFLG_EXTRA|MFLG_SLOW;
-  msg->extra = pseudo;
-  msg->handlers[UNREGISTERED_HANDLER] = m_unregistered;
-  msg->handlers[CLIENT_HANDLER] = m_pseudo;
-  msg->handlers[SERVER_HANDLER] = m_ignore;
-  msg->handlers[ENCAP_HANDLER] = m_ignore;
-  msg->handlers[OPER_HANDLER] = m_pseudo;
-  msg->handlers[DUMMY_HANDLER] = m_ignore;
+  cmd->msg.cmd = cmd->command;
+  cmd->msg.args_max = 2;
+  cmd->msg.flags = MFLG_EXTRA|MFLG_SLOW;
+  cmd->msg.extra = cmd;
+  cmd->msg.handlers[UNREGISTERED_HANDLER] = m_unregistered;
+  cmd->msg.handlers[CLIENT_HANDLER] = m_pseudo;
+  cmd->msg.handlers[SERVER_HANDLER] = m_ignore;
+  cmd->msg.handlers[ENCAP_HANDLER] = m_ignore;
+  cmd->msg.handlers[OPER_HANDLER] = m_pseudo;
+  cmd->msg.handlers[DUMMY_HANDLER] = m_ignore;
+  dlinkAdd(cmd, &cmd->node, &pseudo_cmd_list);
 
-  mod_add_cmd(msg);
-  pseudo->msg = msg;
+  mod_add_cmd(&cmd->msg);
 }
 
 void
@@ -130,12 +125,17 @@ pseudo_clear(void)
 
   DLINK_FOREACH_SAFE(ptr, ptr_next, pseudo_cmd_list.head)
   {
-    struct pseudo_cmd *pseudo = ptr->data;
-    assert(find_command(pseudo->cmmd));
+    struct pseudo_cmd *cmd = ptr->data;
+    assert(find_command(cmd->msg.cmd));
 
-    mod_del_cmd(pseudo->msg);
-    dlinkDelete(&pseudo->node, &pseudo_cmd_list);
-    MyFree(pseudo->msg);
-    MyFree(pseudo);
+    mod_del_cmd(&cmd->msg);
+    dlinkDelete(&cmd->node, &pseudo_cmd_list);
+
+    MyFree(cmd->name);
+    MyFree(cmd->nick);
+    MyFree(cmd->serv);
+    MyFree(cmd->prep);
+    MyFree(cmd->command);
+    MyFree(cmd);
   }
 }

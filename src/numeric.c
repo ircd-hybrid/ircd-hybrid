@@ -494,7 +494,7 @@ static const char *const replies[] =
 /* 461 ERR_NEEDMOREPARAMS */ "%s :Not enough parameters",
 /* 462 ERR_ALREADYREGISTRED */ ":You may not reregister",
 /* 463 */ NULL,
-/* 464 ERR_PASSWDMISMATCH */ ":Password Incorrect",
+/* 464 ERR_PASSWDMISMATCH */ ":Password incorrect",
 /* 465 ERR_YOUREBANNEDCREEP */ ":You are banned from this server- %s",
 /* 466 */ NULL,
 /* 467 */ NULL,

@@ -6,6 +6,8 @@ o) A topic mask can now be specified within the /list options
 o) All users may now see channel modes in the /list reply
 o) Fixed bug where "NOTICE +#somechan" did allow bypassing resv{} channels,
    or channels that are set +c (no control codes)
+o) pseudo {} blocks also known as service aliases have been implemented.
+   See doc/reference.conf for more information.
 
 
 -- Noteworthy changes in version 8.2.0rc2 (2014-08-03)

@@ -470,7 +470,7 @@ static const char *const replies[] =
 /* 437 ERR_UNAVAILRESOURCE */ "%s :Nick/channel is temporarily unavailable",
 /* 438 ERR_NICKTOOFAST */ "%s :Nick change too fast. Please wait %u seconds.",
 /* 439 */ NULL,
-/* 440 ERR_SERVICESDOWN */ "%s :Services is currently down.",
+/* 440 ERR_SERVICESDOWN */ "%s :Services are currently unavailable.",
 /* 441 ERR_USERNOTINCHANNEL */ "%s %s :They aren't on that channel",
 /* 442 ERR_NOTONCHANNEL */ "%s :You're not on that channel",
 /* 443 ERR_USERONCHANNEL */ "%s %s :is already on channel",

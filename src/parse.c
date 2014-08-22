@@ -307,8 +307,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
     if (*sender && IsServer(client_p))
     {
-      if ((from = find_person(client_p, sender)) == NULL)
-        from = hash_find_server(sender);
+      if ((from = hash_find_id(sender)) == NULL)
+        from = hash_find_client(sender);
 
       /*
        * Hmm! If the client corresponding to the prefix is not found--what is

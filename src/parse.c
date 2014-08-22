@@ -102,7 +102,7 @@ static struct MessageTree
  * side effects -
  */
 static void
-parse_remove_unknown(struct Client *client_p, char *lsender, char *lbuffer)
+parse_remove_unknown(struct Client *client_p, const char *lsender, char *lbuffer)
 {
   /*
    * Do kill if it came from a server because it means there is a ghost
@@ -297,7 +297,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
      * Copy the prefix to 'sender' assuming it terminates
      * with SPACE (or NULL, which is an error, though).
      */
-    char *sender = ++ch;
+    const char *sender = ++ch;
 
     if ((s = strchr(ch, ' ')))
     {

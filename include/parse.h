@@ -74,7 +74,6 @@ typedef int (*MessageHandler)(struct Client *, int, char *[]);
 struct Message
 {
   const char *cmd;
-  void *extra;
   unsigned int count;      /* number of times command used */
   unsigned int rcount;     /* number of times command used by server */
   unsigned int args_min; /* at least this many args must be passed
@@ -92,6 +91,7 @@ struct Message
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, DUMMY, LAST
    */
   MessageHandler handlers[LAST_HANDLER_TYPE];
+  void *extra;
 };
 
 /*

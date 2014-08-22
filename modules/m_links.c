@@ -174,7 +174,7 @@ ms_links(struct Client *source_p, int parc, char *parv[])
 
 static struct Message links_msgtab =
 {
-  "LINKS", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "LINKS", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_links, ms_links, m_ignore, mo_links, m_ignore }
 };
 

@@ -62,7 +62,7 @@ ms_certfp(struct Client *source_p, int parc, char *parv[])
 
 static struct Message certfp_msgtab =
 {
-  "CERTFP", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "CERTFP", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_certfp, m_ignore, m_ignore, m_ignore }
 };
 

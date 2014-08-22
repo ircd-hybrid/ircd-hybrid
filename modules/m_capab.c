@@ -69,7 +69,7 @@ mr_capab(struct Client *source_p, int parc, char *parv[])
 
 static struct Message capab_msgtab =
 {
-  "CAPAB", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "CAPAB", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { mr_capab, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
 };
 

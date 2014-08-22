@@ -74,6 +74,7 @@ typedef int (*MessageHandler)(struct Client *, int, char *[]);
 struct Message
 {
   const char *cmd;
+  void *extra;
   unsigned int count;      /* number of times command used */
   unsigned int rcount;     /* number of times command used by server */
   unsigned int args_min; /* at least this many args must be passed
@@ -99,6 +100,7 @@ struct Message
 #define   MFLG_SLOW             0x001   /* Command can be executed roughly
                                          * once per 2 seconds.
                                          */
+#define MFLG_EXTRA 0x002
 #define MAXPARA    15
 
 extern void parse(struct Client *, char *, char *);

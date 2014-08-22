@@ -194,7 +194,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
 
 static struct Message squit_msgtab =
 {
-  "SQUIT", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
+  "SQUIT", NULL, 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_squit, m_ignore, mo_squit, m_ignore }
 };
 

@@ -171,7 +171,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svsmode_msgtab =
 {
-  "SVSMODE", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
+  "SVSMODE", NULL, 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_svsmode, m_ignore, m_ignore, m_ignore }
 };
 

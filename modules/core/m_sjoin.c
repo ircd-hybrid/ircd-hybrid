@@ -745,7 +745,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 
 static struct Message sjoin_msgtab =
 {
-  "SJOIN", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
+  "SJOIN", NULL, 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_ignore, ms_sjoin, m_ignore, m_ignore, m_ignore }
 };
 

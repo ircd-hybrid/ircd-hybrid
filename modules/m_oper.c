@@ -160,7 +160,7 @@ mo_oper(struct Client *source_p, int parc, char *parv[])
 
 static struct Message oper_msgtab =
 {
-  "OPER", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "OPER", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_oper, m_ignore, m_ignore, mo_oper, m_ignore }
 };
 

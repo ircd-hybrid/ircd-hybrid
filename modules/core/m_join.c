@@ -434,7 +434,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
 
 static struct Message join_msgtab =
 {
-  "JOIN", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "JOIN", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_join, ms_join, m_ignore, m_join, m_ignore }
 };
 

@@ -1621,7 +1621,7 @@ ms_stats(struct Client *source_p, int parc, char *parv[])
 
 static struct Message stats_msgtab =
 {
-  "STATS", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "STATS", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_stats, ms_stats, m_ignore, ms_stats, m_ignore }
 };
 

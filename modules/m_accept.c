@@ -189,7 +189,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 
 static struct Message accept_msgtab =
 {
-  "ACCEPT", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "ACCEPT", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_accept, m_ignore, m_ignore, m_accept, m_ignore }
 };
 

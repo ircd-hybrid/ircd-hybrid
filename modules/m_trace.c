@@ -368,7 +368,7 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
 
 static struct Message trace_msgtab =
 {
-  "TRACE", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "TRACE", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_trace, ms_trace, m_ignore, mo_trace, m_ignore }
 };
 

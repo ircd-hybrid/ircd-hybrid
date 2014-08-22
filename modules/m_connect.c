@@ -282,7 +282,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 
 static struct Message connect_msgtab =
 {
-  "CONNECT", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "CONNECT", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_connect, m_ignore, mo_connect, m_ignore }
 };
 

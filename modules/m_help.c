@@ -160,7 +160,7 @@ mo_help(struct Client *source_p, int parc, char *parv[])
 
 static struct Message help_msgtab =
 {
-  "HELP", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "HELP", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_help, m_ignore, m_ignore, mo_help, m_ignore }
 };
 

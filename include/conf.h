@@ -212,8 +212,6 @@ struct
   const char *dlinefile;
   const char *resvfile;
 
-  char *service_name;
-
   unsigned int gline_min_cidr;
   unsigned int gline_min_cidr6;
   unsigned int dots_in_ident;

@@ -132,7 +132,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 
 static struct Message knock_msgtab =
 {
-  "KNOCK", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "KNOCK", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_knock, m_knock, m_ignore, m_knock, m_ignore }
 };
 

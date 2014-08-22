@@ -70,7 +70,7 @@ m_part(struct Client *source_p, int parc, char *parv[])
 
 static struct Message part_msgtab =
 {
-  "PART", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "PART", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_part, m_part, m_ignore, m_part, m_ignore }
 };
 

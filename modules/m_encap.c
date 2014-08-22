@@ -93,7 +93,7 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
 
 static struct Message encap_msgtab =
 {
-  "ENCAP", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "ENCAP", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_encap, m_ignore, m_ignore, m_ignore }
 };
 

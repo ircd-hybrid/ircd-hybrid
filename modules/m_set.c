@@ -500,7 +500,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
 
 static struct Message set_msgtab =
 {
-  "SET", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "SET", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_set, m_ignore }
 };
 

@@ -83,7 +83,7 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
 
 static struct Message tmode_msgtab =
 {
-  "TMODE", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
+  "TMODE", NULL, 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_tmode, m_ignore, m_ignore, m_ignore }
 };
 

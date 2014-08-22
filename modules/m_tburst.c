@@ -114,7 +114,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
 
 static struct Message tburst_msgtab =
 {
-  "TBURST", 0, 0, 6, MAXPARA, MFLG_SLOW, 0,
+  "TBURST", NULL, 0, 0, 6, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_tburst, m_ignore, m_ignore, m_ignore }
 };
 

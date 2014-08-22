@@ -215,7 +215,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
 
 static struct Message invite_msgtab =
 {
-  "INVITE", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
+  "INVITE", NULL, 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_invite, ms_invite, m_ignore, m_invite, m_ignore }
 };
 

@@ -280,7 +280,7 @@ me_xline(struct Client *source_p, int parc, char *parv[])
 
 static struct Message xline_msgtab =
 {
-  "XLINE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "XLINE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_xline, me_xline, mo_xline, m_ignore }
 };
 

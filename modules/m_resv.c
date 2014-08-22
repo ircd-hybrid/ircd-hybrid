@@ -251,7 +251,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
 
 static struct Message resv_msgtab =
 {
-  "RESV", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "RESV", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_not_oper, ms_resv, me_resv, mo_resv, m_ignore }
 };
 

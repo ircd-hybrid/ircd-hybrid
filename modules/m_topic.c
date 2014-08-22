@@ -185,7 +185,7 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
 
 static struct Message topic_msgtab =
 {
-  "TOPIC", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "TOPIC", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_topic, ms_topic, m_ignore, m_topic, m_ignore }
 };
 

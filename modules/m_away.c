@@ -139,7 +139,7 @@ ms_away(struct Client *source_p, int parc, char *parv[])
 
 static struct Message away_msgtab =
 {
-  "AWAY", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "AWAY", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_away, ms_away, m_ignore, m_away, m_ignore }
 };
 

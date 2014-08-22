@@ -405,7 +405,7 @@ m_cap(struct Client *source_p, int parc, char *parv[])
 
 static struct Message cap_msgtab =
 {
-  "CAP", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "CAP", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_cap, m_cap, m_ignore, m_ignore, m_cap, m_ignore }
 };
 

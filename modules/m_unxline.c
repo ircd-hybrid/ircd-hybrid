@@ -168,7 +168,7 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
 
 static struct Message unxline_msgtab =
 {
-  "UNXLINE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "UNXLINE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_unxline, m_ignore, mo_unxline, m_ignore }
 };
 

@@ -755,7 +755,7 @@ ms_info(struct Client *source_p, int parc, char *parv[])
 
 static struct Message info_msgtab =
 {
-  "INFO", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "INFO", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_info, ms_info, m_ignore, ms_info, m_ignore }
 };
 

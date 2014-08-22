@@ -105,7 +105,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svskill_msgtab =
 {
-  "SVSKILL", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "SVSKILL", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_svskill, m_ignore, m_ignore, m_ignore }
 };
 

@@ -514,13 +514,13 @@ mo_gungline(struct Client *source_p, int parc, char *parv[])
  */
 static struct Message gline_msgtab =
 {
-  "GLINE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "GLINE", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_gline, m_ignore, mo_gline, m_ignore }
 };
 
 static struct Message ungline_msgtab =
 {
-  "GUNGLINE", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "GUNGLINE", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, m_ignore, me_gungline, mo_gungline, m_ignore }
 };
 

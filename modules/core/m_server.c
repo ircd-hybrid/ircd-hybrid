@@ -829,13 +829,13 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
 static struct Message server_msgtab =
 {
-  "SERVER", 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
+  "SERVER", NULL, 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
   { mr_server, m_registered, m_ignore, m_ignore, m_registered, m_ignore }
 };
 
 static struct Message sid_msgtab =
 {
-  "SID", 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
+  "SID", NULL, 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_sid, m_ignore, m_ignore, m_ignore }
 };
 

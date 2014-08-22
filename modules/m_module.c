@@ -257,7 +257,7 @@ mo_module(struct Client *source_p, int parc, char *parv[])
 
 static struct Message module_msgtab =
 {
-  "MODULE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "MODULE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_module, m_ignore }
 };
 

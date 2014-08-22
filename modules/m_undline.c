@@ -190,7 +190,7 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
 
 static struct Message undline_msgtab =
 {
-  "UNDLINE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "UNDLINE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_undline, m_ignore, mo_undline, m_ignore }
 };
 

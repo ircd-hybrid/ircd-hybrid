@@ -104,7 +104,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
 
 static struct Message rehash_msgtab =
 {
-  "REHASH", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "REHASH", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_rehash, m_ignore }
 };
 

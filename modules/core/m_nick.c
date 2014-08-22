@@ -842,13 +842,13 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
 
 static struct Message nick_msgtab =
 {
-  "NICK", 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
+  "NICK", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
   { mr_nick, m_nick, ms_nick, m_ignore, m_nick, m_ignore }
 };
 
 static struct Message uid_msgtab =
 {
-  "UID", 0, 0, 10, MAXPARA, MFLG_SLOW, 0,
+  "UID", NULL, 0, 0, 10, MAXPARA, MFLG_SLOW, 0,
   { m_ignore, m_ignore, ms_uid, m_ignore, m_ignore, m_ignore }
 };
 

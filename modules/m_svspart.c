@@ -93,7 +93,7 @@ ms_svspart(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svspart_msgtab =
 {
-  "SVSPART", 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
+  "SVSPART", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_ignore, ms_svspart, m_ignore, m_ignore, m_ignore }
 };
 

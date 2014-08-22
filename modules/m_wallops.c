@@ -96,7 +96,7 @@ ms_wallops(struct Client *source_p, int parc, char *parv[])
 
 static struct Message wallops_msgtab =
 {
-  "WALLOPS", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "WALLOPS", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_wallops, m_ignore, mo_wallops, m_ignore }
 };
 

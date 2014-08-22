@@ -103,7 +103,7 @@ ms_locops(struct Client *source_p, int parc, char *parv[])
 
 static struct Message locops_msgtab =
 {
-  "LOCOPS", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "LOCOPS", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_locops, m_ignore, mo_locops, m_ignore }
 };
 

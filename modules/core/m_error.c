@@ -86,7 +86,7 @@ ms_error(struct Client *source_p, int parc, char *parv[])
 
 static struct Message error_msgtab =
 {
-  "ERROR", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
+  "ERROR", NULL, 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
   { mr_error, m_ignore, ms_error, m_ignore, m_ignore, m_ignore }
 };
 

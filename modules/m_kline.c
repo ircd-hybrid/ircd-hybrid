@@ -295,7 +295,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
 
 static struct Message kline_msgtab =
 {
-  "KLINE", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "KLINE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, ms_kline, me_kline, mo_kline, m_ignore }
 };
 

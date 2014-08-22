@@ -334,7 +334,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
 
 static struct Message who_msgtab =
 {
-  "WHO", 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
+  "WHO", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_who, m_ignore, m_ignore, m_who, m_ignore }
 };
 

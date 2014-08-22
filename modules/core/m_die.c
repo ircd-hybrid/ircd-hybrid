@@ -78,7 +78,7 @@ mo_die(struct Client *source_p, int parc, char *parv[])
 
 static struct Message die_msgtab =
 {
-  "DIE", 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
+  "DIE", NULL, 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
   { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_die, m_ignore }
 };
 

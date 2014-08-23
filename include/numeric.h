@@ -106,7 +106,6 @@ enum irc_numerics
   RPL_WHOISCERTFP          = 276,
   RPL_ACCEPTLIST           = 281,
   RPL_ENDOFACCEPT          = 282,
-  RPL_NEWHOSTIS            = 285,
   RPL_AWAY                 = 301,
   RPL_USERHOST             = 302,
   RPL_ISON                 = 303,
@@ -161,6 +160,7 @@ enum irc_numerics
   RPL_REHASHING            = 382,
   RPL_RSACHALLENGE         = 386,
   RPL_TIME                 = 391,
+  RPL_VISIBLEHOST          = 396,
 
   /*
    * Errors are in the range from 400-599 currently and are grouped by what

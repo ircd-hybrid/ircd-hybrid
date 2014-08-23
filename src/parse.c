@@ -404,7 +404,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
   para[parc] = ch;
 
-  if (msg_ptr->flags & MFLG_EXTRA)
+  if (msg_ptr && (msg_ptr->flags & MFLG_EXTRA))
   {
     /*
      * XXX: This will have to go away after the command handler rewrite

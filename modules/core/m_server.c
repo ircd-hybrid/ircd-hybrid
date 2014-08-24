@@ -705,7 +705,7 @@ ms_server(struct Client *client_p, struct Client *source_p,
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, MASK_IP), name);
     sendto_one(client_p, "ERROR :Bogus server name introduced");
-    exit_client(client_p, &me, "Bogus server name intoduced");
+    exit_client(client_p, &me, "Bogus server name introduced");
     return 0;
   }
 
@@ -892,7 +892,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, MASK_IP), parv[1]);
     sendto_one(client_p, "ERROR :Bogus server name introduced");
-    exit_client(client_p, &me, "Bogus server name intoduced");
+    exit_client(client_p, &me, "Bogus server name introduced");
     return 0;
   }
 
@@ -905,7 +905,7 @@ ms_sid(struct Client *client_p, struct Client *source_p,
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(client_p, MASK_IP), parv[3]);
     sendto_one(client_p, "ERROR :Bogus server ID introduced");
-    exit_client(client_p, &me, "Bogus server ID intoduced");
+    exit_client(client_p, &me, "Bogus server ID introduced");
     return 0;
   }
 

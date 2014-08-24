@@ -1,3 +1,111 @@
+-- Noteworthy changes in version 8.2.0 (2014-08-24)
+o) Successful operator logins are now announced globally via GLOBOPS
+o) Cleanups and improvements to the resolver code
+o) Cleanups and improvements to the poll() I/O event notification support
+o) A topic mask can now be specified within the /list options
+o) All users may now see channel modes in the /list reply
+o) Fixed bug where "NOTICE +#somechan" did allow bypassing resv{} channels,
+   or channels that are set +c (no control codes)
+o) pseudo {} blocks also known as service aliases have been implemented.
+   See doc/reference.conf for more information.
+o) Removed general::services_name configuration option. This is now no longer needed.
+
+
+-- Noteworthy changes in version 8.2.0rc2 (2014-08-03)
+o) Improved AWAY throttling to allow for better fine-tuning. See the
+   newly added 'away_count' and 'away_time' configuration directives
+   in the general {} block
+o) Support for the select() I/O event notification has been dropped
+o) Minor code cleanups and improvements
+
+
+-- Noteworthy changes in version 8.2.0rc1 (2014-07-20)
+o) Miscellaneous code cleanups and stabilization fixes
+o) ./configure now requires OpenSSL 0.9.8o or above in order
+   to enable TLS/SSL support
+
+
+-- Noteworthy changes in version 8.2.0beta4 (2014-07-06)
+o) Channel halfops are now an integral part of ircd-hybrid
+   and can't be disabled anymore
+o) Many code cleanups and improvements
+o) Added flood control for the INVITE command. See channel {} block in reference.conf
+o) Changed flood control logic for the KNOCK command. See channel {} block in reference.conf
+o) INVITE without any parameters now shows a list of channels a client is invited to
+o) The OPERWALL command has been removed. Use GLOBOPS instead
+o) Added 'max_channels' to class {} blocks
+o) Added 'throttle_count' configuration option to the general {} block
+o) Added 'ssl_message_digest_algorithm' configuration option to serverinfo {} block.
+   See doc/reference.conf for more information.
+o) Added support for Elliptic Curve Diffie-Hellman (ECDH). Also an elliptic curve can be
+   specified via the serverinfo::ssl_dh_elliptic_curve configuration option.
+o) Removed 'ssl_server_method' and 'ssl_client_method' configuration options.
+   ircd now only allows TLSv1, TLSv1.1 and TLSv1.2 protocols depending
+   on the OpenSSL version. SSLv3 is no longer supported.
+
+
+-- Noteworthy changes in version 8.2.0beta3 (2014-05-26)
+o) Code cleanups/performance improvements
+
+
+-- Noteworthy changes in version 8.2.0beta2 (2014-05-15)
+########################################################################
+o) IMPORTANT: renamed general::warn_no_nline configuration directive to
+   general::warn_no_connect_block
+########################################################################
+o) Fixed bug with /whois not showing a list of channel names as expected
+o) Added usermode +q which hides idle and signon time in WHOIS
+o) Added usermode +p which hides channel list in WHOIS
+
+
+-- Noteworthy changes in version 8.2.0beta1 (2014-04-29)
+o) TS6 is now mandatory. ircd is no longer backwards compatible with TS5
+   and below.
+o) SVSJOIN and SVSPART has been added
+o) Major code cleanups and refactoring. Improved overall performance
+o) /INFO now also reports MPATH (path to main motd (Message of the Day) file)
+   and SPATH (Path to server executable)
+o) Updated several help files
+
+
+-- Noteworthy changes in version 8.1.20 (2014-07-20)
+o) Fixed XLINE not working as expected
+o) Fixed build with LibreSSL which hasn't compression support
+o) Miscellaneous stabilization and cosmetical fixes
+o) EGD support has been dropped
+
+
+-- Noteworthy changes in version 8.1.19 (2014-07-05)
+o) Fixed EOB logic for remote servers
+o) Fixed bug where opers that have the +g/+G/+R umodes set won't receive server
+   notices for remote CONNECT/KLINE/DLINE/XLINE/RESV attempts
+o) Sending messages to user@server to local targets is now no longer possible,
+   as this was an easy way to bypass +R/+G/+g user modes.
+o) Fixed splicode logic so SPLITNUM now works as expected
+o) Fixed UNDLINE not to require the IP address to be prepended with *@ 
+
+
+-- Noteworthy changes in version 8.1.18 (2014-06-09)
+o) Fixed CAP issue for certain clients
+o) Fixed bug where "STATS p" would show an invalid amount of irc-operators
+   in case there are any +H opers
+o) irc-operators may now no longer set a channel +O if they are only halfops (%)
+o) Channel halfops (%) may now no longer (de)halfop other channel members
+o) Channel halfops (%) may now no longer KICK other channel halfops
+o) Make sure general::stats_e_disabled gets reset via /rehash
+o) Fixed compile warnings; code cleanups
+o) Fixed bug where the configuration parser wouldn't truncate the network name
+   if general::network_name contains spaces
+
+
+-- Noteworthy changes in version 8.1.17 (2014-05-01)
+o) Fixed possible WATCH core
+o) Fixed bug where the configuration parser wouldn't take time units
+   into consideration for the join_flood_time and throttle_time
+   configuration options
+o) Minor /list optimization
+
+
 -- Noteworthy changes in version 8.1.16 (2014-04-20)
 o) Fixed undefined behaviour with crypt() returning NULL
    since glibc2.17 in certain cases

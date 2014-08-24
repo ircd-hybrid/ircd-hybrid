@@ -512,7 +512,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(source_p, MASK_IP), source_p->id);
     sendto_one(source_p, "ERROR :Bogus server ID introduced");
-    exit_client(source_p, "Bogus server ID intoduced");
+    exit_client(source_p, "Bogus server ID introduced");
     return 0;
   }
 
@@ -670,7 +670,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, MASK_IP), parv[1]);
     sendto_one(client_p, "ERROR :Bogus server name introduced");
-    exit_client(client_p, "Bogus server name intoduced");
+    exit_client(client_p, "Bogus server name introduced");
     return 0;
   }
 
@@ -683,7 +683,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(client_p, MASK_IP), parv[3]);
     sendto_one(client_p, "ERROR :Bogus server ID introduced");
-    exit_client(client_p, "Bogus server ID intoduced");
+    exit_client(client_p, "Bogus server ID introduced");
     return 0;
   }
 

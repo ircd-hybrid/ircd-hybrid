@@ -962,12 +962,8 @@ report_Klines(struct Client *source_p, int tkline)
           (tkline && !conf->until))
         continue;
 
-      if (HasUMode(source_p, UMODE_OPER))
-        sendto_one_numeric(source_p, &me, RPL_STATSKLINE, c, conf->host, conf->user,
-                           conf->reason);
-      else
-        sendto_one_numeric(source_p, &me, RPL_STATSKLINE, c, conf->host, conf->user,
-                           conf->reason);
+      sendto_one_numeric(source_p, &me, RPL_STATSKLINE, c, conf->host, conf->user,
+                         conf->reason);
     }
   }
 }

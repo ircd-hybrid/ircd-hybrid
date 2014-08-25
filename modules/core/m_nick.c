@@ -741,7 +741,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
   if (check_clean_nick(source_p, parv[1], source_p->servptr))
     return 0;
 
-  /* If the nick doesnt exist, allow it and process like normal */
+  /* If the nick doesn't exist, allow it and process like normal */
   if ((target_p = hash_find_client(parv[1])) == NULL)
     change_remote_nick(source_p, parv);
   else if (IsUnknown(target_p))

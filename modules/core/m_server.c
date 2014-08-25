@@ -328,10 +328,10 @@ server_estab(struct Client *client_p)
   hash_add_client(client_p);
   hash_add_id(client_p);
 
-  /* doesnt duplicate client_p->serv if allocated this struct already */
+  /* Doesn't duplicate client_p->serv if allocated this struct already */
   make_server(client_p);
 
-  /* fixing eob timings.. -gnp */
+  /* Fixing eob timings.. -gnp */
   client_p->localClient->firsttime = CurrentTime;
 
   if (find_matching_name_conf(CONF_SERVICE, client_p->name, NULL, NULL, 0))

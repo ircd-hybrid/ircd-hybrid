@@ -213,6 +213,9 @@
 /* Size of the client mempool chunk. */
 #undef MP_CHUNK_SIZE_CLIENT
 
+/* Size of the connection mempool chunk. */
+#undef MP_CHUNK_SIZE_CONNECTION
+
 /* Size of the dbuf mempool chunk. */
 #undef MP_CHUNK_SIZE_DBUF
 
@@ -224,9 +227,6 @@
 
 /* Size of the ip_entry mempool chunk. */
 #undef MP_CHUNK_SIZE_IP_ENTRY
-
-/* Size of the local client mempool chunk. */
-#undef MP_CHUNK_SIZE_LCLIENT
 
 /* Size of the channel-member mempool chunk. */
 #undef MP_CHUNK_SIZE_MEMBER

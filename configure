@@ -13884,7 +13884,7 @@ $as_echo "#define MP_CHUNK_SIZE_BAN 1024*1024" >>confdefs.h
 $as_echo "#define MP_CHUNK_SIZE_CLIENT 1024*1024" >>confdefs.h
 
 
-$as_echo "#define MP_CHUNK_SIZE_LCLIENT 512*1024" >>confdefs.h
+$as_echo "#define MP_CHUNK_SIZE_CONNECTION 512*1024" >>confdefs.h
 
 
 $as_echo "#define MP_CHUNK_SIZE_DNODE 32*1024" >>confdefs.h

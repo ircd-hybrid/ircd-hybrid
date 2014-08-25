@@ -393,7 +393,7 @@ static const char *const replies[] =
 /* 360 */ NULL,
 /* 361 */ NULL,
 /* 362 RPL_CLOSING */ "%s :Closed. Status = %d",
-/* 363 RPL_CLOSEEND */ "%u: Connections Closed",
+/* 363 RPL_CLOSEEND */ "%u: Connections closed",
 /* 364 RPL_LINKS */ "%s %s :%u %s",
 /* 365 RPL_ENDOFLINKS */ "%s :End of /LINKS list.",
 /* 366 RPL_ENDOFNAMES */ "%s :End of /NAMES list.",
@@ -443,8 +443,8 @@ static const char *const replies[] =
 /* 410 ERR_INVALIDCAPCMD */ "%s :Invalid CAP subcommand",
 /* 411 ERR_NORECIPIENT */ ":No recipient given (%s)",
 /* 412 ERR_NOTEXTTOSEND */ ":No text to send",
-/* 413 ERR_NOTOPLEVEL */ "%s :No toplevel domain specified",
-/* 414 ERR_WILDTOPLEVEL */ "%s :Wildcard in toplevel Domain",
+/* 413 ERR_NOTOPLEVEL */ "%s :No top-level domain specified",
+/* 414 ERR_WILDTOPLEVEL */ "%s :Wildcard in top-level domain",
 /* 415 */ NULL,
 /* 416 */ NULL,
 /* 417 */ NULL,
@@ -511,7 +511,7 @@ static const char *const replies[] =
 /* 478 ERR_BANLISTFULL */ "%s %s :Channel ban list is full",
 /* 479 ERR_BADCHANNAME */ "%s :Illegal channel name",
 /* 480 ERR_SSLONLYCHAN */ "%s :Cannot join channel (+S)",
-/* 481 ERR_NOPRIVILEGES */ ":Permission Denied - You're not an IRC operator",
+/* 481 ERR_NOPRIVILEGES */ ":Permission denied - You're not an IRC operator",
 /* 482 ERR_CHANOPRIVSNEEDED */ "%s :You're not channel operator",
 /* 483 ERR_CANTKILLSERVER */ ":You cannot kill a server!",
 /* 484 ERR_RESTRICTED */ ":You are restricted",
@@ -753,7 +753,7 @@ static const char *const replies[] =
 /* 720 */ NULL,
 /* 721 */ NULL,
 /* 722 */ NULL,
-/* 723 ERR_NOPRIVS */ "%s :Insufficient oper privs.",
+/* 723 ERR_NOPRIVS */ "%s :Insufficient oper privileges.",
 /* 724 */ NULL,
 /* 725 */ NULL,
 /* 726 */ NULL,
@@ -1029,7 +1029,7 @@ static const char *const replies[] =
 /* 996 */ NULL,
 /* 997 */ NULL,
 /* 998 */ NULL,
-/* 999 ERR_LAST_ERR_MSG */ ":Last Error Message"
+/* 999 ERR_LAST_ERR_MSG */ ":Last error message"
 };
 
 /*

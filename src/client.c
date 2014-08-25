@@ -60,7 +60,7 @@ dlink_list global_client_list;
 dlink_list global_server_list;
 dlink_list oper_list;
 
-static mp_pool_t *client_pool, *lclient_pool;
+static mp_pool_t *client_pool, *connection_pool;
 static dlink_list dead_list, abort_list;
 static dlink_node *eac_next;  /* next aborted client to exit */
 
@@ -88,7 +88,7 @@ make_client(struct Client *from)
   if (!from)
   {
     client_p->from                      = client_p; /* 'from' of local client is self! */
-    client_p->localClient               = mp_pool_get(lclient_pool);
+    client_p->localClient               = mp_pool_get(connection_pool);
     client_p->localClient->since        = CurrentTime;
     client_p->localClient->lasttime     = CurrentTime;
     client_p->localClient->firsttime    = CurrentTime;
@@ -1101,6 +1101,6 @@ client_init(void)
   };
 
   client_pool = mp_pool_new(sizeof(struct Client), MP_CHUNK_SIZE_CLIENT);
-  lclient_pool = mp_pool_new(sizeof(struct Connection), MP_CHUNK_SIZE_LCLIENT);
+  connection_pool = mp_pool_new(sizeof(struct Connection), MP_CHUNK_SIZE_CONNECTION);
   event_add(&event_ping, NULL);
 }

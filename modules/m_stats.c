@@ -538,7 +538,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      "z :Total: whowas %llu channel %llu conf %llu",
                      totww, total_channel_memory, conf_memory);
 
-  local_client_memory_used = local_client_count*(sizeof(struct Client) + sizeof(struct LocalUser));
+  local_client_memory_used = local_client_count*(sizeof(struct Client) + sizeof(struct Connection));
   total_memory += local_client_memory_used;
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
                      "z :Local client Memory in use: %u(%llu)",

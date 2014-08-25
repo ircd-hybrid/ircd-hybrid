@@ -66,7 +66,7 @@ GeoIP *geoip_ctx;
 struct ServerStatistics ServerStats;
 struct timeval SystemTime;
 struct Client me;             /* That's me */
-struct LocalUser meLocalUser; /* That's also part of me */
+struct Connection meConnection; /* That's also part of me */
 
 const char *logFileName = LPATH;
 const char *pidFileName = PPATH;
@@ -487,7 +487,7 @@ main(int argc, char *argv[])
   /* It ain't random, but it ought to be a little harder to guess */
   init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
 
-  me.localClient = &meLocalUser;
+  me.localClient = &meConnection;
   dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
   ConfigLog.use_logging = 1;

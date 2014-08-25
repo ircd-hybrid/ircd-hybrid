@@ -1101,6 +1101,6 @@ client_init(void)
   };
 
   client_pool = mp_pool_new(sizeof(struct Client), MP_CHUNK_SIZE_CLIENT);
-  lclient_pool = mp_pool_new(sizeof(struct LocalUser), MP_CHUNK_SIZE_LCLIENT);
+  lclient_pool = mp_pool_new(sizeof(struct Connection), MP_CHUNK_SIZE_LCLIENT);
   event_add(&event_ping, NULL);
 }

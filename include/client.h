@@ -296,12 +296,12 @@ struct ListTask
   char topic[TOPICLEN + 1];
 };
 
-/*! \brief LocalUser structure
+/*! \brief Connection structure
  *
  * Allocated only for local clients, that are directly connected
  * to \b this server with a socket.
  */
-struct LocalUser
+struct Connection
 {
   dlink_node   lclient_node;
 
@@ -378,7 +378,7 @@ struct Client
   dlink_node node;
   dlink_node lnode;             /**< Used for Server->servers/users */
 
-  struct LocalUser *localClient;
+  struct Connection *localClient;
   struct Client    *hnext;      /**< For client hash table lookups by name */
   struct Client    *idhnext;    /**< For SID hash table lookups by sid */
   struct Server    *serv;       /**< ...defined, if this is a server */

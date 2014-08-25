@@ -308,7 +308,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     } while (valid_mode);
 
     /*
-     * If the client doesnt exist, or if it's fake direction/server, skip.
+     * If the client doesn't exist, or if it's fake direction/server, skip.
      * we cannot send ERR_NOSUCHNICK here because if it's a UID, we cannot
      * lookup the nick, and it's better to never send the numeric than only
      * sometimes.

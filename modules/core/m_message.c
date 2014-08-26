@@ -120,22 +120,22 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
   if (GlobalSetOptions.floodcount && MyConnect(target_p) &&
       IsClient(source_p) && !IsCanFlood(source_p))
   {
-    if ((target_p->localClient->first_received_message_time + 1)
+    if ((target_p->connection->first_received_message_time + 1)
         < CurrentTime)
     {
       delta =
-        CurrentTime - target_p->localClient->first_received_message_time;
-      target_p->localClient->received_number_of_privmsgs -= delta;
-      target_p->localClient->first_received_message_time = CurrentTime;
+        CurrentTime - target_p->connection->first_received_message_time;
+      target_p->connection->received_number_of_privmsgs -= delta;
+      target_p->connection->first_received_message_time = CurrentTime;
 
-      if (target_p->localClient->received_number_of_privmsgs <= 0)
+      if (target_p->connection->received_number_of_privmsgs <= 0)
       {
-        target_p->localClient->received_number_of_privmsgs = 0;
+        target_p->connection->received_number_of_privmsgs = 0;
         DelFlag(target_p, FLAGS_FLOOD_NOTICED);
       }
     }
 
-    if ((target_p->localClient->received_number_of_privmsgs >=
+    if ((target_p->connection->received_number_of_privmsgs >=
          GlobalSetOptions.floodcount) || HasFlag(target_p, FLAGS_FLOOD_NOTICED))
     {
       if (!HasFlag(target_p, FLAGS_FLOOD_NOTICED))
@@ -146,7 +146,7 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
                              source_p->servptr->name, target_p->name);
 
         AddFlag(target_p, FLAGS_FLOOD_NOTICED);
-        target_p->localClient->received_number_of_privmsgs += 2;  /* Add a bit of penalty */
+        target_p->connection->received_number_of_privmsgs += 2;  /* Add a bit of penalty */
       }
 
       if (MyClient(source_p) && p_or_n != NOTICE)
@@ -155,7 +155,7 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
       return 1;
     }
     else
-      target_p->localClient->received_number_of_privmsgs++;
+      target_p->connection->received_number_of_privmsgs++;
   }
 
   return 0;
@@ -372,7 +372,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
                              callerid ? "server side ignore" :
                                         "server side ignore with the exception of common channels");
 
-        if ((target_p->localClient->last_caller_id_time +
+        if ((target_p->connection->last_caller_id_time +
              ConfigGeneral.caller_id_wait) < CurrentTime)
         {
           if (p_or_n != NOTICE)
@@ -382,7 +382,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
                              get_client_name(source_p, HIDE_IP),
                              callerid ? "+g" : "+G");
 
-          target_p->localClient->last_caller_id_time = CurrentTime;
+          target_p->connection->last_caller_id_time = CurrentTime;
 
         }
 
@@ -733,7 +733,7 @@ m_privmsg(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (MyConnect(source_p))
-    source_p->localClient->last_privmsg = CurrentTime;
+    source_p->connection->last_privmsg = CurrentTime;
 
   m_message(PRIVMSG, "PRIVMSG", source_p, parc, parv);
   return 0;

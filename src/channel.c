@@ -496,15 +496,15 @@ add_invite(struct Channel *chptr, struct Client *who)
   /*
    * Delete last link in chain if the list is max length
    */
-  if (dlink_list_length(&who->localClient->invited) >=
+  if (dlink_list_length(&who->connection->invited) >=
       ConfigChannel.max_channels)
-    del_invite(who->localClient->invited.tail->data, who);
+    del_invite(who->connection->invited.tail->data, who);
 
   /* Add client to channel invite list */
   dlinkAdd(who, make_dlink_node(), &chptr->invites);
 
   /* Add channel to the end of the client invite list */
-  dlinkAdd(chptr, make_dlink_node(), &who->localClient->invited);
+  dlinkAdd(chptr, make_dlink_node(), &who->connection->invited);
 }
 
 /*! \brief Delete Invite block from channel invite list
@@ -517,7 +517,7 @@ del_invite(struct Channel *chptr, struct Client *who)
 {
   dlink_node *ptr = NULL;
 
-  if ((ptr = dlinkFindDelete(&who->localClient->invited, chptr)))
+  if ((ptr = dlinkFindDelete(&who->connection->invited, chptr)))
     free_dlink_node(ptr);
 
   if ((ptr = dlinkFindDelete(&chptr->invites, who)))
@@ -586,13 +586,13 @@ find_bmask(const struct Client *who, const dlink_list *const list)
             return 1;
           break;
         case HM_IPV4:
-          if (who->localClient->aftype == AF_INET)
-            if (match_ipv4(&who->localClient->ip, &bp->addr, bp->bits))
+          if (who->connection->aftype == AF_INET)
+            if (match_ipv4(&who->connection->ip, &bp->addr, bp->bits))
               return 1;
           break;
         case HM_IPV6:
-          if (who->localClient->aftype == AF_INET6)
-            if (match_ipv6(&who->localClient->ip, &bp->addr, bp->bits))
+          if (who->connection->aftype == AF_INET6)
+            if (match_ipv6(&who->connection->ip, &bp->addr, bp->bits))
               return 1;
           break;
         default:
@@ -639,7 +639,7 @@ can_join(struct Client *source_p, struct Channel *chptr, const char *key)
     return ERR_OPERONLYCHAN;
 
   if (chptr->mode.mode & MODE_INVITEONLY)
-    if (!dlinkFind(&source_p->localClient->invited, chptr))
+    if (!dlinkFind(&source_p->connection->invited, chptr))
       if (!find_bmask(source_p, &chptr->invexlist))
         return ERR_INVITEONLYCHAN;
 
@@ -791,15 +791,15 @@ check_spambot_warning(struct Client *source_p, const char *name)
   int decrement_count = 0;
 
   if ((GlobalSetOptions.spam_num &&
-       (source_p->localClient->join_leave_count >=
+       (source_p->connection->join_leave_count >=
         GlobalSetOptions.spam_num)))
   {
-    if (source_p->localClient->oper_warn_count_down > 0)
-      source_p->localClient->oper_warn_count_down--;
+    if (source_p->connection->oper_warn_count_down > 0)
+      source_p->connection->oper_warn_count_down--;
     else
-      source_p->localClient->oper_warn_count_down = 0;
+      source_p->connection->oper_warn_count_down = 0;
 
-    if (source_p->localClient->oper_warn_count_down == 0)
+    if (source_p->connection->oper_warn_count_down == 0)
     {
       /* It's already known as a possible spambot */
       if (name)
@@ -812,31 +812,31 @@ check_spambot_warning(struct Client *source_p, const char *name)
                              "User %s (%s@%s) is a possible spambot",
                              source_p->name, source_p->username,
                              source_p->host);
-      source_p->localClient->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+      source_p->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
     }
   }
   else
   {
-    if ((t_delta = (CurrentTime - source_p->localClient->last_leave_time)) >
+    if ((t_delta = (CurrentTime - source_p->connection->last_leave_time)) >
          JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
       decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
-      if (decrement_count > source_p->localClient->join_leave_count)
-        source_p->localClient->join_leave_count = 0;
+      if (decrement_count > source_p->connection->join_leave_count)
+        source_p->connection->join_leave_count = 0;
       else
-        source_p->localClient->join_leave_count -= decrement_count;
+        source_p->connection->join_leave_count -= decrement_count;
     }
     else
     {
-      if ((CurrentTime - (source_p->localClient->last_join_time)) <
+      if ((CurrentTime - (source_p->connection->last_join_time)) <
           GlobalSetOptions.spam_time)
-        source_p->localClient->join_leave_count++;  /* It's a possible spambot */
+        source_p->connection->join_leave_count++;  /* It's a possible spambot */
     }
 
     if (name)
-      source_p->localClient->last_join_time = CurrentTime;
+      source_p->connection->last_join_time = CurrentTime;
     else
-      source_p->localClient->last_leave_time = CurrentTime;
+      source_p->connection->last_leave_time = CurrentTime;
   }
 }
 
@@ -962,7 +962,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
   char *chan_list = NULL;
   struct Channel *chptr = NULL;
   struct MaskItem *conf = NULL;
-  const struct ClassItem *class = get_class_ptr(&source_p->localClient->confs);
+  const struct ClassItem *class = get_class_ptr(&source_p->connection->confs);
   int i = 0;
   unsigned int flags = 0;
 
@@ -1110,7 +1110,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
 
     channel_member_names(source_p, chptr, 1);
 
-    source_p->localClient->last_join_time = CurrentTime;
+    source_p->connection->last_join_time = CurrentTime;
   }
 }
 
@@ -1146,7 +1146,7 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
    */
   if (*reason && (!MyConnect(source_p) ||
       ((can_send(chptr, source_p, ms, reason) &&
-       (source_p->localClient->firsttime + ConfigGeneral.anti_spam_exit_message_time)
+       (source_p->connection->firsttime + ConfigGeneral.anti_spam_exit_message_time)
         < CurrentTime))))
   {
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s :%s",

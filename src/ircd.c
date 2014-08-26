@@ -487,7 +487,7 @@ main(int argc, char *argv[])
   /* It ain't random, but it ought to be a little harder to guess */
   init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
 
-  me.localClient = &meConnection;
+  me.connection = &meConnection;
   dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
   ConfigLog.use_logging = 1;
@@ -591,9 +591,9 @@ main(int argc, char *argv[])
 
   me.from                   = &me;
   me.servptr                = &me;
-  me.localClient->lasttime  = CurrentTime;
-  me.localClient->since     = CurrentTime;
-  me.localClient->firsttime = CurrentTime;
+  me.connection->lasttime  = CurrentTime;
+  me.connection->since     = CurrentTime;
+  me.connection->firsttime = CurrentTime;
 
   SetMe(&me);
   make_server(&me);

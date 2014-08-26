@@ -54,7 +54,7 @@ list_accepts(struct Client *source_p)
   /* 1       23456              78                     9 10 */
   len = strlen(me.name) + strlen(source_p->name) + 10;
 
-  DLINK_FOREACH(ptr, source_p->localClient->acceptlist.head)
+  DLINK_FOREACH(ptr, source_p->connection->acceptlist.head)
   {
     const struct split_nuh_item *accept_p = ptr->data;
     size_t masklen = strlen(accept_p->nickptr) +
@@ -97,7 +97,7 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
   accept_p->userptr = xstrdup(nuh->userptr);
   accept_p->hostptr = xstrdup(nuh->hostptr);
 
-  dlinkAdd(accept_p, &accept_p->node, &source_p->localClient->acceptlist);
+  dlinkAdd(accept_p, &accept_p->node, &source_p->connection->acceptlist);
 
   list_accepts(source_p);
 }
@@ -156,7 +156,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
     }
     else if (*mask)
     {
-      if (dlink_list_length(&source_p->localClient->acceptlist) >=
+      if (dlink_list_length(&source_p->connection->acceptlist) >=
           ConfigGeneral.max_accept)
       {
         sendto_one_numeric(source_p, &me, ERR_ACCEPTFULL);

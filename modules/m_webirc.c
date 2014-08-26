@@ -67,8 +67,8 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   conf = find_address_conf(source_p->host,
                            IsGotId(source_p) ? source_p->username : "webirc",
-                           &source_p->localClient->ip,
-                           source_p->localClient->aftype, parv[1]);
+                           &source_p->connection->ip,
+                           source_p->connection->aftype, parv[1]);
   if (conf == NULL || !IsConfClient(conf))
     return 0;
 
@@ -104,18 +104,18 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   assert(res);
 
-  memcpy(&source_p->localClient->ip, res->ai_addr, res->ai_addrlen);
-  source_p->localClient->ip.ss_len = res->ai_addrlen;
-  source_p->localClient->ip.ss.ss_family = res->ai_family;
-  source_p->localClient->aftype = res->ai_family;
+  memcpy(&source_p->connection->ip, res->ai_addr, res->ai_addrlen);
+  source_p->connection->ip.ss_len = res->ai_addrlen;
+  source_p->connection->ip.ss.ss_family = res->ai_family;
+  source_p->connection->aftype = res->ai_family;
   freeaddrinfo(res);
 
   strlcpy(source_p->sockhost, parv[4], sizeof(source_p->sockhost));
   strlcpy(source_p->host, parv[3], sizeof(source_p->host));
 
   /* Check dlines now, k/glines will be checked on registration */
-  if ((conf = find_dline_conf(&source_p->localClient->ip,
-                               source_p->localClient->aftype)))
+  if ((conf = find_dline_conf(&source_p->connection->ip,
+                               source_p->connection->aftype)))
   {
     if (!(conf->type == CONF_EXEMPT))
     {

@@ -87,24 +87,24 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
   if (*parv[1] == '+')
   {
     /* Ignore it if we aren't expecting this... -A1kmm */
-    if (source_p->localClient->challenge_response == NULL)
+    if (source_p->connection->challenge_response == NULL)
       return 0;
 
-    if (irccmp(source_p->localClient->challenge_response, ++parv[1]))
+    if (irccmp(source_p->connection->challenge_response, ++parv[1]))
     {
       sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
-      failed_challenge_notice(source_p, source_p->localClient->challenge_operator,
+      failed_challenge_notice(source_p, source_p->connection->challenge_operator,
                               "challenge failed");
       return 0;
     }
 
     conf = find_exact_name_conf(CONF_OPER, source_p,
-                                source_p->localClient->challenge_operator, NULL, NULL);
+                                source_p->connection->challenge_operator, NULL, NULL);
     if (conf == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-      conf = find_exact_name_conf(CONF_OPER, NULL, source_p->localClient->challenge_operator, NULL, NULL);
-      failed_challenge_notice(source_p, source_p->localClient->challenge_operator, (conf != NULL) ?
+      conf = find_exact_name_conf(CONF_OPER, NULL, source_p->connection->challenge_operator, NULL, NULL);
+      failed_challenge_notice(source_p, source_p->connection->challenge_operator, (conf != NULL) ?
                               "host mismatch" : "no operator {} block");
       return 0;
     }
@@ -119,21 +119,21 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
     oper_up(source_p);
 
     ilog(LOG_TYPE_OPER, "CHALLENGE %s by %s!%s@%s",
-         source_p->localClient->challenge_operator,
+         source_p->connection->challenge_operator,
          source_p->name, source_p->username,
          source_p->host);
 
-    MyFree(source_p->localClient->challenge_response);
-    MyFree(source_p->localClient->challenge_operator);
-    source_p->localClient->challenge_response = NULL;
-    source_p->localClient->challenge_operator = NULL;
+    MyFree(source_p->connection->challenge_response);
+    MyFree(source_p->connection->challenge_operator);
+    source_p->connection->challenge_response = NULL;
+    source_p->connection->challenge_operator = NULL;
     return 0;
   }
 
-  MyFree(source_p->localClient->challenge_response);
-  MyFree(source_p->localClient->challenge_operator);
-  source_p->localClient->challenge_response = NULL;
-  source_p->localClient->challenge_operator = NULL;
+  MyFree(source_p->connection->challenge_response);
+  MyFree(source_p->connection->challenge_operator);
+  source_p->connection->challenge_response = NULL;
+  source_p->connection->challenge_operator = NULL;
 
   conf = find_exact_name_conf(CONF_OPER, source_p, parv[1], NULL, NULL);
 
@@ -170,11 +170,11 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (!generate_challenge(&challenge, &source_p->localClient->challenge_response,
+  if (!generate_challenge(&challenge, &source_p->connection->challenge_response,
                           conf->rsa_public_key))
   {
     sendto_one_numeric(source_p, &me, RPL_RSACHALLENGE, challenge);
-    source_p->localClient->challenge_operator = xstrdup(conf->name);
+    source_p->connection->challenge_operator = xstrdup(conf->name);
   }
 
   MyFree(challenge);

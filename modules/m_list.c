@@ -48,7 +48,7 @@ do_list(struct Client *source_p, int parc, char *parv[])
   struct ListTask *lt = NULL;
   int no_masked_channels = 1;
 
-  if (source_p->localClient->list_task)
+  if (source_p->connection->list_task)
   {
     free_list_task(source_p);
     sendto_one_numeric(source_p, &me, RPL_LISTEND);
@@ -59,7 +59,7 @@ do_list(struct Client *source_p, int parc, char *parv[])
   lt->users_max = UINT_MAX;
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;
-  source_p->localClient->list_task = lt;
+  source_p->connection->list_task = lt;
 
   if (parc > 1 && !EmptyString(parv[1]))
   {

@@ -148,7 +148,7 @@ watch_add_to_hash_table(const char *nick, struct Client *client_p)
   {
     /* No it isn't, so add it in the bucket and client addint it */
     dlinkAdd(client_p, make_dlink_node(), &anptr->watched_by);
-    dlinkAdd(anptr, make_dlink_node(), &client_p->localClient->watches);
+    dlinkAdd(anptr, make_dlink_node(), &client_p->connection->watches);
   }
 }
 
@@ -171,7 +171,7 @@ watch_del_from_hash_table(const char *nick, struct Client *client_p)
   dlinkDelete(ptr, &anptr->watched_by);
   free_dlink_node(ptr);
 
-  if ((ptr = dlinkFindDelete(&client_p->localClient->watches, anptr)))
+  if ((ptr = dlinkFindDelete(&client_p->connection->watches, anptr)))
     free_dlink_node(ptr);
 
   /* In case this header is now empty of notices, remove it */
@@ -193,7 +193,7 @@ watch_del_watch_list(struct Client *client_p)
   dlink_node *ptr = NULL, *ptr_next = NULL;
   dlink_node *tmp = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->localClient->watches.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->connection->watches.head)
   {
     struct Watch *anptr = ptr->data;
 
@@ -211,10 +211,10 @@ watch_del_watch_list(struct Client *client_p)
       mp_pool_release(anptr);
     }
 
-    dlinkDelete(ptr, &client_p->localClient->watches);
+    dlinkDelete(ptr, &client_p->connection->watches);
     free_dlink_node(ptr);
   }
 
-  assert(client_p->localClient->watches.head == NULL);
-  assert(client_p->localClient->watches.tail == NULL);
+  assert(client_p->connection->watches.head == NULL);
+  assert(client_p->connection->watches.tail == NULL);
 }

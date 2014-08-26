@@ -51,7 +51,7 @@ mr_capab(struct Client *source_p, int parc, char *parv[])
   char *p = NULL;
   char *s = NULL;
 
-  if (source_p->localClient->caps && !IsCapable(source_p, CAP_TS6))
+  if (source_p->connection->caps && !IsCapable(source_p, CAP_TS6))
   {
     exit_client(source_p, "CAPAB received twice");
     return 0;

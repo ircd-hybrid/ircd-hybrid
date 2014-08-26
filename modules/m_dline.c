@@ -58,13 +58,13 @@ check_dline(struct AddressRec *arec)
     switch (arec->masktype)
     {
       case HM_IPV4:
-        if (client_p->localClient->aftype == AF_INET)
-          if (match_ipv4(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+        if (client_p->connection->aftype == AF_INET)
+          if (match_ipv4(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_try_ban(client_p, arec->conf);
         break;
       case HM_IPV6:
-        if (client_p->localClient->aftype == AF_INET6)
-          if (match_ipv6(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+        if (client_p->connection->aftype == AF_INET6)
+          if (match_ipv6(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_try_ban(client_p, arec->conf);
         break;
       default: break;
@@ -81,13 +81,13 @@ check_dline(struct AddressRec *arec)
     switch (arec->masktype)
     {
       case HM_IPV4:
-        if (client_p->localClient->aftype == AF_INET)
-          if (match_ipv4(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+        if (client_p->connection->aftype == AF_INET)
+          if (match_ipv4(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_try_ban(client_p, arec->conf);
         break;
       case HM_IPV6:
-        if (client_p->localClient->aftype == AF_INET6)
-          if (match_ipv6(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+        if (client_p->connection->aftype == AF_INET6)
+          if (match_ipv6(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_try_ban(client_p, arec->conf);
         break;
       default: break;
@@ -202,8 +202,8 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    getnameinfo((struct sockaddr *)&target_p->localClient->ip,
-                target_p->localClient->ip.ss_len, hostip,
+    getnameinfo((struct sockaddr *)&target_p->connection->ip,
+                target_p->connection->ip.ss_len, hostip,
                 sizeof(hostip), NULL, 0, NI_NUMERICHOST);
     dlhost = hostip;
     t = parse_netmask(dlhost, NULL, &bits);
@@ -311,8 +311,8 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
         return 0;
       }
 
-      getnameinfo((struct sockaddr *)&target_p->localClient->ip,
-                  target_p->localClient->ip.ss_len, hostip,
+      getnameinfo((struct sockaddr *)&target_p->connection->ip,
+                  target_p->connection->ip.ss_len, hostip,
                   sizeof(hostip), NULL, 0, NI_NUMERICHOST);
       dlhost = hostip;
       t = parse_netmask(dlhost, NULL, &bits);

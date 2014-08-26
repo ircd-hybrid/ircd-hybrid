@@ -254,13 +254,13 @@ check_client(struct Client *source_p)
                            "Unauthorized client connection from %s [%s] on [%s/%u].",
                            get_client_name(source_p, SHOW_IP),
                            source_p->sockhost,
-                           source_p->localClient->listener->name,
-                           source_p->localClient->listener->port);
+                           source_p->connection->listener->name,
+                           source_p->connection->listener->port);
       ilog(LOG_TYPE_IRCD,
            "Unauthorized client connection from %s on [%s/%u].",
            get_client_name(source_p, SHOW_IP),
-           source_p->localClient->listener->name,
-           source_p->localClient->listener->port);
+           source_p->connection->listener->name,
+           source_p->connection->listener->port);
 
       exit_client(source_p, "You are not authorized to use this server");
       break;
@@ -293,17 +293,17 @@ verify_access(struct Client *client_p)
   if (IsGotId(client_p))
   {
     conf = find_address_conf(client_p->host, client_p->username,
-                             &client_p->localClient->ip,
-                             client_p->localClient->aftype,
-                             client_p->localClient->password);
+                             &client_p->connection->ip,
+                             client_p->connection->aftype,
+                             client_p->connection->password);
   }
   else
   {
     strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
     conf = find_address_conf(client_p->host,non_ident,
-                             &client_p->localClient->ip,
-                             client_p->localClient->aftype,
-                             client_p->localClient->password);
+                             &client_p->connection->ip,
+                             client_p->connection->aftype,
+                             client_p->connection->password);
   }
 
   if (conf)
@@ -361,7 +361,7 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
   int a_limit_reached = 0;
   unsigned int local = 0, global = 0, ident = 0;
 
-  ip_found = ipcache_find_or_add_address(&client_p->localClient->ip);
+  ip_found = ipcache_find_or_add_address(&client_p->connection->ip);
   ip_found->count++;
   AddFlag(client_p, FLAGS_IPHASH);
 
@@ -409,7 +409,7 @@ detach_conf(struct Client *client_p, enum maskitem_type type)
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->localClient->confs.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->connection->confs.head)
   {
     struct MaskItem *conf = ptr->data;
 
@@ -420,11 +420,11 @@ detach_conf(struct Client *client_p, enum maskitem_type type)
     if (!(conf->type & type))
       continue;
 
-    dlinkDelete(ptr, &client_p->localClient->confs);
+    dlinkDelete(ptr, &client_p->connection->confs);
     free_dlink_node(ptr);
 
     if (conf->type == CONF_CLIENT)
-      remove_from_cidr_check(&client_p->localClient->ip, conf->class);
+      remove_from_cidr_check(&client_p->connection->ip, conf->class);
 
     if (--conf->class->ref_count == 0 && conf->class->active == 0)
     {
@@ -450,18 +450,18 @@ detach_conf(struct Client *client_p, enum maskitem_type type)
 int
 attach_conf(struct Client *client_p, struct MaskItem *conf)
 {
-  if (dlinkFind(&client_p->localClient->confs, conf))
+  if (dlinkFind(&client_p->connection->confs, conf))
     return 1;
 
   if (conf->type == CONF_CLIENT)
     if (cidr_limit_reached(IsConfExemptLimits(conf),
-                           &client_p->localClient->ip, conf->class))
+                           &client_p->connection->ip, conf->class))
       return TOO_MANY;    /* Already at maximum allowed */
 
   conf->class->ref_count++;
   conf->ref_count++;
 
-  dlinkAdd(conf, make_dlink_node(), &client_p->localClient->confs);
+  dlinkAdd(conf, make_dlink_node(), &client_p->connection->confs);
 
   return 0;
 }
@@ -711,14 +711,14 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
                   return conf;
               break;
             case HM_IPV4:
-              if (who->localClient->aftype == AF_INET)
-                if (match_ipv4(&who->localClient->ip, &conf->addr, conf->bits))
+              if (who->connection->aftype == AF_INET)
+                if (match_ipv4(&who->connection->ip, &conf->addr, conf->bits))
                   if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                     return conf;
               break;
             case HM_IPV6:
-              if (who->localClient->aftype == AF_INET6)
-                if (match_ipv6(&who->localClient->ip, &conf->addr, conf->bits))
+              if (who->connection->aftype == AF_INET6)
+                if (match_ipv6(&who->connection->ip, &conf->addr, conf->bits))
                   if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                     return conf;
               break;
@@ -1146,7 +1146,7 @@ get_oper_name(const struct Client *client_p)
 
   if (MyConnect(client_p))
   {
-    if ((cnode = client_p->localClient->confs.head))
+    if ((cnode = client_p->connection->confs.head))
     {
       const struct MaskItem *conf = cnode->data;
 

@@ -285,7 +285,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   if (IsDefunct(client_p))
     return;
 
-  assert(client_p->localClient->fd.flags.open);
+  assert(client_p->connection->fd.flags.open);
   assert((bufend - pbuffer) < IRCD_BUFSIZE);
 
   for (ch = pbuffer; *ch == ' '; ++ch)  /* Skip spaces */

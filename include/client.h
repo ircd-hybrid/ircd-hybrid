@@ -82,7 +82,7 @@ struct MaskItem;
                                  (x)->handler = HasUMode(x, UMODE_OPER) ? \
                                  OPER_HANDLER : CLIENT_HANDLER; }
 
-#define MyConnect(x)            ((x)->localClient != NULL)
+#define MyConnect(x)            ((x)->connection != NULL)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 
 /*
@@ -99,7 +99,7 @@ struct MaskItem;
 #define CAP_AWAY_NOTIFY   0x00000002U
 #define CAP_UHNAMES       0x00000004U
 
-#define HasCap(x, y) ((x)->localClient->cap_active & (y))
+#define HasCap(x, y) ((x)->connection->cap_active & (y))
 
 
 /* housekeeping flags */
@@ -202,10 +202,10 @@ struct MaskItem;
 #define OPER_FLAG_UNXLINE        0x00400000U  /**< Oper can use UNXLINE command */
 
 
-#define HasOFlag(x, y) (MyConnect(x) ? (x)->localClient->operflags & (y) : 0)
-#define AddOFlag(x, y) ((x)->localClient->operflags |=  (y))
-#define DelOFlag(x, y) ((x)->localClient->operflags &= ~(y))
-#define ClrOFlag(x)    ((x)->localClient->operflags = 0)
+#define HasOFlag(x, y) (MyConnect(x) ? (x)->connection->operflags & (y) : 0)
+#define AddOFlag(x, y) ((x)->connection->operflags |=  (y))
+#define DelOFlag(x, y) ((x)->connection->operflags &= ~(y))
+#define ClrOFlag(x)    ((x)->connection->operflags = 0)
 
 
 
@@ -378,7 +378,7 @@ struct Client
   dlink_node node;
   dlink_node lnode;             /**< Used for Server->servers/users */
 
-  struct Connection *localClient;
+  struct Connection *connection;
   struct Client    *hnext;      /**< For client hash table lookups by name */
   struct Client    *idhnext;    /**< For SID hash table lookups by sid */
   struct Server    *serv;       /**< ...defined, if this is a server */

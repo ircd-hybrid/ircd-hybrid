@@ -88,14 +88,14 @@ make_client(struct Client *from)
   if (!from)
   {
     client_p->from                      = client_p; /* 'from' of local client is self! */
-    client_p->localClient               = mp_pool_get(connection_pool);
-    client_p->localClient->since        = CurrentTime;
-    client_p->localClient->lasttime     = CurrentTime;
-    client_p->localClient->firsttime    = CurrentTime;
-    client_p->localClient->registration = REG_INIT;
+    client_p->connection               = mp_pool_get(connection_pool);
+    client_p->connection->since        = CurrentTime;
+    client_p->connection->lasttime     = CurrentTime;
+    client_p->connection->firsttime    = CurrentTime;
+    client_p->connection->registration = REG_INIT;
 
     /* as good a place as any... */
-    dlinkAdd(client_p, &client_p->localClient->lclient_node, &unknown_list);
+    dlinkAdd(client_p, &client_p->connection->lclient_node, &unknown_list);
   }
   else
     client_p->from = from; /* 'from' of local client is self! */
@@ -133,29 +133,29 @@ free_client(struct Client *client_p)
 
   if (MyConnect(client_p))
   {
-    assert(client_p->localClient->invited.head == NULL);
-    assert(dlink_list_length(&client_p->localClient->invited) == 0);
-    assert(dlink_list_length(&client_p->localClient->watches) == 0);
+    assert(client_p->connection->invited.head == NULL);
+    assert(dlink_list_length(&client_p->connection->invited) == 0);
+    assert(dlink_list_length(&client_p->connection->watches) == 0);
     assert(IsClosing(client_p) && IsDead(client_p));
 
-    MyFree(client_p->localClient->challenge_response);
-    MyFree(client_p->localClient->challenge_operator);
-    client_p->localClient->challenge_response = NULL;
-    client_p->localClient->challenge_operator = NULL;
+    MyFree(client_p->connection->challenge_response);
+    MyFree(client_p->connection->challenge_operator);
+    client_p->connection->challenge_response = NULL;
+    client_p->connection->challenge_operator = NULL;
 
     /*
      * clean up extra sockets from P-lines which have been discarded.
      */
-    if (client_p->localClient->listener)
+    if (client_p->connection->listener)
     {
-      listener_release(client_p->localClient->listener);
-      client_p->localClient->listener = NULL;
+      listener_release(client_p->connection->listener);
+      client_p->connection->listener = NULL;
     }
 
-    dbuf_clear(&client_p->localClient->buf_recvq);
-    dbuf_clear(&client_p->localClient->buf_sendq);
+    dbuf_clear(&client_p->connection->buf_recvq);
+    dbuf_clear(&client_p->connection->buf_sendq);
 
-    mp_pool_release(client_p->localClient);
+    mp_pool_release(client_p->connection);
   }
 
   mp_pool_release(client_p);
@@ -184,9 +184,9 @@ check_pings_list(dlink_list *list)
     if (!IsRegistered(client_p))
       ping = CONNECTTIMEOUT;
     else
-      ping = get_client_ping(&client_p->localClient->confs);
+      ping = get_client_ping(&client_p->connection->confs);
 
-    if (ping < CurrentTime - client_p->localClient->lasttime)
+    if (ping < CurrentTime - client_p->connection->lasttime)
     {
       if (!IsPingSent(client_p))
       {
@@ -196,12 +196,12 @@ check_pings_list(dlink_list *list)
          * it is still alive.
          */
         SetPingSent(client_p);
-        client_p->localClient->lasttime = CurrentTime - ping;
+        client_p->connection->lasttime = CurrentTime - ping;
         sendto_one(client_p, "PING :%s", ID_or_name(&me, client_p));
       }
       else
       {
-        if (CurrentTime - client_p->localClient->lasttime >= 2 * ping)
+        if (CurrentTime - client_p->connection->lasttime >= 2 * ping)
         {
           /*
            * If the client/server hasn't talked to us in 2*ping seconds
@@ -220,7 +220,7 @@ check_pings_list(dlink_list *list)
           }
 
           snprintf(buf, sizeof(buf), "Ping timeout: %d seconds",
-                   (int)(CurrentTime - client_p->localClient->lasttime));
+                   (int)(CurrentTime - client_p->connection->lasttime));
           exit_client(client_p, buf);
         }
       }
@@ -247,7 +247,7 @@ check_unknowns_list(void)
      * Check UNKNOWN connections - if they have been in this state
      * for > 30s, close them.
      */
-    if (IsAuthFinished(client_p) && (CurrentTime - client_p->localClient->firsttime) > 30)
+    if (IsAuthFinished(client_p) && (CurrentTime - client_p->connection->firsttime) > 30)
       exit_client(client_p, "Registration timed out");
   }
 }
@@ -308,8 +308,8 @@ check_conf_klines(void)
     if (IsDead(client_p) || !IsClient(client_p))
       continue;
 
-    if ((conf = find_conf_by_address(NULL, &client_p->localClient->ip, CONF_DLINE,
-                                     client_p->localClient->aftype, NULL, NULL, 1)))
+    if ((conf = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
+                                     client_p->connection->aftype, NULL, NULL, 1)))
     {
       conf_try_ban(client_p, conf);
       continue; /* and go examine next fd/client_p */
@@ -317,8 +317,8 @@ check_conf_klines(void)
 
     if (ConfigGeneral.glines)
     {
-      if ((conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
-                                       CONF_GLINE, client_p->localClient->aftype,
+      if ((conf = find_conf_by_address(client_p->host, &client_p->connection->ip,
+                                       CONF_GLINE, client_p->connection->aftype,
                                        client_p->username, NULL, 1)))
       {
         conf_try_ban(client_p, conf);
@@ -327,8 +327,8 @@ check_conf_klines(void)
       }
     }
 
-    if ((conf = find_conf_by_address(client_p->host, &client_p->localClient->ip,
-                                     CONF_KLINE, client_p->localClient->aftype,
+    if ((conf = find_conf_by_address(client_p->host, &client_p->connection->ip,
+                                     CONF_KLINE, client_p->connection->aftype,
                                      client_p->username, NULL, 1)))
     {
       conf_try_ban(client_p, conf);
@@ -348,8 +348,8 @@ check_conf_klines(void)
   {
     struct Client *client_p = ptr->data;
 
-    if ((conf = find_conf_by_address(NULL, &client_p->localClient->ip, CONF_DLINE,
-                                     client_p->localClient->aftype, NULL, NULL, 1)))
+    if ((conf = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
+                                     client_p->connection->aftype, NULL, NULL, 1)))
     {
       conf_try_ban(client_p, conf);
       continue; /* and go examine next fd/client_p */
@@ -389,8 +389,8 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
       type_string = kline_string;
       break;
     case CONF_DLINE:
-      if (find_conf_by_address(NULL, &client_p->localClient->ip, CONF_EXEMPT,
-                               client_p->localClient->aftype, NULL, NULL, 1))
+      if (find_conf_by_address(NULL, &client_p->connection->ip, CONF_EXEMPT,
+                               client_p->connection->aftype, NULL, NULL, 1))
         return;
       type_string = dline_string;
       break;
@@ -551,7 +551,7 @@ get_client_name(const struct Client *client_p, enum addr_mask_type type)
                client_p->username, client_p->sockhost);
       break;
     case MASK_IP:
-      if (client_p->localClient->aftype == AF_INET)
+      if (client_p->connection->aftype == AF_INET)
         snprintf(buf, sizeof(buf), "%s[%s@255.255.255.255]",
                  client_p->name, client_p->username);
       else
@@ -619,7 +619,7 @@ exit_one_client(struct Client *source_p, const char *comment)
     if (MyConnect(source_p))
     {
       /* Clean up invitefield */
-      DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->localClient->invited.head)
+      DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->connection->invited.head)
         del_invite(ptr->data, source_p);
 
       del_all_accepts(source_p);
@@ -712,10 +712,10 @@ exit_client(struct Client *source_p, const char *comment)
     if (HasFlag(source_p, FLAGS_IPHASH))
     {
       DelFlag(source_p, FLAGS_IPHASH);
-      ipcache_remove_address(&source_p->localClient->ip);
+      ipcache_remove_address(&source_p->connection->ip);
     }
 
-    delete_auth(&source_p->localClient->auth);
+    delete_auth(&source_p->connection->auth);
 
     /*
      * This source_p could have status of one of STAT_UNKNOWN, STAT_CONNECTING
@@ -728,11 +728,11 @@ exit_client(struct Client *source_p, const char *comment)
     {
       assert(dlinkFind(&unknown_list, source_p));
 
-      dlinkDelete(&source_p->localClient->lclient_node, &unknown_list);
+      dlinkDelete(&source_p->connection->lclient_node, &unknown_list);
     }
     else if (IsClient(source_p))
     {
-      time_t on_for = CurrentTime - source_p->localClient->firsttime;
+      time_t on_for = CurrentTime - source_p->connection->firsttime;
       assert(Count.local > 0);
       Count.local--;
 
@@ -741,9 +741,9 @@ exit_client(struct Client *source_p, const char *comment)
           free_dlink_node(m);
 
       assert(dlinkFind(&local_client_list, source_p));
-      dlinkDelete(&source_p->localClient->lclient_node, &local_client_list);
+      dlinkDelete(&source_p->connection->lclient_node, &local_client_list);
 
-      if (source_p->localClient->list_task)
+      if (source_p->connection->list_task)
         free_list_task(source_p);
 
       watch_del_watch_list(source_p);
@@ -753,11 +753,11 @@ exit_client(struct Client *source_p, const char *comment)
                            ConfigGeneral.hide_spoof_ips && IsIPSpoof(source_p) ?
                            "255.255.255.255" : source_p->sockhost);
       ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %llu/%llu",
-           myctime(source_p->localClient->firsttime), (unsigned int)(on_for / 3600),
+           myctime(source_p->connection->firsttime), (unsigned int)(on_for / 3600),
            (unsigned int)((on_for % 3600)/60), (unsigned int)(on_for % 60),
            source_p->name, source_p->username, source_p->host,
-           source_p->localClient->send.bytes>>10,
-           source_p->localClient->recv.bytes>>10);
+           source_p->connection->send.bytes>>10,
+           source_p->connection->recv.bytes>>10);
     }
     else if (IsServer(source_p))
     {
@@ -765,7 +765,7 @@ exit_client(struct Client *source_p, const char *comment)
       --Count.myserver;
 
       assert(dlinkFind(&local_server_list, source_p));
-      dlinkDelete(&source_p->localClient->lclient_node, &local_server_list);
+      dlinkDelete(&source_p->connection->lclient_node, &local_server_list);
     }
 
     if (!IsDead(source_p))
@@ -818,18 +818,18 @@ exit_client(struct Client *source_p, const char *comment)
 
     if (MyConnect(source_p))
     {
-      int connected = CurrentTime - source_p->localClient->firsttime;
+      int connected = CurrentTime - source_p->connection->firsttime;
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s was connected for %d day%s, %2d:%02d:%02d. %llu/%llu sendK/recvK.",
                            source_p->name, connected/86400, (connected/86400 == 1) ? "" : "s",
                            (connected % 86400) / 3600, (connected % 3600) / 60, connected % 60,
-                           source_p->localClient->send.bytes >> 10,
-                           source_p->localClient->recv.bytes >> 10);
+                           source_p->connection->send.bytes >> 10,
+                           source_p->connection->recv.bytes >> 10);
       ilog(LOG_TYPE_IRCD, "%s was connected for %d day%s, %2d:%02d:%02d. %llu/%llu sendK/recvK.",
            source_p->name, connected/86400, (connected/86400 == 1) ? "" : "s",
           (connected % 86400) / 3600, (connected % 3600) / 60, connected % 60,
-          source_p->localClient->send.bytes >> 10,
-          source_p->localClient->recv.bytes >> 10);
+          source_p->connection->send.bytes >> 10,
+          source_p->connection->recv.bytes >> 10);
     }
   }
   else if (IsClient(source_p) && !HasFlag(source_p, FLAGS_KILLED))
@@ -857,8 +857,8 @@ dead_link_on_write(struct Client *client_p, int ierrno)
   if (IsDefunct(client_p))
     return;
 
-  dbuf_clear(&client_p->localClient->buf_recvq);
-  dbuf_clear(&client_p->localClient->buf_sendq);
+  dbuf_clear(&client_p->connection->buf_recvq);
+  dbuf_clear(&client_p->connection->buf_sendq);
 
   assert(dlinkFind(&abort_list, client_p) == NULL);
   ptr = make_dlink_node();
@@ -884,14 +884,14 @@ dead_link_on_read(struct Client *client_p, int error)
   if (IsDefunct(client_p))
     return;
 
-  dbuf_clear(&client_p->localClient->buf_recvq);
-  dbuf_clear(&client_p->localClient->buf_sendq);
+  dbuf_clear(&client_p->connection->buf_recvq);
+  dbuf_clear(&client_p->connection->buf_sendq);
 
-  current_error = get_sockerr(client_p->localClient->fd.fd);
+  current_error = get_sockerr(client_p->connection->fd.fd);
 
   if (IsServer(client_p) || IsHandshake(client_p))
   {
-    int connected = CurrentTime - client_p->localClient->firsttime;
+    int connected = CurrentTime - client_p->connection->firsttime;
 
     if (error == 0)
     {
@@ -980,7 +980,7 @@ exit_aborted_clients(void)
 void
 del_accept(struct split_nuh_item *accept_p, struct Client *client_p)
 {
-  dlinkDelete(&accept_p->node, &client_p->localClient->acceptlist);
+  dlinkDelete(&accept_p->node, &client_p->connection->acceptlist);
 
   MyFree(accept_p->nickptr);
   MyFree(accept_p->userptr);
@@ -995,7 +995,7 @@ find_accept(const char *nick, const char *user,
 {
   dlink_node *ptr = NULL;
 
-  DLINK_FOREACH(ptr, client_p->localClient->acceptlist.head)
+  DLINK_FOREACH(ptr, client_p->connection->acceptlist.head)
   {
     struct split_nuh_item *accept_p = ptr->data;
 
@@ -1044,7 +1044,7 @@ del_all_accepts(struct Client *client_p)
 {
   dlink_node *ptr = NULL, *ptr_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->localClient->acceptlist.head)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->connection->acceptlist.head)
     del_accept(ptr->data, client_p);
 }
 
@@ -1054,13 +1054,13 @@ idle_time_get(const struct Client *source_p, const struct Client *target_p)
   unsigned int idle = 0;
   unsigned int min_idle = 0;
   unsigned int max_idle = 0;
-  const struct ClassItem *class = get_class_ptr(&target_p->localClient->confs);
+  const struct ClassItem *class = get_class_ptr(&target_p->connection->confs);
 
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target_p == source_p)
-    return CurrentTime - target_p->localClient->last_privmsg;
+    return CurrentTime - target_p->connection->last_privmsg;
   if (HasUMode(source_p, UMODE_OPER) &&
       !(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
-    return CurrentTime - target_p->localClient->last_privmsg;
+    return CurrentTime - target_p->connection->last_privmsg;
 
   min_idle = class->min_idle;
   max_idle = class->max_idle;
@@ -1071,7 +1071,7 @@ idle_time_get(const struct Client *source_p, const struct Client *target_p)
   if (class->flags & CLASS_FLAGS_RANDOM_IDLE)
     idle = genrand_int32();
   else
-    idle = CurrentTime - target_p->localClient->last_privmsg;
+    idle = CurrentTime - target_p->connection->last_privmsg;
 
   if (!max_idle)
     idle = 0;

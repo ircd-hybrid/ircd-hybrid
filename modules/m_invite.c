@@ -64,7 +64,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   {
     const dlink_node *ptr = NULL;
 
-    DLINK_FOREACH(ptr, source_p->localClient->invited.head)
+    DLINK_FOREACH(ptr, source_p->connection->invited.head)
       sendto_one_numeric(source_p, &me, RPL_INVITELIST,
                          ((struct Channel *)ptr->data)->chname);
     sendto_one_numeric(source_p, &me, RPL_ENDOFINVITELIST);
@@ -110,17 +110,17 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((source_p->localClient->invite.last_attempt + ConfigChannel.invite_client_time) < CurrentTime)
-    source_p->localClient->invite.count = 0;
+  if ((source_p->connection->invite.last_attempt + ConfigChannel.invite_client_time) < CurrentTime)
+    source_p->connection->invite.count = 0;
 
-  if (source_p->localClient->invite.count > ConfigChannel.invite_client_count)
+  if (source_p->connection->invite.count > ConfigChannel.invite_client_count)
   {
     sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->chname, "user");
     return 0;
   }
 
-  source_p->localClient->invite.last_attempt = CurrentTime;
-  source_p->localClient->invite.count++;
+  source_p->connection->invite.last_attempt = CurrentTime;
+  source_p->connection->invite.count++;
 
   sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->chname);
 

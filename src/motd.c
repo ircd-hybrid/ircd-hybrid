@@ -231,7 +231,7 @@ motd_lookup(const struct Client *client_p)
   if (!MyConnect(client_p))  /* Not my user, always return remote motd */
     return MotdList.remote;
 
-  class = get_class_ptr(&client_p->localClient->confs);
+  class = get_class_ptr(&client_p->connection->confs);
   assert(class);
 
   /* Check the motd blocks first */
@@ -250,13 +250,13 @@ motd_lookup(const struct Client *client_p)
           return motd;
         break;
       case MOTD_IPMASKV4:
-          if (client_p->localClient->aftype == AF_INET)
-            if (match_ipv4(&client_p->localClient->ip, &motd->address, motd->addrbits))
+          if (client_p->connection->aftype == AF_INET)
+            if (match_ipv4(&client_p->connection->ip, &motd->address, motd->addrbits))
               return motd;
         break;
       case MOTD_IPMASKV6:
-          if (client_p->localClient->aftype == AF_INET6)
-            if (match_ipv6(&client_p->localClient->ip, &motd->address, motd->addrbits))
+          if (client_p->connection->aftype == AF_INET6)
+            if (match_ipv6(&client_p->connection->ip, &motd->address, motd->addrbits))
               return motd;
         break;
       default: break;

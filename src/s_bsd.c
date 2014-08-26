@@ -162,16 +162,16 @@ close_connection(struct Client *client_p)
   if (IsClient(client_p))
   {
     ++ServerStats.is_cl;
-    ServerStats.is_cbs += client_p->localClient->send.bytes;
-    ServerStats.is_cbr += client_p->localClient->recv.bytes;
-    ServerStats.is_cti += CurrentTime - client_p->localClient->firsttime;
+    ServerStats.is_cbs += client_p->connection->send.bytes;
+    ServerStats.is_cbr += client_p->connection->recv.bytes;
+    ServerStats.is_cti += CurrentTime - client_p->connection->firsttime;
   }
   else if (IsServer(client_p))
   {
     ++ServerStats.is_sv;
-    ServerStats.is_sbs += client_p->localClient->send.bytes;
-    ServerStats.is_sbr += client_p->localClient->recv.bytes;
-    ServerStats.is_sti += CurrentTime - client_p->localClient->firsttime;
+    ServerStats.is_sbs += client_p->connection->send.bytes;
+    ServerStats.is_sbr += client_p->connection->recv.bytes;
+    ServerStats.is_sti += CurrentTime - client_p->connection->firsttime;
 
     DLINK_FOREACH(ptr, server_items.head)
     {
@@ -191,22 +191,22 @@ close_connection(struct Client *client_p)
     ++ServerStats.is_ni;
 
 #ifdef HAVE_LIBCRYPTO
-  if (client_p->localClient->fd.ssl)
+  if (client_p->connection->fd.ssl)
   {
-    SSL_set_shutdown(client_p->localClient->fd.ssl, SSL_RECEIVED_SHUTDOWN);
+    SSL_set_shutdown(client_p->connection->fd.ssl, SSL_RECEIVED_SHUTDOWN);
 
-    if (!SSL_shutdown(client_p->localClient->fd.ssl))
-      SSL_shutdown(client_p->localClient->fd.ssl);
+    if (!SSL_shutdown(client_p->connection->fd.ssl))
+      SSL_shutdown(client_p->connection->fd.ssl);
   }
 #endif
-  if (client_p->localClient->fd.flags.open)
-    fd_close(&client_p->localClient->fd);
+  if (client_p->connection->fd.flags.open)
+    fd_close(&client_p->connection->fd);
 
-  dbuf_clear(&client_p->localClient->buf_sendq);
-  dbuf_clear(&client_p->localClient->buf_recvq);
+  dbuf_clear(&client_p->connection->buf_sendq);
+  dbuf_clear(&client_p->connection->buf_recvq);
 
-  MyFree(client_p->localClient->password);
-  client_p->localClient->password = NULL;
+  MyFree(client_p->connection->password);
+  client_p->connection->password = NULL;
 
   detach_conf(client_p, CONF_CLIENT|CONF_OPER|CONF_SERVER);
 }
@@ -223,23 +223,23 @@ ssl_handshake(fde_t *fd, void *data)
   X509 *cert = NULL;
   int ret = 0;
 
-  if ((ret = SSL_accept(client_p->localClient->fd.ssl)) <= 0)
+  if ((ret = SSL_accept(client_p->connection->fd.ssl)) <= 0)
   {
-    if ((CurrentTime - client_p->localClient->firsttime) > 30)
+    if ((CurrentTime - client_p->connection->firsttime) > 30)
     {
       exit_client(client_p, "Timeout during SSL handshake");
       return;
     }
 
-    switch (SSL_get_error(client_p->localClient->fd.ssl, ret))
+    switch (SSL_get_error(client_p->connection->fd.ssl, ret))
     {
       case SSL_ERROR_WANT_WRITE:
-        comm_setselect(&client_p->localClient->fd, COMM_SELECT_WRITE,
+        comm_setselect(&client_p->connection->fd, COMM_SELECT_WRITE,
                        ssl_handshake, client_p, 30);
         return;
 
       case SSL_ERROR_WANT_READ:
-        comm_setselect(&client_p->localClient->fd, COMM_SELECT_READ,
+        comm_setselect(&client_p->connection->fd, COMM_SELECT_READ,
                        ssl_handshake, client_p, 30);
         return;
 
@@ -249,11 +249,11 @@ ssl_handshake(fde_t *fd, void *data)
     }
   }
 
-  comm_settimeout(&client_p->localClient->fd, 0, NULL, NULL);
+  comm_settimeout(&client_p->connection->fd, 0, NULL, NULL);
 
-  if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
+  if ((cert = SSL_get_peer_certificate(client_p->connection->fd.ssl)))
   {
-    int res = SSL_get_verify_result(client_p->localClient->fd.ssl);
+    int res = SSL_get_verify_result(client_p->connection->fd.ssl);
     char buf[EVP_MAX_MD_SIZE * 2 + 1] = "";
     unsigned char md[EVP_MAX_MD_SIZE] = "";
 
@@ -291,7 +291,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 {
   struct Client *client_p = make_client(NULL);
 
-  fd_open(&client_p->localClient->fd, fd, 1,
+  fd_open(&client_p->connection->fd, fd, 1,
           (listener->flags & LISTENER_SSL) ?
           "Incoming SSL connection" : "Incoming connection");
 
@@ -299,19 +299,19 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
    * copy address to 'sockhost' as a string, copy it to host too
    * so we have something valid to put into error messages...
    */
-  memcpy(&client_p->localClient->ip, irn, sizeof(struct irc_ssaddr));
+  memcpy(&client_p->connection->ip, irn, sizeof(struct irc_ssaddr));
 
-  getnameinfo((struct sockaddr *)&client_p->localClient->ip,
-              client_p->localClient->ip.ss_len, client_p->sockhost,
+  getnameinfo((struct sockaddr *)&client_p->connection->ip,
+              client_p->connection->ip.ss_len, client_p->sockhost,
               sizeof(client_p->sockhost), NULL, 0, NI_NUMERICHOST);
-  client_p->localClient->aftype = client_p->localClient->ip.ss.ss_family;
+  client_p->connection->aftype = client_p->connection->ip.ss.ss_family;
 
 #ifdef HAVE_LIBGEOIP
   /* XXX IPV6 SUPPORT XXX */
   if (irn->ss.ss_family == AF_INET && geoip_ctx)
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&client_p->localClient->ip;
-    client_p->localClient->country_id = GeoIP_id_by_ipnum(geoip_ctx, (unsigned long)ntohl(v4->sin_addr.s_addr));
+    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&client_p->connection->ip;
+    client_p->connection->country_id = GeoIP_id_by_ipnum(geoip_ctx, (unsigned long)ntohl(v4->sin_addr.s_addr));
   }
 #endif
 
@@ -325,13 +325,13 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   else
     strlcpy(client_p->host, client_p->sockhost, sizeof(client_p->host));
 
-  client_p->localClient->listener = listener;
+  client_p->connection->listener = listener;
   ++listener->ref_count;
 
 #ifdef HAVE_LIBCRYPTO
   if (listener->flags & LISTENER_SSL)
   {
-    if ((client_p->localClient->fd.ssl = SSL_new(ConfigServerInfo.server_ctx)) == NULL)
+    if ((client_p->connection->fd.ssl = SSL_new(ConfigServerInfo.server_ctx)) == NULL)
     {
       ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
            ERR_error_string(ERR_get_error(), NULL));
@@ -342,7 +342,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
     }
 
     AddFlag(client_p, FLAGS_SSL);
-    SSL_set_fd(client_p->localClient->fd.ssl, fd);
+    SSL_set_fd(client_p->connection->fd.ssl, fd);
     ssl_handshake(NULL, client_p);
   }
   else

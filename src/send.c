@@ -89,14 +89,14 @@ send_message(struct Client *to, struct dbuf_block *buf)
   assert(!IsMe(to));
   assert(to != &me);
 
-  if (dbuf_length(&to->localClient->buf_sendq) + buf->size > get_sendq(&to->localClient->confs))
+  if (dbuf_length(&to->connection->buf_sendq) + buf->size > get_sendq(&to->connection->confs))
   {
     if (IsServer(to))
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Max SendQ limit exceeded for %s: %lu > %u",
                            get_client_name(to, HIDE_IP),
-                           (unsigned long)(dbuf_length(&to->localClient->buf_sendq) + buf->size),
-                           get_sendq(&to->localClient->confs));
+                           (unsigned long)(dbuf_length(&to->connection->buf_sendq) + buf->size),
+                           get_sendq(&to->connection->confs));
     if (IsClient(to))
       SetSendQExceeded(to);
 
@@ -104,15 +104,15 @@ send_message(struct Client *to, struct dbuf_block *buf)
     return;
   }
 
-  dbuf_add(&to->localClient->buf_sendq, buf);
+  dbuf_add(&to->connection->buf_sendq, buf);
 
   /*
    * Update statistics. The following is slightly incorrect because
    * it counts messages even if queued, but bytes only really sent.
    * Queued bytes get updated in send_queued_write().
    */
-  ++to->localClient->send.messages;
-  ++me.localClient->send.messages;
+  ++to->connection->send.messages;
+  ++me.connection->send.messages;
 
   send_queued_write(to);
 }
@@ -185,7 +185,7 @@ void
 sendq_unblocked(fde_t *fd, void *data)
 {
   struct Client *client_p = data;
-  assert(fd == &client_p->localClient->fd);
+  assert(fd == &client_p->connection->fd);
 
   DelFlag(client_p, FLAGS_BLOCKED);
   send_queued_write(client_p);
@@ -210,21 +210,21 @@ send_queued_write(struct Client *to)
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
-  if (dbuf_length(&to->localClient->buf_sendq))
+  if (dbuf_length(&to->connection->buf_sendq))
   {
     do
     {
-      struct dbuf_block *first = to->localClient->buf_sendq.blocks.head->data;
+      struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
 
 #ifdef HAVE_LIBCRYPTO
-      if (to->localClient->fd.ssl)
+      if (to->connection->fd.ssl)
       {
-        retlen = SSL_write(to->localClient->fd.ssl, first->data + to->localClient->buf_sendq.pos, first->size - to->localClient->buf_sendq.pos);
+        retlen = SSL_write(to->connection->fd.ssl, first->data + to->connection->buf_sendq.pos, first->size - to->connection->buf_sendq.pos);
 
         /* translate openssl error codes, sigh */
         if (retlen < 0)
         {
-          switch (SSL_get_error(to->localClient->fd.ssl, retlen))
+          switch (SSL_get_error(to->connection->fd.ssl, retlen))
           {
             case SSL_ERROR_WANT_READ:
               return;  /* retry later, don't register for write events */
@@ -242,24 +242,24 @@ send_queued_write(struct Client *to)
       }
       else
 #endif
-        retlen = send(to->localClient->fd.fd, first->data + to->localClient->buf_sendq.pos, first->size - to->localClient->buf_sendq.pos, 0);
+        retlen = send(to->connection->fd.fd, first->data + to->connection->buf_sendq.pos, first->size - to->connection->buf_sendq.pos, 0);
 
       if (retlen <= 0)
         break;
 
-      dbuf_delete(&to->localClient->buf_sendq, retlen);
+      dbuf_delete(&to->connection->buf_sendq, retlen);
 
       /* We have some data written .. update counters */
-      to->localClient->send.bytes += retlen;
-      me.localClient->send.bytes += retlen;
-    } while (dbuf_length(&to->localClient->buf_sendq));
+      to->connection->send.bytes += retlen;
+      me.connection->send.bytes += retlen;
+    } while (dbuf_length(&to->connection->buf_sendq));
 
     if (retlen < 0 && ignoreErrno(errno))
     {
       AddFlag(to, FLAGS_BLOCKED);
 
       /* we have a non-fatal error, reschedule a write */
-      comm_setselect(&to->localClient->fd, COMM_SELECT_WRITE,
+      comm_setselect(&to->connection->fd, COMM_SELECT_WRITE,
                      sendq_unblocked, to, 0);
     }
     else if (retlen <= 0)
@@ -444,9 +444,9 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
     if (MyConnect(target_p))
       send_message(target_p, local_buf);
-    else if (target_p->from->localClient->serial != current_serial)
+    else if (target_p->from->connection->serial != current_serial)
       send_message_remote(target_p->from, from, remote_buf);
-    target_p->from->localClient->serial = current_serial;
+    target_p->from->connection->serial = current_serial;
   }
 
   dbuf_ref_free(local_buf);
@@ -498,10 +498,10 @@ sendto_server(struct Client *one,
     if (one && (client_p == one->from))
       continue;
     /* check we have required capabs */
-    if ((client_p->localClient->caps & caps) != caps)
+    if ((client_p->connection->caps & caps) != caps)
       continue;
     /* check we don't have any forbidden capabs */
-    if ((client_p->localClient->caps & nocaps))
+    if ((client_p->connection->caps & nocaps))
       continue;
 
     send_message(client_p, buffer);
@@ -549,19 +549,19 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
       target_p = ms->client_p;
 
       if (target_p == user || IsDefunct(target_p) ||
-          target_p->localClient->serial == current_serial)
+          target_p->connection->serial == current_serial)
         continue;
 
       if (HasCap(target_p, cap) != cap)
         continue;
 
-      target_p->localClient->serial = current_serial;
+      target_p->connection->serial = current_serial;
       send_message(target_p, buffer);
     }
   }
 
   if (touser && MyConnect(user) && !IsDead(user) &&
-      user->localClient->serial != current_serial)
+      user->connection->serial != current_serial)
     if (HasCap(user, cap) == cap)
       send_message(user, buffer);
 
@@ -793,7 +793,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
     if (IsMe(target_p) || target_p->from == source_p->from)
       continue;
 
-    if (target_p->from->localClient->serial == current_serial)
+    if (target_p->from->connection->serial == current_serial)
       continue;
 
     if (!match(mask, target_p->name))
@@ -802,7 +802,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
        * if we set the serial here, then we'll never do a
        * match() again, if !IsCapable()
        */
-      target_p->from->localClient->serial = current_serial;
+      target_p->from->connection->serial = current_serial;
 
       if (!IsCapable(target_p->from, cap))
         continue;

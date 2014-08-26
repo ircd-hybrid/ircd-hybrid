@@ -158,7 +158,7 @@ set_initial_nick(struct Client *source_p, const char *nick)
 
   /* This had to be copied here to avoid problems.. */
   source_p->tsinfo = CurrentTime;
-  source_p->localClient->registration &= ~REG_NEED_NICK;
+  source_p->connection->registration &= ~REG_NEED_NICK;
 
   if (source_p->name[0])
     hash_del_client(source_p);
@@ -167,9 +167,9 @@ set_initial_nick(struct Client *source_p, const char *nick)
   hash_add_client(source_p);
 
   /* fd_desc is long enough */
-  fd_note(&source_p->localClient->fd, "Nick: %s", nick);
+  fd_note(&source_p->connection->fd, "Nick: %s", nick);
 
-  if (!source_p->localClient->registration)
+  if (!source_p->connection->registration)
     register_local_user(source_p);
 }
 
@@ -194,13 +194,13 @@ change_local_nick(struct Client *source_p, const char *nick)
    * on a channel, send note of change to all clients
    * on that channel. Propagate notice to other servers.
    */
-  if ((source_p->localClient->nick.last_attempt +
+  if ((source_p->connection->nick.last_attempt +
        ConfigGeneral.max_nick_time) < CurrentTime)
-    source_p->localClient->nick.count = 0;
+    source_p->connection->nick.count = 0;
 
   if (ConfigGeneral.anti_nick_flood &&
       !HasUMode(source_p, UMODE_OPER) &&
-      source_p->localClient->nick.count >
+      source_p->connection->nick.count >
       ConfigGeneral.max_nick_changes)
   {
     sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST, nick,
@@ -208,8 +208,8 @@ change_local_nick(struct Client *source_p, const char *nick)
     return;
   }
 
-  source_p->localClient->nick.last_attempt = CurrentTime;
-  source_p->localClient->nick.count++;
+  source_p->connection->nick.last_attempt = CurrentTime;
+  source_p->connection->nick.count++;
 
   samenick = !irccmp(source_p->name, nick);
 
@@ -248,7 +248,7 @@ change_local_nick(struct Client *source_p, const char *nick)
     watch_check_hash(source_p, RPL_LOGON);
 
   /* fd_desc is long enough */
-  fd_note(&source_p->localClient->fd, "Nick: %s", nick);
+  fd_note(&source_p->connection->fd, "Nick: %s", nick);
 }
 
 /*!

@@ -65,13 +65,13 @@ check_gline(struct AddressRec *arec)
     switch (arec->masktype)
     {
       case HM_IPV4:
-        if (client_p->localClient->aftype == AF_INET)
-          if (match_ipv4(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+        if (client_p->connection->aftype == AF_INET)
+          if (match_ipv4(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_try_ban(client_p, arec->conf);
         break;
       case HM_IPV6:
-        if (client_p->localClient->aftype == AF_INET6)
-          if (match_ipv6(&client_p->localClient->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+        if (client_p->connection->aftype == AF_INET6)
+          if (match_ipv6(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_try_ban(client_p, arec->conf);
         break;
       default:  /* HM_HOST */

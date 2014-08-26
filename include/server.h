@@ -71,9 +71,9 @@ struct Capability
 /*
  * Capability macros.
  */
-#define IsCapable(x, cap)       ((x)->localClient->caps &   (cap))
-#define SetCapable(x, cap)      ((x)->localClient->caps |=  (cap))
-#define ClearCap(x, cap)        ((x)->localClient->caps &= ~(cap))
+#define IsCapable(x, cap)       ((x)->connection->caps &   (cap))
+#define SetCapable(x, cap)      ((x)->connection->caps |=  (cap))
+#define ClearCap(x, cap)        ((x)->connection->caps &= ~(cap))
 
 
 /*

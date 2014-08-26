@@ -99,7 +99,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
     {
       if (*(s + 1))
       {
-        if (dlink_list_length(&source_p->localClient->watches) >=
+        if (dlink_list_length(&source_p->connection->watches) >=
             ConfigGeneral.max_watch)
         {
           sendto_one_numeric(source_p, &me, ERR_TOOMANYWATCH, s + 1, ConfigGeneral.max_watch);
@@ -159,13 +159,13 @@ m_watch(struct Client *source_p, int parc, char *parv[])
         count = dlink_list_length(&anptr->watched_by);
 
       sendto_one_numeric(source_p, &me, RPL_WATCHSTAT,
-                 dlink_list_length(&source_p->localClient->watches), count);
+                 dlink_list_length(&source_p->connection->watches), count);
 
       /*
        * Send a list of everybody in their WATCH list. Be careful
        * not to buffer overflow.
        */
-      if ((ptr = source_p->localClient->watches.head) == NULL)
+      if ((ptr = source_p->connection->watches.head) == NULL)
       {
         sendto_one_numeric(source_p, &me, RPL_ENDOFWATCHLIST, *s);
         continue;
@@ -212,7 +212,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
 
       list_requested |= 0x2;
 
-      DLINK_FOREACH(ptr, source_p->localClient->watches.head)
+      DLINK_FOREACH(ptr, source_p->connection->watches.head)
       {
         const struct Watch *anptr = ptr->data;
 

@@ -124,7 +124,7 @@ parse_client_queued(struct Client *client_p)
 {
   int dolen = 0;
   int checkflood = 1;
-  struct Connection *lclient_p = client_p->localClient;
+  struct Connection *lclient_p = client_p->connection;
 
   if (IsUnknown(client_p))
   {
@@ -231,12 +231,12 @@ flood_endgrace(struct Client *client_p)
   SetFloodDone(client_p);
 
   /* Drop their flood limit back down */
-  client_p->localClient->allow_read = MAX_FLOOD;
+  client_p->connection->allow_read = MAX_FLOOD;
 
   /* sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,
    * so reset it.
    */
-  client_p->localClient->sent_parsed = 0;
+  client_p->connection->sent_parsed = 0;
 }
 
 /*
@@ -249,7 +249,7 @@ void
 flood_recalc(fde_t *fd, void *data)
 {
   struct Client *client_p = data;
-  struct Connection *lclient_p = client_p->localClient;
+  struct Connection *lclient_p = client_p->connection;
 
   /* allow a bursting client their allocation per second, allow
    * a client whos flooding an extra 2 per second
@@ -333,12 +333,12 @@ read_packet(fde_t *fd, void *data)
       return;
     }
 
-    dbuf_put(&client_p->localClient->buf_recvq, readBuf, length);
+    dbuf_put(&client_p->connection->buf_recvq, readBuf, length);
 
-    if (client_p->localClient->lasttime < CurrentTime)
-      client_p->localClient->lasttime = CurrentTime;
-    if (client_p->localClient->lasttime > client_p->localClient->since)
-      client_p->localClient->since = CurrentTime;
+    if (client_p->connection->lasttime < CurrentTime)
+      client_p->connection->lasttime = CurrentTime;
+    if (client_p->connection->lasttime > client_p->connection->since)
+      client_p->connection->since = CurrentTime;
 
     ClearPingSent(client_p);
 
@@ -350,8 +350,8 @@ read_packet(fde_t *fd, void *data)
 
     /* Check to make sure we're not flooding */
     if (!(IsServer(client_p) || IsHandshake(client_p) || IsConnecting(client_p))
-        && (dbuf_length(&client_p->localClient->buf_recvq) >
-            get_recvq(&client_p->localClient->confs)))
+        && (dbuf_length(&client_p->connection->buf_recvq) >
+            get_recvq(&client_p->connection->confs)))
     {
       if (!(ConfigGeneral.no_oper_flood && HasUMode(client_p, UMODE_OPER)))
       {
@@ -388,14 +388,14 @@ client_dopacket(struct Client *client_p, char *buffer, size_t length)
   /*
    * Update messages received
    */
-  ++me.localClient->recv.messages;
-  ++client_p->localClient->recv.messages;
+  ++me.connection->recv.messages;
+  ++client_p->connection->recv.messages;
 
   /*
    * Update bytes received
    */
-  client_p->localClient->recv.bytes += length;
-  me.localClient->recv.bytes += length;
+  client_p->connection->recv.bytes += length;
+  me.connection->recv.bytes += length;
 
   parse(client_p, buffer, buffer + length);
 }

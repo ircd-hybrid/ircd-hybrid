@@ -348,14 +348,14 @@ user_welcome(struct Client *source_p)
   {
     AddUMode(source_p, UMODE_SSL);
     sendto_one_notice(source_p, &me, ":*** Connected securely via %s",
-                      ssl_get_cipher(source_p->localClient->fd.ssl));
+                      ssl_get_cipher(source_p->connection->fd.ssl));
   }
 #endif
 
   sendto_one_numeric(source_p, &me, RPL_WELCOME, ConfigServerInfo.network_name,
                      source_p->name);
   sendto_one_numeric(source_p, &me, RPL_YOURHOST,
-                     get_listener_name(source_p->localClient->listener), ircd_version);
+                     get_listener_name(source_p->connection->listener), ircd_version);
   sendto_one_numeric(source_p, &me, RPL_CREATED, built_date);
   sendto_one_numeric(source_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
   show_isupport(source_p);
@@ -413,20 +413,20 @@ register_local_user(struct Client *source_p)
 
   assert(source_p == source_p->from);
   assert(MyConnect(source_p));
-  assert(!source_p->localClient->registration);
+  assert(!source_p->connection->registration);
 
   ClearCap(source_p, CAP_TS6);
 
   if (ConfigGeneral.ping_cookie)
   {
-    if (!IsPingSent(source_p) && !source_p->localClient->random_ping)
+    if (!IsPingSent(source_p) && !source_p->connection->random_ping)
     {
       do
-        source_p->localClient->random_ping = genrand_int32();
-      while (!source_p->localClient->random_ping);
+        source_p->connection->random_ping = genrand_int32();
+      while (!source_p->connection->random_ping);
 
       sendto_one(source_p, "PING :%u",
-                 source_p->localClient->random_ping);
+                 source_p->connection->random_ping);
       SetPingSent(source_p);
       return;
     }
@@ -435,9 +435,9 @@ register_local_user(struct Client *source_p)
       return;
   }
 
-  source_p->localClient->last_privmsg = CurrentTime;
+  source_p->connection->last_privmsg = CurrentTime;
   /* Straight up the maximum rate of flooding... */
-  source_p->localClient->allow_read = MAX_FLOOD_BURST;
+  source_p->connection->allow_read = MAX_FLOOD_BURST;
 
   if (!check_client(source_p))
     return;
@@ -450,7 +450,7 @@ register_local_user(struct Client *source_p)
             sizeof(source_p->host));
   }
 
-  conf = source_p->localClient->confs.head->data;
+  conf = source_p->connection->confs.head->data;
 
   if (!IsGotId(source_p))
   {
@@ -481,7 +481,7 @@ register_local_user(struct Client *source_p)
   /* Password check */
   if (!EmptyString(conf->passwd))
   {
-    if (!match_conf_password(source_p->localClient->password, conf))
+    if (!match_conf_password(source_p->connection->password, conf))
     {
       ++ServerStats.is_ref;
 
@@ -492,7 +492,7 @@ register_local_user(struct Client *source_p)
   }
 
   /*
-   * Don't free source_p->localClient->password here - it can be required
+   * Don't free source_p->connection->password here - it can be required
    * by masked /stats I if there are auth{} blocks with need_password = no;
    * --adx
    */
@@ -551,7 +551,7 @@ register_local_user(struct Client *source_p)
                        source_p->name, source_p->username, source_p->host,
                        ConfigGeneral.hide_spoof_ips && IsIPSpoof(source_p) ?
                        "255.255.255.255" : source_p->sockhost,
-                       get_client_class(&source_p->localClient->confs),
+                       get_client_class(&source_p->connection->confs),
                        source_p->info, source_p->id);
 
   if (ConfigGeneral.invisible_on_connect)
@@ -581,7 +581,7 @@ register_local_user(struct Client *source_p)
 
   assert(dlinkFind(&unknown_list, source_p));
 
-  dlink_move_node(&source_p->localClient->lclient_node,
+  dlink_move_node(&source_p->connection->lclient_node,
                   &unknown_list, &local_client_list);
 
   user_welcome(source_p);
@@ -936,9 +936,9 @@ void
 oper_up(struct Client *source_p)
 {
   const unsigned int old = source_p->umodes;
-  const struct MaskItem *conf = source_p->localClient->confs.head->data;
+  const struct MaskItem *conf = source_p->connection->confs.head->data;
 
-  assert(source_p->localClient->confs.head);
+  assert(source_p->connection->confs.head);
 
   ++Count.oper;
   SetOper(source_p);

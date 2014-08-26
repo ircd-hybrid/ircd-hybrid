@@ -129,7 +129,7 @@ resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
 
     if (exptr->coid)
     {
-      if (exptr->coid == who->localClient->country_id)
+      if (exptr->coid == who->connection->country_id)
         return 1;
     }
     else if (!match(exptr->name, who->name) && !match(exptr->user, who->username))
@@ -141,13 +141,13 @@ resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
             return 1;
           break;
         case HM_IPV4:
-          if (who->localClient->aftype == AF_INET)
-            if (match_ipv4(&who->localClient->ip, &exptr->addr, exptr->bits))
+          if (who->connection->aftype == AF_INET)
+            if (match_ipv4(&who->connection->ip, &exptr->addr, exptr->bits))
               return 1;
           break;
         case HM_IPV6:
-          if (who->localClient->aftype == AF_INET6)
-            if (match_ipv6(&who->localClient->ip, &exptr->addr, exptr->bits))
+          if (who->connection->aftype == AF_INET6)
+            if (match_ipv6(&who->connection->ip, &exptr->addr, exptr->bits))
               return 1;
           break;
         default:

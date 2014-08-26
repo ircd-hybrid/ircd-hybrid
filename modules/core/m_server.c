@@ -248,7 +248,7 @@ server_estab(struct Client *client_p)
   inpath = get_client_name(client_p, MASK_IP); /* "refresh" inpath with host */
   host   = client_p->name;
 
-  if ((conf = find_conf_name(&client_p->localClient->confs, host, CONF_SERVER))
+  if ((conf = find_conf_name(&client_p->connection->confs, host, CONF_SERVER))
       == NULL)
   {
     /* This shouldn't happen, better tell the ops... -A1kmm */
@@ -259,8 +259,8 @@ server_estab(struct Client *client_p)
     return;
   }
 
-  MyFree(client_p->localClient->password);
-  client_p->localClient->password = NULL;
+  MyFree(client_p->connection->password);
+  client_p->connection->password = NULL;
 
   /* Its got identd, since it's a server */
   SetGotId(client_p);
@@ -318,7 +318,7 @@ server_estab(struct Client *client_p)
 
   assert(dlinkFind(&unknown_list, client_p));
 
-  dlink_move_node(&client_p->localClient->lclient_node,
+  dlink_move_node(&client_p->connection->lclient_node,
                   &unknown_list, &local_server_list);
 
   Count.myserver++;
@@ -332,22 +332,22 @@ server_estab(struct Client *client_p)
   make_server(client_p);
 
   /* Fixing eob timings.. -gnp */
-  client_p->localClient->firsttime = CurrentTime;
+  client_p->connection->firsttime = CurrentTime;
 
   if (find_matching_name_conf(CONF_SERVICE, client_p->name, NULL, NULL, 0))
     AddFlag(client_p, FLAGS_SERVICE);
 
   /* Show the real host/IP to admins */
 #ifdef HAVE_LIBCRYPTO
-  if (client_p->localClient->fd.ssl)
+  if (client_p->connection->fd.ssl)
   {
 #ifndef OPENSSL_NO_COMP
-    compression = SSL_get_current_compression(client_p->localClient->fd.ssl);
-    expansion   = SSL_get_current_expansion(client_p->localClient->fd.ssl);
+    compression = SSL_get_current_compression(client_p->connection->fd.ssl);
+    expansion   = SSL_get_current_expansion(client_p->connection->fd.ssl);
 #endif
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-                         inpath_ip, ssl_get_cipher(client_p->localClient->fd.ssl),
+                         inpath_ip, ssl_get_cipher(client_p->connection->fd.ssl),
 #ifndef OPENSSL_NO_COMP
                          compression ? SSL_COMP_get_name(compression) : "NONE",
                          expansion ? SSL_COMP_get_name(expansion) : "NONE",
@@ -358,7 +358,7 @@ server_estab(struct Client *client_p)
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                          "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-                         inpath, ssl_get_cipher(client_p->localClient->fd.ssl),
+                         inpath, ssl_get_cipher(client_p->connection->fd.ssl),
 #ifndef OPENSSL_NO_COMP
                          compression ? SSL_COMP_get_name(compression) : "NONE",
                          expansion ? SSL_COMP_get_name(expansion) : "NONE",
@@ -367,7 +367,7 @@ server_estab(struct Client *client_p)
 #endif
                          show_capabilities(client_p));
     ilog(LOG_TYPE_IRCD, "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-         inpath_ip, ssl_get_cipher(client_p->localClient->fd.ssl),
+         inpath_ip, ssl_get_cipher(client_p->connection->fd.ssl),
 #ifndef OPENSSL_NO_COMP
          compression ? SSL_COMP_get_name(compression) : "NONE",
          expansion ? SSL_COMP_get_name(expansion) : "NONE",
@@ -390,7 +390,7 @@ server_estab(struct Client *client_p)
          inpath_ip, show_capabilities(client_p));
   }
 
-  fd_note(&client_p->localClient->fd, "Server: %s", client_p->name);
+  fd_note(&client_p->connection->fd, "Server: %s", client_p->name);
 
   sendto_server(client_p, NOCAPS, NOCAPS, ":%s SID %s 2 %s :%s%s",
                 me.id, client_p->name, client_p->id,
@@ -723,7 +723,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     if (target_p != client_p)
       exit_client(target_p, "Overridden");
 
-  conf = client_p->localClient->confs.head->data;
+  conf = client_p->connection->confs.head->data;
 
   /* See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.

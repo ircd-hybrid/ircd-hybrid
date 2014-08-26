@@ -51,7 +51,7 @@ do_user(struct Client *source_p,
   assert(source_p->username != username);
   assert(IsUnknown(source_p));
 
-  source_p->localClient->registration &= ~REG_NEED_USER;
+  source_p->connection->registration &= ~REG_NEED_USER;
   source_p->servptr = &me;  /* Don't take the clients word for it, ever */
 
   strlcpy(source_p->info, realname, sizeof(source_p->info));
@@ -59,7 +59,7 @@ do_user(struct Client *source_p,
   if (!IsGotId(source_p))
     strlcpy(source_p->username, username, sizeof(source_p->username));
 
-  if (!source_p->localClient->registration)
+  if (!source_p->connection->registration)
     register_local_user(source_p);
 }
 
@@ -82,7 +82,7 @@ mr_user(struct Client *source_p, int parc, char *parv[])
 {
   char *p = NULL;
 
-  if (source_p->localClient->listener->flags & LISTENER_SERVER)
+  if (source_p->connection->listener->flags & LISTENER_SERVER)
   {
     exit_client(source_p, "Use a different port");
     return 0;

@@ -361,11 +361,11 @@ rebuild_cidr_list(struct ClassItem *class)
   DLINK_FOREACH(ptr, local_client_list.head)
   {
     struct Client *client_p = ptr->data;
-    struct MaskItem *conf = client_p->localClient->confs.tail->data;
+    struct MaskItem *conf = client_p->connection->confs.tail->data;
 
     if (conf && (conf->type == CONF_CLIENT))
       if (conf->class == class)
-        cidr_limit_reached(1, &client_p->localClient->ip, class);
+        cidr_limit_reached(1, &client_p->connection->ip, class);
   }
 }
 

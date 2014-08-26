@@ -206,7 +206,7 @@ static int
 cap_ls(struct Client *source_p, const char *caplist)
 {
   if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
-    source_p->localClient->registration |= REG_NEED_CAP;
+    source_p->connection->registration |= REG_NEED_CAP;
 
   return send_caplist(source_p, 0, 0, "LS");  /* Send list of capabilities */
 }
@@ -217,12 +217,12 @@ cap_req(struct Client *source_p, const char *caplist)
   const char *cl = caplist;
   struct capabilities *cap = NULL;
   unsigned int set = 0, rem = 0;
-  unsigned int cs = source_p->localClient->cap_client; /* capability set */
-  unsigned int as = source_p->localClient->cap_active; /* active set */
+  unsigned int cs = source_p->connection->cap_client; /* capability set */
+  unsigned int as = source_p->connection->cap_active; /* active set */
   int neg = 0;
 
   if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
-    source_p->localClient->registration |= REG_NEED_CAP;
+    source_p->connection->registration |= REG_NEED_CAP;
 
   while (cl) {  /* Walk through the capabilities list... */
     if (!(cap = find_cap(&cl, &neg))  /* Look up capability... */
@@ -257,8 +257,8 @@ cap_req(struct Client *source_p, const char *caplist)
   /* Notify client of accepted changes and copy over results. */
   send_caplist(source_p, set, rem, "ACK");
 
-  source_p->localClient->cap_client = cs;
-  source_p->localClient->cap_active = as;
+  source_p->connection->cap_client = cs;
+  source_p->connection->cap_active = as;
 
   return 0;
 }
@@ -279,14 +279,14 @@ cap_ack(struct Client *source_p, const char *caplist)
   {
     /* Walk through the capabilities list... */
     if (!(cap = find_cap(&cl, &neg)) ||  /* Look up capability... */
-        (neg ? (source_p->localClient->cap_active & cap->cap) :
-              !(source_p->localClient->cap_active & cap->cap)))  /* uh... */
+        (neg ? (source_p->connection->cap_active & cap->cap) :
+              !(source_p->connection->cap_active & cap->cap)))  /* uh... */
       continue;
 
     if (neg)  /* Set or clear the active capability... */
-      source_p->localClient->cap_active &= ~cap->cap;
+      source_p->connection->cap_active &= ~cap->cap;
     else
-      source_p->localClient->cap_active |=  cap->cap;
+      source_p->connection->cap_active |=  cap->cap;
   }
 
   return 0;
@@ -303,14 +303,14 @@ cap_clear(struct Client *source_p, const char *caplist)
     cap = &capab_list[ii];
 
     /* Only clear active non-sticky capabilities. */
-    if (!(source_p->localClient->cap_active & cap->cap) || (cap->flags & CAPFL_STICKY))
+    if (!(source_p->connection->cap_active & cap->cap) || (cap->flags & CAPFL_STICKY))
       continue;
 
     cleared |= cap->cap;
-    source_p->localClient->cap_client &= ~cap->cap;
+    source_p->connection->cap_client &= ~cap->cap;
 
     if (!(cap->flags & CAPFL_PROTO))
-      source_p->localClient->cap_active &= ~cap->cap;
+      source_p->connection->cap_active &= ~cap->cap;
   }
 
   return send_caplist(source_p, 0, cleared, "ACK");
@@ -323,10 +323,10 @@ cap_end(struct Client *source_p, const char *caplist)
     return 0;  /* So just ignore the message... */
 
   /* Capability negotiation is now done... */
-  source_p->localClient->registration &= ~REG_NEED_CAP;
+  source_p->connection->registration &= ~REG_NEED_CAP;
 
   /* If client is now done... */
-  if (!source_p->localClient->registration)
+  if (!source_p->connection->registration)
   {
     register_local_user(source_p);
     return 0;
@@ -339,7 +339,7 @@ static int
 cap_list(struct Client *source_p, const char *caplist)
 {
   /* Send the list of the client's capabilities */
-  return send_caplist(source_p, source_p->localClient->cap_client, 0, "LIST");
+  return send_caplist(source_p, source_p->connection->cap_client, 0, "LIST");
 }
 
 static struct subcmd

@@ -63,8 +63,8 @@ mr_pass(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  MyFree(source_p->localClient->password);
-  source_p->localClient->password = xstrndup(parv[1], IRCD_MIN(strlen(parv[1]), PASSWDLEN));
+  MyFree(source_p->connection->password);
+  source_p->connection->password = xstrndup(parv[1], IRCD_MIN(strlen(parv[1]), PASSWDLEN));
 
   if (parc > 2)
   {

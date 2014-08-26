@@ -73,17 +73,17 @@ m_away(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((source_p->localClient->away.last_attempt + ConfigGeneral.away_time) < CurrentTime)
-    source_p->localClient->away.count = 0;
+  if ((source_p->connection->away.last_attempt + ConfigGeneral.away_time) < CurrentTime)
+    source_p->connection->away.count = 0;
 
-  if (source_p->localClient->away.count > ConfigGeneral.away_count)
+  if (source_p->connection->away.count > ConfigGeneral.away_count)
   {
     sendto_one_numeric(source_p, &me, ERR_TOOMANYAWAY);
     return 0;
   }
 
-  source_p->localClient->away.last_attempt = CurrentTime;
-  source_p->localClient->away.count++;
+  source_p->connection->away.last_attempt = CurrentTime;
+  source_p->connection->away.count++;
 
   strlcpy(source_p->away, parv[1], sizeof(source_p->away));
 

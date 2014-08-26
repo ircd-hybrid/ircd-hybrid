@@ -193,7 +193,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
         source_p == target_p)
       sendto_one_numeric(source_p, &me, RPL_WHOISIDLE, target_p->name,
                          idle_time_get(source_p, target_p),
-                         target_p->localClient->firsttime);
+                         target_p->connection->firsttime);
 }
 
 /* do_whois()

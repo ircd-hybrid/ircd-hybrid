@@ -348,7 +348,7 @@ check_server(const char *name, struct Client *client_p)
     {
       error = -2;
 
-      if (!match_conf_password(client_p->localClient->password, conf))
+      if (!match_conf_password(client_p->connection->password, conf))
         return -2;
 
       if (!EmptyString(conf->certfp))
@@ -376,13 +376,13 @@ check_server(const char *name, struct Client *client_p)
         v6 = (struct sockaddr_in6 *)&server_conf->addr;
 
         if (IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr))
-          memcpy(&server_conf->addr, &client_p->localClient->ip, sizeof(struct irc_ssaddr));
+          memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(struct irc_ssaddr));
         break;
       case AF_INET:
         v4 = (struct sockaddr_in *)&server_conf->addr;
 
         if (v4->sin_addr.s_addr == INADDR_NONE)
-          memcpy(&server_conf->addr, &client_p->localClient->ip, sizeof(struct irc_ssaddr));
+          memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(struct irc_ssaddr));
         break;
     }
   }
@@ -622,7 +622,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 
   /* create a socket for the server connection */
-  if (comm_open(&client_p->localClient->fd, conf->addr.ss.ss_family, SOCK_STREAM, 0, NULL) < 0)
+  if (comm_open(&client_p->connection->fd, conf->addr.ss.ss_family, SOCK_STREAM, 0, NULL) < 0)
   {
     /* Eek, failure to create the socket */
     report_error(L_ALL, "opening stream socket to %s: %s", conf->name, errno);
@@ -633,7 +633,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   }
 
   /* servernames are always guaranteed under HOSTLEN chars */
-  fd_note(&client_p->localClient->fd, "Server: %s", conf->name);
+  fd_note(&client_p->connection->fd, "Server: %s", conf->name);
 
   /* Attach config entries to client here rather than in
    * serv_connect_callback(). This to avoid null pointer references.
@@ -665,7 +665,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     strlcpy(client_p->serv->by, "AutoConn.", sizeof(client_p->serv->by));
 
   SetConnecting(client_p);
-  client_p->localClient->aftype = conf->aftype;
+  client_p->connection->aftype = conf->aftype;
 
   /* Now, initiate the connection */
   /* XXX assume that a non 0 type means a specific bind address
@@ -682,7 +682,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         ipn.ss.ss_family = AF_INET;
         ipn.ss_port = 0;
         memcpy(&ipn, &conf->bind, sizeof(struct irc_ssaddr));
-        comm_connect_tcp(&client_p->localClient->fd, conf->host, conf->port,
+        comm_connect_tcp(&client_p->connection->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
                          serv_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
@@ -694,13 +694,13 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         ipn.ss.ss_family = AF_INET;
         ipn.ss_port = 0;
         memcpy(&ipn, &ConfigServerInfo.ip, sizeof(struct irc_ssaddr));
-        comm_connect_tcp(&client_p->localClient->fd, conf->host, conf->port,
+        comm_connect_tcp(&client_p->connection->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
                          serv_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       }
       else
-        comm_connect_tcp(&client_p->localClient->fd, conf->host, conf->port,
+        comm_connect_tcp(&client_p->connection->fd, conf->host, conf->port,
                          NULL, 0, serv_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       break;
@@ -719,7 +719,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
           memcpy(&ipn, &conf->bind, sizeof(struct irc_ssaddr));
           ipn.ss.ss_family = AF_INET6;
           ipn.ss_port = 0;
-          comm_connect_tcp(&client_p->localClient->fd,
+          comm_connect_tcp(&client_p->connection->fd,
                            conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
                            serv_connect_callback, client_p,
@@ -730,14 +730,14 @@ serv_connect(struct MaskItem *conf, struct Client *by)
           memcpy(&ipn, &ConfigServerInfo.ip6, sizeof(struct irc_ssaddr));
           ipn.ss.ss_family = AF_INET6;
           ipn.ss_port = 0;
-          comm_connect_tcp(&client_p->localClient->fd,
+          comm_connect_tcp(&client_p->connection->fd,
                            conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
                            serv_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
         }
         else
-          comm_connect_tcp(&client_p->localClient->fd,
+          comm_connect_tcp(&client_p->connection->fd,
                            conf->host, conf->port,
                            NULL, 0, serv_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
@@ -753,7 +753,7 @@ finish_ssl_server_handshake(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
 
-  conf = find_conf_name(&client_p->localClient->confs,
+  conf = find_conf_name(&client_p->connection->confs,
                         client_p->name, CONF_SERVER);
   if (conf == NULL)
   {
@@ -790,7 +790,7 @@ finish_ssl_server_handshake(struct Client *client_p)
 
   /* don't move to serv_list yet -- we haven't sent a burst! */
   /* If we get here, we're ok, so lets start reading some data */
-  comm_setselect(&client_p->localClient->fd, COMM_SELECT_READ, read_packet, client_p, 0);
+  comm_setselect(&client_p->connection->fd, COMM_SELECT_READ, read_packet, client_p, 0);
 }
 
 static void
@@ -800,16 +800,16 @@ ssl_server_handshake(fde_t *fd, void *data)
   X509 *cert = NULL;
   int ret = 0;
 
-  if ((ret = SSL_connect(client_p->localClient->fd.ssl)) <= 0)
+  if ((ret = SSL_connect(client_p->connection->fd.ssl)) <= 0)
   {
-    switch (SSL_get_error(client_p->localClient->fd.ssl, ret))
+    switch (SSL_get_error(client_p->connection->fd.ssl, ret))
     {
       case SSL_ERROR_WANT_WRITE:
-        comm_setselect(&client_p->localClient->fd, COMM_SELECT_WRITE,
+        comm_setselect(&client_p->connection->fd, COMM_SELECT_WRITE,
                        ssl_server_handshake, client_p, 0);
         return;
       case SSL_ERROR_WANT_READ:
-        comm_setselect(&client_p->localClient->fd, COMM_SELECT_READ,
+        comm_setselect(&client_p->connection->fd, COMM_SELECT_READ,
                        ssl_server_handshake, client_p, 0);
         return;
       default:
@@ -824,9 +824,9 @@ ssl_server_handshake(fde_t *fd, void *data)
     }
   }
 
-  if ((cert = SSL_get_peer_certificate(client_p->localClient->fd.ssl)))
+  if ((cert = SSL_get_peer_certificate(client_p->connection->fd.ssl)))
   {
-    int res = SSL_get_verify_result(client_p->localClient->fd.ssl);
+    int res = SSL_get_verify_result(client_p->connection->fd.ssl);
     char buf[EVP_MAX_MD_SIZE * 2 + 1] = "";
     unsigned char md[EVP_MAX_MD_SIZE] = "";
 
@@ -854,7 +854,7 @@ ssl_server_handshake(fde_t *fd, void *data)
 static void
 ssl_connect_init(struct Client *client_p, struct MaskItem *conf, fde_t *fd)
 {
-  if ((client_p->localClient->fd.ssl = SSL_new(ConfigServerInfo.client_ctx)) == NULL)
+  if ((client_p->connection->fd.ssl = SSL_new(ConfigServerInfo.client_ctx)) == NULL)
   {
     ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
          ERR_error_string(ERR_get_error(), NULL));
@@ -866,7 +866,7 @@ ssl_connect_init(struct Client *client_p, struct MaskItem *conf, fde_t *fd)
   SSL_set_fd(fd->ssl, fd->fd);
 
   if (!EmptyString(conf->cipher_list))
-    SSL_set_cipher_list(client_p->localClient->fd.ssl, conf->cipher_list);
+    SSL_set_cipher_list(client_p->connection->fd.ssl, conf->cipher_list);
 
   ssl_server_handshake(NULL, client_p);
 }
@@ -888,10 +888,10 @@ serv_connect_callback(fde_t *fd, int status, void *data)
 
   /* First, make sure it's a real client! */
   assert(client_p);
-  assert(&client_p->localClient->fd == fd);
+  assert(&client_p->connection->fd == fd);
 
   /* Next, for backward purposes, record the ip of the server */
-  memcpy(&client_p->localClient->ip, &fd->connect.hostaddr,
+  memcpy(&client_p->connection->ip, &fd->connect.hostaddr,
          sizeof(struct irc_ssaddr));
 
   /* Check the status */
@@ -922,7 +922,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
 
   /* COMM_OK, so continue the connection procedure */
   /* Get the C/N lines */
-  conf = find_conf_name(&client_p->localClient->confs,
+  conf = find_conf_name(&client_p->connection->confs,
                         client_p->name, CONF_SERVER);
   if (conf == NULL)
   {

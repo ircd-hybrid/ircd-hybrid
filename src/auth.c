@@ -90,7 +90,7 @@ static void auth_connect_callback(fde_t *, int, void *);
 static struct AuthRequest *
 make_auth_request(struct Client *client)
 {
-  struct AuthRequest *request = &client->localClient->auth;
+  struct AuthRequest *request = &client->connection->auth;
 
   memset(request, 0, sizeof(*request));
 
@@ -124,15 +124,15 @@ release_auth_client(struct AuthRequest *auth)
    * us. This is what read_packet() does.
    *     -- adrian
    */
-  client->localClient->allow_read = MAX_FLOOD;
-  comm_setflush(&client->localClient->fd, 1000, flood_recalc, client);
+  client->connection->allow_read = MAX_FLOOD;
+  comm_setflush(&client->connection->fd, 1000, flood_recalc, client);
 
-  client->localClient->since     = CurrentTime;
-  client->localClient->lasttime  = CurrentTime;
-  client->localClient->firsttime = CurrentTime;
+  client->connection->since     = CurrentTime;
+  client->connection->lasttime  = CurrentTime;
+  client->connection->firsttime = CurrentTime;
   client->flags |= FLAGS_FINISHED_AUTH;
 
-  read_packet(&client->localClient->fd, client);
+  read_packet(&client->connection->fd, client);
 }
 
 /*
@@ -154,9 +154,9 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
     const struct sockaddr_in *v4, *v4dns;
     const struct sockaddr_in6 *v6, *v6dns;
 
-    if (auth->client->localClient->ip.ss.ss_family == AF_INET6)
+    if (auth->client->connection->ip.ss.ss_family == AF_INET6)
     {
-      v6 = (const struct sockaddr_in6 *)&auth->client->localClient->ip;
+      v6 = (const struct sockaddr_in6 *)&auth->client->connection->ip;
       v6dns = (const struct sockaddr_in6 *)addr;
 
       if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)) != 0)
@@ -168,7 +168,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
     }
     else
     {
-      v4 = (const struct sockaddr_in *)&auth->client->localClient->ip;
+      v4 = (const struct sockaddr_in *)&auth->client->connection->ip;
       v4dns = (const struct sockaddr_in *)addr;
 
       if (v4->sin_addr.s_addr != v4dns->sin_addr.s_addr)
@@ -226,7 +226,7 @@ start_auth_query(struct AuthRequest *auth)
   struct sockaddr_in6 *v6;
 
   /* open a socket of the same type as the client socket */
-  if (comm_open(&auth->fd, auth->client->localClient->ip.ss.ss_family,
+  if (comm_open(&auth->fd, auth->client->connection->ip.ss.ss_family,
                 SOCK_STREAM, 0, "ident") == -1)
   {
     report_error(L_ALL, "creating auth stream socket %s:%s",
@@ -247,7 +247,7 @@ start_auth_query(struct AuthRequest *auth)
    * and machines with multiple IP addresses are common now
    */
   memset(&localaddr, 0, locallen);
-  getsockname(auth->client->localClient->fd.fd, (struct sockaddr*)&localaddr,
+  getsockname(auth->client->connection->fd.fd, (struct sockaddr*)&localaddr,
       &locallen);
 
   remove_ipv6_mapping(&localaddr);
@@ -257,7 +257,7 @@ start_auth_query(struct AuthRequest *auth)
 
   comm_connect_tcp(&auth->fd, auth->client->sockhost, RFC1413_PORT,
       (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
-      auth, auth->client->localClient->ip.ss.ss_family,
+      auth, auth->client->connection->ip.ss.ss_family,
       GlobalSetOptions.ident_timeout);
   return 1; /* We suceed here for now */
 }
@@ -290,7 +290,7 @@ start_auth(struct Client *client_p)
     start_auth_query(auth);
   }
 
-  gethost_byaddr(auth_dns_callback, auth, &client_p->localClient->ip);
+  gethost_byaddr(auth_dns_callback, auth, &client_p->connection->ip);
 }
 
 /*
@@ -359,8 +359,8 @@ auth_connect_callback(fde_t *fd, int error, void *data)
     return;
   }
 
-  if (getsockname(auth->client->localClient->fd.fd, (struct sockaddr *)&us, &ulen) ||
-      getpeername(auth->client->localClient->fd.fd, (struct sockaddr *)&them, &tlen))
+  if (getsockname(auth->client->connection->fd.fd, (struct sockaddr *)&us, &ulen) ||
+      getpeername(auth->client->connection->fd.fd, (struct sockaddr *)&them, &tlen))
   {
     ilog(LOG_TYPE_IRCD, "auth get{sock,peer}name error for %s",
          get_client_name(auth->client, SHOW_IP));

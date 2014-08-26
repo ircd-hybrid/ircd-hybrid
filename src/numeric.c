@@ -514,7 +514,7 @@ static const char *const replies[] =
 /* 481 ERR_NOPRIVILEGES */ ":Permission denied - You're not an IRC operator",
 /* 482 ERR_CHANOPRIVSNEEDED */ "%s :You're not channel operator",
 /* 483 ERR_CANTKILLSERVER */ ":You cannot kill a server!",
-/* 484 ERR_RESTRICTED */ ":You are restricted",
+/* 484 */ NULL,
 /* 485 ERR_CHANBANREASON */ "%s :Cannot join channel (%s)",
 /* 486 ERR_NONONREG */ "%s :You must identify to a registered nick to private message that person",
 /* 487 */ NULL,

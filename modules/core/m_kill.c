@@ -40,10 +40,17 @@
 #include "modules.h"
 
 
-/* mo_kill()
- *  parv[0] = command
- *  parv[1] = kill victim
- *  parv[2] = kill path
+/*! \brief KILL command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = kill victim
+ *      - parv[2] = reason
  */
 static int
 mo_kill(struct Client *source_p, int parc, char *parv[])
@@ -138,7 +145,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
                   source_p->username, source_p->name, reason);
 
     /*
-     * Set FLAGS_KILLED. This prevents exit_one_client from sending
+     * Set FLAGS_KILLED. This prevents exit_client() from sending
      * the unnecessary QUIT for this. (This flag should never be
      * set in any other place)
      */
@@ -150,10 +157,17 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/* ms_kill()
- *  parv[0] = command
- *  parv[1] = kill victim
- *  parv[2] = kill path and reason
+/*! \brief KILL command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = kill victim
+ *      - parv[2] = kill path and reason
  */
 static int
 ms_kill(struct Client *source_p, int parc, char *parv[])
@@ -209,7 +223,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
    * Path must contain at least 2 !'s, or bitchx falsely declares it
    * local --fl
    */
-  if (HasUMode(source_p, UMODE_OPER)) /* send it normally */
+  if (HasUMode(source_p, UMODE_OPER))  /* Send it normally */
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s!%s!%s!%s %s",
                          target_p->name, target_p->username, target_p->host,

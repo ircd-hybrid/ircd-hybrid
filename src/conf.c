@@ -522,9 +522,8 @@ find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
 
     if (conf->type == type)
     {
-      if (conf->name && (!irccmp(conf->name, name) ||
-                         !match(conf->name, name)))
-      return conf;
+      if (conf->name && !irccmp(conf->name, name))
+        return conf;
     }
   }
 

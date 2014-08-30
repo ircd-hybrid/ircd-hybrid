@@ -233,7 +233,6 @@ static void
 server_estab(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
-  char *host;
   const char *inpath;
   static char inpath_ip[HOSTLEN * 2 + USERLEN + 6];
   dlink_node *ptr;
@@ -246,15 +245,14 @@ server_estab(struct Client *client_p)
   strlcpy(inpath_ip, get_client_name(client_p, SHOW_IP), sizeof(inpath_ip));
 
   inpath = get_client_name(client_p, MASK_IP); /* "refresh" inpath with host */
-  host   = client_p->name;
 
-  if ((conf = find_conf_name(&client_p->connection->confs, host, CONF_SERVER))
+  if ((conf = find_conf_name(&client_p->connection->confs, client_p->name, CONF_SERVER))
       == NULL)
   {
     /* This shouldn't happen, better tell the ops... -A1kmm */
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Warning: Lost connect{} block "
-                         "for server %s(this shouldn't happen)!", host);
+                         "for server %s(this shouldn't happen)!", client_p->name);
     exit_client(client_p, "Lost connect{} block!");
     return;
   }

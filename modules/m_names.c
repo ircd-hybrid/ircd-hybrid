@@ -52,17 +52,10 @@ static int
 m_names(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  char *s = NULL;
-  char *para = parc > 1 ? parv[1] : NULL;
+  const char *para = parc > 1 ? parv[1] : NULL;
 
   if (!EmptyString(para))
   {
-    if ((s = strchr(para, ',')))
-      *s = '\0';
-
-    if (*para == '\0')
-      return 0;
-
     if ((chptr = hash_find_channel(para)))
       channel_member_names(source_p, chptr, 1);
     else

@@ -39,10 +39,17 @@
 #include "modules.h"
 
 
-/* mo_squit - SQUIT message handler
- *  parv[0] = command
- *  parv[1] = server name
- *  parv[2] = comment
+/*! \brief SQUIT command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = server name
+ *      - parv[2] = comment
  */
 static int
 mo_squit(struct Client *source_p, int parc, char *parv[])
@@ -126,14 +133,17 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/** NOTE: I removed wildcard lookups here, because a wildcarded
- **       SQUIT should/can never happen in ms_squit. -Michael
- **/
-
-/* ms_squit - SQUIT message handler
- *  parv[0] = command
- *  parv[1] = server name
- *  parv[2] = comment
+/*! \brief SQUIT command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = server name
+ *      - parv[2] = comment
  */
 static int
 ms_squit(struct Client *source_p, int parc, char *parv[])

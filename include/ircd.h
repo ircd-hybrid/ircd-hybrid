@@ -69,9 +69,9 @@ struct ServerStatistics
   unsigned int    is_kill; /* number of kills generated on collisions */
   unsigned int    is_asuc; /* successful auth requests */
   unsigned int    is_abad; /* bad auth requests */
-};
+} ServerStats;
 
-struct Counter
+struct
 {
   uint64_t totalrestartcount; /* Total client count ever */
   unsigned int myserver;      /* my servers          */
@@ -103,7 +103,6 @@ extern const char *pidFileName;
 extern int dorehash;
 extern int doremotd;
 extern struct event event_write_links_file;
-extern struct ServerStatistics ServerStats;
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec
 extern int unsigned default_server_capabs;

@@ -254,9 +254,6 @@ server_estab(struct Client *client_p)
   MyFree(client_p->connection->password);
   client_p->connection->password = NULL;
 
-  /* Its got identd, since it's a server */
-  SetGotId(client_p);
-
   /* If there is something in the serv_list, it might be this
    * connecting server..
    */

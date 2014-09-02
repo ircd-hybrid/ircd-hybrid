@@ -254,17 +254,11 @@ server_estab(struct Client *client_p)
   MyFree(client_p->connection->password);
   client_p->connection->password = NULL;
 
-  /* If there is something in the serv_list, it might be this
-   * connecting server..
-   */
-  if (!ConfigServerInfo.hub && local_server_list.head)
+  if (!ConfigServerInfo.hub && dlink_list_length(&local_server_list))
   {
-    if (client_p != local_server_list.head->data || local_server_list.head->next)
-    {
-      ++ServerStats.is_ref;
-      exit_client(client_p, "I'm a leaf not a hub");
-      return;
-    }
+    ++ServerStats.is_ref;
+    exit_client(client_p, "I'm a leaf not a hub");
+    return;
   }
 
   if (IsUnknown(client_p))

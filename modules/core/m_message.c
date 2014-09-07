@@ -198,7 +198,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
         sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "Possible Flooder %s on %s target: %s",
                              get_client_name(source_p, HIDE_IP),
-                             source_p->servptr->name, chptr->chname);
+                             source_p->servptr->name, chptr->name);
 
         SetFloodNoticed(chptr);
         chptr->received_number_of_privmsgs += 2;  /* Add a bit of penalty */
@@ -206,7 +206,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
 
       if (MyClient(source_p) && p_or_n != NOTICE)
         sendto_one_notice(source_p, &me, ":*** Message to %s throttled due to flooding",
-                          chptr->chname);
+                          chptr->name);
       return 1;
     }
     else
@@ -237,7 +237,7 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
     if (result == CAN_SEND_OPV ||
         !flood_attack_channel(p_or_n, source_p, chptr))
       sendto_channel_butone(source_p, source_p, chptr, 0, "%s %s :%s",
-                            command, chptr->chname, text);
+                            command, chptr->name, text);
   }
   else
   {
@@ -245,13 +245,13 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
     {
       if (result == ERR_NOCTRLSONCHAN)
         sendto_one_numeric(source_p, &me, ERR_NOCTRLSONCHAN,
-                           chptr->chname, text);
+                           chptr->name, text);
       else if (result == ERR_NEEDREGGEDNICK)
         sendto_one_numeric(source_p, &me, ERR_NEEDREGGEDNICK,
-                           chptr->chname);
+                           chptr->name);
       else
         sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN,
-                           chptr->chname);
+                           chptr->name);
     }
   }
 }
@@ -298,7 +298,7 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *source_p,
     if (result == CAN_SEND_OPV ||
         !flood_attack_channel(p_or_n, source_p, chptr))
       sendto_channel_butone(source_p, source_p, chptr, type, "%s %c%s :%s",
-                            command, c, chptr->chname, text);
+                            command, c, chptr->name, text);
   }
   else
   {
@@ -306,13 +306,13 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *source_p,
     {
       if (result == ERR_NOCTRLSONCHAN)
         sendto_one_numeric(source_p, &me, ERR_NOCTRLSONCHAN,
-                           chptr->chname, text);
+                           chptr->name, text);
       else if (result == ERR_NEEDREGGEDNICK)
         sendto_one_numeric(source_p, &me, ERR_NEEDREGGEDNICK,
-                           chptr->chname);
+                           chptr->name);
       else
         sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN,
-                           chptr->chname);
+                           chptr->name);
     }
   }
 }

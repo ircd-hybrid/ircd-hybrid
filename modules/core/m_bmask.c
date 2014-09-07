@@ -95,7 +95,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
 
   mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s +",
                   (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
-                  chptr->chname);
+                  chptr->name);
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 
@@ -138,7 +138,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s BMASK %lu %s %s :%s",
-                source_p->id, (unsigned long)chptr->channelts, chptr->chname,
+                source_p->id, (unsigned long)chptr->channelts, chptr->name,
                 parv[3], parv[4]);
   return 0;
 }

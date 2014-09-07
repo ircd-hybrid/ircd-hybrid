@@ -72,13 +72,13 @@ m_kick(struct Client *source_p, int parc, char *parv[])
 
   if ((ms_source = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
     return 0;
   }
 
   if (!has_member_flags(ms_source, CHFL_CHANOP|CHFL_HALFOP))
   {
-    sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
     return 0;
   }
 
@@ -87,7 +87,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
 
   if (!(ms_target = find_channel_link(target_p, chptr)))
   {
-    sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
     return 0;
   }
 
@@ -95,7 +95,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   {
     if (has_member_flags(ms_target, CHFL_CHANOP|CHFL_HALFOP))
     {
-      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
       return 0;
     }
   }
@@ -107,10 +107,10 @@ m_kick(struct Client *source_p, int parc, char *parv[])
 
   sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s KICK %s %s :%s",
                        source_p->name, source_p->username,
-                       source_p->host, chptr->chname,
+                       source_p->host, chptr->name,
                        target_p->name, reason);
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
-                source_p->id, chptr->chname,
+                source_p->id, chptr->name,
                 target_p->id, reason);
   remove_user_from_channel(ms_target);
   return 0;
@@ -149,16 +149,16 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
 
   if (IsServer(source_p))
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s KICK %s %s :%s",
-                         source_p->name, chptr->chname,
+                         source_p->name, chptr->name,
                          target_p->name, reason);
   else
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s KICK %s %s :%s",
                          source_p->name, source_p->username,
-                         source_p->host, chptr->chname,
+                         source_p->host, chptr->name,
                          target_p->name, reason);
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
-                source_p->id, chptr->chname,
+                source_p->id, chptr->name,
                 target_p->id, reason);
   remove_user_from_channel(ms_target);
   return 0;

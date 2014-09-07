@@ -72,7 +72,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
   /* Normal channel, just be sure they aren't on it */
   if (IsMember(source_p, chptr))
   {
-    sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, chptr->name);
     return 0;
   }
 
@@ -80,7 +80,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
         (chptr->mode.limit && dlink_list_length(&chptr->members) >=
          chptr->mode.limit)))
   {
-    sendto_one_numeric(source_p, &me, ERR_CHANOPEN, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_CHANOPEN, chptr->name);
     return 0;
   }
 
@@ -91,7 +91,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
      */
     if (PrivateChannel(chptr) || is_banned(chptr, source_p))
     {
-      sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, chptr->name);
       return 0;
     }
 
@@ -100,33 +100,33 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 
     if (source_p->connection->knock.count > ConfigChannel.knock_client_count)
     {
-      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->chname, "user");
+      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->name, "user");
       return 0;
     }
 
     if ((chptr->last_knock + ConfigChannel.knock_delay_channel) > CurrentTime)
     {
-      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->chname, "channel");
+      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->name, "channel");
       return 0;
     }
 
     source_p->connection->knock.last_attempt = CurrentTime;
     source_p->connection->knock.count++;
 
-    sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, chptr->chname);
+    sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, chptr->name);
   }
 
   chptr->last_knock = CurrentTime;
 
   sendto_channel_local(CHFL_CHANOP, 0, chptr,
                        ":%s NOTICE @%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
-                       me.name, chptr->chname, chptr->chname,
+                       me.name, chptr->name, chptr->name,
                        source_p->name,
                        source_p->username,
                        source_p->host);
 
   sendto_server(source_p, CAP_KNOCK, NOCAPS, ":%s KNOCK %s",
-                source_p->id, chptr->chname);
+                source_p->id, chptr->name);
   return 0;
 }
 

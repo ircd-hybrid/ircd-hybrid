@@ -85,7 +85,7 @@ struct Channel
 
   float number_joined;
 
-  char chname[CHANNELLEN + 1];
+  char name[CHANNELLEN + 1];
 };
 
 /*! \brief Membership structure */

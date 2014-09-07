@@ -236,7 +236,7 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
   }
   else
     sendto_channel_butone(source_p, source_p, chptr, 0, "%u %s %s",
-                          numeric, chptr->chname, parv[2]);
+                          numeric, chptr->name, parv[2]);
 }
 
 /* handle_command()

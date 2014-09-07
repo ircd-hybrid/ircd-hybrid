@@ -63,7 +63,6 @@
 GeoIP *geoip_ctx;
 #endif
 
-struct ServerStatistics ServerStats;
 struct timeval SystemTime;
 struct Client me;             /* That's me */
 struct Connection meConnection; /* That's also part of me */

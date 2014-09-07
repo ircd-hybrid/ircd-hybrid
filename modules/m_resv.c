@@ -86,10 +86,10 @@ mo_resv(struct Client *client_p, struct Client *source_p,
      */
     if (tkline_time != 0)
       cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_RESV,
-                     "RESV %d %s 0 : %s", (int)tkline_time, resv, reason);
+                     "RESV %d %s 0 :%s", (int)tkline_time, resv, reason);
     else
       cluster_a_line(source_p, "RESV", CAP_KLN, SHARED_RESV,
-                     "%s : %s", resv, reason);
+                     "%s :%s", resv, reason);
   }
 
   parse_resv(source_p, resv, (int)tkline_time, reason);

@@ -107,7 +107,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who,
         sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "Possible Join Flooder %s on %s target: %s",
                              get_client_name(who, HIDE_IP),
-                             who->servptr->name, chptr->chname);
+                             who->servptr->name, chptr->name);
       }
     }
 
@@ -167,7 +167,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
 
   start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %lu %s %s %s:",
                              me.id, (unsigned long)chptr->channelts,
-                             chptr->chname, modebuf, parabuf);
+                             chptr->name, modebuf, parabuf);
 
   DLINK_FOREACH(ptr, chptr->members.head)
   {
@@ -233,7 +233,7 @@ send_mode_list(struct Client *client_p, struct Channel *chptr,
     return;
 
   mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %lu %s %c :", me.id,
-                  (unsigned long)chptr->channelts, chptr->chname, flag);
+                  (unsigned long)chptr->channelts, chptr->name, flag);
   cur_len = mlen;
 
   DLINK_FOREACH(ptr, list->head)
@@ -342,17 +342,17 @@ free_channel_list(dlink_list *list)
   assert(list->tail == NULL && list->head == NULL);
 }
 
-/*! \brief Get Channel block for chname (and allocate a new channel
+/*! \brief Get Channel block for name (and allocate a new channel
  *         block, if it didn't exist before)
- * \param chname Channel name
+ * \param name Channel name
  * \return Channel block
  */
 struct Channel *
-make_channel(const char *chname)
+make_channel(const char *name)
 {
   struct Channel *chptr = NULL;
 
-  assert(!EmptyString(chname));
+  assert(!EmptyString(name));
 
   chptr = mp_pool_get(channel_pool);
 
@@ -360,7 +360,7 @@ make_channel(const char *chname)
   chptr->channelts = CurrentTime;
   chptr->last_join_time = CurrentTime;
 
-  strlcpy(chptr->chname, chname, sizeof(chptr->chname));
+  strlcpy(chptr->name, name, sizeof(chptr->name));
   dlinkAdd(chptr, &chptr->node, &channel_list);
 
   hash_add_channel(chptr);
@@ -426,7 +426,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
   {
     t = buf + snprintf(buf, sizeof(buf), numeric_form(RPL_NAMREPLY),
                        me.name, source_p->name,
-                       channel_pub_or_secret(chptr), chptr->chname);
+                       channel_pub_or_secret(chptr), chptr->name);
     start = t;
 
     DLINK_FOREACH(ptr, chptr->members.head)
@@ -481,7 +481,7 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
   }
 
   if (show_eon)
-    sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, chptr->chname);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, chptr->name);
 }
 
 /*! \brief Adds client to invite list
@@ -737,7 +737,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
 
   if (MyClient(source_p) && !IsExemptResv(source_p))
     if (!(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv))
-      if ((conf = match_find_resv(chptr->chname)) && !resv_find_exempt(source_p, conf))
+      if ((conf = match_find_resv(chptr->name)) && !resv_find_exempt(source_p, conf))
         return ERR_CANNOTSENDTOCHAN;
 
   if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
@@ -914,10 +914,10 @@ channel_do_join_0(struct Client *source_p)
     struct Channel *chptr = ((struct Membership *)ptr->data)->chptr;
 
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
-                  source_p->id, chptr->chname);
+                  source_p->id, chptr->name);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
-                         source_p->host, chptr->chname);
+                         source_p->host, chptr->name);
 
     remove_user_from_channel(ptr->data);
   }
@@ -1015,7 +1015,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       if (splitmode && !HasUMode(source_p, UMODE_OPER) &&
           ConfigChannel.no_join_on_split)
       {
-        sendto_one_numeric(source_p, &me, ERR_UNAVAILRESOURCE, chptr->chname);
+        sendto_one_numeric(source_p, &me, ERR_UNAVAILRESOURCE, chptr->name);
         continue;
       }
 
@@ -1024,7 +1024,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
        */
       if ((i = can_join(source_p, chptr, key)))
       {
-        sendto_one_numeric(source_p, &me, i, chptr->chname);
+        sendto_one_numeric(source_p, &me, i, chptr->name);
         continue;
       }
 
@@ -1051,7 +1051,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
     }
 
     if (!HasUMode(source_p, UMODE_OPER))
-      check_spambot_warning(source_p, chptr->chname);
+      check_spambot_warning(source_p, chptr->name);
 
     add_user_to_channel(chptr, source_p, flags, 1);
 
@@ -1066,16 +1066,16 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
 
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s SJOIN %lu %s +nt :@%s",
                     me.id, (unsigned long)chptr->channelts,
-                    chptr->chname, source_p->id);
+                    chptr->name, source_p->id);
 
       /*
        * Notify all other users on the new channel
        */
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            source_p->name, source_p->username,
-                           source_p->host, chptr->chname);
+                           source_p->host, chptr->name);
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s +nt",
-                           me.name, chptr->chname);
+                           me.name, chptr->name);
 
       if (source_p->away[0])
         sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
@@ -1087,10 +1087,10 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
     {
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
                     source_p->id, (unsigned long)chptr->channelts,
-                    chptr->chname);
+                    chptr->name);
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            source_p->name, source_p->username,
-                           source_p->host, chptr->chname);
+                           source_p->host, chptr->name);
 
       if (source_p->away[0])
         sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
@@ -1103,8 +1103,8 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
 
     if (chptr->topic[0])
     {
-      sendto_one_numeric(source_p, &me, RPL_TOPIC, chptr->chname, chptr->topic);
-      sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME, chptr->chname,
+      sendto_one_numeric(source_p, &me, RPL_TOPIC, chptr->name, chptr->topic);
+      sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME, chptr->name,
                          chptr->topic_info, chptr->topic_time);
     }
 
@@ -1133,7 +1133,7 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
 
   if ((ms = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
     return;
   }
 
@@ -1150,18 +1150,18 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
         < CurrentTime))))
   {
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s :%s",
-                  source_p->id, chptr->chname, reason);
+                  source_p->id, chptr->name, reason);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s :%s",
                          source_p->name, source_p->username,
-                         source_p->host, chptr->chname, reason);
+                         source_p->host, chptr->name, reason);
   }
   else
   {
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
-                  source_p->id, chptr->chname);
+                  source_p->id, chptr->name);
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
-                         source_p->host, chptr->chname);
+                         source_p->host, chptr->name);
   }
 
   remove_user_from_channel(ms);

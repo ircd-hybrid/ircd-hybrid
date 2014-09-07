@@ -66,7 +66,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
     DLINK_FOREACH(ptr, source_p->connection->invited.head)
       sendto_one_numeric(source_p, &me, RPL_INVITELIST,
-                         ((struct Channel *)ptr->data)->chname);
+                         ((struct Channel *)ptr->data)->name);
     sendto_one_numeric(source_p, &me, RPL_ENDOFINVITELIST);
     return 0;
   }
@@ -94,19 +94,19 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
   if ((ms = find_channel_link(source_p, chptr)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
     return 0;
   }
 
   if (!has_member_flags(ms, CHFL_CHANOP))
   {
-    sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
     return 0;
   }
 
   if (IsMember(target_p, chptr))
   {
-    sendto_one_numeric(source_p, &me, ERR_USERONCHANNEL, target_p->name, chptr->chname);
+    sendto_one_numeric(source_p, &me, ERR_USERONCHANNEL, target_p->name, chptr->name);
     return 0;
   }
 
@@ -115,14 +115,14 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
   if (source_p->connection->invite.count > ConfigChannel.invite_client_count)
   {
-    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->chname, "user");
+    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->name, "user");
     return 0;
   }
 
   source_p->connection->invite.last_attempt = CurrentTime;
   source_p->connection->invite.count++;
 
-  sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->chname);
+  sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->name);
 
   if (target_p->away[0])
     sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
@@ -132,14 +132,14 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     sendto_one(target_p, ":%s!%s@%s INVITE %s :%s",
                source_p->name, source_p->username,
                source_p->host,
-               target_p->name, chptr->chname);
+               target_p->name, chptr->name);
 
     if (chptr->mode.mode & MODE_INVITEONLY)
     {
       sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP,
                             "NOTICE @%s :%s is inviting %s to %s.",
-                            chptr->chname, source_p->name,
-                            target_p->name, chptr->chname);
+                            chptr->name, source_p->name,
+                            target_p->name, chptr->name);
 
       /* Add the invite if channel is +i */
       add_invite(chptr, target_p);
@@ -148,7 +148,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   else if (target_p->from != source_p->from)
     sendto_one(target_p, ":%s INVITE %s %s %lu",
                source_p->id, target_p->id,
-               chptr->chname, (unsigned long)chptr->channelts);
+               chptr->name, (unsigned long)chptr->channelts);
   return 0;
 }
 
@@ -192,14 +192,14 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
     sendto_one(target_p, ":%s!%s@%s INVITE %s :%s",
                source_p->name, source_p->username,
                source_p->host,
-               target_p->name, chptr->chname);
+               target_p->name, chptr->name);
 
     if (chptr->mode.mode & MODE_INVITEONLY)
     {
       sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP,
                             "NOTICE @%s :%s is inviting %s to %s.",
-                            chptr->chname, source_p->name,
-                            target_p->name, chptr->chname);
+                            chptr->name, source_p->name,
+                            target_p->name, chptr->name);
 
       /* Add the invite if channel is +i */
       add_invite(chptr, target_p);
@@ -208,7 +208,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   else if (target_p->from != source_p->from)
     sendto_one(target_p, ":%s INVITE %s %s %lu",
                source_p->id, target_p->id,
-               chptr->chname, (unsigned long)chptr->channelts);
+               chptr->name, (unsigned long)chptr->channelts);
   return 0;
 }
 

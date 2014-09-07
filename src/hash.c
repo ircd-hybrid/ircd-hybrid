@@ -143,7 +143,7 @@ hash_add_client(struct Client *client_p)
 void
 hash_add_channel(struct Channel *chptr)
 {
-  unsigned int hashv = strhash(chptr->chname);
+  unsigned int hashv = strhash(chptr->name);
 
   chptr->hnextch = channelTable[hashv];
   channelTable[hashv] = chptr;
@@ -270,7 +270,7 @@ hash_del_userhost(struct UserHost *userhost)
 void
 hash_del_channel(struct Channel *chptr)
 {
-  unsigned int hashv = strhash(chptr->chname);
+  unsigned int hashv = strhash(chptr->name);
   struct Channel *tmp = channelTable[hashv];
 
   if (tmp)
@@ -405,13 +405,13 @@ hash_find_channel(const char *name)
 
   if ((chptr = channelTable[hashv]))
   {
-    if (irccmp(name, chptr->chname))
+    if (irccmp(name, chptr->name))
     {
       struct Channel *prev;
 
       while (prev = chptr, (chptr = chptr->hnextch))
       {
-        if (!irccmp(name, chptr->chname))
+        if (!irccmp(name, chptr->name))
         {
           prev->hnextch = chptr->hnextch;
           chptr->hnextch = channelTable[hashv];
@@ -736,16 +736,16 @@ free_list_task(struct Client *source_p)
  * side effects -
  */
 static int
-list_allow_channel(const char *chname, const struct ListTask *lt)
+list_allow_channel(const char *name, const struct ListTask *lt)
 {
   const dlink_node *ptr = NULL;
 
   DLINK_FOREACH(ptr, lt->show_mask.head)
-    if (match(ptr->data, chname) != 0)
+    if (match(ptr->data, name) != 0)
       return 0;
 
   DLINK_FOREACH(ptr, lt->hide_mask.head)
-    if (match(ptr->data, chname) == 0)
+    if (match(ptr->data, name) == 0)
       return 0;
 
   return 1;
@@ -783,7 +783,7 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
   if (lt->topic[0] && match(lt->topic, chptr->topic))
     return;
 
-  if (!list_allow_channel(chptr->chname, lt))
+  if (!list_allow_channel(chptr->name, lt))
     return;
 
   channel_modes(chptr, source_p, modebuf, parabuf);
@@ -793,7 +793,7 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
   else
     snprintf(listbuf, sizeof(listbuf), "[%s]",  modebuf);
 
-  sendto_one_numeric(source_p, &me, RPL_LIST, chptr->chname,
+  sendto_one_numeric(source_p, &me, RPL_LIST, chptr->name,
                      dlink_list_length(&chptr->members),
                      listbuf, chptr->topic);
 }

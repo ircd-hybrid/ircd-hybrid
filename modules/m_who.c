@@ -54,7 +54,7 @@
  */
 static void
 do_who(struct Client *source_p, struct Client *target_p,
-       const char *chname, const char *op_flags)
+       const char *name, const char *op_flags)
 {
   char status[IRCD_BUFSIZE] = "";
 
@@ -70,14 +70,14 @@ do_who(struct Client *source_p, struct Client *target_p,
 
   if (ConfigServerHide.hide_servers || IsHidden(target_p->servptr))
     sendto_one_numeric(source_p, &me, RPL_WHOREPLY,
-               (chname) ? (chname) : "*",
+               (name) ? (name) : "*",
                target_p->username, target_p->host,
                HasUMode(source_p, UMODE_OPER) ? target_p->servptr->name : "*",
                target_p->name, status,
                HasUMode(source_p, UMODE_OPER) ? target_p->hopcount : 0, target_p->info);
   else
     sendto_one_numeric(source_p, &me, RPL_WHOREPLY,
-               (chname) ? (chname) : "*", target_p->username,
+               (name) ? (name) : "*", target_p->username,
                target_p->host, target_p->servptr->name, target_p->name,
                status, target_p->hopcount, target_p->info);
 }
@@ -234,7 +234,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
         if (!HasUMode(target_p, UMODE_OPER) ||
             (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
           continue;
-      do_who(source_p, target_p, chptr->chname, get_member_status(ms, !!HasCap(source_p, CAP_MULTI_PREFIX)));
+      do_who(source_p, target_p, chptr->name, get_member_status(ms, !!HasCap(source_p, CAP_MULTI_PREFIX)));
     }
   }
 }
@@ -299,7 +299,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     }
 
     if (ptr)
-      do_who(source_p, target_p, chptr->chname,
+      do_who(source_p, target_p, chptr->name,
              get_member_status(ptr->data, !!HasCap(source_p, CAP_MULTI_PREFIX)));
     else
       do_who(source_p, target_p, NULL, "");

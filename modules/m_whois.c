@@ -92,7 +92,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
     if (show)
     {
-      if ((cur_len + 4 + strlen(ms->chptr->chname) + 1) > (IRCD_BUFSIZE - 2))
+      if ((cur_len + 4 + strlen(ms->chptr->name) + 1) > (IRCD_BUFSIZE - 2))
       {
         *(t - 1) = '\0';
         sendto_one(source_p, "%s", buf);
@@ -101,7 +101,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
       }
 
       tlen = sprintf(t, "%s%s%s ", show == 2 ? "~" : "", get_member_status(ms, 1),
-                     ms->chptr->chname);
+                     ms->chptr->name);
       t += tlen;
       cur_len += tlen;
       reply_to_send = 1;

@@ -157,7 +157,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     {
       sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                            "*** Bogus TS %lu on %s ignored from %s(via %s)",
-                           (unsigned long)newts, chptr->chname,
+                           (unsigned long)newts, chptr->name,
                            source_p->name, source_p->from->name);
 
       newts = (oldts == 0) ? 0 : 800000000;
@@ -169,10 +169,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     {
       sendto_channel_local(ALL_MEMBERS, 0, chptr,
                            ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
-                           me.name, chptr->chname, chptr->chname, (unsigned long)oldts);
+                           me.name, chptr->name, chptr->name, (unsigned long)oldts);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Server %s changing TS on %s from %lu to 0",
-                           source_p->name, chptr->chname, (unsigned long)oldts);
+                           source_p->name, chptr->name, (unsigned long)oldts);
     }
   }
 
@@ -219,12 +219,12 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :",
                            (IsHidden(source_p) ||
                            ConfigServerHide.hide_servers) ?
-                           me.name : source_p->name, chptr->chname);
+                           me.name : source_p->name, chptr->name);
     }
 
     sendto_channel_local(ALL_MEMBERS, 0, chptr,
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
-                         me.name, chptr->chname, chptr->chname,
+                         me.name, chptr->name, chptr->name,
                          (unsigned long)oldts, (unsigned long)newts);
   }
 
@@ -233,7 +233,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     /* This _SHOULD_ be to ALL_MEMBERS
      * It contains only +imnpstlk, etc */
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s %s",
-                         servername, chptr->chname, modebuf, parabuf);
+                         servername, chptr->name, modebuf, parabuf);
   }
 
   if (*parv[3] != '0' && keep_new_modes)
@@ -246,7 +246,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
                     source_p->id, (unsigned long)tstosend,
-                    chptr->chname, modebuf, parabuf);
+                    chptr->name, modebuf, parabuf);
   uid_ptr = uid_buf + buflen;
 
   /*
@@ -350,7 +350,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
       buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
                         source_p->id, (unsigned long)tstosend,
-                        chptr->chname, modebuf, parabuf);
+                        chptr->name, modebuf, parabuf);
       uid_ptr = uid_buf + buflen;
     }
 
@@ -361,7 +361,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       add_user_to_channel(chptr, target_p, fl, !have_many_nicks);
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
                            target_p->name, target_p->username,
-                           target_p->host, chptr->chname);
+                           target_p->host, chptr->name);
       if (target_p->away[0])
         sendto_channel_local_butone(target_p, 0, CAP_AWAY_NOTIFY, chptr,
                                     ":%s!%s@%s AWAY :%s",
@@ -395,7 +395,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         }
 
         sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
-                            servername, chptr->chname, modebuf, sendbuf);
+                            servername, chptr->name, modebuf, sendbuf);
         mbuf = modebuf;
         *mbuf++ = '+';
 
@@ -421,7 +421,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         }
 
         sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
-                             servername, chptr->chname, modebuf, sendbuf);
+                             servername, chptr->name, modebuf, sendbuf);
 
         mbuf = modebuf;
         *mbuf++ = '+';
@@ -448,7 +448,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         }
 
         sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
-                             servername, chptr->chname, modebuf, sendbuf);
+                             servername, chptr->name, modebuf, sendbuf);
 
         mbuf = modebuf;
         *mbuf++ = '+';
@@ -496,7 +496,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
 
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
-                         servername, chptr->chname, modebuf, sendbuf);
+                         servername, chptr->name, modebuf, sendbuf);
   }
 
   /*
@@ -664,7 +664,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
                            (IsHidden(source_p) || ConfigServerHide.hide_servers) ?
                            me.name : source_p->name,
-                           chptr->chname, lmodebuf, sendbuf);
+                           chptr->name, lmodebuf, sendbuf);
       mbuf = lmodebuf;
       *mbuf++ = '-';
       count = 0;
@@ -686,7 +686,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
                          (IsHidden(source_p) || ConfigServerHide.hide_servers) ?
                          me.name : source_p->name,
-                         chptr->chname, lmodebuf, sendbuf);
+                         chptr->name, lmodebuf, sendbuf);
   }
 }
 
@@ -709,7 +709,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 
   pbuf = lparabuf;
   cur_len = mlen = snprintf(lmodebuf, sizeof(lmodebuf), ":%s MODE %s -",
-                            source_p->name, chptr->chname);
+                            source_p->name, chptr->name);
   mbuf = lmodebuf + mlen;
 
   DLINK_FOREACH_SAFE(ptr, ptr_next, list->head)

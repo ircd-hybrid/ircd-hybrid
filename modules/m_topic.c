@@ -78,7 +78,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
 
     if ((ms = find_channel_link(source_p, chptr)) == NULL)
     {
-      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
       return 0;
     }
 
@@ -92,35 +92,35 @@ m_topic(struct Client *source_p, int parc, char *parv[])
       channel_set_topic(chptr, parv[2], topic_info, CurrentTime, 1);
 
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
-                    source_p->id, chptr->chname,
+                    source_p->id, chptr->name,
                     chptr->topic);
       sendto_channel_local(ALL_MEMBERS, 0,
                            chptr, ":%s!%s@%s TOPIC %s :%s",
                            source_p->name,
                            source_p->username,
                            source_p->host,
-                           chptr->chname, chptr->topic);
+                           chptr->name, chptr->topic);
     }
     else
-      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
   }
   else /* only asking for topic */
   {
     if (!SecretChannel(chptr) || IsMember(source_p, chptr))
     {
       if (chptr->topic[0] == '\0')
-        sendto_one_numeric(source_p, &me, RPL_NOTOPIC, chptr->chname);
+        sendto_one_numeric(source_p, &me, RPL_NOTOPIC, chptr->name);
       else
       {
         sendto_one_numeric(source_p, &me, RPL_TOPIC,
-                           chptr->chname, chptr->topic);
-        sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME, chptr->chname,
+                           chptr->name, chptr->topic);
+        sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME, chptr->name,
                            chptr->topic_info,
                            chptr->topic_time);
       }
     }
     else
-      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
   }
 
   return 0;
@@ -165,20 +165,20 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
   channel_set_topic(chptr, parv[2], topic_info, CurrentTime, 0);
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
-                source_p->id, chptr->chname,
+                source_p->id, chptr->name,
                 chptr->topic);
 
   if (!IsClient(source_p))
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :%s",
                          source_p->name,
-                         chptr->chname, chptr->topic);
+                         chptr->name, chptr->topic);
 
   else
     sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s TOPIC %s :%s",
                          source_p->name,
                          source_p->username,
                          source_p->host,
-                         chptr->chname, chptr->topic);
+                         chptr->name, chptr->topic);
   return 0;
 }
 

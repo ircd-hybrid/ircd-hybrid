@@ -129,7 +129,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
 
     if (num_mask >= ConfigChannel.max_bans)
     {
-      sendto_one_numeric(client_p, &me, ERR_BANLISTFULL, chptr->chname, banid);
+      sendto_one_numeric(client_p, &me, ERR_BANLISTFULL, chptr->name, banid);
       return 0;
     }
 
@@ -407,7 +407,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -459,7 +459,7 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
     if (!(*errors & SM_ERR_ONLYSERVER))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_ONLYSERVERSCANCHANGE, chptr->chname);
+                         ERR_ONLYSERVERSCANCHANGE, chptr->name);
     *errors |= SM_ERR_ONLYSERVER;
     return;
   }
@@ -511,7 +511,7 @@ chm_operonly(struct Client *source_p, struct Channel *chptr, int parc, int *parn
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
 
     *errors |= SM_ERR_NOOPS;
     return;
@@ -574,12 +574,12 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     DLINK_FOREACH(ptr, chptr->banlist.head)
     {
       const struct Ban *banptr = ptr->data;
-      sendto_one_numeric(source_p, &me, RPL_BANLIST, chptr->chname,
+      sendto_one_numeric(source_p, &me, RPL_BANLIST, chptr->name,
                          banptr->name, banptr->user, banptr->host,
                          banptr->who, banptr->when);
     }
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFBANLIST, chptr->chname);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFBANLIST, chptr->name);
     return;
   }
 
@@ -588,7 +588,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -644,12 +644,12 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     {
       const struct Ban *banptr = ptr->data;
 
-      sendto_one_numeric(source_p, &me, RPL_EXCEPTLIST, chptr->chname,
+      sendto_one_numeric(source_p, &me, RPL_EXCEPTLIST, chptr->name,
                          banptr->name, banptr->user, banptr->host,
                          banptr->who, banptr->when);
     }
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFEXCEPTLIST, chptr->chname);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFEXCEPTLIST, chptr->name);
     return;
   }
 
@@ -658,7 +658,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -714,12 +714,12 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     {
       const struct Ban *banptr = ptr->data;
 
-      sendto_one_numeric(source_p, &me, RPL_INVEXLIST, chptr->chname,
+      sendto_one_numeric(source_p, &me, RPL_INVEXLIST, chptr->name,
                          banptr->name, banptr->user, banptr->host,
                          banptr->who, banptr->when);
     }
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFINVEXLIST, chptr->chname);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFINVEXLIST, chptr->name);
     return;
   }
 
@@ -728,7 +728,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -777,7 +777,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -791,7 +791,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -829,7 +829,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -843,7 +843,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -881,7 +881,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -895,7 +895,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if ((member = find_channel_link(target_p, chptr)) == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->chname);
+      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -932,7 +932,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -986,7 +986,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->chname);
+                         ERR_CHANOPRIVSNEEDED, chptr->name);
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -1344,7 +1344,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
   parptr = parabuf;
 
   mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
-                 (unsigned long)chptr->channelts, chptr->chname);
+                 (unsigned long)chptr->channelts, chptr->name);
 
   /* Loop the list of modes we have */
   for (unsigned i = 0; i < mode_count; ++i)
@@ -1377,7 +1377,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
       mc = 0;
 
       mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
-                     (unsigned long)chptr->channelts, chptr->chname);
+                     (unsigned long)chptr->channelts, chptr->name);
 
       pbl = 0;
       parabuf[0] = '\0';
@@ -1438,10 +1438,10 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
   if (IsServer(source_p))
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
                    ConfigServerHide.hide_servers) ?
-                   me.name : source_p->name, chptr->chname);
+                   me.name : source_p->name, chptr->name);
   else
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
-                   source_p->username, source_p->host, chptr->chname);
+                   source_p->username, source_p->host, chptr->name);
 
   parabuf[0] = '\0';
   parptr = parabuf;
@@ -1474,10 +1474,10 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
       if (IsServer(source_p))
         mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
                        ConfigServerHide.hide_servers) ?
-                       me.name : source_p->name, chptr->chname);
+                       me.name : source_p->name, chptr->name);
       else
         mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
-                       source_p->username, source_p->host, chptr->chname);
+                       source_p->username, source_p->host, chptr->name);
 
       pbl = 0;
       parabuf[0] = '\0';

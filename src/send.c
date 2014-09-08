@@ -71,8 +71,8 @@ send_format(struct dbuf_block *buffer, const char *pattern, va_list args)
    */
   dbuf_put_args(buffer, pattern, args);
 
-  if (buffer->size > sizeof(buffer->data) - 2)
-    buffer->size = sizeof(buffer->data) - 2;
+  if (buffer->size > IRCD_BUFSIZE - 2)
+    buffer->size = IRCD_BUFSIZE - 2;
 
   buffer->data[buffer->size++] = '\r';
   buffer->data[buffer->size++] = '\n';

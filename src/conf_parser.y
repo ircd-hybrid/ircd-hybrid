@@ -492,10 +492,8 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
       break;
     }
 
-    if (SSL_CTX_use_certificate_file(ConfigServerInfo.server_ctx, yylval.string,
-                                     SSL_FILETYPE_PEM) <= 0 ||
-        SSL_CTX_use_certificate_file(ConfigServerInfo.client_ctx, yylval.string,
-                                     SSL_FILETYPE_PEM) <= 0)
+    if (SSL_CTX_use_certificate_chain_file(ConfigServerInfo.server_ctx, yylval.string) <= 0 ||
+        SSL_CTX_use_certificate_chain_file(ConfigServerInfo.client_ctx, yylval.string) <= 0)
     {
       report_crypto_errors();
       conf_error_report("Could not open/read certificate file");

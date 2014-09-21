@@ -138,8 +138,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
          get_oper_name(source_p), user, host);
   }
   else
-    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found",
-	              user, host);
+    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", user, host);
   return 0;
 }
 
@@ -161,13 +160,13 @@ me_unkline(struct Client *source_p, int parc, char *parv[])
 {
   const char *kuser, *khost;
 
-  if (parc != 4)
+  if (parc != 4 || EmptyString(parv[3]))
     return 0;
 
   kuser = parv[2];
   khost = parv[3];
 
-  if (!IsClient(source_p) || match(parv[1], me.name))
+  if (match(parv[1], me.name))
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
@@ -177,17 +176,16 @@ me_unkline(struct Client *source_p, int parc, char *parv[])
   {
     if (remove_kline_match(khost, kuser))
     {
-      sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
-                        kuser, khost);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed", kuser, khost);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the K-Line for: [%s@%s]",
                            get_oper_name(source_p), kuser, khost);
       ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
            get_oper_name(source_p), kuser, khost);
     }
-    else
-      sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found",
-                        kuser, khost);
+    else if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", kuser, khost);
   }
 
   return 0;
@@ -209,11 +207,10 @@ me_unkline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_unkline(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc != 4)
+  if (parc != 4 || EmptyString(parv[3]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_UNKLN,
-                     "UNKLINE %s %s %s",
+  sendto_match_servs(source_p, parv[1], CAP_UNKLN, "UNKLINE %s %s %s",
                      parv[1], parv[2], parv[3]);
 
   return me_unkline(source_p, parc, parv);

@@ -109,7 +109,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
     sendto_one_notice(source_p, &me, ":Added temporary %d min. X-Line [%s]",
                       (int)tkline_time/60, conf->name);
     ilog(LOG_TYPE_XLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
-         source_p->name, (int)tkline_time/60, conf->name, conf->reason);
+         get_oper_name(source_p), (int)tkline_time/60, conf->name, conf->reason);
     conf->until = CurrentTime + tkline_time;
   }
   else

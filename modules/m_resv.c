@@ -57,8 +57,8 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 
     if ((conf = create_resv(name, reason, NULL)) == NULL)
     {
-      sendto_one_notice(source_p, &me, ":A RESV has already been placed on channel: %s",
-                        name);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":A RESV has already been placed on channel: %s", name);
       return;
     }
 
@@ -67,8 +67,9 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 
     if (tkline_time)
     {
-      sendto_one_notice(source_p, &me, ":A %d minute %s RESV has been placed on channel: %s",
-                        tkline_time/60, (MyClient(source_p) ? "local" : "remote"), name);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":A %d minute %s RESV has been placed on channel: %s",
+                          tkline_time/60, (MyClient(source_p) ? "local" : "remote"), name);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has placed a %d minute %s RESV on channel: %s [%s]",
                            get_oper_name(source_p),
@@ -82,8 +83,9 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     }
     else
     {
-      sendto_one_notice(source_p, &me, ":A %s RESV has been placed on channel %s",
-                        (MyClient(source_p) ? "local" : "remote"), name);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":A %s RESV has been placed on channel %s",
+                          (MyClient(source_p) ? "local" : "remote"), name);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has placed a %s RESV on channel %s : [%s]",
                            get_oper_name(source_p),
@@ -99,21 +101,23 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 
     if (!valid_wild_card_simple(name))
     {
-      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the resv",
-                        ConfigGeneral.min_nonwildcard_simple);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the resv",
+                          ConfigGeneral.min_nonwildcard_simple);
       return;
     }
 
     if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(name))
     {
-      sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
       return;
     }
 
     if ((conf = create_resv(name, reason, NULL)) == NULL)
     {
-      sendto_one_notice(source_p, &me, ":A RESV has already been placed on nick %s",
-                        name);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":A RESV has already been placed on nick %s", name);
       return;
     }
 
@@ -122,9 +126,10 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
 
     if (tkline_time)
     {
-      sendto_one_notice(source_p, &me, ":A %d minute %s RESV has been placed on nick %s : [%s]",
-                        tkline_time/60, (MyClient(source_p) ? "local" : "remote"),
-                        conf->name, conf->reason);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":A %d minute %s RESV has been placed on nick %s : [%s]",
+                          tkline_time/60, (MyClient(source_p) ? "local" : "remote"),
+                          conf->name, conf->reason);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has placed a %d minute %s RESV on nick %s : [%s]",
                            get_oper_name(source_p), tkline_time/60,
@@ -136,8 +141,9 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
     }
     else
     {
-      sendto_one_notice(source_p, &me, ":A %s RESV has been placed on nick %s : [%s]",
-                        (MyClient(source_p) ? "local" : "remote"), conf->name, conf->reason);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":A %s RESV has been placed on nick %s : [%s]",
+                          (MyClient(source_p) ? "local" : "remote"), conf->name, conf->reason);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has placed a %s RESV on nick %s : [%s]",
                            get_oper_name(source_p),
@@ -220,7 +226,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
 static int
 me_resv(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc != 5 || !IsClient(source_p))
+  if (parc != 5 || EmptyString(parv[4]))
     return 0;
 
   parse_resv(source_p, parv[2], atoi(parv[1]), parv[4]);
@@ -239,14 +245,14 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
   if (parc != 4 || EmptyString(parv[3]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
-                     "RESV %s %s :%s",
+  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "RESV %s %s :%s",
                      parv[1], parv[2], parv[3]);
 
-  if (!IsClient(source_p) || match(parv[1], me.name))
+  if (match(parv[1], me.name))
     return 0;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+  if (HasFlag(source_p, FLAGS_SERVICE) ||
+      find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_RESV))
     parse_resv(source_p, parv[2], 0, parv[3]);

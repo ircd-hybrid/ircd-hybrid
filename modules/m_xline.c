@@ -131,9 +131,6 @@ static void
 relay_xline(struct Client *source_p, char *parv[])
 {
   struct MaskItem *conf = NULL;
-  int t_sec;
-
-  t_sec = atoi(parv[3]);
 
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
                      "XLINE %s %s %s :%s",
@@ -153,7 +150,7 @@ relay_xline(struct Client *source_p, char *parv[])
       return;
     }
 
-    write_xline(source_p, parv[2], parv[4], t_sec);
+    write_xline(source_p, parv[2], parv[4], atoi(parv[3]));
   }
 }
 

@@ -265,13 +265,11 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   char def_reason[] = CONF_NOREASON;
   char *dlhost, *reason;
   const char *creason;
-  const struct Client *target_p = NULL;
   struct irc_ssaddr daddr;
   struct MaskItem *conf=NULL;
   time_t tkline_time=0;
   int bits = 0, aftype = 0, t = 0;
   const char *current_date = NULL;
-  char hostip[HOSTIPLEN + 1];
   char buffer[IRCD_BUFSIZE];
 
   if (parc != 5 || EmptyString(parv[4]))
@@ -295,32 +293,8 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
                               source_p->username, source_p->host,
                               SHARED_DLINE))
   {
-    if ((t = parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
-    {
-      if ((target_p = find_chasing(source_p, dlhost)) == NULL)
-        return 0;  /* find_chasing sends ERR_NOSUCHNICK */
-
-      if (!MyConnect(target_p))
-      {
-        if (IsClient(source_p))
-          sendto_one_notice(source_p, &me, ":Cannot DLINE nick on another server");
-        return 0;
-      }
-
-      if (IsExemptKline(target_p))
-      {
-        if (IsClient(source_p))
-          sendto_one_notice(source_p, &me, ":%s is E-lined", target_p->name);
-        return 0;
-      }
-
-      getnameinfo((struct sockaddr *)&target_p->connection->ip,
-                  target_p->connection->ip.ss_len, hostip,
-                  sizeof(hostip), NULL, 0, NI_NUMERICHOST);
-      dlhost = hostip;
-      t = parse_netmask(dlhost, NULL, &bits);
-      assert(t == HM_IPV4 || t == HM_IPV6);
-    }
+    if ((t = parse_netmask(dlhost, &daddr, &bits)) == HM_HOST)
+      return 0;
 
     if (bits < 8)
     {
@@ -333,8 +307,6 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
       aftype= AF_INET6;
     else
       aftype = AF_INET;
-
-    parse_netmask(dlhost, &daddr, NULL);
 
     if ((conf = find_dline_conf(&daddr, aftype)))
     {

@@ -1143,6 +1143,9 @@ get_oper_name(const struct Client *client_p)
   /* +5 for !,@,{,} and null */
   static char buffer[NICKLEN + USERLEN + HOSTLEN + HOSTLEN + 5];
 
+  if (IsServer(client_p))
+    return client_p->name;
+
   if (MyConnect(client_p))
   {
     if ((cnode = client_p->connection->confs.head))

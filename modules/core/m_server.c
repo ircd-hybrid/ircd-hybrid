@@ -782,7 +782,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   set_server_gecos(target_p, parv[4]);
   SetServer(target_p);
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_SERVICE, target_p->name, NULL, NULL, 0))
+  if (find_matching_name_conf(CONF_SERVICE, target_p->name, NULL, NULL, 0))
     AddFlag(target_p, FLAGS_SERVICE);
 
   dlinkAdd(target_p, &target_p->node, &global_client_list);

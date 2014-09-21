@@ -304,7 +304,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
     }
 
     if (t == HM_IPV6)
-      aftype= AF_INET6;
+      aftype = AF_INET6;
     else
       aftype = AF_INET;
 

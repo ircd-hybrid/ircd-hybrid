@@ -89,6 +89,8 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
                            get_oper_name(source_p),
                            (MyClient(source_p) ? "local" : "remote"),
                            conf->name, conf->reason);
+      ilog(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
+           get_oper_name(source_p), conf->name, conf->reason);
     }
   }
   else
@@ -141,6 +143,8 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
                            get_oper_name(source_p),
                            (MyClient(source_p) ? "local" : "remote"),
                            conf->name, conf->reason);
+      ilog(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
+           get_oper_name(source_p), conf->name, conf->reason);
     }
   }
 }

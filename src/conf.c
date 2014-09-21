@@ -1757,7 +1757,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
 
     if (IsExemptKline(target_p))
     {
-      if (!IsServer(source_p))
+      if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":%s is E-lined", target_p->name);
       return 0;
     }

@@ -64,18 +64,13 @@ check_xline(struct MaskItem *conf)
  * side effects - complains to client, when warn != 0
  */
 static int
-valid_xline(struct Client *source_p, const char *gecos, const char *reason)
+valid_xline(struct Client *source_p, const char *gecos)
 {
-  if (EmptyString(reason))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "XLINE");
-    return 0;
-  }
-
   if (!valid_wild_card_simple(gecos))
   {
-    sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
-                      ConfigGeneral.min_nonwildcard_simple);
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
+                        ConfigGeneral.min_nonwildcard_simple);
     return 0;
   }
 
@@ -102,24 +97,26 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
 
   if (tkline_time)
   {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":Added temporary %d min. X-Line [%s]",
+                        (int)tkline_time/60, conf->name);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. X-Line for [%s] [%s]",
                          get_oper_name(source_p), (int)tkline_time/60,
                          conf->name, conf->reason);
-    sendto_one_notice(source_p, &me, ":Added temporary %d min. X-Line [%s]",
-                      (int)tkline_time/60, conf->name);
     ilog(LOG_TYPE_XLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
          get_oper_name(source_p), (int)tkline_time/60, conf->name, conf->reason);
     conf->until = CurrentTime + tkline_time;
   }
   else
   {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":Added X-Line [%s] [%s]",
+                        conf->name, conf->reason);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added X-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->name,
                          conf->reason);
-    sendto_one_notice(source_p, &me, ":Added X-Line [%s] [%s]",
-                      conf->name, conf->reason);
     ilog(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
          get_oper_name(source_p), conf->name, conf->reason);
   }
@@ -132,21 +129,15 @@ relay_xline(struct Client *source_p, char *parv[])
 {
   struct MaskItem *conf = NULL;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER,
-                     "XLINE %s %s %s :%s",
-                     parv[1], parv[2], parv[3], parv[4]);
-
-  if (match(parv[1], me.name))
-    return;
-
   if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_XLINE))
   {
     if ((conf = find_matching_name_conf(CONF_XLINE, parv[2], NULL, NULL, 0)))
     {
-      sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
-                        parv[2], conf->name, conf->reason);
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
+                          parv[2], conf->name, conf->reason);
       return;
     }
 
@@ -213,7 +204,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
                      "%s 0 :%s", gecos, reason);
   }
 
-  if (!valid_xline(source_p, gecos, reason))
+  if (!valid_xline(source_p, gecos))
     return 0;
 
   if ((conf = find_matching_name_conf(CONF_XLINE, gecos, NULL, NULL, 0)))
@@ -240,10 +231,13 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   if (parc != 5 || EmptyString(parv[4]))
     return 0;
 
-  if (!IsClient(source_p))
+  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "XLINE %s %s %s :%s",
+                     parv[1], parv[2], parv[3], parv[4]);
+
+  if (match(parv[1], me.name))
     return 0;
 
-  if (!valid_xline(source_p, parv[2], parv[4]))
+  if (!valid_xline(source_p, parv[2]))
     return 0;
 
   relay_xline(source_p, parv);
@@ -268,7 +262,10 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
 static int
 me_xline(struct Client *source_p, int parc, char *parv[])
 {
-  if (!IsClient(source_p) || parc != 5)
+  if (parc != 5 || EmptyString(parv[4]))
+    return 0;
+
+  if (!valid_xline(source_p, parv[2]))
     return 0;
 
   relay_xline(source_p, parv);

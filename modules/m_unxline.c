@@ -73,14 +73,15 @@ remove_xline(struct Client *source_p, const char *gecos)
 {
   if (remove_xline_match(gecos))
   {
-    sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos);
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s has removed the X-Line for: [%s]",
                          get_oper_name(source_p), gecos);
     ilog(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
          get_oper_name(source_p), gecos);
   }
-  else
+  else if (IsClient(source_p))
     sendto_one_notice(source_p, &me, ":No X-Line for %s", gecos);
 }
 
@@ -124,8 +125,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNXLINE", CAP_CLUSTER, SHARED_UNXLINE,
-                   "%s", gecos);
+    cluster_a_line(source_p, "UNXLINE", CAP_CLUSTER, SHARED_UNXLINE, "%s", gecos);
 
   remove_xline(source_p, gecos);
   return 0;
@@ -146,10 +146,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_unxline(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc != 3)
-    return 0;
-
-  if (!IsClient(source_p) || EmptyString(parv[2]))
+  if (parc != 3 || EmptyString(parv[2]))
     return 0;
 
   sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "UNXLINE %s %s",

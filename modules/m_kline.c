@@ -91,25 +91,28 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
   if (tkline_time)
   {
     conf->until = CurrentTime + tkline_time;
+
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":Added temporary %d min. K-Line [%s@%s]",
+                        tkline_time/60, conf->user, conf->host);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p), tkline_time/60,
                          conf->user, conf->host,
                          conf->reason);
-    sendto_one_notice(source_p, &me, ":Added temporary %d min. K-Line [%s@%s]",
-                      tkline_time/60, conf->user, conf->host);
     ilog(LOG_TYPE_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), tkline_time/60,
          conf->user, conf->host, conf->reason);
   }
   else
   {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":Added K-Line [%s@%s]",
+                        conf->user, conf->host);
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p),
                          conf->user, conf->host, conf->reason);
-    sendto_one_notice(source_p, &me, ":Added K-Line [%s@%s]",
-                      conf->user, conf->host);
     ilog(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), conf->user, conf->host, conf->reason);
   }
@@ -152,7 +155,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 
   if ((conf = find_conf_by_address(lhost, piphost, CONF_KLINE, aftype, luser, NULL, 0)))
   {
-    if (warn)
+    if (IsClient(source_p) && warn)
     {
       reason = conf->reason ? conf->reason : CONF_NOREASON;
       sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
@@ -258,8 +261,7 @@ me_kline(struct Client *source_p, int parc, char *parv[])
                               source_p->username, source_p->host,
                               SHARED_KLINE))
   {
-    if (!IsClient(source_p) ||
-        already_placed_kline(source_p, kuser, khost, 1))
+    if (already_placed_kline(source_p, kuser, khost, 1))
       return 0;
 
     conf = conf_make(CONF_KLINE);

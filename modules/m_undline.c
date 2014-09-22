@@ -156,7 +156,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_undline(struct Client *source_p, int parc, char *parv[])
 {
-  const char *addr = parv[1];
+  const char *addr = parv[2];
 
   if (parc != 3 || EmptyString(parv[2]))
     return 0;

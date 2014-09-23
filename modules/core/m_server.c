@@ -449,7 +449,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   char *name = NULL;
   struct Client *target_p = NULL;
 
-  if (EmptyString(parv[3]))
+  if (EmptyString(parv[parc - 1]))
   {
     exit_client(source_p, "No server description supplied");
     return 0;
@@ -606,7 +606,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    * connect{} block in source_p->name
    */
   strlcpy(source_p->name, name, sizeof(source_p->name));
-  set_server_gecos(source_p, parv[3]);
+  set_server_gecos(source_p, parv[parc - 1]);
   source_p->hopcount = atoi(parv[2]);
   server_estab(source_p);
   return 0;
@@ -633,7 +633,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   if (!IsServer(source_p))
     return 0;
 
-  if (EmptyString(parv[4]))
+  if (EmptyString(parv[parc - 1]))
   {
     exit_client(client_p, "No server description supplied");
     return 0;
@@ -779,7 +779,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   strlcpy(target_p->name, parv[1], sizeof(target_p->name));
   strlcpy(target_p->id, parv[3], sizeof(target_p->id));
 
-  set_server_gecos(target_p, parv[4]);
+  set_server_gecos(target_p, parv[parc - 1]);
   SetServer(target_p);
 
   if (find_matching_name_conf(CONF_SERVICE, target_p->name, NULL, NULL, 0))

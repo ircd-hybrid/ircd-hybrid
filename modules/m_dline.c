@@ -130,7 +130,6 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
                          get_oper_name(source_p), conf->host, conf->reason);
     ilog(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",
          get_oper_name(source_p), conf->host, conf->reason);
-
   }
 
   SetConfDatabase(conf);

@@ -47,7 +47,7 @@
  * Side effects: Any matching tklines are removed.
  */
 static int
-remove_xline_match(const char *gecos)
+remove_xline_exact(const char *gecos)
 {
   dlink_node *ptr = NULL;
 
@@ -71,7 +71,7 @@ remove_xline_match(const char *gecos)
 static void
 remove_xline(struct Client *source_p, const char *gecos)
 {
-  if (remove_xline_match(gecos))
+  if (remove_xline_exact(gecos))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos);

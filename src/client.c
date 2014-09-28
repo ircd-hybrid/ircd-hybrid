@@ -1139,7 +1139,7 @@ accept_message(struct Client *source,
                                       source->host, target, match))
     return 1;
 
-  if (HasUMode(target, UMODE_SOFTCALLERID))
+  if (!HasUMode(target, UMODE_CALLERID) && HasUMode(target, UMODE_SOFTCALLERID))
     DLINK_FOREACH(ptr, target->channel.head)
       if (IsMember(source, ((struct Membership *)ptr->data)->chptr))
         return 1;

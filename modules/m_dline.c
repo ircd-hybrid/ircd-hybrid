@@ -241,17 +241,14 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
   current_date = smalldate(0);
 
-  if (!valid_comment(source_p, reason, 1))
-    return 0;
-
   conf = conf_make(CONF_DLINE);
   conf->host = xstrdup(dlhost);
 
   if (tkline_time)
-    snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %s (%s)",
-             (int)(tkline_time/60), reason, current_date);
+    snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %.*s (%s)",
+             (int)(tkline_time/60), REASONLEN, reason, current_date);
   else
-    snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
+    snprintf(buffer, sizeof(buffer), "%s (%.*s)", REASONLEN, reason, current_date);
 
   conf->reason = xstrdup(buffer);
   apply_dline(source_p, conf, tkline_time);
@@ -324,17 +321,14 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
 
     current_date = smalldate(0);
 
-    if (!valid_comment(source_p, reason, 1))
-      return 0;
-
     conf = conf_make(CONF_DLINE);
     conf->host = xstrdup(dlhost);
 
     if (tkline_time)
-      snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %s (%s)",
-               (int)(tkline_time/60), reason, current_date);
+      snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %.*s (%s)",
+               (int)(tkline_time/60), REASONLEN, reason, current_date);
     else
-      snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
+      snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, current_date);
 
     conf->reason = xstrdup(buffer);
     apply_dline(source_p, conf, tkline_time);

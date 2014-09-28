@@ -218,10 +218,10 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   conf->user = xstrdup(user);
 
   if (tkline_time)
-    snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %s (%s)",
-             (int)(tkline_time/60), reason, current_date);
+    snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %.*s (%s)",
+             (int)(tkline_time/60), REASONLEN, reason, current_date);
   else
-    snprintf(buffer, sizeof(buffer), "%s (%s)", reason, current_date);
+    snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, current_date);
 
   conf->reason = xstrdup(buffer);
   m_kline_add_kline(source_p, conf, tkline_time);
@@ -264,10 +264,10 @@ me_kline(struct Client *source_p, int parc, char *parv[])
     conf->user = xstrdup(kuser);
 
     if (tkline_time)
-      snprintf(buffer, sizeof(buffer), "Temporary K-line %u min. - %s (%s)",
-               (unsigned int)(tkline_time/60), kreason, current_date);
+      snprintf(buffer, sizeof(buffer), "Temporary K-line %u min. - %.*s (%s)",
+               (unsigned int)(tkline_time/60), REASONLEN, kreason, current_date);
     else
-      snprintf(buffer, sizeof(buffer), "%s (%s)", kreason, current_date);
+      snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, kreason, current_date);
 
     conf->reason = xstrdup(buffer);
     m_kline_add_kline(source_p, conf, tkline_time);

@@ -783,7 +783,7 @@ stats_glines(struct Client *source_p, int parc, char *parv[])
         sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'G',
                            conf->host ? conf->host : "*",
                            conf->user ? conf->user : "*",
-                           conf->reason ? conf->reason : CONF_NOREASON);
+                           conf->reason);
 
       }
     }

@@ -136,7 +136,6 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
 static int
 already_placed_kline(struct Client *source_p, const char *luser, const char *lhost, int warn)
 {
-  const char *reason;
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf = NULL;
   int t = 0;
@@ -156,12 +155,8 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
   if ((conf = find_conf_by_address(lhost, piphost, CONF_KLINE, aftype, luser, NULL, 0)))
   {
     if (IsClient(source_p) && warn)
-    {
-      reason = conf->reason ? conf->reason : CONF_NOREASON;
       sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
-                        luser, lhost, conf->user, conf->host, reason);
-    }
-
+                        luser, lhost, conf->user, conf->host, conf->reason);
     return 1;
   }
 

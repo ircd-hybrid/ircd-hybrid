@@ -1,6 +1,7 @@
 -- Noteworthy changes in version 8.2.1 (2014-??-??)
 o) Fixed bug where "/undline remote.server IP" did not work as expected
 o) Servers are now allowed to add/remove K-/D-/X-lines and RESVs
+o) Usermode +G now no longer allows to override +g
  
 
 -- Noteworthy changes in version 8.2.0 (2014-08-24)

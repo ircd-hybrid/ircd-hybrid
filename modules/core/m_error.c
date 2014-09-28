@@ -60,7 +60,6 @@ mr_error(struct Client *source_p, int parc, char *parv[])
   sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
                        "ERROR :from %s -- %s",
                        get_client_name(source_p, MASK_IP), para);
-
   return 0;
 }
 

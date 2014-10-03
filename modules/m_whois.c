@@ -167,7 +167,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one_numeric(source_p, &me, RPL_WHOISMODES, target_p->name, buf);
   }
 
-  if (target_p->sockhost[0] && strcmp(target_p->sockhost, "0"))
+  if (strcmp(target_p->sockhost, "0"))
   {
     if (HasUMode(source_p, UMODE_ADMIN) || source_p == target_p)
       show_ip = 1;
@@ -175,7 +175,6 @@ whois_person(struct Client *source_p, struct Client *target_p)
       show_ip = (HasUMode(source_p, UMODE_OPER) && !ConfigGeneral.hide_spoof_ips);
     else
       show_ip = 1;
-
 
     sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, target_p->name,
                        show_ip ? target_p->sockhost : "255.255.255.255");

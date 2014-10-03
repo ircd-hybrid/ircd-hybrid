@@ -84,13 +84,15 @@ mo_globops(struct Client *source_p, int parc, char *parv[])
 static int
 ms_globops(struct Client *source_p, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
+  const char *message = parv[1];
+
+  if (EmptyString(message))
     return 0;
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s GLOBOPS :%s",
-                source_p->id, parv[1]);
+                source_p->id, message);
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from %s: %s",
-                       source_p->name, parv[1]);
+                       source_p->name, message);
   return 0;
 }
 

@@ -78,9 +78,10 @@ m_time(struct Client *source_p, int parc, char *parv[])
 static int
 ms_time(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
-    sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
+  if (hunt_server(source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
+    return 0;
 
+  sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
   return 0;
 }
 

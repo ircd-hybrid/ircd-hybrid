@@ -78,8 +78,7 @@ m_motd(struct Client *source_p, int parc, char *parv[])
 
   /* This is safe enough to use during non hidden server mode */
   if (!ConfigServerHide.disable_remote_commands && !ConfigServerHide.hide_servers)
-    if (hunt_server(source_p, ":%s MOTD :%s", 1,
-                    parc, parv) != HUNTED_ISME)
+    if (hunt_server(source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
       return 0;
 
   do_motd(source_p);
@@ -100,8 +99,7 @@ m_motd(struct Client *source_p, int parc, char *parv[])
 static int
 ms_motd(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(source_p, ":%s MOTD :%s", 1,
-                  parc, parv) != HUNTED_ISME)
+  if (hunt_server(source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
     return 0;
 
   do_motd(source_p);

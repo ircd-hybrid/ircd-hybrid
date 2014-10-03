@@ -84,13 +84,6 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((target_p = hash_find_server(parv[1])))
-  {
-    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s.",
-                      target_p->name, target_p->from->name);
-    return 0;
-  }
-
   /*
    * Try to find the name, then host, if both fail notify ops and bail
    */
@@ -101,6 +94,13 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
       sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
       return 0;
     }
+  }
+
+  if ((target_p = hash_find_server(conf->name)))
+  {
+    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s.",
+                      target_p->name, target_p->from->name);
+    return 0;
   }
 
   /*
@@ -194,13 +194,6 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((target_p = hash_find_server(parv[1])))
-  {
-    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s.",
-                      target_p->name, target_p->from->name);
-    return 0;
-  }
-
   /*
    * Try to find the name, then host, if both fail notify ops and bail
    */
@@ -211,6 +204,13 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
       sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
       return 0;
     }
+  }
+
+  if ((target_p = hash_find_server(conf->name)))
+  {
+    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s.",
+                      target_p->name, target_p->from->name);
+    return 0;
   }
 
   /*

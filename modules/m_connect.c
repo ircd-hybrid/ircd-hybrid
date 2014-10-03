@@ -74,8 +74,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    if (hunt_server(source_p, ":%s CONNECT %s %s :%s", 3,
-                    parc, parv) != HUNTED_ISME)
+    if (hunt_server(source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
       return 0;
   }
   else if (!HasOFlag(source_p, OPER_FLAG_CONNECT))
@@ -87,13 +86,11 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Try to find the name, then host, if both fail notify ops and bail
    */
-  if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
+  if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)) &&
+      !(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
   {
-    if (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
-    {
-      sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
-      return 0;
-    }
+    sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
+    return 0;
   }
 
   if ((target_p = hash_find_server(conf->name)))
@@ -105,7 +102,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 
   /*
    * Get port number from user, if given. If not specified,
-   * use the default form configuration structure. If missing
+   * use the default from configuration structure. If missing
    * from there, then use the precompiled default.
    */
   tmpport = port = conf->port;
@@ -184,8 +181,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
 
-  if (hunt_server(source_p, ":%s CONNECT %s %s :%s",
-                  3, parc, parv) != HUNTED_ISME)
+  if (hunt_server(source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
     return 0;
 
   if (EmptyString(parv[1]))
@@ -197,13 +193,11 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Try to find the name, then host, if both fail notify ops and bail
    */
-  if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)))
+  if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)) &&
+      !(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
   {
-    if (!(conf = find_matching_name_conf(CONF_SERVER,  NULL, NULL, parv[1], 0)))
-    {
-      sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
-      return 0;
-    }
+    sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in ircd.conf", parv[1]);
+    return 0;
   }
 
   if ((target_p = hash_find_server(conf->name)))
@@ -215,7 +209,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 
   /*
    * Get port number from user, if given. If not specified,
-   * use the default form configuration structure. If missing
+   * use the default from configuration structure. If missing
    * from there, then use the precompiled default.
    */
   tmpport = port = conf->port;

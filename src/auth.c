@@ -231,8 +231,6 @@ start_auth_query(struct AuthRequest *auth)
   {
     report_error(L_ALL, "creating auth stream socket %s:%s",
                  get_client_name(auth->client, SHOW_IP), errno);
-    ilog(LOG_TYPE_IRCD, "Unable to create auth socket for %s",
-        get_client_name(auth->client, SHOW_IP));
     ++ServerStats.is_abad;
     return 0;
   }

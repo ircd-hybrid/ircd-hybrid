@@ -181,14 +181,14 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
 
-  if (hunt_server(source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
-    return 0;
-
-  if (EmptyString(parv[1]))
+  if (parc < 4 || EmptyString(parv[3]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CONNECT");
     return 0;
   }
+
+  if (hunt_server(source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
+    return 0;
 
   /*
    * Try to find the name, then host, if both fail notify ops and bail

@@ -641,10 +641,10 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   if (!attach_connect_block(client_p, conf->name, conf->host))
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "Host %s is not enabled for connecting: no connect{} block",
+                         "Host %s is not enabled for connecting: no connect {} block",
                          conf->name);
     if (by && IsClient(by) && !MyClient(by))
-      sendto_one_notice(by, &me, ":Connect to host %s failed.", client_p->name);
+      sendto_one_notice(by, &me, ":Connect to host %s failed: no connect {} block", client_p->name);
 
     SetDead(client_p);
     exit_client(client_p, "Connection failed");

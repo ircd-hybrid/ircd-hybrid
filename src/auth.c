@@ -324,8 +324,6 @@ timeout_auth_queries_event(void *notused)
       sendheader(auth->client, REPORT_FAIL_DNS);
     }
 
-    ilog(LOG_TYPE_IRCD, "DNS/AUTH timeout %s",
-         get_client_name(auth->client, SHOW_IP));
     release_auth_client(auth);
   }
 }

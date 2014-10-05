@@ -814,8 +814,8 @@ send_umode(struct Client *client_p, struct Client *source_p,
 
   if (*umode_buf && client_p)
     sendto_one(client_p, ":%s!%s@%s MODE %s :%s",
-               source_p->name, source_p->username,
-               source_p->host, source_p->name, umode_buf);
+               client_p->name, client_p->username,
+               client_p->host, client_p->name, umode_buf);
 }
 
 /* send_umode_out()

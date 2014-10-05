@@ -825,19 +825,15 @@ send_umode(struct Client *client_p, struct Client *source_p,
  * side effects - Only send ubuf out to servers that know about this client
  */
 void
-send_umode_out(struct Client *client_p, struct Client *source_p,
-               unsigned int old)
+send_umode_out(struct Client *source_p, unsigned int old)
 {
   char buf[IRCD_BUFSIZE] = "";
 
-  send_umode(NULL, source_p, old, buf);
+  send_umode(MyClient(source_p) ? source_p : NULL, source_p, old, buf);
 
   if (buf[0])
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s MODE %s :%s",
                   source_p->id, source_p->id, buf);
-
-  if (client_p && MyClient(client_p))
-    send_umode(client_p, source_p, old, buf);
 }
 
 void
@@ -965,7 +961,7 @@ oper_up(struct Client *source_p)
                        get_oper_name(source_p));
   sendto_server(NULL, NOCAPS, NOCAPS, ":%s GLOBOPS :%s is now an operator",
                 me.id, get_oper_name(source_p));
-  send_umode_out(source_p, source_p, old);
+  send_umode_out(source_p, old);
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
 }
 

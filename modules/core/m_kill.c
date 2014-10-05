@@ -223,7 +223,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
    * Path must contain at least 2 !'s, or bitchx falsely declares it
    * local --fl
    */
-  if (HasUMode(source_p, UMODE_OPER))  /* Send it normally */
+  if (IsClient(source_p))  /* Send it normally */
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Received KILL message for %s!%s@%s[%s/%s]. From %s Path: %s!%s!%s!%s %s",
                          target_p->name, target_p->username, target_p->host,

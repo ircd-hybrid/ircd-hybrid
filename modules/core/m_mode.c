@@ -179,7 +179,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
    * Compare new modes with old modes and send string which
    * will cause servers to update correctly.
    */
-  send_umode_out(source_p, source_p, setmodes);
+  send_umode_out(source_p, setmodes);
 }
 
 /*

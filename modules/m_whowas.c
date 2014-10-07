@@ -113,9 +113,8 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
 
   last_used = CurrentTime;
 
-  if (parc > 3 && !ConfigServerHide.disable_remote_commands)
-    if (hunt_server(source_p, ":%s WHOWAS %s %s :%s", 3,
-                    parc, parv) != HUNTED_ISME)
+  if (!ConfigServerHide.disable_remote_commands)
+    if (hunt_server(source_p, ":%s WHOWAS %s %s :%s", 3, parc, parv) != HUNTED_ISME)
       return 0;
 
   do_whowas(source_p, parc, parv);
@@ -144,10 +143,8 @@ ms_whowas(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (parc > 3)
-    if (hunt_server(source_p, ":%s WHOWAS %s %s :%s", 3,
-                    parc, parv) != HUNTED_ISME)
-      return 0;
+  if (hunt_server(source_p, ":%s WHOWAS %s %s :%s", 3, parc, parv) != HUNTED_ISME)
+    return 0;
 
   do_whowas(source_p, parc, parv);
   return 0;

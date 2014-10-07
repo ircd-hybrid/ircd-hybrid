@@ -52,8 +52,8 @@
 static int
 m_ping(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p;
-  char *origin, *destination;
+  struct Client *target_p = NULL;
+  const char *destination = NULL;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -61,30 +61,27 @@ m_ping(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  origin = parv[1];
   destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
 
   if (ConfigServerHide.disable_remote_commands && !HasUMode(source_p, UMODE_OPER))
   {
     sendto_one(source_p, ":%s PONG %s :%s", me.name,
-              (destination) ? destination : me.name, origin);
+               (destination) ? destination : me.name, parv[1]);
     return 0;
   }
 
   if (!EmptyString(destination) && irccmp(destination, me.name))
   {
-    /* We're sending it across servers.. origin == source_p->name --fl_ */
-    origin = source_p->name;
-
     if ((target_p = hash_find_server(destination)))
-      sendto_one(target_p, ":%s PING %s :%s", source_p->name,
-                 origin, destination);
+      sendto_one(target_p, ":%s PING %s :%s",
+                 ID_or_name(source_p, target_p), source_p->name,
+                 ID_or_name(target_p, target_p));
     else
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
   else
     sendto_one(source_p, ":%s PONG %s :%s", me.name,
-               (destination) ? destination : me.name, origin);
+               (destination) ? destination : me.name, parv[1]);
   return 0;
 }
 
@@ -103,8 +100,8 @@ m_ping(struct Client *source_p, int parc, char *parv[])
 static int
 ms_ping(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p;
-  const char *origin, *destination;
+  struct Client *target_p = NULL;
+  const char *destination = NULL;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -112,20 +109,20 @@ ms_ping(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  origin = source_p->name;
   destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
 
   if (!EmptyString(destination) && irccmp(destination, me.name) && irccmp(destination, me.id))
   {
     if ((target_p = hash_find_server(destination)))
-      sendto_one(target_p, ":%s PING %s :%s", source_p->name,
-                 origin, destination);
-    else
+      sendto_one(target_p, ":%s PING %s :%s",
+                 ID_or_name(source_p, target_p), source_p->name,
+                 ID_or_name(target_p, target_p));
+    else if (!IsDigit(*destination))
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
   else
     sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, source_p),
-               (destination) ? destination : me.name, origin);
+               (destination) ? destination : me.name, ID_or_name(source_p, source_p));
   return 0;
 }
 

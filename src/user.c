@@ -162,11 +162,11 @@ void
 show_lusers(struct Client *source_p)
 {
   if (!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER))
-    sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT, (Count.total-Count.invisi),
+    sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT, (Count.total - Count.invisi),
                        Count.invisi, dlink_list_length(&global_server_list));
   else
-    sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT,
-                       (Count.total - Count.invisi), Count.invisi, 1);
+    sendto_one_numeric(source_p, &me, RPL_LUSERCLIENT, (Count.total - Count.invisi),
+                       Count.invisi, 1);
 
   if (Count.oper)
     sendto_one_numeric(source_p, &me, RPL_LUSEROP, Count.oper);
@@ -425,8 +425,7 @@ register_local_user(struct Client *source_p)
         source_p->connection->random_ping = genrand_int32();
       while (!source_p->connection->random_ping);
 
-      sendto_one(source_p, "PING :%u",
-                 source_p->connection->random_ping);
+      sendto_one(source_p, "PING :%u", source_p->connection->random_ping);
       SetPingSent(source_p);
       return;
     }
@@ -446,8 +445,7 @@ register_local_user(struct Client *source_p)
   {
     sendto_one_notice(source_p, &me, ":*** Notice -- You have an illegal "
                       "character in your hostname");
-    strlcpy(source_p->host, source_p->sockhost,
-            sizeof(source_p->host));
+    strlcpy(source_p->host, source_p->sockhost, sizeof(source_p->host));
   }
 
   conf = source_p->connection->confs.head->data;
@@ -493,7 +491,7 @@ register_local_user(struct Client *source_p)
 
   /*
    * Don't free source_p->connection->password here - it can be required
-   * by masked /stats I if there are auth{} blocks with need_password = no;
+   * by masked /stats I if there are auth {} blocks with need_password = no;
    * --adx
    */
 

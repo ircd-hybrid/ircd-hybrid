@@ -114,9 +114,12 @@ ms_ping(struct Client *source_p, int parc, char *parv[])
   if (!EmptyString(destination) && irccmp(destination, me.name) && irccmp(destination, me.id))
   {
     if ((target_p = hash_find_server(destination)))
-      sendto_one(target_p, ":%s PING %s :%s",
-                 ID_or_name(source_p, target_p), source_p->name,
-                 ID_or_name(target_p, target_p));
+    {
+      if (target_p->from != source_p->from)
+        sendto_one(target_p, ":%s PING %s :%s",
+                   ID_or_name(source_p, target_p), source_p->name,
+                   ID_or_name(target_p, target_p));
+    }
     else if (!IsDigit(*destination))
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }

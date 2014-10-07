@@ -190,9 +190,6 @@ burst_all(struct Client *client_p)
 
     DelFlag(target_p, FLAGS_BURSTED);
   }
-
-  if (IsCapable(client_p, CAP_EOB))
-    sendto_one(client_p, ":%s EOB", me.id);
 }
 
 /* server_burst()
@@ -411,6 +408,20 @@ server_estab(struct Client *client_p)
   }
 
   server_burst(client_p);
+
+  if (IsCapable(client_p, CAP_EOB))
+  {
+    DLINK_FOREACH_PREV(ptr, global_server_list.tail)
+    {
+      struct Client *target_p = ptr->data;
+
+      if (target_p->from == client_p)
+        continue;
+
+      if (IsMe(target_p) || HasFlag(target_p, FLAGS_EOB))
+        sendto_one(client_p, ":%s EOB", target_p->id);
+    }
+  }
 }
 
 /* set_server_gecos()

@@ -146,7 +146,7 @@ watch_add_to_hash_table(const char *nick, struct Client *client_p)
 
   if (ptr == NULL)
   {
-    /* No it isn't, so add it in the bucket and client addint it */
+    /* No it isn't, so add it in the bucket and client adding it */
     dlinkAdd(client_p, make_dlink_node(), &anptr->watched_by);
     dlinkAdd(anptr, make_dlink_node(), &client_p->connection->watches);
   }

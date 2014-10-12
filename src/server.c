@@ -802,7 +802,7 @@ ssl_server_handshake(fde_t *fd, void *data)
 
   if ((ret = SSL_connect(client_p->connection->fd.ssl)) <= 0)
   {
-    if ((CurrentTime - client_p->connection->firsttime) > 30)
+    if ((CurrentTime - client_p->connection->firsttime) > CONNECTTIMEOUT)
     {
       exit_client(client_p, "Timeout during SSL handshake");
       return;
@@ -812,11 +812,11 @@ ssl_server_handshake(fde_t *fd, void *data)
     {
       case SSL_ERROR_WANT_WRITE:
         comm_setselect(&client_p->connection->fd, COMM_SELECT_WRITE,
-                       ssl_server_handshake, client_p, 30);
+                       ssl_server_handshake, client_p, CONNECTTIMEOUT);
         return;
       case SSL_ERROR_WANT_READ:
         comm_setselect(&client_p->connection->fd, COMM_SELECT_READ,
-                       ssl_server_handshake, client_p, 30);
+                       ssl_server_handshake, client_p, CONNECTTIMEOUT);
         return;
       default:
       {

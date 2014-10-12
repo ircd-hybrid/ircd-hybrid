@@ -351,7 +351,7 @@ check_pidfile(const char *filename)
   /* Don't do logging here, since we don't have log() initialised */
   if ((fb = fopen(filename, "r")))
   {
-    if (fgets(buff, 20, fb) == NULL)
+    if (!fgets(buff, 20, fb))
     {
       /* log(L_ERROR, "Error reading from pid file %s (%s)", filename,
        * strerror(errno));
@@ -420,7 +420,7 @@ ssl_init(void)
   SSL_load_error_strings();
   SSLeay_add_ssl_algorithms();
 
-  if ((ConfigServerInfo.server_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL)
+  if (!(ConfigServerInfo.server_ctx = SSL_CTX_new(SSLv23_server_method())))
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
@@ -449,7 +449,7 @@ ssl_init(void)
   SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_SINGLE_ECDH_USE);
 #endif
 
-  if ((ConfigServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
+  if (!(ConfigServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())))
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
@@ -470,7 +470,7 @@ int
 main(int argc, char *argv[])
 {
   /* Check to see if the user is running us as root, which is a nono */
-  if (geteuid() == 0)
+  if (!geteuid())
   {
     fprintf(stderr, "ERROR: This server won't run as root/superuser\n");
     return -1;

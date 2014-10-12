@@ -321,7 +321,7 @@ write_pidfile(const char *filename)
 
     snprintf(buff, sizeof(buff), "%u\n", pid);
 
-    if ((fputs(buff, fb) == -1))
+    if (fputs(buff, fb) == -1)
       ilog(LOG_TYPE_IRCD, "Error writing %u to pid file %s (%s)",
            pid, filename, strerror(errno));
 

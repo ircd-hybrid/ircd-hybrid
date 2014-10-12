@@ -222,13 +222,16 @@ static const struct ModuleStruct module_cmd_table[] =
 static int
 mo_module(struct Client *source_p, int parc, char *parv[])
 {
+  const char *subcmd = parv[1];
+  const char *module = parv[2];
+
   if (!HasOFlag(source_p, OPER_FLAG_MODULE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "module");
     return 0;
   }
 
-  if (EmptyString(parv[1]))
+  if (EmptyString(subcmd))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
     return 0;
@@ -236,22 +239,22 @@ mo_module(struct Client *source_p, int parc, char *parv[])
 
   for (const struct ModuleStruct *tab = module_cmd_table; tab->handler; ++tab)
   {
-    if (irccmp(tab->cmd, parv[1]))
+    if (irccmp(tab->cmd, subcmd))
       continue;
 
-    if (tab->arg_required && EmptyString(parv[2]))
+    if (tab->arg_required && EmptyString(module))
     {
       sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
       return 0;
     }
 
-    tab->handler(source_p, parv[2]);
+    tab->handler(source_p, module);
     return 0;
   }
 
   sendto_one_notice(source_p, &me, ":%s is not a valid option. "
                     "Choose from LOAD, UNLOAD, RELOAD, LIST",
-                    parv[1]);
+                    subcmd);
   return 0;
 }
 

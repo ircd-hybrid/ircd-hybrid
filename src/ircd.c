@@ -435,7 +435,7 @@ ssl_init(void)
                      always_accept_verify_cb);
   SSL_CTX_set_session_cache_mode(ConfigServerInfo.server_ctx, SSL_SESS_CACHE_OFF);
 
-#if OPENSSL_VERSION_NUMBER >= 0x1000005FL && !defined(OPENSSL_NO_ECDH)
+#if OPENSSL_VERSION_NUMBER >= 0x009080FFL && !defined(OPENSSL_NO_ECDH)
   {
     EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 

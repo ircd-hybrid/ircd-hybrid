@@ -329,7 +329,8 @@ write_pidfile(const char *filename)
   }
   else
   {
-    ilog(LOG_TYPE_IRCD, "Error opening pid file %s", filename);
+    ilog(LOG_TYPE_IRCD, "Error opening pid file %s (%s)",
+         filename, strerror(errno));
   }
 }
 

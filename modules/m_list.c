@@ -43,7 +43,7 @@
 
 
 static void
-do_list(struct Client *source_p, int parc, char *parv[])
+do_list(struct Client *source_p, char *arg)
 {
   struct ListTask *lt = NULL;
   int no_masked_channels = 1;
@@ -61,14 +61,14 @@ do_list(struct Client *source_p, int parc, char *parv[])
   lt->topicts_max = UINT_MAX;
   source_p->connection->list_task = lt;
 
-  if (parc > 1 && !EmptyString(parv[1]))
+  if (!EmptyString(arg))
   {
     char *opt, *save = NULL;
     dlink_list *list = NULL;
     int i = 0, errors = 0;
 
-    for (opt = strtoken(&save, parv[1], ","); opt;
-         opt = strtoken(&save,    NULL, ","))
+    for (opt = strtoken(&save,  arg, ","); opt;
+         opt = strtoken(&save, NULL, ","))
     {
       switch (*opt)
       {
@@ -182,7 +182,7 @@ do_list(struct Client *source_p, int parc, char *parv[])
 static int
 m_list(struct Client *source_p, int parc, char *parv[])
 {
-  do_list(source_p, parc, parv);
+  do_list(source_p, parv[1]);
   return 0;
 }
 

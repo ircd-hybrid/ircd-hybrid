@@ -53,7 +53,7 @@
  *                server is CAP_TBURST capable
  */
 static void
-send_tb(struct Client *client_p, struct Channel *chptr)
+send_tb(struct Client *client_p, const struct Channel *chptr)
 {
   /*
    * We may also send an empty topic here, but only if topic_time isn't 0,
@@ -457,7 +457,7 @@ set_server_gecos(struct Client *client_p, const char *info)
 static int
 mr_server(struct Client *source_p, int parc, char *parv[])
 {
-  char *name = NULL;
+  const char *name = parv[1];
   struct Client *target_p = NULL;
 
   if (EmptyString(parv[parc - 1]))
@@ -465,8 +465,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     exit_client(source_p, "No server description supplied");
     return 0;
   }
-
-  name = parv[1];
 
   /*
    * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo

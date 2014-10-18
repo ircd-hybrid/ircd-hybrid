@@ -1345,12 +1345,12 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
  * common parse routine for m_stats args
  *
  */
-static char *
+static const char *
 parse_stats_args(struct Client *source_p, int parc, char *parv[], int *doall, int *wilds)
 {
   if (parc > 2)
   {
-    char *name = parv[2];
+    const char *name = parv[2];
 
     if (!irccmp(name, ID_or_name(&me, source_p)))
       *doall = 2;
@@ -1366,8 +1366,8 @@ parse_stats_args(struct Client *source_p, int parc, char *parv[], int *doall, in
 }
 
 static void
-stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
-             dlink_list *list, char statchar)
+stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
+             dlink_list *list, const char statchar)
 {
   dlink_node *ptr = NULL;
 
@@ -1456,8 +1456,8 @@ stats_L_list(struct Client *source_p, char *name, int doall, int wilds,
  * side effects -
  */
 static void
-stats_L(struct Client *source_p, char *name,int doall,
-        int wilds, char statchar)
+stats_L(struct Client *source_p, const char *name, int doall,
+        int wilds, const char statchar)
 {
   stats_L_list(source_p, name, doall, wilds, &unknown_list, statchar);
   stats_L_list(source_p, name, doall, wilds, &local_client_list, statchar);
@@ -1469,12 +1469,11 @@ stats_ltrace(struct Client *source_p, int parc, char *parv[])
 {
   int doall = 0;
   int wilds = 0;
-  char *name = NULL;
-  char statchar;
+  const char *name = NULL;
 
   if ((name = parse_stats_args(source_p, parc, parv, &doall, &wilds)))
   {
-    statchar = *parv[1];
+    const char statchar = *parv[1];
     stats_L(source_p, name, doall, wilds, statchar);
   }
   else

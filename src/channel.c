@@ -932,7 +932,7 @@ channel_find_last0(struct Client *source_p, char *chanlist)
   {
     if (*p == '0' && (*(p + 1) == ',' || *(p + 1) == '\0'))
     {
-      if ((*p + 1) == ',')
+      if (*(p + 1) == ',')
         ++p;
 
       chanlist = p + 1;

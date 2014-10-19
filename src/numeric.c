@@ -360,7 +360,7 @@ static const char *const replies[] =
 /* 327 */ NULL,
 /* 328 */ NULL,
 /* 329 RPL_CREATIONTIME */ "%s %lu",
-/* 330 RPL_WHOISACCOUNT */ "%s %s :is logged in as",
+/* 330 RPL_WHOISACCOUNT */ "%s %s :%s logged in as",
 /* 331 RPL_NOTOPIC */ "%s :No topic is set.",
 /* 332 RPL_TOPIC */ "%s :%s",
 /* 333 RPL_TOPICWHOTIME */ "%s %s %lu",

@@ -5,6 +5,7 @@ o) Usermode +G now no longer allows to override +g
 o) Due to potential weakness, TLS session caching and session tickets
    have been disabled
 o) Minor improvements to TS6 implementation
+o) /WHOWAS now shows the name of the services account a user was logged in
  
 
 -- Noteworthy changes in version 8.2.0 (2014-08-24)

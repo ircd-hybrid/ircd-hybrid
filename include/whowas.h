@@ -37,6 +37,7 @@ struct Whowas
   int hashv;
   int shide;
   time_t logoff;
+  char svid[NICKLEN + 1];  /**< Services ID */
   char name[NICKLEN + 1];
   char username[USERLEN + 1];
   char hostname[HOSTLEN + 1];

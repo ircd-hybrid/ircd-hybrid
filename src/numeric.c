@@ -733,7 +733,7 @@ static const char *const replies[] =
 /* 700 */ NULL,
 /* 701 */ NULL,
 /* 702 RPL_MODLIST */ "%s %p %s %s",
-/* 703 RPL_ENDOFMODLIST */ ":End of /MODLIST.",
+/* 703 RPL_ENDOFMODLIST */ ":End of /MODULE LIST.",
 /* 704 RPL_HELPSTART */ "%s :%s",
 /* 705 RPL_HELPTXT */ "%s :%s",
 /* 706 RPL_ENDOFHELP */ "%s :End of /HELP.",

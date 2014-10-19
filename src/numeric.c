@@ -293,7 +293,7 @@ static const char *const replies[] =
 /* 260 */ NULL,
 /* 261 */ NULL,
 /* 262 RPL_ENDOFTRACE */ "%s :End of TRACE",
-/* 263 RPL_LOAD2HI */ ":Server load is temporarily too heavy. Please wait a while and try again.",
+/* 263 RPL_LOAD2HI */ "%s :Server load is temporarily too heavy. Please wait a while and try again.",
 /* 264 */ NULL,
 /* 265 RPL_LOCALUSERS */ ":Current local users: %u  Max: %u",
 /* 266 RPL_GLOBALUSERS */ ":Current global users: %u  Max: %u",

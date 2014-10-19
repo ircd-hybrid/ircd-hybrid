@@ -1583,7 +1583,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
   /* Check the user is actually allowed to do /stats, and isn't flooding */
   if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
+    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "STATS");
     return 0;
   }
 

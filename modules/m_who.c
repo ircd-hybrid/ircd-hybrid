@@ -154,7 +154,7 @@ who_global(struct Client *source_p, char *mask, int server_oper)
   {
     if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
     {
-      sendto_one_numeric(source_p, &me, RPL_LOAD2HI);
+      sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "WHO");
       return;
     }
 

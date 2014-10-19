@@ -426,7 +426,7 @@ ssl_init(void)
     const char *s = ERR_lib_error_string(ERR_get_error());
 
     fprintf(stderr, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
+    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Server context -- %s", s);
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
@@ -456,7 +456,7 @@ ssl_init(void)
     const char *s = ERR_lib_error_string(ERR_get_error());
 
     fprintf(stderr, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
+    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Client context -- %s", s);
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }

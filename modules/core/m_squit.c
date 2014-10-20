@@ -56,9 +56,8 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 {
   char comment[REASONLEN + 1] = "";
   struct Client *target_p = NULL;
-  struct Client *p;
-  dlink_node *ptr;
-  const char *server;
+  dlink_node *ptr = NULL;
+  const char *server = parv[1];
 
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -66,14 +65,10 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  server = parv[1];
-
-  /* The following allows wild cards in SQUIT. Only
-   * useful when the command is issued by an oper.
-   */
+  /* The following allows wild cards in SQUIT. */
   DLINK_FOREACH(ptr, global_server_list.head)
   {
-    p = ptr->data;
+    struct Client *p = ptr->data;
 
     if (IsServer(p) || IsMe(p))
     {
@@ -85,7 +80,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if ((target_p == NULL) || IsMe(target_p))
+  if (!target_p || IsMe(target_p))
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server);
     return 0;
@@ -118,6 +113,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 
     /* To them, we are exiting */
     sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
+
     /* Send to everything but target */
     sendto_server(target_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
                   source_p->id, target_p->id, comment);
@@ -150,7 +146,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
-  dlink_node *ptr;
+  dlink_node *ptr = NULL;
 
   if (parc < 2 || EmptyString(parv[1]))
     return 0;
@@ -170,8 +166,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
                          me.name, target_p->name, source_p->name, comment);
-    sendto_server(source_p, NOCAPS, NOCAPS,
-                  ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
+    sendto_server(source_p, NOCAPS, NOCAPS, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
                   me.id, target_p->name, source_p->name, comment);
     ilog(LOG_TYPE_IRCD, "SQUIT From %s : %s (%s)", source_p->name,
          target_p->name, comment);

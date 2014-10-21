@@ -318,9 +318,6 @@ verify_access(struct Client *client_p)
         return NOT_AUTHORIZED;
       }
 
-      if (IsConfDoIdentd(conf))
-        SetNeedId(client_p);
-
       /* Thanks for spoof idea amm */
       if (IsConfDoSpoofIp(conf))
       {

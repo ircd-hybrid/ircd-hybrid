@@ -40,23 +40,22 @@
 #define IsConfGline(x)          ((x)->type == CONF_GLINE)
 
 /* MaskItem->flags */
-#define CONF_FLAGS_DO_IDENTD            0x00000001U
-#define CONF_FLAGS_NO_TILDE             0x00000004U
-#define CONF_FLAGS_NEED_IDENTD          0x00000008U
-#define CONF_FLAGS_EXEMPTKLINE          0x00000010U
-#define CONF_FLAGS_NOLIMIT              0x00000020U
-#define CONF_FLAGS_SPOOF_IP             0x00000040U
-#define CONF_FLAGS_SPOOF_NOTICE         0x00000080U
-#define CONF_FLAGS_REDIR                0x00000100U
-#define CONF_FLAGS_EXEMPTGLINE          0x00000200U
-#define CONF_FLAGS_CAN_FLOOD            0x00000400U
-#define CONF_FLAGS_NEED_PASSWORD        0x00000800U
-#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00001000U
-#define CONF_FLAGS_ENCRYPTED            0x00002000U
-#define CONF_FLAGS_IN_DATABASE          0x00004000U
-#define CONF_FLAGS_EXEMPTRESV           0x00008000U
-#define CONF_FLAGS_SSL                  0x00010000U
-#define CONF_FLAGS_WEBIRC               0x00020000U
+#define CONF_FLAGS_NO_TILDE             0x00000001U
+#define CONF_FLAGS_NEED_IDENTD          0x00000002U
+#define CONF_FLAGS_EXEMPTKLINE          0x00000004U
+#define CONF_FLAGS_NOLIMIT              0x00000008U
+#define CONF_FLAGS_SPOOF_IP             0x00000010U
+#define CONF_FLAGS_SPOOF_NOTICE         0x00000020U
+#define CONF_FLAGS_REDIR                0x00000040U
+#define CONF_FLAGS_EXEMPTGLINE          0x00000080U
+#define CONF_FLAGS_CAN_FLOOD            0x00000100U
+#define CONF_FLAGS_NEED_PASSWORD        0x00000200U
+#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00000400U
+#define CONF_FLAGS_ENCRYPTED            0x00000800U
+#define CONF_FLAGS_IN_DATABASE          0x00001000U
+#define CONF_FLAGS_EXEMPTRESV           0x00002000U
+#define CONF_FLAGS_SSL                  0x00004000U
+#define CONF_FLAGS_WEBIRC               0x00008000U
 
 /* Macros for struct MaskItem */
 #define IsConfWebIRC(x)           ((x)->flags & CONF_FLAGS_WEBIRC)
@@ -68,7 +67,6 @@
 #define IsConfExemptLimits(x)     ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptGline(x)      ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
 #define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
-#define IsConfDoIdentd(x)         ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)
 #define IsConfSpoofNotice(x)      ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
 #define IsConfAllowAutoConn(x)    ((x)->flags & CONF_FLAGS_ALLOW_AUTO_CONN)

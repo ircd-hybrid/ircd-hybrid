@@ -42,7 +42,7 @@
 #include "packet.h"
 
 
-static unsigned int current_serial = 0;
+static uint64_t current_serial;
 
 
 /* send_format()

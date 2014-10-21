@@ -108,30 +108,29 @@ struct MaskItem;
 #define FLAGS_KILLED         0x00000004U  /**< Prevents "QUIT" from being sent for this */
 #define FLAGS_CLOSING        0x00000008U  /**< Set when closing to suppress errors */
 #define FLAGS_GOTID          0x00000010U  /**< Successful ident lookup achieved */
-#define FLAGS_NEEDID         0x00000020U  /**< auth{} block say must use ident return */
-#define FLAGS_SENDQEX        0x00000040U  /**< Sendq exceeded */
-#define FLAGS_IPHASH         0x00000080U  /**< Iphashed this client */
-#define FLAGS_MARK           0x00000100U  /**< Marked client */
-#define FLAGS_CANFLOOD       0x00000200U  /**< Client has the ability to flood */
-#define FLAGS_EXEMPTGLINE    0x00000400U  /**< Client can't be G-lined */
-#define FLAGS_EXEMPTKLINE    0x00000800U  /**< Client is exempt from kline */
-#define FLAGS_NOLIMIT        0x00001000U  /**< Client is exempt from limits */
-#define FLAGS_PING_COOKIE    0x00002000U  /**< PING Cookie */
-#define FLAGS_IP_SPOOFING    0x00004000U  /**< Client IP is spoofed */
-#define FLAGS_FLOODDONE      0x00008000U  /**< Flood grace period has been ended. */
-#define FLAGS_EOB            0x00010000U  /**< Server has sent us an EOB */
-#define FLAGS_HIDDEN         0x00020000U  /**< A hidden server. Not shown in /links */
-#define FLAGS_BLOCKED        0x00040000U  /**< Must wait for COMM_SELECT_WRITE */
-#define FLAGS_USERHOST       0x00080000U  /**< Client is in userhost hash */
-#define FLAGS_BURSTED        0x00100000U  /**< User was already bursted */
-#define FLAGS_EXEMPTRESV     0x00200000U  /**< Client is exempt from RESV */
-#define FLAGS_GOTUSER        0x00400000U  /**< If we received a USER command */
-#define FLAGS_FINISHED_AUTH  0x00800000U  /**< Client has been released from auth */
-#define FLAGS_FLOOD_NOTICED  0x01000000U  /**< Notice to opers about this flooder has been sent */
-#define FLAGS_SERVICE        0x02000000U  /**< Client/server is a network service */
-#define FLAGS_AUTH_SPOOF     0x04000000U  /**< User's hostname has been spoofed by an auth{} spoof */
-#define FLAGS_SSL            0x08000000U  /**< User is connected via TLS/SSL */
-#define FLAGS_SQUIT          0x10000000U
+#define FLAGS_SENDQEX        0x00000020U  /**< Sendq exceeded */
+#define FLAGS_IPHASH         0x00000040U  /**< Iphashed this client */
+#define FLAGS_MARK           0x00000080U  /**< Marked client */
+#define FLAGS_CANFLOOD       0x00000100U  /**< Client has the ability to flood */
+#define FLAGS_EXEMPTGLINE    0x00000200U  /**< Client can't be G-lined */
+#define FLAGS_EXEMPTKLINE    0x00000400U  /**< Client is exempt from kline */
+#define FLAGS_NOLIMIT        0x00000800U  /**< Client is exempt from limits */
+#define FLAGS_PING_COOKIE    0x00001000U  /**< PING Cookie */
+#define FLAGS_IP_SPOOFING    0x00002000U  /**< Client IP is spoofed */
+#define FLAGS_FLOODDONE      0x00004000U  /**< Flood grace period has been ended. */
+#define FLAGS_EOB            0x00008000U  /**< Server has sent us an EOB */
+#define FLAGS_HIDDEN         0x00010000U  /**< A hidden server. Not shown in /links */
+#define FLAGS_BLOCKED        0x00020000U  /**< Must wait for COMM_SELECT_WRITE */
+#define FLAGS_USERHOST       0x00040000U  /**< Client is in userhost hash */
+#define FLAGS_BURSTED        0x00080000U  /**< User was already bursted */
+#define FLAGS_EXEMPTRESV     0x00100000U  /**< Client is exempt from RESV */
+#define FLAGS_GOTUSER        0x00200000U  /**< If we received a USER command */
+#define FLAGS_FINISHED_AUTH  0x00400000U  /**< Client has been released from auth */
+#define FLAGS_FLOOD_NOTICED  0x00800000U  /**< Notice to opers about this flooder has been sent */
+#define FLAGS_SERVICE        0x01000000U  /**< Client/server is a network service */
+#define FLAGS_AUTH_SPOOF     0x02000000U  /**< User's hostname has been spoofed by an auth{} spoof */
+#define FLAGS_SSL            0x04000000U  /**< User is connected via TLS/SSL */
+#define FLAGS_SQUIT          0x08000000U
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
@@ -238,9 +237,6 @@ struct MaskItem;
 #define SetPingSent(x)          ((x)->flags |= FLAGS_PINGSENT)
 #define IsPingSent(x)           ((x)->flags & FLAGS_PINGSENT)
 #define ClearPingSent(x)        ((x)->flags &= ~FLAGS_PINGSENT)
-
-#define SetNeedId(x)            ((x)->flags |= FLAGS_NEEDID)
-#define IsNeedId(x)             ((x)->flags & FLAGS_NEEDID)
 
 #define SetGotId(x)             ((x)->flags |= FLAGS_GOTID)
 #define IsGotId(x)              ((x)->flags & FLAGS_GOTID)

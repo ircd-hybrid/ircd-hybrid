@@ -309,7 +309,7 @@ struct Connection
   unsigned int operflags;     /**< IRC Operator privilege flags */
   unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
 
-  unsigned int serial;     /**< Used to enforce 1 send per nick */
+  uint64_t serial;     /**< Used to enforce 1 send per nick */
 
   time_t       lasttime;   /**< ...should be only LOCAL clients? --msa */
   time_t       firsttime;  /**< Time client was created */

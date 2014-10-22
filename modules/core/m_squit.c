@@ -136,7 +136,7 @@ ms_squit(struct Client *client_p, struct Client *source_p,
   struct Client *target_p = NULL;
   const char *comment = NULL;
 
-  if (parc < 2 || EmptyString(parv[parc - 1]))
+  if (parc < 2 || EmptyString(parv[1]))
     return 0;
 
   if ((target_p = hash_find_server(parv[1])) == NULL)

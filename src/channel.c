@@ -686,7 +686,7 @@ find_channel_link(struct Client *client_p, struct Channel *chptr)
   return NULL;
 }
 
-/*! Tests if a client can send to a channel
+/*! Checks if a message contains control codes
  * \param message The actual message string the client wants to send
  * \return 1 if the message does contain any control codes, 0 otherwise
  */
@@ -714,7 +714,7 @@ msg_has_ctrls(const char *message)
     return 1;  /* Control code */
   }
 
-  return 0;
+  return 0;  /* No control code found */
 }
 
 /*! Tests if a client can send to a channel

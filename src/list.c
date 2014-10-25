@@ -164,7 +164,7 @@ dlinkDelete(dlink_node *m, dlink_list *list)
  * side effects - Look for ptr in the linked listed pointed to by link.
  */
 dlink_node *
-dlinkFind(dlink_list *list, void *data)
+dlinkFind(dlink_list *list, const void *data)
 {
   dlink_node *ptr;
 

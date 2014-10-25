@@ -157,7 +157,7 @@ remove_user_from_channel(struct Membership *member)
  * side effects -
  */
 static void
-send_members(struct Client *client_p, struct Channel *chptr,
+send_members(struct Client *client_p, const struct Channel *chptr,
              char *modebuf, char *parabuf)
 {
   char buf[IRCD_BUFSIZE] = "";
@@ -220,7 +220,7 @@ send_members(struct Client *client_p, struct Channel *chptr,
  * \param flag     Char flag flagging type of mode. Currently this can be 'b', e' or 'I'
  */
 static void
-send_mode_list(struct Client *client_p, struct Channel *chptr,
+send_mode_list(struct Client *client_p, const struct Channel *chptr,
                const dlink_list *list, const char flag)
 {
   const dlink_node *ptr = NULL;
@@ -627,7 +627,7 @@ is_banned(const struct Channel *chptr, const struct Client *who)
  *         or 0 if allowed to join.
  */
 int
-can_join(struct Client *source_p, struct Channel *chptr, const char *key)
+can_join(struct Client *source_p, const struct Channel *chptr, const char *key)
 {
   if ((chptr->mode.mode & MODE_SSLONLY) && !HasUMode(source_p, UMODE_SSL))
     return ERR_SSLONLYCHAN;
@@ -730,7 +730,7 @@ int
 can_send(struct Channel *chptr, struct Client *source_p,
          struct Membership *ms, const char *message)
 {
-  struct MaskItem *conf = NULL;
+  const struct MaskItem *conf = NULL;
 
   if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))
     return CAN_SEND_OPV;
@@ -962,7 +962,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
   char *chan_list = NULL;
   struct Channel *chptr = NULL;
   struct MaskItem *conf = NULL;
-  const struct ClassItem *class = get_class_ptr(&source_p->connection->confs);
+  const struct ClassItem *const class = get_class_ptr(&source_p->connection->confs);
   int i = 0;
   unsigned int flags = 0;
 
@@ -1168,15 +1168,15 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
 }
 
 void
-channel_do_part(struct Client *source_p, char *channel, char *reason)
+channel_do_part(struct Client *source_p, char *channel, const char *reason)
 {
   char *p = NULL, *name = NULL;
-  char reasonbuf[KICKLEN + 1] = "";
+  char buf[KICKLEN + 1] = "";
 
   if (!EmptyString(reason))
-    strlcpy(reasonbuf, reason, sizeof(reasonbuf));
+    strlcpy(buf, reason, sizeof(buf));
 
   for (name = strtoken(&p, channel, ","); name;
        name = strtoken(&p,    NULL, ","))
-    channel_part_one_client(source_p, name, reasonbuf);
+    channel_part_one_client(source_p, name, buf);
 }

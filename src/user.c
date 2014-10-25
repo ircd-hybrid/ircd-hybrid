@@ -930,7 +930,7 @@ void
 oper_up(struct Client *source_p)
 {
   const unsigned int old = source_p->umodes;
-  const struct MaskItem *conf = source_p->connection->confs.head->data;
+  const struct MaskItem *const conf = source_p->connection->confs.head->data;
 
   assert(source_p->connection->confs.head);
 

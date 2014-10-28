@@ -88,11 +88,11 @@ whowas_add_history(struct Client *client_p, const int online)
 void
 whowas_off_history(struct Client *client_p)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->whowas.head)
+  DLINK_FOREACH_SAFE(node, node_next, client_p->whowas.head)
   {
-    struct Whowas *temp = ptr->data;
+    struct Whowas *temp = node->data;
 
     temp->online = NULL;
     dlinkDelete(&temp->cnode, &client_p->whowas);
@@ -102,13 +102,13 @@ whowas_off_history(struct Client *client_p)
 struct Client *
 whowas_get_history(const char *nick, time_t timelimit)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   timelimit = CurrentTime - timelimit;
 
-  DLINK_FOREACH(ptr, WHOWASHASH[strhash(nick)].head)
+  DLINK_FOREACH(node, WHOWASHASH[strhash(nick)].head)
   {
-    struct Whowas *temp = ptr->data;
+    struct Whowas *temp = node->data;
 
     if (temp->logoff < timelimit)
       continue;

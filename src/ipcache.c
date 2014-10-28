@@ -80,15 +80,15 @@ ipcache_hash_address(const struct irc_ssaddr *addr)
 struct ip_entry *
 ipcache_find_or_add_address(struct irc_ssaddr *addr)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct ip_entry *iptr = NULL;
   uint32_t hash_index = ipcache_hash_address(addr);
   struct sockaddr_in *v4 = (struct sockaddr_in *)addr, *ptr_v4;
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr, *ptr_v6;
 
-  DLINK_FOREACH(ptr, ip_hash_table[hash_index].head)
+  DLINK_FOREACH(node, ip_hash_table[hash_index].head)
   {
-    iptr = ptr->data;
+    iptr = node->data;
 
     if (iptr->ip.ss.ss_family != addr->ss.ss_family)
       continue;
@@ -127,14 +127,14 @@ ipcache_find_or_add_address(struct irc_ssaddr *addr)
 void
 ipcache_remove_address(struct irc_ssaddr *addr)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   uint32_t hash_index = ipcache_hash_address(addr);
   struct sockaddr_in *v4 = (struct sockaddr_in *)addr, *ptr_v4;
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr, *ptr_v6;
 
-  DLINK_FOREACH(ptr, ip_hash_table[hash_index].head)
+  DLINK_FOREACH(node, ip_hash_table[hash_index].head)
   {
-    struct ip_entry *iptr = ptr->data;
+    struct ip_entry *iptr = node->data;
 
     if (iptr->ip.ss.ss_family != addr->ss.ss_family)
       continue;
@@ -173,13 +173,13 @@ ipcache_remove_address(struct irc_ssaddr *addr)
 static void
 ipcache_remove_expired_entries(void *unused)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
   for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
   {
-    DLINK_FOREACH_SAFE(ptr, ptr_next, ip_hash_table[i].head)
+    DLINK_FOREACH_SAFE(node, node_next, ip_hash_table[i].head)
     {
-      struct ip_entry *iptr = ptr->data;
+      struct ip_entry *iptr = node->data;
 
       if (iptr->count == 0 &&
           (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)

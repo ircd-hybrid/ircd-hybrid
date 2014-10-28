@@ -359,11 +359,18 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     if (!IsMember(target_p, chptr))
     {
       add_user_to_channel(chptr, target_p, fl, !have_many_nicks);
-      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
-                           target_p->name, target_p->username,
-                           target_p->host, chptr->name);
+
+      sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
+                                  target_p->name, target_p->username,
+                                  target_p->host, chptr->name,
+                                  (!IsDigit(target_p->svid[0]) && target_p->svid[0] != '*') ? target_p->svid : "*",
+                                  target_p->info);
+      sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
+                                  target_p->name, target_p->username,
+                                  target_p->host, chptr->name);
+
       if (target_p->away[0])
-        sendto_channel_local_butone(target_p, 0, CAP_AWAY_NOTIFY, chptr,
+        sendto_channel_local_butone(target_p, CAP_AWAY_NOTIFY, 0, chptr,
                                     ":%s!%s@%s AWAY :%s",
                                     target_p->name, target_p->username,
                                     target_p->host, target_p->away);

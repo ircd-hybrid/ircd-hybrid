@@ -905,9 +905,16 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
 
     *p = '\0';
 
-    sendto_channel_local_butone(target_p, 0, 0, ms->chptr, ":%s!%s@%s JOIN :%s",
-                                target_p->name, target_p->username, target_p->host,
-                                ms->chptr->name);
+
+    sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, ms->chptr, ":%s!%s@%s JOIN %s %s :%s",
+                                target_p->name, target_p->username,
+                                target_p->host, ms->chptr->name,
+                                (!IsDigit(target_p->svid[0]) && target_p->svid[0] != '*') ? target_p->svid : "*",
+                                target_p->info);
+    sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, ms->chptr, ":%s!%s@%s JOIN :%s",
+                                target_p->name, target_p->username,
+                                target_p->host, ms->chptr->name);
+
     if (nickbuf[0])
       sendto_channel_local_butone(target_p, 0, 0, ms->chptr, ":%s MODE %s +%s %s",
                                   target_p->servptr->name, ms->chptr->name,

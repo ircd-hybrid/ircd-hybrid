@@ -222,12 +222,18 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   if (!IsMember(source_p, chptr))
   {
     add_user_to_channel(chptr, source_p, 0, 1);
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
-                         source_p->name, source_p->username,
-                         source_p->host, chptr->name);
+
+    sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
+                                source_p->name, source_p->username,
+                                source_p->host, chptr->name,
+                                (!IsDigit(source_p->svid[0]) && source_p->svid[0] != '*') ? source_p->svid : "*",
+                                source_p->info);
+    sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
+                                source_p->name, source_p->username,
+                                source_p->host, chptr->name);
 
     if (source_p->away[0])
-      sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
+      sendto_channel_local_butone(source_p, CAP_AWAY_NOTIFY, 0, chptr,
                                   ":%s!%s@%s AWAY :%s",
                                   source_p->name, source_p->username,
                                   source_p->host, source_p->away);

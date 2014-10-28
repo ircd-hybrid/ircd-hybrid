@@ -624,14 +624,12 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
  * WARNING - +D clients are omitted
  */
 void
-sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int cap,
+sendto_channel_local_butone(struct Client *one, unsigned int poscap, unsigned int negcap,
                             struct Channel *chptr, const char *pattern, ...)
 {
   va_list args;
   dlink_node *ptr = NULL;
-  struct dbuf_block *buffer;
-
-  buffer = dbuf_alloc();
+  struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
@@ -642,16 +640,16 @@ sendto_channel_local_butone(struct Client *one, unsigned int type, unsigned int 
     struct Membership *ms = ptr->data;
     struct Client *target_p = ms->client_p;
 
-    if (type && (ms->flags & type) == 0)
-      continue;
-
     if (one && target_p == one->from)
       continue;
 
     if (IsDefunct(target_p) || HasUMode(target_p, UMODE_DEAF))
       continue;
 
-    if (HasCap(target_p, cap) != cap)
+    if (poscap && HasCap(target_p, poscap) != poscap)
+      continue;
+
+    if (negcap && HasCap(target_p, negcap))
       continue;
 
     send_message(target_p, buffer);

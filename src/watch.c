@@ -82,7 +82,7 @@ void
 watch_check_hash(const struct Client *client_p, const enum irc_numerics reply)
 {
   struct Watch *anptr = NULL;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   assert(IsClient(client_p));
 
@@ -93,8 +93,8 @@ watch_check_hash(const struct Client *client_p, const enum irc_numerics reply)
   anptr->lasttime = CurrentTime;
 
   /* Send notifies out to everybody on the list in header */
-  DLINK_FOREACH(ptr, anptr->watched_by.head)
-    sendto_one_numeric(ptr->data, &me, reply, client_p->name,
+  DLINK_FOREACH(node, anptr->watched_by.head)
+    sendto_one_numeric(node->data, &me, reply, client_p->name,
                        client_p->username, client_p->host,
                        anptr->lasttime, client_p->info);
 }
@@ -105,11 +105,11 @@ watch_check_hash(const struct Client *client_p, const enum irc_numerics reply)
 struct Watch *
 watch_find_hash(const char *name)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, watchTable[strhash(name)].head)
+  DLINK_FOREACH(node, watchTable[strhash(name)].head)
   {
-    struct Watch *anptr = ptr->data;
+    struct Watch *anptr = node->data;
 
     if (!irccmp(anptr->nick, name))
       return anptr;
@@ -126,7 +126,7 @@ void
 watch_add_to_hash_table(const char *nick, struct Client *client_p)
 {
   struct Watch *anptr = NULL;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   /* If found NULL (no header for this nick), make one... */
   if ((anptr = watch_find_hash(nick)) == NULL)
@@ -141,10 +141,10 @@ watch_add_to_hash_table(const char *nick, struct Client *client_p)
   else
   {
     /* Is this client already on the watch-list? */
-    ptr = dlinkFind(&anptr->watched_by, client_p);
+    node = dlinkFind(&anptr->watched_by, client_p);
   }
 
-  if (ptr == NULL)
+  if (node == NULL)
   {
     /* No it isn't, so add it in the bucket and client adding it */
     dlinkAdd(client_p, make_dlink_node(), &anptr->watched_by);
@@ -160,19 +160,19 @@ void
 watch_del_from_hash_table(const char *nick, struct Client *client_p)
 {
   struct Watch *anptr = NULL;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if ((anptr = watch_find_hash(nick)) == NULL)
     return;  /* No header found for that nick. i.e. it's not being watched */
 
-  if ((ptr = dlinkFind(&anptr->watched_by, client_p)) == NULL)
+  if ((node = dlinkFind(&anptr->watched_by, client_p)) == NULL)
     return;  /* This nick isn't being watched by client_p */
 
-  dlinkDelete(ptr, &anptr->watched_by);
-  free_dlink_node(ptr);
+  dlinkDelete(node, &anptr->watched_by);
+  free_dlink_node(node);
 
-  if ((ptr = dlinkFindDelete(&client_p->connection->watches, anptr)))
-    free_dlink_node(ptr);
+  if ((node = dlinkFindDelete(&client_p->connection->watches, anptr)))
+    free_dlink_node(node);
 
   /* In case this header is now empty of notices, remove it */
   if (anptr->watched_by.head == NULL)
@@ -190,17 +190,17 @@ watch_del_from_hash_table(const char *nick, struct Client *client_p)
 void
 watch_del_watch_list(struct Client *client_p)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
-  dlink_node *tmp = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *temp = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->connection->watches.head)
+  DLINK_FOREACH_SAFE(node, node_next, client_p->connection->watches.head)
   {
-    struct Watch *anptr = ptr->data;
+    struct Watch *anptr = node->data;
 
     assert(dlinkFind(&anptr->watched_by, client_p));
 
-    if ((tmp = dlinkFindDelete(&anptr->watched_by, client_p)))
-      free_dlink_node(tmp);
+    if ((temp = dlinkFindDelete(&anptr->watched_by, client_p)))
+      free_dlink_node(temp);
 
     /* If this leaves a header without notifies, remove it. */
     if (anptr->watched_by.head == NULL)
@@ -211,8 +211,8 @@ watch_del_watch_list(struct Client *client_p)
       mp_pool_release(anptr);
     }
 
-    dlinkDelete(ptr, &client_p->connection->watches);
-    free_dlink_node(ptr);
+    dlinkDelete(node, &client_p->connection->watches);
+    free_dlink_node(node);
   }
 
   assert(client_p->connection->watches.head == NULL);

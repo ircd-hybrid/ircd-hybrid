@@ -82,11 +82,11 @@ class_init(void)
 struct ClassItem *
 get_class_ptr(const dlink_list *const list)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  if ((ptr = list->head))
+  if ((node = list->head))
   {
-    const struct MaskItem *conf = ptr->data;
+    const struct MaskItem *conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -100,11 +100,11 @@ get_class_ptr(const dlink_list *const list)
 const char *
 get_client_class(const dlink_list *const list)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  if ((ptr = list->head))
+  if ((node = list->head))
   {
-    const struct MaskItem *conf = ptr->data;
+    const struct MaskItem *conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -118,11 +118,11 @@ get_client_class(const dlink_list *const list)
 unsigned int
 get_client_ping(const dlink_list *const list)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  if ((ptr = list->head))
+  if ((node = list->head))
   {
-    const struct MaskItem *conf = ptr->data;
+    const struct MaskItem *conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -136,11 +136,11 @@ get_client_ping(const dlink_list *const list)
 unsigned int
 get_sendq(const dlink_list *const list)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  if ((ptr = list->head))
+  if ((node = list->head))
   {
-    const struct MaskItem *conf = ptr->data;
+    const struct MaskItem *conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -154,11 +154,11 @@ get_sendq(const dlink_list *const list)
 unsigned int
 get_recvq(const dlink_list *const list)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  if ((ptr = list->head))
+  if ((node = list->head))
   {
-    const struct MaskItem *conf = ptr->data;
+    const struct MaskItem *conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -177,11 +177,11 @@ get_recvq(const dlink_list *const list)
 struct ClassItem *
 class_find(const char *name, int active)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, class_list.head)
+  DLINK_FOREACH(node, class_list.head)
   {
-    struct ClassItem *class = ptr->data;
+    struct ClassItem *class = node->data;
 
     if (!irccmp(class->name, name))
       return active && !class->active ? NULL : class;
@@ -197,20 +197,20 @@ class_find(const char *name, int active)
 void
 class_mark_for_deletion(void)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH_PREV(ptr, class_list.tail->prev)
-    ((struct ClassItem *)ptr->data)->active = 0;
+  DLINK_FOREACH_PREV(node, class_list.tail->prev)
+    ((struct ClassItem *)node->data)->active = 0;
 }
 
 void
 class_delete_marked(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, class_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, class_list.head)
   {
-    struct ClassItem *class = ptr->data;
+    struct ClassItem *class = node->data;
 
     if (!class->active && !class->ref_count)
     {
@@ -233,7 +233,7 @@ class_delete_marked(void)
 int
 cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct CidrItem *cidr = NULL;
 
   if (class->number_per_cidr == 0)
@@ -244,9 +244,9 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
     if (class->cidr_bitlen_ipv4 == 0)
       return 0;
 
-    DLINK_FOREACH(ptr, class->list_ipv4.head)
+    DLINK_FOREACH(node, class->list_ipv4.head)
     {
-      cidr = ptr->data;
+      cidr = node->data;
 
       if (match_ipv4(ip, &cidr->mask, class->cidr_bitlen_ipv4))
       {
@@ -266,9 +266,9 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
   }
   else if (class->cidr_bitlen_ipv6 > 0)
   {
-    DLINK_FOREACH(ptr, class->list_ipv6.head)
+    DLINK_FOREACH(node, class->list_ipv6.head)
     {
-      cidr = ptr->data;
+      cidr = node->data;
 
       if (match_ipv6(ip, &cidr->mask, class->cidr_bitlen_ipv6))
       {
@@ -301,9 +301,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
 void
 remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 {
-  dlink_node *ptr = NULL;
-  dlink_node *next_ptr = NULL;
-  struct CidrItem *cidr;
+  dlink_node *node = NULL, *node_next = NULL;
 
   if (aclass->number_per_cidr == 0)
     return;
@@ -313,9 +311,9 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
     if (aclass->cidr_bitlen_ipv4 == 0)
       return;
 
-    DLINK_FOREACH_SAFE(ptr, next_ptr, aclass->list_ipv4.head)
+    DLINK_FOREACH_SAFE(node, node_next, aclass->list_ipv4.head)
     {
-      cidr = ptr->data;
+      struct CidrItem *cidr = node->data;
 
       if (match_ipv4(ip, &cidr->mask, aclass->cidr_bitlen_ipv4))
       {
@@ -323,7 +321,7 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 
         if (cidr->number_on_this_cidr == 0)
         {
-          dlinkDelete(ptr, &aclass->list_ipv4);
+          dlinkDelete(node, &aclass->list_ipv4);
           MyFree(cidr);
           return;
         }
@@ -332,9 +330,9 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
   }
   else if (aclass->cidr_bitlen_ipv6 > 0)
   {
-    DLINK_FOREACH_SAFE(ptr, next_ptr, aclass->list_ipv6.head)
+    DLINK_FOREACH_SAFE(node, node_next, aclass->list_ipv6.head)
     {
-      cidr = ptr->data;
+      struct CidrItem *cidr = node->data;
 
       if (match_ipv6(ip, &cidr->mask, aclass->cidr_bitlen_ipv6))
       {
@@ -342,7 +340,7 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 
         if (cidr->number_on_this_cidr == 0)
         {
-          dlinkDelete(ptr, &aclass->list_ipv6);
+          dlinkDelete(node, &aclass->list_ipv6);
           MyFree(cidr);
           return;
         }
@@ -354,13 +352,13 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 void
 rebuild_cidr_list(struct ClassItem *class)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   destroy_cidr_class(class);
 
-  DLINK_FOREACH(ptr, local_client_list.head)
+  DLINK_FOREACH(node, local_client_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
     struct MaskItem *conf = client_p->connection->confs.tail->data;
 
     if (conf && (conf->type == CONF_CLIENT))
@@ -379,12 +377,12 @@ rebuild_cidr_list(struct ClassItem *class)
 static void
 destroy_cidr_list(dlink_list *list)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, list->head)
+  DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
-    dlinkDelete(ptr, list);
-    MyFree(ptr->data);
+    dlinkDelete(node, list);
+    MyFree(node->data);
   }
 }
 

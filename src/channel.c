@@ -161,7 +161,7 @@ send_members(struct Client *client_p, const struct Channel *chptr,
              char *modebuf, char *parabuf)
 {
   char buf[IRCD_BUFSIZE] = "";
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
 
@@ -169,9 +169,9 @@ send_members(struct Client *client_p, const struct Channel *chptr,
                              me.id, (unsigned long)chptr->channelts,
                              chptr->name, modebuf, parabuf);
 
-  DLINK_FOREACH(ptr, chptr->members.head)
+  DLINK_FOREACH(node, chptr->members.head)
   {
-    const struct Membership *ms = ptr->data;
+    const struct Membership *ms = node->data;
 
     tlen = strlen(ms->client_p->id) + 1;  /* +1 for space */
 
@@ -223,7 +223,7 @@ static void
 send_mode_list(struct Client *client_p, const struct Channel *chptr,
                const dlink_list *list, const char flag)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
   char mbuf[IRCD_BUFSIZE] = "";
   char pbuf[IRCD_BUFSIZE] = "";
   int tlen, mlen, cur_len;
@@ -236,9 +236,9 @@ send_mode_list(struct Client *client_p, const struct Channel *chptr,
                   (unsigned long)chptr->channelts, chptr->name, flag);
   cur_len = mlen;
 
-  DLINK_FOREACH(ptr, list->head)
+  DLINK_FOREACH(node, list->head)
   {
-    const struct Ban *banptr = ptr->data;
+    const struct Ban *banptr = node->data;
 
     tlen = banptr->len + 3;  /* +3 for ! + @ + space */
 
@@ -334,10 +334,10 @@ remove_ban(struct Ban *bptr, dlink_list *list)
 void
 free_channel_list(dlink_list *list)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, list->head)
-    remove_ban(ptr->data, list);
+  DLINK_FOREACH_SAFE(node, node_next, list->head)
+    remove_ban(node->data, list);
 
   assert(list->tail == NULL && list->head == NULL);
 }
@@ -374,10 +374,10 @@ make_channel(const char *name)
 void
 destroy_channel(struct Channel *chptr)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, chptr->invites.head)
-    del_invite(chptr, ptr->data);
+  DLINK_FOREACH_SAFE(node, node_next, chptr->invites.head)
+    del_invite(chptr, node->data);
 
   /* Free ban/exception/invex lists */
   free_channel_list(&chptr->banlist);
@@ -414,7 +414,7 @@ void
 channel_member_names(struct Client *source_p, struct Channel *chptr,
                      int show_eon)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
   char buf[IRCD_BUFSIZE + 1] = "";
   char *t = NULL, *start = NULL;
   int tlen = 0;
@@ -429,9 +429,9 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
                        channel_pub_or_secret(chptr), chptr->name);
     start = t;
 
-    DLINK_FOREACH(ptr, chptr->members.head)
+    DLINK_FOREACH(node, chptr->members.head)
     {
-      const struct Membership *ms = ptr->data;
+      const struct Membership *ms = node->data;
 
       if (HasUMode(ms->client_p, UMODE_INVISIBLE) && !is_member)
         continue;
@@ -515,13 +515,13 @@ add_invite(struct Channel *chptr, struct Client *who)
 void
 del_invite(struct Channel *chptr, struct Client *who)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  if ((ptr = dlinkFindDelete(&who->connection->invited, chptr)))
-    free_dlink_node(ptr);
+  if ((node = dlinkFindDelete(&who->connection->invited, chptr)))
+    free_dlink_node(node);
 
-  if ((ptr = dlinkFindDelete(&chptr->invites, who)))
-    free_dlink_node(ptr);
+  if ((node = dlinkFindDelete(&chptr->invites, who)))
+    free_dlink_node(node);
 }
 
 /* get_member_status()
@@ -571,11 +571,11 @@ get_member_status(const struct Membership *ms, const int combine)
 static int
 find_bmask(const struct Client *who, const dlink_list *const list)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, list->head)
+  DLINK_FOREACH(node, list->head)
   {
-    const struct Ban *bp = ptr->data;
+    const struct Ban *bp = node->data;
 
     if (!match(bp->name, who->name) && !match(bp->user, who->username))
     {
@@ -665,22 +665,22 @@ has_member_flags(const struct Membership *ms, const unsigned int flags)
 struct Membership *
 find_channel_link(struct Client *client_p, struct Channel *chptr)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (!IsClient(client_p))
     return NULL;
 
   if (dlink_list_length(&chptr->members) < dlink_list_length(&client_p->channel))
   {
-    DLINK_FOREACH(ptr, chptr->members.head)
-      if (((struct Membership *)ptr->data)->client_p == client_p)
-        return ptr->data;
+    DLINK_FOREACH(node, chptr->members.head)
+      if (((struct Membership *)node->data)->client_p == client_p)
+        return node->data;
   }
   else
   {
-    DLINK_FOREACH(ptr, client_p->channel.head)
-      if (((struct Membership *)ptr->data)->chptr == chptr)
-        return ptr->data;
+    DLINK_FOREACH(node, client_p->channel.head)
+      if (((struct Membership *)node->data)->chptr == chptr)
+        return node->data;
   }
 
   return NULL;
@@ -903,15 +903,15 @@ channel_set_topic(struct Channel *chptr, const char *topic,
 void
 channel_do_join_0(struct Client *source_p)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
   if (source_p->channel.head)
     if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
       check_spambot_warning(source_p, NULL);
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->channel.head)
+  DLINK_FOREACH_SAFE(node, node_next, source_p->channel.head)
   {
-    struct Channel *chptr = ((struct Membership *)ptr->data)->chptr;
+    struct Channel *chptr = ((struct Membership *)node->data)->chptr;
 
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
                   source_p->id, chptr->name);
@@ -919,7 +919,7 @@ channel_do_join_0(struct Client *source_p)
                          source_p->name, source_p->username,
                          source_p->host, chptr->name);
 
-    remove_user_from_channel(ptr->data);
+    remove_user_from_channel(node->data);
   }
 }
 

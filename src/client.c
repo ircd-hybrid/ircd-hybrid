@@ -172,11 +172,11 @@ check_pings_list(dlink_list *list)
 {
   char buf[IRCD_BUFSIZE] = "";
   int ping = 0;      /* ping time value from client */
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, list->head)
+  DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     if (IsDead(client_p))
       continue;  /* Ignore it, its been exited already */
@@ -237,11 +237,11 @@ check_pings_list(dlink_list *list)
 static void
 check_unknowns_list(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     /*
      * Check UNKNOWN connections - if they have been in this state
@@ -297,11 +297,11 @@ void
 check_conf_klines(void)
 {
   struct MaskItem *conf = NULL;
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, local_client_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     /* If a client is already being exited
      */
@@ -344,9 +344,9 @@ check_conf_klines(void)
   }
 
   /* also check the unknowns list for new dlines */
-  DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     if ((conf = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
                                      client_p->connection->aftype, NULL, NULL, 1)))
@@ -570,13 +570,13 @@ get_client_name(const struct Client *client_p, enum addr_mask_type type)
 void
 free_exited_clients(void)
 {
-  dlink_node *ptr = NULL, *next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, next, dead_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, dead_list.head)
   {
-    free_client(ptr->data);
-    dlinkDelete(ptr, &dead_list);
-    free_dlink_node(ptr);
+    free_client(node->data);
+    dlinkDelete(node, &dead_list);
+    free_dlink_node(node);
   }
 }
 
@@ -589,7 +589,7 @@ free_exited_clients(void)
 static void
 exit_one_client(struct Client *source_p, const char *comment)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
   assert(!IsMe(source_p));
   assert(source_p != &me);
@@ -608,8 +608,8 @@ exit_one_client(struct Client *source_p, const char *comment)
     sendto_common_channels_local(source_p, 0, 0, ":%s!%s@%s QUIT :%s",
                                  source_p->name, source_p->username,
                                  source_p->host, comment);
-    DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->channel.head)
-      remove_user_from_channel(ptr->data);
+    DLINK_FOREACH_SAFE(node, node_next, source_p->channel.head)
+      remove_user_from_channel(node->data);
 
     whowas_add_history(source_p, 0);
     whowas_off_history(source_p);
@@ -619,8 +619,8 @@ exit_one_client(struct Client *source_p, const char *comment)
     if (MyConnect(source_p))
     {
       /* Clean up invitefield */
-      DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->connection->invited.head)
-        del_invite(ptr->data, source_p);
+      DLINK_FOREACH_SAFE(node, node_next, source_p->connection->invited.head)
+        del_invite(node->data, source_p);
 
       del_all_accepts(source_p);
     }
@@ -630,8 +630,8 @@ exit_one_client(struct Client *source_p, const char *comment)
     dlinkDelete(&source_p->lnode, &source_p->servptr->serv->server_list);
     dlinkDelete(&source_p->node, &global_client_list);
 
-    if ((ptr = dlinkFindDelete(&global_server_list, source_p)))
-      free_dlink_node(ptr);
+    if ((node = dlinkFindDelete(&global_server_list, source_p)))
+      free_dlink_node(node);
   }
 
   /* Remove source_p from the client lists */
@@ -662,15 +662,15 @@ exit_one_client(struct Client *source_p, const char *comment)
 static void
 recurse_remove_clients(struct Client *source_p, const char *comment)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->client_list.head)
-    exit_one_client(ptr->data, comment);
+  DLINK_FOREACH_SAFE(node, node_next, source_p->serv->client_list.head)
+    exit_one_client(node->data, comment);
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->server_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, source_p->serv->server_list.head)
   {
-    recurse_remove_clients(ptr->data, comment);
-    exit_one_client(ptr->data, comment);
+    recurse_remove_clients(node->data, comment);
+    exit_one_client(node->data, comment);
   }
 }
 
@@ -694,7 +694,7 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 void
 exit_client(struct Client *source_p, const char *comment)
 {
-  dlink_node *m = NULL;
+  dlink_node *node = NULL;
 
   assert(!IsMe(source_p));
   assert(source_p != &me);
@@ -737,8 +737,8 @@ exit_client(struct Client *source_p, const char *comment)
       Count.local--;
 
       if (HasUMode(source_p, UMODE_OPER))
-        if ((m = dlinkFindDelete(&oper_list, source_p)))
-          free_dlink_node(m);
+        if ((node = dlinkFindDelete(&oper_list, source_p)))
+          free_dlink_node(node);
 
       assert(dlinkFind(&local_client_list, source_p));
       dlinkDelete(&source_p->connection->lclient_node, &local_client_list);
@@ -852,7 +852,7 @@ exit_client(struct Client *source_p, const char *comment)
 void
 dead_link_on_write(struct Client *client_p, int ierrno)
 {
-  dlink_node *ptr;
+  dlink_node *node;
 
   if (IsDefunct(client_p))
     return;
@@ -861,12 +861,12 @@ dead_link_on_write(struct Client *client_p, int ierrno)
   dbuf_clear(&client_p->connection->buf_sendq);
 
   assert(dlinkFind(&abort_list, client_p) == NULL);
-  ptr = make_dlink_node();
+  node = make_dlink_node();
   /* don't let exit_aborted_clients() finish yet */
-  dlinkAddTail(client_p, ptr, &abort_list);
+  dlinkAddTail(client_p, node, &abort_list);
 
   if (eac_next == NULL)
-    eac_next = ptr;
+    eac_next = node;
 
   SetDead(client_p); /* You are dead my friend */
 }
@@ -993,11 +993,11 @@ find_accept(const char *nick, const char *user,
             const char *host, struct Client *client_p,
             int (*cmpfunc)(const char *, const char *))
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, client_p->connection->acceptlist.head)
+  DLINK_FOREACH(node, client_p->connection->acceptlist.head)
   {
-    struct split_nuh_item *accept_p = ptr->data;
+    struct split_nuh_item *accept_p = node->data;
 
     if (!cmpfunc(accept_p->nickptr, nick) &&
         !cmpfunc(accept_p->userptr, user) &&
@@ -1019,15 +1019,15 @@ int
 accept_message(struct Client *source,
                struct Client *target)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (source == target || find_accept(source->name, source->username,
                                       source->host, target, match))
     return 1;
 
   if (!HasUMode(target, UMODE_CALLERID) && HasUMode(target, UMODE_SOFTCALLERID))
-    DLINK_FOREACH(ptr, target->channel.head)
-      if (IsMember(source, ((struct Membership *)ptr->data)->chptr))
+    DLINK_FOREACH(node, target->channel.head)
+      if (IsMember(source, ((struct Membership *)node->data)->chptr))
         return 1;
 
   return 0;
@@ -1042,10 +1042,10 @@ accept_message(struct Client *source,
 void
 del_all_accepts(struct Client *client_p)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->connection->acceptlist.head)
-    del_accept(ptr->data, client_p);
+  DLINK_FOREACH_SAFE(node, node_next, client_p->connection->acceptlist.head)
+    del_accept(node->data, client_p);
 }
 
 unsigned int

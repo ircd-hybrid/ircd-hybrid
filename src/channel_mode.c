@@ -598,7 +598,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
   mask = nuh_mask[*parn];
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
-  ++*parn;
+  ++(*parn);
 
   if (!MyConnect(source_p))
     if (strchr(mask, ' '))
@@ -668,7 +668,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
   mask = nuh_mask[*parn];
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
-  ++*parn;
+  ++(*parn);
 
   if (!MyConnect(source_p))
     if (strchr(mask, ' '))
@@ -738,7 +738,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
   mask = nuh_mask[*parn];
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
-  ++*parn;
+  ++(*parn);
 
   if (!MyConnect(source_p))
     if (strchr(mask, ' '))
@@ -1018,7 +1018,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   else if (dir == MODE_DEL)
   {
     if (parc > *parn)
-      (*parn)++;
+      ++(*parn);
 
     if (chptr->mode.key[0] == '\0')
       return;
@@ -1393,14 +1393,14 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 
     modebuf[mbl++] = mode_changes[i].letter;
     modebuf[mbl] = '\0';
-    nc++;
+    ++nc;
 
     if (arg)
     {
       len = sprintf(parptr, "%s ", arg);
       pbl += len;
       parptr += len;
-      mc++;
+      ++mc;
     }
   }
 
@@ -1458,7 +1458,7 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
     else
       arglen = 0;
 
-    if ((mc == MAXMODEPARAMS)  ||
+    if ((mc == MAXMODEPARAMS) ||
         ((arglen + mbl + pbl + 2) > IRCD_BUFSIZE) ||
         ((arglen + pbl + BAN_FUDGE) >= MODEBUFLEN))
     {
@@ -1493,14 +1493,14 @@ send_mode_changes(struct Client *source_p, struct Channel *chptr)
 
     modebuf[mbl++] = mode_changes[i].letter;
     modebuf[mbl] = '\0';
-    nc++;
+    ++nc;
 
     if (arg)
     {
       len = sprintf(parptr, "%s ", arg);
       pbl += len;
       parptr += len;
-      mc++;
+      ++mc;
     }
   }
 

@@ -34,12 +34,6 @@ enum { NOCAPS = 0 };
 
 enum
 {
-  ALL_MEMBERS  = 0,
-  ONLY_SERVERS = 1
-};
-
-enum
-{
   L_ALL   = 0,
   L_OPER  = 1,
   L_ADMIN = 2

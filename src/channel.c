@@ -915,7 +915,7 @@ channel_do_join_0(struct Client *source_p)
 
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
                   source_p->id, chptr->name);
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
+    sendto_channel_local(0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->name);
 
@@ -1079,7 +1079,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
                                   source_p->name, source_p->username,
                                   source_p->host, chptr->name);
-      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s +nt",
+      sendto_channel_local(0, chptr, ":%s MODE %s +nt",
                            me.name, chptr->name);
 
       if (source_p->away[0])
@@ -1162,7 +1162,7 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
   {
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s :%s",
                   source_p->id, chptr->name, reason);
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s :%s",
+    sendto_channel_local(0, chptr, ":%s!%s@%s PART %s :%s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->name, reason);
   }
@@ -1170,7 +1170,7 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
   {
     sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
                   source_p->id, chptr->name);
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s PART %s",
+    sendto_channel_local(0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->name);
   }

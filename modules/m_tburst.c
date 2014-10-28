@@ -104,7 +104,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
                   source_p->id, parv[1], parv[2], parv[3], setby, topic);
 
     if (topic_differs)
-      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :%s",
+      sendto_channel_local(0, chptr, ":%s TOPIC %s :%s",
                            hidden_server ? me.name : source_p->name,
                            chptr->name, chptr->topic);
   }

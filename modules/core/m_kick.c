@@ -105,7 +105,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   else
     strlcpy(reason, source_p->name, sizeof(reason));
 
-  sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s KICK %s %s :%s",
+  sendto_channel_local(0, chptr, ":%s!%s@%s KICK %s %s :%s",
                        source_p->name, source_p->username,
                        source_p->host, chptr->name,
                        target_p->name, reason);
@@ -148,11 +148,11 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
     strlcpy(reason, source_p->name, sizeof(reason));
 
   if (IsServer(source_p))
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s KICK %s %s :%s",
+    sendto_channel_local(0, chptr, ":%s KICK %s %s :%s",
                          source_p->name, chptr->name,
                          target_p->name, reason);
   else
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s KICK %s %s :%s",
+    sendto_channel_local(0, chptr, ":%s!%s@%s KICK %s %s :%s",
                          source_p->name, source_p->username,
                          source_p->host, chptr->name,
                          target_p->name, reason);

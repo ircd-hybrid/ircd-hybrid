@@ -835,7 +835,7 @@ sendto_anywhere(struct Client *to, struct Client *from,
   send_format(buffer, pattern, args);
   va_end(args);
 
-  if (MyClient(to))
+  if (MyConnect(to))
     send_message(to, buffer);
   else
     send_message_remote(to->from, from, buffer);

@@ -353,6 +353,7 @@ sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics num
     numstr = va_arg(args, const char *);
   else
     numstr = numeric_form(numeric);
+
   send_format(buffer, numstr, args);
   va_end(args);
 

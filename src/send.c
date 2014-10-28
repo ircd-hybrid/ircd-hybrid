@@ -771,9 +771,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 {
   va_list args;
   dlink_node *ptr = NULL, *ptr_next = NULL;
-  struct dbuf_block *buffer;
-
-  buffer = dbuf_alloc();
+  struct dbuf_block *buffer = dbuf_alloc();
 
   dbuf_put_fmt(buffer, ":%s ", source_p->id);
   va_start(args, pattern);
@@ -793,19 +791,19 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
     if (target_p->from->connection->serial == current_serial)
       continue;
 
-    if (!match(mask, target_p->name))
-    {
-      /*
-       * if we set the serial here, then we'll never do a
-       * match() again, if !IsCapable()
-       */
-      target_p->from->connection->serial = current_serial;
+    if (match(mask, target_p->name))
+      continue;
 
-      if (!IsCapable(target_p->from, cap))
-        continue;
+    /*
+     * If we set the serial here, then we'll never do a
+     * match() again, if !IsCapable()
+     */
+    target_p->from->connection->serial = current_serial;
 
-      send_message_remote(target_p->from, source_p, buffer);
-    }
+    if (!IsCapable(target_p->from, cap))
+      continue;
+
+    send_message_remote(target_p->from, source_p, buffer);
   }
 
   dbuf_ref_free(buffer);

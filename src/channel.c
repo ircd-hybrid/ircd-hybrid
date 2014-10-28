@@ -1071,14 +1071,19 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       /*
        * Notify all other users on the new channel
        */
-      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
-                           source_p->name, source_p->username,
-                           source_p->host, chptr->name);
+      sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
+                                  source_p->name, source_p->username,
+                                  source_p->host, chptr->name,
+                                  (!IsDigit(source_p->svid[0]) && source_p->svid[0] != '*') ? source_p->svid : "*",
+                                  source_p->info);
+      sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
+                                  source_p->name, source_p->username,
+                                  source_p->host, chptr->name);
       sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s +nt",
                            me.name, chptr->name);
 
       if (source_p->away[0])
-        sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
+        sendto_channel_local_butone(source_p, CAP_AWAY_NOTIFY, 0, chptr,
                                     ":%s!%s@%s AWAY :%s",
                                     source_p->name, source_p->username,
                                     source_p->host, source_p->away);
@@ -1088,12 +1093,18 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
                     source_p->id, (unsigned long)chptr->channelts,
                     chptr->name);
-      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s!%s@%s JOIN :%s",
-                           source_p->name, source_p->username,
-                           source_p->host, chptr->name);
+
+      sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
+                                  source_p->name, source_p->username,
+                                  source_p->host, chptr->name,
+                                  (!IsDigit(source_p->svid[0]) && source_p->svid[0] != '*') ? source_p->svid : "*",
+                                  source_p->info);
+      sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
+                                  source_p->name, source_p->username,
+                                  source_p->host, chptr->name);
 
       if (source_p->away[0])
-        sendto_channel_local_butone(source_p, 0, CAP_AWAY_NOTIFY, chptr,
+        sendto_channel_local_butone(source_p, CAP_AWAY_NOTIFY, 0, chptr,
                                     ":%s!%s@%s AWAY :%s",
                                     source_p->name, source_p->username,
                                     source_p->host, source_p->away);

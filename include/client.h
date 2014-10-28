@@ -98,6 +98,7 @@ struct MaskItem;
 #define CAP_MULTI_PREFIX  0x00000001U
 #define CAP_AWAY_NOTIFY   0x00000002U
 #define CAP_UHNAMES       0x00000004U
+#define CAP_EXTENDED_JOIN 0x00000008U
 
 #define HasCap(x, y) ((x)->connection->cap_active & (y))
 

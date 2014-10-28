@@ -150,7 +150,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   {
     if (!newts && !isnew && oldts)
     {
-      sendto_channel_local(ALL_MEMBERS, 0, chptr,
+      sendto_channel_local(0, chptr,
                            ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
                            me.name, chptr->name, chptr->name, (unsigned long)oldts);
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -196,13 +196,13 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     if (chptr->topic[0])
     {
       channel_set_topic(chptr, "", "", 0, 0);
-      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s TOPIC %s :",
+      sendto_channel_local(0, chptr, ":%s TOPIC %s :",
                            (IsHidden(source_p) ||
                            ConfigServerHide.hide_servers) ?
                            me.name : source_p->name, chptr->name);
     }
 
-    sendto_channel_local(ALL_MEMBERS, 0, chptr,
+    sendto_channel_local(0, chptr,
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
                           me.name, chptr->name, chptr->name,
                          (unsigned long)oldts, (unsigned long)newts);
@@ -215,7 +215,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
     /* This _SHOULD_ be to ALL_MEMBERS
      * It contains only +imnpstlk, etc */
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s %s",
+    sendto_channel_local(0, chptr, ":%s MODE %s %s %s",
                          servername, chptr->name, modebuf, parabuf);
   }
 
@@ -407,7 +407,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
       }
 
       *mbuf = '\0';
-      sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
+      sendto_channel_local(0, chptr, ":%s MODE %s %s%s",
                            (IsHidden(source_p) ||
                            ConfigServerHide.hide_servers) ?
                            me.name : source_p->name,
@@ -432,7 +432,7 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
       strlcat(sendbuf, lpara[lcount], sizeof(sendbuf));
     }
 
-    sendto_channel_local(ALL_MEMBERS, 0, chptr, ":%s MODE %s %s%s",
+    sendto_channel_local(0, chptr, ":%s MODE %s %s%s",
                          (IsHidden(source_p) || ConfigServerHide.hide_servers) ?
                          me.name : source_p->name, chptr->name, lmodebuf, sendbuf);
   }

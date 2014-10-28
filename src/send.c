@@ -572,7 +572,6 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
 /* sendto_channel_local()
  *
  * inputs	- member status mask, e.g. CHFL_CHANOP | CHFL_VOICE
- *              - whether to ignore +D clients (YES/NO)
  *              - pointer to channel to send to
  *              - var args pattern
  * output	- NONE
@@ -580,7 +579,7 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
  *		  locally connected to this server.
  */
 void
-sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
+sendto_channel_local(unsigned int type, struct Channel *chptr,
                      const char *pattern, ...)
 {
   va_list args;
@@ -601,8 +600,7 @@ sendto_channel_local(unsigned int type, int nodeaf, struct Channel *chptr,
     if (type && (ms->flags & type) == 0)
       continue;
 
-    if (IsDefunct(target_p) ||
-        (nodeaf && HasUMode(target_p, UMODE_DEAF)))
+    if (IsDefunct(target_p))
       continue;
 
     send_message(target_p, buffer);
@@ -643,7 +641,7 @@ sendto_channel_local_butone(struct Client *one, unsigned int poscap, unsigned in
     if (one && target_p == one->from)
       continue;
 
-    if (IsDefunct(target_p) || HasUMode(target_p, UMODE_DEAF))
+    if (IsDefunct(target_p))
       continue;
 
     if (poscap && HasCap(target_p, poscap) != poscap)

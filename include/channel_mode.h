@@ -103,7 +103,6 @@ struct ChModeChange
   const char *arg;
   const char *id;
   int dir;
-  int mems;
 };
 
 struct mode_letter

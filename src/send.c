@@ -88,6 +88,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
 {
   assert(!IsMe(to));
   assert(to != &me);
+  assert(MyConnect(to));
 
   if (dbuf_length(&to->connection->buf_sendq) + buf->size > get_sendq(&to->connection->confs))
   {
@@ -130,15 +131,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
 static void
 send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *buf)
 {
-  to = to->from;
-
-  if (!MyConnect(to))
-  {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "Server send message to %s [%s] dropped from %s(Not local server)",
-                         to->name, to->from->name, from->name);
-    return;
-  }
+  assert(MyConnect(to));
 
   /* Optimize by checking if (from && to) before everything */
   /* we set to->from up there.. */
@@ -845,7 +838,7 @@ sendto_anywhere(struct Client *to, struct Client *from,
   if (MyClient(to))
     send_message(to, buffer);
   else
-    send_message_remote(to, from, buffer);
+    send_message_remote(to->from, from, buffer);
 
   dbuf_ref_free(buffer);
 }

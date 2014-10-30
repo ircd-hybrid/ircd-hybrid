@@ -1,7 +1,7 @@
 /* loader-shl_load.c --  dynamic linking with shl_load (HP-UX)
 
-   Copyright (C) 1998, 1999, 2000, 2004, 2006,
-                 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 1998-2000, 2004, 2006-2008, 2011-2014 Free Software
+   Foundation, Inc.
    Written by Thomas Tanner, 1998
 
    NOTE: The canonical source of this file is maintained with the
@@ -90,7 +90,7 @@ get_vtable (lt_user_data loader_data)
 /* --- IMPLEMENTATION --- */
 
 
-#if defined(HAVE_DL_H)
+#if defined HAVE_DL_H
 #  include <dl.h>
 #endif
 
@@ -103,11 +103,11 @@ get_vtable (lt_user_data loader_data)
  *
  * Optionally:
  * BIND_FIRST	   - Place the library at the head of the symbol search
- * 		     order.
+ *		     order.
  * BIND_NONFATAL   - The default BIND_IMMEDIATE behavior is to treat all
- * 		     unsatisfied symbols as fatal.  This flag allows
- * 		     binding of unsatisfied code symbols to be deferred
- * 		     until use.
+ *		     unsatisfied symbols as fatal.  This flag allows
+ *		     binding of unsatisfied code symbols to be deferred
+ *		     until use.
  *		     [Perl: For certain libraries, like DCE, deferred
  *		     binding often causes run time problems. Adding
  *		     BIND_NONFATAL to BIND_IMMEDIATE still allows
@@ -125,10 +125,10 @@ get_vtable (lt_user_data loader_data)
  *		     library specified by the path argument.
  */
 
-#if !defined(DYNAMIC_PATH)
+#if !defined DYNAMIC_PATH
 #  define DYNAMIC_PATH		0
 #endif
-#if !defined(BIND_RESTRICTED)
+#if !defined BIND_RESTRICTED
 #  define BIND_RESTRICTED	0
 #endif
 

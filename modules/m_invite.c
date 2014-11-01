@@ -148,7 +148,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   else if (target_p->from != source_p->from)
     sendto_one(target_p, ":%s INVITE %s %s %lu",
                source_p->id, target_p->id,
-               chptr->name, (unsigned long)chptr->channelts);
+               chptr->name, (unsigned long)chptr->creationtime);
   return 0;
 }
 
@@ -184,7 +184,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (parc > 3 && IsDigit(*parv[3]))
-    if (atoi(parv[3]) > chptr->channelts)
+    if (atoi(parv[3]) > chptr->creationtime)
       return 0;
 
   if (MyConnect(target_p))
@@ -208,7 +208,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   else if (target_p->from != source_p->from)
     sendto_one(target_p, ":%s INVITE %s %s %lu",
                source_p->id, target_p->id,
-               chptr->name, (unsigned long)chptr->channelts);
+               chptr->name, (unsigned long)chptr->creationtime);
   return 0;
 }
 

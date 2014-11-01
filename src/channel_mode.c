@@ -1328,7 +1328,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
   parptr = parabuf;
 
   mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
-                 (unsigned long)chptr->channelts, chptr->name);
+                 (unsigned long)chptr->creationtime, chptr->name);
 
   /* Loop the list of modes we have */
   for (unsigned i = 0; i < mode_count; ++i)
@@ -1361,7 +1361,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
       mc = 0;
 
       mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ", source_p->id,
-                     (unsigned long)chptr->channelts, chptr->name);
+                     (unsigned long)chptr->creationtime, chptr->name);
 
       pbl = 0;
       parabuf[0] = '\0';

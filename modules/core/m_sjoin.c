@@ -148,7 +148,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
 
   parabuf[0] = '\0';
-  oldts = chptr->channelts;
+  oldts = chptr->creationtime;
   oldmode = &chptr->mode;
 
   if (ConfigGeneral.ignore_bogus_ts)
@@ -177,15 +177,15 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
 
   if (isnew)
-    chptr->channelts = tstosend = newts;
+    chptr->creationtime = tstosend = newts;
   else if (newts == 0 || oldts == 0)
-    chptr->channelts = tstosend = 0;
+    chptr->creationtime = tstosend = 0;
   else if (newts == oldts)
     tstosend = oldts;
   else if (newts < oldts)
   {
     keep_our_modes = 0;
-    chptr->channelts = tstosend = newts;
+    chptr->creationtime = tstosend = newts;
   }
   else
   {

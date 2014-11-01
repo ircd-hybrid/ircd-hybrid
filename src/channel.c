@@ -166,7 +166,7 @@ send_members(struct Client *client_p, const struct Channel *chptr,
   char *t, *start;       /* temp char pointer */
 
   start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %lu %s %s %s:",
-                             me.id, (unsigned long)chptr->channelts,
+                             me.id, (unsigned long)chptr->creationtime,
                              chptr->name, modebuf, parabuf);
 
   DLINK_FOREACH(node, chptr->members.head)
@@ -233,7 +233,7 @@ send_mode_list(struct Client *client_p, const struct Channel *chptr,
     return;
 
   mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %lu %s %c :", me.id,
-                  (unsigned long)chptr->channelts, chptr->name, flag);
+                  (unsigned long)chptr->creationtime, chptr->name, flag);
   cur_len = mlen;
 
   DLINK_FOREACH(node, list->head)
@@ -356,7 +356,7 @@ make_channel(const char *name)
   chptr = mp_pool_get(channel_pool);
 
   /* Doesn't hurt to set it here */
-  chptr->channelts = CurrentTime;
+  chptr->creationtime = CurrentTime;
   chptr->last_join_time = CurrentTime;
 
   strlcpy(chptr->name, name, sizeof(chptr->name));
@@ -1068,12 +1068,12 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
      */
     if (flags == CHFL_CHANOP)
     {
-      chptr->channelts = CurrentTime;
+      chptr->creationtime = CurrentTime;
       chptr->mode.mode |= MODE_TOPICLIMIT;
       chptr->mode.mode |= MODE_NOPRIVMSGS;
 
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s SJOIN %lu %s +nt :@%s",
-                    me.id, (unsigned long)chptr->channelts,
+                    me.id, (unsigned long)chptr->creationtime,
                     chptr->name, source_p->id);
 
       /*
@@ -1099,7 +1099,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
     else
     {
       sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
-                    source_p->id, (unsigned long)chptr->channelts,
+                    source_p->id, (unsigned long)chptr->creationtime,
                     chptr->name);
 
       sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",

@@ -62,8 +62,8 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
                          temp->username, temp->hostname,
                          temp->realname);
 
-      if (!IsDigit(temp->svid[0]) && temp->svid[0] != '*')
-        sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, temp->name, temp->svid, "was");
+      if (!IsDigit(temp->account[0]) && temp->account[0] != '*')
+        sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, temp->name, temp->account, "was");
 
       if ((temp->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
         sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,

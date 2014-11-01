@@ -181,7 +181,7 @@ struct exempt
   struct irc_ssaddr addr;
   int bits;
   int type;
-  int coid;
+  int country_id;
 };
 
 struct CidrItem

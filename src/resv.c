@@ -88,7 +88,7 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
 #ifdef HAVE_LIBGEOIP
         exptr = MyCalloc(sizeof(*exptr));
         exptr->name = xstrdup(s);
-        exptr->coid = GeoIP_id_by_code(s);
+        exptr->country_id = GeoIP_id_by_code(s);
         dlinkAdd(exptr, &exptr->node, &conf->exempt_list);
 #endif
       }
@@ -127,9 +127,9 @@ resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
   {
     const struct exempt *exptr = node->data;
 
-    if (exptr->coid)
+    if (exptr->country_id)
     {
-      if (exptr->coid == who->connection->country_id)
+      if (exptr->country_id == who->connection->country_id)
         return 1;
     }
     else if (!match(exptr->name, who->name) && !match(exptr->user, who->username))

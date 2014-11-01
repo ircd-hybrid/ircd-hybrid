@@ -88,11 +88,11 @@ show_ports(struct Client *source_p)
 {
   char buf[IRCD_BUFSIZE] = "";
   char *p = NULL;
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, listener_list.head)
+  DLINK_FOREACH(node, listener_list.head)
   {
-    const struct Listener *listener = ptr->data;
+    const struct Listener *listener = node->data;
     p = buf;
 
     if (listener->flags & LISTENER_HIDDEN)
@@ -271,13 +271,13 @@ inetport(struct Listener *listener)
 static struct Listener *
 find_listener(int port, struct irc_ssaddr *addr)
 {
-  dlink_node *ptr;
+  dlink_node *node;
   struct Listener *listener    = NULL;
   struct Listener *last_closed = NULL;
 
-  DLINK_FOREACH(ptr, listener_list.head)
+  DLINK_FOREACH(node, listener_list.head)
   {
-    listener = ptr->data;
+    listener = node->data;
 
     if ((port == listener->port) &&
         (!memcmp(addr, &listener->addr, sizeof(struct irc_ssaddr))))
@@ -321,11 +321,11 @@ close_listener(struct Listener *listener)
 void
 close_listeners(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
   /* close all 'extra' listening ports we have */
-  DLINK_FOREACH_SAFE(ptr, ptr_next, listener_list.head)
-    close_listener(ptr->data);
+  DLINK_FOREACH_SAFE(node, node_next, listener_list.head)
+    close_listener(node->data);
 }
 
 void

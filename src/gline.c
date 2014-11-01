@@ -70,13 +70,13 @@ find_is_glined(const char *host, const char *user)
 static void
 expire_pending_glines(struct gline_pending *in)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
   for (unsigned int i = 0; i < GLINE_PENDING_ADD_TYPE + 1; ++i)
   {
-    DLINK_FOREACH_SAFE(ptr, ptr_next, pending_glines[i].head)
+    DLINK_FOREACH_SAFE(node, node_next, pending_glines[i].head)
     {
-      struct gline_pending *glp_ptr = ptr->data;
+      struct gline_pending *glp_ptr = node->data;
 
       if ((glp_ptr->last_gline_time + ConfigGeneral.gline_request_time) <= CurrentTime ||
           glp_ptr == in)

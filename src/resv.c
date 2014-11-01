@@ -53,7 +53,7 @@
 struct MaskItem *
 create_resv(const char *name, const char *reason, const dlink_list *list)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct MaskItem *conf = NULL;
   enum maskitem_type type;
 
@@ -74,14 +74,14 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
 
   if (list)
   {
-    DLINK_FOREACH(ptr, list->head)
+    DLINK_FOREACH(node, list->head)
     {
       char nick[NICKLEN + 1];
       char user[USERLEN + 1];
       char host[HOSTLEN + 1];
       struct split_nuh_item nuh;
       struct exempt *exptr = NULL;
-      char *s = ptr->data;
+      char *s = node->data;
 
       if (strlen(s) == 2 && IsAlpha(*(s + 1) && IsAlpha(*(s + 2))))
       {
@@ -121,11 +121,11 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
 int
 resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, conf->exempt_list.head)
+  DLINK_FOREACH(node, conf->exempt_list.head)
   {
-    const struct exempt *exptr = ptr->data;
+    const struct exempt *exptr = node->data;
 
     if (exptr->coid)
     {
@@ -169,14 +169,14 @@ resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
 struct MaskItem *
 match_find_resv(const char *name)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (EmptyString(name))
     return NULL;
 
-  DLINK_FOREACH(ptr, cresv_items.head)
+  DLINK_FOREACH(node, cresv_items.head)
   {
-    struct MaskItem *conf = ptr->data;
+    struct MaskItem *conf = node->data;
 
     if (!match(conf->name, name))
       return conf;

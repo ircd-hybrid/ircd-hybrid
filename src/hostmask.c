@@ -446,7 +446,7 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
                      int fam, const char *username, const char *password, int do_match)
 {
   unsigned int hprecv = 0;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct MaskItem *hprec = NULL;
   struct AddressRec *arec = NULL;
   int b;
@@ -459,9 +459,9 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
     {
       for (b = 128; b >= 0; b -= 16)
       {
-        DLINK_FOREACH(ptr, atable[hash_ipv6(addr, b)].head)
+        DLINK_FOREACH(node, atable[hash_ipv6(addr, b)].head)
         {
-          arec = ptr->data;
+          arec = node->data;
 
           if ((arec->type == type) &&
               arec->precedence > hprecv &&
@@ -482,9 +482,9 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
     {
       for (b = 32; b >= 0; b -= 8)
       {
-        DLINK_FOREACH(ptr, atable[hash_ipv4(addr, b)].head)
+        DLINK_FOREACH(node, atable[hash_ipv4(addr, b)].head)
         {
-          arec = ptr->data;
+          arec = node->data;
 
           if ((arec->type == type) &&
               arec->precedence > hprecv &&
@@ -509,9 +509,9 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
 
     while (1)
     {
-        DLINK_FOREACH(ptr, atable[hash_text(p)].head)
+        DLINK_FOREACH(node, atable[hash_text(p)].head)
         {
-          arec = ptr->data;
+          arec = node->data;
           if ((arec->type == type) &&
             arec->precedence > hprecv &&
             (arec->masktype == HM_HOST) &&
@@ -530,9 +530,9 @@ find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int typ
       ++p;
     }
 
-    DLINK_FOREACH(ptr, atable[0].head)
+    DLINK_FOREACH(node, atable[0].head)
     {
-      arec = ptr->data;
+      arec = node->data;
 
       if (arec->type == type &&
           arec->precedence > hprecv &&
@@ -666,7 +666,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 {
   int bits = 0;
   uint32_t hv = 0;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct irc_ssaddr addr;
 
   switch (parse_netmask(address, &addr, &bits))
@@ -686,9 +686,9 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
       break;
   }
 
-  DLINK_FOREACH(ptr, atable[hv].head)
+  DLINK_FOREACH(node, atable[hv].head)
   {
-    struct AddressRec *arec = ptr->data;
+    struct AddressRec *arec = node->data;
 
     if (arec->conf == conf)
     {
@@ -713,13 +713,13 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 void
 clear_out_address_conf(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH_SAFE(ptr, ptr_next, atable[i].head)
+    DLINK_FOREACH_SAFE(node, node_next, atable[i].head)
     {
-      struct AddressRec *arec = ptr->data;
+      struct AddressRec *arec = node->data;
 
       /*
        * We keep the temporary K-lines and destroy the permanent ones,
@@ -769,13 +769,13 @@ hostmask_send_expiration(struct AddressRec *arec)
 void
 hostmask_expire_temporary(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH_SAFE(ptr, ptr_next, atable[i].head)
+    DLINK_FOREACH_SAFE(node, node_next, atable[i].head)
     {
-      struct AddressRec *arec = ptr->data;
+      struct AddressRec *arec = node->data;
 
       if (!arec->conf->until || arec->conf->until > CurrentTime)
         continue;

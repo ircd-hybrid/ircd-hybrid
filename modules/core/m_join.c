@@ -383,14 +383,14 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
 
   DLINK_FOREACH(ptr, chptr->members.head)
   {
-    struct Membership *ms = ptr->data;
+    struct Membership *member = ptr->data;
 
-    if ((ms->flags & mask) == 0)
+    if ((member->flags & mask) == 0)
       continue;
 
-    ms->flags &= ~mask;
+    member->flags &= ~mask;
 
-    lpara[count++] = ms->client_p->name;
+    lpara[count++] = member->client_p->name;
 
     *mbuf++ = flag;
 

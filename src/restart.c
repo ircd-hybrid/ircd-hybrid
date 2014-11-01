@@ -40,7 +40,7 @@ void
 server_die(const char *message, int rboot)
 {
   char buffer[IRCD_BUFSIZE] = "";
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   static int was_here = 0;
 
   if (rboot && was_here++)
@@ -53,8 +53,8 @@ server_die(const char *message, int rboot)
     snprintf(buffer, sizeof(buffer), "Server %s: %s",
              rboot ? "Restarting" : "Terminating", message);
 
-  DLINK_FOREACH(ptr, local_client_list.head)
-    sendto_one_notice(ptr->data, &me, ":%s", buffer);
+  DLINK_FOREACH(node, local_client_list.head)
+    sendto_one_notice(node->data, &me, ":%s", buffer);
 
   sendto_server(NULL, NOCAPS, NOCAPS, ":%s ERROR :%s", me.id, buffer);
 

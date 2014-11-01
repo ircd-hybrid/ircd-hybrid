@@ -202,11 +202,11 @@ modules_init(void)
 static struct module_path *
 mod_find_path(const char *path)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, modules_path.head)
+  DLINK_FOREACH(node, modules_path.head)
   {
-    struct module_path *mpath = ptr->data;
+    struct module_path *mpath = node->data;
 
     if (!strcmp(path, mpath->path))
       return mpath;
@@ -261,18 +261,18 @@ add_conf_module(const char *name)
 void
 mod_clear_paths(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, modules_path.head)
+  DLINK_FOREACH_SAFE(node, node_next, modules_path.head)
   {
-    dlinkDelete(ptr, &modules_path);
-    MyFree(ptr->data);
+    dlinkDelete(node, &modules_path);
+    MyFree(node->data);
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, modules_conf.head)
+  DLINK_FOREACH_SAFE(node, node_next, modules_conf.head)
   {
-    dlinkDelete(ptr, &modules_conf);
-    MyFree(ptr->data);
+    dlinkDelete(node, &modules_conf);
+    MyFree(node->data);
   }
 }
 
@@ -285,11 +285,11 @@ mod_clear_paths(void)
 struct module *
 findmodule_byname(const char *name)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, modules_list.head)
+  DLINK_FOREACH(node, modules_list.head)
   {
-    struct module *modp = ptr->data;
+    struct module *modp = node->data;
 
     if (!strcmp(modp->name, name))
       return modp;
@@ -340,11 +340,11 @@ load_all_modules(int warn)
 void
 load_conf_modules(void)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, modules_conf.head)
+  DLINK_FOREACH(node, modules_conf.head)
   {
-    struct module_path *mpath = ptr->data;
+    struct module_path *mpath = node->data;
 
     if (findmodule_byname(mpath->path) == NULL)
       load_one_module(mpath->path);
@@ -386,13 +386,13 @@ load_core_modules(int warn)
 int
 load_one_module(const char *name)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   char path[HYB_PATH_MAX + 1];
   struct stat statbuf;
 
-  DLINK_FOREACH(ptr, modules_path.head)
+  DLINK_FOREACH(node, modules_path.head)
   {
-    const struct module_path *mpath = ptr->data;
+    const struct module_path *mpath = node->data;
 
     snprintf(path, sizeof(path), "%s/%s", mpath->path, name);
 

@@ -220,11 +220,11 @@ restart_resolver(void)
 void
 delete_resolver_queries(const void *vptr)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, request_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, request_list.head)
   {
-    struct reslist *request = ptr->data;
+    struct reslist *request = node->data;
 
     if (request->callback_ctx == vptr)
       rem_request(request);
@@ -267,11 +267,11 @@ send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 static struct reslist *
 find_id(int id)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, request_list.head)
+  DLINK_FOREACH(node, request_list.head)
   {
-    struct reslist *request = ptr->data;
+    struct reslist *request = node->data;
 
     if (request->id == id)
       return request;
@@ -657,14 +657,14 @@ report_dns_servers(struct Client *source_p)
 static time_t
 timeout_query_list(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
   struct reslist *request = NULL;
   time_t next_time = 0;
   time_t timeout   = 0;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, request_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, request_list.head)
   {
-    request = ptr->data;
+    request = node->data;
     timeout = request->sentat + request->timeout;
 
     if (CurrentTime >= timeout)

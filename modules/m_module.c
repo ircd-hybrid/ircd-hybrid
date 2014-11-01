@@ -109,15 +109,15 @@ module_reload(struct Client *source_p, const char *arg)
   if (!strcmp(arg, "*"))
   {
     unsigned int modnum = 0;
-    dlink_node *ptr = NULL, *ptr_next = NULL;
+    dlink_node *node = NULL, *node_next = NULL;
 
     sendto_one_notice(source_p, &me, ":Reloading all modules");
 
     modnum = dlink_list_length(modules_get_list());
 
-    DLINK_FOREACH_SAFE(ptr, ptr_next, modules_get_list()->head)
+    DLINK_FOREACH_SAFE(node, node_next, modules_get_list()->head)
     {
-      modp = ptr->data;
+      modp = node->data;
 
       if (!(modp->flags & MODULE_FLAG_NOUNLOAD))
         unload_one_module(modp->name, 0);
@@ -174,11 +174,11 @@ module_reload(struct Client *source_p, const char *arg)
 static void
 module_list(struct Client *source_p, const char *arg)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, modules_get_list()->head)
+  DLINK_FOREACH(node, modules_get_list()->head)
   {
-    const struct module *modp = ptr->data;
+    const struct module *modp = node->data;
 
     if (!EmptyString(arg) && match(arg, modp->name))
       continue;

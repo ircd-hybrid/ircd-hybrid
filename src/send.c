@@ -272,19 +272,19 @@ send_queued_write(struct Client *to)
 void
 send_queued_all(void)
 {
-  dlink_node *ptr;
+  dlink_node *node = NULL;
 
   /* Servers are processed first, mainly because this can generate
    * a notice to opers, which is to be delivered by this function.
    */
-  DLINK_FOREACH(ptr, local_server_list.head)
-    send_queued_write(ptr->data);
+  DLINK_FOREACH(node, local_server_list.head)
+    send_queued_write(node->data);
 
-  DLINK_FOREACH(ptr, unknown_list.head)
-    send_queued_write(ptr->data);
+  DLINK_FOREACH(node, unknown_list.head)
+    send_queued_write(node->data);
 
-  DLINK_FOREACH(ptr, local_client_list.head)
-    send_queued_write(ptr->data);
+  DLINK_FOREACH(node, local_client_list.head)
+    send_queued_write(node->data);
 
   /* NOTE: This can still put clients on aborted_list; unfortunately,
    * exit_aborted_clients takes precedence over send_queued_all,
@@ -401,7 +401,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 {
   va_list alocal, aremote;
   struct dbuf_block *local_buf, *remote_buf;
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
 
@@ -422,10 +422,10 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
   ++current_serial;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, chptr->members.head)
+  DLINK_FOREACH_SAFE(node, node_next, chptr->members.head)
   {
-    struct Membership *ms = ptr->data;
-    struct Client *target_p = ms->client_p;
+    struct Membership *member = node->data;
+    struct Client *target_p = member->client_p;
 
     assert(IsClient(target_p));
 
@@ -433,7 +433,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
         (one && target_p->from == one->from))
       continue;
 
-    if (type && (ms->flags & type) == 0)
+    if (type && (member->flags & type) == 0)
       continue;
 
     if (MyConnect(target_p))
@@ -472,18 +472,16 @@ sendto_server(struct Client *one,
               const char *format, ...)
 {
   va_list args;
-  dlink_node *ptr = NULL;
-  struct dbuf_block *buffer;
-
-  buffer = dbuf_alloc();
+  dlink_node *node = NULL;
+  struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, format);
   send_format(buffer, format, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, local_server_list.head)
+  DLINK_FOREACH(node, local_server_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     /* If dead already skip */
     if (IsDead(client_p))
@@ -521,11 +519,9 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
   dlink_node *uptr;
   dlink_node *cptr;
   struct Channel *chptr;
-  struct Membership *ms;
+  struct Membership *member;
   struct Client *target_p;
-  struct dbuf_block *buffer;
-
-  buffer = dbuf_alloc();
+  struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
@@ -539,8 +535,8 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
 
     DLINK_FOREACH(uptr, chptr->locmembers.head)
     {
-      ms = uptr->data;
-      target_p = ms->client_p;
+      member = uptr->data;
+      target_p = member->client_p;
 
       if (target_p == user || IsDefunct(target_p) ||
           target_p->connection->serial == current_serial)
@@ -576,21 +572,19 @@ sendto_channel_local(unsigned int type, struct Channel *chptr,
                      const char *pattern, ...)
 {
   va_list args;
-  dlink_node *ptr = NULL;
-  struct dbuf_block *buffer;
-
-  buffer = dbuf_alloc();
+  dlink_node *node = NULL;
+  struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, chptr->locmembers.head)
+  DLINK_FOREACH(node, chptr->locmembers.head)
   {
-    struct Membership *ms = ptr->data;
-    struct Client *target_p = ms->client_p;
+    struct Membership *member = node->data;
+    struct Client *target_p = member->client_p;
 
-    if (type && (ms->flags & type) == 0)
+    if (type && (member->flags & type) == 0)
       continue;
 
     if (IsDefunct(target_p))
@@ -619,17 +613,17 @@ sendto_channel_local_butone(struct Client *one, unsigned int poscap, unsigned in
                             struct Channel *chptr, const char *pattern, ...)
 {
   va_list args;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, chptr->locmembers.head)
+  DLINK_FOREACH(node, chptr->locmembers.head)
   {
-    struct Membership *ms = ptr->data;
-    struct Client *target_p = ms->client_p;
+    struct Membership *member = node->data;
+    struct Client *target_p = member->client_p;
 
     if (one && target_p == one->from)
       continue;
@@ -687,7 +681,7 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
                     int what, const char *pattern, ...)
 {
   va_list alocal, aremote;
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
   struct dbuf_block *local_buf, *remote_buf;
 
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
@@ -703,9 +697,9 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
   va_end(alocal);
 
   /* scan the local clients */
-  DLINK_FOREACH(ptr, local_client_list.head)
+  DLINK_FOREACH(node, local_client_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     if ((!one || client_p != one->from) && !IsDefunct(client_p) &&
         match_it(client_p, mask, what))
@@ -713,9 +707,9 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
   }
 
   /* Now scan servers */
-  DLINK_FOREACH_SAFE(ptr, ptr_next, local_server_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, local_server_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     /*
      * The old code looped through every client on the
@@ -763,7 +757,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
                    const char *pattern, ...)
 {
   va_list args;
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
   struct dbuf_block *buffer = dbuf_alloc();
 
   dbuf_put_fmt(buffer, ":%s ", source_p->id);
@@ -773,9 +767,9 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 
   ++current_serial;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, global_server_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, global_server_list.head)
   {
-    struct Client *target_p = ptr->data;
+    struct Client *target_p = node->data;
 
     /* Do not attempt to send to ourselves, or the source */
     if (IsMe(target_p) || target_p->from == source_p->from)
@@ -855,7 +849,7 @@ void
 sendto_realops_flags(unsigned int flags, int level, int type, const char *pattern, ...)
 {
   const char *ntype = NULL;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   char nbuf[IRCD_BUFSIZE] = "";
   va_list args;
 
@@ -878,9 +872,9 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
       assert(0);
   }
 
-  DLINK_FOREACH(ptr, oper_list.head)
+  DLINK_FOREACH(node, oper_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
     assert(HasUMode(client_p, UMODE_OPER));
 
     /*
@@ -934,11 +928,9 @@ void
 sendto_wallops_flags(unsigned int flags, struct Client *source_p,
                      const char *pattern, ...)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   va_list args;
-  struct dbuf_block *buffer;
-
-  buffer = dbuf_alloc();
+  struct dbuf_block *buffer = dbuf_alloc();
 
   if (IsClient(source_p))
     dbuf_put_fmt(buffer, ":%s!%s@%s WALLOPS :", source_p->name, source_p->username, source_p->host);
@@ -949,9 +941,9 @@ sendto_wallops_flags(unsigned int flags, struct Client *source_p,
   send_format(buffer, pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, oper_list.head)
+  DLINK_FOREACH(node, oper_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
     assert(client_p->umodes & UMODE_OPER);
 
     if (HasUMode(client_p, flags) && !IsDefunct(client_p))

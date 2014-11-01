@@ -53,9 +53,9 @@ init_dlink_nodes(void)
 dlink_node *
 make_dlink_node(void)
 {
-  dlink_node *ptr = mp_pool_get(dnode_pool);
+  dlink_node *node = mp_pool_get(dnode_pool);
 
-  return ptr;
+  return node;
 }
 
 /* free_dlink_node()
@@ -65,9 +65,9 @@ make_dlink_node(void)
  * side effects	- free given dlink_node
  */
 void
-free_dlink_node(dlink_node *ptr)
+free_dlink_node(dlink_node *node)
 {
-  mp_pool_release(ptr);
+  mp_pool_release(node);
 }
 
 /*
@@ -166,11 +166,11 @@ dlinkDelete(dlink_node *m, dlink_list *list)
 dlink_node *
 dlinkFind(dlink_list *list, const void *data)
 {
-  dlink_node *ptr;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, list->head)
-    if (ptr->data == data)
-      return ptr;
+  DLINK_FOREACH(node, list->head)
+    if (node->data == data)
+      return node;
 
   return NULL;
 }

@@ -119,14 +119,14 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
             if (MyConnect(source_p))
             {
-              dlink_node *ptr = NULL;
+              dlink_node *node = NULL;
 
               detach_conf(source_p, CONF_OPER);
               ClrOFlag(source_p);
               DelUMode(source_p, ConfigGeneral.oper_only_umodes);
 
-              if ((ptr = dlinkFindDelete(&oper_list, source_p)))
-                free_dlink_node(ptr);
+              if ((node = dlinkFindDelete(&oper_list, source_p)))
+                free_dlink_node(node);
             }
           }
 

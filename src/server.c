@@ -67,22 +67,22 @@ void
 write_links_file(void *unused)
 {
   FILE *file = NULL;
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
   char buff[IRCD_BUFSIZE] = "";
 
   if ((file = fopen(LIPATH, "w")) == NULL)
     return;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, flatten_links.head)
+  DLINK_FOREACH_SAFE(node, node_next, flatten_links.head)
   {
-    dlinkDelete(ptr, &flatten_links);
-    MyFree(ptr->data);
-    free_dlink_node(ptr);
+    dlinkDelete(node, &flatten_links);
+    MyFree(node->data);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH(ptr, global_server_list.head)
+  DLINK_FOREACH(node, global_server_list.head)
   {
-    const struct Client *target_p = ptr->data;
+    const struct Client *target_p = node->data;
 
     /*
      * Skip hidden servers, aswell as ourselves, since we already send
@@ -157,7 +157,7 @@ hunt_server(struct Client *source_p, const char *command,
             const int server, const int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   /* Assume it's me, if no server */
   if (parc <= server || EmptyString(parv[server]))
@@ -177,9 +177,9 @@ hunt_server(struct Client *source_p, const char *command,
 
   if (!target_p && has_wildcards(parv[server]))
   {
-    DLINK_FOREACH(ptr, global_client_list.head)
+    DLINK_FOREACH(node, global_client_list.head)
     {
-      struct Client *tmp = ptr->data;
+      struct Client *tmp = node->data;
 
       assert(IsMe(tmp) || IsServer(tmp) || IsClient(tmp));
       if (!match(parv[server], tmp->name))
@@ -187,7 +187,7 @@ hunt_server(struct Client *source_p, const char *command,
         if (tmp->from == source_p->from && !MyConnect(tmp))
           continue;
 
-        target_p = ptr->data;
+        target_p = node->data;
         break;
       }
     }
@@ -223,16 +223,16 @@ hunt_server(struct Client *source_p, const char *command,
 void
 try_connections(void *unused)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   int confrq = 0;
 
   /* TODO: change this to set active flag to 0 when added to event! --Habeeb */
   if (GlobalSetOptions.autoconn == 0)
     return;
 
-  DLINK_FOREACH(ptr, server_items.head)
+  DLINK_FOREACH(node, server_items.head)
   {
-    struct MaskItem *conf = ptr->data;
+    struct MaskItem *conf = node->data;
 
     assert(conf->type == CONF_SERVER);
 
@@ -269,9 +269,9 @@ try_connections(void *unused)
     if (conf->class->ref_count < conf->class->max_total)
     {
       /* Go to the end of the list, if not already last */
-      if (ptr->next)
+      if (node->next)
       {
-        dlinkDelete(ptr, &server_items);
+        dlinkDelete(node, &server_items);
         dlinkAddTail(conf, &conf->node, &server_items);
       }
 
@@ -324,7 +324,7 @@ valid_servname(const char *name)
 int
 check_server(const char *name, struct Client *client_p)
 {
-  dlink_node *ptr;
+  dlink_node *node = NULL;
   struct MaskItem *conf        = NULL;
   struct MaskItem *server_conf = NULL;
   int error = -1;
@@ -332,9 +332,9 @@ check_server(const char *name, struct Client *client_p)
   assert(client_p);
 
   /* loop through looking for all possible connect items that might work */
-  DLINK_FOREACH(ptr, server_items.head)
+  DLINK_FOREACH(node, server_items.head)
   {
-    conf = ptr->data;
+    conf = node->data;
 
     if (match(name, conf->name))
       continue;
@@ -421,18 +421,18 @@ add_capability(const char *capab_name, int cap_flag, int add_to_default)
 int
 delete_capability(const char *capab_name)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, cap_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, cap_list.head)
   {
-    struct Capability *cap = ptr->data;
+    struct Capability *cap = node->data;
 
     if (cap->cap)
     {
       if (!irccmp(cap->name, capab_name))
       {
         default_server_capabs &= ~(cap->cap);
-        dlinkDelete(ptr, &cap_list);
+        dlinkDelete(node, &cap_list);
         MyFree(cap->name);
         MyFree(cap);
       }
@@ -452,11 +452,11 @@ delete_capability(const char *capab_name)
 unsigned int
 find_capability(const char *capab)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, cap_list.head)
+  DLINK_FOREACH(node, cap_list.head)
   {
-    const struct Capability *cap = ptr->data;
+    const struct Capability *cap = node->data;
 
     if (cap->cap && !irccmp(cap->name, capab))
       return cap->cap;
@@ -477,16 +477,16 @@ void
 send_capabilities(struct Client *client_p, int cap_can_send)
 {
   char buf[IRCD_BUFSIZE] = "";
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, cap_list.head)
+  DLINK_FOREACH(node, cap_list.head)
   {
-    const struct Capability *cap = ptr->data;
+    const struct Capability *cap = node->data;
 
     if (cap->cap & (cap_can_send|default_server_capabs))
     {
       strlcat(buf, cap->name, sizeof(buf));
-      if (ptr->next)
+      if (node->next)
         strlcat(buf, " ", sizeof(buf));
     }
   }
@@ -505,13 +505,13 @@ const char *
 show_capabilities(const struct Client *target_p)
 {
   static char msgbuf[IRCD_BUFSIZE] = "";
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
   strlcpy(msgbuf, "TS", sizeof(msgbuf));
 
-  DLINK_FOREACH(ptr, cap_list.head)
+  DLINK_FOREACH(node, cap_list.head)
   {
-    const struct Capability *cap = ptr->data;
+    const struct Capability *cap = node->data;
 
     if (!IsCapable(target_p, cap->cap))
       continue;

@@ -637,7 +637,7 @@ static void
 remove_a_mode(struct Channel *chptr, struct Client *source_p,
              int mask, char flag)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   char lmodebuf[MODEBUFLEN];
   char *sp = sendbuf;
   const char *lpara[MAXMODEPARAMS];
@@ -648,16 +648,16 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
   *mbuf++ = '-';
   *sp = '\0';
 
-  DLINK_FOREACH(ptr, chptr->members.head)
+  DLINK_FOREACH(node, chptr->members.head)
   {
-    struct Membership *ms = ptr->data;
+    struct Membership *member = node->data;
 
-    if ((ms->flags & mask) == 0)
+    if ((member->flags & mask) == 0)
       continue;
 
-    ms->flags &= ~mask;
+    member->flags &= ~mask;
 
-    lpara[count++] = ms->client_p->name;
+    lpara[count++] = member->client_p->name;
 
     *mbuf++ = flag;
 
@@ -711,7 +711,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 {
   char lmodebuf[MODEBUFLEN];
   char lparabuf[IRCD_BUFSIZE];
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
   char *pbuf = NULL;
   int count = 0;
   int cur_len, mlen, plen;
@@ -721,11 +721,11 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
                             source_p->name, chptr->name);
   mbuf = lmodebuf + mlen;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, list->head)
+  DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
-    struct Ban *banptr = ptr->data;
+    struct Ban *ban = node->data;
 
-    plen = banptr->len + 4;  /* another +b and "!@ " */
+    plen = ban->len + 4;  /* another +b and "!@ " */
 
     if (count >= MAXMODEPARAMS ||
         (cur_len + 1 /* space between */ + (plen - 1)) > IRCD_BUFSIZE - 2)
@@ -741,11 +741,10 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
 
     *mbuf++ = c;
     cur_len += plen;
-    pbuf += sprintf(pbuf, "%s!%s@%s ", banptr->name, banptr->user,
-                    banptr->host);
+    pbuf += sprintf(pbuf, "%s!%s@%s ", ban->name, ban->user, ban->host);
     ++count;
 
-    remove_ban(banptr, list);
+    remove_ban(ban, list);
   }
 
   *mbuf = *(pbuf - 1) = '\0';

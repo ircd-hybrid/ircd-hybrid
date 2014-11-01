@@ -49,11 +49,11 @@
 static int
 remove_xline_exact(const char *gecos)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, xconf_items.head)
+  DLINK_FOREACH(node, xconf_items.head)
   {
-    struct MaskItem *conf = ptr->data;
+    struct MaskItem *conf = node->data;
 
     if (!IsConfDatabase(conf))
       continue;

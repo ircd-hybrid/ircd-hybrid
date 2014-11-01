@@ -133,6 +133,7 @@ extern void remove_user_from_channel(struct Membership *);
 extern void channel_member_names(struct Client *, struct Channel *, int);
 extern void add_invite(struct Channel *, struct Client *);
 extern void del_invite(struct Channel *, struct Client *);
+extern void clear_invites(struct Channel *);
 extern void send_channel_modes(struct Client *, struct Channel *);
 extern void channel_modes(struct Channel *, struct Client *, char *, char *);
 extern void check_spambot_warning(struct Client *, const char *);

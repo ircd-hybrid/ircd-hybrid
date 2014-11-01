@@ -70,7 +70,7 @@ send_tb(struct Client *client_p, const struct Channel *chptr)
    */
   if (chptr->topic_time)
     sendto_one(client_p, ":%s TBURST %lu %s %lu %s :%s", me.id,
-               (unsigned long)chptr->channelts, chptr->name,
+               (unsigned long)chptr->creationtime, chptr->name,
                (unsigned long)chptr->topic_time,
                chptr->topic_info,
                chptr->topic);

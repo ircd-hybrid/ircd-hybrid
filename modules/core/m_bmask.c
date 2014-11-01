@@ -72,7 +72,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   /* TS is higher, drop it. */
-  if (atol(parv[1]) > chptr->channelts)
+  if (atol(parv[1]) > chptr->creationtime)
     return 0;
 
   switch (*parv[3])
@@ -138,7 +138,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s BMASK %lu %s %s :%s",
-                source_p->id, (unsigned long)chptr->channelts, chptr->name,
+                source_p->id, (unsigned long)chptr->creationtime, chptr->name,
                 parv[3], parv[4]);
   return 0;
 }

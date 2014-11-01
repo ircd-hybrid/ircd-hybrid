@@ -68,7 +68,7 @@ struct Channel
   char topic[TOPICLEN + 1];
   char topic_info[USERHOST_REPLYLEN];
 
-  time_t channelts;
+  time_t creationtime;
   time_t topic_time;
   time_t last_knock;  /**< Don't allow knock to flood */
   time_t last_join_time;

@@ -131,7 +131,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
 
   newts   = atol(parv[1]);
-  oldts   = chptr->channelts;
+  oldts   = chptr->creationtime;
   oldmode = &chptr->mode;
 
   if (ConfigGeneral.ignore_bogus_ts)
@@ -160,15 +160,15 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
 
   if (isnew)
-    chptr->channelts = newts;
+    chptr->creationtime = newts;
   else if (newts == 0 || oldts == 0)
-    chptr->channelts = 0;
+    chptr->creationtime = 0;
   else if (newts == oldts)
     ;
   else if (newts < oldts)
   {
     keep_our_modes = 0;
-    chptr->channelts = newts;
+    chptr->creationtime = newts;
   }
   else
     keep_new_modes = 0;
@@ -240,7 +240,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
-                source_p->id, (unsigned long)chptr->channelts, chptr->name);
+                source_p->id, (unsigned long)chptr->creationtime, chptr->name);
   return 0;
 }
 

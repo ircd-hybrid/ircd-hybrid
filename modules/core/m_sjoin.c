@@ -213,9 +213,19 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   {
     /* Update channel name to be the correct case */
     if (!isnew)
-      strlcpy(chptr->chname, parv[2], sizeof(chptr->chname));
+      strlcpy(chptr->name, parv[2], sizeof(chptr->name));
 
     remove_our_modes(chptr, source_p);
+
+    if (dlink_list_length(&chptr->banlist))
+      remove_ban_list(chptr, source_p, &chptr->banlist, 'b');
+
+    if (dlink_list_length(&chptr->exceptlist))
+      remove_ban_list(chptr, source_p, &chptr->exceptlist, 'e');
+
+    if (dlink_list_length(&chptr->invexlist))
+      remove_ban_list(chptr, source_p, &chptr->invexlist, 'I');
+    clear_ban_cache(chptr);
 
     if (chptr->topic[0])
     {
@@ -527,20 +537,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   sendto_server(source_p, NOCAPS, NOCAPS, "%s", uid_buf);
-
-  if (!keep_our_modes)
-  {
-    if (dlink_list_length(&chptr->banlist))
-      remove_ban_list(chptr, source_p, &chptr->banlist, 'b');
-
-    if (dlink_list_length(&chptr->exceptlist))
-      remove_ban_list(chptr, source_p, &chptr->exceptlist, 'e');
-
-    if (dlink_list_length(&chptr->invexlist))
-      remove_ban_list(chptr, source_p, &chptr->invexlist, 'I');
-    clear_ban_cache(chptr);
-  }
-
   return 0;
 }
 

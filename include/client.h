@@ -395,8 +395,8 @@ struct Client
 
   char away[AWAYLEN + 1]; /**< Client's AWAY message. Can be set/unset via AWAY command */
   char name[HOSTLEN + 1]; /**< Unique name for a client nick or host */
-  char svid[SVIDLEN + 1]; /**< Services ID */
   char id[IDLEN + 1];       /**< Client ID, unique ID per client */
+  char account[SVIDLEN + 1]; /**< Services account */
 
   /*
    * client->username is the username from ident or the USER message,

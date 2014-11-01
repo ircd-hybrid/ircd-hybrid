@@ -312,7 +312,7 @@ introduce_client(struct Client *source_p)
                  ubuf, source_p->username, source_p->host,
                  (MyClient(source_p) && IsIPSpoof(source_p)) ?
                  "0" : source_p->sockhost, source_p->id,
-                 source_p->svid,
+                 source_p->account,
                  source_p->info);
     else
       sendto_one(server, ":%s UID %s %d %lu %s %s %s %s %s :%s",
@@ -909,7 +909,7 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, member->chptr, ":%s!%s@%s JOIN %s %s :%s",
                                 target_p->name, target_p->username,
                                 target_p->host, member->chptr->name,
-                                (!IsDigit(target_p->svid[0]) && target_p->svid[0] != '*') ? target_p->svid : "*",
+                                (!IsDigit(target_p->account[0]) && target_p->account[0] != '*') ? target_p->account : "*",
                                 target_p->info);
     sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, member->chptr, ":%s!%s@%s JOIN :%s",
                                 target_p->name, target_p->username,

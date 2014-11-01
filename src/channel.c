@@ -1082,7 +1082,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
                                   source_p->name, source_p->username,
                                   source_p->host, chptr->name,
-                                  (!IsDigit(source_p->svid[0]) && source_p->svid[0] != '*') ? source_p->svid : "*",
+                                  (!IsDigit(source_p->account[0]) && source_p->account[0] != '*') ? source_p->account : "*",
                                   source_p->info);
       sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
                                   source_p->name, source_p->username,
@@ -1105,7 +1105,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
                                   source_p->name, source_p->username,
                                   source_p->host, chptr->name,
-                                  (!IsDigit(source_p->svid[0]) && source_p->svid[0] != '*') ? source_p->svid : "*",
+                                  (!IsDigit(source_p->account[0]) && source_p->account[0] != '*') ? source_p->account : "*",
                                   source_p->info);
       sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
                                   source_p->name, source_p->username,

@@ -107,7 +107,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
                ubuf, target_p->username, target_p->host,
                (MyClient(target_p) && IsIPSpoof(target_p)) ?
                "0" : target_p->sockhost, target_p->id,
-               target_p->svid, target_p->info);
+               target_p->account, target_p->info);
   else
     sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s :%s",
                target_p->servptr->id,

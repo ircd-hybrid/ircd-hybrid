@@ -303,8 +303,7 @@ check_conf_klines(void)
   {
     struct Client *client_p = node->data;
 
-    /* If a client is already being exited
-     */
+    /* If a client is already being exited */
     if (IsDead(client_p))
       continue;
 

@@ -211,6 +211,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   /* Lost the TS, other side wins, so remove modes on this side */
   if (!keep_our_modes)
   {
+    /* Update channel name to be the correct case */
+    if (!isnew)
+      strlcpy(chptr->chname, parv[2], sizeof(chptr->chname));
+
     remove_our_modes(chptr, source_p);
 
     if (chptr->topic[0])

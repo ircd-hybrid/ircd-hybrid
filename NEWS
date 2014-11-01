@@ -1,5 +1,6 @@
 -- Noteworthy changes in version 8.2.2 (2014-??-??)
 o) Added support for the "extended-join" client capability
+o) Channel half-ops can now use /INVITE as well
 
 
 -- Noteworthy changes in version 8.2.1 (2014-10-21)

@@ -52,8 +52,8 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   char reason[KICKLEN + 1] = "";
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
-  struct Membership *ms_source = NULL;
-  struct Membership *ms_target = NULL;
+  struct Membership *member_source = NULL;
+  struct Membership *member_target = NULL;
 
   if (EmptyString(parv[2]))
   {
@@ -70,13 +70,13 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((ms_source = find_channel_link(source_p, chptr)) == NULL)
+  if ((member_source = find_channel_link(source_p, chptr)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
     return 0;
   }
 
-  if (!has_member_flags(ms_source, CHFL_CHANOP|CHFL_HALFOP))
+  if (!has_member_flags(member_source, CHFL_CHANOP|CHFL_HALFOP))
   {
     sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
     return 0;
@@ -85,15 +85,15 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   if ((target_p = find_chasing(source_p, parv[2])) == NULL)
     return 0;  /* find_chasing sends ERR_NOSUCHNICK */
 
-  if (!(ms_target = find_channel_link(target_p, chptr)))
+  if (!(member_target = find_channel_link(target_p, chptr)))
   {
     sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
     return 0;
   }
 
-  if (has_member_flags(ms_source, CHFL_HALFOP) && !has_member_flags(ms_source, CHFL_CHANOP))
+  if (has_member_flags(member_source, CHFL_HALFOP) && !has_member_flags(member_source, CHFL_CHANOP))
   {
-    if (has_member_flags(ms_target, CHFL_CHANOP|CHFL_HALFOP))
+    if (has_member_flags(member_target, CHFL_CHANOP|CHFL_HALFOP))
     {
       sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
       return 0;
@@ -112,7 +112,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
                 source_p->id, chptr->name,
                 target_p->id, reason);
-  remove_user_from_channel(ms_target);
+  remove_user_from_channel(member_target);
   return 0;
 }
 
@@ -128,7 +128,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   char reason[KICKLEN + 1] = "";
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
-  struct Membership *ms_target = NULL;
+  struct Membership *member_target = NULL;
 
   if (EmptyString(parv[2]))
     return 0;
@@ -139,7 +139,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   if ((target_p = find_person(source_p, parv[2])) == NULL)
     return 0;
 
-  if ((ms_target = find_channel_link(target_p, chptr)) == NULL)
+  if ((member_target = find_channel_link(target_p, chptr)) == NULL)
     return 0;
 
   if (!EmptyString(parv[3]))
@@ -160,7 +160,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
                 source_p->id, chptr->name,
                 target_p->id, reason);
-  remove_user_from_channel(ms_target);
+  remove_user_from_channel(member_target);
   return 0;
 }
 

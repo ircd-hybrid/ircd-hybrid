@@ -298,11 +298,11 @@ start_auth(struct Client *client_p)
 static void
 timeout_auth_queries_event(void *notused)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, auth_pending_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, auth_pending_list.head)
   {
-    struct AuthRequest *auth = ptr->data;
+    struct AuthRequest *auth = node->data;
 
     if (auth->timeout > CurrentTime)
       break;

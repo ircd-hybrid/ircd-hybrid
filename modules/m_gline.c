@@ -50,11 +50,11 @@
 static void
 check_gline(struct AddressRec *arec)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, local_client_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     if (IsDead(client_p))
       continue;
@@ -205,7 +205,7 @@ static int
 check_majority(const struct Client *source_p, const char *user,
                const char *host, const char *reason, const int type)
 {
-  dlink_node *dn_ptr = NULL;
+  dlink_node *node = NULL;
 
   cleanup_glines(NULL);
 
@@ -213,9 +213,9 @@ check_majority(const struct Client *source_p, const char *user,
   if ((type == GLINE_PENDING_ADD_TYPE) && find_is_glined(host, user))
     return GLINE_NOT_PLACED;
 
-  DLINK_FOREACH(dn_ptr, pending_glines[type].head)
+  DLINK_FOREACH(node, pending_glines[type].head)
   {
-    struct gline_pending *gp_ptr = dn_ptr->data;
+    struct gline_pending *gp_ptr = node->data;
 
     if (irccmp(gp_ptr->user, user) ||
         irccmp(gp_ptr->host, host))

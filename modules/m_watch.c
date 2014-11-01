@@ -72,7 +72,7 @@ show_watch(struct Client *source_p, const char *name,
 static int
 m_watch(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   char *s = NULL;
   char *p = NULL;
   char *user;
@@ -143,7 +143,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
     if (*s == 'S' || *s == 's')
     {
       char buf[IRCD_BUFSIZE] = "";
-      const struct Watch *anptr = NULL;
+      const struct Watch *watch = NULL;
       unsigned int count = 0;
 
       if (list_requested & 0x1)
@@ -155,8 +155,8 @@ m_watch(struct Client *source_p, int parc, char *parv[])
        * Send a list of how many users they have on their WATCH list
        * and how many WATCH lists they are on.
        */
-      if ((anptr = watch_find_hash(source_p->name)))
-        count = dlink_list_length(&anptr->watched_by);
+      if ((watch = watch_find_hash(source_p->name)))
+        count = dlink_list_length(&watch->watched_by);
 
       sendto_one_numeric(source_p, &me, RPL_WATCHSTAT,
                  dlink_list_length(&source_p->connection->watches), count);
@@ -165,23 +165,23 @@ m_watch(struct Client *source_p, int parc, char *parv[])
        * Send a list of everybody in their WATCH list. Be careful
        * not to buffer overflow.
        */
-      if ((ptr = source_p->connection->watches.head) == NULL)
+      if ((node = source_p->connection->watches.head) == NULL)
       {
         sendto_one_numeric(source_p, &me, RPL_ENDOFWATCHLIST, *s);
         continue;
       }
 
-      anptr = ptr->data;
-      strlcpy(buf, anptr->nick, sizeof(buf));
+      watch = node->data;
+      strlcpy(buf, watch->nick, sizeof(buf));
 
       count = strlen(source_p->name) + strlen(me.name) + 10 +
               strlen(buf);
 
-      while ((ptr = ptr->next))
+      while ((node = node->next))
       {
-        anptr = ptr->data;
+        watch = node->data;
 
-        if (count + strlen(anptr->nick) + 1 > IRCD_BUFSIZE - 2)
+        if (count + strlen(watch->nick) + 1 > IRCD_BUFSIZE - 2)
         {
           sendto_one_numeric(source_p, &me, RPL_WATCHLIST, buf);
           buf[0] = '\0';
@@ -189,8 +189,8 @@ m_watch(struct Client *source_p, int parc, char *parv[])
         }
 
         strlcat(buf, " ", sizeof(buf));
-        strlcat(buf, anptr->nick, sizeof(buf));
-        count += (strlen(anptr->nick) + 1);
+        strlcat(buf, watch->nick, sizeof(buf));
+        count += (strlen(watch->nick) + 1);
       }
 
       sendto_one_numeric(source_p, &me, RPL_WATCHLIST, buf);
@@ -212,11 +212,11 @@ m_watch(struct Client *source_p, int parc, char *parv[])
 
       list_requested |= 0x2;
 
-      DLINK_FOREACH(ptr, source_p->connection->watches.head)
+      DLINK_FOREACH(node, source_p->connection->watches.head)
       {
-        const struct Watch *anptr = ptr->data;
+        const struct Watch *watch = node->data;
 
-        if ((target_p = find_person(source_p, anptr->nick)))
+        if ((target_p = find_person(source_p, watch->nick)))
           sendto_one_numeric(source_p, &me, RPL_NOWON,
                              target_p->name, target_p->username,
                              target_p->host, target_p->tsinfo);
@@ -226,8 +226,8 @@ m_watch(struct Client *source_p, int parc, char *parv[])
          * 'L' (full list wanted).
          */
         else if (*s == 'L')
-          sendto_one_numeric(source_p, &me, RPL_NOWOFF, anptr->nick,
-                             "*", "*", anptr->lasttime);
+          sendto_one_numeric(source_p, &me, RPL_NOWOFF, watch->nick,
+                             "*", "*", watch->lasttime);
       }
 
       sendto_one_numeric(source_p, &me, RPL_ENDOFWATCHLIST, *s);

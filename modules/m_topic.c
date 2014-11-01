@@ -74,16 +74,16 @@ m_topic(struct Client *source_p, int parc, char *parv[])
   /* setting topic */
   if (parc > 2)
   {
-    const struct Membership *ms = NULL;
+    const struct Membership *member = NULL;
 
-    if ((ms = find_channel_link(source_p, chptr)) == NULL)
+    if ((member = find_channel_link(source_p, chptr)) == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
       return 0;
     }
 
     if (!(chptr->mode.mode & MODE_TOPICLIMIT) ||
-        has_member_flags(ms, CHFL_CHANOP|CHFL_HALFOP))
+        has_member_flags(member, CHFL_CHANOP|CHFL_HALFOP))
     {
       char topic_info[USERHOST_REPLYLEN];
 

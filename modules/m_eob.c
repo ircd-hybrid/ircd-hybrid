@@ -36,14 +36,14 @@
 static void
 server_eob(struct Client *server)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   assert(IsServer(server));
 
   AddFlag(server, FLAGS_EOB);
 
-  DLINK_FOREACH(ptr, server->serv->server_list.head)
-    server_eob(ptr->data);
+  DLINK_FOREACH(node, server->serv->server_list.head)
+    server_eob(node->data);
 }
 
 /*! \brief EOB command handler

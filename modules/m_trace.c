@@ -46,13 +46,13 @@ static void
 trace_get_dependent(unsigned int *const server,
                     unsigned int *const client, const struct Client *target_p)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
   (*server)++;
   (*client) += dlink_list_length(&target_p->serv->client_list);
 
-  DLINK_FOREACH(ptr, target_p->serv->server_list.head)
-    trace_get_dependent(server, client, ptr->data);
+  DLINK_FOREACH(node, target_p->serv->server_list.head)
+    trace_get_dependent(server, client, node->data);
 }
 
 /*
@@ -64,14 +64,14 @@ trace_get_dependent(unsigned int *const server,
 static int
 m_trace(struct Client *source_p, int parc, char *parv[])
 {
-  const char *tname = NULL;
+  const char *name = NULL;
 
   if (parc > 1)
-    tname = parv[1];
+    name = parv[1];
   else
-    tname = me.name;
+    name = me.name;
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, tname);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, name);
   return 0;
 }
 
@@ -82,17 +82,17 @@ m_trace(struct Client *source_p, int parc, char *parv[])
 static int
 mo_trace(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *ptr = NULL;
-  const char *tname = NULL;
+  dlink_node *node = NULL;
+  const char *name = NULL;
 
   if (parc > 2)
     if (hunt_server(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
       return 0;
 
   if (parc > 1)
-    tname = parv[1];
+    name = parv[1];
   else
-    tname = me.name;
+    name = me.name;
 
   switch (hunt_server(source_p, ":%s TRACE :%s", 1, parc, parv))
   {
@@ -100,13 +100,13 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
     {
       struct Client *ac2ptr = NULL;
 
-      if ((ac2ptr = hash_find_client(tname)) == NULL)
+      if ((ac2ptr = hash_find_client(name)) == NULL)
       {
-        DLINK_FOREACH(ptr, global_client_list.head)
+        DLINK_FOREACH(node, global_client_list.head)
         {
-          ac2ptr = ptr->data;
+          ac2ptr = node->data;
 
-          if (!match(tname, ac2ptr->name))
+          if (!match(name, ac2ptr->name))
             break;
           else
             ac2ptr = NULL;
@@ -115,10 +115,10 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
 
       if (ac2ptr)
         sendto_one_numeric(source_p, &me, RPL_TRACELINK,
-                           ircd_version, tname, ac2ptr->from->name);
+                           ircd_version, name, ac2ptr->from->name);
       else
         sendto_one_numeric(source_p, &me, RPL_TRACELINK,
-                           ircd_version, tname, "ac2ptr_is_NULL!!");
+                           ircd_version, name, "ac2ptr_is_NULL!!");
       return 0;
     }
 
@@ -155,44 +155,41 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
   int doall = 0;
   int wilds, dow;
-  dlink_node *ptr;
-  const char *tname;
+  dlink_node *node;
+  const char *name;
 
   if (parc > 1)
-    tname = parv[1];
+    name = parv[1];
   else
-    tname = me.name;
+    name = me.name;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "TRACE requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  if (!match(tname, me.name))
+  if (!match(name, me.name))
     doall = 1;
-  else if (!MyClient(source_p) && !strcmp(tname, me.id))
+  else if (!MyClient(source_p) && !strcmp(name, me.id))
   {
     doall = 1;
-    tname = me.name;
+    name = me.name;
   }
 
-  wilds = !parv[1] || has_wildcards(tname);
+  wilds = !parv[1] || has_wildcards(name);
   dow = wilds || doall;
 
   if (!HasUMode(source_p, UMODE_OPER) || !dow) /* non-oper traces must be full nicks */
                               /* lets also do this for opers tracing nicks */
   {
-    const char *name;
-    target_p = hash_find_client(tname);
+    target_p = hash_find_client(name);
 
     if (target_p && IsClient(target_p))
     {
-      name = get_client_name(target_p, HIDE_IP);
-
       if (HasUMode(target_p, UMODE_OPER))
       {
         sendto_one_numeric(source_p, &me, RPL_TRACEOPERATOR,
-                   get_client_class(&target_p->connection->confs), name,
+                   get_client_class(&target_p->connection->confs), get_client_name(target_p, HIDE_IP),
                    IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
                    CurrentTime - target_p->connection->lasttime,
                    idle_time_get(source_p, target_p));
@@ -200,68 +197,68 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
       else
       {
         sendto_one_numeric(source_p, &me, RPL_TRACEUSER,
-                   get_client_class(&target_p->connection->confs), name,
+                   get_client_class(&target_p->connection->confs), get_client_name(target_p, HIDE_IP),
                    IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
                    CurrentTime - target_p->connection->lasttime,
                    idle_time_get(source_p, target_p));
       }
     }
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, tname);
+    sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, name);
     return;
   }
 
   /* report all direct connections */
-  DLINK_FOREACH(ptr, local_client_list.head)
+  DLINK_FOREACH(node, local_client_list.head)
   {
-    target_p = ptr->data;
+    target_p = node->data;
 
     if (HasUMode(target_p, UMODE_INVISIBLE) && dow &&
         !(MyConnect(source_p) && HasUMode(source_p, UMODE_OPER)) &&
         !HasUMode(target_p, UMODE_OPER) && (target_p != source_p))
       continue;
-    if (!doall && wilds && match(tname, target_p->name))
+    if (!doall && wilds && match(name, target_p->name))
       continue;
-    if (!dow && irccmp(tname, target_p->name))
+    if (!dow && irccmp(name, target_p->name))
       continue;
 
     report_this_status(source_p, target_p, dow);
   }
 
-  DLINK_FOREACH(ptr, local_server_list.head)
+  DLINK_FOREACH(node, local_server_list.head)
   {
-    target_p = ptr->data;
+    target_p = node->data;
 
-    if (!doall && wilds && match(tname, target_p->name))
+    if (!doall && wilds && match(name, target_p->name))
       continue;
-    if (!dow && irccmp(tname, target_p->name))
+    if (!dow && irccmp(name, target_p->name))
       continue;
 
     report_this_status(source_p, target_p, dow);
   }
 
   /* This section is to report the unknowns */
-  DLINK_FOREACH(ptr, unknown_list.head)
+  DLINK_FOREACH(node, unknown_list.head)
   {
-    target_p = ptr->data;
+    target_p = node->data;
 
-    if (!doall && wilds && match(tname, target_p->name))
+    if (!doall && wilds && match(name, target_p->name))
       continue;
-    if (!dow && irccmp(tname, target_p->name))
+    if (!dow && irccmp(name, target_p->name))
       continue;
 
     report_this_status(source_p, target_p, dow);
   }
 
-  DLINK_FOREACH(ptr, class_get_list()->head)
+  DLINK_FOREACH(node, class_get_list()->head)
   {
-    const struct ClassItem *class = ptr->data;
+    const struct ClassItem *class = node->data;
 
     if (class->ref_count > 0)
       sendto_one_numeric(source_p, &me, RPL_TRACECLASS, class->name, class->ref_count);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, tname);
+  sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, name);
 }
 
 /* report_this_status()

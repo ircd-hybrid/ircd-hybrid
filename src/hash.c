@@ -506,16 +506,16 @@ void
 count_user_host(const char *user, const char *host, unsigned int *global_p,
                 unsigned int *local_p, unsigned int *icount_p)
 {
-  dlink_node *ptr;
+  dlink_node *node = NULL;
   struct UserHost *found_userhost;
   struct NameHost *nameh;
 
   if ((found_userhost = hash_find_userhost(host)) == NULL)
     return;
 
-  DLINK_FOREACH(ptr, found_userhost->list.head)
+  DLINK_FOREACH(node, found_userhost->list.head)
   {
-    nameh = ptr->data;
+    nameh = node->data;
 
     if (!irccmp(user, nameh->name))
     {
@@ -563,7 +563,7 @@ find_or_add_userhost(const char *host)
 void
 add_user_host(const char *user, const char *host, int global)
 {
-  dlink_node *ptr;
+  dlink_node *node = NULL;
   struct UserHost *found_userhost;
   struct NameHost *nameh;
   unsigned int hasident = 1;
@@ -577,9 +577,9 @@ add_user_host(const char *user, const char *host, int global)
   if ((found_userhost = find_or_add_userhost(host)) == NULL)
     return;
 
-  DLINK_FOREACH(ptr, found_userhost->list.head)
+  DLINK_FOREACH(node, found_userhost->list.head)
   {
-    nameh = ptr->data;
+    nameh = node->data;
 
     if (!irccmp(user, nameh->name))
     {
@@ -623,7 +623,7 @@ add_user_host(const char *user, const char *host, int global)
 void
 delete_user_host(const char *user, const char *host, int global)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct UserHost *found_userhost = NULL;
   unsigned int hasident = 1;
 
@@ -636,9 +636,9 @@ delete_user_host(const char *user, const char *host, int global)
   if ((found_userhost = hash_find_userhost(host)) == NULL)
     return;
 
-  DLINK_FOREACH(ptr, found_userhost->list.head)
+  DLINK_FOREACH(node, found_userhost->list.head)
   {
-    struct NameHost *nameh = ptr->data;
+    struct NameHost *nameh = node->data;
 
     if (!irccmp(user, nameh->name))
     {
@@ -704,21 +704,21 @@ void
 free_list_task(struct Client *source_p)
 {
   struct ListTask *lt = source_p->connection->list_task;
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  if ((ptr = dlinkFindDelete(&listing_client_list, source_p)))
-    free_dlink_node(ptr);
+  if ((node = dlinkFindDelete(&listing_client_list, source_p)))
+    free_dlink_node(node);
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, lt->show_mask.head)
+  DLINK_FOREACH_SAFE(node, node_next, lt->show_mask.head)
   {
-    MyFree(ptr->data);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, lt->hide_mask.head)
+  DLINK_FOREACH_SAFE(node, node_next, lt->hide_mask.head)
   {
-    MyFree(ptr->data);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    free_dlink_node(node);
   }
 
   MyFree(lt);
@@ -738,14 +738,14 @@ free_list_task(struct Client *source_p)
 static int
 list_allow_channel(const char *name, const struct ListTask *lt)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, lt->show_mask.head)
-    if (match(ptr->data, name) != 0)
+  DLINK_FOREACH(node, lt->show_mask.head)
+    if (match(node->data, name) != 0)
       return 0;
 
-  DLINK_FOREACH(ptr, lt->hide_mask.head)
-    if (match(ptr->data, name) == 0)
+  DLINK_FOREACH(node, lt->hide_mask.head)
+    if (match(node->data, name) == 0)
       return 0;
 
   return 1;
@@ -831,10 +831,10 @@ safe_list_channels(struct Client *source_p, int only_unmasked_channels)
   }
   else
   {
-    dlink_node *ptr = NULL;
+    dlink_node *node = NULL;
 
-    DLINK_FOREACH(ptr, lt->show_mask.head)
-      if ((chptr = hash_find_channel(ptr->data)))
+    DLINK_FOREACH(node, lt->show_mask.head)
+      if ((chptr = hash_find_channel(node->data)))
         list_one_channel(source_p, chptr);
   }
 

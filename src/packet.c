@@ -56,7 +56,7 @@ extract_one_line(struct dbuf_queue *qptr, char *buffer)
 {
   int line_bytes = 0, empty_bytes = 0, phase = 0;
   unsigned int idx = 0;
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   /*
    * Phase 0: "empty" characters before the line
@@ -70,11 +70,11 @@ extract_one_line(struct dbuf_queue *qptr, char *buffer)
    *
    * --adx
    */
-  DLINK_FOREACH(ptr, qptr->blocks.head)
+  DLINK_FOREACH(node, qptr->blocks.head)
   {
-    struct dbuf_block *block = ptr->data;
+    struct dbuf_block *block = node->data;
 
-    if (ptr == qptr->blocks.head)
+    if (node == qptr->blocks.head)
       idx = qptr->pos;
     else
       idx = 0;

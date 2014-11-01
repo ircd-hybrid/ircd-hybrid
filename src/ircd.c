@@ -222,9 +222,9 @@ io_loop(void)
   {
     if (listing_client_list.head)
     {
-      dlink_node *ptr = NULL, *ptr_next = NULL;
-      DLINK_FOREACH_SAFE(ptr, ptr_next, listing_client_list.head)
-        safe_list_channels(ptr->data, 0);
+      dlink_node *node = NULL, *node_next = NULL;
+      DLINK_FOREACH_SAFE(node, node_next, listing_client_list.head)
+        safe_list_channels(node->data, 0);
     }
 
     /* Run pending events */

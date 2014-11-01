@@ -105,14 +105,14 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
           if (MyConnect(target_p))
           {
-            dlink_node *dm = NULL;
+            dlink_node *node = NULL;
 
             detach_conf(target_p, CONF_OPER);
             ClrOFlag(target_p);
             DelUMode(target_p, ConfigGeneral.oper_only_umodes);
 
-            if ((dm = dlinkFindDelete(&oper_list, target_p)))
-              free_dlink_node(dm);
+            if ((node = dlinkFindDelete(&oper_list, target_p)))
+              free_dlink_node(node);
           }
         }
 

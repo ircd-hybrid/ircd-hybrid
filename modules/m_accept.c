@@ -48,15 +48,15 @@ list_accepts(struct Client *source_p)
   int len = 0;
   char nicks[IRCD_BUFSIZE] = "";
   char *t = nicks;
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
   /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */ 
   /* 1       23456              78                     9 10 */
   len = strlen(me.name) + strlen(source_p->name) + 10;
 
-  DLINK_FOREACH(ptr, source_p->connection->acceptlist.head)
+  DLINK_FOREACH(node, source_p->connection->acceptlist.head)
   {
-    const struct split_nuh_item *accept_p = ptr->data;
+    const struct split_nuh_item *accept_p = node->data;
     size_t masklen = strlen(accept_p->nickptr) +
                      strlen(accept_p->userptr) +
                      strlen(accept_p->hostptr) + 3;  /* +3 for ! + @ + space */

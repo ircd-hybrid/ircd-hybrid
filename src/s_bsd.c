@@ -144,8 +144,6 @@ setup_socket(int fd)
 void
 close_connection(struct Client *client_p)
 {
-  dlink_node *ptr = NULL;
-
   assert(client_p);
 
   if (!IsDead(client_p))
@@ -168,14 +166,16 @@ close_connection(struct Client *client_p)
   }
   else if (IsServer(client_p))
   {
+    dlink_node *node = NULL;
+
     ++ServerStats.is_sv;
     ServerStats.is_sbs += client_p->connection->send.bytes;
     ServerStats.is_sbr += client_p->connection->recv.bytes;
     ServerStats.is_sti += CurrentTime - client_p->connection->firsttime;
 
-    DLINK_FOREACH(ptr, server_items.head)
+    DLINK_FOREACH(node, server_items.head)
     {
-      struct MaskItem *conf = ptr->data;
+      struct MaskItem *conf = node->data;
 
       if (irccmp(conf->name, client_p->name))
         continue;

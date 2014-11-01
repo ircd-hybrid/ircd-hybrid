@@ -46,15 +46,15 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
 {
   int cur = 0;
   int max = -1;
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
   if (parc > 2 && !EmptyString(parv[2]))
     if ((max = atoi(parv[2])) > 20 && !MyConnect(source_p))
       max = 20;
 
-  DLINK_FOREACH(ptr, WHOWASHASH[strhash(parv[1])].head)
+  DLINK_FOREACH(node, WHOWASHASH[strhash(parv[1])].head)
   {
-    const struct Whowas *temp = ptr->data;
+    const struct Whowas *temp = node->data;
 
     if (!irccmp(parv[1], temp->name))
     {

@@ -210,10 +210,10 @@ show_lusers(struct Client *source_p)
 void
 show_isupport(struct Client *source_p)
 {
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, support_list_lines.head)
-    sendto_one_numeric(source_p, &me, RPL_ISUPPORT, ptr->data);
+  DLINK_FOREACH(node, support_list_lines.head)
+    sendto_one_numeric(source_p, &me, RPL_ISUPPORT, node->data);
 }
 
 
@@ -281,7 +281,7 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
 static void
 introduce_client(struct Client *source_p)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   char ubuf[IRCD_BUFSIZE] = "";
 
   if (MyClient(source_p))
@@ -297,9 +297,9 @@ introduce_client(struct Client *source_p)
     ubuf[1] = '\0';
   }
 
-  DLINK_FOREACH(ptr, local_server_list.head)
+  DLINK_FOREACH(node, local_server_list.head)
   {
-    struct Client *server = ptr->data;
+    struct Client *server = node->data;
 
     if (server == source_p->from)
       continue;
@@ -837,7 +837,7 @@ send_umode_out(struct Client *source_p, unsigned int old)
 void
 user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (!strcmp(target_p->host, hostname))
     return;
@@ -878,26 +878,26 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
   if (!ConfigGeneral.cycle_on_host_change)
     return;
 
-  DLINK_FOREACH(ptr, target_p->channel.head)
+  DLINK_FOREACH(node, target_p->channel.head)
   {
     char modebuf[4], nickbuf[NICKLEN * 3 + 3] = "";
     char *p = modebuf;
     int len = 0;
-    const struct Membership *ms = ptr->data;
+    const struct Membership *member = node->data;
 
-    if (has_member_flags(ms, CHFL_CHANOP))
+    if (has_member_flags(member, CHFL_CHANOP))
     {
       *p++ = 'o';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", target_p->name);
     }
 
-    if (has_member_flags(ms, CHFL_HALFOP))
+    if (has_member_flags(member, CHFL_HALFOP))
     {
       *p++ = 'h';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", target_p->name);
     }
 
-    if (has_member_flags(ms, CHFL_VOICE))
+    if (has_member_flags(member, CHFL_VOICE))
     {
       *p++ = 'v';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", target_p->name);
@@ -906,18 +906,18 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     *p = '\0';
 
 
-    sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, ms->chptr, ":%s!%s@%s JOIN %s %s :%s",
+    sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, member->chptr, ":%s!%s@%s JOIN %s %s :%s",
                                 target_p->name, target_p->username,
-                                target_p->host, ms->chptr->name,
+                                target_p->host, member->chptr->name,
                                 (!IsDigit(target_p->svid[0]) && target_p->svid[0] != '*') ? target_p->svid : "*",
                                 target_p->info);
-    sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, ms->chptr, ":%s!%s@%s JOIN :%s",
+    sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, member->chptr, ":%s!%s@%s JOIN :%s",
                                 target_p->name, target_p->username,
-                                target_p->host, ms->chptr->name);
+                                target_p->host, member->chptr->name);
 
     if (nickbuf[0])
-      sendto_channel_local_butone(target_p, 0, 0, ms->chptr, ":%s MODE %s +%s %s",
-                                  target_p->servptr->name, ms->chptr->name,
+      sendto_channel_local_butone(target_p, 0, 0, member->chptr, ":%s MODE %s +%s %s",
+                                  target_p->servptr->name, member->chptr->name,
                                   modebuf, nickbuf);
 
   }
@@ -1088,12 +1088,12 @@ init_isupport(void)
 void
 add_isupport(const char *name, const char *options, int n)
 {
-  dlink_node *ptr;
+  dlink_node *node = NULL;
   struct Isupport *support = NULL;
 
-  DLINK_FOREACH(ptr, support_list.head)
+  DLINK_FOREACH(node, support_list.head)
   {
-    support = ptr->data;
+    support = node->data;
     if (irccmp(support->name, name) == 0)
     {
       MyFree(support->name);
@@ -1102,7 +1102,7 @@ add_isupport(const char *name, const char *options, int n)
     }
   }
 
-  if (ptr == NULL)
+  if (node == NULL)
   {
     support = MyCalloc(sizeof(*support));
     dlinkAddTail(support, &support->node, &support_list);
@@ -1126,15 +1126,15 @@ add_isupport(const char *name, const char *options, int n)
 void
 delete_isupport(const char *name)
 {
-  dlink_node *ptr;
-  struct Isupport *support;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, support_list.head)
+  DLINK_FOREACH(node, support_list.head)
   {
-    support = ptr->data;
+    struct Isupport *support = node->data;
+
     if (irccmp(support->name, name) == 0)
     {
-      dlinkDelete(ptr, &support_list);
+      dlinkDelete(node, &support_list);
       MyFree(support->name);
       MyFree(support->options);
       MyFree(support);
@@ -1157,22 +1157,22 @@ rebuild_isupport_message_line(void)
 {
   char isupportbuffer[IRCD_BUFSIZE];
   char *p = isupportbuffer;
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
   int n = 0;
   int tokens = 0;
   size_t len = 0;
   size_t reserve = strlen(me.name) + HOSTLEN + strlen(numeric_form(RPL_ISUPPORT));
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, support_list_lines.head)
+  DLINK_FOREACH_SAFE(node, node_next, support_list_lines.head)
   {
-    dlinkDelete(ptr, &support_list_lines);
-    MyFree(ptr->data);
-    free_dlink_node(ptr);
+    dlinkDelete(node, &support_list_lines);
+    MyFree(node->data);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH(ptr, support_list.head)
+  DLINK_FOREACH(node, support_list.head)
   {
-    struct Isupport *support = ptr->data;
+    struct Isupport *support = node->data;
 
     p += (n = sprintf(p, "%s", support->name));
     len += n;

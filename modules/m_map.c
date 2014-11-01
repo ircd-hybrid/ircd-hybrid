@@ -38,7 +38,7 @@ static void dump_map(struct Client *client,
                      struct Client *server,
                      unsigned int prompt_length)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct Client *target_p = NULL;
   static char prompt[64];
   static char buf[IRCD_BUFSIZE];
@@ -85,9 +85,9 @@ static void dump_map(struct Client *client,
     return;
   strcpy(p, "|-");
 
-  DLINK_FOREACH(ptr, server->serv->server_list.head)
+  DLINK_FOREACH(node, server->serv->server_list.head)
   {
-    target_p = ptr->data;
+    target_p = node->data;
 
     if (IsHidden(target_p) && !HasUMode(client, UMODE_OPER))
       continue;
@@ -99,9 +99,9 @@ static void dump_map(struct Client *client,
     ++cnt;
   }
 
-  DLINK_FOREACH(ptr, server->serv->server_list.head)
+  DLINK_FOREACH(node, server->serv->server_list.head)
   {
-    target_p = ptr->data;
+    target_p = node->data;
 
     if (IsHidden(target_p) && !HasUMode(client, UMODE_OPER))
       continue;

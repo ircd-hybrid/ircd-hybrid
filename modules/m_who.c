@@ -97,11 +97,11 @@ static void
 who_common_channel(struct Client *source_p, struct Channel *chptr, char *mask,
                    int server_oper, unsigned int *maxmatches)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, chptr->members.head)
+  DLINK_FOREACH(node, chptr->members.head)
   {
-    struct Client *target_p = ((struct Membership *)ptr->data)->client_p;
+    struct Client *target_p = ((struct Membership *)node->data)->client_p;
 
     if (!HasUMode(target_p, UMODE_INVISIBLE) || HasFlag(target_p, FLAGS_MARK))
       continue;
@@ -146,7 +146,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, char *mask,
 static void
 who_global(struct Client *source_p, char *mask, int server_oper)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   unsigned int maxmatches = WHO_MAXREPLIES;
   static time_t last_used = 0;
 
@@ -162,16 +162,16 @@ who_global(struct Client *source_p, char *mask, int server_oper)
   }
 
   /* First, list all matching invisible clients on common channels */
-  DLINK_FOREACH(ptr, source_p->channel.head)
+  DLINK_FOREACH(node, source_p->channel.head)
   {
-    struct Channel *chptr = ((struct Membership *)ptr->data)->chptr;
+    struct Channel *chptr = ((struct Membership *)node->data)->chptr;
     who_common_channel(source_p, chptr, mask, server_oper, &maxmatches);
   }
 
   /* Second, list all matching visible clients */
-  DLINK_FOREACH(ptr, global_client_list.head)
+  DLINK_FOREACH(node, global_client_list.head)
   {
-    struct Client *target_p = ptr->data;
+    struct Client *target_p = node->data;
 
     if (!IsClient(target_p))
       continue;
@@ -219,22 +219,22 @@ who_global(struct Client *source_p, char *mask, int server_oper)
  */
 static void
 do_who_on_channel(struct Client *source_p, struct Channel *chptr,
-                  int member, int server_oper)
+                  int is_member, int server_oper)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, chptr->members.head)
+  DLINK_FOREACH(node, chptr->members.head)
   {
-    struct Membership *ms = ptr->data;
-    struct Client *target_p = ms->client_p;
+    struct Membership *member = node->data;
+    struct Client *target_p = member->client_p;
 
-    if (member || !HasUMode(target_p, UMODE_INVISIBLE))
+    if (is_member || !HasUMode(target_p, UMODE_INVISIBLE))
     {
       if (server_oper)
         if (!HasUMode(target_p, UMODE_OPER) ||
             (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
           continue;
-      do_who(source_p, target_p, chptr->name, get_member_status(ms, !!HasCap(source_p, CAP_MULTI_PREFIX)));
+      do_who(source_p, target_p, chptr->name, get_member_status(member, !!HasCap(source_p, CAP_MULTI_PREFIX)));
     }
   }
 }
@@ -257,7 +257,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
   char *mask = parv[1];
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   int server_oper = parc > 2 ? (*parv[2] == 'o') : 0; /* Show OPERS only */
 
   /* See if mask is there, collapse it or return if not there */
@@ -291,16 +291,16 @@ m_who(struct Client *source_p, int parc, char *parv[])
   if (((target_p = hash_find_client(mask))) &&
       IsClient(target_p) && (!server_oper || HasUMode(target_p, UMODE_OPER)))
   {
-    DLINK_FOREACH(ptr, target_p->channel.head)
+    DLINK_FOREACH(node, target_p->channel.head)
     {
-      chptr = ((struct Membership *)ptr->data)->chptr;
+      chptr = ((struct Membership *)node->data)->chptr;
       if (PubChannel(chptr) || IsMember(source_p, chptr))
         break;
     }
 
-    if (ptr)
+    if (node)
       do_who(source_p, target_p, chptr->name,
-             get_member_status(ptr->data, !!HasCap(source_p, CAP_MULTI_PREFIX)));
+             get_member_status(node->data, !!HasCap(source_p, CAP_MULTI_PREFIX)));
     else
       do_who(source_p, target_p, NULL, "");
 
@@ -311,9 +311,9 @@ m_who(struct Client *source_p, int parc, char *parv[])
   /* '/who *' */
   if (!strcmp(mask, "*"))
   {
-    if ((ptr = source_p->channel.head))
+    if ((node = source_p->channel.head))
     {
-      chptr = ((struct Membership *)ptr->data)->chptr;
+      chptr = ((struct Membership *)node->data)->chptr;
       do_who_on_channel(source_p, chptr, 1, server_oper);
     }
 

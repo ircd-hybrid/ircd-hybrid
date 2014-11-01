@@ -136,13 +136,13 @@ static void
 burst_members(struct Client *client_p, struct Channel *chptr)
 {
   struct Client *target_p;
-  struct Membership *ms;
-  dlink_node *ptr;
+  struct Membership *member;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, chptr->members.head)
+  DLINK_FOREACH(node, chptr->members.head)
   {
-    ms       = ptr->data;
-    target_p = ms->client_p;
+    member   = node->data;
+    target_p = member->client_p;
 
     if (!HasFlag(target_p, FLAGS_BURSTED))
     {
@@ -163,11 +163,11 @@ burst_members(struct Client *client_p, struct Channel *chptr)
 static void
 burst_all(struct Client *client_p)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, channel_list.head)
+  DLINK_FOREACH(node, channel_list.head)
   {
-    struct Channel *chptr = ptr->data;
+    struct Channel *chptr = node->data;
 
     if (dlink_list_length(&chptr->members))
     {
@@ -181,9 +181,9 @@ burst_all(struct Client *client_p)
 
   /* also send out those that are not on any channel
    */
-  DLINK_FOREACH(ptr, global_client_list.head)
+  DLINK_FOREACH(node, global_client_list.head)
   {
-    struct Client *target_p = ptr->data;
+    struct Client *target_p = node->data;
 
     if (!HasFlag(target_p, FLAGS_BURSTED) && target_p->from != client_p)
       sendnick_TS(client_p, target_p);
@@ -230,7 +230,7 @@ static void
 server_estab(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
-  dlink_node *ptr;
+  dlink_node *node = NULL;
 #if defined(HAVE_LIBCRYPTO) && !defined(OPENSSL_NO_COMP)
   const COMP_METHOD *compression = NULL, *expansion = NULL;
 #endif
@@ -393,9 +393,9 @@ server_estab(struct Client *client_p)
    *    see previous *WARNING*!!! (Also, original inpath
    *    is destroyed...)
    */
-  DLINK_FOREACH_PREV(ptr, global_server_list.tail)
+  DLINK_FOREACH_PREV(node, global_server_list.tail)
   {
-    struct Client *target_p = ptr->data;
+    struct Client *target_p = node->data;
 
     /* target_p->from == target_p for target_p == client_p */
     if (IsMe(target_p) || target_p->from == client_p)
@@ -411,9 +411,9 @@ server_estab(struct Client *client_p)
 
   if (IsCapable(client_p, CAP_EOB))
   {
-    DLINK_FOREACH_PREV(ptr, global_server_list.tail)
+    DLINK_FOREACH_PREV(node, global_server_list.tail)
     {
-      struct Client *target_p = ptr->data;
+      struct Client *target_p = node->data;
 
       if (target_p->from == client_p)
         continue;
@@ -631,7 +631,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 static int
 ms_sid(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   struct Client *target_p = NULL;
   struct Client *client_p = source_p->from; /* XXX */
   const struct MaskItem *conf = NULL;
@@ -711,18 +711,18 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   /* See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  DLINK_FOREACH(ptr, conf->leaf_list.head)
+  DLINK_FOREACH(node, conf->leaf_list.head)
   {
-    if (!match(ptr->data, parv[1]))
+    if (!match(node->data, parv[1]))
     {
       llined = 1;
       break;
     }
   }
 
-  DLINK_FOREACH(ptr, conf->hub_list.head)
+  DLINK_FOREACH(node, conf->hub_list.head)
   {
-    if (!match(ptr->data, parv[1]))
+    if (!match(node->data, parv[1]))
     {
       hlined = 1;
       break;

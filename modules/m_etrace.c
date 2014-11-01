@@ -79,7 +79,7 @@ do_etrace(struct Client *source_p, const char *arg)
 {
   const char *tname = NULL;
   unsigned int wilds = 0, do_all = 0;
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "ETRACE requested by %s (%s@%s) [%s]",
@@ -108,9 +108,9 @@ do_etrace(struct Client *source_p, const char *arg)
     return;
   }
 
-  DLINK_FOREACH(ptr, local_client_list.head)
+  DLINK_FOREACH(node, local_client_list.head)
   {
-    const struct Client *target_p = ptr->data;
+    const struct Client *target_p = node->data;
 
     if (wilds)
     {

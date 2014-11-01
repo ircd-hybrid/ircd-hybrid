@@ -143,7 +143,7 @@ conf_make(enum maskitem_type type)
 void
 conf_free(struct MaskItem *conf)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
   dlink_list *list = NULL;
 
   if ((list = map_to_list(conf->type)))
@@ -172,25 +172,25 @@ conf_free(struct MaskItem *conf)
   if (conf->rsa_public_key)
     RSA_free(conf->rsa_public_key);
 #endif
-  DLINK_FOREACH_SAFE(ptr, ptr_next, conf->hub_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, conf->hub_list.head)
   {
-    MyFree(ptr->data);
-    dlinkDelete(ptr, &conf->hub_list);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    dlinkDelete(node, &conf->hub_list);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, conf->leaf_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, conf->leaf_list.head)
   {
-    MyFree(ptr->data);
-    dlinkDelete(ptr, &conf->leaf_list);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    dlinkDelete(node, &conf->leaf_list);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, conf->exempt_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, conf->exempt_list.head)
   {
-    struct exempt *exptr = ptr->data;
+    struct exempt *exptr = node->data;
 
-    dlinkDelete(ptr, &conf->exempt_list);
+    dlinkDelete(node, &conf->exempt_list);
     MyFree(exptr->name);
     MyFree(exptr->user);
     MyFree(exptr->host);
@@ -404,11 +404,11 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
 void
 detach_conf(struct Client *client_p, enum maskitem_type type)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, client_p->connection->confs.head)
+  DLINK_FOREACH_SAFE(node, node_next, client_p->connection->confs.head)
   {
-    struct MaskItem *conf = ptr->data;
+    struct MaskItem *conf = node->data;
 
     assert(conf->type & (CONF_CLIENT | CONF_OPER | CONF_SERVER));
     assert(conf->ref_count > 0);
@@ -417,8 +417,8 @@ detach_conf(struct Client *client_p, enum maskitem_type type)
     if (!(conf->type & type))
       continue;
 
-    dlinkDelete(ptr, &client_p->connection->confs);
-    free_dlink_node(ptr);
+    dlinkDelete(node, &client_p->connection->confs);
+    free_dlink_node(node);
 
     if (conf->type == CONF_CLIENT)
       remove_from_cidr_check(&client_p->connection->ip, conf->class);
@@ -475,8 +475,7 @@ int
 attach_connect_block(struct Client *client_p, const char *name,
                      const char *host)
 {
-  dlink_node *ptr;
-  struct MaskItem *conf = NULL;
+  dlink_node *node = NULL;
 
   assert(client_p != NULL);
   assert(host != NULL);
@@ -484,9 +483,9 @@ attach_connect_block(struct Client *client_p, const char *name,
   if (client_p == NULL || host == NULL)
     return 0;
 
-  DLINK_FOREACH(ptr, server_items.head)
+  DLINK_FOREACH(node, server_items.head)
   {
-    conf = ptr->data;
+    struct MaskItem *conf = node->data;
 
     if (match(conf->name, name) || match(conf->host, host))
       continue;
@@ -510,12 +509,11 @@ attach_connect_block(struct Client *client_p, const char *name,
 struct MaskItem *
 find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
 {
-  dlink_node *ptr;
-  struct MaskItem* conf;
+  dlink_node *node = NULL;
 
-  DLINK_FOREACH(ptr, list->head)
+  DLINK_FOREACH(node, list->head)
   {
-    conf = ptr->data;
+    struct MaskItem *conf = node->data;
 
     if (conf->type == type)
     {
@@ -580,16 +578,16 @@ struct MaskItem *
 find_matching_name_conf(enum maskitem_type type, const char *name, const char *user,
                         const char *host, unsigned int flags)
 {
-  dlink_node *ptr=NULL;
-  struct MaskItem *conf=NULL;
-  dlink_list *list_p = map_to_list(type);
+  dlink_node *node = NULL;
+  dlink_list *list = map_to_list(type);
+  struct MaskItem *conf = NULL;
 
   switch (type)
   {
   case CONF_SERVICE:
-    DLINK_FOREACH(ptr, list_p->head)
+    DLINK_FOREACH(node, list->head)
     {
-      conf = ptr->data;
+      conf = node->data;
 
       if (EmptyString(conf->name))
         continue;
@@ -602,9 +600,9 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
   case CONF_ULINE:
   case CONF_NRESV:
   case CONF_CRESV:
-    DLINK_FOREACH(ptr, list_p->head)
+    DLINK_FOREACH(node, list->head)
     {
-      conf = ptr->data;
+      conf = node->data;
 
       if (EmptyString(conf->name))
         continue;
@@ -623,9 +621,9 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
       break;
 
   case CONF_SERVER:
-    DLINK_FOREACH(ptr, list_p->head)
+    DLINK_FOREACH(node, list->head)
     {
-      conf = ptr->data;
+      conf = node->data;
 
       if ((name != NULL) && !match(name, conf->name))
         return conf;
@@ -653,9 +651,9 @@ struct MaskItem *
 find_exact_name_conf(enum maskitem_type type, const struct Client *who, const char *name,
                      const char *user, const char *host)
 {
-  dlink_node *ptr = NULL;
-  struct MaskItem *conf;
-  dlink_list *list_p = map_to_list(type);
+  dlink_node *node = NULL;
+  dlink_list *list = map_to_list(type);
+  struct MaskItem *conf = NULL;
 
   switch(type)
   {
@@ -664,9 +662,9 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
   case CONF_NRESV:
   case CONF_CRESV:
 
-    DLINK_FOREACH(ptr, list_p->head)
+    DLINK_FOREACH(node, list->head)
     {
-      conf = ptr->data;
+      conf = node->data;
 
       if (EmptyString(conf->name))
         continue;
@@ -684,9 +682,9 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
     break;
 
   case CONF_OPER:
-    DLINK_FOREACH(ptr, list_p->head)
+    DLINK_FOREACH(node, list->head)
     {
-      conf = ptr->data;
+      conf = node->data;
 
       if (EmptyString(conf->name))
         continue;
@@ -728,9 +726,9 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
     break;
 
   case CONF_SERVER:
-    DLINK_FOREACH(ptr, list_p->head)
+    DLINK_FOREACH(node, list->head)
     {
-      conf = ptr->data;
+      conf = node->data;
 
       if (EmptyString(conf->name))
         continue;
@@ -1051,14 +1049,13 @@ cleanup_tklines(void *unused)
  * side effects - expire tklines
  */
 static void
-expire_tklines(dlink_list *tklist)
+expire_tklines(dlink_list *list)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
-  struct MaskItem *conf = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, tklist->head)
+  DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
-    conf = ptr->data;
+    struct MaskItem *conf = node->data;
 
     if (!conf->until || conf->until > CurrentTime)
       continue;
@@ -1250,7 +1247,7 @@ read_conf_files(int cold)
 static void
 clear_out_old_conf(void)
 {
-  dlink_node *ptr = NULL, *next_ptr = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
   dlink_list *free_items [] = {
     &server_items,   &oconf_items,
      &uconf_items,   &xconf_items,
@@ -1265,9 +1262,9 @@ clear_out_old_conf(void)
 
   for (; *iterator != NULL; iterator++)
   {
-    DLINK_FOREACH_SAFE(ptr, next_ptr, (*iterator)->head)
+    DLINK_FOREACH_SAFE(node, node_next, (*iterator)->head)
     {
-      struct MaskItem *conf = ptr->data;
+      struct MaskItem *conf = node->data;
 
       conf->active = 0;
       dlinkDelete(&conf->node, *iterator);
@@ -1836,15 +1833,15 @@ cluster_a_line(struct Client *source_p, const char *command,
 {
   va_list args;
   char buffer[IRCD_BUFSIZE] = "";
-  const dlink_node *ptr = NULL;
+  const dlink_node *node = NULL;
 
   va_start(args, pattern);
   vsnprintf(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(ptr, cluster_items.head)
+  DLINK_FOREACH(node, cluster_items.head)
   {
-    const struct MaskItem *conf = ptr->data;
+    const struct MaskItem *conf = node->data;
 
     if (conf->flags & cluster_type)
       sendto_match_servs(source_p, conf->name, CAP_CLUSTER|capab,

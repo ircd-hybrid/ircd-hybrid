@@ -46,11 +46,11 @@
 static void
 check_dline(struct AddressRec *arec)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, local_client_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     if (IsDead(client_p))
       continue;
@@ -71,9 +71,9 @@ check_dline(struct AddressRec *arec)
     }
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
-    struct Client *client_p = ptr->data;
+    struct Client *client_p = node->data;
 
     if (IsDead(client_p))
       continue;

@@ -45,7 +45,7 @@
 static void
 do_links(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "LINKS requested by %s (%s@%s) [%s]",
@@ -57,9 +57,9 @@ do_links(struct Client *source_p, int parc, char *parv[])
   {
     const char *mask = (parc > 2 ? parv[2] : parv[1]);
 
-    DLINK_FOREACH(ptr, global_server_list.head)
+    DLINK_FOREACH(node, global_server_list.head)
     {
-      struct Client *target_p = ptr->data;
+      struct Client *target_p = node->data;
 
       /* skip hidden servers */
       if (IsHidden(target_p))
@@ -93,8 +93,8 @@ do_links(struct Client *source_p, int parc, char *parv[])
      */
     sendto_one_numeric(source_p, &me, RPL_LINKS, me.name, me.name, 0, me.info);
 
-    DLINK_FOREACH(ptr, flatten_links.head)
-      sendto_one_numeric(source_p, &me, RPL_LINKS|SND_EXPLICIT, "%s", ptr->data);
+    DLINK_FOREACH(node, flatten_links.head)
+      sendto_one_numeric(source_p, &me, RPL_LINKS|SND_EXPLICIT, "%s", node->data);
     sendto_one_numeric(source_p, &me, RPL_ENDOFLINKS, "*");
   }
 }

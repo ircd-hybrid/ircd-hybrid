@@ -54,7 +54,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
-  char reason[KICKLEN + 1] = "SVSKilled: ";
+  char reason[KILLLEN + 1] = "SVSKilled: ";
   time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))

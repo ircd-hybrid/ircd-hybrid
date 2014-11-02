@@ -117,6 +117,6 @@ extern const struct ChannelMode ModeTable[];
 extern int add_id(struct Client *, struct Channel *, char *, unsigned int);
 extern void set_channel_mode(struct Client *, struct Channel *,
                              struct Membership *, int, char **);
-extern void clear_ban_cache(struct Channel *);
+extern void clear_ban_cache_channel(struct Channel *);
 extern void clear_ban_cache_client(struct Client *);
 #endif /* INCLUDED_channel_mode_h */

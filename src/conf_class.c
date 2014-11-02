@@ -47,7 +47,7 @@ class_get_list(void)
 struct ClassItem *
 class_make(void)
 {
-  struct ClassItem *class = MyCalloc(sizeof(*class));
+  struct ClassItem *const class = MyCalloc(sizeof(*class));
 
   class->active    = 1;
   class->con_freq  = DEFAULT_CONNECTFREQUENCY;
@@ -86,7 +86,7 @@ get_class_ptr(const dlink_list *const list)
 
   if ((node = list->head))
   {
-    const struct MaskItem *conf = node->data;
+    const struct MaskItem *const conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -104,7 +104,7 @@ get_client_class(const dlink_list *const list)
 
   if ((node = list->head))
   {
-    const struct MaskItem *conf = node->data;
+    const struct MaskItem *const conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -122,7 +122,7 @@ get_client_ping(const dlink_list *const list)
 
   if ((node = list->head))
   {
-    const struct MaskItem *conf = node->data;
+    const struct MaskItem *const conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -140,7 +140,7 @@ get_sendq(const dlink_list *const list)
 
   if ((node = list->head))
   {
-    const struct MaskItem *conf = node->data;
+    const struct MaskItem *const conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
@@ -158,7 +158,7 @@ get_recvq(const dlink_list *const list)
 
   if ((node = list->head))
   {
-    const struct MaskItem *conf = node->data;
+    const struct MaskItem *const conf = node->data;
 
     assert(conf->class);
     assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));

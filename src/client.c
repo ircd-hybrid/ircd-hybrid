@@ -1053,7 +1053,7 @@ idle_time_get(const struct Client *source_p, const struct Client *target_p)
   unsigned int idle = 0;
   unsigned int min_idle = 0;
   unsigned int max_idle = 0;
-  const struct ClassItem *class = get_class_ptr(&target_p->connection->confs);
+  const struct ClassItem *const class = get_class_ptr(&target_p->connection->confs);
 
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target_p == source_p)
     return CurrentTime - target_p->connection->last_privmsg;

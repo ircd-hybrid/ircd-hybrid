@@ -83,7 +83,7 @@ const struct mode_letter chan_modes[] =
 static char *
 check_string(char *s)
 {
-  char *str = s;
+  char *const str = s;
   static char star[] = "*";
 
   if (EmptyString(str))
@@ -930,7 +930,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
   if (dir == MODE_ADD && parc > *parn)
   {
-    char *lstr = parv[(*parn)++];
+    char *const lstr = parv[(*parn)++];
 
     if (EmptyString(lstr) || (limit = atoi(lstr)) <= 0)
       return;
@@ -982,7 +982,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
   if (dir == MODE_ADD && parc > *parn)
   {
-    char *key = fix_key(parv[(*parn)++]);
+    char *const key = fix_key(parv[(*parn)++]);
 
     if (EmptyString(key))
       return;

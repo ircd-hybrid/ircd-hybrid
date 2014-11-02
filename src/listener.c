@@ -40,6 +40,7 @@
 
 #define TOOFAST_WARNING "ERROR :Your host is trying to (re)connect too fast -- throttled.\r\n"
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
+#define ALLINUSE_WARNING "ERROR :All connections in use\r\n"
 
 static dlink_list listener_list;
 
@@ -155,7 +156,7 @@ listener_accept_connection(fde_t *pfd, void *data)
                                        get_listener_name(listener));
 
       if (!(listener->flags & LISTENER_SSL))
-        send(fd, "ERROR :All connections in use\r\n", 32, 0);
+        send(fd, ALLINUSE_WARNING, sizeof(ALLINUSE_WARNING) - 1, 0);
 
       close(fd);
       break;    /* jump out and re-register a new io request */

@@ -157,11 +157,11 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
   {
     case CHFL_BAN:
       list = &chptr->banlist;
-      clear_ban_cache(chptr);
+      clear_ban_cache_channel(chptr);
       break;
     case CHFL_EXCEPTION:
       list = &chptr->exceptlist;
-      clear_ban_cache(chptr);
+      clear_ban_cache_channel(chptr);
       break;
     case CHFL_INVEX:
       list = &chptr->invexlist;
@@ -247,11 +247,11 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
   {
     case CHFL_BAN:
       list = &chptr->banlist;
-      clear_ban_cache(chptr);
+      clear_ban_cache_channel(chptr);
       break;
     case CHFL_EXCEPTION:
       list = &chptr->exceptlist;
-      clear_ban_cache(chptr);
+      clear_ban_cache_channel(chptr);
       break;
     case CHFL_INVEX:
       list = &chptr->invexlist;
@@ -347,7 +347,7 @@ fix_key(char *arg)
  * side effects - clear ban cache
  */
 void
-clear_ban_cache(struct Channel *chptr)
+clear_ban_cache_channel(struct Channel *chptr)
 {
   dlink_node *node = NULL;
 

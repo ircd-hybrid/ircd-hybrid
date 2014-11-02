@@ -151,7 +151,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
    * Re-assemble a new n!u@h and print it back to banid for sending
    * the mode to the channel.
    */
-  len = sprintf(banid, "%s!%s@%s", name, user, host);
+  len = snprintf(banid, IRCD_BUFSIZE, "%s!%s@%s", name, user, host);
 
   switch (type)
   {
@@ -241,7 +241,7 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
    * Re-assemble a new n!u@h and print it back to banid for sending
    * the mode to the channel.
    */
-  sprintf(banid, "%s!%s@%s", name, user, host);
+  snprintf(banid, IRCD_BUFSIZE, "%s!%s@%s", name, user, host);
 
   switch (type)
   {

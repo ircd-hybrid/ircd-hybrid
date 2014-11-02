@@ -72,22 +72,22 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
        */
       if (MyClient(target_p) && (target_p == source_p))
       {
-        rl = sprintf(response, "%s%s=%c%s@%s ",
-                     target_p->name,
-                     HasUMode(target_p, UMODE_OPER) ? "*" : "",
-                     (target_p->away[0]) ? '-' : '+',
-                     target_p->username,
-                     target_p->sockhost);
+        rl = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
+                      target_p->name,
+                      HasUMode(target_p, UMODE_OPER) ? "*" : "",
+                      (target_p->away[0]) ? '-' : '+',
+                      target_p->username,
+                      target_p->sockhost);
       }
       else
       {
-        rl = sprintf(response, "%s%s=%c%s@%s ",
-                     target_p->name, (HasUMode(target_p, UMODE_OPER) &&
-                                      (!HasUMode(target_p, UMODE_HIDDEN) ||
-                                        HasUMode(source_p, UMODE_OPER))) ? "*" : "",
-                     (target_p->away[0]) ? '-' : '+',
-                     target_p->username,
-                     target_p->host);
+        rl = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
+                      target_p->name, (HasUMode(target_p, UMODE_OPER) &&
+                                       (!HasUMode(target_p, UMODE_HIDDEN) ||
+                                         HasUMode(source_p, UMODE_OPER))) ? "*" : "",
+                      (target_p->away[0]) ? '-' : '+',
+                      target_p->username,
+                      target_p->host);
       }
 
       if ((rl + cur_len) < (IRCD_BUFSIZE - 10))

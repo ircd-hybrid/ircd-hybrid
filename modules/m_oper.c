@@ -77,7 +77,7 @@ static int
 m_oper(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
-  const char *name = parv[1];
+  const char *opername = parv[1];
   const char *password = parv[2];
 
   if (EmptyString(password))
@@ -90,11 +90,11 @@ m_oper(struct Client *source_p, int parc, char *parv[])
   if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  if ((conf = find_exact_name_conf(CONF_OPER, source_p, name, NULL, NULL)) == NULL)
+  if ((conf = find_exact_name_conf(CONF_OPER, source_p, opername, NULL, NULL)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-    conf = find_exact_name_conf(CONF_OPER, NULL, name, NULL, NULL);
-    failed_oper_notice(source_p, name, (conf != NULL) ?
+    conf = find_exact_name_conf(CONF_OPER, NULL, opername, NULL, NULL);
+    failed_oper_notice(source_p, opername, (conf != NULL) ?
                        "host mismatch" : "no operator {} block");
     return 0;
   }
@@ -102,7 +102,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
   if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
   {
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-    failed_oper_notice(source_p, name, "requires SSL/TLS");
+    failed_oper_notice(source_p, opername, "requires SSL/TLS");
     return 0;
   }
 
@@ -111,7 +111,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     if (EmptyString(source_p->certfp) || strcasecmp(source_p->certfp, conf->certfp))
     {
       sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-      failed_oper_notice(source_p, name, "client certificate fingerprint mismatch");
+      failed_oper_notice(source_p, opername, "client certificate fingerprint mismatch");
       return 0;
     }
   }
@@ -121,19 +121,19 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     if (attach_conf(source_p, conf))
     {
       sendto_one_notice(source_p, &me, ":Can't attach conf!");
-      failed_oper_notice(source_p, name, "can't attach conf!");
+      failed_oper_notice(source_p, opername, "can't attach conf!");
       return 0;
     }
 
     oper_up(source_p);
 
-    ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s",
-         name, source_p->name, source_p->username, source_p->host);
+    ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s", opername, source_p->name,
+         source_p->username, source_p->host);
   }
   else
   {
     sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
-    failed_oper_notice(source_p, name, "password mismatch");
+    failed_oper_notice(source_p, opername, "password mismatch");
   }
 
   return 0;

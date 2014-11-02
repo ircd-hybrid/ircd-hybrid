@@ -414,9 +414,9 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
   char buf[IRCD_BUFSIZE + 1] = "";
   char *t = NULL, *start = NULL;
   int tlen = 0;
-  int is_member = IsMember(source_p, chptr);
-  int multi_prefix = HasCap(source_p, CAP_MULTI_PREFIX) != 0;
-  int uhnames = HasCap(source_p, CAP_UHNAMES) != 0;
+  const int is_member = IsMember(source_p, chptr);
+  const int multi_prefix = HasCap(source_p, CAP_MULTI_PREFIX) != 0;
+  const int uhnames = HasCap(source_p, CAP_UHNAMES) != 0;
 
   if (PubChannel(chptr) || is_member)
   {

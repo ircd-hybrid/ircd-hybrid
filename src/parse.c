@@ -297,7 +297,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
      * Copy the prefix to 'sender' assuming it terminates
      * with SPACE (or NULL, which is an error, though).
      */
-    const char *sender = ++ch;
+    const char *const sender = ++ch;
 
     if ((s = strchr(ch, ' ')))
     {
@@ -646,7 +646,7 @@ recurse_report_messages(struct Client *source_p, const struct MessageTree *mtree
 void
 report_messages(struct Client *source_p)
 {
-  const struct MessageTree *mtree = &msg_tree;
+  const struct MessageTree *const mtree = &msg_tree;
 
   for (unsigned int i = 0; i < MAXPTRLEN; ++i)
     if (mtree->pointers[i])

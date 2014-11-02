@@ -77,8 +77,8 @@ static int
 m_oper(struct Client *source_p, int parc, char *parv[])
 {
   struct MaskItem *conf = NULL;
-  const char *opername = parv[1];
-  const char *password = parv[2];
+  const char *const opername = parv[1];
+  const char *const password = parv[2];
 
   if (EmptyString(password))
   {

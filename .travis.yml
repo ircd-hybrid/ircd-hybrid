@@ -39,3 +39,5 @@ notifications:
   skip_join: true
 
 after_failure: "cat config.log"
+
+osx_image: xcode61

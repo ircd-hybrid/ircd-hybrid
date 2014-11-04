@@ -51,6 +51,7 @@ static int
 mo_die(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
+  const char *const name = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_DIE))
   {
@@ -58,13 +59,13 @@ mo_die(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(name))
   {
     sendto_one_notice(source_p, &me, ":Need server name /die %s", me.name);
     return 0;
   }
 
-  if (irccmp(parv[1], me.name))
+  if (irccmp(name, me.name))
   {
     sendto_one_notice(source_p, &me, ":Mismatch on /die %s", me.name);
     return 0;

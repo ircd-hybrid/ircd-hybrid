@@ -51,6 +51,7 @@ static int
 mo_restart(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
+  const char *const name = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_RESTART))
   {
@@ -58,13 +59,13 @@ mo_restart(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (EmptyString(parv[1]))
+  if (EmptyString(name))
   {
     sendto_one_notice(source_p, &me, ":Need server name /restart %s", me.name);
     return 0;
   }
 
-  if (irccmp(parv[1], me.name))
+  if (irccmp(name, me.name))
   {
     sendto_one_notice(source_p, &me, ":Mismatch on /restart %s", me.name);
     return 0;

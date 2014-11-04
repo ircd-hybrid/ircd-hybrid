@@ -54,6 +54,7 @@ static int
 mo_rehash(struct Client *source_p, int parc, char *parv[])
 {
   int found = 0;
+  const char *const option = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_REHASH))
   {
@@ -61,9 +62,9 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!EmptyString(parv[1]))
+  if (!EmptyString(option))
   {
-    if (!irccmp(parv[1], "DNS"))
+    if (!irccmp(option, "DNS"))
     {
       sendto_one_numeric(source_p, &me, RPL_REHASHING, "DNS");
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
@@ -72,7 +73,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
       restart_resolver();
       found = 1;
     }
-    else if (!irccmp(parv[1], "MOTD"))
+    else if (!irccmp(option, "MOTD"))
     {
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s is forcing re-reading of MOTD files",
@@ -83,10 +84,10 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
 
     if (found)
       ilog(LOG_TYPE_IRCD, "REHASH %s From %s",
-           parv[1], get_oper_name(source_p));
+           option, get_oper_name(source_p));
     else
       sendto_one_notice(source_p, &me, ":%s is not a valid option. "
-                        "Choose from DNS, MOTD", parv[1]);
+                        "Choose from DNS, MOTD", option);
   }
   else
   {

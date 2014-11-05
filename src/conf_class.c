@@ -82,9 +82,9 @@ class_init(void)
 struct ClassItem *
 get_class_ptr(const dlink_list *const list)
 {
-  const dlink_node *node = NULL;
+  const dlink_node *const node = list->head;
 
-  if ((node = list->head))
+  if (node)
   {
     const struct MaskItem *const conf = node->data;
 
@@ -100,9 +100,9 @@ get_class_ptr(const dlink_list *const list)
 const char *
 get_client_class(const dlink_list *const list)
 {
-  const dlink_node *node = NULL;
+  const dlink_node *const node = list->head;
 
-  if ((node = list->head))
+  if (node)
   {
     const struct MaskItem *const conf = node->data;
 
@@ -118,9 +118,9 @@ get_client_class(const dlink_list *const list)
 unsigned int
 get_client_ping(const dlink_list *const list)
 {
-  const dlink_node *node = NULL;
+  const dlink_node *const node = list->head;
 
-  if ((node = list->head))
+  if (node)
   {
     const struct MaskItem *const conf = node->data;
 
@@ -136,9 +136,9 @@ get_client_ping(const dlink_list *const list)
 unsigned int
 get_sendq(const dlink_list *const list)
 {
-  const dlink_node *node = NULL;
+  const dlink_node *const node = list->head;
 
-  if ((node = list->head))
+  if (node)
   {
     const struct MaskItem *const conf = node->data;
 
@@ -154,9 +154,9 @@ get_sendq(const dlink_list *const list)
 unsigned int
 get_recvq(const dlink_list *const list)
 {
-  const dlink_node *node = NULL;
+  const dlink_node *const node = list->head;
 
-  if ((node = list->head))
+  if (node)
   {
     const struct MaskItem *const conf = node->data;
 

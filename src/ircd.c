@@ -546,7 +546,6 @@ main(int argc, char *argv[])
   dbuf_init();
   hash_init();
   ipcache_init();
-  init_host_hash();          /* Host-hashtable. */
   client_init();
   class_init();
   whowas_init();

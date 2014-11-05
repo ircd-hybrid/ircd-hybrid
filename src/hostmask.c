@@ -341,12 +341,6 @@ mask_addr(struct irc_ssaddr *ip, int bits)
 /* Hashtable stuff...now external as it's used in m_stats.c */
 dlink_list atable[ATABLE_SIZE];
 
-void
-init_host_hash(void)
-{
-  memset(&atable, 0, sizeof(atable));
-}
-
 /* unsigned long hash_ipv4(struct irc_ssaddr*)
  * Input: An IP address.
  * Output: A hash value of the IP address.

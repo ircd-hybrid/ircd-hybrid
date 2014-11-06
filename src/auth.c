@@ -90,7 +90,7 @@ static void auth_connect_callback(fde_t *, int, void *);
 static struct AuthRequest *
 make_auth_request(struct Client *client)
 {
-  struct AuthRequest *request = &client->connection->auth;
+  struct AuthRequest *const request = &client->connection->auth;
 
   memset(request, 0, sizeof(*request));
 
@@ -108,7 +108,7 @@ make_auth_request(struct Client *client)
 void
 release_auth_client(struct AuthRequest *auth)
 {
-  struct Client *client = auth->client;
+  struct Client *const client = auth->client;
 
   if (IsDoingAuth(auth) || IsDNSPending(auth))
     return;
@@ -145,7 +145,7 @@ release_auth_client(struct AuthRequest *auth)
 static void
 auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
 {
-  struct AuthRequest *auth = vptr;
+  struct AuthRequest *const auth = vptr;
 
   ClearDNSPending(auth);
 
@@ -270,11 +270,8 @@ start_auth_query(struct AuthRequest *auth)
 void
 start_auth(struct Client *client_p)
 {
-  struct AuthRequest *auth = NULL;
+  struct AuthRequest *const auth = make_auth_request(client_p);
 
-  assert(client_p);
-
-  auth = make_auth_request(client_p);
   SetInAuth(auth);
   dlinkAddTail(auth, &auth->node, &auth_pending_list);
 
@@ -481,7 +478,7 @@ check_ident_reply(char *reply)
 static void
 read_auth_reply(fde_t *fd, void *data)
 {
-  struct AuthRequest *auth = data;
+  struct AuthRequest *const auth = data;
   const char *username = NULL;
   ssize_t len = 0;
   char buf[RFC1413_BUFSIZ + 1];

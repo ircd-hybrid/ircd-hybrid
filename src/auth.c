@@ -337,7 +337,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
   struct AuthRequest *auth = data;
   struct irc_ssaddr us;
   struct irc_ssaddr them;
-  char authbuf[32];
+  char authbuf[16];
   socklen_t ulen = sizeof(struct irc_ssaddr);
   socklen_t tlen = sizeof(struct irc_ssaddr);
   uint16_t uport, tport;

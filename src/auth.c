@@ -235,11 +235,8 @@ start_auth_query(struct AuthRequest *auth)
   sendheader(auth->client, REPORT_DO_ID);
 
   /*
-   * get the local address of the client and bind to that to
-   * make the auth request.  This used to be done only for
-   * ifdef VIRTUAL_HOST, but needs to be done for all clients
-   * since the ident request must originate from that same address--
-   * and machines with multiple IP addresses are common now
+   * Get the local address of the client and bind to that to
+   * make the auth request.
    */
   memset(&localaddr, 0, locallen);
   getsockname(auth->client->connection->fd.fd, (struct sockaddr*)&localaddr,

@@ -334,7 +334,7 @@ timeout_auth_queries_event(void *notused)
 static void
 auth_connect_callback(fde_t *fd, int error, void *data)
 {
-  struct AuthRequest *auth = data;
+  struct AuthRequest *const auth = data;
   struct irc_ssaddr us;
   struct irc_ssaddr them;
   char authbuf[16];
@@ -391,11 +391,11 @@ enum IdentReplyFields
  * \return The userid, or NULL on parse failure.
  */
 static const char *
-check_ident_reply(char *reply)
+check_ident_reply(char *const reply)
 {
   char *token = NULL, *end = NULL;
   char *vector[USERID_TOKEN_COUNT];
-  int count = token_vector(reply, ':', vector, USERID_TOKEN_COUNT);
+  const int count = token_vector(reply, ':', vector, USERID_TOKEN_COUNT);
 
   if (USERID_TOKEN_COUNT != count)
     return NULL;

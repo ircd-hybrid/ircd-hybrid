@@ -722,9 +722,7 @@ free_list_task(struct Client *source_p)
   }
 
   MyFree(lt);
-
-  if (MyConnect(source_p))
-    source_p->connection->list_task = NULL;
+  source_p->connection->list_task = NULL;
 }
 
 /* list_allow_channel()

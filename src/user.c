@@ -232,7 +232,7 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   if (IsConfDoSpoofIp(conf))
     sendto_one_notice(source_p, &me, ":*** Spoofing your IP. Congrats.");
 
-  /* If this user is in the exception class, Set it "E lined" */
+  /* If this user is in the exception class, set it "E lined" */
   if (IsConfExemptKline(conf))
   {
     SetExemptKline(source_p);

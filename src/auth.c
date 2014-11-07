@@ -151,13 +151,10 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
   if (!EmptyString(name))
   {
-    const struct sockaddr_in *v4, *v4dns;
-    const struct sockaddr_in6 *v6, *v6dns;
-
     if (auth->client->connection->ip.ss.ss_family == AF_INET6)
     {
-      v6 = (const struct sockaddr_in6 *)&auth->client->connection->ip;
-      v6dns = (const struct sockaddr_in6 *)addr;
+      const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&auth->client->connection->ip;
+      const struct sockaddr_in6 *const v6dns = (const struct sockaddr_in6 *)addr;
 
       if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)) != 0)
       {
@@ -168,8 +165,8 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
     }
     else
     {
-      v4 = (const struct sockaddr_in *)&auth->client->connection->ip;
-      v4dns = (const struct sockaddr_in *)addr;
+      const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&auth->client->connection->ip;
+      const struct sockaddr_in *const v4dns = (const struct sockaddr_in *)addr;
 
       if (v4->sin_addr.s_addr != v4dns->sin_addr.s_addr)
       {

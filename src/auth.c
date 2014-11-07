@@ -352,8 +352,8 @@ auth_connect_callback(fde_t *fd, int error, void *data)
   if (getsockname(auth->client->connection->fd.fd, (struct sockaddr *)&us, &ulen) ||
       getpeername(auth->client->connection->fd.fd, (struct sockaddr *)&them, &tlen))
   {
-    ilog(LOG_TYPE_IRCD, "auth get{sock,peer}name error for %s",
-         get_client_name(auth->client, SHOW_IP));
+    report_error(L_ALL, "auth get{sock,peer}name error %s:%s",
+                 get_client_name(auth->client, SHOW_IP), errno);
     auth_error(auth);
     return;
   }

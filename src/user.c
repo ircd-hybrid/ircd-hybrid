@@ -1072,8 +1072,8 @@ init_isupport(void)
   add_isupport("MODES", NULL, MAXMODEPARAMS);
   add_isupport("PREFIX", "(ohv)@%+", -1);
   add_isupport("STATUSMSG", "@%+", -1);
-  add_isupport("EXCEPTS", "e", -1);
-  add_isupport("INVEX", "I", -1);
+  add_isupport("EXCEPTS", NULL, -1);
+  add_isupport("INVEX", NULL, -1);
 }
 
 /*

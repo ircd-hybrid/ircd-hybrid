@@ -68,7 +68,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   int bits = 128;
   int deficit = 0;
   short dc[8];
-  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr;
+  struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)addr;
 
   for (const char *p = text; (c = *p); ++p)
   {
@@ -175,7 +175,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   unsigned char addb[4];
   int n = 0, bits = 0;
   char c;
-  struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
+  struct sockaddr_in *const v4 = (struct sockaddr_in *)addr;
 
   digits[n++] = text;
 
@@ -351,7 +351,7 @@ hash_ipv4(const struct irc_ssaddr *addr, int bits)
 {
   if (bits != 0)
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
     uint32_t av = ntohl(v4->sin_addr.s_addr) & ~((1 << (32 - bits)) - 1);
 
     return (av ^ (av >> 12) ^ (av >> 24)) & (ATABLE_SIZE - 1);
@@ -369,7 +369,7 @@ static uint32_t
 hash_ipv6(const struct irc_ssaddr *addr, int bits)
 {
   uint32_t v = 0, n;
-  const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
+  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;
 
   for (n = 0; n < 16; ++n)
   {

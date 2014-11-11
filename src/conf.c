@@ -95,7 +95,7 @@ static int find_user_host(struct Client *, char *, char *, char *, unsigned int)
 static void
 conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
 {
-  struct MaskItem *conf = vptr;
+  struct MaskItem *const conf = vptr;
 
   conf->dns_pending = 0;
 
@@ -128,7 +128,7 @@ conf_dns_lookup(struct MaskItem *conf)
 struct MaskItem *
 conf_make(enum maskitem_type type)
 {
-  struct MaskItem *conf = MyCalloc(sizeof(*conf));
+  struct MaskItem *const conf = MyCalloc(sizeof(*conf));
   dlink_list *list = NULL;
 
   conf->type   = type;
@@ -353,7 +353,7 @@ verify_access(struct Client *client_p)
 static int
 attach_iline(struct Client *client_p, struct MaskItem *conf)
 {
-  const struct ClassItem *class = conf->class;
+  const struct ClassItem *const class = conf->class;
   struct ip_entry *ip_found;
   int a_limit_reached = 0;
   unsigned int local = 0, global = 0, ident = 0;
@@ -1001,7 +1001,7 @@ int
 conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
 {
   struct ip_entry *ip_found = NULL;
-  struct MaskItem *conf = find_dline_conf(addr, aftype);
+  struct MaskItem *const conf = find_dline_conf(addr, aftype);
 
   /* DLINE exempt also gets you out of static limits/pacing... */
   if (conf && (conf->type == CONF_EXEMPT))

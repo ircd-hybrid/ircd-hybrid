@@ -62,7 +62,7 @@ class_make(void)
 }
 
 void
-class_free(struct ClassItem *class)
+class_free(struct ClassItem *const class)
 {
   assert(class != class_default);
   assert(class->active    == 0);

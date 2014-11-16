@@ -44,8 +44,8 @@ int number_fd = LEAKED_FDS;
 int hard_fdlimit = 0;
 
 
-static int
-set_fdlimit(void)
+void
+fdlist_init(void)
 {
   int fdmax;
   struct rlimit limit;
@@ -65,14 +65,6 @@ set_fdlimit(void)
   /* under no condition shall this raise over 65536
    * for example user ip heap is sized 2*hard_fdlimit */
   hard_fdlimit = IRCD_MIN(fdmax, 65536);
-
-  return -1;
-}
-
-void
-fdlist_init(void)
-{
-  set_fdlimit();
 }
 
 static inline unsigned int

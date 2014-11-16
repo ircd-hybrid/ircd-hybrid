@@ -53,7 +53,7 @@ m_ison(struct Client *source_p, int parc, char *parv[])
   char *p = NULL;
   char *current_insert_point = NULL;
   char buf[IRCD_BUFSIZE];
-  int len;
+  int len, cut = 0;
 
   len = snprintf(buf, sizeof(buf), numeric_form(RPL_ISON), me.name, source_p->name);
   current_insert_point = buf + len;
@@ -67,6 +67,7 @@ m_ison(struct Client *source_p, int parc, char *parv[])
 
       if ((current_insert_point + (len + 5)) < (buf + sizeof(buf)))
       {
+        cut = 1;
         strlcpy(current_insert_point, target_p->name, len + 1);
         current_insert_point += len;
         *current_insert_point++ = ' ';
@@ -76,7 +77,7 @@ m_ison(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  *(current_insert_point - 1)  = '\0';
+  *(current_insert_point - cut)  = '\0';
 
   sendto_one(source_p, "%s", buf);
   return 0;

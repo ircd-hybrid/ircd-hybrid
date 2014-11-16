@@ -54,48 +54,29 @@ m_ison(struct Client *source_p, int parc, char *parv[])
   char *current_insert_point = NULL;
   char buf[IRCD_BUFSIZE];
   int len;
-  int done = 0;
 
   len = snprintf(buf, sizeof(buf), numeric_form(RPL_ISON), me.name, source_p->name);
   current_insert_point = buf + len;
 
-  /*
-   * rfc1459 is ambigious about how to handle ISON
-   * this should handle both interpretations.
-   */
-  for (int i = 1; i < parc; ++i)
+  for (nick = strtoken(&p, parv[1], " "); nick;
+       nick = strtoken(&p,    NULL, " "))
   {
-    for (nick = strtoken(&p, parv[i], " "); nick;
-         nick = strtoken(&p,    NULL, " "))
+    if ((target_p = find_person(source_p, nick)))
     {
-      if ((target_p = find_person(source_p, nick)))
+      len = strlen(target_p->name);
+
+      if ((current_insert_point + (len + 5)) < (buf + sizeof(buf)))
       {
-        len = strlen(target_p->name);
-
-        if ((current_insert_point + (len + 5)) < (buf + sizeof(buf)))
-        {
-          strlcpy(current_insert_point, target_p->name, len);
-          current_insert_point += len;
-          *current_insert_point++ = ' ';
-        }
-        else
-        {
-          done = 1;
-          break;
-        }
+        strlcpy(current_insert_point, target_p->name, len + 1);
+        current_insert_point += len;
+        *current_insert_point++ = ' ';
       }
+      else
+        break;
     }
-
-    if (done)
-      break;
   }
 
-  /*
-   *  current_insert_point--;
-   *  Do NOT take out the trailing space, it breaks ircII
-   *  --Rodder
-   */
-  *current_insert_point  = '\0';
+  *(current_insert_point - 1)  = '\0';
 
   sendto_one(source_p, "%s", buf);
   return 0;

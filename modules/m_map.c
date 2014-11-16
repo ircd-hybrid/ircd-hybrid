@@ -66,7 +66,7 @@ static void dump_map(struct Client *client,
     buf[bufpos++] = ' ';
     buf[bufpos++] = '|';
 
-    bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users %5d (%1.2f%%)",
+    bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users: %5d (%1.2f%%)",
                        dlink_list_length(&server->serv->client_list), 100 *
                        (float)dlink_list_length(&server->serv->client_list) /
                        (float)Count.total);

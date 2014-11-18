@@ -144,7 +144,7 @@ free_client(struct Client *client_p)
     client_p->connection->challenge_operator = NULL;
 
     /*
-     * clean up extra sockets from P-lines which have been discarded.
+     * Clean up extra sockets from listen{} blocks which have been discarded.
      */
     if (client_p->connection->listener)
     {
@@ -482,23 +482,23 @@ find_person(const struct Client *const source_p, const char *name)
 struct Client *
 find_chasing(struct Client *source_p, const char *name)
 {
-  struct Client *who = find_person(source_p, name);
+  struct Client *target_p = find_person(source_p, name);
 
-  if (who)
-    return who;
+  if (target_p)
+    return target_p;
 
   if (IsDigit(*name))
     return NULL;
 
-  if ((who = whowas_get_history(name,
-                         (time_t)ConfigGeneral.kill_chase_time_limit))
-                         == NULL)
+  target_p = whowas_get_history(name, (time_t)ConfigGeneral.kill_chase_time_limit);
+
+  if (!target_p)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
     return NULL;
   }
 
-  return who;
+  return target_p;
 }
 
 /*
@@ -607,6 +607,7 @@ exit_one_client(struct Client *source_p, const char *comment)
     sendto_common_channels_local(source_p, 0, 0, ":%s!%s@%s QUIT :%s",
                                  source_p->name, source_p->username,
                                  source_p->host, comment);
+
     DLINK_FOREACH_SAFE(node, node_next, source_p->channel.head)
       remove_user_from_channel(node->data);
 
@@ -636,6 +637,7 @@ exit_one_client(struct Client *source_p, const char *comment)
   /* Remove source_p from the client lists */
   if (source_p->id[0])
     hash_del_id(source_p);
+
   if (source_p->name[0])
     hash_del_client(source_p);
 
@@ -732,8 +734,9 @@ exit_client(struct Client *source_p, const char *comment)
     else if (IsClient(source_p))
     {
       time_t on_for = CurrentTime - source_p->connection->firsttime;
+
       assert(Count.local > 0);
-      Count.local--;
+      --Count.local;
 
       if (HasUMode(source_p, UMODE_OPER))
         if ((node = dlinkFindDelete(&oper_list, source_p)))
@@ -751,6 +754,7 @@ exit_client(struct Client *source_p, const char *comment)
                            source_p->name, source_p->username, source_p->host, comment,
                            ConfigGeneral.hide_spoof_ips && IsIPSpoof(source_p) ?
                            "255.255.255.255" : source_p->sockhost);
+
       ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %llu/%llu",
            myctime(source_p->connection->firsttime), (unsigned int)(on_for / 3600),
            (unsigned int)((on_for % 3600)/60), (unsigned int)(on_for % 60),
@@ -1057,6 +1061,7 @@ idle_time_get(const struct Client *source_p, const struct Client *target_p)
 
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target_p == source_p)
     return CurrentTime - target_p->connection->last_privmsg;
+
   if (HasUMode(source_p, UMODE_OPER) &&
       !(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
     return CurrentTime - target_p->connection->last_privmsg;

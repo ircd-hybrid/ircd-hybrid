@@ -262,8 +262,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode)
 
   for (const struct mode_letter *tab = chan_modes; tab->letter; ++tab)
   {
-    if ((tab->mode & mode->mode) &&
-        !(tab->mode & oldmode->mode))
+    if ((tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
     {
       if (what != 1)
       {
@@ -277,8 +276,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode)
 
   for (const struct mode_letter *tab = chan_modes; tab->letter; ++tab)
   {
-    if ((tab->mode & oldmode->mode) &&
-        !(tab->mode & mode->mode))
+    if ((tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
     {
       if (what != -1)
       {
@@ -301,7 +299,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode)
     *mbuf++ = 'l';
   }
 
-  if (oldmode->key[0] && !mode->key[0])
+  if (oldmode->key[0] && mode->key[0] == '\0')
   {
     if (what != -1)
     {

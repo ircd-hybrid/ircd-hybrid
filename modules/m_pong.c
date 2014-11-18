@@ -103,21 +103,20 @@ mr_pong(struct Client *source_p, int parc, char *parv[])
 
   if (parc == 2 && !EmptyString(parv[1]))
   {
-    if (ConfigGeneral.ping_cookie && !source_p->connection->registration)
+    if (ConfigGeneral.ping_cookie && source_p->connection->random_ping)
     {
       unsigned int incoming_ping = strtoul(parv[1], NULL, 10);
 
-      if (incoming_ping)
+      if (source_p->connection->random_ping == incoming_ping)
       {
-        if (source_p->connection->random_ping == incoming_ping)
-        {
-          SetPingCookie(source_p);
+        SetPingCookie(source_p);
+
+        if (!source_p->connection->registration)
           register_local_user(source_p);
-        }
-        else
-          sendto_one_numeric(source_p, &me, ERR_WRONGPONG,
-                             source_p->connection->random_ping);
       }
+      else
+        sendto_one_numeric(source_p, &me, ERR_WRONGPONG,
+                           source_p->connection->random_ping);
     }
   }
   else

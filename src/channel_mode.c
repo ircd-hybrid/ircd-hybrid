@@ -408,6 +408,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, chptr->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -458,6 +459,7 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_ONLYSERVERSCANCHANGE, chptr->name);
+
     *errors |= SM_ERR_ONLYSERVER;
     return;
   }
@@ -583,6 +585,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, chptr->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -652,6 +655,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, chptr->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -721,6 +725,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, chptr->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -769,6 +774,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, chptr->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -783,6 +789,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
       sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
+
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -793,6 +800,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   /* no redundant mode changes */
   if (dir == MODE_ADD &&  has_member_flags(member, CHFL_VOICE))
     return;
+
   if (dir == MODE_DEL && !has_member_flags(member, CHFL_VOICE))
     return;
 
@@ -820,6 +828,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, chptr->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -834,6 +843,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
       sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
+
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -844,6 +854,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   /* no redundant mode changes */
   if (dir == MODE_ADD &&  has_member_flags(member, CHFL_HALFOP))
     return;
+
   if (dir == MODE_DEL && !has_member_flags(member, CHFL_HALFOP))
     return;
 
@@ -871,6 +882,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       sendto_one_numeric(source_p, &me,
                          alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, chptr->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -885,6 +897,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
       sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
+
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
@@ -895,6 +908,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   /* no redundant mode changes */
   if (dir == MODE_ADD &&  has_member_flags(member, CHFL_CHANOP))
     return;
+
   if (dir == MODE_DEL && !has_member_flags(member, CHFL_CHANOP))
     return;
 

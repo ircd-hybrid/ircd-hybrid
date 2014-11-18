@@ -83,9 +83,9 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
      * rewrite the KILL for this new nickname--this keeps
      * servers in synch when nick change and kill collide
      */
-    if ((target_p = whowas_get_history(parv[1],
-                                (time_t)ConfigGeneral.kill_chase_time_limit))
-                                == NULL)
+    target_p = whowas_get_history(parv[1], (time_t)ConfigGeneral.kill_chase_time_limit);
+
+    if (!target_p)
     {
       sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
       return 0;

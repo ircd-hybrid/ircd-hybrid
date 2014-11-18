@@ -750,13 +750,17 @@ can_send(struct Channel *chptr, struct Client *source_p,
 
   if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
     return ERR_NOCTRLSONCHAN;
+
   if (member || (member = find_channel_link(source_p, chptr)))
     if (member->flags & (CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
       return CAN_SEND_OPV;
+
   if (!member && (chptr->mode.mode & MODE_NOPRIVMSGS))
     return ERR_CANNOTSENDTOCHAN;
+
   if (chptr->mode.mode & MODE_MODERATED)
     return ERR_CANNOTSENDTOCHAN;
+
   if ((chptr->mode.mode & MODE_MODREG) && !HasUMode(source_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
 
@@ -829,6 +833,7 @@ check_spambot_warning(struct Client *source_p, const char *name)
          JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
       decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
+
       if (decrement_count > source_p->connection->join_leave_count)
         source_p->connection->join_leave_count = 0;
       else

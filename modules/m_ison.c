@@ -77,7 +77,7 @@ m_ison(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  *(current_insert_point - cut)  = '\0';
+  *(current_insert_point - cut) = '\0';
 
   sendto_one(source_p, "%s", buf);
   return 0;

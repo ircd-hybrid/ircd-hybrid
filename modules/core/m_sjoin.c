@@ -561,14 +561,13 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
   *mbuf++ = '-';
 
   for (const struct mode_letter *tab = chan_modes; tab->letter; ++tab)
-    if ((tab->mode & oldmode->mode) &&
-        !(tab->mode & mode->mode))
+    if ((tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
       *mbuf++ = tab->letter;
 
   if (oldmode->limit && mode->limit == 0)
     *mbuf++ = 'l';
 
-  if (oldmode->key[0] && !mode->key[0])
+  if (oldmode->key[0] && mode->key[0] == '\0')
   {
     *mbuf++ = 'k';
     len = sprintf(pbuf, "%s ", oldmode->key);
@@ -582,8 +581,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
     *mbuf++ = '+';
 
   for (const struct mode_letter *tab = chan_modes; tab->letter; ++tab)
-    if ((tab->mode & mode->mode) &&
-        !(tab->mode & oldmode->mode))
+    if ((tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
       *mbuf++ = tab->letter;
 
   if (mode->limit && oldmode->limit != mode->limit)

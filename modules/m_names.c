@@ -52,7 +52,7 @@ static int
 m_names(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  const char *para = parc > 1 ? parv[1] : NULL;
+  const char *const para = parc > 1 ? parv[1] : NULL;
 
   if (!EmptyString(para))
   {

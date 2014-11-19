@@ -810,6 +810,7 @@ set_default_conf(void)
   SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_SINGLE_ECDH_USE);
 #endif
 
+  SSL_CTX_set_cipher_list(ConfigServerInfo.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
   ConfigServerInfo.message_digest_algorithm = EVP_sha256();
   ConfigServerInfo.rsa_private_key = NULL;
   ConfigServerInfo.rsa_private_key_file = NULL;

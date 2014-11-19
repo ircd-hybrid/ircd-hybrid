@@ -202,8 +202,10 @@ parse_client_queued(struct Client *client_p)
        * and no 'bursts' will be permitted.
        */
       if (checkflood > 0)
+      {
         if (lclient_p->sent_parsed >= lclient_p->allow_read)
           break;
+      }
 
       /*
        * Allow opers 4 times the amount of messages as users. why 4?

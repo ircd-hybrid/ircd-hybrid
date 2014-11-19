@@ -140,6 +140,7 @@ parse_client_queued(struct Client *client_p)
         break;
 
       dolen = extract_one_line(&lclient_p->buf_recvq, readBuf);
+
       if (dolen == 0)
         break;
 
@@ -160,6 +161,7 @@ parse_client_queued(struct Client *client_p)
     {
       if (IsDefunct(client_p))
         return;
+
       if ((dolen = extract_one_line(&lclient_p->buf_recvq, readBuf)) == 0)
         break;
 
@@ -200,18 +202,18 @@ parse_client_queued(struct Client *client_p)
        * and no 'bursts' will be permitted.
        */
       if (checkflood > 0)
-      {
         if (lclient_p->sent_parsed >= lclient_p->allow_read)
           break;
-      }
 
-      /* allow opers 4 times the amount of messages as users. why 4?
+      /*
+       * Allow opers 4 times the amount of messages as users. why 4?
        * why not. :) --fl_
        */
       else if (lclient_p->sent_parsed >= (4 * lclient_p->allow_read) && checkflood != -1)
         break;
 
       dolen = extract_one_line(&lclient_p->buf_recvq, readBuf);
+
       if (dolen == 0)
         break;
 
@@ -251,7 +253,8 @@ flood_recalc(fde_t *fd, void *data)
   struct Client *client_p = data;
   struct Connection *lclient_p = client_p->connection;
 
-  /* allow a bursting client their allocation per second, allow
+  /*
+   * Allow a bursting client their allocation per second, allow
    * a client whos flooding an extra 2 per second
    */
   if (IsFloodDone(client_p))
@@ -337,6 +340,7 @@ read_packet(fde_t *fd, void *data)
 
     if (client_p->connection->lasttime < CurrentTime)
       client_p->connection->lasttime = CurrentTime;
+
     if (client_p->connection->lasttime > client_p->connection->since)
       client_p->connection->since = CurrentTime;
 

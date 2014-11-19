@@ -98,6 +98,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
                            get_client_name(to, HIDE_IP),
                            (unsigned long)(dbuf_length(&to->connection->buf_sendq) + buf->size),
                            get_sendq(&to->connection->confs));
+
     if (IsClient(to))
       SetSendQExceeded(to);
 
@@ -440,6 +441,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
       send_message(target_p, local_buf);
     else if (target_p->from->connection->serial != current_serial)
       send_message_remote(target_p->from, from, remote_buf);
+
     target_p->from->connection->serial = current_serial;
   }
 
@@ -486,12 +488,15 @@ sendto_server(struct Client *one,
     /* If dead already skip */
     if (IsDead(client_p))
       continue;
+
     /* check against 'one' */
     if (one && (client_p == one->from))
       continue;
+
     /* check we have required capabs */
     if ((client_p->connection->caps & caps) != caps)
       continue;
+
     /* check we don't have any forbidden capabs */
     if ((client_p->connection->caps & nocaps))
       continue;
@@ -906,6 +911,7 @@ sendto_realops_flags_ratelimited(time_t *rate, const char *pattern, ...)
 
   if ((CurrentTime - *rate) < 20)
     return;
+
   *rate = CurrentTime;
 
   va_start(args, pattern);

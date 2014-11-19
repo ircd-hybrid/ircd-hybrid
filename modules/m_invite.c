@@ -67,6 +67,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     DLINK_FOREACH(node, source_p->connection->invited.head)
       sendto_one_numeric(source_p, &me, RPL_INVITELIST,
                          ((struct Channel *)node->data)->name);
+
     sendto_one_numeric(source_p, &me, RPL_ENDOFINVITELIST);
     return 0;
   }

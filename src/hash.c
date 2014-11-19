@@ -92,7 +92,8 @@ strhash(const char *name)
 
   if (EmptyString(p))
     return 0;
-  for (; *p != '\0'; ++p)
+
+  for (; *p; ++p)
   {
     hval += (hval << 1) + (hval <<  4) + (hval << 7) +
             (hval << 8) + (hval << 24);
@@ -525,6 +526,7 @@ count_user_host(const char *user, const char *host, unsigned int *global_p,
         *local_p  = nameh->lcount;
       if (icount_p)
         *icount_p = nameh->icount;
+
       return;
     }
   }
@@ -606,6 +608,7 @@ add_user_host(const char *user, const char *host, int global)
   {
     if (hasident)
       nameh->icount = 1;
+
     nameh->lcount = 1;
   }
 
@@ -644,10 +647,12 @@ delete_user_host(const char *user, const char *host, int global)
     {
       if (nameh->gcount > 0)
         nameh->gcount--;
+
       if (!global)
       {
         if (nameh->lcount > 0)
           nameh->lcount--;
+
         if (hasident && nameh->icount > 0)
           nameh->icount--;
       }
@@ -768,6 +773,7 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
   if (SecretChannel(chptr) &&
       !(HasUMode(source_p, UMODE_ADMIN) || IsMember(source_p, chptr)))
     return;
+
   if (dlink_list_length(&chptr->members) < lt->users_min ||
       dlink_list_length(&chptr->members) > lt->users_max ||
       (chptr->creationtime != 0 &&

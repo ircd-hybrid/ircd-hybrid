@@ -35,7 +35,7 @@ static const char *const replies[] =
 /* 002 RPL_YOURHOST */ ":%s 002 %s :Your host is %s, running version %s",
 /* 003 RPL_CREATED */ ":%s 003 %s :This server was created %s",
 #ifdef HALFOPS
-/* 004 RPL_MYINFO */ ":%s 004 %s %s %s %s bciklmnoprstveIMORS bkloveIh",
+/* 004 RPL_MYINFO */ ":%s 004 %s %s %s %s bchiklmnoprstveIMORS bkloveIh",
 #else
 /* 004 RPL_MYINFO */ ":%s 004 %s %s %s %s bciklmnoprstveIMORS bkloveI",
 #endif

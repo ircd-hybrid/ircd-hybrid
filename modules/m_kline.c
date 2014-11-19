@@ -95,6 +95,7 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %d min. K-Line [%s@%s]",
                         tkline_time/60, conf->user, conf->host);
+
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p), tkline_time/60,
@@ -109,6 +110,7 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added K-Line [%s@%s]",
                         conf->user, conf->host);
+
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p),
@@ -179,7 +181,6 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   char *reason = NULL;
   char *user = NULL;
   char *host = NULL;
-  const char *current_date;
   char *target_server = NULL;
   struct MaskItem *conf;
   time_t tkline_time = 0;
@@ -211,17 +212,15 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   if (already_placed_kline(source_p, user, host, 1))
     return 0;
 
-  current_date = smalldate(0);
   conf = conf_make(CONF_KLINE);
-
   conf->host = xstrdup(host);
   conf->user = xstrdup(user);
 
   if (tkline_time)
     snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %.*s (%s)",
-             (int)(tkline_time/60), REASONLEN, reason, current_date);
+             (int)(tkline_time/60), REASONLEN, reason, smalldate(0));
   else
-    snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, current_date);
+    snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, smalldate(0));
 
   conf->reason = xstrdup(buffer);
   m_kline_add_kline(source_p, conf, tkline_time);
@@ -235,7 +234,6 @@ me_kline(struct Client *source_p, int parc, char *parv[])
   char buffer[IRCD_BUFSIZE];
   struct MaskItem *conf = NULL;
   time_t tkline_time = 0;
-  const char *current_date;
   char *kuser, *khost, *kreason;
 
   if (parc != 6 || EmptyString(parv[5]))
@@ -248,8 +246,6 @@ me_kline(struct Client *source_p, int parc, char *parv[])
   kuser = parv[3];
   khost = parv[4];
   kreason = parv[5];
-
-  current_date = smalldate(0);
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
@@ -265,9 +261,9 @@ me_kline(struct Client *source_p, int parc, char *parv[])
 
     if (tkline_time)
       snprintf(buffer, sizeof(buffer), "Temporary K-line %u min. - %.*s (%s)",
-               (unsigned int)(tkline_time/60), REASONLEN, kreason, current_date);
+               (unsigned int)(tkline_time/60), REASONLEN, kreason, smalldate(0));
     else
-      snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, kreason, current_date);
+      snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, kreason, smalldate(0));
 
     conf->reason = xstrdup(buffer);
     m_kline_add_kline(source_p, conf, tkline_time);

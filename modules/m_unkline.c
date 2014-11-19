@@ -62,6 +62,7 @@ remove_kline_match(const char *host, const char *user)
       aftype = AF_INET6;
     else
       aftype = AF_INET;
+
     piphost = &iphost;
   }
   else
@@ -178,6 +179,7 @@ me_unkline(struct Client *source_p, int parc, char *parv[])
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed", kuser, khost);
+
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "%s has removed the K-Line for: [%s@%s]",
                            get_oper_name(source_p), kuser, khost);

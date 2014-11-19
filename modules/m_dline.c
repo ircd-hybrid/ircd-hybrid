@@ -113,6 +113,7 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %d min. D-Line [%s]",
                         tkline_time/60, conf->host);
+
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. D-Line for [%s] [%s]",
                          get_oper_name(source_p), tkline_time/60,
@@ -156,10 +157,9 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   const char *creason;
   const struct Client *target_p = NULL;
   struct irc_ssaddr daddr;
-  struct MaskItem *conf=NULL;
+  struct MaskItem *conf = NULL;
   time_t tkline_time=0;
   int bits = 0, aftype = 0, t = 0;
-  const char *current_date = NULL;
   char hostip[HOSTIPLEN + 1];
   char buffer[IRCD_BUFSIZE];
 
@@ -239,16 +239,14 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  current_date = smalldate(0);
-
   conf = conf_make(CONF_DLINE);
   conf->host = xstrdup(dlhost);
 
   if (tkline_time)
     snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %.*s (%s)",
-             (int)(tkline_time/60), REASONLEN, reason, current_date);
+             (int)(tkline_time/60), REASONLEN, reason, smalldate(0));
   else
-    snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, current_date);
+    snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, smalldate(0));
 
   conf->reason = xstrdup(buffer);
   apply_dline(source_p, conf, tkline_time);
@@ -262,10 +260,9 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   char *dlhost, *reason;
   const char *creason;
   struct irc_ssaddr daddr;
-  struct MaskItem *conf=NULL;
+  struct MaskItem *conf = NULL;
   time_t tkline_time=0;
   int bits = 0, aftype = 0, t = 0;
-  const char *current_date = NULL;
   char buffer[IRCD_BUFSIZE];
 
   if (parc != 5 || EmptyString(parv[4]))
@@ -273,8 +270,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4] */
   /* command  target_server  tkline_time  host     reason  */
-  sendto_match_servs(source_p, parv[1], CAP_DLN,
-                     "DLINE %s %s %s :%s",
+  sendto_match_servs(source_p, parv[1], CAP_DLN, "DLINE %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4]);
 
   if (match(parv[1], me.name))
@@ -310,6 +306,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
         return 0;
 
       creason = conf->reason ? conf->reason : def_reason;
+
       if (IsConfExemptKline(conf))
         sendto_one_notice(source_p, &me, ":[%s] is (E)d-lined by [%s] - %s",
                           dlhost, conf->host, creason);
@@ -319,16 +316,14 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    current_date = smalldate(0);
-
     conf = conf_make(CONF_DLINE);
     conf->host = xstrdup(dlhost);
 
     if (tkline_time)
       snprintf(buffer, sizeof(buffer), "Temporary D-line %d min. - %.*s (%s)",
-               (int)(tkline_time/60), REASONLEN, reason, current_date);
+               (int)(tkline_time/60), REASONLEN, reason, smalldate(0));
     else
-      snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, current_date);
+      snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, smalldate(0));
 
     conf->reason = xstrdup(buffer);
     apply_dline(source_p, conf, tkline_time);

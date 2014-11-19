@@ -100,6 +100,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %d min. X-Line [%s]",
                         (int)tkline_time/60, conf->name);
+
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. X-Line for [%s] [%s]",
                          get_oper_name(source_p), (int)tkline_time/60,
@@ -113,6 +114,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added X-Line [%s] [%s]",
                         conf->name, conf->reason);
+
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "%s added X-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->name,

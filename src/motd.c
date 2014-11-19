@@ -285,6 +285,7 @@ motd_forward(struct Client *source_p, const struct MotdCache *cache)
 
   for (unsigned int i = 0; i < cache->count; ++i)
     sendto_one_numeric(source_p, &me, RPL_MOTD, cache->motd[i]);
+
   sendto_one_numeric(source_p, &me, RPL_ENDOFMOTD);
 }
 
@@ -322,8 +323,7 @@ motd_signon(struct Client *source_p)
                       cache->modtime.tm_min);
     sendto_one_notice(source_p, &me, ":*** Notice -- Please read the motd if you haven't read it");
     sendto_one_numeric(source_p, &me, RPL_MOTDSTART, me.name);
-    sendto_one_numeric(source_p, &me, RPL_MOTD,
-                       "*** This is the short motd ***");
+    sendto_one_numeric(source_p, &me, RPL_MOTD, "*** This is the short motd ***");
     sendto_one_numeric(source_p, &me, RPL_ENDOFMOTD);
   }
 }

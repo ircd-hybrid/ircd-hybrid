@@ -29,6 +29,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "conf.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -149,8 +150,8 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
 
   if (IsServer(source_p))
     sendto_channel_local(0, chptr, ":%s KICK %s %s :%s",
-                         source_p->name, chptr->name,
-                         target_p->name, reason);
+                         IsHidden(source_p) || ConfigServerHide.hide_servers ? me.name : source_p->name,
+                         chptr->name, target_p->name, reason);
   else
     sendto_channel_local(0, chptr, ":%s!%s@%s KICK %s %s :%s",
                          source_p->name, source_p->username,

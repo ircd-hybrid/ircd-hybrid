@@ -21,7 +21,7 @@
 
 /*! \file m_opme.c
  * \brief Includes required functions for processing the OPME command.
- * \version $Id: m_opme.c 4883 2014-11-18 16:22:18Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -127,7 +127,7 @@ struct module module_entry =
 {
   .node    = { NULL, NULL, NULL },
   .name    = NULL,
-  .version = "$Revision: 4883 $",
+  .version = "$Revision$",
   .handle  = NULL,
   .modinit = module_init,
   .modexit = module_exit,

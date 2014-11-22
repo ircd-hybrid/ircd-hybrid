@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 MODULE_FLAGS = -module -avoid-version
-SUBDIRS = core
+SUBDIRS = core extra
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
 modulesdir = $(pkglibdir)/modules/autoload

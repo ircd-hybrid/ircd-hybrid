@@ -1,7 +1,7 @@
 /* loader-loadlibrary.c --  dynamic linking for Win32
 
-   Copyright (C) 1998, 1999, 2000, 2004, 2005, 2006,
-                 2007, 2008, 2010 Free Software Foundation, Inc.
+   Copyright (C) 1998-2000, 2004-2008, 2010-2014 Free Software
+   Foundation, Inc.
    Written by Thomas Tanner, 1998
 
    NOTE: The canonical source of this file is maintained with the
@@ -32,7 +32,7 @@ or obtained by writing to the Free Software Foundation, Inc.,
 #include "lt__private.h"
 #include "lt_dlloader.h"
 
-#if defined(__CYGWIN__)
+#if defined __CYGWIN__
 # include <sys/cygwin.h>
 #endif
 
@@ -163,7 +163,7 @@ vm_open (lt_user_data LT__UNUSED loader_data, const char *filename,
 	  return 0;
 	}
       len = 0;
-#elif defined(__CYGWIN__)
+#elif defined __CYGWIN__
       cygwin_conv_to_full_win32_path (filename, wpath);
       len = 0;
 #else
@@ -173,8 +173,8 @@ vm_open (lt_user_data LT__UNUSED loader_data, const char *filename,
       ext = strrchr (wpath, '.');
       if (!ext)
 	{
-	  /* Append a `.' to stop Windows from adding an
-	     implicit `.dll' extension. */
+	  /* Append a '.' to stop Windows from adding an
+	     implicit '.dll' extension. */
 	  if (!len)
 	    len = strlen (wpath);
 
@@ -306,7 +306,7 @@ loadlibraryerror (const char *default_errmsg)
   return len ? error_message : default_errmsg;
 }
 
-/* A function called through the getthreaderrormode variable which checks
+/* A function called through the getthreaderrormode variable that checks
    if the system supports GetThreadErrorMode (or GetErrorMode) and arranges
    for it or a fallback implementation to be called directly in the future.
    The selected version is then called. */
@@ -339,7 +339,7 @@ fallback_getthreaderrormode (void)
   return (DWORD) SetErrorMode (SEM_FAILCRITICALERRORS);
 }
 
-/* A function called through the setthreaderrormode variable which checks
+/* A function called through the setthreaderrormode variable that checks
    if the system supports SetThreadErrorMode and arranges for it or a
    fallback implementation to be called directly in the future.
    The selected version is then called. */

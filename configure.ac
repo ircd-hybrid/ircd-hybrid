@@ -98,6 +98,7 @@ AC_CONFIG_FILES(              \
        libltdl/Makefile       \
        modules/Makefile       \
        modules/core/Makefile  \
+       modules/extra/Makefile \
        doc/Makefile           \
        help/Makefile          \
        tools/Makefile)

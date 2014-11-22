@@ -1,7 +1,7 @@
 /* loader-dld_link.c -- dynamic linking with dld
 
-   Copyright (C) 1998, 1999, 2000, 2004, 2006,
-                 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 1998-2000, 2004, 2006-2008, 2011-2014 Free Software
+   Foundation, Inc.
    Written by Thomas Tanner, 1998
 
    NOTE: The canonical source of this file is maintained with the
@@ -90,7 +90,7 @@ get_vtable (lt_user_data loader_data)
 /* --- IMPLEMENTATION --- */
 
 
-#if defined(HAVE_DLD_H)
+#if defined HAVE_DLD_H
 #  include <dld.h>
 #endif
 

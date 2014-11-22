@@ -1,7 +1,7 @@
 /* loader-dlopen.c --  dynamic linking with dlopen/dlsym
 
-   Copyright (C) 1998, 1999, 2000, 2004, 2006,
-                 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 1998-2000, 2004, 2006-2008, 2011-2014 Free Software
+   Foundation, Inc.
    Written by Thomas Tanner, 1998
 
    NOTE: The canonical source of this file is maintained with the
@@ -68,7 +68,7 @@ get_vtable (lt_user_data loader_data)
   if (vtable && !vtable->name)
     {
       vtable->name		= "lt_dlopen";
-#if defined(DLSYM_USCORE)
+#if defined DLSYM_USCORE
       vtable->sym_prefix	= "_";
 #endif
       vtable->module_open	= vm_open;
@@ -93,53 +93,53 @@ get_vtable (lt_user_data loader_data)
 /* --- IMPLEMENTATION --- */
 
 
-#if defined(HAVE_DLFCN_H)
+#if defined HAVE_DLFCN_H
 #  include <dlfcn.h>
 #endif
 
-#if defined(HAVE_SYS_DL_H)
+#if defined HAVE_SYS_DL_H
 #  include <sys/dl.h>
 #endif
 
 
 /* We may have to define LT_LAZY_OR_NOW in the command line if we
    find out it does not work in some platform. */
-#if !defined(LT_LAZY_OR_NOW)
-#  if defined(RTLD_LAZY)
+#if !defined LT_LAZY_OR_NOW
+#  if defined RTLD_LAZY
 #    define LT_LAZY_OR_NOW	RTLD_LAZY
 #  else
-#    if defined(DL_LAZY)
+#    if defined DL_LAZY
 #      define LT_LAZY_OR_NOW	DL_LAZY
 #    endif
 #  endif /* !RTLD_LAZY */
 #endif
-#if !defined(LT_LAZY_OR_NOW)
-#  if defined(RTLD_NOW)
+#if !defined LT_LAZY_OR_NOW
+#  if defined RTLD_NOW
 #    define LT_LAZY_OR_NOW	RTLD_NOW
 #  else
-#    if defined(DL_NOW)
+#    if defined DL_NOW
 #      define LT_LAZY_OR_NOW	DL_NOW
 #    endif
 #  endif /* !RTLD_NOW */
 #endif
-#if !defined(LT_LAZY_OR_NOW)
+#if !defined LT_LAZY_OR_NOW
 #  define LT_LAZY_OR_NOW	0
 #endif /* !LT_LAZY_OR_NOW */
 
 /* We only support local and global symbols from modules for loaders
    that provide such a thing, otherwise the system default is used.  */
-#if !defined(RTLD_GLOBAL)
-#  if defined(DL_GLOBAL)
+#if !defined RTLD_GLOBAL
+#  if defined DL_GLOBAL
 #    define RTLD_GLOBAL		DL_GLOBAL
 #  endif
 #endif /* !RTLD_GLOBAL */
-#if !defined(RTLD_LOCAL)
-#  if defined(DL_LOCAL)
+#if !defined RTLD_LOCAL
+#  if defined DL_LOCAL
 #    define RTLD_LOCAL		DL_LOCAL
 #  endif
 #endif /* !RTLD_LOCAL */
 
-#if defined(HAVE_DLERROR)
+#if defined HAVE_DLERROR
 #  define DLERROR(arg)	dlerror ()
 #else
 #  define DLERROR(arg)	LT__STRERROR (arg)

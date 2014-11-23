@@ -141,7 +141,7 @@ ssl_get_cipher(const SSL *ssl)
 
   SSL_CIPHER_get_bits(SSL_get_current_cipher(ssl), &bits);
 
-  snprintf(buffer, sizeof(buffer), "%s %s-%d", SSL_get_version(ssl),
+  snprintf(buffer, sizeof(buffer), "%s-%s-%d", SSL_get_version(ssl),
            SSL_get_cipher(ssl), bits);
   return buffer;
 }

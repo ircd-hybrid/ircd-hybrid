@@ -200,8 +200,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
     if (IsExemptKline(target_p))
     {
-      sendto_one_notice(source_p, &me, ":%s is E-lined",
-                        target_p->name);
+      sendto_one_notice(source_p, &me, ":%s is E-lined", target_p->name);
       return 0;
     }
 

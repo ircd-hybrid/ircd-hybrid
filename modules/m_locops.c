@@ -50,7 +50,7 @@
 static int
 mo_locops(struct Client *source_p, int parc, char *parv[])
 {
-  const char *message = parv[1];
+  const char *const message = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_LOCOPS))
   {

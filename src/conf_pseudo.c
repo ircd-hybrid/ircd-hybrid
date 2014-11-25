@@ -55,7 +55,7 @@ static int
 m_pseudo(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE] = "";
-  const struct pseudo_cmd *pseudo = (const struct pseudo_cmd *)parv[1];
+  const struct pseudo_cmd *const pseudo = (const struct pseudo_cmd *)parv[1];
   struct Client *target_p = NULL;
   struct Client *server_p = NULL;
   const char *msg = parv[parc - 1];

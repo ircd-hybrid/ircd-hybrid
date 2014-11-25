@@ -295,7 +295,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
                              from->name, from->from->name,
                              get_client_name(client_p, SHOW_IP));
         sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
-                             "Fake direction: dropped message fro %s[%s] via %s",
+                             "Fake direction: dropped message from %s[%s] via %s",
                              from->name, from->from->name,
                              get_client_name(client_p, MASK_IP));
         return;

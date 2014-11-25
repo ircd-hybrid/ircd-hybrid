@@ -2,6 +2,7 @@
 o) Added support for the "extended-join" client capability
 o) Channel half-ops can now use /INVITE as well
 o) Fixed broken 'make install -jX'
+o) m_opme.c has been added to modules/extra. Can be used on opless channels only.
 
 
 -- Noteworthy changes in version 8.2.1 (2014-10-21)

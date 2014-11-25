@@ -133,10 +133,11 @@ static void
 send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *buf)
 {
   assert(MyConnect(to));
+  assert(IsServer(to));
   assert(!IsMe(to));
   assert(to->from == to);
 
-  if (!MyConnect(from) && to == from->from)
+  if (to == from->from)
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                          "Send message to %s dropped from %s (Fake Dir)",

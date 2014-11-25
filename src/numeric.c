@@ -533,7 +533,7 @@ static const char *const replies[] =
 /* 500 */ NULL,
 /* 501 ERR_UMODEUNKNOWNFLAG */ ":Unknown MODE flag",
 /* 502 ERR_USERSDONTMATCH */ ":Cannot change mode for other users",
-/* 503 ERR_GHOSTEDCLIENT */ ":Message could not be delivered to %s",
+/* 503 */ NULL,
 /* 504 ERR_USERNOTONSERV */ "%s :User is not on this server",
 /* 505 */ NULL,
 /* 506 */ NULL,

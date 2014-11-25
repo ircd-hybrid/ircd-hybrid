@@ -221,7 +221,6 @@ enum irc_numerics
   ERR_NOOPERHOST           = 491,
   ERR_UMODEUNKNOWNFLAG     = 501,
   ERR_USERSDONTMATCH       = 502,
-  ERR_GHOSTEDCLIENT        = 503,
   ERR_USERNOTONSERV        = 504,
   ERR_TOOMANYWATCH         = 512,
   ERR_WRONGPONG            = 513,

@@ -378,7 +378,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 {
   va_list alocal, aremote;
   struct dbuf_block *local_buf, *remote_buf;
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node = NULL;
 
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
 
@@ -399,7 +399,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
 
   ++current_serial;
 
-  DLINK_FOREACH_SAFE(node, node_next, chptr->members.head)
+  DLINK_FOREACH(node, chptr->members.head)
   {
     struct Membership *member = node->data;
     struct Client *target_p = member->client_p;
@@ -662,7 +662,7 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
                     int what, const char *pattern, ...)
 {
   va_list alocal, aremote;
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node = NULL;
   struct dbuf_block *local_buf, *remote_buf;
 
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
@@ -688,7 +688,7 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
   }
 
   /* Now scan servers */
-  DLINK_FOREACH_SAFE(node, node_next, local_server_list.head)
+  DLINK_FOREACH(node, local_server_list.head)
   {
     struct Client *client_p = node->data;
 
@@ -738,7 +738,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
                    const char *pattern, ...)
 {
   va_list args;
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node = NULL;
   struct dbuf_block *buffer = dbuf_alloc();
 
   dbuf_put_fmt(buffer, ":%s ", source_p->id);
@@ -748,7 +748,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
 
   ++current_serial;
 
-  DLINK_FOREACH_SAFE(node, node_next, global_server_list.head)
+  DLINK_FOREACH(node, global_server_list.head)
   {
     struct Client *target_p = node->data;
 

@@ -77,7 +77,7 @@ capab_search(const char *key, const struct capabilities *cap)
     if (*key++ == '\0')  /* Hit the end, all right... */
       return 0;
     else  /* OK, let's move on... */
-      rb++;
+      ++rb;
 
   /*
    * If the character they differ on happens to be a space, and it happens

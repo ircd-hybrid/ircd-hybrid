@@ -130,41 +130,6 @@ parse_remove_unknown(struct Client *client_p, const char *lsender, char *lbuffer
                me.id, lsender, me.name);
 }
 
-/* cancel_clients()
- *
- * inputs       -
- * output       -
- * side effects -
- */
-static void
-parse_cancel_clients(struct Client *client_p, struct Client *source_p, char *cmd)
-{
-  if (IsServer(source_p) || IsMe(source_p))
-  {
-    sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
-                         "Message for %s[%s] from %s",
-                         source_p->name, source_p->from->name,
-                         get_client_name(client_p, SHOW_IP));
-    sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
-                         "Message for %s[%s] from %s",
-                         source_p->name, source_p->from->name,
-                         get_client_name(client_p, MASK_IP));
-    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                         "Not dropping server %s (%s) for Fake Direction",
-                         client_p->name, source_p->name);
-    return;
-  }
-
-  sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
-                       "Message for %s[%s@%s!%s] from %s (TS, ignored)",
-                       source_p->name, source_p->username, source_p->host,
-                       source_p->from->name, get_client_name(client_p, SHOW_IP));
-  sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
-                       "Message for %s[%s@%s!%s] from %s (TS, ignored)",
-                       source_p->name, source_p->username, source_p->host,
-                       source_p->from->name, get_client_name(client_p, MASK_IP));
-}
-
 /*
  *
  *      parc    number of arguments ('sender' counted as one!)
@@ -325,7 +290,14 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       if (from->from != client_p)
       {
         ++ServerStats.is_wrdi;
-        parse_cancel_clients(client_p, from, pbuffer);
+        sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
+                             "Fake direction: dropped message from %s[%s] via %s",
+                             from->name, from->from->name,
+                             get_client_name(client_p, SHOW_IP));
+        sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
+                             "Fake direction: dropped message fro %s[%s] via %s",
+                             from->name, from->from->name,
+                             get_client_name(client_p, MASK_IP));
         return;
       }
     }

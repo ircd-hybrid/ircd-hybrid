@@ -76,7 +76,7 @@ strip_tabs(char *dest, const char *src, size_t len)
  */
 #ifndef HAVE_STRTOK_R
 char *
-strtoken(char** save, char* str, const char* fs)
+strtoken(char **save, char *str, const char *fs)
 {
   char *pos = *save;  /* keep last position across calls */
   char *tmp = NULL;
@@ -88,7 +88,7 @@ strtoken(char** save, char* str, const char* fs)
     ++pos;        /* skip leading separators */
 
   if (!pos || !*pos)
-    return (pos = *save = NULL);   /* string contains only sep's */
+    return pos = *save = NULL;   /* string contains only sep's */
 
   tmp = pos;       /* now, keep position of the token */
 
@@ -138,6 +138,7 @@ token_vector(char *names, char token, char *vector[], int size)
     if (*start)
     {
       vector[count++] = start;
+
       if (count < size)
         continue;
     }

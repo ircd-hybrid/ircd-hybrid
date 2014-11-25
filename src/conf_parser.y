@@ -121,27 +121,27 @@ static struct
 static void
 reset_block_state(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, block_state.mask.list.head)
+  DLINK_FOREACH_SAFE(node, node_next, block_state.mask.list.head)
   {
-    MyFree(ptr->data);
-    dlinkDelete(ptr, &block_state.mask.list);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    dlinkDelete(node, &block_state.mask.list);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, block_state.leaf.list.head)
+  DLINK_FOREACH_SAFE(node, node_next, block_state.leaf.list.head)
   {
-    MyFree(ptr->data);
-    dlinkDelete(ptr, &block_state.leaf.list);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    dlinkDelete(node, &block_state.leaf.list);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, block_state.hub.list.head)
+  DLINK_FOREACH_SAFE(node, node_next, block_state.hub.list.head)
   {
-    MyFree(ptr->data);
-    dlinkDelete(ptr, &block_state.hub.list);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    dlinkDelete(node, &block_state.hub.list);
+    free_dlink_node(node);
   }
 
   memset(&block_state, 0, sizeof(block_state));
@@ -899,7 +899,7 @@ motd_entry: MOTD
     reset_block_state();
 } '{' motd_items '}' ';'
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -907,8 +907,8 @@ motd_entry: MOTD
   if (!block_state.file.buf[0])
     break;
 
-  DLINK_FOREACH(ptr, block_state.mask.list.head)
-    motd_add(ptr->data, block_state.file.buf);
+  DLINK_FOREACH(node, block_state.mask.list.head)
+    motd_add(node->data, block_state.file.buf);
 };
 
 motd_items: motd_items motd_item | motd_item;
@@ -1098,7 +1098,7 @@ oper_entry: OPERATOR
   block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
 } '{' oper_items '}' ';'
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -1114,12 +1114,12 @@ oper_entry: OPERATOR
     break;
 #endif
 
-  DLINK_FOREACH(ptr, block_state.mask.list.head)
+  DLINK_FOREACH(node, block_state.mask.list.head)
   {
     struct MaskItem *conf = NULL;
     struct split_nuh_item nuh;
 
-    nuh.nuhmask  = ptr->data;
+    nuh.nuhmask  = node->data;
     nuh.nickptr  = NULL;
     nuh.userptr  = block_state.user.buf;
     nuh.hostptr  = block_state.host.buf;
@@ -1737,17 +1737,17 @@ auth_entry: IRCD_AUTH
     reset_block_state();
 } '{' auth_items '}' ';'
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (conf_parser_ctx.pass != 2)
     break;
 
-  DLINK_FOREACH(ptr, block_state.mask.list.head)
+  DLINK_FOREACH(node, block_state.mask.list.head)
   {
     struct MaskItem *conf = NULL;
     struct split_nuh_item nuh;
 
-    nuh.nuhmask  = ptr->data;
+    nuh.nuhmask  = node->data;
     nuh.nickptr  = NULL;
     nuh.userptr  = block_state.user.buf;
     nuh.hostptr  = block_state.host.buf;

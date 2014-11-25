@@ -366,7 +366,7 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
 static void
 remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const char flag)
 {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
   char lmodebuf[MODEBUFLEN];
   const char *lpara[MAXMODEPARAMS];
   int count = 0, lcount = 0;
@@ -379,9 +379,9 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
 
   sendbuf[0] = '\0';
 
-  DLINK_FOREACH(ptr, chptr->members.head)
+  DLINK_FOREACH(node, chptr->members.head)
   {
-    struct Membership *member = ptr->data;
+    struct Membership *member = node->data;
 
     if ((member->flags & mask) == 0)
       continue;

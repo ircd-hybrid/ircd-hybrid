@@ -159,27 +159,27 @@ static struct
 static void
 reset_block_state(void)
 {
-  dlink_node *ptr = NULL, *ptr_next = NULL;
+  dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, block_state.mask.list.head)
+  DLINK_FOREACH_SAFE(node, node_next, block_state.mask.list.head)
   {
-    MyFree(ptr->data);
-    dlinkDelete(ptr, &block_state.mask.list);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    dlinkDelete(node, &block_state.mask.list);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, block_state.leaf.list.head)
+  DLINK_FOREACH_SAFE(node, node_next, block_state.leaf.list.head)
   {
-    MyFree(ptr->data);
-    dlinkDelete(ptr, &block_state.leaf.list);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    dlinkDelete(node, &block_state.leaf.list);
+    free_dlink_node(node);
   }
 
-  DLINK_FOREACH_SAFE(ptr, ptr_next, block_state.hub.list.head)
+  DLINK_FOREACH_SAFE(node, node_next, block_state.hub.list.head)
   {
-    MyFree(ptr->data);
-    dlinkDelete(ptr, &block_state.hub.list);
-    free_dlink_node(ptr);
+    MyFree(node->data);
+    dlinkDelete(node, &block_state.hub.list);
+    free_dlink_node(node);
   }
 
   memset(&block_state, 0, sizeof(block_state));
@@ -3441,7 +3441,7 @@ yyreduce:
   case 101:
 #line 901 "conf_parser.y" /* yacc.c:1646  */
     {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3449,8 +3449,8 @@ yyreduce:
   if (!block_state.file.buf[0])
     break;
 
-  DLINK_FOREACH(ptr, block_state.mask.list.head)
-    motd_add(ptr->data, block_state.file.buf);
+  DLINK_FOREACH(node, block_state.mask.list.head)
+    motd_add(node->data, block_state.file.buf);
 }
 #line 3456 "conf_parser.c" /* yacc.c:1646  */
     break;
@@ -3713,7 +3713,7 @@ yyreduce:
   case 154:
 #line 1100 "conf_parser.y" /* yacc.c:1646  */
     {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3729,12 +3729,12 @@ yyreduce:
     break;
 #endif
 
-  DLINK_FOREACH(ptr, block_state.mask.list.head)
+  DLINK_FOREACH(node, block_state.mask.list.head)
   {
     struct MaskItem *conf = NULL;
     struct split_nuh_item nuh;
 
-    nuh.nuhmask  = ptr->data;
+    nuh.nuhmask  = node->data;
     nuh.nickptr  = NULL;
     nuh.userptr  = block_state.user.buf;
     nuh.hostptr  = block_state.host.buf;
@@ -4663,17 +4663,17 @@ yyreduce:
   case 298:
 #line 1739 "conf_parser.y" /* yacc.c:1646  */
     {
-  dlink_node *ptr = NULL;
+  dlink_node *node = NULL;
 
   if (conf_parser_ctx.pass != 2)
     break;
 
-  DLINK_FOREACH(ptr, block_state.mask.list.head)
+  DLINK_FOREACH(node, block_state.mask.list.head)
   {
     struct MaskItem *conf = NULL;
     struct split_nuh_item nuh;
 
-    nuh.nuhmask  = ptr->data;
+    nuh.nuhmask  = node->data;
     nuh.nickptr  = NULL;
     nuh.userptr  = block_state.user.buf;
     nuh.hostptr  = block_state.host.buf;

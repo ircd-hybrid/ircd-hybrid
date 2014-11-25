@@ -330,7 +330,7 @@ mask_addr(struct irc_ssaddr *ip, int bits)
     m = bits % 8;
     v6_base_ip = (struct sockaddr_in6 *)ip;
 
-    mask = ~((1 << (8 - m)) -1 );
+    mask = ~((1 << (8 - m)) - 1);
     v6_base_ip->sin6_addr.s6_addr[n] = v6_base_ip->sin6_addr.s6_addr[n] & mask;
 
     for (i = n + 1; i < 16; i++)

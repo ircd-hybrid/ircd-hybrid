@@ -3,7 +3,7 @@ ETRACE [nickname mask]
 The ETRACE command will display a list of locally connected users
 in the following format:
 
-User/Oper class nickname username host gecos
+User/Oper class nickname username host ip gecos
 
 You can optionally give a parameter with nickname mask to limit
 the output. Wildcards are allowed.

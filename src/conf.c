@@ -1344,7 +1344,7 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
   {
     conf->class = class_default;
 
-    if (conf->type == CONF_CLIENT)
+    if (conf->type == CONF_CLIENT || conf->type == CONF_OPER)
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Warning *** Defaulting to default class for %s@%s",
                            conf->user, conf->host);
@@ -1358,7 +1358,7 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
 
   if (conf->class == NULL)
   {
-    if (conf->type == CONF_CLIENT)
+    if (conf->type == CONF_CLIENT || conf->type == CONF_OPER)
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Warning *** Defaulting to default class for %s@%s",
                            conf->user, conf->host);

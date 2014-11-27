@@ -899,12 +899,12 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     *p = '\0';
 
 
-    sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, member->chptr, ":%s!%s@%s JOIN %s %s :%s",
+    sendto_channel_local_butone(target_p, CAP_EXTENDED_JOIN, 0, member->chptr, ":%s!%s@%s JOIN %s %s :%s",
                                 target_p->name, target_p->username,
                                 target_p->host, member->chptr->name,
                                 (!IsDigit(target_p->account[0]) && target_p->account[0] != '*') ? target_p->account : "*",
                                 target_p->info);
-    sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, member->chptr, ":%s!%s@%s JOIN :%s",
+    sendto_channel_local_butone(target_p, 0, CAP_EXTENDED_JOIN, member->chptr, ":%s!%s@%s JOIN :%s",
                                 target_p->name, target_p->username,
                                 target_p->host, member->chptr->name);
 

@@ -34,7 +34,6 @@
 
 #define CONF_NOREASON "<No reason supplied>"
 
-#define IsConfOperator(x)       ((x)->type == CONF_OPER)
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)
 #define IsConfClient(x)         ((x)->type == CONF_CLIENT)
 #define IsConfGline(x)          ((x)->type == CONF_GLINE)

@@ -215,19 +215,19 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
  * side effects -
  */
 static void
-parse_handle_command(struct Message *mptr, struct Client *source_p,
+parse_handle_command(struct Message *message, struct Client *source_p,
                      unsigned int i, char *para[])
 {
   if (IsServer(source_p->from))
-    ++mptr->rcount;
+    ++message->rcount;
 
-  ++mptr->count;
+  ++message->count;
 
   /* Check right amount of parameters is passed... --is */
-  if (i < mptr->args_min)
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, mptr->cmd);
+  if (i < message->args_min)
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, message->cmd);
   else
-    mptr->handlers[source_p->from->handler](source_p, i, para);
+    message->handlers[source_p->from->handler](source_p, i, para);
 }
 
 /*
@@ -239,7 +239,7 @@ void
 parse(struct Client *client_p, char *pbuffer, char *bufend)
 {
   struct Client *from = client_p;
-  struct Message *msg_ptr = NULL;
+  struct Message *message = NULL;
   char *para[MAXPARA + 2];  /* <command> + <parameters> + NULL */
   char *ch = NULL;
   char *s = NULL;
@@ -337,7 +337,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
     if ((s = strchr(ch, ' ')))
       *s++ = '\0';
 
-    if ((msg_ptr = find_command(ch)) == NULL)
+    if ((message = find_command(ch)) == NULL)
     {
       /*
        * Note: Give error message *only* to recognized
@@ -358,11 +358,11 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       return;
     }
 
-    assert(msg_ptr->cmd);
+    assert(message->cmd);
 
-    paramcount = msg_ptr->args_max;
+    paramcount = message->args_max;
     length = bufend - ((s) ? s : ch);
-    msg_ptr->bytes += length;
+    message->bytes += length;
   }
 
   /*
@@ -376,12 +376,12 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
   para[parc] = ch;
 
-  if (msg_ptr && (msg_ptr->flags & MFLG_EXTRA))
+  if (message && (message->flags & MFLG_EXTRA))
   {
     /*
      * XXX: This will have to go away after the command handler rewrite
      */
-    para[++parc] = msg_ptr->extra;
+    para[++parc] = message->extra;
   }
 
   if (s)
@@ -416,8 +416,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
   para[++parc] = NULL;
 
-  if (msg_ptr)
-    parse_handle_command(msg_ptr, from, parc, para);
+  if (message)
+    parse_handle_command(message, from, parc, para);
   else
     parse_handle_numeric(numeric, from, parc, para);
 }

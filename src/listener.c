@@ -130,7 +130,7 @@ listener_accept_connection(fde_t *pfd, void *data)
   struct irc_ssaddr addr;
   int fd;
   int pe;
-  struct Listener *listener = data;
+  struct Listener *const listener = data;
 
   assert(listener);
 

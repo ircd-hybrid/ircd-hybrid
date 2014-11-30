@@ -56,10 +56,10 @@ list_accepts(struct Client *source_p)
 
   DLINK_FOREACH(node, source_p->connection->acceptlist.head)
   {
-    const struct split_nuh_item *accept_p = node->data;
-    size_t masklen = strlen(accept_p->nickptr) +
-                     strlen(accept_p->userptr) +
-                     strlen(accept_p->hostptr) + 3;  /* +3 for ! + @ + space */
+    const struct split_nuh_item *accept = node->data;
+    size_t masklen = strlen(accept->nickptr) +
+                     strlen(accept->userptr) +
+                     strlen(accept->hostptr) + 3;  /* +3 for ! + @ + space */
 
     if ((t - nicks) + masklen + len > IRCD_BUFSIZE)
     {
@@ -69,8 +69,8 @@ list_accepts(struct Client *source_p)
     }
 
     t += sprintf(t, "%s!%s@%s ",
-                 accept_p->nickptr,
-                 accept_p->userptr, accept_p->hostptr);
+                 accept->nickptr,
+                 accept->userptr, accept->hostptr);
   }
 
   if (nicks[0])
@@ -91,13 +91,13 @@ list_accepts(struct Client *source_p)
 static void
 add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
 {
-  struct split_nuh_item *accept_p = MyCalloc(sizeof(*accept_p));
+  struct split_nuh_item *const accept = MyCalloc(sizeof(*accept));
 
-  accept_p->nickptr = xstrdup(nuh->nickptr);
-  accept_p->userptr = xstrdup(nuh->userptr);
-  accept_p->hostptr = xstrdup(nuh->hostptr);
+  accept->nickptr = xstrdup(nuh->nickptr);
+  accept->userptr = xstrdup(nuh->userptr);
+  accept->hostptr = xstrdup(nuh->hostptr);
 
-  dlinkAdd(accept_p, &accept_p->node, &source_p->connection->acceptlist);
+  dlinkAdd(accept, &accept->node, &source_p->connection->acceptlist);
 
   list_accepts(source_p);
 }
@@ -122,7 +122,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
   char user[USERLEN + 1] = "";
   char host[HOSTLEN + 1] = "";
   struct split_nuh_item nuh;
-  struct split_nuh_item *accept_p = NULL;
+  struct split_nuh_item *accept = NULL;
 
   if (EmptyString(parv[1]) || !strcmp(parv[1], "*"))
   {
@@ -146,13 +146,13 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 
       split_nuh(&nuh);
 
-      if ((accept_p = find_accept(nick, user, host, source_p, irccmp)) == NULL)
+      if ((accept = find_accept(nick, user, host, source_p, irccmp)) == NULL)
       {
         sendto_one_numeric(source_p, &me, ERR_ACCEPTNOT, nick, user, host);
         continue;
       }
 
-      del_accept(accept_p, source_p);
+      del_accept(accept, source_p);
     }
     else if (*mask)
     {
@@ -174,7 +174,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 
       split_nuh(&nuh);
 
-      if ((accept_p = find_accept(nick, user, host, source_p, irccmp)))
+      if ((accept = find_accept(nick, user, host, source_p, irccmp)))
       {
         sendto_one_numeric(source_p, &me, ERR_ACCEPTEXIST, nick, user, host);
         continue;

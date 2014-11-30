@@ -78,7 +78,7 @@ binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
 {
   static const char trans[] = "0123456789ABCDEF";
 
-  for (const unsigned char *end = bin + length; bin < end; ++bin)
+  for (const unsigned char *const end = bin + length; bin < end; ++bin)
   {
     *hex++ = trans[*bin >>  4];
     *hex++ = trans[*bin & 0xf];

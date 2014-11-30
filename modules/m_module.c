@@ -222,8 +222,8 @@ static const struct ModuleStruct module_cmd_table[] =
 static int
 mo_module(struct Client *source_p, int parc, char *parv[])
 {
-  const char *subcmd = parv[1];
-  const char *module = parv[2];
+  const char *const subcmd = parv[1];
+  const char *const module = parv[2];
 
   if (!HasOFlag(source_p, OPER_FLAG_MODULE))
   {

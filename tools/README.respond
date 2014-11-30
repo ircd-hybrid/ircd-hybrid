@@ -13,9 +13,6 @@ Notes:
 The private key file is protected by a passphrase, entered when the key is
 created.  The passphrase is prompted for whenever respond is called.
 
-Do not use mkkeypair to create a RSA key. The shell script will create it
-without a passphrase.
-
 If the passphrase is passed on the command line (insecure mode), the
 program will not prompt for a passphrase.  This is primarily for running
 rsa_respond from a script.

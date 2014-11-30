@@ -35,8 +35,7 @@
 
                                     Process
 
-   Each oper should have a private key file and a public key file. The keys
-   can be generated with the mkkeypair utility provided in tools/.
+   Each oper should have a private key file and a public key file.
 
    The oper keeps their private key file in a safe place, and gives their
    public key file to their admin(s).
@@ -72,9 +71,6 @@
            line constraint.
 
    It is highly recommended that you set a password on your private key.
-
-   The tools/mkkeypair utility cannot be used to create a key suitable for
-   use in CHALLENGE.
 
      ----------------------------------------------------------------------
 

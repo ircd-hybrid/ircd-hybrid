@@ -1,4 +1,4 @@
-/* argz.c -- argz implementation for non-glibc systems
+/* lt__argz.c -- argz implementation for non-glibc systems
 
    Copyright (C) 2004, 2006-2008, 2011-2014 Free Software Foundation,
    Inc.
@@ -35,7 +35,7 @@ or obtained by writing to the Free Software Foundation, Inc.,
 #  include <config.h>
 #endif
 
-#include <argz.h>
+#include <lt__argz.h>
 
 #include <assert.h>
 #include <stdlib.h>

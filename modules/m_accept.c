@@ -50,7 +50,7 @@ list_accepts(struct Client *source_p)
   char *t = nicks;
   const dlink_node *node = NULL;
 
-  /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */ 
+  /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */
   /* 1       23456              78                     9 10 */
   len = strlen(me.name) + strlen(source_p->name) + 10;
 

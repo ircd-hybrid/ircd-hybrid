@@ -976,14 +976,14 @@ exit_aborted_clients(void)
  */
 
 void
-del_accept(struct split_nuh_item *accept, struct Client *client_p)
+del_accept(struct split_nuh_item *accept_p, struct Client *client_p)
 {
-  dlinkDelete(&accept->node, &client_p->connection->acceptlist);
+  dlinkDelete(&accept_p->node, &client_p->connection->acceptlist);
 
-  MyFree(accept->nickptr);
-  MyFree(accept->userptr);
-  MyFree(accept->hostptr);
-  MyFree(accept);
+  MyFree(accept_p->nickptr);
+  MyFree(accept_p->userptr);
+  MyFree(accept_p->hostptr);
+  MyFree(accept_p);
 }
 
 struct split_nuh_item *
@@ -995,12 +995,12 @@ find_accept(const char *nick, const char *user,
 
   DLINK_FOREACH(node, client_p->connection->acceptlist.head)
   {
-    struct split_nuh_item *accept = node->data;
+    struct split_nuh_item *accept_p = node->data;
 
-    if (!cmpfunc(accept->nickptr, nick) &&
-        !cmpfunc(accept->userptr, user) &&
-        !cmpfunc(accept->hostptr, host))
-      return accept;
+    if (!cmpfunc(accept_p->nickptr, nick) &&
+        !cmpfunc(accept_p->userptr, user) &&
+        !cmpfunc(accept_p->hostptr, host))
+      return accept_p;
   }
 
   return NULL;

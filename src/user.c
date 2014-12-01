@@ -310,8 +310,7 @@ introduce_client(struct Client *source_p)
                  source_p->name, source_p->hopcount+1,
                  (unsigned long)source_p->tsinfo,
                  ubuf, source_p->username, source_p->host,
-                 (MyClient(source_p) && IsIPSpoof(source_p)) ?
-                 "0" : source_p->sockhost, source_p->id,
+                 source_p->sockhost, source_p->id,
                  source_p->account,
                  source_p->info);
     else
@@ -320,8 +319,7 @@ introduce_client(struct Client *source_p)
                  source_p->name, source_p->hopcount+1,
                  (unsigned long)source_p->tsinfo,
                  ubuf, source_p->username, source_p->host,
-                 (MyClient(source_p) && IsIPSpoof(source_p)) ?
-                 "0" : source_p->sockhost, source_p->id, source_p->info);
+                 source_p->sockhost, source_p->id, source_p->info);
 
     if (!EmptyString(source_p->certfp))
       sendto_one(server, ":%s CERTFP %s", source_p->id, source_p->certfp);

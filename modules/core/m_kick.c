@@ -110,7 +110,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
                        source_p->name, source_p->username,
                        source_p->host, chptr->name,
                        target_p->name, reason);
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
+  sendto_server(source_p, 0, 0, ":%s KICK %s %s :%s",
                 source_p->id, chptr->name,
                 target_p->id, reason);
   remove_user_from_channel(member_target);
@@ -158,7 +158,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
                          source_p->host, chptr->name,
                          target_p->name, reason);
 
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s KICK %s %s :%s",
+  sendto_server(source_p, 0, 0, ":%s KICK %s %s :%s",
                 source_p->id, chptr->name,
                 target_p->id, reason);
   remove_user_from_channel(member_target);

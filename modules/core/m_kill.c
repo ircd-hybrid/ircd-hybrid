@@ -140,7 +140,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
    */
   if (!MyConnect(target_p))
   {
-    sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s!%s!%s!%s (%s)",
+    sendto_server(source_p, 0, 0, ":%s KILL %s :%s!%s!%s!%s (%s)",
                   source_p->id, target_p->id, me.name, source_p->host,
                   source_p->username, source_p->name, reason);
 
@@ -242,7 +242,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   ilog(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
        source_p->name, target_p->name, source_p->name, reason);
 
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s %s",
+  sendto_server(source_p, 0, 0, ":%s KILL %s :%s %s",
                 source_p->id, target_p->id, parv[2], reason);
   AddFlag(target_p, FLAGS_KILLED);
 

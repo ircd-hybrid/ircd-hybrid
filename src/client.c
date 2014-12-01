@@ -814,7 +814,7 @@ exit_client(struct Client *source_p, const char *comment)
 
     /* Send SQUIT for source_p in every direction. source_p is already off of local_server_list here */
     if (!HasFlag(source_p, FLAGS_SQUIT))
-      sendto_server(NULL, NOCAPS, NOCAPS, "SQUIT %s :%s", source_p->id, comment);
+      sendto_server(NULL, 0, 0, "SQUIT %s :%s", source_p->id, comment);
 
     /* Now exit the clients internally */
     recurse_remove_clients(source_p, splitstr);
@@ -836,7 +836,7 @@ exit_client(struct Client *source_p, const char *comment)
     }
   }
   else if (IsClient(source_p) && !HasFlag(source_p, FLAGS_KILLED))
-    sendto_server(source_p->from, NOCAPS, NOCAPS, ":%s QUIT :%s",
+    sendto_server(source_p->from, 0, 0, ":%s QUIT :%s",
                   source_p->id, comment);
 
   /* The client *better* be off all of the lists */

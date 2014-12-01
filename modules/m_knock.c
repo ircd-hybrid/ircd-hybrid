@@ -125,7 +125,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
                        source_p->username,
                        source_p->host);
 
-  sendto_server(source_p, CAP_KNOCK, NOCAPS, ":%s KNOCK %s",
+  sendto_server(source_p, CAP_KNOCK, 0, ":%s KNOCK %s",
                 source_p->id, chptr->name);
   return 0;
 }

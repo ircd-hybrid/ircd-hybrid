@@ -362,7 +362,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if ((uid_ptr - uid_buf + len_uid) > (IRCD_BUFSIZE - 2))
     {
-      sendto_server(source_p, NOCAPS, NOCAPS, "%s", uid_buf);
+      sendto_server(source_p, 0, 0, "%s", uid_buf);
 
       buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %lu %s %s %s:",
                         source_p->id, (unsigned long)tstosend,
@@ -538,7 +538,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   if (*parv[4 + args] == '\0')
     return 0;
 
-  sendto_server(source_p, NOCAPS, NOCAPS, "%s", uid_buf);
+  sendto_server(source_p, 0, 0, "%s", uid_buf);
   return 0;
 }
 

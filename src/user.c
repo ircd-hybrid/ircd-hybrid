@@ -823,7 +823,7 @@ send_umode_out(struct Client *source_p, unsigned int old)
   send_umode(MyClient(source_p) ? source_p : NULL, source_p, old, buf);
 
   if (buf[0])
-    sendto_server(source_p, NOCAPS, NOCAPS, ":%s MODE %s :%s",
+    sendto_server(source_p, 0, 0, ":%s MODE %s :%s",
                   source_p->id, source_p->id, buf);
 }
 
@@ -957,7 +957,7 @@ oper_up(struct Client *source_p)
 
   sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
-  sendto_server(NULL, NOCAPS, NOCAPS, ":%s GLOBOPS :%s is now an operator",
+  sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                 me.id, get_oper_name(source_p));
   send_umode_out(source_p, old);
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);

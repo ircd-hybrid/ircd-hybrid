@@ -76,7 +76,7 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
     /* Bad nick change */
     if (IsClient(source_p) && !MyConnect(source_p))
     {
-      sendto_server(source_p, NOCAPS, NOCAPS, ":%s KILL %s :%s (Bad Nickname)",
+      sendto_server(source_p, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
                     me.id, source_p->id, me.name);
       AddFlag(source_p, FLAGS_KILLED);
       exit_client(source_p, "Bad Nickname");
@@ -237,7 +237,7 @@ change_local_nick(struct Client *source_p, const char *nick)
                                source_p->host, nick);
   whowas_add_history(source_p, 1);
 
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s NICK %s :%lu",
+  sendto_server(source_p, 0, 0, ":%s NICK %s :%lu",
                 source_p->id, nick, (unsigned long)source_p->tsinfo);
 
   hash_del_client(source_p);
@@ -287,7 +287,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
                                source_p->host, parv[1]);
 
   whowas_add_history(source_p, 1);
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s NICK %s :%lu",
+  sendto_server(source_p, 0, 0, ":%s NICK %s :%lu",
                 source_p->id, parv[1], (unsigned long)source_p->tsinfo);
 
   /* Set the new nick name */
@@ -427,7 +427,7 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
 
     sendto_one(source_p, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
-    sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision (new))",
+    sendto_server(NULL, 0, 0, ":%s KILL %s :%s (Nick collision (new))",
                   me.id, target_p->id, me.name);
 
     ++ServerStats.is_kill;
@@ -468,7 +468,7 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   ++ServerStats.is_kill;
   sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
 
-  sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision (new))",
+  sendto_server(NULL, 0, 0, ":%s KILL %s :%s (Nick collision (new))",
                 me.id, target_p->id, me.name);
 
   AddFlag(target_p, FLAGS_KILLED);
@@ -512,9 +512,9 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
     sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
     ServerStats.is_kill += 2;
 
-    sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick change collision)",
+    sendto_server(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
                   me.id, source_p->id, me.name);
-    sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick change collision)",
+    sendto_server(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
                   me.id, target_p->id, me.name);
 
     AddFlag(source_p, FLAGS_KILLED);
@@ -544,7 +544,7 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
 
     ++ServerStats.is_kill;
 
-    sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick change collision)",
+    sendto_server(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
                   me.id, source_p->id, me.name);
     AddFlag(source_p, FLAGS_KILLED);
 
@@ -566,7 +566,7 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
                          target_p->name, target_p->from->name,
                          source_p->from->name);
 
-  sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (Nick collision)",
+  sendto_server(NULL, 0, 0, ":%s KILL %s :%s (Nick collision)",
                 me.id, target_p->id, me.name);
 
   ++ServerStats.is_kill;
@@ -819,7 +819,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
                          target_p->name, target_p->from->name,
                          source_p->from->name);
 
-    sendto_server(NULL, NOCAPS, NOCAPS, ":%s KILL %s :%s (ID collision)",
+    sendto_server(NULL, 0, 0, ":%s KILL %s :%s (ID collision)",
                   me.id, target_p->id, me.name);
 
     ++ServerStats.is_kill;

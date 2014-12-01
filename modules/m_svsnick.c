@@ -118,7 +118,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
 
   whowas_add_history(target_p, 1);
 
-  sendto_server(NULL, NOCAPS, NOCAPS, ":%s NICK %s :%lu",
+  sendto_server(NULL, 0, 0, ":%s NICK %s :%lu",
                 target_p->id, parv[2], (unsigned long)target_p->tsinfo);
   hash_del_client(target_p);
   strlcpy(target_p->name, parv[2], sizeof(target_p->name));

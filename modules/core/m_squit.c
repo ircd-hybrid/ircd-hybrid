@@ -115,12 +115,12 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
     sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
 
     /* Send to everything but target */
-    sendto_server(target_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+    sendto_server(target_p, 0, 0, ":%s SQUIT %s :%s",
                   source_p->id, target_p->id, comment);
   }
   else
     /* Send to everything */
-    sendto_server(NULL, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+    sendto_server(NULL, 0, 0, ":%s SQUIT %s :%s",
                   source_p->id, target_p->id, comment);
 
   AddFlag(target_p, FLAGS_SQUIT);
@@ -166,7 +166,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
                          me.name, target_p->name, source_p->name, comment);
-    sendto_server(source_p, NOCAPS, NOCAPS, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
+    sendto_server(source_p, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
                   me.id, target_p->name, source_p->name, comment);
     ilog(LOG_TYPE_IRCD, "SQUIT From %s : %s (%s)", source_p->name,
          target_p->name, comment);
@@ -188,7 +188,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
   }
   else
     /* Send to everything but source */
-    sendto_server(source_p, NOCAPS, NOCAPS, ":%s SQUIT %s :%s",
+    sendto_server(source_p, 0, 0, ":%s SQUIT %s :%s",
                   source_p->id, target_p->id, comment);
 
   AddFlag(target_p, FLAGS_SQUIT);

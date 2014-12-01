@@ -307,7 +307,7 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
   host   = parv[2];
   reason = parv[3];
 
-  sendto_server(source_p, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
+  sendto_server(source_p, CAP_GLN, 0, ":%s GLINE %s %s :%s",
                 source_p->id, user, host, reason);
 
   if (!ConfigGeneral.glines)
@@ -418,7 +418,7 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
   ilog(LOG_TYPE_GLINE, "G-Line for [%s@%s] [%s] requested by %s",
        user, host, reason, get_oper_name(source_p));
 
-  sendto_server(NULL, CAP_GLN, NOCAPS, ":%s GLINE %s %s :%s",
+  sendto_server(NULL, CAP_GLN, 0, ":%s GLINE %s %s :%s",
 		source_p->id, user, host, reason);
   return 0;
 }
@@ -441,7 +441,7 @@ do_sungline(struct Client *source_p, const char *user,
 
   if (prop)
   {
-    sendto_server(source_p, CAP_ENCAP, NOCAPS,
+    sendto_server(source_p, CAP_ENCAP, 0,
                   ":%s ENCAP * GUNGLINE %s %s :%s",
                   source_p->id, user, host, reason);
   }

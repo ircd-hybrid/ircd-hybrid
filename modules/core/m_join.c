@@ -239,7 +239,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                                   source_p->host, source_p->away);
   }
 
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
+  sendto_server(source_p, 0, 0, ":%s JOIN %lu %s +",
                 source_p->id, (unsigned long)chptr->creationtime, chptr->name);
   return 0;
 }

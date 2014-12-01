@@ -926,7 +926,7 @@ channel_do_join_0(struct Client *source_p)
   {
     struct Channel *chptr = ((struct Membership *)node->data)->chptr;
 
-    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
+    sendto_server(source_p, 0, 0, ":%s PART %s",
                   source_p->id, chptr->name);
     sendto_channel_local(0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,
@@ -1077,7 +1077,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       chptr->mode.mode |= MODE_TOPICLIMIT;
       chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-      sendto_server(source_p, NOCAPS, NOCAPS, ":%s SJOIN %lu %s +nt :@%s",
+      sendto_server(source_p, 0, 0, ":%s SJOIN %lu %s +nt :@%s",
                     me.id, (unsigned long)chptr->creationtime,
                     chptr->name, source_p->id);
 
@@ -1103,7 +1103,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
     }
     else
     {
-      sendto_server(source_p, NOCAPS, NOCAPS, ":%s JOIN %lu %s +",
+      sendto_server(source_p, 0, 0, ":%s JOIN %lu %s +",
                     source_p->id, (unsigned long)chptr->creationtime,
                     chptr->name);
 
@@ -1173,7 +1173,7 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
        (source_p->connection->firsttime + ConfigGeneral.anti_spam_exit_message_time)
         < CurrentTime))))
   {
-    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s :%s",
+    sendto_server(source_p, 0, 0, ":%s PART %s :%s",
                   source_p->id, chptr->name, reason);
     sendto_channel_local(0, chptr, ":%s!%s@%s PART %s :%s",
                          source_p->name, source_p->username,
@@ -1181,7 +1181,7 @@ channel_part_one_client(struct Client *source_p, const char *name, const char *r
   }
   else
   {
-    sendto_server(source_p, NOCAPS, NOCAPS, ":%s PART %s",
+    sendto_server(source_p, 0, 0, ":%s PART %s",
                   source_p->id, chptr->name);
     sendto_channel_local(0, chptr, ":%s!%s@%s PART %s",
                          source_p->name, source_p->username,

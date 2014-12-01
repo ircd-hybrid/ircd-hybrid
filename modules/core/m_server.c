@@ -371,7 +371,7 @@ server_estab(struct Client *client_p)
 
   fd_note(&client_p->connection->fd, "Server: %s", client_p->name);
 
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s SID %s 2 %s :%s%s",
+  sendto_server(client_p, 0, 0, ":%s SID %s 2 %s :%s%s",
                 me.id, client_p->name, client_p->id,
                 IsHidden(client_p) ? "(H) " : "", client_p->info);
 
@@ -801,7 +801,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   hash_add_client(target_p);
   hash_add_id(target_p);
 
-  sendto_server(client_p, NOCAPS, NOCAPS, ":%s SID %s %d %s :%s%s",
+  sendto_server(client_p, 0, 0, ":%s SID %s %d %s :%s%s",
                 source_p->id, target_p->name, target_p->hopcount + 1,
                 target_p->id, IsHidden(target_p) ? "(H) " : "", target_p->info);
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,

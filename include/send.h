@@ -30,8 +30,6 @@
 #include "fdlist.h"
 #include "numeric.h"
 
-enum { NOCAPS = 0 };
-
 enum
 {
   L_ALL   = 0,

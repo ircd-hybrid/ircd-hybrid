@@ -69,7 +69,7 @@ ms_eob(struct Client *source_p, int parc, char *parv[])
 
   server_eob(source_p);
 
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s EOB", source_p->id);
+  sendto_server(source_p, 0, 0, ":%s EOB", source_p->id);
   return 0;
 }
 

@@ -56,7 +56,7 @@ server_die(const char *message, int rboot)
   DLINK_FOREACH(node, local_client_list.head)
     sendto_one_notice(node->data, &me, ":%s", buffer);
 
-  sendto_server(NULL, NOCAPS, NOCAPS, ":%s ERROR :%s", me.id, buffer);
+  sendto_server(NULL, 0, 0, ":%s ERROR :%s", me.id, buffer);
 
   ilog(LOG_TYPE_IRCD, "%s", buffer);
 

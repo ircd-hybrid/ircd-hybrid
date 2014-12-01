@@ -99,7 +99,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
 
     channel_set_topic(chptr, topic, setby, remote_topic_ts, 0);
 
-    sendto_server(source_p, CAP_TBURST, NOCAPS,
+    sendto_server(source_p, CAP_TBURST, 0,
                   ":%s TBURST %s %s %s %s :%s",
                   source_p->id, parv[1], parv[2], parv[3], setby, topic);
 

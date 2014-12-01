@@ -91,7 +91,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
                source_p->username, source_p->host);
       channel_set_topic(chptr, parv[2], topic_info, CurrentTime, 1);
 
-      sendto_server(source_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
+      sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
                     source_p->id, chptr->name,
                     chptr->topic);
       sendto_channel_local(0, chptr, ":%s!%s@%s TOPIC %s :%s",
@@ -163,7 +163,7 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
              source_p->username, source_p->host);
   channel_set_topic(chptr, parv[2], topic_info, CurrentTime, 0);
 
-  sendto_server(source_p, NOCAPS, NOCAPS, ":%s TOPIC %s :%s",
+  sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
                 source_p->id, chptr->name,
                 chptr->topic);
 

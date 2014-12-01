@@ -51,24 +51,14 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
   if (target_p->status != STAT_CLIENT)
     return;
 
-  if (ConfigGeneral.hide_spoof_ips)
-    sendto_one_numeric(source_p, &me, RPL_ETRACE,
-                       HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-                       get_client_class(&target_p->connection->confs),
-                       target_p->name,
-                       target_p->username,
-                       target_p->host,
-                       IsIPSpoof(target_p) ? "255.255.255.255" : target_p->sockhost,
-                       target_p->info);
-  else
-    sendto_one_numeric(source_p, &me, RPL_ETRACE,
-                       HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-                       get_client_class(&target_p->connection->confs),
-                       target_p->name,
-                       target_p->username,
-                       target_p->host,
-                       target_p->sockhost,
-                       target_p->info);
+  sendto_one_numeric(source_p, &me, RPL_ETRACE,
+                     HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
+                     get_client_class(&target_p->connection->confs),
+                     target_p->name,
+                     target_p->username,
+                     target_p->host,
+                     target_p->sockhost,
+                     target_p->info);
 }
 
 /*

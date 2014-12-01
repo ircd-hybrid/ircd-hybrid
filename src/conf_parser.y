@@ -2532,7 +2532,6 @@ general_entry: GENERAL
 general_items:      general_items general_item | general_item;
 general_item:       general_away_count |
                     general_away_time |
-                    general_hide_spoof_ips |
                     general_ignore_bogus_ts |
                     general_failed_oper_notice |
                     general_anti_nick_flood |
@@ -2639,11 +2638,6 @@ general_tkline_expire_notices: TKLINE_EXPIRE_NOTICES '=' TBOOL ';'
 general_kill_chase_time_limit: KILL_CHASE_TIME_LIMIT '=' timespec ';'
 {
   ConfigGeneral.kill_chase_time_limit = $3;
-};
-
-general_hide_spoof_ips: HIDE_SPOOF_IPS '=' TBOOL ';'
-{
-  ConfigGeneral.hide_spoof_ips = yylval.number;
 };
 
 general_ignore_bogus_ts: IGNORE_BOGUS_TS '=' TBOOL ';'

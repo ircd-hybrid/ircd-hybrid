@@ -311,12 +311,6 @@ static const struct InfoStruct info_table[] =
     "Nick Change Tracker for KILL"
   },
   {
-    "hide_spoof_ips",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigGeneral.hide_spoof_ips,
-    "Hide spoofed IP addresses"
-  },
-  {
     "ignore_bogus_ts",
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.ignore_bogus_ts,

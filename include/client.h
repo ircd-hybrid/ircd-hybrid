@@ -117,21 +117,19 @@ struct MaskItem;
 #define FLAGS_EXEMPTKLINE    0x00000400U  /**< Client is exempt from kline */
 #define FLAGS_NOLIMIT        0x00000800U  /**< Client is exempt from limits */
 #define FLAGS_PING_COOKIE    0x00001000U  /**< PING Cookie */
-#define FLAGS_IP_SPOOFING    0x00002000U  /**< Client IP is spoofed */
-#define FLAGS_FLOODDONE      0x00004000U  /**< Flood grace period has been ended. */
-#define FLAGS_EOB            0x00008000U  /**< Server has sent us an EOB */
-#define FLAGS_HIDDEN         0x00010000U  /**< A hidden server. Not shown in /links */
-#define FLAGS_BLOCKED        0x00020000U  /**< Must wait for COMM_SELECT_WRITE */
-#define FLAGS_USERHOST       0x00040000U  /**< Client is in userhost hash */
-#define FLAGS_BURSTED        0x00080000U  /**< User was already bursted */
-#define FLAGS_EXEMPTRESV     0x00100000U  /**< Client is exempt from RESV */
-#define FLAGS_GOTUSER        0x00200000U  /**< If we received a USER command */
-#define FLAGS_FINISHED_AUTH  0x00400000U  /**< Client has been released from auth */
-#define FLAGS_FLOOD_NOTICED  0x00800000U  /**< Notice to opers about this flooder has been sent */
-#define FLAGS_SERVICE        0x01000000U  /**< Client/server is a network service */
-#define FLAGS_AUTH_SPOOF     0x02000000U  /**< User's hostname has been spoofed by an auth{} spoof */
-#define FLAGS_SSL            0x04000000U  /**< User is connected via TLS/SSL */
-#define FLAGS_SQUIT          0x08000000U
+#define FLAGS_FLOODDONE      0x00002000U  /**< Flood grace period has been ended. */
+#define FLAGS_EOB            0x00004000U  /**< Server has sent us an EOB */
+#define FLAGS_HIDDEN         0x00008000U  /**< A hidden server. Not shown in /links */
+#define FLAGS_BLOCKED        0x00010000U  /**< Must wait for COMM_SELECT_WRITE */
+#define FLAGS_USERHOST       0x00020000U  /**< Client is in userhost hash */
+#define FLAGS_BURSTED        0x00040000U  /**< User was already bursted */
+#define FLAGS_EXEMPTRESV     0x00080000U  /**< Client is exempt from RESV */
+#define FLAGS_GOTUSER        0x00100000U  /**< If we received a USER command */
+#define FLAGS_FINISHED_AUTH  0x00200000U  /**< Client has been released from auth */
+#define FLAGS_FLOOD_NOTICED  0x00400000U  /**< Notice to opers about this flooder has been sent */
+#define FLAGS_SERVICE        0x00800000U  /**< Client/server is a network service */
+#define FLAGS_SSL            0x01000000U  /**< User is connected via TLS/SSL */
+#define FLAGS_SQUIT          0x02000000U
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
@@ -250,8 +248,6 @@ struct MaskItem;
 #define SetExemptGline(x)       ((x)->flags |= FLAGS_EXEMPTGLINE)
 #define IsExemptResv(x)         ((x)->flags & FLAGS_EXEMPTRESV)
 #define SetExemptResv(x)        ((x)->flags |= FLAGS_EXEMPTRESV)
-#define SetIPSpoof(x)           ((x)->flags |= FLAGS_IP_SPOOFING)
-#define IsIPSpoof(x)            ((x)->flags & FLAGS_IP_SPOOFING)
 
 #define IsFloodDone(x)          ((x)->flags &  FLAGS_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags |= FLAGS_FLOODDONE)

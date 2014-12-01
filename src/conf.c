@@ -321,12 +321,11 @@ verify_access(struct Client *client_p)
       /* Thanks for spoof idea amm */
       if (IsConfDoSpoofIp(conf))
       {
-        if (!ConfigGeneral.hide_spoof_ips && IsConfSpoofNotice(conf))
+        if (IsConfSpoofNotice(conf))
           sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                                "%s spoofing: %s as %s",
                                client_p->name, client_p->host, conf->name);
         strlcpy(client_p->host, conf->name, sizeof(client_p->host));
-        AddFlag(client_p, FLAGS_IP_SPOOFING | FLAGS_AUTH_SPOOF);
       }
 
       return attach_iline(client_p, conf);
@@ -873,7 +872,6 @@ set_default_conf(void)
   ConfigGeneral.gline_min_cidr6 = 48;
   ConfigGeneral.invisible_on_connect = 1;
   ConfigGeneral.tkline_expire_notices = 1;
-  ConfigGeneral.hide_spoof_ips = 1;
   ConfigGeneral.ignore_bogus_ts = 0;
   ConfigGeneral.disable_auth = 0;
   ConfigGeneral.kill_chase_time_limit = 90;

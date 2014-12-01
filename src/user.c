@@ -538,8 +538,7 @@ register_local_user(struct Client *source_p)
   sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                        "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
                        source_p->name, source_p->username, source_p->host,
-                       ConfigGeneral.hide_spoof_ips && IsIPSpoof(source_p) ?
-                       "255.255.255.255" : source_p->sockhost,
+                       source_p->sockhost,
                        get_client_class(&source_p->connection->confs),
                        source_p->info, source_p->id);
 
@@ -837,13 +836,9 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
   {
     case MODE_ADD:
       AddUMode(target_p, UMODE_HIDDENHOST);
-      AddFlag(target_p, FLAGS_IP_SPOOFING);
       break;
     case MODE_DEL:
       DelUMode(target_p, UMODE_HIDDENHOST);
-
-      if (!HasFlag(target_p, FLAGS_AUTH_SPOOF))
-        DelFlag(target_p, FLAGS_IP_SPOOFING);
       break;
     default: return;
   }

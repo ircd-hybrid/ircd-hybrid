@@ -876,20 +876,11 @@ report_auth(struct Client *source_p, int parc, char *parv[])
       /* We are doing a partial list, based on what matches the u@h of the
        * sender, so prepare the strings for comparing --fl_
        */
-      if (ConfigGeneral.hide_spoof_ips)
-        sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
-                           conf->name == NULL ? "*" : conf->name,
-                           show_iline_prefix(source_p, conf),
-                           IsConfDoSpoofIp(conf) ? "255.255.255.255" :
-                           conf->host, conf->port,
-                           conf->class->name);
-
-      else
-        sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
-                           conf->name == NULL ? "*" : conf->name,
-                           show_iline_prefix(source_p, conf),
-                           conf->host, conf->port,
-                           conf->class->name);
+      sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
+                         conf->name == NULL ? "*" : conf->name,
+                         show_iline_prefix(source_p, conf),
+                         conf->host, conf->port,
+                         conf->class->name);
     }
   }
 }
@@ -1415,9 +1406,8 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
     }
     else
     {
-      /* If it's a hidden ip, an admin, or a server, mask the real IP */
-      if (IsIPSpoof(target_p) || IsServer(target_p) || HasUMode(target_p, UMODE_ADMIN) ||
-          IsHandshake(target_p) || IsConnecting(target_p))
+      /* If it's a server, mask the real IP */
+      if (IsServer(target_p) || IsHandshake(target_p) || IsConnecting(target_p))
         sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
                    get_client_name(target_p, MASK_IP),
                    dbuf_length(&target_p->connection->buf_sendq),

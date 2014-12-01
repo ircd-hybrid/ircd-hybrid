@@ -236,7 +236,6 @@ struct
   unsigned int true_no_oper_flood;
   unsigned int oper_pass_resv;
   unsigned int glines;
-  unsigned int hide_spoof_ips;
   unsigned int tkline_expire_notices;
   unsigned int opers_bypass_callerid;
   unsigned int ignore_bogus_ts;

@@ -72,7 +72,6 @@ whois_person(struct Client *source_p, struct Client *target_p)
   const dlink_node *lp = NULL;
   char *t = NULL;
   int cur_len = 0;
-  int show_ip = 0;
   int mlen = 0;
   int tlen = 0;
   int reply_to_send = 0;
@@ -167,18 +166,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one_numeric(source_p, &me, RPL_WHOISMODES, target_p->name, buf);
   }
 
-  if (strcmp(target_p->sockhost, "0"))
-  {
-    if (HasUMode(source_p, UMODE_ADMIN) || source_p == target_p)
-      show_ip = 1;
-    else if (IsIPSpoof(target_p))
-      show_ip = (HasUMode(source_p, UMODE_OPER) && !ConfigGeneral.hide_spoof_ips);
-    else
-      show_ip = 1;
-
-    sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, target_p->name,
-                       show_ip ? target_p->sockhost : "255.255.255.255");
-  }
+  if (strcmp(target_p->sockhost, "0")) /* XXX: TBR */
+    if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
+      sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, target_p->name,
+                         target_p->sockhost);
 
   if (HasUMode(target_p, UMODE_SSL))
     sendto_one_numeric(source_p, &me, RPL_WHOISSECURE, target_p->name);

@@ -602,12 +602,12 @@ register_remote_user(struct Client *source_p)
                          source_p->host, source_p->servptr->name,
                          target_p->name, target_p->from->name);
     sendto_one(source_p->from,
-               ":%s KILL %s :%s (NICK from wrong direction (%s != %s))",
+               ":%s KILL %s :%s (UID from wrong direction (%s != %s))",
                me.id, source_p->id, me.name, source_p->servptr->name,
                target_p->from->name);
 
     AddFlag(source_p, FLAGS_KILLED);
-    exit_client(source_p, "USER server wrong direction");
+    exit_client(source_p, "UID server wrong direction");
     return;
   }
 

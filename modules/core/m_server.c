@@ -105,8 +105,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
                target_p->name, target_p->hopcount + 1,
                (unsigned long) target_p->tsinfo,
                ubuf, target_p->username, target_p->host,
-               (MyClient(target_p) && IsIPSpoof(target_p)) ?
-               "0" : target_p->sockhost, target_p->id,
+               target_p->sockhost, target_p->id,
                target_p->account, target_p->info);
   else
     sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s :%s",
@@ -114,8 +113,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
                target_p->name, target_p->hopcount + 1,
                (unsigned long) target_p->tsinfo,
                ubuf, target_p->username, target_p->host,
-               (MyClient(target_p) && IsIPSpoof(target_p)) ?
-               "0" : target_p->sockhost, target_p->id, target_p->info);
+               target_p->sockhost, target_p->id, target_p->info);
 
   if (!EmptyString(target_p->certfp))
     sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->certfp);

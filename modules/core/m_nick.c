@@ -439,7 +439,10 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   }
 
   /* The timestamps are different */
-  sameuser = !irccmp(target_p->username, parv[5]) && !irccmp(target_p->host, parv[6]);
+  if (!strcmp(target_p->sockhost, "0")) /* XXX: TBR */
+    sameuser = !irccmp(target_p->username, parv[5]) && !irccmp(target_p->host, parv[6]);
+  else
+    sameuser = !irccmp(target_p->username, parv[5]) && !irccmp(target_p->sockhost, parv[7]);
 
   /*
    * If the users are the same (loaded a client on a different server)
@@ -525,8 +528,12 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   }
 
   /* The timestamps are different */
-  sameuser = !irccmp(target_p->username, source_p->username) &&
-             !irccmp(target_p->host, source_p->host);
+  if (!strcmp(target_p->sockhost, "0") || !strcmp(source_p->sockhost, "0")) /* XXX: TBR */
+    sameuser = !irccmp(target_p->username, source_p->username) &&
+               !irccmp(target_p->host, source_p->host);
+  else
+    sameuser = !irccmp(target_p->username, source_p->username) &&
+               !irccmp(target_p->sockhost, source_p->sockhost);
 
   if ((sameuser && newts < target_p->tsinfo) ||
       (!sameuser && newts > target_p->tsinfo))

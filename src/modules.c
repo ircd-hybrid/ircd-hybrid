@@ -45,8 +45,8 @@ static dlink_list modules_list;
 static dlink_list modules_path;
 static dlink_list modules_conf;
 
-static const char *unknown_ver = "<unknown>";
-static const char *core_module_table[] =
+static const char *const unknown_ver = "<unknown>";
+static const char *const core_module_table[] =
 {
   "m_bmask.la",
   "m_die.la",

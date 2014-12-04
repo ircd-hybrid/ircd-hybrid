@@ -49,7 +49,7 @@ ipcache_hash_address(const struct irc_ssaddr *addr)
 {
   if (addr->ss.ss_family == AF_INET)
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
     uint32_t hash = 0, ip = ntohl(v4->sin_addr.s_addr);
 
     hash = ((ip >> 12) + ip) & (IP_HASH_SIZE - 1);
@@ -57,8 +57,8 @@ ipcache_hash_address(const struct irc_ssaddr *addr)
   }
   else
   {
-    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
-    uint32_t hash = 0, *ip = (uint32_t *)&v6->sin6_addr.s6_addr;
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;
+    uint32_t hash = 0, *const ip = (uint32_t *)&v6->sin6_addr.s6_addr;
 
     hash  = ip[0] ^ ip[3];
     hash ^= hash >> 16;
@@ -82,7 +82,7 @@ ipcache_find_or_add_address(struct irc_ssaddr *addr)
 {
   dlink_node *node = NULL;
   struct ip_entry *iptr = NULL;
-  uint32_t hash_index = ipcache_hash_address(addr);
+  const uint32_t hash_index = ipcache_hash_address(addr);
   struct sockaddr_in *v4 = (struct sockaddr_in *)addr, *ptr_v4;
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr, *ptr_v6;
 
@@ -128,7 +128,7 @@ void
 ipcache_remove_address(struct irc_ssaddr *addr)
 {
   dlink_node *node = NULL;
-  uint32_t hash_index = ipcache_hash_address(addr);
+  const uint32_t hash_index = ipcache_hash_address(addr);
   struct sockaddr_in *v4 = (struct sockaddr_in *)addr, *ptr_v4;
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)addr, *ptr_v6;
 

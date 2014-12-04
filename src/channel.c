@@ -134,8 +134,8 @@ add_user_to_channel(struct Channel *chptr, struct Client *who,
 void
 remove_user_from_channel(struct Membership *member)
 {
-  struct Client *client_p = member->client_p;
-  struct Channel *chptr = member->chptr;
+  struct Client *const client_p = member->client_p;
+  struct Channel *const chptr = member->chptr;
 
   dlinkDelete(&member->channode, &chptr->members);
 
@@ -229,7 +229,7 @@ send_mode_list(struct Client *client_p, const struct Channel *chptr,
   int tlen, mlen, cur_len;
   char *pp = pbuf;
 
-  if (list->length == 0)
+  if (!list->length)
     return;
 
   mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %lu %s %c :", me.id,
@@ -1045,7 +1045,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
        * This should never be the case unless there is some sort of
        * persistant channels.
        */
-      if (dlink_list_length(&chptr->members) == 0)
+      if (!dlink_list_length(&chptr->members))
         flags = CHFL_CHANOP;
       else
         flags = 0;

@@ -267,8 +267,8 @@ int
 match_ipv6(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bits)
 {
   int i, m, n = bits / 8;
-  const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
-  const struct sockaddr_in6 *v6mask = (const struct sockaddr_in6 *)mask;
+  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;
+  const struct sockaddr_in6 *const v6mask = (const struct sockaddr_in6 *)mask;
 
   for (i = 0; i < n; ++i)
     if (v6->sin6_addr.s6_addr[i] != v6mask->sin6_addr.s6_addr[i])
@@ -290,8 +290,8 @@ match_ipv6(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bit
 int
 match_ipv4(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bits)
 {
-  const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr;
-  const struct sockaddr_in *v4mask = (const struct sockaddr_in *)mask;
+  const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
+  const struct sockaddr_in *const v4mask = (const struct sockaddr_in *)mask;
 
   if ((ntohl(v4->sin_addr.s_addr) & ~((1 << (32 - bits)) - 1)) !=
       ntohl(v4mask->sin_addr.s_addr))
@@ -612,11 +612,11 @@ find_dline_conf(struct irc_ssaddr *addr, int aftype)
 struct AddressRec *
 add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 {
-  const char *hostname = conf->host;
-  const char *username = conf->user;
+  struct AddressRec *arec = NULL;
+  const char *const hostname = conf->host;
+  const char *const username = conf->user;
   static unsigned int prec_value = 0xFFFFFFFF;
   int bits = 0;
-  struct AddressRec *arec = NULL;
 
   assert(type && !EmptyString(hostname));
 
@@ -733,7 +733,7 @@ clear_out_address_conf(void)
 }
 
 static void
-hostmask_send_expiration(struct AddressRec *arec)
+hostmask_send_expiration(const struct AddressRec *const arec)
 {
   char ban_type = '\0';
 

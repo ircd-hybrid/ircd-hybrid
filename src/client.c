@@ -83,7 +83,7 @@ static dlink_node *eac_next;  /* next aborted client to exit */
 struct Client *
 make_client(struct Client *from)
 {
-  struct Client *client_p = mp_pool_get(client_pool);
+  struct Client *const client_p = mp_pool_get(client_pool);
 
   if (!from)
   {

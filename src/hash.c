@@ -125,7 +125,7 @@ strhash(const char *name)
 void
 hash_add_client(struct Client *client_p)
 {
-  unsigned int hashv = strhash(client_p->name);
+  const unsigned int hashv = strhash(client_p->name);
 
   client_p->hnext = clientTable[hashv];
   clientTable[hashv] = client_p;
@@ -144,7 +144,7 @@ hash_add_client(struct Client *client_p)
 void
 hash_add_channel(struct Channel *chptr)
 {
-  unsigned int hashv = strhash(chptr->name);
+  const unsigned int hashv = strhash(chptr->name);
 
   chptr->hnextch = channelTable[hashv];
   channelTable[hashv] = chptr;
@@ -153,7 +153,7 @@ hash_add_channel(struct Channel *chptr)
 void
 hash_add_userhost(struct UserHost *userhost)
 {
-  unsigned int hashv = strhash(userhost->host);
+  const unsigned int hashv = strhash(userhost->host);
 
   userhost->next = userhostTable[hashv];
   userhostTable[hashv] = userhost;
@@ -162,7 +162,7 @@ hash_add_userhost(struct UserHost *userhost)
 void
 hash_add_id(struct Client *client_p)
 {
-  unsigned int hashv = strhash(client_p->id);
+  const unsigned int hashv = strhash(client_p->id);
 
   client_p->idhnext = idTable[hashv];
   idTable[hashv] = client_p;
@@ -177,7 +177,7 @@ hash_add_id(struct Client *client_p)
 void
 hash_del_id(struct Client *client_p)
 {
-  unsigned int hashv = strhash(client_p->id);
+  const unsigned int hashv = strhash(client_p->id);
   struct Client *tmp = idTable[hashv];
 
   if (tmp)
@@ -208,7 +208,7 @@ hash_del_id(struct Client *client_p)
 void
 hash_del_client(struct Client *client_p)
 {
-  unsigned int hashv = strhash(client_p->name);
+  const unsigned int hashv = strhash(client_p->name);
   struct Client *tmp = clientTable[hashv];
 
   if (tmp)
@@ -239,7 +239,7 @@ hash_del_client(struct Client *client_p)
 void
 hash_del_userhost(struct UserHost *userhost)
 {
-  unsigned int hashv = strhash(userhost->host);
+  const unsigned int hashv = strhash(userhost->host);
   struct UserHost *tmp = userhostTable[hashv];
 
   if (tmp)
@@ -271,7 +271,7 @@ hash_del_userhost(struct UserHost *userhost)
 void
 hash_del_channel(struct Channel *chptr)
 {
-  unsigned int hashv = strhash(chptr->name);
+  const unsigned int hashv = strhash(chptr->name);
   struct Channel *tmp = channelTable[hashv];
 
   if (tmp)
@@ -304,7 +304,7 @@ hash_del_channel(struct Channel *chptr)
 struct Client *
 hash_find_client(const char *name)
 {
-  unsigned int hashv = strhash(name);
+  const unsigned int hashv = strhash(name);
   struct Client *client_p;
 
   if ((client_p = clientTable[hashv]))
@@ -332,7 +332,7 @@ hash_find_client(const char *name)
 struct Client *
 hash_find_id(const char *name)
 {
-  unsigned int hashv = strhash(name);
+  const unsigned int hashv = strhash(name);
   struct Client *client_p;
 
   if ((client_p = idTable[hashv]))
@@ -360,7 +360,7 @@ hash_find_id(const char *name)
 struct Client *
 hash_find_server(const char *name)
 {
-  unsigned int hashv = strhash(name);
+  const unsigned int hashv = strhash(name);
   struct Client *client_p = NULL;
 
   if (IsDigit(*name) && strlen(name) == IRC_MAXSID)
@@ -401,7 +401,7 @@ hash_find_server(const char *name)
 struct Channel *
 hash_find_channel(const char *name)
 {
-  unsigned int hashv = strhash(name);
+  const unsigned int hashv = strhash(name);
   struct Channel *chptr = NULL;
 
   if ((chptr = channelTable[hashv]))
@@ -440,6 +440,7 @@ void *
 hash_get_bucket(int type, unsigned int hashv)
 {
   assert(hashv < HASHSIZE);
+
   if (hashv >= HASHSIZE)
       return NULL;
 
@@ -467,7 +468,7 @@ hash_get_bucket(int type, unsigned int hashv)
 struct UserHost *
 hash_find_userhost(const char *host)
 {
-  unsigned int hashv = strhash(host);
+  const unsigned int hashv = strhash(host);
   struct UserHost *userhost;
 
   if ((userhost = userhostTable[hashv]))

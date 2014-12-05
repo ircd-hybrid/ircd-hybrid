@@ -52,12 +52,6 @@ AC_CHECK_HEADERS_ONCE(crypt.h        \
 
 AC_SEARCH_LIBS(crypt, crypt)
 
-AC_ARG_ENABLE(libgeoip,
-  [AS_HELP_STRING([--disable-libgeoip],[Disable GeoIP support])], [],
-    [AC_CHECK_HEADER(GeoIP.h,
-      [AC_SEARCH_LIBS(GeoIP_id_by_ipnum_v6_gl, GeoIP,
-        [AC_DEFINE(HAVE_LIBGEOIP, 1, [Define to 1 if libGeoIP (-lGeoIP) is available.])])])], [])
-
 AC_DEFINE([NICKNAMEHISTORYLENGTH], 32768, [Size of the WHOWAS array.])
 AC_DEFINE([MP_CHUNK_SIZE_CHANNEL], 1024*1024, [Size of the channel mempool chunk.])
 AC_DEFINE([MP_CHUNK_SIZE_MEMBER], 2048*1024, [Size of the channel-member mempool chunk.])
@@ -79,6 +73,7 @@ AX_ARG_ENABLE_ASSERT
 AX_ARG_ENABLE_DEBUGGING
 AX_ARG_ENABLE_WARNINGS
 AX_ARG_OPENSSL
+AX_ARG_LIBGEOIP
 
 AC_DEFINE_DIR([PREFIX],[prefix],[Set to prefix.])
 AC_DEFINE_DIR([SYSCONFDIR],[sysconfdir],[Set to sysconfdir.])

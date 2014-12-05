@@ -807,11 +807,11 @@ with_ltdl_include
 with_ltdl_lib
 enable_ltdl_install
 enable_libgeoip
-enable_assert
 enable_kqueue
 enable_epoll
 enable_devpoll
 enable_poll
+enable_assert
 enable_debugging
 enable_warnings
 enable_openssl
@@ -1461,11 +1461,11 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-ltdl-install   install libltdl
   --disable-libgeoip      Disable GeoIP support
-  --enable-assert         Enable assert() statements
   --enable-kqueue         Force kqueue usage.
   --enable-epoll          Force epoll usage.
   --enable-devpoll        Force devpoll usage.
   --enable-poll           Force poll usage.
+  --enable-assert         Enable assert() statements
   --enable-debugging      Enable debugging.
   --enable-warnings       Enable compiler warnings.
   --enable-openssl=DIR       Enable LibreSSL/OpenSSL support (DIR optional).
@@ -14282,20 +14282,6 @@ fi
 fi
 
 
-# Check whether --enable-assert was given.
-if test "${enable_assert+set}" = set; then :
-  enableval=$enable_assert; assert=$enableval
-else
-  assert=no
-fi
-
-
-if test "$assert" = "no"; then :
-
-$as_echo "#define NDEBUG 1" >>confdefs.h
-
-fi
-
 
 $as_echo "#define NICKNAMEHISTORYLENGTH 32768" >>confdefs.h
 
@@ -14598,6 +14584,21 @@ cat >>confdefs.h <<_ACEOF
 #define USE_IOPOLL_MECHANISM $use_iopoll_mechanism
 _ACEOF
 
+
+
+  # Check whether --enable-assert was given.
+if test "${enable_assert+set}" = set; then :
+  enableval=$enable_assert; assert=$enableval
+else
+  assert=no
+fi
+
+
+  if test "$assert" = "no"; then :
+
+$as_echo "#define NDEBUG 1" >>confdefs.h
+
+fi
 
 
   # Check whether --enable-debugging was given.

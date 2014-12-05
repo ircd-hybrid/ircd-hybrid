@@ -58,13 +58,6 @@ AC_ARG_ENABLE(libgeoip,
       [AC_SEARCH_LIBS(GeoIP_id_by_ipnum_v6_gl, GeoIP,
         [AC_DEFINE(HAVE_LIBGEOIP, 1, [Define to 1 if libGeoIP (-lGeoIP) is available.])])])], [])
 
-AC_ARG_ENABLE(assert, AS_HELP_STRING([--enable-assert], 
-                                     [Enable assert() statements]),
-  [assert=$enableval], [assert=no])
-
-AS_IF([test "$assert" = "no"],
-  [AC_DEFINE(NDEBUG, 1, [Define to disable assert() statements.])])
-
 AC_DEFINE([NICKNAMEHISTORYLENGTH], 32768, [Size of the WHOWAS array.])
 AC_DEFINE([MP_CHUNK_SIZE_CHANNEL], 1024*1024, [Size of the channel mempool chunk.])
 AC_DEFINE([MP_CHUNK_SIZE_MEMBER], 2048*1024, [Size of the channel-member mempool chunk.])
@@ -82,6 +75,7 @@ AC_DEFINE([MP_CHUNK_SIZE_IP_ENTRY], 128*1024, [Size of the ip_entry mempool chun
 
 # Argument processing.
 AX_ARG_IOLOOP_MECHANISM
+AX_ARG_ENABLE_ASSERT
 AX_ARG_ENABLE_DEBUGGING
 AX_ARG_ENABLE_WARNINGS
 AX_ARG_OPENSSL

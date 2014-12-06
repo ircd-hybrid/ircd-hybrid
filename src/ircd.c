@@ -237,7 +237,7 @@ io_loop(void)
     /* Check to see whether we have to rehash the configuration .. */
     if (dorehash)
     {
-      rehash(1);
+      conf_rehash(1);
       dorehash = 0;
     }
 

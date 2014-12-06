@@ -97,7 +97,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
                          get_oper_name(source_p));
     ilog(LOG_TYPE_IRCD, "REHASH From %s",
          get_oper_name(source_p));
-    rehash(0);
+    conf_rehash(0);
   }
 
   return 0;

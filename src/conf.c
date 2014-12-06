@@ -58,28 +58,19 @@
 
 
 /* general conf items link list root, other than k lines etc. */
-dlink_list service_items = { NULL, NULL, 0 };
-dlink_list server_items  = { NULL, NULL, 0 };
-dlink_list cluster_items = { NULL, NULL, 0 };
-dlink_list oconf_items   = { NULL, NULL, 0 };
-dlink_list uconf_items   = { NULL, NULL, 0 };
-dlink_list xconf_items   = { NULL, NULL, 0 };
-dlink_list nresv_items   = { NULL, NULL, 0 };
-dlink_list cresv_items   = { NULL, NULL, 0 };
+dlink_list service_items;
+dlink_list server_items;
+dlink_list cluster_items;
+dlink_list oconf_items;
+dlink_list uconf_items;
+dlink_list xconf_items;
+dlink_list nresv_items;
+dlink_list cresv_items;
 
 extern unsigned int lineno;
 extern char linebuf[];
 extern char conffilebuf[IRCD_BUFSIZE];
 extern int yyparse(); /* defined in y.tab.c */
-
-/* internally defined functions */
-static void read_conf(FILE *);
-static void clear_out_old_conf(void);
-static void expire_tklines(dlink_list *);
-static int verify_access(struct Client *);
-static int attach_iline(struct Client *, struct MaskItem *);
-static dlink_list *map_to_list(enum maskitem_type);
-static int find_user_host(struct Client *, char *, char *, char *, unsigned int);
 
 
 /* conf_dns_callback()
@@ -114,14 +105,54 @@ conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 static void
 conf_dns_lookup(struct MaskItem *conf)
 {
-  if (!conf->dns_pending)
-  {
-    conf->dns_pending = 1;
+  if (conf->dns_pending)
+    return;
 
-    if (conf->aftype == AF_INET)
-      gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
-    else
-      gethost_byname_type(conf_dns_callback, conf, conf->host, T_AAAA);
+  conf->dns_pending = 1;
+
+  if (conf->aftype == AF_INET)
+    gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
+  else
+    gethost_byname_type(conf_dns_callback, conf, conf->host, T_AAAA);
+}
+
+/* map_to_list()
+ *
+ * inputs       - ConfType conf
+ * output       - pointer to dlink_list to use
+ * side effects - none
+ */
+static dlink_list *
+map_to_list(enum maskitem_type type)
+{
+  switch (type)
+  {
+    case CONF_XLINE:
+      return &xconf_items;
+      break;
+    case CONF_ULINE:
+      return &uconf_items;
+      break;
+    case CONF_NRESV:
+      return &nresv_items;
+      break;
+    case CONF_CRESV:
+      return &cresv_items;
+      break;
+    case CONF_OPER:
+      return &oconf_items;
+      break;
+    case CONF_SERVER:
+      return &server_items;
+      break;
+    case CONF_SERVICE:
+      return &service_items;
+      break;
+    case CONF_CLUSTER:
+      return &cluster_items;
+      break;
+    default:
+      return NULL;
   }
 }
 
@@ -200,154 +231,12 @@ conf_free(struct MaskItem *conf)
   MyFree(conf);
 }
 
-/* check_client()
- *
- * inputs	- pointer to client
- * output	- 0 = Success
- * 		  NOT_AUTHORIZED    (-1) = Access denied (no I line match)
- * 		  IRCD_SOCKET_ERROR (-2) = Bad socket.
- * 		  I_LINE_FULL       (-3) = I-line is full
- *		  TOO_MANY          (-4) = Too many connections from hostname
- * 		  BANNED_CLIENT     (-5) = K-lined
- * side effects - Ordinary client access check.
- *		  Look for conf lines which have the same
- * 		  status as the flags passed.
- */
-int
-check_client(struct Client *source_p)
-{
-  int i;
-
-  if ((i = verify_access(source_p)))
-    ilog(LOG_TYPE_IRCD, "Access denied: %s[%s]",
-         source_p->name, source_p->sockhost);
-
-  switch (i)
-  {
-    case TOO_MANY:
-      sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
-                           "Too many on IP for %s (%s).",
-                           get_client_name(source_p, SHOW_IP),
-                           source_p->sockhost);
-      ilog(LOG_TYPE_IRCD, "Too many connections on IP from %s.",
-           get_client_name(source_p, SHOW_IP));
-      ++ServerStats.is_ref;
-      exit_client(source_p, "No more connections allowed on that IP");
-      break;
-
-    case I_LINE_FULL:
-      sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
-                           "auth{} block is full for %s (%s).",
-                           get_client_name(source_p, SHOW_IP),
-                           source_p->sockhost);
-      ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
-           get_client_name(source_p, SHOW_IP));
-      ++ServerStats.is_ref;
-      exit_client(source_p, "No more connections allowed in your connection class");
-      break;
-
-    case NOT_AUTHORIZED:
-      ++ServerStats.is_ref;
-      /* jdc - lists server name & port connections are on */
-      /*       a purely cosmetical change */
-      sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
-                           "Unauthorized client connection from %s [%s] on [%s/%u].",
-                           get_client_name(source_p, SHOW_IP),
-                           source_p->sockhost,
-                           source_p->connection->listener->name,
-                           source_p->connection->listener->port);
-      ilog(LOG_TYPE_IRCD,
-           "Unauthorized client connection from %s on [%s/%u].",
-           get_client_name(source_p, SHOW_IP),
-           source_p->connection->listener->name,
-           source_p->connection->listener->port);
-
-      exit_client(source_p, "You are not authorized to use this server");
-      break;
-
-   case BANNED_CLIENT:
-     exit_client(source_p, "Banned");
-     ++ServerStats.is_ref;
-     break;
-
-   case 0:
-   default:
-     break;
-  }
-
-  return (i < 0 ? 0 : 1);
-}
-
-/* verify_access()
- *
- * inputs	- pointer to client to verify
- * output	- 0 if success -'ve if not
- * side effect	- find the first (best) I line to attach.
- */
-static int
-verify_access(struct Client *client_p)
-{
-  struct MaskItem *conf = NULL;
-  char non_ident[USERLEN + 1] = "~";
-
-  if (IsGotId(client_p))
-  {
-    conf = find_address_conf(client_p->host, client_p->username,
-                             &client_p->connection->ip,
-                             client_p->connection->aftype,
-                             client_p->connection->password);
-  }
-  else
-  {
-    strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
-    conf = find_address_conf(client_p->host,non_ident,
-                             &client_p->connection->ip,
-                             client_p->connection->aftype,
-                             client_p->connection->password);
-  }
-
-  if (conf)
-  {
-    if (IsConfClient(conf))
-    {
-      if (IsConfRedir(conf))
-      {
-        sendto_one_numeric(client_p, &me, RPL_REDIR,
-                           conf->name ? conf->name : "",
-                           conf->port);
-        return NOT_AUTHORIZED;
-      }
-
-      /* Thanks for spoof idea amm */
-      if (IsConfDoSpoofIp(conf))
-      {
-        if (IsConfSpoofNotice(conf))
-          sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-                               "%s spoofing: %s as %s",
-                               client_p->name, client_p->host, conf->name);
-        strlcpy(client_p->host, conf->name, sizeof(client_p->host));
-      }
-
-      return attach_iline(client_p, conf);
-    }
-    else if (IsConfKill(conf) || (ConfigGeneral.glines && IsConfGline(conf)))
-    {
-      if (IsConfGline(conf))
-        sendto_one_notice(client_p, &me, ":*** G-lined");
-      sendto_one_notice(client_p, &me, ":*** Banned: %s", conf->reason);
-      return BANNED_CLIENT;
-    }
-  }
-
-  return NOT_AUTHORIZED;
-}
-
 /* attach_iline()
  *
- * inputs	- client pointer
- *		- conf pointer
- * output	-
- * side effects	- do actual attach
+ * inputs       - client pointer
+ *              - conf pointer
+ * output       -
+ * side effects - do actual attach
  */
 static int
 attach_iline(struct Client *client_p, struct MaskItem *conf)
@@ -390,6 +279,148 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
   }
 
   return attach_conf(client_p, conf);
+}
+
+/* verify_access()
+ *
+ * inputs       - pointer to client to verify
+ * output       - 0 if success -'ve if not
+ * side effect  - find the first (best) I line to attach.
+ */
+static int
+verify_access(struct Client *client_p)
+{
+  struct MaskItem *conf = NULL;
+  char non_ident[USERLEN + 1] = "~";
+
+  if (IsGotId(client_p))
+  {
+    conf = find_address_conf(client_p->host, client_p->username,
+                             &client_p->connection->ip,
+                             client_p->connection->aftype,
+                             client_p->connection->password);
+  }
+  else
+  {
+    strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
+    conf = find_address_conf(client_p->host, non_ident,
+                             &client_p->connection->ip,
+                             client_p->connection->aftype,
+                             client_p->connection->password);
+  }
+
+  if (conf)
+  {
+    if (IsConfClient(conf))
+    {
+      if (IsConfRedir(conf))
+      {
+        sendto_one_numeric(client_p, &me, RPL_REDIR,
+                           conf->name ? conf->name : "",
+                           conf->port);
+        return NOT_AUTHORIZED;
+      }
+
+      /* Thanks for spoof idea amm */
+      if (IsConfDoSpoofIp(conf))
+      {
+        if (IsConfSpoofNotice(conf))
+          sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE, "%s spoofing: %s as %s",
+                               client_p->name, client_p->host, conf->name);
+
+        strlcpy(client_p->host, conf->name, sizeof(client_p->host));
+      }
+
+      return attach_iline(client_p, conf);
+    }
+    else if (IsConfKill(conf) || (ConfigGeneral.glines && IsConfGline(conf)))
+    {
+      if (IsConfGline(conf))
+        sendto_one_notice(client_p, &me, ":*** G-lined");
+
+      sendto_one_notice(client_p, &me, ":*** Banned: %s", conf->reason);
+      return BANNED_CLIENT;
+    }
+  }
+
+  return NOT_AUTHORIZED;
+}
+
+/* check_client()
+ *
+ * inputs	- pointer to client
+ * output	- 0 = Success
+ * 		  NOT_AUTHORIZED    (-1) = Access denied (no I line match)
+ * 		  IRCD_SOCKET_ERROR (-2) = Bad socket.
+ * 		  I_LINE_FULL       (-3) = I-line is full
+ *		  TOO_MANY          (-4) = Too many connections from hostname
+ * 		  BANNED_CLIENT     (-5) = K-lined
+ * side effects - Ordinary client access check.
+ *		  Look for conf lines which have the same
+ * 		  status as the flags passed.
+ */
+int
+check_client(struct Client *source_p)
+{
+  int i;
+
+  if ((i = verify_access(source_p)))
+    ilog(LOG_TYPE_IRCD, "Access denied: %s[%s]",
+         source_p->name, source_p->sockhost);
+
+  switch (i)
+  {
+    case TOO_MANY:
+      sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
+                           "Too many on IP for %s (%s).",
+                           get_client_name(source_p, SHOW_IP),
+                           source_p->sockhost);
+      ilog(LOG_TYPE_IRCD, "Too many connections on IP from %s.",
+           get_client_name(source_p, SHOW_IP));
+      ++ServerStats.is_ref;
+      exit_client(source_p, "No more connections allowed on that IP");
+      break;
+
+    case I_LINE_FULL:
+      sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
+                           "auth {} block is full for %s (%s).",
+                           get_client_name(source_p, SHOW_IP),
+                           source_p->sockhost);
+      ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
+           get_client_name(source_p, SHOW_IP));
+      ++ServerStats.is_ref;
+      exit_client(source_p, "No more connections allowed in your connection class");
+      break;
+
+    case NOT_AUTHORIZED:
+      /* jdc - lists server name & port connections are on */
+      /*       a purely cosmetical change */
+      sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
+                           "Unauthorized client connection from %s [%s] on [%s/%u].",
+                           get_client_name(source_p, SHOW_IP),
+                           source_p->sockhost,
+                           source_p->connection->listener->name,
+                           source_p->connection->listener->port);
+      ilog(LOG_TYPE_IRCD, "Unauthorized client connection from %s on [%s/%u].",
+           get_client_name(source_p, SHOW_IP),
+           source_p->connection->listener->name,
+           source_p->connection->listener->port);
+
+      ++ServerStats.is_ref;
+      exit_client(source_p, "You are not authorized to use this server");
+      break;
+
+    case BANNED_CLIENT:
+      ++ServerStats.is_ref;
+      exit_client(source_p, "Banned");
+      break;
+
+    case 0:
+    default:
+      break;
+  }
+
+  return !(i < 0);
 }
 
 /* detach_conf()
@@ -522,45 +553,6 @@ find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
   }
 
   return NULL;
-}
-
-/* map_to_list()
- *
- * inputs	- ConfType conf
- * output	- pointer to dlink_list to use
- * side effects	- none
- */
-static dlink_list *
-map_to_list(enum maskitem_type type)
-{
-  switch(type)
-  {
-  case CONF_XLINE:
-    return(&xconf_items);
-    break;
-  case CONF_ULINE:
-    return(&uconf_items);
-    break;
-  case CONF_NRESV:
-    return(&nresv_items);
-    break;
-  case CONF_CRESV:
-    return(&cresv_items);
-  case CONF_OPER:
-    return(&oconf_items);
-    break;
-  case CONF_SERVER:
-    return(&server_items);
-    break;
-  case CONF_SERVICE:
-    return(&service_items);
-    break;
-  case CONF_CLUSTER:
-    return(&cluster_items);
-    break;
-  default:
-    return NULL;
-  }
 }
 
 /* find_matching_name_conf()
@@ -752,31 +744,6 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
   return NULL;
 }
 
-/* rehash()
- *
- * Actual REHASH service routine. Called with sig == 0 if it has been called
- * as a result of an operator issuing this command, else assume it has been
- * called as a result of the server receiving a HUP signal.
- */
-int
-rehash(int sig)
-{
-  if (sig)
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "Got signal SIGHUP, reloading configuration file(s)");
-
-  restart_resolver();
-
-  /* don't close listeners until we know we can go ahead with the rehash */
-
-  read_conf_files(0);
-
-  load_conf_modules();
-  check_conf_klines();
-
-  return 0;
-}
-
 /* set_default_conf()
  *
  * inputs	- NONE
@@ -952,6 +919,31 @@ read_conf(FILE *file)
   class_delete_marked();  /* Delete unused classes that are marked for deletion */
 }
 
+/* conf_rehash()
+ *
+ * Actual REHASH service routine. Called with sig == 0 if it has been called
+ * as a result of an operator issuing this command, else assume it has been
+ * called as a result of the server receiving a HUP signal.
+ */
+int
+conf_rehash(int sig)
+{
+  if (sig)
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "Got signal SIGHUP, reloading configuration file(s)");
+
+  restart_resolver();
+
+  /* don't close listeners until we know we can go ahead with the rehash */
+
+  read_conf_files(0);
+
+  load_conf_modules();
+  check_conf_klines();
+
+  return 0;
+}
+
 /* lookup_confhost()
  *
  * start DNS lookups of all hostnames in the conf
@@ -1025,22 +1017,6 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
   return 0;
 }
 
-/* cleanup_tklines()
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - call function to expire temporary k/d lines
- *                This is an event started off in ircd.c
- */
-void
-cleanup_tklines(void *unused)
-{
-  hostmask_expire_temporary();
-  expire_tklines(&xconf_items);
-  expire_tklines(&nresv_items);
-  expire_tklines(&cresv_items);
-}
-
 /* expire_tklines()
  *
  * inputs       - tkline list pointer
@@ -1074,6 +1050,22 @@ expire_tklines(dlink_list *list)
       conf_free(conf);
     }
   }
+}
+
+/* cleanup_tklines()
+ *
+ * inputs       - NONE
+ * output       - NONE
+ * side effects - call function to expire temporary k/d lines
+ *                This is an event started off in ircd.c
+ */
+void
+cleanup_tklines(void *unused)
+{
+  hostmask_expire_temporary();
+  expire_tklines(&xconf_items);
+  expire_tklines(&nresv_items);
+  expire_tklines(&cresv_items);
 }
 
 /* oper_privs_as_string()
@@ -1166,78 +1158,6 @@ get_oper_name(const struct Client *client_p)
   return buffer;
 }
 
-/* read_conf_files()
- *
- * inputs       - cold start YES or NO
- * output       - none
- * side effects - read all conf files needed, ircd.conf kline.conf etc.
- */
-void
-read_conf_files(int cold)
-{
-  const char *filename = NULL;
-  char chanmodes[IRCD_BUFSIZE] = "";
-  char chanlimit[IRCD_BUFSIZE] = "";
-
-  conf_parser_ctx.boot = cold;
-  filename = ConfigGeneral.configfile;
-
-  /* We need to know the initial filename for the yyerror() to report
-     FIXME: The full path is in conffilenamebuf first time since we
-             don't know anything else
-
-     - Gozem 2002-07-21
-  */
-  strlcpy(conffilebuf, filename, sizeof(conffilebuf));
-
-  if ((conf_parser_ctx.conf_file = fopen(filename, "r")) == NULL)
-  {
-    if (cold)
-    {
-      ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
-           filename, strerror(errno));
-      exit(-1);
-    }
-    else
-    {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Unable to read configuration file '%s': %s",
-                           filename, strerror(errno));
-      return;
-    }
-  }
-
-  if (!cold)
-    clear_out_old_conf();
-
-  read_conf(conf_parser_ctx.conf_file);
-  fclose(conf_parser_ctx.conf_file);
-
-  log_reopen_all();
-
-  add_isupport("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
-  add_isupport("NETWORK", ConfigServerInfo.network_name, -1);
-
-  snprintf(chanmodes, sizeof(chanmodes), "beI:%d", ConfigChannel.max_bans);
-  add_isupport("MAXLIST", chanmodes, -1);
-  add_isupport("MAXTARGETS", NULL, ConfigGeneral.max_targets);
-  add_isupport("CHANTYPES", "#", -1);
-
-  snprintf(chanlimit, sizeof(chanlimit), "#:%d",
-           ConfigChannel.max_channels);
-  add_isupport("CHANLIMIT", chanlimit, -1);
-  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstMORS");
-  add_isupport("CHANNELLEN", NULL, CHANNELLEN);
-  add_isupport("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
-  add_isupport("CHANMODES", chanmodes, -1);
-
-  /*
-   * message_locale may have changed.  rebuild isupport since it relies
-   * on strlen(form_str(RPL_ISUPPORT))
-   */
-  rebuild_isupport_message_line();
-}
-
 /* clear_out_old_conf()
  *
  * inputs       - none
@@ -1328,6 +1248,78 @@ clear_out_old_conf(void)
 
   /* clean out listeners */
   close_listeners();
+}
+
+/* read_conf_files()
+ *
+ * inputs       - cold start YES or NO
+ * output       - none
+ * side effects - read all conf files needed, ircd.conf kline.conf etc.
+ */
+void
+read_conf_files(int cold)
+{
+  const char *filename = NULL;
+  char chanmodes[IRCD_BUFSIZE] = "";
+  char chanlimit[IRCD_BUFSIZE] = "";
+
+  conf_parser_ctx.boot = cold;
+  filename = ConfigGeneral.configfile;
+
+  /* We need to know the initial filename for the yyerror() to report
+     FIXME: The full path is in conffilenamebuf first time since we
+             don't know anything else
+
+     - Gozem 2002-07-21
+  */
+  strlcpy(conffilebuf, filename, sizeof(conffilebuf));
+
+  if ((conf_parser_ctx.conf_file = fopen(filename, "r")) == NULL)
+  {
+    if (cold)
+    {
+      ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
+           filename, strerror(errno));
+      exit(-1);
+    }
+    else
+    {
+      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                           "Unable to read configuration file '%s': %s",
+                           filename, strerror(errno));
+      return;
+    }
+  }
+
+  if (!cold)
+    clear_out_old_conf();
+
+  read_conf(conf_parser_ctx.conf_file);
+  fclose(conf_parser_ctx.conf_file);
+
+  log_reopen_all();
+
+  add_isupport("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
+  add_isupport("NETWORK", ConfigServerInfo.network_name, -1);
+
+  snprintf(chanmodes, sizeof(chanmodes), "beI:%d", ConfigChannel.max_bans);
+  add_isupport("MAXLIST", chanmodes, -1);
+  add_isupport("MAXTARGETS", NULL, ConfigGeneral.max_targets);
+  add_isupport("CHANTYPES", "#", -1);
+
+  snprintf(chanlimit, sizeof(chanlimit), "#:%d",
+           ConfigChannel.max_channels);
+  add_isupport("CHANLIMIT", chanlimit, -1);
+  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstMORS");
+  add_isupport("CHANNELLEN", NULL, CHANNELLEN);
+  add_isupport("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
+  add_isupport("CHANMODES", chanmodes, -1);
+
+  /*
+   * message_locale may have changed.  rebuild isupport since it relies
+   * on strlen(form_str(RPL_ISUPPORT))
+   */
+  rebuild_isupport_message_line();
 }
 
 /* conf_add_class_to_conf()
@@ -1544,162 +1536,13 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
   return 0;
 }
 
-/* XXX should this go into a separate file ? -Dianora */
-/* parse_aline
- *
- * input        - pointer to cmd name being used
- *              - pointer to client using cmd
- *              - parc parameter count
- *              - parv[] list of parameters to parse
- *		- parse_flags bit map of things to test
- *		- pointer to user or string to parse into
- *              - pointer to host or NULL to parse into if non NULL
- *              - pointer to optional tkline time or NULL
- *              - pointer to target_server to parse into if non NULL
- *              - pointer to reason to parse into
- *
- * output       - 1 if valid, -1 if not valid
- * side effects - A generalised k/d/x etc. line parser,
- *               "ALINE [time] user@host|string [ON] target :reason"
- *                will parse returning a parsed user, host if
- *                h_p pointer is non NULL, string otherwise.
- *                if tkline_time pointer is non NULL a tk line will be set
- *                to non zero if found.
- *                if tkline_time pointer is NULL and tk line is found,
- *                error is reported.
- *                if target_server is NULL and an "ON" is found error
- *                is reported.
- *                if reason pointer is NULL ignore pointer,
- *                this allows use of parse_a_line in unkline etc.
- *
- * - Dianora
- */
-int
-parse_aline(const char *cmd, struct Client *source_p,
-            int parc, char **parv,
-            int parse_flags, char **up_p, char **h_p, time_t *tkline_time,
-            char **target_server, char **reason)
-{
-  int found_tkline_time=0;
-  static char def_reason[] = CONF_NOREASON;
-  static char user[USERLEN*4+1];
-  static char host[HOSTLEN*4+1];
-
-  parv++;
-  parc--;
-
-  found_tkline_time = valid_tkline(*parv, TK_MINUTES);
-
-  if (found_tkline_time != 0)
-  {
-    parv++;
-    parc--;
-
-    if (tkline_time != NULL)
-      *tkline_time = found_tkline_time;
-    else
-    {
-      sendto_one_notice(source_p, &me, ":temp_line not supported by %s", cmd);
-      return -1;
-    }
-  }
-
-  if (parc == 0)
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
-    return -1;
-  }
-
-  if (h_p == NULL)
-    *up_p = *parv;
-  else
-  {
-    if (find_user_host(source_p, *parv, user, host, parse_flags) == 0)
-      return -1;
-
-    *up_p = user;
-    *h_p = host;
-  }
-
-  parc--;
-  parv++;
-
-  if (parc != 0)
-  {
-    if (irccmp(*parv, "ON") == 0)
-    {
-      parc--;
-      parv++;
-
-      if (target_server == NULL)
-      {
-        sendto_one_notice(source_p, &me, ":ON server not supported by %s", cmd);
-        return -1;
-      }
-
-      if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
-      {
-        sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "remoteban");
-        return -1;
-      }
-
-      if (parc == 0 || EmptyString(*parv))
-      {
-        sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
-        return -1;
-      }
-
-      *target_server = *parv;
-      parc--;
-      parv++;
-    }
-    else
-    {
-      /* Make sure target_server *is* NULL if no ON server found
-       * caller probably NULL'd it first, but no harm to do it again -db
-       */
-      if (target_server != NULL)
-        *target_server = NULL;
-    }
-  }
-
-  if (h_p != NULL)
-  {
-    if (strchr(user, '!') != NULL)
-    {
-      sendto_one_notice(source_p, &me, ":Invalid character '!' in kline");
-      return -1;
-    }
-
-    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, 2, *up_p, *h_p))
-      return -1;
-  }
-  else
-    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, 1, *up_p))
-      return -1;
-
-  if (reason != NULL)
-  {
-    if (parc != 0 && !EmptyString(*parv))
-    {
-      *reason = *parv;
-      if (!valid_comment(source_p, *reason, 1))
-        return -1;
-    }
-    else
-      *reason = def_reason;
-  }
-
-  return 1;
-}
-
 /* find_user_host()
  *
- * inputs	- pointer to client placing kline
+ * inputs       - pointer to client placing kline
  *              - pointer to user_host_or_nick
  *              - pointer to user buffer
  *              - pointer to host buffer
- * output	- 0 if not ok to kline, 1 to kline i.e. if valid user host
+ * output       - 0 if not ok to kline, 1 to kline i.e. if valid user host
  * side effects -
  */
 static int
@@ -1718,10 +1561,10 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
   if ((hostp = strchr(user_host_or_nick, '@')) || *user_host_or_nick == '*')
   {
     /* Explicit user@host mask given */
-
-    if (hostp != NULL)                            /* I'm a little user@host */
+    if (hostp)                            /* I'm a little user@host */
     {
       *(hostp++) = '\0';                       /* short and squat */
+
       if (*user_host_or_nick)
         strlcpy(luser, user_host_or_nick, USERLEN*4 + 1); /* here is my user */
       else
@@ -1773,6 +1616,156 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
   }
 
   return 0;
+}
+
+/* XXX should this go into a separate file ? -Dianora */
+/* parse_aline
+ *
+ * input        - pointer to cmd name being used
+ *              - pointer to client using cmd
+ *              - parc parameter count
+ *              - parv[] list of parameters to parse
+ *		- parse_flags bit map of things to test
+ *		- pointer to user or string to parse into
+ *              - pointer to host or NULL to parse into if non NULL
+ *              - pointer to optional tkline time or NULL
+ *              - pointer to target_server to parse into if non NULL
+ *              - pointer to reason to parse into
+ *
+ * output       - 1 if valid, -1 if not valid
+ * side effects - A generalised k/d/x etc. line parser,
+ *               "ALINE [time] user@host|string [ON] target :reason"
+ *                will parse returning a parsed user, host if
+ *                h_p pointer is non NULL, string otherwise.
+ *                if tkline_time pointer is non NULL a tk line will be set
+ *                to non zero if found.
+ *                if tkline_time pointer is NULL and tk line is found,
+ *                error is reported.
+ *                if target_server is NULL and an "ON" is found error
+ *                is reported.
+ *                if reason pointer is NULL ignore pointer,
+ *                this allows use of parse_a_line in unkline etc.
+ *
+ * - Dianora
+ */
+int
+parse_aline(const char *cmd, struct Client *source_p,
+            int parc, char **parv,
+            int parse_flags, char **up_p, char **h_p, time_t *tkline_time,
+            char **target_server, char **reason)
+{
+  int found_tkline_time=0;
+  static char def_reason[] = CONF_NOREASON;
+  static char user[USERLEN*4+1];
+  static char host[HOSTLEN*4+1];
+
+  parv++;
+  parc--;
+
+  found_tkline_time = valid_tkline(*parv, TK_MINUTES);
+
+  if (found_tkline_time)
+  {
+    parv++;
+    parc--;
+
+    if (tkline_time)
+      *tkline_time = found_tkline_time;
+    else
+    {
+      sendto_one_notice(source_p, &me, ":temp_line not supported by %s", cmd);
+      return -1;
+    }
+  }
+
+  if (parc == 0)
+  {
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
+    return -1;
+  }
+
+  if (h_p == NULL)
+    *up_p = *parv;
+  else
+  {
+    if (find_user_host(source_p, *parv, user, host, parse_flags) == 0)
+      return -1;
+
+    *up_p = user;
+    *h_p = host;
+  }
+
+  parc--;
+  parv++;
+
+  if (parc)
+  {
+    if (irccmp(*parv, "ON") == 0)
+    {
+      parc--;
+      parv++;
+
+      if (target_server == NULL)
+      {
+        sendto_one_notice(source_p, &me, ":ON server not supported by %s", cmd);
+        return -1;
+      }
+
+      if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
+      {
+        sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "remoteban");
+        return -1;
+      }
+
+      if (parc == 0 || EmptyString(*parv))
+      {
+        sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
+        return -1;
+      }
+
+      *target_server = *parv;
+      parc--;
+      parv++;
+    }
+    else
+    {
+      /* Make sure target_server *is* NULL if no ON server found
+       * caller probably NULL'd it first, but no harm to do it again -db
+       */
+      if (target_server)
+        *target_server = NULL;
+    }
+  }
+
+  if (h_p)
+  {
+    if (strchr(user, '!'))
+    {
+      sendto_one_notice(source_p, &me, ":Invalid character '!' in kline");
+      return -1;
+    }
+
+    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, 2, *up_p, *h_p))
+      return -1;
+  }
+  else
+    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, 1, *up_p))
+      return -1;
+
+  if (reason)
+  {
+    if (parc && !EmptyString(*parv))
+    {
+      *reason = *parv;
+
+      if (!valid_comment(source_p, *reason, 1))
+        return -1;
+    }
+    else
+      *reason = def_reason;
+  }
+
+  return 1;
 }
 
 /* valid_comment()
@@ -1884,8 +1877,10 @@ split_nuh(struct split_nuh_item *const iptr)
 
   if (iptr->nickptr)
     strlcpy(iptr->nickptr, "*", iptr->nicksize);
+
   if (iptr->userptr)
     strlcpy(iptr->userptr, "*", iptr->usersize);
+
   if (iptr->hostptr)
     strlcpy(iptr->hostptr, "*", iptr->hostsize);
 

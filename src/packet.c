@@ -42,7 +42,33 @@
 #define READBUF_SIZE 16384
 
 static char readBuf[READBUF_SIZE];
-static void client_dopacket(struct Client *, char *, size_t);
+
+
+/*
+ * client_dopacket - copy packet to client buf and parse it
+ *      client_p - pointer to client structure for which the buffer data
+ *             applies.
+ *      buffer - pointr to the buffer containing the newly read data
+ *      length - number of valid bytes of data in the buffer
+ *
+ * Note:
+ *      It is implicitly assumed that dopacket is called only
+ *      with client_p of "local" variation, which contains all the
+ *      necessary fields (buffer etc..)
+ */
+static void
+client_dopacket(struct Client *client_p, char *buffer, size_t length)
+{
+  /* Update messages received */
+  ++me.connection->recv.messages;
+  ++client_p->connection->recv.messages;
+
+  /* Update bytes received */
+  client_p->connection->recv.bytes += length;
+  me.connection->recv.bytes += length;
+
+  parse(client_p, buffer, buffer + length);
+}
 
 /* extract_one_line()
  *
@@ -124,30 +150,30 @@ parse_client_queued(struct Client *client_p)
 {
   int dolen = 0;
   int checkflood = 1;
-  struct Connection *lclient_p = client_p->connection;
 
   if (IsUnknown(client_p))
   {
-    int i = 0;
+    unsigned int i = 0;
 
     while (1)
     {
       if (IsDefunct(client_p))
         return;
 
-      /* rate unknown clients at MAX_FLOOD per loop */
+      /* Rate unknown clients at MAX_FLOOD per loop */
       if (i >= MAX_FLOOD)
         break;
 
-      dolen = extract_one_line(&lclient_p->buf_recvq, readBuf);
+      dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
 
       if (dolen == 0)
         break;
 
       client_dopacket(client_p, readBuf, dolen);
-      i++;
+      ++i;
 
-      /* if they've dropped out of the unknown state, break and move
+      /*
+       * If they've dropped out of the unknown state, break and move
        * to the parsing for their appropriate status.  --fl
        */
       if (!IsUnknown(client_p))
@@ -162,7 +188,7 @@ parse_client_queued(struct Client *client_p)
       if (IsDefunct(client_p))
         return;
 
-      if ((dolen = extract_one_line(&lclient_p->buf_recvq, readBuf)) == 0)
+      if ((dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf)) == 0)
         break;
 
       client_dopacket(client_p, readBuf, dolen);
@@ -188,7 +214,8 @@ parse_client_queued(struct Client *client_p)
       if (IsDefunct(client_p))
         break;
 
-      /* This flood protection works as follows:
+      /*
+       * This flood protection works as follows:
        *
        * A client is given allow_read lines to send to the server.  Every
        * time a line is parsed, sent_parsed is increased.  sent_parsed
@@ -203,7 +230,7 @@ parse_client_queued(struct Client *client_p)
        */
       if (checkflood > 0)
       {
-        if (lclient_p->sent_parsed >= lclient_p->allow_read)
+        if (client_p->connection->sent_parsed >= client_p->connection->allow_read)
           break;
       }
 
@@ -211,16 +238,17 @@ parse_client_queued(struct Client *client_p)
        * Allow opers 4 times the amount of messages as users. why 4?
        * why not. :) --fl_
        */
-      else if (lclient_p->sent_parsed >= (4 * lclient_p->allow_read) && checkflood != -1)
+      else if (client_p->connection->sent_parsed >=
+               (4 * client_p->connection->allow_read) && checkflood != -1)
         break;
 
-      dolen = extract_one_line(&lclient_p->buf_recvq, readBuf);
+      dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
 
       if (dolen == 0)
         break;
 
       client_dopacket(client_p, readBuf, dolen);
-      lclient_p->sent_parsed++;
+      ++client_p->connection->sent_parsed;
     }
   }
 }
@@ -237,7 +265,8 @@ flood_endgrace(struct Client *client_p)
   /* Drop their flood limit back down */
   client_p->connection->allow_read = MAX_FLOOD;
 
-  /* sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,
+  /*
+   * sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,
    * so reset it.
    */
   client_p->connection->sent_parsed = 0;
@@ -252,20 +281,19 @@ flood_endgrace(struct Client *client_p)
 void
 flood_recalc(fde_t *fd, void *data)
 {
-  struct Client *client_p = data;
-  struct Connection *lclient_p = client_p->connection;
+  struct Client *const client_p = data;
 
   /*
    * Allow a bursting client their allocation per second, allow
    * a client whos flooding an extra 2 per second
    */
   if (IsFloodDone(client_p))
-    lclient_p->sent_parsed -= 2;
+    client_p->connection->sent_parsed -= 2;
   else
-    lclient_p->sent_parsed = 0;
+    client_p->connection->sent_parsed = 0;
 
-  if (lclient_p->sent_parsed < 0)
-    lclient_p->sent_parsed = 0;
+  if (client_p->connection->sent_parsed < 0)
+    client_p->connection->sent_parsed = 0;
 
   parse_client_queued(client_p);
 
@@ -283,7 +311,7 @@ flood_recalc(fde_t *fd, void *data)
 void
 read_packet(fde_t *fd, void *data)
 {
-  struct Client *client_p = data;
+  struct Client *const client_p = data;
   int length = 0;
 
   if (IsDefunct(client_p))
@@ -374,34 +402,4 @@ read_packet(fde_t *fd, void *data)
 
   /* If we get here, we need to register for another COMM_SELECT_READ */
   comm_setselect(fd, COMM_SELECT_READ, read_packet, client_p, 0);
-}
-
-/*
- * client_dopacket - copy packet to client buf and parse it
- *      client_p - pointer to client structure for which the buffer data
- *             applies.
- *      buffer - pointr to the buffer containing the newly read data
- *      length - number of valid bytes of data in the buffer
- *
- * Note:
- *      It is implicitly assumed that dopacket is called only
- *      with client_p of "local" variation, which contains all the
- *      necessary fields (buffer etc..)
- */
-static void
-client_dopacket(struct Client *client_p, char *buffer, size_t length)
-{
-  /*
-   * Update messages received
-   */
-  ++me.connection->recv.messages;
-  ++client_p->connection->recv.messages;
-
-  /*
-   * Update bytes received
-   */
-  client_p->connection->recv.bytes += length;
-  me.connection->recv.bytes += length;
-
-  parse(client_p, buffer, buffer + length);
 }

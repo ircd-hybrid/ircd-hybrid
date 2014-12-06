@@ -730,7 +730,7 @@ valid_nickname(const char *nickname, const int local)
 {
   const char *p = nickname;
 
-  assert(nickname && *nickname);
+  assert(p);
 
   /*
    * Nicks can't start with a digit or - or be 0 length.

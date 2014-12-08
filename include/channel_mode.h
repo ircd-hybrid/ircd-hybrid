@@ -30,7 +30,7 @@
 #define MODEBUFLEN    200
 
 /* Maximum mode changes allowed per client, per server is different */
-#define MAXMODEPARAMS 4
+#define MAXMODEPARAMS 6
 
 enum
 {

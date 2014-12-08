@@ -229,7 +229,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
 
 /* me_kline - handle remote kline. no propagation */
 static int
-me_kline(struct Client *source_p, int parc, char *parv[])
+ms_kline(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE];
   struct MaskItem *conf = NULL;
@@ -238,6 +238,11 @@ me_kline(struct Client *source_p, int parc, char *parv[])
 
   if (parc != 6 || EmptyString(parv[5]))
     return 0;
+
+  /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
+  /* command  target_server  tkline_time  user     host     reason */
+  sendto_match_servs(source_p, parv[1], CAP_KLN, "KLINE %s %s %s %s :%s",
+                     parv[1], parv[2], parv[3], parv[4], parv[5]);
 
   if (match(parv[1], me.name))
     return 0;
@@ -272,24 +277,10 @@ me_kline(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-static int
-ms_kline(struct Client *source_p, int parc, char *parv[])
-{
-  if (parc != 6 || EmptyString(parv[5]))
-    return 0;
-
-  /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
-  /* command  target_server  tkline_time  user     host     reason */
-  sendto_match_servs(source_p, parv[1], CAP_KLN, "KLINE %s %s %s %s :%s",
-                     parv[1], parv[2], parv[3], parv[4], parv[5]);
-
-  return me_kline(source_p, parc, parv);
-}
-
 static struct Message kline_msgtab =
 {
   "KLINE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_not_oper, ms_kline, me_kline, mo_kline, m_ignore }
+  { m_unregistered, m_not_oper, ms_kline, m_ignore, mo_kline, m_ignore }
 };
 
 static void

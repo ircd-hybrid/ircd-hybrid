@@ -497,12 +497,6 @@ static const struct InfoStruct info_table[] =
     "Reduce flood control for operators"
   },
   {
-    "true_no_oper_flood",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigGeneral.true_no_oper_flood,
-    "Completely disable flood control for operators"
-  },
-  {
     "oper_pass_resv",
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.oper_pass_resv,

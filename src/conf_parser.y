@@ -364,7 +364,6 @@ reset_block_state(void)
 %token  THROTTLE_TIME
 %token  TKLINE_EXPIRE_NOTICES
 %token  TMASKED
-%token  TRUE_NO_OPER_FLOOD
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
 %token  TWODOTS
@@ -2554,7 +2553,6 @@ general_item:       general_away_count |
                     general_stats_u_oper_only |
                     general_short_motd |
                     general_no_oper_flood |
-                    general_true_no_oper_flood |
                     general_oper_pass_resv |
                     general_oper_only_umodes |
                     general_max_targets |
@@ -2771,11 +2769,6 @@ general_short_motd: SHORT_MOTD '=' TBOOL ';'
 general_no_oper_flood: NO_OPER_FLOOD '=' TBOOL ';'
 {
   ConfigGeneral.no_oper_flood = yylval.number;
-};
-
-general_true_no_oper_flood: TRUE_NO_OPER_FLOOD '=' TBOOL ';'
-{
-  ConfigGeneral.true_no_oper_flood = yylval.number;
 };
 
 general_oper_pass_resv: OPER_PASS_RESV '=' TBOOL ';'

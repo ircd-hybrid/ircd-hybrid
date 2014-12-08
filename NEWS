@@ -5,6 +5,9 @@ o) Fixed broken 'make install -jX'
 o) m_opme.c has been added to modules/extra. Can be used on opless channels only.
 o) Updated several help files
 o) The general::hide_spoof_ips configuration option has been deprecated
+o) The general::true_no_oper_flood configuration option has been deprecated.
+   Operators still can have higher 'flood' limits with no_oper_flood = yes;
+   hoewever, they are no longer allowed to bypass RecvQ limits.
 
 
 -- Noteworthy changes in version 8.2.1 (2014-10-21)

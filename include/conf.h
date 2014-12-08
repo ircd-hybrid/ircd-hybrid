@@ -233,7 +233,6 @@ struct
   unsigned int stats_u_oper_only;
   unsigned int short_motd;
   unsigned int no_oper_flood;
-  unsigned int true_no_oper_flood;
   unsigned int oper_pass_resv;
   unsigned int glines;
   unsigned int tkline_expire_notices;

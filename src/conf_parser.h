@@ -263,19 +263,18 @@ extern int yydebug;
     THROTTLE_TIME = 473,
     TKLINE_EXPIRE_NOTICES = 474,
     TMASKED = 475,
-    TRUE_NO_OPER_FLOOD = 476,
-    TS_MAX_DELTA = 477,
-    TS_WARN_DELTA = 478,
-    TWODOTS = 479,
-    TYPE = 480,
-    UNKLINE = 481,
-    USE_EGD = 482,
-    USE_LOGGING = 483,
-    USER = 484,
-    VHOST = 485,
-    VHOST6 = 486,
-    WARN_NO_CONNECT_BLOCK = 487,
-    XLINE = 488
+    TS_MAX_DELTA = 476,
+    TS_WARN_DELTA = 477,
+    TWODOTS = 478,
+    TYPE = 479,
+    UNKLINE = 480,
+    USE_EGD = 481,
+    USE_LOGGING = 482,
+    USER = 483,
+    VHOST = 484,
+    VHOST6 = 485,
+    WARN_NO_CONNECT_BLOCK = 486,
+    XLINE = 487
   };
 #endif
 /* Tokens.  */
@@ -497,19 +496,18 @@ extern int yydebug;
 #define THROTTLE_TIME 473
 #define TKLINE_EXPIRE_NOTICES 474
 #define TMASKED 475
-#define TRUE_NO_OPER_FLOOD 476
-#define TS_MAX_DELTA 477
-#define TS_WARN_DELTA 478
-#define TWODOTS 479
-#define TYPE 480
-#define UNKLINE 481
-#define USE_EGD 482
-#define USE_LOGGING 483
-#define USER 484
-#define VHOST 485
-#define VHOST6 486
-#define WARN_NO_CONNECT_BLOCK 487
-#define XLINE 488
+#define TS_MAX_DELTA 476
+#define TS_WARN_DELTA 477
+#define TWODOTS 478
+#define TYPE 479
+#define UNKLINE 480
+#define USE_EGD 481
+#define USE_LOGGING 482
+#define USER 483
+#define VHOST 484
+#define VHOST6 485
+#define WARN_NO_CONNECT_BLOCK 486
+#define XLINE 487
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -521,7 +519,7 @@ union YYSTYPE
   int number;
   char *string;
 
-#line 525 "conf_parser.h" /* yacc.c:1909  */
+#line 523 "conf_parser.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

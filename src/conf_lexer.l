@@ -325,7 +325,6 @@ target                      { return T_TARGET; }
 throttle_count              { return THROTTLE_COUNT; }
 throttle_time               { return THROTTLE_TIME; }
 tkline_expire_notices       { return TKLINE_EXPIRE_NOTICES; }
-true_no_oper_flood          { return TRUE_NO_OPER_FLOOD; }
 ts_max_delta                { return TS_MAX_DELTA; }
 ts_warn_delta               { return TS_WARN_DELTA; }
 type                        { return TYPE; }

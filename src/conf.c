@@ -868,7 +868,6 @@ set_default_conf(void)
   ConfigGeneral.short_motd = 0;
   ConfigGeneral.ping_cookie = 0;
   ConfigGeneral.no_oper_flood = 0;
-  ConfigGeneral.true_no_oper_flood = 0;
   ConfigGeneral.oper_pass_resv = 1;
   ConfigGeneral.max_targets = MAX_TARGETS_DEFAULT;
   ConfigGeneral.oper_only_umodes = UMODE_DEBUG;

@@ -52,7 +52,7 @@ static char readBuf[READBUF_SIZE];
  *      length - number of valid bytes of data in the buffer
  *
  * Note:
- *      It is implicitly assumed that dopacket is called only
+ *      It is implicitly assumed that client_dopacket() is called only
  *      with client_p of "local" variation, which contains all the
  *      necessary fields (buffer etc..)
  */
@@ -149,7 +149,6 @@ static void
 parse_client_queued(struct Client *client_p)
 {
   int dolen = 0;
-  int checkflood = 1;
 
   if (IsUnknown(client_p))
   {
@@ -196,13 +195,12 @@ parse_client_queued(struct Client *client_p)
   }
   else if (IsClient(client_p))
   {
-    if (ConfigGeneral.no_oper_flood && (HasUMode(client_p, UMODE_OPER) || IsCanFlood(client_p)))
-    {
-      if (ConfigGeneral.true_no_oper_flood)
-        checkflood = -1;
-      else
-        checkflood = 0;
-    }
+    unsigned int checkflood = 1;
+
+    if (ConfigGeneral.no_oper_flood && HasUMode(client_p, UMODE_OPER))
+      checkflood = 0;
+    else if (IsCanFlood(client_p))
+      checkflood = 0;
 
     /*
      * Handle flood protection here - if we exceed our flood limit on
@@ -228,19 +226,9 @@ parse_client_queued(struct Client *client_p)
        * as sent_parsed will always hover around the allow_read limit
        * and no 'bursts' will be permitted.
        */
-      if (checkflood > 0)
-      {
+      if (checkflood)
         if (client_p->connection->sent_parsed >= client_p->connection->allow_read)
           break;
-      }
-
-      /*
-       * Allow opers 4 times the amount of messages as users. why 4?
-       * why not. :) --fl_
-       */
-      else if (client_p->connection->sent_parsed >=
-               (4 * client_p->connection->allow_read) && checkflood != -1)
-        break;
 
       dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
 
@@ -383,15 +371,12 @@ read_packet(fde_t *fd, void *data)
       return;
 
     /* Check to make sure we're not flooding */
-    if (!(IsServer(client_p) || IsHandshake(client_p) || IsConnecting(client_p))
-        && (dbuf_length(&client_p->connection->buf_recvq) >
-            get_recvq(&client_p->connection->confs)))
+    if (!(IsServer(client_p) || IsHandshake(client_p) || IsConnecting(client_p)) &&
+        (dbuf_length(&client_p->connection->buf_recvq) >
+         get_recvq(&client_p->connection->confs)))
     {
-      if (!(ConfigGeneral.no_oper_flood && HasUMode(client_p, UMODE_OPER)))
-      {
-        exit_client(client_p, "Excess Flood");
-        return;
-      }
+      exit_client(client_p, "Excess Flood");
+      return;
     }
   }
 #ifdef HAVE_LIBCRYPTO

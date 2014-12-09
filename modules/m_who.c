@@ -288,7 +288,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   }
 
   /* '/who nick' */
-  if (((target_p = hash_find_client(mask))) && IsClient(target_p) &&
+  if ((target_p = find_person(source_p, mask)) &&
       (!server_oper || HasUMode(target_p, UMODE_OPER)))
   {
     DLINK_FOREACH(node, target_p->channel.head)

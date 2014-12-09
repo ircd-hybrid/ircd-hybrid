@@ -89,9 +89,9 @@ do_etrace(struct Client *source_p, const char *arg)
 
   if (!wilds && !do_all)
   {
-    const struct Client *target_p = hash_find_client(tname);
+    const struct Client *target_p = find_person(source_p, tname);
 
-    if (target_p && MyClient(target_p))
+    if (target_p && MyConnect(target_p))
       report_this_status(source_p, target_p);
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, tname);

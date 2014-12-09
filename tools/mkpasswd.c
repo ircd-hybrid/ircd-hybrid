@@ -133,7 +133,7 @@ main(int argc, char *argv[])
   {
     if (flag & FLAG_SALT)
     {
-      if ((strlen(saltpara) == 2))
+      if (strlen(saltpara) == 2)
         salt = saltpara;
       else
       {
@@ -176,7 +176,7 @@ main(int argc, char *argv[])
     /* XXX - rounds needs to be done */
     if (flag & FLAG_SALT)
     {
-      if ((strlen(saltpara) == 4))
+      if (strlen(saltpara) == 4)
       {
         salt = make_ext_salt_para(rounds, saltpara);
       }

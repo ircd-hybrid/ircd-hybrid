@@ -64,11 +64,9 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /* TBD: add 'opme' to oper::flags */
-  if (!HasUMode(source_p, UMODE_ADMIN))
+  if (!HasOFlag(source_p, OPER_FLAG_OPME))
   {
-    // sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "opme");
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "opme");
     return 0;
   }
 

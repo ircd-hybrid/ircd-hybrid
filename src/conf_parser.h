@@ -232,49 +232,50 @@ extern int yydebug;
     T_MAX_CLIENTS = 442,
     T_NCHANGE = 443,
     T_NONONREG = 444,
-    T_PREPEND = 445,
-    T_PSEUDO = 446,
-    T_RECVQ = 447,
-    T_REJ = 448,
-    T_RESTART = 449,
-    T_SERVER = 450,
-    T_SERVICE = 451,
-    T_SERVNOTICE = 452,
-    T_SET = 453,
-    T_SHARED = 454,
-    T_SIZE = 455,
-    T_SKILL = 456,
-    T_SOFTCALLERID = 457,
-    T_SPY = 458,
-    T_SSL = 459,
-    T_SSL_CIPHER_LIST = 460,
-    T_TARGET = 461,
-    T_UMODES = 462,
-    T_UNAUTH = 463,
-    T_UNDLINE = 464,
-    T_UNLIMITED = 465,
-    T_UNRESV = 466,
-    T_UNXLINE = 467,
-    T_WALLOP = 468,
-    T_WALLOPS = 469,
-    T_WEBIRC = 470,
-    TBOOL = 471,
-    THROTTLE_COUNT = 472,
-    THROTTLE_TIME = 473,
-    TKLINE_EXPIRE_NOTICES = 474,
-    TMASKED = 475,
-    TS_MAX_DELTA = 476,
-    TS_WARN_DELTA = 477,
-    TWODOTS = 478,
-    TYPE = 479,
-    UNKLINE = 480,
-    USE_EGD = 481,
-    USE_LOGGING = 482,
-    USER = 483,
-    VHOST = 484,
-    VHOST6 = 485,
-    WARN_NO_CONNECT_BLOCK = 486,
-    XLINE = 487
+    T_OPME = 445,
+    T_PREPEND = 446,
+    T_PSEUDO = 447,
+    T_RECVQ = 448,
+    T_REJ = 449,
+    T_RESTART = 450,
+    T_SERVER = 451,
+    T_SERVICE = 452,
+    T_SERVNOTICE = 453,
+    T_SET = 454,
+    T_SHARED = 455,
+    T_SIZE = 456,
+    T_SKILL = 457,
+    T_SOFTCALLERID = 458,
+    T_SPY = 459,
+    T_SSL = 460,
+    T_SSL_CIPHER_LIST = 461,
+    T_TARGET = 462,
+    T_UMODES = 463,
+    T_UNAUTH = 464,
+    T_UNDLINE = 465,
+    T_UNLIMITED = 466,
+    T_UNRESV = 467,
+    T_UNXLINE = 468,
+    T_WALLOP = 469,
+    T_WALLOPS = 470,
+    T_WEBIRC = 471,
+    TBOOL = 472,
+    THROTTLE_COUNT = 473,
+    THROTTLE_TIME = 474,
+    TKLINE_EXPIRE_NOTICES = 475,
+    TMASKED = 476,
+    TS_MAX_DELTA = 477,
+    TS_WARN_DELTA = 478,
+    TWODOTS = 479,
+    TYPE = 480,
+    UNKLINE = 481,
+    USE_EGD = 482,
+    USE_LOGGING = 483,
+    USER = 484,
+    VHOST = 485,
+    VHOST6 = 486,
+    WARN_NO_CONNECT_BLOCK = 487,
+    XLINE = 488
   };
 #endif
 /* Tokens.  */
@@ -465,49 +466,50 @@ extern int yydebug;
 #define T_MAX_CLIENTS 442
 #define T_NCHANGE 443
 #define T_NONONREG 444
-#define T_PREPEND 445
-#define T_PSEUDO 446
-#define T_RECVQ 447
-#define T_REJ 448
-#define T_RESTART 449
-#define T_SERVER 450
-#define T_SERVICE 451
-#define T_SERVNOTICE 452
-#define T_SET 453
-#define T_SHARED 454
-#define T_SIZE 455
-#define T_SKILL 456
-#define T_SOFTCALLERID 457
-#define T_SPY 458
-#define T_SSL 459
-#define T_SSL_CIPHER_LIST 460
-#define T_TARGET 461
-#define T_UMODES 462
-#define T_UNAUTH 463
-#define T_UNDLINE 464
-#define T_UNLIMITED 465
-#define T_UNRESV 466
-#define T_UNXLINE 467
-#define T_WALLOP 468
-#define T_WALLOPS 469
-#define T_WEBIRC 470
-#define TBOOL 471
-#define THROTTLE_COUNT 472
-#define THROTTLE_TIME 473
-#define TKLINE_EXPIRE_NOTICES 474
-#define TMASKED 475
-#define TS_MAX_DELTA 476
-#define TS_WARN_DELTA 477
-#define TWODOTS 478
-#define TYPE 479
-#define UNKLINE 480
-#define USE_EGD 481
-#define USE_LOGGING 482
-#define USER 483
-#define VHOST 484
-#define VHOST6 485
-#define WARN_NO_CONNECT_BLOCK 486
-#define XLINE 487
+#define T_OPME 445
+#define T_PREPEND 446
+#define T_PSEUDO 447
+#define T_RECVQ 448
+#define T_REJ 449
+#define T_RESTART 450
+#define T_SERVER 451
+#define T_SERVICE 452
+#define T_SERVNOTICE 453
+#define T_SET 454
+#define T_SHARED 455
+#define T_SIZE 456
+#define T_SKILL 457
+#define T_SOFTCALLERID 458
+#define T_SPY 459
+#define T_SSL 460
+#define T_SSL_CIPHER_LIST 461
+#define T_TARGET 462
+#define T_UMODES 463
+#define T_UNAUTH 464
+#define T_UNDLINE 465
+#define T_UNLIMITED 466
+#define T_UNRESV 467
+#define T_UNXLINE 468
+#define T_WALLOP 469
+#define T_WALLOPS 470
+#define T_WEBIRC 471
+#define TBOOL 472
+#define THROTTLE_COUNT 473
+#define THROTTLE_TIME 474
+#define TKLINE_EXPIRE_NOTICES 475
+#define TMASKED 476
+#define TS_MAX_DELTA 477
+#define TS_WARN_DELTA 478
+#define TWODOTS 479
+#define TYPE 480
+#define UNKLINE 481
+#define USE_EGD 482
+#define USE_LOGGING 483
+#define USER 484
+#define VHOST 485
+#define VHOST6 486
+#define WARN_NO_CONNECT_BLOCK 487
+#define XLINE 488
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -519,7 +521,7 @@ union YYSTYPE
   int number;
   char *string;
 
-#line 523 "conf_parser.h" /* yacc.c:1909  */
+#line 525 "conf_parser.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

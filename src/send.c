@@ -155,7 +155,7 @@ send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *b
 void
 sendq_unblocked(fde_t *fd, void *data)
 {
-  struct Client *client_p = data;
+  struct Client *const client_p = data;
   assert(fd == &client_p->connection->fd);
 
   DelFlag(client_p, FLAGS_BLOCKED);

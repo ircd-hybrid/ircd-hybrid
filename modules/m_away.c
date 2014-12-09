@@ -34,7 +34,6 @@
 #include "modules.h"
 #include "conf.h"
 #include "server.h"
-#include "packet.h"
 #include "user.h"
 
 
@@ -52,9 +51,6 @@
 static int
 m_away(struct Client *source_p, int parc, char *parv[])
 {
-  if (!IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
   if (parc < 2 || EmptyString(parv[1]))
   {
     /* Marking as not away */

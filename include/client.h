@@ -198,6 +198,7 @@ struct MaskItem;
 #define OPER_FLAG_WALLOPS        0x00100000U  /**< Oper can use WALLOPS command */
 #define OPER_FLAG_LOCOPS         0x00200000U  /**< Oper can use LOCOPS command */
 #define OPER_FLAG_UNXLINE        0x00400000U  /**< Oper can use UNXLINE command */
+#define OPER_FLAG_OPME           0x00800000U  /**< Oper can use OPME command */
 
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->connection->operflags & (y) : 0)

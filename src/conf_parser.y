@@ -333,6 +333,7 @@ reset_block_state(void)
 %token  T_MAX_CLIENTS
 %token  T_NCHANGE
 %token  T_NONONREG
+%token  T_OPME
 %token  T_PREPEND
 %token  T_PSEUDO
 %token  T_RECVQ
@@ -1441,6 +1442,10 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_MODULE;
+} | T_OPME
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_OPME;
 };
 
 

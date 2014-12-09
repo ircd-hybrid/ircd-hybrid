@@ -290,7 +290,7 @@ check_channel_name(const char *name, const int local)
 {
   const char *p = name;
 
-  assert(name != NULL);
+  assert(p);
 
   if (!IsChanPrefix(*p))
     return 0;

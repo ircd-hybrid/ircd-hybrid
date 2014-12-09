@@ -32,7 +32,6 @@
 #include "server.h"
 #include "send.h"
 #include "conf.h"
-#include "motd.h"
 #include "parse.h"
 #include "modules.h"
 

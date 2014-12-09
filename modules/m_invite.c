@@ -35,7 +35,6 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "server.h"
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"

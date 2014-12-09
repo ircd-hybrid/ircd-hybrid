@@ -35,7 +35,6 @@
 #include "log.h"
 #include "misc.h"
 #include "send.h"
-#include "hash.h"
 #include "server.h"
 #include "parse.h"
 #include "modules.h"

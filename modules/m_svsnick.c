@@ -30,8 +30,6 @@
 #include "client.h"
 #include "ircd.h"
 #include "channel_mode.h"
-#include "numeric.h"
-#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"

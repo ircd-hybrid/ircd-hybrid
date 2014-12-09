@@ -28,7 +28,6 @@
 #include "client.h"
 #include "irc_string.h"
 #include "server.h"
-#include "conf.h"
 #include "parse.h"
 #include "modules.h"
 

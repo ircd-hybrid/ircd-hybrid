@@ -32,14 +32,10 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "numeric.h"
-#include "user.h"
 #include "conf.h"
-#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 
 
 /*! \brief BMASK command handler

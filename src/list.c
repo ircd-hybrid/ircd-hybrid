@@ -233,7 +233,7 @@ dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
   m->next = list_add->head;
 
   /* Assumption: If list_add->tail != NULL, list_add->head != NULL */
-  if (list_add->head != NULL)
+  if (list_add->head)
     list_add->head->prev = m;
   else if (list_add->tail == NULL)
     list_add->tail = m;

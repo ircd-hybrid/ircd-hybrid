@@ -60,12 +60,12 @@ mo_hash(struct Client *source_p, int parc, char *parv[])
 
   for (i = 0; i < HASHSIZE; ++i)
   {
-    if ((cl = hash_get_bucket(HASH_TYPE_CLIENT, i)) != NULL)
+    if ((cl = hash_get_bucket(HASH_TYPE_CLIENT, i)))
     {
       unsigned int len = 0;
 
       ++buckets;
-      for (; cl != NULL; cl = cl->hnext)
+      for (; cl; cl = cl->hnext)
         ++len;
       if (len > max_chain)
         max_chain = len;
@@ -82,12 +82,12 @@ mo_hash(struct Client *source_p, int parc, char *parv[])
 
   for (i = 0; i < HASHSIZE; ++i)
   {
-    if ((ch = hash_get_bucket(HASH_TYPE_CHANNEL, i)) != NULL)
+    if ((ch = hash_get_bucket(HASH_TYPE_CHANNEL, i)))
     {
       unsigned int len = 0;
 
       ++buckets;
-      for (; ch != NULL; ch = ch->hnextch)
+      for (; ch; ch = ch->hnextch)
         ++len;
       if (len > max_chain)
         max_chain = len;
@@ -104,12 +104,12 @@ mo_hash(struct Client *source_p, int parc, char *parv[])
 
   for (i = 0; i < HASHSIZE; ++i)
   {
-    if ((icl = hash_get_bucket(HASH_TYPE_ID, i)) != NULL)
+    if ((icl = hash_get_bucket(HASH_TYPE_ID, i)))
     {
       unsigned int len = 0;
 
       ++buckets;
-      for (; icl != NULL; icl = icl->idhnext)
+      for (; icl; icl = icl->idhnext)
         ++len;
       if (len > max_chain)
         max_chain = len;
@@ -126,12 +126,12 @@ mo_hash(struct Client *source_p, int parc, char *parv[])
 
   for (i = 0; i < HASHSIZE; ++i)
   {
-    if ((ush = hash_get_bucket(HASH_TYPE_USERHOST, i)) != NULL)
+    if ((ush = hash_get_bucket(HASH_TYPE_USERHOST, i)))
     {
       unsigned int len = 0;
 
       ++buckets;
-      for (; ush != NULL; ush = ush->next)
+      for (; ush; ush = ush->next)
         ++len;
       if (len > max_chain)
         max_chain = len;

@@ -367,7 +367,8 @@ add_listener(int port, const char *vhost_ip, unsigned int flags)
   snprintf(portname, sizeof(portname), "%d", port);
   getaddrinfo("::", portname, &hints, &res);
   vaddr.ss.ss_family = AF_INET6;
-  assert(res != NULL);
+
+  assert(res);
 
   memcpy((struct sockaddr*)&vaddr, res->ai_addr, res->ai_addrlen);
   vaddr.ss_port = port;

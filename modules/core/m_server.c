@@ -233,8 +233,6 @@ server_estab(struct Client *client_p)
   const COMP_METHOD *compression = NULL, *expansion = NULL;
 #endif
 
-  assert(client_p);
-
   if ((conf = find_conf_name(&client_p->connection->confs, client_p->name, CONF_SERVER))
       == NULL)
   {

@@ -47,8 +47,6 @@ do_user(struct Client *source_p,
         const char *username,
         const char *realname)
 {
-  assert(source_p != NULL);
-  assert(source_p->username != username);
   assert(IsUnknown(source_p));
 
   source_p->connection->registration &= ~REG_NEED_USER;

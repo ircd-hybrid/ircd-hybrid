@@ -507,11 +507,7 @@ attach_connect_block(struct Client *client_p, const char *name,
 {
   dlink_node *node = NULL;
 
-  assert(client_p != NULL);
-  assert(host != NULL);
-
-  if (client_p == NULL || host == NULL)
-    return 0;
+  assert(host);
 
   DLINK_FOREACH(node, server_items.head)
   {
@@ -582,7 +578,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
 
       if (EmptyString(conf->name))
         continue;
-      if ((name != NULL) && !irccmp(name, conf->name))
+      if (name && !irccmp(name, conf->name))
         return conf;
     }
     break;
@@ -597,7 +593,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
 
       if (EmptyString(conf->name))
         continue;
-      if ((name != NULL) && !match(conf->name, name))
+      if (name && !match(conf->name, name))
       {
         if ((user == NULL && (host == NULL)))
           return conf;
@@ -616,9 +612,9 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
     {
       conf = node->data;
 
-      if ((name != NULL) && !match(name, conf->name))
+      if (name && !match(name, conf->name))
         return conf;
-      else if ((host != NULL) && !match(host, conf->host))
+      if (host && !match(host, conf->host))
         return conf;
     }
     break;
@@ -1179,7 +1175,7 @@ clear_out_old_conf(void)
    * Resetting structs, etc, is taken care of by set_default_conf().
    */
 
-  for (; *iterator != NULL; iterator++)
+  for (; *iterator; iterator++)
   {
     DLINK_FOREACH_SAFE(node, node_next, (*iterator)->head)
     {

@@ -33,7 +33,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "restart.h"
-#include "conf.h"
 
 
 /*! \brief DIE command handler

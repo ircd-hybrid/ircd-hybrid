@@ -31,12 +31,9 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "numeric.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "conf.h"
-#include "packet.h"
 
 
 /*! \brief SVSPART command handler

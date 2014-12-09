@@ -27,18 +27,13 @@
 #include "stdinc.h"
 #include "list.h"
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "numeric.h"
 #include "send.h"
-#include "server.h"
-#include "conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "resv.h"
 
 
 /*! \brief SVSJOIN command handler

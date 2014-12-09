@@ -36,7 +36,6 @@
 #include "conf.h"
 #include "log.h"
 #include "resv.h"
-#include "hash.h"
 
 
 static void

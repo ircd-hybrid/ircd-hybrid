@@ -119,7 +119,6 @@ make_client(struct Client *from)
 static void
 free_client(struct Client *client_p)
 {
-  assert(client_p);
   assert(client_p != &me);
   assert(client_p->hnext == client_p);
   assert(client_p->idhnext == client_p);
@@ -437,6 +436,7 @@ update_client_exit_stats(struct Client *client_p)
   if (IsClient(client_p))
   {
     assert(Count.total > 0);
+
     --Count.total;
     if (HasUMode(client_p, UMODE_OPER))
       --Count.oper;
@@ -523,8 +523,6 @@ const char *
 get_client_name(const struct Client *client_p, enum addr_mask_type type)
 {
   static char buf[HOSTLEN * 2 + USERLEN + 5];
-
-  assert(client_p);
 
   if (!MyConnect(client_p))
     return client_p->name;
@@ -732,6 +730,7 @@ exit_client(struct Client *source_p, const char *comment)
       time_t on_for = CurrentTime - source_p->connection->firsttime;
 
       assert(Count.local > 0);
+
       --Count.local;
 
       if (HasUMode(source_p, UMODE_OPER))
@@ -760,6 +759,7 @@ exit_client(struct Client *source_p, const char *comment)
     else if (IsServer(source_p))
     {
       assert(Count.myserver > 0);
+
       --Count.myserver;
 
       assert(dlinkFind(&local_server_list, source_p));

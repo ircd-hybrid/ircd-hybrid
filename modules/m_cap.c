@@ -141,8 +141,9 @@ find_cap(const char **caplist_p, int *neg_p)
  * @param[in] subcmd Name of capability subcommand.
  */
 static int
-send_caplist(struct Client *source_p, unsigned int set,
-             unsigned int rem, const char *subcmd)
+send_caplist(struct Client *source_p,
+             const unsigned int *const set,
+             const unsigned int *const rem, const char *subcmd)
 {
   char capbuf[IRCD_BUFSIZE] = "", pfx[16];
   char cmdbuf[IRCD_BUFSIZE] = "";
@@ -162,8 +163,8 @@ send_caplist(struct Client *source_p, unsigned int set,
      * capability if (and only if) it is set in \a rem or \a set, or
      * if both are null and the capability is hidden.
      */
-    if (!(rem && (rem & capab_list[i].cap)) &&
-        !(set && (set & capab_list[i].cap)) &&
+    if (!(rem && (*rem & capab_list[i].cap)) &&
+        !(set && (*set & capab_list[i].cap)) &&
          (rem || set || (flags & CAPFL_HIDDEN)))
       continue;
 
@@ -172,7 +173,7 @@ send_caplist(struct Client *source_p, unsigned int set,
 
     if (loc)
       pfx[pfx_len++] = ' ';
-    if (rem && (rem & capab_list[i].cap))
+    if (rem && (*rem & capab_list[i].cap))
       pfx[pfx_len++] = '-';
     else
     {
@@ -208,7 +209,7 @@ cap_ls(struct Client *source_p, const char *caplist)
   if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
     source_p->connection->registration |= REG_NEED_CAP;
 
-  return send_caplist(source_p, 0, 0, "LS");  /* Send list of capabilities */
+  return send_caplist(source_p, NULL, NULL, "LS");  /* Send list of capabilities */
 }
 
 static int
@@ -255,7 +256,7 @@ cap_req(struct Client *source_p, const char *caplist)
   }
 
   /* Notify client of accepted changes and copy over results. */
-  send_caplist(source_p, set, rem, "ACK");
+  send_caplist(source_p, &set, &rem, "ACK");
 
   source_p->connection->cap_client = cs;
   source_p->connection->cap_active = as;
@@ -279,8 +280,8 @@ cap_ack(struct Client *source_p, const char *caplist)
   {
     /* Walk through the capabilities list... */
     if (!(cap = find_cap(&cl, &neg)) ||  /* Look up capability... */
-        (neg ? (source_p->connection->cap_active & cap->cap) :
-              !(source_p->connection->cap_active & cap->cap)))  /* uh... */
+        (neg ? (source_p->connection->cap_client & cap->cap) :
+              !(source_p->connection->cap_client & cap->cap)))  /* uh... */
       continue;
 
     if (neg)  /* Set or clear the active capability... */
@@ -303,7 +304,7 @@ cap_clear(struct Client *source_p, const char *caplist)
     cap = &capab_list[ii];
 
     /* Only clear active non-sticky capabilities. */
-    if (!(source_p->connection->cap_active & cap->cap) || (cap->flags & CAPFL_STICKY))
+    if (!(source_p->connection->cap_client & cap->cap) || (cap->flags & CAPFL_STICKY))
       continue;
 
     cleared |= cap->cap;
@@ -313,7 +314,7 @@ cap_clear(struct Client *source_p, const char *caplist)
       source_p->connection->cap_active &= ~cap->cap;
   }
 
-  return send_caplist(source_p, 0, cleared, "ACK");
+  return send_caplist(source_p, NULL, &cleared, "ACK");
 }
 
 static int
@@ -339,7 +340,7 @@ static int
 cap_list(struct Client *source_p, const char *caplist)
 {
   /* Send the list of the client's capabilities */
-  return send_caplist(source_p, source_p->connection->cap_client, 0, "LIST");
+  return send_caplist(source_p, &source_p->connection->cap_client, NULL, "LIST");
 }
 
 static struct subcmd

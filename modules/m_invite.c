@@ -136,8 +136,8 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
     if (chptr->mode.mode & MODE_INVITEONLY)
     {
-      sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP,
-                            "NOTICE @%s :%s is inviting %s to %s.",
+      sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP | CHFL_HALFOP,
+                            "NOTICE %%%s :%s is inviting %s to %s.",
                             chptr->name, source_p->name,
                             target_p->name, chptr->name);
 
@@ -196,8 +196,8 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
 
     if (chptr->mode.mode & MODE_INVITEONLY)
     {
-      sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP,
-                            "NOTICE @%s :%s is inviting %s to %s.",
+      sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP | CHFL_HALFOP,
+                            "NOTICE %%%s :%s is inviting %s to %s.",
                             chptr->name, source_p->name,
                             target_p->name, chptr->name);
 

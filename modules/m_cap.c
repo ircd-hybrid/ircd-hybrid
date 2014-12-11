@@ -147,7 +147,7 @@ send_caplist(struct Client *source_p,
 {
   char capbuf[IRCD_BUFSIZE] = "", pfx[16];
   char cmdbuf[IRCD_BUFSIZE] = "";
-  unsigned int i, loc, len, flags, pfx_len, clen;
+  unsigned int i, loc, len, pfx_len, clen;
 
   /* Set up the buffer for the final LS message... */
   clen = snprintf(cmdbuf, sizeof(capbuf), ":%s CAP %s %s ", me.name,
@@ -155,7 +155,7 @@ send_caplist(struct Client *source_p,
 
   for (i = 0, loc = 0; i < CAPAB_LIST_LEN; ++i)
   {
-    flags = capab_list[i].flags;
+    const struct capabilities *cap = &capab_list[i];
 
     /*
      * This is a little bit subtle, but just involves applying de
@@ -163,9 +163,9 @@ send_caplist(struct Client *source_p,
      * capability if (and only if) it is set in \a rem or \a set, or
      * if both are null and the capability is hidden.
      */
-    if (!(rem && (*rem & capab_list[i].cap)) &&
-        !(set && (*set & capab_list[i].cap)) &&
-         (rem || set || (flags & CAPFL_HIDDEN)))
+    if (!(rem && (*rem & cap->cap)) &&
+        !(set && (*set & cap->cap)) &&
+         (rem || set || (cap->flags & CAPFL_HIDDEN)))
       continue;
 
     /* Build the prefix (space separator and any modifiers needed). */
@@ -173,19 +173,19 @@ send_caplist(struct Client *source_p,
 
     if (loc)
       pfx[pfx_len++] = ' ';
-    if (rem && (*rem & capab_list[i].cap))
+    if (rem && (*rem & cap->cap))
       pfx[pfx_len++] = '-';
     else
     {
-      if (flags & CAPFL_PROTO)
+      if (cap->flags & CAPFL_PROTO)
         pfx[pfx_len++] = '~';
-      if (flags & CAPFL_STICKY)
+      if (cap->flags & CAPFL_STICKY)
         pfx[pfx_len++] = '=';
     }
 
     pfx[pfx_len] = '\0';
 
-    len = capab_list[i].namelen + pfx_len;  /* How much we'd add... */
+    len = cap->namelen + pfx_len;  /* How much we'd add... */
 
     if (sizeof(capbuf) < (clen + loc + len + 15))
     {
@@ -195,7 +195,7 @@ send_caplist(struct Client *source_p,
     }
 
     loc += snprintf(capbuf + loc, sizeof(capbuf) - loc,
-                    "%s%s", pfx, capab_list[i].name);
+                    "%s%s", pfx, cap->name);
   }
 
   sendto_one(source_p, "%s:%s", cmdbuf, capbuf);

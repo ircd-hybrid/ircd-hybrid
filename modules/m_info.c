@@ -544,7 +544,7 @@ static const struct InfoStruct info_table[] =
     NULL,
     0,
     NULL,
-    0
+    NULL
   }
 };
 

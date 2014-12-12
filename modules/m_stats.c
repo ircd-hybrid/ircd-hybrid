@@ -1033,7 +1033,10 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
 static void
 stats_messages(struct Client *source_p, int parc, char *parv[])
 {
-  report_messages(source_p);
+  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_m_oper_only)
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+  else
+    report_messages(source_p);
 }
 
 static void

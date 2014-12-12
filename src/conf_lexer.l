@@ -319,6 +319,7 @@ ssl_message_digest_algorithm { return SSL_MESSAGE_DIGEST_ALGORITHM; }
 stats_e_disabled            { return STATS_E_DISABLED; }
 stats_i_oper_only           { return STATS_I_OPER_ONLY; }
 stats_k_oper_only           { return STATS_K_OPER_ONLY; }
+stats_m_oper_only           { return STATS_M_OPER_ONLY; }
 stats_o_oper_only           { return STATS_O_OPER_ONLY; }
 stats_P_oper_only           { return STATS_P_OPER_ONLY; }
 stats_u_oper_only           { return STATS_U_OPER_ONLY; }

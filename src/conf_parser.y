@@ -308,6 +308,7 @@ reset_block_state(void)
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
 %token  STATS_K_OPER_ONLY
+%token  STATS_M_OPER_ONLY
 %token  STATS_O_OPER_ONLY
 %token  STATS_P_OPER_ONLY
 %token  STATS_U_OPER_ONLY
@@ -2549,13 +2550,14 @@ general_item:       general_away_count |
                     general_invisible_on_connect |
                     general_warn_no_connect_block |
                     general_dots_in_ident |
-                    general_stats_o_oper_only |
-                    general_stats_k_oper_only |
-                    general_pace_wait |
                     general_stats_i_oper_only |
-                    general_pace_wait_simple |
+                    general_stats_k_oper_only |
+                    general_stats_m_oper_only |
+                    general_stats_o_oper_only |
                     general_stats_P_oper_only |
                     general_stats_u_oper_only |
+                    general_pace_wait |
+                    general_pace_wait_simple |
                     general_short_motd |
                     general_no_oper_flood |
                     general_oper_pass_resv |
@@ -2713,6 +2715,11 @@ general_warn_no_connect_block: WARN_NO_CONNECT_BLOCK '=' TBOOL ';'
 general_stats_e_disabled: STATS_E_DISABLED '=' TBOOL ';'
 {
   ConfigGeneral.stats_e_disabled = yylval.number;
+};
+
+general_stats_m_oper_only: STATS_M_OPER_ONLY '=' TBOOL ';'
+{
+  ConfigGeneral.stats_m_oper_only = yylval.number;
 };
 
 general_stats_o_oper_only: STATS_O_OPER_ONLY '=' TBOOL ';'

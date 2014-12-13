@@ -301,7 +301,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
    */
   memcpy(&client_p->connection->ip, irn, sizeof(struct irc_ssaddr));
 
-  getnameinfo((struct sockaddr *)&client_p->connection->ip,
+  getnameinfo((const struct sockaddr *)&client_p->connection->ip,
               client_p->connection->ip.ss_len, client_p->sockhost,
               sizeof(client_p->sockhost), NULL, 0, NI_NUMERICHOST);
   client_p->connection->aftype = client_p->connection->ip.ss.ss_family;

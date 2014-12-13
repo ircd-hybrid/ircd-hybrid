@@ -32,14 +32,10 @@
 #include "dbuf.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "numeric.h"
-#include "fdlist.h"
 #include "s_bsd.h"
 #include "server.h"
-#include "conf.h"
+#include "conf_class.h"
 #include "log.h"
-#include "memory.h"
-#include "packet.h"
 
 
 static uint64_t current_serial;

@@ -290,7 +290,7 @@ ascii2prefix (int family, char *string)
 	    return (NULL);
 }
 
-prefix_t *
+static prefix_t *
 Ref_Prefix (prefix_t * prefix)
 {
     if (prefix == NULL)
@@ -304,7 +304,7 @@ Ref_Prefix (prefix_t * prefix)
     return (prefix);
 }
 
-void 
+static void
 Deref_Prefix (prefix_t * prefix)
 {
     if (prefix == NULL)

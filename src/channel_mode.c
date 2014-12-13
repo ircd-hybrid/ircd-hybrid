@@ -597,9 +597,8 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 
-  if (!MyConnect(source_p))
-    if (strchr(mask, ' '))
-      return;
+  if (*mask == ':' || (!MyConnect(source_p) && strchr(mask, ' ')))
+    return;
 
   switch (dir)
   {
@@ -667,9 +666,8 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 
-  if (!MyConnect(source_p))
-    if (strchr(mask, ' '))
-      return;
+  if (*mask == ':' || (!MyConnect(source_p) && strchr(mask, ' ')))
+    return;
 
   switch (dir)
   {
@@ -737,9 +735,8 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   memcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 
-  if (!MyConnect(source_p))
-    if (strchr(mask, ' '))
-      return;
+  if (*mask == ':' || (!MyConnect(source_p) && strchr(mask, ' ')))
+    return;
 
   switch (dir)
   {

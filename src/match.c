@@ -49,18 +49,21 @@ match(const char *mask, const char *name)
     switch (*m)
     {
       case '\0':
-        if (!*n)
+        if (*n == '\0')
           return 0;
   backtrack:
         if (m_tmp == mask)
           return 1;
+
         m = m_tmp;
         n = ++n_tmp;
+
         if (*n == '\0')
           return 1;
         break;
       case '\\':
         ++m;
+
         /* allow escaping to force capitalization */
         if (*m++ != *n++)
           goto backtrack;
@@ -73,7 +76,7 @@ match(const char *mask, const char *name)
             star = 1;
           else if (*m == '?')
           {
-            if (!*n++)
+            if (*n++ == '\0')
               goto backtrack;
           }
           else
@@ -82,12 +85,13 @@ match(const char *mask, const char *name)
 
         if (star)
         {
-          if (!*m)
+          if (*m == '\0')
             return 0;
           else if (*m == '\\')
           {
             m_tmp = ++m;
-            if (!*m)
+
+            if (*m == '\0')
               return 1;
             for (n_tmp = n; *n && *n != *m; ++n)
               ;
@@ -101,7 +105,7 @@ match(const char *mask, const char *name)
         }
         /* and fall through */
       default:
-        if (!*n)
+        if (*n == '\0')
           return *m != '\0';
         if (ToLower(*m) != ToLower(*n))
           goto backtrack;

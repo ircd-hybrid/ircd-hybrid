@@ -87,9 +87,7 @@ my_inet_pton (int af, const char *src, void *dst)
     } else if (af == AF_INET6) {
         return (inet_pton (af, src, dst));
     } else {
-#ifndef NT
 	errno = EAFNOSUPPORT;
-#endif /* NT */
 	return -1;
     }
 }
@@ -186,14 +184,7 @@ New_Prefix2 (int family, void *dest, int bitlen, prefix_t *prefix)
     }
     else if (family == AF_INET) {
 	if (prefix == NULL) {
-#ifndef NT
             prefix = calloc(1, sizeof (prefix4_t));
-#else
-	    //for some reason, compiler is getting
-	    //prefix4_t size incorrect on NT
-	    prefix = calloc(1, sizeof (prefix_t)); 
-#endif /* NT */
-		
 	    dynamic_allocated++;
 	}
 	memcpy (&prefix->add.sin, dest, sizeof(struct in_addr));
@@ -268,14 +259,9 @@ ascii2prefix (int family, char *string)
 	    return (New_Prefix (AF_INET, &sin, bitlen));
 	}
 	else if (family == AF_INET6) {
-// Get rid of this with next IPv6 upgrade
-#if defined(NT) && !defined(HAVE_INET_NTOP)
-	    inet6_addr(string, &sin6);
-	    return (New_Prefix (AF_INET6, &sin6, bitlen));
-#else
 	    if ((result = inet_pton (AF_INET6, string, &sin6)) <= 0)
 		return (NULL);
-#endif /* NT */
+
 	    return (New_Prefix (AF_INET6, &sin6, bitlen));
 	}
 	else

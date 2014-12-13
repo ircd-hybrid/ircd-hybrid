@@ -592,7 +592,7 @@ patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix)
     patricia_node_t *node, *new_node, *parent, *glue;
     u_char *addr, *test_addr;
     u_int bitlen, check_bit, differ_bit;
-    int i, j, r;
+    int j, r;
 
     assert (patricia);
     assert (prefix);
@@ -659,7 +659,7 @@ patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix)
     /* find the first bit different */
     check_bit = (node->bit < bitlen)? node->bit: bitlen;
     differ_bit = 0;
-    for (i = 0; i*8 < check_bit; i++) {
+    for (unsigned int i = 0; i*8 < check_bit; i++) {
 	if ((r = (addr[i] ^ test_addr[i])) == 0) {
 	    differ_bit = (i + 1) * 8;
 	    continue;

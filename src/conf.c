@@ -882,10 +882,10 @@ validate_conf(void)
   if (ConfigGeneral.ts_max_delta < TS_MAX_DELTA_MIN)
     ConfigGeneral.ts_max_delta = TS_MAX_DELTA_DEFAULT;
 
-  if (ConfigServerInfo.network_name == NULL)
+  if (EmptyString(ConfigServerInfo.network_name))
     ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
 
-  if (ConfigServerInfo.network_desc == NULL)
+  if (EmptyString(ConfigServerInfo.network_desc))
     ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
 
   ConfigGeneral.max_watch = IRCD_MAX(ConfigGeneral.max_watch, WATCHSIZE_MIN);

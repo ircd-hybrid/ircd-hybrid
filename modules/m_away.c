@@ -51,7 +51,9 @@
 static int
 m_away(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc < 2 || EmptyString(parv[1]))
+  const char *const message = parv[1];
+
+  if (EmptyString(message))
   {
     /* Marking as not away */
     if (source_p->away[0])
@@ -81,7 +83,7 @@ m_away(struct Client *source_p, int parc, char *parv[])
   source_p->connection->away.last_attempt = CurrentTime;
   source_p->connection->away.count++;
 
-  strlcpy(source_p->away, parv[1], sizeof(source_p->away));
+  strlcpy(source_p->away, message, sizeof(source_p->away));
 
   sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
   sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY :%s",
@@ -106,7 +108,9 @@ m_away(struct Client *source_p, int parc, char *parv[])
 static int
 ms_away(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc < 2 || EmptyString(parv[1]))
+  const char *const message = parv[1];
+
+  if (EmptyString(message))
   {
     /* Marking as not away */
     if (source_p->away[0])
@@ -123,7 +127,7 @@ ms_away(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  strlcpy(source_p->away, parv[1], sizeof(source_p->away));
+  strlcpy(source_p->away, message, sizeof(source_p->away));
 
   sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,

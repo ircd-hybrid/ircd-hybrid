@@ -203,7 +203,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    getnameinfo((struct sockaddr *)&target_p->connection->ip,
+    getnameinfo((const struct sockaddr *)&target_p->connection->ip,
                 target_p->connection->ip.ss_len, hostip,
                 sizeof(hostip), NULL, 0, NI_NUMERICHOST);
     dlhost = hostip;

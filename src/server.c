@@ -572,7 +572,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   /* Make sure conf is useful */
   assert(conf);
 
-  getnameinfo((struct sockaddr *)&conf->addr, conf->addr.ss_len,
+  getnameinfo((const struct sockaddr *)&conf->addr, conf->addr.ss_len,
               buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
   ilog(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host,
        buf);

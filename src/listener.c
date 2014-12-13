@@ -217,7 +217,7 @@ inetport(struct Listener *listener)
   memset(&lsin, 0, sizeof(lsin));
   memcpy(&lsin, &listener->addr, sizeof(lsin));
 
-  getnameinfo((struct sockaddr *)&lsin, lsin.ss_len, listener->name,
+  getnameinfo((const struct sockaddr *)&lsin, lsin.ss_len, listener->name,
               sizeof(listener->name), NULL, 0, NI_NUMERICHOST);
 
   /*

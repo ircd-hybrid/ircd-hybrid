@@ -88,75 +88,72 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
   setmodes = source_p->umodes;
 
   /* parse mode change string(s) */
-  for (char **p = &parv[2]; p && *p; ++p)
+  for (const char *m = parv[2]; *m; ++m)
   {
-    for (const char *m = *p; *m; ++m)
+    switch (*m)
     {
-      switch (*m)
-      {
-        case '+':
-          what = MODE_ADD;
-          break;
-        case '-':
-          what = MODE_DEL;
-          break;
-        case 'o':
-          if (what == MODE_ADD)
+      case '+':
+        what = MODE_ADD;
+        break;
+      case '-':
+        what = MODE_DEL;
+        break;
+      case 'o':
+        if (what == MODE_ADD)
+        {
+          if (!MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
           {
-            if (!MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
-            {
-              ++Count.oper;
-              SetOper(source_p);
-            }
+            ++Count.oper;
+            SetOper(source_p);
           }
+        }
+        else
+        {
+          if (!HasUMode(source_p, UMODE_OPER))
+            break;
+
+          ClearOper(source_p);
+          --Count.oper;
+
+          if (MyConnect(source_p))
+          {
+            dlink_node *node = NULL;
+
+            detach_conf(source_p, CONF_OPER);
+            ClrOFlag(source_p);
+            DelUMode(source_p, ConfigGeneral.oper_only_umodes);
+
+            if ((node = dlinkFindDelete(&oper_list, source_p)))
+              free_dlink_node(node);
+          }
+        }
+
+        break;
+
+      case 'S':  /* Only servers may set +S in a burst */
+      case 'W':  /* Only servers may set +W in a burst */
+      case 'r':  /* Only services may set +r */
+      case 'x':  /* Only services may set +x */
+        break;
+
+      default:
+        if ((mode = user_modes[(unsigned char)*m]))
+        {
+          if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER) &&
+              (ConfigGeneral.oper_only_umodes & mode))
+            badmode = 1;
           else
           {
-            if (!HasUMode(source_p, UMODE_OPER))
-              break;
-
-            ClearOper(source_p);
-            --Count.oper;
-
-            if (MyConnect(source_p))
-            {
-              dlink_node *node = NULL;
-
-              detach_conf(source_p, CONF_OPER);
-              ClrOFlag(source_p);
-              DelUMode(source_p, ConfigGeneral.oper_only_umodes);
-
-              if ((node = dlinkFindDelete(&oper_list, source_p)))
-                free_dlink_node(node);
-            }
-          }
-
-          break;
-
-        case 'S':  /* Only servers may set +S in a burst */
-        case 'W':  /* Only servers may set +W in a burst */
-        case 'r':  /* Only services may set +r */
-        case 'x':  /* Only services may set +x */
-          break;
-
-        default:
-          if ((mode = user_modes[(unsigned char)*m]))
-          {
-            if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER) &&
-                (ConfigGeneral.oper_only_umodes & mode))
-              badmode = 1;
+            if (what == MODE_ADD)
+              AddUMode(source_p, mode);
             else
-            {
-              if (what == MODE_ADD)
-                AddUMode(source_p, mode);
-              else
-                DelUMode(source_p, mode);
-            }
+              DelUMode(source_p, mode);
           }
-          else if (MyConnect(source_p))
-            badmode = 1;
+        }
+        else if (MyConnect(source_p))
+          badmode = 1;
 
-          break;
-      }
+        break;
     }
   }
 

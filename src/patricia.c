@@ -12,10 +12,6 @@
  * "demo.c" so that it could be used as a standalone API.
  */
 
-static char copyright[] =
-"This product includes software developed by the University of Michigan, Merit"
-"Network, Inc., and their contributors.";
-
 #include <assert.h> /* assert */
 #include <ctype.h> /* isdigit */
 #include <errno.h> /* errno */
@@ -31,14 +27,12 @@ static char copyright[] =
 
 #include "patricia.h"
 
-#define Delete free
-
 /* { from prefix.c */
 
 /* prefix_tochar
  * convert prefix information to bytes
  */
-u_char *
+static u_char *
 prefix_tochar (prefix_t * prefix)
 {
     if (prefix == NULL)
@@ -47,7 +41,7 @@ prefix_tochar (prefix_t * prefix)
     return ((u_char *) & prefix->add.sin);
 }
 
-int 
+static int 
 comp_with_mask (void *addr, void *dest, u_int mask)
 {
 
@@ -62,7 +56,7 @@ comp_with_mask (void *addr, void *dest, u_int mask)
 }
 
 /* this allows imcomplete prefix */
-int
+static int
 my_inet_pton (int af, const char *src, void *dst)
 {
     if (af == AF_INET) {
@@ -108,7 +102,7 @@ my_inet_pton (int af, const char *src, void *dst)
  * convert prefix information to ascii string with length
  * thread safe and (almost) re-entrant implementation
  */
-char *
+static const char *
 prefix_toa2x (prefix_t *prefix, char *buff, int with_len)
 {
     if (prefix == NULL)
@@ -151,8 +145,7 @@ prefix_toa2x (prefix_t *prefix, char *buff, int with_len)
     }
 #ifdef HAVE_IPV6
     else if (prefix->family == AF_INET6) {
-	char *r;
-	r = (char *) inet_ntop (AF_INET6, &prefix->add.sin6, buff, 48 /* a guess value */ );
+	const char *r = inet_ntop(AF_INET6, &prefix->add.sin6, buff, 48 /* a guess value */ );
 	if (r && with_len) {
 	    assert (prefix->bitlen <= sizeof(struct in6_addr) * 8);
 	    sprintf (buff + strlen (buff), "/%d", prefix->bitlen);
@@ -167,7 +160,7 @@ prefix_toa2x (prefix_t *prefix, char *buff, int with_len)
 /* prefix_toa2
  * convert prefix information to ascii string
  */
-char *
+const char *
 prefix_toa2 (prefix_t *prefix, char *buff)
 {
     return (prefix_toa2x (prefix, buff, 0));
@@ -175,7 +168,7 @@ prefix_toa2 (prefix_t *prefix, char *buff)
 
 /* prefix_toa
  */
-char *
+const char *
 prefix_toa (prefix_t * prefix)
 {
     return (prefix_toa2 (prefix, (char *) NULL));
@@ -329,7 +322,7 @@ Deref_Prefix (prefix_t * prefix)
     prefix->ref_count--;
     assert (prefix->ref_count >= 0);
     if (prefix->ref_count <= 0) {
-	Delete (prefix);
+	free (prefix);
 	return;
     }
 }
@@ -383,7 +376,7 @@ Clear_Patricia (patricia_tree_t *patricia, void_fn_t func)
     	    else {
 		assert (Xrn->data == NULL);
     	    }
-    	    Delete (Xrn);
+    	    free (Xrn);
 	    patricia->num_active_node--;
 
             if (l) {
@@ -401,7 +394,7 @@ Clear_Patricia (patricia_tree_t *patricia, void_fn_t func)
         }
     }
     assert (patricia->num_active_node == 0);
-    /* Delete (patricia); */
+    /* free (patricia); */
 }
 
 
@@ -409,7 +402,7 @@ void
 Destroy_Patricia (patricia_tree_t *patricia, void_fn_t func)
 {
     Clear_Patricia (patricia, func);
-    Delete (patricia);
+    free (patricia);
     num_active_patricia--;
 }
 
@@ -428,29 +421,6 @@ patricia_process (patricia_tree_t *patricia, void_fn_t func)
 	func (node->prefix, node->data);
     } PATRICIA_WALK_END;
 }
-
-size_t
-patricia_walk_inorder(patricia_node_t *node, void_fn_t func)
-{
-    size_t n = 0;
-    assert(func);
-
-    if (node->l) {
-         n += patricia_walk_inorder(node->l, func);
-    }
-
-    if (node->prefix) {
-	func(node->prefix, node->data);
-	n++;
-    }
-	
-    if (node->r) {
-         n += patricia_walk_inorder(node->r, func);
-    }
-
-    return n;
-}
-
 
 patricia_node_t *
 patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix)
@@ -867,7 +837,7 @@ patricia_remove (patricia_tree_t *patricia, patricia_node_t *node)
 #endif /* PATRICIA_DEBUG */
 	parent = node->parent;
 	Deref_Prefix (node->prefix);
-	Delete (node);
+	free (node);
         patricia->num_active_node--;
 
 	if (parent == NULL) {
@@ -903,7 +873,7 @@ patricia_remove (patricia_tree_t *patricia, patricia_node_t *node)
 	    parent->parent->l = child;
 	}
 	child->parent = parent->parent;
-	Delete (parent);
+	free (parent);
         patricia->num_active_node--;
 	return;
     }
@@ -923,7 +893,7 @@ patricia_remove (patricia_tree_t *patricia, patricia_node_t *node)
     child->parent = parent;
 
     Deref_Prefix (node->prefix);
-    Delete (node);
+    free (node);
     patricia->num_active_node--;
 
     if (parent == NULL) {

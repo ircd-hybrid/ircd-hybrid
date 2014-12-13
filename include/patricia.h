@@ -78,26 +78,27 @@ typedef struct _patricia_tree_t {
 } patricia_tree_t;
 
 
-patricia_node_t *patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix);
-patricia_node_t *patricia_search_best (patricia_tree_t *patricia, prefix_t *prefix);
-patricia_node_t * patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix, 
+extern patricia_node_t *patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix);
+extern patricia_node_t *patricia_search_best (patricia_tree_t *patricia, prefix_t *prefix);
+extern patricia_node_t * patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix, 
 				   int inclusive);
-patricia_node_t *patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix);
-void patricia_remove (patricia_tree_t *patricia, patricia_node_t *node);
-patricia_tree_t *New_Patricia (int maxbits);
-void Clear_Patricia (patricia_tree_t *patricia, void_fn_t func);
-void Destroy_Patricia (patricia_tree_t *patricia, void_fn_t func);
+extern patricia_node_t *patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix);
+extern void patricia_remove (patricia_tree_t *patricia, patricia_node_t *node);
+extern patricia_tree_t *New_Patricia (int maxbits);
+extern void Clear_Patricia (patricia_tree_t *patricia, void_fn_t func);
+extern void Destroy_Patricia (patricia_tree_t *patricia, void_fn_t func);
 
-void patricia_process (patricia_tree_t *patricia, void_fn_t func);
+extern void patricia_process (patricia_tree_t *patricia, void_fn_t func);
 
-char *prefix_toa (prefix_t * prefix);
-
+extern const char *prefix_toa (prefix_t * prefix);
+extern void lookup_then_remove(patricia_tree_t *, char *);
+extern patricia_node_t *try_search_exact(patricia_tree_t *, char *);
 /* { from demo.c */
 
-prefix_t *
+extern prefix_t *
 ascii2prefix (int family, char *string);
 
-patricia_node_t *
+extern patricia_node_t *
 make_and_lookup (patricia_tree_t *tree, char *string);
 
 /* } */

@@ -54,7 +54,7 @@ const char *infotext[] =
   "Hybrid List, use this link:",
   "  https://lists.ircd-hybrid.org/mailman/listinfo/hybrid",
   "",
-  "The core team as, of this major release:",
+  "The core team as of this major release:",
   "",
   "billy-jon, William Bierman III <bill@mu.org>",
   "cryogen, Stuart Walsh <stu@ipng.org.uk>",

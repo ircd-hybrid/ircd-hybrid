@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.2 (2014-??-??)
+-- Noteworthy changes in version 8.2.2 (2015-??-??)
 o) Added support for the "extended-join" client capability
 o) Channel half-ops can now use /INVITE as well
 o) Fixed broken 'make install -jX'
@@ -9,6 +9,7 @@ o) The general::true_no_oper_flood configuration option has been deprecated.
    Operators still can have higher 'flood' limits with no_oper_flood = yes;
    hoewever, they are no longer allowed to bypass RecvQ limits.
 o) Added general::stats_m_oper_only configuration option
+o) Remote client connection notices now do show ip addresses, too
 
 
 -- Noteworthy changes in version 8.2.1 (2014-10-21)

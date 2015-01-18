@@ -70,7 +70,7 @@ check_kline(struct AddressRec *arec)
             conf_try_ban(client_p, arec->conf);
         break;
       default:  /* HM_HOST */
-        if (!match(arec->Mask.hostname, client_p->host))
+        if (!match(arec->Mask.hostname, client_p->host) || !match(arec->Mask.hostname, client_p->sockhost))
           conf_try_ban(client_p, arec->conf);
         break;
     }

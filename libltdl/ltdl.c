@@ -1,6 +1,6 @@
 /* ltdl.c -- system independent dlopen wrapper
 
-   Copyright (C) 1998-2000, 2004-2008, 2011-2014 Free Software
+   Copyright (C) 1998-2000, 2004-2008, 2011-2015 Free Software
    Foundation, Inc.
    Written by Thomas Tanner, 1998
 
@@ -815,7 +815,7 @@ find_handle (const char *search_path, const char *base_name,
 
 #if !defined LTDL_DLOPEN_DEPLIBS
 static int
-load_deplibs (lt_dlhandle handle, char * LT__UNUSED deplibs)
+load_deplibs (lt_dlhandle handle, char * deplibs LT__UNUSED)
 {
   handle->depcount = 0;
   return 0;

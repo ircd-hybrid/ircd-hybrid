@@ -1,6 +1,6 @@
 /* loader-dyld.c -- dynamic linking on darwin and OS X
 
-   Copyright (C) 1998-2000, 2004, 2006-2008, 2011-2014 Free Software
+   Copyright (C) 1998-2000, 2004, 2006-2008, 2011-2015 Free Software
    Foundation, Inc.
    Written by Peter O'Gorman, 1998
 
@@ -185,7 +185,7 @@ static int dyld_cannot_close				  = 0;
 /* A function called through the vtable when this loader is no
    longer needed by the application.  */
 static int
-vl_exit (lt_user_data LT__UNUSED loader_data)
+vl_exit (lt_user_data loader_data LT__UNUSED)
 {
   vtable = NULL;
   return 0;
@@ -226,7 +226,7 @@ vl_init (lt_user_data loader_data)
    module for processing with this loader's other vtable functions.  */
 static lt_module
 vm_open (lt_user_data loader_data, const char *filename,
-         lt_dladvise LT__UNUSED advise)
+         lt_dladvise advise LT__UNUSED)
 {
   lt_module module = 0;
   NSObjectFileImage ofi = 0;

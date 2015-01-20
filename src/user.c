@@ -65,89 +65,50 @@ struct Isupport
 static dlink_list support_list;
 static dlink_list support_list_lines;
 
-/* memory is cheap. map 0-255 to equivalent mode */
-const unsigned int user_modes[256] =
+const struct user_modes *umode_map[256];
+const struct user_modes  umode_tab[] =
 {
-  /* 0x00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x0F */
-  /* 0x10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x1F */
-  /* 0x20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x2F */
-  /* 0x30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x3F */
-  0,                  /* @ */
-  0,                  /* A */
-  0,                  /* B */
-  0,                  /* C */
-  UMODE_DEAF,         /* D */
-  0,                  /* E */
-  UMODE_FARCONNECT,   /* F */
-  UMODE_SOFTCALLERID, /* G */
-  UMODE_HIDDEN,       /* H */
-  0,                  /* I */
-  0,                  /* J */
-  0,                  /* K */
-  0,                  /* L */
-  0,                  /* M */
-  0,                  /* N */
-  0,                  /* O */
-  0,                  /* P */
-  0,                  /* Q */
-  UMODE_REGONLY,      /* R */
-  UMODE_SSL,          /* S */
-  0,                  /* T */
-  0,                  /* U */
-  0,                  /* V */
-  UMODE_WEBIRC,       /* W */
-  0,                  /* X */
-  0,                  /* Y */
-  0,                  /* Z 0x5A */
-  0, 0, 0, 0, 0,      /* 0x5F   */
-  0,                  /* 0x60   */
-  UMODE_ADMIN,        /* a */
-  UMODE_BOTS,         /* b */
-  UMODE_CCONN,        /* c */
-  UMODE_DEBUG,        /* d */
-  UMODE_EXTERNAL,     /* e */
-  UMODE_FULL,         /* f */
-  UMODE_CALLERID,     /* g */
-  0,                  /* h */
-  UMODE_INVISIBLE,    /* i */
-  UMODE_REJ,          /* j */
-  UMODE_SKILL,        /* k */
-  UMODE_LOCOPS,       /* l */
-  0,                  /* m */
-  UMODE_NCHANGE,      /* n */
-  UMODE_OPER,         /* o */
-  UMODE_HIDECHANS,    /* p */
-  UMODE_HIDEIDLE,     /* q */
-  UMODE_REGISTERED,   /* r */
-  UMODE_SERVNOTICE,   /* s */
-  0,                  /* t */
-  UMODE_UNAUTH,       /* u */
-  0,                  /* v */
-  UMODE_WALLOP,       /* w */
-  UMODE_HIDDENHOST,   /* x */
-  UMODE_SPY,          /* y */
-  0,                  /* z      0x7A */
-  0,0,0,0,0,          /* 0x7B - 0x7F */
-
-  /* 0x80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x8F */
-  /* 0x90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x9F */
-  /* 0xA0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xAF */
-  /* 0xB0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xBF */
-  /* 0xC0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xCF */
-  /* 0xD0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xDF */
-  /* 0xE0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xEF */
-  /* 0xF0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0  /* 0xFF */
+  { 'D', UMODE_DEAF         },
+  { 'F', UMODE_FARCONNECT   },
+  { 'G', UMODE_SOFTCALLERID },
+  { 'H', UMODE_HIDDEN       },
+  { 'R', UMODE_REGONLY      },
+  { 'S', UMODE_SSL          },
+  { 'W', UMODE_WEBIRC       },
+  { 'a', UMODE_ADMIN        },
+  { 'b', UMODE_BOTS         },
+  { 'c', UMODE_CCONN        },
+  { 'd', UMODE_DEBUG        },
+  { 'e', UMODE_EXTERNAL     },
+  { 'f', UMODE_FULL         },
+  { 'g', UMODE_CALLERID     },
+  { 'i', UMODE_INVISIBLE    },
+  { 'j', UMODE_REJ          },
+  { 'k', UMODE_SKILL        },
+  { 'l', UMODE_LOCOPS       },
+  { 'n', UMODE_NCHANGE      },
+  { 'o', UMODE_OPER         },
+  { 'p', UMODE_HIDECHANS    },
+  { 'q', UMODE_HIDEIDLE     },
+  { 'r', UMODE_REGISTERED   },
+  { 's', UMODE_SERVNOTICE   },
+  { 'u', UMODE_UNAUTH       },
+  { 'w', UMODE_WALLOP       },
+  { 'x', UMODE_HIDDENHOST   },
+  { 'y', UMODE_SPY          },
+  { '\0', 0 }
 };
 
 void
-assemble_umode_buffer(void)
+user_usermodes_init(void)
 {
-  unsigned int idx = 0;
   char *umode_buffer_ptr = umode_buffer;
 
-  for (; idx < (sizeof(user_modes) / sizeof(user_modes[0])); ++idx)
-    if (user_modes[idx])
-      *umode_buffer_ptr++ = idx;
+  for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
+  {
+    umode_map[tab->c] = tab;
+    *umode_buffer_ptr++ = tab->c;
+  }
 
   *umode_buffer_ptr = '\0';
 }
@@ -774,33 +735,28 @@ send_umode(struct Client *client_p, struct Client *source_p,
    * Build a string in umode_buf to represent the change in the user's
    * mode between the new (source_p->umodes) and 'old'.
    */
-  for (unsigned int i = 0; i < 128; ++i)
+  for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
   {
-    unsigned int flag = user_modes[i];
-
-    if (!flag)
-      continue;
-
-    if ((flag & old) && !HasUMode(source_p, flag))
+    if ((tab->flag & old) && !HasUMode(source_p, tab->flag))
     {
       if (what == MODE_DEL)
-        *m++ = (char)i;
+        *m++ = tab->c;
       else
       {
         what = MODE_DEL;
         *m++ = '-';
-        *m++ = (char)i;
+        *m++ = tab->c;
       }
     }
-    else if (!(flag & old) && HasUMode(source_p, flag))
+    else if (!(tab->flag & old) && HasUMode(source_p, tab->flag))
     {
       if (what == MODE_ADD)
-        *m++ = (char)i;
+        *m++ = tab->c;
       else
       {
         what = MODE_ADD;
         *m++ = '+';
-        *m++ = (char)i;
+        *m++ = tab->c;
       }
     }
   }

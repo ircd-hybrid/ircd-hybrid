@@ -357,14 +357,16 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   /* Parse usermodes */
   for (const char *m = &parv[4][1]; *m; ++m)
   {
-    unsigned int flag = user_modes[(unsigned char)*m];
+    const struct user_modes *tab = umode_map[(unsigned char)*m];
 
-    if ((flag & UMODE_INVISIBLE) && !HasUMode(client_p, UMODE_INVISIBLE))
+    if (!tab)
+      continue;
+    if ((tab->flag & UMODE_INVISIBLE) && !HasUMode(client_p, UMODE_INVISIBLE))
       ++Count.invisi;
-    if ((flag & UMODE_OPER) && !HasUMode(client_p, UMODE_OPER))
+    if ((tab->flag & UMODE_OPER) && !HasUMode(client_p, UMODE_OPER))
       ++Count.oper;
 
-    AddUMode(client_p, flag);
+    AddUMode(client_p, tab->flag);
   }
 
   register_remote_user(client_p);

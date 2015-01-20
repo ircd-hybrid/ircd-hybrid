@@ -561,6 +561,7 @@ main(int argc, char *argv[])
   channel_init();
   read_links_file();
   motd_init();
+  user_usermodes_init();
 #ifdef HAVE_LIBGEOIP
   geoip_ctx = GeoIP_new(GEOIP_MEMORY_CACHE);
 #endif
@@ -626,12 +627,6 @@ main(int argc, char *argv[])
     perror("chdir");
     exit(EXIT_FAILURE);
   }
-
-  /*
-   * assemble_umode_buffer() has to be called after
-   * reading conf/loading modules.
-   */
-  assemble_umode_buffer();
 
   write_pidfile(pidFileName);
 

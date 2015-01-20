@@ -54,9 +54,10 @@
 static int
 ms_svsmode(struct Client *source_p, int parc, char *parv[])
 {
+  const struct user_modes *tab = NULL;
   struct Client *target_p = NULL;
   int what = MODE_ADD;
-  unsigned int flag = 0, setmodes = 0;
+  unsigned int setmodes = 0;
   const char *modes = NULL, *extarg = NULL;
   time_t ts = 0;
 
@@ -137,12 +138,12 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
         break;
 
       default:
-        if ((flag = user_modes[(unsigned char)*m]))
+        if ((tab = umode_map[(unsigned char)*m]))
         {
           if (what == MODE_ADD)
-            AddUMode(target_p, flag);
+            AddUMode(target_p, tab->flag);
           else
-            DelUMode(target_p, flag);
+            DelUMode(target_p, tab->flag);
         }
 
         break;

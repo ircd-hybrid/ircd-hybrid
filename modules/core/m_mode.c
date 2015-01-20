@@ -77,7 +77,8 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     *m++ = '+';
 
     for (tab = umode_tab; tab->c; ++tab)
-      *m++ = tab->c;
+      if (HasUMode(source_p, tab->flag))
+        *m++ = tab->c;
     *m = '\0';
 
     sendto_one_numeric(source_p, &me, RPL_UMODEIS, buf);

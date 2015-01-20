@@ -35,7 +35,7 @@ struct Client;
 
 struct user_modes
 {
-  char c;
+  unsigned char c;
   unsigned int flag;
 };
 

@@ -52,7 +52,8 @@
 static void
 set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
-  unsigned int mode = 0, setmodes = 0;
+  const struct user_modes *tab = NULL;
+  unsigned int setmodes = 0;
   struct Client *target_p = NULL;
   int what = MODE_ADD, badmode = 0;
 
@@ -75,9 +76,8 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     char *m = buf;
     *m++ = '+';
 
-    for (unsigned int i = 0; i < 128; ++i)
-      if (HasUMode(source_p, user_modes[i]))
-        *m++ = (char)i;
+    for (tab = umode_tab; tab->c; ++tab)
+      *m++ = tab->c;
     *m = '\0';
 
     sendto_one_numeric(source_p, &me, RPL_UMODEIS, buf);
@@ -137,17 +137,17 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
         break;
 
       default:
-        if ((mode = user_modes[(unsigned char)*m]))
+        if ((tab = umode_map[(unsigned char)*m]))
         {
           if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER) &&
-              (ConfigGeneral.oper_only_umodes & mode))
+              (ConfigGeneral.oper_only_umodes & tab->flag))
             badmode = 1;
           else
           {
             if (what == MODE_ADD)
-              AddUMode(source_p, mode);
+              AddUMode(source_p, tab->flag);
             else
-              DelUMode(source_p, mode);
+              DelUMode(source_p, tab->flag);
           }
         }
         else if (MyConnect(source_p))

@@ -33,9 +33,16 @@
 
 struct Client;
 
-extern const unsigned int user_modes[];
+struct user_modes
+{
+  char c;
+  unsigned int flag;
+};
 
-extern void assemble_umode_buffer(void);
+extern const struct user_modes *umode_map[];
+extern const struct user_modes  umode_tab[];
+
+extern void user_usermodes_init(void);
 extern void send_umode(struct Client *, struct Client *,
                        unsigned int, char *);
 extern void send_umode_out(struct Client *, unsigned int);

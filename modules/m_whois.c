@@ -158,9 +158,8 @@ whois_person(struct Client *source_p, struct Client *target_p)
     char *m = buf;
     *m++ = '+';
 
-    for (unsigned int i = 0; i < 128; ++i)
-      if (HasUMode(target_p, user_modes[i]))
-        *m++ = (char)i;
+    for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
+      *m++ = tab->c;
     *m = '\0';
 
     sendto_one_numeric(source_p, &me, RPL_WHOISMODES, target_p->name, buf);

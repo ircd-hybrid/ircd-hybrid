@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.2 (2015-??-??)
+-- Noteworthy changes in version 8.2.2 (2015-01-20)
 o) Added support for the "extended-join" client capability
 o) Channel half-ops can now use /INVITE as well
 o) Fixed broken 'make install -jX'

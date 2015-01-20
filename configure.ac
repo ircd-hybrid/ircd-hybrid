@@ -93,3 +93,10 @@ AC_CONFIG_FILES(              \
        tools/Makefile)
 
 AC_OUTPUT
+
+echo "###############################################################################"
+echo "Configuration complete.  Type make (or gmake on some *BSD machines) to compile."
+echo
+echo "ircd-hybrid will be installed in ${prefix}.  To change this, run:"
+echo "   ./configure --prefix=DIRECTORY"
+echo "###############################################################################"

@@ -1,6 +1,6 @@
 /* loader-preopen.c -- emulate dynamic linking using preloaded_symbols
 
-   Copyright (C) 1998-2000, 2004, 2006-2008, 2011-2014 Free Software
+   Copyright (C) 1998-2000, 2004, 2006-2008, 2011-2015 Free Software
    Foundation, Inc.
    Written by Thomas Tanner, 1998
 
@@ -113,7 +113,7 @@ static const	lt_dlsymlist   *default_preloaded_symbols	= 0;
 
 /* A function called through the vtable to initialise this loader.  */
 static int
-vl_init (lt_user_data LT__UNUSED loader_data)
+vl_init (lt_user_data loader_data LT__UNUSED)
 {
   int errors = 0;
 
@@ -130,7 +130,7 @@ vl_init (lt_user_data LT__UNUSED loader_data)
 /* A function called through the vtable when this loader is no
    longer needed by the application.  */
 static int
-vl_exit (lt_user_data LT__UNUSED loader_data)
+vl_exit (lt_user_data loader_data LT__UNUSED)
 {
   vtable = NULL;
   free_symlists ();
@@ -142,8 +142,8 @@ vl_exit (lt_user_data LT__UNUSED loader_data)
    loader.  Returns an opaque representation of the newly opened
    module for processing with this loader's other vtable functions.  */
 static lt_module
-vm_open (lt_user_data LT__UNUSED loader_data, const char *filename,
-         lt_dladvise LT__UNUSED advise)
+vm_open (lt_user_data loader_data LT__UNUSED, const char *filename,
+         lt_dladvise advise LT__UNUSED)
 {
   symlist_chain *lists;
   lt_module	 module = 0;
@@ -195,7 +195,7 @@ vm_open (lt_user_data LT__UNUSED loader_data, const char *filename,
 /* A function called through the vtable when a particular module
    should be unloaded.  */
 static int
-vm_close (lt_user_data LT__UNUSED loader_data, lt_module LT__UNUSED module)
+vm_close (lt_user_data loader_data LT__UNUSED, lt_module module LT__UNUSED)
 {
   /* Just to silence gcc -Wall */
   module = 0;
@@ -206,7 +206,7 @@ vm_close (lt_user_data LT__UNUSED loader_data, lt_module LT__UNUSED module)
 /* A function called through the vtable to get the address of
    a symbol loaded from a particular module.  */
 static void *
-vm_sym (lt_user_data LT__UNUSED loader_data, lt_module module, const char *name)
+vm_sym (lt_user_data loader_data LT__UNUSED, lt_module module, const char *name)
 {
   lt_dlsymlist	       *symbol = (lt_dlsymlist*) module;
 

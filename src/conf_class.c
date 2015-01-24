@@ -79,7 +79,7 @@ class_init(void)
   (class_default = class_make())->name = xstrdup("default");
 }
 
-struct ClassItem *
+const struct ClassItem *
 get_class_ptr(const dlink_list *const list)
 {
   const dlink_node *const node = list->head;
@@ -100,73 +100,25 @@ get_class_ptr(const dlink_list *const list)
 const char *
 get_client_class(const dlink_list *const list)
 {
-  const dlink_node *const node = list->head;
-
-  if (node)
-  {
-    const struct MaskItem *const conf = node->data;
-
-    assert(conf->class);
-    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
-
-    return conf->class->name;
-  }
-
-  return class_default->name;
+  return get_class_ptr(list)->name;
 }
 
 unsigned int
 get_client_ping(const dlink_list *const list)
 {
-  const dlink_node *const node = list->head;
-
-  if (node)
-  {
-    const struct MaskItem *const conf = node->data;
-
-    assert(conf->class);
-    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
-
-    return conf->class->ping_freq;
-  }
-
-  return class_default->ping_freq;
+  return get_class_ptr(list)->ping_freq;
 }
 
 unsigned int
 get_sendq(const dlink_list *const list)
 {
-  const dlink_node *const node = list->head;
-
-  if (node)
-  {
-    const struct MaskItem *const conf = node->data;
-
-    assert(conf->class);
-    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
-
-    return conf->class->max_sendq;
-  }
-
-  return class_default->max_sendq;
+  return get_class_ptr(list)->max_sendq;
 }
 
 unsigned int
 get_recvq(const dlink_list *const list)
 {
-  const dlink_node *const node = list->head;
-
-  if (node)
-  {
-    const struct MaskItem *const conf = node->data;
-
-    assert(conf->class);
-    assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
-
-    return conf->class->max_recvq;
-  }
-
-  return class_default->max_recvq;
+  return get_class_ptr(list)->max_recvq;
 }
 
 /*

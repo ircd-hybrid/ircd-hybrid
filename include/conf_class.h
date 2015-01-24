@@ -65,7 +65,7 @@ struct ClassItem
 extern struct ClassItem *class_default;
 
 extern struct ClassItem *class_make(void);
-extern struct ClassItem *get_class_ptr(const dlink_list *const);
+extern const struct ClassItem *get_class_ptr(const dlink_list *const);
 extern const dlink_list *class_get_list(void);
 extern void class_free(struct ClassItem *const);
 extern void class_init(void);

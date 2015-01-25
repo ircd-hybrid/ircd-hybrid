@@ -182,7 +182,6 @@ reset_block_state(void)
 %token  DISABLE_FAKE_CHANNELS
 %token  DISABLE_REMOTE_COMMANDS
 %token  DOTS_IN_IDENT
-%token  EGDPOOL_PATH
 %token  EMAIL
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
@@ -371,7 +370,6 @@ reset_block_state(void)
 %token  TWODOTS
 %token  TYPE
 %token  UNKLINE
-%token  USE_EGD
 %token  USE_LOGGING
 %token  USER
 %token  VHOST

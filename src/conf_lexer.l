@@ -163,7 +163,6 @@ disable_fake_channels       { return DISABLE_FAKE_CHANNELS; }
 disable_remote_commands     { return DISABLE_REMOTE_COMMANDS; }
 dline                       { return T_DLINE; }
 dots_in_ident               { return DOTS_IN_IDENT; }
-egdpool_path                { return EGDPOOL_PATH; }
 email                       { return EMAIL; }
 encrypted                   { return ENCRYPTED; }
 exceed_limit                { return EXCEED_LIMIT; }
@@ -337,7 +336,6 @@ unkline                     { return UNKLINE; }
 unlimited                   { return T_UNLIMITED; }
 unresv                      { return T_UNRESV; }
 unxline                     { return T_UNXLINE; }
-use_egd                     { return USE_EGD; }
 use_logging                 { return USE_LOGGING; }
 user                        { return USER; }
 vhost                       { return VHOST; }

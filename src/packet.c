@@ -81,14 +81,14 @@ static int
 extract_one_line(struct dbuf_queue *qptr, char *buffer)
 {
   int line_bytes = 0, eol_bytes = 0;
-  dlink_node *ptr;
+  dlink_node *node;
 
-  DLINK_FOREACH(ptr, qptr->blocks.head)
+  DLINK_FOREACH(node, qptr->blocks.head)
   {
-    struct dbuf_block *block = ptr->data;
+    const struct dbuf_block *block = node->data;
     unsigned int idx;
 
-    if (ptr == qptr->blocks.head)
+    if (node == qptr->blocks.head)
       idx = qptr->pos;
     else
       idx = 0;

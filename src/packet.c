@@ -57,7 +57,7 @@ static char readBuf[READBUF_SIZE];
  *      necessary fields (buffer etc..)
  */
 static void
-client_dopacket(struct Client *client_p, char *buffer, size_t length)
+client_dopacket(struct Client *client_p, char *buffer, unsigned int length)
 {
   /* Update messages received */
   ++me.connection->recv.messages;
@@ -77,10 +77,10 @@ client_dopacket(struct Client *client_p, char *buffer, size_t length)
  * output       - length of <buffer>
  * side effects - one line is copied and removed from the dbuf
  */
-static int
+static unsigned int
 extract_one_line(struct dbuf_queue *qptr, char *buffer)
 {
-  int line_bytes = 0, eol_bytes = 0;
+  unsigned int line_bytes = 0, eol_bytes = 0;
   dlink_node *node;
 
   DLINK_FOREACH(node, qptr->blocks.head)
@@ -135,7 +135,7 @@ out:
 static void
 parse_client_queued(struct Client *client_p)
 {
-  int dolen = 0;
+  unsigned int dolen = 0;
 
   if (IsUnknown(client_p))
   {

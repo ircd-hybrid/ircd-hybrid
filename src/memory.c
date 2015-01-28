@@ -63,8 +63,7 @@ MyRealloc(void *x, size_t y)
 void
 MyFree(void *x)
 {
-  if (x)
-    free(x);
+  free(x);
 }
 
 void *

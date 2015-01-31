@@ -611,22 +611,9 @@ main(int argc, char *argv[])
   load_xline_database();
   load_resv_database();
 
-  if (chdir(MODPATH))
-  {
-    ilog(LOG_TYPE_IRCD, "Could not load core modules. Terminating!");
-    exit(EXIT_FAILURE);
-  }
-
   load_all_modules(1);
   load_conf_modules();
   load_core_modules(1);
-
-  /* Go back to DPATH after checking to see if we can chdir to MODPATH */
-  if (chdir(ConfigGeneral.dpath))
-  {
-    perror("chdir");
-    exit(EXIT_FAILURE);
-  }
 
   write_pidfile(pidFileName);
 

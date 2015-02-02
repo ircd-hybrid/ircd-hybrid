@@ -115,15 +115,18 @@ duplicate_ptr(const void *const ptr)
 static int
 flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p)
 {
-  int delta = 0;
+  assert(MyClient(target_p));
+  assert(IsClient(source_p));
 
-  if (GlobalSetOptions.floodcount && MyConnect(target_p) &&
-      IsClient(source_p) && !IsCanFlood(source_p))
+  if (HasUMode(source_p, UMODE_OPER) || HasFlag(source_p, FLAGS_SERVICE))
+    return 0;
+
+  if (GlobalSetOptions.floodcount && !IsCanFlood(source_p))
   {
     if ((target_p->connection->first_received_message_time + 1)
         < CurrentTime)
     {
-      delta =
+      const int delta =
         CurrentTime - target_p->connection->first_received_message_time;
       target_p->connection->received_number_of_privmsgs -= delta;
       target_p->connection->first_received_message_time = CurrentTime;
@@ -348,65 +351,43 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
     }
   }
 
-  if (MyClient(target_p))
+  if (MyClient(target_p) && IsClient(source_p))
   {
-    if (!IsServer(source_p) && HasUMode(target_p, UMODE_CALLERID|UMODE_SOFTCALLERID))
+    if (HasUMode(target_p, UMODE_CALLERID|UMODE_SOFTCALLERID) &&
+        !accept_message(source_p, target_p))
     {
-      /* Here is the anti-flood bot/spambot code -db */
-      if (HasFlag(source_p, FLAGS_SERVICE) || accept_message(source_p, target_p) ||
-         (HasUMode(source_p, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
-      {
-        sendto_one(target_p, ":%s!%s@%s %s %s :%s",
-                   source_p->name, source_p->username,
-                   source_p->host, command, target_p->name, text);
-      }
-      else
-      {
-        int callerid = !!HasUMode(target_p, UMODE_CALLERID);
+      const int callerid = !!HasUMode(target_p, UMODE_CALLERID);
 
-        /* check for accept, flag recipient incoming message */
+      /* check for accept, flag recipient incoming message */
+      if (p_or_n != NOTICE)
+        sendto_one_numeric(source_p, &me, RPL_TARGUMODEG,
+                           target_p->name,
+                           callerid ? "+g" : "+G",
+                           callerid ? "server side ignore" :
+                                      "server side ignore with the exception of common channels");
+
+      if ((target_p->connection->last_caller_id_time +
+           ConfigGeneral.caller_id_wait) < CurrentTime)
+      {
         if (p_or_n != NOTICE)
-          sendto_one_numeric(source_p, &me, RPL_TARGUMODEG,
-                             target_p->name,
-                             callerid ? "+g" : "+G",
-                             callerid ? "server side ignore" :
-                                        "server side ignore with the exception of common channels");
+          sendto_one_numeric(source_p, &me, RPL_TARGNOTIFY, target_p->name);
 
-        if ((target_p->connection->last_caller_id_time +
-             ConfigGeneral.caller_id_wait) < CurrentTime)
-        {
-          if (p_or_n != NOTICE)
-            sendto_one_numeric(source_p, &me, RPL_TARGNOTIFY, target_p->name);
-
-          sendto_one_numeric(target_p, &me, RPL_UMODEGMSG,
-                             get_client_name(source_p, HIDE_IP),
-                             callerid ? "+g" : "+G");
-
-          target_p->connection->last_caller_id_time = CurrentTime;
-
-        }
-
-        /* Only so opers can watch for floods */
-        flood_attack_client(p_or_n, source_p, target_p);
+        sendto_one_numeric(target_p, &me, RPL_UMODEGMSG,
+                           get_client_name(source_p, HIDE_IP),
+                           callerid ? "+g" : "+G");
+        target_p->connection->last_caller_id_time = CurrentTime;
       }
+
+      /* Only so opers can watch for floods */
+      flood_attack_client(p_or_n, source_p, target_p);
+      return;
     }
-    else
-    {
-      /*
-       * If the client is remote, we dont perform a special check for
-       * flooding.. as we wouldn't block their message anyway.. this means
-       * we dont give warnings.. we then check if theyre opered
-       * (to avoid flood warnings), lastly if theyre our client
-       * and flooding    -- fl
-       */
-      if (!MyClient(source_p) || HasUMode(source_p, UMODE_OPER) ||
-          !flood_attack_client(p_or_n, source_p, target_p))
-        sendto_anywhere(target_p, source_p, command, ":%s", text);
-    }
+
+    if (flood_attack_client(p_or_n, source_p, target_p))
+      return;
   }
-  else if (!MyClient(source_p) || HasUMode(source_p, UMODE_OPER) ||
-           !flood_attack_client(p_or_n, source_p, target_p))
-    sendto_anywhere(target_p, source_p, command, ":%s", text);
+
+  sendto_anywhere(target_p, source_p, command, ":%s", text);
 }
 
 /* handle_special()

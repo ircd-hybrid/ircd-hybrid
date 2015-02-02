@@ -1019,6 +1019,10 @@ accept_message(struct Client *source,
 {
   dlink_node *node = NULL;
 
+  if (HasFlag(source, FLAGS_SERVICE) ||
+      (HasUMode(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
+    return 1;
+
   if (source == target || find_accept(source->name, source->username,
                                       source->host, target, match))
     return 1;

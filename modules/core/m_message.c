@@ -379,7 +379,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
       }
 
       /* Only so opers can watch for floods */
-      flood_attack_client(p_or_n, source_p, target_p);
+      flood_attack_client(NOTICE, source_p, target_p);
       return;
     }
 

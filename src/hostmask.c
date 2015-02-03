@@ -44,6 +44,9 @@
                          ch = ch - 'a' + 10; \
                        } while (0);
 
+/* Hashtable stuff...now external as it's used in m_stats.c */
+dlink_list atable[ATABLE_SIZE];
+
 /* The mask parser/type determination code... */
 
 /* int try_parse_v6_netmask(const char *, struct irc_ssaddr *, int *);
@@ -337,9 +340,6 @@ mask_addr(struct irc_ssaddr *ip, int bits)
       v6_base_ip->sin6_addr.s6_addr[i] = 0;
   }
 }
-
-/* Hashtable stuff...now external as it's used in m_stats.c */
-dlink_list atable[ATABLE_SIZE];
 
 /* unsigned long hash_ipv4(struct irc_ssaddr*)
  * Input: An IP address.

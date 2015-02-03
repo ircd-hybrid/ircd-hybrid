@@ -64,20 +64,14 @@ GeoIP *geoip_ctx;
 #endif
 
 struct timeval SystemTime;
-struct Client me;             /* That's me */
-struct Connection meConnection; /* That's also part of me */
+struct Client me = { .connection = &(struct Connection) {} };  /* That's me */
 
+char **myargv;
 const char *logFileName = LPATH;
 const char *pidFileName = PPATH;
 
-char **myargv;
-
-int dorehash = 0;
-int doremotd = 0;
-
-/* Set to zero because it should be initialized later using
- * initialize_server_capabs
- */
+unsigned int dorehash;
+unsigned int doremotd;
 unsigned int default_server_capabs;
 unsigned int splitmode;
 unsigned int splitchecking;
@@ -489,7 +483,6 @@ main(int argc, char *argv[])
   /* It ain't random, but it ought to be a little harder to guess */
   init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
 
-  me.connection = &meConnection;
   dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
 						   of Client list */
   ConfigLog.use_logging = 1;

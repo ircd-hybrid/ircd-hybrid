@@ -45,10 +45,10 @@
 #include "user.h"
 
 
-static mp_pool_t *userhost_pool = NULL;
-static mp_pool_t *namehost_pool = NULL;
+static mp_pool_t *userhost_pool;
+static mp_pool_t *namehost_pool;
 
-static unsigned int hashf_xor_key = 0;
+static unsigned int hashf_xor_key;
 
 /* The actual hash tables, They MUST be of the same HASHSIZE, variable
  * size tables could be supported but the rehash routine should also

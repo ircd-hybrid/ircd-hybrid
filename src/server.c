@@ -51,7 +51,7 @@
 #define MIN_CONN_FREQ 300
 
 dlink_list flatten_links;
-static dlink_list cap_list = { NULL, NULL, 0 };
+static dlink_list cap_list;
 static void serv_connect_callback(fde_t *, int, void *);
 
 

@@ -100,8 +100,8 @@ extern const char *serno;
 extern const char *ircd_version;
 extern const char *logFileName;
 extern const char *pidFileName;
-extern int dorehash;
-extern int doremotd;
+extern unsigned int dorehash;
+extern unsigned int doremotd;
 extern struct event event_write_links_file;
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec

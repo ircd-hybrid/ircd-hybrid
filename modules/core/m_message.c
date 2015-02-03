@@ -51,15 +51,14 @@ enum
 {
   ENTITY_NONE               = 0,
   ENTITY_CHANNEL            = 1,
-  ENTITY_CHANOPS_ON_CHANNEL = 2,
-  ENTITY_CLIENT             = 3
+  ENTITY_CLIENT             = 2
 };
 
 static struct
 {
   void *ptr;
-  int type;
-  int flags;
+  unsigned int type;
+  unsigned int flags;
 } targets[IRCD_BUFSIZE];
 
 static int unsigned ntargets = 0;
@@ -176,13 +175,11 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
 static int
 flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
 {
-  int delta = 0;
-
   if (GlobalSetOptions.floodcount && !IsCanFlood(source_p))
   {
     if ((chptr->first_received_message_time + 1) < CurrentTime)
     {
-      delta = CurrentTime - chptr->first_received_message_time;
+      const int delta = CurrentTime - chptr->first_received_message_time;
       chptr->received_number_of_privmsgs -= delta;
       chptr->first_received_message_time = CurrentTime;
 
@@ -219,46 +216,6 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
   return 0;
 }
 
-/* msg_channel()
- *
- * inputs	- flag privmsg or notice
- * 		- pointer to command "PRIVMSG" or "NOTICE"
- *		- pointer to source_p
- *		- pointer to channel
- * output	- NONE
- * side effects	- message given channel
- */
-static void
-msg_channel(int p_or_n, const char *command, struct Client *source_p,
-            struct Channel *chptr, const char *text)
-{
-  int result = 0;
-
-  /* Chanops and voiced can flood their own channel with impunity */
-  if ((result = can_send(chptr, source_p, NULL, text)) < 0)
-  {
-    if (result == CAN_SEND_OPV ||
-        !flood_attack_channel(p_or_n, source_p, chptr))
-      sendto_channel_butone(source_p, source_p, chptr, 0, "%s %s :%s",
-                            command, chptr->name, text);
-  }
-  else
-  {
-    if (p_or_n != NOTICE)
-    {
-      if (result == ERR_NOCTRLSONCHAN)
-        sendto_one_numeric(source_p, &me, ERR_NOCTRLSONCHAN,
-                           chptr->name, text);
-      else if (result == ERR_NEEDREGGEDNICK)
-        sendto_one_numeric(source_p, &me, ERR_NEEDREGGEDNICK,
-                           chptr->name);
-      else
-        sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN,
-                           chptr->name);
-    }
-  }
-}
-
 /* msg_channel_flags()
  *
  * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
@@ -272,27 +229,27 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_channel_flags(int p_or_n, const char *command, struct Client *source_p,
-                  struct Channel *chptr, int flags, const char *text)
+msg_channel(int p_or_n, const char *command, struct Client *source_p,
+            struct Channel *chptr, unsigned int flags, const char *text)
 {
-  unsigned int type = 0;
   int result = 0;
-  char c = '\0';
+  unsigned int type = 0;
+  const char *prefix = "";
 
   if (flags & CHFL_VOICE)
   {
     type = CHFL_VOICE|CHFL_HALFOP|CHFL_CHANOP;
-    c = '+';
+    prefix = "+";
   }
   else if (flags & CHFL_HALFOP)
   {
     type = CHFL_HALFOP|CHFL_CHANOP;
-    c = '%';
-   }
-  else
+    prefix = "%";
+  }
+  else if (flags & CHFL_CHANOP)
   {
     type = CHFL_CHANOP;
-    c = '@';
+    prefix = "@";
   }
 
   /* Chanops and voiced can flood their own channel with impunity */
@@ -300,8 +257,8 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *source_p,
   {
     if (result == CAN_SEND_OPV ||
         !flood_attack_channel(p_or_n, source_p, chptr))
-      sendto_channel_butone(source_p, source_p, chptr, type, "%s %c%s :%s",
-                            command, c, chptr->name, text);
+      sendto_channel_butone(source_p, source_p, chptr, type, "%s %s%s :%s",
+                            command, prefix, chptr->name, text);
   }
   else
   {
@@ -506,20 +463,16 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
  */
 static int
 build_target_list(int p_or_n, const char *command, struct Client *source_p,
-                  char *nicks_channels, const char *text)
+                  char *list, const char *text)
 {
-  int type = 0;
-  char *p = NULL, *nick = NULL;
-  char *target_list = NULL;
-  struct Channel *chptr = NULL;
-  struct Client *target_p = NULL;
-
-  target_list = nicks_channels;
+  unsigned int type = 0;
+  char *p = NULL;
+  void *target = NULL;
 
   ntargets = 0;
 
-  for (nick = strtoken(&p, target_list, ","); nick;
-       nick = strtoken(&p,        NULL, ","))
+  for (const char *name = strtoken(&p, list, ","); name;
+                   name = strtoken(&p, NULL, ","))
   {
     const char *with_prefix = NULL;
 
@@ -527,45 +480,43 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
      * Channels are privmsg'd a lot more than other clients, moved up
      * here plain old channel msg?
      */
-    if (IsChanPrefix(*nick))
+    if (IsChanPrefix(*name))
     {
-      if ((chptr = hash_find_channel(nick)))
+      if ((target = hash_find_channel(name)))
       {
-        if (!duplicate_ptr(chptr))
+        if (!duplicate_ptr(target))
         {
           if (ntargets >= ConfigGeneral.max_targets)
           {
             sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
-                               nick, ConfigGeneral.max_targets);
+                               name, ConfigGeneral.max_targets);
             return 1;
           }
 
-          targets[ntargets].ptr = chptr;
-          targets[ntargets++].type = ENTITY_CHANNEL;
+          targets[ntargets].ptr = target;
+          targets[ntargets].type = ENTITY_CHANNEL;
+          targets[ntargets++].flags = 0;
         }
       }
-      else
-      {
-        if (p_or_n != NOTICE)
-          sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, nick);
-      }
+      else if (p_or_n != NOTICE)
+        sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
 
       continue;
     }
 
     /* Look for a PRIVMSG/NOTICE to another client */
-    if ((target_p = find_person(source_p, nick)))
+    if ((target = find_person(source_p, name)))
     {
-      if (!duplicate_ptr(target_p))
+      if (!duplicate_ptr(target))
       {
         if (ntargets >= ConfigGeneral.max_targets)
         {
           sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
-                             nick, ConfigGeneral.max_targets);
+                             name, ConfigGeneral.max_targets);
           return 1;
         }
 
-        targets[ntargets].ptr = target_p;
+        targets[ntargets].ptr = target;
         targets[ntargets].type = ENTITY_CLIENT;
         targets[ntargets++].flags = 0;
       }
@@ -575,39 +526,39 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
 
     /* @#channel or +#channel message ? */
     type = 0;
-    with_prefix = nick;
+    with_prefix = name;
 
     /* Allow %+@ if someone wants to do that */
     while (1)
     {
-      if (*nick == '@')
+      if (*name == '@')
         type |= CHFL_CHANOP;
-      else if (*nick == '%')
+      else if (*name == '%')
         type |= CHFL_CHANOP | CHFL_HALFOP;
-      else if (*nick == '+')
+      else if (*name == '+')
         type |= CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE;
       else
         break;
-      ++nick;
+      ++name;
     }
 
     if (type)
     {
-      if (EmptyString(nick))  /* If it's a '\0' dump it, there is no recipient */
+      if (EmptyString(name))  /* If it's a '\0' dump it, there is no recipient */
       {
         sendto_one_numeric(source_p, &me, ERR_NORECIPIENT, command);
         continue;
       }
 
       /*
-       * At this point, nick+1 should be a channel name i.e. #foo or &foo
+       * At this point, name+1 should be a channel name i.e. #foo or &foo
        * if the channel is found, fine, if not report an error
        */
-      if ((chptr = hash_find_channel(nick)))
+      if ((target = hash_find_channel(name)))
       {
         if (IsClient(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
         {
-          if (!has_member_flags(find_channel_link(source_p, chptr),
+          if (!has_member_flags(find_channel_link(source_p, target),
                                 CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
           {
             sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, with_prefix);
@@ -615,37 +566,34 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
           }
         }
 
-        if (!duplicate_ptr(chptr))
+        if (!duplicate_ptr(target))
         {
           if (ntargets >= ConfigGeneral.max_targets)
           {
             sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
-                               nick, ConfigGeneral.max_targets);
+                               name, ConfigGeneral.max_targets);
             return 1;
           }
 
-          targets[ntargets].ptr = chptr;
-          targets[ntargets].type = ENTITY_CHANOPS_ON_CHANNEL;
+          targets[ntargets].ptr = target;
+          targets[ntargets].type = ENTITY_CHANNEL;
           targets[ntargets++].flags = type;
         }
       }
-      else
-      {
-        if (p_or_n != NOTICE)
-          sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, nick);
-      }
+      else if (p_or_n != NOTICE)
+        sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
 
       continue;
     }
 
-    if (*nick == '$' || strchr(nick, '@'))
-      handle_special(p_or_n, command, source_p, nick, text);
+    if (*name == '$' || strchr(name, '@'))
+      handle_special(p_or_n, command, source_p, name, text);
     else
     {
       if (p_or_n != NOTICE)
       {
-        if (!IsDigit(*nick) || MyClient(source_p))
-          sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, nick);
+        if (!IsDigit(*name) || MyClient(source_p))
+          sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
       }
     }
   }
@@ -692,12 +640,8 @@ m_message(int p_or_n, const char *command, struct Client *source_p, int parc, ch
         break;
 
       case ENTITY_CHANNEL:
-        msg_channel(p_or_n, command, source_p, targets[i].ptr, parv[2]);
-        break;
-
-      case ENTITY_CHANOPS_ON_CHANNEL:
-        msg_channel_flags(p_or_n, command, source_p, targets[i].ptr,
-                          targets[i].flags, parv[2]);
+        msg_channel(p_or_n, command, source_p, targets[i].ptr,
+                    targets[i].flags, parv[2]);
         break;
     }
   }

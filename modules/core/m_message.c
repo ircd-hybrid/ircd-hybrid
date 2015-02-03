@@ -562,7 +562,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
                                 CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
           {
             sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, with_prefix);
-            return -1;
+            continue;
           }
         }
 

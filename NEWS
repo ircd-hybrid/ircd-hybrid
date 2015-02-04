@@ -1,5 +1,6 @@
 -- Noteworthy changes in version 8.2.3 (2015-??-??)
 o) Added channel mode +C which prevents users from sending CTCPS to a channel
+o) Fixes to the NOTICE/PRIVMSG anti-flood logic
 
 
 -- Noteworthy changes in version 8.2.2 (2015-01-20)

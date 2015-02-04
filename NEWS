@@ -1,3 +1,7 @@
+-- Noteworthy changes in version 8.2.3 (2015-??-??)
+o) Added channel mode +C which prevents users from sending CTCPS to a channel
+
+
 -- Noteworthy changes in version 8.2.2 (2015-01-20)
 o) Added support for the "extended-join" client capability
 o) Channel half-ops can now use /INVITE as well

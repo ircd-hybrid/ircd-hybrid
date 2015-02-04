@@ -78,6 +78,7 @@ enum
 #define MODE_REGONLY    0x0200U  /**< Only registered clients may join a channel with that mode set */
 #define MODE_NOCTRL     0x0400U  /**< Prevents users from sending messages containing control codes to the channel */
 #define MODE_MODREG     0x0800U  /**< Unregistered/unidentified clients cannot send text to the channel */
+#define MODE_NOCTCP     0x1000U
 
 /* cache flags for silence on ban */
 #define CHFL_BAN_CHECKED  0x0080U

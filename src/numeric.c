@@ -522,7 +522,7 @@ static const char *const replies[] =
 /* 489 */ NULL,
 /* 490 */ NULL,
 /* 491 ERR_NOOPERHOST */ ":Only few of mere mortals may try to enter the twilight zone",
-/* 492 */ NULL,
+/* 492 ERR_NOCTCP */ "%s :You cannot send CTCPs to this channel. Not sent: %s",
 /* 493 */ NULL,
 /* 494 */ NULL,
 /* 495 */ NULL,

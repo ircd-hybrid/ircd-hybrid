@@ -751,6 +751,10 @@ can_send(struct Channel *chptr, struct Client *source_p,
   if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
     return ERR_NOCTRLSONCHAN;
 
+  if (chptr->mode.mode & MODE_NOCTCP)
+    if (*message++ == '\001' && strncmp(message, "ACTION ", 7))
+      return ERR_NOCTCP;
+
   if (member || (member = find_channel_link(source_p, chptr)))
     if (member->flags & (CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
       return CAN_SEND_OPV;

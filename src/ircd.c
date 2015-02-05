@@ -64,7 +64,8 @@ GeoIP *geoip_ctx;
 #endif
 
 struct timeval SystemTime;
-struct Client me = { .connection = &(struct Connection) {} };  /* That's me */
+struct Connection meConnection; /* That's also part of me */
+struct Client me = { .connection = &meConnection };  /* That's me */
 
 char **myargv;
 const char *logFileName = LPATH;

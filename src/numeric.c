@@ -34,7 +34,7 @@ static const char *const replies[] =
 /* 001 RPL_WELCOME */ ":Welcome to the %s Internet Relay Chat Network %s",
 /* 002 RPL_YOURHOST */ ":Your host is %s, running version %s",
 /* 003 RPL_CREATED */ ":This server was created %s",
-/* 004 RPL_MYINFO */ "%s %s %s bchiklmnoprstveIMORS bkloveIh",
+/* 004 RPL_MYINFO */ "%s %s %s bchiklmnoprstveCIMORS bkloveIh",
 /* 005 RPL_ISUPPORT */ "%s :are supported by this server",
 /* 006 */ NULL,
 /* 007 */ NULL,

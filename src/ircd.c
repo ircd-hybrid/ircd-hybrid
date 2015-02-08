@@ -264,9 +264,8 @@ initialize_global_set_options(void)
   else
     GlobalSetOptions.floodcount = 10;
 
-  /* XXX I have no idea what to try here - Dianora */
-  GlobalSetOptions.joinfloodcount = 16;
-  GlobalSetOptions.joinfloodtime = 8;
+  GlobalSetOptions.joinfloodcount = 18;
+  GlobalSetOptions.joinfloodtime = 6;
 
   split_servers = ConfigChannel.default_split_server_count;
   split_users   = ConfigChannel.default_split_user_count;

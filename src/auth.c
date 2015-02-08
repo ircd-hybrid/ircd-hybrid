@@ -77,7 +77,7 @@ enum
   REPORT_HOST_TOOLONG
 };
 
-#define sendheader(c, i) sendto_one_notice((c), &me, HeaderMessages[(i)])
+#define sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
 
 static dlink_list auth_pending_list;
 static void read_auth_reply(fde_t *, void *);

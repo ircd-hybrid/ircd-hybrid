@@ -1,4 +1,4 @@
-JOIN <#channel1[,#channel2,#channel3...]> [key]
+JOIN <#channel1[,#channel2,#channel3...]> [<key>{,<key>}]
 
 The JOIN command allows you to enter a public chat area known as
 a channel. You can join more than one channel at a time,

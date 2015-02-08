@@ -11,6 +11,8 @@ o) Fixed bug where "/rehash" would always reset the "MAX", "JFLOODTIME", and
    command
 o) Added channel mode +C which prevents users from sending CTCPs to a channel
 o) Fixes to the NOTICE/PRIVMSG anti-flood logic
+o) Allow to disable the NOTICE/PRIVMSG anti-flood mechanism by setting the
+   general::default_floodcount configuration option to 0
 o) Updated some help files
 
 

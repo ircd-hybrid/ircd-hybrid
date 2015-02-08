@@ -139,7 +139,7 @@ struct MaskItem;
 
 /* umodes, settable flags */
 #define UMODE_SERVNOTICE   0x00000001U  /**< Server notices such as kill */
-#define UMODE_CCONN        0x00000002U  /**< Client Connections */
+#define UMODE_CCONN        0x00000002U  /**< Can see client connection notices */
 #define UMODE_REJ          0x00000004U  /**< Bot Rejections */
 #define UMODE_SKILL        0x00000008U  /**< Server Killed */
 #define UMODE_FULL         0x00000010U  /**< Full messages */
@@ -153,12 +153,12 @@ struct MaskItem;
 #define UMODE_CALLERID     0x00001000U  /**< Block unless caller id's */
 #define UMODE_SOFTCALLERID 0x00002000U  /**< Block unless on common channel */
 #define UMODE_UNAUTH       0x00004000U  /**< Show unauth connects here */
-#define UMODE_LOCOPS       0x00008000U  /**< Show locops */
+#define UMODE_LOCOPS       0x00008000U  /**< Can see LOCOPS messages */
 #define UMODE_DEAF         0x00010000U  /**< Don't receive channel messages */
 #define UMODE_REGISTERED   0x00020000U  /**< User has identified for that nick. */
 #define UMODE_REGONLY      0x00040000U  /**< Only registered nicks may PM */
-#define UMODE_HIDDEN       0x00080000U  /**< Operator status is hidden */
-#define UMODE_OPER         0x00100000U  /**< Operator */
+#define UMODE_HIDDEN       0x00080000U  /**< IRC operator status is hidden */
+#define UMODE_OPER         0x00100000U  /**< IRC operator */
 #define UMODE_ADMIN        0x00200000U  /**< Admin on server */
 #define UMODE_FARCONNECT   0x00400000U  /**< Can see remote client connects/exits */
 #define UMODE_HIDDENHOST   0x00800000U  /**< User's host is hidden */

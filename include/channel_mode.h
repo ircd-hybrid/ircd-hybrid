@@ -68,9 +68,9 @@ enum
 /* channel modes ONLY */
 #define MODE_PRIVATE    0x0001U  /**< */
 #define MODE_SECRET     0x0002U  /**< Channel does not show up on NAMES or LIST */
-#define MODE_MODERATED  0x0004U  /**< Users without +v/h/o cannot send text to the channel */
+#define MODE_MODERATED  0x0004U  /**< Users without +v/+h/+o cannot send text to the channel */
 #define MODE_TOPICLIMIT 0x0008U  /**< Only chanops can change the topic */
-#define MODE_INVITEONLY 0x0010U  /**< Only invited usersmay join this channel */
+#define MODE_INVITEONLY 0x0010U  /**< Only invited users may join this channel */
 #define MODE_NOPRIVMSGS 0x0020U  /**< Users must be in the channel to send text to it */
 #define MODE_SSLONLY    0x0040U  /**< Prevents anyone who isn't connected via SSL/TLS from joining the channel */
 #define MODE_OPERONLY   0x0080U  /**< Prevents anyone who hasn't obtained IRC operator status from joining the channel */
@@ -78,7 +78,7 @@ enum
 #define MODE_REGONLY    0x0200U  /**< Only registered clients may join a channel with that mode set */
 #define MODE_NOCTRL     0x0400U  /**< Prevents users from sending messages containing control codes to the channel */
 #define MODE_MODREG     0x0800U  /**< Unregistered/unidentified clients cannot send text to the channel */
-#define MODE_NOCTCP     0x1000U
+#define MODE_NOCTCP     0x1000U  /**< Clients cannot send CTCP messages to the channel */
 
 /* cache flags for silence on ban */
 #define CHFL_BAN_CHECKED  0x0080U

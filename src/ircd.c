@@ -255,6 +255,7 @@ io_loop(void)
 static void
 initialize_global_set_options(void)
 {
+  GlobalSetOptions.maxclients = ConfigServerInfo.default_max_clients;
   GlobalSetOptions.autoconn  = 1;
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num  = MAX_JOIN_LEAVE_COUNT;
@@ -264,8 +265,8 @@ initialize_global_set_options(void)
   else
     GlobalSetOptions.floodcount = 10;
 
-  GlobalSetOptions.joinfloodcount = 18;
-  GlobalSetOptions.joinfloodtime = 6;
+  GlobalSetOptions.joinfloodcount = ConfigChannel.default_join_flood_count;
+  GlobalSetOptions.joinfloodtime = ConfigChannel.default_join_flood_time;
 
   split_servers = ConfigChannel.default_split_server_count;
   split_users   = ConfigChannel.default_split_user_count;
@@ -550,7 +551,7 @@ main(int argc, char *argv[])
   read_conf_files(1);   /* cold start init conf files */
   init_uid();
   initialize_server_capabs();   /* Set up default_server_capabs */
-  initialize_global_set_options();
+  initialize_global_set_options();  /* Has to be called after read_conf_files() */
   channel_init();
   read_links_file();
   motd_init();

@@ -173,6 +173,9 @@ reset_block_state(void)
 %token  CONNECTFREQ
 %token  CYCLE_ON_HOST_CHANGE
 %token  DEFAULT_FLOODCOUNT
+%token  DEFAULT_JOIN_FLOOD_COUNT
+%token  DEFAULT_JOIN_FLOOD_TIME
+%token  DEFAULT_MAX_CLIENTS
 %token  DEFAULT_SPLIT_SERVER_COUNT
 %token  DEFAULT_SPLIT_USER_COUNT
 %token  DENY
@@ -219,8 +222,6 @@ reset_block_state(void)
 %token  IRCD_AUTH
 %token  IRCD_FLAGS
 %token  IRCD_SID
-%token  JOIN_FLOOD_COUNT
-%token  JOIN_FLOOD_TIME
 %token  KILL
 %token  KILL_CHASE_TIME_LIMIT
 %token  KLINE
@@ -466,7 +467,7 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_description |
                         serverinfo_network_name |
                         serverinfo_network_desc |
-                        serverinfo_max_clients |
+                        serverinfo_default_max_clients |
                         serverinfo_max_nick_length |
                         serverinfo_max_topic_length |
                         serverinfo_ssl_dh_param_file |
@@ -776,7 +777,7 @@ serverinfo_vhost6: VHOST6 '=' QSTRING ';'
   }
 };
 
-serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
+serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -787,7 +788,7 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "MAXCLIENTS too low, setting to %d", MAXCLIENTS_MIN);
     conf_error_report(buf);
-    ConfigServerInfo.max_clients = MAXCLIENTS_MIN;
+    ConfigServerInfo.default_max_clients = MAXCLIENTS_MIN;
   }
   else if ($3 > MAXCLIENTS_MAX)
   {
@@ -795,10 +796,10 @@ serverinfo_max_clients: T_MAX_CLIENTS '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "MAXCLIENTS too high, setting to %d", MAXCLIENTS_MAX);
     conf_error_report(buf);
-    ConfigServerInfo.max_clients = MAXCLIENTS_MAX;
+    ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   }
   else
-    ConfigServerInfo.max_clients = $3;
+    ConfigServerInfo.default_max_clients = $3;
 };
 
 serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
@@ -2992,8 +2993,8 @@ channel_item:       channel_max_bans |
                     channel_default_split_server_count |
                     channel_no_create_on_split |
                     channel_no_join_on_split |
-                    channel_jflood_count |
-                    channel_jflood_time |
+                    channel_default_join_flood_count |
+                    channel_default_join_flood_time |
                     channel_disable_fake_channels |
                     error;
 
@@ -3057,14 +3058,14 @@ channel_no_join_on_split: NO_JOIN_ON_SPLIT '=' TBOOL ';'
   ConfigChannel.no_join_on_split = yylval.number;
 };
 
-channel_jflood_count: JOIN_FLOOD_COUNT '=' NUMBER ';'
+channel_default_join_flood_count: DEFAULT_JOIN_FLOOD_COUNT '=' NUMBER ';'
 {
-  GlobalSetOptions.joinfloodcount = yylval.number;
+  ConfigChannel.default_join_flood_count = yylval.number;
 };
 
-channel_jflood_time: JOIN_FLOOD_TIME '=' timespec ';'
+channel_default_join_flood_time: DEFAULT_JOIN_FLOOD_TIME '=' timespec ';'
 {
-  GlobalSetOptions.joinfloodtime = $3;
+  ConfigChannel.default_join_flood_time = $3;
 };
 
 /***************************************************************************

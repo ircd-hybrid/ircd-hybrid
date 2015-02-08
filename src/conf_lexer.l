@@ -153,6 +153,9 @@ cycle_on_host_change        { return CYCLE_ON_HOST_CHANGE; }
 deaf                        { return T_DEAF; }
 debug                       { return T_DEBUG; }
 default_floodcount          { return DEFAULT_FLOODCOUNT; }
+default_join_flood_count    { return DEFAULT_JOIN_FLOOD_COUNT; }
+default_join_flood_time     { return DEFAULT_JOIN_FLOOD_TIME; }
+default_max_clients         { return DEFAULT_MAX_CLIENTS; }
 default_split_server_count  { return DEFAULT_SPLIT_SERVER_COUNT; }
 default_split_user_count    { return DEFAULT_SPLIT_USER_COUNT; }
 deny                        { return DENY; }
@@ -206,8 +209,6 @@ invite_client_time          { return INVITE_CLIENT_TIME; }
 ip                          { return IP; }
 ipv4                        { return T_IPV4; }
 ipv6                        { return T_IPV6; }
-join_flood_count            { return JOIN_FLOOD_COUNT; }
-join_flood_time             { return JOIN_FLOOD_TIME; }
 kill                        { return KILL; }
 kill_chase_time_limit       { return KILL_CHASE_TIME_LIMIT; }
 kline                       { return KLINE; }
@@ -225,7 +226,6 @@ masked                      { return TMASKED; }
 max_accept                  { return MAX_ACCEPT; }
 max_bans                    { return MAX_BANS; }
 max_channels                { return MAX_CHANNELS; }
-max_clients                 { return T_MAX_CLIENTS; }
 max_global                  { return MAX_GLOBAL; }
 max_ident                   { return MAX_IDENT; }
 max_idle                    { return MAX_IDLE; }

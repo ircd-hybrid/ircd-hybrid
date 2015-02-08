@@ -256,15 +256,10 @@ static void
 initialize_global_set_options(void)
 {
   GlobalSetOptions.maxclients = ConfigServerInfo.default_max_clients;
-  GlobalSetOptions.autoconn  = 1;
+  GlobalSetOptions.autoconn = 1;
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
-  GlobalSetOptions.spam_num  = MAX_JOIN_LEAVE_COUNT;
-
-  if (ConfigGeneral.default_floodcount)
-    GlobalSetOptions.floodcount = ConfigGeneral.default_floodcount;
-  else
-    GlobalSetOptions.floodcount = 10;
-
+  GlobalSetOptions.spam_num = MAX_JOIN_LEAVE_COUNT;
+  GlobalSetOptions.floodcount = ConfigGeneral.default_floodcount;
   GlobalSetOptions.joinfloodcount = ConfigChannel.default_join_flood_count;
   GlobalSetOptions.joinfloodtime = ConfigChannel.default_join_flood_time;
 

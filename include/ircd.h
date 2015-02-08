@@ -34,6 +34,7 @@
 
 struct
 {
+  unsigned int maxclients;
   unsigned int autoconn;      /* autoconn enabled for all servers? */
   int floodcount;    /* Number of messages in 1 second    */
   unsigned int joinfloodtime;

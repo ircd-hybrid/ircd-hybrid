@@ -268,6 +268,8 @@ struct
   unsigned int knock_delay_channel;
   unsigned int max_bans;
   unsigned int max_channels;
+  unsigned int default_join_flood_count;
+  unsigned int default_join_flood_time;
   unsigned int no_create_on_split;
   unsigned int no_join_on_split;
   unsigned int default_split_server_count;
@@ -302,7 +304,7 @@ struct
   void *server_ctx;
   void *client_ctx;
   unsigned int hub;
-  unsigned int max_clients;
+  unsigned int default_max_clients;
   unsigned int max_nick_length;
   unsigned int max_topic_length;
   unsigned int specific_ipv4_vhost;

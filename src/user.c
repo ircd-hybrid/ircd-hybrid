@@ -463,8 +463,8 @@ register_local_user(struct Client *source_p)
    * probably be just a percentage of the MAXCLIENTS...
    *   -Taner
    */
-  if ((Count.local >= ConfigServerInfo.max_clients + MAX_BUFFER) ||
-      (Count.local >= ConfigServerInfo.max_clients && !IsExemptLimits(source_p)))
+  if ((Count.local >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
+      (Count.local >= GlobalSetOptions.maxclients && !IsExemptLimits(source_p)))
   {
     sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                          "Too many clients, rejecting %s[%s].",

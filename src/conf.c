@@ -789,7 +789,7 @@ set_default_conf(void)
   memset(&ConfigServerInfo.ip6, 0, sizeof(ConfigServerInfo.ip6));
   ConfigServerInfo.specific_ipv6_vhost = 0;
 
-  ConfigServerInfo.max_clients = MAXCLIENTS_MAX;
+  ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   ConfigServerInfo.max_nick_length = 9;
   ConfigServerInfo.max_topic_length = 80;
   ConfigServerInfo.hub = 0;
@@ -810,6 +810,8 @@ set_default_conf(void)
   ConfigChannel.knock_delay_channel = 60;
   ConfigChannel.max_channels = 25;
   ConfigChannel.max_bans = 25;
+  ConfigChannel.default_join_flood_count = 18;
+  ConfigChannel.default_join_flood_time = 6;
   ConfigChannel.default_split_user_count = 0;
   ConfigChannel.default_split_server_count = 0;
   ConfigChannel.no_join_on_split = 0;

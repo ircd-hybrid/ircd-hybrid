@@ -136,10 +136,10 @@ static const struct InfoStruct info_table[] =
     "Server is a hub"
   },
   {
-    "max_clients",
+    "default_max_clients",
     OUTPUT_DECIMAL,
-    &ConfigServerInfo.max_clients,
-    "Maximum number of clients permitted simultaneously on this server"
+    &ConfigServerInfo.default_max_clients,
+    "The default maximum number of clients permitted simultaneously on this server"
   },
   {
     "max_nick_length",

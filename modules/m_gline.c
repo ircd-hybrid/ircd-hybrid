@@ -419,7 +419,7 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
        user, host, reason, get_oper_name(source_p));
 
   sendto_server(NULL, CAP_GLN, 0, ":%s GLINE %s %s :%s",
-		source_p->id, user, host, reason);
+                source_p->id, user, host, reason);
   return 0;
 }
 
@@ -440,11 +440,8 @@ do_sungline(struct Client *source_p, const char *user,
                          "oper or server has already voted");
 
   if (prop)
-  {
-    sendto_server(source_p, CAP_ENCAP, 0,
-                  ":%s ENCAP * GUNGLINE %s %s :%s",
+    sendto_server(source_p, CAP_ENCAP, 0, ":%s ENCAP * GUNGLINE %s %s :%s",
                   source_p->id, user, host, reason);
-  }
 }
 
 /*! \brief GUNGLINE command handler

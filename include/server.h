@@ -28,8 +28,6 @@
 #define INCLUDED_serv_h
 
 
-struct MaskItem;
-
 /*
  * number of seconds to wait after server starts up, before
  * starting try_connections()

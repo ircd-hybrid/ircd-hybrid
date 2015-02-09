@@ -1124,8 +1124,7 @@ oper_privs_as_string(const unsigned int port)
 const char *
 get_oper_name(const struct Client *client_p)
 {
-  /* +5 for !,@,{,} and null */
-  static char buffer[NICKLEN + USERLEN + HOSTLEN + HOSTLEN + 5];
+  static char buffer[IRCD_BUFSIZE];
 
   if (IsServer(client_p))
     return client_p->name;

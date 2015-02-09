@@ -41,7 +41,7 @@ static void dump_map(struct Client *client,
   dlink_node *node = NULL;
   struct Client *target_p = NULL;
   static char prompt[64];
-  static char buf[IRCD_BUFSIZE];
+  char buf[IRCD_BUFSIZE];
   char *p = prompt + prompt_length;
   unsigned int cnt = 0;
   unsigned int bufpos = 0;

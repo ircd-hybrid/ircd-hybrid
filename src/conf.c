@@ -869,7 +869,9 @@ set_default_conf(void)
   ConfigGeneral.no_oper_flood = 0;
   ConfigGeneral.oper_pass_resv = 1;
   ConfigGeneral.max_targets = MAX_TARGETS_DEFAULT;
-  ConfigGeneral.oper_only_umodes = UMODE_DEBUG;
+  ConfigGeneral.oper_only_umodes = UMODE_DEBUG | UMODE_LOCOPS | UMODE_HIDDEN | UMODE_FARCONNECT |
+                                   UMODE_UNAUTH | UMODE_EXTERNAL | UMODE_BOTS | UMODE_NCHANGE |
+                                   UMODE_SPY | UMODE_FULL | UMODE_SKILL | UMODE_REJ | UMODE_CCONN;
   ConfigGeneral.oper_umodes = UMODE_BOTS | UMODE_LOCOPS | UMODE_SERVNOTICE | UMODE_WALLOP;
   ConfigGeneral.throttle_count = 1;
   ConfigGeneral.throttle_time = 1;

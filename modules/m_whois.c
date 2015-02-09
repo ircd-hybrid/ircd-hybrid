@@ -133,9 +133,9 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name,
                        target_p->away);
 
-  if (HasUMode(target_p, UMODE_CALLERID|UMODE_SOFTCALLERID))
+  if (HasUMode(target_p, UMODE_CALLERID | UMODE_SOFTCALLERID))
   {
-    int callerid = !!HasUMode(target_p, UMODE_CALLERID);
+    const int callerid = !!HasUMode(target_p, UMODE_CALLERID);
 
     sendto_one_numeric(source_p, &me, RPL_TARGUMODEG, target_p->name,
                        callerid ? "+g" : "+G",

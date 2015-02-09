@@ -106,7 +106,7 @@ extern unsigned int doremotd;
 extern struct event event_write_links_file;
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec
-extern int unsigned default_server_capabs;
+extern unsigned int default_server_capabs;
 extern unsigned int splitmode;
 extern unsigned int splitchecking;
 extern unsigned int split_users;

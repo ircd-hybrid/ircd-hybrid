@@ -1,6 +1,6 @@
--- Noteworthy changes in version 8.2.3 (2015-??-??)
+-- Noteworthy changes in version 8.2.3 (2015-02-10)
 ########################################################################
-o) IMPORTANT: the following ircd.conf configuration directives have been renamed
+o) IMPORTANT: the following ircd.conf configuration directives have been renamed:
 
    max_clients -> default_max_clients
    join_flood_count -> default_join_flood_count
@@ -14,6 +14,7 @@ o) Fixes to the NOTICE/PRIVMSG anti-flood logic
 o) Allow to disable the NOTICE/PRIVMSG anti-flood mechanism by setting the
    general::default_floodcount configuration option to 0
 o) Updated some help files
+o) Minor code cleanups and improvements
 
 
 -- Noteworthy changes in version 8.2.2 (2015-01-20)

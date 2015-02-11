@@ -53,7 +53,7 @@ whois_can_see_channels(struct Channel *chptr,
   if (source_p == target_p || IsMember(source_p, chptr))
     return 1;
 
-  if (HasUMode(source_p, UMODE_ADMIN))
+  if (HasUMode(source_p, UMODE_OPER))
     return 2;
   return 0;
 }
@@ -153,7 +153,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one_numeric(source_p, &me, RPL_WHOISTEXT, target_p->name,
                        "User connected using a webirc gateway");
 
-  if (HasUMode(source_p, UMODE_ADMIN) || source_p == target_p)
+  if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
   {
     char *m = buf;
     *m++ = '+';
@@ -175,7 +175,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one_numeric(source_p, &me, RPL_WHOISSECURE, target_p->name);
 
   if (!EmptyString(target_p->certfp))
-    if (target_p == source_p || HasUMode(source_p, UMODE_ADMIN))
+    if (target_p == source_p || HasUMode(source_p, UMODE_OPER))
       sendto_one_numeric(source_p, &me, RPL_WHOISCERTFP, target_p->name, target_p->certfp);
 
   if (MyConnect(target_p))

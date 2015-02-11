@@ -29,6 +29,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "conf.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -169,7 +170,7 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
 
   if (!IsClient(source_p))
     sendto_channel_local(0, chptr, ":%s TOPIC %s :%s",
-                         source_p->name,
+                        (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name, 
                          chptr->name, chptr->topic);
 
   else

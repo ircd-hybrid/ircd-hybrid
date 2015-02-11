@@ -1296,8 +1296,8 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
                target_p->connection->send.bytes >> 10,
                target_p->connection->recv.messages,
                target_p->connection->recv.bytes >> 10,
-               (unsigned)(CurrentTime - target_p->connection->firsttime),
-               (CurrentTime > target_p->connection->since) ? (unsigned)(CurrentTime - target_p->connection->since) : 0,
+               (unsigned int)(CurrentTime - target_p->connection->firsttime),
+               (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since) : 0,
                HasUMode(source_p, UMODE_OPER) ? show_capabilities(target_p) : "TS");
   }
 
@@ -1403,8 +1403,8 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
                  target_p->connection->send.bytes>>10,
                  target_p->connection->recv.messages,
                  target_p->connection->recv.bytes>>10,
-                 (unsigned)(CurrentTime - target_p->connection->firsttime),
-                 (CurrentTime > target_p->connection->since) ? (unsigned)(CurrentTime - target_p->connection->since) : 0,
+                 (unsigned int)(CurrentTime - target_p->connection->firsttime),
+                 (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since) : 0,
                  IsServer(target_p) ? show_capabilities(target_p) : "-");
     }
     else
@@ -1418,8 +1418,8 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
                    target_p->connection->send.bytes>>10,
                    target_p->connection->recv.messages,
                    target_p->connection->recv.bytes>>10,
-                   (unsigned)(CurrentTime - target_p->connection->firsttime),
-                   (CurrentTime > target_p->connection->since) ? (unsigned)(CurrentTime - target_p->connection->since):0,
+                   (unsigned int)(CurrentTime - target_p->connection->firsttime),
+                   (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since):0,
                    IsServer(target_p) ? show_capabilities(target_p) : "-");
       else /* show the real IP */
         sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
@@ -1431,8 +1431,8 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
                    target_p->connection->send.bytes>>10,
                    target_p->connection->recv.messages,
                    target_p->connection->recv.bytes>>10,
-                   (unsigned)(CurrentTime - target_p->connection->firsttime),
-                   (CurrentTime > target_p->connection->since) ? (unsigned)(CurrentTime - target_p->connection->since):0,
+                   (unsigned int)(CurrentTime - target_p->connection->firsttime),
+                   (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since):0,
                    IsServer(target_p) ? show_capabilities(target_p) : "-");
     }
   }

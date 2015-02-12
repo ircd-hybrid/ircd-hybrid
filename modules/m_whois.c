@@ -70,6 +70,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
 {
   char buf[IRCD_BUFSIZE] = "";
   const dlink_node *lp = NULL;
+  const struct ServicesTag *svstag = NULL;
   char *t = NULL;
   int cur_len = 0;
   int mlen = 0;
@@ -143,11 +144,26 @@ whois_person(struct Client *source_p, struct Client *target_p)
                                   "server side ignore with the exception of common channels");
   }
 
+  if (target_p->svstags.head)
+    svstag = target_p->svstags.head->data;
+
   if (HasUMode(target_p, UMODE_OPER))
     if (!HasUMode(target_p, UMODE_HIDDEN) || HasUMode(source_p, UMODE_OPER))
-      sendto_one_numeric(source_p, &me, RPL_WHOISOPERATOR, target_p->name,
-                 HasUMode(target_p, UMODE_ADMIN) ? "is a Server Administrator" :
+      if (!svstag || svstag->numeric != RPL_WHOISOPERATOR)
+        sendto_one_numeric(source_p, &me, RPL_WHOISOPERATOR, target_p->name,
+                   HasUMode(target_p, UMODE_ADMIN) ? "is a Server Administrator" :
                                                    "is an IRC Operator");
+
+  DLINK_FOREACH(lp, target_p->svstags.head)
+  {
+    svstag = lp->data;
+
+    if (!svstag->privilege ||
+        (svstag->privilege == 1 && HasUMode(source_p, UMODE_OPER)) ||
+        (svstag->privilege == 2 && HasUMode(source_p, UMODE_ADMIN)))
+      sendto_one_numeric(source_p, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
+                         target_p->name, svstag->tag);
+  }
 
   if (HasUMode(target_p, UMODE_WEBIRC))
     sendto_one_numeric(source_p, &me, RPL_WHOISTEXT, target_p->name,

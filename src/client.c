@@ -160,6 +160,21 @@ free_client(struct Client *client_p)
   mp_pool_release(client_p);
 }
 
+void
+client_clear_svstags(struct Client *client_p)
+{
+  dlink_node *node = NULL, *node_next = NULL;
+
+  DLINK_FOREACH_SAFE(node, node_next, client_p->svstags.head)
+  {
+    struct ServicesTag *svstag = node->data;
+
+    dlinkDelete(&svstag->node, &client_p->svstags);
+    MyFree(svstag->tag);
+    MyFree(svstag);
+  }
+}
+
 /* check_pings_list()
  *
  * inputs	- pointer to list to check
@@ -744,6 +759,8 @@ exit_client(struct Client *source_p, const char *comment)
         free_list_task(source_p);
 
       watch_del_watch_list(source_p);
+      client_clear_svstags(source_p);
+
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                            "Client exiting: %s (%s@%s) [%s] [%s]",
                            source_p->name, source_p->username, source_p->host, comment,

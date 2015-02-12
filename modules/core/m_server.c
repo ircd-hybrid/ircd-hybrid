@@ -86,6 +86,7 @@ send_tb(struct Client *client_p, const struct Channel *chptr)
 static void
 sendnick_TS(struct Client *client_p, struct Client *target_p)
 {
+  dlink_node *node = NULL;
   char ubuf[IRCD_BUFSIZE] = "";
 
   if (!IsClient(target_p))
@@ -121,6 +122,15 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   if (target_p->away[0])
     sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
 
+
+  DLINK_FOREACH(node, target_p->svstags.head)
+  {
+    const struct ServicesTag *svstag = node->data;
+
+    sendto_one(client_p, ":%s SVSTAG %s %lu %s %s :%s", me.id, target_p->id,
+               target_p->tsinfo, svstag->numeric, svstag->privilege,
+               svstag->tag);
+  }
 }
 
 /* burst_members()

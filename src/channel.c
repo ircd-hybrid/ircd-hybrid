@@ -574,7 +574,6 @@ get_member_status(const struct Membership *member, const int combine)
  * \param who  Pointer to Client to check
  * \param list Pointer to ban list to search
  * \return 1 if ban found for given n!u\@h mask, 0 otherwise
- *
  */
 static int
 find_bmask(const struct Client *who, const dlink_list *const list)
@@ -1073,7 +1072,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
     add_user_to_channel(chptr, source_p, flags, 1);
 
     /*
-     *  Set timestamp if appropriate, and propagate
+     * Set timestamp if appropriate, and propagate
      */
     if (flags == CHFL_CHANOP)
     {

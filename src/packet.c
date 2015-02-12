@@ -190,8 +190,8 @@ parse_client_queued(struct Client *client_p)
       checkflood = 0;
 
     /*
-     * Handle flood protection here - if we exceed our flood limit on
-     * messages in this loop, we simply drop out of the loop prematurely.
+     * Handle flood protection here - if we exceed our flood limit on messages
+     * in this loop, we simply drop out of the loop prematurely.
      *   -- adrian
      */
     while (1)
@@ -331,7 +331,7 @@ read_packet(fde_t *fd, void *data)
     if (length <= 0)
     {
       /*
-       * If true, then we can recover from this error.  Just jump out of
+       * If true, then we can recover from this error. Just jump out of
        * the loop and re-register a new io-request.
        */
       if (length < 0 && ignoreErrno(errno))

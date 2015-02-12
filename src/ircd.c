@@ -318,10 +318,8 @@ write_pidfile(const char *filename)
     fclose(fb);
   }
   else
-  {
     ilog(LOG_TYPE_IRCD, "Error opening pid file %s (%s)",
          filename, strerror(errno));
-  }
 }
 
 /* check_pidfile()
@@ -473,14 +471,14 @@ main(int argc, char *argv[])
   /* Setup corefile size immediately after boot -kre */
   setup_corefile();
 
-  /* save server boot time right away, so getrusage works correctly */
+  /* Save server boot time right away, so getrusage works correctly */
   set_time();
 
-  /* It ain't random, but it ought to be a little harder to guess */
+  /* It's not random, but it ought to be a little harder to guess */
   init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
 
-  dlinkAdd(&me, &me.node, &global_client_list);  /* Pointer to beginning
-						   of Client list */
+  dlinkAdd(&me, &me.node, &global_client_list);
+
   ConfigLog.use_logging = 1;
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;
@@ -580,10 +578,10 @@ main(int argc, char *argv[])
 
   strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
-  me.from                   = &me;
-  me.servptr                = &me;
-  me.connection->lasttime  = CurrentTime;
-  me.connection->since     = CurrentTime;
+  me.from = &me;
+  me.servptr = &me;
+  me.connection->lasttime = CurrentTime;
+  me.connection->since = CurrentTime;
   me.connection->firsttime = CurrentTime;
 
   SetMe(&me);

@@ -1343,7 +1343,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
                  (unsigned long)chptr->creationtime, chptr->name);
 
   /* Loop the list of modes we have */
-  for (unsigned i = 0; i < mode_count; ++i)
+  for (unsigned int i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0)
       continue;

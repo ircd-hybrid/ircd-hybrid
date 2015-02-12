@@ -1051,7 +1051,7 @@ del_all_accepts(struct Client *client_p)
 }
 
 unsigned int
-idle_time_get(const struct Client *source_p, const struct Client *target_p)
+client_get_idle_time(const struct Client *source_p, const struct Client *target_p)
 {
   unsigned int idle = 0;
   unsigned int min_idle = 0;

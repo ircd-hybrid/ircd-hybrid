@@ -192,7 +192,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
                    get_client_class(&target_p->connection->confs), get_client_name(target_p, HIDE_IP),
                    target_p->sockhost,
                    CurrentTime - target_p->connection->lasttime,
-                   idle_time_get(source_p, target_p));
+                   client_get_idle_time(source_p, target_p));
       }
       else
       {
@@ -200,7 +200,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
                    get_client_class(&target_p->connection->confs), get_client_name(target_p, HIDE_IP),
                    target_p->sockhost,
                    CurrentTime - target_p->connection->lasttime,
-                   idle_time_get(source_p, target_p));
+                   client_get_idle_time(source_p, target_p));
       }
     }
 
@@ -299,12 +299,12 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
         sendto_one_numeric(source_p, &me, RPL_TRACEOPERATOR, class_name, name,
                            target_p->sockhost,
                            CurrentTime - target_p->connection->lasttime,
-                           idle_time_get(source_p, target_p));
+                           client_get_idle_time(source_p, target_p));
       else
         sendto_one_numeric(source_p, &me, RPL_TRACEUSER, class_name, name,
                            target_p->sockhost,
                            CurrentTime - target_p->connection->lasttime,
-                           idle_time_get(source_p, target_p));
+                           client_get_idle_time(source_p, target_p));
       break;
     case STAT_SERVER:
     {

@@ -1066,7 +1066,7 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
       continue;
 
     if (HasUMode(source_p, UMODE_OPER) || !HasUMode(target_p, UMODE_HIDEIDLE))
-      snprintf(buf, sizeof(buf), "%u", idle_time_get(source_p, target_p));
+      snprintf(buf, sizeof(buf), "%u", client_get_idle_time(source_p, target_p));
     else
       strlcpy(buf, "n/a", sizeof(buf));
 

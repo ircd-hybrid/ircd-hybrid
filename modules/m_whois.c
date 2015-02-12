@@ -69,7 +69,7 @@ static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
   char buf[IRCD_BUFSIZE] = "";
-  const dlink_node *lp = NULL;
+  const dlink_node *node = NULL;
   const struct ServicesTag *svstag = NULL;
   char *t = NULL;
   int cur_len = 0;
@@ -85,9 +85,9 @@ whois_person(struct Client *source_p, struct Client *target_p)
                             me.name, source_p->name, target_p->name, "");
   t = buf + mlen;
 
-  DLINK_FOREACH(lp, target_p->channel.head)
+  DLINK_FOREACH(node, target_p->channel.head)
   {
-    const struct Membership *member = lp->data;
+    const struct Membership *member = node->data;
     int show = whois_can_see_channels(member->chptr, source_p, target_p);
 
     if (show)
@@ -154,9 +154,9 @@ whois_person(struct Client *source_p, struct Client *target_p)
                    HasUMode(target_p, UMODE_ADMIN) ? "is a Server Administrator" :
                                                    "is an IRC Operator");
 
-  DLINK_FOREACH(lp, target_p->svstags.head)
+  DLINK_FOREACH(node, target_p->svstags.head)
   {
-    svstag = lp->data;
+    svstag = node->data;
 
     if (svstag->numeric == RPL_WHOISOPERATOR)
       if (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER))

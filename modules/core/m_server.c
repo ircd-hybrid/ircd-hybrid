@@ -127,7 +127,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   {
     const struct ServicesTag *svstag = node->data;
 
-    sendto_one(client_p, ":%s SVSTAG %s %lu %s %s :%s", me.id, target_p->id,
+    sendto_one(client_p, ":%s SVSTAG %s %lu %u %u :%s", me.id, target_p->id,
                target_p->tsinfo, svstag->numeric, svstag->privilege,
                svstag->tag);
   }

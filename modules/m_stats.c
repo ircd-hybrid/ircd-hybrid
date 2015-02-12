@@ -591,7 +591,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
 
       conf = arec->conf;
 
-      /* Don't report a tdline as a dline */
+      /* Don't report a temporary dline as permanent dline */
       if (conf->until)
         continue;
 
@@ -623,7 +623,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 
       conf = arec->conf;
 
-      /* Don't report a permanent dline as a tdline */
+      /* Don't report a permanent dline as temporary dline */
       if (!conf->until)
         continue;
 
@@ -873,9 +873,6 @@ report_auth(struct Client *source_p, int parc, char *parv[])
       if (!MyOper(source_p) && IsConfDoSpoofIp(conf))
         continue;
 
-      /* We are doing a partial list, based on what matches the u@h of the
-       * sender, so prepare the strings for comparing --fl_
-       */
       sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
                          conf->name == NULL ? "*" : conf->name,
                          show_iline_prefix(source_p, conf),
@@ -983,7 +980,7 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
     if (!conf)
       return;
 
-    /* Don't report a permanent kline as a tkline */
+    /* Don't report a permanent kline as temporary kline */
     if (!conf->until)
       return;
 
@@ -1019,7 +1016,7 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
     if (!conf)
       return;
 
-    /* Don't report a tkline as a kline */
+    /* Don't report a temporary kline as permanent kline */
     if (conf->until)
       return;
 

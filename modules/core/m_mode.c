@@ -53,8 +53,8 @@ static void
 set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
   const struct user_modes *tab = NULL;
-  unsigned int setmodes = 0;
-  struct Client *target_p = NULL;
+  const unsigned int setmodes = source_p->umodes;
+  const struct Client *target_p = NULL;
   int what = MODE_ADD, badmode = 0;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
@@ -84,9 +84,6 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     sendto_one_numeric(source_p, &me, RPL_UMODEIS, buf);
     return;
   }
-
-  /* Find modes already set for user */
-  setmodes = source_p->umodes;
 
   /* parse mode change string(s) */
   for (const char *m = parv[2]; *m; ++m)

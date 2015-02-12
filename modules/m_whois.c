@@ -158,6 +158,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
   {
     svstag = lp->data;
 
+    if (svstag->numeric == RPL_WHOISOPERATOR)
+      if (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER))
+        continue;
+
     if (!svstag->privilege ||
         (svstag->privilege == 1 && HasUMode(source_p, UMODE_OPER)) ||
         (svstag->privilege == 2 && HasUMode(source_p, UMODE_ADMIN)))

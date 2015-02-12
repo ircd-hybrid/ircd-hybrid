@@ -510,14 +510,13 @@ count_user_host(const char *user, const char *host, unsigned int *global_p,
 {
   dlink_node *node = NULL;
   struct UserHost *found_userhost;
-  struct NameHost *nameh;
 
   if ((found_userhost = hash_find_userhost(host)) == NULL)
     return;
 
   DLINK_FOREACH(node, found_userhost->list.head)
   {
-    nameh = node->data;
+    struct NameHost *nameh = node->data;
 
     if (!irccmp(user, nameh->name))
     {
@@ -600,10 +599,8 @@ add_user_host(const char *user, const char *host, int global)
   }
 
   nameh = mp_pool_get(namehost_pool);
-
-  strlcpy(nameh->name, user, sizeof(nameh->name));
-
   nameh->gcount = 1;
+  strlcpy(nameh->name, user, sizeof(nameh->name));
 
   if (!global)
   {

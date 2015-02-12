@@ -433,14 +433,14 @@ motd_memory_count(struct Client *source_p)
 
   if (MotdList.local)
   {
-    mt++;
+    ++mt;
     mtm += sizeof(struct Motd);
     mtm += MotdList.local->path ? (strlen(MotdList.local->path) + 1) : 0;
   }
 
   if (MotdList.remote)
   {
-    mt++;
+    ++mt;
     mtm += sizeof(struct Motd);
     mtm += MotdList.remote->path ? (strlen(MotdList.remote->path) + 1) : 0;
   }
@@ -449,7 +449,7 @@ motd_memory_count(struct Client *source_p)
   {
     const struct Motd *motd = node->data;
 
-    mt++;
+    ++mt;
     mtm += sizeof(struct Motd);
     mtm += motd->path ? (strlen(motd->path) + 1) : 0;
   }
@@ -458,11 +458,11 @@ motd_memory_count(struct Client *source_p)
   {
     const struct MotdCache *cache = node->data;
 
-    mtc++;
+    ++mtc;
     mtcm += sizeof(struct MotdCache) + (MOTD_LINESIZE * (cache->count - 1));
   }
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Motds %u(%u) Cache %u(%u)",
                      mt, mtm, mtc, mtcm);
 }

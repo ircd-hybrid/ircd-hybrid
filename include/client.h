@@ -439,7 +439,7 @@ extern dlink_list unknown_list;       /* unknown clients ON this server only    
 extern dlink_list oper_list;          /* our opers, duplicated in local_client_list */
 
 extern int accept_message(struct Client *, struct Client *);
-extern unsigned int idle_time_get(const struct Client *, const struct Client *);
+extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
 extern struct split_nuh_item *find_accept(const char *, const char *,
                                           const char *, struct Client *,
                                           int (*)(const char *, const char *));

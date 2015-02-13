@@ -126,10 +126,15 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   DLINK_FOREACH(node, target_p->svstags.head)
   {
     const struct ServicesTag *svstag = node->data;
+    char *m = ubuf;
 
-    sendto_one(client_p, ":%s SVSTAG %s %lu %u %u :%s", me.id, target_p->id,
-               target_p->tsinfo, svstag->numeric, svstag->privilege,
-               svstag->tag);
+    for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
+      if (svstag->umodes & tab->flag)
+        *m++ = tab->c;
+    *m = '\0';
+
+    sendto_one(client_p, ":%s SVSTAG %s %lu %u +%s :%s", me.id, target_p->id,
+               target_p->tsinfo, svstag->numeric, ubuf, svstag->tag);
   }
 }
 

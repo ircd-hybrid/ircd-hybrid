@@ -49,7 +49,7 @@
  *      - parv[1] = nickname
  *      - parv[2] = TS
  *      - parv[3] = [-][raw]
- *      - parv[4] = required privileges to see the tag; 0 user, 1 oper, 2 admin
+ *      - parv[4] = required user mode(s) to see the tag
  *      - parv[5] = tag line
  */
 static int
@@ -80,9 +80,8 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   if (parc < 6 || EmptyString(parv[5]))
     return 0;
 
-  client_attach_svstag(target_p,
-                       strtoul(parv[3], NULL, 10),
-                       strtoul(parv[4], NULL, 10), parv[5]);
+  client_attach_svstag(target_p, strtoul(parv[3], NULL, 10),
+                       parv[4], parv[5]);
 
   sendto_server(source_p, 0, 0, ":%s SVSTAG %s %lu %s %s :%s",
                 source_p->id,

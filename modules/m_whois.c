@@ -162,9 +162,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
       if (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER))
         continue;
 
-    if (!svstag->privilege ||
-        (svstag->privilege == 1 && HasUMode(source_p, UMODE_OPER)) ||
-        (svstag->privilege == 2 && HasUMode(source_p, UMODE_ADMIN)))
+    if (!svstag->umodes || HasUMode(source_p, svstag->umodes))
       sendto_one_numeric(source_p, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
                          target_p->name, svstag->tag);
   }

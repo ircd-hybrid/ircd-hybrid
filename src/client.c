@@ -178,7 +178,6 @@ client_attach_svstag(struct Client *client_p, unsigned int numeric,
     dlinkAddTail(svstag, &svstag->node, &client_p->svstags);
   else
     dlinkAdd(svstag, &svstag->node, &client_p->svstags);
-
 }
 
 void

@@ -53,7 +53,7 @@ struct MaskItem;
 #define REG_NEED_CAP     0x00000004U  /**< In middle of CAP negotiations */
 #define REG_INIT  (REG_NEED_USER|REG_NEED_NICK)
 
-#define ID_or_name(x,client_p)  ((IsCapable(client_p->from, CAP_TS6) && (x)->id[0]) ? (x)->id : (x)->name)
+#define ID_or_name(x,client_p)  ((IsServer(client_p->from) && (x)->id[0]) ? (x)->id : (x)->name)
 
 #define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
 #define IsConnecting(x)         ((x)->status == STAT_CONNECTING)

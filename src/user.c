@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_user.c
+/*! \file user.c
  * \brief User related functions.
  * \version $Id$
  */

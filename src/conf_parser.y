@@ -332,7 +332,6 @@ reset_block_state(void)
 %token  T_IPV6
 %token  T_LOCOPS
 %token  T_LOG
-%token  T_MAX_CLIENTS
 %token  T_NCHANGE
 %token  T_NONONREG
 %token  T_OPME

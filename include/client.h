@@ -266,6 +266,14 @@ enum addr_mask_type
   MASK_IP  /**< IP is masked. 255.255.255.255 is shown instead */
 };
 
+struct ServicesTag
+{
+  dlink_node node;
+  char *tag;
+  unsigned int numeric;
+  unsigned int umodes;
+};
+
 /*! \brief Server structure */
 struct Server
 {
@@ -389,6 +397,7 @@ struct Client
 
   dlink_list        whowas;
   dlink_list        channel;   /**< Chain of channel pointer blocks */
+  dlink_list        svstags;   /**< List of ServicesTag items */
 
   char away[AWAYLEN + 1]; /**< Client's AWAY message. Can be set/unset via AWAY command */
   char name[HOSTLEN + 1]; /**< Unique name for a client nick or host */
@@ -443,6 +452,8 @@ extern unsigned int client_get_idle_time(const struct Client *, const struct Cli
 extern struct split_nuh_item *find_accept(const char *, const char *,
                                           const char *, struct Client *,
                                           int (*)(const char *, const char *));
+extern void client_attach_svstag(struct Client *, unsigned int, const char *, const char *const);
+extern void client_clear_svstags(struct Client *);
 extern void del_accept(struct split_nuh_item *, struct Client *);
 extern void del_all_accepts(struct Client *);
 extern void exit_client(struct Client *, const char *);

@@ -195,6 +195,7 @@ conf_free(struct MaskItem *conf)
   MyFree(conf->spasswd);
   MyFree(conf->reason);
   MyFree(conf->certfp);
+  MyFree(conf->whois);
   MyFree(conf->user);
   MyFree(conf->host);
 #ifdef HAVE_LIBCRYPTO

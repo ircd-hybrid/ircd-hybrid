@@ -344,6 +344,7 @@ wallop                      { return T_WALLOP; }
 wallops                     { return T_WALLOPS; }
 warn_no_connect_block       { return WARN_NO_CONNECT_BLOCK; }
 webirc                      { return T_WEBIRC; }
+whois                       { return WHOIS; }
 xline                       { return XLINE; }
 
 yes                         { yylval.number = 1; return TBOOL; }

@@ -165,6 +165,7 @@ struct MaskItem
   char              *spasswd;  /* Password to send. */
   char              *reason;
   char              *certfp;
+  char              *whois;
   char              *cipher_list;
   void              *rsa_public_key;
 };

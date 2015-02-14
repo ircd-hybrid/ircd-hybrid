@@ -30,6 +30,7 @@
 #include "send.h"
 #include "channel_mode.h"
 #include "parse.h"
+#include "memory.h"
 #include "modules.h"
 #include "irc_string.h"
 #include "user.h"
@@ -60,16 +61,16 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
     return 0;
 
-  ts = atol(parv[2]);
-
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
-  if (ts && (ts != target_p->tsinfo))
+  if ((ts = atol(parv[2])) && ts != target_p->tsinfo)
     return 0;
 
   if (!strncmp(parv[3], "-", 1))
   {
+    /* XXX: possibly allow to remove certain tags by numeric */
+    client_clear_svstags(target_p);
     sendto_server(source_p, 0, 0, ":%s SVSTAG %s %lu %s",
                   source_p->id,
                   target_p->id, (unsigned long)target_p->tsinfo, parv[3]);
@@ -78,6 +79,9 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
 
   if (parc < 6 || EmptyString(parv[5]))
     return 0;
+
+  client_attach_svstag(target_p, strtoul(parv[3], NULL, 10),
+                       parv[4], parv[5]);
 
   sendto_server(source_p, 0, 0, ":%s SVSTAG %s %lu %s %s :%s",
                 source_p->id,

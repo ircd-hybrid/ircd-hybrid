@@ -160,6 +160,45 @@ free_client(struct Client *client_p)
   mp_pool_release(client_p);
 }
 
+void
+client_attach_svstag(struct Client *client_p, unsigned int numeric,
+                     const char *umodes, const char *const tag)
+{
+  struct ServicesTag *svstag = NULL;
+  const struct user_modes *tab = NULL;
+
+  if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
+    return;
+
+  svstag = MyCalloc(sizeof(*svstag));
+  svstag->numeric = numeric;
+  svstag->tag = xstrdup(tag);
+
+  for (const char *m = umodes + 1; *m; ++m)
+    if ((tab = umode_map[(unsigned char)*m]))
+      svstag->umodes |= tab->flag;
+
+  if (numeric != RPL_WHOISOPERATOR)
+    dlinkAddTail(svstag, &svstag->node, &client_p->svstags);
+  else
+    dlinkAdd(svstag, &svstag->node, &client_p->svstags);
+}
+
+void
+client_clear_svstags(struct Client *client_p)
+{
+  dlink_node *node = NULL, *node_next = NULL;
+
+  DLINK_FOREACH_SAFE(node, node_next, client_p->svstags.head)
+  {
+    struct ServicesTag *svstag = node->data;
+
+    dlinkDelete(&svstag->node, &client_p->svstags);
+    MyFree(svstag->tag);
+    MyFree(svstag);
+  }
+}
+
 /* check_pings_list()
  *
  * inputs	- pointer to list to check
@@ -744,6 +783,8 @@ exit_client(struct Client *source_p, const char *comment)
         free_list_task(source_p);
 
       watch_del_watch_list(source_p);
+      client_clear_svstags(source_p);
+
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                            "Client exiting: %s (%s@%s) [%s] [%s]",
                            source_p->name, source_p->username, source_p->host, comment,

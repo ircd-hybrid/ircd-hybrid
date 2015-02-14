@@ -87,6 +87,7 @@ static struct
     cert,
     rpass,
     spass,
+    whois,
     class,
     target,
     prepend,
@@ -376,6 +377,7 @@ reset_block_state(void)
 %token  VHOST
 %token  VHOST6
 %token  WARN_NO_CONNECT_BLOCK
+%token  WHOIS
 %token  XLINE
 
 %type  <string> QSTRING
@@ -1139,6 +1141,9 @@ oper_entry: OPERATOR
     if (block_state.rpass.buf[0])
       conf->passwd = xstrdup(block_state.rpass.buf);
 
+    if (block_state.whois.buf[0])
+      conf->whois = xstrdup(block_state.whois.buf);
+
     conf->flags = block_state.flags.value;
     conf->modes = block_state.modes.value;
     conf->port  = block_state.port.value;
@@ -1179,6 +1184,7 @@ oper_items:     oper_items oper_item | oper_item;
 oper_item:      oper_name |
                 oper_user |
                 oper_password |
+                oper_whois |
                 oper_umodes |
                 oper_class |
                 oper_encrypted |
@@ -1204,6 +1210,12 @@ oper_password: PASSWORD '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
+};
+
+oper_whois: WHOIS '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    strlcpy(block_state.whois.buf, yylval.string, sizeof(block_state.whois.buf));
 };
 
 oper_encrypted: ENCRYPTED '=' TBOOL ';'

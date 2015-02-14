@@ -282,9 +282,6 @@ server_estab(struct Client *client_p)
   sendto_one(client_p, ":%s SVINFO %d %d 0 :%lu", me.id, TS_CURRENT, TS_MIN,
              (unsigned long)CurrentTime);
 
-  /* XXX Does this ever happen? I don't think so -db */
-  detach_conf(client_p, CONF_OPER);
-
   /* *WARNING*
   **    In the following code in place of plain server's
   **    name we send what is returned by get_client_name

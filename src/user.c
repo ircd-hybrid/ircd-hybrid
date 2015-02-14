@@ -367,8 +367,6 @@ register_local_user(struct Client *source_p)
   assert(MyConnect(source_p));
   assert(!source_p->connection->registration);
 
-  ClearCap(source_p, CAP_TS6);
-
   if (ConfigGeneral.ping_cookie)
   {
     if (!IsPingSent(source_p) && !source_p->connection->random_ping)

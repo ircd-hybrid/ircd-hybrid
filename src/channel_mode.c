@@ -103,7 +103,7 @@ check_string(char *s)
 }
 
 /*
- * Ban functions to work with mode +b/e/d/I
+ * Ban functions to work with mode +b/e/I
  */
 /* add the specified ID to the channel.
  *   -is 8/9/00

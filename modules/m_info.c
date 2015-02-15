@@ -557,7 +557,7 @@ static const struct InfoStruct info_table[] =
 static void
 send_birthdate_online_time(struct Client *source_p)
 {
-  sendto_one_numeric(source_p, &me, RPL_INFO|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                      ":On-line since %s",
                      myctime(me.connection->firsttime));
 }
@@ -583,7 +583,7 @@ send_conf_options(struct Client *source_p)
       {
         const char *option = *((const char *const *)iptr->option);
 
-        sendto_one_numeric(source_p, &me, RPL_INFO|SND_EXPLICIT,
+        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",
                            iptr->name, option ? option : "NONE",
                            iptr->desc ? iptr->desc : "<none>");
@@ -595,7 +595,7 @@ send_conf_options(struct Client *source_p)
       {
         const char *option = iptr->option;
 
-        sendto_one_numeric(source_p, &me, RPL_INFO|SND_EXPLICIT,
+        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",
                            iptr->name, option ? option : "NONE",
                            iptr->desc ? iptr->desc : "<none>");
@@ -607,7 +607,7 @@ send_conf_options(struct Client *source_p)
       {
         const int option = *((const int *const)iptr->option);
 
-        sendto_one_numeric(source_p, &me, RPL_INFO|SND_EXPLICIT,
+        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5d [%s]",
                            iptr->name, option, iptr->desc ? iptr->desc : "<none>");
         break;
@@ -618,7 +618,7 @@ send_conf_options(struct Client *source_p)
       {
         const int option = *((const int *const)iptr->option);
 
-        sendto_one_numeric(source_p, &me, RPL_INFO|SND_EXPLICIT,
+        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",
                            iptr->name, option ? "ON" : "OFF",
                            iptr->desc ? iptr->desc : "<none>");
@@ -631,7 +631,7 @@ send_conf_options(struct Client *source_p)
       {
         const int option = *((const int *const)iptr->option);
 
-        sendto_one_numeric(source_p, &me, RPL_INFO|SND_EXPLICIT,
+        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",
                            iptr->name, option ? "YES" : "NO",
                            iptr->desc ? iptr->desc : "<none>");
@@ -642,7 +642,7 @@ send_conf_options(struct Client *source_p)
       {
         const int option = *((const int *const)iptr->option);
 
-        sendto_one_numeric(source_p, &me, RPL_INFO|SND_EXPLICIT,
+        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",
                            iptr->name, option ? ((option == 1) ? "MASK" : "YES") : "NO",
                            iptr->desc ? iptr->desc : "<none>");

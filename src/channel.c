@@ -755,7 +755,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
       return ERR_NOCTCP;
 
   if (member || (member = find_channel_link(source_p, chptr)))
-    if (member->flags & (CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
+    if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
       return CAN_SEND_OPV;
 
   if (!member && (chptr->mode.mode & MODE_NOPRIVMSGS))
@@ -779,7 +779,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
       {
         if (is_banned(chptr, source_p))
         {
-          member->flags |= (CHFL_BAN_CHECKED|CHFL_BAN_SILENCED);
+          member->flags |= (CHFL_BAN_CHECKED | CHFL_BAN_SILENCED);
           return ERR_CANNOTSENDTOCHAN;
         }
 

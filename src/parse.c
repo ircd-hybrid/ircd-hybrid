@@ -195,9 +195,9 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
     /* Fake it for server hiding, if it's our client */
     if ((ConfigServerHide.hide_servers || IsHidden(source_p)) && MyConnect(target_p) &&
         !HasUMode(target_p, UMODE_OPER))
-      sendto_one_numeric(target_p, &me, numeric|SND_EXPLICIT, "%s", parv[2]);
+      sendto_one_numeric(target_p, &me, numeric | SND_EXPLICIT, "%s", parv[2]);
     else
-      sendto_one_numeric(target_p, source_p, numeric|SND_EXPLICIT, "%s", parv[2]);
+      sendto_one_numeric(target_p, source_p, numeric | SND_EXPLICIT, "%s", parv[2]);
   }
   else
     sendto_channel_butone(source_p, source_p, chptr, 0, "%u %s %s",

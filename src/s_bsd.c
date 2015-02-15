@@ -208,7 +208,7 @@ close_connection(struct Client *client_p)
   MyFree(client_p->connection->password);
   client_p->connection->password = NULL;
 
-  detach_conf(client_p, CONF_CLIENT|CONF_OPER|CONF_SERVER);
+  detach_conf(client_p, CONF_CLIENT | CONF_OPER | CONF_SERVER);
 }
 
 #ifdef HAVE_LIBCRYPTO

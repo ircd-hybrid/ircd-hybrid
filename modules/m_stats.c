@@ -271,29 +271,29 @@ stats_usage(struct Client *source_p, int parc, char *parv[])
   if (rup == 0)
     rup = 1;
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "R :CPU Secs %d:%02d User %d:%02d System %d:%02d",
                      (int)(secs/60), (int)(secs%60),
                      (int)(rus.ru_utime.tv_sec/60), (int)(rus.ru_utime.tv_sec%60),
                      (int)(rus.ru_stime.tv_sec/60), (int)(rus.ru_stime.tv_sec%60));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "R :RSS %ld ShMem %ld Data %ld Stack %ld",
                      rus.ru_maxrss,
                      (rus.ru_ixrss / rup), (rus.ru_idrss / rup),
                      (rus.ru_isrss / rup));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "R :Swaps %d Reclaims %d Faults %d",
                      (int)rus.ru_nswap,
                      (int)rus.ru_minflt, (int)rus.ru_majflt);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "R :Block in %d out %d",
                      (int)rus.ru_inblock,
                      (int)rus.ru_oublock);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "R :Msg Rcv %d Send %d",
                      (int)rus.ru_msgrcv,
                      (int)rus.ru_msgsnd);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "R :Signals %d Context Vol. %d Invol %d",
                      (int)rus.ru_nsignals,
                      (int)rus.ru_nvcsw, (int)rus.ru_nivcsw);
@@ -454,55 +454,55 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   whowas_count_memory(&wwu, &wwm);
   watch_count_memory(&watch_list_headers, &watch_list_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :WATCH headers %u(%llu) entries %d(%u)",
                      watch_list_headers,
                      watch_list_memory, watch_list_entries,
                      watch_list_entries * sizeof(dlink_node) * 2);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Clients %u(%u)",
                      users_counted,
                      (users_counted * sizeof(struct Client)));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :User aways %u", aways_counted);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Attached confs %u(%llu)",
                      local_client_conf_count,
                      (unsigned long long)(local_client_conf_count * sizeof(dlink_node)));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Resv channels %u(%lu) nicks %u(%lu)",
                      dlink_list_length(&cresv_items),
                      dlink_list_length(&cresv_items) * sizeof(struct MaskItem),
                      dlink_list_length(&nresv_items),
                      dlink_list_length(&nresv_items) * sizeof(struct MaskItem));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Classes %u(%llu)",
                      class_count, (unsigned long long)(class_count * sizeof(struct ClassItem)));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Channels %u(%llu) Topics %u(%u)",
                      dlink_list_length(&channel_list),
                      channel_memory, topic_count, topic_count *
                      (TOPICLEN + 1 + USERHOST_REPLYLEN));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Bans %u(%llu)",
                      channel_bans, channel_ban_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Exceptions %u(%llu)",
                      channel_except, channel_except_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Invex %u(%llu)",
                      channel_invex, channel_invex_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Channel members %u(%llu) invites %u(%llu)",
                      channel_members,
                      (unsigned long long)(channel_members * sizeof(struct Membership)),
@@ -512,15 +512,15 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                          channel_members * sizeof(struct Membership) +
                          (channel_invites * sizeof(dlink_node)*2);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Safelist %u(%llu)",
                      safelist_count, safelist_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Whowas users %u(%llu)",
                      wwu, (unsigned long long)(wwu * sizeof(struct Client)));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Whowas array %u(%llu)",
                      NICKNAMEHISTORYLENGTH, wwm);
 
@@ -528,29 +528,29 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   motd_memory_count(source_p);
   ipcache_get_stats(&number_ips_stored, &mem_ips_stored);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :iphash %u(%llu)",
                      number_ips_stored, mem_ips_stored);
 
   total_memory = totww + total_channel_memory + conf_memory + class_count *
                  sizeof(struct ClassItem);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Total: whowas %llu channel %llu conf %llu",
                      totww, total_channel_memory, conf_memory);
 
   local_client_memory_used = local_client_count*(sizeof(struct Client) + sizeof(struct Connection));
   total_memory += local_client_memory_used;
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Local client Memory in use: %u(%llu)",
                      local_client_count, local_client_memory_used);
 
   remote_client_memory_used = remote_client_count * sizeof(struct Client);
   total_memory += remote_client_memory_used;
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Remote client Memory in use: %u(%llu)",
                      remote_client_count, remote_client_memory_used);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :TOTAL: %llu",
                      me.name, RPL_STATSDEBUG, source_p->name,
                      total_memory);
@@ -1071,20 +1071,20 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
       strlcpy(buf, "n/a", sizeof(buf));
 
     if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER))
-      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "p :[%c][%s] %s (%s@%s) Idle: %s",
                          HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
                          oper_privs_as_string(target_p->connection->operflags),
                          target_p->name, target_p->username, target_p->host, buf);
     else
-      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "p :[%c] %s (%s@%s) Idle: %s",
                          HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
                          target_p->name, target_p->username, target_p->host, buf);
     ++opercount;
   }
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "p :%u OPER(s)", opercount);
 }
 
@@ -1147,37 +1147,37 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
 
   sp->is_ni += dlink_list_length(&unknown_list);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :accepts %u refused %u",
                      sp->is_ac, sp->is_ref);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :unknown commands %u prefixes %u",
                      sp->is_unco, sp->is_unpf);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :nick collisions %u unknown closes %u",
                      sp->is_kill, sp->is_ni);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :wrong direction %u empty %u",
                      sp->is_wrdi, sp->is_empt);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :numerics seen %u",
                      sp->is_num);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :auth successes %u fails %u",
                      sp->is_asuc, sp->is_abad);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :Client Server");
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :connected %u %u",
                      (unsigned int)sp->is_cl,
                      (unsigned int)sp->is_sv);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :bytes sent %llu %llu",
                      sp->is_cbs, sp->is_sbs);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :bytes recv %llu %llu",
                      sp->is_cbr, sp->is_sbr);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :time connected %u %u",
                      (unsigned int)sp->is_cti,
                      (unsigned int)sp->is_sti);
@@ -1222,14 +1222,14 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
   {
     const struct Client *target_p = node->data;
 
-    sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+    sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                        "v :%s (%s!%s@%s) Idle: %d",
                        target_p->name,
                        (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
                        "*", "*", (int)(CurrentTime - target_p->connection->lasttime));
   }
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "v :%u Server(s)",
                      dlink_list_length(&local_server_list));
 }
@@ -1301,22 +1301,22 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   sendB >>= 10;
   recvB >>= 10;
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT, "? :%u total server(s)",
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :%u total server(s)",
                      dlink_list_length(&local_server_list));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT, "? :Sent total: %7.2f %s",
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Sent total: %7.2f %s",
                      _GMKv(sendB), _GMKs(sendB));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT, "? :Recv total: %7.2f %s",
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
                      _GMKv(recvB), _GMKs(recvB));
 
   uptime = (CurrentTime - me.connection->since);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "? :Server send: %7.2f %s (%4.1f K/s)",
                      _GMKv((me.connection->send.bytes>>10)),
                      _GMKs((me.connection->send.bytes>>10)),
                      (float)((float)((me.connection->send.bytes) >> 10) /
                      (float)uptime));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG|SND_EXPLICIT,
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "? :Server recv: %7.2f %s (%4.1f K/s)",
                      _GMKv((me.connection->recv.bytes>>10)),
                      _GMKs((me.connection->recv.bytes>>10)),

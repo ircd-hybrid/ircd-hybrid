@@ -93,7 +93,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, RPL_LINKS, me.name, me.name, 0, me.info);
 
     DLINK_FOREACH(node, flatten_links.head)
-      sendto_one_numeric(source_p, &me, RPL_LINKS|SND_EXPLICIT, "%s", node->data);
+      sendto_one_numeric(source_p, &me, RPL_LINKS | SND_EXPLICIT, "%s", node->data);
     sendto_one_numeric(source_p, &me, RPL_ENDOFLINKS, "*");
   }
 }

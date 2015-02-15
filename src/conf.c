@@ -292,7 +292,6 @@ static int
 verify_access(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
-  char non_ident[USERLEN + 1] = "~";
 
   if (IsGotId(client_p))
   {
@@ -303,6 +302,8 @@ verify_access(struct Client *client_p)
   }
   else
   {
+    char non_ident[USERLEN + 1] = "~";
+
     strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
     conf = find_address_conf(client_p->host, non_ident,
                              &client_p->connection->ip,
@@ -1040,14 +1041,14 @@ expire_tklines(dlink_list *list)
     {
       if (ConfigGeneral.tkline_expire_notices)
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                               "Temporary X-line for [%s] expired", conf->name);
+                             "Temporary X-line for [%s] expired", conf->name);
       conf_free(conf);
     }
     else if (conf->type == CONF_NRESV || conf->type == CONF_CRESV)
     {
       if (ConfigGeneral.tkline_expire_notices)
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                               "Temporary RESV for [%s] expired", conf->name);
+                             "Temporary RESV for [%s] expired", conf->name);
       conf_free(conf);
     }
   }
@@ -1208,19 +1209,19 @@ clear_out_old_conf(void)
   motd_clear();
 
   /*
-   * don't delete the class table, rather mark all entries
-   * for deletion. The table is cleaned up by class_delete_marked. - avalon
+   * Don't delete the class table, rather mark all entries for deletion.
+   * The table is cleaned up by class_delete_marked. - avalon
    */
   class_mark_for_deletion();
 
   clear_out_address_conf();
 
-  /* clean out module paths */
+  /* Clean out module paths */
   mod_clear_paths();
 
   pseudo_clear();
 
-  /* clean out ConfigServerInfo */
+  /* Clean out ConfigServerInfo */
   MyFree(ConfigServerInfo.description);
   ConfigServerInfo.description = NULL;
   MyFree(ConfigServerInfo.network_name);
@@ -1238,7 +1239,7 @@ clear_out_old_conf(void)
   ConfigServerInfo.rsa_private_key_file = NULL;
 #endif
 
-  /* clean out ConfigAdminInfo */
+  /* Clean out ConfigAdminInfo */
   MyFree(ConfigAdminInfo.name);
   ConfigAdminInfo.name = NULL;
   MyFree(ConfigAdminInfo.email);
@@ -1246,7 +1247,7 @@ clear_out_old_conf(void)
   MyFree(ConfigAdminInfo.description);
   ConfigAdminInfo.description = NULL;
 
-  /* clean out listeners */
+  /* Clean out listeners */
   close_listeners();
 }
 
@@ -1424,8 +1425,8 @@ valid_tkline(const char *data, const int minutes)
 
   /*
    * In the degenerate case where oper does a /quote kline 0 user@host :reason
-   * i.e. they specifically use 0, I am going to return 1 instead
-   * as a return value of non-zero is used to flag it as a temporary kline
+   * i.e. they specifically use 0, I am going to return 1 instead as a return
+   * value of non-zero is used to flag it as a temporary kline
    */
   if (result == 0)
     result = 1;
@@ -1440,7 +1441,7 @@ valid_tkline(const char *data, const int minutes)
   if (result > MAX_TDKLINE_TIME)
     result = MAX_TDKLINE_TIME;
 
-  result = result * 60;  /* turn it into seconds */
+  result = result * 60;  /* Turn it into seconds */
 
   return result;
 }
@@ -1600,7 +1601,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
     }
 
     /*
-     * turn the "user" bit into "*user", blow away '~'
+     * Turn the "user" bit into "*user", blow away '~'
      * if found in original user name (non-idented)
      */
     strlcpy(luser, target_p->username, USERLEN*4 + 1);
@@ -1821,8 +1822,8 @@ match_conf_password(const char *password, const struct MaskItem *conf)
  *		  along to all servers that match capab and cluster type
 */
 void
-cluster_a_line(struct Client *source_p, const char *command,
-               int capab, int cluster_type, const char *pattern, ...)
+cluster_a_line(struct Client *source_p, const char *command, int capab,
+               int cluster_type, const char *pattern, ...)
 {
   va_list args;
   char buffer[IRCD_BUFSIZE] = "";
@@ -1837,7 +1838,7 @@ cluster_a_line(struct Client *source_p, const char *command,
     const struct MaskItem *conf = node->data;
 
     if (conf->flags & cluster_type)
-      sendto_match_servs(source_p, conf->name, CAP_CLUSTER|capab,
+      sendto_match_servs(source_p, conf->name, CAP_CLUSTER | capab,
                          "%s %s %s", command, conf->name, buffer);
   }
 }
@@ -1923,7 +1924,7 @@ split_nuh(struct split_nuh_item *const iptr)
     }
     else
     {
-      /* no @ found */
+      /* No @ found */
       if (!iptr->nickptr || strpbrk(iptr->nuhmask, ".:"))
         strlcpy(iptr->hostptr, iptr->nuhmask, iptr->hostsize);
       else

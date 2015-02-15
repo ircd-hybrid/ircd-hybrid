@@ -105,7 +105,7 @@ pseudo_register(const char *name, const char *nick,
 
   cmd->msg.cmd = cmd->command;
   cmd->msg.args_max = 2;
-  cmd->msg.flags = MFLG_EXTRA|MFLG_SLOW;
+  cmd->msg.flags = MFLG_EXTRA | MFLG_SLOW;
   cmd->msg.extra = cmd;
   cmd->msg.handlers[UNREGISTERED_HANDLER] = m_unregistered;
   cmd->msg.handlers[CLIENT_HANDLER] = m_pseudo;

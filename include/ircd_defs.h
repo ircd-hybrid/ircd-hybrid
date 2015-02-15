@@ -42,7 +42,7 @@
  */
 #define NICKLEN         30
 #define USERLEN         10
-#define SVIDLEN         30
+#define ACCOUNTLEN      NICKLEN
 #define PORTNAMELEN 6  /* ":31337" */
 
 #define HOSTIPLEN       45 /* sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255") */

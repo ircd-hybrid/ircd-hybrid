@@ -380,5 +380,5 @@ extern int match_conf_password(const char *, const struct MaskItem *);
 
 #define CLEANUP_TKLINES_TIME 60
 
-extern void cluster_a_line(struct Client *, const char *, int, int, const char *,...);
+extern void cluster_a_line(struct Client *, const char *, unsigned int, unsigned int, const char *,...);
 #endif /* INCLUDED_s_conf_h */

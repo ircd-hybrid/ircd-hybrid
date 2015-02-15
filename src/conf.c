@@ -1822,8 +1822,8 @@ match_conf_password(const char *password, const struct MaskItem *conf)
  *		  along to all servers that match capab and cluster type
 */
 void
-cluster_a_line(struct Client *source_p, const char *command, int capab,
-               int cluster_type, const char *pattern, ...)
+cluster_a_line(struct Client *source_p, const char *command, unsigned int capab,
+               unsigned int cluster_type, const char *pattern, ...)
 {
   va_list args;
   char buffer[IRCD_BUFSIZE] = "";

@@ -37,7 +37,7 @@ struct Whowas
   int hashv;
   int shide;
   time_t logoff;
-  char account[NICKLEN + 1];  /**< Services account */
+  char account[ACCOUNTLEN + 1];  /**< Services account */
   char name[NICKLEN + 1];
   char username[USERLEN + 1];
   char hostname[HOSTLEN + 1];

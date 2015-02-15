@@ -3,6 +3,7 @@ o) Added SVSTAG command which services may use to add tags to users which can
    be seen in /whois
 o) Added oper::whois configuration option which allows to override the default
    RPL_WHOISOPERATOR numeric string shown in /whois.
+o) IRC operators may now use +O on a channel even if they are only a half-op
 
 
 -- Noteworthy changes in version 8.2.3 (2015-02-11)

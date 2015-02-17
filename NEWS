@@ -4,7 +4,7 @@ o) Added SVSTAG command which services may use to add tags to users which can
 o) Added oper::whois configuration option which allows to override the default
    RPL_WHOISOPERATOR numeric string shown in /whois.
 o) IRC operators may now use +O on a channel even if they are only a half-op
-o) Fixed bug where TOPIC messages were not n!u@h prefixed in case of TBURST 
+o) Fixed bug where TOPIC messages were not n!u@h prefixed in case of TBURST
    issued by services clients
 
 

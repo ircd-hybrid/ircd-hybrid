@@ -143,7 +143,7 @@ free_client(struct Client *client_p)
     client_p->connection->challenge_operator = NULL;
 
     /*
-     * Clean up extra sockets from listen{} blocks which have been discarded.
+     * Clean up extra sockets from listen {} blocks which have been discarded.
      */
     if (client_p->connection->listener)
     {
@@ -866,9 +866,9 @@ exit_client(struct Client *source_p, const char *comment)
                            source_p->connection->recv.bytes >> 10);
       ilog(LOG_TYPE_IRCD, "%s was connected for %d day%s, %2d:%02d:%02d. %llu/%llu sendK/recvK.",
            source_p->name, connected/86400, (connected/86400 == 1) ? "" : "s",
-          (connected % 86400) / 3600, (connected % 3600) / 60, connected % 60,
-          source_p->connection->send.bytes >> 10,
-          source_p->connection->recv.bytes >> 10);
+           (connected % 86400) / 3600, (connected % 3600) / 60, connected % 60,
+           source_p->connection->send.bytes >> 10,
+           source_p->connection->recv.bytes >> 10);
     }
   }
   else if (IsClient(source_p) && !HasFlag(source_p, FLAGS_KILLED))

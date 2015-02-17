@@ -365,6 +365,7 @@ register_local_user(struct Client *source_p)
 
   assert(source_p == source_p->from);
   assert(MyConnect(source_p));
+  assert(IsUnknown(source_p));
   assert(!source_p->connection->registration);
 
   if (ConfigGeneral.ping_cookie)

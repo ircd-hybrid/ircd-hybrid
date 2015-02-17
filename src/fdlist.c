@@ -93,7 +93,9 @@ void
 fd_open(fde_t *F, int fd, int is_socket, const char *desc)
 {
   unsigned int hashv = hash_fd(fd);
+
   assert(fd >= 0);
+  assert(!F->flags.open);
 
   F->fd = fd;
   F->comm_index = -1;
@@ -116,6 +118,8 @@ void
 fd_close(fde_t *F)
 {
   unsigned int hashv = hash_fd(F->fd);
+
+  assert(F->flags.open);
 
   if (F == fd_next_in_loop)
     fd_next_in_loop = F->hnext;

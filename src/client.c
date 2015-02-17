@@ -125,7 +125,7 @@ free_client(struct Client *client_p)
   assert(client_p->channel.head == NULL);
   assert(dlink_list_length(&client_p->channel) == 0);
   assert(dlink_list_length(&client_p->whowas) == 0);
-  assert(!IsServer(client_p) || client_p->serv);
+  assert(dlink_list_length(&client_p->svstags) == 0);
 
   MyFree(client_p->serv);
   MyFree(client_p->certfp);
@@ -835,8 +835,8 @@ exit_client(struct Client *source_p, const char *comment)
   {
     char splitstr[HOSTLEN + HOSTLEN + 2] = "";
 
-    /* This shouldn't ever happen */
-    assert(source_p->serv && source_p->servptr);
+    assert(source_p->serv);
+    assert(source_p->servptr);
 
     if (ConfigServerHide.hide_servers)
       /*

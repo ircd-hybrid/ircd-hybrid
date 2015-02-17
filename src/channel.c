@@ -83,6 +83,8 @@ add_user_to_channel(struct Channel *chptr, struct Client *who,
 {
   struct Membership *member = NULL;
 
+  assert(IsClient(who));
+
   if (GlobalSetOptions.joinfloodtime > 0)
   {
     if (flood_ctrl)
@@ -290,7 +292,7 @@ check_channel_name(const char *name, const int local)
 {
   const char *p = name;
 
-  assert(p);
+  assert(!EmptyString(p));
 
   if (!IsChanPrefix(*p))
     return 0;
@@ -418,6 +420,8 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
   const int multi_prefix = HasCap(source_p, CAP_MULTI_PREFIX) != 0;
   const int uhnames = HasCap(source_p, CAP_UHNAMES) != 0;
 
+  assert(IsClient(source_p));
+
   if (PubChannel(chptr) || is_member)
   {
     t = buf + snprintf(buf, sizeof(buf), numeric_form(RPL_NAMREPLY),
@@ -487,6 +491,8 @@ channel_member_names(struct Client *source_p, struct Channel *chptr,
 void
 add_invite(struct Channel *chptr, struct Client *who)
 {
+  assert(IsClient(who));
+
   del_invite(chptr, who);
 
   /*
@@ -982,6 +988,8 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
   int i = 0;
   unsigned int flags = 0;
 
+  assert(IsClient(source_p));
+
   chan_list = channel_find_last0(source_p, channel);
 
   for (chan = strtoken(&p, chan_list, ","); chan;
@@ -1199,6 +1207,8 @@ channel_do_part(struct Client *source_p, char *channel, const char *reason)
 {
   char *p = NULL, *name = NULL;
   char buf[KICKLEN + 1] = "";
+
+  assert(IsClient(source_p));
 
   if (!EmptyString(reason))
     strlcpy(buf, reason, sizeof(buf));

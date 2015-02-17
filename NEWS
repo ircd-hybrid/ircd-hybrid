@@ -1,4 +1,14 @@
--- Noteworthy changes in version 8.2.3 (2015-02-10)
+-- Noteworthy changes in version 8.2.4 (2015-02-17)
+o) Added SVSTAG command which services may use to add tags to users which can
+   be seen in /whois
+o) Added oper::whois configuration option which allows to override the default
+   RPL_WHOISOPERATOR numeric string shown in /whois.
+o) IRC operators may now use +O on a channel even if they are only a half-op
+o) Fixed bug where TOPIC messages were not n!u@h prefixed in case of TBURST
+   issued by services clients
+
+
+-- Noteworthy changes in version 8.2.3 (2015-02-11)
 ########################################################################
 o) IMPORTANT: the following ircd.conf configuration directives have been renamed:
 
@@ -15,6 +25,8 @@ o) Allow to disable the NOTICE/PRIVMSG anti-flood mechanism by setting the
    general::default_floodcount configuration option to 0
 o) Updated some help files
 o) Minor code cleanups and improvements
+o) Operators may now see certificate fingerprints, user modes and hidden
+   channels via /whois as well. This used to be admin only.
 
 
 -- Noteworthy changes in version 8.2.2 (2015-01-20)

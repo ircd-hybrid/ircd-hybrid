@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.4 (2015-??-??)
+-- Noteworthy changes in version 8.2.4 (2015-02-17)
 o) Added SVSTAG command which services may use to add tags to users which can
    be seen in /whois
 o) Added oper::whois configuration option which allows to override the default

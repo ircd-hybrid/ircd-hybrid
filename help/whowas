@@ -1,8 +1,13 @@
-WHOWAS <nick>
+WHOWAS <nick> [count] [nick|server]
 
-WHOWAS will show you the last known host and whois
-information for the specified nick.  Depending on the
-number of times they have connected to the network, there
-may be more than one listing for a specific user.
+WHOWAS will show you brief information from the last time
+the specified nick was connected or changed nickname.
+Depending on the number of times they have connected,
+there may be more than one listing for the specified nick.
+You can limit how many of those listings will be shown
+with the count parameter.
+
+Specifying nick or server as an additional parameter forwards
+the query to that server.
 
 The WHOWAS data will expire after time.

@@ -154,10 +154,11 @@ check_clean_host(struct Client *source_p, char *nick,
 static void
 set_initial_nick(struct Client *source_p, const char *nick)
 {
-  /* Client setting NICK the first time */
+  const int samenick = !irccmp(source_p->name, nick);
 
-  /* This had to be copied here to avoid problems.. */
-  source_p->tsinfo = CurrentTime;
+  if (!samenick)
+    source_p->tsinfo = CurrentTime;
+
   source_p->connection->registration &= ~REG_NEED_NICK;
 
   if (source_p->name[0])
@@ -632,10 +633,8 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((target_p = hash_find_client(nick)) == NULL)
+  if ((target_p = hash_find_client(nick)) == NULL || target_p == source_p)
     set_initial_nick(source_p, nick);
-  else if (source_p == target_p)
-    strlcpy(source_p->name, nick, sizeof(source_p->name));
   else
     sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, target_p->name);
 

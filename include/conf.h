@@ -191,14 +191,14 @@ struct CidrItem
   unsigned int number_on_this_cidr;
 };
 
-struct
+struct conf_parser_context
 {
   unsigned int boot;
   unsigned int pass;
   FILE *conf_file;
-} conf_parser_ctx;
+};
 
-struct
+struct config_general_entry
 {
   const char *dpath;
   const char *mpath;
@@ -257,9 +257,9 @@ struct
   unsigned int ping_cookie;
   unsigned int disable_auth;
   unsigned int cycle_on_host_change;
-} ConfigGeneral;
+};
 
-struct
+struct config_channel_entry
 {
   unsigned int disable_fake_channels;
   unsigned int invite_client_count;
@@ -275,9 +275,9 @@ struct
   unsigned int no_join_on_split;
   unsigned int default_split_server_count;
   unsigned int default_split_user_count;
-} ConfigChannel;
+};
 
-struct
+struct config_server_hide
 {
   char *hidden_name;
   unsigned int flatten_links;
@@ -288,9 +288,9 @@ struct
   unsigned int links_disabled;
   unsigned int hidden;
   unsigned int hide_server_ips;
-} ConfigServerHide;
+};
 
-struct
+struct server_info
 {
 #ifdef HAVE_LIBCRYPTO
   const EVP_MD *message_digest_algorithm;
@@ -312,19 +312,19 @@ struct
   unsigned int specific_ipv6_vhost;
   struct irc_ssaddr ip;
   struct irc_ssaddr ip6;
-} ConfigServerInfo;
+};
 
-struct
+struct admin_info
 {
   char *name;
   char *description;
   char *email;
-} ConfigAdminInfo;
+};
 
-struct
+struct logging_entry
 {
   unsigned int use_logging;
-} ConfigLog;
+};
 
 extern dlink_list flatten_links;
 extern dlink_list server_items;
@@ -335,6 +335,13 @@ extern dlink_list oconf_items;
 extern dlink_list service_items;
 extern dlink_list nresv_items;
 extern dlink_list cresv_items;
+extern struct conf_parser_context conf_parser_ctx;
+extern struct logging_entry ConfigLog;
+extern struct config_general_entry ConfigGeneral;
+extern struct config_channel_entry ConfigChannel;
+extern struct config_server_hide ConfigServerHide;
+extern struct server_info ConfigServerInfo;
+extern struct admin_info ConfigAdminInfo;
 
 extern int valid_wild_card_simple(const char *);
 extern int valid_wild_card(struct Client *, int, int, ...);

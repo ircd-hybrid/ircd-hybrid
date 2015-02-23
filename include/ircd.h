@@ -32,7 +32,7 @@
 #include "config.h"
 
 
-struct
+struct SetOptions
 {
   unsigned int maxclients;
   unsigned int autoconn;      /* autoconn enabled for all servers? */
@@ -42,7 +42,7 @@ struct
   unsigned int ident_timeout; /* timeout for identd lookups        */
   int spam_num;
   unsigned int spam_time;
-} GlobalSetOptions;
+};
 
 /*
  * statistics structures
@@ -70,9 +70,9 @@ struct ServerStatistics
   unsigned int    is_kill; /* number of kills generated on collisions */
   unsigned int    is_asuc; /* successful auth requests */
   unsigned int    is_abad; /* bad auth requests */
-} ServerStats;
+};
 
-struct
+struct Counter
 {
   uint64_t totalrestartcount; /* Total client count ever */
   unsigned int myserver;      /* my servers          */
@@ -84,12 +84,12 @@ struct
   unsigned int max_tot;       /* MAX global clients  */
   unsigned int max_loc_con;   /* MAX local connection count (clients + server) */
   unsigned int max_loc_cli;   /* XXX This is redundant - Max local client count */
-} Count;
+};
 
-struct
+struct ServerState_t
 {
   unsigned int foreground;
-} server_state;
+};;
 
 
 #ifdef HAVE_LIBGEOIP
@@ -103,6 +103,10 @@ extern const char *logFileName;
 extern const char *pidFileName;
 extern unsigned int dorehash;
 extern unsigned int doremotd;
+extern struct Counter Count;
+extern struct ServerStatistics ServerStats;
+extern struct SetOptions GlobalSetOptions; /* defined in ircd.c */
+extern struct ServerState_t server_state;
 extern struct event event_write_links_file;
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec

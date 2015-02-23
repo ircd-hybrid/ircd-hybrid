@@ -57,6 +57,14 @@
 #include "ipcache.h"
 
 
+struct config_channel_entry ConfigChannel;
+struct config_server_hide ConfigServerHide;
+struct config_general_entry ConfigGeneral;
+struct logging_entry ConfigLog = { .use_logging = 1 };
+struct server_info ConfigServerInfo;
+struct admin_info ConfigAdminInfo;
+struct conf_parser_context conf_parser_ctx;
+
 /* general conf items link list root, other than k lines etc. */
 dlink_list service_items;
 dlink_list server_items;

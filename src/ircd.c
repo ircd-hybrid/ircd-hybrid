@@ -63,6 +63,11 @@
 GeoIP *geoip_ctx;
 #endif
 
+/* /quote set variables */
+struct SetOptions GlobalSetOptions;
+struct Counter Count;
+struct ServerState_t server_state;
+struct ServerStatistics ServerStats;
 struct timeval SystemTime;
 struct Connection meConnection; /* That's also part of me */
 struct Client me = { .connection = &meConnection };  /* That's me */
@@ -479,7 +484,6 @@ main(int argc, char *argv[])
 
   dlinkAdd(&me, &me.node, &global_client_list);
 
-  ConfigLog.use_logging = 1;
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;
   ConfigGeneral.mpath      = MPATH;

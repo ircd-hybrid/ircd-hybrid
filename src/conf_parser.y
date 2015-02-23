@@ -978,15 +978,13 @@ pseudo_target: T_TARGET '=' QSTRING ';'
 
     nuh.nuhmask  = yylval.string;
     nuh.nickptr  = NULL;
-    nuh.userptr  = block_state.user.buf;
+    nuh.userptr  = block_state.nick.buf;
     nuh.hostptr  = block_state.host.buf;
     nuh.nicksize = 0;
     nuh.usersize = sizeof(block_state.nick.buf);
     nuh.hostsize = sizeof(block_state.host.buf);
-    split_nuh(&nuh);
 
-    strlcpy(block_state.nick.buf, nuh.userptr, sizeof(block_state.nick.buf));
-    strlcpy(block_state.host.buf, nuh.hostptr, sizeof(block_state.host.buf));
+    split_nuh(&nuh);
   }
 };
 

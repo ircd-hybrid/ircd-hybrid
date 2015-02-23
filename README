@@ -68,7 +68,7 @@ Feature Specific Requirements:
   Debian GNU/Linux 7.6
   Debian GNU/Hurd 0.3
   openSUSE 13.1
-  Mac OS X 10.9 (Mavericks)
+  Mac OS X 10.10 (Yosemite)
 
 - /etc/resolv.conf must exist for the resolver to work.
 

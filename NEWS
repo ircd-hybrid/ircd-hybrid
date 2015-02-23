@@ -1,3 +1,8 @@
+-- Noteworthy changes in version 8.2.5 (2015-??-??)
+o) Fixed core on Mac OSX 10.10 and possibly some other systems when parsing
+   the ircd.conf with configured pseudo {} blocks
+
+
 -- Noteworthy changes in version 8.2.4 (2015-02-17)
 o) Added SVSTAG command which services may use to add tags to users which can
    be seen in /whois

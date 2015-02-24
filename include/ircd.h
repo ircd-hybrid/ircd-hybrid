@@ -89,7 +89,7 @@ struct Counter
 struct ServerState_t
 {
   unsigned int foreground;
-};;
+};
 
 
 #ifdef HAVE_LIBGEOIP
@@ -105,7 +105,7 @@ extern unsigned int dorehash;
 extern unsigned int doremotd;
 extern struct Counter Count;
 extern struct ServerStatistics ServerStats;
-extern struct SetOptions GlobalSetOptions; /* defined in ircd.c */
+extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
 extern struct event event_write_links_file;
 extern struct timeval SystemTime;

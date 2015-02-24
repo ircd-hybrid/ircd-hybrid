@@ -87,18 +87,14 @@
 
                                 HOW TO GET HELP
 
-   - Send Check or Money Order to... just kidding! You're on your own for
-     support. Try asking other ircd-hybrid admins on EFnet if you can't
-     fix it yourself. If you do fix anything, however, please send context
-     or unified diffs to bugs@ircd-hybrid.org so the fixes can be
-     incorporated into the next release of ircd-hybrid. If hybrid crashes
-     on you, PLEASE contact bugs@ircd-hybrid.org ASAP with a backtrace of
-     the core. The Hybrid team can't fix bugs if no one tells us about them!
+   - Send Check or Money Order to... just kidding! For bugs, patches or crash
+     reports, contact bugs@ircd-hybrid.org. Please provide as much information
+     as possible, context or unified diffs or backtrace of the core.
+     The Hybrid team can't fix bugs if no one tells us about them!
 
-   - https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
-     Here you can subscribe to a mailing list for general discussion of Hybrid.
-
-   - IRC contact: #ircd-coders on irc.ircd-hybrid.org
+   - For general discussion or support, you can subscribe to our mailing list at
+     https://lists.ircd-hybrid.org/mailman/listinfo/hybrid. Alternatively,
+     you can find us on IRC in #ircd-coders on irc.ircd-hybrid.org.
 
      ----------------------------------------------------------------------
 

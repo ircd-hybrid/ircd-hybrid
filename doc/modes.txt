@@ -3,7 +3,7 @@
 
 In /VERSION one might see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.0 DFGHRSWabcdefgijklnopqrsuwxyz bciklmnoprstveIMORS bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.4 DFGHRSWabcdefgijklnopqrsuwxy bchiklmnoprstveCIMORS bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -12,7 +12,7 @@ Here is a guide to the preceding modes:
 
 User Modes:
 
-+a - admin        - Admin status. Can for example see IPs in "STATS c"
++a - admin        - Admin status. Can for example see IP addresses in "STATS c"
 +b - bots         - See bot and drone flooding notices
 +c - cconn        - Client connection/quit notices
 +D - deaf         - Don't receive channel messages
@@ -28,7 +28,7 @@ User Modes:
 +k - skill        - See server generated KILL messages
 +l - locops       - See LOCOPS messages
 +n - nchange      - See client nick changes
-+o - oper         - Operator status
++o - oper         - IRC operator status
 +p - hidechans    - Hides channel list in WHOIS
 +q - hideidle     - Hides idle and signon time in WHOIS
 +r - registered   - User has been registered and identified for its nick.

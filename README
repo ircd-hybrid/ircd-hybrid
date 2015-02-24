@@ -8,9 +8,11 @@ Contact Information:
   * IRC contact:
     - #ircd-coders on irc.ircd-hybrid.org
 
-Recommended IRC services package:
+
+Recommended IRC services packages:
 
 - Anope 2.0.1 and above, which can be found on http://anope.org
+- HOPM (hybrid open proxy monitor), which can be found on http://ircd-hybrid.org
 
 
 ******************************* IMPORTANT *************************************

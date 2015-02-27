@@ -56,7 +56,7 @@ static void dump_map(struct Client *client,
 
     bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, "%s", server->name);
 
-    if (HasUMode(client, UMODE_OPER) && server->id[0])
+    if (HasUMode(client, UMODE_OPER))
       bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, "[%s]", server->id);
 
     buf[bufpos++] = ' ';

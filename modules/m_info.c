@@ -371,6 +371,12 @@ static const struct InfoStruct info_table[] =
     "Minimum non-wildcards in gecos bans"
   },
   {
+    "max_watch",
+    OUTPUT_DECIMAL,
+    &ConfigGeneral.max_watch,
+    "Maximum nicknames on watch list"
+  },
+  {
     "max_accept",
     OUTPUT_DECIMAL,
     &ConfigGeneral.max_accept,
@@ -423,6 +429,12 @@ static const struct InfoStruct info_table[] =
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.stats_e_disabled,
     "Whether or not STATS e is disabled"
+  },
+  {
+    "stats_m_oper_only",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigGeneral.stats_m_oper_only,
+    "STATS m output is only shown to operators"
   },
   {
     "stats_o_oper_only",

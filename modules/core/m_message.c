@@ -238,12 +238,12 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
 
   if (flags & CHFL_VOICE)
   {
-    type = CHFL_VOICE|CHFL_HALFOP|CHFL_CHANOP;
+    type = CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE;
     prefix = "+";
   }
   else if (flags & CHFL_HALFOP)
   {
-    type = CHFL_HALFOP|CHFL_CHANOP;
+    type = CHFL_CHANOP | CHFL_HALFOP;
     prefix = "%";
   }
   else if (flags & CHFL_CHANOP)
@@ -302,7 +302,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
 
     if (HasUMode(target_p, UMODE_REGONLY) && target_p != source_p)
     {
-      if (!HasUMode(source_p, UMODE_REGISTERED|UMODE_OPER))
+      if (!HasUMode(source_p, UMODE_REGISTERED | UMODE_OPER))
       {
         if (p_or_n != NOTICE)
           sendto_one_numeric(source_p, &me, ERR_NONONREG, target_p->name);
@@ -313,7 +313,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
 
   if (MyClient(target_p) && IsClient(source_p))
   {
-    if (HasUMode(target_p, UMODE_CALLERID|UMODE_SOFTCALLERID) &&
+    if (HasUMode(target_p, UMODE_CALLERID | UMODE_SOFTCALLERID) &&
         !accept_message(source_p, target_p))
     {
       const int callerid = !!HasUMode(target_p, UMODE_CALLERID);

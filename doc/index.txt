@@ -1,19 +1,21 @@
 $Id$
------------------------------------------------
 
 Documentation for ircd-hybrid
+-----------------------------
 
-CIDR.txt		- Description of CIDR in IPv4
 challenge.txt		- Overview of the challenge/response system for
-                          obtaining operator status
+			  obtaining operator status
+CIDR.txt		- Description of CIDR in IPv4
+Doxyfile		- Configuration file for generating documentation
+			  with Doxygen
 index.txt		- This file
-ircd.8                  - The new revised manpage, read with the following
-                          commands in the prefix directory:
-                          man -M . ircd
-kline.txt               - Outline of the remote K-line protocol for both
-                          opers and servers
-modeg.txt               - An in depth description of the server side silence
-                          user mode (+g)
-modes.txt               - A list of all user and channel modes
-resv.txt		- Outline of the RESV command.
-serverhide.txt          - Information about the server hide options
+ircd.8			- The new revised manpage, read with the following
+			  command in the prefix directory:
+			  man -M . ircd
+kline.txt		- Outline of the remote K-line protocol for both,
+			  operators and servers
+modeg.txt		- Description of the server-side silence user mode (+g)
+modes.txt		- A list of all user and channel modes
+reference.conf		- Overview of IRCD's configuration file
+resv.txt		- Outline of the RESV command
+serverhide.txt		- Information about the server hide options

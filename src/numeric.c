@@ -368,7 +368,7 @@ static const char *const replies[] =
 /* 335 RPL_WHOISTEXT */ "%s :%s",
 /* 336 RPL_INVITELIST */ ":%s",
 /* 337 RPL_ENDOFINVITELIST */ ":End of /INVITE list.",
-/* 338 RPL_WHOISACTUALLY */ "%s %s :actually using host",
+/* 338 RPL_WHOISACTUALLY */ "%s %s@%s %s :Actual user@host, actual IP",
 /* 339 */ NULL,
 /* 340 */ NULL,
 /* 341 RPL_INVITING */ "%s %s",

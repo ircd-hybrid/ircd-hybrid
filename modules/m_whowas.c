@@ -62,6 +62,12 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
                          temp->username, temp->hostname,
                          temp->realname);
 
+      if (HasUMode(source_p, UMODE_OPER))
+        if (strcmp(temp->sockhost, "0"))  /* XXX: TBR */
+          sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, temp->name,
+                             temp->username, temp->hostname,
+                             temp->sockhost);
+
       if (!IsDigit(temp->account[0]) && temp->account[0] != '*')
         sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, temp->name, temp->account, "was");
 

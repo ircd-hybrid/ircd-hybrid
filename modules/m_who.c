@@ -40,7 +40,7 @@
 #include "modules.h"
 
 
-#define WHO_MAXREPLIES 500
+#define WHO_MAX_REPLIES 500
 
 
 /* do_who()
@@ -126,7 +126,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, char *mask,
       {
         if (--(*maxmatches) == 0)
         {
-          sendto_one_numeric(source_p, &me, ERR_WHOLIMEXCEED, WHO_MAXREPLIES, "WHO");
+          sendto_one_numeric(source_p, &me, ERR_WHOLIMEXCEED, WHO_MAX_REPLIES, "WHO");
           return;
         }
       }
@@ -147,7 +147,7 @@ static void
 who_global(struct Client *source_p, char *mask, int server_oper)
 {
   dlink_node *node = NULL;
-  unsigned int maxmatches = WHO_MAXREPLIES;
+  unsigned int maxmatches = WHO_MAX_REPLIES;
   static time_t last_used = 0;
 
   if (!HasUMode(source_p, UMODE_OPER))
@@ -198,7 +198,7 @@ who_global(struct Client *source_p, char *mask, int server_oper)
       {
         if (--maxmatches == 0)
         {
-          sendto_one_numeric(source_p, &me, ERR_WHOLIMEXCEED, WHO_MAXREPLIES, "WHO");
+          sendto_one_numeric(source_p, &me, ERR_WHOLIMEXCEED, WHO_MAX_REPLIES, "WHO");
           return;
         }
       }
@@ -258,7 +258,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   struct Channel *chptr = NULL;
   char *mask = parv[1];
   dlink_node *node = NULL;
-  int server_oper = parc > 2 ? (*parv[2] == 'o') : 0; /* Show OPERS only */
+  const int server_oper = parc > 2 ? (*parv[2] == 'o') : 0; /* Show OPERS only */
 
   /* See if mask is there, collapse it or return if not there */
   if (EmptyString(mask))

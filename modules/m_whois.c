@@ -184,9 +184,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one_numeric(source_p, &me, RPL_WHOISMODES, target_p->name, buf);
   }
 
-  if (strcmp(target_p->sockhost, "0")) /* XXX: TBR */
-    if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
+  if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
+    if (strcmp(target_p->sockhost, "0")) /* XXX: TBR */
       sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, target_p->name,
+                         target_p->username, target_p->host,
                          target_p->sockhost);
 
   if (HasUMode(target_p, UMODE_SSL))

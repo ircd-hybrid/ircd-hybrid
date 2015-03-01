@@ -41,6 +41,7 @@ struct Whowas
   char name[NICKLEN + 1];
   char username[USERLEN + 1];
   char hostname[HOSTLEN + 1];
+  char sockhost[HOSTIPLEN + 1];  /**< This is the host name from the socket ip address as string */
   char realname[REALLEN + 1];
   char servername[HOSTLEN + 1];
   struct Client *online; /* Pointer to new nickname for chasing or NULL */

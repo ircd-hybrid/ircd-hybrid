@@ -1106,7 +1106,7 @@ static const struct oper_privs
   { 0, '\0' }
 };
 
-char *
+const char *
 oper_privs_as_string(const unsigned int port)
 {
   static char privs_out[IRCD_BUFSIZE];

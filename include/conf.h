@@ -357,7 +357,7 @@ extern int check_client(struct Client *);
 extern void detach_conf(struct Client *, enum maskitem_type);
 extern struct MaskItem *find_conf_name(dlink_list *, const char *, enum maskitem_type);
 extern int conf_connect_allowed(struct irc_ssaddr *, int);
-extern char *oper_privs_as_string(const unsigned int);
+extern const char *oper_privs_as_string(const unsigned int);
 extern void split_nuh(struct split_nuh_item *);
 extern struct MaskItem *find_matching_name_conf(enum maskitem_type, const char *,
                                                 const char *, const char *, unsigned int);

@@ -36,12 +36,12 @@ o) Allow to disable the NOTICE/PRIVMSG anti-flood mechanism by setting the
 o) Updated some help files
 o) Minor code cleanups and improvements
 o) Operators may now see certificate fingerprints, user modes and hidden
-   channels via /whois as well. This used to be admin only.
+   channels via WHOIS as well. This used to be admin only.
 
 
 -- Noteworthy changes in version 8.2.2 (2015-01-20)
 o) Added support for the "extended-join" client capability
-o) Channel half-ops can now use /INVITE as well
+o) Channel half-ops can now use INVITE as well
 o) Fixed broken 'make install -jX'
 o) m_opme.c has been added to modules/extra. Can be used on opless channels only.
 o) Added 'opme' to irc-operator flags
@@ -61,14 +61,14 @@ o) Usermode +G now no longer allows to override +g
 o) Due to potential weakness, TLS session caching and session tickets
    have been disabled
 o) Minor improvements to TS6 implementation
-o) /WHOWAS now shows the name of the services account a user was logged in
+o) WHOWAS now shows the name of the services account a user was logged in
 
 
 -- Noteworthy changes in version 8.2.0 (2014-08-24)
 o) Successful operator logins are now announced globally via GLOBOPS
 o) Cleanups and improvements to the resolver code
 o) Cleanups and improvements to the poll() I/O event notification support
-o) A topic mask can now be specified within the /list options
+o) A topic mask can now be specified within the LIST options
 o) All users may now see channel modes in the /list reply
 o) Fixed bug where "NOTICE +#somechan" did allow bypassing resv {} channels,
    or channels that are set +c (no control codes)
@@ -119,7 +119,7 @@ o) Code cleanups/performance improvements
 o) IMPORTANT: renamed general::warn_no_nline configuration directive to
    general::warn_no_connect_block
 ########################################################################
-o) Fixed bug with /whois not showing a list of channel names as expected
+o) Fixed bug with WHOIS not showing a list of channel names as expected
 o) Added usermode +q which hides idle and signon time in WHOIS
 o) Added usermode +p which hides channel list in WHOIS
 
@@ -129,7 +129,7 @@ o) TS6 is now mandatory. ircd is no longer backwards compatible with TS5
    and below.
 o) SVSJOIN and SVSPART has been added
 o) Major code cleanups and refactoring. Improved overall performance
-o) /INFO now also reports MPATH (path to main motd (Message of the Day) file)
+o) INFO now also reports MPATH (path to main motd (Message of the Day) file)
    and SPATH (Path to server executable)
 o) Updated several help files
 
@@ -158,7 +158,6 @@ o) Fixed bug where "STATS p" would show an invalid amount of irc-operators
 o) irc-operators may now no longer set a channel +O if they are only halfops (%)
 o) Channel halfops (%) may now no longer (de)halfop other channel members
 o) Channel halfops (%) may now no longer KICK other channel halfops
-o) Make sure general::stats_e_disabled gets reset via /rehash
 o) Fixed compile warnings; code cleanups
 o) Fixed bug where the configuration parser wouldn't truncate the network name
    if general::network_name contains spaces
@@ -169,7 +168,7 @@ o) Fixed possible WATCH core
 o) Fixed bug where the configuration parser wouldn't take time units
    into consideration for the join_flood_time and throttle_time
    configuration options
-o) Minor /list optimization
+o) Minor LIST optimization
 
 
 -- Noteworthy changes in version 8.1.16 (2014-04-20)
@@ -185,7 +184,7 @@ o) Fixed corrupted "STATS U" output
 o) IMPORTANT: ircd binary is now again placed into bin/ instead of sbin/
 ########################################################################
 o) mkpasswd in tools/ now defaults to MD5 instead of DES
-o) USERS command has been removed
+o) The USERS command has been removed
 o) Fixed issue with SVSNICK where clients self-collided when changing
    just the case of the nick name, i.e. somenick -> SomeNicK
 o) Minor code cleanups and cosmetical fixes
@@ -197,20 +196,19 @@ o) Improved TS6 inter-server communication
 o) Minor code cleanups and speed enhancements
 o) Added 'unxline' oper flag
 o) Added support for "userhost-in-names" client capability
-o) ircd now allows private rsa keys larger than 2048 bits
+o) ircd now allows private RSA keys larger than 2048 bits
 o) Fixed bug where signals stopped from working after restarting
    the ircd via SIGINT
 o) Fixed bug where certain irc clients could not reconnect via TLS/SSL
 o) Fixed long-standing bug where +p channels have been shown
-   in the /whois reply
+   in the WHOIS reply
 
 
 -- Noteworthy changes in version 8.1.13 (2014-01-07)
-o) Fixed EOB not working for remote servers (resulted in fake
-   direction notices)
+o) Fixed EOB not working for remote servers (resulted in fake direction notices)
 o) Fixed remote client connection notices for servers that are
    more than one hop away
-o) Fixed bug where ircd didn't timeout SSL connections that
+o) Fixed bug where the ircd didn't timeout SSL connections that
    haven't finished the SSL handshake
 o) Fixed several bugs with server hiding
 o) Updated/fixed help files
@@ -224,37 +222,33 @@ o) Fixed possible channel mode desynch with services
 o) Fixed TS6 support with LOCOPS
 o) Minor code cleanups
 o) Fixed file descriptor leak with empty help files
-o) Fixed issue with WEBIRC where hostnames were
-   not validated
+o) Fixed issue with WEBIRC where hostnames were not validated
 
 
 -- Noteworthy changes in version 8.1.11 (2013-12-06)
-o) Administrators may now see channel modes in /LIST
+o) Administrators may now see channel modes in LIST
 o) Fixed compile error on BSD systems when building with kqueue()
 
 
 -- Noteworthy changes in version 8.1.10 (2013-11-25)
 o) Fixed bug with kqueue() where it occasionally dropped updates
-o) Changed WHOIS to show a client's certificate fingerprint
-   to administrators only
-o) The WHO reply now shows whether or not a nickname has
-   been registered with NickServ. ('r' status flag)
+o) Changed WHOIS to show certificate fingerprint to administrators only
+o) The WHO reply now shows if a nickname has been registered
+   with NickServ. ('r' status flag)
 o) Fixed some flaws with server hiding
 o) Fixed bug where "STATS P" would leak ip addresses to remotely connected
    administrators, even if serverhide::hide_server_ips was set to 'yes'
-o) Services coders: added SVSKILL
+o) Added SVSKILL command
 
 
 -- Noteworthy changes in version 8.1.9 (2013-11-08)
 o) Added usermode +W. Users connected via a webirc gateway get this
    mode set by servers.
-o) /WHOIS now shows if a client is connected via a webirc
-   gateway
-o) Administrators may now see +s channels a user is in with /WHOIS.
-   Secret channels are prepended with a tilde in the /WHOIS
-   reply.
+o) WHOIS now shows if a client is connected via a webirc gateway
+o) Administrators may now see +s channels a user is in with WHOIS.
+   Secret channels are prepended with a tilde in the WHOIS reply.
 o) Administrators are now able to see all the user modes a user has
-   set via /whois
+   set via WHOIS
 
 
 -- Noteworthy changes in version 8.1.8 (2013-10-25)
@@ -264,9 +258,9 @@ o) Fixed bug that would lead to a desynchronized nick database
 o) Cleaned up/modernized build system
 o) Add -fstack-protector to CFLAGS if available. Basically checks for
    buffer overflows/stack-smashing attacks
-o) When using anope 1.9/2.0 services, /WHOIS now shows the account name
+o) When using anope 1.9/2.0 services, WHOIS now shows the account name
    of a registered/identified client (numeric 330)
-o) Administrators can now see +s channels in /LIST
+o) Administrators can now see +s channels in the LIST reply
 
 
 -- Noteworthy changes in version 8.1.7 (2013-08-18)
@@ -287,7 +281,7 @@ o) Fixed bug that would prevent servers from linking together
 -- Noteworthy changes in version 8.1.4 (2013-07-05)
 o) Added 'xline' and 'resv' logging types. See doc/reference.conf
    for more information
-o) Fixed bug where remote /STATS requests were not rate limited
+o) Fixed bug where remote STATS requests were not rate limited
 o) Fixed core with empty auth::spoof entries
 o) Increased oper/auth/connect password length limit from 20 to 128
 o) Minor fixes to nickflood control code
@@ -312,8 +306,7 @@ o) Added operator::ssl_connection_required configuration option. See
 o) Added usermode +S (client is connected via SSL/TLS). Allows services
    to keep track of what users are connected via SSL, and allows to see
    ssl-status of remote clients in a /whois
-o) Fixed a server name leak with server hiding enabled. Reported by
-   Adam <adam@anope.org>
+o) Fixed a server name leak with server hiding enabled
 
 
 -- Noteworthy changes in version 8.1.1 (2013-06-06)
@@ -395,11 +388,11 @@ o) Improved WEBIRC authentication; added 'webirc' to auth::flags.
 o) Implemented new memory pool allocator which basically is based upon Tor's
    mempool allocator for Tor cells
 o) Major code cleanups
-o) Implemented new binary database storage for X-,D-,K-,G-Lines and RESVs.
+o) Implemented new binary database storage for X-, D-, K-, G-Lines and RESVs.
    Temporary bans are now stored as well and will persist after a reboot
 o) Channel based resv {} blocks may now contain wildcards
 o) NICK/JOIN now shows the actual reason of reserved nick-/channelnames
-o) contrib/ and its content has been removed from the tree
+o) contrib/ and its content has been enirely removed from the tree
 o) Added serverhide::hide_services configuration option
 o) Added 'nononreg' (+R) to oper::umodes and general::oper_only_modes
 o) Added support for "away-notify" client capability
@@ -420,8 +413,7 @@ o) Unidentified/unregistered nicks may not speak in +R channels
 
 -- Noteworthy changes in version 8.0.7 (2013-04-12)
 o) Services may now set a channel topic without joining the channel first
-o) Fixed bug where /whois would send empty sockhost information on TS5
-   servers
+o) Fixed bug where WHOIS would send empty sockhost information on TS5 servers
 o) Remote server connection and split notices now go to new usermode +e.
    These previously used usermode +x.
 o) Services may now change the host of a specific user
@@ -440,7 +432,7 @@ o) IMPORTANT: nick and topic lengths are now configurable via ircd.conf.
    A max_nick_length, as well as a max_topic_length configuration option
    can now be found in the serverinfo {} block
 ########################################################################
-o) Fixed build on GNU/Hurd as reported by Dominic Hargreaves
+o) Fixed build on GNU/Hurd
 o) Fixed log files not getting reopened after /rehash
 o) Improved logging of configuration file issues
 o) ircd.pid has been accidentally saved in /var instead of /var/run
@@ -459,7 +451,7 @@ o) The configuration parser now does support 'year' and 'month' units
 
 -- Noteworthy changes in version 8.0.4 (2013-01-02)
 o) Fixed possible core on USERHOST/ISON with optimization enabled
-o) Fixed bug where can_flood sometimes didn't work as expected
+o) Fixed bug where 'can_flood' sometimes didn't work as expected
 
 
 -- Noteworthy changes in version 8.0.3 (2012-12-24)
@@ -482,7 +474,7 @@ o) IRC operators may now again see server generated nick rejection notices
 o) Fixed broken CIDR support for CHALLENGE based irc operator logins
 o) Fixed class limits not properly applying to operator {} blocks
 o) Fixed possible TBURST desynchronization with services
-o) Fixed TBURST sending server's name to clients if it's a hidden server
+o) Fixed TBURST from leaking the server name if it's a hidden server
 
 
 -- Noteworthy changes in version 8.0.0 (2012-10-18)

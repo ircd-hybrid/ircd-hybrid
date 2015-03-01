@@ -127,7 +127,7 @@ o) Added usermode +p which hides channel list in WHOIS
 -- Noteworthy changes in version 8.2.0beta1 (2014-04-29)
 o) TS6 is now mandatory. ircd is no longer backwards compatible with TS5
    and below.
-o) SVSJOIN and SVSPART has been added
+o) SVSJOIN and SVSPART commands have been added
 o) Major code cleanups and refactoring. Improved overall performance
 o) INFO now also reports MPATH (path to main motd (Message of the Day) file)
    and SPATH (Path to server executable)
@@ -252,7 +252,7 @@ o) Administrators are now able to see all the user modes a user has
 
 
 -- Noteworthy changes in version 8.1.8 (2013-10-25)
-o) Fixed bug that would lead to a desynchronized nick database
+o) Fixed bug that could lead to a desynchronized nick database
    throughout the entire network if using services enforced
    nick names (SVSNICK)
 o) Cleaned up/modernized build system

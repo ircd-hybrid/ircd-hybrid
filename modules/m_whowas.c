@@ -41,6 +41,8 @@
 #include "modules.h"
 
 
+#define WHOWAS_MAX_REPLIES 20  /* Does only apply to remote clients */
+
 static void
 do_whowas(struct Client *source_p, const int parc, char *parv[])
 {
@@ -49,8 +51,10 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
   const dlink_node *node = NULL;
 
   if (parc > 2 && !EmptyString(parv[2]))
-    if ((max = atoi(parv[2])) > 20 && !MyConnect(source_p))
-      max = 20;
+    max = atoi(parv[2]);
+
+  if (!MyConnect(source_p) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
+    max = WHOWAS_MAX_REPLIES;
 
   DLINK_FOREACH(node, WHOWASHASH[strhash(parv[1])].head)
   {

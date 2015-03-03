@@ -277,7 +277,7 @@ struct config_channel_entry
   unsigned int default_split_user_count;
 };
 
-struct config_server_hide
+struct config_serverhide_entry
 {
   char *hidden_name;
   unsigned int flatten_links;
@@ -290,7 +290,7 @@ struct config_server_hide
   unsigned int hide_server_ips;
 };
 
-struct server_info
+struct config_serverinfo_entry
 {
 #ifdef HAVE_LIBCRYPTO
   const EVP_MD *message_digest_algorithm;
@@ -314,14 +314,14 @@ struct server_info
   struct irc_ssaddr ip6;
 };
 
-struct admin_info
+struct config_admin_entry
 {
   char *name;
   char *description;
   char *email;
 };
 
-struct logging_entry
+struct config_log_entry
 {
   unsigned int use_logging;
 };
@@ -336,12 +336,12 @@ extern dlink_list service_items;
 extern dlink_list nresv_items;
 extern dlink_list cresv_items;
 extern struct conf_parser_context conf_parser_ctx;
-extern struct logging_entry ConfigLog;
+extern struct config_log_entry ConfigLog;
 extern struct config_general_entry ConfigGeneral;
 extern struct config_channel_entry ConfigChannel;
-extern struct config_server_hide ConfigServerHide;
-extern struct server_info ConfigServerInfo;
-extern struct admin_info ConfigAdminInfo;
+extern struct config_serverhide_entry ConfigServerHide;
+extern struct config_serverinfo_entry ConfigServerInfo;
+extern struct config_admin_entry ConfigAdminInfo;
 
 extern int valid_wild_card_simple(const char *);
 extern int valid_wild_card(struct Client *, int, int, ...);

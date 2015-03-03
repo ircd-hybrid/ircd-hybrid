@@ -58,11 +58,11 @@
 
 
 struct config_channel_entry ConfigChannel;
-struct config_server_hide ConfigServerHide;
+struct config_serverhide_entry ConfigServerHide;
 struct config_general_entry ConfigGeneral;
-struct logging_entry ConfigLog = { .use_logging = 1 };
-struct server_info ConfigServerInfo;
-struct admin_info ConfigAdminInfo;
+struct config_log_entry ConfigLog = { .use_logging = 1 };
+struct config_serverinfo_entry ConfigServerInfo;
+struct config_admin_entry ConfigAdminInfo;
 struct conf_parser_context conf_parser_ctx;
 
 /* general conf items link list root, other than k lines etc. */

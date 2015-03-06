@@ -100,9 +100,9 @@
 
 #define WATCHSIZE_MIN 1
 #define WATCHSIZE_DEFAULT 32
-#define TS_MAX_DELTA_MIN      10        /* min value for ts_max_delta */
+#define TS_MAX_DELTA_MIN      1         /* min value for ts_max_delta */
 #define TS_MAX_DELTA_DEFAULT  600       /* default for ts_max_delta */
-#define TS_WARN_DELTA_MIN     10        /* min value for ts_warn_delta */
+#define TS_WARN_DELTA_MIN     1         /* min value for ts_warn_delta */
 #define TS_WARN_DELTA_DEFAULT 30        /* default for ts_warn_delta */
 
 /* ConfigServerInfo default values */

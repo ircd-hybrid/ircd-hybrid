@@ -27,7 +27,6 @@
 
 %{
 
-#define YY_NO_UNPUT
 #include <sys/types.h>
 #include <string.h>
 

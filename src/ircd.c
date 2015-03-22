@@ -495,7 +495,7 @@ main(int argc, char *argv[])
   ConfigGeneral.resvfile   = RESVPATH; /* resv file                 */
 
   myargv = argv;
-  umask(077);                /* better safe than sorry --SRB */
+  umask(077);  /* umask 077: u=rwx,g=,o= */
 
   parseargs(&argc, &argv, myopts);
 

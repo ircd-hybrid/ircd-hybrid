@@ -335,6 +335,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
   struct irc_ssaddr us;
   struct irc_ssaddr them;
   char authbuf[16];
+  ssize_t len = 0;
   socklen_t ulen = sizeof(struct irc_ssaddr);
   socklen_t tlen = sizeof(struct irc_ssaddr);
   uint16_t uport, tport;
@@ -362,9 +363,9 @@ auth_connect_callback(fde_t *fd, int error, void *data)
   remove_ipv6_mapping(&us);
   remove_ipv6_mapping(&them);
 
-  snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
+  len = snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
 
-  if (send(fd->fd, authbuf, strlen(authbuf), 0) == -1)
+  if (send(fd->fd, authbuf, len, 0) != len)
   {
     auth_error(auth);
     return;

@@ -63,13 +63,12 @@
 GeoIP *geoip_ctx;
 #endif
 
-/* /quote set variables */
-struct SetOptions GlobalSetOptions;
+struct SetOptions GlobalSetOptions;  /* /quote set variables */
 struct Counter Count;
 struct ServerState_t server_state;
 struct ServerStatistics ServerStats;
 struct timeval SystemTime;
-struct Connection meConnection; /* That's also part of me */
+struct Connection meConnection;  /* That's also part of me */
 struct Client me = { .connection = &meConnection };  /* That's me */
 
 char **myargv;
@@ -317,8 +316,8 @@ write_pidfile(const char *filename)
     snprintf(buff, sizeof(buff), "%u\n", pid);
 
     if (fputs(buff, fb) == -1)
-      ilog(LOG_TYPE_IRCD, "Error writing %u to pid file %s: %s",
-           pid, filename, strerror(errno));
+      ilog(LOG_TYPE_IRCD, "Error writing to pid file %s: %s",
+           filename, strerror(errno));
 
     fclose(fb);
   }

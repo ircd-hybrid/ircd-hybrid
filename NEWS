@@ -1,6 +1,9 @@
--- Noteworthy changes in version 8.2.6 (2015-??-??)
-o) INFO now also shows configured values of 'max_watch' and 'stats_m_oper_only'
+-- Noteworthy changes in version 8.2.6 (2015-03-29)
+o) INFO now shows configured values of 'max_watch' and 'stats_m_oper_only'
 o) WHOWAS now shows IP addresses to irc operators
+o) Fixed bug that would allow remote clients to bypass the hard
+   limit of max WHOWAS entries to be returned
+o) Code cleanups and performance improvements
 
 
 -- Noteworthy changes in version 8.2.5 (2015-02-24)

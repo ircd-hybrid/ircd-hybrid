@@ -349,7 +349,7 @@ check_conf_klines(void)
                                      client_p->connection->aftype, NULL, NULL, 1)))
     {
       conf_try_ban(client_p, conf);
-      continue; /* and go examine next fd/client_p */
+      continue;  /* and go examine next Client */
     }
 
     if (ConfigGeneral.glines)
@@ -359,8 +359,7 @@ check_conf_klines(void)
                                        client_p->username, NULL, 1)))
       {
         conf_try_ban(client_p, conf);
-        /* and go examine next fd/client_p */
-        continue;
+        continue;  /* and go examine next Client */
       }
     }
 
@@ -369,18 +368,18 @@ check_conf_klines(void)
                                      client_p->username, NULL, 1)))
     {
       conf_try_ban(client_p, conf);
-      continue;
+      continue;  /* and go examine next Client */
     }
 
     if ((conf = find_matching_name_conf(CONF_XLINE,  client_p->info,
                                         NULL, NULL, 0)))
     {
       conf_try_ban(client_p, conf);
-      continue;
+      continue;  /* and go examine next Client */
     }
   }
 
-  /* also check the unknowns list for new dlines */
+  /* Also check the unknowns list for new dlines */
   DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
     struct Client *client_p = node->data;
@@ -389,7 +388,7 @@ check_conf_klines(void)
                                      client_p->connection->aftype, NULL, NULL, 1)))
     {
       conf_try_ban(client_p, conf);
-      continue; /* and go examine next fd/client_p */
+      continue;  /* and go examine next Client */
     }
   }
 }

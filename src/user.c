@@ -588,20 +588,11 @@ register_remote_user(struct Client *source_p)
   SetUserHost(source_p);
 
   if (HasFlag(source_p->servptr, FLAGS_EOB))
-  {
-    if (strcmp(source_p->sockhost, "0")) /* XXX: TBR */
-      sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
-                           "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
-                           source_p->servptr->name,
-                           source_p->name, source_p->username, source_p->host,
-                           source_p->sockhost, source_p->info, source_p->id);
-    else
-      sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
-                           "Client connecting at %s: %s (%s@%s) [%s] <%s>",
-                           source_p->servptr->name,
-                           source_p->name, source_p->username, source_p->host,
-                           source_p->info, source_p->id);
-  }
+    sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
+                         "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
+                         source_p->servptr->name,
+                         source_p->name, source_p->username, source_p->host,
+                         source_p->sockhost, source_p->info, source_p->id);
 
   introduce_client(source_p);
 }

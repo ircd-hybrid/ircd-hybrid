@@ -1427,10 +1427,6 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
   const char *arg = NULL;
   char *parptr = NULL;
 
-  /* Bail out if we have nothing to do... */
-  if (!mode_count)
-    return;
-
   if (IsServer(source_p))
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
                    ConfigServerHide.hide_servers) ?
@@ -1552,6 +1548,10 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
       }
     }
   }
+
+  /* Bail out if we have nothing to do... */
+  if (!mode_count)
+    return;
 
   send_mode_changes_client(source_p, chptr);
   send_mode_changes_server(source_p, chptr);

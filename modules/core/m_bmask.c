@@ -107,6 +107,9 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
 
     if (tlen && *s != ':' && add_id(source_p, chptr, s, mode_type))
     {
+      /* add_id can modify 's' */
+      tlen = strlen(s);
+
       /* this new one wont fit.. */
       if (mbuf - modebuf + 2 + pbuf - parabuf + tlen > IRCD_BUFSIZE - 2 ||
           modecount >= MAXMODEPARAMS)

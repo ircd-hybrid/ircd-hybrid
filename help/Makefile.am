@@ -5,14 +5,12 @@ helpfdir = $(pkgdatadir)/help
 dist_helpf_DATA = accept    \
                   admin     \
                   away      \
-                  capab     \
                   challenge \
                   close     \
                   cmode     \
                   connect   \
                   die       \
                   dline     \
-                  eob       \
                   error     \
                   etrace    \
                   gline     \
@@ -49,12 +47,9 @@ dist_helpf_DATA = accept    \
                   rehash    \
                   restart   \
                   resv      \
-                  server    \
                   set       \
-                  sjoin     \
                   squit     \
                   stats     \
-                  svinfo    \
                   time      \
                   topic     \
                   trace     \

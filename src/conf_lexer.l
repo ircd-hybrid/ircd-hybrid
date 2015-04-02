@@ -186,7 +186,6 @@ gline_exempt                { return GLINE_EXEMPT; }
 gline_min_cidr              { return GLINE_MIN_CIDR; }
 gline_min_cidr6             { return GLINE_MIN_CIDR6; }
 gline_request_duration      { return GLINE_REQUEST_DURATION; }
-global_kill                 { return GLOBAL_KILL; }
 globops                     { return T_GLOBOPS; }
 have_ident                  { return NEED_IDENT; }
 havent_read_conf            { return HAVENT_READ_CONF; }

@@ -200,7 +200,6 @@ reset_block_state(void)
 %token  GLINE_MIN_CIDR
 %token  GLINE_MIN_CIDR6
 %token  GLINE_REQUEST_DURATION
-%token  GLOBAL_KILL
 %token  HAVENT_READ_CONF
 %token  HIDDEN
 %token  HIDDEN_NAME
@@ -210,7 +209,6 @@ reset_block_state(void)
 %token  HIDE_SERVER_IPS
 %token  HIDE_SERVERS
 %token  HIDE_SERVICES
-%token  HIDE_SPOOF_IPS
 %token  HOST
 %token  HUB
 %token  HUB_MASK

@@ -103,10 +103,10 @@ struct Membership
 struct Ban
 {
   dlink_node node;
-  char *name;
-  char *user;
-  char *host;
-  char *who;
+  char name[NICKLEN + 1];
+  char user[USERLEN + 1];
+  char host[HOSTLEN + 1];
+  char who[NICKLEN + USERLEN + HOSTLEN + 3];
   size_t len;
   time_t when;
   struct irc_ssaddr addr;

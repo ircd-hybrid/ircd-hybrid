@@ -317,12 +317,6 @@ void
 remove_ban(struct Ban *ban, dlink_list *list)
 {
   dlinkDelete(&ban->node, list);
-
-  MyFree(ban->name);
-  MyFree(ban->user);
-  MyFree(ban->host);
-  MyFree(ban->who);
-
   mp_pool_release(ban);
 }
 
@@ -339,8 +333,6 @@ free_channel_list(dlink_list *list)
 
   DLINK_FOREACH_SAFE(node, node_next, list->head)
     remove_ban(node->data, list);
-
-  assert(list->tail == NULL && list->head == NULL);
 }
 
 /*! \brief Get Channel block for name (and allocate a new channel

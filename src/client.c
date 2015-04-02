@@ -371,7 +371,7 @@ check_conf_klines(void)
       continue;  /* and go examine next Client */
     }
 
-    if ((conf = find_matching_name_conf(CONF_XLINE,  client_p->info,
+    if ((conf = find_matching_name_conf(CONF_XLINE, client_p->info,
                                         NULL, NULL, 0)))
     {
       conf_try_ban(client_p, conf);

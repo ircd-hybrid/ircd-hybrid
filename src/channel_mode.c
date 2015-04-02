@@ -355,7 +355,7 @@ clear_ban_cache_channel(struct Channel *chptr)
   DLINK_FOREACH(node, chptr->locmembers.head)
   {
     struct Membership *member = node->data;
-    member->flags &= ~(CHFL_BAN_SILENCED|CHFL_BAN_CHECKED);
+    member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED);
   }
 }
 
@@ -367,7 +367,7 @@ clear_ban_cache_client(struct Client *client_p)
   DLINK_FOREACH(node, client_p->channel.head)
   {
     struct Membership *member = node->data;
-    member->flags &= ~(CHFL_BAN_SILENCED|CHFL_BAN_CHECKED);
+    member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED);
   }
 }
 

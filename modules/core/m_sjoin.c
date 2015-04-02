@@ -370,7 +370,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       uid_ptr = uid_buf + buflen;
     }
 
-    uid_ptr += sprintf(uid_ptr,  "%s%s ", uid_prefix, target_p->id);
+    uid_ptr += sprintf(uid_ptr, "%s%s ", uid_prefix, target_p->id);
 
     if (!IsMember(target_p, chptr))
     {

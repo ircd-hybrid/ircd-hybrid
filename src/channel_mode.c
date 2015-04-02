@@ -198,7 +198,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
     sprintf(ban->who, "%s!%s@%s", client_p->name,
             client_p->username, client_p->host);
   }
-  else if (IsHidden(client_p) || (IsServer(client_p) && ConfigServerHide.hide_servers))
+  else if (IsHidden(client_p) || ConfigServerHide.hide_servers)
     ban->who = xstrdup(me.name);
   else
     ban->who = xstrdup(client_p->name);

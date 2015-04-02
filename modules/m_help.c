@@ -41,6 +41,7 @@ static void
 sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 {
   FILE *file = NULL;
+  char *p = NULL;
   char line[HELPLEN] = "";
 
   if ((file = fopen(path, "r")) == NULL)
@@ -56,12 +57,15 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
     return;
   }
 
-  line[strlen(line) - 1] = '\0';
+  if ((p = strpbrk(line, "\r\n")))
+    *p = '\0';
+
   sendto_one_numeric(source_p, &me, RPL_HELPSTART, topic, line);
 
   while (fgets(line, sizeof(line), file))
   {
-    line[strlen(line) - 1] = '\0';
+    if ((p = strpbrk(line, "\r\n")))
+      *p = '\0';
 
     sendto_one_numeric(source_p, &me, RPL_HELPTXT, topic, line);
   }

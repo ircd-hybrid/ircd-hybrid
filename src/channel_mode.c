@@ -183,25 +183,20 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
   }
 
   ban = mp_pool_get(ban_pool);
-  ban->name = xstrdup(name);
-  ban->user = xstrdup(user);
-  ban->host = xstrdup(host);
   ban->when = CurrentTime;
   ban->len = len - 2;  /* -2 for ! + @ */
   ban->type = parse_netmask(host, &ban->addr, &ban->bits);
+  strlcpy(ban->name, name, sizeof(ban->name));
+  strlcpy(ban->user, user, sizeof(ban->user));
+  strlcpy(ban->host, host, sizeof(ban->host));
 
   if (IsClient(client_p))
-  {
-    ban->who = MyCalloc(strlen(client_p->name) +
-                        strlen(client_p->username) +
-                        strlen(client_p->host) + 3);
-    sprintf(ban->who, "%s!%s@%s", client_p->name,
-            client_p->username, client_p->host);
-  }
+    snprintf(ban->who, sizeof(ban->who), "%s!%s@%s", client_p->name,
+             client_p->username, client_p->host);
   else if (IsHidden(client_p) || ConfigServerHide.hide_servers)
-    ban->who = xstrdup(me.name);
+    strlcpy(ban->who, me.name, sizeof(ban->who));
   else
-    ban->who = xstrdup(client_p->name);
+    strlcpy(ban->who, client_p->name, sizeof(ban->who));
 
   dlinkAdd(ban, &ban->node, list);
 

@@ -371,11 +371,10 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Count up all channels, ban lists, except lists, Invex lists */
-  channel_memory = dlink_list_length(&channel_list) *
-                   sizeof(struct Channel);
+  channel_memory = dlink_list_length(&channel_list) * sizeof(struct Channel);
+
   DLINK_FOREACH(gptr, channel_list.head)
   {
-    const struct Ban *actualBan;
     const struct Channel *chptr = gptr->data;
 
     channel_members += dlink_list_length(&chptr->members);
@@ -387,38 +386,11 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
     channel_bans += dlink_list_length(&chptr->banlist);
     channel_ban_memory += dlink_list_length(&chptr->banlist) * sizeof(struct Ban);
 
-    DLINK_FOREACH(dlink, chptr->banlist.head)
-    {
-      actualBan = dlink->data;
-      assert(actualBan->who);
-
-      channel_ban_memory += actualBan->len + 1;
-      channel_ban_memory += strlen(actualBan->who) + 1;
-    }
-
     channel_except += dlink_list_length(&chptr->exceptlist);
     channel_except_memory += dlink_list_length(&chptr->exceptlist) * sizeof(struct Ban);
 
-    DLINK_FOREACH(dlink, chptr->exceptlist.head)
-    {
-      actualBan = dlink->data;
-      assert(actualBan->who);
-
-      channel_except_memory += actualBan->len + 1;
-      channel_except_memory += strlen(actualBan->who) + 1;
-    }
-
     channel_invex += dlink_list_length(&chptr->invexlist);
     channel_invex_memory += dlink_list_length(&chptr->invexlist) * sizeof(struct Ban);
-
-    DLINK_FOREACH(dlink, chptr->invexlist.head)
-    {
-      actualBan = dlink->data;
-      assert(actualBan->who);
-
-      channel_invex_memory += actualBan->len + 1;
-      channel_invex_memory += strlen(actualBan->who) + 1;
-    }
   }
 
   if ((safelist_count = dlink_list_length(&listing_client_list)))

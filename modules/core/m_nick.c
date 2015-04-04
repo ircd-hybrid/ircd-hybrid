@@ -344,7 +344,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = atol(parv[3]);
 
-  strlcpy(client_p->account, (parc == 11 ? parv[9] : "0"), sizeof(client_p->account));
+  strlcpy(client_p->account, (parc == 11 ? parv[9] : "*"), sizeof(client_p->account));
   strlcpy(client_p->name, parv[1], sizeof(client_p->name));
   strlcpy(client_p->id, parv[8], sizeof(client_p->id));
   strlcpy(client_p->sockhost, parv[7], sizeof(client_p->sockhost));

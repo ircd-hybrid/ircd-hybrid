@@ -168,8 +168,8 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (parse_aline("DLINE", source_p, parc, parv, AWILD, &dlhost,
-                  NULL, &tkline_time, &target_server, &reason) < 0)
+  if (!parse_aline("DLINE", source_p, parc, parv, AWILD, &dlhost,
+                   NULL, &tkline_time, &target_server, &reason))
     return 0;
 
   if (target_server)

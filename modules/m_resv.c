@@ -177,8 +177,8 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   /* RESV #channel ON irc.server.com :abuse
    * RESV kiddie ON irc.server.com :abuse
    */
-  if (parse_aline("RESV", source_p, parc, parv, 0, &resv, NULL,
-                  &tkline_time, &target_server, &reason) < 0)
+  if (!parse_aline("RESV", source_p, parc, parv, 0, &resv, NULL,
+                   &tkline_time, &target_server, &reason))
     return 0;
 
   if (target_server)

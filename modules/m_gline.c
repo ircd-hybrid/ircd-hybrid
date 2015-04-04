@@ -382,8 +382,8 @@ mo_gline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (parse_aline("GLINE", source_p, parc, parv, AWILD,
-                  &user, &host, NULL, NULL, &reason) < 0)
+  if (!parse_aline("GLINE", source_p, parc, parv, AWILD,
+                   &user, &host, NULL, NULL, &reason))
     return 0;
 
   if ((p = strchr(host, '/')))
@@ -496,8 +496,8 @@ mo_gungline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (parse_aline("GUNGLINE", source_p, parc, parv, 0, &user,
-                  &host, NULL, NULL, &reason) < 0)
+  if (!parse_aline("GUNGLINE", source_p, parc, parv, 0, &user,
+                   &host, NULL, NULL, &reason))
     return 0;
 
   do_sungline(source_p, user, host, reason, 1);

@@ -90,9 +90,6 @@ struct MaskItem;
  */
 #define TS_CURRENT      6  /**< Current TS protocol version */
 #define TS_MIN          6  /**< Minimum supported TS protocol version */
-#define TS_DOESTS       0x20000000
-#define DoesTS(x)       ((x)->tsinfo == TS_DOESTS)
-
 
 
 #define CAP_MULTI_PREFIX  0x00000001U

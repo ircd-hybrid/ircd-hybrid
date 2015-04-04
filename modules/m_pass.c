@@ -48,7 +48,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = password
- *      - parv[2] = optional extra version information
+ *      - parv[2] = unused
  *      - parv[3] = TS protocol version
  *      - parv[4] = server ID (SID)
  */
@@ -65,20 +65,6 @@ mr_pass(struct Client *source_p, int parc, char *parv[])
 
   MyFree(source_p->connection->password);
   source_p->connection->password = xstrndup(parv[1], IRCD_MIN(strlen(parv[1]), PASSWDLEN));
-
-  if (parc > 2)
-  {
-    /*
-     * It looks to me as if orabidoo wanted to have more
-     * than one set of option strings possible here...
-     * i.e. ":AABBTS" as long as TS was the last two chars
-     * however, as we are now using CAPAB, I think we can
-     * safely assume if there is a ":TS" then it's a TS server
-     * -Dianora
-     */
-    if (!irccmp(parv[2], "TS") && source_p->tsinfo == 0)
-      source_p->tsinfo = TS_DOESTS;
-  }
 
   /* Only do this stuff if we are doing ts6 */
   if (parc > 4)

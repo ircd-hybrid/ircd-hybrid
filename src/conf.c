@@ -527,7 +527,7 @@ attach_connect_block(struct Client *client_p, const char *name,
       continue;
 
     attach_conf(client_p, conf);
-    return -1;
+    return 1;
   }
 
   return 0;
@@ -935,7 +935,7 @@ read_conf(FILE *file)
  * as a result of an operator issuing this command, else assume it has been
  * called as a result of the server receiving a HUP signal.
  */
-int
+void
 conf_rehash(int sig)
 {
   if (sig)
@@ -950,8 +950,6 @@ conf_rehash(int sig)
 
   load_conf_modules();
   check_conf_klines();
-
-  return 0;
 }
 
 /* lookup_confhost()
@@ -1641,7 +1639,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
  *              - pointer to target_server to parse into if non NULL
  *              - pointer to reason to parse into
  *
- * output       - 1 if valid, -1 if not valid
+ * output       - 1 if valid, 0 if not valid
  * side effects - A generalised k/d/x etc. line parser,
  *               "ALINE [time] user@host|string [ON] target :reason"
  *                will parse returning a parsed user, host if
@@ -1683,14 +1681,14 @@ parse_aline(const char *cmd, struct Client *source_p,
     else
     {
       sendto_one_notice(source_p, &me, ":temp_line not supported by %s", cmd);
-      return -1;
+      return 0;
     }
   }
 
   if (parc == 0)
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
-    return -1;
+    return 0;
   }
 
   if (h_p == NULL)
@@ -1698,7 +1696,7 @@ parse_aline(const char *cmd, struct Client *source_p,
   else
   {
     if (find_user_host(source_p, *parv, user, host, parse_flags) == 0)
-      return -1;
+      return 0;
 
     *up_p = user;
     *h_p = host;
@@ -1717,19 +1715,19 @@ parse_aline(const char *cmd, struct Client *source_p,
       if (target_server == NULL)
       {
         sendto_one_notice(source_p, &me, ":ON server not supported by %s", cmd);
-        return -1;
+        return 0;
       }
 
       if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
       {
         sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "remoteban");
-        return -1;
+        return 0;
       }
 
       if (parc == 0 || EmptyString(*parv))
       {
         sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
-        return -1;
+        return 0;
       }
 
       *target_server = *parv;
@@ -1751,15 +1749,15 @@ parse_aline(const char *cmd, struct Client *source_p,
     if (strchr(user, '!'))
     {
       sendto_one_notice(source_p, &me, ":Invalid character '!' in kline");
-      return -1;
+      return 0;
     }
 
     if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, 2, *up_p, *h_p))
-      return -1;
+      return 0;
   }
   else
     if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, 1, *up_p))
-      return -1;
+      return 0;
 
   if (reason)
   {
@@ -1768,7 +1766,7 @@ parse_aline(const char *cmd, struct Client *source_p,
       *reason = *parv;
 
       if (!valid_comment(source_p, *reason, 1))
-        return -1;
+        return 0;
     }
     else
       *reason = def_reason;

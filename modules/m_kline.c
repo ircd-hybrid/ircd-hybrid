@@ -190,8 +190,8 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (parse_aline("KLINE", source_p, parc, parv, AWILD, &user, &host,
-                  &tkline_time, &target_server, &reason) < 0)
+  if (!parse_aline("KLINE", source_p, parc, parv, AWILD, &user, &host,
+                   &tkline_time, &target_server, &reason))
     return 0;
 
   if (target_server)

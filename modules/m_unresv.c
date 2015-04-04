@@ -127,8 +127,8 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
 
   /* UNRESV #channel ON irc.server.com */
   /* UNRESV kiddie ON irc.server.com */
-  if (parse_aline("UNRESV", source_p, parc, parv, 0, &resv, NULL,
-                  NULL, &target_server, &reason) < 0)
+  if (!parse_aline("UNRESV", source_p, parc, parv, 0, &resv, NULL,
+                   NULL, &target_server, &reason))
     return 0;
 
   if (target_server)

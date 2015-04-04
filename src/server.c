@@ -418,7 +418,7 @@ add_capability(const char *capab_name, int cap_flag, int add_to_default)
  * output	- NONE
  * side effects	- delete given capability from ones known.
  */
-int
+void
 delete_capability(const char *capab_name)
 {
   dlink_node *node = NULL, *node_next = NULL;
@@ -438,8 +438,6 @@ delete_capability(const char *capab_name)
       }
     }
   }
-
-  return 0;
 }
 
 /*

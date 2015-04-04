@@ -367,7 +367,7 @@ extern void conf_free(struct MaskItem *);
 extern void yyerror(const char *);
 extern void conf_error_report(const char *);
 extern void cleanup_tklines(void *);
-extern int conf_rehash(int);
+extern void conf_rehash(int);
 extern void lookup_confhost(struct MaskItem *);
 extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 

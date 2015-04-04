@@ -176,8 +176,8 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
    * XLINE <gecos> <time> ON <mask> :<reason>
    * XLINE <gecos> ON <mask> :<reason>
    */
-  if (parse_aline("XLINE", source_p, parc, parv, 0, &gecos, NULL,
-                  &tkline_time, &target_server, &reason) < 0)
+  if (!parse_aline("XLINE", source_p, parc, parv, 0, &gecos, NULL,
+                   &tkline_time, &target_server, &reason))
     return 0;
 
   if (target_server)

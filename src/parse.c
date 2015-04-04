@@ -539,7 +539,7 @@ msg_tree_parse(const char *cmd)
 {
   struct MessageTree *mtree = &msg_tree;
 
-  assert(cmd && *cmd);
+  assert(!EmptyString(cmd));
 
   while (IsAlpha(*cmd) && (mtree = mtree->pointers[*cmd & (MAXPTRLEN - 1)]))
     if (*++cmd == '\0')

@@ -474,21 +474,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /*
-   * Reject a direct nonTS server connection if we're TS_ONLY -orabidoo
-   */
-  if (!DoesTS(source_p))
-  {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
-          "Unauthorized server connection attempt from %s: Non-TS server "
-          "for server %s", get_client_name(source_p, HIDE_IP), name);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
-          "Unauthorized server connection attempt from %s: Non-TS server "
-          "for server %s", get_client_name(source_p, MASK_IP), name);
-    exit_client(source_p, "Non-TS server");
-    return 0;
-  }
-
   if (!valid_servname(name))
   {
     sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,

@@ -266,7 +266,7 @@ introduce_client(struct Client *source_p)
       continue;
 
     if (IsCapable(server, CAP_SVS))
-      sendto_one(server, ":%s UID %s %d %lu %s %s %s %s %s %s :%s",
+      sendto_one(server, ":%s UID %s %u %lu %s %s %s %s %s %s :%s",
                  source_p->servptr->id,
                  source_p->name, source_p->hopcount+1,
                  (unsigned long)source_p->tsinfo,
@@ -275,7 +275,7 @@ introduce_client(struct Client *source_p)
                  source_p->account,
                  source_p->info);
     else
-      sendto_one(server, ":%s UID %s %d %lu %s %s %s %s %s :%s",
+      sendto_one(server, ":%s UID %s %u %lu %s %s %s %s %s :%s",
                  source_p->servptr->id,
                  source_p->name, source_p->hopcount+1,
                  (unsigned long)source_p->tsinfo,

@@ -101,7 +101,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   }
 
   if (IsCapable(client_p, CAP_SVS))
-    sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s %s :%s",
+    sendto_one(client_p, ":%s UID %s %u %lu %s %s %s %s %s %s :%s",
                target_p->servptr->id,
                target_p->name, target_p->hopcount + 1,
                (unsigned long) target_p->tsinfo,
@@ -109,7 +109,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
                target_p->sockhost, target_p->id,
                target_p->account, target_p->info);
   else
-    sendto_one(client_p, ":%s UID %s %d %lu %s %s %s %s %s :%s",
+    sendto_one(client_p, ":%s UID %s %u %lu %s %s %s %s %s :%s",
                target_p->servptr->id,
                target_p->name, target_p->hopcount + 1,
                (unsigned long) target_p->tsinfo,
@@ -409,7 +409,7 @@ server_estab(struct Client *client_p)
     if (IsMe(target_p) || target_p->from == client_p)
       continue;
 
-    sendto_one(client_p, ":%s SID %s %d %s :%s%s",
+    sendto_one(client_p, ":%s SID %s %u %s :%s%s",
                target_p->servptr->id, target_p->name, target_p->hopcount+1,
                target_p->id, IsHidden(target_p) ? "(H) " : "",
                target_p->info);
@@ -794,7 +794,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   hash_add_client(target_p);
   hash_add_id(target_p);
 
-  sendto_server(client_p, 0, 0, ":%s SID %s %d %s :%s%s",
+  sendto_server(client_p, 0, 0, ":%s SID %s %u %s :%s%s",
                 source_p->id, target_p->name, target_p->hopcount + 1,
                 target_p->id, IsHidden(target_p) ? "(H) " : "", target_p->info);
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,

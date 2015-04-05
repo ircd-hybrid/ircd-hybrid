@@ -1554,7 +1554,7 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
  */
 static int
 find_user_host(struct Client *source_p, char *user_host_or_nick,
-               char *luser, char *lhost, unsigned int flags)
+               char *luser, char *lhost)
 {
   struct Client *target_p = NULL;
   char *hostp = NULL;
@@ -1695,7 +1695,7 @@ parse_aline(const char *cmd, struct Client *source_p,
     *up_p = *parv;
   else
   {
-    if (find_user_host(source_p, *parv, user, host, parse_flags) == 0)
+    if (find_user_host(source_p, *parv, user, host) == 0)
       return 0;
 
     *up_p = user;

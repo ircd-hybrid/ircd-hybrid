@@ -1,3 +1,10 @@
+-- Noteworthy changes in version 8.2.7 (2015-04-05)
+o) Fixed a potential buffer overflow with the BMASK inter-server command
+o) Fixed undefined behavior in the HELP command module which could
+   lead to stack corruption
+o) Removed useless help files for inter-server commands
+
+
 -- Noteworthy changes in version 8.2.6 (2015-03-29)
 o) INFO now shows configured values of 'max_watch' and 'stats_m_oper_only'
 o) WHOWAS now shows IP addresses to irc operators

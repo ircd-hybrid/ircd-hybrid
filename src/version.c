@@ -34,7 +34,15 @@ const char *serno = SERIALNUM;
 const char *infotext[] =
 {
   "ircd-hybrid --",
-  "Based on the original code written by Jarkko Oikarinen",
+  "",
+  "This release of ircd-hybrid is dedicated to Rhea Michelle Noxon (1968-2015)",
+  "",
+  "My deepest condolences go out to my good IRC buddy Andrew 'astrutt' Strutt,",
+  "and his loved ones.  May she rest in peace and may the lovely memories you",
+  "have of her help heal your broken hearts.  --Michael",
+  "",
+  "",
+  "ircd-hybrid is based on the original code written by Jarkko Oikarinen",
   "Copyright (c) 1988-1991 University of Oulu, Computing Center",
   "Copyright (c) 1997-2015 ircd-hybrid development team",
   "",

@@ -256,6 +256,9 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
                               source_p->username, source_p->host,
                               SHARED_KLINE))
   {
+    if (!valid_wild_card(source_p, 2, kuser, khost))
+      return 0;
+
     if (already_placed_kline(source_p, kuser, khost, 1))
       return 0;
 

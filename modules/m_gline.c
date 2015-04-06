@@ -313,7 +313,7 @@ ms_gline(struct Client *source_p, int parc, char *parv[])
   if (!ConfigGeneral.glines)
     return 0;
 
-  if (!valid_wild_card(source_p, 1, 2, user, host))
+  if (!valid_wild_card(source_p, 2, user, host))
     return 0;
 
   if ((p = strchr(host, '/')))

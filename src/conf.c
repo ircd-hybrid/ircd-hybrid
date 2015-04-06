@@ -1492,7 +1492,7 @@ valid_wild_card_simple(const char *data)
  * side effects - NOTICE is given to source_p if warn is 1
  */
 int
-valid_wild_card(struct Client *source_p, int warn, int count, ...)
+valid_wild_card(struct Client *source_p, int count, ...)
 {
   unsigned char tmpch = '\0';
   unsigned int nonwild = 0;
@@ -1535,7 +1535,7 @@ valid_wild_card(struct Client *source_p, int warn, int count, ...)
     }
   }
 
-  if (warn)
+  if (IsClient(source_p))
     sendto_one_notice(source_p, &me,
                       ":Please include at least %u non-wildcard characters with the mask",
                       ConfigGeneral.min_nonwildcard);
@@ -1752,11 +1752,11 @@ parse_aline(const char *cmd, struct Client *source_p,
       return 0;
     }
 
-    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, 2, *up_p, *h_p))
+    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 2, *up_p, *h_p))
       return 0;
   }
   else
-    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, 1, *up_p))
+    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, *up_p))
       return 0;
 
   if (reason)

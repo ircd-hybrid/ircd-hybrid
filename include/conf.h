@@ -344,7 +344,7 @@ extern struct config_serverinfo_entry ConfigServerInfo;
 extern struct config_admin_entry ConfigAdminInfo;
 
 extern int valid_wild_card_simple(const char *);
-extern int valid_wild_card(struct Client *, int, int, ...);
+extern int valid_wild_card(struct Client *, int, ...);
 /* End GLOBAL section */
 
 extern struct MaskItem *conf_make(enum maskitem_type);

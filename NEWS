@@ -1,6 +1,6 @@
 -- Noteworthy changes in version 8.2.8 (2015-??-??)
 o) ircd now reject remote k-line requests for user@host mask that don't
-   have at least general::min_nonwildcard wildcard characters in it
+   have at least general::min_nonwildcard non-wildcard characters in it
 
 
 -- Noteworthy changes in version 8.2.7 (2015-04-05)

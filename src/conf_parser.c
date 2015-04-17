@@ -3172,13 +3172,13 @@ yyreduce:
   {
     if ((nid = OBJ_sn2nid(yylval.string)) == 0)
     {
-        conf_error_report("Ignoring serverinfo::serverinfo_ssl_dh_elliptic_curve -- unknown curve name");
+        conf_error_report("Ignoring serverinfo::ssl_dh_elliptic_curve -- unknown curve name");
         break;
     }
 
     if ((key = EC_KEY_new_by_curve_name(nid)) == NULL)
     {
-      conf_error_report("Ignoring serverinfo::serverinfo_ssl_dh_elliptic_curve -- could not create curve");
+      conf_error_report("Ignoring serverinfo::ssl_dh_elliptic_curve -- could not create curve");
       break;
     }
 

@@ -526,7 +526,7 @@ module_init(void)
 {
   mod_add_cmd(&gline_msgtab);
   mod_add_cmd(&ungline_msgtab);
-  add_capability("GLN", CAP_GLN, 1);
+  add_capability("GLN", CAP_GLN);
 }
 
 static void

@@ -77,7 +77,6 @@ const char *pidFileName = PPATH;
 
 unsigned int dorehash;
 unsigned int doremotd;
-unsigned int default_server_capabs;
 unsigned int splitmode;
 unsigned int splitchecking;
 unsigned int split_users;
@@ -288,13 +287,12 @@ initialize_global_set_options(void)
 static void
 initialize_server_capabs(void)
 {
-  add_capability("QS", CAP_QS, 1);
-  add_capability("EOB", CAP_EOB, 1);
-  add_capability("TS6", CAP_TS6, 0);
-  add_capability("CLUSTER", CAP_CLUSTER, 1);
-  add_capability("SVS", CAP_SVS, 1);
-  add_capability("CHW", CAP_CHW, 1);
-  add_capability("HOPS", CAP_HOPS, 1);
+  add_capability("QS", CAP_QS);
+  add_capability("EOB", CAP_EOB);
+  add_capability("CLUSTER", CAP_CLUSTER);
+  add_capability("SVS", CAP_SVS);
+  add_capability("CHW", CAP_CHW);
+  add_capability("HOPS", CAP_HOPS);
 }
 
 /* write_pidfile()

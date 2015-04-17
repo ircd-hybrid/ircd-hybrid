@@ -289,7 +289,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&kline_msgtab);
-  add_capability("KLN", CAP_KLN, 1);
+  add_capability("KLN", CAP_KLN);
 }
 
 static void

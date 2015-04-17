@@ -128,7 +128,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&tburst_msgtab);
-  add_capability("TBURST", CAP_TBURST, 1);
+  add_capability("TBURST", CAP_TBURST);
 }
 
 static void

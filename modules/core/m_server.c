@@ -273,7 +273,7 @@ server_estab(struct Client *client_p)
   {
     sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
 
-    send_capabilities(client_p, 0);
+    send_capabilities(client_p);
 
     sendto_one(client_p, "SERVER %s 1 :%s%s",
                me.name, ConfigServerHide.hidden ? "(H) " : "", me.info);

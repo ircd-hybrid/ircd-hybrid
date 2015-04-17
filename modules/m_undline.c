@@ -200,7 +200,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&undline_msgtab);
-  add_capability("UNDLN", CAP_UNDLN, 1);
+  add_capability("UNDLN", CAP_UNDLN);
 }
 
 static void

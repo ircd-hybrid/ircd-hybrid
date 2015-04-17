@@ -205,7 +205,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&unkline_msgtab);
-  add_capability("UNKLN", CAP_UNKLN, 1);
+  add_capability("UNKLN", CAP_UNKLN);
 }
 
 static void

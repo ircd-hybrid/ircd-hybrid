@@ -62,8 +62,8 @@ static mp_pool_t *member_pool, *channel_pool;
 void
 channel_init(void)
 {
-  add_capability("EX", CAP_EX, 1);
-  add_capability("IE", CAP_IE, 1);
+  add_capability("EX", CAP_EX);
+  add_capability("IE", CAP_IE);
 
   channel_pool = mp_pool_new(sizeof(struct Channel), MP_CHUNK_SIZE_CHANNEL);
   ban_pool = mp_pool_new(sizeof(struct Ban), MP_CHUNK_SIZE_BAN);

@@ -340,7 +340,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&dline_msgtab);
-  add_capability("DLN", CAP_DLN, 1);
+  add_capability("DLN", CAP_DLN);
 }
 
 static void

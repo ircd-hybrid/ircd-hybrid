@@ -140,7 +140,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&knock_msgtab);
-  add_capability("KNOCK", CAP_KNOCK, 1);
+  add_capability("KNOCK", CAP_KNOCK);
   add_isupport("KNOCK", NULL, -1);
 }
 

@@ -101,7 +101,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&encap_msgtab);
-  add_capability("ENCAP", CAP_ENCAP, 1);
+  add_capability("ENCAP", CAP_ENCAP);
 }
 
 static void

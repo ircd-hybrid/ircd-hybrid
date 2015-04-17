@@ -1336,9 +1336,9 @@ read_conf_files(int cold)
  * side effects - Add a class pointer to a conf
  */
 void
-conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
+conf_add_class_to_conf(struct MaskItem *conf, const char *name)
 {
-  if (class_name == NULL)
+  if (EmptyString(name) || (conf->class = class_find(name, 1)) == NULL)
   {
     conf->class = class_default;
 
@@ -1350,21 +1350,6 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *class_name)
       sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                            "Warning *** Defaulting to default class for %s",
                            conf->name);
-  }
-  else
-    conf->class = class_find(class_name, 1);
-
-  if (conf->class == NULL)
-  {
-    if (conf->type == CONF_CLIENT || conf->type == CONF_OPER)
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Warning *** Defaulting to default class for %s@%s",
-                           conf->user, conf->host);
-    else
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "Warning *** Defaulting to default class for %s",
-                           conf->name);
-    conf->class = class_default;
   }
 }
 

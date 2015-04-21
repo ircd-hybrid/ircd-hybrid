@@ -13,8 +13,6 @@ dist_helpf_DATA = accept    \
                   dline     \
                   error     \
                   etrace    \
-                  gline     \
-                  gungline  \
                   hash      \
                   help      \
                   index     \

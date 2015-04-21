@@ -184,6 +184,8 @@ reset_block_state(void)
 %token  DISABLE_AUTH
 %token  DISABLE_FAKE_CHANNELS
 %token  DISABLE_REMOTE_COMMANDS
+%token  DLINE_MIN_CIDR
+%token  DLINE_MIN_CIDR6
 %token  DOTS_IN_IDENT
 %token  EMAIL
 %token  ENCRYPTED
@@ -193,13 +195,6 @@ reset_block_state(void)
 %token  FLATTEN_LINKS
 %token  GECOS
 %token  GENERAL
-%token  GLINE
-%token  GLINE_DURATION
-%token  GLINE_ENABLE
-%token  GLINE_EXEMPT
-%token  GLINE_MIN_CIDR
-%token  GLINE_MIN_CIDR6
-%token  GLINE_REQUEST_DURATION
 %token  HAVENT_READ_CONF
 %token  HIDDEN
 %token  HIDDEN_NAME
@@ -224,6 +219,8 @@ reset_block_state(void)
 %token  KILL_CHASE_TIME_LIMIT
 %token  KLINE
 %token  KLINE_EXEMPT
+%token  KLINE_MIN_CIDR
+%token  KLINE_MIN_CIDR6
 %token  KNOCK_CLIENT_COUNT
 %token  KNOCK_CLIENT_TIME
 %token  KNOCK_DELAY_CHANNEL
@@ -1051,10 +1048,6 @@ logging_file_type_item:  USER
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_OPER;
-} | GLINE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.type.value = LOG_TYPE_GLINE;
 } | XLINE
 {
   if (conf_parser_ctx.pass == 2)
@@ -1404,10 +1397,6 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNXLINE;
-} | GLINE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_GLINE;
 } | DIE
 {
   if (conf_parser_ctx.pass == 2)
@@ -1854,10 +1843,6 @@ auth_flags_item: SPOOF_NOTICE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_NO_TILDE;
-} | GLINE_EXEMPT
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_EXEMPTGLINE;
 } | RESV_EXEMPT
 {
   if (conf_parser_ctx.pass == 2)
@@ -2580,11 +2565,10 @@ general_item:       general_away_count |
                     general_ping_cookie |
                     general_disable_auth |
                     general_tkline_expire_notices |
-                    general_gline_enable |
-                    general_gline_duration |
-                    general_gline_request_duration |
-                    general_gline_min_cidr |
-                    general_gline_min_cidr6 |
+                    general_dline_min_cidr |
+                    general_dline_min_cidr6 |
+                    general_kline_min_cidr |
+                    general_kline_min_cidr6 |
                     general_stats_e_disabled |
                     general_max_watch |
                     general_cycle_on_host_change |
@@ -2612,32 +2596,24 @@ general_cycle_on_host_change: CYCLE_ON_HOST_CHANGE '=' TBOOL ';'
     ConfigGeneral.cycle_on_host_change = yylval.number;
 };
 
-general_gline_enable: GLINE_ENABLE '=' TBOOL ';'
+general_dline_min_cidr: DLINE_MIN_CIDR '=' NUMBER ';'
 {
-  if (conf_parser_ctx.pass == 2)
-    ConfigGeneral.glines = yylval.number;
+  ConfigGeneral.dline_min_cidr = $3;
 };
 
-general_gline_duration: GLINE_DURATION '=' timespec ';'
+general_dline_min_cidr6: DLINE_MIN_CIDR6 '=' NUMBER ';'
 {
-  if (conf_parser_ctx.pass == 2)
-    ConfigGeneral.gline_time = $3;
+  ConfigGeneral.dline_min_cidr6 = $3;
 };
 
-general_gline_request_duration: GLINE_REQUEST_DURATION '=' timespec ';'
+general_kline_min_cidr: KLINE_MIN_CIDR '=' NUMBER ';'
 {
-  if (conf_parser_ctx.pass == 2)
-    ConfigGeneral.gline_request_time = $3;
+  ConfigGeneral.kline_min_cidr = $3;
 };
 
-general_gline_min_cidr: GLINE_MIN_CIDR '=' NUMBER ';'
+general_kline_min_cidr6: KLINE_MIN_CIDR6 '=' NUMBER ';'
 {
-  ConfigGeneral.gline_min_cidr = $3;
-};
-
-general_gline_min_cidr6: GLINE_MIN_CIDR6 '=' NUMBER ';'
-{
-  ConfigGeneral.gline_min_cidr6 = $3;
+  ConfigGeneral.kline_min_cidr6 = $3;
 };
 
 general_tkline_expire_notices: TKLINE_EXPIRE_NOTICES '=' TBOOL ';'

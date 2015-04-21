@@ -2,17 +2,17 @@ Available HELP topics (some of them are only accessible to IRC operators):
 
 ACCEPT          ADMIN           AWAY            CHALLENGE
 CLOSE           CMODE           CONNECT         DIE
-DLINE           ERROR           ETRACE          GLINE
-GUNGLINE        HASH            HELP            INF
-INVITE          ISON            JOIN            KICK
-KILL            KLINE           KNOCK           LINKS
-LIST            LOCOPS          LUSERS          MAP
-MODULE          MOTD            NAMES           NICK
-NOTICE          OPER            PART            PASS
-PING            PONG            POST            PRIVMSG
-QUIT            REHASH          RESTART         RESV
-SET             SQUIT           STATS           TIME
-TOPIC           TRACE           UMODE           UNDLINE
-UNKLINE         UNRESV          UNXLINE         USER
-USERHOST        VERSION         WALLOPS         WHO
-WHOIS           WHOWAS          XLINE
+DLINE           ERROR           ETRACE          HASH
+HELP            INF             INVITE          ISON
+JOIN            KICK            KILL            KLINE
+KNOCK           LINKS           LIST            LOCOPS
+LUSERS          MAP             MODULE          MOTD
+NAMES           NICK            NOTICE          OPER
+PART            PASS            PING            PONG
+POST            PRIVMSG         QUIT            REHASH
+RESTART         RESV            SET             SQUIT
+STATS           TIME            TOPIC           TRACE
+UMODE           UNDLINE         UNKLINE         UNRESV
+UNXLINE         USER            USERHOST        VERSION
+WALLOPS         WHO             WHOIS           WHOWAS
+XLINE

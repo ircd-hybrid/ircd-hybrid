@@ -52,17 +52,16 @@ struct Capability
 #define CAP_IE          0x00000004 /* Can do invite exceptions */
 #define CAP_EOB         0x00000008 /* Can do EOB message */
 #define CAP_KLN         0x00000010 /* Can do KLINE message */
-#define CAP_GLN         0x00000020 /* Can do GLINE message */
-#define CAP_KNOCK       0x00000040 /* supports KNOCK */
-#define CAP_UNKLN       0x00000080 /* Can do UNKLINE message */
-#define CAP_CLUSTER     0x00000100 /* supports server clustering */
-#define CAP_ENCAP       0x00000200 /* supports ENCAP message */
-#define CAP_HOPS        0x00000400 /* supports HALFOPS */
-#define CAP_TBURST      0x00000800 /* supports TBURST */
-#define CAP_SVS         0x00001000 /* supports services */
-#define CAP_DLN         0x00002000 /* Can do DLINE message */
-#define CAP_UNDLN       0x00004000 /* Can do UNDLINE message */
-#define CAP_CHW         0x00008000 /* Can do channel wall @# */
+#define CAP_KNOCK       0x00000020 /* supports KNOCK */
+#define CAP_UNKLN       0x00000040 /* Can do UNKLINE message */
+#define CAP_CLUSTER     0x00000080 /* supports server clustering */
+#define CAP_ENCAP       0x00000100 /* supports ENCAP message */
+#define CAP_HOPS        0x00000200 /* supports HALFOPS */
+#define CAP_TBURST      0x00000400 /* supports TBURST */
+#define CAP_SVS         0x00000800 /* supports services */
+#define CAP_DLN         0x00001000 /* Can do DLINE message */
+#define CAP_UNDLN       0x00002000 /* Can do UNDLINE message */
+#define CAP_CHW         0x00004000 /* Can do channel wall @# */
 
 /*
  * Capability macros.

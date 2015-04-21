@@ -211,16 +211,31 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     assert(t == HM_IPV4 || t == HM_IPV6);
   }
 
-  if (bits < 8)
+  switch (t)
   {
-    sendto_one_notice(source_p, &me, ":For safety, bitmasks less than 8 require conf access.");
-    return 0;
-  }
+    case HM_IPV4:
+      if ((unsigned int)bits < ConfigGeneral.dline_min_cidr)
+      {
+        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                          ConfigGeneral.dline_min_cidr);
+        return 0;
+      }
 
-  if (t == HM_IPV6)
-    aftype = AF_INET6;
-  else
-    aftype = AF_INET;
+      aftype = AF_INET;
+      break;
+    case HM_IPV6:
+      if ((unsigned int)bits < ConfigGeneral.dline_min_cidr6)
+      {
+        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                          ConfigGeneral.dline_min_cidr6);
+        return 0;
+      }
+
+      aftype = AF_INET6;
+      break;
+    default:  /* HM_HOST */
+     return 0;
+  }
 
   parse_netmask(dlhost, &daddr, NULL);
 
@@ -283,20 +298,35 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
                               source_p->username, source_p->host,
                               SHARED_DLINE))
   {
-    if ((t = parse_netmask(dlhost, &daddr, &bits)) == HM_HOST)
-      return 0;
+    t = parse_netmask(dlhost, &daddr, &bits);
 
-    if (bits < 8)
+    switch (t)
     {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than 8 require conf access.");
-      return 0;
-    }
+      case HM_IPV4:
+        if ((unsigned int)bits < ConfigGeneral.dline_min_cidr)
+        {
+          if (IsClient(source_p))
+            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                              ConfigGeneral.dline_min_cidr);
+          return 0;
+        }
 
-    if (t == HM_IPV6)
-      aftype = AF_INET6;
-    else
-      aftype = AF_INET;
+        aftype = AF_INET;
+        break;
+      case HM_IPV6:
+        if ((unsigned int)bits < ConfigGeneral.dline_min_cidr6)
+        {
+          if (IsClient(source_p))
+            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                              ConfigGeneral.dline_min_cidr6);
+          return 0;
+        }
+
+        aftype = AF_INET6;
+        break;
+      default:  /* HM_HOST */
+       return 0;
+    }
 
     if ((conf = find_dline_conf(&daddr, aftype)))
     {

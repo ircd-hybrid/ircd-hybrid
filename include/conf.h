@@ -36,7 +36,6 @@
 
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)
 #define IsConfClient(x)         ((x)->type == CONF_CLIENT)
-#define IsConfGline(x)          ((x)->type == CONF_GLINE)
 
 /* MaskItem->flags */
 #define CONF_FLAGS_NO_TILDE             0x00000001U
@@ -46,15 +45,14 @@
 #define CONF_FLAGS_SPOOF_IP             0x00000010U
 #define CONF_FLAGS_SPOOF_NOTICE         0x00000020U
 #define CONF_FLAGS_REDIR                0x00000040U
-#define CONF_FLAGS_EXEMPTGLINE          0x00000080U
-#define CONF_FLAGS_CAN_FLOOD            0x00000100U
-#define CONF_FLAGS_NEED_PASSWORD        0x00000200U
-#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00000400U
-#define CONF_FLAGS_ENCRYPTED            0x00000800U
-#define CONF_FLAGS_IN_DATABASE          0x00001000U
-#define CONF_FLAGS_EXEMPTRESV           0x00002000U
-#define CONF_FLAGS_SSL                  0x00004000U
-#define CONF_FLAGS_WEBIRC               0x00008000U
+#define CONF_FLAGS_CAN_FLOOD            0x00000080U
+#define CONF_FLAGS_NEED_PASSWORD        0x00000100U
+#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00000200U
+#define CONF_FLAGS_ENCRYPTED            0x00000400U
+#define CONF_FLAGS_IN_DATABASE          0x00000800U
+#define CONF_FLAGS_EXEMPTRESV           0x00001000U
+#define CONF_FLAGS_SSL                  0x00002000U
+#define CONF_FLAGS_WEBIRC               0x00004000U
 
 /* Macros for struct MaskItem */
 #define IsConfWebIRC(x)           ((x)->flags & CONF_FLAGS_WEBIRC)
@@ -64,7 +62,6 @@
 #define IsNeedIdentd(x)           ((x)->flags & CONF_FLAGS_NEED_IDENTD)
 #define IsConfExemptKline(x)      ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
 #define IsConfExemptLimits(x)     ((x)->flags & CONF_FLAGS_NOLIMIT)
-#define IsConfExemptGline(x)      ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
 #define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
 #define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)
 #define IsConfSpoofNotice(x)      ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
@@ -105,11 +102,10 @@ enum maskitem_type
   CONF_CLUSTER  = 1 <<  5,
   CONF_XLINE    = 1 <<  6,
   CONF_ULINE    = 1 <<  7,
-  CONF_GLINE    = 1 <<  8,
-  CONF_CRESV    = 1 <<  9,
-  CONF_NRESV    = 1 << 10,
-  CONF_SERVICE  = 1 << 11,
-  CONF_OPER     = 1 << 12
+  CONF_CRESV    = 1 <<  8,
+  CONF_NRESV    = 1 <<  9,
+  CONF_SERVICE  = 1 << 10,
+  CONF_OPER     = 1 << 11
 };
 
 enum
@@ -205,13 +201,14 @@ struct config_general_entry
   const char *spath;
   const char *configfile;
   const char *klinefile;
-  const char *glinefile;
   const char *xlinefile;
   const char *dlinefile;
   const char *resvfile;
 
-  unsigned int gline_min_cidr;
-  unsigned int gline_min_cidr6;
+  unsigned int dline_min_cidr;
+  unsigned int dline_min_cidr6;
+  unsigned int kline_min_cidr;
+  unsigned int kline_min_cidr6;
   unsigned int dots_in_ident;
   unsigned int failed_oper_notice;
   unsigned int anti_spam_exit_message_time;
@@ -236,14 +233,11 @@ struct config_general_entry
   unsigned int short_motd;
   unsigned int no_oper_flood;
   unsigned int oper_pass_resv;
-  unsigned int glines;
   unsigned int tkline_expire_notices;
   unsigned int opers_bypass_callerid;
   unsigned int ignore_bogus_ts;
   unsigned int pace_wait;
   unsigned int pace_wait_simple;
-  unsigned int gline_time;
-  unsigned int gline_request_time;
   unsigned int oper_only_umodes;
   unsigned int oper_umodes;
   unsigned int max_targets;

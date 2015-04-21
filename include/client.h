@@ -110,23 +110,22 @@ struct MaskItem;
 #define FLAGS_IPHASH         0x00000040U  /**< Iphashed this client */
 #define FLAGS_MARK           0x00000080U  /**< Marked client */
 #define FLAGS_CANFLOOD       0x00000100U  /**< Client has the ability to flood */
-#define FLAGS_EXEMPTGLINE    0x00000200U  /**< Client can't be G-lined */
-#define FLAGS_EXEMPTKLINE    0x00000400U  /**< Client is exempt from kline */
-#define FLAGS_NOLIMIT        0x00000800U  /**< Client is exempt from limits */
-#define FLAGS_PING_COOKIE    0x00001000U  /**< PING Cookie */
-#define FLAGS_FLOODDONE      0x00002000U  /**< Flood grace period has been ended. */
-#define FLAGS_EOB            0x00004000U  /**< Server has sent us an EOB */
-#define FLAGS_HIDDEN         0x00008000U  /**< A hidden server. Not shown in /links */
-#define FLAGS_BLOCKED        0x00010000U  /**< Must wait for COMM_SELECT_WRITE */
-#define FLAGS_USERHOST       0x00020000U  /**< Client is in userhost hash */
-#define FLAGS_BURSTED        0x00040000U  /**< User was already bursted */
-#define FLAGS_EXEMPTRESV     0x00080000U  /**< Client is exempt from RESV */
-#define FLAGS_GOTUSER        0x00100000U  /**< If we received a USER command */
-#define FLAGS_FINISHED_AUTH  0x00200000U  /**< Client has been released from auth */
-#define FLAGS_FLOOD_NOTICED  0x00400000U  /**< Notice to opers about this flooder has been sent */
-#define FLAGS_SERVICE        0x00800000U  /**< Client/server is a network service */
-#define FLAGS_SSL            0x01000000U  /**< User is connected via TLS/SSL */
-#define FLAGS_SQUIT          0x02000000U
+#define FLAGS_EXEMPTKLINE    0x00000200U  /**< Client is exempt from kline */
+#define FLAGS_NOLIMIT        0x00000400U  /**< Client is exempt from limits */
+#define FLAGS_PING_COOKIE    0x00000800U  /**< PING Cookie */
+#define FLAGS_FLOODDONE      0x00001000U  /**< Flood grace period has been ended. */
+#define FLAGS_EOB            0x00002000U  /**< Server has sent us an EOB */
+#define FLAGS_HIDDEN         0x00004000U  /**< A hidden server. Not shown in /links */
+#define FLAGS_BLOCKED        0x00008000U  /**< Must wait for COMM_SELECT_WRITE */
+#define FLAGS_USERHOST       0x00010000U  /**< Client is in userhost hash */
+#define FLAGS_BURSTED        0x00020000U  /**< User was already bursted */
+#define FLAGS_EXEMPTRESV     0x00040000U  /**< Client is exempt from RESV */
+#define FLAGS_GOTUSER        0x00080000U  /**< If we received a USER command */
+#define FLAGS_FINISHED_AUTH  0x00100000U  /**< Client has been released from auth */
+#define FLAGS_FLOOD_NOTICED  0x00200000U  /**< Notice to opers about this flooder has been sent */
+#define FLAGS_SERVICE        0x00400000U  /**< Client/server is a network service */
+#define FLAGS_SSL            0x00800000U  /**< User is connected via TLS/SSL */
+#define FLAGS_SQUIT          0x01000000U
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
@@ -175,27 +174,26 @@ struct MaskItem;
 #define OPER_FLAG_KILL_REMOTE    0x00000001U  /**< Oper can KILL remote users */
 #define OPER_FLAG_KILL           0x00000002U  /**< Oper can KILL local users */
 #define OPER_FLAG_UNKLINE        0x00000004U  /**< Oper can use UNKLINE command */
-#define OPER_FLAG_GLINE          0x00000008U  /**< Oper can use GLINE command */
-#define OPER_FLAG_KLINE          0x00000010U  /**< Oper can use KLINE command */
-#define OPER_FLAG_XLINE          0x00000020U  /**< Oper can use XLINE command */
-#define OPER_FLAG_DIE            0x00000040U  /**< Oper can use DIE command */
-#define OPER_FLAG_REHASH         0x00000080U  /**< Oper can use REHASH command */
-#define OPER_FLAG_ADMIN          0x00000100U  /**< Oper can set user mode +a */
-#define OPER_FLAG_REMOTEBAN      0x00000200U  /**< Oper can set remote bans */
-#define OPER_FLAG_GLOBOPS        0x00000400U  /**< Oper can use GLOBOPS command */
-#define OPER_FLAG_MODULE         0x00000800U  /**< Oper can use MODULE command */
-#define OPER_FLAG_RESTART        0x00001000U  /**< Oper can use RESTART command */
-#define OPER_FLAG_DLINE          0x00002000U  /**< Oper can use DLINE command */
-#define OPER_FLAG_UNDLINE        0x00004000U  /**< Oper can use UNDLINE command */
-#define OPER_FLAG_SET            0x00008000U  /**< Oper can use SET command */
-#define OPER_FLAG_SQUIT          0x00010000U  /**< Oper can do local SQUIT */
-#define OPER_FLAG_SQUIT_REMOTE   0x00020000U  /**< Oper can do remote SQUIT */
-#define OPER_FLAG_CONNECT        0x00040000U  /**< Oper can do local CONNECT */
-#define OPER_FLAG_CONNECT_REMOTE 0x00080000U  /**< Oper can do remote CONNECT */
-#define OPER_FLAG_WALLOPS        0x00100000U  /**< Oper can use WALLOPS command */
-#define OPER_FLAG_LOCOPS         0x00200000U  /**< Oper can use LOCOPS command */
-#define OPER_FLAG_UNXLINE        0x00400000U  /**< Oper can use UNXLINE command */
-#define OPER_FLAG_OPME           0x00800000U  /**< Oper can use OPME command */
+#define OPER_FLAG_KLINE          0x00000008U  /**< Oper can use KLINE command */
+#define OPER_FLAG_XLINE          0x00000010U  /**< Oper can use XLINE command */
+#define OPER_FLAG_DIE            0x00000020U  /**< Oper can use DIE command */
+#define OPER_FLAG_REHASH         0x00000040U  /**< Oper can use REHASH command */
+#define OPER_FLAG_ADMIN          0x00000080U  /**< Oper can set user mode +a */
+#define OPER_FLAG_REMOTEBAN      0x00000100U  /**< Oper can set remote bans */
+#define OPER_FLAG_GLOBOPS        0x00000200U  /**< Oper can use GLOBOPS command */
+#define OPER_FLAG_MODULE         0x00000400U  /**< Oper can use MODULE command */
+#define OPER_FLAG_RESTART        0x00000800U  /**< Oper can use RESTART command */
+#define OPER_FLAG_DLINE          0x00001000U  /**< Oper can use DLINE command */
+#define OPER_FLAG_UNDLINE        0x00002000U  /**< Oper can use UNDLINE command */
+#define OPER_FLAG_SET            0x00004000U  /**< Oper can use SET command */
+#define OPER_FLAG_SQUIT          0x00008000U  /**< Oper can do local SQUIT */
+#define OPER_FLAG_SQUIT_REMOTE   0x00010000U  /**< Oper can do remote SQUIT */
+#define OPER_FLAG_CONNECT        0x00020000U  /**< Oper can do local CONNECT */
+#define OPER_FLAG_CONNECT_REMOTE 0x00040000U  /**< Oper can do remote CONNECT */
+#define OPER_FLAG_WALLOPS        0x00080000U  /**< Oper can use WALLOPS command */
+#define OPER_FLAG_LOCOPS         0x00100000U  /**< Oper can use LOCOPS command */
+#define OPER_FLAG_UNXLINE        0x00200000U  /**< Oper can use UNXLINE command */
+#define OPER_FLAG_OPME           0x00400000U  /**< Oper can use OPME command */
 
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->connection->operflags & (y) : 0)
@@ -242,8 +240,6 @@ struct MaskItem;
 #define SetExemptKline(x)       ((x)->flags |= FLAGS_EXEMPTKLINE)
 #define IsExemptLimits(x)       ((x)->flags & FLAGS_NOLIMIT)
 #define SetExemptLimits(x)      ((x)->flags |= FLAGS_NOLIMIT)
-#define IsExemptGline(x)        ((x)->flags & FLAGS_EXEMPTGLINE)
-#define SetExemptGline(x)       ((x)->flags |= FLAGS_EXEMPTGLINE)
 #define IsExemptResv(x)         ((x)->flags & FLAGS_EXEMPTRESV)
 #define SetExemptResv(x)        ((x)->flags |= FLAGS_EXEMPTRESV)
 

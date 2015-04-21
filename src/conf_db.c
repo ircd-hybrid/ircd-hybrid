@@ -733,96 +733,6 @@ load_dline_database(void)
 }
 
 void
-save_gline_database(void)
-{
-  uint32_t i = 0;
-  uint32_t records = 0;
-  struct dbFILE *f = NULL;
-  dlink_node *ptr = NULL;
-
-  if (!(f = open_db(GPATH, "w", KLINE_DB_VERSION)))
-    return;
-
-  for (i = 0; i < ATABLE_SIZE; ++i)
-  {
-    DLINK_FOREACH(ptr, atable[i].head)
-    {
-      struct AddressRec *arec = ptr->data;
-
-      if (arec->type == CONF_GLINE && IsConfDatabase(arec->conf))
-        ++records;
-    }
-  }
-
-  SAFE_WRITE(write_uint32(records, f), GPATH);
-
-  for (i = 0; i < ATABLE_SIZE; ++i)
-  {
-    DLINK_FOREACH(ptr, atable[i].head)
-    {
-      struct AddressRec *arec = ptr->data;
-
-      if (arec->type == CONF_GLINE && IsConfDatabase(arec->conf))
-      {
-        SAFE_WRITE(write_string(arec->conf->user, f), GPATH);
-        SAFE_WRITE(write_string(arec->conf->host, f), GPATH);
-        SAFE_WRITE(write_string(arec->conf->reason, f), GPATH);
-        SAFE_WRITE(write_uint64(arec->conf->setat, f), GPATH);
-        SAFE_WRITE(write_uint64(arec->conf->until, f), GPATH);
-      }
-    }
-  }
-
-  close_db(f);
-}
-
-void
-load_gline_database(void)
-{
-  struct dbFILE *f = NULL;
-  struct MaskItem *conf = NULL;
-  char *field_1 = NULL;
-  char *field_2 = NULL;
-  char *field_3 = NULL;
-  uint32_t i = 0;
-  uint32_t records = 0;
-  uint64_t field_4 = 0;
-  uint64_t field_5 = 0;
-
-  if (!(f = open_db(GPATH, "r", KLINE_DB_VERSION)))
-    return;
-
-  if (get_file_version(f) < 1)
-  {
-    close_db(f);
-    return;
-  }
-
-  read_uint32(&records, f);
-
-  for (i = 0; i < records; ++i)
-  {
-    SAFE_READ(read_string(&field_1, f));
-    SAFE_READ(read_string(&field_2, f));
-    SAFE_READ(read_string(&field_3, f));
-    SAFE_READ(read_uint64(&field_4, f));
-    SAFE_READ(read_uint64(&field_5, f));
-
-    conf = conf_make(CONF_GLINE);
-    conf->user = field_1;
-    conf->host = field_2;
-    conf->reason = field_3;
-    conf->setat = field_4;
-    conf->until = field_5;
-    SetConfDatabase(conf);
-
-    add_conf_by_address(CONF_GLINE, conf);
-  }
-
-  close_db(f);
-}
-
-void
 save_resv_database(void)
 {
   uint32_t records = 0;
@@ -1007,7 +917,6 @@ save_all_databases(void *unused)
 {
   save_kline_database();
   save_dline_database();
-  save_gline_database();
   save_xline_database();
   save_resv_database();
 }

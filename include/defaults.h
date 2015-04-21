@@ -65,7 +65,6 @@
 #define RESVPATH  ETCPATH "/resv.db"  /* resv file */
 #define DLPATH    ETCPATH "/dline.db"  /* dline file */
 #define XPATH     ETCPATH "/xline.db"  /* xline file */
-#define GPATH     ETCPATH "/gline.db"  /* gline file */
 #define MPATH     ETCPATH "/ircd.motd"  /* MOTD file */
 #define LPATH     LOGPATH "/ircd.log"  /* ircd logfile */
 #define PPATH     RUNPATH "/ircd.pid"  /* pid file */
@@ -108,8 +107,6 @@
 /* ConfigServerInfo default values */
 #define NETWORK_NAME_DEFAULT "EFnet"             /* default for network_name */
 #define NETWORK_DESC_DEFAULT "Eris Free Network" /* default for network_desc */
-
-#define GLINE_REQUEST_EXPIRE_DEFAULT 600
 
 /* General defaults */
 #define MAXIMUM_LINKS_DEFAULT 0         /* default for maximum_links */

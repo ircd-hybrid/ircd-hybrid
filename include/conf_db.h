@@ -66,8 +66,6 @@ extern void load_kline_database(void);
 extern void save_kline_database(void);
 extern void load_dline_database(void);
 extern void save_dline_database(void);
-extern void load_gline_database(void);
-extern void save_gline_database(void);
 extern void load_xline_database(void);
 extern void save_xline_database(void);
 extern void load_resv_database(void);

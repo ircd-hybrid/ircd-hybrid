@@ -23,7 +23,6 @@ ircd_SOURCES = auth.c            \
                event.c           \
                fdlist.c          \
                getopt.c          \
-               gline.c           \
                hash.c            \
                hostmask.c        \
                ipcache.c         \

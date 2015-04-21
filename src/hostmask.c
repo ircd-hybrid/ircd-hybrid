@@ -571,15 +571,8 @@ find_address_conf(const char *host, const char *user, struct irc_ssaddr *ip,
 
   /*
    * If they are K-lined, return the K-line. Otherwise, return the
-   * auth{} block. -A1kmm
+   * auth {} block. -A1kmm
    */
-  if (killcnf)
-    return killcnf;
-
-  if (IsConfExemptGline(authcnf))
-    return authcnf;
-
-  killcnf = find_conf_by_address(host, ip, CONF_GLINE, aftype, user, NULL, 1);
   if (killcnf)
     return killcnf;
 
@@ -748,9 +741,6 @@ hostmask_send_expiration(const struct AddressRec *const arec)
     case CONF_DLINE:
       ban_type = 'D';
       break;
-    case CONF_GLINE:
-      ban_type = 'G';
-      break;
     default: break;
   }
 
@@ -778,7 +768,6 @@ hostmask_expire_temporary(void)
       {
         case CONF_KLINE:
         case CONF_DLINE:
-        case CONF_GLINE:
           hostmask_send_expiration(arec);
 
           dlinkDelete(&arec->node, &atable[i]);

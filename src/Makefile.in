@@ -122,19 +122,18 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	conf_class.$(OBJEXT) conf_db.$(OBJEXT) conf_pseudo.$(OBJEXT) \
 	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) \
 	event.$(OBJEXT) fdlist.$(OBJEXT) getopt.$(OBJEXT) \
-	gline.$(OBJEXT) hash.$(OBJEXT) hostmask.$(OBJEXT) \
-	ipcache.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_signal.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
-	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) \
-	mempool.$(OBJEXT) misc.$(OBJEXT) modules.$(OBJEXT) \
-	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
-	parse.$(OBJEXT) patricia.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
-	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
-	s_bsd_kqueue.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
-	restart.$(OBJEXT) resv.$(OBJEXT) rng_mt.$(OBJEXT) \
-	rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
-	user.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	hash.$(OBJEXT) hostmask.$(OBJEXT) ipcache.$(OBJEXT) \
+	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
+	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
+	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
+	misc.$(OBJEXT) modules.$(OBJEXT) motd.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	patricia.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) res.$(OBJEXT) \
+	reslib.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
+	rng_mt.$(OBJEXT) rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) \
+	server.$(OBJEXT) user.$(OBJEXT) version.$(OBJEXT) \
+	watch.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -388,7 +387,6 @@ ircd_SOURCES = auth.c            \
                event.c           \
                fdlist.c          \
                getopt.c          \
-               gline.c           \
                hash.c            \
                hostmask.c        \
                ipcache.c         \
@@ -536,7 +534,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipcache.Po@am__quote@

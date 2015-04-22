@@ -153,7 +153,6 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   char def_reason[] = CONF_NOREASON;
   char *dlhost = NULL, *reason = NULL;
   char *target_server = NULL;
-  const char *creason;
   const struct Client *target_p = NULL;
   struct irc_ssaddr daddr;
   struct MaskItem *conf = NULL;
@@ -239,16 +238,10 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
   parse_netmask(dlhost, &daddr, NULL);
 
-  if ((conf = find_dline_conf(&daddr, aftype)))
+  if ((conf = find_conf_by_address(NULL, &daddr, CONF_DLINE, aftype, NULL, NULL, 1)))
   {
-    creason = conf->reason ? conf->reason : def_reason;
-
-    if (IsConfExemptKline(conf))
-      sendto_one_notice(source_p, &me, ":[%s] is (E)d-lined by [%s] - %s",
-                        dlhost, conf->host, creason);
-    else
-      sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
-                        dlhost, conf->host, creason);
+    sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
+                      dlhost, conf->host, conf->reason);
     return 0;
   }
 
@@ -328,19 +321,11 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
        return 0;
     }
 
-    if ((conf = find_dline_conf(&daddr, aftype)))
+    if ((conf = find_conf_by_address(NULL, &daddr, CONF_DLINE, aftype, NULL, NULL, 1)))
     {
-      if (!IsClient(source_p))
-        return 0;
-
-      creason = conf->reason ? conf->reason : def_reason;
-
-      if (IsConfExemptKline(conf))
-        sendto_one_notice(source_p, &me, ":[%s] is (E)d-lined by [%s] - %s",
-                          dlhost, conf->host, creason);
-      else
+      if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
-                          dlhost, conf->host, creason);
+                          dlhost, conf->host, conf->reason);
       return 0;
     }
 

@@ -150,7 +150,6 @@ apply_dline(struct Client *source_p, struct MaskItem *conf,
 static int
 mo_dline(struct Client *source_p, int parc, char *parv[])
 {
-  char def_reason[] = CONF_NOREASON;
   char *dlhost = NULL, *reason = NULL;
   char *target_server = NULL;
   const struct Client *target_p = NULL;
@@ -262,9 +261,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_dline(struct Client *source_p, int parc, char *parv[])
 {
-  char def_reason[] = CONF_NOREASON;
   char *dlhost, *reason;
-  const char *creason;
   struct irc_ssaddr daddr;
   struct MaskItem *conf = NULL;
   time_t tkline_time=0;

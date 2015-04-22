@@ -197,7 +197,7 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   if (IsConfExemptKline(conf))
   {
     SetExemptKline(source_p);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D/G lines. Congrats.");
+    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D lines. Congrats.");
   }
 
   if (IsConfExemptResv(conf))

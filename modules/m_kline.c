@@ -135,7 +135,7 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
  *       have to walk the hash and check every existing K-line. -A1kmm.
  */
 static int
-already_placed_kline(struct Client *source_p, const char *luser, const char *lhost, int warn)
+already_placed_kline(struct Client *source_p, const char *luser, const char *lhost)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf = NULL;
@@ -155,7 +155,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 
   if ((conf = find_conf_by_address(lhost, piphost, CONF_KLINE, aftype, luser, NULL, 0)))
   {
-    if (IsClient(source_p) && warn)
+    if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
                         luser, lhost, conf->user, conf->host, conf->reason);
     return 1;
@@ -209,7 +209,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
     cluster_a_line(source_p, "KLINE", CAP_KLN, SHARED_KLINE,
                    "%d %s %s :%s", tkline_time, user, host, reason);
 
-  if (already_placed_kline(source_p, user, host, 1))
+  if (already_placed_kline(source_p, user, host))
     return 0;
 
   switch (parse_netmask(host, NULL, &bits))
@@ -285,7 +285,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
     if (!valid_wild_card(source_p, 2, kuser, khost))
       return 0;
 
-    if (already_placed_kline(source_p, kuser, khost, 1))
+    if (already_placed_kline(source_p, kuser, khost))
       return 0;
 
     switch (parse_netmask(khost, NULL, &bits))

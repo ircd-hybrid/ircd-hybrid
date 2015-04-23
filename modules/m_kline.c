@@ -183,6 +183,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   char *target_server = NULL;
   struct MaskItem *conf;
   time_t tkline_time = 0;
+  int bits = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_KLINE))
   {
@@ -211,6 +212,30 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   if (already_placed_kline(source_p, user, host, 1))
     return 0;
 
+  switch (parse_netmask(host, NULL, &bits))
+  {
+    case HM_IPV4:
+      if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
+      {
+        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                          ConfigGeneral.kline_min_cidr);
+        return 0;
+      }
+
+      break;
+    case HM_IPV6:
+      if ((unsigned int)bits < ConfigGeneral.kline_min_cidr6)
+      {
+        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                          ConfigGeneral.kline_min_cidr6);
+        return 0;
+      }
+
+      break;
+    default:  /* HM_HOST */
+      break;
+  }
+
   conf = conf_make(CONF_KLINE);
   conf->host = xstrdup(host);
   conf->user = xstrdup(user);
@@ -234,6 +259,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
   struct MaskItem *conf = NULL;
   time_t tkline_time = 0;
   char *kuser, *khost, *kreason;
+  int bits = 0;
 
   if (parc != 6 || EmptyString(parv[5]))
     return 0;
@@ -261,6 +287,32 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
 
     if (already_placed_kline(source_p, kuser, khost, 1))
       return 0;
+
+    switch (parse_netmask(khost, NULL, &bits))
+    {
+      case HM_IPV4:
+        if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
+        {
+          if (IsClient(source_p))
+            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                              ConfigGeneral.kline_min_cidr);
+          return 0;
+        }
+
+        break;
+      case HM_IPV6:
+        if ((unsigned int)bits < ConfigGeneral.kline_min_cidr6)
+        {
+          if (IsClient(source_p))
+            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                              ConfigGeneral.kline_min_cidr6);
+          return 0;
+        }
+
+        break;
+      default:  /* HM_HOST */
+        break;
+    }
 
     conf = conf_make(CONF_KLINE);
     conf->host = xstrdup(khost);

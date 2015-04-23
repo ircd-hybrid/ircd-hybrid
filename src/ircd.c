@@ -35,7 +35,6 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
-#include "gline.h"
 #include "motd.h"
 #include "conf.h"
 #include "hostmask.h"
@@ -81,13 +80,6 @@ unsigned int splitmode;
 unsigned int splitchecking;
 unsigned int split_users;
 unsigned int split_servers;
-
-static struct event event_cleanup_glines =
-{
-  .name = "cleanup_glines",
-  .handler = cleanup_glines,
-  .when = CLEANUP_GLINES_TIME
-};
 
 static struct event event_cleanup_tklines =
 {
@@ -161,8 +153,6 @@ static struct lgetopt myopts[] =
 {
   {"configfile", &ConfigGeneral.configfile,
    STRING, "File to use for ircd.conf"},
-  {"glinefile",  &ConfigGeneral.glinefile,
-   STRING, "File to use for gline database"},
   {"klinefile",  &ConfigGeneral.klinefile,
    STRING, "File to use for kline database"},
   {"dlinefile",  &ConfigGeneral.dlinefile,
@@ -486,7 +476,6 @@ main(int argc, char *argv[])
   ConfigGeneral.mpath      = MPATH;
   ConfigGeneral.configfile = CPATH;    /* Server configuration file */
   ConfigGeneral.klinefile  = KPATH;    /* Server kline file         */
-  ConfigGeneral.glinefile  = GPATH;    /* Server gline file         */
   ConfigGeneral.xlinefile  = XPATH;    /* Server xline file         */
   ConfigGeneral.dlinefile  = DLPATH;   /* dline file                */
   ConfigGeneral.resvfile   = RESVPATH; /* resv file                 */
@@ -595,7 +584,6 @@ main(int argc, char *argv[])
 
   load_kline_database();
   load_dline_database();
-  load_gline_database();
   load_xline_database();
   load_resv_database();
 
@@ -607,7 +595,6 @@ main(int argc, char *argv[])
 
   ilog(LOG_TYPE_IRCD, "Server Ready");
 
-  event_addish(&event_cleanup_glines, NULL);
   event_addish(&event_cleanup_tklines, NULL);
 
   /* We want try_connections to be called as soon as possible now! -- adrian */

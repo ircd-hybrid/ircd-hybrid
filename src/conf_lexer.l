@@ -165,6 +165,8 @@ disable_auth                { return DISABLE_AUTH; }
 disable_fake_channels       { return DISABLE_FAKE_CHANNELS; }
 disable_remote_commands     { return DISABLE_REMOTE_COMMANDS; }
 dline                       { return T_DLINE; }
+dline_min_cidr              { return DLINE_MIN_CIDR; }
+dline_min_cidr6             { return DLINE_MIN_CIDR6; }
 dots_in_ident               { return DOTS_IN_IDENT; }
 email                       { return EMAIL; }
 encrypted                   { return ENCRYPTED; }
@@ -179,13 +181,8 @@ flatten_links               { return FLATTEN_LINKS; }
 full                        { return T_FULL; }
 gecos                       { return GECOS; }
 general                     { return GENERAL; }
-gline                       { return GLINE; }
-gline_duration              { return GLINE_DURATION; }
-gline_enable                { return GLINE_ENABLE; }
-gline_exempt                { return GLINE_EXEMPT; }
-gline_min_cidr              { return GLINE_MIN_CIDR; }
-gline_min_cidr6             { return GLINE_MIN_CIDR6; }
-gline_request_duration      { return GLINE_REQUEST_DURATION; }
+kline_min_cidr              { return KLINE_MIN_CIDR; }
+kline_min_cidr6             { return KLINE_MIN_CIDR6; }
 globops                     { return T_GLOBOPS; }
 have_ident                  { return NEED_IDENT; }
 havent_read_conf            { return HAVENT_READ_CONF; }

@@ -319,41 +319,35 @@ verify_access(struct Client *client_p)
                              client_p->connection->password);
   }
 
-  if (conf)
+  if (!conf)
+    return NOT_AUTHORIZED;
+
+  assert(IsConfClient(conf) || IsConfKill(conf));
+
+  if (IsConfClient(conf))
   {
-    if (IsConfClient(conf))
+    if (IsConfRedir(conf))
     {
-      if (IsConfRedir(conf))
-      {
-        sendto_one_numeric(client_p, &me, RPL_REDIR,
-                           conf->name ? conf->name : "",
-                           conf->port);
-        return NOT_AUTHORIZED;
-      }
-
-      /* Thanks for spoof idea amm */
-      if (IsConfDoSpoofIp(conf))
-      {
-        if (IsConfSpoofNotice(conf))
-          sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE, "%s spoofing: %s as %s",
-                               client_p->name, client_p->host, conf->name);
-
-        strlcpy(client_p->host, conf->name, sizeof(client_p->host));
-      }
-
-      return attach_iline(client_p, conf);
+      sendto_one_numeric(client_p, &me, RPL_REDIR,
+                         conf->name ? conf->name : "",
+                         conf->port);
+      return NOT_AUTHORIZED;
     }
-    else if (IsConfKill(conf) || (ConfigGeneral.glines && IsConfGline(conf)))
+
+    if (IsConfDoSpoofIp(conf))
     {
-      if (IsConfGline(conf))
-        sendto_one_notice(client_p, &me, ":*** G-lined");
+      if (IsConfSpoofNotice(conf))
+        sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE, "%s spoofing: %s as %s",
+                             client_p->name, client_p->host, conf->name);
 
-      sendto_one_notice(client_p, &me, ":*** Banned: %s", conf->reason);
-      return BANNED_CLIENT;
+      strlcpy(client_p->host, conf->name, sizeof(client_p->host));
     }
+
+    return attach_iline(client_p, conf);
   }
 
-  return NOT_AUTHORIZED;
+  sendto_one_notice(client_p, &me, ":*** Banned: %s", conf->reason);
+  return BANNED_CLIENT;
 }
 
 /* check_client()
@@ -840,11 +834,10 @@ set_default_conf(void)
   ConfigGeneral.away_time = 10;
   ConfigGeneral.max_watch = WATCHSIZE_DEFAULT;
   ConfigGeneral.cycle_on_host_change = 1;
-  ConfigGeneral.glines = 0;
-  ConfigGeneral.gline_time = 12 * 3600;
-  ConfigGeneral.gline_request_time = GLINE_REQUEST_EXPIRE_DEFAULT;
-  ConfigGeneral.gline_min_cidr = 16;
-  ConfigGeneral.gline_min_cidr6 = 48;
+  ConfigGeneral.dline_min_cidr = 16;
+  ConfigGeneral.dline_min_cidr6 = 48;
+  ConfigGeneral.kline_min_cidr = 16;
+  ConfigGeneral.kline_min_cidr6 = 48;
   ConfigGeneral.invisible_on_connect = 1;
   ConfigGeneral.tkline_expire_notices = 1;
   ConfigGeneral.ignore_bogus_ts = 0;
@@ -1090,7 +1083,6 @@ static const struct oper_privs
   { OPER_FLAG_ADMIN,          'A' },
   { OPER_FLAG_REMOTEBAN,      'B' },
   { OPER_FLAG_DIE,            'D' },
-  { OPER_FLAG_GLINE,          'G' },
   { OPER_FLAG_REHASH,         'H' },
   { OPER_FLAG_KLINE,          'K' },
   { OPER_FLAG_KILL,           'N' },

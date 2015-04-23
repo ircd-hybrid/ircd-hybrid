@@ -30,7 +30,6 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
-#include "gline.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "hostmask.h"
@@ -643,125 +642,6 @@ stats_events(struct Client *source_p, int parc, char *parv[])
   show_events(source_p);
 }
 
-/* stats_pending_glines()
- *
- * input        - client pointer
- * output       - none
- * side effects - client is shown list of pending glines
- */
-static void
-stats_pending_glines(struct Client *source_p, int parc, char *parv[])
-{
-  const dlink_node *node = NULL;
-  const struct gline_pending *glp_ptr = NULL;
-  char timebuffer[MAX_DATE_STRING] = "";
-  struct tm *tmptr = NULL;
-
-  if (!ConfigGeneral.glines)
-  {
-    sendto_one_notice(source_p, &me, ":This server does not support G-Lines");
-    return;
-  }
-
-  if (dlink_list_length(&pending_glines[GLINE_PENDING_ADD_TYPE]))
-    sendto_one_notice(source_p, &me, ":Pending G-lines");
-
-  DLINK_FOREACH(node, pending_glines[GLINE_PENDING_ADD_TYPE].head)
-  {
-    glp_ptr = node->data;
-    tmptr   = localtime(&glp_ptr->vote_1.time_request);
-    strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-
-    sendto_one_notice(source_p, &me, ":1) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
-                      glp_ptr->vote_1.oper_nick,
-                      glp_ptr->vote_1.oper_user, glp_ptr->vote_1.oper_host,
-                      glp_ptr->vote_1.oper_server, timebuffer,
-                      glp_ptr->user, glp_ptr->host, glp_ptr->vote_1.reason);
-
-    if (glp_ptr->vote_2.oper_nick[0])
-    {
-      tmptr = localtime(&glp_ptr->vote_2.time_request);
-      strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-
-      sendto_one_notice(source_p, &me, ":2) %s!%s@%s on %s requested gline at %s for %s@%s [%s]",
-                        glp_ptr->vote_2.oper_nick,
-                        glp_ptr->vote_2.oper_user, glp_ptr->vote_2.oper_host,
-                        glp_ptr->vote_2.oper_server, timebuffer,
-                        glp_ptr->user, glp_ptr->host, glp_ptr->vote_2.reason);
-    }
-  }
-
-  sendto_one_notice(source_p, &me, ":End of Pending G-lines");
-
-  if (dlink_list_length(&pending_glines[GLINE_PENDING_DEL_TYPE]))
-    sendto_one_notice(source_p, &me, ":Pending UNG-lines");
-
-  DLINK_FOREACH(node, pending_glines[GLINE_PENDING_DEL_TYPE].head)
-  {
-    glp_ptr = node->data;
-    tmptr   = localtime(&glp_ptr->vote_1.time_request);
-    strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-
-    sendto_one_notice(source_p, &me, ":1) %s!%s@%s on %s requested ungline at %s for %s@%s [%s]",
-                      glp_ptr->vote_1.oper_nick,
-                      glp_ptr->vote_1.oper_user, glp_ptr->vote_1.oper_host,
-                      glp_ptr->vote_1.oper_server, timebuffer,
-                      glp_ptr->user, glp_ptr->host, glp_ptr->vote_1.reason);
-
-    if (glp_ptr->vote_2.oper_nick[0])
-    {
-      tmptr = localtime(&glp_ptr->vote_2.time_request);
-      strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
-
-      sendto_one_notice(source_p, &me, ":2) %s!%s@%s on %s requested ungline at %s for %s@%s [%s]",
-                        glp_ptr->vote_2.oper_nick,
-                        glp_ptr->vote_2.oper_user, glp_ptr->vote_2.oper_host,
-                        glp_ptr->vote_2.oper_server, timebuffer,
-                        glp_ptr->user, glp_ptr->host, glp_ptr->vote_2.reason);
-
-    }
-  }
-
-  sendto_one_notice(source_p, &me, ":End of Pending UNG-lines");
-}
-
-/* stats_glines()
- *
- * input        - client pointer
- * output       - none
- * side effects - client is shown list of glines
- */
-static void
-stats_glines(struct Client *source_p, int parc, char *parv[])
-{
-  const dlink_node *node = NULL;
-
-  if (!ConfigGeneral.glines)
-  {
-    sendto_one_notice(source_p, &me, ":This server does not support G-Lines");
-    return;
-  }
-
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
-  {
-    DLINK_FOREACH(node, atable[i].head)
-    {
-      const struct AddressRec *arec = node->data;
-
-      if (arec->type == CONF_GLINE)
-      {
-        const struct MaskItem *conf = arec->conf;
-
-        sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'G',
-                           conf->host ? conf->host : "*",
-                           conf->user ? conf->user : "*",
-                           conf->reason);
-
-      }
-    }
-  }
-}
-
 static void
 stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 {
@@ -813,8 +693,6 @@ show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
     *prefix_ptr++ = '=';
   if (MyOper(sptr) && IsConfExemptKline(conf))
     *prefix_ptr++ = '^';
-  if (MyOper(sptr) && IsConfExemptGline(conf))
-    *prefix_ptr++ = '_';
   if (MyOper(sptr) && IsConfExemptLimits(conf))
     *prefix_ptr++ = '>';
   if (IsConfCanFlood(conf))
@@ -1459,8 +1337,6 @@ static const struct StatsStruct
   { 'E',     stats_events,         1,      1 },
   { 'f',     fd_dump,              1,      1 },
   { 'F',     fd_dump,              1,      1 },
-  { 'g',     stats_pending_glines, 1,      0 },
-  { 'G',     stats_glines,         1,      0 },
   { 'h',     stats_hubleaf,        1,      1 },
   { 'H',     stats_hubleaf,        1,      0 },
   { 'i',     stats_auth,           0,      0 },

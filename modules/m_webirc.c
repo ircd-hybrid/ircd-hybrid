@@ -113,7 +113,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   strlcpy(source_p->sockhost, parv[4], sizeof(source_p->sockhost));
   strlcpy(source_p->host, parv[3], sizeof(source_p->host));
 
-  /* Check dlines now, k/glines will be checked on registration */
+  /* Check dlines now, k-lines will be checked on registration */
   if ((conf = find_dline_conf(&source_p->connection->ip,
                                source_p->connection->aftype)))
   {

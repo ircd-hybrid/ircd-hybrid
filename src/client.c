@@ -352,17 +352,6 @@ check_conf_klines(void)
       continue;  /* and go examine next Client */
     }
 
-    if (ConfigGeneral.glines)
-    {
-      if ((conf = find_conf_by_address(client_p->host, &client_p->connection->ip,
-                                       CONF_GLINE, client_p->connection->aftype,
-                                       client_p->username, NULL, 1)))
-      {
-        conf_try_ban(client_p, conf);
-        continue;  /* and go examine next Client */
-      }
-    }
-
     if ((conf = find_conf_by_address(client_p->host, &client_p->connection->ip,
                                      CONF_KLINE, client_p->connection->aftype,
                                      client_p->username, NULL, 1)))
@@ -408,7 +397,6 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
   const char *type_string = NULL;
   const char dline_string[] = "D-line";
   const char kline_string[] = "K-line";
-  const char gline_string[] = "G-line";
   const char xline_string[] = "X-line";
 
   switch (conf->type)
@@ -429,18 +417,6 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
                                client_p->connection->aftype, NULL, NULL, 1))
         return;
       type_string = dline_string;
-      break;
-    case CONF_GLINE:
-      if (IsExemptKline(client_p) ||
-          IsExemptGline(client_p))
-      {
-        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                             "GLINE over-ruled for %s, client is %sline_exempt",
-                             get_client_name(client_p, HIDE_IP), IsExemptKline(client_p) ? "k" : "g");
-        return;
-      }
-
-      type_string = gline_string;
       break;
     case CONF_XLINE:
       type_string = xline_string;

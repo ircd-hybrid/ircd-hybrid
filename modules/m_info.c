@@ -100,12 +100,6 @@ static const struct InfoStruct info_table[] =
     "Path to K-line database file"
   },
   {
-    "GPATH",
-    OUTPUT_STRING,
-    &ConfigGeneral.glinefile,
-    "Path to G-line database file"
-  },
-  {
     "XPATH",
     OUTPUT_STRING,
     &ConfigGeneral.xlinefile,
@@ -287,16 +281,28 @@ static const struct InfoStruct info_table[] =
     "How many away_count aways are allowed in this time"
   },
   {
-    "gline_min_cidr",
+    "dline_min_cidr",
     OUTPUT_DECIMAL,
-    &ConfigGeneral.gline_min_cidr,
-    "Minimum required length of a CIDR bitmask for IPv4 G-Lines"
+    &ConfigGeneral.dline_min_cidr,
+    "Minimum required length of a CIDR bitmask for IPv4 D-Lines"
   },
   {
-    "gline_min_cidr6",
+    "dline_min_cidr6",
     OUTPUT_DECIMAL,
-    &ConfigGeneral.gline_min_cidr6,
-    "Minimum required length of a CIDR bitmask for IPv6 G-Lines"
+    &ConfigGeneral.dline_min_cidr6,
+    "Minimum required length of a CIDR bitmask for IPv6 D-Lines"
+  },
+  {
+    "kline_min_cidr",
+    OUTPUT_DECIMAL,
+    &ConfigGeneral.kline_min_cidr,
+    "Minimum required length of a CIDR bitmask for IPv4 K-Lines"
+  },
+  {
+    "kline_min_cidr6",
+    OUTPUT_DECIMAL,
+    &ConfigGeneral.kline_min_cidr6,
+    "Minimum required length of a CIDR bitmask for IPv6 K-Lines"
   },
   {
     "invisible_on_connect",
@@ -531,24 +537,6 @@ static const struct InfoStruct info_table[] =
     OUTPUT_DECIMAL,
     &ConfigGeneral.throttle_time,
     "Minimum time between client reconnects"
-  },
-  {
-    "gline_enable",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigGeneral.glines,
-    "G-line (network-wide K-line) support"
-  },
-  {
-    "gline_duration",
-    OUTPUT_DECIMAL,
-    &ConfigGeneral.gline_time,
-    "Expiry time for G-lines"
-  },
-  {
-    "gline_request_duration",
-    OUTPUT_DECIMAL,
-    &ConfigGeneral.gline_request_time,
-    "Expiry time for pending G-lines"
   },
 
   /* --[  END OF TABLE  ]---------------------------------------------- */

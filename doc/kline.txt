@@ -88,11 +88,6 @@ Server to server messages are formatted like this:
 
   ":oper KLINE target.server duration user host :reason"
 
-Note the difference between hybrid-6 GLINE which explicitly passed
-the oper user@host and server along. This was originally done to handle
-possible desync conditions, but is now shelved in favor of saving
-some bandwidth.
-
 oper:           the nick of the oper performing the K-Line
 target.server:  the server(s) this K-Line is destined for
 duration:       the duration if a TK-Line, 0 if permanent.

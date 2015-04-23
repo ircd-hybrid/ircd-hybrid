@@ -197,17 +197,7 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   if (IsConfExemptKline(conf))
   {
     SetExemptKline(source_p);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D/G lines. Congrats.");
-  }
-
-  /*
-   * The else here is to make sure that G line exempt users
-   * do not get noticed twice.
-   */
-  else if (IsConfExemptGline(conf))
-  {
-    SetExemptGline(source_p);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from G lines. Congrats.");
+    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D lines. Congrats.");
   }
 
   if (IsConfExemptResv(conf))

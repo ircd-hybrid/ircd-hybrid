@@ -1283,7 +1283,7 @@ read_conf_files(int cold)
     }
     else
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                            "Unable to read configuration file '%s': %s",
                            filename, strerror(errno));
       return;
@@ -1335,11 +1335,11 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *name)
     conf->class = class_default;
 
     if (conf->type == CONF_CLIENT || conf->type == CONF_OPER)
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                            "Warning *** Defaulting to default class for %s@%s",
                            conf->user, conf->host);
     else
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                            "Warning *** Defaulting to default class for %s",
                            conf->name);
   }
@@ -1360,7 +1360,7 @@ yyerror(const char *msg)
     return;
 
   strip_tabs(newlinebuf, linebuf, sizeof(newlinebuf));
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+  sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
                        conffilebuf, lineno + 1, msg, newlinebuf);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
@@ -1373,7 +1373,7 @@ conf_error_report(const char *msg)
   char newlinebuf[IRCD_BUFSIZE];
 
   strip_tabs(newlinebuf, linebuf, sizeof(newlinebuf));
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+  sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
                        conffilebuf, lineno + 1, msg, newlinebuf);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",

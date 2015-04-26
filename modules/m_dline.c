@@ -184,7 +184,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     cluster_a_line(source_p, "DLINE", CAP_DLN, SHARED_DLINE,
                    "%d %s :%s", tkline_time, dlhost, reason);
 
-  if ((t = parse_netmask(dlhost, &daddr, &bits)) == HM_HOST)
+  if ((t = parse_netmask(dlhost, NULL, NULL)) == HM_HOST)
   {
     if ((target_p = find_chasing(source_p, dlhost)) == NULL)
       return 0;  /* find_chasing sends ERR_NOSUCHNICK */

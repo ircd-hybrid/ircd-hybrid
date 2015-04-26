@@ -7,6 +7,8 @@ o) Configuration related server notices are now sent to admins only as
 o) The GLINE/GUNGLINE commands have been removed. KLINE in conjunction
    with cluster {} and/or shared {} blocks is now the recommended
    way to add global user@host mask based server bans
+o) Fixed bug where a REHASH would clear all X-Lines that have been set
+   with the XLINE command
 
 
 -- Noteworthy changes in version 8.2.7 (2015-04-05)

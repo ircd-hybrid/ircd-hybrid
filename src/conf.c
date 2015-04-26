@@ -1191,7 +1191,7 @@ clear_out_old_conf(void)
       /* XXX This is less than pretty */
       if (conf->type == CONF_SERVER || conf->type == CONF_OPER)
       {
-        if (!conf->ref_count)
+        if (!conf->ref_count && !IsConfDatabase(conf))
           conf_free(conf);
       }
       else if (conf->type == CONF_XLINE)

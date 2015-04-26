@@ -47,7 +47,7 @@
  * Side effects: Any matching tklines are removed.
  */
 static int
-remove_xline_exact(const char *gecos)
+xline_remove(const char *gecos)
 {
   dlink_node *node = NULL;
 
@@ -69,9 +69,9 @@ remove_xline_exact(const char *gecos)
 }
 
 static void
-remove_xline(struct Client *source_p, const char *gecos)
+xline_remove_and_notify(struct Client *source_p, const char *gecos)
 {
-  if (remove_xline_exact(gecos))
+  if (xline_remove(gecos))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos);
@@ -128,7 +128,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
   else
     cluster_a_line(source_p, "UNXLINE", CAP_CLUSTER, SHARED_UNXLINE, "%s", gecos);
 
-  remove_xline(source_p, gecos);
+  xline_remove_and_notify(source_p, gecos);
   return 0;
 }
 
@@ -160,7 +160,7 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_UNXLINE))
-    remove_xline(source_p, parv[2]);
+    xline_remove_and_notify(source_p, parv[2]);
   return 0;
 }
 

@@ -184,7 +184,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     cluster_a_line(source_p, "DLINE", CAP_DLN, SHARED_DLINE,
                    "%d %s :%s", tkline_time, dlhost, reason);
 
-  if ((t = parse_netmask(dlhost, NULL, &bits)) == HM_HOST)
+  if ((t = parse_netmask(dlhost, &daddr, &bits)) == HM_HOST)
   {
     if ((target_p = find_chasing(source_p, dlhost)) == NULL)
       return 0;  /* find_chasing sends ERR_NOSUCHNICK */
@@ -205,11 +205,9 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
                 target_p->connection->ip.ss_len, hostip,
                 sizeof(hostip), NULL, 0, NI_NUMERICHOST);
     dlhost = hostip;
-    t = parse_netmask(dlhost, NULL, &bits);
-    assert(t == HM_IPV4 || t == HM_IPV6);
   }
 
-  switch (t)
+  switch (parse_netmask(dlhost, &daddr, &bits))
   {
     case HM_IPV4:
       if ((unsigned int)bits < ConfigGeneral.dline_min_cidr)
@@ -234,8 +232,6 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     default:  /* HM_HOST */
      return 0;
   }
-
-  parse_netmask(dlhost, &daddr, NULL);
 
   if ((conf = find_conf_by_address(NULL, &daddr, CONF_DLINE, aftype, NULL, NULL, 1)))
   {

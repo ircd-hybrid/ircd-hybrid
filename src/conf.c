@@ -1186,16 +1186,14 @@ clear_out_old_conf(void)
       struct MaskItem *conf = node->data;
 
       conf->active = 0;
-      dlinkDelete(&conf->node, *iterator);
 
-      /* XXX This is less than pretty */
-      if (conf->type == CONF_SERVER || conf->type == CONF_OPER)
+      if (!IsConfDatabase(conf))
       {
+        dlinkDelete(&conf->node, *iterator);
+
         if (!conf->ref_count)
           conf_free(conf);
       }
-      else if (!IsConfDatabase(conf))
-        conf_free(conf);
     }
   }
 

@@ -709,10 +709,9 @@ clear_out_address_conf(void)
       struct AddressRec *arec = node->data;
 
       /*
-       * We keep the temporary K-lines and destroy the permanent ones,
-       * just to be confusing :) -A1kmm
+       * Destroy the ircd.conf items and keep those that are in the databases
        */
-      if (arec->conf->until || IsConfDatabase(arec->conf))
+      if (IsConfDatabase(arec->conf))
         continue;
 
       dlinkDelete(&arec->node, &atable[i]);

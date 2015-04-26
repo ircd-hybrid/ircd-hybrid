@@ -84,9 +84,25 @@ check_kline(struct AddressRec *arec)
  * side effects - tkline as given is placed
  */
 static void
-m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
-                  time_t tkline_time)
+kline_add(struct Client *source_p, const char *user, const char *host,
+          const char *reason, time_t tkline_time)
 {
+  char buf[IRCD_BUFSIZE];
+  struct MaskItem *conf;
+
+  if (tkline_time)
+    snprintf(buf, sizeof(buf), "Temporary K-line %d min. - %.*s (%s)",
+             (int)(tkline_time/60), REASONLEN, reason, smalldate(0));
+  else
+    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, smalldate(0));
+
+  conf = conf_make(CONF_KLINE);
+  conf->host = xstrdup(host);
+  conf->user = xstrdup(user);
+  conf->setat = CurrentTime;
+  conf->reason = xstrdup(buf);
+  SetConfDatabase(conf);
+
   if (tkline_time)
   {
     conf->until = CurrentTime + tkline_time;
@@ -117,9 +133,6 @@ m_kline_add_kline(struct Client *source_p, struct MaskItem *conf,
     ilog(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), conf->user, conf->host, conf->reason);
   }
-
-  conf->setat = CurrentTime;
-  SetConfDatabase(conf);
 
   check_kline(add_conf_by_address(CONF_KLINE, conf));
 }
@@ -176,12 +189,10 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 static int
 mo_kline(struct Client *source_p, int parc, char *parv[])
 {
-  char buffer[IRCD_BUFSIZE];
   char *reason = NULL;
   char *user = NULL;
   char *host = NULL;
   char *target_server = NULL;
-  struct MaskItem *conf;
   time_t tkline_time = 0;
   int bits = 0;
 
@@ -236,18 +247,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
       break;
   }
 
-  conf = conf_make(CONF_KLINE);
-  conf->host = xstrdup(host);
-  conf->user = xstrdup(user);
-
-  if (tkline_time)
-    snprintf(buffer, sizeof(buffer), "Temporary K-line %d min. - %.*s (%s)",
-             (int)(tkline_time/60), REASONLEN, reason, smalldate(0));
-  else
-    snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, reason, smalldate(0));
-
-  conf->reason = xstrdup(buffer);
-  m_kline_add_kline(source_p, conf, tkline_time);
+  kline_add(source_p, user, host, reason, tkline_time);
   return 0;
 }
 
@@ -255,10 +255,8 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_kline(struct Client *source_p, int parc, char *parv[])
 {
-  char buffer[IRCD_BUFSIZE];
-  struct MaskItem *conf = NULL;
   time_t tkline_time = 0;
-  char *kuser, *khost, *kreason;
+  const char *user, *host, *reason;
   int bits = 0;
 
   if (parc != 6 || EmptyString(parv[5]))
@@ -273,22 +271,22 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   tkline_time = valid_tkline(parv[2], TK_SECONDS);
-  kuser = parv[3];
-  khost = parv[4];
-  kreason = parv[5];
+  user = parv[3];
+  host = parv[4];
+  reason = parv[5];
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_KLINE))
   {
-    if (!valid_wild_card(source_p, 2, kuser, khost))
+    if (!valid_wild_card(source_p, 2, user, host))
       return 0;
 
-    if (already_placed_kline(source_p, kuser, khost))
+    if (already_placed_kline(source_p, user, host))
       return 0;
 
-    switch (parse_netmask(khost, NULL, &bits))
+    switch (parse_netmask(host, NULL, &bits))
     {
       case HM_IPV4:
         if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
@@ -314,18 +312,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
         break;
     }
 
-    conf = conf_make(CONF_KLINE);
-    conf->host = xstrdup(khost);
-    conf->user = xstrdup(kuser);
-
-    if (tkline_time)
-      snprintf(buffer, sizeof(buffer), "Temporary K-line %u min. - %.*s (%s)",
-               (unsigned int)(tkline_time/60), REASONLEN, kreason, smalldate(0));
-    else
-      snprintf(buffer, sizeof(buffer), "%.*s (%s)", REASONLEN, kreason, smalldate(0));
-
-    conf->reason = xstrdup(buffer);
-    m_kline_add_kline(source_p, conf, tkline_time);
+    kline_add(source_p, user, host, reason, tkline_time);
   }
 
   return 0;

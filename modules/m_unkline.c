@@ -48,7 +48,7 @@
  * Side effects: Any matching tklines are removed.
  */
 static int
-remove_kline_match(const char *host, const char *user)
+kline_remove(const char *user, const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
@@ -77,6 +77,24 @@ remove_kline_match(const char *host, const char *user)
   }
 
   return 0;
+}
+
+static void
+kline_remove_and_notify(struct Client *source_p, const char *user, const char *host)
+{
+  if (kline_remove(user, host))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed", user, host);
+
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s has removed the K-Line for: [%s@%s]",
+                         get_oper_name(source_p), user, host);
+    ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
+         get_oper_name(source_p), user, host);
+  }
+  else if (IsClient(source_p))
+    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", user, host);
 }
 
 /*! \brief UNKLINE command handler
@@ -128,17 +146,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
     cluster_a_line(source_p, "UNKLINE", CAP_UNKLN, SHARED_UNKLINE,
                    "%s %s", user, host);
 
-  if (remove_kline_match(host, user))
-  {
-    sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed", user, host);
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has removed the K-Line for: [%s@%s]",
-                         get_oper_name(source_p), user, host);
-    ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-         get_oper_name(source_p), user, host);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", user, host);
+  kline_remove_and_notify(source_p, user, host);
   return 0;
 }
 
@@ -158,7 +166,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_unkline(struct Client *source_p, int parc, char *parv[])
 {
-  const char *kuser, *khost;
+  const char *user, *host;
 
   if (parc != 4 || EmptyString(parv[3]))
     return 0;
@@ -166,8 +174,8 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
   sendto_match_servs(source_p, parv[1], CAP_UNKLN, "UNKLINE %s %s %s",
                      parv[1], parv[2], parv[3]);
 
-  kuser = parv[2];
-  khost = parv[3];
+  user = parv[2];
+  host = parv[3];
 
   if (match(parv[1], me.name))
     return 0;
@@ -176,21 +184,7 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_UNKLINE))
-  {
-    if (remove_kline_match(khost, kuser))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed", kuser, khost);
-
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "%s has removed the K-Line for: [%s@%s]",
-                           get_oper_name(source_p), kuser, khost);
-      ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-           get_oper_name(source_p), kuser, khost);
-    }
-    else if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", kuser, khost);
-  }
+    kline_remove_and_notify(source_p, user, host);
 
   return 0;
 }

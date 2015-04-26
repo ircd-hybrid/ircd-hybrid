@@ -48,7 +48,7 @@
  * Side effects: Any matching tdlines are removed.
  */
 static int
-remove_dline_match(const char *host)
+dline_remove(const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
@@ -77,6 +77,24 @@ remove_dline_match(const char *host)
   }
 
   return 0;
+}
+
+static void
+dline_remove_and_notify(struct Client *source_p, const char *host)
+{
+  if (dline_remove(host))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", host);
+
+    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                         "%s has removed the D-Line for: [%s]",
+                         get_oper_name(source_p), host);
+    ilog(LOG_TYPE_KLINE, "%s removed D-Line for [%s]",
+         get_oper_name(source_p), host);
+  }
+  else if (IsClient(source_p))
+    sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", host);
 }
 
 /*! \brief UNDLINE command handler
@@ -126,18 +144,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
   else
     cluster_a_line(source_p, "UNDLINE", CAP_UNDLN, SHARED_UNDLINE, "%s", addr);
 
-  if (remove_dline_match(addr))
-  {
-    sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", addr);
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has removed the D-Line for: [%s]",
-                         get_oper_name(source_p), addr);
-    ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
-         get_oper_name(source_p), addr);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", addr);
-
+  dline_remove_and_notify(source_p, addr);
   return 0;
 }
 
@@ -171,21 +178,7 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_UNDLINE))
-  {
-    if (remove_dline_match(addr))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", addr);
-
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                           "%s has removed the D-Line for: [%s]",
-                           get_oper_name(source_p), addr);
-      ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
-           get_oper_name(source_p), addr);
-    }
-    else if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", addr);
-  }
+    dline_remove_and_notify(source_p, addr);
 
   return 0;
 }

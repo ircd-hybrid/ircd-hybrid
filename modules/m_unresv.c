@@ -39,70 +39,44 @@
 
 
 static void
-remove_resv(struct Client *source_p, const char *name)
+resv_remove(struct Client *source_p, const char *name)
 {
+  unsigned int type_int = CONF_CRESV;
+  const char *type_str = "channel";
   struct MaskItem *conf = NULL;
 
-  if (IsChanPrefix(*name))
+  if (!IsChanPrefix(*name))
   {
-    if ((conf = find_exact_name_conf(CONF_CRESV, NULL, name, NULL, NULL)) == NULL)
-    {
-      if (IsClient(source_p))
-       sendto_one_notice(source_p, &me, ":A RESV does not exist for channel: %s", name);
-
-      return;
-    }
-
-    if (!IsConfDatabase(conf))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":The RESV for channel: %s is in ircd.conf and must be removed by hand.",
-                          name);
-
-      return;
-    }
-
-    conf_free(conf);
-
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":The RESV has been removed on channel: %s", name);
-
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has removed the RESV for channel: %s",
-                         get_oper_name(source_p), name);
-    ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
-         get_oper_name(source_p), name);
+    type_int = CONF_NRESV;
+    type_str = "nick";
   }
-  else
+
+  if ((conf = find_exact_name_conf(type_int, NULL, name, NULL, NULL)) == NULL)
   {
-    if ((conf = find_exact_name_conf(CONF_NRESV, NULL, name, NULL, NULL)) == NULL)
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":A RESV does not exist for nick: %s", name);
-
-      return;
-    }
-
-    if (!IsConfDatabase(conf))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":The RESV for nick: %s is in ircd.conf and must be removed by hand.",
-                          name);
-
-      return;
-    }
-
-    conf_free(conf);
-
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":The RESV has been removed on nick: %s", name);
+     sendto_one_notice(source_p, &me, ":A RESV does not exist for %s: %s", type_str, name);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
-                         "%s has removed the RESV for nick: %s",
-                         get_oper_name(source_p), name);
-    ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
-         get_oper_name(source_p), name);
+    return;
   }
+
+  if (!IsConfDatabase(conf))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":The RESV for %s: %s is in ircd.conf and must be removed by hand.",
+                        type_str, name);
+    return;
+  }
+
+  conf_free(conf);
+
+  if (IsClient(source_p))
+    sendto_one_notice(source_p, &me, ":The RESV has been removed on %s: %s", type_str, name);
+
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                       "%s has removed the RESV for %s: %s",
+                       get_oper_name(source_p), type_str, name);
+  ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
+       get_oper_name(source_p), name);
 }
 
 /*! \brief UNRESV command handler
@@ -143,7 +117,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
   else
     cluster_a_line(source_p, "UNRESV", CAP_KLN, SHARED_UNRESV, resv);
 
-  remove_resv(source_p, resv);
+  resv_remove(source_p, resv);
   return 0;
 }
 
@@ -175,7 +149,8 @@ ms_unresv(struct Client *source_p, int parc, char *parv[])
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_UNRESV))
-    remove_resv(source_p, parv[2]);
+    resv_remove(source_p, parv[2]);
+
   return 0;
 }
 

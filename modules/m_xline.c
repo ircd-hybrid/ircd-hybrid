@@ -32,6 +32,7 @@
 #include "conf.h"
 #include "numeric.h"
 #include "log.h"
+#include "misc.h"
 #include "send.h"
 #include "server.h"
 #include "parse.h"
@@ -90,7 +91,7 @@ write_xline(struct Client *source_p, char *gecos, char *reason,
   struct MaskItem *conf = conf_make(CONF_XLINE);
 
   conf->name = xstrdup(gecos);
-  conf->reason = xstrdup(reason);
+  conf->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
   conf->setat = CurrentTime;
 
   SetConfDatabase(conf);

@@ -436,7 +436,7 @@ get_mask_hash(const char *text)
  * should always be true (i.e. conf->flags & CONF_FLAGS_NEED_PASSWORD == 0)
  */
 struct MaskItem *
-find_conf_by_address(const char *name, struct irc_ssaddr *addr, unsigned int type,
+find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned int type,
                      int fam, const char *username, const char *password, int do_match)
 {
   unsigned int hprecv = 0;

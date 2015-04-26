@@ -1639,7 +1639,7 @@ parse_aline(const char *cmd, struct Client *source_p,
             char **target_server, char **reason)
 {
   int found_tkline_time=0;
-  static char def_reason[] = CONF_NOREASON;
+  static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN*4+1];
   static char host[HOSTLEN*4+1];
 
@@ -1739,32 +1739,10 @@ parse_aline(const char *cmd, struct Client *source_p,
   if (reason)
   {
     if (parc && !EmptyString(*parv))
-    {
       *reason = *parv;
-
-      if (!valid_comment(source_p, *reason, 1))
-        return 0;
-    }
     else
-      *reason = def_reason;
+      *reason = default_reason;
   }
-
-  return 1;
-}
-
-/* valid_comment()
- *
- * inputs	- pointer to client
- *              - pointer to comment
- * output       - 0 if no valid comment,
- *              - 1 if valid
- * side effects - truncates reason where necessary
- */
-int
-valid_comment(struct Client *source_p, char *comment, int warn)
-{
-  if (strlen(comment) > REASONLEN)
-    comment[REASONLEN-1] = '\0';
 
   return 1;
 }

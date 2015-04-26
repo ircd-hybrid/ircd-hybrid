@@ -371,8 +371,6 @@ extern const char *get_oper_name(const struct Client *);
 #define AWILD 0x1  /* check wild cards */
 extern int parse_aline(const char *, struct Client *, int, char **,
                        int, char **, char **, time_t *, char **, char **);
-extern int valid_comment(struct Client *, char *, int);
-
 
 #define TK_SECONDS 0
 #define TK_MINUTES 1

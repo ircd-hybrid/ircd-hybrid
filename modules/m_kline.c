@@ -43,7 +43,7 @@
 
 
 static void
-check_kline(struct AddressRec *arec)
+kline_check(struct AddressRec *arec)
 {
   dlink_node *node = NULL, *node_next = NULL;
 
@@ -134,7 +134,7 @@ kline_add(struct Client *source_p, const char *user, const char *host,
          get_oper_name(source_p), conf->user, conf->host, conf->reason);
   }
 
-  check_kline(add_conf_by_address(CONF_KLINE, conf));
+  kline_check(add_conf_by_address(CONF_KLINE, conf));
 }
 
 /* already_placed_kline()

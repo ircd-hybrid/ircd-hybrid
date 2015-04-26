@@ -43,7 +43,7 @@
 
 
 static void
-check_dline(struct AddressRec *arec)
+dline_check(struct AddressRec *arec)
 {
   dlink_node *node = NULL, *node_next = NULL;
 
@@ -147,7 +147,7 @@ dline_add(struct Client *source_p, const char *addr,
          get_oper_name(source_p), conf->host, conf->reason);
   }
 
-  check_dline(add_conf_by_address(CONF_DLINE, conf));
+  dline_check(add_conf_by_address(CONF_DLINE, conf));
 }
 
 /* mo_dline()

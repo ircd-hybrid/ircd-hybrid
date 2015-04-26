@@ -265,7 +265,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   struct irc_ssaddr daddr;
   struct MaskItem *conf = NULL;
   time_t tkline_time=0;
-  int bits = 0, aftype = 0, t = 0;
+  int bits = 0, aftype = 0;
   char buffer[IRCD_BUFSIZE];
 
   if (parc != 5 || EmptyString(parv[4]))
@@ -288,9 +288,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
                               source_p->username, source_p->host,
                               SHARED_DLINE))
   {
-    t = parse_netmask(dlhost, &daddr, &bits);
-
-    switch (t)
+    switch (parse_netmask(dlhost, &daddr, &bits))
     {
       case HM_IPV4:
         if ((unsigned int)bits < ConfigGeneral.dline_min_cidr)

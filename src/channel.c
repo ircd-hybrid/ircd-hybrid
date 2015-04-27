@@ -530,6 +530,9 @@ clear_invites_channel(struct Channel *chptr)
     del_invite(chptr, node->data);
 }
 
+/*! \brief Removes all invites of a specific client
+ * \param source_p Pointer to Client struct
+ */
 void
 clear_invites_client(struct Client *source_p)
 {

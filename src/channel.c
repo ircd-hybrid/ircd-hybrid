@@ -367,7 +367,7 @@ make_channel(const char *name)
 void
 destroy_channel(struct Channel *chptr)
 {
-  clear_invites(chptr);
+  clear_invites_channel(chptr);
 
   /* Free ban/exception/invex lists */
   free_channel_list(&chptr->banlist);
@@ -522,12 +522,21 @@ del_invite(struct Channel *chptr, struct Client *who)
  * \param chptr Pointer to Channel struct
  */
 void
-clear_invites(struct Channel *chptr)
+clear_invites_channel(struct Channel *chptr)
 {
   dlink_node *node = NULL, *node_next = NULL;
 
   DLINK_FOREACH_SAFE(node, node_next, chptr->invites.head)
     del_invite(chptr, node->data);
+}
+
+void
+clear_invites_client(struct Client *source_p)
+{
+  dlink_node *node = NULL, *node_next = NULL;
+
+  DLINK_FOREACH_SAFE(node, node_next, source_p->connection->invited.head)
+    del_invite(node->data, source_p);
 }
 
 /* get_member_status()

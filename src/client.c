@@ -626,10 +626,7 @@ exit_one_client(struct Client *source_p, const char *comment)
 
     if (MyConnect(source_p))
     {
-      /* Clean up invitefield */
-      DLINK_FOREACH_SAFE(node, node_next, source_p->connection->invited.head)
-        del_invite(node->data, source_p);
-
+      clear_invites_client(source_p);
       del_all_accepts(source_p);
     }
   }

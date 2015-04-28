@@ -180,39 +180,22 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /*
-   * XLINE <gecos> <time> ON <mask> :<reason>
-   * XLINE <gecos> ON <mask> :<reason>
-   */
   if (!parse_aline("XLINE", source_p, parc, parv, 0, &gecos, NULL,
                    &txline_time, &target_server, &reason))
     return 0;
 
   if (target_server)
   {
-    /* if a given expire time is given, ENCAP it */
-    if (txline_time)
-      sendto_match_servs(source_p, target_server, CAP_ENCAP,
-                         "ENCAP %s XLINE %d %s 0 :%s",
-                         target_server, (int)txline_time, gecos, reason);
-    else
-      sendto_match_servs(source_p, target_server, CAP_CLUSTER,
-                         "XLINE %s %s %d :%s",
-                         target_server, gecos, (int)txline_time, reason);
+    sendto_match_servs(source_p, target_server, CAP_CLUSTER, "XLINE %s %s %d :%s",
+                       target_server, gecos, (int)txline_time, reason);
 
     /* Allow ON to apply local xline as well if it matches */
     if (match(target_server, me.name))
       return 0;
   }
   else
-  {
-    if (txline_time)
-      cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_XLINE,
-                     "XLINE %d %s 0 :%s", (int)txline_time, gecos, reason);
-    else
-      cluster_a_line(source_p, "XLINE", CAP_KLN, SHARED_XLINE,
-                     "%s 0 :%s", gecos, reason);
-  }
+    cluster_a_line(source_p, "XLINE", CAP_CLUSTER, SHARED_XLINE, "%s %d :%s",
+                   gecos, txline_time, reason);
 
   if (!valid_xline(source_p, gecos))
     return 0;
@@ -228,12 +211,19 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/* ms_xline()
+/*! \brief XLINE command handler
  *
- * inputs	- oper, target server, xline, {type}, reason
- *
- * outputs	- none
- * side effects	- propagates xline, applies it if we are a target
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = target server
+ *      - parv[2] = gecos
+ *      - parv[3] = time
+ *      - parv[4] = reason
  */
 static int
 ms_xline(struct Client *source_p, int parc, char *parv[])
@@ -254,6 +244,7 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
+/* XXX: TBR */
 /* me_xline()
  *
  * inputs	- server

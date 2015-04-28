@@ -78,14 +78,14 @@ valid_xline(struct Client *source_p, const char *gecos)
   return 1;
 }
 
-/* write_xline()
+/* xline_add()
  *
  * inputs       - client taking credit for xline, gecos, reason, xline type
  * outputs      - none
  * side effects - when successful, adds an xline to the conf
  */
 static void
-write_xline(struct Client *source_p, const char *gecos, const char *reason,
+xline_add(struct Client *source_p, const char *gecos, const char *reason,
             time_t txline_time)
 {
   char buf[IRCD_BUFSIZE];
@@ -151,7 +151,7 @@ relay_xline(struct Client *source_p, char *parv[])
       return;
     }
 
-    write_xline(source_p, parv[2], parv[4], atoi(parv[3]));
+    xline_add(source_p, parv[2], parv[4], atoi(parv[3]));
   }
 }
 
@@ -224,7 +224,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  write_xline(source_p, gecos, reason, txline_time);
+  xline_add(source_p, gecos, reason, txline_time);
   return 0;
 }
 

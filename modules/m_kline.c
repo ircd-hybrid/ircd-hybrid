@@ -148,29 +148,30 @@ kline_add(struct Client *source_p, const char *user, const char *host,
  *       have to walk the hash and check every existing K-line. -A1kmm.
  */
 static int
-already_placed_kline(struct Client *source_p, const char *luser, const char *lhost)
+already_placed_kline(struct Client *source_p, const char *user, const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf = NULL;
   int t = 0;
   int aftype = 0;
 
-  if ((t = parse_netmask(lhost, &iphost, NULL)) != HM_HOST)
+  if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
   {
     if (t == HM_IPV6)
       aftype = AF_INET6;
     else
       aftype = AF_INET;
+
     piphost = &iphost;
   }
   else
     piphost = NULL;
 
-  if ((conf = find_conf_by_address(lhost, piphost, CONF_KLINE, aftype, luser, NULL, 0)))
+  if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, aftype, user, NULL, 0)))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
-                        luser, lhost, conf->user, conf->host, conf->reason);
+                        user, host, conf->user, conf->host, conf->reason);
     return 1;
   }
 

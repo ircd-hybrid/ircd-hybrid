@@ -64,7 +64,7 @@ pass_cb(char *buf, int size, int rwflag, void *u)
 
   len = strlen(tmp);
 
-  if (len <= 0) 
+  if (len <= 0)
     return 0;
   if (len > size)
     len = size;

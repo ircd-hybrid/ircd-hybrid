@@ -102,8 +102,8 @@ dline_check(struct AddressRec *arec)
  * side effects	- dline as given is placed
  */
 static void
-dline_add(struct Client *source_p, const char *addr,
-          const char *reason, time_t tdline_time)
+dline_add(struct Client *source_p, const char *addr, const char *reason,
+          time_t tdline_time)
 {
   char buf[IRCD_BUFSIZE];
   struct MaskItem *conf;
@@ -262,7 +262,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   const char *dlhost, *reason;
   struct irc_ssaddr daddr;
   struct MaskItem *conf = NULL;
-  time_t tdline_time=0;
+  time_t tdline_time = 0;
   int bits = 0, aftype = 0;
 
   if (parc != 5 || EmptyString(parv[4]))

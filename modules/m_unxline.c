@@ -111,7 +111,6 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /* UNXLINE bill ON irc.server.com */
   if (!parse_aline("UNXLINE", source_p, parc, parv, 0, &gecos,
                    NULL, NULL, &target_server, NULL))
     return 0;

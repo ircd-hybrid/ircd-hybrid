@@ -42,7 +42,7 @@
 
 
 static void
-check_xline(struct MaskItem *conf)
+xline_check(struct MaskItem *conf)
 {
   dlink_node *node = NULL, *node_next = NULL;
 
@@ -86,7 +86,7 @@ valid_xline(struct Client *source_p, const char *gecos)
  */
 static void
 xline_add(struct Client *source_p, const char *gecos, const char *reason,
-            time_t txline_time)
+          time_t txline_time)
 {
   char buf[IRCD_BUFSIZE];
   struct MaskItem *conf;
@@ -105,6 +105,8 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
 
   if (txline_time)
   {
+    conf->until = CurrentTime + txline_time;
+
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %d min. X-Line [%s]",
                         (int)txline_time/60, conf->name);
@@ -115,7 +117,6 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
                          conf->name, conf->reason);
     ilog(LOG_TYPE_XLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
          get_oper_name(source_p), (int)txline_time/60, conf->name, conf->reason);
-    conf->until = CurrentTime + txline_time;
   }
   else
   {
@@ -131,7 +132,7 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
          get_oper_name(source_p), conf->name, conf->reason);
   }
 
-  check_xline(conf);
+  xline_check(conf);
 }
 
 static void

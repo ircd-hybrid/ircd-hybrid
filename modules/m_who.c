@@ -263,7 +263,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   /* See if mask is there, collapse it or return if not there */
   if (EmptyString(mask))
   {
-    who_global(source_p, mask, server_oper);
+    who_global(source_p, NULL, server_oper);
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, "*");
     return 0;
   }

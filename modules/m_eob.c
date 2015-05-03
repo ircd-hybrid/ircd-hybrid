@@ -75,8 +75,13 @@ ms_eob(struct Client *source_p, int parc, char *parv[])
 
 static struct Message eob_msgtab =
 {
-  "EOB", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_ignore, ms_eob, m_ignore, m_ignore, m_ignore }
+  .cmd = "EOB",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = ms_eob,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

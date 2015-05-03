@@ -321,8 +321,14 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
 
 static struct Message kline_msgtab =
 {
-  "KLINE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_not_oper, ms_kline, m_ignore, mo_kline, m_ignore }
+  .cmd = "KLINE",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_not_oper,
+  .handlers[SERVER_HANDLER] = ms_kline,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_kline
 };
 
 static void

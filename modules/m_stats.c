@@ -1453,8 +1453,14 @@ ms_stats(struct Client *source_p, int parc, char *parv[])
 
 static struct Message stats_msgtab =
 {
-  "STATS", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_stats, ms_stats, m_ignore, ms_stats, m_ignore }
+  .cmd = "STATS",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_stats,
+  .handlers[SERVER_HANDLER] = ms_stats,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = ms_stats
 };
 
 static void

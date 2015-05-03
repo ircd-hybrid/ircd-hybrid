@@ -132,8 +132,14 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 
 static struct Message knock_msgtab =
 {
-  "KNOCK", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_knock, m_knock, m_ignore, m_knock, m_ignore }
+  .cmd = "KNOCK",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_knock,
+  .handlers[SERVER_HANDLER] = m_knock,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_knock
 };
 
 static void

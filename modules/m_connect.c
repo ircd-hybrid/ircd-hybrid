@@ -275,8 +275,14 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 
 static struct Message connect_msgtab =
 {
-  "CONNECT", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_not_oper, ms_connect, m_ignore, mo_connect, m_ignore }
+  .cmd = "CONNECT",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_not_oper,
+  .handlers[SERVER_HANDLER] = ms_connect,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_connect
 };
 
 static void

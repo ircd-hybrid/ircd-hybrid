@@ -215,8 +215,13 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
 
 static struct Message invite_msgtab =
 {
-  "INVITE", NULL, 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_invite, ms_invite, m_ignore, m_invite, m_ignore }
+  .cmd = "INVITE",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_invite,
+  .handlers[SERVER_HANDLER] = ms_invite,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_invite
 };
 
 static void

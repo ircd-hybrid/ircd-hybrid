@@ -406,8 +406,14 @@ m_cap(struct Client *source_p, int parc, char *parv[])
 
 static struct Message cap_msgtab =
 {
-  "CAP", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_cap, m_cap, m_ignore, m_ignore, m_cap, m_ignore }
+  .cmd = "CAP",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_cap,
+  .handlers[CLIENT_HANDLER] = m_cap,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_cap
 };
 
 static void

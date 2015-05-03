@@ -71,8 +71,13 @@ mo_close(struct Client *source_p, int parc, char *parv[])
 
 static struct Message close_msgtab =
 {
-  "CLOSE", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_not_oper, m_ignore, m_ignore, mo_close, m_ignore }
+  .cmd = "CLOSE",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_not_oper,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_close
 };
 
 static void

@@ -84,8 +84,13 @@ ms_quit(struct Client *source_p, int parc, char *parv[])
 
 static struct Message quit_msgtab =
 {
-  "QUIT", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_quit, m_quit, ms_quit, m_ignore, m_quit, m_ignore }
+  .cmd = "QUIT",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_quit,
+  .handlers[CLIENT_HANDLER] = m_quit,
+  .handlers[SERVER_HANDLER] = ms_quit,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_quit
 };
 
 static void

@@ -315,8 +315,13 @@ mo_whois(struct Client *source_p, int parc, char *parv[])
 
 static struct Message whois_msgtab =
 {
-  "WHOIS", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_whois, mo_whois, m_ignore, mo_whois, m_ignore }
+  .cmd = "WHOIS",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_whois,
+  .handlers[SERVER_HANDLER] = mo_whois,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_whois
 };
 
 static void

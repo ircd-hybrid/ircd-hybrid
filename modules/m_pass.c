@@ -76,8 +76,14 @@ mr_pass(struct Client *source_p, int parc, char *parv[])
 
 static struct Message pass_msgtab =
 {
-  "PASS", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { mr_pass, m_registered, m_ignore, m_ignore, m_registered, mr_pass }
+  .cmd = "PASS",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = mr_pass,
+  .handlers[CLIENT_HANDLER] = m_registered,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_registered
 };
 
 static void

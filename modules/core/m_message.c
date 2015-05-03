@@ -676,14 +676,24 @@ m_notice(struct Client *source_p, int parc, char *parv[])
 
 static struct Message privmsg_msgtab =
 {
-  "PRIVMSG", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_privmsg, m_privmsg, m_ignore, m_privmsg, m_ignore }
+  .cmd = "PRIVMSG",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_privmsg,
+  .handlers[SERVER_HANDLER] = m_privmsg,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_privmsg
 };
 
 static struct Message notice_msgtab =
 {
-  "NOTICE", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_notice, m_notice, m_ignore, m_notice, m_ignore }
+  .cmd = "NOTICE",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_notice,
+  .handlers[SERVER_HANDLER] = m_notice,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_notice
 };
 
 static void

@@ -165,8 +165,13 @@ ms_whowas(struct Client *source_p, int parc, char *parv[])
 
 static struct Message whowas_msgtab =
 {
-  "WHOWAS", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_whowas, ms_whowas, m_ignore, ms_whowas, m_ignore }
+  .cmd = "WHOWAS",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_whowas,
+  .handlers[SERVER_HANDLER] = ms_whowas,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = ms_whowas
 };
 
 static void

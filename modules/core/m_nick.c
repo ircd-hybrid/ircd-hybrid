@@ -850,14 +850,25 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
 
 static struct Message nick_msgtab =
 {
-  "NICK", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { mr_nick, m_nick, ms_nick, m_ignore, m_nick, m_ignore }
+  .cmd = "NICK",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = mr_nick,
+  .handlers[CLIENT_HANDLER] = m_nick,
+  .handlers[SERVER_HANDLER] = ms_nick,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_nick
 };
 
 static struct Message uid_msgtab =
 {
-  "UID", NULL, 0, 0, 10, MAXPARA, MFLG_SLOW, 0,
-  { m_ignore, m_ignore, ms_uid, m_ignore, m_ignore, m_ignore }
+  .cmd = "UID",
+  .args_min = 10,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_ignore,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = ms_uid,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

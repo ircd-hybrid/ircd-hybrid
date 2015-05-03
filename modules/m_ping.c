@@ -131,8 +131,13 @@ ms_ping(struct Client *source_p, int parc, char *parv[])
 
 static struct Message ping_msgtab =
 {
-  "PING", NULL, 0, 0, 1, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_ping, ms_ping, m_ignore, m_ping, m_ping }
+  .cmd = "PING",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_ping,
+  .handlers[SERVER_HANDLER] = ms_ping,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ping
 };
 
 static void

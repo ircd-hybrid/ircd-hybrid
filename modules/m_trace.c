@@ -331,8 +331,13 @@ report_this_status(struct Client *source_p, struct Client *target_p, int dow)
 
 static struct Message trace_msgtab =
 {
-  "TRACE", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_trace, ms_trace, m_ignore, mo_trace, m_ignore }
+  .cmd = "TRACE",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_trace,
+  .handlers[SERVER_HANDLER] = ms_trace,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_trace
 };
 
 static void

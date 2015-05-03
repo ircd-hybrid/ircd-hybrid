@@ -90,8 +90,14 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svsjoin_msgtab =
 {
-  "SVSJOIN", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_ignore, ms_svsjoin, m_ignore, m_ignore, m_ignore }
+  .cmd = "SVSJOIN",
+  .args_min = 3,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = ms_svsjoin,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

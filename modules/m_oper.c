@@ -160,8 +160,14 @@ mo_oper(struct Client *source_p, int parc, char *parv[])
 
 static struct Message oper_msgtab =
 {
-  "OPER", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_oper, m_ignore, m_ignore, mo_oper, m_ignore }
+  .cmd = "OPER",
+  .args_min = 3,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_oper,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_oper
 };
 
 static void

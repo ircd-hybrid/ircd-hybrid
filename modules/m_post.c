@@ -54,20 +54,35 @@ mr_dumb_proxy(struct Client *source_p, int parc, char *parv[])
 
 static struct Message post_msgtab =
 {
-  "POST", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
+  .cmd = "POST",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = mr_dumb_proxy,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static struct Message get_msgtab =
 {
-  "GET", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
+  .cmd = "GET",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = mr_dumb_proxy,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static struct Message put_msgtab =
 {
-  "PUT", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { mr_dumb_proxy, m_ignore, m_ignore, m_ignore, m_ignore, m_ignore }
+  .cmd = "PUT",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = mr_dumb_proxy,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

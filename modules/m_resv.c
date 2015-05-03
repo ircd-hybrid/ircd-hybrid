@@ -225,8 +225,14 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
 
 static struct Message resv_msgtab =
 {
-  "RESV", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  { m_ignore, m_not_oper, ms_resv, me_resv, mo_resv, m_ignore }
+  .cmd = "RESV",
+  .args_min = 3,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_ignore,
+  .handlers[CLIENT_HANDLER] = m_not_oper,
+  .handlers[SERVER_HANDLER] = ms_resv,
+  .handlers[ENCAP_HANDLER] = me_resv,
+  .handlers[OPER_HANDLER] = mo_resv
 };
 
 static void

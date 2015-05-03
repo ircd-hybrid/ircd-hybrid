@@ -201,8 +201,14 @@ mo_challenge(struct Client *source_p, int parc, char *parv[])
 
 static struct Message challenge_msgtab =
 {
-  "CHALLENGE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_challenge, m_ignore, m_ignore, mo_challenge, m_ignore }
+  .cmd = "CHALLENGE",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_challenge,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_challenge
 };
 
 static void

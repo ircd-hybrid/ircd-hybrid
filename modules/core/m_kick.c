@@ -167,8 +167,14 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
 
 static struct Message kick_msgtab =
 {
-  "KICK", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_kick, ms_kick, m_ignore, m_kick, m_ignore }
+  .cmd = "KICK",
+  .args_min = 3,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_kick,
+  .handlers[SERVER_HANDLER] = ms_kick,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_kick
 };
 
 static void

@@ -77,8 +77,14 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
 
 static struct Message tmode_msgtab =
 {
-  "TMODE", NULL, 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
-  { m_ignore, m_ignore, ms_tmode, m_ignore, m_ignore, m_ignore }
+  .cmd = "TMODE",
+  .args_min = 4,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_ignore,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = ms_tmode,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

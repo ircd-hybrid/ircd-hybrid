@@ -185,8 +185,14 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
 
 static struct Message topic_msgtab =
 {
-  "TOPIC", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_topic, ms_topic, m_ignore, m_topic, m_ignore }
+  .cmd = "TOPIC",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_topic,
+  .handlers[SERVER_HANDLER] = ms_topic,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_topic
 };
 
 static void

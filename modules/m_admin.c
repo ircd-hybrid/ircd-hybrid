@@ -114,8 +114,13 @@ ms_admin(struct Client *source_p, int parc, char *parv[])
 
 static struct Message admin_msgtab =
 {
-  "ADMIN", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_admin, ms_admin, m_ignore, ms_admin, m_ignore }
+  .cmd = "ADMIN",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_admin,
+  .handlers[SERVER_HANDLER] = ms_admin,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = ms_admin
 };
 
 static void

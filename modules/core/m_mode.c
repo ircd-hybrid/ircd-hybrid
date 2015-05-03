@@ -243,8 +243,14 @@ m_mode(struct Client *source_p, int parc, char *parv[])
 
 static struct Message mode_msgtab =
 {
-  "MODE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_mode, m_mode, m_ignore, m_mode, m_ignore }
+  .cmd = "MODE",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_mode,
+  .handlers[SERVER_HANDLER] = m_mode,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_mode
 };
 
 static void

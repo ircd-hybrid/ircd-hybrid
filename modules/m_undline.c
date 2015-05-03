@@ -185,8 +185,14 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
 
 static struct Message undline_msgtab =
 {
-  "UNDLINE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_not_oper, ms_undline, m_ignore, mo_undline, m_ignore }
+  .cmd = "UNDLINE",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_not_oper,
+  .handlers[SERVER_HANDLER] = ms_undline,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_undline
 };
 
 static void

@@ -14,8 +14,6 @@ X A - Shows the DNS servers in use
 * e - Shows exemptions to D lines
 X E - Shows active timers/events
 X f - Shows file descriptors
-* g - Shows pending G lines
-* G - Shows G lines
 * H - Shows configured hub/leaf entries
 ^ i - Shows configured auth {} blocks
 ^ K - Shows permanent K lines (or matched permanent klines)

@@ -367,7 +367,7 @@ static const struct InfoStruct info_table[] =
     "min_nonwildcard",
     OUTPUT_DECIMAL,
     &ConfigGeneral.min_nonwildcard,
-    "Minimum non-wildcard chars in K/G lines"
+    "Minimum non-wildcard chars in K/D lines"
   },
   {
     "min_nonwildcard_simple",

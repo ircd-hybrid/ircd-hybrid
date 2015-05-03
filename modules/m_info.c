@@ -165,7 +165,6 @@ static const struct InfoStruct info_table[] =
     &ConfigChannel.invite_client_count,
     "How many INVITE attempts are permitted in invite_client_time"
   },
-
   {
     "invite_client_time",
     OUTPUT_DECIMAL,
@@ -605,10 +604,10 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as a decimal value. */
       case OUTPUT_DECIMAL:
       {
-        const int option = *((const int *const)iptr->option);
+        const unsigned int option = *((const unsigned int *const)iptr->option);
 
         sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
-                           ":%-30s %-5d [%s]",
+                           ":%-30s %-5u [%s]",
                            iptr->name, option, iptr->desc ? iptr->desc : "<none>");
         break;
       }
@@ -616,7 +615,7 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as "ON" or "OFF" */
       case OUTPUT_BOOLEAN:
       {
-        const int option = *((const int *const)iptr->option);
+        const unsigned int option = *((const unsigned int *const)iptr->option);
 
         sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",
@@ -629,7 +628,7 @@ send_conf_options(struct Client *source_p)
       /* Output info_table[i].option as "YES" or "NO" */
       case OUTPUT_BOOLEAN_YN:
       {
-        const int option = *((const int *const)iptr->option);
+        const unsigned int option = *((const unsigned int *const)iptr->option);
 
         sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",
@@ -640,7 +639,7 @@ send_conf_options(struct Client *source_p)
 
       case OUTPUT_BOOLEAN2:
       {
-        const int option = *((const int *const)iptr->option);
+        const unsigned int option = *((const unsigned int *const)iptr->option);
 
         sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",

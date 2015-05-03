@@ -53,18 +53,6 @@
 #include "mempool.h"
 
 
-static const char *const HeaderMessages[] =
-{
-  ":*** Looking up your hostname",
-  ":*** Found your hostname",
-  ":*** Couldn't look up your hostname",
-  ":*** Checking Ident",
-  ":*** Got Ident response",
-  ":*** No Ident response",
-  ":*** Your forward and reverse DNS do not match, ignoring hostname",
-  ":*** Your hostname is too long, ignoring hostname"
-};
-
 enum
 {
   REPORT_DO_DNS,
@@ -75,6 +63,18 @@ enum
   REPORT_FAIL_ID,
   REPORT_IP_MISMATCH,
   REPORT_HOST_TOOLONG
+};
+
+static const char *const HeaderMessages[] =
+{
+  [REPORT_DO_DNS] = ":*** Looking up your hostname",
+  [REPORT_FIN_DNS] = ":*** Found your hostname",
+  [REPORT_FAIL_DNS] = ":*** Couldn't look up your hostname",
+  [REPORT_DO_ID] = ":*** Checking Ident",
+  [REPORT_FIN_ID] = ":*** Got Ident response",
+  [REPORT_FAIL_ID] = ":*** No Ident response",
+  [REPORT_IP_MISMATCH] = ":*** Your forward and reverse DNS do not match, ignoring hostname",
+  [REPORT_HOST_TOOLONG] = ":*** Your hostname is too long, ignoring hostname"
 };
 
 #define sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])

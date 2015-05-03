@@ -335,7 +335,6 @@ m_who(struct Client *source_p, int parc, char *parv[])
 static struct Message who_msgtab =
 {
   .cmd = "WHO",
-  .args_min = 2,
   .args_max = MAXPARA,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_who,

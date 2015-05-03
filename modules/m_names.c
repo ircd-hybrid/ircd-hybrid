@@ -69,8 +69,13 @@ m_names(struct Client *source_p, int parc, char *parv[])
 
 static struct Message names_msgtab =
 {
-  "NAMES", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_names, m_ignore, m_ignore, m_names, m_ignore }
+  .cmd = "NAMES",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_names,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_names
 };
 
 static void

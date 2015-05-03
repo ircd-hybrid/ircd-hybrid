@@ -741,8 +741,13 @@ ms_info(struct Client *source_p, int parc, char *parv[])
 
 static struct Message info_msgtab =
 {
-  "INFO", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_info, ms_info, m_ignore, ms_info, m_ignore }
+  .cmd = "INFO",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_info,
+  .handlers[SERVER_HANDLER] = ms_info,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = ms_info
 };
 
 static void

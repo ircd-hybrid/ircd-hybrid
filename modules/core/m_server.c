@@ -805,14 +805,26 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
 static struct Message server_msgtab =
 {
-  "SERVER", NULL, 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
-  { mr_server, m_registered, m_ignore, m_ignore, m_registered, m_ignore }
+  .cmd = "SERVER",
+  .args_min = 4,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = mr_server,
+  .handlers[CLIENT_HANDLER] = m_registered,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_registered
 };
 
 static struct Message sid_msgtab =
 {
-  "SID", NULL, 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
-  { m_ignore, m_ignore, ms_sid, m_ignore, m_ignore, m_ignore }
+  .cmd = "SID",
+  .args_min = 5,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_ignore,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = ms_sid,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

@@ -90,8 +90,14 @@ ms_svspart(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svspart_msgtab =
 {
-  "SVSPART", NULL, 0, 0, 3, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_ignore, ms_svspart, m_ignore, m_ignore, m_ignore }
+  .cmd = "SVSPART",
+  .args_min = 3,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = ms_svspart,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

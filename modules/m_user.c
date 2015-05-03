@@ -101,8 +101,14 @@ mr_user(struct Client *source_p, int parc, char *parv[])
 
 static struct Message user_msgtab =
 {
-  "USER", NULL, 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
-  { mr_user, m_registered, m_ignore, m_ignore, m_registered, m_ignore }
+  .cmd = "USER",
+  .args_min = 5,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = mr_user,
+  .handlers[CLIENT_HANDLER] = m_registered,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_registered
 };
 
 static void

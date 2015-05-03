@@ -85,8 +85,14 @@ m_ison(struct Client *source_p, int parc, char *parv[])
 
 static struct Message ison_msgtab =
 {
-  "ISON", NULL, 0, 0, 2, 1, MFLG_SLOW, 0,
-  { m_unregistered, m_ison, m_ignore, m_ignore, m_ison, m_ignore }
+  .cmd = "ISON",
+  .args_min = 2,
+  .args_max = 1,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_ison,
+  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ison
 };
 
 static void

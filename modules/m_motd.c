@@ -107,8 +107,13 @@ ms_motd(struct Client *source_p, int parc, char *parv[])
 
 static struct Message motd_msgtab =
 {
-  "MOTD", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_motd, ms_motd, m_ignore, ms_motd, m_ignore }
+  .cmd = "MOTD",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_motd,
+  .handlers[SERVER_HANDLER] = ms_motd,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = ms_motd
 };
 
 static void

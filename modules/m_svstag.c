@@ -92,8 +92,14 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svstag_msgtab =
 {
-  "SVSTAG", NULL, 0, 0, 4, MAXPARA, MFLG_SLOW, 0,
-  { m_ignore, m_ignore, ms_svstag, m_ignore, m_ignore, m_ignore }
+  .cmd = "SVSTAG",
+  .args_min = 4,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_ignore,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = ms_svstag,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

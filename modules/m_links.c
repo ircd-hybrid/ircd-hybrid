@@ -172,8 +172,13 @@ ms_links(struct Client *source_p, int parc, char *parv[])
 
 static struct Message links_msgtab =
 {
-  "LINKS", NULL, 0, 0, 0, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_links, ms_links, m_ignore, mo_links, m_ignore }
+  .cmd = "LINKS",
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_links,
+  .handlers[SERVER_HANDLER] = ms_links,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_links
 };
 
 static void

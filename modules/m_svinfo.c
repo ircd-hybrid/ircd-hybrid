@@ -118,8 +118,14 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
 
 static struct Message svinfo_msgtab =
 {
-  "SVINFO", NULL, 0, 0, 5, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_ignore, ms_svinfo, m_ignore, m_ignore, m_ignore }
+  .cmd = "SVINFO",
+  .args_min = 5,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = ms_svinfo,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = m_ignore
 };
 
 static void

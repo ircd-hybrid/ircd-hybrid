@@ -62,7 +62,6 @@ typedef enum HandlerType
   SERVER_HANDLER,
   ENCAP_HANDLER,
   OPER_HANDLER,
-  DUMMY_HANDLER,
   LAST_HANDLER_TYPE
 } HandlerType;
 
@@ -82,14 +81,11 @@ struct Message
                              * before the m_func is even called
                              */
   unsigned int args_max;    /* maximum permitted parameters */
-  unsigned int flags;      /* bit 0 set means that this command is allowed
-                             * to be used only on the average of once per 2
-                             * seconds -SRB
-                             */
+  unsigned int flags;
   uint64_t bytes;  /* bytes received for this message */
 
   /* handlers:
-   * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, DUMMY, LAST
+   * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
    */
   MessageHandler handlers[LAST_HANDLER_TYPE];
 };
@@ -97,10 +93,7 @@ struct Message
 /*
  * Constants
  */
-#define   MFLG_SLOW             0x001   /* Command can be executed roughly
-                                         * once per 2 seconds.
-                                         */
-#define MFLG_EXTRA 0x002
+#define MFLG_EXTRA 0x00000001U
 #define MAXPARA    15
 
 extern void parse(struct Client *, char *, char *);

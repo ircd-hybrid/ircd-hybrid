@@ -165,8 +165,14 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
 
 static struct Message unxline_msgtab =
 {
-  "UNXLINE", NULL, 0, 0, 2, MAXPARA, MFLG_SLOW, 0,
-  { m_unregistered, m_not_oper, ms_unxline, m_ignore, mo_unxline, m_ignore }
+  .cmd = "UNXLINE",
+  .args_min = 2,
+  .args_max = MAXPARA,
+  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
+  .handlers[CLIENT_HANDLER] = m_not_oper,
+  .handlers[SERVER_HANDLER] = ms_unxline,
+  .handlers[ENCAP_HANDLER] = m_ignore,
+  .handlers[OPER_HANDLER] = mo_unxline
 };
 
 static void

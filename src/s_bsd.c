@@ -53,9 +53,15 @@
 #include "user.h"
 
 
-static const char *comm_err_str[] = { "Comm OK", "Error during bind()",
-  "Error during DNS lookup", "connect timeout", "Error during connect()",
-  "Comm Error" };
+static const char *const comm_err_str[] =
+{
+  [COMM_OK] = "Comm OK",
+  [COMM_ERR_BIND] = "Error during bind()",
+  [COMM_ERR_DNS] = "Error during DNS lookup",
+  [COMM_ERR_TIMEOUT] = "connect timeout",
+  [COMM_ERR_CONNECT] = "Error during connect()",
+  [COMM_ERROR] = "Comm Error"
+};
 
 static void comm_connect_callback(fde_t *, int);
 static void comm_connect_timeout(fde_t *, void *);

@@ -177,7 +177,7 @@ comm_select(void)
 
     if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
     {
-      if ((hdl = F->read_handler) != NULL)
+      if ((hdl = F->read_handler))
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
@@ -188,7 +188,7 @@ comm_select(void)
 
     if (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
     {
-      if ((hdl = F->write_handler) != NULL)
+      if ((hdl = F->write_handler))
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);

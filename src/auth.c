@@ -156,7 +156,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
       const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&auth->client->connection->ip;
       const struct sockaddr_in6 *const v6dns = (const struct sockaddr_in6 *)addr;
 
-      if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)) != 0)
+      if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)))
       {
         sendheader(auth->client, REPORT_IP_MISMATCH);
         release_auth_client(auth);

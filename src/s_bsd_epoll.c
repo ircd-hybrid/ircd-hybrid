@@ -148,7 +148,7 @@ comm_select(void)
 
     if ((ep_fdlist[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR)))
     {
-      if ((hdl = F->read_handler) != NULL)
+      if ((hdl = F->read_handler))
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
@@ -159,7 +159,7 @@ comm_select(void)
 
     if ((ep_fdlist[i].events & (EPOLLOUT | EPOLLHUP | EPOLLERR)))
     {
-      if ((hdl = F->write_handler) != NULL)
+      if ((hdl = F->write_handler))
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);

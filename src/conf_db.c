@@ -44,7 +44,7 @@
  * \param f dbFile Struct Member
  * \return int 0 if failure, 1 > is the version number
  */
-uint32_t
+static uint32_t
 get_file_version(struct dbFILE *f)
 {
   uint32_t version = 0;
@@ -71,7 +71,7 @@ get_file_version(struct dbFILE *f)
  * \param version Database version
  * \return 0 on error, 1 on success.
  */
-int
+static int
 write_file_version(struct dbFILE *f, uint32_t version)
 {
   if (write_uint32(version, f) == -1)
@@ -189,7 +189,7 @@ open_db_write(const char *filename, uint32_t version)
  * \param version Database version
  * \return dbFile struct
  */
-struct dbFILE *
+static struct dbFILE *
 open_db(const char *filename, const char *mode, uint32_t version)
 {
   switch (*mode)
@@ -213,7 +213,7 @@ open_db(const char *filename, const char *mode, uint32_t version)
  *
  * \param dbFile struct
  */
-void
+static void
 restore_db(struct dbFILE *f)
 {
   int errno_save = errno;
@@ -234,7 +234,7 @@ restore_db(struct dbFILE *f)
  * \param dbFile struct
  * \return -1 on error, 0 on success.
  */
-int
+static int
 close_db(struct dbFILE *f)
 {
   int res;
@@ -272,48 +272,13 @@ close_db(struct dbFILE *f)
 }
 
 /*
- * Read and write 2-, 4- and 8-byte quantities, pointers, and strings.  All
- * multibyte values are stored in big-endian order (most significant byte
- * first).  A pointer is stored as a byte, either 0 if NULL or 1 if not,
- * and read pointers are returned as either (void *)0 or (void *)1.  A
- * string is stored with a 2-byte unsigned length (including the trailing
+ * Read and write 2-, 4- and 8-byte quantities, and strings. All multibyte
+ * values are stored in big-endian order (most significant byte first).
+ * A string is stored with a 2-byte unsigned length (including the trailing
  * \0) first; a length of 0 indicates that the string pointer is NULL.
  * Written strings are truncated silently at 4294967294 bytes, and are always
  * null-terminated.
  */
-
-/*! \brief Read a unsigned 8bit integer
- *
- * \param ret 8bit integer to read
- * \param dbFile struct
- * \return -1 on error, 0 otherwise.
- */
-int
-read_uint8(uint8_t*ret, struct dbFILE *f)
-{
-  int c = fgetc(f->fp);
-
-  if (c == EOF)
-    return -1;
-
-  *ret = c;
-  return 0;
-}
-
-/*! \brief Write a 8bit integer
- *
- * \param val 8bit integer to write
- * \param dbFile struct
- * \return -1 on error, 0 otherwise.
- */
-int
-write_uint8(uint8_t val, struct dbFILE *f)
-{
-  if (fputc(val, f->fp) == EOF)
-    return -1;
-
-  return 0;
-}
 
 /*! \brief Read a unsigned 8bit integer
  *
@@ -444,39 +409,6 @@ write_uint64(uint64_t val, struct dbFILE *f)
   if (fputc((val >>  8) & 0xFF, f->fp) == EOF)
     return -1;
   if (fputc((val)       & 0xFF, f->fp) == EOF)
-    return -1;
-  return 0;
-}
-
-/*! \brief Read Pointer
- *
- * \param ret pointer to read
- * \param dbFile struct
- * \return -1 on error, 0 otherwise.
- */
-int
-read_ptr(void **ret, struct dbFILE *f)
-{
-  int c = fgetc(f->fp);
-
-  if (c == EOF)
-    return -1;
-
-  *ret = (c ? (void *)1 : (void *)0);
-  return 0;
-}
-
-
-/*! \brief Write Pointer
- *
- * \param ptr pointer to write
- * \param dbFile struct
- * \return -1 on error, 0 otherwise.
- */
-int
-write_ptr(const void *ptr, struct dbFILE *f)
-{
-  if (fputc(ptr ? 1 : 0, f->fp) == EOF)
     return -1;
   return 0;
 }

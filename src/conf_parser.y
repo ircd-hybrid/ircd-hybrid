@@ -195,7 +195,6 @@ reset_block_state(void)
 %token  FLATTEN_LINKS
 %token  GECOS
 %token  GENERAL
-%token  HAVENT_READ_CONF
 %token  HIDDEN
 %token  HIDDEN_NAME
 %token  HIDE_CHANS
@@ -2561,7 +2560,6 @@ general_item:       general_away_count |
                     general_min_nonwildcard_simple |
                     general_throttle_count |
                     general_throttle_time |
-                    general_havent_read_conf |
                     general_ping_cookie |
                     general_disable_auth |
                     general_tkline_expire_notices |
@@ -2670,17 +2668,6 @@ general_ts_max_delta: TS_MAX_DELTA '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 2)
     ConfigGeneral.ts_max_delta = $3;
-};
-
-general_havent_read_conf: HAVENT_READ_CONF '=' NUMBER ';'
-{
-  if (($3 > 0) && conf_parser_ctx.pass == 1)
-  {
-    ilog(LOG_TYPE_IRCD, "You haven't read your config file properly.");
-    ilog(LOG_TYPE_IRCD, "There is a line in the example conf that will kill your server if not removed.");
-    ilog(LOG_TYPE_IRCD, "Consider actually reading/editing the conf file, and removing this line.");
-    exit(0);
-  }
 };
 
 general_invisible_on_connect: INVISIBLE_ON_CONNECT '=' TBOOL ';'

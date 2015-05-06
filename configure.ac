@@ -4,7 +4,7 @@
 AC_REVISION([$Id$])
 
 AC_PREREQ(2.69)
-AC_INIT([ircd-hybrid], [8.2.7], [bugs@ircd-hybrid.org])
+AC_INIT([ircd-hybrid], [8.2.8], [bugs@ircd-hybrid.org])
 AM_INIT_AUTOMAKE(1.15 subdir-objects)
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])

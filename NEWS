@@ -11,6 +11,7 @@ o) Fixed bug where a REHASH would clear all X-Lines and RESVs that have
    been set with the XLINE/RESV commands
 o) Fixed broken temporary remote XLINEs
 o) The general::havent_read_conf configuration directive has been removed
+o) Various code cleanups
 
 
 -- Noteworthy changes in version 8.2.7 (2015-04-05)

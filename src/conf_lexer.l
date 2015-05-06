@@ -185,7 +185,6 @@ kline_min_cidr              { return KLINE_MIN_CIDR; }
 kline_min_cidr6             { return KLINE_MIN_CIDR6; }
 globops                     { return T_GLOBOPS; }
 have_ident                  { return NEED_IDENT; }
-havent_read_conf            { return HAVENT_READ_CONF; }
 hidden                      { return HIDDEN; }
 hidden_name                 { return HIDDEN_NAME; }
 hidechans                   { return HIDE_CHANS; }

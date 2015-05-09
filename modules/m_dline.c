@@ -38,7 +38,6 @@
 #include "server.h"
 #include "parse.h"
 #include "modules.h"
-#include "conf_db.h"
 #include "memory.h"
 
 

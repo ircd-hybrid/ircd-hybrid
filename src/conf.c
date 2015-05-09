@@ -1672,12 +1672,6 @@ parse_aline(const char *cmd, struct Client *source_p,
       parc--;
       parv++;
 
-      if (target_server == NULL)
-      {
-        sendto_one_notice(source_p, &me, ":ON server not supported by %s", cmd);
-        return 0;
-      }
-
       if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
       {
         sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "remoteban");

@@ -131,9 +131,6 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   char *target_server = NULL;
   time_t tkline_time = 0;
 
-  /* RESV #channel ON irc.server.com :abuse
-   * RESV kiddie ON irc.server.com :abuse
-   */
   if (!parse_aline("RESV", source_p, parc, parv, 0, &resv, NULL,
                    &tkline_time, &target_server, &reason))
     return 0;
@@ -149,15 +146,13 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
       sendto_match_servs(source_p, target_server, CAP_CLUSTER,
                          "RESV %s %s :%s",
                          target_server, resv, reason);
+
     /* Allow ON to apply local resv as well if it matches */
     if (match(target_server, me.name))
       return 0;
   }
   else
   {
-    /* RESV #channel :abuse
-     * RESV kiddie :abuse
-     */
     if (tkline_time)
       cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_RESV,
                      "RESV %d %s 0 :%s", (int)tkline_time, resv, reason);

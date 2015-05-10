@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.8 (2015-??-??)
+-- Noteworthy changes in version 8.2.8 (2015-05-10)
 o) ircd now rejects remote k-line requests for user@host mask that don't
    have at least general::min_nonwildcard non-wildcard characters in it
 o) Configuration related server notices are now sent to admins only as

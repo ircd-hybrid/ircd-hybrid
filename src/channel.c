@@ -1020,8 +1020,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
         ((conf = match_find_resv(chan)) && !resv_find_exempt(source_p, conf)))
     {
       ++conf->count;
-      sendto_one_numeric(source_p, &me, ERR_CHANBANREASON,
-                         chan, conf->reason ? conf->reason : "Reserved channel");
+      sendto_one_numeric(source_p, &me, ERR_CHANBANREASON, chan, conf->reason);
       sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                            "Forbidding reserved channel %s from user %s",
                            chan, get_client_name(source_p, HIDE_IP));

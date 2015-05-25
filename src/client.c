@@ -393,11 +393,7 @@ check_conf_klines(void)
 void
 conf_try_ban(struct Client *client_p, struct MaskItem *conf)
 {
-  const char *user_reason = NULL;  /* What is sent to user */
-  const char *type_string = NULL;
-  const char dline_string[] = "D-line";
-  const char kline_string[] = "K-line";
-  const char xline_string[] = "X-line";
+  char ban_type = '\0';
 
   switch (conf->type)
   {
@@ -410,16 +406,16 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
         return;
       }
 
-      type_string = kline_string;
+      ban_type = 'K';
       break;
     case CONF_DLINE:
       if (find_conf_by_address(NULL, &client_p->connection->ip, CONF_EXEMPT,
                                client_p->connection->aftype, NULL, NULL, 1))
         return;
-      type_string = dline_string;
+      ban_type = 'D';
       break;
     case CONF_XLINE:
-      type_string = xline_string;
+      ban_type = 'X';
       ++conf->count;
       break;
     default:
@@ -427,15 +423,13 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
       break;
   }
 
-  user_reason = conf->reason ? conf->reason : type_string;
-
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s active for %s",
-                       type_string, get_client_name(client_p, HIDE_IP));
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s-line active for %s",
+                       ban_type, get_client_name(client_p, HIDE_IP));
 
   if (IsClient(client_p))
-    sendto_one_numeric(client_p, &me, ERR_YOUREBANNEDCREEP, user_reason);
+    sendto_one_numeric(client_p, &me, ERR_YOUREBANNEDCREEP, conf->reason);
 
-  exit_client(client_p, user_reason);
+  exit_client(client_p, conf->reason);
 }
 
 /* update_client_exit_stats()

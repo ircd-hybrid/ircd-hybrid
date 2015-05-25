@@ -423,7 +423,7 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
       break;
   }
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s-line active for %s",
+  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%c-line active for %s",
                        ban_type, get_client_name(client_p, HIDE_IP));
 
   if (IsClient(client_p))

@@ -7,6 +7,8 @@ o) Configuration related server notices are now sent to admins only as
 o) The GLINE/GUNGLINE commands have been removed. KLINE in conjunction
    with cluster {} and/or shared {} blocks is now the recommended
    way to add global user@host mask based server bans
+o) Added dline_min_cidr, dline_min_cidr6, kline_min_cidr, and kline_min_cidr6
+   configuration options to the general {} block
 o) Fixed bug where a REHASH would clear all X-Lines and RESVs that have
    been set with the XLINE/RESV commands
 o) Fixed broken temporary remote XLINEs

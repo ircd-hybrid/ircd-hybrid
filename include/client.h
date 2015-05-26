@@ -110,7 +110,7 @@ struct MaskItem;
 #define FLAGS_IPHASH         0x00000040U  /**< Iphashed this client */
 #define FLAGS_MARK           0x00000080U  /**< Marked client */
 #define FLAGS_CANFLOOD       0x00000100U  /**< Client has the ability to flood */
-#define FLAGS_EXEMPTKLINE    0x00000200U  /**< Client is exempt from kline */
+#define FLAGS_EXEMPTKLINE    0x00000200U  /**< Client is exempt from k-lines */
 #define FLAGS_NOLIMIT        0x00000400U  /**< Client is exempt from limits */
 #define FLAGS_PING_COOKIE    0x00000800U  /**< PING Cookie */
 #define FLAGS_FLOODDONE      0x00001000U  /**< Flood grace period has been ended. */
@@ -126,6 +126,7 @@ struct MaskItem;
 #define FLAGS_SERVICE        0x00400000U  /**< Client/server is a network service */
 #define FLAGS_SSL            0x00800000U  /**< User is connected via TLS/SSL */
 #define FLAGS_SQUIT          0x01000000U
+#define FLAGS_EXEMPTXLINE    0x02000000U  /**< Client is exempt from x-lines */
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
@@ -238,6 +239,8 @@ struct MaskItem;
 
 #define IsExemptKline(x)        ((x)->flags & FLAGS_EXEMPTKLINE)
 #define SetExemptKline(x)       ((x)->flags |= FLAGS_EXEMPTKLINE)
+#define IsExemptXline(x)        ((x)->flags & FLAGS_EXEMPTXLINE)
+#define SetExemptXline(x)       ((x)->flags |= FLAGS_EXEMPTXLINE)
 #define IsExemptLimits(x)       ((x)->flags & FLAGS_NOLIMIT)
 #define SetExemptLimits(x)      ((x)->flags |= FLAGS_NOLIMIT)
 #define IsExemptResv(x)         ((x)->flags & FLAGS_EXEMPTRESV)

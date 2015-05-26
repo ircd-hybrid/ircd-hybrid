@@ -53,6 +53,7 @@
 #define CONF_FLAGS_EXEMPTRESV           0x00001000U
 #define CONF_FLAGS_SSL                  0x00002000U
 #define CONF_FLAGS_WEBIRC               0x00004000U
+#define CONF_FLAGS_EXEMPTXLINE          0x00008000U
 
 /* Macros for struct MaskItem */
 #define IsConfWebIRC(x)           ((x)->flags & CONF_FLAGS_WEBIRC)
@@ -61,6 +62,7 @@
 #define IsNeedPassword(x)         ((x)->flags & CONF_FLAGS_NEED_PASSWORD)
 #define IsNeedIdentd(x)           ((x)->flags & CONF_FLAGS_NEED_IDENTD)
 #define IsConfExemptKline(x)      ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
+#define IsConfExemptXline(x)      ((x)->flags & CONF_FLAGS_EXEMPTXLINE)
 #define IsConfExemptLimits(x)     ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
 #define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)

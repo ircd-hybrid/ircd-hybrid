@@ -676,7 +676,7 @@ stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 static const char *
 show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
 {
-  static char prefix_of_host[USERLEN + 15];
+  static char prefix_of_host[USERLEN + 16];
   char *prefix_ptr = prefix_of_host;
 
   if (IsConfWebIRC(conf))
@@ -693,6 +693,8 @@ show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
     *prefix_ptr++ = '=';
   if (MyOper(sptr) && IsConfExemptKline(conf))
     *prefix_ptr++ = '^';
+  if (MyOper(sptr) && IsConfExemptXline(conf))
+    *prefix_ptr++ = '!';
   if (MyOper(sptr) && IsConfExemptLimits(conf))
     *prefix_ptr++ = '>';
   if (IsConfCanFlood(conf))

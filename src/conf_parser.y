@@ -371,6 +371,7 @@ reset_block_state(void)
 %token  WARN_NO_CONNECT_BLOCK
 %token  WHOIS
 %token  XLINE
+%token  XLINE_EXEMPT
 
 %type  <string> QSTRING
 %type  <number> NUMBER
@@ -1830,6 +1831,10 @@ auth_flags_item: SPOOF_NOTICE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_EXEMPTKLINE;
+} | XLINE_EXEMPT
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.flags.value |= CONF_FLAGS_EXEMPTXLINE;
 } | NEED_IDENT
 {
   if (conf_parser_ctx.pass == 2)

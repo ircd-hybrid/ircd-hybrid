@@ -200,6 +200,12 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
     sendto_one_notice(source_p, &me, ":*** You are exempt from K/D lines. Congrats.");
   }
 
+  if (IsConfExemptXline(conf))
+  {
+    SetExemptXline(source_p);
+    sendto_one_notice(source_p, &me, ":*** You are exempt from X lines. Congrats.");
+  }
+
   if (IsConfExemptResv(conf))
   {
     SetExemptResv(source_p);
@@ -324,6 +330,9 @@ static int
 check_xline(struct Client *source_p)
 {
   struct MaskItem *conf = NULL;
+
+  if (IsExemptXline(source_p))
+    return 0;
 
   if ((conf = find_matching_name_conf(CONF_XLINE, source_p->info, NULL, NULL, 0)))
   {

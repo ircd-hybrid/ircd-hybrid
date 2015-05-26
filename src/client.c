@@ -415,6 +415,13 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
       ban_type = 'D';
       break;
     case CONF_XLINE:
+      if (IsExemptXline(client_p))
+      {
+        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+                             "XLINE over-ruled for %s, client is xline_exempt",
+                             get_client_name(client_p, HIDE_IP));
+        return;
+      }
       ban_type = 'X';
       ++conf->count;
       break;

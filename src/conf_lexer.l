@@ -341,6 +341,7 @@ warn_no_connect_block       { return WARN_NO_CONNECT_BLOCK; }
 webirc                      { return T_WEBIRC; }
 whois                       { return WHOIS; }
 xline                       { return XLINE; }
+Xline_exempt                { return XLINE_EXEMPT; }
 
 yes                         { yylval.number = 1; return TBOOL; }
 no                          { yylval.number = 0; return TBOOL; }

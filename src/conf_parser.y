@@ -1497,12 +1497,7 @@ class_entry: CLASS
   class->min_idle = block_state.min_idle.value;
   class->max_idle = block_state.max_idle.value;
 
-  if (class->number_per_cidr && block_state.number_per_cidr.value)
-    if ((class->cidr_bitlen_ipv4 && block_state.cidr_bitlen_ipv4.value) ||
-        (class->cidr_bitlen_ipv6 && block_state.cidr_bitlen_ipv6.value))
-      if ((class->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value) ||
-          (class->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value))
-        rebuild_cidr_list(class);
+  rebuild_cidr_list(class);
 
   class->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
   class->cidr_bitlen_ipv6 = block_state.cidr_bitlen_ipv6.value;

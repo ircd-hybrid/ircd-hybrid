@@ -3,7 +3,7 @@ Available HELP topics (some of them are only accessible to IRC operators):
 ACCEPT          ADMIN           AWAY            CHALLENGE
 CLOSE           CMODE           CONNECT         DIE
 DLINE           ERROR           ETRACE          HASH
-HELP            INF             INVITE          ISON
+HELP            INFO            INVITE          ISON
 JOIN            KICK            KILL            KLINE
 KNOCK           LINKS           LIST            LOCOPS
 LUSERS          MAP             MODULE          MOTD

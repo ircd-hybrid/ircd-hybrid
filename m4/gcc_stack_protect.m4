@@ -9,6 +9,8 @@ dnl     * Uses macros to ensure correct ouput in quiet/silent mode
 dnl 1.2 - April 2007 - Ted Percival <ted@midg3t.net>
 dnl     * Added GCC_STACK_PROTECTOR macro for simpler (one-line) invocation
 dnl     * GCC_STACK_PROTECT_LIB now adds -lssp to LIBS rather than LDFLAGS
+dnl h.1 - June 2015 - Michael Wobst <michael@wobst.at>
+dnl     * Added support for -fstack-protector-strong which is supported since gcc 4.9
 dnl
 dnl About ssp:
 dnl GCC extension for protecting applications from stack-smashing attacks
@@ -54,16 +56,29 @@ AC_DEFUN([GCC_STACK_PROTECT_LIB],[
 AC_DEFUN([GCC_STACK_PROTECT_CC],[
   AC_LANG_ASSERT(C)
   if test "X$CC" != "X"; then
-    AC_CACHE_CHECK([whether ${CC} accepts -fstack-protector],
+    AC_CACHE_CHECK([whether ${CC} accepts -fstack-protector-strong],
       ssp_cv_cc,
       [ssp_old_cflags="$CFLAGS"
-       CFLAGS="$CFLAGS -fstack-protector"
+       CFLAGS="$CFLAGS -fstack-protector-strong"
        AC_TRY_COMPILE(,, ssp_cv_cc=yes, ssp_cv_cc=no)
        CFLAGS="$ssp_old_cflags"
       ])
     if test $ssp_cv_cc = yes; then
-      CFLAGS="$CFLAGS -fstack-protector"
+      CFLAGS="$CFLAGS -fstack-protector-strong"
       AC_DEFINE([ENABLE_SSP_CC], 1, [Define if SSP C support is enabled.])
+    else
+      unset ssp_cv_cc
+      AC_CACHE_CHECK([whether ${CC} accepts -fstack-protector],
+        ssp_cv_cc,
+        [ssp_old_cflags="$CFLAGS"
+         CFLAGS="$CFLAGS -fstack-protector"
+         AC_TRY_COMPILE(,, ssp_cv_cc=yes, ssp_cv_cc=no)
+         CFLAGS="$ssp_old_cflags"
+        ])
+      if test $ssp_cv_cc = yes; then
+        CFLAGS="$CFLAGS -fstack-protector"
+        AC_DEFINE([ENABLE_SSP_CC], 1, [Define if SSP C support is enabled.])
+      fi
     fi
   fi
 ])
@@ -71,16 +86,29 @@ AC_DEFUN([GCC_STACK_PROTECT_CC],[
 AC_DEFUN([GCC_STACK_PROTECT_CXX],[
   AC_LANG_ASSERT(C++)
   if test "X$CXX" != "X"; then
-    AC_CACHE_CHECK([whether ${CXX} accepts -fstack-protector],
+    AC_CACHE_CHECK([whether ${CXX} accepts -fstack-protector-strong],
       ssp_cv_cxx,
       [ssp_old_cxxflags="$CXXFLAGS"
-       CXXFLAGS="$CXXFLAGS -fstack-protector"
+       CXXFLAGS="$CXXFLAGS -fstack-protector-strong"
        AC_TRY_COMPILE(,, ssp_cv_cxx=yes, ssp_cv_cxx=no)
        CXXFLAGS="$ssp_old_cxxflags"
       ])
     if test $ssp_cv_cxx = yes; then
-      CXXFLAGS="$CXXFLAGS -fstack-protector"
+      CXXFLAGS="$CXXFLAGS -fstack-protector-strong"
       AC_DEFINE([ENABLE_SSP_CXX], 1, [Define if SSP C++ support is enabled.])
+    else
+      unset ssp_cv_cxx
+      AC_CACHE_CHECK([whether ${CXX} accepts -fstack-protector],
+        ssp_cv_cxx,
+        [ssp_old_cxxflags="$CXXFLAGS"
+         CXXFLAGS="$CXXFLAGS -fstack-protector"
+         AC_TRY_COMPILE(,, ssp_cv_cxx=yes, ssp_cv_cxx=no)
+         CXXFLAGS="$ssp_old_cxxflags"
+        ])
+      if test $ssp_cv_cxx = yes; then
+        CXXFLAGS="$CXXFLAGS -fstack-protector"
+        AC_DEFINE([ENABLE_SSP_CXX], 1, [Define if SSP C++ support is enabled.])
+      fi
     fi
   fi
 ])

@@ -32,6 +32,8 @@
 #include "config.h"
 
 
+#define NICKNAMEHISTORYLENGTH 32768
+
 struct Whowas
 {
   int hashv;

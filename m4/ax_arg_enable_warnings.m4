@@ -1,7 +1,7 @@
 AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
   AC_ARG_ENABLE([warnings],[AS_HELP_STRING([--enable-warnings],[Enable compiler warnings.])],[warnings="$enableval"],[warnings="no"])
 
-  if test "$warnings" = "yes" ; then
+  AS_IF([test "$warnings" = "yes"], [
     AX_APPEND_COMPILE_FLAGS([-Wall])
     AX_APPEND_COMPILE_FLAGS([-Wbad-function-cast])
     AX_APPEND_COMPILE_FLAGS([-Wcast-align])
@@ -26,5 +26,5 @@ AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
     AX_APPEND_COMPILE_FLAGS([-Wundef])
     AX_APPEND_COMPILE_FLAGS([-Wuninitialized])
     AX_APPEND_COMPILE_FLAGS([-Wwrite-strings])
-  fi
+  ])
 ])

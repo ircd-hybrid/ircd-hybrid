@@ -1,5 +1,4 @@
-# Inspired by work Copyright (C) 2006 Luca Filipozzi
-# vim: set fdm=marker ts=2 sw=2 et:
+dnl Process this file with autoconf to produce a configure script.
 
 AC_REVISION([$Id$])
 

@@ -45,7 +45,7 @@ AC_DEFUN([GCC_STACK_PROTECT_LIB],[
   AC_CACHE_CHECK([whether libssp exists], ssp_cv_lib,
     [ssp_old_libs="$LIBS"
      LIBS="$LIBS -lssp"
-     AC_TRY_LINK(,, ssp_cv_lib=yes, ssp_cv_lib=no)
+     AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])], [ssp_cv_lib=yes], [ssp_cv_lib=no])
      LIBS="$ssp_old_libs"
     ])
   if test $ssp_cv_lib = yes; then
@@ -60,7 +60,7 @@ AC_DEFUN([GCC_STACK_PROTECT_CC],[
       ssp_cv_cc,
       [ssp_old_cflags="$CFLAGS"
        CFLAGS="$CFLAGS -fstack-protector-strong"
-       AC_TRY_COMPILE(,, ssp_cv_cc=yes, ssp_cv_cc=no)
+       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [])], [ssp_cv_cc=yes], [ssp_cv_cc=no])
        CFLAGS="$ssp_old_cflags"
       ])
     if test $ssp_cv_cc = yes; then
@@ -72,7 +72,7 @@ AC_DEFUN([GCC_STACK_PROTECT_CC],[
         ssp_cv_cc,
         [ssp_old_cflags="$CFLAGS"
          CFLAGS="$CFLAGS -fstack-protector"
-         AC_TRY_COMPILE(,, ssp_cv_cc=yes, ssp_cv_cc=no)
+         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [])], [ssp_cv_cc=yes], [ssp_cv_cc=no])
          CFLAGS="$ssp_old_cflags"
         ])
       if test $ssp_cv_cc = yes; then
@@ -90,7 +90,7 @@ AC_DEFUN([GCC_STACK_PROTECT_CXX],[
       ssp_cv_cxx,
       [ssp_old_cxxflags="$CXXFLAGS"
        CXXFLAGS="$CXXFLAGS -fstack-protector-strong"
-       AC_TRY_COMPILE(,, ssp_cv_cxx=yes, ssp_cv_cxx=no)
+       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [])], [ssp_cv_cxx=yes], [ssp_cv_cxx=no])
        CXXFLAGS="$ssp_old_cxxflags"
       ])
     if test $ssp_cv_cxx = yes; then
@@ -102,7 +102,7 @@ AC_DEFUN([GCC_STACK_PROTECT_CXX],[
         ssp_cv_cxx,
         [ssp_old_cxxflags="$CXXFLAGS"
          CXXFLAGS="$CXXFLAGS -fstack-protector"
-         AC_TRY_COMPILE(,, ssp_cv_cxx=yes, ssp_cv_cxx=no)
+         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [])], [ssp_cv_cxx=yes], [ssp_cv_cxx=no])
          CXXFLAGS="$ssp_old_cxxflags"
         ])
       if test $ssp_cv_cxx = yes; then

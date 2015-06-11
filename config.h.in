@@ -248,9 +248,6 @@
 /* Define if dlsym() requires a leading underscore in symbol names. */
 #undef NEED_USCORE
 
-/* Size of the WHOWAS array. */
-#undef NICKNAMEHISTORYLENGTH
-
 /* Name of package */
 #undef PACKAGE
 

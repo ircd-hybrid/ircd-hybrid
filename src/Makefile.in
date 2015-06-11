@@ -102,6 +102,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_define_dir.m4 \
 	$(top_srcdir)/m4/ax_arg_openssl.m4 \
 	$(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_library_net.m4 \
+	$(top_srcdir)/m4/ax_mempool_chunksizes.m4 \
 	$(top_srcdir)/m4/ax_require_defined.m4 \
 	$(top_srcdir)/m4/gcc_stack_protect.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltargz.m4 \

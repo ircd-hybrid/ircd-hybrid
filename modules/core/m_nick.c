@@ -355,7 +355,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   hash_add_client(client_p);
   hash_add_id(client_p);
 
-  /* Parse usermodes */
+  /* Parse user modes */
   for (const char *m = &parv[4][1]; *m; ++m)
   {
     const struct user_modes *tab = umode_map[(unsigned char)*m];

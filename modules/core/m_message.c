@@ -333,7 +333,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
           sendto_one_numeric(source_p, &me, RPL_TARGNOTIFY, target_p->name);
 
         sendto_one_numeric(target_p, &me, RPL_UMODEGMSG,
-                           get_client_name(source_p, HIDE_IP),
+                           source_p->name, source_p->username, source_p->host,
                            callerid ? "+g" : "+G");
         target_p->connection->last_caller_id_time = CurrentTime;
       }

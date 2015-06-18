@@ -532,7 +532,6 @@ main(int argc, char *argv[])
   init_resolver();      /* Needs to be setup before the io loop */
   modules_init();
   read_conf_files(1);   /* cold start init conf files */
-  init_uid();
   initialize_server_capabs();   /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after read_conf_files() */
   channel_init();
@@ -542,14 +541,6 @@ main(int argc, char *argv[])
 #ifdef HAVE_LIBGEOIP
   geoip_ctx = GeoIP_new(GEOIP_MEMORY_CACHE);
 #endif
-
-  if (EmptyString(ConfigServerInfo.sid))
-  {
-    ilog(LOG_TYPE_IRCD, "ERROR: No server id specified in serverinfo block.");
-    exit(EXIT_FAILURE);
-  }
-
-  strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
 
   if (EmptyString(ConfigServerInfo.name))
   {
@@ -568,6 +559,16 @@ main(int argc, char *argv[])
 
   strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
+  if (EmptyString(ConfigServerInfo.sid))
+  {
+    ilog(LOG_TYPE_IRCD, "Generating server ID");
+    generate_sid();
+  }
+  else
+  {
+    strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
+  }
+
   me.from = &me;
   me.servptr = &me;
   me.connection->lasttime = CurrentTime;
@@ -581,6 +582,8 @@ main(int argc, char *argv[])
   hash_add_client(&me);
 
   dlinkAdd(&me, make_dlink_node(), &global_server_list);
+
+  init_uid();
 
   load_kline_database();
   load_dline_database();

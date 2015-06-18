@@ -29,6 +29,7 @@
 #include "client.h"
 #include "event.h"
 #include "hash.h"
+#include "id.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"

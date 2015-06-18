@@ -27,10 +27,6 @@
 #ifndef INCLUDED_user_h
 #define INCLUDED_user_h
 
-#define IRC_MAXSID 3
-#define IRC_MAXUID 6
-#define TOTALSIDUID (IRC_MAXSID + IRC_MAXUID)
-
 struct Client;
 
 struct user_modes
@@ -52,8 +48,6 @@ extern void oper_up(struct Client *);
 
 extern void register_local_user(struct Client *);
 extern void register_remote_user(struct Client *);
-extern void init_uid(void);
-extern int valid_sid(const char *);
 extern int valid_hostname(const char *);
 extern int valid_username(const char *, const int);
 extern int valid_nickname(const char *, const int);

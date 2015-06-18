@@ -1004,17 +1004,3 @@ find_servconn_in_progress(const char *name)
 
   return NULL;
 }
-
-void
-generate_sid(void)
-{
-  unsigned int sid = 0;
-  const char *p;
-
-  for (p = me.name; *p; ++p)
-    sid = 5 * sid + *p;
-  for (p = me.info; *p; ++p)
-    sid = 5 * sid + *p;
-
-  snprintf(me.id, IRC_MAXSID + 1, "%03d", sid % 1000);
-}

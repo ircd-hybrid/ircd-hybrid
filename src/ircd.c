@@ -33,6 +33,7 @@
 #include "event.h"
 #include "fdlist.h"
 #include "hash.h"
+#include "id.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
 #include "motd.h"

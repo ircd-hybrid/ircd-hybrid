@@ -939,12 +939,11 @@ valid_sid(const char *sid)
  * side effects	- new_uid is filled in with server id portion (sid)
  *		  (first 3 bytes). Rest is filled in with '9'.
  *
- * NOTE: this function assumes that 'ConfigServerInfo.sid' has been set to a proper value
  */
 void
 init_uid(void)
 {
-  snprintf(new_uid, sizeof(new_uid), "%s999999", ConfigServerInfo.sid);
+  snprintf(new_uid, sizeof(new_uid), "%s999999", me.id);
 }
 
 /*

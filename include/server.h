@@ -95,4 +95,5 @@ extern void try_connections(void *);
 extern int serv_connect(struct MaskItem *, struct Client *);
 extern struct Client *find_servconn_in_progress(const char *);
 extern struct Server *make_server(struct Client *);
+extern void generate_sid(void);
 #endif /* INCLUDED_server.h */

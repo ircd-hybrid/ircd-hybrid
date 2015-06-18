@@ -123,13 +123,13 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	conf_class.$(OBJEXT) conf_db.$(OBJEXT) conf_pseudo.$(OBJEXT) \
 	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) \
 	event.$(OBJEXT) fdlist.$(OBJEXT) getopt.$(OBJEXT) \
-	hash.$(OBJEXT) hostmask.$(OBJEXT) ipcache.$(OBJEXT) \
-	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
-	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
-	match.$(OBJEXT) memory.$(OBJEXT) mempool.$(OBJEXT) \
-	misc.$(OBJEXT) modules.$(OBJEXT) motd.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	hash.$(OBJEXT) hostmask.$(OBJEXT) id.$(OBJEXT) \
+	ipcache.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_signal.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
+	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) \
+	mempool.$(OBJEXT) misc.$(OBJEXT) modules.$(OBJEXT) \
+	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
+	parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
 	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) res.$(OBJEXT) \
 	reslib.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
 	rng_mt.$(OBJEXT) rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) \
@@ -390,6 +390,7 @@ ircd_SOURCES = auth.c            \
                getopt.c          \
                hash.c            \
                hostmask.c        \
+               id.c              \
                ipcache.c         \
                irc_string.c      \
                ircd.c            \
@@ -536,6 +537,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/id.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipcache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@

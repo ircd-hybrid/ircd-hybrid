@@ -14657,9 +14657,12 @@ else
   debugging="no"
 fi
 
-  if test "$debugging" = "yes" ; then
+
+  if test "$debugging" = "yes"; then :
+
     CFLAGS="-Wall -g -O0"
-  fi
+
+fi
 
 
   # Check whether --enable-warnings was given.
@@ -14670,7 +14673,8 @@ else
 fi
 
 
-  if test "$warnings" = "yes" ; then
+  if test "$warnings" = "yes"; then :
+
 
 
 
@@ -16471,7 +16475,8 @@ fi
 
 done
 
-  fi
+
+fi
 
 
 # Check whether --enable-openssl was given.

@@ -1010,13 +1010,11 @@ generate_sid(void)
 {
   unsigned int sid = 0;
   const char *p;
-  char sidbuf[IRC_MAXSID + 1];
 
   for (p = me.name; *p; ++p)
     sid = 5 * sid + *p;
   for (p = me.info; *p; ++p)
     sid = 5 * sid + *p;
 
-  snprintf(sidbuf, sizeof(sidbuf), "%03d", sid % 1000);
-  strlcpy(me.id, sidbuf, sizeof(me.id));
+  snprintf(me.id, IRC_MAXSID + 1, "%03d", sid % 1000);
 }

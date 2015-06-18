@@ -29,6 +29,7 @@
 #include "irc_string.h"
 #include "send.h"
 #include "numeric.h"
+#include "id.h"
 #include "ircd.h"
 #include "parse.h"
 #include "modules.h"

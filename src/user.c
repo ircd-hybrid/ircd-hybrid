@@ -31,6 +31,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
+#include "id.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
@@ -49,7 +50,6 @@
 #include "watch.h"
 
 static char umode_buffer[IRCD_BUFSIZE];
-static const char *uid_get(void);
 
 /* Used for building up the isupport string,
  * used with init_isupport, add_isupport, delete_isupport
@@ -916,73 +916,6 @@ oper_up(struct Client *source_p)
                 me.id, get_oper_name(source_p));
   send_umode_out(source_p, old);
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
-}
-
-static char new_uid[TOTALSIDUID + 1];  /* Allow for \0 */
-
-int
-valid_sid(const char *sid)
-{
-  if (strlen(sid) == IRC_MAXSID)
-    if (IsDigit(*sid))
-      if (IsAlNum(*(sid + 1)) && IsAlNum(*(sid + 2)))
-        return 1;
-
-  return 0;
-}
-
-/*
- * init_uid()
- *
- * inputs	- NONE
- * output	- NONE
- * side effects	- new_uid is filled in with server id portion (sid)
- *		  (first 3 bytes). Rest is filled in with '9'.
- *
- */
-void
-init_uid(void)
-{
-  snprintf(new_uid, sizeof(new_uid), "%s999999", me.id);
-}
-
-/*
- * add_one_to_uid
- *
- * inputs	- index number into new_uid
- * output	- NONE
- * side effects	- new_uid is incremented by one
- *		  note this is a recursive function
- */
-static void
-add_one_to_uid(unsigned int i)
-{
-  if (i < IRC_MAXSID)
-    return;
-
-  if (new_uid[i] == 'Z')
-    new_uid[i] = '0';
-  else if (new_uid[i] == '9')
-  {
-    new_uid[i] = 'A';
-    add_one_to_uid(i - 1);
-  }
-  else
-    ++new_uid[i];
-}
-
-/*
- * uid_get
- *
- * inputs       - struct Client *
- * output       - new UID is returned to caller
- * side effects - new_uid is incremented by one.
- */
-static const char *
-uid_get(void)
-{
-  add_one_to_uid(TOTALSIDUID - 1);  /* Index from 0 */
-  return new_uid;
 }
 
 /*

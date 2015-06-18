@@ -25,6 +25,7 @@ ircd_SOURCES = auth.c            \
                getopt.c          \
                hash.c            \
                hostmask.c        \
+               id.c              \
                ipcache.c         \
                irc_string.c      \
                ircd.c            \
@@ -41,7 +42,6 @@ ircd_SOURCES = auth.c            \
                numeric.c         \
                packet.c          \
                parse.c           \
-               patricia.c        \
                s_bsd_epoll.c     \
                s_bsd_poll.c      \
                s_bsd_devpoll.c   \

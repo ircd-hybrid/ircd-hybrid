@@ -32,6 +32,7 @@
 #include "client.h"
 #include "modules.h"
 #include "hash.h"
+#include "id.h"
 #include "resv.h"
 #include "rng_mt.h"
 #include "userhost.h"

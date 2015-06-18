@@ -38,6 +38,7 @@
 #include "conf_class.h"
 #include "conf_pseudo.h"
 #include "event.h"
+#include "id.h"
 #include "log.h"
 #include "client.h"	/* for UMODE_ALL only */
 #include "irc_string.h"

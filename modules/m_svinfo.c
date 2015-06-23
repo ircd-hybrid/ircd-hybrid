@@ -80,7 +80,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   set_time();
 
   theirtime = atol(parv[4]);
-  deltat = abs(theirtime - CurrentTime);
+  deltat = labs(theirtime - CurrentTime);
 
   if (deltat > ConfigGeneral.ts_max_delta)
   {

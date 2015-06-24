@@ -539,7 +539,7 @@ main(int argc, char *argv[])
   channel_init();
   read_links_file();
   motd_init();
-  user_usermodes_init();
+  user_modes_init();
 #ifdef HAVE_LIBGEOIP
   geoip_ctx = GeoIP_new(GEOIP_MEMORY_CACHE);
 #endif

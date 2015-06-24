@@ -30,6 +30,7 @@ ircd_SOURCES = auth.c            \
                irc_string.c      \
                ircd.c            \
                ircd_signal.c     \
+               isupport.c        \
                list.c            \
                listener.c        \
                log.c             \

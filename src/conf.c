@@ -55,6 +55,7 @@
 #include "conf_class.h"
 #include "motd.h"
 #include "ipcache.h"
+#include "isupport.h"
 
 
 struct config_channel_entry ConfigChannel;
@@ -1281,27 +1282,27 @@ read_conf_files(int cold)
 
   log_reopen_all();
 
-  add_isupport("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
-  add_isupport("NETWORK", ConfigServerInfo.network_name, -1);
+  isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
+  isupport_add("NETWORK", ConfigServerInfo.network_name, -1);
 
   snprintf(chanmodes, sizeof(chanmodes), "beI:%d", ConfigChannel.max_bans);
-  add_isupport("MAXLIST", chanmodes, -1);
-  add_isupport("MAXTARGETS", NULL, ConfigGeneral.max_targets);
-  add_isupport("CHANTYPES", "#", -1);
+  isupport_add("MAXLIST", chanmodes, -1);
+  isupport_add("MAXTARGETS", NULL, ConfigGeneral.max_targets);
+  isupport_add("CHANTYPES", "#", -1);
 
   snprintf(chanlimit, sizeof(chanlimit), "#:%d",
            ConfigChannel.max_channels);
-  add_isupport("CHANLIMIT", chanlimit, -1);
+  isupport_add("CHANLIMIT", chanlimit, -1);
   snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstCMORS");
-  add_isupport("CHANNELLEN", NULL, CHANNELLEN);
-  add_isupport("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
-  add_isupport("CHANMODES", chanmodes, -1);
+  isupport_add("CHANNELLEN", NULL, CHANNELLEN);
+  isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
+  isupport_add("CHANMODES", chanmodes, -1);
 
   /*
    * message_locale may have changed.  rebuild isupport since it relies
    * on strlen(form_str(RPL_ISUPPORT))
    */
-  rebuild_isupport_message_line();
+  isupport_rebuild();
 }
 
 /* conf_add_class_to_conf()

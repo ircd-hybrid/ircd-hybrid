@@ -57,6 +57,7 @@
 #include "conf_db.h"
 #include "conf_class.h"
 #include "ipcache.h"
+#include "isupport.h"
 
 
 #ifdef HAVE_LIBGEOIP
@@ -521,7 +522,7 @@ main(int argc, char *argv[])
 
   mp_pool_init();
   init_dlink_nodes();
-  init_isupport();
+  isupport_init();
   dbuf_init();
   hash_init();
   ipcache_init();

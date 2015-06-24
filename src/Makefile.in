@@ -125,16 +125,17 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	event.$(OBJEXT) fdlist.$(OBJEXT) getopt.$(OBJEXT) \
 	hash.$(OBJEXT) hostmask.$(OBJEXT) id.$(OBJEXT) \
 	ipcache.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_signal.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
-	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) \
-	mempool.$(OBJEXT) misc.$(OBJEXT) modules.$(OBJEXT) \
-	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
-	parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
-	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) res.$(OBJEXT) \
-	reslib.$(OBJEXT) restart.$(OBJEXT) resv.$(OBJEXT) \
-	rng_mt.$(OBJEXT) rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) \
-	server.$(OBJEXT) user.$(OBJEXT) version.$(OBJEXT) \
-	watch.$(OBJEXT) whowas.$(OBJEXT)
+	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) list.$(OBJEXT) \
+	listener.$(OBJEXT) log.$(OBJEXT) match.$(OBJEXT) \
+	memory.$(OBJEXT) mempool.$(OBJEXT) misc.$(OBJEXT) \
+	modules.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
+	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
+	s_bsd_kqueue.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
+	restart.$(OBJEXT) resv.$(OBJEXT) rng_mt.$(OBJEXT) \
+	rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	user.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -395,6 +396,7 @@ ircd_SOURCES = auth.c            \
                irc_string.c      \
                ircd.c            \
                ircd_signal.c     \
+               isupport.c        \
                list.c            \
                listener.c        \
                log.c             \
@@ -542,6 +544,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isupport.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Po@am__quote@

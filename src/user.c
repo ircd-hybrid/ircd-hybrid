@@ -845,7 +845,7 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
  * \param source_p Pointer to given client to oper
  */
 void
-oper_up(struct Client *source_p)
+user_oper_up(struct Client *source_p)
 {
   const unsigned int old = source_p->umodes;
   const struct MaskItem *const conf = source_p->connection->confs.head->data;

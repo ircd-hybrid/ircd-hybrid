@@ -125,7 +125,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    oper_up(source_p);
+    user_oper_up(source_p);
 
     ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s", opername, source_p->name,
          source_p->username, source_p->host);

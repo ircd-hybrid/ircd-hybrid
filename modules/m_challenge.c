@@ -116,7 +116,7 @@ m_challenge(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    oper_up(source_p);
+    user_oper_up(source_p);
 
     ilog(LOG_TYPE_OPER, "CHALLENGE %s by %s!%s@%s",
          source_p->connection->challenge_operator,

@@ -87,7 +87,7 @@ const struct user_modes  umode_tab[] =
 };
 
 void
-user_usermodes_init(void)
+user_modes_init(void)
 {
   char *umode_buffer_ptr = umode_buffer;
 

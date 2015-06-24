@@ -48,22 +48,9 @@
 #include "misc.h"
 #include "parse.h"
 #include "watch.h"
+#include "isupport.h"
 
 static char umode_buffer[IRCD_BUFSIZE];
-
-/* Used for building up the isupport string,
- * used with init_isupport, add_isupport, delete_isupport
- */
-struct Isupport
-{
-  dlink_node node;
-  char *name;
-  char *options;
-  int number;
-};
-
-static dlink_list support_list;
-static dlink_list support_list_lines;
 
 const struct user_modes *umode_map[256];
 const struct user_modes  umode_tab[] =
@@ -161,22 +148,6 @@ show_lusers(struct Client *source_p)
   if ((Count.local + Count.myserver) > Count.max_loc_con)
     Count.max_loc_con = Count.local + Count.myserver;
 }
-
-/* show_isupport()
- *
- * inputs       - pointer to client
- * output       - NONE
- * side effects	- display to client what we support (for them)
- */
-void
-show_isupport(struct Client *source_p)
-{
-  const dlink_node *node = NULL;
-
-  DLINK_FOREACH(node, support_list_lines.head)
-    sendto_one_numeric(source_p, &me, RPL_ISUPPORT, node->data);
-}
-
 
 /* report_and_set_user_flags()
  *
@@ -313,7 +284,7 @@ user_welcome(struct Client *source_p)
                      get_listener_name(source_p->connection->listener), ircd_version);
   sendto_one_numeric(source_p, &me, RPL_CREATED, built_date);
   sendto_one_numeric(source_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
-  show_isupport(source_p);
+  isupport_show(source_p);
   sendto_one_numeric(source_p, &me, RPL_YOURID, source_p->id);
 
   show_lusers(source_p);
@@ -916,162 +887,4 @@ oper_up(struct Client *source_p)
                 me.id, get_oper_name(source_p));
   send_umode_out(source_p, old);
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
-}
-
-/*
- * init_isupport()
- *
- * input	- NONE
- * output	- NONE
- * side effects	- Must be called before isupport is enabled
- */
-void
-init_isupport(void)
-{
-  add_isupport("CALLERID", NULL, -1);
-  add_isupport("CASEMAPPING", "rfc1459", -1);
-  add_isupport("DEAF", "D", -1);
-  add_isupport("KICKLEN", NULL, KICKLEN);
-  add_isupport("MODES", NULL, MAXMODEPARAMS);
-  add_isupport("PREFIX", "(ohv)@%+", -1);
-  add_isupport("STATUSMSG", "@%+", -1);
-  add_isupport("EXCEPTS", NULL, -1);
-  add_isupport("INVEX", NULL, -1);
-}
-
-/*
- * add_isupport()
- *
- * input	- name of supported function
- *		- options if any
- *		- number if any
- * output	- NONE
- * side effects	- Each supported item must call this when activated
- */
-void
-add_isupport(const char *name, const char *options, int n)
-{
-  dlink_node *node = NULL;
-  struct Isupport *support = NULL;
-
-  DLINK_FOREACH(node, support_list.head)
-  {
-    support = node->data;
-    if (irccmp(support->name, name) == 0)
-    {
-      MyFree(support->name);
-      MyFree(support->options);
-      break;
-    }
-  }
-
-  if (node == NULL)
-  {
-    support = MyCalloc(sizeof(*support));
-    dlinkAddTail(support, &support->node, &support_list);
-  }
-
-  support->name = xstrdup(name);
-  if (options)
-    support->options = xstrdup(options);
-  support->number = n;
-
-  rebuild_isupport_message_line();
-}
-
-/*
- * delete_isupport()
- *
- * input	- name of supported function
- * output	- NONE
- * side effects	- Each supported item must call this when deactivated
- */
-void
-delete_isupport(const char *name)
-{
-  dlink_node *node = NULL;
-
-  DLINK_FOREACH(node, support_list.head)
-  {
-    struct Isupport *support = node->data;
-
-    if (irccmp(support->name, name) == 0)
-    {
-      dlinkDelete(node, &support_list);
-      MyFree(support->name);
-      MyFree(support->options);
-      MyFree(support);
-      break;
-    }
-  }
-
-  rebuild_isupport_message_line();
-}
-
-/*
- * rebuild_isupport_message_line
- *
- * input	- NONE
- * output	- NONE
- * side effects	- Destroy the isupport MessageFile lines, and rebuild.
- */
-void
-rebuild_isupport_message_line(void)
-{
-  char isupportbuffer[IRCD_BUFSIZE];
-  char *p = isupportbuffer;
-  dlink_node *node = NULL, *node_next = NULL;
-  int n = 0;
-  int tokens = 0;
-  size_t len = 0;
-  size_t reserve = strlen(me.name) + HOSTLEN + strlen(numeric_form(RPL_ISUPPORT));
-
-  DLINK_FOREACH_SAFE(node, node_next, support_list_lines.head)
-  {
-    dlinkDelete(node, &support_list_lines);
-    MyFree(node->data);
-    free_dlink_node(node);
-  }
-
-  DLINK_FOREACH(node, support_list.head)
-  {
-    struct Isupport *support = node->data;
-
-    p += (n = sprintf(p, "%s", support->name));
-    len += n;
-
-    if (support->options)
-    {
-      p += (n = sprintf(p, "=%s", support->options));
-      len += n;
-    }
-
-    if (support->number > 0)
-    {
-      p += (n = sprintf(p, "=%d", support->number));
-      len += n;
-    }
-
-    *p++ = ' ';
-    len++;
-    *p = '\0';
-
-    if (++tokens == (MAXPARA-2) || len >= (sizeof(isupportbuffer)-reserve))
-    { /* arbritrary for now */
-      if (*--p == ' ')
-        *p = '\0';
-
-      dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &support_list_lines);
-      p = isupportbuffer;
-      len = 0;
-      n = tokens = 0;
-    }
-  }
-
-  if (len)
-  {
-    if (*--p == ' ')
-      *p = '\0';
-    dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &support_list_lines);
-  }
 }

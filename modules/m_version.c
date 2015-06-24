@@ -34,6 +34,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
+#include "isupport.h"
 
 
 /* Option string. */
@@ -81,7 +82,7 @@ m_version(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_numeric(source_p, &me, RPL_VERSION, ircd_version, serno,
                      me.name, serveropts);
-  show_isupport(source_p);
+  isupport_show(source_p);
   return 0;
 }
 
@@ -104,7 +105,7 @@ ms_version(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_numeric(source_p, &me, RPL_VERSION, ircd_version, serno,
                      me.name, serveropts);
-  show_isupport(source_p);
+  isupport_show(source_p);
   return 0;
 }
 

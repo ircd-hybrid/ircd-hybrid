@@ -36,6 +36,7 @@
 #include "modules.h"
 #include "user.h"
 #include "watch.h"
+#include "isupport.h"
 
 
 /*
@@ -255,14 +256,14 @@ static void
 module_init(void)
 {
   mod_add_cmd(&watch_msgtab);
-  add_isupport("WATCH", NULL, ConfigGeneral.max_watch);
+  isupport_add("WATCH", NULL, ConfigGeneral.max_watch);
 }
 
 static void
 module_exit(void)
 {
   mod_del_cmd(&watch_msgtab);
-  delete_isupport("WATCH");
+  isupport_delete("WATCH");
 }
 
 struct module module_entry =

@@ -36,6 +36,7 @@
 #include "modules.h"
 #include "user.h"
 #include "memory.h"
+#include "isupport.h"
 
 
 static void
@@ -197,16 +198,16 @@ static void
 module_init(void)
 {
   mod_add_cmd(&list_msgtab);
-  add_isupport("ELIST", "CMNTU", -1);
-  add_isupport("SAFELIST", NULL, -1);
+  isupport_add("ELIST", "CMNTU", -1);
+  isupport_add("SAFELIST", NULL, -1);
 }
 
 static void
 module_exit(void)
 {
   mod_del_cmd(&list_msgtab);
-  delete_isupport("ELIST");
-  delete_isupport("SAFELIST");
+  isupport_delete("ELIST");
+  isupport_delete("SAFELIST");
 }
 
 struct module module_entry =

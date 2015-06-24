@@ -35,6 +35,7 @@
 #include "conf.h"
 #include "server.h"
 #include "user.h"
+#include "isupport.h"
 
 
 /*! \brief AWAY command handler
@@ -152,14 +153,14 @@ static void
 module_init(void)
 {
   mod_add_cmd(&away_msgtab);
-  add_isupport("AWAYLEN", NULL, AWAYLEN);
+  isupport_add("AWAYLEN", NULL, AWAYLEN);
 }
 
 static void
 module_exit(void)
 {
   mod_del_cmd(&away_msgtab);
-  delete_isupport("AWAYLEN");
+  isupport_delete("AWAYLEN");
 }
 
 struct module module_entry =

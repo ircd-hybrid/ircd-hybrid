@@ -39,6 +39,7 @@
 #include "modules.h"
 #include "server.h"
 #include "user.h"
+#include "isupport.h"
 
 
 /*! \brief KNOCK command handler
@@ -147,7 +148,7 @@ module_init(void)
 {
   mod_add_cmd(&knock_msgtab);
   add_capability("KNOCK", CAP_KNOCK);
-  add_isupport("KNOCK", NULL, -1);
+  isupport_add("KNOCK", NULL, -1);
 }
 
 static void
@@ -155,7 +156,7 @@ module_exit(void)
 {
   mod_del_cmd(&knock_msgtab);
   delete_capability("KNOCK");
-  delete_isupport("KNOCK");
+  isupport_delete("KNOCK");
 }
 
 struct module module_entry =

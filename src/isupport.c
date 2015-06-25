@@ -198,7 +198,8 @@ isupport_rebuild(void)
       dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &isupport_list_lines);
       p = isupportbuffer;
       len = 0;
-      n = tokens = 0;
+      n = 0;
+      tokens = 0;
     }
   }
 

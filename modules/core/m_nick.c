@@ -807,9 +807,6 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
 
-  if (parc < 10)
-    return 0;
-
   if (check_clean_nick(source_p, parv[1], source_p) ||
       check_clean_user(source_p, parv[1], parv[5], source_p) ||
       check_clean_host(source_p, parv[1], parv[6], source_p))

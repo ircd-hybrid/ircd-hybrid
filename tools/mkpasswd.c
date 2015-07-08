@@ -62,6 +62,7 @@ main(int argc, char *argv[])
   const char *plaintext = NULL;
   const char *saltpara = NULL;
   const char *salt = NULL;
+  const char *ret = NULL;
   int c;
   int flag = 0;
   int length = 0; /* Not Set */
@@ -213,7 +214,11 @@ main(int argc, char *argv[])
   else
     plaintext = getpass("plaintext: ");
 
-  printf("%s\n", crypt(plaintext, salt));
+  if ((ret = crypt(plaintext, salt)))
+    printf("%s\n", ret);
+  else
+    printf("crypt() failed: invalid or unsupported setting\n");
+
   return 0;
 }
 

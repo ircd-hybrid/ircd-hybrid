@@ -1,5 +1,8 @@
 -- Noteworthy changes in version 8.2.9 (2015-??-??)
 o) Added 'xline_exempt' to auth {} block flags
+o) serverinfo::sid is now optional. A unique SID is now automatically
+   generated based on the server's name and description
+o) Various fixes to the mkpasswd tool
 
 
 -- Noteworthy changes in version 8.2.8 (2015-05-10)

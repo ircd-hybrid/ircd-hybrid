@@ -98,11 +98,13 @@ main(int argc, char *argv[])
         break;
       case 'l':
         flag |= FLAG_LENGTH;
-        length = atoi(optarg);
+        if ((length = atoi(optarg)) < 0)
+          length = 0;
         break;
       case 'r':
         flag |= FLAG_ROUNDS;
-        rounds = atoi(optarg);
+        if ((rounds = atoi(optarg)) < 0)
+          rounds = 0;
         break;
       case 's':
         flag |= FLAG_SALT;

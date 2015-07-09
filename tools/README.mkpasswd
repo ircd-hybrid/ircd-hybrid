@@ -2,7 +2,7 @@ $Id$
 
 This is documentation for the mkpasswd.c included in ircd-hybrid.
 
-This version of mkpasswd can create DES, Extended DES, BlowFish, MD5,
+This version of mkpasswd can create DES, Extended DES, Blowfish, MD5,
 SHA-256 and SHA-512 passwords, with either randomly generated or user
 provided salts.
 
@@ -10,11 +10,11 @@ Options:
 -6 - Create a SHA-512 password
 -5 - Create a SHA-256 password
 -m - Create an MD5 password
--b - Create a BlowFish password
+-b - Create a Blowfish password
 -d - Create a DES password
 -e - Create an Extended DES password
 -l - Specify the length of a random MD5 salt
--r - Specify a number of rounds for a BlowFish or Extended DES password
+-r - Specify a number of rounds for a Blowfish or Extended DES password
 -p - Specify the plaintext password at the command line
 -s - Specify the salt at the command line
 -R - Specify a raw salt passed directly to crypt()
@@ -42,8 +42,6 @@ Linux glibc (SHA-256/SHA-512 since glibc 2.7, DES and MD5)
 FreeBSD 3.x (DES (MD5 maybe))
 FreeBSD 4.x (DES and MD5)
 Solaris 2.5-2.6 (DES only)
-Cygwin 1.1.4 (DES only)
-Prior Cygwin with the MD5 libcrypt (MD5 only)
 OpenBSD 2.7 (don't link with -lcrypt) (DES and MD5, no Blowfish support)
 Mac OS-X (Darwin) (don't link with -lcrypt) (DES only)
 

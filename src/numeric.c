@@ -39,7 +39,6 @@ static const char *const replies[] =
   /* 015 */  [RPL_MAP] = ":%s%s",
   /* 016 */  [RPL_MAPMORE] = ":%s%s --> *more*",
   /* 017 */  [RPL_MAPEND] = ":End of /MAP",
-  /* 042 */  [RPL_YOURID] = "%s :your unique ID",
   /* 200 */  [RPL_TRACELINK] = "Link %s %s %s",
   /* 201 */  [RPL_TRACECONNECTING] = "Try. %s %s",
   /* 202 */  [RPL_TRACEHANDSHAKE] = "H.S. %s %s",

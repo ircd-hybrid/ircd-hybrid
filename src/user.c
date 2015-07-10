@@ -284,9 +284,8 @@ user_welcome(struct Client *source_p)
                      get_listener_name(source_p->connection->listener), ircd_version);
   sendto_one_numeric(source_p, &me, RPL_CREATED, built_date);
   sendto_one_numeric(source_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
-  isupport_show(source_p);
-  sendto_one_numeric(source_p, &me, RPL_YOURID, source_p->id);
 
+  isupport_show(source_p);
   show_lusers(source_p);
   motd_signon(source_p);
 }

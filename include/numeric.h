@@ -47,7 +47,6 @@ enum irc_numerics
   RPL_MAP                  = 15,
   RPL_MAPMORE              = 16,
   RPL_MAPEND               = 17,
-  RPL_YOURID               = 42,
 
   /*
    * Numeric replies from server commands.

@@ -3,6 +3,8 @@ o) Added 'xline_exempt' to auth {} block flags
 o) serverinfo::sid is now optional. A unique SID is now automatically
    generated based on the server's name and description
 o) Various fixes to the mkpasswd tool
+o) If supported by the compiler, ircd-hybrid now compiles with
+   -fstack-protector-strong instead of -fstack-protector
 
 
 -- Noteworthy changes in version 8.2.8 (2015-05-10)

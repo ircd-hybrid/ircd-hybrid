@@ -218,9 +218,9 @@ do_whois(struct Client *source_p, const char *name)
 {
   struct Client *target_p = NULL;
 
-  if ((target_p = find_person(source_p, name)))
+  if ((target_p = hash_find_client(name)) && IsClient(target_p))
     whois_person(source_p, target_p);
-  else if (!IsDigit(*name))
+  else
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFWHOIS, name);

@@ -1,5 +1,5 @@
 /*
- * $Id: patricia.c,v 1.7 2005/12/07 20:46:41 dplonka Exp $
+ * $Id$
  * Dave Plonka <plonka@doit.wisc.edu>
  *
  * This file had been called "radix.c" in the MRT sources.

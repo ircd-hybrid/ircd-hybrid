@@ -21,7 +21,7 @@
 
 /*! \file conf_pseudo.h
  * \brief Handles with pseudo commands/service aliases.
- * \version $Id: conf_pseudo.h 4299 2014-07-20 13:51:28Z michael $
+ * \version $Id$
  */
 
 #ifndef INCLUDED_conf_pseudo_h

@@ -300,7 +300,7 @@ const unsigned char ToUpperTab[] =
 /*
  * CharAttrs table
  *
- * NOTE: RFC 1459 sez: anything but a ^G, comma, or space is allowed
+ * NOTE: RFC 1459 says: anything but a ^G, comma, or space is allowed
  * for channel names
  */
 const unsigned int CharAttrs[] =

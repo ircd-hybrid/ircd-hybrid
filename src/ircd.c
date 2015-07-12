@@ -331,15 +331,11 @@ check_pidfile(const char *filename)
   char buff[IRCD_BUFSIZE];
   pid_t pidfromfile;
 
-  /* Don't do logging here, since we don't have log() initialised */
   if ((fb = fopen(filename, "r")))
   {
     if (!fgets(buff, 20, fb))
-    {
-      /* log(L_ERROR, "Error reading from pid file %s (%s)", filename,
-       * strerror(errno));
-       */
-    }
+      ilog(LOG_TYPE_IRCD, "Error reading from pid file %s: %s",
+           filename, strerror(errno));
     else
     {
       pidfromfile = atoi(buff);
@@ -355,9 +351,8 @@ check_pidfile(const char *filename)
     fclose(fb);
   }
   else if (errno != ENOENT)
-  {
-    /* log(L_ERROR, "Error opening pid file %s", filename); */
-  }
+    ilog(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
+         filename, strerror(errno));
 }
 
 /* setup_corefile()

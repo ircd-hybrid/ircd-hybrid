@@ -70,8 +70,8 @@ server_die(const char *message, int rboot)
   if (rboot)
   {
     execv(SPATH, myargv);
-    exit(1);
+    exit(EXIT_FAILURE);
   }
   else
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

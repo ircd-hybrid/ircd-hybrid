@@ -35,6 +35,13 @@
 
 static dlink_list events;
 
+
+const dlink_list *
+event_get_list(void)
+{
+  return &events;
+}
+
 void
 event_add(struct event *ev, void *data)
 {
@@ -127,32 +134,3 @@ set_back_events(time_t by)
     ev->next -= by;
   }
 }
-
-/*
- * void show_events(struct Client *source_p)
- *
- * Input: Client requesting the event
- * Output: List of events
- * Side Effects: None
- */
-void
-show_events(struct Client *source_p)
-{
-  const dlink_node *node;
-
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "E :Operation                      Next Execution");
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "E :---------------------------------------------");
-
-  DLINK_FOREACH(node, events.head)
-  {
-    const struct event *ev = node->data;
-
-    sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                       "E :%-30s %-4d seconds",
-                       ev->name,
-                       (int)(ev->next - CurrentTime));
-  }
-}
-

@@ -29,9 +29,6 @@
 
 #include "list.h"
 
-struct Client;
-struct event;
-
 struct event
 {
   /* public */
@@ -47,10 +44,10 @@ struct event
   dlink_node node;
 };
 
+extern const dlink_list *event_get_list(void);
 extern void event_add(struct event *, void *);
 extern void event_addish(struct event *, void *);
 extern void event_delete(struct event *);
 extern void event_run(void);
 extern void set_back_events(time_t);
-extern void show_events(struct Client *);
 #endif /* INCLUDED_event_h */

@@ -849,8 +849,6 @@ user_oper_up(struct Client *source_p)
   const unsigned int old = source_p->umodes;
   const struct MaskItem *const conf = source_p->connection->confs.head->data;
 
-  assert(source_p->connection->confs.head);
-
   ++Count.oper;
   SetOper(source_p);
 

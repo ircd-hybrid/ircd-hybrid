@@ -566,7 +566,7 @@ get_client_name(const struct Client *client_p, enum addr_mask_type type)
         snprintf(buf, sizeof(buf), "%s[%s@ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]",
                  client_p->name, client_p->username);
       break;
-    default:
+    default:  /* HIDE_IP */
       snprintf(buf, sizeof(buf), "%s[%s@%s]",
                client_p->name,
                client_p->username, client_p->host);

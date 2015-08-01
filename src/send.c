@@ -96,7 +96,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
                            get_sendq(&to->connection->confs));
 
     if (IsClient(to))
-      SetSendQExceeded(to);
+      AddFlag(to, FLAGS_SENDQEX);
 
     dead_link_on_write(to, 0);
     return;

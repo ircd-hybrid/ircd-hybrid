@@ -447,7 +447,7 @@ set_server_gecos(struct Client *client_p, const char *info)
   /* check for (H) which is a hidden server */
   if (!strncmp(s, "(H) ", 4))
   {
-    SetHidden(client_p);
+    AddFlag(client_p, FLAGS_HIDDEN);
     s = s + 4;
   }
 

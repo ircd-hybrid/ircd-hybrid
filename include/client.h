@@ -210,8 +210,6 @@ struct MaskItem;
 #define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
 #define IsClosing(x)            ((x)->flags & FLAGS_CLOSING)
 #define SetClosing(x)           ((x)->flags |= FLAGS_CLOSING)
-#define SetCanFlood(x)          ((x)->flags |= FLAGS_CANFLOOD)
-#define IsCanFlood(x)           ((x)->flags & FLAGS_CANFLOOD)
 #define IsDefunct(x)            ((x)->flags & (FLAGS_DEADSOCKET|FLAGS_CLOSING|FLAGS_KILLED))
 
 /* oper flags */
@@ -224,34 +222,8 @@ struct MaskItem;
                                  if (!HasUMode(x, UMODE_OPER) && !IsServer((x))) \
                                   (x)->handler = CLIENT_HANDLER; }
 
-#define SetSendQExceeded(x)     ((x)->flags |= FLAGS_SENDQEX)
-#define IsSendQExceeded(x)      ((x)->flags &  FLAGS_SENDQEX)
-
-#define SetUserHost(x)          ((x)->flags |= FLAGS_USERHOST)
-#define IsUserHostIp(x)         ((x)->flags & FLAGS_USERHOST)
-
-#define SetPingSent(x)          ((x)->flags |= FLAGS_PINGSENT)
-#define IsPingSent(x)           ((x)->flags & FLAGS_PINGSENT)
-#define ClearPingSent(x)        ((x)->flags &= ~FLAGS_PINGSENT)
-
-#define SetGotId(x)             ((x)->flags |= FLAGS_GOTID)
-#define IsGotId(x)              ((x)->flags & FLAGS_GOTID)
-
-#define IsExemptKline(x)        ((x)->flags & FLAGS_EXEMPTKLINE)
-#define SetExemptKline(x)       ((x)->flags |= FLAGS_EXEMPTKLINE)
-#define IsExemptXline(x)        ((x)->flags & FLAGS_EXEMPTXLINE)
-#define SetExemptXline(x)       ((x)->flags |= FLAGS_EXEMPTXLINE)
-#define IsExemptLimits(x)       ((x)->flags & FLAGS_NOLIMIT)
-#define SetExemptLimits(x)      ((x)->flags |= FLAGS_NOLIMIT)
-#define IsExemptResv(x)         ((x)->flags & FLAGS_EXEMPTRESV)
-#define SetExemptResv(x)        ((x)->flags |= FLAGS_EXEMPTRESV)
-
 #define IsFloodDone(x)          ((x)->flags &  FLAGS_FLOODDONE)
-#define SetFloodDone(x)         ((x)->flags |= FLAGS_FLOODDONE)
-#define HasPingCookie(x)        ((x)->flags & FLAGS_PING_COOKIE)
-#define SetPingCookie(x)        ((x)->flags |= FLAGS_PING_COOKIE)
 #define IsHidden(x)             ((x)->flags &  FLAGS_HIDDEN)
-#define SetHidden(x)            ((x)->flags |= FLAGS_HIDDEN)
 
 
 /*! \brief addr_mask_type enumeration */

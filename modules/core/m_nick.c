@@ -681,7 +681,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!IsExemptResv(source_p) &&
+  if (!HasFlag(source_p, FLAGS_EXEMPTRESV) &&
       !(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv) &&
       (conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
   {

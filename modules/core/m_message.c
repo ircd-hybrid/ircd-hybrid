@@ -120,7 +120,7 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
   if (HasUMode(source_p, UMODE_OPER) || HasFlag(source_p, FLAGS_SERVICE))
     return 0;
 
-  if (GlobalSetOptions.floodcount && !IsCanFlood(source_p))
+  if (GlobalSetOptions.floodcount && !HasFlag(source_p, FLAGS_CANFLOOD))
   {
     if ((target_p->connection->first_received_message_time + 1)
         < CurrentTime)
@@ -175,7 +175,7 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
 static int
 flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
 {
-  if (GlobalSetOptions.floodcount && !IsCanFlood(source_p))
+  if (GlobalSetOptions.floodcount && !HasFlag(source_p, FLAGS_CANFLOOD))
   {
     if ((chptr->first_received_message_time + 1) < CurrentTime)
     {

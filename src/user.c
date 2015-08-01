@@ -167,32 +167,32 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
   /* If this user is in the exception class, set it "E lined" */
   if (IsConfExemptKline(conf))
   {
-    SetExemptKline(source_p);
+    AddFlag(source_p, FLAGS_EXEMPTKLINE);
     sendto_one_notice(source_p, &me, ":*** You are exempt from K/D lines. Congrats.");
   }
 
   if (IsConfExemptXline(conf))
   {
-    SetExemptXline(source_p);
+    AddFlag(source_p, FLAGS_EXEMPTXLINE);
     sendto_one_notice(source_p, &me, ":*** You are exempt from X lines. Congrats.");
   }
 
   if (IsConfExemptResv(conf))
   {
-    SetExemptResv(source_p);
+    AddFlag(source_p, FLAGS_EXEMPTRESV);
     sendto_one_notice(source_p, &me, ":*** You are exempt from resvs. Congrats.");
   }
 
   /* If this user is exempt from user limits set it "F lined" */
   if (IsConfExemptLimits(conf))
   {
-    SetExemptLimits(source_p);
+    AddFlag(source_p, FLAGS_NOLIMIT);
     sendto_one_notice(source_p, &me, ":*** You are exempt from user limits. Congrats.");
   }
 
   if (IsConfCanFlood(conf))
   {
-    SetCanFlood(source_p);
+    AddFlag(source_p, FLAGS_CANFLOOD);
     sendto_one_notice(source_p, &me, ":*** You are exempt from flood "
                       "protection, aren't you fearsome.");
   }
@@ -301,7 +301,7 @@ check_xline(struct Client *source_p)
 {
   struct MaskItem *conf = NULL;
 
-  if (IsExemptXline(source_p))
+  if (HasFlag(source_p, FLAGS_EXEMPTXLINE))
     return 0;
 
   if ((conf = find_matching_name_conf(CONF_XLINE, source_p->info, NULL, NULL, 0)))
@@ -339,18 +339,18 @@ register_local_user(struct Client *source_p)
 
   if (ConfigGeneral.ping_cookie)
   {
-    if (!IsPingSent(source_p) && !source_p->connection->random_ping)
+    if (!HasFlag(source_p, FLAGS_PINGSENT) && !source_p->connection->random_ping)
     {
       do
         source_p->connection->random_ping = genrand_int32();
       while (!source_p->connection->random_ping);
 
       sendto_one(source_p, "PING :%u", source_p->connection->random_ping);
-      SetPingSent(source_p);
+      AddFlag(source_p, FLAGS_PINGSENT);
       return;
     }
 
-    if (!HasPingCookie(source_p))
+    if (!HasFlag(source_p, FLAGS_PING_COOKIE))
       return;
   }
 
@@ -370,7 +370,7 @@ register_local_user(struct Client *source_p)
 
   conf = source_p->connection->confs.head->data;
 
-  if (!IsGotId(source_p))
+  if (!HasFlag(source_p, FLAGS_GOTID))
   {
     char username[USERLEN + 1] = "";
     const char *p = username;
@@ -432,7 +432,7 @@ register_local_user(struct Client *source_p)
    *   -Taner
    */
   if ((Count.local >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
-      (Count.local >= GlobalSetOptions.maxclients && !IsExemptLimits(source_p)))
+      (Count.local >= GlobalSetOptions.maxclients && !HasFlag(source_p, FLAGS_NOLIMIT)))
   {
     sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                          "Too many clients, rejecting %s[%s].",
@@ -503,7 +503,7 @@ register_local_user(struct Client *source_p)
 
   user_welcome(source_p);
   add_user_host(source_p->username, source_p->host, 0);
-  SetUserHost(source_p);
+  AddFlag(source_p, FLAGS_USERHOST);
 
   introduce_client(source_p);
 }
@@ -554,7 +554,7 @@ register_remote_user(struct Client *source_p)
   dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->client_list);
   dlinkAdd(source_p, &source_p->node, &global_client_list);
   add_user_host(source_p->username, source_p->host, 1);
-  SetUserHost(source_p);
+  AddFlag(source_p, FLAGS_USERHOST);
 
   if (HasFlag(source_p->servptr, FLAGS_EOB))
     sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
@@ -771,13 +771,13 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     sendto_common_channels_local(target_p, 0, 0, ":%s!%s@%s QUIT :Changing hostname",
                                  target_p->name, target_p->username, target_p->host);
 
-  if (IsUserHostIp(target_p))
+  if (HasFlag(target_p, FLAGS_USERHOST))
     delete_user_host(target_p->username, target_p->host, !MyConnect(target_p));
 
   strlcpy(target_p->host, hostname, sizeof(target_p->host));
 
   add_user_host(target_p->username, target_p->host, !MyConnect(target_p));
-  SetUserHost(target_p);
+  AddFlag(target_p, FLAGS_USERHOST);
 
   if (MyClient(target_p))
   {

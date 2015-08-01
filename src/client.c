@@ -226,14 +226,14 @@ check_pings_list(dlink_list *list)
 
     if (ping < CurrentTime - client_p->connection->lasttime)
     {
-      if (!IsPingSent(client_p))
+      if (!HasFlag(client_p, FLAGS_PINGSENT))
       {
         /*
          * If we haven't PINGed the connection and we haven't
          * heard from it in a while, PING it to make sure
          * it is still alive.
          */
-        SetPingSent(client_p);
+        AddFlag(client_p, FLAGS_PINGSENT);
         client_p->connection->lasttime = CurrentTime - ping;
         sendto_one(client_p, "PING :%s", ID_or_name(&me, client_p));
       }
@@ -398,7 +398,7 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
   switch (conf->type)
   {
     case CONF_KLINE:
-      if (IsExemptKline(client_p))
+      if (HasFlag(client_p, FLAGS_EXEMPTKLINE))
       {
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                              "KLINE over-ruled for %s, client is kline_exempt",
@@ -415,13 +415,14 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
       ban_type = 'D';
       break;
     case CONF_XLINE:
-      if (IsExemptXline(client_p))
+      if (HasFlag(client_p, FLAGS_EXEMPTXLINE))
       {
         sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
                              "XLINE over-ruled for %s, client is xline_exempt",
                              get_client_name(client_p, HIDE_IP));
         return;
       }
+
       ban_type = 'X';
       ++conf->count;
       break;
@@ -647,7 +648,7 @@ exit_one_client(struct Client *source_p, const char *comment)
   if (source_p->name[0])
     hash_del_client(source_p);
 
-  if (IsUserHostIp(source_p))
+  if (HasFlag(source_p, FLAGS_USERHOST))
     delete_user_host(source_p->username, source_p->host, !MyConnect(source_p));
 
   update_client_exit_stats(source_p);
@@ -969,7 +970,7 @@ exit_aborted_clients(void)
 
     dlinkDelete(ptr, &abort_list);
 
-    if (IsSendQExceeded(target_p))
+    if (HasFlag(target_p, FLAGS_SENDQEX))
       notice = "Max SendQ exceeded";
     else
       notice = "Write error: connection closed";

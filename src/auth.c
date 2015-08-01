@@ -498,7 +498,7 @@ read_auth_reply(fde_t *fd, void *data)
     strlcpy(auth->client->username, username, sizeof(auth->client->username));
     sendheader(auth->client, REPORT_FIN_ID);
     ++ServerStats.is_asuc;
-    SetGotId(auth->client);
+    AddFlag(auth->client, FLAGS_GOTID);
   }
 
   release_auth_client(auth);

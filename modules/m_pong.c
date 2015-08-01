@@ -109,7 +109,7 @@ mr_pong(struct Client *source_p, int parc, char *parv[])
 
       if (source_p->connection->random_ping == incoming_ping)
       {
-        SetPingCookie(source_p);
+        AddFlag(source_p, FLAGS_PING_COOKIE);
 
         if (!source_p->connection->registration)
           register_local_user(source_p);

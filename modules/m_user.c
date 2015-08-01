@@ -54,7 +54,7 @@ do_user(struct Client *source_p,
 
   strlcpy(source_p->info, realname, sizeof(source_p->info));
 
-  if (!IsGotId(source_p))
+  if (!HasFlag(source_p, FLAGS_GOTID))
     strlcpy(source_p->username, username, sizeof(source_p->username));
 
   if (!source_p->connection->registration)

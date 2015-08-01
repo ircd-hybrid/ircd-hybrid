@@ -752,7 +752,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
   if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))
     return CAN_SEND_OPV;
 
-  if (MyClient(source_p) && !IsExemptResv(source_p))
+  if (MyClient(source_p) && !HasFlag(source_p, FLAGS_EXEMPTRESV))
     if (!(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv))
       if ((conf = match_find_resv(chptr->name)) && !resv_find_exempt(source_p, conf))
         return ERR_CANNOTSENDTOCHAN;
@@ -1015,7 +1015,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       continue;
     }
 
-    if (!IsExemptResv(source_p) &&
+    if (!HasFlag(source_p, FLAGS_EXEMPTRESV) &&
         !(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv) &&
         ((conf = match_find_resv(chan)) && !resv_find_exempt(source_p, conf)))
     {

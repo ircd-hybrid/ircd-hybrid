@@ -302,7 +302,7 @@ verify_access(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
 
-  if (IsGotId(client_p))
+  if (HasFlag(client_p, FLAGS_GOTID))
   {
     conf = find_address_conf(client_p->host, client_p->username,
                              &client_p->connection->ip,
@@ -1560,7 +1560,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
         find_chasing(source_p, user_host_or_nick)) == NULL)
       return 0;  /* find_chasing sends ERR_NOSUCHNICK */
 
-    if (IsExemptKline(target_p))
+    if (HasFlag(target_p, FLAGS_EXEMPTKLINE))
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":%s is E-lined", target_p->name);

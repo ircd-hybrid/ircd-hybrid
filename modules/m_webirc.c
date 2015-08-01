@@ -66,7 +66,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   }
 
   conf = find_address_conf(source_p->host,
-                           IsGotId(source_p) ? source_p->username : "webirc",
+                           HasFlag(source_p, FLAGS_GOTID) ? source_p->username : "webirc",
                            &source_p->connection->ip,
                            source_p->connection->aftype, parv[1]);
   if (conf == NULL || !IsConfClient(conf))

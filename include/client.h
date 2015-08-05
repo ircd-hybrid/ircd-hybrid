@@ -41,17 +41,23 @@ struct MaskItem;
 /*
  * status macros.
  */
-#define STAT_CONNECTING  0x00000001U
-#define STAT_HANDSHAKE   0x00000002U
-#define STAT_ME          0x00000004U
-#define STAT_UNKNOWN     0x00000008U
-#define STAT_SERVER      0x00000010U
-#define STAT_CLIENT      0x00000020U
+enum
+{
+  STAT_CONNECTING = 0x00000001U,
+  STAT_HANDSHAKE  = 0x00000002U,
+  STAT_ME         = 0x00000004U,
+  STAT_UNKNOWN    = 0x00000008U,
+  STAT_SERVER     = 0x00000010U,
+  STAT_CLIENT     = 0x00000020U
+};
 
-#define REG_NEED_USER    0x00000001U  /**< User must send USER command */
-#define REG_NEED_NICK    0x00000002U  /**< User must send NICK command */
-#define REG_NEED_CAP     0x00000004U  /**< In middle of CAP negotiations */
-#define REG_INIT  (REG_NEED_USER|REG_NEED_NICK)
+enum
+{
+  REG_NEED_USER = 0x00000001U,  /**< User must send USER command */
+  REG_NEED_NICK = 0x00000002U,  /**< User must send NICK command */
+  REG_NEED_CAP  = 0x00000004U,  /**< In middle of CAP negotiations */
+  REG_INIT      = REG_NEED_USER | REG_NEED_NICK
+};
 
 #define ID_or_name(x,client_p)  ((IsServer(client_p->from) && (x)->id[0]) ? (x)->id : (x)->name)
 
@@ -88,81 +94,91 @@ struct MaskItem;
 /*
  * ts stuff
  */
-#define TS_CURRENT      6  /**< Current TS protocol version */
-#define TS_MIN          6  /**< Minimum supported TS protocol version */
+enum
+{
+  TS_CURRENT = 6,  /**< Current TS protocol version */
+  TS_MIN     = 6   /**< Minimum supported TS protocol version */
+};
 
-
-#define CAP_MULTI_PREFIX  0x00000001U
-#define CAP_AWAY_NOTIFY   0x00000002U
-#define CAP_UHNAMES       0x00000004U
-#define CAP_EXTENDED_JOIN 0x00000008U
+enum
+{
+  CAP_MULTI_PREFIX  = 0x00000001U,
+  CAP_AWAY_NOTIFY   = 0x00000002U,
+  CAP_UHNAMES       = 0x00000004U,
+  CAP_EXTENDED_JOIN = 0x00000008U
+};
 
 #define HasCap(x, y) ((x)->connection->cap_active & (y))
 
 
 /* housekeeping flags */
-#define FLAGS_PINGSENT       0x00000001U  /**< Unreplied ping sent */
-#define FLAGS_DEADSOCKET     0x00000002U  /**< Local socket is dead--Exiting soon */
-#define FLAGS_KILLED         0x00000004U  /**< Prevents "QUIT" from being sent for this */
-#define FLAGS_CLOSING        0x00000008U  /**< Set when closing to suppress errors */
-#define FLAGS_GOTID          0x00000010U  /**< Successful ident lookup achieved */
-#define FLAGS_SENDQEX        0x00000020U  /**< Sendq exceeded */
-#define FLAGS_IPHASH         0x00000040U  /**< Iphashed this client */
-#define FLAGS_MARK           0x00000080U  /**< Marked client */
-#define FLAGS_CANFLOOD       0x00000100U  /**< Client has the ability to flood */
-#define FLAGS_EXEMPTKLINE    0x00000200U  /**< Client is exempt from k-lines */
-#define FLAGS_NOLIMIT        0x00000400U  /**< Client is exempt from limits */
-#define FLAGS_PING_COOKIE    0x00000800U  /**< PING Cookie */
-#define FLAGS_FLOODDONE      0x00001000U  /**< Flood grace period has been ended. */
-#define FLAGS_EOB            0x00002000U  /**< Server has sent us an EOB */
-#define FLAGS_HIDDEN         0x00004000U  /**< A hidden server. Not shown in /links */
-#define FLAGS_BLOCKED        0x00008000U  /**< Must wait for COMM_SELECT_WRITE */
-#define FLAGS_USERHOST       0x00010000U  /**< Client is in userhost hash */
-#define FLAGS_BURSTED        0x00020000U  /**< User was already bursted */
-#define FLAGS_EXEMPTRESV     0x00040000U  /**< Client is exempt from RESV */
-#define FLAGS_GOTUSER        0x00080000U  /**< If we received a USER command */
-#define FLAGS_FINISHED_AUTH  0x00100000U  /**< Client has been released from auth */
-#define FLAGS_FLOOD_NOTICED  0x00200000U  /**< Notice to opers about this flooder has been sent */
-#define FLAGS_SERVICE        0x00400000U  /**< Client/server is a network service */
-#define FLAGS_SSL            0x00800000U  /**< User is connected via TLS/SSL */
-#define FLAGS_SQUIT          0x01000000U
-#define FLAGS_EXEMPTXLINE    0x02000000U  /**< Client is exempt from x-lines */
+enum
+{
+  FLAGS_PINGSENT      = 0x00000001U,  /**< Unreplied ping sent */
+  FLAGS_DEADSOCKET    = 0x00000002U,  /**< Local socket is dead--Exiting soon */
+  FLAGS_KILLED        = 0x00000004U,  /**< Prevents "QUIT" from being sent for this */
+  FLAGS_CLOSING       = 0x00000008U,  /**< Set when closing to suppress errors */
+  FLAGS_GOTID         = 0x00000010U,  /**< Successful ident lookup achieved */
+  FLAGS_SENDQEX       = 0x00000020U,  /**< Sendq exceeded */
+  FLAGS_IPHASH        = 0x00000040U,  /**< Iphashed this client */
+  FLAGS_MARK          = 0x00000080U,  /**< Marked client */
+  FLAGS_CANFLOOD      = 0x00000100U,  /**< Client has the ability to flood */
+  FLAGS_EXEMPTKLINE   = 0x00000200U,  /**< Client is exempt from k-lines */
+  FLAGS_NOLIMIT       = 0x00000400U,  /**< Client is exempt from limits */
+  FLAGS_PING_COOKIE   = 0x00000800U,  /**< PING Cookie */
+  FLAGS_FLOODDONE     = 0x00001000U,  /**< Flood grace period has been ended. */
+  FLAGS_EOB           = 0x00002000U,  /**< Server has sent us an EOB */
+  FLAGS_HIDDEN        = 0x00004000U,  /**< A hidden server. Not shown in /links */
+  FLAGS_BLOCKED       = 0x00008000U,  /**< Must wait for COMM_SELECT_WRITE */
+  FLAGS_USERHOST      = 0x00010000U,  /**< Client is in userhost hash */
+  FLAGS_BURSTED       = 0x00020000U,  /**< User was already bursted */
+  FLAGS_EXEMPTRESV    = 0x00040000U,  /**< Client is exempt from RESV */
+  FLAGS_GOTUSER       = 0x00080000U,  /**< If we received a USER command */
+  FLAGS_FINISHED_AUTH = 0x00100000U,  /**< Client has been released from auth */
+  FLAGS_FLOOD_NOTICED = 0x00200000U,  /**< Notice to opers about this flooder has been sent */
+  FLAGS_SERVICE       = 0x00400000U,  /**< Client/server is a network service */
+  FLAGS_SSL           = 0x00800000U,  /**< User is connected via TLS/SSL */
+  FLAGS_SQUIT         = 0x01000000U,
+  FLAGS_EXEMPTXLINE   = 0x02000000U   /**< Client is exempt from x-lines */
+};
 
 #define HasFlag(x, y) ((x)->flags &   (y))
 #define AddFlag(x, y) ((x)->flags |=  (y))
 #define DelFlag(x, y) ((x)->flags &= ~(y))
 
 
-
 /* umodes, settable flags */
-#define UMODE_SERVNOTICE   0x00000001U  /**< Server notices such as kill */
-#define UMODE_CCONN        0x00000002U  /**< Can see client connection notices */
-#define UMODE_REJ          0x00000004U  /**< Bot Rejections */
-#define UMODE_SKILL        0x00000008U  /**< Server Killed */
-#define UMODE_FULL         0x00000010U  /**< Full messages */
-#define UMODE_SPY          0x00000020U  /**< See STATS / LINKS */
-#define UMODE_DEBUG        0x00000040U  /**< 'debugging' info */
-#define UMODE_NCHANGE      0x00000080U  /**< Nick change notice */
-#define UMODE_WALLOP       0x00000100U  /**< Send wallops to them */
-#define UMODE_INVISIBLE    0x00000200U  /**< Makes user invisible */
-#define UMODE_BOTS         0x00000400U  /**< Shows bots */
-#define UMODE_EXTERNAL     0x00000800U  /**< Show servers introduced and splitting */
-#define UMODE_CALLERID     0x00001000U  /**< Block unless caller id's */
-#define UMODE_SOFTCALLERID 0x00002000U  /**< Block unless on common channel */
-#define UMODE_UNAUTH       0x00004000U  /**< Show unauth connects here */
-#define UMODE_LOCOPS       0x00008000U  /**< Can see LOCOPS messages */
-#define UMODE_DEAF         0x00010000U  /**< Don't receive channel messages */
-#define UMODE_REGISTERED   0x00020000U  /**< User has identified for that nick. */
-#define UMODE_REGONLY      0x00040000U  /**< Only registered nicks may PM */
-#define UMODE_HIDDEN       0x00080000U  /**< IRC operator status is hidden */
-#define UMODE_OPER         0x00100000U  /**< IRC operator */
-#define UMODE_ADMIN        0x00200000U  /**< Admin on server */
-#define UMODE_FARCONNECT   0x00400000U  /**< Can see remote client connects/exits */
-#define UMODE_HIDDENHOST   0x00800000U  /**< User's host is hidden */
-#define UMODE_SSL          0x01000000U  /**< User is connected via TLS/SSL */
-#define UMODE_WEBIRC       0x02000000U  /**< User connected via a webirc gateway */
-#define UMODE_HIDEIDLE     0x04000000U  /**< Hides idle and signon time in WHOIS */
-#define UMODE_HIDECHANS    0x08000000U  /**< Hides channel list in WHOIS */
+enum
+{
+  UMODE_SERVNOTICE   = 0x00000001U,  /**< Server notices such as kill */
+  UMODE_CCONN        = 0x00000002U,  /**< Can see client connection notices */
+  UMODE_REJ          = 0x00000004U,  /**< Bot Rejections */
+  UMODE_SKILL        = 0x00000008U,  /**< Server Killed */
+  UMODE_FULL         = 0x00000010U,  /**< Full messages */
+  UMODE_SPY          = 0x00000020U,  /**< See STATS / LINKS */
+  UMODE_DEBUG        = 0x00000040U,  /**< 'debugging' info */
+  UMODE_NCHANGE      = 0x00000080U,  /**< Nick change notice */
+  UMODE_WALLOP       = 0x00000100U,  /**< Send wallops to them */
+  UMODE_INVISIBLE    = 0x00000200U,  /**< Makes user invisible */
+  UMODE_BOTS         = 0x00000400U,  /**< Shows bots */
+  UMODE_EXTERNAL     = 0x00000800U,  /**< Show servers introduced and splitting */
+  UMODE_CALLERID     = 0x00001000U,  /**< Block unless caller id's */
+  UMODE_SOFTCALLERID = 0x00002000U,  /**< Block unless on common channel */
+  UMODE_UNAUTH       = 0x00004000U,  /**< Show unauth connects here */
+  UMODE_LOCOPS       = 0x00008000U,  /**< Can see LOCOPS messages */
+  UMODE_DEAF         = 0x00010000U,  /**< Don't receive channel messages */
+  UMODE_REGISTERED   = 0x00020000U,  /**< User has identified for that nick. */
+  UMODE_REGONLY      = 0x00040000U,  /**< Only registered nicks may PM */
+  UMODE_HIDDEN       = 0x00080000U,  /**< IRC operator status is hidden */
+  UMODE_OPER         = 0x00100000U,  /**< IRC operator */
+  UMODE_ADMIN        = 0x00200000U,  /**< Admin on server */
+  UMODE_FARCONNECT   = 0x00400000U,  /**< Can see remote client connects/exits */
+  UMODE_HIDDENHOST   = 0x00800000U,  /**< User's host is hidden */
+  UMODE_SSL          = 0x01000000U,  /**< User is connected via TLS/SSL */
+  UMODE_WEBIRC       = 0x02000000U,  /**< User connected via a webirc gateway */
+  UMODE_HIDEIDLE     = 0x04000000U,  /**< Hides idle and signon time in WHOIS */
+  UMODE_HIDECHANS    = 0x08000000U   /**< Hides channel list in WHOIS */
+};
 
 #define UMODE_ALL          UMODE_SERVNOTICE
 
@@ -172,30 +188,32 @@ struct MaskItem;
 
 
 /* oper priv flags */
-#define OPER_FLAG_KILL_REMOTE    0x00000001U  /**< Oper can KILL remote users */
-#define OPER_FLAG_KILL           0x00000002U  /**< Oper can KILL local users */
-#define OPER_FLAG_UNKLINE        0x00000004U  /**< Oper can use UNKLINE command */
-#define OPER_FLAG_KLINE          0x00000008U  /**< Oper can use KLINE command */
-#define OPER_FLAG_XLINE          0x00000010U  /**< Oper can use XLINE command */
-#define OPER_FLAG_DIE            0x00000020U  /**< Oper can use DIE command */
-#define OPER_FLAG_REHASH         0x00000040U  /**< Oper can use REHASH command */
-#define OPER_FLAG_ADMIN          0x00000080U  /**< Oper can set user mode +a */
-#define OPER_FLAG_REMOTEBAN      0x00000100U  /**< Oper can set remote bans */
-#define OPER_FLAG_GLOBOPS        0x00000200U  /**< Oper can use GLOBOPS command */
-#define OPER_FLAG_MODULE         0x00000400U  /**< Oper can use MODULE command */
-#define OPER_FLAG_RESTART        0x00000800U  /**< Oper can use RESTART command */
-#define OPER_FLAG_DLINE          0x00001000U  /**< Oper can use DLINE command */
-#define OPER_FLAG_UNDLINE        0x00002000U  /**< Oper can use UNDLINE command */
-#define OPER_FLAG_SET            0x00004000U  /**< Oper can use SET command */
-#define OPER_FLAG_SQUIT          0x00008000U  /**< Oper can do local SQUIT */
-#define OPER_FLAG_SQUIT_REMOTE   0x00010000U  /**< Oper can do remote SQUIT */
-#define OPER_FLAG_CONNECT        0x00020000U  /**< Oper can do local CONNECT */
-#define OPER_FLAG_CONNECT_REMOTE 0x00040000U  /**< Oper can do remote CONNECT */
-#define OPER_FLAG_WALLOPS        0x00080000U  /**< Oper can use WALLOPS command */
-#define OPER_FLAG_LOCOPS         0x00100000U  /**< Oper can use LOCOPS command */
-#define OPER_FLAG_UNXLINE        0x00200000U  /**< Oper can use UNXLINE command */
-#define OPER_FLAG_OPME           0x00400000U  /**< Oper can use OPME command */
-
+enum
+{
+ OPER_FLAG_KILL_REMOTE    = 0x00000001U,  /**< Oper can KILL remote users */
+ OPER_FLAG_KILL           = 0x00000002U,  /**< Oper can KILL local users */
+ OPER_FLAG_UNKLINE        = 0x00000004U,  /**< Oper can use UNKLINE command */
+ OPER_FLAG_KLINE          = 0x00000008U,  /**< Oper can use KLINE command */
+ OPER_FLAG_XLINE          = 0x00000010U,  /**< Oper can use XLINE command */
+ OPER_FLAG_DIE            = 0x00000020U,  /**< Oper can use DIE command */
+ OPER_FLAG_REHASH         = 0x00000040U,  /**< Oper can use REHASH command */
+ OPER_FLAG_ADMIN          = 0x00000080U,  /**< Oper can set user mode +a */
+ OPER_FLAG_REMOTEBAN      = 0x00000100U,  /**< Oper can set remote bans */
+ OPER_FLAG_GLOBOPS        = 0x00000200U,  /**< Oper can use GLOBOPS command */
+ OPER_FLAG_MODULE         = 0x00000400U,  /**< Oper can use MODULE command */
+ OPER_FLAG_RESTART        = 0x00000800U,  /**< Oper can use RESTART command */
+ OPER_FLAG_DLINE          = 0x00001000U,  /**< Oper can use DLINE command */
+ OPER_FLAG_UNDLINE        = 0x00002000U,  /**< Oper can use UNDLINE command */
+ OPER_FLAG_SET            = 0x00004000U,  /**< Oper can use SET command */
+ OPER_FLAG_SQUIT          = 0x00008000U,  /**< Oper can do local SQUIT */
+ OPER_FLAG_SQUIT_REMOTE   = 0x00010000U,  /**< Oper can do remote SQUIT */
+ OPER_FLAG_CONNECT        = 0x00020000U,  /**< Oper can do local CONNECT */
+ OPER_FLAG_CONNECT_REMOTE = 0x00040000U,  /**< Oper can do remote CONNECT */
+ OPER_FLAG_WALLOPS        = 0x00080000U,  /**< Oper can use WALLOPS command */
+ OPER_FLAG_LOCOPS         = 0x00100000U,  /**< Oper can use LOCOPS command */
+ OPER_FLAG_UNXLINE        = 0x00200000U,  /**< Oper can use UNXLINE command */
+ OPER_FLAG_OPME           = 0x00400000U   /**< Oper can use OPME command */
+};
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->connection->operflags & (y) : 0)
 #define AddOFlag(x, y) ((x)->connection->operflags |=  (y))

@@ -27,9 +27,12 @@
 #ifndef INCLUDED_id_h
 #define INCLUDED_id_h
 
-#define IRC_MAXSID 3
-#define IRC_MAXUID 6
-#define TOTALSIDUID (IRC_MAXSID + IRC_MAXUID)
+enum
+{
+  IRC_MAXSID  = 3,
+  IRC_MAXUID  = 6,
+  TOTALSIDUID = IRC_MAXSID + IRC_MAXUID
+};
 
 extern int valid_sid(const char *);
 extern void init_uid(void);

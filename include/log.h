@@ -27,7 +27,7 @@
 #ifndef INCLUDED_s_log_h
 #define INCLUDED_s_log_h
 
-#define LOG_BUFSIZE 1024
+enum { LOG_BUFSIZE = 1024 };
 
 enum log_type
 {

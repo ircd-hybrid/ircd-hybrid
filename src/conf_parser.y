@@ -40,7 +40,7 @@
 #include "event.h"
 #include "id.h"
 #include "log.h"
-#include "client.h"	/* for UMODE_ALL only */
+#include "client.h"	/* for UMODE_SERVNOTICE only */
 #include "irc_string.h"
 #include "memory.h"
 #include "modules.h"

@@ -253,7 +253,7 @@ server_estab(struct Client *client_p)
       == NULL)
   {
     /* This shouldn't happen, better tell the ops... -A1kmm */
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Warning: Lost connect{} block "
                          "for server %s(this shouldn't happen)!", client_p->name);
     exit_client(client_p, "Lost connect{} block!");
@@ -333,7 +333,7 @@ server_estab(struct Client *client_p)
     compression = SSL_get_current_compression(client_p->connection->fd.ssl);
     expansion   = SSL_get_current_expansion(client_p->connection->fd.ssl);
 #endif
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
                          get_client_name(client_p, SHOW_IP), ssl_get_cipher(client_p->connection->fd.ssl),
 #ifndef OPENSSL_NO_COMP
@@ -344,7 +344,7 @@ server_estab(struct Client *client_p)
 #endif
                          show_capabilities(client_p));
     /* Now show the masked hostname/IP to opers */
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
                          get_client_name(client_p, MASK_IP), ssl_get_cipher(client_p->connection->fd.ssl),
 #ifndef OPENSSL_NO_COMP
@@ -367,11 +367,11 @@ server_estab(struct Client *client_p)
   else
 #endif
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
                          get_client_name(client_p, SHOW_IP), show_capabilities(client_p));
     /* Now show the masked hostname/IP to opers */
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
                          get_client_name(client_p, MASK_IP), show_capabilities(client_p));
     ilog(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
@@ -477,10 +477,10 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 
   if (!valid_servname(name))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", get_client_name(source_p, HIDE_IP), name);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", get_client_name(source_p, MASK_IP), name);
     exit_client(source_p, "Bogus server name");
@@ -489,10 +489,10 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 
   if (!valid_sid(source_p->id))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(source_p, SHOW_IP), source_p->id);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(source_p, MASK_IP), source_p->id);
     exit_client(source_p, "Bogus server ID introduced");
@@ -507,11 +507,11 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     case -1:
       if (ConfigGeneral.warn_no_connect_block)
       {
-        sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+        sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(source_p, HIDE_IP), name);
 
-        sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+        sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: No entry for "
            "servername %s", get_client_name(source_p, MASK_IP), name);
       }
@@ -522,11 +522,11 @@ mr_server(struct Client *source_p, int parc, char *parv[])
       break;
 
     case -2:
-      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Bad password "
            "for server %s", get_client_name(source_p, HIDE_IP), name);
 
-      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Bad password "
            "for server %s", get_client_name(source_p, MASK_IP), name);
 
@@ -536,22 +536,22 @@ mr_server(struct Client *source_p, int parc, char *parv[])
       break;
 
     case -3:
-      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid host "
            "for server %s", get_client_name(source_p, HIDE_IP), name);
 
-      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid host "
            "for server %s", get_client_name(source_p, MASK_IP), name);
 
       exit_client(source_p, "Invalid host.");
       return 0;
     case -4:
-      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid certificate fingerprint "
            "for server %s", get_client_name(source_p, HIDE_IP), name);
 
-      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid certificate fingerprint "
            "for server %s", get_client_name(source_p, MASK_IP), name);
 
@@ -573,10 +573,10 @@ mr_server(struct Client *source_p, int parc, char *parv[])
      * Definitely don't do that here. This is from an unregistered
      * connect - A1kmm.
      */
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s from %s",
                          name, get_client_name(source_p, HIDE_IP));
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Attempt to re-introduce server %s from %s",
                          name, get_client_name(source_p, MASK_IP));
     exit_client(source_p, "Server already exists");
@@ -585,11 +585,11 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 
   if ((target_p = hash_find_id(source_p->id)))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
                          name, source_p->id,
                          get_client_name(source_p, HIDE_IP));
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
                          name, source_p->id,
                          get_client_name(source_p, MASK_IP));
@@ -644,10 +644,10 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   if (!valid_servname(parv[1]))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, SHOW_IP), parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
                          get_client_name(client_p, MASK_IP), parv[1]);
     exit_client(client_p, "Bogus server name introduced");
@@ -656,10 +656,10 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   if (!valid_sid(parv[3]))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(client_p, SHOW_IP), parv[3]);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
                          get_client_name(client_p, MASK_IP), parv[3]);
     exit_client(client_p, "Bogus server ID introduced");
@@ -669,10 +669,10 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   /* collision on SID? */
   if ((target_p = hash_find_id(parv[3])))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server ID %s already exists",
                          get_client_name(client_p, SHOW_IP), parv[3]);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server ID %s already exists",
                          client_p->name, parv[3]);
     exit_client(client_p, "Link cancelled, server ID already exists");
@@ -682,10 +682,10 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   /* collision on name? */
   if ((target_p = hash_find_server(parv[1])))
   {
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
                          get_client_name(client_p, SHOW_IP), parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
                          client_p->name, parv[1]);
     exit_client(client_p, "Server exists");
@@ -750,10 +750,10 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   if (!hlined)
   {
     /* OOOPs nope can't HUB */
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, SHOW_IP), parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Non-Hub link %s introduced %s.",
                          get_client_name(client_p, MASK_IP), parv[1]);
     exit_client(source_p, "No matching hub_mask.");
@@ -764,10 +764,10 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   if (llined)
   {
     /* OOOPs nope can't HUB this leaf */
-    sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced leafed server %s.",
                          get_client_name(client_p, SHOW_IP), parv[1]);
-    sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced leafed server %s.",
                          get_client_name(client_p, MASK_IP), parv[1]);
     exit_client(client_p, "Leafed server.");

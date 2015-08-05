@@ -94,7 +94,7 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
 
   ilog(LOG_TYPE_IRCD, "%s used OPME to gain channel operator status on opless channel %s",
        get_oper_name(source_p), chptr->name);
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from %s: %s used OPME to gain channel operator status on opless channel %s",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s used OPME to gain channel operator status on opless channel %s",
                        me.name, get_oper_name(source_p), chptr->name);
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s used OPME to gain channel operator status on opless channel %s",
                 me.id, get_oper_name(source_p), chptr->name);

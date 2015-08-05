@@ -89,7 +89,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
   if (dbuf_length(&to->connection->buf_sendq) + buf->size > get_sendq(&to->connection->confs))
   {
     if (IsServer(to))
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Max SendQ limit exceeded for %s: %lu > %u",
                            get_client_name(to, HIDE_IP),
                            (unsigned long)(dbuf_length(&to->connection->buf_sendq) + buf->size),
@@ -135,7 +135,7 @@ send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *b
 
   if (to == from->from)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Send message to %s dropped from %s (Fake Dir)",
                          to->name, from->name);
     return;
@@ -891,7 +891,7 @@ sendto_realops_flags_ratelimited(time_t *rate, const char *pattern, ...)
   vsnprintf(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s", buffer);
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s", buffer);
   ilog(LOG_TYPE_IRCD, "%s", buffer);
 }
 

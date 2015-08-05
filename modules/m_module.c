@@ -126,7 +126,7 @@ module_reload(struct Client *source_p, const char *arg)
     load_conf_modules();
     load_core_modules(0);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Module Restart: %u modules unloaded, %u modules loaded",
                          modnum, dlink_list_length(modules_get_list()));
     ilog(LOG_TYPE_IRCD, "Module Restart: %u modules unloaded, %u modules loaded",
@@ -157,7 +157,7 @@ module_reload(struct Client *source_p, const char *arg)
 
   if ((load_one_module(arg) == -1) && check_core)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error reloading core "
                          "module: %s: terminating ircd", arg);
     ilog(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);

@@ -92,7 +92,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
       sendto_one_notice(source_p, &me, ":A %d minute %s RESV has been placed on %s: %s",
                         tkline_time/60, (MyClient(source_p) ? "local" : "remote"), type, name);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has placed a %d minute %s RESV on %s: %s [%s]",
                          get_oper_name(source_p),
                          tkline_time/60,
@@ -109,7 +109,7 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
       sendto_one_notice(source_p, &me, ":A %s RESV has been placed on %s: %s",
                         (MyClient(source_p) ? "local" : "remote"), type, name);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has placed a %s RESV on %s: %s [%s]",
                          get_oper_name(source_p),
                          (MyClient(source_p) ? "local" : "remote"), type,

@@ -882,7 +882,7 @@ check_splitmode(void *unused)
     {
       splitmode = 1;
 
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Network split, activating splitmode");
       event_add(&splitmode_event, NULL);
     }
@@ -890,7 +890,7 @@ check_splitmode(void *unused)
     {
       splitmode = 0;
 
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Network rejoined, deactivating splitmode");
       event_delete(&splitmode_event);
     }

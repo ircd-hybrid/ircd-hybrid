@@ -244,7 +244,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Notify all operators about remote connect requests
    */
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from %s: Remote CONNECT %s %d from %s",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: Remote CONNECT %s %d from %s",
                        me.name, parv[1], port, source_p->name);
   sendto_server(NULL, 0, 0,
                 ":%s GLOBOPS :Remote CONNECT %s %d from %s",

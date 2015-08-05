@@ -52,7 +52,7 @@ quote_autoconn(struct Client *source_p, const char *arg, int newval)
       else
         ClearConfAllowAutoConn(conf);
 
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s has changed AUTOCONN for %s to %i",
                            get_oper_name(source_p), arg, newval);
       sendto_one_notice(source_p, &me, ":AUTOCONN for %s is now set to %i",
@@ -71,7 +71,7 @@ quote_autoconnall(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed AUTOCONNALL to %i",
                          get_oper_name(source_p), newval);
 
@@ -89,7 +89,7 @@ quote_floodcount(struct Client *source_p, const char *arg, int newval)
   if (newval >= 0)
   {
     GlobalSetOptions.floodcount = newval;
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed FLOODCOUNT to %i",
                          get_oper_name(source_p), GlobalSetOptions.floodcount);
   }
@@ -110,7 +110,7 @@ quote_identtimeout(struct Client *source_p, const char *arg, int newval)
 
   if (newval > 0)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed IDENTTIMEOUT to %d",
                          get_oper_name(source_p), newval);
     GlobalSetOptions.ident_timeout = newval;
@@ -142,7 +142,7 @@ quote_max(struct Client *source_p, const char *arg, int newval)
 
     GlobalSetOptions.maxclients = newval;
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
         "%s set new MAXCLIENTS to %d (%d current)",
         get_oper_name(source_p), GlobalSetOptions.maxclients, Count.local);
   }
@@ -159,14 +159,14 @@ quote_spamnum(struct Client *source_p, const char *arg, int newval)
   {
     if (newval == 0)
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s has disabled ANTI_SPAMBOT", source_p->name);
       GlobalSetOptions.spam_num = newval;
       return;
     }
 
     GlobalSetOptions.spam_num = IRCD_MAX(newval, MIN_SPAM_NUM);
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed SPAMNUM to %i",
                          get_oper_name(source_p), GlobalSetOptions.spam_num);
   }
@@ -182,7 +182,7 @@ quote_spamtime(struct Client *source_p, const char *arg, int newval)
   if (newval > 0)
   {
     GlobalSetOptions.spam_time = IRCD_MAX(newval, MIN_SPAM_TIME);
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed SPAMTIME to %i",
                          get_oper_name(source_p), GlobalSetOptions.spam_time);
   }
@@ -225,7 +225,7 @@ quote_splitmode(struct Client *source_p, const char *charval, int val)
     /* OFF */
     if (newval == 0)
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s is disabling splitmode",
                            get_oper_name(source_p));
 
@@ -237,7 +237,7 @@ quote_splitmode(struct Client *source_p, const char *charval, int val)
     /* ON */
     else if (newval == 1)
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s is enabling and activating splitmode",
                            get_oper_name(source_p));
 
@@ -250,7 +250,7 @@ quote_splitmode(struct Client *source_p, const char *charval, int val)
     /* AUTO */
     else if (newval == 2)
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s is enabling automatic splitmode",
                            get_oper_name(source_p));
 
@@ -273,7 +273,7 @@ quote_splitnum(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed SPLITNUM to %i",
                          get_oper_name(source_p), newval);
     split_servers = newval;
@@ -292,7 +292,7 @@ quote_splitusers(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed SPLITUSERS to %i",
                          get_oper_name(source_p), newval);
     split_users = newval;
@@ -311,7 +311,7 @@ quote_jfloodtime(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed JFLOODTIME to %i",
                          get_oper_name(source_p), newval);
     GlobalSetOptions.joinfloodtime = newval;
@@ -327,7 +327,7 @@ quote_jfloodcount(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed JFLOODCOUNT to %i",
                          get_oper_name(source_p), newval);
     GlobalSetOptions.joinfloodcount = newval;

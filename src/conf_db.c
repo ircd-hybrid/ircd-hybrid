@@ -155,7 +155,7 @@ open_db_write(const char *filename, uint32_t version)
     static int walloped = 0;
 
     if (!walloped++)
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Cannot create temporary database file %s",
                            f->tempname);
 
@@ -257,7 +257,7 @@ close_db(struct dbFILE *f)
     {
       int errno_save = errno;
 
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "Unable to move new "
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Unable to move new "
                            "data to database file %s; new data NOT saved.",
                            f->filename);
       errno = errno_save;

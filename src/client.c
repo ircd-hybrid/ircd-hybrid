@@ -247,10 +247,10 @@ check_pings_list(dlink_list *list)
            */
           if (IsServer(client_p) || IsHandshake(client_p))
           {
-            sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+            sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                                  "No response from %s, closing link",
                                  get_client_name(client_p, HIDE_IP));
-            sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+            sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                                  "No response from %s, closing link",
                                  get_client_name(client_p, MASK_IP));
             ilog(LOG_TYPE_IRCD, "No response from %s, closing link",
@@ -400,7 +400,7 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
     case CONF_KLINE:
       if (HasFlag(client_p, FLAGS_EXEMPTKLINE))
       {
-        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                              "KLINE over-ruled for %s, client is kline_exempt",
                              get_client_name(client_p, HIDE_IP));
         return;
@@ -417,7 +417,7 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
     case CONF_XLINE:
       if (HasFlag(client_p, FLAGS_EXEMPTXLINE))
       {
-        sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                              "XLINE over-ruled for %s, client is xline_exempt",
                              get_client_name(client_p, HIDE_IP));
         return;
@@ -431,7 +431,7 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
       break;
   }
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%c-line active for %s",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%c-line active for %s",
                        ban_type, get_client_name(client_p, HIDE_IP));
 
   if (IsClient(client_p))
@@ -832,7 +832,7 @@ exit_client(struct Client *source_p, const char *comment)
     if (MyConnect(source_p))
     {
       int connected = CurrentTime - source_p->connection->firsttime;
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s was connected for %d day%s, %2d:%02d:%02d. %llu/%llu sendK/recvK.",
                            source_p->name, connected/86400, (connected/86400 == 1) ? "" : "s",
                            (connected % 86400) / 3600, (connected % 3600) / 60, connected % 60,
@@ -909,12 +909,12 @@ dead_link_on_read(struct Client *client_p, int error)
     if (error == 0)
     {
       /* Admins get the real IP */
-      sendto_realops_flags(UMODE_ALL, L_ADMIN, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "Server %s closed the connection",
                            get_client_name(client_p, SHOW_IP));
 
       /* Opers get a masked IP */
-      sendto_realops_flags(UMODE_ALL, L_OPER, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                            "Server %s closed the connection",
                            get_client_name(client_p, MASK_IP));
 
@@ -929,7 +929,7 @@ dead_link_on_read(struct Client *client_p, int error)
                    get_client_name(client_p, MASK_IP), current_error);
     }
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s was connected for %d day%s, %2d:%02d:%02d",
                          client_p->name, connected/86400,
                          (connected/86400 == 1) ? "" : "s",
@@ -961,7 +961,7 @@ exit_aborted_clients(void)
 
     if (target_p == NULL)
     {
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Warning: null client on abort_list!");
       dlinkDelete(ptr, &abort_list);
       free_dlink_node(ptr);

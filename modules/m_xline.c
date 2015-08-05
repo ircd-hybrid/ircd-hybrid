@@ -110,7 +110,7 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
       sendto_one_notice(source_p, &me, ":Added temporary %d min. X-Line [%s]",
                         (int)txline_time/60, conf->name);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. X-Line for [%s] [%s]",
                          get_oper_name(source_p), (int)txline_time/60,
                          conf->name, conf->reason);
@@ -123,7 +123,7 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
       sendto_one_notice(source_p, &me, ":Added X-Line [%s] [%s]",
                         conf->name, conf->reason);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added X-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->name,
                          conf->reason);

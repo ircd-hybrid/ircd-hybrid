@@ -30,9 +30,12 @@
 #define RFC1413_BUFSIZ  512  /**< rfc1413 says we MUST accept 512 bytes */
 #define RFC1413_PORT    113  /**< As defined per rfc1413, IDENT server listens on TCP port 113 */
 
-#define AM_IN_AUTH      0x00000001U
-#define AM_DOING_AUTH   0x00000002U
-#define AM_DNS_PENDING  0x00000004U
+enum
+{
+  AM_IN_AUTH     = 0x00000001U,
+  AM_DOING_AUTH  = 0x00000002U,
+  AM_DNS_PENDING = 0x00000004U
+};
 
 #define SetInAuth(x)         ((x)->flags |= AM_IN_AUTH)
 #define ClearInAuth(x)       ((x)->flags &= ~AM_IN_AUTH)

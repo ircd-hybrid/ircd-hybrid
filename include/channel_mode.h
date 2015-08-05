@@ -56,33 +56,37 @@ enum
   CAN_SEND_OPV   = -2
 };
 
-
 /* Channel related flags */
-#define CHFL_CHANOP     0x0001U  /* Channel operator   */
-#define CHFL_HALFOP     0x0002U  /* Channel half op    */
-#define CHFL_VOICE      0x0004U  /* the power to speak */
-#define CHFL_BAN        0x0008U  /* ban channel flag */
-#define CHFL_EXCEPTION  0x0010U  /* exception to ban channel flag */
-#define CHFL_INVEX      0x0020U
+enum
+{
+  CHFL_CHANOP       = 0x00000001U,  /* Channel operator   */
+  CHFL_HALFOP       = 0x00000002U,  /* Channel half op    */
+  CHFL_VOICE        = 0x00000004U,  /* the power to speak */
+  CHFL_BAN          = 0x00000008U,  /* ban channel flag */
+  CHFL_EXCEPTION    = 0x00000010U,  /* exception to ban channel flag */
+  CHFL_INVEX        = 0x00000020U,
+  /* Cache flags for silence on ban */
+  CHFL_BAN_CHECKED  = 0x00000040U,
+  CHFL_BAN_SILENCED = 0x00000080U
+};
 
 /* channel modes ONLY */
-#define MODE_PRIVATE    0x0001U  /**< */
-#define MODE_SECRET     0x0002U  /**< Channel does not show up on NAMES or LIST */
-#define MODE_MODERATED  0x0004U  /**< Users without +v/+h/+o cannot send text to the channel */
-#define MODE_TOPICLIMIT 0x0008U  /**< Only chanops can change the topic */
-#define MODE_INVITEONLY 0x0010U  /**< Only invited users may join this channel */
-#define MODE_NOPRIVMSGS 0x0020U  /**< Users must be in the channel to send text to it */
-#define MODE_SSLONLY    0x0040U  /**< Prevents anyone who isn't connected via SSL/TLS from joining the channel */
-#define MODE_OPERONLY   0x0080U  /**< Prevents anyone who hasn't obtained IRC operator status from joining the channel */
-#define MODE_REGISTERED 0x0100U  /**< Channel has been registered with ChanServ */
-#define MODE_REGONLY    0x0200U  /**< Only registered clients may join a channel with that mode set */
-#define MODE_NOCTRL     0x0400U  /**< Prevents users from sending messages containing control codes to the channel */
-#define MODE_MODREG     0x0800U  /**< Unregistered/unidentified clients cannot send text to the channel */
-#define MODE_NOCTCP     0x1000U  /**< Clients cannot send CTCP messages to the channel */
-
-/* cache flags for silence on ban */
-#define CHFL_BAN_CHECKED  0x0080U
-#define CHFL_BAN_SILENCED 0x0100U
+enum
+{
+  MODE_PRIVATE    = 0x00000001U,  /**< */
+  MODE_SECRET     = 0x00000002U,  /**< Channel does not show up on NAMES or LIST */
+  MODE_MODERATED  = 0x00000004U,  /**< Users without +v/+h/+o cannot send text to the channel */
+  MODE_TOPICLIMIT = 0x00000008U,  /**< Only chanops can change the topic */
+  MODE_INVITEONLY = 0x00000010U,  /**< Only invited users may join this channel */
+  MODE_NOPRIVMSGS = 0x00000020U,  /**< Users must be in the channel to send text to it */
+  MODE_SSLONLY    = 0x00000040U,  /**< Prevents anyone who isn't connected via SSL/TLS from joining the channel */
+  MODE_OPERONLY   = 0x00000080U,  /**< Prevents anyone who hasn't obtained IRC operator status from joining the channel */
+  MODE_REGISTERED = 0x00000100U,  /**< Channel has been registered with ChanServ */
+  MODE_REGONLY    = 0x00000200U,  /**< Only registered clients may join a channel with that mode set */
+  MODE_NOCTRL     = 0x00000400U,  /**< Prevents users from sending messages containing control codes to the channel */
+  MODE_MODREG     = 0x00000800U,  /**< Unregistered/unidentified clients cannot send text to the channel */
+  MODE_NOCTCP     = 0x00001000U   /**< Clients cannot send CTCP messages to the channel */
+};
 
 /* name invisible */
 #define SecretChannel(x)        (((x)->mode.mode & MODE_SECRET))

@@ -45,8 +45,11 @@
  * just connected.  this allows clients to rejoin multiple channels
  * without being so heavily penalised they excess flood.
  */
-#define MAX_FLOOD 5
-#define MAX_FLOOD_BURST MAX_FLOOD * 8
+enum
+{
+  MAX_FLOOD = 5,
+  MAX_FLOOD_BURST = MAX_FLOOD * 8
+};
 
 extern void read_packet(fde_t *, void *);
 extern void flood_recalc(fde_t *, void *);

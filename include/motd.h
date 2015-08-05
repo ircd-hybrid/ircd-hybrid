@@ -55,9 +55,9 @@ struct Motd
 };
 
 /** Length of one MOTD line(80 chars + '\\0'). */
-#define MOTD_LINESIZE   81
+enum { MOTD_LINESIZE  =  81 };
 /** Maximum number of lines for MOTD */
-#define MOTD_MAXLINES   100
+enum { MOTD_MAXLINES  = 100 };
 
 
 /** Cache entry for the contents of a MOTD file. */

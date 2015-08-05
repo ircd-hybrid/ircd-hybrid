@@ -33,7 +33,7 @@
  * starting try_connections()
  * TOO SOON and you can nick collide like crazy.
  */
-#define STARTUP_CONNECTIONS_TIME 60
+enum { STARTUP_CONNECTIONS_TIME = 60 };
 
 struct Client;
 struct MaskItem;
@@ -47,21 +47,24 @@ struct Capability
   unsigned int cap;  /* mask value */
 };
 
-#define CAP_QS          0x00000001 /* Can handle quit storm removal */
-#define CAP_EX          0x00000002 /* Can do channel +e exemptions */
-#define CAP_IE          0x00000004 /* Can do invite exceptions */
-#define CAP_EOB         0x00000008 /* Can do EOB message */
-#define CAP_KLN         0x00000010 /* Can do KLINE message */
-#define CAP_KNOCK       0x00000020 /* supports KNOCK */
-#define CAP_UNKLN       0x00000040 /* Can do UNKLINE message */
-#define CAP_CLUSTER     0x00000080 /* supports server clustering */
-#define CAP_ENCAP       0x00000100 /* supports ENCAP message */
-#define CAP_HOPS        0x00000200 /* supports HALFOPS */
-#define CAP_TBURST      0x00000400 /* supports TBURST */
-#define CAP_SVS         0x00000800 /* supports services */
-#define CAP_DLN         0x00001000 /* Can do DLINE message */
-#define CAP_UNDLN       0x00002000 /* Can do UNDLINE message */
-#define CAP_CHW         0x00004000 /* Can do channel wall @# */
+enum
+{
+  CAP_QS      = 0x00000001U,  /* Can handle quit storm removal */
+  CAP_EX      = 0x00000002U,  /* Can do channel +e exemptions */
+  CAP_IE      = 0x00000004U,  /* Can do invite exceptions */
+  CAP_EOB     = 0x00000008U,  /* Can do EOB message */
+  CAP_KLN     = 0x00000010U,  /* Can do KLINE message */
+  CAP_KNOCK   = 0x00000020U,  /* supports KNOCK */
+  CAP_UNKLN   = 0x00000040U,  /* Can do UNKLINE message */
+  CAP_CLUSTER = 0x00000080U,  /* supports server clustering */
+  CAP_ENCAP   = 0x00000100U,  /* supports ENCAP message */
+  CAP_HOPS    = 0x00000200U,  /* supports HALFOPS */
+  CAP_TBURST  = 0x00000400U,  /* supports TBURST */
+  CAP_SVS     = 0x00000800U,  /* supports services */
+  CAP_DLN     = 0x00001000U,  /* Can do DLINE message */
+  CAP_UNDLN   = 0x00002000U,  /* Can do UNDLINE message */
+  CAP_CHW     = 0x00004000U   /* Can do channel wall @# */
+};
 
 /*
  * Capability macros.

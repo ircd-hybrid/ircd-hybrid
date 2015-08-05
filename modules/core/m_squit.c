@@ -105,7 +105,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 
   if (MyConnect(target_p))
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Received SQUIT %s from %s (%s)",
                          target_p->name, get_client_name(source_p, HIDE_IP), comment);
     ilog(LOG_TYPE_IRCD, "Received SQUIT %s from %s (%s)",
@@ -164,7 +164,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
 
   if (MyConnect(target_p))
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
                          me.name, target_p->name, source_p->name, comment);
     sendto_server(source_p, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
                   me.id, target_p->name, source_p->name, comment);

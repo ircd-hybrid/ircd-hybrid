@@ -423,7 +423,7 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   /* If we don't have a TS, or their TS's are the same, kill both */
   if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(both killed)",
                          target_p->name, target_p->from->name,
                          source_p->from->name);
@@ -461,12 +461,12 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   }
 
   if (sameuser)
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(older killed)",
                          target_p->name, target_p->from->name,
                          source_p->from->name);
   else
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(newer killed)",
                          target_p->name, target_p->from->name,
                          source_p->from->name);
@@ -510,7 +510,7 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   /* It's a client changing nick and causing a collide */
   if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                "Nick change collision from %s to %s(%s <- %s)(both killed)",
                source_p->name, target_p->name, target_p->from->name,
                source_p->from->name);
@@ -542,12 +542,12 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
       (!sameuser && newts > target_p->tsinfo))
   {
     if (sameuser)
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
            "Nick change collision from %s to %s(%s <- %s)(older killed)",
            source_p->name, target_p->name, target_p->from->name,
            source_p->from->name);
     else
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
            "Nick change collision from %s to %s(%s <- %s)(newer killed)",
              source_p->name, target_p->name, target_p->from->name,
              source_p->from->name);
@@ -566,12 +566,12 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   }
 
   if (sameuser)
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(older killed)",
                          target_p->name, target_p->from->name,
                          source_p->from->name);
   else
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(newer killed)",
                          target_p->name, target_p->from->name,
                          source_p->from->name);
@@ -819,7 +819,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
    */
   if ((target_p = hash_find_id(parv[8])))
   {
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "ID collision on %s(%s <- %s)(both killed)",
                          target_p->name, target_p->from->name,
                          source_p->from->name);

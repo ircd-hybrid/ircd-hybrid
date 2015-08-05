@@ -743,7 +743,7 @@ hostmask_send_expiration(const struct AddressRec *const arec)
     default: break;
   }
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "Temporary %c-line for [%s@%s] expired", ban_type,
                        (arec->conf->user) ? arec->conf->user : "*",
                        (arec->conf->host) ? arec->conf->host : "*");

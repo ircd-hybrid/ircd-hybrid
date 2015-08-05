@@ -72,7 +72,7 @@ resv_remove(struct Client *source_p, const char *name)
   if (IsClient(source_p))
     sendto_one_notice(source_p, &me, ":The RESV has been removed on %s: %s", type_str, name);
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "%s has removed the RESV for %s: %s",
                        get_oper_name(source_p), type_str, name);
   ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",

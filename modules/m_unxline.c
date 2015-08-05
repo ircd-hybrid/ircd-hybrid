@@ -75,7 +75,7 @@ xline_remove_and_notify(struct Client *source_p, const char *gecos)
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has removed the X-Line for: [%s]",
                          get_oper_name(source_p), gecos);
     ilog(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",

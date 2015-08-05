@@ -482,7 +482,7 @@ register_local_user(struct Client *source_p)
     Count.max_loc = Count.local;
 
     if (!(Count.max_loc % 10))
-      sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "New maximum local client connections: %u",
                            Count.max_loc);
   }
@@ -878,7 +878,7 @@ user_oper_up(struct Client *source_p)
                   RPL_WHOISOPERATOR, conf->whois);
   }
 
-  sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE, "%s is now an operator",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                 me.id, get_oper_name(source_p));

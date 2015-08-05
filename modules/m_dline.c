@@ -127,7 +127,7 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
       sendto_one_notice(source_p, &me, ":Added temporary %d min. D-Line [%s]",
                         tdline_time/60, conf->host);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. D-Line for [%s] [%s]",
                          get_oper_name(source_p), tdline_time/60,
                          conf->host, conf->reason);
@@ -139,7 +139,7 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added D-Line [%s]", conf->host);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added D-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->host, conf->reason);
     ilog(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",

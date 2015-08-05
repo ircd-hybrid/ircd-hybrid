@@ -180,8 +180,6 @@ enum
   UMODE_HIDECHANS    = 0x08000000U   /**< Hides channel list in WHOIS */
 };
 
-#define UMODE_ALL          UMODE_SERVNOTICE
-
 #define HasUMode(x, y) ((x)->umodes &   (y))
 #define AddUMode(x, y) ((x)->umodes |=  (y))
 #define DelUMode(x, y) ((x)->umodes &= ~(y))

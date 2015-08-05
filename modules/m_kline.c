@@ -110,7 +110,7 @@ kline_add(struct Client *source_p, const char *user, const char *host,
       sendto_one_notice(source_p, &me, ":Added temporary %d min. K-Line [%s@%s]",
                         tkline_time/60, conf->user, conf->host);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p), tkline_time/60,
                          conf->user, conf->host,
@@ -125,7 +125,7 @@ kline_add(struct Client *source_p, const char *user, const char *host,
       sendto_one_notice(source_p, &me, ":Added K-Line [%s@%s]",
                         conf->user, conf->host);
 
-    sendto_realops_flags(UMODE_ALL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p),
                          conf->user, conf->host, conf->reason);

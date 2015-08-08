@@ -61,7 +61,6 @@ enum
 
 #define ID_or_name(x,client_p)  ((IsServer(client_p->from) && (x)->id[0]) ? (x)->id : (x)->name)
 
-#define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
 #define IsConnecting(x)         ((x)->status == STAT_CONNECTING)
 #define IsHandshake(x)          ((x)->status == STAT_HANDSHAKE)
 #define IsMe(x)                 ((x)->status == STAT_ME)

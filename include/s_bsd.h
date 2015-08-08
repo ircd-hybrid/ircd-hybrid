@@ -31,11 +31,14 @@
 #include "fdlist.h"
 
 /* Type of IO */
-#define COMM_SELECT_READ  1
-#define COMM_SELECT_WRITE 2
+enum
+{
+  COMM_SELECT_READ  = 1,
+  COMM_SELECT_WRITE = 2
+};
 
 /* How long can comm_select() wait for network events [milliseconds] */
-#define SELECT_DELAY    500
+enum { SELECT_DELAY = 500 };
 
 struct Client;
 struct MaskItem;
@@ -53,10 +56,9 @@ extern void comm_setflush(fde_t *, time_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
 extern void comm_connect_tcp(fde_t *, const char *, unsigned short, struct sockaddr *, int,
                              void (struct _fde *, int, void *), void *, int, int);
-extern const char *comm_errstr(int status);
-extern int comm_open(fde_t *F, int family, int sock_type, int proto,
-                     const char *note);
-extern int comm_accept(struct Listener *, struct irc_ssaddr *pn);
+extern const char *comm_errstr(int);
+extern int comm_open(fde_t *, int, int, int, const char *);
+extern int comm_accept(struct Listener *, struct irc_ssaddr *);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void init_netio(void);

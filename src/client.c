@@ -219,10 +219,10 @@ check_pings_list(dlink_list *list)
     if (IsDead(client_p))
       continue;  /* Ignore it, its been exited already */
 
-    if (!IsRegistered(client_p))
-      ping = CONNECTTIMEOUT;
-    else
+    if (IsClient(client_p) || IsServer(client_p))
       ping = get_client_ping(&client_p->connection->confs);
+    else
+      ping = CONNECTTIMEOUT;
 
     if (ping < CurrentTime - client_p->connection->lasttime)
     {
@@ -725,20 +725,7 @@ exit_client(struct Client *source_p, const char *comment)
 
     delete_auth(&source_p->connection->auth);
 
-    /*
-     * This source_p could have status of one of STAT_UNKNOWN, STAT_CONNECTING
-     * STAT_HANDSHAKE or STAT_UNKNOWN
-     * all of which are lumped together into unknown_list
-     *
-     * In all above cases IsRegistered() will not be true.
-     */
-    if (!IsRegistered(source_p))
-    {
-      assert(dlinkFind(&unknown_list, source_p));
-
-      dlinkDelete(&source_p->connection->lclient_node, &unknown_list);
-    }
-    else if (IsClient(source_p))
+    if (IsClient(source_p))
     {
       time_t on_for = CurrentTime - source_p->connection->firsttime;
 
@@ -779,6 +766,11 @@ exit_client(struct Client *source_p, const char *comment)
 
       assert(dlinkFind(&local_server_list, source_p));
       dlinkDelete(&source_p->connection->lclient_node, &local_server_list);
+    }
+    else
+    {
+      assert(dlinkFind(&unknown_list, source_p));
+      dlinkDelete(&source_p->connection->lclient_node, &unknown_list);
     }
 
     if (!IsDead(source_p))

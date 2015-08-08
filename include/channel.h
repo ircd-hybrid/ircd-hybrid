@@ -38,13 +38,13 @@
 
 enum
 {
-  FLOOD_NOTICED      = 0x00000001U,
+  MSG_FLOOD_NOTICED  = 0x00000001U,
   JOIN_FLOOD_NOTICED = 0x00000002U
 };
 
-#define SetFloodNoticed(x)   ((x)->flags |= FLOOD_NOTICED)
-#define IsSetFloodNoticed(x) ((x)->flags & FLOOD_NOTICED)
-#define ClearFloodNoticed(x) ((x)->flags &= ~FLOOD_NOTICED)
+#define SetFloodNoticed(x)   ((x)->flags |= MSG_FLOOD_NOTICED)
+#define IsSetFloodNoticed(x) ((x)->flags & MSG_FLOOD_NOTICED)
+#define ClearFloodNoticed(x) ((x)->flags &= ~MSG_FLOOD_NOTICED)
 
 #define SetJoinFloodNoticed(x)   ((x)->flags |= JOIN_FLOOD_NOTICED)
 #define IsSetJoinFloodNoticed(x) ((x)->flags & JOIN_FLOOD_NOTICED)

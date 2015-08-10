@@ -54,25 +54,23 @@ parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
   struct MaskItem *conf = NULL;
 
   if (!IsChanPrefix(*name))
-  {
     type = "nick";
 
-    if (!valid_wild_card_simple(name))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the resv",
-                          ConfigGeneral.min_nonwildcard_simple);
+  if (!valid_wild_card_simple(name))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the resv",
+                        ConfigGeneral.min_nonwildcard_simple);
 
-      return;
-    }
+    return;
+  }
 
-    if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(name))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
+  if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(name))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
 
-      return;
-    }
+    return;
   }
 
   if ((conf = create_resv(name, reason, NULL)) == NULL)

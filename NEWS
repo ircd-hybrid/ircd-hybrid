@@ -5,6 +5,7 @@ o) serverinfo::sid is now optional. A unique SID is now automatically
 o) Various fixes to the mkpasswd tool
 o) If supported by the compiler, ircd-hybrid now compiles with
    -fstack-protector-strong instead of -fstack-protector
+o) Services can now add SQLINEs/RESVs that have wildcards in it
 
 
 -- Noteworthy changes in version 8.2.8 (2015-05-10)

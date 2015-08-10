@@ -48,7 +48,7 @@
  * side effects	- parse resv, create if valid
  */
 static void
-parse_resv(struct Client *source_p, char *name, int tkline_time, char *reason)
+parse_resv(struct Client *source_p, const char *name, int tkline_time, const char *reason)
 {
   const char *type = "channel";
   struct MaskItem *conf = NULL;

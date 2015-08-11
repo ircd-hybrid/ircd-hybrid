@@ -41,7 +41,7 @@
 #include "modules.h"
 
 
-#define WHOWAS_MAX_REPLIES 20  /* Only applies to remote clients */
+enum { WHOWAS_MAX_REPLIES = 20 };  /* Only applies to remote clients */
 
 static void
 do_whowas(struct Client *source_p, const int parc, char *parv[])

@@ -83,7 +83,7 @@
  * For a small parser like this, this is a good compromise and does
  * make it somewhat faster. - Dianora
  */
-#define MAXPTRLEN 32
+enum { MAXPTRLEN = 32 };
 
 
 static struct MessageTree

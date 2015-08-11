@@ -24,8 +24,8 @@
  * \version $Id$
  */
 
-#ifndef INCLUDED_serv_h
-#define INCLUDED_serv_h
+#ifndef INCLUDED_server_h
+#define INCLUDED_server_h
 
 
 /*

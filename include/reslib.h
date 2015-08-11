@@ -3,8 +3,8 @@
  *
  * $Id$
  */
-#ifndef INCLUDED_ircdreslib_h
-#define INCLUDED_ircdreslib_h
+#ifndef INCLUDED_reslib_h
+#define INCLUDED_reslib_h
 
 /*
  * Inline versions of get/put short/long.  Pointer is advanced.

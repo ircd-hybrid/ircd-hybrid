@@ -24,8 +24,8 @@
  * \version $Id$
  */
 
-#ifndef INCLUDED_irc_res_h
-#define INCLUDED_irc_res_h
+#ifndef INCLUDED_res_h
+#define INCLUDED_res_h
 
 #include "config.h"
 

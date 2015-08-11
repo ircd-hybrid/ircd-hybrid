@@ -24,8 +24,8 @@
  * \version $Id$
  */
 
-#ifndef _I_MEMORY_H
-#define _I_MEMORY_H
+#ifndef INCLUDED_memory_h
+#define INCLUDED_memory_h
 
 #include "ircd_defs.h"
 
@@ -35,4 +35,4 @@ extern void *MyRealloc(void *, size_t);
 extern void MyFree(void *);
 extern void *xstrdup(const char *);
 extern void *xstrndup(const char *, size_t);
-#endif /* _I_MEMORY_H */
+#endif /* INCLUDED_memory_h */

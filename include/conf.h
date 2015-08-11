@@ -24,8 +24,8 @@
  * \version $Id$
  */
 
-#ifndef INCLUDED_s_conf_h
-#define INCLUDED_s_conf_h
+#ifndef INCLUDED_conf_h
+#define INCLUDED_conf_h
 #include "config.h"
 #include "ircd_defs.h"
 #include "client.h"

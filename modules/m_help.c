@@ -34,8 +34,8 @@
 #include "modules.h"
 #include "irc_string.h"
 
-#define HELPLEN 400
 
+enum { HELPLEN = 400 };
 
 static void
 sendhelpfile(struct Client *source_p, const char *path, const char *topic)

@@ -48,7 +48,7 @@
 #include "channel.h"
 #include "parse.h"
 
-#define MIN_CONN_FREQ 300
+enum { MIN_CONN_FREQ = 300 };
 
 dlink_list flatten_links;
 static dlink_list server_capabilities_list;

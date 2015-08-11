@@ -32,7 +32,7 @@
 #include "s_bsd.h"
 #include "log.h"
 
-#define KE_LENGTH 128
+enum { KE_LENGTH = 128 };
 
 static fde_t kqfd;
 static struct kevent kq_fdlist[KE_LENGTH];  /* kevent buffer */

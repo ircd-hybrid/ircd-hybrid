@@ -27,10 +27,10 @@
 #ifndef INCLUDED_dbuf_h
 #define INCLUDED_dbuf_h
 
-#define DBUF_BLOCK_SIZE 1024
-
 #define dbuf_length(x) ((x)->total_size)
 #define dbuf_clear(x) dbuf_delete(x, dbuf_length(x))
+
+enum { DBUF_BLOCK_SIZE = 1024 };
 
 struct dbuf_block
 {

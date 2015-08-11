@@ -140,7 +140,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
                          target_server, (int)tkline_time, resv, reason);
     else
       sendto_match_servs(source_p, target_server, CAP_CLUSTER,
-                         "RESV %s %s :%s",
+                         "RESV %s 0 %s :%s",
                          target_server, resv, reason);
 
     /* Allow ON to apply local resv as well if it matches */
@@ -154,7 +154,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
                      "RESV %d %s 0 :%s", (int)tkline_time, resv, reason);
     else
       cluster_a_line(source_p, "RESV", CAP_KLN, SHARED_RESV,
-                     "%s :%s", resv, reason);
+                     "0 %s :%s", resv, reason);
   }
 
   parse_resv(source_p, resv, (int)tkline_time, reason);
@@ -191,17 +191,18 @@ me_resv(struct Client *source_p, int parc, char *parv[])
 /* ms_resv()
  *   parv[0] = command
  *   parv[1] = target server
- *   parv[2] = channel/nick to resv
- *   parv[3] = reason
+ *   parv[2] = tkline_time
+ *   parv[3] = channel/nick to resv
+ *   parv[4] = reason
  */
 static int
 ms_resv(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc != 4 || EmptyString(parv[3]))
+  if (parc != 5 || EmptyString(parv[4]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "RESV %s %s :%s",
-                     parv[1], parv[2], parv[3]);
+  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "RESV %s %s %s :%s",
+                     parv[1], parv[2], parv[3], parv[4]);
 
   if (match(parv[1], me.name))
     return 0;
@@ -210,7 +211,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
       find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_RESV))
-    parse_resv(source_p, parv[2], 0, parv[3]);
+    parse_resv(source_p, parv[3], atoi(parv[2]), parv[4]);
   return 0;
 }
 

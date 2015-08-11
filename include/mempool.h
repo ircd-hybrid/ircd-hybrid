@@ -36,8 +36,8 @@
  * \version $Id$
  */
 
-#ifndef TOR_MEMPOOL_H
-#define TOR_MEMPOOL_H
+#ifndef INCLUDED_mempool_h
+#define INCLUDED_mempool_h
 
 /** A memory pool is a context in which a large number of fixed-sized
 * objects can be allocated efficiently.  See mempool.c for implementation

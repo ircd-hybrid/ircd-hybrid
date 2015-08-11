@@ -24,8 +24,8 @@
  * \version $Id$
  */
 
-#ifndef INCLUDED_s_log_h
-#define INCLUDED_s_log_h
+#ifndef INCLUDED_log_h
+#define INCLUDED_log_h
 
 enum { LOG_BUFSIZE = 1024 };
 

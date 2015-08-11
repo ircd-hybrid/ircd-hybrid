@@ -24,8 +24,8 @@
  * \version $Id$
  */
 
-#ifndef __DBUF_H_INCLUDED
-#define __DBUF_H_INCLUDED
+#ifndef INCLUDED_dbuf_h
+#define INCLUDED_dbuf_h
 
 #define DBUF_BLOCK_SIZE 1024
 

@@ -23,8 +23,8 @@
  *
  */
 
-#ifndef STDINC_H /* prevent multiple #includes */
-#define STDINC_H
+#ifndef INCLUDED_stdinc_h /* prevent multiple #includes */
+#define INCLUDED_stdinc_h
 
 #include "config.h"
 

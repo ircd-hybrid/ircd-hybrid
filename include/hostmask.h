@@ -24,8 +24,8 @@
  * \version $Id$
  */
 
-#ifndef INCLUDE_hostmask_h
-#define INCLUDE_hostmask_h
+#ifndef INCLUDED_hostmask_h
+#define INCLUDED_hostmask_h
 
 #define ATABLE_SIZE 0x1000
 
@@ -83,4 +83,4 @@ extern struct MaskItem *find_address_conf(const char *, const char *,
 extern struct MaskItem *find_dline_conf(struct irc_ssaddr *, int);
 extern struct MaskItem *find_conf_by_address(const char *, const struct irc_ssaddr *,
                                              unsigned int, int, const char *, const char *, int);
-#endif /* INCLUDE_hostmask_h */
+#endif /* INCLUDED_hostmask_h */

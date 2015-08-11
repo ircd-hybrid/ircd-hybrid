@@ -29,7 +29,10 @@
 #define FILEIO_V2
 
 #include "ircd_defs.h"
-#define FD_DESC_SZ 128  /* hostlen + comment */
+
+
+enum { FD_DESC_SIZE = 128 };  /* hostlen + comment */
+enum { FD_HASH_SIZE = 1024 };
 
 enum
 {
@@ -55,7 +58,7 @@ typedef struct _fde
   int fd;  /* So we can use the fde_t as a callback ptr */
   int comm_index;  /* where in the poll list we live */
   int evcache;          /* current fd events as set up by the underlying I/O */
-  char desc[FD_DESC_SZ];
+  char desc[FD_DESC_SIZE];
   void (*read_handler)(struct _fde *, void *);
   void *read_data;
   void (*write_handler)(struct _fde *, void *);
@@ -87,8 +90,6 @@ typedef struct _fde
 #endif
   struct _fde *hnext;
 } fde_t;
-
-#define FD_HASH_SIZE 1024
 
 extern int number_fd;
 extern int hard_fdlimit;

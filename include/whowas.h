@@ -32,7 +32,7 @@
 #include "config.h"
 
 
-#define NICKNAMEHISTORYLENGTH 32768
+enum { NICKNAMEHISTORYLENGTH = 32768 };
 
 struct Whowas
 {

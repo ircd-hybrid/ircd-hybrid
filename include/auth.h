@@ -27,8 +27,8 @@
 #ifndef INCLUDED_auth_h
 #define INCLUDED_auth_h
 
-#define RFC1413_BUFSIZ  512  /**< rfc1413 says we MUST accept 512 bytes */
-#define RFC1413_PORT    113  /**< As defined per rfc1413, IDENT server listens on TCP port 113 */
+enum { RFC1413_BUFSIZ = 512 };  /**< rfc1413 says we MUST accept 512 bytes */
+enum { RFC1413_PORT   = 113 };  /**< As defined per rfc1413, IDENT server listens on TCP port 113 */
 
 enum
 {

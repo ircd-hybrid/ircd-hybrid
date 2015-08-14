@@ -1755,7 +1755,7 @@ match_conf_password(const char *password, const struct MaskItem *conf)
  *
  * inputs	- client sending the cluster
  *		- command name "KLINE" "XLINE" etc.
- *		- capab -- CAP_KLN etc. from server.h
+ *		- capab -- CAPAB_KLN etc. from server.h
  *		- cluster type -- CLUSTER_KLINE etc. from conf.h
  *		- pattern and args to send along
  * output	- none
@@ -1779,7 +1779,7 @@ cluster_a_line(struct Client *source_p, const char *command, unsigned int capab,
     const struct MaskItem *conf = node->data;
 
     if (conf->flags & cluster_type)
-      sendto_match_servs(source_p, conf->name, CAP_CLUSTER | capab,
+      sendto_match_servs(source_p, conf->name, CAPAB_CLUSTER | capab,
                          "%s %s %s", command, conf->name, buffer);
   }
 }

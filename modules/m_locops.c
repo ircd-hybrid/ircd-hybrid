@@ -88,7 +88,7 @@ ms_locops(struct Client *source_p, int parc, char *parv[])
   if (parc != 3 || EmptyString(parv[2]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "LOCOPS %s :%s",
+  sendto_match_servs(source_p, parv[1], CAPAB_CLUSTER, "LOCOPS %s :%s",
                      parv[1], parv[2]);
 
   if (match(parv[1], me.name))

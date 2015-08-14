@@ -135,11 +135,11 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   {
     /* if a given expire time is given, ENCAP it */
     if (tkline_time)
-      sendto_match_servs(source_p, target_server, CAP_ENCAP,
+      sendto_match_servs(source_p, target_server, CAPAB_ENCAP,
                          "ENCAP %s RESV %d %s 0 :%s",
                          target_server, (int)tkline_time, resv, reason);
     else
-      sendto_match_servs(source_p, target_server, CAP_CLUSTER,
+      sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
                          "RESV %s 0 %s :%s",
                          target_server, resv, reason);
 
@@ -150,10 +150,10 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   else
   {
     if (tkline_time)
-      cluster_a_line(source_p, "ENCAP", CAP_ENCAP, SHARED_RESV,
+      cluster_a_line(source_p, "ENCAP", CAPAB_ENCAP, SHARED_RESV,
                      "RESV %d %s 0 :%s", (int)tkline_time, resv, reason);
     else
-      cluster_a_line(source_p, "RESV", CAP_KLN, SHARED_RESV,
+      cluster_a_line(source_p, "RESV", CAPAB_KLN, SHARED_RESV,
                      "0 %s :%s", resv, reason);
   }
 
@@ -201,7 +201,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
   if (parc != 5 || EmptyString(parv[4]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "RESV %s %s %s :%s",
+  sendto_match_servs(source_p, parv[1], CAPAB_CLUSTER, "RESV %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4]);
 
   if (match(parv[1], me.name))

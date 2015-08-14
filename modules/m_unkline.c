@@ -133,7 +133,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-     sendto_match_servs(source_p, target_server, CAP_UNKLN,
+     sendto_match_servs(source_p, target_server, CAPAB_UNKLN,
                         "UNKLINE %s %s %s",
                         target_server, user, host);
 
@@ -142,7 +142,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNKLINE", CAP_UNKLN, SHARED_UNKLINE,
+    cluster_a_line(source_p, "UNKLINE", CAPAB_UNKLN, SHARED_UNKLINE,
                    "%s %s", user, host);
 
   kline_remove_and_notify(source_p, user, host);
@@ -170,7 +170,7 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
   if (parc != 4 || EmptyString(parv[3]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_UNKLN, "UNKLINE %s %s %s",
+  sendto_match_servs(source_p, parv[1], CAPAB_UNKLN, "UNKLINE %s %s %s",
                      parv[1], parv[2], parv[3]);
 
   user = parv[2];
@@ -204,7 +204,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&unkline_msgtab);
-  add_capability("UNKLN", CAP_UNKLN);
+  add_capability("UNKLN", CAPAB_UNKLN);
 }
 
 static void

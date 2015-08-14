@@ -51,7 +51,7 @@
  *              - pointer to channel
  * output       - NONE
  * side effects - Called on a server burst when
- *                server is CAP_TBURST capable
+ *                server is CAPAB_TBURST capable
  */
 static void
 send_tb(struct Client *client_p, const struct Channel *chptr)
@@ -101,7 +101,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
     ubuf[1] = '\0';
   }
 
-  if (IsCapable(client_p, CAP_SVS))
+  if (IsCapable(client_p, CAPAB_SVS))
     sendto_one(client_p, ":%s UID %s %u %lu %s %s %s %s %s %s :%s",
                target_p->servptr->id,
                target_p->name, target_p->hopcount + 1,
@@ -188,7 +188,7 @@ burst_all(struct Client *client_p)
       burst_members(client_p, chptr);
       send_channel_modes(client_p, chptr);
 
-      if (IsCapable(client_p, CAP_TBURST))
+      if (IsCapable(client_p, CAPAB_TBURST))
         send_tb(client_p, chptr);
     }
   }
@@ -418,7 +418,7 @@ server_estab(struct Client *client_p)
 
   server_burst(client_p);
 
-  if (IsCapable(client_p, CAP_EOB))
+  if (IsCapable(client_p, CAPAB_EOB))
   {
     DLINK_FOREACH_PREV(node, global_server_list.tail)
     {

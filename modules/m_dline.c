@@ -183,7 +183,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    sendto_match_servs(source_p, target_server, CAP_DLN, "DLINE %s %lu %s :%s",
+    sendto_match_servs(source_p, target_server, CAPAB_DLN, "DLINE %s %lu %s :%s",
                        target_server, (unsigned long)tdline_time,
                        dlhost, reason);
 
@@ -192,7 +192,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "DLINE", CAP_DLN, SHARED_DLINE,
+    cluster_a_line(source_p, "DLINE", CAPAB_DLN, SHARED_DLINE,
                    "%d %s :%s", tdline_time, dlhost, reason);
 
   if ((t = parse_netmask(dlhost, NULL, NULL)) == HM_HOST)
@@ -269,7 +269,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4] */
   /* command  target_server  tdline_time  host     reason  */
-  sendto_match_servs(source_p, parv[1], CAP_DLN, "DLINE %s %s %s :%s",
+  sendto_match_servs(source_p, parv[1], CAPAB_DLN, "DLINE %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4]);
 
   if (match(parv[1], me.name))
@@ -342,7 +342,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&dline_msgtab);
-  add_capability("DLN", CAP_DLN);
+  add_capability("DLN", CAPAB_DLN);
 }
 
 static void

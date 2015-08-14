@@ -99,7 +99,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
 
     channel_set_topic(chptr, topic, setby, remote_topic_ts, 0);
 
-    sendto_server(source_p, CAP_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
+    sendto_server(source_p, CAPAB_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
                   source_p->id, parv[1], parv[2], parv[3], setby, topic);
 
     if (topic_differs)
@@ -134,7 +134,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&tburst_msgtab);
-  add_capability("TBURST", CAP_TBURST);
+  add_capability("TBURST", CAPAB_TBURST);
 }
 
 static void

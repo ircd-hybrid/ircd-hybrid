@@ -186,7 +186,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    sendto_match_servs(source_p, target_server, CAP_CLUSTER, "XLINE %s %s %d :%s",
+    sendto_match_servs(source_p, target_server, CAPAB_CLUSTER, "XLINE %s %s %d :%s",
                        target_server, gecos, (int)txline_time, reason);
 
     /* Allow ON to apply local xline as well if it matches */
@@ -194,7 +194,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "XLINE", CAP_CLUSTER, SHARED_XLINE, "%s %d :%s",
+    cluster_a_line(source_p, "XLINE", CAPAB_CLUSTER, SHARED_XLINE, "%s %d :%s",
                    gecos, txline_time, reason);
 
   if (!valid_xline(source_p, gecos))
@@ -231,7 +231,7 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   if (parc != 5 || EmptyString(parv[4]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "XLINE %s %s %s :%s",
+  sendto_match_servs(source_p, parv[1], CAPAB_CLUSTER, "XLINE %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4]);
 
   if (match(parv[1], me.name))

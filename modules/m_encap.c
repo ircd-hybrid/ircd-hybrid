@@ -68,7 +68,7 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   else
     snprintf(ptr, sizeof(buffer) - cur_len, ":%s", parv[parc - 1]);
 
-  sendto_match_servs(source_p, parv[1], CAP_ENCAP,
+  sendto_match_servs(source_p, parv[1], CAPAB_ENCAP,
                      "ENCAP %s", buffer);
 
   if (match(parv[1], me.name))
@@ -107,7 +107,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&encap_msgtab);
-  add_capability("ENCAP", CAP_ENCAP);
+  add_capability("ENCAP", CAPAB_ENCAP);
 }
 
 static void

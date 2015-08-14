@@ -105,7 +105,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    sendto_match_servs(source_p, target_server, CAP_CLUSTER, "UNRESV %s %s",
+    sendto_match_servs(source_p, target_server, CAPAB_CLUSTER, "UNRESV %s %s",
                        target_server, resv);
 
     /* Allow ON to apply local unresv as well if it matches */
@@ -113,7 +113,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNRESV", CAP_KLN, SHARED_UNRESV, resv);
+    cluster_a_line(source_p, "UNRESV", CAPAB_KLN, SHARED_UNRESV, resv);
 
   resv_remove(source_p, resv);
   return 0;
@@ -137,7 +137,7 @@ ms_unresv(struct Client *source_p, int parc, char *parv[])
   if (parc != 3 || EmptyString(parv[2]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "UNRESV %s %s",
+  sendto_match_servs(source_p, parv[1], CAPAB_CLUSTER, "UNRESV %s %s",
                      parv[1], parv[2]);
 
   if (match(parv[1], me.name))

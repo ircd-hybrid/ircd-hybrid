@@ -116,7 +116,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    sendto_match_servs(source_p, target_server, CAP_CLUSTER,
+    sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
                        "UNXLINE %s %s", target_server, gecos);
 
     /* Allow ON to apply local unxline as well if it matches */
@@ -124,7 +124,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNXLINE", CAP_CLUSTER, SHARED_UNXLINE, "%s", gecos);
+    cluster_a_line(source_p, "UNXLINE", CAPAB_CLUSTER, SHARED_UNXLINE, "%s", gecos);
 
   xline_remove_and_notify(source_p, gecos);
   return 0;
@@ -148,7 +148,7 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
   if (parc != 3 || EmptyString(parv[2]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAP_CLUSTER, "UNXLINE %s %s",
+  sendto_match_servs(source_p, parv[1], CAPAB_CLUSTER, "UNXLINE %s %s",
                      parv[1], parv[2]);
 
   if (match(parv[1], me.name))

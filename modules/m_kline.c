@@ -208,7 +208,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    sendto_match_servs(source_p, target_server, CAP_KLN, "KLINE %s %lu %s %s :%s",
+    sendto_match_servs(source_p, target_server, CAPAB_KLN, "KLINE %s %lu %s %s :%s",
                        target_server, (unsigned long)tkline_time,
                        user, host, reason);
 
@@ -217,7 +217,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "KLINE", CAP_KLN, SHARED_KLINE,
+    cluster_a_line(source_p, "KLINE", CAPAB_KLN, SHARED_KLINE,
                    "%d %s %s :%s", tkline_time, user, host, reason);
 
   if (already_placed_kline(source_p, user, host))
@@ -264,7 +264,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
   /* command  target_server  tkline_time  user     host     reason */
-  sendto_match_servs(source_p, parv[1], CAP_KLN, "KLINE %s %s %s %s :%s",
+  sendto_match_servs(source_p, parv[1], CAPAB_KLN, "KLINE %s %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4], parv[5]);
 
   if (match(parv[1], me.name))
@@ -334,7 +334,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&kline_msgtab);
-  add_capability("KLN", CAP_KLN);
+  add_capability("KLN", CAPAB_KLN);
 }
 
 static void

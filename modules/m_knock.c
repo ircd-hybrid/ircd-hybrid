@@ -126,7 +126,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
                        source_p->username,
                        source_p->host);
 
-  sendto_server(source_p, CAP_KNOCK, 0, ":%s KNOCK %s",
+  sendto_server(source_p, CAPAB_KNOCK, 0, ":%s KNOCK %s",
                 source_p->id, chptr->name);
   return 0;
 }
@@ -147,7 +147,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&knock_msgtab);
-  add_capability("KNOCK", CAP_KNOCK);
+  add_capability("KNOCK", CAPAB_KNOCK);
   isupport_add("KNOCK", NULL, -1);
 }
 

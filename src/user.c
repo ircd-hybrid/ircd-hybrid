@@ -232,7 +232,7 @@ introduce_client(struct Client *source_p)
     if (server == source_p->from)
       continue;
 
-    if (IsCapable(server, CAP_SVS))
+    if (IsCapable(server, CAPAB_SVS))
       sendto_one(server, ":%s UID %s %u %lu %s %s %s %s %s %s :%s",
                  source_p->servptr->id,
                  source_p->name, source_p->hopcount+1,

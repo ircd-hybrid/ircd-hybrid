@@ -279,12 +279,12 @@ initialize_global_set_options(void)
 static void
 initialize_server_capabs(void)
 {
-  add_capability("QS", CAP_QS);
-  add_capability("EOB", CAP_EOB);
-  add_capability("CLUSTER", CAP_CLUSTER);
-  add_capability("SVS", CAP_SVS);
-  add_capability("CHW", CAP_CHW);
-  add_capability("HOPS", CAP_HOPS);
+  add_capability("QS", CAPAB_QS);
+  add_capability("EOB", CAPAB_EOB);
+  add_capability("CLUSTER", CAPAB_CLUSTER);
+  add_capability("SVS", CAPAB_SVS);
+  add_capability("CHW", CAPAB_CHW);
+  add_capability("HOPS", CAPAB_HOPS);
 }
 
 /* write_pidfile()

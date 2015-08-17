@@ -25,8 +25,8 @@
  * \version $Id$
  */
 
-#ifndef DATAFILES_H
-#define DATAFILES_H
+#ifndef INCLUDED_conf_db_h
+#define INCLUDED_conf_db_h
 
 struct dbFILE
 {
@@ -55,6 +55,6 @@ extern void load_resv_database(void);
 extern void save_resv_database(void);
 extern void save_all_databases(void *);
 
-#define DATABASE_UPDATE_TIMEOUT 300
-#define KLINE_DB_VERSION 1
+enum { DATABASE_UPDATE_TIMEOUT = 300 };
+enum { KLINE_DB_VERSION = 1 };
 #endif

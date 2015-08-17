@@ -72,7 +72,7 @@ mo_die(struct Client *source_p, int parc, char *parv[])
 
   snprintf(buf, sizeof(buf), "received DIE command from %s",
            get_client_name(source_p, HIDE_IP));
-  server_die(buf, 0);
+  server_die(buf, SERVER_SHUTDOWN);
   return 0;
 }
 

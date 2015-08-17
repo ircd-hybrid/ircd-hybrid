@@ -187,7 +187,7 @@ set_time(void)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Clock Failure (%s), TS can be corrupted",
                          strerror(errno));
-    server_die("Clock Failure", 1);
+    server_die("Clock Failure", SERVER_SHUTDOWN);
   }
 
   if (newtime.tv_sec < CurrentTime)

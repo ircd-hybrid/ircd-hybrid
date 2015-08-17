@@ -108,5 +108,5 @@ outofmemory(void)
     abort();
 
   ilog(LOG_TYPE_IRCD, "Out of memory: restarting server...");
-  server_die("Out of Memory", 1);
+  server_die("Out of Memory", SERVER_RESTART);
 }

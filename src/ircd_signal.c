@@ -36,7 +36,7 @@
 static void
 sigterm_handler(int sig)
 {
-  server_die("received signal SIGTERM", 0);
+  server_die("received signal SIGTERM", SERVER_SHUTDOWN);
 }
 
 /*
@@ -80,7 +80,7 @@ sigchld_handler(int sig)
 static void
 sigint_handler(int sig)
 {
-  server_die("received signal SIGINT", !server_state.foreground);
+  server_die("received signal SIGINT", server_state.foreground ? SERVER_SHUTDOWN : SERVER_RESTART);
 }
 
 /*

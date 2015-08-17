@@ -58,7 +58,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
 
     DLINK_FOREACH(node, global_server_list.head)
     {
-      struct Client *target_p = node->data;
+      const struct Client *target_p = node->data;
 
       /* skip hidden servers */
       if (IsHidden(target_p))

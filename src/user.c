@@ -373,7 +373,6 @@ register_local_user(struct Client *source_p)
   if (!HasFlag(source_p, FLAGS_GOTID))
   {
     char username[USERLEN + 1] = "";
-    const char *p = username;
     unsigned int i = 0;
 
     if (IsNeedIdentd(conf))
@@ -390,7 +389,7 @@ register_local_user(struct Client *source_p)
     if (!IsNoTilde(conf))
       source_p->username[i++] = '~';
 
-    for (; *p && i < USERLEN; ++p)
+    for (const char *p = username; *p && i < USERLEN; ++p)
       source_p->username[i++] = *p;
 
     source_p->username[i] = '\0';
@@ -681,7 +680,6 @@ valid_nickname(const char *nickname, const int local)
  * inputs	- client_p
  *		- source_p
  *		- int old
- *		- sendmask mask of modes to send
  * 		- suplied umode_buf
  * output	- NONE
  */

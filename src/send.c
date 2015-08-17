@@ -181,7 +181,7 @@ send_queued_write(struct Client *to)
   {
     do
     {
-      struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
+      const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
 
 #ifdef HAVE_LIBCRYPTO
       if (to->connection->fd.ssl)

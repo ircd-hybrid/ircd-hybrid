@@ -72,7 +72,7 @@ mo_restart(struct Client *source_p, int parc, char *parv[])
 
   snprintf(buf, sizeof(buf), "received RESTART command from %s",
            get_client_name(source_p, HIDE_IP));
-  server_die(buf, 1);
+  server_die(buf, SERVER_RESTART);
   return 0;
 }
 

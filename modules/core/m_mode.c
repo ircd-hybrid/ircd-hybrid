@@ -74,8 +74,8 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
   {
     char buf[IRCD_BUFSIZE] = "";
     char *m = buf;
-    *m++ = '+';
 
+    *m++ = '+';
     for (tab = umode_tab; tab->c; ++tab)
       if (HasUMode(source_p, tab->flag))
         *m++ = tab->c;
@@ -85,7 +85,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     return;
   }
 
-  /* parse mode change string(s) */
+  /* Parse user mode change string */
   for (const char *m = parv[2]; *m; ++m)
   {
     switch (*m)
@@ -171,16 +171,23 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     --Count.invisi;
 
   /*
-   * Compare new modes with old modes and send string which
-   * will cause servers to update correctly.
+   * Compare new modes with old modes and send string which will cause
+   * servers to update correctly.
    */
   send_umode_out(source_p, setmodes);
 }
 
-/*
- * m_mode - MODE command handler
- * parv[0] - command
- * parv[1] - channel
+/*! \brief MODE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel or nick name
+ *      - parv[2] = modes to be added or removed
  */
 static int
 m_mode(struct Client *source_p, int parc, char *parv[])
@@ -196,7 +203,7 @@ m_mode(struct Client *source_p, int parc, char *parv[])
   /* Now, try to find the channel in question */
   if (!IsChanPrefix(*parv[1]))
   {
-    /* if here, it has to be a non-channel name */
+    /* If here, it has to be a non-channel name */
     set_user_mode(source_p, parc, parv);
     return 0;
   }

@@ -50,9 +50,8 @@ struct Listener
 };
 
 extern const dlink_list *listener_get_list(void);
-extern void add_listener(int, const char *, unsigned int);
+extern void listener_add(int, const char *, unsigned int);
 extern void listener_release(struct Listener *);
-extern void close_listeners(void);
-extern const char *get_listener_name(const struct Listener *const);
-extern void free_listener(struct Listener *);
+extern void listener_close_marked(void);
+extern const char *listener_get_name(const struct Listener *const);
 #endif

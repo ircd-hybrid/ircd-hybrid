@@ -44,6 +44,12 @@
 
 static dlink_list listener_list;
 
+const dlink_list *
+listener_get_list(void)
+{
+  return &listener_list;
+}
+
 static struct Listener *
 make_listener(const int port, const struct irc_ssaddr *addr)
 {
@@ -74,51 +80,6 @@ get_listener_name(const struct Listener *const listener)
   snprintf(buf, sizeof(buf), "%s[%s/%u]", me.name,
            listener->name, listener->port);
   return buf;
-}
-
-/* show_ports()
- *
- * inputs       - pointer to client to show ports to
- * output       - none
- * side effects - send port listing to a client
- */
-void
-show_ports(struct Client *source_p)
-{
-  char buf[IRCD_BUFSIZE] = "";
-  char *p = NULL;
-  const dlink_node *node = NULL;
-
-  DLINK_FOREACH(node, listener_list.head)
-  {
-    const struct Listener *listener = node->data;
-    p = buf;
-
-    if (listener->flags & LISTENER_HIDDEN)
-    {
-      if (!HasUMode(source_p, UMODE_ADMIN))
-        continue;
-      *p++ = 'H';
-    }
-
-    if (listener->flags & LISTENER_SERVER)
-      *p++ = 'S';
-    if (listener->flags & LISTENER_SSL)
-      *p++ = 's';
-    *p = '\0';
-
-
-    if (HasUMode(source_p, UMODE_ADMIN) &&
-        (MyClient(source_p) || !ConfigServerHide.hide_server_ips))
-      sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
-                         listener->name,
-                         listener->ref_count, buf,
-                         listener->active ? "active" : "disabled");
-    else
-      sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
-                         me.name, listener->ref_count, buf,
-                         listener->active ? "active" : "disabled");
-  }
 }
 
 static void

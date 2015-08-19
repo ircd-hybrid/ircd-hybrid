@@ -1692,7 +1692,7 @@ port_item: NUMBER
       break;
     }
 #endif
-    add_listener($1, block_state.addr.buf, block_state.flags.value);
+    listener_add($1, block_state.addr.buf, block_state.flags.value);
   }
 } | NUMBER TWODOTS NUMBER
 {
@@ -1707,7 +1707,7 @@ port_item: NUMBER
 #endif
 
     for (int i = $1; i <= $3; ++i)
-      add_listener(i, block_state.addr.buf, block_state.flags.value);
+      listener_add(i, block_state.addr.buf, block_state.flags.value);
   }
 };
 

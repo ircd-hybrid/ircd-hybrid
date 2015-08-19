@@ -1230,7 +1230,7 @@ clear_out_old_conf(void)
   ConfigAdminInfo.description = NULL;
 
   /* Clean out listeners */
-  close_listeners();
+  listener_close_marked();
 }
 
 /* read_conf_files()

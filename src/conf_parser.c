@@ -4613,7 +4613,7 @@ yyreduce:
       break;
     }
 #endif
-    add_listener((yyvsp[0].number), block_state.addr.buf, block_state.flags.value);
+    listener_add((yyvsp[0].number), block_state.addr.buf, block_state.flags.value);
   }
 }
 #line 4620 "conf_parser.c" /* yacc.c:1646  */
@@ -4633,7 +4633,7 @@ yyreduce:
 #endif
 
     for (int i = (yyvsp[-2].number); i <= (yyvsp[0].number); ++i)
-      add_listener(i, block_state.addr.buf, block_state.flags.value);
+      listener_add(i, block_state.addr.buf, block_state.flags.value);
   }
 }
 #line 4640 "conf_parser.c" /* yacc.c:1646  */

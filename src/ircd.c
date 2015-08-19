@@ -198,7 +198,7 @@ set_time(void)
                          "System clock is running backwards - (%lu < %lu)",
                          (unsigned long)newtime.tv_sec,
                          (unsigned long)CurrentTime);
-    set_back_events(CurrentTime - newtime.tv_sec);
+    event_set_back_events(CurrentTime - newtime.tv_sec);
   }
 
   SystemTime.tv_sec  = newtime.tv_sec;

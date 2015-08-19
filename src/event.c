@@ -33,13 +33,13 @@
 #include "numeric.h"
 #include "rng_mt.h"
 
-static dlink_list events;
+static dlink_list event_list;
 
 
 const dlink_list *
 event_get_list(void)
 {
-  return &events;
+  return &event_list;
 }
 
 void
@@ -53,18 +53,18 @@ event_add(struct event *ev, void *data)
   ev->next = CurrentTime + ev->when;
   ev->enabled = 1;
 
-  DLINK_FOREACH(node, events.head)
+  DLINK_FOREACH(node, event_list.head)
   {
     struct event *e = node->data;
 
     if (e->next > ev->next)
     {
-      dlinkAddBefore(node, ev, &ev->node, &events);
+      dlinkAddBefore(node, ev, &ev->node, &event_list);
       return;
     }
   }
 
-  dlinkAddTail(ev, &ev->node, &events);
+  dlinkAddTail(ev, &ev->node, &event_list);
 }
 
 void
@@ -86,7 +86,7 @@ event_delete(struct event *ev)
   if (!ev->enabled)
     return;
 
-  dlinkDelete(&ev->node, &events);
+  dlinkDelete(&ev->node, &event_list);
   ev->enabled = 0;
 }
 
@@ -100,10 +100,10 @@ event_run(void)
     return;
   last = CurrentTime;
 
-  len = dlink_list_length(&events);
-  while (len-- && dlink_list_length(&events))
+  len = dlink_list_length(&event_list);
+  while (len-- && dlink_list_length(&event_list))
   {
-    struct event *e = events.head->data;
+    struct event *e = event_list.head->data;
 
     if (e->next > CurrentTime)
       break;
@@ -118,17 +118,17 @@ event_run(void)
 }
 
 /*
- * void set_back_events(time_t by)
+ * void event_set_back_events(time_t by)
  * Input: Time to set back events by.
  * Output: None.
  * Side-effects: Sets back all events by "by" seconds.
  */
 void
-set_back_events(time_t by)
+event_set_back_events(time_t by)
 {
   dlink_node *node;
 
-  DLINK_FOREACH(node, events.head)
+  DLINK_FOREACH(node, event_list.head)
   {
     struct event *ev = node->data;
     ev->next -= by;

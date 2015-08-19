@@ -49,10 +49,10 @@ struct Listener
   unsigned int flags;        /**< Listener flags (ssl, hidden, server) */
 };
 
+extern const dlink_list *listener_get_list(void);
 extern void add_listener(int, const char *, unsigned int);
 extern void listener_release(struct Listener *);
 extern void close_listeners(void);
 extern const char *get_listener_name(const struct Listener *const);
-extern void show_ports(struct Client *);
 extern void free_listener(struct Listener *);
 #endif

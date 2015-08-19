@@ -37,7 +37,6 @@ enum { STARTUP_CONNECTIONS_TIME = 60 };
 
 struct Client;
 struct MaskItem;
-struct Channel;
 
 /* Capabilities */
 struct Capability

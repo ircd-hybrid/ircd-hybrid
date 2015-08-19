@@ -30,8 +30,6 @@
 #include "ircd_defs.h"
 #include "fdlist.h"
 
-struct Client;
-
 enum
 {
   LISTENER_SSL    = 1 << 0,

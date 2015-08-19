@@ -44,8 +44,8 @@
 */
 
 
-#ifndef __include_rng_mt_header__
-#define __include_rng_mt_header__
+#ifndef INCLUDED_rng_mt_h
+#define INCLUDED_rng_mt_h
 
 extern void init_genrand(uint32_t);
 extern void init_by_array(uint32_t[], int);

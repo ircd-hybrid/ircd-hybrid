@@ -27,7 +27,6 @@
 
 #ifndef INCLUDED_motd_h
 #define INCLUDED_motd_h
-struct Client;
 
 /** Type of MOTD. */
 enum MotdType

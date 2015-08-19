@@ -27,7 +27,6 @@
 #ifndef INCLUDED_conf_h
 #define INCLUDED_conf_h
 #include "config.h"
-#include "ircd_defs.h"
 #include "client.h"
 #include "conf_class.h"
 

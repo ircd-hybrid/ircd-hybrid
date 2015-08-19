@@ -36,7 +36,6 @@
 #include "numeric.h"
 #include "send.h"
 #include "fdlist.h"
-#include "s_bsd.h"
 #include "misc.h"
 #include "server.h"
 #include "user.h"

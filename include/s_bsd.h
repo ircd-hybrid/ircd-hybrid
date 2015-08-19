@@ -41,7 +41,6 @@ enum
 enum { SELECT_DELAY = 500 };
 
 struct Client;
-struct MaskItem;
 struct Listener;
 
 extern void add_connection(struct Listener *, struct irc_ssaddr *, int);

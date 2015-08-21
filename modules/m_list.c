@@ -159,7 +159,7 @@ do_list(struct Client *source_p, char *arg)
     }
   }
 
-  dlinkAdd(source_p, make_dlink_node(), &listing_client_list);
+  dlinkAdd(source_p, &lt->node, &listing_client_list);
 
   sendto_one_numeric(source_p, &me, RPL_LISTSTART);
   safe_list_channels(source_p, no_masked_channels && lt->show_mask.head != NULL);

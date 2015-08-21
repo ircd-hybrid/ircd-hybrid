@@ -97,7 +97,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
           case STRING:
             if (*argc < 2)
             {
-              fprintf(stderr, "error: option '%c%s' requires an argument\n",
+              fprintf(stderr, "Error: option '%c%s' requires an argument\n",
                       OPTCHAR, opts[i].opt);
               usage(progname, opts);
             }
@@ -121,7 +121,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 
     if (!found)
     {
-      fprintf(stderr, "error: unknown argument '%c%s'\n",
+      fprintf(stderr, "Error: unknown argument '%c%s'\n",
               OPTCHAR, opt);
       usage(progname, opts);
     }

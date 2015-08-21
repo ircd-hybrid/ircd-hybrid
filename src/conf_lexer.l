@@ -156,8 +156,6 @@ default_floodcount          { return DEFAULT_FLOODCOUNT; }
 default_join_flood_count    { return DEFAULT_JOIN_FLOOD_COUNT; }
 default_join_flood_time     { return DEFAULT_JOIN_FLOOD_TIME; }
 default_max_clients         { return DEFAULT_MAX_CLIENTS; }
-default_split_server_count  { return DEFAULT_SPLIT_SERVER_COUNT; }
-default_split_user_count    { return DEFAULT_SPLIT_USER_COUNT; }
 deny                        { return DENY; }
 description                 { return DESCRIPTION; }
 die                         { return DIE; }
@@ -245,8 +243,6 @@ need_password               { return NEED_PASSWORD; }
 network_desc                { return NETWORK_DESC; }
 network_name                { return NETWORK_NAME; }
 nick                        { return NICK; }
-no_create_on_split          { return NO_CREATE_ON_SPLIT; }
-no_join_on_split            { return NO_JOIN_ON_SPLIT; }
 no_oper_flood               { return NO_OPER_FLOOD; }
 no_tilde                    { return NO_TILDE; }
 nononreg                    { return T_NONONREG; }

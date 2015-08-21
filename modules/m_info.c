@@ -202,30 +202,6 @@ static const struct InfoStruct info_table[] =
     "Total +b/e/I modes allowed in a channel"
   },
   {
-    "default_split_user_count",
-    OUTPUT_DECIMAL,
-    &ConfigChannel.default_split_user_count,
-    "Startup value of SPLITUSERS"
-  },
-  {
-    "default_split_server_count",
-    OUTPUT_DECIMAL,
-    &ConfigChannel.default_split_server_count,
-    "Startup value of SPLITNUM"
-  },
-  {
-    "no_create_on_split",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.no_create_on_split,
-    "Disallow creation of channels when split"
-  },
-  {
-    "no_join_on_split",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigChannel.no_join_on_split,
-    "Disallow joining channels when split"
-  },
-  {
     "flatten_links",
     OUTPUT_BOOLEAN_YN,
     &ConfigServerHide.flatten_links,

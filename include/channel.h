@@ -118,7 +118,6 @@ struct Ban
 };
 
 extern dlink_list channel_list;
-extern struct event splitmode_event;
 
 extern int channel_check_name(const char *, const int);
 extern int can_send(struct Channel *, struct Client *, struct Membership *, const char *);
@@ -141,7 +140,6 @@ extern void clear_invites_client(struct Client *);
 extern void channel_send_modes(struct Client *, struct Channel *);
 extern void channel_modes(struct Channel *, struct Client *, char *, char *);
 extern void check_spambot_warning(struct Client *, const char *);
-extern void check_splitmode(void *);
 extern void channel_free(struct Channel *);
 extern void channel_set_topic(struct Channel *, const char *, const char *, time_t, int);
 

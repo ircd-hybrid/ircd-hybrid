@@ -268,10 +268,6 @@ struct config_channel_entry
   unsigned int max_channels;
   unsigned int default_join_flood_count;
   unsigned int default_join_flood_time;
-  unsigned int no_create_on_split;
-  unsigned int no_join_on_split;
-  unsigned int default_split_server_count;
-  unsigned int default_split_user_count;
 };
 
 struct config_serverhide_entry

@@ -78,10 +78,6 @@ const char *pidFileName = PPATH;
 
 unsigned int dorehash;
 unsigned int doremotd;
-unsigned int splitmode;
-unsigned int splitchecking;
-unsigned int split_users;
-unsigned int split_servers;
 
 static struct event event_cleanup_tklines =
 {
@@ -257,17 +253,6 @@ initialize_global_set_options(void)
   GlobalSetOptions.floodcount = ConfigGeneral.default_floodcount;
   GlobalSetOptions.joinfloodcount = ConfigChannel.default_join_flood_count;
   GlobalSetOptions.joinfloodtime = ConfigChannel.default_join_flood_time;
-
-  split_servers = ConfigChannel.default_split_server_count;
-  split_users   = ConfigChannel.default_split_user_count;
-
-  if (split_users && split_servers && (ConfigChannel.no_create_on_split ||
-                                       ConfigChannel.no_join_on_split))
-  {
-    splitmode     = 1;
-    splitchecking = 1;
-  }
-
   GlobalSetOptions.ident_timeout = IDENT_TIMEOUT;
 }
 
@@ -613,9 +598,6 @@ main(int argc, char *argv[])
   }
   else
     ConfigServerHide.links_disabled = 1;
-
-  if (splitmode)
-    event_addish(&splitmode_event, NULL);
 
   io_loop();
   return 0;

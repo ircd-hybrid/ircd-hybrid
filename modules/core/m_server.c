@@ -186,7 +186,7 @@ burst_all(struct Client *client_p)
     if (dlink_list_length(&chptr->members))
     {
       burst_members(client_p, chptr);
-      send_channel_modes(client_p, chptr);
+      channel_send_modes(client_p, chptr);
 
       if (IsCapable(client_p, CAPAB_TBURST))
         send_tb(client_p, chptr);

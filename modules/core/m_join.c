@@ -112,7 +112,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   if (parc < 4)
     return 0;
 
-  if (!check_channel_name(parv[2], 0))
+  if (!channel_check_name(parv[2], 0))
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
@@ -127,7 +127,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
     isnew = 1;
-    chptr = make_channel(parv[2]);
+    chptr = channel_make(parv[2]);
   }
 
   newts   = atol(parv[1]);

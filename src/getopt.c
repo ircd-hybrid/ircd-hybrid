@@ -34,16 +34,14 @@
 static void
 usage(const char *name, const struct lgetopt *opts)
 {
-  unsigned int i;
-
   fprintf(stderr, "Usage: %s [options]\n", name);
   fprintf(stderr, "Where valid options are:\n");
 
-  for (i = 0; opts[i].opt; ++i)
-    fprintf(stderr, "\t%c%-10s %-20s%s\n", OPTCHAR, opts[i].opt,
-            (opts[i].argtype == YESNO || opts[i].argtype == USAGE) ? "" :
-            opts[i].argtype == INTEGER ? "<number>" : "<string>",
-            opts[i].desc);
+  for (; opts->opt; ++opts)
+    fprintf(stderr, "\t%c%-10s %-20s%s\n", OPTCHAR, opts->opt,
+            (opts->argtype == YESNO || opts->argtype == USAGE) ? "" :
+            opts->argtype == INTEGER ? "<number>" : "<string>",
+            opts->desc);
 
   exit(EXIT_FAILURE);
 }

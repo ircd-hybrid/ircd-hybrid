@@ -41,11 +41,18 @@
 #include "server.h"
 
 
-/* m_kick()
- *  parv[0] = command
- *  parv[1] = channel
- *  parv[2] = client to kick
- *  parv[3] = kick comment
+/*! \brief KICK command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
+ *      - parv[2] = client to kick
+ *      - parv[3] = reason
  */
 static int
 m_kick(struct Client *source_p, int parc, char *parv[])
@@ -117,11 +124,18 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/* ms_kick()
- *  parv[0] = command
- *  parv[1] = channel
- *  parv[2] = client to kick
- *  parv[3] = kick comment
+/*! \brief KICK command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = channel name
+ *      - parv[2] = client to kick
+ *      - parv[3] = reason
  */
 static int
 ms_kick(struct Client *source_p, int parc, char *parv[])

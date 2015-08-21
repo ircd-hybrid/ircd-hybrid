@@ -268,6 +268,7 @@ struct Server
 /*! \brief ListTask structure */
 struct ListTask
 {
+  dlink_node node;  /**< Embedded list node used to link into listing_client_list */
   dlink_list show_mask; /**< Channels to show */
   dlink_list hide_mask; /**< Channels to hide */
 

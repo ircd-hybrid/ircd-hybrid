@@ -47,13 +47,6 @@
 dlink_list channel_list;
 mp_pool_t *ban_pool;    /*! \todo ban_pool shouldn't be a global var */
 
-struct event splitmode_event =
-{
-  .name = "check_splitmode",
-  .handler = check_splitmode,
-  .when = 5
-};
-
 static mp_pool_t *member_pool, *channel_pool;
 
 
@@ -866,37 +859,6 @@ check_spambot_warning(struct Client *source_p, const char *name)
   }
 }
 
-/*! \brief Compares usercount and servercount against their split
- *         values and adjusts splitmode accordingly
- * \param unused Unused address pointer
- */
-void
-check_splitmode(void *unused)
-{
-  if (splitchecking && (ConfigChannel.no_join_on_split ||
-                        ConfigChannel.no_create_on_split))
-  {
-    const unsigned int server = dlink_list_length(&global_server_list);
-
-    if (!splitmode && ((server < split_servers) || (Count.total < split_users)))
-    {
-      splitmode = 1;
-
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "Network split, activating splitmode");
-      event_add(&splitmode_event, NULL);
-    }
-    else if (splitmode && (server >= split_servers) && (Count.total >= split_users))
-    {
-      splitmode = 0;
-
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "Network rejoined, deactivating splitmode");
-      event_delete(&splitmode_event);
-    }
-  }
-}
-
 /*! \brief Sets the channel topic for a certain channel
  * \param chptr      Pointer to struct Channel
  * \param topic      The topic string
@@ -1039,13 +1001,6 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       if (IsMember(source_p, chptr))
         continue;
 
-      if (splitmode && !HasUMode(source_p, UMODE_OPER) &&
-          ConfigChannel.no_join_on_split)
-      {
-        sendto_one_numeric(source_p, &me, ERR_UNAVAILRESOURCE, chptr->name);
-        continue;
-      }
-
       /*
        * can_join checks for +i key, bans.
        */
@@ -1066,13 +1021,6 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
     }
     else
     {
-      if (splitmode && !HasUMode(source_p, UMODE_OPER) &&
-          (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))
-      {
-        sendto_one_numeric(source_p, &me, ERR_UNAVAILRESOURCE, chan);
-        continue;
-      }
-
       flags = CHFL_CHANOP;
       chptr = channel_make(chan);
     }

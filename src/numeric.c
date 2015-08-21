@@ -162,7 +162,6 @@ static const char *const replies[] =
   /* 432 */  [ERR_ERRONEUSNICKNAME] = "%s :%s",
   /* 433 */  [ERR_NICKNAMEINUSE] = "%s :Nickname is already in use.",
   /* 436 */  [ERR_NICKCOLLISION] = "%s :Nickname collision KILL",
-  /* 437 */  [ERR_UNAVAILRESOURCE] = "%s :Nick/channel is temporarily unavailable",
   /* 438 */  [ERR_NICKTOOFAST] = "%s :Nick change too fast. Please wait %u seconds.",
   /* 440 */  [ERR_SERVICESDOWN] = "%s :Services are currently unavailable.",
   /* 441 */  [ERR_USERNOTINCHANNEL] = "%s %s :They aren't on that channel",

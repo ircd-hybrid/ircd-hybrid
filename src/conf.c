@@ -817,10 +817,6 @@ set_default_conf(void)
   ConfigChannel.max_bans = 25;
   ConfigChannel.default_join_flood_count = 18;
   ConfigChannel.default_join_flood_time = 6;
-  ConfigChannel.default_split_user_count = 0;
-  ConfigChannel.default_split_server_count = 0;
-  ConfigChannel.no_join_on_split = 0;
-  ConfigChannel.no_create_on_split = 0;
 
   ConfigServerHide.flatten_links = 0;
   ConfigServerHide.links_delay = 300;

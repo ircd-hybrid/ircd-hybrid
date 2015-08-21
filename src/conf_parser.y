@@ -177,8 +177,6 @@ reset_block_state(void)
 %token  DEFAULT_JOIN_FLOOD_COUNT
 %token  DEFAULT_JOIN_FLOOD_TIME
 %token  DEFAULT_MAX_CLIENTS
-%token  DEFAULT_SPLIT_SERVER_COUNT
-%token  DEFAULT_SPLIT_USER_COUNT
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
@@ -254,8 +252,6 @@ reset_block_state(void)
 %token  NETWORK_DESC
 %token  NETWORK_NAME
 %token  NICK
-%token  NO_CREATE_ON_SPLIT
-%token  NO_JOIN_ON_SPLIT
 %token  NO_OPER_FLOOD
 %token  NO_TILDE
 %token  NUMBER
@@ -2959,10 +2955,6 @@ channel_item:       channel_max_bans |
                     channel_knock_client_time |
                     channel_knock_delay_channel |
                     channel_max_channels |
-                    channel_default_split_user_count |
-                    channel_default_split_server_count |
-                    channel_no_create_on_split |
-                    channel_no_join_on_split |
                     channel_default_join_flood_count |
                     channel_default_join_flood_time |
                     channel_disable_fake_channels |
@@ -3006,26 +2998,6 @@ channel_max_channels: MAX_CHANNELS '=' NUMBER ';'
 channel_max_bans: MAX_BANS '=' NUMBER ';'
 {
   ConfigChannel.max_bans = $3;
-};
-
-channel_default_split_user_count: DEFAULT_SPLIT_USER_COUNT '=' NUMBER ';'
-{
-  ConfigChannel.default_split_user_count = $3;
-};
-
-channel_default_split_server_count: DEFAULT_SPLIT_SERVER_COUNT '=' NUMBER ';'
-{
-  ConfigChannel.default_split_server_count = $3;
-};
-
-channel_no_create_on_split: NO_CREATE_ON_SPLIT '=' TBOOL ';'
-{
-  ConfigChannel.no_create_on_split = yylval.number;
-};
-
-channel_no_join_on_split: NO_JOIN_ON_SPLIT '=' TBOOL ';'
-{
-  ConfigChannel.no_join_on_split = yylval.number;
 };
 
 channel_default_join_flood_count: DEFAULT_JOIN_FLOOD_COUNT '=' NUMBER ';'

@@ -19,14 +19,5 @@ SET <option> <value>
                 constitutes a possible spambot.
   SPAMTIME    - Below this time on a channel
                 counts as a join/part as above.
-  SPLITMODE   - Sets splitmode to <value>:
-                 ON   - splitmode is permanently on
-                 OFF  - splitmode is permanently off
-                 AUTO - ircd chooses splitmode based on
-                        SPLITUSERS and SPLITNUM
-  SPLITNUM    - Sets the minimum amount of servers needed to
-                deactivate automatic splitmode.
-  SPLITUSERS  - Sets the minimum amount of users needed to
-                deactivate automatic splitmode.
 
 - Requires Oper Priv: set

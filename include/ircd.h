@@ -110,10 +110,6 @@ extern struct ServerState_t server_state;
 extern struct event event_write_links_file;
 extern struct timeval SystemTime;
 #define CurrentTime SystemTime.tv_sec
-extern unsigned int splitmode;
-extern unsigned int splitchecking;
-extern unsigned int split_users;
-extern unsigned int split_servers;
 
 extern void set_time(void);
 #endif

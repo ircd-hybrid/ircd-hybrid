@@ -397,10 +397,6 @@ server_estab(struct Client *client_p)
    * that at least two servers from my fragment are building
    * up connection this other fragment at the same time, it's
    * a race condition, not the normal way of operation...
-   *
-   * ALSO NOTE: using the get_client_name for server names--
-   *    see previous *WARNING*!!! (Also, original inpath
-   *    is destroyed...)
    */
   DLINK_FOREACH_PREV(node, global_server_list.tail)
   {

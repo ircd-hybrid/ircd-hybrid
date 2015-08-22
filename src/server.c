@@ -48,8 +48,6 @@
 #include "channel.h"
 #include "parse.h"
 
-enum { MIN_CONN_FREQ = 300 };
-
 dlink_list flatten_links;
 static dlink_list server_capabilities_list;
 static void serv_connect_callback(fde_t *, int, void *);
@@ -242,7 +240,6 @@ void
 try_connections(void *unused)
 {
   dlink_node *node = NULL;
-  int confrq = 0;
 
   /* TODO: change this to set active flag to 0 when added to event! --Habeeb */
   if (GlobalSetOptions.autoconn == 0)
@@ -271,11 +268,7 @@ try_connections(void *unused)
 
     assert(conf->class);
 
-    confrq = conf->class->con_freq;
-    if (confrq < MIN_CONN_FREQ)
-      confrq = MIN_CONN_FREQ;
-
-    conf->until = CurrentTime + confrq;
+    conf->until = CurrentTime + conf->class->con_freq;
 
     /*
      * Found a CONNECT config with port specified, scan clients
@@ -286,7 +279,7 @@ try_connections(void *unused)
 
     if (conf->class->ref_count < conf->class->max_total)
     {
-      /* Go to the end of the list, if not already last */
+      /* Move this entry to the end of the list, if not already last */
       if (node->next)
       {
         dlinkDelete(node, &server_items);

@@ -58,6 +58,7 @@
 #include "conf_class.h"
 #include "ipcache.h"
 #include "isupport.h"
+#include "userhost.h"
 
 
 #ifdef HAVE_LIBGEOIP
@@ -505,6 +506,7 @@ main(int argc, char *argv[])
   isupport_init();
   dbuf_init();
   hash_init();
+  userhost_init();
   ipcache_init();
   client_init();
   class_init();

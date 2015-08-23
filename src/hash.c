@@ -46,9 +46,6 @@
 #include "user.h"
 
 
-static mp_pool_t *userhost_pool;
-static mp_pool_t *namehost_pool;
-
 static unsigned int hashf_xor_key;
 
 /* The actual hash tables, They MUST be of the same HASHSIZE, variable
@@ -62,7 +59,7 @@ static struct Channel *channelTable[HASHSIZE];
 static struct UserHost *userhostTable[HASHSIZE];
 
 
-/* init_hash()
+/* hash_init()
  *
  * inputs       - NONE
  * output       - NONE
@@ -72,9 +69,6 @@ static struct UserHost *userhostTable[HASHSIZE];
 void
 hash_init(void)
 {
-  userhost_pool = mp_pool_new(sizeof(struct UserHost), MP_CHUNK_SIZE_USERHOST);
-  namehost_pool = mp_pool_new(sizeof(struct NameHost), MP_CHUNK_SIZE_NAMEHOST);
-
   hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
 }
 
@@ -427,45 +421,6 @@ hash_find_channel(const char *name)
   return chptr;
 }
 
-/* hash_get_bucket(int type, unsigned int hashv)
- *
- * inputs       - hash value (must be between 0 and HASHSIZE - 1)
- * output       - NONE
- * returns      - pointer to first channel in channelTable[hashv]
- *                if that exists;
- *                NULL if there is no channel in that place;
- *                NULL if hashv is an invalid number.
- * side effects - NONE
- */
-void *
-hash_get_bucket(int type, unsigned int hashv)
-{
-  assert(hashv < HASHSIZE);
-
-  if (hashv >= HASHSIZE)
-      return NULL;
-
-  switch (type)
-  {
-    case HASH_TYPE_ID:
-      return idTable[hashv];
-      break;
-    case HASH_TYPE_CHANNEL:
-      return channelTable[hashv];
-      break;
-    case HASH_TYPE_CLIENT:
-      return clientTable[hashv];
-      break;
-    case HASH_TYPE_USERHOST:
-      return userhostTable[hashv];
-      break;
-    default:
-      assert(0);
-  }
-
-  return NULL;
-}
-
 struct UserHost *
 hash_find_userhost(const char *host)
 {
@@ -494,183 +449,43 @@ hash_find_userhost(const char *host)
   return userhost;
 }
 
-/* count_user_host()
+/* hash_get_bucket(int type, unsigned int hashv)
  *
- * inputs	- user name
- *		- hostname
- *		- int flag 1 if global, 0 if local
- * 		- pointer to where global count should go
- *		- pointer to where local count should go
- *		- pointer to where identd count should go (local clients only)
- * output	- none
- * side effects	-
+ * inputs       - hash value (must be between 0 and HASHSIZE - 1)
+ * output       - NONE
+ * returns      - pointer to first channel in channelTable[hashv]
+ *                if that exists;
+ *                NULL if there is no channel in that place;
+ *                NULL if hashv is an invalid number.
+ * side effects - NONE
  */
-void
-count_user_host(const char *user, const char *host, unsigned int *global_p,
-                unsigned int *local_p, unsigned int *icount_p)
+void *
+hash_get_bucket(int type, unsigned int hashv)
 {
-  dlink_node *node = NULL;
-  struct UserHost *found_userhost;
+  assert(hashv < HASHSIZE);
 
-  if ((found_userhost = hash_find_userhost(host)) == NULL)
-    return;
+  if (hashv >= HASHSIZE)
+    return NULL;
 
-  DLINK_FOREACH(node, found_userhost->list.head)
+  switch (type)
   {
-    struct NameHost *nameh = node->data;
-
-    if (!irccmp(user, nameh->name))
-    {
-      if (global_p)
-        *global_p = nameh->gcount;
-      if (local_p)
-        *local_p  = nameh->lcount;
-      if (icount_p)
-        *icount_p = nameh->icount;
-
-      return;
-    }
-  }
-}
-
-/* find_or_add_userhost()
- *
- * inputs       - host name
- * output       - none
- * side effects - find UserHost * for given host name
- */
-static struct UserHost *
-find_or_add_userhost(const char *host)
-{
-  struct UserHost *userhost = NULL;
-
-  if ((userhost = hash_find_userhost(host)))
-    return userhost;
-
-  userhost = mp_pool_get(userhost_pool);
-
-  strlcpy(userhost->host, host, sizeof(userhost->host));
-  hash_add_userhost(userhost);
-
-  return userhost;
-}
-
-/* add_user_host()
- *
- * inputs	- user name
- *		- hostname
- *		- int flag 1 if global, 0 if local
- * output	- none
- * side effects	- add given user@host to hash tables
- */
-void
-add_user_host(const char *user, const char *host, int global)
-{
-  dlink_node *node = NULL;
-  struct UserHost *found_userhost;
-  struct NameHost *nameh;
-  unsigned int hasident = 1;
-
-  if (*user == '~')
-  {
-    hasident = 0;
-    ++user;
+    case HASH_TYPE_ID:
+      return idTable[hashv];
+      break;
+    case HASH_TYPE_CHANNEL:
+      return channelTable[hashv];
+      break;
+    case HASH_TYPE_CLIENT:
+      return clientTable[hashv];
+      break;
+    case HASH_TYPE_USERHOST:
+      return userhostTable[hashv];
+      break;
+    default:
+      assert(0);
   }
 
-  if ((found_userhost = find_or_add_userhost(host)) == NULL)
-    return;
-
-  DLINK_FOREACH(node, found_userhost->list.head)
-  {
-    nameh = node->data;
-
-    if (!irccmp(user, nameh->name))
-    {
-      nameh->gcount++;
-
-      if (!global)
-      {
-        if (hasident)
-          nameh->icount++;
-        nameh->lcount++;
-      }
-
-      return;
-    }
-  }
-
-  nameh = mp_pool_get(namehost_pool);
-  nameh->gcount = 1;
-  strlcpy(nameh->name, user, sizeof(nameh->name));
-
-  if (!global)
-  {
-    if (hasident)
-      nameh->icount = 1;
-
-    nameh->lcount = 1;
-  }
-
-  dlinkAdd(nameh, &nameh->node, &found_userhost->list);
-}
-
-/* delete_user_host()
- *
- * inputs	- user name
- *		- hostname
- *		- int flag 1 if global, 0 if local
- * output	- none
- * side effects	- delete given user@host to hash tables
- */
-void
-delete_user_host(const char *user, const char *host, int global)
-{
-  dlink_node *node = NULL;
-  struct UserHost *found_userhost = NULL;
-  unsigned int hasident = 1;
-
-  if (*user == '~')
-  {
-    hasident = 0;
-    ++user;
-  }
-
-  if ((found_userhost = hash_find_userhost(host)) == NULL)
-    return;
-
-  DLINK_FOREACH(node, found_userhost->list.head)
-  {
-    struct NameHost *nameh = node->data;
-
-    if (!irccmp(user, nameh->name))
-    {
-      if (nameh->gcount > 0)
-        nameh->gcount--;
-
-      if (!global)
-      {
-        if (nameh->lcount > 0)
-          nameh->lcount--;
-
-        if (hasident && nameh->icount > 0)
-          nameh->icount--;
-      }
-
-      if (nameh->gcount == 0 && nameh->lcount == 0)
-      {
-        dlinkDelete(&nameh->node, &found_userhost->list);
-        mp_pool_release(nameh);
-      }
-
-      if (dlink_list_length(&found_userhost->list) == 0)
-      {
-        hash_del_userhost(found_userhost);
-        mp_pool_release(found_userhost);
-      }
-
-      return;
-    }
-  }
+  return NULL;
 }
 
 /*

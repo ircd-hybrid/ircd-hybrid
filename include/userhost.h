@@ -43,6 +43,7 @@ struct UserHost
   char host[HOSTLEN + 1];
 };
 
+extern void userhost_init(void);
 extern void count_user_host(const char *, const char *, unsigned int *, unsigned int *, unsigned int *);
 extern void add_user_host(const char *, const char *, int);
 extern void delete_user_host(const char *, const char *, int);

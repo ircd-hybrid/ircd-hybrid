@@ -134,8 +134,8 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	s_bsd_kqueue.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
 	restart.$(OBJEXT) resv.$(OBJEXT) rng_mt.$(OBJEXT) \
 	rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
-	user.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	user.$(OBJEXT) userhost.$(OBJEXT) version.$(OBJEXT) \
+	watch.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -423,6 +423,7 @@ ircd_SOURCES = auth.c            \
                send.c            \
                server.c          \
                user.c            \
+               userhost.c        \
                version.c         \
                watch.c           \
                whowas.c
@@ -571,6 +572,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/userhost.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/watch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@

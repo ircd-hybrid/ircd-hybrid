@@ -55,7 +55,8 @@ static struct capabilities
   _CAP(CAP_UHNAMES, 0, "userhost-in-names"),
   _CAP(CAP_MULTI_PREFIX, 0, "multi-prefix"),
   _CAP(CAP_AWAY_NOTIFY, 0, "away-notify"),
-  _CAP(CAP_EXTENDED_JOIN, 0, "extended-join")
+  _CAP(CAP_EXTENDED_JOIN, 0, "extended-join"),
+  _CAP(CAP_ACCOUNT_NOTIFY, 0, "account-notify")
 #undef _CAP
 };
 

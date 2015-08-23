@@ -860,7 +860,7 @@ ssl_server_handshake(fde_t *fd, void *data)
 }
 
 static void
-ssl_connect_init(struct Client *client_p, struct MaskItem *conf, fde_t *fd)
+ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *fd)
 {
   if ((client_p->connection->fd.ssl = SSL_new(ConfigServerInfo.client_ctx)) == NULL)
   {
@@ -891,8 +891,8 @@ ssl_connect_init(struct Client *client_p, struct MaskItem *conf, fde_t *fd)
 static void
 serv_connect_callback(fde_t *fd, int status, void *data)
 {
-  struct Client *client_p = data;
-  struct MaskItem *conf = NULL;
+  struct Client *const client_p = data;
+  const struct MaskItem *conf = NULL;
 
   /* First, make sure it's a real client! */
   assert(client_p);

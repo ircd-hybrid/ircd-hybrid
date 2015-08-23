@@ -236,7 +236,7 @@ o) WHOWAS now honors serverhide::disable_remote_commands
 o) Improved TS6 inter-server communication
 o) Minor code cleanups and speed enhancements
 o) Added 'unxline' oper flag
-o) Added support for "userhost-in-names" client capability
+o) Implemented IRCv3.2 userhost-in-names extension
 o) ircd now allows private RSA keys larger than 2048 bits
 o) Fixed bug where signals stopped from working after restarting
    the ircd via SIGINT

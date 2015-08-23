@@ -7,6 +7,7 @@ o) If supported by the compiler, ircd-hybrid now compiles with
    -fstack-protector-strong instead of -fstack-protector
 o) Services can now add SQLINEs/RESVs that have wildcards in it
 o) Channel name RESVs are now sanity checked for too broad masks
+o) class::connectfreq now works properly with values lower than 300 seconds
 
 
 -- Noteworthy changes in version 8.2.8 (2015-05-10)

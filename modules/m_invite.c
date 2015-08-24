@@ -135,20 +135,16 @@ m_invite(struct Client *source_p, int parc, char *parv[])
                target_p->name, chptr->name);
 
     if (chptr->mode.mode & MODE_INVITEONLY)
-    {
-      sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP | CHFL_HALFOP,
-                            "NOTICE %%%s :%s is inviting %s to %s.",
-                            chptr->name, source_p->name,
-                            target_p->name, chptr->name);
-
-      /* Add the invite if channel is +i */
-      add_invite(chptr, target_p);
-    }
+      add_invite(chptr, target_p);  /* Add the invite if channel is +i */
   }
-  else if (target_p->from != source_p->from)
-    sendto_one(target_p, ":%s INVITE %s %s %lu",
-               source_p->id, target_p->id,
-               chptr->name, (unsigned long)chptr->creationtime);
+
+  if (chptr->mode.mode & MODE_INVITEONLY)
+    sendto_channel_local(CHFL_CHANOP | CHFL_HALFOP, chptr, ":%s NOTICE %%%s :%s is inviting %s to %s.",
+                         me.name, chptr->name, source_p->name, target_p->name, chptr->name);
+
+  sendto_server(source_p, 0, 0, ":%s INVITE %s %s %lu",
+                source_p->id, target_p->id,
+                chptr->name, (unsigned long)chptr->creationtime);
   return 0;
 }
 
@@ -195,20 +191,16 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
                target_p->name, chptr->name);
 
     if (chptr->mode.mode & MODE_INVITEONLY)
-    {
-      sendto_channel_butone(NULL, &me, chptr, CHFL_CHANOP | CHFL_HALFOP,
-                            "NOTICE %%%s :%s is inviting %s to %s.",
-                            chptr->name, source_p->name,
-                            target_p->name, chptr->name);
-
-      /* Add the invite if channel is +i */
-      add_invite(chptr, target_p);
-    }
+      add_invite(chptr, target_p);  /* Add the invite if channel is +i */
   }
-  else if (target_p->from != source_p->from)
-    sendto_one(target_p, ":%s INVITE %s %s %lu",
-               source_p->id, target_p->id,
-               chptr->name, (unsigned long)chptr->creationtime);
+
+  if (chptr->mode.mode & MODE_INVITEONLY)
+    sendto_channel_local(CHFL_CHANOP | CHFL_HALFOP, chptr, ":%s NOTICE %%%s :%s is inviting %s to %s.",
+                         me.name, chptr->name, source_p->name, target_p->name, chptr->name);
+
+  sendto_server(source_p, 0, 0, ":%s INVITE %s %s %lu",
+                source_p->id, target_p->id,
+                chptr->name, (unsigned long)chptr->creationtime);
   return 0;
 }
 

@@ -573,7 +573,7 @@ find_address_conf(const char *host, const char *user, struct irc_ssaddr *ip,
    * If they are K-lined, return the K-line. Otherwise, return the
    * auth {} block. -A1kmm
    */
-  if (killcnf && (killcnf->until == 0 || killcnf->until > CurrentTime))
+  if (killcnf)
     return killcnf;
 
   return authcnf;
@@ -589,17 +589,12 @@ struct MaskItem *
 find_dline_conf(struct irc_ssaddr *addr, int aftype)
 {
   struct MaskItem *eline;
-  struct MaskItem *dline;
 
   eline = find_conf_by_address(NULL, addr, CONF_EXEMPT, aftype, NULL, NULL, 1);
   if (eline)
     return eline;
 
-  dline = find_conf_by_address(NULL, addr, CONF_DLINE, aftype, NULL, NULL, 1);
-  if (dline && (dline->until == 0 || dline->until > CurrentTime))
-    return dline;
-
-  return NULL;
+  return find_conf_by_address(NULL, addr, CONF_DLINE, aftype, NULL, NULL, 1);
 }
 
 /* void add_conf_by_address(int, struct MaskItem *aconf)

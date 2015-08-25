@@ -40,7 +40,7 @@
 #include "modules.h"
 
 
-#define WHO_MAX_REPLIES 500
+enum { WHO_MAX_REPLIES = 500 };
 
 
 /* do_who()

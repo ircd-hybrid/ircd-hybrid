@@ -91,9 +91,9 @@ kline_add(struct Client *source_p, const char *user, const char *host,
 
   if (tkline_time)
     snprintf(buf, sizeof(buf), "Temporary K-line %d min. - %.*s (%s)",
-             (int)(tkline_time/60), REASONLEN, reason, smalldate(0));
+             (int)(tkline_time/60), REASONLEN, reason, date_iso8601(0));
   else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, smalldate(0));
+    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
   conf = conf_make(CONF_KLINE);
   conf->host = xstrdup(host);

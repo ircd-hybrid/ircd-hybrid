@@ -92,9 +92,9 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
 
   if (txline_time)
     snprintf(buf, sizeof(buf), "Temporary X-line %d min. - %.*s (%s)",
-             (int)(txline_time/60), REASONLEN, reason, smalldate(0));
+             (int)(txline_time/60), REASONLEN, reason, date_iso8601(0));
   else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, smalldate(0));
+    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
   conf = conf_make(CONF_XLINE);
   conf->name = xstrdup(gecos);

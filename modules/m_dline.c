@@ -109,9 +109,9 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
 
   if (tdline_time)
     snprintf(buf, sizeof(buf), "Temporary D-line %d min. - %.*s (%s)",
-             (int)(tdline_time/60), REASONLEN, reason, smalldate(0));
+             (int)(tdline_time/60), REASONLEN, reason, date_iso8601(0));
   else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, smalldate(0));
+    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
   conf = conf_make(CONF_DLINE);
   conf->host = xstrdup(addr);

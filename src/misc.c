@@ -154,6 +154,9 @@ myctime(time_t lclock)
   char *p;
   static time_t lclock_last;
 
+  if (!lclock)
+    lclock = CurrentTime;
+
   if (lclock_last == lclock)
     return buf;
 

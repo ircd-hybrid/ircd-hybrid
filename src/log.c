@@ -94,11 +94,7 @@ log_exceed_size(unsigned int type)
 static void
 log_write(enum log_type type, const char *message)
 {
-  char buf[IRCD_BUFSIZE] = "";
-
-  strftime(buf, sizeof(buf), "[%FT%H:%M:%S%z]", localtime(&CurrentTime));
-
-  fprintf(log_type_table[type].file, "%s %s\n", buf, message);
+  fprintf(log_type_table[type].file, "[%s] %s\n", date_iso8601(0), message);
   fflush(log_type_table[type].file);
 }
 

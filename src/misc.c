@@ -50,10 +50,15 @@ date(time_t lclock)
   struct tm *lt, *gm;
   struct tm gmbuf;
   int minswest;
+  static time_t lclock_last;
 
   if (!lclock)
     lclock = CurrentTime;
 
+  if (lclock_last == lclock)
+    return buf;
+
+  lclock_last = lclock;
   gm = gmtime(&lclock);
   memcpy(&gmbuf, gm, sizeof(gmbuf));
   gm = &gmbuf;
@@ -91,10 +96,15 @@ smalldate(time_t lclock)
   static char buf[MAX_DATE_STRING];
   struct tm *lt, *gm;
   struct tm gmbuf;
+  static time_t lclock_last;
 
   if (!lclock)
     lclock = CurrentTime;
 
+  if (lclock_last == lclock)
+    return buf;
+
+  lclock_last = lclock;
   gm = gmtime(&lclock);
   memcpy(&gmbuf, gm, sizeof(gmbuf));
   gm = &gmbuf;
@@ -120,12 +130,17 @@ smalldate(time_t lclock)
  * Thu Nov 24 18:22:48 1986
  */
 const char *
-myctime(time_t value)
+myctime(time_t lclock)
 {
   static char buf[32];
   char *p;
+  static time_t lclock_last;
 
-  strlcpy(buf, ctime(&value), sizeof(buf));
+  if (lclock_last == lclock)
+    return buf;
+
+  lclock_last = lclock;
+  strlcpy(buf, ctime(&lclock), sizeof(buf));
 
   if ((p = strchr(buf, '\n')))
     *p = '\0';

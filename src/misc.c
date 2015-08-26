@@ -91,6 +91,24 @@ date(time_t lclock)
 }
 
 const char *
+date_iso8601(time_t lclock)
+{
+  static char buf[MAX_DATE_STRING];
+  static time_t lclock_last;
+
+  if (!lclock)
+    lclock = CurrentTime;
+
+  if (lclock_last != lclock)
+  {
+    lclock_last = lclock;
+    strftime(buf, sizeof(buf), "%FT%H:%M:%S%z", localtime(&lclock));
+  }
+
+  return buf;
+}
+
+const char *
 smalldate(time_t lclock)
 {
   static char buf[MAX_DATE_STRING];

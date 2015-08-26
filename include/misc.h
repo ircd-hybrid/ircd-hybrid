@@ -28,6 +28,7 @@
 #define INCLUDED_misc_h
 
 extern const char *date(time_t);
+extern const char *date_iso8601(time_t);
 extern const char *smalldate(time_t);
 extern const char *myctime(time_t);
 #ifdef HAVE_LIBCRYPTO

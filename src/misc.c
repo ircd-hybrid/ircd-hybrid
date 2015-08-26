@@ -32,9 +32,9 @@
 
 static const char *const months[] =
 {
-  "January",   "February", "March",   "April",
-  "May",       "June",     "July",    "August",
-  "September", "October",  "November","December"
+  "January",   "February", "March",    "April",
+  "May",       "June",     "July",     "August",
+  "September", "October",  "November", "December"
 };
 
 static const char *const weekdays[] =
@@ -47,10 +47,10 @@ const char *
 date(time_t lclock)
 {
   static char buf[80], plus;
+  static time_t lclock_last;
   struct tm *lt, *gm;
   struct tm gmbuf;
   int minswest;
-  static time_t lclock_last;
 
   if (!lclock)
     lclock = CurrentTime;
@@ -84,7 +84,7 @@ date(time_t lclock)
     minswest = -minswest;
 
   snprintf(buf, sizeof(buf), "%s %s %d %d -- %02u:%02u:%02u %c%02u:%02u",
-           weekdays[lt->tm_wday], months[lt->tm_mon],lt->tm_mday,
+           weekdays[lt->tm_wday], months[lt->tm_mon], lt->tm_mday,
            lt->tm_year + 1900, lt->tm_hour, lt->tm_min, lt->tm_sec,
            plus, minswest/60, minswest%60);
   return buf;
@@ -123,9 +123,9 @@ date_iso8601(time_t lclock)
 const char *
 myctime(time_t lclock)
 {
-  static char buf[32];
-  char *p;
+  static char buf[MAX_DATE_STRING];
   static time_t lclock_last;
+  char *p;
 
   if (!lclock)
     lclock = CurrentTime;

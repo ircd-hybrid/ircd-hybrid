@@ -249,12 +249,12 @@ check_pings_list(dlink_list *list)
           {
             sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                                  "No response from %s, closing link",
-                                 get_client_name(client_p, HIDE_IP));
+                                 get_client_name(client_p, SHOW_IP));
             sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                                  "No response from %s, closing link",
                                  get_client_name(client_p, MASK_IP));
             ilog(LOG_TYPE_IRCD, "No response from %s, closing link",
-                 get_client_name(client_p, HIDE_IP));
+                 get_client_name(client_p, SHOW_IP));
           }
 
           snprintf(buf, sizeof(buf), "Ping timeout: %d seconds",

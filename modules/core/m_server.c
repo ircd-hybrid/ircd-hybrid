@@ -475,7 +475,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
-          "for server %s", get_client_name(source_p, HIDE_IP), name);
+          "for server %s", get_client_name(source_p, SHOW_IP), name);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", get_client_name(source_p, MASK_IP), name);
@@ -505,7 +505,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
       {
         sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: No entry for "
-           "servername %s", get_client_name(source_p, HIDE_IP), name);
+           "servername %s", get_client_name(source_p, SHOW_IP), name);
 
         sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: No entry for "
@@ -520,7 +520,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     case -2:
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Bad password "
-           "for server %s", get_client_name(source_p, HIDE_IP), name);
+           "for server %s", get_client_name(source_p, SHOW_IP), name);
 
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Bad password "
@@ -534,7 +534,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     case -3:
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid host "
-           "for server %s", get_client_name(source_p, HIDE_IP), name);
+           "for server %s", get_client_name(source_p, SHOW_IP), name);
 
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid host "
@@ -545,7 +545,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     case -4:
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid certificate fingerprint "
-           "for server %s", get_client_name(source_p, HIDE_IP), name);
+           "for server %s", get_client_name(source_p, SHOW_IP), name);
 
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
            "Unauthorized server connection attempt from %s: Invalid certificate fingerprint "
@@ -571,7 +571,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
      */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s from %s",
-                         name, get_client_name(source_p, HIDE_IP));
+                         name, get_client_name(source_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Attempt to re-introduce server %s from %s",
                          name, get_client_name(source_p, MASK_IP));
@@ -584,7 +584,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
                          name, source_p->id,
-                         get_client_name(source_p, HIDE_IP));
+                         get_client_name(source_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
                          name, source_p->id,

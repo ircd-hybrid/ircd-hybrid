@@ -107,9 +107,9 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Received SQUIT %s from %s (%s)",
-                         target_p->name, get_client_name(source_p, HIDE_IP), comment);
+                         target_p->name, get_oper_name(source_p), comment);
     ilog(LOG_TYPE_IRCD, "Received SQUIT %s from %s (%s)",
-         target_p->name, get_client_name(source_p, HIDE_IP), comment);
+         target_p->name, get_oper_name(source_p), comment);
 
     /* To them, we are exiting */
     sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);

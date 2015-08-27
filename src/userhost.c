@@ -43,7 +43,7 @@ userhost_init(void)
   namehost_pool = mp_pool_new(sizeof(struct NameHost), MP_CHUNK_SIZE_NAMEHOST);
 }
 
-/* count_user_host()
+/* userhost_count()
  *
  * inputs       - user name
  *              - hostname
@@ -55,8 +55,8 @@ userhost_init(void)
  * side effects -
  */
 void
-count_user_host(const char *user, const char *host, unsigned int *global_p,
-                unsigned int *local_p, unsigned int *icount_p)
+userhost_count(const char *user, const char *host, unsigned int *global_p,
+               unsigned int *local_p, unsigned int *icount_p)
 {
   dlink_node *node = NULL;
   struct UserHost *found_userhost;
@@ -82,14 +82,14 @@ count_user_host(const char *user, const char *host, unsigned int *global_p,
   }
 }
 
-/* find_or_add_userhost()
+/* userhost_find_or_add()
  *
  * inputs       - host name
  * output       - none
  * side effects - find UserHost * for given host name
  */
 static struct UserHost *
-find_or_add_userhost(const char *host)
+userhost_find_or_add(const char *host)
 {
   struct UserHost *userhost = NULL;
 
@@ -104,7 +104,7 @@ find_or_add_userhost(const char *host)
   return userhost;
 }
 
-/* add_user_host()
+/* userhost_add()
  *
  * inputs       - user name
  *              - hostname
@@ -113,7 +113,7 @@ find_or_add_userhost(const char *host)
  * side effects - add given user@host to hash tables
  */
 void
-add_user_host(const char *user, const char *host, int global)
+userhost_add(const char *user, const char *host, int global)
 {
   dlink_node *node = NULL;
   struct UserHost *found_userhost;
@@ -126,7 +126,7 @@ add_user_host(const char *user, const char *host, int global)
     ++user;
   }
 
-  if ((found_userhost = find_or_add_userhost(host)) == NULL)
+  if ((found_userhost = userhost_find_or_add(host)) == NULL)
     return;
 
   DLINK_FOREACH(node, found_userhost->list.head)
@@ -163,7 +163,7 @@ add_user_host(const char *user, const char *host, int global)
   dlinkAdd(nameh, &nameh->node, &found_userhost->list);
 }
 
-/* delete_user_host()
+/* userhost_del()
  *
  * inputs       - user name
  *              - hostname
@@ -172,7 +172,7 @@ add_user_host(const char *user, const char *host, int global)
  * side effects - delete given user@host to hash tables
  */
 void
-delete_user_host(const char *user, const char *host, int global)
+userhost_del(const char *user, const char *host, int global)
 {
   dlink_node *node = NULL;
   struct UserHost *found_userhost = NULL;

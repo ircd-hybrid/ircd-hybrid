@@ -187,7 +187,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
                        target_server, (unsigned long)tdline_time,
                        dlhost, reason);
 
-    /* Allow ON to apply local kline as well if it matches */
+    /* Allow ON to apply local dline as well if it matches */
     if (match(target_server, me.name))
       return 0;
   }

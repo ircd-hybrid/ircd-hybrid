@@ -672,7 +672,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          get_client_name(client_p, SHOW_IP), parv[3]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server ID %s already exists",
-                         client_p->name, parv[3]);
+                         get_client_name(client_p, MASK_IP), parv[3]);
     exit_client(client_p, "Link cancelled, server ID already exists");
     return 0;
   }
@@ -685,7 +685,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          get_client_name(client_p, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
-                         client_p->name, parv[1]);
+                         get_client_name(client_p, MASK_IP), parv[1]);
     exit_client(client_p, "Server exists");
     return 0;
   }

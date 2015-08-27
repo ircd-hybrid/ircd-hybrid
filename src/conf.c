@@ -260,8 +260,8 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
   ip_found->count++;
   AddFlag(client_p, FLAGS_IPHASH);
 
-  count_user_host(client_p->username, client_p->host,
-                  &global, &local, &ident);
+  userhost_count(client_p->username, client_p->host,
+                 &global, &local, &ident);
 
   /* XXX blah. go down checking the various silly limits
    * setting a_limit_reached if any limit is reached.

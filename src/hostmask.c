@@ -552,7 +552,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
  * Side-effects: None
  */
 struct MaskItem *
-find_address_conf(const char *host, const char *user, struct irc_ssaddr *ip,
+find_address_conf(const char *host, const char *user, const struct irc_ssaddr *ip,
                   int aftype, const char *password)
 {
   struct MaskItem *authcnf = NULL, *killcnf = NULL;
@@ -586,7 +586,7 @@ find_address_conf(const char *host, const char *user, struct irc_ssaddr *ip,
  * Side effects: None.
  */
 struct MaskItem *
-find_dline_conf(struct irc_ssaddr *addr, int aftype)
+find_dline_conf(const struct irc_ssaddr *addr, int aftype)
 {
   struct MaskItem *eline;
 

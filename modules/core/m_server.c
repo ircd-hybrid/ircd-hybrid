@@ -249,13 +249,15 @@ server_estab(struct Client *client_p)
   const COMP_METHOD *compression = NULL, *expansion = NULL;
 #endif
 
-  if ((conf = find_conf_name(&client_p->connection->confs, client_p->name, CONF_SERVER))
-      == NULL)
+  if ((conf = find_conf_name(&client_p->connection->confs, client_p->name, CONF_SERVER)) == NULL)
   {
     /* This shouldn't happen, better tell the ops... -A1kmm */
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Warning: Lost connect{} block "
-                         "for server %s(this shouldn't happen)!", client_p->name);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+                         "Warning: lost connect{} block for %s",
+                         get_client_name(client_p, SHOW_IP));
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+                         "Warning: lost connect{} block for %s",
+                         get_client_name(client_p, MASK_IP));
     exit_client(client_p, "Lost connect{} block!");
     return;
   }

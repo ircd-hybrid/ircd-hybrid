@@ -758,7 +758,7 @@ finish_ssl_server_handshake(struct Client *client_p)
   if (conf == NULL)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Lost connect{} block for %s", get_client_name(client_p, HIDE_IP));
+                         "Lost connect{} block for %s", get_client_name(client_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
 
@@ -774,18 +774,17 @@ finish_ssl_server_handshake(struct Client *client_p)
              me.name, ConfigServerHide.hidden ? "(H) " : "",
              me.info);
 
-  /* If we've been marked dead because a send failed, just exit
+  /*
+   * If we've been marked dead because a send failed, just exit
    * here now and save everyone the trouble of us ever existing.
    */
   if (IsDead(client_p))
   {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                           "%s[%s] went dead during handshake",
-                           client_p->name,
-                           client_p->host);
-      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                           "%s went dead during handshake", client_p->name);
-      return;
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+                         "%s went dead during handshake", get_client_name(client_p, SHOW_IP));
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+                         "%s went dead during handshake", get_client_name(client_p, MASK_IP));
+    return;
   }
 
   /* don't move to serv_list yet -- we haven't sent a burst! */
@@ -905,27 +904,20 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   /* Check the status */
   if (status != COMM_OK)
   {
-    /* We have an error, so report it and quit
-     * Admins get to see any IP, mere opers don't *sigh*
+    /* We have an error, so report it and quit */
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+                         "Error connecting to %s: %s",
+                         get_client_name(client_p, SHOW_IP), comm_errstr(status));
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+                         "Error connecting to %s: %s",
+                         get_client_name(client_p, MASK_IP), comm_errstr(status));
+
+    /*
+     * If a fd goes bad, call dead_link() the socket is no
+     * longer valid for reading or writing.
      */
-     if (ConfigServerHide.hide_server_ips)
-       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                            "Error connecting to %s: %s",
-                            client_p->name, comm_errstr(status));
-     else
-       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                            "Error connecting to %s[%s]: %s", client_p->name,
-                            client_p->host, comm_errstr(status));
-
-     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                          "Error connecting to %s: %s",
-                          client_p->name, comm_errstr(status));
-
-     /* If a fd goes bad, call dead_link() the socket is no
-      * longer valid for reading or writing.
-      */
-     dead_link_on_write(client_p, 0);
-     return;
+    dead_link_on_write(client_p, 0);
+    return;
   }
 
   /* COMM_OK, so continue the connection procedure */
@@ -935,7 +927,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   if (conf == NULL)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Lost connect{} block for %s", get_client_name(client_p, HIDE_IP));
+                         "Lost connect{} block for %s", get_client_name(client_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
 
@@ -961,18 +953,17 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   sendto_one(client_p, "SERVER %s 1 :%s%s", me.name,
              ConfigServerHide.hidden ? "(H) " : "", me.info);
 
-  /* If we've been marked dead because a send failed, just exit
+  /*
+   * If we've been marked dead because a send failed, just exit
    * here now and save everyone the trouble of us ever existing.
    */
   if (IsDead(client_p))
   {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                           "%s[%s] went dead during handshake",
-                           client_p->name,
-                           client_p->host);
-      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                           "%s went dead during handshake", client_p->name);
-      return;
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+                         "%s went dead during handshake", get_client_name(client_p, SHOW_IP));
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+                         "%s went dead during handshake", get_client_name(client_p, MASK_IP));
+    return;
   }
 
   /* don't move to serv_list yet -- we haven't sent a burst! */

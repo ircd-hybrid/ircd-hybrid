@@ -122,7 +122,7 @@ parse_remove_unknown(struct Client *client_p, const char *lsender, char *lbuffer
                          lbuffer, get_client_name(client_p, SHOW_IP), lsender);
     sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",
-                         lbuffer, client_p->name, lsender);
+                         lbuffer, get_client_name(client_p, MASK_IP), lsender);
     sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
                me.id, lsender, lbuffer, client_p->name);
   }

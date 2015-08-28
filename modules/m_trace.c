@@ -40,7 +40,7 @@
 
 
 static void do_actual_trace(struct Client *, int, char *[]);
-static void report_this_status(struct Client *, struct Client *, int);
+static void report_this_status(struct Client *, const struct Client *);
 
 static void
 trace_get_dependent(unsigned int *const server,
@@ -111,7 +111,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
           else
             ac2ptr = NULL;
         }
-     }
+      }
 
       if (ac2ptr)
         sendto_one_numeric(source_p, &me, RPL_TRACELINK,
@@ -140,8 +140,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
 static int
 ms_trace(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(source_p, ":%s TRACE %s :%s",
-                  2, parc, parv) != HUNTED_ISME)
+  if (hunt_server(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
     return 0;
 
   if (HasUMode(source_p, UMODE_OPER))
@@ -152,11 +151,13 @@ ms_trace(struct Client *source_p, int parc, char *parv[])
 static void
 do_actual_trace(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
+  const struct Client *target_p = NULL;
   int doall = 0;
   int wilds, dow;
   dlink_node *node;
   const char *name;
+
+  assert(HasUMode(source_p, UMODE_OPER));
 
   if (parc > 1)
     name = parv[1];
@@ -179,30 +180,10 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
   wilds = !parv[1] || has_wildcards(name);
   dow = wilds || doall;
 
-  if (!HasUMode(source_p, UMODE_OPER) || !dow) /* non-oper traces must be full nicks */
-                              /* lets also do this for opers tracing nicks */
+  if (!dow)  /* lets also do this for opers tracing nicks */
   {
-    target_p = hash_find_client(name);
-
-    if (target_p && IsClient(target_p))
-    {
-      if (HasUMode(target_p, UMODE_OPER))
-      {
-        sendto_one_numeric(source_p, &me, RPL_TRACEOPERATOR,
-                   get_client_class(&target_p->connection->confs), get_client_name(target_p, HIDE_IP),
-                   target_p->sockhost,
-                   CurrentTime - target_p->connection->lasttime,
-                   client_get_idle_time(source_p, target_p));
-      }
-      else
-      {
-        sendto_one_numeric(source_p, &me, RPL_TRACEUSER,
-                   get_client_class(&target_p->connection->confs), get_client_name(target_p, HIDE_IP),
-                   target_p->sockhost,
-                   CurrentTime - target_p->connection->lasttime,
-                   client_get_idle_time(source_p, target_p));
-      }
-    }
+    if ((target_p = hash_find_client(name)) && IsClient(target_p))
+      report_this_status(source_p, target_p);
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, name);
     return;
@@ -213,16 +194,12 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
   {
     target_p = node->data;
 
-    if (HasUMode(target_p, UMODE_INVISIBLE) && dow &&
-        !(MyConnect(source_p) && HasUMode(source_p, UMODE_OPER)) &&
-        !HasUMode(target_p, UMODE_OPER) && (target_p != source_p))
-      continue;
     if (!doall && wilds && match(name, target_p->name))
       continue;
     if (!dow && irccmp(name, target_p->name))
       continue;
 
-    report_this_status(source_p, target_p, dow);
+    report_this_status(source_p, target_p);
   }
 
   DLINK_FOREACH(node, local_server_list.head)
@@ -234,7 +211,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     if (!dow && irccmp(name, target_p->name))
       continue;
 
-    report_this_status(source_p, target_p, dow);
+    report_this_status(source_p, target_p);
   }
 
   /* This section is to report the unknowns */
@@ -247,7 +224,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     if (!dow && irccmp(name, target_p->name))
       continue;
 
-    report_this_status(source_p, target_p, dow);
+    report_this_status(source_p, target_p);
   }
 
   DLINK_FOREACH(node, class_get_list()->head)
@@ -269,7 +246,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
  * side effects - NONE
  */
 static void
-report_this_status(struct Client *source_p, struct Client *target_p, int dow)
+report_this_status(struct Client *source_p, const struct Client *target_p)
 {
   const char *name;
   const char *class_name;

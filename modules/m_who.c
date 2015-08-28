@@ -53,7 +53,7 @@ enum { WHO_MAX_REPLIES = 500 };
  * side effects - do a who on given person
  */
 static void
-do_who(struct Client *source_p, struct Client *target_p,
+do_who(struct Client *source_p, const struct Client *target_p,
        const char *name, const char *op_flags)
 {
   char status[IRCD_BUFSIZE] = "";
@@ -258,7 +258,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   struct Channel *chptr = NULL;
   char *mask = parv[1];
   dlink_node *node = NULL;
-  const int server_oper = parc > 2 ? (*parv[2] == 'o') : 0; /* Show OPERS only */
+  const int server_oper = parc > 2 && *parv[2] == 'o';  /* Show OPERS only */
 
   /* See if mask is there, collapse it or return if not there */
   if (EmptyString(mask))

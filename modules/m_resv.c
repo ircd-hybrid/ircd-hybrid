@@ -48,7 +48,7 @@
  * side effects	- parse resv, create if valid
  */
 static void
-parse_resv(struct Client *source_p, const char *name, int tkline_time, const char *reason)
+parse_resv(struct Client *source_p, const char *name, int duration, const char *reason)
 {
   const char *type = "channel";
   struct MaskItem *conf = NULL;
@@ -84,21 +84,21 @@ parse_resv(struct Client *source_p, const char *name, int tkline_time, const cha
   conf->setat = CurrentTime;
   SetConfDatabase(conf);
 
-  if (tkline_time)
+  if (duration)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":A %d minute RESV has been placed on %s: %s",
-                        tkline_time/60, type, name);
+                        duration/60, type, name);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has placed a %d minute RESV on %s: %s [%s]",
                          get_oper_name(source_p),
-                         tkline_time/60, type,
+                         duration/60, type,
                          conf->name, conf->reason);
     ilog(LOG_TYPE_RESV, "%s added temporary %d min. RESV for [%s] [%s]",
-         get_oper_name(source_p), (int)tkline_time/60,
+         get_oper_name(source_p), (int)duration/60,
          conf->name, conf->reason);
-    conf->until = CurrentTime + tkline_time;
+    conf->until = CurrentTime + duration;
   }
   else
   {
@@ -125,7 +125,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   char *resv = NULL;
   char *reason = NULL;
   char *target_server = NULL;
-  time_t tkline_time = 0;
+  time_t duration = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_RESV))
   {
@@ -134,16 +134,16 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   }
 
   if (!parse_aline("RESV", source_p, parc, parv, 0, &resv, NULL,
-                   &tkline_time, &target_server, &reason))
+                   &duration, &target_server, &reason))
     return 0;
 
   if (target_server)
   {
     /* if a given expire time is given, ENCAP it */
-    if (tkline_time)
+    if (duration)
       sendto_match_servs(source_p, target_server, CAPAB_ENCAP,
                          "ENCAP %s RESV %d %s 0 :%s",
-                         target_server, (int)tkline_time, resv, reason);
+                         target_server, (int)duration, resv, reason);
     else
       sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
                          "RESV %s 0 %s :%s",
@@ -155,15 +155,15 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   }
   else
   {
-    if (tkline_time)
+    if (duration)
       cluster_a_line(source_p, "ENCAP", CAPAB_ENCAP, SHARED_RESV,
-                     "RESV %d %s 0 :%s", (int)tkline_time, resv, reason);
+                     "RESV %d %s 0 :%s", (int)duration, resv, reason);
     else
       cluster_a_line(source_p, "RESV", CAPAB_KLN, SHARED_RESV,
                      "0 %s :%s", resv, reason);
   }
 
-  parse_resv(source_p, resv, (int)tkline_time, reason);
+  parse_resv(source_p, resv, (int)duration, reason);
   return 0;
 }
 
@@ -175,7 +175,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
  *		- parv list of arguments
  * via parv[]
  * parv[0] = command
- * parv[1] = tkline_time
+ * parv[1] = duration
  * parv[2] = name
  * parv[3] = 0
  * parv[4] = reason
@@ -197,7 +197,7 @@ me_resv(struct Client *source_p, int parc, char *parv[])
 /* ms_resv()
  *   parv[0] = command
  *   parv[1] = target server
- *   parv[2] = tkline_time
+ *   parv[2] = duration
  *   parv[3] = channel/nick to resv
  *   parv[4] = reason
  */

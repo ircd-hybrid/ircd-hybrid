@@ -84,14 +84,14 @@ kline_check(struct AddressRec *arec)
  */
 static void
 kline_add(struct Client *source_p, const char *user, const char *host,
-          const char *reason, time_t tkline_time)
+          const char *reason, time_t duration)
 {
   char buf[IRCD_BUFSIZE];
   struct MaskItem *conf;
 
-  if (tkline_time)
+  if (duration)
     snprintf(buf, sizeof(buf), "Temporary K-line %d min. - %.*s (%s)",
-             (int)(tkline_time/60), REASONLEN, reason, date_iso8601(0));
+             (int)(duration/60), REASONLEN, reason, date_iso8601(0));
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
@@ -102,21 +102,21 @@ kline_add(struct Client *source_p, const char *user, const char *host,
   conf->reason = xstrdup(buf);
   SetConfDatabase(conf);
 
-  if (tkline_time)
+  if (duration)
   {
-    conf->until = CurrentTime + tkline_time;
+    conf->until = CurrentTime + duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %d min. K-Line [%s@%s]",
-                        tkline_time/60, conf->user, conf->host);
+                        duration/60, conf->user, conf->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-                         get_oper_name(source_p), tkline_time/60,
+                         get_oper_name(source_p), duration/60,
                          conf->user, conf->host,
                          conf->reason);
     ilog(LOG_TYPE_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-         get_oper_name(source_p), tkline_time/60,
+         get_oper_name(source_p), duration/60,
          conf->user, conf->host, conf->reason);
   }
   else
@@ -193,7 +193,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   char *user = NULL;
   char *host = NULL;
   char *target_server = NULL;
-  time_t tkline_time = 0;
+  time_t duration = 0;
   int bits = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_KLINE))
@@ -203,13 +203,13 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   }
 
   if (!parse_aline("KLINE", source_p, parc, parv, AWILD, &user, &host,
-                   &tkline_time, &target_server, &reason))
+                   &duration, &target_server, &reason))
     return 0;
 
   if (target_server)
   {
     sendto_match_servs(source_p, target_server, CAPAB_KLN, "KLINE %s %lu %s %s :%s",
-                       target_server, (unsigned long)tkline_time,
+                       target_server, (unsigned long)duration,
                        user, host, reason);
 
     /* Allow ON to apply local kline as well if it matches */
@@ -218,7 +218,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_a_line(source_p, "KLINE", CAPAB_KLN, SHARED_KLINE,
-                   "%d %s %s :%s", tkline_time, user, host, reason);
+                   "%d %s %s :%s", duration, user, host, reason);
 
   if (already_placed_kline(source_p, user, host))
     return 0;
@@ -247,7 +247,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
       break;
   }
 
-  kline_add(source_p, user, host, reason, tkline_time);
+  kline_add(source_p, user, host, reason, duration);
   return 0;
 }
 
@@ -255,7 +255,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_kline(struct Client *source_p, int parc, char *parv[])
 {
-  time_t tkline_time = 0;
+  time_t duration = 0;
   const char *user, *host, *reason;
   int bits = 0;
 
@@ -263,14 +263,14 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
-  /* command  target_server  tkline_time  user     host     reason */
+  /* command  target_server  duration  user     host     reason */
   sendto_match_servs(source_p, parv[1], CAPAB_KLN, "KLINE %s %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4], parv[5]);
 
   if (match(parv[1], me.name))
     return 0;
 
-  tkline_time = valid_tkline(parv[2], TK_SECONDS);
+  duration = valid_tkline(parv[2], TK_SECONDS);
   user = parv[3];
   host = parv[4];
   reason = parv[5];
@@ -312,7 +312,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
         break;
     }
 
-    kline_add(source_p, user, host, reason, tkline_time);
+    kline_add(source_p, user, host, reason, duration);
   }
 
   return 0;

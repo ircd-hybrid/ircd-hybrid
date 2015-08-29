@@ -213,6 +213,7 @@ reset_block_state(void)
 %token  IRCD_AUTH
 %token  IRCD_FLAGS
 %token  IRCD_SID
+%token  JOIN
 %token  KILL
 %token  KILL_CHASE_TIME_LIMIT
 %token  KLINE
@@ -258,7 +259,6 @@ reset_block_state(void)
 %token  NUMBER_PER_CIDR
 %token  NUMBER_PER_IP
 %token  OPER_ONLY_UMODES
-%token  OPER_PASS_RESV
 %token  OPER_UMODES
 %token  OPERATOR
 %token  OPERS_BYPASS_CALLERID
@@ -1438,6 +1438,14 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_OPME;
+} | NICK ':' RESV
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_NICK_RESV;
+} | JOIN ':' RESV
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_JOIN_RESV;
 };
 
 
@@ -2546,7 +2554,6 @@ general_item:       general_away_count |
                     general_pace_wait_simple |
                     general_short_motd |
                     general_no_oper_flood |
-                    general_oper_pass_resv |
                     general_oper_only_umodes |
                     general_max_targets |
                     general_oper_umodes |
@@ -2746,11 +2753,6 @@ general_short_motd: SHORT_MOTD '=' TBOOL ';'
 general_no_oper_flood: NO_OPER_FLOOD '=' TBOOL ';'
 {
   ConfigGeneral.no_oper_flood = yylval.number;
-};
-
-general_oper_pass_resv: OPER_PASS_RESV '=' TBOOL ';'
-{
-  ConfigGeneral.oper_pass_resv = yylval.number;
 };
 
 general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'

@@ -867,7 +867,6 @@ set_default_conf(void)
   ConfigGeneral.short_motd = 0;
   ConfigGeneral.ping_cookie = 0;
   ConfigGeneral.no_oper_flood = 0;
-  ConfigGeneral.oper_pass_resv = 1;
   ConfigGeneral.max_targets = MAX_TARGETS_DEFAULT;
   ConfigGeneral.oper_only_umodes = UMODE_DEBUG | UMODE_LOCOPS | UMODE_HIDDEN | UMODE_FARCONNECT |
                                    UMODE_UNAUTH | UMODE_EXTERNAL | UMODE_BOTS | UMODE_NCHANGE |

@@ -682,7 +682,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   }
 
   if (!HasFlag(source_p, FLAGS_EXEMPTRESV) &&
-      !(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv) &&
+      !(HasUMode(source_p, UMODE_OPER) && HasOFlag(source_p, OPER_FLAG_NICK_RESV)) &&
       (conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
   {
     ++conf->count;

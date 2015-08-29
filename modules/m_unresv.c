@@ -99,6 +99,12 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
   char *reason = NULL;
   char *target_server = NULL;
 
+  if (!HasOFlag(source_p, OPER_FLAG_UNRESV))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "unresv");
+    return 0;
+  }
+
   if (!parse_aline("UNRESV", source_p, parc, parv, 0, &resv, NULL,
                    NULL, &target_server, &reason))
     return 0;

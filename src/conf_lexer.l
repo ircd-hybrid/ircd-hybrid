@@ -202,6 +202,7 @@ invite_client_time          { return INVITE_CLIENT_TIME; }
 ip                          { return IP; }
 ipv4                        { return T_IPV4; }
 ipv6                        { return T_IPV6; }
+join                        { return JOIN; }
 kill                        { return KILL; }
 kill_chase_time_limit       { return KILL_CHASE_TIME_LIMIT; }
 kline                       { return KLINE; }
@@ -250,7 +251,6 @@ number_per_cidr             { return NUMBER_PER_CIDR; }
 number_per_ip               { return NUMBER_PER_IP; }
 oper                        { return OPERATOR; }
 oper_only_umodes            { return OPER_ONLY_UMODES; }
-oper_pass_resv              { return OPER_PASS_RESV; }
 oper_umodes                 { return OPER_UMODES; }
 operator                    { return OPERATOR; }
 opers_bypass_callerid       { return OPERS_BYPASS_CALLERID; }

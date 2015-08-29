@@ -210,7 +210,9 @@ enum
  OPER_FLAG_WALLOPS        = 0x00080000U,  /**< Oper can use WALLOPS command */
  OPER_FLAG_LOCOPS         = 0x00100000U,  /**< Oper can use LOCOPS command */
  OPER_FLAG_UNXLINE        = 0x00200000U,  /**< Oper can use UNXLINE command */
- OPER_FLAG_OPME           = 0x00400000U   /**< Oper can use OPME command */
+ OPER_FLAG_OPME           = 0x00400000U,  /**< Oper can use OPME command */
+ OPER_FLAG_JOIN_RESV      = 0x00800000U,  /**< Oper can use JOIN on resv {} channels */
+ OPER_FLAG_NICK_RESV      = 0x01000000U   /**< Oper can use NICK on resv {} nicks */
 };
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->connection->operflags & (y) : 0)

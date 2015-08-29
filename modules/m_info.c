@@ -490,12 +490,6 @@ static const struct InfoStruct info_table[] =
     "Reduce flood control for operators"
   },
   {
-    "oper_pass_resv",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigGeneral.oper_pass_resv,
-    "Opers can over-ride RESVs"
-  },
-  {
     "max_targets",
     OUTPUT_DECIMAL,
     &ConfigGeneral.max_targets,

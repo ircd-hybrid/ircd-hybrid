@@ -746,7 +746,7 @@ can_send(struct Channel *chptr, struct Client *source_p,
     return CAN_SEND_OPV;
 
   if (MyClient(source_p) && !HasFlag(source_p, FLAGS_EXEMPTRESV))
-    if (!(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv))
+    if (!(HasUMode(source_p, UMODE_OPER) && HasOFlag(source_p, OPER_FLAG_JOIN_RESV)))
       if ((conf = match_find_resv(chptr->name)) && !resv_find_exempt(source_p, conf))
         return ERR_CANNOTSENDTOCHAN;
 
@@ -978,7 +978,7 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
     }
 
     if (!HasFlag(source_p, FLAGS_EXEMPTRESV) &&
-        !(HasUMode(source_p, UMODE_OPER) && ConfigGeneral.oper_pass_resv) &&
+        !(HasUMode(source_p, UMODE_OPER) && HasOFlag(source_p, OPER_FLAG_JOIN_RESV)) &&
         ((conf = match_find_resv(chan)) && !resv_find_exempt(source_p, conf)))
     {
       ++conf->count;

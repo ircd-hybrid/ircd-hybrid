@@ -127,6 +127,12 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   char *target_server = NULL;
   time_t tkline_time = 0;
 
+  if (!HasOFlag(source_p, OPER_FLAG_RESV))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "resv");
+    return 0;
+  }
+
   if (!parse_aline("RESV", source_p, parc, parv, 0, &resv, NULL,
                    &tkline_time, &target_server, &reason))
     return 0;

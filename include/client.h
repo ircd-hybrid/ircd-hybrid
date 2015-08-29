@@ -212,7 +212,9 @@ enum
   OPER_FLAG_UNXLINE        = 0x00200000U,  /**< Oper can use UNXLINE command */
   OPER_FLAG_OPME           = 0x00400000U,  /**< Oper can use OPME command */
   OPER_FLAG_JOIN_RESV      = 0x00800000U,  /**< Oper can use JOIN on resv {} channels */
-  OPER_FLAG_NICK_RESV      = 0x01000000U   /**< Oper can use NICK on resv {} nicks */
+  OPER_FLAG_NICK_RESV      = 0x01000000U,  /**< Oper can use NICK on resv {} nicks */
+  OPER_FLAG_RESV           = 0x02000000U,  /**< Oper can use RESV command */
+  OPER_FLAG_UNRESV         = 0x02000000U   /**< Oper can use UNRESV command */
 };
 
 #define HasOFlag(x, y) (MyConnect(x) ? (x)->connection->operflags & (y) : 0)

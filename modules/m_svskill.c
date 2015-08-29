@@ -65,11 +65,11 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
 
   if (parc > 3)
   {
-    comment = parv[3] ? parv[3] : source_p->name;
+    comment = parv[3] ? parv[3] : CONF_NOREASON;
     ts = atol(parv[2]);
   }
   else
-    comment = (parc > 2 && parv[2]) ? parv[2] : source_p->name;
+    comment = (parc > 2 && parv[2]) ? parv[2] : CONF_NOREASON;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;

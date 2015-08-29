@@ -102,14 +102,14 @@ dline_check(struct AddressRec *arec)
  */
 static void
 dline_add(struct Client *source_p, const char *addr, const char *reason,
-          time_t tdline_time)
+          time_t duration)
 {
   char buf[IRCD_BUFSIZE];
   struct MaskItem *conf;
 
-  if (tdline_time)
+  if (duration)
     snprintf(buf, sizeof(buf), "Temporary D-line %d min. - %.*s (%s)",
-             (int)(tdline_time/60), REASONLEN, reason, date_iso8601(0));
+             (int)(duration/60), REASONLEN, reason, date_iso8601(0));
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
@@ -119,20 +119,20 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
   conf->setat = CurrentTime;
   SetConfDatabase(conf);
 
-  if (tdline_time)
+  if (duration)
   {
-    conf->until = CurrentTime + tdline_time;
+    conf->until = CurrentTime + duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %d min. D-Line [%s]",
-                        tdline_time/60, conf->host);
+                        duration/60, conf->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %d min. D-Line for [%s] [%s]",
-                         get_oper_name(source_p), tdline_time/60,
+                         get_oper_name(source_p), duration/60,
                          conf->host, conf->reason);
     ilog(LOG_TYPE_DLINE, "%s added temporary %d min. D-Line for [%s] [%s]",
-         get_oper_name(source_p), tdline_time/60, conf->host, conf->reason);
+         get_oper_name(source_p), duration/60, conf->host, conf->reason);
   }
   else
   {
@@ -167,7 +167,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   const struct Client *target_p = NULL;
   struct irc_ssaddr daddr;
   struct MaskItem *conf = NULL;
-  time_t tdline_time = 0;
+  time_t duration = 0;
   int bits = 0, aftype = 0, t = 0;
   char hostip[HOSTIPLEN + 1];
 
@@ -178,13 +178,13 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   }
 
   if (!parse_aline("DLINE", source_p, parc, parv, AWILD, &dlhost,
-                   NULL, &tdline_time, &target_server, &reason))
+                   NULL, &duration, &target_server, &reason))
     return 0;
 
   if (target_server)
   {
     sendto_match_servs(source_p, target_server, CAPAB_DLN, "DLINE %s %lu %s :%s",
-                       target_server, (unsigned long)tdline_time,
+                       target_server, (unsigned long)duration,
                        dlhost, reason);
 
     /* Allow ON to apply local dline as well if it matches */
@@ -193,7 +193,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_a_line(source_p, "DLINE", CAPAB_DLN, SHARED_DLINE,
-                   "%d %s :%s", tdline_time, dlhost, reason);
+                   "%d %s :%s", duration, dlhost, reason);
 
   if ((t = parse_netmask(dlhost, NULL, NULL)) == HM_HOST)
   {
@@ -251,7 +251,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  dline_add(source_p, dlhost, reason, tdline_time);
+  dline_add(source_p, dlhost, reason, duration);
   return 0;
 }
 
@@ -261,21 +261,21 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   const char *dlhost, *reason;
   struct irc_ssaddr daddr;
   struct MaskItem *conf = NULL;
-  time_t tdline_time = 0;
+  time_t duration = 0;
   int bits = 0, aftype = 0;
 
   if (parc != 5 || EmptyString(parv[4]))
     return 0;
 
   /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4] */
-  /* command  target_server  tdline_time  host     reason  */
+  /* command  target_server  duration  host     reason  */
   sendto_match_servs(source_p, parv[1], CAPAB_DLN, "DLINE %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4]);
 
   if (match(parv[1], me.name))
     return 0;
 
-  tdline_time = valid_tkline(parv[2], TK_SECONDS);
+  duration = valid_tkline(parv[2], TK_SECONDS);
   dlhost = parv[3];
   reason = parv[4];
 
@@ -320,7 +320,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    dline_add(source_p, dlhost, reason, tdline_time);
+    dline_add(source_p, dlhost, reason, duration);
   }
 
   return 0;

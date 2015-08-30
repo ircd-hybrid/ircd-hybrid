@@ -452,8 +452,6 @@ main(int argc, char *argv[])
   /* It's not random, but it ought to be a little harder to guess */
   init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
 
-  dlinkAdd(&me, &me.node, &global_client_list);
-
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;
   ConfigGeneral.mpath      = MPATH;
@@ -549,9 +547,9 @@ main(int argc, char *argv[])
     generate_sid();
   }
   else
-  {
     strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
-  }
+
+  init_uid();
 
   me.from = &me;
   me.servptr = &me;
@@ -566,8 +564,7 @@ main(int argc, char *argv[])
   hash_add_client(&me);
 
   dlinkAdd(&me, make_dlink_node(), &global_server_list);
-
-  init_uid();
+  dlinkAdd(&me, &me.node, &global_client_list);
 
   load_kline_database();
   load_dline_database();
@@ -579,8 +576,6 @@ main(int argc, char *argv[])
   load_core_modules(1);
 
   write_pidfile(pidFileName);
-
-  ilog(LOG_TYPE_IRCD, "Server Ready");
 
   event_addish(&event_cleanup_tklines, NULL);
 
@@ -601,6 +596,8 @@ main(int argc, char *argv[])
   else
     ConfigServerHide.links_disabled = 1;
 
+  ilog(LOG_TYPE_IRCD, "Server Ready");
   io_loop();
+
   return 0;
 }

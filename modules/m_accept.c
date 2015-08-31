@@ -116,22 +116,22 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
 static int
 m_accept(struct Client *source_p, int parc, char *parv[])
 {
-  char *mask = NULL;
-  char *p = NULL;
+  struct split_nuh_item nuh;
+  struct split_nuh_item *accept_p = NULL;
   char nick[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
   char host[HOSTLEN + 1] = "";
-  struct split_nuh_item nuh;
-  struct split_nuh_item *accept_p = NULL;
+  char *p = NULL;
+  char *mask = collapse(parv[1]);
 
-  if (EmptyString(parv[1]) || !strcmp(parv[1], "*"))
+  if (EmptyString(mask) || !strcmp(mask, "*"))
   {
     list_accepts(source_p);
     return 0;
   }
 
-  for (mask = strtoken(&p, parv[1], ","); mask;
-       mask = strtoken(&p,    NULL, ","))
+  for (mask = strtoken(&p, mask, ","); mask;
+       mask = strtoken(&p, NULL, ","))
   {
     if (*mask == '-' && *++mask)
     {

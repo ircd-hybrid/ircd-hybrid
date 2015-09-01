@@ -85,19 +85,22 @@ mo_locops(struct Client *source_p, int parc, char *parv[])
 static int
 ms_locops(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc != 3 || EmptyString(parv[2]))
+  const char *const targets = parv[1];
+  const char *const message = parv[2];
+
+  if (parc != 3 || EmptyString(message))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAPAB_CLUSTER, "LOCOPS %s :%s",
-                     parv[1], parv[2]);
+  sendto_match_servs(source_p, targets, CAPAB_CLUSTER, "LOCOPS %s :%s",
+                     targets, message);
 
-  if (match(parv[1], me.name))
+  if (match(targets, me.name))
     return 0;
 
   if (find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
                               "*", "*", SHARED_LOCOPS))
     sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
-                         source_p->name, parv[2]);
+                         source_p->name, message);
   return 0;
 }
 

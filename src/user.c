@@ -50,6 +50,10 @@
 #include "watch.h"
 #include "isupport.h"
 
+#ifndef BUILD_DATE
+#define BUILD_DATE __DATE__ " at " __TIME__
+#endif
+
 static char umode_buffer[IRCD_BUFSIZE];
 
 const struct user_modes *umode_map[256];
@@ -263,11 +267,7 @@ introduce_client(struct Client *source_p)
 static void
 user_welcome(struct Client *source_p)
 {
-#if defined(__TIME__) && defined(__DATE__)
-  static const char built_date[] = __DATE__ " at " __TIME__;
-#else
-  static const char built_date[] = "unknown";
-#endif
+static const char built_date[] = BUILD_DATE;
 
 #ifdef HAVE_LIBCRYPTO
   if (HasFlag(source_p, FLAGS_SSL))

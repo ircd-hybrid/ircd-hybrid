@@ -79,7 +79,7 @@ static const char *const HeaderMessages[] =
 
 #define sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
 
-static dlink_list auth_pending_list;
+static dlink_list auth_list;
 static void read_auth_reply(fde_t *, void *);
 static void auth_connect_callback(fde_t *, int, void *);
 
@@ -115,7 +115,7 @@ release_auth_client(struct AuthRequest *auth)
 
   if (IsInAuth(auth))
   {
-    dlinkDelete(&auth->node, &auth_pending_list);
+    dlinkDelete(&auth->node, &auth_list);
     ClearInAuth(auth);
   }
 
@@ -267,7 +267,7 @@ start_auth(struct Client *client_p)
   struct AuthRequest *const auth = make_auth_request(client_p);
 
   SetInAuth(auth);
-  dlinkAddTail(auth, &auth->node, &auth_pending_list);
+  dlinkAddTail(auth, &auth->node, &auth_list);
 
   sendheader(client_p, REPORT_DO_DNS);
 
@@ -291,7 +291,7 @@ timeout_auth_queries_event(void *notused)
 {
   dlink_node *node = NULL, *node_next = NULL;
 
-  DLINK_FOREACH_SAFE(node, node_next, auth_pending_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, auth_list.head)
   {
     struct AuthRequest *auth = node->data;
 
@@ -518,7 +518,7 @@ delete_auth(struct AuthRequest *auth)
 
   if (IsInAuth(auth))
   {
-    dlinkDelete(&auth->node, &auth_pending_list);
+    dlinkDelete(&auth->node, &auth_list);
     ClearInAuth(auth);
   }
 }

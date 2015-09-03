@@ -146,30 +146,30 @@ make_daemon(void)
   setsid();
 }
 
-static int printVersion = 0;
+static int printVersion;
 
 static struct lgetopt myopts[] =
 {
-  {"configfile", &ConfigGeneral.configfile,
-   STRING, "File to use for ircd.conf"},
-  {"klinefile",  &ConfigGeneral.klinefile,
-   STRING, "File to use for kline database"},
-  {"dlinefile",  &ConfigGeneral.dlinefile,
-   STRING, "File to use for dline database"},
-  {"xlinefile",  &ConfigGeneral.xlinefile,
-   STRING, "File to use for xline database"},
-  {"resvfile",  &ConfigGeneral.resvfile,
-   STRING, "File to use for resv database"},
-  {"logfile",    &logFileName,
-   STRING, "File to use for ircd.log"},
-  {"pidfile",    &pidFileName,
-   STRING, "File to use for process ID"},
-  {"foreground", &server_state.foreground,
-   YESNO, "Run in foreground (don't detach)"},
-  {"version",    &printVersion,
-   YESNO, "Print version and exit"},
-  {"help", NULL, USAGE, "Print this text"},
-  {NULL, NULL, STRING, NULL},
+  { "configfile", &ConfigGeneral.configfile,
+   STRING, "File to use for ircd.conf" },
+  { "klinefile",  &ConfigGeneral.klinefile,
+   STRING, "File to use for kline database" },
+  { "dlinefile",  &ConfigGeneral.dlinefile,
+   STRING, "File to use for dline database" },
+  { "xlinefile",  &ConfigGeneral.xlinefile,
+   STRING, "File to use for xline database" },
+  { "resvfile",   &ConfigGeneral.resvfile,
+   STRING, "File to use for resv database" },
+  { "logfile",    &logFileName,
+   STRING, "File to use for ircd.log" },
+  { "pidfile",    &pidFileName,
+   STRING, "File to use for process ID" },
+  { "foreground", &server_state.foreground,
+   YESNO, "Run in foreground (don't detach)" },
+  { "version",    &printVersion,
+   YESNO, "Print version and exit" },
+  { "help", NULL, USAGE, "Print this text" },
+  { NULL, NULL, STRING, NULL },
 };
 
 void
@@ -286,12 +286,12 @@ write_pidfile(const char *filename)
 
   if ((fb = fopen(filename, "w")))
   {
-    char buff[IRCD_BUFSIZE];
+    char buf[IRCD_BUFSIZE];
     unsigned int pid = (unsigned int)getpid();
 
-    snprintf(buff, sizeof(buff), "%u\n", pid);
+    snprintf(buf, sizeof(buf), "%u\n", pid);
 
-    if (fputs(buff, fb) == -1)
+    if (fputs(buf, fb) == -1)
       ilog(LOG_TYPE_IRCD, "Error writing to pid file %s: %s",
            filename, strerror(errno));
 
@@ -314,17 +314,16 @@ static void
 check_pidfile(const char *filename)
 {
   FILE *fb;
-  char buff[IRCD_BUFSIZE];
-  pid_t pidfromfile;
+  char buf[IRCD_BUFSIZE];
 
   if ((fb = fopen(filename, "r")))
   {
-    if (!fgets(buff, 20, fb))
+    if (!fgets(buf, 20, fb))
       ilog(LOG_TYPE_IRCD, "Error reading from pid file %s: %s",
            filename, strerror(errno));
     else
     {
-      pidfromfile = atoi(buff);
+      pid_t pidfromfile = atoi(buf);
 
       if (!kill(pidfromfile, 0))
       {

@@ -27,10 +27,10 @@
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
 
-#define MODEBUFLEN    200
+enum { MODEBUFLEN = 200 };
 
 /* Maximum mode changes allowed per client, per server is different */
-#define MAXMODEPARAMS 6
+enum { MAXMODEPARAMS = 6 };
 
 enum
 {

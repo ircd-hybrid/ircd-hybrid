@@ -27,8 +27,7 @@
 #ifndef INCLUDED_hostmask_h
 #define INCLUDED_hostmask_h
 
-#define ATABLE_SIZE 0x1000
-
+enum { ATABLE_SIZE = 0x1000 };
 
 enum hostmask_type
 {

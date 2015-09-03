@@ -179,12 +179,11 @@ set_time(void)
 
   if (gettimeofday(&newtime, NULL) == -1)
   {
-    ilog(LOG_TYPE_IRCD, "Clock Failure (%s), TS can be corrupted",
-         strerror(errno));
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Clock Failure (%s), TS can be corrupted",
-                         strerror(errno));
-    server_die("Clock Failure", SERVER_SHUTDOWN);
+    char buf[IRCD_BUFSIZE];
+
+    snprintf(buf, sizeof(buf), "Clock failure, TS can be corrupted: %s",
+             strerror(errno));
+    server_die(buf, SERVER_SHUTDOWN);
   }
 
   if (newtime.tv_sec < CurrentTime)

@@ -46,7 +46,7 @@
 #include "auth.h"
 #include "s_bsd.h"
 #include "log.h"
-#include "server.h"      /* try_connections */
+#include "server.h"
 #include "send.h"
 #include "whowas.h"
 #include "modules.h"
@@ -198,7 +198,7 @@ set_time(void)
     event_set_back_events(CurrentTime - newtime.tv_sec);
   }
 
-  SystemTime.tv_sec  = newtime.tv_sec;
+  SystemTime.tv_sec = newtime.tv_sec;
   SystemTime.tv_usec = newtime.tv_usec;
 }
 
@@ -323,9 +323,9 @@ check_pidfile(const char *filename)
            filename, strerror(errno));
     else
     {
-      pid_t pidfromfile = atoi(buf);
+      pid_t pid = atoi(buf);
 
-      if (!kill(pidfromfile, 0))
+      if (!kill(pid, 0))
       {
         /* log(L_ERROR, "Server is already running"); */
         printf("ircd: daemon is already running\n");
@@ -370,7 +370,7 @@ always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
 }
 #endif
 
-/* init_ssl()
+/* ssl_init()
  *
  * inputs       - nothing
  * output       - nothing
@@ -531,7 +531,7 @@ main(int argc, char *argv[])
 
   strlcpy(me.name, ConfigServerInfo.name, sizeof(me.name));
 
-  /* serverinfo{} description must exist.  If not, error out.*/
+  /* serverinfo {} description must exist.  If not, error out.*/
   if (EmptyString(ConfigServerInfo.description))
   {
     ilog(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
@@ -587,7 +587,7 @@ main(int argc, char *argv[])
 
   event_addish(&event_save_all_databases, NULL);
 
-  if (ConfigServerHide.links_delay > 0)
+  if (ConfigServerHide.links_delay)
   {
     event_write_links_file.when = ConfigServerHide.links_delay;
     event_addish(&event_write_links_file, NULL);

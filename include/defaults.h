@@ -55,20 +55,21 @@
 #define HPATH        DATADIR "/" PACKAGE "/help"
 #define AUTOMODPATH  MODPATH "/autoload/"
 #define ETCPATH      SYSCONFDIR
+#define LIBPATH      LOCALSTATEDIR "/lib"
 #define LOGPATH      LOCALSTATEDIR "/log"
 #define RUNPATH      LOCALSTATEDIR "/run"
 
 /* files */
 #define SPATH     BINPATH "/ircd"  /* ircd executable */
 #define CPATH     ETCPATH "/ircd.conf"  /* ircd.conf file */
-#define KPATH     ETCPATH "/kline.db"  /* kline file */
-#define RESVPATH  ETCPATH "/resv.db"  /* resv file */
-#define DLPATH    ETCPATH "/dline.db"  /* dline file */
-#define XPATH     ETCPATH "/xline.db"  /* xline file */
+#define KPATH     LIBPATH "/kline.db"  /* kline file */
+#define RESVPATH  LIBPATH "/resv.db"  /* resv file */
+#define DLPATH    LIBPATH "/dline.db"  /* dline file */
+#define XPATH     LIBPATH "/xline.db"  /* xline file */
 #define MPATH     ETCPATH "/ircd.motd"  /* MOTD file */
 #define LPATH     LOGPATH "/ircd.log"  /* ircd logfile */
 #define PPATH     RUNPATH "/ircd.pid"  /* pid file */
-#define LIPATH    ETCPATH "/links.txt"  /* cached links file */
+#define LIPATH    LIBPATH "/links.txt"  /* cached links file */
 
 /*
  * This file is included to supply default values for things which

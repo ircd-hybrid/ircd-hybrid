@@ -225,11 +225,8 @@ enum
 
 
 /* flags macros. */
-#define IsAuthFinished(x)       ((x)->flags & FLAGS_FINISHED_AUTH)
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
 #define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
-#define IsClosing(x)            ((x)->flags & FLAGS_CLOSING)
-#define SetClosing(x)           ((x)->flags |= FLAGS_CLOSING)
 #define IsDefunct(x)            ((x)->flags & (FLAGS_DEADSOCKET|FLAGS_CLOSING|FLAGS_KILLED))
 
 /* oper flags */

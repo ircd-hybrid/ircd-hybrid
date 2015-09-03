@@ -298,7 +298,7 @@ server_estab(struct Client *client_p)
   */
   client_p->servptr = &me;
 
-  if (IsClosing(client_p))
+  if (HasFlag(client_p, FLAGS_CLOSING))
     return;
 
   SetServer(client_p);

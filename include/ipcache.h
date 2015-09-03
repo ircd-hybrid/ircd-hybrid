@@ -33,7 +33,7 @@
  * but in this case I am dealing with ip addresses,
  * not ascii strings.
  */
-#define IP_HASH_SIZE 0x1000
+enum { IP_HASH_SIZE = 0x1000 };
 
 struct ip_entry
 {

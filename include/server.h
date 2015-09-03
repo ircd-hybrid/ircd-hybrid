@@ -27,23 +27,33 @@
 #ifndef INCLUDED_server_h
 #define INCLUDED_server_h
 
+struct Client;
+struct MaskItem;
 
 /*
- * number of seconds to wait after server starts up, before
+ * Number of seconds to wait after server starts up, before
  * starting try_connections()
  * TOO SOON and you can nick collide like crazy.
  */
 enum { STARTUP_CONNECTIONS_TIME = 60 };
 
-struct Client;
-struct MaskItem;
+/*
+ * Return values for hunt_server()
+ */
+enum
+{
+  HUNTED_NOSUCH  = -1,  /**< If the hunted server is not found */
+  HUNTED_ISME    =  0,  /**< If this server should execute the command */
+  HUNTED_PASS    =  1   /**< If message passed onwards successfully */
+};
+
 
 /* Capabilities */
 struct Capability
 {
   dlink_node node;
-  char *name;  /* name of capability */
-  unsigned int cap;  /* mask value */
+  char *name;  /**< Name of capability */
+  unsigned int cap;  /**< Mask value */
 };
 
 enum
@@ -53,13 +63,13 @@ enum
   CAPAB_IE      = 0x00000004U,  /* Can do invite exceptions */
   CAPAB_EOB     = 0x00000008U,  /* Can do EOB message */
   CAPAB_KLN     = 0x00000010U,  /* Can do KLINE message */
-  CAPAB_KNOCK   = 0x00000020U,  /* supports KNOCK */
+  CAPAB_KNOCK   = 0x00000020U,  /* Supports KNOCK */
   CAPAB_UNKLN   = 0x00000040U,  /* Can do UNKLINE message */
-  CAPAB_CLUSTER = 0x00000080U,  /* supports server clustering */
-  CAPAB_ENCAP   = 0x00000100U,  /* supports ENCAP message */
-  CAPAB_HOPS    = 0x00000200U,  /* supports HALFOPS */
-  CAPAB_TBURST  = 0x00000400U,  /* supports TBURST */
-  CAPAB_SVS     = 0x00000800U,  /* supports services */
+  CAPAB_CLUSTER = 0x00000080U,  /* Supports server clustering */
+  CAPAB_ENCAP   = 0x00000100U,  /* Supports ENCAP message */
+  CAPAB_HOPS    = 0x00000200U,  /* Supports HALFOPS */
+  CAPAB_TBURST  = 0x00000400U,  /* Supports TBURST */
+  CAPAB_SVS     = 0x00000800U,  /* Supports services */
   CAPAB_DLN     = 0x00001000U,  /* Can do DLINE message */
   CAPAB_UNDLN   = 0x00002000U,  /* Can do UNDLINE message */
   CAPAB_CHW     = 0x00004000U   /* Can do channel wall @# */
@@ -71,17 +81,6 @@ enum
 #define IsCapable(x, cap)       ((x)->connection->caps &   (cap))
 #define SetCapable(x, cap)      ((x)->connection->caps |=  (cap))
 #define ClearCap(x, cap)        ((x)->connection->caps &= ~(cap))
-
-
-/*
- * return values for hunt_server()
- */
-enum
-{
-  HUNTED_NOSUCH  = -1,  /* If the hunted server is not found */
-  HUNTED_ISME    =  0,  /* If this server should execute the command */
-  HUNTED_PASS    =  1   /* If message passed onwards successfully */
-};
 
 extern int valid_servname(const char *);
 extern int check_server(const char *, struct Client *);
@@ -97,4 +96,4 @@ extern void try_connections(void *);
 extern int serv_connect(struct MaskItem *, struct Client *);
 extern struct Client *find_servconn_in_progress(const char *);
 extern struct Server *make_server(struct Client *);
-#endif /* INCLUDED_server.h */
+#endif  /* INCLUDED_server_h */

@@ -135,7 +135,7 @@ free_client(struct Client *client_p)
     assert(client_p->connection->invited.head == NULL);
     assert(dlink_list_length(&client_p->connection->invited) == 0);
     assert(dlink_list_length(&client_p->connection->watches) == 0);
-    assert(IsClosing(client_p) && IsDead(client_p));
+    assert(HasFlag(client_p, FLAGS_CLOSING) && IsDead(client_p));
 
     MyFree(client_p->connection->challenge_response);
     client_p->connection->challenge_response = NULL;
@@ -285,7 +285,7 @@ check_unknowns_list(void)
      * Check UNKNOWN connections - if they have been in this state
      * for > 30s, close them.
      */
-    if (IsAuthFinished(client_p) && (CurrentTime - client_p->connection->firsttime) > 30)
+    if (HasFlag(client_p, FLAGS_FINISHED_AUTH) && (CurrentTime - client_p->connection->firsttime) > 30)
       exit_client(client_p, "Registration timed out");
   }
 }
@@ -709,10 +709,10 @@ exit_client(struct Client *source_p, const char *comment)
     /* DO NOT REMOVE. exit_client can be called twice after a failed
      * read/write.
      */
-    if (IsClosing(source_p))
+    if (HasFlag(source_p, FLAGS_CLOSING))
       return;
 
-    SetClosing(source_p);
+    AddFlag(source_p, FLAGS_CLOSING);
 
     if (HasFlag(source_p, FLAGS_IPHASH))
     {

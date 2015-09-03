@@ -12,6 +12,7 @@ o) Implemented IRCv3.1 account-notify extension
 o) The general::oper_pass_resv configuration directive has been removed
 o) Added 'join:resv', 'nick:resv', 'resv', and 'unresv' to irc-operator
    flags. See doc/reference.conf for more information.
+o) Database files and links.txt are now stored in /var/lib instead of /etc
 
 
 -- Noteworthy changes in version 8.2.8 (2015-05-10)

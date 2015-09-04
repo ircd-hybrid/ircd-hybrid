@@ -52,8 +52,8 @@
 #define REALLEN         50
 #define CHANNELLEN      50
 #define TOPICLEN        300
-#define KILLLEN         180
-#define REASONLEN       180
+#define KILLLEN         240
+#define REASONLEN       240
 #define KICKLEN         180
 #define AWAYLEN         180
 #define KEYLEN          23

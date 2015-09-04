@@ -50,6 +50,12 @@ mo_close(struct Client *source_p, int parc, char *parv[])
   dlink_node *node = NULL, *node_next = NULL;
   unsigned int closed = dlink_list_length(&unknown_list);
 
+  if (!HasOFlag(source_p, OPER_FLAG_CLOSE))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "close");
+    return 0;
+  }
+
   DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
     struct Client *target_p = node->data;

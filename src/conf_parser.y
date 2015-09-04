@@ -170,6 +170,7 @@ reset_block_state(void)
 %token  CIDR_BITLEN_IPV4
 %token  CIDR_BITLEN_IPV6
 %token  CLASS
+%token  CLOSE
 %token  CONNECT
 %token  CONNECTFREQ
 %token  CYCLE_ON_HOST_CHANGE
@@ -1454,6 +1455,10 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNRESV;
+} | CLOSE
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_CLOSE;
 };
 
 

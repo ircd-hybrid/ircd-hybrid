@@ -23,7 +23,7 @@ o) The general::oper_pass_resv configuration directive has been deprecated
    in favor of the new 'join:resv', and 'nick:resv' irc-operator flags.
    See doc/reference.conf for more information.
 o) Added 'resv', and 'unresv' irc-operator flags. Previously, all
-   irc-operator were allowed to RESV and UNRESV, regardless of configured
+   irc-operators were allowed to RESV and UNRESV, regardless of configured
    privileges.
 o) Added 'close' to irc-operator flags
 

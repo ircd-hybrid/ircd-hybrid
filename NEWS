@@ -25,6 +25,7 @@ o) The general::oper_pass_resv configuration directive has been deprecated
 o) Added 'resv', and 'unresv' irc-operator flags. Previously, all
    irc-operator were allowed to RESV and UNRESV, regardless of configured
    privileges.
+o) Added 'close' to irc-operator flags
 
 
 -- Noteworthy changes in version 8.2.8 (2015-05-10)

@@ -145,6 +145,7 @@ channel                     { return CHANNEL; }
 cidr_bitlen_ipv4            { return CIDR_BITLEN_IPV4; }
 cidr_bitlen_ipv6            { return CIDR_BITLEN_IPV6; }
 class                       { return CLASS; }
+close                       { return CLOSE; }
 cluster                     { return T_CLUSTER; }
 command                     { return T_COMMAND; }
 connect                     { return CONNECT; }

@@ -3,18 +3,18 @@
 o) IMPORTANT: database files and links.txt are now stored in /var/lib
    instead of /etc, so make sure to move your k/d/x-line database files
    to the new path before (re)starting the ircd
-#######################################################################
+########################################################################
 o) IMPORTANT: the splitmode logic has been removed along with the
    following channel {} block configuration directives:
    'default_split_user_count', 'default_split_server_count',
    'no_create_on_split', 'no_join_on_split'
-#######################################################################
+########################################################################
 o) Added 'xline_exempt' to auth {} block flags
 o) serverinfo::sid is now optional. A unique SID is now automatically
    generated based on the server's name and description
 o) Various fixes to the mkpasswd tool
 o) If supported by the compiler, ircd-hybrid now compiles with
-   -fstack-protector-strong instead of -fstack-protector
+   '-fstack-protector-strong' instead of '-fstack-protector'
 o) Services can now add SQLINEs/RESVs that have wildcards in it
 o) Channel name RESVs are now sanity checked for too broad masks
 o) class::connectfreq now works properly with values lower than 300 seconds
@@ -112,7 +112,7 @@ o) Remote client connection notices (user mode +F) now do show IP addresses, too
 
 
 -- Noteworthy changes in version 8.2.1 (2014-10-21)
-o) Fixed bug where "/undline remote.server IP" did not work as expected
+o) Fixed bug where "UNDLINE remote.server IP" did not work as expected
 o) Servers are now allowed to add/remove K-/D-/X-lines and RESVs
 o) Usermode +G now no longer allows to override +g
 o) Due to potential weakness, TLS session caching and session tickets

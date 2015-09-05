@@ -263,10 +263,10 @@ introduce_client(struct Client *source_p)
 static void
 user_welcome(struct Client *source_p)
 {
-#if defined(__TIME__) && defined(__DATE__)
-  static const char built_date[] = __DATE__ " at " __TIME__;
+#ifdef BUILD_DATE
+  static const char built_date[] = BUILD_DATE;
 #else
-  static const char built_date[] = "unknown";
+  static const char built_date[] = __DATE__ " at " __TIME__;
 #endif
 
 #ifdef HAVE_LIBCRYPTO

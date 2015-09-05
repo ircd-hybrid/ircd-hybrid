@@ -2,9 +2,11 @@ AUTOMAKE_OPTIONS = foreign
 
 bin_PROGRAMS = ircd
 
+BUILD_DATE ?= $(shell LANG=C date '+%B %-e %Y at %T%z')
+
 AM_YFLAGS = -d
 
-AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include
+AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include -DBUILD_DATE="\"$(BUILD_DATE)\""
 ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)

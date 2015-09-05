@@ -342,7 +342,7 @@ check_server(const char *name, struct Client *client_p)
 
   assert(client_p);
 
-  /* loop through looking for all possible connect items that might work */
+  /* Loop through looking for all possible connect items that might work */
   DLINK_FOREACH(node, server_items.head)
   {
     conf = node->data;
@@ -375,26 +375,23 @@ check_server(const char *name, struct Client *client_p)
 
   attach_conf(client_p, server_conf);
 
-
-  if (server_conf)
+  switch (server_conf->aftype)
   {
-    struct sockaddr_in *v4;
-    struct sockaddr_in6 *v6;
-
-    switch (server_conf->aftype)
+    case AF_INET6:
     {
-      case AF_INET6:
-        v6 = (struct sockaddr_in6 *)&server_conf->addr;
+      const struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&server_conf->addr;
 
-        if (IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr))
-          memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(struct irc_ssaddr));
-        break;
-      case AF_INET:
-        v4 = (struct sockaddr_in *)&server_conf->addr;
+      if (IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr))
+        memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(struct irc_ssaddr));
+      break;
+    }
+    case AF_INET:
+    {
+      const struct sockaddr_in *v4 = (struct sockaddr_in *)&server_conf->addr;
 
-        if (v4->sin_addr.s_addr == INADDR_NONE)
-          memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(struct irc_ssaddr));
-        break;
+      if (v4->sin_addr.s_addr == INADDR_NONE)
+        memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(struct irc_ssaddr));
+      break;
     }
   }
 

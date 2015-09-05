@@ -60,7 +60,7 @@ date_iso8601(time_t lclock)
   if (lclock_last != lclock)
   {
     lclock_last = lclock;
-    strftime(buf, sizeof(buf), "%FT%H:%M:%S%z", localtime(&lclock));
+    strftime(buf, sizeof(buf), "%FT%T%z", localtime(&lclock));
   }
 
   return buf;

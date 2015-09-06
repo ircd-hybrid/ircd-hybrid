@@ -231,8 +231,6 @@ enum
 #define IsDefunct(x)            ((x)->flags & (FLAGS_DEADSOCKET|FLAGS_CLOSING|FLAGS_KILLED))
 
 /* oper flags */
-#define MyOper(x)               (MyConnect(x) && HasUMode(x, UMODE_OPER))
-
 #define SetOper(x)              {(x)->umodes |= UMODE_OPER; \
                                  if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
 

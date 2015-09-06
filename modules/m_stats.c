@@ -688,7 +688,7 @@ stats_hubleaf(struct Client *source_p, int parc, char *parv[])
  * side effects - NONE
  */
 static const char *
-show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
+show_iline_prefix(const struct Client *source_p, const struct MaskItem *conf)
 {
   static char prefix_of_host[USERLEN + 16];
   char *prefix_ptr = prefix_of_host;
@@ -705,12 +705,16 @@ show_iline_prefix(const struct Client *sptr, const struct MaskItem *conf)
     *prefix_ptr++ = '$';
   if (IsConfDoSpoofIp(conf))
     *prefix_ptr++ = '=';
-  if (MyOper(sptr) && IsConfExemptKline(conf))
-    *prefix_ptr++ = '^';
-  if (MyOper(sptr) && IsConfExemptXline(conf))
-    *prefix_ptr++ = '!';
-  if (MyOper(sptr) && IsConfExemptLimits(conf))
-    *prefix_ptr++ = '>';
+  if (HasUMode(source_p, UMODE_OPER))
+  {
+    if (IsConfExemptKline(conf))
+      *prefix_ptr++ = '^';
+    if (IsConfExemptXline(conf))
+      *prefix_ptr++ = '!';
+    if (IsConfExemptLimits(conf))
+      *prefix_ptr++ = '>';
+  }
+
   if (IsConfCanFlood(conf))
     *prefix_ptr++ = '|';
 
@@ -736,7 +740,7 @@ report_auth(struct Client *source_p, int parc, char *parv[])
 
       conf = arec->conf;
 
-      if (!MyOper(source_p) && IsConfDoSpoofIp(conf))
+      if (!HasUMode(source_p, UMODE_OPER) && IsConfDoSpoofIp(conf))
         continue;
 
       sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',

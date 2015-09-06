@@ -3,7 +3,6 @@ $Id$
 
 Technical Documentation for ircd-hybrid-8
 
-event.txt                 - Outline of the event system
 fd-management.txt         - Outline of the file descriptor management system
 hostmask.txt              - Outline of hostmask handling
 network.txt               - Outline of the network traffic subsystem

@@ -79,23 +79,20 @@ date_iso8601(time_t lclock)
  * Thu Nov 24 18:22:48 1986
  */
 const char *
-myctime(time_t lclock)
+date_ctime(time_t lclock)
 {
   static char buf[MAX_DATE_STRING];
   static time_t lclock_last;
-  char *p;
 
   if (!lclock)
     lclock = CurrentTime;
 
-  if (lclock_last == lclock)
-    return buf;
+  if (lclock_last != lclock)
+  {
+    lclock_last = lclock;
+    strftime(buf, sizeof(buf), "%a %b %-e %T %Y", localtime(&lclock));
+  }
 
-  lclock_last = lclock;
-  strlcpy(buf, ctime(&lclock), sizeof(buf));
-
-  if ((p = strchr(buf, '\n')))
-    *p = '\0';
   return buf;
 }
 

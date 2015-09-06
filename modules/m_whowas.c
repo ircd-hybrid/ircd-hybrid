@@ -77,10 +77,10 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
 
       if ((temp->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
         sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
-                           ConfigServerInfo.network_name, myctime(temp->logoff));
+                           ConfigServerInfo.network_name, date_ctime(temp->logoff));
       else
         sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
-                           temp->servername, myctime(temp->logoff));
+                           temp->servername, date_ctime(temp->logoff));
       ++cur;
     }
 

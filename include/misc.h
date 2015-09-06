@@ -29,7 +29,7 @@
 
 extern const char *date(time_t);
 extern const char *date_iso8601(time_t);
-extern const char *myctime(time_t);
+extern const char *date_ctime(time_t);
 #ifdef HAVE_LIBCRYPTO
 extern const char *ssl_get_cipher(const SSL *);
 #endif

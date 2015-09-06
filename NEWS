@@ -26,6 +26,7 @@ o) Added 'resv', and 'unresv' irc-operator flags. Previously, all
    irc-operators were allowed to RESV and UNRESV, regardless of configured
    privileges.
 o) Added 'close' to irc-operator flags
+o) ircd is using ISO 8601 date and time notation in most places now
 
 
 -- Noteworthy changes in version 8.2.8 (2015-05-10)

@@ -48,7 +48,7 @@ static char readBuf[READBUF_SIZE];
  * client_dopacket - copy packet to client buf and parse it
  *      client_p - pointer to client structure for which the buffer data
  *             applies.
- *      buffer - pointr to the buffer containing the newly read data
+ *      buffer - pointer to the buffer containing the newly read data
  *      length - number of valid bytes of data in the buffer
  *
  * Note:

@@ -260,7 +260,7 @@ flood_recalc(fde_t *fd, void *data)
 
   /*
    * Allow a bursting client their allocation per second, allow
-   * a client whos flooding an extra 2 per second
+   * a client who is flooding an extra 2 per second
    */
   if (IsFloodDone(client_p))
     client_p->connection->sent_parsed -= 2;

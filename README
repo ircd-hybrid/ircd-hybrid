@@ -1,5 +1,4 @@
 Contact Information:
-
   * Bug Reports:
     - bugs@ircd-hybrid.org
   * General Discussion and Support mailing list:
@@ -8,12 +7,9 @@ Contact Information:
   * IRC contact:
     - #ircd-coders on irc.ircd-hybrid.org
 
-
 Recommended IRC services packages:
-
 - Anope 2.0.2 and above, which can be found on http://anope.org
 - HOPM (hybrid open proxy monitor), which can be found on http://ircd-hybrid.org
-
 
 ******************************* IMPORTANT *************************************
 
@@ -32,28 +28,21 @@ Recommended IRC services packages:
 ******************************* REQUIREMENTS **********************************
 
 Necessary Requirements:
-
 - A supported platform (look below)
-
 - A working dynamic load library
 
-
 Feature Specific Requirements:
-
 - For the SSL Challenge controlled OPER feature, compressed and/or
   SSL/TLS server links, as well as SSL/TLS client connections,
   a working LibreSSL/OpenSSL library is required
-
 - For encrypted operator, server and auth passwords, a working DES, MD5, or
   SHA library
-
 - For ISO 3166 alpha-2 two letter country code enabled resv {} blocks, a working
   libGeoIP is required
 
 *******************************************************************************
 
-- See the INSTALL document for info on configuring and compiling
-  ircd-hybrid.
+- See the INSTALL document for info on configuring and compiling ircd-hybrid.
 
 - Please read doc/index.txt to get an overview of the current documentation.
 
@@ -76,7 +65,10 @@ Feature Specific Requirements:
 
 - Please read NEWS for information about what is in this release.
 
-- Other files recommended for reading: INSTALL
+- Development process can be followed on GitHub at https://github.com/ircd-hybrid/ircd-hybrid
 
---------------------------------------------------------------------------------
+- Anonymous SVN access is also available:
+  Latest cutting-edge: svn co svn://svn.ircd-hybrid.org/svnroot/ircd-hybrid/trunk
+  Latest stable branch (8.2.x): svn co svn://svn.ircd-hybrid.org/svnroot/ircd-hybrid/branches/8.2.x
+
 $Id$

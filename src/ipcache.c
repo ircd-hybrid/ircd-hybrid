@@ -37,7 +37,6 @@ static dlink_list ip_hash_table[IP_HASH_SIZE];
 static mp_pool_t *ip_entry_pool;
 
 
-
 /* ipcache_hash_address()
  *
  * input        - pointer to an irc_inaddr

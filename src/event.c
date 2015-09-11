@@ -33,8 +33,8 @@
 #include "numeric.h"
 #include "rng_mt.h"
 
-static dlink_list event_list;
 
+static dlink_list event_list;
 
 const dlink_list *
 event_get_list(void)

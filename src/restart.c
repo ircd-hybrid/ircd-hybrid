@@ -36,6 +36,7 @@
 #include "memory.h"
 #include "conf_db.h"
 
+
 void
 server_die(const char *message, int action)
 {

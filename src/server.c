@@ -48,6 +48,7 @@
 #include "channel.h"
 #include "parse.h"
 
+
 dlink_list flatten_links;
 static dlink_list server_capabilities_list;
 static void serv_connect_callback(fde_t *, int, void *);

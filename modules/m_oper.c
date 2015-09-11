@@ -39,7 +39,6 @@
 #include "packet.h"
 
 
-
 /*! \brief Notices all opers of the failed oper attempt if enabled
  *
  * \param source_p Client doing /oper ...

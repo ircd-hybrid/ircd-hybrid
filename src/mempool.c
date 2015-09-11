@@ -42,6 +42,7 @@
 #include "log.h"
 #include "mempool.h"
 
+
 /** Returns floor(log2(u64)).  If u64 is 0, (incorrectly) returns 0. */
 static int
 tor_log2(uint64_t u64)

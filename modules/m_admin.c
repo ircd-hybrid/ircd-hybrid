@@ -36,7 +36,6 @@
 #include "modules.h"
 
 
-
 /*! \brief Sends administrative information about this server.
  *
  * \param source_p Pointer to client to report to

@@ -49,9 +49,9 @@ enum
 
 enum
 {
-  ENTITY_NONE               = 0,
-  ENTITY_CHANNEL            = 1,
-  ENTITY_CLIENT             = 2
+  ENTITY_NONE    = 0,
+  ENTITY_CHANNEL = 1,
+  ENTITY_CLIENT  = 2
 };
 
 static struct
@@ -61,7 +61,7 @@ static struct
   unsigned int flags;
 } targets[IRCD_BUFSIZE];
 
-static int unsigned ntargets = 0;
+static unsigned int ntargets;
 
 
 /*

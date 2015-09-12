@@ -66,18 +66,18 @@ We hope that these goals are obtained.
                                  Sample session
 
 The easiest way to see how this works is by experiencing it. Seeing a sample
-session can help you understand what goes on though.
+session can help you understand what goes on.
 
 Client Hwy-LL is set +g initially.
 Client Hwy101 wants to message Hwy-LL.
 
 Client Hwy101: /msg Hwy-LL hi
-Hwy101 will see: Hwy-LL :is in +g mode (server side ignore)
-                 Hwy-LL :has been informed you messaged them.
-Hwy-LL will see: Hwy101 :is messaging you, and you are umode +g.
+Hwy101 will see: :irc.example.net 716 Hwy101 Hwy-LL :is in +g mode (server side ignore)
+                 :irc.example.net 717 Hwy101 Hwy-LL :has been informed you messaged them.
+Hwy-LL will see: :irc.example.net 718 Hwy-LL Hwy101 :is messaging you, and you are umode +g.
 
 If Hwy101 sends another message to Hwy-LL (before the minute expires), he will
-see: Hwy-LL :is in +g mode (server side ignore)
+see: :irc.example.net 716 Hwy101 Hwy-LL :is in +g mode (server side ignore)
 and will not receive the second numeric. Hwy-LL will NOT see any numeric.
 
 Hwy-LL now wishes to see messages from Hwy101 and SpamBot.
@@ -95,9 +95,8 @@ Hwy-LL now wants to see who is on his accept list.
 
 Client Hwy-LL: /accept *
 
-Hwy-LL will see:
-  irc.example.net 281 Hwy-LL :Hwy101 SpamBot
-  irc.example.net 282 Hwy-LL :End of /ACCEPT list.
+Hwy-LL will see: :irc.example.net 281 Hwy-LL :Hwy101!*@* SpamBot!*@*
+                 :irc.example.net 282 Hwy-LL :End of /ACCEPT list.
 
 The replies are in numeric form to help parsing by scripts.
 

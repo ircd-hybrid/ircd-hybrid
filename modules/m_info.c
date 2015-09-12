@@ -427,13 +427,13 @@ static const struct InfoStruct info_table[] =
     "stats_P_oper_only",
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.stats_P_oper_only,
-    "STATS P is only shown to operators"
+    "STATS P output is only shown to operators"
   },
   {
     "stats_u_oper_only",
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.stats_u_oper_only,
-    "STATS u is only shown to operators"
+    "STATS u output is only shown to operators"
   },
   {
     "stats_i_oper_only",

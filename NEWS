@@ -1,3 +1,52 @@
+-- Noteworthy changes in version 8.2.9 (2015-09-13)
+########################################################################
+o) IMPORTANT: database files and links.txt are now stored in /var/lib
+   instead of /etc, so make sure to move your k/d/x-line database files
+   to the new path before (re)starting the ircd
+########################################################################
+o) IMPORTANT: the splitmode logic has been removed along with the
+   following channel {} block configuration directives:
+   'default_split_user_count', 'default_split_server_count',
+   'no_create_on_split', 'no_join_on_split'
+########################################################################
+o) Added 'xline_exempt' to auth {} block flags
+o) serverinfo::sid is now optional. A unique SID is now automatically
+   generated based on the server's name and description
+o) Various fixes to the mkpasswd tool
+o) If supported by the compiler, ircd-hybrid now compiles with
+   '-fstack-protector-strong' instead of '-fstack-protector'
+o) Services can now add RESVs (SQLINEs) that have wildcards in it
+o) Channel name RESVs are now sanity checked for too broad masks
+o) class::connectfreq now works properly with values lower than 300 seconds
+o) Implemented IRCv3.1 account-notify extension
+o) The general::oper_pass_resv configuration directive has been deprecated
+   in favor of the new 'join:resv', and 'nick:resv' irc-operator flags.
+   See doc/reference.conf for more information.
+o) Added 'resv', and 'unresv' irc-operator flags. Previously, all
+   irc-operators were allowed to RESV and UNRESV, regardless of configured
+   privileges.
+o) Added 'close' to irc-operator flags
+o) ircd is using ISO 8601 date and time notation in most places now
+
+
+-- Noteworthy changes in version 8.2.8 (2015-05-10)
+o) ircd now rejects remote k-line requests for user@host mask that don't
+   have at least general::min_nonwildcard non-wildcard characters in it
+o) Configuration related server notices are now sent to admins only as
+   they potentially could leak passwords and other sensitive data to irc
+   operators that don't have administrator privileges
+o) The GLINE/GUNGLINE commands have been removed. KLINE in conjunction
+   with cluster {} and/or shared {} blocks is now the recommended
+   way to add global user@host mask based server bans
+o) Added dline_min_cidr, dline_min_cidr6, kline_min_cidr, and kline_min_cidr6
+   configuration options to the general {} block
+o) Fixed bug where a REHASH would clear all X-Lines and RESVs that have
+   been set with the XLINE/RESV commands
+o) Fixed broken temporary remote XLINEs
+o) The general::havent_read_conf configuration directive has been removed
+o) Various code cleanups
+
+
 -- Noteworthy changes in version 8.2.7 (2015-04-05)
 o) Fixed a potential buffer overflow with the BMASK inter-server command
 o) Fixed undefined behavior in the HELP command module which could
@@ -50,7 +99,7 @@ o) Operators may now see certificate fingerprints, user modes and hidden
 
 
 -- Noteworthy changes in version 8.2.2 (2015-01-20)
-o) Added support for the "extended-join" client capability
+o) Implemented IRCv3.1 extended-join extension
 o) Channel half-ops can now use INVITE as well
 o) Fixed broken 'make install -jX'
 o) m_opme.c has been added to modules/extra. Can be used on opless channels only.
@@ -65,7 +114,7 @@ o) Remote client connection notices (user mode +F) now do show IP addresses, too
 
 
 -- Noteworthy changes in version 8.2.1 (2014-10-21)
-o) Fixed bug where "/undline remote.server IP" did not work as expected
+o) Fixed bug where "UNDLINE remote.server IP" did not work as expected
 o) Servers are now allowed to add/remove K-/D-/X-lines and RESVs
 o) Usermode +G now no longer allows to override +g
 o) Due to potential weakness, TLS session caching and session tickets
@@ -205,7 +254,7 @@ o) WHOWAS now honors serverhide::disable_remote_commands
 o) Improved TS6 inter-server communication
 o) Minor code cleanups and speed enhancements
 o) Added 'unxline' oper flag
-o) Added support for "userhost-in-names" client capability
+o) Implemented IRCv3.2 userhost-in-names extension
 o) ircd now allows private RSA keys larger than 2048 bits
 o) Fixed bug where signals stopped from working after restarting
    the ircd via SIGINT
@@ -405,7 +454,7 @@ o) NICK/JOIN now shows the actual reason of reserved nick-/channelnames
 o) contrib/ and its content has been enirely removed from the tree
 o) Added serverhide::hide_services configuration option
 o) Added 'nononreg' (+R) to oper::umodes and general::oper_only_modes
-o) Added support for "away-notify" client capability
+o) Implemented IRCv3.1 away-notify extension
 
 
 -- Noteworthy changes in version 8.0.9 (2013-05-16)

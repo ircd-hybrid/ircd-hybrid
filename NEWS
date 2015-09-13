@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.9 (2015-??-??)
+-- Noteworthy changes in version 8.2.9 (2015-09-13)
 ########################################################################
 o) IMPORTANT: database files and links.txt are now stored in /var/lib
    instead of /etc, so make sure to move your k/d/x-line database files

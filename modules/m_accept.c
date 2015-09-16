@@ -130,8 +130,8 @@ m_accept(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  for (mask = strtoken(&p, mask, ","); mask;
-       mask = strtoken(&p, NULL, ","))
+  for (mask = strtok_r(mask, ",", &p); mask;
+       mask = strtok_r(NULL, ",", &p))
   {
     if (*mask == '-' && *++mask)
     {

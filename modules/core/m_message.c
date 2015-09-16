@@ -474,8 +474,8 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
 
   ntargets = 0;
 
-  for (const char *name = strtoken(&p, list, ","); name;
-                   name = strtoken(&p, NULL, ","))
+  for (const char *name = strtok_r(list, ",", &p); name;
+                   name = strtok_r(NULL, ",", &p))
   {
     const char *with_prefix = NULL;
 

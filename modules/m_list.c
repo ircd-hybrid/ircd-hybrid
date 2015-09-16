@@ -64,8 +64,8 @@ do_list(struct Client *source_p, char *arg)
     dlink_list *list = NULL;
     int i = 0, errors = 0;
 
-    for (opt = strtoken(&save,  arg, ","); opt;
-         opt = strtoken(&save, NULL, ","))
+    for (opt = strtok_r(arg,  ",", &save); opt;
+         opt = strtok_r(NULL, ",", &save))
     {
       switch (*opt)
       {

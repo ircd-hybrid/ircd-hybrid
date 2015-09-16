@@ -59,8 +59,8 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
   cur_len = snprintf(buf, sizeof(buf), numeric_form(RPL_USERHOST), me.name, source_p->name, "");
   t = buf + cur_len;
 
-  for (nick = strtoken(&p, parv[1], " "); nick && i++ < 5;
-       nick = strtoken(&p,    NULL, " "))
+  for (nick = strtok_r(parv[1], " ", &p); nick && i++ < 5;
+       nick = strtok_r(NULL,    " ", &p))
   {
     if ((target_p = find_person(source_p, nick)))
     {

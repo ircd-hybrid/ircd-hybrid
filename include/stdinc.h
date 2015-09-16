@@ -35,11 +35,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <errno.h>
-
-#ifdef HAVE_STRTOK_R
-# define strtoken(x, y, z) strtok_r(y, z, x)
-#endif
-
 #include <sys/types.h>
 
 #ifdef HAVE_CRYPT_H

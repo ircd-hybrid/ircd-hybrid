@@ -58,8 +58,8 @@ m_ison(struct Client *source_p, int parc, char *parv[])
   len = snprintf(buf, sizeof(buf), numeric_form(RPL_ISON), me.name, source_p->name);
   current_insert_point = buf + len;
 
-  for (nick = strtoken(&p, parv[1], " "); nick;
-       nick = strtoken(&p,    NULL, " "))
+  for (nick = strtok_r(parv[1], " ", &p); nick;
+       nick = strtok_r(NULL,    " ", &p))
   {
     if ((target_p = find_person(source_p, nick)))
     {

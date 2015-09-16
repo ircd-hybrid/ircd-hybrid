@@ -958,8 +958,8 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
 
   chan_list = channel_find_last0(source_p, channel);
 
-  for (chan = strtoken(&p, chan_list, ","); chan;
-       chan = strtoken(&p,      NULL, ","))
+  for (chan = strtok_r(chan_list, ",", &p); chan;
+       chan = strtok_r(NULL,      ",", &p))
   {
     const char *key = NULL;
 
@@ -1164,7 +1164,7 @@ channel_do_part(struct Client *source_p, char *channel, const char *reason)
   if (!EmptyString(reason))
     strlcpy(buf, reason, sizeof(buf));
 
-  for (name = strtoken(&p, channel, ","); name;
-       name = strtoken(&p,    NULL, ","))
+  for (name = strtok_r(channel, ",", &p); name;
+       name = strtok_r(NULL,    ",", &p))
     channel_part_one_client(source_p, name, buf);
 }

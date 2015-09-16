@@ -75,7 +75,7 @@ extern void strip_tabs(char *, const char *, size_t);
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
 #ifndef HAVE_STRTOK_R
-extern char *strtoken(char **, char *, const char *);
+extern char *strtok_r(char *, const char *, char **);
 #endif
 
 /*

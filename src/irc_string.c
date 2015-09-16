@@ -70,13 +70,13 @@ strip_tabs(char *dest, const char *src, size_t len)
 }
 
 /*
- * strtoken - walk through a string of tokens, using a set of separators
+ * strtok_r - walk through a string of tokens, using a set of separators
  *   argv 9/90
  *
  */
 #ifndef HAVE_STRTOK_R
 char *
-strtoken(char **save, char *str, const char *fs)
+strtok_r(char *str, const char *fs, char **save)
 {
   char *pos = *save;  /* keep last position across calls */
   char *tmp = NULL;

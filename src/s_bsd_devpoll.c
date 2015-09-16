@@ -155,9 +155,8 @@ comm_select(void)
 
   if (num < 0)
   {
-#ifdef HAVE_USLEEP
-    usleep(50000);  /* avoid 99% CPU in comm_select */
-#endif
+    const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
+    nanosleep(&req, NULL);  /* Avoid 99% CPU in comm_select */
     return;
   }
 

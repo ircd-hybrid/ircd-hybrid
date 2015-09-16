@@ -36,7 +36,6 @@ AC_C_BIGENDIAN
 
 # Checks for library functions.
 AC_CHECK_FUNCS_ONCE(strtok_r \
-                    usleep   \
                     strlcat  \
                     strlcpy)
 

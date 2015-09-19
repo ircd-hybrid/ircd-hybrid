@@ -989,14 +989,15 @@ int
 conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
 {
   struct ip_entry *ip_found = NULL;
-  struct MaskItem *const conf = find_dline_conf(addr, aftype);
-
-  /* DLINE exempt also gets you out of static limits/pacing... */
-  if (conf && (conf->type == CONF_EXEMPT))
-    return 0;
+  const struct MaskItem *conf = find_dline_conf(addr, aftype);
 
   if (conf)
+  {
+    /* DLINE exempt also gets you out of static limits/pacing... */
+    if (conf->type == CONF_EXEMPT)
+      return 0;
     return BANNED_CLIENT;
+  }
 
   ip_found = ipcache_find_or_add_address(addr);
 

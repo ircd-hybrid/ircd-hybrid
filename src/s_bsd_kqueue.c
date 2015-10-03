@@ -53,7 +53,7 @@ init_netio(void)
   if ((fd = kqueue()) < 0)
   {
     ilog(LOG_TYPE_IRCD, "init_netio: Couldn't open kqueue fd!");
-    exit(115); /* Whee! */
+    exit(EXIT_FAILURE); /* Whee! */
   }
 
   fd_open(&kqfd, fd, 0, "kqueue() file descriptor");

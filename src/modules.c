@@ -189,7 +189,7 @@ modules_init(void)
   {
     ilog(LOG_TYPE_IRCD, "Couldn't initialize the libltdl run time dynamic"
          " link library. Exiting.");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 }
 

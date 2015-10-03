@@ -52,7 +52,7 @@ init_netio(void)
 
   if ((fd = kqueue()) < 0)
   {
-    ilog(LOG_TYPE_IRCD, "init_netio: Couldn't open kqueue fd!");
+    ilog(LOG_TYPE_IRCD, "init_netio: couldn't open kqueue fd: %s", strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }
 

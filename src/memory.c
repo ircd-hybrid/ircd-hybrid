@@ -28,7 +28,6 @@
 #include "ircd_defs.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "log.h"
 #include "restart.h"
 
 
@@ -107,6 +106,5 @@ outofmemory(void)
   if (was_here++)
     abort();
 
-  ilog(LOG_TYPE_IRCD, "Out of memory: restarting server...");
-  server_die("Out of Memory", SERVER_RESTART);
+  server_die("out of memory", SERVER_RESTART);
 }

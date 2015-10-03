@@ -51,7 +51,7 @@ init_netio(void)
   {
     ilog(LOG_TYPE_IRCD, "init_netio: Couldn't open epoll fd - %d: %s",
          errno, strerror(errno));
-    exit(115); /* Whee! */
+    exit(EXIT_FAILURE); /* Whee! */
   }
 
   fd_open(&efd, fd, 0, "epoll file descriptor");

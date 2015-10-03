@@ -59,7 +59,7 @@ init_netio(void)
   {
     ilog(LOG_TYPE_IRCD, "init_netio: Couldn't open /dev/poll - %d: %s",
          errno, strerror(errno));
-    exit(115); /* Whee! */
+    exit(EXIT_FAILURE); /* Whee! */
   }
 
   fd_open(&dpfd, fd, 0, "/dev/poll file descriptor");

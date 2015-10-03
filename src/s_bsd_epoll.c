@@ -49,8 +49,8 @@ init_netio(void)
 
   if ((fd = epoll_create(hard_fdlimit)) < 0)
   {
-    ilog(LOG_TYPE_IRCD, "init_netio: Couldn't open epoll fd - %d: %s",
-         errno, strerror(errno));
+    ilog(LOG_TYPE_IRCD, "init_netio: couldn't open epoll fd: %s",
+         strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }
 

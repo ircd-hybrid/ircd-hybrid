@@ -285,10 +285,21 @@ cap_ack(struct Client *source_p, const char *caplist)
               !(source_p->connection->cap_client & cap->cap)))  /* uh... */
       continue;
 
-    if (neg)  /* Set or clear the active capability... */
+    /* Set or clear the active capability... */
+    if (neg)
+    {
+      if (cap->flags & CAPFL_STICKY)
+        continue;  /* but don't clear sticky capabilities */
+
       source_p->connection->cap_active &= ~cap->cap;
+    }
     else
+    {
+      if (cap->flags & CAPFL_PROHIBIT)
+        continue;  /* and don't set prohibited ones */
+
       source_p->connection->cap_active |=  cap->cap;
+    }
   }
 
   return 0;

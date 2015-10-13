@@ -820,16 +820,13 @@ exit_client(struct Client *source_p, const char *comment)
 
     if (MyConnect(source_p))
     {
-      int connected = CurrentTime - source_p->connection->firsttime;
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "%s was connected for %d day%s, %2d:%02d:%02d. %llu/%llu sendK/recvK.",
-                           source_p->name, connected/86400, (connected/86400 == 1) ? "" : "s",
-                           (connected % 86400) / 3600, (connected % 3600) / 60, connected % 60,
+                           "%s was connected for %s. %llu/%llu sendK/recvK.",
+                           source_p->name, time_dissect(CurrentTime - source_p->connection->firsttime),
                            source_p->connection->send.bytes >> 10,
                            source_p->connection->recv.bytes >> 10);
-      ilog(LOG_TYPE_IRCD, "%s was connected for %d day%s, %2d:%02d:%02d. %llu/%llu sendK/recvK.",
-           source_p->name, connected/86400, (connected/86400 == 1) ? "" : "s",
-           (connected % 86400) / 3600, (connected % 3600) / 60, connected % 60,
+      ilog(LOG_TYPE_IRCD, "%s was connected for %s. %llu/%llu sendK/recvK.",
+           source_p->name, time_dissect(CurrentTime - source_p->connection->firsttime),
            source_p->connection->send.bytes >> 10,
            source_p->connection->recv.bytes >> 10);
     }
@@ -893,8 +890,6 @@ dead_link_on_read(struct Client *client_p, int error)
 
   if (IsServer(client_p) || IsHandshake(client_p))
   {
-    int connected = CurrentTime - client_p->connection->firsttime;
-
     if (error == 0)
     {
       /* Admins get the real IP */
@@ -919,11 +914,8 @@ dead_link_on_read(struct Client *client_p, int error)
     }
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s was connected for %d day%s, %2d:%02d:%02d",
-                         client_p->name, connected/86400,
-                         (connected/86400 == 1) ? "" : "s",
-                         (connected % 86400) / 3600, (connected % 3600) / 60,
-                         connected % 60);
+                         "%s was connected for %s",
+                         client_p->name, time_dissect(CurrentTime - client_p->connection->firsttime));
   }
 
   if (error == 0)

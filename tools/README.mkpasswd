@@ -41,7 +41,7 @@ Linux glibc (SHA-256/SHA-512 since glibc 2.7, DES and MD5)
 FreeBSD 3.x (DES (MD5 maybe))
 FreeBSD 4.x (DES and MD5)
 Solaris 2.5-2.6 (DES only)
-OpenBSD 5.7
+OpenBSD 5.7 (DES, Extended DES and Blowfish; note that (Extended)DES support has been dropped in 5.8)
 Mac OS-X (Darwin) (don't link with -lcrypt) (DES only)
 
 Other systems probably work, but they haven't been amply tested.

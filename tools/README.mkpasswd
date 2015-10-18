@@ -31,7 +31,6 @@ An MD5 salt consists of up to 16 (though most implementations limit you to
 such as 'tGd' or 'J6d4dfG'.
 
 Known bugs:
-Blowfish (on OpenBSD) is not yet supported
 The encryption algorithms supported depend on your system's crypt()
   implementation.
 The maximum length of an MD5 salt is limited to your system's crypt()
@@ -42,7 +41,7 @@ Linux glibc (SHA-256/SHA-512 since glibc 2.7, DES and MD5)
 FreeBSD 3.x (DES (MD5 maybe))
 FreeBSD 4.x (DES and MD5)
 Solaris 2.5-2.6 (DES only)
-OpenBSD 2.7 (don't link with -lcrypt) (DES and MD5, no Blowfish support)
+OpenBSD 5.7
 Mac OS-X (Darwin) (don't link with -lcrypt) (DES only)
 
 Other systems probably work, but they haven't been amply tested.

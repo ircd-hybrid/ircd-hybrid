@@ -402,14 +402,14 @@ make_bf_salt_para(unsigned int rounds, const char *saltpara)
   static char salt[31];
   char tbuf[3];
 
-  if (saltpara && strlen(saltpara) <= 22)
+  if (saltpara && strlen(saltpara) >= 22)
   {
     snprintf(tbuf, sizeof(tbuf), "%02u", rounds);
     snprintf(salt, sizeof(salt), "$2a$%s$%s$", tbuf, saltpara);
     return salt;
   }
 
-  printf("Invalid salt, please use up to 22 random alphanumeric characters\n");
+  printf("Invalid salt, please use at least 22 random alphanumeric characters\n");
   exit(1);
 
   /* NOT REACHED */
@@ -422,9 +422,9 @@ make_bf_salt(unsigned int rounds, unsigned int length)
   static char salt[31];
   char tbuf[3];
 
-  if (length > 22)
+  if (length < 22)
   {
-    printf("Blowfish salt length too long\n");
+    printf("Blowfish salt length too short\n");
     exit(0);
   }
 

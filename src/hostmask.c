@@ -88,10 +88,13 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
       }
       else
       {
-        /* If there were less than 4 hex digits, e.g. :ABC: shift right
-         * so we don't interpret it as ABC0 -A1kmm */
+        /*
+         * If there were less than 4 hex digits, e.g. :ABC: shift right
+         * so we don't interpret it as ABC0 -A1kmm
+         */
         d[dp] = d[dp] >> 4 * nyble;
         nyble = 4;
+
         if (++dp >= 8)
           return HM_HOST;
       }

@@ -56,10 +56,6 @@ dlink_list atable[ATABLE_SIZE];
  * Side effects: None
  * Comments: Called from parse_netmask
  */
-/* Fixed so ::/0 (any IPv6 address) is valid
-   Also a bug in DigitParse above.
-   -Gozem 2002-07-19 gozem@linux.nu
-*/
 static int
 try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 {

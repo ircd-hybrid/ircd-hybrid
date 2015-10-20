@@ -19,17 +19,18 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define FLAG_MD5      0x00000001
-#define FLAG_DES      0x00000002
-#define FLAG_SALT     0x00000004
-#define FLAG_PASS     0x00000008
-#define FLAG_LENGTH   0x00000010
-#define FLAG_BLOWFISH 0x00000020
-#define FLAG_ROUNDS   0x00000040
-#define FLAG_EXT      0x00000080
-#define FLAG_RAW      0x00000100
-#define FLAG_SHA256   0x00000200
-#define FLAG_SHA512   0x00000400
+enum
+{
+  FLAG_MD5      = 0x00000001,
+  FLAG_SALT     = 0x00000002,
+  FLAG_PASS     = 0x00000004,
+  FLAG_LENGTH   = 0x00000008,
+  FLAG_BLOWFISH = 0x00000010,
+  FLAG_ROUNDS   = 0x00000020,
+  FLAG_RAW      = 0x00000040,
+  FLAG_SHA256   = 0x00000080,
+  FLAG_SHA512   = 0x00000100
+};
 
 
 extern char *crypt();
@@ -39,21 +40,17 @@ static const char *make_sha256_salt(unsigned int);
 static const char *make_sha256_salt_para(const char *);
 static const char *make_sha512_salt(unsigned int);
 static const char *make_sha512_salt_para(const char *);
-static const char *make_des_salt(void);
-static const char *make_ext_salt(unsigned int);
-static const char *make_ext_salt_para(unsigned int, const char *);
 static const char *make_md5_salt(unsigned int);
 static const char *make_md5_salt_para(const char *);
-static const char *make_bf_salt(unsigned int, unsigned int);
-static const char *make_bf_salt_para(unsigned int, const char *);
-static const char *int_to_base64(unsigned int);
+static const char *make_blowfish_salt(unsigned int, unsigned int);
+static const char *make_blowfish_salt_para(unsigned int, const char *);
 static const char *generate_random_salt(char *, unsigned int);
 static const char *generate_poor_salt(char *, unsigned int);
 static void full_usage(void);
 static void brief_usage(void);
 
 static const char saltChars[] =
-       "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+       "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
        /* 0 .. 63, ascii - 64 */
 
 int
@@ -63,8 +60,7 @@ main(int argc, char *argv[])
   const char *saltpara = NULL;
   const char *salt = NULL;
   const char *ret = NULL;
-  int c;
-  int flag = 0;
+  unsigned int flag = 0;
   int length = 0; /* Not Set */
   int rounds = 0; /* Not set, since extended DES needs 25 and blowfish needs
                   ** 4 by default, a side effect of this being the encryption
@@ -72,7 +68,7 @@ main(int argc, char *argv[])
                   ** parameter.
                   */
 
-  while ((c = getopt(argc, argv, "56mdber:h?l:s:p:R:")) != -1)
+  for (int c = 0; (c = getopt(argc, argv, "56mbr:h?l:s:p:R:")) != -1; )
   {
     switch (c)
     {
@@ -85,16 +81,9 @@ main(int argc, char *argv[])
       case 'm':
         flag |= FLAG_MD5;
         break;
-      case 'd':
-        flag |= FLAG_DES;
-        break;
       case 'b':
         flag |= FLAG_BLOWFISH;
         rounds = 4;
-        break;
-      case 'e':
-        flag |= FLAG_EXT;
-        rounds = 25;
         break;
       case 'l':
         flag |= FLAG_LENGTH;
@@ -132,22 +121,7 @@ main(int argc, char *argv[])
     }
   }
 
-  if (flag & FLAG_DES)
-  {
-    if (flag & FLAG_SALT)
-    {
-      if (strlen(saltpara) == 2)
-        salt = saltpara;
-      else
-      {
-        printf("Invalid salt, please enter 2 alphanumeric characters\n");
-        exit(1);
-      }
-    }
-    else
-      salt = make_des_salt();
-  }
-  else if (flag & FLAG_SHA256)
+  if (flag & FLAG_SHA256)
   {
     if (length == 0)
       length = 16;
@@ -170,34 +144,12 @@ main(int argc, char *argv[])
     if (length == 0)
       length = 22;
     if (flag & FLAG_SALT)
-      salt = make_bf_salt_para(rounds, saltpara);
+      salt = make_blowfish_salt_para(rounds, saltpara);
     else
-      salt = make_bf_salt(rounds, length);
-  }
-  else if (flag & FLAG_EXT)
-  {
-    /* XXX - rounds needs to be done */
-    if (flag & FLAG_SALT)
-    {
-      if (strlen(saltpara) == 4)
-      {
-        salt = make_ext_salt_para(rounds, saltpara);
-      }
-      else
-      {
-        printf("Invalid salt, please enter 4 alphanumeric characters\n");
-        exit(1);
-      }
-    }
-    else
-    {
-      salt = make_ext_salt(rounds);
-    }
+      salt = make_blowfish_salt(rounds, length);
   }
   else if (flag & FLAG_RAW)
-  {
     salt = saltpara;
-  }
   else  /* Default to MD5 */
   {
     if (length == 0)
@@ -222,55 +174,6 @@ main(int argc, char *argv[])
     printf("crypt() failed: invalid or unsupported setting\n");
 
   return 0;
-}
-
-static const char *
-make_des_salt(void)
-{
-  static char salt[3];
-
-  generate_random_salt(salt, 2);
-  salt[2] = '\0';
-  return salt;
-}
-
-static const char *
-int_to_base64(unsigned int value)
-{
-  static char buf[5];
-  unsigned int i;
-
-  for (i = 0; i < 4; ++i)
-  {
-    buf[i] = saltChars[value & 63];
-    value >>= 6;  /* Right shifting 6 places is the same as dividing by 64 */
-  }
-
-  buf[i] = '\0';
-
-  return buf;
-}
-
-static const char *
-make_ext_salt(unsigned int rounds)
-{
-  static char salt[10];
-
-  snprintf(salt, sizeof(salt), "_%s", int_to_base64(rounds));
-
-  generate_random_salt(&salt[5], 4);
-  salt[9] = '\0';
-
-  return salt;
-}
-
-static const char *
-make_ext_salt_para(unsigned int rounds, const char *saltpara)
-{
-  static char salt[10];
-
-  snprintf(salt, sizeof(salt), "_%s%s", int_to_base64(rounds), saltpara);
-  return salt;
 }
 
 static const char *
@@ -397,7 +300,7 @@ make_md5_salt(unsigned int length)
 }
 
 static const char *
-make_bf_salt_para(unsigned int rounds, const char *saltpara)
+make_blowfish_salt_para(unsigned int rounds, const char *saltpara)
 {
   static char salt[31];
   char tbuf[3];
@@ -417,7 +320,7 @@ make_bf_salt_para(unsigned int rounds, const char *saltpara)
 }
 
 static const char *
-make_bf_salt(unsigned int rounds, unsigned int length)
+make_blowfish_salt(unsigned int rounds, unsigned int length)
 {
   static char salt[31];
   char tbuf[3];
@@ -481,23 +384,20 @@ generate_random_salt(char *salt, unsigned int length)
 static void
 full_usage(void)
 {
-  printf("mkpasswd [-5|-6|-m|-d|-b|-e] [-l saltlength] [-r rounds] [-s salt] [-p plaintext]\n");
+  printf("mkpasswd [-5|-6|-b|-m] [-l saltlength] [-r rounds] [-s salt] [-p plaintext]\n");
   printf("         [-R rawsalt]\n");
   printf("-5 Generate a SHA-256 password\n");
   printf("-6 Generate a SHA-512 password\n");
-  printf("-m Generate an MD5 password\n");
-  printf("-d Generate a DES password\n");
   printf("-b Generate a Blowfish password\n");
-  printf("-e Generate an Extended DES password\n");
+  printf("-m Generate an MD5 password\n");
   printf("-l Specify a length for a random MD5 or Blowfish salt\n");
-  printf("-r Specify a number of rounds for a Blowfish or Extended DES password\n");
-  printf("   Blowfish:  default 4, no more than 6 recommended\n");
-  printf("   Extended DES:  default 25\n");
-  printf("-s Specify a salt, 2 alphanumeric characters for DES, up to 16 for SHA/MD5,\n");
-  printf("   up to 22 for Blowfish, and 4 for Extended DES\n");
+  printf("-r Specify a number of rounds for a Blowfish password;\n");
+  printf("   default is 4, no more than 6 recommended\n");
+  printf("-s Specify a salt, up to 16 alphanumeric characters for SHA/MD5,\n");
+  printf("   and at least 22 for Blowfish\n");
   printf("-R Specify a raw salt passed directly to crypt()\n");
   printf("-p Specify a plaintext password to use\n");
-  printf("Example: mkpasswd -m -s 3dr -p test\n");
+  printf("Example: mkpasswd -6 -s 3dr -p test\n");
   exit(0);
 }
 
@@ -505,14 +405,12 @@ static void
 brief_usage(void)
 {
   printf("mkpasswd - password hash generator\n");
-  printf("Standard DES:  mkpasswd [-d] [-s salt] [-p plaintext]\n");
-  printf("Extended DES:  mkpasswd -e [-r rounds] [-s salt] [-p plaintext]\n");
-  printf("     SHA-256:  mkpasswd -5 [-l saltlength] [-s salt] [-p plaintext]\n");
-  printf("     SHA-512:  mkpasswd -6 [-l saltlength] [-s salt] [-p plaintext]\n");
-  printf("         MD5:  mkpasswd -m [-l saltlength] [-s salt] [-p plaintext]\n");
-  printf("    Blowfish:  mkpasswd -b [-r rounds] [-l saltlength] [-s salt]\n");
+  printf("     MD5:  mkpasswd [-m] [-l saltlength] [-s salt] [-p plaintext]\n");
+  printf(" SHA-256:  mkpasswd -5 [-l saltlength] [-s salt] [-p plaintext]\n");
+  printf(" SHA-512:  mkpasswd -6 [-l saltlength] [-s salt] [-p plaintext]\n");
+  printf("Blowfish:  mkpasswd -b [-r rounds] [-l saltlength] [-s salt]\n");
   printf("                           [-p plaintext]\n");
-  printf("         Raw:  mkpasswd -R <rawsalt> [-p plaintext]\n");
+  printf("     Raw:  mkpasswd -R <rawsalt> [-p plaintext]\n");
   printf("Use -h for full usage\n");
   exit(0);
 }

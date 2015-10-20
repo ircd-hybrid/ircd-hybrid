@@ -1,6 +1,6 @@
 -- Noteworthy changes in version 8.2.10 (2015-??-??)
 o) mkpasswd (tools): fixed broken bcrypt support on *BSD in conjunction
-   with the -s and -l switches
+   with the -s and -l switches. Dropped DES and Extended DES support.
 
 
 -- Noteworthy changes in version 8.2.9 (2015-09-13)
@@ -156,8 +156,10 @@ o) ./configure now requires OpenSSL 0.9.8o or above in order
 
 
 -- Noteworthy changes in version 8.2.0beta4 (2014-07-06)
-o) Channel halfops are now an integral part of ircd-hybrid
+#####################################################################
+o) IMPORTANT: channel halfops are now an integral part of ircd-hybrid
    and can't be disabled anymore
+#####################################################################
 o) Many code cleanups and improvements
 o) Added flood control for the INVITE command. See channel {} block in reference.conf
 o) Changed flood control logic for the KNOCK command. See channel {} block in reference.conf

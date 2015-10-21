@@ -88,8 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mkpasswd$(EXEEXT) $(am__EXEEXT_1)
-@ENABLE_SSL_TRUE@am__append_1 = respond
+bin_PROGRAMS = mkpasswd$(EXEEXT)
 subdir = tools
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_define_dir.m4 \
@@ -117,7 +116,6 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@ENABLE_SSL_TRUE@am__EXEEXT_1 = respond$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mkpasswd_OBJECTS = mkpasswd.$(OBJEXT)
@@ -127,10 +125,6 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am__respond_SOURCES_DIST = respond.c
-@ENABLE_SSL_TRUE@am_respond_OBJECTS = respond.$(OBJEXT)
-respond_OBJECTS = $(am_respond_OBJECTS)
-respond_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -165,8 +159,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(mkpasswd_SOURCES) $(respond_SOURCES)
-DIST_SOURCES = $(mkpasswd_SOURCES) $(am__respond_SOURCES_DIST)
+SOURCES = $(mkpasswd_SOURCES)
+DIST_SOURCES = $(mkpasswd_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -336,7 +330,6 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-@ENABLE_SSL_TRUE@respond_SOURCES = respond.c
 mkpasswd_SOURCES = mkpasswd.c
 all: all-am
 
@@ -425,10 +418,6 @@ mkpasswd$(EXEEXT): $(mkpasswd_OBJECTS) $(mkpasswd_DEPENDENCIES) $(EXTRA_mkpasswd
 	@rm -f mkpasswd$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mkpasswd_OBJECTS) $(mkpasswd_LDADD) $(LIBS)
 
-respond$(EXEEXT): $(respond_OBJECTS) $(respond_DEPENDENCIES) $(EXTRA_respond_DEPENDENCIES) 
-	@rm -f respond$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(respond_OBJECTS) $(respond_LDADD) $(LIBS)
-
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -436,7 +425,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mkpasswd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/respond.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\

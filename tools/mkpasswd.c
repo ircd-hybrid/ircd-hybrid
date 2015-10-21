@@ -188,7 +188,7 @@ make_sha256_salt_para(const char *saltpara)
   }
 
   printf("Invalid salt, please use up to 16 random alphanumeric characters\n");
-  exit(1);
+  exit(EXIT_FAILURE);
 
   /* NOT REACHED */
   return NULL;
@@ -202,7 +202,7 @@ make_sha256_salt(unsigned int length)
   if (length > 16)
   {
     printf("SHA-256 salt length too long\n");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 
   salt[0] = '$';
@@ -229,7 +229,7 @@ make_sha512_salt_para(const char *saltpara)
   }
 
   printf("Invalid salt, please use up to 16 random alphanumeric characters\n");
-  exit(1);
+  exit(EXIT_FAILURE);
 
   /* NOT REACHED */
   return NULL;
@@ -243,7 +243,7 @@ make_sha512_salt(unsigned int length)
   if (length > 16)
   {
     printf("SHA-512 salt length too long\n");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 
   salt[0] = '$';
@@ -270,7 +270,7 @@ make_md5_salt_para(const char *saltpara)
   }
 
   printf("Invalid salt, please use up to 16 random alphanumeric characters\n");
-  exit(1);
+  exit(EXIT_FAILURE);
 
   /* NOT REACHED */
   return NULL;
@@ -284,7 +284,7 @@ make_md5_salt(unsigned int length)
   if (length > 16)
   {
     printf("MD5 salt length too long\n");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 
   salt[0] = '$';
@@ -313,7 +313,7 @@ make_blowfish_salt_para(unsigned int rounds, const char *saltpara)
   }
 
   printf("Invalid salt, please use at least 22 random alphanumeric characters\n");
-  exit(1);
+  exit(EXIT_FAILURE);
 
   /* NOT REACHED */
   return NULL;
@@ -328,7 +328,7 @@ make_blowfish_salt(unsigned int rounds, unsigned int length)
   if (length < 22)
   {
     printf("Blowfish salt length too short\n");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 
   snprintf(tbuf, sizeof(tbuf), "%02u", rounds);
@@ -398,7 +398,7 @@ full_usage(void)
   printf("-R Specify a raw salt passed directly to crypt()\n");
   printf("-p Specify a plaintext password to use\n");
   printf("Example: mkpasswd -6 -s 3dr -p test\n");
-  exit(0);
+  exit(EXIT_SUCCESS);
 }
 
 static void
@@ -412,5 +412,5 @@ brief_usage(void)
   printf("                           [-p plaintext]\n");
   printf("     Raw:  mkpasswd -R <rawsalt> [-p plaintext]\n");
   printf("Use -h for full usage\n");
-  exit(0);
+  exit(EXIT_SUCCESS);
 }

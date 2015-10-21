@@ -137,7 +137,6 @@ static const char *const replies[] =
   /* 379 */  [RPL_WHOISMODES] = "%s :is using modes %s",
   /* 381 */  [RPL_YOUREOPER] = ":You have entered... the Twilight Zone!",
   /* 382 */  [RPL_REHASHING] = "%s :Rehashing",
-  /* 386 */  [RPL_RSACHALLENGE] = ":%s",
   /* 391 */  [RPL_TIME] = "%s :%s",
   /* 396 */  [RPL_VISIBLEHOST] = "%s :is now your visible host",
   /* 401 */  [ERR_NOSUCHNICK] = "%s :No such nick/channel",

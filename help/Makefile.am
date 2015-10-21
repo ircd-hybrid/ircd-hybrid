@@ -5,7 +5,6 @@ helpfdir = $(pkgdatadir)/help
 dist_helpf_DATA = accept    \
                   admin     \
                   away      \
-                  challenge \
                   close     \
                   cmode     \
                   connect   \

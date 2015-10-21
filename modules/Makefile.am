@@ -11,7 +11,6 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_capab.la     \
                       m_cap.la       \
                       m_certfp.la    \
-                      m_challenge.la \
                       m_close.la     \
                       m_connect.la   \
                       m_dline.la     \
@@ -77,7 +76,6 @@ m_away_la_LDFLAGS = $(MODULE_FLAGS)
 m_capab_la_LDFLAGS = $(MODULE_FLAGS)
 m_cap_la_LDFLAGS = $(MODULE_FLAGS)
 m_certfp_la_LDFLAGS = $(MODULE_FLAGS)
-m_challenge_la_LDFLAGS = $(MODULE_FLAGS)
 m_close_la_LDFLAGS = $(MODULE_FLAGS)
 m_connect_la_LDFLAGS = $(MODULE_FLAGS)
 m_dline_la_LDFLAGS = $(MODULE_FLAGS)
@@ -142,7 +140,6 @@ m_away_la_SOURCES = m_away.c
 m_capab_la_SOURCES = m_capab.c
 m_cap_la_SOURCES = m_cap.c
 m_certfp_la_SOURCES = m_certfp.c
-m_challenge_la_SOURCES = m_challenge.c
 m_close_la_SOURCES = m_close.c
 m_connect_la_SOURCES = m_connect.c
 m_dline_la_SOURCES = m_dline.c

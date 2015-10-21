@@ -3,8 +3,6 @@ $Id$
 Documentation for ircd-hybrid
 -----------------------------
 
-challenge.txt		- Overview of the challenge/response system for
-			  obtaining operator status
 CIDR.txt		- Description of CIDR in IPv4
 Doxyfile		- Configuration file for generating documentation
 			  with Doxygen

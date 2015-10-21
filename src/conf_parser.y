@@ -281,7 +281,6 @@ reset_block_state(void)
 %token  RESV
 %token  RESV_EXEMPT
 %token  RSA_PRIVATE_KEY_FILE
-%token  RSA_PUBLIC_KEY_FILE
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
 %token  SEND_PASSWORD
 %token  SENDQ
@@ -1135,33 +1134,6 @@ oper_entry: OPERATOR
     conf->htype = parse_netmask(conf->host, &conf->addr, &conf->bits);
 
     conf_add_class_to_conf(conf, block_state.class.buf);
-
-#ifdef HAVE_LIBCRYPTO
-    if (block_state.file.buf[0])
-    {
-      BIO *file = NULL;
-      RSA *pkey = NULL;
-
-      if ((file = BIO_new_file(block_state.file.buf, "r")) == NULL)
-      {
-        ilog(LOG_TYPE_IRCD, "Ignoring rsa_public_key_file -- file doesn't exist");
-        break;
-      }
-
-      if ((pkey = PEM_read_bio_RSA_PUBKEY(file, NULL, 0, NULL)) == NULL)
-        ilog(LOG_TYPE_IRCD, "Ignoring rsa_public_key_file -- key invalid; check key syntax");
-      else
-      {
-        if (RSA_size(pkey) > 128)
-          ilog(LOG_TYPE_IRCD, "Ignoring rsa_public_key_file -- key size must be 1024 or below");
-        else
-          conf->rsa_public_key = pkey;
-      }
-
-      BIO_set_close(file, BIO_CLOSE);
-      BIO_free(file);
-    }
-#endif /* HAVE_LIBCRYPTO */
   }
 };
 
@@ -1173,7 +1145,6 @@ oper_item:      oper_name |
                 oper_umodes |
                 oper_class |
                 oper_encrypted |
-                oper_rsa_public_key_file |
                 oper_ssl_certificate_fingerprint |
                 oper_ssl_connection_required |
                 oper_flags |
@@ -1212,12 +1183,6 @@ oper_encrypted: ENCRYPTED '=' TBOOL ';'
     block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
   else
     block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
-};
-
-oper_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
 };
 
 oper_ssl_certificate_fingerprint: SSL_CERTIFICATE_FINGERPRINT '=' QSTRING ';'

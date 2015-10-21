@@ -157,7 +157,6 @@ enum irc_numerics
   RPL_WHOISMODES           = 379,
   RPL_YOUREOPER            = 381,
   RPL_REHASHING            = 382,
-  RPL_RSACHALLENGE         = 386,
   RPL_TIME                 = 391,
   RPL_VISIBLEHOST          = 396,
 

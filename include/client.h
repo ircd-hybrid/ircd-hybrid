@@ -355,8 +355,6 @@ struct Connection
   int sent_parsed;      /**< How many messages we've parsed in this second */
 
   char *password;  /**< Password supplied by the client/server */
-  char *challenge_response;  /**< Expected CHALLENGE response from client */
-  char *challenge_operator;  /**< Operator to become if they supply the response */
 };
 
 /*! \brief Client structure */

@@ -137,11 +137,6 @@ free_client(struct Client *client_p)
     assert(dlink_list_length(&client_p->connection->watches) == 0);
     assert(HasFlag(client_p, FLAGS_CLOSING) && IsDead(client_p));
 
-    MyFree(client_p->connection->challenge_response);
-    client_p->connection->challenge_response = NULL;
-    MyFree(client_p->connection->challenge_operator);
-    client_p->connection->challenge_operator = NULL;
-
     /*
      * Clean up extra sockets from listen {} blocks which have been discarded.
      */

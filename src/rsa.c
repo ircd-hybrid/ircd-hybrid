@@ -65,46 +65,4 @@ binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
 
   *hex = '\0';
 }
-
-int
-get_randomness(unsigned char *buf, int length)
-{
-  return RAND_bytes(buf, length);
-}
-
-int
-generate_challenge(char **r_challenge, char **r_response, RSA *rsa)
-{
-  unsigned char secret[32], *tmp = NULL;
-  unsigned long length = 0;
-  int ret = -1;
-
-  if (!rsa)
-    return -1;
-
-  if (!get_randomness(secret, 32))
-  {
-    report_crypto_errors();
-    return -1;
-  }
-
-  *r_response = MyCalloc(65);
-  binary_to_hex(secret, *r_response, 32);
-
-  length = RSA_size(rsa);
-  tmp = MyCalloc(length);
-  ret = RSA_public_encrypt(32, secret, tmp, rsa, RSA_PKCS1_PADDING);
-
-  *r_challenge = MyCalloc((length << 1) + 1);
-  binary_to_hex(tmp, *r_challenge, length);
-  MyFree(tmp);
-
-  if (ret < 0)
-  {
-    report_crypto_errors();
-    return -1;
-  }
-
-  return 0;
-}
 #endif

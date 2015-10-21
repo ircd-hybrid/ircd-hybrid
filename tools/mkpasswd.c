@@ -2,7 +2,6 @@
 ** copyright 1991, all rights reserved.
 ** You can use this code as long as my name stays with it.
 **
-** md5 patch by W. Campbell <wcampbel@botbay.net>
 ** Modernization, getopt, etc for the Hybrid IRCD team
 ** by W. Campbell
 **
@@ -21,15 +20,14 @@
 
 enum
 {
-  FLAG_MD5      = 0x00000001,
-  FLAG_SALT     = 0x00000002,
-  FLAG_PASS     = 0x00000004,
-  FLAG_LENGTH   = 0x00000008,
-  FLAG_BLOWFISH = 0x00000010,
-  FLAG_ROUNDS   = 0x00000020,
-  FLAG_RAW      = 0x00000040,
-  FLAG_SHA256   = 0x00000080,
-  FLAG_SHA512   = 0x00000100
+  FLAG_SHA256   = 0x00000001,
+  FLAG_SHA512   = 0x00000002,
+  FLAG_BLOWFISH = 0x00000004,
+  FLAG_RAW      = 0x00000008,
+  FLAG_SALT     = 0x00000010,
+  FLAG_LENGTH   = 0x00000020,
+  FLAG_ROUNDS   = 0x00000040,
+  FLAG_PASS     = 0x00000080,
 };
 
 
@@ -40,8 +38,6 @@ static const char *make_sha256_salt(unsigned int);
 static const char *make_sha256_salt_para(const char *);
 static const char *make_sha512_salt(unsigned int);
 static const char *make_sha512_salt_para(const char *);
-static const char *make_md5_salt(unsigned int);
-static const char *make_md5_salt_para(const char *);
 static const char *make_blowfish_salt(unsigned int, unsigned int);
 static const char *make_blowfish_salt_para(unsigned int, const char *);
 static const char *generate_random_salt(char *, unsigned int);
@@ -68,7 +64,7 @@ main(int argc, char *argv[])
                   ** parameter.
                   */
 
-  for (int c = 0; (c = getopt(argc, argv, "56mbr:h?l:s:p:R:")) != -1; )
+  for (int c = 0; (c = getopt(argc, argv, "56br:h?l:s:p:R:")) != -1; )
   {
     switch (c)
     {
@@ -77,9 +73,6 @@ main(int argc, char *argv[])
         break;
       case '6':
         flag |= FLAG_SHA512;
-        break;
-      case 'm':
-        flag |= FLAG_MD5;
         break;
       case 'b':
         flag |= FLAG_BLOWFISH;
@@ -125,6 +118,7 @@ main(int argc, char *argv[])
   {
     if (length == 0)
       length = 16;
+
     if (flag & FLAG_SALT)
       salt = make_sha256_salt_para(saltpara);
     else
@@ -134,6 +128,7 @@ main(int argc, char *argv[])
   {
     if (length == 0)
       length = 16;
+
     if (flag & FLAG_SALT)
       salt = make_sha512_salt_para(saltpara);
     else
@@ -143,6 +138,7 @@ main(int argc, char *argv[])
   {
     if (length == 0)
       length = 22;
+
     if (flag & FLAG_SALT)
       salt = make_blowfish_salt_para(rounds, saltpara);
     else
@@ -150,14 +146,10 @@ main(int argc, char *argv[])
   }
   else if (flag & FLAG_RAW)
     salt = saltpara;
-  else  /* Default to MD5 */
+  else
   {
-    if (length == 0)
-      length = 8;
-    if (flag & FLAG_SALT)
-      salt = make_md5_salt_para(saltpara);
-    else
-      salt = make_md5_salt(length);
+    printf("No hashing algorithm specified\n");
+    exit(EXIT_FAILURE);
   }
 
   if (flag & FLAG_PASS)
@@ -259,47 +251,6 @@ make_sha512_salt(unsigned int length)
 }
 
 static const char *
-make_md5_salt_para(const char *saltpara)
-{
-  static char salt[21];
-
-  if (saltpara && strlen(saltpara) <= 16)
-  {
-    snprintf(salt, sizeof(salt), "$1$%s$", saltpara);
-    return salt;
-  }
-
-  printf("Invalid salt, please use up to 16 random alphanumeric characters\n");
-  exit(EXIT_FAILURE);
-
-  /* NOT REACHED */
-  return NULL;
-}
-
-static const char *
-make_md5_salt(unsigned int length)
-{
-  static char salt[21];
-
-  if (length > 16)
-  {
-    printf("MD5 salt length too long\n");
-    exit(EXIT_FAILURE);
-  }
-
-  salt[0] = '$';
-  salt[1] = '1';
-  salt[2] = '$';
-
-  generate_random_salt(&salt[3], length);
-
-  salt[length + 3] = '$';
-  salt[length + 4] = '\0';
-
-  return salt;
-}
-
-static const char *
 make_blowfish_salt_para(unsigned int rounds, const char *saltpara)
 {
   static char salt[31];
@@ -384,16 +335,15 @@ generate_random_salt(char *salt, unsigned int length)
 static void
 full_usage(void)
 {
-  printf("mkpasswd [-5|-6|-b|-m] [-l saltlength] [-r rounds] [-s salt] [-p plaintext]\n");
+  printf("mkpasswd [-5|-6|-b] [-l saltlength] [-r rounds] [-s salt] [-p plaintext]\n");
   printf("         [-R rawsalt]\n");
   printf("-5 Generate a SHA-256 password\n");
   printf("-6 Generate a SHA-512 password\n");
   printf("-b Generate a Blowfish password\n");
-  printf("-m Generate an MD5 password\n");
-  printf("-l Specify a length for a random MD5 or Blowfish salt\n");
+  printf("-l Specify a length for a random SHA-256/SHA-512 or Blowfish salt\n");
   printf("-r Specify a number of rounds for a Blowfish password;\n");
   printf("   default is 4, no more than 6 recommended\n");
-  printf("-s Specify a salt, up to 16 alphanumeric characters for SHA/MD5,\n");
+  printf("-s Specify a salt, up to 16 alphanumeric characters for SHA-256/SHA-512,\n");
   printf("   and at least 22 for Blowfish\n");
   printf("-R Specify a raw salt passed directly to crypt()\n");
   printf("-p Specify a plaintext password to use\n");
@@ -405,11 +355,9 @@ static void
 brief_usage(void)
 {
   printf("mkpasswd - password hash generator\n");
-  printf("     MD5:  mkpasswd [-m] [-l saltlength] [-s salt] [-p plaintext]\n");
   printf(" SHA-256:  mkpasswd -5 [-l saltlength] [-s salt] [-p plaintext]\n");
   printf(" SHA-512:  mkpasswd -6 [-l saltlength] [-s salt] [-p plaintext]\n");
-  printf("Blowfish:  mkpasswd -b [-r rounds] [-l saltlength] [-s salt]\n");
-  printf("                           [-p plaintext]\n");
+  printf("Blowfish:  mkpasswd -b [-r rounds] [-l saltlength] [-s salt] [-p plaintext]\n");
   printf("     Raw:  mkpasswd -R <rawsalt> [-p plaintext]\n");
   printf("Use -h for full usage\n");
   exit(EXIT_SUCCESS);

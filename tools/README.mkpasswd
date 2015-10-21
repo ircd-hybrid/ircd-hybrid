@@ -2,37 +2,27 @@ $Id$
 
 This is documentation for the mkpasswd.c included in ircd-hybrid.
 
-This version of mkpasswd can create Blowfish, MD5, SHA-256 and SHA-512
+This version of mkpasswd can create Blowfish, SHA-256 and SHA-512
 passwords, with either randomly generated or user provided salts.
 
 Options:
--6 - Create a SHA-512 password
 -5 - Create a SHA-256 password
--m - Create an MD5 password
+-6 - Create a SHA-512 password
 -b - Create a Blowfish password
--l - Specify the length of a random MD5 salt
+-R - Specify a raw salt passed directly to crypt()
+-l - Specify the length of a random SHA-256/SHA-512 or Blowfish salt
 -r - Specify a number of rounds for a Blowfish password
 -p - Specify the plaintext password at the command line
 -s - Specify the salt at the command line
--R - Specify a raw salt passed directly to crypt()
 -h - Get help
-
-If no parameter is given, it will create an MD5 password with a randomly
-generated salt and prompting for the password (without echo).
-
-An MD5 salt consists of up to 16 (though most implementations limit you to
-8) alphanumeric characters (plus '.' and '/'),
-such as 'tGd' or 'J6d4dfG'.
 
 Known bugs:
 The encryption algorithms supported depend on your system's crypt()
-  implementation.
-The maximum length of an MD5 salt is limited to your system's crypt()
-  implementation, typically 8.
+implementation.
 
 Supported Platforms (Known and tested):
-Linux glibc (SHA-256/SHA-512 since glibc 2.7, and MD5)
-FreeBSD 10.2 (SHA-256/SHA-512, Blowfish, and MD5))
+Linux glibc 2.7+ (SHA-256/SHA-512)
+FreeBSD 10.2 (SHA-256/SHA-512, Blowfish)
 OpenBSD 5.8 (Blowfish)
 
 Other systems probably work, but they haven't been amply tested.

@@ -19,7 +19,7 @@
        to users whenever a LINKS is requested. Opers will always see the
        current server structure.
 
-       The file that the LINKS data is stored in is by default etc/links.txt.
+       The file that the LINKS data is stored in is by default var/lib/links.txt.
 
        The benefits of this are that transient splits will not be seen by
        users issuing LINKS commands, and if a server is split, users can

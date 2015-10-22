@@ -194,6 +194,7 @@ reset_block_state(void)
 %token  FAILED_OPER_NOTICE
 %token  FLATTEN_LINKS
 %token  FLATTEN_LINKS_DELAY
+%token  FLATTEN_LINKS_FILE
 %token  GECOS
 %token  GENERAL
 %token  HIDDEN
@@ -2999,6 +3000,7 @@ serverhide_entry: SERVERHIDE
 serverhide_items:   serverhide_items serverhide_item | serverhide_item;
 serverhide_item:    serverhide_flatten_links |
                     serverhide_flatten_links_delay |
+                    serverhide_flatten_links_file |
                     serverhide_disable_remote_commands |
                     serverhide_hide_servers |
                     serverhide_hide_services |
@@ -3052,6 +3054,15 @@ serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
     }
 
     ConfigServerHide.flatten_links_delay = $3;
+  }
+};
+
+serverhide_flatten_links_file: FLATTEN_LINKS_FILE '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+  {
+    MyFree(ConfigServerHide.flatten_links_file);
+    ConfigServerHide.flatten_links_file = xstrdup(yylval.string);
   }
 };
 

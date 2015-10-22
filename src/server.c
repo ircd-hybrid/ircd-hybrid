@@ -69,7 +69,10 @@ write_links_file(void *unused)
   dlink_node *node = NULL, *node_next = NULL;
   char buff[IRCD_BUFSIZE] = "";
 
-  if ((file = fopen(LIPATH, "w")) == NULL)
+  if (EmptyString(ConfigServerHide.flatten_links_file))
+    return;
+
+  if ((file = fopen(ConfigServerHide.flatten_links_file, "w")) == NULL)
     return;
 
   DLINK_FOREACH_SAFE(node, node_next, flatten_links.head)
@@ -118,7 +121,10 @@ read_links_file(void)
   char *p = NULL;
   char buff[IRCD_BUFSIZE] = "";
 
-  if ((file = fopen(LIPATH, "r")) == NULL)
+  if (EmptyString(ConfigServerHide.flatten_links_file))
+    return;
+
+  if ((file = fopen(ConfigServerHide.flatten_links_file, "r")) == NULL)
     return;
 
   while (fgets(buff, sizeof(buff), file))

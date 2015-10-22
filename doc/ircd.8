@@ -1,6 +1,6 @@
 .\" @(#)ircd.8 7b10 25 Oct 2001
 .\" $Id$
-.TH IRCD 8 "14 July 2014" "ircd-hybrid-8"
+.TH IRCD 8 "22 October 2015" "ircd-hybrid-8"
 .SH NAME
 ircd \- The IRCD-Hybrid Internet Relay Chat server
 .SH SYNOPSIS
@@ -32,9 +32,9 @@ this is "etc/ircd.conf" within the prefix you installed the \fIircd\fP in.
 .B \-klinefile filename
 .TP
 .B \-xlinefile filename
-Specifies the files to be used for D-lines (host bans), K-lines (hostmask bans),
-and X-lines (gecos bans), which by default are within the etc/ directory of your
-installation prefix as dline.conf, kline.conf, and xline.conf.
+Specifies the database files to be used for D-lines (host bans), K-lines (hostmask bans),
+and X-lines (gecos bans), which by default are within the var/lib/ directory of your
+installation prefix as dline.db, kline.db, and xline.db.
 .TP
 .B \-logfile filename
 Specifies an alternative logfile to be used than that specified in defaults.h
@@ -55,28 +55,28 @@ you will need to alter your local IRC configuration file (typically named
 servers. This file contains the hostnames, IP addresses, and sometimes
 passwords for connections to other ircds around the world.
 
-The example reference.conf in the etc/ directory documents itself. Read it 
-carefully or you may expose a risk on your network simply by having your 
+The example reference.conf in the etc/ directory documents itself. Read it
+carefully or you may expose a risk on your network simply by having your
 ircd running!
 .LP
 .SH BOOTING THE SERVER
-It is sufficient to type \fBircd\fP at the command line to start 
-ircd-hybrid into the background. If you wish to run ircd in the 
-foreground (perhaps for debugging purposes), use the \fB-foreground\fP 
+It is sufficient to type \fBircd\fP at the command line to start
+ircd-hybrid into the background. If you wish to run ircd in the
+foreground (perhaps for debugging purposes), use the \fB-foreground\fP
 parameter.
 
-The ircd-hybrid package in your distribution may ship with an rc-script 
+The ircd-hybrid package in your distribution may ship with an rc-script
 which handles this for you. In Debian, it is \fB/etc/init.d/ircd-hybrid.\fP
 
 .SH EXAMPLE
 # ircd -configfile /usr/share/ircd/ircd.conf -logfile /var/log/ircd.log
 
-Starts \fBircd\fP with the config file /usr/share/ircd/ircd.conf and 
-with a log file /var/log/ircd.log. It implicitly forks back to the 
+Starts \fBircd\fP with the config file /usr/share/ircd/ircd.conf and
+with a log file /var/log/ircd.log. It implicitly forks back to the
 console -- to prevent this use -foreground.
 
-Many of the above paths are hardcoded at compile time in the 
-\fBinclude/defaults.h\fP file, so it may be convenient to edit these to 
+Many of the above paths are hardcoded at compile time in the
+\fBinclude/defaults.h\fP file, so it may be convenient to edit these to
 suit your needs before you compile the ircd.
 .SH COPYRIGHT
 (c) 1988,1989 University of Oulu, Computing Center, Finland,
@@ -86,18 +86,18 @@ University of Oulu, Finland
 .LP
 (c) 1988-1991 Jarkko Oikarinen
 .LP
-(c) 1997-2014 The IRCD-Hybrid project.
+(c) 1997-2015 The IRCD-Hybrid project.
 .LP
-For full COPYRIGHT see the LICENSE file within the IRC source package.
+For full COPYRIGHT see the COPYING file within the IRC source package.
 .LP
 .RE
 .SH BUGS
-If you find a bug and you have a core file from ircd as a result, use a 
-debugger like \fBgdb(1)\fP to process the core file and send a backtrace 
+If you find a bug and you have a core file from ircd as a result, use a
+debugger like \fBgdb(1)\fP to process the core file and send a backtrace
 to \fBbugs@ircd-hybrid.org\fP.
 
 .SH AUTHORS
-irc2.8 and earlier: Jarkko Oikarinen, currently jto@tolsun.oulu.fi. See 
+irc2.8 and earlier: Jarkko Oikarinen, currently jto@tolsun.oulu.fi. See
 doc/old/Authors for more credits.
 .LP
 ircd-hybrid-8: the IRCD-Hybrid Project, bugs@ircd-hybrid.org.
@@ -105,6 +105,6 @@ ircd-hybrid-8: the IRCD-Hybrid Project, bugs@ircd-hybrid.org.
 Manual page written by Jeff Trim, jtrim@orion.cair.du.edu,
 later modified by jto@tolsun.oulu.fi.
 .LP
-Updated by W. Campbell, wcampbel@botbay.net, Edward Brocklesby, 
-ejb@klamath.uucp.leguin.org.uk, and highly revised by Joshua Kwan 
+Updated by W. Campbell, wcampbel@botbay.net, Edward Brocklesby,
+ejb@klamath.uucp.leguin.org.uk, and highly revised by Joshua Kwan
 (joshk@triplehelix.org) for the Debian distribution.

@@ -586,9 +586,9 @@ main(int argc, char *argv[])
 
   event_addish(&event_save_all_databases, NULL);
 
-  if (ConfigServerHide.links_delay)
+  if (ConfigServerHide.flatten_links_delay)
   {
-    event_write_links_file.when = ConfigServerHide.links_delay;
+    event_write_links_file.when = ConfigServerHide.flatten_links_delay;
     event_addish(&event_write_links_file, NULL);
   }
   else

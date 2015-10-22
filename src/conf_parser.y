@@ -193,6 +193,7 @@ reset_block_state(void)
 %token  EXEMPT
 %token  FAILED_OPER_NOTICE
 %token  FLATTEN_LINKS
+%token  FLATTEN_LINKS_DELAY
 %token  GECOS
 %token  GENERAL
 %token  HIDDEN
@@ -225,7 +226,6 @@ reset_block_state(void)
 %token  KNOCK_CLIENT_TIME
 %token  KNOCK_DELAY_CHANNEL
 %token  LEAF_MASK
-%token  LINKS_DELAY
 %token  LISTEN
 %token  MASK
 %token  MAX_ACCEPT
@@ -2998,10 +2998,10 @@ serverhide_entry: SERVERHIDE
 
 serverhide_items:   serverhide_items serverhide_item | serverhide_item;
 serverhide_item:    serverhide_flatten_links |
+                    serverhide_flatten_links_delay |
                     serverhide_disable_remote_commands |
                     serverhide_hide_servers |
                     serverhide_hide_services |
-                    serverhide_links_delay |
                     serverhide_hidden |
                     serverhide_hidden_name |
                     serverhide_hide_server_ips |
@@ -3040,7 +3040,7 @@ serverhide_hidden_name: HIDDEN_NAME '=' QSTRING ';'
   }
 };
 
-serverhide_links_delay: LINKS_DELAY '=' timespec ';'
+serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -3051,7 +3051,7 @@ serverhide_links_delay: LINKS_DELAY '=' timespec ';'
       ConfigServerHide.links_disabled = 0;
     }
 
-    ConfigServerHide.links_delay = $3;
+    ConfigServerHide.flatten_links_delay = $3;
   }
 };
 

@@ -1,4 +1,8 @@
 -- Noteworthy changes in version 8.2.10 (2015-??-??)
+########################################################################
+o) IMPORTANT: renamed serverhide::links_delay configuration directive to
+   serverhide::flatten_links_delay
+########################################################################
 o) mkpasswd (tools): fixed broken bcrypt support on *BSD in conjunction
    with the -s and -l switches. Dropped MD5, DES and Extended DES support.
 o) Removed CHALLENGE in favour or ssl certificate fingerprint enabled

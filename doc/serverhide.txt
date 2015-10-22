@@ -14,10 +14,10 @@
    ideas originated by (and credited to) numerous people.
 
      * LINKS as a file: This option is always enabled. It will generate a
-       file at a certain interval, defined by the links_delay in ircd.conf,
-       that contains the current LINKS data. This data is sent to users
-       whenever a LINKS is requested. Opers will always see the current
-       server structure.
+       file at a certain interval, defined by the flatten_links_delay in
+       ircd.conf, that contains the current LINKS data. This data is sent
+       to users whenever a LINKS is requested. Opers will always see the
+       current server structure.
 
        The file that the LINKS data is stored in is by default etc/links.txt.
 

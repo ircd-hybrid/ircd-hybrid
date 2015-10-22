@@ -69,7 +69,6 @@
 #define MPATH     ETCPATH "/ircd.motd"  /* MOTD file */
 #define LPATH     LOGPATH "/ircd.log"  /* ircd logfile */
 #define PPATH     RUNPATH "/ircd.pid"  /* pid file */
-#define LIPATH    LIBPATH "/links.txt"  /* cached links file */
 
 /*
  * This file is included to supply default values for things which

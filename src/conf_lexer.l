@@ -178,6 +178,7 @@ file                        { return T_FILE; }
 flags                       { return IRCD_FLAGS; }
 flatten_links               { return FLATTEN_LINKS; }
 flatten_links_delay         { return FLATTEN_LINKS_DELAY; }
+flatten_links_file          { return FLATTEN_LINKS_FILE; }
 full                        { return T_FULL; }
 gecos                       { return GECOS; }
 general                     { return GENERAL; }

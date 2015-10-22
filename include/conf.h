@@ -272,6 +272,7 @@ struct config_channel_entry
 struct config_serverhide_entry
 {
   char *hidden_name;
+  char *flatten_links_file;
   unsigned int flatten_links;
   unsigned int flatten_links_delay;
   unsigned int disable_remote_commands;

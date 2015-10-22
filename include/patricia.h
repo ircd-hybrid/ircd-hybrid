@@ -91,7 +91,7 @@ typedef struct _patricia_tree_t {
 
 extern patricia_node_t *patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix);
 extern patricia_node_t *patricia_search_best (patricia_tree_t *patricia, prefix_t *prefix);
-extern patricia_node_t * patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix, 
+extern patricia_node_t * patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix,
 				   int inclusive);
 extern patricia_node_t *patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix);
 extern void patricia_remove (patricia_tree_t *patricia, patricia_node_t *node);

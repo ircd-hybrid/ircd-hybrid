@@ -177,6 +177,7 @@ farconnect                  { return T_FARCONNECT; }
 file                        { return T_FILE; }
 flags                       { return IRCD_FLAGS; }
 flatten_links               { return FLATTEN_LINKS; }
+flatten_links_delay         { return FLATTEN_LINKS_DELAY; }
 full                        { return T_FULL; }
 gecos                       { return GECOS; }
 general                     { return GENERAL; }
@@ -212,7 +213,6 @@ knock_client_count          { return KNOCK_CLIENT_COUNT; }
 knock_client_time           { return KNOCK_CLIENT_TIME; }
 knock_delay_channel         { return KNOCK_DELAY_CHANNEL; }
 leaf_mask                   { return LEAF_MASK; }
-links_delay                 { return LINKS_DELAY; }
 listen                      { return LISTEN; }
 locops                      { return T_LOCOPS; }
 log                         { return T_LOG; }

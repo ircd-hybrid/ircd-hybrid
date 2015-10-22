@@ -273,10 +273,10 @@ struct config_serverhide_entry
 {
   char *hidden_name;
   unsigned int flatten_links;
+  unsigned int flatten_links_delay;
   unsigned int disable_remote_commands;
   unsigned int hide_servers;
   unsigned int hide_services;
-  unsigned int links_delay;
   unsigned int links_disabled;
   unsigned int hidden;
   unsigned int hide_server_ips;

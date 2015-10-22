@@ -73,7 +73,11 @@ write_links_file(void *unused)
     return;
 
   if ((file = fopen(ConfigServerHide.flatten_links_file, "w")) == NULL)
+  {
+    ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
+         strerror(errno));
     return;
+  }
 
   DLINK_FOREACH_SAFE(node, node_next, flatten_links.head)
   {
@@ -125,7 +129,11 @@ read_links_file(void)
     return;
 
   if ((file = fopen(ConfigServerHide.flatten_links_file, "r")) == NULL)
+  {
+    ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
+         strerror(errno));
     return;
+  }
 
   while (fgets(buff, sizeof(buff), file))
   {

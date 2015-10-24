@@ -217,7 +217,7 @@ enum
   OPER_FLAG_CLOSE          = 0x08000000U   /**< Oper can use CLOSE command */
 };
 
-#define HasOFlag(x, y) (MyConnect(x) ? (x)->connection->operflags & (y) : 0)
+#define HasOFlag(x, y) ((x)->connection->operflags &   (y))
 #define AddOFlag(x, y) ((x)->connection->operflags |=  (y))
 #define DelOFlag(x, y) ((x)->connection->operflags &= ~(y))
 #define ClrOFlag(x)    ((x)->connection->operflags = 0)

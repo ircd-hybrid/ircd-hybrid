@@ -54,7 +54,7 @@ Feature Specific Requirements:
   Red Hat Linux 9
   Ubuntu 10.10, 12.04, 14.04
   FreeBSD 9.1
-  OpenBSD 5.2
+  OpenBSD 5.2, 5.7, 5.8
   Arch Linux 2012.12.01
   Debian GNU/Linux 7.6
   Debian GNU/Hurd 0.3

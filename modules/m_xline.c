@@ -139,7 +139,7 @@ relay_xline(struct Client *source_p, char *parv[])
 {
   struct MaskItem *conf = NULL;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_XLINE))
   {

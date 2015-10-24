@@ -280,7 +280,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   reason = parv[4];
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+      find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
                               source_p->username, source_p->host,
                               SHARED_DLINE))
   {

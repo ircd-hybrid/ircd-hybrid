@@ -97,7 +97,7 @@ ms_locops(struct Client *source_p, int parc, char *parv[])
   if (match(targets, me.name))
     return 0;
 
-  if (find_matching_name_conf(CONF_ULINE, source_p->servptr->name,
+  if (find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
                               "*", "*", SHARED_LOCOPS))
     sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
                          source_p->name, message);

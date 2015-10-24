@@ -101,7 +101,7 @@ enum maskitem_type
   CONF_EXEMPT   = 1 <<  4,
   CONF_CLUSTER  = 1 <<  5,
   CONF_XLINE    = 1 <<  6,
-  CONF_ULINE    = 1 <<  7,
+  CONF_SHARED    = 1 <<  7,
   CONF_CRESV    = 1 <<  8,
   CONF_NRESV    = 1 <<  9,
   CONF_SERVICE  = 1 << 10,
@@ -323,8 +323,8 @@ extern dlink_list flatten_links;
 extern dlink_list server_items;
 extern dlink_list cluster_items;
 extern dlink_list xconf_items;
-extern dlink_list uconf_items;
-extern dlink_list oconf_items;
+extern dlink_list shared_items;
+extern dlink_list operator_items;
 extern dlink_list service_items;
 extern dlink_list nresv_items;
 extern dlink_list cresv_items;

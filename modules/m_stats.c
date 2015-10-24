@@ -95,8 +95,8 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 
       break;
 
-    case CONF_ULINE:
-      DLINK_FOREACH(node, uconf_items.head)
+    case CONF_SHARED:
+      DLINK_FOREACH(node, shared_items.head)
       {
         conf = node->data;
         p = buf;
@@ -137,7 +137,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       break;
 
     case CONF_OPER:
-      DLINK_FOREACH(node, oconf_items.head)
+      DLINK_FOREACH(node, operator_items.head)
       {
         conf = node->data;
 
@@ -1116,7 +1116,7 @@ stats_uptime(struct Client *source_p, int parc, char *parv[])
 static void
 stats_shared(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, CONF_ULINE);
+  report_confitem_types(source_p, CONF_SHARED);
 }
 
 /* stats_servers()

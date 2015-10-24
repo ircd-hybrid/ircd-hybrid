@@ -278,7 +278,6 @@ struct config_serverhide_entry
   unsigned int disable_remote_commands;
   unsigned int hide_servers;
   unsigned int hide_services;
-  unsigned int links_disabled;
   unsigned int hidden;
   unsigned int hide_server_ips;
 };

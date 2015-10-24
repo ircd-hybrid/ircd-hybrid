@@ -40,7 +40,7 @@ struct event
   /* private */
   time_t next;
   void *data;
-  unsigned int enabled;
+  unsigned int active;
   dlink_node node;
 };
 

@@ -65,7 +65,7 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
     if ((target_p = find_person(source_p, nick)))
     {
       /*
-       * Show real IP for USERHOST on yourself.
+       * Show real IP address for USERHOST on yourself.
        * This is needed for things like mIRC, which do a server-based
        * lookup (USERHOST) to figure out what the clients' local IP
        * is. Useful for things like NAT, and dynamic dial-up users.

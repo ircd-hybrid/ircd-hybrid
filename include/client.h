@@ -84,8 +84,7 @@ enum
                                  (x)->handler = SERVER_HANDLER; }
 
 #define SetClient(x)            {(x)->status = STAT_CLIENT; \
-                                 (x)->handler = HasUMode(x, UMODE_OPER) ? \
-                                 OPER_HANDLER : CLIENT_HANDLER; }
+                                 (x)->handler = CLIENT_HANDLER; }
 
 #define MyConnect(x)            ((x)->connection != NULL)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))

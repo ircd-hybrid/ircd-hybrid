@@ -661,7 +661,7 @@ serverinfo_name: NAME '=' QSTRING ';'
     else
     {
       conf_error_report("Ignoring serverinfo::name -- invalid name. Aborting.");
-      exit(0);
+      exit(EXIT_FAILURE);
     }
   }
 };
@@ -676,7 +676,7 @@ serverinfo_sid: IRCD_SID '=' QSTRING ';'
     else
     {
       conf_error_report("Ignoring serverinfo::sid -- invalid SID. Aborting.");
-      exit(0);
+      exit(EXIT_FAILURE);
     }
   }
 };

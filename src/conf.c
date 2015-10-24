@@ -1253,7 +1253,7 @@ read_conf_files(int cold)
     {
       ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
            filename, strerror(errno));
-      exit(-1);
+      exit(EXIT_FAILURE);
     }
     else
     {

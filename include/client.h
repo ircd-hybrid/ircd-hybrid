@@ -362,7 +362,7 @@ struct Client
   dlink_node node;
   dlink_node lnode;             /**< Used for Server->servers/users */
 
-  struct Connection *connection;
+  struct Connection *connection;  /**< Connection structure associated with this client */
   struct Client    *hnext;      /**< For client hash table lookups by name */
   struct Client    *idhnext;    /**< For SID hash table lookups by sid */
   struct Server    *serv;       /**< ...defined, if this is a server */

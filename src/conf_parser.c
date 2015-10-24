@@ -4940,7 +4940,7 @@ yyreduce:
   if (conf_parser_ctx.pass != 2)
     break;
 
-  conf = conf_make(CONF_ULINE);
+  conf = conf_make(CONF_SHARED);
   conf->flags = block_state.flags.value;
   conf->name = xstrdup(block_state.name.buf);
   conf->user = xstrdup(block_state.user.buf);

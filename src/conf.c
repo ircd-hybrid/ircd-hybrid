@@ -779,13 +779,8 @@ set_default_conf(void)
 
   SSL_CTX_set_cipher_list(ConfigServerInfo.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
   ConfigServerInfo.message_digest_algorithm = EVP_sha256();
-  ConfigServerInfo.rsa_private_key = NULL;
-  ConfigServerInfo.rsa_private_key_file = NULL;
 #endif
 
-  /* ConfigServerInfo.name is not rehashable */
-  /* ConfigServerInfo.name = ConfigServerInfo.name; */
-  ConfigServerInfo.description = NULL;
   ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
   ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
 
@@ -798,10 +793,6 @@ set_default_conf(void)
   ConfigServerInfo.max_nick_length = 9;
   ConfigServerInfo.max_topic_length = 80;
   ConfigServerInfo.hub = 0;
-
-  ConfigAdminInfo.name = NULL;
-  ConfigAdminInfo.email = NULL;
-  ConfigAdminInfo.description = NULL;
 
   log_del_all();
 
@@ -820,7 +811,6 @@ set_default_conf(void)
 
   ConfigServerHide.flatten_links = 0;
   ConfigServerHide.flatten_links_delay = 300;
-  ConfigServerHide.flatten_links_file = NULL;
   ConfigServerHide.hidden = 0;
   ConfigServerHide.hide_servers = 0;
   ConfigServerHide.hide_services = 0;

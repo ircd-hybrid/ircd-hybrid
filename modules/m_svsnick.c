@@ -124,7 +124,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
 
   watch_check_hash(target_p, RPL_LOGON);
 
-  fd_note(&target_p->connection->fd, "Nick: %s", parv[2]);
+  fd_note(&target_p->connection->fd, "Nick: %s", target_p->name);
   return 0;
 }
 

@@ -3015,6 +3015,31 @@ serverhide_flatten_links: FLATTEN_LINKS '=' TBOOL ';'
     ConfigServerHide.flatten_links = yylval.number;
 };
 
+serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
+{
+  if (conf_parser_ctx.pass == 2)
+  {
+    if ($3 > 0)
+    {
+      event_write_links_file.when = $3;
+      event_add(&event_write_links_file, NULL);
+    }
+    else
+     event_delete(&event_write_links_file);
+
+    ConfigServerHide.flatten_links_delay = $3;
+  }
+};
+
+serverhide_flatten_links_file: FLATTEN_LINKS_FILE '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+  {
+    MyFree(ConfigServerHide.flatten_links_file);
+    ConfigServerHide.flatten_links_file = xstrdup(yylval.string);
+  }
+};
+
 serverhide_disable_remote_commands: DISABLE_REMOTE_COMMANDS '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
@@ -3039,30 +3064,6 @@ serverhide_hidden_name: HIDDEN_NAME '=' QSTRING ';'
   {
     MyFree(ConfigServerHide.hidden_name);
     ConfigServerHide.hidden_name = xstrdup(yylval.string);
-  }
-};
-
-serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    if (($3 > 0) && ConfigServerHide.links_disabled == 1)
-    {
-      event_write_links_file.when = $3;
-      event_addish(&event_write_links_file, NULL);
-      ConfigServerHide.links_disabled = 0;
-    }
-
-    ConfigServerHide.flatten_links_delay = $3;
-  }
-};
-
-serverhide_flatten_links_file: FLATTEN_LINKS_FILE '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    MyFree(ConfigServerHide.flatten_links_file);
-    ConfigServerHide.flatten_links_file = xstrdup(yylval.string);
   }
 };
 

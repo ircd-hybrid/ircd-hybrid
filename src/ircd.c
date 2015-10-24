@@ -328,7 +328,7 @@ check_pidfile(const char *filename)
       {
         /* log(L_ERROR, "Server is already running"); */
         printf("ircd: daemon is already running\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
       }
     }
 

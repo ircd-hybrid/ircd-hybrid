@@ -1084,7 +1084,7 @@ static const yytype_uint16 yyrline[] =
     2935,  2936,  2937,  2938,  2939,  2940,  2941,  2942,  2944,  2949,
     2954,  2959,  2964,  2969,  2974,  2979,  2984,  2989,  2997,  3000,
     3000,  3001,  3002,  3003,  3004,  3005,  3006,  3007,  3008,  3009,
-    3010,  3012,  3018,  3024,  3030,  3036,  3045,  3060,  3069,  3075
+    3010,  3012,  3018,  3034,  3043,  3049,  3055,  3061,  3070,  3076
 };
 #endif
 
@@ -1228,10 +1228,10 @@ static const char *const yytname[] =
   "channel_max_channels", "channel_max_bans",
   "channel_default_join_flood_count", "channel_default_join_flood_time",
   "serverhide_entry", "serverhide_items", "serverhide_item",
-  "serverhide_flatten_links", "serverhide_disable_remote_commands",
+  "serverhide_flatten_links", "serverhide_flatten_links_delay",
+  "serverhide_flatten_links_file", "serverhide_disable_remote_commands",
   "serverhide_hide_servers", "serverhide_hide_services",
-  "serverhide_hidden_name", "serverhide_flatten_links_delay",
-  "serverhide_flatten_links_file", "serverhide_hidden",
+  "serverhide_hidden_name", "serverhide_hidden",
   "serverhide_hide_server_ips", YY_NULLPTR
 };
 #endif
@@ -1442,7 +1442,7 @@ static const yytype_uint16 yydefact[] =
      506,   507,   500,   498,   504,   505,   503,     0,     0,     0,
        0,     0,     0,     0,    46,    47,    48,     0,     0,     0,
      650,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,   640,   641,   644,   645,   646,   648,   642,   643,   647,
+       0,   640,   641,   642,   643,   644,   645,   646,   648,   647,
      649,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
       54,    69,    66,    64,    70,    71,    65,    55,    68,    58,
@@ -1518,8 +1518,8 @@ static const yytype_uint16 yydefact[] =
        0,     0,     0,     0,   302,     0,     0,   438,     0,     0,
        0,   297,   293,   296,   278,    50,    51,     0,     0,   101,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-     153,     0,     0,     0,   336,   652,   651,   656,   657,   658,
-     655,   659,   653,   654,    86,    81,    89,    80,    87,    88,
+     153,     0,     0,     0,   336,   654,   651,   652,   653,   658,
+     657,   659,   655,   656,    86,    81,    89,    80,    87,    88,
       79,    83,    82,    74,    73,    78,    75,    77,    76,    84,
       85,     0,     0,   377,   128,     0,     0,     0,   140,     0,
      132,   133,   135,   134,     0,     0,     0,     0,   110,   351,
@@ -6464,61 +6464,23 @@ yyreduce:
 #line 3019 "conf_parser.y" /* yacc.c:1646  */
     {
   if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.disable_remote_commands = yylval.number;
-}
-#line 6470 "conf_parser.c" /* yacc.c:1646  */
-    break;
-
-  case 653:
-#line 3025 "conf_parser.y" /* yacc.c:1646  */
-    {
-  if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.hide_servers = yylval.number;
-}
-#line 6479 "conf_parser.c" /* yacc.c:1646  */
-    break;
-
-  case 654:
-#line 3031 "conf_parser.y" /* yacc.c:1646  */
-    {
-  if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.hide_services = yylval.number;
-}
-#line 6488 "conf_parser.c" /* yacc.c:1646  */
-    break;
-
-  case 655:
-#line 3037 "conf_parser.y" /* yacc.c:1646  */
-    {
-  if (conf_parser_ctx.pass == 2)
   {
-    MyFree(ConfigServerHide.hidden_name);
-    ConfigServerHide.hidden_name = xstrdup(yylval.string);
-  }
-}
-#line 6500 "conf_parser.c" /* yacc.c:1646  */
-    break;
-
-  case 656:
-#line 3046 "conf_parser.y" /* yacc.c:1646  */
-    {
-  if (conf_parser_ctx.pass == 2)
-  {
-    if (((yyvsp[-1].number) > 0) && ConfigServerHide.links_disabled == 1)
+    if ((yyvsp[-1].number) > 0)
     {
       event_write_links_file.when = (yyvsp[-1].number);
-      event_addish(&event_write_links_file, NULL);
-      ConfigServerHide.links_disabled = 0;
+      event_add(&event_write_links_file, NULL);
     }
+    else
+     event_delete(&event_write_links_file);
 
     ConfigServerHide.flatten_links_delay = (yyvsp[-1].number);
   }
 }
-#line 6518 "conf_parser.c" /* yacc.c:1646  */
+#line 6480 "conf_parser.c" /* yacc.c:1646  */
     break;
 
-  case 657:
-#line 3061 "conf_parser.y" /* yacc.c:1646  */
+  case 653:
+#line 3035 "conf_parser.y" /* yacc.c:1646  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -6526,29 +6488,68 @@ yyreduce:
     ConfigServerHide.flatten_links_file = xstrdup(yylval.string);
   }
 }
-#line 6530 "conf_parser.c" /* yacc.c:1646  */
+#line 6492 "conf_parser.c" /* yacc.c:1646  */
+    break;
+
+  case 654:
+#line 3044 "conf_parser.y" /* yacc.c:1646  */
+    {
+  if (conf_parser_ctx.pass == 2)
+    ConfigServerHide.disable_remote_commands = yylval.number;
+}
+#line 6501 "conf_parser.c" /* yacc.c:1646  */
+    break;
+
+  case 655:
+#line 3050 "conf_parser.y" /* yacc.c:1646  */
+    {
+  if (conf_parser_ctx.pass == 2)
+    ConfigServerHide.hide_servers = yylval.number;
+}
+#line 6510 "conf_parser.c" /* yacc.c:1646  */
+    break;
+
+  case 656:
+#line 3056 "conf_parser.y" /* yacc.c:1646  */
+    {
+  if (conf_parser_ctx.pass == 2)
+    ConfigServerHide.hide_services = yylval.number;
+}
+#line 6519 "conf_parser.c" /* yacc.c:1646  */
+    break;
+
+  case 657:
+#line 3062 "conf_parser.y" /* yacc.c:1646  */
+    {
+  if (conf_parser_ctx.pass == 2)
+  {
+    MyFree(ConfigServerHide.hidden_name);
+    ConfigServerHide.hidden_name = xstrdup(yylval.string);
+  }
+}
+#line 6531 "conf_parser.c" /* yacc.c:1646  */
     break;
 
   case 658:
-#line 3070 "conf_parser.y" /* yacc.c:1646  */
+#line 3071 "conf_parser.y" /* yacc.c:1646  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hidden = yylval.number;
 }
-#line 6539 "conf_parser.c" /* yacc.c:1646  */
+#line 6540 "conf_parser.c" /* yacc.c:1646  */
     break;
 
   case 659:
-#line 3076 "conf_parser.y" /* yacc.c:1646  */
+#line 3077 "conf_parser.y" /* yacc.c:1646  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hide_server_ips = yylval.number;
 }
-#line 6548 "conf_parser.c" /* yacc.c:1646  */
+#line 6549 "conf_parser.c" /* yacc.c:1646  */
     break;
 
 
-#line 6552 "conf_parser.c" /* yacc.c:1646  */
+#line 6553 "conf_parser.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

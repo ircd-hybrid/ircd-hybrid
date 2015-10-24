@@ -645,7 +645,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   }
 
   /* servernames are always guaranteed under HOSTLEN chars */
-  fd_note(&client_p->connection->fd, "Server: %s", conf->name);
+  fd_note(&client_p->connection->fd, "Server: %s", client_p->name);
 
   /* Attach config entries to client here rather than in
    * serv_connect_callback(). This to avoid null pointer references.

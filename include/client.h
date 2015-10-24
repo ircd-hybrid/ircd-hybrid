@@ -232,10 +232,10 @@ enum
 
 /* oper flags */
 #define SetOper(x)              {(x)->umodes |= UMODE_OPER; \
-                                 if (!IsServer((x))) (x)->handler = OPER_HANDLER;}
+                                 if (MyClient((x))) (x)->handler = OPER_HANDLER;}
 
 #define ClearOper(x)            {(x)->umodes &= ~(UMODE_OPER|UMODE_ADMIN); \
-                                 if (!HasUMode(x, UMODE_OPER) && !IsServer((x))) \
+                                 if (MyClient((x))) \
                                   (x)->handler = CLIENT_HANDLER; }
 
 #define IsFloodDone(x)          ((x)->flags &  FLAGS_FLOODDONE)

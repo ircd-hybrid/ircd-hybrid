@@ -372,7 +372,7 @@ struct Client
   time_t            tsinfo;     /**< TS on the nick, SVINFO on server */
 
   unsigned int      flags;      /**< Client flags */
-  unsigned int      umodes;     /**< Opers, normal users subset */
+  unsigned int      umodes;     /**< User modes this client has set */
   unsigned int      hopcount;   /**< Number of servers to this 0 = local */
   unsigned int      status;     /**< Client type */
   unsigned int      handler;    /**< Handler index */
@@ -416,7 +416,7 @@ struct Client
    */
   char              sockhost[HOSTIPLEN + 1]; /* This is the host name from the
                                                 socket ip address as string */
-  char             *certfp;
+  char             *certfp;  /**< SSL certificate fingerprint */
 };
 
 

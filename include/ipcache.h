@@ -44,8 +44,8 @@ struct ip_entry
   time_t last_attempt;            /**< The last time someone connected from this IP */
 };
 
-extern struct ip_entry *ipcache_find_or_add_address(struct irc_ssaddr *);
-extern void ipcache_remove_address(struct irc_ssaddr *);
+extern struct ip_entry *ipcache_find_or_add_address(const struct irc_ssaddr *);
+extern void ipcache_remove_address(const struct irc_ssaddr *);
 extern void ipcache_get_stats(unsigned int *const, uint64_t *const);
 extern void ipcache_init(void);
 #endif

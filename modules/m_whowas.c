@@ -58,29 +58,29 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
 
   DLINK_FOREACH(node, WHOWASHASH[strhash(parv[1])].head)
   {
-    const struct Whowas *temp = node->data;
+    const struct Whowas *whowas = node->data;
 
-    if (!irccmp(parv[1], temp->name))
+    if (!irccmp(parv[1], whowas->name))
     {
-      sendto_one_numeric(source_p, &me, RPL_WHOWASUSER, temp->name,
-                         temp->username, temp->hostname,
-                         temp->realname);
+      sendto_one_numeric(source_p, &me, RPL_WHOWASUSER, whowas->name,
+                         whowas->username, whowas->hostname,
+                         whowas->realname);
 
       if (HasUMode(source_p, UMODE_OPER))
-        if (strcmp(temp->sockhost, "0"))  /* XXX: TBR */
-          sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, temp->name,
-                             temp->username, temp->hostname,
-                             temp->sockhost);
+        if (strcmp(whowas->sockhost, "0"))  /* XXX: TBR */
+          sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, whowas->name,
+                             whowas->username, whowas->hostname,
+                             whowas->sockhost);
 
-      if (!IsDigit(temp->account[0]) && temp->account[0] != '*')
-        sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, temp->name, temp->account, "was");
+      if (!IsDigit(whowas->account[0]) && whowas->account[0] != '*')
+        sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, whowas->name, whowas->account, "was");
 
-      if ((temp->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
-        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
-                           ConfigServerInfo.network_name, date_ctime(temp->logoff));
+      if ((whowas->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
+        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, whowas->name,
+                           ConfigServerInfo.network_name, date_ctime(whowas->logoff));
       else
-        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, temp->name,
-                           temp->servername, date_ctime(temp->logoff));
+        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, whowas->name,
+                           whowas->servername, date_ctime(whowas->logoff));
       ++cur;
     }
 

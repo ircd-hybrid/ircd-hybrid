@@ -48,42 +48,42 @@ void
 whowas_add_history(struct Client *client_p, const int online)
 {
   static unsigned int whowas_next = 0;
-  struct Whowas *const who = &WHOWAS[whowas_next];
+  struct Whowas *const whowas = &WHOWAS[whowas_next];
 
   assert(IsClient(client_p));
 
   if (++whowas_next == NICKNAMEHISTORYLENGTH)
     whowas_next = 0;
 
-  if (who->hashv != -1)
+  if (whowas->hashv != -1)
   {
-    if (who->online)
-      dlinkDelete(&who->cnode, &who->online->whowas);
+    if (whowas->online)
+      dlinkDelete(&whowas->cnode, &whowas->online->whowas);
 
-    dlinkDelete(&who->tnode, &WHOWASHASH[who->hashv]);
+    dlinkDelete(&whowas->tnode, &WHOWASHASH[whowas->hashv]);
   }
 
-  who->hashv = strhash(client_p->name);
-  who->shide = IsHidden(client_p->servptr) != 0;
-  who->logoff = CurrentTime;
+  whowas->hashv = strhash(client_p->name);
+  whowas->shide = IsHidden(client_p->servptr) != 0;
+  whowas->logoff = CurrentTime;
 
-  strlcpy(who->account, client_p->account, sizeof(who->account));
-  strlcpy(who->name, client_p->name, sizeof(who->name));
-  strlcpy(who->username, client_p->username, sizeof(who->username));
-  strlcpy(who->hostname, client_p->host, sizeof(who->hostname));
-  strlcpy(who->sockhost, client_p->sockhost, sizeof(who->sockhost));
-  strlcpy(who->realname, client_p->info, sizeof(who->realname));
-  strlcpy(who->servername, client_p->servptr->name, sizeof(who->servername));
+  strlcpy(whowas->account, client_p->account, sizeof(whowas->account));
+  strlcpy(whowas->name, client_p->name, sizeof(whowas->name));
+  strlcpy(whowas->username, client_p->username, sizeof(whowas->username));
+  strlcpy(whowas->hostname, client_p->host, sizeof(whowas->hostname));
+  strlcpy(whowas->sockhost, client_p->sockhost, sizeof(whowas->sockhost));
+  strlcpy(whowas->realname, client_p->info, sizeof(whowas->realname));
+  strlcpy(whowas->servername, client_p->servptr->name, sizeof(whowas->servername));
 
   if (online)
   {
-    who->online = client_p;
-    dlinkAdd(who, &who->cnode, &client_p->whowas);
+    whowas->online = client_p;
+    dlinkAdd(whowas, &whowas->cnode, &client_p->whowas);
   }
   else
-    who->online = NULL;
+    whowas->online = NULL;
 
-  dlinkAdd(who, &who->tnode, &WHOWASHASH[who->hashv]);
+  dlinkAdd(whowas, &whowas->tnode, &WHOWASHASH[whowas->hashv]);
 }
 
 void
@@ -93,10 +93,10 @@ whowas_off_history(struct Client *client_p)
 
   DLINK_FOREACH_SAFE(node, node_next, client_p->whowas.head)
   {
-    struct Whowas *temp = node->data;
+    struct Whowas *whowas = node->data;
 
-    temp->online = NULL;
-    dlinkDelete(&temp->cnode, &client_p->whowas);
+    whowas->online = NULL;
+    dlinkDelete(&whowas->cnode, &client_p->whowas);
   }
 }
 
@@ -109,13 +109,13 @@ whowas_get_history(const char *nick, time_t timelimit)
 
   DLINK_FOREACH(node, WHOWASHASH[strhash(nick)].head)
   {
-    struct Whowas *temp = node->data;
+    struct Whowas *whowas = node->data;
 
-    if (temp->logoff < timelimit)
+    if (whowas->logoff < timelimit)
       continue;
-    if (irccmp(nick, temp->name))
+    if (irccmp(nick, whowas->name))
       continue;
-    return temp->online;
+    return whowas->online;
   }
 
   return NULL;
@@ -124,11 +124,11 @@ whowas_get_history(const char *nick, time_t timelimit)
 void
 whowas_count_memory(unsigned int *const count, uint64_t *const bytes)
 {
-  const struct Whowas *tmp = &WHOWAS[0];
+  const struct Whowas *whowas = &WHOWAS[0];
 
-  for (unsigned int i = 0; i < NICKNAMEHISTORYLENGTH; ++i, ++tmp)
+  for (unsigned int i = 0; i < NICKNAMEHISTORYLENGTH; ++i, ++whowas)
   {
-    if (tmp->hashv != -1)
+    if (whowas->hashv != -1)
     {
       (*count)++;
       (*bytes) += sizeof(struct Whowas);

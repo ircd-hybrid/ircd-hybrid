@@ -100,11 +100,11 @@ enum
 
 enum
 {
-  CAP_MULTI_PREFIX   = 0x00000001U,
-  CAP_AWAY_NOTIFY    = 0x00000002U,
-  CAP_UHNAMES        = 0x00000004U,
-  CAP_EXTENDED_JOIN  = 0x00000008U,
-  CAP_ACCOUNT_NOTIFY = 0x00000010U
+  CAP_MULTI_PREFIX   = 0x00000001U,  /**< ircv3.1 multi-prefix client capability */
+  CAP_AWAY_NOTIFY    = 0x00000002U,  /**< ircv3.1 away-notify client capability */
+  CAP_UHNAMES        = 0x00000004U,  /**< ircv3.2 userhost-in-names client capability */
+  CAP_EXTENDED_JOIN  = 0x00000008U,  /**< ircv3.1 extended-join client capability */
+  CAP_ACCOUNT_NOTIFY = 0x00000010U   /**< ircv3.1 account-notify client capability */
 };
 
 #define HasCap(x, y) ((x)->connection->cap_active & (y))

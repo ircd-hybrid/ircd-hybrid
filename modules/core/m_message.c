@@ -260,23 +260,20 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
       sendto_channel_butone(source_p, source_p, chptr, type, "%s %s%s :%s",
                             command, prefix, chptr->name, text);
   }
-  else
+  else if (p_or_n != NOTICE)
   {
-    if (p_or_n != NOTICE)
-    {
-      if (result == ERR_NOCTRLSONCHAN)
-        sendto_one_numeric(source_p, &me, ERR_NOCTRLSONCHAN,
-                           chptr->name, text);
-      else if (result == ERR_NOCTCP)
-        sendto_one_numeric(source_p, &me, ERR_NOCTCP,
-                           chptr->name, text);
-      else if (result == ERR_NEEDREGGEDNICK)
-        sendto_one_numeric(source_p, &me, ERR_NEEDREGGEDNICK,
-                           chptr->name);
-      else
-        sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN,
-                           chptr->name);
-    }
+    if (result == ERR_NOCTRLSONCHAN)
+      sendto_one_numeric(source_p, &me, ERR_NOCTRLSONCHAN,
+                         chptr->name, text);
+    else if (result == ERR_NOCTCP)
+      sendto_one_numeric(source_p, &me, ERR_NOCTCP,
+                         chptr->name, text);
+    else if (result == ERR_NEEDREGGEDNICK)
+      sendto_one_numeric(source_p, &me, ERR_NEEDREGGEDNICK,
+                         chptr->name);
+    else
+      sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN,
+                         chptr->name);
   }
 }
 
@@ -591,13 +588,10 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
 
     if (*name == '$' || strchr(name, '@'))
       handle_special(p_or_n, command, source_p, name, text);
-    else
+    else if (p_or_n != NOTICE)
     {
-      if (p_or_n != NOTICE)
-      {
-        if (!IsDigit(*name) || MyClient(source_p))
-          sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
-      }
+      if (!IsDigit(*name) || MyClient(source_p))
+        sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
     }
   }
 

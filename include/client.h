@@ -301,7 +301,7 @@ struct Connection
 
   uint64_t serial;     /**< Used to enforce 1 send per nick */
 
-  time_t       lasttime;   /**< ...should be only LOCAL clients? --msa */
+  time_t       lasttime;   /**< Last time data read from socket */
   time_t       firsttime;  /**< Time client was created */
   time_t       since;      /**< Last time we parsed something */
   time_t       last_join_time;   /**< When this client last joined a channel */

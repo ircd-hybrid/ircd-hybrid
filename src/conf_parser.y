@@ -430,10 +430,9 @@ sizespec:   NUMBER sizespec_ { $$ = $1 + $2; } |
 
 
 /***************************************************************************
- *  section modules
+ * modules {} section
  ***************************************************************************/
-modules_entry: MODULES
-  '{' modules_items '}' ';';
+modules_entry: MODULES '{' modules_items '}' ';';
 
 modules_items:  modules_items modules_item | modules_item;
 modules_item:   modules_module | modules_path | error ';' ;
@@ -451,6 +450,9 @@ modules_path: PATH '=' QSTRING ';'
 };
 
 
+/***************************************************************************
+ * serverinfo {}  section
+ ***************************************************************************/
 serverinfo_entry: SERVERINFO '{' serverinfo_items '}' ';';
 
 serverinfo_items:       serverinfo_items serverinfo_item | serverinfo_item ;
@@ -653,7 +655,7 @@ serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
 
 serverinfo_name: NAME '=' QSTRING ';'
 {
-  /* this isn't rehashable */
+  /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && !ConfigServerInfo.name)
   {
     if (valid_servname(yylval.string))
@@ -668,7 +670,7 @@ serverinfo_name: NAME '=' QSTRING ';'
 
 serverinfo_sid: IRCD_SID '=' QSTRING ';'
 {
-  /* this isn't rehashable */
+  /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && !ConfigServerInfo.sid)
   {
     if (valid_sid(yylval.string))
@@ -845,8 +847,9 @@ serverinfo_hub: HUB '=' TBOOL ';'
     ConfigServerInfo.hub = yylval.number;
 };
 
+
 /***************************************************************************
- * admin section
+ * admin {} section
  ***************************************************************************/
 admin_entry: ADMIN  '{' admin_items '}' ';' ;
 
@@ -883,8 +886,9 @@ admin_description: DESCRIPTION '=' QSTRING ';'
   ConfigAdminInfo.description = xstrdup(yylval.string);
 };
 
+
 /***************************************************************************
- * motd section
+ * motd {} section
  ***************************************************************************/
 motd_entry: MOTD
 {
@@ -919,8 +923,9 @@ motd_file: T_FILE '=' QSTRING ';'
     strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
 };
 
+
 /***************************************************************************
- * pseudo section
+ * pseudo {} section
  ***************************************************************************/
 pseudo_entry: T_PSEUDO
 {
@@ -980,8 +985,9 @@ pseudo_target: T_TARGET '=' QSTRING ';'
   }
 };
 
+
 /***************************************************************************
- *  section logging
+ * log {} section
  ***************************************************************************/
 logging_entry:          T_LOG  '{' logging_items '}' ';' ;
 logging_items:          logging_items logging_item | logging_item ;
@@ -1074,7 +1080,7 @@ logging_file_type_item:  USER
 
 
 /***************************************************************************
- * section oper
+ * operator {} section
  ***************************************************************************/
 oper_entry: OPERATOR
 {
@@ -1424,7 +1430,7 @@ oper_flags_item: KILL ':' REMOTE
 
 
 /***************************************************************************
- *  section class
+ * class {} section
  ***************************************************************************/
 class_entry: CLASS
 {
@@ -1624,7 +1630,7 @@ class_flags_item: RANDOM_IDLE
 
 
 /***************************************************************************
- *  section listen
+ * listen {} section
  ***************************************************************************/
 listen_entry: LISTEN
 {
@@ -1701,8 +1707,9 @@ listen_host: HOST '=' QSTRING ';'
     strlcpy(block_state.addr.buf, yylval.string, sizeof(block_state.addr.buf));
 };
 
+
 /***************************************************************************
- *  section auth
+ * auth {} section
  ***************************************************************************/
 auth_entry: IRCD_AUTH
 {
@@ -1869,7 +1876,7 @@ auth_redir_port: REDIRPORT '=' NUMBER ';'
 
 
 /***************************************************************************
- *  section resv
+ * resv {} section
  ***************************************************************************/
 resv_entry: RESV
 {
@@ -1909,7 +1916,7 @@ resv_exempt: EXEMPT '=' QSTRING ';'
 
 
 /***************************************************************************
- *  section service
+ * service {} section
  ***************************************************************************/
 service_entry: T_SERVICE '{' service_items '}' ';';
 
@@ -1928,8 +1935,9 @@ service_name: NAME '=' QSTRING ';'
   }
 };
 
+
 /***************************************************************************
- *  section shared, for sharing remote klines etc.
+ * shared {} section, for sharing remote klines etc.
  ***************************************************************************/
 shared_entry: T_SHARED
 {
@@ -2033,8 +2041,9 @@ shared_type_item: KLINE
     block_state.flags.value = SHARED_ALL;
 };
 
+
 /***************************************************************************
- *  section cluster
+ * cluster {} section
  ***************************************************************************/
 cluster_entry: T_CLUSTER
 {
@@ -2115,8 +2124,9 @@ cluster_type_item: KLINE
     block_state.flags.value = SHARED_ALL;
 };
 
+
 /***************************************************************************
- *  section connect
+ * connect {}  section
  ***************************************************************************/
 connect_entry: CONNECT
 {
@@ -2331,7 +2341,7 @@ connect_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
 
 
 /***************************************************************************
- *  section kill
+ * kill {} section
  ***************************************************************************/
 kill_entry: KILL
 {
@@ -2388,8 +2398,9 @@ kill_reason: REASON '=' QSTRING ';'
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
+
 /***************************************************************************
- *  section deny
+ * deny {} section
  ***************************************************************************/
 deny_entry: DENY
 {
@@ -2433,19 +2444,20 @@ deny_reason: REASON '=' QSTRING ';'
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
+
 /***************************************************************************
- *  section exempt
+ * exempt {} section
  ***************************************************************************/
 exempt_entry: EXEMPT '{' exempt_items '}' ';';
 
-exempt_items:     exempt_items exempt_item | exempt_item;
-exempt_item:      exempt_ip | error;
+exempt_items: exempt_items exempt_item | exempt_item;
+exempt_item:  exempt_ip | error;
 
 exempt_ip: IP '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    if (yylval.string[0] && parse_netmask(yylval.string, NULL, NULL) != HM_HOST)
+    if (*yylval.string && parse_netmask(yylval.string, NULL, NULL) != HM_HOST)
     {
       struct MaskItem *conf = conf_make(CONF_EXEMPT);
       conf->host = xstrdup(yylval.string);
@@ -2456,7 +2468,7 @@ exempt_ip: IP '=' QSTRING ';'
 };
 
 /***************************************************************************
- *  section gecos
+ * gecos {} section
  ***************************************************************************/
 gecos_entry: GECOS
 {
@@ -2496,11 +2508,11 @@ gecos_reason: REASON '=' QSTRING ';'
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
+
 /***************************************************************************
- *  section general
+ * general {} section
  ***************************************************************************/
-general_entry: GENERAL
-  '{' general_items '}' ';';
+general_entry: GENERAL '{' general_items '}' ';';
 
 general_items:      general_items general_item | general_item;
 general_item:       general_away_count |
@@ -2918,10 +2930,9 @@ general_default_floodcount: DEFAULT_FLOODCOUNT '=' NUMBER ';'
 
 
 /***************************************************************************
- *  section channel
+ * channel {} section
  ***************************************************************************/
-channel_entry: CHANNEL
-  '{' channel_items '}' ';';
+channel_entry: CHANNEL '{' channel_items '}' ';';
 
 channel_items:      channel_items channel_item | channel_item;
 channel_item:       channel_max_bans |
@@ -2986,11 +2997,11 @@ channel_default_join_flood_time: DEFAULT_JOIN_FLOOD_TIME '=' timespec ';'
   ConfigChannel.default_join_flood_time = $3;
 };
 
+
 /***************************************************************************
- *  section serverhide
+ * serverhide {} section
  ***************************************************************************/
-serverhide_entry: SERVERHIDE
-  '{' serverhide_items '}' ';';
+serverhide_entry: SERVERHIDE '{' serverhide_items '}' ';';
 
 serverhide_items:   serverhide_items serverhide_item | serverhide_item;
 serverhide_item:    serverhide_flatten_links |

@@ -1092,14 +1092,9 @@ oper_entry: OPERATOR
 
   if (!block_state.name.buf[0])
     break;
-#ifdef HAVE_LIBCRYPTO
-  if (!block_state.file.buf[0] &&
-      !block_state.rpass.buf[0])
-    break;
-#else
+
   if (!block_state.rpass.buf[0])
     break;
-#endif
 
   DLINK_FOREACH(node, block_state.mask.list.head)
   {

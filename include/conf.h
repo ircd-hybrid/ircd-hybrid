@@ -94,18 +94,18 @@ enum
 
 enum maskitem_type
 {
-  CONF_CLIENT   = 1 <<  0,
-  CONF_SERVER   = 1 <<  1,
-  CONF_KLINE    = 1 <<  2,
-  CONF_DLINE    = 1 <<  3,
-  CONF_EXEMPT   = 1 <<  4,
-  CONF_CLUSTER  = 1 <<  5,
-  CONF_XLINE    = 1 <<  6,
-  CONF_SHARED    = 1 <<  7,
-  CONF_CRESV    = 1 <<  8,
-  CONF_NRESV    = 1 <<  9,
-  CONF_SERVICE  = 1 << 10,
-  CONF_OPER     = 1 << 11
+  CONF_CLIENT  = 1 <<  0,
+  CONF_SERVER  = 1 <<  1,
+  CONF_KLINE   = 1 <<  2,
+  CONF_DLINE   = 1 <<  3,
+  CONF_EXEMPT  = 1 <<  4,
+  CONF_CLUSTER = 1 <<  5,
+  CONF_XLINE   = 1 <<  6,
+  CONF_SHARED  = 1 <<  7,
+  CONF_CRESV   = 1 <<  8,
+  CONF_NRESV   = 1 <<  9,
+  CONF_SERVICE = 1 << 10,
+  CONF_OPER    = 1 << 11
 };
 
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)

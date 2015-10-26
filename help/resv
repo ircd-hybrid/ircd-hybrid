@@ -7,3 +7,5 @@ nick.  Will not affect remote clients.
 
 If the oper is an admin, they may create a wildcard
 resv, for example: clones*
+
+- Requires Oper Priv: resv

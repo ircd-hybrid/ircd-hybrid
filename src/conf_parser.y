@@ -648,7 +648,7 @@ serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
 
     SSL_CTX_set_tmp_ecdh(ConfigServerInfo.server_ctx, key);
     EC_KEY_free(key);
-}
+  }
 #endif
 #endif
 };

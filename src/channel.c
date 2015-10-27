@@ -745,7 +745,7 @@ can_send(struct Channel *chptr, struct Client *client_p,
   if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE))
     return CAN_SEND_OPV;
 
-  if (MyClient(cliente_p) && !HasFlag(client_p, FLAGS_EXEMPTRESV))
+  if (MyClient(client_p) && !HasFlag(client_p, FLAGS_EXEMPTRESV))
     if (!(HasUMode(client_p, UMODE_OPER) && HasOFlag(client_p, OPER_FLAG_JOIN_RESV)))
       if ((conf = match_find_resv(chptr->name)) && !resv_find_exempt(client_p, conf))
         return ERR_CANNOTSENDTOCHAN;
@@ -799,63 +799,63 @@ can_send(struct Channel *chptr, struct Client *client_p,
 /*! \brief Updates the client's oper_warn_count_down, warns the
  *         IRC operators if necessary, and updates
  *         join_leave_countdown as needed.
- * \param source_p Pointer to struct Client to check
+ * \param client_p Pointer to struct Client to check
  * \param name     Channel name or NULL if this is a part.
  */
 void
-check_spambot_warning(struct Client *source_p, const char *name)
+check_spambot_warning(struct Client *client_p, const char *name)
 {
   int t_delta = 0;
   int decrement_count = 0;
 
   if ((GlobalSetOptions.spam_num &&
-       (source_p->connection->join_leave_count >=
+       (client_p->connection->join_leave_count >=
         GlobalSetOptions.spam_num)))
   {
-    if (source_p->connection->oper_warn_count_down > 0)
-      source_p->connection->oper_warn_count_down--;
+    if (client_p->connection->oper_warn_count_down > 0)
+      client_p->connection->oper_warn_count_down--;
     else
-      source_p->connection->oper_warn_count_down = 0;
+      client_p->connection->oper_warn_count_down = 0;
 
-    if (source_p->connection->oper_warn_count_down == 0)
+    if (client_p->connection->oper_warn_count_down == 0)
     {
       /* It's already known as a possible spambot */
       if (name)
         sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "User %s (%s@%s) trying to join %s is a possible spambot",
-                             source_p->name, source_p->username,
-                             source_p->host, name);
+                             client_p->name, client_p->username,
+                             client_p->host, name);
       else
         sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "User %s (%s@%s) is a possible spambot",
-                             source_p->name, source_p->username,
-                             source_p->host);
-      source_p->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+                             client_p->name, client_p->username,
+                             client_p->host);
+      client_p->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
     }
   }
   else
   {
-    if ((t_delta = (CurrentTime - source_p->connection->last_leave_time)) >
+    if ((t_delta = (CurrentTime - client_p->connection->last_leave_time)) >
          JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
       decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
 
-      if (decrement_count > source_p->connection->join_leave_count)
-        source_p->connection->join_leave_count = 0;
+      if (decrement_count > client_p->connection->join_leave_count)
+        client_p->connection->join_leave_count = 0;
       else
-        source_p->connection->join_leave_count -= decrement_count;
+        client_p->connection->join_leave_count -= decrement_count;
     }
     else
     {
-      if ((CurrentTime - (source_p->connection->last_join_time)) <
+      if ((CurrentTime - (client_p->connection->last_join_time)) <
           GlobalSetOptions.spam_time)
-        source_p->connection->join_leave_count++;  /* It's a possible spambot */
+        client_p->connection->join_leave_count++;  /* It's a possible spambot */
     }
 
     if (name)
-      source_p->connection->last_join_time = CurrentTime;
+      client_p->connection->last_join_time = CurrentTime;
     else
-      source_p->connection->last_leave_time = CurrentTime;
+      client_p->connection->last_leave_time = CurrentTime;
   }
 }
 
@@ -889,30 +889,30 @@ channel_set_topic(struct Channel *chptr, const char *topic,
  * 		  anti spambot code.
  */
 void
-channel_do_join_0(struct Client *source_p)
+channel_do_join_0(struct Client *client_p)
 {
   dlink_node *node = NULL, *node_next = NULL;
 
-  if (source_p->channel.head)
-    if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
-      check_spambot_warning(source_p, NULL);
+  if (client_p->channel.head)
+    if (MyConnect(client_p) && !HasUMode(client_p, UMODE_OPER))
+      check_spambot_warning(client_p, NULL);
 
-  DLINK_FOREACH_SAFE(node, node_next, source_p->channel.head)
+  DLINK_FOREACH_SAFE(node, node_next, client_p->channel.head)
   {
     struct Channel *chptr = ((struct Membership *)node->data)->chptr;
 
-    sendto_server(source_p, 0, 0, ":%s PART %s",
-                  source_p->id, chptr->name);
+    sendto_server(client_p, 0, 0, ":%s PART %s",
+                  client_p->id, chptr->name);
     sendto_channel_local(0, chptr, ":%s!%s@%s PART %s",
-                         source_p->name, source_p->username,
-                         source_p->host, chptr->name);
+                         client_p->name, client_p->username,
+                         client_p->host, chptr->name);
 
     remove_user_from_channel(node->data);
   }
 }
 
 static char *
-channel_find_last0(struct Client *source_p, char *chanlist)
+channel_find_last0(struct Client *client_p, char *chanlist)
 {
   int join0 = 0;
 
@@ -937,26 +937,26 @@ channel_find_last0(struct Client *source_p, char *chanlist)
   }
 
   if (join0)
-    channel_do_join_0(source_p);
+    channel_do_join_0(client_p);
 
   return chanlist;
 }
 
 void
-channel_do_join(struct Client *source_p, char *channel, char *key_list)
+channel_do_join(struct Client *client_p, char *channel, char *key_list)
 {
   char *p = NULL;
   char *chan = NULL;
   char *chan_list = NULL;
   struct Channel *chptr = NULL;
   struct MaskItem *conf = NULL;
-  const struct ClassItem *const class = get_class_ptr(&source_p->connection->confs);
+  const struct ClassItem *const class = get_class_ptr(&client_p->connection->confs);
   int i = 0;
   unsigned int flags = 0;
 
-  assert(IsClient(source_p));
+  assert(IsClient(client_p));
 
-  chan_list = channel_find_last0(source_p, channel);
+  chan_list = channel_find_last0(client_p, channel);
 
   for (chan = strtok_r(chan_list, ",", &p); chan;
        chan = strtok_r(NULL,      ",", &p))
@@ -973,40 +973,40 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
 
     if (!channel_check_name(chan, 1))
     {
-      sendto_one_numeric(source_p, &me, ERR_BADCHANNAME, chan);
+      sendto_one_numeric(client_p, &me, ERR_BADCHANNAME, chan);
       continue;
     }
 
-    if (!HasFlag(source_p, FLAGS_EXEMPTRESV) &&
-        !(HasUMode(source_p, UMODE_OPER) && HasOFlag(source_p, OPER_FLAG_JOIN_RESV)) &&
-        ((conf = match_find_resv(chan)) && !resv_find_exempt(source_p, conf)))
+    if (!HasFlag(client_p, FLAGS_EXEMPTRESV) &&
+        !(HasUMode(client_p, UMODE_OPER) && HasOFlag(client_p, OPER_FLAG_JOIN_RESV)) &&
+        ((conf = match_find_resv(chan)) && !resv_find_exempt(client_p, conf)))
     {
       ++conf->count;
-      sendto_one_numeric(source_p, &me, ERR_CHANBANREASON, chan, conf->reason);
+      sendto_one_numeric(client_p, &me, ERR_CHANBANREASON, chan, conf->reason);
       sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                            "Forbidding reserved channel %s from user %s",
-                           chan, get_client_name(source_p, HIDE_IP));
+                           chan, get_client_name(client_p, HIDE_IP));
       continue;
     }
 
-    if (dlink_list_length(&source_p->channel) >=
+    if (dlink_list_length(&client_p->channel) >=
         ((class->max_channels) ? class->max_channels : ConfigChannel.max_channels))
     {
-      sendto_one_numeric(source_p, &me, ERR_TOOMANYCHANNELS, chan);
+      sendto_one_numeric(client_p, &me, ERR_TOOMANYCHANNELS, chan);
       break;
     }
 
     if ((chptr = hash_find_channel(chan)))
     {
-      if (IsMember(source_p, chptr))
+      if (IsMember(client_p, chptr))
         continue;
 
       /*
        * can_join checks for +i key, bans.
        */
-      if ((i = can_join(source_p, chptr, key)))
+      if ((i = can_join(client_p, chptr, key)))
       {
-        sendto_one_numeric(source_p, &me, i, chptr->name);
+        sendto_one_numeric(client_p, &me, i, chptr->name);
         continue;
       }
 
@@ -1025,10 +1025,10 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       chptr = channel_make(chan);
     }
 
-    if (!HasUMode(source_p, UMODE_OPER))
-      check_spambot_warning(source_p, chptr->name);
+    if (!HasUMode(client_p, UMODE_OPER))
+      check_spambot_warning(client_p, chptr->name);
 
-    add_user_to_channel(chptr, source_p, flags, 1);
+    add_user_to_channel(chptr, client_p, flags, 1);
 
     /*
      * Set timestamp if appropriate, and propagate
@@ -1039,132 +1039,132 @@ channel_do_join(struct Client *source_p, char *channel, char *key_list)
       chptr->mode.mode |= MODE_TOPICLIMIT;
       chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-      sendto_server(source_p, 0, 0, ":%s SJOIN %lu %s +nt :@%s",
+      sendto_server(client_p, 0, 0, ":%s SJOIN %lu %s +nt :@%s",
                     me.id, (unsigned long)chptr->creationtime,
-                    chptr->name, source_p->id);
+                    chptr->name, client_p->id);
 
       /*
        * Notify all other users on the new channel
        */
       sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
-                                  source_p->name, source_p->username,
-                                  source_p->host, chptr->name,
-                                  (!IsDigit(source_p->account[0]) && source_p->account[0] != '*') ? source_p->account : "*",
-                                  source_p->info);
+                                  client_p->name, client_p->username,
+                                  client_p->host, chptr->name,
+                                  (!IsDigit(client_p->account[0]) && client_p->account[0] != '*') ? client_p->account : "*",
+                                  client_p->info);
       sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
-                                  source_p->name, source_p->username,
-                                  source_p->host, chptr->name);
+                                  client_p->name, client_p->username,
+                                  client_p->host, chptr->name);
       sendto_channel_local(0, chptr, ":%s MODE %s +nt",
                            me.name, chptr->name);
 
-      if (source_p->away[0])
-        sendto_channel_local_butone(source_p, CAP_AWAY_NOTIFY, 0, chptr,
+      if (client_p->away[0])
+        sendto_channel_local_butone(client_p, CAP_AWAY_NOTIFY, 0, chptr,
                                     ":%s!%s@%s AWAY :%s",
-                                    source_p->name, source_p->username,
-                                    source_p->host, source_p->away);
+                                    client_p->name, client_p->username,
+                                    client_p->host, client_p->away);
     }
     else
     {
-      sendto_server(source_p, 0, 0, ":%s JOIN %lu %s +",
-                    source_p->id, (unsigned long)chptr->creationtime,
+      sendto_server(client_p, 0, 0, ":%s JOIN %lu %s +",
+                    client_p->id, (unsigned long)chptr->creationtime,
                     chptr->name);
 
       sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
-                                  source_p->name, source_p->username,
-                                  source_p->host, chptr->name,
-                                  (!IsDigit(source_p->account[0]) && source_p->account[0] != '*') ? source_p->account : "*",
-                                  source_p->info);
+                                  client_p->name, client_p->username,
+                                  client_p->host, chptr->name,
+                                  (!IsDigit(client_p->account[0]) && client_p->account[0] != '*') ? client_p->account : "*",
+                                  client_p->info);
       sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
-                                  source_p->name, source_p->username,
-                                  source_p->host, chptr->name);
+                                  client_p->name, client_p->username,
+                                  client_p->host, chptr->name);
 
-      if (source_p->away[0])
-        sendto_channel_local_butone(source_p, CAP_AWAY_NOTIFY, 0, chptr,
+      if (client_p->away[0])
+        sendto_channel_local_butone(client_p, CAP_AWAY_NOTIFY, 0, chptr,
                                     ":%s!%s@%s AWAY :%s",
-                                    source_p->name, source_p->username,
-                                    source_p->host, source_p->away);
+                                    client_p->name, client_p->username,
+                                    client_p->host, client_p->away);
     }
 
-    del_invite(chptr, source_p);
+    del_invite(chptr, client_p);
 
     if (chptr->topic[0])
     {
-      sendto_one_numeric(source_p, &me, RPL_TOPIC, chptr->name, chptr->topic);
-      sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME, chptr->name,
+      sendto_one_numeric(client_p, &me, RPL_TOPIC, chptr->name, chptr->topic);
+      sendto_one_numeric(client_p, &me, RPL_TOPICWHOTIME, chptr->name,
                          chptr->topic_info, chptr->topic_time);
     }
 
-    channel_member_names(source_p, chptr, 1);
+    channel_member_names(client_p, chptr, 1);
 
-    source_p->connection->last_join_time = CurrentTime;
+    client_p->connection->last_join_time = CurrentTime;
   }
 }
 
 /*! \brief Removes a client from a specific channel
- * \param source_p Pointer to source client to remove
+ * \param client_p Pointer to source client to remove
  * \param name     Name of channel to remove from
  * \param reason   Part reason to show
  */
 static void
-channel_part_one_client(struct Client *source_p, const char *name, const char *reason)
+channel_part_one_client(struct Client *client_p, const char *name, const char *reason)
 {
   struct Channel *chptr = NULL;
   struct Membership *member = NULL;
 
   if ((chptr = hash_find_channel(name)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
+    sendto_one_numeric(client_p, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
-  if ((member = find_channel_link(source_p, chptr)) == NULL)
+  if ((member = find_channel_link(client_p, chptr)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
+    sendto_one_numeric(client_p, &me, ERR_NOTONCHANNEL, chptr->name);
     return;
   }
 
-  if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
-    check_spambot_warning(source_p, NULL);
+  if (MyConnect(client_p) && !HasUMode(client_p, UMODE_OPER))
+    check_spambot_warning(client_p, NULL);
 
   /*
    * Remove user from the old channel (if any)
    * only allow /part reasons in -m chans
    */
-  if (*reason && (!MyConnect(source_p) ||
-      ((can_send(chptr, source_p, member, reason) &&
-       (source_p->connection->firsttime + ConfigGeneral.anti_spam_exit_message_time)
+  if (*reason && (!MyConnect(client_p) ||
+      ((can_send(chptr, client_p, member, reason) &&
+       (client_p->connection->firsttime + ConfigGeneral.anti_spam_exit_message_time)
         < CurrentTime))))
   {
-    sendto_server(source_p, 0, 0, ":%s PART %s :%s",
-                  source_p->id, chptr->name, reason);
+    sendto_server(client_p, 0, 0, ":%s PART %s :%s",
+                  client_p->id, chptr->name, reason);
     sendto_channel_local(0, chptr, ":%s!%s@%s PART %s :%s",
-                         source_p->name, source_p->username,
-                         source_p->host, chptr->name, reason);
+                         client_p->name, client_p->username,
+                         client_p->host, chptr->name, reason);
   }
   else
   {
-    sendto_server(source_p, 0, 0, ":%s PART %s",
-                  source_p->id, chptr->name);
+    sendto_server(client_p, 0, 0, ":%s PART %s",
+                  client_p->id, chptr->name);
     sendto_channel_local(0, chptr, ":%s!%s@%s PART %s",
-                         source_p->name, source_p->username,
-                         source_p->host, chptr->name);
+                         client_p->name, client_p->username,
+                         client_p->host, chptr->name);
   }
 
   remove_user_from_channel(member);
 }
 
 void
-channel_do_part(struct Client *source_p, char *channel, const char *reason)
+channel_do_part(struct Client *client_p, char *channel, const char *reason)
 {
   char *p = NULL, *name = NULL;
   char buf[KICKLEN + 1] = "";
 
-  assert(IsClient(source_p));
+  assert(IsClient(client_p));
 
   if (!EmptyString(reason))
     strlcpy(buf, reason, sizeof(buf));
 
   for (name = strtok_r(channel, ",", &p); name;
        name = strtok_r(NULL,    ",", &p))
-    channel_part_one_client(source_p, name, buf);
+    channel_part_one_client(client_p, name, buf);
 }

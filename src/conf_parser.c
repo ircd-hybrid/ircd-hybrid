@@ -3027,12 +3027,12 @@ yyreduce:
     break;
   }
 
-  if (RSA_size(ConfigServerInfo.rsa_private_key) < 128)
+  if (RSA_size(ConfigServerInfo.rsa_private_key) < 256)
   {
     RSA_free(ConfigServerInfo.rsa_private_key);
     ConfigServerInfo.rsa_private_key = NULL;
 
-    conf_error_report("Ignoring serverinfo::rsa_private_key_file -- need at least a 1024 bit key size");
+    conf_error_report("Ignoring serverinfo::rsa_private_key_file -- need at least a 2048 bit key size");
   }
 #endif
 }
@@ -3055,8 +3055,8 @@ yyreduce:
 
       if (dh)
       {
-        if (DH_size(dh) < 128)
-          conf_error_report("Ignoring serverinfo::ssl_dh_param_file -- need at least a 1024 bit DH prime size");
+        if (DH_size(dh) < 256)
+          conf_error_report("Ignoring serverinfo::ssl_dh_param_file -- need at least a 2048 bit DH prime size");
         else
           SSL_CTX_set_tmp_dh(ConfigServerInfo.server_ctx, dh);
 
@@ -3123,7 +3123,7 @@ yyreduce:
 
     SSL_CTX_set_tmp_ecdh(ConfigServerInfo.server_ctx, key);
     EC_KEY_free(key);
-}
+  }
 #endif
 #endif
 }

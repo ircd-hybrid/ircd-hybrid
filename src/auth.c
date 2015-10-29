@@ -90,14 +90,14 @@ static void auth_connect_callback(fde_t *, int, void *);
 static struct AuthRequest *
 make_auth_request(struct Client *client)
 {
-  struct AuthRequest *const request = &client->connection->auth;
+  struct AuthRequest *const auth = &client->connection->auth;
 
-  memset(request, 0, sizeof(*request));
+  memset(auth, 0, sizeof(*auth));
 
-  request->client  = client;
-  request->timeout = CurrentTime + CONNECTTIMEOUT;
+  auth->client = client;
+  auth->timeout = CurrentTime + CONNECTTIMEOUT;
 
-  return request;
+  return auth;
 }
 
 /*

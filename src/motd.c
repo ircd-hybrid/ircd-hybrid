@@ -57,35 +57,35 @@ static struct
 static struct Motd *
 motd_create(const char *mask, const char *path)
 {
-  struct Motd *tmp = MyCalloc(sizeof(struct Motd));
+  struct Motd *motd = MyCalloc(sizeof(struct Motd));
 
   if (EmptyString(mask))
-    tmp->type = MOTD_UNIVERSAL;
+    motd->type = MOTD_UNIVERSAL;
   else if (class_find(mask, 1))
-    tmp->type = MOTD_CLASS;
+    motd->type = MOTD_CLASS;
   else
   {
-    switch (parse_netmask(mask, &tmp->address, &tmp->addrbits))
+    switch (parse_netmask(mask, &motd->address, &motd->addrbits))
     {
       case HM_IPV4:
-        tmp->type = MOTD_IPMASKV4;
+        motd->type = MOTD_IPMASKV4;
         break;
       case HM_IPV6:
-        tmp->type = MOTD_IPMASKV6;
+        motd->type = MOTD_IPMASKV6;
         break;
       default:  /* HM_HOST */
-        tmp->type = MOTD_HOSTMASK;
+        motd->type = MOTD_HOSTMASK;
         break;
     }
   }
 
   if (mask)
-    tmp->mask = xstrdup(mask);
+    motd->mask = xstrdup(mask);
 
-  tmp->path = xstrdup(path);
-  tmp->maxcount = MOTD_MAXLINES;
+  motd->path = xstrdup(path);
+  motd->maxcount = MOTD_MAXLINES;
 
-  return tmp;
+  return motd;
 }
 
 /*! brief\ This function reads a motd out of a file (if needed) and caches it.

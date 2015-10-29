@@ -114,7 +114,7 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
 }
 
 int
-resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
+resv_find_exempt(const struct Client *client_p, const struct MaskItem *conf)
 {
   const dlink_node *node = NULL;
 
@@ -124,25 +124,25 @@ resv_find_exempt(const struct Client *who, const struct MaskItem *conf)
 
     if (exptr->country_id)
     {
-      if (exptr->country_id == who->connection->country_id)
+      if (exptr->country_id == client_p->connection->country_id)
         return 1;
     }
-    else if (!match(exptr->name, who->name) && !match(exptr->user, who->username))
+    else if (!match(exptr->name, client_p->name) && !match(exptr->user, client_p->username))
     {
       switch (exptr->type)
       {
         case HM_HOST:
-          if (!match(exptr->host, who->host) || !match(exptr->host, who->sockhost))
+          if (!match(exptr->host, client_p->host) || !match(exptr->host, client_p->sockhost))
             return 1;
           break;
         case HM_IPV4:
-          if (who->connection->aftype == AF_INET)
-            if (match_ipv4(&who->connection->ip, &exptr->addr, exptr->bits))
+          if (client_p->connection->aftype == AF_INET)
+            if (match_ipv4(&client_p->connection->ip, &exptr->addr, exptr->bits))
               return 1;
           break;
         case HM_IPV6:
-          if (who->connection->aftype == AF_INET6)
-            if (match_ipv6(&who->connection->ip, &exptr->addr, exptr->bits))
+          if (client_p->connection->aftype == AF_INET6)
+            if (match_ipv6(&client_p->connection->ip, &exptr->addr, exptr->bits))
               return 1;
           break;
         default:

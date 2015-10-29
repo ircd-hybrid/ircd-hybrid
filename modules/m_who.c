@@ -94,7 +94,7 @@ do_who(struct Client *source_p, const struct Client *target_p,
  *
  */
 static void
-who_common_channel(struct Client *source_p, struct Channel *chptr, char *mask,
+who_common_channel(struct Client *source_p, struct Channel *chptr, const char *mask,
                    int server_oper, unsigned int *maxmatches)
 {
   dlink_node *node = NULL;
@@ -144,7 +144,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, char *mask,
  *		  this is slightly expensive on EFnet ...
  */
 static void
-who_global(struct Client *source_p, char *mask, int server_oper)
+who_global(struct Client *source_p, const char *mask, int server_oper)
 {
   dlink_node *node = NULL;
   unsigned int maxmatches = WHO_MAX_REPLIES;

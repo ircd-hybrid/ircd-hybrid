@@ -39,6 +39,53 @@
 #include "packet.h"
 
 
+/*! \brief Blindly opers up given source_p, using conf info.
+ *         All checks on passwords have already been done.
+ * \param source_p Pointer to given client to oper
+ */
+static void
+oper_up(struct Client *source_p)
+{
+  const unsigned int old = source_p->umodes;
+  const struct MaskItem *const conf = source_p->connection->confs.head->data;
+
+  ++Count.oper;
+  SetOper(source_p);
+
+  if (conf->modes)
+    AddUMode(source_p, conf->modes);
+  else if (ConfigGeneral.oper_umodes)
+    AddUMode(source_p, ConfigGeneral.oper_umodes);
+
+  if (!(old & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
+    ++Count.invisi;
+  if ((old & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
+    --Count.invisi;
+
+  assert(dlinkFind(&oper_list, source_p) == NULL);
+  dlinkAdd(source_p, make_dlink_node(), &oper_list);
+
+  AddOFlag(source_p, conf->port);
+
+  if (HasOFlag(source_p, OPER_FLAG_ADMIN))
+    AddUMode(source_p, UMODE_ADMIN);
+
+  if (!EmptyString(conf->whois))
+  {
+    client_attach_svstag(source_p, RPL_WHOISOPERATOR, "+", conf->whois);
+    sendto_server(source_p, 0, 0, ":%s SVSTAG %s %lu %u + :%s",
+                  me.id, source_p->id, (unsigned long)source_p->tsinfo,
+                  RPL_WHOISOPERATOR, conf->whois);
+  }
+
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s is now an operator",
+                       get_oper_name(source_p));
+  sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
+                me.id, get_oper_name(source_p));
+  send_umode_out(source_p, old);
+  sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
+}
+
 /*! \brief Notices all opers of the failed oper attempt if enabled
  *
  * \param source_p Client doing /oper ...
@@ -124,7 +171,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    user_oper_up(source_p);
+    oper_up(source_p);
 
     ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s", opername, source_p->name,
          source_p->username, source_p->host);

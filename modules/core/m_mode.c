@@ -167,7 +167,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
   if (!(setmodes & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
     ++Count.invisi;
-  if ((setmodes & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
+  else if ((setmodes & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
     --Count.invisi;
 
   /*

@@ -184,37 +184,37 @@ enum
 #define DelUMode(x, y) ((x)->umodes &= ~(y))
 
 
-/* oper priv flags */
+/** irc-operator privilege flags */
 enum
 {
-  OPER_FLAG_KILL_REMOTE    = 0x00000001U,  /**< Oper can KILL remote users */
-  OPER_FLAG_KILL           = 0x00000002U,  /**< Oper can KILL local users */
-  OPER_FLAG_UNKLINE        = 0x00000004U,  /**< Oper can use UNKLINE command */
-  OPER_FLAG_KLINE          = 0x00000008U,  /**< Oper can use KLINE command */
-  OPER_FLAG_XLINE          = 0x00000010U,  /**< Oper can use XLINE command */
-  OPER_FLAG_DIE            = 0x00000020U,  /**< Oper can use DIE command */
-  OPER_FLAG_REHASH         = 0x00000040U,  /**< Oper can use REHASH command */
-  OPER_FLAG_ADMIN          = 0x00000080U,  /**< Oper can set user mode +a */
-  OPER_FLAG_REMOTEBAN      = 0x00000100U,  /**< Oper can set remote bans */
-  OPER_FLAG_GLOBOPS        = 0x00000200U,  /**< Oper can use GLOBOPS command */
-  OPER_FLAG_MODULE         = 0x00000400U,  /**< Oper can use MODULE command */
-  OPER_FLAG_RESTART        = 0x00000800U,  /**< Oper can use RESTART command */
-  OPER_FLAG_DLINE          = 0x00001000U,  /**< Oper can use DLINE command */
-  OPER_FLAG_UNDLINE        = 0x00002000U,  /**< Oper can use UNDLINE command */
-  OPER_FLAG_SET            = 0x00004000U,  /**< Oper can use SET command */
-  OPER_FLAG_SQUIT          = 0x00008000U,  /**< Oper can do local SQUIT */
-  OPER_FLAG_SQUIT_REMOTE   = 0x00010000U,  /**< Oper can do remote SQUIT */
-  OPER_FLAG_CONNECT        = 0x00020000U,  /**< Oper can do local CONNECT */
-  OPER_FLAG_CONNECT_REMOTE = 0x00040000U,  /**< Oper can do remote CONNECT */
-  OPER_FLAG_WALLOPS        = 0x00080000U,  /**< Oper can use WALLOPS command */
-  OPER_FLAG_LOCOPS         = 0x00100000U,  /**< Oper can use LOCOPS command */
-  OPER_FLAG_UNXLINE        = 0x00200000U,  /**< Oper can use UNXLINE command */
-  OPER_FLAG_OPME           = 0x00400000U,  /**< Oper can use OPME command */
-  OPER_FLAG_JOIN_RESV      = 0x00800000U,  /**< Oper can use JOIN on resv {} channels */
-  OPER_FLAG_NICK_RESV      = 0x01000000U,  /**< Oper can use NICK on resv {} nicks */
-  OPER_FLAG_RESV           = 0x02000000U,  /**< Oper can use RESV command */
-  OPER_FLAG_UNRESV         = 0x04000000U,  /**< Oper can use UNRESV command */
-  OPER_FLAG_CLOSE          = 0x08000000U   /**< Oper can use CLOSE command */
+  OPER_FLAG_ADMIN          = 0x00000001U,  /**< Oper can set user mode +a */
+  OPER_FLAG_CLOSE          = 0x00000002U,  /**< Oper can use CLOSE command */
+  OPER_FLAG_CONNECT        = 0x00000004U,  /**< Oper can do local CONNECT */
+  OPER_FLAG_CONNECT_REMOTE = 0x00000008U,  /**< Oper can do remote CONNECT */
+  OPER_FLAG_DIE            = 0x00000010U,  /**< Oper can use DIE command */
+  OPER_FLAG_DLINE          = 0x00000020U,  /**< Oper can use DLINE command */
+  OPER_FLAG_GLOBOPS        = 0x00000040U,  /**< Oper can use GLOBOPS command */
+  OPER_FLAG_JOIN_RESV      = 0x00000080U,  /**< Oper can use JOIN on resv {} channels */
+  OPER_FLAG_KILL           = 0x00000100U,  /**< Oper can KILL local users */
+  OPER_FLAG_KILL_REMOTE    = 0x00000200U,  /**< Oper can KILL remote users */
+  OPER_FLAG_KLINE          = 0x00000400U,  /**< Oper can use KLINE command */
+  OPER_FLAG_LOCOPS         = 0x00000800U,  /**< Oper can use LOCOPS command */
+  OPER_FLAG_MODULE         = 0x00001000U,  /**< Oper can use MODULE command */
+  OPER_FLAG_NICK_RESV      = 0x00002000U,  /**< Oper can use NICK on resv {} nicks */
+  OPER_FLAG_OPME           = 0x00004000U,  /**< Oper can use OPME command */
+  OPER_FLAG_REHASH         = 0x00008000U,  /**< Oper can use REHASH command */
+  OPER_FLAG_REMOTEBAN      = 0x00010000U,  /**< Oper can set remote bans */
+  OPER_FLAG_RESTART        = 0x00020000U,  /**< Oper can use RESTART command */
+  OPER_FLAG_RESV           = 0x00040000U,  /**< Oper can use RESV command */
+  OPER_FLAG_SET            = 0x00080000U,  /**< Oper can use SET command */
+  OPER_FLAG_SQUIT          = 0x00100000U,  /**< Oper can do local SQUIT */
+  OPER_FLAG_SQUIT_REMOTE   = 0x00200000U,  /**< Oper can do remote SQUIT */
+  OPER_FLAG_UNDLINE        = 0x00400000U,  /**< Oper can use UNDLINE command */
+  OPER_FLAG_UNKLINE        = 0x00800000U,  /**< Oper can use UNKLINE command */
+  OPER_FLAG_UNRESV         = 0x01000000U,  /**< Oper can use UNRESV command */
+  OPER_FLAG_UNXLINE        = 0x02000000U,  /**< Oper can use UNXLINE command */
+  OPER_FLAG_WALLOPS        = 0x04000000U,  /**< Oper can use WALLOPS command */
+  OPER_FLAG_XLINE          = 0x08000000U   /**< Oper can use XLINE command */
 };
 
 #define HasOFlag(x, y) ((x)->connection->operflags &   (y))

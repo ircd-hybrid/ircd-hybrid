@@ -1095,11 +1095,12 @@ oper_privs_as_string(const unsigned int port)
   static char privs_out[IRCD_BUFSIZE];
   char *privs_ptr = privs_out;
 
-  *privs_ptr = '0';
-
   for (const struct oper_privs *opriv = flag_list; opriv->flag; ++opriv)
     if (port & opriv->flag)
       *privs_ptr++ = opriv->c;
+
+  if (privs_ptr == privs_out)
+    *privs_ptr++ = '0';
 
   *privs_ptr = '\0';
 

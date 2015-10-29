@@ -102,12 +102,7 @@ do_etrace(struct Client *source_p, const char *arg)
   {
     const struct Client *target_p = node->data;
 
-    if (wilds)
-    {
-      if (!match(tname, target_p->name))
-        report_this_status(source_p, target_p);
-    }
-    else
+    if (!wilds || !match(tname, target_p->name))
       report_this_status(source_p, target_p);
   }
 

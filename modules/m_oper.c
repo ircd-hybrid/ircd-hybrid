@@ -59,7 +59,7 @@ oper_up(struct Client *source_p)
 
   if (!(old & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
     ++Count.invisi;
-  if ((old & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
+  else if ((old & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
     --Count.invisi;
 
   assert(dlinkFind(&oper_list, source_p) == NULL);

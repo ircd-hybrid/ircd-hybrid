@@ -776,7 +776,7 @@ save_xline_database(void)
   if (!(f = open_db(XPATH, "w", KLINE_DB_VERSION)))
     return;
 
-  DLINK_FOREACH(ptr, xconf_items.head)
+  DLINK_FOREACH(ptr, gecos_items.head)
   {
     conf = ptr->data;
 
@@ -786,7 +786,7 @@ save_xline_database(void)
 
   SAFE_WRITE(write_uint32(records, f), XPATH);
 
-  DLINK_FOREACH(ptr, xconf_items.head)
+  DLINK_FOREACH(ptr, gecos_items.head)
   {
     conf = ptr->data;
 

@@ -85,7 +85,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
   switch (type)
   {
     case CONF_XLINE:
-      DLINK_FOREACH(node, xconf_items.head)
+      DLINK_FOREACH(node, gecos_items.head)
       {
         conf = node->data;
         sendto_one_numeric(source_p, &me, RPL_STATSXLINE,

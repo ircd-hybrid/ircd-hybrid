@@ -84,6 +84,6 @@ extern struct Client *whowas_get_history(const char *, time_t);
 /*
 ** for debugging...counts related structures stored in whowas array.
 */
-extern void whowas_count_memory(unsigned int *const, uint64_t *const);
+extern void whowas_count_memory(unsigned int *const, size_t *const);
 extern dlink_list WHOWASHASH[];
 #endif /* INCLUDED_whowas_h */

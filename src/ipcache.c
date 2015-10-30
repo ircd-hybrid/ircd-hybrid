@@ -201,7 +201,7 @@ ipcache_remove_expired_entries(void *unused)
  * used in the hash.
  */
 void
-ipcache_get_stats(unsigned int *const number_ips_stored, uint64_t *const mem_ips_stored)
+ipcache_get_stats(unsigned int *const number_ips_stored, size_t *const mem_ips_stored)
 {
   for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
     *number_ips_stored += dlink_list_length(&ip_hash_table[i]);

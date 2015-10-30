@@ -46,6 +46,6 @@ struct ip_entry
 
 extern struct ip_entry *ipcache_find_or_add_address(const struct irc_ssaddr *);
 extern void ipcache_remove_address(const struct irc_ssaddr *);
-extern void ipcache_get_stats(unsigned int *const, uint64_t *const);
+extern void ipcache_get_stats(unsigned int *const, size_t *const);
 extern void ipcache_init(void);
 #endif

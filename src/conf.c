@@ -72,7 +72,7 @@ dlink_list server_items;
 dlink_list cluster_items;
 dlink_list operator_items;
 dlink_list shared_items;
-dlink_list xconf_items;
+dlink_list gecos_items;
 dlink_list nresv_items;
 dlink_list cresv_items;
 
@@ -137,7 +137,7 @@ map_to_list(enum maskitem_type type)
   switch (type)
   {
     case CONF_XLINE:
-      return &xconf_items;
+      return &gecos_items;
       break;
     case CONF_SHARED:
       return &shared_items;
@@ -1042,7 +1042,7 @@ void
 cleanup_tklines(void *unused)
 {
   hostmask_expire_temporary();
-  expire_tklines(&xconf_items);
+  expire_tklines(&gecos_items);
   expire_tklines(&nresv_items);
   expire_tklines(&cresv_items);
 }
@@ -1161,7 +1161,7 @@ clear_out_old_conf(void)
   dlink_node *node = NULL, *node_next = NULL;
   dlink_list *free_items [] = {
     &server_items,   &operator_items,
-     &shared_items,   &xconf_items,
+     &shared_items,   &gecos_items,
      &nresv_items, &cluster_items,  &service_items, &cresv_items, NULL
   };
 

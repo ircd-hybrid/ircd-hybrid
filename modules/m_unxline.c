@@ -50,7 +50,7 @@ xline_remove(const char *gecos)
 {
   dlink_node *node = NULL;
 
-  DLINK_FOREACH(node, xconf_items.head)
+  DLINK_FOREACH(node, gecos_items.head)
   {
     struct MaskItem *conf = node->data;
 

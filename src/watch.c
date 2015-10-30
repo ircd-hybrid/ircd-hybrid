@@ -65,7 +65,7 @@ watch_init(void)
 /*! \brief Counts up memory used by watch list headers
  */
 void
-watch_count_memory(unsigned int *const count, uint64_t *const bytes)
+watch_count_memory(unsigned int *const count, size_t *const bytes)
 {
   for (unsigned int i = 0; i < HASHSIZE; ++i)
     (*count) += dlink_list_length(&watchTable[i]);

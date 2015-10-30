@@ -122,7 +122,7 @@ whowas_get_history(const char *nick, time_t timelimit)
 }
 
 void
-whowas_count_memory(unsigned int *const count, uint64_t *const bytes)
+whowas_count_memory(unsigned int *const count, size_t *const bytes)
 {
   const struct Whowas *whowas = &WHOWAS[0];
 

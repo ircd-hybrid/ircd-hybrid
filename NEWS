@@ -12,6 +12,8 @@ o) Removed CHALLENGE in favour or ssl certificate fingerprint enabled
    operator {} blocks
 o) RSA keys with less than 2048 bits are no longer supported; same applies
    to the DH param file
+o) Added missing irc-operator privilege flags to /stats o. For a full list
+   of flags see doc/reference.conf
 
 
 -- Noteworthy changes in version 8.2.9 (2015-09-13)

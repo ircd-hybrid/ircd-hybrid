@@ -256,7 +256,6 @@ try_connections(void *unused)
 {
   dlink_node *node = NULL;
 
-  /* TODO: change this to set active flag to 0 when added to event! --Habeeb */
   if (GlobalSetOptions.autoconn == 0)
     return;
 
@@ -266,13 +265,12 @@ try_connections(void *unused)
 
     assert(conf->type == CONF_SERVER);
 
-    /* Also when already connecting! (update holdtimes) --SRB
-     */
+    /* Also when already connecting! (update holdtimes) --SRB */
     if (!conf->port || !IsConfAllowAutoConn(conf))
       continue;
 
-
-    /* Skip this entry if the use of it is still on hold until
+    /*
+     * Skip this entry if the use of it is still on hold until
      * future. Otherwise handle this entry (and set it on hold
      * until next time). Will reset only hold times, if already
      * made one successfull connection... [this algorithm is

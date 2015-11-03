@@ -602,8 +602,9 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     return 0;
   }
 
-  /* Make sure this server isn't already connected
-   * Note: conf should ALWAYS be a valid C: line
+  /*
+   * Make sure this server isn't already connected.
+   * Note: conf should ALWAYS be a valid connect {} block
    */
   if ((client_p = hash_find_server(conf->name)))
   {
@@ -629,7 +630,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   /* We already converted the ip once, so lets use it - stu */
   strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 
-  /* create a socket for the server connection */
+  /* Create a socket for the server connection */
   if (comm_open(&client_p->connection->fd, conf->addr.ss.ss_family, SOCK_STREAM, 0, NULL) < 0)
   {
     /* Eek, failure to create the socket */
@@ -640,11 +641,12 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     return 0;
   }
 
-  /* servernames are always guaranteed under HOSTLEN chars */
+  /* Server names are always guaranteed under HOSTLEN chars */
   fd_note(&client_p->connection->fd, "Server: %s", client_p->name);
 
-  /* Attach config entries to client here rather than in
-   * serv_connect_callback(). This to avoid null pointer references.
+  /*
+   * Attach config entries to client here rather than in serv_connect_callback().
+   * This to avoid null pointer references.
    */
   if (!attach_connect_block(client_p, conf->name, conf->host))
   {
@@ -659,9 +661,10 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     return 0;
   }
 
-  /* at this point we have a connection in progress and C/N lines
-   * attached to the client, the socket info should be saved in the
-   * client and it should either be resolved or have a valid address.
+  /*
+   * At this point we have a connection in progress and a connect {} block
+   * attached to the client, the socket info should be saved in the client
+   * and it should either be resolved or have a valid address.
    *
    * The socket has been connected or connect is in progress.
    */

@@ -365,8 +365,6 @@ check_server(const char *name, struct Client *client_p)
 
     error = -3;
 
-    /* XXX: Fix me for IPv6                    */
-    /* XXX sockhost is the IPv4 ip as a string */
     if (!match(conf->host, client_p->host) ||
         !match(conf->host, client_p->sockhost))
     {

@@ -371,7 +371,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 AM_YFLAGS = -d
-AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include -DBUILD_DATE="\"$(BUILD_DATE)\""
+AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include
 ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
@@ -823,8 +823,6 @@ uninstall-am: uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
-
-BUILD_DATE ?= $(shell LANG=C date '+%B %-e %Y at %T%z')
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

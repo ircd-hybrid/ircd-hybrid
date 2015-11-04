@@ -773,7 +773,7 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
   userhost_add(target_p->username, target_p->host, !MyConnect(target_p));
   AddFlag(target_p, FLAGS_USERHOST);
 
-  if (MyClient(target_p))
+  if (MyConnect(target_p))
   {
     sendto_one_numeric(target_p, &me, RPL_VISIBLEHOST, target_p->host);
     clear_ban_cache_client(target_p);

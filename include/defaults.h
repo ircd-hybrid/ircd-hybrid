@@ -97,8 +97,6 @@
 #define CLIENT_FLOOD_MAX     8000
 #define CLIENT_FLOOD_MIN     512
 
-#define WATCHSIZE_MIN 1
-#define WATCHSIZE_DEFAULT 32
 #define TS_MAX_DELTA_MIN      1         /* min value for ts_max_delta */
 #define TS_MAX_DELTA_DEFAULT  600       /* default for ts_max_delta */
 #define TS_WARN_DELTA_MIN     1         /* min value for ts_warn_delta */

@@ -820,7 +820,7 @@ set_default_conf(void)
 
   ConfigGeneral.away_count = 2;
   ConfigGeneral.away_time = 10;
-  ConfigGeneral.max_watch = WATCHSIZE_DEFAULT;
+  ConfigGeneral.max_watch = 30;
   ConfigGeneral.cycle_on_host_change = 1;
   ConfigGeneral.dline_min_cidr = 16;
   ConfigGeneral.dline_min_cidr6 = 48;
@@ -881,8 +881,6 @@ validate_conf(void)
 
   if (EmptyString(ConfigServerInfo.network_desc))
     ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
-
-  ConfigGeneral.max_watch = IRCD_MAX(ConfigGeneral.max_watch, WATCHSIZE_MIN);
 }
 
 /* read_conf()

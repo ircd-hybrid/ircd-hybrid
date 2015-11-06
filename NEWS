@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.10 (2015-??-??)
+-- Noteworthy changes in version 8.2.10 (2015-11-06)
 #######################################################################
 o) IMPORTANT: renamed 'serverhide::links_delay' configuration directive
    to 'serverhide::flatten_links_delay'

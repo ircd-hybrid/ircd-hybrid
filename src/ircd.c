@@ -80,6 +80,32 @@ const char *pidFileName = PPATH;
 unsigned int dorehash;
 unsigned int doremotd;
 
+static int printVersion;
+
+static struct lgetopt myopts[] =
+{
+  { "configfile", &ConfigGeneral.configfile,
+   STRING, "File to use for ircd.conf" },
+  { "klinefile",  &ConfigGeneral.klinefile,
+   STRING, "File to use for kline database" },
+  { "dlinefile",  &ConfigGeneral.dlinefile,
+   STRING, "File to use for dline database" },
+  { "xlinefile",  &ConfigGeneral.xlinefile,
+   STRING, "File to use for xline database" },
+  { "resvfile",   &ConfigGeneral.resvfile,
+   STRING, "File to use for resv database" },
+  { "logfile",    &logFileName,
+   STRING, "File to use for ircd.log" },
+  { "pidfile",    &pidFileName,
+   STRING, "File to use for process ID" },
+  { "foreground", &server_state.foreground,
+   YESNO, "Run in foreground (don't detach)" },
+  { "version",    &printVersion,
+   YESNO, "Print version and exit" },
+  { "help", NULL, USAGE, "Print this text" },
+  { NULL, NULL, STRING, NULL },
+};
+
 static struct event event_cleanup_tklines =
 {
   .name = "cleanup_tklines",
@@ -114,63 +140,6 @@ struct event event_write_links_file =
   .handler = write_links_file,
 };
 
-
-/*
- * print_startup - print startup information
- */
-static void
-print_startup(int pid)
-{
-  printf("ircd: version %s(%s)\n", ircd_version, serno);
-  printf("ircd: pid %d\n", pid);
-  printf("ircd: running in %s mode from %s\n", !server_state.foreground ? "background"
-         : "foreground", ConfigGeneral.dpath);
-}
-
-static void
-make_daemon(void)
-{
-  int pid;
-
-  if ((pid = fork()) < 0)
-  {
-    perror("fork");
-    exit(EXIT_FAILURE);
-  }
-  else if (pid > 0)
-  {
-    print_startup(pid);
-    exit(EXIT_SUCCESS);
-  }
-
-  setsid();
-}
-
-static int printVersion;
-
-static struct lgetopt myopts[] =
-{
-  { "configfile", &ConfigGeneral.configfile,
-   STRING, "File to use for ircd.conf" },
-  { "klinefile",  &ConfigGeneral.klinefile,
-   STRING, "File to use for kline database" },
-  { "dlinefile",  &ConfigGeneral.dlinefile,
-   STRING, "File to use for dline database" },
-  { "xlinefile",  &ConfigGeneral.xlinefile,
-   STRING, "File to use for xline database" },
-  { "resvfile",   &ConfigGeneral.resvfile,
-   STRING, "File to use for resv database" },
-  { "logfile",    &logFileName,
-   STRING, "File to use for ircd.log" },
-  { "pidfile",    &pidFileName,
-   STRING, "File to use for process ID" },
-  { "foreground", &server_state.foreground,
-   YESNO, "Run in foreground (don't detach)" },
-  { "version",    &printVersion,
-   YESNO, "Print version and exit" },
-  { "help", NULL, USAGE, "Print this text" },
-  { NULL, NULL, STRING, NULL },
-};
 
 void
 set_time(void)
@@ -220,7 +189,7 @@ io_loop(void)
     exit_aborted_clients();
     free_exited_clients();
 
-    /* Check to see whether we have to rehash the configuration .. */
+    /* Check to see whether we have to rehash the configuration. */
     if (dorehash)
     {
       conf_rehash(1);
@@ -429,6 +398,37 @@ ssl_init(void)
                      always_accept_verify_cb);
   SSL_CTX_set_session_cache_mode(ConfigServerInfo.client_ctx, SSL_SESS_CACHE_OFF);
 #endif /* HAVE_LIBCRYPTO */
+}
+
+/*
+ * print_startup - print startup information
+ */
+static void
+print_startup(int pid)
+{
+  printf("ircd: version %s(%s)\n", ircd_version, serno);
+  printf("ircd: pid %d\n", pid);
+  printf("ircd: running in %s mode from %s\n", !server_state.foreground ? "background"
+         : "foreground", ConfigGeneral.dpath);
+}
+
+static void
+make_daemon(void)
+{
+  int pid;
+
+  if ((pid = fork()) < 0)
+  {
+    perror("fork");
+    exit(EXIT_FAILURE);
+  }
+  else if (pid > 0)
+  {
+    print_startup(pid);
+    exit(EXIT_SUCCESS);
+  }
+
+  setsid();
 }
 
 int

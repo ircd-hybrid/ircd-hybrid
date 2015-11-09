@@ -35,6 +35,7 @@ enum
 };
 
 extern int valid_sid(const char *);
+extern int valid_uid(const char *);
 extern void init_uid(void);
 extern const char *uid_get(void);
 extern void generate_sid(void);

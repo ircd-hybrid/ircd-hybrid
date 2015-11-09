@@ -42,6 +42,22 @@ valid_sid(const char *sid)
   return 0;
 }
 
+int
+valid_uid(const char *uid)
+{
+  if (strlen(uid) != TOTALSIDUID)
+    return 0;
+
+  if (!IsDigit(*uid))
+    return 0;
+
+  for (unsigned int i = 1; i < TOTALSIDUID; ++i)
+    if (!IsAlNum(*(uid + i)))
+      return 0;
+
+  return 1;
+}
+
 /*
  * init_uid()
  *

@@ -820,7 +820,7 @@ set_default_conf(void)
 
   ConfigGeneral.away_count = 2;
   ConfigGeneral.away_time = 10;
-  ConfigGeneral.max_watch = 30;
+  ConfigGeneral.max_watch = 50;
   ConfigGeneral.cycle_on_host_change = 1;
   ConfigGeneral.dline_min_cidr = 16;
   ConfigGeneral.dline_min_cidr6 = 48;
@@ -836,7 +836,7 @@ set_default_conf(void)
   ConfigGeneral.dots_in_ident = 0;
   ConfigGeneral.min_nonwildcard = 4;
   ConfigGeneral.min_nonwildcard_simple = 3;
-  ConfigGeneral.max_accept = 20;
+  ConfigGeneral.max_accept = 50;
   ConfigGeneral.anti_nick_flood = 0;
   ConfigGeneral.max_nick_time = 20;
   ConfigGeneral.max_nick_changes = 5;

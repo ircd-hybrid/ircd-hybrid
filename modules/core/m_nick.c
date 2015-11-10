@@ -59,6 +59,8 @@
 static int
 check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
 {
+  assert(IsServer(source_p) || (IsClient(source_p) && !MyConnect(source_p)));
+
   /*
    * The old code did some wacky stuff here, if the nick is invalid, kill it
    * and don't bother messing at all
@@ -71,7 +73,7 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
                          nick, server_p->name, source_p->from->name);
 
     sendto_one(source_p, ":%s KILL %s :%s (Bad Nickname)",
-               me.name, nick, me.name);
+               me.id, nick, me.name);
 
     /* Bad nick change */
     if (IsClient(source_p) && !MyConnect(source_p))
@@ -101,6 +103,8 @@ static int
 check_clean_user(struct Client *source_p, char *nick,
                  char *user, struct Client *server_p)
 {
+  assert(IsServer(source_p));
+
   if (!valid_username(user, 0))
   {
     ++ServerStats.is_kill;
@@ -108,7 +112,7 @@ check_clean_user(struct Client *source_p, char *nick,
                          "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
                          user, nick, server_p->name, source_p->from->name);
     sendto_one(source_p, ":%s KILL %s :%s (Bad Username)",
-               me.name, nick, me.name);
+               me.id, nick, me.name);
     return 1;
   }
 
@@ -128,6 +132,8 @@ static int
 check_clean_host(struct Client *source_p, char *nick,
                  char *host, struct Client *server_p)
 {
+  assert(IsServer(source_p));
+
   if (!valid_hostname(host))
   {
     ++ServerStats.is_kill;
@@ -135,7 +141,7 @@ check_clean_host(struct Client *source_p, char *nick,
                          "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
                          host, nick, server_p->name, source_p->from->name);
     sendto_one(source_p, ":%s KILL %s :%s (Bad Hostname)",
-               me.name, nick, me.name);
+               me.id, nick, me.name);
     return 1;
   }
 

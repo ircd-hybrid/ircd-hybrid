@@ -267,7 +267,7 @@ change_local_nick(struct Client *source_p, const char *nick)
 static void
 change_remote_nick(struct Client *source_p, char *parv[])
 {
-  int samenick = !irccmp(source_p->name, parv[1]);
+  const int samenick = !irccmp(source_p->name, parv[1]);
 
   assert(!EmptyString(parv[1]));
   assert(IsClient(source_p));

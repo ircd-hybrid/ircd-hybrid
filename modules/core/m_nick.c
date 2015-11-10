@@ -65,29 +65,26 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
    * The old code did some wacky stuff here, if the nick is invalid, kill it
    * and don't bother messing at all
    */
-  if (!valid_nickname(nick, 0))
+  if (valid_nickname(nick, 0))
+    return 0;
+
+  ++ServerStats.is_kill;
+  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+                       "Bad/long Nick: %s From: %s(via %s)",
+                       nick, server_p->name, source_p->from->name);
+  sendto_one(source_p, ":%s KILL %s :%s (Bad Nickname)",
+             me.id, nick, me.name);
+
+  /* Bad nick change */
+  if (IsClient(source_p) && !MyConnect(source_p))
   {
-    ++ServerStats.is_kill;
-    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                         "Bad/long Nick: %s From: %s(via %s)",
-                         nick, server_p->name, source_p->from->name);
-
-    sendto_one(source_p, ":%s KILL %s :%s (Bad Nickname)",
-               me.id, nick, me.name);
-
-    /* Bad nick change */
-    if (IsClient(source_p) && !MyConnect(source_p))
-    {
-      sendto_server(source_p, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
-                    me.id, source_p->id, me.name);
-      AddFlag(source_p, FLAGS_KILLED);
-      exit_client(source_p, "Bad Nickname");
-    }
-
-    return 1;
+    sendto_server(source_p, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
+                  me.id, source_p->id, me.name);
+    AddFlag(source_p, FLAGS_KILLED);
+    exit_client(source_p, "Bad Nickname");
   }
 
-  return 0;
+  return 1;
 }
 
 /* check_clean_user()
@@ -105,18 +102,16 @@ check_clean_user(struct Client *source_p, char *nick,
 {
   assert(IsServer(source_p));
 
-  if (!valid_username(user, 0))
-  {
-    ++ServerStats.is_kill;
-    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                         "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
-                         user, nick, server_p->name, source_p->from->name);
-    sendto_one(source_p, ":%s KILL %s :%s (Bad Username)",
-               me.id, nick, me.name);
-    return 1;
-  }
+  if (valid_username(user, 0))
+    return 0;
 
-  return 0;
+  ++ServerStats.is_kill;
+  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+                       "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
+                       user, nick, server_p->name, source_p->from->name);
+  sendto_one(source_p, ":%s KILL %s :%s (Bad Username)",
+             me.id, nick, me.name);
+  return 1;
 }
 
 /* check_clean_host()
@@ -134,18 +129,16 @@ check_clean_host(struct Client *source_p, char *nick,
 {
   assert(IsServer(source_p));
 
-  if (!valid_hostname(host))
-  {
-    ++ServerStats.is_kill;
-    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                         "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
-                         host, nick, server_p->name, source_p->from->name);
-    sendto_one(source_p, ":%s KILL %s :%s (Bad Hostname)",
-               me.id, nick, me.name);
-    return 1;
-  }
+  if (valid_hostname(host))
+    return 0;
 
-  return 0;
+  ++ServerStats.is_kill;
+  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+                       "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
+                       host, nick, server_p->name, source_p->from->name);
+  sendto_one(source_p, ":%s KILL %s :%s (Bad Hostname)",
+             me.id, nick, me.name);
+  return 1;
 }
 
 /* set_initial_nick()

@@ -76,7 +76,7 @@ check_clean_nick(struct Client *source_p, const char *nick)
              me.id, nick, me.name);
 
   /* Bad nick change */
-  if (IsClient(source_p) && !MyConnect(source_p))
+  if (!IsServer(source_p))
   {
     sendto_server(source_p, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
                   me.id, source_p->id, me.name);
@@ -740,8 +740,8 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
   if (parc != 3 || EmptyString(parv[parc - 1]))
     return 0;
 
-  if (IsServer(source_p))
-    return 0;  /* Servers can't change nicks.. */
+  if (!IsClient(source_p))
+    return 0;  /* Servers and unknown clients can't change nicks.. */
 
   if (check_clean_nick(source_p, parv[1]))
     return 0;

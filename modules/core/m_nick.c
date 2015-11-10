@@ -42,6 +42,7 @@
 #include "packet.h"
 #include "watch.h"
 #include "misc.h"
+#include "id.h"
 
 
 /* check_clean_nick()
@@ -84,6 +85,23 @@ check_clean_nick(struct Client *source_p, const char *nick)
     exit_client(source_p, "Bad Nickname");
   }
 
+  return 1;
+}
+
+static int
+check_clean_uid(struct Client *source_p, const char *nick, const char *uid)
+{
+  assert(IsServer(source_p));
+
+  if (valid_uid(uid) && strncmp(uid, source_p->id, IRC_MAXSID) == 0)
+    return 0;
+
+  ++ServerStats.is_kill;
+  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+                       "Bad UID: %s Nickname: %s From: %s(via %s)",
+                       uid, nick, source_p->name, source_p->from->name);
+  sendto_one(source_p, ":%s KILL %s :%s (Bad UID)",
+             me.id, uid, me.name);
   return 1;
 }
 
@@ -806,7 +824,8 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
 
   if (check_clean_nick(source_p, parv[1]) ||
       check_clean_user(source_p, parv[1], parv[5]) ||
-      check_clean_host(source_p, parv[1], parv[6]))
+      check_clean_host(source_p, parv[1], parv[6]) ||
+      check_clean_uid(source_p, parv[1], parv[8]))
     return 0;
 
   /*

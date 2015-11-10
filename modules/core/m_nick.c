@@ -57,7 +57,7 @@
  *                truncated nickname, return 1
  */
 static int
-check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
+check_clean_nick(struct Client *source_p, const char *nick)
 {
   assert(IsServer(source_p) || (IsClient(source_p) && !MyConnect(source_p)));
 
@@ -69,9 +69,9 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
     return 0;
 
   ++ServerStats.is_kill;
-  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                       "Bad/long Nick: %s From: %s(via %s)",
-                       nick, server_p->name, source_p->from->name);
+  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
+                       nick, IsServer(source_p) ? source_p->name : source_p->servptr->name,
+                       source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad Nickname)",
              me.id, nick, me.name);
 
@@ -97,8 +97,7 @@ check_clean_nick(struct Client *source_p, char *nick, struct Client *server_p)
  * side effects - if username is erroneous, return 1
  */
 static int
-check_clean_user(struct Client *source_p, char *nick,
-                 char *user, struct Client *server_p)
+check_clean_user(struct Client *source_p, const char *nick, const char *user)
 {
   assert(IsServer(source_p));
 
@@ -108,7 +107,7 @@ check_clean_user(struct Client *source_p, char *nick,
   ++ServerStats.is_kill;
   sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                        "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
-                       user, nick, server_p->name, source_p->from->name);
+                       user, nick, source_p->name, source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad Username)",
              me.id, nick, me.name);
   return 1;
@@ -124,8 +123,7 @@ check_clean_user(struct Client *source_p, char *nick,
  * side effects - if hostname is erroneous, return 1
  */
 static int
-check_clean_host(struct Client *source_p, char *nick,
-                 char *host, struct Client *server_p)
+check_clean_host(struct Client *source_p, const char *nick, const char *host)
 {
   assert(IsServer(source_p));
 
@@ -135,7 +133,7 @@ check_clean_host(struct Client *source_p, char *nick,
   ++ServerStats.is_kill;
   sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                        "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
-                       host, nick, server_p->name, source_p->from->name);
+                       host, nick, source_p->name, source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad Hostname)",
              me.id, nick, me.name);
   return 1;
@@ -745,7 +743,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
   if (IsServer(source_p))
     return 0;  /* Servers can't change nicks.. */
 
-  if (check_clean_nick(source_p, parv[1], source_p->servptr))
+  if (check_clean_nick(source_p, parv[1]))
     return 0;
 
   /* If the nick doesn't exist, allow it and process like normal */
@@ -806,9 +804,9 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
 
-  if (check_clean_nick(source_p, parv[1], source_p) ||
-      check_clean_user(source_p, parv[1], parv[5], source_p) ||
-      check_clean_host(source_p, parv[1], parv[6], source_p))
+  if (check_clean_nick(source_p, parv[1]) ||
+      check_clean_user(source_p, parv[1], parv[5]) ||
+      check_clean_host(source_p, parv[1], parv[6]))
     return 0;
 
   /*

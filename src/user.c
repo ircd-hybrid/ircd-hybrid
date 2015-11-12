@@ -601,7 +601,6 @@ valid_hostname(const char *hostname)
 int
 valid_username(const char *username, const int local)
 {
-  unsigned int dots = 0;
   const char *p = username;
 
   assert(p);
@@ -619,6 +618,8 @@ valid_username(const char *username, const int local)
 
   if (local)
   {
+    unsigned int dots = 0;
+
     while (*++p)
     {
       if (*p == '.' && ConfigGeneral.dots_in_ident)

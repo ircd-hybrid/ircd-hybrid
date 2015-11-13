@@ -606,7 +606,7 @@ exit_one_client(struct Client *source_p, const char *comment)
      * that the client can show the "**signoff" message).
      * (Note: The notice is to the local clients *only*)
      */
-    sendto_common_channels_local(source_p, 0, 0, ":%s!%s@%s QUIT :%s",
+    sendto_common_channels_local(source_p, 0, 0, 0, ":%s!%s@%s QUIT :%s",
                                  source_p->name, source_p->username,
                                  source_p->host, comment);
 

@@ -91,7 +91,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
         if (!EmptyString(extarg))
         {
           strlcpy(target_p->account, extarg, sizeof(target_p->account));
-          sendto_common_channels_local(target_p, 1, CAP_ACCOUNT_NOTIFY, ":%s!%s@%s ACCOUNT %s",
+          sendto_common_channels_local(target_p, 1, CAP_ACCOUNT_NOTIFY, 0, ":%s!%s@%s ACCOUNT %s",
                                        target_p->name, target_p->username,
                                        target_p->host, target_p->account);
         }

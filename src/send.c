@@ -490,8 +490,8 @@ sendto_server(struct Client *one,
  *		  used by m_nick.c and exit_one_client.
  */
 void
-sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
-                             const char *pattern, ...)
+sendto_common_channels_local(struct Client *user, int touser, unsigned int poscap,
+                             unsigned int negcap, const char *pattern, ...)
 {
   va_list args;
   dlink_node *uptr;
@@ -520,7 +520,10 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
           target_p->connection->serial == current_serial)
         continue;
 
-      if (HasCap(target_p, cap) != cap)
+      if (poscap && HasCap(target_p, poscap) != poscap)
+        continue;
+
+      if (negcap && HasCap(target_p, negcap))
         continue;
 
       target_p->connection->serial = current_serial;
@@ -530,7 +533,7 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int cap,
 
   if (touser && MyConnect(user) && !IsDead(user) &&
       user->connection->serial != current_serial)
-    if (HasCap(user, cap) == cap)
+    if (HasCap(user, poscap) == poscap)
       send_message(user, buffer);
 
   dbuf_ref_free(buffer);

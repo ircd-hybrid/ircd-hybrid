@@ -57,7 +57,8 @@ static struct capabilities
   _CAP(CAP_AWAY_NOTIFY, 0, "away-notify"),
   _CAP(CAP_EXTENDED_JOIN, 0, "extended-join"),
   _CAP(CAP_ACCOUNT_NOTIFY, 0, "account-notify"),
-  _CAP(CAP_INVITE_NOTIFY, 0, "invite-notify")
+  _CAP(CAP_INVITE_NOTIFY, 0, "invite-notify"),
+  _CAP(CAP_CHGHOST, 0, "chghost")
 #undef _CAP
 };
 

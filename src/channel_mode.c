@@ -1452,7 +1452,7 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
         modebuf[mbl - 1] = '\0';
 
       if (nc)
-        sendto_channel_local(0, chptr, "%s %s", modebuf, parabuf);
+        sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
 
       nc = 0;
       mc = 0;
@@ -1494,7 +1494,7 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
     parabuf[pbl - 1] = '\0';
 
   if (nc)
-    sendto_channel_local(0, chptr, "%s %s", modebuf, parabuf);
+    sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
 }
 
 /*

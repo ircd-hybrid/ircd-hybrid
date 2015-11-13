@@ -105,11 +105,11 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
     if (topic_differs)
     {
       if (!IsClient(source_p))
-        sendto_channel_local(0, chptr, ":%s TOPIC %s :%s",
+        sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :%s",
                              hidden_server ? me.name : source_p->name,
                              chptr->name, chptr->topic);
       else
-        sendto_channel_local(0, chptr, ":%s!%s@%s TOPIC %s :%s",
+        sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
                              source_p->name, source_p->username, source_p->host,
                              chptr->name, chptr->topic);
     }

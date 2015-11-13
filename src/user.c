@@ -811,19 +811,19 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     *p = '\0';
 
 
-    sendto_channel_local_butone(target_p, CAP_EXTENDED_JOIN, 0, member->chptr, ":%s!%s@%s JOIN %s %s :%s",
-                                target_p->name, target_p->username,
-                                target_p->host, member->chptr->name,
-                                (!IsDigit(target_p->account[0]) && target_p->account[0] != '*') ? target_p->account : "*",
-                                target_p->info);
-    sendto_channel_local_butone(target_p, 0, CAP_EXTENDED_JOIN, member->chptr, ":%s!%s@%s JOIN :%s",
-                                target_p->name, target_p->username,
-                                target_p->host, member->chptr->name);
+    sendto_channel_local(target_p, member->chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+                         target_p->name, target_p->username,
+                         target_p->host, member->chptr->name,
+                         (!IsDigit(target_p->account[0]) && target_p->account[0] != '*') ? target_p->account : "*",
+                         target_p->info);
+    sendto_channel_local(target_p, member->chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+                         target_p->name, target_p->username,
+                         target_p->host, member->chptr->name);
 
     if (nickbuf[0])
-      sendto_channel_local_butone(target_p, 0, 0, member->chptr, ":%s MODE %s +%s %s",
-                                  target_p->servptr->name, member->chptr->name,
-                                  modebuf, nickbuf);
+      sendto_channel_local(target_p, member->chptr, 0, 0, 0, ":%s MODE %s +%s %s",
+                           target_p->servptr->name, member->chptr->name,
+                           modebuf, nickbuf);
 
   }
 

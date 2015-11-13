@@ -824,12 +824,10 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
       sendto_channel_local(target_p, member->chptr, 0, 0, 0, ":%s MODE %s +%s %s",
                            target_p->servptr->name, member->chptr->name,
                            modebuf, nickbuf);
-
+    if (target_p->away[0])
+      sendto_channel_local(target_p, member->chptr, 0, CAP_AWAY_NOTIFY, 0,
+                           ":%s!%s@%s AWAY :%s",
+                           target_p->name, target_p->username,
+                           target_p->host, target_p->away);
   }
-
-  if (target_p->away[0])
-    sendto_common_channels_local(target_p, 0, CAP_AWAY_NOTIFY,
-                                 ":%s!%s@%s AWAY :%s",
-                                 target_p->name, target_p->username,
-                                 target_p->host, target_p->away);
 }

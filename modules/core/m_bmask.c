@@ -116,7 +116,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       {
         *mbuf = *(pbuf - 1) = '\0';
 
-        sendto_channel_local(0, chptr, "%s %s", modebuf, parabuf);
+        sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
         mbuf = modebuf + mlen;
         pbuf = parabuf;
         modecount = 0;
@@ -133,7 +133,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   if (modecount)
   {
     *mbuf = *(pbuf - 1) = '\0';
-    sendto_channel_local(0, chptr, "%s %s", modebuf, parabuf);
+    sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
   }
 
   sendto_server(source_p, 0, 0, ":%s BMASK %lu %s %s :%s",

@@ -95,7 +95,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
       sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
                     source_p->id, chptr->name,
                     chptr->topic);
-      sendto_channel_local(0, chptr, ":%s!%s@%s TOPIC %s :%s",
+      sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
                            source_p->name,
                            source_p->username,
                            source_p->host,
@@ -169,12 +169,12 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
                 chptr->topic);
 
   if (!IsClient(source_p))
-    sendto_channel_local(0, chptr, ":%s TOPIC %s :%s",
+    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :%s",
                          (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
                          chptr->name, chptr->topic);
 
   else
-    sendto_channel_local(0, chptr, ":%s!%s@%s TOPIC %s :%s",
+    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
                          source_p->name,
                          source_p->username,
                          source_p->host,

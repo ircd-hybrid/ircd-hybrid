@@ -903,7 +903,7 @@ channel_do_join_0(struct Client *client_p)
 
     sendto_server(client_p, 0, 0, ":%s PART %s",
                   client_p->id, chptr->name);
-    sendto_channel_local(0, chptr, ":%s!%s@%s PART %s",
+    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s PART %s",
                          client_p->name, client_p->username,
                          client_p->host, chptr->name);
 
@@ -1046,22 +1046,22 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
       /*
        * Notify all other users on the new channel
        */
-      sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
-                                  client_p->name, client_p->username,
-                                  client_p->host, chptr->name,
-                                  (!IsDigit(client_p->account[0]) && client_p->account[0] != '*') ? client_p->account : "*",
-                                  client_p->info);
-      sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
-                                  client_p->name, client_p->username,
-                                  client_p->host, chptr->name);
-      sendto_channel_local(0, chptr, ":%s MODE %s +nt",
+      sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+                           client_p->name, client_p->username,
+                           client_p->host, chptr->name,
+                           (!IsDigit(client_p->account[0]) && client_p->account[0] != '*') ? client_p->account : "*",
+                           client_p->info);
+      sendto_channel_local(NULL, chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+                           client_p->name, client_p->username,
+                           client_p->host, chptr->name);
+      sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s MODE %s +nt",
                            me.name, chptr->name);
 
       if (client_p->away[0])
-        sendto_channel_local_butone(client_p, CAP_AWAY_NOTIFY, 0, chptr,
-                                    ":%s!%s@%s AWAY :%s",
-                                    client_p->name, client_p->username,
-                                    client_p->host, client_p->away);
+        sendto_channel_local(client_p, chptr, 0, CAP_AWAY_NOTIFY, 0,
+                             ":%s!%s@%s AWAY :%s",
+                             client_p->name, client_p->username,
+                             client_p->host, client_p->away);
     }
     else
     {
@@ -1069,20 +1069,20 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
                     client_p->id, (unsigned long)chptr->creationtime,
                     chptr->name);
 
-      sendto_channel_local_butone(NULL, CAP_EXTENDED_JOIN, 0, chptr, ":%s!%s@%s JOIN %s %s :%s",
-                                  client_p->name, client_p->username,
-                                  client_p->host, chptr->name,
-                                  (!IsDigit(client_p->account[0]) && client_p->account[0] != '*') ? client_p->account : "*",
-                                  client_p->info);
-      sendto_channel_local_butone(NULL, 0, CAP_EXTENDED_JOIN, chptr, ":%s!%s@%s JOIN :%s",
-                                  client_p->name, client_p->username,
-                                  client_p->host, chptr->name);
+      sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+                           client_p->name, client_p->username,
+                           client_p->host, chptr->name,
+                           (!IsDigit(client_p->account[0]) && client_p->account[0] != '*') ? client_p->account : "*",
+                           client_p->info);
+      sendto_channel_local(NULL, chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+                           client_p->name, client_p->username,
+                           client_p->host, chptr->name);
 
       if (client_p->away[0])
-        sendto_channel_local_butone(client_p, CAP_AWAY_NOTIFY, 0, chptr,
-                                    ":%s!%s@%s AWAY :%s",
-                                    client_p->name, client_p->username,
-                                    client_p->host, client_p->away);
+        sendto_channel_local(client_p, chptr, 0, CAP_AWAY_NOTIFY, 0,
+                             ":%s!%s@%s AWAY :%s",
+                             client_p->name, client_p->username,
+                             client_p->host, client_p->away);
     }
 
     del_invite(chptr, client_p);
@@ -1137,7 +1137,7 @@ channel_part_one_client(struct Client *client_p, const char *name, const char *r
   {
     sendto_server(client_p, 0, 0, ":%s PART %s :%s",
                   client_p->id, chptr->name, reason);
-    sendto_channel_local(0, chptr, ":%s!%s@%s PART %s :%s",
+    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s PART %s :%s",
                          client_p->name, client_p->username,
                          client_p->host, chptr->name, reason);
   }
@@ -1145,7 +1145,7 @@ channel_part_one_client(struct Client *client_p, const char *name, const char *r
   {
     sendto_server(client_p, 0, 0, ":%s PART %s",
                   client_p->id, chptr->name);
-    sendto_channel_local(0, chptr, ":%s!%s@%s PART %s",
+    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s PART %s",
                          client_p->name, client_p->username,
                          client_p->host, chptr->name);
   }

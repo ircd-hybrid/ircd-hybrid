@@ -763,8 +763,12 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
   }
 
   if (ConfigGeneral.cycle_on_host_change)
-    sendto_common_channels_local(target_p, 0, 0, ":%s!%s@%s QUIT :Changing hostname",
+    sendto_common_channels_local(target_p, 0, 0, CAP_CHGHOST, ":%s!%s@%s QUIT :Changing hostname",
                                  target_p->name, target_p->username, target_p->host);
+
+  sendto_common_channels_local(target_p, 0, CAP_CHGHOST, 0, ":%s!%s@%s CHGHOST %s %s",
+                               target_p->name, target_p->username,
+                               target_p->host, target_p->username, hostname);
 
   if (HasFlag(target_p, FLAGS_USERHOST))
     userhost_del(target_p->username, target_p->host, !MyConnect(target_p));
@@ -810,22 +814,21 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
 
     *p = '\0';
 
-
-    sendto_channel_local(target_p, member->chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+    sendto_channel_local(target_p, member->chptr, 0, CAP_EXTENDED_JOIN, CAP_CHGHOST, ":%s!%s@%s JOIN %s %s :%s",
                          target_p->name, target_p->username,
                          target_p->host, member->chptr->name,
                          (!IsDigit(target_p->account[0]) && target_p->account[0] != '*') ? target_p->account : "*",
                          target_p->info);
-    sendto_channel_local(target_p, member->chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+    sendto_channel_local(target_p, member->chptr, 0, 0, CAP_EXTENDED_JOIN | CAP_CHGHOST, ":%s!%s@%s JOIN :%s",
                          target_p->name, target_p->username,
                          target_p->host, member->chptr->name);
 
     if (nickbuf[0])
-      sendto_channel_local(target_p, member->chptr, 0, 0, 0, ":%s MODE %s +%s %s",
+      sendto_channel_local(target_p, member->chptr, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
                            target_p->servptr->name, member->chptr->name,
                            modebuf, nickbuf);
     if (target_p->away[0])
-      sendto_channel_local(target_p, member->chptr, 0, CAP_AWAY_NOTIFY, 0,
+      sendto_channel_local(target_p, member->chptr, 0, CAP_AWAY_NOTIFY, CAP_CHGHOST,
                            ":%s!%s@%s AWAY :%s",
                            target_p->name, target_p->username,
                            target_p->host, target_p->away);

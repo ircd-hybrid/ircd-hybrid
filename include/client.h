@@ -104,7 +104,8 @@ enum
   CAP_AWAY_NOTIFY    = 0x00000002U,  /**< ircv3.1 away-notify client capability */
   CAP_UHNAMES        = 0x00000004U,  /**< ircv3.2 userhost-in-names client capability */
   CAP_EXTENDED_JOIN  = 0x00000008U,  /**< ircv3.1 extended-join client capability */
-  CAP_ACCOUNT_NOTIFY = 0x00000010U   /**< ircv3.1 account-notify client capability */
+  CAP_ACCOUNT_NOTIFY = 0x00000010U,  /**< ircv3.1 account-notify client capability */
+  CAP_INVITE_NOTIFY  = 0x00000020U   /**< ircv3.2 invite-notify client capability */
 };
 
 #define HasCap(x, y) ((x)->connection->cap_active & (y))

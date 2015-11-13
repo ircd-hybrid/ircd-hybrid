@@ -118,8 +118,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
   }
 
   chptr->last_knock = CurrentTime;
-
-  sendto_channel_local(CHFL_CHANOP | CHFL_HALFOP, chptr,
+  sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, 0, 0, 
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
                        me.name, chptr->name, chptr->name,
                        source_p->name,

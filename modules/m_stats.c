@@ -425,7 +425,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   watch_count_memory(&watch_list_headers, &watch_list_memory);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :WATCH headers %u(%llu) entries %d(%u)",
+                     "z :WATCH headers %u(%zu) entries %d(%u)",
                      watch_list_headers,
                      watch_list_memory, watch_list_entries,
                      watch_list_entries * sizeof(dlink_node) * 2);
@@ -1088,10 +1088,10 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
                      (unsigned int)sp->is_cl,
                      (unsigned int)sp->is_sv);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "t :bytes sent %llu %llu",
+                     "t :bytes sent %ju %ju",
                      sp->is_cbs, sp->is_sbs);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "t :bytes recv %llu %llu",
+                     "t :bytes recv %ju %ju",
                      sp->is_cbr, sp->is_sbr);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :time connected %u %u",
@@ -1177,7 +1177,7 @@ stats_class(struct Client *source_p, int parc, char *parv[])
 static void
 stats_servlinks(struct Client *source_p, int parc, char *parv[])
 {
-  uint64_t sendB = 0, recvB = 0;
+  uintmax_t sendB = 0, recvB = 0;
   time_t uptime = 0;
   dlink_node *node = NULL;
 
@@ -1198,7 +1198,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
     sendB += target_p->connection->send.bytes;
     recvB += target_p->connection->recv.bytes;
 
-    /* ":%s 211 %s %s %u %u %llu %u %llu :%u %u %s" */
+    /* ":%s 211 %s %s %u %u %ju %u %ju :%u %u %s" */
     sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
                get_client_name(target_p, HasUMode(source_p, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
                dbuf_length(&target_p->connection->buf_sendq),

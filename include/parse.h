@@ -82,7 +82,7 @@ struct Message
                              */
   unsigned int args_max;    /* maximum permitted parameters */
   unsigned int flags;
-  uint64_t bytes;  /* bytes received for this message */
+  uintmax_t bytes;  /* bytes received for this message */
 
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST

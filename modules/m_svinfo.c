@@ -52,7 +52,7 @@
 static int
 ms_svinfo(struct Client *source_p, int parc, char *parv[])
 {
-  time_t deltat = 0, theirtime = 0;
+  intmax_t deltat = 0, theirtime = 0;
 
   if (!IsServer(source_p) || !MyConnect(source_p))
     return 0;
@@ -79,40 +79,40 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
    */
   set_time();
 
-  theirtime = atol(parv[4]);
-  deltat = labs(theirtime - CurrentTime);
+  theirtime = strtoimax(parv[4], NULL, 10);
+  deltat = imaxabs(theirtime - CurrentTime);
 
   if (deltat > ConfigGeneral.ts_max_delta)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-          "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+          "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
           get_client_name(source_p, SHOW_IP),
-          (unsigned long) CurrentTime,
-          (unsigned long) theirtime,
-          (int) deltat);
+          CurrentTime,
+          theirtime,
+          deltat);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-          "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+          "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
            get_client_name(source_p, MASK_IP),
-           (unsigned long) CurrentTime,
-           (unsigned long) theirtime,
-           (int) deltat);
+           CurrentTime,
+           theirtime,
+           deltat);
     ilog(LOG_TYPE_IRCD,
-         "Link %s dropped, excessive TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+         "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
          get_client_name(source_p, SHOW_IP),
-         (unsigned long) CurrentTime,
-         (unsigned long) theirtime,
-         (int) deltat);
+         CurrentTime,
+         theirtime,
+         deltat);
     exit_client(source_p, "Excessive TS delta");
     return 0;
   }
 
   if (deltat > ConfigGeneral.ts_warn_delta)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                "Link %s notable TS delta (my TS=%lu, their TS=%lu, delta=%d)",
+                "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
                 source_p->name,
-                (unsigned long) CurrentTime,
-                (unsigned long) theirtime,
-                (int) deltat);
+                CurrentTime,
+                theirtime,
+                deltat);
   return 0;
 }
 

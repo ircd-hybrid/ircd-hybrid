@@ -253,8 +253,8 @@ change_local_nick(struct Client *source_p, const char *nick)
                                source_p->host, nick);
   whowas_add_history(source_p, 1);
 
-  sendto_server(source_p, 0, 0, ":%s NICK %s :%lu",
-                source_p->id, nick, (unsigned long)source_p->tsinfo);
+  sendto_server(source_p, 0, 0, ":%s NICK %s :%ju",
+                source_p->id, nick, source_p->tsinfo);
 
   hash_del_client(source_p);
   strlcpy(source_p->name, nick, sizeof(source_p->name));
@@ -303,8 +303,8 @@ change_remote_nick(struct Client *source_p, char *parv[])
                                source_p->host, parv[1]);
 
   whowas_add_history(source_p, 1);
-  sendto_server(source_p, 0, 0, ":%s NICK %s :%lu",
-                source_p->id, parv[1], (unsigned long)source_p->tsinfo);
+  sendto_server(source_p, 0, 0, ":%s NICK %s :%ju",
+                source_p->id, parv[1], source_p->tsinfo);
 
   /* Set the new nick name */
   hash_del_client(source_p);

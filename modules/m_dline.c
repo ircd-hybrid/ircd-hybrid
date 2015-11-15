@@ -108,8 +108,8 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
   struct MaskItem *conf;
 
   if (duration)
-    snprintf(buf, sizeof(buf), "Temporary D-line %d min. - %.*s (%s)",
-             (int)(duration/60), REASONLEN, reason, date_iso8601(0));
+    snprintf(buf, sizeof(buf), "Temporary D-line %ju min. - %.*s (%s)",
+             duration / 60, REASONLEN, reason, date_iso8601(0));
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
@@ -124,15 +124,15 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
     conf->until = CurrentTime + duration;
 
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Added temporary %d min. D-Line [%s]",
-                        duration/60, conf->host);
+      sendto_one_notice(source_p, &me, ":Added temporary %ju min. D-Line [%s]",
+                        duration / 60, conf->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s added temporary %d min. D-Line for [%s] [%s]",
+                         "%s added temporary %ju min. D-Line for [%s] [%s]",
                          get_oper_name(source_p), duration/60,
                          conf->host, conf->reason);
-    ilog(LOG_TYPE_DLINE, "%s added temporary %d min. D-Line for [%s] [%s]",
-         get_oper_name(source_p), duration/60, conf->host, conf->reason);
+    ilog(LOG_TYPE_DLINE, "%s added temporary %ju min. D-Line for [%s] [%s]",
+         get_oper_name(source_p), duration / 60, conf->host, conf->reason);
   }
   else
   {
@@ -183,8 +183,8 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    sendto_match_servs(source_p, target_server, CAPAB_DLN, "DLINE %s %lu %s :%s",
-                       target_server, (unsigned long)duration,
+    sendto_match_servs(source_p, target_server, CAPAB_DLN, "DLINE %s %ju %s :%s",
+                       target_server, duration,
                        dlhost, reason);
 
     /* Allow ON to apply local dline as well if it matches */
@@ -193,7 +193,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_a_line(source_p, "DLINE", CAPAB_DLN, SHARED_DLINE,
-                   "%d %s :%s", duration, dlhost, reason);
+                   "%ju %s :%s", duration, dlhost, reason);
 
   if ((t = parse_netmask(dlhost, NULL, NULL)) == HM_HOST)
   {

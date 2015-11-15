@@ -70,9 +70,9 @@ send_tb(struct Client *client_p, const struct Channel *chptr)
    * for further information   -Michael
    */
   if (chptr->topic_time)
-    sendto_one(client_p, ":%s TBURST %lu %s %lu %s :%s", me.id,
-               (unsigned long)chptr->creationtime, chptr->name,
-               (unsigned long)chptr->topic_time,
+    sendto_one(client_p, ":%s TBURST %ju %s %ju %s :%s", me.id,
+               chptr->creationtime, chptr->name,
+               chptr->topic_time,
                chptr->topic_info,
                chptr->topic);
 }
@@ -102,18 +102,18 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   }
 
   if (IsCapable(client_p, CAPAB_SVS))
-    sendto_one(client_p, ":%s UID %s %u %lu %s %s %s %s %s %s :%s",
+    sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
                target_p->servptr->id,
                target_p->name, target_p->hopcount + 1,
-               (unsigned long) target_p->tsinfo,
+               target_p->tsinfo,
                ubuf, target_p->username, target_p->host,
                target_p->sockhost, target_p->id,
                target_p->account, target_p->info);
   else
-    sendto_one(client_p, ":%s UID %s %u %lu %s %s %s %s %s :%s",
+    sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s :%s",
                target_p->servptr->id,
                target_p->name, target_p->hopcount + 1,
-               (unsigned long) target_p->tsinfo,
+               target_p->tsinfo,
                ubuf, target_p->username, target_p->host,
                target_p->sockhost, target_p->id, target_p->info);
 
@@ -134,7 +134,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
         *m++ = tab->c;
     *m = '\0';
 
-    sendto_one(client_p, ":%s SVSTAG %s %lu %u +%s :%s", me.id, target_p->id,
+    sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id, target_p->id,
                target_p->tsinfo, svstag->numeric, ubuf, svstag->tag);
   }
 }
@@ -282,8 +282,8 @@ server_estab(struct Client *client_p)
                me.name, ConfigServerHide.hidden ? "(H) " : "", me.info);
   }
 
-  sendto_one(client_p, ":%s SVINFO %d %d 0 :%lu", me.id, TS_CURRENT, TS_MIN,
-             (unsigned long)CurrentTime);
+  sendto_one(client_p, ":%s SVINFO %d %d 0 :%ju", me.id, TS_CURRENT, TS_MIN,
+             CurrentTime);
 
   /* *WARNING*
   **    In the following code in place of plain server's

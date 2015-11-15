@@ -49,10 +49,10 @@ struct SetOptions
  */
 struct ServerStatistics
 {
-  uint64_t        is_cbs;  /* bytes sent to clients */
-  uint64_t        is_cbr;  /* bytes received from clients */
-  uint64_t        is_sbs;  /* bytes sent to servers */
-  uint64_t        is_sbr;  /* bytes received from servers */
+  uintmax_t        is_cbs;  /* bytes sent to clients */
+  uintmax_t        is_cbr;  /* bytes received from clients */
+  uintmax_t        is_sbs;  /* bytes sent to servers */
+  uintmax_t        is_sbr;  /* bytes received from servers */
 
   time_t          is_cti;  /* time spent connected by clients */
   time_t          is_sti;  /* time spent connected by servers */
@@ -74,7 +74,7 @@ struct ServerStatistics
 
 struct Counter
 {
-  uint64_t totalrestartcount; /* Total client count ever */
+  uintmax_t totalrestartcount; /* Total client count ever */
   unsigned int myserver;      /* my servers          */
   unsigned int oper;          /* Opers               */
   unsigned int local;         /* Local Clients       */

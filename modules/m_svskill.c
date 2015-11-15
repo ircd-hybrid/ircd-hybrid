@@ -98,7 +98,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
     sendto_one(target_p, ":%s SVSKILL %s :%s", source_p->id,
                target_p->id, comment);
   else
-    sendto_one(target_p, ":%s SVSKILL %s %lu :%s", source_p->id,
+    sendto_one(target_p, ":%s SVSKILL %s %ju :%s", source_p->id,
                target_p->id, ts, comment);
   return 0;
 }

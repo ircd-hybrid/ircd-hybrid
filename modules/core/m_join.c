@@ -139,8 +139,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     if (newts < 800000000)
     {
       sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                           "*** Bogus TS %lu on %s ignored from %s(via %s)",
-                           (unsigned long)newts, chptr->name,
+                           "*** Bogus TS %ju on %s ignored from %s(via %s)",
+                           newts, chptr->name,
                            source_p->name, source_p->from->name);
 
       newts = (oldts == 0) ? 0 : 800000000;
@@ -151,11 +151,11 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     if (!newts && !isnew && oldts)
     {
       sendto_channel_local(NULL, chptr, 0, 0, 0,
-                           ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to 0",
-                           me.name, chptr->name, chptr->name, (unsigned long)oldts);
+                           ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
+                           me.name, chptr->name, chptr->name, oldts);
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "Server %s changing TS on %s from %lu to 0",
-                           source_p->name, chptr->name, (unsigned long)oldts);
+                           "Server %s changing TS on %s from %ju to 0",
+                           source_p->name, chptr->name, oldts);
     }
   }
 
@@ -203,9 +203,9 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     }
 
     sendto_channel_local(NULL, chptr, 0, 0, 0,
-                         ":%s NOTICE %s :*** Notice -- TS for %s changed from %lu to %lu",
+                         ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
                           me.name, chptr->name, chptr->name,
-                         (unsigned long)oldts, (unsigned long)newts);
+                         oldts, newts);
   }
 
   if (*modebuf)
@@ -239,8 +239,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                            source_p->host, source_p->away);
   }
 
-  sendto_server(source_p, 0, 0, ":%s JOIN %lu %s +",
-                source_p->id, (unsigned long)chptr->creationtime, chptr->name);
+  sendto_server(source_p, 0, 0, ":%s JOIN %ju %s +",
+                source_p->id, chptr->creationtime, chptr->name);
   return 0;
 }
 

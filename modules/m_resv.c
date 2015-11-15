@@ -48,7 +48,7 @@
  * side effects	- parse resv, create if valid
  */
 static void
-parse_resv(struct Client *source_p, const char *name, int duration, const char *reason)
+parse_resv(struct Client *source_p, const char *name, time_t duration, const char *reason)
 {
   const char *type = "channel";
   struct MaskItem *conf = NULL;
@@ -87,16 +87,16 @@ parse_resv(struct Client *source_p, const char *name, int duration, const char *
   if (duration)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A %d minute RESV has been placed on %s: %s",
-                        duration/60, type, name);
+      sendto_one_notice(source_p, &me, ":A %ju minute RESV has been placed on %s: %s",
+                        duration / 60, type, name);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has placed a %d minute RESV on %s: %s [%s]",
+                         "%s has placed a %ju minute RESV on %s: %s [%s]",
                          get_oper_name(source_p),
                          duration/60, type,
                          conf->name, conf->reason);
-    ilog(LOG_TYPE_RESV, "%s added temporary %d min. RESV for [%s] [%s]",
-         get_oper_name(source_p), (int)duration/60,
+    ilog(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
+         get_oper_name(source_p), duration / 60,
          conf->name, conf->reason);
     conf->until = CurrentTime + duration;
   }
@@ -142,8 +142,8 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
     /* if a given expire time is given, ENCAP it */
     if (duration)
       sendto_match_servs(source_p, target_server, CAPAB_ENCAP,
-                         "ENCAP %s RESV %d %s 0 :%s",
-                         target_server, (int)duration, resv, reason);
+                         "ENCAP %s RESV %ju %s 0 :%s",
+                         target_server, duration, resv, reason);
     else
       sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
                          "RESV %s 0 %s :%s",
@@ -157,13 +157,13 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   {
     if (duration)
       cluster_a_line(source_p, "ENCAP", CAPAB_ENCAP, SHARED_RESV,
-                     "RESV %d %s 0 :%s", (int)duration, resv, reason);
+                     "RESV %ju %s 0 :%s", duration, resv, reason);
     else
       cluster_a_line(source_p, "RESV", CAPAB_KLN, SHARED_RESV,
                      "0 %s :%s", resv, reason);
   }
 
-  parse_resv(source_p, resv, (int)duration, reason);
+  parse_resv(source_p, resv, duration, reason);
   return 0;
 }
 

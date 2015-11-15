@@ -148,9 +148,9 @@ m_invite(struct Client *source_p, int parc, char *parv[])
                          source_p->host, target_p->name, chptr->name);
   }
 
-  sendto_server(source_p, 0, 0, ":%s INVITE %s %s %lu",
+  sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
-                chptr->name, (unsigned long)chptr->creationtime);
+                chptr->name, chptr->creationtime);
   return 0;
 }
 
@@ -210,9 +210,9 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
                          source_p->host, target_p->name, chptr->name);
   }
 
-  sendto_server(source_p, 0, 0, ":%s INVITE %s %s %lu",
+  sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
-                chptr->name, (unsigned long)chptr->creationtime);
+                chptr->name, chptr->creationtime);
   return 0;
 }
 

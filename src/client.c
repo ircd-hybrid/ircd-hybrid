@@ -743,7 +743,7 @@ exit_client(struct Client *source_p, const char *comment)
                            source_p->name, source_p->username, source_p->host, comment,
                            source_p->sockhost);
 
-      ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %llu/%llu",
+      ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %ju/%ju",
            date_ctime(source_p->connection->firsttime), (unsigned int)(on_for / 3600),
            (unsigned int)((on_for % 3600)/60), (unsigned int)(on_for % 60),
            source_p->name, source_p->username, source_p->host,
@@ -816,11 +816,11 @@ exit_client(struct Client *source_p, const char *comment)
     if (MyConnect(source_p))
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "%s was connected for %s. %llu/%llu sendK/recvK.",
+                           "%s was connected for %s. %ju/%ju sendK/recvK.",
                            source_p->name, time_dissect(CurrentTime - source_p->connection->firsttime),
                            source_p->connection->send.bytes >> 10,
                            source_p->connection->recv.bytes >> 10);
-      ilog(LOG_TYPE_IRCD, "%s was connected for %s. %llu/%llu sendK/recvK.",
+      ilog(LOG_TYPE_IRCD, "%s was connected for %s. %ju/%ju sendK/recvK.",
            source_p->name, time_dissect(CurrentTime - source_p->connection->firsttime),
            source_p->connection->send.bytes >> 10,
            source_p->connection->recv.bytes >> 10);

@@ -90,8 +90,8 @@ kline_add(struct Client *source_p, const char *user, const char *host,
   struct MaskItem *conf;
 
   if (duration)
-    snprintf(buf, sizeof(buf), "Temporary K-line %d min. - %.*s (%s)",
-             (int)(duration/60), REASONLEN, reason, date_iso8601(0));
+    snprintf(buf, sizeof(buf), "Temporary K-line %ju min. - %.*s (%s)",
+             duration / 60, REASONLEN, reason, date_iso8601(0));
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
@@ -107,16 +107,16 @@ kline_add(struct Client *source_p, const char *user, const char *host,
     conf->until = CurrentTime + duration;
 
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Added temporary %d min. K-Line [%s@%s]",
-                        duration/60, conf->user, conf->host);
+      sendto_one_notice(source_p, &me, ":Added temporary %ju min. K-Line [%s@%s]",
+                        duration / 60, conf->user, conf->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-                         get_oper_name(source_p), duration/60,
+                         "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
+                         get_oper_name(source_p), duration / 60,
                          conf->user, conf->host,
                          conf->reason);
-    ilog(LOG_TYPE_KLINE, "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-         get_oper_name(source_p), duration/60,
+    ilog(LOG_TYPE_KLINE, "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
+         get_oper_name(source_p), duration / 60,
          conf->user, conf->host, conf->reason);
   }
   else
@@ -208,8 +208,8 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    sendto_match_servs(source_p, target_server, CAPAB_KLN, "KLINE %s %lu %s %s :%s",
-                       target_server, (unsigned long)duration,
+    sendto_match_servs(source_p, target_server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
+                       target_server, duration,
                        user, host, reason);
 
     /* Allow ON to apply local kline as well if it matches */
@@ -218,7 +218,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_a_line(source_p, "KLINE", CAPAB_KLN, SHARED_KLINE,
-                   "%d %s %s :%s", duration, user, host, reason);
+                   "%ju %s %s :%s", duration, user, host, reason);
 
   if (already_placed_kline(source_p, user, host))
     return 0;

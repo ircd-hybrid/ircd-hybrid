@@ -91,8 +91,8 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
   struct MaskItem *conf;
 
   if (duration)
-    snprintf(buf, sizeof(buf), "Temporary X-line %d min. - %.*s (%s)",
-             (int)(duration/60), REASONLEN, reason, date_iso8601(0));
+    snprintf(buf, sizeof(buf), "Temporary X-line %ju min. - %.*s (%s)",
+             duration / 60, REASONLEN, reason, date_iso8601(0));
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
@@ -107,15 +107,15 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
     conf->until = CurrentTime + duration;
 
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Added temporary %d min. X-Line [%s]",
-                        (int)duration/60, conf->name);
+      sendto_one_notice(source_p, &me, ":Added temporary %ju min. X-Line [%s]",
+                        duration / 60, conf->name);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s added temporary %d min. X-Line for [%s] [%s]",
-                         get_oper_name(source_p), (int)duration/60,
+                         "%s added temporary %ju min. X-Line for [%s] [%s]",
+                         get_oper_name(source_p), duration / 60,
                          conf->name, conf->reason);
-    ilog(LOG_TYPE_XLINE, "%s added temporary %d min. X-Line for [%s] [%s]",
-         get_oper_name(source_p), (int)duration/60, conf->name, conf->reason);
+    ilog(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
+         get_oper_name(source_p), duration / 60, conf->name, conf->reason);
   }
   else
   {
@@ -186,15 +186,15 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    sendto_match_servs(source_p, target_server, CAPAB_CLUSTER, "XLINE %s %s %d :%s",
-                       target_server, gecos, (int)duration, reason);
+    sendto_match_servs(source_p, target_server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
+                       target_server, gecos, duration, reason);
 
     /* Allow ON to apply local xline as well if it matches */
     if (match(target_server, me.name))
       return 0;
   }
   else
-    cluster_a_line(source_p, "XLINE", CAPAB_CLUSTER, SHARED_XLINE, "%s %d :%s",
+    cluster_a_line(source_p, "XLINE", CAPAB_CLUSTER, SHARED_XLINE, "%s %ju :%s",
                    gecos, duration, reason);
 
   if (!valid_xline(source_p, gecos))

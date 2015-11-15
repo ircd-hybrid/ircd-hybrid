@@ -508,9 +508,9 @@ mp_pool_new(size_t item_size, size_t chunk_capacity)
   pool->next = mp_allocated_pools;
   mp_allocated_pools = pool;
 
-  ilog(LOG_TYPE_DEBUG, "Capacity is %lu, item size is %lu, alloc size is %lu",
+  ilog(LOG_TYPE_DEBUG, "Capacity is %lu, item size is %zu, alloc size is %lu",
        (unsigned long)pool->new_chunk_capacity,
-       (unsigned long)pool->item_alloc_size,
+       pool->item_alloc_size,
        (unsigned long)(pool->new_chunk_capacity*pool->item_alloc_size));
 
   return pool;
@@ -716,7 +716,7 @@ mp_pool_log_status(mp_pool_t *pool)
   for (chunk = pool->empty_chunks; chunk; chunk = chunk->next)
     bytes_allocated += chunk->mem_size;
 
-  ilog(LOG_TYPE_DEBUG, "%llu bytes in %d empty chunks",
+  ilog(LOG_TYPE_DEBUG, "%ju bytes in %d empty chunks",
        bytes_allocated, pool->n_empty_chunks);
   for (chunk = pool->used_chunks; chunk; chunk = chunk->next)
   {
@@ -728,7 +728,7 @@ mp_pool_log_status(mp_pool_t *pool)
          chunk->n_allocated);
   }
 
-  ilog(LOG_TYPE_DEBUG, "%llu/%llu bytes in %d partially full chunks",
+  ilog(LOG_TYPE_DEBUG, "%ju/%ju bytes in %d partially full chunks",
        bu, ba, n_used);
   bytes_used += bu;
   bytes_allocated += ba;
@@ -741,19 +741,19 @@ mp_pool_log_status(mp_pool_t *pool)
     ba += chunk->mem_size;
   }
 
-  ilog(LOG_TYPE_DEBUG, "%llu/%llu bytes in %d full chunks",
+  ilog(LOG_TYPE_DEBUG, "%ju/%ju bytes in %d full chunks",
        bu, ba, n_full);
   bytes_used += bu;
   bytes_allocated += ba;
 
-  ilog(LOG_TYPE_DEBUG, "Total: %llu/%llu bytes allocated "
+  ilog(LOG_TYPE_DEBUG, "Total: %ju/%ju bytes allocated "
        "for cell pools are full.",
        bytes_used, bytes_allocated);
 
 #ifdef MEMPOOL_STATS
-  ilog(LOG_TYPE_DEBUG, "%llu cell allocations ever; "
-       "%llu chunk allocations ever; "
-       "%llu chunk frees ever.",
+  ilog(LOG_TYPE_DEBUG, "%ju cell allocations ever; "
+       "%ju chunk allocations ever; "
+       "%ju chunk frees ever.",
        pool->total_items_allocated,
        pool->total_chunks_allocated,
        pool->total_chunks_freed);

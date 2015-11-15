@@ -160,8 +160,8 @@ channel_send_members(struct Client *client_p, const struct Channel *chptr,
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
 
-  start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %lu %s %s %s:",
-                             me.id, (unsigned long)chptr->creationtime,
+  start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s %s:",
+                             me.id, chptr->creationtime,
                              chptr->name, modebuf, parabuf);
 
   DLINK_FOREACH(node, chptr->members.head)
@@ -227,8 +227,8 @@ channel_send_mask_list(struct Client *client_p, const struct Channel *chptr,
   if (!list->length)
     return;
 
-  mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %lu %s %c :", me.id,
-                  (unsigned long)chptr->creationtime, chptr->name, flag);
+  mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %ju %s %c :", me.id,
+                  chptr->creationtime, chptr->name, flag);
   cur_len = mlen;
 
   DLINK_FOREACH(node, list->head)
@@ -1039,8 +1039,8 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
       chptr->mode.mode |= MODE_TOPICLIMIT;
       chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-      sendto_server(client_p, 0, 0, ":%s SJOIN %lu %s +nt :@%s",
-                    me.id, (unsigned long)chptr->creationtime,
+      sendto_server(client_p, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
+                    me.id, chptr->creationtime,
                     chptr->name, client_p->id);
 
       /*
@@ -1065,8 +1065,8 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
     }
     else
     {
-      sendto_server(client_p, 0, 0, ":%s JOIN %lu %s +",
-                    client_p->id, (unsigned long)chptr->creationtime,
+      sendto_server(client_p, 0, 0, ":%s JOIN %ju %s +",
+                    client_p->id, chptr->creationtime,
                     chptr->name);
 
       sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",

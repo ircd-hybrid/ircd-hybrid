@@ -68,6 +68,7 @@
 #include <sys/file.h>
 
 #include <limits.h>
+#include <inttypes.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

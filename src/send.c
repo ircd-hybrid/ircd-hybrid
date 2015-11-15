@@ -38,7 +38,7 @@
 #include "log.h"
 
 
-static uint64_t current_serial;
+static uintmax_t current_serial;
 
 
 /* send_format()

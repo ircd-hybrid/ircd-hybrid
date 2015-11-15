@@ -71,9 +71,9 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   {
     /* XXX: possibly allow to remove certain tags by numeric */
     client_clear_svstags(target_p);
-    sendto_server(source_p, 0, 0, ":%s SVSTAG %s %lu %s",
+    sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s",
                   source_p->id,
-                  target_p->id, (unsigned long)target_p->tsinfo, parv[3]);
+                  target_p->id, target_p->tsinfo, parv[3]);
     return 0;
   }
 
@@ -83,9 +83,9 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   client_attach_svstag(target_p, strtoul(parv[3], NULL, 10),
                        parv[4], parv[5]);
 
-  sendto_server(source_p, 0, 0, ":%s SVSTAG %s %lu %s %s :%s",
+  sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s %s :%s",
                 source_p->id,
-                target_p->id, (unsigned long)target_p->tsinfo,
+                target_p->id, target_p->tsinfo,
                 parv[3], parv[4], parv[5]);
   return 0;
 }

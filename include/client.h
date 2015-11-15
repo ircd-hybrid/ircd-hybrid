@@ -301,7 +301,7 @@ struct Connection
   unsigned int operflags;     /**< IRC Operator privilege flags */
   unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
 
-  uint64_t serial;     /**< Used to enforce 1 send per nick */
+  uintmax_t serial;     /**< Used to enforce 1 send per nick */
 
   time_t       lasttime;   /**< Last time data read from socket */
   time_t       firsttime;  /**< Time client was created */
@@ -326,7 +326,7 @@ struct Connection
   struct
   {
     unsigned int messages;      /**< Statistics: protocol messages sent/received */
-    uint64_t bytes;             /**< Statistics: total bytes sent/received */
+    uintmax_t bytes;             /**< Statistics: total bytes sent/received */
   } recv, send;
 
   struct

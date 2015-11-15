@@ -157,12 +157,12 @@ set_time(void)
 
   if (newtime.tv_sec < CurrentTime)
   {
-    ilog(LOG_TYPE_IRCD, "System clock is running backwards - (%lu < %lu)",
-         (unsigned long)newtime.tv_sec, (unsigned long)CurrentTime);
+    ilog(LOG_TYPE_IRCD, "System clock is running backwards - (%ju < %ju)",
+         newtime.tv_sec, CurrentTime);
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                         "System clock is running backwards - (%lu < %lu)",
-                         (unsigned long)newtime.tv_sec,
-                         (unsigned long)CurrentTime);
+                         "System clock is running backwards - (%ju < %ju)",
+                         newtime.tv_sec,
+                         CurrentTime);
     event_set_back_events(CurrentTime - newtime.tv_sec);
   }
 

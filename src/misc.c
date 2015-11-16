@@ -102,19 +102,19 @@ time_dissect(time_t duration)
   static char buf[64];
   unsigned int days = 0, hours = 0, minutes = 0, seconds = 0;
 
-  while (time >= 60 * 60 * 24)
+  while (duration >= 60 * 60 * 24)
   {
     duration -= 60 * 60 * 24;
     ++days;
   }
 
-  while (time >= 60 * 60)
+  while (duration >= 60 * 60)
   {
     duration -= 60 * 60;
     ++hours;
   }
 
-  while (time >= 60)
+  while (duration >= 60)
   {
     duration -= 60;
     ++minutes;

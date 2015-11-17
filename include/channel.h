@@ -74,6 +74,7 @@ struct Channel
   time_t creationtime;
   time_t topic_time;
   time_t last_knock;  /**< Don't allow knock to flood */
+  time_t last_invite;
   time_t last_join_time;
   time_t first_received_message_time; /*!< channel flood control */
   unsigned int flags;

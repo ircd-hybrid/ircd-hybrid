@@ -119,6 +119,12 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  if ((chptr->last_invite + ConfigChannel.invite_delay_channel) > CurrentTime)
+  {
+    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->name, "channel");
+    return 0;
+  }
+
   source_p->connection->invite.last_attempt = CurrentTime;
   source_p->connection->invite.count++;
 
@@ -126,6 +132,8 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
   if (target_p->away[0])
     sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
+
+  chptr->last_invite = CurrentTime;
 
   if (MyConnect(target_p))
   {
@@ -188,6 +196,8 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   if (parc > 3 && IsDigit(*parv[3]))
     if (atoi(parv[3]) > chptr->creationtime)
       return 0;
+
+  chptr->last_invite = CurrentTime;
 
   if (MyConnect(target_p))
   {

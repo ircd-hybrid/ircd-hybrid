@@ -260,6 +260,7 @@ struct config_channel_entry
   unsigned int disable_fake_channels;
   unsigned int invite_client_count;
   unsigned int invite_client_time;
+  unsigned int invite_delay_channel;
   unsigned int knock_client_count;
   unsigned int knock_client_time;
   unsigned int knock_delay_channel;

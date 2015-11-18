@@ -56,23 +56,24 @@ struct Capability
   unsigned int cap;  /**< Mask value */
 };
 
+/** Server capability flags */
 enum
 {
-  CAPAB_QS      = 0x00000001U,  /* Can handle quit storm removal */
-  CAPAB_EX      = 0x00000002U,  /* Can do channel +e exemptions */
-  CAPAB_IE      = 0x00000004U,  /* Can do invite exceptions */
-  CAPAB_EOB     = 0x00000008U,  /* Can do EOB message */
-  CAPAB_KLN     = 0x00000010U,  /* Can do KLINE message */
-  CAPAB_KNOCK   = 0x00000020U,  /* Supports KNOCK */
-  CAPAB_UNKLN   = 0x00000040U,  /* Can do UNKLINE message */
-  CAPAB_CLUSTER = 0x00000080U,  /* Supports server clustering */
-  CAPAB_ENCAP   = 0x00000100U,  /* Supports ENCAP message */
-  CAPAB_HOPS    = 0x00000200U,  /* Supports HALFOPS */
-  CAPAB_TBURST  = 0x00000400U,  /* Supports TBURST */
-  CAPAB_SVS     = 0x00000800U,  /* Supports services */
-  CAPAB_DLN     = 0x00001000U,  /* Can do DLINE message */
-  CAPAB_UNDLN   = 0x00002000U,  /* Can do UNDLINE message */
-  CAPAB_CHW     = 0x00004000U   /* Can do channel wall @# */
+  CAPAB_QS      = 0x00000001U,  /**< Can handle quit storm removal */
+  CAPAB_EX      = 0x00000002U,  /**< Can do channel +e exemptions */
+  CAPAB_IE      = 0x00000004U,  /**< Can do invite exceptions */
+  CAPAB_EOB     = 0x00000008U,  /**< Can do EOB message */
+  CAPAB_KLN     = 0x00000010U,  /**< Can do KLINE message */
+  CAPAB_KNOCK   = 0x00000020U,  /**< Supports KNOCK */
+  CAPAB_UNKLN   = 0x00000040U,  /**< Can do UNKLINE message */
+  CAPAB_CLUSTER = 0x00000080U,  /**< Supports server clustering */
+  CAPAB_ENCAP   = 0x00000100U,  /**< Supports ENCAP message */
+  CAPAB_HOPS    = 0x00000200U,  /**< Supports HALFOPS */
+  CAPAB_TBURST  = 0x00000400U,  /**< Supports TBURST */
+  CAPAB_SVS     = 0x00000800U,  /**< Supports services */
+  CAPAB_DLN     = 0x00001000U,  /**< Can do DLINE message */
+  CAPAB_UNDLN   = 0x00002000U,  /**< Can do UNDLINE message */
+  CAPAB_CHW     = 0x00004000U   /**< Can do channel wall @# */
 };
 
 /*

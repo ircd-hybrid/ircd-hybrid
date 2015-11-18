@@ -161,8 +161,7 @@ set_time(void)
          newtime.tv_sec, CurrentTime);
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "System clock is running backwards - (%ju < %ju)",
-                         newtime.tv_sec,
-                         CurrentTime);
+                         newtime.tv_sec, CurrentTime);
     event_set_back_events(CurrentTime - newtime.tv_sec);
   }
 

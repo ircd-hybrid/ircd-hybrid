@@ -162,39 +162,38 @@ report_and_set_user_flags(struct Client *source_p, const struct MaskItem *conf)
 {
   /* If this user is being spoofed, tell them so */
   if (IsConfDoSpoofIp(conf))
-    sendto_one_notice(source_p, &me, ":*** Spoofing your IP. Congrats.");
+    sendto_one_notice(source_p, &me, ":*** Spoofing your IP");
 
   /* If this user is in the exception class, set it "E lined" */
   if (IsConfExemptKline(conf))
   {
     AddFlag(source_p, FLAGS_EXEMPTKLINE);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D lines. Congrats.");
+    sendto_one_notice(source_p, &me, ":*** You are exempt from K/D lines");
   }
 
   if (IsConfExemptXline(conf))
   {
     AddFlag(source_p, FLAGS_EXEMPTXLINE);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from X lines. Congrats.");
+    sendto_one_notice(source_p, &me, ":*** You are exempt from X lines");
   }
 
   if (IsConfExemptResv(conf))
   {
     AddFlag(source_p, FLAGS_EXEMPTRESV);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from resvs. Congrats.");
+    sendto_one_notice(source_p, &me, ":*** You are exempt from resvs");
   }
 
   /* If this user is exempt from user limits set it "F lined" */
   if (IsConfExemptLimits(conf))
   {
     AddFlag(source_p, FLAGS_NOLIMIT);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from user limits. Congrats.");
+    sendto_one_notice(source_p, &me, ":*** You are exempt from user limits");
   }
 
   if (IsConfCanFlood(conf))
   {
     AddFlag(source_p, FLAGS_CANFLOOD);
-    sendto_one_notice(source_p, &me, ":*** You are exempt from flood "
-                      "protection, aren't you fearsome.");
+    sendto_one_notice(source_p, &me, ":*** You are exempt from flood protection");
   }
 }
 

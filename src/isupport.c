@@ -63,7 +63,7 @@ void
 isupport_init(void)
 {
   isupport_add("CALLERID", NULL, -1);
-  isupport_add("CASEMAPPING", "rfc1459", -1);
+  isupport_add("CASEMAPPING", "ascii", -1);
   isupport_add("DEAF", "D", -1);
   isupport_add("KICKLEN", NULL, KICKLEN);
   isupport_add("MODES", NULL, MAXMODEPARAMS);

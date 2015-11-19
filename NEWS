@@ -1,3 +1,9 @@
+-- Noteworthy changes in version 8.2.11 (2015-11-19)
+o) Implemented IRCv3.2 invite-notify extension
+o) Implemented IRCv3.2 chghost extension
+o) Added channel::invite_delay_channel configuration option
+
+
 -- Noteworthy changes in version 8.2.10 (2015-11-06)
 #######################################################################
 o) IMPORTANT: renamed 'serverhide::links_delay' configuration directive

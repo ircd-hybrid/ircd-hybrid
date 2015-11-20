@@ -231,22 +231,14 @@ introduce_client(struct Client *source_p)
     if (server == source_p->from)
       continue;
 
-    if (IsCapable(server, CAPAB_SVS))
-      sendto_one(server, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
-                 source_p->servptr->id,
-                 source_p->name, source_p->hopcount+1,
-                 source_p->tsinfo,
-                 ubuf, source_p->username, source_p->host,
-                 source_p->sockhost, source_p->id,
-                 source_p->account,
-                 source_p->info);
-    else
-      sendto_one(server, ":%s UID %s %u %ju %s %s %s %s %s :%s",
-                 source_p->servptr->id,
-                 source_p->name, source_p->hopcount+1,
-                 source_p->tsinfo,
-                 ubuf, source_p->username, source_p->host,
-                 source_p->sockhost, source_p->id, source_p->info);
+    sendto_one(server, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
+               source_p->servptr->id,
+               source_p->name, source_p->hopcount+1,
+               source_p->tsinfo,
+               ubuf, source_p->username, source_p->host,
+               source_p->sockhost, source_p->id,
+               source_p->account,
+               source_p->info);
 
     if (!EmptyString(source_p->certfp))
       sendto_one(server, ":%s CERTFP %s", source_p->id, source_p->certfp);

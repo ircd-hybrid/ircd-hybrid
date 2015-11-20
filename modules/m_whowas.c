@@ -67,10 +67,9 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
                          whowas->realname);
 
       if (HasUMode(source_p, UMODE_OPER))
-        if (strcmp(whowas->sockhost, "0"))  /* XXX: TBR */
-          sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, whowas->name,
-                             whowas->username, whowas->hostname,
-                             whowas->sockhost);
+        sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, whowas->name,
+                           whowas->username, whowas->hostname,
+                           whowas->sockhost);
 
       if (strcmp(whowas->account, "*"))
         sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, whowas->name, whowas->account, "was");

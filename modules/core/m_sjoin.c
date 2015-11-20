@@ -378,9 +378,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
       sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target_p->name, target_p->username,
-                           target_p->host, chptr->name,
-                           (!IsDigit(target_p->account[0]) && target_p->account[0] != '*') ? target_p->account : "*",
-                           target_p->info);
+                           target_p->host, chptr->name, target_p->account, target_p->info);
       sendto_channel_local(NULL, chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                            target_p->name, target_p->username,
                            target_p->host, chptr->name);

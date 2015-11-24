@@ -945,7 +945,7 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
       continue;
 
     if (HasUMode(source_p, UMODE_OPER) || !HasUMode(target_p, UMODE_HIDEIDLE))
-      snprintf(buf, sizeof(buf), "%u", client_get_idle_time(source_p, target_p));
+      snprintf(buf, sizeof(buf), "%s", time_dissect(client_get_idle_time(source_p, target_p)));
     else
       strlcpy(buf, "n/a", sizeof(buf));
 
@@ -1144,10 +1144,10 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
     const struct Client *target_p = node->data;
 
     sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                       "v :%s (%s!%s@%s) Idle: %d",
+                       "v :%s (%s!%s@%s) Idle: %s",
                        target_p->name,
                        (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
-                       "*", "*", (int)(CurrentTime - target_p->connection->lasttime));
+                       "*", "*", time_dissect(CurrentTime - target_p->connection->lasttime));
   }
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,

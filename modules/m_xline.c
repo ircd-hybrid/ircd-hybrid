@@ -244,35 +244,6 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/* XXX: TBR */
-/* me_xline()
- *
- * inputs	- server
- *		- client (oper)
- *		- parc number of arguments
- *		- parv list of arguments
- * via parv[]
- * parv[1] = target server
- * parv[2] = xline
- * parv[3] = time
- * parv[4] = reason
- *
- * outputs	- none
- * side effects	-
- */
-static int
-me_xline(struct Client *source_p, int parc, char *parv[])
-{
-  if (parc != 5 || EmptyString(parv[4]))
-    return 0;
-
-  if (!valid_xline(source_p, parv[2]))
-    return 0;
-
-  relay_xline(source_p, parv);
-  return 0;
-}
-
 static struct Message xline_msgtab =
 {
   .cmd = "XLINE",
@@ -281,7 +252,7 @@ static struct Message xline_msgtab =
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_not_oper,
   .handlers[SERVER_HANDLER] = ms_xline,
-  .handlers[ENCAP_HANDLER] = me_xline,
+  .handlers[ENCAP_HANDLER] = m_ignore,
   .handlers[OPER_HANDLER] = mo_xline
 };
 

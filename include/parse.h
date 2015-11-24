@@ -65,8 +65,6 @@ typedef enum HandlerType
   LAST_HANDLER_TYPE
 } HandlerType;
 
-typedef int (*MessageHandler)(struct Client *, int, char *[]);
-
 /*
  * Message table structure
  */
@@ -87,7 +85,7 @@ struct Message
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
    */
-  MessageHandler handlers[LAST_HANDLER_TYPE];
+  int (*handlers[LAST_HANDLER_TYPE])(struct Client *, int, char *[]);
 };
 
 /*

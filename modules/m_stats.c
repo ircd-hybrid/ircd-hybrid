@@ -46,7 +46,7 @@
 #include "resv.h"
 #include "whowas.h"
 #include "watch.h"
-#include "res.h"
+#include "reslib.h"
 #include "motd.h"
 #include "ipcache.h"
 
@@ -530,7 +530,15 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 static void
 stats_dns_servers(struct Client *source_p, int parc, char *parv[])
 {
-  report_dns_servers(source_p);
+  char ipaddr[HOSTIPLEN + 1] = "";
+
+  for (unsigned int i = 0; i < irc_nscount; ++i)
+  {
+    getnameinfo((const struct sockaddr *)&(irc_nsaddr_list[i]),
+                irc_nsaddr_list[i].ss_len, ipaddr,
+                sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
+    sendto_one_numeric(source_p, &me, RPL_STATSALINE, ipaddr);
+  } 
 }
 
 static void

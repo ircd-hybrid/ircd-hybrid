@@ -636,20 +636,6 @@ res_readreply(fde_t *fd, void *data)
   comm_setselect(fd, COMM_SELECT_READ, res_readreply, NULL, 0);
 }
 
-void
-report_dns_servers(struct Client *source_p)
-{
-  char ipaddr[HOSTIPLEN + 1] = "";
-
-  for (unsigned int i = 0; i < irc_nscount; ++i)
-  {
-    getnameinfo((const struct sockaddr *)&(irc_nsaddr_list[i]),
-                irc_nsaddr_list[i].ss_len, ipaddr,
-                sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
-    sendto_one_numeric(source_p, &me, RPL_STATSALINE, ipaddr);
-  }
-}
-
 /*
  * timeout_query_list - Remove queries from the list which have been
  * there too long without being resolved.

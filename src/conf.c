@@ -1288,12 +1288,12 @@ read_conf_files(int cold)
   isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", ConfigServerInfo.network_name, -1);
 
-  snprintf(chanmodes, sizeof(chanmodes), "beI:%d", ConfigChannel.max_bans);
+  snprintf(chanmodes, sizeof(chanmodes), "beI:%u", ConfigChannel.max_bans);
   isupport_add("MAXLIST", chanmodes, -1);
   isupport_add("MAXTARGETS", NULL, ConfigGeneral.max_targets);
   isupport_add("CHANTYPES", "#", -1);
 
-  snprintf(chanlimit, sizeof(chanlimit), "#:%d",
+  snprintf(chanlimit, sizeof(chanlimit), "#:%u",
            ConfigChannel.max_channels);
   isupport_add("CHANLIMIT", chanlimit, -1);
   snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstCMORS");

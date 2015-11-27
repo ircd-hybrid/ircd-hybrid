@@ -252,8 +252,8 @@ check_pings_list(dlink_list *list)
                  get_client_name(client_p, SHOW_IP));
           }
 
-          snprintf(buf, sizeof(buf), "Ping timeout: %d seconds",
-                   (int)(CurrentTime - client_p->connection->lasttime));
+          snprintf(buf, sizeof(buf), "Ping timeout: %ji seconds",
+                   (CurrentTime - client_p->connection->lasttime));
           exit_client(client_p, buf);
         }
       }

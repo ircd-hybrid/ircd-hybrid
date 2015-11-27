@@ -740,8 +740,8 @@ exit_client(struct Client *source_p, const char *comment)
 
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                            "Client exiting: %s (%s@%s) [%s] [%s]",
-                           source_p->name, source_p->username, source_p->host, comment,
-                           source_p->sockhost);
+                           source_p->name, source_p->username, source_p->host,
+                           source_p->sockhost, comment);
 
       ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %ju/%ju",
            date_ctime(source_p->connection->firsttime), (unsigned int)(on_for / 3600),
@@ -785,9 +785,9 @@ exit_client(struct Client *source_p, const char *comment)
   }
   else if (IsClient(source_p) && HasFlag(source_p->servptr, FLAGS_EOB))
     sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
-                         "Client exiting at %s: %s (%s@%s) [%s]",
+                         "Client exiting at %s: %s (%s@%s) [%s] [%s]",
                          source_p->servptr->name, source_p->name,
-                         source_p->username, source_p->host, comment);
+                         source_p->username, source_p->host, source_p->sockhost, comment);
 
   if (IsServer(source_p))
   {

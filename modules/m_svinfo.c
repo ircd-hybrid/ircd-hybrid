@@ -100,9 +100,15 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   }
 
   if (deltat > ConfigGeneral.ts_warn_delta)
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+  {
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
           "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-          source_p->name, CurrentTime, theirtime, deltat);
+          get_client_name(source_p, SHOW_IP), CurrentTime, theirtime, deltat);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+          "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
+          get_client_name(source_p, MASK_IP), CurrentTime, theirtime, deltat);
+  }
+
   return 0;
 }
 

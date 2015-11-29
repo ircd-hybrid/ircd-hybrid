@@ -738,7 +738,7 @@ msg_has_ctrls(const char *message)
  */
 int
 can_send(struct Channel *chptr, struct Client *client_p,
-         struct Membership *member, const char *message)
+         struct Membership *member, const char *message, int notice)
 {
   const struct MaskItem *conf = NULL;
 
@@ -769,6 +769,9 @@ can_send(struct Channel *chptr, struct Client *client_p,
 
   if ((chptr->mode.mode & MODE_MODREG) && !HasUMode(client_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
+
+  if ((chptr->mode.mode & MODE_NONOTICE) && notice)
+    return ERR_CANNOTSENDTOCHAN;
 
   /* Cache can send if banned */
   if (MyClient(client_p))
@@ -1127,7 +1130,7 @@ channel_part_one_client(struct Client *client_p, const char *name, const char *r
    * only allow /part reasons in -m chans
    */
   if (*reason && (!MyConnect(client_p) ||
-      ((can_send(chptr, client_p, member, reason) &&
+      ((can_send(chptr, client_p, member, reason, 0) &&
        (client_p->connection->firsttime + ConfigGeneral.anti_spam_exit_message_time)
         < CurrentTime))))
   {

@@ -68,6 +68,7 @@ const struct mode_letter chan_modes[] =
   { MODE_OPERONLY,   'O' },
   { MODE_REGONLY,    'R' },
   { MODE_SSLONLY,    'S' },
+  { MODE_NONOTICE,   'T' },
   { 0, '\0' }
 };
 
@@ -1110,7 +1111,7 @@ const struct ChannelMode ModeTable[256] =
   { chm_nosuch,  0 },                   /* Q */
   { chm_simple, MODE_REGONLY},          /* R */
   { chm_simple, MODE_SSLONLY},          /* S */
-  { chm_nosuch,  0 },                   /* T */
+  { chm_simple, MODE_NONOTICE},         /* T */
   { chm_nosuch,  0 },                   /* U */
   { chm_nosuch,  0 },                   /* V */
   { chm_nosuch,  0 },                   /* W */

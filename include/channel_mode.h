@@ -85,7 +85,8 @@ enum
   MODE_REGONLY    = 0x00000200U,  /**< Only registered clients may join a channel with that mode set */
   MODE_NOCTRL     = 0x00000400U,  /**< Prevents users from sending messages containing control codes to the channel */
   MODE_MODREG     = 0x00000800U,  /**< Unregistered/unidentified clients cannot send text to the channel */
-  MODE_NOCTCP     = 0x00001000U   /**< Clients cannot send CTCP messages to the channel */
+  MODE_NOCTCP     = 0x00001000U,  /**< Clients cannot send CTCP messages to the channel */
+  MODE_NONOTICE   = 0x00002000U   /**< Clients cannot send NOTICE to the channel */
 };
 
 /* name invisible */

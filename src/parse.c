@@ -558,7 +558,8 @@ msg_tree_parse(const char *cmd)
 void
 mod_add_cmd(struct Message *msg)
 {
-  assert(msg && msg->cmd);
+  assert(msg);
+  assert(msg->cmd);
 
   /* Command already added? */
   if (msg_tree_parse(msg->cmd))
@@ -576,7 +577,8 @@ mod_add_cmd(struct Message *msg)
 void
 mod_del_cmd(struct Message *msg)
 {
-  assert(msg && msg->cmd);
+  assert(msg);
+  assert(msg->cmd);
 
   if (!msg_tree_parse(msg->cmd))
     return;

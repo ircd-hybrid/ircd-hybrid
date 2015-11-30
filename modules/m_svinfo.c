@@ -46,7 +46,7 @@
  *      - parv[0] = command
  *      - parv[1] = TS_CURRENT for the server
  *      - parv[2] = TS_MIN for the server
- *      - parv[3] = server is standalone or connected to non-TS only
+ *      - parv[3] = unused
  *      - parv[4] = server's idea of UTC time
  */
 static int

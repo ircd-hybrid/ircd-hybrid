@@ -607,7 +607,7 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
   struct AddressRec *arec = NULL;
   const char *const hostname = conf->host;
   const char *const username = conf->user;
-  static unsigned int prec_value = 0xFFFFFFFF;
+  static unsigned int prec_value = UINT_MAX;
   int bits = 0;
 
   assert(type && !EmptyString(hostname));

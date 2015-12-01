@@ -123,7 +123,6 @@ extern dlink_list channel_list;
 extern int channel_check_name(const char *, const int);
 extern int can_send(struct Channel *, struct Client *, struct Membership *, const char *, int);
 extern int is_banned(const struct Channel *, const struct Client *);
-extern int can_join(struct Client *, const struct Channel *, const char *);
 extern int has_member_flags(const struct Membership *, const unsigned int);
 
 extern void channel_do_join(struct Client *, char *, char *);

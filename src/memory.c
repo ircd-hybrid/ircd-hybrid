@@ -25,7 +25,6 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "irc_string.h"
 #include "memory.h"
 #include "restart.h"

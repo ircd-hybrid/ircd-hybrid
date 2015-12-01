@@ -31,7 +31,6 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "ircd_defs.h"
 #include "numeric.h"
 #include "misc.h"
 #include "server.h"

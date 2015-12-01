@@ -636,7 +636,7 @@ is_banned(const struct Channel *chptr, const struct Client *client_p)
  * \return ERR_BANNEDFROMCHAN, ERR_INVITEONLYCHAN, ERR_CHANNELISFULL
  *         or 0 if allowed to join.
  */
-int
+static int
 can_join(struct Client *client_p, const struct Channel *chptr, const char *key)
 {
   if ((chptr->mode.mode & MODE_SSLONLY) && !HasUMode(client_p, UMODE_SSL))

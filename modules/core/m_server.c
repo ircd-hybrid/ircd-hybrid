@@ -44,6 +44,10 @@
 #include "modules.h"
 
 
+/*! Parses server flags to be potentially set
+ * \param client_p Pointer to server's Client structure
+ * \param flags    Pointer to the flag string to be parsed
+ */
 static void
 server_set_flags(struct Client *client_p, const char *flags)
 {

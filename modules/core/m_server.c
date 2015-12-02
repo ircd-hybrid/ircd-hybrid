@@ -452,11 +452,20 @@ set_server_gecos(struct Client *client_p, const char *info)
  *  parv[1] = servername
  *  parv[2] = hopcount
  *  parv[3] = serverinfo
+ *
+ * 8.3.x+:
+ *  parv[0] = command
+ *  parv[1] = servername
+ *  parv[2] = hopcount
+ *  parv[3] = sid
+ *  parv[4] = string of flags starting with '+'
+ *  parv[5] = serverinfo
  */
 static int
 mr_server(struct Client *source_p, int parc, char *parv[])
 {
   const char *name = parv[1];
+  const char *sid = parc == 6 ? parv[3] : source_p->id; /* TBR: compatibility 'mode' */
   struct Client *target_p = NULL;
 
   if (EmptyString(parv[parc - 1]))
@@ -477,14 +486,14 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!valid_sid(source_p->id))
+  if (!valid_sid(sid))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         get_client_name(source_p, SHOW_IP), source_p->id);
+                         get_client_name(source_p, SHOW_IP), sid);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         get_client_name(source_p, MASK_IP), source_p->id);
+                         get_client_name(source_p, MASK_IP), sid);
     exit_client(source_p, "Bogus server ID introduced");
     return 0;
   }
@@ -599,7 +608,15 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    * connect{} block in source_p->name
    */
   strlcpy(source_p->name, name, sizeof(source_p->name));
-  set_server_gecos(source_p, parv[parc - 1]);
+
+  if (parc == 6)  /* TBR: compatibility 'mode' */
+  {
+    strlcpy(source_p->id, sid, sizeof(source_p->id));
+    strlcpy(source_p->info, parv[parc - 1], sizeof(source_p->info));
+    /* TBD: handle the flags */
+  }
+  else
+    set_server_gecos(source_p, parv[parc - 1]);
   source_p->hopcount = atoi(parv[2]);
   server_estab(source_p);
   return 0;
@@ -611,6 +628,14 @@ mr_server(struct Client *source_p, int parc, char *parv[])
  *  parv[2] = hopcount
  *  parv[3] = sid of new server
  *  parv[4] = serverinfo
+ *
+ * 8.3.x+:
+ *  parv[0] = command
+ *  parv[1] = servername
+ *  parv[2] = hopcount
+ *  parv[3] = sid of new server
+ *  parv[4] = string of flags starting with '+'
+ *  parv[5] = serverinfo
  */
 static int
 ms_sid(struct Client *source_p, int parc, char *parv[])
@@ -772,7 +797,14 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   strlcpy(target_p->name, parv[1], sizeof(target_p->name));
   strlcpy(target_p->id, parv[3], sizeof(target_p->id));
 
-  set_server_gecos(target_p, parv[parc - 1]);
+  if (parc == 6)  /* TBR: compatibility 'mode' */
+  {
+    strlcpy(target_p->info, parv[parc - 1], sizeof(target_p->info));
+    /* TBD: handle the flags */
+  }
+  else
+    set_server_gecos(target_p, parv[parc - 1]);
+
   SetServer(target_p);
 
   if (find_matching_name_conf(CONF_SERVICE, target_p->name, NULL, NULL, 0))

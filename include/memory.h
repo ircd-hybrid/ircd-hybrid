@@ -27,8 +27,6 @@
 #ifndef INCLUDED_memory_h
 #define INCLUDED_memory_h
 
-#include "ircd_defs.h"
-
 extern void outofmemory(void);
 extern void *MyCalloc(size_t);
 extern void *MyRealloc(void *, size_t);

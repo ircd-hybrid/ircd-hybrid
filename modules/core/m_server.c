@@ -44,6 +44,27 @@
 #include "modules.h"
 
 
+static void
+server_set_flags(struct Client *client_p, const char *flags)
+{
+  const unsigned char *p = (const unsigned char *)flags;
+
+  if (*p++ != '+')
+    return;
+
+  for (; *p; ++p)
+  {
+    switch (*p)
+    {
+      case 'h':
+        AddFlag(client_p, FLAGS_HIDDEN);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
 /*
  * send_tb
  *
@@ -613,7 +634,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   {
     strlcpy(source_p->id, sid, sizeof(source_p->id));
     strlcpy(source_p->info, parv[parc - 1], sizeof(source_p->info));
-    /* TBD: handle the flags */
+    server_set_flags(source_p, parv[4]);
   }
   else
     set_server_gecos(source_p, parv[parc - 1]);
@@ -800,7 +821,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   if (parc == 6)  /* TBR: compatibility 'mode' */
   {
     strlcpy(target_p->info, parv[parc - 1], sizeof(target_p->info));
-    /* TBD: handle the flags */
+    server_set_flags(target_p, parv[4]);
   }
   else
     set_server_gecos(target_p, parv[parc - 1]);

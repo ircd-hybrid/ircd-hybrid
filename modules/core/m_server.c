@@ -53,10 +53,10 @@ server_set_flags(struct Client *client_p, const char *flags)
 {
   const unsigned char *p = (const unsigned char *)flags;
 
-  if (*p++ != '+')
+  if (*p != '+')
     return;
 
-  for (; *p; ++p)
+  while (*++p)
   {
     switch (*p)
     {

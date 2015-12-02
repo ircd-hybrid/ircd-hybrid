@@ -455,7 +455,7 @@ server_estab(struct Client *client_p)
  * side effects - servers gecos field is set
  */
 static void
-set_server_gecos(struct Client *client_p, const char *info)
+server_set_gecos(struct Client *client_p, const char *info)
 {
   const char *s = info;
 
@@ -641,7 +641,8 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     server_set_flags(source_p, parv[4]);
   }
   else
-    set_server_gecos(source_p, parv[parc - 1]);
+    server_set_gecos(source_p, parv[parc - 1]);
+
   source_p->hopcount = atoi(parv[2]);
   server_estab(source_p);
   return 0;
@@ -828,7 +829,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     server_set_flags(target_p, parv[4]);
   }
   else
-    set_server_gecos(target_p, parv[parc - 1]);
+    server_set_gecos(target_p, parv[parc - 1]);
 
   SetServer(target_p);
 

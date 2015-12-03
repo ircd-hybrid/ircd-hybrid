@@ -109,7 +109,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   modebuf[0] = '\0';
   mbuf = modebuf;
   pargs = 0;
-  newts = atol(parv[1]);
+  newts = strtoimax(parv[1], NULL, 10);
 
   mode.mode = 0;
   mode.limit = 0;

@@ -68,7 +68,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   /* TS is higher, drop it. */
-  if (atol(parv[1]) > chptr->creationtime)
+  if (strtoimax(parv[1], NULL, 10) > chptr->creationtime)
     return 0;
 
   switch (*parv[3])

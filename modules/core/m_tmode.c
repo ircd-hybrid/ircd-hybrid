@@ -60,7 +60,7 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (atol(parv[1]) > chptr->creationtime)
+  if (strtoimax(parv[1], NULL, 10) > chptr->creationtime)
     return 0;
 
   if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))

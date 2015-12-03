@@ -66,7 +66,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
   if (parc > 3)
   {
     comment = parv[3] ? parv[3] : CONF_NOREASON;
-    ts = atol(parv[2]);
+    ts = strtoimax(parv[2], NULL, 10);
   }
   else
     comment = (parc > 2 && parv[2]) ? parv[2] : CONF_NOREASON;

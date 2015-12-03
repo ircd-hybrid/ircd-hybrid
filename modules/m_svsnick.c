@@ -97,7 +97,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  target_p->tsinfo = atoi(parv[3]);
+  target_p->tsinfo = strtoimax(parv[3], NULL, 10);
   clear_ban_cache_client(target_p);
   watch_check_hash(target_p, RPL_LOGOFF);
 

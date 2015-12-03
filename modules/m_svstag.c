@@ -64,7 +64,8 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
-  if ((ts = atol(parv[2])) && ts != target_p->tsinfo)
+  ts = strtoimax(parv[2], NULL, 10);
+  if (ts && (ts != target_p->tsinfo))
     return 0;
 
   if (!strncmp(parv[3], "-", 1))

@@ -130,7 +130,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     chptr = channel_make(parv[2]);
   }
 
-  newts   = atol(parv[1]);
+  newts   = strtoimax(parv[1], NULL, 10);
   oldts   = chptr->creationtime;
   oldmode = &chptr->mode;
 

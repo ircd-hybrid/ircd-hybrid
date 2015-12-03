@@ -294,7 +294,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
   {
     DelUMode(source_p, UMODE_REGISTERED);
     watch_check_hash(source_p, RPL_LOGOFF);
-    source_p->tsinfo = atol(parv[2]);
+    source_p->tsinfo = strtoimax(parv[2], NULL, 10);
     assert(source_p->tsinfo > 0);
   }
 
@@ -344,7 +344,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   client_p = make_client(source_p->from);
   client_p->servptr = source_p;
   client_p->hopcount = atoi(parv[2]);
-  client_p->tsinfo = atol(parv[3]);
+  client_p->tsinfo = strtoimax(parv[3], NULL, 10);
 
   strlcpy(client_p->account, parv[9], sizeof(client_p->account));
   strlcpy(client_p->name, parv[1], sizeof(client_p->name));
@@ -414,7 +414,7 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
                                   int parc, char *parv[])
 {
   const char *uid = parv[8];
-  time_t newts = atol(parv[3]);
+  time_t newts = strtoimax(parv[3], NULL, 10);
   int sameuser = 0;
 
   assert(IsServer(source_p));
@@ -500,7 +500,7 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
                              int parc, char *parv[])
 {
   int sameuser = 0;
-  time_t newts = atol(parv[2]);
+  time_t newts = strtoimax(parv[2], NULL, 10);
 
   assert(IsClient(source_p));
   assert(IsClient(target_p));

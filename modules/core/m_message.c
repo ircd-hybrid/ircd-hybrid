@@ -261,20 +261,7 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
                             command, prefix, chptr->name, text);
   }
   else if (p_or_n != NOTICE)
-  {
-    if (result == ERR_NOCTRLSONCHAN)
-      sendto_one_numeric(source_p, &me, ERR_NOCTRLSONCHAN,
-                         chptr->name, text);
-    else if (result == ERR_NOCTCP)
-      sendto_one_numeric(source_p, &me, ERR_NOCTCP,
-                         chptr->name, text);
-    else if (result == ERR_NEEDREGGEDNICK)
-      sendto_one_numeric(source_p, &me, ERR_NEEDREGGEDNICK,
-                         chptr->name);
-    else
-      sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN,
-                         chptr->name);
-  }
+    sendto_one_numeric(source_p, &me, result, chptr->name, text);
 }
 
 /* msg_client()

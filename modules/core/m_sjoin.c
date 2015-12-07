@@ -80,7 +80,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   char           keep_new_modes = 1;
   char           have_many_nicks = 0;
   int            lcount;
-  char           uid_prefix[4];
+  char           uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1];
   char           *up = NULL;
   int            len_uid = 0;
   int            isnew = 0;
@@ -269,7 +269,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
    * Check we can fit a nick on the end, as well as \r\n and a prefix "
    * @%+", and a space.
    */
-  if (buflen >= (IRCD_BUFSIZE - IRCD_MAX(NICKLEN, IDLEN) - 2 - 3 - 1))
+  if (buflen >= (IRCD_BUFSIZE - IRCD_MAX(NICKLEN, IDLEN) - 2 - CMEMBER_STATUS_FLAGS_LEN - 1))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Long SJOIN from server: %s(via %s) (ignored)",

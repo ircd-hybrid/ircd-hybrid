@@ -549,7 +549,7 @@ clear_invites_client(struct Client *client_p)
 const char *
 get_member_status(const struct Membership *member, const int combine)
 {
-  static char buffer[4];  /* 4 for @%+\0 */
+  static char buffer[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
   char *p = buffer;
 
   if (member->flags & CHFL_CHANOP)

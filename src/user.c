@@ -780,7 +780,8 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
 
   DLINK_FOREACH(node, target_p->channel.head)
   {
-    char modebuf[4], nickbuf[NICKLEN * 3 + 3] = "";
+    char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];
+    char nickbuf[CMEMBER_STATUS_FLAGS_LEN * NICKLEN + CMEMBER_STATUS_FLAGS_LEN] = "";
     char *p = modebuf;
     int len = 0;
     const struct Membership *member = node->data;

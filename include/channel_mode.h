@@ -27,6 +27,10 @@
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
 
+
+#define CMEMBER_STATUS_FLAGS "@%+"
+enum { CMEMBER_STATUS_FLAGS_LEN = sizeof(CMEMBER_STATUS_FLAGS) - 1 };
+
 enum { MODEBUFLEN = 200 };
 
 /* Maximum mode changes allowed per client, per server is different */

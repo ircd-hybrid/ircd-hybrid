@@ -1131,9 +1131,9 @@ channel_part_one_client(struct Client *client_p, const char *name, const char *r
    * only allow /part reasons in -m chans
    */
   if (*reason && (!MyConnect(client_p) ||
-      ((can_send(chptr, client_p, member, reason) < 0 &&
-       (client_p->connection->firsttime + ConfigGeneral.anti_spam_exit_message_time)
-        < CurrentTime))))
+      ((client_p->connection->firsttime +
+        ConfigGeneral.anti_spam_exit_message_time) < CurrentTime &&
+       can_send(chptr, client_p, member, reason, 0) < 0)))
   {
     sendto_server(client_p, 0, 0, ":%s PART %s :%s",
                   client_p->id, chptr->name, reason);

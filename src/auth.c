@@ -360,8 +360,6 @@ auth_connect_callback(fde_t *fd, int error, void *data)
   uport = ntohs(v6->sin6_port);
   v6 = (struct sockaddr_in6 *)&them;
   tport = ntohs(v6->sin6_port);
-  remove_ipv6_mapping(&us);
-  remove_ipv6_mapping(&them);
 
   len = snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
 

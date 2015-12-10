@@ -54,6 +54,12 @@ enum
   ENTITY_CLIENT  = 2
 };
 
+static const char *const command[] =
+{
+  [PRIVMSG] = "PRIVMSG",
+  [NOTICE] = "NOTICE"
+};
+
 static struct
 {
   void *ptr;
@@ -220,7 +226,6 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
  *
  * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
  *		  say NOTICE must not auto reply
- *		- pointer to command, "PRIVMSG" or "NOTICE"
  *		- pointer to source_p
  *		- pointer to channel
  *		- flags
@@ -229,8 +234,8 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_channel(int p_or_n, const char *command, struct Client *source_p,
-            struct Channel *chptr, unsigned int flags, const char *text)
+msg_channel(int p_or_n, struct Client *source_p, struct Channel *chptr,
+            unsigned int flags, const char *text)
 {
   int result = 0;
   unsigned int type = 0;
@@ -258,7 +263,7 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
     if (result == CAN_SEND_OPV ||
         !flood_attack_channel(p_or_n, source_p, chptr))
       sendto_channel_butone(source_p, source_p, chptr, type, "%s %s%s :%s",
-                            command, prefix, chptr->name, text);
+                            command[p_or_n], prefix, chptr->name, text);
   }
   else if (p_or_n != NOTICE)
     sendto_one_numeric(source_p, &me, result, chptr->name, text);
@@ -268,7 +273,6 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
  *
  * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
  *		  say NOTICE must not auto reply
- *		- pointer to command, "PRIVMSG" or "NOTICE"
  * 		- pointer to source_p source (struct Client *)
  *		- pointer to target_p target (struct Client *)
  *		- pointer to text
@@ -276,8 +280,8 @@ msg_channel(int p_or_n, const char *command, struct Client *source_p,
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_client(int p_or_n, const char *command, struct Client *source_p,
-           struct Client *target_p, const char *text)
+msg_client(int p_or_n, struct Client *source_p, struct Client *target_p,
+           const char *text)
 {
   if (MyClient(source_p))
   {
@@ -331,7 +335,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
       return;
   }
 
-  sendto_anywhere(target_p, source_p, command, ":%s", text);
+  sendto_anywhere(target_p, source_p, command[p_or_n], ":%s", text);
 }
 
 /* handle_special()
@@ -355,7 +359,7 @@ msg_client(int p_or_n, const char *command, struct Client *source_p,
  *		- Dianora
  */
 static void
-handle_special(int p_or_n, const char *command, struct Client *source_p,
+handle_special(int p_or_n, struct Client *source_p,
                const char *nick, const char *text)
 {
   struct Client *target_p = NULL;
@@ -380,7 +384,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
 
     if (!IsMe(target_p))
     {
-      sendto_one(target_p, ":%s %s %s :%s", source_p->id, command, nick, text);
+      sendto_one(target_p, ":%s %s %s :%s", source_p->id, command[p_or_n], nick, text);
       return;
     }
 
@@ -407,7 +411,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
     else if (MyClient(source_p))
     {
       sendto_one_notice(source_p, &me, ":The command %s %s is no longer supported, please use $%s",
-                        command, nick, nick);
+                        command[p_or_n], nick, nick);
       return;
     }
 
@@ -429,7 +433,7 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
 
     sendto_match_butone(IsServer(source_p->from) ? source_p->from : NULL, source_p,
                         nick + 1, (*nick == '#') ? MATCH_HOST : MATCH_SERVER,
-                        "%s $%s :%s", command, nick, text);
+                        "%s $%s :%s", command[p_or_n], nick, text);
   }
 }
 
@@ -448,9 +452,8 @@ handle_special(int p_or_n, const char *command, struct Client *source_p,
  *		  to disambiguate.
  *
  */
-static int
-build_target_list(int p_or_n, const char *command, struct Client *source_p,
-                  char *list, const char *text)
+static void
+build_target_list(int p_or_n, struct Client *source_p, char *list, const char *text)
 {
   unsigned int type = 0;
   char *p = NULL;
@@ -477,7 +480,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
           {
             sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
                                name, ConfigGeneral.max_targets);
-            return 1;
+            return;
           }
 
           targets[ntargets].ptr = target;
@@ -500,7 +503,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
         {
           sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
                              name, ConfigGeneral.max_targets);
-          return 1;
+          return;
         }
 
         targets[ntargets].ptr = target;
@@ -533,7 +536,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
     {
       if (EmptyString(name))  /* If it's a '\0' dump it, there is no recipient */
       {
-        sendto_one_numeric(source_p, &me, ERR_NORECIPIENT, command);
+        sendto_one_numeric(source_p, &me, ERR_NORECIPIENT, command[p_or_n]);
         continue;
       }
 
@@ -559,7 +562,7 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
           {
             sendto_one_numeric(source_p, &me, ERR_TOOMANYTARGETS,
                                name, ConfigGeneral.max_targets);
-            return 1;
+            return;
           }
 
           targets[ntargets].ptr = target;
@@ -574,30 +577,27 @@ build_target_list(int p_or_n, const char *command, struct Client *source_p,
     }
 
     if (*name == '$' || strchr(name, '@'))
-      handle_special(p_or_n, command, source_p, name, text);
+      handle_special(p_or_n, source_p, name, text);
     else if (p_or_n != NOTICE)
     {
       if (!IsDigit(*name) || MyClient(source_p))
         sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
     }
   }
-
-  return 1;
 }
 
 /*
  * inputs       - flag privmsg or notice
- *              - pointer to command "PRIVMSG" or "NOTICE"
  *              - pointer to source_p
  *              - pointer to channel
  */
 static void
-m_message(int p_or_n, const char *command, struct Client *source_p, int parc, char *parv[])
+m_message(int p_or_n, struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
     if (p_or_n != NOTICE)
-      sendto_one_numeric(source_p, &me, ERR_NORECIPIENT, command);
+      sendto_one_numeric(source_p, &me, ERR_NORECIPIENT, command[p_or_n]);
     return;
   }
 
@@ -612,20 +612,18 @@ m_message(int p_or_n, const char *command, struct Client *source_p, int parc, ch
   if (MyClient(source_p) && !IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  if (build_target_list(p_or_n, command, source_p, parv[1], parv[2]) < 0)
-    return;
+  build_target_list(p_or_n, source_p, parv[1], parv[2]);
 
   for (unsigned int i = 0; i < ntargets; ++i)
   {
     switch (targets[i].type)
     {
       case ENTITY_CLIENT:
-        msg_client(p_or_n, command, source_p, targets[i].ptr, parv[2]);
+        msg_client(p_or_n, source_p, targets[i].ptr, parv[2]);
         break;
 
       case ENTITY_CHANNEL:
-        msg_channel(p_or_n, command, source_p, targets[i].ptr,
-                    targets[i].flags, parv[2]);
+        msg_channel(p_or_n, source_p, targets[i].ptr, targets[i].flags, parv[2]);
         break;
     }
   }
@@ -644,14 +642,14 @@ m_privmsg(struct Client *source_p, int parc, char *parv[])
   if (MyConnect(source_p))
     source_p->connection->last_privmsg = CurrentTime;
 
-  m_message(PRIVMSG, "PRIVMSG", source_p, parc, parv);
+  m_message(PRIVMSG, source_p, parc, parv);
   return 0;
 }
 
 static int
 m_notice(struct Client *source_p, int parc, char *parv[])
 {
-  m_message(NOTICE, "NOTICE", source_p, parc, parv);
+  m_message(NOTICE, source_p, parc, parv);
   return 0;
 }
 

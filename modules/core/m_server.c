@@ -101,21 +101,13 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
     ubuf[1] = '\0';
   }
 
-  if (IsCapable(client_p, CAPAB_SVS))
-    sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
-               target_p->servptr->id,
-               target_p->name, target_p->hopcount + 1,
-               target_p->tsinfo,
-               ubuf, target_p->username, target_p->host,
-               target_p->sockhost, target_p->id,
-               target_p->account, target_p->info);
-  else
-    sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s :%s",
-               target_p->servptr->id,
-               target_p->name, target_p->hopcount + 1,
-               target_p->tsinfo,
-               ubuf, target_p->username, target_p->host,
-               target_p->sockhost, target_p->id, target_p->info);
+  sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
+             target_p->servptr->id,
+             target_p->name, target_p->hopcount + 1,
+             target_p->tsinfo,
+             ubuf, target_p->username, target_p->host,
+             target_p->sockhost, target_p->id,
+             target_p->account, target_p->info);
 
   if (!EmptyString(target_p->certfp))
     sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->certfp);

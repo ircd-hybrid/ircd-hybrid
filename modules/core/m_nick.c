@@ -359,7 +359,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = strtoimax(parv[3], NULL, 10);
 
-  strlcpy(client_p->account, (parc == 11 ? parv[9] : "*"), sizeof(client_p->account));
+  strlcpy(client_p->account, parv[9], sizeof(client_p->account));
   strlcpy(client_p->name, parv[1], sizeof(client_p->name));
   strlcpy(client_p->id, parv[8], sizeof(client_p->id));
   strlcpy(client_p->sockhost, parv[7], sizeof(client_p->sockhost));
@@ -786,19 +786,6 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *
- * server introducing new nick/UID (without services support)
- *      - parv[0] = command
- *      - parv[1] = nickname
- *      - parv[2] = hop count
- *      - parv[3] = TS
- *      - parv[4] = umode
- *      - parv[5] = username
- *      - parv[6] = hostname
- *      - parv[7] = ip
- *      - parv[8] = uid
- *      - parv[9] = ircname (gecos)
- *
- * server introducing new nick/UID (with services support)
  *      - parv[ 0] = command
  *      - parv[ 1] = nickname
  *      - parv[ 2] = hop count
@@ -869,7 +856,7 @@ static struct Message nick_msgtab =
 static struct Message uid_msgtab =
 {
   .cmd = "UID",
-  .args_min = 10,
+  .args_min = 11,
   .args_max = MAXPARA,
   .handlers[UNREGISTERED_HANDLER] = m_ignore,
   .handlers[CLIENT_HANDLER] = m_ignore,

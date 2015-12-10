@@ -817,8 +817,7 @@ user_set_hostmask(struct Client *target_p, const char *hostname, const int what)
     sendto_channel_local(target_p, member->chptr, 0, CAP_EXTENDED_JOIN, CAP_CHGHOST, ":%s!%s@%s JOIN %s %s :%s",
                          target_p->name, target_p->username,
                          target_p->host, member->chptr->name,
-                         (!IsDigit(target_p->account[0]) && target_p->account[0] != '*') ? target_p->account : "*",
-                         target_p->info);
+                         target_p->account, target_p->info);
     sendto_channel_local(target_p, member->chptr, 0, 0, CAP_EXTENDED_JOIN | CAP_CHGHOST, ":%s!%s@%s JOIN :%s",
                          target_p->name, target_p->username,
                          target_p->host, member->chptr->name);

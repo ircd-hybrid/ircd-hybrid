@@ -70,7 +70,7 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
                            whowas->username, whowas->hostname,
                            whowas->sockhost);
 
-      if (!IsDigit(whowas->account[0]) && whowas->account[0] != '*')
+      if (strcmp(whowas->account, "*"))
         sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, whowas->name, whowas->account, "was");
 
       if ((whowas->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))

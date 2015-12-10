@@ -1051,9 +1051,7 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
        */
       sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            client_p->name, client_p->username,
-                           client_p->host, chptr->name,
-                           (!IsDigit(client_p->account[0]) && client_p->account[0] != '*') ? client_p->account : "*",
-                           client_p->info);
+                           client_p->host, chptr->name, client_p->account, client_p->info);
       sendto_channel_local(NULL, chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                            client_p->name, client_p->username,
                            client_p->host, chptr->name);
@@ -1074,9 +1072,7 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
 
       sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            client_p->name, client_p->username,
-                           client_p->host, chptr->name,
-                           (!IsDigit(client_p->account[0]) && client_p->account[0] != '*') ? client_p->account : "*",
-                           client_p->info);
+                           client_p->host, chptr->name, client_p->account, client_p->info);
       sendto_channel_local(NULL, chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                            client_p->name, client_p->username,
                            client_p->host, chptr->name);

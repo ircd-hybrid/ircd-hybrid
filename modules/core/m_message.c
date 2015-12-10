@@ -258,7 +258,7 @@ msg_channel(int p_or_n, struct Client *source_p, struct Channel *chptr,
   }
 
   /* Chanops and voiced can flood their own channel with impunity */
-  if ((result = can_send(chptr, source_p, NULL, text)) < 0)
+  if ((result = can_send(chptr, source_p, NULL, text, p_or_n == NOTICE)) < 0)
   {
     if (result == CAN_SEND_OPV ||
         !flood_attack_channel(p_or_n, source_p, chptr))

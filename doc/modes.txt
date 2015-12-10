@@ -71,6 +71,7 @@ Channel Modes:
 +S - sslonly      - This mode will prevent anyone who isn't securely connected
                     via SSL/TLS from joining the channel.
 +t - topic        - Only chanops and halfops can change the topic
++T - nonotice     - Users without +v/h/o cannot send NOTICEs to the channel
 +v - voice        - Can speak in a moderated channel, and is exempt from flood
                     restrictions
 

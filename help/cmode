@@ -51,6 +51,9 @@ NO PARAMETERS:
      +S     - 'SSL only'. This will prevent anyone who isn't securely connected
               via SSL/TLS from joining your channel.
 
+     +T     - 'No Notices'. This will prevent any user who isn't opped,
+              half-opped or voiced (+o/+h/+v) from sending channel notices.
+
 
 WITH PARAMETERS:
 ----------------

@@ -324,19 +324,6 @@ change_remote_nick(struct Client *source_p, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *
- * server introducing new nick/UID (without services support)
- *      - parv[0] = command
- *      - parv[1] = nickname
- *      - parv[2] = hop count
- *      - parv[3] = TS
- *      - parv[4] = umode
- *      - parv[5] = username
- *      - parv[6] = hostname
- *      - parv[7] = ip
- *      - parv[8] = uid
- *      - parv[9] = ircname (gecos)
- *
- * server introducing new nick/UID (with services support)
  *      - parv[ 0] = command
  *      - parv[ 1] = nickname
  *      - parv[ 2] = hop count

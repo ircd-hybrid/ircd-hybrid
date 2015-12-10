@@ -1581,10 +1581,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
     if (target_p->username[0] == '~')
       luser[0] = '*';
 
-    if (!strcmp(target_p->sockhost, "0"))
-      strlcpy(lhost, target_p->host, HOSTLEN*4 + 1);
-    else
-      strlcpy(lhost, target_p->sockhost, HOSTLEN*4 + 1);
+    strlcpy(lhost, target_p->sockhost, HOSTLEN*4 + 1);
     return 1;
   }
 

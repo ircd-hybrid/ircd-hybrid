@@ -489,14 +489,14 @@ write_string(const char *s, struct dbFILE *f)
 } while (0)
 
 void
-save_kline_database(void)
+save_kline_database(const char *filename)
 {
   uint32_t i = 0;
   uint32_t records = 0;
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
 
-  if (!(f = open_db(KPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)
@@ -510,7 +510,7 @@ save_kline_database(void)
     }
   }
 
-  SAFE_WRITE(write_uint32(records, f), KPATH);
+  SAFE_WRITE(write_uint32(records, f), filename);
 
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -520,11 +520,11 @@ save_kline_database(void)
 
       if (arec->type == CONF_KLINE && IsConfDatabase(arec->conf))
       {
-        SAFE_WRITE(write_string(arec->conf->user, f), KPATH);
-        SAFE_WRITE(write_string(arec->conf->host, f), KPATH);
-        SAFE_WRITE(write_string(arec->conf->reason, f), KPATH);
-        SAFE_WRITE(write_uint64(arec->conf->setat, f), KPATH);
-        SAFE_WRITE(write_uint64(arec->conf->until, f), KPATH);
+        SAFE_WRITE(write_string(arec->conf->user, f), filename);
+        SAFE_WRITE(write_string(arec->conf->host, f), filename);
+        SAFE_WRITE(write_string(arec->conf->reason, f), filename);
+        SAFE_WRITE(write_uint64(arec->conf->setat, f), filename);
+        SAFE_WRITE(write_uint64(arec->conf->until, f), filename);
       }
     }
   }
@@ -533,7 +533,7 @@ save_kline_database(void)
 }
 
 void
-load_kline_database(void)
+load_kline_database(const char *filename)
 {
   struct dbFILE *f = NULL;
   struct MaskItem *conf = NULL;
@@ -545,7 +545,7 @@ load_kline_database(void)
   uint64_t field_4 = 0;
   uint64_t field_5 = 0;
 
-  if (!(f = open_db(KPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)
@@ -579,14 +579,14 @@ load_kline_database(void)
 }
 
 void
-save_dline_database(void)
+save_dline_database(const char *filename)
 {
   uint32_t i = 0;
   uint32_t records = 0;
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
 
-  if (!(f = open_db(DLPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)
@@ -600,7 +600,7 @@ save_dline_database(void)
     }
   }
 
-  SAFE_WRITE(write_uint32(records, f), DLPATH);
+  SAFE_WRITE(write_uint32(records, f), filename);
 
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -610,10 +610,10 @@ save_dline_database(void)
 
       if (arec->type == CONF_DLINE && IsConfDatabase(arec->conf))
       {
-        SAFE_WRITE(write_string(arec->conf->host, f), DLPATH);
-        SAFE_WRITE(write_string(arec->conf->reason, f), DLPATH);
-        SAFE_WRITE(write_uint64(arec->conf->setat, f), DLPATH);
-        SAFE_WRITE(write_uint64(arec->conf->until, f), DLPATH);
+        SAFE_WRITE(write_string(arec->conf->host, f), filename);
+        SAFE_WRITE(write_string(arec->conf->reason, f), filename);
+        SAFE_WRITE(write_uint64(arec->conf->setat, f), filename);
+        SAFE_WRITE(write_uint64(arec->conf->until, f), filename);
       }
     }
   }
@@ -622,7 +622,7 @@ save_dline_database(void)
 }
 
 void
-load_dline_database(void)
+load_dline_database(const char *filename)
 {
   struct dbFILE *f = NULL;
   struct MaskItem *conf = NULL;
@@ -633,7 +633,7 @@ load_dline_database(void)
   uint64_t field_3 = 0;
   uint64_t field_4 = 0;
 
-  if (!(f = open_db(DLPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)
@@ -665,14 +665,14 @@ load_dline_database(void)
 }
 
 void
-save_resv_database(void)
+save_resv_database(const char *filename)
 {
   uint32_t records = 0;
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!(f = open_db(RESVPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
     return;
 
   DLINK_FOREACH(ptr, cresv_items.head)
@@ -691,7 +691,7 @@ save_resv_database(void)
       ++records;
   }
 
-  SAFE_WRITE(write_uint32(records, f), RESVPATH);
+  SAFE_WRITE(write_uint32(records, f), filename);
 
   DLINK_FOREACH(ptr, cresv_items.head)
   {
@@ -700,10 +700,10 @@ save_resv_database(void)
     if (!IsConfDatabase(conf))
       continue;
 
-    SAFE_WRITE(write_string(conf->name, f), RESVPATH);
-    SAFE_WRITE(write_string(conf->reason, f), RESVPATH);
-    SAFE_WRITE(write_uint64(conf->setat, f), RESVPATH);
-    SAFE_WRITE(write_uint64(conf->until, f), RESVPATH);
+    SAFE_WRITE(write_string(conf->name, f), filename);
+    SAFE_WRITE(write_string(conf->reason, f), filename);
+    SAFE_WRITE(write_uint64(conf->setat, f), filename);
+    SAFE_WRITE(write_uint64(conf->until, f), filename);
   }
 
   DLINK_FOREACH(ptr, nresv_items.head)
@@ -713,17 +713,17 @@ save_resv_database(void)
     if (!IsConfDatabase(conf))
       continue;
 
-    SAFE_WRITE(write_string(conf->name, f), RESVPATH);
-    SAFE_WRITE(write_string(conf->reason, f), RESVPATH);
-    SAFE_WRITE(write_uint64(conf->setat, f), RESVPATH);
-    SAFE_WRITE(write_uint64(conf->until, f), RESVPATH);
+    SAFE_WRITE(write_string(conf->name, f), filename);
+    SAFE_WRITE(write_string(conf->reason, f), filename);
+    SAFE_WRITE(write_uint64(conf->setat, f), filename);
+    SAFE_WRITE(write_uint64(conf->until, f), filename);
   }
 
   close_db(f);
 }
 
 void
-load_resv_database(void)
+load_resv_database(const char *filename)
 {
   uint32_t i = 0;
   uint32_t records = 0;
@@ -733,7 +733,7 @@ load_resv_database(void)
   char *reason = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!(f = open_db(RESVPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)
@@ -766,14 +766,14 @@ load_resv_database(void)
 }
 
 void
-save_xline_database(void)
+save_xline_database(const char *filename)
 {
   uint32_t records = 0;
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!(f = open_db(XPATH, "w", KLINE_DB_VERSION)))
+  if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
     return;
 
   DLINK_FOREACH(ptr, gecos_items.head)
@@ -784,7 +784,7 @@ save_xline_database(void)
       ++records;
   }
 
-  SAFE_WRITE(write_uint32(records, f), XPATH);
+  SAFE_WRITE(write_uint32(records, f), filename);
 
   DLINK_FOREACH(ptr, gecos_items.head)
   {
@@ -793,17 +793,17 @@ save_xline_database(void)
     if (!IsConfDatabase(conf))
       continue;
 
-    SAFE_WRITE(write_string(conf->name, f), XPATH);
-    SAFE_WRITE(write_string(conf->reason, f), XPATH);
-    SAFE_WRITE(write_uint64(conf->setat, f), XPATH);
-    SAFE_WRITE(write_uint64(conf->until, f), XPATH);
+    SAFE_WRITE(write_string(conf->name, f), filename);
+    SAFE_WRITE(write_string(conf->reason, f), filename);
+    SAFE_WRITE(write_uint64(conf->setat, f), filename);
+    SAFE_WRITE(write_uint64(conf->until, f), filename);
   }
 
   close_db(f);
 }
 
 void
-load_xline_database(void)
+load_xline_database(const char *filename)
 {
   uint32_t i = 0;
   uint32_t records = 0;
@@ -813,7 +813,7 @@ load_xline_database(void)
   char *reason = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!(f = open_db(XPATH, "r", KLINE_DB_VERSION)))
+  if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
     return;
 
   if (get_file_version(f) < 1)
@@ -847,8 +847,8 @@ load_xline_database(void)
 void
 save_all_databases(void *unused)
 {
-  save_kline_database();
-  save_dline_database();
-  save_xline_database();
-  save_resv_database();
+  save_kline_database(ConfigGeneral.klinefile);
+  save_dline_database(ConfigGeneral.dlinefile);
+  save_xline_database(ConfigGeneral.xlinefile);
+  save_resv_database(ConfigGeneral.resvfile);
 }

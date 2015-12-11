@@ -45,14 +45,14 @@ extern int write_uint64(uint64_t, struct dbFILE *);
 extern int read_string(char **, struct dbFILE *);
 extern int write_string(const char *, struct dbFILE *);
 
-extern void load_kline_database(void);
-extern void save_kline_database(void);
-extern void load_dline_database(void);
-extern void save_dline_database(void);
-extern void load_xline_database(void);
-extern void save_xline_database(void);
-extern void load_resv_database(void);
-extern void save_resv_database(void);
+extern void load_kline_database(const char *);
+extern void save_kline_database(const char *);
+extern void load_dline_database(const char *);
+extern void save_dline_database(const char *);
+extern void load_xline_database(const char *);
+extern void save_xline_database(const char *);
+extern void load_resv_database(const char *);
+extern void save_resv_database(const char *);
 extern void save_all_databases(void *);
 
 enum { DATABASE_UPDATE_TIMEOUT = 300 };

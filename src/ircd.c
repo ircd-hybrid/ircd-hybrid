@@ -563,10 +563,10 @@ main(int argc, char *argv[])
   dlinkAdd(&me, make_dlink_node(), &global_server_list);
   dlinkAdd(&me, &me.node, &global_client_list);
 
-  load_kline_database();
-  load_dline_database();
-  load_xline_database();
-  load_resv_database();
+  load_kline_database(ConfigGeneral.klinefile);
+  load_dline_database(ConfigGeneral.dlinefile);
+  load_xline_database(ConfigGeneral.xlinefile);
+  load_resv_database(ConfigGeneral.resvfile);
 
   load_all_modules(1);
   load_conf_modules();

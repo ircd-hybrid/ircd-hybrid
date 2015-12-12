@@ -99,7 +99,7 @@ date_ctime(time_t lclock)
 const char *
 time_dissect(time_t duration)
 {
-  static char buf[64];
+  static char buf[32];  /* 32 = sizeof("9999999999999999 days, 23:59:59") */
   unsigned int days = 0, hours = 0, minutes = 0, seconds = 0;
 
   while (duration >= 60 * 60 * 24)

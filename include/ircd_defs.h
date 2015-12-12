@@ -58,7 +58,6 @@
 #define AWAYLEN         180
 #define KEYLEN          23
 
-#define USERHOST_REPLYLEN       (NICKLEN+USERLEN+HOSTLEN+3)  /* +3 for !, @, \0 */
 #define MAX_DATE_STRING 32      /* maximum string length for a date string */
 #define IRCD_MAXNS      3       /* Maximum number of nameservers in
                                    /etc/resolv.conf we care about */

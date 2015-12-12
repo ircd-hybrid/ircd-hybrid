@@ -69,7 +69,7 @@ struct Channel
   struct Mode mode;
 
   char topic[TOPICLEN + 1];
-  char topic_info[USERHOST_REPLYLEN];
+  char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];
 
   time_t creationtime;
   time_t topic_time;

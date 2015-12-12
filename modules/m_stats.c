@@ -339,7 +339,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   size_t remote_client_memory_used = 0;
 
   size_t total_memory = 0;
-  unsigned int topic_count = 0;
+  unsigned int channel_topics = 0;
 
   unsigned int watch_list_headers = 0;   /* watchlist headers     */
   unsigned int watch_list_entries = 0;   /* watchlist entries     */
@@ -379,7 +379,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
     channel_invites += dlink_list_length(&chptr->invites);
 
     if (chptr->topic[0])
-      ++topic_count;
+      ++channel_topics;
 
     channel_bans += dlink_list_length(&chptr->banlist);
     channel_ban_memory += dlink_list_length(&chptr->banlist) * sizeof(struct Ban);
@@ -455,10 +455,9 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      class_count, class_count * sizeof(struct ClassItem));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :Channels %u(%zu) Topics %u(%u)",
+                     "z :Channels %u(%zu) Topics %u",
                      dlink_list_length(&channel_list),
-                     channel_memory, topic_count, topic_count *
-                     (TOPICLEN + 1 + USERHOST_REPLYLEN));
+                     channel_memory, channel_topics);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Bans %u(%zu)",

@@ -86,7 +86,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
     if (!(chptr->mode.mode & MODE_TOPICLIMIT) ||
         has_member_flags(member, CHFL_CHANOP|CHFL_HALFOP))
     {
-      char topic_info[USERHOST_REPLYLEN];
+      char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
 
       snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
                source_p->username, source_p->host);
@@ -143,7 +143,7 @@ static int
 ms_topic(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
-  char topic_info[USERHOST_REPLYLEN];
+  char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
 
   if (EmptyString(parv[1]))
   {

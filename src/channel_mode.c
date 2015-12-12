@@ -791,22 +791,26 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  /* no redundant mode changes */
-  if (dir == MODE_ADD &&  has_member_flags(member, CHFL_VOICE))
-    return;
+  switch (dir)
+  {
+    case MODE_ADD:
+      if (has_member_flags(member, CHFL_VOICE))
+        return;  /* No redundant mode changes */
 
-  if (dir == MODE_DEL && !has_member_flags(member, CHFL_VOICE))
-    return;
+      AddMemberFlag(member, CHFL_VOICE);
+      break;
+    case MODE_DEL:
+      if (!has_member_flags(member, CHFL_VOICE))
+        return;  /* No redundant mode changes */
+
+      DelMemberFlag(member, CHFL_VOICE);
+      break;
+  }
 
   mode_changes[mode_count].letter = c;
   mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
   mode_changes[mode_count++].dir = dir;
-
-  if (dir == MODE_ADD)
-    AddMemberFlag(member, CHFL_VOICE);
-  else
-    DelMemberFlag(member, CHFL_VOICE);
 }
 
 static void
@@ -845,22 +849,26 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  /* no redundant mode changes */
-  if (dir == MODE_ADD &&  has_member_flags(member, CHFL_HALFOP))
-    return;
+  switch (dir)
+  {
+    case MODE_ADD:
+      if (has_member_flags(member, CHFL_HALFOP))
+        return;  /* No redundant mode changes */
 
-  if (dir == MODE_DEL && !has_member_flags(member, CHFL_HALFOP))
-    return;
+      AddMemberFlag(member, CHFL_HALFOP);
+      break;
+    case MODE_DEL:
+      if (!has_member_flags(member, CHFL_HALFOP))
+        return;  /* No redundant mode changes */
+
+      DelMemberFlag(member, CHFL_HALFOP);
+      break;
+  }
 
   mode_changes[mode_count].letter = c;
   mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
   mode_changes[mode_count++].dir = dir;
-
-  if (dir == MODE_ADD)
-    AddMemberFlag(member, CHFL_HALFOP);
-  else
-    DelMemberFlag(member, CHFL_HALFOP);
 }
 
 static void
@@ -899,22 +907,26 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  /* no redundant mode changes */
-  if (dir == MODE_ADD &&  has_member_flags(member, CHFL_CHANOP))
-    return;
+  switch (dir)
+  {
+    case MODE_ADD:
+      if (has_member_flags(member, CHFL_CHANOP))
+        return;  /* No redundant mode changes */
 
-  if (dir == MODE_DEL && !has_member_flags(member, CHFL_CHANOP))
-    return;
+      AddMemberFlag(member, CHFL_CHANOP);
+      break;
+    case MODE_DEL:
+      if (!has_member_flags(member, CHFL_CHANOP))
+        return;  /* No redundant mode changes */
+
+      DelMemberFlag(member, CHFL_CHANOP);
+      break;
+  }
 
   mode_changes[mode_count].letter = c;
   mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
   mode_changes[mode_count++].dir = dir;
-
-  if (dir == MODE_ADD)
-    AddMemberFlag(member, CHFL_CHANOP);
-  else
-    DelMemberFlag(member, CHFL_CHANOP);
 }
 
 static void

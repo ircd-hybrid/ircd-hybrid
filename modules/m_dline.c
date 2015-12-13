@@ -129,7 +129,7 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. D-Line for [%s] [%s]",
-                         get_oper_name(source_p), duration/60,
+                         get_oper_name(source_p), duration / 60,
                          conf->host, conf->reason);
     ilog(LOG_TYPE_DLINE, "%s added temporary %ju min. D-Line for [%s] [%s]",
          get_oper_name(source_p), duration / 60, conf->host, conf->reason);

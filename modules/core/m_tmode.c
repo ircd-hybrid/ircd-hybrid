@@ -54,6 +54,8 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
 
+  assert(!MyClient(source_p));
+
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
@@ -63,15 +65,7 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
   if (strtoimax(parv[1], NULL, 10) > chptr->creationtime)
     return 0;
 
-  if (IsServer(source_p) || HasFlag(source_p, FLAGS_SERVICE))
-    set_channel_mode(source_p, chptr, NULL, parc - 3, parv + 3);
-  else
-  {
-    struct Membership *member = find_channel_link(source_p, chptr);
-
-    set_channel_mode(source_p, chptr, member, parc - 3, parv + 3);
-  }
-
+  set_channel_mode(source_p, chptr, NULL, parc - 3, parv + 3);
   return 0;
 }
 

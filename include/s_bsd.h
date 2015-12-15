@@ -54,7 +54,7 @@ extern void comm_settimeout(fde_t *, time_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, time_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
 extern void comm_connect_tcp(fde_t *, const char *, unsigned short, struct sockaddr *, int,
-                             void (struct _fde *, int, void *), void *, int, int);
+                             void (struct _fde *, int, void *), void *, int, time_t);
 extern const char *comm_errstr(int);
 extern int comm_open(fde_t *, int, int, int, const char *);
 extern int comm_accept(struct Listener *, struct irc_ssaddr *);

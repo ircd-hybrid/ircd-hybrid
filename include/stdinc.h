@@ -1,5 +1,5 @@
 /*
- *  ircd-hybrid: an advanced Internet Relay Chat Daemon(ircd).
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *  stdinc.h: Pull in all of the necessary system headers
  *
  *  Copyright (C) 2002 Aaron Sethman <androsyn@ratbox.org>

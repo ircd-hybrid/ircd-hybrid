@@ -1,5 +1,6 @@
 -- Noteworthy changes in version 8.2.12 (201?-??-??)
 o) Added channel mode +T which forbids NOTICEs to be sent to a channel
+o) Fixed minor SVSTAG memory leak
 
 
 -- Noteworthy changes in version 8.2.11 (2015-11-19)

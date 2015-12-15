@@ -388,7 +388,7 @@ check_conf_klines(void)
 void
 conf_try_ban(struct Client *client_p, struct MaskItem *conf)
 {
-  char ban_type = '\0';
+  char ban_type = '?';
 
   switch (conf->type)
   {

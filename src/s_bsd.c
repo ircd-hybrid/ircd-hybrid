@@ -503,13 +503,9 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
   {
     /* Failure, call the callback with COMM_ERR_BIND */
     comm_connect_callback(fd, COMM_ERR_BIND);
-    /* ... and quit */
-    return;
+    return;  /* ... and quit */
   }
 
-  /* Next, if we have been given an IP, get the addr and skip the
-   * DNS check (and head direct to comm_connect_tryconnect().
-   */
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
@@ -517,6 +513,10 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
 
   snprintf(portname, sizeof(portname), "%d", port);
 
+  /*
+   * Next, if we have been given an IP address, get the address and skip the
+   * DNS check (and head direct to comm_connect_tryconnect()).
+   */
   if (getaddrinfo(host, portname, &hints, &res))
   {
     /* Send the DNS request, for the next level */

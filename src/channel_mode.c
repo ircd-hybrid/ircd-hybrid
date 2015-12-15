@@ -933,8 +933,6 @@ static void
 chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  int limit = 0;
-
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
@@ -951,6 +949,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (dir == MODE_ADD && parc > *parn)
   {
     char *const lstr = parv[(*parn)++];
+    int limit = 0;
 
     if (EmptyString(lstr) || (limit = atoi(lstr)) <= 0)
       return;

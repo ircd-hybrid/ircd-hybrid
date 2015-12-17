@@ -45,6 +45,9 @@
 	(cp) += NS_INT32SZ; \
 }
 
+#define RESLIB_MAXNS 8  /* Maximum number of nameservers in
+                           /etc/resolv.conf we care about */
+
 extern struct irc_ssaddr irc_nsaddr_list[];
 extern unsigned int irc_nscount;
 extern void irc_res_init(void);

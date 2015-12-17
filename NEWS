@@ -2,6 +2,8 @@
 o) Added channel mode +T which forbids NOTICEs to be sent to a channel
 o) Fixed minor SVSTAG memory leak
 o) Fixed broken PART message blocking mechanism
+o) ircd now makes use of up to 8 name servers that are specified in
+   /etc/resolv.conf
 
 
 -- Noteworthy changes in version 8.2.11 (2015-11-19)

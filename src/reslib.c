@@ -88,7 +88,7 @@
 
 /* $Id$ */
 
-struct irc_ssaddr irc_nsaddr_list[IRCD_MAXNS];
+struct irc_ssaddr irc_nsaddr_list[RESLIB_MAXNS];
 unsigned int irc_nscount = 0;
 
 static const char digits[] = "0123456789";
@@ -143,7 +143,7 @@ add_nameserver(const char *arg)
   struct addrinfo hints, *res;
 
   /* Done max number of nameservers? */
-  if (irc_nscount >= IRCD_MAXNS)
+  if (irc_nscount >= RESLIB_MAXNS)
     return;
 
   memset(&hints, 0, sizeof(hints));

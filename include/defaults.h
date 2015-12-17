@@ -97,11 +97,6 @@
 #define CLIENT_FLOOD_MAX     8000
 #define CLIENT_FLOOD_MIN     512
 
-#define TS_MAX_DELTA_MIN      1         /* min value for ts_max_delta */
-#define TS_MAX_DELTA_DEFAULT  600       /* default for ts_max_delta */
-#define TS_WARN_DELTA_MIN     1         /* min value for ts_warn_delta */
-#define TS_WARN_DELTA_DEFAULT 30        /* default for ts_warn_delta */
-
 /* ConfigServerInfo default values */
 #define NETWORK_NAME_DEFAULT "EFnet"             /* default for network_name */
 #define NETWORK_DESC_DEFAULT "Eris Free Network" /* default for network_desc */

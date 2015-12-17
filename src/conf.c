@@ -842,8 +842,8 @@ set_default_conf(void)
   ConfigGeneral.max_nick_time = 20;
   ConfigGeneral.max_nick_changes = 5;
   ConfigGeneral.anti_spam_exit_message_time = 0;
-  ConfigGeneral.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
-  ConfigGeneral.ts_max_delta = TS_MAX_DELTA_DEFAULT;
+  ConfigGeneral.ts_warn_delta = 30;
+  ConfigGeneral.ts_max_delta = 600;
   ConfigGeneral.warn_no_connect_block = 1;
   ConfigGeneral.stats_e_disabled = 0;
   ConfigGeneral.stats_i_oper_only = 1;  /* 1 = masked */
@@ -871,12 +871,6 @@ set_default_conf(void)
 static void
 validate_conf(void)
 {
-  if (ConfigGeneral.ts_warn_delta < TS_WARN_DELTA_MIN)
-    ConfigGeneral.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
-
-  if (ConfigGeneral.ts_max_delta < TS_MAX_DELTA_MIN)
-    ConfigGeneral.ts_max_delta = TS_MAX_DELTA_DEFAULT;
-
   if (EmptyString(ConfigServerInfo.network_name))
     ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
 

@@ -203,7 +203,7 @@ client_clear_svstags(struct Client *client_p)
 static void
 check_pings_list(dlink_list *list)
 {
-  char buf[IRCD_BUFSIZE] = "";
+  char buf[32] = "";  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
   int ping = 0;      /* ping time value from client */
   dlink_node *node = NULL, *node_next = NULL;
 

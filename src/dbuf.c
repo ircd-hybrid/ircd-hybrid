@@ -112,8 +112,12 @@ dbuf_put_args(struct dbuf_block *dbuf, const char *data, va_list args)
   assert(dbuf->refs == 1);
 
   dbuf->size += vsnprintf(dbuf->data + dbuf->size, sizeof(dbuf->data) - dbuf->size, data, args);
+
+  /*
+   * As per C99, (v)snprintf returns the length the resulting string would be
+   */
   if (dbuf->size > sizeof(dbuf->data))
-    dbuf->size = sizeof(dbuf->data); /* required by some versions of vsnprintf */
+    dbuf->size = sizeof(dbuf->data);
 }
 
 void

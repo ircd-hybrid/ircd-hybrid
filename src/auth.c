@@ -232,6 +232,7 @@ start_auth_query(struct AuthRequest *auth)
     return 0;
   }
 
+  SetDoingAuth(auth);
   sendheader(auth->client, REPORT_DO_ID);
 
   /*
@@ -274,10 +275,7 @@ start_auth(struct Client *client_p)
   SetDNSPending(auth);
 
   if (ConfigGeneral.disable_auth == 0)
-  {
-    SetDoingAuth(auth);
     start_auth_query(auth);
-  }
 
   gethost_byaddr(auth_dns_callback, auth, &client_p->connection->ip);
 }

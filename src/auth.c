@@ -215,7 +215,7 @@ auth_error(struct AuthRequest *auth)
  * identifing process fail, it is aborted and the user is given a username
  * of "unknown".
  */
-static int
+static void
 start_auth_query(struct AuthRequest *auth)
 {
   struct irc_ssaddr localaddr;
@@ -229,7 +229,7 @@ start_auth_query(struct AuthRequest *auth)
     report_error(L_ALL, "creating auth stream socket %s:%s",
                  get_client_name(auth->client, SHOW_IP), errno);
     ++ServerStats.is_abad;
-    return 0;
+    return;
   }
 
   SetDoingAuth(auth);
@@ -252,7 +252,6 @@ start_auth_query(struct AuthRequest *auth)
       (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
       auth, auth->client->connection->ip.ss.ss_family,
       GlobalSetOptions.ident_timeout);
-  return 1; /* We suceed here for now */
 }
 
 /*

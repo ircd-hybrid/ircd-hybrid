@@ -346,9 +346,11 @@ channel_make(const char *name)
   chptr->creationtime = CurrentTime;
   chptr->last_join_time = CurrentTime;
 
-  strlcpy(chptr->name, name, sizeof(chptr->name));
+  chptr->name_len = strlcpy(chptr->name, name, sizeof(chptr->name));
+  if (chptr->name_len >= sizeof(chptr->name))
+    chptr->name_len = sizeof(chptr->name) - 1;
+    
   dlinkAdd(chptr, &chptr->node, &channel_list);
-
   hash_add_channel(chptr);
 
   return chptr;

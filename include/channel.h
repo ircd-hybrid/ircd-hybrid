@@ -90,6 +90,7 @@ struct Channel
   float number_joined;
 
   char name[CHANNELLEN + 1];
+  size_t name_len;
 };
 
 /*! \brief Membership structure */

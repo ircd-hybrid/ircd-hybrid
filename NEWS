@@ -4,6 +4,8 @@ o) Fixed minor SVSTAG memory leak
 o) Fixed broken PART message blocking mechanism
 o) ircd now makes use of up to 8 name servers that are specified in
    /etc/resolv.conf
+o) The -klinefile, -dlinefile, etc. switches didn't work at all
+o) Fixed possible core on ident lookup if ircd is out of file descriptors
 
 
 -- Noteworthy changes in version 8.2.11 (2015-11-19)

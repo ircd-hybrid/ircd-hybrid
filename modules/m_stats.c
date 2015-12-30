@@ -537,7 +537,7 @@ stats_dns_servers(struct Client *source_p, int parc, char *parv[])
                 irc_nsaddr_list[i].ss_len, ipaddr,
                 sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
     sendto_one_numeric(source_p, &me, RPL_STATSALINE, ipaddr);
-  } 
+  }
 }
 
 static void

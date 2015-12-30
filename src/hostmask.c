@@ -726,7 +726,7 @@ clear_out_address_conf(void)
 static void
 hostmask_send_expiration(const struct AddressRec *const arec)
 {
-  char ban_type = '\0';
+  char ban_type = '?';
 
   if (!ConfigGeneral.tkline_expire_notices)
     return;

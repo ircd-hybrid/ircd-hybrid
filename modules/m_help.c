@@ -92,7 +92,7 @@ do_help(struct Client *source_p, char *topic)
     return;
   }
 
-  char path[sizeof(HPATH) + strlen(topic) + 1];
+  char path[sizeof(HPATH) + strlen(topic) + 1];  /* +1 for / */
   snprintf(path, sizeof(path), "%s/%s", HPATH, topic);
 
   if (stat(path, &sb) < 0)

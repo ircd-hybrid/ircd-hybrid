@@ -98,18 +98,7 @@
   No. When there is a valid reason for this, then possibly, but I honestly
   don't see why anyone needs it.
 
-- Can I resv a local channel?
-
-  Yes. It takes the same format as creating a resv on a normal channel:
-    /resv &clones :no clonebots!
-
 - Do you support wildcard channel resv's?
 
-  No. This is mainly for speed reasons. When we are searching nicks, we
-  cannot just check if the nick, and the item in the list of resv'd nicks
-  are string equal, we have to check if they match, so we have to search a
-  full list. With channels however, we can search a hash table to see if an
-  entry exists, if it doesn't, then the channel isn't resv'd. We don't have
-  to search through all the channels.
-
-  Besides.. it's legal for a channel to be called #*warez* anyway ;)
+  Yes. For an exact match, wildcard characters can be escaped with a
+  backslash.

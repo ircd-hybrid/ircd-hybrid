@@ -1,9 +1,9 @@
                         User and Channel Modes Guide
                         ----------------------------
 
-In /VERSION one might see something like this:
+Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.4 DFGHRSWabcdefgijklnopqrsuwxy bchiklmnoprstveCIMORS bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.12 DFGHRSWabcdefgijklnopqrsuwxy bchiklmnoprstveCIMORST bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.

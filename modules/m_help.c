@@ -78,7 +78,6 @@ static void
 do_help(struct Client *source_p, char *topic)
 {
   char h_index[] = "index";
-  char path[HYB_PATH_MAX + 1];
   struct stat sb;
 
   if (EmptyString(topic))
@@ -93,12 +92,7 @@ do_help(struct Client *source_p, char *topic)
     return;
   }
 
-  if (strlen(HPATH) + strlen(topic) + 1 > HYB_PATH_MAX)
-  {
-    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
-    return;
-  }
-
+  char path[sizeof(HPATH) + strlen(topic) + 1];
   snprintf(path, sizeof(path), "%s/%s", HPATH, topic);
 
   if (stat(path, &sb) < 0)

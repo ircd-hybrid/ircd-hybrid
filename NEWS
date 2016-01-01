@@ -1,4 +1,9 @@
 -- Noteworthy changes in version 8.2.12 (201?-??-??)
+#######################################################################
+o) IMPORTANT: Character case mapping is 'ascii' now. It is recommended
+   to update all servers on the network to prevent possible channel
+   desynchronizations and nick name collision kills
+#######################################################################
 o) Added channel mode +T which forbids NOTICEs to be sent to a channel
 o) Fixed minor SVSTAG memory leak
 o) Fixed broken PART message blocking mechanism

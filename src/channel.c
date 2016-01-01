@@ -224,7 +224,7 @@ channel_send_mask_list(struct Client *client_p, const struct Channel *chptr,
   int tlen, mlen, cur_len;
   char *pp = pbuf;
 
-  if (!list->length)
+  if (!dlink_list_length(list))
     return;
 
   mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %ju %s %c :", me.id,

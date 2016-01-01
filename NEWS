@@ -33,7 +33,7 @@ o) Fixed bug where changing 'serverhide::flatten_links_delay' on runtime
    would not have any effect
 o) mkpasswd (tools): fixed broken bcrypt support on *BSD in conjunction
    with the -s and -l switches. Dropped MD5, DES and Extended DES support.
-o) Removed CHALLENGE in favor or ssl certificate fingerprint enabled
+o) Removed CHALLENGE in favor of ssl certificate fingerprint enabled
    operator {} blocks
 o) RSA keys with less than 2048 bits are no longer supported; same applies
    to the DH param file

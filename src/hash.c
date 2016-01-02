@@ -69,7 +69,9 @@ static struct UserHost *userhostTable[HASHSIZE];
 void
 hash_init(void)
 {
-  hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
+  do
+    hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
+  while (!hashf_xor_key);
 }
 
 /*

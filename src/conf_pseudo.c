@@ -96,7 +96,7 @@ pseudo_register(const char *name, const char *nick,
   if (find_command(command))
     return;
 
-  cmd = MyCalloc(sizeof(*cmd));
+  cmd = xcalloc(sizeof(*cmd));
   cmd->name = xstrdup(name);
   cmd->nick = xstrdup(nick);
   cmd->serv = xstrdup(serv);
@@ -130,11 +130,11 @@ pseudo_clear(void)
     mod_del_cmd(&cmd->msg);
     dlinkDelete(&cmd->node, &pseudo_cmd_list);
 
-    MyFree(cmd->name);
-    MyFree(cmd->nick);
-    MyFree(cmd->serv);
-    MyFree(cmd->prep);
-    MyFree(cmd->command);
-    MyFree(cmd);
+    xfree(cmd->name);
+    xfree(cmd->nick);
+    xfree(cmd->serv);
+    xfree(cmd->prep);
+    xfree(cmd->command);
+    xfree(cmd);
   }
 }

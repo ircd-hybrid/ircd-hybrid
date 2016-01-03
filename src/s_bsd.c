@@ -211,7 +211,7 @@ close_connection(struct Client *client_p)
   dbuf_clear(&client_p->connection->buf_sendq);
   dbuf_clear(&client_p->connection->buf_recvq);
 
-  MyFree(client_p->connection->password);
+  xfree(client_p->connection->password);
   client_p->connection->password = NULL;
 
   detach_conf(client_p, CONF_CLIENT | CONF_OPER | CONF_SERVER);

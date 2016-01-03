@@ -91,7 +91,7 @@ list_accepts(struct Client *source_p)
 static void
 add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
 {
-  struct split_nuh_item *const accept_p = MyCalloc(sizeof(*accept_p));
+  struct split_nuh_item *const accept_p = xcalloc(sizeof(*accept_p));
 
   accept_p->nickptr = xstrdup(nuh->nickptr);
   accept_p->userptr = xstrdup(nuh->userptr);

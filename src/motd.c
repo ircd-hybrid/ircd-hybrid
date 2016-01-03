@@ -57,7 +57,7 @@ static struct
 static struct Motd *
 motd_create(const char *mask, const char *path)
 {
-  struct Motd *motd = MyCalloc(sizeof(struct Motd));
+  struct Motd *motd = xcalloc(sizeof(struct Motd));
 
   if (EmptyString(mask))
     motd->type = MOTD_UNIVERSAL;
@@ -141,7 +141,7 @@ motd_cache(struct Motd *motd)
   }
 
   /* Ok, allocate a structure; we'll realloc later to trim memory */
-  cache = MyCalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * MOTD_MAXLINES));
+  cache = xcalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * MOTD_MAXLINES));
   cache->ref = 1;
   cache->path = xstrdup(motd->path);
   cache->maxcount = motd->maxcount;
@@ -160,11 +160,11 @@ motd_cache(struct Motd *motd)
   fclose(file);  /* Close the file */
 
   /* Trim memory usage a little */
-  motd->cache = MyCalloc(sizeof(struct MotdCache) +
+  motd->cache = xcalloc(sizeof(struct MotdCache) +
                          (MOTD_LINESIZE * cache->count));
   memcpy(motd->cache, cache, sizeof(struct MotdCache) +
          (MOTD_LINESIZE * cache->count));
-  MyFree(cache);
+  xfree(cache);
 
   /* Now link it in */
   dlinkAdd(motd->cache, &motd->cache->node, &MotdList.cachelist);
@@ -191,8 +191,8 @@ motd_decache(struct Motd *motd)
   if (--cache->ref == 0)  /* Reduce reference count */
   {
     dlinkDelete(&cache->node, &MotdList.cachelist);
-    MyFree(cache->path);  /* Free path info */
-    MyFree(cache);  /* Very simple for a reason */
+    xfree(cache->path);  /* Free path info */
+    xfree(cache);  /* Very simple for a reason */
   }
 }
 
@@ -208,9 +208,9 @@ motd_destroy(struct Motd *motd)
   if (motd->cache)  /* Drop the cache */
     motd_decache(motd);
 
-  MyFree(motd->path);  /* We always must have a path */
-  MyFree(motd->mask);
-  MyFree(motd);
+  xfree(motd->path);  /* We always must have a path */
+  xfree(motd->mask);
+  xfree(motd);
 }
 
 /*! \brief Find the first matching MOTD block for a user.

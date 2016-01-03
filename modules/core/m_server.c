@@ -279,7 +279,7 @@ server_estab(struct Client *client_p)
     return;
   }
 
-  MyFree(client_p->connection->password);
+  xfree(client_p->connection->password);
   client_p->connection->password = NULL;
 
   if (!ConfigServerInfo.hub && dlink_list_length(&local_server_list))

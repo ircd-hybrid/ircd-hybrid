@@ -82,7 +82,7 @@ write_links_file(void *unused)
   DLINK_FOREACH_SAFE(node, node_next, flatten_links.head)
   {
     dlinkDelete(node, &flatten_links);
-    MyFree(node->data);
+    xfree(node->data);
     free_dlink_node(node);
   }
 
@@ -421,7 +421,7 @@ check_server(const char *name, struct Client *client_p)
 void
 add_capability(const char *name, unsigned int flag)
 {
-  struct Capability *cap = MyCalloc(sizeof(*cap));
+  struct Capability *cap = xcalloc(sizeof(*cap));
 
   cap->name = xstrdup(name);
   cap->cap = flag;
@@ -446,8 +446,8 @@ delete_capability(const char *name)
     if (!irccmp(cap->name, name))
     {
       dlinkDelete(node, &server_capabilities_list);
-      MyFree(cap->name);
-      MyFree(cap);
+      xfree(cap->name);
+      xfree(cap);
     }
   }
 }
@@ -542,7 +542,7 @@ struct Server *
 make_server(struct Client *client_p)
 {
   if (client_p->serv == NULL)
-    client_p->serv = MyCalloc(sizeof(struct Server));
+    client_p->serv = xcalloc(sizeof(struct Server));
 
   return client_p->serv;
 }

@@ -57,7 +57,7 @@ void
 init_netio(void)
 {
   pollfds_size = hard_fdlimit;
-  pollfds = MyCalloc(sizeof(struct pollfd) * pollfds_size);
+  pollfds = xcalloc(sizeof(struct pollfd) * pollfds_size);
 }
 
 /*
@@ -120,7 +120,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
         if (pollnum >= pollfds_size)
         {
           pollfds_size *= 2;
-          pollfds = MyRealloc(pollfds, sizeof(struct pollfd) * pollfds_size);
+          pollfds = xrealloc(pollfds, sizeof(struct pollfd) * pollfds_size);
         }
 
         F->comm_index = pollnum++;

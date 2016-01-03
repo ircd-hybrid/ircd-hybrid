@@ -91,7 +91,7 @@ write_file_version(struct dbFILE *f, uint32_t version)
 static struct dbFILE *
 open_db_read(const char *filename)
 {
-  struct dbFILE *f = MyCalloc(sizeof(*f));
+  struct dbFILE *f = xcalloc(sizeof(*f));
   FILE *fp = NULL;
 
   strlcpy(f->filename, filename, sizeof(f->filename));
@@ -106,7 +106,7 @@ open_db_read(const char *filename)
     if (errno != ENOENT)
       ilog(LOG_TYPE_IRCD, "Cannot read database file %s", f->filename);
 
-    MyFree(f);
+    xfree(f);
     errno = errno_save;
     return NULL;
   }
@@ -123,7 +123,7 @@ open_db_read(const char *filename)
 static struct dbFILE *
 open_db_write(const char *filename, uint32_t version)
 {
-  struct dbFILE *f = MyCalloc(sizeof(*f));
+  struct dbFILE *f = xcalloc(sizeof(*f));
   int fd = 0;
 
   strlcpy(f->filename, filename, sizeof(f->filename));
@@ -137,7 +137,7 @@ open_db_write(const char *filename, uint32_t version)
   {
     ilog(LOG_TYPE_IRCD, "Opening database file %s for write: Filename too long",
          filename);
-    MyFree(f);
+    xfree(f);
     errno = ENAMETOOLONG;
     return NULL;
   }
@@ -167,7 +167,7 @@ open_db_write(const char *filename, uint32_t version)
       fclose(f->fp);
 
     remove(f->tempname);
-    MyFree(f);
+    xfree(f);
 
     errno = errno_save;
     return NULL;
@@ -223,7 +223,7 @@ restore_db(struct dbFILE *f)
   if (f->mode == 'w' && f->tempname[0])
     remove(f->tempname);
 
-  MyFree(f);
+  xfree(f);
   errno = errno_save;
 }
 
@@ -267,7 +267,7 @@ close_db(struct dbFILE *f)
     }
   }
 
-  MyFree(f);
+  xfree(f);
   return 0;
 }
 
@@ -434,11 +434,11 @@ read_string(char **ret, struct dbFILE *f)
     return 0;
   }
 
-  s = MyCalloc(len);
+  s = xcalloc(len);
 
   if (len != fread(s, 1, len, f->fp))
   {
-    MyFree(s);
+    xfree(s);
     return -1;
   }
 
@@ -758,8 +758,8 @@ load_resv_database(const char *filename)
     conf->until = tmp64_hold;
     SetConfDatabase(conf);
 
-    MyFree(name);
-    MyFree(reason);
+    xfree(name);
+    xfree(reason);
   }
 
   close_db(f);

@@ -31,10 +31,10 @@
 
 
 /*
- * MyCalloc - allocate memory, call outofmemory on failure
+ * xcalloc - allocate memory, call outofmemory on failure
  */
 void *
-MyCalloc(size_t size)
+xcalloc(size_t size)
 {
   void *ret = calloc(1, size);
 
@@ -45,10 +45,10 @@ MyCalloc(size_t size)
 }
 
 /*
- * MyRealloc - reallocate memory, call outofmemory on failure
+ * xrealloc - reallocate memory, call outofmemory on failure
  */
 void *
-MyRealloc(void *x, size_t y)
+xrealloc(void *x, size_t y)
 {
   void *ret = realloc(x, y);
 
@@ -59,7 +59,7 @@ MyRealloc(void *x, size_t y)
 }
 
 void
-MyFree(void *x)
+xfree(void *x)
 {
   free(x);
 }

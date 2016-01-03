@@ -127,8 +127,8 @@ free_client(struct Client *client_p)
   assert(dlink_list_length(&client_p->whowas) == 0);
   assert(dlink_list_length(&client_p->svstags) == 0);
 
-  MyFree(client_p->serv);
-  MyFree(client_p->certfp);
+  xfree(client_p->serv);
+  xfree(client_p->certfp);
 
   if (MyConnect(client_p))
   {
@@ -165,7 +165,7 @@ client_attach_svstag(struct Client *client_p, unsigned int numeric,
   if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
     return;
 
-  svstag = MyCalloc(sizeof(*svstag));
+  svstag = xcalloc(sizeof(*svstag));
   svstag->numeric = numeric;
   svstag->tag = xstrdup(tag);
 
@@ -189,8 +189,8 @@ client_clear_svstags(struct Client *client_p)
     struct ServicesTag *svstag = node->data;
 
     dlinkDelete(&svstag->node, &client_p->svstags);
-    MyFree(svstag->tag);
-    MyFree(svstag);
+    xfree(svstag->tag);
+    xfree(svstag);
   }
 }
 
@@ -972,10 +972,10 @@ del_accept(struct split_nuh_item *accept_p, struct Client *client_p)
 {
   dlinkDelete(&accept_p->node, &client_p->connection->acceptlist);
 
-  MyFree(accept_p->nickptr);
-  MyFree(accept_p->userptr);
-  MyFree(accept_p->hostptr);
-  MyFree(accept_p);
+  xfree(accept_p->nickptr);
+  xfree(accept_p->userptr);
+  xfree(accept_p->hostptr);
+  xfree(accept_p);
 }
 
 struct split_nuh_item *

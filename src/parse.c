@@ -464,7 +464,7 @@ add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
      */
     if ((ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)]) == NULL)
     {
-      ntree_p = MyCalloc(sizeof(struct MessageTree));
+      ntree_p = xcalloc(sizeof(struct MessageTree));
       mtree_p->pointers[*cmd & (MAXPTRLEN - 1)] = ntree_p;
 
       mtree_p->links++;  /* Have new pointer, so up ref count */
@@ -522,7 +522,7 @@ del_msg_element(struct MessageTree *mtree_p, const char *cmd)
       {
         mtree_p->pointers[*cmd & (MAXPTRLEN - 1)] = NULL;
         mtree_p->links--;
-        MyFree(ntree_p);
+        xfree(ntree_p);
       }
     }
   }

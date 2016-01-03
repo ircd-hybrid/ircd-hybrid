@@ -47,7 +47,7 @@ class_get_list(void)
 struct ClassItem *
 class_make(void)
 {
-  struct ClassItem *const class = MyCalloc(sizeof(*class));
+  struct ClassItem *const class = xcalloc(sizeof(*class));
 
   class->active    = 1;
   class->con_freq  = DEFAULT_CONNECTFREQUENCY;
@@ -69,8 +69,8 @@ class_free(struct ClassItem *const class)
   assert(class->ref_count == 0);
 
   dlinkDelete(&class->node, &class_list);
-  MyFree(class->name);
-  MyFree(class);
+  xfree(class->name);
+  xfree(class);
 }
 
 void
@@ -210,7 +210,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
       }
     }
 
-    cidr = MyCalloc(sizeof(struct CidrItem));
+    cidr = xcalloc(sizeof(struct CidrItem));
     cidr->number_on_this_cidr = 1;
     cidr->mask = *ip;
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv4);
@@ -232,7 +232,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
       }
     }
 
-    cidr = MyCalloc(sizeof(struct CidrItem));
+    cidr = xcalloc(sizeof(struct CidrItem));
     cidr->number_on_this_cidr = 1;
     cidr->mask = *ip;
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv6);
@@ -274,7 +274,7 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
         if (cidr->number_on_this_cidr == 0)
         {
           dlinkDelete(node, &aclass->list_ipv4);
-          MyFree(cidr);
+          xfree(cidr);
           return;
         }
       }
@@ -293,7 +293,7 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
         if (cidr->number_on_this_cidr == 0)
         {
           dlinkDelete(node, &aclass->list_ipv6);
-          MyFree(cidr);
+          xfree(cidr);
           return;
         }
       }
@@ -334,7 +334,7 @@ destroy_cidr_list(dlink_list *list)
   DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
     dlinkDelete(node, list);
-    MyFree(node->data);
+    xfree(node->data);
   }
 }
 

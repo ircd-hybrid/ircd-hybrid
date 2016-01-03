@@ -531,17 +531,17 @@ free_list_task(struct Client *source_p)
 
   DLINK_FOREACH_SAFE(node, node_next, lt->show_mask.head)
   {
-    MyFree(node->data);
+    xfree(node->data);
     free_dlink_node(node);
   }
 
   DLINK_FOREACH_SAFE(node, node_next, lt->hide_mask.head)
   {
-    MyFree(node->data);
+    xfree(node->data);
     free_dlink_node(node);
   }
 
-  MyFree(lt);
+  xfree(lt);
   source_p->connection->list_task = NULL;
 }
 

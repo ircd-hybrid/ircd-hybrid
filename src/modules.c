@@ -99,7 +99,7 @@ unload_one_module(const char *name, int warn)
 
   assert(dlink_list_length(&modules_list) > 0);
   dlinkDelete(&modp->node, &modules_list);
-  MyFree(modp->name);
+  xfree(modp->name);
 
   lt_dlclose(modp->handle);
 
@@ -229,7 +229,7 @@ mod_add_path(const char *path)
   if (mod_find_path(path))
     return;
 
-  pathst = MyCalloc(sizeof(struct module_path));
+  pathst = xcalloc(sizeof(struct module_path));
 
   strlcpy(pathst->path, path, sizeof(pathst->path));
   dlinkAdd(pathst, &pathst->node, &modules_path);
@@ -246,7 +246,7 @@ add_conf_module(const char *name)
 {
   struct module_path *pathst;
 
-  pathst = MyCalloc(sizeof(struct module_path));
+  pathst = xcalloc(sizeof(struct module_path));
 
   strlcpy(pathst->path, name, sizeof(pathst->path));
   dlinkAdd(pathst, &pathst->node, &modules_conf);
@@ -266,13 +266,13 @@ mod_clear_paths(void)
   DLINK_FOREACH_SAFE(node, node_next, modules_path.head)
   {
     dlinkDelete(node, &modules_path);
-    MyFree(node->data);
+    xfree(node->data);
   }
 
   DLINK_FOREACH_SAFE(node, node_next, modules_conf.head)
   {
     dlinkDelete(node, &modules_conf);
-    MyFree(node->data);
+    xfree(node->data);
   }
 }
 

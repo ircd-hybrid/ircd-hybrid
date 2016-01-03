@@ -168,7 +168,7 @@ map_to_list(enum maskitem_type type)
 struct MaskItem *
 conf_make(enum maskitem_type type)
 {
-  struct MaskItem *const conf = MyCalloc(sizeof(*conf));
+  struct MaskItem *const conf = xcalloc(sizeof(*conf));
   dlink_list *list = NULL;
 
   conf->type   = type;
@@ -189,7 +189,7 @@ conf_free(struct MaskItem *conf)
   if ((list = map_to_list(conf->type)))
     dlinkFindDelete(list, conf);
 
-  MyFree(conf->name);
+  xfree(conf->name);
 
   if (conf->dns_pending)
     delete_resolver_queries(conf);
@@ -200,29 +200,29 @@ conf_free(struct MaskItem *conf)
 
   conf->class = NULL;
 
-  MyFree(conf->passwd);
-  MyFree(conf->spasswd);
-  MyFree(conf->reason);
-  MyFree(conf->certfp);
-  MyFree(conf->whois);
-  MyFree(conf->user);
-  MyFree(conf->host);
+  xfree(conf->passwd);
+  xfree(conf->spasswd);
+  xfree(conf->reason);
+  xfree(conf->certfp);
+  xfree(conf->whois);
+  xfree(conf->user);
+  xfree(conf->host);
 #ifdef HAVE_LIBCRYPTO
-  MyFree(conf->cipher_list);
+  xfree(conf->cipher_list);
 
   if (conf->rsa_public_key)
     RSA_free(conf->rsa_public_key);
 #endif
   DLINK_FOREACH_SAFE(node, node_next, conf->hub_list.head)
   {
-    MyFree(node->data);
+    xfree(node->data);
     dlinkDelete(node, &conf->hub_list);
     free_dlink_node(node);
   }
 
   DLINK_FOREACH_SAFE(node, node_next, conf->leaf_list.head)
   {
-    MyFree(node->data);
+    xfree(node->data);
     dlinkDelete(node, &conf->leaf_list);
     free_dlink_node(node);
   }
@@ -232,13 +232,13 @@ conf_free(struct MaskItem *conf)
     struct exempt *exptr = node->data;
 
     dlinkDelete(node, &conf->exempt_list);
-    MyFree(exptr->name);
-    MyFree(exptr->user);
-    MyFree(exptr->host);
-    MyFree(exptr);
+    xfree(exptr->name);
+    xfree(exptr->user);
+    xfree(exptr->host);
+    xfree(exptr);
   }
 
-  MyFree(conf);
+  xfree(conf);
 }
 
 /* attach_iline()
@@ -1198,11 +1198,11 @@ clear_out_old_conf(void)
   pseudo_clear();
 
   /* Clean out ConfigServerInfo */
-  MyFree(ConfigServerInfo.description);
+  xfree(ConfigServerInfo.description);
   ConfigServerInfo.description = NULL;
-  MyFree(ConfigServerInfo.network_name);
+  xfree(ConfigServerInfo.network_name);
   ConfigServerInfo.network_name = NULL;
-  MyFree(ConfigServerInfo.network_desc);
+  xfree(ConfigServerInfo.network_desc);
   ConfigServerInfo.network_desc = NULL;
 #ifdef HAVE_LIBCRYPTO
   if (ConfigServerInfo.rsa_private_key)
@@ -1211,19 +1211,19 @@ clear_out_old_conf(void)
     ConfigServerInfo.rsa_private_key = NULL;
   }
 
-  MyFree(ConfigServerInfo.rsa_private_key_file);
+  xfree(ConfigServerInfo.rsa_private_key_file);
   ConfigServerInfo.rsa_private_key_file = NULL;
 #endif
 
   /* Clean out ConfigAdminInfo */
-  MyFree(ConfigAdminInfo.name);
+  xfree(ConfigAdminInfo.name);
   ConfigAdminInfo.name = NULL;
-  MyFree(ConfigAdminInfo.email);
+  xfree(ConfigAdminInfo.email);
   ConfigAdminInfo.email = NULL;
-  MyFree(ConfigAdminInfo.description);
+  xfree(ConfigAdminInfo.description);
   ConfigAdminInfo.description = NULL;
 
-  MyFree(ConfigServerHide.flatten_links_file);
+  xfree(ConfigServerHide.flatten_links_file);
   ConfigServerHide.flatten_links_file = NULL;
 
   /* Clean out listeners */

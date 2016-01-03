@@ -126,21 +126,21 @@ reset_block_state(void)
 
   DLINK_FOREACH_SAFE(node, node_next, block_state.mask.list.head)
   {
-    MyFree(node->data);
+    xfree(node->data);
     dlinkDelete(node, &block_state.mask.list);
     free_dlink_node(node);
   }
 
   DLINK_FOREACH_SAFE(node, node_next, block_state.leaf.list.head)
   {
-    MyFree(node->data);
+    xfree(node->data);
     dlinkDelete(node, &block_state.leaf.list);
     free_dlink_node(node);
   }
 
   DLINK_FOREACH_SAFE(node, node_next, block_state.hub.list.head)
   {
-    MyFree(node->data);
+    xfree(node->data);
     dlinkDelete(node, &block_state.hub.list);
     free_dlink_node(node);
   }
@@ -533,7 +533,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 
   if (ConfigServerInfo.rsa_private_key_file)
   {
-    MyFree(ConfigServerInfo.rsa_private_key_file);
+    xfree(ConfigServerInfo.rsa_private_key_file);
     ConfigServerInfo.rsa_private_key_file = NULL;
   }
 
@@ -688,7 +688,7 @@ serverinfo_description: DESCRIPTION '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    MyFree(ConfigServerInfo.description);
+    xfree(ConfigServerInfo.description);
     ConfigServerInfo.description = xstrdup(yylval.string);
     strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
   }
@@ -703,7 +703,7 @@ serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
     if ((p = strchr(yylval.string, ' ')))
       *p = '\0';
 
-    MyFree(ConfigServerInfo.network_name);
+    xfree(ConfigServerInfo.network_name);
     ConfigServerInfo.network_name = xstrdup(yylval.string);
   }
 };
@@ -713,7 +713,7 @@ serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  MyFree(ConfigServerInfo.network_desc);
+  xfree(ConfigServerInfo.network_desc);
   ConfigServerInfo.network_desc = xstrdup(yylval.string);
 };
 
@@ -865,7 +865,7 @@ admin_name: NAME '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  MyFree(ConfigAdminInfo.name);
+  xfree(ConfigAdminInfo.name);
   ConfigAdminInfo.name = xstrdup(yylval.string);
 };
 
@@ -874,7 +874,7 @@ admin_email: EMAIL '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  MyFree(ConfigAdminInfo.email);
+  xfree(ConfigAdminInfo.email);
   ConfigAdminInfo.email = xstrdup(yylval.string);
 };
 
@@ -883,7 +883,7 @@ admin_description: DESCRIPTION '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  MyFree(ConfigAdminInfo.description);
+  xfree(ConfigAdminInfo.description);
   ConfigAdminInfo.description = xstrdup(yylval.string);
 };
 
@@ -1459,7 +1459,7 @@ class_entry: CLASS
     class = class_make();
 
   class->active = 1;
-  MyFree(class->name);
+  xfree(class->name);
   class->name = xstrdup(block_state.class.buf);
   class->ping_freq = block_state.ping_freq.value;
   class->max_perip = block_state.max_perip.value;
@@ -3048,7 +3048,7 @@ serverhide_flatten_links_file: FLATTEN_LINKS_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    MyFree(ConfigServerHide.flatten_links_file);
+    xfree(ConfigServerHide.flatten_links_file);
     ConfigServerHide.flatten_links_file = xstrdup(yylval.string);
   }
 };
@@ -3075,7 +3075,7 @@ serverhide_hidden_name: HIDDEN_NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    MyFree(ConfigServerHide.hidden_name);
+    xfree(ConfigServerHide.hidden_name);
     ConfigServerHide.hidden_name = xstrdup(yylval.string);
   }
 };

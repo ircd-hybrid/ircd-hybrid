@@ -612,7 +612,7 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 
   assert(type && !EmptyString(hostname));
 
-  arec = MyCalloc(sizeof(struct AddressRec));
+  arec = xcalloc(sizeof(struct AddressRec));
   arec->masktype = parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
   arec->Mask.ipa.bits = bits;
   arec->username = username;
@@ -683,7 +683,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
       if (!conf->ref_count)
         conf_free(conf);
 
-      MyFree(arec);
+      xfree(arec);
       return;
     }
   }
@@ -718,7 +718,7 @@ clear_out_address_conf(void)
 
       if (!arec->conf->ref_count)
         conf_free(arec->conf);
-      MyFree(arec);
+      xfree(arec);
     }
   }
 }
@@ -770,7 +770,7 @@ hostmask_expire_temporary(void)
 
           dlinkDelete(&arec->node, &atable[i]);
           conf_free(arec->conf);
-          MyFree(arec);
+          xfree(arec);
           break;
         default: break;
       }

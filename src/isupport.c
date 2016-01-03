@@ -93,15 +93,15 @@ isupport_add(const char *name, const char *options, int n)
     support = node->data;
     if (irccmp(support->name, name) == 0)
     {
-      MyFree(support->name);
-      MyFree(support->options);
+      xfree(support->name);
+      xfree(support->options);
       break;
     }
   }
 
   if (node == NULL)
   {
-    support = MyCalloc(sizeof(*support));
+    support = xcalloc(sizeof(*support));
     dlinkAddTail(support, &support->node, &isupport_list);
   }
 
@@ -132,9 +132,9 @@ isupport_delete(const char *name)
     if (irccmp(support->name, name) == 0)
     {
       dlinkDelete(node, &isupport_list);
-      MyFree(support->name);
-      MyFree(support->options);
-      MyFree(support);
+      xfree(support->name);
+      xfree(support->options);
+      xfree(support);
       break;
     }
   }
@@ -163,7 +163,7 @@ isupport_rebuild(void)
   DLINK_FOREACH_SAFE(node, node_next, isupport_list_lines.head)
   {
     dlinkDelete(node, &isupport_list_lines);
-    MyFree(node->data);
+    xfree(node->data);
     free_dlink_node(node);
   }
 

@@ -52,7 +52,7 @@ listener_get_list(void)
 static struct Listener *
 listener_make(const int port, const struct irc_ssaddr *addr)
 {
-  struct Listener *listener = MyCalloc(sizeof(struct Listener));
+  struct Listener *listener = xcalloc(sizeof(struct Listener));
 
   listener->port = port;
   memcpy(&listener->addr, addr, sizeof(struct irc_ssaddr));
@@ -64,7 +64,7 @@ static void
 listener_free(struct Listener *listener)
 {
   dlinkDelete(&listener->node, &listener_list);
-  MyFree(listener);
+  xfree(listener);
 }
 
 /*

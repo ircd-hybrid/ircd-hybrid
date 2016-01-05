@@ -1,3 +1,22 @@
+-- Noteworthy changes in version 8.2.12 (2016-01-05)
+#######################################################################
+o) IMPORTANT: Character case mapping is 'ascii' now. It is recommended
+   to update all servers on the network to prevent possible channel
+   desynchronizations and nick name collision kills
+#######################################################################
+o) Added channel mode +T which forbids NOTICEs to be sent to a channel
+o) Fixed minor SVSTAG memory leak
+o) Fixed broken PART message blocking mechanism
+o) ircd now makes use of up to 8 name servers that are specified in
+   /etc/resolv.conf
+o) The -klinefile, -dlinefile, etc. switches didn't work at all
+o) Fixed possible core on ident lookups if ircd is out of file descriptors
+o) Far client exit notices (+F) now show IP addresses, too
+o) Made idle time look nicer in "STATS v|p" by using a formatted time string
+o) 'general::ts_warn_delta', and 'general::ts_max_delta' can be set to 0 now
+o) Several code cleanups and optimizations. Improved documentation
+
+
 -- Noteworthy changes in version 8.2.11 (2015-11-19)
 o) Implemented IRCv3.2 invite-notify extension
 o) Implemented IRCv3.2 chghost extension
@@ -14,7 +33,7 @@ o) Fixed bug where changing 'serverhide::flatten_links_delay' on runtime
    would not have any effect
 o) mkpasswd (tools): fixed broken bcrypt support on *BSD in conjunction
    with the -s and -l switches. Dropped MD5, DES and Extended DES support.
-o) Removed CHALLENGE in favour or ssl certificate fingerprint enabled
+o) Removed CHALLENGE in favor of ssl certificate fingerprint enabled
    operator {} blocks
 o) RSA keys with less than 2048 bits are no longer supported; same applies
    to the DH param file

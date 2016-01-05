@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.12 (201?-??-??)
+-- Noteworthy changes in version 8.2.12 (2016-01-05)
 #######################################################################
 o) IMPORTANT: Character case mapping is 'ascii' now. It is recommended
    to update all servers on the network to prevent possible channel
@@ -10,7 +10,7 @@ o) Fixed broken PART message blocking mechanism
 o) ircd now makes use of up to 8 name servers that are specified in
    /etc/resolv.conf
 o) The -klinefile, -dlinefile, etc. switches didn't work at all
-o) Fixed possible core on ident lookup if ircd is out of file descriptors
+o) Fixed possible core on ident lookups if ircd is out of file descriptors
 o) Far client exit notices (+F) now show IP addresses, too
 o) Made idle time look nicer in "STATS v|p" by using a formatted time string
 o) 'general::ts_warn_delta', and 'general::ts_max_delta' can be set to 0 now

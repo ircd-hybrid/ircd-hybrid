@@ -94,7 +94,7 @@ do_etrace(struct Client *source_p, const char *arg)
     if (target_p && MyConnect(target_p))
       report_this_status(source_p, target_p);
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, tname);
+    sendto_one_numeric(source_p, &me, RPL_TRACEEND, tname);
     return;
   }
 
@@ -106,7 +106,7 @@ do_etrace(struct Client *source_p, const char *arg)
       report_this_status(source_p, target_p);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, tname);
+  sendto_one_numeric(source_p, &me, RPL_TRACEEND, tname);
 }
 
 /* mo_etrace()

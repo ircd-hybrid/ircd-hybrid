@@ -71,7 +71,7 @@ m_trace(struct Client *source_p, int parc, char *parv[])
   else
     name = me.name;
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, name);
+  sendto_one_numeric(source_p, &me, RPL_TRACEEND, name);
   return 0;
 }
 
@@ -185,7 +185,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     if ((target_p = hash_find_client(name)) && IsClient(target_p))
       report_this_status(source_p, target_p);
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, name);
+    sendto_one_numeric(source_p, &me, RPL_TRACEEND, name);
     return;
   }
 
@@ -235,7 +235,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
       sendto_one_numeric(source_p, &me, RPL_TRACECLASS, class->name, class->ref_count);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFTRACE, name);
+  sendto_one_numeric(source_p, &me, RPL_TRACEEND, name);
 }
 
 /* report_this_status()

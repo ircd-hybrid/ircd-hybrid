@@ -98,7 +98,7 @@ enum irc_numerics
   RPL_ADMINLOC1            = 257,
   RPL_ADMINLOC2            = 258,
   RPL_ADMINEMAIL           = 259,
-  RPL_ENDOFTRACE           = 262,
+  RPL_TRACEEND             = 262,
   RPL_LOAD2HI              = 263,
   RPL_LOCALUSERS           = 265,
   RPL_GLOBALUSERS          = 266,

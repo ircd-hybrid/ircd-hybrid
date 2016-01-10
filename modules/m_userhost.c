@@ -70,7 +70,7 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
        * lookup (USERHOST) to figure out what the clients' local IP
        * is. Useful for things like NAT, and dynamic dial-up users.
        */
-      if (MyClient(target_p) && (target_p == source_p))
+      if (MyConnect(target_p) && (target_p == source_p))
       {
         rl = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
                       target_p->name,

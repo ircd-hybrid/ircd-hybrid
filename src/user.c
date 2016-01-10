@@ -211,7 +211,7 @@ introduce_client(struct Client *source_p)
   dlink_node *node = NULL;
   char ubuf[IRCD_BUFSIZE] = "";
 
-  if (MyClient(source_p))
+  if (MyConnect(source_p))
     send_umode(source_p, source_p, 0, ubuf);
   else
     send_umode(NULL, source_p, 0, ubuf);

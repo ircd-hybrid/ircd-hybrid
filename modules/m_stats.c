@@ -948,7 +948,7 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
     else
       strlcpy(buf, "n/a", sizeof(buf));
 
-    if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER))
+    if (MyConnect(source_p) && HasUMode(source_p, UMODE_OPER))
       sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "p :[%c][%s] %s (%s@%s) Idle: %s",
                          HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
@@ -999,7 +999,7 @@ show_ports(struct Client *source_p)
 
 
     if (HasUMode(source_p, UMODE_ADMIN) &&
-        (MyClient(source_p) || !ConfigServerHide.hide_server_ips))
+        (MyConnect(source_p) || !ConfigServerHide.hide_server_ips))
       sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
                          listener->name,
                          listener->ref_count, buf,
@@ -1306,7 +1306,7 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
      * This basically shows ips for our opers if it's not a server/admin, or
      * it's one of our admins.
      */
-    if (MyClient(source_p) && HasUMode(source_p, UMODE_OPER) &&
+    if (MyConnect(source_p) && HasUMode(source_p, UMODE_OPER) &&
         (HasUMode(source_p, UMODE_ADMIN) ||
         (!IsServer(target_p) && !HasUMode(target_p, UMODE_ADMIN) &&
         !IsHandshake(target_p) && !IsConnecting(target_p))))

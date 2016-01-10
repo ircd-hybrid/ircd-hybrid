@@ -747,7 +747,7 @@ can_send(struct Channel *chptr, struct Client *client_p,
   if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE))
     return CAN_SEND_OPV;
 
-  if (MyClient(client_p) && !HasFlag(client_p, FLAGS_EXEMPTRESV))
+  if (MyConnect(client_p) && !HasFlag(client_p, FLAGS_EXEMPTRESV))
     if (!(HasUMode(client_p, UMODE_OPER) && HasOFlag(client_p, OPER_FLAG_JOIN_RESV)))
       if ((conf = match_find_resv(chptr->name)) && !resv_find_exempt(client_p, conf))
         return ERR_CANNOTSENDTOCHAN;
@@ -776,7 +776,7 @@ can_send(struct Channel *chptr, struct Client *client_p,
     return ERR_CANNOTSENDTOCHAN;
 
   /* Cache can send if banned */
-  if (MyClient(client_p))
+  if (MyConnect(client_p))
   {
     if (member)
     {

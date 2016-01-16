@@ -207,29 +207,15 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 
   /*
    * Get port number from user, if given. If not specified,
-   * use the default from configuration structure. If missing
-   * from there, then use the precompiled default.
+   * use the default from configuration structure.
    */
-  tmpport = port = conf->port;
+  port = atoi(parv[2]);
 
-  if (parc > 2 && !EmptyString(parv[2]))
+  if (port == 0)
+    port = conf->port;
+  if (port <= 0)
   {
-    port = atoi(parv[2]);
-
-    /*
-     * If someone sends port 0, and we have a config port.. use it
-     */
-    if (port == 0 && conf->port)
-      port = conf->port;
-    else if (port <= 0)
-    {
-      sendto_one_notice(source_p, &me, ":Connect: Illegal port number");
-      return 0;
-    }
-  }
-  else if (port <= 0 && (port = PORTNUM) <= 0)
-  {
-    sendto_one_notice(source_p, &me, ":Connect: missing port number");
+    sendto_one_notice(source_p, &me, ":Connect: Illegal port number");
     return 0;
   }
 
@@ -252,6 +238,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %d",
        source_p->name, parv[1], port);
 
+  tmpport = conf->port;
   conf->port = port;
 
   /*

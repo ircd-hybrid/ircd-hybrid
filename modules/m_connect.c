@@ -54,7 +54,7 @@
 static int
 mo_connect(struct Client *source_p, int parc, char *parv[])
 {
-  int port = 0, tmpport = 0;
+  int port = 0;
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
 
@@ -100,22 +100,15 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 
   /*
    * Get port number from user, if given. If not specified,
-   * use the default from configuration structure. If missing
-   * from there, then use the precompiled default.
+   * use the default from configuration structure.
    */
-  tmpport = port = conf->port;
-
   if (parc > 2 && !EmptyString(parv[2]))
+    port = atoi(parv[2]);
+  if (port == 0)
+    port = conf->port;
+  if (port <= 0)
   {
-    if ((port = atoi(parv[2])) <= 0)
-    {
-      sendto_one_notice(source_p, &me, ":Connect: Illegal port number");
-      return 0;
-    }
-  }
-  else if (port <= 0 && (port = PORTNUM) <= 0)
-  {
-    sendto_one_notice(source_p, &me, ":Connect: missing port number");
+    sendto_one_notice(source_p, &me, ":Connect: Illegal port number");
     return 0;
   }
 
@@ -132,6 +125,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %s",
        source_p->name, parv[1], parv[2] ? parv[2] : "");
 
+  const int tmpport = conf->port;
   conf->port = port;
 
   /*
@@ -175,7 +169,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 static int
 ms_connect(struct Client *source_p, int parc, char *parv[])
 {
-  int port = 0, tmpport = 0;
+  int port = 0;
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
 
@@ -238,7 +232,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %d",
        source_p->name, parv[1], port);
 
-  tmpport = conf->port;
+  const int tmpport = conf->port;
   conf->port = port;
 
   /*

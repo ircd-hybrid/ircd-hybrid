@@ -205,18 +205,19 @@ enum
   OPER_FLAG_NICK_RESV      = 0x00002000U,  /**< Oper can use NICK on resv {} nicks */
   OPER_FLAG_OPME           = 0x00004000U,  /**< Oper can use OPME command */
   OPER_FLAG_REHASH         = 0x00008000U,  /**< Oper can use REHASH command */
-  OPER_FLAG_REMOTEBAN      = 0x00010000U,  /**< Oper can set remote bans */
-  OPER_FLAG_RESTART        = 0x00020000U,  /**< Oper can use RESTART command */
-  OPER_FLAG_RESV           = 0x00040000U,  /**< Oper can use RESV command */
-  OPER_FLAG_SET            = 0x00080000U,  /**< Oper can use SET command */
-  OPER_FLAG_SQUIT          = 0x00100000U,  /**< Oper can do local SQUIT */
-  OPER_FLAG_SQUIT_REMOTE   = 0x00200000U,  /**< Oper can do remote SQUIT */
-  OPER_FLAG_UNDLINE        = 0x00400000U,  /**< Oper can use UNDLINE command */
-  OPER_FLAG_UNKLINE        = 0x00800000U,  /**< Oper can use UNKLINE command */
-  OPER_FLAG_UNRESV         = 0x01000000U,  /**< Oper can use UNRESV command */
-  OPER_FLAG_UNXLINE        = 0x02000000U,  /**< Oper can use UNXLINE command */
-  OPER_FLAG_WALLOPS        = 0x04000000U,  /**< Oper can use WALLOPS command */
-  OPER_FLAG_XLINE          = 0x08000000U   /**< Oper can use XLINE command */
+  OPER_FLAG_REHASH_REMOTE  = 0x00010000U,  /**< Oper can do remote REHASH command */
+  OPER_FLAG_REMOTEBAN      = 0x00020000U,  /**< Oper can set remote bans */
+  OPER_FLAG_RESTART        = 0x00040000U,  /**< Oper can use RESTART command */
+  OPER_FLAG_RESV           = 0x00080000U,  /**< Oper can use RESV command */
+  OPER_FLAG_SET            = 0x00100000U,  /**< Oper can use SET command */
+  OPER_FLAG_SQUIT          = 0x00200000U,  /**< Oper can do local SQUIT */
+  OPER_FLAG_SQUIT_REMOTE   = 0x00400000U,  /**< Oper can do remote SQUIT */
+  OPER_FLAG_UNDLINE        = 0x00800000U,  /**< Oper can use UNDLINE command */
+  OPER_FLAG_UNKLINE        = 0x01000000U,  /**< Oper can use UNKLINE command */
+  OPER_FLAG_UNRESV         = 0x02000000U,  /**< Oper can use UNRESV command */
+  OPER_FLAG_UNXLINE        = 0x04000000U,  /**< Oper can use UNXLINE command */
+  OPER_FLAG_WALLOPS        = 0x08000000U,  /**< Oper can use WALLOPS command */
+  OPER_FLAG_XLINE          = 0x10000000U   /**< Oper can use XLINE command */
 };
 
 #define HasOFlag(x, y) ((x)->connection->operflags &   (y))

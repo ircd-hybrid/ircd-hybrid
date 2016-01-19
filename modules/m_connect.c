@@ -93,7 +93,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 
   if ((target_p = hash_find_server(conf->name)))
   {
-    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s.",
+    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
                       target_p->name, target_p->from->name);
     return 0;
   }
@@ -114,16 +114,16 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 
   if (find_servconn_in_progress(conf->name))
   {
-    sendto_one_notice(source_p, &me, ":Connect: a connection to %s "
-                      "is already in progress.", conf->name);
+    sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress.",
+                      conf->name);
     return 0;
   }
 
   /*
    * Notify all operators about remote connect requests
    */
-  ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %s",
-       source_p->name, parv[1], parv[2] ? parv[2] : "");
+  ilog(LOG_TYPE_IRCD, "CONNECT %s %d from %s",
+       parv[1], port, get_oper_name(source_p));
 
   const int tmpport = conf->port;
   conf->port = port;
@@ -194,7 +194,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 
   if ((target_p = hash_find_server(conf->name)))
   {
-    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s.",
+    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
                       target_p->name, target_p->from->name);
     return 0;
   }
@@ -215,8 +215,8 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 
   if (find_servconn_in_progress(conf->name))
   {
-    sendto_one_notice(source_p, &me, ":Connect: a connection to %s "
-                      "is already in progress.", conf->name);
+    sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress",
+                      conf->name);
     return 0;
   }
 
@@ -224,13 +224,12 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
    * Notify all operators about remote connect requests
    */
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: Remote CONNECT %s %d from %s",
-                       me.name, parv[1], port, source_p->name);
-  sendto_server(NULL, 0, 0,
-                ":%s GLOBOPS :Remote CONNECT %s %d from %s",
-                me.id, parv[1], port, source_p->name);
+                       me.name, parv[1], port, get_oper_name(source_p));
+  sendto_server(NULL, 0, 0, ":%s GLOBOPS :Remote CONNECT %s %d from %s",
+                me.id, parv[1], port, get_oper_name(source_p));
 
-  ilog(LOG_TYPE_IRCD, "CONNECT From %s : %s %d",
-       source_p->name, parv[1], port);
+  ilog(LOG_TYPE_IRCD, "Remote CONNECT %s %d from %s",
+       parv[1], port, get_oper_name(source_p));
 
   const int tmpport = conf->port;
   conf->port = port;

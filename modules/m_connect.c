@@ -54,11 +54,11 @@
 static int
 mo_connect(struct Client *source_p, int parc, char *parv[])
 {
-  int port = 0;
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
+  const char *const name = parv[1];
 
-  if (EmptyString(parv[1]))
+  if (EmptyString(name))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CONNECT");
     return 0;
@@ -84,10 +84,10 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Try to find the name, then host, if both fail notify ops and bail
    */
-  if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)) &&
-      !(conf = find_matching_name_conf(CONF_SERVER, NULL, NULL, parv[1], 0)))
+  if (!(conf = find_matching_name_conf(CONF_SERVER, name, NULL, NULL, 0)) &&
+      !(conf = find_matching_name_conf(CONF_SERVER, NULL, NULL, name, 0)))
   {
-    sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in configuration file", parv[1]);
+    sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in configuration file", name);
     return 0;
   }
 
@@ -102,6 +102,8 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
    * Get port number from user, if given. If not specified,
    * use the default from configuration structure.
    */
+  int port = 0;
+
   if (parc > 2 && !EmptyString(parv[2]))
     port = atoi(parv[2]);
   if (port == 0)
@@ -114,7 +116,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 
   if (find_servconn_in_progress(conf->name))
   {
-    sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress.",
+    sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress",
                       conf->name);
     return 0;
   }
@@ -123,7 +125,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
    * Notify all operators about remote connect requests
    */
   ilog(LOG_TYPE_IRCD, "CONNECT %s %d from %s",
-       parv[1], port, get_oper_name(source_p));
+       name, port, get_oper_name(source_p));
 
   const int tmpport = conf->port;
   conf->port = port;
@@ -169,9 +171,9 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 static int
 ms_connect(struct Client *source_p, int parc, char *parv[])
 {
-  int port = 0;
   struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
+  const char *const name = parv[1];
 
   if (parc < 4 || EmptyString(parv[3]))
   {
@@ -185,10 +187,10 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Try to find the name, then host, if both fail notify ops and bail
    */
-  if (!(conf = find_matching_name_conf(CONF_SERVER, parv[1], NULL, NULL, 0)) &&
-      !(conf = find_matching_name_conf(CONF_SERVER, NULL, NULL, parv[1], 0)))
+  if (!(conf = find_matching_name_conf(CONF_SERVER, name, NULL, NULL, 0)) &&
+      !(conf = find_matching_name_conf(CONF_SERVER, NULL, NULL, name, 0)))
   {
-    sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in configuration file", parv[1]);
+    sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in configuration file", name);
     return 0;
   }
 
@@ -203,7 +205,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
    * Get port number from user, if given. If not specified,
    * use the default from configuration structure.
    */
-  port = atoi(parv[2]);
+  int port = atoi(parv[2]);
 
   if (port == 0)
     port = conf->port;
@@ -224,12 +226,12 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
    * Notify all operators about remote connect requests
    */
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: Remote CONNECT %s %d from %s",
-                       me.name, parv[1], port, get_oper_name(source_p));
+                       me.name, name, port, get_oper_name(source_p));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :Remote CONNECT %s %d from %s",
-                me.id, parv[1], port, get_oper_name(source_p));
+                me.id, name, port, get_oper_name(source_p));
 
   ilog(LOG_TYPE_IRCD, "Remote CONNECT %s %d from %s",
-       parv[1], port, get_oper_name(source_p));
+       name, port, get_oper_name(source_p));
 
   const int tmpport = conf->port;
   conf->port = port;

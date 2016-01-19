@@ -139,58 +139,19 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
 
   if (target_server)
   {
-    /* if a given expire time is given, ENCAP it */
-    if (duration)
-      sendto_match_servs(source_p, target_server, CAPAB_ENCAP,
-                         "ENCAP %s RESV %ju %s 0 :%s",
-                         target_server, duration, resv, reason);
-    else
-      sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
-                         "RESV %s 0 %s :%s",
-                         target_server, resv, reason);
+    sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
+                       "RESV %s %ju %s :%s",
+                       target_server, duration, resv, reason);
 
     /* Allow ON to apply local resv as well if it matches */
     if (match(target_server, me.name))
       return 0;
   }
   else
-  {
-    if (duration)
-      cluster_a_line(source_p, "ENCAP", CAPAB_ENCAP, SHARED_RESV,
-                     "RESV %ju %s 0 :%s", duration, resv, reason);
-    else
-      cluster_a_line(source_p, "RESV", CAPAB_KLN, SHARED_RESV,
-                     "0 %s :%s", resv, reason);
-  }
+    cluster_a_line(source_p, "RESV", CAPAB_KLN, SHARED_RESV,
+                   "%ju %s :%s", duration, resv, reason);
 
   parse_resv(source_p, resv, duration, reason);
-  return 0;
-}
-
-/* me_resv()
- *
- * inputs	- server
- *		- client (oper)
- *		- parc number of arguments
- *		- parv list of arguments
- * via parv[]
- * parv[0] = command
- * parv[1] = duration
- * parv[2] = name
- * parv[3] = 0
- * parv[4] = reason
- * parc should be 5
- *
- * outputs	- NONE
- * side effects -
- */
-static int
-me_resv(struct Client *source_p, int parc, char *parv[])
-{
-  if (parc != 5 || EmptyString(parv[4]))
-    return 0;
-
-  parse_resv(source_p, parv[2], atoi(parv[1]), parv[4]);
   return 0;
 }
 
@@ -229,7 +190,7 @@ static struct Message resv_msgtab =
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_not_oper,
   .handlers[SERVER_HANDLER] = ms_resv,
-  .handlers[ENCAP_HANDLER] = me_resv,
+  .handlers[ENCAP_HANDLER] = m_ignore,
   .handlers[OPER_HANDLER] = mo_resv
 };
 

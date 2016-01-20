@@ -50,11 +50,7 @@
 static void
 parse_resv(struct Client *source_p, const char *name, time_t duration, const char *reason)
 {
-  const char *type = "channel";
   struct MaskItem *conf = NULL;
-
-  if (!IsChanPrefix(*name))
-    type = "nick";
 
   if (!HasFlag(source_p, FLAGS_SERVICE) && !HasUMode(source_p, UMODE_ADMIN) && has_wildcards(name))
   {
@@ -76,7 +72,7 @@ parse_resv(struct Client *source_p, const char *name, time_t duration, const cha
   if ((conf = create_resv(name, reason, NULL)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A RESV has already been placed on %s: %s", type, name);
+      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", name);
 
     return;
   }
@@ -86,30 +82,29 @@ parse_resv(struct Client *source_p, const char *name, time_t duration, const cha
 
   if (duration)
   {
+    conf->until = CurrentTime + duration;
+
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A %ju minute RESV has been placed on %s: %s",
-                        duration / 60, type, name);
+      sendto_one_notice(source_p, &me, ":Added temporary %ju min. RESV [%s]",
+                        duration / 60, conf->name);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has placed a %ju minute RESV on %s: %s [%s]",
-                         get_oper_name(source_p),
-                         duration/60, type,
+                         "%s added temporary %ju min. RESV for [%s] [%s]",
+                         get_oper_name(source_p), duration / 60,
                          conf->name, conf->reason);
     ilog(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
-         get_oper_name(source_p), duration / 60,
-         conf->name, conf->reason);
-    conf->until = CurrentTime + duration;
+         get_oper_name(source_p), duration / 60, conf->name, conf->reason);
   }
   else
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A RESV has been placed on %s: %s",
-                        type, name);
+      sendto_one_notice(source_p, &me, ":Added RESV [%s] [%s]",
+                        conf->name, conf->reason);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has placed a RESV on %s: %s [%s]",
-                         get_oper_name(source_p), type,
-                         conf->name, conf->reason);
+                         "%s added RESV for [%s] [%s]",
+                         get_oper_name(source_p), conf->name,
+                         conf->reason);
     ilog(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
          get_oper_name(source_p), conf->name, conf->reason);
   }

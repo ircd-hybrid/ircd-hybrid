@@ -41,20 +41,16 @@
 static void
 resv_remove(struct Client *source_p, const char *name)
 {
-  unsigned int type_int = CONF_CRESV;
-  const char *type_str = "channel";
+  unsigned int type = CONF_CRESV;
   struct MaskItem *conf = NULL;
 
   if (!IsChanPrefix(*name))
-  {
-    type_int = CONF_NRESV;
-    type_str = "nick";
-  }
+    type = CONF_NRESV;
 
-  if ((conf = find_exact_name_conf(type_int, NULL, name, NULL, NULL)) == NULL)
+  if ((conf = find_exact_name_conf(type, NULL, name, NULL, NULL)) == NULL)
   {
     if (IsClient(source_p))
-     sendto_one_notice(source_p, &me, ":A RESV does not exist for %s: %s", type_str, name);
+      sendto_one_notice(source_p, &me, ":No RESV for %s", name);
 
     return;
   }
@@ -62,19 +58,19 @@ resv_remove(struct Client *source_p, const char *name)
   if (!IsConfDatabase(conf))
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":The RESV for %s: %s is in ircd.conf and must be removed by hand.",
-                        type_str, name);
+      sendto_one_notice(source_p, &me, ":The RESV for %s is in ircd.conf and must be removed by hand",
+                        name);
     return;
   }
 
   conf_free(conf);
 
   if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":The RESV has been removed on %s: %s", type_str, name);
+    sendto_one_notice(source_p, &me, ":RESV for [%s] is removed", name);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "%s has removed the RESV for %s: %s",
-                       get_oper_name(source_p), type_str, name);
+                       "%s has removed the RESV for: [%s]",
+                       get_oper_name(source_p), name);
   ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
        get_oper_name(source_p), name);
 }

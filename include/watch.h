@@ -36,7 +36,7 @@ struct Watch
   dlink_list watched_by;  /**< List of clients that have this
                               entry on their watch list */
   time_t lasttime;  /**< Last time the client was seen */
-  char nick[NICKLEN + 1];  /**< Nick name of the client to watch */
+  char name[NICKLEN + 1];  /**< Name of the client to watch */
 };
 
 extern void watch_init(void);

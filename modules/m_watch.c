@@ -93,8 +93,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
       *user++ = '\0'; /* Not used */
 
     /*
-     * Prefix of "+", they want to add a name to their WATCH
-     * list.
+     * Prefix of "+", they want to add a name to their WATCH list.
      */
     if (*s == '+')
     {
@@ -173,7 +172,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
       }
 
       watch = node->data;
-      strlcpy(buf, watch->nick, sizeof(buf));
+      strlcpy(buf, watch->name, sizeof(buf));
 
       count = strlen(source_p->name) + strlen(me.name) + 10 +
               strlen(buf);
@@ -182,7 +181,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
       {
         watch = node->data;
 
-        if (count + strlen(watch->nick) + 1 > IRCD_BUFSIZE - 2)
+        if (count + strlen(watch->name) + 1 > IRCD_BUFSIZE - 2)
         {
           sendto_one_numeric(source_p, &me, RPL_WATCHLIST, buf);
           buf[0] = '\0';
@@ -190,8 +189,8 @@ m_watch(struct Client *source_p, int parc, char *parv[])
         }
 
         strlcat(buf, " ", sizeof(buf));
-        strlcat(buf, watch->nick, sizeof(buf));
-        count += (strlen(watch->nick) + 1);
+        strlcat(buf, watch->name, sizeof(buf));
+        count += (strlen(watch->name) + 1);
       }
 
       sendto_one_numeric(source_p, &me, RPL_WATCHLIST, buf);
@@ -217,7 +216,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
       {
         const struct Watch *watch = node->data;
 
-        if ((target_p = find_person(source_p, watch->nick)))
+        if ((target_p = find_person(source_p, watch->name)))
           sendto_one_numeric(source_p, &me, RPL_NOWON,
                              target_p->name, target_p->username,
                              target_p->host, target_p->tsinfo);
@@ -227,7 +226,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
          * 'L' (full list wanted).
          */
         else if (*s == 'L')
-          sendto_one_numeric(source_p, &me, RPL_NOWOFF, watch->nick,
+          sendto_one_numeric(source_p, &me, RPL_NOWOFF, watch->name,
                              "*", "*", watch->lasttime);
       }
 

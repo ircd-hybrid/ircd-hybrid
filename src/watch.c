@@ -73,7 +73,7 @@ watch_count_memory(unsigned int *const count, size_t *const bytes)
   (*bytes) = *count * sizeof(struct Watch);
 }
 
-/*! \brief Notifies all clients that have client_p's nick name on
+/*! \brief Notifies all clients that have client_p's name on
  *         their watch list.
  * \param client_p Pointer to Client struct
  * \param reply Numeric to send. Either RPL_LOGON or RPL_LOGOFF
@@ -87,7 +87,7 @@ watch_check_hash(const struct Client *client_p, const enum irc_numerics reply)
   assert(IsClient(client_p));
 
   if ((watch = watch_find_hash(client_p->name)) == NULL)
-    return;  /* This nick isn't on watch */
+    return;  /* This name isn't on watch */
 
   /* Update the time of last change to item */
   watch->lasttime = CurrentTime;
@@ -99,7 +99,7 @@ watch_check_hash(const struct Client *client_p, const enum irc_numerics reply)
                        watch->lasttime, client_p->info);
 }
 
-/*! \brief Looks up the watch table for a given nick
+/*! \brief Looks up the watch table for a given name
  * \param name Nick name to look up
  */
 struct Watch *
@@ -111,7 +111,7 @@ watch_find_hash(const char *name)
   {
     struct Watch *watch = node->data;
 
-    if (!irccmp(watch->nick, name))
+    if (!irccmp(watch->name, name))
       return watch;
   }
 
@@ -119,24 +119,24 @@ watch_find_hash(const char *name)
 }
 
 /*! \brief Adds a watch entry to client_p's watch list
- * \param nick     Nick name to add
+ * \param name     Nick name to add
  * \param client_p Pointer to Client struct
  */
 void
-watch_add_to_hash_table(const char *nick, struct Client *client_p)
+watch_add_to_hash_table(const char *name, struct Client *client_p)
 {
   struct Watch *watch = NULL;
   dlink_node *node = NULL;
 
-  /* If found NULL (no header for this nick), make one... */
-  if ((watch = watch_find_hash(nick)) == NULL)
+  /* If found NULL (no header for this name), make one... */
+  if ((watch = watch_find_hash(name)) == NULL)
   {
     watch = mp_pool_get(watch_pool);
 
     watch->lasttime = CurrentTime;
-    strlcpy(watch->nick, nick, sizeof(watch->nick));
+    strlcpy(watch->name, name, sizeof(watch->name));
 
-    dlinkAdd(watch, &watch->node, &watchTable[strhash(watch->nick)]);
+    dlinkAdd(watch, &watch->node, &watchTable[strhash(watch->name)]);
   }
   else
   {
@@ -153,20 +153,20 @@ watch_add_to_hash_table(const char *nick, struct Client *client_p)
 }
 
 /*! \brief Removes a single entry from client_p's watch list
- * \param nick     Nick name to remove
+ * \param name     Name to remove
  * \param client_p Pointer to Client struct
  */
 void
-watch_del_from_hash_table(const char *nick, struct Client *client_p)
+watch_del_from_hash_table(const char *name, struct Client *client_p)
 {
   struct Watch *watch = NULL;
   dlink_node *node = NULL;
 
-  if ((watch = watch_find_hash(nick)) == NULL)
-    return;  /* No header found for that nick. i.e. it's not being watched */
+  if ((watch = watch_find_hash(name)) == NULL)
+    return;  /* No header found for that name. i.e. it's not being watched */
 
   if ((node = dlinkFind(&watch->watched_by, client_p)) == NULL)
-    return;  /* This nick isn't being watched by client_p */
+    return;  /* This name isn't being watched by client_p */
 
   dlinkDelete(node, &watch->watched_by);
   free_dlink_node(node);
@@ -177,8 +177,8 @@ watch_del_from_hash_table(const char *nick, struct Client *client_p)
   /* In case this header is now empty of notices, remove it */
   if (watch->watched_by.head == NULL)
   {
-    assert(dlinkFind(&watchTable[strhash(watch->nick)], watch));
-    dlinkDelete(&watch->node, &watchTable[strhash(watch->nick)]);
+    assert(dlinkFind(&watchTable[strhash(watch->name)], watch));
+    dlinkDelete(&watch->node, &watchTable[strhash(watch->name)]);
     mp_pool_release(watch);
   }
 }
@@ -205,8 +205,8 @@ watch_del_watch_list(struct Client *client_p)
     /* If this leaves a header without notifies, remove it. */
     if (watch->watched_by.head == NULL)
     {
-      assert(dlinkFind(&watchTable[strhash(watch->nick)], watch));
-      dlinkDelete(&watch->node, &watchTable[strhash(watch->nick)]);
+      assert(dlinkFind(&watchTable[strhash(watch->name)], watch));
+      dlinkDelete(&watch->node, &watchTable[strhash(watch->name)]);
 
       mp_pool_release(watch);
     }

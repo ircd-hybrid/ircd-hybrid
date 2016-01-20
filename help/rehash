@@ -1,10 +1,12 @@
-REHASH [option]
+REHASH <option>
 
-When no [option] is given, ircd will re-read the
-ircd.conf file.
-
-[option] can be one of the following:
+<option> can be one of the following:
+  CONF - Re-read the server configuration file(s)
   DNS  - Re-read the /etc/resolv.conf file
-  MOTD - Re-reads MOTD file
+  MOTD - Re-read MOTD file(s)
+
+To REHASH on remote servers:
+  REHASH <server> <option>
 
 - Requires Oper Priv: rehash
+- Requires Oper Priv: rehash:remote for REHASH on remote servers

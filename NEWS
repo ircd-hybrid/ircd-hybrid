@@ -1,3 +1,9 @@
+-- Noteworthy changes in version 8.2.13 (2016-??-??)
+o) Added support for remote REHASH: REHASH <server> <option>
+o) Added 'rehash:remote' irc-operator privilege flag
+o) Added 'rehash' flag to shared {} blocks
+
+
 -- Noteworthy changes in version 8.2.12 (2016-01-05)
 #######################################################################
 o) IMPORTANT: Character case mapping is 'ascii' now. It is recommended

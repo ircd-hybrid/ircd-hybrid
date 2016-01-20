@@ -90,7 +90,7 @@ m_watch(struct Client *source_p, int parc, char *parv[])
        s = strtok_r(NULL,    ", ", &p))
   {
     if ((user = strchr(s, '!')))
-      *user++ = '\0'; /* Not used */
+      *user = '\0'; /* Not used */
 
     /*
      * Prefix of "+", they want to add a name to their WATCH list.

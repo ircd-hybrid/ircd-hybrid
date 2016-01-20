@@ -226,8 +226,8 @@ quote_jfloodcount(struct Client *source_p, const char *arg, int newval)
 /* Structure used for the SET table itself */
 struct SetStruct
 {
-  const char *name;
-  void (*handler)(struct Client *, const char *, int);
+  const char *const name;
+  void (*const handler)(struct Client *, const char *, int);
   const unsigned int wants_char;  /* 1 if it expects (char *, [int]) */
   const unsigned int wants_int;  /* 1 if it expects ([char *], int) */
   /* eg:  0, 1 == only an int arg

@@ -105,7 +105,6 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
           time_t duration)
 {
   char buf[IRCD_BUFSIZE];
-  struct MaskItem *conf;
 
   if (duration)
     snprintf(buf, sizeof(buf), "Temporary D-line %ju min. - %.*s (%s)",
@@ -113,7 +112,7 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
-  conf = conf_make(CONF_DLINE);
+  struct MaskItem *conf = conf_make(CONF_DLINE);
   conf->host = xstrdup(addr);
   conf->reason = xstrdup(buf);
   conf->setat = CurrentTime;

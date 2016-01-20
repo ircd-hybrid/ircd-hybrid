@@ -74,8 +74,6 @@ void
 add_user_to_channel(struct Channel *chptr, struct Client *client_p,
                     unsigned int flags, int flood_ctrl)
 {
-  struct Membership *member = NULL;
-
   assert(IsClient(client_p));
 
   if (GlobalSetOptions.joinfloodtime > 0)
@@ -109,7 +107,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p,
     chptr->last_join_time = CurrentTime;
   }
 
-  member = mp_pool_get(member_pool);
+  struct Membership *member = mp_pool_get(member_pool);
   member->client_p = client_p;
   member->chptr = chptr;
   member->flags = flags;

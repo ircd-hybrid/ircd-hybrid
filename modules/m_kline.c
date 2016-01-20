@@ -87,7 +87,6 @@ kline_add(struct Client *source_p, const char *user, const char *host,
           const char *reason, time_t duration)
 {
   char buf[IRCD_BUFSIZE];
-  struct MaskItem *conf;
 
   if (duration)
     snprintf(buf, sizeof(buf), "Temporary K-line %ju min. - %.*s (%s)",
@@ -95,7 +94,7 @@ kline_add(struct Client *source_p, const char *user, const char *host,
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
-  conf = conf_make(CONF_KLINE);
+  struct MaskItem *conf = conf_make(CONF_KLINE);
   conf->host = xstrdup(host);
   conf->user = xstrdup(user);
   conf->setat = CurrentTime;

@@ -192,8 +192,8 @@ module_list(struct Client *source_p, const char *arg)
 
 struct ModuleStruct
 {
-  const char *cmd;
-  void (*handler)(struct Client *, const char *);
+  const char *const cmd;
+  void (*const handler)(struct Client *, const char *);
   const unsigned int arg_required;
 };
 

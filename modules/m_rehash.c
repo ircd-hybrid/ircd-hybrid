@@ -89,8 +89,8 @@ rehash_dns(struct Client *source_p)
 
 struct RehashStruct
 {
-  const char *option;
-  void (*handler)(struct Client *);
+  const char *const option;
+  void (*const handler)(struct Client *);
 };
 
 static const struct RehashStruct rehash_cmd_table[] =

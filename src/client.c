@@ -159,13 +159,12 @@ void
 client_attach_svstag(struct Client *client_p, unsigned int numeric,
                      const char *umodes, const char *const tag)
 {
-  struct ServicesTag *svstag = NULL;
   const struct user_modes *tab = NULL;
 
   if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
     return;
 
-  svstag = xcalloc(sizeof(*svstag));
+  struct ServicesTag *svstag = xcalloc(sizeof(*svstag));
   svstag->numeric = numeric;
   svstag->tag = xstrdup(tag);
 

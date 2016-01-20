@@ -88,7 +88,6 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
           time_t duration)
 {
   char buf[IRCD_BUFSIZE];
-  struct MaskItem *conf;
 
   if (duration)
     snprintf(buf, sizeof(buf), "Temporary X-line %ju min. - %.*s (%s)",
@@ -96,7 +95,7 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
-  conf = conf_make(CONF_XLINE);
+  struct MaskItem *conf = conf_make(CONF_XLINE);
   conf->name = xstrdup(gecos);
   conf->reason = xstrdup(buf);
   conf->setat = CurrentTime;

@@ -42,7 +42,6 @@
 static void
 do_list(struct Client *source_p, char *arg)
 {
-  struct ListTask *lt = NULL;
   int no_masked_channels = 1;
 
   if (source_p->connection->list_task)
@@ -52,7 +51,7 @@ do_list(struct Client *source_p, char *arg)
     return;
   }
 
-  lt = xcalloc(sizeof(struct ListTask));
+  struct ListTask *lt = xcalloc(sizeof(struct ListTask));
   lt->users_max = UINT_MAX;
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;

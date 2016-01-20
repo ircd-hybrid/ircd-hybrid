@@ -96,7 +96,6 @@ static int
 mo_unresv(struct Client *source_p, int parc, char *parv[])
 {
   char *resv = NULL;
-  char *reason = NULL;
   char *target_server = NULL;
 
   if (!HasOFlag(source_p, OPER_FLAG_UNRESV))
@@ -106,7 +105,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
   }
 
   if (!parse_aline("UNRESV", source_p, parc, parv, 0, &resv, NULL,
-                   NULL, &target_server, &reason))
+                   NULL, &target_server, NULL))
     return 0;
 
   if (target_server)

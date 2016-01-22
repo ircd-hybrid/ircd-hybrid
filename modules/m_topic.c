@@ -50,7 +50,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = channel name
- *      - parv[2] = topic text, if setting topic
+ *      - parv[2] = topic text, if setting topic (can be an empty string)
  */
 static int
 m_topic(struct Client *source_p, int parc, char *parv[])
@@ -137,7 +137,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = channel name
- *      - parv[2] = topic text
+ *      - parv[2] = topic text (can be an empty string)
  */
 static int
 ms_topic(struct Client *source_p, int parc, char *parv[])

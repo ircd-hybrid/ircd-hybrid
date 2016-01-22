@@ -139,7 +139,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = target server
+ *      - parv[1] = target server mask
  *      - parv[2] = gecos
  */
 static int

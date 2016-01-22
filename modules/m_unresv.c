@@ -129,8 +129,8 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = target server
- *      - parv[2] = channel/nick
+ *      - parv[1] = target server mask
+ *      - parv[2] = name mask
  */
 static int
 ms_unresv(struct Client *source_p, int parc, char *parv[])

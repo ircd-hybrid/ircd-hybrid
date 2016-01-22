@@ -250,7 +250,21 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/* me_kline - handle remote kline. no propagation */
+/*! \brief KLINE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = target server mask
+ *      - parv[2] = duration in seconds
+ *      - parv[3] = user mask
+ *      - parv[4] = host mask
+ *      - parv[5] = reason
+ */
 static int
 ms_kline(struct Client *source_p, int parc, char *parv[])
 {
@@ -261,8 +275,6 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
   if (parc != 6 || EmptyString(parv[5]))
     return 0;
 
-  /* parv[0]  parv[1]        parv[2]      parv[3]  parv[4]  parv[5] */
-  /* command  target_server  duration  user     host     reason */
   sendto_match_servs(source_p, parv[1], CAPAB_KLN, "KLINE %s %s %s %s :%s",
                      parv[1], parv[2], parv[3], parv[4], parv[5]);
 

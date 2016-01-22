@@ -219,9 +219,9 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = target server
+ *      - parv[1] = target server mask
  *      - parv[2] = gecos
- *      - parv[3] = time
+ *      - parv[3] = duration in seconds
  *      - parv[4] = reason
  */
 static int

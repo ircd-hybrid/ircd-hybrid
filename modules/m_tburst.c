@@ -48,7 +48,7 @@
  *      - parv[2] = channel name
  *      - parv[3] = topic timestamp
  *      - parv[4] = topic setter
- *      - parv[5] = topic
+ *      - parv[5] = topic (can be an empty string)
  */
 static int
 ms_tburst(struct Client *source_p, int parc, char *parv[])

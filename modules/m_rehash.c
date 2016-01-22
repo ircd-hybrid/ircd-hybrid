@@ -113,7 +113,7 @@ static const struct RehashStruct rehash_cmd_table[] =
  *      - parv[1] = option [CONF, DNS, MOTD]
  * or for remote REHASH:
  *      - parv[0] = command
- *      - parv[1] = server name mask
+ *      - parv[1] = target server mask
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
 static int
@@ -179,7 +179,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name mask
+ *      - parv[1] = target server mask
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
 static int

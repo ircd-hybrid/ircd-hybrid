@@ -145,7 +145,7 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
   struct Channel *chptr = NULL;
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
 
-  if (EmptyString(parv[1]))
+  if (parc < 3)
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "TOPIC");
     return 0;

@@ -257,14 +257,12 @@ user_welcome(struct Client *source_p)
 {
   static const char built_date[] = __DATE__ " at " __TIME__;
 
-#ifdef HAVE_TLS
   if (HasFlag(source_p, FLAGS_SSL))
   {
     AddUMode(source_p, UMODE_SSL);
     sendto_one_notice(source_p, &me, ":*** Connected securely via %s",
                       tls_get_cipher(&source_p->connection->fd.ssl));
   }
-#endif
 
   sendto_one_numeric(source_p, &me, RPL_WELCOME, ConfigServerInfo.network_name,
                      source_p->name);

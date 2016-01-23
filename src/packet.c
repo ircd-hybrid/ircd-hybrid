@@ -289,9 +289,7 @@ read_packet(fde_t *fd, void *data)
 {
   struct Client *const client_p = data;
   int length = 0;
-#ifdef HAVE_TLS
   int want_write = 0;
-#endif
 
   if (IsDefunct(client_p))
     return;
@@ -303,7 +301,6 @@ read_packet(fde_t *fd, void *data)
    */
   do
   {
-#ifdef HAVE_TLS
     if (tls_isusing(&fd->ssl))
     {
       length = tls_read(&fd->ssl, readBuf, sizeof(readBuf), &want_write);
@@ -312,10 +309,7 @@ read_packet(fde_t *fd, void *data)
         comm_setselect(fd, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);
     }
     else
-#endif
-    {
       length = recv(fd->fd, readBuf, sizeof(readBuf), 0);
-    }
 
     if (length <= 0)
     {

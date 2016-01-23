@@ -29,6 +29,7 @@
 #include "config.h"
 #include "client.h"
 #include "conf_class.h"
+#include "tls.h"
 
 
 #define CONF_NOREASON "<No reason supplied>"
@@ -286,18 +287,22 @@ struct config_serverhide_entry
 
 struct config_serverinfo_entry
 {
-#ifdef HAVE_LIBCRYPTO
-  const EVP_MD *message_digest_algorithm;
-#endif
   char *sid;
   char *name;
   char *description;
   char *network_name;
   char *network_desc;
   char *rsa_private_key_file;
-  void *rsa_private_key;
-  void *server_ctx;
-  void *client_ctx;
+  char *ssl_certificate_file;
+  char *ssl_dh_param_file;
+  char *ssl_dh_elliptic_curve;
+  char *ssl_cipher_list;
+  char *ssl_message_digest_algorithm;
+#ifdef HAVE_LIBCRYPTO
+  RSA  *rsa_private_key;
+#endif
+  tls_context_t tls_ctx;
+  tls_md_t message_digest_algorithm;
   unsigned int hub;
   unsigned int default_max_clients;
   unsigned int max_nick_length;

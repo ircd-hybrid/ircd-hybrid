@@ -1,7 +1,7 @@
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (c) 2000-2016 ircd-hybrid development team
+ *  Copyright (c) 2006-2016 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,18 +19,31 @@
  *  USA
  */
 
-/*! \file rsa.h
- * \brief A header for the RSA functions.
+/*! \file tls_openssl.h
+ * \brief OpenSSL-specific TLS types
  * \version $Id$
  */
 
-#ifndef INCLUDED_rsa_h
-#define INCLUDED_rsa_h
 
-#include "config.h"
+#ifndef INCLUDED_tls_openssl_h
+#define INCLUDED_tls_openssl_h
 
 #ifdef HAVE_LIBCRYPTO
-extern void report_crypto_errors(void);
-#endif
-extern void binary_to_hex(const unsigned char *, char *, unsigned int);
-#endif /* INCLUDED_rsa_h */
+
+#define HAVE_TLS
+#define HAVE_TLS_OPENSSL
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+typedef SSL * tls_data_t;
+typedef const EVP_MD * tls_md_t;
+
+typedef struct
+{
+  SSL_CTX *server_ctx;
+  SSL_CTX *client_ctx;
+} tls_context_t;
+
+#endif  /* HAVE_LIBCRYPTO */
+#endif  /* INCLUDED_tls_openssl_h */

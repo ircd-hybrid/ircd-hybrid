@@ -207,12 +207,8 @@ conf_free(struct MaskItem *conf)
   xfree(conf->whois);
   xfree(conf->user);
   xfree(conf->host);
-#ifdef HAVE_LIBCRYPTO
   xfree(conf->cipher_list);
 
-  if (conf->rsa_public_key)
-    RSA_free(conf->rsa_public_key);
-#endif
   DLINK_FOREACH_SAFE(node, node_next, conf->hub_list.head)
   {
     xfree(node->data);
@@ -762,25 +758,6 @@ set_default_conf(void)
    */
   assert(class_default == class_get_list()->tail->data);
 
-#ifdef HAVE_LIBCRYPTO
-#if OPENSSL_VERSION_NUMBER >= 0x009080FFL && !defined(OPENSSL_NO_ECDH)
-  {
-    EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-
-    if (key)
-    {
-      SSL_CTX_set_tmp_ecdh(ConfigServerInfo.server_ctx, key);
-      EC_KEY_free(key);
-    }
-  }
-
-  SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_SINGLE_ECDH_USE);
-#endif
-
-  SSL_CTX_set_cipher_list(ConfigServerInfo.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-  ConfigServerInfo.message_digest_algorithm = EVP_sha256();
-#endif
-
   ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
   ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
 
@@ -1210,10 +1187,20 @@ clear_out_old_conf(void)
     RSA_free(ConfigServerInfo.rsa_private_key);
     ConfigServerInfo.rsa_private_key = NULL;
   }
+#endif
 
   xfree(ConfigServerInfo.rsa_private_key_file);
   ConfigServerInfo.rsa_private_key_file = NULL;
-#endif
+  xfree(ConfigServerInfo.ssl_certificate_file);
+  ConfigServerInfo.ssl_certificate_file = NULL;
+  xfree(ConfigServerInfo.ssl_dh_param_file);
+  ConfigServerInfo.ssl_dh_param_file = NULL;
+  xfree(ConfigServerInfo.ssl_dh_elliptic_curve);
+  ConfigServerInfo.ssl_dh_elliptic_curve = NULL;
+  xfree(ConfigServerInfo.ssl_cipher_list);
+  ConfigServerInfo.ssl_cipher_list = NULL;
+  xfree(ConfigServerInfo.ssl_message_digest_algorithm);
+  ConfigServerInfo.ssl_message_digest_algorithm = NULL;
 
   /* Clean out ConfigAdminInfo */
   xfree(ConfigAdminInfo.name);
@@ -1228,6 +1215,25 @@ clear_out_old_conf(void)
 
   /* Clean out listeners */
   listener_close_marked();
+}
+
+static void
+conf_handle_tls(int cold)
+{
+  if (!tls_new_cred())
+  {
+    if (cold)
+    {
+      ilog(LOG_TYPE_IRCD, "Error while initializing TLS");
+      exit(-1);
+    }
+    else
+    {
+      /* Failed to load new settings/certs, old ones remain active */
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                           "Error reloading TLS settings, check the ircd log"); // report_crypto_errors logs this
+    }
+  }
 }
 
 /* read_conf_files()
@@ -1278,6 +1284,7 @@ read_conf_files(int cold)
   fclose(conf_parser_ctx.conf_file);
 
   log_reopen_all();
+  conf_handle_tls(cold);
 
   isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", ConfigServerInfo.network_name, -1);

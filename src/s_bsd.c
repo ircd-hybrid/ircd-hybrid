@@ -25,9 +25,6 @@
  */
 
 #include "stdinc.h"
-#ifdef HAVE_LIBCRYPTO
-#include "rsa.h"
-#endif
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
@@ -196,15 +193,11 @@ close_connection(struct Client *client_p)
   else
     ++ServerStats.is_ni;
 
-#ifdef HAVE_LIBCRYPTO
-  if (client_p->connection->fd.ssl)
-  {
-    SSL_set_shutdown(client_p->connection->fd.ssl, SSL_RECEIVED_SHUTDOWN);
-
-    if (!SSL_shutdown(client_p->connection->fd.ssl))
-      SSL_shutdown(client_p->connection->fd.ssl);
-  }
+#ifdef HAVE_TLS
+  if (tls_isusing(&client_p->connection->fd.ssl))
+    tls_shutdown(&client_p->connection->fd.ssl);
 #endif
+
   if (client_p->connection->fd.flags.open)
     fd_close(&client_p->connection->fd);
 
@@ -217,7 +210,7 @@ close_connection(struct Client *client_p)
   detach_conf(client_p, CONF_CLIENT | CONF_OPER | CONF_SERVER);
 }
 
-#ifdef HAVE_LIBCRYPTO
+#ifdef HAVE_TLS
 /*
  * ssl_handshake - let OpenSSL initialize the protocol. Register for
  * read/write events if necessary.
@@ -226,60 +219,38 @@ static void
 ssl_handshake(fde_t *fd, void *data)
 {
   struct Client *client_p = data;
-  X509 *cert = NULL;
-  int ret = 0;
+  int res = 0;
 
-  if ((ret = SSL_accept(client_p->connection->fd.ssl)) <= 0)
+  tls_handshake_status_t ret = tls_handshake(&client_p->connection->fd.ssl, TLS_ROLE_SERVER, NULL);
+  if (ret != TLS_HANDSHAKE_DONE)
   {
     if ((CurrentTime - client_p->connection->firsttime) > CONNECTTIMEOUT)
     {
-      exit_client(client_p, "Timeout during SSL handshake");
+      exit_client(client_p, "Timeout during TLS handshake");
       return;
     }
 
-    switch (SSL_get_error(client_p->connection->fd.ssl, ret))
+    switch (ret)
     {
-      case SSL_ERROR_WANT_WRITE:
+      case TLS_HANDSHAKE_WANT_WRITE:
         comm_setselect(&client_p->connection->fd, COMM_SELECT_WRITE,
                        ssl_handshake, client_p, CONNECTTIMEOUT);
         return;
-
-      case SSL_ERROR_WANT_READ:
+      case TLS_HANDSHAKE_WANT_READ:
         comm_setselect(&client_p->connection->fd, COMM_SELECT_READ,
                        ssl_handshake, client_p, CONNECTTIMEOUT);
         return;
-
       default:
-        exit_client(client_p, "Error during SSL handshake");
+        exit_client(client_p, "Error during TLS handshake");
         return;
     }
   }
 
   comm_settimeout(&client_p->connection->fd, 0, NULL, NULL);
 
-  if ((cert = SSL_get_peer_certificate(client_p->connection->fd.ssl)))
-  {
-    int res = SSL_get_verify_result(client_p->connection->fd.ssl);
-    char buf[EVP_MAX_MD_SIZE * 2 + 1] = "";
-    unsigned char md[EVP_MAX_MD_SIZE] = "";
-
-    if (res == X509_V_OK || res == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
-        res == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE ||
-        res == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT)
-    {
-      unsigned int n = 0;
-
-      if (X509_digest(cert, ConfigServerInfo.message_digest_algorithm, md, &n))
-      {
-        binary_to_hex(md, buf, n);
-        client_p->certfp = xstrdup(buf);
-      }
-    }
-    else
-      ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad SSL client certificate: %d",
-           client_p->name, client_p->username, client_p->host, res);
-    X509_free(cert);
-  }
+  if (!tls_verify_cert(&client_p->connection->fd.ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp, &res))
+    ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad TLS client certificate: %d",
+         client_p->name, client_p->username, client_p->host, res);
 
   start_auth(client_p);
 }
@@ -334,21 +305,17 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   client_p->connection->listener = listener;
   ++listener->ref_count;
 
-#ifdef HAVE_LIBCRYPTO
+#ifdef HAVE_TLS
   if (listener->flags & LISTENER_SSL)
   {
-    if ((client_p->connection->fd.ssl = SSL_new(ConfigServerInfo.server_ctx)) == NULL)
+    if (!tls_new(&client_p->connection->fd.ssl, fd, TLS_ROLE_SERVER))
     {
-      ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
-           ERR_error_string(ERR_get_error(), NULL));
-
       SetDead(client_p);
-      exit_client(client_p, "SSL_new failed");
+      exit_client(client_p, "TLS context initialization failed");
       return;
     }
 
     AddFlag(client_p, FLAGS_SSL);
-    SSL_set_fd(client_p->connection->fd.ssl, fd);
     ssl_handshake(NULL, client_p);
   }
   else

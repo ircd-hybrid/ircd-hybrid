@@ -262,9 +262,6 @@ server_estab(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
   dlink_node *node = NULL;
-#if defined(HAVE_LIBCRYPTO) && !defined(OPENSSL_NO_COMP)
-  const COMP_METHOD *compression = NULL, *expansion = NULL;
-#endif
 
   if ((conf = find_conf_name(&client_p->connection->confs, client_p->name, CONF_SERVER)) == NULL)
   {
@@ -345,47 +342,26 @@ server_estab(struct Client *client_p)
     AddFlag(client_p, FLAGS_SERVICE);
 
   /* Show the real host/IP to admins */
-#ifdef HAVE_LIBCRYPTO
-  if (client_p->connection->fd.ssl)
+  if (tls_isusing(&client_p->connection->fd.ssl))
   {
-#ifndef OPENSSL_NO_COMP
-    compression = SSL_get_current_compression(client_p->connection->fd.ssl);
-    expansion   = SSL_get_current_expansion(client_p->connection->fd.ssl);
-#endif
+    /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-                         get_client_name(client_p, SHOW_IP), ssl_get_cipher(client_p->connection->fd.ssl),
-#ifndef OPENSSL_NO_COMP
-                         compression ? SSL_COMP_get_name(compression) : "NONE",
-                         expansion ? SSL_COMP_get_name(expansion) : "NONE",
-#else
-                         "NONE", "NONE",
-#endif
+                         "Link with %s established: [TLS: %s] (Capabilities: %s)",
+                         get_client_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd.ssl),
                          show_capabilities(client_p));
+
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-                         get_client_name(client_p, MASK_IP), ssl_get_cipher(client_p->connection->fd.ssl),
-#ifndef OPENSSL_NO_COMP
-                         compression ? SSL_COMP_get_name(compression) : "NONE",
-                         expansion ? SSL_COMP_get_name(expansion) : "NONE",
-#else
-                         "NONE", "NONE",
-#endif
+                         "Link with %s established: [TLS: %s] (Capabilities: %s)",
+                         get_client_name(client_p, MASK_IP), tls_get_cipher(&client_p->connection->fd.ssl),
                          show_capabilities(client_p));
-    ilog(LOG_TYPE_IRCD, "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-         get_client_name(client_p, SHOW_IP), ssl_get_cipher(client_p->connection->fd.ssl),
-#ifndef OPENSSL_NO_COMP
-         compression ? SSL_COMP_get_name(compression) : "NONE",
-         expansion ? SSL_COMP_get_name(expansion) : "NONE",
-#else
-         "NONE", "NONE",
-#endif
+    ilog(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
+         get_client_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd.ssl),
          show_capabilities(client_p));
   }
   else
-#endif
   {
+    /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
                          get_client_name(client_p, SHOW_IP), show_capabilities(client_p));

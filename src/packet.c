@@ -289,6 +289,9 @@ read_packet(fde_t *fd, void *data)
 {
   struct Client *const client_p = data;
   int length = 0;
+#ifdef HAVE_TLS
+  int want_write = 0;
+#endif
 
   if (IsDefunct(client_p))
     return;
@@ -300,28 +303,13 @@ read_packet(fde_t *fd, void *data)
    */
   do
   {
-#ifdef HAVE_LIBCRYPTO
-    if (fd->ssl)
+#ifdef HAVE_TLS
+    if (tls_isusing(&fd->ssl))
     {
-      length = SSL_read(fd->ssl, readBuf, sizeof(readBuf));
+      length = tls_read(&fd->ssl, readBuf, sizeof(readBuf), &want_write);
 
-      /* translate openssl error codes, sigh */
-      if (length < 0)
-        switch (SSL_get_error(fd->ssl, length))
-        {
-          case SSL_ERROR_WANT_WRITE:
-            comm_setselect(fd, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);
-            return;
-          case SSL_ERROR_WANT_READ:
-              errno = EWOULDBLOCK;
-          case SSL_ERROR_SYSCALL:
-              break;
-          case SSL_ERROR_SSL:
-            if (errno == EAGAIN)
-              break;
-          default:
-            length = errno = 0;
-        }
+      if (want_write)
+        comm_setselect(fd, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);
     }
     else
 #endif
@@ -366,12 +354,7 @@ read_packet(fde_t *fd, void *data)
       exit_client(client_p, "Excess Flood");
       return;
     }
-  }
-#ifdef HAVE_LIBCRYPTO
-  while (length == sizeof(readBuf) || fd->ssl);
-#else
-  while (length == sizeof(readBuf));
-#endif
+  } while (length == sizeof(readBuf) || tls_isusing(&fd->ssl));
 
   /* If we get here, we need to register for another COMM_SELECT_READ */
   comm_setselect(fd, COMM_SELECT_READ, read_packet, client_p, 0);

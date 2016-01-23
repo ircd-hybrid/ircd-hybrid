@@ -97,6 +97,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_define_dir.m4 \
 	$(top_srcdir)/m4/ax_arg_enable_assert.m4 \
 	$(top_srcdir)/m4/ax_arg_enable_debugging.m4 \
 	$(top_srcdir)/m4/ax_arg_enable_warnings.m4 \
+	$(top_srcdir)/m4/ax_arg_gnutls.m4 \
 	$(top_srcdir)/m4/ax_arg_ioloop_mechanism.m4 \
 	$(top_srcdir)/m4/ax_arg_libgeoip.m4 \
 	$(top_srcdir)/m4/ax_arg_openssl.m4 \
@@ -131,7 +132,8 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	modules.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
 	packet.$(OBJEXT) parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
 	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
-	s_bsd_kqueue.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
+	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
+	tls_openssl.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
 	restart.$(OBJEXT) resv.$(OBJEXT) rng_mt.$(OBJEXT) \
 	rsa.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
 	user.$(OBJEXT) userhost.$(OBJEXT) version.$(OBJEXT) \
@@ -413,6 +415,9 @@ ircd_SOURCES = auth.c            \
                s_bsd_poll.c      \
                s_bsd_devpoll.c   \
                s_bsd_kqueue.c    \
+               tls_gnutls.c      \
+               tls_none.c        \
+               tls_openssl.c     \
                res.c             \
                reslib.c          \
                restart.c         \
@@ -571,6 +576,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_poll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_gnutls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_none.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_openssl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/userhost.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@

@@ -54,22 +54,25 @@
 static int
 mr_webirc(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf = NULL;
+  const struct MaskItem *conf = NULL;
+  const char *const pass = parv[1];
+  const char *const host = parv[3];
+  const char *const addr = parv[4];
   struct addrinfo hints, *res;
 
   assert(MyConnect(source_p));
 
-  if (!valid_hostname(parv[3]))
+  if (!valid_hostname(host))
   {
-    sendto_one_notice(source_p, &me, ":WEBIRC: Invalid hostname");
+    sendto_one_notice(source_p, &me, ":WEBIRC: Invalid hostname %s", host);
     return 0;
   }
 
   conf = find_address_conf(source_p->host,
                            HasFlag(source_p, FLAGS_GOTID) ? source_p->username : "webirc",
                            &source_p->connection->ip,
-                           source_p->connection->aftype, parv[1]);
-  if (conf == NULL || !IsConfClient(conf))
+                           source_p->connection->aftype, pass);
+  if (!conf || !IsConfClient(conf))
     return 0;
 
   if (!IsConfWebIRC(conf))
@@ -84,7 +87,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!match_conf_password(parv[1], conf))
+  if (!match_conf_password(pass, conf))
   {
     sendto_one_notice(source_p, &me, ":WEBIRC password incorrect");
     return 0;
@@ -96,9 +99,9 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
 
-  if (getaddrinfo(parv[4], NULL, &hints, &res))
+  if (getaddrinfo(addr, NULL, &hints, &res))
   {
-    sendto_one_notice(source_p, &me, ":Invalid WEBIRC IP %s", parv[4]);
+    sendto_one_notice(source_p, &me, ":Invalid WEBIRC IP address %s", addr);
     return 0;
   }
 
@@ -110,14 +113,14 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   source_p->connection->aftype = res->ai_family;
   freeaddrinfo(res);
 
-  strlcpy(source_p->sockhost, parv[4], sizeof(source_p->sockhost));
-  strlcpy(source_p->host, parv[3], sizeof(source_p->host));
+  strlcpy(source_p->sockhost, addr, sizeof(source_p->sockhost));
+  strlcpy(source_p->host, host, sizeof(source_p->host));
 
   /* Check dlines now, k-lines will be checked on registration */
   if ((conf = find_dline_conf(&source_p->connection->ip,
                                source_p->connection->aftype)))
   {
-    if (!(conf->type == CONF_EXEMPT))
+    if (conf->type == CONF_DLINE)
     {
       exit_client(source_p, "D-lined");
       return 0;
@@ -125,8 +128,8 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   }
 
   AddUMode(source_p, UMODE_WEBIRC);
-  sendto_one_notice(source_p, &me, ":WEBIRC host/IP set to %s %s",
-                    parv[3], parv[4]);
+  sendto_one_notice(source_p, &me, ":WEBIRC host/IP set to %s %s", host, addr);
+
   return 0;
 }
 

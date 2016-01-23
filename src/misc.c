@@ -126,18 +126,3 @@ time_dissect(time_t duration)
            days, days == 1 ? "" : "s", hours, minutes, seconds);
   return buf;
 }
-
-#ifdef HAVE_LIBCRYPTO
-const char *
-ssl_get_cipher(const SSL *ssl)
-{
-  static char buffer[IRCD_BUFSIZE];
-  int bits = 0;
-
-  SSL_CIPHER_get_bits(SSL_get_current_cipher(ssl), &bits);
-
-  snprintf(buffer, sizeof(buffer), "%s-%s-%d", SSL_get_version(ssl),
-           SSL_get_cipher(ssl), bits);
-  return buffer;
-}
-#endif

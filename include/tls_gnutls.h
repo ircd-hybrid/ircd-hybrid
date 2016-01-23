@@ -1,7 +1,7 @@
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (c) 2000-2016 ircd-hybrid development team
+ *  Copyright (c) 2015-2016 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,18 +19,39 @@
  *  USA
  */
 
-/*! \file rsa.h
- * \brief A header for the RSA functions.
+/*! \file tls_gnutls.h
+ * \brief GnuTLS-specific TLS types
  * \version $Id$
  */
 
-#ifndef INCLUDED_rsa_h
-#define INCLUDED_rsa_h
 
-#include "config.h"
+#ifndef INCLUDED_tls_gnutls_h
+#define INCLUDED_tls_gnutls_h
 
-#ifdef HAVE_LIBCRYPTO
-extern void report_crypto_errors(void);
-#endif
-extern void binary_to_hex(const unsigned char *, char *, unsigned int);
-#endif /* INCLUDED_rsa_h */
+#if defined(HAVE_LIBGNUTLS) && !defined(HAVE_LIBCRYPTO)
+
+#define HAVE_TLS
+#define HAVE_TLS_GNUTLS
+
+#include <gnutls/gnutls.h>
+#include <gnutls/x509.h>
+
+typedef gnutls_digest_algorithm_t tls_md_t;
+typedef struct gnutls_context * tls_context_t;
+
+struct gnutls_context
+{
+  gnutls_certificate_credentials_t x509_cred;
+  gnutls_priority_t priorities;
+  gnutls_dh_params_t dh_params;
+  unsigned int refs;
+};
+
+typedef struct
+{
+  gnutls_session_t session;
+  tls_context_t context;
+} tls_data_t;
+
+#endif  /* defined(HAVE_LIBGNUTLS) && !defined(HAVE_LIBCRYPTO) */
+#endif  /* INCLUDED_tls_openssl_h */

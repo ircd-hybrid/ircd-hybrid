@@ -44,6 +44,31 @@
 #include "modules.h"
 
 
+/*! Parses server flags to be potentially set
+ * \param client_p Pointer to server's Client structure
+ * \param flags    Pointer to the flag string to be parsed
+ */
+static void
+server_set_flags(struct Client *client_p, const char *flags)
+{
+  const unsigned char *p = (const unsigned char *)flags;
+
+  if (*p != '+')
+    return;
+
+  while (*++p)
+  {
+    switch (*p)
+    {
+      case 'h':
+        AddFlag(client_p, FLAGS_HIDDEN);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
 /*
  * send_tb
  *
@@ -237,9 +262,6 @@ server_estab(struct Client *client_p)
 {
   struct MaskItem *conf = NULL;
   dlink_node *node = NULL;
-#if defined(HAVE_LIBCRYPTO) && !defined(OPENSSL_NO_COMP)
-  const COMP_METHOD *compression = NULL, *expansion = NULL;
-#endif
 
   if ((conf = find_conf_name(&client_p->connection->confs, client_p->name, CONF_SERVER)) == NULL)
   {
@@ -320,47 +342,26 @@ server_estab(struct Client *client_p)
     AddFlag(client_p, FLAGS_SERVICE);
 
   /* Show the real host/IP to admins */
-#ifdef HAVE_LIBCRYPTO
-  if (client_p->connection->fd.ssl)
+  if (tls_isusing(&client_p->connection->fd.ssl))
   {
-#ifndef OPENSSL_NO_COMP
-    compression = SSL_get_current_compression(client_p->connection->fd.ssl);
-    expansion   = SSL_get_current_expansion(client_p->connection->fd.ssl);
-#endif
+    /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-                         get_client_name(client_p, SHOW_IP), ssl_get_cipher(client_p->connection->fd.ssl),
-#ifndef OPENSSL_NO_COMP
-                         compression ? SSL_COMP_get_name(compression) : "NONE",
-                         expansion ? SSL_COMP_get_name(expansion) : "NONE",
-#else
-                         "NONE", "NONE",
-#endif
+                         "Link with %s established: [TLS: %s] (Capabilities: %s)",
+                         get_client_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd.ssl),
                          show_capabilities(client_p));
+
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-                         get_client_name(client_p, MASK_IP), ssl_get_cipher(client_p->connection->fd.ssl),
-#ifndef OPENSSL_NO_COMP
-                         compression ? SSL_COMP_get_name(compression) : "NONE",
-                         expansion ? SSL_COMP_get_name(expansion) : "NONE",
-#else
-                         "NONE", "NONE",
-#endif
+                         "Link with %s established: [TLS: %s] (Capabilities: %s)",
+                         get_client_name(client_p, MASK_IP), tls_get_cipher(&client_p->connection->fd.ssl),
                          show_capabilities(client_p));
-    ilog(LOG_TYPE_IRCD, "Link with %s established: [SSL: %s, Compression/Expansion method: %s/%s] (Capabilities: %s)",
-         get_client_name(client_p, SHOW_IP), ssl_get_cipher(client_p->connection->fd.ssl),
-#ifndef OPENSSL_NO_COMP
-         compression ? SSL_COMP_get_name(compression) : "NONE",
-         expansion ? SSL_COMP_get_name(expansion) : "NONE",
-#else
-         "NONE", "NONE",
-#endif
+    ilog(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
+         get_client_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd.ssl),
          show_capabilities(client_p));
   }
   else
-#endif
   {
+    /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
                          get_client_name(client_p, SHOW_IP), show_capabilities(client_p));
@@ -430,7 +431,7 @@ server_estab(struct Client *client_p)
  * side effects - servers gecos field is set
  */
 static void
-set_server_gecos(struct Client *client_p, const char *info)
+server_set_gecos(struct Client *client_p, const char *info)
 {
   const char *s = info;
 
@@ -452,11 +453,20 @@ set_server_gecos(struct Client *client_p, const char *info)
  *  parv[1] = servername
  *  parv[2] = hopcount
  *  parv[3] = serverinfo
+ *
+ * 8.3.x+:
+ *  parv[0] = command
+ *  parv[1] = servername
+ *  parv[2] = hopcount
+ *  parv[3] = sid
+ *  parv[4] = string of flags starting with '+'
+ *  parv[5] = serverinfo
  */
 static int
 mr_server(struct Client *source_p, int parc, char *parv[])
 {
   const char *name = parv[1];
+  const char *sid = parc == 6 ? parv[3] : source_p->id; /* TBR: compatibility 'mode' */
   struct Client *target_p = NULL;
 
   if (EmptyString(parv[parc - 1]))
@@ -477,14 +487,14 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!valid_sid(source_p->id))
+  if (!valid_sid(sid))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         get_client_name(source_p, SHOW_IP), source_p->id);
+                         get_client_name(source_p, SHOW_IP), sid);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         get_client_name(source_p, MASK_IP), source_p->id);
+                         get_client_name(source_p, MASK_IP), sid);
     exit_client(source_p, "Bogus server ID introduced");
     return 0;
   }
@@ -599,7 +609,16 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    * connect{} block in source_p->name
    */
   strlcpy(source_p->name, name, sizeof(source_p->name));
-  set_server_gecos(source_p, parv[parc - 1]);
+
+  if (parc == 6)  /* TBR: compatibility 'mode' */
+  {
+    strlcpy(source_p->id, sid, sizeof(source_p->id));
+    strlcpy(source_p->info, parv[parc - 1], sizeof(source_p->info));
+    server_set_flags(source_p, parv[4]);
+  }
+  else
+    server_set_gecos(source_p, parv[parc - 1]);
+
   source_p->hopcount = atoi(parv[2]);
   server_estab(source_p);
   return 0;
@@ -611,6 +630,14 @@ mr_server(struct Client *source_p, int parc, char *parv[])
  *  parv[2] = hopcount
  *  parv[3] = sid of new server
  *  parv[4] = serverinfo
+ *
+ * 8.3.x+:
+ *  parv[0] = command
+ *  parv[1] = servername
+ *  parv[2] = hopcount
+ *  parv[3] = sid of new server
+ *  parv[4] = string of flags starting with '+'
+ *  parv[5] = serverinfo
  */
 static int
 ms_sid(struct Client *source_p, int parc, char *parv[])
@@ -772,7 +799,14 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   strlcpy(target_p->name, parv[1], sizeof(target_p->name));
   strlcpy(target_p->id, parv[3], sizeof(target_p->id));
 
-  set_server_gecos(target_p, parv[parc - 1]);
+  if (parc == 6)  /* TBR: compatibility 'mode' */
+  {
+    strlcpy(target_p->info, parv[parc - 1], sizeof(target_p->info));
+    server_set_flags(target_p, parv[4]);
+  }
+  else
+    server_set_gecos(target_p, parv[parc - 1]);
+
   SetServer(target_p);
 
   if (find_matching_name_conf(CONF_SERVICE, target_p->name, NULL, NULL, 0))

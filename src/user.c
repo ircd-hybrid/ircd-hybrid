@@ -49,6 +49,7 @@
 #include "parse.h"
 #include "watch.h"
 #include "isupport.h"
+#include "tls.h"
 
 static char umode_buffer[IRCD_BUFSIZE];
 
@@ -256,12 +257,12 @@ user_welcome(struct Client *source_p)
 {
   static const char built_date[] = __DATE__ " at " __TIME__;
 
-#ifdef HAVE_LIBCRYPTO
+#ifdef HAVE_TLS
   if (HasFlag(source_p, FLAGS_SSL))
   {
     AddUMode(source_p, UMODE_SSL);
     sendto_one_notice(source_p, &me, ":*** Connected securely via %s",
-                      ssl_get_cipher(source_p->connection->fd.ssl));
+                      tls_get_cipher(&source_p->connection->fd.ssl));
   }
 #endif
 

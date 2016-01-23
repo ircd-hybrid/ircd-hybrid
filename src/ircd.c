@@ -329,76 +329,6 @@ setup_corefile(void)
 #endif
 }
 
-#ifdef HAVE_LIBCRYPTO
-static int
-always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
-{
-  return 1;
-}
-#endif
-
-/* ssl_init()
- *
- * inputs       - nothing
- * output       - nothing
- * side effects - setups SSL context.
- */
-static void
-ssl_init(void)
-{
-#ifdef HAVE_LIBCRYPTO
-  SSL_load_error_strings();
-  SSLeay_add_ssl_algorithms();
-
-  if (!(ConfigServerInfo.server_ctx = SSL_CTX_new(SSLv23_server_method())))
-  {
-    const char *s = ERR_lib_error_string(ERR_get_error());
-
-    fprintf(stderr, "ERROR: Could not initialize the SSL Server context -- %s\n", s);
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Server context -- %s", s);
-    exit(EXIT_FAILURE);
-    return;  /* Not reached */
-  }
-
-  SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TICKET);
-  SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_SINGLE_DH_USE|SSL_OP_CIPHER_SERVER_PREFERENCE);
-  SSL_CTX_set_verify(ConfigServerInfo.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
-                     always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(ConfigServerInfo.server_ctx, SSL_SESS_CACHE_OFF);
-  SSL_CTX_set_cipher_list(ConfigServerInfo.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-
-#if OPENSSL_VERSION_NUMBER >= 0x009080FFL && !defined(OPENSSL_NO_ECDH)
-  {
-    EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-
-    if (key)
-    {
-      SSL_CTX_set_tmp_ecdh(ConfigServerInfo.server_ctx, key);
-      EC_KEY_free(key);
-    }
-  }
-
-  SSL_CTX_set_options(ConfigServerInfo.server_ctx, SSL_OP_SINGLE_ECDH_USE);
-#endif
-
-  if (!(ConfigServerInfo.client_ctx = SSL_CTX_new(SSLv23_client_method())))
-  {
-    const char *s = ERR_lib_error_string(ERR_get_error());
-
-    fprintf(stderr, "ERROR: Could not initialize the SSL Client context -- %s\n", s);
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL Client context -- %s", s);
-    exit(EXIT_FAILURE);
-    return;  /* Not reached */
-  }
-
-  SSL_CTX_set_options(ConfigServerInfo.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TICKET);
-  SSL_CTX_set_options(ConfigServerInfo.client_ctx, SSL_OP_SINGLE_DH_USE);
-  SSL_CTX_set_verify(ConfigServerInfo.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
-                     always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(ConfigServerInfo.client_ctx, SSL_SESS_CACHE_OFF);
-#endif /* HAVE_LIBCRYPTO */
-}
-
 /*
  * print_startup - print startup information
  */
@@ -475,16 +405,17 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  ssl_init();
-
   if (!server_state.foreground)
   {
     make_daemon();
-    close_standard_fds(); /* this needs to be before init_netio()! */
+    //https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=768841 says close_standard_fds should be ok
+    //since we are initing gnutls explicitly on the other side, but it doesn't work for me
+    //close_standard_fds(); /* this needs to be before init_netio()! */
   }
   else
     print_startup(getpid());
 
+  tls_init();
   setup_signals();
 
   /* We need this to initialise the fd array before anything else */

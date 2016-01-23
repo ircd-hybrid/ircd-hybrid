@@ -29,6 +29,7 @@
 #define FILEIO_V2
 
 #include "ircd_defs.h"
+#include "tls.h"
 
 
 enum { FD_DESC_SIZE = 128 };  /* hostlen + comment */
@@ -85,9 +86,8 @@ typedef struct _fde
     void *data;
     /* We'd also add the retry count here when we get to that -- adrian */
   } connect;
-#ifdef HAVE_LIBCRYPTO
-  SSL *ssl;
-#endif
+
+  tls_data_t ssl;
   struct _fde *hnext;
 } fde_t;
 

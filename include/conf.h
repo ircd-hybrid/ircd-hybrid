@@ -168,7 +168,6 @@ struct MaskItem
   char              *certfp;
   char              *whois;
   char              *cipher_list;
-  void              *rsa_public_key;
 };
 
 struct exempt

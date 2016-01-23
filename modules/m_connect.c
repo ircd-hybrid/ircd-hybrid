@@ -121,9 +121,6 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /*
-   * Notify all operators about remote connect requests
-   */
   ilog(LOG_TYPE_IRCD, "CONNECT %s %d from %s",
        name, port, get_oper_name(source_p));
 

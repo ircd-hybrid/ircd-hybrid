@@ -79,6 +79,4 @@ AS_IF([test "$cf_enable_openssl" != "no"],
       [AC_CHECK_LIB(ssl, SSL_connect)])
     ],[AC_MSG_RESULT(no - LibreSSL/OpenSSL support disabled)
     cf_enable_openssl="no"])])
-
-AM_CONDITIONAL(ENABLE_SSL, [test "$ac_cv_lib_ssl_SSL_connect" = yes])
 ])

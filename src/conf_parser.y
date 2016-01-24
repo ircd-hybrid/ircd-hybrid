@@ -472,26 +472,18 @@ serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    if (!ConfigServerInfo.rsa_private_key_file)
-    {
-      conf_error_report("No rsa_private_key_file specified, SSL disabled");
-      break;
-    }
-
-    if (ConfigServerInfo.ssl_certificate_file)
-      xfree(ConfigServerInfo.ssl_certificate_file);
-
+    xfree(ConfigServerInfo.ssl_certificate_file);
     ConfigServerInfo.ssl_certificate_file = xstrdup(yylval.string);
   }
 };
 
 serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass != 1)
-    break;
-
-  xfree(ConfigServerInfo.rsa_private_key_file);
-  ConfigServerInfo.rsa_private_key_file = xstrdup(yylval.string);
+  if (conf_parser_ctx.pass == 2)
+  {
+    xfree(ConfigServerInfo.rsa_private_key_file);
+    ConfigServerInfo.rsa_private_key_file = xstrdup(yylval.string);
+  }
 };
 
 serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'

@@ -136,7 +136,8 @@ tls_get_cipher(const tls_data_t *tls_data)
 {
   static char buffer[IRCD_BUFSIZE];
 
-  snprintf(buffer, sizeof(buffer), "%s-%s-%s",
+  snprintf(buffer, sizeof(buffer), "%s-%s-%s-%s",
+           gnutls_protocol_get_name(gnutls_protocol_get_version(tls_data->session)),
            gnutls_kx_get_name(gnutls_kx_get(tls_data->session)),
            gnutls_cipher_get_name(gnutls_cipher_get(tls_data->session)),
            gnutls_mac_get_name(gnutls_mac_get(tls_data->session)));

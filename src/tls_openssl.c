@@ -151,7 +151,7 @@ tls_new_cred(void)
   }
 
 #if OPENSSL_VERSION_NUMBER >= 0x009080FFL && !defined(OPENSSL_NO_ECDH)
-  if (ConfigServerInfo.ssl_dh_elliptic_curve != NULL)
+  if (ConfigServerInfo.ssl_dh_elliptic_curve)
   {
     int nid = 0;
     EC_KEY *key = NULL;
@@ -182,12 +182,11 @@ set_default_curve:
 #endif
 
   if (ConfigServerInfo.ssl_message_digest_algorithm == NULL)
-  {
     ConfigServerInfo.message_digest_algorithm = EVP_sha256();
-  }
   else
   {
     ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.ssl_message_digest_algorithm);
+
     if (ConfigServerInfo.message_digest_algorithm == NULL)
     {
       ConfigServerInfo.message_digest_algorithm = EVP_sha256();
@@ -216,7 +215,7 @@ int
 tls_isusing(tls_data_t *tls_data)
 {
   SSL *ssl = *tls_data;
-  return (ssl != NULL);
+  return ssl != NULL;
 }
 
 void

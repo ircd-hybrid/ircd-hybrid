@@ -27,9 +27,6 @@
 
 %{
 
-#include <sys/types.h>
-#include <string.h>
-
 #include "config.h"
 #include "stdinc.h"
 #include "ircd.h"
@@ -40,16 +37,13 @@
 #include "event.h"
 #include "id.h"
 #include "log.h"
-#include "client.h"	/* for UMODE_SERVNOTICE only */
 #include "irc_string.h"
 #include "memory.h"
 #include "modules.h"
 #include "server.h"
 #include "hostmask.h"
-#include "send.h"
 #include "listener.h"
 #include "resv.h"
-#include "numeric.h"
 #include "user.h"
 #include "motd.h"
 

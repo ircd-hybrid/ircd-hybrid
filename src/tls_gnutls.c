@@ -64,11 +64,9 @@ tls_new_cred(void)
   gnutls_global_init();
 
   ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
-  if (ret < 0)
+  if (ret != GNUTLS_E_SUCCESS)
   {
-    const char *error = gnutls_strerror(ret);
-
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the SSL credentials -- %s", error);
+    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
     xfree(context);
     return 0;
   }
@@ -76,7 +74,7 @@ tls_new_cred(void)
   gnutls_priority_init(&context->priorities, "NORMAL", NULL);
 
   ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.ssl_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
-  if (ret < 0)
+  if (ret != GNUTLS_E_SUCCESS)
   {
     ilog(LOG_TYPE_IRCD, "Could not set TLS keys -- %s", gnutls_strerror(ret));
 
@@ -237,7 +235,7 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
   gnutls_priority_deinit(tls_data->context->priorities);
 
   ret = gnutls_priority_init(&tls_data->context->priorities, cipher_list, &prioerror);
-  if (ret < 0)
+  if (ret != GNUTLS_E_SUCCESS)
   {
     /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
     ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default (NORMAL)",
@@ -290,24 +288,24 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint, int *
   gnutls_x509_crt_t cert;
   const gnutls_datum_t *cert_list;
   unsigned int cert_list_size = 0;
-  unsigned char digestbuf[IRCD_BUFSIZE];
+  unsigned char digestbuf[TLS_GNUTLS_MAX_HASH_SIZE];
   size_t digest_size = sizeof(digestbuf);
-  char buf[IRCD_BUFSIZE];
+  char buf[TLS_GNUTLS_MAX_HASH_SIZE * 2 + 1];
 
   cert_list = gnutls_certificate_get_peers(tls_data->session, &cert_list_size);
   if (!cert_list)
     return 1;  /* No certificate */
 
   ret = gnutls_x509_crt_init(&cert);
-  if (ret < 0)
+  if (ret != GNUTLS_E_SUCCESS)
     return 1;
 
   ret = gnutls_x509_crt_import(cert, &cert_list[0], GNUTLS_X509_FMT_DER);
-  if (ret < 0)
+  if (ret != GNUTLS_E_SUCCESS)
     goto info_done_dealloc;
 
   ret = gnutls_x509_crt_get_fingerprint(cert, digest, digestbuf, &digest_size);
-  if (ret < 0)
+  if (ret != GNUTLS_E_SUCCESS)
     goto info_done_dealloc;
 
   binary_to_hex(digestbuf, buf, digest_size);

@@ -41,11 +41,6 @@
 #include <crypt.h>
 #endif
 
-#ifdef HAVE_LIBCRYPTO
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#endif
-
 #ifdef HAVE_LIBGEOIP
 #include <GeoIP.h>
 #endif

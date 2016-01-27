@@ -1181,13 +1181,6 @@ clear_out_old_conf(void)
   ConfigServerInfo.network_name = NULL;
   xfree(ConfigServerInfo.network_desc);
   ConfigServerInfo.network_desc = NULL;
-#ifdef HAVE_LIBCRYPTO
-  if (ConfigServerInfo.rsa_private_key)
-  {
-    RSA_free(ConfigServerInfo.rsa_private_key);
-    ConfigServerInfo.rsa_private_key = NULL;
-  }
-#endif
 
   xfree(ConfigServerInfo.rsa_private_key_file);
   ConfigServerInfo.rsa_private_key_file = NULL;

@@ -297,9 +297,6 @@ struct config_serverinfo_entry
   char *ssl_dh_elliptic_curve;
   char *ssl_cipher_list;
   char *ssl_message_digest_algorithm;
-#ifdef HAVE_LIBCRYPTO
-  RSA  *rsa_private_key;
-#endif
   tls_context_t tls_ctx;
   tls_md_t message_digest_algorithm;
   unsigned int hub;

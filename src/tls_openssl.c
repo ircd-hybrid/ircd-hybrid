@@ -30,10 +30,22 @@
 #include "tls.h"
 #include "conf.h"
 #include "log.h"
-#include "rsa.h"
+#include "misc.h"
 #include "memory.h"
 
 #ifdef HAVE_TLS_OPENSSL
+
+/*
+ * report_crypto_errors - Dump crypto error list to log
+ */
+static void
+report_crypto_errors(void)
+{
+  unsigned long e = 0;
+
+  while ((e = ERR_get_error()))
+    ilog(LOG_TYPE_IRCD, "SSL error: %s", ERR_error_string(e, 0));
+}
 
 static int
 always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)

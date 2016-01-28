@@ -55,7 +55,6 @@ ircd_SOURCES = auth.c            \
                restart.c         \
                resv.c            \
                rng_mt.c          \
-               rsa.c             \
                s_bsd.c           \
                send.c            \
                server.c          \

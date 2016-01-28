@@ -158,7 +158,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
     if (!EmptyString(server))
       sendto_match_servs(source_p, server, 0, "REHASH %s %s", server, option);
 
-    if (EmptyString(server) || match(server, me.name))
+    if (EmptyString(server) || !match(server, me.name))
       tab->handler(source_p);
 
     return 0;

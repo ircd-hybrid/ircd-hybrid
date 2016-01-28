@@ -311,6 +311,7 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
   binary_to_hex(digestbuf, buf, digest_size);
   *fingerprint = xstrdup(buf);
 
+  gnutls_x509_crt_deinit(cert);
   return 1;
 
 info_done_dealloc:

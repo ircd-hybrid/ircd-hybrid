@@ -16752,6 +16752,17 @@ fi
 fi
 
 
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GnuTLS 3.3.8 and above" >&5
+$as_echo_n "checking for GnuTLS 3.3.8 and above... " >&6; }
+    if test "$ac_cv_lib_gnutls_gnutls_init" = "yes"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no - GnuTLS support disabled" >&5
+$as_echo "no - GnuTLS support disabled" >&6; }
+fi
+
   fi
 fi
 

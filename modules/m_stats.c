@@ -104,7 +104,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
         *p++ = 'c';
 
         for (const struct shared_flags *shared = flag_table; shared->type; ++shared)
-          if (shared->type & conf->flags)
+          if (shared->type & conf->modes)
             *p++ = shared->letter;
           else
             *p++ = ToLower(shared->letter);
@@ -124,7 +124,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
         *p++ = 'C';
 
         for (const struct shared_flags *shared = flag_table; shared->type; ++shared)
-          if (shared->type & conf->flags)
+          if (shared->type & conf->modes)
             *p++ = shared->letter;
           else
             *p++ = ToLower(shared->letter);

@@ -598,7 +598,7 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
       {
         if ((user == NULL && (host == NULL)))
           return conf;
-        if ((conf->flags & flags) != flags)
+        if ((conf->modes & flags) != flags)
           continue;
         if (EmptyString(conf->user) || EmptyString(conf->host))
           return conf;

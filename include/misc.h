@@ -31,6 +31,7 @@ extern const char *date(time_t);
 extern const char *date_iso8601(time_t);
 extern const char *date_ctime(time_t);
 extern const char *time_dissect(time_t);
+extern void binary_to_hex(const unsigned char *, char *, unsigned int);
 
 /* Just blindly define our own MIN/MAX macro */
 #define IRCD_MAX(a, b)  ((a) > (b) ? (a) : (b))

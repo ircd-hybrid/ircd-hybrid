@@ -30,7 +30,7 @@
 #include "tls.h"
 #include "conf.h"
 #include "log.h"
-#include "rsa.h"
+#include "misc.h"
 #include "memory.h"
 
 #ifdef HAVE_TLS_GNUTLS

@@ -45,8 +45,7 @@ AC_CHECK_HEADERS_ONCE(crypt.h        \
                       sys/param.h    \
                       types.h        \
                       socket.h       \
-                      sys/wait.h     \
-                      wait.h)
+                      sys/wait.h)
 
 AC_SEARCH_LIBS(crypt, crypt)
 

@@ -16528,8 +16528,8 @@ $as_echo "disabled" >&6; }
 fi
 
 if test "$cf_enable_openssl" != "no"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LibreSSL or OpenSSL 0.9.8o and above" >&5
-$as_echo_n "checking for LibreSSL or OpenSSL 0.9.8o and above... " >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LibreSSL or OpenSSL 1.0.1d and above" >&5
+$as_echo_n "checking for LibreSSL or OpenSSL 1.0.1d and above... " >&6; }
   if test "$cross_compiling" = yes; then :
   cf_openssl_version_ok=no
 else
@@ -16542,7 +16542,7 @@ else
 int
 main ()
 {
- exit(!(OPENSSL_VERSION_NUMBER >= 0x009080ffL));
+ exit(!(OPENSSL_VERSION_NUMBER >= 0x1000104fL));
   ;
   return 0;
 }
@@ -16673,9 +16673,33 @@ fi
 if test "$cf_enable_openssl" != "auto" &&
    test "$cf_enable_openssl" != "yes"; then
   if test "$cf_enable_gnutls" != "no"; then
+
     ac_fn_c_check_header_mongrel "$LINENO" "gnutls/gnutls.h" "ac_cv_header_gnutls_gnutls_h" "$ac_includes_default"
 if test "x$ac_cv_header_gnutls_gnutls_h" = xyes; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gnutls_init in -lgnutls" >&5
+
+      if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+          #include <gnutls/gnutls.h>
+          #include <stdlib.h>
+int
+main ()
+{
+
+          exit(!(GNUTLS_VERSION_NUMBER >= 0x030308));
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gnutls_init in -lgnutls" >&5
 $as_echo_n "checking for gnutls_init in -lgnutls... " >&6; }
 if ${ac_cv_lib_gnutls_gnutls_init+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -16718,6 +16742,11 @@ _ACEOF
 
   LIBS="-lgnutls $LIBS"
 
+fi
+
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
 fi

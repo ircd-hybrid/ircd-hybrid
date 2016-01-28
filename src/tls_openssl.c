@@ -362,7 +362,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 int
-tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint, int *raw_result)
+tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
   SSL *ssl = *tls_data;
   X509 *cert = SSL_get_peer_certificate(ssl);
@@ -390,7 +390,6 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint, int *
   }
 
   X509_free(cert);
-  *raw_result = res;
   return ret;
 }
 #endif  /* HAVE_TLS_OPENSSL */

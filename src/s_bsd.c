@@ -219,7 +219,6 @@ static void
 ssl_handshake(fde_t *fd, void *data)
 {
   struct Client *client_p = data;
-  int res = 0;
 
   tls_handshake_status_t ret = tls_handshake(&client_p->connection->fd.ssl, TLS_ROLE_SERVER, NULL);
   if (ret != TLS_HANDSHAKE_DONE)
@@ -248,9 +247,9 @@ ssl_handshake(fde_t *fd, void *data)
 
   comm_settimeout(&client_p->connection->fd, 0, NULL, NULL);
 
-  if (!tls_verify_cert(&client_p->connection->fd.ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp, &res))
-    ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad TLS client certificate: %d",
-         client_p->name, client_p->username, client_p->host, res);
+  if (!tls_verify_cert(&client_p->connection->fd.ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp))
+    ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad TLS client certificate",
+         client_p->name, client_p->username, client_p->host);
 
   start_auth(client_p);
 }

@@ -282,7 +282,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 int
-tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint, int *raw_result)
+tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
   int ret;
   gnutls_x509_crt_t cert;
@@ -315,7 +315,6 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint, int *
 
 info_done_dealloc:
   gnutls_x509_crt_deinit(cert);
-  *raw_result = 0;
   return 0;
 }
 #endif  /* HAVE_TLS_GNUTLS */

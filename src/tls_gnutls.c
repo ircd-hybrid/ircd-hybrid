@@ -167,9 +167,11 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, int *want_write)
       case GNUTLS_E_AGAIN:
       case GNUTLS_E_INTERRUPTED:
         errno = EWOULDBLOCK;
+        return -1;
       case 0:  /* Closed */
       default:  /* Other error */
-        return -1;
+        /* XXX can gnutls_strerror(length) if <0 for gnutls's idea of the reason */
+        return 0;
     }
   }
 
@@ -189,8 +191,9 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, int *want_read)
       case GNUTLS_E_INTERRUPTED:
       case 0:
         errno = EWOULDBLOCK;
-      default:
         return -1;
+      default:
+        return 0;
     }
   }
 

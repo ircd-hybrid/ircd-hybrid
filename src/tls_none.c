@@ -87,7 +87,7 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 }
 
 int
-tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint, int *raw_result)
+tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
   return 0;
 }

@@ -4831,7 +4831,7 @@ yyreduce:
     break;
 
   conf = conf_make(CONF_SHARED);
-  conf->flags = block_state.flags.value;
+  conf->modes = block_state.flags.value;
   conf->name = xstrdup(block_state.name.buf);
   conf->user = xstrdup(block_state.user.buf);
   conf->host = xstrdup(block_state.host.buf);
@@ -4992,7 +4992,7 @@ yyreduce:
     break;
 
   conf = conf_make(CONF_CLUSTER);
-  conf->flags = block_state.flags.value;
+  conf->modes = block_state.flags.value;
   conf->name = xstrdup(block_state.name.buf);
 }
 #line 4999 "conf_parser.c" /* yacc.c:1646  */

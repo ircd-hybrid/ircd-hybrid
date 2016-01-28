@@ -712,7 +712,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
      */
     target_p->from->connection->serial = current_serial;
 
-    if (!IsCapable(target_p->from, cap))
+    if (cap && !IsCapable(target_p->from, cap))
       continue;
 
     send_message_remote(target_p->from, source_p, buffer);

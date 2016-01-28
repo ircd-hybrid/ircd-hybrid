@@ -5,6 +5,7 @@ o) Implemented support for GnuTLS. Currently ./configure's autodetection
 o) Added support for remote REHASH: REHASH <server> <option>
 o) Added 'rehash:remote' irc-operator privilege flag
 o) Added 'rehash' type to shared {} blocks
+o) Fixed minor memory leak with shared {} and cluster {} blocks
 
 
 -- Noteworthy changes in version 8.2.12 (2016-01-05)

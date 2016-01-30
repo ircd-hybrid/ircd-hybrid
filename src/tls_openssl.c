@@ -82,7 +82,7 @@ tls_init(void)
   SSL_CTX_set_session_cache_mode(ConfigServerInfo.tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
   SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
 
-#if OPENSSL_VERSION_NUMBER >= 0x009080FFL && !defined(OPENSSL_NO_ECDH)
+#ifndef OPENSSL_NO_ECDH
   {
     EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 
@@ -164,7 +164,7 @@ tls_new_cred(void)
       ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- could not open/read Diffie-Hellman parameter file");
   }
 
-#if OPENSSL_VERSION_NUMBER >= 0x009080FFL && !defined(OPENSSL_NO_ECDH)
+#ifndef OPENSSL_NO_ECDH
   if (ConfigServerInfo.ssl_dh_elliptic_curve)
   {
     int nid = 0;

@@ -208,6 +208,9 @@ set_default_curve:
     }
   }
 
+  if (ConfigServerInfo.ssl_cipher_list)
+    SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_cipher_list);
+
   return 1;
 }
 

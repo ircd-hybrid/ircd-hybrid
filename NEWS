@@ -1,3 +1,13 @@
+-- Noteworthy changes in version 8.2.13 (2016-02-02)
+o) Implemented support for GnuTLS. Currently ./configure's autodetection
+   intentionally prefers OpenSSL over GnuTLS, so OpenSSL detection needs
+   to be disabled explicitely by using the --disable-openssl switch.
+o) Added support for remote REHASH: REHASH <server> <option>
+o) Added 'rehash:remote' irc-operator privilege flag
+o) Added 'rehash' type to shared {} blocks
+o) Fixed minor memory leak with shared {} and cluster {} blocks
+
+
 -- Noteworthy changes in version 8.2.12 (2016-01-05)
 #######################################################################
 o) IMPORTANT: Character case mapping is 'ascii' now. It is recommended

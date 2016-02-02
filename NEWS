@@ -2,6 +2,8 @@
 o) Implemented support for GnuTLS. Currently ./configure's autodetection
    intentionally prefers OpenSSL over GnuTLS, so OpenSSL detection needs
    to be disabled explicitely by using the --disable-openssl switch.
+o) Minimum supported GnuTLS version is 3.3.8 now
+o) Minimum supported OpenSSL version is 1.0.1d now
 o) Added support for remote REHASH: REHASH <server> <option>
 o) Added 'rehash:remote' irc-operator privilege flag
 o) Added 'rehash' type to shared {} blocks

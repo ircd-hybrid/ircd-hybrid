@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "ircd_defs.h"
 #include "irc_string.h"
 #include "memory.h"
 #include "conf_shared.h"

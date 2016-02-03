@@ -259,20 +259,22 @@ add_conf_module(const char *name)
  * side effects - clear the lists of paths and conf modules
  */
 void
-mod_clear_paths(void)
+modules_conf_clear(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, modules_path.head)
+  while (modules_path.head)
   {
-    dlinkDelete(node, &modules_path);
-    xfree(node->data);
+    struct module_path *path = modules_path.head->data;
+
+    dlinkDelete(&path->node, &modules_path);
+    xfree(path);
   }
 
-  DLINK_FOREACH_SAFE(node, node_next, modules_conf.head)
+  while (modules_conf.head)
   {
-    dlinkDelete(node, &modules_conf);
-    xfree(node->data);
+    struct module_path *path = modules_conf.head->data;
+
+    dlinkDelete(&path->node, &modules_conf);
+    xfree(path);
   }
 }
 

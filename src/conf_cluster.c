@@ -26,11 +26,8 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "ircd_defs.h"
-#include "irc_string.h"
 #include "memory.h"
 #include "conf_cluster.h"
-#include "client.h"
 #include "server.h"
 #include "send.h"
 
@@ -67,7 +64,7 @@ cluster_make(void)
 }
 
 void
-cluster_distribute(struct Client *source_p, const char *command, unsigned int capab,
+cluster_distribute(void *source_p, const char *command, unsigned int capab,
                    unsigned int type, const char *pattern, ...)
 {
   va_list args;

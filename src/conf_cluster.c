@@ -21,7 +21,7 @@
 
 /*! \file conf_cluster.c
  * \brief Implements cluster {} block configuration management.
- * \version $Id: conf_cluster.c 7158 2016-01-28 11:25:55Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

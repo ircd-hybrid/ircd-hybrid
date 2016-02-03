@@ -21,7 +21,7 @@
 
 /*! \file conf_cluster.h
  * \brief Implements cluster {} block configuration management.
- * \version $Id: conf_cluster.h 7158 2016-01-28 11:25:55Z michael $
+ * \version $Id$
  */
 
 #ifndef INCLUDED_conf_cluster_h

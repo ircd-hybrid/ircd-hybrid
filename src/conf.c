@@ -1015,11 +1015,11 @@ cleanup_tklines(void *unused)
  * output        - pointer to static string showing oper privs
  * side effects  - return as string, the oper privs as derived from port
  */
-static const struct oper_privs
+static const struct oper_flags
 {
   const unsigned int flag;
   const unsigned char c;
-} flag_list[] = {
+} flag_table[] = {
   { OPER_FLAG_ADMIN,          'A' },
   { OPER_FLAG_CLOSE,          'B' },
   { OPER_FLAG_CONNECT,        'C' },
@@ -1052,21 +1052,21 @@ static const struct oper_privs
 };
 
 const char *
-oper_privs_as_string(const unsigned int port)
+oper_privs_as_string(const unsigned int flags)
 {
-  static char privs_out[sizeof(flag_list) / sizeof(struct oper_privs)];
-  char *privs_ptr = privs_out;
+  static char buf[sizeof(flag_table) / sizeof(struct oper_flags)];
+  char *p = buf;
 
-  for (const struct oper_privs *opriv = flag_list; opriv->flag; ++opriv)
-    if (port & opriv->flag)
-      *privs_ptr++ = opriv->c;
+  for (const struct oper_flags *tab = flag_table; tab->flag; ++tab)
+    if (flags & tab->flag)
+      *p++ = tab->c;
 
-  if (privs_ptr == privs_out)
-    *privs_ptr++ = '0';
+  if (p == buf)
+    *p++ = '0';
 
-  *privs_ptr = '\0';
+  *p = '\0';
 
-  return privs_out;
+  return buf;
 }
 
 /*

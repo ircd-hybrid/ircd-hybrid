@@ -1054,7 +1054,7 @@ static const struct oper_privs
 const char *
 oper_privs_as_string(const unsigned int port)
 {
-  static char privs_out[IRCD_BUFSIZE];
+  static char privs_out[sizeof(flag_list) / sizeof(struct oper_privs)];
   char *privs_ptr = privs_out;
 
   for (const struct oper_privs *opriv = flag_list; opriv->flag; ++opriv)

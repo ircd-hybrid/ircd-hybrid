@@ -56,7 +56,7 @@
 static void
 report_shared(struct Client *source_p)
 {
-  static const struct shared_flags
+  static const struct shared_types
   {
     unsigned int type;
     unsigned char letter;
@@ -74,32 +74,32 @@ report_shared(struct Client *source_p)
   };
 
   dlink_node *node;
-  char buf[sizeof(flag_table) / sizeof(struct shared_flags)];
+  char buf[sizeof(flag_table) / sizeof(struct shared_types)];
 
   DLINK_FOREACH(node, shared_get_list()->head)
   {
-    struct SharedItem *conf = node->data;
+    const struct SharedItem *shared = node->data;
     char *p = buf;
 
     *p++ = 'c';
 
-    for (const struct shared_flags *shared = flag_table; shared->type; ++shared)
-      if (shared->type & conf->type)
-        *p++ = shared->letter;
+    for (const struct shared_types *tab = flag_table; tab->type; ++tab)
+      if (tab->type & shared->type)
+        *p++ = tab->letter;
       else
-        *p++ = ToLower(shared->letter);
+        *p++ = ToLower(tab->letter);
 
     *p = '\0';
 
-    sendto_one_numeric(source_p, &me, RPL_STATSULINE, conf->server,
-                       conf->user, conf->host, buf);
+    sendto_one_numeric(source_p, &me, RPL_STATSULINE, shared->server,
+                       shared->user, shared->host, buf);
   }
 }
 
 static void
 report_cluster(struct Client *source_p)
 {
-  static const struct cluster_flags
+  static const struct cluster_types
   {
     unsigned int type;
     unsigned char letter;
@@ -117,24 +117,24 @@ report_cluster(struct Client *source_p)
   };
 
   dlink_node *node;
-  char buf[sizeof(flag_table) / sizeof(struct cluster_flags)];
+  char buf[sizeof(flag_table) / sizeof(struct cluster_types)];
 
   DLINK_FOREACH(node, cluster_get_list()->head)
   {
-    struct ClusterItem *conf = node->data;
+    const struct ClusterItem *cluster = node->data;
     char *p = buf;
 
     *p++ = 'C';
 
-    for (const struct cluster_flags *cluster = flag_table; cluster->type; ++cluster)
-      if (cluster->type & conf->type)
-        *p++ = cluster->letter;
+    for (const struct cluster_types *tab = flag_table; tab->type; ++tab)
+      if (tab->type & cluster->type)
+        *p++ = tab->letter;
       else
-        *p++ = ToLower(cluster->letter);
+        *p++ = ToLower(tab->letter);
 
     *p = '\0';
 
-    sendto_one_numeric(source_p, &me, RPL_STATSULINE, conf->server,
+    sendto_one_numeric(source_p, &me, RPL_STATSULINE, cluster->server,
                        "*", "*", buf);
   }
 }

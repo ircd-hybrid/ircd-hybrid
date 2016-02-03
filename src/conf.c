@@ -1151,7 +1151,7 @@ clear_out_old_conf(void)
     }
   }
 
-  motd_clear();
+  motd_clear();  /* Clear motd {} items and re-cache default motd */
 
   /*
    * Don't delete the class table, rather mark all entries for deletion.
@@ -1161,8 +1161,9 @@ clear_out_old_conf(void)
 
   clear_out_address_conf();
 
-  /* Clean out module paths */
-  mod_clear_paths();
+  mod_clear_paths();  /* Clear modules {} items */
+
+  motd_clear();  /* Clear motd {} items and re-cache default motd */
 
   cluster_clear();  /* Clear cluster {} items */
 

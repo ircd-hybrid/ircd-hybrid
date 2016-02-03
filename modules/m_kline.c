@@ -30,6 +30,8 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "log.h"
@@ -216,8 +218,8 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "KLINE", CAPAB_KLN, SHARED_KLINE,
-                   "%ju %s %s :%s", duration, user, host, reason);
+    cluster_distribute(source_p, "KLINE", CAPAB_KLN, CLUSTER_KLINE,
+                       "%ju %s %s :%s", duration, user, host, reason);
 
   if (already_placed_kline(source_p, user, host))
     return 0;
@@ -287,9 +289,8 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
   reason = parv[5];
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_KLINE))
+      shared_find(SHARED_KLINE, source_p->servptr->name,
+                  source_p->username, source_p->host))
   {
     if (!valid_wild_card(source_p, 2, user, host))
       return 0;

@@ -29,6 +29,7 @@
 #include "ircd_defs.h"
 #include "conf.h"
 #include "conf_pseudo.h"
+#include "conf_shared.h"
 #include "server.h"
 #include "resv.h"
 #include "channel.h"
@@ -69,9 +70,7 @@ struct conf_parser_context conf_parser_ctx;
 /* general conf items link list root, other than k lines etc. */
 dlink_list service_items;
 dlink_list server_items;
-dlink_list cluster_items;
 dlink_list operator_items;
-dlink_list shared_items;
 dlink_list gecos_items;
 dlink_list nresv_items;
 dlink_list cresv_items;
@@ -139,9 +138,6 @@ map_to_list(enum maskitem_type type)
     case CONF_XLINE:
       return &gecos_items;
       break;
-    case CONF_SHARED:
-      return &shared_items;
-      break;
     case CONF_NRESV:
       return &nresv_items;
       break;
@@ -156,9 +152,6 @@ map_to_list(enum maskitem_type type)
       break;
     case CONF_SERVICE:
       return &service_items;
-      break;
-    case CONF_CLUSTER:
-      return &cluster_items;
       break;
     default:
       return NULL;
@@ -585,7 +578,6 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
     break;
 
   case CONF_XLINE:
-  case CONF_SHARED:
   case CONF_NRESV:
   case CONF_CRESV:
     DLINK_FOREACH(node, list->head)
@@ -646,7 +638,6 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
   switch(type)
   {
   case CONF_XLINE:
-  case CONF_SHARED:
   case CONF_NRESV:
   case CONF_CRESV:
 
@@ -1131,8 +1122,8 @@ clear_out_old_conf(void)
   dlink_node *node = NULL, *node_next = NULL;
   dlink_list *free_items [] = {
     &server_items,   &operator_items,
-     &shared_items,   &gecos_items,
-     &nresv_items, &cluster_items,  &service_items, &cresv_items, NULL
+     &gecos_items,
+     &nresv_items, &service_items, &cresv_items, NULL
   };
 
   dlink_list ** iterator = free_items; /* C is dumb */
@@ -1173,6 +1164,8 @@ clear_out_old_conf(void)
   mod_clear_paths();
 
   pseudo_clear();
+
+  shared_clear();  /* Clear shared {} items */
 
   /* Clean out ConfigServerInfo */
   xfree(ConfigServerInfo.description);
@@ -1742,40 +1735,6 @@ match_conf_password(const char *password, const struct MaskItem *conf)
     encr = password;
 
   return encr && !strcmp(encr, conf->passwd);
-}
-
-/*
- * cluster_a_line
- *
- * inputs	- client sending the cluster
- *		- command name "KLINE" "XLINE" etc.
- *		- capab -- CAPAB_KLN etc. from server.h
- *		- cluster type -- CLUSTER_KLINE etc. from conf.h
- *		- pattern and args to send along
- * output	- none
- * side effects	- Take source_p send the pattern with args given
- *		  along to all servers that match capab and cluster type
-*/
-void
-cluster_a_line(struct Client *source_p, const char *command, unsigned int capab,
-               unsigned int cluster_type, const char *pattern, ...)
-{
-  va_list args;
-  char buffer[IRCD_BUFSIZE] = "";
-  const dlink_node *node = NULL;
-
-  va_start(args, pattern);
-  vsnprintf(buffer, sizeof(buffer), pattern, args);
-  va_end(args);
-
-  DLINK_FOREACH(node, cluster_items.head)
-  {
-    const struct MaskItem *conf = node->data;
-
-    if (conf->flags & cluster_type)
-      sendto_match_servs(source_p, conf->name, CAPAB_CLUSTER | capab,
-                         "%s %s %s", command, conf->name, buffer);
-  }
 }
 
 /*

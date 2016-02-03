@@ -33,7 +33,9 @@
 #include "list.h"
 #include "conf.h"
 #include "conf_class.h"
+#include "conf_cluster.h"
 #include "conf_pseudo.h"
+#include "conf_shared.h"
 #include "event.h"
 #include "id.h"
 #include "log.h"
@@ -1819,16 +1821,14 @@ shared_entry: T_SHARED
   block_state.flags.value = SHARED_ALL;
 } '{' shared_items '}' ';'
 {
-  struct MaskItem *conf = NULL;
-
   if (conf_parser_ctx.pass != 2)
     break;
 
-  conf = conf_make(CONF_SHARED);
-  conf->modes = block_state.flags.value;
-  conf->name = xstrdup(block_state.name.buf);
-  conf->user = xstrdup(block_state.user.buf);
-  conf->host = xstrdup(block_state.host.buf);
+  struct SharedItem *shared = shared_make();
+  shared->type = block_state.flags.value;
+  shared->server = xstrdup(block_state.name.buf);
+  shared->user = xstrdup(block_state.user.buf);
+  shared->host = xstrdup(block_state.host.buf);
 };
 
 shared_items: shared_items shared_item | shared_item;
@@ -1920,17 +1920,15 @@ cluster_entry: T_CLUSTER
   reset_block_state();
 
   strlcpy(block_state.name.buf, "*", sizeof(block_state.name.buf));
-  block_state.flags.value = SHARED_ALL;
+  block_state.flags.value = CLUSTER_ALL;
 } '{' cluster_items '}' ';'
 {
-  struct MaskItem *conf = NULL;
-
   if (conf_parser_ctx.pass != 2)
     break;
 
-  conf = conf_make(CONF_CLUSTER);
-  conf->modes = block_state.flags.value;
-  conf->name = xstrdup(block_state.name.buf);
+  struct ClusterItem *cluster = cluster_make();
+  cluster->type = block_state.flags.value;
+  cluster->server = xstrdup(block_state.name.buf);
 };
 
 cluster_items:  cluster_items cluster_item | cluster_item;
@@ -1952,43 +1950,43 @@ cluster_types:  cluster_types ',' cluster_type_item | cluster_type_item;
 cluster_type_item: KLINE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_KLINE;
+    block_state.flags.value |= CLUSTER_KLINE;
 } | UNKLINE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_UNKLINE;
+    block_state.flags.value |= CLUSTER_UNKLINE;
 } | T_DLINE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_DLINE;
+    block_state.flags.value |= CLUSTER_DLINE;
 } | T_UNDLINE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_UNDLINE;
+    block_state.flags.value |= CLUSTER_UNDLINE;
 } | XLINE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_XLINE;
+    block_state.flags.value |= CLUSTER_XLINE;
 } | T_UNXLINE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_UNXLINE;
+    block_state.flags.value |= CLUSTER_UNXLINE;
 } | RESV
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_RESV;
+    block_state.flags.value |= CLUSTER_RESV;
 } | T_UNRESV
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_UNRESV;
+    block_state.flags.value |= CLUSTER_UNRESV;
 } | T_LOCOPS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= SHARED_LOCOPS;
+    block_state.flags.value |= CLUSTER_LOCOPS;
 } | T_ALL
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value = SHARED_ALL;
+    block_state.flags.value = CLUSTER_ALL;
 };
 
 

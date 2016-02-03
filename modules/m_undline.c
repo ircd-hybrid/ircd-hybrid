@@ -29,6 +29,8 @@
 #include "client.h"
 #include "irc_string.h"
 #include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "ircd.h"
 #include "hostmask.h"
 #include "numeric.h"
@@ -141,7 +143,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNDLINE", CAPAB_UNDLN, SHARED_UNDLINE, "%s", addr);
+    cluster_distribute(source_p, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s", addr);
 
   dline_remove_and_notify(source_p, addr);
   return 0;
@@ -174,9 +176,8 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_UNDLINE))
+      shared_find(SHARED_UNDLINE, source_p->servptr->name,
+                  source_p->username, source_p->host))
     dline_remove_and_notify(source_p, addr);
 
   return 0;

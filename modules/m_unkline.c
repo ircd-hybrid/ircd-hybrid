@@ -30,6 +30,8 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "log.h"
@@ -142,8 +144,8 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNKLINE", CAPAB_UNKLN, SHARED_UNKLINE,
-                   "%s %s", user, host);
+    cluster_distribute(source_p, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE,
+                       "%s %s", user, host);
 
   kline_remove_and_notify(source_p, user, host);
   return 0;
@@ -180,9 +182,8 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_UNKLINE))
+      shared_find(SHARED_UNKLINE, source_p->servptr->name,
+                  source_p->username, source_p->host))
     kline_remove_and_notify(source_p, user, host);
 
   return 0;

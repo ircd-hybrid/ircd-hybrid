@@ -32,6 +32,7 @@
 #include "numeric.h"
 #include "res.h"
 #include "conf.h"
+#include "conf_shared.h"
 #include "log.h"
 #include "send.h"
 #include "parse.h"
@@ -193,9 +194,8 @@ ms_rehash(struct Client *source_p, int parc, char *parv[])
   if (match(server, me.name))
     return 0;
 
-  if (!find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                               source_p->username, source_p->host,
-                               SHARED_REHASH))
+  if (!shared_find(SHARED_REHASH, source_p->servptr->name,
+                   source_p->username, source_p->host))
     return 0;
 
   for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)

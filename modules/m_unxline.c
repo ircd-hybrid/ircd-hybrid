@@ -30,6 +30,8 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "numeric.h"
 #include "log.h"
 #include "send.h"
@@ -124,7 +126,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNXLINE", CAPAB_CLUSTER, SHARED_UNXLINE, "%s", gecos);
+    cluster_distribute(source_p, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s", gecos);
 
   xline_remove_and_notify(source_p, gecos);
   return 0;
@@ -155,9 +157,8 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_UNXLINE))
+      shared_find(SHARED_UNXLINE, source_p->servptr->name,
+                  source_p->username, source_p->host))
     xline_remove_and_notify(source_p, parv[2]);
   return 0;
 }

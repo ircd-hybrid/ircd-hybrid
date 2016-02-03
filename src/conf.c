@@ -1215,7 +1215,7 @@ conf_handle_tls(int cold)
     if (cold)
     {
       ilog(LOG_TYPE_IRCD, "Error while initializing TLS");
-      exit(-1);
+      exit(EXIT_FAILURE);
     }
     else
     {

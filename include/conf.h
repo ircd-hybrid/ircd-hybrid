@@ -304,7 +304,6 @@ struct config_log_entry
 extern dlink_list flatten_links;
 extern dlink_list server_items;
 extern dlink_list gecos_items;
-extern dlink_list shared_items;
 extern dlink_list operator_items;
 extern dlink_list service_items;
 extern dlink_list nresv_items;

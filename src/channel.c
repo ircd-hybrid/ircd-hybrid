@@ -31,6 +31,7 @@
 #include "client.h"
 #include "hash.h"
 #include "conf.h"
+#include "conf_resv.h"
 #include "hostmask.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -41,7 +42,6 @@
 #include "memory.h"
 #include "mempool.h"
 #include "misc.h"
-#include "resv.h"
 
 
 dlink_list channel_list;

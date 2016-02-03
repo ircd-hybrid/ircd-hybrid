@@ -36,9 +36,9 @@
 #include "send.h"
 #include "server.h"
 #include "conf.h"
+#include "conf_resv.h"
 #include "parse.h"
 #include "modules.h"
-#include "resv.h"
 
 
 static void set_final_mode(const struct Mode *, const struct Mode *);

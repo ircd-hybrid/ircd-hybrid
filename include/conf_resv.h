@@ -19,13 +19,13 @@
  *  USA
  */
 
-/*! \file resv.h
+/*! \file conf_resv.h
  * \brief A header for the RESV functions.
  * \version $Id$
  */
 
-#ifndef INCLUDED_resv_h
-#define INCLUDED_resv_h
+#ifndef INCLUDED_conf_resv_h
+#define INCLUDED_conf_resv_h
 
 extern struct MaskItem *create_resv(const char *, const char *, const dlink_list *);
 extern int resv_find_exempt(const struct Client *, const struct MaskItem *);

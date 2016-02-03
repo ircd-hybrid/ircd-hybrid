@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file resv.c
+/*! \file conf_resv.c
  * \brief Functions to reserve(jupe) a nick/channel.
  * \version $Id$
  */
@@ -29,11 +29,11 @@
 #include "send.h"
 #include "client.h"
 #include "memory.h"
-#include "resv.h"
 #include "irc_string.h"
 #include "ircd_defs.h"
 #include "misc.h"
 #include "conf.h"
+#include "conf_resv.h"
 #include "hostmask.h"
 
 

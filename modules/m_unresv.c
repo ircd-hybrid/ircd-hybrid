@@ -31,6 +31,7 @@
 #include "ircd.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_resv.h"
 #include "conf_shared.h"
 #include "numeric.h"
 #include "log.h"
@@ -39,7 +40,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "memory.h"
-#include "resv.h"
 
 
 static void

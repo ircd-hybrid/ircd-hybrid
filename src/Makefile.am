@@ -18,6 +18,7 @@ ircd_SOURCES = auth.c            \
                conf_cluster.c    \
                conf_db.c         \
                conf_pseudo.c     \
+               conf_resv.c       \
                conf_shared.c     \
                conf_parser.y     \
                conf_lexer.l      \
@@ -55,7 +56,6 @@ ircd_SOURCES = auth.c            \
                res.c             \
                reslib.c          \
                restart.c         \
-               resv.c            \
                rng_mt.c          \
                s_bsd.c           \
                send.c            \

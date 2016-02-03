@@ -54,7 +54,7 @@ struct module_path
 extern dlink_list *modules_get_list(void);
 /* add a path */
 extern void mod_add_path(const char *);
-extern void mod_clear_paths(void);
+extern void modules_conf_clear(void);
 
 /* load all modules */
 extern void load_all_modules(int);

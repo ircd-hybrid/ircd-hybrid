@@ -1161,7 +1161,7 @@ clear_out_old_conf(void)
 
   clear_out_address_conf();
 
-  mod_clear_paths();  /* Clear modules {} items */
+  modules_conf_clear();  /* Clear modules {} items */
 
   motd_clear();  /* Clear motd {} items and re-cache default motd */
 

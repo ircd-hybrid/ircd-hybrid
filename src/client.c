@@ -181,11 +181,9 @@ client_attach_svstag(struct Client *client_p, unsigned int numeric,
 void
 client_clear_svstags(struct Client *client_p)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, client_p->svstags.head)
+  while (client_p->svstags.head)
   {
-    struct ServicesTag *svstag = node->data;
+    struct ServicesTag *svstag = client_p->svstags.head->data;
 
     dlinkDelete(&svstag->node, &client_p->svstags);
     xfree(svstag->tag);

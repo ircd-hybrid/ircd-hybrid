@@ -120,11 +120,9 @@ pseudo_register(const char *name, const char *nick,
 void
 pseudo_clear(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, pseudo_cmd_list.head)
+  while (pseudo_cmd_list.head)
   {
-    struct pseudo_cmd *cmd = node->data;
+    struct pseudo_cmd *cmd = pseudo_cmd_list.head->data;
     assert(find_command(cmd->msg.cmd));
 
     mod_del_cmd(&cmd->msg);

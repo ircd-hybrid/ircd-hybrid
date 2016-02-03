@@ -89,11 +89,9 @@ whowas_add_history(struct Client *client_p, const int online)
 void
 whowas_off_history(struct Client *client_p)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, client_p->whowas.head)
+  while (client_p->whowas.head)
   {
-    struct Whowas *whowas = node->data;
+    struct Whowas *whowas = client_p->whowas.head->data;
 
     whowas->online = NULL;
     dlinkDelete(&whowas->cnode, &client_p->whowas);

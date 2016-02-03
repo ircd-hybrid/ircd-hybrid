@@ -83,14 +83,12 @@ tls_init(void)
   SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
 
 #ifndef OPENSSL_NO_ECDH
-  {
-    EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+  EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 
-    if (key)
-    {
-      SSL_CTX_set_tmp_ecdh(ConfigServerInfo.tls_ctx.server_ctx, key);
-      EC_KEY_free(key);
-    }
+  if (key)
+  {
+    SSL_CTX_set_tmp_ecdh(ConfigServerInfo.tls_ctx.server_ctx, key);
+    EC_KEY_free(key);
   }
 
   SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_SINGLE_ECDH_USE);

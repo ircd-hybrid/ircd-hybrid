@@ -1,3 +1,8 @@
+-- Noteworthy changes in version 8.2.14 (2016-02-??)
+o) Fixed server clustering
+o) Various code cleanups
+
+
 -- Noteworthy changes in version 8.2.13 (2016-02-02)
 o) Implemented support for GnuTLS. Currently ./configure's autodetection
    intentionally prefers OpenSSL over GnuTLS, so OpenSSL detection needs

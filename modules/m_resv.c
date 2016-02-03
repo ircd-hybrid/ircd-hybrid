@@ -34,6 +34,8 @@
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "log.h"
 #include "resv.h"
 
@@ -143,8 +145,8 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "RESV", CAPAB_KLN, SHARED_RESV,
-                   "%ju %s :%s", duration, resv, reason);
+    cluster_distribute(source_p, "RESV", CAPAB_KLN, CLUSTER_RESV,
+                       "%ju %s :%s", duration, resv, reason);
 
   parse_resv(source_p, resv, duration, reason);
   return 0;
@@ -177,9 +179,8 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_RESV))
+      shared_find(SHARED_RESV, source_p->servptr->name,
+                  source_p->username, source_p->host))
     parse_resv(source_p, parv[3], atoi(parv[2]), parv[4]);
   return 0;
 }

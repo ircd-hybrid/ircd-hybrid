@@ -25,16 +25,20 @@
  */
 
 #include "stdinc.h"
+#include "list.h"
 #include "client.h"
-#include "ircd.h"
 #include "irc_string.h"
+#include "ircd.h"
+#include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "numeric.h"
-#include "server.h"
+#include "log.h"
 #include "send.h"
+#include "server.h"
 #include "parse.h"
 #include "modules.h"
-#include "conf.h"
-#include "log.h"
+#include "memory.h"
 #include "resv.h"
 
 
@@ -114,7 +118,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "UNRESV", CAPAB_KLN, SHARED_UNRESV, resv);
+    cluster_distribute(source_p, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, resv);
 
   resv_remove(source_p, resv);
   return 0;
@@ -145,9 +149,8 @@ ms_unresv(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_UNRESV))
+      shared_find(SHARED_UNRESV, source_p->servptr->name,
+                  source_p->username, source_p->host))
     resv_remove(source_p, parv[2]);
 
   return 0;

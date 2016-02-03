@@ -29,6 +29,8 @@
 #include "client.h"
 #include "irc_string.h"
 #include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "ircd.h"
 #include "hostmask.h"
 #include "numeric.h"
@@ -191,8 +193,8 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "DLINE", CAPAB_DLN, SHARED_DLINE,
-                   "%ju %s :%s", duration, dlhost, reason);
+    cluster_distribute(source_p, "DLINE", CAPAB_DLN, CLUSTER_DLINE,
+                       "%ju %s :%s", duration, dlhost, reason);
 
   if ((t = parse_netmask(dlhost, NULL, NULL)) == HM_HOST)
   {
@@ -291,9 +293,8 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   reason = parv[4];
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_DLINE))
+      shared_find(SHARED_DLINE, source_p->servptr->name,
+                  source_p->username, source_p->host))
   {
     switch (parse_netmask(dlhost, &daddr, &bits))
     {

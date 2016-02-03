@@ -76,38 +76,18 @@ enum
 #define SetConfDatabase(x)        ((x)->flags |= CONF_FLAGS_IN_DATABASE)
 
 
-/* shared/cluster server entry types
- * These defines are used for both shared and cluster.
- */
-enum
-{
-  SHARED_KLINE   = 0x00000001U,
-  SHARED_UNKLINE = 0x00000002U,
-  SHARED_XLINE   = 0x00000004U,
-  SHARED_UNXLINE = 0x00000008U,
-  SHARED_RESV    = 0x00000010U,
-  SHARED_UNRESV  = 0x00000020U,
-  SHARED_LOCOPS  = 0x00000040U,
-  SHARED_DLINE   = 0x00000080U,
-  SHARED_UNDLINE = 0x00000100U,
-  SHARED_REHASH  = 0x00000200U,
-  SHARED_ALL     = 0xFFFFFFFFU
-};
-
 enum maskitem_type
 {
-  CONF_CLIENT  = 1 <<  0,
-  CONF_SERVER  = 1 <<  1,
-  CONF_KLINE   = 1 <<  2,
-  CONF_DLINE   = 1 <<  3,
-  CONF_EXEMPT  = 1 <<  4,
-  CONF_CLUSTER = 1 <<  5,
-  CONF_XLINE   = 1 <<  6,
-  CONF_SHARED  = 1 <<  7,
-  CONF_CRESV   = 1 <<  8,
-  CONF_NRESV   = 1 <<  9,
-  CONF_SERVICE = 1 << 10,
-  CONF_OPER    = 1 << 11
+  CONF_CLIENT  = 1 << 0,
+  CONF_SERVER  = 1 << 1,
+  CONF_KLINE   = 1 << 2,
+  CONF_DLINE   = 1 << 3,
+  CONF_EXEMPT  = 1 << 4,
+  CONF_XLINE   = 1 << 5,
+  CONF_CRESV   = 1 << 6,
+  CONF_NRESV   = 1 << 7,
+  CONF_SERVICE = 1 << 8,
+  CONF_OPER    = 1 << 9
 };
 
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)
@@ -323,7 +303,6 @@ struct config_log_entry
 
 extern dlink_list flatten_links;
 extern dlink_list server_items;
-extern dlink_list cluster_items;
 extern dlink_list gecos_items;
 extern dlink_list shared_items;
 extern dlink_list operator_items;

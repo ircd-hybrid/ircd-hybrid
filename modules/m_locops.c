@@ -31,6 +31,8 @@
 #include "numeric.h"
 #include "send.h"
 #include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "server.h"
 #include "parse.h"
 #include "modules.h"
@@ -66,7 +68,7 @@ mo_locops(struct Client *source_p, int parc, char *parv[])
 
   sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
                        source_p->name, message);
-  cluster_a_line(source_p, "LOCOPS", 0, SHARED_LOCOPS, message);
+  cluster_distribute(source_p, "LOCOPS", 0, CLUSTER_LOCOPS, message);
   return 0;
 }
 
@@ -97,8 +99,7 @@ ms_locops(struct Client *source_p, int parc, char *parv[])
   if (match(targets, me.name))
     return 0;
 
-  if (find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              "*", "*", SHARED_LOCOPS))
+  if (shared_find(SHARED_LOCOPS, source_p->servptr->name, "*", "*"))
     sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
                          source_p->name, message);
   return 0;

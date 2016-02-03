@@ -30,6 +30,8 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "conf.h"
+#include "conf_cluster.h"
+#include "conf_shared.h"
 #include "numeric.h"
 #include "log.h"
 #include "misc.h"
@@ -138,9 +140,9 @@ relay_xline(struct Client *source_p, char *parv[])
 {
   struct MaskItem *conf = NULL;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) || find_matching_name_conf(CONF_SHARED, source_p->servptr->name,
-                              source_p->username, source_p->host,
-                              SHARED_XLINE))
+  if (HasFlag(source_p, FLAGS_SERVICE) ||
+      shared_find(SHARED_XLINE, source_p->servptr->name,
+                  source_p->username, source_p->host))
   {
     if ((conf = find_matching_name_conf(CONF_XLINE, parv[2], NULL, NULL, 0)))
     {
@@ -193,8 +195,8 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
       return 0;
   }
   else
-    cluster_a_line(source_p, "XLINE", CAPAB_CLUSTER, SHARED_XLINE, "%s %ju :%s",
-                   gecos, duration, reason);
+    cluster_distribute(source_p, "XLINE", CAPAB_CLUSTER, CLUSTER_XLINE, "%s %ju :%s",
+                       gecos, duration, reason);
 
   if (!valid_xline(source_p, gecos))
     return 0;

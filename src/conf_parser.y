@@ -35,6 +35,7 @@
 #include "conf_class.h"
 #include "conf_cluster.h"
 #include "conf_pseudo.h"
+#include "conf_resv.h"
 #include "conf_shared.h"
 #include "event.h"
 #include "id.h"
@@ -45,7 +46,6 @@
 #include "server.h"
 #include "hostmask.h"
 #include "listener.h"
-#include "resv.h"
 #include "user.h"
 #include "motd.h"
 

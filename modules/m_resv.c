@@ -35,9 +35,9 @@
 #include "modules.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_resv.h"
 #include "conf_shared.h"
 #include "log.h"
-#include "resv.h"
 
 
 /* parse_resv()

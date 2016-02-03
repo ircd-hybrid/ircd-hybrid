@@ -27,14 +27,14 @@
 
 
 #include "stdinc.h"
+#include "conf.h"
 #include "conf_db.h"
+#include "conf_resv.h"
 #include "memory.h"
 #include "log.h"
 #include "send.h"
 #include "irc_string.h"
-#include "conf.h"
 #include "hostmask.h"
-#include "resv.h"
 
 
 /*! \brief Return the version number on the file.  Return 0 if there is no version

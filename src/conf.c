@@ -28,6 +28,7 @@
 #include "list.h"
 #include "ircd_defs.h"
 #include "conf.h"
+#include "conf_cluster.h"
 #include "conf_pseudo.h"
 #include "conf_shared.h"
 #include "server.h"
@@ -1163,9 +1164,11 @@ clear_out_old_conf(void)
   /* Clean out module paths */
   mod_clear_paths();
 
-  pseudo_clear();
+  cluster_clear();  /* Clear cluster {} items */
 
   shared_clear();  /* Clear shared {} items */
+
+  pseudo_clear();  /* Clear pseudo {} items */
 
   /* Clean out ConfigServerInfo */
   xfree(ConfigServerInfo.description);

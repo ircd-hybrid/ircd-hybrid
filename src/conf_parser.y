@@ -36,6 +36,7 @@
 #include "conf_cluster.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
+#include "conf_service.h"
 #include "conf_shared.h"
 #include "event.h"
 #include "id.h"
@@ -1799,8 +1800,8 @@ service_name: NAME '=' QSTRING ';'
 
   if (valid_servname(yylval.string))
   {
-    struct MaskItem *conf = conf_make(CONF_SERVICE);
-    conf->name = xstrdup(yylval.string);
+    struct ServiceItem *service = service_make();
+    service->name = xstrdup(yylval.string);
   }
 };
 

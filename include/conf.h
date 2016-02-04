@@ -86,8 +86,7 @@ enum maskitem_type
   CONF_XLINE   = 1 << 5,
   CONF_CRESV   = 1 << 6,
   CONF_NRESV   = 1 << 7,
-  CONF_SERVICE = 1 << 8,
-  CONF_OPER    = 1 << 9
+  CONF_OPER    = 1 << 8
 };
 
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)
@@ -305,7 +304,6 @@ extern dlink_list flatten_links;
 extern dlink_list server_items;
 extern dlink_list gecos_items;
 extern dlink_list operator_items;
-extern dlink_list service_items;
 extern dlink_list nresv_items;
 extern dlink_list cresv_items;
 extern struct conf_parser_context conf_parser_ctx;

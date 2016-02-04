@@ -34,6 +34,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"
+#include "conf_service.h"
 #include "log.h"
 #include "misc.h"
 #include "server.h"
@@ -338,7 +339,7 @@ server_estab(struct Client *client_p)
   /* Fixing eob timings.. -gnp */
   client_p->connection->firsttime = CurrentTime;
 
-  if (find_matching_name_conf(CONF_SERVICE, client_p->name, NULL, NULL, 0))
+  if (service_find(client_p->name))
     AddFlag(client_p, FLAGS_SERVICE);
 
   /* Show the real host/IP to admins */
@@ -809,7 +810,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   SetServer(target_p);
 
-  if (find_matching_name_conf(CONF_SERVICE, target_p->name, NULL, NULL, 0))
+  if (service_find(target_p->name))
     AddFlag(target_p, FLAGS_SERVICE);
 
   dlinkAdd(target_p, &target_p->node, &global_client_list);

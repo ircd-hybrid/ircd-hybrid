@@ -34,6 +34,7 @@
 #include "conf_class.h"
 #include "conf_cluster.h"
 #include "conf_resv.h"
+#include "conf_service.h"
 #include "conf_shared.h"
 #include "hostmask.h"
 #include "numeric.h"
@@ -139,6 +140,18 @@ report_cluster(struct Client *source_p)
   }
 }
 
+static void
+report_service(struct Client *source_p)
+{
+  dlink_node *node;
+
+  DLINK_FOREACH(node, service_get_list()->head)
+  {
+    const struct ServiceItem *service = node->data;
+    sendto_one_numeric(source_p, &me, RPL_STATSSERVICE, 'S', "*", service->name, 0, 0);
+  }
+}
+
 /*
  * inputs	- pointer to client requesting confitem report
  *		- ConfType to report
@@ -179,15 +192,6 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
         else
           sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
                              conf->name, "0", conf->class->name);
-      }
-
-      break;
-
-    case CONF_SERVICE:
-      DLINK_FOREACH(node, service_items.head)
-      {
-        conf = node->data;
-        sendto_one_numeric(source_p, &me, RPL_STATSSERVICE, 'S', "*", conf->name, 0, 0);
       }
 
       break;
@@ -1059,7 +1063,7 @@ stats_resv(struct Client *source_p, int parc, char *parv[])
 static void
 stats_service(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, CONF_SERVICE);
+  report_service(source_p);
 }
 
 static void

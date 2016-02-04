@@ -31,6 +31,7 @@
 #include "conf_cluster.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
+#include "conf_service.h"
 #include "conf_shared.h"
 #include "server.h"
 #include "channel.h"
@@ -69,7 +70,6 @@ struct config_admin_entry ConfigAdminInfo;
 struct conf_parser_context conf_parser_ctx;
 
 /* general conf items link list root, other than k lines etc. */
-dlink_list service_items;
 dlink_list server_items;
 dlink_list operator_items;
 dlink_list gecos_items;
@@ -150,9 +150,6 @@ map_to_list(enum maskitem_type type)
       break;
     case CONF_SERVER:
       return &server_items;
-      break;
-    case CONF_SERVICE:
-      return &service_items;
       break;
     default:
       return NULL;
@@ -566,18 +563,6 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
 
   switch (type)
   {
-  case CONF_SERVICE:
-    DLINK_FOREACH(node, list->head)
-    {
-      conf = node->data;
-
-      if (EmptyString(conf->name))
-        continue;
-      if (name && !irccmp(name, conf->name))
-        return conf;
-    }
-    break;
-
   case CONF_XLINE:
   case CONF_NRESV:
   case CONF_CRESV:
@@ -1124,7 +1109,7 @@ clear_out_old_conf(void)
   dlink_list *free_items [] = {
     &server_items,   &operator_items,
      &gecos_items,
-     &nresv_items, &service_items, &cresv_items, NULL
+     &nresv_items, &cresv_items, NULL
   };
 
   dlink_list ** iterator = free_items; /* C is dumb */
@@ -1166,6 +1151,8 @@ clear_out_old_conf(void)
   motd_clear();  /* Clear motd {} items and re-cache default motd */
 
   cluster_clear();  /* Clear cluster {} items */
+
+  service_clear();  /* Clear service {} items */
 
   shared_clear();  /* Clear shared {} items */
 

@@ -123,22 +123,23 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	channel_mode.$(OBJEXT) client.$(OBJEXT) conf.$(OBJEXT) \
 	conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) conf_db.$(OBJEXT) \
 	conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
-	conf_shared.$(OBJEXT) conf_parser.$(OBJEXT) \
-	conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) event.$(OBJEXT) \
-	fdlist.$(OBJEXT) getopt.$(OBJEXT) hash.$(OBJEXT) \
-	hostmask.$(OBJEXT) id.$(OBJEXT) ipcache.$(OBJEXT) \
-	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
-	isupport.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
-	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) \
-	mempool.$(OBJEXT) misc.$(OBJEXT) modules.$(OBJEXT) \
-	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
-	parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
-	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
-	tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) tls_openssl.$(OBJEXT) \
-	res.$(OBJEXT) reslib.$(OBJEXT) restart.$(OBJEXT) \
-	rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) \
-	server.$(OBJEXT) user.$(OBJEXT) userhost.$(OBJEXT) \
-	version.$(OBJEXT) watch.$(OBJEXT) whowas.$(OBJEXT)
+	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
+	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) \
+	event.$(OBJEXT) fdlist.$(OBJEXT) getopt.$(OBJEXT) \
+	hash.$(OBJEXT) hostmask.$(OBJEXT) id.$(OBJEXT) \
+	ipcache.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) list.$(OBJEXT) \
+	listener.$(OBJEXT) log.$(OBJEXT) match.$(OBJEXT) \
+	memory.$(OBJEXT) mempool.$(OBJEXT) misc.$(OBJEXT) \
+	modules.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
+	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
+	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
+	tls_openssl.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
+	restart.$(OBJEXT) rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) \
+	send.$(OBJEXT) server.$(OBJEXT) user.$(OBJEXT) \
+	userhost.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -388,6 +389,7 @@ ircd_SOURCES = auth.c            \
                conf_db.c         \
                conf_pseudo.c     \
                conf_resv.c       \
+               conf_service.c    \
                conf_shared.c     \
                conf_parser.y     \
                conf_lexer.l      \
@@ -543,6 +545,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_pseudo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_resv.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_shared.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbuf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@

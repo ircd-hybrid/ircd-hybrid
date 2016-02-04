@@ -27,7 +27,6 @@
 #ifndef INCLUDED_conf_cluster_h
 #define INCLUDED_conf_cluster_h
 #include "stdinc.h"
-#include "client.h"
 
 enum
 {

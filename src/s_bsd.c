@@ -306,7 +306,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   client_p->connection->listener = listener;
   ++listener->ref_count;
 
-  if (tls_is_initialized() && (listener->flags & LISTENER_SSL))
+  if (listener->flags & LISTENER_SSL)
   {
     if (!tls_new(&client_p->connection->fd.ssl, fd, TLS_ROLE_SERVER))
     {

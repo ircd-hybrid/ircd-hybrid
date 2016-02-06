@@ -383,15 +383,14 @@ motd_add(const char *mask, const char *path)
 void
 motd_clear(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
   motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
   motd_decache(MotdList.remote);
 
-  DLINK_FOREACH_SAFE(node, node_next, MotdList.other.head)  /* Destroy other MOTDs */
+  while (MotdList.other.head)  /* Destroy other MOTDs */
   {
-    dlinkDelete(node, &MotdList.other);
-    motd_destroy(node->data);
+    struct Motd *motd = MotdList.other.head->data;
+    dlinkDelete(&motd->node, &MotdList.other);
+    motd_destroy(motd);
   }
 
   /* Now recache local and remote MOTDs */

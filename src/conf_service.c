@@ -48,6 +48,7 @@ service_clear(void)
     struct ServiceItem *service = service_list.head->data;
 
     dlinkDelete(&service->node, &service_list);
+    xfree(service->name);
     xfree(service);
   }
 }

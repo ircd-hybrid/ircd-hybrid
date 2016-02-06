@@ -62,7 +62,8 @@
 
 
 #ifdef HAVE_LIBGEOIP
-GeoIP *geoip_ctx;
+GeoIP *GeoIPv4_ctx;
+GeoIP *GeoIPv6_ctx;
 #endif
 
 struct SetOptions GlobalSetOptions;  /* /quote set variables */
@@ -448,9 +449,6 @@ main(int argc, char *argv[])
   read_links_file();
   motd_init();
   user_modes_init();
-#ifdef HAVE_LIBGEOIP
-  geoip_ctx = GeoIP_new(GEOIP_MEMORY_CACHE);
-#endif
 
   if (EmptyString(ConfigServerInfo.name))
   {

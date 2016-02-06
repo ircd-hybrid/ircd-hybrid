@@ -747,6 +747,7 @@ set_default_conf(void)
   ConfigServerInfo.max_nick_length = 9;
   ConfigServerInfo.max_topic_length = 80;
   ConfigServerInfo.hub = 0;
+  ConfigServerInfo.libgeoip_database_options = 0;
 
   log_del_all();
 
@@ -1158,6 +1159,13 @@ clear_out_old_conf(void)
 
   pseudo_clear();  /* Clear pseudo {} items */
 
+#ifdef HAVE_LIBGEOIP
+  GeoIP_delete(GeoIPv4_ctx);
+  GeoIPv4_ctx = NULL;
+  GeoIP_delete(GeoIPv6_ctx);
+  GeoIPv6_ctx = NULL;
+#endif
+
   /* Clean out ConfigServerInfo */
   xfree(ConfigServerInfo.description);
   ConfigServerInfo.description = NULL;
@@ -1165,7 +1173,10 @@ clear_out_old_conf(void)
   ConfigServerInfo.network_name = NULL;
   xfree(ConfigServerInfo.network_desc);
   ConfigServerInfo.network_desc = NULL;
-
+  xfree(ConfigServerInfo.libgeoip_ipv6_database_file);
+  ConfigServerInfo.libgeoip_ipv6_database_file = NULL;
+  xfree(ConfigServerInfo.libgeoip_ipv4_database_file);
+  ConfigServerInfo.libgeoip_ipv4_database_file = NULL;
   xfree(ConfigServerInfo.rsa_private_key_file);
   ConfigServerInfo.rsa_private_key_file = NULL;
   xfree(ConfigServerInfo.ssl_certificate_file);

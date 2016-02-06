@@ -31,6 +31,12 @@
 
 #ifndef HAVE_TLS
 
+int
+tls_is_initialized(void)
+{
+  return 0;
+}
+
 void
 tls_init(void)
 {

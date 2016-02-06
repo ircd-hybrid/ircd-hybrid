@@ -754,7 +754,6 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   return 1;
 }
 
-#ifdef HAVE_TLS
 static void
 finish_ssl_server_handshake(struct Client *client_p)
 {
@@ -859,7 +858,6 @@ ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *fd
 
   ssl_server_handshake(NULL, client_p);
 }
-#endif
 
 /* serv_connect_callback() - complete a server connection.
  *
@@ -920,13 +918,11 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   /* Next, send the initial handshake */
   SetHandshake(client_p);
 
-#ifdef HAVE_TLS
-  if (IsConfSSL(conf))
+  if (tls_is_initialized() && IsConfSSL(conf))
   {
     ssl_connect_init(client_p, conf, fd);
     return;
   }
-#endif
 
   sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
 

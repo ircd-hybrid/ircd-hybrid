@@ -35,6 +35,14 @@
 
 #ifdef HAVE_TLS_GNUTLS
 
+static int TLS_initialized;
+
+int
+tls_is_initialized(void)
+{
+  return TLS_initialized;
+}
+
 void
 tls_init(void)
 {
@@ -58,8 +66,10 @@ tls_new_cred(void)
   int ret;
   struct gnutls_context *context;
 
+  TLS_initialized = 0;
+
   if (!ConfigServerInfo.ssl_certificate_file || !ConfigServerInfo.rsa_private_key_file)
-    return 0;
+    return 1;
 
   context = xcalloc(sizeof(*context));
 
@@ -130,6 +140,7 @@ tls_new_cred(void)
   ConfigServerInfo.tls_ctx = context;
   ++context->refs;
 
+  TLS_initialized = 1;
   return 1;
 }
 

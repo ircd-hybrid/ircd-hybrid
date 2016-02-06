@@ -35,6 +35,8 @@
 
 #ifdef HAVE_TLS_OPENSSL
 
+static int TLS_initialized;
+
 /*
  * report_crypto_errors - Dump crypto error list to log
  */
@@ -51,6 +53,12 @@ static int
 always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
 {
   return 1;
+}
+
+int
+tls_is_initialized(void)
+{
+  return TLS_initialized;
 }
 
 /* tls_init()
@@ -114,6 +122,8 @@ tls_init(void)
 int
 tls_new_cred(void)
 {
+  TLS_initialized = 0;
+
   if (!ConfigServerInfo.ssl_certificate_file || !ConfigServerInfo.rsa_private_key_file)
     return 1;
 
@@ -209,6 +219,7 @@ set_default_curve:
   if (ConfigServerInfo.ssl_cipher_list)
     SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_cipher_list);
 
+  TLS_initialized = 1;
   return 1;
 }
 

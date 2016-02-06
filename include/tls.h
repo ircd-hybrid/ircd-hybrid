@@ -51,6 +51,7 @@ typedef enum _tls_handshake_status
   TLS_HANDSHAKE_ERROR
 } tls_handshake_status_t;
 
+extern int tls_is_initialized(void);
 extern void tls_init(void);
 extern int tls_new_cred(void);
 

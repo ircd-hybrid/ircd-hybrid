@@ -409,9 +409,7 @@ main(int argc, char *argv[])
   if (!server_state.foreground)
   {
     make_daemon();
-    //https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=768841 says close_standard_fds should be ok
-    //since we are initing gnutls explicitly on the other side, but it doesn't work for me
-    //close_standard_fds(); /* this needs to be before init_netio()! */
+    close_standard_fds(); /* this needs to be before init_netio()! */
   }
   else
     print_startup(getpid());

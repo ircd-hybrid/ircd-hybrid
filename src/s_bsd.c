@@ -193,10 +193,8 @@ close_connection(struct Client *client_p)
   else
     ++ServerStats.is_ni;
 
-#ifdef HAVE_TLS
   if (tls_isusing(&client_p->connection->fd.ssl))
     tls_shutdown(&client_p->connection->fd.ssl);
-#endif
 
   if (client_p->connection->fd.flags.open)
     fd_close(&client_p->connection->fd);
@@ -210,7 +208,6 @@ close_connection(struct Client *client_p)
   detach_conf(client_p, CONF_CLIENT | CONF_OPER | CONF_SERVER);
 }
 
-#ifdef HAVE_TLS
 /*
  * ssl_handshake - let OpenSSL initialize the protocol. Register for
  * read/write events if necessary.
@@ -253,7 +250,6 @@ ssl_handshake(fde_t *fd, void *data)
 
   start_auth(client_p);
 }
-#endif
 
 /*
  * add_connection - creates a client which has just connected to us on
@@ -310,8 +306,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   client_p->connection->listener = listener;
   ++listener->ref_count;
 
-#ifdef HAVE_TLS
-  if (listener->flags & LISTENER_SSL)
+  if (tls_is_initialized() && (listener->flags & LISTENER_SSL))
   {
     if (!tls_new(&client_p->connection->fd.ssl, fd, TLS_ROLE_SERVER))
     {
@@ -324,7 +319,6 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
     ssl_handshake(NULL, client_p);
   }
   else
-#endif
     start_auth(client_p);
 }
 

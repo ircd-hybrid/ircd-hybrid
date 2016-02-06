@@ -270,6 +270,8 @@ struct config_serverinfo_entry
   char *description;
   char *network_name;
   char *network_desc;
+  char *libgeoip_ipv4_database_file;
+  char *libgeoip_ipv6_database_file;
   char *rsa_private_key_file;
   char *ssl_certificate_file;
   char *ssl_dh_param_file;
@@ -282,6 +284,7 @@ struct config_serverinfo_entry
   unsigned int default_max_clients;
   unsigned int max_nick_length;
   unsigned int max_topic_length;
+  unsigned int libgeoip_database_options;
   unsigned int specific_ipv4_vhost;
   unsigned int specific_ipv6_vhost;
   struct irc_ssaddr ip;

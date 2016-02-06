@@ -142,6 +142,7 @@ callerid                    { return T_CALLERID; }
 can_flood                   { return CAN_FLOOD; }
 cconn                       { return T_CCONN; }
 channel                     { return CHANNEL; }
+check_cache                 { return CHECK_CACHE; }
 cidr_bitlen_ipv4            { return CIDR_BITLEN_IPV4; }
 cidr_bitlen_ipv6            { return CIDR_BITLEN_IPV6; }
 class                       { return CLASS; }
@@ -215,6 +216,9 @@ knock_client_count          { return KNOCK_CLIENT_COUNT; }
 knock_client_time           { return KNOCK_CLIENT_TIME; }
 knock_delay_channel         { return KNOCK_DELAY_CHANNEL; }
 leaf_mask                   { return LEAF_MASK; }
+libgeoip_database_options   { return LIBGEOIP_DATABASE_OPTIONS; }
+libgeoip_ipv4_database_file { return LIBGEOIP_IPV4_DATABASE_FILE; }
+libgeoip_ipv6_database_file { return LIBGEOIP_IPV6_DATABASE_FILE; }
 listen                      { return LISTEN; }
 locops                      { return T_LOCOPS; }
 log                         { return T_LOG; }
@@ -234,9 +238,11 @@ max_number                  { return MAX_NUMBER; }
 max_targets                 { return MAX_TARGETS; }
 max_topic_length            { return MAX_TOPIC_LENGTH; }
 max_watch                   { return MAX_WATCH; }
+memory_cache                { return MEMORY_CACHE; }
 min_idle                    { return MIN_IDLE; }
 min_nonwildcard             { return MIN_NONWILDCARD; }
 min_nonwildcard_simple      { return MIN_NONWILDCARD_SIMPLE; }
+mmap_cache                  { return MMAP_CACHE; }
 module                      { return MODULE; }
 modules                     { return MODULES; }
 motd                        { return MOTD; }
@@ -308,6 +314,7 @@ ssl_connection_required     { return SSL_CONNECTION_REQUIRED; }
 ssl_dh_elliptic_curve       { return SSL_DH_ELLIPTIC_CURVE; }
 ssl_dh_param_file           { return SSL_DH_PARAM_FILE; }
 ssl_message_digest_algorithm { return SSL_MESSAGE_DIGEST_ALGORITHM; }
+standard                    { return STANDARD; }
 stats_e_disabled            { return STATS_E_DISABLED; }
 stats_i_oper_only           { return STATS_I_OPER_ONLY; }
 stats_k_oper_only           { return STATS_K_OPER_ONLY; }

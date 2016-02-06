@@ -155,6 +155,7 @@ reset_block_state(void)
 %token  CALLER_ID_WAIT
 %token  CAN_FLOOD
 %token  CHANNEL
+%token  CHECK_CACHE
 %token  CIDR_BITLEN_IPV4
 %token  CIDR_BITLEN_IPV6
 %token  CLASS
@@ -216,6 +217,9 @@ reset_block_state(void)
 %token  KNOCK_CLIENT_TIME
 %token  KNOCK_DELAY_CHANNEL
 %token  LEAF_MASK
+%token  LIBGEOIP_DATABASE_OPTIONS
+%token  LIBGEOIP_IPV4_DATABASE_FILE
+%token  LIBGEOIP_IPV6_DATABASE_FILE
 %token  LISTEN
 %token  MASK
 %token  MAX_ACCEPT
@@ -232,9 +236,11 @@ reset_block_state(void)
 %token  MAX_TARGETS
 %token  MAX_TOPIC_LENGTH
 %token  MAX_WATCH
+%token  MEMORY_CACHE
 %token  MIN_IDLE
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
+%token  MMAP_CACHE
 %token  MODULE
 %token  MODULES
 %token  MOTD
@@ -286,6 +292,7 @@ reset_block_state(void)
 %token  SSL_DH_ELLIPTIC_CURVE
 %token  SSL_DH_PARAM_FILE
 %token  SSL_MESSAGE_DIGEST_ALGORITHM
+%token  STANDARD
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
 %token  STATS_K_OPER_ONLY
@@ -462,6 +469,9 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_ssl_certificate_file |
                         serverinfo_ssl_cipher_list |
                         serverinfo_ssl_message_digest_algorithm |
+                        serverinfo_libgeoip_database_options |
+                        serverinfo_libgeoip_ipv4_database_file |
+                        serverinfo_libgeoip_ipv6_database_file |
                         error ';' ;
 
 
@@ -516,6 +526,69 @@ serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
   {
     xfree(ConfigServerInfo.ssl_dh_elliptic_curve);
     ConfigServerInfo.ssl_dh_elliptic_curve = xstrdup(yylval.string);
+  }
+};
+
+serverinfo_libgeoip_database_options: LIBGEOIP_DATABASE_OPTIONS
+{
+  if (conf_parser_ctx.pass == 1)
+    ConfigServerInfo.libgeoip_database_options = 0;
+} '='  options_items ';';
+
+options_items: options_items ',' options_item | options_item;
+options_item: STANDARD
+{
+#ifdef HAVE_LIBGEOIP
+  if (conf_parser_ctx.pass == 1)
+    ConfigServerInfo.libgeoip_database_options |= GEOIP_STANDARD;
+#endif
+} | MEMORY_CACHE
+{
+#ifdef HAVE_LIBGEOIP
+  if (conf_parser_ctx.pass == 1)
+    ConfigServerInfo.libgeoip_database_options |= GEOIP_MEMORY_CACHE;
+#endif
+} | MMAP_CACHE
+{
+#ifdef HAVE_LIBGEOIP
+  if (conf_parser_ctx.pass == 1)
+    ConfigServerInfo.libgeoip_database_options |= GEOIP_MMAP_CACHE;
+#endif
+} | CHECK_CACHE
+{
+#ifdef HAVE_LIBGEOIP
+  if (conf_parser_ctx.pass == 1)
+    ConfigServerInfo.libgeoip_database_options |= GEOIP_CHECK_CACHE;
+#endif
+};
+
+serverinfo_libgeoip_ipv4_database_file:  LIBGEOIP_IPV4_DATABASE_FILE '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+  {
+    xfree(ConfigServerInfo.libgeoip_ipv4_database_file);
+    ConfigServerInfo.libgeoip_ipv4_database_file = xstrdup(yylval.string);
+
+#ifdef HAVE_LIBGEOIP
+    if (GeoIPv4_ctx)
+      GeoIP_delete(GeoIPv4_ctx);
+    GeoIPv4_ctx = GeoIP_open(yylval.string, ConfigServerInfo.libgeoip_database_options);
+#endif
+  }
+};
+
+serverinfo_libgeoip_ipv6_database_file:  LIBGEOIP_IPV6_DATABASE_FILE '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+  {
+    xfree(ConfigServerInfo.libgeoip_ipv6_database_file);
+    ConfigServerInfo.libgeoip_ipv6_database_file = xstrdup(yylval.string);
+
+#ifdef HAVE_LIBGEOIP
+    if (GeoIPv6_ctx)
+      GeoIP_delete(GeoIPv6_ctx);
+    GeoIPv6_ctx = GeoIP_open(yylval.string, ConfigServerInfo.libgeoip_database_options);
+#endif
   }
 };
 

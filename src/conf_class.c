@@ -329,12 +329,11 @@ rebuild_cidr_list(struct ClassItem *class)
 static void
 destroy_cidr_list(dlink_list *list)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
+  while (list->head)
   {
-    dlinkDelete(node, list);
-    xfree(node->data);
+    struct CidrItem *cidr = list->head->data;
+    dlinkDelete(&cidr->node, list);
+    xfree(cidr);
   }
 }
 

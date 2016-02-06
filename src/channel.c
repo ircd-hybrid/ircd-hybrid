@@ -320,10 +320,11 @@ remove_ban(struct Ban *ban, dlink_list *list)
 static void
 channel_free_mask_list(dlink_list *list)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
-    remove_ban(node->data, list);
+  while (list->head)
+  {
+    struct Ban *ban = list->head->data;
+    remove_ban(ban, list);
+  }
 }
 
 /*! \brief Get Channel block for name (and allocate a new channel
@@ -894,23 +895,21 @@ channel_set_topic(struct Channel *chptr, const char *topic,
 void
 channel_do_join_0(struct Client *client_p)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
   if (client_p->channel.head)
     if (MyConnect(client_p) && !HasUMode(client_p, UMODE_OPER))
       check_spambot_warning(client_p, NULL);
 
-  DLINK_FOREACH_SAFE(node, node_next, client_p->channel.head)
+  while (client_p->channel.head)
   {
-    struct Channel *chptr = ((struct Membership *)node->data)->chptr;
+    struct Membership *member = client_p->channel.head->data;
 
     sendto_server(client_p, 0, 0, ":%s PART %s",
-                  client_p->id, chptr->name);
-    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s PART %s",
+                  client_p->id, member->chptr->name);
+    sendto_channel_local(NULL, member->chptr, 0, 0, 0, ":%s!%s@%s PART %s",
                          client_p->name, client_p->username,
-                         client_p->host, chptr->name);
+                         client_p->host, member->chptr->name);
 
-    remove_user_from_channel(node->data);
+    remove_user_from_channel(member);
   }
 }
 

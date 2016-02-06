@@ -88,6 +88,12 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   return 0;
 }
 
+tls_handshake_status_t
+tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
+{
+  return 0;
+}
+
 int
 tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 {

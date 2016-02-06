@@ -227,6 +227,9 @@ tls_shutdown(tls_data_t *tls_data)
 int
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
+  if (!TLS_initialized)
+    return 0;
+
   gnutls_init(&tls_data->session, role == TLS_ROLE_SERVER ? GNUTLS_SERVER : GNUTLS_CLIENT);
 
   tls_data->context = ConfigServerInfo.tls_ctx;

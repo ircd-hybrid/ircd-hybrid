@@ -331,6 +331,9 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
   SSL *ssl;
 
+  if (!TLS_initialized)
+    return 0;
+
   if (role == TLS_ROLE_SERVER)
     ssl = SSL_new(ConfigServerInfo.tls_ctx.server_ctx);
   else

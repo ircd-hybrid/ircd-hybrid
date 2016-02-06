@@ -918,7 +918,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   /* Next, send the initial handshake */
   SetHandshake(client_p);
 
-  if (tls_is_initialized() && IsConfSSL(conf))
+  if (IsConfSSL(conf))
   {
     ssl_connect_init(client_p, conf, fd);
     return;

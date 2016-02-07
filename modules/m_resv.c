@@ -74,7 +74,7 @@ parse_resv(struct Client *source_p, const char *mask, time_t duration, const cha
   if ((resv = resv_make(mask, reason, NULL)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", resv->mask);
+      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", mask);
 
     return;
   }

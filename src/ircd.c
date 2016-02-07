@@ -414,7 +414,6 @@ main(int argc, char *argv[])
   else
     print_startup(getpid());
 
-  tls_init();
   setup_signals();
 
   /* We need this to initialise the fd array before anything else */
@@ -422,6 +421,7 @@ main(int argc, char *argv[])
   log_set_file(LOG_TYPE_IRCD, 0, logFileName);
 
   init_netio();         /* This needs to be setup early ! -- adrian */
+  tls_init();
 
   /* Check if there is pidfile and daemon already running */
   check_pidfile(pidFileName);

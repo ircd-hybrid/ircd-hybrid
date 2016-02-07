@@ -669,54 +669,54 @@ save_resv_database(const char *filename)
 {
   uint32_t records = 0;
   struct dbFILE *f = NULL;
-  dlink_node *ptr = NULL;
-  struct MaskItem *conf = NULL;
+  dlink_node *node = NULL;
+  const struct ResvItem *resv = NULL;
 
   if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
     return;
 
-  DLINK_FOREACH(ptr, cresv_items.head)
+  DLINK_FOREACH(node, resv_chan_get_list()->head)
   {
-    conf = ptr->data;
+    resv = node->data;
 
-    if (IsConfDatabase(conf))
+    if (resv->in_database)
       ++records;
   }
 
-  DLINK_FOREACH(ptr, nresv_items.head)
+  DLINK_FOREACH(node, resv_nick_get_list()->head)
   {
-    conf = ptr->data;
+    resv = node->data;
 
-    if (IsConfDatabase(conf))
+    if (resv->in_database)
       ++records;
   }
 
   SAFE_WRITE(write_uint32(records, f), filename);
 
-  DLINK_FOREACH(ptr, cresv_items.head)
+  DLINK_FOREACH(node, resv_chan_get_list()->head)
   {
-    conf = ptr->data;
+    resv = node->data;
 
-    if (!IsConfDatabase(conf))
+    if (!resv->in_database)
       continue;
 
-    SAFE_WRITE(write_string(conf->name, f), filename);
-    SAFE_WRITE(write_string(conf->reason, f), filename);
-    SAFE_WRITE(write_uint64(conf->setat, f), filename);
-    SAFE_WRITE(write_uint64(conf->until, f), filename);
+    SAFE_WRITE(write_string(resv->mask, f), filename);
+    SAFE_WRITE(write_string(resv->reason, f), filename);
+    SAFE_WRITE(write_uint64(resv->setat, f), filename);
+    SAFE_WRITE(write_uint64(resv->expire, f), filename);
   }
 
-  DLINK_FOREACH(ptr, nresv_items.head)
+  DLINK_FOREACH(node, resv_nick_get_list()->head)
   {
-    conf = ptr->data;
+    resv = node->data;
 
-    if (!IsConfDatabase(conf))
+    if (!resv->in_database)
       continue;
 
-    SAFE_WRITE(write_string(conf->name, f), filename);
-    SAFE_WRITE(write_string(conf->reason, f), filename);
-    SAFE_WRITE(write_uint64(conf->setat, f), filename);
-    SAFE_WRITE(write_uint64(conf->until, f), filename);
+    SAFE_WRITE(write_string(resv->mask, f), filename);
+    SAFE_WRITE(write_string(resv->reason, f), filename);
+    SAFE_WRITE(write_uint64(resv->setat, f), filename);
+    SAFE_WRITE(write_uint64(resv->expire, f), filename);
   }
 
   close_db(f);
@@ -731,7 +731,7 @@ load_resv_database(const char *filename)
   struct dbFILE *f = NULL;
   char *name = NULL;
   char *reason = NULL;
-  struct MaskItem *conf = NULL;
+  struct ResvItem *resv = NULL;
 
   if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
     return;
@@ -751,12 +751,12 @@ load_resv_database(const char *filename)
     SAFE_READ(read_uint64(&tmp64_setat, f));
     SAFE_READ(read_uint64(&tmp64_hold, f));
 
-    if ((conf = create_resv(name, reason, NULL)) == NULL)
+    if ((resv = resv_make(name, reason, NULL)) == NULL)
       continue;
 
-    conf->setat = tmp64_setat;
-    conf->until = tmp64_hold;
-    SetConfDatabase(conf);
+    resv->setat = tmp64_setat;
+    resv->expire = tmp64_hold;
+    resv->in_database = 1;
 
     xfree(name);
     xfree(reason);

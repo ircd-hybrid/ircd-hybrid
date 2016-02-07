@@ -27,7 +27,38 @@
 #ifndef INCLUDED_conf_resv_h
 #define INCLUDED_conf_resv_h
 
-extern struct MaskItem *create_resv(const char *, const char *, const dlink_list *);
-extern int resv_find_exempt(const struct Client *, const struct MaskItem *);
-extern struct MaskItem *match_find_resv(const char *);
-#endif  /* INCLUDED_resv_h */
+struct ResvItem
+{
+  dlink_node node;
+  dlink_list *list;
+  dlink_list exempt_list;
+  char *mask;
+  char *reason;
+  time_t expire;
+  time_t setat;
+  unsigned int in_database;
+};
+
+struct ResvExemptItem
+{
+  dlink_node node;
+  char *name;
+  char *user;
+  char *host;
+  size_t len;
+  time_t when;
+  struct irc_ssaddr addr;
+  int bits;
+  int type;
+  int country_id;
+};
+
+extern const dlink_list *resv_chan_get_list(void);
+extern const dlink_list *resv_nick_get_list(void);
+extern void resv_delete(struct ResvItem *);
+extern struct ResvItem *resv_make(const char *, const char *, const dlink_list *);
+extern int resv_exempt_find(const struct Client *, const struct ResvItem *);
+extern struct ResvItem *resv_find(const char *, int (*)(const char *, const char *));
+extern void resv_clear(void);
+extern void resv_expire(void);
+#endif  /* INCLUDED_conf_resv_h */

@@ -29,6 +29,7 @@
 #include "send.h"
 #include "client.h"
 #include "memory.h"
+#include "ircd.h"
 #include "irc_string.h"
 #include "ircd_defs.h"
 #include "misc.h"
@@ -36,6 +37,41 @@
 #include "conf_resv.h"
 #include "hostmask.h"
 
+
+static dlink_list resv_chan_list;
+static dlink_list resv_nick_list;
+
+
+const dlink_list *
+resv_chan_get_list(void)
+{
+  return &resv_chan_list;
+}
+
+const dlink_list *
+resv_nick_get_list(void)
+{
+  return &resv_nick_list;
+}
+
+void
+resv_delete(struct ResvItem *resv)
+{
+  while (resv->exempt_list.head)
+  {
+    struct ResvExemptItem *exempt = resv->exempt_list.head->data;
+
+    dlinkDelete(&exempt->node, &resv->exempt_list);
+    xfree(exempt->name);
+    xfree(exempt->user);
+    xfree(exempt->host);
+    xfree(exempt);
+  }
+
+  dlinkDelete(&resv->node, resv->list);
+  xfree(resv->mask);
+  xfree(resv);
+}
 
 /* create_resv()
  *
@@ -45,46 +81,43 @@
  * output	- pointer to struct ResvNick
  * side effects	-
  */
-struct MaskItem *
-create_resv(const char *name, const char *reason, const dlink_list *list)
+struct ResvItem *
+resv_make(const char *mask, const char *reason, const dlink_list *elist)
 {
-  dlink_node *node = NULL;
-  struct MaskItem *conf = NULL;
-  enum maskitem_type type;
+  dlink_list *list;
 
-  if (name == NULL || reason == NULL)
-    return NULL;
-
-  if (IsChanPrefix(*name))
-    type = CONF_CRESV;
+  if (IsChanPrefix(*mask))
+    list = &resv_chan_list;
   else
-    type = CONF_NRESV;
+    list = &resv_nick_list;
 
-  if (find_exact_name_conf(type, NULL, name, NULL, NULL))
+  if (resv_find(mask, irccmp))
     return NULL;
 
-  conf = conf_make(type);
-  conf->name = xstrdup(name);
-  conf->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
+  struct ResvItem *resv = xcalloc(sizeof(*resv));
+  resv->list = list;
+  resv->mask = xstrdup(mask);
+  resv->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
 
-  if (list)
+  if (elist)
   {
-    DLINK_FOREACH(node, list->head)
+    dlink_node *node;
+
+    DLINK_FOREACH(node, elist->head)
     {
       char nick[NICKLEN + 1];
       char user[USERLEN + 1];
       char host[HOSTLEN + 1];
       struct split_nuh_item nuh;
-      struct exempt *exptr = NULL;
       char *s = node->data;
 
       if (strlen(s) == 2 && IsAlpha(*(s + 1) && IsAlpha(*(s + 2))))
       {
 #ifdef HAVE_LIBGEOIP
-        exptr = xcalloc(sizeof(*exptr));
-        exptr->name = xstrdup(s);
-        exptr->country_id = GeoIP_id_by_code(s);
-        dlinkAdd(exptr, &exptr->node, &conf->exempt_list);
+        struct ResvExemptItem *exempt = xcalloc(sizeof(*exempt));
+        exempt->name = xstrdup(s);
+        exempt->country_id = GeoIP_id_by_code(s);
+        dlinkAdd(exempt, &exempt->node, &resv->exempt_list);
 #endif
       }
       else
@@ -100,49 +133,71 @@ create_resv(const char *name, const char *reason, const dlink_list *list)
 
         split_nuh(&nuh);
 
-        exptr = xcalloc(sizeof(*exptr));
-        exptr->name = xstrdup(nick);
-        exptr->user = xstrdup(user);
-        exptr->host = xstrdup(host);
-        exptr->type = parse_netmask(host, &exptr->addr, &exptr->bits);
-        dlinkAdd(exptr, &exptr->node, &conf->exempt_list);
+        struct ResvExemptItem *exempt = xcalloc(sizeof(*exempt));
+        exempt->name = xstrdup(nick);
+        exempt->user = xstrdup(user);
+        exempt->host = xstrdup(host);
+        exempt->type = parse_netmask(host, &exempt->addr, &exempt->bits);
+        dlinkAdd(exempt, &exempt->node, &resv->exempt_list);
       }
     }
   }
 
-  return conf;
+  return resv;
+}
+
+struct ResvItem *
+resv_find(const char *name, int (*compare)(const char *, const char *))
+{
+  dlink_node *node = NULL;
+  dlink_list *list = NULL;
+
+  if (IsChanPrefix(*name))
+    list = &resv_chan_list;
+  else
+    list = &resv_nick_list;
+
+  DLINK_FOREACH(node, list->head)
+  {
+    struct ResvItem *resv = node->data;
+
+    if (!compare(resv->mask, name))
+      return resv;
+  }
+
+  return NULL;
 }
 
 int
-resv_find_exempt(const struct Client *client_p, const struct MaskItem *conf)
+resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
 {
   const dlink_node *node = NULL;
 
-  DLINK_FOREACH(node, conf->exempt_list.head)
+  DLINK_FOREACH(node, resv->exempt_list.head)
   {
-    const struct exempt *exptr = node->data;
+    const struct ResvExemptItem *exempt = node->data;
 
-    if (exptr->country_id)
+    if (exempt->country_id)
     {
-      if (exptr->country_id == client_p->connection->country_id)
+      if (exempt->country_id == client_p->connection->country_id)
         return 1;
     }
-    else if (!match(exptr->name, client_p->name) && !match(exptr->user, client_p->username))
+    else if (!match(exempt->name, client_p->name) && !match(exempt->user, client_p->username))
     {
-      switch (exptr->type)
+      switch (exempt->type)
       {
         case HM_HOST:
-          if (!match(exptr->host, client_p->host) || !match(exptr->host, client_p->sockhost))
+          if (!match(exempt->host, client_p->host) || !match(exempt->host, client_p->sockhost))
             return 1;
           break;
         case HM_IPV4:
           if (client_p->connection->aftype == AF_INET)
-            if (match_ipv4(&client_p->connection->ip, &exptr->addr, exptr->bits))
+            if (match_ipv4(&client_p->connection->ip, &exempt->addr, exempt->bits))
               return 1;
           break;
         case HM_IPV6:
           if (client_p->connection->aftype == AF_INET6)
-            if (match_ipv6(&client_p->connection->ip, &exptr->addr, exptr->bits))
+            if (match_ipv6(&client_p->connection->ip, &exempt->addr, exempt->bits))
               return 1;
           break;
         default:
@@ -154,28 +209,45 @@ resv_find_exempt(const struct Client *client_p, const struct MaskItem *conf)
   return 0;
 }
 
-/* match_find_resv()
- *
- * inputs       - pointer to name
- * output       - pointer to a struct ResvChannel
- * side effects - Finds a reserved channel whose name matches 'name',
- *                if can't find one returns NULL.
- */
-struct MaskItem *
-match_find_resv(const char *name)
+void
+resv_clear(void)
 {
-  dlink_node *node = NULL;
+  dlink_list *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
 
-  if (EmptyString(name))
-    return NULL;
-
-  DLINK_FOREACH(node, cresv_items.head)
+  for (dlink_list **list = tab; *list; ++list)
   {
-    struct MaskItem *conf = node->data;
+    dlink_node *node = NULL, *node_next = NULL;
 
-    if (!match(conf->name, name))
-      return conf;
+    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
+    {
+      struct ResvItem *resv = node->data;
+
+      if (!resv->in_database)
+        resv_delete(resv);
+    }
   }
+}
 
-  return NULL;
+void
+resv_expire(void)
+{
+  dlink_list *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
+
+  for (dlink_list **list = tab; *list; ++list)
+  {
+    dlink_node *node = NULL, *node_next = NULL;
+
+    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
+    {
+      struct ResvItem *resv = node->data;
+
+      if (!resv->expire || resv->expire > CurrentTime)
+        continue;
+
+      if (ConfigGeneral.tkline_expire_notices)
+        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Temporary RESV for [%s] expired",
+                             resv->mask);
+      resv_delete(resv);
+    }
+  }
 }

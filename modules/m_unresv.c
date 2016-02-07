@@ -43,40 +43,36 @@
 
 
 static void
-resv_remove(struct Client *source_p, const char *name)
+resv_remove(struct Client *source_p, const char *mask)
 {
-  unsigned int type = CONF_CRESV;
-  struct MaskItem *conf = NULL;
+  struct ResvItem *resv = NULL;
 
-  if (!IsChanPrefix(*name))
-    type = CONF_NRESV;
-
-  if ((conf = find_exact_name_conf(type, NULL, name, NULL, NULL)) == NULL)
+  if ((resv = resv_find(mask, irccmp)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":No RESV for %s", name);
+      sendto_one_notice(source_p, &me, ":No RESV for %s", mask);
 
     return;
   }
 
-  if (!IsConfDatabase(conf))
+  if (!resv->in_database)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":The RESV for %s is in ircd.conf and must be removed by hand",
-                        name);
+                        resv->mask);
     return;
   }
 
-  conf_free(conf);
+  resv_delete(resv);
 
   if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":RESV for [%s] is removed", name);
+    sendto_one_notice(source_p, &me, ":RESV for [%s] is removed", mask);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "%s has removed the RESV for: [%s]",
-                       get_oper_name(source_p), name);
+                       get_oper_name(source_p), mask);
   ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
-       get_oper_name(source_p), name);
+       get_oper_name(source_p), mask);
 }
 
 /*! \brief UNRESV command handler
@@ -95,7 +91,7 @@ resv_remove(struct Client *source_p, const char *name)
 static int
 mo_unresv(struct Client *source_p, int parc, char *parv[])
 {
-  char *resv = NULL;
+  char *mask = NULL;
   char *target_server = NULL;
 
   if (!HasOFlag(source_p, OPER_FLAG_UNRESV))
@@ -104,23 +100,23 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("UNRESV", source_p, parc, parv, 0, &resv, NULL,
+  if (!parse_aline("UNRESV", source_p, parc, parv, 0, &mask, NULL,
                    NULL, &target_server, NULL))
     return 0;
 
   if (target_server)
   {
     sendto_match_servs(source_p, target_server, CAPAB_CLUSTER, "UNRESV %s %s",
-                       target_server, resv);
+                       target_server, mask);
 
     /* Allow ON to apply local unresv as well if it matches */
     if (match(target_server, me.name))
       return 0;
   }
   else
-    cluster_distribute(source_p, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, resv);
+    cluster_distribute(source_p, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, mask);
 
-  resv_remove(source_p, resv);
+  resv_remove(source_p, mask);
   return 0;
 }
 

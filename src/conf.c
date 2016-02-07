@@ -73,8 +73,6 @@ struct conf_parser_context conf_parser_ctx;
 dlink_list server_items;
 dlink_list operator_items;
 dlink_list gecos_items;
-dlink_list nresv_items;
-dlink_list cresv_items;
 
 extern unsigned int lineno;
 extern char linebuf[];
@@ -138,12 +136,6 @@ map_to_list(enum maskitem_type type)
   {
     case CONF_XLINE:
       return &gecos_items;
-      break;
-    case CONF_NRESV:
-      return &nresv_items;
-      break;
-    case CONF_CRESV:
-      return &cresv_items;
       break;
     case CONF_OPER:
       return &operator_items;
@@ -212,17 +204,6 @@ conf_free(struct MaskItem *conf)
     xfree(node->data);
     dlinkDelete(node, &conf->leaf_list);
     free_dlink_node(node);
-  }
-
-  DLINK_FOREACH_SAFE(node, node_next, conf->exempt_list.head)
-  {
-    struct exempt *exptr = node->data;
-
-    dlinkDelete(node, &conf->exempt_list);
-    xfree(exptr->name);
-    xfree(exptr->user);
-    xfree(exptr->host);
-    xfree(exptr);
   }
 
   xfree(conf);
@@ -564,8 +545,6 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
   switch (type)
   {
   case CONF_XLINE:
-  case CONF_NRESV:
-  case CONF_CRESV:
     DLINK_FOREACH(node, list->head)
     {
       conf = node->data;
@@ -624,9 +603,6 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
   switch(type)
   {
   case CONF_XLINE:
-  case CONF_NRESV:
-  case CONF_CRESV:
-
     DLINK_FOREACH(node, list->head)
     {
       conf = node->data;
@@ -991,8 +967,7 @@ cleanup_tklines(void *unused)
 {
   hostmask_expire_temporary();
   expire_tklines(&gecos_items);
-  expire_tklines(&nresv_items);
-  expire_tklines(&cresv_items);
+  resv_expire();
 }
 
 /* oper_privs_as_string()
@@ -1109,8 +1084,7 @@ clear_out_old_conf(void)
   dlink_node *node = NULL, *node_next = NULL;
   dlink_list *free_items [] = {
     &server_items,   &operator_items,
-     &gecos_items,
-     &nresv_items, &cresv_items, NULL
+     &gecos_items, NULL
   };
 
   dlink_list ** iterator = free_items; /* C is dumb */
@@ -1152,6 +1126,8 @@ clear_out_old_conf(void)
   motd_clear();  /* Clear motd {} items and re-cache default motd */
 
   cluster_clear();  /* Clear cluster {} items */
+
+  resv_clear();  /* Clear resv {} items */
 
   service_clear();  /* Clear service {} items */
 

@@ -244,22 +244,22 @@ report_resv(struct Client *source_p)
 {
   const dlink_node *node = NULL;
 
-  DLINK_FOREACH(node, cresv_items.head)
+  DLINK_FOREACH(node, resv_chan_get_list()->head)
   {
-    const struct MaskItem *conf = node->data;
+    const struct ResvItem *resv = node->data;
 
     sendto_one_numeric(source_p, &me, RPL_STATSQLINE,
-                       conf->until ? 'q' : 'Q', conf->count,
-                       conf->name, conf->reason);
+                       resv->expire ? 'q' : 'Q',
+                       resv->mask, resv->reason);
   }
 
-  DLINK_FOREACH(node, nresv_items.head)
+  DLINK_FOREACH(node, resv_nick_get_list()->head)
   {
-    const struct MaskItem *conf = node->data;
+    const struct ResvItem *resv = node->data;
 
     sendto_one_numeric(source_p, &me, RPL_STATSQLINE,
-                       conf->until ? 'q' : 'Q', conf->count,
-                       conf->name, conf->reason);
+                       resv->expire ? 'q' : 'Q',
+                       resv->mask, resv->reason);
   }
 }
 
@@ -479,10 +479,10 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Resv channels %u(%zu) nicks %u(%zu)",
-                     dlink_list_length(&cresv_items),
-                     dlink_list_length(&cresv_items) * sizeof(struct MaskItem),
-                     dlink_list_length(&nresv_items),
-                     dlink_list_length(&nresv_items) * sizeof(struct MaskItem));
+                     dlink_list_length(resv_chan_get_list()),
+                     dlink_list_length(resv_chan_get_list()) * sizeof(struct ResvItem),
+                     dlink_list_length(resv_nick_get_list()),
+                     dlink_list_length(resv_nick_get_list()) * sizeof(struct ResvItem));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Classes %u(%zu)",

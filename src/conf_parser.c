@@ -4887,7 +4887,7 @@ yyreduce:
   if (conf_parser_ctx.pass != 2)
     break;
 
-  create_resv(block_state.name.buf, block_state.rpass.buf, &block_state.mask.list);
+  resv_make(block_state.name.buf, block_state.rpass.buf, &block_state.mask.list);
 }
 #line 4893 "conf_parser.c" /* yacc.c:1646  */
     break;

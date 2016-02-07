@@ -87,13 +87,13 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
 {
   dlink_list *list;
 
+  if (resv_find(mask, irccmp))
+    return NULL;
+
   if (IsChanPrefix(*mask))
     list = &resv_chan_list;
   else
     list = &resv_nick_list;
-
-  if (resv_find(mask, irccmp))
-    return NULL;
 
   struct ResvItem *resv = xcalloc(sizeof(*resv));
   resv->list = list;

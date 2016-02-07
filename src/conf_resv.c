@@ -98,6 +98,7 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
   resv->list = list;
   resv->mask = xstrdup(mask);
   resv->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
+  dlinkAdd(resv, &resv->node, resv->list);
 
   if (elist)
   {

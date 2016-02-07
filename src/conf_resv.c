@@ -70,6 +70,7 @@ resv_delete(struct ResvItem *resv)
 
   dlinkDelete(&resv->node, resv->list);
   xfree(resv->mask);
+  xfree(resv->reason);
   xfree(resv);
 }
 

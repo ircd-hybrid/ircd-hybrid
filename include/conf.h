@@ -84,9 +84,7 @@ enum maskitem_type
   CONF_DLINE   = 1 << 3,
   CONF_EXEMPT  = 1 << 4,
   CONF_XLINE   = 1 << 5,
-  CONF_CRESV   = 1 << 6,
-  CONF_NRESV   = 1 << 7,
-  CONF_OPER    = 1 << 8
+  CONF_OPER    = 1 << 6
 };
 
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)
@@ -120,7 +118,6 @@ struct MaskItem
   dlink_node         node;
   dlink_list         leaf_list;
   dlink_list         hub_list;
-  dlink_list         exempt_list;
   enum maskitem_type type;
   unsigned int       dns_failed;
   unsigned int       dns_pending;
@@ -147,20 +144,6 @@ struct MaskItem
   char              *certfp;
   char              *whois;
   char              *cipher_list;
-};
-
-struct exempt
-{
-  dlink_node node;
-  char *name;
-  char *user;
-  char *host;
-  size_t len;
-  time_t when;
-  struct irc_ssaddr addr;
-  int bits;
-  int type;
-  int country_id;
 };
 
 struct CidrItem
@@ -307,8 +290,6 @@ extern dlink_list flatten_links;
 extern dlink_list server_items;
 extern dlink_list gecos_items;
 extern dlink_list operator_items;
-extern dlink_list nresv_items;
-extern dlink_list cresv_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct config_log_entry ConfigLog;
 extern struct config_general_entry ConfigGeneral;

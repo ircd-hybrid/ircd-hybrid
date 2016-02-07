@@ -42,7 +42,7 @@
 
 /* parse_resv()
  *
- * inputs	- source_p, NULL supported
+ * inputs	- source_p
  *		- thing to resv
  *		- time_t if tkline
  *		- reason
@@ -50,11 +50,11 @@
  * side effects	- parse resv, create if valid
  */
 static void
-parse_resv(struct Client *source_p, const char *name, time_t duration, const char *reason)
+parse_resv(struct Client *source_p, const char *mask, time_t duration, const char *reason)
 {
-  struct MaskItem *conf = NULL;
+  struct ResvItem *resv = NULL;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !HasUMode(source_p, UMODE_ADMIN) && has_wildcards(name))
+  if (!HasFlag(source_p, FLAGS_SERVICE) && !HasUMode(source_p, UMODE_ADMIN) && has_wildcards(mask))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
@@ -62,7 +62,7 @@ parse_resv(struct Client *source_p, const char *name, time_t duration, const cha
     return;
   }
 
-  if (!valid_wild_card_simple(name + !!IsChanPrefix(*name)))
+  if (!valid_wild_card_simple(mask + !!IsChanPrefix(*mask)))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the resv",
@@ -71,44 +71,44 @@ parse_resv(struct Client *source_p, const char *name, time_t duration, const cha
     return;
   }
 
-  if ((conf = create_resv(name, reason, NULL)) == NULL)
+  if ((resv = resv_make(mask, reason, NULL)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", name);
+      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", resv->mask);
 
     return;
   }
 
-  conf->setat = CurrentTime;
-  SetConfDatabase(conf);
+  resv->setat = CurrentTime;
+  resv->in_database = 1;
 
   if (duration)
   {
-    conf->until = CurrentTime + duration;
+    resv->expire = CurrentTime + duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %ju min. RESV [%s]",
-                        duration / 60, conf->name);
+                        duration / 60, resv->mask);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. RESV for [%s] [%s]",
                          get_oper_name(source_p), duration / 60,
-                         conf->name, conf->reason);
+                         resv->mask, resv->reason);
     ilog(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
-         get_oper_name(source_p), duration / 60, conf->name, conf->reason);
+         get_oper_name(source_p), duration / 60, resv->mask, resv->reason);
   }
   else
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added RESV [%s] [%s]",
-                        conf->name, conf->reason);
+                        resv->mask, resv->reason);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added RESV for [%s] [%s]",
-                         get_oper_name(source_p), conf->name,
-                         conf->reason);
+                         get_oper_name(source_p), resv->mask,
+                         resv->reason);
     ilog(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
-         get_oper_name(source_p), conf->name, conf->reason);
+         get_oper_name(source_p), resv->mask, resv->reason);
   }
 }
 
@@ -119,7 +119,7 @@ parse_resv(struct Client *source_p, const char *name, time_t duration, const cha
 static int
 mo_resv(struct Client *source_p, int parc, char *parv[])
 {
-  char *resv = NULL;
+  char *mask = NULL;
   char *reason = NULL;
   char *target_server = NULL;
   time_t duration = 0;
@@ -130,7 +130,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("RESV", source_p, parc, parv, 0, &resv, NULL,
+  if (!parse_aline("RESV", source_p, parc, parv, 0, &mask, NULL,
                    &duration, &target_server, &reason))
     return 0;
 
@@ -138,7 +138,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   {
     sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
                        "RESV %s %ju %s :%s",
-                       target_server, duration, resv, reason);
+                       target_server, duration, mask, reason);
 
     /* Allow ON to apply local resv as well if it matches */
     if (match(target_server, me.name))
@@ -146,9 +146,9 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_distribute(source_p, "RESV", CAPAB_KLN, CLUSTER_RESV,
-                       "%ju %s :%s", duration, resv, reason);
+                       "%ju %s :%s", duration, mask, reason);
 
-  parse_resv(source_p, resv, duration, reason);
+  parse_resv(source_p, mask, duration, reason);
   return 0;
 }
 

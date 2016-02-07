@@ -1833,7 +1833,7 @@ resv_entry: RESV
   if (conf_parser_ctx.pass != 2)
     break;
 
-  create_resv(block_state.name.buf, block_state.rpass.buf, &block_state.mask.list);
+  resv_make(block_state.name.buf, block_state.rpass.buf, &block_state.mask.list);
 };
 
 resv_items:     resv_items resv_item | resv_item;

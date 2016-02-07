@@ -741,14 +741,14 @@ int
 can_send(struct Channel *chptr, struct Client *client_p,
          struct Membership *member, const char *message, int notice)
 {
-  const struct MaskItem *conf = NULL;
+  const struct ResvItem *resv = NULL;
 
   if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE))
     return CAN_SEND_OPV;
 
   if (MyConnect(client_p) && !HasFlag(client_p, FLAGS_EXEMPTRESV))
     if (!(HasUMode(client_p, UMODE_OPER) && HasOFlag(client_p, OPER_FLAG_JOIN_RESV)))
-      if ((conf = match_find_resv(chptr->name)) && !resv_find_exempt(client_p, conf))
+      if ((resv = resv_find(chptr->name, match)) && !resv_exempt_find(client_p, resv))
         return ERR_CANNOTSENDTOCHAN;
 
   if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
@@ -951,7 +951,7 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
   char *chan = NULL;
   char *chan_list = NULL;
   struct Channel *chptr = NULL;
-  struct MaskItem *conf = NULL;
+  const struct ResvItem *resv = NULL;
   const struct ClassItem *const class = get_class_ptr(&client_p->connection->confs);
   int i = 0;
   unsigned int flags = 0;
@@ -981,10 +981,9 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
 
     if (!HasFlag(client_p, FLAGS_EXEMPTRESV) &&
         !(HasUMode(client_p, UMODE_OPER) && HasOFlag(client_p, OPER_FLAG_JOIN_RESV)) &&
-        ((conf = match_find_resv(chan)) && !resv_find_exempt(client_p, conf)))
+        ((resv = resv_find(chan, match)) && !resv_exempt_find(client_p, resv)))
     {
-      ++conf->count;
-      sendto_one_numeric(client_p, &me, ERR_CHANBANREASON, chan, conf->reason);
+      sendto_one_numeric(client_p, &me, ERR_CHANBANREASON, chan, resv->reason);
       sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                            "Forbidding reserved channel %s from user %s",
                            chan, get_client_name(client_p, HIDE_IP));

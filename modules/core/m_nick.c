@@ -587,7 +587,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
 {
   char nick[NICKLEN + 1] = "";
   struct Client *target_p = NULL;
-  struct MaskItem *conf = NULL;
+  const struct ResvItem *resv = NULL;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -606,10 +606,9 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Check if the nick is resv'd */
-  if ((conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
+  if ((resv = resv_find(nick, match)))
   {
-    ++conf->count;
-    sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, conf->reason);
+    sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Forbidding reserved nick %s from user %s",
                          nick, get_client_name(source_p, HIDE_IP));
@@ -640,7 +639,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
 {
   char nick[NICKLEN + 1] = "";
   struct Client *target_p = NULL;
-  struct MaskItem *conf = NULL;
+  const struct ResvItem *resv = NULL;
 
   assert(MyClient(source_p));
 
@@ -666,10 +665,9 @@ m_nick(struct Client *source_p, int parc, char *parv[])
 
   if (!HasFlag(source_p, FLAGS_EXEMPTRESV) &&
       !(HasUMode(source_p, UMODE_OPER) && HasOFlag(source_p, OPER_FLAG_NICK_RESV)) &&
-      (conf = find_matching_name_conf(CONF_NRESV, nick, NULL, NULL, 0)))
+      (resv = resv_find(nick, match)))
   {
-    ++conf->count;
-    sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, conf->reason);
+    sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Forbidding reserved nick %s from user %s",
                          nick, get_client_name(source_p, HIDE_IP));

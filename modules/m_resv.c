@@ -50,10 +50,8 @@
  * side effects	- parse resv, create if valid
  */
 static void
-parse_resv(struct Client *source_p, const char *mask, time_t duration, const char *reason)
+resv_handle(struct Client *source_p, const char *mask, time_t duration, const char *reason)
 {
-  struct ResvItem *resv = NULL;
-
   if (!HasFlag(source_p, FLAGS_SERVICE) && !HasUMode(source_p, UMODE_ADMIN) && has_wildcards(mask))
   {
     if (IsClient(source_p))
@@ -65,13 +63,14 @@ parse_resv(struct Client *source_p, const char *mask, time_t duration, const cha
   if (!valid_wild_card_simple(mask + !!IsChanPrefix(*mask)))
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the resv",
+      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the RESV",
                         ConfigGeneral.min_nonwildcard_simple);
 
     return;
   }
 
-  if ((resv = resv_make(mask, reason, NULL)) == NULL)
+  struct ResvItem *resv = resv_make(mask, reason, NULL);
+  if (!resv)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", mask);
@@ -148,7 +147,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
     cluster_distribute(source_p, "RESV", CAPAB_KLN, CLUSTER_RESV,
                        "%ju %s :%s", duration, mask, reason);
 
-  parse_resv(source_p, mask, duration, reason);
+  resv_handle(source_p, mask, duration, reason);
   return 0;
 }
 
@@ -181,7 +180,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_RESV, source_p->servptr->name,
                   source_p->username, source_p->host))
-    parse_resv(source_p, parv[3], atoi(parv[2]), parv[4]);
+    resv_handle(source_p, parv[3], atoi(parv[2]), parv[4]);
   return 0;
 }
 

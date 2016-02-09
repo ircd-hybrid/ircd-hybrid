@@ -45,7 +45,7 @@ tls_init(void)
 int
 tls_new_cred(void)
 {
-  return 0;
+  return 1;
 }
 
 const char *

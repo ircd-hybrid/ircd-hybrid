@@ -1,6 +1,12 @@
 -- Noteworthy changes in version 8.2.14 (2016-02-??)
 o) Fixed server clustering
-o) Various code cleanups
+o) Major cleanups to the configuration subsystem
+o) Improvements to libGeoIP support:
+   - Works now with IPv6 addresses
+   - Added 'libgeoip_database_options', 'libgeoip_ipv4_database_file',
+     and 'libgeoip_ipv6_database_file' configuration directives to the
+     serverinfo {} block
+o) Further improvements to GnuTLS support
 
 
 -- Noteworthy changes in version 8.2.13 (2016-02-02)

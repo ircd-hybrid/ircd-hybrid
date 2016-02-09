@@ -149,13 +149,13 @@ static const struct InfoStruct info_table[] =
   },
   {
     "libgeoip_ipv4_database_file",
-    OUTPUT_DECIMAL,
+    OUTPUT_STRING,
     &ConfigServerInfo.libgeoip_ipv4_database_file,
     "Path to the libGeoIP IPv4 database file"
   },
   {
     "libgeoip_ipv6_database_file",
-    OUTPUT_DECIMAL,
+    OUTPUT_STRING,
     &ConfigServerInfo.libgeoip_ipv6_database_file,
     "Path to the libGeoIP IPv6 database file"
   },
@@ -183,7 +183,6 @@ static const struct InfoStruct info_table[] =
     &ConfigChannel.invite_client_time,
     "How many invite_client_count invites are allowed in this time"
   },
-
   {
     "invite_delay_channel",
     OUTPUT_DECIMAL,

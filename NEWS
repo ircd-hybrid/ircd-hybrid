@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.14 (2016-02-??)
+-- Noteworthy changes in version 8.2.14 (2016-02-09)
 o) Fixed server clustering
 o) Major cleanups to the configuration subsystem
 o) Improvements to libGeoIP support:

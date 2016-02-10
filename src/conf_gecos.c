@@ -21,7 +21,7 @@
 
 /*! \file conf_gecos.c
  * \brief Implements gecos {} block configuration management.
- * \version $Id: conf_gecos.c 7240 2016-02-03 16:40:25Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

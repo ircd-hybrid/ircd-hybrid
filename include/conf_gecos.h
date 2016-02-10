@@ -21,7 +21,7 @@
 
 /*! \file conf_gecos.h
  * \brief Implements gecos {} block configuration management.
- * \version $Id: conf_gecos.h 7281 2016-02-07 18:02:24Z michael $
+ * \version $Id$
  */
 
 #ifndef INCLUDED_conf_gecos_h

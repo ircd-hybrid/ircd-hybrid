@@ -162,7 +162,7 @@ report_gecos(struct Client *source_p)
   {
     const struct GecosItem *gecos = node->data;
     sendto_one_numeric(source_p, &me, RPL_STATSXLINE,
-                       gecos->expire ? 'x': 'X',
+                       gecos->expire ? 'x' : 'X',
                        gecos->mask, gecos->reason);
   }
 }

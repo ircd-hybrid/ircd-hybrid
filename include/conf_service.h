@@ -21,7 +21,7 @@
 
 /*! \file conf_service.h
  * \brief Implements service {} block configuration management.
- * \version $Id: conf_service.h 7220 2016-02-03 15:35:45Z michael $
+ * \version $Id$
  */
 
 #ifndef INCLUDED_conf_service_h

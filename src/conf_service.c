@@ -21,7 +21,7 @@
 
 /*! \file conf_service.c
  * \brief Implements service {} block configuration management.
- * \version $Id: conf_service.c 7240 2016-02-03 16:40:25Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

@@ -83,8 +83,7 @@ enum maskitem_type
   CONF_KLINE   = 1 << 2,
   CONF_DLINE   = 1 << 3,
   CONF_EXEMPT  = 1 << 4,
-  CONF_XLINE   = 1 << 5,
-  CONF_OPER    = 1 << 6
+  CONF_OPER    = 1 << 5
 };
 
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)
@@ -288,7 +287,6 @@ struct config_log_entry
 
 extern dlink_list flatten_links;
 extern dlink_list server_items;
-extern dlink_list gecos_items;
 extern dlink_list operator_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct config_log_entry ConfigLog;

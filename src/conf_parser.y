@@ -34,6 +34,7 @@
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
+#include "conf_gecos.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
@@ -2415,21 +2416,19 @@ gecos_entry: GECOS
     reset_block_state();
 } '{' gecos_items '}' ';'
 {
-  struct MaskItem *conf = NULL;
-
   if (conf_parser_ctx.pass != 2)
     break;
 
   if (!block_state.name.buf[0])
     break;
 
-  conf = conf_make(CONF_XLINE);
-  conf->name = xstrdup(block_state.name.buf);
+  struct GecosItem *gecos = gecos_make();
+  gecos->mask = xstrdup(block_state.name.buf);
 
   if (block_state.rpass.buf[0])
-    conf->reason = xstrdup(block_state.rpass.buf);
+    gecos->reason = xstrdup(block_state.rpass.buf);
   else
-    conf->reason = xstrdup(CONF_NOREASON);
+    gecos->reason = xstrdup(CONF_NOREASON);
 };
 
 gecos_items: gecos_items gecos_item | gecos_item;

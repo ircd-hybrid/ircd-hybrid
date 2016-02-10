@@ -35,6 +35,7 @@
 #include "auth.h"
 #include "s_bsd.h"
 #include "conf.h"
+#include "conf_gecos.h"
 #include "log.h"
 #include "misc.h"
 #include "server.h"
@@ -326,8 +327,8 @@ check_pings(void *unused)
 void
 check_conf_klines(void)
 {
-  struct MaskItem *conf = NULL;
   dlink_node *node = NULL, *node_next = NULL;
+  void *ptr;
 
   DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
@@ -337,25 +338,27 @@ check_conf_klines(void)
     if (IsDead(client_p))
       continue;
 
-    if ((conf = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
-                                     client_p->connection->aftype, NULL, NULL, 1)))
+    if ((ptr = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
+                                    client_p->connection->aftype, NULL, NULL, 1)))
     {
-      conf_try_ban(client_p, conf);
+      const struct MaskItem *conf = ptr;
+      conf_try_ban(client_p, CLIENT_BAN_DLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
 
-    if ((conf = find_conf_by_address(client_p->host, &client_p->connection->ip,
-                                     CONF_KLINE, client_p->connection->aftype,
-                                     client_p->username, NULL, 1)))
+    if ((ptr = find_conf_by_address(client_p->host, &client_p->connection->ip,
+                                    CONF_KLINE, client_p->connection->aftype,
+                                    client_p->username, NULL, 1)))
     {
-      conf_try_ban(client_p, conf);
+      const struct MaskItem *conf = ptr;
+      conf_try_ban(client_p, CLIENT_BAN_KLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
 
-    if ((conf = find_matching_name_conf(CONF_XLINE, client_p->info,
-                                        NULL, NULL, 0)))
+    if ((ptr = gecos_find(client_p->info, match)))
     {
-      conf_try_ban(client_p, conf);
+      const struct GecosItem *conf = ptr;
+      conf_try_ban(client_p, CLIENT_BAN_XLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
   }
@@ -365,10 +368,11 @@ check_conf_klines(void)
   {
     struct Client *client_p = node->data;
 
-    if ((conf = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
-                                     client_p->connection->aftype, NULL, NULL, 1)))
+    if ((ptr = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
+                                    client_p->connection->aftype, NULL, NULL, 1)))
     {
-      conf_try_ban(client_p, conf);
+      const struct MaskItem *conf = ptr;
+      conf_try_ban(client_p, CLIENT_BAN_DLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
   }
@@ -383,13 +387,13 @@ check_conf_klines(void)
  * side effects	- given client_p is banned
  */
 void
-conf_try_ban(struct Client *client_p, struct MaskItem *conf)
+conf_try_ban(struct Client *client_p, int type, const char *reason)
 {
   char ban_type = '?';
 
-  switch (conf->type)
+  switch (type)
   {
-    case CONF_KLINE:
+    case CLIENT_BAN_KLINE:
       if (HasFlag(client_p, FLAGS_EXEMPTKLINE))
       {
         sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
@@ -400,13 +404,13 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
 
       ban_type = 'K';
       break;
-    case CONF_DLINE:
+    case CLIENT_BAN_DLINE:
       if (find_conf_by_address(NULL, &client_p->connection->ip, CONF_EXEMPT,
                                client_p->connection->aftype, NULL, NULL, 1))
         return;
       ban_type = 'D';
       break;
-    case CONF_XLINE:
+    case CLIENT_BAN_XLINE:
       if (HasFlag(client_p, FLAGS_EXEMPTXLINE))
       {
         sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
@@ -416,7 +420,6 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
       }
 
       ban_type = 'X';
-      ++conf->count;
       break;
     default:
       assert(0);
@@ -427,9 +430,9 @@ conf_try_ban(struct Client *client_p, struct MaskItem *conf)
                        ban_type, get_client_name(client_p, HIDE_IP));
 
   if (IsClient(client_p))
-    sendto_one_numeric(client_p, &me, ERR_YOUREBANNEDCREEP, conf->reason);
+    sendto_one_numeric(client_p, &me, ERR_YOUREBANNEDCREEP, reason);
 
-  exit_client(client_p, conf->reason);
+  exit_client(client_p, reason);
 }
 
 /* update_client_exit_stats()

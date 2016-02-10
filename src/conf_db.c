@@ -29,6 +29,7 @@
 #include "stdinc.h"
 #include "conf.h"
 #include "conf_db.h"
+#include "conf_gecos.h"
 #include "conf_resv.h"
 #include "memory.h"
 #include "log.h"
@@ -771,32 +772,32 @@ save_xline_database(const char *filename)
   uint32_t records = 0;
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
-  struct MaskItem *conf = NULL;
+  struct GecosItem *gecos = NULL;
 
   if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
     return;
 
-  DLINK_FOREACH(ptr, gecos_items.head)
+  DLINK_FOREACH(ptr, gecos_get_list()->head)
   {
-    conf = ptr->data;
+    gecos = ptr->data;
 
-    if (IsConfDatabase(conf))
+    if (gecos->in_database)
       ++records;
   }
 
   SAFE_WRITE(write_uint32(records, f), filename);
 
-  DLINK_FOREACH(ptr, gecos_items.head)
+  DLINK_FOREACH(ptr, gecos_get_list()->head)
   {
-    conf = ptr->data;
+    gecos = ptr->data;
 
-    if (!IsConfDatabase(conf))
+    if (!gecos->in_database)
       continue;
 
-    SAFE_WRITE(write_string(conf->name, f), filename);
-    SAFE_WRITE(write_string(conf->reason, f), filename);
-    SAFE_WRITE(write_uint64(conf->setat, f), filename);
-    SAFE_WRITE(write_uint64(conf->until, f), filename);
+    SAFE_WRITE(write_string(gecos->mask, f), filename);
+    SAFE_WRITE(write_string(gecos->reason, f), filename);
+    SAFE_WRITE(write_uint64(gecos->setat, f), filename);
+    SAFE_WRITE(write_uint64(gecos->expire, f), filename);
   }
 
   close_db(f);
@@ -811,7 +812,7 @@ load_xline_database(const char *filename)
   struct dbFILE *f = NULL;
   char *name = NULL;
   char *reason = NULL;
-  struct MaskItem *conf = NULL;
+  struct GecosItem *gecos = NULL;
 
   if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
     return;
@@ -831,14 +832,12 @@ load_xline_database(const char *filename)
     SAFE_READ(read_uint64(&tmp64_setat, f));
     SAFE_READ(read_uint64(&tmp64_hold, f));
 
-    conf = conf_make(CONF_XLINE);
-
-    SetConfDatabase(conf);
-
-    conf->name = name;
-    conf->reason = reason;
-    conf->setat = tmp64_setat;
-    conf->until = tmp64_hold;
+    gecos = gecos_make();
+    gecos->in_database = 1;
+    gecos->mask = name;
+    gecos->reason = reason;
+    gecos->setat = tmp64_setat;
+    gecos->expire = tmp64_hold;
   }
 
   close_db(f);

@@ -31,6 +31,7 @@
 #include "ircd.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_gecos.h"
 #include "conf_shared.h"
 #include "numeric.h"
 #include "log.h"
@@ -43,7 +44,7 @@
 
 
 static void
-xline_check(struct MaskItem *conf)
+xline_check(struct GecosItem *gecos)
 {
   dlink_node *node = NULL, *node_next = NULL;
 
@@ -54,8 +55,8 @@ xline_check(struct MaskItem *conf)
     if (IsDead(client_p))
       continue;
 
-    if (!match(conf->name, client_p->info))
-      conf_try_ban(client_p, conf);
+    if (!match(gecos->mask, client_p->info))
+      conf_try_ban(client_p, CLIENT_BAN_XLINE, gecos->reason);
   }
 }
 
@@ -86,7 +87,7 @@ valid_xline(struct Client *source_p, const char *gecos)
  * side effects - when successful, adds an xline to the conf
  */
 static void
-xline_add(struct Client *source_p, const char *gecos, const char *reason,
+xline_add(struct Client *source_p, const char *mask, const char *reason,
           time_t duration)
 {
   char buf[IRCD_BUFSIZE];
@@ -97,58 +98,58 @@ xline_add(struct Client *source_p, const char *gecos, const char *reason,
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
-  struct MaskItem *conf = conf_make(CONF_XLINE);
-  conf->name = xstrdup(gecos);
-  conf->reason = xstrdup(buf);
-  conf->setat = CurrentTime;
-  SetConfDatabase(conf);
+  struct GecosItem *gecos = gecos_make();
+  gecos->mask = xstrdup(mask);
+  gecos->reason = xstrdup(buf);
+  gecos->setat = CurrentTime;
+  gecos->in_database = 1;
 
   if (duration)
   {
-    conf->until = CurrentTime + duration;
+    gecos->expire = CurrentTime + duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %ju min. X-Line [%s]",
-                        duration / 60, conf->name);
+                        duration / 60, gecos->mask);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. X-Line for [%s] [%s]",
                          get_oper_name(source_p), duration / 60,
-                         conf->name, conf->reason);
+                         gecos->mask, gecos->reason);
     ilog(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
-         get_oper_name(source_p), duration / 60, conf->name, conf->reason);
+         get_oper_name(source_p), duration / 60, gecos->mask, gecos->reason);
   }
   else
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added X-Line [%s] [%s]",
-                        conf->name, conf->reason);
+                        gecos->mask, gecos->reason);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added X-Line for [%s] [%s]",
-                         get_oper_name(source_p), conf->name,
-                         conf->reason);
+                         get_oper_name(source_p), gecos->mask,
+                         gecos->reason);
     ilog(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
-         get_oper_name(source_p), conf->name, conf->reason);
+         get_oper_name(source_p), gecos->mask, gecos->reason);
   }
 
-  xline_check(conf);
+  xline_check(gecos);
 }
 
 static void
 relay_xline(struct Client *source_p, char *parv[])
 {
-  struct MaskItem *conf = NULL;
+  const struct GecosItem *gecos = NULL;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_XLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
   {
-    if ((conf = find_matching_name_conf(CONF_XLINE, parv[2], NULL, NULL, 0)))
+    if ((gecos = gecos_find(parv[2], match)))
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
-                          parv[2], conf->name, conf->reason);
+                          parv[2], gecos->mask, gecos->reason);
       return;
     }
 
@@ -170,8 +171,8 @@ static int
 mo_xline(struct Client *source_p, int parc, char *parv[])
 {
   char *reason = NULL;
-  char *gecos = NULL;
-  struct MaskItem *conf = NULL;
+  char *mask = NULL;
+  const struct GecosItem *gecos = NULL;
   char *target_server = NULL;
   time_t duration = 0;
 
@@ -181,14 +182,14 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("XLINE", source_p, parc, parv, 0, &gecos, NULL,
+  if (!parse_aline("XLINE", source_p, parc, parv, 0, &mask, NULL,
                    &duration, &target_server, &reason))
     return 0;
 
   if (target_server)
   {
     sendto_match_servs(source_p, target_server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
-                       target_server, gecos, duration, reason);
+                       target_server, mask, duration, reason);
 
     /* Allow ON to apply local xline as well if it matches */
     if (match(target_server, me.name))
@@ -196,19 +197,19 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_distribute(source_p, "XLINE", CAPAB_CLUSTER, CLUSTER_XLINE, "%s %ju :%s",
-                       gecos, duration, reason);
+                       mask, duration, reason);
 
-  if (!valid_xline(source_p, gecos))
+  if (!valid_xline(source_p, mask))
     return 0;
 
-  if ((conf = find_matching_name_conf(CONF_XLINE, gecos, NULL, NULL, 0)))
+  if ((gecos = gecos_find(mask, match)))
   {
     sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
-                      gecos, conf->name, conf->reason);
+                      mask, gecos->mask, gecos->reason);
     return 0;
   }
 
-  xline_add(source_p, gecos, reason, duration);
+  xline_add(source_p, mask, reason, duration);
   return 0;
 }
 

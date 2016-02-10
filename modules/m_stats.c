@@ -33,6 +33,7 @@
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
+#include "conf_gecos.h"
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
@@ -152,6 +153,20 @@ report_service(struct Client *source_p)
   }
 }
 
+static void
+report_gecos(struct Client *source_p)
+{
+  dlink_node *node;
+
+  DLINK_FOREACH(node, gecos_get_list()->head)
+  {
+    const struct GecosItem *gecos = node->data;
+    sendto_one_numeric(source_p, &me, RPL_STATSXLINE,
+                       gecos->expire ? 'x': 'X',
+                       gecos->mask, gecos->reason);
+  }
+}
+
 /*
  * inputs	- pointer to client requesting confitem report
  *		- ConfType to report
@@ -168,17 +183,6 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
 
   switch (type)
   {
-    case CONF_XLINE:
-      DLINK_FOREACH(node, gecos_items.head)
-      {
-        conf = node->data;
-        sendto_one_numeric(source_p, &me, RPL_STATSXLINE,
-                           conf->until ? 'x': 'X', conf->count,
-                           conf->name, conf->reason);
-      }
-
-      break;
-
     case CONF_OPER:
       DLINK_FOREACH(node, operator_items.head)
       {
@@ -1192,7 +1196,7 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
 static void
 stats_gecos(struct Client *source_p, int parc, char *parv[])
 {
-  report_confitem_types(source_p, CONF_XLINE);
+  report_gecos(source_p);
 }
 
 static void

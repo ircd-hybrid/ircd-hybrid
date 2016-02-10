@@ -38,6 +38,7 @@
 #include "motd.h"
 #include "numeric.h"
 #include "conf.h"
+#include "conf_gecos.h"
 #include "log.h"
 #include "server.h"
 #include "send.h"
@@ -285,17 +286,16 @@ user_welcome(struct Client *source_p)
 static int
 check_xline(struct Client *source_p)
 {
-  struct MaskItem *conf = NULL;
+  const struct GecosItem *gecos = NULL;
 
   if (HasFlag(source_p, FLAGS_EXEMPTXLINE))
     return 0;
 
-  if ((conf = find_matching_name_conf(CONF_XLINE, source_p->info, NULL, NULL, 0)))
+  if ((gecos = gecos_find(source_p->info, match)))
   {
-    ++conf->count;
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "X-line Rejecting [%s] [%s], user %s [%s]",
-                         source_p->info, conf->reason,
+                         source_p->info, gecos->reason,
                          get_client_name(source_p, HIDE_IP),
                          source_p->sockhost);
 

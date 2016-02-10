@@ -244,6 +244,14 @@ enum
 #define IsHidden(x)             ((x)->flags &  FLAGS_HIDDEN)
 
 
+/*! \brief server ban types */
+enum
+{
+  CLIENT_BAN_KLINE,
+  CLIENT_BAN_DLINE,
+  CLIENT_BAN_XLINE
+};
+
 /*! \brief addr_mask_type enumeration */
 enum addr_mask_type
 {
@@ -442,7 +450,7 @@ extern void client_clear_svstags(struct Client *);
 extern void del_accept(struct split_nuh_item *, struct Client *);
 extern void del_all_accepts(struct Client *);
 extern void exit_client(struct Client *, const char *);
-extern void conf_try_ban(struct Client *, struct MaskItem *);
+extern void conf_try_ban(struct Client *, int, const char *);
 extern void check_conf_klines(void);
 extern void client_init(void);
 extern void dead_link_on_write(struct Client *, int);

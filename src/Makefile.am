@@ -17,6 +17,7 @@ ircd_SOURCES = auth.c            \
                conf_class.c      \
                conf_cluster.c    \
                conf_db.c         \
+               conf_gecos.c      \
                conf_pseudo.c     \
                conf_resv.c       \
                conf_service.c    \

@@ -31,6 +31,7 @@
 #include "ircd.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_gecos.h"
 #include "conf_shared.h"
 #include "numeric.h"
 #include "log.h"
@@ -48,20 +49,15 @@
  * Side effects: Any matching tklines are removed.
  */
 static int
-xline_remove(const char *gecos)
+xline_remove(const char *mask)
 {
-  dlink_node *node = NULL;
+  struct GecosItem *gecos;
 
-  DLINK_FOREACH(node, gecos_items.head)
+  if ((gecos = gecos_find(mask, irccmp)))
   {
-    struct MaskItem *conf = node->data;
-
-    if (!IsConfDatabase(conf))
-      continue;
-
-    if (!irccmp(gecos, conf->name))
+    if (gecos->in_database)
     {
-      conf_free(conf);
+      gecos_delete(gecos);
       return 1;
     }
   }

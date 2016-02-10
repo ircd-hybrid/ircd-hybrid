@@ -29,6 +29,7 @@
 #include "ircd_defs.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_gecos.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
@@ -72,7 +73,6 @@ struct conf_parser_context conf_parser_ctx;
 /* general conf items link list root, other than k lines etc. */
 dlink_list server_items;
 dlink_list operator_items;
-dlink_list gecos_items;
 
 extern unsigned int lineno;
 extern char linebuf[];
@@ -134,9 +134,6 @@ map_to_list(enum maskitem_type type)
 {
   switch (type)
   {
-    case CONF_XLINE:
-      return &gecos_items;
-      break;
     case CONF_OPER:
       return &operator_items;
       break;
@@ -544,27 +541,6 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
 
   switch (type)
   {
-  case CONF_XLINE:
-    DLINK_FOREACH(node, list->head)
-    {
-      conf = node->data;
-
-      if (EmptyString(conf->name))
-        continue;
-      if (name && !match(conf->name, name))
-      {
-        if ((user == NULL && (host == NULL)))
-          return conf;
-        if ((conf->modes & flags) != flags)
-          continue;
-        if (EmptyString(conf->user) || EmptyString(conf->host))
-          return conf;
-        if (!match(conf->user, user) && !match(conf->host, host))
-          return conf;
-      }
-    }
-      break;
-
   case CONF_SERVER:
     DLINK_FOREACH(node, list->head)
     {
@@ -602,26 +578,6 @@ find_exact_name_conf(enum maskitem_type type, const struct Client *who, const ch
 
   switch(type)
   {
-  case CONF_XLINE:
-    DLINK_FOREACH(node, list->head)
-    {
-      conf = node->data;
-
-      if (EmptyString(conf->name))
-        continue;
-
-      if (irccmp(conf->name, name) == 0)
-      {
-        if ((user == NULL && (host == NULL)))
-          return conf;
-        if (EmptyString(conf->user) || EmptyString(conf->host))
-          return conf;
-        if (!match(conf->user, user) && !match(conf->host, host))
-          return conf;
-      }
-    }
-    break;
-
   case CONF_OPER:
     DLINK_FOREACH(node, list->head)
     {
@@ -930,31 +886,6 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
   return 0;
 }
 
-/* expire_tklines()
- *
- * inputs       - tkline list pointer
- * output       - NONE
- * side effects - expire tklines
- */
-static void
-expire_tklines(dlink_list *list)
-{
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
-  {
-    struct MaskItem *conf = node->data;
-
-    if (!conf->until || conf->until > CurrentTime)
-      continue;
-
-    if (ConfigGeneral.tkline_expire_notices)
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Temporary %s for [%s] expired",
-                           (conf->type == CONF_XLINE) ? "X-line" : "RESV", conf->name);
-    conf_free(conf);
-  }
-}
-
 /* cleanup_tklines()
  *
  * inputs       - NONE
@@ -966,7 +897,7 @@ void
 cleanup_tklines(void *unused)
 {
   hostmask_expire_temporary();
-  expire_tklines(&gecos_items);
+  gecos_expire();
   resv_expire();
 }
 
@@ -1083,8 +1014,7 @@ clear_out_old_conf(void)
 {
   dlink_node *node = NULL, *node_next = NULL;
   dlink_list *free_items [] = {
-    &server_items,   &operator_items,
-     &gecos_items, NULL
+    &server_items, &operator_items, NULL
   };
 
   dlink_list ** iterator = free_items; /* C is dumb */
@@ -1100,14 +1030,10 @@ clear_out_old_conf(void)
       struct MaskItem *conf = node->data;
 
       conf->active = 0;
+      dlinkDelete(&conf->node, *iterator);
 
-      if (!IsConfDatabase(conf))
-      {
-        dlinkDelete(&conf->node, *iterator);
-
-        if (!conf->ref_count)
-          conf_free(conf);
-      }
+      if (!conf->ref_count)
+        conf_free(conf);
     }
   }
 
@@ -1126,6 +1052,8 @@ clear_out_old_conf(void)
   motd_clear();  /* Clear motd {} items and re-cache default motd */
 
   cluster_clear();  /* Clear cluster {} items */
+
+  gecos_clear();  /* Clear gecos {} items */
 
   resv_clear();  /* Clear resv {} items */
 

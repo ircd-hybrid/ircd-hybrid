@@ -60,12 +60,12 @@ dline_check(struct AddressRec *arec)
       case HM_IPV4:
         if (client_p->connection->aftype == AF_INET)
           if (match_ipv4(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, arec->conf);
+            conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
         break;
       case HM_IPV6:
         if (client_p->connection->aftype == AF_INET6)
           if (match_ipv6(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, arec->conf);
+            conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
         break;
       default: break;
     }
@@ -83,12 +83,12 @@ dline_check(struct AddressRec *arec)
       case HM_IPV4:
         if (client_p->connection->aftype == AF_INET)
           if (match_ipv4(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, arec->conf);
+            conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
         break;
       case HM_IPV6:
         if (client_p->connection->aftype == AF_INET6)
           if (match_ipv6(&client_p->connection->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, arec->conf);
+            conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
         break;
       default: break;
     }

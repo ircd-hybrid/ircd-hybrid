@@ -122,7 +122,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	channel_mode.$(OBJEXT) client.$(OBJEXT) conf.$(OBJEXT) \
 	conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) conf_db.$(OBJEXT) \
-	conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
+	conf_gecos.$(OBJEXT) conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
 	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
 	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) \
 	event.$(OBJEXT) fdlist.$(OBJEXT) getopt.$(OBJEXT) \
@@ -387,6 +387,7 @@ ircd_SOURCES = auth.c            \
                conf_class.c      \
                conf_cluster.c    \
                conf_db.c         \
+               conf_gecos.c      \
                conf_pseudo.c     \
                conf_resv.c       \
                conf_service.c    \
@@ -541,6 +542,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_class.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_cluster.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_db.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_gecos.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_lexer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_pseudo.Po@am__quote@

@@ -45,8 +45,6 @@ struct ResvExemptItem
   char *name;
   char *user;
   char *host;
-  size_t len;
-  time_t when;
   struct irc_ssaddr addr;
   int bits;
   int type;

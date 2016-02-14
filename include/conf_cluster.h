@@ -53,5 +53,5 @@ struct ClusterItem
 extern const dlink_list *cluster_get_list(void);
 extern void cluster_clear(void);
 extern struct ClusterItem *cluster_make(void);
-extern void cluster_distribute(void *, const char *, unsigned int, unsigned int, const char *, ...);
+extern void cluster_distribute(const void *, const char *, unsigned int, unsigned int, const char *, ...);
 #endif

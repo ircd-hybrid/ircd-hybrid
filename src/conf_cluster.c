@@ -64,7 +64,7 @@ cluster_make(void)
 }
 
 void
-cluster_distribute(void *source_p, const char *command, unsigned int capab,
+cluster_distribute(const void *source_p, const char *command, unsigned int capab,
                    unsigned int type, const char *pattern, ...)
 {
   va_list args;

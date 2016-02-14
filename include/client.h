@@ -36,7 +36,6 @@
 #include "channel.h"
 #include "auth.h"
 
-struct MaskItem;
 
 /*
  * status macros.

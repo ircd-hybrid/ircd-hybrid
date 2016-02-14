@@ -126,7 +126,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
  *
  */
 static void
-send_message_remote(struct Client *to, struct Client *from, struct dbuf_block *buf)
+send_message_remote(struct Client *to, const struct Client *from, struct dbuf_block *buf)
 {
   assert(MyConnect(to));
   assert(IsServer(to));
@@ -186,13 +186,15 @@ send_queued_write(struct Client *to)
 
       if (tls_isusing(&to->connection->fd.ssl))
       {
-        retlen = tls_write(&to->connection->fd.ssl, first->data + to->connection->buf_sendq.pos, first->size - to->connection->buf_sendq.pos, &want_read);
+        retlen = tls_write(&to->connection->fd.ssl, first->data + to->connection->buf_sendq.pos,
+                                                    first->size - to->connection->buf_sendq.pos, &want_read);
 
         if (want_read)
           return;  /* Retry later, don't register for write events */
       }
       else
-        retlen = send(to->connection->fd.fd, first->data + to->connection->buf_sendq.pos, first->size - to->connection->buf_sendq.pos, 0);
+        retlen = send(to->connection->fd.fd, first->data + to->connection->buf_sendq.pos,
+                                             first->size - to->connection->buf_sendq.pos, 0);
 
       if (retlen <= 0)
         break;
@@ -209,8 +211,7 @@ send_queued_write(struct Client *to)
       AddFlag(to, FLAGS_BLOCKED);
 
       /* we have a non-fatal error, reschedule a write */
-      comm_setselect(&to->connection->fd, COMM_SELECT_WRITE,
-                     sendq_unblocked, to, 0);
+      comm_setselect(&to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to, 0);
     }
     else if (retlen <= 0)
     {
@@ -279,7 +280,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
 }
 
 void
-sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics numeric, ...)
+sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
   struct dbuf_block *buffer = NULL;
   const char *dest = NULL, *numstr = NULL;
@@ -313,7 +314,7 @@ sendto_one_numeric(struct Client *to, struct Client *from, enum irc_numerics num
 }
 
 void
-sendto_one_notice(struct Client *to, struct Client *from, const char *pattern, ...)
+sendto_one_notice(struct Client *to, const struct Client *from, const char *pattern, ...)
 {
   struct dbuf_block *buffer = NULL;
   const char *dest = NULL;
@@ -352,7 +353,7 @@ sendto_one_notice(struct Client *to, struct Client *from, const char *pattern, .
  * WARNING - +D clients are ignored
  */
 void
-sendto_channel_butone(struct Client *one, struct Client *from,
+sendto_channel_butone(struct Client *one, const struct Client *from,
                       struct Channel *chptr, unsigned int type,
                       const char *pattern, ...)
 {
@@ -424,7 +425,7 @@ sendto_channel_butone(struct Client *one, struct Client *from,
  * -davidt
  */
 void
-sendto_server(struct Client *one,
+sendto_server(const struct Client *one,
               const unsigned int caps,
               const unsigned int nocaps,
               const char *format, ...)
@@ -602,8 +603,8 @@ match_it(const struct Client *one, const char *mask, unsigned int what)
  * ugh. ONLY used by m_message.c to send an "oper magic" message. ugh.
  */
 void
-sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
-                    int what, const char *pattern, ...)
+sendto_match_butone(const struct Client *one, const struct Client *from,
+                    const char *mask, int what, const char *pattern, ...)
 {
   va_list alocal, aremote;
   dlink_node *node = NULL;
@@ -678,7 +679,7 @@ sendto_match_butone(struct Client *one, struct Client *from, const char *mask,
  * side effects	- data sent to servers matching with capab
  */
 void
-sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
+sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int cap,
                    const char *pattern, ...)
 {
   va_list args;
@@ -731,7 +732,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, unsigned int cap,
  * 		  but useful when one does not know where target "lives"
  */
 void
-sendto_anywhere(struct Client *to, struct Client *from,
+sendto_anywhere(struct Client *to, const struct Client *from,
                 const char *command,
                 const char *pattern, ...)
 {
@@ -851,7 +852,7 @@ sendto_realops_flags_ratelimited(time_t *rate, const char *pattern, ...)
  * side effects - Send a wallops to local opers
  */
 void
-sendto_wallops_flags(unsigned int flags, struct Client *source_p,
+sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
                      const char *pattern, ...)
 {
   dlink_node *node = NULL;

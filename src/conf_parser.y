@@ -1046,8 +1046,12 @@ oper_entry: OPERATOR
   {
     struct MaskItem *conf = NULL;
     struct split_nuh_item nuh;
+    char *s = node->data;
 
-    nuh.nuhmask  = node->data;
+    if (EmptyString(s))
+      continue;
+
+    nuh.nuhmask  = s;
     nuh.nickptr  = NULL;
     nuh.userptr  = block_state.user.buf;
     nuh.hostptr  = block_state.host.buf;
@@ -1670,8 +1674,12 @@ auth_entry: IRCD_AUTH
   {
     struct MaskItem *conf = NULL;
     struct split_nuh_item nuh;
+    char *s = node->data;
 
-    nuh.nuhmask  = node->data;
+    if (EmptyString(s))
+      continue;
+
+    nuh.nuhmask  = s;
     nuh.nickptr  = NULL;
     nuh.userptr  = block_state.user.buf;
     nuh.hostptr  = block_state.host.buf;

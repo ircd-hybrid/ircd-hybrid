@@ -27,7 +27,6 @@
 #ifndef INCLUDED_s_bsd_h
 #define INCLUDED_s_bsd_h
 
-#include "config.h"
 #include "fdlist.h"
 
 /* Type of IO */

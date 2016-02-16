@@ -29,7 +29,6 @@
 
 #include "ircd_defs.h"
 #include "client.h"
-#include "config.h"
 
 
 enum { NICKNAMEHISTORYLENGTH = 32768 };

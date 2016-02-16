@@ -30,7 +30,6 @@
 
 #include "list.h"
 #include "fdlist.h"
-#include "config.h"
 #include "ircd_defs.h"
 #include "dbuf.h"
 #include "channel.h"

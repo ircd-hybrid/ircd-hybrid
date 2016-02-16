@@ -26,7 +26,6 @@
 
 #ifndef INCLUDED_conf_service_h
 #define INCLUDED_conf_service_h
-#include "stdinc.h"
 
 struct ServiceItem
 {

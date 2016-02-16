@@ -26,7 +26,6 @@
 
 #ifndef INCLUDED_conf_shared_h
 #define INCLUDED_conf_shared_h
-#include "stdinc.h"
 
 enum
 {

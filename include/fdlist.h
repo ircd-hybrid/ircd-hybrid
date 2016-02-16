@@ -26,7 +26,6 @@
 
 #ifndef INCLUDED_fdlist_h
 #define INCLUDED_fdlist_h
-#define FILEIO_V2
 
 #include "ircd_defs.h"
 #include "tls.h"

@@ -278,8 +278,8 @@ static void
 stats_usage(struct Client *source_p, int parc, char *parv[])
 {
   struct rusage rus;
-  time_t secs;
-  time_t rup;
+  uintmax_t secs;
+  uintmax_t rup;
 #ifdef  hz
 # define hzz hz
 #else
@@ -313,10 +313,10 @@ stats_usage(struct Client *source_p, int parc, char *parv[])
                      (int)(rus.ru_utime.tv_sec/60), (int)(rus.ru_utime.tv_sec%60),
                      (int)(rus.ru_stime.tv_sec/60), (int)(rus.ru_stime.tv_sec%60));
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "R :RSS %ld ShMem %ld Data %ld Stack %ld",
+                     "R :RSS %ld ShMem %ju Data %ju Stack %ju",
                      rus.ru_maxrss,
-                     (rus.ru_ixrss / rup), (rus.ru_idrss / rup),
-                     (rus.ru_isrss / rup));
+                     (uintmax_t)(rus.ru_ixrss / rup), (uintmax_t)(rus.ru_idrss / rup),
+                     (uintmax_t)(rus.ru_isrss / rup));
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "R :Swaps %d Reclaims %d Faults %d",
                      (int)rus.ru_nswap,
@@ -1130,8 +1130,7 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
                      "t :Client Server");
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :connected %u %u",
-                     (unsigned int)sp->is_cl,
-                     (unsigned int)sp->is_sv);
+                     sp->is_cl, sp->is_sv);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :bytes sent %ju %ju",
                      sp->is_cbs, sp->is_sbs);
@@ -1139,9 +1138,8 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
                      "t :bytes recv %ju %ju",
                      sp->is_cbr, sp->is_sbr);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "t :time connected %u %u",
-                     (unsigned int)sp->is_cti,
-                     (unsigned int)sp->is_sti);
+                     "t :time connected %ju %ju",
+                     sp->is_cti, sp->is_sti);
 }
 
 static void
@@ -1224,7 +1222,7 @@ static void
 stats_servlinks(struct Client *source_p, int parc, char *parv[])
 {
   uintmax_t sendB = 0, recvB = 0;
-  time_t uptime = 0;
+  uintmax_t uptime = 0;
   dlink_node *node = NULL;
 
   if (ConfigServerHide.flatten_links && !HasUMode(source_p, UMODE_OPER))
@@ -1519,7 +1517,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
 static int
 m_stats(struct Client *source_p, int parc, char *parv[])
 {
-  static time_t last_used = 0;
+  static uintmax_t last_used = 0;
 
   /* Check the user is actually allowed to do /stats, and isn't flooding */
   if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)

@@ -84,8 +84,8 @@ struct reslist
   char type;                                 /**< Current request type. */
   char retries;                              /**< Retry counter */
   unsigned int sends;                        /**< Number of sends (>1 means resent). */
-  time_t sentat;                             /**< Timestamp we last sent this request. */
-  time_t timeout;                            /**< When this request times out. */
+  uintmax_t sentat;                          /**< Timestamp we last sent this request. */
+  uintmax_t timeout;                         /**< When this request times out. */
   struct irc_ssaddr addr;                    /**< Address for this request. */
   char name[RFC1035_MAX_DOMAIN_LENGTH + 1];  /**< Hostname for this request. */
   size_t namelength;                         /**< Actual hostname length. */
@@ -635,13 +635,13 @@ res_readreply(fde_t *fd, void *data)
  * timeout_query_list - Remove queries from the list which have been
  * there too long without being resolved.
  */
-static time_t
+static uintmax_t
 timeout_query_list(void)
 {
   dlink_node *node = NULL, *node_next = NULL;
   struct reslist *request = NULL;
-  time_t next_time = 0;
-  time_t timeout   = 0;
+  uintmax_t next_time = 0;
+  uintmax_t timeout   = 0;
 
   DLINK_FOREACH_SAFE(node, node_next, request_list.head)
   {

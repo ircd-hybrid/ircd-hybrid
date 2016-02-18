@@ -1270,12 +1270,12 @@ conf_error_report(const char *msg)
  * side effects - none
  * Originally written by Dianora (Diane, db@db.net)
  */
-time_t
+uintmax_t
 valid_tkline(const char *data, const int minutes)
 {
   const unsigned char *p = (const unsigned char *)data;
   unsigned char tmpch = '\0';
-  time_t result = 0;
+  uintmax_t result = 0;
 
   while ((tmpch = *p++))
   {
@@ -1514,7 +1514,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
 int
 parse_aline(const char *cmd, struct Client *source_p,
             int parc, char **parv,
-            int parse_flags, char **up_p, char **h_p, time_t *tkline_time,
+            int parse_flags, char **up_p, char **h_p, uintmax_t *tkline_time,
             char **target_server, char **reason)
 {
   int found_tkline_time=0;

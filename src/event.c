@@ -72,7 +72,7 @@ event_addish(struct event *ev, void *data)
 {
   if (ev->when >= 3)
   {
-    const time_t two_third = (2 * ev->when) / 3;
+    const uintmax_t two_third = (2 * ev->when) / 3;
 
     ev->when = two_third + ((genrand_int32() % 1000) * two_third) / 1000;
   }
@@ -93,7 +93,7 @@ event_delete(struct event *ev)
 void
 event_run(void)
 {
-  static time_t last = 0;
+  static uintmax_t last = 0;
   unsigned int len = 0;
 
   if (last == CurrentTime)
@@ -118,13 +118,13 @@ event_run(void)
 }
 
 /*
- * void event_set_back_events(time_t by)
+ * void event_set_back_events(uintmax_t by)
  * Input: Time to set back events by.
  * Output: None.
  * Side-effects: Sets back all events by "by" seconds.
  */
 void
-event_set_back_events(time_t by)
+event_set_back_events(uintmax_t by)
 {
   dlink_node *node;
 

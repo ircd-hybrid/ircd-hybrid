@@ -129,8 +129,8 @@ struct MaskItem
   unsigned int       htype;
   unsigned int       ref_count;  /* Number of *LOCAL* clients using this */
   int                bits;
-  time_t             until;     /* Hold action until this time (calendar time) */
-  time_t             setat;
+  uintmax_t          until;     /* Hold action until this time (calendar time) */
+  uintmax_t          setat;
   struct irc_ssaddr  bind;  /* ip to bind to for outgoing connect */
   struct irc_ssaddr  addr;  /* ip to connect to */
   struct ClassItem  *class;  /* Class of connection */
@@ -329,11 +329,11 @@ extern const char *get_oper_name(const struct Client *);
 /* XXX should the parse_aline stuff go into another file ?? */
 #define AWILD 0x1  /* check wild cards */
 extern int parse_aline(const char *, struct Client *, int, char **,
-                       int, char **, char **, time_t *, char **, char **);
+                       int, char **, char **, uintmax_t *, char **, char **);
 
 #define TK_SECONDS 0
 #define TK_MINUTES 1
-extern time_t valid_tkline(const char *, const int);
+extern uintmax_t valid_tkline(const char *, const int);
 extern int match_conf_password(const char *, const struct MaskItem *);
 
 enum { CLEANUP_TKLINES_TIME = 60 };

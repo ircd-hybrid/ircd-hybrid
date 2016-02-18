@@ -84,7 +84,7 @@ listener_get_name(const struct Listener *const listener)
 static void
 listener_accept_connection(fde_t *pfd, void *data)
 {
-  static time_t rate = 0;
+  static uintmax_t rate = 0;
   struct irc_ssaddr addr;
   int fd;
   int pe;

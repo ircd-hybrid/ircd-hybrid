@@ -59,7 +59,6 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   int what = MODE_ADD;
   unsigned int setmodes = 0;
   const char *modes = NULL, *extarg = NULL;
-  time_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
@@ -70,7 +69,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
-  ts = strtoimax(parv[2], NULL, 10);
+  uintmax_t ts = strtoumax(parv[2], NULL, 10);
   if (ts && (ts != target_p->tsinfo))
     return 0;
 

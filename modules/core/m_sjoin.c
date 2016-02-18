@@ -71,9 +71,9 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   struct Client  *target_p = NULL;
-  time_t         newts;
-  time_t         oldts;
-  time_t         tstosend;
+  uintmax_t newts;
+  uintmax_t oldts;
+  uintmax_t tstosend;
   struct Mode mode, *oldmode;
   int            args = 0;
   char           keep_our_modes = 1;
@@ -109,7 +109,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   modebuf[0] = '\0';
   mbuf = modebuf;
   pargs = 0;
-  newts = strtoimax(parv[1], NULL, 10);
+  newts = strtoumax(parv[1], NULL, 10);
 
   mode.mode = 0;
   mode.limit = 0;

@@ -240,7 +240,7 @@ do_whois(struct Client *source_p, const char *name)
 static int
 m_whois(struct Client *source_p, int parc, char *parv[])
 {
-  static time_t last_used = 0;
+  static uintmax_t last_used = 0;
 
   if (parc < 2 || EmptyString(parv[1]))
   {

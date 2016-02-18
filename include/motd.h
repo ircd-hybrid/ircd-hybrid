@@ -67,7 +67,7 @@ struct MotdCache
   unsigned int ref;      /**< Number of references to this entry. */
   unsigned int maxcount; /**< Number of lines allocated for message. */
   unsigned int count;    /**< Actual number of lines used in message. */
-  time_t       modtime;  /**< Last modification time from file. */
+  uintmax_t    modtime;  /**< Last modification time from file. */
   char         motd[][MOTD_LINESIZE]; /**< Message body. */
 };
 

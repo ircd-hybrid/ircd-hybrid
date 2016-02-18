@@ -315,7 +315,7 @@ generate_random_salt(char *salt, unsigned int length)
 
   buf = calloc(1, length);
 
-  if (read(fd, buf, length) != length)
+  if (read(fd, buf, length) != (ssize_t)length)
   {
     close(fd);
     free(buf);

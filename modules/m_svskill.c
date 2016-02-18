@@ -55,7 +55,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
   const char *comment = NULL;
   char reason[KILLLEN + 1] = "SVSKilled: ";
-  time_t ts = 0;
+  uintmax_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
@@ -66,7 +66,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
   if (parc > 3)
   {
     comment = parv[3] ? parv[3] : CONF_NOREASON;
-    ts = strtoimax(parv[2], NULL, 10);
+    ts = strtoumax(parv[2], NULL, 10);
   }
   else
     comment = (parc > 2 && parv[2]) ? parv[2] : CONF_NOREASON;

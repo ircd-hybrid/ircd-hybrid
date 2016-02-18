@@ -147,7 +147,7 @@ do_map(struct Client *source_p)
 static int
 m_map(struct Client *source_p, int parc, char *parv[])
 {
-  static time_t last_used = 0;
+  static uintmax_t last_used = 0;
 
   if (ConfigServerHide.flatten_links)
     return m_not_oper(source_p, parc, parv);

@@ -91,8 +91,8 @@ m_join(struct Client *source_p, int parc, char *parv[])
 static int
 ms_join(struct Client *source_p, int parc, char *parv[])
 {
-  time_t newts = 0;
-  time_t oldts = 0;
+  uintmax_t newts = 0;
+  uintmax_t oldts = 0;
   int keep_our_modes = 1;
   int keep_new_modes = 1;
   int isnew = 0;
@@ -130,7 +130,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     chptr = channel_make(parv[2]);
   }
 
-  newts   = strtoimax(parv[1], NULL, 10);
+  newts   = strtoumax(parv[1], NULL, 10);
   oldts   = chptr->creationtime;
   oldmode = &chptr->mode;
 

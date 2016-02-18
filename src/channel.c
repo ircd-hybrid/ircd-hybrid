@@ -872,7 +872,7 @@ check_spambot_warning(struct Client *client_p, const char *name)
  */
 void
 channel_set_topic(struct Channel *chptr, const char *topic,
-                  const char *topic_info, time_t topicts, int local)
+                  const char *topic_info, uintmax_t topicts, int local)
 {
   if (local)
     strlcpy(chptr->topic, topic, IRCD_MIN(sizeof(chptr->topic), ConfigServerInfo.max_topic_length + 1));

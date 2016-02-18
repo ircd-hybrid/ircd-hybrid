@@ -99,7 +99,7 @@ whowas_off_history(struct Client *client_p)
 }
 
 struct Client *
-whowas_get_history(const char *nick, time_t timelimit)
+whowas_get_history(const char *nick, uintmax_t timelimit)
 {
   dlink_node *node = NULL;
 

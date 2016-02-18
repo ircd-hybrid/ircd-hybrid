@@ -55,8 +55,8 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
   int accept_remote = 0;
-  time_t remote_channel_ts = strtoimax(parv[1], NULL, 10);
-  time_t remote_topic_ts = strtoimax(parv[3], NULL, 10);
+  uintmax_t remote_channel_ts = strtoumax(parv[1], NULL, 10);
+  uintmax_t remote_topic_ts = strtoumax(parv[3], NULL, 10);
   const char *topic = parv[5];
   const char *setby = parv[4];
 

@@ -71,12 +71,12 @@ struct Channel
   char topic[TOPICLEN + 1];
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];
 
-  time_t creationtime;
-  time_t topic_time;
-  time_t last_knock;  /**< Don't allow knock to flood */
-  time_t last_invite;
-  time_t last_join_time;
-  time_t first_received_message_time; /*!< channel flood control */
+  uintmax_t creationtime;
+  uintmax_t topic_time;
+  uintmax_t last_knock;  /**< Don't allow knock to flood */
+  uintmax_t last_invite;
+  uintmax_t last_join_time;
+  uintmax_t first_received_message_time; /*!< channel flood control */
   unsigned int flags;
   int received_number_of_privmsgs;
 
@@ -113,7 +113,7 @@ struct Ban
   char host[HOSTLEN + 1];
   char who[NICKLEN + USERLEN + HOSTLEN + 3];
   size_t len;
-  time_t when;
+  uintmax_t when;
   struct irc_ssaddr addr;
   int bits;
   int type;
@@ -142,7 +142,7 @@ extern void channel_send_modes(struct Client *, struct Channel *);
 extern void channel_modes(struct Channel *, struct Client *, char *, char *);
 extern void check_spambot_warning(struct Client *, const char *);
 extern void channel_free(struct Channel *);
-extern void channel_set_topic(struct Channel *, const char *, const char *, time_t, int);
+extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, int);
 
 extern const char *get_member_status(const struct Membership *, const int);
 

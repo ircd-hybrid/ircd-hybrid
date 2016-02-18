@@ -104,7 +104,7 @@ dline_check(struct AddressRec *arec)
  */
 static void
 dline_add(struct Client *source_p, const char *addr, const char *reason,
-          time_t duration)
+          uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
 
@@ -168,7 +168,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   const struct Client *target_p = NULL;
   struct irc_ssaddr daddr;
   struct MaskItem *conf = NULL;
-  time_t duration = 0;
+  uintmax_t duration = 0;
   int bits = 0, aftype = 0, t = 0;
   char hostip[HOSTIPLEN + 1];
 
@@ -276,7 +276,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   const char *dlhost, *reason;
   struct irc_ssaddr daddr;
   struct MaskItem *conf = NULL;
-  time_t duration = 0;
+  uintmax_t duration = 0;
   int bits = 0, aftype = 0;
 
   if (parc != 5 || EmptyString(parv[4]))

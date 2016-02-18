@@ -88,7 +88,7 @@ valid_xline(struct Client *source_p, const char *gecos)
  */
 static void
 xline_add(struct Client *source_p, const char *mask, const char *reason,
-          time_t duration)
+          uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
 
@@ -174,7 +174,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
   char *mask = NULL;
   const struct GecosItem *gecos = NULL;
   char *target_server = NULL;
-  time_t duration = 0;
+  uintmax_t duration = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_XLINE))
   {

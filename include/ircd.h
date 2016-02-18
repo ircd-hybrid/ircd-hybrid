@@ -54,8 +54,8 @@ struct ServerStatistics
   uintmax_t        is_sbs;  /* bytes sent to servers */
   uintmax_t        is_sbr;  /* bytes received from servers */
 
-  time_t          is_cti;  /* time spent connected by clients */
-  time_t          is_sti;  /* time spent connected by servers */
+  uintmax_t        is_cti;  /* time spent connected by clients */
+  uintmax_t        is_sti;  /* time spent connected by servers */
 
   unsigned int    is_cl;   /* number of client connections */
   unsigned int    is_sv;   /* number of server connections */
@@ -91,6 +91,11 @@ struct ServerState_t
   unsigned int foreground;
 };
 
+struct ServerTime
+{
+  uintmax_t tv_sec, tv_usec;
+};
+
 
 #ifdef HAVE_LIBGEOIP
 extern GeoIP *GeoIPv4_ctx;
@@ -109,7 +114,7 @@ extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
 extern struct event event_write_links_file;
-extern struct timeval SystemTime;
+extern struct ServerTime SystemTime;
 #define CurrentTime SystemTime.tv_sec
 
 extern void set_time(void);

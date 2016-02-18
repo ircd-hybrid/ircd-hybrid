@@ -70,7 +70,7 @@ struct SetOptions GlobalSetOptions;  /* /quote set variables */
 struct Counter Count;
 struct ServerState_t server_state;
 struct ServerStatistics ServerStats;
-struct timeval SystemTime;
+struct ServerTime SystemTime;
 struct Connection meConnection;  /* That's also part of me */
 struct Client me = { .connection = &meConnection };  /* That's me */
 
@@ -156,14 +156,14 @@ set_time(void)
     server_die(buf, SERVER_SHUTDOWN);
   }
 
-  if (newtime.tv_sec < CurrentTime)
+  if ((uintmax_t)newtime.tv_sec < CurrentTime)
   {
     ilog(LOG_TYPE_IRCD, "System clock is running backwards - (%ju < %ju)",
-         newtime.tv_sec, CurrentTime);
+         (uintmax_t)newtime.tv_sec, CurrentTime);
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "System clock is running backwards - (%ju < %ju)",
-                         newtime.tv_sec, CurrentTime);
-    event_set_back_events(CurrentTime - newtime.tv_sec);
+                         (uintmax_t)newtime.tv_sec, CurrentTime);
+    event_set_back_events(CurrentTime - (uintmax_t)newtime.tv_sec);
   }
 
   SystemTime.tv_sec = newtime.tv_sec;

@@ -34,11 +34,11 @@ struct event
   /* public */
   const char *name;
   void (*handler)(void *);
-  time_t when;
+  uintmax_t when;
   unsigned int oneshot;
 
   /* private */
-  time_t next;
+  uintmax_t next;
   void *data;
   unsigned int active;
   dlink_node node;
@@ -49,5 +49,5 @@ extern void event_add(struct event *, void *);
 extern void event_addish(struct event *, void *);
 extern void event_delete(struct event *);
 extern void event_run(void);
-extern void event_set_back_events(time_t);
+extern void event_set_back_events(uintmax_t);
 #endif /* INCLUDED_event_h */

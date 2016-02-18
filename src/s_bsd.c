@@ -355,7 +355,7 @@ ignoreErrno(int ierrno)
  * Set the timeout for the fd
  */
 void
-comm_settimeout(fde_t *fd, time_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
+comm_settimeout(fde_t *fd, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
   assert(fd->flags.open);
 
@@ -377,7 +377,7 @@ comm_settimeout(fde_t *fd, time_t timeout, void (*callback)(fde_t *, void *), vo
  * comm_close() is replaced with fd_close() in fdlist.c
  */
 void
-comm_setflush(fde_t *fd, time_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
+comm_setflush(fde_t *fd, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
   assert(fd->flags.open);
 
@@ -446,7 +446,7 @@ comm_checktimeouts(void *unused)
 void
 comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockaddr *clocal,
                  int socklen, void (*callback)(fde_t *, int, void *), void *data,
-                 int aftype, time_t timeout)
+                 int aftype, uintmax_t timeout)
 {
   struct addrinfo hints, *res;
   char portname[PORTNAMELEN + 1];

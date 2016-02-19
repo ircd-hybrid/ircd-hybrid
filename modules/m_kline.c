@@ -86,7 +86,7 @@ kline_check(struct AddressRec *arec)
  */
 static void
 kline_add(struct Client *source_p, const char *user, const char *host,
-          const char *reason, time_t duration)
+          const char *reason, uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
 
@@ -194,7 +194,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   char *user = NULL;
   char *host = NULL;
   char *target_server = NULL;
-  time_t duration = 0;
+  uintmax_t duration = 0;
   int bits = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_KLINE))
@@ -270,7 +270,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_kline(struct Client *source_p, int parc, char *parv[])
 {
-  time_t duration = 0;
+  uintmax_t duration = 0;
   const char *user, *host, *reason;
   int bits = 0;
 

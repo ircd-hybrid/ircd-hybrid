@@ -81,7 +81,7 @@ extern void sendto_realops_flags(unsigned int, int, int,
                                  const char *, ...) AFP(4,5);
 extern void sendto_wallops_flags(unsigned int, const struct Client *,
                                  const char *, ...) AFP(3,4);
-extern void sendto_realops_flags_ratelimited(time_t *, const char *, ...) AFP(2,3);
+extern void sendto_realops_flags_ratelimited(uintmax_t *, const char *, ...) AFP(2,3);
 
 extern void sendto_anywhere(struct Client *, const struct Client *,
                             const char *,

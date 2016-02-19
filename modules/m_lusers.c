@@ -51,7 +51,7 @@
 static int
 m_lusers(struct Client *source_p, int parc, char *parv[])
 {
-  static time_t last_used = 0;
+  static uintmax_t last_used = 0;
 
   if ((last_used + ConfigGeneral.pace_wait_simple) > CurrentTime)
   {

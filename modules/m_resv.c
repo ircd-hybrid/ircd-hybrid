@@ -44,13 +44,13 @@
  *
  * inputs	- source_p
  *		- thing to resv
- *		- time_t if tkline
+ *		- !0 if temporary
  *		- reason
  * outputs	- none
  * side effects	- parse resv, create if valid
  */
 static void
-resv_handle(struct Client *source_p, const char *mask, time_t duration, const char *reason)
+resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const char *reason)
 {
   if (!HasFlag(source_p, FLAGS_SERVICE) && !HasUMode(source_p, UMODE_ADMIN) && has_wildcards(mask))
   {
@@ -121,7 +121,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   char *mask = NULL;
   char *reason = NULL;
   char *target_server = NULL;
-  time_t duration = 0;
+  uintmax_t duration = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_RESV))
   {

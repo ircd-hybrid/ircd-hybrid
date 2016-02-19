@@ -202,7 +202,7 @@ static void
 check_pings_list(dlink_list *list)
 {
   char buf[32] = "";  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
-  int ping = 0;      /* ping time value from client */
+  unsigned int ping = 0;      /* ping time value from client */
   dlink_node *node = NULL, *node_next = NULL;
 
   DLINK_FOREACH_SAFE(node, node_next, list->head)
@@ -288,7 +288,6 @@ check_unknowns_list(void)
  * kill off stuff that should die
  *
  * inputs       - NOT USED (from event)
- * output       - next time_t when check_pings() should be called again
  * side effects -
  *
  *
@@ -498,7 +497,7 @@ find_chasing(struct Client *source_p, const char *name)
   if (IsDigit(*name))
     return NULL;
 
-  target_p = whowas_get_history(name, (time_t)ConfigGeneral.kill_chase_time_limit);
+  target_p = whowas_get_history(name, (uintmax_t)ConfigGeneral.kill_chase_time_limit);
 
   if (!target_p)
   {
@@ -721,7 +720,7 @@ exit_client(struct Client *source_p, const char *comment)
 
     if (IsClient(source_p))
     {
-      time_t on_for = CurrentTime - source_p->connection->firsttime;
+      uintmax_t on_for = CurrentTime - source_p->connection->firsttime;
 
       assert(Count.local > 0);
 

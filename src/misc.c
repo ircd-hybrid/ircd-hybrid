@@ -31,10 +31,10 @@
 
 
 const char *
-date(time_t lclock)
+date(uintmax_t lclock)
 {
   static char buf[80];
-  static time_t lclock_last;
+  static uintmax_t lclock_last;
 
   if (!lclock)
     lclock = CurrentTime;
@@ -42,17 +42,17 @@ date(time_t lclock)
   if (lclock_last != lclock)
   {
     lclock_last = lclock;
-    strftime(buf, sizeof(buf), "%A %B %-e %Y -- %T %z", localtime(&lclock));
+    strftime(buf, sizeof(buf), "%A %B %-e %Y -- %T %z", localtime((time_t *)&lclock));
   }
 
   return buf;
 }
 
 const char *
-date_iso8601(time_t lclock)
+date_iso8601(uintmax_t lclock)
 {
   static char buf[MAX_DATE_STRING];
-  static time_t lclock_last;
+  static uintmax_t lclock_last;
 
   if (!lclock)
     lclock = CurrentTime;
@@ -60,7 +60,7 @@ date_iso8601(time_t lclock)
   if (lclock_last != lclock)
   {
     lclock_last = lclock;
-    strftime(buf, sizeof(buf), "%FT%T%z", localtime(&lclock));
+    strftime(buf, sizeof(buf), "%FT%T%z", localtime((time_t *)&lclock));
   }
 
   return buf;
@@ -79,10 +79,10 @@ date_iso8601(time_t lclock)
  * Thu Nov 24 18:22:48 1986
  */
 const char *
-date_ctime(time_t lclock)
+date_ctime(uintmax_t lclock)
 {
   static char buf[MAX_DATE_STRING];
-  static time_t lclock_last;
+  static uintmax_t lclock_last;
 
   if (!lclock)
     lclock = CurrentTime;
@@ -90,14 +90,14 @@ date_ctime(time_t lclock)
   if (lclock_last != lclock)
   {
     lclock_last = lclock;
-    strftime(buf, sizeof(buf), "%a %b %-e %T %Y", localtime(&lclock));
+    strftime(buf, sizeof(buf), "%a %b %-e %T %Y", localtime((time_t *)&lclock));
   }
 
   return buf;
 }
 
 const char *
-time_dissect(time_t duration)
+time_dissect(uintmax_t duration)
 {
   static char buf[32];  /* 32 = sizeof("9999999999999999 days, 23:59:59") */
   unsigned int days = 0, hours = 0, minutes = 0, seconds = 0;

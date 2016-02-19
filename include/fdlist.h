@@ -65,10 +65,10 @@ typedef struct _fde
   void *write_data;
   void (*timeout_handler)(struct _fde *, void *);
   void *timeout_data;
-  time_t timeout;
+  uintmax_t timeout;
   void (*flush_handler)(struct _fde *, void *);
   void *flush_data;
-  time_t flush_timeout;
+  uintmax_t flush_timeout;
 
   struct
   {

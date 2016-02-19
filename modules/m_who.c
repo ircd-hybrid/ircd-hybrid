@@ -148,7 +148,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
 {
   dlink_node *node = NULL;
   unsigned int maxmatches = WHO_MAX_REPLIES;
-  static time_t last_used = 0;
+  static uintmax_t last_used = 0;
 
   if (!HasUMode(source_p, UMODE_OPER))
   {

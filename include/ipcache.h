@@ -41,7 +41,7 @@ struct ip_entry
   struct irc_ssaddr ip;           /**< Holds an IPv6 or IPv4 address */
   unsigned int count;             /**< Number of registered users using this IP */
   unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
-  time_t last_attempt;            /**< The last time someone connected from this IP */
+  uintmax_t last_attempt;         /**< The last time someone connected from this IP */
 };
 
 extern struct ip_entry *ipcache_find_or_add_address(const struct irc_ssaddr *);

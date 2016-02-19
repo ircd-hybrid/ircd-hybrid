@@ -49,18 +49,18 @@ extern void report_error(int, const char *, const char *, int);
 extern int get_sockerr(int);
 extern int ignoreErrno(int);
 
-extern void comm_settimeout(fde_t *, time_t, void (*)(fde_t *, void *), void *);
-extern void comm_setflush(fde_t *, time_t, void (*)(fde_t *, void *), void *);
+extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
+extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
 extern void comm_connect_tcp(fde_t *, const char *, unsigned short, struct sockaddr *, int,
-                             void (struct _fde *, int, void *), void *, int, time_t);
+                             void (struct _fde *, int, void *), void *, int, uintmax_t);
 extern const char *comm_errstr(int);
 extern int comm_open(fde_t *, int, int, int, const char *);
 extern int comm_accept(struct Listener *, struct irc_ssaddr *);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void init_netio(void);
-extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, time_t);
+extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);
 extern void comm_select(void);
 extern void remove_ipv6_mapping(struct irc_ssaddr *);
 #endif /* INCLUDED_s_bsd_h */

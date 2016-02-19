@@ -194,7 +194,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (parc > 3 && IsDigit(*parv[3]))
-    if (strtoimax(parv[3], NULL, 10) > chptr->creationtime)
+    if (strtoumax(parv[3], NULL, 10) > chptr->creationtime)
       return 0;
 
   chptr->last_invite = CurrentTime;

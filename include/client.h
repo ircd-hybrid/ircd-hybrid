@@ -310,18 +310,18 @@ struct Connection
 
   uintmax_t serial;     /**< Used to enforce 1 send per nick */
 
-  time_t       lasttime;   /**< Last time data read from socket */
-  time_t       firsttime;  /**< Time client was created */
-  time_t       since;      /**< Last time we parsed something */
-  time_t       last_join_time;   /**< When this client last joined a channel */
-  time_t       last_leave_time;  /**< When this client last left a channel */
+  uintmax_t    lasttime;   /**< Last time data read from socket */
+  uintmax_t    firsttime;  /**< Time client was created */
+  uintmax_t    since;      /**< Last time we parsed something */
+  uintmax_t    last_join_time;   /**< When this client last joined a channel */
+  uintmax_t    last_leave_time;  /**< When this client last left a channel */
   int          join_leave_count; /**< Count of JOIN/LEAVE in less than
                                          MIN_JOIN_LEAVE_TIME seconds */
   int          oper_warn_count_down; /**< Warn opers of this possible
                                           spambot every time this gets to 0 */
-  time_t       last_caller_id_time;
-  time_t       first_received_message_time;
-  time_t       last_privmsg;  /**< Last time we got a PRIVMSG */
+  uintmax_t    last_caller_id_time;
+  uintmax_t    first_received_message_time;
+  uintmax_t    last_privmsg;  /**< Last time we got a PRIVMSG */
 
   int          received_number_of_privmsgs;
 
@@ -339,7 +339,7 @@ struct Connection
   struct
   {
     unsigned int count;  /**< How many AWAY/INVITE/KNOCK/NICK requests client has sent */
-    time_t last_attempt;  /**< Last time the AWAY/INVITE/KNOCK/NICK request was issued */
+    uintmax_t last_attempt;  /**< Last time the AWAY/INVITE/KNOCK/NICK request was issued */
   } away, invite, knock, nick;
 
   struct AuthRequest auth;
@@ -378,7 +378,7 @@ struct Client
   struct Client    *servptr;    /**< Points to server this Client is on */
   struct Client    *from;       /**< == self, if Local Client, *NEVER* NULL! */
 
-  time_t            tsinfo;     /**< TS on the nick, SVINFO on server */
+  uintmax_t         tsinfo;     /**< TS on the nick, SVINFO on server */
 
   unsigned int      flags;      /**< Client flags */
   unsigned int      umodes;     /**< User modes this client has set */

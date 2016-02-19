@@ -32,8 +32,8 @@ struct GecosItem
   dlink_node node;
   char *mask;
   char *reason;
-  time_t expire;
-  time_t setat;
+  uintmax_t expire;
+  uintmax_t setat;
   unsigned int in_database;
 };
 

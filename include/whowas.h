@@ -37,7 +37,7 @@ struct Whowas
 {
   int hashv;
   int shide;
-  time_t logoff;
+  uintmax_t logoff;
   char account[ACCOUNTLEN + 1];  /**< Services account */
   char name[NICKLEN + 1];
   char username[USERLEN + 1];
@@ -78,7 +78,7 @@ extern void whowas_off_history(struct Client *);
 **      nickname within the timelimit. Returns NULL, if no
 **      one found...
 */
-extern struct Client *whowas_get_history(const char *, time_t);
+extern struct Client *whowas_get_history(const char *, uintmax_t);
 
 /*
 ** for debugging...counts related structures stored in whowas array.

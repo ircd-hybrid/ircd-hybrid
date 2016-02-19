@@ -68,7 +68,7 @@ init_netio(void)
  */
 void
 comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
-               void *client_data, time_t timeout)
+               void *client_data, uintmax_t timeout)
 {
   int new_events;
 

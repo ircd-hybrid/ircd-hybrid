@@ -88,7 +88,7 @@ kq_update_events(int fd, int filter, int what)
  */
 void
 comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
-               void *client_data, time_t timeout)
+               void *client_data, uintmax_t timeout)
 {
   int new_events, diff;
 

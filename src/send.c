@@ -825,7 +825,7 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
  *                (at most 5 warnings every 5 seconds)
  */
 void
-sendto_realops_flags_ratelimited(time_t *rate, const char *pattern, ...)
+sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
 {
   va_list args;
   char buffer[IRCD_BUFSIZE] = "";

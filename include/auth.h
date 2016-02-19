@@ -58,7 +58,7 @@ struct AuthRequest
   unsigned int flags;     /**< Current state of request. */
   struct Client *client;  /**< Pointer to Client structure for request. */
   fde_t fd;               /**< File descriptor for identd queries. */
-  time_t timeout;         /**< Time when query expires. */
+  uintmax_t timeout;      /**< Time when query expires. */
 };
 
 extern void auth_init(void);

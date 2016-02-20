@@ -443,7 +443,7 @@ extern unsigned int client_get_idle_time(const struct Client *, const struct Cli
 extern struct split_nuh_item *find_accept(const char *, const char *,
                                           const char *, struct Client *,
                                           int (*)(const char *, const char *));
-extern void client_attach_svstag(struct Client *, unsigned int, const char *, const char *const);
+extern void client_attach_svstag(struct Client *, unsigned int, const char *, const char *);
 extern void client_clear_svstags(struct Client *);
 extern void del_accept(struct split_nuh_item *, struct Client *);
 extern void del_all_accepts(struct Client *);

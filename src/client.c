@@ -158,7 +158,7 @@ free_client(struct Client *client_p)
 
 void
 client_attach_svstag(struct Client *client_p, unsigned int numeric,
-                     const char *umodes, const char *const tag)
+                     const char *umodes, const char *tag)
 {
   const struct user_modes *tab = NULL;
 

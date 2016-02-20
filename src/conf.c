@@ -1037,8 +1037,6 @@ clear_out_old_conf(void)
     }
   }
 
-  motd_clear();  /* Clear motd {} items and re-cache default motd */
-
   /*
    * Don't delete the class table, rather mark all entries for deletion.
    * The table is cleaned up by class_delete_marked. - avalon

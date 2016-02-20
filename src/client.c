@@ -720,8 +720,6 @@ exit_client(struct Client *source_p, const char *comment)
 
     if (IsClient(source_p))
     {
-      uintmax_t on_for = CurrentTime - source_p->connection->firsttime;
-
       assert(Count.local > 0);
 
       --Count.local;
@@ -743,12 +741,13 @@ exit_client(struct Client *source_p, const char *comment)
                            source_p->name, source_p->username, source_p->host,
                            source_p->sockhost, comment);
 
-      ilog(LOG_TYPE_USER, "%s (%3u:%02u:%02u): %s!%s@%s %ju/%ju",
-           date_ctime(source_p->connection->firsttime), (unsigned int)(on_for / 3600),
-           (unsigned int)((on_for % 3600)/60), (unsigned int)(on_for % 60),
+      ilog(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
+           date_ctime(source_p->connection->firsttime),
+           CurrentTime - source_p->connection->firsttime,
            source_p->name, source_p->username, source_p->host,
-           source_p->connection->send.bytes>>10,
-           source_p->connection->recv.bytes>>10);
+           source_p->sockhost, source_p->account,
+           source_p->connection->send.bytes >> 10,
+           source_p->connection->recv.bytes >> 10, source_p->info);
     }
     else if (IsServer(source_p))
     {

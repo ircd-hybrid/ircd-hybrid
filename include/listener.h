@@ -53,5 +53,5 @@ extern const dlink_list *listener_get_list(void);
 extern void listener_add(int, const char *, unsigned int);
 extern void listener_release(struct Listener *);
 extern void listener_close_marked(void);
-extern const char *listener_get_name(const struct Listener *const);
+extern const char *listener_get_name(const struct Listener *);
 #endif

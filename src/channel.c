@@ -580,7 +580,7 @@ get_member_status(const struct Membership *member, const int combine)
  * \return 1 if ban found for given n!u\@h mask, 0 otherwise
  */
 static int
-find_bmask(const struct Client *client_p, const dlink_list *const list)
+find_bmask(const struct Client *client_p, const dlink_list *list)
 {
   const dlink_node *node = NULL;
 

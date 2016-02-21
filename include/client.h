@@ -457,7 +457,7 @@ extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
 extern struct Client *make_client(struct Client *);
 extern struct Client *find_chasing(struct Client *, const char *);
-extern struct Client *find_person(const struct Client *const, const char *);
+extern struct Client *find_person(const struct Client *, const char *);
 extern const char *get_client_name(const struct Client *, enum addr_mask_type);
 
 #endif /* INCLUDED_client_h */

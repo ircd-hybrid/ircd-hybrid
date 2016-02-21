@@ -267,74 +267,6 @@ report_resv(struct Client *source_p)
   }
 }
 
-/*
- * This is part of the STATS replies. There is no offical numeric for this
- * since this isn't an official command, in much the same way as HASH isn't.
- * It is also possible that some systems wont support this call or have
- * different field names for "struct rusage".
- * -avalon
- */
-static void
-stats_usage(struct Client *source_p, int parc, char *parv[])
-{
-  struct rusage rus;
-  uintmax_t secs;
-  uintmax_t rup;
-#ifdef  hz
-# define hzz hz
-#else
-# ifdef HZ
-#  define hzz HZ
-# else
-  int hzz = 1;
-# endif
-#endif
-
-  if (getrusage(RUSAGE_SELF, &rus) == -1)
-  {
-    sendto_one_notice(source_p, &me, ":Getruseage error: %s",
-                      strerror(errno));
-    return;
-  }
-
-  secs = rus.ru_utime.tv_sec + rus.ru_stime.tv_sec;
-
-  if (secs == 0)
-    secs = 1;
-
-  rup = (CurrentTime - me.connection->since) * hzz;
-
-  if (rup == 0)
-    rup = 1;
-
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "R :CPU Secs %d:%02d User %d:%02d System %d:%02d",
-                     (int)(secs/60), (int)(secs%60),
-                     (int)(rus.ru_utime.tv_sec/60), (int)(rus.ru_utime.tv_sec%60),
-                     (int)(rus.ru_stime.tv_sec/60), (int)(rus.ru_stime.tv_sec%60));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "R :RSS %ld ShMem %ju Data %ju Stack %ju",
-                     rus.ru_maxrss,
-                     (uintmax_t)(rus.ru_ixrss / rup), (uintmax_t)(rus.ru_idrss / rup),
-                     (uintmax_t)(rus.ru_isrss / rup));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "R :Swaps %d Reclaims %d Faults %d",
-                     (int)rus.ru_nswap,
-                     (int)rus.ru_minflt, (int)rus.ru_majflt);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "R :Block in %d out %d",
-                     (int)rus.ru_inblock,
-                     (int)rus.ru_oublock);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "R :Msg Rcv %d Send %d",
-                     (int)rus.ru_msgrcv,
-                     (int)rus.ru_msgsnd);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "R :Signals %d Context Vol. %d Invol %d",
-                     (int)rus.ru_nsignals,
-                     (int)rus.ru_nvcsw, (int)rus.ru_nivcsw);
-}
-
 static void
 stats_memory(struct Client *source_p, int parc, char *parv[])
 {
@@ -1462,8 +1394,6 @@ static const struct StatsStruct  stats_tab[] =
   { 'P',  stats_ports,       0           },
   { 'q',  stats_resv,        UMODE_OPER  },
   { 'Q',  stats_resv,        UMODE_OPER  },
-  { 'r',  stats_usage,       UMODE_OPER  },
-  { 'R',  stats_usage,       UMODE_OPER  },
   { 's',  stats_service,     UMODE_OPER  },
   { 'S',  stats_service,     UMODE_OPER  },
   { 't',  stats_tstats,      UMODE_OPER  },

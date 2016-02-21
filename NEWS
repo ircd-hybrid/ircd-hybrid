@@ -1,5 +1,6 @@
 -- Noteworthy changes in version 8.2.15 (2016-??-??)
 o) Added proper support for Raspbian/ARM
+o) Fixed an assert with empty user = "" directives in auth {} blocks
 
 
 -- Noteworthy changes in version 8.2.14 (2016-02-09)

@@ -81,6 +81,13 @@ listener_get_name(const struct Listener *listener)
   return buf;
 }
 
+void
+listener_count_memory(unsigned int *count, size_t *bytes)
+{
+  (*count) = dlink_list_length(&listener_list);
+  (*bytes) = *count * sizeof(struct Listener);
+}
+
 static void
 listener_accept_connection(fde_t *pfd, void *data)
 {

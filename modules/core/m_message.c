@@ -458,7 +458,6 @@ handle_special(int p_or_n, struct Client *source_p,
 static void
 build_target_list(int p_or_n, struct Client *source_p, char *list, const char *text)
 {
-  unsigned int type = 0;
   char *p = NULL;
   void *target = NULL;
 
@@ -467,8 +466,6 @@ build_target_list(int p_or_n, struct Client *source_p, char *list, const char *t
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
   {
-    const char *with_prefix = NULL;
-
     /*
      * Channels are privmsg'd a lot more than other clients, moved up
      * here plain old channel msg?
@@ -518,8 +515,8 @@ build_target_list(int p_or_n, struct Client *source_p, char *list, const char *t
     }
 
     /* @#channel or +#channel message ? */
-    type = 0;
-    with_prefix = name;
+    unsigned int type = 0;
+    const char *with_prefix = name;
 
     /* Allow %+@ if someone wants to do that */
     while (1)

@@ -315,6 +315,9 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   unsigned int watch_list_entries = 0;   /* watchlist entries     */
   size_t watch_list_memory = 0; /* watchlist memory used */
 
+  unsigned int listener_count = 0;
+  size_t listener_memory = 0;
+
 
   DLINK_FOREACH(gptr, global_client_list.head)
   {
@@ -419,6 +422,12 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      dlink_list_length(resv_chan_get_list()) * sizeof(struct ResvItem),
                      dlink_list_length(resv_nick_get_list()),
                      dlink_list_length(resv_nick_get_list()) * sizeof(struct ResvItem));
+
+  listener_count_memory(&listener_count, &listener_memory);
+
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+                     "z :Listeners allocated %d(%zu)",
+                     listener_count, listener_memory);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Classes %u(%zu)",

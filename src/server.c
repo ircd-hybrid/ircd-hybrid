@@ -33,15 +33,12 @@
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "s_bsd.h"
-#include "numeric.h"
 #include "packet.h"
 #include "conf.h"
 #include "server.h"
 #include "log.h"
-#include "user.h"
 #include "send.h"
 #include "memory.h"
-#include "channel.h"
 #include "parse.h"
 
 

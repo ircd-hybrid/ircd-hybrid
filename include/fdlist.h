@@ -45,7 +45,6 @@ enum
   COMM_ERR_MAX
 };
 
-struct _fde;
 struct Client;
 
 typedef struct _fde

@@ -72,7 +72,7 @@ listener_free(struct Listener *listener)
  * returns "host.foo.org/6667" for a given listener
  */
 const char *
-listener_get_name(const struct Listener *const listener)
+listener_get_name(const struct Listener *listener)
 {
   static char buf[HOSTLEN + HOSTIPLEN + PORTNAMELEN + 4];  /* +4 for [,/,],\0 */
 

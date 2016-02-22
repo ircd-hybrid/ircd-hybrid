@@ -1,6 +1,8 @@
 -- Noteworthy changes in version 8.2.15 (2016-??-??)
-o) Added proper support for Raspbian/ARM
+o) Added proper support for Raspbian/ARM. Gracias to Beave/2600.net
+   for providing a box for testing purposes.
 o) Fixed an assert with empty user = "" directives in auth {} blocks
+o) "STATS z" now shows allocated listeners
 
 
 -- Noteworthy changes in version 8.2.14 (2016-02-09)

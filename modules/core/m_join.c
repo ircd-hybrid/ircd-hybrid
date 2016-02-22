@@ -319,7 +319,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode)
     }
 
     *mbuf++ = 'l';
-    len = sprintf(pbuf, "%d ", mode->limit);
+    len = sprintf(pbuf, "%u ", mode->limit);
     pbuf += len;
   }
 

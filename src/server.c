@@ -769,7 +769,7 @@ finish_ssl_server_handshake(struct Client *client_p)
     return;
   }
 
-  sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
+  sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
   send_capabilities(client_p);
 
@@ -921,7 +921,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
     return;
   }
 
-  sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
+  sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
   send_capabilities(client_p);
 

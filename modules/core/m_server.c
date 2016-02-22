@@ -289,7 +289,7 @@ server_estab(struct Client *client_p)
 
   if (IsUnknown(client_p))
   {
-    sendto_one(client_p, "PASS %s TS %d %s", conf->spasswd, TS_CURRENT, me.id);
+    sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
     send_capabilities(client_p);
 
@@ -297,7 +297,7 @@ server_estab(struct Client *client_p)
                me.name, ConfigServerHide.hidden ? "(H) " : "", me.info);
   }
 
-  sendto_one(client_p, ":%s SVINFO %d %d 0 :%ju", me.id, TS_CURRENT, TS_MIN,
+  sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MIN,
              CurrentTime);
 
   /* *WARNING*

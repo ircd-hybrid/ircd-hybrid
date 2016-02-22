@@ -299,7 +299,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
     *mbuf++ = 'l';
 
     if (IsServer(client_p) || IsMember(client_p, chptr))
-      pbuf += sprintf(pbuf, "%d ", chptr->mode.limit);
+      pbuf += sprintf(pbuf, "%u ", chptr->mode.limit);
   }
 
   if (chptr->mode.key[0])

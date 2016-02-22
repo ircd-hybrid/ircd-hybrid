@@ -585,7 +585,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
   if (mode->limit && oldmode->limit != mode->limit)
   {
     *mbuf++ = 'l';
-    len = sprintf(pbuf, "%d ", mode->limit);
+    len = sprintf(pbuf, "%u ", mode->limit);
     pbuf += len;
     pargs++;
   }

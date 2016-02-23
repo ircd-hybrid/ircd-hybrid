@@ -153,7 +153,7 @@ relay_xline(struct Client *source_p, char *parv[])
       return;
     }
 
-    xline_add(source_p, parv[2], parv[4], atoi(parv[3]));
+    xline_add(source_p, parv[2], parv[4], strtoumax(parv[3], NULL, 10));
   }
 }
 

@@ -180,7 +180,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_RESV, source_p->servptr->name,
                   source_p->username, source_p->host))
-    resv_handle(source_p, parv[3], atoi(parv[2]), parv[4]);
+    resv_handle(source_p, parv[3], strtoumax(parv[2], NULL, 10), parv[4]);
   return 0;
 }
 

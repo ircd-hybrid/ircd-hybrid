@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.15 (2016-??-??)
+-- Noteworthy changes in version 8.2.15 (2016-02-24)
 o) Added proper support for Raspbian/ARM. Gracias to Beave/2600.net
    for providing a box for testing purposes.
 o) Fixed an assert with empty user = "" directives in auth {} blocks

@@ -1,3 +1,22 @@
+-- Noteworthy changes in version 8.2.15 (2016-02-24)
+o) Added proper support for Raspbian/ARM. Gracias to Beave/2600.net
+   for providing a box for testing purposes.
+o) Fixed an assert with empty user = "" directives in auth {} blocks
+o) "STATS z" now shows allocated listeners
+o) Fixed bug where 'can_flood' auth {} flags did not work on channels
+
+
+-- Noteworthy changes in version 8.2.14 (2016-02-09)
+o) Fixed server clustering
+o) Major cleanups to the configuration subsystem
+o) Improvements to libGeoIP support:
+   - Works now with IPv6 addresses
+   - Added 'libgeoip_database_options', 'libgeoip_ipv4_database_file',
+     and 'libgeoip_ipv6_database_file' configuration directives to the
+     serverinfo {} block
+o) Further improvements to GnuTLS support
+
+
 -- Noteworthy changes in version 8.2.13 (2016-02-02)
 o) Implemented support for GnuTLS. Currently ./configure's autodetection
    intentionally prefers OpenSSL over GnuTLS, so OpenSSL detection needs

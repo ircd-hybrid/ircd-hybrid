@@ -1,4 +1,6 @@
-INVITE <nickname> <channel>
+INVITE [ <nickname> <channel> ]
 
 INVITE sends a notice to the user that you have
 asked him/her to come to the specified channel.
+If used without parameters, it displays a list
+of channels you're invited to.

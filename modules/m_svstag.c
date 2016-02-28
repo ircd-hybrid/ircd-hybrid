@@ -28,13 +28,9 @@
 #include "client.h"
 #include "ircd.h"
 #include "send.h"
-#include "channel_mode.h"
 #include "parse.h"
-#include "memory.h"
 #include "modules.h"
 #include "irc_string.h"
-#include "user.h"
-#include "conf.h"
 
 
 /*! \brief SVSTAG command handler

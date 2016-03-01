@@ -333,8 +333,6 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   }
   else
   {
-    unsigned int length = 0;
-
     if ((s = strchr(ch, ' ')))
       *s++ = '\0';
 
@@ -362,7 +360,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
     assert(message->cmd);
 
     paramcount = message->args_max;
-    length = bufend - ((s) ? s : ch);
+
+    size_t length = bufend - ((s) ? s : ch);
     message->bytes += length;
   }
 

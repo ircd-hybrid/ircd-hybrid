@@ -812,8 +812,7 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
       continue;
 
     if (HasUMode(client_p, flags))
-      sendto_one(client_p, ":%s NOTICE %s :*** %s -- %s",
-                 me.name, client_p->name, ntype, nbuf);
+      sendto_one_notice(client_p, &me, ":*** %s -- %s", ntype, nbuf);
   }
 }
 

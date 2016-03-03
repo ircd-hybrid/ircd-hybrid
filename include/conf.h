@@ -123,7 +123,6 @@ struct MaskItem
   unsigned int       flags;
   unsigned int       modes;
   unsigned int       port;
-  unsigned int       count;
   unsigned int       aftype;
   unsigned int       active;
   unsigned int       htype;

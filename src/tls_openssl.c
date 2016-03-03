@@ -158,11 +158,7 @@ tls_new_cred(void)
 
       if (dh)
       {
-        if (DH_size(dh) >= 256)
-          SSL_CTX_set_tmp_dh(ConfigServerInfo.tls_ctx.server_ctx, dh);
-        else
-          ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- need at least a 2048 bit DH prime size");
-
+        SSL_CTX_set_tmp_dh(ConfigServerInfo.tls_ctx.server_ctx, dh);
         DH_free(dh);
       }
     }

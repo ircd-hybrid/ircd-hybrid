@@ -37,6 +37,8 @@ static struct Whowas WHOWAS[NICKNAMEHISTORYLENGTH];
 dlink_list WHOWASHASH[HASHSIZE];
 
 
+/*! \brief Initializes whowas table
+ */
 void
 whowas_init(void)
 {
@@ -44,6 +46,12 @@ whowas_init(void)
     WHOWAS[i].hashv = -1;
 }
 
+/*! \brief Adds the currently defined name of the client to history.
+ *         Usually called before changing to a new name (nick).
+ *         Client must be a fully registered user.
+ * \param client_p pointer to Client struct to add
+ * \param online   either 1 if it's a nick change or 0 on client exit
+ */
 void
 whowas_add_history(struct Client *client_p, const int online)
 {
@@ -86,6 +94,11 @@ whowas_add_history(struct Client *client_p, const int online)
   dlinkAdd(whowas, &whowas->tnode, &WHOWASHASH[whowas->hashv]);
 }
 
+/*! \brief This must be called when the client structure is about to
+ *         be released. History mechanism keeps pointers to client
+ *         structures and it must know when they cease to exist.
+ * \param client_p pointer to Client struct
+ */
 void
 whowas_off_history(struct Client *client_p)
 {
@@ -98,6 +111,12 @@ whowas_off_history(struct Client *client_p)
   }
 }
 
+/*! \brief Returns the current client that was using the given
+ *         nickname within the timelimit. Returns NULL, if no
+ *         one found...
+ * \param nick      name of the nick
+ * \param timelimit maximum age for a client since log-off
+ */
 struct Client *
 whowas_get_history(const char *nick, uintmax_t timelimit)
 {
@@ -119,6 +138,8 @@ whowas_get_history(const char *nick, uintmax_t timelimit)
   return NULL;
 }
 
+/*! \brief For debugging. Counts related structures stored in whowas array
+ */
 void
 whowas_count_memory(unsigned int *const count, size_t *const bytes)
 {

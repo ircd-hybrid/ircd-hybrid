@@ -250,30 +250,11 @@ dlinkFindDelete(dlink_list *list, void *data)
 
   DLINK_FOREACH(m, list->head)
   {
-    if (m->data != data)
-      continue;
-
-    if (m->next)
-      m->next->prev = m->prev;
-    else
+    if (m->data == data)
     {
-      assert(list->tail == m);
-      list->tail = m->prev;
+      dlinkDelete(m, list);
+      return m;
     }
-
-    if (m->prev)
-      m->prev->next = m->next;
-    else
-    {
-      assert(list->head == m);
-      list->head = m->next;
-    }
-
-    /* Set this to NULL does matter */
-    m->next = m->prev = NULL;
-    list->length--;
-
-    return m;
   }
 
   return NULL;

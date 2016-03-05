@@ -114,23 +114,23 @@ whowas_off_history(struct Client *client_p)
 /*! \brief Returns the current client that was using the given
  *         nickname within the timelimit. Returns NULL, if no
  *         one found...
- * \param nick      name of the nick
+ * \param name      name of the nick
  * \param timelimit maximum age for a client since log-off
  */
 struct Client *
-whowas_get_history(const char *nick, uintmax_t timelimit)
+whowas_get_history(const char *name, uintmax_t timelimit)
 {
   dlink_node *node = NULL;
 
   timelimit = CurrentTime - timelimit;
 
-  DLINK_FOREACH(node, WHOWASHASH[strhash(nick)].head)
+  DLINK_FOREACH(node, WHOWASHASH[strhash(name)].head)
   {
     struct Whowas *whowas = node->data;
 
     if (whowas->logoff < timelimit)
       continue;
-    if (irccmp(nick, whowas->name))
+    if (irccmp(name, whowas->name))
       continue;
     return whowas->online;
   }

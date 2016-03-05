@@ -142,7 +142,7 @@ report_cluster(struct Client *source_p)
 }
 
 static void
-report_service(struct Client *source_p)
+stats_service(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
 
@@ -154,7 +154,7 @@ report_service(struct Client *source_p)
 }
 
 static void
-report_gecos(struct Client *source_p)
+stats_gecos(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
 
@@ -244,7 +244,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
  * side effects - report all resvs to client.
  */
 static void
-report_resv(struct Client *source_p)
+stats_resv(struct Client *source_p, int parc, char *parv[])
 {
   const dlink_node *node = NULL;
 
@@ -1000,18 +1000,6 @@ stats_ports(struct Client *source_p, int parc, char *parv[])
 }
 
 static void
-stats_resv(struct Client *source_p, int parc, char *parv[])
-{
-  report_resv(source_p);
-}
-
-static void
-stats_service(struct Client *source_p, int parc, char *parv[])
-{
-  report_service(source_p);
-}
-
-static void
 stats_tstats(struct Client *source_p, int parc, char *parv[])
 {
   const dlink_node *node = NULL;
@@ -1130,12 +1118,6 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "v :%u Server(s)",
                      dlink_list_length(&local_server_list));
-}
-
-static void
-stats_gecos(struct Client *source_p, int parc, char *parv[])
-{
-  report_gecos(source_p);
 }
 
 static void

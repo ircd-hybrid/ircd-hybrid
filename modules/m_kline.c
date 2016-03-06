@@ -78,6 +78,47 @@ kline_check(struct AddressRec *arec)
   }
 }
 
+/* already_placed_kline()
+ * inputs       - user to complain to, username & host to check for
+ * outputs      - returns 1 on existing K-line, 0 if doesn't exist
+ * side effects - notifies source_p if the K-line already exists
+ */
+/*
+ * Note: This currently works if the new K-line is a special case of an
+ *       existing K-line, but not the other way round. To do that we would
+ *       have to walk the hash and check every existing K-line. -A1kmm.
+ */
+static int
+already_placed_kline(struct Client *source_p, const char *user, const char *host)
+{
+  struct irc_ssaddr iphost, *piphost;
+  struct MaskItem *conf = NULL;
+  int t = 0;
+  int aftype = 0;
+
+  if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
+  {
+    if (t == HM_IPV6)
+      aftype = AF_INET6;
+    else
+      aftype = AF_INET;
+
+    piphost = &iphost;
+  }
+  else
+    piphost = NULL;
+
+  if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, aftype, user, NULL, 0)))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
+                        user, host, conf->user, conf->host, conf->reason);
+    return 1;
+  }
+
+  return 0;
+}
+
 /* apply_tkline()
  *
  * inputs       -
@@ -85,10 +126,46 @@ kline_check(struct AddressRec *arec)
  * side effects - tkline as given is placed
  */
 static void
-kline_add(struct Client *source_p, const char *user, const char *host,
-          const char *reason, uintmax_t duration)
+kline_handle(struct Client *source_p, const char *user, const char *host,
+             const char *reason, uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
+
+  if (!HasFlag(source_p, FLAGS_SERVICE))
+  {
+    if (!valid_wild_card(source_p, 2, user, host))
+      return;
+
+    int bits = 0;
+    switch (parse_netmask(host, NULL, &bits))
+    {
+      case HM_IPV4:
+        if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
+        {
+          if (IsClient(source_p))
+            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                              ConfigGeneral.kline_min_cidr);
+          return;
+        }
+
+        break;
+      case HM_IPV6:
+        if ((unsigned int)bits < ConfigGeneral.kline_min_cidr6)
+        {
+          if (IsClient(source_p))
+            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                              ConfigGeneral.kline_min_cidr6);
+          return;
+        }
+
+        break;
+      default:  /* HM_HOST */
+        break;
+    }
+  }
+
+  if (already_placed_kline(source_p, user, host))
+    return;
 
   if (duration)
     snprintf(buf, sizeof(buf), "Temporary K-line %ju min. - %.*s (%s)",
@@ -137,47 +214,6 @@ kline_add(struct Client *source_p, const char *user, const char *host,
   kline_check(add_conf_by_address(CONF_KLINE, conf));
 }
 
-/* already_placed_kline()
- * inputs       - user to complain to, username & host to check for
- * outputs      - returns 1 on existing K-line, 0 if doesn't exist
- * side effects - notifies source_p if the K-line already exists
- */
-/*
- * Note: This currently works if the new K-line is a special case of an
- *       existing K-line, but not the other way round. To do that we would
- *       have to walk the hash and check every existing K-line. -A1kmm.
- */
-static int
-already_placed_kline(struct Client *source_p, const char *user, const char *host)
-{
-  struct irc_ssaddr iphost, *piphost;
-  struct MaskItem *conf = NULL;
-  int t = 0;
-  int aftype = 0;
-
-  if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
-  {
-    if (t == HM_IPV6)
-      aftype = AF_INET6;
-    else
-      aftype = AF_INET;
-
-    piphost = &iphost;
-  }
-  else
-    piphost = NULL;
-
-  if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, aftype, user, NULL, 0)))
-  {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
-                        user, host, conf->user, conf->host, conf->reason);
-    return 1;
-  }
-
-  return 0;
-}
-
 /* mo_kline()
  *
  * inputs	- pointer to server
@@ -195,7 +231,6 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   char *host = NULL;
   char *target_server = NULL;
   uintmax_t duration = 0;
-  int bits = 0;
 
   if (!HasOFlag(source_p, OPER_FLAG_KLINE))
   {
@@ -221,34 +256,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
     cluster_distribute(source_p, "KLINE", CAPAB_KLN, CLUSTER_KLINE,
                        "%ju %s %s :%s", duration, user, host, reason);
 
-  if (already_placed_kline(source_p, user, host))
-    return 0;
-
-  switch (parse_netmask(host, NULL, &bits))
-  {
-    case HM_IPV4:
-      if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
-      {
-        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                          ConfigGeneral.kline_min_cidr);
-        return 0;
-      }
-
-      break;
-    case HM_IPV6:
-      if ((unsigned int)bits < ConfigGeneral.kline_min_cidr6)
-      {
-        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                          ConfigGeneral.kline_min_cidr6);
-        return 0;
-      }
-
-      break;
-    default:  /* HM_HOST */
-      break;
-  }
-
-  kline_add(source_p, user, host, reason, duration);
+  kline_handle(source_p, user, host, reason, duration);
   return 0;
 }
 
@@ -272,7 +280,6 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
 {
   uintmax_t duration = 0;
   const char *user, *host, *reason;
-  int bits = 0;
 
   if (parc != 6 || EmptyString(parv[5]))
     return 0;
@@ -291,44 +298,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_KLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-  {
-    if (already_placed_kline(source_p, user, host))
-      return 0;
-
-    if (!HasFlag(source_p, FLAGS_SERVICE))
-    {
-      if (!valid_wild_card(source_p, 2, user, host))
-        return 0;
-
-      switch (parse_netmask(host, NULL, &bits))
-      {
-        case HM_IPV4:
-          if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
-          {
-            if (IsClient(source_p))
-              sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                                ConfigGeneral.kline_min_cidr);
-            return 0;
-          }
-
-          break;
-        case HM_IPV6:
-          if ((unsigned int)bits < ConfigGeneral.kline_min_cidr6)
-          {
-            if (IsClient(source_p))
-              sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                                ConfigGeneral.kline_min_cidr6);
-            return 0;
-          }
-
-          break;
-        default:  /* HM_HOST */
-          break;
-      }
-    }
-
-    kline_add(source_p, user, host, reason, duration);
-  }
+    kline_handle(source_p, user, host, reason, duration);
 
   return 0;
 }

@@ -252,7 +252,7 @@ try_connections(void *unused)
   if (GlobalSetOptions.autoconn == 0)
     return;
 
-  DLINK_FOREACH(node, server_items.head)
+  DLINK_FOREACH(node, connect_items.head)
   {
     struct MaskItem *conf = node->data;
 
@@ -288,8 +288,8 @@ try_connections(void *unused)
       /* Move this entry to the end of the list, if not already last */
       if (node->next)
       {
-        dlinkDelete(node, &server_items);
-        dlinkAddTail(conf, &conf->node, &server_items);
+        dlinkDelete(node, &connect_items);
+        dlinkAddTail(conf, &conf->node, &connect_items);
       }
 
       if (find_servconn_in_progress(conf->name))
@@ -349,7 +349,7 @@ check_server(const char *name, struct Client *client_p)
   assert(client_p);
 
   /* Loop through looking for all possible connect items that might work */
-  DLINK_FOREACH(node, server_items.head)
+  DLINK_FOREACH(node, connect_items.head)
   {
     conf = node->data;
 

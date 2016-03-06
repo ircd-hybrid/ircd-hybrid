@@ -201,7 +201,7 @@ report_confitem_types(struct Client *source_p, enum maskitem_type type)
       break;
 
     case CONF_SERVER:
-      DLINK_FOREACH(node, server_items.head)
+      DLINK_FOREACH(node, connect_items.head)
       {
         p = buf;
         conf = node->data;
@@ -648,7 +648,7 @@ stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 {
   const dlink_node *node = NULL, *dptr = NULL;
 
-  DLINK_FOREACH(node, server_items.head)
+  DLINK_FOREACH(node, connect_items.head)
   {
     const struct MaskItem *conf = node->data;
 
@@ -656,7 +656,7 @@ stats_hubleaf(struct Client *source_p, int parc, char *parv[])
       sendto_one_numeric(source_p, &me, RPL_STATSHLINE, 'H', dptr->data, conf->name, 0, "*");
   }
 
-  DLINK_FOREACH(node, server_items.head)
+  DLINK_FOREACH(node, connect_items.head)
   {
     const struct MaskItem *conf = node->data;
 

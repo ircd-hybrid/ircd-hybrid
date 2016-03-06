@@ -292,36 +292,39 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
       shared_find(SHARED_KLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
   {
-    if (!valid_wild_card(source_p, 2, user, host))
-      return 0;
-
     if (already_placed_kline(source_p, user, host))
       return 0;
 
-    switch (parse_netmask(host, NULL, &bits))
+    if (!HasFlag(source_p, FLAGS_SERVICE))
     {
-      case HM_IPV4:
-        if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
-        {
-          if (IsClient(source_p))
-            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                              ConfigGeneral.kline_min_cidr);
-          return 0;
-        }
+      if (!valid_wild_card(source_p, 2, user, host))
+        return 0;
 
-        break;
-      case HM_IPV6:
-        if ((unsigned int)bits < ConfigGeneral.kline_min_cidr6)
-        {
-          if (IsClient(source_p))
-            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                              ConfigGeneral.kline_min_cidr6);
-          return 0;
-        }
+      switch (parse_netmask(host, NULL, &bits))
+      {
+        case HM_IPV4:
+          if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
+          {
+            if (IsClient(source_p))
+              sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                                ConfigGeneral.kline_min_cidr);
+            return 0;
+          }
 
-        break;
-      default:  /* HM_HOST */
-        break;
+          break;
+        case HM_IPV6:
+          if ((unsigned int)bits < ConfigGeneral.kline_min_cidr6)
+          {
+            if (IsClient(source_p))
+              sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                                ConfigGeneral.kline_min_cidr6);
+            return 0;
+          }
+
+          break;
+        default:  /* HM_HOST */
+          break;
+      }
     }
 
     kline_add(source_p, user, host, reason, duration);

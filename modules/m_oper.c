@@ -136,10 +136,10 @@ m_oper(struct Client *source_p, int parc, char *parv[])
   if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  if ((conf = find_exact_name_conf(CONF_OPER, source_p, opername, NULL, NULL)) == NULL)
+  if ((conf = operator_find(source_p, opername, NULL, NULL)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-    conf = find_exact_name_conf(CONF_OPER, NULL, opername, NULL, NULL);
+    conf = operator_find(NULL, opername, NULL, NULL);
     failed_oper_notice(source_p, opername, (conf != NULL) ?
                        "host mismatch" : "no operator {} block");
     return 0;

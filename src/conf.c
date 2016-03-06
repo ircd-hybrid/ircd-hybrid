@@ -71,7 +71,7 @@ struct config_admin_entry ConfigAdminInfo;
 struct conf_parser_context conf_parser_ctx;
 
 /* general conf items link list root, other than k lines etc. */
-dlink_list server_items;
+dlink_list connect_items;
 dlink_list operator_items;
 
 extern unsigned int lineno;
@@ -138,7 +138,7 @@ map_to_list(enum maskitem_type type)
       return &operator_items;
       break;
     case CONF_SERVER:
-      return &server_items;
+      return &connect_items;
       break;
     default:
       return NULL;
@@ -479,7 +479,7 @@ attach_connect_block(struct Client *client_p, const char *name,
 
   assert(host);
 
-  DLINK_FOREACH(node, server_items.head)
+  DLINK_FOREACH(node, connect_items.head)
   {
     struct MaskItem *conf = node->data;
 
@@ -532,30 +532,20 @@ find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
  * side effects - looks for a match on name field
  */
 struct MaskItem *
-find_matching_name_conf(enum maskitem_type type, const char *name, const char *user,
-                        const char *host, unsigned int flags)
+connect_find(const char *name, const char *host, int (*compare)(const char *, const char *))
 {
   dlink_node *node = NULL;
-  dlink_list *list = map_to_list(type);
-  struct MaskItem *conf = NULL;
 
-  switch (type)
+  DLINK_FOREACH(node, connect_items.head)
   {
-  case CONF_SERVER:
-    DLINK_FOREACH(node, list->head)
-    {
-      conf = node->data;
+    struct MaskItem *conf = node->data;
 
-      if (name && !match(name, conf->name))
-        return conf;
-      if (host && !match(host, conf->host))
-        return conf;
-    }
-    break;
-
-  default:
-    break;
+    if (name && !compare(name, conf->name))
+      return conf;
+    if (host && !compare(host, conf->host))
+      return conf;
   }
+
   return NULL;
 }
 
@@ -569,82 +559,46 @@ find_matching_name_conf(enum maskitem_type type, const char *name, const char *u
  * side effects - looks for an exact match on name field
  */
 struct MaskItem *
-find_exact_name_conf(enum maskitem_type type, const struct Client *who, const char *name,
-                     const char *user, const char *host)
+operator_find(const struct Client *who, const char *name,
+              const char *user, const char *host)
 {
   dlink_node *node = NULL;
-  dlink_list *list = map_to_list(type);
-  struct MaskItem *conf = NULL;
 
-  switch(type)
+  DLINK_FOREACH(node, operator_items.head)
   {
-  case CONF_OPER:
-    DLINK_FOREACH(node, list->head)
+    struct MaskItem *conf = node->data;
+
+    if (!irccmp(conf->name, name))
     {
-      conf = node->data;
+      if (!who)
+        return conf;
 
-      if (EmptyString(conf->name))
-        continue;
-
-      if (!irccmp(conf->name, name))
+      if (!match(conf->user, who->username))
       {
-        if (!who)
-          return conf;
-        if (EmptyString(conf->user) || EmptyString(conf->host))
-          return NULL;
-        if (!match(conf->user, who->username))
+        switch (conf->htype)
         {
-          switch (conf->htype)
-          {
-            case HM_HOST:
-              if (!match(conf->host, who->host) || !match(conf->host, who->sockhost))
+          case HM_HOST:
+            if (!match(conf->host, who->host) || !match(conf->host, who->sockhost))
+              if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
+                return conf;
+            break;
+          case HM_IPV4:
+            if (who->connection->aftype == AF_INET)
+              if (match_ipv4(&who->connection->ip, &conf->addr, conf->bits))
                 if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                   return conf;
-              break;
-            case HM_IPV4:
-              if (who->connection->aftype == AF_INET)
-                if (match_ipv4(&who->connection->ip, &conf->addr, conf->bits))
-                  if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
-                    return conf;
-              break;
-            case HM_IPV6:
-              if (who->connection->aftype == AF_INET6)
-                if (match_ipv6(&who->connection->ip, &conf->addr, conf->bits))
-                  if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
-                    return conf;
-              break;
-            default:
-              assert(0);
-          }
+            break;
+          case HM_IPV6:
+            if (who->connection->aftype == AF_INET6)
+              if (match_ipv6(&who->connection->ip, &conf->addr, conf->bits))
+                if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
+                  return conf;
+            break;
+          default:
+            assert(0);
         }
       }
     }
-
-    break;
-
-  case CONF_SERVER:
-    DLINK_FOREACH(node, list->head)
-    {
-      conf = node->data;
-
-      if (EmptyString(conf->name))
-        continue;
-
-      if (name == NULL)
-      {
-        if (EmptyString(conf->host))
-          continue;
-        if (irccmp(conf->host, host) == 0)
-          return conf;
-      }
-      else if (irccmp(conf->name, name) == 0)
-        return conf;
-    }
-
-    break;
-
-  default:
-    break;
   }
 
   return NULL;
@@ -1014,7 +968,7 @@ clear_out_old_conf(void)
 {
   dlink_node *node = NULL, *node_next = NULL;
   dlink_list *free_items [] = {
-    &server_items, &operator_items, NULL
+    &connect_items, &operator_items, NULL
   };
 
   dlink_list ** iterator = free_items; /* C is dumb */

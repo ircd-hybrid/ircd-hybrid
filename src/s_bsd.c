@@ -176,7 +176,7 @@ close_connection(struct Client *client_p)
     ServerStats.is_sbr += client_p->connection->recv.bytes;
     ServerStats.is_sti += CurrentTime - client_p->connection->firsttime;
 
-    DLINK_FOREACH(node, server_items.head)
+    DLINK_FOREACH(node, connect_items.head)
     {
       struct MaskItem *conf = node->data;
 

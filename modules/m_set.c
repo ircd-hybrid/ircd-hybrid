@@ -43,7 +43,7 @@ quote_autoconn(struct Client *source_p, const char *arg, int newval)
 {
   if (!EmptyString(arg))
   {
-    struct MaskItem *conf = find_exact_name_conf(CONF_SERVER, NULL, arg, NULL, NULL);
+    struct MaskItem *conf = connect_find(arg, NULL, irccmp);
 
     if (conf)
     {

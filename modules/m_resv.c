@@ -52,21 +52,24 @@
 static void
 resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const char *reason)
 {
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !HasUMode(source_p, UMODE_ADMIN) && has_wildcards(mask))
+  if (!HasFlag(source_p, FLAGS_SERVICE))
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
+    if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(mask))
+    {
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
 
-    return;
-  }
+      return;
+    }
 
-  if (!valid_wild_card_simple(mask + !!IsChanPrefix(*mask)))
-  {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the RESV",
-                        ConfigGeneral.min_nonwildcard_simple);
+    if (!valid_wild_card_simple(mask + !!IsChanPrefix(*mask)))
+    {
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the RESV",
+                          ConfigGeneral.min_nonwildcard_simple);
 
-    return;
+      return;
+    }
   }
 
   struct ResvItem *resv = resv_make(mask, reason, NULL);

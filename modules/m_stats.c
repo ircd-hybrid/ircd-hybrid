@@ -174,66 +174,62 @@ stats_gecos(struct Client *source_p, int parc, char *parv[])
  * side effects	-
  */
 static void
-report_confitem_types(struct Client *source_p, enum maskitem_type type)
+stats_operator(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
-  const struct MaskItem *conf = NULL;
-  char buf[IRCD_BUFSIZE];
-  char *p = NULL;
+  dlink_node *node;
 
-  switch (type)
+  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_o_oper_only)
   {
-    case CONF_OPER:
-      DLINK_FOREACH(node, operator_items.head)
-      {
-        conf = node->data;
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    return;
+  }
 
-        /* Don't allow non opers to see oper privs */
-        if (HasUMode(source_p, UMODE_OPER))
-          sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
-                             conf->name, oper_privs_as_string(conf->port),
-                             conf->class->name);
-        else
-          sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
-                             conf->name, "0", conf->class->name);
-      }
+  DLINK_FOREACH(node, operator_items.head)
+  {
+    const struct MaskItem *conf = node->data;
 
-      break;
+    /* Don't allow non opers to see oper privs */
+    if (HasUMode(source_p, UMODE_OPER))
+      sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
+                         conf->name, oper_privs_as_string(conf->port),
+                         conf->class->name);
+    else
+      sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
+                         conf->name, "0", conf->class->name);
+  }
+}
 
-    case CONF_SERVER:
-      DLINK_FOREACH(node, connect_items.head)
-      {
-        p = buf;
-        conf = node->data;
+static void
+stats_connect(struct Client *source_p, int parc, char *parv[])
+{
+  dlink_node *node;
 
-        buf[0] = '\0';
+  DLINK_FOREACH(node, connect_items.head)
+  {
+    char buf[8];
+    char *p = buf;
+    const struct MaskItem *conf = node->data;
 
-        if (IsConfAllowAutoConn(conf))
-          *p++ = 'A';
-        if (IsConfSSL(conf))
-          *p++ = 'S';
-        if (buf[0] == '\0')
-          *p++ = '*';
+    if (IsConfAllowAutoConn(conf))
+      *p++ = 'A';
+    if (IsConfSSL(conf))
+      *p++ = 'S';
+    if (p == buf)
+      *p++ = '*';
 
-        *p = '\0';
+    *p = '\0';
 
-        /*
-         * Allow admins to see actual ips unless hide_server_ips is enabled
-         */
-        if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
-          sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C', conf->host,
-                             buf, conf->name, conf->port,
-                             conf->class->name);
-        else
-          sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C',
-                             "*@127.0.0.1", buf, conf->name, conf->port,
-                             conf->class->name);
-      }
-
-      break;
-
-    default:
-      break;
+    /*
+     * Allow admins to see actual ips unless hide_server_ips is enabled
+     */
+    if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
+      sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C', conf->host,
+                         buf, conf->name, conf->port,
+                         conf->class->name);
+    else
+      sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C',
+                         "*@127.0.0.1", buf, conf->name, conf->port,
+                         conf->class->name);
   }
 }
 
@@ -517,12 +513,6 @@ stats_dns_servers(struct Client *source_p, int parc, char *parv[])
                 sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
     sendto_one_numeric(source_p, &me, RPL_STATSALINE, ipaddr);
   }
-}
-
-static void
-stats_connect(struct Client *source_p, int parc, char *parv[])
-{
-  report_confitem_types(source_p, CONF_SERVER);
 }
 
 /* stats_deny()
@@ -891,15 +881,6 @@ stats_messages(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
   else
     report_messages(source_p);
-}
-
-static void
-stats_oper(struct Client *source_p, int parc, char *parv[])
-{
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_o_oper_only)
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
-  else
-    report_confitem_types(source_p, CONF_OPER);
 }
 
 /* stats_operedup()
@@ -1379,8 +1360,8 @@ static const struct StatsStruct  stats_tab[] =
   { 'L',  stats_ltrace,      UMODE_OPER  },
   { 'm',  stats_messages,    0           },
   { 'M',  stats_messages,    0           },
-  { 'o',  stats_oper,        0           },
-  { 'O',  stats_oper,        0           },
+  { 'o',  stats_operator,    0           },
+  { 'O',  stats_operator,    0           },
   { 'p',  stats_operedup,    0           },
   { 'P',  stats_ports,       0           },
   { 'q',  stats_resv,        UMODE_OPER  },

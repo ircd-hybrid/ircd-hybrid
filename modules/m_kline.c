@@ -78,47 +78,6 @@ kline_check(struct AddressRec *arec)
   }
 }
 
-/* already_placed_kline()
- * inputs       - user to complain to, username & host to check for
- * outputs      - returns 1 on existing K-line, 0 if doesn't exist
- * side effects - notifies source_p if the K-line already exists
- */
-/*
- * Note: This currently works if the new K-line is a special case of an
- *       existing K-line, but not the other way round. To do that we would
- *       have to walk the hash and check every existing K-line. -A1kmm.
- */
-static int
-already_placed_kline(struct Client *source_p, const char *user, const char *host)
-{
-  struct irc_ssaddr iphost, *piphost;
-  struct MaskItem *conf = NULL;
-  int t = 0;
-  int aftype = 0;
-
-  if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
-  {
-    if (t == HM_IPV6)
-      aftype = AF_INET6;
-    else
-      aftype = AF_INET;
-
-    piphost = &iphost;
-  }
-  else
-    piphost = NULL;
-
-  if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, aftype, user, NULL, 0)))
-  {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
-                        user, host, conf->user, conf->host, conf->reason);
-    return 1;
-  }
-
-  return 0;
-}
-
 /* apply_tkline()
  *
  * inputs       -
@@ -130,42 +89,51 @@ kline_handle(struct Client *source_p, const char *user, const char *host,
              const char *reason, uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
+  int bits = 0, aftype = 0;
+  struct irc_ssaddr iphost, *piphost = NULL;
+  struct MaskItem *conf = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
-  {
     if (!valid_wild_card(source_p, 2, user, host))
       return;
 
-    int bits = 0;
-    switch (parse_netmask(host, NULL, &bits))
-    {
-      case HM_IPV4:
-        if ((unsigned int)bits < ConfigGeneral.kline_min_cidr)
-        {
-          if (IsClient(source_p))
-            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                              ConfigGeneral.kline_min_cidr);
-          return;
-        }
+  switch (parse_netmask(host, &iphost, &bits))
+  {
+    case HM_IPV4:
+      if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.kline_min_cidr)
+      {
+        if (IsClient(source_p))
+          sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                            ConfigGeneral.kline_min_cidr);
+        return;
+      }
 
-        break;
-      case HM_IPV6:
-        if ((unsigned int)bits < ConfigGeneral.kline_min_cidr6)
-        {
-          if (IsClient(source_p))
-            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                              ConfigGeneral.kline_min_cidr6);
-          return;
-        }
+      aftype = AF_INET;
+      piphost = &iphost;
+      break;
+    case HM_IPV6:
+      if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.kline_min_cidr6)
+      {
+        if (IsClient(source_p))
+          sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                            ConfigGeneral.kline_min_cidr6);
+        return;
+      }
 
-        break;
-      default:  /* HM_HOST */
-        break;
-    }
+      aftype = AF_INET6;
+      piphost = &iphost;
+      break;
+    default:  /* HM_HOST */
+      break;
   }
 
-  if (already_placed_kline(source_p, user, host))
+  if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, aftype, user, NULL, 0)))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
+                        user, host, conf->user, conf->host, conf->reason);
     return;
+  }
 
   if (duration)
     snprintf(buf, sizeof(buf), "Temporary K-line %ju min. - %.*s (%s)",
@@ -173,7 +141,7 @@ kline_handle(struct Client *source_p, const char *user, const char *host,
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
-  struct MaskItem *conf = conf_make(CONF_KLINE);
+  conf = conf_make(CONF_KLINE);
   conf->host = xstrdup(host);
   conf->user = xstrdup(user);
   conf->setat = CurrentTime;

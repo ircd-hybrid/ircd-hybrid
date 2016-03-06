@@ -559,8 +559,7 @@ connect_find(const char *name, const char *host, int (*compare)(const char *, co
  * side effects - looks for an exact match on name field
  */
 struct MaskItem *
-operator_find(const struct Client *who, const char *name,
-              const char *user, const char *host)
+operator_find(const struct Client *who, const char *name)
 {
   dlink_node *node = NULL;
 

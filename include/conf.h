@@ -311,8 +311,7 @@ extern struct MaskItem *find_conf_name(dlink_list *, const char *, enum maskitem
 extern int conf_connect_allowed(struct irc_ssaddr *, int);
 extern const char *oper_privs_as_string(const unsigned int);
 extern void split_nuh(struct split_nuh_item *);
-extern struct MaskItem *operator_find(const struct Client *, const char *,
-                                      const char *, const char *);
+extern struct MaskItem *operator_find(const struct Client *, const char *);
 extern struct MaskItem *connect_find(const char *, const char *, int (*)(const char *, const char *));
 extern void conf_free(struct MaskItem *);
 extern void yyerror(const char *);

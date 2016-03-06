@@ -136,27 +136,6 @@ xline_add(struct Client *source_p, const char *mask, const char *reason,
   xline_check(gecos);
 }
 
-static void
-relay_xline(struct Client *source_p, char *parv[])
-{
-  const struct GecosItem *gecos = NULL;
-
-  if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_XLINE, source_p->servptr->name,
-                  source_p->username, source_p->host))
-  {
-    if ((gecos = gecos_find(parv[2], match)))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
-                          parv[2], gecos->mask, gecos->reason);
-      return;
-    }
-
-    xline_add(source_p, parv[2], parv[4], strtoumax(parv[3], NULL, 10));
-  }
-}
-
 /* mo_xline()
  *
  * inputs	- pointer to server
@@ -239,10 +218,27 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   if (match(parv[1], me.name))
     return 0;
 
-  if (!valid_xline(source_p, parv[2]))
-    return 0;
+  if (HasFlag(source_p, FLAGS_SERVICE) ||
+      shared_find(SHARED_XLINE, source_p->servptr->name,
+                  source_p->username, source_p->host))
+  {
+    const struct GecosItem *gecos;
 
-  relay_xline(source_p, parv);
+    if (!HasFlag(source_p, FLAGS_SERVICE))
+      if (!valid_xline(source_p, parv[2]))
+        return 0;
+
+    if ((gecos = gecos_find(parv[2], match)))
+    {
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
+                          parv[2], gecos->mask, gecos->reason);
+      return 0;
+    }
+
+    xline_add(source_p, parv[2], parv[4], strtoumax(parv[3], NULL, 10));
+  }
+
   return 0;
 }
 

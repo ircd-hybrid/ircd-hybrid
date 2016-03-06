@@ -60,37 +60,37 @@ xline_check(struct GecosItem *gecos)
   }
 }
 
-/* valid_xline()
- *
- * inputs       - client to complain to, gecos, reason, whether to complain
- * outputs      - 1 for valid, else 0
- * side effects - complains to client, when warn != 0
- */
-static int
-valid_xline(struct Client *source_p, const char *gecos)
-{
-  if (!valid_wild_card_simple(gecos))
-  {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
-                        ConfigGeneral.min_nonwildcard_simple);
-    return 0;
-  }
-
-  return 1;
-}
-
-/* xline_add()
+/* xline_handle()
  *
  * inputs       - client taking credit for xline, gecos, reason, xline type
  * outputs      - none
  * side effects - when successful, adds an xline to the conf
  */
 static void
-xline_add(struct Client *source_p, const char *mask, const char *reason,
-          uintmax_t duration)
+xline_handle(struct Client *source_p, const char *mask, const char *reason,
+             uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
+  struct GecosItem *gecos = NULL;
+
+  if (!HasFlag(source_p, FLAGS_SERVICE))
+  {
+    if (!valid_wild_card_simple(mask))
+    {
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
+                          ConfigGeneral.min_nonwildcard_simple);
+      return;
+    }
+  }
+
+  if ((gecos = gecos_find(mask, match)))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
+                        mask, gecos->mask, gecos->reason);
+    return;
+  }
 
   if (duration)
     snprintf(buf, sizeof(buf), "Temporary X-line %ju min. - %.*s (%s)",
@@ -98,7 +98,7 @@ xline_add(struct Client *source_p, const char *mask, const char *reason,
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
-  struct GecosItem *gecos = gecos_make();
+  gecos = gecos_make();
   gecos->mask = xstrdup(mask);
   gecos->reason = xstrdup(buf);
   gecos->setat = CurrentTime;
@@ -151,7 +151,6 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
 {
   char *reason = NULL;
   char *mask = NULL;
-  const struct GecosItem *gecos = NULL;
   char *target_server = NULL;
   uintmax_t duration = 0;
 
@@ -178,17 +177,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
     cluster_distribute(source_p, "XLINE", CAPAB_CLUSTER, CLUSTER_XLINE, "%s %ju :%s",
                        mask, duration, reason);
 
-  if (!valid_xline(source_p, mask))
-    return 0;
-
-  if ((gecos = gecos_find(mask, match)))
-  {
-    sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
-                      mask, gecos->mask, gecos->reason);
-    return 0;
-  }
-
-  xline_add(source_p, mask, reason, duration);
+  xline_handle(source_p, mask, reason, duration);
   return 0;
 }
 
@@ -221,23 +210,7 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_XLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-  {
-    const struct GecosItem *gecos;
-
-    if (!HasFlag(source_p, FLAGS_SERVICE))
-      if (!valid_xline(source_p, parv[2]))
-        return 0;
-
-    if ((gecos = gecos_find(parv[2], match)))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
-                          parv[2], gecos->mask, gecos->reason);
-      return 0;
-    }
-
-    xline_add(source_p, parv[2], parv[4], strtoumax(parv[3], NULL, 10));
-  }
+    xline_handle(source_p, parv[2], parv[4], strtoumax(parv[3], NULL, 10));
 
   return 0;
 }

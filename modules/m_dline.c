@@ -95,7 +95,6 @@ dline_check(struct AddressRec *arec)
   }
 }
 
-
 /* dline_add()
  *
  * inputs	-
@@ -103,10 +102,49 @@ dline_check(struct AddressRec *arec)
  * side effects	- dline as given is placed
  */
 static void
-dline_add(struct Client *source_p, const char *addr, const char *reason,
-          uintmax_t duration)
+dline_handle(struct Client *source_p, const char *addr, const char *reason,
+             uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
+  struct irc_ssaddr daddr;
+  int bits = 0, aftype = 0;
+  struct MaskItem *conf = NULL;
+
+  switch (parse_netmask(addr, &daddr, &bits))
+  {
+    case HM_IPV4:
+      if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.dline_min_cidr)
+      {
+        if (IsClient(source_p))
+          sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                            ConfigGeneral.dline_min_cidr);
+        return;
+      }
+
+      aftype = AF_INET;
+      break;
+    case HM_IPV6:
+      if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.dline_min_cidr6)
+      {
+        if (IsClient(source_p))
+          sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
+                            ConfigGeneral.dline_min_cidr6);
+        return;
+      }
+
+      aftype = AF_INET6;
+      break;
+    default:  /* HM_HOST */
+     return;
+  }
+
+  if ((conf = find_conf_by_address(NULL, &daddr, CONF_DLINE, aftype, NULL, NULL, 1)))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
+                        addr, conf->host, conf->reason);
+    return;
+  }
 
   if (duration)
     snprintf(buf, sizeof(buf), "Temporary D-line %ju min. - %.*s (%s)",
@@ -114,7 +152,7 @@ dline_add(struct Client *source_p, const char *addr, const char *reason,
   else
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
 
-  struct MaskItem *conf = conf_make(CONF_DLINE);
+  conf = conf_make(CONF_DLINE);
   conf->host = xstrdup(addr);
   conf->reason = xstrdup(buf);
   conf->setat = CurrentTime;
@@ -166,10 +204,8 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   char *dlhost = NULL, *reason = NULL;
   char *target_server = NULL;
   const struct Client *target_p = NULL;
-  struct irc_ssaddr daddr;
-  struct MaskItem *conf = NULL;
   uintmax_t duration = 0;
-  int bits = 0, aftype = 0, t = 0;
+  int t = 0;
   char hostip[HOSTIPLEN + 1];
 
   if (!HasOFlag(source_p, OPER_FLAG_DLINE))
@@ -219,40 +255,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     dlhost = hostip;
   }
 
-  switch (parse_netmask(dlhost, &daddr, &bits))
-  {
-    case HM_IPV4:
-      if ((unsigned int)bits < ConfigGeneral.dline_min_cidr)
-      {
-        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                          ConfigGeneral.dline_min_cidr);
-        return 0;
-      }
-
-      aftype = AF_INET;
-      break;
-    case HM_IPV6:
-      if ((unsigned int)bits < ConfigGeneral.dline_min_cidr6)
-      {
-        sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                          ConfigGeneral.dline_min_cidr6);
-        return 0;
-      }
-
-      aftype = AF_INET6;
-      break;
-    default:  /* HM_HOST */
-     return 0;
-  }
-
-  if ((conf = find_conf_by_address(NULL, &daddr, CONF_DLINE, aftype, NULL, NULL, 1)))
-  {
-    sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
-                      dlhost, conf->host, conf->reason);
-    return 0;
-  }
-
-  dline_add(source_p, dlhost, reason, duration);
+  dline_handle(source_p, dlhost, reason, duration);
   return 0;
 }
 
@@ -274,10 +277,7 @@ static int
 ms_dline(struct Client *source_p, int parc, char *parv[])
 {
   const char *dlhost, *reason;
-  struct irc_ssaddr daddr;
-  struct MaskItem *conf = NULL;
   uintmax_t duration = 0;
-  int bits = 0, aftype = 0;
 
   if (parc != 5 || EmptyString(parv[4]))
     return 0;
@@ -295,45 +295,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_DLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-  {
-    switch (parse_netmask(dlhost, &daddr, &bits))
-    {
-      case HM_IPV4:
-        if ((unsigned int)bits < ConfigGeneral.dline_min_cidr)
-        {
-          if (IsClient(source_p))
-            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                              ConfigGeneral.dline_min_cidr);
-          return 0;
-        }
-
-        aftype = AF_INET;
-        break;
-      case HM_IPV6:
-        if ((unsigned int)bits < ConfigGeneral.dline_min_cidr6)
-        {
-          if (IsClient(source_p))
-            sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                              ConfigGeneral.dline_min_cidr6);
-          return 0;
-        }
-
-        aftype = AF_INET6;
-        break;
-      default:  /* HM_HOST */
-       return 0;
-    }
-
-    if ((conf = find_conf_by_address(NULL, &daddr, CONF_DLINE, aftype, NULL, NULL, 1)))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
-                          dlhost, conf->host, conf->reason);
-      return 0;
-    }
-
-    dline_add(source_p, dlhost, reason, duration);
-  }
+    dline_handle(source_p, dlhost, reason, duration);
 
   return 0;
 }

@@ -180,7 +180,6 @@ enum irc_numerics
   ERR_WILDTOPLEVEL         = 414,
   ERR_UNKNOWNCOMMAND       = 421,
   ERR_NOMOTD               = 422,
-  ERR_NOADMININFO          = 423,
   ERR_TOOMANYAWAY          = 429,
   ERR_NONICKNAMEGIVEN      = 431,
   ERR_ERRONEUSNICKNAME     = 432,

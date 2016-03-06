@@ -155,7 +155,6 @@ static const char *const replies[] =
   /* 414 */  [ERR_WILDTOPLEVEL] = "%s :Wildcard in top-level domain",
   /* 421 */  [ERR_UNKNOWNCOMMAND] = "%s :Unknown command",
   /* 422 */  [ERR_NOMOTD] = ":MOTD File is missing",
-  /* 423 */  [ERR_NOADMININFO] = "%s :No administrative info available",
   /* 429 */  [ERR_TOOMANYAWAY] = ":Too many aways - Flood protection activated",
   /* 431 */  [ERR_NONICKNAMEGIVEN] = ":No nickname given",
   /* 432 */  [ERR_ERRONEUSNICKNAME] = "%s :%s",

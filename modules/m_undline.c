@@ -129,7 +129,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("UNDLINE", source_p, parc, parv, 0, &addr,
+  if (!parse_aline("UNDLINE", source_p, parc, parv, &addr,
                    NULL, NULL, &target_server, NULL))
     return 0;
 

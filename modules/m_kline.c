@@ -93,9 +93,13 @@ kline_handle(struct Client *source_p, const char *user, const char *host,
   struct irc_ssaddr iphost, *piphost = NULL;
   struct MaskItem *conf = NULL;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE))
-    if (!valid_wild_card(source_p, 2, user, host))
-      return;
+  if (!HasFlag(source_p, FLAGS_SERVICE) && !valid_wild_card(2, user, host))
+  {
+    sendto_one_notice(source_p, &me,
+                      ":Please include at least %u non-wildcard characters with the mask",
+                      ConfigGeneral.min_nonwildcard);
+    return;
+  }
 
   switch (parse_netmask(host, &iphost, &bits))
   {
@@ -206,7 +210,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("KLINE", source_p, parc, parv, AWILD, &user, &host,
+  if (!parse_aline("KLINE", source_p, parc, parv, &user, &host,
                    &duration, &target_server, &reason))
     return 0;
 

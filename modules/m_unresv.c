@@ -100,7 +100,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("UNRESV", source_p, parc, parv, 0, &mask, NULL,
+  if (!parse_aline("UNRESV", source_p, parc, parv, &mask, NULL,
                    NULL, &target_server, NULL))
     return 0;
 

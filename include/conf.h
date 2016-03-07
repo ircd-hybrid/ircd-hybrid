@@ -296,7 +296,7 @@ extern struct config_serverinfo_entry ConfigServerInfo;
 extern struct config_admin_entry ConfigAdminInfo;
 
 extern int valid_wild_card_simple(const char *);
-extern int valid_wild_card(struct Client *, int, ...);
+extern int valid_wild_card(int, ...);
 /* End GLOBAL section */
 
 extern struct MaskItem *conf_make(enum maskitem_type);
@@ -324,9 +324,8 @@ extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 extern const char *get_oper_name(const struct Client *);
 
 /* XXX should the parse_aline stuff go into another file ?? */
-#define AWILD 0x1  /* check wild cards */
 extern int parse_aline(const char *, struct Client *, int, char **,
-                       int, char **, char **, uintmax_t *, char **, char **);
+                       char **, char **, uintmax_t *, char **, char **);
 
 #define TK_SECONDS 0
 #define TK_MINUTES 1

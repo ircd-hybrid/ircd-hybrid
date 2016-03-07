@@ -277,7 +277,6 @@ static int
 ms_dline(struct Client *source_p, int parc, char *parv[])
 {
   const char *dlhost, *reason;
-  uintmax_t duration = 0;
 
   if (parc != 5 || EmptyString(parv[4]))
     return 0;
@@ -288,14 +287,13 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   if (match(parv[1], me.name))
     return 0;
 
-  duration = valid_tkline(parv[2], TK_SECONDS);
   dlhost = parv[3];
   reason = parv[4];
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_DLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-    dline_handle(source_p, dlhost, reason, duration);
+    dline_handle(source_p, dlhost, reason, strtoumax(parv[2], NULL, 10));
 
   return 0;
 }

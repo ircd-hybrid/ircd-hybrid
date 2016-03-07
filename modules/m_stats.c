@@ -76,7 +76,7 @@ report_shared(struct Client *source_p)
   };
 
   dlink_node *node;
-  char buf[sizeof(flag_table) / sizeof(struct shared_types)];
+  char buf[sizeof(flag_table) / sizeof(struct shared_types) + 1];  /* +1 for 'c' */
 
   DLINK_FOREACH(node, shared_get_list()->head)
   {
@@ -119,7 +119,7 @@ report_cluster(struct Client *source_p)
   };
 
   dlink_node *node;
-  char buf[sizeof(flag_table) / sizeof(struct cluster_types)];
+  char buf[sizeof(flag_table) / sizeof(struct cluster_types) + 1];  /* +1 for 'C' */
 
   DLINK_FOREACH(node, cluster_get_list()->head)
   {

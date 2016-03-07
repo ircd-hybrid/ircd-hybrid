@@ -246,7 +246,6 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_kline(struct Client *source_p, int parc, char *parv[])
 {
-  uintmax_t duration = 0;
   const char *user, *host, *reason;
 
   if (parc != 6 || EmptyString(parv[5]))
@@ -258,7 +257,6 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
   if (match(parv[1], me.name))
     return 0;
 
-  duration = valid_tkline(parv[2], TK_SECONDS);
   user = parv[3];
   host = parv[4];
   reason = parv[5];
@@ -266,7 +264,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_KLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-    kline_handle(source_p, user, host, reason, duration);
+    kline_handle(source_p, user, host, reason, strtoumax(parv[2], NULL, 10));
 
   return 0;
 }

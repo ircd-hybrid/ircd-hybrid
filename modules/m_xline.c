@@ -160,7 +160,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("XLINE", source_p, parc, parv, 0, &mask, NULL,
+  if (!parse_aline("XLINE", source_p, parc, parv, &mask, NULL,
                    &duration, &target_server, &reason))
     return 0;
 

@@ -1302,7 +1302,7 @@ valid_wild_card_simple(const char *data)
  * side effects - NOTICE is given to source_p if warn is 1
  */
 int
-valid_wild_card(struct Client *source_p, int count, ...)
+valid_wild_card(int count, ...)
 {
   unsigned char tmpch = '\0';
   unsigned int nonwild = 0;
@@ -1345,10 +1345,6 @@ valid_wild_card(struct Client *source_p, int count, ...)
     }
   }
 
-  if (IsClient(source_p))
-    sendto_one_notice(source_p, &me,
-                      ":Please include at least %u non-wildcard characters with the mask",
-                      ConfigGeneral.min_nonwildcard);
   va_end(args);
   return 0;
 }
@@ -1465,10 +1461,10 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
 int
 parse_aline(const char *cmd, struct Client *source_p,
             int parc, char **parv,
-            int parse_flags, char **up_p, char **h_p, uintmax_t *tkline_time,
+            char **up_p, char **h_p, uintmax_t *tkline_time,
             char **target_server, char **reason)
 {
-  int found_tkline_time=0;
+  uintmax_t found_tkline_time=0;
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN*4+1];
   static char host[HOSTLEN*4+1];
@@ -1544,21 +1540,6 @@ parse_aline(const char *cmd, struct Client *source_p,
         *target_server = NULL;
     }
   }
-
-  if (h_p)
-  {
-    if (strchr(user, '!'))
-    {
-      sendto_one_notice(source_p, &me, ":Invalid character '!' in kline");
-      return 0;
-    }
-
-    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 2, *up_p, *h_p))
-      return 0;
-  }
-  else
-    if ((parse_flags & AWILD) && !valid_wild_card(source_p, 1, *up_p))
-      return 0;
 
   if (reason)
   {

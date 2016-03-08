@@ -327,7 +327,7 @@ void
 check_conf_klines(void)
 {
   dlink_node *node = NULL, *node_next = NULL;
-  void *ptr;
+  const void *ptr;
 
   DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {

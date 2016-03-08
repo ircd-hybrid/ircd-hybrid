@@ -296,8 +296,8 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   if (client_p->sockhost[0] == ':' && client_p->sockhost[1] == ':')
   {
     strlcpy(client_p->host, "0", sizeof(client_p->host));
-    strlcpy(client_p->host+1, client_p->sockhost, sizeof(client_p->host)-1);
-    memmove(client_p->sockhost+1, client_p->sockhost, sizeof(client_p->sockhost)-1);
+    strlcpy(client_p->host + 1, client_p->sockhost, sizeof(client_p->host) - 1);
+    memmove(client_p->sockhost + 1, client_p->sockhost, sizeof(client_p->sockhost) - 1);
     client_p->sockhost[0] = '0';
   }
   else
@@ -396,12 +396,12 @@ comm_setflush(fde_t *fd, uintmax_t timeout, void (*callback)(fde_t *, void *), v
 void
 comm_checktimeouts(void *unused)
 {
-  int i;
   fde_t *F;
   void (*hdl)(fde_t *, void *);
   void *data;
 
-  for (i = 0; i < FD_HASH_SIZE; i++)
+  for (unsigned int i = 0; i < FD_HASH_SIZE; i++)
+  {
     for (F = fd_hash[i]; F != NULL; F = fd_next_in_loop)
     {
       assert(F->flags.open);
@@ -428,6 +428,7 @@ comm_checktimeouts(void *unused)
         hdl(F, data);
       }
     }
+  }
 }
 
 /*
@@ -465,7 +466,7 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
    * virtual host IP, for completeness.
    *   -- adrian
    */
-  if ((clocal != NULL) && (bind(fd->fd, clocal, socklen) < 0))
+  if (clocal && bind(fd->fd, clocal, socklen) < 0)
   {
     /* Failure, call the callback with COMM_ERR_BIND */
     comm_connect_callback(fd, COMM_ERR_BIND);
@@ -473,6 +474,7 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
   }
 
   memset(&hints, 0, sizeof(hints));
+
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
@@ -495,12 +497,14 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
   {
     /* We have a valid IP, so we just call tryconnect */
     /* Make sure we actually set the timeout here .. */
-    assert(res != NULL);
+    assert(res);
+
     memcpy(&fd->connect.hostaddr, res->ai_addr, res->ai_addrlen);
     fd->connect.hostaddr.ss_len = res->ai_addrlen;
     fd->connect.hostaddr.ss.ss_family = res->ai_family;
     freeaddrinfo(res);
-    comm_settimeout(fd, timeout*1000, comm_connect_timeout, NULL);
+
+    comm_settimeout(fd, timeout * 1000, comm_connect_timeout, NULL);
     comm_connect_tryconnect(fd, NULL);
   }
 }
@@ -549,7 +553,7 @@ comm_connect_timeout(fde_t *fd, void *unused)
 static void
 comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
 {
-  fde_t *F = vptr;
+  fde_t *const F = vptr;
 
   if (!addr)
   {
@@ -567,8 +571,9 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
    *     -- adrian
    */
   memcpy(&F->connect.hostaddr, addr, addr->ss_len);
+
   /* The cast is hacky, but safe - port offset is same on v4 and v6 */
-  ((struct sockaddr_in *) &F->connect.hostaddr)->sin_port = F->connect.hostaddr.ss_port;
+  ((struct sockaddr_in *)&F->connect.hostaddr)->sin_port = F->connect.hostaddr.ss_port;
   F->connect.hostaddr.ss_len = addr->ss_len;
 
   /* Now, call the tryconnect() routine to try a connect() */
@@ -586,15 +591,12 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
 static void
 comm_connect_tryconnect(fde_t *fd, void *unused)
 {
-  int retval;
-
   /* This check is needed or re-entrant s_bsd_* like sigio break it. */
   if (fd->connect.callback == NULL)
     return;
 
   /* Try the connect() */
-  retval = connect(fd->fd, (struct sockaddr *) &fd->connect.hostaddr,
-    fd->connect.hostaddr.ss_len);
+  int retval = connect(fd->fd, (struct sockaddr *)&fd->connect.hostaddr, fd->connect.hostaddr.ss_len);
 
   /* Error? */
   if (retval < 0)
@@ -608,8 +610,7 @@ comm_connect_tryconnect(fde_t *fd, void *unused)
       comm_connect_callback(fd, COMM_OK);
     else if (ignoreErrno(errno))
       /* Ignore error? Reschedule */
-      comm_setselect(fd, COMM_SELECT_WRITE, comm_connect_tryconnect,
-                     NULL, 0);
+      comm_setselect(fd, COMM_SELECT_WRITE, comm_connect_tryconnect, NULL, 0);
     else
       /* Error? Fail with COMM_ERR_CONNECT */
       comm_connect_callback(fd, COMM_ERR_CONNECT);
@@ -641,8 +642,6 @@ comm_errstr(int error)
 int
 comm_open(fde_t *F, int family, int sock_type, int proto, const char *note)
 {
-  int fd;
-
   /* First, make sure we aren't going to run out of file descriptors */
   if (number_fd >= hard_fdlimit)
   {
@@ -655,7 +654,7 @@ comm_open(fde_t *F, int family, int sock_type, int proto, const char *note)
    * limit if/when we get an error, but we can deal with that later.
    * XXX !!! -- adrian
    */
-  fd = socket(family, sock_type, proto);
+  int fd = socket(family, sock_type, proto);
   if (fd < 0)
     return -1; /* errno will be passed through, yay.. */
 
@@ -676,7 +675,6 @@ comm_open(fde_t *F, int family, int sock_type, int proto, const char *note)
 int
 comm_accept(struct Listener *lptr, struct irc_ssaddr *addr)
 {
-  int newfd;
   socklen_t addrlen = sizeof(struct irc_ssaddr);
 
   if (number_fd >= hard_fdlimit)
@@ -692,16 +690,16 @@ comm_accept(struct Listener *lptr, struct irc_ssaddr *addr)
    * reserved fd limit, but we can deal with that when comm_open()
    * also does it. XXX -- adrian
    */
-  newfd = accept(lptr->fd.fd, (struct sockaddr *)addr, &addrlen);
-  if (newfd < 0)
+  int fd = accept(lptr->fd.fd, (struct sockaddr *)addr, &addrlen);
+  if (fd < 0)
     return -1;
 
   remove_ipv6_mapping(addr);
 
-  setup_socket(newfd);
+  setup_socket(fd);
 
   /* .. and return */
-  return newfd;
+  return fd;
 }
 
 /*

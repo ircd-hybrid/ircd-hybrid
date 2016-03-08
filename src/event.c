@@ -94,26 +94,25 @@ void
 event_run(void)
 {
   static uintmax_t last = 0;
-  unsigned int len = 0;
 
   if (last == CurrentTime)
     return;
   last = CurrentTime;
 
-  len = dlink_list_length(&event_list);
+  unsigned int len = dlink_list_length(&event_list);
   while (len-- && dlink_list_length(&event_list))
   {
-    struct event *e = event_list.head->data;
+    struct event *ev = event_list.head->data;
 
-    if (e->next > CurrentTime)
+    if (ev->next > CurrentTime)
       break;
 
-    event_delete(e);
+    event_delete(ev);
 
-    e->handler(e->data);
+    ev->handler(ev->data);
 
-    if (!e->oneshot)
-      event_add(e, e->data);
+    if (!ev->oneshot)
+      event_add(ev, ev->data);
   }
 }
 

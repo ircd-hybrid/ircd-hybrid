@@ -264,8 +264,7 @@ stats_resv(struct Client *source_p, int parc, char *parv[])
 static void
 stats_memory(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *gptr = NULL;
-  const dlink_node *dlink = NULL;
+  const dlink_node *node, *node2;
 
   unsigned int local_client_conf_count = 0;      /* local client conf links */
   unsigned int users_counted = 0;                /* user structs */
@@ -313,9 +312,9 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   size_t listener_memory = 0;
 
 
-  DLINK_FOREACH(gptr, global_client_list.head)
+  DLINK_FOREACH(node, global_client_list.head)
   {
-    const struct Client *target_p = gptr->data;
+    const struct Client *target_p = node->data;
 
     if (MyConnect(target_p))
     {
@@ -338,15 +337,15 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   /* Count up all channels, ban lists, except lists, Invex lists */
   channel_memory = dlink_list_length(&channel_list) * sizeof(struct Channel);
 
-  DLINK_FOREACH(gptr, channel_list.head)
+  DLINK_FOREACH(node, channel_list.head)
   {
-    const struct Channel *chptr = gptr->data;
-
-    channel_members += dlink_list_length(&chptr->members);
-    channel_invites += dlink_list_length(&chptr->invites);
+    const struct Channel *chptr = node->data;
 
     if (chptr->topic[0])
       ++channel_topics;
+
+    channel_members += dlink_list_length(&chptr->members);
+    channel_invites += dlink_list_length(&chptr->invites);
 
     channel_bans += dlink_list_length(&chptr->banlist);
     channel_ban_memory += dlink_list_length(&chptr->banlist) * sizeof(struct Ban);
@@ -361,30 +360,19 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   if ((safelist_count = dlink_list_length(&listing_client_list)))
   {
     safelist_memory = safelist_count * sizeof(struct ListTask);
-    DLINK_FOREACH(gptr, listing_client_list.head)
+
+    DLINK_FOREACH(node, listing_client_list.head)
     {
-      const struct Client *acptr = gptr->data;
+      const struct Client *acptr = node->data;
 
-      DLINK_FOREACH(dlink, acptr->connection->list_task->show_mask.head)
-        safelist_memory += strlen(dlink->data);
+      DLINK_FOREACH(node2, acptr->connection->list_task->show_mask.head)
+        safelist_memory += strlen(node2->data);
 
-      DLINK_FOREACH(dlink, acptr->connection->list_task->hide_mask.head)
-        safelist_memory += strlen(dlink->data);
+      DLINK_FOREACH(node2, acptr->connection->list_task->hide_mask.head)
+        safelist_memory += strlen(node2->data);
     }
   }
 
-#if 0
-  /* XXX THIS has to be fixed !!!! -db */
-  /* count up all config items */
-  DLINK_FOREACH(dlink, ConfigItemList.head)
-  {
-      aconf = dlink->data;
-      conf_memory += aconf->host ? strlen(aconf->host)+1 : 0;
-      conf_memory += aconf->passwd ? strlen(aconf->passwd)+1 : 0;
-      conf_memory += aconf->name ? strlen(aconf->name)+1 : 0;
-      conf_memory += sizeof(struct AccessItem);
-  }
-#endif
   /* count up all classes */
   class_count = dlink_list_length(class_get_list());
 

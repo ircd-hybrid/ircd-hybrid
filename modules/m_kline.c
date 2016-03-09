@@ -44,7 +44,7 @@
 
 
 static void
-kline_check(struct AddressRec *arec)
+kline_check(const struct AddressRec *arec)
 {
   dlink_node *node = NULL, *node_next = NULL;
 

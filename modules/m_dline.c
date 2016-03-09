@@ -44,7 +44,7 @@
 
 
 static void
-dline_check(struct AddressRec *arec)
+dline_check(const struct AddressRec *arec)
 {
   dlink_node *node = NULL, *node_next = NULL;
 

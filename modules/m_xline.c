@@ -44,7 +44,7 @@
 
 
 static void
-xline_check(struct GecosItem *gecos)
+xline_check(const struct GecosItem *gecos)
 {
   dlink_node *node = NULL, *node_next = NULL;
 

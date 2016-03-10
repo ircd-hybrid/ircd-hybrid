@@ -239,6 +239,9 @@
 /* Size of the watch mempool chunk. */
 #undef MP_CHUNK_SIZE_WATCH
 
+/* Size of the Whowas mempool chunk. */
+#undef MP_CHUNK_SIZE_WHOWAS
+
 /* Define to disable assert() statements. */
 #undef NDEBUG
 

@@ -42,16 +42,16 @@ static dlink_list whowas_list;  /*! Chain of struct Whowas pointers */
 dlink_list WHOWASHASH[HASHSIZE];
 
 
-/*! \brief Initializes the whowas memory pool
+/*! \brief Initializes the whowas memory pool.
  */
 void
 whowas_init(void)
 {
-  whowas_pool = mp_pool_new(sizeof(struct Membership), MP_CHUNK_SIZE_WHOWAS);
+  whowas_pool = mp_pool_new(sizeof(struct Whowas), MP_CHUNK_SIZE_WHOWAS);
 }
 
 /*! \brief Unlinks a Whowas struct from its associated lists.
- * \param whowas Pointer to Whowas struct to be unlinked
+ * \param whowas Pointer to Whowas struct to be unlinked.
  */
 static struct Whowas *
 whowas_unlink(struct Whowas *whowas)
@@ -70,7 +70,7 @@ whowas_unlink(struct Whowas *whowas)
 
 /*! \brief Unlinks a Whowas struct from its associated lists
  *         and returns memory back to the pooling allocator.
- * \param whowas Pointer to Whowas struct to be unlinked and freed
+ * \param whowas Pointer to Whowas struct to be unlinked and freed.
  */
 static void
 whowas_free(struct Whowas *whowas)
@@ -115,8 +115,8 @@ whowas_trim(void)
 /*! \brief Adds the currently defined name of the client to history.
  *         Usually called before changing to a new name (nick).
  *         Client must be a fully registered user.
- * \param client_p pointer to Client struct to add
- * \param online   either 1 if it's a nick change or 0 on client exit
+ * \param client_p Pointer to Client struct to add to whowas history
+ * \param online   Either 1 if it's a nick change or 0 on client exit
  */
 void
 whowas_add_history(struct Client *client_p, const int online)
@@ -155,7 +155,7 @@ whowas_add_history(struct Client *client_p, const int online)
 /*! \brief This must be called when the client structure is about to
  *         be released. History mechanism keeps pointers to client
  *         structures and it must know when they cease to exist.
- * \param client_p pointer to Client struct
+ * \param client_p Pointer to Client struct
  */
 void
 whowas_off_history(struct Client *client_p)
@@ -172,8 +172,8 @@ whowas_off_history(struct Client *client_p)
 /*! \brief Returns the current client that was using the given
  *         nickname within the timelimit. Returns NULL, if no
  *         one found.
- * \param name      name of the nick
- * \param timelimit maximum age for a client since log-off
+ * \param name      Name of the nick
+ * \param timelimit Maximum age for a client since log-off
  */
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)

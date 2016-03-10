@@ -435,7 +435,7 @@ main(int argc, char *argv[])
   ipcache_init();
   client_init();
   class_init();
-//  whowas_init();
+  whowas_init();
   watch_init();
   auth_init();          /* Initialise the auth code */
   init_resolver();      /* Needs to be setup before the io loop */

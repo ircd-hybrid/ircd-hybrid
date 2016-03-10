@@ -293,7 +293,6 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   size_t mem_ips_stored = 0;        /* memory used by ip address hash */
 
   size_t total_channel_memory = 0;
-  size_t totww = 0;
 
   unsigned int local_client_count  = 0;
   unsigned int remote_client_count = 0;
@@ -447,15 +446,9 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      "z :Safelist %u(%zu)",
                      safelist_count, safelist_memory);
 
+  whowas_count_memory(&wwu, &wwm);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :Whowas users %u(%zu)",
-                     wwu, wwu * sizeof(struct Client));
-
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :Whowas array %u(%zu)",
-                     NICKNAMEHISTORYLENGTH, wwm);
-
-  totww = wwu * sizeof(struct Client) + wwm;
+                     "z :Whowas users %u(%zu)", wwu, wwm);
 
   motd_memory_count(source_p);
   ipcache_get_stats(&number_ips_stored, &mem_ips_stored);
@@ -463,11 +456,11 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      "z :iphash %u(%zu)",
                      number_ips_stored, mem_ips_stored);
 
-  total_memory = totww + total_channel_memory + conf_memory + class_count *
+  total_memory = total_channel_memory + conf_memory + class_count *
                  sizeof(struct ClassItem);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :Total: whowas %zu channel %zu conf %zu",
-                     totww, total_channel_memory, conf_memory);
+                     "z :Total: channel %zu conf %zu",
+                     total_channel_memory, conf_memory);
 
   local_client_memory_used = local_client_count*(sizeof(struct Client) + sizeof(struct Connection));
   total_memory += local_client_memory_used;

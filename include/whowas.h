@@ -31,8 +31,6 @@
 #include "client.h"
 
 
-enum { NICKNAMEHISTORYLENGTH = 32768 };
-
 struct Whowas
 {
   int hashv;
@@ -48,9 +46,11 @@ struct Whowas
   struct Client *online; /* Pointer to new nickname for chasing or NULL */
   dlink_node tnode;      /* for hash table...                           */
   dlink_node cnode;      /* for client struct linked list               */
+  dlink_node lnode;  /**< List node; linked into whowas_list */
 };
 
 extern void whowas_init(void);
+extern void whowas_trim(void);
 extern void whowas_add_history(struct Client *, const int);
 extern void whowas_off_history(struct Client *);
 extern struct Client *whowas_get_history(const char *, uintmax_t);

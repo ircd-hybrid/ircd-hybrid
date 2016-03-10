@@ -388,6 +388,12 @@ static const struct InfoStruct info_table[] =
     "Maximum nicknames on accept list"
   },
   {
+    "whowas_history_length",
+    OUTPUT_DECIMAL,
+    &ConfigGeneral.whowas_history_length,
+    "Length of the WHOWAS nick name history list"
+  },
+  {
     "anti_nick_flood",
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.anti_nick_flood,

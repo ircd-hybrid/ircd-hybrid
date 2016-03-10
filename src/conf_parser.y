@@ -365,6 +365,7 @@ reset_block_state(void)
 %token  VHOST6
 %token  WARN_NO_CONNECT_BLOCK
 %token  WHOIS
+%token  WHOWAS_HISTORY_LENGTH
 %token  XLINE
 %token  XLINE_EXEMPT
 
@@ -2469,6 +2470,7 @@ general_item:       general_away_count |
                     general_max_nick_time |
                     general_max_nick_changes |
                     general_max_accept |
+                    general_whowas_history_length |
                     general_anti_spam_exit_message_time |
                     general_ts_warn_delta |
                     general_ts_max_delta |
@@ -2522,6 +2524,11 @@ general_away_time: AWAY_TIME '=' timespec ';'
 general_max_watch: MAX_WATCH '=' NUMBER ';'
 {
   ConfigGeneral.max_watch = $3;
+};
+
+general_whowas_history_length: WHOWAS_HISTORY_LENGTH '=' NUMBER ';'
+{
+  ConfigGeneral.whowas_history_length = $3;
 };
 
 general_cycle_on_host_change: CYCLE_ON_HOST_CHANGE '=' TBOOL ';'

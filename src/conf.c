@@ -60,6 +60,7 @@
 #include "motd.h"
 #include "ipcache.h"
 #include "isupport.h"
+#include "whowas.h"
 
 
 struct config_channel_entry ConfigChannel;
@@ -662,6 +663,7 @@ set_default_conf(void)
   ConfigGeneral.away_count = 2;
   ConfigGeneral.away_time = 10;
   ConfigGeneral.max_watch = 50;
+  ConfigGeneral.whowas_history_length = 15000;
   ConfigGeneral.cycle_on_host_change = 1;
   ConfigGeneral.dline_min_cidr = 16;
   ConfigGeneral.dline_min_cidr6 = 48;
@@ -739,6 +741,7 @@ read_conf(FILE *file)
   yyparse();  /* Load the values from the conf */
   validate_conf();  /* Check to make sure some values are still okay. */
                     /* Some global values are also loaded here. */
+  whowas_trim();  /* Attempt to trim whowas list if necessary */
   class_delete_marked();  /* Delete unused classes that are marked for deletion */
 }
 

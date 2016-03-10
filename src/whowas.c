@@ -89,7 +89,7 @@ whowas_make(void)
   struct Whowas *whowas;
 
   if (dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-    whowas = whowas_unlink(whowas_list.tail->data);
+    whowas = whowas_unlink(whowas_list.tail->data);  /* Re-use oldest item */
   else
     whowas = mp_pool_get(whowas_pool);
 

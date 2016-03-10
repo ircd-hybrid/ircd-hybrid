@@ -14368,6 +14368,9 @@ $as_echo "#define MP_CHUNK_SIZE_USERHOST 128*1024" >>confdefs.h
 $as_echo "#define MP_CHUNK_SIZE_IP_ENTRY 128*1024" >>confdefs.h
 
 
+$as_echo "#define MP_CHUNK_SIZE_WHOWAS 256*1024" >>confdefs.h
+
+
 
 # Argument processing.
 

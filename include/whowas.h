@@ -33,8 +33,8 @@
 
 struct Whowas
 {
-  int hashv;
-  int shide;
+  unsigned int hashv;
+  unsigned int shide;
   uintmax_t logoff;
   char account[ACCOUNTLEN + 1];  /**< Services account */
   char name[NICKLEN + 1];
@@ -43,17 +43,17 @@ struct Whowas
   char sockhost[HOSTIPLEN + 1];  /**< This is the host name from the socket ip address as string */
   char realname[REALLEN + 1];
   char servername[HOSTLEN + 1];
-  struct Client *online; /* Pointer to new nickname for chasing or NULL */
-  dlink_node tnode;      /* for hash table...                           */
+  struct Client *online; /**< Pointer to new nickname for chasing or NULL */
+  dlink_node hnode;  /**< List node; linked into whowas_hash */
   dlink_node cnode;      /* for client struct linked list               */
   dlink_node lnode;  /**< List node; linked into whowas_list */
 };
 
+extern const dlink_list *whowas_get_hash(unsigned int);
 extern void whowas_init(void);
 extern void whowas_trim(void);
 extern void whowas_add_history(struct Client *, const int);
 extern void whowas_off_history(struct Client *);
 extern struct Client *whowas_get_history(const char *, uintmax_t);
 extern void whowas_count_memory(unsigned int *const, size_t *const);
-extern dlink_list WHOWASHASH[];
 #endif /* INCLUDED_whowas_h */

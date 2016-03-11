@@ -32,7 +32,6 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "send.h"
 #include "conf.h"
 
 

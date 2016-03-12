@@ -611,22 +611,22 @@ stats_events(struct Client *source_p, int parc, char *parv[])
 static void
 stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL, *dptr = NULL;
+  const dlink_node *node, *node2;
 
   DLINK_FOREACH(node, connect_items.head)
   {
     const struct MaskItem *conf = node->data;
 
-    DLINK_FOREACH(dptr, conf->hub_list.head)
-      sendto_one_numeric(source_p, &me, RPL_STATSHLINE, 'H', dptr->data, conf->name, 0, "*");
+    DLINK_FOREACH(node2, conf->hub_list.head)
+      sendto_one_numeric(source_p, &me, RPL_STATSHLINE, 'H', node2->data, conf->name, 0, "*");
   }
 
   DLINK_FOREACH(node, connect_items.head)
   {
     const struct MaskItem *conf = node->data;
 
-    DLINK_FOREACH(dptr, conf->leaf_list.head)
-      sendto_one_numeric(source_p, &me, RPL_STATSLLINE, 'L', dptr->data, conf->name, 0, "*");
+    DLINK_FOREACH(node2, conf->leaf_list.head)
+      sendto_one_numeric(source_p, &me, RPL_STATSLLINE, 'L', node2->data, conf->name, 0, "*");
   }
 }
 
@@ -642,37 +642,35 @@ stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 static const char *
 show_iline_prefix(const struct Client *source_p, const struct MaskItem *conf)
 {
-  static char prefix_of_host[USERLEN + 16];
-  char *prefix_ptr = prefix_of_host;
+  static char buf[USERLEN + 16];
+  char *p = buf;
 
   if (IsConfWebIRC(conf))
-    *prefix_ptr++ = '<';
+    *p++ = '<';
   if (IsNoTilde(conf))
-    *prefix_ptr++ = '-';
+    *p++ = '-';
   if (IsNeedIdentd(conf))
-    *prefix_ptr++ = '+';
+    *p++ = '+';
   if (!IsNeedPassword(conf))
-    *prefix_ptr++ = '&';
+    *p++ = '&';
   if (IsConfExemptResv(conf))
-    *prefix_ptr++ = '$';
+    *p++ = '$';
   if (IsConfDoSpoofIp(conf))
-    *prefix_ptr++ = '=';
+    *p++ = '=';
+  if (IsConfCanFlood(conf))
+    *p++ = '|';
   if (HasUMode(source_p, UMODE_OPER))
   {
     if (IsConfExemptKline(conf))
-      *prefix_ptr++ = '^';
+      *p++ = '^';
     if (IsConfExemptXline(conf))
-      *prefix_ptr++ = '!';
+      *p++ = '!';
     if (IsConfExemptLimits(conf))
-      *prefix_ptr++ = '>';
+      *p++ = '>';
   }
 
-  if (IsConfCanFlood(conf))
-    *prefix_ptr++ = '|';
-
-  strlcpy(prefix_ptr, conf->user, USERLEN+1);
-
-  return prefix_of_host;
+  strlcpy(p, conf->user, USERLEN+1);
+  return buf;
 }
 
 static void

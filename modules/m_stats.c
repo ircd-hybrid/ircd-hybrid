@@ -375,9 +375,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   /* count up all classes */
   class_count = dlink_list_length(class_get_list());
 
-  whowas_count_memory(&wwu, &wwm);
   watch_count_memory(&watch_list_headers, &watch_list_memory);
-
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :WATCH headers %u(%zu) entries %u(%u)",
                      watch_list_headers,
@@ -405,7 +403,6 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      dlink_list_length(resv_nick_get_list()) * sizeof(struct ResvItem));
 
   listener_count_memory(&listener_count, &listener_memory);
-
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Listeners allocated %u(%zu)",
                      listener_count, listener_memory);

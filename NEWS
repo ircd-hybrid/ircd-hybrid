@@ -6,6 +6,9 @@ GnuTLS support as of version 8.2.13
 -- Noteworthy changes in version 8.2.16 (2016-??-??)
 o) Added 'general::whowas_history_length' configuration options which
    allows to define the maximum length of the WHOWAS nickname history
+o) Services are now allowed to override 'general::min_nonwildcard',
+   and 'general::min_nonwildcard_simple' settings
+o) Minor update to help files
 
 
 -- Noteworthy changes in version 8.2.15 (2016-02-24)

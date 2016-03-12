@@ -497,7 +497,7 @@ find_chasing(struct Client *source_p, const char *name)
   if (IsDigit(*name))
     return NULL;
 
-  target_p = whowas_get_history(name, (uintmax_t)ConfigGeneral.kill_chase_time_limit);
+  target_p = whowas_get_history(name, ConfigGeneral.kill_chase_time_limit);
 
   if (!target_p)
   {

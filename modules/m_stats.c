@@ -603,9 +603,8 @@ stats_events(struct Client *source_p, int parc, char *parv[])
     const struct event *ev = node->data;
 
     sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                       "E :%-30s %-4d seconds",
-                       ev->name,
-                       (int)(ev->next - CurrentTime));
+                       "E :%-30s %-4ji seconds",
+                       ev->name, ev->next - CurrentTime);
   }
 }
 

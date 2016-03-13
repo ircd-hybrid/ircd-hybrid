@@ -276,7 +276,6 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   unsigned int channel_invex = 0;
 
   unsigned int wwu = 0;                  /* whowas users */
-  unsigned int class_count = 0;          /* classes */
   unsigned int aways_counted = 0;
   unsigned int number_ips_stored = 0;        /* number of ip addresses hashed */
 
@@ -353,7 +352,8 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
     channel_invex_memory += dlink_list_length(&chptr->invexlist) * sizeof(struct Ban);
   }
 
-  if ((safelist_count = dlink_list_length(&listing_client_list)))
+  safelist_count = dlink_list_length(&listing_client_list);
+  if (safelist_count)
   {
     safelist_memory = safelist_count * sizeof(struct ListTask);
 
@@ -401,10 +401,10 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      "z :Listeners %u(%zu)",
                      listener_count, listener_memory);
 
-  class_count = dlink_list_length(class_get_list());
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Classes %u(%zu)",
-                     class_count, class_count * sizeof(struct ClassItem));
+                     dlink_list_length(class_get_list()),
+                     dlink_list_length(class_get_list()) * sizeof(struct ClassItem));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Channels %u(%zu) Topics %u",
@@ -439,12 +439,13 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      "z :Whowas users %u(%zu)", wwu, wwm);
 
   motd_memory_count(source_p);
+
   ipcache_get_stats(&number_ips_stored, &mem_ips_stored);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :iphash %u(%zu)",
                      number_ips_stored, mem_ips_stored);
 
-  local_client_memory_used = local_client_count*(sizeof(struct Client) + sizeof(struct Connection));
+  local_client_memory_used = local_client_count *(sizeof(struct Client) + sizeof(struct Connection));
   total_memory += local_client_memory_used;
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Local client Memory in use: %u(%zu)",
@@ -480,7 +481,6 @@ stats_dns_servers(struct Client *source_p, int parc, char *parv[])
 static void
 stats_deny(struct Client *source_p, int parc, char *parv[])
 {
-  const struct MaskItem *conf = NULL;
   const dlink_node *node = NULL;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
@@ -492,8 +492,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
       if (arec->type != CONF_DLINE)
         continue;
 
-      conf = arec->conf;
-
+      const struct MaskItem *conf = arec->conf;
       /* Don't report a temporary dline as permanent dline */
       if (conf->until)
         continue;
@@ -512,7 +511,6 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_tdeny(struct Client *source_p, int parc, char *parv[])
 {
-  const struct MaskItem *conf = NULL;
   const dlink_node *node = NULL;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
@@ -524,8 +522,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
       if (arec->type != CONF_DLINE)
         continue;
 
-      conf = arec->conf;
-
+      const struct MaskItem *conf = arec->conf;
       /* Don't report a permanent dline as temporary dline */
       if (!conf->until)
         continue;
@@ -544,7 +541,6 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_exempt(struct Client *source_p, int parc, char *parv[])
 {
-  const struct MaskItem *conf = NULL;
   const dlink_node *node = NULL;
 
   if (ConfigGeneral.stats_e_disabled)
@@ -562,7 +558,7 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
       if (arec->type != CONF_EXEMPT)
         continue;
 
-      conf = arec->conf;
+      const struct MaskItem *conf = arec->conf;
       sendto_one_numeric(source_p, &me, RPL_STATSDLINE, 'e', conf->host, "");
     }
   }
@@ -656,7 +652,6 @@ show_iline_prefix(const struct Client *source_p, const struct MaskItem *conf)
 static void
 report_auth(struct Client *source_p, int parc, char *parv[])
 {
-  const struct MaskItem *conf = NULL;
   const dlink_node *node = NULL;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
@@ -668,8 +663,7 @@ report_auth(struct Client *source_p, int parc, char *parv[])
       if (arec->type != CONF_CLIENT)
         continue;
 
-      conf = arec->conf;
-
+      const struct MaskItem *conf = arec->conf;
       if (!HasUMode(source_p, UMODE_OPER) && IsConfDoSpoofIp(conf))
         continue;
 
@@ -704,7 +698,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
       conf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT, 0,
                                   source_p->username, NULL, 1);
 
-    if (conf == NULL)
+    if (!conf)
       return;
 
     sendto_one_numeric(source_p, &me, RPL_STATSILINE,
@@ -726,7 +720,6 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
 static void
 report_Klines(struct Client *source_p, int tkline)
 {
-  const struct MaskItem *conf = NULL;
   const dlink_node *node = NULL;
   char c = '\0';
 
@@ -744,8 +737,7 @@ report_Klines(struct Client *source_p, int tkline)
       if (arec->type != CONF_KLINE)
         continue;
 
-      conf = arec->conf;
-
+      const struct MaskItem *conf = arec->conf;
       if ((!tkline && conf->until) ||
           (tkline && !conf->until))
         continue;
@@ -888,14 +880,13 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
 static void
 show_ports(struct Client *source_p)
 {
-  char buf[IRCD_BUFSIZE] = "";
-  char *p = NULL;
+  char buf[8] = "";
   const dlink_node *node = NULL;
 
   DLINK_FOREACH(node, listener_get_list()->head)
   {
     const struct Listener *listener = node->data;
-    p = buf;
+    char *p = buf;
 
     if (listener->flags & LISTENER_HIDDEN)
     {
@@ -909,7 +900,6 @@ show_ports(struct Client *source_p)
     if (listener->flags & LISTENER_SSL)
       *p++ = 's';
     *p = '\0';
-
 
     if (HasUMode(source_p, UMODE_ADMIN) &&
         (MyConnect(source_p) || !ConfigServerHide.hide_server_ips))
@@ -998,7 +988,7 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
                      "t :bytes sent %ju %ju",
                      sp->is_cbs, sp->is_sbs);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "t :bytes recv %ju %ju",
+                     "t :bytes received %ju %ju",
                      sp->is_cbr, sp->is_sbr);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :time connected %ju %ju",
@@ -1057,7 +1047,7 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
 static void
 stats_class(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node = NULL;
 
   DLINK_FOREACH(node, class_get_list()->head)
   {
@@ -1078,9 +1068,9 @@ stats_class(struct Client *source_p, int parc, char *parv[])
 static void
 stats_servlinks(struct Client *source_p, int parc, char *parv[])
 {
+  dlink_node *node;
   uintmax_t sendB = 0, recvB = 0;
   uintmax_t uptime = 0;
-  dlink_node *node = NULL;
 
   if (ConfigServerHide.flatten_links && !HasUMode(source_p, UMODE_OPER))
   {
@@ -1090,7 +1080,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
 
   DLINK_FOREACH(node, local_server_list.head)
   {
-    struct Client *target_p = node->data;
+    const struct Client *target_p = node->data;
 
     if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (!HasUMode(source_p, UMODE_OPER))
@@ -1173,7 +1163,7 @@ static void
 stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
              dlink_list *list, const char statchar)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   /*
    * Send info about connections which match, or all if the
@@ -1183,7 +1173,7 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
    */
   DLINK_FOREACH(node, list->head)
   {
-    struct Client *target_p = node->data;
+    const struct Client *target_p = node->data;
 
     if (HasUMode(target_p, UMODE_INVISIBLE) && (doall || wilds) &&
         !(MyConnect(source_p) && HasUMode(source_p, UMODE_OPER)) &&

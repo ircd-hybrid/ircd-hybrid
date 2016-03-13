@@ -32,14 +32,13 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "conf.h"
 #include "send.h"
 #include "mempool.h"
 #include "watch.h"
 
 
-static dlink_list watchTable[HASHSIZE];
 static mp_pool_t *watch_pool;
+static dlink_list watchTable[HASHSIZE];
 
 /*! \brief Initializes the watch table
  */

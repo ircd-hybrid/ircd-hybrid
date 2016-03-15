@@ -69,12 +69,6 @@ enum irc_numerics
   RPL_STATSQLINE           = 217,
   RPL_STATSYLINE           = 218,
   RPL_ENDOFSTATS           = 219,
-
-  /*
-   * Note ircu uses 217 for STATSPLINE frip. conflict
-   * as RPL_STATSQLINE was used in old 2.8 for Q line
-   * I'm going to steal 220 for now *sigh* -Dianora
-   */
   RPL_STATSPLINE           = 220,
   RPL_UMODEIS              = 221,
   RPL_STATSDLINE           = 225,

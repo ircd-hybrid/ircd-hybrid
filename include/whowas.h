@@ -45,7 +45,7 @@ struct Whowas
   char servername[HOSTLEN + 1];
   struct Client *online; /**< Pointer to new nickname for chasing or NULL */
   dlink_node hnode;  /**< List node; linked into whowas_hash */
-  dlink_node cnode;      /* for client struct linked list               */
+  dlink_node cnode;  /**< List node; linked into client->whowas_list */
   dlink_node lnode;  /**< List node; linked into whowas_list */
 };
 

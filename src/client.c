@@ -125,7 +125,7 @@ free_client(struct Client *client_p)
   assert(client_p->idhnext == client_p);
   assert(client_p->channel.head == NULL);
   assert(dlink_list_length(&client_p->channel) == 0);
-  assert(dlink_list_length(&client_p->whowas) == 0);
+  assert(dlink_list_length(&client_p->whowas_list) == 0);
   assert(dlink_list_length(&client_p->svstags) == 0);
 
   xfree(client_p->serv);

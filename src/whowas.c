@@ -71,7 +71,7 @@ whowas_unlink(struct Whowas *whowas)
     return NULL;
 
   if (whowas->online)
-    dlinkDelete(&whowas->cnode, &whowas->online->whowas);
+    dlinkDelete(&whowas->cnode, &whowas->online->whowas_list);
 
   dlinkDelete(&whowas->hnode, &whowas_hash[whowas->hashv]);
   dlinkDelete(&whowas->lnode, &whowas_list);
@@ -154,7 +154,7 @@ whowas_add_history(struct Client *client_p, const int online)
   if (online)
   {
     whowas->online = client_p;
-    dlinkAdd(whowas, &whowas->cnode, &client_p->whowas);
+    dlinkAdd(whowas, &whowas->cnode, &client_p->whowas_list);
   }
   else
     whowas->online = NULL;
@@ -171,12 +171,12 @@ whowas_add_history(struct Client *client_p, const int online)
 void
 whowas_off_history(struct Client *client_p)
 {
-  while (client_p->whowas.head)
+  while (client_p->whowas_list.head)
   {
-    struct Whowas *whowas = client_p->whowas.head->data;
+    struct Whowas *whowas = client_p->whowas_list.head->data;
 
     whowas->online = NULL;
-    dlinkDelete(&whowas->cnode, &client_p->whowas);
+    dlinkDelete(&whowas->cnode, &client_p->whowas_list);
   }
 }
 

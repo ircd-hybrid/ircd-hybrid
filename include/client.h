@@ -386,7 +386,7 @@ struct Client
   unsigned int      status;     /**< Client type */
   unsigned int      handler;    /**< Handler index */
 
-  dlink_list        whowas;
+  dlink_list        whowas_list;
   dlink_list        channel;   /**< Chain of channel pointer blocks */
   dlink_list        svstags;   /**< List of ServicesTag items */
 

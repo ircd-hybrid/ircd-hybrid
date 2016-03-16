@@ -1147,12 +1147,6 @@ read_conf_files(int cold)
   isupport_add("CHANNELLEN", NULL, CHANNELLEN);
   isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
   isupport_add("CHANMODES", chanmodes, -1);
-
-  /*
-   * message_locale may have changed.  rebuild isupport since it relies
-   * on strlen(form_str(RPL_ISUPPORT))
-   */
-  isupport_rebuild();
 }
 
 /* conf_add_class_to_conf()

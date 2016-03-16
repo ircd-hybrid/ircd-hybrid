@@ -28,9 +28,6 @@
 #include "list.h"
 #include "ircd.h"
 #include "event.h"
-#include "client.h"
-#include "send.h"
-#include "numeric.h"
 #include "rng_mt.h"
 
 

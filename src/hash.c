@@ -27,11 +27,9 @@
 #include "stdinc.h"
 #include "list.h"
 #include "conf.h"
-#include "conf_resv.h"
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "modules.h"
 #include "hash.h"
 #include "id.h"
 #include "rng_mt.h"
@@ -41,9 +39,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "memory.h"
-#include "mempool.h"
 #include "dbuf.h"
-#include "user.h"
 
 
 static unsigned int hashf_xor_key;

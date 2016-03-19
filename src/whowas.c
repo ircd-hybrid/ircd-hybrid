@@ -116,7 +116,7 @@ whowas_trim(void)
 {
   while (dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
   {
-    if (!whowas_list.tail->data)
+    if (!whowas_list.tail)
       return;  /* whowas_list is now empty. No more items can be freed. */
 
     whowas_free(whowas_list.tail->data);

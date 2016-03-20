@@ -3,6 +3,14 @@ Reminder for package maintainers of ircd-hybrid: ircd-hybrid now has
 GnuTLS support as of version 8.2.13
 #######################################################################
 
+-- Noteworthy changes in version 8.2.16 (2016-03-20)
+o) Added 'general::whowas_history_length' configuration option which
+   allows to define the maximum length of the WHOWAS nickname history
+o) Services are now allowed to override 'general::min_nonwildcard',
+   and 'general::min_nonwildcard_simple' settings
+o) Minor updates to help files
+
+
 -- Noteworthy changes in version 8.2.15 (2016-02-24)
 o) Added proper support for Raspbian/ARM. Gracias to Beave/2600.net
    for providing a box for testing purposes.

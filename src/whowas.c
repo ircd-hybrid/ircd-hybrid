@@ -114,13 +114,9 @@ whowas_make(void)
 void
 whowas_trim(void)
 {
-  while (dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-  {
-    if (!whowas_list.tail)
-      return;  /* whowas_list is now empty. No more items can be freed. */
-
+  while (dlink_list_length(&whowas_list) &&
+         dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
     whowas_free(whowas_list.tail->data);
-  }
 }
 
 /*! \brief Adds the currently defined name of the client to history.

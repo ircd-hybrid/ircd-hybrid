@@ -67,9 +67,6 @@ whowas_get_hash(unsigned int hashv)
 static struct Whowas *
 whowas_unlink(struct Whowas *whowas)
 {
-  if (!whowas)  /* Can be NULL. */
-    return NULL;
-
   if (whowas->online)
     dlinkDelete(&whowas->cnode, &whowas->online->whowas_list);
 
@@ -99,7 +96,8 @@ whowas_make(void)
 {
   struct Whowas *whowas;
 
-  if (dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
+  if (dlink_list_length(&whowas_list) &&
+      dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
     whowas = whowas_unlink(whowas_list.tail->data);  /* Re-use oldest item */
   else
     whowas = mp_pool_get(whowas_pool);
@@ -129,9 +127,6 @@ void
 whowas_add_history(struct Client *client_p, const int online)
 {
   struct Whowas *whowas = whowas_make();
-
-  if (!whowas)  /* Can be NULL. */
-    return;
 
   assert(IsClient(client_p));
 

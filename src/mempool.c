@@ -284,7 +284,6 @@ mp_pool_get(mp_pool_t *pool)
 {
   mp_chunk_t *chunk;
   mp_allocated_t *allocated;
-  void *ptr = NULL;
 
   if (pool->used_chunks)
   {
@@ -375,7 +374,7 @@ mp_pool_get(mp_pool_t *pool)
   }
 
   /* And return the memory portion of the mp_allocated_t. */
-  ptr = A2M(allocated);
+  void *ptr = A2M(allocated);
   memset(ptr, 0, pool->item_size);
 
   return ptr;

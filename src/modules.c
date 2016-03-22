@@ -230,8 +230,7 @@ mod_add_path(const char *path)
     return;
 
   pathst = xcalloc(sizeof(struct module_path));
-
-  strlcpy(pathst->path, path, sizeof(pathst->path));
+  pathst->path = xstrdup(path);
   dlinkAdd(pathst, &pathst->node, &modules_path);
 }
 
@@ -247,8 +246,7 @@ add_conf_module(const char *name)
   struct module_path *pathst;
 
   pathst = xcalloc(sizeof(struct module_path));
-
-  strlcpy(pathst->path, name, sizeof(pathst->path));
+  pathst->path = xstrdup(name);
   dlinkAdd(pathst, &pathst->node, &modules_conf);
 }
 
@@ -266,6 +264,7 @@ modules_conf_clear(void)
     struct module_path *path = modules_path.head->data;
 
     dlinkDelete(&path->node, &modules_path);
+    xfree(path->path);
     xfree(path);
   }
 
@@ -274,6 +273,7 @@ modules_conf_clear(void)
     struct module_path *path = modules_conf.head->data;
 
     dlinkDelete(&path->node, &modules_conf);
+    xfree(path->path);
     xfree(path);
   }
 }

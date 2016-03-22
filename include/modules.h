@@ -47,7 +47,7 @@ struct module
 struct module_path
 {
   dlink_node node;
-  char path[HYB_PATH_MAX + 1];
+  char *path;
 };
 
 

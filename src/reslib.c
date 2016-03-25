@@ -154,9 +154,6 @@ add_nameserver(const char *arg)
   if (getaddrinfo(arg, "domain", &hints, &res))
     return;
 
-  if (res == NULL)
-    return;
-
   memcpy(&irc_nsaddr_list[irc_nscount].ss, res->ai_addr, res->ai_addrlen);
   irc_nsaddr_list[irc_nscount++].ss_len = res->ai_addrlen;
   freeaddrinfo(res);

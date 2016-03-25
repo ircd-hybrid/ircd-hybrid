@@ -54,7 +54,7 @@ extern void mp_pool_assert_ok(mp_pool_t *);
 extern void mp_pool_log_status(mp_pool_t *);
 extern void mp_pool_garbage_collect(void *);
 
-#define MEMPOOL_STATS
+#undef MEMPOOL_STATS
 
 struct mp_pool_t
 {

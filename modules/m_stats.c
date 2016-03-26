@@ -645,7 +645,7 @@ show_iline_prefix(const struct Client *source_p, const struct MaskItem *conf)
       *p++ = '>';
   }
 
-  strlcpy(p, conf->user, USERLEN+1);
+  strlcpy(p, conf->user, USERLEN + 1);
   return buf;
 }
 

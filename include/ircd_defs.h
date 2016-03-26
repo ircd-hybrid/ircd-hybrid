@@ -52,6 +52,12 @@
                               generated length; DO NOT CHANGE! */
 #define REALLEN         50
 #define CHANNELLEN      50
+
+/*
+ * TOPICLEN: maximum size of a topic that your server will be able to handle
+ * when receiving topics from remote servers. Do not change this; if you want to
+ * change the maximum allowed topic length, you can do this in the ircd.conf
+ */
 #define TOPICLEN        300
 #define KILLLEN         240
 #define REASONLEN       240

@@ -70,8 +70,8 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
 
   if (!EmptyString(reason))
   {
-    if (strlen(reason) > (size_t)KILLLEN)
-      reason[KILLLEN] = '\0';
+    if (strlen(reason) > (size_t)REASONLEN)
+      reason[REASONLEN] = '\0';
   }
   else
     reason = def_reason;

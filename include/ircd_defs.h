@@ -37,8 +37,9 @@
 #define HOSTLEN          63     /* Length of hostname. Updated to comply
                                    with RFC 1123 */
 /*
- * NICKLEN: do not change this; if you want to change the maximum
- * allowed nickname length, you can do this in the ircd.conf
+ * NICKLEN: maximum size of a nick name that your server will be able to handle
+ * when receiving nicks from remote servers. Do not change this; if you want to
+ * change the maximum allowed nickname length, you can do this in the ircd.conf
  */
 #define NICKLEN         30
 #define USERLEN         10

@@ -59,7 +59,6 @@
  * change the maximum allowed topic length, you can do this in the ircd.conf
  */
 #define TOPICLEN        300
-#define KILLLEN         240
 #define REASONLEN       240
 #define KICKLEN         180
 #define AWAYLEN         180

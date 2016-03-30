@@ -553,8 +553,6 @@ static void
 chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  char *mask = NULL;
-
   if (dir == MODE_QUERY || parc <= *parn)
   {
     dlink_node *node = NULL;
@@ -590,7 +588,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  mask = nuh_mask[*parn];
+  char *mask = nuh_mask[*parn];
   strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 
@@ -621,8 +619,6 @@ static void
 chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
            char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  char *mask = NULL;
-
   if (dir == MODE_QUERY || parc <= *parn)
   {
     dlink_node *node = NULL;
@@ -635,7 +631,6 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     DLINK_FOREACH(node, chptr->exceptlist.head)
     {
       const struct Ban *ban = node->data;
-
       sendto_one_numeric(source_p, &me, RPL_EXCEPTLIST, chptr->name,
                          ban->name, ban->user, ban->host,
                          ban->who, ban->when);
@@ -659,7 +654,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  mask = nuh_mask[*parn];
+  char *mask = nuh_mask[*parn];
   strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 
@@ -690,8 +685,6 @@ static void
 chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
-  char *mask = NULL;
-
   if (dir == MODE_QUERY || parc <= *parn)
   {
     dlink_node *node = NULL;
@@ -704,7 +697,6 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     DLINK_FOREACH(node, chptr->invexlist.head)
     {
       const struct Ban *ban = node->data;
-
       sendto_one_numeric(source_p, &me, RPL_INVEXLIST, chptr->name,
                          ban->name, ban->user, ban->host,
                          ban->who, ban->when);
@@ -728,7 +720,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  mask = nuh_mask[*parn];
+  char *mask = nuh_mask[*parn];
   strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 

@@ -342,7 +342,6 @@ int
 check_server(const char *name, struct Client *client_p)
 {
   dlink_node *node = NULL;
-  struct MaskItem *conf        = NULL;
   struct MaskItem *server_conf = NULL;
   int error = -1;
 
@@ -351,15 +350,15 @@ check_server(const char *name, struct Client *client_p)
   /* Loop through looking for all possible connect items that might work */
   DLINK_FOREACH(node, connect_items.head)
   {
-    conf = node->data;
+    struct MaskItem *conf = node->data;
 
-    if (match(name, conf->name))
+    if (irccmp(name, conf->name))
       continue;
 
     error = -3;
 
-    if (!match(conf->host, client_p->host) ||
-        !match(conf->host, client_p->sockhost))
+    if (!irccmp(conf->host, client_p->host) ||
+        !irccmp(conf->host, client_p->sockhost))
     {
       error = -2;
 

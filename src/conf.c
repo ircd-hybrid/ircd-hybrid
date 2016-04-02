@@ -484,7 +484,8 @@ attach_connect_block(struct Client *client_p, const char *name,
   {
     struct MaskItem *conf = node->data;
 
-    if (match(conf->name, name) || match(conf->host, host))
+    if (irccmp(conf->name, name) ||
+        irccmp(conf->host, host))
       continue;
 
     attach_conf(client_p, conf);

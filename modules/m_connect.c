@@ -75,7 +75,8 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
     if (hunt_server(source_p, ":%s CONNECT %s %s :%s", 3, parc, parv) != HUNTED_ISME)
       return 0;
   }
-  else if (!HasOFlag(source_p, OPER_FLAG_CONNECT))
+
+  if (!HasOFlag(source_p, OPER_FLAG_CONNECT))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "connect");
     return 0;

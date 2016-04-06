@@ -33,20 +33,20 @@
 
 struct Whowas
 {
-  unsigned int hashv;
-  unsigned int shide;
-  uintmax_t logoff;
-  char account[ACCOUNTLEN + 1];  /**< Services account */
-  char name[NICKLEN + 1];
-  char username[USERLEN + 1];
-  char hostname[HOSTLEN + 1];
-  char sockhost[HOSTIPLEN + 1];  /**< This is the host name from the socket ip address as string */
-  char realname[REALLEN + 1];
-  char servername[HOSTLEN + 1];
-  struct Client *online; /**< Pointer to new nickname for chasing or NULL */
   dlink_node hnode;  /**< List node; linked into whowas_hash */
   dlink_node cnode;  /**< List node; linked into client->whowas_list */
   dlink_node lnode;  /**< List node; linked into whowas_list */
+  unsigned int hashv;  /**< Hash value derived from Whowas::name */
+  unsigned int shide;  /**< Client's server is hidden */
+  uintmax_t logoff;  /**< When the client logged off */
+  char account[ACCOUNTLEN + 1];  /**< Services account */
+  char name[NICKLEN + 1];  /**< Client's nick name */
+  char username[USERLEN + 1];  /**< Client's user name */
+  char hostname[HOSTLEN + 1];  /**< Client's host name */
+  char sockhost[HOSTIPLEN + 1];  /**< Client's IP address as string */
+  char realname[REALLEN + 1];  /**< Client's real name/gecos */
+  char servername[HOSTLEN + 1];  /**< Name of the server the client is using */
+  struct Client *online;  /**< Pointer to new nick name for chasing or NULL */
 };
 
 extern const dlink_list *whowas_get_hash(unsigned int);

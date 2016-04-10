@@ -12,10 +12,7 @@ ircd-hybrid list, use this link:
 
 The core team as of this major release:
 
-billy-jon, William Bierman III <bill@mu.org>
-cryogen, Stuart Walsh <stu@ipng.org.uk>
 Dianora, Diane Bruce <db@db.net>
-metalrock, Jack Low <jclow@csupomona.edu>
 Michael, Michael Wobst <michael@ircd-hybrid.de>
 Rodder, Jon Lusky <lusky@blown.net>
 Wohali, Joan Touzet <joant@ieee.org>
@@ -29,8 +26,10 @@ Adrian Chadd <adrian@creative.net.au>
 adx, Piotr Nizynski <nizynski@sysplex.pl>
 AndroSyn, Aaron Sethman <androsyn@ratbox.org>
 bane, Dragan Dosen <bane@idolnet.org>
+billy-jon, William Bierman III <bill@thebiermans.org>
 bysin, Ben Kittridge <bkittridge@cfl.rr.com>
 cosine, Patrick Alken <wnder@uwns.underworld.net>
+cryogen, Stuart Walsh <stu@ipng.org.uk>
 David-T, David Taylor <davidt@yadt.co.uk>
 Dom, Dominic Hargreaves <dom@earth.li>
 Fawkes, Christoph Ostermeier <fawkes@phat-net.de>
@@ -47,6 +46,7 @@ kire, Erik Small <smalle@hawaii.edu>
 knight, Alan LeVee <alan.levee@prometheus-designs.net>
 kre, Dinko Korunic <kreator@fly.srk.fer.hr>
 madmax, Paul Lomax <madmax@efnet.org>
+metalrock, Jack Low <jclow@csupomona.edu>
 Riedel, Dennis Vink, <riedel@chaotic.nl>
 scuzzy, David Todd <scuzzy@aniverse.net>
 spookey, David Colburn <spookey@spookey.org>

@@ -949,14 +949,13 @@ struct Client *
 find_servconn_in_progress(const char *name)
 {
   dlink_node *ptr;
-  struct Client *cptr;
 
   DLINK_FOREACH(ptr, unknown_list.head)
   {
-    cptr = ptr->data;
+    struct Client *cptr = ptr->data;
 
-    if (cptr && cptr->name[0])
-      if (!match(name, cptr->name))
+    if (cptr->name[0])
+      if (!irccmp(name, cptr->name))
         return cptr;
   }
 

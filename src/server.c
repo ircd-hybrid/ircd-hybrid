@@ -504,23 +504,23 @@ send_capabilities(struct Client *client_p)
 const char *
 show_capabilities(const struct Client *target_p)
 {
-  static char msgbuf[IRCD_BUFSIZE] = "";
+  static char buf[IRCD_BUFSIZE] = "";
   const dlink_node *node = NULL;
-
-  strlcpy(msgbuf, "TS", sizeof(msgbuf));
 
   DLINK_FOREACH(node, server_capabilities_list.head)
   {
     const struct Capability *cap = node->data;
 
-    if (!IsCapable(target_p, cap->cap))
-      continue;
+    if (IsCapable(target_p, cap->cap))
+    {
+      strlcat(buf, cap->name, sizeof(buf));
 
-    strlcat(msgbuf,       " ", sizeof(msgbuf));
-    strlcat(msgbuf, cap->name, sizeof(msgbuf));
+      if (node->next)
+        strlcat(buf, " ", sizeof(buf));
+    }
   }
 
-  return msgbuf;
+  return buf;
 }
 
 /* make_server()

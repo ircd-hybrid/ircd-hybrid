@@ -367,9 +367,8 @@ check_client(struct Client *source_p)
       /* jdc - lists server name & port connections are on */
       /*       a purely cosmetical change */
       sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
-                           "Unauthorized client connection from %s [%s] on [%s/%u].",
+                           "Unauthorized client connection from %s on [%s/%u].",
                            get_client_name(source_p, SHOW_IP),
-                           source_p->sockhost,
                            source_p->connection->listener->name,
                            source_p->connection->listener->port);
       ilog(LOG_TYPE_IRCD, "Unauthorized client connection from %s on [%s/%u].",

@@ -334,6 +334,4 @@ extern uintmax_t valid_tkline(const char *, const int);
 extern int match_conf_password(const char *, const struct MaskItem *);
 
 enum { CLEANUP_TKLINES_TIME = 60 };
-
-extern void cluster_a_line(struct Client *, const char *, unsigned int, unsigned int, const char *,...);
 #endif /* INCLUDED_s_conf_h */

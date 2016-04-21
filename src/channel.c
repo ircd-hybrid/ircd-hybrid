@@ -481,11 +481,9 @@ add_invite(struct Channel *chptr, struct Client *client_p)
 
   del_invite(chptr, client_p);
 
-  /*
-   * Delete last link in chain if the list is max length
-   */
-  if (dlink_list_length(&client_p->connection->invited) && 
-      dlink_list_length(&client_p->connection->invited) >= ConfigChannel.max_channels)
+  /* Delete last link in chain if the list is max length */
+  while (dlink_list_length(&client_p->connection->invited) && 
+         dlink_list_length(&client_p->connection->invited) >= ConfigChannel.max_channels)
     del_invite(client_p->connection->invited.tail->data, client_p);
 
   /* Add client to channel invite list */

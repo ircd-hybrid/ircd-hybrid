@@ -946,7 +946,6 @@ void
 channel_do_join(struct Client *client_p, char *channel, char *key_list)
 {
   char *p = NULL;
-  char *chan = NULL;
   char *chan_list = NULL;
   struct Channel *chptr = NULL;
   const struct ResvItem *resv = NULL;
@@ -958,8 +957,8 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
 
   chan_list = channel_find_last0(client_p, channel);
 
-  for (chan = strtok_r(chan_list, ",", &p); chan;
-       chan = strtok_r(NULL,      ",", &p))
+  for (const char *chan = strtok_r(chan_list, ",", &p); chan;
+                   chan = strtok_r(NULL,      ",", &p))
   {
     const char *key = NULL;
 

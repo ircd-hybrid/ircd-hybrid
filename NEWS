@@ -3,6 +3,12 @@ Reminder for package maintainers of ircd-hybrid: ircd-hybrid now has
 GnuTLS support as of version 8.2.13
 #######################################################################
 
+-- Noteworthy changes in version 8.2.17 (2016-04-21)
+o) Fixed core on "REHASH CONF" with 'general::whowas_history_length'
+   set to 0
+o) Fixed possible core on INVITE with 'channel::max_channels' set to 0
+
+
 -- Noteworthy changes in version 8.2.16 (2016-03-20)
 o) Added 'general::whowas_history_length' configuration option which
    allows to define the maximum length of the WHOWAS nickname history

@@ -119,6 +119,16 @@ struct Ban
   int type;
 };
 
+/*! \brief Invite structure */
+struct Invite
+{
+  dlink_node user_node;  /**< link to client_p->connection->invited */
+  dlink_node chan_node;  /**< link to chptr->invites */
+  struct Channel *chptr;  /**< Channel pointer */
+  struct Client *client_p;  /**< Client pointer */
+  uintmax_t when;  /**< Time the invite has been created */
+};
+
 extern dlink_list channel_list;
 
 extern int channel_check_name(const char *, const int);
@@ -135,7 +145,7 @@ extern void add_user_to_channel(struct Channel *, struct Client *, unsigned int,
 extern void remove_user_from_channel(struct Membership *);
 extern void channel_member_names(struct Client *, struct Channel *, int);
 extern void add_invite(struct Channel *, struct Client *);
-extern void del_invite(struct Channel *, struct Client *);
+extern void del_invite(struct Invite *);
 extern void clear_invites_channel(struct Channel *);
 extern void clear_invites_client(struct Client *);
 extern void channel_send_modes(struct Client *, struct Channel *);

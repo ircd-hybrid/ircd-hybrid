@@ -2,6 +2,7 @@ AC_DEFUN([AX_MEMPOOL_CHUNKSIZES],[
   AC_DEFINE([MP_CHUNK_SIZE_CHANNEL], 1024*1024, [Size of the channel mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_MEMBER], 2048*1024, [Size of the channel-member mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_BAN], 1024*1024, [Size of the ban mempool chunk.])
+  AC_DEFINE([MP_CHUNK_SIZE_INVITE], 4*1024, [Size of the invite mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_CLIENT], 1024*1024, [Size of the client mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_CONNECTION], 512*1024, [Size of the connection mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_DNODE], 32*1024, [Size of the dlink_node mempool chunk.])

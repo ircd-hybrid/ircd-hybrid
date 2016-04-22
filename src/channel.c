@@ -47,7 +47,7 @@
 dlink_list channel_list;
 mp_pool_t *ban_pool;    /*! \todo ban_pool shouldn't be a global var */
 
-static mp_pool_t *member_pool, *channel_pool;
+static mp_pool_t *member_pool, *channel_pool, *invite_pool;
 
 
 /*! \brief Initializes the channel blockheap, adds known channel CAPAB
@@ -58,6 +58,7 @@ channel_init(void)
   add_capability("EX", CAPAB_EX);
   add_capability("IE", CAPAB_IE);
 
+  invite_pool = mp_pool_new(sizeof(struct Invite), MP_CHUNK_SIZE_INVITE);
   channel_pool = mp_pool_new(sizeof(struct Channel), MP_CHUNK_SIZE_CHANNEL);
   ban_pool = mp_pool_new(sizeof(struct Ban), MP_CHUNK_SIZE_BAN);
   member_pool = mp_pool_new(sizeof(struct Membership), MP_CHUNK_SIZE_MEMBER);
@@ -470,6 +471,28 @@ channel_member_names(struct Client *client_p, struct Channel *chptr,
     sendto_one_numeric(client_p, &me, RPL_ENDOFNAMES, chptr->name);
 }
 
+static struct Invite *
+find_invite(struct Channel *chptr, struct Client *client_p)
+{
+  dlink_node *node, *node_next;
+  dlink_list *list;
+
+  if (dlink_list_length(&client_p->connection->invited) < dlink_list_length(&chptr->invites))
+    list = &client_p->connection->invited;
+  else
+    list = &chptr->invites;
+
+  DLINK_FOREACH_SAFE(node, node_next, list->head)
+  {
+    struct Invite *invite = node->data;
+
+    if (invite->chptr == chptr && invite->client_p == client_p)
+      return invite;
+  }
+
+  return NULL;
+}
+
 /*! \brief Adds client to invite list
  * \param chptr    Pointer to channel block
  * \param client_p Pointer to client to add invite to
@@ -477,37 +500,40 @@ channel_member_names(struct Client *client_p, struct Channel *chptr,
 void
 add_invite(struct Channel *chptr, struct Client *client_p)
 {
-  assert(IsClient(client_p));
+  struct Invite *invite;
 
-  del_invite(chptr, client_p);
+  if ((invite = find_invite(chptr, client_p)))
+    del_invite(invite);
+
+  invite = mp_pool_get(invite_pool);
+  invite->client_p = client_p;
+  invite->chptr = chptr;
+  invite->when = CurrentTime;
 
   /* Delete last link in chain if the list is max length */
   while (dlink_list_length(&client_p->connection->invited) && 
          dlink_list_length(&client_p->connection->invited) >= ConfigChannel.max_channels)
-    del_invite(client_p->connection->invited.tail->data, client_p);
+    del_invite(client_p->connection->invited.tail->data);
 
   /* Add client to channel invite list */
-  dlinkAdd(client_p, make_dlink_node(), &chptr->invites);
+  dlinkAdd(invite, &invite->chan_node, &chptr->invites);
 
   /* Add channel to the end of the client invite list */
-  dlinkAdd(chptr, make_dlink_node(), &client_p->connection->invited);
+  dlinkAdd(invite, &invite->user_node, &client_p->connection->invited);
 }
 
 /*! \brief Delete Invite block from channel invite list
  *         and client invite list
- * \param chptr    Pointer to Channel struct
- * \param client_p Pointer to client to remove invites from
+ * \param invite Pointer to Invite struct
  */
 void
-del_invite(struct Channel *chptr, struct Client *client_p)
+del_invite(struct Invite *invite)
 {
-  dlink_node *node = NULL;
+  dlinkDelete(&invite->user_node, &invite->client_p->connection->invited);
+  dlinkDelete(&invite->chan_node, &invite->chptr->invites);
 
-  if ((node = dlinkFindDelete(&client_p->connection->invited, chptr)))
-    free_dlink_node(node);
-
-  if ((node = dlinkFindDelete(&chptr->invites, client_p)))
-    free_dlink_node(node);
+  /* Release memory pointed to by 'invite' */
+  mp_pool_release(invite);
 }
 
 /*! \brief Removes all invites of a specific channel
@@ -516,10 +542,8 @@ del_invite(struct Channel *chptr, struct Client *client_p)
 void
 clear_invites_channel(struct Channel *chptr)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, chptr->invites.head)
-    del_invite(chptr, node->data);
+  while (chptr->invites.head)
+    del_invite(chptr->invites.head->data);
 }
 
 /*! \brief Removes all invites of a specific client
@@ -528,10 +552,8 @@ clear_invites_channel(struct Channel *chptr)
 void
 clear_invites_client(struct Client *client_p)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-
-  DLINK_FOREACH_SAFE(node, node_next, client_p->connection->invited.head)
-    del_invite(node->data, client_p);
+  while (client_p->connection->invited.head)
+    del_invite(client_p->connection->invited.head->data);
 }
 
 /* get_member_status()
@@ -636,7 +658,7 @@ is_banned(const struct Channel *chptr, const struct Client *client_p)
  *         or 0 if allowed to join.
  */
 static int
-can_join(struct Client *client_p, const struct Channel *chptr, const char *key)
+can_join(struct Client *client_p, struct Channel *chptr, const char *key)
 {
   if ((chptr->mode.mode & MODE_SSLONLY) && !HasUMode(client_p, UMODE_SSL))
     return ERR_SSLONLYCHAN;
@@ -648,7 +670,7 @@ can_join(struct Client *client_p, const struct Channel *chptr, const char *key)
     return ERR_OPERONLYCHAN;
 
   if (chptr->mode.mode & MODE_INVITEONLY)
-    if (!dlinkFind(&client_p->connection->invited, chptr))
+    if (!find_invite(chptr, client_p))
       if (!find_bmask(client_p, &chptr->invexlist))
         return ERR_INVITEONLYCHAN;
 
@@ -1079,7 +1101,9 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
                              client_p->host, client_p->away);
     }
 
-    del_invite(chptr, client_p);
+    struct Invite *invite = find_invite(chptr, client_p);
+    if (invite)
+      del_invite(invite);
 
     if (chptr->topic[0])
     {

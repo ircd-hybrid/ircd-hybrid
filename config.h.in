@@ -224,6 +224,9 @@
 /* Size of the dns mempool chunk. */
 #undef MP_CHUNK_SIZE_DNS
 
+/* Size of the invite mempool chunk. */
+#undef MP_CHUNK_SIZE_INVITE
+
 /* Size of the ip_entry mempool chunk. */
 #undef MP_CHUNK_SIZE_IP_ENTRY
 

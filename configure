@@ -14338,6 +14338,9 @@ $as_echo "#define MP_CHUNK_SIZE_MEMBER 2048*1024" >>confdefs.h
 $as_echo "#define MP_CHUNK_SIZE_BAN 1024*1024" >>confdefs.h
 
 
+$as_echo "#define MP_CHUNK_SIZE_INVITE 4*1024" >>confdefs.h
+
+
 $as_echo "#define MP_CHUNK_SIZE_CLIENT 1024*1024" >>confdefs.h
 
 

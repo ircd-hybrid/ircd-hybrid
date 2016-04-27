@@ -78,7 +78,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   int            args = 0;
   char           keep_our_modes = 1;
   char           keep_new_modes = 1;
-  char           have_many_nicks = 0;
+  char           have_many_uids = 0;
   int            lcount;
   char           uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1];
   char           *up = NULL;
@@ -269,7 +269,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
    * Check we can fit a nick on the end, as well as \r\n and a prefix "
    * @%+", and a space.
    */
-  if (buflen >= (IRCD_BUFSIZE - IRCD_MAX(NICKLEN, IDLEN) - 2 - CMEMBER_STATUS_FLAGS_LEN - 1))
+  if (buflen >= (IRCD_BUFSIZE - IDLEN - 2 - CMEMBER_STATUS_FLAGS_LEN - 1))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Long SJOIN from server: %s(via %s) (ignored)",
@@ -293,7 +293,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     while (*p == ' ')
       ++p;
-    have_many_nicks = *p;
+    have_many_uids = *p;
   }
 
   while (*s)
@@ -329,7 +329,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
      * lookup the nick, and it's better to never send the numeric than only
      * sometimes.
      */
-    if ((target_p = find_chasing(source_p, s)) == NULL || target_p->from != source_p->from)
+    if ((target_p = find_person(source_p, s)) == NULL || target_p->from != source_p->from)
       goto nextnick;
 
     len_uid = strlen(target_p->id);
@@ -374,7 +374,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if (!IsMember(target_p, chptr))
     {
-      add_user_to_channel(chptr, target_p, fl, !have_many_nicks);
+      add_user_to_channel(chptr, target_p, fl, !have_many_uids);
 
       sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target_p->name, target_p->username,

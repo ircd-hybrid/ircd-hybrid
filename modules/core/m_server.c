@@ -80,7 +80,7 @@ server_set_flags(struct Client *client_p, const char *flags)
  *                server is CAPAB_TBURST capable
  */
 static void
-send_tb(struct Client *client_p, const struct Channel *chptr)
+server_send_tburst(struct Client *client_p, const struct Channel *chptr)
 {
   /*
    * We may also send an empty topic here, but only if topic_time isn't 0,
@@ -111,7 +111,7 @@ send_tb(struct Client *client_p, const struct Channel *chptr)
  * side effects - NICK message is sent towards given client_p
  */
 static void
-sendnick_TS(struct Client *client_p, struct Client *target_p)
+server_send_client(struct Client *client_p, struct Client *target_p)
 {
   dlink_node *node = NULL;
   char ubuf[IRCD_BUFSIZE] = "";
@@ -157,35 +157,6 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
   }
 }
 
-/* burst_members()
- *
- * inputs       - pointer to server to send members to
- *              - dlink_list pointer to membership list to send
- * output       - NONE
- * side effects -
- */
-static void
-burst_members(struct Client *client_p, struct Channel *chptr)
-{
-  struct Client *target_p;
-  struct Membership *member;
-  dlink_node *node = NULL;
-
-  DLINK_FOREACH(node, chptr->members.head)
-  {
-    member   = node->data;
-    target_p = member->client_p;
-
-    if (!HasFlag(target_p, FLAGS_BURSTED))
-    {
-      AddFlag(target_p, FLAGS_BURSTED);
-
-      if (target_p->from != client_p)
-        sendnick_TS(client_p, target_p);
-    }
-  }
-}
-
 /* burst_all()
  *
  * inputs       - pointer to server to send burst to
@@ -193,9 +164,17 @@ burst_members(struct Client *client_p, struct Channel *chptr)
  * side effects - complete burst of channels/nicks is sent to client_p
  */
 static void
-burst_all(struct Client *client_p)
+server_burst(struct Client *client_p)
 {
   dlink_node *node = NULL;
+
+  DLINK_FOREACH(node, global_client_list.head)
+  {
+    struct Client *target_p = node->data;
+
+    if (target_p->from != client_p)
+      server_send_client(client_p, target_p);
+  }
 
   DLINK_FOREACH(node, channel_list.head)
   {
@@ -203,51 +182,13 @@ burst_all(struct Client *client_p)
 
     if (dlink_list_length(&chptr->members))
     {
-      burst_members(client_p, chptr);
       channel_send_modes(client_p, chptr);
 
       if (IsCapable(client_p, CAPAB_TBURST))
-        send_tb(client_p, chptr);
+        server_send_tburst(client_p, chptr);
     }
   }
 
-  /* also send out those that are not on any channel
-   */
-  DLINK_FOREACH(node, global_client_list.head)
-  {
-    struct Client *target_p = node->data;
-
-    if (!HasFlag(target_p, FLAGS_BURSTED) && target_p->from != client_p)
-      sendnick_TS(client_p, target_p);
-
-    DelFlag(target_p, FLAGS_BURSTED);
-  }
-}
-
-/* server_burst()
- *
- * inputs       - struct Client pointer server
- *              -
- * output       - none
- * side effects - send a server burst
- * bugs         - still too long
- */
-static void
-server_burst(struct Client *client_p)
-{
-  /* Send it in the shortened format with the TS, if
-  ** it's a TS server; walk the list of channels, sending
-  ** all the nicks that haven't been sent yet for each
-  ** channel, then send the channel itself -- it's less
-  ** obvious than sending all nicks first, but on the
-  ** receiving side memory will be allocated more nicely
-  ** saving a few seconds in the handling of a split
-  ** -orabidoo
-  */
-
-  burst_all(client_p);
-
-  /* EOB stuff is now in burst_all */
   /* Always send a PING after connect burst is done */
   sendto_one(client_p, "PING :%s", me.id);
 }

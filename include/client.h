@@ -130,15 +130,14 @@ enum
   FLAGS_HIDDEN        = 0x00004000U,  /**< A hidden server. Not shown in /links */
   FLAGS_BLOCKED       = 0x00008000U,  /**< Must wait for COMM_SELECT_WRITE */
   FLAGS_USERHOST      = 0x00010000U,  /**< Client is in userhost hash */
-  FLAGS_BURSTED       = 0x00020000U,  /**< User was already bursted */
-  FLAGS_EXEMPTRESV    = 0x00040000U,  /**< Client is exempt from RESV */
-  FLAGS_GOTUSER       = 0x00080000U,  /**< If we received a USER command */
-  FLAGS_FINISHED_AUTH = 0x00100000U,  /**< Client has been released from auth */
-  FLAGS_FLOOD_NOTICED = 0x00200000U,  /**< Notice to opers about this flooder has been sent */
-  FLAGS_SERVICE       = 0x00400000U,  /**< Client/server is a network service */
-  FLAGS_SSL           = 0x00800000U,  /**< User is connected via TLS/SSL */
-  FLAGS_SQUIT         = 0x01000000U,
-  FLAGS_EXEMPTXLINE   = 0x02000000U   /**< Client is exempt from x-lines */
+  FLAGS_EXEMPTRESV    = 0x00020000U,  /**< Client is exempt from RESV */
+  FLAGS_GOTUSER       = 0x00040000U,  /**< If we received a USER command */
+  FLAGS_FINISHED_AUTH = 0x00080000U,  /**< Client has been released from auth */
+  FLAGS_FLOOD_NOTICED = 0x00100000U,  /**< Notice to opers about this flooder has been sent */
+  FLAGS_SERVICE       = 0x00200000U,  /**< Client/server is a network service */
+  FLAGS_SSL           = 0x00400000U,  /**< User is connected via TLS/SSL */
+  FLAGS_SQUIT         = 0x00800000U,
+  FLAGS_EXEMPTXLINE   = 0x01000000U   /**< Client is exempt from x-lines */
 };
 
 #define HasFlag(x, y) ((x)->flags &   (y))

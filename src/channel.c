@@ -972,7 +972,6 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
   struct Channel *chptr = NULL;
   const struct ResvItem *resv = NULL;
   const struct ClassItem *const class = get_class_ptr(&client_p->connection->confs);
-  int i = 0;
   unsigned int flags = 0;
 
   assert(IsClient(client_p));
@@ -1021,12 +1020,11 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
       if (IsMember(client_p, chptr))
         continue;
 
-      /*
-       * can_join checks for +i key, bans.
-       */
-      if ((i = can_join(client_p, chptr, key)))
+      /* can_join() checks for +i, +l, key, bans, etc. */
+      int ret = can_join(client_p, chptr, key);
+      if (ret)
       {
-        sendto_one_numeric(client_p, &me, i, chptr->name);
+        sendto_one_numeric(client_p, &me, ret, chptr->name);
         continue;
       }
 

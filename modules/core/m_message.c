@@ -240,7 +240,6 @@ static void
 msg_channel(int p_or_n, struct Client *source_p, struct Channel *chptr,
             unsigned int flags, const char *text)
 {
-  int result = 0;
   unsigned int type = 0;
   const char *prefix = "";
 
@@ -261,15 +260,15 @@ msg_channel(int p_or_n, struct Client *source_p, struct Channel *chptr,
   }
 
   /* Chanops and voiced can flood their own channel with impunity */
-  if ((result = can_send(chptr, source_p, NULL, text, p_or_n == NOTICE)) < 0)
+  int ret = can_send(chptr, source_p, NULL, text, p_or_n == NOTICE);
+  if (ret < 0)
   {
-    if (result == CAN_SEND_OPV ||
-        !flood_attack_channel(p_or_n, source_p, chptr))
+    if (ret == CAN_SEND_OPV || !flood_attack_channel(p_or_n, source_p, chptr))
       sendto_channel_butone(source_p, source_p, chptr, type, "%s %s%s :%s",
                             command[p_or_n], prefix, chptr->name, text);
   }
   else if (p_or_n != NOTICE)
-    sendto_one_numeric(source_p, &me, result, chptr->name, text);
+    sendto_one_numeric(source_p, &me, ret, chptr->name, text);
 }
 
 /* msg_client()

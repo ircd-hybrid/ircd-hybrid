@@ -401,6 +401,22 @@ check_server(const char *name, struct Client *client_p)
   return 0;
 }
 
+/* server_capab_init()
+ *
+ * inputs       - none
+ * output       - none
+ */
+void
+server_capab_init(void)
+{
+  add_capability("QS", CAPAB_QS);
+  add_capability("EOB", CAPAB_EOB);
+  add_capability("CLUSTER", CAPAB_CLUSTER);
+  add_capability("SVS", CAPAB_SVS);
+  add_capability("CHW", CAPAB_CHW);
+  add_capability("HOPS", CAPAB_HOPS);
+}
+
 /* add_capability()
  *
  * inputs	- string name of CAPAB

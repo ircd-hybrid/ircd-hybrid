@@ -681,10 +681,10 @@ timeout_resolver(void *unused)
 }
 
 /*
- * init_resolver - initialize resolver and resolver library
+ * resolver_init - initialize resolver and resolver library
  */
 void
-init_resolver(void)
+resolver_init(void)
 {
   static struct event event_timeout_resolver =
   {

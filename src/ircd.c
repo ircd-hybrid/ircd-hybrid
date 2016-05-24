@@ -438,7 +438,7 @@ main(int argc, char *argv[])
   whowas_init();
   watch_init();
   auth_init();          /* Initialise the auth code */
-  init_resolver();      /* Needs to be setup before the io loop */
+  resolver_init();      /* Needs to be setup before the io loop */
   modules_init();
   read_conf_files(1);   /* cold start init conf files */
   initialize_server_capabs();   /* Set up default_server_capabs */

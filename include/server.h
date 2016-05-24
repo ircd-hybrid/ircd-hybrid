@@ -86,6 +86,7 @@ enum
 extern int valid_servname(const char *);
 extern int check_server(const char *, struct Client *);
 extern int hunt_server(struct Client *, const char *, const int, const int, char *[]);
+extern void server_capab_init(void);
 extern void add_capability(const char *, unsigned int);
 extern void delete_capability(const char *);
 extern unsigned int find_capability(const char *);

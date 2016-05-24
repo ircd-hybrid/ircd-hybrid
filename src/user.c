@@ -315,7 +315,6 @@ check_xline(struct Client *source_p)
 void
 register_local_user(struct Client *source_p)
 {
-  const char *id = NULL;
   const struct MaskItem *conf = NULL;
 
   assert(source_p == source_p->from);
@@ -443,6 +442,7 @@ register_local_user(struct Client *source_p)
   if (check_xline(source_p))
     return;
 
+  const char *id;
   while (hash_find_id((id = uid_get())))
     ;
 

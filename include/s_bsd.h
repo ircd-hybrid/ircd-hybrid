@@ -59,7 +59,7 @@ extern int comm_open(fde_t *, int, int, int, const char *);
 extern int comm_accept(struct Listener *, struct irc_ssaddr *);
 
 /* These must be defined in the network IO loop code of your choice */
-extern void init_netio(void);
+extern void netio_init(void);
 extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);
 extern void comm_select(void);
 extern void remove_ipv6_mapping(struct irc_ssaddr *);

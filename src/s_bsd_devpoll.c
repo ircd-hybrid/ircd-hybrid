@@ -45,19 +45,19 @@
 static fde_t dpfd;
 
 /*
- * init_netio
+ * netio_init
  *
  * This is a needed exported function which will be called to initialise
  * the network loop code.
  */
 void
-init_netio(void)
+netio_init(void)
 {
   int fd;
 
   if ((fd = open("/dev/poll", O_RDWR)) < 0)
   {
-    ilog(LOG_TYPE_IRCD, "init_netio: couldn't open /dev/poll: %s",
+    ilog(LOG_TYPE_IRCD, "netio_init: couldn't open /dev/poll: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }

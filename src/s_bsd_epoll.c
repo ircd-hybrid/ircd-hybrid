@@ -37,19 +37,19 @@ static fde_t efd;
 
 
 /*
- * init_netio
+ * netio_init
  *
  * This is a needed exported function which will be called to initialise
  * the network loop code.
  */
 void
-init_netio(void)
+netio_init(void)
 {
   int fd;
 
   if ((fd = epoll_create(hard_fdlimit)) < 0)
   {
-    ilog(LOG_TYPE_IRCD, "init_netio: couldn't open epoll fd: %s",
+    ilog(LOG_TYPE_IRCD, "netio_init: couldn't open epoll fd: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }

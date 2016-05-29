@@ -523,7 +523,7 @@ free_list_task(struct Client *source_p)
   struct ListTask *const lt = source_p->connection->list_task;
   dlink_node *node = NULL, *node_next = NULL;
 
-  dlinkDelete(&lt->node, &listing_client_list);
+  dlinkFindDelete(&listing_client_list, lt);
 
   DLINK_FOREACH_SAFE(node, node_next, lt->show_mask.head)
   {

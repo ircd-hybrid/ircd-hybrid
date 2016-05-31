@@ -383,6 +383,12 @@ m_svinfo_la_OBJECTS = $(am_m_svinfo_la_OBJECTS)
 m_svinfo_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_svinfo_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svshost_la_LIBADD =
+am_m_svshost_la_OBJECTS = m_svshost.lo
+m_svshost_la_OBJECTS = $(am_m_svshost_la_OBJECTS)
+m_svshost_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_svshost_la_LDFLAGS) $(LDFLAGS) -o $@
 m_svsjoin_la_LIBADD =
 am_m_svsjoin_la_OBJECTS = m_svsjoin.lo
 m_svsjoin_la_OBJECTS = $(am_m_svsjoin_la_OBJECTS)
@@ -578,19 +584,19 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
 	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
-	$(m_svinfo_la_SOURCES) $(m_svsjoin_la_SOURCES) \
-	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
-	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
-	$(m_svstag_la_SOURCES) $(m_tburst_la_SOURCES) \
-	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
-	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
-	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
-	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_svinfo_la_SOURCES) $(m_svshost_la_SOURCES) \
+	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
+	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
+	$(m_svspart_la_SOURCES) $(m_svstag_la_SOURCES) \
+	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
+	$(m_topic_la_SOURCES) $(m_trace_la_SOURCES) \
+	$(m_undline_la_SOURCES) $(m_unkline_la_SOURCES) \
+	$(m_unresv_la_SOURCES) $(m_unxline_la_SOURCES) \
+	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
+	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
+	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
+	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
+	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
 	$(m_certfp_la_SOURCES) $(m_close_la_SOURCES) \
@@ -608,19 +614,19 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
 	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
-	$(m_svinfo_la_SOURCES) $(m_svsjoin_la_SOURCES) \
-	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
-	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
-	$(m_svstag_la_SOURCES) $(m_tburst_la_SOURCES) \
-	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
-	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
-	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
-	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_svinfo_la_SOURCES) $(m_svshost_la_SOURCES) \
+	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
+	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
+	$(m_svspart_la_SOURCES) $(m_svstag_la_SOURCES) \
+	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
+	$(m_topic_la_SOURCES) $(m_trace_la_SOURCES) \
+	$(m_undline_la_SOURCES) $(m_unkline_la_SOURCES) \
+	$(m_unresv_la_SOURCES) $(m_unxline_la_SOURCES) \
+	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
+	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
+	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
+	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
+	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -875,6 +881,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_set.la       \
                       m_stats.la     \
                       m_svinfo.la    \
+                      m_svshost.la   \
                       m_svsjoin.la   \
                       m_svskill.la   \
                       m_svsmode.la   \
@@ -939,6 +946,7 @@ m_resv_la_LDFLAGS = $(MODULE_FLAGS)
 m_set_la_LDFLAGS = $(MODULE_FLAGS)
 m_stats_la_LDFLAGS = $(MODULE_FLAGS)
 m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
+m_svshost_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsjoin_la_LDFLAGS = $(MODULE_FLAGS)
 m_svskill_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsmode_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1001,6 +1009,7 @@ m_restart_la_SOURCES = m_restart.c
 m_resv_la_SOURCES = m_resv.c
 m_set_la_SOURCES = m_set.c
 m_stats_la_SOURCES = m_stats.c
+m_svshost_la_SOURCES = m_svshost.c
 m_svinfo_la_SOURCES = m_svinfo.c
 m_svsjoin_la_SOURCES = m_svsjoin.c
 m_svskill_la_SOURCES = m_svskill.c
@@ -1212,6 +1221,9 @@ m_stats.la: $(m_stats_la_OBJECTS) $(m_stats_la_DEPENDENCIES) $(EXTRA_m_stats_la_
 m_svinfo.la: $(m_svinfo_la_OBJECTS) $(m_svinfo_la_DEPENDENCIES) $(EXTRA_m_svinfo_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_svinfo_la_LINK) -rpath $(modulesdir) $(m_svinfo_la_OBJECTS) $(m_svinfo_la_LIBADD) $(LIBS)
 
+m_svshost.la: $(m_svshost_la_OBJECTS) $(m_svshost_la_DEPENDENCIES) $(EXTRA_m_svshost_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_svshost_la_LINK) -rpath $(modulesdir) $(m_svshost_la_OBJECTS) $(m_svshost_la_LIBADD) $(LIBS)
+
 m_svsjoin.la: $(m_svsjoin_la_OBJECTS) $(m_svsjoin_la_DEPENDENCIES) $(EXTRA_m_svsjoin_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_svsjoin_la_LINK) -rpath $(modulesdir) $(m_svsjoin_la_OBJECTS) $(m_svsjoin_la_LIBADD) $(LIBS)
 
@@ -1329,6 +1341,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_stats.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svinfo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svshost.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsjoin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svskill.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsmode.Plo@am__quote@

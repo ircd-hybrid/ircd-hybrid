@@ -44,6 +44,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_set.la       \
                       m_stats.la     \
                       m_svinfo.la    \
+                      m_svshost.la   \
                       m_svsjoin.la   \
                       m_svskill.la   \
                       m_svsmode.la   \
@@ -109,6 +110,7 @@ m_resv_la_LDFLAGS = $(MODULE_FLAGS)
 m_set_la_LDFLAGS = $(MODULE_FLAGS)
 m_stats_la_LDFLAGS = $(MODULE_FLAGS)
 m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
+m_svshost_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsjoin_la_LDFLAGS = $(MODULE_FLAGS)
 m_svskill_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsmode_la_LDFLAGS = $(MODULE_FLAGS)
@@ -172,6 +174,7 @@ m_restart_la_SOURCES = m_restart.c
 m_resv_la_SOURCES = m_resv.c
 m_set_la_SOURCES = m_set.c
 m_stats_la_SOURCES = m_stats.c
+m_svshost_la_SOURCES = m_svshost.c
 m_svinfo_la_SOURCES = m_svinfo.c
 m_svsjoin_la_SOURCES = m_svsjoin.c
 m_svskill_la_SOURCES = m_svskill.c

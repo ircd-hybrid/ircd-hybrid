@@ -388,7 +388,7 @@ check_ident_reply(char *const reply)
 {
   char *token = NULL, *end = NULL;
   char *vector[USERID_TOKEN_COUNT];
-  const int count = token_vector(reply, ':', vector, USERID_TOKEN_COUNT);
+  const unsigned int count = token_vector(reply, ':', vector, USERID_TOKEN_COUNT);
 
   if (USERID_TOKEN_COUNT != count)
     return NULL;

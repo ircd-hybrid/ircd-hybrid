@@ -21,7 +21,7 @@
 
 /*! \file m_svshost.c
  * \brief Includes required functions for processing the SVSHOST command.
- * \version $Id: m_svshost.c 7329 2016-02-18 21:07:50Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"
@@ -110,7 +110,7 @@ module_exit(void)
 
 struct module module_entry =
 {
-  .version = "$Revision: 7329 $",
+  .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
 };

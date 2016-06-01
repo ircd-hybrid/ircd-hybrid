@@ -116,12 +116,11 @@ strtok_r(char *str, const char *fs, char **save)
  * \param size Maximum number of elements to put in \a vector.
  * \return Number of elements written to \a vector.
  */
-int
-token_vector(char *names, char token, char *vector[], int size)
+unsigned int
+token_vector(char *names, char token, char *vector[], unsigned int size)
 {
-  int count = 0;
+  unsigned int count = 0;
   char *start = names;
-  char *end = NULL;
 
   assert(names);
   assert(vector);
@@ -129,8 +128,8 @@ token_vector(char *names, char token, char *vector[], int size)
 
   vector[count++] = start;
 
-  for (end = strchr(start, token); end;
-       end = strchr(start, token))
+  for (char *end = strchr(start, token); end;
+             end = strchr(start, token))
   {
     *end++ = '\0';
     start = end;

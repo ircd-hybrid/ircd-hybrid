@@ -33,7 +33,7 @@
 extern int has_wildcards(const char *);
 extern int match(const char *, const char *);
 
-extern int token_vector(char *, char, char *[], int);
+extern unsigned int token_vector(char *, char, char *[], unsigned int);
 
 /*
  * collapse - collapse a string in place, converts multiple adjacent *'s

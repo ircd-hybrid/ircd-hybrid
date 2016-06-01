@@ -769,11 +769,9 @@ serv_connect(struct MaskItem *conf, struct Client *by)
 static void
 finish_ssl_server_handshake(struct Client *client_p)
 {
-  struct MaskItem *conf = NULL;
-
-  conf = find_conf_name(&client_p->connection->confs,
-                        client_p->name, CONF_SERVER);
-  if (conf == NULL)
+  const struct MaskItem *conf = find_conf_name(&client_p->connection->confs,
+                                                client_p->name, CONF_SERVER);
+  if (!conf)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Lost connect{} block for %s", get_client_name(client_p, SHOW_IP));
@@ -883,15 +881,13 @@ static void
 serv_connect_callback(fde_t *fd, int status, void *data)
 {
   struct Client *const client_p = data;
-  const struct MaskItem *conf = NULL;
 
   /* First, make sure it's a real client! */
   assert(client_p);
   assert(&client_p->connection->fd == fd);
 
   /* Next, for backward purposes, record the ip of the server */
-  memcpy(&client_p->connection->ip, &fd->connect.hostaddr,
-         sizeof(struct irc_ssaddr));
+  memcpy(&client_p->connection->ip, &fd->connect.hostaddr, sizeof(struct irc_ssaddr));
 
   /* Check the status */
   if (status != COMM_OK)
@@ -913,10 +909,10 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   }
 
   /* COMM_OK, so continue the connection procedure */
-  /* Get the C/N lines */
-  conf = find_conf_name(&client_p->connection->confs,
-                        client_p->name, CONF_SERVER);
-  if (conf == NULL)
+  /* Get the connect {} block */
+  const struct MaskItem *conf = find_conf_name(&client_p->connection->confs,
+                                                client_p->name, CONF_SERVER);
+  if (!conf)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Lost connect{} block for %s", get_client_name(client_p, SHOW_IP));

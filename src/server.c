@@ -483,33 +483,6 @@ find_capability(const char *name)
   return 0;
 }
 
-/* send_capabilities()
- *
- * inputs	- Client pointer to send to
- *		- int flag of capabilities that this server can send
- * output	- NONE
- * side effects	- send the CAPAB line to a server  -orabidoo
- *
- */
-void
-send_capabilities(struct Client *client_p)
-{
-  char buf[IRCD_BUFSIZE] = "";
-  const dlink_node *node = NULL;
-
-  DLINK_FOREACH(node, server_capabilities_list.head)
-  {
-    const struct Capability *cap = node->data;
-
-    strlcat(buf, cap->name, sizeof(buf));
-
-    if (node->next)
-      strlcat(buf, " ", sizeof(buf));
-  }
-
-  sendto_one(client_p, "CAPAB :%s", buf);
-}
-
 /*
  * show_capabilities - show current server capabilities
  *
@@ -518,22 +491,24 @@ send_capabilities(struct Client *client_p)
  * side effects - build up string representing capabilities of server listed
  */
 const char *
-show_capabilities(const struct Client *target_p)
+get_capabilities(const struct Client *client_p)
 {
   static char buf[IRCD_BUFSIZE] = "";
   const dlink_node *node = NULL;
+
+  buf[0] = '\0';
 
   DLINK_FOREACH(node, server_capabilities_list.head)
   {
     const struct Capability *cap = node->data;
 
-    if (IsCapable(target_p, cap->cap))
-    {
-      strlcat(buf, cap->name, sizeof(buf));
+    if (client_p && !IsCapable(client_p, cap->cap))
+      continue;
 
-      if (node->next)
-        strlcat(buf, " ", sizeof(buf));
-    }
+    strlcat(buf, cap->name, sizeof(buf));
+
+    if (node->next)
+      strlcat(buf, " ", sizeof(buf));
   }
 
   return buf;
@@ -784,7 +759,7 @@ finish_ssl_server_handshake(struct Client *client_p)
 
   sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
-  send_capabilities(client_p);
+  sendto_one(client_p, "CAPAB :%s", get_capabilities(NULL));
 
   sendto_one(client_p, "SERVER %s 1 :%s%s",
              me.name, ConfigServerHide.hidden ? "(H) " : "",
@@ -934,7 +909,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
 
   sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
-  send_capabilities(client_p);
+  sendto_one(client_p, "CAPAB :%s", get_capabilities(NULL));
 
   sendto_one(client_p, "SERVER %s 1 :%s%s", me.name,
              ConfigServerHide.hidden ? "(H) " : "", me.info);

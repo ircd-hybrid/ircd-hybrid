@@ -79,8 +79,7 @@ static void res_readreply(fde_t *, void *);
 struct reslist
 {
   dlink_node node;                           /**< Doubly linked list node. */
-  int id;                                    /**< Request ID (from request header). */
-  int sent;                                  /**< Number of requests sent */
+  unsigned int id;                           /**< Request ID (from request header). */
   char type;                                 /**< Current request type. */
   char retries;                              /**< Retry counter */
   unsigned int sends;                        /**< Number of sends (>1 means resent). */
@@ -233,10 +232,9 @@ delete_resolver_queries(const void *vptr)
  * isn't present. Returns number of messages successfully sent to
  * nameservers or -1 if no successful sends.
  */
-static int
+static void
 send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 {
-  int sent = 0;
   unsigned int max_queries = IRCD_MIN(irc_nscount, rcount);
 
   /* RES_PRIMARY option is not implemented
@@ -246,21 +244,15 @@ send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
     max_queries = 1;
 
   for (unsigned int i = 0; i < max_queries; ++i)
-  {
-    if (sendto(ResolverFileDescriptor.fd, msg, len, 0,
-        (struct sockaddr*)&irc_nsaddr_list[i],
-        irc_nsaddr_list[i].ss_len) == len)
-      ++sent;
-  }
-
-  return sent;
+    sendto(ResolverFileDescriptor.fd, msg, len, 0,
+           (struct sockaddr *)&irc_nsaddr_list[i], irc_nsaddr_list[i].ss_len);
 }
 
 /*
  * find_id - find a dns request id (id is determined by dn_mkquery)
  */
 static struct reslist *
-find_id(int id)
+find_id(unsigned int id)
 {
   dlink_node *node = NULL;
 
@@ -303,7 +295,7 @@ query_name(const char *name, int query_class, int type, struct reslist *request)
     request->id = header->id;
     ++request->sends;
 
-    request->sent += send_res_msg(buf, request_len, request->sends);
+    send_res_msg(buf, request_len, request->sends);
   }
 }
 

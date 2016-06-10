@@ -117,10 +117,10 @@ make_request(dns_callback_fnc callback, void *ctx)
 {
   struct reslist *request = mp_pool_get(dns_pool);
 
-  request->sentat       = CurrentTime;
-  request->retries      = 2;
-  request->timeout      = 4;  /* Start at 4 and exponential inc. */
-  request->callback     = callback;
+  request->sentat = CurrentTime;
+  request->retries = 2;
+  request->timeout = 4;  /* Start at 4 and exponential inc. */
+  request->callback = callback;
   request->callback_ctx = ctx;
 
   dlinkAdd(request, &request->node, &request_list);
@@ -310,10 +310,10 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
 
   strlcpy(host_name, name, sizeof(host_name));
 
-  if (request == NULL)
+  if (!request)
   {
-    request             = make_request(callback, ctx);
-    request->type       = type;
+    request = make_request(callback, ctx);
+    request->type = type;
     request->namelength = strlcpy(request->name, host_name, sizeof(request->name));
   }
 
@@ -366,9 +366,9 @@ do_query_number(dns_callback_fnc callback, void *ctx,
              (unsigned int)(cp[0] & 0xf), (unsigned int)(cp[0] >> 4));
   }
 
-  if (request == NULL)
+  if (!request)
   {
-    request       = make_request(callback, ctx);
+    request = make_request(callback, ctx);
     request->type = T_PTR;
     memcpy(&request->addr, addr, sizeof(struct irc_ssaddr));
   }
@@ -530,7 +530,6 @@ static void
 res_readreply(fde_t *fd, void *data)
 {
   unsigned char buf[sizeof(HEADER) + MAXPACKET];
-  HEADER *header;
   struct reslist *request = NULL;
   ssize_t rc = 0;
   socklen_t len = sizeof(struct irc_ssaddr);
@@ -550,7 +549,7 @@ res_readreply(fde_t *fd, void *data)
     /*
      * Convert DNS reply reader from Network byte order to CPU byte order.
      */
-    header = (HEADER *)buf;
+    HEADER *header = (HEADER *)buf;
     header->ancount = ntohs(header->ancount);
     header->qdcount = ntohs(header->qdcount);
     header->nscount = ntohs(header->nscount);
@@ -566,8 +565,8 @@ res_readreply(fde_t *fd, void *data)
     if (header->rcode != NO_ERRORS || header->ancount == 0)
     {
       /*
-       * If a bad error was returned, stop here and don't
-       * send any more (no retries granted).
+       * If a bad error was returned, stop here and don't send
+       * any more (no retries granted).
        */
       (*request->callback)(request->callback_ctx, NULL, NULL, 0);
       rem_request(request);
@@ -606,6 +605,7 @@ res_readreply(fde_t *fd, void *data)
         gethost_byname_type(request->callback, request->callback_ctx, request->name, T_AAAA);
       else
         gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);
+
       rem_request(request);
     }
     else

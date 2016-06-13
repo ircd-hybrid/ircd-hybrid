@@ -241,7 +241,7 @@ change_local_nick(struct Client *source_p, const char *nick)
       char modebuf[IRCD_BUFSIZE] = "";
 
       DelUMode(source_p, UMODE_REGISTERED);
-      send_umode(source_p, source_p, oldmodes, modebuf);
+      send_umode(source_p, 1, oldmodes, modebuf);
     }
   }
 

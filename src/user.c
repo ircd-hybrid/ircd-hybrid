@@ -718,7 +718,7 @@ send_umode_out(struct Client *source_p, unsigned int old)
 {
   char buf[IRCD_BUFSIZE] = "";
 
-  send_umode(source_p, MyClient(source_p), old, buf);
+  send_umode(source_p, MyConnect(source_p), old, buf);
 
   if (buf[0])
     sendto_server(source_p, 0, 0, ":%s MODE %s :%s",

@@ -119,7 +119,7 @@ server_send_client(struct Client *client_p, struct Client *target_p)
   if (!IsClient(target_p))
     return;
 
-  send_umode(NULL, target_p, 0, ubuf);
+  send_umode(target_p, 0, 0, ubuf);
 
   if (ubuf[0] == '\0')
   {

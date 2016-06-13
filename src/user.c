@@ -213,11 +213,7 @@ introduce_client(struct Client *source_p)
   dlink_node *node = NULL;
   char ubuf[IRCD_BUFSIZE] = "";
 
-  if (MyConnect(source_p))
-    send_umode(source_p, source_p, 0, ubuf);
-  else
-    send_umode(NULL, source_p, 0, ubuf);
-
+  send_umode(source_p, MyConnect(source_p), 0, ubuf);
   watch_check_hash(source_p, RPL_LOGON);
 
   if (ubuf[0] == '\0')
@@ -660,21 +656,17 @@ valid_nickname(const char *nickname, const int local)
   return p - nickname <= NICKLEN;
 }
 
-/* send_umode()
- * send the MODE string for user (user) to connection client_p
- * -avalon
- *
- * inputs	- client_p
- *		- source_p
- *		- int old
- * 		- suplied umode_buf
- * output	- NONE
+/*! \brief Builds a mode change string to buffer pointed by \a buf
+ * \param client_p  Pointer to client
+ * \param send      Whether to send a MODE message to client_p
+ * \param old       Old user mode to compare against when building new mode buffer
+ * \param buf       Pointer to buffer to build string in
  */
 void
-send_umode(struct Client *client_p, struct Client *source_p,
-           unsigned int old, char *umode_buf)
+send_umode(struct Client *client_p, unsigned int send,
+           unsigned int old, char *buf)
 {
-  char *m = umode_buf;
+  char *m = buf;
   int what = 0;
 
   /*
@@ -683,7 +675,7 @@ send_umode(struct Client *client_p, struct Client *source_p,
    */
   for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
   {
-    if ((tab->flag & old) && !HasUMode(source_p, tab->flag))
+    if ((tab->flag & old) && !HasUMode(client_p, tab->flag))
     {
       if (what == MODE_DEL)
         *m++ = tab->c;
@@ -694,7 +686,7 @@ send_umode(struct Client *client_p, struct Client *source_p,
         *m++ = tab->c;
       }
     }
-    else if (!(tab->flag & old) && HasUMode(source_p, tab->flag))
+    else if (!(tab->flag & old) && HasUMode(client_p, tab->flag))
     {
       if (what == MODE_ADD)
         *m++ = tab->c;
@@ -709,10 +701,10 @@ send_umode(struct Client *client_p, struct Client *source_p,
 
   *m = '\0';
 
-  if (*umode_buf && client_p)
+  if (send && *buf)
     sendto_one(client_p, ":%s!%s@%s MODE %s :%s",
                client_p->name, client_p->username,
-               client_p->host, client_p->name, umode_buf);
+               client_p->host, client_p->name, buf);
 }
 
 /* send_umode_out()
@@ -726,7 +718,7 @@ send_umode_out(struct Client *source_p, unsigned int old)
 {
   char buf[IRCD_BUFSIZE] = "";
 
-  send_umode(MyClient(source_p) ? source_p : NULL, source_p, old, buf);
+  send_umode(source_p, MyClient(source_p), old, buf);
 
   if (buf[0])
     sendto_server(source_p, 0, 0, ":%s MODE %s :%s",

@@ -1117,7 +1117,7 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
 }
 
 /*! \brief Removes a client from a specific channel
- * \param client_p Pointer to source client to remove
+ * \param client_p Pointer to client to remove
  * \param name     Name of channel to remove from
  * \param reason   Part reason to show
  */

@@ -278,7 +278,6 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   unsigned int wwu = 0;                  /* whowas users */
   unsigned int number_ips_stored = 0;        /* number of ip addresses hashed */
 
-  size_t channel_memory = 0;
   size_t channel_ban_memory = 0;
   size_t channel_except_memory = 0;
   size_t channel_invex_memory = 0;
@@ -320,9 +319,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
       ++users_counted;
   }
 
-  /* Count up all channels, ban lists, except lists, Invex lists */
-  channel_memory = dlink_list_length(&channel_list) * sizeof(struct Channel);
-
+  /* Count up all members, invites, ban lists, except lists, Invex lists */
   DLINK_FOREACH(node, channel_list.head)
   {
     const struct Channel *chptr = node->data;
@@ -393,7 +390,8 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Channels %u(%zu)",
-                     dlink_list_length(&channel_list), channel_memory);
+                     dlink_list_length(&channel_list),
+                     dlink_list_length(&channel_list) * sizeof(struct Channel));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Bans %u(%zu)",

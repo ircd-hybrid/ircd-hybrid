@@ -410,7 +410,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      channel_members,
                      channel_members * sizeof(struct Membership),
                      channel_invites,
-                     channel_invites * sizeof(dlink_node) * 2);
+                     channel_invites * sizeof(struct Invite));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Safelist %u(%zu)",

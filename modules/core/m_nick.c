@@ -200,8 +200,6 @@ set_initial_nick(struct Client *source_p, const char *nick)
 static void
 change_local_nick(struct Client *source_p, const char *nick)
 {
-  int samenick = 0;
-
   assert(source_p->name[0] && !EmptyString(nick));
   assert(MyClient(source_p));
 
@@ -227,7 +225,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   source_p->connection->nick.last_attempt = CurrentTime;
   source_p->connection->nick.count++;
 
-  samenick = !irccmp(source_p->name, nick);
+  int samenick = !irccmp(source_p->name, nick);
 
   if (!samenick)
   {
@@ -283,13 +281,13 @@ change_local_nick(struct Client *source_p, const char *nick)
 static void
 change_remote_nick(struct Client *source_p, char *parv[])
 {
-  const int samenick = !irccmp(source_p->name, parv[1]);
-
   assert(!EmptyString(parv[1]));
   assert(IsClient(source_p));
   assert(source_p->name[0]);
 
   /* Client changing their nick */
+  int samenick = !irccmp(source_p->name, parv[1]);
+
   if (!samenick)
   {
     DelUMode(source_p, UMODE_REGISTERED);
@@ -402,7 +400,6 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
 {
   const char *uid = parv[8];
   uintmax_t newts = strtoumax(parv[3], NULL, 10);
-  int sameuser = 0;
 
   assert(IsServer(source_p));
   assert(IsClient(target_p));
@@ -431,8 +428,8 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   }
 
   /* The timestamps are different */
-  sameuser = !irccmp(target_p->username, parv[5]) &&
-             !irccmp(target_p->sockhost, parv[7]);
+  int sameuser = !irccmp(target_p->username, parv[5]) &&
+                 !irccmp(target_p->sockhost, parv[7]);
 
   /*
    * If the users are the same (loaded a client on a different server)
@@ -487,7 +484,6 @@ static int
 perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
                              int parc, char *parv[])
 {
-  int sameuser = 0;
   uintmax_t newts = strtoumax(parv[2], NULL, 10);
 
   assert(IsClient(source_p));
@@ -518,8 +514,8 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   }
 
   /* The timestamps are different */
-  sameuser = !irccmp(target_p->username, source_p->username) &&
-             !irccmp(target_p->sockhost, source_p->sockhost);
+  int sameuser = !irccmp(target_p->username, source_p->username) &&
+                 !irccmp(target_p->sockhost, source_p->sockhost);
 
   if ((sameuser && newts < target_p->tsinfo) ||
       (!sameuser && newts > target_p->tsinfo))

@@ -3,6 +3,11 @@ Reminder for package maintainers of ircd-hybrid: ircd-hybrid now has
 GnuTLS support as of version 8.2.13
 #######################################################################
 
+-- Noteworthy changes in version 8.2.18 (2016-06-22)
+o) Fixed an assert when a client sends invalid LIST options
+o) Fixed invalid memory stats of channel invites in "STATS z
+
+
 -- Noteworthy changes in version 8.2.17 (2016-04-21)
 o) Fixed core on "REHASH CONF" with 'general::whowas_history_length'
    set to 0

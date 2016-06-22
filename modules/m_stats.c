@@ -356,15 +356,16 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   watch_count_memory(&watch_list_headers, &watch_list_memory);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :WATCH headers %u(%zu) entries %u(%u)",
+                     "z :WATCH headers %u(%zu) entries %u(%zu)",
                      watch_list_headers,
-                     watch_list_memory, watch_list_entries,
+                     watch_list_memory,
+                     watch_list_entries,
                      watch_list_entries * sizeof(dlink_node) * 2);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :Clients %u(%u)",
+                     "z :Clients %u(%zu)",
                      users_counted,
-                     (users_counted * sizeof(struct Client)));
+                     users_counted * sizeof(struct Client));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Attached confs %u(%zu)",

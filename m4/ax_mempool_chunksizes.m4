@@ -10,7 +10,6 @@ AC_DEFUN([AX_MEMPOOL_CHUNKSIZES],[
   AC_DEFINE([MP_CHUNK_SIZE_AUTH], 128*1024, [Size of the auth mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_DNS], 64*1024, [Size of the dns mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_WATCH], 8*1024, [Size of the watch mempool chunk.])
-  AC_DEFINE([MP_CHUNK_SIZE_NAMEHOST], 64*1024, [Size of the namehost mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_USERHOST], 128*1024, [Size of the userhost mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_IP_ENTRY], 128*1024, [Size of the ip_entry mempool chunk.])
   AC_DEFINE([MP_CHUNK_SIZE_WHOWAS], 256*1024, [Size of the Whowas mempool chunk.])

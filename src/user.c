@@ -483,7 +483,7 @@ register_local_user(struct Client *client_p)
                   &unknown_list, &local_client_list);
 
   user_welcome(client_p);
-  userhost_add(client_p->username, client_p->host, 0);
+  userhost_add(client_p->sockhost, 0);
   AddFlag(client_p, FLAGS_USERHOST);
 
   introduce_client(client_p);
@@ -534,7 +534,7 @@ register_remote_user(struct Client *client_p)
   SetClient(client_p);
   dlinkAdd(client_p, &client_p->lnode, &client_p->servptr->serv->client_list);
   dlinkAdd(client_p, &client_p->node, &global_client_list);
-  userhost_add(client_p->username, client_p->host, 1);
+  userhost_add(client_p->sockhost, 1);
   AddFlag(client_p, FLAGS_USERHOST);
 
   if (HasFlag(client_p->servptr, FLAGS_EOB))
@@ -752,13 +752,7 @@ user_set_hostmask(struct Client *client_p, const char *hostname, const int what)
                                client_p->name, client_p->username,
                                client_p->host, client_p->username, hostname);
 
-  if (HasFlag(client_p, FLAGS_USERHOST))
-    userhost_del(client_p->username, client_p->host, !MyConnect(client_p));
-
   strlcpy(client_p->host, hostname, sizeof(client_p->host));
-
-  userhost_add(client_p->username, client_p->host, !MyConnect(client_p));
-  AddFlag(client_p, FLAGS_USERHOST);
 
   if (MyConnect(client_p))
   {

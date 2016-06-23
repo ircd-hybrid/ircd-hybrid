@@ -49,7 +49,6 @@ struct ClassItem
   unsigned int max_total;
   unsigned int max_local;
   unsigned int max_global;
-  unsigned int max_ident;
   unsigned int max_perip;
   unsigned int min_idle;
   unsigned int max_idle;

@@ -642,7 +642,7 @@ exit_one_client(struct Client *source_p, const char *comment)
     hash_del_client(source_p);
 
   if (HasFlag(source_p, FLAGS_USERHOST))
-    userhost_del(source_p->username, source_p->host, !MyConnect(source_p));
+    userhost_del(source_p->sockhost, !MyConnect(source_p));
 
   update_client_exit_stats(source_p);
 

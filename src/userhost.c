@@ -33,14 +33,12 @@
 
 
 static mp_pool_t *userhost_pool;
-static mp_pool_t *namehost_pool;
 
 
 void
 userhost_init(void)
 {
   userhost_pool = mp_pool_new(sizeof(struct UserHost), MP_CHUNK_SIZE_USERHOST);
-  namehost_pool = mp_pool_new(sizeof(struct NameHost), MP_CHUNK_SIZE_NAMEHOST);
 }
 
 /* userhost_count()
@@ -55,31 +53,17 @@ userhost_init(void)
  * side effects -
  */
 void
-userhost_count(const char *user, const char *host, unsigned int *global_p,
-               unsigned int *local_p, unsigned int *icount_p)
+userhost_count(const char *host, unsigned int *global_p, unsigned int *local_p)
 {
-  dlink_node *node = NULL;
-  struct UserHost *found_userhost;
+  struct UserHost *userhost;
 
-  if ((found_userhost = hash_find_userhost(host)) == NULL)
+  if ((userhost = hash_find_userhost(host)) == NULL)
     return;
 
-  DLINK_FOREACH(node, found_userhost->list.head)
-  {
-    struct NameHost *nameh = node->data;
-
-    if (!irccmp(user, nameh->name))
-    {
-      if (global_p)
-        *global_p = nameh->gcount;
-      if (local_p)
-        *local_p  = nameh->lcount;
-      if (icount_p)
-        *icount_p = nameh->icount;
-
-      return;
-    }
-  }
+  if (global_p)
+    *global_p = userhost->gcount;
+  if (local_p)
+    *local_p  = userhost->lcount;
 }
 
 /* userhost_find_or_add()
@@ -91,7 +75,7 @@ userhost_count(const char *user, const char *host, unsigned int *global_p,
 static struct UserHost *
 userhost_find_or_add(const char *host)
 {
-  struct UserHost *userhost = NULL;
+  struct UserHost *userhost;
 
   if ((userhost = hash_find_userhost(host)))
     return userhost;
@@ -113,54 +97,17 @@ userhost_find_or_add(const char *host)
  * side effects - add given user@host to hash tables
  */
 void
-userhost_add(const char *user, const char *host, int global)
+userhost_add(const char *host, int global)
 {
-  dlink_node *node = NULL;
-  struct UserHost *found_userhost;
-  struct NameHost *nameh;
-  unsigned int hasident = 1;
+  struct UserHost *userhost;
 
-  if (*user == '~')
-  {
-    hasident = 0;
-    ++user;
-  }
-
-  if ((found_userhost = userhost_find_or_add(host)) == NULL)
+  if ((userhost = userhost_find_or_add(host)) == NULL)
     return;
 
-  DLINK_FOREACH(node, found_userhost->list.head)
-  {
-    nameh = node->data;
-
-    if (!irccmp(user, nameh->name))
-    {
-      nameh->gcount++;
-
-      if (!global)
-      {
-        if (hasident)
-          nameh->icount++;
-        nameh->lcount++;
-      }
-
-      return;
-    }
-  }
-
-  nameh = mp_pool_get(namehost_pool);
-  nameh->gcount = 1;
-  strlcpy(nameh->name, user, sizeof(nameh->name));
+  userhost->gcount++;
 
   if (!global)
-  {
-    if (hasident)
-      nameh->icount = 1;
-
-    nameh->lcount = 1;
-  }
-
-  dlinkAdd(nameh, &nameh->node, &found_userhost->list);
+    userhost->lcount++;
 }
 
 /* userhost_del()
@@ -172,52 +119,23 @@ userhost_add(const char *user, const char *host, int global)
  * side effects - delete given user@host to hash tables
  */
 void
-userhost_del(const char *user, const char *host, int global)
+userhost_del(const char *host, int global)
 {
-  dlink_node *node = NULL;
-  struct UserHost *found_userhost = NULL;
-  unsigned int hasident = 1;
+  struct UserHost *userhost;
 
-  if (*user == '~')
-  {
-    hasident = 0;
-    ++user;
-  }
-
-  if ((found_userhost = hash_find_userhost(host)) == NULL)
+  if ((userhost = hash_find_userhost(host)) == NULL)
     return;
 
-  DLINK_FOREACH(node, found_userhost->list.head)
+  if (userhost->gcount > 0)
+    userhost->gcount--;
+
+  if (!global)
+    if (userhost->lcount > 0)
+      userhost->lcount--;
+
+  if (userhost->gcount == 0 && userhost->lcount == 0)
   {
-    struct NameHost *nameh = node->data;
-
-    if (!irccmp(user, nameh->name))
-    {
-      if (nameh->gcount > 0)
-        nameh->gcount--;
-
-      if (!global)
-      {
-        if (nameh->lcount > 0)
-          nameh->lcount--;
-
-        if (hasident && nameh->icount > 0)
-          nameh->icount--;
-      }
-
-      if (nameh->gcount == 0 && nameh->lcount == 0)
-      {
-        dlinkDelete(&nameh->node, &found_userhost->list);
-        mp_pool_release(nameh);
-      }
-
-      if (dlink_list_length(&found_userhost->list) == 0)
-      {
-        hash_del_userhost(found_userhost);
-        mp_pool_release(found_userhost);
-      }
-
-      return;
-    }
+    hash_del_userhost(userhost);
+    mp_pool_release(userhost);
   }
 }

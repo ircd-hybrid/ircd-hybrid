@@ -99,7 +99,6 @@ static struct
     max_total,
     max_global,
     max_local,
-    max_ident,
     max_sendq,
     max_recvq,
     max_channels,
@@ -227,7 +226,6 @@ reset_block_state(void)
 %token  MAX_BANS
 %token  MAX_CHANNELS
 %token  MAX_GLOBAL
-%token  MAX_IDENT
 %token  MAX_IDLE
 %token  MAX_LOCAL
 %token  MAX_NICK_CHANGES
@@ -1415,7 +1413,6 @@ class_entry: CLASS
   class->max_total = block_state.max_total.value;
   class->max_global = block_state.max_global.value;
   class->max_local = block_state.max_local.value;
-  class->max_ident = block_state.max_ident.value;
   class->max_sendq = block_state.max_sendq.value;
   class->max_recvq = block_state.max_recvq.value;
   class->max_channels = block_state.max_channels.value;
@@ -1450,8 +1447,8 @@ class_item:     class_name |
                 class_max_number |
                 class_max_global |
                 class_max_local |
-                class_max_ident |
-                class_sendq | class_recvq |
+                class_sendq |
+                class_recvq |
                 class_min_idle |
                 class_max_idle |
                 class_flags |
@@ -1503,12 +1500,6 @@ class_max_local: MAX_LOCAL '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
     block_state.max_local.value = $3;
-};
-
-class_max_ident: MAX_IDENT '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass == 1)
-    block_state.max_ident.value = $3;
 };
 
 class_sendq: SENDQ '=' sizespec ';'

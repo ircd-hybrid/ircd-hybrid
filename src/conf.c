@@ -220,14 +220,13 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
   const struct ClassItem *const class = conf->class;
   struct ip_entry *ip_found;
   int a_limit_reached = 0;
-  unsigned int local = 0, global = 0, ident = 0;
+  unsigned int local = 0, global = 0;
 
   ip_found = ipcache_find_or_add_address(&client_p->connection->ip);
   ip_found->count++;
   AddFlag(client_p, FLAGS_IPHASH);
 
-  userhost_count(client_p->username, client_p->host,
-                 &global, &local, &ident);
+  userhost_count(client_p->sockhost, &global, &local);
 
   /* XXX blah. go down checking the various silly limits
    * setting a_limit_reached if any limit is reached.
@@ -237,12 +236,9 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
     a_limit_reached = 1;
   else if (class->max_perip && ip_found->count > class->max_perip)
     a_limit_reached = 1;
-  else if (class->max_local && local >= class->max_local)
+  else if (class->max_local && local >= class->max_local) /* XXX: redundant */
     a_limit_reached = 1;
   else if (class->max_global && global >= class->max_global)
-    a_limit_reached = 1;
-  else if (class->max_ident && ident >= class->max_ident &&
-           client_p->username[0] != '~')
     a_limit_reached = 1;
 
   if (a_limit_reached)

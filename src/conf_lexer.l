@@ -228,7 +228,6 @@ max_accept                  { return MAX_ACCEPT; }
 max_bans                    { return MAX_BANS; }
 max_channels                { return MAX_CHANNELS; }
 max_global                  { return MAX_GLOBAL; }
-max_ident                   { return MAX_IDENT; }
 max_idle                    { return MAX_IDLE; }
 max_local                   { return MAX_LOCAL; }
 max_nick_changes            { return MAX_NICK_CHANGES; }

@@ -27,24 +27,16 @@
 #ifndef INCLUDED_userhost_h
 #define INCLUDED_userhost_h
 
-struct NameHost
-{
-  dlink_node node;  /* Point to other names on this hostname */
-  char name[USERLEN + 1];
-  unsigned int icount;  /* Number of =local= identd on this name*/
-  unsigned int gcount;  /* Global user count on this name */
-  unsigned int lcount;  /* Local user count on this name */
-};
-
 struct UserHost
 {
-  dlink_list list;  /* List of names on this hostname */
   struct UserHost *next;
-  char host[HOSTLEN + 1];
+  char host[HOSTIPLEN + 1];
+  unsigned int gcount;  /* Global user count on this addr */
+  unsigned int lcount;  /* Local user count on this addr */
 };
 
 extern void userhost_init(void);
-extern void userhost_count(const char *, const char *, unsigned int *, unsigned int *, unsigned int *);
-extern void userhost_add(const char *, const char *, int);
-extern void userhost_del(const char *, const char *, int);
+extern void userhost_count(const char *, unsigned int *, unsigned int *);
+extern void userhost_add(const char *, int);
+extern void userhost_del(const char *, int);
 #endif  /* INCLUDED_userhost_h */

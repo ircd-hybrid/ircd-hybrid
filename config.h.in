@@ -233,9 +233,6 @@
 /* Size of the channel-member mempool chunk. */
 #undef MP_CHUNK_SIZE_MEMBER
 
-/* Size of the namehost mempool chunk. */
-#undef MP_CHUNK_SIZE_NAMEHOST
-
 /* Size of the userhost mempool chunk. */
 #undef MP_CHUNK_SIZE_USERHOST
 

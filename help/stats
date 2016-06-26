@@ -25,7 +25,6 @@ X f - Shows file descriptors
 ^ P - Shows configured listen {} blocks
   p - Shows opers connected and their idle times
 * q - Shows resv'd nicks and channels
-* r - Shows resource usage by ircd
 * s - Shows configured service {} blocks
 * T - Shows configured motd {} blocks
 * t - Shows generic server stats

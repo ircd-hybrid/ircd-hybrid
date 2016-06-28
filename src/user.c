@@ -502,24 +502,7 @@ register_local_user(struct Client *client_p)
 void
 register_remote_user(struct Client *client_p)
 {
-  const struct Client *server_p = NULL;
-
-  if ((server_p = client_p->servptr) && server_p->from != client_p->from)
-  {
-    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                         "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
-                         client_p->from->name, client_p->name, client_p->username,
-                         client_p->host, client_p->servptr->name,
-                         server_p->name, server_p->from->name);
-    sendto_one(client_p->from,
-               ":%s KILL %s :%s (UID from wrong direction (%s != %s))",
-               me.id, client_p->id, me.name, client_p->servptr->name,
-               server_p->from->name);
-
-    AddFlag(client_p, FLAGS_KILLED);
-    exit_client(client_p, "UID server wrong direction");
-    return;
-  }
+  assert(client_p->servptr->from == client_p->from);
 
   /*
    * If the nick has been introduced by a services server,

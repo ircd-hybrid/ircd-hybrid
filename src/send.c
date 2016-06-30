@@ -707,15 +707,10 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
     if (match(mask, target_p->name))
       continue;
 
-    /*
-     * If we set the serial here, then we'll never do a
-     * match() again, if !IsCapable()
-     */
-    target_p->from->connection->serial = current_serial;
-
     if (cap && IsCapable(target_p->from, cap) != cap)
       continue;
 
+    target_p->from->connection->serial = current_serial;
     send_message_remote(target_p->from, source_p, buffer);
   }
 

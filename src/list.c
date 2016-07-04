@@ -95,7 +95,7 @@ dlinkAdd(void *data, dlink_node *m, dlink_list *list)
 void
 dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 {
-  /* Shortcut - if its the first one, call dlinkAdd only */
+  /* Shortcut - if it's the first one, call dlinkAdd only */
   if (b == list->head)
     dlinkAdd(data, m, list);
   else
@@ -184,7 +184,7 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
     return;
 
   /* case two, nothing in to list */
-  /* actually if to->head is NULL and to->tail isn't, thats a bug */
+  /* actually if to->head is NULL and to->tail isn't, that's a bug */
   if (to->head == NULL)
   {
     to->head = from->head;

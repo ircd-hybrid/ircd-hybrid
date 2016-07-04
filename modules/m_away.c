@@ -38,6 +38,58 @@
 #include "isupport.h"
 
 
+/*!
+ *
+ * \param source_p Pointer to client to set (un)away
+ * \param message  Away message; can be NULL
+ */
+static void
+do_away(struct Client *source_p, const char *message)
+{
+  assert(IsClient(source_p));
+
+  if (EmptyString(message))
+  {
+    /* Marking as not away */
+    if (source_p->away[0])
+    {
+      source_p->away[0] = '\0';
+
+      /* We now send this only if they were away before --is */
+      sendto_server(source_p, 0, 0, ":%s AWAY", source_p->id);
+      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
+                                   source_p->name, source_p->username, source_p->host);
+    }
+
+    if (MyConnect(source_p))
+      sendto_one_numeric(source_p, &me, RPL_UNAWAY);
+    return;
+  }
+
+  if (MyConnect(source_p))
+  {
+    if ((source_p->connection->away.last_attempt + ConfigGeneral.away_time) < CurrentTime)
+      source_p->connection->away.count = 0;
+
+    if (source_p->connection->away.count > ConfigGeneral.away_count)
+    {
+      sendto_one_numeric(source_p, &me, ERR_TOOMANYAWAY);
+      return;
+    }
+
+    source_p->connection->away.last_attempt = CurrentTime;
+    source_p->connection->away.count++;
+    sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
+  }
+
+  strlcpy(source_p->away, message, sizeof(source_p->away));
+  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                               source_p->name, source_p->username,
+                               source_p->host, source_p->away);
+  sendto_server(source_p, 0, 0, ":%s AWAY :%s",
+                source_p->id, source_p->away);
+}
+
 /*! \brief AWAY command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
@@ -54,44 +106,7 @@ m_away(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (EmptyString(message))
-  {
-    /* Marking as not away */
-    if (source_p->away[0])
-    {
-      source_p->away[0] = '\0';
-
-      /* We now send this only if they were away before --is */
-      sendto_server(source_p, 0, 0, ":%s AWAY", source_p->id);
-      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
-                                   source_p->name, source_p->username,
-                                   source_p->host);
-    }
-
-    sendto_one_numeric(source_p, &me, RPL_UNAWAY);
-    return 0;
-  }
-
-  if ((source_p->connection->away.last_attempt + ConfigGeneral.away_time) < CurrentTime)
-    source_p->connection->away.count = 0;
-
-  if (source_p->connection->away.count > ConfigGeneral.away_count)
-  {
-    sendto_one_numeric(source_p, &me, ERR_TOOMANYAWAY);
-    return 0;
-  }
-
-  source_p->connection->away.last_attempt = CurrentTime;
-  source_p->connection->away.count++;
-
-  strlcpy(source_p->away, message, sizeof(source_p->away));
-
-  sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
-  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                               source_p->name, source_p->username,
-                               source_p->host, source_p->away);
-  sendto_server(source_p, 0, 0, ":%s AWAY :%s",
-                source_p->id, source_p->away);
+  do_away(source_p, message);
   return 0;
 }
 
@@ -111,30 +126,7 @@ ms_away(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (EmptyString(message))
-  {
-    /* Marking as not away */
-    if (source_p->away[0])
-    {
-      source_p->away[0] = '\0';
-
-      /* We now send this only if they were away before --is */
-      sendto_server(source_p, 0, 0, ":%s AWAY", source_p->id);
-      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
-                                   source_p->name, source_p->username,
-                                   source_p->host);
-    }
-
-    return 0;
-  }
-
-  strlcpy(source_p->away, message, sizeof(source_p->away));
-
-  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                               source_p->name, source_p->username,
-                               source_p->host, source_p->away);
-  sendto_server(source_p, 0, 0, ":%s AWAY :%s",
-                source_p->id, source_p->away);
+  do_away(source_p, message);
   return 0;
 }
 

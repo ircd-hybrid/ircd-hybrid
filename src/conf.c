@@ -751,8 +751,11 @@ void
 conf_rehash(int sig)
 {
   if (sig)
+  {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Got signal SIGHUP, reloading configuration file(s)");
+    ilog(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
+  }
 
   restart_resolver();
 

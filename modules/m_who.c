@@ -82,6 +82,38 @@ do_who(struct Client *source_p, const struct Client *target_p,
                status, target_p->hopcount, target_p->info);
 }
 
+/*!
+ * \param source_p Pointer to client requesting who
+ * \param target_p Pointer to client to do who on
+ * \param mask Mask to match
+ * \return 1 if mask matches, 0 otherwise
+ */
+static int
+who_matches(struct Client *source_p, struct Client *target_p, const char *mask)
+{
+  if (!mask)
+    return 1;
+
+  if (!match(mask, target_p->name))
+    return 1;
+
+  if (!match(mask, target_p->username))
+    return 1;
+
+  if (!match(mask, target_p->host))
+    return 1;
+
+  if (!match(mask, target_p->info))
+    return 1;
+
+  if (HasUMode(source_p, UMODE_OPER) ||
+      (!ConfigServerHide.hide_servers && !IsHidden(target_p->servptr)))
+    if (!match(mask, target_p->servptr->name))
+      return 1;
+
+  return 0;
+}
+
 /* who_common_channel
  * inputs	- pointer to client requesting who
  * 		- pointer to channel member chain.
@@ -113,12 +145,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, const char *m
 
     AddFlag(target_p, FLAGS_MARK);
 
-    if ((mask == NULL) ||
-      !match(mask, target_p->name) || !match(mask, target_p->username) ||
-      !match(mask, target_p->host) ||
-      ((!ConfigServerHide.hide_servers || HasUMode(source_p, UMODE_OPER)) &&
-       !match(mask, target_p->servptr->name)) ||
-      !match(mask, target_p->info))
+    if (who_matches(source_p, target_p, mask))
     {
       do_who(source_p, target_p, NULL, "");
 
@@ -187,10 +214,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
           (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
         continue;
 
-    if (!mask ||
-        !match(mask, target_p->name) || !match(mask, target_p->username) ||
-        !match(mask, target_p->host) || !match(mask, target_p->servptr->name) ||
-        !match(mask, target_p->info))
+    if (who_matches(source_p, target_p, mask))
     {
       do_who(source_p, target_p, NULL, "");
 

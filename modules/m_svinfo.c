@@ -93,7 +93,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
          get_client_name(source_p, SHOW_IP), CurrentTime, theirtime, deltat);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
          "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ji, delta=%ji)",
-          get_client_name(source_p, MASK_IP), CurrentTime, theirtime, deltat);
+         get_client_name(source_p, MASK_IP), CurrentTime, theirtime, deltat);
     ilog(LOG_TYPE_IRCD,
          "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ji, delta=%ji)",
          get_client_name(source_p, SHOW_IP), CurrentTime, theirtime, deltat);

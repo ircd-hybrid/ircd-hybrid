@@ -1148,18 +1148,12 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
 
   /*
    * Send info about connections which match, or all if the
-   * mask matches from. Only restrictions are on those who
-   * are invisible not being visible to 'foreigners' who use
-   * a wild card based search to list it.
+   * mask matches from.
    */
   DLINK_FOREACH(node, list->head)
   {
     const struct Client *target_p = node->data;
-
-    if (HasUMode(target_p, UMODE_INVISIBLE) && (doall || wilds) &&
-        !(MyConnect(source_p) && HasUMode(source_p, UMODE_OPER)) &&
-        !HasUMode(target_p, UMODE_OPER) && (target_p != source_p))
-      continue;
+    enum addr_mask_type type = 0;
 
     if (!doall && wilds && match(name, target_p->name))
       continue;
@@ -1167,56 +1161,25 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
     if (!(doall || wilds) && irccmp(name, target_p->name))
       continue;
 
-    /*
-     * This basically shows ips for our opers if it's not a server/admin, or
-     * it's one of our admins.
-     */
-    if (MyConnect(source_p) && HasUMode(source_p, UMODE_OPER) &&
-        (HasUMode(source_p, UMODE_ADMIN) ||
-        (!IsServer(target_p) && !HasUMode(target_p, UMODE_ADMIN) &&
-        !IsHandshake(target_p) && !IsConnecting(target_p))))
-    {
-      sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
-                 (IsUpper(statchar)) ?
-                 get_client_name(target_p, SHOW_IP) :
-                 get_client_name(target_p, HIDE_IP),
-                 dbuf_length(&target_p->connection->buf_sendq),
-                 target_p->connection->send.messages,
-                 target_p->connection->send.bytes >> 10,
-                 target_p->connection->recv.messages,
-                 target_p->connection->recv.bytes >> 10,
-                 (unsigned int)(CurrentTime - target_p->connection->firsttime),
-                 (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since) : 0,
-                 IsServer(target_p) ? get_capabilities(target_p) : "-");
-    }
+    if (IsUpper(statchar))
+      type = SHOW_IP;
     else
-    {
-      /* If it's a server, mask the real IP */
-      if (IsServer(target_p) || IsHandshake(target_p) || IsConnecting(target_p))
-        sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
-                   get_client_name(target_p, MASK_IP),
-                   dbuf_length(&target_p->connection->buf_sendq),
-                   target_p->connection->send.messages,
-                   target_p->connection->send.bytes >> 10,
-                   target_p->connection->recv.messages,
-                   target_p->connection->recv.bytes >> 10,
-                   (unsigned int)(CurrentTime - target_p->connection->firsttime),
-                   (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since):0,
-                   IsServer(target_p) ? get_capabilities(target_p) : "-");
-      else /* show the real IP */
-        sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
-                   (IsUpper(statchar)) ?
-                   get_client_name(target_p, SHOW_IP) :
-                   get_client_name(target_p, HIDE_IP),
-                   dbuf_length(&target_p->connection->buf_sendq),
-                   target_p->connection->send.messages,
-                   target_p->connection->send.bytes >> 10,
-                   target_p->connection->recv.messages,
-                   target_p->connection->recv.bytes >> 10,
-                   (unsigned int)(CurrentTime - target_p->connection->firsttime),
-                   (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since):0,
-                   IsServer(target_p) ? get_capabilities(target_p) : "-");
-    }
+      type = HIDE_IP;
+
+    if (IsServer(target_p) || IsConnecting(target_p) || IsHandshake(target_p))
+      if (ConfigServerHide.hide_server_ips || !HasUMode(source_p, UMODE_ADMIN))
+        type = MASK_IP;
+
+    sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
+                       get_client_name(target_p, type),
+                       dbuf_length(&target_p->connection->buf_sendq),
+                       target_p->connection->send.messages,
+                       target_p->connection->send.bytes >> 10,
+                       target_p->connection->recv.messages,
+                       target_p->connection->recv.bytes >> 10,
+                       (unsigned int)(CurrentTime - target_p->connection->firsttime),
+                       (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since) : 0,
+                       IsServer(target_p) ? get_capabilities(target_p) : "-");
   }
 }
 

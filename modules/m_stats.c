@@ -1167,7 +1167,7 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
       type = HIDE_IP;
 
     if (IsServer(target_p) || IsConnecting(target_p) || IsHandshake(target_p))
-      if (ConfigServerHide.hide_server_ips || !HasUMode(source_p, UMODE_ADMIN))
+      if (!HasUMode(source_p, UMODE_ADMIN))
         type = MASK_IP;
 
     sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,

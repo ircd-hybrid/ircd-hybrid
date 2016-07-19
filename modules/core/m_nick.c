@@ -528,8 +528,8 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
     else
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
            "Nick change collision from %s to %s(%s <- %s)(newer killed)",
-             source_p->name, target_p->name, target_p->from->name,
-             source_p->from->name);
+           source_p->name, target_p->name, target_p->from->name,
+           source_p->from->name);
 
     ++ServerStats.is_kill;
 

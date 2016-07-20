@@ -57,7 +57,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   const struct user_modes *tab = NULL;
   struct Client *target_p = NULL;
   int what = MODE_ADD;
-  unsigned int setmodes = 0;
+  const unsigned int setmodes = target_p->umodes;
   const char *modes = NULL, *extarg = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
@@ -72,8 +72,6 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
   if (ts && (ts != target_p->tsinfo))
     return 0;
-
-  setmodes = target_p->umodes;
 
   for (const char *m = modes; *m; ++m)
   {

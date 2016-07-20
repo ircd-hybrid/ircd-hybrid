@@ -67,8 +67,7 @@ xline_check(const struct GecosItem *gecos)
  * side effects - when successful, adds an xline to the conf
  */
 static void
-xline_handle(struct Client *source_p, const char *mask, const char *reason,
-             uintmax_t duration)
+xline_handle(struct Client *source_p, const char *mask, const char *reason, uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
   struct GecosItem *gecos = NULL;

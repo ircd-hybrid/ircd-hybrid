@@ -102,8 +102,7 @@ dline_check(const struct AddressRec *arec)
  * side effects	- dline as given is placed
  */
 static void
-dline_handle(struct Client *source_p, const char *addr, const char *reason,
-             uintmax_t duration)
+dline_handle(struct Client *source_p, const char *addr, const char *reason, uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
   struct irc_ssaddr daddr;

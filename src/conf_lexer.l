@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file ircd_lexer.l
+/*! \file conf_lexer.l
  * \brief Scans the ircd configuration file for tokens.
  * \version $Id$
  */

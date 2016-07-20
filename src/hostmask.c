@@ -604,7 +604,6 @@ find_dline_conf(const struct irc_ssaddr *addr, int aftype)
 struct AddressRec *
 add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 {
-  struct AddressRec *arec = NULL;
   const char *const hostname = conf->host;
   const char *const username = conf->user;
   static unsigned int prec_value = UINT_MAX;
@@ -612,7 +611,7 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 
   assert(type && !EmptyString(hostname));
 
-  arec = xcalloc(sizeof(struct AddressRec));
+  struct AddressRec *arec = xcalloc(sizeof(struct AddressRec));
   arec->masktype = parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
   arec->Mask.ipa.bits = bits;
   arec->username = username;

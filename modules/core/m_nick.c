@@ -203,19 +203,11 @@ change_local_nick(struct Client *source_p, const char *nick)
   assert(source_p->name[0] && !EmptyString(nick));
   assert(MyClient(source_p));
 
-  /*
-   * Client just changing his/her nick. If he/she is
-   * on a channel, send note of change to all clients
-   * on that channel. Propagate notice to other servers.
-   */
-  if ((source_p->connection->nick.last_attempt +
-       ConfigGeneral.max_nick_time) < CurrentTime)
+  if ((source_p->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < CurrentTime)
     source_p->connection->nick.count = 0;
 
-  if (ConfigGeneral.anti_nick_flood &&
-      !HasUMode(source_p, UMODE_OPER) &&
-      source_p->connection->nick.count >
-      ConfigGeneral.max_nick_changes)
+  if (ConfigGeneral.anti_nick_flood && !HasUMode(source_p, UMODE_OPER) &&
+      (source_p->connection->nick.count > ConfigGeneral.max_nick_changes))
   {
     sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST, nick,
                        ConfigGeneral.max_nick_time);
@@ -243,6 +235,11 @@ change_local_nick(struct Client *source_p, const char *nick)
     }
   }
 
+  /*
+   * Client just changing his/her nick. If he/she is on a channel,
+   * send note of change to all clients on that channel. Propagate
+   * notice to other servers.
+   */
   sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
                        "Nick change: From %s to %s [%s@%s]",
                        source_p->name, nick, source_p->username, source_p->host);
@@ -679,7 +676,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   {
     /*
      * If (target_p == source_p) the client is changing nicks between
-     * equivalent nicknames ie: [nick] -> {nick}
+     * equivalent nicknames ie: nick -> nIcK
      */
 
     /* Check the nick isn't exactly the same */
@@ -689,8 +686,8 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   else if (IsUnknown(target_p))
   {
     /*
-     * If the client that has the nick isn't registered yet (nick but no
-     * user) then drop the unregged client
+     * If the client that has the nick isn't registered yet (NICK but no
+     * USER) then drop the unregistered client
      */
     exit_client(target_p, "Overridden by other sign on");
     change_local_nick(source_p, nick);

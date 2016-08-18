@@ -27,6 +27,7 @@
 #ifndef INCLUDED_conf_pseudo_h
 #define INCLUDED_conf_pseudo_h
 
+extern const dlink_list *pseudo_get_list(void);
 extern void pseudo_register(const char *, const char *,
                             const char *, const char *,
                             const char *);

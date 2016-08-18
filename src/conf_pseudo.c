@@ -51,6 +51,13 @@ struct PseudoItem
 
 static dlink_list pseudo_list;
 
+
+const dlink_list *
+pseudo_get_list(void)
+{
+  return &pseudo_list;
+}
+
 static int
 m_pseudo(struct Client *source_p, int parc, char *parv[])
 {

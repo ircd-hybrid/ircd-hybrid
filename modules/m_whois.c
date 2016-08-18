@@ -69,7 +69,7 @@ static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
   char buf[IRCD_BUFSIZE] = "";
-  const dlink_node *node = NULL;
+  dlink_node *node;
   const struct ServicesTag *svstag = NULL;
   char *t = NULL;
   int cur_len = 0;

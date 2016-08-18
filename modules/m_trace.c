@@ -46,7 +46,7 @@ static void
 trace_get_dependent(unsigned int *const server,
                     unsigned int *const client, const struct Client *target_p)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   (*server)++;
   (*client) += dlink_list_length(&target_p->serv->client_list);

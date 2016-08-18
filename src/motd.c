@@ -404,7 +404,7 @@ motd_clear(void)
 void
 motd_report(struct Client *client_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, MotdList.other.head)
   {
@@ -421,7 +421,7 @@ motd_report(struct Client *client_p, int parc, char *parv[])
 void
 motd_memory_count(struct Client *client_p)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
   unsigned int mt  = 0;  /* Motd count */
   unsigned int mtc = 0;  /* Motd cache count */
   size_t mtm  = 0;  /* Memory consumed by motd */

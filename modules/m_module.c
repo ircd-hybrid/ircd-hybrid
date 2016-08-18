@@ -173,7 +173,7 @@ module_reload(struct Client *source_p, const char *arg)
 static void
 module_list(struct Client *source_p, const char *arg)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, modules_get_list()->head)
   {

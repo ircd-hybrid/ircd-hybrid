@@ -552,7 +552,7 @@ free_list_task(struct Client *source_p)
 static int
 list_allow_channel(const char *name, const struct ListTask *lt)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, lt->show_mask.head)
     if (match(node->data, name) != 0)

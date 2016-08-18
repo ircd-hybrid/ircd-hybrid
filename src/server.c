@@ -470,7 +470,7 @@ delete_capability(const char *name)
 unsigned int
 find_capability(const char *name)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, server_capabilities_list.head)
   {
@@ -494,7 +494,7 @@ const char *
 get_capabilities(const struct Client *client_p)
 {
   static char buf[IRCD_BUFSIZE] = "";
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   buf[0] = '\0';
 

@@ -173,7 +173,7 @@ resv_find(const char *name, int (*compare)(const char *, const char *))
 int
 resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, resv->exempt_list.head)
   {

@@ -240,7 +240,7 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
 static void
 stats_resv(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, resv_chan_get_list()->head)
   {
@@ -264,7 +264,7 @@ stats_resv(struct Client *source_p, int parc, char *parv[])
 static void
 stats_memory(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node, *node2;
+  dlink_node *node, *node2;
 
   unsigned int local_client_conf_count = 0;      /* local client conf links */
   unsigned int users_counted = 0;                /* user structs */
@@ -462,7 +462,7 @@ stats_dns_servers(struct Client *source_p, int parc, char *parv[])
 static void
 stats_deny(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -492,7 +492,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_tdeny(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -522,7 +522,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 static void
 stats_exempt(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   if (ConfigGeneral.stats_e_disabled)
   {
@@ -548,7 +548,7 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
 static void
 stats_events(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node;
+  dlink_node *node;
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "E :Operation                      Next Execution");
@@ -568,7 +568,7 @@ stats_events(struct Client *source_p, int parc, char *parv[])
 static void
 stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node, *node2;
+  dlink_node *node, *node2;
 
   DLINK_FOREACH(node, connect_items.head)
   {
@@ -633,7 +633,7 @@ show_iline_prefix(const struct Client *source_p, const struct MaskItem *conf)
 static void
 report_auth(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -701,7 +701,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
 static void
 report_Klines(struct Client *source_p, int tkline)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
   char c = '\0';
 
   if (tkline)
@@ -818,7 +818,7 @@ stats_messages(struct Client *source_p, int parc, char *parv[])
 static void
 stats_operedup(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
   unsigned int opercount = 0;
   char buf[IRCD_BUFSIZE] = "";
 
@@ -861,13 +861,13 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
 static void
 show_ports(struct Client *source_p)
 {
-  char buf[8] = "";
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, listener_get_list()->head)
   {
-    const struct Listener *listener = node->data;
+    char buf[8];
     char *p = buf;
+    const struct Listener *listener = node->data;
 
     if (listener->flags & LISTENER_HIDDEN)
     {
@@ -906,7 +906,7 @@ stats_ports(struct Client *source_p, int parc, char *parv[])
 static void
 stats_tstats(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
   struct ServerStatistics tmp;
   struct ServerStatistics *sp = &tmp;
 
@@ -1006,7 +1006,7 @@ stats_shared(struct Client *source_p, int parc, char *parv[])
 static void
 stats_servers(struct Client *source_p, int parc, char *parv[])
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, local_server_list.head)
   {

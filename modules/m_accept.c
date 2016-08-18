@@ -45,14 +45,13 @@
 static void
 list_accepts(struct Client *source_p)
 {
-  int len = 0;
   char nicks[IRCD_BUFSIZE] = "";
   char *t = nicks;
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */
   /* 1       23456              78                     9 10 */
-  len = strlen(me.name) + strlen(source_p->name) + 10;
+  int len = strlen(me.name) + strlen(source_p->name) + 10;
 
   DLINK_FOREACH(node, source_p->connection->acceptlist.head)
   {

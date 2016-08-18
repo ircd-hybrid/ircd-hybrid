@@ -155,7 +155,7 @@ channel_send_members(struct Client *client_p, const struct Channel *chptr,
                      char *modebuf, char *parabuf)
 {
   char buf[IRCD_BUFSIZE] = "";
-  const dlink_node *node = NULL;
+  dlink_node *node;
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
 
@@ -217,7 +217,7 @@ static void
 channel_send_mask_list(struct Client *client_p, const struct Channel *chptr,
                        const dlink_list *list, const char flag)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
   char mbuf[IRCD_BUFSIZE] = "";
   char pbuf[IRCD_BUFSIZE] = "";
   int tlen, mlen, cur_len;
@@ -399,7 +399,7 @@ void
 channel_member_names(struct Client *client_p, struct Channel *chptr,
                      int show_eon)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
   char buf[IRCD_BUFSIZE + 1] = "";
   char *t = NULL, *start = NULL;
   int tlen = 0;
@@ -602,7 +602,7 @@ get_member_status(const struct Membership *member, const int combine)
 static int
 find_bmask(const struct Client *client_p, const dlink_list *list)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, list->head)
   {

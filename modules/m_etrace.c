@@ -69,7 +69,7 @@ do_etrace(struct Client *source_p, const char *arg)
 {
   const char *tname = NULL;
   unsigned int wilds = 0, do_all = 0;
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "ETRACE requested by %s (%s@%s) [%s]",

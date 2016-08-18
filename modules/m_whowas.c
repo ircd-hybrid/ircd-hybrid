@@ -47,7 +47,7 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
 {
   int cur = 0;
   int max = -1;
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   if (parc > 2 && !EmptyString(parv[2]))
     max = atoi(parv[2]);

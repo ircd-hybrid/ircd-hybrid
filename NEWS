@@ -4,7 +4,7 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
--- Noteworthy changes in version 8.2.19 (2016-??-??)
+-- Noteworthy changes in version 8.2.19 (2016-08-21)
 o) Fixed a possible server name leak in "WHO" with server hiding enabled
 o) "WHO" now allows opers to search by IP address
 o) Admins no longer can see IP addresses in "STATS P" with

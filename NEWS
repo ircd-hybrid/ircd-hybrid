@@ -3,15 +3,24 @@ Reminder for package maintainers of ircd-hybrid: ircd-hybrid now has
 GnuTLS support as of version 8.2.13
 #######################################################################
 
+
+-- Noteworthy changes in version 8.2.19 (2016-08-21)
+o) Fixed a possible server name leak in "WHO" with server hiding enabled
+o) "WHO" now allows opers to search by IP address
+o) Admins no longer can see IP addresses in "STATS P" with
+   'serverhide::hide_server_ips' enabled
+o) User mode 'n' now shows nick name changes from remote clients, too
+
+
 -- Noteworthy changes in version 8.2.18 (2016-06-22)
 o) Fixed an assert when a client sends invalid LIST options
-o) Fixed invalid memory stats of channel invites in "STATS z
+o) Fixed invalid memory stats of channel invites in "STATS z"
 
 
 -- Noteworthy changes in version 8.2.17 (2016-04-21)
 o) Fixed core on "REHASH CONF" with 'general::whowas_history_length'
    set to 0
-o) Fixed possible core on INVITE with 'channel::max_channels' set to 0
+o) Fixed possible core on "INVITE" with 'channel::max_channels' set to 0
 
 
 -- Noteworthy changes in version 8.2.16 (2016-03-20)

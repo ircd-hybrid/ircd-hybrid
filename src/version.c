@@ -91,6 +91,7 @@ const char *infotext[] =
   "kre, Dinko Korunic <kreator@fly.srk.fer.hr>",
   "madmax, Paul Lomax <madmax@efnet.org>",
   "metalrock, Jack Low <jclow@csupomona.edu>",
+  "r0d3nt, Andrew Strutt, <andrew.strutt@gmail.com>",
   "Riedel, Dennis Vink, <riedel@chaotic.nl>",
   "scuzzy, David Todd <scuzzy@aniverse.net>",
   "spookey, David Colburn <spookey@spookey.org>",

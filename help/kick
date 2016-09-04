@@ -2,5 +2,7 @@ KICK <channel> <nick> :[msg]
 
 The KICK command will remove the specified user
 from the specified channel, using the optional
-kick message.  You must be a channel operator to
-use this command.
+reason. If reason is not specified, nickname
+of the user issuing the KICK will be used as reason.
+
+You must be a channel operator or half-op to use this command.

@@ -90,7 +90,7 @@ const char *infotext[] =
   "knight, Alan LeVee <alan.levee@prometheus-designs.net>",
   "kre, Dinko Korunic <kreator@fly.srk.fer.hr>",
   "madmax, Paul Lomax <madmax@efnet.org>",
-  "metalrock, Jack Low <jclow@csupomona.edu>",
+  "metalrock, Jack Low <xxjack12xx@gmail.com>",
   "r0d3nt, Andrew Strutt <andrew.strutt@gmail.com>",
   "Riedel, Dennis Vink <riedel@chaotic.nl>",
   "scuzzy, David Todd <scuzzy@aniverse.net>",

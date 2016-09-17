@@ -1,4 +1,4 @@
-KICK <channel> <nick> :[msg]
+KICK <channel> <nick> :[reason]
 
 The KICK command will remove the specified user
 from the specified channel, using the optional

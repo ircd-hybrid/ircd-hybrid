@@ -48,11 +48,16 @@ unsigned int lineno = 1;
 char linebuf[IRCD_BUFSIZE];
 char conffilebuf[IRCD_BUFSIZE];
 
-static int include_stack_ptr = 0;
-static YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
-static unsigned int lineno_stack[MAX_INCLUDE_DEPTH];
-static FILE *inc_fbfile_in[MAX_INCLUDE_DEPTH];
-static char conffile_stack[MAX_INCLUDE_DEPTH][IRCD_BUFSIZE];
+static struct included_file
+{
+  YY_BUFFER_STATE state;
+  unsigned int lineno;
+  FILE *file;
+  char conffile[IRCD_BUFSIZE];
+} include_stack[MAX_INCLUDE_DEPTH];
+
+static unsigned int include_stack_ptr;
+
 static void ccomment(void);
 static void cinclude(void);
 static int ieof(void);
@@ -428,45 +433,44 @@ static void
 cinclude(void)
 {
   char *p = NULL;
+  char filenamebuf[IRCD_BUFSIZE];
 
   if ((p = strchr(yytext, '<')) == NULL)
     *strchr(p = strchr(yytext, '"') + 1, '"') = '\0';
   else
     *strchr(++p, '>') = '\0';
 
-  /* log(L_NOTICE, "got include %s!", c); */
-
   /* do stacking and co. */
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
-    ilog(LOG_TYPE_IRCD, "Includes nested too deep in %s", p);
-  else
   {
-    FILE *tmp_fbfile_in = NULL;
-    char filenamebuf[IRCD_BUFSIZE];
-
-    if (*p == '/')  /* if it is an absolute path */
-      snprintf(filenamebuf, sizeof(filenamebuf), "%s", p);
-    else
-      snprintf(filenamebuf, sizeof(filenamebuf), "%s/%s", ETCPATH, p);
-
-    tmp_fbfile_in = fopen(filenamebuf, "r");
-
-    if (tmp_fbfile_in == NULL)
-    {
-      ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
-           filenamebuf, strerror(errno));
-      return;
-    }
-
-    lineno_stack[include_stack_ptr] = lineno;
-    lineno = 1;
-    inc_fbfile_in[include_stack_ptr] = conf_parser_ctx.conf_file;
-    strlcpy(conffile_stack[include_stack_ptr], conffilebuf, IRCD_BUFSIZE);
-    include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
-    conf_parser_ctx.conf_file = tmp_fbfile_in;
-    snprintf(conffilebuf, sizeof(conffilebuf), "%s", filenamebuf);
-    yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+    ilog(LOG_TYPE_IRCD, "Includes nested too deep in %s", p);
+    return;
   }
+
+  if (*p == '/')  /* if it is an absolute path */
+    snprintf(filenamebuf, sizeof(filenamebuf), "%s", p);
+  else
+    snprintf(filenamebuf, sizeof(filenamebuf), "%s/%s", ETCPATH, p);
+
+  FILE *tmp_fbfile_in = fopen(filenamebuf, "r");
+  if (!tmp_fbfile_in)
+  {
+    ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
+         filenamebuf, strerror(errno));
+    return;
+  }
+
+  struct included_file *file = &include_stack[include_stack_ptr++];
+  file->lineno = lineno;
+  file->file = conf_parser_ctx.conf_file;
+  file->state = YY_CURRENT_BUFFER;
+  strlcpy(file->conffile, conffilebuf, sizeof(file->conffile));
+
+  lineno = 1;
+  conf_parser_ctx.conf_file = tmp_fbfile_in;
+
+  snprintf(conffilebuf, sizeof(conffilebuf), "%s", filenamebuf);
+  yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 }
 
 /* This is function that will be called on EOF in conf file. It will
@@ -475,26 +479,28 @@ cinclude(void)
 static int
 ieof(void)
 {
-  /* log(L_NOTICE, "return from include stack!"); */
-  if (include_stack_ptr)
-    fclose(conf_parser_ctx.conf_file);
-  if (--include_stack_ptr < 0)
+  if (include_stack_ptr == 0)
   {
-    /* log(L_NOTICE, "terminating lexer"); */
-    /* We will now exit the lexer - restore init values if we get /rehash
-     * later and reenter lexer -kre */
-    include_stack_ptr = 0;
     lineno = 1;
     return 1;
   }
 
   /* switch buffer */
-  /* log(L_NOTICE, "deleting include_stack_ptr=%d", include_stack_ptr); */
-  yy_delete_buffer(YY_CURRENT_BUFFER);
-  lineno = lineno_stack[include_stack_ptr];
-  conf_parser_ctx.conf_file = inc_fbfile_in[include_stack_ptr];
-  strlcpy(conffilebuf, conffile_stack[include_stack_ptr], sizeof(conffilebuf));
-  yy_switch_to_buffer(include_stack[include_stack_ptr]);
+  struct included_file *file = &include_stack[--include_stack_ptr];
 
+  /* close current file */
+  fclose(conf_parser_ctx.conf_file);
+
+  /* switch buffers */
+  yy_delete_buffer(YY_CURRENT_BUFFER);
+  yy_switch_to_buffer(file->state);
+
+  /* switch lineno */
+  lineno = file->lineno;
+
+  /* switch file */
+  conf_parser_ctx.conf_file = file->file;
+
+  strlcpy(conffilebuf, file->conffile, sizeof(conffilebuf));
   return 0;
 }

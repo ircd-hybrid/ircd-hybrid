@@ -56,6 +56,7 @@ extern void tls_init(void);
 extern int tls_new_cred(void);
 
 extern const char *tls_get_cipher(const tls_data_t *);
+extern const char *tls_get_version(void);
 
 extern int tls_isusing(tls_data_t *);
 extern int tls_new(tls_data_t *, int, tls_role_t);

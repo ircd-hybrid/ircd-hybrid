@@ -231,6 +231,16 @@ tls_get_cipher(const tls_data_t *tls_data)
   return buffer;
 }
 
+const char *
+tls_get_version(void)
+{
+  static char buf[IRCD_BUFSIZE];
+
+  snprintf(buf, sizeof(buf), "OpenSSL version: library: %s, header: %s",
+           SSLeay_version(SSLEAY_VERSION), OPENSSL_VERSION_TEXT);
+  return buf;
+}
+
 int
 tls_isusing(tls_data_t *tls_data)
 {

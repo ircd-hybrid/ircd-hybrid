@@ -35,6 +35,7 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
+#include "tls.h"
 
 
 /* Types for output_type in InfoStruct */
@@ -678,7 +679,12 @@ send_info_text(struct Client *source_p)
   }
 
   if (HasUMode(source_p, UMODE_OPER))
+  {
     send_conf_options(source_p);
+
+    if (tls_is_initialized())
+      sendto_one_numeric(source_p, &me, RPL_INFO, tls_get_version());
+  }
 
   send_birthdate_online_time(source_p);
 

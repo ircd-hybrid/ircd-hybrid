@@ -158,6 +158,16 @@ tls_get_cipher(const tls_data_t *tls_data)
   return buffer;
 }
 
+const char *
+tls_get_version(void)
+{
+  static char buf[IRCD_BUFSIZE];
+
+  snprintf(buf, sizeof(buf), "GnuTLS version: library: %s, header: %s",
+           gnutls_check_version(NULL), GNUTLS_VERSION);
+  return buf;
+}
+
 int
 tls_isusing(tls_data_t *tls_data)
 {

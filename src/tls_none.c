@@ -54,6 +54,12 @@ tls_get_cipher(const tls_data_t *tls_data)
   return NULL;
 }
 
+const char *
+tls_get_version(void)
+{
+  return NULL;
+}
+
 int
 tls_isusing(tls_data_t *tls_data)
 {

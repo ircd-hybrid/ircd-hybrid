@@ -48,25 +48,19 @@ has_wildcards(const char *str)
   return 0;
 }
 
-/*
- * strip_tabs(dst, src, length)
- *
- *   Copies src to dst, while converting all \t (tabs) into spaces.
- */
-void
-strip_tabs(char *dest, const char *src, size_t len)
+char *
+stripws(char *txt)
 {
-  char *d = dest;
+  while (*txt == '\t' || *txt == ' ')
+    ++txt;
 
-  /* Sanity check; we don't want anything nasty... */
-  assert(dest);
-  assert(src);
-  assert(len > 0);
+  char *tmp = txt + strlen(txt) - 1;
+  while (tmp >= txt && (*tmp == '\t' || *tmp == ' '))
+    --tmp;
 
-  for (; --len && *src; ++src)
-    *d++ = *src == '\t' ? ' ' : *src;
+  *(tmp + 1) = '\0';
 
-  *d = '\0'; /* NUL terminate, thanks and goodbye */
+  return txt;
 }
 
 /*

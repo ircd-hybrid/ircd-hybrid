@@ -1181,30 +1181,26 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *name)
 void
 yyerror(const char *msg)
 {
-  char newlinebuf[IRCD_BUFSIZE];
-
   if (conf_parser_ctx.pass != 1)
     return;
 
-  strip_tabs(newlinebuf, linebuf, sizeof(newlinebuf));
+  char *p = stripws(linebuf);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
-                       conffilebuf, lineno + 1, msg, newlinebuf);
+                       conffilebuf, lineno + 1, msg, p);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-       conffilebuf, lineno + 1, msg, newlinebuf);
+       conffilebuf, lineno + 1, msg, p);
 }
 
 void
 conf_error_report(const char *msg)
 {
-  char newlinebuf[IRCD_BUFSIZE];
-
-  strip_tabs(newlinebuf, linebuf, sizeof(newlinebuf));
+  char *p = stripws(linebuf);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
-                       conffilebuf, lineno + 1, msg, newlinebuf);
+                       conffilebuf, lineno + 1, msg, linebuf);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-       conffilebuf, lineno + 1, msg, newlinebuf);
+       conffilebuf, lineno + 1, msg, linebuf);
 }
 
 /*

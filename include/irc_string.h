@@ -66,11 +66,7 @@ extern size_t strlcat(char *, const char *, size_t);
 
 extern const char *libio_basename(const char *);
 
-/*
- * strip_tabs - convert tabs to spaces
- * - jdc
- */
-extern void strip_tabs(char *, const char *, size_t);
+extern char *stripws(char *);
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 

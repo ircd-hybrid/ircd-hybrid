@@ -470,7 +470,7 @@ cinclude(void)
   conf_parser_ctx.conf_file = tmp_fbfile_in;
 
   snprintf(conffilebuf, sizeof(conffilebuf), "%s", filenamebuf);
-  yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+  yy_switch_to_buffer(yy_create_buffer(NULL, YY_BUF_SIZE));
 }
 
 /* This is function that will be called on EOF in conf file. It will

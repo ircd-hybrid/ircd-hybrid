@@ -468,8 +468,8 @@ cinclude(void)
 
   lineno = 1;
   conf_parser_ctx.conf_file = tmp_fbfile_in;
+  strlcpy(conffilebuf, filenamebuf, sizeof(conffilebuf));
 
-  snprintf(conffilebuf, sizeof(conffilebuf), "%s", filenamebuf);
   yy_switch_to_buffer(yy_create_buffer(NULL, YY_BUF_SIZE));
 }
 

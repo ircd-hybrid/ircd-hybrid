@@ -725,7 +725,7 @@ validate_conf(void)
 static void
 read_conf(FILE *file)
 {
-  lineno = 0;
+  lineno = 1;
 
   set_default_conf();  /* Set default values prior to conf parsing */
   conf_parser_ctx.pass = 1;
@@ -1187,9 +1187,9 @@ yyerror(const char *msg)
   char *p = stripws(linebuf);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
-                       conffilebuf, lineno + 1, msg, p);
+                       conffilebuf, lineno, msg, p);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-       conffilebuf, lineno + 1, msg, p);
+       conffilebuf, lineno, msg, p);
 }
 
 void
@@ -1198,9 +1198,9 @@ conf_error_report(const char *msg)
   char *p = stripws(linebuf);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
-                       conffilebuf, lineno + 1, msg, linebuf);
+                       conffilebuf, lineno, msg, linebuf);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-       conffilebuf, lineno + 1, msg, linebuf);
+       conffilebuf, lineno, msg, linebuf);
 }
 
 /*

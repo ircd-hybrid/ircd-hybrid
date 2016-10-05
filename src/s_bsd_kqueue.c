@@ -65,7 +65,7 @@ netio_init(void)
 static void
 kq_update_events(int fd, int filter, int what)
 {
-  static struct timespec zero_timespec = {0, 0};
+  const struct timespec zero_timespec = { .tv_sec = 0, .tv_nsec = 0 };
   struct kevent *kep = kq_fdlist + kqoff;
 
   EV_SET(kep, (uintptr_t) fd, (short) filter, what, 0, 0, NULL);

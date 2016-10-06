@@ -740,7 +740,7 @@ user_set_hostmask(struct Client *client_p, const char *hostname, const int what)
   if (MyConnect(client_p))
   {
     sendto_one_numeric(client_p, &me, RPL_VISIBLEHOST, client_p->host);
-    clear_ban_cache_client(client_p);
+    clear_ban_cache_list(&client_p->channel);
   }
 
   if (!ConfigGeneral.cycle_on_host_change)

@@ -222,7 +222,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   if (!samenick)
   {
     source_p->tsinfo = CurrentTime;
-    clear_ban_cache_client(source_p);
+    clear_ban_cache_list(&source_p->channel);
     watch_check_hash(source_p, RPL_LOGOFF);
 
     if (HasUMode(source_p, UMODE_REGISTERED))

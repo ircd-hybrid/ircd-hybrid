@@ -362,7 +362,7 @@ channel_make(const char *name)
 void
 channel_free(struct Channel *chptr)
 {
-  clear_invites_channel(chptr);
+  clear_invite_list(&chptr->invites);
 
   /* Free ban/exception/invex lists */
   channel_free_mask_list(&chptr->banlist);
@@ -536,24 +536,14 @@ del_invite(struct Invite *invite)
   mp_pool_release(invite);
 }
 
-/*! \brief Removes all invites of a specific channel
- * \param chptr Pointer to Channel struct
+/*! \brief Removes and frees all Invite blocks from a list
+ * \param list Pointer to a dlink_list
  */
 void
-clear_invites_channel(struct Channel *chptr)
+clear_invite_list(dlink_list *list)
 {
-  while (chptr->invites.head)
-    del_invite(chptr->invites.head->data);
-}
-
-/*! \brief Removes all invites of a specific client
- * \param client_p Pointer to Client struct
- */
-void
-clear_invites_client(struct Client *client_p)
-{
-  while (client_p->connection->invited.head)
-    del_invite(client_p->connection->invited.head->data);
+  while (list->head)
+    del_invite(list->head->data);
 }
 
 /* get_member_status()

@@ -6,7 +6,8 @@ GnuTLS support as of version 8.2.13
 
 -- Noteworthy changes in version 8.2.20 (201?-??-??)
 o) "INFO" now shows GnuTLS/OpenSSL library/header versions
-
+o) Added 'channel::max_invites' configuration option. See doc/reference.conf
+   for more information.
 
 -- Noteworthy changes in version 8.2.19 (2016-08-21)
 o) Fixed a possible server name leak in "WHO" with server hiding enabled

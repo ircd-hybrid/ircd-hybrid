@@ -226,6 +226,7 @@ struct config_channel_entry
   unsigned int knock_client_count;
   unsigned int knock_client_time;
   unsigned int knock_delay_channel;
+  unsigned int max_invites;
   unsigned int max_bans;
   unsigned int max_channels;
   unsigned int default_join_flood_count;

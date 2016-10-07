@@ -234,6 +234,7 @@ max_bans                    { return MAX_BANS; }
 max_channels                { return MAX_CHANNELS; }
 max_global                  { return MAX_GLOBAL; }
 max_idle                    { return MAX_IDLE; }
+max_invites                 { return MAX_INVITES; }
 max_local                   { return MAX_LOCAL; }
 max_nick_changes            { return MAX_NICK_CHANGES; }
 max_nick_length             { return MAX_NICK_LENGTH; }

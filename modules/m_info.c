@@ -215,6 +215,12 @@ static const struct InfoStruct info_table[] =
     "Maximum number of channels a user can join"
   },
   {
+    "max_invites",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.max_invites,
+    "Maximum number of channels a user can be invited to"
+  },
+  {
     "max_bans",
     OUTPUT_DECIMAL,
     &ConfigChannel.max_bans,

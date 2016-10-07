@@ -643,6 +643,7 @@ set_default_conf(void)
   ConfigChannel.knock_client_time = 300;
   ConfigChannel.knock_delay_channel = 60;
   ConfigChannel.max_channels = 25;
+  ConfigChannel.max_invites = 20;
   ConfigChannel.max_bans = 25;
   ConfigChannel.default_join_flood_count = 18;
   ConfigChannel.default_join_flood_time = 6;

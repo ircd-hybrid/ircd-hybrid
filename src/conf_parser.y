@@ -227,6 +227,7 @@ reset_block_state(void)
 %token  MAX_CHANNELS
 %token  MAX_GLOBAL
 %token  MAX_IDLE
+%token  MAX_INVITES
 %token  MAX_LOCAL
 %token  MAX_NICK_CHANGES
 %token  MAX_NICK_LENGTH
@@ -2887,6 +2888,7 @@ channel_item:       channel_max_bans |
                     channel_knock_client_time |
                     channel_knock_delay_channel |
                     channel_max_channels |
+                    channel_max_invites |
                     channel_default_join_flood_count |
                     channel_default_join_flood_time |
                     channel_disable_fake_channels |
@@ -2930,6 +2932,11 @@ channel_knock_delay_channel: KNOCK_DELAY_CHANNEL '=' timespec ';'
 channel_max_channels: MAX_CHANNELS '=' NUMBER ';'
 {
   ConfigChannel.max_channels = $3;
+};
+
+channel_max_invites: MAX_INVITES '=' NUMBER ';'
+{
+  ConfigChannel.max_invites = $3;
 };
 
 channel_max_bans: MAX_BANS '=' NUMBER ';'

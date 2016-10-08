@@ -125,7 +125,6 @@ dbuf_put(struct dbuf_queue *queue, const char *buf, size_t sz)
 {
   while (sz > 0)
   {
-    size_t avail;
     struct dbuf_block *block = dbuf_length(queue) ? queue->blocks.tail->data : NULL;
 
     if (block == NULL || sizeof(block->data) - block->size == 0)
@@ -134,7 +133,7 @@ dbuf_put(struct dbuf_queue *queue, const char *buf, size_t sz)
       dlinkAddTail(block, make_dlink_node(), &queue->blocks);
     }
 
-    avail = sizeof(block->data) - block->size;
+    size_t avail = sizeof(block->data) - block->size;
     if (avail > sz)
       avail = sz;
 

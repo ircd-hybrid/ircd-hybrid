@@ -1199,9 +1199,9 @@ conf_error_report(const char *msg)
   char *p = stripws(linebuf);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
-                       conffilebuf, lineno, msg, linebuf);
+                       conffilebuf, lineno, msg, p);
   ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-       conffilebuf, lineno, msg, linebuf);
+       conffilebuf, lineno, msg, p);
 }
 
 /*

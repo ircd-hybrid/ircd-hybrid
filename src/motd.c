@@ -98,7 +98,6 @@ static struct MotdCache *
 motd_cache(struct Motd *motd)
 {
   FILE *file = NULL;
-  struct MotdCache *cache = NULL;
   struct stat sb;
   char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
   char *tmp = NULL;
@@ -114,7 +113,7 @@ motd_cache(struct Motd *motd)
   /* Try to find it in the list of cached files */
   DLINK_FOREACH(node, MotdList.cachelist.head)
   {
-    cache = node->data;
+    struct MotdCache *cache = node->data;
 
     if (!strcmp(cache->path, motd->path) && cache->maxcount == motd->maxcount)
     {
@@ -141,7 +140,7 @@ motd_cache(struct Motd *motd)
   }
 
   /* Ok, allocate a structure; we'll realloc later to trim memory */
-  cache = xcalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * MOTD_MAXLINES));
+  struct MotdCache *cache = xcalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * MOTD_MAXLINES));
   cache->ref = 1;
   cache->path = xstrdup(motd->path);
   cache->maxcount = motd->maxcount;

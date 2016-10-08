@@ -77,7 +77,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p,
 {
   assert(IsClient(client_p));
 
-  if (GlobalSetOptions.joinfloodtime > 0)
+  if (GlobalSetOptions.joinfloodtime)
   {
     if (flood_ctrl)
       ++chptr->number_joined;

@@ -641,12 +641,12 @@ valid_nickname(const char *nickname, const int local)
 
 /*! \brief Builds a mode change string to buffer pointed by \a buf
  * \param client_p  Pointer to client
- * \param send      Whether to send a MODE message to client_p
+ * \param dispatch  Whether to send a MODE message to client_p
  * \param old       Old user mode to compare against when building new mode buffer
  * \param buf       Pointer to buffer to build string in
  */
 void
-send_umode(struct Client *client_p, unsigned int send,
+send_umode(struct Client *client_p, unsigned int dispatch,
            unsigned int old, char *buf)
 {
   char *m = buf;
@@ -684,7 +684,7 @@ send_umode(struct Client *client_p, unsigned int send,
 
   *m = '\0';
 
-  if (send && *buf)
+  if (dispatch && *buf)
     sendto_one(client_p, ":%s!%s@%s MODE %s :%s",
                client_p->name, client_p->username,
                client_p->host, client_p->name, buf);

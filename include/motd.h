@@ -53,8 +53,8 @@ struct Motd
   struct MotdCache  *cache;    /**< MOTD cache entry. */
 };
 
-/** Length of one MOTD line(80 chars + '\\0'). */
-enum { MOTD_LINESIZE  =  81 };
+/** Length of one MOTD line(320 chars + '\\0'). */
+enum { MOTD_LINESIZE  = 321 };
 /** Maximum number of lines for MOTD */
 enum { MOTD_MAXLINES  = 100 };
 

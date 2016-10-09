@@ -10,7 +10,6 @@ dist_helpf_DATA = accept    \
                   connect   \
                   die       \
                   dline     \
-                  error     \
                   etrace    \
                   hash      \
                   help      \

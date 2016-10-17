@@ -209,6 +209,7 @@ invisible_on_connect        { return INVISIBLE_ON_CONNECT; }
 invite_client_count         { return INVITE_CLIENT_COUNT; }
 invite_client_time          { return INVITE_CLIENT_TIME; }
 invite_delay_channel        { return INVITE_DELAY_CHANNEL; }
+invite_expire_time          { return INVITE_EXPIRE_TIME; }
 ip                          { return IP; }
 ipv4                        { return T_IPV4; }
 ipv6                        { return T_IPV6; }

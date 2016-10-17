@@ -191,6 +191,12 @@ static const struct InfoStruct info_table[] =
     "Delay between INVITE attempts to a channel"
   },
   {
+    "invite_expire_time",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.invite_expire_time,
+    "Amount of time an INVITE will be active until it expires"
+  },
+  {
     "knock_client_count",
     OUTPUT_DECIMAL,
     &ConfigChannel.knock_client_count,

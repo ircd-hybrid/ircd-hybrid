@@ -639,6 +639,7 @@ set_default_conf(void)
   ConfigChannel.invite_client_count = 10;
   ConfigChannel.invite_client_time = 300;
   ConfigChannel.invite_delay_channel = 5;
+  ConfigChannel.invite_expire_time = 1800;
   ConfigChannel.knock_client_count = 1;
   ConfigChannel.knock_client_time = 300;
   ConfigChannel.knock_delay_channel = 60;

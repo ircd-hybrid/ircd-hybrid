@@ -202,6 +202,7 @@ reset_block_state(void)
 %token  INVITE_CLIENT_COUNT
 %token  INVITE_CLIENT_TIME
 %token  INVITE_DELAY_CHANNEL
+%token  INVITE_EXPIRE_TIME
 %token  IP
 %token  IRCD_AUTH
 %token  IRCD_FLAGS
@@ -2884,6 +2885,7 @@ channel_item:       channel_max_bans |
                     channel_invite_client_count |
                     channel_invite_client_time |
                     channel_invite_delay_channel |
+                    channel_invite_expire_time |
                     channel_knock_client_count |
                     channel_knock_client_time |
                     channel_knock_delay_channel |
@@ -2912,6 +2914,11 @@ channel_invite_client_time: INVITE_CLIENT_TIME '=' timespec ';'
 channel_invite_delay_channel: INVITE_DELAY_CHANNEL '=' timespec ';'
 {
   ConfigChannel.invite_delay_channel = $3;
+};
+
+channel_invite_expire_time: INVITE_EXPIRE_TIME '=' timespec ';'
+{
+  ConfigChannel.invite_expire_time = $3;
 };
 
 channel_knock_client_count: KNOCK_CLIENT_COUNT '=' NUMBER ';'

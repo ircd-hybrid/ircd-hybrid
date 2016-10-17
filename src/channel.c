@@ -477,6 +477,7 @@ find_invite(struct Channel *chptr, struct Client *client_p)
   dlink_node *node, *node_next;
   dlink_list *list;
 
+  /* Take the shortest of the two lists */
   if (dlink_list_length(&client_p->connection->invited) < dlink_list_length(&chptr->invites))
     list = &client_p->connection->invited;
   else
@@ -486,7 +487,10 @@ find_invite(struct Channel *chptr, struct Client *client_p)
   {
     struct Invite *invite = node->data;
 
-    if (invite->chptr == chptr && invite->client_p == client_p)
+    if (ConfigChannel.invite_expire_time &&
+        ConfigChannel.invite_expire_time + invite->when < CurrentTime)
+      del_invite(invite);
+    else if (invite->chptr == chptr && invite->client_p == client_p)
       return invite;
   }
 

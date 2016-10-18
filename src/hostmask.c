@@ -453,7 +453,6 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
   dlink_node *node = NULL;
   struct MaskItem *hprec = NULL;
   struct AddressRec *arec = NULL;
-  int b;
   int (*cmpfunc)(const char *, const char *) = do_match ? match : irccmp;
 
   if (addr)
@@ -461,7 +460,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
     /* Check for IPV6 matches... */
     if (fam == AF_INET6)
     {
-      for (b = 128; b >= 0; b -= 16)
+      for (int b = 128; b >= 0; b -= 16)
       {
         DLINK_FOREACH(node, atable[hash_ipv6(addr, b)].head)
         {
@@ -484,7 +483,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
     }
     else if (fam == AF_INET)
     {
-      for (b = 32; b >= 0; b -= 8)
+      for (int b = 32; b >= 0; b -= 8)
       {
         DLINK_FOREACH(node, atable[hash_ipv4(addr, b)].head)
         {
@@ -568,8 +567,7 @@ find_address_conf(const char *host, const char *user, const struct irc_ssaddr *i
   struct MaskItem *authcnf = NULL, *killcnf = NULL;
 
   /* Find the best auth{} block... If none, return NULL -A1kmm */
-  if ((authcnf = find_conf_by_address(host, ip, CONF_CLIENT, aftype, user,
-                                      password, 1)) == NULL)
+  if ((authcnf = find_conf_by_address(host, ip, CONF_CLIENT, aftype, user, password, 1)) == NULL)
     return NULL;
 
   /* If they are exempt from K-lines, return the best auth{} block. -A1kmm */

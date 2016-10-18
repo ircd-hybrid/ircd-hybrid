@@ -152,7 +152,7 @@ remove_user_from_channel(struct Membership *member)
  */
 static void
 channel_send_members(struct Client *client_p, const struct Channel *chptr,
-                     char *modebuf, char *parabuf)
+                     const char *modebuf, const char *parabuf)
 {
   char buf[IRCD_BUFSIZE] = "";
   dlink_node *node;
@@ -1166,7 +1166,7 @@ channel_part_one_client(struct Client *client_p, const char *name, const char *r
 void
 channel_do_part(struct Client *client_p, char *channel, const char *reason)
 {
-  char *p = NULL, *name = NULL;
+  char *p = NULL;
   char buf[KICKLEN + 1] = "";
 
   assert(IsClient(client_p));
@@ -1174,7 +1174,7 @@ channel_do_part(struct Client *client_p, char *channel, const char *reason)
   if (!EmptyString(reason))
     strlcpy(buf, reason, sizeof(buf));
 
-  for (name = strtok_r(channel, ",", &p); name;
-       name = strtok_r(NULL,    ",", &p))
+  for (const char *name = strtok_r(channel, ",", &p); name;
+                   name = strtok_r(NULL,    ",", &p))
     channel_part_one_client(client_p, name, buf);
 }

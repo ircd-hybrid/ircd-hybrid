@@ -113,10 +113,8 @@ check_string(char *s)
 int
 add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int type)
 {
-  dlink_list *list = NULL;
-  dlink_node *node = NULL;
-  struct Ban *ban = NULL;
-  size_t len = 0;
+  dlink_list *list;
+  dlink_node *node;
   char name[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
   char host[HOSTLEN + 1] = "";
@@ -153,7 +151,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
    * Re-assemble a new n!u@h and print it back to banid for sending
    * the mode to the channel.
    */
-  len = snprintf(banid, IRCD_BUFSIZE, "%s!%s@%s", name, user, host);
+  size_t len = snprintf(banid, IRCD_BUFSIZE, "%s!%s@%s", name, user, host);
 
   switch (type)
   {
@@ -169,13 +167,12 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
       list = &chptr->invexlist;
       break;
     default:
-      assert(0);
-      return 0;
+      list = NULL;  /* Let it crash */
   }
 
   DLINK_FOREACH(node, list->head)
   {
-    ban = node->data;
+    const struct Ban *ban = node->data;
 
     if (!irccmp(ban->name, name) &&
         !irccmp(ban->user, user) &&
@@ -183,7 +180,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
       return 0;
   }
 
-  ban = mp_pool_get(ban_pool);
+  struct Ban *ban = mp_pool_get(ban_pool);
   ban->when = CurrentTime;
   ban->len = len - 2;  /* -2 for ! + @ */
   ban->type = parse_netmask(host, &ban->addr, &ban->bits);
@@ -214,8 +211,8 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
 static int
 del_id(struct Channel *chptr, char *banid, unsigned int type)
 {
-  dlink_list *list = NULL;
-  dlink_node *node = NULL;
+  dlink_list *list;
+  dlink_node *node;
   char name[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
   char host[HOSTLEN + 1] = "";
@@ -254,8 +251,7 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
       list = &chptr->invexlist;
       break;
     default:
-      assert(0);
-      return 0;
+      list = NULL;  /* Let it crash */
   }
 
   DLINK_FOREACH(node, list->head)
@@ -543,7 +539,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
-    dlink_node *node = NULL;
+    dlink_node *node;
 
     if (*errors & SM_ERR_RPL_B)
       return;
@@ -609,7 +605,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
-    dlink_node *node = NULL;
+    dlink_node *node;
 
     if (*errors & SM_ERR_RPL_E)
       return;
@@ -675,7 +671,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
-    dlink_node *node = NULL;
+    dlink_node *node;
 
     if (*errors & SM_ERR_RPL_I)
       return;

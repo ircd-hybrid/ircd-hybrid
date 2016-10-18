@@ -8,6 +8,8 @@ GnuTLS support as of version 8.2.13
 o) "INFO" now shows GnuTLS/OpenSSL library/header versions
 o) Added 'channel::max_invites' configuration option. See doc/reference.conf
    for more information.
+o) INVITE expirations have been implemented. Expire time can be adjusted with
+   the 'channel::invite_expire_time' configuration directive
 o) /whois notices to operators have been re-added. User mode +y is required
    to see them
 o) The maximum line length for motd files has been increased to 320 bytes

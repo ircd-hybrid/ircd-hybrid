@@ -66,7 +66,7 @@ extern size_t strlcat(char *, const char *, size_t);
 
 extern const char *libio_basename(const char *);
 
-extern char *stripws(char *);
+extern const char *stripws(char *);
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 

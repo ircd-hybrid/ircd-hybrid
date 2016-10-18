@@ -48,7 +48,7 @@ has_wildcards(const char *str)
   return 0;
 }
 
-char *
+const char *
 stripws(char *txt)
 {
   while (*txt == '\t' || *txt == ' ')

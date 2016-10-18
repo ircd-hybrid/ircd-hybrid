@@ -88,8 +88,8 @@ strhash(const char *name)
 
   for (; *p; ++p)
   {
-    hval += (hval << 1) + (hval <<  4) + (hval << 7) +
-            (hval << 8) + (hval << 24);
+    hval += (hval << 1) + (hval << 4) +
+            (hval << 7) + (hval << 8) + (hval << 24);
     hval ^= (ToLower(*p) ^ hashf_xor_key);
   }
 
@@ -521,7 +521,7 @@ void
 free_list_task(struct Client *source_p)
 {
   struct ListTask *const lt = source_p->connection->list_task;
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   dlinkFindDelete(&listing_client_list, source_p);
 
@@ -646,7 +646,7 @@ safe_list_channels(struct Client *source_p, int only_unmasked_channels)
   }
   else
   {
-    dlink_node *node = NULL;
+    dlink_node *node;
 
     DLINK_FOREACH(node, lt->show_mask.head)
       if ((chptr = hash_find_channel(node->data)))

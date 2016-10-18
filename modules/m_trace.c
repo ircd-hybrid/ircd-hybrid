@@ -231,7 +231,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
   {
     const struct ClassItem *class = node->data;
 
-    if (class->ref_count > 0)
+    if (class->ref_count)
       sendto_one_numeric(source_p, &me, RPL_TRACECLASS, class->name, class->ref_count);
   }
 

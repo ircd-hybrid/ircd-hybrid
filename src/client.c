@@ -86,7 +86,9 @@ make_client(struct Client *from)
 {
   struct Client *const client_p = mp_pool_get(client_pool);
 
-  if (!from)
+  if (from)
+    client_p->from = from;
+  else
   {
     client_p->from = client_p;  /* 'from' of local client is self! */
     client_p->connection = mp_pool_get(connection_pool);
@@ -98,8 +100,6 @@ make_client(struct Client *from)
     /* as good a place as any... */
     dlinkAdd(client_p, &client_p->connection->lclient_node, &unknown_list);
   }
-  else
-    client_p->from = from;
 
   client_p->idhnext = client_p;
   client_p->hnext = client_p;
@@ -498,12 +498,8 @@ find_chasing(struct Client *source_p, const char *name)
     return NULL;
 
   target_p = whowas_get_history(name, ConfigGeneral.kill_chase_time_limit);
-
   if (!target_p)
-  {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
-    return NULL;
-  }
 
   return target_p;
 }

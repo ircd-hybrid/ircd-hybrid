@@ -180,7 +180,7 @@ whowas_off_history(struct Client *client_p)
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   timelimit = CurrentTime - timelimit;
 

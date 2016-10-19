@@ -929,6 +929,8 @@ try_search_exact (patricia_tree_t *tree, char *string)
       Deref_Prefix (prefix);
       return node;
     }
+
+    return (NULL);
 }
 
 void

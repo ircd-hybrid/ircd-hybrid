@@ -950,18 +950,15 @@ lookup_then_remove (patricia_tree_t *tree, char *string)
 patricia_node_t *
 try_search_best (patricia_tree_t *tree, char *string)
 {
-    prefix_t *prefix;
-    patricia_node_t *node;
+    prefix_t *prefix = ascii2prefix (0, string);
+    if (prefix)
+    {
+      patricia_node_t *node = patricia_search_best (tree, prefix);
+      Deref_Prefix (prefix);
+      return node;
+    }
 
-    prefix = ascii2prefix (AF_INET, string);
-    printf ("try_search_best: %s/%d\n", prefix_toa (prefix), prefix->bitlen);
-    if ((node = patricia_search_best (tree, prefix)) == NULL)
-        printf ("try_search_best: not found\n");
-    else
-        printf ("try_search_best: %s/%d found\n",
-	        prefix_toa (node->prefix), node->prefix->bitlen);
-    Deref_Prefix (prefix);
-    return (node);
+    return (NULL);
 }
 
 /* } */

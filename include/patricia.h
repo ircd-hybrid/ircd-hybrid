@@ -92,9 +92,6 @@ extern void lookup_then_remove(patricia_tree_t *, char *);
 extern patricia_node_t *try_search_exact(patricia_tree_t *, char *);
 /* { from demo.c */
 
-extern prefix_t *
-ascii2prefix (int family, char *string);
-
 extern patricia_node_t *
 make_and_lookup (patricia_tree_t *tree, char *string);
 

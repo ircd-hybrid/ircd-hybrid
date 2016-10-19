@@ -190,7 +190,7 @@ prefix_toa (prefix_t * prefix)
     return (prefix_toa2 (prefix, (char *) NULL));
 }
 
-prefix_t *
+static prefix_t *
 New_Prefix2 (int family, void *dest, int bitlen, prefix_t *prefix)
 {
     int dynamic_allocated = 0;
@@ -225,7 +225,7 @@ New_Prefix2 (int family, void *dest, int bitlen, prefix_t *prefix)
     return (prefix);
 }
 
-prefix_t *
+static prefix_t *
 New_Prefix (int family, void *dest, int bitlen)
 {
     return (New_Prefix2 (family, dest, bitlen, NULL));
@@ -233,7 +233,7 @@ New_Prefix (int family, void *dest, int bitlen)
 
 /* ascii2prefix
  */
-prefix_t *
+static prefix_t *
 ascii2prefix (int family, char *string)
 {
     unsigned long bitlen, maxbitlen = 0;
@@ -405,7 +405,7 @@ Destroy_Patricia (patricia_tree_t *patricia, void (*func)(void *))
  */
 
 void
-patricia_process (patricia_tree_t *patricia, void (*func)(patricia_node_t *, void *))
+patricia_process (patricia_tree_t *patricia, void (*func)(prefix_t *, void *))
 {
     patricia_node_t *node;
     assert (func);

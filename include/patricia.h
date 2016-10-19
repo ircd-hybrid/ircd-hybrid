@@ -36,7 +36,6 @@
 #ifndef _PATRICIA_H
 #define _PATRICIA_H
 
-typedef void (*void_fn_t)();
 /* { from defs.h */
 #define prefix_touchar(prefix) ((unsigned char *)&(prefix)->add.sin)
 #define MAXLINE 1024
@@ -93,10 +92,10 @@ extern patricia_node_t * patricia_search_best2 (patricia_tree_t *patricia, prefi
 extern patricia_node_t *patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix);
 extern void patricia_remove (patricia_tree_t *patricia, patricia_node_t *node);
 extern patricia_tree_t *New_Patricia (int maxbits);
-extern void Clear_Patricia (patricia_tree_t *patricia, void_fn_t func);
-extern void Destroy_Patricia (patricia_tree_t *patricia, void_fn_t func);
+extern void Clear_Patricia (patricia_tree_t *patricia, void (*func)(void *));
+extern void Destroy_Patricia (patricia_tree_t *patricia, void (*func)(void *));
 
-extern void patricia_process (patricia_tree_t *patricia, void_fn_t func);
+extern void patricia_process (patricia_tree_t *patricia, void (*func)(prefix_t *, void *));
 
 extern const char *prefix_toa (prefix_t * prefix);
 extern void lookup_then_remove(patricia_tree_t *, char *);

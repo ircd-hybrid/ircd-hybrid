@@ -54,24 +54,24 @@
 /* prefix_tochar
  * convert prefix information to bytes
  */
-static u_char *
+static unsigned char *
 prefix_tochar (prefix_t * prefix)
 {
     if (prefix == NULL)
 	return (NULL);
 
-    return ((u_char *) & prefix->add.sin);
+    return ((unsigned char *) & prefix->add.sin);
 }
 
 static int
-comp_with_mask (void *addr, void *dest, u_int mask)
+comp_with_mask (void *addr, void *dest, unsigned int mask)
 {
 
     if ( /* mask/8 == 0 || */ memcmp (addr, dest, mask / 8) == 0) {
 	int n = mask / 8;
 	int m = ((-1) << (8 - (mask % 8)));
 
-	if (mask % 8 == 0 || (((u_char *)addr)[n] & m) == (((u_char *)dest)[n] & m))
+	if (mask % 8 == 0 || (((unsigned char *)addr)[n] & m) == (((unsigned char *)dest)[n] & m))
 	    return (1);
     }
     return (0);
@@ -83,7 +83,7 @@ my_inet_pton (int af, const char *src, void *dst)
 {
     if (af == AF_INET) {
         int i, c, val;
-        u_char xp[sizeof(struct in_addr)] = {0, 0, 0, 0};
+        unsigned char xp[sizeof(struct in_addr)] = {0, 0, 0, 0};
 
         for (i = 0; ; i++) {
 	    c = *src++;
@@ -130,7 +130,7 @@ prefix_toa2x (prefix_t *prefix, char *buff, int with_len)
 
         struct buffer {
             char buffs[PATRICIA_MAX_THREADS][48+5];
-            u_int i;
+            unsigned int i;
         } *buffp;
 
 #    if 0
@@ -149,7 +149,7 @@ prefix_toa2x (prefix_t *prefix, char *buff, int with_len)
 	buff = buffp->buffs[buffp->i++%PATRICIA_MAX_THREADS];
     }
     if (prefix->family == AF_INET) {
-	u_char *a;
+	unsigned char *a;
 	assert (prefix->bitlen <= sizeof(struct in_addr) * 8);
 	a = prefix_touchar (prefix);
 	if (with_len) {
@@ -236,7 +236,7 @@ New_Prefix (int family, void *dest, int bitlen)
 prefix_t *
 ascii2prefix (int family, char *string)
 {
-    u_long bitlen, maxbitlen = 0;
+    unsigned long bitlen, maxbitlen = 0;
     char *cp;
     struct in_addr sin;
     struct in6_addr sin6;
@@ -419,8 +419,8 @@ patricia_node_t *
 patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix)
 {
     patricia_node_t *node;
-    u_char *addr;
-    u_int bitlen;
+    unsigned char *addr;
+    unsigned int bitlen;
 
     assert (patricia);
     assert (prefix);
@@ -491,8 +491,8 @@ patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix, int inclusiv
 {
     patricia_node_t *node;
     patricia_node_t *stack[PATRICIA_MAXBITS + 1];
-    u_char *addr;
-    u_int bitlen;
+    unsigned char *addr;
+    unsigned int bitlen;
     int cnt = 0;
 
     assert (patricia);
@@ -590,8 +590,8 @@ patricia_node_t *
 patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix)
 {
     patricia_node_t *node, *new_node, *parent, *glue;
-    u_char *addr, *test_addr;
-    u_int bitlen, check_bit, differ_bit;
+    unsigned char *addr, *test_addr;
+    unsigned int bitlen, check_bit, differ_bit;
     int j, r;
 
     assert (patricia);

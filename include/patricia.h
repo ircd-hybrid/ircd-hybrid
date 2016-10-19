@@ -47,13 +47,6 @@
 
 /* { from mrt.h */
 
-typedef struct _prefix4_t {
-    unsigned short family;		/* AF_INET | AF_INET6 */
-    unsigned short bitlen;		/* same as mask? */
-    int ref_count;		/* reference count */
-    struct in_addr sin;
-} prefix4_t;
-
 typedef struct _prefix_t {
     unsigned short family;		/* AF_INET | AF_INET6 */
     unsigned short bitlen;		/* same as mask? */

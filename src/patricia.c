@@ -206,7 +206,7 @@ New_Prefix2 (int family, void *dest, int bitlen, prefix_t *prefix)
     }
     else if (family == AF_INET) {
 	if (prefix == NULL) {
-            prefix = xcalloc(sizeof (prefix4_t));
+            prefix = xcalloc(sizeof (prefix_t));
 	    dynamic_allocated++;
 	}
 	memcpy (&prefix->add.sin, dest, sizeof(struct in_addr));

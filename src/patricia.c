@@ -922,20 +922,13 @@ make_and_lookup (patricia_tree_t *tree, char *string)
 patricia_node_t *
 try_search_exact (patricia_tree_t *tree, char *string)
 {
-    prefix_t *prefix;
-    patricia_node_t *node;
-
-    prefix = ascii2prefix (AF_INET, string);
-    printf ("try_search_exact: %s/%d\n", prefix_toa (prefix), prefix->bitlen);
-    if ((node = patricia_search_exact (tree, prefix)) == NULL) {
-        printf ("try_search_exact: not found\n");
+    prefix_t *prefix = ascii2prefix (0, string);
+    if (prefix)
+    {
+      patricia_node_t *node = patricia_search_exact (tree, prefix);
+      Deref_Prefix (prefix);
+      return node;
     }
-    else {
-        printf ("try_search_exact: %s/%d found\n",
-	        prefix_toa (node->prefix), node->prefix->bitlen);
-    }
-    Deref_Prefix (prefix);
-    return (node);
 }
 
 void

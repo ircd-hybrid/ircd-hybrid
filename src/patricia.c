@@ -909,14 +909,15 @@ patricia_remove (patricia_tree_t *patricia, patricia_node_t *node)
 patricia_node_t *
 make_and_lookup (patricia_tree_t *tree, char *string)
 {
-    prefix_t *prefix;
-    patricia_node_t *node;
+    prefix_t *prefix = ascii2prefix (0, string);
+    if (prefix)
+    {
+      patricia_node_t *node = patricia_lookup (tree, prefix);
+      Deref_Prefix (prefix);
+      return node;
+    }
 
-    prefix = ascii2prefix (AF_INET, string);
-    printf ("make_and_lookup: %s/%d\n", prefix_toa (prefix), prefix->bitlen);
-    node = patricia_lookup (tree, prefix);
-    Deref_Prefix (prefix);
-    return (node);
+    return (NULL);
 }
 
 patricia_node_t *

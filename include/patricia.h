@@ -42,9 +42,6 @@
 #define BIT_TEST(f, b)  ((f) & (b))
 /* } */
 
-#include <sys/types.h> /* for u_* definitions (on FreeBSD 5) */
-
-#include <errno.h> /* for EAFNOSUPPORT */
 #include <netinet/in.h> /* for struct in_addr */
 #include <sys/socket.h> /* for AF_INET */
 

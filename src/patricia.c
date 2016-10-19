@@ -234,7 +234,7 @@ New_Prefix (int family, void *dest, int bitlen)
 /* ascii2prefix
  */
 static prefix_t *
-ascii2prefix (int family, char *string)
+ascii2prefix (int family, const char *string)
 {
     unsigned long bitlen, maxbitlen = 0;
     char *cp;
@@ -907,7 +907,7 @@ patricia_remove (patricia_tree_t *patricia, patricia_node_t *node)
 /* { from demo.c */
 
 patricia_node_t *
-make_and_lookup (patricia_tree_t *tree, char *string)
+make_and_lookup (patricia_tree_t *tree, const char *string)
 {
     prefix_t *prefix = ascii2prefix (0, string);
     if (prefix)
@@ -921,7 +921,7 @@ make_and_lookup (patricia_tree_t *tree, char *string)
 }
 
 patricia_node_t *
-try_search_exact (patricia_tree_t *tree, char *string)
+try_search_exact (patricia_tree_t *tree, const char *string)
 {
     prefix_t *prefix = ascii2prefix (0, string);
     if (prefix)
@@ -935,7 +935,7 @@ try_search_exact (patricia_tree_t *tree, char *string)
 }
 
 void
-lookup_then_remove (patricia_tree_t *tree, char *string)
+lookup_then_remove (patricia_tree_t *tree, const char *string)
 {
     patricia_node_t *node;
 
@@ -944,7 +944,7 @@ lookup_then_remove (patricia_tree_t *tree, char *string)
 }
 
 patricia_node_t *
-try_search_best (patricia_tree_t *tree, char *string)
+try_search_best (patricia_tree_t *tree, const char *string)
 {
     prefix_t *prefix = ascii2prefix (0, string);
     if (prefix)

@@ -87,7 +87,7 @@ extern void Destroy_Patricia (patricia_tree_t *patricia, void (*func)(void *));
 
 extern void patricia_process (patricia_tree_t *patricia, void (*func)(prefix_t *, void *));
 
-extern const char *prefix_toa (prefix_t * prefix);
+extern const char *prefix_toa (prefix_t * prefix, int);
 extern void lookup_then_remove(patricia_tree_t *, const char *);
 extern patricia_node_t *try_search_exact(patricia_tree_t *, const char *);
 /* { from demo.c */

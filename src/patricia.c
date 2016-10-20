@@ -118,76 +118,39 @@ my_inet_pton (int af, const char *src, void *dst)
 
 /*
  * convert prefix information to ascii string with length
- * thread safe and (almost) re-entrant implementation
  */
-static const char *
-prefix_toa2x (prefix_t *prefix, char *buff, int with_len)
+const char *
+prefix_toa(prefix_t *prefix, int with_len)
 {
+  static char buff[INET6_ADDRSTRLEN + 5];
     if (prefix == NULL)
 	return ("(Null)");
     assert (prefix->ref_count >= 0);
-    if (buff == NULL) {
 
-        struct buffer {
-            char buffs[PATRICIA_MAX_THREADS][48+5];
-            unsigned int i;
-        } *buffp;
-
-#    if 0
-	THREAD_SPECIFIC_DATA (struct buffer, buffp, 1);
-#    else
-        { /* for scope only */
-	   static struct buffer local_buff;
-           buffp = &local_buff;
-	}
-#    endif
-	if (buffp == NULL) {
-	    /* XXX should we report an error? */
-	    return (NULL);
-	}
-
-	buff = buffp->buffs[buffp->i++%PATRICIA_MAX_THREADS];
-    }
     if (prefix->family == AF_INET) {
 	unsigned char *a;
 	assert (prefix->bitlen <= sizeof(struct in_addr) * 8);
 	a = prefix_touchar (prefix);
 	if (with_len) {
-	    sprintf (buff, "%d.%d.%d.%d/%d", a[0], a[1], a[2], a[3],
+	    snprintf (buff, sizeof(buff), "%d.%d.%d.%d/%d", a[0], a[1], a[2], a[3],
 		     prefix->bitlen);
 	}
 	else {
-	    sprintf (buff, "%d.%d.%d.%d", a[0], a[1], a[2], a[3]);
+	    snprintf (buff, sizeof(buff), "%d.%d.%d.%d", a[0], a[1], a[2], a[3]);
 	}
 	return (buff);
     }
     else if (prefix->family == AF_INET6) {
-	const char *r = inet_ntop(AF_INET6, &prefix->add.sin6, buff, 48 /* a guess value */ );
+	const char *r = inet_ntop(AF_INET6, &prefix->add.sin6, buff, sizeof(buff) - 5);
 	if (r && with_len) {
+            size_t len = strlen(buff);
 	    assert (prefix->bitlen <= sizeof(struct in6_addr) * 8);
-	    sprintf (buff + strlen (buff), "/%d", prefix->bitlen);
+	    snprintf(buff + len, sizeof(buff) - len, "/%d", prefix->bitlen);
 	}
 	return (buff);
     }
     else
 	return (NULL);
-}
-
-/* prefix_toa2
- * convert prefix information to ascii string
- */
-const char *
-prefix_toa2 (prefix_t *prefix, char *buff)
-{
-    return (prefix_toa2x (prefix, buff, 0));
-}
-
-/* prefix_toa
- */
-const char *
-prefix_toa (prefix_t * prefix)
-{
-    return (prefix_toa2 (prefix, (char *) NULL));
 }
 
 static prefix_t *

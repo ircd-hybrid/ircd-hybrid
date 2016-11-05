@@ -278,7 +278,7 @@ Deref_Prefix (prefix_t * prefix)
     prefix->ref_count--;
     assert (prefix->ref_count >= 0);
     if (prefix->ref_count <= 0) {
-	free (prefix);
+	xfree (prefix);
 	return;
     }
 }
@@ -846,7 +846,7 @@ patricia_remove (patricia_tree_t *patricia, patricia_node_t *node)
     child->parent = parent;
 
     Deref_Prefix (node->prefix);
-    free (node);
+    xfree (node);
     patricia->num_active_node--;
 
     if (parent == NULL) {

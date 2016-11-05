@@ -287,8 +287,6 @@ Deref_Prefix (prefix_t * prefix)
 
 /* #define PATRICIA_DEBUG 1 */
 
-static int num_active_patricia = 0;
-
 /* these routines support continuous mask only */
 
 patricia_tree_t *
@@ -300,7 +298,7 @@ New_Patricia (int maxbits)
     patricia->head = NULL;
     patricia->num_active_node = 0;
     assert (maxbits <= PATRICIA_MAXBITS); /* XXX */
-    num_active_patricia++;
+
     return (patricia);
 }
 
@@ -359,7 +357,6 @@ Destroy_Patricia (patricia_tree_t *patricia, void (*func)(void *))
 {
     Clear_Patricia (patricia, func);
     xfree (patricia);
-    num_active_patricia--;
 }
 
 

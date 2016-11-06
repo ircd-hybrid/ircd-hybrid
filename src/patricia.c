@@ -77,43 +77,6 @@ comp_with_mask(void *addr, void *dest, unsigned int mask)
   return 0;
 }
 
-/* this allows imcomplete prefix */
-static int
-my_inet_pton (int af, const char *src, void *dst)
-{
-    if (af == AF_INET) {
-        int i, c, val;
-        unsigned char xp[sizeof(struct in_addr)] = {0, 0, 0, 0};
-
-        for (i = 0; ; i++) {
-	    c = *src++;
-	    if (!isdigit (c))
-		return (-1);
-	    val = 0;
-	    do {
-		val = val * 10 + c - '0';
-		if (val > 255)
-		    return (0);
-		c = *src++;
-	    } while (c && isdigit (c));
-            xp[i] = val;
-	    if (c == '\0')
-		break;
-            if (c != '.')
-                return (0);
-	    if (i >= 3)
-		return (0);
-        }
-	memcpy (dst, xp, sizeof(struct in_addr));
-        return (1);
-    } else if (af == AF_INET6) {
-        return (inet_pton (af, src, dst));
-    } else {
-	errno = EAFNOSUPPORT;
-	return -1;
-    }
-}
-
 /*
  * convert prefix information to ascii string with length
  */
@@ -193,15 +156,16 @@ ascii2prefix(int family, const char *string)
 {
   unsigned long bitlen, maxbitlen = 0;
   char *cp;
-  struct in_addr sin;
-  struct in6_addr sin6;
-  int result;
   char save[MAXLINE];
+  union
+  {
+    struct in_addr sin;
+    struct in6_addr sin6;
+  } sin;
 
-  if (string == NULL)
-    return NULL;
+  assert(string);
 
-  /* easy way to handle both families */
+  /* Easy way to handle both families */
   if (family == 0)
   {
     family = AF_INET;
@@ -211,15 +175,11 @@ ascii2prefix(int family, const char *string)
   }
 
   if (family == AF_INET)
-  {
-    maxbitlen = sizeof(struct in_addr) * 8;
-  }
+    maxbitlen = sizeof(struct in_addr)  * 8;
   else if (family == AF_INET6)
-  {
     maxbitlen = sizeof(struct in6_addr) * 8;
-  }
 
-  if ((cp = strchr(string, '/')) != NULL)
+  if ((cp = strchr(string, '/')))
   {
     bitlen = atol(cp + 1);
 
@@ -235,24 +195,11 @@ ascii2prefix(int family, const char *string)
       bitlen = maxbitlen;
   }
   else
-  {
     bitlen = maxbitlen;
-  }
 
-  if (family == AF_INET)
-  {
-    if ((result = my_inet_pton(AF_INET, string, &sin)) <= 0)
-      return NULL;
-    return New_Prefix(AF_INET, &sin, bitlen);
-  }
-  else if (family == AF_INET6)
-  {
-    if ((result = inet_pton(AF_INET6, string, &sin6)) <= 0)
-      return NULL;
-    return New_Prefix(AF_INET6, &sin6, bitlen);
-  }
-  else
+  if (inet_pton(family, string, &sin) <= 0)
     return NULL;
+  return New_Prefix(family, &sin, bitlen);
 }
 
 static prefix_t *

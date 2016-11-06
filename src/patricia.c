@@ -101,43 +101,29 @@ static prefix_t *
 New_Prefix2(int family, void *dest, int bitlen, prefix_t *prefix)
 {
   int dynamic_allocated = 0;
-  int default_bitlen = sizeof(struct in_addr) * 8;
+  int addr_size = 0;
 
-  if (family == AF_INET6)
+  switch (family)
   {
-    default_bitlen = sizeof(struct in6_addr) * 8;
-
-    if (prefix == NULL)
-    {
-      prefix = xcalloc(sizeof(prefix_t));
-      dynamic_allocated++;
-    }
-
-    memcpy(&prefix->add.sin6, dest, sizeof(struct in6_addr));
-  }
-  else if (family == AF_INET)
-  {
-    if (prefix == NULL)
-    {
-      prefix = xcalloc(sizeof(prefix_t));
-      dynamic_allocated++;
-    }
-
-    memcpy(&prefix->add.sin, dest, sizeof(struct in_addr));
-  }
-  else
-  {
-    return NULL;
+    case AF_INET:
+      addr_size = sizeof(struct in_addr);
+      break;
+    case AF_INET6:
+      addr_size = sizeof(struct in6_addr);
+      break;
+    default: return NULL;
   }
 
-  prefix->bitlen = (bitlen >= 0) ? bitlen : default_bitlen;
+  if (!prefix)
+  {
+    prefix = xcalloc(sizeof(prefix_t));
+    dynamic_allocated = 1;
+  }
+
+  memcpy(&prefix->add.sin6, dest, addr_size);
+  prefix->bitlen = (bitlen >= 0) ? bitlen : addr_size * 8;
   prefix->family = family;
-  prefix->ref_count = 0;
-
-  if (dynamic_allocated)
-  {
-    prefix->ref_count++;
-  }
+  prefix->ref_count = dynamic_allocated == 1;
 
 /* fprintf(stderr, "[C %s, %d]\n", prefix_toa(prefix), prefix->ref_count); */
   return prefix;

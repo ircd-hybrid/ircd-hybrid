@@ -55,7 +55,7 @@
  * convert prefix information to bytes
  */
 static unsigned char *
-prefix_tochar(prefix_t * prefix)
+prefix_tochar(prefix_t *prefix)
 {
   if (prefix == NULL)
     return NULL;
@@ -130,7 +130,7 @@ New_Prefix2(int family, void *dest, int bitlen, prefix_t *prefix)
 }
 
 static prefix_t *
-New_Prefix (int family, void *dest, int bitlen)
+New_Prefix(int family, void *dest, int bitlen)
 {
   return New_Prefix2(family, dest, bitlen, NULL);
 }

@@ -118,48 +118,20 @@ my_inet_pton (int af, const char *src, void *dst)
  * convert prefix information to ascii string with length
  */
 const char *
-prefix_toa(prefix_t *prefix, int with_len)
+prefix_toa(const prefix_t *prefix, int with_len)
 {
-  static char buff[INET6_ADDRSTRLEN + 5];
+  static char buf[INET6_ADDRSTRLEN + sizeof("/128")];
 
-  if (prefix == NULL)
-    return "(Null)";
-
+  assert(prefix);
   assert(prefix->ref_count >= 0);
+  assert((prefix->family == AF_INET  && prefix->bitlen <=  32) ||
+         (prefix->family == AF_INET6 && prefix->bitlen <= 128));
 
-  if (prefix->family == AF_INET)
-  {
-    unsigned char *a;
-    assert(prefix->bitlen <= sizeof(struct in_addr) * 8);
+  inet_ntop(prefix->family, &prefix->add.sin6, buf, INET6_ADDRSTRLEN);
 
-    a = prefix_touchar(prefix);
-    if (with_len)
-    {
-      snprintf(buff, sizeof(buff), "%d.%d.%d.%d/%d", a[0], a[1], a[2], a[3], prefix->bitlen);
-    }
-    else
-    {
-      snprintf(buff, sizeof(buff), "%d.%d.%d.%d", a[0], a[1], a[2], a[3]);
-    }
-
-    return buff;
-  }
-  else if (prefix->family == AF_INET6)
-  {
-    const char *r = inet_ntop(AF_INET6, &prefix->add.sin6, buff, sizeof(buff) - 5);
-
-    if (r && with_len)
-    {
-      size_t len = strlen(buff);
-      assert(prefix->bitlen <= sizeof(struct in6_addr) * 8);
-
-      snprintf(buff + len, sizeof(buff) - len, "/%d", prefix->bitlen);
-    }
-
-    return buff;
-  }
-  else
-    return NULL;
+  if (with_len)
+    sprintf(buf + strlen(buf), "/%d", prefix->bitlen);
+  return buf;
 }
 
 static prefix_t *

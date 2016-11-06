@@ -83,7 +83,7 @@ extern patricia_node_t *patricia_search_best(patricia_tree_t *, prefix_t *);
 extern patricia_node_t *patricia_search_best2(patricia_tree_t *, prefix_t *, int);
 extern patricia_node_t *patricia_lookup(patricia_tree_t *, prefix_t *);
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
-extern patricia_tree_t *New_Patricia(int);
+extern patricia_tree_t *New_Patricia(unsigned int);
 extern void Clear_Patricia(patricia_tree_t *, void (*)(void *));
 extern void Destroy_Patricia(patricia_tree_t *, void (*)(void *));
 extern void patricia_process(patricia_tree_t *, void (*)(prefix_t *, void *));

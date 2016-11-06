@@ -225,19 +225,14 @@ Deref_Prefix(prefix_t *prefix)
 /* these routines support continuous mask only */
 
 patricia_tree_t *
-New_Patricia(int maxbits)
+New_Patricia(unsigned int maxbits)
 {
   patricia_tree_t *patricia = xcalloc(sizeof *patricia);
-
   patricia->maxbits = maxbits;
-  patricia->head = NULL;
-  patricia->num_active_node = 0;
 
   assert(maxbits <= PATRICIA_MAXBITS);  /* XXX */
-
   return patricia;
 }
-
 
 /*
  * if func is supplied, it will be called as func(node->data)

@@ -50,22 +50,39 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = old nickname
- *      - parv[2] = new nickname
- *      - parv[3] = timestamp
+ *      - parv[2] = old timestampt
+ *      - parv[3] = new nickname
+ *      - parv[4] = new timestamp
  */
 static int
 ms_svsnick(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL, *exists_p = NULL;
+  const char *new_nick = parc == 5 ? parv[3] : parv[2];  /* TBR: compatibility mode */
+  uintmax_t ts = 0, new_ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
 
-  if (!valid_nickname(parv[2], 1))
+  if (!valid_nickname(new_nick, 1))
     return 0;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
+
+  if (parc == 5)  /* TBR: compatibility mode */
+  {
+    ts = strtoumax(parv[2], NULL, 10);
+    if (ts && (ts != target_p->tsinfo))
+      return 0;
+  }
+  else  /* parc == 4 */
+    ts = strtoumax(parv[3], NULL, 10);
+
+  if (parc == 4)  /* TBR: compatibility mode */
+    new_ts = ts;
+  else
+    new_ts = strtoumax(parv[4], NULL, 10);
 
   if (!MyConnect(target_p))
   {
@@ -80,15 +97,15 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
     }
 
     sendto_one(target_p, ":%s SVSNICK %s %s %s", source_p->id,
-               target_p->id, parv[2], parv[3]);
+               target_p->id, new_nick, parv[3]);
     return 0;
   }
 
-  if ((exists_p = hash_find_client(parv[2])))
+  if ((exists_p = hash_find_client(new_nick)))
   {
     if (target_p == exists_p)
     {
-      if (!strcmp(target_p->name, parv[2]))
+      if (!strcmp(target_p->name, new_nick))
         return 0;
     }
     else if (IsUnknown(exists_p))
@@ -100,7 +117,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  target_p->tsinfo = strtoumax(parv[3], NULL, 10);
+  target_p->tsinfo = new_ts;
   clear_ban_cache_list(&target_p->channel);
   watch_check_hash(target_p, RPL_LOGOFF);
 
@@ -115,14 +132,14 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
 
   sendto_common_channels_local(target_p, 1, 0, 0, ":%s!%s@%s NICK :%s",
                                target_p->name, target_p->username,
-                               target_p->host, parv[2]);
+                               target_p->host, new_nick);
 
   whowas_add_history(target_p, 1);
 
   sendto_server(NULL, 0, 0, ":%s NICK %s :%ju",
-                target_p->id, parv[2], target_p->tsinfo);
+                target_p->id, new_nick, target_p->tsinfo);
   hash_del_client(target_p);
-  strlcpy(target_p->name, parv[2], sizeof(target_p->name));
+  strlcpy(target_p->name, new_nick, sizeof(target_p->name));
   hash_add_client(target_p);
 
   watch_check_hash(target_p, RPL_LOGON);

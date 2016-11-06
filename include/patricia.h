@@ -91,6 +91,8 @@ extern const char *patricia_prefix_toa(const prefix_t *, int);
 extern void patricia_lookup_then_remove(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_try_search_exact(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_try_search_best(patricia_tree_t *, const char *);
+extern patricia_node_t *patricia_try_search_exact_addr(patricia_tree_t *, struct sockaddr *, int);
+extern patricia_node_t *patricia_try_search_best_addr(patricia_tree_t *, struct sockaddr *, int);
 
 /* { from demo.c */
 extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);

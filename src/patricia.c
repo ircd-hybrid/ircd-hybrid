@@ -916,4 +916,68 @@ patricia_try_search_best(patricia_tree_t *tree, const char *string)
 
   return NULL;
 }
+
+patricia_node_t *
+patricia_try_search_exact_addr(patricia_tree_t *tree, struct sockaddr *addr, int bitlen)
+{
+  int family;
+  void *dest;
+
+  if (addr->sa_family == AF_INET6)
+  {
+    if (bitlen == 0 || bitlen > 128)
+      bitlen = 128;
+    family = AF_INET6;
+    dest = &((struct sockaddr_in6 *)ip)->sin6_addr;
+  }
+  else
+  {
+    if (bitlen == 0 || bitlen > 32)
+      bitlen = 32;
+    family = AF_INET;
+    dest = &((struct sockaddr_in *)ip)->sin_addr;
+  }
+
+  prefix_t *prefix = New_Prefix(family, dest, bitlen);
+  if (prefix)
+  {
+    patricia_node_t *node = patricia_search_exact(tree, prefix);
+    Deref_Prefix(prefix);
+    return node;
+  }
+
+  return NULL;
+}
+
+patricia_node_t *
+patricia_try_search_best_addr(patricia_tree_t *tree, struct sockaddr *addr, int bitlen)
+{
+  int family;
+  void *dest;
+
+  if (addr->sa_family == AF_INET6)
+  {
+    if (bitlen == 0 || bitlen > 128)
+      bitlen = 128;
+    family = AF_INET6;
+    dest = &((struct sockaddr_in6 *)ip)->sin6_addr;
+  }
+  else
+  {
+    if (bitlen == 0 || bitlen > 32)
+      bitlen = 32;
+    family = AF_INET;
+    dest = &((struct sockaddr_in *)ip)->sin_addr;
+  }
+
+  prefix_t *prefix = New_Prefix(family, dest, bitlen);
+  if (prefix)
+  {
+    patricia_node_t *node = patricia_search_best(tree, prefix);
+    Deref_Prefix(prefix);
+    return node;
+  }
+
+  return NULL;
+}
 /* } */

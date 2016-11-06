@@ -50,7 +50,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = old nickname
- *      - parv[2] = old timestampt
+ *      - parv[2] = old timestamp
  *      - parv[3] = new nickname
  *      - parv[4] = new timestamp
  */

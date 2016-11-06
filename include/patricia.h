@@ -83,17 +83,17 @@ extern patricia_node_t *patricia_search_best(patricia_tree_t *, prefix_t *);
 extern patricia_node_t *patricia_search_best2(patricia_tree_t *, prefix_t *, int);
 extern patricia_node_t *patricia_lookup(patricia_tree_t *, prefix_t *);
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
-extern patricia_tree_t *New_Patricia(unsigned int);
-extern void Clear_Patricia(patricia_tree_t *, void (*)(void *));
-extern void Destroy_Patricia(patricia_tree_t *, void (*)(void *));
+extern patricia_tree_t *patricia_new(unsigned int);
+extern void patricia_clear(patricia_tree_t *, void (*)(void *));
+extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
 extern void patricia_process(patricia_tree_t *, void (*)(prefix_t *, void *));
-extern const char *prefix_toa(const prefix_t *, int);
-extern void lookup_then_remove(patricia_tree_t *, const char *);
-extern patricia_node_t *try_search_exact(patricia_tree_t *, const char *);
-extern patricia_node_t *try_search_best(patricia_tree_t *, const char *);
+extern const char *patricia_prefix_toa(const prefix_t *, int);
+extern void patricia_lookup_then_remove(patricia_tree_t *, const char *);
+extern patricia_node_t *patricia_try_search_exact(patricia_tree_t *, const char *);
+extern patricia_node_t *patricia_try_search_best(patricia_tree_t *, const char *);
 
 /* { from demo.c */
-extern patricia_node_t *make_and_lookup(patricia_tree_t *, const char *);
+extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);
 /* } */
 
 #define PATRICIA_MAXBITS   (sizeof(struct in6_addr) * 8)

@@ -34,9 +34,6 @@
  */
 
 #include <assert.h> /* assert */
-#include <ctype.h> /* isdigit */
-#include <errno.h> /* errno */
-#include <math.h> /* sin */
 #include <stddef.h> /* NULL */
 #include <stdio.h> /* sprintf, fprintf, stderr */
 #include <stdlib.h> /* free, atol, calloc */
@@ -216,7 +213,6 @@ Deref_Prefix(prefix_t *prefix)
   if (--prefix->ref_count <= 0)
     xfree(prefix);
 }
-
 /* } */
 
 /* #define PATRICIA_DEBUG 1 */
@@ -265,7 +261,7 @@ patricia_clear(patricia_tree_t *patricia, void (*func)(void *))
         assert(Xrn->data == NULL);
       }
 
-      xfree (Xrn);
+      xfree(Xrn);
       patricia->num_active_node--;
 
       if (l)
@@ -580,10 +576,8 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
 
     /* I know the better way, but for now */
     for (j = 0; j < 8; j++)
-    {
-      if (BIT_TEST (r, (0x80 >> j)))
+      if (BIT_TEST(r, (0x80 >> j)))
         break;
-    }
 
     /* Must be found */
     assert(j < 8);
@@ -928,14 +922,14 @@ patricia_try_search_exact_addr(patricia_tree_t *tree, struct sockaddr *addr, int
     if (bitlen == 0 || bitlen > 128)
       bitlen = 128;
     family = AF_INET6;
-    dest = &((struct sockaddr_in6 *)ip)->sin6_addr;
+    dest = &((struct sockaddr_in6 *)addr)->sin6_addr;
   }
   else
   {
     if (bitlen == 0 || bitlen > 32)
       bitlen = 32;
     family = AF_INET;
-    dest = &((struct sockaddr_in *)ip)->sin_addr;
+    dest = &((struct sockaddr_in *)addr)->sin_addr;
   }
 
   prefix_t *prefix = New_Prefix(family, dest, bitlen);
@@ -960,14 +954,14 @@ patricia_try_search_best_addr(patricia_tree_t *tree, struct sockaddr *addr, int 
     if (bitlen == 0 || bitlen > 128)
       bitlen = 128;
     family = AF_INET6;
-    dest = &((struct sockaddr_in6 *)ip)->sin6_addr;
+    dest = &((struct sockaddr_in6 *)addr)->sin6_addr;
   }
   else
   {
     if (bitlen == 0 || bitlen > 32)
       bitlen = 32;
     family = AF_INET;
-    dest = &((struct sockaddr_in *)ip)->sin_addr;
+    dest = &((struct sockaddr_in *)addr)->sin_addr;
   }
 
   prefix_t *prefix = New_Prefix(family, dest, bitlen);

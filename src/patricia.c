@@ -306,18 +306,10 @@ Deref_Prefix(prefix_t *prefix)
   if (prefix == NULL)
     return;
 
-  /* for secure programming, raise an assert. no static prefix can call this */
+  /* For secure programming, raise an assert. No static prefix can call this */
   assert(prefix->ref_count > 0);
-
-  prefix->ref_count--;
-
-  assert(prefix->ref_count >= 0);
-
-  if (prefix->ref_count <= 0)
-  {
+  if (--prefix->ref_count <= 0)
     xfree(prefix);
-    return;
-  }
 }
 
 /* } */

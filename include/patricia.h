@@ -42,106 +42,104 @@
 #define BIT_TEST(f, b)  ((f) & (b))
 /* } */
 
-#include <netinet/in.h> /* for struct in_addr */
-#include <sys/socket.h> /* for AF_INET */
+#include <netinet/in.h>  /* for struct in_addr */
+#include <sys/socket.h>  /* for AF_INET */
 
 /* { from mrt.h */
+typedef struct _prefix_t
+{
+  unsigned short family;  /* AF_INET | AF_INET6 */
+  unsigned short bitlen;  /* same as mask? */
+  int ref_count;  /* reference count */
 
-typedef struct _prefix_t {
-    unsigned short family;		/* AF_INET | AF_INET6 */
-    unsigned short bitlen;		/* same as mask? */
-    int ref_count;		/* reference count */
-    union {
-		struct in_addr sin;
-		struct in6_addr sin6;
-    } add;
+  union
+  {
+    struct in_addr sin;
+    struct in6_addr sin6;
+  } add;
 } prefix_t;
-
 /* } */
 
-typedef struct _patricia_node_t {
-   unsigned int bit;			/* flag if this node used */
-   prefix_t *prefix;		/* who we are in patricia tree */
-   struct _patricia_node_t *l, *r;	/* left and right children */
-   struct _patricia_node_t *parent;/* may be used */
-   void *data;			/* pointer to data */
-   void	*user1;			/* pointer to usr data (ex. route flap info) */
+typedef struct _patricia_node_t
+{
+  unsigned int bit;  /* flag if this node used */
+  prefix_t *prefix;  /* who we are in patricia tree */
+  struct _patricia_node_t *l, *r;  /* left and right children */
+  struct _patricia_node_t *parent;  /* may be used */
+  void *data;  /* pointer to data */
+  void *user1;  /* pointer to usr data (ex. route flap info) */
 } patricia_node_t;
 
-typedef struct _patricia_tree_t {
-   patricia_node_t 	*head;
-   unsigned int		maxbits;	/* for IP, 32 bit addresses */
-   int num_active_node;		/* for debug purpose */
+typedef struct _patricia_tree_t
+{
+  patricia_node_t *head;
+  unsigned int maxbits;  /* for IP, 32 bit addresses */
+  int num_active_node;  /* for debug purpose */
 } patricia_tree_t;
 
 
-extern patricia_node_t *patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix);
-extern patricia_node_t *patricia_search_best (patricia_tree_t *patricia, prefix_t *prefix);
-extern patricia_node_t * patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix,
-				   int inclusive);
-extern patricia_node_t *patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix);
-extern void patricia_remove (patricia_tree_t *patricia, patricia_node_t *node);
-extern patricia_tree_t *New_Patricia (int maxbits);
-extern void Clear_Patricia (patricia_tree_t *patricia, void (*func)(void *));
-extern void Destroy_Patricia (patricia_tree_t *patricia, void (*func)(void *));
-
-extern void patricia_process (patricia_tree_t *patricia, void (*func)(prefix_t *, void *));
-
-extern const char *prefix_toa (prefix_t * prefix, int);
+extern patricia_node_t *patricia_search_exact(patricia_tree_t *, prefix_t *);
+extern patricia_node_t *patricia_search_best(patricia_tree_t *, prefix_t *);
+extern patricia_node_t *patricia_search_best2(patricia_tree_t *, prefix_t *, int);
+extern patricia_node_t *patricia_lookup(patricia_tree_t *, prefix_t *);
+extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
+extern patricia_tree_t *New_Patricia(int);
+extern void Clear_Patricia(patricia_tree_t *, void (*)(void *));
+extern void Destroy_Patricia(patricia_tree_t *, void (*)(void *));
+extern void patricia_process(patricia_tree_t *, void (*)(prefix_t *, void *));
+extern const char *prefix_toa(prefix_t *, int);
 extern void lookup_then_remove(patricia_tree_t *, const char *);
 extern patricia_node_t *try_search_exact(patricia_tree_t *, const char *);
+
 /* { from demo.c */
-
-extern patricia_node_t *
-make_and_lookup (patricia_tree_t *tree, const char *string);
-
+extern patricia_node_t *make_and_lookup(patricia_tree_t *, const char *);
 /* } */
 
-#define PATRICIA_MAXBITS	(sizeof(struct in6_addr) * 8)
-#define PATRICIA_NBIT(x)        (0x80 >> ((x) & 0x7f))
-#define PATRICIA_NBYTE(x)       ((x) >> 3)
+#define PATRICIA_MAXBITS   (sizeof(struct in6_addr) * 8)
+#define PATRICIA_NBIT(x)   (0x80 >> ((x) & 0x7f))
+#define PATRICIA_NBYTE(x)  ((x) >> 3)
 
 #define PATRICIA_DATA_GET(node, type) (type *)((node)->data)
 #define PATRICIA_DATA_SET(node, value) ((node)->data = (void *)(value))
 
 #define PATRICIA_WALK(Xhead, Xnode) \
-    do { \
-        patricia_node_t *Xstack[PATRICIA_MAXBITS+1]; \
-        patricia_node_t **Xsp = Xstack; \
-        patricia_node_t *Xrn = (Xhead); \
-        while ((Xnode = Xrn)) { \
-            if (Xnode->prefix)
+  do { \
+    patricia_node_t *Xstack[PATRICIA_MAXBITS + 1]; \
+    patricia_node_t **Xsp = Xstack; \
+    patricia_node_t *Xrn = (Xhead); \
+    while ((Xnode = Xrn)) { \
+      if (Xnode->prefix)
 
 #define PATRICIA_WALK_ALL(Xhead, Xnode) \
-do { \
-        patricia_node_t *Xstack[PATRICIA_MAXBITS+1]; \
-        patricia_node_t **Xsp = Xstack; \
-        patricia_node_t *Xrn = (Xhead); \
-        while ((Xnode = Xrn)) { \
-	    if (1)
+  do { \
+    patricia_node_t *Xstack[PATRICIA_MAXBITS + 1]; \
+    patricia_node_t **Xsp = Xstack; \
+    patricia_node_t *Xrn = (Xhead); \
+    while ((Xnode = Xrn)) { \
+      if (1)
 
 #define PATRICIA_WALK_BREAK { \
-	    if (Xsp != Xstack) { \
-		Xrn = *(--Xsp); \
-	     } else { \
-		Xrn = (patricia_node_t *) 0; \
-	    } \
-	    continue; }
+  if (Xsp != Xstack) { \
+    Xrn = *(--Xsp); \
+  } else { \
+    Xrn = (patricia_node_t *)0; \
+  } \
+  continue; }
 
 #define PATRICIA_WALK_END \
-            if (Xrn->l) { \
-                if (Xrn->r) { \
-                    *Xsp++ = Xrn->r; \
-                } \
-                Xrn = Xrn->l; \
-            } else if (Xrn->r) { \
-                Xrn = Xrn->r; \
-            } else if (Xsp != Xstack) { \
-                Xrn = *(--Xsp); \
-            } else { \
-                Xrn = (patricia_node_t *) 0; \
-            } \
-        } \
-    } while (0)
+    if (Xrn->l) { \
+      if (Xrn->r) { \
+        *Xsp++ = Xrn->r; \
+      } \
+      Xrn = Xrn->l; \
+    } else if (Xrn->r) { \
+      Xrn = Xrn->r; \
+    } else if (Xsp != Xstack) { \
+      Xrn = *(--Xsp); \
+    } else { \
+      Xrn = (patricia_node_t *)0; \
+    } \
+  } \
+} while (0)
 
-#endif /* _PATRICIA_H */
+#endif

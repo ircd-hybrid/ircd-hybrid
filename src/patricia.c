@@ -114,8 +114,6 @@ my_inet_pton (int af, const char *src, void *dst)
     }
 }
 
-#define PATRICIA_MAX_THREADS		16
-
 /*
  * convert prefix information to ascii string with length
  */

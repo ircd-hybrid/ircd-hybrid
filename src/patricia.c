@@ -140,7 +140,7 @@ New_Prefix (int family, void *dest, int bitlen)
 static prefix_t *
 ascii2prefix(int family, const char *string)
 {
-  unsigned long bitlen, maxbitlen = 0;
+  int bitlen, maxbitlen = 0;
   char *cp;
   char save[MAXLINE];
   union
@@ -167,7 +167,7 @@ ascii2prefix(int family, const char *string)
 
   if ((cp = strchr(string, '/')))
   {
-    bitlen = atol(cp + 1);
+    bitlen = atoi(cp + 1);
 
     /* *cp = '\0'; */
     /* copy the string to save. Avoid destroying the string */

@@ -512,9 +512,6 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
     node = xcalloc(sizeof *node);
     node->bit = prefix->bitlen;
     node->prefix = Ref_Prefix (prefix);
-    node->parent = NULL;
-    node->l = node->r = NULL;
-    node->data = NULL;
     patricia->head = node;
 #ifdef PATRICIA_DEBUG
     fprintf(stderr, "patricia_lookup: new_node #0 %s/%d (head)\n",
@@ -641,10 +638,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
 
   new_node = xcalloc(sizeof *new_node);
   new_node->bit = prefix->bitlen;
-  new_node->prefix = Ref_Prefix (prefix);
-  new_node->parent = NULL;
-  new_node->l = new_node->r = NULL;
-  new_node->data = NULL;
+  new_node->prefix = Ref_Prefix(prefix);
   patricia->num_active_node++;
 
   if (node->bit == differ_bit)
@@ -705,9 +699,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
   {
     glue = xcalloc(sizeof *glue);
     glue->bit = differ_bit;
-    glue->prefix = NULL;
     glue->parent = node->parent;
-    glue->data = NULL;
     patricia->num_active_node++;
 
     if (differ_bit < patricia->maxbits && BIT_TEST(addr[differ_bit >> 3], 0x80 >> (differ_bit & 0x07)))

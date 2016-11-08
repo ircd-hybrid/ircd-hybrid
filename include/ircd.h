@@ -36,8 +36,8 @@ struct SetOptions
 {
   unsigned int maxclients;
   unsigned int autoconn;      /* autoconn enabled for all servers? */
-  int floodcount;  /* Number of messages in 'floodtime' seconds */
-  int floodtime;
+  unsigned int floodcount;  /* Number of messages in 'floodtime' seconds */
+  unsigned int floodtime;
   unsigned int joinfloodtime;
   unsigned int joinfloodcount;
   unsigned int ident_timeout; /* timeout for identd lookups        */

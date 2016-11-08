@@ -673,6 +673,7 @@ set_default_conf(void)
   ConfigGeneral.disable_auth = 0;
   ConfigGeneral.kill_chase_time_limit = 90;
   ConfigGeneral.default_floodcount = 8;
+  ConfigGeneral.default_floodtime = 1;
   ConfigGeneral.failed_oper_notice = 1;
   ConfigGeneral.dots_in_ident = 0;
   ConfigGeneral.min_nonwildcard = 4;

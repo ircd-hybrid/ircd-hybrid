@@ -160,6 +160,7 @@ cycle_on_host_change        { return CYCLE_ON_HOST_CHANGE; }
 deaf                        { return T_DEAF; }
 debug                       { return T_DEBUG; }
 default_floodcount          { return DEFAULT_FLOODCOUNT; }
+default_floodtime           { return DEFAULT_FLOODTIME; }
 default_join_flood_count    { return DEFAULT_JOIN_FLOOD_COUNT; }
 default_join_flood_time     { return DEFAULT_JOIN_FLOOD_TIME; }
 default_max_clients         { return DEFAULT_MAX_CLIENTS; }

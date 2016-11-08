@@ -123,49 +123,43 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
   assert(MyClient(target_p));
   assert(IsClient(source_p));
 
+  if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
+    return 0;
+
   if (HasUMode(source_p, UMODE_OPER) || HasFlag(source_p, FLAGS_SERVICE))
     return 0;
 
-  if (GlobalSetOptions.floodcount && !HasFlag(source_p, FLAGS_CANFLOOD))
+  if (HasFlag(source_p, FLAGS_CANFLOOD))
+    return 0;
+
+  if (target_p->connection->first_received_message_time + GlobalSetOptions.floodtime < CurrentTime)
   {
-    if ((target_p->connection->first_received_message_time + 1)
-        < CurrentTime)
-    {
-      const int delta =
-        CurrentTime - target_p->connection->first_received_message_time;
-      target_p->connection->received_number_of_privmsgs -= delta;
-      target_p->connection->first_received_message_time = CurrentTime;
-
-      if (target_p->connection->received_number_of_privmsgs <= 0)
-      {
-        target_p->connection->received_number_of_privmsgs = 0;
-        DelFlag(target_p, FLAGS_FLOOD_NOTICED);
-      }
-    }
-
-    if ((target_p->connection->received_number_of_privmsgs >=
-         GlobalSetOptions.floodcount) || HasFlag(target_p, FLAGS_FLOOD_NOTICED))
-    {
-      if (!HasFlag(target_p, FLAGS_FLOOD_NOTICED))
-      {
-        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
-                             "Possible Flooder %s on %s target: %s",
-                             get_client_name(source_p, HIDE_IP),
-                             source_p->servptr->name, target_p->name);
-
-        AddFlag(target_p, FLAGS_FLOOD_NOTICED);
-        target_p->connection->received_number_of_privmsgs += 2;  /* Add a bit of penalty */
-      }
-
-      if (p_or_n != NOTICE)
-        sendto_one_notice(source_p, &me, ":*** Message to %s throttled due to flooding",
-                          target_p->name);
-      return 1;
-    }
+    if (!target_p->connection->received_number_of_privmsgs)
+      DelFlag(target_p, FLAGS_FLOOD_NOTICED);
     else
-      target_p->connection->received_number_of_privmsgs++;
+      target_p->connection->received_number_of_privmsgs = 0;
+
+    target_p->connection->first_received_message_time = CurrentTime;
   }
 
+  if (target_p->connection->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
+  {
+    if (!HasFlag(target_p, FLAGS_FLOOD_NOTICED))
+    {
+      sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
+                           "Possible Flooder %s on %s target: %s",
+                           get_client_name(source_p, HIDE_IP),
+                           source_p->servptr->name, target_p->name);
+      AddFlag(target_p, FLAGS_FLOOD_NOTICED);
+    }
+
+    if (p_or_n != NOTICE)
+      sendto_one_notice(source_p, &me, ":*** Message to %s throttled due to flooding",
+                        target_p->name);
+    return 1;
+  }
+
+  ++target_p->connection->received_number_of_privmsgs;
   return 0;
 }
 
@@ -181,47 +175,43 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
 static int
 flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
 {
-  if (GlobalSetOptions.floodcount && !HasFlag(source_p, FLAGS_CANFLOOD))
+  if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
+    return 0;
+
+  if (HasFlag(source_p, FLAGS_CANFLOOD))
+    return 0;
+
+  if (chptr->first_received_message_time + GlobalSetOptions.floodtime < CurrentTime)
   {
-    if ((chptr->first_received_message_time + 1) < CurrentTime)
-    {
-      const int delta = CurrentTime - chptr->first_received_message_time;
-      chptr->received_number_of_privmsgs -= delta;
-      chptr->first_received_message_time = CurrentTime;
-
-      if (chptr->received_number_of_privmsgs <= 0)
-      {
-        chptr->received_number_of_privmsgs = 0;
-        ClearFloodNoticed(chptr);
-      }
-    }
-
-    if ((chptr->received_number_of_privmsgs >= GlobalSetOptions.floodcount) ||
-         IsSetFloodNoticed(chptr))
-    {
-      if (!IsSetFloodNoticed(chptr))
-      {
-        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
-                             "Possible Flooder %s on %s target: %s",
-                             get_client_name(source_p, HIDE_IP),
-                             source_p->servptr->name, chptr->name);
-
-        SetFloodNoticed(chptr);
-        chptr->received_number_of_privmsgs += 2;  /* Add a bit of penalty */
-      }
-
-      if (MyClient(source_p))
-      {
-        if (p_or_n != NOTICE)
-          sendto_one_notice(source_p, &me, ":*** Message to %s throttled due to flooding",
-                            chptr->name);
-        return 1;
-      }
-    }
+    if (!chptr->received_number_of_privmsgs)
+      ClearFloodNoticed(chptr);
     else
-      chptr->received_number_of_privmsgs++;
+      chptr->received_number_of_privmsgs = 0;
+
+    chptr->first_received_message_time = CurrentTime;
   }
 
+  if (chptr->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
+  {
+    if (!IsSetFloodNoticed(chptr))
+    {
+      sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
+                           "Possible Flooder %s on %s target: %s",
+                           get_client_name(source_p, HIDE_IP),
+                           source_p->servptr->name, chptr->name);
+      SetFloodNoticed(chptr);
+    }
+
+    if (MyClient(source_p))
+    {
+      if (p_or_n != NOTICE)
+        sendto_one_notice(source_p, &me, ":*** Message to %s throttled due to flooding",
+                          chptr->name);
+      return 1;
+    }
+  }
+
+  ++chptr->received_number_of_privmsgs;
   return 0;
 }
 

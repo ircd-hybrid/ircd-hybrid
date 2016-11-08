@@ -164,6 +164,7 @@ reset_block_state(void)
 %token  CONNECTFREQ
 %token  CYCLE_ON_HOST_CHANGE
 %token  DEFAULT_FLOODCOUNT
+%token  DEFAULT_FLOODTIME
 %token  DEFAULT_JOIN_FLOOD_COUNT
 %token  DEFAULT_JOIN_FLOOD_TIME
 %token  DEFAULT_MAX_CLIENTS
@@ -2487,6 +2488,7 @@ general_item:       general_away_count |
                     general_caller_id_wait |
                     general_opers_bypass_callerid |
                     general_default_floodcount |
+                    general_default_floodtime |
                     general_min_nonwildcard |
                     general_min_nonwildcard_simple |
                     general_throttle_count |
@@ -2872,6 +2874,11 @@ general_min_nonwildcard_simple: MIN_NONWILDCARD_SIMPLE '=' NUMBER ';'
 general_default_floodcount: DEFAULT_FLOODCOUNT '=' NUMBER ';'
 {
   ConfigGeneral.default_floodcount = $3;
+};
+
+general_default_floodtime: DEFAULT_FLOODTIME '=' timespec ';'
+{
+  ConfigGeneral.default_floodtime = $3;
 };
 
 

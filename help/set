@@ -4,10 +4,12 @@ SET <option> <value>
   AUTOCONN    - Sets auto-connect on or off for a particular
                 server
   AUTOCONNALL - Sets auto-connect on or off for all servers
-  FLOODCOUNT  - The number of lines allowed before
-                throttling a connection due to flooding
+
+  FLOODCOUNT  - The number of messages allowed before
+                throttling a user due to flooding.
                 Note that this variable is used for both
-                channels and clients
+                channels and clients.
+  FLOODTIME   - The time, in seconds, of FLOODCOUNT.
   JFLOODCOUNT - Sets the number of joins in JFLOODTIME to
                 count as flooding. Use 0 to disable.
   JFLOODTIME  - The amount of time in seconds in JFLOODCOUNT to consider

@@ -365,6 +365,12 @@ static const struct InfoStruct info_table[] =
     "Startup value of FLOODCOUNT"
   },
   {
+    "default_floodtime",
+    OUTPUT_DECIMAL,
+    &ConfigGeneral.default_floodtime,
+    "Startup value of FLOODTIME"
+  },
+  {
     "failed_oper_notice",
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.failed_oper_notice,

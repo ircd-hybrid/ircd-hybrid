@@ -220,6 +220,7 @@ initialize_global_set_options(void)
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num = MAX_JOIN_LEAVE_COUNT;
   GlobalSetOptions.floodcount = ConfigGeneral.default_floodcount;
+  GlobalSetOptions.floodtime = ConfigGeneral.default_floodtime;
   GlobalSetOptions.joinfloodcount = ConfigChannel.default_join_flood_count;
   GlobalSetOptions.joinfloodtime = ConfigChannel.default_join_flood_time;
   GlobalSetOptions.ident_timeout = IDENT_TIMEOUT;

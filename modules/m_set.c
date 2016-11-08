@@ -98,6 +98,22 @@ quote_floodcount(struct Client *source_p, const char *arg, int newval)
                       GlobalSetOptions.floodcount);
 }
 
+/* SET FLOODTIME */
+static void
+quote_floodtime(struct Client *source_p, const char *arg, int newval)
+{
+  if (newval >= 0)
+  {
+    GlobalSetOptions.floodtime = newval;
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                         "%s has changed FLOODTIME to %i",
+                         get_oper_name(source_p), GlobalSetOptions.floodtime);
+  }
+  else
+    sendto_one_notice(source_p, &me, ":FLOODTIME is currently %i",
+                      GlobalSetOptions.floodtime);
+}
+
 /* SET IDENTTIMEOUT */
 static void
 quote_identtimeout(struct Client *source_p, const char *arg, int newval)
@@ -248,6 +264,7 @@ static const struct SetStruct set_cmd_table[] =
   { "AUTOCONN",         quote_autoconn,         1,      1 },
   { "AUTOCONNALL",      quote_autoconnall,      0,      1 },
   { "FLOODCOUNT",       quote_floodcount,       0,      1 },
+  { "FLOODTIME",        quote_floodtime,        0,      1 },
   { "IDENTTIMEOUT",     quote_identtimeout,     0,      1 },
   { "MAX",              quote_max,              0,      1 },
   { "SPAMNUM",          quote_spamnum,          0,      1 },

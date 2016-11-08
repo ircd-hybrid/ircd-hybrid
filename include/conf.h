@@ -210,6 +210,7 @@ struct config_general_entry
   unsigned int min_nonwildcard_simple;
   unsigned int kill_chase_time_limit;
   unsigned int default_floodcount;
+  unsigned int default_floodtime;
   unsigned int throttle_count;
   unsigned int throttle_time;
   unsigned int ping_cookie;

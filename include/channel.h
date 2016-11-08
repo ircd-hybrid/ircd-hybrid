@@ -78,7 +78,7 @@ struct Channel
   uintmax_t last_join_time;
   uintmax_t first_received_message_time; /*!< channel flood control */
   unsigned int flags;
-  int received_number_of_privmsgs;
+  unsigned int received_number_of_privmsgs;
 
   dlink_list locmembers;  /*!< local members are here too */
   dlink_list members;

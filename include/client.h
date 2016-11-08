@@ -322,7 +322,7 @@ struct Connection
   uintmax_t    first_received_message_time;
   uintmax_t    last_privmsg;  /**< Last time we got a PRIVMSG */
 
-  int          received_number_of_privmsgs;
+  unsigned int received_number_of_privmsgs;
 
   struct ListTask  *list_task;
 

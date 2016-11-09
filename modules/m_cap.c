@@ -310,12 +310,11 @@ cap_ack(struct Client *source_p, const char *caplist)
 static int
 cap_clear(struct Client *source_p, const char *caplist)
 {
-  struct capabilities *cap = NULL;
   unsigned int cleared = 0;
 
   for (unsigned int ii = 0; ii < CAPAB_LIST_LEN; ++ii)
   {
-    cap = &capab_list[ii];
+    const struct capabilities *cap = &capab_list[ii];
 
     /* Only clear active non-sticky capabilities. */
     if (!(source_p->connection->cap_client & cap->cap) || (cap->flags & CAPFL_STICKY))

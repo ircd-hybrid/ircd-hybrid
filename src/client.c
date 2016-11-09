@@ -822,8 +822,7 @@ exit_client(struct Client *source_p, const char *comment)
     }
   }
   else if (IsClient(source_p) && !HasFlag(source_p, FLAGS_KILLED))
-    sendto_server(source_p->from, 0, 0, ":%s QUIT :%s",
-                  source_p->id, comment);
+    sendto_server(source_p->from, 0, 0, ":%s QUIT :%s", source_p->id, comment);
 
   /* The client *better* be off all of the lists */
   assert(dlinkFind(&unknown_list, source_p) == NULL);
@@ -1063,10 +1062,10 @@ client_get_idle_time(const struct Client *source_p,
   else
     idle = CurrentTime - target_p->connection->last_privmsg;
 
-  if (!max_idle)
-    idle = 0;
-  else
+  if (max_idle)
     idle %= max_idle;
+  else
+    idle = 0;
 
   if (idle < min_idle)
     idle = min_idle + (idle % (max_idle - min_idle));

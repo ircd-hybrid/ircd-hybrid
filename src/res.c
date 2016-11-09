@@ -440,7 +440,7 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
    */
   while (header->ancount > 0 && current < eob)
   {
-    header->ancount--;
+    --header->ancount;
 
     n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
 

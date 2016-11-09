@@ -56,6 +56,7 @@ do_list(struct Client *source_p, char *arg)
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;
   source_p->connection->list_task = lt;
+  dlinkAdd(source_p, &lt->node, &listing_client_list);
 
   if (!EmptyString(arg))
   {
@@ -157,8 +158,6 @@ do_list(struct Client *source_p, char *arg)
       return;
     }
   }
-
-  dlinkAdd(source_p, &lt->node, &listing_client_list);
 
   sendto_one_numeric(source_p, &me, RPL_LISTSTART);
   safe_list_channels(source_p, no_masked_channels && lt->show_mask.head != NULL);

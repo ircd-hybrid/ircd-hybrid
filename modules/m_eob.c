@@ -33,19 +33,6 @@
 #include "server.h"
 
 
-static void
-server_eob(struct Client *server)
-{
-  dlink_node *node = NULL;
-
-  assert(IsServer(server));
-
-  AddFlag(server, FLAGS_EOB);
-
-  DLINK_FOREACH(node, server->serv->server_list.head)
-    server_eob(node->data);
-}
-
 /*! \brief EOB command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
@@ -67,9 +54,9 @@ ms_eob(struct Client *source_p, int parc, char *parv[])
                          source_p->name,
                          (CurrentTime - source_p->connection->firsttime));
 
-  server_eob(source_p);
-
+  AddFlag(source_p, FLAGS_EOB);
   sendto_server(source_p, 0, 0, ":%s EOB", source_p->id);
+
   return 0;
 }
 

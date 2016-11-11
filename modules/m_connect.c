@@ -48,7 +48,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = target server
- *      - parv[2] = port number
+ *      - parv[2] = unused/ignored
  *      - parv[3] = nickname/servername
  */
 static int
@@ -82,7 +82,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   }
 
   /*
-   * Try to find the name, then host, if both fail notify ops and bail
+   * Try to find the name, then host, if both fail notify and bail
    */
   struct MaskItem *conf;
   if (!(conf = connect_find(name, NULL, match)) &&
@@ -143,7 +143,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = target server
- *      - parv[2] = port number
+ *      - parv[2] = unused/ignored
  *      - parv[3] = nickname/servername
  */
 static int
@@ -162,7 +162,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   /*
-   * Try to find the name, then host, if both fail notify ops and bail
+   * Try to find the name, then host, if both fail notify and bail
    */
   struct MaskItem *conf;
   if (!(conf = connect_find(name, NULL, match)) &&

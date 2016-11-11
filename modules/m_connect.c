@@ -54,7 +54,6 @@
 static int
 mo_connect(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
   const char *const name = parv[1];
 
@@ -85,6 +84,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Try to find the name, then host, if both fail notify ops and bail
    */
+  struct MaskItem *conf;
   if (!(conf = connect_find(name, NULL, match)) &&
       !(conf = connect_find(NULL, name, match)))
   {
@@ -99,22 +99,6 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /*
-   * Get port number from user, if given. If not specified,
-   * use the default from configuration structure.
-   */
-  int port = 0;
-
-  if (parc > 2 && !EmptyString(parv[2]))
-    port = atoi(parv[2]);
-  if (port == 0)
-    port = conf->port;
-  if (port <= 0)
-  {
-    sendto_one_notice(source_p, &me, ":Connect: Illegal port number");
-    return 0;
-  }
-
   if (find_servconn_in_progress(conf->name))
   {
     sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress",
@@ -122,11 +106,8 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  ilog(LOG_TYPE_IRCD, "CONNECT %s %d from %s",
-       name, port, get_oper_name(source_p));
-
-  const int tmpport = conf->port;
-  conf->port = port;
+  ilog(LOG_TYPE_IRCD, "CONNECT %s %u from %s",
+       name, conf->port, get_oper_name(source_p));
 
   /*
    * At this point we should be calling connect_server with a valid
@@ -135,21 +116,20 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   if (serv_connect(conf, source_p))
   {
     if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
-      sendto_one_notice(source_p, &me, ":*** Connecting to %s[%s].%d",
+      sendto_one_notice(source_p, &me, ":*** Connecting to %s[%s].%u",
                         conf->host, conf->name, conf->port);
     else
-      sendto_one_notice(source_p, &me, ":*** Connecting to %s.%d",
+      sendto_one_notice(source_p, &me, ":*** Connecting to %s.%u",
                         conf->name, conf->port);
   }
   else
-    sendto_one_notice(source_p, &me, ":*** Couldn't connect to %s.%d",
+    sendto_one_notice(source_p, &me, ":*** Couldn't connect to %s.%u",
                       conf->name, conf->port);
 
   /*
    * Client is either connecting with all the data it needs or has been
    * destroyed
    */
-  conf->port = tmpport;
   return 0;
 }
 
@@ -169,7 +149,6 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 static int
 ms_connect(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf = NULL;
   const struct Client *target_p = NULL;
   const char *const name = parv[1];
 
@@ -185,6 +164,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Try to find the name, then host, if both fail notify ops and bail
    */
+  struct MaskItem *conf;
   if (!(conf = connect_find(name, NULL, match)) &&
       !(conf = connect_find(NULL, name, match)))
   {
@@ -199,20 +179,6 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /*
-   * Get port number from user, if given. If not specified,
-   * use the default from configuration structure.
-   */
-  int port = atoi(parv[2]);
-
-  if (port == 0)
-    port = conf->port;
-  if (port <= 0)
-  {
-    sendto_one_notice(source_p, &me, ":Connect: Illegal port number");
-    return 0;
-  }
-
   if (find_servconn_in_progress(conf->name))
   {
     sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress",
@@ -223,32 +189,28 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Notify all operators about remote connect requests
    */
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: Remote CONNECT %s %d from %s",
-                       me.name, name, port, get_oper_name(source_p));
-  sendto_server(NULL, 0, 0, ":%s GLOBOPS :Remote CONNECT %s %d from %s",
-                me.id, name, port, get_oper_name(source_p));
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: Remote CONNECT %s %u from %s",
+                       me.name, name, conf->port, get_oper_name(source_p));
+  sendto_server(NULL, 0, 0, ":%s GLOBOPS :Remote CONNECT %s %u from %s",
+                me.id, name, conf->port, get_oper_name(source_p));
 
-  ilog(LOG_TYPE_IRCD, "Remote CONNECT %s %d from %s",
-       name, port, get_oper_name(source_p));
-
-  const int tmpport = conf->port;
-  conf->port = port;
+  ilog(LOG_TYPE_IRCD, "Remote CONNECT %s %u from %s",
+       name, conf->port, get_oper_name(source_p));
 
   /*
    * At this point we should be calling connect_server with a valid
    * connect{} block and a valid port in the connect{} block
    */
   if (serv_connect(conf, source_p))
-    sendto_one_notice(source_p, &me, ":*** Connecting to %s.%d",
+    sendto_one_notice(source_p, &me, ":*** Connecting to %s.%u",
                       conf->name, conf->port);
   else
-    sendto_one_notice(source_p, &me, ":*** Couldn't connect to %s.%d",
+    sendto_one_notice(source_p, &me, ":*** Couldn't connect to %s.%u",
                       conf->name, conf->port);
   /*
    * Client is either connecting with all the data it needs or has been
    * destroyed
    */
-  conf->port = tmpport;
   return 0;
 }
 

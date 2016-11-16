@@ -221,7 +221,7 @@ struct mp_chunk_t
   char mem[]; /**< Storage for this chunk. */
 };
 
-static mp_pool_t *mp_allocated_pools = NULL;
+static mp_pool_t *mp_allocated_pools;
 
 /** Number of extra bytes needed beyond mem_size to allocate a chunk. */
 #define CHUNK_OVERHEAD offsetof(mp_chunk_t, mem[0])

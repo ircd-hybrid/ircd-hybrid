@@ -67,7 +67,6 @@ typedef struct _patricia_node_t
   struct _patricia_node_t *l, *r;  /* left and right children */
   struct _patricia_node_t *parent;  /* may be used */
   void *data;  /* pointer to data */
-  void *user1;  /* pointer to usr data (ex. route flap info) */
 } patricia_node_t;
 
 typedef struct _patricia_tree_t

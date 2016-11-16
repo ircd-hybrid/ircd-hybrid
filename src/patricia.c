@@ -151,7 +151,7 @@ ascii2prefix(int family, const char *string)
   {
     family = AF_INET;
 
-    if (strchr (string, ':'))
+    if (strchr(string, ':'))
       family = AF_INET6;
   }
 
@@ -506,7 +506,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
   {
     node = xcalloc(sizeof *node);
     node->bit = prefix->bitlen;
-    node->prefix = Ref_Prefix (prefix);
+    node->prefix = Ref_Prefix(prefix);
     patricia->head = node;
 #ifdef PATRICIA_DEBUG
     fprintf(stderr, "patricia_lookup: new_node #0 %s/%d (head)\n",

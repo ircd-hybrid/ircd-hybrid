@@ -53,30 +53,20 @@
 static int
 ms_pong(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-  const char *destination = NULL;
-
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
     return 0;
   }
 
-  destination = parv[2];
-
-  /* Now attempt to route the PONG, comstud pointed out routable PING
-   * is used for SPING.  routable PING should also probably be left in
-   *        -Dianora
-   * That being the case, we will route, but only for registered clients (a
-   * case can be made to allow them only from servers). -Shadowfax
-   */
-  if (!EmptyString(destination) && match(destination, me.name) &&
-      irccmp(destination, me.id))
+  const char *const destination = parv[2];
+  if (!EmptyString(destination))
   {
+    struct Client *target_p;
     if ((target_p = hash_find_client(destination)) ||
         (target_p = hash_find_id(destination)))
     {
-      if (target_p->from != source_p->from)
+      if (!IsMe(target_p) && target_p->from != source_p->from)
         sendto_one(target_p, ":%s PONG %s %s",
                    ID_or_name(source_p, target_p), parv[1],
                    ID_or_name(target_p, target_p));

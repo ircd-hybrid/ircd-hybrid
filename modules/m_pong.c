@@ -75,9 +75,12 @@ ms_pong(struct Client *source_p, int parc, char *parv[])
   {
     if ((target_p = hash_find_client(destination)) ||
         (target_p = hash_find_id(destination)))
-      sendto_one(target_p, ":%s PONG %s %s",
-                 ID_or_name(source_p, target_p), parv[1],
-                 ID_or_name(target_p, target_p));
+    {
+      if (target_p->from != source_p->from)
+        sendto_one(target_p, ":%s PONG %s %s",
+                   ID_or_name(source_p, target_p), parv[1],
+                   ID_or_name(target_p, target_p));
+    }
     else if (!IsDigit(*destination))
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }

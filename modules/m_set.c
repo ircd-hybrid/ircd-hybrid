@@ -71,14 +71,13 @@ quote_autoconnall(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed AUTOCONNALL to %i",
-                         get_oper_name(source_p), newval);
-
     GlobalSetOptions.autoconn = newval;
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                         "%s has changed AUTOCONNALL to %u",
+                         get_oper_name(source_p), GlobalSetOptions.autoconn);
   }
   else
-    sendto_one_notice(source_p, &me, ":AUTOCONNALL is currently %i",
+    sendto_one_notice(source_p, &me, ":AUTOCONNALL is currently %u",
                       GlobalSetOptions.autoconn);
 }
 
@@ -90,11 +89,11 @@ quote_floodcount(struct Client *source_p, const char *arg, int newval)
   {
     GlobalSetOptions.floodcount = newval;
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed FLOODCOUNT to %i",
+                         "%s has changed FLOODCOUNT to %u",
                          get_oper_name(source_p), GlobalSetOptions.floodcount);
   }
   else
-    sendto_one_notice(source_p, &me, ":FLOODCOUNT is currently %i",
+    sendto_one_notice(source_p, &me, ":FLOODCOUNT is currently %u",
                       GlobalSetOptions.floodcount);
 }
 
@@ -106,11 +105,11 @@ quote_floodtime(struct Client *source_p, const char *arg, int newval)
   {
     GlobalSetOptions.floodtime = newval;
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed FLOODTIME to %i",
+                         "%s has changed FLOODTIME to %u",
                          get_oper_name(source_p), GlobalSetOptions.floodtime);
   }
   else
-    sendto_one_notice(source_p, &me, ":FLOODTIME is currently %i",
+    sendto_one_notice(source_p, &me, ":FLOODTIME is currently %u",
                       GlobalSetOptions.floodtime);
 }
 
@@ -126,13 +125,13 @@ quote_identtimeout(struct Client *source_p, const char *arg, int newval)
 
   if (newval > 0)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed IDENTTIMEOUT to %d",
-                         get_oper_name(source_p), newval);
     GlobalSetOptions.ident_timeout = newval;
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                         "%s has changed IDENTTIMEOUT to %u",
+                         get_oper_name(source_p), GlobalSetOptions.ident_timeout);
   }
   else
-    sendto_one_notice(source_p, &me, ":IDENTTIMEOUT is currently %d",
+    sendto_one_notice(source_p, &me, ":IDENTTIMEOUT is currently %u",
                       GlobalSetOptions.ident_timeout);
 }
 
@@ -144,26 +143,25 @@ quote_max(struct Client *source_p, const char *arg, int newval)
   {
     if (newval > MAXCLIENTS_MAX)
     {
-      sendto_one_notice(source_p, &me, ":You cannot set MAXCLIENTS to > %d, restoring to %d",
+      sendto_one_notice(source_p, &me, ":You cannot set MAXCLIENTS to > %d, restoring to %u",
                         MAXCLIENTS_MAX, GlobalSetOptions.maxclients);
       return;
     }
 
     if (newval < MAXCLIENTS_MIN)
     {
-      sendto_one_notice(source_p, &me, ":You cannot set MAXCLIENTS to < %d, restoring to %d",
+      sendto_one_notice(source_p, &me, ":You cannot set MAXCLIENTS to < %d, restoring to %u",
                         MAXCLIENTS_MIN, GlobalSetOptions.maxclients);
       return;
     }
 
     GlobalSetOptions.maxclients = newval;
-
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-        "%s set new MAXCLIENTS to %d (%d current)",
-        get_oper_name(source_p), GlobalSetOptions.maxclients, Count.local);
+                         "%s set new MAXCLIENTS to %u (%u current)",
+                         get_oper_name(source_p), GlobalSetOptions.maxclients, Count.local);
   }
   else
-    sendto_one_notice(source_p, &me, ":Current MAXCLIENTS = %d (%d)",
+    sendto_one_notice(source_p, &me, ":Current MAXCLIENTS = %u (%u)",
                       GlobalSetOptions.maxclients, Count.local);
 }
 
@@ -175,9 +173,9 @@ quote_spamnum(struct Client *source_p, const char *arg, int newval)
   {
     if (newval == 0)
     {
+      GlobalSetOptions.spam_num = newval;
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s has disabled ANTI_SPAMBOT", source_p->name);
-      GlobalSetOptions.spam_num = newval;
       return;
     }
 
@@ -199,11 +197,11 @@ quote_spamtime(struct Client *source_p, const char *arg, int newval)
   {
     GlobalSetOptions.spam_time = IRCD_MAX(newval, MIN_SPAM_TIME);
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed SPAMTIME to %i",
+                         "%s has changed SPAMTIME to %u",
                          get_oper_name(source_p), GlobalSetOptions.spam_time);
   }
   else
-    sendto_one_notice(source_p, &me, ":SPAMTIME is currently %i",
+    sendto_one_notice(source_p, &me, ":SPAMTIME is currently %u",
                       GlobalSetOptions.spam_time);
 }
 
@@ -213,13 +211,13 @@ quote_jfloodtime(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed JFLOODTIME to %i",
-                         get_oper_name(source_p), newval);
     GlobalSetOptions.joinfloodtime = newval;
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                         "%s has changed JFLOODTIME to %u",
+                         get_oper_name(source_p), GlobalSetOptions.joinfloodtime);
   }
   else
-    sendto_one_notice(source_p, &me, ":JFLOODTIME is currently %i",
+    sendto_one_notice(source_p, &me, ":JFLOODTIME is currently %u",
                       GlobalSetOptions.joinfloodtime);
 }
 
@@ -229,13 +227,13 @@ quote_jfloodcount(struct Client *source_p, const char *arg, int newval)
 {
   if (newval >= 0)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed JFLOODCOUNT to %i",
-                         get_oper_name(source_p), newval);
     GlobalSetOptions.joinfloodcount = newval;
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                         "%s has changed JFLOODCOUNT to %u",
+                         get_oper_name(source_p), GlobalSetOptions.joinfloodcount);
   }
   else
-    sendto_one_notice(source_p, &me, ":JFLOODCOUNT is currently %i",
+    sendto_one_notice(source_p, &me, ":JFLOODCOUNT is currently %u",
                       GlobalSetOptions.joinfloodcount);
 }
 

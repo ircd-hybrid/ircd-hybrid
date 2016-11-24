@@ -78,6 +78,8 @@ oper_up(struct Client *source_p)
                   RPL_WHOISOPERATOR, conf->whois);
   }
 
+  ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s", conf->name, source_p->name,
+       source_p->username, source_p->host);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
@@ -172,9 +174,6 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     }
 
     oper_up(source_p);
-
-    ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s", opername, source_p->name,
-         source_p->username, source_p->host);
   }
   else
   {

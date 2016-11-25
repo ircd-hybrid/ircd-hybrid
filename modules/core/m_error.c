@@ -34,17 +34,21 @@
 #include "irc_string.h"
 
 
-/*
- * Note: At least at protocol level ERROR has only one parameter.
- * --msa
+/*! \brief ERROR command handler
  *
- *      parv[0] = command
- *      parv[*] = parameters
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = error message
  */
 static int
 mr_error(struct Client *source_p, int parc, char *parv[])
 {
-  const char *para = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
+  const char *message = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
 
   assert(MyConnect(source_p));
 
@@ -52,34 +56,45 @@ mr_error(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
-       source_p->name, para);
+       source_p->name, message);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "ERROR :from %s -- %s",
-                       get_client_name(source_p, HIDE_IP), para);
+                       get_client_name(source_p, HIDE_IP), message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                        "ERROR :from %s -- %s",
-                       get_client_name(source_p, MASK_IP), para);
+                       get_client_name(source_p, MASK_IP), message);
   return 0;
 }
 
+/*! \brief ERROR command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = error message
+ */
 static int
 ms_error(struct Client *source_p, int parc, char *parv[])
 {
-  const char *para = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
+  const char *message = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
-       source_p->name, para);
+       source_p->name, message);
 
   if (MyConnect(source_p))
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "ERROR :from %s -- %s",
-                         get_client_name(source_p->from, MASK_IP), para);
+                         get_client_name(source_p->from, MASK_IP), message);
   else
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "ERROR :from %s via %s -- %s",
                          source_p->name,
-                         get_client_name(source_p->from, MASK_IP), para);
+                         get_client_name(source_p->from, MASK_IP), message);
   return 0;
 }
 

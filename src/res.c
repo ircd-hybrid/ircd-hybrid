@@ -214,7 +214,7 @@ restart_resolver(void)
 void
 delete_resolver_queries(const void *vptr)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, request_list.head)
   {
@@ -254,7 +254,7 @@ send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 static struct reslist *
 find_id(unsigned int id)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, request_list.head)
   {
@@ -630,15 +630,13 @@ res_readreply(fde_t *fd, void *data)
 static uintmax_t
 timeout_query_list(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-  struct reslist *request = NULL;
+  dlink_node *node, *node_next;
   uintmax_t next_time = 0;
-  uintmax_t timeout   = 0;
 
   DLINK_FOREACH_SAFE(node, node_next, request_list.head)
   {
-    request = node->data;
-    timeout = request->sentat + request->timeout;
+    struct reslist *request = node->data;
+    uintmax_t timeout = request->sentat + request->timeout;
 
     if (CurrentTime >= timeout)
     {

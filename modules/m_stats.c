@@ -1027,7 +1027,7 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
 static void
 stats_class(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, class_get_list()->head)
   {

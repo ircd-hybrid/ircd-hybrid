@@ -286,7 +286,7 @@ start_auth(struct Client *client_p)
 static void
 timeout_auth_queries_event(void *notused)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, auth_list.head)
   {

@@ -330,7 +330,7 @@ motd_signon(struct Client *client_p)
 void
 motd_recache(void)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
   motd_decache(MotdList.remote);

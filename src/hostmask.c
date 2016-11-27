@@ -450,7 +450,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
                      int fam, const char *username, const char *password, int do_match)
 {
   unsigned int hprecv = 0;
-  dlink_node *node = NULL;
+  dlink_node *node;
   struct MaskItem *hprec = NULL;
   struct AddressRec *arec = NULL;
   int (*cmpfunc)(const char *, const char *) = do_match ? match : irccmp;
@@ -660,7 +660,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 {
   int bits = 0;
   uint32_t hv = 0;
-  dlink_node *node = NULL;
+  dlink_node *node;
   struct irc_ssaddr addr;
 
   switch (parse_netmask(address, &addr, &bits))
@@ -707,7 +707,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 void
 clear_out_address_conf(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -759,7 +759,7 @@ hostmask_send_expiration(const struct AddressRec *const arec)
 void
 hostmask_expire_temporary(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {

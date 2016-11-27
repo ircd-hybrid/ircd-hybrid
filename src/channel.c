@@ -336,12 +336,9 @@ channel_free_mask_list(dlink_list *list)
 struct Channel *
 channel_make(const char *name)
 {
-  struct Channel *chptr = NULL;
-
   assert(!EmptyString(name));
 
-  chptr = mp_pool_get(channel_pool);
-
+  struct Channel *chptr = mp_pool_get(channel_pool);
   /* Doesn't hurt to set it here */
   chptr->creationtime = CurrentTime;
   chptr->last_join_time = CurrentTime;
@@ -690,7 +687,7 @@ has_member_flags(const struct Membership *member, const unsigned int flags)
 struct Membership *
 find_channel_link(struct Client *client_p, struct Channel *chptr)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (!IsClient(client_p))
     return NULL;
@@ -963,7 +960,6 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
 {
   char *p = NULL;
   char *chan_list = NULL;
-  struct Channel *chptr = NULL;
   const struct ResvItem *resv = NULL;
   const struct ClassItem *const class = get_class_ptr(&client_p->connection->confs);
   unsigned int flags = 0;
@@ -1009,6 +1005,7 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
       break;
     }
 
+    struct Channel *chptr;
     if ((chptr = hash_find_channel(name)))
     {
       if (IsMember(client_p, chptr))

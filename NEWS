@@ -4,6 +4,14 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
+-- Noteworthy changes in version 8.2.21 (2016-11-27)
+o) The 'general::default_floodtime' configuration option has been added
+   along with the "SET FLOODTIME" command. These allow to fine-tune the
+   message throttling better
+o) Fixed an issue with /invite not showing the list of channels the
+   sender is invited to
+
+
 -- Noteworthy changes in version 8.2.20 (2016-11-05)
 o) "INFO" now shows GnuTLS/OpenSSL library/header versions
 o) Added 'channel::max_invites' configuration option. See doc/reference.conf

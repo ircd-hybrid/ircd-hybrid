@@ -69,8 +69,7 @@ m_ping(struct Client *source_p, int parc, char *parv[])
   }
 
   if (EmptyString(destination) || ((target_p = hash_find_server(destination)) && IsMe(target_p)))
-    sendto_one(source_p, ":%s PONG %s :%s", me.name,
-               (destination) ? destination : me.name, parv[1]);
+    sendto_one(source_p, ":%s PONG %s :%s", me.name, me.name, parv[1]);
   else if (target_p)
     sendto_one(target_p, ":%s PING %s :%s",
                ID_or_name(source_p, target_p), source_p->name,
@@ -107,7 +106,7 @@ ms_ping(struct Client *source_p, int parc, char *parv[])
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
   if (EmptyString(destination) || ((target_p = hash_find_server(destination)) && IsMe(target_p)))
     sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, source_p),
-               (destination) ? destination : me.name, ID_or_name(source_p, source_p));
+               me.name, ID_or_name(source_p, source_p));
   else if (target_p)
   {
     if (target_p->from != source_p->from)

@@ -972,8 +972,8 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
 
   chan_list = channel_find_last0(client_p, channel);
 
-  for (const char *chan = strtok_r(chan_list, ",", &p); chan;
-                   chan = strtok_r(NULL,      ",", &p))
+  for (const char *name = strtok_r(chan_list, ",", &p); name;
+                   name = strtok_r(NULL,      ",", &p))
   {
     const char *key = NULL;
 
@@ -985,31 +985,31 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
     if (key && *key == '\0')
       key = NULL;
 
-    if (!channel_check_name(chan, 1))
+    if (!channel_check_name(name, 1))
     {
-      sendto_one_numeric(client_p, &me, ERR_BADCHANNAME, chan);
+      sendto_one_numeric(client_p, &me, ERR_BADCHANNAME, name);
       continue;
     }
 
     if (!HasFlag(client_p, FLAGS_EXEMPTRESV) &&
         !(HasUMode(client_p, UMODE_OPER) && HasOFlag(client_p, OPER_FLAG_JOIN_RESV)) &&
-        ((resv = resv_find(chan, match)) && !resv_exempt_find(client_p, resv)))
+        ((resv = resv_find(name, match)) && !resv_exempt_find(client_p, resv)))
     {
-      sendto_one_numeric(client_p, &me, ERR_CHANBANREASON, chan, resv->reason);
+      sendto_one_numeric(client_p, &me, ERR_CHANBANREASON, name, resv->reason);
       sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                            "Forbidding reserved channel %s from user %s",
-                           chan, get_client_name(client_p, HIDE_IP));
+                           name, get_client_name(client_p, HIDE_IP));
       continue;
     }
 
     if (dlink_list_length(&client_p->channel) >=
         ((class->max_channels) ? class->max_channels : ConfigChannel.max_channels))
     {
-      sendto_one_numeric(client_p, &me, ERR_TOOMANYCHANNELS, chan);
+      sendto_one_numeric(client_p, &me, ERR_TOOMANYCHANNELS, name);
       break;
     }
 
-    if ((chptr = hash_find_channel(chan)))
+    if ((chptr = hash_find_channel(name)))
     {
       if (IsMember(client_p, chptr))
         continue;
@@ -1034,7 +1034,7 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
     else
     {
       flags = CHFL_CHANOP;
-      chptr = channel_make(chan);
+      chptr = channel_make(name);
     }
 
     if (!HasUMode(client_p, UMODE_OPER))

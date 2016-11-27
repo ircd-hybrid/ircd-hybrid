@@ -76,15 +76,15 @@ do_etrace(struct Client *source_p, const char *arg)
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  if (!EmptyString(arg))
-  {
-    tname = arg;
-    wilds = has_wildcards(tname);
-  }
-  else
+  if (EmptyString(arg))
   {
     do_all = 1;
     tname = "*";
+  }
+  else
+  {
+    tname = arg;
+    wilds = has_wildcards(tname);
   }
 
   if (!wilds && !do_all)

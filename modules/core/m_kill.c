@@ -135,7 +135,6 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
    * And pass on the message to other servers. Note, that if KILL
    * was changed, the message has to be sent to all links, also
    * back.
-   * Suicide kills are NOT passed on --SRB
    */
   if (!MyConnect(target_p))
   {

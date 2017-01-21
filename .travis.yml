@@ -14,11 +14,6 @@ compiler:
  - gcc
  - clang
 
-matrix:
-  exclude:
-    - os: osx
-      compiler: gcc
-
 addons:
   coverity_scan:
     project:
@@ -30,7 +25,7 @@ addons:
     branch_pattern: coverity_scan
 
 script:
- - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$CC" = "gcc" ]; then export CC=gcc-4.8; fi
+ - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$CC" = "gcc" ]; then export CC=$(ls -t /usr/local/bin/gcc-?.?); fi
  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --disable-openssl --enable-assert; else ./configure --enable-assert; fi
  - make
  - sudo make install
@@ -42,5 +37,3 @@ notifications:
   channels:
   - "irc.ircd-hybrid.org#ircd-coders"
   skip_join: true
-
-osx_image: xcode61

@@ -159,10 +159,8 @@ motd_cache(struct Motd *motd)
   fclose(file);  /* Close the file */
 
   /* Trim memory usage a little */
-  motd->cache = xcalloc(sizeof(struct MotdCache) +
-                         (MOTD_LINESIZE * cache->count));
-  memcpy(motd->cache, cache, sizeof(struct MotdCache) +
-         (MOTD_LINESIZE * cache->count));
+  motd->cache = xcalloc(sizeof(struct MotdCache) + (MOTD_LINESIZE * cache->count));
+  memcpy(motd->cache, cache, sizeof(struct MotdCache) + (MOTD_LINESIZE * cache->count));
   xfree(cache);
 
   /* Now link it in */
@@ -223,16 +221,12 @@ motd_destroy(struct Motd *motd)
 static struct Motd *
 motd_lookup(const struct Client *client_p)
 {
-  dlink_node *node = NULL;
-  const struct ClassItem *class = NULL;
+  dlink_node *node;
 
   assert(client_p);
 
   if (!MyConnect(client_p))  /* Not my user, always return remote motd */
     return MotdList.remote;
-
-  class = get_class_ptr(&client_p->connection->confs);
-  assert(class);
 
   /* Check the motd blocks first */
   DLINK_FOREACH(node, MotdList.other.head)
@@ -242,9 +236,12 @@ motd_lookup(const struct Client *client_p)
     switch (motd->type)
     {
       case MOTD_CLASS:
+      {
+        const struct ClassItem *class = get_class_ptr(&client_p->connection->confs);
         if (!match(motd->mask, class->name))
           return motd;
         break;
+      }
       case MOTD_HOSTMASK:
         if (!match(motd->mask, client_p->host) || !match(motd->mask, client_p->sockhost))
           return motd;

@@ -151,8 +151,8 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
 struct ResvItem *
 resv_find(const char *name, int (*compare)(const char *, const char *))
 {
-  dlink_node *node = NULL;
-  dlink_list *list = NULL;
+  dlink_node *node;
+  dlink_list *list;
 
   if (IsChanPrefix(*name))
     list = &resv_chan_list;

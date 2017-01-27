@@ -41,7 +41,7 @@ date(uintmax_t lclock)
 
   if (lclock_last != lclock)
   {
-    lclock_last = lclock;
+    lclock_last = lclock;  /* Cache value to avoid repetitive strftime() calls. */
     strftime(buf, sizeof(buf), "%A %B %-e %Y -- %T %z", localtime((time_t *)&lclock));
   }
 
@@ -59,7 +59,7 @@ date_iso8601(uintmax_t lclock)
 
   if (lclock_last != lclock)
   {
-    lclock_last = lclock;
+    lclock_last = lclock;  /* Cache value to avoid repetitive strftime() calls. */
     strftime(buf, sizeof(buf), "%FT%T%z", localtime((time_t *)&lclock));
   }
 
@@ -89,7 +89,7 @@ date_ctime(uintmax_t lclock)
 
   if (lclock_last != lclock)
   {
-    lclock_last = lclock;
+    lclock_last = lclock;  /* Cache value to avoid repetitive strftime() calls. */
     strftime(buf, sizeof(buf), "%a %b %-e %T %Y", localtime((time_t *)&lclock));
   }
 

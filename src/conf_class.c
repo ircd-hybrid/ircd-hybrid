@@ -76,7 +76,8 @@ class_free(struct ClassItem *const class)
 void
 class_init(void)
 {
-  (class_default = class_make())->name = xstrdup("default");
+  class_default = class_make();
+  class_default->name = xstrdup("default");
 }
 
 const struct ClassItem *

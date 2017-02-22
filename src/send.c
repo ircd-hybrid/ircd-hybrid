@@ -387,7 +387,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 
     assert(IsClient(target_p));
 
-    if (IsDefunct(target_p) || HasUMode(target_p, UMODE_DEAF) ||
+    if (IsDefunct(target_p->from) || HasUMode(target_p, UMODE_DEAF) ||
         (one && target_p->from == one->from))
       continue;
 

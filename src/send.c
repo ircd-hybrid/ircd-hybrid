@@ -263,15 +263,15 @@ void
 sendto_one(struct Client *to, const char *pattern, ...)
 {
   va_list args;
-  struct dbuf_block *buffer = NULL;
 
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
 
-  buffer = dbuf_alloc();
-
   va_start(args, pattern);
+
+  struct dbuf_block *buffer = dbuf_alloc();
   send_format(buffer, pattern, args);
+
   va_end(args);
 
   send_message(to->from, buffer);
@@ -282,20 +282,17 @@ sendto_one(struct Client *to, const char *pattern, ...)
 void
 sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
-  struct dbuf_block *buffer = NULL;
-  const char *dest = NULL, *numstr = NULL;
   va_list args;
+  const char *numstr = NULL;
 
   if (IsDead(to->from))
     return;
 
-  dest = ID_or_name(to, to);
-
+  const char *dest = ID_or_name(to, to);
   if (EmptyString(dest))
     dest = "*";
 
-  buffer = dbuf_alloc();
-
+  struct dbuf_block *buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s %03d %s ", ID_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
 
   va_start(args, numeric);
@@ -316,20 +313,16 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
 void
 sendto_one_notice(struct Client *to, const struct Client *from, const char *pattern, ...)
 {
-  struct dbuf_block *buffer = NULL;
-  const char *dest = NULL;
   va_list args;
 
   if (IsDead(to->from))
     return;
 
-  dest = ID_or_name(to, to);
-
+  const char *dest = ID_or_name(to, to);
   if (EmptyString(dest))
     dest = "*";
 
-  buffer = dbuf_alloc();
-
+  struct dbuf_block *buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s NOTICE %s ", ID_or_name(from, to), dest);
 
   va_start(args, pattern);
@@ -436,11 +429,13 @@ sendto_server(const struct Client *one,
               const char *format, ...)
 {
   va_list args;
-  dlink_node *node = NULL;
-  struct dbuf_block *buffer = dbuf_alloc();
+  dlink_node *node;
 
   va_start(args, format);
+
+  struct dbuf_block *buffer = dbuf_alloc();
   send_format(buffer, format, args);
+
   va_end(args);
 
   DLINK_FOREACH(node, local_server_list.head)

@@ -694,7 +694,7 @@ set_default_conf(void)
   ConfigGeneral.stats_P_oper_only = 0;
   ConfigGeneral.stats_u_oper_only = 0;
   ConfigGeneral.caller_id_wait = 60;
-  ConfigGeneral.opers_bypass_callerid = 0;
+  ConfigGeneral.opers_bypass_callerid = 1;
   ConfigGeneral.pace_wait = 10;
   ConfigGeneral.pace_wait_simple = 1;
   ConfigGeneral.short_motd = 0;

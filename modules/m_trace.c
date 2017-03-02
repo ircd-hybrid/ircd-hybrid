@@ -86,7 +86,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
   const char *name = NULL;
 
   if (parc > 2)
-    if (hunt_server(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
+    if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
       return 0;
 
   if (parc > 1)
@@ -94,7 +94,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
   else
     name = me.name;
 
-  switch (hunt_server(source_p, ":%s TRACE :%s", 1, parc, parv))
+  switch (server_hunt(source_p, ":%s TRACE :%s", 1, parc, parv))
   {
     case HUNTED_PASS: /* note: gets here only if parv[1] exists */
     {
@@ -140,7 +140,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
 static int
 ms_trace(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
+  if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
     return 0;
 
   if (HasUMode(source_p, UMODE_OPER))

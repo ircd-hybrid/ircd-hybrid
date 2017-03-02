@@ -38,7 +38,7 @@ struct MaskItem;
 enum { STARTUP_CONNECTIONS_TIME = 60 };
 
 /*
- * Return values for hunt_server()
+ * Return values for server_hunt()
  */
 enum
 {
@@ -84,7 +84,7 @@ enum
 #define ClearCap(x, cap)        ((x)->connection->caps &= ~(cap))
 
 extern int valid_servname(const char *);
-extern int hunt_server(struct Client *, const char *, const int, const int, char *[]);
+extern int server_hunt(struct Client *, const char *, const int, const int, char *[]);
 extern void server_capab_init(void);
 extern void add_capability(const char *, unsigned int);
 extern void delete_capability(const char *);

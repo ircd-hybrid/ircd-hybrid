@@ -139,7 +139,7 @@ read_links_file(void)
   fclose(file);
 }
 
-/* hunt_server()
+/* server_hunt()
  *      Do the basic thing in delivering the message (command)
  *      across the relays to the specific server (server) for
  *      actions.
@@ -159,7 +159,7 @@ read_links_file(void)
  *      returns: (see #defines)
  */
 int
-hunt_server(struct Client *source_p, const char *command,
+server_hunt(struct Client *source_p, const char *command,
             const int server, const int parc, char *parv[])
 {
   struct Client *target_p = NULL;

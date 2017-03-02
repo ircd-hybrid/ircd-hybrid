@@ -77,7 +77,7 @@ m_motd(struct Client *source_p, int parc, char *parv[])
   last_used = CurrentTime;
 
   if (!ConfigServerHide.disable_remote_commands)
-    if (hunt_server(source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
+    if (server_hunt(source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
       return 0;
 
   do_motd(source_p);
@@ -98,7 +98,7 @@ m_motd(struct Client *source_p, int parc, char *parv[])
 static int
 ms_motd(struct Client *source_p, int parc, char *parv[])
 {
-  if (hunt_server(source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
+  if (server_hunt(source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
     return 0;
 
   do_motd(source_p);

@@ -390,6 +390,69 @@ server_set_gecos(struct Client *client_p, const char *info)
     strlcpy(client_p->info, "(Unknown Location)", sizeof(client_p->info));
 }
 
+static int
+server_check(const char *name, struct Client *client_p)
+{
+  dlink_node *node = NULL;
+  struct MaskItem *server_conf = NULL;
+  int error = -1;
+
+  assert(client_p);
+
+  /* Loop through looking for all possible connect items that might work */
+  DLINK_FOREACH(node, connect_items.head)
+  {
+    struct MaskItem *conf = node->data;
+
+    if (irccmp(name, conf->name))
+      continue;
+
+    error = -3;
+
+    if (!irccmp(conf->host, client_p->host) ||
+        !irccmp(conf->host, client_p->sockhost))
+    {
+      error = -2;
+
+      if (!match_conf_password(client_p->connection->password, conf))
+        return -2;
+
+      if (!EmptyString(conf->certfp))
+        if (EmptyString(client_p->certfp) || strcasecmp(client_p->certfp, conf->certfp))
+          return -4;
+
+      server_conf = conf;
+    }
+  }
+
+  if (server_conf == NULL)
+    return error;
+
+  attach_conf(client_p, server_conf);
+
+  switch (server_conf->aftype)
+  {
+    case AF_INET6:
+    {
+      const struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&server_conf->addr;
+
+      if (IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr))
+        memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(struct irc_ssaddr));
+      break;
+    }
+    case AF_INET:
+    {
+      const struct sockaddr_in *v4 = (struct sockaddr_in *)&server_conf->addr;
+
+      if (v4->sin_addr.s_addr == INADDR_NONE)
+        memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(struct irc_ssaddr));
+      break;
+    }
+  }
+
+  return 0;
+}
+
 /* mr_server()
  *  parv[0] = command
  *  parv[1] = servername
@@ -441,10 +504,10 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /* Now we just have to call check_server and everything should
+  /* Now we just have to call server_check() and everything should
    * be check for us... -A1kmm.
    */
-  switch (check_server(name, source_p))
+  switch (server_check(name, source_p))
   {
     case -1:
       if (ConfigGeneral.warn_no_connect_block)

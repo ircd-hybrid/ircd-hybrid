@@ -80,7 +80,7 @@ static const char *const HeaderMessages[] =
 #define sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
 
 static dlink_list auth_list;
-static void read_auth_reply(fde_t *, void *);
+static void auth_read_reply(fde_t *, void *);
 static void auth_connect_callback(fde_t *, int, void *);
 
 
@@ -255,14 +255,14 @@ start_auth_query(struct AuthRequest *auth)
 }
 
 /*
- * start_auth
+ * auth_start
  *
  * inputs	- pointer to client to auth
  * output	- NONE
  * side effects	- starts auth (identd) and dns queries for a client
  */
 void
-start_auth(struct Client *client_p)
+auth_start(struct Client *client_p)
 {
   struct AuthRequest *const auth = make_auth_request(client_p);
 
@@ -366,7 +366,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
     return;
   }
 
-  comm_setselect(fd, COMM_SELECT_READ, read_auth_reply, auth, 0);
+  comm_setselect(fd, COMM_SELECT_READ, auth_read_reply, auth, 0);
 }
 
 /** Enum used to index ident reply fields in a human-readable way. */
@@ -460,13 +460,13 @@ check_ident_reply(char *const reply)
 }
 
 /*
- * read_auth_reply - read the reply (if any) from the ident server
+ * auth_read_reply - read the reply (if any) from the ident server
  * we connected to.
  * We only give it one shot, if the reply isn't good the first time
  * fail the authentication entirely. --Bleep
  */
 static void
-read_auth_reply(fde_t *fd, void *data)
+auth_read_reply(fde_t *fd, void *data)
 {
   struct AuthRequest *const auth = data;
   const char *username = NULL;
@@ -500,10 +500,10 @@ read_auth_reply(fde_t *fd, void *data)
 }
 
 /*
- * delete_auth()
+ * auth_delete()
  */
 void
-delete_auth(struct AuthRequest *auth)
+auth_delete(struct AuthRequest *auth)
 {
   if (IsDNSPending(auth))
     delete_resolver_queries(auth);

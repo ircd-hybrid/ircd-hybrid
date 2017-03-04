@@ -248,7 +248,7 @@ ssl_handshake(fde_t *fd, void *data)
     ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad TLS client certificate",
          client_p->name, client_p->username, client_p->host);
 
-  start_auth(client_p);
+  auth_start(client_p);
 }
 
 /*
@@ -319,7 +319,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
     ssl_handshake(NULL, client_p);
   }
   else
-    start_auth(client_p);
+    auth_start(client_p);
 }
 
 /*

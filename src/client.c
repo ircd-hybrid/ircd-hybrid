@@ -712,7 +712,7 @@ exit_client(struct Client *source_p, const char *comment)
       ipcache_remove_address(&source_p->connection->ip);
     }
 
-    delete_auth(&source_p->connection->auth);
+    auth_delete(&source_p->connection->auth);
 
     if (IsClient(source_p))
     {

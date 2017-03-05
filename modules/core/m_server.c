@@ -796,7 +796,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  target_p = make_client(client_p);
+  target_p = client_make(client_p);
   make_server(target_p);
   target_p->hopcount = atoi(parv[2]);
   target_p->servptr = source_p;

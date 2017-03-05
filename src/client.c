@@ -82,7 +82,7 @@ static dlink_node *eac_next;  /* next aborted client to exit */
  *                      'from'). ('from' is a local client!!).
  */
 struct Client *
-make_client(struct Client *from)
+client_make(struct Client *from)
 {
   struct Client *const client_p = mp_pool_get(client_pool);
 
@@ -111,14 +111,14 @@ make_client(struct Client *from)
 }
 
 /*
- * free_client
+ * client_free
  *
  * inputs	- pointer to client
  * output	- NONE
  * side effects	- client pointed to has its memory freed
  */
 static void
-free_client(struct Client *client_p)
+client_free(struct Client *client_p)
 {
   assert(client_p != &me);
   assert(client_p->hnext == client_p);
@@ -570,7 +570,7 @@ free_exited_clients(void)
 
   DLINK_FOREACH_SAFE(node, node_next, dead_list.head)
   {
-    free_client(node->data);
+    client_free(node->data);
     dlinkDelete(node, &dead_list);
     free_dlink_node(node);
   }

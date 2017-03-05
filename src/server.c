@@ -541,7 +541,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   }
 
   /* Create a local client */
-  client_p = make_client(NULL);
+  client_p = client_make(NULL);
 
   /* Copy in the server, hostname, fd */
   strlcpy(client_p->name, conf->name, sizeof(client_p->name));

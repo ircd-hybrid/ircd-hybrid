@@ -339,7 +339,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *client_p = NULL;
 
-  client_p = make_client(source_p->from);
+  client_p = client_make(source_p->from);
   client_p->servptr = source_p;
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = strtoumax(parv[3], NULL, 10);

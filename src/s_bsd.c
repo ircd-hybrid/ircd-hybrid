@@ -261,7 +261,7 @@ ssl_handshake(fde_t *fd, void *data)
 void
 add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 {
-  struct Client *client_p = make_client(NULL);
+  struct Client *client_p = client_make(NULL);
 
   fd_open(&client_p->connection->fd, fd, 1,
           (listener->flags & LISTENER_SSL) ?

@@ -153,7 +153,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
 
   if (!dow)  /* lets also do this for opers tracing nicks */
   {
-    if ((target_p = hash_find_client(name)) && IsClient(target_p))
+    if ((target_p = find_person(source_p, name)))
       report_this_status(source_p, target_p);
 
     sendto_one_numeric(source_p, &me, RPL_TRACEEND, name);

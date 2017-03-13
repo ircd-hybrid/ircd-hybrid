@@ -472,8 +472,7 @@ main(int argc, char *argv[])
   hash_add_id(&me);
   hash_add_client(&me);
 
-  dlinkAdd(&me, make_dlink_node(), &global_server_list);
-  dlinkAdd(&me, &me.node, &global_client_list);
+  dlinkAdd(&me, &me.node, &global_server_list);
 
   load_kline_database(ConfigGeneral.klinefile);
   load_dline_database(ConfigGeneral.dlinefile);

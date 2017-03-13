@@ -204,8 +204,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
   {
     struct Client *target_p = node->data;
 
-    if (!IsClient(target_p))
-      continue;
+    assert(IsClient(target_p));
 
     if (HasUMode(target_p, UMODE_INVISIBLE))
     {

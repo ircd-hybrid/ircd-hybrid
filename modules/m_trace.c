@@ -100,9 +100,10 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
     {
       struct Client *ac2ptr = NULL;
 
+/* This mess needs to be reviewed and cleaned up */
       if ((ac2ptr = hash_find_client(name)) == NULL)
       {
-        DLINK_FOREACH(node, global_client_list.head)
+        DLINK_FOREACH(node, global_server_list.head)
         {
           ac2ptr = node->data;
 
@@ -110,6 +111,19 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
             break;
           else
             ac2ptr = NULL;
+        }
+
+        if (!ac2ptr)
+        {
+          DLINK_FOREACH(node, global_client_list.head)
+          {
+            ac2ptr = node->data;
+
+            if (!match(name, ac2ptr->name))
+              break;
+            else
+              ac2ptr = NULL;
+          }
         }
       }
 

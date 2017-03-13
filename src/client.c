@@ -611,10 +611,7 @@ exit_one_client(struct Client *source_p, const char *comment)
                          source_p->name, source_p->servptr->name);
 
     dlinkDelete(&source_p->lnode, &source_p->servptr->serv->server_list);
-    dlinkDelete(&source_p->node, &global_client_list);
-
-    if ((node = dlinkFindDelete(&global_server_list, source_p)))
-      free_dlink_node(node);
+    dlinkDelete(&source_p->node, &global_server_list);
   }
 
   /* Remove source_p from the client lists */

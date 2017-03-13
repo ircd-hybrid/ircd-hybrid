@@ -158,11 +158,11 @@ quote_max(struct Client *source_p, const char *arg, int newval)
     GlobalSetOptions.maxclients = newval;
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s set new MAXCLIENTS to %u (%u current)",
-                         get_oper_name(source_p), GlobalSetOptions.maxclients, Count.local);
+                         get_oper_name(source_p), GlobalSetOptions.maxclients, dlink_list_length(&local_client_list));
   }
   else
     sendto_one_notice(source_p, &me, ":Current MAXCLIENTS = %u (%u)",
-                      GlobalSetOptions.maxclients, Count.local);
+                      GlobalSetOptions.maxclients, dlink_list_length(&local_client_list));
 }
 
 /* SET SPAMNUM */

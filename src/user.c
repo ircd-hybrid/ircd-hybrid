@@ -129,8 +129,8 @@ show_lusers(struct Client *client_p)
 
   if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
   {
-    sendto_one_numeric(client_p, &me, RPL_LUSERME, Count.local, dlink_list_length(&local_server_list));
-    sendto_one_numeric(client_p, &me, RPL_LOCALUSERS, Count.local, Count.max_loc);
+    sendto_one_numeric(client_p, &me, RPL_LUSERME, dlink_list_length(&local_client_list), dlink_list_length(&local_server_list));
+    sendto_one_numeric(client_p, &me, RPL_LOCALUSERS, dlink_list_length(&local_client_list), Count.max_loc);
   }
   else
   {
@@ -144,11 +144,11 @@ show_lusers(struct Client *client_p)
     sendto_one_numeric(client_p, &me, RPL_STATSCONN, Count.max_loc_con,
                        Count.max_loc_cli, Count.totalrestartcount);
 
-  if (Count.local > Count.max_loc_cli)
-    Count.max_loc_cli = Count.local;
+  if (dlink_list_length(&local_client_list) > Count.max_loc_cli)
+    Count.max_loc_cli = dlink_list_length(&local_client_list);
 
-  if ((Count.local + dlink_list_length(&local_server_list)) > Count.max_loc_con)
-    Count.max_loc_con = Count.local + dlink_list_length(&local_server_list);
+  if ((dlink_list_length(&local_client_list) + dlink_list_length(&local_server_list)) > Count.max_loc_con)
+    Count.max_loc_con = dlink_list_length(&local_client_list) + dlink_list_length(&local_server_list);
 }
 
 /* report_and_set_user_flags()
@@ -411,8 +411,8 @@ register_local_user(struct Client *client_p)
    * probably be just a percentage of the MAXCLIENTS...
    *   -Taner
    */
-  if ((Count.local >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
-      (Count.local >= GlobalSetOptions.maxclients && !HasFlag(client_p, FLAGS_NOLIMIT)))
+  if ((dlink_list_length(&local_client_list) >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
+      (dlink_list_length(&local_client_list) >= GlobalSetOptions.maxclients && !HasFlag(client_p, FLAGS_NOLIMIT)))
   {
     sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                          "Too many clients, rejecting %s[%s].",
@@ -458,16 +458,6 @@ register_local_user(struct Client *client_p)
     ++Count.invisi;
   }
 
-  if (++Count.local > Count.max_loc)
-  {
-    Count.max_loc = Count.local;
-
-    if (!(Count.max_loc % 10))
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "New maximum local client connections: %u",
-                           Count.max_loc);
-  }
-
   assert(client_p->servptr == &me);
   SetClient(client_p);
   dlinkAdd(client_p, &client_p->lnode, &client_p->servptr->serv->client_list);
@@ -477,6 +467,16 @@ register_local_user(struct Client *client_p)
 
   dlink_move_node(&client_p->connection->lclient_node,
                   &unknown_list, &local_client_list);
+
+  if (dlink_list_length(&local_client_list) > Count.max_loc)
+  {
+    Count.max_loc = dlink_list_length(&local_client_list);
+
+    if (!(Count.max_loc % 10))
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                           "New maximum local client connections: %u",
+                           Count.max_loc);
+  }
 
   if (dlink_list_length(&global_client_list) > Count.max_tot)
     Count.max_tot = dlink_list_length(&global_client_list);

@@ -301,32 +301,23 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   size_t listener_memory = 0;
 
 
-  DLINK_FOREACH(node, global_server_list.head)
+  DLINK_FOREACH(node, local_server_list.head)
   {
     const struct Client *target_p = node->data;
 
-    if (MyConnect(target_p))
-    {
-      ++local_client_count;
-      local_client_conf_count += dlink_list_length(&target_p->connection->confs);
-    }
-    else
-      ++remote_client_count;
+    local_client_conf_count += dlink_list_length(&target_p->connection->confs);
   }
 
-  DLINK_FOREACH(node, global_client_list.head)
+  DLINK_FOREACH(node, local_client_list.head)
   {
     const struct Client *target_p = node->data;
 
-    if (MyConnect(target_p))
-    {
-      ++local_client_count;
-      local_client_conf_count += dlink_list_length(&target_p->connection->confs);
-      watch_list_entries += dlink_list_length(&target_p->connection->watches);
-    }
-    else
-      ++remote_client_count;
+    local_client_conf_count += dlink_list_length(&target_p->connection->confs);
+    watch_list_entries += dlink_list_length(&target_p->connection->watches);
   }
+
+  local_client_count = dlink_list_length(&local_server_list) + dlink_list_length(&local_client_list);
+  remote_client_count = dlink_list_length(&global_server_list) + dlink_list_length(&global_client_list) - local_client_count;
 
   /* Count up all members, invites, ban lists, except lists, Invex lists */
   DLINK_FOREACH(node, channel_list.head)

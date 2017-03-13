@@ -82,57 +82,25 @@ m_trace(struct Client *source_p, int parc, char *parv[])
 static int
 mo_trace(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *node = NULL;
-  const char *name = NULL;
-
   if (parc > 2)
-    if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
+    if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
       return 0;
 
-  if (parc > 1)
-    name = parv[1];
-  else
-    name = me.name;
-
-  switch (server_hunt(source_p, ":%s TRACE :%s", 1, parc, parv))
+  const struct server_hunt *hunt = server_hunt(source_p, ":%s TRACE :%s", 1, parc, parv);
+  switch (hunt->ret)
   {
-    case HUNTED_PASS: /* note: gets here only if parv[1] exists */
+    assert(hunt->target_p);
+    case HUNTED_PASS:
     {
-      struct Client *ac2ptr = NULL;
+      const char *name;
 
-/* This mess needs to be reviewed and cleaned up */
-      if ((ac2ptr = hash_find_client(name)) == NULL)
-      {
-        DLINK_FOREACH(node, global_server_list.head)
-        {
-          ac2ptr = node->data;
-
-          if (!match(name, ac2ptr->name))
-            break;
-          else
-            ac2ptr = NULL;
-        }
-
-        if (!ac2ptr)
-        {
-          DLINK_FOREACH(node, global_client_list.head)
-          {
-            ac2ptr = node->data;
-
-            if (!match(name, ac2ptr->name))
-              break;
-            else
-              ac2ptr = NULL;
-          }
-        }
-      }
-
-      if (ac2ptr)
-        sendto_one_numeric(source_p, &me, RPL_TRACELINK,
-                           ircd_version, name, ac2ptr->from->name);
+      if (parc > 1)
+        name = parv[1];
       else
-        sendto_one_numeric(source_p, &me, RPL_TRACELINK,
-                           ircd_version, name, "ac2ptr_is_NULL!!");
+        name = me.name;
+
+      sendto_one_numeric(source_p, &me, RPL_TRACELINK,
+                         ircd_version, name, hunt->target_p->from->name);
       return 0;
     }
 
@@ -154,7 +122,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
 static int
 ms_trace(struct Client *source_p, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parc, parv) != HUNTED_ISME)
+  if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
     return 0;
 
   if (HasUMode(source_p, UMODE_OPER))

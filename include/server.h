@@ -40,13 +40,18 @@ enum { STARTUP_CONNECTIONS_TIME = 60 };
 /*
  * Return values for server_hunt()
  */
-enum
+enum server_hunt_ret
 {
   HUNTED_NOSUCH  = -1,  /**< If the hunted server is not found */
   HUNTED_ISME    =  0,  /**< If this server should execute the command */
   HUNTED_PASS    =  1   /**< If message passed onwards successfully */
 };
 
+struct server_hunt
+{
+  enum server_hunt_ret ret;
+  struct Client *target_p;
+};
 
 /* Capabilities */
 struct Capability
@@ -84,7 +89,7 @@ enum
 #define ClearCap(x, cap)        ((x)->connection->caps &= ~(cap))
 
 extern int valid_servname(const char *);
-extern int server_hunt(struct Client *, const char *, const int, const int, char *[]);
+extern struct server_hunt *server_hunt(struct Client *, const char *, const int, const int, char *[]);
 extern void server_capab_init(void);
 extern void add_capability(const char *, unsigned int);
 extern void delete_capability(const char *);

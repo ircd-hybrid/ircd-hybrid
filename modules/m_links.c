@@ -103,8 +103,7 @@ mo_links(struct Client *source_p, int parc, char *parv[])
 {
   if (parc > 2)
     if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
-      if (server_hunt(source_p, ":%s LINKS %s :%s", 1,
-                      parc, parv) != HUNTED_ISME)
+      if (server_hunt(source_p, ":%s LINKS %s :%s", 1, parc, parv)->ret != HUNTED_ISME)
         return 0;
 
   do_links(source_p, parc, parv);
@@ -164,7 +163,7 @@ m_links(struct Client *source_p, int parc, char *parv[])
 static int
 ms_links(struct Client *source_p, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s LINKS %s :%s", 1, parc, parv) != HUNTED_ISME)
+  if (server_hunt(source_p, ":%s LINKS %s :%s", 1, parc, parv)->ret != HUNTED_ISME)
     return 0;
 
   return m_links(source_p, parc, parv);

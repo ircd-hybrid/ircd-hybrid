@@ -112,10 +112,10 @@ void
 show_lusers(struct Client *client_p)
 {
   if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
-    sendto_one_numeric(client_p, &me, RPL_LUSERCLIENT, (Count.total - Count.invisi),
+    sendto_one_numeric(client_p, &me, RPL_LUSERCLIENT, (dlink_list_length(&global_client_list) - Count.invisi),
                        Count.invisi, dlink_list_length(&global_server_list));
   else
-    sendto_one_numeric(client_p, &me, RPL_LUSERCLIENT, (Count.total - Count.invisi),
+    sendto_one_numeric(client_p, &me, RPL_LUSERCLIENT, (dlink_list_length(&global_client_list) - Count.invisi),
                        Count.invisi, 1);
 
   if (Count.oper)
@@ -134,11 +134,11 @@ show_lusers(struct Client *client_p)
   }
   else
   {
-    sendto_one_numeric(client_p, &me, RPL_LUSERME, Count.total, 0);
-    sendto_one_numeric(client_p, &me, RPL_LOCALUSERS, Count.total, Count.max_tot);
+    sendto_one_numeric(client_p, &me, RPL_LUSERME, dlink_list_length(&global_client_list), 0);
+    sendto_one_numeric(client_p, &me, RPL_LOCALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
   }
 
-  sendto_one_numeric(client_p, &me, RPL_GLOBALUSERS, Count.total, Count.max_tot);
+  sendto_one_numeric(client_p, &me, RPL_GLOBALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
 
   if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
     sendto_one_numeric(client_p, &me, RPL_STATSCONN, Count.max_loc_con,
@@ -468,10 +468,6 @@ register_local_user(struct Client *client_p)
                            Count.max_loc);
   }
 
-  if (++Count.total > Count.max_tot)
-    Count.max_tot = Count.total;
-  ++Count.totalrestartcount;
-
   assert(client_p->servptr == &me);
   SetClient(client_p);
   dlinkAdd(client_p, &client_p->lnode, &client_p->servptr->serv->client_list);
@@ -481,6 +477,10 @@ register_local_user(struct Client *client_p)
 
   dlink_move_node(&client_p->connection->lclient_node,
                   &unknown_list, &local_client_list);
+
+  if (dlink_list_length(&global_client_list) > Count.max_tot)
+    Count.max_tot = dlink_list_length(&global_client_list);
+  ++Count.totalrestartcount;
 
   user_welcome(client_p);
   userhost_add(client_p->sockhost, 0);
@@ -511,12 +511,13 @@ register_remote_user(struct Client *client_p)
   if (HasFlag(client_p->servptr, FLAGS_SERVICE))
     AddFlag(client_p, FLAGS_SERVICE);
 
-  if (++Count.total > Count.max_tot)
-    Count.max_tot = Count.total;
-
   SetClient(client_p);
   dlinkAdd(client_p, &client_p->lnode, &client_p->servptr->serv->client_list);
   dlinkAdd(client_p, &client_p->node, &global_client_list);
+
+  if (dlink_list_length(&global_client_list) > Count.max_tot)
+    Count.max_tot = dlink_list_length(&global_client_list);
+
   userhost_add(client_p->sockhost, 1);
   AddFlag(client_p, FLAGS_USERHOST);
 

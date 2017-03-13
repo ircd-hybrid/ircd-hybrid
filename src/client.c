@@ -567,9 +567,6 @@ exit_one_client(struct Client *source_p, const char *comment)
 
   if (IsClient(source_p))
   {
-    assert(Count.total > 0);
-
-    --Count.total;
     if (HasUMode(source_p, UMODE_OPER))
       --Count.oper;
     if (HasUMode(source_p, UMODE_INVISIBLE))

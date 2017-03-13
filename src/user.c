@@ -129,7 +129,7 @@ show_lusers(struct Client *client_p)
 
   if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
   {
-    sendto_one_numeric(client_p, &me, RPL_LUSERME, Count.local, Count.myserver);
+    sendto_one_numeric(client_p, &me, RPL_LUSERME, Count.local, dlink_list_length(&local_server_list));
     sendto_one_numeric(client_p, &me, RPL_LOCALUSERS, Count.local, Count.max_loc);
   }
   else
@@ -147,8 +147,8 @@ show_lusers(struct Client *client_p)
   if (Count.local > Count.max_loc_cli)
     Count.max_loc_cli = Count.local;
 
-  if ((Count.local + Count.myserver) > Count.max_loc_con)
-    Count.max_loc_con = Count.local + Count.myserver;
+  if ((Count.local + dlink_list_length(&local_server_list)) > Count.max_loc_con)
+    Count.max_loc_con = Count.local + dlink_list_length(&local_server_list);
 }
 
 /* report_and_set_user_flags()

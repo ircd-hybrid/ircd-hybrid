@@ -726,10 +726,6 @@ exit_client(struct Client *source_p, const char *comment)
     }
     else if (IsServer(source_p))
     {
-      assert(Count.myserver > 0);
-
-      --Count.myserver;
-
       assert(dlinkFind(&local_server_list, source_p));
       dlinkDelete(&source_p->connection->lclient_node, &local_server_list);
     }

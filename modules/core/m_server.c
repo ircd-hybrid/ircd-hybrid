@@ -266,8 +266,6 @@ server_estab(struct Client *client_p)
   dlink_move_node(&client_p->connection->lclient_node,
                   &unknown_list, &local_server_list);
 
-  Count.myserver++;
-
   dlinkAdd(client_p, &client_p->node, &global_server_list);
   hash_add_client(client_p);
   hash_add_id(client_p);

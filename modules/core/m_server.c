@@ -116,8 +116,7 @@ server_send_client(struct Client *client_p, struct Client *target_p)
   dlink_node *node = NULL;
   char ubuf[IRCD_BUFSIZE] = "";
 
-  if (!IsClient(target_p))
-    return;
+  assert(IsClient(target_p));
 
   send_umode(target_p, 0, 0, ubuf);
 
@@ -269,8 +268,7 @@ server_estab(struct Client *client_p)
 
   Count.myserver++;
 
-  dlinkAdd(client_p, &client_p->node, &global_client_list);
-  dlinkAdd(client_p, make_dlink_node(), &global_server_list);
+  dlinkAdd(client_p, &client_p->node, &global_server_list);
   hash_add_client(client_p);
   hash_add_id(client_p);
 
@@ -817,8 +815,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   if (service_find(target_p->name))
     AddFlag(target_p, FLAGS_SERVICE);
 
-  dlinkAdd(target_p, &target_p->node, &global_client_list);
-  dlinkAdd(target_p, make_dlink_node(), &global_server_list);
+  dlinkAdd(target_p, &target_p->node, &global_server_list);
   dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->server_list);
 
   hash_add_client(target_p);

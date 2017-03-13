@@ -267,7 +267,6 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   dlink_node *node, *node2;
 
   unsigned int local_client_conf_count = 0;      /* local client conf links */
-  unsigned int users_counted = 0;                /* user structs */
 
   unsigned int channel_members = 0;
   unsigned int channel_invites = 0;
@@ -302,6 +301,19 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   size_t listener_memory = 0;
 
 
+  DLINK_FOREACH(node, global_server_list.head)
+  {
+    const struct Client *target_p = node->data;
+
+    if (MyConnect(target_p))
+    {
+      ++local_client_count;
+      local_client_conf_count += dlink_list_length(&target_p->connection->confs);
+    }
+    else
+      ++remote_client_count;
+  }
+
   DLINK_FOREACH(node, global_client_list.head)
   {
     const struct Client *target_p = node->data;
@@ -314,9 +326,6 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
     }
     else
       ++remote_client_count;
-
-    if (IsClient(target_p))
-      ++users_counted;
   }
 
   /* Count up all members, invites, ban lists, except lists, Invex lists */
@@ -364,8 +373,8 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Clients %u(%zu)",
-                     users_counted,
-                     users_counted * sizeof(struct Client));
+                     dlink_list_length(&global_client_list),
+                     dlink_list_length(&global_client_list) * sizeof(struct Client));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Attached confs %u(%zu)",

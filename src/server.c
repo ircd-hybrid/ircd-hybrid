@@ -204,7 +204,7 @@ server_hunt(struct Client *source_p, const char *command,
       {
         struct Client *tmp = node->data;
 
-        assert(IsMe(tmp) || IsServer(tmp) || IsClient(tmp));
+        assert(IsClient(tmp));
         if (!match(parv[server], tmp->name))
         {
           if (tmp->from == source_p->from && !MyConnect(tmp))

@@ -76,7 +76,6 @@ struct ServerStatistics
 struct Counter
 {
   uintmax_t totalrestartcount; /* Total client count ever */
-  unsigned int myserver;      /* my servers          */
   unsigned int oper;          /* Opers               */
   unsigned int local;         /* Local Clients       */
   unsigned int invisi;        /* invisible clients   */

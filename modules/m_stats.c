@@ -377,6 +377,12 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      dlink_list_length(&global_client_list) * sizeof(struct Client));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+                     "z :Servers %u(%zu, %zu)",
+                     dlink_list_length(&global_server_list),
+                     dlink_list_length(&global_server_list) * sizeof(struct Client),
+                     dlink_list_length(&global_server_list) * sizeof(struct Server));
+
+  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Attached confs %u(%zu)",
                      local_client_conf_count,
                      local_client_conf_count * sizeof(dlink_node));

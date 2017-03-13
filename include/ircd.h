@@ -79,7 +79,6 @@ struct Counter
   unsigned int myserver;      /* my servers          */
   unsigned int oper;          /* Opers               */
   unsigned int local;         /* Local Clients       */
-  unsigned int total;         /* total clients       */
   unsigned int invisi;        /* invisible clients   */
   unsigned int max_loc;       /* MAX local clients   */
   unsigned int max_tot;       /* MAX global clients  */

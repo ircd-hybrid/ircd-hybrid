@@ -69,7 +69,7 @@ static void dump_map(struct Client *client,
     bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users: %5d (%1.2f%%)",
                        dlink_list_length(&server->serv->client_list), 100 *
                        (float)dlink_list_length(&server->serv->client_list) /
-                       (float)Count.total);
+                       (float)dlink_list_length(&global_client_list));
     sendto_one_numeric(client, &me, RPL_MAP, prompt, buf);
   }
 

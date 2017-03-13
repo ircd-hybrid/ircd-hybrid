@@ -434,31 +434,6 @@ conf_try_ban(struct Client *client_p, int type, const char *reason)
   exit_client(client_p, reason);
 }
 
-/* update_client_exit_stats()
- *
- * input	- pointer to client
- * output	- NONE
- * side effects	-
- */
-static void
-update_client_exit_stats(struct Client *client_p)
-{
-  if (IsClient(client_p))
-  {
-    assert(Count.total > 0);
-
-    --Count.total;
-    if (HasUMode(client_p, UMODE_OPER))
-      --Count.oper;
-    if (HasUMode(client_p, UMODE_INVISIBLE))
-      --Count.invisi;
-  }
-  else if (IsServer(client_p))
-    sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
-                         "Server %s split from %s",
-                         client_p->name, client_p->servptr->name);
-}
-
 /* find_person()
  *
  * inputs	- pointer to name
@@ -592,6 +567,14 @@ exit_one_client(struct Client *source_p, const char *comment)
 
   if (IsClient(source_p))
   {
+    assert(Count.total > 0);
+
+    --Count.total;
+    if (HasUMode(source_p, UMODE_OPER))
+      --Count.oper;
+    if (HasUMode(source_p, UMODE_INVISIBLE))
+      --Count.invisi;
+
     dlinkDelete(&source_p->lnode, &source_p->servptr->serv->client_list);
     dlinkDelete(&source_p->node, &global_client_list);
 
@@ -623,6 +606,10 @@ exit_one_client(struct Client *source_p, const char *comment)
   }
   else if (IsServer(source_p))
   {
+    sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
+                         "Server %s split from %s",
+                         source_p->name, source_p->servptr->name);
+
     dlinkDelete(&source_p->lnode, &source_p->servptr->serv->server_list);
     dlinkDelete(&source_p->node, &global_client_list);
 
@@ -639,8 +626,6 @@ exit_one_client(struct Client *source_p, const char *comment)
 
   if (HasFlag(source_p, FLAGS_USERHOST))
     userhost_del(source_p->sockhost, !MyConnect(source_p));
-
-  update_client_exit_stats(source_p);
 
   /* Check to see if the client isn't already on the dead list */
   assert(dlinkFind(&dead_list, source_p) == NULL);

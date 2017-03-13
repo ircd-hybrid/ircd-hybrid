@@ -89,7 +89,7 @@ enum
 #define ClearCap(x, cap)        ((x)->connection->caps &= ~(cap))
 
 extern int valid_servname(const char *);
-extern struct server_hunt *server_hunt(struct Client *, const char *, const int, const int, char *[]);
+extern const struct server_hunt *server_hunt(struct Client *, const char *, const int, const int, char *[]);
 extern void server_capab_init(void);
 extern void add_capability(const char *, unsigned int);
 extern void delete_capability(const char *);

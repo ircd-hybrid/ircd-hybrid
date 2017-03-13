@@ -158,7 +158,7 @@ read_links_file(void)
  *
  *      returns: (see #defines)
  */
-struct server_hunt *
+const struct server_hunt *
 server_hunt(struct Client *source_p, const char *command,
             const int server, const int parc, char *parv[])
 {

@@ -89,26 +89,15 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
   const struct server_hunt *hunt = server_hunt(source_p, ":%s TRACE :%s", 1, parc, parv);
   switch (hunt->ret)
   {
-    assert(hunt->target_p);
     case HUNTED_PASS:
-    {
-      const char *name;
-
-      if (parc > 1)
-        name = parv[1];
-      else
-        name = me.name;
-
       sendto_one_numeric(source_p, &me, RPL_TRACELINK,
-                         ircd_version, name, hunt->target_p->from->name);
-      return 0;
-    }
-
+                         ircd_version, hunt->target_p->name, hunt->target_p->from->name);
+      break;
     case HUNTED_ISME:
       do_actual_trace(source_p, parc, parv);
       break;
     default:
-      return 0;
+      break;
   }
 
   return 0;

@@ -77,7 +77,6 @@ struct Counter
 {
   uintmax_t totalrestartcount; /* Total client count ever */
   unsigned int oper;          /* Opers               */
-  unsigned int local;         /* Local Clients       */
   unsigned int invisi;        /* invisible clients   */
   unsigned int max_loc;       /* MAX local clients   */
   unsigned int max_tot;       /* MAX global clients  */

@@ -695,10 +695,6 @@ exit_client(struct Client *source_p, const char *comment)
 
     if (IsClient(source_p))
     {
-      assert(Count.local > 0);
-
-      --Count.local;
-
       if (HasUMode(source_p, UMODE_OPER))
         if ((node = dlinkFindDelete(&oper_list, source_p)))
           free_dlink_node(node);

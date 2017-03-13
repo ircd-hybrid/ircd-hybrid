@@ -64,7 +64,7 @@ trace_get_dependent(unsigned int *const server,
 static int
 m_trace(struct Client *source_p, int parc, char *parv[])
 {
-  const char *name = NULL;
+  const char *name;
 
   if (parc > 1)
     name = parv[1];
@@ -122,23 +122,22 @@ ms_trace(struct Client *source_p, int parc, char *parv[])
 static void
 do_actual_trace(struct Client *source_p, int parc, char *parv[])
 {
-  const struct Client *target_p = NULL;
   int doall = 0;
-  int wilds, dow;
+  int wilds = 0, dow = 0;
   dlink_node *node;
   const char *name;
 
   assert(HasUMode(source_p, UMODE_OPER));
 
-  if (parc > 1)
-    name = parv[1];
-  else
-    name = me.name;
-
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "TRACE requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
+
+  if (parc > 1)
+    name = parv[1];
+  else
+    name = me.name;
 
   if (!match(name, me.name))
     doall = 1;
@@ -153,7 +152,8 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
 
   if (!dow)  /* lets also do this for opers tracing nicks */
   {
-    if ((target_p = find_person(source_p, name)))
+    const struct Client *target_p = find_person(source_p, name);
+    if (target_p)
       report_this_status(source_p, target_p);
 
     sendto_one_numeric(source_p, &me, RPL_TRACEEND, name);
@@ -163,7 +163,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
   /* report all direct connections */
   DLINK_FOREACH(node, local_client_list.head)
   {
-    target_p = node->data;
+    const struct Client *target_p = node->data;
 
     if (!doall && wilds && match(name, target_p->name))
       continue;
@@ -175,7 +175,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
 
   DLINK_FOREACH(node, local_server_list.head)
   {
-    target_p = node->data;
+    const struct Client *target_p = node->data;
 
     if (!doall && wilds && match(name, target_p->name))
       continue;
@@ -188,7 +188,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
   /* This section is to report the unknowns */
   DLINK_FOREACH(node, unknown_list.head)
   {
-    target_p = node->data;
+    const struct Client *target_p = node->data;
 
     if (!doall && wilds && match(name, target_p->name))
       continue;

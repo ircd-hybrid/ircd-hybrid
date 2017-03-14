@@ -64,14 +64,7 @@ trace_get_dependent(unsigned int *const server,
 static int
 m_trace(struct Client *source_p, int parc, char *parv[])
 {
-  const char *name;
-
-  if (parc > 1)
-    name = parv[1];
-  else
-    name = me.name;
-
-  sendto_one_numeric(source_p, &me, RPL_TRACEEND, name);
+  sendto_one_numeric(source_p, &me, RPL_TRACEEND, me.name);
   return 0;
 }
 
@@ -156,7 +149,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     if (target_p)
       report_this_status(source_p, target_p);
 
-    sendto_one_numeric(source_p, &me, RPL_TRACEEND, name);
+    sendto_one_numeric(source_p, &me, RPL_TRACEEND, me.name);
     return;
   }
 
@@ -206,7 +199,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
       sendto_one_numeric(source_p, &me, RPL_TRACECLASS, class->name, class->ref_count);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_TRACEEND, name);
+  sendto_one_numeric(source_p, &me, RPL_TRACEEND, me.name);
 }
 
 /* report_this_status()

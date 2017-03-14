@@ -227,7 +227,7 @@ start_auth_query(struct AuthRequest *auth)
                 SOCK_STREAM, 0, "ident") == -1)
   {
     report_error(L_ALL, "creating auth stream socket %s:%s",
-                 get_client_name(auth->client, SHOW_IP), errno);
+                 client_get_name(auth->client, SHOW_IP), errno);
     ++ServerStats.is_abad;
     return;
   }
@@ -348,7 +348,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
       getpeername(auth->client->connection->fd.fd, (struct sockaddr *)&them, &tlen))
   {
     report_error(L_ALL, "auth get{sock,peer}name error %s:%s",
-                 get_client_name(auth->client, SHOW_IP), errno);
+                 client_get_name(auth->client, SHOW_IP), errno);
     auth_error(auth);
     return;
   }

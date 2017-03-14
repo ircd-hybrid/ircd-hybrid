@@ -539,13 +539,13 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Server %s already present from %s",
-                         conf->name, get_client_name(client_p, SHOW_IP));
+                         conf->name, client_get_name(client_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Server %s already present from %s",
-                         conf->name, get_client_name(client_p, MASK_IP));
+                         conf->name, client_get_name(client_p, MASK_IP));
     if (by && IsClient(by) && !MyClient(by))
       sendto_one_notice(by, &me, ":Server %s already present from %s",
-                        conf->name, get_client_name(client_p, MASK_IP));
+                        conf->name, client_get_name(client_p, MASK_IP));
     return 0;
   }
 
@@ -695,9 +695,9 @@ finish_ssl_server_handshake(struct Client *client_p)
   if (!conf)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Lost connect{} block for %s", get_client_name(client_p, SHOW_IP));
+                         "Lost connect{} block for %s", client_get_name(client_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
+                         "Lost connect{} block for %s", client_get_name(client_p, MASK_IP));
 
     exit_client(client_p, "Lost connect{} block");
     return;
@@ -718,9 +718,9 @@ finish_ssl_server_handshake(struct Client *client_p)
   if (IsDead(client_p))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "%s went dead during handshake", get_client_name(client_p, SHOW_IP));
+                         "%s went dead during handshake", client_get_name(client_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "%s went dead during handshake", get_client_name(client_p, MASK_IP));
+                         "%s went dead during handshake", client_get_name(client_p, MASK_IP));
     return;
   }
 
@@ -816,10 +816,10 @@ serv_connect_callback(fde_t *fd, int status, void *data)
     /* We have an error, so report it and quit */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Error connecting to %s: %s",
-                         get_client_name(client_p, SHOW_IP), comm_errstr(status));
+                         client_get_name(client_p, SHOW_IP), comm_errstr(status));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Error connecting to %s: %s",
-                         get_client_name(client_p, MASK_IP), comm_errstr(status));
+                         client_get_name(client_p, MASK_IP), comm_errstr(status));
 
     /*
      * If a fd goes bad, call dead_link() the socket is no
@@ -836,9 +836,9 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   if (!conf)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Lost connect{} block for %s", get_client_name(client_p, SHOW_IP));
+                         "Lost connect{} block for %s", client_get_name(client_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Lost connect{} block for %s", get_client_name(client_p, MASK_IP));
+                         "Lost connect{} block for %s", client_get_name(client_p, MASK_IP));
 
     exit_client(client_p, "Lost connect{} block");
     return;
@@ -867,9 +867,9 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   if (IsDead(client_p))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "%s went dead during handshake", get_client_name(client_p, SHOW_IP));
+                         "%s went dead during handshake", client_get_name(client_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "%s went dead during handshake", get_client_name(client_p, MASK_IP));
+                         "%s went dead during handshake", client_get_name(client_p, MASK_IP));
     return;
   }
 

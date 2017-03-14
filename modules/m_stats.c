@@ -1077,7 +1077,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
 
     /* ":%s 211 %s %s %u %u %ju %u %ju :%u %u %s" */
     sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
-               get_client_name(target_p, HasUMode(source_p, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
+               client_get_name(target_p, HasUMode(source_p, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
                dbuf_length(&target_p->connection->buf_sendq),
                target_p->connection->send.messages,
                target_p->connection->send.bytes >> 10,
@@ -1176,7 +1176,7 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
         type = MASK_IP;
 
     sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
-                       get_client_name(target_p, type),
+                       client_get_name(target_p, type),
                        dbuf_length(&target_p->connection->buf_sendq),
                        target_p->connection->send.messages,
                        target_p->connection->send.bytes >> 10,

@@ -143,9 +143,6 @@ show_lusers(struct Client *client_p)
   if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
     sendto_one_numeric(client_p, &me, RPL_STATSCONN, Count.max_loc_con,
                        Count.max_loc, Count.totalrestartcount);
-
-  if ((dlink_list_length(&local_client_list) + dlink_list_length(&local_server_list)) > Count.max_loc_con)
-    Count.max_loc_con = dlink_list_length(&local_client_list) + dlink_list_length(&local_server_list);
 }
 
 /* report_and_set_user_flags()
@@ -474,6 +471,11 @@ register_local_user(struct Client *client_p)
                            "New maximum local client connections: %u",
                            Count.max_loc);
   }
+
+  if ((dlink_list_length(&local_client_list) +
+       dlink_list_length(&local_server_list)) > Count.max_loc_con)
+    Count.max_loc_con = dlink_list_length(&local_client_list) +
+                        dlink_list_length(&local_server_list);
 
   if (dlink_list_length(&global_client_list) > Count.max_tot)
     Count.max_tot = dlink_list_length(&global_client_list);

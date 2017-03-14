@@ -267,6 +267,12 @@ server_estab(struct Client *client_p)
                   &unknown_list, &local_server_list);
 
   dlinkAdd(client_p, &client_p->node, &global_server_list);
+
+  if ((dlink_list_length(&local_client_list) +
+       dlink_list_length(&local_server_list)) > Count.max_loc_con)
+    Count.max_loc_con = dlink_list_length(&local_client_list) +
+                        dlink_list_length(&local_server_list);
+
   hash_add_client(client_p);
   hash_add_id(client_p);
 

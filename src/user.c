@@ -142,10 +142,7 @@ show_lusers(struct Client *client_p)
 
   if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
     sendto_one_numeric(client_p, &me, RPL_STATSCONN, Count.max_loc_con,
-                       Count.max_loc_cli, Count.totalrestartcount);
-
-  if (dlink_list_length(&local_client_list) > Count.max_loc_cli)
-    Count.max_loc_cli = dlink_list_length(&local_client_list);
+                       Count.max_loc, Count.totalrestartcount);
 
   if ((dlink_list_length(&local_client_list) + dlink_list_length(&local_server_list)) > Count.max_loc_con)
     Count.max_loc_con = dlink_list_length(&local_client_list) + dlink_list_length(&local_server_list);

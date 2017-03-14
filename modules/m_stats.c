@@ -992,7 +992,7 @@ stats_uptime(struct Client *source_p, int parc, char *parv[])
                        time_dissect(CurrentTime - me.connection->since));
     if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
        sendto_one_numeric(source_p, &me, RPL_STATSCONN, Count.max_loc_con,
-                          Count.max_loc_cli, Count.totalrestartcount);
+                          Count.max_loc, Count.totalrestartcount);
   }
 }
 

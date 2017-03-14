@@ -81,7 +81,6 @@ struct Counter
   unsigned int max_loc;       /* MAX local clients   */
   unsigned int max_tot;       /* MAX global clients  */
   unsigned int max_loc_con;   /* MAX local connection count (clients + server) */
-  unsigned int max_loc_cli;   /* XXX This is redundant - Max local client count */
 };
 
 struct ServerState_t

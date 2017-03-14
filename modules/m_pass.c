@@ -33,8 +33,6 @@
 #include "ircd.h"
 #include "parse.h"
 #include "modules.h"
-#include "server.h"
-#include "user.h"
 #include "misc.h"
 #include "memory.h"
 
@@ -50,8 +48,8 @@
  *      - parv[0] = command
  *      - parv[1] = password
  *      - parv[2] = unused
- *      - parv[3] = TS protocol version
- *      - parv[4] = server ID (SID)
+ *      - parv[3] = TS protocol version (will be deprecated in some future release)
+ *      - parv[4] = server ID (SID) (will be deprecated in some future release)
  */
 static int
 mr_pass(struct Client *source_p, int parc, char *parv[])

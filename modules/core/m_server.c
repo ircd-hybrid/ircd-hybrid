@@ -649,12 +649,8 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 static int
 ms_sid(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *node = NULL;
   struct Client *target_p = NULL;
   struct Client *client_p = source_p->from; /* XXX */
-  const struct MaskItem *conf = NULL;
-  int hlined = 0;
-  int llined = 0;
 
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
@@ -724,11 +720,15 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     if (target_p != client_p)
       exit_client(target_p, "Overridden");
 
-  conf = client_p->connection->confs.head->data;
-
-  /* See if the newly found server is behind a guaranteed
+  /*
+   * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
+  dlink_node *node;
+  unsigned int hlined = 0;
+  unsigned int llined = 0;
+  const struct MaskItem *conf = client_p->connection->confs.head->data;
+
   DLINK_FOREACH(node, conf->leaf_list.head)
   {
     if (!match(node->data, parv[1]))

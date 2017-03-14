@@ -45,8 +45,7 @@ enum { WHOWAS_MAX_REPLIES = 20 };  /* Only applies to remote clients */
 static void
 do_whowas(struct Client *source_p, const int parc, char *parv[])
 {
-  int cur = 0;
-  int max = -1;
+  int count = 0, max = -1;
   dlink_node *node;
 
   if (parc > 2 && !EmptyString(parv[2]))
@@ -79,14 +78,14 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
       else
         sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, whowas->name,
                            whowas->servername, date_ctime(whowas->logoff));
-      ++cur;
+      ++count;
     }
 
-    if (max > 0 && cur >= max)
+    if (max > 0 && count >= max)
       break;
   }
 
-  if (!cur)
+  if (!count)
     sendto_one_numeric(source_p, &me, ERR_WASNOSUCHNICK, parv[1]);
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFWHOWAS, parv[1]);

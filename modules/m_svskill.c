@@ -89,7 +89,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
                          "Received wrong-direction SVSKILL "
                          "for %s (behind %s) from %s",
                          target_p->name, source_p->from->name,
-                         get_client_name(source_p, HIDE_IP));
+                         client_get_name(source_p, HIDE_IP));
     return 0;
   }
 

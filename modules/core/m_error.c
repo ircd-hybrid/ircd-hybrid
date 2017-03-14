@@ -60,10 +60,10 @@ mr_error(struct Client *source_p, int parc, char *parv[])
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "ERROR :from %s -- %s",
-                       get_client_name(source_p, HIDE_IP), message);
+                       client_get_name(source_p, HIDE_IP), message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                        "ERROR :from %s -- %s",
-                       get_client_name(source_p, MASK_IP), message);
+                       client_get_name(source_p, MASK_IP), message);
   return 0;
 }
 
@@ -89,12 +89,12 @@ ms_error(struct Client *source_p, int parc, char *parv[])
   if (MyConnect(source_p))
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "ERROR :from %s -- %s",
-                         get_client_name(source_p->from, MASK_IP), message);
+                         client_get_name(source_p->from, MASK_IP), message);
   else
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "ERROR :from %s via %s -- %s",
                          source_p->name,
-                         get_client_name(source_p->from, MASK_IP), message);
+                         client_get_name(source_p->from, MASK_IP), message);
   return 0;
 }
 

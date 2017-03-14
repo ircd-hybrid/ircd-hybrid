@@ -61,7 +61,7 @@ mo_close(struct Client *source_p, int parc, char *parv[])
     struct Client *target_p = node->data;
 
     sendto_one_numeric(source_p, &me, RPL_CLOSING,
-                       get_client_name(target_p, SHOW_IP),
+                       client_get_name(target_p, SHOW_IP),
                        target_p->status);
 
     /*

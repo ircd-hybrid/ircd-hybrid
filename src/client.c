@@ -242,12 +242,12 @@ check_pings_list(dlink_list *list)
           {
             sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                                  "No response from %s, closing link",
-                                 get_client_name(client_p, SHOW_IP));
+                                 client_get_name(client_p, SHOW_IP));
             sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                                  "No response from %s, closing link",
-                                 get_client_name(client_p, MASK_IP));
+                                 client_get_name(client_p, MASK_IP));
             ilog(LOG_TYPE_IRCD, "No response from %s, closing link",
-                 get_client_name(client_p, SHOW_IP));
+                 client_get_name(client_p, SHOW_IP));
           }
 
           snprintf(buf, sizeof(buf), "Ping timeout: %ji seconds",
@@ -397,7 +397,7 @@ conf_try_ban(struct Client *client_p, int type, const char *reason)
       {
         sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                              "KLINE over-ruled for %s, client is kline_exempt",
-                             get_client_name(client_p, HIDE_IP));
+                             client_get_name(client_p, HIDE_IP));
         return;
       }
 
@@ -414,7 +414,7 @@ conf_try_ban(struct Client *client_p, int type, const char *reason)
       {
         sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                              "XLINE over-ruled for %s, client is xline_exempt",
-                             get_client_name(client_p, HIDE_IP));
+                             client_get_name(client_p, HIDE_IP));
         return;
       }
 
@@ -426,7 +426,7 @@ conf_try_ban(struct Client *client_p, int type, const char *reason)
   }
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%c-line active for %s",
-                       ban_type, get_client_name(client_p, HIDE_IP));
+                       ban_type, client_get_name(client_p, HIDE_IP));
 
   if (IsClient(client_p))
     sendto_one_numeric(client_p, &me, ERR_YOUREBANNEDCREEP, reason);
@@ -480,7 +480,7 @@ find_chasing(struct Client *source_p, const char *name)
 }
 
 /*
- * get_client_name -  Return the name of the client
+ * client_get_name -  Return the name of the client
  *    for various tracking and
  *      admin purposes. The main purpose of this function is to
  *      return the "socket host" name of the client, if that
@@ -498,7 +498,7 @@ find_chasing(struct Client *source_p, const char *name)
  *        to modify what it points!!!
  */
 const char *
-get_client_name(const struct Client *client_p, enum addr_mask_type type)
+client_get_name(const struct Client *client_p, enum addr_mask_type type)
 {
   static char buf[HOSTLEN * 2 + USERLEN + 4];  /* +4 for [,@,],\0 */
 
@@ -855,22 +855,22 @@ dead_link_on_read(struct Client *client_p, int error)
       /* Admins get the real IP */
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "Server %s closed the connection",
-                           get_client_name(client_p, SHOW_IP));
+                           client_get_name(client_p, SHOW_IP));
 
       /* Opers get a masked IP */
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                            "Server %s closed the connection",
-                           get_client_name(client_p, MASK_IP));
+                           client_get_name(client_p, MASK_IP));
 
       ilog(LOG_TYPE_IRCD, "Server %s closed the connection",
-           get_client_name(client_p, SHOW_IP));
+           client_get_name(client_p, SHOW_IP));
     }
     else
     {
       report_error(L_ADMIN, "Lost connection to %s: %s",
-                   get_client_name(client_p, SHOW_IP), current_error);
+                   client_get_name(client_p, SHOW_IP), current_error);
       report_error(L_OPER, "Lost connection to %s: %s",
-                   get_client_name(client_p, MASK_IP), current_error);
+                   client_get_name(client_p, MASK_IP), current_error);
     }
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,

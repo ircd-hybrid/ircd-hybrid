@@ -100,7 +100,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p,
         SetJoinFloodNoticed(chptr);
         sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                              "Possible Join Flooder %s on %s target: %s",
-                             get_client_name(client_p, HIDE_IP),
+                             client_get_name(client_p, HIDE_IP),
                              client_p->servptr->name, chptr->name);
       }
     }
@@ -556,7 +556,7 @@ clear_invite_list(dlink_list *list)
  * side effects -
  *
  * NOTE: Returned string is usually a static buffer
- * (like in get_client_name)
+ * (like in client_get_name)
  */
 const char *
 get_member_status(const struct Membership *member, const int combine)
@@ -994,7 +994,7 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
       sendto_one_numeric(client_p, &me, ERR_CHANBANREASON, name, resv->reason);
       sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                            "Forbidding reserved channel %s from user %s",
-                           name, get_client_name(client_p, HIDE_IP));
+                           name, client_get_name(client_p, HIDE_IP));
       continue;
     }
 

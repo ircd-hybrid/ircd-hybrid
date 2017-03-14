@@ -119,10 +119,10 @@ parse_remove_unknown(struct Client *client_p, const char *lsender, char *lbuffer
   {
     sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",
-                         lbuffer, get_client_name(client_p, SHOW_IP), lsender);
+                         lbuffer, client_get_name(client_p, SHOW_IP), lsender);
     sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",
-                         lbuffer, get_client_name(client_p, MASK_IP), lsender);
+                         lbuffer, client_get_name(client_p, MASK_IP), lsender);
     sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
                me.id, lsender, lbuffer, client_p->name);
   }
@@ -294,11 +294,11 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
         sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                              "Fake direction: dropped message from %s[%s] via %s",
                              from->name, from->from->name,
-                             get_client_name(client_p, SHOW_IP));
+                             client_get_name(client_p, SHOW_IP));
         sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
                              "Fake direction: dropped message from %s[%s] via %s",
                              from->name, from->from->name,
-                             get_client_name(client_p, MASK_IP));
+                             client_get_name(client_p, MASK_IP));
         return;
       }
     }

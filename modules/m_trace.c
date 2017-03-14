@@ -222,7 +222,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
   const char *name;
   const char *class_name;
 
-  name = get_client_name(target_p, HIDE_IP);
+  name = client_get_name(target_p, HIDE_IP);
   class_name = get_client_class(&target_p->connection->confs);
 
   switch (target_p->status)
@@ -262,7 +262,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
       trace_get_dependent(&servers, &clients, target_p);
 
       if (!HasUMode(source_p, UMODE_ADMIN))
-        name = get_client_name(target_p, MASK_IP);
+        name = client_get_name(target_p, MASK_IP);
 
       sendto_one_numeric(source_p, &me, RPL_TRACESERVER, class_name, servers,
                          clients, name, *(target_p->serv->by) ?

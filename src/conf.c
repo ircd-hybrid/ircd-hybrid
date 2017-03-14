@@ -340,10 +340,10 @@ check_client(struct Client *source_p)
     case TOO_MANY:
       sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                            "Too many on IP for %s (%s).",
-                           get_client_name(source_p, SHOW_IP),
+                           client_get_name(source_p, SHOW_IP),
                            source_p->sockhost);
       ilog(LOG_TYPE_IRCD, "Too many connections on IP from %s.",
-           get_client_name(source_p, SHOW_IP));
+           client_get_name(source_p, SHOW_IP));
       ++ServerStats.is_ref;
       exit_client(source_p, "No more connections allowed on that IP");
       break;
@@ -351,10 +351,10 @@ check_client(struct Client *source_p)
     case I_LINE_FULL:
       sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                            "auth {} block is full for %s (%s).",
-                           get_client_name(source_p, SHOW_IP),
+                           client_get_name(source_p, SHOW_IP),
                            source_p->sockhost);
       ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
-           get_client_name(source_p, SHOW_IP));
+           client_get_name(source_p, SHOW_IP));
       ++ServerStats.is_ref;
       exit_client(source_p, "No more connections allowed in your connection class");
       break;
@@ -364,11 +364,11 @@ check_client(struct Client *source_p)
       /*       a purely cosmetical change */
       sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
                            "Unauthorized client connection from %s on [%s/%u].",
-                           get_client_name(source_p, SHOW_IP),
+                           client_get_name(source_p, SHOW_IP),
                            source_p->connection->listener->name,
                            source_p->connection->listener->port);
       ilog(LOG_TYPE_IRCD, "Unauthorized client connection from %s on [%s/%u].",
-           get_client_name(source_p, SHOW_IP),
+           client_get_name(source_p, SHOW_IP),
            source_p->connection->listener->name,
            source_p->connection->listener->port);
 

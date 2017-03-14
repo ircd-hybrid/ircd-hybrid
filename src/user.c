@@ -292,7 +292,7 @@ check_xline(struct Client *client_p)
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "X-line Rejecting [%s] [%s], user %s [%s]",
                          client_p->info, gecos->reason,
-                         get_client_name(client_p, HIDE_IP),
+                         client_get_name(client_p, HIDE_IP),
                          client_p->sockhost);
 
     ++ServerStats.is_ref;

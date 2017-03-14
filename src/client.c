@@ -947,7 +947,7 @@ find_accept(const char *nick, const char *user,
             const char *host, struct Client *client_p,
             int (*cmpfunc)(const char *, const char *))
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, client_p->connection->acceptlist.head)
   {
@@ -1000,7 +1000,7 @@ accept_message(struct Client *source,
 void
 del_all_accepts(struct Client *client_p)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, client_p->connection->acceptlist.head)
     del_accept(node->data, client_p);
@@ -1011,8 +1011,6 @@ client_get_idle_time(const struct Client *source_p,
                      const struct Client *target_p)
 {
   unsigned int idle = 0;
-  unsigned int min_idle = 0;
-  unsigned int max_idle = 0;
   const struct ClassItem *const class = get_class_ptr(&target_p->connection->confs);
 
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target_p == source_p)
@@ -1022,8 +1020,8 @@ client_get_idle_time(const struct Client *source_p,
       !(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
     return CurrentTime - target_p->connection->last_privmsg;
 
-  min_idle = class->min_idle;
-  max_idle = class->max_idle;
+  const unsigned int min_idle = class->min_idle;
+  const unsigned int max_idle = class->max_idle;
 
   if (min_idle == max_idle)
     return min_idle;

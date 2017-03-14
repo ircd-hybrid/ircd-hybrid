@@ -33,8 +33,6 @@
 #include "ircd.h"
 #include "parse.h"
 #include "modules.h"
-#include "server.h"
-#include "user.h"
 #include "misc.h"
 #include "memory.h"
 

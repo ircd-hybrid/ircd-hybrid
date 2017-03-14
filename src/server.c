@@ -59,7 +59,7 @@ void
 write_links_file(void *unused)
 {
   FILE *file = NULL;
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
   char buff[IRCD_BUFSIZE] = "";
 
   if (EmptyString(ConfigServerHide.flatten_links_file))
@@ -163,7 +163,7 @@ server_hunt(struct Client *source_p, const char *command,
             const int server, const int parc, char *parv[])
 {
   static struct server_hunt hunt;
-  struct server_hunt *h = &hunt;
+  struct server_hunt *const h = &hunt;
   dlink_node *node;
 
   /* Assume it's me, if no server */
@@ -257,7 +257,7 @@ server_hunt(struct Client *source_p, const char *command,
 void
 try_connections(void *unused)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (GlobalSetOptions.autoconn == 0)
     return;
@@ -267,6 +267,7 @@ try_connections(void *unused)
     struct MaskItem *conf = node->data;
 
     assert(conf->type == CONF_SERVER);
+    assert(conf->class);
 
     /* Also when already connecting! (update holdtimes) --SRB */
     if (!conf->port || !IsConfAllowAutoConn(conf))
@@ -281,8 +282,6 @@ try_connections(void *unused)
      */
     if (conf->until > CurrentTime)
       continue;
-
-    assert(conf->class);
 
     conf->until = CurrentTime + conf->class->con_freq;
 
@@ -392,7 +391,7 @@ add_capability(const char *name, unsigned int flag)
 void
 delete_capability(const char *name)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, server_capabilities_list.head)
   {

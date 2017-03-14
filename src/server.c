@@ -169,8 +169,8 @@ server_hunt(struct Client *source_p, const char *command,
   /* Assume it's me, if no server */
   if (parc <= server || EmptyString(parv[server]))
   {
-    h->ret = HUNTED_ISME;
     h->target_p = &me;
+    h->ret = HUNTED_ISME;
     return h;
   }
 
@@ -198,7 +198,7 @@ server_hunt(struct Client *source_p, const char *command,
         if (tmp->from == source_p->from && !MyConnect(tmp))
           continue;
 
-        h->target_p = node->data;
+        h->target_p = tmp;
         break;
       }
     }
@@ -215,7 +215,7 @@ server_hunt(struct Client *source_p, const char *command,
           if (tmp->from == source_p->from && !MyConnect(tmp))
             continue;
 
-          h->target_p = node->data;
+          h->target_p = tmp;
           break;
         }
       }

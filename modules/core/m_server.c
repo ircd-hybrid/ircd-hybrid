@@ -258,11 +258,9 @@ server_estab(struct Client *client_p)
 
   SetServer(client_p);
 
-  /* Some day, all these lists will be consolidated *sigh* */
   dlinkAdd(client_p, &client_p->lnode, &me.serv->server_list);
 
   assert(dlinkFind(&unknown_list, client_p));
-
   dlink_move_node(&client_p->connection->lclient_node,
                   &unknown_list, &local_server_list);
 

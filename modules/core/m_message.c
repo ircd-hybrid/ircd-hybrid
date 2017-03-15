@@ -70,25 +70,6 @@ static struct
 static unsigned int ntargets;
 
 
-/*
-** m_privmsg
-**
-** massive cleanup
-** rev argv 6/91
-**
-**   Another massive cleanup Nov, 2000
-** (I don't think there is a single line left from 6/91. Maybe.)
-** m_privmsg and m_notice do basically the same thing.
-** in the original 2.8.2 code base, they were the same function
-** "m_message.c." When we did the great cleanup in conjuncton with bleep
-** of ircu fame, we split m_privmsg.c and m_notice.c.
-** I don't see the point of that now. It's harder to maintain, it's
-** easier to introduce bugs into one version and not the other etc.
-** Really, the penalty of an extra function call isn't that big a deal folks.
-** -db Nov 13, 2000
-**
-*/
-
 /* duplicate_ptr()
  *
  * inputs       - pointer to check

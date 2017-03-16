@@ -317,7 +317,7 @@ fix_key(char *arg)
 {
   unsigned char *s, *t, c;
 
-  for (s = t = (unsigned char *)arg; (c = *s); ++s)
+  for (s = t = (unsigned char *)arg; (c = *s) && s - (unsigned char *)arg < KEYLEN; ++s)
   {
     c &= 0x7f;
 
@@ -986,7 +986,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
         mode_changes[i].letter = 0;
 
     mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].arg = chptr->mode.key;
+    mode_changes[mode_count].arg = key;
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count++].dir = dir;
   }

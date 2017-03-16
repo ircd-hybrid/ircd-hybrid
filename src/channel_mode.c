@@ -40,13 +40,8 @@
 #include "mempool.h"
 #include "parse.h"
 
-/* 10 is a magic number in hybrid 6 NFI where it comes from -db */
-#define BAN_FUDGE       10
 
 static char nuh_mask[MAXPARA][IRCD_BUFSIZE];
-/* some buffers for rebuilding channel/nick lists with ,'s */
-static char modebuf[IRCD_BUFSIZE];
-static char parabuf[MODEBUFLEN];
 static struct ChModeChange mode_changes[IRCD_BUFSIZE];
 static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
@@ -1313,17 +1308,14 @@ get_channel_access(const struct Client *source_p,
 static void
 send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 {
+  char modebuf[IRCD_BUFSIZE] = "";
+  char parabuf[IRCD_BUFSIZE] = "";
+  char *parptr = parabuf;
   int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
-  int len = 0;
   int dir = MODE_QUERY;
-  const char *arg = NULL;
-  char *parptr = NULL;
 
-  parabuf[0] = '\0';
-  parptr = parabuf;
-
-  mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ", source_p->id,
-                 chptr->creationtime, chptr->name);
+  mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
+                 source_p->id, chptr->creationtime, chptr->name);
 
   /* Loop the list of modes we have */
   for (unsigned int i = 0; i < mode_count; ++i)
@@ -1331,6 +1323,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
     if (mode_changes[i].letter == 0)
       continue;
 
+    const char *arg;
     if (mode_changes[i].id)
       arg = mode_changes[i].id;
     else
@@ -1346,8 +1339,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
      * another line for the other modes
      */
     if ((paracount == MAXMODEPARAMS) ||
-        ((arglen + mbl + pbl + 2) > IRCD_BUFSIZE) ||
-        (pbl + arglen + BAN_FUDGE) >= MODEBUFLEN)
+        ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > IRCD_BUFSIZE))
     {
       if (modecount)
         sendto_server(source_p, 0, 0, "%s %s", modebuf, parabuf);
@@ -1355,8 +1347,8 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
       modecount = 0;
       paracount = 0;
 
-      mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ", source_p->id,
-                     chptr->creationtime, chptr->name);
+      mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
+                     source_p->id, chptr->creationtime, chptr->name);
 
       pbl = 0;
       parabuf[0] = '\0';
@@ -1376,7 +1368,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 
     if (arg)
     {
-      len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
+      int len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
       pbl += len;
       parptr += len;
       ++paracount;
@@ -1397,15 +1389,14 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
  * Side-effects: Sends the appropriate mode changes to other clients
  *               and propagates to servers.
  */
-/* ensure parabuf < MODEBUFLEN -db */
 static void
 send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
 {
+  char modebuf[IRCD_BUFSIZE] = "";
+  char parabuf[IRCD_BUFSIZE] = "";
+  char *parptr = parabuf;
   int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
-  int len = 0;
   int dir = MODE_QUERY;
-  const char *arg = NULL;
-  char *parptr = NULL;
 
   if (IsServer(source_p))
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
@@ -1415,23 +1406,19 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
                    source_p->username, source_p->host, chptr->name);
 
-  parabuf[0] = '\0';
-  parptr = parabuf;
-
   for (unsigned int i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0)
       continue;
 
-    arg = mode_changes[i].arg;
+    const char *arg = mode_changes[i].arg;
     if (arg)
       arglen = strlen(arg);
     else
       arglen = 0;
 
     if ((paracount == MAXMODEPARAMS) ||
-        ((arglen + mbl + pbl + 2) > IRCD_BUFSIZE) ||
-        ((arglen + pbl + BAN_FUDGE) >= MODEBUFLEN))
+        ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > IRCD_BUFSIZE))
     {
       if (mbl && modebuf[mbl - 1] == '-')
         modebuf[mbl - 1] = '\0';
@@ -1468,7 +1455,7 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
 
     if (arg)
     {
-      len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
+      int len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
       pbl += len;
       parptr += len;
       ++paracount;

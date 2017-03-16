@@ -1420,9 +1420,6 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
     if ((paracount == MAXMODEPARAMS) ||
         ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > IRCD_BUFSIZE))
     {
-      if (mbl && modebuf[mbl - 1] == '-')
-        modebuf[mbl - 1] = '\0';
-
       if (modecount)
         sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
 

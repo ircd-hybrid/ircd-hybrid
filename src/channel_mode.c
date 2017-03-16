@@ -1376,15 +1376,12 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 
     if (arg)
     {
-      len = sprintf(parptr, "%s ", arg);
+      len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
       pbl += len;
       parptr += len;
       ++mc;
     }
   }
-
-  if (pbl && parabuf[pbl - 1] == ' ')
-    parabuf[pbl - 1] = '\0';
 
   if (nc)
     sendto_server(source_p, 0, 0, "%s %s", modebuf, parabuf);
@@ -1471,15 +1468,12 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
 
     if (arg)
     {
-      len = sprintf(parptr, "%s ", arg);
+      len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
       pbl += len;
       parptr += len;
       ++mc;
     }
   }
-
-  if (pbl && parabuf[pbl - 1] == ' ')
-    parabuf[pbl - 1] = '\0';
 
   if (nc)
     sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);

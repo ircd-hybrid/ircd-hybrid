@@ -589,7 +589,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 
   mode_changes[mode_count].letter = c;
-  mode_changes[mode_count].arg = mask;
+  mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count++].dir = dir;
 }
@@ -655,7 +655,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 
   mode_changes[mode_count].letter = c;
-  mode_changes[mode_count].arg = mask;
+  mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count++].dir = dir;
 }
@@ -721,7 +721,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 
   mode_changes[mode_count].letter = c;
-  mode_changes[mode_count].arg = mask;
+  mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count++].dir = dir;
 }

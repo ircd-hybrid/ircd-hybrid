@@ -1313,7 +1313,7 @@ get_channel_access(const struct Client *source_p,
 static void
 send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 {
-  int mbl = 0, pbl = 0, arglen = 0, nc = 0, mc = 0;
+  int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
   int len = 0;
   int dir = MODE_QUERY;
   const char *arg = NULL;
@@ -1345,15 +1345,15 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
      * If we're creeping past the buf size, we need to send it and make
      * another line for the other modes
      */
-    if ((mc == MAXMODEPARAMS) ||
+    if ((paracount == MAXMODEPARAMS) ||
         ((arglen + mbl + pbl + 2) > IRCD_BUFSIZE) ||
         (pbl + arglen + BAN_FUDGE) >= MODEBUFLEN)
     {
-      if (nc)
+      if (modecount)
         sendto_server(source_p, 0, 0, "%s %s", modebuf, parabuf);
 
-      nc = 0;
-      mc = 0;
+      modecount = 0;
+      paracount = 0;
 
       mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ", source_p->id,
                      chptr->creationtime, chptr->name);
@@ -1372,18 +1372,18 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 
     modebuf[mbl++] = mode_changes[i].letter;
     modebuf[mbl] = '\0';
-    ++nc;
+    ++modecount;
 
     if (arg)
     {
       len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
       pbl += len;
       parptr += len;
-      ++mc;
+      ++paracount;
     }
   }
 
-  if (nc)
+  if (modecount)
     sendto_server(source_p, 0, 0, "%s %s", modebuf, parabuf);
 }
 
@@ -1401,7 +1401,7 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
 static void
 send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
 {
-  int mbl = 0, pbl = 0, arglen = 0, nc = 0, mc = 0;
+  int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
   int len = 0;
   int dir = MODE_QUERY;
   const char *arg = NULL;
@@ -1429,18 +1429,18 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
     else
       arglen = 0;
 
-    if ((mc == MAXMODEPARAMS) ||
+    if ((paracount == MAXMODEPARAMS) ||
         ((arglen + mbl + pbl + 2) > IRCD_BUFSIZE) ||
         ((arglen + pbl + BAN_FUDGE) >= MODEBUFLEN))
     {
       if (mbl && modebuf[mbl - 1] == '-')
         modebuf[mbl - 1] = '\0';
 
-      if (nc)
+      if (modecount)
         sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
 
-      nc = 0;
-      mc = 0;
+      modecount = 0;
+      paracount = 0;
 
       if (IsServer(source_p))
         mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
@@ -1464,18 +1464,18 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
 
     modebuf[mbl++] = mode_changes[i].letter;
     modebuf[mbl] = '\0';
-    ++nc;
+    ++modecount;
 
     if (arg)
     {
       len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
       pbl += len;
       parptr += len;
-      ++mc;
+      ++paracount;
     }
   }
 
-  if (nc)
+  if (modecount)
     sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
 }
 

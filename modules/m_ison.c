@@ -48,7 +48,6 @@
 static int
 m_ison(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
   char *nick;
   char *p = NULL;
   char *current_insert_point = NULL;
@@ -61,7 +60,8 @@ m_ison(struct Client *source_p, int parc, char *parv[])
   for (nick = strtok_r(parv[1], " ", &p); nick;
        nick = strtok_r(NULL,    " ", &p))
   {
-    if ((target_p = find_person(source_p, nick)))
+    const struct Client *target_p = find_person(source_p, nick);
+    if (target_p)
     {
       len = strlen(target_p->name);
 

@@ -48,9 +48,8 @@
 static int
 m_userhost(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p;
   char buf[IRCD_BUFSIZE];
-  char response[NICKLEN*2+USERLEN+HOSTLEN+30];
+  char response[NICKLEN * 2 + USERLEN + HOSTLEN + 30];
   char *t = NULL, *p = NULL, *nick = NULL;
   int i = 0;
   int cur_len;
@@ -62,7 +61,8 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
   for (nick = strtok_r(parv[1], " ", &p); nick && i++ < 5;
        nick = strtok_r(NULL,    " ", &p))
   {
-    if ((target_p = find_person(source_p, nick)))
+    const struct Client *target_p = find_person(source_p, nick);
+    if (target_p)
     {
       /*
        * Show real IP address for USERHOST on yourself.

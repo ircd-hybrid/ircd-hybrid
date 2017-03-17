@@ -46,7 +46,7 @@
 static void
 xline_check(const struct GecosItem *gecos)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
@@ -70,7 +70,6 @@ static void
 xline_handle(struct Client *source_p, const char *mask, const char *reason, uintmax_t duration)
 {
   char buf[IRCD_BUFSIZE];
-  struct GecosItem *gecos = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
   {
@@ -83,7 +82,8 @@ xline_handle(struct Client *source_p, const char *mask, const char *reason, uint
     }
   }
 
-  if ((gecos = gecos_find(mask, match)))
+  struct GecosItem *gecos = gecos_find(mask, match);
+  if (gecos)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",

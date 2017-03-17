@@ -303,7 +303,6 @@ check_pidfile(const char *filename)
 static void
 setup_corefile(void)
 {
-#ifdef HAVE_SYS_RESOURCE_H
   struct rlimit rlim; /* resource limits */
 
   /* Set corefilesize to maximum */
@@ -312,7 +311,6 @@ setup_corefile(void)
     rlim.rlim_cur = rlim.rlim_max;
     setrlimit(RLIMIT_CORE, &rlim);
   }
-#endif
 }
 
 /*

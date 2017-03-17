@@ -41,7 +41,6 @@ AC_CHECK_FUNCS_ONCE(strtok_r \
 
 # Checks for header files.
 AC_CHECK_HEADERS_ONCE(crypt.h        \
-                      sys/resource.h \
                       sys/param.h    \
                       types.h        \
                       socket.h       \

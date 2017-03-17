@@ -732,13 +732,11 @@ sendto_anywhere(struct Client *to, const struct Client *from,
                 const char *pattern, ...)
 {
   va_list args;
-  struct dbuf_block *buffer = NULL;
 
   if (IsDead(to->from))
     return;
 
-  buffer = dbuf_alloc();
-
+  struct dbuf_block *buffer = dbuf_alloc();
   if (MyClient(to) && IsClient(from))
     dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ", from->name, from->username,
                  from->host, command, to->name);
@@ -808,7 +806,7 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
         ((level == L_OPER) && HasUMode(client_p, UMODE_ADMIN)))
       continue;
 
-    if (HasUMode(client_p, flags) && !IsDefunct(client_p))
+    if (HasUMode(client_p, flags) && !IsDead(client_p))
       send_message(client_p, buffer);
   }
 
@@ -871,7 +869,7 @@ sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
     struct Client *client_p = node->data;
     assert(client_p->umodes & UMODE_OPER);
 
-    if (HasUMode(client_p, flags) && !IsDefunct(client_p))
+    if (HasUMode(client_p, flags) && !IsDead(client_p))
       send_message(client_p, buffer);
   }
 

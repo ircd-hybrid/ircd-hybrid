@@ -498,9 +498,8 @@ find_invite(struct Channel *chptr, struct Client *client_p)
 void
 add_invite(struct Channel *chptr, struct Client *client_p)
 {
-  struct Invite *invite;
-
-  if ((invite = find_invite(chptr, client_p)))
+  struct Invite *invite = find_invite(chptr, client_p);
+  if (invite)
     del_invite(invite);
 
   invite = mp_pool_get(invite_pool);
@@ -1002,8 +1001,8 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
       break;
     }
 
-    struct Channel *chptr;
-    if ((chptr = hash_find_channel(name)))
+    struct Channel *chptr = hash_find_channel(name);
+    if (chptr)
     {
       if (IsMember(client_p, chptr))
         continue;

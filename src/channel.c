@@ -340,6 +340,7 @@ channel_make(const char *name)
   chptr->creationtime = CurrentTime;
   chptr->last_join_time = CurrentTime;
 
+  /* Cache channel name length to avoid repetitive strlen() calls. */
   chptr->name_len = strlcpy(chptr->name, name, sizeof(chptr->name));
   if (chptr->name_len >= sizeof(chptr->name))
     chptr->name_len = sizeof(chptr->name) - 1;

@@ -771,12 +771,7 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
 {
   const char *ntype = "???";
   dlink_node *node;
-  char nbuf[IRCD_BUFSIZE] = "";
   va_list args;
-
-  va_start(args, pattern);
-  vsnprintf(nbuf, sizeof(nbuf), pattern, args);
-  va_end(args);
 
   switch (type)
   {
@@ -793,6 +788,13 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
       assert(0);
   }
 
+  struct dbuf_block *buffer = dbuf_alloc();
+  dbuf_put_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype); 
+
+  va_start(args, pattern);
+  send_format(buffer, pattern, args);
+  va_end(args);
+
   DLINK_FOREACH(node, oper_list.head)
   {
     struct Client *client_p = node->data;
@@ -806,9 +808,11 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
         ((level == L_OPER) && HasUMode(client_p, UMODE_ADMIN)))
       continue;
 
-    if (HasUMode(client_p, flags))
-      sendto_one_notice(client_p, &me, ":*** %s -- %s", ntype, nbuf);
+    if (HasUMode(client_p, flags) && !IsDefunct(client_p))
+      send_message(client_p, buffer);
   }
+
+  dbuf_ref_free(buffer);
 }
 
 /* ts_warn()

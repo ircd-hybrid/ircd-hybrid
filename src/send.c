@@ -769,8 +769,8 @@ sendto_anywhere(struct Client *to, const struct Client *from,
 void
 sendto_realops_flags(unsigned int flags, int level, int type, const char *pattern, ...)
 {
-  const char *ntype = NULL;
-  dlink_node *node = NULL;
+  const char *ntype = "???";
+  dlink_node *node;
   char nbuf[IRCD_BUFSIZE] = "";
   va_list args;
 

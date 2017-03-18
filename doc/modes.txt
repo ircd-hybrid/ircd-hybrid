@@ -3,7 +3,7 @@
 
 Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.12 DFGHRSWabcdefgijklnopqrsuwxy bchiklmnoprstveCIMORST bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.22 DFGHRSWabcdefgijklnopqrsuwxy bchiklmnoprstveCIMORST bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -71,6 +71,8 @@ Channel Modes:
 +S - sslonly      - This mode will prevent anyone who isn't securely connected
                     via SSL/TLS from joining the channel.
 +t - topic        - Only chanops and halfops can change the topic
++u - hidebmasks   - Hides +b/+e/+I mode changes and lists to everyone except
+                    channel ops, and half-ops (+o/+h)
 +T - nonotice     - Users without +v/h/o cannot send NOTICEs to the channel
 +v - voice        - Can speak in a moderated channel, and is exempt from flood
                     restrictions

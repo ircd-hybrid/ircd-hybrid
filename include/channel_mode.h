@@ -38,9 +38,9 @@ enum { MAXMODEPARAMS = 6 };
 
 enum
 {
-  MODE_QUERY =  0,
-  MODE_ADD   =  1,
-  MODE_DEL   = -1
+  MODE_QUERY = 0,
+  MODE_DEL   = 1,
+  MODE_ADD   = 2
 };
 
 enum
@@ -90,7 +90,8 @@ enum
   MODE_NOCTRL     = 0x00000400U,  /**< Prevents users from sending messages containing control codes to the channel */
   MODE_MODREG     = 0x00000800U,  /**< Unregistered/unidentified clients cannot send text to the channel */
   MODE_NOCTCP     = 0x00001000U,  /**< Clients cannot send CTCP messages to the channel */
-  MODE_NONOTICE   = 0x00002000U   /**< Clients cannot send NOTICE to the channel */
+  MODE_NONOTICE   = 0x00002000U,  /**< Clients cannot send NOTICE to the channel */
+  MODE_HIDEBMASKS = 0x00004000U   /**< Hides +b/+e/+I lists/changes for non-chanops everywhere */
 };
 
 /* name invisible */
@@ -113,6 +114,7 @@ struct ChModeChange
   const char *arg;
   const char *id;
   int dir;
+  unsigned int flags;
 };
 
 struct mode_letter

@@ -142,11 +142,11 @@ m_invite(struct Client *source_p, int parc, char *parv[])
                source_p->host,
                target_p->name, chptr->name);
 
-    if (chptr->mode.mode & MODE_INVITEONLY)
+    if (HasCMode(chptr, MODE_INVITEONLY))
       add_invite(chptr, target_p);  /* Add the invite if channel is +i */
   }
 
-  if (chptr->mode.mode & MODE_INVITEONLY)
+  if (HasCMode(chptr, MODE_INVITEONLY))
   {
     sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, 0, CAP_INVITE_NOTIFY,
                          ":%s NOTICE %%%s :%s is inviting %s to %s.",
@@ -206,11 +206,11 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
                source_p->host,
                target_p->name, chptr->name);
 
-    if (chptr->mode.mode & MODE_INVITEONLY)
+    if (HasCMode(chptr, MODE_INVITEONLY))
       add_invite(chptr, target_p);  /* Add the invite if channel is +i */
   }
 
-  if (chptr->mode.mode & MODE_INVITEONLY)
+  if (HasCMode(chptr, MODE_INVITEONLY))
   {
     sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, 0, CAP_INVITE_NOTIFY,
                          ":%s NOTICE %%%s :%s is inviting %s to %s.",

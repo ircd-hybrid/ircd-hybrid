@@ -283,7 +283,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
   *pbuf = '\0';
 
   for (const struct mode_letter *tab = chan_modes; tab->mode; ++tab)
-    if (chptr->mode.mode & tab->mode)
+    if (HasCMode(chptr, tab->mode))
       *mbuf++ = tab->letter;
 
   if (chptr->mode.limit)
@@ -406,7 +406,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
    */
   if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
   {
-    chptr->mode.mode |= d;
+    AddCMode(chptr, d);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].arg = NULL;
@@ -417,8 +417,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
   {
     /* setting - */
-
-    chptr->mode.mode &= ~d;
+    DelCMode(chptr, d);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].arg = NULL;
@@ -459,7 +458,7 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
    */
   if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
   {
-    chptr->mode.mode |= d;
+    AddCMode(chptr, d);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].arg = NULL;
@@ -470,8 +469,7 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
   else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
   {
     /* setting - */
-
-    chptr->mode.mode &= ~d;
+    DelCMode(chptr, d);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].arg = NULL;
@@ -513,7 +511,7 @@ chm_operonly(struct Client *source_p, struct Channel *chptr, int parc, int *parn
 
   if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
   {
-    chptr->mode.mode |= d;
+    AddCMode(chptr, d);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].arg = NULL;
@@ -524,8 +522,7 @@ chm_operonly(struct Client *source_p, struct Channel *chptr, int parc, int *parn
   else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
   {
     /* setting - */
-
-    chptr->mode.mode &= ~d;
+    DelCMode(chptr, d);
 
     mode_changes[mode_count].letter = c;
     mode_changes[mode_count].arg = NULL;
@@ -552,7 +549,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     {
       const struct Ban *ban = node->data;
 
-      if (!(chptr->mode.mode & MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
+      if (!HasCMode(chptr, MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
         sendto_one_numeric(source_p, &me, RPL_BANLIST, chptr->name,
                            ban->name, ban->user, ban->host,
                            ban->who, ban->when);
@@ -600,7 +597,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count].letter = c;
   mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
-  if (chptr->mode.mode & MODE_HIDEBMASKS)
+  if (HasCMode(chptr, MODE_HIDEBMASKS))
     mode_changes[mode_count].flags = CHFL_CHANOP | CHFL_HALFOP;
   else
     mode_changes[mode_count].flags = 0;
@@ -624,7 +621,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     {
       const struct Ban *ban = node->data;
 
-      if (!(chptr->mode.mode & MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
+      if (!HasCMode(chptr, MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
         sendto_one_numeric(source_p, &me, RPL_EXCEPTLIST, chptr->name,
                            ban->name, ban->user, ban->host,
                            ban->who, ban->when);
@@ -672,7 +669,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count].letter = c;
   mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
-  if (chptr->mode.mode & MODE_HIDEBMASKS)
+  if (HasCMode(chptr, MODE_HIDEBMASKS))
     mode_changes[mode_count].flags = CHFL_CHANOP | CHFL_HALFOP;
   else
     mode_changes[mode_count].flags = 0;
@@ -696,7 +693,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
     {
       const struct Ban *ban = node->data;
 
-      if (!(chptr->mode.mode & MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
+      if (!HasCMode(chptr, MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
         sendto_one_numeric(source_p, &me, RPL_INVEXLIST, chptr->name,
                            ban->name, ban->user, ban->host,
                            ban->who, ban->when);
@@ -744,7 +741,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   mode_changes[mode_count].letter = c;
   mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
-  if (chptr->mode.mode & MODE_HIDEBMASKS)
+  if (HasCMode(chptr, MODE_HIDEBMASKS))
     mode_changes[mode_count].flags = CHFL_CHANOP | CHFL_HALFOP;
   else
     mode_changes[mode_count].flags = 0;

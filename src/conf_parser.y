@@ -226,6 +226,7 @@ reset_block_state(void)
 %token  MASK
 %token  MAX_ACCEPT
 %token  MAX_BANS
+%token  MAX_BANS_LARGE
 %token  MAX_CHANNELS
 %token  MAX_GLOBAL
 %token  MAX_IDLE
@@ -2889,6 +2890,7 @@ channel_entry: CHANNEL '{' channel_items '}' ';';
 
 channel_items:      channel_items channel_item | channel_item;
 channel_item:       channel_max_bans |
+                    channel_max_bans_large |
                     channel_invite_client_count |
                     channel_invite_client_time |
                     channel_invite_delay_channel |
@@ -2956,6 +2958,11 @@ channel_max_invites: MAX_INVITES '=' NUMBER ';'
 channel_max_bans: MAX_BANS '=' NUMBER ';'
 {
   ConfigChannel.max_bans = $3;
+};
+
+channel_max_bans_large: MAX_BANS_LARGE '=' NUMBER ';'
+{
+  ConfigChannel.max_bans_large = $3;
 };
 
 channel_default_join_flood_count: DEFAULT_JOIN_FLOOD_COUNT '=' NUMBER ';'

@@ -645,7 +645,8 @@ set_default_conf(void)
   ConfigChannel.knock_delay_channel = 60;
   ConfigChannel.max_channels = 25;
   ConfigChannel.max_invites = 20;
-  ConfigChannel.max_bans = 25;
+  ConfigChannel.max_bans = 100;
+  ConfigChannel.max_bans_large = 500;
   ConfigChannel.default_join_flood_count = 18;
   ConfigChannel.default_join_flood_time = 6;
 
@@ -1145,7 +1146,7 @@ read_conf_files(int cold)
   snprintf(chanlimit, sizeof(chanlimit), "#:%u",
            ConfigChannel.max_channels);
   isupport_add("CHANLIMIT", chanlimit, -1);
-  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstuCMORST");
+  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstuCLMORST");
   isupport_add("CHANNELLEN", NULL, CHANNELLEN);
   isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
   isupport_add("CHANMODES", chanmodes, -1);

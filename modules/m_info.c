@@ -233,6 +233,12 @@ static const struct InfoStruct info_table[] =
     "Total +b/e/I modes allowed in a channel"
   },
   {
+    "max_bans_large",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.max_bans_large,
+    "Total +b/e/I modes allowed in a +L channel"
+  },
+  {
     "flatten_links",
     OUTPUT_BOOLEAN_YN,
     &ConfigServerHide.flatten_links,

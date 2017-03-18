@@ -233,6 +233,7 @@ mask                        { return MASK; }
 masked                      { return TMASKED; }
 max_accept                  { return MAX_ACCEPT; }
 max_bans                    { return MAX_BANS; }
+max_bans_large              { return MAX_BANS_LARGE; }
 max_channels                { return MAX_CHANNELS; }
 max_global                  { return MAX_GLOBAL; }
 max_idle                    { return MAX_IDLE; }

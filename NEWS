@@ -4,6 +4,17 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
+-- Noteworthy changes in version 8.2.22 (2017-??-??)
+o) Implemented channel mode 'L'. Channels with that mode set can make use of an
+   extended ban list size specified with the new 'channel::max_bans_large'
+   configuraton option. This mode can be set only by irc-operators or servers.
+o) Implemented channel mode 'u' which hides bmask (+b/+e/+I) lists and mode changes
+   to non-chanops everywhere
+o) Fixed an issue with "TRACE" where remote servers would reply with RPL_TRACEUSER
+   numerics containing UIDs
+o) "STATS z" now shows simple memory stats of servers linked to the network
+
+
 -- Noteworthy changes in version 8.2.21 (2016-11-27)
 o) The 'general::default_floodtime' configuration option has been added
    along with the "SET FLOODTIME" command. These allow to fine-tune the

@@ -1343,8 +1343,8 @@ send_mode_changes_server(struct Client *source_p, struct Channel *chptr)
   char modebuf[IRCD_BUFSIZE] = "";
   char parabuf[IRCD_BUFSIZE] = "";
   char *parptr = parabuf;
-  int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
-  int dir = MODE_QUERY;
+  unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
+  unsigned int dir = MODE_QUERY;
 
   mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
                  source_p->id, chptr->creationtime, chptr->name);
@@ -1431,8 +1431,8 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
     char modebuf[IRCD_BUFSIZE] = "";
     char parabuf[IRCD_BUFSIZE] = "";
     char *parptr = parabuf;
-    int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
-    int dir = MODE_QUERY;
+    unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
+    unsigned int dir = MODE_QUERY;
 
     if (IsServer(source_p))
       mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||

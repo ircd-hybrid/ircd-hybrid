@@ -36,6 +36,9 @@ NO PARAMETERS:
      +r     - 'Registered'. Channel has been registered with ChanServ.
               This mode can be set by servers only.
 
+     +u     - 'Hide bmasks'. Hides +b/+e/+I mode changes and lists to everyone
+              except channel ops, and half-ops (+o/+h).
+
      +C     - 'No CTCPs'. Prevent users from sending CTCPs to the channel.
 
      +M     - 'Modreg'. Unregistered/unidentified clients cannot send text to

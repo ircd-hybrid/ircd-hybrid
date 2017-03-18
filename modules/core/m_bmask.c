@@ -63,6 +63,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   unsigned int mode_type = 0;
   int mlen = 0, tlen = 0;
   int modecount = 0;
+  unsigned int flags = 0;
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
     return 0;
@@ -95,6 +96,9 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 
+  if (chptr->mode.mode & MODE_HIDEBMASKS)
+    flags = CHFL_CHANOP | CHFL_HALFOP;
+
   do
   {
     if ((t = strchr(s, ' ')))
@@ -116,7 +120,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       {
         *mbuf = *(pbuf - 1) = '\0';
 
-        sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
+        sendto_channel_local(NULL, chptr, flags, 0, 0, "%s %s", modebuf, parabuf);
         mbuf = modebuf + mlen;
         pbuf = parabuf;
         modecount = 0;
@@ -133,7 +137,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   if (modecount)
   {
     *mbuf = *(pbuf - 1) = '\0';
-    sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
+    sendto_channel_local(NULL, chptr, flags, 0, 0, "%s %s", modebuf, parabuf);
   }
 
   sendto_server(source_p, 0, 0, ":%s BMASK %ju %s %s :%s",

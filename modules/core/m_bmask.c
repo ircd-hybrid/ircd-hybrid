@@ -96,7 +96,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 
-  if (chptr->mode.mode & MODE_HIDEBMASKS)
+  if (HasCMode(chptr, MODE_HIDEBMASKS))
     flags = CHFL_CHANOP | CHFL_HALFOP;
 
   do

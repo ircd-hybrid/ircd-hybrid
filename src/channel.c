@@ -648,16 +648,16 @@ is_banned(const struct Channel *chptr, const struct Client *client_p)
 static int
 can_join(struct Client *client_p, struct Channel *chptr, const char *key)
 {
-  if ((chptr->mode.mode & MODE_SSLONLY) && !HasUMode(client_p, UMODE_SSL))
+  if (HasCMode(chptr, MODE_SSLONLY) && !HasUMode(client_p, UMODE_SSL))
     return ERR_SSLONLYCHAN;
 
-  if ((chptr->mode.mode & MODE_REGONLY) && !HasUMode(client_p, UMODE_REGISTERED))
+  if (HasCMode(chptr, MODE_REGONLY) && !HasUMode(client_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
 
-  if ((chptr->mode.mode & MODE_OPERONLY) && !HasUMode(client_p, UMODE_OPER))
+  if (HasCMode(chptr, MODE_OPERONLY) && !HasUMode(client_p, UMODE_OPER))
     return ERR_OPERONLYCHAN;
 
-  if (chptr->mode.mode & MODE_INVITEONLY)
+  if (HasCMode(chptr, MODE_INVITEONLY))
     if (!find_invite(chptr, client_p))
       if (!find_bmask(client_p, &chptr->invexlist))
         return ERR_INVITEONLYCHAN;
@@ -759,10 +759,10 @@ can_send(struct Channel *chptr, struct Client *client_p,
       if ((resv = resv_find(chptr->name, match)) && !resv_exempt_find(client_p, resv))
         return ERR_CANNOTSENDTOCHAN;
 
-  if ((chptr->mode.mode & MODE_NOCTRL) && msg_has_ctrls(message))
+  if (HasCMode(chptr, MODE_NOCTRL) && msg_has_ctrls(message))
     return ERR_NOCTRLSONCHAN;
 
-  if (chptr->mode.mode & MODE_NOCTCP)
+  if (HasCMode(chptr, MODE_NOCTCP))
     if (*message == '\001' && strncmp(message + 1, "ACTION ", 7))
       return ERR_NOCTCP;
 
@@ -770,16 +770,16 @@ can_send(struct Channel *chptr, struct Client *client_p,
     if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
       return CAN_SEND_OPV;
 
-  if (!member && (chptr->mode.mode & MODE_NOPRIVMSGS))
+  if (!member && HasCMode(chptr, MODE_NOPRIVMSGS))
     return ERR_CANNOTSENDTOCHAN;
 
-  if (chptr->mode.mode & MODE_MODERATED)
+  if (HasCMode(chptr, MODE_MODERATED))
     return ERR_CANNOTSENDTOCHAN;
 
-  if ((chptr->mode.mode & MODE_MODREG) && !HasUMode(client_p, UMODE_REGISTERED))
+  if (HasCMode(chptr, MODE_MODREG) && !HasUMode(client_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
 
-  if ((chptr->mode.mode & MODE_NONOTICE) && notice)
+  if (HasCMode(chptr, MODE_NONOTICE) && notice)
     return ERR_CANNOTSENDTOCHAN;
 
   /* Cache can send if banned */
@@ -1042,8 +1042,8 @@ channel_do_join(struct Client *client_p, char *channel, char *key_list)
     if (flags == CHFL_CHANOP)
     {
       chptr->creationtime = CurrentTime;
-      chptr->mode.mode |= MODE_TOPICLIMIT;
-      chptr->mode.mode |= MODE_NOPRIVMSGS;
+      AddCMode(chptr, MODE_TOPICLIMIT);
+      AddCMode(chptr, MODE_NOPRIVMSGS);
 
       sendto_server(client_p, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
                     me.id, chptr->creationtime,

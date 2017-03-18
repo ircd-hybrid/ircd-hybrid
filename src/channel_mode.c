@@ -60,6 +60,7 @@ const struct mode_letter chan_modes[] =
   { MODE_TOPICLIMIT, 't' },
   { MODE_HIDEBMASKS, 'u' },
   { MODE_NOCTCP,     'C' },
+  { MODE_EXTLIMIT,   'L' },
   { MODE_MODREG,     'M' },
   { MODE_OPERONLY,   'O' },
   { MODE_REGONLY,    'R' },
@@ -116,14 +117,15 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
   char host[HOSTLEN + 1] = "";
   struct split_nuh_item nuh;
 
-  /* Don't let local clients overflow the b/e/I lists */
   if (MyClient(client_p))
   {
     unsigned int num_mask = dlink_list_length(&chptr->banlist) +
                             dlink_list_length(&chptr->exceptlist) +
                             dlink_list_length(&chptr->invexlist);
 
-    if (num_mask >= ConfigChannel.max_bans)
+    /* Don't let local clients overflow the b/e/I lists */
+    if (num_mask >= ((HasCMode(chptr, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large :
+                                                        ConfigChannel.max_bans))
     {
       sendto_one_numeric(client_p, &me, ERR_BANLISTFULL, chptr->name, banid);
       return 0;
@@ -480,8 +482,8 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
 }
 
 static void
-chm_operonly(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-             char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_simple_oper(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
+                char **parv, int *errors, int alev, int dir, char c, unsigned int d)
 {
   if (alev < CHACCESS_HALFOP)
   {
@@ -1114,10 +1116,10 @@ const struct ChannelMode ModeTable[256] =
   { chm_invex,   0 },                   /* I */
   { chm_nosuch,  0 },                   /* J */
   { chm_nosuch,  0 },                   /* K */
-  { chm_nosuch,  0 },                   /* L */
+  { chm_simple_oper,  MODE_EXTLIMIT },  /* L */
   { chm_simple, MODE_MODREG},           /* M */
   { chm_nosuch,  0 },                   /* N */
-  { chm_operonly, MODE_OPERONLY},       /* O */
+  { chm_simple_oper, MODE_OPERONLY},    /* O */
   { chm_nosuch,  0 },                   /* P */
   { chm_nosuch,  0 },                   /* Q */
   { chm_simple, MODE_REGONLY},          /* R */

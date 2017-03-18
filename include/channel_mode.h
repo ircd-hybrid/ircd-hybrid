@@ -91,7 +91,8 @@ enum
   MODE_MODREG     = 0x00000800U,  /**< Unregistered/unidentified clients cannot send text to the channel */
   MODE_NOCTCP     = 0x00001000U,  /**< Clients cannot send CTCP messages to the channel */
   MODE_NONOTICE   = 0x00002000U,  /**< Clients cannot send NOTICE to the channel */
-  MODE_HIDEBMASKS = 0x00004000U   /**< Hides +b/+e/+I lists/changes for non-chanops everywhere */
+  MODE_HIDEBMASKS = 0x00004000U,  /**< Hides +b/+e/+I lists/changes for non-chanops everywhere */
+  MODE_EXTLIMIT   = 0x00008000U   /**< Channel can make use of the extended ban list limit */
 };
 
 #define HasCMode(x, y) ((x)->mode.mode &   (y))

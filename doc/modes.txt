@@ -3,7 +3,7 @@
 
 Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.22 DFGHRSWabcdefgijklnopqrsuwxy bchiklmnoprstveCIMORST bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.22 DFGHRSWabcdefgijklnopqrsuwxy bchiklmnoprstveCILMORST bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -32,7 +32,7 @@ User Modes:
 +p - hidechans    - Hides channel list in WHOIS
 +q - hideidle     - Hides idle and signon time in WHOIS
 +r - registered   - User has been registered and identified for its nick.
-                    This mode can be set by servers and services only.
+                    Can be set only by servers and services.
 +R - regonly      - Only registered clients may message you
 +s - servnotice   - See general server notices
 +S - ssl          - Client is connected via SSL/TLS
@@ -57,14 +57,15 @@ Channel Modes:
 +k - key          - Key/password for the channel
 +l - limit        - Limit the number of users in a channel
 +m - moderated    - Users without +v/h/o cannot send text to the channel
++L - extlimit     - Channel can make use of the extended ban list limit. Can be set only by irc-operators.
 +M - modreg       - Unregistered/unidentified clients cannot send text to the channel
 +n - noexternal   - Users must be in the channel to send text to it
 +o - chanop       - Full operator status
-+O - operonly     - This mode will prevent anyone who hasn't obtained IRC operator
-                    status from joining the channel. Can only be set by an IRC operator
++O - operonly     - This mode will prevent anyone who hasn't obtained irc-operator status from joining the
+                    channel. Can be set only by irc-operators.
 +p - private      - Private is obsolete, this now restricts KNOCK, and can be
                     set at the same time as +s.
-+r - registered   - Channel has been registered
++r - registered   - Channel has been registered. Can be set only by servers and services.
 +R - regonly      - Only registered clients may join a channel with that mode set
 +s - secret       - The channel does not show up on NAMES or LIST or in the
                     WHOIS channel list unless you are a member of the channel

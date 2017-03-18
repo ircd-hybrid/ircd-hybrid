@@ -113,7 +113,7 @@ struct ChModeChange
   char letter;
   const char *arg;
   const char *id;
-  int dir;
+  unsigned int dir;
   unsigned int flags;
 };
 

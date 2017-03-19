@@ -361,8 +361,8 @@ enum
   SM_ERR_RPL_E        = 1 << 3,
   SM_ERR_RPL_I        = 1 << 4,
   SM_ERR_NOTONCHANNEL = 1 << 5,  /* Client is not on channel */
-  SM_ERR_NOTOPER      = 1 << 6,
-  SM_ERR_ONLYSERVER   = 1 << 7
+  SM_ERR_NOTOPER      = 1 << 6,  /* Only irc-operators can change that mode */
+  SM_ERR_ONLYSERVER   = 1 << 7   /* Only servers or services can change that mode */
 };
 
 /* Mode functions handle mode changes for a particular mode... */
@@ -399,13 +399,6 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   simple_modes_mask |= d;
 
   /* setting + */
-  /* Apparently, (though no one has ever told the hybrid group directly)
-   * admins don't like redundant mode checking. ok. It would have been nice
-   * if you had have told us directly. I've left the original code snippets
-   * in place.
-   *
-   * -Dianora
-   */
   if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
   {
     AddCMode(chptr, d);
@@ -451,13 +444,6 @@ chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *pa
   simple_modes_mask |= d;
 
   /* setting + */
-  /* Apparently, (though no one has ever told the hybrid group directly)
-   * admins don't like redundant mode checking. ok. It would have been nice
-   * if you had have told us directly. I've left the original code snippets
-   * in place.
-   *
-   * -Dianora
-   */
   if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
   {
     AddCMode(chptr, d);
@@ -575,7 +561,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  char *mask = nuh_mask[*parn];
+  char *const mask = nuh_mask[*parn];
   strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 
@@ -647,7 +633,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  char *mask = nuh_mask[*parn];
+  char *const mask = nuh_mask[*parn];
   strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 
@@ -719,7 +705,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  char *mask = nuh_mask[*parn];
+  char *const mask = nuh_mask[*parn];
   strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
   ++(*parn);
 

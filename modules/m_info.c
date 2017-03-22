@@ -380,7 +380,7 @@ static const struct InfoStruct info_table[] =
     "failed_oper_notice",
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.failed_oper_notice,
-    "Inform opers if someone tries to /oper with the wrong password"
+    "Inform opers if someone tries to /oper with the wrong credentials"
   },
   {
     "dots_in_ident",

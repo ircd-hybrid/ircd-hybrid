@@ -113,24 +113,24 @@ server_send_tburst(struct Client *client_p, const struct Channel *chptr)
 static void
 server_send_client(struct Client *client_p, struct Client *target_p)
 {
-  dlink_node *node = NULL;
-  char ubuf[IRCD_BUFSIZE] = "";
+  dlink_node *node;
+  char buf[UMODE_MAX_STR] = "";
 
   assert(IsClient(target_p));
 
-  send_umode(target_p, 0, 0, ubuf);
+  send_umode(target_p, 0, 0, buf);
 
-  if (ubuf[0] == '\0')
+  if (buf[0] == '\0')
   {
-    ubuf[0] = '+';
-    ubuf[1] = '\0';
+    buf[0] = '+';
+    buf[1] = '\0';
   }
 
   sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
              target_p->servptr->id,
              target_p->name, target_p->hopcount + 1,
              target_p->tsinfo,
-             ubuf, target_p->username, target_p->host,
+             buf, target_p->username, target_p->host,
              target_p->sockhost, target_p->id,
              target_p->account, target_p->info);
 
@@ -144,7 +144,7 @@ server_send_client(struct Client *client_p, struct Client *target_p)
   DLINK_FOREACH(node, target_p->svstags.head)
   {
     const struct ServicesTag *svstag = node->data;
-    char *m = ubuf;
+    char *m = buf;
 
     for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
       if (svstag->umodes & tab->flag)
@@ -152,7 +152,7 @@ server_send_client(struct Client *client_p, struct Client *target_p)
     *m = '\0';
 
     sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id, target_p->id,
-               target_p->tsinfo, svstag->numeric, ubuf, svstag->tag);
+               target_p->tsinfo, svstag->numeric, buf, svstag->tag);
   }
 }
 

@@ -29,6 +29,11 @@
 
 struct Client;
 
+enum
+{
+  UMODE_MAX_STR = 56  /* sizeof("+abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ") + 1 */
+};
+
 struct user_modes
 {
   unsigned char c;

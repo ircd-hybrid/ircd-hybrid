@@ -72,7 +72,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
   if (parc < 3)
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[UMODE_MAX_STR] = "";
     char *m = buf;
 
     *m++ = '+';

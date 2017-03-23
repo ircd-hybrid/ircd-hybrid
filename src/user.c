@@ -52,7 +52,7 @@
 #include "isupport.h"
 #include "tls.h"
 
-static char umode_buffer[IRCD_BUFSIZE];
+static char umode_buffer[UMODE_MAX_STR];
 
 const struct user_modes *umode_map[256];
 const struct user_modes  umode_tab[] =
@@ -202,15 +202,15 @@ static void
 introduce_client(struct Client *client_p)
 {
   dlink_node *node;
-  char ubuf[IRCD_BUFSIZE] = "";
+  char buf[UMODE_MAX_STR] = "";
 
-  send_umode(client_p, MyConnect(client_p), 0, ubuf);
+  send_umode(client_p, MyConnect(client_p), 0, buf);
   watch_check_hash(client_p, RPL_LOGON);
 
-  if (ubuf[0] == '\0')
+  if (buf[0] == '\0')
   {
-    ubuf[0] = '+';
-    ubuf[1] = '\0';
+    buf[0] = '+';
+    buf[1] = '\0';
   }
 
   DLINK_FOREACH(node, local_server_list.head)
@@ -224,7 +224,7 @@ introduce_client(struct Client *client_p)
                client_p->servptr->id,
                client_p->name, client_p->hopcount+1,
                client_p->tsinfo,
-               ubuf, client_p->username, client_p->host,
+               buf, client_p->username, client_p->host,
                client_p->sockhost, client_p->id,
                client_p->account,
                client_p->info);
@@ -696,7 +696,7 @@ send_umode(struct Client *client_p, unsigned int dispatch,
 void
 send_umode_out(struct Client *client_p, unsigned int old)
 {
-  char buf[IRCD_BUFSIZE] = "";
+  char buf[UMODE_MAX_STR] = "";
 
   send_umode(client_p, MyConnect(client_p), old, buf);
 

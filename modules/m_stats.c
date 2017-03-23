@@ -218,16 +218,14 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
     *p = '\0';
 
     /*
-     * Allow admins to see actual ips unless hide_server_ips is enabled
+     * Allow admins to see actual ips unless 'hide_server_ips' is enabled
      */
     if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
       sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C', conf->host,
-                         buf, conf->name, conf->port,
-                         conf->class->name);
+                         buf, conf->name, conf->port, conf->class->name);
     else
-      sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C',
-                         "*@127.0.0.1", buf, conf->name, conf->port,
-                         conf->class->name);
+      sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C', "*@127.0.0.1",
+                         buf, conf->name, conf->port, conf->class->name);
   }
 }
 

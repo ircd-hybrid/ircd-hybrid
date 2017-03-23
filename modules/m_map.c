@@ -38,13 +38,11 @@ static void dump_map(struct Client *client,
                      struct Client *server,
                      unsigned int prompt_length)
 {
-  dlink_node *node = NULL;
-  struct Client *target_p = NULL;
+  dlink_node *node;
   static char prompt[64];
   char buf[IRCD_BUFSIZE];
   char *p = prompt + prompt_length;
   unsigned int cnt = 0;
-  unsigned int bufpos = 0;
 
   *p = '\0';
 
@@ -52,17 +50,16 @@ static void dump_map(struct Client *client,
     sendto_one_numeric(client, &me, RPL_MAPMORE, prompt, server->name);
   else
   {
-    int dashes;
-
-    bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, "%s", server->name);
+    unsigned int bufpos = snprintf(buf, sizeof(buf), "%s", server->name);
 
     if (HasUMode(client, UMODE_OPER))
       bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, "[%s]", server->id);
 
     buf[bufpos++] = ' ';
-    dashes = 50 - bufpos - prompt_length;
-    for (; dashes > 0; --dashes)
+
+    for (int dashes = 50 - bufpos - prompt_length; dashes > 0; --dashes)
       buf[bufpos++] = '-';
+
     buf[bufpos++] = ' ';
     buf[bufpos++] = '|';
 
@@ -87,7 +84,7 @@ static void dump_map(struct Client *client,
 
   DLINK_FOREACH(node, server->serv->server_list.head)
   {
-    target_p = node->data;
+    struct Client *target_p = node->data;
 
     if (IsHidden(target_p) && !HasUMode(client, UMODE_OPER))
       continue;
@@ -101,7 +98,7 @@ static void dump_map(struct Client *client,
 
   DLINK_FOREACH(node, server->serv->server_list.head)
   {
-    target_p = node->data;
+    struct Client *target_p = node->data;
 
     if (IsHidden(target_p) && !HasUMode(client, UMODE_OPER))
       continue;

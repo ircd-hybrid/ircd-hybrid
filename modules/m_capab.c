@@ -48,10 +48,9 @@ mr_capab(struct Client *source_p, int parc, char *parv[])
 {
   unsigned int cap = 0;
   char *p = NULL;
-  char *s = NULL;
 
-  for (s = strtok_r(parv[1], " ", &p); s;
-       s = strtok_r(NULL,    " ", &p))
+  for (const char *s = strtok_r(parv[1], " ", &p); s;
+                   s = strtok_r(NULL,    " ", &p))
     if ((cap = find_capability(s)))
       SetCapable(source_p, cap);
 

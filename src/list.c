@@ -166,7 +166,7 @@ dlinkDelete(dlink_node *m, dlink_list *list)
 dlink_node *
 dlinkFind(dlink_list *list, const void *data)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, list->head)
     if (node->data == data)
@@ -246,7 +246,7 @@ dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
 dlink_node *
 dlinkFindDelete(dlink_list *list, void *data)
 {
-  dlink_node *m = NULL;
+  dlink_node *m;
 
   DLINK_FOREACH(m, list->head)
   {

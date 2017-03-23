@@ -58,7 +58,6 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   char buf[IRCD_BUFSIZE] = "";
   char def_reason[] = CONF_NOREASON;
   struct Client *target_p = NULL;
-  char *reason = NULL;
 
   if (EmptyString(parv[1]))
   {
@@ -66,8 +65,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
-
+  char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
   if (!EmptyString(reason))
   {
     if (strlen(reason) > (size_t)REASONLEN)
@@ -173,7 +171,6 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   char buf[IRCD_BUFSIZE] = "";
   char def_reason[] = CONF_NOREASON;
   struct Client *target_p = NULL;
-  char *reason = NULL;
 
   if (parc < 3 || EmptyString(parv[2]))
   {
@@ -184,7 +181,8 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
-  if ((reason = strchr(parv[2], ' ')))
+  char *reason = strchr(parv[2], ' ');
+  if (reason)
     *reason++ = '\0';
   else
     reason = def_reason;

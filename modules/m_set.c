@@ -312,7 +312,6 @@ list_quote_commands(struct Client *source_p)
 static int
 mo_set(struct Client *source_p, int parc, char *parv[])
 {
-  int n;
   int newval;
   const char *strarg = NULL;
   const char *intarg = NULL;
@@ -337,7 +336,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
       /*
        * Command found; now execute the code
        */
-      n = 2;
+      int n = 2;
 
       if (tab->wants_char)
         strarg = parv[n++];
@@ -372,8 +371,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
 
         if (newval < 0)
         {
-          sendto_one_notice(source_p, &me, ":Value less than 0 illegal for %s",
-                            tab->name);
+          sendto_one_notice(source_p, &me, ":Value less than 0 illegal for %s", tab->name);
           return 0;
         }
       }

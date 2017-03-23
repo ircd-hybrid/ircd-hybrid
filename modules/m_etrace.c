@@ -31,6 +31,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
+#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
@@ -65,7 +66,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
  * do_etrace()
  */
 static void
-do_etrace(struct Client *source_p, const char *arg)
+do_etrace(struct Client *source_p, int parc, char *parv[])
 {
   const char *tname = NULL;
   unsigned int wilds = 0, do_all = 0;
@@ -76,14 +77,14 @@ do_etrace(struct Client *source_p, const char *arg)
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  if (EmptyString(arg))
+  if (EmptyString(parv[1]))
   {
     do_all = 1;
     tname = "*";
   }
   else
   {
-    tname = arg;
+    tname = parv[1];
     wilds = has_wildcards(tname);
   }
 
@@ -109,14 +110,39 @@ do_etrace(struct Client *source_p, const char *arg)
   sendto_one_numeric(source_p, &me, RPL_TRACEEND, tname);
 }
 
-/* mo_etrace()
- *      parv[0] = command
- *      parv[1] = servername
+/*! \brief ETRACE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nick name to trace
+ *      - parv[2] = nick or server name to forward the etrace to
  */
 static int
 mo_etrace(struct Client *source_p, int parc, char *parv[])
 {
-  do_etrace(source_p, parv[1]);
+  if (parc > 2)
+    if (server_hunt(source_p, ":%s ETRACE %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
+      return 0;
+
+  const struct server_hunt *hunt = server_hunt(source_p, ":%s ETRACE :%s", 1, parc, parv);
+  switch (hunt->ret)
+  {
+    case HUNTED_PASS:
+      sendto_one_numeric(source_p, &me, RPL_TRACELINK,
+                         ircd_version, hunt->target_p->name, hunt->target_p->from->name);
+      break;
+    case HUNTED_ISME:
+      do_etrace(source_p, parc, parv);
+      break;
+    default:
+      break;
+  }
+
   return 0;
 }
 
@@ -126,7 +152,7 @@ static struct Message etrace_msgtab =
   .args_max = MAXPARA,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = m_ignore,
+  .handlers[SERVER_HANDLER] = mo_etrace,
   .handlers[ENCAP_HANDLER] = m_ignore,
   .handlers[OPER_HANDLER] = mo_etrace
 };

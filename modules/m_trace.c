@@ -108,29 +108,6 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*! \brief TRACE command handler
- *
- * \param source_p Pointer to allocated Client struct from which the message
- *                 originally comes from.  This can be a local or remote client.
- * \param parc     Integer holding the number of supplied arguments.
- * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
- *                 pointers.
- * \note Valid arguments for this command are:
- *      - parv[0] = command
- *      - parv[1] = nick or server name to trace
- *      - parv[2] = nick or server name to forward the trace to
- */
-static int
-ms_trace(struct Client *source_p, int parc, char *parv[])
-{
-  if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
-    return 0;
-
-  if (HasUMode(source_p, UMODE_OPER))
-    return mo_trace(source_p, parc, parv);
-  return 0;
-}
-
 static void
 do_actual_trace(struct Client *source_p, int parc, char *parv[])
 {
@@ -295,7 +272,7 @@ static struct Message trace_msgtab =
   .args_max = MAXPARA,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_trace,
-  .handlers[SERVER_HANDLER] = ms_trace,
+  .handlers[SERVER_HANDLER] = mo_trace,
   .handlers[ENCAP_HANDLER] = m_ignore,
   .handlers[OPER_HANDLER] = mo_trace
 };

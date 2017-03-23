@@ -130,7 +130,7 @@ get_recvq(const dlink_list *const list)
 struct ClassItem *
 class_find(const char *name, int active)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, class_list.head)
   {
@@ -150,7 +150,7 @@ class_find(const char *name, int active)
 void
 class_mark_for_deletion(void)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH_PREV(node, class_list.tail->prev)
     ((struct ClassItem *)node->data)->active = 0;
@@ -159,7 +159,7 @@ class_mark_for_deletion(void)
 void
 class_delete_marked(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, class_list.head)
   {
@@ -186,8 +186,7 @@ class_delete_marked(void)
 int
 cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class)
 {
-  dlink_node *node = NULL;
-  struct CidrItem *cidr = NULL;
+  dlink_node *node;
 
   if (class->number_per_cidr == 0)
     return 0;
@@ -199,7 +198,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
 
     DLINK_FOREACH(node, class->list_ipv4.head)
     {
-      cidr = node->data;
+      struct CidrItem *cidr = node->data;
 
       if (match_ipv4(ip, &cidr->mask, class->cidr_bitlen_ipv4))
       {
@@ -211,7 +210,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
       }
     }
 
-    cidr = xcalloc(sizeof(struct CidrItem));
+    struct CidrItem *cidr = xcalloc(sizeof(struct CidrItem));
     cidr->number_on_this_cidr = 1;
     cidr->mask = *ip;
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv4);
@@ -221,7 +220,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
   {
     DLINK_FOREACH(node, class->list_ipv6.head)
     {
-      cidr = node->data;
+      struct CidrItem *cidr = node->data;
 
       if (match_ipv6(ip, &cidr->mask, class->cidr_bitlen_ipv6))
       {
@@ -233,7 +232,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
       }
     }
 
-    cidr = xcalloc(sizeof(struct CidrItem));
+    struct CidrItem *cidr = xcalloc(sizeof(struct CidrItem));
     cidr->number_on_this_cidr = 1;
     cidr->mask = *ip;
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv6);
@@ -254,7 +253,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
 void
 remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   if (aclass->number_per_cidr == 0)
     return;
@@ -305,7 +304,7 @@ remove_from_cidr_check(struct irc_ssaddr *ip, struct ClassItem *aclass)
 void
 rebuild_cidr_list(struct ClassItem *class)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   destroy_cidr_class(class);
 

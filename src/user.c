@@ -204,7 +204,7 @@ report_and_set_user_flags(struct Client *client_p, const struct MaskItem *conf)
 static void
 introduce_client(struct Client *client_p)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
   char ubuf[IRCD_BUFSIZE] = "";
 
   send_umode(client_p, MyConnect(client_p), 0, ubuf);
@@ -711,7 +711,7 @@ send_umode_out(struct Client *client_p, unsigned int old)
 void
 user_set_hostmask(struct Client *client_p, const char *hostname, const int what)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (!strcmp(client_p->host, hostname))
     return;

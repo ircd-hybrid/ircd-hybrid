@@ -51,12 +51,12 @@
 static int
 m_names(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *chptr = NULL;
   const char *const para = parc > 1 ? parv[1] : NULL;
 
   if (!EmptyString(para))
   {
-    if ((chptr = hash_find_channel(para)))
+    struct Channel *chptr = hash_find_channel(para);
+    if (chptr)
       channel_member_names(source_p, chptr, 1);
     else
       sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, para);

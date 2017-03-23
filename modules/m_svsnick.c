@@ -138,6 +138,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(NULL, 0, 0, ":%s NICK %s :%ju",
                 target_p->id, new_nick, target_p->tsinfo);
+
   hash_del_client(target_p);
   strlcpy(target_p->name, new_nick, sizeof(target_p->name));
   hash_add_client(target_p);

@@ -115,7 +115,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
           if (MyConnect(source_p))
           {
-            dlink_node *node = NULL;
+            dlink_node *node;
 
             detach_conf(source_p, CONF_OPER);
             ClrOFlag(source_p);

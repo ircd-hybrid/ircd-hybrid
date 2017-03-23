@@ -151,8 +151,8 @@ static void
 channel_send_members(struct Client *client_p, const struct Channel *chptr,
                      const char *modebuf, const char *parabuf)
 {
-  char buf[IRCD_BUFSIZE] = "";
   dlink_node *node;
+  char buf[IRCD_BUFSIZE] = "";
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
 

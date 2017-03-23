@@ -218,7 +218,7 @@ resv_clear(void)
 
   for (dlink_list **list = tab; *list; ++list)
   {
-    dlink_node *node = NULL, *node_next = NULL;
+    dlink_node *node, *node_next;
 
     DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
     {
@@ -237,7 +237,7 @@ resv_expire(void)
 
   for (dlink_list **list = tab; *list; ++list)
   {
-    dlink_node *node = NULL, *node_next = NULL;
+    dlink_node *node, *node_next;
 
     DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
     {

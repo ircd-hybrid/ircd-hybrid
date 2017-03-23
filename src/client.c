@@ -541,7 +541,7 @@ client_get_name(const struct Client *client_p, enum addr_mask_type type)
 void
 free_exited_clients(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, dead_list.head)
   {
@@ -560,7 +560,7 @@ free_exited_clients(void)
 static void
 exit_one_client(struct Client *source_p, const char *comment)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   assert(!IsMe(source_p));
   assert(source_p != &me);
@@ -638,7 +638,7 @@ exit_one_client(struct Client *source_p, const char *comment)
 static void
 recurse_remove_clients(struct Client *source_p, const char *comment)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, source_p->serv->client_list.head)
     exit_one_client(node->data, comment);
@@ -670,15 +670,15 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 void
 exit_client(struct Client *source_p, const char *comment)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   assert(!IsMe(source_p));
   assert(source_p != &me);
 
   if (MyConnect(source_p))
   {
-    /* DO NOT REMOVE. exit_client can be called twice after a failed
-     * read/write.
+    /*
+     * DO NOT REMOVE. exit_client can be called twice after a failed read/write.
      */
     if (HasFlag(source_p, FLAGS_CLOSING))
       return;
@@ -973,7 +973,7 @@ int
 accept_message(struct Client *source,
                struct Client *target)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (HasFlag(source, FLAGS_SERVICE) ||
       (HasUMode(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))

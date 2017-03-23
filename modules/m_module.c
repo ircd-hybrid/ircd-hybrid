@@ -103,16 +103,13 @@ module_reload(struct Client *source_p, const char *arg)
 {
   const char *m_bn = NULL;
   struct module *modp = NULL;
-  int check_core = 0;
 
   if (!strcmp(arg, "*"))
   {
-    unsigned int modnum = 0;
-    dlink_node *node = NULL, *node_next = NULL;
+    unsigned int modnum = dlink_list_length(modules_get_list());
+    dlink_node *node, *node_next;
 
     sendto_one_notice(source_p, &me, ":Reloading all modules");
-
-    modnum = dlink_list_length(modules_get_list());
 
     DLINK_FOREACH_SAFE(node, node_next, modules_get_list()->head)
     {
@@ -147,15 +144,14 @@ module_reload(struct Client *source_p, const char *arg)
     return;
   }
 
-  check_core = (modp->flags & MODULE_FLAG_CORE) != 0;
-
   if (unload_one_module(m_bn, 1) == -1)
   {
     sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
     return;
   }
 
-  if ((load_one_module(arg) == -1) && check_core)
+  int check_core = (modp->flags & MODULE_FLAG_CORE) != 0;
+  if (load_one_module(arg) == -1 && check_core)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error reloading core "

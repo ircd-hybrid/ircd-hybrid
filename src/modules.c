@@ -202,7 +202,7 @@ modules_init(void)
 static struct module_path *
 mod_find_path(const char *path)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, modules_path.head)
   {
@@ -287,7 +287,7 @@ modules_conf_clear(void)
 struct module *
 findmodule_byname(const char *name)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, modules_list.head)
   {
@@ -342,7 +342,7 @@ load_all_modules(int warn)
 void
 load_conf_modules(void)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, modules_conf.head)
   {
@@ -388,7 +388,7 @@ load_core_modules(int warn)
 int
 load_one_module(const char *name)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
   char path[HYB_PATH_MAX + 1];
   struct stat statbuf;
 

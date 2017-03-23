@@ -46,7 +46,7 @@
 static void
 kline_check(const struct AddressRec *arec)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {

@@ -131,18 +131,15 @@ show_lusers(struct Client *client_p)
   {
     sendto_one_numeric(client_p, &me, RPL_LUSERME, dlink_list_length(&local_client_list), dlink_list_length(&local_server_list));
     sendto_one_numeric(client_p, &me, RPL_LOCALUSERS, dlink_list_length(&local_client_list), Count.max_loc);
+    sendto_one_numeric(client_p, &me, RPL_GLOBALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
+    sendto_one_numeric(client_p, &me, RPL_STATSCONN, Count.max_loc_con, Count.max_loc, Count.totalrestartcount);
   }
   else
   {
     sendto_one_numeric(client_p, &me, RPL_LUSERME, dlink_list_length(&global_client_list), 0);
     sendto_one_numeric(client_p, &me, RPL_LOCALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
+    sendto_one_numeric(client_p, &me, RPL_GLOBALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
   }
-
-  sendto_one_numeric(client_p, &me, RPL_GLOBALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
-
-  if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
-    sendto_one_numeric(client_p, &me, RPL_STATSCONN, Count.max_loc_con,
-                       Count.max_loc, Count.totalrestartcount);
 }
 
 /* report_and_set_user_flags()

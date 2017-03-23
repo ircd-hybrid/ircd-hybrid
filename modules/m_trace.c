@@ -55,11 +55,15 @@ trace_get_dependent(unsigned int *const server,
     trace_get_dependent(server, client, node->data);
 }
 
-/*
- * m_trace()
+/*! \brief TRACE command handler
  *
- *	parv[0] = command
- *	parv[1] = target client/server to trace
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
  */
 static int
 m_trace(struct Client *source_p, int parc, char *parv[])
@@ -68,9 +72,17 @@ m_trace(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/* mo_trace()
- *      parv[0] = command
- *      parv[1] = servername
+/*! \brief TRACE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nick or server name to trace
+ *      - parv[2] = nick or server name to forward the trace to
  */
 static int
 mo_trace(struct Client *source_p, int parc, char *parv[])
@@ -96,11 +108,18 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*
-** ms_trace
-**      parv[0] = command
-**      parv[1] = servername
-*/
+/*! \brief TRACE command handler
+ *
+ * \param source_p Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nick or server name to trace
+ *      - parv[2] = nick or server name to forward the trace to
+ */
 static int
 ms_trace(struct Client *source_p, int parc, char *parv[])
 {

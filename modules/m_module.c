@@ -157,7 +157,7 @@ module_reload(struct Client *source_p, const char *arg)
                          "Error reloading core "
                          "module: %s: terminating ircd", arg);
     ilog(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 }
 

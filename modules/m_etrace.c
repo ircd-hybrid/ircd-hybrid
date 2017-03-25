@@ -66,7 +66,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
  * do_etrace()
  */
 static void
-do_etrace(struct Client *source_p, int parc, char *parv[])
+do_etrace(struct Client *source_p, const char *arg)
 {
   const char *tname = NULL;
   unsigned int wilds = 0, do_all = 0;
@@ -77,14 +77,14 @@ do_etrace(struct Client *source_p, int parc, char *parv[])
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  if (EmptyString(parv[1]))
+  if (EmptyString(arg))
   {
     do_all = 1;
     tname = "*";
   }
   else
   {
-    tname = parv[1];
+    tname = arg;
     wilds = has_wildcards(tname);
   }
 
@@ -137,7 +137,7 @@ mo_etrace(struct Client *source_p, int parc, char *parv[])
                          ircd_version, hunt->target_p->name, hunt->target_p->from->name);
       break;
     case HUNTED_ISME:
-      do_etrace(source_p, parc, parv);
+      do_etrace(source_p, parv[1]);
       break;
     default:
       break;

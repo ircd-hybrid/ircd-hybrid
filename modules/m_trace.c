@@ -39,7 +39,7 @@
 #include "conf_class.h"
 
 
-static void do_actual_trace(struct Client *, int, char *[]);
+static void do_trace(struct Client *, const char *);
 static void report_this_status(struct Client *, const struct Client *);
 
 static void
@@ -99,7 +99,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
                          ircd_version, hunt->target_p->name, hunt->target_p->from->name);
       break;
     case HUNTED_ISME:
-      do_actual_trace(source_p, parc, parv);
+      do_trace(source_p, parv[1]);
       break;
     default:
       break;
@@ -109,7 +109,7 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
 }
 
 static void
-do_actual_trace(struct Client *source_p, int parc, char *parv[])
+do_trace(struct Client *source_p, const char *arg)
 {
   int doall = 0;
   int wilds = 0, dow = 0;
@@ -123,10 +123,10 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  if (parc > 1)
-    name = parv[1];
-  else
+  if (EmptyString(arg))
     name = me.name;
+  else
+    name = arg;
 
   if (!match(name, me.name))
     doall = 1;
@@ -136,7 +136,7 @@ do_actual_trace(struct Client *source_p, int parc, char *parv[])
     name = me.name;
   }
 
-  wilds = !parv[1] || has_wildcards(name);
+  wilds = EmptyString(arg) || has_wildcards(name);
   dow = wilds || doall;
 
   if (!dow)  /* lets also do this for opers tracing nicks */

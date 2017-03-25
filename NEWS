@@ -13,6 +13,7 @@ o) Implemented channel mode 'u' which hides bmask (+b/+e/+I) lists and mode chan
 o) Fixed an issue with "TRACE" where remote servers would reply with RPL_TRACEUSER
    numerics containing UIDs
 o) "STATS z" now shows simple memory stats of servers linked to the network
+o) Added support for remote "ETRACE"
 
 
 -- Noteworthy changes in version 8.2.21 (2016-11-27)

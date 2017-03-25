@@ -86,6 +86,11 @@ do_etrace(struct Client *source_p, const char *arg)
   {
     tname = arg;
     wilds = has_wildcards(tname);
+
+    if (!match(tname, me.name))
+      do_all = 1;
+    else if (!MyClient(source_p) && !strcmp(tname, me.id))
+      do_all = 1;
   }
 
   if (!wilds && !do_all)

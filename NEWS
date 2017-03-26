@@ -4,7 +4,7 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
--- Noteworthy changes in version 8.2.22 (2017-??-??)
+-- Noteworthy changes in version 8.2.22 (2017-03-26)
 o) Implemented channel mode 'L'. Channels with that mode set can make use of an
    extended ban list size specified with the new 'channel::max_bans_large'
    configuraton option. This mode can be set only by irc-operators or servers.

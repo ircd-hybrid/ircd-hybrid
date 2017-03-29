@@ -137,7 +137,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
       default:
       {
-        const struct mode_letter *cmode = cmode_map[(unsigned char)*modes];
+        const struct chan_mode *cmode = cmode_map[(unsigned char)*modes];
 
         if (cmode)
           mode.mode |= cmode->mode;
@@ -563,7 +563,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
 
   *mbuf++ = '-';
 
-  for (const struct mode_letter *tab = cmode_tab; tab->letter; ++tab)
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
     if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
       *mbuf++ = tab->letter;
 
@@ -583,7 +583,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
   else
     *mbuf++ = '+';
 
-  for (const struct mode_letter *tab = cmode_tab; tab->letter; ++tab)
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
     if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
       *mbuf++ = tab->letter;
 

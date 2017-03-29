@@ -263,7 +263,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
   *mbuf++ = '+';
   *pbuf = '\0';
 
-  for (const struct mode_letter *tab = cmode_tab; tab->mode; ++tab)
+  for (const struct chan_mode *tab = cmode_tab; tab->mode; ++tab)
     if (tab->mode && HasCMode(chptr, tab->mode))
       *mbuf++ = tab->letter;
 
@@ -346,20 +346,46 @@ enum
 
 /* Mode functions handle mode changes for a particular mode... */
 static void
-chm_nosuch(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_nosuch(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+           int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   if (*errors & SM_ERR_UNKNOWN)
     return;
 
   *errors |= SM_ERR_UNKNOWN;
-  sendto_one_numeric(source_p, &me, ERR_UNKNOWNMODE, c);
+  sendto_one_numeric(source_p, &me, ERR_UNKNOWNMODE, mode->letter);
 }
 
 static void
-chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+           int *errors, int alev, int dir, const struct chan_mode *mode)
 {
+  if (mode->only_opers)
+  {
+    if (MyClient(source_p) && !HasUMode(source_p, UMODE_OPER))
+    {
+      if (!(*errors & SM_ERR_NOTOPER))
+        sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+
+      *errors |= SM_ERR_NOTOPER;
+      return;
+    }
+  }
+
+  if (mode->only_servers)
+  {
+    if (!IsServer(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
+    {
+      if (!(*errors & SM_ERR_ONLYSERVER))
+        sendto_one_numeric(source_p, &me,
+                           alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                           ERR_ONLYSERVERSCANCHANGE, chptr->name);
+
+      *errors |= SM_ERR_ONLYSERVER;
+      return;
+    }
+  }
+
   if (alev < CHACCESS_HALFOP)
   {
     if (!(*errors & SM_ERR_NOOPS))
@@ -372,17 +398,17 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   }
 
   /* If have already dealt with this simple mode, ignore it */
-  if (simple_modes_mask & d)
+  if (simple_modes_mask & mode->mode)
     return;
 
-  simple_modes_mask |= d;
+  simple_modes_mask |= mode->mode;
 
   /* setting + */
   if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
   {
-    AddCMode(chptr, d);
+    AddCMode(chptr, mode->mode);
 
-    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count].flags = 0;
@@ -391,9 +417,9 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
   else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
   {
     /* setting - */
-    DelCMode(chptr, d);
+    DelCMode(chptr, mode->mode);
 
-    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count].flags = 0;
@@ -402,106 +428,8 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 }
 
 static void
-chm_registered(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-               char **parv, int *errors, int alev, int dir, char c, unsigned int d)
-{
-  if (!IsServer(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
-  {
-    if (!(*errors & SM_ERR_ONLYSERVER))
-      sendto_one_numeric(source_p, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_ONLYSERVERSCANCHANGE, chptr->name);
-
-    *errors |= SM_ERR_ONLYSERVER;
-    return;
-  }
-
-  /* If have already dealt with this simple mode, ignore it */
-  if (simple_modes_mask & d)
-    return;
-
-  simple_modes_mask |= d;
-
-  /* setting + */
-  if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
-  {
-    AddCMode(chptr, d);
-
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].flags = 0;
-    mode_changes[mode_count++].dir = dir;
-  }
-  else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
-  {
-    /* setting - */
-    DelCMode(chptr, d);
-
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].flags = 0;
-    mode_changes[mode_count++].dir = dir;
-  }
-}
-
-static void
-chm_simple_oper(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-                char **parv, int *errors, int alev, int dir, char c, unsigned int d)
-{
-  if (alev < CHACCESS_HALFOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(source_p, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->name);
-
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
-
-  if (MyClient(source_p) && !HasUMode(source_p, UMODE_OPER))
-  {
-    if (!(*errors & SM_ERR_NOTOPER))
-      sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
-
-    *errors |= SM_ERR_NOTOPER;
-    return;
-  }
-
-  /* If have already dealt with this simple mode, ignore it */
-  if (simple_modes_mask & d)
-    return;
-
-  simple_modes_mask |= d;
-
-  if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
-  {
-    AddCMode(chptr, d);
-
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].flags = 0;
-    mode_changes[mode_count++].dir = dir;
-  }
-  else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
-  {
-    /* setting - */
-    DelCMode(chptr, d);
-
-    mode_changes[mode_count].letter = c;
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].flags = 0;
-    mode_changes[mode_count++].dir = dir;
-  }
-}
-
-static void
-chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+        int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
@@ -561,7 +489,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       assert(0);
   }
 
-  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].letter = mode->letter;
   mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
   if (HasCMode(chptr, MODE_HIDEBMASKS))
@@ -572,8 +500,8 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 }
 
 static void
-chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-           char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+           int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
@@ -633,7 +561,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       assert(0);
   }
 
-  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].letter = mode->letter;
   mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
   if (HasCMode(chptr, MODE_HIDEBMASKS))
@@ -644,8 +572,8 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 }
 
 static void
-chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+          int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
@@ -705,7 +633,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       assert(0);
   }
 
-  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].letter = mode->letter;
   mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
   mode_changes[mode_count].id = NULL;
   if (HasCMode(chptr, MODE_HIDEBMASKS))
@@ -716,8 +644,8 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 }
 
 static void
-chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+          int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   struct Client *target_p;
   struct Membership *member;
@@ -767,7 +695,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       break;
   }
 
-  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].letter = mode->letter;
   mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
   mode_changes[mode_count].flags = 0;
@@ -775,8 +703,8 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 }
 
 static void
-chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+        int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   struct Client *target_p;
   struct Membership *member;
@@ -826,7 +754,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       break;
   }
 
-  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].letter = mode->letter;
   mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
   mode_changes[mode_count].flags = 0;
@@ -834,8 +762,8 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 }
 
 static void
-chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-       char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+       int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   struct Client *target_p;
   struct Membership *member;
@@ -885,7 +813,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
       break;
   }
 
-  mode_changes[mode_count].letter = c;
+  mode_changes[mode_count].letter = mode->letter;
   mode_changes[mode_count].arg = target_p->name;
   mode_changes[mode_count].id = target_p->id;
   mode_changes[mode_count].flags = 0;
@@ -893,8 +821,8 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 }
 
 static void
-chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-          char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+          int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   if (alev < CHACCESS_HALFOP)
   {
@@ -921,10 +849,10 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
     /* If somebody sets MODE #channel +ll 1 2, accept latter --fl */
     for (unsigned int i = 0; i < mode_count; ++i)
-      if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
+      if (mode_changes[i].letter == mode->letter && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
 
-    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = lstr;
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count].flags = 0;
@@ -939,7 +867,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
     chptr->mode.limit = 0;
 
-    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = NULL;
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count].flags = 0;
@@ -948,8 +876,8 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 }
 
 static void
-chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
-        char **parv, int *errors, int alev, int dir, char c, unsigned int d)
+chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+        int *errors, int alev, int dir, const struct chan_mode *mode)
 {
   if (alev < CHACCESS_HALFOP)
   {
@@ -976,10 +904,10 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
     /* If somebody does MODE #channel +kk a b, accept latter --fl */
     for (unsigned int i = 0; i < mode_count; ++i)
-      if (mode_changes[i].letter == c && mode_changes[i].dir == MODE_ADD)
+      if (mode_changes[i].letter == mode->letter && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
 
-    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = key;
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count].flags = 0;
@@ -995,7 +923,7 @@ chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn,
 
     chptr->mode.key[0] = '\0';
 
-    mode_changes[mode_count].letter = c;
+    mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = "*";
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count].flags = 0;
@@ -1204,40 +1132,40 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
   }
 }
 
-const struct mode_letter *cmode_map[256];
-const struct mode_letter  cmode_tab[] =
+const struct chan_mode *cmode_map[256];
+const struct chan_mode  cmode_tab[] =
 {
-  { 'b', 0, chm_ban },
-  { 'c', MODE_NOCTRL, chm_simple },
-  { 'e', 0, chm_except },
-  { 'h', 0, chm_hop },
-  { 'i', MODE_INVITEONLY, chm_simple },
-  { 'k', 0, chm_key },
-  { 'l', 0, chm_limit },
-  { 'm', MODE_MODERATED, chm_simple },
-  { 'n', MODE_NOPRIVMSGS, chm_simple },
-  { 'o', 0, chm_op },
-  { 'p', MODE_PRIVATE, chm_simple },
-  { 'r', MODE_REGISTERED, chm_registered },
-  { 's', MODE_SECRET, chm_simple },
-  { 't', MODE_TOPICLIMIT, chm_simple },
-  { 'u', MODE_HIDEBMASKS, chm_simple },
-  { 'v', 0, chm_voice },
-  { 'C', MODE_NOCTCP, chm_simple },
-  { 'I', 0, chm_invex },
-  { 'L', MODE_EXTLIMIT, chm_simple_oper },
-  { 'M', MODE_MODREG, chm_simple },
-  { 'O', MODE_OPERONLY, chm_simple_oper },
-  { 'R', MODE_REGONLY, chm_simple },
-  { 'S', MODE_SSLONLY, chm_simple },
-  { 'T', MODE_NONOTICE, chm_simple },
-  { '\0', 0, NULL }
+  { 'b', 0, 0, 0, chm_ban },
+  { 'c', MODE_NOCTRL, 0, 0, chm_simple },
+  { 'e', 0, 0, 0, chm_except },
+  { 'h', 0, 0, 0, chm_hop },
+  { 'i', MODE_INVITEONLY, 0, 0, chm_simple },
+  { 'k', 0, 0, 0, chm_key },
+  { 'l', 0, 0, 0, chm_limit },
+  { 'm', MODE_MODERATED, 0, 0, chm_simple },
+  { 'n', MODE_NOPRIVMSGS, 0, 0, chm_simple },
+  { 'o', 0, 0, 0, chm_op },
+  { 'p', MODE_PRIVATE, 0, 0, chm_simple },
+  { 'r', MODE_REGISTERED, 0, 1, chm_simple },
+  { 's', MODE_SECRET, 0, 0, chm_simple },
+  { 't', MODE_TOPICLIMIT, 0, 0, chm_simple },
+  { 'u', MODE_HIDEBMASKS, 0, 0, chm_simple },
+  { 'v', 0, 0, 0, chm_voice },
+  { 'C', MODE_NOCTCP, 0, 0, chm_simple },
+  { 'I', 0, 0, 0, chm_invex },
+  { 'L', MODE_EXTLIMIT, 1, 0, chm_simple },
+  { 'M', MODE_MODREG, 0, 0, chm_simple },
+  { 'O', MODE_OPERONLY, 1, 0, chm_simple },
+  { 'R', MODE_REGONLY, 0, 0, chm_simple },
+  { 'S', MODE_SSLONLY, 0, 0, chm_simple },
+  { 'T', MODE_NONOTICE, 0, 0, chm_simple },
+  { '\0', 0, 0, 0, NULL }
 };
 
 void
 channel_mode_init(void)
 {
-  for (const struct mode_letter *tab = cmode_tab; tab->letter; ++tab)
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
     cmode_map[tab->letter] = tab;
 }
 
@@ -1279,14 +1207,12 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
         break;
       default:
       {
-        const struct mode_letter *mode = cmode_map[(unsigned char)*ml];
+        const struct chan_mode *mode = cmode_map[(unsigned char)*ml];
 
         if (mode)
-          mode->func(source_p, chptr, parc, &parn, parv,
-                     &errors, alevel, dir, *ml, mode->mode);
+          mode->func(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, mode);
         else
-          chm_nosuch(source_p, chptr, parc, &parn, parv,
-                     &errors, alevel, dir, *ml, mode->mode);
+          chm_nosuch(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, mode);
         break;
       }
     }

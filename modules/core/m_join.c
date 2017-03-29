@@ -258,9 +258,9 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode)
   char *pbuf = parabuf;
   int what = 0, len = 0;
 
-  for (const struct mode_letter *tab = chan_modes; tab->letter; ++tab)
+  for (const struct mode_letter *tab = cmode_tab; tab->letter; ++tab)
   {
-    if ((tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
+    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
     {
       if (what != 1)
       {
@@ -272,9 +272,9 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode)
     }
   }
 
-  for (const struct mode_letter *tab = chan_modes; tab->letter; ++tab)
+  for (const struct mode_letter *tab = cmode_tab; tab->letter; ++tab)
   {
-    if ((tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
+    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
     {
       if (what != -1)
       {

@@ -347,18 +347,18 @@ enum
 /* Mode functions handle mode changes for a particular mode... */
 static void
 chm_nosuch(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-           int *errors, int alev, int dir, const struct chan_mode *mode)
+           int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   if (*errors & SM_ERR_UNKNOWN)
     return;
 
   *errors |= SM_ERR_UNKNOWN;
-  sendto_one_numeric(source_p, &me, ERR_UNKNOWNMODE, mode->letter);
+  sendto_one_numeric(source_p, &me, ERR_UNKNOWNMODE, c);
 }
 
 static void
 chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-           int *errors, int alev, int dir, const struct chan_mode *mode)
+           int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   if (mode->only_opers)
   {
@@ -429,7 +429,7 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn, 
 
 static void
 chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-        int *errors, int alev, int dir, const struct chan_mode *mode)
+        int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
@@ -501,7 +501,7 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn, cha
 
 static void
 chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-           int *errors, int alev, int dir, const struct chan_mode *mode)
+           int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
@@ -573,7 +573,7 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn, 
 
 static void
 chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-          int *errors, int alev, int dir, const struct chan_mode *mode)
+          int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   if (dir == MODE_QUERY || parc <= *parn)
   {
@@ -645,7 +645,7 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn, c
 
 static void
 chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-          int *errors, int alev, int dir, const struct chan_mode *mode)
+          int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   struct Client *target_p;
   struct Membership *member;
@@ -704,7 +704,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn, c
 
 static void
 chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-        int *errors, int alev, int dir, const struct chan_mode *mode)
+        int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   struct Client *target_p;
   struct Membership *member;
@@ -763,7 +763,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn, cha
 
 static void
 chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-       int *errors, int alev, int dir, const struct chan_mode *mode)
+       int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   struct Client *target_p;
   struct Membership *member;
@@ -822,7 +822,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char
 
 static void
 chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-          int *errors, int alev, int dir, const struct chan_mode *mode)
+          int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   if (alev < CHACCESS_HALFOP)
   {
@@ -877,7 +877,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn, c
 
 static void
 chm_key(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-        int *errors, int alev, int dir, const struct chan_mode *mode)
+        int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   if (alev < CHACCESS_HALFOP)
   {
@@ -1210,9 +1210,9 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
         const struct chan_mode *mode = cmode_map[(unsigned char)*ml];
 
         if (mode)
-          mode->func(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, mode);
+          mode->func(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, *ml, mode);
         else
-          chm_nosuch(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, mode);
+          chm_nosuch(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, *ml, mode);
         break;
       }
     }

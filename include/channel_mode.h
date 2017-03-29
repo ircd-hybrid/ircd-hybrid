@@ -121,8 +121,8 @@ struct chan_mode
   const unsigned int only_opers;
   const unsigned int only_servers;
   void (*func)(struct Client *,
-               struct Channel *, int, int *, char **,
-               int *, int, int, const struct chan_mode *);
+               struct Channel *, int, int *, char **, int *,
+               int, int, const char, const struct chan_mode *);
 };
 
 extern const struct chan_mode *cmode_map[];

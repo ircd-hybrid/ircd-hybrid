@@ -105,14 +105,6 @@ enum
 /* knock is forbidden, halfops can't kick/deop other halfops. */
 #define PrivateChannel(x)       (((x)->mode.mode & MODE_PRIVATE))
 
-struct ChannelMode
-{
-  void (*func)(struct Client *,
-               struct Channel *, int, int *, char **,
-               int *, int, int, char, unsigned int);
-  unsigned int d;
-};
-
 struct ChModeChange
 {
   char letter;
@@ -124,13 +116,17 @@ struct ChModeChange
 
 struct mode_letter
 {
-  const unsigned int mode;
   const unsigned char letter;
+  const unsigned int mode;
+  void (*func)(struct Client *,
+               struct Channel *, int, int *, char **,
+               int *, int, int, char, unsigned int);
 };
 
-extern const struct mode_letter chan_modes[];
-extern const struct ChannelMode ModeTable[];
+extern const struct mode_letter *cmode_map[];
+extern const struct mode_letter  cmode_tab[];
 
+extern void channel_mode_init(void);
 extern int add_id(struct Client *, struct Channel *, char *, unsigned int);
 extern void set_channel_mode(struct Client *, struct Channel *,
                              struct Membership *, int, char **);

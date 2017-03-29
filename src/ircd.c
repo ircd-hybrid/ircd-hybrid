@@ -29,6 +29,7 @@
 #include "list.h"
 #include "ircd.h"
 #include "channel.h"
+#include "channel_mode.h"
 #include "client.h"
 #include "event.h"
 #include "fdlist.h"
@@ -427,6 +428,7 @@ main(int argc, char *argv[])
   server_capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after read_conf_files() */
   channel_init();
+  channel_mode_init();
   read_links_file();
   motd_init();
   user_modes_init();

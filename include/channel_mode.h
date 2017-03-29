@@ -114,17 +114,19 @@ struct ChModeChange
   unsigned int flags;
 };
 
-struct mode_letter
+struct chan_mode
 {
   const unsigned char letter;
   const unsigned int mode;
+  const unsigned int only_opers;
+  const unsigned int only_servers;
   void (*func)(struct Client *,
                struct Channel *, int, int *, char **,
-               int *, int, int, char, unsigned int);
+               int *, int, int, const struct chan_mode *);
 };
 
-extern const struct mode_letter *cmode_map[];
-extern const struct mode_letter  cmode_tab[];
+extern const struct chan_mode *cmode_map[];
+extern const struct chan_mode  cmode_tab[];
 
 extern void channel_mode_init(void);
 extern int add_id(struct Client *, struct Channel *, char *, unsigned int);

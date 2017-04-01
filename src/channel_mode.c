@@ -403,28 +403,26 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn, 
 
   simple_modes_mask |= mode->mode;
 
-  /* setting + */
-  if (dir == MODE_ADD) /* && !(chptr->mode.mode & d)) */
+  if (dir == MODE_ADD)  /* setting + */
   {
+    if (MyClient(source_p) && HasCMode(chptr, mode->mode))
+      return;
+
     AddCMode(chptr, mode->mode);
-
-    mode_changes[mode_count].letter = mode->letter;
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].flags = 0;
-    mode_changes[mode_count++].dir = dir;
   }
-  else if (dir == MODE_DEL) /* && (chptr->mode.mode & d)) */
+  else if (dir == MODE_DEL)  /* setting - */
   {
-    /* setting - */
-    DelCMode(chptr, mode->mode);
+    if (MyClient(source_p) && !HasCMode(chptr, mode->mode))
+      return;
 
-    mode_changes[mode_count].letter = mode->letter;
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count].flags = 0;
-    mode_changes[mode_count++].dir = dir;
+    DelCMode(chptr, mode->mode);
   }
+
+  mode_changes[mode_count].letter = mode->letter;
+  mode_changes[mode_count].arg = NULL;
+  mode_changes[mode_count].id = NULL;
+  mode_changes[mode_count].flags = 0;
+  mode_changes[mode_count++].dir = dir;
 }
 
 static void
@@ -1154,11 +1152,11 @@ const struct chan_mode  cmode_tab[] =
   { .letter = 'C', .mode = MODE_NOCTCP, .func = chm_simple },
   { .letter = 'I', .func = chm_invex },
   { .letter = 'L', .mode = MODE_EXTLIMIT, .only_opers = 1, .func = chm_simple },
-  { .letter = 'M', .mode = MODE_MODREG, .func = chm_simple},
+  { .letter = 'M', .mode = MODE_MODREG, .func = chm_simple },
   { .letter = 'O', .mode = MODE_OPERONLY, .only_opers = 1, .func = chm_simple },
-  { .letter = 'R', .mode = MODE_REGONLY, .func = chm_simple},
-  { .letter = 'S', .mode = MODE_SSLONLY, .func = chm_simple},
-  { .letter = 'T', .mode = MODE_NONOTICE, .func = chm_simple},
+  { .letter = 'R', .mode = MODE_REGONLY, .func = chm_simple },
+  { .letter = 'S', .mode = MODE_SSLONLY, .func = chm_simple },
+  { .letter = 'T', .mode = MODE_NONOTICE, .func = chm_simple },
   { .letter = '\0', .mode = 0 }
 };
 

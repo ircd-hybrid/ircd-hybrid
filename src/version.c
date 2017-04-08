@@ -92,7 +92,7 @@ const char *infotext[] =
   "madmax, Paul Lomax <madmax@efnet.org>",
   "metalrock, Jack Low <xxjack12xx@gmail.com>",
   "r0d3nt, Andrew Strutt <andrew.strutt@gmail.com>",
-  "Riedel, Dennis Vink <riedel@chaotic.nl>",
+  "Riedel, Dennis Vink <dennis@drvink.com>",
   "scuzzy, David Todd <scuzzy@aniverse.net>",
   "spookey, David Colburn <spookey@spookey.org>",
   "TimeMr14C, Yusuf Iskenderoglu <uhc0@stud.uni-karlsruhe.de>",

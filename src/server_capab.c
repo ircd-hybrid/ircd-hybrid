@@ -21,7 +21,7 @@
 
 /*! \file server_capab.c
  * \brief Server CAPAB related functions.
- * \version $Id: server_capab.c 7996 2017-03-14 13:17:39Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

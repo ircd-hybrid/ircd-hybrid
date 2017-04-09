@@ -21,7 +21,7 @@
 
 /*! \file server_capab.h
  * \brief A header for the server CAPAB functions.
- * \version $Id: server.h 8002 2017-03-14 14:20:50Z michael $
+ * \version $Id$
  */
 
 #ifndef INCLUDED_server_capab_h

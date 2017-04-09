@@ -38,6 +38,7 @@
 #include "log.h"
 #include "misc.h"
 #include "server.h"
+#include "server_capab.h"
 #include "user.h"
 #include "send.h"
 #include "parse.h"
@@ -231,7 +232,7 @@ server_estab(struct Client *client_p)
   {
     sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
-    sendto_one(client_p, "CAPAB :%s", get_capabilities(NULL));
+    sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
 
     sendto_one(client_p, "SERVER %s 1 :%s%s",
                me.name, ConfigServerHide.hidden ? "(H) " : "", me.info);
@@ -290,29 +291,29 @@ server_estab(struct Client *client_p)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
                          client_get_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd.ssl),
-                         get_capabilities(client_p));
+                         capab_get(client_p));
 
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
                          client_get_name(client_p, MASK_IP), tls_get_cipher(&client_p->connection->fd.ssl),
-                         get_capabilities(client_p));
+                         capab_get(client_p));
     ilog(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
          client_get_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd.ssl),
-         get_capabilities(client_p));
+         capab_get(client_p));
   }
   else
   {
     /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
-                         client_get_name(client_p, SHOW_IP), get_capabilities(client_p));
+                         client_get_name(client_p, SHOW_IP), capab_get(client_p));
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
-                         client_get_name(client_p, MASK_IP), get_capabilities(client_p));
+                         client_get_name(client_p, MASK_IP), capab_get(client_p));
     ilog(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
-         client_get_name(client_p, SHOW_IP), get_capabilities(client_p));
+         client_get_name(client_p, SHOW_IP), capab_get(client_p));
   }
 
   fd_note(&client_p->connection->fd, "Server: %s", client_p->name);

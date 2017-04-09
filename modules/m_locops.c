@@ -33,7 +33,7 @@
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_shared.h"
-#include "server.h"
+#include "server_capab.h"
 #include "parse.h"
 #include "modules.h"
 

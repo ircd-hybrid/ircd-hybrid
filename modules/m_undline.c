@@ -37,7 +37,7 @@
 #include "log.h"
 #include "misc.h"
 #include "send.h"
-#include "server.h"
+#include "server_capab.h"
 #include "parse.h"
 #include "modules.h"
 #include "memory.h"
@@ -199,14 +199,14 @@ static void
 module_init(void)
 {
   mod_add_cmd(&undline_msgtab);
-  add_capability("UNDLN", CAPAB_UNDLN);
+  capab_add("UNDLN", CAPAB_UNDLN);
 }
 
 static void
 module_exit(void)
 {
   mod_del_cmd(&undline_msgtab);
-  delete_capability("UNDLN");
+  capab_del("UNDLN");
 }
 
 struct module module_entry =

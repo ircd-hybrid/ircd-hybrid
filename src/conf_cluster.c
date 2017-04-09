@@ -28,7 +28,7 @@
 #include "list.h"
 #include "memory.h"
 #include "conf_cluster.h"
-#include "server.h"
+#include "server_capab.h"
 #include "send.h"
 
 

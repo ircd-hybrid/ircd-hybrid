@@ -29,7 +29,7 @@
 #include "ircd.h"
 #include "irc_string.h"
 #include "numeric.h"
-#include "server.h"
+#include "server_capab.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"

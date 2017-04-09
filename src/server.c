@@ -36,6 +36,7 @@
 #include "packet.h"
 #include "conf.h"
 #include "server.h"
+#include "server_capab.h"
 #include "log.h"
 #include "send.h"
 #include "memory.h"
@@ -43,7 +44,6 @@
 
 
 dlink_list flatten_links;
-static dlink_list server_capabilities_list;
 static void serv_connect_callback(fde_t *, int, void *);
 
 
@@ -347,119 +347,6 @@ valid_servname(const char *name)
   return dots && (p - name) <= HOSTLEN;
 }
 
-/* server_capab_init()
- *
- * inputs       - none
- * output       - none
- */
-void
-server_capab_init(void)
-{
-  add_capability("QS", CAPAB_QS);
-  add_capability("EOB", CAPAB_EOB);
-  add_capability("CLUSTER", CAPAB_CLUSTER);
-  add_capability("SVS", CAPAB_SVS);
-  add_capability("CHW", CAPAB_CHW);
-  add_capability("HOPS", CAPAB_HOPS);
-}
-
-/* add_capability()
- *
- * inputs	- string name of CAPAB
- *		- int flag of capability
- * output	- NONE
- * side effects	- Adds given capability name and bit mask to
- *		  current supported capabilities. This allows
- *		  modules to dynamically add or subtract their capability.
- */
-void
-add_capability(const char *name, unsigned int flag)
-{
-  struct Capability *cap = xcalloc(sizeof(*cap));
-
-  cap->name = xstrdup(name);
-  cap->cap = flag;
-  dlinkAdd(cap, &cap->node, &server_capabilities_list);
-}
-
-/* delete_capability()
- *
- * inputs	- string name of CAPAB
- * output	- NONE
- * side effects	- delete given capability from ones known.
- */
-void
-delete_capability(const char *name)
-{
-  dlink_node *node, *node_next;
-
-  DLINK_FOREACH_SAFE(node, node_next, server_capabilities_list.head)
-  {
-    struct Capability *cap = node->data;
-
-    if (!irccmp(cap->name, name))
-    {
-      dlinkDelete(node, &server_capabilities_list);
-      xfree(cap->name);
-      xfree(cap);
-    }
-  }
-}
-
-/*
- * find_capability()
- *
- * inputs	- string name of capab to find
- * output	- 0 if not found CAPAB otherwise
- * side effects	- none
- */
-unsigned int
-find_capability(const char *name)
-{
-  dlink_node *node;
-
-  DLINK_FOREACH(node, server_capabilities_list.head)
-  {
-    const struct Capability *cap = node->data;
-
-    if (!irccmp(cap->name, name))
-      return cap->cap;
-  }
-
-  return 0;
-}
-
-/*
- * show_capabilities - show current server capabilities
- *
- * inputs       - pointer to a struct Client
- * output       - pointer to static string
- * side effects - build up string representing capabilities of server listed
- */
-const char *
-get_capabilities(const struct Client *client_p)
-{
-  static char buf[IRCD_BUFSIZE] = "";
-  dlink_node *node;
-
-  buf[0] = '\0';
-
-  DLINK_FOREACH(node, server_capabilities_list.head)
-  {
-    const struct Capability *cap = node->data;
-
-    if (client_p && !IsCapable(client_p, cap->cap))
-      continue;
-
-    strlcat(buf, cap->name, sizeof(buf));
-
-    if (node->next)
-      strlcat(buf, " ", sizeof(buf));
-  }
-
-  return buf;
-}
-
 /* make_server()
  *
  * inputs       - pointer to client struct
@@ -705,7 +592,7 @@ finish_ssl_server_handshake(struct Client *client_p)
 
   sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
-  sendto_one(client_p, "CAPAB :%s", get_capabilities(NULL));
+  sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
 
   sendto_one(client_p, "SERVER %s 1 :%s%s",
              me.name, ConfigServerHide.hidden ? "(H) " : "",
@@ -855,7 +742,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
 
   sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
-  sendto_one(client_p, "CAPAB :%s", get_capabilities(NULL));
+  sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
 
   sendto_one(client_p, "SERVER %s 1 :%s%s", me.name,
              ConfigServerHide.hidden ? "(H) " : "", me.info);

@@ -43,6 +43,7 @@
 #include "fdlist.h"
 #include "misc.h"
 #include "server.h"
+#include "server_capab.h"
 #include "event.h"
 #include "parse.h"
 #include "modules.h"
@@ -1083,7 +1084,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
                target_p->connection->recv.bytes >> 10,
                (unsigned int)(CurrentTime - target_p->connection->firsttime),
                (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since) : 0,
-               HasUMode(source_p, UMODE_OPER) ? get_capabilities(target_p) : "TS");
+               HasUMode(source_p, UMODE_OPER) ? capab_get(target_p) : "TS");
   }
 
   sendB >>= 10;
@@ -1182,7 +1183,7 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
                        target_p->connection->recv.bytes >> 10,
                        (unsigned int)(CurrentTime - target_p->connection->firsttime),
                        (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since) : 0,
-                       IsServer(target_p) ? get_capabilities(target_p) : "-");
+                       IsServer(target_p) ? capab_get(target_p) : "-");
   }
 }
 

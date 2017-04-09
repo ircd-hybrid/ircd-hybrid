@@ -37,7 +37,7 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "server.h"
+#include "server_capab.h"
 #include "user.h"
 #include "isupport.h"
 
@@ -146,7 +146,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&knock_msgtab);
-  add_capability("KNOCK", CAPAB_KNOCK);
+  capab_add("KNOCK", CAPAB_KNOCK);
   isupport_add("KNOCK", NULL, -1);
 }
 
@@ -154,7 +154,7 @@ static void
 module_exit(void)
 {
   mod_del_cmd(&knock_msgtab);
-  delete_capability("KNOCK");
+  capab_del("KNOCK");
   isupport_delete("KNOCK");
 }
 

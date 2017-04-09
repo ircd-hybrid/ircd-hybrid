@@ -27,7 +27,7 @@
 #include "stdinc.h"
 #include "client.h"
 #include "irc_string.h"
-#include "server.h"
+#include "server_capab.h"
 #include "parse.h"
 #include "modules.h"
 
@@ -51,7 +51,7 @@ mr_capab(struct Client *source_p, int parc, char *parv[])
 
   for (const char *s = strtok_r(parv[1], " ", &p); s;
                    s = strtok_r(NULL,    " ", &p))
-    if ((cap = find_capability(s)))
+    if ((cap = capab_find(s)))
       SetCapable(source_p, cap);
 
   return 0;

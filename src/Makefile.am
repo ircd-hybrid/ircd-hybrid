@@ -62,6 +62,7 @@ ircd_SOURCES = auth.c            \
                s_bsd.c           \
                send.c            \
                server.c          \
+               server_capab.c    \
                user.c            \
                userhost.c        \
                version.c         \

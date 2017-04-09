@@ -30,7 +30,7 @@
 #include "send.h"
 #include "modules.h"
 #include "hash.h"
-#include "server.h"
+#include "server_capab.h"
 #include "conf.h"
 #include "parse.h"
 
@@ -134,14 +134,14 @@ static void
 module_init(void)
 {
   mod_add_cmd(&tburst_msgtab);
-  add_capability("TBURST", CAPAB_TBURST);
+  capab_add("TBURST", CAPAB_TBURST);
 }
 
 static void
 module_exit(void)
 {
   mod_del_cmd(&tburst_msgtab);
-  delete_capability("TBURST");
+  capab_del("TBURST");
 }
 
 struct module module_entry =

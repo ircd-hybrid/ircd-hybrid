@@ -48,6 +48,7 @@
 #include "s_bsd.h"
 #include "log.h"
 #include "server.h"
+#include "server_capab.h"
 #include "send.h"
 #include "whowas.h"
 #include "modules.h"
@@ -425,7 +426,7 @@ main(int argc, char *argv[])
   resolver_init();      /* Needs to be setup before the io loop */
   modules_init();
   read_conf_files(1);   /* cold start init conf files */
-  server_capab_init();  /* Set up default_server_capabs */
+  capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after read_conf_files() */
   channel_init();
   channel_mode_init();

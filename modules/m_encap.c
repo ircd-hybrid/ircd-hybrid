@@ -27,7 +27,7 @@
 #include "stdinc.h"
 #include "client.h"
 #include "parse.h"
-#include "server.h"
+#include "server_capab.h"
 #include "send.h"
 #include "modules.h"
 #include "irc_string.h"
@@ -107,14 +107,14 @@ static void
 module_init(void)
 {
   mod_add_cmd(&encap_msgtab);
-  add_capability("ENCAP", CAPAB_ENCAP);
+  capab_add("ENCAP", CAPAB_ENCAP);
 }
 
 static void
 module_exit(void)
 {
   mod_del_cmd(&encap_msgtab);
-  delete_capability("ENCAP");
+  capab_del("ENCAP");
 }
 
 struct module module_entry =

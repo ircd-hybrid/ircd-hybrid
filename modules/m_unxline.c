@@ -36,7 +36,7 @@
 #include "numeric.h"
 #include "log.h"
 #include "send.h"
-#include "server.h"
+#include "server_capab.h"
 #include "parse.h"
 #include "modules.h"
 #include "memory.h"

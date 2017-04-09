@@ -33,7 +33,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "s_bsd.h"
-#include "server.h"
+#include "server_capab.h"
 #include "conf_class.h"
 #include "log.h"
 

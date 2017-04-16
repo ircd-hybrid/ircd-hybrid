@@ -344,13 +344,6 @@ register_local_user(struct Client *client_p)
   if (!check_client(client_p))
     return;
 
-  if (!valid_hostname(client_p->host))
-  {
-    sendto_one_notice(client_p, &me, ":*** Notice -- You have an illegal "
-                      "character in your hostname");
-    strlcpy(client_p->host, client_p->sockhost, sizeof(client_p->host));
-  }
-
   conf = client_p->connection->confs.head->data;
 
   if (!HasFlag(client_p, FLAGS_GOTID))

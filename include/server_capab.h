@@ -42,7 +42,8 @@ enum
   CAPAB_SVS     = 0x00000200U,  /**< Supports services */
   CAPAB_DLN     = 0x00000400U,  /**< Can do DLINE message */
   CAPAB_UNDLN   = 0x00000800U,  /**< Can do UNDLINE message */
-  CAPAB_CHW     = 0x00001000U   /**< Can do channel wall @# */
+  CAPAB_CHW     = 0x00001000U,  /**< Can do channel wall @# */
+  CAPAB_RHOST   = 0x00002000U   /**< Can do extended realhost UID messages */
 };
 
 /*

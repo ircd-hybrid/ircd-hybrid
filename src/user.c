@@ -41,6 +41,7 @@
 #include "conf_gecos.h"
 #include "log.h"
 #include "server.h"
+#include "server_capab.h" /* TBR: RHOST compatibility mode */
 #include "send.h"
 #include "memory.h"
 #include "packet.h"
@@ -219,14 +220,25 @@ introduce_client(struct Client *client_p)
     if (server_p == client_p->from)
       continue;
 
-    sendto_one(server_p, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
-               client_p->servptr->id,
-               client_p->name, client_p->hopcount+1,
-               client_p->tsinfo,
-               buf, client_p->username, client_p->host,
-               client_p->sockhost, client_p->id,
-               client_p->account,
-               client_p->info);
+    /* TBR: compatibility mode */
+    if (IsCapable(server_p, CAPAB_RHOST))
+      sendto_one(server_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
+                 client_p->servptr->id,
+                 client_p->name, client_p->hopcount+1,
+                 client_p->tsinfo,
+                 buf, client_p->username, client_p->host, client_p->realhost,
+                 client_p->sockhost, client_p->id,
+                 client_p->account,
+                 client_p->info);
+    else
+      sendto_one(server_p, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
+                 client_p->servptr->id,
+                 client_p->name, client_p->hopcount+1,
+                 client_p->tsinfo,
+                 buf, client_p->username, client_p->host,
+                 client_p->sockhost, client_p->id,
+                 client_p->account,
+                 client_p->info);
 
     if (!EmptyString(client_p->certfp))
       sendto_one(server_p, ":%s CERTFP %s", client_p->id, client_p->certfp);

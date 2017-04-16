@@ -410,6 +410,14 @@ struct Client
   char              host[HOSTLEN + 1];     /* client's hostname */
 
   /*
+   * client->realhost contains the resolved name or ip address as a string
+   * for the user. Once a client has registered, this field should be
+   * considered read-only.
+   */
+  char              realhost[HOSTLEN + 1];     /* client's real hostname */
+
+
+  /*
    * client->info for unix clients will normally contain the info from the
    * gcos field in /etc/passwd but anything can go here.
    */

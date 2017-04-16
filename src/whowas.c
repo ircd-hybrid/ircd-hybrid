@@ -138,6 +138,7 @@ whowas_add_history(struct Client *client_p, const int online)
   strlcpy(whowas->name, client_p->name, sizeof(whowas->name));
   strlcpy(whowas->username, client_p->username, sizeof(whowas->username));
   strlcpy(whowas->hostname, client_p->host, sizeof(whowas->hostname));
+  strlcpy(whowas->realhost, client_p->realhost, sizeof(whowas->realhost));
   strlcpy(whowas->sockhost, client_p->sockhost, sizeof(whowas->sockhost));
   strlcpy(whowas->realname, client_p->info, sizeof(whowas->realname));
   strlcpy(whowas->servername, client_p->servptr->name, sizeof(whowas->servername));

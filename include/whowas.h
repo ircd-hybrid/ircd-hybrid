@@ -43,6 +43,7 @@ struct Whowas
   char name[NICKLEN + 1];  /**< Client's nick name */
   char username[USERLEN + 1];  /**< Client's user name */
   char hostname[HOSTLEN + 1];  /**< Client's host name */
+  char realhost[HOSTLEN + 1];  /**< Client's real host name */
   char sockhost[HOSTIPLEN + 1];  /**< Client's IP address as string */
   char realname[REALLEN + 1];  /**< Client's real name/gecos */
   char servername[HOSTLEN + 1];  /**< Name of the server the client is using */

@@ -344,13 +344,18 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = strtoumax(parv[3], NULL, 10);
 
-  strlcpy(client_p->account, parv[9], sizeof(client_p->account));
   strlcpy(client_p->name, parv[1], sizeof(client_p->name));
-  strlcpy(client_p->id, parv[8], sizeof(client_p->id));
-  strlcpy(client_p->sockhost, parv[7], sizeof(client_p->sockhost));
   strlcpy(client_p->info, parv[parc - 1], sizeof(client_p->info));
   strlcpy(client_p->host, parv[6], sizeof(client_p->host));
   strlcpy(client_p->username, parv[5], sizeof(client_p->username));
+
+  /* TBR: compatibility mode */
+  const int does_rhost = parc == 12;
+
+  strlcpy(client_p->realhost, parv[6 + does_rhost], sizeof(client_p->realhost));
+  strlcpy(client_p->sockhost, parv[7 + does_rhost], sizeof(client_p->sockhost));
+  strlcpy(client_p->id, parv[8 + does_rhost], sizeof(client_p->id));
+  strlcpy(client_p->account, parv[9 + does_rhost], sizeof(client_p->account));
 
   hash_add_client(client_p);
   hash_add_id(client_p);
@@ -393,12 +398,27 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
  *      - parv[ 8] = uid
  *      - parv[ 9] = services id (account name)
  *      - parv[10] = ircname (gecos)
+ *  or with CAPAB_RHOST (parc == 12):
+ *      - parv[ 0] = command
+ *      - parv[ 1] = nickname
+ *      - parv[ 2] = hop count
+ *      - parv[ 3] = TS
+ *      - parv[ 4] = umode
+ *      - parv[ 5] = username
+ *      - parv[ 6] = hostname
+ *      - parv[ 7] = real host
+ *      - parv[ 8] = IP address
+ *      - parv[ 9] = uid
+ *      - parv[10] = services id (account name)
+ *      - parv[11] = ircname (gecos)
  */
 static int
 perform_uid_introduction_collides(struct Client *source_p, struct Client *target_p,
                                   int parc, char *parv[])
 {
-  const char *uid = parv[8];
+  /* TBR: compatibility mode */
+  const int does_rhost = parc == 12;
+  const char *uid = parv[8 + does_rhost];
   uintmax_t newts = strtoumax(parv[3], NULL, 10);
 
   assert(IsServer(source_p));
@@ -429,7 +449,7 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
 
   /* The timestamps are different */
   int sameuser = !irccmp(target_p->username, parv[5]) &&
-                 !irccmp(target_p->sockhost, parv[7]);
+                 !irccmp(target_p->sockhost, parv[7 + does_rhost]);
 
   /*
    * If the users are the same (loaded a client on a different server)
@@ -765,16 +785,35 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
  *      - parv[ 8] = uid
  *      - parv[ 9] = services id (account name)
  *      - parv[10] = ircname (gecos)
+ *  or with CAPAB_RHOST (parc == 12):
+ *      - parv[ 0] = command
+ *      - parv[ 1] = nickname
+ *      - parv[ 2] = hop count
+ *      - parv[ 3] = TS
+ *      - parv[ 4] = umode
+ *      - parv[ 5] = username
+ *      - parv[ 6] = hostname
+ *      - parv[ 7] = real host
+ *      - parv[ 8] = IP address
+ *      - parv[ 9] = uid
+ *      - parv[10] = services id (account name)
+ *      - parv[11] = ircname (gecos)
  */
 static int
 ms_uid(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
+  /* TBR: compatibility mode */
+  const int does_rhost = parc == 12;
 
   if (check_clean_nick(source_p, parv[1]) ||
       check_clean_user(source_p, parv[1], parv[5]) ||
       check_clean_host(source_p, parv[1], parv[6]) ||
-      check_clean_uid(source_p, parv[1], parv[8]))
+      check_clean_uid(source_p, parv[1], parv[8 + does_rhost]))
+    return 0;
+
+  /* TBR: compatibility mode */
+  if (does_rhost && check_clean_host(source_p, parv[1], parv[7]))
     return 0;
 
   /*
@@ -782,7 +821,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
    * This may generate 401's, but it ensures that both clients always
    * go, even if the other server refuses to do the right thing.
    */
-  if ((target_p = hash_find_id(parv[8])))
+  if ((target_p = hash_find_id(parv[8 + does_rhost])))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "ID collision on %s(%s <- %s)(both killed)",

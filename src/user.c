@@ -442,7 +442,7 @@ register_local_user(struct Client *client_p)
 
   sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                        "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
-                       client_p->name, client_p->username, client_p->host,
+                       client_p->name, client_p->username, client_p->realhost,
                        client_p->sockhost,
                        get_client_class(&client_p->connection->confs),
                        client_p->info, client_p->id);
@@ -525,7 +525,7 @@ register_remote_user(struct Client *client_p)
     sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
                          "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
                          client_p->servptr->name,
-                         client_p->name, client_p->username, client_p->host,
+                         client_p->name, client_p->username, client_p->realhost,
                          client_p->sockhost, client_p->info, client_p->id);
 
   introduce_client(client_p);

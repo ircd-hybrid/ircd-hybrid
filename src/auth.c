@@ -139,6 +139,10 @@ release_auth_client(struct AuthRequest *auth)
   read_packet(&client->connection->fd, client);
 }
 
+/*! Checks if a hostname is valid and doesn't contain illegal characters
+ * \param hostname The string to verify
+ * \return 1 if it is valid, 0 if it isn't
+ */
 static int
 auth_verify_hostname(const char *hostname)
 {

@@ -132,6 +132,8 @@ release_auth_client(struct AuthRequest *auth)
   client->connection->firsttime = CurrentTime;
   client->flags |= FLAGS_FINISHED_AUTH;
 
+  strlcpy(client->realhost, client->host, sizeof(client->realhost));
+
   read_packet(&client->connection->fd, client);
 }
 

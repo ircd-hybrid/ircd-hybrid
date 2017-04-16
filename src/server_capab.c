@@ -50,6 +50,7 @@ capab_init(void)
   capab_add("SVS", CAPAB_SVS);
   capab_add("CHW", CAPAB_CHW);
   capab_add("HOPS", CAPAB_HOPS);
+  capab_add("RHOST", CAPAB_RHOST);
 }
 
 /* capab_add()

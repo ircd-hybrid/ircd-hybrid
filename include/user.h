@@ -54,5 +54,5 @@ extern void register_remote_user(struct Client *);
 extern int valid_hostname(const char *);
 extern int valid_username(const char *, const int);
 extern int valid_nickname(const char *, const int);
-extern void user_set_hostmask(struct Client *, const char *, const int);
+extern void user_set_hostmask(struct Client *, const char *);
 #endif

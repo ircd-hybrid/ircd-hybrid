@@ -83,7 +83,6 @@ const struct user_modes  umode_tab[] =
   { 's', UMODE_SERVNOTICE   },
   { 'u', UMODE_UNAUTH       },
   { 'w', UMODE_WALLOP       },
-  { 'x', UMODE_HIDDENHOST   },
   { 'y', UMODE_SPY          },
   { '\0', 0 }
 };
@@ -706,23 +705,12 @@ send_umode_out(struct Client *client_p, unsigned int old)
 }
 
 void
-user_set_hostmask(struct Client *client_p, const char *hostname, const int what)
+user_set_hostmask(struct Client *client_p, const char *hostname)
 {
   dlink_node *node;
 
   if (!strcmp(client_p->host, hostname))
     return;
-
-  switch (what)
-  {
-    case MODE_ADD:
-      AddUMode(client_p, UMODE_HIDDENHOST);
-      break;
-    case MODE_DEL:
-      DelUMode(client_p, UMODE_HIDDENHOST);
-      break;
-    default: return;
-  }
 
   if (ConfigGeneral.cycle_on_host_change)
     sendto_common_channels_local(client_p, 0, 0, CAP_CHGHOST, ":%s!%s@%s QUIT :Changing hostname",

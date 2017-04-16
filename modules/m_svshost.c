@@ -45,14 +45,12 @@
  *      - parv[0] = command
  *      - parv[1] = nickname
  *      - parv[2] = TS
- *      - parv[3] = +|-
- *      - parv[4] = host name
+ *      - parv[3] = host name
  */
 static int
 ms_svshost(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-  int what = MODE_ADD;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
@@ -64,30 +62,19 @@ ms_svshost(struct Client *source_p, int parc, char *parv[])
   if (ts && (ts != target_p->tsinfo))
     return 0;
 
-  switch (*parv[3])
-  {
-    case '+':
-      what = MODE_ADD;
-      break;
-    case '-':
-      what = MODE_DEL;
-      break;
-    default: return 0;
-  }
+  if (valid_hostname(parv[3]))
+    user_set_hostmask(target_p, parv[3]);
 
-  if (valid_hostname(parv[4]))
-    user_set_hostmask(target_p, parv[4], what);
-
-  sendto_server(source_p, 0, 0, ":%s SVSHOST %s %ju %s %s",
+  sendto_server(source_p, 0, 0, ":%s SVSHOST %s %ju %s",
                 source_p->id,
-                target_p->id, target_p->tsinfo, parv[3], parv[4]);
+                target_p->id, target_p->tsinfo, parv[3]);
   return 0;
 }
 
 static struct Message svshost_msgtab =
 {
   .cmd = "SVSHOST",
-  .args_min = 5,
+  .args_min = 4,
   .args_max = MAXPARA,
   .handlers[UNREGISTERED_HANDLER] = m_ignore,
   .handlers[CLIENT_HANDLER] = m_ignore,

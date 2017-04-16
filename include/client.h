@@ -171,11 +171,10 @@ enum
   UMODE_OPER         = 0x00100000U,  /**< IRC operator */
   UMODE_ADMIN        = 0x00200000U,  /**< Admin on server */
   UMODE_FARCONNECT   = 0x00400000U,  /**< Can see remote client connects/exits */
-  UMODE_HIDDENHOST   = 0x00800000U,  /**< User's host is hidden */
-  UMODE_SSL          = 0x01000000U,  /**< User is connected via TLS/SSL */
-  UMODE_WEBIRC       = 0x02000000U,  /**< User connected via a webirc gateway */
-  UMODE_HIDEIDLE     = 0x04000000U,  /**< Hides idle and signon time in WHOIS */
-  UMODE_HIDECHANS    = 0x08000000U   /**< Hides channel list in WHOIS */
+  UMODE_SSL          = 0x00800000U,  /**< User is connected via TLS/SSL */
+  UMODE_WEBIRC       = 0x01000000U,  /**< User connected via a webirc gateway */
+  UMODE_HIDEIDLE     = 0x02000000U,  /**< Hides idle and signon time in WHOIS */
+  UMODE_HIDECHANS    = 0x04000000U   /**< Hides channel list in WHOIS */
 };
 
 #define HasUMode(x, y) ((x)->umodes &   (y))

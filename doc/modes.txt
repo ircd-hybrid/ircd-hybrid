@@ -3,7 +3,7 @@
 
 Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.22 DFGHRSWabcdefgijklnopqrsuwxy bchiklmnoprstuveCILMORST bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.22 DFGHRSWabcdefgijklnopqrsuwy bchiklmnoprstuveCILMORST bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -39,8 +39,6 @@ User Modes:
 +u - unauth       - See unauthorized client notices
 +w - wallop       - See server generated WALLOPS
 +W - webirc       - User is connected using a webirc gateway
-+x - hiddenhost   - User's host has been spoofed by services.
-                    This mode can be set by servers and services only.
 +y - spy          - See ADMIN, LINKS, MOTD, STATS, TRACE notices
 
 Channel Modes:

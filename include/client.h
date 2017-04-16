@@ -403,10 +403,9 @@ struct Client
   char              username[USERLEN + 1]; /* client's username */
 
   /*
-   * client->host contains the resolved name or ip address
-   * as a string for the user, it may be fiddled with for oper spoofing etc.
-   * once it's changed the *real* address goes away. This should be
-   * considered a read-only field after the client has registered.
+   * client->host contains the resolved name or ip address as a string
+   * for the user, it may be fiddled with for oper spoofing etc.
+   * once it's changed the *real* address goes away.
    */
   char              host[HOSTLEN + 1];     /* client's hostname */
 

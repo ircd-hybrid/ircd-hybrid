@@ -709,7 +709,7 @@ exit_client(struct Client *source_p, const char *comment)
 
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                            "Client exiting: %s (%s@%s) [%s] [%s]",
-                           source_p->name, source_p->username, source_p->host,
+                           source_p->name, source_p->username, source_p->realhost,
                            source_p->sockhost, comment);
 
       ilog(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
@@ -753,7 +753,7 @@ exit_client(struct Client *source_p, const char *comment)
     sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
                          "Client exiting at %s: %s (%s@%s) [%s] [%s]",
                          source_p->servptr->name, source_p->name,
-                         source_p->username, source_p->host, source_p->sockhost, comment);
+                         source_p->username, source_p->realhost, source_p->sockhost, comment);
 
   if (IsServer(source_p))
   {

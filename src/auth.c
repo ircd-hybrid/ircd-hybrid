@@ -62,7 +62,8 @@ enum
   REPORT_FIN_ID,
   REPORT_FAIL_ID,
   REPORT_IP_MISMATCH,
-  REPORT_HOST_TOOLONG
+  REPORT_HOST_TOOLONG,
+  REPORT_HOST_INVALID
 };
 
 static const char *const HeaderMessages[] =
@@ -74,7 +75,8 @@ static const char *const HeaderMessages[] =
   [REPORT_FIN_ID] = ":*** Got Ident response",
   [REPORT_FAIL_ID] = ":*** No Ident response",
   [REPORT_IP_MISMATCH] = ":*** Your forward and reverse DNS do not match, ignoring hostname",
-  [REPORT_HOST_TOOLONG] = ":*** Your hostname is too long, ignoring hostname"
+  [REPORT_HOST_TOOLONG] = ":*** Your hostname is too long, ignoring hostname",
+  [REPORT_HOST_INVALID] = ":*** Your hostname contains illegal characters, ignoring hostname"
 };
 
 #define sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
@@ -137,6 +139,23 @@ release_auth_client(struct AuthRequest *auth)
   read_packet(&client->connection->fd, client);
 }
 
+static int
+auth_verify_hostname(const char *hostname)
+{
+  const char *p = hostname;
+
+  assert(p);
+
+  if (EmptyString(p) || *p == '.' || *p == ':')
+    return 0;
+
+  for (; *p; ++p)
+    if (!IsHostChar(*p))
+      return 0;
+
+  return 1;
+}
+
 /*
  * auth_dns_callback - called when resolver query finishes
  * if the query resulted in a successful search, name will contain
@@ -180,6 +199,8 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
     if (namelength > HOSTLEN)
       sendheader(auth->client, REPORT_HOST_TOOLONG);
+    else if (!auth_verify_hostname(name))
+      sendheader(auth->client, REPORT_HOST_INVALID);
     else
     {
       strlcpy(auth->client->host, name, sizeof(auth->client->host));

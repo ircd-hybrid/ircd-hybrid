@@ -263,7 +263,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
   *mbuf++ = '+';
   *pbuf = '\0';
 
-  for (const struct chan_mode *tab = cmode_tab; tab->mode; ++tab)
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
     if (tab->mode && HasCMode(chptr, tab->mode))
       *mbuf++ = tab->letter;
 

@@ -115,6 +115,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   strlcpy(source_p->sockhost, addr, sizeof(source_p->sockhost));
   strlcpy(source_p->host, host, sizeof(source_p->host));
+  strlcpy(source_p->realhost, host, sizeof(source_p->realhost));
 
   /* Check dlines now, k-lines will be checked on registration */
   if ((conf = find_dline_conf(&source_p->connection->ip,

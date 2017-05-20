@@ -1198,7 +1198,7 @@ set_channel_mode(struct Client *source_p, struct Channel *chptr,
         if (mode)
           mode->func(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, *ml, mode);
         else
-          chm_nosuch(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, *ml, mode);
+          chm_nosuch(source_p, chptr, parc, &parn, parv, &errors, alevel, dir, *ml, NULL);
         break;
       }
     }

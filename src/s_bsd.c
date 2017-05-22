@@ -673,7 +673,7 @@ comm_open(fde_t *F, int family, int sock_type, int proto, const char *note)
  * fd_open (this function no longer does it).
  */
 int
-comm_accept(struct Listener *lptr, struct irc_ssaddr *addr)
+comm_accept(fde_t *F, struct irc_ssaddr *addr)
 {
   socklen_t addrlen = sizeof(struct irc_ssaddr);
 
@@ -690,7 +690,7 @@ comm_accept(struct Listener *lptr, struct irc_ssaddr *addr)
    * reserved fd limit, but we can deal with that when comm_open()
    * also does it. XXX -- adrian
    */
-  int fd = accept(lptr->fd.fd, (struct sockaddr *)addr, &addrlen);
+  int fd = accept(F->fd, (struct sockaddr *)addr, &addrlen);
   if (fd < 0)
     return -1;
 

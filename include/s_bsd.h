@@ -56,7 +56,7 @@ extern void comm_connect_tcp(fde_t *, const char *, unsigned short, struct socka
                              void (struct _fde *, int, void *), void *, int, uintmax_t);
 extern const char *comm_errstr(int);
 extern int comm_open(fde_t *, int, int, int, const char *);
-extern int comm_accept(struct Listener *, struct irc_ssaddr *);
+extern int comm_accept(fde_t *, struct irc_ssaddr *);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void netio_init(void);

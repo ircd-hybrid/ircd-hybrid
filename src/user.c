@@ -264,7 +264,7 @@ user_welcome(struct Client *client_p)
   }
 
   sendto_one_numeric(client_p, &me, RPL_WELCOME, ConfigServerInfo.network_name,
-                     client_p->name);
+                     client_p->name, client_p->username, client_p->realhost);
   sendto_one_numeric(client_p, &me, RPL_YOURHOST,
                      listener_get_name(client_p->connection->listener), ircd_version);
   sendto_one_numeric(client_p, &me, RPL_CREATED, built_date);

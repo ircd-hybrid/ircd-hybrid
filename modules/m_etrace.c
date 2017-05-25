@@ -66,10 +66,9 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
  * do_etrace()
  */
 static void
-do_etrace(struct Client *source_p, const char *arg)
+do_etrace(struct Client *source_p, const char *name)
 {
-  const char *tname = NULL;
-  unsigned int wilds = 0, do_all = 0;
+  int doall = 0;
   dlink_node *node;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
@@ -77,38 +76,18 @@ do_etrace(struct Client *source_p, const char *arg)
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
-  if (EmptyString(arg))
-  {
-    do_all = 1;
-    tname = "*";
-  }
-  else
-  {
-    tname = arg;
-    wilds = has_wildcards(tname);
-
-    if (!match(tname, me.name))
-      do_all = 1;
-    else if (!MyClient(source_p) && !strcmp(tname, me.id))
-      do_all = 1;
-  }
-
-  if (!wilds && !do_all)
-  {
-    const struct Client *target_p = find_person(source_p, tname);
-
-    if (target_p && MyConnect(target_p))
-      report_this_status(source_p, target_p);
-
-    sendto_one_numeric(source_p, &me, RPL_ETRACEEND, me.name);
-    return;
-  }
+  if (EmptyString(name))
+    doall = 1;
+  else if (!match(name, me.name))
+    doall = 1;
+  else if (!MyClient(source_p) && !strcmp(name, me.id))
+    doall = 1;
 
   DLINK_FOREACH(node, local_client_list.head)
   {
     const struct Client *target_p = node->data;
 
-    if (!wilds || !match(tname, target_p->name))
+    if (doall || match(name, target_p->name) == 0)
       report_this_status(source_p, target_p);
   }
 

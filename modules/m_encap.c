@@ -52,9 +52,9 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
 
   for (i = 1; i < (unsigned int)parc - 1; ++i)
   {
-    len = strlen(parv[i]) + 1;  /* +1 for ':' */
+    len = strlen(parv[i]) + 1;  /* +1 for the space */
 
-    /* Drop the whole command if the last parameter would be truncated */
+    /* Drop the whole command if this parameter would be truncated */
     if ((cur_len + len) >= sizeof(buffer))
       return 0;
 

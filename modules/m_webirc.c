@@ -114,6 +114,13 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   freeaddrinfo(res);
 
   strlcpy(source_p->sockhost, addr, sizeof(source_p->sockhost));
+
+  if (source_p->sockhost[0] == ':')
+  {
+    memmove(source_p->sockhost + 1, source_p->sockhost, sizeof(source_p->sockhost) - 1);
+    source_p->sockhost[0] = '0';
+  }
+
   strlcpy(source_p->host, host, sizeof(source_p->host));
   strlcpy(source_p->realhost, host, sizeof(source_p->realhost));
 

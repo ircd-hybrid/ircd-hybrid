@@ -293,15 +293,13 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   }
 #endif
 
-  if (client_p->sockhost[0] == ':' && client_p->sockhost[1] == ':')
+  if (client_p->sockhost[0] == ':')
   {
-    strlcpy(client_p->host, "0", sizeof(client_p->host));
-    strlcpy(client_p->host + 1, client_p->sockhost, sizeof(client_p->host) - 1);
-    memmove(client_p->sockhost + 1, client_p->sockhost, sizeof(client_p->sockhost) - 1);
     client_p->sockhost[0] = '0';
+    memmove(client_p->sockhost + 1, client_p->sockhost, sizeof(client_p->sockhost) - 1);
   }
-  else
-    strlcpy(client_p->host, client_p->sockhost, sizeof(client_p->host));
+
+  strlcpy(client_p->host, client_p->sockhost, sizeof(client_p->host));
 
   client_p->connection->listener = listener;
   ++listener->ref_count;

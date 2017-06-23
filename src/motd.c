@@ -247,14 +247,14 @@ motd_lookup(const struct Client *client_p)
           return motd;
         break;
       case MOTD_IPMASKV4:
-          if (client_p->connection->aftype == AF_INET)
-            if (match_ipv4(&client_p->connection->ip, &motd->address, motd->addrbits))
-              return motd;
+        if (client_p->connection->aftype == AF_INET)
+          if (match_ipv4(&client_p->connection->ip, &motd->address, motd->addrbits))
+            return motd;
         break;
       case MOTD_IPMASKV6:
-          if (client_p->connection->aftype == AF_INET6)
-            if (match_ipv6(&client_p->connection->ip, &motd->address, motd->addrbits))
-              return motd;
+        if (client_p->connection->aftype == AF_INET6)
+          if (match_ipv6(&client_p->connection->ip, &motd->address, motd->addrbits))
+            return motd;
         break;
       default: break;
     }

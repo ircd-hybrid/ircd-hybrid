@@ -69,9 +69,10 @@
 
        These are optional or have default values that may be overridden:
 
-          * --enable-assert - Enable use of numerous debugging checks. This
-            should not be used on any production servers for maximum speed
-            so as to prevent cores from things that shouldn't normally happen.
+          * --enable-assert - Enable use of numerous debugging checks. This is
+            considered a developer-only feature and should not be used on any
+            production servers for maximum speed so as to prevent cores from
+            things that shouldn't normally happen.
 
           * --enable-debugging - Prepares Makefiles to compile the ircd sources
             with proper settings that are required for debugging purposes.

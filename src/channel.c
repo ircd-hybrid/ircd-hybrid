@@ -817,9 +817,6 @@ can_send(struct Channel *chptr, struct Client *client_p,
 void
 check_spambot_warning(struct Client *client_p, const char *name)
 {
-  int t_delta = 0;
-  int decrement_count = 0;
-
   if (GlobalSetOptions.spam_num &&
       (client_p->connection->join_leave_count >= GlobalSetOptions.spam_num))
   {
@@ -846,11 +843,10 @@ check_spambot_warning(struct Client *client_p, const char *name)
   }
   else
   {
-    if ((t_delta = (CurrentTime - client_p->connection->last_leave_time)) >
-         JOIN_LEAVE_COUNT_EXPIRE_TIME)
+    int t_delta = CurrentTime - client_p->connection->last_leave_time;
+    if (t_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
-      decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
-
+      int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
       if (decrement_count > client_p->connection->join_leave_count)
         client_p->connection->join_leave_count = 0;
       else

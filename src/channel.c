@@ -820,9 +820,8 @@ check_spambot_warning(struct Client *client_p, const char *name)
   int t_delta = 0;
   int decrement_count = 0;
 
-  if ((GlobalSetOptions.spam_num &&
-       (client_p->connection->join_leave_count >=
-        GlobalSetOptions.spam_num)))
+  if (GlobalSetOptions.spam_num &&
+      (client_p->connection->join_leave_count >= GlobalSetOptions.spam_num))
   {
     if (client_p->connection->oper_warn_count_down > 0)
       client_p->connection->oper_warn_count_down--;

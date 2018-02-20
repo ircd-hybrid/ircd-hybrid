@@ -124,8 +124,9 @@ static void
 do_trace(struct Client *source_p, const char *name)
 {
   int doall = 0;
-  dlink_node *node;
-  dlink_list *tab[] = { &local_client_list, &local_server_list, &unknown_list, NULL };
+  const dlink_node *node;
+  const dlink_list *tab[] = { &local_client_list,
+                              &local_server_list, &unknown_list, NULL };
 
   assert(HasUMode(source_p, UMODE_OPER));
 
@@ -141,7 +142,7 @@ do_trace(struct Client *source_p, const char *name)
   else if (!MyClient(source_p) && !strcmp(name, me.id))
     doall = 1;
 
-  for (dlink_list **list = tab; *list; ++list)
+  for (const dlink_list **list = tab; *list; ++list)
   {
     DLINK_FOREACH(node, (*list)->head)
     {

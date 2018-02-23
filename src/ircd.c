@@ -503,7 +503,7 @@ main(int argc, char *argv[])
     event_add(&event_write_links_file, NULL);
   }
 
-  ilog(LOG_TYPE_IRCD, "Server Ready");
+  ilog(LOG_TYPE_IRCD, "Server ready. Running version: %s(%s)", ircd_version, serno);
   io_loop();
 
   return 0;

@@ -120,10 +120,13 @@ client_make(struct Client *from)
 static void
 client_free(struct Client *client_p)
 {
+  assert(!IsMe(client_p));
   assert(client_p != &me);
   assert(client_p->hnext == client_p);
   assert(client_p->idhnext == client_p);
   assert(client_p->channel.head == NULL);
+  assert(client_p->whowas_list.head == NULL);
+  assert(client_p->svstags.head == NULL);
   assert(dlink_list_length(&client_p->channel) == 0);
   assert(dlink_list_length(&client_p->whowas_list) == 0);
   assert(dlink_list_length(&client_p->svstags) == 0);
@@ -133,10 +136,24 @@ client_free(struct Client *client_p)
 
   if (MyConnect(client_p))
   {
+    assert(client_p->connection->lclient_node.node->next == NULL);
+    assert(client_p->connection->lclient_node.node->prev == NULL);
+    assert(client_p->connection->list_task == NULL);
+    assert(client_p->connection->confs.head == NULL);
+    assert(client_p->connection->acceptlist.head == NULL);
     assert(client_p->connection->invited.head == NULL);
+    assert(client_p->connection->watches.head == NULL);
+    assert(dlink_list_length(&client_p->connection->confs) == 0);
+    assert(dlink_list_length(&client_p->connection->acceptlist) == 0);
     assert(dlink_list_length(&client_p->connection->invited) == 0);
     assert(dlink_list_length(&client_p->connection->watches) == 0);
     assert(HasFlag(client_p, FLAGS_CLOSING) && IsDead(client_p));
+    assert(client_p->connection->auth.node->next == NULL);
+    assert(client_p->connection->auth.node->prev == NULL);
+    assert(client_p->connection->auth.flags == 0);
+    assert(client_p->connection->auth.fd.fd == 0);
+    assert(client_p->connection->auth.client == NULL || client_p->connection->auth.client == client_p);
+
 
     /*
      * Clean up extra sockets from listen {} blocks which have been discarded.

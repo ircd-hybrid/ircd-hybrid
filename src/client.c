@@ -136,8 +136,8 @@ client_free(struct Client *client_p)
 
   if (MyConnect(client_p))
   {
-    assert(client_p->connection->lclient_node.node->next == NULL);
-    assert(client_p->connection->lclient_node.node->prev == NULL);
+    assert(client_p->connection->lclient_node.next == NULL);
+    assert(client_p->connection->lclient_node.prev == NULL);
     assert(client_p->connection->list_task == NULL);
     assert(client_p->connection->confs.head == NULL);
     assert(client_p->connection->acceptlist.head == NULL);
@@ -148,8 +148,8 @@ client_free(struct Client *client_p)
     assert(dlink_list_length(&client_p->connection->invited) == 0);
     assert(dlink_list_length(&client_p->connection->watches) == 0);
     assert(HasFlag(client_p, FLAGS_CLOSING) && IsDead(client_p));
-    assert(client_p->connection->auth.node->next == NULL);
-    assert(client_p->connection->auth.node->prev == NULL);
+    assert(client_p->connection->auth.node.next == NULL);
+    assert(client_p->connection->auth.node.prev == NULL);
     assert(client_p->connection->auth.flags == 0);
     assert(client_p->connection->auth.fd.fd == 0);
     assert(client_p->connection->auth.client == NULL || client_p->connection->auth.client == client_p);

@@ -917,16 +917,15 @@ exit_aborted_clients(void)
     target_p = ptr->data;
     eac_next = ptr->next;
 
+    dlinkDelete(ptr, &abort_list);
+    free_dlink_node(ptr);
+
     if (target_p == NULL)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Warning: null client on abort_list!");
-      dlinkDelete(ptr, &abort_list);
-      free_dlink_node(ptr);
       continue;
     }
-
-    dlinkDelete(ptr, &abort_list);
 
     if (HasFlag(target_p, FLAGS_SENDQEX))
       notice = "Max SendQ exceeded";
@@ -934,7 +933,6 @@ exit_aborted_clients(void)
       notice = "Write error: connection closed";
 
     exit_client(target_p, notice);
-    free_dlink_node(ptr);
   }
 }
 

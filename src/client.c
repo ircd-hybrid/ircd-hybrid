@@ -687,8 +687,6 @@ recurse_remove_clients(struct Client *source_p, const char *comment)
 void
 exit_client(struct Client *source_p, const char *comment)
 {
-  dlink_node *node;
-
   assert(!IsMe(source_p));
   assert(source_p != &me);
 
@@ -712,6 +710,8 @@ exit_client(struct Client *source_p, const char *comment)
 
     if (IsClient(source_p))
     {
+      dlink_node *node;
+
       if (HasUMode(source_p, UMODE_OPER))
         if ((node = dlinkFindDelete(&oper_list, source_p)))
           free_dlink_node(node);
@@ -817,6 +817,7 @@ exit_client(struct Client *source_p, const char *comment)
   assert(dlinkFind(&local_client_list, source_p) == NULL);
   assert(dlinkFind(&local_server_list, source_p) == NULL);
   assert(dlinkFind(&oper_list, source_p) == NULL);
+  assert(dlinkFind(&listing_client_list, source_p) == NULL);
 
   exit_one_client(source_p, comment);
 }

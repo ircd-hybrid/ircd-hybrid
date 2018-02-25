@@ -533,10 +533,16 @@ void
 auth_delete(struct AuthRequest *auth)
 {
   if (IsDNSPending(auth))
+  {
     delete_resolver_queries(auth);
+    ClearDNSPending(auth);
+  }
 
   if (IsDoingAuth(auth))
+  {
     fd_close(&auth->fd);
+    ClearAuth(auth);
+  }
 
   if (IsInAuth(auth))
   {

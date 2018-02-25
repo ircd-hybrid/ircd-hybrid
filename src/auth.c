@@ -132,7 +132,7 @@ release_auth_client(struct AuthRequest *auth)
   client->connection->since     = CurrentTime;
   client->connection->lasttime  = CurrentTime;
   client->connection->firsttime = CurrentTime;
-  client->flags |= FLAGS_FINISHED_AUTH;
+  AddFlag(client, FLAGS_FINISHED_AUTH);
 
   strlcpy(client->realhost, client->host, sizeof(client->realhost));
 

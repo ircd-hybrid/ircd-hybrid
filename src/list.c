@@ -132,6 +132,8 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 void
 dlinkDelete(dlink_node *m, dlink_list *list)
 {
+  assert(list->length > 0);
+
   /* Assumption: If m->next == NULL, then list->tail == m
    *      and:   If m->prev == NULL, then list->head == m
    */

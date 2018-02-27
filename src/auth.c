@@ -20,7 +20,7 @@
  */
 
 /*! \file auth.c
- * \brief Functions for querying a users ident.
+ * \brief Implementation of DNS and ident lookups.
  * \version $Id$
  */
 
@@ -79,18 +79,16 @@ static const char *const HeaderMessages[] =
   [REPORT_HOST_INVALID] = ":*** Your hostname contains illegal characters, ignoring hostname"
 };
 
-#define sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
+#define auth_sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
 
 static dlink_list auth_list;
-static void auth_read_reply(fde_t *, void *);
-static void auth_connect_callback(fde_t *, int, void *);
 
 
 /*
- * make_auth_request - allocate a new auth request
+ * auth_make_request - allocate a new auth request
  */
 static struct AuthRequest *
-make_auth_request(struct Client *client)
+auth_make_request(struct Client *client)
 {
   struct AuthRequest *const auth = &client->connection->auth;
 
@@ -102,13 +100,12 @@ make_auth_request(struct Client *client)
   return auth;
 }
 
-/*
- * release_auth_client - release auth client from auth system
- * this adds the client into the local client lists so it can be read by
- * the main io processing loop
+/*! \brief Release auth client from auth system. This adds the client into the
+ *         local client lists so it can be read by the main io processing loop.
+ * \param auth Pointer to AuthRequest struct to release
  */
 static void
-release_auth_client(struct AuthRequest *auth)
+auth_release_client(struct AuthRequest *auth)
 {
   struct Client *const client = auth->client;
 
@@ -160,12 +157,12 @@ auth_verify_hostname(const char *hostname)
   return 1;
 }
 
-/*
- * auth_dns_callback - called when resolver query finishes
- * if the query resulted in a successful search, name will contain
- * a non-NULL pointer, otherwise name will be NULL.
- * set the client on it's way to a connection completion, regardless
- * of success of failure
+/*! \brief Handle a complete DNS lookup. Send the client on its way to a connection
+ *         completion, regardless of success or failure.
+ * \param vptr The pending struct AuthRequest.
+ * \param addr IP address being resolved.
+ * \param name Resolved name, or NULL if lookup failed.
+ * \param namelength String length of the resolved hostname pointed by 'name'
  */
 static void
 auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
@@ -183,8 +180,8 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
       if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)))
       {
-        sendheader(auth->client, REPORT_IP_MISMATCH);
-        release_auth_client(auth);
+        auth_sendheader(auth->client, REPORT_IP_MISMATCH);
+        auth_release_client(auth);
         return;
       }
     }
@@ -195,30 +192,30 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
       if (v4->sin_addr.s_addr != v4dns->sin_addr.s_addr)
       {
-        sendheader(auth->client, REPORT_IP_MISMATCH);
-        release_auth_client(auth);
+        auth_sendheader(auth->client, REPORT_IP_MISMATCH);
+        auth_release_client(auth);
         return;
       }
     }
 
     if (namelength > HOSTLEN)
-      sendheader(auth->client, REPORT_HOST_TOOLONG);
+      auth_sendheader(auth->client, REPORT_HOST_TOOLONG);
     else if (!auth_verify_hostname(name))
-      sendheader(auth->client, REPORT_HOST_INVALID);
+      auth_sendheader(auth->client, REPORT_HOST_INVALID);
     else
     {
       strlcpy(auth->client->host, name, sizeof(auth->client->host));
-      sendheader(auth->client, REPORT_FIN_DNS);
+      auth_sendheader(auth->client, REPORT_FIN_DNS);
     }
   }
   else
-    sendheader(auth->client, REPORT_FAIL_DNS);
+    auth_sendheader(auth->client, REPORT_FAIL_DNS);
 
-  release_auth_client(auth);
+  auth_release_client(auth);
 }
 
 /*
- * authsenderr - handle auth send errors
+ * auth_error - handle auth send errors
  */
 static void
 auth_error(struct AuthRequest *auth)
@@ -226,174 +223,11 @@ auth_error(struct AuthRequest *auth)
   ++ServerStats.is_abad;
 
   fd_close(&auth->fd);
-
   ClearAuth(auth);
 
-  sendheader(auth->client, REPORT_FAIL_ID);
+  auth_sendheader(auth->client, REPORT_FAIL_ID);
 
-  release_auth_client(auth);
-}
-
-/*
- * start_auth_query - Flag the client to show that an attempt to
- * contact the ident server on
- * the client's host.  The connect and subsequently the socket are all put
- * into 'non-blocking' mode.  Should the connect or any later phase of the
- * identifing process fail, it is aborted and the user is given a username
- * of "unknown".
- */
-static void
-start_auth_query(struct AuthRequest *auth)
-{
-  struct irc_ssaddr localaddr;
-  socklen_t locallen = sizeof(struct irc_ssaddr);
-  struct sockaddr_in6 *v6;
-
-  /* open a socket of the same type as the client socket */
-  if (comm_open(&auth->fd, auth->client->connection->ip.ss.ss_family,
-                SOCK_STREAM, 0, "ident") == -1)
-  {
-    report_error(L_ALL, "creating auth stream socket %s:%s",
-                 client_get_name(auth->client, SHOW_IP), errno);
-    ++ServerStats.is_abad;
-    return;
-  }
-
-  SetDoingAuth(auth);
-  sendheader(auth->client, REPORT_DO_ID);
-
-  /*
-   * Get the local address of the client and bind to that to
-   * make the auth request.
-   */
-  memset(&localaddr, 0, locallen);
-  getsockname(auth->client->connection->fd.fd, (struct sockaddr*)&localaddr,
-      &locallen);
-
-  remove_ipv6_mapping(&localaddr);
-  v6 = (struct sockaddr_in6 *)&localaddr;
-  v6->sin6_port = htons(0);
-  localaddr.ss_port = htons(0);
-
-  comm_connect_tcp(&auth->fd, auth->client->sockhost, RFC1413_PORT,
-      (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
-      auth, auth->client->connection->ip.ss.ss_family,
-      GlobalSetOptions.ident_timeout);
-}
-
-/*
- * auth_start
- *
- * inputs	- pointer to client to auth
- * output	- NONE
- * side effects	- starts auth (identd) and dns queries for a client
- */
-void
-auth_start(struct Client *client_p)
-{
-  struct AuthRequest *const auth = make_auth_request(client_p);
-
-  SetInAuth(auth);
-  dlinkAddTail(auth, &auth->node, &auth_list);
-
-  sendheader(client_p, REPORT_DO_DNS);
-
-  SetDNSPending(auth);
-
-  if (ConfigGeneral.disable_auth == 0)
-    start_auth_query(auth);
-
-  gethost_byaddr(auth_dns_callback, auth, &client_p->connection->ip);
-}
-
-/*
- * timeout_auth_queries - timeout resolver and identd requests
- * allow clients through if requests failed
- */
-static void
-timeout_auth_queries_event(void *notused)
-{
-  dlink_node *node, *node_next;
-
-  DLINK_FOREACH_SAFE(node, node_next, auth_list.head)
-  {
-    struct AuthRequest *auth = node->data;
-
-    if (auth->timeout > CurrentTime)
-      break;
-
-    if (IsDoingAuth(auth))
-    {
-      ++ServerStats.is_abad;
-      fd_close(&auth->fd);
-      ClearAuth(auth);
-      sendheader(auth->client, REPORT_FAIL_ID);
-    }
-
-    if (IsDNSPending(auth))
-    {
-      delete_resolver_queries(auth);
-      ClearDNSPending(auth);
-      sendheader(auth->client, REPORT_FAIL_DNS);
-    }
-
-    release_auth_client(auth);
-  }
-}
-
-/*
- * auth_connect_callback() - deal with the result of comm_connect_tcp()
- *
- * If the connection failed, we simply close the auth fd and report
- * a failure. If the connection suceeded send the ident server a query
- * giving "theirport , ourport". The write is only attempted *once* so
- * it is deemed to be a fail if the entire write doesn't write all the
- * data given.  This shouldnt be a problem since the socket should have
- * a write buffer far greater than this message to store it in should
- * problems arise. -avalon
- */
-static void
-auth_connect_callback(fde_t *fd, int error, void *data)
-{
-  struct AuthRequest *const auth = data;
-  struct irc_ssaddr us;
-  struct irc_ssaddr them;
-  char authbuf[16];
-  ssize_t len = 0;
-  socklen_t ulen = sizeof(struct irc_ssaddr);
-  socklen_t tlen = sizeof(struct irc_ssaddr);
-  uint16_t uport, tport;
-  struct sockaddr_in6 *v6;
-
-  if (error != COMM_OK)
-  {
-    auth_error(auth);
-    return;
-  }
-
-  if (getsockname(auth->client->connection->fd.fd, (struct sockaddr *)&us, &ulen) ||
-      getpeername(auth->client->connection->fd.fd, (struct sockaddr *)&them, &tlen))
-  {
-    report_error(L_ALL, "auth get{sock,peer}name error %s:%s",
-                 client_get_name(auth->client, SHOW_IP), errno);
-    auth_error(auth);
-    return;
-  }
-
-  v6 = (struct sockaddr_in6 *)&us;
-  uport = ntohs(v6->sin6_port);
-  v6 = (struct sockaddr_in6 *)&them;
-  tport = ntohs(v6->sin6_port);
-
-  len = snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
-
-  if (send(fd->fd, authbuf, len, 0) != len)
-  {
-    auth_error(auth);
-    return;
-  }
-
-  comm_setselect(fd, COMM_SELECT_READ, auth_read_reply, auth, 0);
+  auth_release_client(auth);
 }
 
 /** Enum used to index ident reply fields in a human-readable way. */
@@ -411,7 +245,7 @@ enum IdentReplyFields
  * \return The userid, or NULL on parse failure.
  */
 static const char *
-check_ident_reply(char *const reply)
+auth_check_ident_reply(char *const reply)
 {
   char *token = NULL, *end = NULL;
   char *vector[USERID_TOKEN_COUNT];
@@ -486,11 +320,11 @@ check_ident_reply(char *const reply)
   return token;
 }
 
-/*
- * auth_read_reply - read the reply (if any) from the ident server
- * we connected to.
- * We only give it one shot, if the reply isn't good the first time
- * fail the authentication entirely. --Bleep
+/*! \brief Read the reply (if any) from the ident server we connected to. We
+ *         only give it one shot, if the reply isn't good the first time fail
+ *         the authentication entirely. --Bleep
+ * \param fd The socket/fd to read from.
+ * \param data The request to read.
  */
 static void
 auth_read_reply(fde_t *fd, void *data)
@@ -503,27 +337,149 @@ auth_read_reply(fde_t *fd, void *data)
   if ((len = recv(fd->fd, buf, RFC1413_BUFSIZ, 0)) > 0)
   {
     buf[len] = '\0';
-    username = check_ident_reply(buf);
+    username = auth_check_ident_reply(buf);
   }
 
   fd_close(fd);
-
   ClearAuth(auth);
 
   if (EmptyString(username))
   {
-    sendheader(auth->client, REPORT_FAIL_ID);
+    auth_sendheader(auth->client, REPORT_FAIL_ID);
     ++ServerStats.is_abad;
   }
   else
   {
     strlcpy(auth->client->username, username, sizeof(auth->client->username));
-    sendheader(auth->client, REPORT_FIN_ID);
+    auth_sendheader(auth->client, REPORT_FIN_ID);
     ++ServerStats.is_asuc;
     AddFlag(auth->client, FLAGS_GOTID);
   }
 
-  release_auth_client(auth);
+  auth_release_client(auth);
+}
+
+/*
+ * auth_connect_callback() - deal with the result of comm_connect_tcp()
+ *
+ * If the connection failed, we simply close the auth fd and report
+ * a failure. If the connection suceeded send the ident server a query
+ * giving "theirport , ourport". The write is only attempted *once* so
+ * it is deemed to be a fail if the entire write doesn't write all the
+ * data given.  This shouldnt be a problem since the socket should have
+ * a write buffer far greater than this message to store it in should
+ * problems arise. -avalon
+ */
+static void
+auth_connect_callback(fde_t *fd, int error, void *data)
+{
+  struct AuthRequest *const auth = data;
+  struct irc_ssaddr us;
+  struct irc_ssaddr them;
+  char authbuf[16];
+  ssize_t len = 0;
+  socklen_t ulen = sizeof(struct irc_ssaddr);
+  socklen_t tlen = sizeof(struct irc_ssaddr);
+  uint16_t uport, tport;
+  struct sockaddr_in6 *v6;
+
+  if (error != COMM_OK)
+  {
+    auth_error(auth);
+    return;
+  }
+
+  if (getsockname(auth->client->connection->fd.fd, (struct sockaddr *)&us, &ulen) ||
+      getpeername(auth->client->connection->fd.fd, (struct sockaddr *)&them, &tlen))
+  {
+    report_error(L_ALL, "auth get{sock,peer}name error %s:%s",
+                 client_get_name(auth->client, SHOW_IP), errno);
+    auth_error(auth);
+    return;
+  }
+
+  v6 = (struct sockaddr_in6 *)&us;
+  uport = ntohs(v6->sin6_port);
+  v6 = (struct sockaddr_in6 *)&them;
+  tport = ntohs(v6->sin6_port);
+
+  len = snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
+
+  if (send(fd->fd, authbuf, len, 0) != len)
+  {
+    auth_error(auth);
+    return;
+  }
+
+  comm_setselect(fd, COMM_SELECT_READ, auth_read_reply, auth, 0);
+}
+
+/*! \brief Flag the client to show an attempt to contact the ident server on
+ *         the client's host. Should the connect or any later phase of the
+ *         identifying process fail, it is aborted and the user is given a
+ *         username of "unknown".
+ * \param auth The request for which to start the ident lookup.
+ */
+static void
+auth_start_query(struct AuthRequest *auth)
+{
+  struct irc_ssaddr localaddr;
+  socklen_t locallen = sizeof(struct irc_ssaddr);
+  struct sockaddr_in6 *v6;
+
+  /* Open a socket of the same type as the client socket */
+  if (comm_open(&auth->fd, auth->client->connection->ip.ss.ss_family, SOCK_STREAM, 0, "ident") == -1)
+  {
+    report_error(L_ALL, "creating auth stream socket %s:%s",
+                 client_get_name(auth->client, SHOW_IP), errno);
+    ++ServerStats.is_abad;
+    return;
+  }
+
+  SetDoingAuth(auth);
+  auth_sendheader(auth->client, REPORT_DO_ID);
+
+  /*
+   * Get the local address of the client and bind to that to
+   * make the auth request.
+   */
+  memset(&localaddr, 0, locallen);
+  getsockname(auth->client->connection->fd.fd, (struct sockaddr *)&localaddr, &locallen);
+
+  remove_ipv6_mapping(&localaddr);
+  v6 = (struct sockaddr_in6 *)&localaddr;
+  v6->sin6_port = htons(0);
+  localaddr.ss_port = htons(0);
+
+  comm_connect_tcp(&auth->fd, auth->client->sockhost, RFC1413_PORT,
+      (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
+      auth, auth->client->connection->ip.ss.ss_family,
+      GlobalSetOptions.ident_timeout);
+}
+
+/*
+ * auth_start
+ *
+ * inputs       - pointer to client to auth
+ * output       - NONE
+ * side effects - starts auth (identd) and dns queries for a client
+ */
+void
+auth_start(struct Client *client_p)
+{
+  struct AuthRequest *const auth = auth_make_request(client_p);
+
+  SetInAuth(auth);
+  dlinkAddTail(auth, &auth->node, &auth_list);
+
+  auth_sendheader(client_p, REPORT_DO_DNS);
+
+  SetDNSPending(auth);
+
+  if (ConfigGeneral.disable_auth == 0)
+    auth_start_query(auth);
+
+  gethost_byaddr(auth_dns_callback, auth, &client_p->connection->ip);
 }
 
 /*
@@ -532,22 +488,59 @@ auth_read_reply(fde_t *fd, void *data)
 void
 auth_delete(struct AuthRequest *auth)
 {
-  if (IsDNSPending(auth))
-  {
-    delete_resolver_queries(auth);
-    ClearDNSPending(auth);
-  }
-
   if (IsDoingAuth(auth))
   {
     fd_close(&auth->fd);
     ClearAuth(auth);
   }
 
+  if (IsDNSPending(auth))
+  {
+    delete_resolver_queries(auth);
+    ClearDNSPending(auth);
+  }
+
   if (IsInAuth(auth))
   {
     dlinkDelete(&auth->node, &auth_list);
     ClearInAuth(auth);
+  }
+}
+
+/*
+ * auth_timeout_queries - timeout resolver and identd requests
+ * allow clients through if requests failed
+ */
+static void
+auth_timeout_queries(void *notused)
+{
+  dlink_node *node, *node_next;
+
+  DLINK_FOREACH_SAFE(node, node_next, auth_list.head)
+  {
+    struct AuthRequest *auth = node->data;
+
+    if (auth->timeout > CurrentTime)
+      break;
+
+    if (IsDoingAuth(auth))
+    {
+      ++ServerStats.is_abad;
+      fd_close(&auth->fd);
+      ClearAuth(auth);
+
+      auth_sendheader(auth->client, REPORT_FAIL_ID);
+    }
+
+    if (IsDNSPending(auth))
+    {
+      delete_resolver_queries(auth);
+      ClearDNSPending(auth);
+
+      auth_sendheader(auth->client, REPORT_FAIL_DNS);
+    }
+
+    auth_release_client(auth);
   }
 }
 
@@ -560,8 +553,8 @@ auth_init(void)
 {
   static struct event timeout_auth_queries =
   {
-    .name = "timeout_auth_queries_event",
-    .handler = timeout_auth_queries_event,
+    .name = "auth_timeout_queries",
+    .handler = auth_timeout_queries,
     .when = 1
   };
 

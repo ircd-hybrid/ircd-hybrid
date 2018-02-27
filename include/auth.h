@@ -20,7 +20,7 @@
  */
 
 /*! \file auth.h
- * \brief A header for the ident functions.
+ * \brief Interface for DNS and ident lookups.
  * \version $Id$
  */
 

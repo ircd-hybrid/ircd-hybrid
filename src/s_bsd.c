@@ -41,7 +41,6 @@
 #include "packet.h"
 #include "res.h"
 #include "restart.h"
-#include "auth.h"
 #include "conf.h"
 #include "log.h"
 #include "server.h"

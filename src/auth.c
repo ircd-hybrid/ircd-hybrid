@@ -107,7 +107,7 @@ make_auth_request(struct Client *client)
  * this adds the client into the local client lists so it can be read by
  * the main io processing loop
  */
-void
+static void
 release_auth_client(struct AuthRequest *auth)
 {
   struct Client *const client = auth->client;

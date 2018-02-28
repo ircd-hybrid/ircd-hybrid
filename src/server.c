@@ -358,7 +358,7 @@ struct Server *
 make_server(struct Client *client_p)
 {
   if (client_p->serv == NULL)
-    client_p->serv = xcalloc(sizeof(struct Server));
+    client_p->serv = xcalloc(sizeof(*client_p->serv));
 
   return client_p->serv;
 }
@@ -502,13 +502,16 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   {
     case AF_INET:
       v4 = (struct sockaddr_in*)&conf->bind;
+
       if (v4->sin_addr.s_addr)
       {
         struct irc_ssaddr ipn;
-        memset(&ipn, 0, sizeof(struct irc_ssaddr));
+
+        memset(&ipn, 0, sizeof(ipn));
         ipn.ss.ss_family = AF_INET;
         ipn.ss_port = 0;
-        memcpy(&ipn, &conf->bind, sizeof(struct irc_ssaddr));
+        memcpy(&ipn, &conf->bind, sizeof(ipn));
+
         comm_connect_tcp(&client_p->connection->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
                          serv_connect_callback, client_p, conf->aftype,
@@ -517,10 +520,12 @@ serv_connect(struct MaskItem *conf, struct Client *by)
       else if (ConfigServerInfo.specific_ipv4_vhost)
       {
         struct irc_ssaddr ipn;
-        memset(&ipn, 0, sizeof(struct irc_ssaddr));
+
+        memset(&ipn, 0, sizeof(ipn));
         ipn.ss.ss_family = AF_INET;
         ipn.ss_port = 0;
-        memcpy(&ipn, &ConfigServerInfo.ip, sizeof(struct irc_ssaddr));
+        memcpy(&ipn, &ConfigServerInfo.ip, sizeof(ipn));
+
         comm_connect_tcp(&client_p->connection->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
                          serv_connect_callback, client_p, conf->aftype,
@@ -537,15 +542,16 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         struct sockaddr_in6 *v6;
         struct sockaddr_in6 *v6conf;
 
-        memset(&ipn, 0, sizeof(struct irc_ssaddr));
+        memset(&ipn, 0, sizeof(ipn));
         v6conf = (struct sockaddr_in6 *)&conf->bind;
         v6 = (struct sockaddr_in6 *)&ipn;
 
         if (memcmp(&v6conf->sin6_addr, &v6->sin6_addr, sizeof(struct in6_addr)))
         {
-          memcpy(&ipn, &conf->bind, sizeof(struct irc_ssaddr));
+          memcpy(&ipn, &conf->bind, sizeof(ipn));
           ipn.ss.ss_family = AF_INET6;
           ipn.ss_port = 0;
+
           comm_connect_tcp(&client_p->connection->fd,
                            conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
@@ -554,9 +560,10 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         }
         else if (ConfigServerInfo.specific_ipv6_vhost)
         {
-          memcpy(&ipn, &ConfigServerInfo.ip6, sizeof(struct irc_ssaddr));
+          memcpy(&ipn, &ConfigServerInfo.ip6, sizeof(ipn));
           ipn.ss.ss_family = AF_INET6;
           ipn.ss_port = 0;
+
           comm_connect_tcp(&client_p->connection->fd,
                            conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
@@ -695,7 +702,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
   assert(&client_p->connection->fd == fd);
 
   /* Next, for backward purposes, record the ip of the server */
-  memcpy(&client_p->connection->ip, &fd->connect.hostaddr, sizeof(struct irc_ssaddr));
+  memcpy(&client_p->connection->ip, &fd->connect.hostaddr, sizeof(client_p->connection->ip));
 
   /* Check the status */
   if (status != COMM_OK)

@@ -52,10 +52,10 @@ listener_get_list(void)
 static struct Listener *
 listener_make(const int port, const struct irc_ssaddr *addr)
 {
-  struct Listener *listener = xcalloc(sizeof(struct Listener));
+  struct Listener *listener = xcalloc(sizeof(*listener));
 
   listener->port = port;
-  memcpy(&listener->addr, addr, sizeof(struct irc_ssaddr));
+  memcpy(&listener->addr, addr, sizeof(listener->addr));
 
   return listener;
 }
@@ -246,7 +246,7 @@ listener_find(int port, struct irc_ssaddr *addr)
     listener = node->data;
 
     if ((port == listener->port) &&
-        (!memcmp(addr, &listener->addr, sizeof(struct irc_ssaddr))))
+        (!memcmp(addr, &listener->addr, sizeof(*addr))))
     {
       /* Try to return an open listener, otherwise reuse a closed one */
       if (!listener->fd.flags.open)

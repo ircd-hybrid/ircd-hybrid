@@ -113,35 +113,23 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
       struct split_nuh_item nuh;
       char *s = node->data;
 
-      if (strlen(s) == 2 && IsAlpha(*(s + 1) && IsAlpha(*(s + 2))))
-      {
-#ifdef HAVE_LIBGEOIP
-        struct ResvExemptItem *exempt = xcalloc(sizeof(*exempt));
-        exempt->name = xstrdup(s);
-        exempt->country_id = GeoIP_id_by_code(s);
-        dlinkAdd(exempt, &exempt->node, &resv->exempt_list);
-#endif
-      }
-      else
-      {
-        nuh.nuhmask  = s;
-        nuh.nickptr  = nick;
-        nuh.userptr  = user;
-        nuh.hostptr  = host;
+      nuh.nuhmask  = s;
+      nuh.nickptr  = nick;
+      nuh.userptr  = user;
+      nuh.hostptr  = host;
 
-        nuh.nicksize = sizeof(nick);
-        nuh.usersize = sizeof(user);
-        nuh.hostsize = sizeof(host);
+      nuh.nicksize = sizeof(nick);
+      nuh.usersize = sizeof(user);
+      nuh.hostsize = sizeof(host);
 
-        split_nuh(&nuh);
+      split_nuh(&nuh);
 
-        struct ResvExemptItem *exempt = xcalloc(sizeof(*exempt));
-        exempt->name = xstrdup(nick);
-        exempt->user = xstrdup(user);
-        exempt->host = xstrdup(host);
-        exempt->type = parse_netmask(host, &exempt->addr, &exempt->bits);
-        dlinkAdd(exempt, &exempt->node, &resv->exempt_list);
-      }
+      struct ResvExemptItem *exempt = xcalloc(sizeof(*exempt));
+      exempt->name = xstrdup(nick);
+      exempt->user = xstrdup(user);
+      exempt->host = xstrdup(host);
+      exempt->type = parse_netmask(host, &exempt->addr, &exempt->bits);
+      dlinkAdd(exempt, &exempt->node, &resv->exempt_list);
     }
   }
 
@@ -179,12 +167,7 @@ resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
   {
     const struct ResvExemptItem *exempt = node->data;
 
-    if (exempt->country_id)
-    {
-      if (exempt->country_id == client_p->connection->country_id)
-        return 1;
-    }
-    else if (!match(exempt->name, client_p->name) && !match(exempt->user, client_p->username))
+    if (!match(exempt->name, client_p->name) && !match(exempt->user, client_p->username))
     {
       switch (exempt->type)
       {

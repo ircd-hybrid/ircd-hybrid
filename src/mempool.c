@@ -243,7 +243,9 @@ mp_pool_init(void)
     .when = 187
   };
 
+#ifndef MEMPOOL_DISABLED
   event_add(&event_mp_gc, NULL);
+#endif
 }
 
 /** Helper: Allocate and return a new memory chunk for <b>pool</b>.  Does not
@@ -284,6 +286,10 @@ mp_pool_get(mp_pool_t *pool)
 {
   mp_chunk_t *chunk;
   mp_allocated_t *allocated;
+
+#ifdef MEMPOOL_DISABLED
+  return xcalloc((size_t)pool);
+#endif
 
   if (pool->used_chunks)
   {
@@ -384,6 +390,11 @@ mp_pool_get(mp_pool_t *pool)
 void
 mp_pool_release(void *item)
 {
+#ifdef MEMPOOL_DISABLED
+  xfree(item);
+  return;
+#endif
+
   mp_allocated_t *allocated = (void *)M2A(item);
   mp_chunk_t *chunk = allocated->in_chunk;
 
@@ -457,6 +468,11 @@ mp_pool_new(size_t item_size, size_t chunk_capacity)
   assert(chunk_capacity < SIZE_T_CEILING);
   assert(SIZE_T_CEILING / item_size > chunk_capacity);
 */
+
+#ifdef MEMPOOL_DISABLED
+  return (void *)item_size;
+#endif
+
   pool = xcalloc(sizeof(mp_pool_t));
   /*
    * First, we figure out how much space to allow per item. We'll want to

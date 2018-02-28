@@ -92,6 +92,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_define_dir.m4 \
 	$(top_srcdir)/m4/ax_append_compile_flags.m4 \
 	$(top_srcdir)/m4/ax_append_flag.m4 \
+	$(top_srcdir)/m4/ax_arg_disable_mempool.m4 \
 	$(top_srcdir)/m4/ax_arg_enable_assert.m4 \
 	$(top_srcdir)/m4/ax_arg_enable_debugging.m4 \
 	$(top_srcdir)/m4/ax_arg_enable_warnings.m4 \
@@ -176,7 +177,7 @@ CSCOPE = cscope
 DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in AUTHORS \
 	COPYING INSTALL NEWS README compile config.guess config.sub \
-	install-sh ltmain.sh missing
+	install-sh ltmain.sh missing ylwrap
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)

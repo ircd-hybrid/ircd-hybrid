@@ -82,9 +82,6 @@
 /* Define if libdlloader will be built on this platform */
 #undef HAVE_LIBDLLOADER
 
-/* Define to 1 if libGeoIP (-lGeoIP) is available. */
-#undef HAVE_LIBGEOIP
-
 /* Define to 1 if you have the `gnutls' library (-lgnutls). */
 #undef HAVE_LIBGNUTLS
 

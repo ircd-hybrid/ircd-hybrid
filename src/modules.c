@@ -229,7 +229,7 @@ mod_add_path(const char *path)
   if (mod_find_path(path))
     return;
 
-  pathst = xcalloc(sizeof(struct module_path));
+  pathst = xcalloc(sizeof(*pathst));
   pathst->path = xstrdup(path);
   dlinkAdd(pathst, &pathst->node, &modules_path);
 }
@@ -245,7 +245,7 @@ add_conf_module(const char *name)
 {
   struct module_path *pathst;
 
-  pathst = xcalloc(sizeof(struct module_path));
+  pathst = xcalloc(sizeof(*pathst));
   pathst->path = xstrdup(name);
   dlinkAdd(pathst, &pathst->node, &modules_conf);
 }

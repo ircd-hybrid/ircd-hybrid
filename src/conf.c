@@ -905,7 +905,7 @@ static const struct oper_flags
 const char *
 oper_privs_as_string(const unsigned int flags)
 {
-  static char buf[sizeof(flag_table) / sizeof(struct oper_flags)];
+  static char buf[sizeof(flag_table) / sizeof(flag_table[0])];
   char *p = buf;
 
   for (const struct oper_flags *tab = flag_table; tab->flag; ++tab)

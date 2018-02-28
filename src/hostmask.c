@@ -260,7 +260,7 @@ int
 parse_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 {
   if (addr)
-    memset(addr, 0, sizeof(struct irc_ssaddr));
+    memset(addr, 0, sizeof(*addr));
 
   if (strchr(text, '.'))
     return try_parse_v4_netmask(text, addr, b);
@@ -620,7 +620,7 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 
   assert(type && !EmptyString(hostname));
 
-  struct AddressRec *arec = xcalloc(sizeof(struct AddressRec));
+  struct AddressRec *arec = xcalloc(sizeof(*arec));
   arec->masktype = parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
   arec->Mask.ipa.bits = bits;
   arec->username = username;

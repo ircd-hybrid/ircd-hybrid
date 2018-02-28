@@ -210,7 +210,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
       }
     }
 
-    struct CidrItem *cidr = xcalloc(sizeof(struct CidrItem));
+    struct CidrItem *cidr = xcalloc(sizeof(*cidr));
     cidr->number_on_this_cidr = 1;
     cidr->mask = *ip;
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv4);
@@ -232,7 +232,7 @@ cidr_limit_reached(int over_rule, struct irc_ssaddr *ip, struct ClassItem *class
       }
     }
 
-    struct CidrItem *cidr = xcalloc(sizeof(struct CidrItem));
+    struct CidrItem *cidr = xcalloc(sizeof(*cidr));
     cidr->number_on_this_cidr = 1;
     cidr->mask = *ip;
     mask_addr(&cidr->mask, class->cidr_bitlen_ipv6);

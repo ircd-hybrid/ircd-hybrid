@@ -51,7 +51,7 @@ do_list(struct Client *source_p, char *arg)
     return;
   }
 
-  struct ListTask *lt = xcalloc(sizeof(struct ListTask));
+  struct ListTask *lt = xcalloc(sizeof(*lt));
   lt->users_max = UINT_MAX;
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;

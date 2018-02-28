@@ -277,21 +277,6 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
               sizeof(client_p->sockhost), NULL, 0, NI_NUMERICHOST);
   client_p->connection->aftype = client_p->connection->ip.ss.ss_family;
 
-#ifdef HAVE_LIBGEOIP
-  if (irn->ss.ss_family == AF_INET && GeoIPv4_ctx)
-  {
-    GeoIPLookup gl;
-    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&client_p->connection->ip;
-    client_p->connection->country_id = GeoIP_id_by_ipnum_gl(GeoIPv4_ctx, (unsigned long)ntohl(v4->sin_addr.s_addr), &gl);
-  }
-  else if (irn->ss.ss_family == AF_INET6 && GeoIPv6_ctx)
-  {
-    GeoIPLookup gl;
-    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&client_p->connection->ip;
-    client_p->connection->country_id = GeoIP_id_by_ipnum_v6_gl(GeoIPv6_ctx, v6->sin6_addr, &gl);
-  }
-#endif
-
   if (client_p->sockhost[0] == ':')
   {
     client_p->sockhost[0] = '0';

@@ -149,18 +149,6 @@ static const struct InfoStruct info_table[] =
     "Maximum topic length"
   },
   {
-    "libgeoip_ipv4_database_file",
-    OUTPUT_STRING,
-    &ConfigServerInfo.libgeoip_ipv4_database_file,
-    "Path to the libGeoIP IPv4 database file"
-  },
-  {
-    "libgeoip_ipv6_database_file",
-    OUTPUT_STRING,
-    &ConfigServerInfo.libgeoip_ipv6_database_file,
-    "Path to the libGeoIP IPv6 database file"
-  },
-  {
     "use_logging",
     OUTPUT_BOOLEAN_YN,
     &ConfigLog.use_logging,

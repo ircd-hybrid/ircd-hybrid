@@ -63,11 +63,6 @@
 #include "userhost.h"
 
 
-#ifdef HAVE_LIBGEOIP
-GeoIP *GeoIPv4_ctx;
-GeoIP *GeoIPv6_ctx;
-#endif
-
 struct SetOptions GlobalSetOptions;  /* /quote set variables */
 struct Counter Count;
 struct ServerState_t server_state;

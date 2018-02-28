@@ -48,7 +48,6 @@ struct ResvExemptItem
   struct irc_ssaddr addr;
   int bits;
   int type;
-  int country_id;
 };
 
 extern const dlink_list *resv_chan_get_list(void);

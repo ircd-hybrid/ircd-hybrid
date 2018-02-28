@@ -168,6 +168,7 @@ client_free(struct Client *client_p)
     dbuf_clear(&client_p->connection->buf_sendq);
 
     mp_pool_release(client_p->connection);
+    client_p->connection = NULL;
   }
 
   mp_pool_release(client_p);

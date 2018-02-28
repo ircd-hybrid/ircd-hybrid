@@ -194,6 +194,9 @@
 /* Define to the shared archive member specification, say "(shr.o)". */
 #undef LT_SHARED_LIB_MEMBER
 
+/* Define to disable the memory pooling allocator. */
+#undef MEMPOOL_DISABLED
+
 /* Size of the auth mempool chunk. */
 #undef MP_CHUNK_SIZE_AUTH
 

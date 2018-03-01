@@ -124,36 +124,66 @@ client_free(struct Client *client_p)
   assert(client_p != &me);
   assert(client_p->hnext == client_p);
   assert(client_p->idhnext == client_p);
-  assert(client_p->channel.head == NULL);
-  assert(client_p->whowas_list.head == NULL);
-  assert(client_p->svstags.head == NULL);
-  assert(dlink_list_length(&client_p->channel) == 0);
+
+  assert(client_p->connection->node.data == NULL);
+  assert(client_p->connection->node.prev == NULL);
+  assert(client_p->connection->node.next == NULL);
+
+  assert(client_p->connection->lnode.data == NULL);
+  assert(client_p->connection->lnode.prev == NULL);
+  assert(client_p->connection->lnode.next == NULL);
+
   assert(dlink_list_length(&client_p->whowas_list) == 0);
+  assert(client_p->whowas_list.head == NULL);
+  assert(client_p->whowas_list.tail == NULL);
+
+  assert(dlink_list_length(&client_p->channel) == 0);
+  assert(client_p->channel.head == NULL);
+  assert(client_p->channel.tail == NULL);
+
   assert(dlink_list_length(&client_p->svstags) == 0);
+  assert(client_p->svstags.head == NULL);
+  assert(client_p->svstags.tail == NULL);
+
 
   xfree(client_p->serv);
   xfree(client_p->certfp);
 
   if (MyConnect(client_p))
   {
-    assert(client_p->connection->lclient_node.next == NULL);
+    assert(client_p->connection->lclient_node.data == NULL);
     assert(client_p->connection->lclient_node.prev == NULL);
+    assert(client_p->connection->lclient_node.next == NULL);
+
     assert(client_p->connection->list_task == NULL);
-    assert(client_p->connection->confs.head == NULL);
-    assert(client_p->connection->acceptlist.head == NULL);
-    assert(client_p->connection->invited.head == NULL);
-    assert(client_p->connection->watches.head == NULL);
-    assert(dlink_list_length(&client_p->connection->confs) == 0);
-    assert(dlink_list_length(&client_p->connection->acceptlist) == 0);
-    assert(dlink_list_length(&client_p->connection->invited) == 0);
-    assert(dlink_list_length(&client_p->connection->watches) == 0);
-    assert(HasFlag(client_p, FLAGS_CLOSING) && IsDead(client_p));
-    assert(client_p->connection->auth.node.next == NULL);
+
+    assert(client_p->connection->auth.node.data == NULL);
     assert(client_p->connection->auth.node.prev == NULL);
+    assert(client_p->connection->auth.node.next == NULL);
     assert(client_p->connection->auth.flags == 0);
     assert(client_p->connection->auth.fd.fd == 0);
     assert(client_p->connection->auth.client == NULL || client_p->connection->auth.client == client_p);
 
+    assert(dlink_list_length(&client_p->connection->acceptlist) == 0);
+    assert(client_p->connection->acceptlist.head == NULL);
+    assert(client_p->connection->acceptlist.tail == NULL);
+
+
+    assert(dlink_list_length(&client_p->connection->watches) == 0);
+    assert(client_p->connection->watches.head == NULL);
+    assert(client_p->connection->watches.tail == NULL);
+
+    assert(dlink_list_length(&client_p->connection->confs) == 0);
+    assert(client_p->connection->confs.head == NULL);
+    assert(client_p->connection->confs.tail == NULL);
+
+    assert(dlink_list_length(&client_p->connection->invited) == 0);
+    assert(client_p->connection->invited.head == NULL);
+    assert(client_p->connection->invited.tail == NULL);
+
+    assert(client_p->connection->fd.fd == 0);
+
+    assert(HasFlag(client_p, FLAGS_CLOSING) && IsDead(client_p));
 
     /*
      * Clean up extra sockets from listen {} blocks which have been discarded.

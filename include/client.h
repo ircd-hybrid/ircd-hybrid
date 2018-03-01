@@ -348,7 +348,6 @@ struct Connection
   dlink_list        invited;   /**< Chain of invite pointer blocks */
   struct irc_ssaddr ip;
   int               aftype;    /**< Makes life easier for DNS res in IPV6 */
-  int               country_id; /**< ID corresponding to a ISO 3166 country code */
 
   fde_t             fd;
 

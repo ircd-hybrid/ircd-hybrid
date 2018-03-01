@@ -125,13 +125,13 @@ client_free(struct Client *client_p)
   assert(client_p->hnext == client_p);
   assert(client_p->idhnext == client_p);
 
-  assert(client_p->connection->node.data == NULL);
-  assert(client_p->connection->node.prev == NULL);
-  assert(client_p->connection->node.next == NULL);
+  assert(client_p->node.data == NULL);
+  assert(client_p->node.prev == NULL);
+  assert(client_p->node.next == NULL);
 
-  assert(client_p->connection->lnode.data == NULL);
-  assert(client_p->connection->lnode.prev == NULL);
-  assert(client_p->connection->lnode.next == NULL);
+  assert(client_p->lnode.data == NULL);
+  assert(client_p->lnode.prev == NULL);
+  assert(client_p->lnode.next == NULL);
 
   assert(dlink_list_length(&client_p->whowas_list) == 0);
   assert(client_p->whowas_list.head == NULL);

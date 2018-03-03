@@ -147,7 +147,7 @@ comm_select(void)
    */
   poll_time.tv_sec = 0;
   poll_time.tv_nsec = SELECT_DELAY * 1000000;
-  num = kevent(kqfd.fd, kq_fdlist, kqoff, ke, KE_LENGTH, &poll_time);
+  num = kevent(kqueue_fd, kq_fdlist, kqoff, ke, KE_LENGTH, &poll_time);
   kqoff = 0;
 
   set_time();

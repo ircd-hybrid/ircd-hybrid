@@ -149,10 +149,14 @@ send_message_remote(struct Client *to, const struct Client *from, struct dbuf_bl
  **      Called when a socket is ready for writing.
  */
 void
-sendq_unblocked(fde_t *fd, void *data)
+sendq_unblocked(fde_t *F, void *data)
 {
   struct Client *const client_p = data;
-  assert(fd == &client_p->connection->fd);
+
+  assert(client_p);
+  assert(client_p->connection);
+  assert(client_p->connection->fd);
+  assert(client_p->connection->fd == F);
 
   DelFlag(client_p, FLAGS_BLOCKED);
   send_queued_write(client_p);
@@ -184,17 +188,17 @@ send_queued_write(struct Client *to)
     {
       const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
 
-      if (tls_isusing(&to->connection->fd.ssl))
+      if (tls_isusing(&to->connection->fd->ssl))
       {
-        retlen = tls_write(&to->connection->fd.ssl, first->data + to->connection->buf_sendq.pos,
-                                                    first->size - to->connection->buf_sendq.pos, &want_read);
+        retlen = tls_write(&to->connection->fd->ssl, first->data + to->connection->buf_sendq.pos,
+                                                     first->size - to->connection->buf_sendq.pos, &want_read);
 
         if (want_read)
           return;  /* Retry later, don't register for write events */
       }
       else
-        retlen = send(to->connection->fd.fd, first->data + to->connection->buf_sendq.pos,
-                                             first->size - to->connection->buf_sendq.pos, 0);
+        retlen = send(to->connection->fd->fd, first->data + to->connection->buf_sendq.pos,
+                                              first->size - to->connection->buf_sendq.pos, 0);
 
       if (retlen <= 0)
         break;
@@ -211,7 +215,7 @@ send_queued_write(struct Client *to)
       AddFlag(to, FLAGS_BLOCKED);
 
       /* we have a non-fatal error, reschedule a write */
-      comm_setselect(&to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to, 0);
+      comm_setselect(to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to, 0);
     }
     else if (retlen <= 0)
     {

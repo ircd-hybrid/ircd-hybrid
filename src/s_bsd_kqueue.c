@@ -34,7 +34,7 @@
 
 enum { KE_LENGTH = 128 };
 
-static fde_t kqfd;
+static int kqueue_fd;
 static struct kevent kq_fdlist[KE_LENGTH];  /* kevent buffer */
 static int kqoff;      /* offset into the buffer */
 
@@ -48,15 +48,13 @@ static int kqoff;      /* offset into the buffer */
 void
 netio_init(void)
 {
-  int fd;
-
-  if ((fd = kqueue()) < 0)
+  if ((kqueue_fd = kqueue()) < 0)
   {
     ilog(LOG_TYPE_IRCD, "netio_init: couldn't open kqueue fd: %s", strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }
 
-  fd_open(&kqfd, fd, 0, "kqueue() file descriptor");
+  fd_open(kqueue_fd, 0, "kqueue() file descriptor");
 }
 
 /*
@@ -75,7 +73,7 @@ kq_update_events(int fd, int filter, int what)
     int i;
 
     for (i = 0; i < kqoff; ++i)
-      kevent(kqfd.fd, &kq_fdlist[i], 1, NULL, 0, &zero_timespec);
+      kevent(kqueue_fd, &kq_fdlist[i], 1, NULL, 0, &zero_timespec);
     kqoff = 0;
   }
 }
@@ -141,7 +139,6 @@ comm_select(void)
   static struct kevent ke[KE_LENGTH];
   struct timespec poll_time;
   void (*hdl)(fde_t *, void *);
-  fde_t *F;
 
   /*
    * remember we are doing NANOseconds here, not micro/milli. God knows
@@ -164,8 +161,9 @@ comm_select(void)
 
   for (i = 0; i < num; i++)
   {
-    F = lookup_fd(ke[i].ident);
-    if (F == NULL || !F->flags.open || (ke[i].flags & EV_ERROR))
+    fde_t *F = fd_table[ke[i].ident];
+
+    if (F->flags.open == 0 || (ke[i].flags & EV_ERROR))
       continue;
 
     if (ke[i].filter == EVFILT_READ)
@@ -174,7 +172,8 @@ comm_select(void)
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
-        if (!F->flags.open)
+
+        if (F->flags.open == 0)
           continue;
       }
     }
@@ -185,7 +184,8 @@ comm_select(void)
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);
-        if (!F->flags.open)
+
+        if (F->flags.open == 0)
           continue;
       }
     }

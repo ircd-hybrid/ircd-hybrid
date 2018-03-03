@@ -100,7 +100,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
     {
       if (F->comm_index != pollnum - 1)
       {
-        fde_t *other = lookup_fd(pollfds[pollnum - 1].fd);
+        fde_t *other = &fd_table[pollfds[pollnum - 1].fd];
 
         pollfds[F->comm_index].fd = pollfds[pollnum - 1].fd;
         pollfds[F->comm_index].events = pollfds[pollnum - 1].events;
@@ -148,7 +148,6 @@ comm_select(void)
 {
   int num, ci;
   void (*hdl)(fde_t *, void *);
-  fde_t *F;
 
   num = poll(pollfds, pollnum, SELECT_DELAY);
 
@@ -169,9 +168,9 @@ comm_select(void)
       continue;
     num--;
 
-    F = lookup_fd(pollfds[ci].fd);
-    assert(F);
-    if (!F->flags.open)
+    fde_t *F = &fd_table[pollfds[ci].fd];
+
+    if (F->flags.open == 0)
       continue;
 
     if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
@@ -180,7 +179,8 @@ comm_select(void)
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
-        if (!F->flags.open)
+
+        if (F->flags.open == 0)
           continue;
       }
     }
@@ -191,7 +191,8 @@ comm_select(void)
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);
-        if (!F->flags.open)
+
+        if (F->flags.open == 0)
           continue;
       }
     }

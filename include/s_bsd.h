@@ -53,10 +53,10 @@ extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void 
 extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
 extern void comm_connect_tcp(fde_t *, const char *, unsigned short, struct sockaddr *, int,
-                             void (struct _fde *, int, void *), void *, int, uintmax_t);
+                             void (fde_t *, int, void *), void *, int, uintmax_t);
 extern const char *comm_errstr(int);
-extern int comm_open(fde_t *, int, int, int, const char *);
-extern int comm_accept(fde_t *, struct irc_ssaddr *);
+extern int comm_socket(int, int, int);
+extern int comm_accept(int, struct irc_ssaddr *);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void netio_init(void);

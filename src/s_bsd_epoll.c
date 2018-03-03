@@ -33,7 +33,7 @@
 #include <sys/epoll.h>
 #include <sys/syscall.h>
 
-static fde_t efd;
+static int epoll_fd;
 
 
 /*
@@ -45,16 +45,14 @@ static fde_t efd;
 void
 netio_init(void)
 {
-  int fd;
-
-  if ((fd = epoll_create(hard_fdlimit)) < 0)
+  if ((epoll_fd = epoll_create(hard_fdlimit)) < 0)
   {
     ilog(LOG_TYPE_IRCD, "netio_init: couldn't open epoll fd: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }
 
-  fd_open(&efd, fd, 0, "epoll file descriptor");
+  fd_open(epoll_fd, 0, "epoll file descriptor");
 }
 
 /*
@@ -104,7 +102,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
     ep_event.events = F->evcache = new_events;
     ep_event.data.fd = F->fd;
 
-    if (epoll_ctl(efd.fd, op, F->fd, &ep_event) != 0)
+    if (epoll_ctl(epoll_fd, op, F->fd, &ep_event) != 0)
     {
       ilog(LOG_TYPE_IRCD, "comm_setselect: epoll_ctl() failed: %s", strerror(errno));
       abort();
@@ -126,9 +124,8 @@ comm_select(void)
   struct epoll_event ep_fdlist[128];
   int num, i;
   void (*hdl)(fde_t *, void *);
-  fde_t *F;
 
-  num = epoll_wait(efd.fd, ep_fdlist, 128, SELECT_DELAY);
+  num = epoll_wait(epoll_fd, ep_fdlist, 128, SELECT_DELAY);
 
   set_time();
 
@@ -141,8 +138,9 @@ comm_select(void)
 
   for (i = 0; i < num; i++)
   {
-    F = lookup_fd(ep_fdlist[i].data.fd);
-    if (F == NULL || !F->flags.open)
+    fde_t *F = &fd_table[ep_fdlist[i].data.fd];
+
+    if (F->flags.open == 0)
       continue;
 
     if ((ep_fdlist[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR)))
@@ -151,7 +149,8 @@ comm_select(void)
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
-        if (!F->flags.open)
+
+        if (F->flags.open == 0)
           continue;
       }
     }
@@ -162,7 +161,8 @@ comm_select(void)
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);
-        if (!F->flags.open)
+
+        if (F->flags.open == 0)
           continue;
       }
     }

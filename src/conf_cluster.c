@@ -25,6 +25,7 @@
  */
 
 #include "stdinc.h"
+#include "ircd_defs.h"
 #include "list.h"
 #include "memory.h"
 #include "conf_cluster.h"

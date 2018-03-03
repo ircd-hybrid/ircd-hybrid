@@ -192,11 +192,14 @@ close_connection(struct Client *client_p)
   else
     ++ServerStats.is_ni;
 
-  if (tls_isusing(&client_p->connection->fd.ssl))
-    tls_shutdown(&client_p->connection->fd.ssl);
+  if (tls_isusing(&client_p->connection->fd->ssl))
+    tls_shutdown(&client_p->connection->fd->ssl);
 
-  if (client_p->connection->fd.flags.open)
-    fd_close(&client_p->connection->fd);
+  if (&client_p->connection->fd)
+  {
+    fd_close(client_p->connection->fd);
+    client_p->connection->fd = NULL;
+  }
 
   dbuf_clear(&client_p->connection->buf_sendq);
   dbuf_clear(&client_p->connection->buf_recvq);
@@ -212,11 +215,16 @@ close_connection(struct Client *client_p)
  * read/write events if necessary.
  */
 static void
-ssl_handshake(fde_t *fd, void *data)
+ssl_handshake(fde_t *F, void *data)
 {
   struct Client *client_p = data;
 
-  tls_handshake_status_t ret = tls_handshake(&client_p->connection->fd.ssl, TLS_ROLE_SERVER, NULL);
+  assert(client_p);
+  assert(client_p->connection);
+  assert(client_p->connection->fd);
+  assert(client_p->connection->fd == F);
+
+  tls_handshake_status_t ret = tls_handshake(&F->ssl, TLS_ROLE_SERVER, NULL);
   if (ret != TLS_HANDSHAKE_DONE)
   {
     if ((CurrentTime - client_p->connection->firsttime) > CONNECTTIMEOUT)
@@ -228,11 +236,11 @@ ssl_handshake(fde_t *fd, void *data)
     switch (ret)
     {
       case TLS_HANDSHAKE_WANT_WRITE:
-        comm_setselect(&client_p->connection->fd, COMM_SELECT_WRITE,
+        comm_setselect(client_p->connection->fd, COMM_SELECT_WRITE,
                        ssl_handshake, client_p, CONNECTTIMEOUT);
         return;
       case TLS_HANDSHAKE_WANT_READ:
-        comm_setselect(&client_p->connection->fd, COMM_SELECT_READ,
+        comm_setselect(client_p->connection->fd, COMM_SELECT_READ,
                        ssl_handshake, client_p, CONNECTTIMEOUT);
         return;
       default:
@@ -241,9 +249,9 @@ ssl_handshake(fde_t *fd, void *data)
     }
   }
 
-  comm_settimeout(&client_p->connection->fd, 0, NULL, NULL);
+  comm_settimeout(F, 0, NULL, NULL);
 
-  if (!tls_verify_cert(&client_p->connection->fd.ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp))
+  if (!tls_verify_cert(&F->ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp))
     ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad TLS client certificate",
          client_p->name, client_p->username, client_p->host);
 
@@ -262,9 +270,8 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 {
   struct Client *client_p = client_make(NULL);
 
-  fd_open(&client_p->connection->fd, fd, 1,
-          (listener->flags & LISTENER_SSL) ?
-          "Incoming SSL connection" : "Incoming connection");
+  client_p->connection->fd = fd_open(fd, 1, (listener->flags & LISTENER_SSL) ?
+                                     "Incoming SSL connection" : "Incoming connection");
 
   /*
    * copy address to 'sockhost' as a string, copy it to host too
@@ -290,7 +297,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 
   if (listener->flags & LISTENER_SSL)
   {
-    if (!tls_new(&client_p->connection->fd.ssl, fd, TLS_ROLE_SERVER))
+    if (!tls_new(&client_p->connection->fd->ssl, fd, TLS_ROLE_SERVER))
     {
       SetDead(client_p);
       exit_client(client_p, "TLS context initialization failed");
@@ -298,7 +305,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
     }
 
     AddFlag(client_p, FLAGS_SSL);
-    ssl_handshake(NULL, client_p);
+    ssl_handshake(client_p->connection->fd, client_p);
   }
   else
     auth_start(client_p);
@@ -337,13 +344,13 @@ ignoreErrno(int ierrno)
  * Set the timeout for the fd
  */
 void
-comm_settimeout(fde_t *fd, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
+comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
-  assert(fd->flags.open);
+  assert(F->flags.open);
 
-  fd->timeout = CurrentTime + (timeout / 1000);
-  fd->timeout_handler = callback;
-  fd->timeout_data = cbdata;
+  F->timeout = CurrentTime + (timeout / 1000);
+  F->timeout_handler = callback;
+  F->timeout_data = cbdata;
 }
 
 /*
@@ -359,13 +366,13 @@ comm_settimeout(fde_t *fd, uintmax_t timeout, void (*callback)(fde_t *, void *),
  * comm_close() is replaced with fd_close() in fdlist.c
  */
 void
-comm_setflush(fde_t *fd, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
+comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
-  assert(fd->flags.open);
+  assert(F->flags.open);
 
-  fd->flush_timeout = CurrentTime + (timeout / 1000);
-  fd->flush_handler = callback;
-  fd->flush_data = cbdata;
+  F->flush_timeout = CurrentTime + (timeout / 1000);
+  F->flush_handler = callback;
+  F->flush_data = cbdata;
 }
 
 /*
@@ -378,37 +385,35 @@ comm_setflush(fde_t *fd, uintmax_t timeout, void (*callback)(fde_t *, void *), v
 void
 comm_checktimeouts(void *unused)
 {
-  fde_t *F;
   void (*hdl)(fde_t *, void *);
   void *data;
 
-  for (unsigned int i = 0; i < FD_HASH_SIZE; i++)
+  for (int fd = 0; fd <= highest_fd; ++fd)
   {
-    for (F = fd_hash[i]; F != NULL; F = fd_next_in_loop)
+    fde_t *F = &fd_table[fd];
+
+    if (F->flags.open == 0)
+      continue;
+
+    /* check flush functions */
+    if (F->flush_handler && F->flush_timeout > 0 &&
+        F->flush_timeout < CurrentTime)
     {
-      assert(F->flags.open);
-      fd_next_in_loop = F->hnext;
+      hdl = F->flush_handler;
+      data = F->flush_data;
+      comm_setflush(F, 0, NULL, NULL);
+      hdl(F, data);
+    }
 
-      /* check flush functions */
-      if (F->flush_handler && F->flush_timeout > 0 &&
-          F->flush_timeout < CurrentTime)
-      {
-        hdl = F->flush_handler;
-        data = F->flush_data;
-        comm_setflush(F, 0, NULL, NULL);
-        hdl(F, data);
-      }
-
-      /* check timeouts */
-      if (F->timeout_handler && F->timeout > 0 &&
-          F->timeout < CurrentTime)
-      {
-        /* Call timeout handler */
-        hdl = F->timeout_handler;
-        data = F->timeout_data;
-        comm_settimeout(F, 0, NULL, NULL);
-        hdl(F, data);
-      }
+    /* check timeouts */
+    if (F->timeout_handler && F->timeout > 0 &&
+        F->timeout < CurrentTime)
+    {
+      /* Call timeout handler */
+      hdl = F->timeout_handler;
+      data = F->timeout_data;
+      comm_settimeout(F, 0, NULL, NULL);
+      hdl(F, data);
     }
   }
 }
@@ -427,7 +432,7 @@ comm_checktimeouts(void *unused)
  *               may be called now, or it may be called later.
  */
 void
-comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockaddr *clocal,
+comm_connect_tcp(fde_t *F, const char *host, unsigned short port, struct sockaddr *clocal,
                  int socklen, void (*callback)(fde_t *, int, void *), void *data,
                  int aftype, uintmax_t timeout)
 {
@@ -435,11 +440,11 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
   char portname[PORTNAMELEN + 1];
 
   assert(callback);
-  fd->connect.callback = callback;
-  fd->connect.data = data;
+  F->connect.callback = callback;
+  F->connect.data = data;
 
-  fd->connect.hostaddr.ss.ss_family = aftype;
-  fd->connect.hostaddr.ss_port = htons(port);
+  F->connect.hostaddr.ss.ss_family = aftype;
+  F->connect.hostaddr.ss_port = htons(port);
 
   /* Note that we're using a passed sockaddr here. This is because
    * generally you'll be bind()ing to a sockaddr grabbed from
@@ -448,10 +453,10 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
    * virtual host IP, for completeness.
    *   -- adrian
    */
-  if (clocal && bind(fd->fd, clocal, socklen) < 0)
+  if (clocal && bind(F->fd, clocal, socklen) < 0)
   {
     /* Failure, call the callback with COMM_ERR_BIND */
-    comm_connect_callback(fd, COMM_ERR_BIND);
+    comm_connect_callback(F, COMM_ERR_BIND);
     return;  /* ... and quit */
   }
 
@@ -471,9 +476,9 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
   {
     /* Send the DNS request, for the next level */
     if (aftype == AF_INET6)
-      gethost_byname_type(comm_connect_dns_callback, fd, host, T_AAAA);
+      gethost_byname_type(comm_connect_dns_callback, F, host, T_AAAA);
     else
-      gethost_byname_type(comm_connect_dns_callback, fd, host, T_A);
+      gethost_byname_type(comm_connect_dns_callback, F, host, T_A);
   }
   else
   {
@@ -481,13 +486,13 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
     /* Make sure we actually set the timeout here .. */
     assert(res);
 
-    memcpy(&fd->connect.hostaddr, res->ai_addr, res->ai_addrlen);
-    fd->connect.hostaddr.ss_len = res->ai_addrlen;
-    fd->connect.hostaddr.ss.ss_family = res->ai_family;
+    memcpy(&F->connect.hostaddr, res->ai_addr, res->ai_addrlen);
+    F->connect.hostaddr.ss_len = res->ai_addrlen;
+    F->connect.hostaddr.ss.ss_family = res->ai_family;
     freeaddrinfo(res);
 
-    comm_settimeout(fd, timeout * 1000, comm_connect_timeout, NULL);
-    comm_connect_tryconnect(fd, NULL);
+    comm_settimeout(F, timeout * 1000, comm_connect_timeout, NULL);
+    comm_connect_tryconnect(F, NULL);
   }
 }
 
@@ -495,23 +500,23 @@ comm_connect_tcp(fde_t *fd, const char *host, unsigned short port, struct sockad
  * comm_connect_callback() - call the callback, and continue with life
  */
 static void
-comm_connect_callback(fde_t *fd, int status)
+comm_connect_callback(fde_t *F, int status)
 {
   void (*hdl)(fde_t *, int, void *);
 
   /* This check is gross..but probably necessary */
-  if (fd->connect.callback == NULL)
+  if (F->connect.callback == NULL)
     return;
 
   /* Clear the connect flag + handler */
-  hdl = fd->connect.callback;
-  fd->connect.callback = NULL;
+  hdl = F->connect.callback;
+  F->connect.callback = NULL;
 
   /* Clear the timeout handler */
-  comm_settimeout(fd, 0, NULL, NULL);
+  comm_settimeout(F, 0, NULL, NULL);
 
   /* Call the handler */
-  hdl(fd, status, fd->connect.data);
+  hdl(F, status, F->connect.data);
 }
 
 /*
@@ -520,10 +525,10 @@ comm_connect_callback(fde_t *fd, int status)
  * called ..
  */
 static void
-comm_connect_timeout(fde_t *fd, void *unused)
+comm_connect_timeout(fde_t *F, void *unused)
 {
   /* error! */
-  comm_connect_callback(fd, COMM_ERR_TIMEOUT);
+  comm_connect_callback(F, COMM_ERR_TIMEOUT);
 }
 
 /*
@@ -543,8 +548,8 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
     return;
   }
 
-  /* No error, set a 10 second timeout */
-  comm_settimeout(F, 30*1000, comm_connect_timeout, NULL);
+  /* No error, set a 30 second timeout */
+  comm_settimeout(F, 30 * 1000, comm_connect_timeout, NULL);
 
   /* Copy over the DNS reply info so we can use it in the connect() */
   /*
@@ -562,7 +567,7 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
   comm_connect_tryconnect(F, NULL);
 }
 
-/* static void comm_connect_tryconnect(int fd, void *unused)
+/* static void comm_connect_tryconnect(fde_t *fd, void *unused)
  * Input: The fd, the handler data(unused).
  * Output: None.
  * Side-effects: Try and connect with pending connect data for the FD. If
@@ -571,14 +576,14 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
  *               to select for a write event on this FD.
  */
 static void
-comm_connect_tryconnect(fde_t *fd, void *unused)
+comm_connect_tryconnect(fde_t *F, void *unused)
 {
   /* This check is needed or re-entrant s_bsd_* like sigio break it. */
-  if (fd->connect.callback == NULL)
+  if (F->connect.callback == NULL)
     return;
 
   /* Try the connect() */
-  int retval = connect(fd->fd, (struct sockaddr *)&fd->connect.hostaddr, fd->connect.hostaddr.ss_len);
+  int retval = connect(F->fd, (struct sockaddr *)&F->connect.hostaddr, F->connect.hostaddr.ss_len);
 
   /* Error? */
   if (retval < 0)
@@ -589,18 +594,18 @@ comm_connect_tryconnect(fde_t *fd, void *unused)
      *   -- adrian
      */
     if (errno == EISCONN)
-      comm_connect_callback(fd, COMM_OK);
+      comm_connect_callback(F, COMM_OK);
     else if (ignoreErrno(errno))
       /* Ignore error? Reschedule */
-      comm_setselect(fd, COMM_SELECT_WRITE, comm_connect_tryconnect, NULL, 0);
+      comm_setselect(F, COMM_SELECT_WRITE, comm_connect_tryconnect, NULL, 0);
     else
       /* Error? Fail with COMM_ERR_CONNECT */
-      comm_connect_callback(fd, COMM_ERR_CONNECT);
+      comm_connect_callback(F, COMM_ERR_CONNECT);
     return;
   }
 
   /* If we get here, we've suceeded, so call with COMM_OK */
-  comm_connect_callback(fd, COMM_OK);
+  comm_connect_callback(F, COMM_OK);
 }
 
 /*
@@ -622,7 +627,7 @@ comm_errstr(int error)
  * to run out of file descriptors.
  */
 int
-comm_open(fde_t *F, int family, int sock_type, int proto, const char *note)
+comm_socket(int family, int sock_type, int proto)
 {
   /* First, make sure we aren't going to run out of file descriptors */
   if (number_fd >= hard_fdlimit)
@@ -642,9 +647,7 @@ comm_open(fde_t *F, int family, int sock_type, int proto, const char *note)
 
   setup_socket(fd);
 
-  /* update things in our fd tracking */
-  fd_open(F, fd, 1, note);
-  return 0;
+  return fd;
 }
 
 /*
@@ -655,7 +658,7 @@ comm_open(fde_t *F, int family, int sock_type, int proto, const char *note)
  * fd_open (this function no longer does it).
  */
 int
-comm_accept(fde_t *F, struct irc_ssaddr *addr)
+comm_accept(int fd, struct irc_ssaddr *addr)
 {
   socklen_t addrlen = sizeof(struct irc_ssaddr);
 
@@ -672,16 +675,16 @@ comm_accept(fde_t *F, struct irc_ssaddr *addr)
    * reserved fd limit, but we can deal with that when comm_open()
    * also does it. XXX -- adrian
    */
-  int fd = accept(F->fd, (struct sockaddr *)addr, &addrlen);
-  if (fd < 0)
+  int new_fd = accept(fd, (struct sockaddr *)addr, &addrlen);
+  if (new_fd < 0)
     return -1;
 
   remove_ipv6_mapping(addr);
 
-  setup_socket(fd);
+  setup_socket(new_fd);
 
   /* .. and return */
-  return fd;
+  return new_fd;
 }
 
 /*

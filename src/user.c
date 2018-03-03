@@ -260,7 +260,7 @@ user_welcome(struct Client *client_p)
   {
     AddUMode(client_p, UMODE_SSL);
     sendto_one_notice(client_p, &me, ":*** Connected securely via %s",
-                      tls_get_cipher(&client_p->connection->fd.ssl));
+                      tls_get_cipher(&client_p->connection->fd->ssl));
   }
 
   sendto_one_numeric(client_p, &me, RPL_WELCOME, ConfigServerInfo.network_name,

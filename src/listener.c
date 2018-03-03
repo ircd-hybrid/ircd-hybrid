@@ -98,6 +98,9 @@ listener_accept_connection(fde_t *pfd, void *data)
   struct Listener *const listener = data;
 
   assert(listener);
+  assert(listener->fd == pfd);
+  assert(listener->fd);
+  assert(listener->fd->flags.open);
 
   /* There may be many reasons for error return, but
    * in otherwise correctly working environment the
@@ -109,7 +112,7 @@ listener_accept_connection(fde_t *pfd, void *data)
    * point, just assume that connections cannot
    * be accepted until some old is closed first.
    */
-  while ((fd = comm_accept(&listener->fd, &addr)) != -1)
+  while ((fd = comm_accept(listener->fd->fd, &addr)) != -1)
   {
     /*
      * check for connection limit
@@ -157,7 +160,7 @@ listener_accept_connection(fde_t *pfd, void *data)
   }
 
   /* Re-register a new IO request for the next accept .. */
-  comm_setselect(&listener->fd, COMM_SELECT_READ, listener_accept_connection,
+  comm_setselect(listener->fd, COMM_SELECT_READ, listener_accept_connection,
                  listener, 0);
 }
 
@@ -190,19 +193,19 @@ inetport(struct Listener *listener)
   /*
    * At first, open a new socket
    */
-  if (comm_open(&listener->fd, listener->addr.ss.ss_family, SOCK_STREAM, 0,
-                "Listener socket") == -1)
+  int fd = comm_socket(listener->addr.ss.ss_family, SOCK_STREAM, 0);
+  if (fd == -1)
   {
     report_error(L_ALL, "opening listener socket %s:%s",
                  listener_get_name(listener), errno);
     return 0;
   }
 
-  if (setsockopt(listener->fd.fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
+  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
   {
     report_error(L_ALL, "setting SO_REUSEADDR for listener %s:%s",
                  listener_get_name(listener), errno);
-    fd_close(&listener->fd);
+    close(fd);
     return 0;
   }
 
@@ -212,25 +215,27 @@ inetport(struct Listener *listener)
    */
   lsin.ss_port = htons(listener->port);
 
-  if (bind(listener->fd.fd, (struct sockaddr *)&lsin, lsin.ss_len))
+  if (bind(fd, (struct sockaddr *)&lsin, lsin.ss_len))
   {
     report_error(L_ALL, "binding listener socket %s:%s",
                  listener_get_name(listener), errno);
-    fd_close(&listener->fd);
+    close(fd);
     return 0;
   }
 
-  if (listen(listener->fd.fd, HYBRID_SOMAXCONN))
+  if (listen(fd, HYBRID_SOMAXCONN))
   {
     report_error(L_ALL, "listen failed for %s:%s",
                  listener_get_name(listener), errno);
-    fd_close(&listener->fd);
+    close(fd);
     return 0;
   }
 
+  listener->fd = fd_open(fd, 1, "Listener socket");
+
   /* Listen completion events are READ events .. */
 
-  listener_accept_connection(&listener->fd, listener);
+  listener_accept_connection(listener->fd, listener);
   return 1;
 }
 
@@ -249,8 +254,11 @@ listener_find(int port, struct irc_ssaddr *addr)
         (!memcmp(addr, &listener->addr, sizeof(*addr))))
     {
       /* Try to return an open listener, otherwise reuse a closed one */
-      if (!listener->fd.flags.open)
+      if (listener->fd)
+      {
+        assert(listener->fd->flags.open);
         last_closed = listener;
+      }
       else
         return (listener);
     }
@@ -265,8 +273,13 @@ listener_find(int port, struct irc_ssaddr *addr)
 static void
 listener_close(struct Listener *listener)
 {
-  if (listener->fd.flags.open)
-    fd_close(&listener->fd);
+  if (listener->fd)
+  {
+    assert(listener->fd->flags.open);
+
+    fd_close(listener->fd);
+    listener->fd = NULL;
+  }
 
   listener->active = 0;
 
@@ -378,8 +391,11 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   {
     listener->flags = flags;
 
-    if (listener->fd.flags.open)
+    if (listener->fd)
+    {
+      assert(listener->fd->flags.open);
       return;
+    }
   }
   else
   {

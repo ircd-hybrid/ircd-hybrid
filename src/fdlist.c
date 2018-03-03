@@ -38,16 +38,15 @@
 #include "misc.h"
 #include "res.h"
 
-fde_t *fd_hash[FD_HASH_SIZE];
-fde_t *fd_next_in_loop = NULL;
+fde_t *fd_table;
 int number_fd = LEAKED_FDS;
 int hard_fdlimit = 0;
+int highest_fd;
 
 
 void
 fdlist_init(void)
 {
-  int fdmax;
   struct rlimit limit;
 
   if (!getrlimit(RLIMIT_NOFILE, &limit))
@@ -56,73 +55,76 @@ fdlist_init(void)
     setrlimit(RLIMIT_NOFILE, &limit);
   }
 
-  fdmax = getdtablesize();
-
   /* allow MAXCLIENTS_MIN clients even at the cost of MAX_BUFFER and
    * some not really LEAKED_FDS */
-  fdmax = IRCD_MAX(fdmax, LEAKED_FDS + MAX_BUFFER + MAXCLIENTS_MIN);
-
-  /* under no condition shall this raise over 65536
-   * for example user ip heap is sized 2*hard_fdlimit */
-  hard_fdlimit = IRCD_MIN(fdmax, 65536);
+  hard_fdlimit = IRCD_MAX(getdtablesize(), LEAKED_FDS + MAX_BUFFER + MAXCLIENTS_MIN);
+  fd_table = xcalloc(sizeof(fde_t) * hard_fdlimit);
 }
 
-static inline unsigned int
-hash_fd(int fd)
+static void
+fdlist_update_highest_fd(int fd, int opening)
 {
-  return ((unsigned int)fd) % FD_HASH_SIZE;
-}
+  if (fd < highest_fd)
+    return;
 
-fde_t *
-lookup_fd(int fd)
-{
-  fde_t *F = fd_hash[hash_fd(fd)];
+  assert(fd < hard_fdlimit);
 
-  while (F)
+  if (fd > highest_fd)
   {
-    if (F->fd == fd)
-      return F;
-    F = F->hnext;
+    /*
+     * assert() that we are not closing a FD bigger than our known highest FD.
+     */
+    assert(opening);
+    highest_fd = fd;
+    return;
   }
 
-  return NULL;
+  /* If we are here, then fd == highest_fd */
+  /*
+   * assert() that we are closing the highest FD; we can't be re-opening it.
+   */
+  assert(!opening);
+
+  while (highest_fd >= 0 && fd_table[highest_fd].flags.open == 0)
+    --highest_fd;
 }
 
 /* Called to open a given filedescriptor */
-void
-fd_open(fde_t *F, int fd, int is_socket, const char *desc)
+fde_t *
+fd_open(int fd, int is_socket, const char *desc)
 {
-  unsigned int hashv = hash_fd(fd);
+  fde_t *F = &fd_table[fd];
 
   assert(fd >= 0);
-  assert(!F->flags.open);
+  assert(F->fd == 0);
+  assert(F->flags.open == 0);
 
+  /*
+   * Note: normally we'd have to clear the other flags, but currently F
+   * is always cleared before calling us.
+   */
   F->fd = fd;
   F->comm_index = -1;
+  F->flags.open = 1;
+  F->flags.is_socket = is_socket;
 
   if (desc)
     strlcpy(F->desc, desc, sizeof(F->desc));
 
-  /* Note: normally we'd have to clear the other flags,
-   * but currently F is always cleared before calling us.. */
-  F->flags.open = 1;
-  F->flags.is_socket = is_socket;
-  F->hnext = fd_hash[hashv];
-  fd_hash[hashv] = F;
+  ++number_fd;
+  fdlist_update_highest_fd(fd, 1);
 
-  number_fd++;
+  return F;
 }
 
 /* Called to close a given filedescriptor */
 void
 fd_close(fde_t *F)
 {
-  unsigned int hashv = hash_fd(F->fd);
+  const int fd = F->fd;
 
+  assert(F->fd >= 0);
   assert(F->flags.open);
-
-  if (F == fd_next_in_loop)
-    fd_next_in_loop = F->hnext;
 
   if (F->flags.is_socket)
     comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
@@ -132,23 +134,12 @@ fd_close(fde_t *F)
   if (tls_isusing(&F->ssl))
     tls_free(&F->ssl);
 
-  if (fd_hash[hashv] == F)
-    fd_hash[hashv] = F->hnext;
-  else
-  {
-    fde_t *prev;
-
-    /* let it core if not found */
-    for (prev = fd_hash[hashv]; prev->hnext != F; prev = prev->hnext)
-      ;
-    prev->hnext = F->hnext;
-  }
-
   /* Unlike squid, we're actually closing the FD here! -- adrian */
   close(F->fd);
-  number_fd--;
+  memset(F, 0, sizeof(*F));  /* Must set F->flags.open == 0 before fdlist_update_highest_fd() */
 
-  memset(F, 0, sizeof(fde_t));
+  --number_fd;
+  fdlist_update_highest_fd(fd, 0);
 }
 
 /*
@@ -157,10 +148,14 @@ fd_close(fde_t *F)
 void
 fd_dump(struct Client *source_p, int parc, char *parv[])
 {
-  for (unsigned int i = 0; i < FD_HASH_SIZE; ++i)
-    for (fde_t *F = fd_hash[i]; F; F = F->hnext)
+  for (int fd = 0; fd <= highest_fd; ++fd)
+  {
+    const fde_t *F = &fd_table[fd];
+
+    if (F->flags.open)
       sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "F :fd %-5d desc '%s'", F->fd, F->desc);
+  }
 }
 
 /*
@@ -190,7 +185,7 @@ fd_note(fde_t *F, const char *format, ...)
 void
 close_standard_fds(void)
 {
-  for (unsigned int i = 0; i < LOWEST_SAFE_FD; ++i)
+  for (int i = 0; i < LOWEST_SAFE_FD; ++i)
   {
     close(i);
 
@@ -200,10 +195,8 @@ close_standard_fds(void)
 }
 
 void
-close_fds(fde_t *one)
+close_fds(void)
 {
-  for (unsigned int i = 0; i < FD_HASH_SIZE; ++i)
-    for (fde_t *F = fd_hash[i]; F; F = F->hnext)
-      if (F != one)
-        close(F->fd);
+  for (int fd = 0; fd <= highest_fd; ++fd)
+    close(fd);
 }

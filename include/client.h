@@ -340,7 +340,7 @@ struct Connection
     uintmax_t last_attempt;  /**< Last time the AWAY/INVITE/KNOCK/NICK request was issued */
   } away, invite, knock, nick;
 
-  struct AuthRequest auth;
+  struct AuthRequest *auth;
   struct Listener *listener;   /**< Listener accepted from */
   dlink_list        acceptlist; /**< Clients I'll allow to talk to me */
   dlink_list        watches;   /**< Chain of Watch pointer blocks */
@@ -349,7 +349,7 @@ struct Connection
   struct irc_ssaddr ip;
   int               aftype;    /**< Makes life easier for DNS res in IPV6 */
 
-  fde_t             fd;
+  fde_t            *fd;
 
   /* Anti-flood stuff. We track how many messages were parsed and how
    * many we were allowed in the current second, and apply a simple

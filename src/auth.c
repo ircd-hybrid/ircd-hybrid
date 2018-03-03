@@ -81,6 +81,7 @@ static const char *const HeaderMessages[] =
 
 #define auth_sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
 
+static mp_pool_t *auth_pool;
 static dlink_list auth_list;
 
 
@@ -88,11 +89,9 @@ static dlink_list auth_list;
  * auth_make_request - allocate a new auth request
  */
 static struct AuthRequest *
-auth_make_request(struct Client *client)
+auth_make(struct Client *client)
 {
-  struct AuthRequest *const auth = &client->connection->auth;
-
-  memset(auth, 0, sizeof(*auth));
+  struct AuthRequest *auth = mp_pool_get(auth_pool);;
 
   auth->client = client;
   auth->timeout = CurrentTime + CONNECTTIMEOUT;
@@ -112,11 +111,10 @@ auth_release_client(struct AuthRequest *auth)
   if (IsDoingAuth(auth) || IsDNSPending(auth))
     return;
 
-  if (IsInAuth(auth))
-  {
-    dlinkDelete(&auth->node, &auth_list);
-    ClearInAuth(auth);
-  }
+  dlinkDelete(&auth->node, &auth_list);
+
+  mp_pool_release(auth);
+  client->connection->auth = NULL;
 
   /*
    * When a client has auth'ed, we want to start reading what it sends
@@ -124,7 +122,7 @@ auth_release_client(struct AuthRequest *auth)
    *     -- adrian
    */
   client->connection->allow_read = MAX_FLOOD;
-  comm_setflush(&client->connection->fd, 1000, flood_recalc, client);
+  comm_setflush(client->connection->fd, 1000, flood_recalc, client);
 
   client->connection->since     = CurrentTime;
   client->connection->lasttime  = CurrentTime;
@@ -133,7 +131,7 @@ auth_release_client(struct AuthRequest *auth)
 
   strlcpy(client->realhost, client->host, sizeof(client->realhost));
 
-  read_packet(&client->connection->fd, client);
+  read_packet(client->connection->fd, client);
 }
 
 /*! Checks if a hostname is valid and doesn't contain illegal characters
@@ -222,7 +220,9 @@ auth_error(struct AuthRequest *auth)
 {
   ++ServerStats.is_abad;
 
-  fd_close(&auth->fd);
+  fd_close(auth->fd);
+  auth->fd = NULL;
+
   ClearAuth(auth);
 
   auth_sendheader(auth->client, REPORT_FAIL_ID);
@@ -334,13 +334,17 @@ auth_read_reply(fde_t *fd, void *data)
   ssize_t len = 0;
   char buf[RFC1413_BUFSIZ + 1];
 
-  if ((len = recv(fd->fd, buf, RFC1413_BUFSIZ, 0)) > 0)
+  assert(fd == auth->fd);
+
+  if ((len = recv(auth->fd->fd, buf, RFC1413_BUFSIZ, 0)) > 0)
   {
     buf[len] = '\0';
     username = auth_check_ident_reply(buf);
   }
 
-  fd_close(fd);
+  fd_close(auth->fd);
+  auth->fd = NULL;
+
   ClearAuth(auth);
 
   if (EmptyString(username))
@@ -389,8 +393,10 @@ auth_connect_callback(fde_t *fd, int error, void *data)
     return;
   }
 
-  if (getsockname(auth->client->connection->fd.fd, (struct sockaddr *)&us, &ulen) ||
-      getpeername(auth->client->connection->fd.fd, (struct sockaddr *)&them, &tlen))
+  assert(fd == auth->fd);
+
+  if (getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&us, &ulen) ||
+      getpeername(auth->client->connection->fd->fd, (struct sockaddr *)&them, &tlen))
   {
     report_error(L_ALL, "auth get{sock,peer}name error %s:%s",
                  client_get_name(auth->client, SHOW_IP), errno);
@@ -428,13 +434,16 @@ auth_start_query(struct AuthRequest *auth)
   struct sockaddr_in6 *v6;
 
   /* Open a socket of the same type as the client socket */
-  if (comm_open(&auth->fd, auth->client->connection->ip.ss.ss_family, SOCK_STREAM, 0, "ident") == -1)
+  int fd = comm_socket(auth->client->connection->ip.ss.ss_family, SOCK_STREAM, 0);
+  if (fd == -1)
   {
     report_error(L_ALL, "creating auth stream socket %s:%s",
                  client_get_name(auth->client, SHOW_IP), errno);
     ++ServerStats.is_abad;
     return;
   }
+
+  auth->fd = fd_open(fd, 1, "ident");
 
   SetDoingAuth(auth);
   auth_sendheader(auth->client, REPORT_DO_ID);
@@ -444,14 +453,14 @@ auth_start_query(struct AuthRequest *auth)
    * make the auth request.
    */
   memset(&localaddr, 0, locallen);
-  getsockname(auth->client->connection->fd.fd, (struct sockaddr *)&localaddr, &locallen);
+  getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&localaddr, &locallen);
 
   remove_ipv6_mapping(&localaddr);
   v6 = (struct sockaddr_in6 *)&localaddr;
   v6->sin6_port = htons(0);
   localaddr.ss_port = htons(0);
 
-  comm_connect_tcp(&auth->fd, auth->client->sockhost, RFC1413_PORT,
+  comm_connect_tcp(auth->fd, auth->client->sockhost, RFC1413_PORT,
       (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
       auth, auth->client->connection->ip.ss.ss_family,
       GlobalSetOptions.ident_timeout);
@@ -467,9 +476,8 @@ auth_start_query(struct AuthRequest *auth)
 void
 auth_start(struct Client *client_p)
 {
-  struct AuthRequest *const auth = auth_make_request(client_p);
+  struct AuthRequest *auth = auth_make(client_p);
 
-  SetInAuth(auth);
   dlinkAddTail(auth, &auth->node, &auth_list);
 
   auth_sendheader(client_p, REPORT_DO_DNS);
@@ -490,7 +498,8 @@ auth_delete(struct AuthRequest *auth)
 {
   if (IsDoingAuth(auth))
   {
-    fd_close(&auth->fd);
+    fd_close(auth->fd);
+    auth->fd = NULL;
     ClearAuth(auth);
   }
 
@@ -500,11 +509,8 @@ auth_delete(struct AuthRequest *auth)
     ClearDNSPending(auth);
   }
 
-  if (IsInAuth(auth))
-  {
-    dlinkDelete(&auth->node, &auth_list);
-    ClearInAuth(auth);
-  }
+  dlinkDelete(&auth->node, &auth_list);
+  mp_pool_release(auth);
 }
 
 /*
@@ -526,7 +532,9 @@ auth_timeout_queries(void *notused)
     if (IsDoingAuth(auth))
     {
       ++ServerStats.is_abad;
-      fd_close(&auth->fd);
+      fd_close(auth->fd);
+      auth->fd = NULL;
+
       ClearAuth(auth);
 
       auth_sendheader(auth->client, REPORT_FAIL_ID);
@@ -558,5 +566,6 @@ auth_init(void)
     .when = 1
   };
 
+  auth_pool = mp_pool_new(sizeof(struct AuthRequest), MP_CHUNK_SIZE_AUTH);
   event_add(&timeout_auth_queries, NULL);
 }

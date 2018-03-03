@@ -183,7 +183,7 @@ set_initial_nick(struct Client *source_p, const char *nick)
   hash_add_client(source_p);
 
   /* fd_desc is long enough */
-  fd_note(&source_p->connection->fd, "Nick: %s", source_p->name);
+  fd_note(source_p->connection->fd, "Nick: %s", source_p->name);
 
   if (!source_p->connection->registration)
     register_local_user(source_p);
@@ -259,7 +259,7 @@ change_local_nick(struct Client *source_p, const char *nick)
     watch_check_hash(source_p, RPL_LOGON);
 
   /* fd_desc is long enough */
-  fd_note(&source_p->connection->fd, "Nick: %s", source_p->name);
+  fd_note(source_p->connection->fd, "Nick: %s", source_p->name);
 }
 
 /*!

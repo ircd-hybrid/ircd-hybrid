@@ -40,7 +40,7 @@ enum
 struct Listener
 {
   dlink_node node;           /**< Doubly linked list node */
-  fde_t fd;                  /**< Describe socket to event system */
+  fde_t *fd;                 /**< File descriptor */
   int port;                  /**< Listener IP port */
   int ref_count;             /**< Number of connection references */
   int active;                /**< Current state of listener */

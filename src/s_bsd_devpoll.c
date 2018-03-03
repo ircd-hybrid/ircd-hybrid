@@ -42,7 +42,7 @@
 #include "s_bsd.h"
 #include "log.h"
 
-static fde_t dpfd;
+static int devpoll_fd;
 
 /*
  * netio_init
@@ -53,16 +53,14 @@ static fde_t dpfd;
 void
 netio_init(void)
 {
-  int fd;
-
-  if ((fd = open("/dev/poll", O_RDWR)) < 0)
+  if ((devpoll_fd = open("/dev/poll", O_RDWR)) < 0)
   {
     ilog(LOG_TYPE_IRCD, "netio_init: couldn't open /dev/poll: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }
 
-  fd_open(&dpfd, fd, 0, "/dev/poll file descriptor");
+  fd_open(devpoll_fd, 0, "/dev/poll file descriptor");
 }
 
 /*
@@ -82,7 +80,7 @@ devpoll_write_update(int fd, int events)
   pfd.events = events;
 
   /* Write the thing to our poll fd */
-  if (write(dpfd.fd, &pfd, sizeof(pfd)) != sizeof(pfd))
+  if (write(devpoll_fd, &pfd, sizeof(pfd)) != sizeof(pfd))
     ilog(LOG_TYPE_IRCD, "devpoll_write_update: dpfd write failed %d: %s",
          errno, strerror(errno));
 }
@@ -144,12 +142,11 @@ comm_select(void)
   struct pollfd pollfds[128];
   struct dvpoll dopoll;
   void (*hdl)(fde_t *, void *);
-  fde_t *F;
 
   dopoll.dp_timeout = SELECT_DELAY;
   dopoll.dp_nfds = 128;
   dopoll.dp_fds = &pollfds[0];
-  num = ioctl(dpfd.fd, DP_POLL, &dopoll);
+  num = ioctl(devpoll_fd, DP_POLL, &dopoll);
 
   set_time();
 
@@ -162,8 +159,9 @@ comm_select(void)
 
   for (i = 0; i < num; i++)
   {
-    F = lookup_fd(dopoll.dp_fds[i].fd);
-    if (F == NULL || !F->flags.open)
+    fde_t *F = &fd_table[dopoll.dp_fds[i].fd];
+
+    if (F->flags.open == 0)
       continue;
 
     if ((dopoll.dp_fds[i].revents & POLLIN))
@@ -172,7 +170,8 @@ comm_select(void)
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
-        if (!F->flags.open)
+
+        if (F->flags.open == 0)
           continue;
       }
     }
@@ -183,7 +182,8 @@ comm_select(void)
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);
-        if (!F->flags.open)
+
+        if (F->flags.open == 0)
           continue;
       }
     }

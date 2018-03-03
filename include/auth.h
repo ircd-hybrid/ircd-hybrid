@@ -32,14 +32,9 @@ enum { RFC1413_PORT   = 113 };  /**< As defined per rfc1413, IDENT server listen
 
 enum
 {
-  AM_IN_AUTH     = 0x00000001U,
-  AM_DOING_AUTH  = 0x00000002U,
-  AM_DNS_PENDING = 0x00000004U
+  AM_DOING_AUTH  = 0x00000001U,
+  AM_DNS_PENDING = 0x00000002U
 };
-
-#define SetInAuth(x)         ((x)->flags |= AM_IN_AUTH)
-#define ClearInAuth(x)       ((x)->flags &= ~AM_IN_AUTH)
-#define IsInAuth(x)          ((x)->flags &  AM_IN_AUTH)
 
 #define SetDNSPending(x)     ((x)->flags |= AM_DNS_PENDING)
 #define ClearDNSPending(x)   ((x)->flags &= ~AM_DNS_PENDING)
@@ -57,7 +52,7 @@ struct AuthRequest
   dlink_node node;        /**< Doubly linked list node. */
   unsigned int flags;     /**< Current state of request. */
   struct Client *client;  /**< Pointer to Client structure for request. */
-  fde_t fd;               /**< File descriptor for identd queries. */
+  fde_t *fd;              /**< File descriptor for identd queries. */
   uintmax_t timeout;      /**< Time when query expires. */
 };
 

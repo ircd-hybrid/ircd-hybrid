@@ -44,6 +44,7 @@
 #include "parse.h"
 #include "memory.h"
 #include "modules.h"
+#include "fdlist.h"
 
 
 /*! Parses server flags to be potentially set
@@ -295,21 +296,21 @@ server_estab(struct Client *client_p)
     AddFlag(client_p, FLAGS_SERVICE);
 
   /* Show the real host/IP to admins */
-  if (tls_isusing(&client_p->connection->fd.ssl))
+  if (tls_isusing(&client_p->connection->fd->ssl))
   {
     /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                         client_get_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd.ssl),
+                         client_get_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd->ssl),
                          capab_get(client_p));
 
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                         client_get_name(client_p, MASK_IP), tls_get_cipher(&client_p->connection->fd.ssl),
+                         client_get_name(client_p, MASK_IP), tls_get_cipher(&client_p->connection->fd->ssl),
                          capab_get(client_p));
     ilog(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
-         client_get_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd.ssl),
+         client_get_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd->ssl),
          capab_get(client_p));
   }
   else
@@ -326,7 +327,7 @@ server_estab(struct Client *client_p)
          client_get_name(client_p, SHOW_IP), capab_get(client_p));
   }
 
-  fd_note(&client_p->connection->fd, "Server: %s", client_p->name);
+  fd_note(client_p->connection->fd, "Server: %s", client_p->name);
 
   sendto_server(client_p, 0, 0, ":%s SID %s 2 %s :%s%s",
                 me.id, client_p->name, client_p->id,

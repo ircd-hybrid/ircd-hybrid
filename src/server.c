@@ -447,7 +447,8 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 
   /* Create a socket for the server connection */
-  if (comm_open(&client_p->connection->fd, conf->addr.ss.ss_family, SOCK_STREAM, 0, NULL) < 0)
+  int fd = comm_socket(conf->addr.ss.ss_family, SOCK_STREAM, 0);
+  if (fd == -1)
   {
     /* Eek, failure to create the socket */
     report_error(L_ALL, "opening stream socket to %s: %s", conf->name, errno);
@@ -457,8 +458,10 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     return 0;
   }
 
+  client_p->connection->fd = fd_open(fd, 1, NULL);
+
   /* Server names are always guaranteed under HOSTLEN chars */
-  fd_note(&client_p->connection->fd, "Server: %s", client_p->name);
+  fd_note(client_p->connection->fd, "Server: %s", client_p->name);
 
   /*
    * Attach config entries to client here rather than in serv_connect_callback().
@@ -512,7 +515,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         ipn.ss_port = 0;
         memcpy(&ipn, &conf->bind, sizeof(ipn));
 
-        comm_connect_tcp(&client_p->connection->fd, conf->host, conf->port,
+        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
                          serv_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
@@ -526,13 +529,13 @@ serv_connect(struct MaskItem *conf, struct Client *by)
         ipn.ss_port = 0;
         memcpy(&ipn, &ConfigServerInfo.ip, sizeof(ipn));
 
-        comm_connect_tcp(&client_p->connection->fd, conf->host, conf->port,
+        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
                          serv_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       }
       else
-        comm_connect_tcp(&client_p->connection->fd, conf->host, conf->port,
+        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
                          NULL, 0, serv_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       break;
@@ -552,7 +555,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
           ipn.ss.ss_family = AF_INET6;
           ipn.ss_port = 0;
 
-          comm_connect_tcp(&client_p->connection->fd,
+          comm_connect_tcp(client_p->connection->fd,
                            conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
                            serv_connect_callback, client_p,
@@ -564,14 +567,14 @@ serv_connect(struct MaskItem *conf, struct Client *by)
           ipn.ss.ss_family = AF_INET6;
           ipn.ss_port = 0;
 
-          comm_connect_tcp(&client_p->connection->fd,
+          comm_connect_tcp(client_p->connection->fd,
                            conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
                            serv_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
         }
         else
-          comm_connect_tcp(&client_p->connection->fd,
+          comm_connect_tcp(client_p->connection->fd,
                            conf->host, conf->port,
                            NULL, 0, serv_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
@@ -620,16 +623,21 @@ finish_ssl_server_handshake(struct Client *client_p)
 
   /* don't move to serv_list yet -- we haven't sent a burst! */
   /* If we get here, we're ok, so lets start reading some data */
-  comm_setselect(&client_p->connection->fd, COMM_SELECT_READ, read_packet, client_p, 0);
+  comm_setselect(client_p->connection->fd, COMM_SELECT_READ, read_packet, client_p, 0);
 }
 
 static void
-ssl_server_handshake(fde_t *fd, void *data)
+ssl_server_handshake(fde_t *F, void *data)
 {
   struct Client *client_p = data;
   const char *sslerr = NULL;
 
-  tls_handshake_status_t ret = tls_handshake(&client_p->connection->fd.ssl, TLS_ROLE_CLIENT, &sslerr);
+  assert(client_p);
+  assert(client_p->connection);
+  assert(client_p->connection->fd);
+  assert(client_p->connection->fd == F);
+
+  tls_handshake_status_t ret = tls_handshake(&F->ssl, TLS_ROLE_CLIENT, &sslerr);
   if (ret != TLS_HANDSHAKE_DONE)
   {
     if ((CurrentTime - client_p->connection->firsttime) > CONNECTTIMEOUT)
@@ -641,11 +649,11 @@ ssl_server_handshake(fde_t *fd, void *data)
     switch (ret)
     {
       case TLS_HANDSHAKE_WANT_WRITE:
-        comm_setselect(&client_p->connection->fd, COMM_SELECT_WRITE,
+        comm_setselect(F, COMM_SELECT_WRITE,
                        ssl_server_handshake, client_p, CONNECTTIMEOUT);
         return;
       case TLS_HANDSHAKE_WANT_READ:
-        comm_setselect(&client_p->connection->fd, COMM_SELECT_READ,
+        comm_setselect(F, COMM_SELECT_READ,
                        ssl_server_handshake, client_p, CONNECTTIMEOUT);
         return;
       default:
@@ -659,9 +667,9 @@ ssl_server_handshake(fde_t *fd, void *data)
     }
   }
 
-  comm_settimeout(&client_p->connection->fd, 0, NULL, NULL);
+  comm_settimeout(F, 0, NULL, NULL);
 
-  if (!tls_verify_cert(&client_p->connection->fd.ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp))
+  if (!tls_verify_cert(&F->ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp))
     ilog(LOG_TYPE_IRCD, "Server %s!%s@%s gave bad TLS client certificate",
          client_p->name, client_p->username, client_p->host);
 
@@ -669,9 +677,14 @@ ssl_server_handshake(fde_t *fd, void *data)
 }
 
 static void
-ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *fd)
+ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *F)
 {
-  if (!tls_new(&client_p->connection->fd.ssl, fd->fd, TLS_ROLE_CLIENT))
+  assert(client_p);
+  assert(client_p->connection);
+  assert(client_p->connection->fd);
+  assert(client_p->connection->fd == F);
+
+  if (!tls_new(&F->ssl, F->fd, TLS_ROLE_CLIENT))
   {
     SetDead(client_p);
     exit_client(client_p, "TLS context initialization failed");
@@ -679,9 +692,9 @@ ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *fd
   }
 
   if (!EmptyString(conf->cipher_list))
-    tls_set_ciphers(&client_p->connection->fd.ssl, conf->cipher_list);
+    tls_set_ciphers(&F->ssl, conf->cipher_list);
 
-  ssl_server_handshake(NULL, client_p);
+  ssl_server_handshake(F, client_p);
 }
 
 /* serv_connect_callback() - complete a server connection.
@@ -693,16 +706,18 @@ ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *fd
  * marked for reading.
  */
 static void
-serv_connect_callback(fde_t *fd, int status, void *data)
+serv_connect_callback(fde_t *F, int status, void *data)
 {
   struct Client *const client_p = data;
 
   /* First, make sure it's a real client! */
   assert(client_p);
-  assert(&client_p->connection->fd == fd);
+  assert(client_p->connection);
+  assert(client_p->connection->fd);
+  assert(client_p->connection->fd == F);
 
   /* Next, for backward purposes, record the ip of the server */
-  memcpy(&client_p->connection->ip, &fd->connect.hostaddr, sizeof(client_p->connection->ip));
+  memcpy(&client_p->connection->ip, &F->connect.hostaddr, sizeof(client_p->connection->ip));
 
   /* Check the status */
   if (status != COMM_OK)
@@ -743,7 +758,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
 
   if (IsConfSSL(conf))
   {
-    ssl_connect_init(client_p, conf, fd);
+    ssl_connect_init(client_p, conf, F);
     return;
   }
 
@@ -769,7 +784,7 @@ serv_connect_callback(fde_t *fd, int status, void *data)
 
   /* don't move to serv_list yet -- we haven't sent a burst! */
   /* If we get here, we're ok, so lets start reading some data */
-  comm_setselect(fd, COMM_SELECT_READ, read_packet, client_p, 0);
+  comm_setselect(F, COMM_SELECT_READ, read_packet, client_p, 0);
 }
 
 struct Client *

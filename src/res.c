@@ -92,7 +92,7 @@ struct reslist
   void *callback_ctx;                        /**< Context pointer for callback. */
 };
 
-static fde_t ResolverFileDescriptor;
+static fde_t *ResolverFileDescriptor;
 static dlink_list request_list;
 static mp_pool_t *dns_pool;
 
@@ -186,14 +186,16 @@ start_resolver(void)
 {
   irc_res_init();
 
-  if (!ResolverFileDescriptor.flags.open)
+  if (!ResolverFileDescriptor)
   {
-    if (comm_open(&ResolverFileDescriptor, irc_nsaddr_list[0].ss.ss_family,
-                  SOCK_DGRAM, 0, "UDP resolver socket") == -1)
+    int fd = comm_socket(irc_nsaddr_list[0].ss.ss_family, SOCK_DGRAM, 0);
+    if (fd == -1)
       return;
 
+    ResolverFileDescriptor = fd_open(fd, 1, "UDP resolver socket");
+
     /* At the moment, the resolver FD data is global .. */
-    comm_setselect(&ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
+    comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
   }
 }
 
@@ -203,7 +205,10 @@ start_resolver(void)
 void
 restart_resolver(void)
 {
-  fd_close(&ResolverFileDescriptor);
+  assert(ResolverFileDescriptor);
+
+  fd_close(ResolverFileDescriptor);
+  ResolverFileDescriptor = NULL;
   start_resolver();
 }
 
@@ -244,7 +249,7 @@ send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
     max_queries = 1;
 
   for (unsigned int i = 0; i < max_queries; ++i)
-    sendto(ResolverFileDescriptor.fd, msg, len, 0,
+    sendto(ResolverFileDescriptor->fd, msg, len, 0,
            (struct sockaddr *)&irc_nsaddr_list[i], irc_nsaddr_list[i].ss_len);
 }
 
@@ -527,7 +532,7 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
  * res_readreply - read a dns reply from the nameserver and process it.
  */
 static void
-res_readreply(fde_t *fd, void *data)
+res_readreply(fde_t *F, void *data)
 {
   unsigned char buf[sizeof(HEADER) + MAXPACKET];
   struct reslist *request = NULL;
@@ -535,7 +540,7 @@ res_readreply(fde_t *fd, void *data)
   socklen_t len = sizeof(struct irc_ssaddr);
   struct irc_ssaddr lsin;
 
-  while ((rc = recvfrom(fd->fd, buf, sizeof(buf), 0, (struct sockaddr *)&lsin, &len)) != -1)
+  while ((rc = recvfrom(F->fd, buf, sizeof(buf), 0, (struct sockaddr *)&lsin, &len)) != -1)
   {
     if (rc <= (ssize_t)sizeof(HEADER))
       continue;
@@ -620,7 +625,7 @@ res_readreply(fde_t *fd, void *data)
     continue;
   }
 
-  comm_setselect(fd, COMM_SELECT_READ, res_readreply, NULL, 0);
+  comm_setselect(F, COMM_SELECT_READ, res_readreply, NULL, 0);
 }
 
 /*

@@ -31,8 +31,7 @@
 #include "tls.h"
 
 
-enum { FD_DESC_SIZE = 128 };  /* hostlen + comment */
-enum { FD_HASH_SIZE = 1024 };
+enum { FD_DESC_SIZE = 128 };  /* HOSTLEN + comment */
 
 enum
 {
@@ -86,20 +85,18 @@ typedef struct _fde
   } connect;
 
   tls_data_t ssl;
-  struct _fde *hnext;
 } fde_t;
 
 extern int number_fd;
 extern int hard_fdlimit;
-extern fde_t *fd_hash[];
-extern fde_t *fd_next_in_loop;
+extern int highest_fd;
+extern fde_t *fd_table;
 
 extern void fdlist_init(void);
-extern fde_t *lookup_fd(int);
-extern void fd_open(fde_t *, int, int, const char *);
+extern fde_t *fd_open(int, int, const char *);
 extern void fd_close(fde_t *);
 extern void fd_dump(struct Client *, int, char *[]);
 extern void fd_note(fde_t *, const char *, ...);
 extern void close_standard_fds(void);
-extern void close_fds(fde_t *);
+extern void close_fds(void);
 #endif /* INCLUDED_fdlist_h */

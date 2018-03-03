@@ -255,7 +255,7 @@ flood_endgrace(struct Client *client_p)
  * once a second on any given client. We then attempt to flush some data.
  */
 void
-flood_recalc(fde_t *fd, void *data)
+flood_recalc(fde_t *F, void *data)
 {
   struct Client *const client_p = data;
 
@@ -277,7 +277,7 @@ flood_recalc(fde_t *fd, void *data)
   if (!IsDead(client_p))
   {
     /* and finally, reset the flood check */
-    comm_setflush(fd, 1000, flood_recalc, client_p);
+    comm_setflush(F, 1000, flood_recalc, client_p);
   }
 }
 
@@ -285,11 +285,16 @@ flood_recalc(fde_t *fd, void *data)
  * read_packet - Read a 'packet' of data from a connection and process it.
  */
 void
-read_packet(fde_t *fd, void *data)
+read_packet(fde_t *F, void *data)
 {
   struct Client *const client_p = data;
   int length = 0;
   int want_write = 0;
+
+  assert(client_p);
+  assert(client_p->connection);
+  assert(client_p->connection->fd);
+  assert(client_p->connection->fd == F);
 
   if (IsDefunct(client_p))
     return;
@@ -301,15 +306,15 @@ read_packet(fde_t *fd, void *data)
    */
   do
   {
-    if (tls_isusing(&fd->ssl))
+    if (tls_isusing(&F->ssl))
     {
-      length = tls_read(&fd->ssl, readBuf, sizeof(readBuf), &want_write);
+      length = tls_read(&F->ssl, readBuf, sizeof(readBuf), &want_write);
 
       if (want_write)
-        comm_setselect(fd, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);
+        comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);
     }
     else
-      length = recv(fd->fd, readBuf, sizeof(readBuf), 0);
+      length = recv(F->fd, readBuf, sizeof(readBuf), 0);
 
     if (length <= 0)
     {
@@ -348,8 +353,8 @@ read_packet(fde_t *fd, void *data)
       exit_client(client_p, "Excess Flood");
       return;
     }
-  } while (length == sizeof(readBuf) || tls_isusing(&fd->ssl));
+  } while (length == sizeof(readBuf) || tls_isusing(&F->ssl));
 
   /* If we get here, we need to register for another COMM_SELECT_READ */
-  comm_setselect(fd, COMM_SELECT_READ, read_packet, client_p, 0);
+  comm_setselect(F, COMM_SELECT_READ, read_packet, client_p, 0);
 }

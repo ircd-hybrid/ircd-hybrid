@@ -156,13 +156,7 @@ client_free(struct Client *client_p)
     assert(client_p->connection->lclient_node.next == NULL);
 
     assert(client_p->connection->list_task == NULL);
-
-    assert(client_p->connection->auth.node.data == NULL);
-    assert(client_p->connection->auth.node.prev == NULL);
-    assert(client_p->connection->auth.node.next == NULL);
-    assert(client_p->connection->auth.flags == 0);
-    assert(client_p->connection->auth.fd.fd == 0);
-    assert(client_p->connection->auth.client == NULL || client_p->connection->auth.client == client_p);
+    assert(client_p->connection->auth == NULL);
 
     assert(dlink_list_length(&client_p->connection->acceptlist) == 0);
     assert(client_p->connection->acceptlist.head == NULL);
@@ -181,7 +175,7 @@ client_free(struct Client *client_p)
     assert(client_p->connection->invited.head == NULL);
     assert(client_p->connection->invited.tail == NULL);
 
-    assert(client_p->connection->fd.fd == 0);
+    assert(client_p->connection->fd == NULL);
 
     assert(HasFlag(client_p, FLAGS_CLOSING) && IsDead(client_p));
 
@@ -737,7 +731,11 @@ exit_client(struct Client *source_p, const char *comment)
       ipcache_remove_address(&source_p->connection->ip);
     }
 
-    auth_delete(&source_p->connection->auth);
+    if (source_p->connection->auth)
+    {
+      auth_delete(source_p->connection->auth);
+      source_p->connection->auth = NULL;
+    }
 
     if (IsClient(source_p))
     {
@@ -895,7 +893,7 @@ dead_link_on_read(struct Client *client_p, int error)
   dbuf_clear(&client_p->connection->buf_recvq);
   dbuf_clear(&client_p->connection->buf_sendq);
 
-  current_error = get_sockerr(client_p->connection->fd.fd);
+  current_error = get_sockerr(client_p->connection->fd->fd);
 
   if (IsServer(client_p) || IsHandshake(client_p))
   {

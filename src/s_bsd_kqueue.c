@@ -161,7 +161,7 @@ comm_select(void)
 
   for (i = 0; i < num; i++)
   {
-    fde_t *F = fd_table[ke[i].ident];
+    fde_t *F = &fd_table[ke[i].ident];
 
     if (F->flags.open == 0 || (ke[i].flags & EV_ERROR))
       continue;

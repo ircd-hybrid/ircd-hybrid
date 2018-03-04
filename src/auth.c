@@ -113,6 +113,7 @@ auth_release_client(struct AuthRequest *auth)
   if (IsDoingAuth(auth) || IsDNSPending(auth))
     return;
 
+  assert(dlinkFind(&auth_list, auth));
   dlinkDelete(&auth->node, &auth_list);
 
   mp_pool_release(auth);
@@ -512,6 +513,7 @@ auth_delete(struct AuthRequest *auth)
     ClearDNSPending(auth);
   }
 
+  assert(dlinkFind(&auth_list, auth));
   dlinkDelete(&auth->node, &auth_list);
   mp_pool_release(auth);
 }

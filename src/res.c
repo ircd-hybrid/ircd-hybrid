@@ -205,10 +205,12 @@ start_resolver(void)
 void
 restart_resolver(void)
 {
-  assert(ResolverFileDescriptor);
+  if (ResolverFileDescriptor)
+  {
+    fd_close(ResolverFileDescriptor);
+    ResolverFileDescriptor = NULL;
+  }
 
-  fd_close(ResolverFileDescriptor);
-  ResolverFileDescriptor = NULL;
   start_resolver();
 }
 

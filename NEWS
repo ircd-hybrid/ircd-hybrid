@@ -9,6 +9,9 @@ o) irc-operators are now able to see a user's resolved hostname in /whowas,
    and /whois even if the user has a fakehost/vhost
 o) RPL_WELCOME now does use the rfc2812 style nick!user@host format
 o) Removed rudimentary libgeoip support
+o) Added --disable-mempool configure switch. Useful for debugging purposes
+o) Added --enable-efence switch to allow easy linking with the
+   electric fence memory debugger library
 
 
 -- Noteworthy changes in version 8.2.22 (2017-03-26)

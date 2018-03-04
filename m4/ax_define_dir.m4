@@ -1,4 +1,4 @@
-dnl @synopsis AC_DEFINE_DIR(VARNAME, DIR [, DESCRIPTION])
+dnl @synopsis AX_DEFINE_DIR(VARNAME, DIR [, DESCRIPTION])
 dnl
 dnl This macro sets VARNAME to the expansion of the DIR variable,
 dnl taking care of fixing up ${prefix} and such.
@@ -8,7 +8,7 @@ dnl preprocessor symbol.
 dnl
 dnl Example:
 dnl
-dnl    AC_DEFINE_DIR([DATADIR], [datadir], [Where data are placed to.])
+dnl    AX_DEFINE_DIR([DATADIR], [datadir], [Where data are placed to.])
 dnl
 dnl @category Misc
 dnl @author Stepan Kasal <kasal@ucw.cz>
@@ -18,7 +18,7 @@ dnl @author Alexandre Oliva
 dnl @version 2006-10-13
 dnl @license AllPermissive
 
-AC_DEFUN([AC_DEFINE_DIR], [
+AC_DEFUN([AX_DEFINE_DIR], [
   prefix_NONE=
   exec_prefix_NONE=
   test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix

@@ -61,11 +61,11 @@ AX_ARG_DISABLE_MEMPOOL
 AX_ARG_OPENSSL
 AX_ARG_GNUTLS
 
-AC_DEFINE_DIR([PREFIX],[prefix],[Set to prefix.])
-AC_DEFINE_DIR([SYSCONFDIR],[sysconfdir],[Set to sysconfdir.])
-AC_DEFINE_DIR([LIBDIR],[libdir],[Set to libdir.])
-AC_DEFINE_DIR([DATADIR],[datadir],[Set to datadir.])
-AC_DEFINE_DIR([LOCALSTATEDIR],[localstatedir],[Set to localstatedir.])
+AX_DEFINE_DIR([PREFIX],[prefix],[Set to prefix.])
+AX_DEFINE_DIR([SYSCONFDIR],[sysconfdir],[Set to sysconfdir.])
+AX_DEFINE_DIR([LIBDIR],[libdir],[Set to libdir.])
+AX_DEFINE_DIR([DATADIR],[datadir],[Set to datadir.])
+AX_DEFINE_DIR([LOCALSTATEDIR],[localstatedir],[Set to localstatedir.])
 
 AC_CONFIG_FILES(              \
        Makefile               \

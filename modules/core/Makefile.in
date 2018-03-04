@@ -90,8 +90,7 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = modules/core
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/ac_define_dir.m4 \
-	$(top_srcdir)/m4/ax_append_compile_flags.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_compile_flags.m4 \
 	$(top_srcdir)/m4/ax_append_flag.m4 \
 	$(top_srcdir)/m4/ax_arg_disable_mempool.m4 \
 	$(top_srcdir)/m4/ax_arg_enable_assert.m4 \
@@ -102,6 +101,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_define_dir.m4 \
 	$(top_srcdir)/m4/ax_arg_ioloop_mechanism.m4 \
 	$(top_srcdir)/m4/ax_arg_openssl.m4 \
 	$(top_srcdir)/m4/ax_check_compile_flag.m4 \
+	$(top_srcdir)/m4/ax_define_dir.m4 \
 	$(top_srcdir)/m4/ax_library_net.m4 \
 	$(top_srcdir)/m4/ax_mempool_chunksizes.m4 \
 	$(top_srcdir)/m4/ax_require_defined.m4 \

@@ -85,8 +85,9 @@ static mp_pool_t *auth_pool;
 static dlink_list auth_list;
 
 
-/*
- * auth_make_request - allocate a new auth request
+/*! \brief Allocate a new auth request.
+ * \param client The client being looked up.
+ * \return The newly allocated auth request.
  */
 static struct AuthRequest *
 auth_make(struct Client *client)
@@ -324,18 +325,18 @@ auth_check_ident_reply(char *const reply)
 /*! \brief Read the reply (if any) from the ident server we connected to. We
  *         only give it one shot, if the reply isn't good the first time fail
  *         the authentication entirely. --Bleep
- * \param fd The socket/fd to read from.
+ * \param F The socket/fd to read from.
  * \param data The request to read.
  */
 static void
-auth_read_reply(fde_t *fd, void *data)
+auth_read_reply(fde_t *F, void *data)
 {
   struct AuthRequest *const auth = data;
   const char *username = NULL;
   ssize_t len = 0;
   char buf[RFC1413_BUFSIZ + 1];
 
-  assert(fd == auth->fd);
+  assert(auth->fd == F);
 
   if ((len = recv(auth->fd->fd, buf, RFC1413_BUFSIZ, 0)) > 0)
   {
@@ -376,7 +377,7 @@ auth_read_reply(fde_t *fd, void *data)
  * problems arise. -avalon
  */
 static void
-auth_connect_callback(fde_t *fd, int error, void *data)
+auth_connect_callback(fde_t *F, int error, void *data)
 {
   struct AuthRequest *const auth = data;
   struct irc_ssaddr us;
@@ -394,7 +395,7 @@ auth_connect_callback(fde_t *fd, int error, void *data)
     return;
   }
 
-  assert(fd == auth->fd);
+  assert(auth->fd == F);
 
   if (getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&us, &ulen) ||
       getpeername(auth->client->connection->fd->fd, (struct sockaddr *)&them, &tlen))
@@ -412,13 +413,13 @@ auth_connect_callback(fde_t *fd, int error, void *data)
 
   len = snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
 
-  if (send(fd->fd, authbuf, len, 0) != len)
+  if (send(F->fd, authbuf, len, 0) != len)
   {
     auth_error(auth);
     return;
   }
 
-  comm_setselect(fd, COMM_SELECT_READ, auth_read_reply, auth, 0);
+  comm_setselect(F, COMM_SELECT_READ, auth_read_reply, auth, 0);
 }
 
 /*! \brief Flag the client to show an attempt to contact the ident server on
@@ -501,6 +502,7 @@ auth_delete(struct AuthRequest *auth)
   {
     fd_close(auth->fd);
     auth->fd = NULL;
+
     ClearAuth(auth);
   }
 
@@ -533,6 +535,7 @@ auth_timeout_queries(void *notused)
     if (IsDoingAuth(auth))
     {
       ++ServerStats.is_abad;
+
       fd_close(auth->fd);
       auth->fd = NULL;
 

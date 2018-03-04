@@ -110,7 +110,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
           if (MyConnect(target_p))
           {
-            dlink_node *node = NULL;
+            dlink_node *node;
 
             detach_conf(target_p, CONF_OPER);
             ClrOFlag(target_p);

@@ -195,7 +195,7 @@ close_connection(struct Client *client_p)
   if (tls_isusing(&client_p->connection->fd->ssl))
     tls_shutdown(&client_p->connection->fd->ssl);
 
-  if (&client_p->connection->fd)
+  if (client_p->connection->fd)
   {
     fd_close(client_p->connection->fd);
     client_p->connection->fd = NULL;
@@ -401,6 +401,7 @@ comm_checktimeouts(void *unused)
     {
       hdl = F->flush_handler;
       data = F->flush_data;
+
       comm_setflush(F, 0, NULL, NULL);
       hdl(F, data);
     }
@@ -412,6 +413,7 @@ comm_checktimeouts(void *unused)
       /* Call timeout handler */
       hdl = F->timeout_handler;
       data = F->timeout_data;
+
       comm_settimeout(F, 0, NULL, NULL);
       hdl(F, data);
     }

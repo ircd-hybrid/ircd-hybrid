@@ -234,7 +234,7 @@ send_queued_write(struct Client *to)
 void
 send_queued_all(void)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   /* Servers are processed first, mainly because this can generate
    * a notice to opers, which is to be delivered by this function.
@@ -356,7 +356,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 {
   va_list alocal, aremote;
   struct dbuf_block *local_buf, *remote_buf;
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
 
@@ -540,7 +540,7 @@ sendto_channel_local(const struct Client *one, struct Channel *chptr, unsigned i
                      unsigned int poscap, unsigned int negcap, const char *pattern, ...)
 {
   va_list args;
-  dlink_node *node = NULL;
+  dlink_node *node;
   struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, pattern);
@@ -611,7 +611,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
                     const char *mask, int what, const char *pattern, ...)
 {
   va_list alocal, aremote;
-  dlink_node *node = NULL;
+  dlink_node *node;
   struct dbuf_block *local_buf, *remote_buf;
 
   local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
@@ -687,7 +687,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
                    const char *pattern, ...)
 {
   va_list args;
-  dlink_node *node = NULL;
+  dlink_node *node;
   struct dbuf_block *buffer = dbuf_alloc();
 
   dbuf_put_fmt(buffer, ":%s ", source_p->id);
@@ -855,7 +855,7 @@ void
 sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
                      const char *pattern, ...)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
   va_list args;
   struct dbuf_block *buffer = dbuf_alloc();
 

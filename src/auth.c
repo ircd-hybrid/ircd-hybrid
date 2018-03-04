@@ -93,7 +93,7 @@ auth_make(struct Client *client)
 {
   struct AuthRequest *auth = mp_pool_get(auth_pool);;
 
-  auth->client->connection->auth = auth;
+  client->connection->auth = auth;
   auth->client = client;
   auth->timeout = CurrentTime + CONNECTTIMEOUT;
 

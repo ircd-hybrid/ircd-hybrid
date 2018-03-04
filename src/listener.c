@@ -89,7 +89,7 @@ listener_count_memory(unsigned int *count, size_t *bytes)
 }
 
 static void
-listener_accept_connection(fde_t *pfd, void *data)
+listener_accept_connection(fde_t *F, void *data)
 {
   static uintmax_t rate = 0;
   struct irc_ssaddr addr;
@@ -98,7 +98,7 @@ listener_accept_connection(fde_t *pfd, void *data)
   struct Listener *const listener = data;
 
   assert(listener);
-  assert(listener->fd == pfd);
+  assert(listener->fd == F);
   assert(listener->fd);
   assert(listener->fd->flags.open);
 
@@ -295,7 +295,7 @@ listener_close(struct Listener *listener)
 void
 listener_close_marked(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   /* close all 'extra' listening ports we have */
   DLINK_FOREACH_SAFE(node, node_next, listener_list.head)

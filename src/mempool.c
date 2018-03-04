@@ -236,6 +236,7 @@ static mp_pool_t *mp_allocated_pools;
 void
 mp_pool_init(void)
 {
+#ifndef MEMPOOL_DISABLED
   static struct event event_mp_gc =
   {
     .name = "mp_pool_garbage_collect",
@@ -243,7 +244,6 @@ mp_pool_init(void)
     .when = 187
   };
 
-#ifndef MEMPOOL_DISABLED
   event_add(&event_mp_gc, NULL);
 #endif
 }
@@ -299,7 +299,6 @@ mp_pool_get(mp_pool_t *pool)
      * up the used ones before we start on any empty ones.
      */
     chunk = pool->used_chunks;
-
   }
   else if (pool->empty_chunks)
   {

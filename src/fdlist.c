@@ -27,16 +27,14 @@
 #include "stdinc.h"
 #include "fdlist.h"
 #include "client.h"  /* struct Client */
-#include "event.h"
-#include "ircd.h"    /* GlobalSetOptions */
 #include "irc_string.h"
 #include "s_bsd.h"   /* comm_setselect */
-#include "conf.h"  /* ConfigServerInfo */
 #include "send.h"
 #include "memory.h"
 #include "numeric.h"
 #include "misc.h"
 #include "res.h"
+
 
 fde_t *fd_table;
 int number_fd = LEAKED_FDS;

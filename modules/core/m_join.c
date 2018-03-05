@@ -103,12 +103,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   if (!IsClient(source_p))
     return 0;
 
-  if (parc == 2 && !strcmp(parv[1], "0"))
-  {
-    channel_do_join_0(source_p);
-    return 0;
-  }
-
   if (parc < 4)
     return 0;
 

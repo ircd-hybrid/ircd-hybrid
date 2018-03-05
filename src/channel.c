@@ -886,79 +886,15 @@ channel_set_topic(struct Channel *chptr, const char *topic,
   chptr->topic_time = topicts;
 }
 
-/* do_join_0()
- *
- * inputs	- pointer to client doing join 0
- * output	- NONE
- * side effects	- Use has decided to join 0. This is legacy
- *		  from the days when channels were numbers not names. *sigh*
- *		  There is a bunch of evilness necessary here due to
- * 		  anti spambot code.
- */
 void
-channel_do_join_0(struct Client *client_p)
-{
-  if (client_p->channel.head)
-    if (MyConnect(client_p) && !HasUMode(client_p, UMODE_OPER))
-      check_spambot_warning(client_p, NULL);
-
-  while (client_p->channel.head)
-  {
-    struct Membership *member = client_p->channel.head->data;
-
-    sendto_server(client_p, 0, 0, ":%s PART %s",
-                  client_p->id, member->chptr->name);
-    sendto_channel_local(NULL, member->chptr, 0, 0, 0, ":%s!%s@%s PART %s",
-                         client_p->name, client_p->username,
-                         client_p->host, member->chptr->name);
-
-    remove_user_from_channel(member);
-  }
-}
-
-static char *
-channel_find_last0(struct Client *client_p, char *chanlist)
-{
-  int join0 = 0;
-
-  for (char *p = chanlist; *p; ++p)  /* Find last "JOIN 0" */
-  {
-    if (*p == '0' && (*(p + 1) == ',' || *(p + 1) == '\0'))
-    {
-      if (*(p + 1) == ',')
-        ++p;
-
-      chanlist = p + 1;
-      join0 = 1;
-    }
-    else
-    {
-      while (*p != ',' && *p != '\0')  /* Skip past channel name */
-        ++p;
-
-      if (*p == '\0')  /* Hit the end */
-        break;
-    }
-  }
-
-  if (join0)
-    channel_do_join_0(client_p);
-
-  return chanlist;
-}
-
-void
-channel_do_join(struct Client *client_p, char *channel, char *key_list)
+channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
 {
   char *p = NULL;
-  char *chan_list = NULL;
   const struct ResvItem *resv = NULL;
   const struct ClassItem *const class = get_class_ptr(&client_p->connection->confs);
   unsigned int flags = 0;
 
   assert(IsClient(client_p));
-
-  chan_list = channel_find_last0(client_p, channel);
 
   for (const char *name = strtok_r(chan_list, ",", &p); name;
                    name = strtok_r(NULL,      ",", &p))

@@ -137,7 +137,6 @@ extern int is_banned(const struct Channel *, const struct Client *);
 extern int has_member_flags(const struct Membership *, const unsigned int);
 
 extern void channel_do_join(struct Client *, char *, char *);
-extern void channel_do_join_0(struct Client *);
 extern void channel_do_part(struct Client *, char *, const char *);
 extern void remove_ban(struct Ban *, dlink_list *);
 extern void channel_init(void);

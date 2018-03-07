@@ -25,8 +25,8 @@ LTDL_INIT([recursive convenience])
 LIBTOOL="$LIBTOOL --silent"
 
 # Checks for libraries.
-GCC_STACK_PROTECT_CC
-GCC_STACK_PROTECT_LIB
+AX_GCC_STACK_PROTECT_CC
+AX_GCC_STACK_PROTECT_LIB
 
 AX_APPEND_COMPILE_FLAGS([-fno-strict-aliasing])
 AX_LIBRARY_NET

@@ -117,6 +117,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
           {
             dlink_node *node;
 
+            client_detach_svstag(&source_p->svstags, RPL_WHOISOPERATOR);
             detach_conf(source_p, CONF_OPER);
             ClrOFlag(source_p);
             DelUMode(source_p, ConfigGeneral.oper_only_umodes);

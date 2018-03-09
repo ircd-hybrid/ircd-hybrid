@@ -198,8 +198,30 @@ client_free(struct Client *client_p)
   mp_pool_release(client_p);
 }
 
+static void
+svstag_free(struct ServicesTag *svstag, dlink_list *list)
+{
+  dlinkDelete(&svstag->node, list);
+  xfree(svstag->tag);
+  xfree(svstag);
+}
+
 void
-client_attach_svstag(struct Client *client_p, unsigned int numeric,
+client_detach_svstag(dlink_list *list, unsigned int numeric)
+{
+  dlink_node *node, *node_next;
+
+  DLINK_FOREACH_SAFE(node, node_next, list->head)
+  {
+    struct ServicesTag *svstag = node->data;
+
+    if (svstag->numeric == numeric)
+      svstag_free(svstag, list);
+  }
+}
+
+void
+client_attach_svstag(dlink_list *list, unsigned int numeric,
                      const char *umodes, const char *tag)
 {
   const struct user_modes *tab = NULL;
@@ -216,22 +238,16 @@ client_attach_svstag(struct Client *client_p, unsigned int numeric,
       svstag->umodes |= tab->flag;
 
   if (numeric != RPL_WHOISOPERATOR)
-    dlinkAddTail(svstag, &svstag->node, &client_p->svstags);
+    dlinkAddTail(svstag, &svstag->node, list);
   else
-    dlinkAdd(svstag, &svstag->node, &client_p->svstags);
+    dlinkAdd(svstag, &svstag->node, list);
 }
 
 void
-client_clear_svstags(struct Client *client_p)
+client_clear_svstags(dlink_list *list)
 {
-  while (client_p->svstags.head)
-  {
-    struct ServicesTag *svstag = client_p->svstags.head->data;
-
-    dlinkDelete(&svstag->node, &client_p->svstags);
-    xfree(svstag->tag);
-    xfree(svstag);
-  }
+  while (list->head)
+    svstag_free(list->head->data, list);
 }
 
 /* check_pings_list()
@@ -630,7 +646,7 @@ exit_one_client(struct Client *source_p, const char *comment)
     DLINK_FOREACH_SAFE(node, node_next, source_p->channel.head)
       remove_user_from_channel(node->data);
 
-    client_clear_svstags(source_p);
+    client_clear_svstags(&source_p->svstags);
 
     whowas_add_history(source_p, 0);
     whowas_off_history(source_p);

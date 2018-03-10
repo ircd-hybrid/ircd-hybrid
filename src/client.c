@@ -652,12 +652,6 @@ exit_one_client(struct Client *source_p, const char *comment)
     whowas_off_history(source_p);
 
     watch_check_hash(source_p, RPL_LOGOFF);
-
-    if (MyConnect(source_p))
-    {
-      clear_invite_list(&source_p->connection->invited);
-      del_all_accepts(source_p);
-    }
   }
   else if (IsServer(source_p))
   {
@@ -767,6 +761,8 @@ exit_client(struct Client *source_p, const char *comment)
       if (source_p->connection->list_task)
         free_list_task(source_p);
 
+      clear_invite_list(&source_p->connection->invited);
+      del_all_accepts(source_p);
       watch_del_watch_list(source_p);
 
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,

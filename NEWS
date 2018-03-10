@@ -12,6 +12,7 @@ o) Removed rudimentary libgeoip support
 o) Added --disable-mempool configure switch. Useful for debugging purposes
 o) Added --enable-efence switch to allow easy linking with the
    electric fence memory debugger library
+o) "JOIN 0" is no longer supported
 o) Fixed bug where ircd would not remove RPL_WHOISOPERATOR based svstags
    when deoppering
 

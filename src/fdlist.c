@@ -26,12 +26,9 @@
 
 #include "stdinc.h"
 #include "fdlist.h"
-#include "client.h"  /* struct Client */
 #include "irc_string.h"
 #include "s_bsd.h"   /* comm_setselect */
-#include "send.h"
 #include "memory.h"
-#include "numeric.h"
 #include "misc.h"
 #include "res.h"
 
@@ -138,22 +135,6 @@ fd_close(fde_t *F)
 
   --number_fd;
   fdlist_update_highest_fd(fd, 0);
-}
-
-/*
- * fd_dump() - dump the list of active filedescriptors
- */
-void
-fd_dump(struct Client *source_p, int parc, char *parv[])
-{
-  for (int fd = 0; fd <= highest_fd; ++fd)
-  {
-    const fde_t *F = &fd_table[fd];
-
-    if (F->flags.open)
-      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                         "F :fd %-5d desc '%s'", F->fd, F->desc);
-  }
 }
 
 /*

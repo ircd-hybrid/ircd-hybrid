@@ -571,6 +571,19 @@ stats_events(struct Client *source_p, int parc, char *parv[])
 }
 
 static void
+stats_fdlist(struct Client *source_p, int parc, char *parv[])
+{
+  for (int fd = 0; fd <= highest_fd; ++fd)
+  {
+    const fde_t *F = &fd_table[fd];
+
+    if (F->flags.open)
+      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+                         "F :fd %-5d desc '%s'", F->fd, F->desc);
+  }
+}
+
+static void
 stats_hubleaf(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node, *node2;
@@ -1239,8 +1252,8 @@ static const struct StatsStruct  stats_tab[] =
   { 'D',  stats_deny,        UMODE_OPER  },
   { 'e',  stats_exempt,      UMODE_OPER  },
   { 'E',  stats_events,      UMODE_ADMIN },
-  { 'f',  fd_dump,           UMODE_ADMIN },
-  { 'F',  fd_dump,           UMODE_ADMIN },
+  { 'f',  stats_fdlist,      UMODE_ADMIN },
+  { 'F',  stats_fdlist,      UMODE_ADMIN },
   { 'h',  stats_hubleaf,     UMODE_OPER  },
   { 'H',  stats_hubleaf,     UMODE_OPER  },
   { 'i',  stats_auth,        0           },

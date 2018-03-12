@@ -98,8 +98,8 @@
 #define CLIENT_FLOOD_MIN     512
 
 /* ConfigServerInfo default values */
-#define NETWORK_NAME_DEFAULT "EFnet"             /* default for network_name */
-#define NETWORK_DESC_DEFAULT "Eris Free Network" /* default for network_desc */
+#define NETWORK_NAME_DEFAULT "2600net"  /* default for network_name */
+#define NETWORK_DESC_DEFAULT "2600net IRC Network"  /* default for network_desc */
 
 /* General defaults */
 #define MAXIMUM_LINKS_DEFAULT 0         /* default for maximum_links */

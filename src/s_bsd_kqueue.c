@@ -61,12 +61,12 @@ netio_init(void)
  * Write a single update to the kqueue list.
  */
 static void
-kq_update_events(int fd, int filter, int what)
+kq_update_events(fde_t *F, int filter, int what)
 {
   const struct timespec zero_timespec = { .tv_sec = 0, .tv_nsec = 0 };
   struct kevent *kep = kq_fdlist + kqoff;
 
-  EV_SET(kep, (uintptr_t) fd, (short) filter, what, 0, 0, NULL);
+  EV_SET(kep, (uintptr_t) F->fd, (short) filter, what, 0, 0, F);
 
   if (++kqoff == KE_LENGTH)
   {
@@ -115,11 +115,9 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
   diff = new_events ^ F->evcache;
 
   if ((diff & COMM_SELECT_READ))
-    kq_update_events(F->fd, EVFILT_READ,
-      (new_events & COMM_SELECT_READ) ? EV_ADD : EV_DELETE);
+    kq_update_events(F, EVFILT_READ, (new_events & COMM_SELECT_READ) ? EV_ADD : EV_DELETE);
   if ((diff & COMM_SELECT_WRITE))
-    kq_update_events(F->fd, EVFILT_WRITE,
-      (new_events & COMM_SELECT_WRITE) ? EV_ADD : EV_DELETE);
+    kq_update_events(F, EVFILT_WRITE, (new_events & COMM_SELECT_WRITE) ? EV_ADD : EV_DELETE);
 
   F->evcache = new_events;
 }
@@ -161,7 +159,7 @@ comm_select(void)
 
   for (i = 0; i < num; i++)
   {
-    fde_t *F = &fd_table[ke[i].ident];
+    fde_t *F = ke[i].udata;
 
     if (F->flags.open == 0 || (ke[i].flags & EV_ERROR))
       continue;

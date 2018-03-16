@@ -528,12 +528,14 @@ free_list_task(struct Client *source_p)
   DLINK_FOREACH_SAFE(node, node_next, lt->show_mask.head)
   {
     xfree(node->data);
+    dlinkDelete(node, &lt->show_mask);
     free_dlink_node(node);
   }
 
   DLINK_FOREACH_SAFE(node, node_next, lt->hide_mask.head)
   {
     xfree(node->data);
+    dlinkDelete(node, &lt->hide_mask);
     free_dlink_node(node);
   }
 

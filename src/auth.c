@@ -50,7 +50,7 @@
 #include "s_bsd.h"
 #include "log.h"
 #include "send.h"
-#include "mempool.h"
+#include "memory.h"
 
 
 enum
@@ -81,7 +81,6 @@ static const char *const HeaderMessages[] =
 
 #define auth_sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
 
-static mp_pool_t *auth_pool;
 static dlink_list auth_list;
 
 
@@ -92,7 +91,7 @@ static dlink_list auth_list;
 static struct AuthRequest *
 auth_make(struct Client *client)
 {
-  struct AuthRequest *auth = mp_pool_get(auth_pool);;
+  struct AuthRequest *auth = xcalloc(sizeof(*auth));
 
   client->connection->auth = auth;
   auth->client = client;
@@ -116,7 +115,7 @@ auth_release_client(struct AuthRequest *auth)
   assert(dlinkFind(&auth_list, auth));
   dlinkDelete(&auth->node, &auth_list);
 
-  mp_pool_release(auth);
+  xfree(auth);
   client->connection->auth = NULL;
 
   /*
@@ -515,7 +514,7 @@ auth_delete(struct AuthRequest *auth)
 
   assert(dlinkFind(&auth_list, auth));
   dlinkDelete(&auth->node, &auth_list);
-  mp_pool_release(auth);
+  xfree(auth);
 }
 
 /*
@@ -572,6 +571,5 @@ auth_init(void)
     .when = 1
   };
 
-  auth_pool = mp_pool_new(sizeof(struct AuthRequest), MP_CHUNK_SIZE_AUTH);
   event_add(&timeout_auth_queries, NULL);
 }

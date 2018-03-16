@@ -51,7 +51,6 @@ struct Whowas
 };
 
 extern const dlink_list *whowas_get_hash(unsigned int);
-extern void whowas_init(void);
 extern void whowas_trim(void);
 extern void whowas_add_history(struct Client *, const int);
 extern void whowas_off_history(struct Client *);

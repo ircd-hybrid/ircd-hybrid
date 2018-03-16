@@ -40,26 +40,11 @@
 #include "send.h"
 #include "event.h"
 #include "memory.h"
-#include "mempool.h"
 #include "misc.h"
 
 
 dlink_list channel_list;
-mp_pool_t *ban_pool;    /*! \todo ban_pool shouldn't be a global var */
 
-static mp_pool_t *member_pool, *channel_pool, *invite_pool;
-
-
-/*! \brief Initializes the channel blockheap, adds known channel CAPAB
- */
-void
-channel_init(void)
-{
-  invite_pool = mp_pool_new(sizeof(struct Invite), MP_CHUNK_SIZE_INVITE);
-  channel_pool = mp_pool_new(sizeof(struct Channel), MP_CHUNK_SIZE_CHANNEL);
-  ban_pool = mp_pool_new(sizeof(struct Ban), MP_CHUNK_SIZE_BAN);
-  member_pool = mp_pool_new(sizeof(struct Membership), MP_CHUNK_SIZE_MEMBER);
-}
 
 /*! \brief Adds a user to a channel by adding another link to the
  *         channels member chain.
@@ -105,7 +90,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p,
     chptr->last_join_time = CurrentTime;
   }
 
-  struct Membership *member = mp_pool_get(member_pool);
+  struct Membership *member = xcalloc(sizeof(*member));
   member->client_p = client_p;
   member->chptr = chptr;
   member->flags = flags;
@@ -135,7 +120,7 @@ remove_user_from_channel(struct Membership *member)
 
   dlinkDelete(&member->usernode, &client_p->channel);
 
-  mp_pool_release(member);
+  xfree(member);
 
   if (chptr->members.head == NULL)
     channel_free(chptr);
@@ -306,7 +291,7 @@ void
 remove_ban(struct Ban *ban, dlink_list *list)
 {
   dlinkDelete(&ban->node, list);
-  mp_pool_release(ban);
+  xfree(ban);
 }
 
 /* channel_free_mask_list()
@@ -335,7 +320,7 @@ channel_make(const char *name)
 {
   assert(!EmptyString(name));
 
-  struct Channel *chptr = mp_pool_get(channel_pool);
+  struct Channel *chptr = xcalloc(sizeof(*chptr));
   /* Doesn't hurt to set it here */
   chptr->creationtime = CurrentTime;
   chptr->last_join_time = CurrentTime;
@@ -367,7 +352,7 @@ channel_free(struct Channel *chptr)
   dlinkDelete(&chptr->node, &channel_list);
   hash_del_channel(chptr);
 
-  mp_pool_release(chptr);
+  xfree(chptr);
 }
 
 /*!
@@ -503,7 +488,7 @@ add_invite(struct Channel *chptr, struct Client *client_p)
   if (invite)
     del_invite(invite);
 
-  invite = mp_pool_get(invite_pool);
+  invite = xcalloc(sizeof(*invite));
   invite->client_p = client_p;
   invite->chptr = chptr;
   invite->when = CurrentTime;
@@ -531,7 +516,7 @@ del_invite(struct Invite *invite)
   dlinkDelete(&invite->chan_node, &invite->chptr->invites);
 
   /* Release memory pointed to by 'invite' */
-  mp_pool_release(invite);
+  xfree(invite);
 }
 
 /*! \brief Removes and frees all Invite blocks from a list

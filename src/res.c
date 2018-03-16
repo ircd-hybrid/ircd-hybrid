@@ -52,9 +52,9 @@
 #include "fdlist.h"
 #include "s_bsd.h"
 #include "misc.h"
-#include "mempool.h"
 #include "res.h"
 #include "reslib.h"
+#include "memory.h"
 
 #if (CHAR_BIT != 8)
 #error this code needs to be able to address individual octets
@@ -94,7 +94,6 @@ struct reslist
 
 static fde_t *ResolverFileDescriptor;
 static dlink_list request_list;
-static mp_pool_t *dns_pool;
 
 
 /*
@@ -106,7 +105,7 @@ static void
 rem_request(struct reslist *request)
 {
   dlinkDelete(&request->node, &request_list);
-  mp_pool_release(request);
+  xfree(request);
 }
 
 /*
@@ -115,7 +114,7 @@ rem_request(struct reslist *request)
 static struct reslist *
 make_request(dns_callback_fnc callback, void *ctx)
 {
-  struct reslist *request = mp_pool_get(dns_pool);
+  struct reslist *request = xcalloc(sizeof(*request));
 
   request->sentat = CurrentTime;
   request->retries = 2;
@@ -689,8 +688,6 @@ resolver_init(void)
     .handler = timeout_resolver,
     .when = 1
   };
-
-  dns_pool = mp_pool_new(sizeof(struct reslist), MP_CHUNK_SIZE_DNS);
 
   start_resolver();
   event_add(&event_timeout_resolver, NULL);

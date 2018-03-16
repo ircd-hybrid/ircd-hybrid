@@ -26,7 +26,7 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "mempool.h"
+#include "memory.h"
 #include "whowas.h"
 #include "client.h"
 #include "hash.h"
@@ -35,19 +35,9 @@
 #include "conf.h"
 
 
-static mp_pool_t *whowas_pool;
-
 static dlink_list whowas_list;  /*! Chain of struct Whowas pointers */
 static dlink_list whowas_hash[HASHSIZE];
 
-
-/*! \brief Initializes the whowas memory pool.
- */
-void
-whowas_init(void)
-{
-  whowas_pool = mp_pool_new(sizeof(struct Whowas), MP_CHUNK_SIZE_WHOWAS);
-}
 
 /*! \brief Returns a slot of the whowas_hash by the hash value associated with it.
  * \param hashv Hash value.
@@ -77,14 +67,14 @@ whowas_unlink(struct Whowas *whowas)
 }
 
 /*! \brief Unlinks a Whowas struct from its associated lists
- *         and returns memory back to the pooling allocator.
+ *         and frees memory.
  * \param whowas Pointer to Whowas struct to be unlinked and freed.
  */
 static void
 whowas_free(struct Whowas *whowas)
 {
   whowas_unlink(whowas);
-  mp_pool_release(whowas);
+  xfree(whowas);
 }
 
 /*! \brief Returns a Whowas struct for further use. Either allocates
@@ -100,7 +90,7 @@ whowas_make(void)
       dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
     whowas = whowas_unlink(whowas_list.tail->data);  /* Re-use oldest item */
   else
-    whowas = mp_pool_get(whowas_pool);
+    whowas = xcalloc(sizeof(*whowas));
 
   return whowas;
 }

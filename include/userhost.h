@@ -35,7 +35,6 @@ struct UserHost
   unsigned int lcount;  /* Local user count on this addr */
 };
 
-extern void userhost_init(void);
 extern void userhost_count(const char *, unsigned int *, unsigned int *);
 extern void userhost_add(const char *, int);
 extern void userhost_del(const char *, int);

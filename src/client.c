@@ -43,7 +43,6 @@
 #include "whowas.h"
 #include "user.h"
 #include "memory.h"
-#include "mempool.h"
 #include "hostmask.h"
 #include "listener.h"
 #include "userhost.h"
@@ -61,7 +60,6 @@ dlink_list global_client_list;
 dlink_list global_server_list;
 dlink_list oper_list;
 
-static mp_pool_t *client_pool, *connection_pool;
 static dlink_list dead_list, abort_list;
 static dlink_node *eac_next;  /* next aborted client to exit */
 
@@ -84,14 +82,14 @@ static dlink_node *eac_next;  /* next aborted client to exit */
 struct Client *
 client_make(struct Client *from)
 {
-  struct Client *const client_p = mp_pool_get(client_pool);
+  struct Client *const client_p = xcalloc(sizeof(*client_p));
 
   if (from)
     client_p->from = from;
   else
   {
     client_p->from = client_p;  /* 'from' of local client is self! */
-    client_p->connection = mp_pool_get(connection_pool);
+    client_p->connection = xcalloc(sizeof(*client_p->connection));
     client_p->connection->since = CurrentTime;
     client_p->connection->lasttime = CurrentTime;
     client_p->connection->firsttime = CurrentTime;
@@ -191,11 +189,11 @@ client_free(struct Client *client_p)
     dbuf_clear(&client_p->connection->buf_recvq);
     dbuf_clear(&client_p->connection->buf_sendq);
 
-    mp_pool_release(client_p->connection);
+    xfree(client_p->connection);
     client_p->connection = NULL;
   }
 
-  mp_pool_release(client_p);
+  xfree(client_p);
 }
 
 static void
@@ -1115,7 +1113,5 @@ client_init(void)
     .when = 5
   };
 
-  client_pool = mp_pool_new(sizeof(struct Client), MP_CHUNK_SIZE_CLIENT);
-  connection_pool = mp_pool_new(sizeof(struct Connection), MP_CHUNK_SIZE_CONNECTION);
   event_add(&event_ping, NULL);
 }

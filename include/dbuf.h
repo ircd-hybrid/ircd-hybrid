@@ -46,7 +46,6 @@ struct dbuf_queue
   size_t pos;
 };
 
-extern void dbuf_init(void);
 extern struct dbuf_block *dbuf_alloc(void);
 extern void dbuf_ref_free(struct dbuf_block *);
 extern void dbuf_add(struct dbuf_queue *, struct dbuf_block *);

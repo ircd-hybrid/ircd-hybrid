@@ -50,17 +50,13 @@
 #include "server.h"
 #include "server_capab.h"
 #include "send.h"
-#include "whowas.h"
 #include "modules.h"
 #include "memory.h"
-#include "mempool.h"
 #include "ircd_getopt.h"
-#include "watch.h"
 #include "conf_db.h"
 #include "conf_class.h"
 #include "ipcache.h"
 #include "isupport.h"
-#include "userhost.h"
 
 
 struct SetOptions GlobalSetOptions;  /* /quote set variables */
@@ -406,24 +402,17 @@ main(int argc, char *argv[])
   /* Check if there is pidfile and daemon already running */
   check_pidfile(pidFileName);
 
-  mp_pool_init();
-  init_dlink_nodes();
   isupport_init();
-  dbuf_init();
   hash_init();
-  userhost_init();
   ipcache_init();
   client_init();
   class_init();
-  whowas_init();
-  watch_init();
   auth_init();          /* Initialise the auth code */
   resolver_init();      /* Needs to be setup before the io loop */
   modules_init();
   read_conf_files(1);   /* cold start init conf files */
   capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after read_conf_files() */
-  channel_init();
   channel_mode_init();
   read_links_file();
   motd_init();

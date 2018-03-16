@@ -28,21 +28,12 @@
 #include "list.h"
 #include "dbuf.h"
 #include "memory.h"
-#include "mempool.h"
 
-
-static mp_pool_t *dbuf_pool;
-
-void
-dbuf_init(void)
-{
-  dbuf_pool = mp_pool_new(sizeof(struct dbuf_block), MP_CHUNK_SIZE_DBUF);
-}
 
 struct dbuf_block *
 dbuf_alloc(void)
 {
-  struct dbuf_block *block = mp_pool_get(dbuf_pool);
+  struct dbuf_block *block = xcalloc(sizeof(*block));
 
   ++block->refs;
   return block;
@@ -52,7 +43,7 @@ void
 dbuf_ref_free(struct dbuf_block *block)
 {
   if (--block->refs <= 0)
-    mp_pool_release(block);
+    xfree(block);
 }
 
 void

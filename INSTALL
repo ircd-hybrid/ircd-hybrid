@@ -78,9 +78,6 @@
             with proper settings that are required for debugging purposes.
             This switch basically sets CFLAGS to "-g -O0".
 
-          * --disable-mempool - Disables the memory pooling allocator and makes
-            code fall back straight to malloc/free. Useful for debugging purposes.
-
           * --enable-efence - Allows easy linking with the electric fence memory
             debugger library.
 

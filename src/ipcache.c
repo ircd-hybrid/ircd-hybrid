@@ -28,13 +28,12 @@
 #include "list.h"
 #include "ipcache.h"
 #include "event.h"
-#include "mempool.h"
+#include "memory.h"
 #include "conf.h"
 #include "ircd.h"
 
 
 static dlink_list ip_hash_table[IP_HASH_SIZE];
-static mp_pool_t *ip_entry_pool;
 
 
 /* ipcache_hash_address()
@@ -105,7 +104,7 @@ ipcache_find_or_add_address(const struct irc_ssaddr *addr)
     }
   }
 
-  struct ip_entry *iptr = mp_pool_get(ip_entry_pool);
+  struct ip_entry *iptr = xcalloc(sizeof(*iptr));
   memcpy(&iptr->ip, addr, sizeof(struct irc_ssaddr));
 
   dlinkAdd(iptr, &iptr->node, &ip_hash_table[hash_index]);
@@ -156,7 +155,7 @@ ipcache_remove_address(const struct irc_ssaddr *addr)
         (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
     {
       dlinkDelete(&iptr->node, &ip_hash_table[hash_index]);
-      mp_pool_release(iptr);
+      xfree(iptr);
       return;
     }
   }
@@ -183,7 +182,7 @@ ipcache_remove_expired_entries(void *unused)
           (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
       {
         dlinkDelete(&iptr->node, &ip_hash_table[i]);
-        mp_pool_release(iptr);
+        xfree(iptr);
       }
     }
   }
@@ -218,5 +217,4 @@ ipcache_init(void)
   };
 
   event_add(&event_expire_ipcache, NULL);
-  ip_entry_pool = mp_pool_new(sizeof(struct ip_entry), MP_CHUNK_SIZE_IP_ENTRY);
 }

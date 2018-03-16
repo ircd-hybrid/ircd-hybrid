@@ -41,7 +41,6 @@ ircd_SOURCES = auth.c            \
                log.c             \
                match.c           \
                memory.c          \
-               mempool.c         \
                misc.c            \
                modules.c         \
                motd.c            \

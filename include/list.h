@@ -70,7 +70,6 @@ struct _dlink_list
   unsigned int length;
 };
 
-extern void init_dlink_nodes(void);
 extern void free_dlink_node(dlink_node *);
 extern void dlinkAdd(void *, dlink_node *, dlink_list *);
 extern void dlinkAddBefore(dlink_node *, void *, dlink_node *, dlink_list *);

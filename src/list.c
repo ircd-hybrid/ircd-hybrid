@@ -26,23 +26,8 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "mempool.h"
+#include "memory.h"
 
-
-static mp_pool_t *dnode_pool;
-
-
-/* init_dlink_nodes()
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - initializes the dnode BlockHeap
- */
-void
-init_dlink_nodes(void)
-{
-  dnode_pool = mp_pool_new(sizeof(dlink_node), MP_CHUNK_SIZE_DNODE);
-}
 
 /* make_dlink_node()
  *
@@ -53,7 +38,7 @@ init_dlink_nodes(void)
 dlink_node *
 make_dlink_node(void)
 {
-  dlink_node *node = mp_pool_get(dnode_pool);
+  dlink_node *node = xcalloc(sizeof(*node));
 
   return node;
 }
@@ -67,7 +52,7 @@ make_dlink_node(void)
 void
 free_dlink_node(dlink_node *node)
 {
-  mp_pool_release(node);
+  xfree(node);
 }
 
 /*

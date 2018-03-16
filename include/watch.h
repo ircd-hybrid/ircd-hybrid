@@ -39,7 +39,6 @@ struct Watch
   char name[NICKLEN + 1];  /**< Name of the client to watch */
 };
 
-extern void watch_init(void);
 extern void watch_add_to_hash_table(const char *, struct Client *);
 extern void watch_del_from_hash_table(const char *, struct Client *);
 extern void watch_check_hash(const struct Client *, const enum irc_numerics);

@@ -37,7 +37,6 @@
 #include "server.h"
 #include "send.h"
 #include "memory.h"
-#include "mempool.h"
 #include "parse.h"
 
 
@@ -46,7 +45,6 @@ static struct ChModeChange mode_changes[IRCD_BUFSIZE];
 static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
 static unsigned int simple_modes_mask;  /* bit mask of simple modes already set */
-extern mp_pool_t *ban_pool;
 
 
 /* check_string()
@@ -157,7 +155,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
       return 0;
   }
 
-  struct Ban *ban = mp_pool_get(ban_pool);
+  struct Ban *ban = xcalloc(sizeof(*ban));
   ban->when = CurrentTime;
   ban->len = len - 2;  /* -2 for ! + @ */
   ban->type = parse_netmask(host, &ban->addr, &ban->bits);

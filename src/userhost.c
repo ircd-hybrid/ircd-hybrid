@@ -28,18 +28,9 @@
 #include "hash.h"
 #include "client.h"
 #include "userhost.h"
-#include "mempool.h"
 #include "irc_string.h"
+#include "memory.h"
 
-
-static mp_pool_t *userhost_pool;
-
-
-void
-userhost_init(void)
-{
-  userhost_pool = mp_pool_new(sizeof(struct UserHost), MP_CHUNK_SIZE_USERHOST);
-}
 
 /* userhost_count()
  *
@@ -80,7 +71,7 @@ userhost_find_or_add(const char *host)
   if ((userhost = hash_find_userhost(host)))
     return userhost;
 
-  userhost = mp_pool_get(userhost_pool);
+  userhost = xcalloc(sizeof(*userhost));
 
   strlcpy(userhost->host, host, sizeof(userhost->host));
   hash_add_userhost(userhost);
@@ -136,6 +127,6 @@ userhost_del(const char *host, int global)
   if (userhost->gcount == 0 && userhost->lcount == 0)
   {
     hash_del_userhost(userhost);
-    mp_pool_release(userhost);
+    xfree(userhost);
   }
 }

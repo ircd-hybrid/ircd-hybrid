@@ -27,26 +27,18 @@
 
 #include "stdinc.h"
 #include "list.h"
+#include "memory.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "mempool.h"
 #include "watch.h"
 
 
-static mp_pool_t *watch_pool;
 static dlink_list watchTable[HASHSIZE];
 
-/*! \brief Initializes the watch table
- */
-void
-watch_init(void)
-{
-  watch_pool = mp_pool_new(sizeof(struct Watch), MP_CHUNK_SIZE_WATCH);
-}
 
 /*
  * Rough figure of the datastructures for watch:
@@ -130,7 +122,7 @@ watch_add_to_hash_table(const char *name, struct Client *client_p)
   /* If found NULL (no header for this name), make one... */
   if ((watch = watch_find_hash(name)) == NULL)
   {
-    watch = mp_pool_get(watch_pool);
+    watch = xcalloc(sizeof(*watch));
 
     watch->lasttime = CurrentTime;
     strlcpy(watch->name, name, sizeof(watch->name));
@@ -178,7 +170,7 @@ watch_del_from_hash_table(const char *name, struct Client *client_p)
   {
     assert(dlinkFind(&watchTable[strhash(watch->name)], watch));
     dlinkDelete(&watch->node, &watchTable[strhash(watch->name)]);
-    mp_pool_release(watch);
+    xfree(watch);
   }
 }
 
@@ -207,7 +199,7 @@ watch_del_watch_list(struct Client *client_p)
       assert(dlinkFind(&watchTable[strhash(watch->name)], watch));
       dlinkDelete(&watch->node, &watchTable[strhash(watch->name)]);
 
-      mp_pool_release(watch);
+      xfree(watch);
     }
 
     dlinkDelete(node, &client_p->connection->watches);

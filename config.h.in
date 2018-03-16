@@ -194,51 +194,6 @@
 /* Define to the shared archive member specification, say "(shr.o)". */
 #undef LT_SHARED_LIB_MEMBER
 
-/* Define to disable the memory pooling allocator. */
-#undef MEMPOOL_DISABLED
-
-/* Size of the auth mempool chunk. */
-#undef MP_CHUNK_SIZE_AUTH
-
-/* Size of the ban mempool chunk. */
-#undef MP_CHUNK_SIZE_BAN
-
-/* Size of the channel mempool chunk. */
-#undef MP_CHUNK_SIZE_CHANNEL
-
-/* Size of the client mempool chunk. */
-#undef MP_CHUNK_SIZE_CLIENT
-
-/* Size of the connection mempool chunk. */
-#undef MP_CHUNK_SIZE_CONNECTION
-
-/* Size of the dbuf mempool chunk. */
-#undef MP_CHUNK_SIZE_DBUF
-
-/* Size of the dlink_node mempool chunk. */
-#undef MP_CHUNK_SIZE_DNODE
-
-/* Size of the dns mempool chunk. */
-#undef MP_CHUNK_SIZE_DNS
-
-/* Size of the invite mempool chunk. */
-#undef MP_CHUNK_SIZE_INVITE
-
-/* Size of the ip_entry mempool chunk. */
-#undef MP_CHUNK_SIZE_IP_ENTRY
-
-/* Size of the channel-member mempool chunk. */
-#undef MP_CHUNK_SIZE_MEMBER
-
-/* Size of the userhost mempool chunk. */
-#undef MP_CHUNK_SIZE_USERHOST
-
-/* Size of the watch mempool chunk. */
-#undef MP_CHUNK_SIZE_WATCH
-
-/* Size of the Whowas mempool chunk. */
-#undef MP_CHUNK_SIZE_WHOWAS
-
 /* Define to disable assert() statements. */
 #undef NDEBUG
 

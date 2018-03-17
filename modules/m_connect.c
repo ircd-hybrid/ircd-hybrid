@@ -85,10 +85,9 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
    * Try to find the name, then host, if both fail notify and bail
    */
   struct MaskItem *conf;
-  if (!(conf = connect_find(name, NULL, match)) &&
-      !(conf = connect_find(NULL, name, match)))
+  if (!(conf = connect_find(name, match)))
   {
-    sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in configuration file", name);
+    sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
     return 0;
   }
 
@@ -165,10 +164,9 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
    * Try to find the name, then host, if both fail notify and bail
    */
   struct MaskItem *conf;
-  if (!(conf = connect_find(name, NULL, match)) &&
-      !(conf = connect_find(NULL, name, match)))
+  if (!(conf = connect_find(name, match)))
   {
-    sendto_one_notice(source_p, &me, ":Connect: Host %s not listed in configuration file", name);
+    sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
     return 0;
   }
 

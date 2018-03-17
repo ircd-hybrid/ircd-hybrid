@@ -387,7 +387,6 @@ make_server(struct Client *client_p)
 int
 serv_connect(struct MaskItem *conf, struct Client *by)
 {
-  struct Client *client_p = NULL;
   char buf[HOSTIPLEN + 1] = "";
 
   /* conversion structs */
@@ -395,6 +394,8 @@ serv_connect(struct MaskItem *conf, struct Client *by)
 
   /* Make sure conf is useful */
   assert(conf);
+  assert(conf->type == CONF_SERVER);
+  assert(hash_find_server(conf->name) == NULL);  /* This should have been checked by the caller */
 
   getnameinfo((const struct sockaddr *)&conf->addr, conf->addr.ss_len,
               buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
@@ -418,26 +419,17 @@ serv_connect(struct MaskItem *conf, struct Client *by)
     return 0;
   }
 
-  /*
-   * Make sure this server isn't already connected.
-   * Note: conf should ALWAYS be a valid connect {} block
-   */
-  if ((client_p = hash_find_server(conf->name)))
+  /* Create a socket for the server connection */
+  int fd = comm_socket(conf->addr.ss.ss_family, SOCK_STREAM, 0);
+  if (fd == -1)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Server %s already present from %s",
-                         conf->name, client_get_name(client_p, SHOW_IP));
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Server %s already present from %s",
-                         conf->name, client_get_name(client_p, MASK_IP));
-    if (by && IsClient(by) && !MyClient(by))
-      sendto_one_notice(by, &me, ":Server %s already present from %s",
-                        conf->name, client_get_name(client_p, MASK_IP));
+    /* Eek, failure to create the socket */
+    report_error(L_ALL, "opening stream socket to %s: %s", conf->name, errno);
     return 0;
   }
 
   /* Create a local client */
-  client_p = client_make(NULL);
+  struct Client *client_p = client_make(NULL);
 
   /* Copy in the server, hostname, fd */
   strlcpy(client_p->name, conf->name, sizeof(client_p->name));
@@ -445,18 +437,6 @@ serv_connect(struct MaskItem *conf, struct Client *by)
 
   /* We already converted the ip once, so lets use it - stu */
   strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
-
-  /* Create a socket for the server connection */
-  int fd = comm_socket(conf->addr.ss.ss_family, SOCK_STREAM, 0);
-  if (fd == -1)
-  {
-    /* Eek, failure to create the socket */
-    report_error(L_ALL, "opening stream socket to %s: %s", conf->name, errno);
-
-    SetDead(client_p);
-    exit_client(client_p, "Connection failed");
-    return 0;
-  }
 
   client_p->connection->fd = fd_open(fd, 1, NULL);
 
@@ -467,18 +447,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
    * Attach config entries to client here rather than in serv_connect_callback().
    * This to avoid null pointer references.
    */
-  if (!attach_connect_block(client_p, conf->name, conf->host))
-  {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Host %s is not enabled for connecting: no connect {} block",
-                         conf->name);
-    if (by && IsClient(by) && !MyClient(by))
-      sendto_one_notice(by, &me, ":Connect to host %s failed: no connect {} block", client_p->name);
-
-    SetDead(client_p);
-    exit_client(client_p, "Connection failed");
-    return 0;
-  }
+  attach_conf(client_p, conf);
 
   /*
    * At this point we have a connection in progress and a connect {} block

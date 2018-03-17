@@ -304,7 +304,6 @@ extern int valid_wild_card(int, ...);
 extern struct MaskItem *conf_make(enum maskitem_type);
 extern void read_conf_files(int);
 extern int attach_conf(struct Client *, struct MaskItem *);
-extern int attach_connect_block(struct Client *, const char *, const char *);
 extern int check_client(struct Client *);
 
 
@@ -314,7 +313,7 @@ extern int conf_connect_allowed(struct irc_ssaddr *, int);
 extern const char *oper_privs_as_string(const unsigned int);
 extern void split_nuh(struct split_nuh_item *);
 extern struct MaskItem *operator_find(const struct Client *, const char *);
-extern struct MaskItem *connect_find(const char *, const char *, int (*)(const char *, const char *));
+extern struct MaskItem *connect_find(const char *, int (*)(const char *, const char *));
 extern void conf_free(struct MaskItem *);
 extern void yyerror(const char *);
 extern void conf_error_report(const char *);

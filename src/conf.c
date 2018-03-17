@@ -459,37 +459,6 @@ attach_conf(struct Client *client_p, struct MaskItem *conf)
   return 0;
 }
 
-/* attach_connect_block()
- *
- * inputs	- pointer to server to attach
- * 		- name of server
- *		- hostname of server
- * output	- true (1) if both are found, otherwise return false (0)
- * side effects - find connect block and attach them to connecting client
- */
-int
-attach_connect_block(struct Client *client_p, const char *name,
-                     const char *host)
-{
-  dlink_node *node = NULL;
-
-  assert(host);
-
-  DLINK_FOREACH(node, connect_items.head)
-  {
-    struct MaskItem *conf = node->data;
-
-    if (irccmp(conf->name, name) ||
-        irccmp(conf->host, host))
-      continue;
-
-    attach_conf(client_p, conf);
-    return 1;
-  }
-
-  return 0;
-}
-
 /* find_conf_name()
  *
  * inputs	- pointer to conf link list to search
@@ -518,28 +487,20 @@ find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
   return NULL;
 }
 
-/* find_matching_name_conf()
- *
- * inputs       - type of link list to look in
- *		- pointer to name string to find
- *		- pointer to user
- *		- pointer to host
- *		- optional flags to match on as well
- * output       - NULL or pointer to found struct MaskItem
- * side effects - looks for a match on name field
+/*! \brief Find a connect {} conf that has a name that matches \a name.
+ * \param name Name to match
+ * \param compare Pointer to function to be used for string matching
  */
 struct MaskItem *
-connect_find(const char *name, const char *host, int (*compare)(const char *, const char *))
+connect_find(const char *name, int (*compare)(const char *, const char *))
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, connect_items.head)
   {
     struct MaskItem *conf = node->data;
 
-    if (name && !compare(name, conf->name))
-      return conf;
-    if (host && !compare(host, conf->host))
+    if (!compare(name, conf->name))
       return conf;
   }
 

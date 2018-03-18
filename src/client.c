@@ -676,7 +676,7 @@ client_close_connection(struct Client *client_p)
   xfree(client_p->connection->password);
   client_p->connection->password = NULL;
 
-  detach_conf(client_p, CONF_CLIENT | CONF_OPER | CONF_SERVER);
+  conf_detach(client_p, CONF_CLIENT | CONF_OPER | CONF_SERVER);
 }
 
 /*

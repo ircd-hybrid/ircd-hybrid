@@ -447,7 +447,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
    * Attach config entries to client here rather than in serv_connect_callback().
    * This to avoid null pointer references.
    */
-  attach_conf(client_p, conf);
+  conf_attach(client_p, conf);
 
   /*
    * At this point we have a connection in progress and a connect {} block

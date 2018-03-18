@@ -113,7 +113,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
             dlink_node *node;
 
             client_detach_svstag(&target_p->svstags, RPL_WHOISOPERATOR);
-            detach_conf(target_p, CONF_OPER);
+            conf_detach(target_p, CONF_OPER);
             ClrOFlag(target_p);
             DelUMode(target_p, ConfigGeneral.oper_only_umodes);
 

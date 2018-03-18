@@ -981,25 +981,25 @@ dead_link_on_read(struct Client *client_p, int error)
   {
     if (error == 0)
     {
-      /* Admins get the real IP */
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "Server %s closed the connection",
                            client_get_name(client_p, SHOW_IP));
-
-      /* Opers get a masked IP */
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                            "Server %s closed the connection",
                            client_get_name(client_p, MASK_IP));
-
       ilog(LOG_TYPE_IRCD, "Server %s closed the connection",
            client_get_name(client_p, SHOW_IP));
     }
     else
     {
-      report_error(L_ADMIN, "Lost connection to %s: %s",
-                   client_get_name(client_p, SHOW_IP), current_error);
-      report_error(L_OPER, "Lost connection to %s: %s",
-                   client_get_name(client_p, MASK_IP), current_error);
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+                           "Lost connection to %s: %s",
+                           client_get_name(client_p, SHOW_IP), strerror(current_error));
+      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+                           "Lost connection to %s: %s",
+                           client_get_name(client_p, MASK_IP), strerror(current_error));
+      ilog(LOG_TYPE_IRCD, "Lost connection to %s: %s",
+           client_get_name(client_p, SHOW_IP), strerror(current_error));
     }
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,

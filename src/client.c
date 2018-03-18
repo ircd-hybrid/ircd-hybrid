@@ -123,11 +123,9 @@ client_free(struct Client *client_p)
   assert(client_p->hnext == client_p);
   assert(client_p->idhnext == client_p);
 
-  assert(client_p->node.data == NULL);
   assert(client_p->node.prev == NULL);
   assert(client_p->node.next == NULL);
 
-  assert(client_p->lnode.data == NULL);
   assert(client_p->lnode.prev == NULL);
   assert(client_p->lnode.next == NULL);
 
@@ -149,7 +147,6 @@ client_free(struct Client *client_p)
 
   if (MyConnect(client_p))
   {
-    assert(client_p->connection->lclient_node.data == NULL);
     assert(client_p->connection->lclient_node.prev == NULL);
     assert(client_p->connection->lclient_node.next == NULL);
 

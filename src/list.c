@@ -139,7 +139,6 @@ dlinkDelete(dlink_node *m, dlink_list *list)
   }
 
   /* Set this to NULL does matter */
-  m->data = NULL;
   m->next = NULL;
   m->prev = NULL;
 

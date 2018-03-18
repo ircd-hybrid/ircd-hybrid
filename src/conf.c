@@ -250,7 +250,7 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
                       "but you have exceed_limit = yes;");
   }
 
-  return attach_conf(client_p, conf);
+  return conf_attach(client_p, conf);
 }
 
 /* verify_access()
@@ -389,18 +389,15 @@ check_client(struct Client *source_p)
   return !(i < 0);
 }
 
-/* detach_conf()
- *
- * inputs	- pointer to client to detach
- *		- type of conf to detach
- * output	- 0 for success, -1 for failure
- * side effects	- Disassociate configuration from the client.
- *		  Also removes a class from the list if marked for deleting.
+/*! \brief Disassociate configuration from the client. Also removes a class
+ *         from the list if marked for deleting.
+ * \param client_p Client to operate on
+ * \param type     Type of conf to detach
  */
 void
-detach_conf(struct Client *client_p, enum maskitem_type type)
+conf_detach(struct Client *client_p, enum maskitem_type type)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, client_p->connection->confs.head)
   {
@@ -430,18 +427,14 @@ detach_conf(struct Client *client_p, enum maskitem_type type)
   }
 }
 
-/* attach_conf()
- *
- * inputs	- client pointer
- * 		- conf pointer
- * output	-
- * side effects - Associate a specific configuration entry to a *local*
- *                client (this is the one which used in accepting the
- *                connection). Note, that this automatically changes the
- *                attachment if there was an old one...
+/*! \brief Associate a specific configuration entry to a *local* client (this
+ *         is the one which used in accepting the connection). Note, that this
+ *         automatically changes the attachment if there was an old one.
+ * \param client_p Client to attach the conf to
+ * \param conf Configuration record to attach
  */
 int
-attach_conf(struct Client *client_p, struct MaskItem *conf)
+conf_attach(struct Client *client_p, struct MaskItem *conf)
 {
   if (dlinkFind(&client_p->connection->confs, conf))
     return 1;

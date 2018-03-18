@@ -440,7 +440,7 @@ server_check(const char *name, struct Client *client_p)
   if (server_conf == NULL)
     return error;
 
-  attach_conf(client_p, server_conf);
+  conf_attach(client_p, server_conf);
 
   switch (server_conf->aftype)
   {

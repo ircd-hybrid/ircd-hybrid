@@ -577,22 +577,8 @@ finish_ssl_server_handshake(struct Client *client_p)
              me.name, ConfigServerHide.hidden ? "(H) " : "",
              me.info);
 
-  /*
-   * If we've been marked dead because a send failed, just exit
-   * here now and save everyone the trouble of us ever existing.
-   */
-  if (IsDead(client_p))
-  {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "%s went dead during handshake", client_get_name(client_p, SHOW_IP));
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "%s went dead during handshake", client_get_name(client_p, MASK_IP));
-    return;
-  }
-
-  /* don't move to serv_list yet -- we haven't sent a burst! */
   /* If we get here, we're ok, so lets start reading some data */
-  comm_setselect(client_p->connection->fd, COMM_SELECT_READ, read_packet, client_p, 0);
+  read_packet(client_p->connection->fd, client_p); 
 }
 
 static void
@@ -738,22 +724,8 @@ serv_connect_callback(fde_t *F, int status, void *data)
   sendto_one(client_p, "SERVER %s 1 :%s%s", me.name,
              ConfigServerHide.hidden ? "(H) " : "", me.info);
 
-  /*
-   * If we've been marked dead because a send failed, just exit
-   * here now and save everyone the trouble of us ever existing.
-   */
-  if (IsDead(client_p))
-  {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "%s went dead during handshake", client_get_name(client_p, SHOW_IP));
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "%s went dead during handshake", client_get_name(client_p, MASK_IP));
-    return;
-  }
-
-  /* don't move to serv_list yet -- we haven't sent a burst! */
   /* If we get here, we're ok, so lets start reading some data */
-  comm_setselect(F, COMM_SELECT_READ, read_packet, client_p, 0);
+  read_packet(client_p->connection->fd, client_p);
 }
 
 struct Client *

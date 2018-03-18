@@ -608,6 +608,78 @@ free_exited_clients(void)
 }
 
 /*
+ * client_close_connection
+ *        Close the physical connection. This function must make
+ *        MyConnect(client_p) == FALSE, and set client_p->from == NULL.
+ */
+static void
+client_close_connection(struct Client *client_p)
+{
+  assert(client_p);
+
+  if (!IsDead(client_p))
+  {
+    /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
+    /* there is still a chance that we might send data to this socket
+     * even if it is marked as blocked (COMM_SELECT_READ handler is called
+     * before COMM_SELECT_WRITE). Let's try, nothing to lose.. -adx
+     */
+    DelFlag(client_p, FLAGS_BLOCKED);
+    send_queued_write(client_p);
+  }
+
+  if (IsClient(client_p))
+  {
+    ++ServerStats.is_cl;
+    ServerStats.is_cbs += client_p->connection->send.bytes;
+    ServerStats.is_cbr += client_p->connection->recv.bytes;
+    ServerStats.is_cti += CurrentTime - client_p->connection->firsttime;
+  }
+  else if (IsServer(client_p))
+  {
+    dlink_node *node = NULL;
+
+    ++ServerStats.is_sv;
+    ServerStats.is_sbs += client_p->connection->send.bytes;
+    ServerStats.is_sbr += client_p->connection->recv.bytes;
+    ServerStats.is_sti += CurrentTime - client_p->connection->firsttime;
+
+    DLINK_FOREACH(node, connect_items.head)
+    {
+      struct MaskItem *conf = node->data;
+
+      if (irccmp(conf->name, client_p->name))
+        continue;
+
+      /*
+       * Reset next-connect cycle of all connect{} blocks that match
+       * this servername.
+       */
+      conf->until = CurrentTime + conf->class->con_freq;
+    }
+  }
+  else
+    ++ServerStats.is_ni;
+
+  if (tls_isusing(&client_p->connection->fd->ssl))
+    tls_shutdown(&client_p->connection->fd->ssl);
+
+  if (client_p->connection->fd)
+  {
+    fd_close(client_p->connection->fd);
+    client_p->connection->fd = NULL;
+  }
+
+  dbuf_clear(&client_p->connection->buf_sendq);
+  dbuf_clear(&client_p->connection->buf_recvq);
+
+  xfree(client_p->connection->password);
+  client_p->connection->password = NULL;
+
+  detach_conf(client_p, CONF_CLIENT | CONF_OPER | CONF_SERVER);
+}
+
+/*
  * Exit one client, local or remote. Assuming all dependents have
  * been already removed, and socket closed for local client.
  *
@@ -803,7 +875,7 @@ exit_client(struct Client *source_p, const char *comment)
                  source_p->host, comment);
     }
 
-    close_connection(source_p);
+    client_close_connection(source_p);
   }
   else if (IsClient(source_p) && HasFlag(source_p->servptr, FLAGS_EOB))
     sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,

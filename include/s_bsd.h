@@ -43,7 +43,6 @@ struct Client;
 struct Listener;
 
 extern void add_connection(struct Listener *, struct irc_ssaddr *, int);
-extern void close_connection(struct Client *);
 extern void report_error(int, const char *, const char *, int);
 
 extern int get_sockerr(int);

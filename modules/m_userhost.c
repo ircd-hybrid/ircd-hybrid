@@ -49,7 +49,7 @@ static int
 m_userhost(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
-  char response[NICKLEN * 2 + USERLEN + HOSTLEN + 30];
+  char response[NICKLEN + USERLEN + HOSTLEN + 6]; /* +6 for "*=+@ \0" */
   char *t = NULL, *p = NULL, *nick = NULL;
   int i = 0;
   int cur_len;

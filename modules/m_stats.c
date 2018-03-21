@@ -925,72 +925,62 @@ static void
 stats_tstats(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
-  struct ServerStatistics tmp;
-  struct ServerStatistics *sp = &tmp;
+  struct ServerStatistics sp;
 
-  memcpy(sp, &ServerStats, sizeof(struct ServerStatistics));
-
-  /*
-   * must use the += operator. is_sv is not the number of currently
-   * active server connections. Note the incrementation in
-   * s_bsd.c:close_connection.
-   */
-  sp->is_sv += dlink_list_length(&local_server_list);
+  memcpy(&sp, &ServerStats, sizeof(sp));
 
   DLINK_FOREACH(node, local_server_list.head)
   {
     const struct Client *target_p = node->data;
 
-    sp->is_sbs += target_p->connection->send.bytes;
-    sp->is_sbr += target_p->connection->recv.bytes;
-    sp->is_sti += CurrentTime - target_p->connection->firsttime;
+    sp.is_sbs += target_p->connection->send.bytes;
+    sp.is_sbr += target_p->connection->recv.bytes;
+    sp.is_sti += CurrentTime - target_p->connection->firsttime;
+    sp.is_sv++;
   }
-
-  sp->is_cl += dlink_list_length(&local_client_list);
 
   DLINK_FOREACH(node, local_client_list.head)
   {
     const struct Client *target_p = node->data;
 
-    sp->is_cbs += target_p->connection->send.bytes;
-    sp->is_cbr += target_p->connection->recv.bytes;
-    sp->is_cti += CurrentTime - target_p->connection->firsttime;
+    sp.is_cbs += target_p->connection->send.bytes;
+    sp.is_cbr += target_p->connection->recv.bytes;
+    sp.is_cti += CurrentTime - target_p->connection->firsttime;
+    sp.is_cl++;
   }
-
-  sp->is_ni += dlink_list_length(&unknown_list);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :accepts %u refused %u",
-                     sp->is_ac, sp->is_ref);
+                     sp.is_ac, sp.is_ref);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :unknown commands %u prefixes %u",
-                     sp->is_unco, sp->is_unpf);
+                     sp.is_unco, sp.is_unpf);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :nick collisions %u unknown closes %u",
-                     sp->is_kill, sp->is_ni);
+                     sp.is_kill, sp.is_ni);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :wrong direction %u empty %u",
-                     sp->is_wrdi, sp->is_empt);
+                     sp.is_wrdi, sp.is_empt);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :numerics seen %u",
-                     sp->is_num);
+                     sp.is_num);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :auth successes %u fails %u",
-                     sp->is_asuc, sp->is_abad);
+                     sp.is_asuc, sp.is_abad);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :Client Server");
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :connected %u %u",
-                     sp->is_cl, sp->is_sv);
+                     sp.is_cl, sp.is_sv);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :bytes sent %ju %ju",
-                     sp->is_cbs, sp->is_sbs);
+                     sp.is_cbs, sp.is_sbs);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :bytes received %ju %ju",
-                     sp->is_cbr, sp->is_sbr);
+                     sp.is_cbr, sp.is_sbr);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :time connected %ju %ju",
-                     sp->is_cti, sp->is_sti);
+                     sp.is_cti, sp.is_sti);
 }
 
 static void

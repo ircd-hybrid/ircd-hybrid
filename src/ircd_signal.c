@@ -113,31 +113,31 @@ setup_signals(void)
   sigaddset(&act.sa_mask, SIGCHLD);
 
 #ifdef SIGXFSZ
-  sigaction(SIGXFSZ, &act, 0);
+  sigaction(SIGXFSZ, &act, NULL);
 #endif
 #ifdef SIGWINCH
-  sigaction(SIGWINCH, &act, 0);
+  sigaction(SIGWINCH, &act, NULL);
 #endif
 #ifdef SIGTRAP
-  sigaction(SIGTRAP, &act, 0);
+  sigaction(SIGTRAP, &act, NULL);
 #endif
-  sigaction(SIGPIPE, &act, 0);
-  sigaction(SIGALRM, &act, 0);
+  sigaction(SIGPIPE, &act, NULL);
+  sigaction(SIGALRM, &act, NULL);
 
   act.sa_handler = sighup_handler;
-  sigaction(SIGHUP, &act, 0);
+  sigaction(SIGHUP, &act, NULL);
 
   act.sa_handler = sigint_handler;
-  sigaction(SIGINT, &act, 0);
+  sigaction(SIGINT, &act, NULL);
 
   act.sa_handler = sigterm_handler;
-  sigaction(SIGTERM, &act, 0);
+  sigaction(SIGTERM, &act, NULL);
 
   act.sa_handler = sigusr1_handler;
-  sigaction(SIGUSR1, &act, 0);
+  sigaction(SIGUSR1, &act, NULL);
 
   act.sa_handler = sigchld_handler;
-  sigaction(SIGCHLD, &act, 0);
+  sigaction(SIGCHLD, &act, NULL);
 
   sigprocmask(SIG_UNBLOCK, &act.sa_mask, NULL);
 }

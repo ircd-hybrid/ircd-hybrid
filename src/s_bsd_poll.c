@@ -48,13 +48,13 @@ static int pollnum;
 
 
 /*
- * netio_init
+ * comm_select_init
  *
  * This is a needed exported function which will be called to initialise
  * the network loop code.
  */
 void
-netio_init(void)
+comm_select_init(void)
 {
   pollfds_size = hard_fdlimit;
   pollfds = xcalloc(sizeof(struct pollfd) * pollfds_size);

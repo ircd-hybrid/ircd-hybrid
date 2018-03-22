@@ -37,17 +37,17 @@ static int epoll_fd;
 
 
 /*
- * netio_init
+ * comm_select_init
  *
  * This is a needed exported function which will be called to initialise
  * the network loop code.
  */
 void
-netio_init(void)
+comm_select_init(void)
 {
   if ((epoll_fd = epoll_create(hard_fdlimit)) < 0)
   {
-    ilog(LOG_TYPE_IRCD, "netio_init: couldn't open epoll fd: %s",
+    ilog(LOG_TYPE_IRCD, "comm_select_init: couldn't open epoll fd: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }

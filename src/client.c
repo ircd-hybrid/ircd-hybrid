@@ -972,7 +972,7 @@ dead_link_on_read(struct Client *client_p, int error)
   dbuf_clear(&client_p->connection->buf_recvq);
   dbuf_clear(&client_p->connection->buf_sendq);
 
-  current_error = get_sockerr(client_p->connection->fd->fd);
+  current_error = comm_get_sockerr(client_p->connection->fd->fd);
 
   if (IsServer(client_p) || IsHandshake(client_p))
   {

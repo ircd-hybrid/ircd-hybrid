@@ -210,7 +210,7 @@ send_queued_write(struct Client *to)
       me.connection->send.bytes += retlen;
     } while (dbuf_length(&to->connection->buf_sendq));
 
-    if (retlen < 0 && ignoreErrno(errno))
+    if (retlen < 0 && comm_ignore_errno(errno))
     {
       AddFlag(to, FLAGS_BLOCKED);
 

@@ -385,7 +385,7 @@ main(int argc, char *argv[])
   if (!server_state.foreground)
   {
     make_daemon();
-    close_standard_fds(); /* this needs to be before netio_init()! */
+    close_standard_fds(); /* this needs to be before comm_select_init()! */
   }
   else
     print_startup(getpid());
@@ -396,7 +396,7 @@ main(int argc, char *argv[])
   fdlist_init();
   log_set_file(LOG_TYPE_IRCD, 0, logFileName);
 
-  netio_init();         /* This needs to be setup early ! -- adrian */
+  comm_select_init();  /* This needs to be setup early ! -- adrian */
   tls_init();
 
   /* Check if there is pidfile and daemon already running */

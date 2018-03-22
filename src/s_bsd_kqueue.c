@@ -40,17 +40,18 @@ static int kqoff;      /* offset into the buffer */
 
 
 /*
- * netio_init
+ * comm_select_init
  *
  * This is a needed exported function which will be called to initialise
  * the network loop code.
  */
 void
-netio_init(void)
+comm_select_init(void)
 {
   if ((kqueue_fd = kqueue()) < 0)
   {
-    ilog(LOG_TYPE_IRCD, "netio_init: couldn't open kqueue fd: %s", strerror(errno));
+    ilog(LOG_TYPE_IRCD, "comm_select_init: couldn't open kqueue fd: %s",
+         strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }
 

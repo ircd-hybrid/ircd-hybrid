@@ -322,7 +322,7 @@ read_packet(fde_t *F, void *data)
        * If true, then we can recover from this error. Just jump out of
        * the loop and re-register a new io-request.
        */
-      if (length < 0 && ignoreErrno(errno))
+      if (length < 0 && comm_ignore_errno(errno))
         break;
 
       dead_link_on_read(client_p, length);

@@ -65,14 +65,14 @@ static void comm_connect_dns_callback(void *, const struct irc_ssaddr *, const c
 static void comm_connect_tryconnect(fde_t *, void *);
 
 
-/* get_sockerr - get the error value from the socket or the current errno
+/* comm_get_sockerr - get the error value from the socket or the current errno
  *
  * Get the *real* error from the socket (well try to anyway..).
  * This may only work when SO_DEBUG is enabled but its worth the
  * gamble anyway.
  */
 int
-get_sockerr(int fd)
+comm_get_sockerr(int fd)
 {
   int errtmp = errno;
 #ifdef SO_ERROR
@@ -246,7 +246,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
  *     -- adrian
  */
 int
-ignoreErrno(int ierrno)
+comm_ignore_errno(int ierrno)
 {
   switch (ierrno)
   {
@@ -419,6 +419,7 @@ comm_connect_tcp(fde_t *F, const char *host, unsigned short port, struct sockadd
     memcpy(&F->connect.hostaddr, res->ai_addr, res->ai_addrlen);
     F->connect.hostaddr.ss_len = res->ai_addrlen;
     F->connect.hostaddr.ss.ss_family = res->ai_family;
+
     freeaddrinfo(res);
 
     comm_settimeout(F, timeout * 1000, comm_connect_timeout, NULL);
@@ -525,7 +526,7 @@ comm_connect_tryconnect(fde_t *F, void *unused)
      */
     if (errno == EISCONN)
       comm_connect_callback(F, COMM_OK);
-    else if (ignoreErrno(errno))
+    else if (comm_ignore_errno(errno))
       /* Ignore error? Reschedule */
       comm_setselect(F, COMM_SELECT_WRITE, comm_connect_tryconnect, NULL, 0);
     else

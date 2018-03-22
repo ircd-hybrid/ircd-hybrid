@@ -45,17 +45,17 @@
 static int devpoll_fd;
 
 /*
- * netio_init
+ * comm_select_init
  *
  * This is a needed exported function which will be called to initialise
  * the network loop code.
  */
 void
-netio_init(void)
+comm_select_init(void)
 {
   if ((devpoll_fd = open("/dev/poll", O_RDWR)) < 0)
   {
-    ilog(LOG_TYPE_IRCD, "netio_init: couldn't open /dev/poll: %s",
+    ilog(LOG_TYPE_IRCD, "comm_select_init: couldn't open /dev/poll: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }

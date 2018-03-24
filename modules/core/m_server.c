@@ -252,17 +252,6 @@ server_estab(struct Client *client_p)
   sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MIN,
              CurrentTime);
 
-  /* *WARNING*
-  **    In the following code in place of plain server's
-  **    name we send what is returned by client_get_name
-  **    which may add the "sockhost" after the name. It's
-  **    *very* *important* that there is a SPACE between
-  **    the name and sockhost (if present). The receiving
-  **    server will start the information field from this
-  **    first blank and thus puts the sockhost into info.
-  **    ...a bit tricky, but you have been warned, besides
-  **    code is more neat this way...  --msa
-  */
   client_p->servptr = &me;
 
   if (HasFlag(client_p, FLAGS_CLOSING))

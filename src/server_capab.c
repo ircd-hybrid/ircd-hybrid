@@ -48,8 +48,6 @@ capab_init(void)
   capab_add("EOB", CAPAB_EOB);
   capab_add("CLUSTER", CAPAB_CLUSTER);
   capab_add("SVS", CAPAB_SVS);
-  capab_add("CHW", CAPAB_CHW);
-  capab_add("HOPS", CAPAB_HOPS);
   capab_add("RHOST", CAPAB_RHOST);
 }
 

@@ -37,13 +37,11 @@ enum
   CAPAB_UNKLN   = 0x00000010U,  /**< Can do UNKLINE message */
   CAPAB_CLUSTER = 0x00000020U,  /**< Supports server clustering */
   CAPAB_ENCAP   = 0x00000040U,  /**< Supports ENCAP message */
-  CAPAB_HOPS    = 0x00000080U,  /**< Supports HALFOPS */
-  CAPAB_TBURST  = 0x00000100U,  /**< Supports TBURST */
-  CAPAB_SVS     = 0x00000200U,  /**< Supports services */
-  CAPAB_DLN     = 0x00000400U,  /**< Can do DLINE message */
-  CAPAB_UNDLN   = 0x00000800U,  /**< Can do UNDLINE message */
-  CAPAB_CHW     = 0x00001000U,  /**< Can do channel wall @# */
-  CAPAB_RHOST   = 0x00002000U   /**< Can do extended realhost UID messages */
+  CAPAB_TBURST  = 0x00000080U,  /**< Supports TBURST */
+  CAPAB_SVS     = 0x00000100U,  /**< Supports services */
+  CAPAB_DLN     = 0x00000200U,  /**< Can do DLINE message */
+  CAPAB_UNDLN   = 0x00000400U,  /**< Can do UNDLINE message */
+  CAPAB_RHOST   = 0x00000800U   /**< Can do extended realhost UID messages */
 };
 
 /*

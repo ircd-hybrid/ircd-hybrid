@@ -768,7 +768,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * .edu's
    */
 
-  /* Ok, check source_p->from can hub the new server, and make sure it's not a LL */
+  /* Ok, check source_p->from can hub the new server */
   if (!hlined)
   {
     /* OOOPs nope can't HUB */

@@ -649,7 +649,6 @@ static int
 ms_sid(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-  struct Client *client_p = source_p->from; /* XXX */
 
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
@@ -657,7 +656,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   if (EmptyString(parv[parc - 1]))
   {
-    exit_client(client_p, "No server description supplied");
+    exit_client(source_p->from, "No server description supplied");
     return 0;
   }
 
@@ -665,11 +664,11 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
-                         client_get_name(client_p, SHOW_IP), parv[1]);
+                         client_get_name(source_p->from, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
-                         client_get_name(client_p, MASK_IP), parv[1]);
-    exit_client(client_p, "Bogus server name introduced");
+                         client_get_name(source_p->from, MASK_IP), parv[1]);
+    exit_client(source_p->from, "Bogus server name introduced");
     return 0;
   }
 
@@ -677,11 +676,11 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         client_get_name(client_p, SHOW_IP), parv[3]);
+                         client_get_name(source_p->from, SHOW_IP), parv[3]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         client_get_name(client_p, MASK_IP), parv[3]);
-    exit_client(client_p, "Bogus server ID introduced");
+                         client_get_name(source_p->from, MASK_IP), parv[3]);
+    exit_client(source_p->from, "Bogus server ID introduced");
     return 0;
   }
 
@@ -690,11 +689,11 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server ID %s already exists",
-                         client_get_name(client_p, SHOW_IP), parv[3]);
+                         client_get_name(source_p->from, SHOW_IP), parv[3]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server ID %s already exists",
-                         client_get_name(client_p, MASK_IP), parv[3]);
-    exit_client(client_p, "Link cancelled, server ID already exists");
+                         client_get_name(source_p->from, MASK_IP), parv[3]);
+    exit_client(source_p->from, "Link cancelled, server ID already exists");
     return 0;
   }
 
@@ -703,11 +702,11 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
-                         client_get_name(client_p, SHOW_IP), parv[1]);
+                         client_get_name(source_p->from, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
-                         client_get_name(client_p, MASK_IP), parv[1]);
-    exit_client(client_p, "Server exists");
+                         client_get_name(source_p->from, MASK_IP), parv[1]);
+    exit_client(source_p->from, "Server exists");
     return 0;
   }
 
@@ -716,7 +715,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * but only if it's not the same client! - Dianora
    */
   if ((target_p = find_servconn_in_progress(parv[1])))
-    if (target_p != client_p)
+    if (target_p != source_p->from)
       exit_client(target_p, "Overridden");
 
   /*
@@ -726,7 +725,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   dlink_node *node;
   unsigned int hlined = 0;
   unsigned int llined = 0;
-  const struct MaskItem *conf = client_p->connection->confs.head->data;
+  const struct MaskItem *conf = source_p->from->connection->confs.head->data;
 
   DLINK_FOREACH(node, conf->leaf_list.head)
   {
@@ -769,16 +768,16 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * .edu's
    */
 
-  /* Ok, check client_p can hub the new server, and make sure it's not a LL */
+  /* Ok, check source_p->from can hub the new server, and make sure it's not a LL */
   if (!hlined)
   {
     /* OOOPs nope can't HUB */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Non-Hub link %s introduced %s.",
-                         client_get_name(client_p, SHOW_IP), parv[1]);
+                         client_get_name(source_p->from, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Non-Hub link %s introduced %s.",
-                         client_get_name(client_p, MASK_IP), parv[1]);
+                         client_get_name(source_p->from, MASK_IP), parv[1]);
     exit_client(source_p, "No matching hub_mask.");
     return 0;
   }
@@ -789,15 +788,15 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     /* OOOPs nope can't HUB this leaf */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced leafed server %s.",
-                         client_get_name(client_p, SHOW_IP), parv[1]);
+                         client_get_name(source_p->from, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced leafed server %s.",
-                         client_get_name(client_p, MASK_IP), parv[1]);
-    exit_client(client_p, "Leafed server.");
+                         client_get_name(source_p->from, MASK_IP), parv[1]);
+    exit_client(source_p->from, "Leafed server.");
     return 0;
   }
 
-  target_p = client_make(client_p);
+  target_p = client_make(source_p->from);
   make_server(target_p);
   target_p->hopcount = atoi(parv[2]);
   target_p->servptr = source_p;
@@ -824,7 +823,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   hash_add_client(target_p);
   hash_add_id(target_p);
 
-  sendto_server(client_p, 0, 0, ":%s SID %s %u %s :%s%s",
+  sendto_server(source_p->from, 0, 0, ":%s SID %s %u %s :%s%s",
                 source_p->id, target_p->name, target_p->hopcount + 1,
                 target_p->id, IsHidden(target_p) ? "(H) " : "", target_p->info);
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,

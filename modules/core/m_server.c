@@ -276,7 +276,7 @@ server_estab(struct Client *client_p)
   hash_add_id(client_p);
 
   /* Doesn't duplicate client_p->serv if allocated this struct already */
-  make_server(client_p);
+  server_make(client_p);
 
   /* Fixing eob timings.. -gnp */
   client_p->connection->firsttime = CurrentTime;
@@ -797,7 +797,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   }
 
   target_p = client_make(source_p->from);
-  make_server(target_p);
+  server_make(target_p);
   target_p->hopcount = atoi(parv[2]);
   target_p->servptr = source_p;
 

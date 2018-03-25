@@ -452,7 +452,7 @@ main(int argc, char *argv[])
   me.connection->firsttime = CurrentTime;
 
   SetMe(&me);
-  make_server(&me);
+  server_make(&me);
 
   hash_add_id(&me);
   hash_add_client(&me);

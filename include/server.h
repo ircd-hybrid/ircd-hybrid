@@ -58,7 +58,7 @@ extern const struct server_hunt *server_hunt(struct Client *, const char *, cons
 extern void write_links_file(void *);
 extern void read_links_file(void);
 extern void try_connections(void *);
-extern int serv_connect(struct MaskItem *, struct Client *);
+extern int server_connect(struct MaskItem *, struct Client *);
 extern struct Client *find_servconn_in_progress(const char *);
-extern struct Server *make_server(struct Client *);
+extern struct Server *server_make(struct Client *);
 #endif  /* INCLUDED_server_h */

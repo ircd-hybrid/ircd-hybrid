@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_serv.c
+/*! \file server.c
  * \brief Server related functions.
  * \version $Id$
  */
@@ -44,7 +44,7 @@
 
 
 dlink_list flatten_links;
-static void serv_connect_callback(fde_t *, int, void *);
+static void server_connect_callback(fde_t *, int, void *);
 
 
 /*
@@ -305,11 +305,11 @@ try_connections(void *unused)
         return;
 
       /*
-       * We used to only print this if serv_connect() actually
+       * We used to only print this if server_connect() actually
        * succeeded, but since comm_tcp_connect() can call the callback
        * immediately if there is an error, we were getting error messages
        * in the wrong order. SO, we just print out the activated line,
-       * and let serv_connect() / serv_connect_callback() print an
+       * and let server_connect() / server_connect_callback() print an
        * error afterwards if it fails.
        *   -- adrian
        */
@@ -322,7 +322,7 @@ try_connections(void *unused)
                              "Connection to %s[%s] activated.",
                              conf->name, conf->host);
 
-      serv_connect(conf, NULL);
+      server_connect(conf, NULL);
       /* We connect only one at time... */
       return;
     }
@@ -347,7 +347,7 @@ valid_servname(const char *name)
   return dots && (p - name) <= HOSTLEN;
 }
 
-/* make_server()
+/* server_make()
  *
  * inputs       - pointer to client struct
  * output       - pointer to struct Server
@@ -355,7 +355,7 @@ valid_servname(const char *name)
  *                if it was not previously allocated.
  */
 struct Server *
-make_server(struct Client *client_p)
+server_make(struct Client *client_p)
 {
   if (client_p->serv == NULL)
     client_p->serv = xcalloc(sizeof(*client_p->serv));
@@ -363,12 +363,7 @@ make_server(struct Client *client_p)
   return client_p->serv;
 }
 
-/* New server connection code
- * Based upon the stuff floating about in s_bsd.c
- *   -- adrian
- */
-
-/* serv_connect() - initiate a server connection
+/* server_connect() - initiate a server connection
  *
  * inputs	- pointer to conf
  *		- pointer to client doing the connect
@@ -385,7 +380,7 @@ make_server(struct Client *client_p)
  * it suceeded or not, and 0 if it fails in here somewhere.
  */
 int
-serv_connect(struct MaskItem *conf, struct Client *by)
+server_connect(struct MaskItem *conf, struct Client *by)
 {
   char buf[HOSTIPLEN + 1] = "";
 
@@ -444,19 +439,12 @@ serv_connect(struct MaskItem *conf, struct Client *by)
   fd_note(client_p->connection->fd, "Server: %s", client_p->name);
 
   /*
-   * Attach config entries to client here rather than in serv_connect_callback().
+   * Attach config entries to client here rather than in server_connect_callback().
    * This to avoid null pointer references.
    */
   conf_attach(client_p, conf);
 
-  /*
-   * At this point we have a connection in progress and a connect {} block
-   * attached to the client, the socket info should be saved in the client
-   * and it should either be resolved or have a valid address.
-   *
-   * The socket has been connected or connect is in progress.
-   */
-  make_server(client_p);
+  server_make(client_p);
 
   if (by && IsClient(by))
     strlcpy(client_p->serv->by, by->name, sizeof(client_p->serv->by));
@@ -486,7 +474,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
 
         comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
-                         serv_connect_callback, client_p, conf->aftype,
+                         server_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       }
       else if (ConfigServerInfo.specific_ipv4_vhost)
@@ -500,12 +488,12 @@ serv_connect(struct MaskItem *conf, struct Client *by)
 
         comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
                          (struct sockaddr *)&ipn, ipn.ss_len,
-                         serv_connect_callback, client_p, conf->aftype,
+                         server_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       }
       else
         comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
-                         NULL, 0, serv_connect_callback, client_p, conf->aftype,
+                         NULL, 0, server_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       break;
     case AF_INET6:
@@ -527,7 +515,7 @@ serv_connect(struct MaskItem *conf, struct Client *by)
           comm_connect_tcp(client_p->connection->fd,
                            conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
-                           serv_connect_callback, client_p,
+                           server_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
         }
         else if (ConfigServerInfo.specific_ipv6_vhost)
@@ -539,22 +527,29 @@ serv_connect(struct MaskItem *conf, struct Client *by)
           comm_connect_tcp(client_p->connection->fd,
                            conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
-                           serv_connect_callback, client_p,
+                           server_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
         }
         else
           comm_connect_tcp(client_p->connection->fd,
                            conf->host, conf->port,
-                           NULL, 0, serv_connect_callback, client_p,
+                           NULL, 0, server_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
       }
   }
 
+  /*
+   * At this point we have a connection in progress and a connect {} block
+   * attached to the client, the socket info should be saved in the client
+   * and it should either be resolved or have a valid address.
+   *
+   * The socket has been connected or connect is in progress.
+   */
   return 1;
 }
 
 static void
-finish_ssl_server_handshake(struct Client *client_p)
+server_finish_tls_handshake(struct Client *client_p)
 {
   const struct MaskItem *conf = find_conf_name(&client_p->connection->confs,
                                                 client_p->name, CONF_SERVER);
@@ -582,7 +577,7 @@ finish_ssl_server_handshake(struct Client *client_p)
 }
 
 static void
-ssl_server_handshake(fde_t *F, void *data)
+server_tls_handshake(fde_t *F, void *data)
 {
   struct Client *client_p = data;
   const char *sslerr = NULL;
@@ -605,11 +600,11 @@ ssl_server_handshake(fde_t *F, void *data)
     {
       case TLS_HANDSHAKE_WANT_WRITE:
         comm_setselect(F, COMM_SELECT_WRITE,
-                       ssl_server_handshake, client_p, CONNECTTIMEOUT);
+                       server_tls_handshake, client_p, CONNECTTIMEOUT);
         return;
       case TLS_HANDSHAKE_WANT_READ:
         comm_setselect(F, COMM_SELECT_READ,
-                       ssl_server_handshake, client_p, CONNECTTIMEOUT);
+                       server_tls_handshake, client_p, CONNECTTIMEOUT);
         return;
       default:
       {
@@ -628,11 +623,11 @@ ssl_server_handshake(fde_t *F, void *data)
     ilog(LOG_TYPE_IRCD, "Server %s!%s@%s gave bad TLS client certificate",
          client_p->name, client_p->username, client_p->host);
 
-  finish_ssl_server_handshake(client_p);
+  server_finish_tls_handshake(client_p);
 }
 
 static void
-ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *F)
+server_tls_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *F)
 {
   assert(client_p);
   assert(client_p->connection);
@@ -649,10 +644,10 @@ ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *F)
   if (!EmptyString(conf->cipher_list))
     tls_set_ciphers(&F->ssl, conf->cipher_list);
 
-  ssl_server_handshake(F, client_p);
+  server_tls_handshake(F, client_p);
 }
 
-/* serv_connect_callback() - complete a server connection.
+/* server_connect_callback() - complete a server connection.
  *
  * This routine is called after the server connection attempt has
  * completed. If unsucessful, an error is sent to ops and the client
@@ -661,7 +656,7 @@ ssl_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *F)
  * marked for reading.
  */
 static void
-serv_connect_callback(fde_t *F, int status, void *data)
+server_connect_callback(fde_t *F, int status, void *data)
 {
   struct Client *const client_p = data;
 
@@ -713,7 +708,7 @@ serv_connect_callback(fde_t *F, int status, void *data)
 
   if (IsConfSSL(conf))
   {
-    ssl_connect_init(client_p, conf, F);
+    server_tls_connect_init(client_p, conf, F);
     return;
   }
 

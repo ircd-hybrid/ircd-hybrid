@@ -4,6 +4,19 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
+-- Noteworthy changes in version 8.2.23 (2018-03-26)
+o) irc-operators are now able to see a user's resolved hostname in /whowas,
+   and /whois even if the user has a fakehost/vhost
+o) RPL_WELCOME now does use the rfc2812 style nick!user@host format
+o) Removed rudimentary libgeoip support
+o) Added --enable-efence switch to allow easy linking with the
+   electric fence memory debugger library
+o) "JOIN 0" is no longer supported
+o) Fixed bug where ircd would not remove RPL_WHOISOPERATOR based svstags
+   when deoppering
+o) Fixed 'unknown closes' statistic in "STATS t" showing invalid values sometimes
+
+
 -- Noteworthy changes in version 8.2.22 (2017-03-26)
 o) Implemented channel mode 'L'. Channels with that mode set can make use of an
    extended ban list size specified with the new 'channel::max_bans_large'

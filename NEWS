@@ -4,7 +4,7 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
--- Noteworthy changes in version 8.2.23 (2017-??-??)
+-- Noteworthy changes in version 8.2.23 (2018-03-26)
 o) irc-operators are now able to see a user's resolved hostname in /whowas,
    and /whois even if the user has a fakehost/vhost
 o) RPL_WELCOME now does use the rfc2812 style nick!user@host format

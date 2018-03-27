@@ -47,7 +47,7 @@ class_get_list(void)
 struct ClassItem *
 class_make(void)
 {
-  struct ClassItem *const class = xcalloc(sizeof(*class));
+  struct ClassItem *class = xcalloc(sizeof(*class));
 
   class->active    = 1;
   class->con_freq  = DEFAULT_CONNECTFREQUENCY;
@@ -165,7 +165,7 @@ class_delete_marked(void)
   {
     struct ClassItem *class = node->data;
 
-    if (!class->active && !class->ref_count)
+    if (class->active == 0 && class->ref_count == 0)
     {
       destroy_cidr_class(class);
       class_free(class);

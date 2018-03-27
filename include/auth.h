@@ -32,8 +32,8 @@ enum { RFC1413_PORT   = 113 };  /**< As defined per rfc1413, IDENT server listen
 
 enum
 {
-  AM_DOING_AUTH  = 0x00000001U,
-  AM_DNS_PENDING = 0x00000002U
+  AM_DOING_AUTH  = 1 << 0,
+  AM_DNS_PENDING = 1 << 1
 };
 
 #define SetDNSPending(x)     ((x)->flags |= AM_DNS_PENDING)

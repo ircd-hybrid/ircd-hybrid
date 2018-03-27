@@ -87,7 +87,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
   new_events = (F->read_handler ? POLLRDNORM : 0) |
                (F->write_handler ? POLLWRNORM : 0);
 
-  if (timeout != 0)
+  if (timeout)
   {
     F->timeout = CurrentTime + (timeout / 1000);
     F->timeout_handler = handler;
@@ -146,7 +146,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 void
 comm_select(void)
 {
-  int num, ci;
+  int num;
   void (*hdl)(fde_t *, void *);
 
   num = poll(pollfds, pollnum, SELECT_DELAY);
@@ -160,13 +160,13 @@ comm_select(void)
     return;
   }
 
-  for (ci = 0; ci < pollnum && num > 0; ci++)
+  for (int ci = 0; ci < pollnum && num > 0; ++ci)
   {
     int revents = pollfds[ci].revents;
-
     if (revents == 0)
       continue;
-    num--;
+
+    --num;
 
     fde_t *F = &fd_table[pollfds[ci].fd];
 

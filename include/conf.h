@@ -32,27 +32,35 @@
 #include "tls.h"
 
 
+enum
+{
+  TK_SECONDS,
+  TK_MINUTES
+};
+
+enum { CLEANUP_TKLINES_TIME = 60 };
+
 #define CONF_NOREASON "<No reason supplied>"
 
 /* MaskItem->flags */
 enum
 {
-  CONF_FLAGS_NO_TILDE        = 0x00000001U,
-  CONF_FLAGS_NEED_IDENTD     = 0x00000002U,
-  CONF_FLAGS_EXEMPTKLINE     = 0x00000004U,
-  CONF_FLAGS_NOLIMIT         = 0x00000008U,
-  CONF_FLAGS_SPOOF_IP        = 0x00000010U,
-  CONF_FLAGS_SPOOF_NOTICE    = 0x00000020U,
-  CONF_FLAGS_REDIR           = 0x00000040U,
-  CONF_FLAGS_CAN_FLOOD       = 0x00000080U,
-  CONF_FLAGS_NEED_PASSWORD   = 0x00000100U,
-  CONF_FLAGS_ALLOW_AUTO_CONN = 0x00000200U,
-  CONF_FLAGS_ENCRYPTED       = 0x00000400U,
-  CONF_FLAGS_IN_DATABASE     = 0x00000800U,
-  CONF_FLAGS_EXEMPTRESV      = 0x00001000U,
-  CONF_FLAGS_SSL             = 0x00002000U,
-  CONF_FLAGS_WEBIRC          = 0x00004000U,
-  CONF_FLAGS_EXEMPTXLINE     = 0x00008000U
+  CONF_FLAGS_NO_TILDE        = 1 <<  0,
+  CONF_FLAGS_NEED_IDENTD     = 1 <<  1,
+  CONF_FLAGS_EXEMPTKLINE     = 1 <<  2,
+  CONF_FLAGS_NOLIMIT         = 1 <<  3,
+  CONF_FLAGS_SPOOF_IP        = 1 <<  4,
+  CONF_FLAGS_SPOOF_NOTICE    = 1 <<  5,
+  CONF_FLAGS_REDIR           = 1 <<  6,
+  CONF_FLAGS_CAN_FLOOD       = 1 <<  7,
+  CONF_FLAGS_NEED_PASSWORD   = 1 <<  8,
+  CONF_FLAGS_ALLOW_AUTO_CONN = 1 <<  9,
+  CONF_FLAGS_ENCRYPTED       = 1 << 10,
+  CONF_FLAGS_IN_DATABASE     = 1 << 11,
+  CONF_FLAGS_EXEMPTRESV      = 1 << 12,
+  CONF_FLAGS_SSL             = 1 << 13,
+  CONF_FLAGS_WEBIRC          = 1 << 14,
+  CONF_FLAGS_EXEMPTXLINE     = 1 << 15
 };
 
 /* Macros for struct MaskItem */
@@ -299,7 +307,6 @@ extern struct config_admin_entry ConfigAdminInfo;
 
 extern int valid_wild_card_simple(const char *);
 extern int valid_wild_card(int, ...);
-/* End GLOBAL section */
 
 extern struct MaskItem *conf_make(enum maskitem_type);
 extern void read_conf_files(int);
@@ -328,10 +335,6 @@ extern const char *get_oper_name(const struct Client *);
 extern int parse_aline(const char *, struct Client *, int, char **,
                        char **, char **, uintmax_t *, char **, char **);
 
-#define TK_SECONDS 0
-#define TK_MINUTES 1
 extern uintmax_t valid_tkline(const char *, const int);
 extern int match_conf_password(const char *, const struct MaskItem *);
-
-enum { CLEANUP_TKLINES_TIME = 60 };
 #endif /* INCLUDED_s_conf_h */

@@ -327,7 +327,7 @@ clear_ban_cache_list(dlink_list *list)
 }
 
 /*
- * Bitmasks for various error returns that set_channel_mode should only return
+ * Bitmasks for various error returns that channel_mode_set should only return
  * once per call  -orabidoo
  */
 enum
@@ -1050,13 +1050,13 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
     unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
     unsigned int dir = MODE_QUERY;
 
-    if (IsServer(source_p))
+    if (IsClient(source_p))
+      mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
+                     source_p->username, source_p->host, chptr->name);
+    else
       mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
                      ConfigServerHide.hide_servers) ?
                      me.name : source_p->name, chptr->name);
-    else
-      mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
-                     source_p->username, source_p->host, chptr->name);
 
     for (unsigned int i = 0; i < mode_count; ++i)
     {
@@ -1078,13 +1078,13 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
         modecount = 0;
         paracount = 0;
 
-        if (IsServer(source_p))
+        if (IsClient(source_p))
+          mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
+                         source_p->username, source_p->host, chptr->name);
+        else
           mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(source_p) ||
                          ConfigServerHide.hide_servers) ?
                          me.name : source_p->name, chptr->name);
-        else
-          mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", source_p->name,
-                         source_p->username, source_p->host, chptr->name);
 
         pbl = 0;
         parabuf[0] = '\0';
@@ -1163,7 +1163,7 @@ channel_mode_init(void)
  *               clients.
  */
 void
-set_channel_mode(struct Client *source_p, struct Channel *chptr,
+channel_mode_set(struct Client *source_p, struct Channel *chptr,
                  struct Membership *member, int parc, char *parv[])
 {
   int dir = MODE_ADD;

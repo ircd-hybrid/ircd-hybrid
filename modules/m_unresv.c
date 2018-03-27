@@ -45,7 +45,7 @@
 static void
 resv_remove(struct Client *source_p, const char *mask)
 {
-  struct ResvItem *resv = NULL;
+  struct ResvItem *resv;
 
   if ((resv = resv_find(mask, irccmp)) == NULL)
   {

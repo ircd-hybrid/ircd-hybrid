@@ -119,6 +119,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
             client_detach_svstag(&source_p->svstags, RPL_WHOISOPERATOR);
             conf_detach(source_p, CONF_OPER);
+
             ClrOFlag(source_p);
             DelUMode(source_p, ConfigGeneral.oper_only_umodes);
 
@@ -192,7 +193,6 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 static int
 m_mode(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *chptr = NULL;
   struct Membership *member = NULL;
 
   if (EmptyString(parv[1]))
@@ -209,6 +209,7 @@ m_mode(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
@@ -236,7 +237,7 @@ m_mode(struct Client *source_p, int parc, char *parv[])
         flood_endgrace(source_p);
   }
 
-  set_channel_mode(source_p, chptr, member, parc - 2, parv + 2);
+  channel_mode_set(source_p, chptr, member, parc - 2, parv + 2);
   return 0;
 }
 

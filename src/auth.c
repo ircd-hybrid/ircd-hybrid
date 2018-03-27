@@ -171,7 +171,9 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
   ClearDNSPending(auth);
 
-  if (!EmptyString(name))
+  if (EmptyString(name))
+    auth_sendheader(auth->client, REPORT_FAIL_DNS);
+  else
   {
     if (auth->client->connection->ip.ss.ss_family == AF_INET6)
     {
@@ -208,8 +210,6 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
       auth_sendheader(auth->client, REPORT_FIN_DNS);
     }
   }
-  else
-    auth_sendheader(auth->client, REPORT_FAIL_DNS);
 
   auth_release_client(auth);
 }

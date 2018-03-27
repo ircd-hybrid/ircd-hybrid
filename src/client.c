@@ -263,7 +263,7 @@ check_pings_list(dlink_list *list)
     struct Client *client_p = node->data;
 
     if (IsDead(client_p))
-      continue;  /* Ignore it, its been exited already */
+      continue;  /* Ignore it, it's been exited already */
 
     if (IsClient(client_p) || IsServer(client_p))
       ping = get_client_ping(&client_p->connection->confs);
@@ -321,7 +321,7 @@ check_pings_list(dlink_list *list)
 static void
 check_unknowns_list(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
@@ -634,7 +634,7 @@ client_close_connection(struct Client *client_p)
   }
   else if (IsServer(client_p))
   {
-    dlink_node *node = NULL;
+    dlink_node *node;
 
     ++ServerStats.is_sv;
     ServerStats.is_sbs += client_p->connection->send.bytes;
@@ -743,7 +743,7 @@ exit_one_client(struct Client *source_p, const char *comment)
   /* Check to see if the client isn't already on the dead list */
   assert(dlinkFind(&dead_list, source_p) == NULL);
 
-  /* add to dead client dlist */
+  /* Add to dead client dlist */
   SetDead(source_p);
   dlinkAdd(source_p, make_dlink_node(), &dead_list);
 }
@@ -862,7 +862,7 @@ exit_client(struct Client *source_p, const char *comment)
       {
         if (!HasFlag(source_p, FLAGS_SQUIT))
         {
-          /* for them, we are exiting the network */
+          /* For them, we are exiting the network */
           sendto_one(source_p, ":%s SQUIT %s :%s",
                      me.id, me.id, comment);
         }
@@ -889,8 +889,8 @@ exit_client(struct Client *source_p, const char *comment)
 
     if (ConfigServerHide.hide_servers)
       /*
-       * Set netsplit message to "*.net *.split" to still show
-       * that its a split, but hide the servers splitting
+       * Set netsplit message to "*.net *.split" to still show that it's a split,
+       * but hide the servers splitting.
        */
       strlcpy(splitstr, "*.net *.split", sizeof(splitstr));
     else

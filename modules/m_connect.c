@@ -54,7 +54,6 @@
 static int
 mo_connect(struct Client *source_p, int parc, char *parv[])
 {
-  const struct Client *target_p = NULL;
   const char *const name = parv[1];
 
   if (EmptyString(name))
@@ -85,12 +84,13 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
    * Try to find the name. If it fails, notify and bail.
    */
   struct MaskItem *conf;
-  if (!(conf = connect_find(name, match)))
+  if ((conf = connect_find(name, match)) == NULL)
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
     return 0;
   }
 
+  const struct Client *target_p;
   if ((target_p = hash_find_server(conf->name)))
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
@@ -148,7 +148,6 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 static int
 ms_connect(struct Client *source_p, int parc, char *parv[])
 {
-  const struct Client *target_p = NULL;
   const char *const name = parv[1];
 
   if (parc < 4 || EmptyString(parv[3]))
@@ -164,12 +163,13 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
    * Try to find the name. If it fails, notify and bail.
    */
   struct MaskItem *conf;
-  if (!(conf = connect_find(name, match)))
+  if ((conf = connect_find(name, match)) == NULL)
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
     return 0;
   }
 
+  const struct Client *target_p;
   if ((target_p = hash_find_server(conf->name)))
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
@@ -205,6 +205,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   else
     sendto_one_notice(source_p, &me, ":*** Couldn't connect to %s.%u",
                       conf->name, conf->port);
+
   /*
    * Client is either connecting with all the data it needs or has been
    * destroyed

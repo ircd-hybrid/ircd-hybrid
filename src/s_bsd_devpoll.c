@@ -112,7 +112,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
   new_events = (F->read_handler ? POLLIN : 0) |
     (F->write_handler ? POLLOUT : 0);
 
-  if (timeout != 0)
+  if (timeout)
   {
     F->timeout = CurrentTime + (timeout / 1000);
     F->timeout_handler = handler;
@@ -138,7 +138,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 void
 comm_select(void)
 {
-  int num, i;
+  int num;
   struct pollfd pollfds[128];
   struct dvpoll dopoll;
   void (*hdl)(fde_t *, void *);
@@ -157,7 +157,7 @@ comm_select(void)
     return;
   }
 
-  for (i = 0; i < num; i++)
+  for (int i = 0; i < num; ++i)
   {
     fde_t *F = &fd_table[dopoll.dp_fds[i].fd];
 
@@ -166,7 +166,7 @@ comm_select(void)
 
     if ((dopoll.dp_fds[i].revents & POLLIN))
     {
-      if ((hdl = F->read_handler) != NULL)
+      if ((hdl = F->read_handler))
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
@@ -178,7 +178,7 @@ comm_select(void)
 
     if ((dopoll.dp_fds[i].revents & POLLOUT))
     {
-      if ((hdl = F->write_handler) != NULL)
+      if ((hdl = F->write_handler))
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);

@@ -56,21 +56,20 @@
 static int
 m_knock(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *chptr = NULL;
-
   if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KNOCK");
     return 0;
   }
 
+  struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return 0;
   }
 
-  /* Normal channel, just be sure they aren't on it */
+  /* Normal channel, just be sure they aren't on it. */
   if (IsMember(source_p, chptr))
   {
     sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, chptr->name);
@@ -88,7 +87,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
   if (MyClient(source_p))
   {
     /*
-     * Don't allow a knock if the user is banned, or the channel is private
+     * Don't allow a knock if the user is banned, or the channel is private.
      */
     if (PrivateChannel(chptr) || is_banned(chptr, source_p))
     {

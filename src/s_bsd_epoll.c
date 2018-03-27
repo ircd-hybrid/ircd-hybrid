@@ -83,7 +83,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
   new_events = (F->read_handler ? EPOLLIN : 0) |
     (F->write_handler ? EPOLLOUT : 0);
 
-  if (timeout != 0)
+  if (timeout)
   {
     F->timeout = CurrentTime + (timeout / 1000);
     F->timeout_handler = handler;
@@ -102,7 +102,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
     ep_event.events = F->evcache = new_events;
     ep_event.data.ptr = F;
 
-    if (epoll_ctl(epoll_fd, op, F->fd, &ep_event) != 0)
+    if (epoll_ctl(epoll_fd, op, F->fd, &ep_event))
     {
       ilog(LOG_TYPE_IRCD, "comm_setselect: epoll_ctl() failed: %s", strerror(errno));
       abort();
@@ -122,7 +122,7 @@ void
 comm_select(void)
 {
   struct epoll_event ep_fdlist[128];
-  int num, i;
+  int num;
   void (*hdl)(fde_t *, void *);
 
   num = epoll_wait(epoll_fd, ep_fdlist, 128, SELECT_DELAY);
@@ -136,7 +136,7 @@ comm_select(void)
     return;
   }
 
-  for (i = 0; i < num; i++)
+  for (int i = 0; i < num; ++i)
   {
     fde_t *F = ep_fdlist[i].data.ptr;
 

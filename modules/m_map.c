@@ -70,7 +70,7 @@ static void dump_map(struct Client *client,
     sendto_one_numeric(client, &me, RPL_MAP, prompt, buf);
   }
 
-  if (prompt_length > 0)
+  if (prompt_length)
   {
     *(p - 1) = ' ';
 
@@ -86,8 +86,9 @@ static void dump_map(struct Client *client,
   {
     struct Client *target_p = node->data;
 
-    if (IsHidden(target_p) && !HasUMode(client, UMODE_OPER))
-      continue;
+    if (IsHidden(target_p))
+      if (!HasUMode(client, UMODE_OPER))
+        continue;
 
     if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (!HasUMode(client, UMODE_OPER))
@@ -100,8 +101,9 @@ static void dump_map(struct Client *client,
   {
     struct Client *target_p = node->data;
 
-    if (IsHidden(target_p) && !HasUMode(client, UMODE_OPER))
-      continue;
+    if (IsHidden(target_p))
+      if (!HasUMode(client, UMODE_OPER))
+        continue;
 
     if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (!HasUMode(client, UMODE_OPER))
@@ -112,7 +114,7 @@ static void dump_map(struct Client *client,
     dump_map(client, target_p, prompt_length + 2);
   }
 
-  if (prompt_length > 0)
+  if (prompt_length)
     *(p - 1) = '-';
 }
 

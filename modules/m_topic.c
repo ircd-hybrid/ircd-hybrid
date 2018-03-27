@@ -157,28 +157,29 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!IsClient(source_p))
-    strlcpy(topic_info, source_p->name, sizeof(topic_info));
-  else
+  if (IsClient(source_p))
     snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
              source_p->username, source_p->host);
+  else
+    strlcpy(topic_info, source_p->name, sizeof(topic_info));
+
   channel_set_topic(chptr, parv[2], topic_info, CurrentTime, 0);
 
   sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
                 source_p->id, chptr->name,
                 chptr->topic);
 
-  if (!IsClient(source_p))
-    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :%s",
-                         (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
-                         chptr->name, chptr->topic);
-
-  else
+  if (IsClient(source_p))
     sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
                          source_p->name,
                          source_p->username,
                          source_p->host,
                          chptr->name, chptr->topic);
+  else
+    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :%s",
+                         (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
+                         chptr->name, chptr->topic);
+
   return 0;
 }
 

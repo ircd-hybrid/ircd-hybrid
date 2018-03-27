@@ -79,7 +79,7 @@ comm_get_sockerr(int fd)
   int err = 0;
   socklen_t len = sizeof(err);
 
-  if (-1 < fd && !getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len))
+  if (fd > -1 && !getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len))
   {
     if (err)
       errtmp = err;
@@ -107,9 +107,8 @@ comm_get_sockerr(int fd)
  *
  * Actually stderr is still there IFF ircd was run with -s --Rodder
  */
-
 void
-report_error(int level, const char* text, const char* who, int error)
+report_error(int level, const char *text, const char *who, int error)
 {
   who = (who) ? who : "";
 
@@ -599,7 +598,7 @@ comm_accept(int fd, struct irc_ssaddr *addr)
     return -1;
   }
 
-  memset(addr, 0, sizeof(struct irc_ssaddr));
+  memset(addr, 0, sizeof(*addr));
 
   /*
    * Next, do the accept(). if we get an error, we should drop the

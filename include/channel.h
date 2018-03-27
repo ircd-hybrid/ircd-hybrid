@@ -38,8 +38,8 @@
 
 enum
 {
-  MSG_FLOOD_NOTICED  = 0x00000001U,
-  JOIN_FLOOD_NOTICED = 0x00000002U
+  MSG_FLOOD_NOTICED  = 1 << 0,
+  JOIN_FLOOD_NOTICED = 1 << 1
 };
 
 #define SetFloodNoticed(x)   ((x)->flags |= MSG_FLOOD_NOTICED)

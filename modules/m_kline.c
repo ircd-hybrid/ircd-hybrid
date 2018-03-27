@@ -91,7 +91,6 @@ kline_handle(struct Client *source_p, const char *user, const char *host,
   char buf[IRCD_BUFSIZE];
   int bits = 0, aftype = 0;
   struct irc_ssaddr iphost, *piphost = NULL;
-  struct MaskItem *conf = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE) && !valid_wild_card(2, user, host))
   {
@@ -131,6 +130,7 @@ kline_handle(struct Client *source_p, const char *user, const char *host,
       break;
   }
 
+  struct MaskItem *conf;
   if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, aftype, user, NULL, 0)))
   {
     if (IsClient(source_p))

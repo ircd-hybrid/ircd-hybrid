@@ -52,7 +52,7 @@
 static int
 ms_tmode(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *chptr = NULL;
+  struct Channel *chptr;
 
   assert(!MyClient(source_p));
 
@@ -65,7 +65,7 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
   if (strtoumax(parv[1], NULL, 10) > chptr->creationtime)
     return 0;
 
-  set_channel_mode(source_p, chptr, NULL, parc - 3, parv + 3);
+  channel_mode_set(source_p, chptr, NULL, parc - 3, parv + 3);
   return 0;
 }
 

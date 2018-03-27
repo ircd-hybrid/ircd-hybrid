@@ -41,19 +41,19 @@
  */
 enum
 {
-  STAT_CONNECTING = 0x00000001U,
-  STAT_HANDSHAKE  = 0x00000002U,
-  STAT_ME         = 0x00000004U,
-  STAT_UNKNOWN    = 0x00000008U,
-  STAT_SERVER     = 0x00000010U,
-  STAT_CLIENT     = 0x00000020U
+  STAT_CONNECTING,
+  STAT_HANDSHAKE,
+  STAT_ME,
+  STAT_UNKNOWN,
+  STAT_SERVER,
+  STAT_CLIENT
 };
 
 enum
 {
-  REG_NEED_USER = 0x00000001U,  /**< User must send USER command */
-  REG_NEED_NICK = 0x00000002U,  /**< User must send NICK command */
-  REG_NEED_CAP  = 0x00000004U,  /**< In middle of CAP negotiations */
+  REG_NEED_USER = 1 << 0,  /**< User must send USER command */
+  REG_NEED_NICK = 1 << 1,  /**< User must send NICK command */
+  REG_NEED_CAP  = 1 << 2,  /**< In middle of CAP negotiations */
   REG_INIT      = REG_NEED_USER | REG_NEED_NICK
 };
 
@@ -98,13 +98,13 @@ enum
 
 enum
 {
-  CAP_MULTI_PREFIX   = 0x00000001U,  /**< ircv3.1 multi-prefix client capability */
-  CAP_AWAY_NOTIFY    = 0x00000002U,  /**< ircv3.1 away-notify client capability */
-  CAP_UHNAMES        = 0x00000004U,  /**< ircv3.2 userhost-in-names client capability */
-  CAP_EXTENDED_JOIN  = 0x00000008U,  /**< ircv3.1 extended-join client capability */
-  CAP_ACCOUNT_NOTIFY = 0x00000010U,  /**< ircv3.1 account-notify client capability */
-  CAP_INVITE_NOTIFY  = 0x00000020U,  /**< ircv3.2 invite-notify client capability */
-  CAP_CHGHOST        = 0x00000040U   /**< ircv3.2 chghost client capability */
+  CAP_MULTI_PREFIX   = 1 << 0,  /**< ircv3.1 multi-prefix client capability */
+  CAP_AWAY_NOTIFY    = 1 << 1,  /**< ircv3.1 away-notify client capability */
+  CAP_UHNAMES        = 1 << 2,  /**< ircv3.2 userhost-in-names client capability */
+  CAP_EXTENDED_JOIN  = 1 << 3,  /**< ircv3.1 extended-join client capability */
+  CAP_ACCOUNT_NOTIFY = 1 << 4,  /**< ircv3.1 account-notify client capability */
+  CAP_INVITE_NOTIFY  = 1 << 5,  /**< ircv3.2 invite-notify client capability */
+  CAP_CHGHOST        = 1 << 6   /**< ircv3.2 chghost client capability */
 };
 
 #define HasCap(x, y) ((x)->connection->cap_active & (y))
@@ -113,31 +113,31 @@ enum
 /* housekeeping flags */
 enum
 {
-  FLAGS_PINGSENT      = 0x00000001U,  /**< Unreplied ping sent */
-  FLAGS_DEADSOCKET    = 0x00000002U,  /**< Local socket is dead--Exiting soon */
-  FLAGS_KILLED        = 0x00000004U,  /**< Prevents "QUIT" from being sent for this */
-  FLAGS_CLOSING       = 0x00000008U,  /**< Set when closing to suppress errors */
-  FLAGS_GOTID         = 0x00000010U,  /**< Successful ident lookup achieved */
-  FLAGS_SENDQEX       = 0x00000020U,  /**< Sendq exceeded */
-  FLAGS_IPHASH        = 0x00000040U,  /**< Iphashed this client */
-  FLAGS_MARK          = 0x00000080U,  /**< Marked client */
-  FLAGS_CANFLOOD      = 0x00000100U,  /**< Client has the ability to flood */
-  FLAGS_EXEMPTKLINE   = 0x00000200U,  /**< Client is exempt from k-lines */
-  FLAGS_NOLIMIT       = 0x00000400U,  /**< Client is exempt from limits */
-  FLAGS_PING_COOKIE   = 0x00000800U,  /**< PING Cookie */
-  FLAGS_FLOODDONE     = 0x00001000U,  /**< Flood grace period has been ended. */
-  FLAGS_EOB           = 0x00002000U,  /**< Server has sent us an EOB */
-  FLAGS_HIDDEN        = 0x00004000U,  /**< A hidden server. Not shown in /links */
-  FLAGS_BLOCKED       = 0x00008000U,  /**< Must wait for COMM_SELECT_WRITE */
-  FLAGS_USERHOST      = 0x00010000U,  /**< Client is in userhost hash */
-  FLAGS_EXEMPTRESV    = 0x00020000U,  /**< Client is exempt from RESV */
-  FLAGS_GOTUSER       = 0x00040000U,  /**< If we received a USER command */
-  FLAGS_FINISHED_AUTH = 0x00080000U,  /**< Client has been released from auth */
-  FLAGS_FLOOD_NOTICED = 0x00100000U,  /**< Notice to opers about this flooder has been sent */
-  FLAGS_SERVICE       = 0x00200000U,  /**< Client/server is a network service */
-  FLAGS_SSL           = 0x00400000U,  /**< User is connected via TLS/SSL */
-  FLAGS_SQUIT         = 0x00800000U,
-  FLAGS_EXEMPTXLINE   = 0x01000000U   /**< Client is exempt from x-lines */
+  FLAGS_PINGSENT      = 1 <<  0,  /**< Unreplied ping sent */
+  FLAGS_DEADSOCKET    = 1 <<  1,  /**< Local socket is dead--Exiting soon */
+  FLAGS_KILLED        = 1 <<  2,  /**< Prevents "QUIT" from being sent for this */
+  FLAGS_CLOSING       = 1 <<  3,  /**< Set when closing to suppress errors */
+  FLAGS_GOTID         = 1 <<  4,  /**< Successful ident lookup achieved */
+  FLAGS_SENDQEX       = 1 <<  5,  /**< Sendq exceeded */
+  FLAGS_IPHASH        = 1 <<  6,  /**< Iphashed this client */
+  FLAGS_MARK          = 1 <<  7,  /**< Marked client */
+  FLAGS_CANFLOOD      = 1 <<  8,  /**< Client has the ability to flood */
+  FLAGS_EXEMPTKLINE   = 1 <<  9,  /**< Client is exempt from k-lines */
+  FLAGS_NOLIMIT       = 1 << 10,  /**< Client is exempt from limits */
+  FLAGS_PING_COOKIE   = 1 << 11,  /**< PING Cookie */
+  FLAGS_FLOODDONE     = 1 << 12,  /**< Flood grace period has been ended. */
+  FLAGS_EOB           = 1 << 13,  /**< Server has sent us an EOB */
+  FLAGS_HIDDEN        = 1 << 14,  /**< A hidden server. Not shown in /links */
+  FLAGS_BLOCKED       = 1 << 15,  /**< Must wait for COMM_SELECT_WRITE */
+  FLAGS_USERHOST      = 1 << 16,  /**< Client is in userhost hash */
+  FLAGS_EXEMPTRESV    = 1 << 17,  /**< Client is exempt from RESV */
+  FLAGS_GOTUSER       = 1 << 18,  /**< If we received a USER command */
+  FLAGS_FINISHED_AUTH = 1 << 19,  /**< Client has been released from auth */
+  FLAGS_FLOOD_NOTICED = 1 << 20,  /**< Notice to opers about this flooder has been sent */
+  FLAGS_SERVICE       = 1 << 21,  /**< Client/server is a network service */
+  FLAGS_SSL           = 1 << 22,  /**< User is connected via TLS/SSL */
+  FLAGS_SQUIT         = 1 << 23,
+  FLAGS_EXEMPTXLINE   = 1 << 24   /**< Client is exempt from x-lines */
 };
 
 #define HasFlag(x, y) ((x)->flags &   (y))
@@ -148,33 +148,33 @@ enum
 /* umodes, settable flags */
 enum
 {
-  UMODE_SERVNOTICE   = 0x00000001U,  /**< Server notices such as kill */
-  UMODE_CCONN        = 0x00000002U,  /**< Can see client connection notices */
-  UMODE_REJ          = 0x00000004U,  /**< Bot Rejections */
-  UMODE_SKILL        = 0x00000008U,  /**< Server Killed */
-  UMODE_FULL         = 0x00000010U,  /**< Full messages */
-  UMODE_SPY          = 0x00000020U,  /**< See STATS / LINKS */
-  UMODE_DEBUG        = 0x00000040U,  /**< 'debugging' info */
-  UMODE_NCHANGE      = 0x00000080U,  /**< Nick change notice */
-  UMODE_WALLOP       = 0x00000100U,  /**< Send wallops to them */
-  UMODE_INVISIBLE    = 0x00000200U,  /**< Makes user invisible */
-  UMODE_BOTS         = 0x00000400U,  /**< Shows bots */
-  UMODE_EXTERNAL     = 0x00000800U,  /**< Show servers introduced and splitting */
-  UMODE_CALLERID     = 0x00001000U,  /**< Block unless caller id's */
-  UMODE_SOFTCALLERID = 0x00002000U,  /**< Block unless on common channel */
-  UMODE_UNAUTH       = 0x00004000U,  /**< Show unauth connects here */
-  UMODE_LOCOPS       = 0x00008000U,  /**< Can see LOCOPS messages */
-  UMODE_DEAF         = 0x00010000U,  /**< Don't receive channel messages */
-  UMODE_REGISTERED   = 0x00020000U,  /**< User has identified for that nick. */
-  UMODE_REGONLY      = 0x00040000U,  /**< Only registered nicks may PM */
-  UMODE_HIDDEN       = 0x00080000U,  /**< IRC operator status is hidden */
-  UMODE_OPER         = 0x00100000U,  /**< IRC operator */
-  UMODE_ADMIN        = 0x00200000U,  /**< Admin on server */
-  UMODE_FARCONNECT   = 0x00400000U,  /**< Can see remote client connects/exits */
-  UMODE_SSL          = 0x00800000U,  /**< User is connected via TLS/SSL */
-  UMODE_WEBIRC       = 0x01000000U,  /**< User connected via a webirc gateway */
-  UMODE_HIDEIDLE     = 0x02000000U,  /**< Hides idle and signon time in WHOIS */
-  UMODE_HIDECHANS    = 0x04000000U   /**< Hides channel list in WHOIS */
+  UMODE_SERVNOTICE   = 1 <<  0,  /**< Server notices such as kill */
+  UMODE_CCONN        = 1 <<  1,  /**< Can see client connection notices */
+  UMODE_REJ          = 1 <<  2,  /**< Bot Rejections */
+  UMODE_SKILL        = 1 <<  3,  /**< Server Killed */
+  UMODE_FULL         = 1 <<  4,  /**< Full messages */
+  UMODE_SPY          = 1 <<  5,  /**< See STATS / LINKS */
+  UMODE_DEBUG        = 1 <<  6,  /**< 'debugging' info */
+  UMODE_NCHANGE      = 1 <<  7,  /**< Nick change notice */
+  UMODE_WALLOP       = 1 <<  8,  /**< Send wallops to them */
+  UMODE_INVISIBLE    = 1 <<  9,  /**< Makes user invisible */
+  UMODE_BOTS         = 1 << 10,  /**< Shows bots */
+  UMODE_EXTERNAL     = 1 << 11,  /**< Show servers introduced and splitting */
+  UMODE_CALLERID     = 1 << 12,  /**< Block unless caller id's */
+  UMODE_SOFTCALLERID = 1 << 13,  /**< Block unless on common channel */
+  UMODE_UNAUTH       = 1 << 14,  /**< Show unauth connects here */
+  UMODE_LOCOPS       = 1 << 15,  /**< Can see LOCOPS messages */
+  UMODE_DEAF         = 1 << 16,  /**< Don't receive channel messages */
+  UMODE_REGISTERED   = 1 << 17,  /**< User has identified for that nick. */
+  UMODE_REGONLY      = 1 << 18,  /**< Only registered nicks may PM */
+  UMODE_HIDDEN       = 1 << 19,  /**< IRC operator status is hidden */
+  UMODE_OPER         = 1 << 20,  /**< IRC operator */
+  UMODE_ADMIN        = 1 << 21,  /**< Admin on server */
+  UMODE_FARCONNECT   = 1 << 22,  /**< Can see remote client connects/exits */
+  UMODE_SSL          = 1 << 23,  /**< User is connected via TLS/SSL */
+  UMODE_WEBIRC       = 1 << 24,  /**< User connected via a webirc gateway */
+  UMODE_HIDEIDLE     = 1 << 25,  /**< Hides idle and signon time in WHOIS */
+  UMODE_HIDECHANS    = 1 << 26   /**< Hides channel list in WHOIS */
 };
 
 #define HasUMode(x, y) ((x)->umodes &   (y))
@@ -185,35 +185,35 @@ enum
 /** irc-operator privilege flags */
 enum
 {
-  OPER_FLAG_ADMIN          = 0x00000001U,  /**< Oper can set user mode +a */
-  OPER_FLAG_CLOSE          = 0x00000002U,  /**< Oper can use CLOSE command */
-  OPER_FLAG_CONNECT        = 0x00000004U,  /**< Oper can do local CONNECT */
-  OPER_FLAG_CONNECT_REMOTE = 0x00000008U,  /**< Oper can do remote CONNECT */
-  OPER_FLAG_DIE            = 0x00000010U,  /**< Oper can use DIE command */
-  OPER_FLAG_DLINE          = 0x00000020U,  /**< Oper can use DLINE command */
-  OPER_FLAG_GLOBOPS        = 0x00000040U,  /**< Oper can use GLOBOPS command */
-  OPER_FLAG_JOIN_RESV      = 0x00000080U,  /**< Oper can use JOIN on resv {} channels */
-  OPER_FLAG_KILL           = 0x00000100U,  /**< Oper can KILL local users */
-  OPER_FLAG_KILL_REMOTE    = 0x00000200U,  /**< Oper can KILL remote users */
-  OPER_FLAG_KLINE          = 0x00000400U,  /**< Oper can use KLINE command */
-  OPER_FLAG_LOCOPS         = 0x00000800U,  /**< Oper can use LOCOPS command */
-  OPER_FLAG_MODULE         = 0x00001000U,  /**< Oper can use MODULE command */
-  OPER_FLAG_NICK_RESV      = 0x00002000U,  /**< Oper can use NICK on resv {} nicks */
-  OPER_FLAG_OPME           = 0x00004000U,  /**< Oper can use OPME command */
-  OPER_FLAG_REHASH         = 0x00008000U,  /**< Oper can use REHASH command */
-  OPER_FLAG_REHASH_REMOTE  = 0x00010000U,  /**< Oper can do remote REHASH command */
-  OPER_FLAG_REMOTEBAN      = 0x00020000U,  /**< Oper can set remote bans */
-  OPER_FLAG_RESTART        = 0x00040000U,  /**< Oper can use RESTART command */
-  OPER_FLAG_RESV           = 0x00080000U,  /**< Oper can use RESV command */
-  OPER_FLAG_SET            = 0x00100000U,  /**< Oper can use SET command */
-  OPER_FLAG_SQUIT          = 0x00200000U,  /**< Oper can do local SQUIT */
-  OPER_FLAG_SQUIT_REMOTE   = 0x00400000U,  /**< Oper can do remote SQUIT */
-  OPER_FLAG_UNDLINE        = 0x00800000U,  /**< Oper can use UNDLINE command */
-  OPER_FLAG_UNKLINE        = 0x01000000U,  /**< Oper can use UNKLINE command */
-  OPER_FLAG_UNRESV         = 0x02000000U,  /**< Oper can use UNRESV command */
-  OPER_FLAG_UNXLINE        = 0x04000000U,  /**< Oper can use UNXLINE command */
-  OPER_FLAG_WALLOPS        = 0x08000000U,  /**< Oper can use WALLOPS command */
-  OPER_FLAG_XLINE          = 0x10000000U   /**< Oper can use XLINE command */
+  OPER_FLAG_ADMIN          = 1 <<  0,  /**< Oper can set user mode +a */
+  OPER_FLAG_CLOSE          = 1 <<  1,  /**< Oper can use CLOSE command */
+  OPER_FLAG_CONNECT        = 1 <<  2,  /**< Oper can do local CONNECT */
+  OPER_FLAG_CONNECT_REMOTE = 1 <<  3,  /**< Oper can do remote CONNECT */
+  OPER_FLAG_DIE            = 1 <<  4,  /**< Oper can use DIE command */
+  OPER_FLAG_DLINE          = 1 <<  5,  /**< Oper can use DLINE command */
+  OPER_FLAG_GLOBOPS        = 1 <<  6,  /**< Oper can use GLOBOPS command */
+  OPER_FLAG_JOIN_RESV      = 1 <<  7,  /**< Oper can use JOIN on resv {} channels */
+  OPER_FLAG_KILL           = 1 <<  8,  /**< Oper can KILL local users */
+  OPER_FLAG_KILL_REMOTE    = 1 <<  9,  /**< Oper can KILL remote users */
+  OPER_FLAG_KLINE          = 1 << 10,  /**< Oper can use KLINE command */
+  OPER_FLAG_LOCOPS         = 1 << 11,  /**< Oper can use LOCOPS command */
+  OPER_FLAG_MODULE         = 1 << 12,  /**< Oper can use MODULE command */
+  OPER_FLAG_NICK_RESV      = 1 << 13,  /**< Oper can use NICK on resv {} nicks */
+  OPER_FLAG_OPME           = 1 << 14,  /**< Oper can use OPME command */
+  OPER_FLAG_REHASH         = 1 << 15,  /**< Oper can use REHASH command */
+  OPER_FLAG_REHASH_REMOTE  = 1 << 16,  /**< Oper can do remote REHASH command */
+  OPER_FLAG_REMOTEBAN      = 1 << 17,  /**< Oper can set remote bans */
+  OPER_FLAG_RESTART        = 1 << 18,  /**< Oper can use RESTART command */
+  OPER_FLAG_RESV           = 1 << 19,  /**< Oper can use RESV command */
+  OPER_FLAG_SET            = 1 << 20,  /**< Oper can use SET command */
+  OPER_FLAG_SQUIT          = 1 << 21,  /**< Oper can do local SQUIT */
+  OPER_FLAG_SQUIT_REMOTE   = 1 << 22,  /**< Oper can do remote SQUIT */
+  OPER_FLAG_UNDLINE        = 1 << 23,  /**< Oper can use UNDLINE command */
+  OPER_FLAG_UNKLINE        = 1 << 24,  /**< Oper can use UNKLINE command */
+  OPER_FLAG_UNRESV         = 1 << 25,  /**< Oper can use UNRESV command */
+  OPER_FLAG_UNXLINE        = 1 << 26,  /**< Oper can use UNXLINE command */
+  OPER_FLAG_WALLOPS        = 1 << 27,  /**< Oper can use WALLOPS command */
+  OPER_FLAG_XLINE          = 1 << 28   /**< Oper can use XLINE command */
 };
 
 #define HasOFlag(x, y) ((x)->connection->operflags &   (y))

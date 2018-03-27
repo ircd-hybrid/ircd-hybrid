@@ -565,10 +565,8 @@ mod_add_cmd(struct Message *msg)
   assert(msg->cmd);
 
   /* Command already added? */
-  if (msg_tree_parse(msg->cmd))
-    return;
-
-  add_msg_element(&msg_tree, msg, msg->cmd);
+  if (msg_tree_parse(msg->cmd) == NULL)
+    add_msg_element(&msg_tree, msg, msg->cmd);
 }
 
 /* mod_del_cmd()
@@ -583,10 +581,8 @@ mod_del_cmd(struct Message *msg)
   assert(msg);
   assert(msg->cmd);
 
-  if (!msg_tree_parse(msg->cmd))
-    return;
-
-  del_msg_element(&msg_tree, msg->cmd);
+  if (msg_tree_parse(msg->cmd))
+    del_msg_element(&msg_tree, msg->cmd);
 }
 
 /* find_command()

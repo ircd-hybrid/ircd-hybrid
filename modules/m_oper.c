@@ -84,6 +84,7 @@ oper_up(struct Client *source_p)
                        get_oper_name(source_p));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                 me.id, get_oper_name(source_p));
+
   send_umode_out(source_p, old);
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
 }
@@ -124,7 +125,6 @@ failed_oper_notice(struct Client *source_p, const char *name,
 static int
 m_oper(struct Client *source_p, int parc, char *parv[])
 {
-  struct MaskItem *conf = NULL;
   const char *const opername = parv[1];
   const char *const password = parv[2];
 
@@ -138,12 +138,13 @@ m_oper(struct Client *source_p, int parc, char *parv[])
   if (!IsFloodDone(source_p))
     flood_endgrace(source_p);
 
+  struct MaskItem *conf;
   if ((conf = operator_find(source_p, opername)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
+
     conf = operator_find(NULL, opername);
-    failed_oper_notice(source_p, opername, (conf != NULL) ?
-                       "host mismatch" : "no operator {} block");
+    failed_oper_notice(source_p, opername, conf ? "host mismatch" : "no operator {} block");
     return 0;
   }
 

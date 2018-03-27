@@ -44,7 +44,7 @@
 static void
 do_links(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
                        "LINKS requested by %s (%s@%s) [%s]",
@@ -60,7 +60,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
     {
       const struct Client *target_p = node->data;
 
-      /* skip hidden servers */
+      /* Skip hidden servers */
       if (IsHidden(target_p))
         if (!HasUMode(source_p, UMODE_OPER))
           continue;
@@ -74,7 +74,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
 
       /*
        * We just send the reply, as if they are here there's either no SHIDE,
-       * or they're an oper..
+       * or they're an oper.
        */
       sendto_one_numeric(source_p, &me, RPL_LINKS,
                          target_p->name, target_p->servptr->name,
@@ -87,8 +87,8 @@ do_links(struct Client *source_p, int parc, char *parv[])
   else
   {
     /*
-     * Print our own info so at least it looks like a normal links
-     * then print out the file (which may or may not be empty)
+     * Print our own info so at least it looks like a normal links, then
+     * print out the file (which may or may not be empty).
      */
     sendto_one_numeric(source_p, &me, RPL_LINKS, me.name, me.name, 0, me.info);
 

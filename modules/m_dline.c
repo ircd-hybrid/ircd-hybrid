@@ -107,7 +107,6 @@ dline_handle(struct Client *source_p, const char *addr, const char *reason, uint
   char buf[IRCD_BUFSIZE];
   struct irc_ssaddr daddr;
   int bits = 0, aftype = 0;
-  struct MaskItem *conf = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE) && !valid_wild_card(1, addr))
   {
@@ -145,6 +144,7 @@ dline_handle(struct Client *source_p, const char *addr, const char *reason, uint
      return;
   }
 
+  struct MaskItem *conf;
   if ((conf = find_conf_by_address(NULL, &daddr, CONF_DLINE, aftype, NULL, NULL, 1)))
   {
     if (IsClient(source_p))

@@ -32,23 +32,23 @@
 
 enum
 {
-  L_ALL   = 0,
-  L_OPER  = 1,
-  L_ADMIN = 2
+  L_ALL,
+  L_OPER,
+  L_ADMIN
 };
 
 enum
 {
-  SEND_NOTICE = 1,
-  SEND_GLOBAL = 2,
-  SEND_LOCOPS = 3
+  SEND_NOTICE,
+  SEND_GLOBAL,
+  SEND_LOCOPS
 };
 
 /* Used when sending to $#mask or $$mask */
 enum
 {
-  MATCH_SERVER = 1,
-  MATCH_HOST   = 2
+  MATCH_SERVER,
+  MATCH_HOST
 };
 
 /*

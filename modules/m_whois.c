@@ -193,7 +193,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
     sendto_one_numeric(source_p, &me, RPL_WHOISSECURE, target_p->name);
 
   if (!EmptyString(target_p->certfp))
-    if (target_p == source_p || HasUMode(source_p, UMODE_OPER))
+    if (HasUMode(source_p, UMODE_OPER) || target_p == source_p)
       sendto_one_numeric(source_p, &me, RPL_WHOISCERTFP, target_p->name, target_p->certfp);
 
   if (MyConnect(target_p))
@@ -219,7 +219,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
 static void
 do_whois(struct Client *source_p, const char *name)
 {
-  struct Client *target_p = NULL;
+  struct Client *target_p;
 
   if ((target_p = hash_find_client(name)) && IsClient(target_p))
     whois_person(source_p, target_p);

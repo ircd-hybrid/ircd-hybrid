@@ -47,7 +47,7 @@
 static int
 mo_close(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
   unsigned int closed = dlink_list_length(&unknown_list);
 
   if (!HasOFlag(source_p, OPER_FLAG_CLOSE))

@@ -32,8 +32,8 @@
 /* Type of IO */
 enum
 {
-  COMM_SELECT_READ  = 1,
-  COMM_SELECT_WRITE = 2
+  COMM_SELECT_READ  = 1 << 0,
+  COMM_SELECT_WRITE = 1 << 1
 };
 
 /* How long can comm_select() wait for network events [milliseconds] */

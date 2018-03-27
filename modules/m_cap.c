@@ -36,10 +36,13 @@
 #include "irc_string.h"
 
 
-#define CAPFL_HIDDEN    0x0001  /**< Do not advertize this capability */
-#define CAPFL_PROHIBIT  0x0002  /**< Client may not set this capability */
-#define CAPFL_PROTO     0x0004  /**< Cap must be acknowledged by client */
-#define CAPFL_STICKY    0x0008  /**< Cap may not be cleared once set */
+enum
+{
+  CAPFL_HIDDEN    = 1 << 0,  /**< Do not advertize this capability */
+  CAPFL_PROHIBIT  = 1 << 1,  /**< Client may not set this capability */
+  CAPFL_PROTO     = 1 << 2,  /**< Cap must be acknowledged by client */
+  CAPFL_STICKY    = 1 << 3   /**< Cap may not be cleared once set */
+};
 
 typedef int (*bqcmp)(const void *, const void *);
 

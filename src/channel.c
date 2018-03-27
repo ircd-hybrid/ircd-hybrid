@@ -184,7 +184,7 @@ channel_send_members(struct Client *client_p, const struct Channel *chptr,
 
   /* Should always be non-NULL unless we have a kind of persistent channels */
   if (chptr->members.head)
-    t--;  /* Take the space out */
+    --t;  /* Take the space out */
   *t = '\0';
   sendto_one(client_p, "%s", buf);
 }
@@ -376,8 +376,7 @@ channel_pub_or_secret(const struct Channel *chptr)
  *                 (don't want it with /names with no params)
  */
 void
-channel_member_names(struct Client *client_p, struct Channel *chptr,
-                     int show_eon)
+channel_member_names(struct Client *client_p, struct Channel *chptr, int show_eon)
 {
   dlink_node *node;
   char buf[IRCD_BUFSIZE + 1] = "";
@@ -403,24 +402,24 @@ channel_member_names(struct Client *client_p, struct Channel *chptr,
       if (HasUMode(member->client_p, UMODE_INVISIBLE) && !is_member)
         continue;
 
-      if (!uhnames)
-        tlen = strlen(member->client_p->name) + 1;  /* +1 for space */
-      else
+      if (uhnames)
         tlen = strlen(member->client_p->name) + strlen(member->client_p->username) +
                strlen(member->client_p->host) + 3;  /* +3 for ! + @ + space */
-
-      if (!multi_prefix)
-      {
-        if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
-          ++tlen;
-      }
       else
+        tlen = strlen(member->client_p->name) + 1;  /* +1 for space */
+
+      if (multi_prefix)
       {
         if (member->flags & CHFL_CHANOP)
           ++tlen;
         if (member->flags & CHFL_HALFOP)
           ++tlen;
         if (member->flags & CHFL_VOICE)
+          ++tlen;
+      }
+      else
+      {
+        if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
           ++tlen;
       }
 
@@ -431,13 +430,13 @@ channel_member_names(struct Client *client_p, struct Channel *chptr,
         t = start;
       }
 
-      if (!uhnames)
-        t += sprintf(t, "%s%s ", get_member_status(member, multi_prefix),
-                     member->client_p->name);
-      else
+      if (uhnames)
         t += sprintf(t, "%s%s!%s@%s ", get_member_status(member, multi_prefix),
                      member->client_p->name, member->client_p->username,
                      member->client_p->host);
+      else
+        t += sprintf(t, "%s%s ", get_member_status(member, multi_prefix),
+                     member->client_p->name);
     }
 
     if (tlen)
@@ -484,8 +483,8 @@ find_invite(struct Channel *chptr, struct Client *client_p)
 void
 add_invite(struct Channel *chptr, struct Client *client_p)
 {
-  struct Invite *invite = find_invite(chptr, client_p);
-  if (invite)
+  struct Invite *invite;
+  if ((invite = find_invite(chptr, client_p)))
     del_invite(invite);
 
   invite = xcalloc(sizeof(*invite));
@@ -918,8 +917,8 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
       break;
     }
 
-    struct Channel *chptr = hash_find_channel(name);
-    if (chptr)
+    struct Channel *chptr;
+    if ((chptr = hash_find_channel(name)))
     {
       if (IsMember(client_p, chptr))
         continue;
@@ -1003,8 +1002,8 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
                              client_p->host, client_p->away);
     }
 
-    struct Invite *invite = find_invite(chptr, client_p);
-    if (invite)
+    struct Invite *invite;
+    if ((invite = find_invite(chptr, client_p)))
       del_invite(invite);
 
     if (chptr->topic[0])

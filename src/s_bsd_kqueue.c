@@ -106,7 +106,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
   new_events = (F->read_handler ? COMM_SELECT_READ : 0) |
                (F->write_handler ? COMM_SELECT_WRITE : 0);
 
-  if (timeout != 0)
+  if (timeout)
   {
     F->timeout = CurrentTime + (timeout / 1000);
     F->timeout_handler = handler;
@@ -134,7 +134,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 void
 comm_select(void)
 {
-  int num, i;
+  int num;
   static struct kevent ke[KE_LENGTH];
   struct timespec poll_time;
   void (*hdl)(fde_t *, void *);
@@ -158,7 +158,7 @@ comm_select(void)
     return;
   }
 
-  for (i = 0; i < num; i++)
+  for (int i = 0; i < num; ++i)
   {
     fde_t *F = ke[i].udata;
 
@@ -167,7 +167,7 @@ comm_select(void)
 
     if (ke[i].filter == EVFILT_READ)
     {
-      if ((hdl = F->read_handler) != NULL)
+      if ((hdl = F->read_handler))
       {
         F->read_handler = NULL;
         hdl(F, F->read_data);
@@ -179,7 +179,7 @@ comm_select(void)
 
     if (ke[i].filter == EVFILT_WRITE)
     {
-      if ((hdl = F->write_handler) != NULL)
+      if ((hdl = F->write_handler))
       {
         F->write_handler = NULL;
         hdl(F, F->write_data);

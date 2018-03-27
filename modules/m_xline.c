@@ -82,8 +82,8 @@ xline_handle(struct Client *source_p, const char *mask, const char *reason, uint
     }
   }
 
-  struct GecosItem *gecos = gecos_find(mask, match);
-  if (gecos)
+  struct GecosItem *gecos;
+  if ((gecos = gecos_find(mask, match)))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",

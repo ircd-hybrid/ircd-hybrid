@@ -93,7 +93,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   if ((target_p = find_chasing(source_p, parv[2])) == NULL)
     return 0;  /* find_chasing sends ERR_NOSUCHNICK */
 
-  if (!(member_target = find_channel_link(target_p, chptr)))
+  if ((member_target = find_channel_link(target_p, chptr)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
     return 0;

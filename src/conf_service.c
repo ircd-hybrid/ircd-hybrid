@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "irc_string.h"
 #include "memory.h"
 #include "conf_service.h"
 
@@ -63,7 +62,7 @@ service_make(void)
 }
 
 const struct ServiceItem *
-service_find(const char *name)
+service_find(const char *name, int (*compare)(const char *, const char *))
 {
   dlink_node *node;
 
@@ -71,7 +70,7 @@ service_find(const char *name)
   {
     const struct ServiceItem *service = node->data;
 
-    if (!irccmp(service->name, name))
+    if (!compare(service->name, name))
       return service;
   }
 

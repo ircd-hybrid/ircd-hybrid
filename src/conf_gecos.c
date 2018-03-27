@@ -28,7 +28,6 @@
 #include "list.h"
 #include "send.h"
 #include "client.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "memory.h"
 #include "conf.h"

@@ -281,7 +281,7 @@ server_estab(struct Client *client_p)
   /* Fixing eob timings.. -gnp */
   client_p->connection->firsttime = CurrentTime;
 
-  if (service_find(client_p->name))
+  if (service_find(client_p->name, irccmp))
     AddFlag(client_p, FLAGS_SERVICE);
 
   /* Show the real host/IP to admins */
@@ -814,7 +814,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   SetServer(target_p);
 
-  if (service_find(target_p->name))
+  if (service_find(target_p->name, irccmp))
     AddFlag(target_p, FLAGS_SERVICE);
 
   dlinkAdd(target_p, &target_p->node, &global_server_list);

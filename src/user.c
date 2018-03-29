@@ -124,8 +124,8 @@ show_lusers(struct Client *client_p)
   if (dlink_list_length(&unknown_list))
     sendto_one_numeric(client_p, &me, RPL_LUSERUNKNOWN, dlink_list_length(&unknown_list));
 
-  if (dlink_list_length(&channel_list))
-    sendto_one_numeric(client_p, &me, RPL_LUSERCHANNELS, dlink_list_length(&channel_list));
+  if (dlink_list_length(channel_get_list()))
+    sendto_one_numeric(client_p, &me, RPL_LUSERCHANNELS, dlink_list_length(channel_get_list()));
 
   if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
   {

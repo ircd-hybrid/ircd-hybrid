@@ -187,9 +187,9 @@ server_burst(struct Client *client_p)
       server_send_client(client_p, target_p);
   }
 
-  DLINK_FOREACH(node, channel_list.head)
+  DLINK_FOREACH(node, channel_get_list()->head)
   {
-    struct Channel *chptr = node->data;
+    const struct Channel *chptr = node->data;
 
     if (dlink_list_length(&chptr->members))
     {

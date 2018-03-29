@@ -129,8 +129,8 @@ struct Invite
   uintmax_t when;  /**< Time the invite has been created */
 };
 
-extern dlink_list channel_list;
 
+extern const dlink_list *channel_get_list(void);
 extern int channel_check_name(const char *, const int);
 extern int can_send(struct Channel *, struct Client *, struct Membership *, const char *, int);
 extern int is_banned(const struct Channel *, const struct Client *);
@@ -145,8 +145,8 @@ extern void channel_member_names(struct Client *, struct Channel *, int);
 extern void add_invite(struct Channel *, struct Client *);
 extern void del_invite(struct Invite *);
 extern void clear_invite_list(dlink_list *);
-extern void channel_send_modes(struct Client *, struct Channel *);
-extern void channel_modes(struct Channel *, struct Client *, char *, char *);
+extern void channel_send_modes(struct Client *, const struct Channel *);
+extern void channel_modes(const struct Channel *, const struct Client *, char *, char *);
 extern void check_spambot_warning(struct Client *, const char *);
 extern void channel_free(struct Channel *);
 extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, int);
@@ -154,5 +154,5 @@ extern void channel_set_topic(struct Channel *, const char *, const char *, uint
 extern const char *get_member_status(const struct Membership *, const int);
 
 extern struct Channel *channel_make(const char *);
-extern struct Membership *find_channel_link(struct Client *, struct Channel *);
-#endif
+extern struct Membership *find_channel_link(const struct Client *, const struct Channel *);
+#endif  /* INCLUDED_channel_h */

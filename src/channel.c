@@ -43,8 +43,18 @@
 #include "misc.h"
 
 
-dlink_list channel_list;
+/** Doubly linked list containing a list of all channels. */
+static dlink_list channel_list;
 
+
+/*! \brief Returns the channel_list as constant
+ * \return channel_list
+ */
+const dlink_list *
+channel_get_list(void)
+{
+  return &channel_list;
+}
 
 /*! \brief Adds a user to a channel by adding another link to the
  *         channels member chain.
@@ -243,7 +253,7 @@ channel_send_mask_list(struct Client *client_p, const struct Channel *chptr,
  * \param chptr    Pointer to channel pointer
  */
 void
-channel_send_modes(struct Client *client_p, struct Channel *chptr)
+channel_send_modes(struct Client *client_p, const struct Channel *chptr)
 {
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
@@ -666,13 +676,14 @@ has_member_flags(const struct Membership *member, const unsigned int flags)
 }
 
 struct Membership *
-find_channel_link(struct Client *client_p, struct Channel *chptr)
+find_channel_link(const struct Client *client_p, const struct Channel *chptr)
 {
   dlink_node *node;
 
   if (!IsClient(client_p))
     return NULL;
 
+  /* Take the shortest of the two lists */
   if (dlink_list_length(&chptr->members) < dlink_list_length(&client_p->channel))
   {
     DLINK_FOREACH(node, chptr->members.head)

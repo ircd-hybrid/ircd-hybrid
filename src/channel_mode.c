@@ -256,7 +256,7 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
  * chptr onto buffer mbuf with the parameters in pbuf.
  */
 void
-channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
+channel_modes(const struct Channel *chptr, const struct Client *client_p, char *mbuf, char *pbuf)
 {
   *mbuf++ = '+';
   *pbuf = '\0';

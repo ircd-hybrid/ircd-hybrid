@@ -319,7 +319,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   remote_client_count = dlink_list_length(&global_server_list) + dlink_list_length(&global_client_list) - local_client_count;
 
   /* Count up all members, invites, ban lists, except lists, Invex lists */
-  DLINK_FOREACH(node, channel_list.head)
+  DLINK_FOREACH(node, channel_get_list()->head)
   {
     const struct Channel *chptr = node->data;
 
@@ -396,8 +396,8 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Channels %u(%zu)",
-                     dlink_list_length(&channel_list),
-                     dlink_list_length(&channel_list) * sizeof(struct Channel));
+                     dlink_list_length(channel_get_list()),
+                     dlink_list_length(channel_get_list()) * sizeof(struct Channel));
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Bans %u(%zu)",

@@ -58,11 +58,11 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
   cur_len = snprintf(buf, sizeof(buf), numeric_form(RPL_USERHOST), me.name, source_p->name, "");
   t = buf + cur_len;
 
-  for (char *nick = strtok_r(parv[1], " ", &p); nick && i++ < 5;
-             nick = strtok_r(NULL,    " ", &p))
+  for (const char *name = strtok_r(parv[1], " ", &p); name && i++ < 5;
+                   name = strtok_r(NULL,    " ", &p))
   {
     const struct Client *target_p;
-    if ((target_p = find_person(source_p, nick)))
+    if ((target_p = find_person(source_p, name)))
     {
       /*
        * Show real IP address for USERHOST on yourself.

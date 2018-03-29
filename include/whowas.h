@@ -56,4 +56,4 @@ extern void whowas_add_history(struct Client *, const int);
 extern void whowas_off_history(struct Client *);
 extern struct Client *whowas_get_history(const char *, uintmax_t);
 extern void whowas_count_memory(unsigned int *const, size_t *const);
-#endif /* INCLUDED_whowas_h */
+#endif  /* INCLUDED_whowas_h */

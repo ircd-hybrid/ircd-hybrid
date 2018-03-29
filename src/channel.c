@@ -875,7 +875,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
 {
   char *p = NULL;
   const struct ResvItem *resv = NULL;
-  const struct ClassItem *const class = get_class_ptr(&client_p->connection->confs);
+  const struct ClassItem *const class = class_get_ptr(&client_p->connection->confs);
   unsigned int flags = 0;
 
   assert(IsClient(client_p));

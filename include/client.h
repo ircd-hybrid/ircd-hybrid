@@ -41,7 +41,7 @@
  */
 enum
 {
-  STAT_CONNECTING,
+  STAT_CONNECTING = 1,
   STAT_HANDSHAKE,
   STAT_ME,
   STAT_UNKNOWN,
@@ -251,9 +251,9 @@ enum
 /*! \brief addr_mask_type enumeration */
 enum addr_mask_type
 {
-  HIDE_IP, /**< IP is hidden. Resolved hostname is shown instead */
-  SHOW_IP, /**< IP is shown. No parts of it are hidden or masked */
-  MASK_IP  /**< IP is masked. 255.255.255.255 is shown instead */
+  HIDE_IP,  /**< IP is hidden. Resolved hostname is shown instead */
+  SHOW_IP,  /**< IP is shown. No parts of it are hidden or masked */
+  MASK_IP   /**< IP is masked. 255.255.255.255 is shown instead */
 };
 
 struct ServicesTag
@@ -267,19 +267,19 @@ struct ServicesTag
 /*! \brief Server structure */
 struct Server
 {
-  dlink_list server_list; /**< Servers on this server */
-  dlink_list client_list; /**< Clients on this server */
-  char by[NICKLEN + 1];   /**< Who activated this connection */
+  dlink_list server_list;  /**< Servers on this server */
+  dlink_list client_list;  /**< Clients on this server */
+  char by[NICKLEN + 1];    /**< Who activated this connection */
 };
 
 /*! \brief ListTask structure */
 struct ListTask
 {
   dlink_node node;  /**< Embedded list node used to link into listing_client_list */
-  dlink_list show_mask; /**< Channels to show */
-  dlink_list hide_mask; /**< Channels to hide */
+  dlink_list show_mask;  /**< Channels to show */
+  dlink_list hide_mask;  /**< Channels to hide */
 
-  unsigned int hash_index; /**< The hash bucket we are currently in */
+  unsigned int hash_index;  /**< The hash bucket we are currently in */
   unsigned int users_min;
   unsigned int users_max;
   unsigned int created_min;
@@ -464,5 +464,4 @@ extern struct Client *client_make(struct Client *);
 extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);
-
-#endif /* INCLUDED_client_h */
+#endif  /* INCLUDED_client_h */

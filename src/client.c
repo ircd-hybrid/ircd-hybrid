@@ -65,7 +65,7 @@ static dlink_node *eac_next;  /* next aborted client to exit */
 
 
 /*
- * make_client - create a new Client struct and set it to initial state.
+ * client_make - create a new Client struct and set it to initial state.
  *
  *      from == NULL,   create local client (a client connected
  *                      to a socket).
@@ -82,7 +82,7 @@ static dlink_node *eac_next;  /* next aborted client to exit */
 struct Client *
 client_make(struct Client *from)
 {
-  struct Client *const client_p = xcalloc(sizeof(*client_p));
+  struct Client *client_p = xcalloc(sizeof(*client_p));
 
   if (from)
     client_p->from = from;
@@ -256,7 +256,7 @@ check_pings_list(dlink_list *list)
 {
   char buf[32] = "";  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
   unsigned int ping = 0;      /* ping time value from client */
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
@@ -1069,7 +1069,7 @@ del_accept(struct split_nuh_item *accept_p, struct Client *client_p)
 struct split_nuh_item *
 find_accept(const char *nick, const char *user,
             const char *host, struct Client *client_p,
-            int (*cmpfunc)(const char *, const char *))
+            int (*compare)(const char *, const char *))
 {
   dlink_node *node;
 
@@ -1077,9 +1077,9 @@ find_accept(const char *nick, const char *user,
   {
     struct split_nuh_item *accept_p = node->data;
 
-    if (!cmpfunc(accept_p->nickptr, nick) &&
-        !cmpfunc(accept_p->userptr, user) &&
-        !cmpfunc(accept_p->hostptr, host))
+    if (!compare(accept_p->nickptr, nick) &&
+        !compare(accept_p->userptr, user) &&
+        !compare(accept_p->hostptr, host))
       return accept_p;
   }
 
@@ -1135,7 +1135,7 @@ client_get_idle_time(const struct Client *source_p,
                      const struct Client *target_p)
 {
   unsigned int idle = 0;
-  const struct ClassItem *const class = get_class_ptr(&target_p->connection->confs);
+  const struct ClassItem *const class = class_get_ptr(&target_p->connection->confs);
 
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target_p == source_p)
     return CurrentTime - target_p->connection->last_privmsg;

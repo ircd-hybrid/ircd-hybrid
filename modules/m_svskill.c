@@ -51,7 +51,6 @@
 static int
 ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
   const char *comment = NULL;
   char reason[REASONLEN + 1] = "SVSKilled: ";
   uintmax_t ts = 0;
@@ -70,6 +69,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
   else
     comment = (parc > 2 && parv[2]) ? parv[2] : CONF_NOREASON;
 
+  struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 

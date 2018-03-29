@@ -326,7 +326,7 @@ register_local_user(struct Client *client_p)
     {
       do
         client_p->connection->random_ping = genrand_int32();
-      while (!client_p->connection->random_ping);
+      while (client_p->connection->random_ping == 0);
 
       sendto_one(client_p, "PING :%u", client_p->connection->random_ping);
       AddFlag(client_p, FLAGS_PINGSENT);

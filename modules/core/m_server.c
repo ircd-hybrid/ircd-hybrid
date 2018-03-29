@@ -481,7 +481,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!valid_servname(name))
+  if (!server_valid_name(name))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
@@ -660,7 +660,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!valid_servname(parv[1]))
+  if (!server_valid_name(parv[1]))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",

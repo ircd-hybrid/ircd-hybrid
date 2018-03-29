@@ -433,7 +433,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      "z :iphash %u(%zu)",
                      number_ips_stored, mem_ips_stored);
 
-  local_client_memory_used = local_client_count *(sizeof(struct Client) + sizeof(struct Connection));
+  local_client_memory_used = local_client_count * (sizeof(struct Client) + sizeof(struct Connection));
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Local client Memory in use: %u(%zu)",
                      local_client_count, local_client_memory_used);
@@ -1290,7 +1290,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
 
   if ((tab = stats_map[statchar]))
   {
-    if (!tab->required_modes || HasUMode(source_p, tab->required_modes))
+    if (tab->required_modes == 0 || HasUMode(source_p, tab->required_modes))
       tab->handler(source_p, parc, parv);
     else
       sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);

@@ -133,7 +133,7 @@ static void
 who_common_channel(struct Client *source_p, struct Channel *chptr, const char *mask,
                    int server_oper, unsigned int *maxmatches)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, chptr->members.head)
   {
@@ -153,7 +153,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, const char *m
     {
       do_who(source_p, target_p, NULL, "");
 
-      if (*maxmatches > 0)
+      if (*maxmatches)
       {
         if (--(*maxmatches) == 0)
         {
@@ -177,7 +177,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, const char *m
 static void
 who_global(struct Client *source_p, const char *mask, int server_oper)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
   unsigned int maxmatches = WHO_MAX_REPLIES;
   static uintmax_t last_used = 0;
 
@@ -221,7 +221,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
     {
       do_who(source_p, target_p, NULL, "");
 
-      if (maxmatches > 0)
+      if (maxmatches)
       {
         if (--maxmatches == 0)
         {
@@ -248,7 +248,7 @@ static void
 do_who_on_channel(struct Client *source_p, struct Channel *chptr,
                   int is_member, int server_oper)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, chptr->members.head)
   {
@@ -281,10 +281,10 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
 static int
 m_who(struct Client *source_p, int parc, char *parv[])
 {
+  dlink_node *node;
   struct Client *target_p = NULL;
   struct Channel *chptr = NULL;
   char *mask = parv[1];
-  dlink_node *node = NULL;
   const int server_oper = parc > 2 && *parv[2] == 'o';  /* Show OPERS only */
 
   /* See if mask is there, collapse it or return if not there */

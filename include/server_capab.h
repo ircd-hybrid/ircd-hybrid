@@ -54,7 +54,7 @@ enum
 /* Capabilities */
 struct Capability
 {
-  dlink_node node;
+  dlink_node node;  /**< List node; linked into capab_list */
   char *name;  /**< Name of capability */
   unsigned int cap;  /**< Mask value */
 };

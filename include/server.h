@@ -53,7 +53,7 @@ struct server_hunt
   struct Client *target_p;
 };
 
-extern int valid_servname(const char *);
+extern int server_valid_name(const char *);
 extern const struct server_hunt *server_hunt(struct Client *, const char *, const int, const int, char *[]);
 extern void write_links_file(void *);
 extern void read_links_file(void);

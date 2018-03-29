@@ -237,7 +237,7 @@ motd_lookup(const struct Client *client_p)
     {
       case MOTD_CLASS:
       {
-        const struct ClassItem *class = get_class_ptr(&client_p->connection->confs);
+        const struct ClassItem *class = class_get_ptr(&client_p->connection->confs);
         if (!match(motd->mask, class->name))
           return motd;
         break;

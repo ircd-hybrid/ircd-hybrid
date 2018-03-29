@@ -50,11 +50,10 @@
 static int
 ms_svshost(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
 
+  struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 

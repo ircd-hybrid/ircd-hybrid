@@ -270,7 +270,7 @@ try_connections(void *unused)
     assert(conf->class);
 
     /* Also when already connecting! (update holdtimes) --SRB */
-    if (!conf->port || !IsConfAllowAutoConn(conf))
+    if (conf->port == 0 || !IsConfAllowAutoConn(conf))
       continue;
 
     /*
@@ -330,7 +330,7 @@ try_connections(void *unused)
 }
 
 int
-valid_servname(const char *name)
+server_valid_name(const char *name)
 {
   unsigned int dots = 0;
   const char *p = name;
@@ -394,8 +394,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
 
   getnameinfo((const struct sockaddr *)&conf->addr, conf->addr.ss_len,
               buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
-  ilog(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host,
-       buf);
+  ilog(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
 
   /* Still processing a DNS lookup? -> exit */
   if (conf->dns_pending)

@@ -57,7 +57,7 @@ do_user(struct Client *source_p,
   if (!HasFlag(source_p, FLAGS_GOTID))
     strlcpy(source_p->username, username, sizeof(source_p->username));
 
-  if (!source_p->connection->registration)
+  if (source_p->connection->registration == 0)
     register_local_user(source_p);
 }
 

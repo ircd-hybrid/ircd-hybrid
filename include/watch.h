@@ -32,9 +32,8 @@
 /*! \brief Watch structure */
 struct Watch
 {
-  dlink_node node;  /**< Embedded dlink_node used to link into watchTable */
-  dlink_list watched_by;  /**< List of clients that have this
-                              entry on their watch list */
+  dlink_node node;  /**< List node; linked into watchTable */
+  dlink_list watched_by;  /**< List of clients that have this entry on their watch list */
   uintmax_t lasttime;  /**< Last time the client was seen */
   char name[NICKLEN + 1];  /**< Name of the client to watch */
 };
@@ -45,4 +44,4 @@ extern void watch_check_hash(const struct Client *, const enum irc_numerics);
 extern void watch_del_watch_list(struct Client *);
 extern void watch_count_memory(unsigned int *const, size_t *const);
 extern struct Watch *watch_find_hash(const char *);
-#endif
+#endif  /* INCLUDED_watch_h */

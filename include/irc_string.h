@@ -85,23 +85,26 @@ extern const unsigned char ToUpperTab[];
 
 extern const unsigned int CharAttrs[];
 
-#define PRINT_C   0x00001
-#define CNTRL_C   0x00002
-#define ALPHA_C   0x00004
-#define PUNCT_C   0x00008
-#define DIGIT_C   0x00010
-#define SPACE_C   0x00020
-#define NICK_C    0x00040
-#define CHAN_C    0x00080
-#define KWILD_C   0x00100
-#define CHANPFX_C 0x00200
-#define USER_C    0x00400
-#define HOST_C    0x00800
-#define NONEOS_C  0x01000
-#define SERV_C    0x02000
-#define EOL_C     0x04000
-#define MWILD_C   0x08000
-#define VCHAN_C   0x10000
+enum
+{
+  PRINT_C   = 1 <<  0,
+  CNTRL_C   = 1 <<  1,
+  ALPHA_C   = 1 <<  2,
+  PUNCT_C   = 1 <<  3,
+  DIGIT_C   = 1 <<  4,
+  SPACE_C   = 1 <<  5,
+  NICK_C    = 1 <<  6,
+  CHAN_C    = 1 <<  7,
+  KWILD_C   = 1 <<  8,
+  CHANPFX_C = 1 <<  9,
+  USER_C    = 1 << 10,
+  HOST_C    = 1 << 11,
+  NONEOS_C  = 1 << 12,
+  SERV_C    = 1 << 13,
+  EOL_C     = 1 << 14,
+  MWILD_C   = 1 << 15,
+  VCHAN_C   = 1 << 16
+};
 
 #define IsVisibleChanChar(c)   (CharAttrs[(unsigned char)(c)] & VCHAN_C)
 #define IsHostChar(c)   (CharAttrs[(unsigned char)(c)] & HOST_C)
@@ -129,4 +132,4 @@ extern const unsigned int CharAttrs[];
 
 #define IsNonEOS(c) (CharAttrs[(unsigned char)(c)] & NONEOS_C)
 #define IsEol(c) (CharAttrs[(unsigned char)(c)] & EOL_C)
-#endif /* INCLUDED_irc_string_h */
+#endif  /* INCLUDED_irc_string_h */

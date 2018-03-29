@@ -343,7 +343,7 @@ cap_end(struct Client *source_p, const char *caplist)
   source_p->connection->registration &= ~REG_NEED_CAP;
 
   /* If client is now done... */
-  if (!source_p->connection->registration)
+  if (source_p->connection->registration == 0)
   {
     register_local_user(source_p);
     return 0;

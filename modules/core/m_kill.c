@@ -57,7 +57,6 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
   char def_reason[] = CONF_NOREASON;
-  struct Client *target_p = NULL;
 
   if (EmptyString(parv[1]))
   {
@@ -74,6 +73,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   else
     reason = def_reason;
 
+  struct Client *target_p;
   if ((target_p = hash_find_client(parv[1])) == NULL)
   {
     /*
@@ -167,7 +167,6 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
   char def_reason[] = CONF_NOREASON;
-  struct Client *target_p = NULL;
 
   if (parc < 3 || EmptyString(parv[2]))
   {
@@ -175,6 +174,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 

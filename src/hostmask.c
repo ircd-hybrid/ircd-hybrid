@@ -359,7 +359,7 @@ mask_addr(struct irc_ssaddr *ip, int bits)
 static uint32_t
 hash_ipv4(const struct irc_ssaddr *addr, int bits)
 {
-  if (bits != 0)
+  if (bits)
   {
     const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
     uint32_t av = ntohl(v4->sin_addr.s_addr) & ~((1 << (32 - bits)) - 1);
@@ -688,7 +688,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
     {
       dlinkDelete(&arec->node, &atable[hv]);
 
-      if (!conf->ref_count)
+      if (conf->ref_count == 0)
         conf_free(conf);
 
       xfree(arec);
@@ -724,7 +724,7 @@ clear_out_address_conf(void)
       dlinkDelete(&arec->node, &atable[i]);
       arec->conf->active = 0;
 
-      if (!arec->conf->ref_count)
+      if (arec->conf->ref_count == 0)
         conf_free(arec->conf);
       xfree(arec);
     }
@@ -767,7 +767,7 @@ hostmask_expire_temporary(void)
     {
       struct AddressRec *arec = node->data;
 
-      if (!arec->conf->until || arec->conf->until > CurrentTime)
+      if (arec->conf->until == 0 || arec->conf->until > CurrentTime)
         continue;
 
       switch (arec->type)

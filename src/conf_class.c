@@ -81,7 +81,7 @@ class_init(void)
 }
 
 const struct ClassItem *
-get_class_ptr(const dlink_list *const list)
+class_get_ptr(const dlink_list *const list)
 {
   const dlink_node *const node = list->head;
 
@@ -101,25 +101,25 @@ get_class_ptr(const dlink_list *const list)
 const char *
 get_client_class(const dlink_list *const list)
 {
-  return get_class_ptr(list)->name;
+  return class_get_ptr(list)->name;
 }
 
 unsigned int
 get_client_ping(const dlink_list *const list)
 {
-  return get_class_ptr(list)->ping_freq;
+  return class_get_ptr(list)->ping_freq;
 }
 
 unsigned int
 get_sendq(const dlink_list *const list)
 {
-  return get_class_ptr(list)->max_sendq;
+  return class_get_ptr(list)->max_sendq;
 }
 
 unsigned int
 get_recvq(const dlink_list *const list)
 {
-  return get_class_ptr(list)->max_recvq;
+  return class_get_ptr(list)->max_recvq;
 }
 
 /*

@@ -80,7 +80,7 @@ event_addish(struct event *ev, void *data)
 void
 event_delete(struct event *ev)
 {
-  if (!ev->active)
+  if (ev->active == 0)
     return;
 
   dlinkDelete(&ev->node, &event_list);
@@ -108,7 +108,7 @@ event_run(void)
 
     ev->handler(ev->data);
 
-    if (!ev->oneshot)
+    if (ev->oneshot == 0)
       event_add(ev, ev->data);
   }
 }

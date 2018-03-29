@@ -64,7 +64,7 @@ struct ClassItem
 extern struct ClassItem *class_default;
 
 extern struct ClassItem *class_make(void);
-extern const struct ClassItem *get_class_ptr(const dlink_list *const);
+extern const struct ClassItem *class_get_ptr(const dlink_list *const);
 extern const dlink_list *class_get_list(void);
 extern void class_free(struct ClassItem *const);
 extern void class_init(void);
@@ -79,4 +79,4 @@ extern void destroy_cidr_class(struct ClassItem *);
 extern int cidr_limit_reached(int, struct irc_ssaddr *, struct ClassItem *);
 extern void remove_from_cidr_check(struct irc_ssaddr *, struct ClassItem *);
 extern void rebuild_cidr_list(struct ClassItem *);
-#endif
+#endif  /* INCLUDED_conf_class_h */

@@ -404,7 +404,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
        if (*s == ':')
        {
          /* The rest is single parameter--can include blanks also. */
-         para[++parc] = s + (!numeric);  /* Keep the colon if it's a numeric */
+         para[++parc] = s + (numeric == 0);  /* Keep the colon if it's a numeric */
          break;
        }
 

@@ -48,7 +48,6 @@
 static int
 m_ison(struct Client *source_p, int parc, char *parv[])
 {
-  char *nick;
   char *p = NULL;
   char *current_insert_point = NULL;
   char buf[IRCD_BUFSIZE];
@@ -57,11 +56,11 @@ m_ison(struct Client *source_p, int parc, char *parv[])
   len = snprintf(buf, sizeof(buf), numeric_form(RPL_ISON), me.name, source_p->name);
   current_insert_point = buf + len;
 
-  for (nick = strtok_r(parv[1], " ", &p); nick;
-       nick = strtok_r(NULL,    " ", &p))
+  for (char *nick = strtok_r(parv[1], " ", &p); nick;
+             nick = strtok_r(NULL,    " ", &p))
   {
-    const struct Client *target_p = find_person(source_p, nick);
-    if (target_p)
+    const struct Client *target_p;
+    if ((target_p = find_person(source_p, nick)))
     {
       len = strlen(target_p->name);
 

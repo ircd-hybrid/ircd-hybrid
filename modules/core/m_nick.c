@@ -169,9 +169,8 @@ check_clean_host(struct Client *source_p, const char *nick, const char *host)
 static void
 set_initial_nick(struct Client *source_p, const char *nick)
 {
-  const int samenick = !irccmp(source_p->name, nick);
-
-  if (!samenick)
+  int samenick = irccmp(source_p->name, nick) == 0;
+  if (samenick == 0)
     source_p->tsinfo = CurrentTime;
 
   source_p->connection->registration &= ~REG_NEED_NICK;
@@ -185,7 +184,7 @@ set_initial_nick(struct Client *source_p, const char *nick)
   /* fd_desc is long enough */
   fd_note(source_p->connection->fd, "Nick: %s", source_p->name);
 
-  if (!source_p->connection->registration)
+  if (source_p->connection->registration == 0)
     register_local_user(source_p);
 }
 
@@ -217,9 +216,8 @@ change_local_nick(struct Client *source_p, const char *nick)
   source_p->connection->nick.last_attempt = CurrentTime;
   source_p->connection->nick.count++;
 
-  int samenick = !irccmp(source_p->name, nick);
-
-  if (!samenick)
+  int samenick = irccmp(source_p->name, nick) == 0;
+  if (samenick == 0)
   {
     source_p->tsinfo = CurrentTime;
     clear_ban_cache_list(&source_p->channel);
@@ -255,7 +253,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   strlcpy(source_p->name, nick, sizeof(source_p->name));
   hash_add_client(source_p);
 
-  if (!samenick)
+  if (samenick == 0)
     watch_check_hash(source_p, RPL_LOGON);
 
   /* fd_desc is long enough */
@@ -283,9 +281,8 @@ change_remote_nick(struct Client *source_p, char *parv[])
   assert(source_p->name[0]);
 
   /* Client changing their nick */
-  int samenick = !irccmp(source_p->name, parv[1]);
-
-  if (!samenick)
+  int samenick = irccmp(source_p->name, parv[1]) == 0;
+  if (samenick == 0)
   {
     DelUMode(source_p, UMODE_REGISTERED);
     watch_check_hash(source_p, RPL_LOGOFF);
@@ -309,7 +306,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
   strlcpy(source_p->name, parv[1], sizeof(source_p->name));
   hash_add_client(source_p);
 
-  if (!samenick)
+  if (samenick == 0)
     watch_check_hash(source_p, RPL_LOGON);
 }
 
@@ -534,8 +531,8 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   }
 
   /* The timestamps are different */
-  int sameuser = !irccmp(target_p->username, source_p->username) &&
-                 !irccmp(target_p->sockhost, source_p->sockhost);
+  int sameuser = irccmp(target_p->username, source_p->username) == 0 &&
+                 irccmp(target_p->sockhost, source_p->sockhost) == 0;
 
   if ((sameuser && newts < target_p->tsinfo) ||
       (!sameuser && newts > target_p->tsinfo))
@@ -602,8 +599,6 @@ static int
 mr_nick(struct Client *source_p, int parc, char *parv[])
 {
   char nick[NICKLEN + 1] = "";
-  struct Client *target_p = NULL;
-  const struct ResvItem *resv = NULL;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -622,6 +617,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Check if the nick is resv'd */
+  const struct ResvItem *resv;
   if ((resv = resv_find(nick, match)))
   {
     sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
@@ -631,6 +627,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  struct Client *target_p;
   if ((target_p = hash_find_client(nick)) == NULL || target_p == source_p)
     set_initial_nick(source_p, nick);
   else
@@ -654,7 +651,6 @@ static int
 m_nick(struct Client *source_p, int parc, char *parv[])
 {
   char nick[NICKLEN + 1] = "";
-  struct Client *target_p = NULL;
   const struct ResvItem *resv = NULL;
 
   assert(MyClient(source_p));
@@ -690,6 +686,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  struct Client *target_p;
   if ((target_p = hash_find_client(nick)) == NULL)
     change_local_nick(source_p, nick);
   else if (target_p == source_p)
@@ -735,8 +732,6 @@ m_nick(struct Client *source_p, int parc, char *parv[])
 static int
 ms_nick(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
   if (parc != 3 || EmptyString(parv[parc - 1]))
     return 0;
 
@@ -747,6 +742,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   /* If the nick doesn't exist, allow it and process like normal */
+  struct Client *target_p;
   if ((target_p = hash_find_client(parv[1])) == NULL)
     change_remote_nick(source_p, parv);
   else if (IsUnknown(target_p))
@@ -802,7 +798,6 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
 static int
 ms_uid(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
   /* TBR: compatibility mode */
   const int does_rhost = parc == 12;
 
@@ -821,6 +816,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
    * This may generate 401's, but it ensures that both clients always
    * go, even if the other server refuses to do the right thing.
    */
+  struct Client *target_p;
   if ((target_p = hash_find_id(parv[8 + does_rhost])))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,

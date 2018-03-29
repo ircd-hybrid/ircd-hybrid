@@ -51,11 +51,10 @@
 static int
 ms_svstag(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
   if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
     return 0;
 
+  struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
@@ -65,7 +64,7 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
 
   if (!strncmp(parv[3], "-", 1))
   {
-    /* XXX: possibly allow to remove certain tags by numeric */
+    /* TBD: possibly allow to remove certain tags by numeric */
     client_clear_svstags(&target_p->svstags);
     sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s",
                   source_p->id,

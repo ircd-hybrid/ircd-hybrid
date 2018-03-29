@@ -52,8 +52,6 @@
 static int
 ms_svinfo(struct Client *source_p, int parc, char *parv[])
 {
-  intmax_t deltat = 0, theirtime = 0;
-
   if (!IsServer(source_p) || !MyConnect(source_p))
     return 0;
 
@@ -83,8 +81,8 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
    */
   set_time();
 
-  theirtime = strtoimax(parv[4], NULL, 10);
-  deltat = imaxabs(theirtime - CurrentTime);
+  intmax_t theirtime = strtoimax(parv[4], NULL, 10);
+  intmax_t deltat = imaxabs(theirtime - CurrentTime);
 
   if (deltat > ConfigGeneral.ts_max_delta)
   {

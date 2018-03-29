@@ -20,16 +20,15 @@
 
 enum
 {
-  FLAG_SHA256   = 0x00000001,
-  FLAG_SHA512   = 0x00000002,
-  FLAG_BLOWFISH = 0x00000004,
-  FLAG_RAW      = 0x00000008,
-  FLAG_SALT     = 0x00000010,
-  FLAG_LENGTH   = 0x00000020,
-  FLAG_ROUNDS   = 0x00000040,
-  FLAG_PASS     = 0x00000080,
+  FLAG_SHA256   = 1 << 0,
+  FLAG_SHA512   = 1 << 1,
+  FLAG_BLOWFISH = 1 << 2,
+  FLAG_RAW      = 1 << 3,
+  FLAG_SALT     = 1 << 4,
+  FLAG_LENGTH   = 1 << 5,
+  FLAG_ROUNDS   = 1 << 6,
+  FLAG_PASS     = 1 << 7,
 };
-
 
 extern char *crypt();
 

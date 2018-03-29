@@ -53,8 +53,6 @@
 static int
 ms_tburst(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *chptr = NULL;
-  int accept_remote = 0;
   uintmax_t remote_channel_ts = strtoumax(parv[1], NULL, 10);
   uintmax_t remote_topic_ts = strtoumax(parv[3], NULL, 10);
   const char *topic = parv[5];
@@ -68,6 +66,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
    */
 
 
+  struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[2])) == NULL)
     return 0;
 
@@ -84,6 +83,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
    *        The TS of the remote channel is equal to ours AND
    *        the TS of the remote topic is newer than ours
    */
+  int accept_remote = 0;
   if (HasFlag(source_p, FLAGS_SERVICE))
     accept_remote = 1;
   else if (remote_channel_ts < chptr->creationtime)

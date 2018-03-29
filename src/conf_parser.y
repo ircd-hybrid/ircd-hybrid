@@ -528,7 +528,7 @@ serverinfo_name: NAME '=' QSTRING ';'
   /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && !ConfigServerInfo.name)
   {
-    if (valid_servname(yylval.string))
+    if (server_valid_name(yylval.string))
       ConfigServerInfo.name = xstrdup(yylval.string);
     else
     {
@@ -1803,7 +1803,7 @@ service_name: NAME '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (valid_servname(yylval.string))
+  if (server_valid_name(yylval.string))
   {
     struct ServiceItem *service = service_make();
     service->name = xstrdup(yylval.string);

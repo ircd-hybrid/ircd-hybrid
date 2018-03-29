@@ -55,10 +55,6 @@
 static int
 m_invite(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-  struct Channel *chptr = NULL;
-  struct Membership *member = NULL;
-
   if (parc < 2)
   {
     dlink_node *node;
@@ -80,18 +76,21 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   if (IsFloodDone(source_p))
     flood_endgrace(source_p);
 
+  struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
     return 0;
   }
 
+  struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return 0;
   }
 
+  struct Membership *member;
   if ((member = find_channel_link(source_p, chptr)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
@@ -178,15 +177,14 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 static int
 ms_invite(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-  struct Channel *chptr = NULL;
-
   if (parc < 3 || EmptyString(parv[2]))
     return 0;
 
+  struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
+  struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[2])) == NULL)
     return 0;
 

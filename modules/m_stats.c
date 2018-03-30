@@ -34,6 +34,7 @@
 #include "conf_class.h"
 #include "conf_cluster.h"
 #include "conf_gecos.h"
+#include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
@@ -827,6 +828,12 @@ stats_messages(struct Client *source_p, int parc, char *parv[])
     report_messages(source_p);
 }
 
+static void
+stats_pseudo(struct Client *source_p, int parc, char *parv[])
+{
+  pseudo_stats(source_p);
+}
+
 /* stats_operedup()
  *
  * input	- client pointer
@@ -1258,6 +1265,7 @@ static const struct StatsStruct  stats_tab[] =
   { 'O',  stats_operator,    0           },
   { 'p',  stats_operedup,    0           },
   { 'P',  stats_ports,       0           },
+  { 'R',  stats_pseudo,      UMODE_OPER  },
   { 'q',  stats_resv,        UMODE_OPER  },
   { 'Q',  stats_resv,        UMODE_OPER  },
   { 's',  stats_service,     UMODE_OPER  },

@@ -73,6 +73,7 @@ enum irc_numerics
   RPL_UMODEIS              = 221,
   RPL_STATSDLINE           = 225,
   RPL_STATSALINE           = 226,
+  RPL_STATSPSEUDO          = 227,
   RPL_STATSLLINE           = 241,
   RPL_STATSUPTIME          = 242,
   RPL_STATSOLINE           = 243,

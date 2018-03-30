@@ -32,4 +32,5 @@ extern void pseudo_register(const char *, const char *,
                             const char *, const char *,
                             const char *);
 extern void pseudo_clear(void);
+extern void pseudo_stats(struct Client *);
 #endif

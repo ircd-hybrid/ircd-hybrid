@@ -60,6 +60,7 @@ static const char *const replies[] =
   /* 221 */  [RPL_UMODEIS] = "%s",
   /* 225 */  [RPL_STATSDLINE] = "%c %s :%s",
   /* 226 */  [RPL_STATSALINE] = "%s",
+  /* 227 */  [RPL_STATSPSEUDO] = "R %s %s %s@%s :%s",
   /* 241 */  [RPL_STATSLLINE] = "%c %s * %s %u %s",
   /* 242 */  [RPL_STATSUPTIME] = ":Server Up %s",
   /* 243 */  [RPL_STATSOLINE] = "%c %s@%s * %s %s %s",

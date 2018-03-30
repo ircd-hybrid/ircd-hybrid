@@ -73,7 +73,7 @@ m_pseudo(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!EmptyString(pseudo->prepend))
+  if (pseudo->prepend)
   {
     snprintf(buffer, sizeof(buffer), "%s%s", pseudo->prepend, msg);
     msg = buffer;
@@ -105,8 +105,9 @@ pseudo_register(const char *name, const char *nick, const char *serv,
   pseudo->name = xstrdup(name);
   pseudo->nick = xstrdup(nick);
   pseudo->serv = xstrdup(serv);
-  pseudo->prepend = xstrdup(prepend);
   pseudo->command = xstrdup(command);
+  if (!EmptyString(prepend))
+    pseudo->prepend = xstrdup(prepend);
 
   pseudo->msg.cmd = pseudo->command;
   pseudo->msg.args_max = 2;
@@ -139,5 +140,19 @@ pseudo_clear(void)
     xfree(pseudo->prepend);
     xfree(pseudo->command);
     xfree(pseudo);
+  }
+}
+
+void
+pseudo_stats(struct Client *source_p)
+{
+  dlink_node *node;
+
+  DLINK_FOREACH(node, pseudo_list.head)
+  {
+    struct PseudoItem *pseudo = node->data;
+    sendto_one_numeric(source_p, &me, RPL_STATSPSEUDO, pseudo->command,
+                       pseudo->name, pseudo->nick, pseudo->serv,
+                       pseudo->prepend ? pseudo->prepend : "*");
   }
 }

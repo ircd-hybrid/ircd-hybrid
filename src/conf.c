@@ -1001,8 +1001,11 @@ clear_out_old_conf(void)
   xfree(ConfigAdminInfo.description);
   ConfigAdminInfo.description = NULL;
 
+  /* Clean out ConfigServerHide */
   xfree(ConfigServerHide.flatten_links_file);
   ConfigServerHide.flatten_links_file = NULL;
+  xfree(ConfigServerHide.hidden_name);
+  ConfigServerHide.hidden_name = NULL;
 
   /* Clean out listeners */
   listener_close_marked();

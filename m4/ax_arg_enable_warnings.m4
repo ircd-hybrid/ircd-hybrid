@@ -22,6 +22,7 @@ AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
     AX_APPEND_COMPILE_FLAGS([-Wpointer-arith])
     AX_APPEND_COMPILE_FLAGS([-Wredundant-decls])
     AX_APPEND_COMPILE_FLAGS([-Wshadow])
+    AX_APPEND_COMPILE_FLAGS([-Wshift-negative-value])
     AX_APPEND_COMPILE_FLAGS([-Wsign-compare])
     AX_APPEND_COMPILE_FLAGS([-Wtype-limits])
     AX_APPEND_COMPILE_FLAGS([-Wundef])

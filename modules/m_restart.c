@@ -60,7 +60,7 @@ mo_restart(struct Client *source_p, int parc, char *parv[])
 
   if (EmptyString(name))
   {
-    sendto_one_notice(source_p, &me, ":Need server name /restart %s", me.name);
+    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "RESTART");
     return 0;
   }
 

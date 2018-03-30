@@ -616,8 +616,9 @@ client_close_connection(struct Client *client_p)
 
   if (!IsDead(client_p))
   {
-    /* attempt to flush any pending dbufs. Evil, but .. -- adrian */
-    /* there is still a chance that we might send data to this socket
+    /* Attempt to flush any pending dbufs. Evil, but .. -- adrian */
+    /*
+     * There is still a chance that we might send data to this socket
      * even if it is marked as blocked (COMM_SELECT_READ handler is called
      * before COMM_SELECT_WRITE). Let's try, nothing to lose.. -adx
      */

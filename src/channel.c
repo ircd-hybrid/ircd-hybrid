@@ -215,7 +215,7 @@ channel_send_mask_list(struct Client *client_p, const struct Channel *chptr,
   int tlen, mlen, cur_len;
   char *pp = pbuf;
 
-  if (!dlink_list_length(list))
+  if (dlink_list_length(list) == 0)
     return;
 
   mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %ju %s %c :", me.id,
@@ -904,7 +904,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
     if (key && *key == '\0')
       key = NULL;
 
-    if (!channel_check_name(name, 1))
+    if (channel_check_name(name, 1) == 0)
     {
       sendto_one_numeric(client_p, &me, ERR_BADCHANNAME, name);
       continue;
@@ -946,7 +946,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
        * This should never be the case unless there is some sort of
        * persistant channels.
        */
-      if (!dlink_list_length(&chptr->members))
+      if (dlink_list_length(&chptr->members) == 0)
         flags = CHFL_CHANOP;
       else
         flags = 0;

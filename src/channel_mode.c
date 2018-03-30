@@ -473,12 +473,12 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn, cha
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (!add_id(source_p, chptr, mask, CHFL_BAN))
+    if (add_id(source_p, chptr, mask, CHFL_BAN) == 0)
       return;
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (!del_id(chptr, mask, CHFL_BAN))
+    if (del_id(chptr, mask, CHFL_BAN) == 0)
       return;
   }
 
@@ -542,12 +542,12 @@ chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn, 
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (!add_id(source_p, chptr, mask, CHFL_EXCEPTION))
+    if (add_id(source_p, chptr, mask, CHFL_EXCEPTION) == 0)
       return;
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (!del_id(chptr, mask, CHFL_EXCEPTION))
+    if (del_id(chptr, mask, CHFL_EXCEPTION) == 0)
       return;
   }
 
@@ -611,12 +611,12 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn, c
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (!add_id(source_p, chptr, mask, CHFL_INVEX))
+    if (add_id(source_p, chptr, mask, CHFL_INVEX) == 0)
       return;
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (!del_id(chptr, mask, CHFL_INVEX))
+    if (del_id(chptr, mask, CHFL_INVEX) == 0)
       return;
   }
 
@@ -675,7 +675,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn, c
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (!has_member_flags(member, CHFL_VOICE))
+    if (has_member_flags(member, CHFL_VOICE) == 0)
       return;  /* No redundant mode changes */
 
     DelMemberFlag(member, CHFL_VOICE);
@@ -733,7 +733,7 @@ chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn, cha
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (!has_member_flags(member, CHFL_HALFOP))
+    if (has_member_flags(member, CHFL_HALFOP) == 0)
       return;  /* No redundant mode changes */
 
     DelMemberFlag(member, CHFL_HALFOP);
@@ -791,7 +791,7 @@ chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (!has_member_flags(member, CHFL_CHANOP))
+    if (has_member_flags(member, CHFL_CHANOP) == 0)
       return;  /* No redundant mode changes */
 
     DelMemberFlag(member, CHFL_CHANOP);
@@ -846,7 +846,7 @@ chm_limit(struct Client *source_p, struct Channel *chptr, int parc, int *parn, c
   }
   else if (dir == MODE_DEL)
   {
-    if (!chptr->mode.limit)
+    if (chptr->mode.limit == 0)
       return;
 
     chptr->mode.limit = 0;
@@ -1203,7 +1203,7 @@ channel_mode_set(struct Client *source_p, struct Channel *chptr,
   }
 
   /* Bail out if we have nothing to do... */
-  if (!mode_count)
+  if (mode_count == 0)
     return;
 
   send_mode_changes_client(source_p, chptr);

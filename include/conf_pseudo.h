@@ -27,10 +27,20 @@
 #ifndef INCLUDED_conf_pseudo_h
 #define INCLUDED_conf_pseudo_h
 
+struct PseudoItem
+{
+  dlink_node node;
+  struct Message msg;
+  char *name;
+  char *nick;
+  char *serv;
+  char *prepend;
+  char *command;
+};
+
 extern const dlink_list *pseudo_get_list(void);
 extern void pseudo_register(const char *, const char *,
                             const char *, const char *,
                             const char *);
 extern void pseudo_clear(void);
-extern void pseudo_stats(struct Client *);
-#endif
+#endif  /* INCLUDED_conf_pseudo_h */

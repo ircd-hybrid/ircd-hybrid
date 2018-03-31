@@ -38,16 +38,6 @@
 #include "server.h"
 #include "conf_pseudo.h"
 
-struct PseudoItem
-{
-  dlink_node node;
-  struct Message msg;
-  char *name;
-  char *nick;
-  char *serv;
-  char *prepend;
-  char *command;
-};
 
 static dlink_list pseudo_list;
 
@@ -59,7 +49,7 @@ pseudo_get_list(void)
 }
 
 static int
-m_pseudo(struct Client *source_p, int parc, char *parv[])
+pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE] = "";
   const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];
@@ -114,10 +104,10 @@ pseudo_register(const char *name, const char *nick, const char *serv,
   pseudo->msg.flags = MFLG_EXTRA;
   pseudo->msg.extra = pseudo;
   pseudo->msg.handlers[UNREGISTERED_HANDLER] = m_unregistered;
-  pseudo->msg.handlers[CLIENT_HANDLER] = m_pseudo;
+  pseudo->msg.handlers[CLIENT_HANDLER] = pseudo_message_handler;
   pseudo->msg.handlers[SERVER_HANDLER] = m_ignore;
   pseudo->msg.handlers[ENCAP_HANDLER] = m_ignore;
-  pseudo->msg.handlers[OPER_HANDLER] = m_pseudo;
+  pseudo->msg.handlers[OPER_HANDLER] = pseudo_message_handler;
   dlinkAdd(pseudo, &pseudo->node, &pseudo_list);
 
   mod_add_cmd(&pseudo->msg);
@@ -140,19 +130,5 @@ pseudo_clear(void)
     xfree(pseudo->prepend);
     xfree(pseudo->command);
     xfree(pseudo);
-  }
-}
-
-void
-pseudo_stats(struct Client *source_p)
-{
-  dlink_node *node;
-
-  DLINK_FOREACH(node, pseudo_list.head)
-  {
-    struct PseudoItem *pseudo = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSPSEUDO, pseudo->command,
-                       pseudo->name, pseudo->nick, pseudo->serv,
-                       pseudo->prepend ? pseudo->prepend : "*");
   }
 }

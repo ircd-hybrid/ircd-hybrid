@@ -30,6 +30,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
+#include "parse.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
@@ -46,7 +47,6 @@
 #include "server.h"
 #include "server_capab.h"
 #include "event.h"
-#include "parse.h"
 #include "modules.h"
 #include "whowas.h"
 #include "watch.h"
@@ -831,7 +831,15 @@ stats_messages(struct Client *source_p, int parc, char *parv[])
 static void
 stats_pseudo(struct Client *source_p, int parc, char *parv[])
 {
-  pseudo_stats(source_p);
+  dlink_node *node;
+
+  DLINK_FOREACH(node, pseudo_get_list()->head)
+  {
+    const struct PseudoItem *pseudo = node->data;
+    sendto_one_numeric(source_p, &me, RPL_STATSPSEUDO, pseudo->command,
+                       pseudo->name, pseudo->nick, pseudo->serv,
+                       pseudo->prepend ? pseudo->prepend : "*");
+  }
 }
 
 /* stats_operedup()

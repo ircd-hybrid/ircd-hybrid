@@ -31,6 +31,7 @@
 #include "stdinc.h"
 #include "ircd.h"
 #include "list.h"
+#include "parse.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"

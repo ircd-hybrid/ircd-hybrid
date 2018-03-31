@@ -73,13 +73,10 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
   server_p = hash_find_server(pseudo->serv);
 
   if (target_p && server_p && (target_p->servptr == server_p) && !IsMe(server_p))
-  {
-    sendto_one(target_p, ":%s PRIVMSG %s :%s",
-               source_p->id, target_p->id, msg);
-    return 0;
-  }
+    sendto_one(target_p, ":%s PRIVMSG %s :%s", source_p->id, target_p->id, msg);
+  else
+    sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, pseudo->name);
 
-  sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, pseudo->name);
   return 0;
 }
 

@@ -51,28 +51,20 @@
 static int
 ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
-  const char *comment = NULL;
+  const char *comment = parv[3];  /* Either defined or NULL */
   char reason[REASONLEN + 1] = "SVSKilled: ";
-  uintmax_t ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
 
-  if (EmptyString(parv[1]))
-    return 0;
-
-  if (parc > 3)
-  {
-    comment = parv[3] ? parv[3] : CONF_NOREASON;
-    ts = strtoumax(parv[2], NULL, 10);
-  }
-  else
-    comment = (parc > 2 && parv[2]) ? parv[2] : CONF_NOREASON;
+  if (EmptyString(comment))
+    comment = CONF_NOREASON;
 
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return 0;
 
+  uintmax_t ts = strtoumax(parv[2], NULL, 10);
   if (ts && (ts != target_p->tsinfo))
     return 0;
 
@@ -93,19 +85,15 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (ts == 0)
-    sendto_one(target_p, ":%s SVSKILL %s :%s", source_p->id,
-               target_p->id, comment);
-  else
-    sendto_one(target_p, ":%s SVSKILL %s %ju :%s", source_p->id,
-               target_p->id, ts, comment);
+  sendto_one(target_p, ":%s SVSKILL %s %ju :%s", source_p->id,
+             target_p->id, ts, comment);
   return 0;
 }
 
 static struct Message svskill_msgtab =
 {
   .cmd = "SVSKILL",
-  .args_min = 2,
+  .args_min = 3,
   .args_max = MAXPARA,
   .handlers[UNREGISTERED_HANDLER] = m_ignore,
   .handlers[CLIENT_HANDLER] = m_ignore,

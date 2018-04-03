@@ -207,7 +207,7 @@ resv_clear(void)
     {
       struct ResvItem *resv = node->data;
 
-      if (!resv->in_database)
+      if (resv->in_database == 0)
         resv_delete(resv);
     }
   }
@@ -226,7 +226,7 @@ resv_expire(void)
     {
       struct ResvItem *resv = node->data;
 
-      if (!resv->expire || resv->expire > CurrentTime)
+      if (resv->expire == 0 || resv->expire > CurrentTime)
         continue;
 
       if (ConfigGeneral.tkline_expire_notices)

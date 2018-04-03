@@ -52,7 +52,7 @@ gecos_clear(void)
   {
     struct GecosItem *gecos = node->data;
 
-    if (!gecos->in_database)
+    if (gecos->in_database == 0)
       gecos_delete(gecos);
   }
 }
@@ -100,7 +100,7 @@ gecos_expire(void)
   {
     struct GecosItem *gecos = node->data;
 
-    if (!gecos->expire || gecos->expire > CurrentTime)
+    if (gecos->expire == 0 || gecos->expire > CurrentTime)
       continue;
 
     if (ConfigGeneral.tkline_expire_notices)

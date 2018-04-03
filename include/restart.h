@@ -34,4 +34,4 @@ enum
 };
 
 extern void server_die(const char *, int);
-#endif
+#endif  /* INCLUDED_restart_h */

@@ -42,7 +42,7 @@ NO PARAMETERS:
      +C     - 'No CTCPs'. Prevent users from sending CTCPs to the channel.
 
      +L     - 'Large ban list'. Channel can make use of the extended ban list
-              limit. Can be set only by irc-operators.
+              limit. Can be set only by irc-operators, servers and services.
 
      +M     - 'Modreg'. Unregistered/unidentified clients cannot send text to
               the channel
@@ -52,7 +52,7 @@ NO PARAMETERS:
 
      +O     - 'IRCOps only'. This will prevent anyone who hasn't obtained
               irc-operator status from joining your channel. Can be set only
-              by irc-operators.
+              by irc-operators, servers and services.
 
      +R     - 'Registered only'. Only registered clients may join a channel
               with that mode set

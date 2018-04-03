@@ -93,7 +93,7 @@ enum
   MODE_NONOTICE     = 1 << 13,  /**< Clients cannot send NOTICE to the channel */
   MODE_HIDEBMASKS   = 1 << 14,  /**< Hides +b/+e/+I lists/changes for non-chanops everywhere */
   MODE_EXTLIMIT     = 1 << 15,  /**< Channel can make use of the extended ban list limit */
-  MODE_NONICKCHANGE = 1 << 16   /**< User is prevented from changing their nick when in this channel */
+  MODE_NONICKCHANGE = 1 << 16   /**< User is prevented from changing their nick while in this channel */
 };
 
 #define HasCMode(x, y) ((x)->mode.mode &   (y))

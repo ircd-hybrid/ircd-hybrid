@@ -337,4 +337,4 @@ extern int parse_aline(const char *, struct Client *, int, char **,
 
 extern uintmax_t valid_tkline(const char *, const int);
 extern int match_conf_password(const char *, const struct MaskItem *);
-#endif /* INCLUDED_s_conf_h */
+#endif  /* INCLUDED_conf_h */

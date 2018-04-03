@@ -30,12 +30,12 @@
 #include "fdlist.h"
 
 /*
- * this hides in here rather than in defaults.h because it really shouldn't
+ * This hides in here rather than in defaults.h because it really shouldn't
  * be tweaked unless you *REALLY REALLY* know what you're doing!
  * Remember, messages are only anti-flooded on incoming from the client, not on
  * incoming from a server for a given client, so if you tweak this you risk
  * allowing a client to flood differently depending upon where they are on
- * the network..
+ * the network.
  *   -- adrian
  */
 /* MAX_FLOOD is the amount of lines in a 'burst' we allow from a client,
@@ -54,4 +54,4 @@ enum
 extern void read_packet(fde_t *, void *);
 extern void flood_recalc(fde_t *, void *);
 extern void flood_endgrace(struct Client *);
-#endif /* INCLUDED_packet_h */
+#endif  /* INCLUDED_packet_h */

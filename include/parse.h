@@ -105,4 +105,4 @@ extern int m_ignore(struct Client *, int, char *[]);
 extern int m_not_oper(struct Client *, int, char *[]);
 extern int m_registered(struct Client *, int, char *[]);
 extern int m_unregistered(struct Client *, int, char *[]);
-#endif /* INCLUDED_parse_h */
+#endif  /* INCLUDED_parse_h */

@@ -1139,6 +1139,7 @@ const struct chan_mode  cmode_tab[] =
   { .letter = 'I', .func = chm_invex },
   { .letter = 'L', .mode = MODE_EXTLIMIT, .only_opers = 1, .func = chm_simple },
   { .letter = 'M', .mode = MODE_MODREG, .func = chm_simple },
+  { .letter = 'N', .mode = MODE_NONICKCHANGE, .func = chm_simple },
   { .letter = 'O', .mode = MODE_OPERONLY, .only_opers = 1, .func = chm_simple },
   { .letter = 'R', .mode = MODE_REGONLY, .func = chm_simple },
   { .letter = 'S', .mode = MODE_SSLONLY, .func = chm_simple },

@@ -47,6 +47,9 @@ NO PARAMETERS:
      +M     - 'Modreg'. Unregistered/unidentified clients cannot send text to
               the channel
 
+     +N     - 'No nick changes'. This will prevent any user who isn't opped or
+              half-opped (+o/+h) from changing their nick while in the channel.
+
      +O     - 'IRCOps only'. This will prevent anyone who hasn't obtained
               irc-operator status from joining your channel. Can be set only
               by irc-operators.

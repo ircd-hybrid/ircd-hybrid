@@ -3,7 +3,7 @@
 
 Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.22 DFGHRSWabcdefgijklnopqrsuwy bchiklmnoprstuveCILMORST bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.23 DFGHRSWabcdefgijklnopqrsuwy bchiklmnoprstuveCILMNORST bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -48,33 +48,32 @@ Channel Modes:
 +C - noctcps      - Prevent users from sending CTCPs to the channel
 +e - exempt       - Exemption from bans
 +h - halfop       - Half-Op status
-+I - invex        - Invite exceptions, nick!user@host does not need to be
-                    explicitly INVITE'd into the channel before being able
-                    JOIN
++I - invex        - Invite exceptions, nick!user@host does not need to be explicitly INVITE'd
+                    into the channel before being able JOIN
 +i - invite       - Invite only
 +k - key          - Key/password for the channel
 +l - limit        - Limit the number of users in a channel
 +m - moderated    - Users without +v/h/o cannot send text to the channel
 +L - extlimit     - Channel can make use of the extended ban list limit. Can be set only by irc-operators.
 +M - modreg       - Unregistered/unidentified clients cannot send text to the channel
++N - nonickchange - This will prevent any user who isn't opped or half-opped (+o/+h) from changing their
+                    nick while in the channel.
 +n - noexternal   - Users must be in the channel to send text to it
 +o - chanop       - Full operator status
 +O - operonly     - This mode will prevent anyone who hasn't obtained irc-operator status from joining the
                     channel. Can be set only by irc-operators.
-+p - private      - Private is obsolete, this now restricts KNOCK, and can be
-                    set at the same time as +s.
++p - private      - Private is obsolete, this now restricts KNOCK, and can be set at the same time as +s.
 +r - registered   - Channel has been registered. Can be set only by servers and services.
 +R - regonly      - Only registered clients may join a channel with that mode set
 +s - secret       - The channel does not show up on NAMES or LIST or in the
                     WHOIS channel list unless you are a member of the channel
-+S - sslonly      - This mode will prevent anyone who isn't securely connected
-                    via SSL/TLS from joining the channel.
++S - sslonly      - This mode will prevent anyone who isn't securely connected via SSL/TLS from joining
+                    the channel.
 +t - topic        - Only chanops and halfops can change the topic
-+u - hidebmasks   - Hides +b/+e/+I mode changes and lists to everyone except
-                    channel ops, and half-ops (+o/+h)
++u - hidebmasks   - Hides +b/+e/+I mode changes and lists to everyone except channel ops, and
+                    half-ops (+o/+h)
 +T - nonotice     - Users without +v/h/o cannot send NOTICEs to the channel
-+v - voice        - Can speak in a moderated channel, and is exempt from flood
-                    restrictions
++v - voice        - Can speak in a moderated channel, and is exempt from flood restrictions
 
 The third part of the 004 numeric lists channel modes that require arguments.
 Currently these are bkloveIh.

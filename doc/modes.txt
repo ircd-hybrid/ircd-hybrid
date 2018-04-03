@@ -3,7 +3,7 @@
 
 Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.23 DFGHRSWabcdefgijklnopqrsuwy bchiklmnoprstuveCILMNORST bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.24 DFGHRSWabcdefgijklnopqrsuwy bchiklmnoprstuveCILMNORST bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.

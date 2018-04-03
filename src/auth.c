@@ -93,11 +93,24 @@ auth_make(struct Client *client)
 {
   struct AuthRequest *auth = xcalloc(sizeof(*auth));
 
-  client->connection->auth = auth;
   auth->client = client;
+  auth->client->connection->auth = auth;
   auth->timeout = CurrentTime + CONNECTTIMEOUT;
 
   return auth;
+}
+
+/*! \brief Unlink auth request from auth_list and free memory
+ * \param auth The allocated auth request to cleanup.
+ */
+static void
+auth_free(struct AuthRequest *auth)
+{
+  assert(dlinkFind(&auth_list, auth));
+  dlinkDelete(&auth->node, &auth_list);
+  assert(dlinkFind(&auth_list, auth) == NULL);
+
+  xfree(auth);
 }
 
 /*! \brief Release auth client from auth system. This adds the client into the
@@ -107,15 +120,12 @@ auth_make(struct Client *client)
 static void
 auth_release_client(struct AuthRequest *auth)
 {
-  struct Client *const client = auth->client;
+  struct Client *client = auth->client;
 
   if (IsDoingAuth(auth) || IsDNSPending(auth))
     return;
 
-  assert(dlinkFind(&auth_list, auth));
-  dlinkDelete(&auth->node, &auth_list);
-
-  xfree(auth);
+  auth_free(auth);
   client->connection->auth = NULL;
 
   /*
@@ -512,9 +522,7 @@ auth_delete(struct AuthRequest *auth)
     ClearDNSPending(auth);
   }
 
-  assert(dlinkFind(&auth_list, auth));
-  dlinkDelete(&auth->node, &auth_list);
-  xfree(auth);
+  auth_free(auth);
 }
 
 /*

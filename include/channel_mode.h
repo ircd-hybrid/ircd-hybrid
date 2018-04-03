@@ -77,22 +77,23 @@ enum
 /* channel modes ONLY */
 enum
 {
-  MODE_PRIVATE    = 1 <<  0,  /**< */
-  MODE_SECRET     = 1 <<  1,  /**< Channel does not show up on NAMES or LIST */
-  MODE_MODERATED  = 1 <<  2,  /**< Users without +v/+h/+o cannot send text to the channel */
-  MODE_TOPICLIMIT = 1 <<  3,  /**< Only chanops can change the topic */
-  MODE_INVITEONLY = 1 <<  4,  /**< Only invited users may join this channel */
-  MODE_NOPRIVMSGS = 1 <<  5,  /**< Users must be in the channel to send text to it */
-  MODE_SSLONLY    = 1 <<  6,  /**< Prevents anyone who isn't connected via SSL/TLS from joining the channel */
-  MODE_OPERONLY   = 1 <<  7,  /**< Prevents anyone who hasn't obtained IRC operator status from joining the channel */
-  MODE_REGISTERED = 1 <<  8,  /**< Channel has been registered with ChanServ */
-  MODE_REGONLY    = 1 <<  9,  /**< Only registered clients may join a channel with that mode set */
-  MODE_NOCTRL     = 1 << 10,  /**< Prevents users from sending messages containing control codes to the channel */
-  MODE_MODREG     = 1 << 11,  /**< Unregistered/unidentified clients cannot send text to the channel */
-  MODE_NOCTCP     = 1 << 12,  /**< Clients cannot send CTCP messages to the channel */
-  MODE_NONOTICE   = 1 << 13,  /**< Clients cannot send NOTICE to the channel */
-  MODE_HIDEBMASKS = 1 << 14,  /**< Hides +b/+e/+I lists/changes for non-chanops everywhere */
-  MODE_EXTLIMIT   = 1 << 15   /**< Channel can make use of the extended ban list limit */
+  MODE_PRIVATE      = 1 <<  0,  /**< */
+  MODE_SECRET       = 1 <<  1,  /**< Channel does not show up on NAMES or LIST */
+  MODE_MODERATED    = 1 <<  2,  /**< Users without +v/+h/+o cannot send text to the channel */
+  MODE_TOPICLIMIT   = 1 <<  3,  /**< Only chanops can change the topic */
+  MODE_INVITEONLY   = 1 <<  4,  /**< Only invited users may join this channel */
+  MODE_NOPRIVMSGS   = 1 <<  5,  /**< Users must be in the channel to send text to it */
+  MODE_SSLONLY      = 1 <<  6,  /**< Prevents anyone who isn't connected via SSL/TLS from joining the channel */
+  MODE_OPERONLY     = 1 <<  7,  /**< Prevents anyone who hasn't obtained IRC operator status from joining the channel */
+  MODE_REGISTERED   = 1 <<  8,  /**< Channel has been registered with ChanServ */
+  MODE_REGONLY      = 1 <<  9,  /**< Only registered clients may join a channel with that mode set */
+  MODE_NOCTRL       = 1 << 10,  /**< Prevents users from sending messages containing control codes to the channel */
+  MODE_MODREG       = 1 << 11,  /**< Unregistered/unidentified clients cannot send text to the channel */
+  MODE_NOCTCP       = 1 << 12,  /**< Clients cannot send CTCP messages to the channel */
+  MODE_NONOTICE     = 1 << 13,  /**< Clients cannot send NOTICE to the channel */
+  MODE_HIDEBMASKS   = 1 << 14,  /**< Hides +b/+e/+I lists/changes for non-chanops everywhere */
+  MODE_EXTLIMIT     = 1 << 15,  /**< Channel can make use of the extended ban list limit */
+  MODE_NONICKCHANGE = 1 << 16   /**< User is prevented from changing their nick when in this channel */
 };
 
 #define HasCMode(x, y) ((x)->mode.mode &   (y))

@@ -1091,7 +1091,7 @@ read_conf_files(int cold)
   snprintf(chanlimit, sizeof(chanlimit), "#:%u",
            ConfigChannel.max_channels);
   isupport_add("CHANLIMIT", chanlimit, -1);
-  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstuCLMORST");
+  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstuCLMNORST");
   isupport_add("CHANNELLEN", NULL, CHANNELLEN);
   isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
   isupport_add("CHANMODES", chanmodes, -1);

@@ -686,6 +686,21 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  dlink_node *node;
+  DLINK_FOREACH(node, source_p->channel.head)
+  {
+    const struct Membership *member = node->data;
+
+    if (HasCMode(member->chptr, MODE_NONICKCHANGE))
+    {
+      if (has_member_flags(member, CHFL_CHANOP | CHFL_HALFOP) == 0)
+      {
+        sendto_one_numeric(source_p, &me, ERR_NONICKCHANGE, member->chptr->name);
+        return 0;
+      }
+    }
+  }
+
   struct Client *target_p;
   if ((target_p = hash_find_client(nick)) == NULL)
     change_local_nick(source_p, nick);

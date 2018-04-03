@@ -185,6 +185,7 @@ enum irc_numerics
   ERR_USERNOTINCHANNEL     = 441,
   ERR_NOTONCHANNEL         = 442,
   ERR_USERONCHANNEL        = 443,
+  ERR_NONICKCHANGE         = 447,
   ERR_NOTREGISTERED        = 451,
   ERR_ACCEPTFULL           = 456,
   ERR_ACCEPTEXIST          = 457,

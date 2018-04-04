@@ -144,15 +144,26 @@ whois_person(struct Client *source_p, struct Client *target_p)
                                   "server side ignore with the exception of common channels");
   }
 
-  if (target_p->svstags.head)
-    svstag = target_p->svstags.head->data;
-
-  if (HasUMode(target_p, UMODE_OPER))
+  if (HasUMode(target_p, UMODE_OPER) || HasFlag(target_p, FLAGS_SERVICE))
+  {
     if (!HasUMode(target_p, UMODE_HIDDEN) || HasUMode(source_p, UMODE_OPER))
+    {
+      if (target_p->svstags.head)
+        svstag = target_p->svstags.head->data;
+
       if (!svstag || svstag->numeric != RPL_WHOISOPERATOR)
-        sendto_one_numeric(source_p, &me, RPL_WHOISOPERATOR, target_p->name,
-                   HasUMode(target_p, UMODE_ADMIN) ? "is a Server Administrator" :
-                                                   "is an IRC Operator");
+      {
+        const char *text;
+        if (HasFlag(target_p, FLAGS_SERVICE))
+          text = "is a Network Service";
+        else if (HasUMode(target_p, UMODE_ADMIN))
+          text = "is a Server Administrator";
+        else  /* HasUMode(target_p, UMODE_OPER) == true */
+          text = "is an IRC Operator";
+        sendto_one_numeric(source_p, &me, RPL_WHOISOPERATOR, target_p->name, text);
+      }
+    }
+  }
 
   DLINK_FOREACH(node, target_p->svstags.head)
   {
@@ -162,7 +173,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
       if (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER))
         continue;
 
-    if (!svstag->umodes || HasUMode(source_p, svstag->umodes))
+    if (svstag->umodes == 0 || HasUMode(source_p, svstag->umodes))
       sendto_one_numeric(source_p, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
                          target_p->name, svstag->tag);
   }

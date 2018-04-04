@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "client.h"
+#include "client_svstag.h"
 #include "hash.h"
 #include "channel.h"
 #include "channel_mode.h"

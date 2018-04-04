@@ -29,6 +29,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_svstag.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -117,7 +118,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
           {
             dlink_node *node;
 
-            client_detach_svstag(&source_p->svstags, RPL_WHOISOPERATOR);
+            svstag_detach(&source_p->svstags, RPL_WHOISOPERATOR);
             conf_detach(source_p, CONF_OPER);
 
             ClrOFlag(source_p);

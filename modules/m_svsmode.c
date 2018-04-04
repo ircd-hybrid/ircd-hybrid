@@ -26,7 +26,9 @@
  */
 
 #include "stdinc.h"
+#include "list.h"
 #include "client.h"
+#include "client_svstag.h"
 #include "ircd.h"
 #include "send.h"
 #include "channel_mode.h"
@@ -112,7 +114,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
           {
             dlink_node *node;
 
-            client_detach_svstag(&target_p->svstags, RPL_WHOISOPERATOR);
+            svstag_detach(&target_p->svstags, RPL_WHOISOPERATOR);
             conf_detach(target_p, CONF_OPER);
             ClrOFlag(target_p);
             DelUMode(target_p, ConfigGeneral.oper_only_umodes);

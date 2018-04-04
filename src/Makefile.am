@@ -13,6 +13,7 @@ ircd_SOURCES = auth.c            \
                channel.c         \
                channel_mode.c    \
                client.c          \
+               client_svstag.c   \
                conf.c            \
                conf_class.c      \
                conf_cluster.c    \

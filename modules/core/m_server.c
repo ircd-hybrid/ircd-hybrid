@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "client.h"
+#include "client_svstag.h"
 #include "event.h"
 #include "hash.h"
 #include "id.h"

@@ -25,7 +25,9 @@
  */
 
 #include "stdinc.h"
+#include "list.h"
 #include "client.h"
+#include "client_svstag.h"
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
@@ -65,7 +67,7 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   if (!strncmp(parv[3], "-", 1))
   {
     /* TBD: possibly allow to remove certain tags by numeric */
-    client_clear_svstags(&target_p->svstags);
+    svstag_clear_list(&target_p->svstags);
     sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s",
                   source_p->id,
                   target_p->id, target_p->tsinfo, parv[3]);
@@ -75,8 +77,7 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   if (parc < 6 || EmptyString(parv[5]))
     return 0;
 
-  client_attach_svstag(&target_p->svstags, strtoul(parv[3], NULL, 10),
-                       parv[4], parv[5]);
+  svstag_attach(&target_p->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
 
   sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s %s :%s",
                 source_p->id,

@@ -21,7 +21,7 @@
 
 /*! \file client_svstag.c
  * \brief Controls SVSTAGS.
- * \version $Id: $
+ * \version $Id$
  */
 
 #include "stdinc.h"

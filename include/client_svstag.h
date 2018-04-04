@@ -21,7 +21,7 @@
 
 /*! \file client_svstag.h
  * \brief Controls SVSTAGS.
- * \version $Id: $
+ * \version $Id$
  */
 
 #ifndef INCLUDED_client_svstag_h

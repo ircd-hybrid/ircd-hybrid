@@ -149,7 +149,7 @@ stats_service(struct Client *source_p, int parc, char *parv[])
   DLINK_FOREACH(node, service_get_list()->head)
   {
     const struct ServiceItem *service = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSSERVICE, 'S', "*", service->name, 0, 0);
+    sendto_one_numeric(source_p, &me, RPL_STATSSERVICE, "*", service->name, 0, 0);
   }
 }
 
@@ -1275,8 +1275,7 @@ static const struct StatsStruct  stats_tab[] =
   { 'P',  stats_ports,       0           },
   { 'q',  stats_resv,        UMODE_OPER  },
   { 'Q',  stats_resv,        UMODE_OPER  },
-  { 'R',  stats_pseudo,      UMODE_OPER  },
-  { 's',  stats_service,     UMODE_OPER  },
+  { 's',  stats_pseudo,      UMODE_OPER  },
   { 'S',  stats_service,     UMODE_OPER  },
   { 't',  stats_tstats,      UMODE_OPER  },
   { 'T',  motd_report,       UMODE_OPER  },

@@ -8,6 +8,7 @@ GnuTLS support as of version 8.2.13
 o) Added "STATS R" to show configured pseudo {} blocks
 o) Implemented channel mode 'N' which prevents users from changing their
    nick while in a channel with that mode set
+o) Services clients are now shown with 'is a Network Service' in "WHOIS"
 
 
 -- Noteworthy changes in version 8.2.23 (2018-03-26)

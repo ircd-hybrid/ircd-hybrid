@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "client.h"
+#include "client_svstag.h"
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -191,58 +192,6 @@ client_free(struct Client *client_p)
   }
 
   xfree(client_p);
-}
-
-static void
-svstag_free(struct ServicesTag *svstag, dlink_list *list)
-{
-  dlinkDelete(&svstag->node, list);
-  xfree(svstag->tag);
-  xfree(svstag);
-}
-
-void
-client_detach_svstag(dlink_list *list, unsigned int numeric)
-{
-  dlink_node *node, *node_next;
-
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
-  {
-    struct ServicesTag *svstag = node->data;
-
-    if (svstag->numeric == numeric)
-      svstag_free(svstag, list);
-  }
-}
-
-void
-client_attach_svstag(dlink_list *list, unsigned int numeric,
-                     const char *umodes, const char *tag)
-{
-  const struct user_modes *tab = NULL;
-
-  if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
-    return;
-
-  struct ServicesTag *svstag = xcalloc(sizeof(*svstag));
-  svstag->numeric = numeric;
-  svstag->tag = xstrdup(tag);
-
-  for (const char *m = umodes + 1; *m; ++m)
-    if ((tab = umode_map[(unsigned char)*m]))
-      svstag->umodes |= tab->flag;
-
-  if (numeric != RPL_WHOISOPERATOR)
-    dlinkAddTail(svstag, &svstag->node, list);
-  else
-    dlinkAdd(svstag, &svstag->node, list);
-}
-
-void
-client_clear_svstags(dlink_list *list)
-{
-  while (list->head)
-    svstag_free(list->head->data, list);
 }
 
 /* check_pings_list()
@@ -714,7 +663,7 @@ exit_one_client(struct Client *source_p, const char *comment)
     DLINK_FOREACH_SAFE(node, node_next, source_p->channel.head)
       remove_user_from_channel(node->data);
 
-    client_clear_svstags(&source_p->svstags);
+    svstag_clear_list(&source_p->svstags);
 
     whowas_add_history(source_p, 0);
     whowas_off_history(source_p);

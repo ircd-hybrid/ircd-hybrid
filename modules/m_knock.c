@@ -56,16 +56,18 @@
 static int
 m_knock(struct Client *source_p, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
+  const char *const name = parv[1];
+
+  if (EmptyString(name))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KNOCK");
     return 0;
   }
 
   struct Channel *chptr;
-  if ((chptr = hash_find_channel(parv[1])) == NULL)
+  if ((chptr = hash_find_channel(name)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
     return 0;
   }
 

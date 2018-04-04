@@ -4,7 +4,7 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
--- Noteworthy changes in version 8.2.24 (2018-??-??)
+-- Noteworthy changes in version 8.2.24 (2018-04-05)
 o) Added "STATS R" to show configured pseudo {} blocks
 o) Implemented channel mode 'N' which prevents users from changing their
    nick while in a channel with that mode set

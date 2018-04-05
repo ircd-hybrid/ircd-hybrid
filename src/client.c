@@ -339,7 +339,7 @@ check_conf_klines(void)
       continue;
 
     if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE,
-                                    client_p->connection->aftype, NULL, NULL, 1)))
+                                    client_p->ip.ss.ss_family, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
       conf_try_ban(client_p, CLIENT_BAN_DLINE, conf->reason);
@@ -347,7 +347,7 @@ check_conf_klines(void)
     }
 
     if ((ptr = find_conf_by_address(client_p->host, &client_p->ip,
-                                    CONF_KLINE, client_p->connection->aftype,
+                                    CONF_KLINE, client_p->ip.ss.ss_family,
                                     client_p->username, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
@@ -369,7 +369,7 @@ check_conf_klines(void)
     struct Client *client_p = node->data;
 
     if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE,
-                                    client_p->connection->aftype, NULL, NULL, 1)))
+                                    client_p->ip.ss.ss_family, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
       conf_try_ban(client_p, CLIENT_BAN_DLINE, conf->reason);
@@ -406,7 +406,7 @@ conf_try_ban(struct Client *client_p, int type, const char *reason)
       break;
     case CLIENT_BAN_DLINE:
       if (find_conf_by_address(NULL, &client_p->ip, CONF_EXEMPT,
-                               client_p->connection->aftype, NULL, NULL, 1))
+                               client_p->ip.ss.ss_family, NULL, NULL, 1))
         return;
       ban_type = 'D';
       break;
@@ -523,7 +523,7 @@ client_get_name(const struct Client *client_p, enum addr_mask_type type)
                client_p->username, client_p->sockhost);
       break;
     case MASK_IP:
-      if (client_p->connection->aftype == AF_INET)
+      if (client_p->ip.ss.ss_family == AF_INET)
         snprintf(buf, sizeof(buf), "%s[%s@255.255.255.255]",
                  client_p->name, client_p->username);
       else

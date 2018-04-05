@@ -61,12 +61,12 @@ kline_check(const struct AddressRec *arec)
     switch (arec->masktype)
     {
       case HM_IPV4:
-        if (client_p->connection->aftype == AF_INET)
+        if (client_p->ip.ss.ss_family == AF_INET)
           if (match_ipv4(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
       case HM_IPV6:
-        if (client_p->connection->aftype == AF_INET6)
+        if (client_p->ip.ss.ss_family == AF_INET6)
           if (match_ipv6(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
         break;

@@ -691,7 +691,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
                                   &source_p->ip, CONF_CLIENT,
-                                  source_p->connection->aftype,
+                                  source_p->ip.ss.ss_family,
                                   source_p->username,
                                   source_p->connection->password, 1);
     else
@@ -763,7 +763,7 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
                                   &source_p->ip, CONF_KLINE,
-                                  source_p->connection->aftype,
+                                  source_p->ip.ss.ss_family,
                                   source_p->username, NULL, 1);
     else
       conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE, 0,
@@ -799,7 +799,7 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
                                   &source_p->ip, CONF_KLINE,
-                                  source_p->connection->aftype,
+                                  source_p->ip.ss.ss_family,
                                   source_p->username, NULL, 0);
     else
       conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE, 0,

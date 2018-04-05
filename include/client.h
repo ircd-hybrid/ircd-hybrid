@@ -129,15 +129,14 @@ enum
   FLAGS_EOB           = 1 << 13,  /**< Server has sent us an EOB */
   FLAGS_HIDDEN        = 1 << 14,  /**< A hidden server. Not shown in /links */
   FLAGS_BLOCKED       = 1 << 15,  /**< Must wait for COMM_SELECT_WRITE */
-  FLAGS_USERHOST      = 1 << 16,  /**< Client is in userhost hash */
-  FLAGS_EXEMPTRESV    = 1 << 17,  /**< Client is exempt from RESV */
-  FLAGS_GOTUSER       = 1 << 18,  /**< If we received a USER command */
-  FLAGS_FINISHED_AUTH = 1 << 19,  /**< Client has been released from auth */
-  FLAGS_FLOOD_NOTICED = 1 << 20,  /**< Notice to opers about this flooder has been sent */
-  FLAGS_SERVICE       = 1 << 21,  /**< Client/server is a network service */
-  FLAGS_SSL           = 1 << 22,  /**< User is connected via TLS/SSL */
-  FLAGS_SQUIT         = 1 << 23,
-  FLAGS_EXEMPTXLINE   = 1 << 24   /**< Client is exempt from x-lines */
+  FLAGS_EXEMPTRESV    = 1 << 16,  /**< Client is exempt from RESV */
+  FLAGS_GOTUSER       = 1 << 17,  /**< If we received a USER command */
+  FLAGS_FINISHED_AUTH = 1 << 18,  /**< Client has been released from auth */
+  FLAGS_FLOOD_NOTICED = 1 << 19,  /**< Notice to opers about this flooder has been sent */
+  FLAGS_SERVICE       = 1 << 20,  /**< Client/server is a network service */
+  FLAGS_SSL           = 1 << 21,  /**< User is connected via TLS/SSL */
+  FLAGS_SQUIT         = 1 << 22,
+  FLAGS_EXEMPTXLINE   = 1 << 23   /**< Client is exempt from x-lines */
 };
 
 #define HasFlag(x, y) ((x)->flags &   (y))
@@ -338,7 +337,6 @@ struct Connection
   dlink_list        watches;   /**< Chain of Watch pointer blocks */
   dlink_list        confs;     /**< Configuration record associated */
   dlink_list        invited;   /**< Chain of invite pointer blocks */
-  struct irc_ssaddr ip;
   int               aftype;    /**< Makes life easier for DNS res in IPV6 */
 
   fde_t            *fd;
@@ -378,6 +376,8 @@ struct Client
   dlink_list        whowas_list;
   dlink_list        channel;   /**< Chain of channel pointer blocks */
   dlink_list        svstags;   /**< List of ServicesTag items */
+
+  struct irc_ssaddr ip;  /**< Real IP address */
 
   char away[AWAYLEN + 1]; /**< Client's AWAY message. Can be set/unset via AWAY command */
   char name[HOSTLEN + 1]; /**< Unique name for a client nick or host */

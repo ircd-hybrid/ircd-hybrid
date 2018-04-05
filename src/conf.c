@@ -51,7 +51,6 @@
 #include "send.h"
 #include "memory.h"
 #include "res.h"
-#include "userhost.h"
 #include "user.h"
 #include "channel_mode.h"
 #include "misc.h"
@@ -218,27 +217,18 @@ static int
 attach_iline(struct Client *client_p, struct MaskItem *conf)
 {
   const struct ClassItem *const class = conf->class;
-  struct ip_entry *ip_found;
   int a_limit_reached = 0;
-  unsigned int local = 0, global = 0;
 
-  ip_found = ipcache_find_or_add_address(&client_p->connection->ip);
-  ip_found->count++;
+  struct ip_entry *ipcache = ipcache_find_or_add_address(&client_p->ip);
+  ++ipcache->count_local;
   AddFlag(client_p, FLAGS_IPHASH);
 
-  userhost_count(client_p->sockhost, &global, &local);
-
-  /* XXX blah. go down checking the various silly limits
-   * setting a_limit_reached if any limit is reached.
-   * - Dianora
-   */
   if (class->max_total && class->ref_count >= class->max_total)
     a_limit_reached = 1;
-  else if (class->max_perip && ip_found->count > class->max_perip)
+  else if (class->max_perip_local && ipcache->count_local > class->max_perip_local)
     a_limit_reached = 1;
-  else if (class->max_local && local >= class->max_local) /* XXX: redundant */
-    a_limit_reached = 1;
-  else if (class->max_global && global >= class->max_global)
+  else if (class->max_perip_global &&
+           (ipcache->count_local + ipcache->count_remote) > class->max_perip_global)
     a_limit_reached = 1;
 
   if (a_limit_reached)
@@ -267,7 +257,7 @@ verify_access(struct Client *client_p)
   if (HasFlag(client_p, FLAGS_GOTID))
   {
     conf = find_address_conf(client_p->host, client_p->username,
-                             &client_p->connection->ip,
+                             &client_p->ip,
                              client_p->connection->aftype,
                              client_p->connection->password);
   }
@@ -277,7 +267,7 @@ verify_access(struct Client *client_p)
 
     strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
     conf = find_address_conf(client_p->host, non_ident,
-                             &client_p->connection->ip,
+                             &client_p->ip,
                              client_p->connection->aftype,
                              client_p->connection->password);
   }
@@ -414,7 +404,7 @@ conf_detach(struct Client *client_p, enum maskitem_type type)
     free_dlink_node(node);
 
     if (conf->type == CONF_CLIENT)
-      remove_from_cidr_check(&client_p->connection->ip, conf->class);
+      remove_from_cidr_check(&client_p->ip, conf->class);
 
     if (--conf->class->ref_count == 0 && conf->class->active == 0)
     {
@@ -441,7 +431,7 @@ conf_attach(struct Client *client_p, struct MaskItem *conf)
 
   if (conf->type == CONF_CLIENT)
     if (cidr_limit_reached(IsConfExemptLimits(conf),
-                           &client_p->connection->ip, conf->class))
+                           &client_p->ip, conf->class))
       return TOO_MANY;    /* Already at maximum allowed */
 
   conf->class->ref_count++;
@@ -534,13 +524,13 @@ operator_find(const struct Client *who, const char *name)
             break;
           case HM_IPV4:
             if (who->connection->aftype == AF_INET)
-              if (match_ipv4(&who->connection->ip, &conf->addr, conf->bits))
+              if (match_ipv4(&who->ip, &conf->addr, conf->bits))
                 if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                   return conf;
             break;
           case HM_IPV6:
             if (who->connection->aftype == AF_INET6)
-              if (match_ipv6(&who->connection->ip, &conf->addr, conf->bits))
+              if (match_ipv6(&who->ip, &conf->addr, conf->bits))
                 if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                   return conf;
             break;

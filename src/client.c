@@ -46,7 +46,6 @@
 #include "memory.h"
 #include "hostmask.h"
 #include "listener.h"
-#include "userhost.h"
 #include "watch.h"
 #include "rng_mt.h"
 #include "parse.h"
@@ -339,7 +338,7 @@ check_conf_klines(void)
     if (IsDead(client_p))
       continue;
 
-    if ((ptr = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
+    if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE,
                                     client_p->connection->aftype, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
@@ -347,7 +346,7 @@ check_conf_klines(void)
       continue;  /* and go examine next Client */
     }
 
-    if ((ptr = find_conf_by_address(client_p->host, &client_p->connection->ip,
+    if ((ptr = find_conf_by_address(client_p->host, &client_p->ip,
                                     CONF_KLINE, client_p->connection->aftype,
                                     client_p->username, NULL, 1)))
     {
@@ -369,7 +368,7 @@ check_conf_klines(void)
   {
     struct Client *client_p = node->data;
 
-    if ((ptr = find_conf_by_address(NULL, &client_p->connection->ip, CONF_DLINE,
+    if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE,
                                     client_p->connection->aftype, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
@@ -406,7 +405,7 @@ conf_try_ban(struct Client *client_p, int type, const char *reason)
       ban_type = 'K';
       break;
     case CLIENT_BAN_DLINE:
-      if (find_conf_by_address(NULL, &client_p->connection->ip, CONF_EXEMPT,
+      if (find_conf_by_address(NULL, &client_p->ip, CONF_EXEMPT,
                                client_p->connection->aftype, NULL, NULL, 1))
         return;
       ban_type = 'D';
@@ -687,8 +686,11 @@ exit_one_client(struct Client *source_p, const char *comment)
   if (source_p->name[0])
     hash_del_client(source_p);
 
-  if (HasFlag(source_p, FLAGS_USERHOST))
-    userhost_del(source_p->sockhost, !MyConnect(source_p));
+  if (HasFlag(source_p, FLAGS_IPHASH))
+  {
+    DelFlag(source_p, FLAGS_IPHASH);
+    ipcache_remove_address(&source_p->ip, MyConnect(source_p));
+  }
 
   /* Check to see if the client isn't already on the dead list */
   assert(dlinkFind(&dead_list, source_p) == NULL);
@@ -751,12 +753,6 @@ exit_client(struct Client *source_p, const char *comment)
       return;
 
     AddFlag(source_p, FLAGS_CLOSING);
-
-    if (HasFlag(source_p, FLAGS_IPHASH))
-    {
-      DelFlag(source_p, FLAGS_IPHASH);
-      ipcache_remove_address(&source_p->connection->ip);
-    }
 
     if (source_p->connection->auth)
     {

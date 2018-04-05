@@ -600,12 +600,12 @@ find_bmask(const struct Client *client_p, const dlink_list *list)
           break;
         case HM_IPV4:
           if (client_p->connection->aftype == AF_INET)
-            if (match_ipv4(&client_p->connection->ip, &ban->addr, ban->bits))
+            if (match_ipv4(&client_p->ip, &ban->addr, ban->bits))
               return 1;
           break;
         case HM_IPV6:
           if (client_p->connection->aftype == AF_INET6)
-            if (match_ipv6(&client_p->connection->ip, &ban->addr, ban->bits))
+            if (match_ipv6(&client_p->ip, &ban->addr, ban->bits))
               return 1;
           break;
         default:

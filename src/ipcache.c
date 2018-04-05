@@ -122,7 +122,7 @@ ipcache_find_or_add_address(const struct irc_ssaddr *addr)
  *                 the struct ip_entry is returned to the ip_entry_heap
  */
 void
-ipcache_remove_address(const struct irc_ssaddr *addr)
+ipcache_remove_address(const struct irc_ssaddr *addr, int local)
 {
   dlink_node *node;
   const uint32_t hash_index = ipcache_hash_address(addr);
@@ -149,9 +149,14 @@ ipcache_remove_address(const struct irc_ssaddr *addr)
         continue;
     }
 
-    assert(iptr->count > 0);
+    assert(iptr->count_local > 0 || iptr->count_remote > 0);
 
-    if (--iptr->count == 0 &&
+    if (local)
+      --iptr->count_local;
+    else
+      --iptr->count_remote;
+
+    if (iptr->count_local == 0 && iptr->count_remote == 0 &&
         (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
     {
       dlinkDelete(&iptr->node, &ip_hash_table[hash_index]);
@@ -178,7 +183,7 @@ ipcache_remove_expired_entries(void *unused)
     {
       struct ip_entry *iptr = node->data;
 
-      if (iptr->count == 0 &&
+      if (iptr->count_local == 0 && iptr->count_remote == 0 &&
           (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
       {
         dlinkDelete(&iptr->node, &ip_hash_table[i]);

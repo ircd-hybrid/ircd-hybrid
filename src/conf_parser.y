@@ -93,13 +93,12 @@ static struct
     port,
     aftype,
     ping_freq,
-    max_perip,
+    max_perip_local,
+    max_perip_global,
     con_freq,
     min_idle,
     max_idle,
     max_total,
-    max_global,
-    max_local,
     max_sendq,
     max_recvq,
     max_channels,
@@ -225,10 +224,8 @@ reset_block_state(void)
 %token  MAX_BANS
 %token  MAX_BANS_LARGE
 %token  MAX_CHANNELS
-%token  MAX_GLOBAL
 %token  MAX_IDLE
 %token  MAX_INVITES
-%token  MAX_LOCAL
 %token  MAX_NICK_CHANGES
 %token  MAX_NICK_LENGTH
 %token  MAX_NICK_TIME
@@ -252,7 +249,8 @@ reset_block_state(void)
 %token  NO_TILDE
 %token  NUMBER
 %token  NUMBER_PER_CIDR
-%token  NUMBER_PER_IP
+%token  NUMBER_PER_IP_GLOBAL
+%token  NUMBER_PER_IP_LOCAL
 %token  OPER_ONLY_UMODES
 %token  OPER_UMODES
 %token  OPERATOR
@@ -1340,11 +1338,10 @@ class_entry: CLASS
   xfree(class->name);
   class->name = xstrdup(block_state.class.buf);
   class->ping_freq = block_state.ping_freq.value;
-  class->max_perip = block_state.max_perip.value;
+  class->max_perip_local = block_state.max_perip_local.value;
+  class->max_perip_global = block_state.max_perip_global.value;
   class->con_freq = block_state.con_freq.value;
   class->max_total = block_state.max_total.value;
-  class->max_global = block_state.max_global.value;
-  class->max_local = block_state.max_local.value;
   class->max_sendq = block_state.max_sendq.value;
   class->max_recvq = block_state.max_recvq.value;
   class->max_channels = block_state.max_channels.value;
@@ -1373,12 +1370,11 @@ class_item:     class_name |
                 class_cidr_bitlen_ipv6 |
                 class_ping_time |
                 class_number_per_cidr |
-                class_number_per_ip |
+                class_number_per_ip_local |
+                class_number_per_ip_global |
                 class_connectfreq |
                 class_max_channels |
                 class_max_number |
-                class_max_global |
-                class_max_local |
                 class_sendq |
                 class_recvq |
                 class_min_idle |
@@ -1398,10 +1394,16 @@ class_ping_time: PING_TIME '=' timespec ';'
     block_state.ping_freq.value = $3;
 };
 
-class_number_per_ip: NUMBER_PER_IP '=' NUMBER ';'
+class_number_per_ip_local: NUMBER_PER_IP_LOCAL '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
-    block_state.max_perip.value = $3;
+    block_state.max_perip_local.value = $3;
+};
+
+class_number_per_ip_global: NUMBER_PER_IP_GLOBAL '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass == 1)
+    block_state.max_perip_global.value = $3;
 };
 
 class_connectfreq: CONNECTFREQ '=' timespec ';'
@@ -1420,18 +1422,6 @@ class_max_number: MAX_NUMBER '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
     block_state.max_total.value = $3;
-};
-
-class_max_global: MAX_GLOBAL '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass == 1)
-    block_state.max_global.value = $3;
-};
-
-class_max_local: MAX_LOCAL '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass == 1)
-    block_state.max_local.value = $3;
 };
 
 class_sendq: SENDQ '=' sizespec ';'

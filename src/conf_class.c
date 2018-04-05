@@ -315,7 +315,7 @@ rebuild_cidr_list(struct ClassItem *class)
 
     if (conf && (conf->type == CONF_CLIENT))
       if (conf->class == class)
-        cidr_limit_reached(1, &client_p->connection->ip, class);
+        cidr_limit_reached(1, &client_p->ip, class);
   }
 }
 

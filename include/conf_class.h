@@ -47,9 +47,8 @@ struct ClassItem
   unsigned int con_freq;
   unsigned int ping_freq;
   unsigned int max_total;
-  unsigned int max_local;
-  unsigned int max_global;
-  unsigned int max_perip;
+  unsigned int max_perip_local;
+  unsigned int max_perip_global;
   unsigned int min_idle;
   unsigned int max_idle;
   unsigned int max_channels;

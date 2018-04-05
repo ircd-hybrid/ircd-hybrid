@@ -439,7 +439,7 @@ server_check(const char *name, struct Client *client_p)
       const struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&server_conf->addr;
 
       if (IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr))
-        memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(server_conf->addr));
+        memcpy(&server_conf->addr, &client_p->ip, sizeof(server_conf->addr));
       break;
     }
     case AF_INET:
@@ -447,7 +447,7 @@ server_check(const char *name, struct Client *client_p)
       const struct sockaddr_in *v4 = (struct sockaddr_in *)&server_conf->addr;
 
       if (v4->sin_addr.s_addr == INADDR_NONE)
-        memcpy(&server_conf->addr, &client_p->connection->ip, sizeof(server_conf->addr));
+        memcpy(&server_conf->addr, &client_p->ip, sizeof(server_conf->addr));
       break;
     }
   }

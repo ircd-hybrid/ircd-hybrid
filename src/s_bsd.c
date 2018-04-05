@@ -209,7 +209,6 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   getnameinfo((const struct sockaddr *)&client_p->ip,
               client_p->ip.ss_len, client_p->sockhost,
               sizeof(client_p->sockhost), NULL, 0, NI_NUMERICHOST);
-  client_p->connection->aftype = client_p->ip.ss.ss_family;
 
   if (client_p->sockhost[0] == ':')
   {

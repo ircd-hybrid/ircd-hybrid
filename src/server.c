@@ -451,7 +451,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
     strlcpy(client_p->serv->by, "AutoConn.", sizeof(client_p->serv->by));
 
   SetConnecting(client_p);
-  client_p->connection->aftype = conf->aftype;
+  client_p->ip.ss.ss_family = conf->aftype;
 
   /* Now, initiate the connection */
   /* XXX assume that a non 0 type means a specific bind address

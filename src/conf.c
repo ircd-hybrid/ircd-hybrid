@@ -258,7 +258,7 @@ verify_access(struct Client *client_p)
   {
     conf = find_address_conf(client_p->host, client_p->username,
                              &client_p->ip,
-                             client_p->connection->aftype,
+                             client_p->ip.ss.ss_family,
                              client_p->connection->password);
   }
   else
@@ -268,7 +268,7 @@ verify_access(struct Client *client_p)
     strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
     conf = find_address_conf(client_p->host, non_ident,
                              &client_p->ip,
-                             client_p->connection->aftype,
+                             client_p->ip.ss.ss_family,
                              client_p->connection->password);
   }
 
@@ -523,13 +523,13 @@ operator_find(const struct Client *who, const char *name)
                 return conf;
             break;
           case HM_IPV4:
-            if (who->connection->aftype == AF_INET)
+            if (who->ip.ss.ss_family == AF_INET)
               if (match_ipv4(&who->ip, &conf->addr, conf->bits))
                 if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                   return conf;
             break;
           case HM_IPV6:
-            if (who->connection->aftype == AF_INET6)
+            if (who->ip.ss.ss_family == AF_INET6)
               if (match_ipv6(&who->ip, &conf->addr, conf->bits))
                 if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                   return conf;

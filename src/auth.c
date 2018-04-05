@@ -185,9 +185,9 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
     auth_sendheader(auth->client, REPORT_FAIL_DNS);
   else
   {
-    if (auth->client->connection->ip.ss.ss_family == AF_INET6)
+    if (auth->client->ip.ss.ss_family == AF_INET6)
     {
-      const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&auth->client->connection->ip;
+      const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&auth->client->ip;
       const struct sockaddr_in6 *const v6dns = (const struct sockaddr_in6 *)addr;
 
       if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)))
@@ -199,7 +199,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
     }
     else
     {
-      const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&auth->client->connection->ip;
+      const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&auth->client->ip;
       const struct sockaddr_in *const v4dns = (const struct sockaddr_in *)addr;
 
       if (v4->sin_addr.s_addr != v4dns->sin_addr.s_addr)
@@ -446,7 +446,7 @@ auth_start_query(struct AuthRequest *auth)
   struct sockaddr_in6 *v6;
 
   /* Open a socket of the same type as the client socket */
-  int fd = comm_socket(auth->client->connection->ip.ss.ss_family, SOCK_STREAM, 0);
+  int fd = comm_socket(auth->client->ip.ss.ss_family, SOCK_STREAM, 0);
   if (fd == -1)
   {
     report_error(L_ALL, "creating auth stream socket %s:%s",
@@ -474,7 +474,7 @@ auth_start_query(struct AuthRequest *auth)
 
   comm_connect_tcp(auth->fd, auth->client->sockhost, RFC1413_PORT,
       (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
-      auth, auth->client->connection->ip.ss.ss_family,
+      auth, auth->client->ip.ss.ss_family,
       GlobalSetOptions.ident_timeout);
 }
 
@@ -499,7 +499,7 @@ auth_start(struct Client *client_p)
   if (ConfigGeneral.disable_auth == 0)
     auth_start_query(auth);
 
-  gethost_byaddr(auth_dns_callback, auth, &client_p->connection->ip);
+  gethost_byaddr(auth_dns_callback, auth, &client_p->ip);
 }
 
 /*

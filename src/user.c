@@ -46,7 +46,6 @@
 #include "memory.h"
 #include "packet.h"
 #include "rng_mt.h"
-#include "userhost.h"
 #include "misc.h"
 #include "parse.h"
 #include "watch.h"
@@ -483,8 +482,6 @@ register_local_user(struct Client *client_p)
   ++Count.totalrestartcount;
 
   user_welcome(client_p);
-  userhost_add(client_p->sockhost, 0);
-  AddFlag(client_p, FLAGS_USERHOST);
 
   introduce_client(client_p);
 }
@@ -517,9 +514,6 @@ register_remote_user(struct Client *client_p)
 
   if (dlink_list_length(&global_client_list) > Count.max_tot)
     Count.max_tot = dlink_list_length(&global_client_list);
-
-  userhost_add(client_p->sockhost, 1);
-  AddFlag(client_p, FLAGS_USERHOST);
 
   if (HasFlag(client_p->servptr, FLAGS_EOB))
     sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,

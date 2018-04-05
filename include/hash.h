@@ -34,14 +34,12 @@
 
 struct Client;
 struct Channel;
-struct UserHost;
 
 enum
 {
   HASH_TYPE_ID,
   HASH_TYPE_CLIENT,
-  HASH_TYPE_CHANNEL,
-  HASH_TYPE_USERHOST
+  HASH_TYPE_CHANNEL
 };
 
 extern void hash_init(void);
@@ -51,10 +49,7 @@ extern void hash_add_channel(struct Channel *);
 extern void hash_del_channel(struct Channel *);
 extern void hash_add_id(struct Client *);
 extern void hash_del_id(struct Client *);
-extern void hash_add_userhost(struct UserHost *);
-extern void hash_del_userhost(struct UserHost *);
 
-extern struct UserHost *hash_find_userhost(const char *);
 extern struct Client *hash_find_id(const char *);
 extern struct Client *hash_find_client(const char *);
 extern struct Client *hash_find_server(const char *);

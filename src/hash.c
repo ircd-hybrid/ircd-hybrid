@@ -33,7 +33,6 @@
 #include "hash.h"
 #include "id.h"
 #include "rng_mt.h"
-#include "userhost.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -52,7 +51,6 @@ static unsigned int hashf_xor_key;
 static struct Client *idTable[HASHSIZE];
 static struct Client *clientTable[HASHSIZE];
 static struct Channel *channelTable[HASHSIZE];
-static struct UserHost *userhostTable[HASHSIZE];
 
 
 /* hash_init()
@@ -144,15 +142,6 @@ hash_add_channel(struct Channel *chptr)
 }
 
 void
-hash_add_userhost(struct UserHost *userhost)
-{
-  const unsigned int hashv = strhash(userhost->host);
-
-  userhost->next = userhostTable[hashv];
-  userhostTable[hashv] = userhost;
-}
-
-void
 hash_add_id(struct Client *client_p)
 {
   const unsigned int hashv = strhash(client_p->id);
@@ -219,37 +208,6 @@ hash_del_client(struct Client *client_p)
 
       tmp->hnext = tmp->hnext->hnext;
       client_p->hnext = client_p;
-    }
-  }
-}
-
-/* hash_del_userhost()
- *
- * inputs       - pointer to userhost
- * output       - NONE
- * side effects - Removes a userhost from the hash linked list
- */
-void
-hash_del_userhost(struct UserHost *userhost)
-{
-  const unsigned int hashv = strhash(userhost->host);
-  struct UserHost *tmp = userhostTable[hashv];
-
-  if (tmp)
-  {
-    if (tmp == userhost)
-    {
-      userhostTable[hashv] = userhost->next;
-      userhost->next = userhost;
-    }
-    else
-    {
-      while (tmp->next != userhost)
-        if ((tmp = tmp->next) == NULL)
-          return;
-
-      tmp->next = tmp->next->next;
-      userhost->next = userhost;
     }
   }
 }
@@ -419,34 +377,6 @@ hash_find_channel(const char *name)
   return chptr;
 }
 
-struct UserHost *
-hash_find_userhost(const char *host)
-{
-  const unsigned int hashv = strhash(host);
-  struct UserHost *userhost;
-
-  if ((userhost = userhostTable[hashv]))
-  {
-    if (irccmp(host, userhost->host))
-    {
-      struct UserHost *prev;
-
-      while (prev = userhost, (userhost = userhost->next))
-      {
-        if (!irccmp(host, userhost->host))
-        {
-          prev->next = userhost->next;
-          userhost->next = userhostTable[hashv];
-          userhostTable[hashv] = userhost;
-          break;
-        }
-      }
-    }
-  }
-
-  return userhost;
-}
-
 /* hash_get_bucket(int type, unsigned int hashv)
  *
  * inputs       - hash value (must be between 0 and HASHSIZE - 1)
@@ -475,9 +405,6 @@ hash_get_bucket(int type, unsigned int hashv)
       break;
     case HASH_TYPE_CLIENT:
       return clientTable[hashv];
-      break;
-    case HASH_TYPE_USERHOST:
-      return userhostTable[hashv];
       break;
     default:
       assert(0);

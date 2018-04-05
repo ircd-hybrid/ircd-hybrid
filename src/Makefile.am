@@ -64,7 +64,6 @@ ircd_SOURCES = auth.c            \
                server.c          \
                server_capab.c    \
                user.c            \
-               userhost.c        \
                version.c         \
                watch.c           \
                whowas.c

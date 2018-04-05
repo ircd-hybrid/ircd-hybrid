@@ -39,13 +39,14 @@ struct ip_entry
 {
   dlink_node node;                /**< Doubly linked list node */
   struct irc_ssaddr ip;           /**< Holds an IPv6 or IPv4 address */
-  unsigned int count;             /**< Number of registered users using this IP */
+  unsigned int count_local;       /**< Number of local users using this IP */
+  unsigned int count_remote;      /**< Number of remote users using this IP */
   unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
   uintmax_t last_attempt;         /**< The last time someone connected from this IP */
 };
 
 extern struct ip_entry *ipcache_find_or_add_address(const struct irc_ssaddr *);
-extern void ipcache_remove_address(const struct irc_ssaddr *);
+extern void ipcache_remove_address(const struct irc_ssaddr *, int);
 extern void ipcache_get_stats(unsigned int *const, size_t *const);
 extern void ipcache_init(void);
 #endif

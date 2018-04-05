@@ -33,7 +33,6 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "userhost.h"
 
 
 /*! \brief HASH command handler
@@ -56,7 +55,6 @@ mo_hash(struct Client *source_p, int parc, char *parv[])
   const struct Client *cl = NULL;
   const struct Client *icl = NULL;
   const struct Channel *ch = NULL;
-  const struct UserHost *ush = NULL;
 
   for (i = 0; i < HASHSIZE; ++i)
   {
@@ -118,28 +116,6 @@ mo_hash(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_one_notice(source_p, &me, ":Id: entries: %u buckets: %u "
-                    "max chain: %u", count, buckets, max_chain);
-
-  count     = 0;
-  buckets   = 0;
-  max_chain = 0;
-
-  for (i = 0; i < HASHSIZE; ++i)
-  {
-    if ((ush = hash_get_bucket(HASH_TYPE_USERHOST, i)))
-    {
-      unsigned int len = 0;
-
-      ++buckets;
-      for (; ush; ush = ush->next)
-        ++len;
-      if (len > max_chain)
-        max_chain = len;
-      count += len;
-    }
-  }
-
-  sendto_one_notice(source_p, &me, ":UserHost: entries: %u buckets: %u "
                     "max chain: %u", count, buckets, max_chain);
   return 0;
 }

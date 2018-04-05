@@ -70,7 +70,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   conf = find_address_conf(source_p->host,
                            HasFlag(source_p, FLAGS_GOTID) ? source_p->username : "webirc",
-                           &source_p->connection->ip,
+                           &source_p->ip,
                            source_p->connection->aftype, pass);
   if (!conf || !IsConfClient(conf))
     return 0;
@@ -107,9 +107,9 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   assert(res);
 
-  memcpy(&source_p->connection->ip, res->ai_addr, res->ai_addrlen);
-  source_p->connection->ip.ss_len = res->ai_addrlen;
-  source_p->connection->ip.ss.ss_family = res->ai_family;
+  memcpy(&source_p->ip, res->ai_addr, res->ai_addrlen);
+  source_p->ip.ss_len = res->ai_addrlen;
+  source_p->ip.ss.ss_family = res->ai_family;
   source_p->connection->aftype = res->ai_family;
   freeaddrinfo(res);
 
@@ -125,7 +125,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   strlcpy(source_p->realhost, host, sizeof(source_p->realhost));
 
   /* Check dlines now, k-lines will be checked on registration */
-  if ((conf = find_dline_conf(&source_p->connection->ip,
+  if ((conf = find_dline_conf(&source_p->ip,
                                source_p->connection->aftype)))
   {
     if (conf->type == CONF_DLINE)

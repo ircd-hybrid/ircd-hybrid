@@ -666,7 +666,7 @@ server_connect_callback(fde_t *F, int status, void *data)
   assert(client_p->connection->fd == F);
 
   /* Next, for backward purposes, record the ip of the server */
-  memcpy(&client_p->connection->ip, &F->connect.hostaddr, sizeof(client_p->connection->ip));
+  memcpy(&client_p->ip, &F->connect.hostaddr, sizeof(client_p->ip));
 
   /* Check the status */
   if (status != COMM_OK)

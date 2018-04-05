@@ -337,7 +337,6 @@ struct Connection
   dlink_list        watches;   /**< Chain of Watch pointer blocks */
   dlink_list        confs;     /**< Configuration record associated */
   dlink_list        invited;   /**< Chain of invite pointer blocks */
-  int               aftype;    /**< Makes life easier for DNS res in IPV6 */
 
   fde_t            *fd;
 

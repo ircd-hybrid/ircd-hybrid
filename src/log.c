@@ -26,15 +26,14 @@
 
 #include "stdinc.h"
 #include "log.h"
-#include "irc_string.h"
-#include "ircd.h"
 #include "conf.h"
 #include "misc.h"
+#include "memory.h"
 
 
 static struct LogFile
 {
-  char path[HYB_PATH_MAX + 1];
+  char *path;
   size_t size;
   FILE *file;
 } log_type_table[LOG_TYPE_LAST];
@@ -45,7 +44,10 @@ log_set_file(enum log_type type, size_t size, const char *path)
 {
   struct LogFile *log = &log_type_table[type];
 
-  strlcpy(log->path, path, sizeof(log->path));
+  if (log->path)
+    xfree(log->path);
+
+  log->path = xstrdup(path);
   log->size = size;
 
   if (type == LOG_TYPE_IRCD)
@@ -55,18 +57,19 @@ log_set_file(enum log_type type, size_t size, const char *path)
 void
 log_del_all(void)
 {
-  unsigned int type = 0;
+  for (unsigned int type = 1; type < LOG_TYPE_LAST; ++type)
+  {
+    struct LogFile *log = &log_type_table[type];
 
-  while (++type < LOG_TYPE_LAST)
-    log_type_table[type].path[0] = '\0';
+    xfree(log->path);
+    log->path = NULL;
+  }
 }
 
 void
 log_reopen_all(void)
 {
-  unsigned int type = 0;
-
-  while (++type < LOG_TYPE_LAST)
+  for (unsigned int type = 1; type < LOG_TYPE_LAST; ++type)
   {
     struct LogFile *log = &log_type_table[type];
 
@@ -76,7 +79,7 @@ log_reopen_all(void)
       log->file = NULL;
     }
 
-    if (log->path[0])
+    if (log->path)
       log->file = fopen(log->path, "a");
   }
 }

@@ -186,14 +186,14 @@ server_hunt(struct Client *source_p, const char *command,
     if (h->target_p->from == source_p->from && !MyConnect(h->target_p))
       h->target_p = NULL;
 
-  if (!h->target_p && has_wildcards(parv[server]))
+  if (h->target_p == NULL && has_wildcards(parv[server]))
   {
     DLINK_FOREACH(node, global_server_list.head)
     {
       struct Client *tmp = node->data;
 
       assert(IsMe(tmp) || IsServer(tmp));
-      if (!match(parv[server], tmp->name))
+      if (match(parv[server], tmp->name) == 0)
       {
         if (tmp->from == source_p->from && !MyConnect(tmp))
           continue;
@@ -203,14 +203,14 @@ server_hunt(struct Client *source_p, const char *command,
       }
     }
 
-    if (!h->target_p)
+    if (h->target_p == NULL)
     {
       DLINK_FOREACH(node, global_client_list.head)
       {
         struct Client *tmp = node->data;
 
         assert(IsClient(tmp));
-        if (!match(parv[server], tmp->name))
+        if (match(parv[server], tmp->name) == 0)
         {
           if (tmp->from == source_p->from && !MyConnect(tmp))
             continue;

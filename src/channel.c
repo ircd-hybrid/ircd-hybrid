@@ -765,7 +765,7 @@ can_send(struct Channel *chptr, struct Client *client_p,
     if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
       return CAN_SEND_OPV;
 
-  if (!member && HasCMode(chptr, MODE_NOPRIVMSGS))
+  if (member == NULL && HasCMode(chptr, MODE_NOPRIVMSGS))
     return ERR_CANNOTSENDTOCHAN;
 
   if (HasCMode(chptr, MODE_MODERATED))

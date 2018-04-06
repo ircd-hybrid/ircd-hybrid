@@ -85,7 +85,7 @@ capab_del(const char *name)
   {
     struct Capability *cap = node->data;
 
-    if (!irccmp(cap->name, name))
+    if (irccmp(cap->name, name) == 0)
     {
       dlinkDelete(node, &capab_list);
       xfree(cap->name);
@@ -110,7 +110,7 @@ capab_find(const char *name)
   {
     const struct Capability *cap = node->data;
 
-    if (!irccmp(cap->name, name))
+    if (irccmp(cap->name, name) == 0)
       return cap->cap;
   }
 
@@ -130,7 +130,7 @@ capab_get(const void *ptr)
   static char buf[IRCD_BUFSIZE] = "";
   dlink_node *node;
 
-  buf[0] = '\0';
+  buf[0] = '\0';  /* buf is static */
 
   DLINK_FOREACH(node, capab_list.head)
   {

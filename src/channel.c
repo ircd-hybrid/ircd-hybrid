@@ -889,7 +889,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
   const struct ClassItem *const class = class_get_ptr(&client_p->connection->confs);
   unsigned int flags = 0;
 
-  assert(IsClient(client_p));
+  assert(MyClient(client_p));
 
   for (const char *name = strtok_r(chan_list, ",", &p); name;
                    name = strtok_r(NULL,      ",", &p))
@@ -971,7 +971,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
       AddCMode(chptr, MODE_TOPICLIMIT);
       AddCMode(chptr, MODE_NOPRIVMSGS);
 
-      sendto_server(client_p, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
+      sendto_server(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
                     me.id, chptr->creationtime,
                     chptr->name, client_p->id);
 
@@ -995,7 +995,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
     }
     else
     {
-      sendto_server(client_p, 0, 0, ":%s JOIN %ju %s +",
+      sendto_server(NULL, 0, 0, ":%s JOIN %ju %s +",
                     client_p->id, chptr->creationtime,
                     chptr->name);
 

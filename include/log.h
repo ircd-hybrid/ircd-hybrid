@@ -43,8 +43,16 @@ enum log_type
   LOG_TYPE_LAST
 };
 
+struct LogFile
+{
+  char *path;
+  size_t size;
+  FILE *file;
+};
+
 extern void log_set_file(enum log_type, size_t, const char *);
-extern void log_del_all(void);
-extern void log_reopen_all(void);
+extern void log_free(struct LogFile *);
+extern void log_reopen(struct LogFile *);
+extern void log_iterate(void (*func)(struct LogFile *));
 extern void ilog(enum log_type, const char *, ...) AFP(2,3);
-#endif /* INCLUDED_s_log_h */
+#endif  /* INCLUDED_log_h */

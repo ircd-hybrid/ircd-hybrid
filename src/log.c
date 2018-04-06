@@ -31,12 +31,7 @@
 #include "memory.h"
 
 
-static struct LogFile
-{
-  char *path;
-  size_t size;
-  FILE *file;
-} log_type_table[LOG_TYPE_LAST];
+static struct LogFile log_type_table[LOG_TYPE_LAST];
 
 
 void
@@ -55,33 +50,31 @@ log_set_file(enum log_type type, size_t size, const char *path)
 }
 
 void
-log_del_all(void)
+log_free(struct LogFile *log)
 {
-  for (unsigned int type = 1; type < LOG_TYPE_LAST; ++type)
-  {
-    struct LogFile *log = &log_type_table[type];
-
-    xfree(log->path);
-    log->path = NULL;
-  }
+  xfree(log->path);
+  log->path = NULL;
 }
 
 void
-log_reopen_all(void)
+log_reopen(struct LogFile *log)
 {
-  for (unsigned int type = 1; type < LOG_TYPE_LAST; ++type)
+  if (log->file)
   {
-    struct LogFile *log = &log_type_table[type];
-
-    if (log->file)
-    {
-      fclose(log->file);
-      log->file = NULL;
-    }
-
-    if (log->path)
-      log->file = fopen(log->path, "a");
+    fclose(log->file);
+    log->file = NULL;
   }
+
+  if (log->path)
+    log->file = fopen(log->path, "a");
+}
+
+void
+log_iterate(void (*func)(struct LogFile *))
+{
+  /* type = 1 to skip LOG_TYPE_IRCD */
+  for (unsigned int type = 1; type < LOG_TYPE_LAST; ++type)
+    func(&log_type_table[type]);
 }
 
 static int

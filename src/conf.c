@@ -574,7 +574,7 @@ set_default_conf(void)
   ConfigServerInfo.max_topic_length = 80;
   ConfigServerInfo.hub = 0;
 
-  log_del_all();
+  log_iterate(log_free);
 
   ConfigLog.use_logging = 1;
 
@@ -1067,7 +1067,7 @@ read_conf_files(int cold)
   read_conf(conf_parser_ctx.conf_file);
   fclose(conf_parser_ctx.conf_file);
 
-  log_reopen_all();
+  log_iterate(log_reopen);
   conf_handle_tls(cold);
 
   isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);

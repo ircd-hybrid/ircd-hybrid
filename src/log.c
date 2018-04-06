@@ -32,7 +32,7 @@
 #include "misc.h"
 
 
-static struct
+static struct LogFile
 {
   char path[HYB_PATH_MAX + 1];
   size_t size;
@@ -43,11 +43,13 @@ static struct
 void
 log_set_file(enum log_type type, size_t size, const char *path)
 {
-  strlcpy(log_type_table[type].path, path, sizeof(log_type_table[type].path));
-  log_type_table[type].size = size;
+  struct LogFile *log = &log_type_table[type];
+
+  strlcpy(log->path, path, sizeof(log->path));
+  log->size = size;
 
   if (type == LOG_TYPE_IRCD)
-    log_type_table[type].file = fopen(log_type_table[type].path, "a");
+    log->file = fopen(log->path, "a");
 }
 
 void
@@ -66,67 +68,68 @@ log_reopen_all(void)
 
   while (++type < LOG_TYPE_LAST)
   {
-    if (log_type_table[type].file)
+    struct LogFile *log = &log_type_table[type];
+
+    if (log->file)
     {
-      fclose(log_type_table[type].file);
-      log_type_table[type].file = NULL;
+      fclose(log->file);
+      log->file = NULL;
     }
 
-    if (log_type_table[type].path[0])
-      log_type_table[type].file = fopen(log_type_table[type].path, "a");
+    if (log->path[0])
+      log->file = fopen(log->path, "a");
   }
 }
 
 static int
-log_exceed_size(unsigned int type)
+log_exceed_size(struct LogFile *log)
 {
   struct stat sb;
 
-  if (!log_type_table[type].size)
+  if (log->size == 0)
     return 0;
 
-  if (stat(log_type_table[type].path, &sb) < 0)
-    return -1;
+  if (stat(log->path, &sb) < 0)
+    return 0;
 
-  return (size_t)sb.st_size > log_type_table[type].size;
+  return (size_t)sb.st_size > log->size;
 }
 
 static void
-log_write(enum log_type type, const char *message)
+log_write(struct LogFile *log, const char *message)
 {
-  fprintf(log_type_table[type].file, "[%s] %s\n", date_iso8601(0), message);
-  fflush(log_type_table[type].file);
+  fprintf(log->file, "[%s] %s\n", date_iso8601(0), message);
+  fflush(log->file);
 }
 
 void
 ilog(enum log_type type, const char *fmt, ...)
 {
+  struct LogFile *log = &log_type_table[type];
   char buf[LOG_BUFSIZE] = "";
   va_list args;
 
-  if (!log_type_table[type].file || !ConfigLog.use_logging)
+  if (log->file == NULL || ConfigLog.use_logging == 0)
     return;
 
   va_start(args, fmt);
   vsnprintf(buf, sizeof(buf), fmt, args);
   va_end(args);
 
-  log_write(type, buf);
+  log_write(log, buf);
 
-  if (log_exceed_size(type) <= 0)
+  if (log_exceed_size(log) == 0)
     return;
 
-  snprintf(buf, sizeof(buf), "Rotating logfile %s",
-           log_type_table[type].path);
-  log_write(type, buf);
+  snprintf(buf, sizeof(buf), "Rotating logfile %s", log->path);
+  log_write(log, buf);
 
-  fclose(log_type_table[type].file);
-  log_type_table[type].file = NULL;
+  fclose(log->file);
+  log->file = NULL;
 
-  snprintf(buf, sizeof(buf), "%s.old", log_type_table[type].path);
+  snprintf(buf, sizeof(buf), "%s.old", log->path);
   unlink(buf);
-  rename(log_type_table[type].path, buf);
+  rename(log->path, buf);
 
-  log_set_file(type, log_type_table[type].size, log_type_table[type].path);
-  log_type_table[type].file = fopen(log_type_table[type].path, "a");
+  log->file = fopen(log->path, "a");
 }

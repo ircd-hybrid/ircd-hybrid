@@ -74,7 +74,7 @@ oper_up(struct Client *source_p)
   if (!EmptyString(conf->whois))
   {
     svstag_attach(&source_p->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
-    sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
+    sendto_server(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
                   me.id, source_p->id, source_p->tsinfo,
                   RPL_WHOISOPERATOR, conf->whois);
   }

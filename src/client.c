@@ -474,7 +474,7 @@ find_chasing(struct Client *source_p, const char *name)
     return NULL;
 
   target_p = whowas_get_history(name, ConfigGeneral.kill_chase_time_limit);
-  if (!target_p)
+  if (target_p == NULL)
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
 
   return target_p;
@@ -508,7 +508,7 @@ client_get_name(const struct Client *client_p, enum addr_mask_type type)
 
   if (IsServer(client_p) || IsConnecting(client_p) || IsHandshake(client_p))
   {
-    if (!irccmp(client_p->name, client_p->host))
+    if (irccmp(client_p->name, client_p->host) == 0)
       return client_p->name;
     else if (ConfigServerHide.hide_server_ips)
       type = MASK_IP;
@@ -1023,9 +1023,9 @@ find_accept(const char *nick, const char *user,
   {
     struct split_nuh_item *accept_p = node->data;
 
-    if (!compare(accept_p->nickptr, nick) &&
-        !compare(accept_p->userptr, user) &&
-        !compare(accept_p->hostptr, host))
+    if (compare(accept_p->nickptr, nick) == 0 &&
+        compare(accept_p->userptr, user) == 0 &&
+        compare(accept_p->hostptr, host) == 0)
       return accept_p;
   }
 

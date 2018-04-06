@@ -315,9 +315,9 @@ register_local_user(struct Client *client_p)
   const struct MaskItem *conf = NULL;
 
   assert(client_p == client_p->from);
+  assert(client_p->connection->registration == 0);
   assert(MyConnect(client_p));
   assert(IsUnknown(client_p));
-  assert(!client_p->connection->registration);
 
   if (ConfigGeneral.ping_cookie)
   {
@@ -708,7 +708,7 @@ user_set_hostmask(struct Client *client_p, const char *hostname)
 {
   dlink_node *node;
 
-  if (!strcmp(client_p->host, hostname))
+  if (strcmp(client_p->host, hostname) == 0)
     return;
 
   if (ConfigGeneral.cycle_on_host_change)
@@ -727,7 +727,7 @@ user_set_hostmask(struct Client *client_p, const char *hostname)
     clear_ban_cache_list(&client_p->channel);
   }
 
-  if (!ConfigGeneral.cycle_on_host_change)
+  if (ConfigGeneral.cycle_on_host_change == 0)
     return;
 
   DLINK_FOREACH(node, client_p->channel.head)

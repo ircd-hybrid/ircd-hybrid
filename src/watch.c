@@ -102,7 +102,7 @@ watch_find_hash(const char *name)
   {
     struct Watch *watch = node->data;
 
-    if (!irccmp(watch->name, name))
+    if (irccmp(watch->name, name) == 0)
       return watch;
   }
 

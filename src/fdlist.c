@@ -36,7 +36,7 @@
 fde_t *fd_table;
 int number_fd = LEAKED_FDS;
 int hard_fdlimit = 0;
-int highest_fd;
+int highest_fd = -1;
 
 
 void

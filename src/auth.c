@@ -212,7 +212,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
     if (namelength > HOSTLEN)
       auth_sendheader(auth->client, REPORT_HOST_TOOLONG);
-    else if (!auth_verify_hostname(name))
+    else if (auth_verify_hostname(name) == 0)
       auth_sendheader(auth->client, REPORT_HOST_INVALID);
     else
     {
@@ -230,6 +230,9 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 static void
 auth_error(struct AuthRequest *auth)
 {
+  assert(auth);
+  assert(auth->fd);
+
   ++ServerStats.is_abad;
 
   fd_close(auth->fd);

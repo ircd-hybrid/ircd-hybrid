@@ -136,8 +136,8 @@ class_find(const char *name, int active)
   {
     struct ClassItem *class = node->data;
 
-    if (!irccmp(class->name, name))
-      return active && !class->active ? NULL : class;
+    if (irccmp(class->name, name) == 0)
+      return active && class->active == 0 ? NULL : class;
   }
 
   return NULL;

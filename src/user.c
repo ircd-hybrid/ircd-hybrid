@@ -110,7 +110,7 @@ user_modes_init(void)
 void
 show_lusers(struct Client *client_p)
 {
-  if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
+  if (ConfigServerHide.hide_servers == 0 || HasUMode(client_p, UMODE_OPER))
     sendto_one_numeric(client_p, &me, RPL_LUSERCLIENT, (dlink_list_length(&global_client_list) - Count.invisi),
                        Count.invisi, dlink_list_length(&global_server_list));
   else
@@ -126,7 +126,7 @@ show_lusers(struct Client *client_p)
   if (dlink_list_length(channel_get_list()))
     sendto_one_numeric(client_p, &me, RPL_LUSERCHANNELS, dlink_list_length(channel_get_list()));
 
-  if (!ConfigServerHide.hide_servers || HasUMode(client_p, UMODE_OPER))
+  if (ConfigServerHide.hide_servers == 0 || HasUMode(client_p, UMODE_OPER))
   {
     sendto_one_numeric(client_p, &me, RPL_LUSERME, dlink_list_length(&local_client_list), dlink_list_length(&local_server_list));
     sendto_one_numeric(client_p, &me, RPL_LOCALUSERS, dlink_list_length(&local_client_list), Count.max_loc);
@@ -340,7 +340,7 @@ register_local_user(struct Client *client_p)
   /* Straight up the maximum rate of flooding... */
   client_p->connection->allow_read = MAX_FLOOD_BURST;
 
-  if (!check_client(client_p))
+  if (check_client(client_p) == 0)
     return;
 
   conf = client_p->connection->confs.head->data;
@@ -373,7 +373,7 @@ register_local_user(struct Client *client_p)
   /* Password check */
   if (!EmptyString(conf->passwd))
   {
-    if (!match_conf_password(client_p->connection->password, conf))
+    if (match_conf_password(client_p->connection->password, conf) == 0)
     {
       ++ServerStats.is_ref;
 
@@ -416,7 +416,7 @@ register_local_user(struct Client *client_p)
     return;
   }
 
-  if (!valid_username(client_p->username, 1))
+  if (valid_username(client_p->username, 1) == 0)
   {
     char buf[IRCD_BUFSIZE] = "";
 
@@ -453,6 +453,7 @@ register_local_user(struct Client *client_p)
   }
 
   assert(client_p->servptr == &me);
+
   SetClient(client_p);
   dlinkAdd(client_p, &client_p->lnode, &client_p->servptr->serv->client_list);
   dlinkAdd(client_p, &client_p->node, &global_client_list);

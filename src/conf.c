@@ -1180,7 +1180,7 @@ valid_tkline(const char *data, const int minutes)
    * If the incoming time is in seconds convert it to minutes for the purpose
    * of this calculation
    */
-  if (!minutes)
+  if (minutes == 0)
     result = result / 60;
 
   if (result > MAX_TDKLINE_TIME)

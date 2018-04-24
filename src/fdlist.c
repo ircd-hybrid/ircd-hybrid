@@ -44,14 +44,16 @@ fdlist_init(void)
 {
   struct rlimit limit;
 
-  if (!getrlimit(RLIMIT_NOFILE, &limit))
+  if (getrlimit(RLIMIT_NOFILE, &limit) == 0)
   {
     limit.rlim_cur = limit.rlim_max;
     setrlimit(RLIMIT_NOFILE, &limit);
   }
 
-  /* allow MAXCLIENTS_MIN clients even at the cost of MAX_BUFFER and
-   * some not really LEAKED_FDS */
+  /*
+   * Allow MAXCLIENTS_MIN clients even at the cost of MAX_BUFFER and
+   * some not really LEAKED_FDS
+   */
   hard_fdlimit = IRCD_MAX(getdtablesize(), LEAKED_FDS + MAX_BUFFER + MAXCLIENTS_MIN);
   fd_table = xcalloc(sizeof(fde_t) * hard_fdlimit);
 }

@@ -158,8 +158,7 @@ res_ourserver(const struct irc_ssaddr *inp)
       case AF_INET6:
         if (srv->ss.ss_family == inp->ss.ss_family)
           if (v6->sin6_port == v6in->sin6_port)
-            if (!memcmp(&v6->sin6_addr.s6_addr, &v6in->sin6_addr.s6_addr,
-                        sizeof(struct in6_addr)))
+            if (memcmp(&v6->sin6_addr.s6_addr, &v6in->sin6_addr.s6_addr, sizeof(struct in6_addr)) == 0)
               return 1;
         break;
       case AF_INET:
@@ -185,7 +184,7 @@ start_resolver(void)
 {
   irc_res_init();
 
-  if (!ResolverFileDescriptor)
+  if (ResolverFileDescriptor == NULL)
   {
     int fd = comm_socket(irc_nsaddr_list[0].ss.ss_family, SOCK_DGRAM, 0);
     if (fd == -1)
@@ -316,7 +315,7 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
 
   strlcpy(host_name, name, sizeof(host_name));
 
-  if (!request)
+  if (request == NULL)
   {
     request = make_request(callback, ctx);
     request->type = type;
@@ -372,7 +371,7 @@ do_query_number(dns_callback_fnc callback, void *ctx,
              (unsigned int)(cp[0] & 0xf), (unsigned int)(cp[0] >> 4));
   }
 
-  if (!request)
+  if (request == NULL)
   {
     request = make_request(callback, ctx);
     request->type = T_PTR;
@@ -540,7 +539,6 @@ static void
 res_readreply(fde_t *F, void *data)
 {
   unsigned char buf[sizeof(HEADER) + MAXPACKET];
-  struct reslist *request = NULL;
   ssize_t rc = 0;
   socklen_t len = sizeof(struct irc_ssaddr);
   struct irc_ssaddr lsin;
@@ -569,6 +567,7 @@ res_readreply(fde_t *F, void *data)
      * Response for an id which we have already received an answer for
      * just ignore this response.
      */
+    struct reslist *request;
     if ((request = find_id(header->id)) == NULL)
       continue;
 

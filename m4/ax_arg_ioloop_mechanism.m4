@@ -18,7 +18,7 @@ AC_DEFUN([AX_ARG_IOLOOP_MECHANISM],[
 
   iopoll_mechanism_epoll=2
   AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_EPOLL],[$iopoll_mechanism_epoll],[epoll mechanism])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [epoll_create(256);])], [is_epoll_mechanism_available="yes"],[is_epoll_mechanism_available="no"])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [epoll_create1(EPOLL_CLOEXEC);])], [is_epoll_mechanism_available="yes"],[is_epoll_mechanism_available="no"])
 
   iopoll_mechanism_devpoll=3
   AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_DEVPOLL],[$iopoll_mechanism_devpoll],[devpoll mechanism])

@@ -45,7 +45,7 @@ static int epoll_fd;
 void
 comm_select_init(void)
 {
-  if ((epoll_fd = epoll_create(hard_fdlimit)) < 0)
+  if ((epoll_fd = epoll_create1(EPOLL_CLOEXEC)) < 0)
   {
     ilog(LOG_TYPE_IRCD, "comm_select_init: couldn't open epoll fd: %s",
          strerror(errno));

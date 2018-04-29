@@ -30,10 +30,24 @@
 #include "ircd.h"
 #include "s_bsd.h"
 #include "log.h"
+#include "memory.h"
 #include <sys/epoll.h>
 #include <sys/syscall.h>
 
-static int epoll_fd;
+enum
+{
+  INITIAL_NEVENT =   16,
+  MAXIMUM_NEVENT = 4096
+};
+
+struct epollop
+{
+  struct epoll_event *events;
+  int nevents;
+  int fd;
+};
+
+static struct epollop *epollop;
 
 
 /*
@@ -45,14 +59,20 @@ static int epoll_fd;
 void
 comm_select_init(void)
 {
-  if ((epoll_fd = epoll_create1(EPOLL_CLOEXEC)) < 0)
+  int fd = epoll_create1(EPOLL_CLOEXEC);
+  if (fd < 0)
   {
     ilog(LOG_TYPE_IRCD, "comm_select_init: couldn't open epoll fd: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }
 
-  fd_open(epoll_fd, 0, "epoll file descriptor");
+  fd_open(fd, 0, "epoll file descriptor");
+
+  epollop = xcalloc(sizeof(*epollop));
+  epollop->fd = fd;
+  epollop->nevents = INITIAL_NEVENT;
+  epollop->events = xcalloc(epollop->nevents * sizeof(*epollop->events));
 }
 
 /*
@@ -105,7 +125,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
     ep_event.events = F->evcache = new_events;
     ep_event.data.ptr = F;
 
-    if (epoll_ctl(epoll_fd, op, F->fd, &ep_event))
+    if (epoll_ctl(epollop->fd, op, F->fd, &ep_event))
     {
       ilog(LOG_TYPE_IRCD, "comm_setselect: epoll_ctl() failed: %s", strerror(errno));
       abort();
@@ -124,11 +144,11 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 void
 comm_select(void)
 {
-  struct epoll_event ep_fdlist[128];
   int num;
   void (*hdl)(fde_t *, void *);
 
-  num = epoll_wait(epoll_fd, ep_fdlist, 128, SELECT_DELAY);
+  num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, SELECT_DELAY);
+  assert(num <= epollop->nevents);
 
   set_time();
 
@@ -141,12 +161,12 @@ comm_select(void)
 
   for (int i = 0; i < num; ++i)
   {
-    fde_t *F = ep_fdlist[i].data.ptr;
+    fde_t *F = epollop->events[i].data.ptr;
 
     if (F->flags.open == 0)
       continue;
 
-    if ((ep_fdlist[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR)))
+    if ((epollop->events[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR)))
     {
       if ((hdl = F->read_handler))
       {
@@ -158,7 +178,7 @@ comm_select(void)
       }
     }
 
-    if ((ep_fdlist[i].events & (EPOLLOUT | EPOLLHUP | EPOLLERR)))
+    if ((epollop->events[i].events & (EPOLLOUT | EPOLLHUP | EPOLLERR)))
     {
       if ((hdl = F->write_handler))
       {
@@ -171,6 +191,19 @@ comm_select(void)
     }
 
     comm_setselect(F, 0, NULL, NULL, 0);
+  }
+
+  if (num == epollop->nevents && epollop->nevents < MAXIMUM_NEVENT)
+  {
+    /*
+     * We used all of the event space this time. We should be
+     * ready for more events next time.
+     */
+    int new_nevents = epollop->nevents * 2;
+    struct epoll_event *new_events = xrealloc(epollop->events, new_nevents * sizeof(*epollop->events));
+
+    epollop->events = new_events;
+    epollop->nevents = new_nevents;
   }
 }
 #endif

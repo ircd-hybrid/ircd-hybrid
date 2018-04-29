@@ -66,7 +66,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
                void *client_data, uintmax_t timeout)
 {
   int new_events, op;
-  struct epoll_event ep_event = { 0, { 0 } };
+  struct epoll_event ep_event;
 
   assert(F->flags.open);
 
@@ -101,6 +101,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
     else
       op = EPOLL_CTL_MOD;
 
+    memset(&ep_event, 0, sizeof(ep_event));
     ep_event.events = F->evcache = new_events;
     ep_event.data.ptr = F;
 

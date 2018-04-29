@@ -14350,7 +14350,7 @@ _ACEOF
 int
 main ()
 {
-epoll_create(256);
+epoll_create1(EPOLL_CLOEXEC);
   ;
   return 0;
 }

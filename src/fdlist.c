@@ -108,18 +108,16 @@ fd_open(int fd, int is_socket, const char *desc)
   if (desc)
     strlcpy(F->desc, desc, sizeof(F->desc));
 
+  fdlist_update_highest_fd(F->fd, 1);
   ++number_fd;
-  fdlist_update_highest_fd(fd, 1);
 
   return F;
 }
 
 /* Called to close a given filedescriptor */
-void
+fde_t *
 fd_close(fde_t *F)
 {
-  const int fd = F->fd;
-
   assert(F->fd >= 0);
   assert(F->flags.open);
 
@@ -133,10 +131,14 @@ fd_close(fde_t *F)
 
   /* Unlike squid, we're actually closing the FD here! -- adrian */
   close(F->fd);
-  memset(F, 0, sizeof(*F));  /* Must set F->flags.open == 0 before fdlist_update_highest_fd() */
+  F->flags.open = 0;  /* Must set F->flags.open == 0 before fdlist_update_highest_fd() */
 
+  fdlist_update_highest_fd(F->fd, 0);
   --number_fd;
-  fdlist_update_highest_fd(fd, 0);
+
+  memset(F, 0, sizeof(*F));
+
+  return F;
 }
 
 /*

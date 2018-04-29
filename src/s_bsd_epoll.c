@@ -32,7 +32,6 @@
 #include "log.h"
 #include "memory.h"
 #include <sys/epoll.h>
-#include <sys/syscall.h>
 
 enum
 {

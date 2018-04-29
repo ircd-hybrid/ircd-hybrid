@@ -99,7 +99,7 @@ extern fde_t *fd_table;
 
 extern void fdlist_init(void);
 extern fde_t *fd_open(int, int, const char *);
-extern void fd_close(fde_t *);
+extern fde_t *fd_close(fde_t *);
 extern void fd_note(fde_t *, const char *, ...);
 extern void close_standard_fds(void);
 extern void close_fds(void);

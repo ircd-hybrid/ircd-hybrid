@@ -163,12 +163,10 @@ ssl_handshake(fde_t *F, void *data)
     switch (ret)
     {
       case TLS_HANDSHAKE_WANT_WRITE:
-        comm_setselect(client_p->connection->fd, COMM_SELECT_WRITE,
-                       ssl_handshake, client_p, CONNECTTIMEOUT);
+        comm_setselect(F, COMM_SELECT_WRITE, ssl_handshake, client_p, CONNECTTIMEOUT);
         return;
       case TLS_HANDSHAKE_WANT_READ:
-        comm_setselect(client_p->connection->fd, COMM_SELECT_READ,
-                       ssl_handshake, client_p, CONNECTTIMEOUT);
+        comm_setselect(F, COMM_SELECT_READ, ssl_handshake, client_p, CONNECTTIMEOUT);
         return;
       default:
         exit_client(client_p, "Error during TLS handshake");

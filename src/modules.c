@@ -208,7 +208,7 @@ mod_find_path(const char *path)
   {
     struct module_path *mpath = node->data;
 
-    if (!strcmp(path, mpath->path))
+    if (strcmp(path, mpath->path) == 0)
       return mpath;
   }
 
@@ -293,7 +293,7 @@ findmodule_byname(const char *name)
   {
     struct module *modp = node->data;
 
-    if (!strcmp(modp->name, name))
+    if (strcmp(modp->name, name) == 0)
       return modp;
   }
 
@@ -398,12 +398,12 @@ load_one_module(const char *name)
 
     snprintf(path, sizeof(path), "%s/%s", mpath->path, name);
 
-    if (!modules_valid_suffix(name))
+    if (modules_valid_suffix(name) == 0)
       continue;
 
     if (strstr(path, "../") == NULL &&
         strstr(path, "/..") == NULL)
-      if (!stat(path, &statbuf))
+      if (stat(path, &statbuf) == 0)
         if (S_ISREG(statbuf.st_mode))  /* Regular files only please */
           return load_a_module(path, 1);
   }

@@ -986,12 +986,6 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
                            client_p->host, chptr->name);
       sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s MODE %s +nt",
                            me.name, chptr->name);
-
-      if (client_p->away[0])
-        sendto_channel_local(client_p, chptr, 0, CAP_AWAY_NOTIFY, 0,
-                             ":%s!%s@%s AWAY :%s",
-                             client_p->name, client_p->username,
-                             client_p->host, client_p->away);
     }
     else
     {
@@ -1005,13 +999,13 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
       sendto_channel_local(NULL, chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                            client_p->name, client_p->username,
                            client_p->host, chptr->name);
-
-      if (client_p->away[0])
-        sendto_channel_local(client_p, chptr, 0, CAP_AWAY_NOTIFY, 0,
-                             ":%s!%s@%s AWAY :%s",
-                             client_p->name, client_p->username,
-                             client_p->host, client_p->away);
     }
+
+    if (client_p->away[0])
+      sendto_channel_local(client_p, chptr, 0, CAP_AWAY_NOTIFY, 0,
+                           ":%s!%s@%s AWAY :%s",
+                           client_p->name, client_p->username,
+                           client_p->host, client_p->away);
 
     struct Invite *invite;
     if ((invite = find_invite(chptr, client_p)))

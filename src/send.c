@@ -172,7 +172,6 @@ void
 send_queued_write(struct Client *to)
 {
   int retlen = 0;
-  int want_read = 0;
 
   /*
    ** Once socket is marked dead, we cannot start writing to it,
@@ -186,6 +185,7 @@ send_queued_write(struct Client *to)
   {
     do
     {
+      int want_read = 0;
       const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
 
       if (tls_isusing(&to->connection->fd->ssl))
@@ -594,9 +594,9 @@ static int
 match_it(const struct Client *one, const char *mask, unsigned int what)
 {
   if (what == MATCH_HOST)
-    return !match(mask, one->host);
+    return match(mask, one->host) == 0;
 
-  return !match(mask, one->servptr->name);
+  return match(mask, one->servptr->name) == 0;
 }
 
 /* sendto_match_butone()
@@ -631,9 +631,9 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
   {
     struct Client *client_p = node->data;
 
-    if ((!one || client_p != one->from) && !IsDefunct(client_p) &&
-        match_it(client_p, mask, what))
-      send_message(client_p, local_buf);
+    if ((one == NULL || client_p != one->from) && !IsDefunct(client_p))
+      if (match_it(client_p, mask, what))
+        send_message(client_p, local_buf);
   }
 
   /* Now scan servers */
@@ -665,7 +665,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
      * server deal with it.
      * -wnder
      */
-    if ((!one || client_p != one->from) && !IsDefunct(client_p))
+    if ((one == NULL || client_p != one->from) && !IsDefunct(client_p))
       send_message_remote(client_p, from, remote_buf);
   }
 

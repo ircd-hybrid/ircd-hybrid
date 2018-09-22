@@ -321,7 +321,7 @@ register_local_user(struct Client *client_p)
 
   if (ConfigGeneral.ping_cookie)
   {
-    if (!HasFlag(client_p, FLAGS_PINGSENT) && !client_p->connection->random_ping)
+    if (!HasFlag(client_p, FLAGS_PINGSENT) && client_p->connection->random_ping == 0)
     {
       do
         client_p->connection->random_ping = genrand_int32();

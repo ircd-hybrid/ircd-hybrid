@@ -84,6 +84,7 @@ comm_get_sockerr(int fd)
     if (err)
       errtmp = err;
   }
+
   errno = errtmp;
 #endif
   return errtmp;
@@ -469,7 +470,7 @@ comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char 
 {
   fde_t *const F = vptr;
 
-  if (!addr)
+  if (addr == NULL)
   {
     comm_connect_callback(F, COMM_ERR_DNS);
     return;

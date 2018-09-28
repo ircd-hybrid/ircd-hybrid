@@ -698,6 +698,8 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
                          me.name : source_p->name,
                          chptr->name, lmodebuf, sendbuf);
   }
+  
+  mbuf = NULL;
 }
 
 /* remove_ban_list()

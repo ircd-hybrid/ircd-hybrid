@@ -426,6 +426,8 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
                          (IsHidden(source_p) || ConfigServerHide.hide_servers) ?
                          me.name : source_p->name, chptr->name, lmodebuf, sendbuf);
   }
+  
+  mbuf = NULL;
 }
 
 static struct Message join_msgtab =

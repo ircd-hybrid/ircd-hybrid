@@ -124,10 +124,11 @@ watch_add_to_hash_table(const char *name, struct Client *client_p)
   {
     watch = xcalloc(sizeof(*watch));
 
-    watch->lasttime = CurrentTime;
     strlcpy(watch->name, name, sizeof(watch->name));
+    watch->hash_value = strhash(watch->name);
+    watch->lasttime = CurrentTime;
 
-    dlinkAdd(watch, &watch->node, &watchTable[strhash(watch->name)]);
+    dlinkAdd(watch, &watch->node, &watchTable[watch->hash_value]);
   }
   else
   {
@@ -168,8 +169,8 @@ watch_del_from_hash_table(const char *name, struct Client *client_p)
   /* In case this header is now empty of notices, remove it */
   if (watch->watched_by.head == NULL)
   {
-    assert(dlinkFind(&watchTable[strhash(watch->name)], watch));
-    dlinkDelete(&watch->node, &watchTable[strhash(watch->name)]);
+    assert(dlinkFind(&watchTable[watch->hash_value], watch));
+    dlinkDelete(&watch->node, &watchTable[watch->hash_value]);
     xfree(watch);
   }
 }
@@ -196,8 +197,8 @@ watch_del_watch_list(struct Client *client_p)
     /* If this leaves a header without notifies, remove it. */
     if (watch->watched_by.head == NULL)
     {
-      assert(dlinkFind(&watchTable[strhash(watch->name)], watch));
-      dlinkDelete(&watch->node, &watchTable[strhash(watch->name)]);
+      assert(dlinkFind(&watchTable[watch->hash_value], watch));
+      dlinkDelete(&watch->node, &watchTable[watch->hash_value]);
 
       xfree(watch);
     }

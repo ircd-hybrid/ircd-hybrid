@@ -331,6 +331,7 @@ channel_make(const char *name)
   assert(!EmptyString(name));
 
   struct Channel *chptr = xcalloc(sizeof(*chptr));
+  chptr->hnextch = chptr;
   /* Doesn't hurt to set it here */
   chptr->creationtime = CurrentTime;
   chptr->last_join_time = CurrentTime;
@@ -361,6 +362,35 @@ channel_free(struct Channel *chptr)
 
   dlinkDelete(&chptr->node, &channel_list);
   hash_del_channel(chptr);
+
+  assert(chptr->hnextch == chptr);
+
+  assert(chptr->node.prev == NULL);
+  assert(chptr->node.next == NULL);
+
+  assert(dlink_list_length(&chptr->locmembers) == 0);
+  assert(chptr->locmembers.head == NULL);
+  assert(chptr->locmembers.tail == NULL);
+
+  assert(dlink_list_length(&chptr->members) == 0);
+  assert(chptr->members.head == NULL);
+  assert(chptr->members.tail == NULL);
+
+  assert(dlink_list_length(&chptr->invites) == 0);
+  assert(chptr->invites.head == NULL);
+  assert(chptr->invites.tail == NULL);
+
+  assert(dlink_list_length(&chptr->banlist) == 0);
+  assert(chptr->banlist.head == NULL);
+  assert(chptr->banlist.tail == NULL);
+
+  assert(dlink_list_length(&chptr->exceptlist) == 0);
+  assert(chptr->exceptlist.head == NULL);
+  assert(chptr->exceptlist.tail == NULL);
+
+  assert(dlink_list_length(&chptr->invexlist) == 0);
+  assert(chptr->invexlist.head == NULL);
+  assert(chptr->invexlist.tail == NULL);
 
   xfree(chptr);
 }

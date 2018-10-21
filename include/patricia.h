@@ -95,6 +95,7 @@ extern patricia_node_t *patricia_try_search_best_addr(patricia_tree_t *, struct 
 
 /* { from demo.c */
 extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);
+extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, struct sockaddr *, int);
 /* } */
 
 #define PATRICIA_MAXBITS   (sizeof(struct in6_addr) * 8)

@@ -287,8 +287,9 @@ change_remote_nick(struct Client *source_p, char *parv[])
   {
     DelUMode(source_p, UMODE_REGISTERED);
     watch_check_hash(source_p, RPL_LOGOFF);
+
     source_p->tsinfo = strtoumax(parv[2], NULL, 10);
-    assert(source_p->tsinfo > 0);
+    assert(source_p->tsinfo);
   }
 
   sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
@@ -525,7 +526,7 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
 
   assert(IsClient(source_p));
   assert(IsClient(target_p));
-  assert(newts > 0);
+  assert(newts);
 
   /* It's a client changing nick and causing a collide */
   if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))

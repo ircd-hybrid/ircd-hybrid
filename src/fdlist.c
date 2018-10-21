@@ -80,7 +80,7 @@ fdlist_update_highest_fd(int fd, int opening)
   /*
    * assert() that we are closing the highest FD; we can't be re-opening it.
    */
-  assert(!opening);
+  assert(opening == 0);
 
   while (highest_fd >= 0 && fd_table[highest_fd].flags.open == 0)
     --highest_fd;

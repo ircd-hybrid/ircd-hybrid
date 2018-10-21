@@ -97,7 +97,6 @@ unload_one_module(const char *name, int warn)
   if (modp->modexit)
    modp->modexit();
 
-  assert(dlink_list_length(&modules_list) > 0);
   dlinkDelete(&modp->node, &modules_list);
   xfree(modp->name);
 

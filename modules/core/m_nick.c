@@ -374,7 +374,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   hash_add_client(client_p);
   hash_add_id(client_p);
 
-  struct ip_entry *ipcache = ipcache_find_or_add_address(&client_p->ip);
+  struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->ip);
   ++ipcache->count_remote;
   AddFlag(client_p, FLAGS_IPHASH);
 

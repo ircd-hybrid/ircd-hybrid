@@ -219,7 +219,7 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
   const struct ClassItem *const class = conf->class;
   int a_limit_reached = 0;
 
-  struct ip_entry *ipcache = ipcache_find_or_add_address(&client_p->ip);
+  struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->ip);
   ++ipcache->count_local;
   AddFlag(client_p, FLAGS_IPHASH);
 
@@ -772,7 +772,7 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
     return BANNED_CLIENT;
   }
 
-  ip_found = ipcache_find_or_add_address(addr);
+  ip_found = ipcache_record_find_or_add(addr);
 
   if ((CurrentTime - ip_found->last_attempt) < ConfigGeneral.throttle_time)
   {

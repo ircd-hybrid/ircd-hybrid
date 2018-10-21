@@ -132,13 +132,14 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	listener.$(OBJEXT) log.$(OBJEXT) match.$(OBJEXT) \
 	memory.$(OBJEXT) misc.$(OBJEXT) modules.$(OBJEXT) \
 	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
-	parse.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
-	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
-	tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) tls_openssl.$(OBJEXT) \
-	res.$(OBJEXT) reslib.$(OBJEXT) restart.$(OBJEXT) \
-	rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) \
-	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
-	version.$(OBJEXT) watch.$(OBJEXT) whowas.$(OBJEXT)
+	parse.$(OBJEXT) patricia.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
+	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
+	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
+	tls_openssl.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
+	restart.$(OBJEXT) rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) \
+	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
+	user.$(OBJEXT) version.$(OBJEXT) watch.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -417,6 +418,7 @@ ircd_SOURCES = auth.c            \
                numeric.c         \
                packet.c          \
                parse.c           \
+               patricia.c        \
                s_bsd_epoll.c     \
                s_bsd_poll.c      \
                s_bsd_devpoll.c   \
@@ -572,6 +574,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/res.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restart.Po@am__quote@

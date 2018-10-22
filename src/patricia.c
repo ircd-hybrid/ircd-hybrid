@@ -111,9 +111,9 @@ New_Prefix2(int family, void *dest, int bitlen, prefix_t *prefix)
     default: return NULL;
   }
 
-  if (!prefix)
+  if (prefix == NULL)
   {
-    prefix = xcalloc(sizeof(prefix_t));
+    prefix = xcalloc(sizeof(*prefix));
     dynamic_allocated = 1;
   }
 
@@ -224,7 +224,7 @@ Deref_Prefix(prefix_t *prefix)
 patricia_tree_t *
 patricia_new(unsigned int maxbits)
 {
-  patricia_tree_t *patricia = xcalloc(sizeof *patricia);
+  patricia_tree_t *patricia = xcalloc(sizeof(*patricia));
   patricia->maxbits = maxbits;
 
   assert(maxbits <= PATRICIA_MAXBITS);  /* XXX */
@@ -291,7 +291,7 @@ patricia_clear(patricia_tree_t *patricia, void (*func)(void *))
   }
 
   assert(patricia->num_active_node == 0);
-  /* xfree (patricia); */
+  /* xfree(patricia); */
 }
 
 void
@@ -506,7 +506,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
 
   if (patricia->head == NULL)
   {
-    node = xcalloc(sizeof *node);
+    node = xcalloc(sizeof(*node));
     node->bit = prefix->bitlen;
     node->prefix = Ref_Prefix(prefix);
     patricia->head = node;
@@ -631,7 +631,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
     return node;
   }
 
-  new_node = xcalloc(sizeof *new_node);
+  new_node = xcalloc(sizeof(*new_node));
   new_node->bit = prefix->bitlen;
   new_node->prefix = Ref_Prefix(prefix);
   patricia->num_active_node++;
@@ -692,7 +692,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
   }
   else
   {
-    glue = xcalloc(sizeof *glue);
+    glue = xcalloc(sizeof(*glue));
     glue->bit = differ_bit;
     glue->parent = node->parent;
     patricia->num_active_node++;
@@ -753,7 +753,7 @@ patricia_remove(patricia_tree_t *patricia, patricia_node_t *node)
      * This might be a placeholder node -- have to check and make sure
      * there is a prefix associated with it !
      */
-    if (node->prefix != NULL)
+    if (node->prefix)
       Deref_Prefix(node->prefix);
 
     node->prefix = NULL;

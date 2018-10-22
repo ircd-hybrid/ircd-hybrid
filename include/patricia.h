@@ -38,7 +38,6 @@
 
 /* { from defs.h */
 #define prefix_touchar(prefix) ((unsigned char *)&(prefix)->add.sin)
-#define MAXLINE 1024
 #define BIT_TEST(f, b)  ((f) & (b))
 /* } */
 

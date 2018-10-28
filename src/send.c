@@ -499,7 +499,7 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int posca
   {
     chptr = ((struct Membership *)cptr->data)->chptr;
 
-    DLINK_FOREACH(uptr, chptr->locmembers.head)
+    DLINK_FOREACH(uptr, chptr->members_local.head)
     {
       member = uptr->data;
       target_p = member->client_p;
@@ -547,7 +547,7 @@ sendto_channel_local(const struct Client *one, struct Channel *chptr, unsigned i
   send_format(buffer, pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(node, chptr->locmembers.head)
+  DLINK_FOREACH(node, chptr->members_local.head)
   {
     struct Membership *member = node->data;
     struct Client *target_p = member->client_p;

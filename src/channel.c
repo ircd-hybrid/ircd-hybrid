@@ -108,7 +108,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p,
   dlinkAdd(member, &member->channode, &chptr->members);
 
   if (MyConnect(client_p))
-    dlinkAdd(member, &member->locchannode, &chptr->locmembers);
+    dlinkAdd(member, &member->locchannode, &chptr->members_local);
 
   dlinkAdd(member, &member->usernode, &client_p->channel);
 }
@@ -126,7 +126,7 @@ remove_user_from_channel(struct Membership *member)
   dlinkDelete(&member->channode, &chptr->members);
 
   if (MyConnect(client_p))
-    dlinkDelete(&member->locchannode, &chptr->locmembers);
+    dlinkDelete(&member->locchannode, &chptr->members_local);
 
   dlinkDelete(&member->usernode, &client_p->channel);
 
@@ -368,9 +368,9 @@ channel_free(struct Channel *chptr)
   assert(chptr->node.prev == NULL);
   assert(chptr->node.next == NULL);
 
-  assert(dlink_list_length(&chptr->locmembers) == 0);
-  assert(chptr->locmembers.head == NULL);
-  assert(chptr->locmembers.tail == NULL);
+  assert(dlink_list_length(&chptr->members_local) == 0);
+  assert(chptr->members_local.head == NULL);
+  assert(chptr->members_local.tail == NULL);
 
   assert(dlink_list_length(&chptr->members) == 0);
   assert(chptr->members.head == NULL);

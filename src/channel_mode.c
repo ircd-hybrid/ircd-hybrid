@@ -233,9 +233,9 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
   {
     struct Ban *ban = node->data;
 
-    if (!irccmp(name, ban->name) &&
-        !irccmp(user, ban->user) &&
-        !irccmp(host, ban->host))
+    if (irccmp(name, ban->name) == 0 &&
+        irccmp(user, ban->user) == 0 &&
+        irccmp(host, ban->host) == 0)
     {
       remove_ban(ban, list);
       return 1;

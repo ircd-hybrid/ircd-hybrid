@@ -55,7 +55,7 @@ xline_check(const struct GecosItem *gecos)
     if (IsDead(client_p))
       continue;
 
-    if (!match(gecos->mask, client_p->info))
+    if (match(gecos->mask, client_p->info) == 0)
       conf_try_ban(client_p, CLIENT_BAN_XLINE, gecos->reason);
   }
 }
@@ -73,7 +73,7 @@ xline_handle(struct Client *source_p, const char *mask, const char *reason, uint
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
   {
-    if (!valid_wild_card_simple(mask))
+    if (valid_wild_card_simple(mask) == 0)
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",

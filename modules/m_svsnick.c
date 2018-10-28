@@ -64,7 +64,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
 
-  if (!valid_nickname(new_nick, 1))
+  if (valid_nickname(new_nick, 1) == 0)
     return 0;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
@@ -105,7 +105,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   {
     if (target_p == exists_p)
     {
-      if (!strcmp(target_p->name, new_nick))
+      if (strcmp(target_p->name, new_nick) == 0)
         return 0;
     }
     else if (IsUnknown(exists_p))

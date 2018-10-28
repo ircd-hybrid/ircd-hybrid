@@ -75,9 +75,9 @@ shared_find(unsigned int type, const char *server,
     const struct SharedItem *shared = node->data;
 
     if (shared->type & type)
-      if (!match(shared->server, server))
-        if (!match(shared->user, user) &&
-            !match(shared->host, host))
+      if (match(shared->server, server) == 0)
+        if (match(shared->user, user) == 0 &&
+            match(shared->host, host) == 0)
           return shared;
   }
 

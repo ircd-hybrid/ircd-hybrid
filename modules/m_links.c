@@ -102,7 +102,7 @@ static int
 mo_links(struct Client *source_p, int parc, char *parv[])
 {
   if (parc > 2)
-    if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
+    if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(source_p, UMODE_OPER))
       if (server_hunt(source_p, ":%s LINKS %s :%s", 1, parc, parv)->ret != HUNTED_ISME)
         return 0;
 
@@ -138,7 +138,7 @@ m_links(struct Client *source_p, int parc, char *parv[])
 
   last_used = CurrentTime;
 
-  if (!ConfigServerHide.flatten_links)
+  if (ConfigServerHide.flatten_links == 0)
     return mo_links(source_p, parc, parv);
 
   do_links(source_p, parc, parv);

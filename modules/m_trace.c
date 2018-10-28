@@ -137,9 +137,9 @@ do_trace(struct Client *source_p, const char *name)
 
   if (EmptyString(name))
     doall = 1;
-  else if (!match(name, me.name))
+  else if (match(name, me.name) == 0)
     doall = 1;
-  else if (!MyClient(source_p) && !strcmp(name, me.id))
+  else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
     doall = 1;
 
   for (const dlink_list **list = tab; *list; ++list)

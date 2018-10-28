@@ -56,7 +56,7 @@ m_time(struct Client *source_p, int parc, char *parv[])
     flood_endgrace(source_p);
 
   /* This is safe enough to use during non hidden server mode */
-  if (!ConfigServerHide.disable_remote_commands)
+  if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s TIME :%s", 1, parc, parv)->ret != HUNTED_ISME)
       return 0;
 

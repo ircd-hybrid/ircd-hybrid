@@ -222,7 +222,7 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
     /*
      * Allow admins to see actual ips unless 'hide_server_ips' is enabled
      */
-    if (!ConfigServerHide.hide_server_ips && HasUMode(source_p, UMODE_ADMIN))
+    if (ConfigServerHide.hide_server_ips == 0 && HasUMode(source_p, UMODE_ADMIN))
       sendto_one_numeric(source_p, &me, RPL_STATSCLINE, 'C', conf->host,
                          buf, conf->name, conf->port, conf->class->name);
     else
@@ -511,7 +511,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
 
       const struct MaskItem *conf = arec->conf;
       /* Don't report a permanent dline as temporary dline */
-      if (!conf->until)
+      if (conf->until == 0)
         continue;
 
       sendto_one_numeric(source_p, &me, RPL_STATSDLINE, 'd', conf->host, conf->reason);
@@ -698,7 +698,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
       conf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT, 0,
                                   source_p->username, NULL, 1);
 
-    if (!conf)
+    if (conf == NULL)
       return;
 
     sendto_one_numeric(source_p, &me, RPL_STATSILINE,
@@ -769,11 +769,11 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
       conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE, 0,
                                   source_p->username, NULL, 1);
 
-    if (!conf)
+    if (conf == NULL)
       return;
 
     /* Don't report a permanent kline as temporary kline */
-    if (!conf->until)
+    if (conf->until == 0)
       return;
 
     sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'k',
@@ -805,7 +805,7 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
       conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE, 0,
                                   source_p->username, NULL, 0);
 
-    if (!conf)
+    if (conf == NULL)
       return;
 
     /* Don't report a temporary kline as permanent kline */
@@ -1007,7 +1007,7 @@ stats_uptime(struct Client *source_p, int parc, char *parv[])
   {
     sendto_one_numeric(source_p, &me, RPL_STATSUPTIME,
                        time_dissect(CurrentTime - me.connection->since));
-    if (!ConfigServerHide.disable_remote_commands || HasUMode(source_p, UMODE_OPER))
+    if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(source_p, UMODE_OPER))
        sendto_one_numeric(source_p, &me, RPL_STATSCONN, Count.max_loc_con,
                           Count.max_loc, Count.totalrestartcount);
   }
@@ -1149,9 +1149,9 @@ parse_stats_args(struct Client *source_p, int parc, char *parv[], int *doall, in
   {
     const char *name = parv[2];
 
-    if (!irccmp(name, ID_or_name(&me, source_p)))
+    if (irccmp(name, ID_or_name(&me, source_p)) == 0)
       *doall = 2;
-    else if (!match(name, ID_or_name(&me, source_p)))
+    else if (match(name, ID_or_name(&me, source_p)) == 0)
       *doall = 1;
 
     *wilds = has_wildcards(name);
@@ -1340,7 +1340,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
   last_used = CurrentTime;
 
   /* Is the stats meant for us? */
-  if (!ConfigServerHide.disable_remote_commands)
+  if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s STATS %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
       return 0;
 

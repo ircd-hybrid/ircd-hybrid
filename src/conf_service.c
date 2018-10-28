@@ -70,7 +70,7 @@ service_find(const char *name, int (*compare)(const char *, const char *))
   {
     const struct ServiceItem *service = node->data;
 
-    if (!compare(service->name, name))
+    if (compare(service->name, name) == 0)
       return service;
   }
 

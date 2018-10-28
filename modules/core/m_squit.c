@@ -72,7 +72,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 
     if (IsServer(p) || IsMe(p))
     {
-      if (!match(server, p->name))
+      if (match(server, p->name) == 0)
       {
         target_p = p;
         break;
@@ -80,7 +80,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (!target_p || IsMe(target_p))
+  if (target_p == NULL || IsMe(target_p))
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server);
     return 0;

@@ -104,7 +104,7 @@ module_reload(struct Client *source_p, const char *arg)
   const char *m_bn = NULL;
   struct module *modp = NULL;
 
-  if (!strcmp(arg, "*"))
+  if (strcmp(arg, "*") == 0)
   {
     unsigned int modnum = dlink_list_length(modules_get_list());
     dlink_node *node, *node_next;

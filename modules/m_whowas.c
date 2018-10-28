@@ -58,7 +58,7 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
   {
     const struct Whowas *whowas = node->data;
 
-    if (!irccmp(parv[1], whowas->name))
+    if (irccmp(parv[1], whowas->name) == 0)
     {
       sendto_one_numeric(source_p, &me, RPL_WHOWASUSER, whowas->name,
                          whowas->username, whowas->hostname,
@@ -85,7 +85,7 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
       break;
   }
 
-  if (!count)
+  if (count == 0)
     sendto_one_numeric(source_p, &me, ERR_WASNOSUCHNICK, parv[1]);
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFWHOWAS, parv[1]);
@@ -123,7 +123,7 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
 
   last_used = CurrentTime;
 
-  if (!ConfigServerHide.disable_remote_commands)
+  if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s WHOWAS %s %s :%s", 3, parc, parv)->ret != HUNTED_ISME)
       return 0;
 

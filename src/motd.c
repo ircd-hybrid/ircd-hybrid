@@ -115,7 +115,7 @@ motd_cache(struct Motd *motd)
   {
     struct MotdCache *cache = node->data;
 
-    if (!strcmp(cache->path, motd->path) && cache->maxcount == motd->maxcount)
+    if (strcmp(cache->path, motd->path) == 0 && cache->maxcount == motd->maxcount)
     {
       cache->ref++;  /* Increase reference count */
       motd->cache = cache;  /* Remember cache */
@@ -238,12 +238,12 @@ motd_lookup(const struct Client *client_p)
       case MOTD_CLASS:
       {
         const struct ClassItem *class = class_get_ptr(&client_p->connection->confs);
-        if (!match(motd->mask, class->name))
+        if (match(motd->mask, class->name) == 0)
           return motd;
         break;
       }
       case MOTD_HOSTMASK:
-        if (!match(motd->mask, client_p->host) || !match(motd->mask, client_p->sockhost))
+        if (match(motd->mask, client_p->host) == 0 || match(motd->mask, client_p->sockhost) == 0)
           return motd;
         break;
       case MOTD_IPMASKV4:
@@ -271,7 +271,7 @@ motd_lookup(const struct Client *client_p)
 static void
 motd_forward(struct Client *client_p, const struct MotdCache *cache)
 {
-  if (!cache)  /* No motd to send */
+  if (cache == NULL)  /* No motd to send */
   {
     sendto_one_numeric(client_p, &me, ERR_NOMOTD);
     return;
@@ -308,7 +308,7 @@ motd_signon(struct Client *client_p)
 {
   const struct MotdCache *cache = motd_cache(motd_lookup(client_p));
 
-  if (!ConfigGeneral.short_motd || !cache)
+  if (ConfigGeneral.short_motd == 0 || cache == NULL)
     motd_forward(client_p, cache);
   else
   {

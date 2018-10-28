@@ -76,7 +76,7 @@ modules_get_list(void)
 int
 modules_valid_suffix(const char *name)
 {
-  return ((name = strrchr(name, '.'))) && !strcmp(name, ".la");
+  return ((name = strrchr(name, '.'))) && strcmp(name, ".la") == 0;
 }
 
 /* unload_one_module()

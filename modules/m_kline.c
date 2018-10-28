@@ -71,7 +71,7 @@ kline_check(const struct AddressRec *arec)
             conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
       default:  /* HM_HOST */
-        if (!match(arec->Mask.hostname, client_p->host) || !match(arec->Mask.hostname, client_p->sockhost))
+        if (match(arec->Mask.hostname, client_p->host) == 0 || match(arec->Mask.hostname, client_p->sockhost) == 0)
           conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
     }
@@ -92,7 +92,7 @@ kline_handle(struct Client *source_p, const char *user, const char *host,
   int bits = 0, aftype = 0;
   struct irc_ssaddr iphost, *piphost = NULL;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !valid_wild_card(2, user, host))
+  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(2, user, host) == 0)
   {
     sendto_one_notice(source_p, &me,
                       ":Please include at least %u non-wildcard characters with the mask",

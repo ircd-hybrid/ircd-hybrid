@@ -68,7 +68,7 @@ svstag_attach(dlink_list *list, unsigned int numeric,
   svstag->numeric = numeric;
   svstag->tag = xstrdup(tag);
 
-  for (const char *m = umodes + 1; *m; ++m)
+  for (const char *m = umodes + 1  /* + 1 to skip the '+' */; *m; ++m)
     if ((tab = umode_map[(unsigned char)*m]))
       svstag->umodes |= tab->flag;
 

@@ -93,14 +93,13 @@ static struct dbFILE *
 open_db_read(const char *filename)
 {
   struct dbFILE *f = xcalloc(sizeof(*f));
-  FILE *fp = NULL;
 
   strlcpy(f->filename, filename, sizeof(f->filename));
 
   f->mode = 'r';
-  fp = fopen(f->filename, "rb");
+  f->fp = fopen(f->filename, "rb");
 
-  if (!fp)
+  if (f->fp == NULL)
   {
     int errno_save = errno;
 
@@ -112,7 +111,6 @@ open_db_read(const char *filename)
     return NULL;
   }
 
-  f->fp = fp;
   return f;
 }
 

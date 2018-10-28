@@ -91,28 +91,28 @@ do_who(struct Client *source_p, const struct Client *target_p,
 static int
 who_matches(struct Client *source_p, struct Client *target_p, const char *mask)
 {
-  if (!mask)
+  if (mask == NULL)
     return 1;
 
-  if (!match(mask, target_p->name))
+  if (match(mask, target_p->name) == 0)
     return 1;
 
-  if (!match(mask, target_p->username))
+  if (match(mask, target_p->username) == 0)
     return 1;
 
-  if (!match(mask, target_p->host))
+  if (match(mask, target_p->host) == 0)
     return 1;
 
-  if (!match(mask, target_p->info))
+  if (match(mask, target_p->info) == 0)
     return 1;
 
   if (HasUMode(source_p, UMODE_OPER))
-    if (!match(mask, target_p->sockhost))
+    if (match(mask, target_p->sockhost) == 0)
       return 1;
 
   if (HasUMode(source_p, UMODE_OPER) ||
-      (!ConfigServerHide.hide_servers && !IsHidden(target_p->servptr)))
-    if (!match(mask, target_p->servptr->name))
+      (ConfigServerHide.hide_servers == 0 && !IsHidden(target_p->servptr)))
+    if (match(mask, target_p->servptr->name) == 0)
       return 1;
 
   return 0;
@@ -316,7 +316,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
 
   /* '/who nick' */
   if ((target_p = find_person(source_p, mask)) &&
-      (!server_oper || HasUMode(target_p, UMODE_OPER)))
+      (server_oper == 0 || HasUMode(target_p, UMODE_OPER)))
   {
     DLINK_FOREACH(node, target_p->channel.head)
     {
@@ -336,7 +336,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   }
 
   /* '/who *' */
-  if (!strcmp(mask, "*"))
+  if (strcmp(mask, "*") == 0)
   {
     if ((node = source_p->channel.head))
     {
@@ -349,7 +349,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   }
 
   /* '/who 0' */
-  if (!strcmp(mask, "0"))
+  if (strcmp(mask, "0") == 0)
     who_global(source_p, NULL, server_oper);
   else
     who_global(source_p, mask, server_oper);

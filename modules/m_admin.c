@@ -82,7 +82,7 @@ m_admin(struct Client *source_p, int parc, char *parv[])
 
   last_used = CurrentTime;
 
-  if (!ConfigServerHide.disable_remote_commands)
+  if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s ADMIN :%s", 1, parc, parv)->ret != HUNTED_ISME)
       return 0;
 

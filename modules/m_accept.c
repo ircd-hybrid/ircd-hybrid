@@ -123,7 +123,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
   char *p = NULL;
   char *mask = collapse(parv[1]);
 
-  if (EmptyString(mask) || !strcmp(mask, "*"))
+  if (EmptyString(mask) || strcmp(mask, "*") == 0)
   {
     list_accepts(source_p);
     return 0;

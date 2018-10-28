@@ -68,7 +68,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
     /* Search through our argument list, and see if it matches */
     for (unsigned int i = 0; opts[i].opt; ++i)
     {
-      if (!strcmp(opts[i].opt, opt))
+      if (strcmp(opts[i].opt, opt) == 0)
       {
         /* Found our argument */
         found = 1;
@@ -117,7 +117,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
       }
     }
 
-    if (!found)
+    if (found == 0)
     {
       fprintf(stderr, "Error: unknown argument '%c%s'\n",
               OPTCHAR, opt);

@@ -84,7 +84,7 @@ gecos_find(const char *name, int (*compare)(const char *, const char *))
   {
     struct GecosItem *gecos = node->data;
 
-    if (!compare(gecos->mask, name))
+    if (compare(gecos->mask, name) == 0)
       return gecos;
   }
 

@@ -64,7 +64,7 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   if (ts && (ts != target_p->tsinfo))
     return 0;
 
-  if (!strncmp(parv[3], "-", 1))
+  if (strncmp(parv[3], "-", 1) == 0)
   {
     /* TBD: possibly allow to remove certain tags by numeric */
     svstag_clear_list(&target_p->svstags);

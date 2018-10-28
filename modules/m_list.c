@@ -146,7 +146,7 @@ do_list(struct Client *source_p, char *arg)
           else if (!IsChanPrefix(*opt))
             errors = 1;
 
-          if (!errors)
+          if (errors == 0)
             dlinkAdd(xstrdup(opt), make_dlink_node(), list);
       }
     }

@@ -78,9 +78,9 @@ do_etrace(struct Client *source_p, const char *name)
 
   if (EmptyString(name))
     doall = 1;
-  else if (!match(name, me.name))
+  else if (match(name, me.name) == 0)
     doall = 1;
-  else if (!MyClient(source_p) && !strcmp(name, me.id))
+  else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
     doall = 1;
 
   DLINK_FOREACH(node, local_client_list.head)

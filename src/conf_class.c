@@ -176,11 +176,11 @@ class_delete_marked(void)
 }
 
 int
-class_ip_limit_add(struct ClassItem *class, struct sockaddr *addr, int over_rule)
+class_ip_limit_add(struct ClassItem *class, void *addr, int over_rule)
 {
   int bitlen;
 
-  if (addr->sa_family == AF_INET6)
+  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
     bitlen = class->cidr_bitlen_ipv6;
   else
     bitlen = class->cidr_bitlen_ipv4;
@@ -197,11 +197,11 @@ class_ip_limit_add(struct ClassItem *class, struct sockaddr *addr, int over_rule
 }
 
 int
-class_ip_limit_remove(struct ClassItem *class, struct sockaddr *addr)
+class_ip_limit_remove(struct ClassItem *class, void *addr)
 {
   int bitlen;
 
-  if (addr->sa_family == AF_INET6)
+  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
     bitlen = class->cidr_bitlen_ipv6;
   else
     bitlen = class->cidr_bitlen_ipv4;
@@ -238,6 +238,6 @@ class_ip_limit_rebuild(struct ClassItem *class)
 
     if (conf->type == CONF_CLIENT)
       if (conf->class == class)
-        class_ip_limit_add(class, (struct sockaddr *)&client_p->ip, 1);
+        class_ip_limit_add(class, &client_p->ip, 1);
   }
 }

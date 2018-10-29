@@ -404,7 +404,7 @@ conf_detach(struct Client *client_p, enum maskitem_type type)
     free_dlink_node(node);
 
     if (conf->type == CONF_CLIENT)
-      remove_from_cidr_check(&client_p->ip, conf->class);
+      class_ip_limit_remove(conf->class, (struct sockaddr *)&client_p->ip);
 
     if (--conf->class->ref_count == 0 && conf->class->active == 0)
     {
@@ -430,8 +430,7 @@ conf_attach(struct Client *client_p, struct MaskItem *conf)
     return 1;
 
   if (conf->type == CONF_CLIENT)
-    if (cidr_limit_reached(IsConfExemptLimits(conf),
-                           &client_p->ip, conf->class))
+    if (class_ip_limit_add(conf->class, (struct sockaddr *)&client_p->ip, IsConfExemptLimits(conf)))
       return TOO_MANY;    /* Already at maximum allowed */
 
   conf->class->ref_count++;

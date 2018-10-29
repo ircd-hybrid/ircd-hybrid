@@ -4239,11 +4239,11 @@ yyreduce:
   class->min_idle = block_state.min_idle.value;
   class->max_idle = block_state.max_idle.value;
 
-  rebuild_cidr_list(class);
-
   class->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
   class->cidr_bitlen_ipv6 = block_state.cidr_bitlen_ipv6.value;
   class->number_per_cidr = block_state.number_per_cidr.value;
+
+  class_ip_limit_rebuild(class);
 }
 #line 4249 "conf_parser.c" /* yacc.c:1646  */
     break;

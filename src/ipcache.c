@@ -35,8 +35,18 @@
 
 
 static dlink_list ipcache_list;
-static patricia_tree_t *ipcache_trie;
+static patricia_tree_t *ipcache_trie_v6;
+static patricia_tree_t *ipcache_trie_v4;
 
+
+static void *
+ipcache_get_trie(void *addr)
+{
+  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
+    return ipcache_trie_v6;
+  else
+    return ipcache_trie_v4;
+}
 
 /* ipcache_find_or_add_address()
  *
@@ -50,12 +60,14 @@ static patricia_tree_t *ipcache_trie;
 struct ip_entry *
 ipcache_record_find_or_add(void *addr)
 {
-  patricia_node_t *pnode = patricia_make_and_lookup_addr(ipcache_trie, addr, 0);
+  patricia_tree_t *ptrie = ipcache_get_trie(addr);
+  patricia_node_t *pnode = patricia_make_and_lookup_addr(ptrie, addr, 0);
 
   if (pnode->data)  /* Deliberate crash if 'pnode' is NULL */
     return pnode->data;  /* Already added to the trie */
 
   struct ip_entry *iptr = xcalloc(sizeof(*iptr));
+  iptr->trie_pointer = ptrie;
   dlinkAdd(pnode, &iptr->node, &ipcache_list);
 
   PATRICIA_DATA_SET(pnode, iptr);
@@ -71,10 +83,10 @@ ipcache_record_delete(patricia_node_t *pnode)
   if (iptr->count_local == 0 && iptr->count_remote == 0 &&
       (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
   {
+    patricia_remove(iptr->trie_pointer, pnode);
+
     dlinkDelete(&iptr->node, &ipcache_list);
     xfree(iptr);
-
-    patricia_remove(ipcache_trie, pnode);
   }
 }
 
@@ -90,7 +102,7 @@ ipcache_record_delete(patricia_node_t *pnode)
 void
 ipcache_record_remove(void *addr, int local)
 {
-  patricia_node_t *pnode = patricia_try_search_exact_addr(ipcache_trie, addr, 0);
+  patricia_node_t *pnode = patricia_try_search_exact_addr(ipcache_get_trie(addr), addr, 0);
 
   if (pnode == NULL)
     return;
@@ -149,7 +161,8 @@ ipcache_init(void)
     .when = 123
   };
 
-  ipcache_trie = patricia_new(PATRICIA_MAXBITS);
+  ipcache_trie_v6 = patricia_new(128);
+  ipcache_trie_v4 = patricia_new( 32);
 
   event_add(&event_expire_ipcache, NULL);
 }

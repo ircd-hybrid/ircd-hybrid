@@ -39,7 +39,8 @@ struct ClassItem
 {
   char *name;
   dlink_node node;
-  void *ip_tree;  /**< Pointer to 'patricia_tree_t' item */
+  void *ip_tree_v6;  /**< Pointer to 'patricia_tree_t' item */
+  void *ip_tree_v4;  /**< Pointer to 'patricia_tree_t' item */
   unsigned int ref_count;
   unsigned int max_sendq;
   unsigned int max_recvq;

@@ -56,7 +56,8 @@ class_make(void)
   class->max_total = MAXIMUM_LINKS_DEFAULT;
   class->max_sendq = DEFAULT_SENDQ;
   class->max_recvq = DEFAULT_RECVQ;
-  class->ip_tree   = patricia_new(PATRICIA_MAXBITS);
+  class->ip_tree_v6 = patricia_new(128);
+  class->ip_tree_v4 = patricia_new( 32);
 
   dlinkAdd(class, &class->node, &class_list);
 
@@ -70,8 +71,10 @@ class_free(struct ClassItem *const class)
   assert(class->active    == 0);
   assert(class->ref_count == 0);
 
-  if (class->ip_tree)
-    patricia_destroy(class->ip_tree, NULL);
+  if (class->ip_tree_v6)
+    patricia_destroy(class->ip_tree_v6, NULL);
+  if (class->ip_tree_v4)
+    patricia_destroy(class->ip_tree_v4, NULL);
 
   dlinkDelete(&class->node, &class_list);
   xfree(class->name);
@@ -175,6 +178,15 @@ class_delete_marked(void)
   }
 }
 
+static void *
+class_ip_limit_trie(struct ClassItem *class, void *addr)
+{
+  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
+    return class->ip_tree_v6;
+  else
+    return class->ip_tree_v4;
+}
+
 int
 class_ip_limit_add(struct ClassItem *class, void *addr, int over_rule)
 {
@@ -188,7 +200,7 @@ class_ip_limit_add(struct ClassItem *class, void *addr, int over_rule)
   if (class->number_per_cidr == 0 || bitlen == 0)
     return 0;
 
-  patricia_node_t *pnode = patricia_make_and_lookup_addr(class->ip_tree, addr, bitlen);
+  patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(class, addr), addr, bitlen);
   if (((uintptr_t)pnode->data) >= class->number_per_cidr && over_rule == 0)
     return 1;
 
@@ -209,7 +221,7 @@ class_ip_limit_remove(struct ClassItem *class, void *addr)
   if (class->number_per_cidr == 0 || bitlen == 0)
     return 0;
 
-  patricia_node_t *pnode = patricia_try_search_best_addr(class->ip_tree, addr, 0);
+  patricia_node_t *pnode = patricia_try_search_best_addr(class_ip_limit_trie(class, addr), addr, 0);
   if (pnode == NULL)
     return 0;
 
@@ -217,7 +229,7 @@ class_ip_limit_remove(struct ClassItem *class, void *addr)
 
   if (((uintptr_t)pnode->data) == 0)
   {
-    patricia_remove(class->ip_tree, pnode);
+    patricia_remove(class_ip_limit_trie(class, addr), pnode);
     return 1;
   }
 
@@ -229,7 +241,8 @@ class_ip_limit_rebuild(struct ClassItem *class)
 {
   dlink_node *node;
 
-  patricia_clear(class->ip_tree, NULL);
+  patricia_clear(class->ip_tree_v6, NULL);
+  patricia_clear(class->ip_tree_v4, NULL);
 
   DLINK_FOREACH(node, local_client_list.head)
   {

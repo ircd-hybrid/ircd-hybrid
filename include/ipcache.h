@@ -30,6 +30,7 @@
 struct ip_entry
 {
   dlink_node node;                /**< List node; linked into ipcache_list */
+  void *trie_pointer;             /**< Pointer to 'patricia_tree_t' item */
   unsigned int count_local;       /**< Number of local users using this IP */
   unsigned int count_remote;      /**< Number of remote users using this IP */
   unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */

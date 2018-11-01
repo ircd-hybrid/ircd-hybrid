@@ -293,7 +293,6 @@ patricia_clear(patricia_tree_t *patricia, void (*func)(void *))
   patricia->head = NULL;
 
   assert(patricia->num_active_node == 0);
-  /* xfree(patricia); */
 }
 
 void

@@ -260,7 +260,7 @@ struct Server
 {
   dlink_list server_list;  /**< Servers on this server */
   dlink_list client_list;  /**< Clients on this server */
-  char by[NICKLEN + 1];    /**< Who activated this connection */
+  char by[NICKLEN + 1];  /**< Who activated this connection */
 };
 
 /*! \brief ListTask structure */
@@ -287,30 +287,28 @@ struct ListTask
  */
 struct Connection
 {
-  dlink_node   lclient_node;
+  dlink_node lclient_node;
 
   unsigned int registration;
   unsigned int cap_client;  /**< Client capabilities (from us) */
   unsigned int cap_active;  /**< Active capabilities (to us) */
-  unsigned int       caps;  /**< Capabilities bit-field */
+  unsigned int caps;  /**< Capabilities bit-field */
 
   unsigned int operflags;     /**< IRC Operator privilege flags */
   unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
 
-  uintmax_t serial;     /**< Used to enforce 1 send per nick */
+  uintmax_t serial;  /**< Used to enforce 1 send per nick */
+  uintmax_t lasttime;  /**< Last time data read from socket */
+  uintmax_t firsttime;  /**< Time client was created */
+  uintmax_t since;  /**< Last time we parsed something */
+  uintmax_t last_caller_id_time;
+  uintmax_t first_received_message_time;
+  uintmax_t last_privmsg;  /**< Last time we got a PRIVMSG */
+  uintmax_t last_join_time;  /**< When this client last joined a channel */
+  uintmax_t last_leave_time;  /**< When this client last left a channel */
 
-  uintmax_t    lasttime;   /**< Last time data read from socket */
-  uintmax_t    firsttime;  /**< Time client was created */
-  uintmax_t    since;      /**< Last time we parsed something */
-  uintmax_t    last_join_time;   /**< When this client last joined a channel */
-  uintmax_t    last_leave_time;  /**< When this client last left a channel */
-  int          join_leave_count; /**< Count of JOIN/LEAVE in less than
-                                         MIN_JOIN_LEAVE_TIME seconds */
-  int          oper_warn_count_down; /**< Warn opers of this possible
-                                          spambot every time this gets to 0 */
-  uintmax_t    last_caller_id_time;
-  uintmax_t    first_received_message_time;
-  uintmax_t    last_privmsg;  /**< Last time we got a PRIVMSG */
+  int join_leave_count;  /**< Count of JOIN/LEAVE in less than MIN_JOIN_LEAVE_TIME seconds */
+  int oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
 
   unsigned int received_number_of_privmsgs;
 
@@ -321,8 +319,8 @@ struct Connection
 
   struct
   {
-    unsigned int messages;      /**< Statistics: protocol messages sent/received */
-    uintmax_t bytes;             /**< Statistics: total bytes sent/received */
+    unsigned int messages;  /**< Statistics: protocol messages sent/received */
+    uintmax_t bytes;  /**< Statistics: total bytes sent/received */
   } recv, send;
 
   struct
@@ -332,21 +330,21 @@ struct Connection
   } away, invite, knock, nick;
 
   struct AuthRequest *auth;
-  struct Listener *listener;   /**< Listener accepted from */
-  dlink_list        acceptlist; /**< Clients I'll allow to talk to me */
-  dlink_list        watches;   /**< Chain of Watch pointer blocks */
-  dlink_list        confs;     /**< Configuration record associated */
-  dlink_list        invited;   /**< Chain of invite pointer blocks */
+  struct Listener *listener;  /**< Listener accepted from */
+  dlink_list acceptlist;  /**< Clients I'll allow to talk to me */
+  dlink_list watches;  /**< Chain of Watch pointer blocks */
+  dlink_list confs;  /**< Configuration record associated */
+  dlink_list invited;  /**< Chain of invite pointer blocks */
 
-  fde_t            *fd;
+  fde_t *fd;  /**< Pointer to fdlist.c:fd_table[] */
 
   /* Anti-flood stuff. We track how many messages were parsed and how
    * many we were allowed in the current second, and apply a simple
    * decay to avoid flooding.
    *   -- adrian
    */
-  int allow_read;       /**< How many we're allowed to read in this second */
-  int sent_parsed;      /**< How many messages we've parsed in this second */
+  int allow_read;  /**< How many we're allowed to read in this second */
+  int sent_parsed;  /**< How many messages we've parsed in this second */
 
   char *password;  /**< Password supplied by the client/server */
 };
@@ -355,33 +353,35 @@ struct Connection
 struct Client
 {
   dlink_node node;
-  dlink_node lnode;             /**< Used for Server->servers/users */
+  dlink_node lnode;  /**< Used for Server->servers/users */
 
   struct Connection *connection;  /**< Connection structure associated with this client */
-  struct Client    *hnext;      /**< For client hash table lookups by name */
-  struct Client    *idhnext;    /**< For SID hash table lookups by sid */
-  struct Server    *serv;       /**< ...defined, if this is a server */
-  struct Client    *servptr;    /**< Points to server this Client is on */
-  struct Client    *from;       /**< == self, if Local Client, *NEVER* NULL! */
+  struct Client *hnext;  /**< For client hash table lookups by name */
+  struct Client *idhnext;  /**< For SID hash table lookups by sid */
+  struct Server *serv;  /**< ...defined, if this is a server */
+  struct Client *servptr;  /**< Points to server this Client is on */
+  struct Client *from;  /**< == self, if Local Client, *NEVER* NULL! */
 
-  uintmax_t         tsinfo;     /**< TS on the nick, SVINFO on server */
+  uintmax_t tsinfo;  /**< TS on the nick, SVINFO on server */
 
-  unsigned int      flags;      /**< Client flags */
-  unsigned int      umodes;     /**< User modes this client has set */
-  unsigned int      hopcount;   /**< Number of servers to this 0 = local */
-  unsigned int      status;     /**< Client type */
-  unsigned int      handler;    /**< Handler index */
+  unsigned int flags;  /**< Client flags */
+  unsigned int umodes;  /**< User modes this client has set */
+  unsigned int hopcount;  /**< Number of servers to this 0 = local */
+  unsigned int status;  /**< Client type */
+  unsigned int handler;  /**< Handler index */
 
-  dlink_list        whowas_list;
-  dlink_list        channel;   /**< Chain of channel pointer blocks */
-  dlink_list        svstags;   /**< List of ServicesTag items */
+  dlink_list whowas_list;
+  dlink_list channel;  /**< Chain of channel pointer blocks */
+  dlink_list svstags;  /**< List of ServicesTag items */
 
   struct irc_ssaddr ip;  /**< Real IP address */
 
-  char away[AWAYLEN + 1]; /**< Client's AWAY message. Can be set/unset via AWAY command */
-  char name[HOSTLEN + 1]; /**< Unique name for a client nick or host */
-  char id[IDLEN + 1];       /**< Client ID, unique ID per client */
-  char account[ACCOUNTLEN + 1]; /**< Services account */
+  char *certfp;  /**< SSL certificate fingerprint */
+
+  char away[AWAYLEN + 1];  /**< Client's AWAY message. Can be set/unset via AWAY command */
+  char name[HOSTLEN + 1];  /**< Unique name for a client nick or host */
+  char id[IDLEN + 1];  /**< Client ID, unique ID per client */
+  char account[ACCOUNTLEN + 1];  /**< Services account */
 
   /*
    * client->username is the username from ident or the USER message,
@@ -390,37 +390,35 @@ struct Client
    * tilde depending on the auth{} block. Once a client has registered,
    * this field should be considered read-only.
    */
-  char              username[USERLEN + 1]; /* client's username */
+  char username[USERLEN + 1];  /**< client's username */
 
   /*
    * client->host contains the resolved name or ip address as a string
    * for the user, it may be fiddled with for oper spoofing etc.
    * once it's changed the *real* address goes away.
    */
-  char              host[HOSTLEN + 1];     /* client's hostname */
+  char host[HOSTLEN + 1];  /**< Client's hostname. Can be faked/spoofed */
 
   /*
    * client->realhost contains the resolved name or ip address as a string
    * for the user. Once a client has registered, this field should be
    * considered read-only.
    */
-  char              realhost[HOSTLEN + 1];     /* client's real hostname */
+  char realhost[HOSTLEN + 1];  /**< Client's real hostname */
 
 
   /*
    * client->info for unix clients will normally contain the info from the
    * gcos field in /etc/passwd but anything can go here.
    */
-  char              info[REALLEN + 1]; /* Free form additional client info */
+  char info[REALLEN + 1];  /**< Free form additional client info */
 
   /*
    * client->sockhost contains the ip address gotten from the socket as a
    * string, this field should be considered read-only once the connection
    * has been made. (set in s_bsd.c only)
    */
-  char              sockhost[HOSTIPLEN + 1]; /* This is the host name from the
-                                                socket ip address as string */
-  char             *certfp;  /**< SSL certificate fingerprint */
+  char sockhost[HOSTIPLEN + 1];  /**< This is the host name from the socket ip address as string */
 };
 
 

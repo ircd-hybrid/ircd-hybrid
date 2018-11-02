@@ -366,6 +366,10 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
     memcpy(&client_p->ip, res->ai_addr, res->ai_addrlen);
     client_p->ip.ss.ss_family = res->ai_family;
     client_p->ip.ss_len = res->ai_addrlen;
+
+    struct ip_entry *ipcache = ipcache_find_or_add_address(&client_p->ip);
+    ++ipcache->count_remote;
+    AddFlag(client_p, FLAGS_IPHASH);
   }
 
   if (res)
@@ -373,10 +377,6 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
 
   hash_add_client(client_p);
   hash_add_id(client_p);
-
-  struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->ip);
-  ++ipcache->count_remote;
-  AddFlag(client_p, FLAGS_IPHASH);
 
   /* Parse user modes */
   for (const char *m = &parv[4][1]; *m; ++m)

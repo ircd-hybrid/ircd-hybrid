@@ -41,14 +41,10 @@
 #include "modules.h"
 
 
-static void set_final_mode(const struct Mode *, const struct Mode *);
+static void set_final_mode(const struct Mode *, const struct Mode *, char *, char *);
 static void remove_our_modes(struct Channel *, struct Client *);
 static void remove_a_mode(struct Channel *, struct Client *, int, const char);
 
-static char modebuf[MODEBUFLEN];
-static char parabuf[MODEBUFLEN];
-static char sendbuf[MODEBUFLEN];
-static char *mbuf;
 
 /*! \brief JOIN command handler
  *
@@ -99,6 +95,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   const char *servername = NULL;
   struct Channel *chptr = NULL;
   struct Mode mode, *oldmode;
+  char modebuf[MODEBUFLEN];
+  char parabuf[MODEBUFLEN];
 
   if (!IsClient(source_p))
     return 0;
@@ -114,7 +112,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  mbuf = modebuf;
   mode.mode = mode.limit = 0;
   mode.key[0] = '\0';
 
@@ -179,7 +176,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
       strlcpy(mode.key, oldmode->key, sizeof(mode.key));
   }
 
-  set_final_mode(&mode, oldmode);
+  set_final_mode(&mode, oldmode, modebuf, parabuf);
   chptr->mode = mode;
 
   /* Lost the TS, other side wins, so remove modes on this side */
@@ -246,9 +243,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
  *                but were not set in oldmode.
  */
 static void
-set_final_mode(const struct Mode *mode, const struct Mode *oldmode)
+set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
 {
-  char *pbuf = parabuf;
   int what = 0, len = 0;
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
@@ -359,10 +355,11 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
 {
   dlink_node *node = NULL;
   char lmodebuf[MODEBUFLEN];
+  char sendbuf[MODEBUFLEN];
   const char *lpara[MAXMODEPARAMS];
   int count = 0, lcount = 0;
+  char *mbuf = lmodebuf;
 
-  mbuf = lmodebuf;
   *mbuf++ = '-';
 
   for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)

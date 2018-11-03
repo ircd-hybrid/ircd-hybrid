@@ -217,14 +217,9 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     remove_our_modes(chptr, source_p);
 
-    if (dlink_list_length(&chptr->banlist))
-      remove_ban_list(chptr, source_p, &chptr->banlist, 'b');
-
-    if (dlink_list_length(&chptr->exceptlist))
-      remove_ban_list(chptr, source_p, &chptr->exceptlist, 'e');
-
-    if (dlink_list_length(&chptr->invexlist))
-      remove_ban_list(chptr, source_p, &chptr->invexlist, 'I');
+    remove_ban_list(chptr, source_p, &chptr->banlist, 'b');
+    remove_ban_list(chptr, source_p, &chptr->exceptlist, 'e');
+    remove_ban_list(chptr, source_p, &chptr->invexlist, 'I');
 
     clear_ban_cache_list(&chptr->members_local);
     clear_invite_list(&chptr->invites);
@@ -696,37 +691,39 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
  * side effects	- given ban list is removed, modes are sent to local clients
  */
 static void
-remove_ban_list(struct Channel *chptr, struct Client *source_p,
-                dlink_list *list, char c)
+remove_ban_list(struct Channel *chptr, struct Client *source_p, dlink_list *list, char c)
 {
-  char lmodebuf[MODEBUFLEN];
-  char lparabuf[IRCD_BUFSIZE];
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
+  char modebuf[IRCD_BUFSIZE];
+  char parabuf[IRCD_BUFSIZE];
   char *mbuf;
   char *pbuf;
   int count = 0;
-  int cur_len, mlen, plen;
+  int cur_len, mlen;
 
-  pbuf = lparabuf;
-  cur_len = mlen = snprintf(lmodebuf, sizeof(lmodebuf), ":%s MODE %s -",
+  if (dlink_list_length(list) == 0)
+    return;
+
+  cur_len = mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s -",
                             source_p->name, chptr->name);
-  mbuf = lmodebuf + mlen;
+  mbuf = modebuf + mlen;
+  pbuf = parabuf;
 
   DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
     struct Ban *ban = node->data;
-
-    plen = ban->len + 4;  /* another +b and "!@ " */
+    int plen = ban->len + 4;  /* another +b and "!@ " */
 
     if (count >= MAXMODEPARAMS ||
         (cur_len + 1 /* space between */ + (plen - 1)) > IRCD_BUFSIZE - 2)
     {
       /* NUL-terminate and remove trailing space */
       *mbuf = *(pbuf - 1) = '\0';
-      sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", lmodebuf, lparabuf);
+      sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
+
       cur_len = mlen;
-      mbuf = lmodebuf + mlen;
-      pbuf = lparabuf;
+      mbuf = modebuf + mlen;
+      pbuf = parabuf;
       count = 0;
     }
 
@@ -739,7 +736,7 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
   }
 
   *mbuf = *(pbuf - 1) = '\0';
-  sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", lmodebuf, lparabuf);
+  sendto_channel_local(NULL, chptr, 0, 0, 0, "%s %s", modebuf, parabuf);
 }
 
 static struct Message sjoin_msgtab =

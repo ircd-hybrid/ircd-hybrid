@@ -41,14 +41,7 @@
 #include "misc.h"
 
 
-static char modebuf[MODEBUFLEN];
-static char parabuf[MODEBUFLEN];
-static char sendbuf[MODEBUFLEN];
-static const char *para[MAXMODEPARAMS];
-static char *mbuf;
-static int pargs;
-
-static void set_final_mode(struct Mode *, struct Mode *);
+static void set_final_mode(struct Mode *, struct Mode *, char *, char *);
 static void remove_our_modes(struct Channel *, struct Client *);
 static void remove_a_mode(struct Channel *, struct Client *, int, char);
 static void remove_ban_list(struct Channel *, struct Client *, dlink_list *, char);
@@ -79,7 +72,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   char           keep_our_modes = 1;
   char           keep_new_modes = 1;
   char           have_many_uids = 0;
-  int            lcount;
+  unsigned int   lcount;
   char           uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1];
   char           *up = NULL;
   int            len_uid = 0;
@@ -94,6 +87,11 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   char           *p; /* pointer used making sjbuf */
   const char *servername = (ConfigServerHide.hide_servers || IsHidden(source_p)) ?
                             me.name : source_p->name;
+  const char *para[MAXMODEPARAMS];
+  char sendbuf[MODEBUFLEN] = "";
+  char modebuf[MODEBUFLEN] = "";
+  char parabuf[MODEBUFLEN] = "";
+  unsigned int pargs = 0;
 
   if (!IsServer(source_p))
     return 0;
@@ -106,8 +104,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  modebuf[0] = '\0';
-  mbuf = modebuf;
   pargs = 0;
   newts = strtoumax(parv[1], NULL, 10);
 
@@ -152,7 +148,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     chptr = channel_make(parv[2]);
   }
 
-  parabuf[0] = '\0';
   oldts = chptr->creationtime;
   oldmode = &chptr->mode;
 
@@ -210,7 +205,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       strlcpy(mode.key, oldmode->key, sizeof(mode.key));
   }
 
-  set_final_mode(&mode, oldmode);
+  set_final_mode(&mode, oldmode, modebuf, parabuf);
   chptr->mode = mode;
 
   /* Lost the TS, other side wins, so remove modes on this side */
@@ -282,10 +277,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  mbuf = modebuf;
-  sendbuf[0] = '\0';
-  pargs = 0;
-
+  char *mbuf = modebuf;
   *mbuf++ = '+';
 
   s = parv[args + 4];
@@ -556,9 +548,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
  *		  but were not set in oldmode.
  */
 static void
-set_final_mode(struct Mode *mode, struct Mode *oldmode)
+set_final_mode(struct Mode *mode, struct Mode *oldmode, char *mbuf, char *pbuf)
 {
-  char *pbuf = parabuf;
   int len = 0;
 
   *mbuf++ = '-';
@@ -575,7 +566,6 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
     *mbuf++ = 'k';
     len = sprintf(pbuf, "%s ", oldmode->key);
     pbuf += len;
-    pargs++;
   }
 
   if (*(mbuf - 1) == '-')
@@ -592,7 +582,6 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
     *mbuf++ = 'l';
     len = sprintf(pbuf, "%u ", mode->limit);
     pbuf += len;
-    pargs++;
   }
 
   if (mode->key[0] && strcmp(oldmode->key, mode->key))
@@ -600,7 +589,6 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode)
     *mbuf++ = 'k';
     len = sprintf(pbuf, "%s ", mode->key);
     pbuf += len;
-    pargs++;
   }
 
   if (*(mbuf - 1) == '+')
@@ -640,12 +628,13 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p,
 {
   dlink_node *node = NULL;
   char lmodebuf[MODEBUFLEN];
+  char sendbuf[MODEBUFLEN];
   char *sp = sendbuf;
   const char *lpara[MAXMODEPARAMS];
   unsigned int count = 0;
   int l = 0;
+  char *mbuf = lmodebuf;
 
-  mbuf = lmodebuf;
   *mbuf++ = '-';
   *sp = '\0';
 
@@ -713,7 +702,8 @@ remove_ban_list(struct Channel *chptr, struct Client *source_p,
   char lmodebuf[MODEBUFLEN];
   char lparabuf[IRCD_BUFSIZE];
   dlink_node *node = NULL, *node_next = NULL;
-  char *pbuf = NULL;
+  char *mbuf;
+  char *pbuf;
   int count = 0;
   int cur_len, mlen, plen;
 

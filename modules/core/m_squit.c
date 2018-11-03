@@ -56,7 +56,6 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 {
   char comment[REASONLEN + 1] = "";
   struct Client *target_p = NULL;
-  dlink_node *node = NULL;
   const char *server = parv[1];
 
   if (parc < 2 || EmptyString(parv[1]))
@@ -66,6 +65,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   }
 
   /* The following allows wild cards in SQUIT. */
+  dlink_node *node;
   DLINK_FOREACH(node, global_server_list.head)
   {
     struct Client *p = node->data;
@@ -98,10 +98,10 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!EmptyString(parv[2]))
-    strlcpy(comment, parv[2], sizeof(comment));
-  else
+  if (EmptyString(parv[2]))
     strlcpy(comment, CONF_NOREASON, sizeof(comment));
+  else
+    strlcpy(comment, parv[2], sizeof(comment));
 
   if (MyConnect(target_p))
   {
@@ -146,7 +146,6 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
-  dlink_node *node = NULL;
 
   if (parc < 2 || EmptyString(parv[1]))
     return 0;
@@ -175,6 +174,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
     sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
 
     /* Send to everything but target and source */
+    dlink_node *node;
     DLINK_FOREACH(node, local_server_list.head)
     {
       struct Client *client_p = node->data;

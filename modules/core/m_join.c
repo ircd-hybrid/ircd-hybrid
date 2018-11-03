@@ -106,7 +106,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   if (parc < 4)
     return 0;
 
-  if (!channel_check_name(parv[2], 0))
+  if (channel_check_name(parv[2], 0) == 0)
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
@@ -142,7 +142,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
   else
   {
-    if (!newts && !isnew && oldts)
+    if (newts == 0 && isnew == 0 && oldts)
     {
       sendto_channel_local(NULL, chptr, 0, 0, 0,
                            ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
@@ -167,7 +167,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   else
     keep_new_modes = 0;
 
-  if (!keep_new_modes)
+  if (keep_new_modes == 0)
     mode = *oldmode;
   else if (keep_our_modes)
   {
@@ -183,7 +183,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   chptr->mode = mode;
 
   /* Lost the TS, other side wins, so remove modes on this side */
-  if (!keep_our_modes)
+  if (keep_our_modes == 0)
   {
     remove_our_modes(chptr, source_p);
 
@@ -198,8 +198,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
     sendto_channel_local(NULL, chptr, 0, 0, 0,
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
-                          me.name, chptr->name, chptr->name,
-                         oldts, newts);
+                         me.name, chptr->name, chptr->name, oldts, newts);
   }
 
   if (*modebuf)

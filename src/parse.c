@@ -176,7 +176,7 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
   else
     target_p = find_person(source_p, parv[1]);
 
-  if ((target_p == NULL || target_p->from == source_p->from) && !chptr)
+  if ((target_p == NULL || target_p->from == source_p->from) && chptr == NULL)
     return;
 
   /*

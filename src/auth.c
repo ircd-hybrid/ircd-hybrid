@@ -307,7 +307,7 @@ auth_check_ident_reply(char *const reply)
    * form - e.g., something that could be used as an argument to "finger"
    * or as a mail address.
    */
-  if (!strncmp(token, "OTHER", 5))
+  if (strncmp(token, "OTHER", 5) == 0)
     return NULL;
 
   /*

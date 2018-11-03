@@ -98,7 +98,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   if (!IsServer(source_p))
     return 0;
 
-  if (!channel_check_name(parv[2], 0))
+  if (channel_check_name(parv[2], 0) == 0)
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
@@ -170,7 +170,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
   else
   {
-    if (!newts && !isnew && oldts)
+    if (newts == 0 && isnew == 0 && oldts)
     {
       sendto_channel_local(NULL, chptr, 0, 0, 0,
                            ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
@@ -198,7 +198,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     tstosend = oldts;
   }
 
-  if (!keep_new_modes)
+  if (keep_new_modes == 0)
     mode = *oldmode;
   else if (keep_our_modes)
   {
@@ -214,10 +214,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   chptr->mode = mode;
 
   /* Lost the TS, other side wins, so remove modes on this side */
-  if (!keep_our_modes)
+  if (keep_our_modes == 0)
   {
     /* Update channel name to be the correct case */
-    if (!isnew)
+    if (isnew == 0)
       strlcpy(chptr->name, parv[2], sizeof(chptr->name));
 
     remove_our_modes(chptr, source_p);
@@ -249,7 +249,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                          oldts, newts);
   }
 
-  if (*modebuf != '\0')
+  if (*modebuf)
   {
     /* This _SHOULD_ be to ALL_MEMBERS
      * It contains only +imnpstlk, etc */
@@ -379,7 +379,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if (!IsMember(target_p, chptr))
     {
-      add_user_to_channel(chptr, target_p, fl, !have_many_uids);
+      add_user_to_channel(chptr, target_p, fl, have_many_uids == 0);
 
       sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target_p->name, target_p->username,
@@ -532,7 +532,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
    * and leaving us with a channel formed just as the client parts.
    * - Dianora
    */
-  if (!dlink_list_length(&chptr->members) && isnew)
+  if (dlink_list_length(&chptr->members) == 0 && isnew)
   {
     channel_free(chptr);
     return 0;

@@ -178,7 +178,7 @@ server_send_client(struct Client *client_p, struct Client *target_p)
 static void
 server_burst(struct Client *client_p)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, global_client_list.head)
   {
@@ -233,7 +233,7 @@ server_estab(struct Client *client_p)
   xfree(client_p->connection->password);
   client_p->connection->password = NULL;
 
-  if (!ConfigServerInfo.hub && dlink_list_length(&local_server_list))
+  if (ConfigServerInfo.hub == 0 && dlink_list_length(&local_server_list))
   {
     ++ServerStats.is_ref;
     exit_client(client_p, "I'm a leaf not a hub");
@@ -404,7 +404,7 @@ enum
 static int
 server_check(const char *name, struct Client *client_p)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
   struct MaskItem *server_conf = NULL;
   int error = SERVER_CHECK_NOCONNECT;
 
@@ -491,7 +491,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!server_valid_name(name))
+  if (server_valid_name(name) == 0)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
@@ -503,7 +503,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!valid_sid(sid))
+  if (valid_sid(sid) == 0)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
@@ -645,7 +645,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!server_valid_name(parv[1]))
+  if (server_valid_name(parv[1]) == 0)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
@@ -657,7 +657,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!valid_sid(parv[3]))
+  if (valid_sid(parv[3]) == 0)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
@@ -714,7 +714,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   DLINK_FOREACH(node, conf->leaf_list.head)
   {
-    if (!match(node->data, parv[1]))
+    if (match(node->data, parv[1]) == 0)
     {
       llined = 1;
       break;
@@ -723,7 +723,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   DLINK_FOREACH(node, conf->hub_list.head)
   {
-    if (!match(node->data, parv[1]))
+    if (match(node->data, parv[1]) == 0)
     {
       hlined = 1;
       break;
@@ -754,7 +754,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    */
 
   /* Ok, check source_p->from can hub the new server */
-  if (!hlined)
+  if (hlined == 0)
   {
     /* OOOPs nope can't HUB */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,

@@ -149,9 +149,9 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
   {
     const struct Ban *ban = node->data;
 
-    if (!irccmp(ban->name, name) &&
-        !irccmp(ban->user, user) &&
-        !irccmp(ban->host, host))
+    if (irccmp(ban->name, name) == 0 &&
+        irccmp(ban->user, user) == 0 &&
+        irccmp(ban->host, host) == 0)
       return 0;
   }
 
@@ -931,7 +931,7 @@ get_channel_access(const struct Client *source_p,
   if (!MyClient(source_p))
     return CHACCESS_REMOTE;
 
-  if (!member)
+  if (member == NULL)
     return CHACCESS_NOTONCHAN;
 
   /* Just to be sure.. */

@@ -219,7 +219,7 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
   const struct ClassItem *const class = conf->class;
   int a_limit_reached = 0;
 
-  struct ip_entry *ipcache = ipcache_find_or_add_address(&client_p->ip);
+  struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->ip);
   ++ipcache->count_local;
   AddFlag(client_p, FLAGS_IPHASH);
 
@@ -404,7 +404,7 @@ conf_detach(struct Client *client_p, enum maskitem_type type)
     free_dlink_node(node);
 
     if (conf->type == CONF_CLIENT)
-      remove_from_cidr_check(&client_p->ip, conf->class);
+      class_ip_limit_remove(conf->class, &client_p->ip);
 
     if (--conf->class->ref_count == 0 && conf->class->active == 0)
     {
@@ -430,8 +430,7 @@ conf_attach(struct Client *client_p, struct MaskItem *conf)
     return 1;
 
   if (conf->type == CONF_CLIENT)
-    if (cidr_limit_reached(IsConfExemptLimits(conf),
-                           &client_p->ip, conf->class))
+    if (class_ip_limit_add(conf->class, &client_p->ip, IsConfExemptLimits(conf)))
       return TOO_MANY;    /* Already at maximum allowed */
 
   conf->class->ref_count++;
@@ -772,7 +771,7 @@ conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
     return BANNED_CLIENT;
   }
 
-  ip_found = ipcache_find_or_add_address(addr);
+  ip_found = ipcache_record_find_or_add(addr);
 
   if ((CurrentTime - ip_found->last_attempt) < ConfigGeneral.throttle_time)
   {

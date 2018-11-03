@@ -689,7 +689,7 @@ exit_one_client(struct Client *source_p, const char *comment)
   if (HasFlag(source_p, FLAGS_IPHASH))
   {
     DelFlag(source_p, FLAGS_IPHASH);
-    ipcache_remove_address(&source_p->ip, MyConnect(source_p));
+    ipcache_record_remove(&source_p->ip, MyConnect(source_p));
   }
 
   /* Check to see if the client isn't already on the dead list */

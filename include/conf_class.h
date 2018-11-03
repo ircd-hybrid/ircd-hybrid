@@ -39,8 +39,8 @@ struct ClassItem
 {
   char *name;
   dlink_node node;
-  dlink_list list_ipv4;         /* base of per cidr ipv4 client link list */
-  dlink_list list_ipv6;         /* base of per cidr ipv6 client link list */
+  void *ip_tree_v6;  /**< Pointer to 'patricia_tree_t' item */
+  void *ip_tree_v4;  /**< Pointer to 'patricia_tree_t' item */
   unsigned int ref_count;
   unsigned int max_sendq;
   unsigned int max_recvq;
@@ -74,8 +74,7 @@ extern unsigned int get_recvq(const dlink_list *const);
 extern struct ClassItem *class_find(const char *, int);
 extern void class_mark_for_deletion(void);
 extern void class_delete_marked(void);
-extern void destroy_cidr_class(struct ClassItem *);
-extern int cidr_limit_reached(int, struct irc_ssaddr *, struct ClassItem *);
-extern void remove_from_cidr_check(struct irc_ssaddr *, struct ClassItem *);
-extern void rebuild_cidr_list(struct ClassItem *);
+extern int class_ip_limit_add(struct ClassItem *, void *, int);
+extern int class_ip_limit_remove(struct ClassItem *, void *);
+extern void class_ip_limit_rebuild(struct ClassItem *);
 #endif  /* INCLUDED_conf_class_h */

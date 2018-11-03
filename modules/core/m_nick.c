@@ -367,7 +367,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
     client_p->ip.ss.ss_family = res->ai_family;
     client_p->ip.ss_len = res->ai_addrlen;
 
-    struct ip_entry *ipcache = ipcache_find_or_add_address(&client_p->ip);
+    struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->ip);
     ++ipcache->count_remote;
     AddFlag(client_p, FLAGS_IPHASH);
   }

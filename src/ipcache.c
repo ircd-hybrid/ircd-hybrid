@@ -31,39 +31,21 @@
 #include "memory.h"
 #include "conf.h"
 #include "ircd.h"
+#include "patricia.h"
 
 
-static dlink_list ip_hash_table[IP_HASH_SIZE];
+static dlink_list ipcache_list;
+static patricia_tree_t *ipcache_trie_v6;
+static patricia_tree_t *ipcache_trie_v4;
 
 
-/* ipcache_hash_address()
- *
- * input        - pointer to an irc_inaddr
- * output       - integer value used as index into hash table
- * side effects - hopefully, none
- */
-static uint32_t
-ipcache_hash_address(const struct irc_ssaddr *addr)
+static void *
+ipcache_get_trie(void *addr)
 {
-  if (addr->ss.ss_family == AF_INET)
-  {
-    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
-    uint32_t hash = 0, ip = ntohl(v4->sin_addr.s_addr);
-
-    hash = ((ip >> 12) + ip) & (IP_HASH_SIZE - 1);
-    return hash;
-  }
+  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
+    return ipcache_trie_v6;
   else
-  {
-    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;
-    uint32_t hash = 0, *const ip = (uint32_t *)&v6->sin6_addr.s6_addr;
-
-    hash  = ip[0] ^ ip[3];
-    hash ^= hash >> 16;
-    hash ^= hash >> 8;
-    hash  = hash & (IP_HASH_SIZE - 1);
-    return hash;
-  }
+    return ipcache_trie_v4;
 }
 
 /* ipcache_find_or_add_address()
@@ -76,40 +58,36 @@ ipcache_hash_address(const struct irc_ssaddr *addr)
  * count set to 0.
  */
 struct ip_entry *
-ipcache_find_or_add_address(const struct irc_ssaddr *addr)
+ipcache_record_find_or_add(void *addr)
 {
-  dlink_node *node;
-  const uint32_t hash_index = ipcache_hash_address(addr);
-  const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr, *ptr_v4;
-  const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr, *ptr_v6;
+  patricia_tree_t *ptrie = ipcache_get_trie(addr);
+  patricia_node_t *pnode = patricia_make_and_lookup_addr(ptrie, addr, 0);
 
-  DLINK_FOREACH(node, ip_hash_table[hash_index].head)
-  {
-    struct ip_entry *iptr = node->data;
-
-    if (iptr->ip.ss.ss_family != addr->ss.ss_family)
-      continue;
-
-    if (addr->ss.ss_family == AF_INET6)
-    {
-      ptr_v6 = (const struct sockaddr_in6 *)&iptr->ip;
-      if (!memcmp(&v6->sin6_addr, &ptr_v6->sin6_addr, sizeof(struct in6_addr)))
-        return iptr;  /* Found entry already in hash, return it. */
-    }
-    else
-    {
-      ptr_v4 = (const struct sockaddr_in *)&iptr->ip;
-      if (!memcmp(&v4->sin_addr, &ptr_v4->sin_addr, sizeof(struct in_addr)))
-        return iptr;  /* Found entry already in hash, return it. */
-    }
-  }
+  if (pnode->data)  /* Deliberate crash if 'pnode' is NULL */
+    return pnode->data;  /* Already added to the trie */
 
   struct ip_entry *iptr = xcalloc(sizeof(*iptr));
-  memcpy(&iptr->ip, addr, sizeof(struct irc_ssaddr));
+  iptr->trie_pointer = ptrie;
+  dlinkAdd(pnode, &iptr->node, &ipcache_list);
 
-  dlinkAdd(iptr, &iptr->node, &ip_hash_table[hash_index]);
+  PATRICIA_DATA_SET(pnode, iptr);
 
   return iptr;
+}
+
+static void
+ipcache_record_delete(patricia_node_t *pnode)
+{
+  struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
+
+  if (iptr->count_local == 0 && iptr->count_remote == 0 &&
+      (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
+  {
+    patricia_remove(iptr->trie_pointer, pnode);
+
+    dlinkDelete(&iptr->node, &ipcache_list);
+    xfree(iptr);
+  }
 }
 
 /* ipcache_remove_addres()
@@ -122,48 +100,22 @@ ipcache_find_or_add_address(const struct irc_ssaddr *addr)
  *                 the struct ip_entry is returned to the ip_entry_heap
  */
 void
-ipcache_remove_address(const struct irc_ssaddr *addr, int local)
+ipcache_record_remove(void *addr, int local)
 {
-  dlink_node *node;
-  const uint32_t hash_index = ipcache_hash_address(addr);
-  const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr, *ptr_v4;
-  const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr, *ptr_v6;
+  patricia_node_t *pnode = patricia_try_search_exact_addr(ipcache_get_trie(addr), addr, 0);
 
-  DLINK_FOREACH(node, ip_hash_table[hash_index].head)
-  {
-    struct ip_entry *iptr = node->data;
+  if (pnode == NULL)
+    return;
 
-    if (iptr->ip.ss.ss_family != addr->ss.ss_family)
-      continue;
+  struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
+  assert(iptr->count_local > 0 || iptr->count_remote > 0);
 
-    if (addr->ss.ss_family == AF_INET6)
-    {
-      ptr_v6 = (const struct sockaddr_in6 *)&iptr->ip;
-      if (memcmp(&v6->sin6_addr, &ptr_v6->sin6_addr, sizeof(struct in6_addr)))
-        continue;
-    }
-    else
-    {
-      ptr_v4 = (const struct sockaddr_in *)&iptr->ip;
-      if (memcmp(&v4->sin_addr, &ptr_v4->sin_addr, sizeof(struct in_addr)))
-        continue;
-    }
+  if (local)
+    --iptr->count_local;
+  else
+    --iptr->count_remote;
 
-    assert(iptr->count_local > 0 || iptr->count_remote > 0);
-
-    if (local)
-      --iptr->count_local;
-    else
-      --iptr->count_remote;
-
-    if (iptr->count_local == 0 && iptr->count_remote == 0 &&
-        (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
-    {
-      dlinkDelete(&iptr->node, &ip_hash_table[hash_index]);
-      xfree(iptr);
-      return;
-    }
-  }
+  ipcache_record_delete(pnode);
 }
 
 /* ipcache_remove_expired_entries()
@@ -173,24 +125,12 @@ ipcache_remove_address(const struct irc_ssaddr *addr, int local)
  * side effects - free up all ip entries with no connections
  */
 static void
-ipcache_remove_expired_entries(void *unused)
+ipcache_remove_expired_records(void *unused)
 {
   dlink_node *node, *node_next;
 
-  for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
-  {
-    DLINK_FOREACH_SAFE(node, node_next, ip_hash_table[i].head)
-    {
-      struct ip_entry *iptr = node->data;
-
-      if (iptr->count_local == 0 && iptr->count_remote == 0 &&
-          (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
-      {
-        dlinkDelete(&iptr->node, &ip_hash_table[i]);
-        xfree(iptr);
-      }
-    }
-  }
+  DLINK_FOREACH_SAFE(node, node_next, ipcache_list.head)
+    ipcache_record_delete(node->data);
 }
 
 /* ipcache_get_stats()
@@ -206,9 +146,9 @@ ipcache_remove_expired_entries(void *unused)
 void
 ipcache_get_stats(unsigned int *const number_ips_stored, size_t *const mem_ips_stored)
 {
-  for (unsigned int i = 0; i < IP_HASH_SIZE; ++i)
-    *number_ips_stored += dlink_list_length(&ip_hash_table[i]);
-  *mem_ips_stored = *number_ips_stored * sizeof(struct ip_entry);
+  /* TBD: inaccurate for now as it does only count the amount of memory for struct ip_entry items */
+  (*number_ips_stored) = dlink_list_length(&ipcache_list);
+  (*mem_ips_stored) = dlink_list_length(&ipcache_list) * sizeof(struct ip_entry);
 }
 
 void
@@ -216,10 +156,13 @@ ipcache_init(void)
 {
   static struct event event_expire_ipcache =
   {
-    .name = "ipcache_remove_expired_entries",
-    .handler = ipcache_remove_expired_entries,
+    .name = "ipcache_remove_expired_records",
+    .handler = ipcache_remove_expired_records,
     .when = 123
   };
+
+  ipcache_trie_v6 = patricia_new(128);
+  ipcache_trie_v4 = patricia_new( 32);
 
   event_add(&event_expire_ipcache, NULL);
 }

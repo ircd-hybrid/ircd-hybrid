@@ -383,7 +383,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   {
     const struct user_modes *tab = umode_map[(unsigned char)*m];
 
-    if (!tab)
+    if (tab == NULL)
       continue;
     if ((tab->flag & UMODE_INVISIBLE) && !HasUMode(client_p, UMODE_INVISIBLE))
       ++Count.invisi;
@@ -445,7 +445,7 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   /* Server introducing new nick */
 
   /* If we don't have a TS, or their TS's are the same, kill both */
-  if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))
+  if (newts == 0 || target_p->tsinfo == 0 || (newts == target_p->tsinfo))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(both killed)",
@@ -466,16 +466,15 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   }
 
   /* The timestamps are different */
-  int sameuser = !irccmp(target_p->username, parv[5]) &&
-                 !irccmp(target_p->sockhost, parv[7 + does_rhost]);
+  int sameuser = irccmp(target_p->username, parv[5]) == 0 &&
+                 irccmp(target_p->sockhost, parv[7 + does_rhost]) == 0;
 
   /*
    * If the users are the same (loaded a client on a different server)
    * and the new users ts is older, or the users are different and the
    * new users ts is newer, ignore the new client and let it do the kill
    */
-  if ((sameuser && newts < target_p->tsinfo) ||
-      (!sameuser && newts > target_p->tsinfo))
+  if ((sameuser && newts < target_p->tsinfo) || (sameuser == 0 && newts > target_p->tsinfo))
   {
     sendto_one(source_p, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
@@ -529,7 +528,7 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   assert(newts);
 
   /* It's a client changing nick and causing a collide */
-  if (!newts || !target_p->tsinfo || (newts == target_p->tsinfo))
+  if (newts == 0 || target_p->tsinfo == 0 || (newts == target_p->tsinfo))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                "Nick change collision from %s to %s(%s <- %s)(both killed)",
@@ -555,8 +554,7 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   int sameuser = irccmp(target_p->username, source_p->username) == 0 &&
                  irccmp(target_p->sockhost, source_p->sockhost) == 0;
 
-  if ((sameuser && newts < target_p->tsinfo) ||
-      (!sameuser && newts > target_p->tsinfo))
+  if ((sameuser && newts < target_p->tsinfo) || (sameuser == 0 && newts > target_p->tsinfo))
   {
     if (sameuser)
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
@@ -631,7 +629,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
-  if (!valid_nickname(nick, 1))
+  if (valid_nickname(nick, 1) == 0)
   {
     sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, parv[1], "Erroneous Nickname");
     return 0;
@@ -690,7 +688,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
-  if (!valid_nickname(nick, 1))
+  if (valid_nickname(nick, 1) == 0)
   {
     sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, "Erroneous Nickname");
     return 0;

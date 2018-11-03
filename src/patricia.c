@@ -164,16 +164,16 @@ ascii2prefix(int family, const char *string)
   const char *const cp = strchr(string, '/');
   if (cp)
   {
-    size_t strlen = cp - string;
+    size_t length = cp - string;
 
-    if (strlen >= sizeof(save))
+    if (length >= sizeof(save))
       return NULL;
 
     bitlen = atoi(cp + 1);
 
     /* Copy the string to save. Avoid destroying the string */
-    memcpy(save, string, strlen);
-    save[strlen] = '\0';
+    memcpy(save, string, length);
+    save[length] = '\0';
 
     string = save;
 

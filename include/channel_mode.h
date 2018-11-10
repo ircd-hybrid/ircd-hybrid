@@ -119,8 +119,10 @@ struct chan_mode
 {
   const unsigned char letter;
   const unsigned int mode;
+  unsigned int flag;
   const unsigned int only_opers;
   const unsigned int only_servers;
+  int required_oplevel;
   void (*func)(struct Client *,
                struct Channel *, int, int *, char **, int *,
                int, int, const char, const struct chan_mode *);

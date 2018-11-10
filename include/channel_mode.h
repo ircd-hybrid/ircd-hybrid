@@ -120,8 +120,8 @@ struct chan_mode
   unsigned char letter;
   unsigned int mode;
   unsigned int flag;
-  unsigned int only_opers;
-  unsigned int only_servers;
+  bool only_opers;
+  bool only_servers;
   int required_oplevel;
   void (*func)(struct Client *,
                struct Channel *, int, int *, char **, int *,

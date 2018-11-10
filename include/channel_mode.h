@@ -117,11 +117,11 @@ struct ChModeChange
 
 struct chan_mode
 {
-  const unsigned char letter;
-  const unsigned int mode;
+  unsigned char letter;
+  unsigned int mode;
   unsigned int flag;
-  const unsigned int only_opers;
-  const unsigned int only_servers;
+  unsigned int only_opers;
+  unsigned int only_servers;
   int required_oplevel;
   void (*func)(struct Client *,
                struct Channel *, int, int *, char **, int *,

@@ -60,6 +60,7 @@
 
 #include <limits.h>
 #include <inttypes.h>
+#include <stdbool.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

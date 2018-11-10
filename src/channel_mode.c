@@ -85,9 +85,8 @@ check_string(char *s)
  */
 
 int
-add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int type)
+add_id(struct Client *client_p, struct Channel *chptr, char *banid, dlink_list *list)
 {
-  dlink_list *list;
   dlink_node *node;
   char name[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
@@ -128,23 +127,6 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
    */
   size_t len = snprintf(banid, IRCD_BUFSIZE, "%s!%s@%s", name, user, host);
 
-  switch (type)
-  {
-    case CHFL_BAN:
-      list = &chptr->banlist;
-      clear_ban_cache_list(&chptr->members_local);
-      break;
-    case CHFL_EXCEPTION:
-      list = &chptr->exceptlist;
-      clear_ban_cache_list(&chptr->members_local);
-      break;
-    case CHFL_INVEX:
-      list = &chptr->invexlist;
-      break;
-    default:
-      list = NULL;  /* Let it crash */
-  }
-
   DLINK_FOREACH(node, list->head)
   {
     const struct Ban *ban = node->data;
@@ -154,6 +136,8 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
         irccmp(ban->host, host) == 0)
       return 0;
   }
+
+  clear_ban_cache_list(&chptr->members_local);
 
   struct Ban *ban = xcalloc(sizeof(*ban));
   ban->when = CurrentTime;
@@ -184,9 +168,8 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, unsigned int
  * side effects	-
  */
 static int
-del_id(struct Channel *chptr, char *banid, unsigned int type)
+del_id(struct Channel *chptr, char *banid, dlink_list *list)
 {
-  dlink_list *list;
   dlink_node *node;
   char name[NICKLEN + 1] = "";
   char user[USERLEN + 1] = "";
@@ -212,23 +195,6 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
    */
   snprintf(banid, IRCD_BUFSIZE, "%s!%s@%s", name, user, host);
 
-  switch (type)
-  {
-    case CHFL_BAN:
-      list = &chptr->banlist;
-      clear_ban_cache_list(&chptr->members_local);
-      break;
-    case CHFL_EXCEPTION:
-      list = &chptr->exceptlist;
-      clear_ban_cache_list(&chptr->members_local);
-      break;
-    case CHFL_INVEX:
-      list = &chptr->invexlist;
-      break;
-    default:
-      list = NULL;  /* Let it crash */
-  }
-
   DLINK_FOREACH(node, list->head)
   {
     struct Ban *ban = node->data;
@@ -237,6 +203,7 @@ del_id(struct Channel *chptr, char *banid, unsigned int type)
         irccmp(user, ban->user) == 0 &&
         irccmp(host, ban->host) == 0)
     {
+      clear_ban_cache_list(&chptr->members_local);
       remove_ban(ban, list);
       return 1;
     }
@@ -501,12 +468,12 @@ chm_mask(struct Client *source_p, struct Channel *chptr, int parc, int *parn, ch
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (add_id(source_p, chptr, mask, mode->flag) == 0)
+    if (add_id(source_p, chptr, mask, list) == 0)
       return;
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (del_id(chptr, mask, mode->flag) == 0)
+    if (del_id(chptr, mask, list) == 0)
       return;
   }
 

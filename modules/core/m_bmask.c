@@ -60,7 +60,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   char banbuf[IRCD_BUFSIZE] = "";
   struct Channel *chptr = NULL;
   char *s, *t, *mbuf, *pbuf;
-  unsigned int mode_type = 0;
+  dlink_list *list = NULL;
   int mlen = 0, tlen = 0;
   int modecount = 0;
   unsigned int flags = 0;
@@ -75,13 +75,13 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   switch (*parv[3])
   {
     case 'b':
-      mode_type = CHFL_BAN;
+      list = &chptr->banlist;
       break;
     case 'e':
-      mode_type = CHFL_EXCEPTION;
+      list = &chptr->exceptlist;
       break;
     case 'I':
-      mode_type = CHFL_INVEX;
+      list = &chptr->invexlist;
       break;
     default:
       return 0;
@@ -109,7 +109,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     if (tlen > MODEBUFLEN)
       break;
 
-    if (tlen && *s != ':' && add_id(source_p, chptr, s, mode_type))
+    if (tlen && *s != ':' && add_id(source_p, chptr, s, list))
     {
       /* add_id can modify 's' */
       tlen = strlen(s);

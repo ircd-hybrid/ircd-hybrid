@@ -631,13 +631,13 @@ chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn, c
 }
 
 static void
-chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-          int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
+chm_flag(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+         int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
   struct Client *target_p;
   struct Membership *member;
 
-  if (alev < CHACCESS_HALFOP)
+  if (alev < mode->required_oplevel)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
@@ -668,133 +668,17 @@ chm_voice(struct Client *source_p, struct Channel *chptr, int parc, int *parn, c
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (has_member_flags(member, CHFL_VOICE))
+    if (has_member_flags(member, mode->flag))
       return;  /* No redundant mode changes */
 
-    AddMemberFlag(member, CHFL_VOICE);
+    AddMemberFlag(member, mode->flag);
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (has_member_flags(member, CHFL_VOICE) == 0)
+    if (has_member_flags(member, mode->flag) == 0)
       return;  /* No redundant mode changes */
 
-    DelMemberFlag(member, CHFL_VOICE);
-  }
-
-  mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = target_p->name;
-  mode_changes[mode_count].id = target_p->id;
-  mode_changes[mode_count].flags = 0;
-  mode_changes[mode_count++].dir = dir;
-}
-
-static void
-chm_hop(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-        int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
-{
-  struct Client *target_p;
-  struct Membership *member;
-
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(source_p, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->name);
-
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
-
-  if (dir == MODE_QUERY || parc <= *parn)
-    return;
-
-  if ((target_p = find_chasing(source_p, parv[(*parn)++])) == NULL)
-    return;  /* find_chasing sends ERR_NOSUCHNICK */
-
-  if ((member = find_channel_link(target_p, chptr)) == NULL)
-  {
-    if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
-
-    *errors |= SM_ERR_NOTONCHANNEL;
-    return;
-  }
-
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
-
-  if (dir == MODE_ADD)  /* setting + */
-  {
-    if (has_member_flags(member, CHFL_HALFOP))
-      return;  /* No redundant mode changes */
-
-    AddMemberFlag(member, CHFL_HALFOP);
-  }
-  else if (dir == MODE_DEL)  /* setting - */
-  {
-    if (has_member_flags(member, CHFL_HALFOP) == 0)
-      return;  /* No redundant mode changes */
-
-    DelMemberFlag(member, CHFL_HALFOP);
-  }
-
-  mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = target_p->name;
-  mode_changes[mode_count].id = target_p->id;
-  mode_changes[mode_count].flags = 0;
-  mode_changes[mode_count++].dir = dir;
-}
-
-static void
-chm_op(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-       int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
-{
-  struct Client *target_p;
-  struct Membership *member;
-
-  if (alev < CHACCESS_CHANOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(source_p, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->name);
-
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
-
-  if (dir == MODE_QUERY || parc <= *parn)
-    return;
-
-  if ((target_p = find_chasing(source_p, parv[(*parn)++])) == NULL)
-    return;  /* find_chasing sends ERR_NOSUCHNICK */
-
-  if ((member = find_channel_link(target_p, chptr)) == NULL)
-  {
-    if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
-
-    *errors |= SM_ERR_NOTONCHANNEL;
-    return;
-  }
-
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
-
-  if (dir == MODE_ADD)  /* setting + */
-  {
-    if (has_member_flags(member, CHFL_CHANOP))
-      return;  /* No redundant mode changes */
-
-    AddMemberFlag(member, CHFL_CHANOP);
-  }
-  else if (dir == MODE_DEL)  /* setting - */
-  {
-    if (has_member_flags(member, CHFL_CHANOP) == 0)
-      return;  /* No redundant mode changes */
-
-    DelMemberFlag(member, CHFL_CHANOP);
+    DelMemberFlag(member, mode->flag);
   }
 
   mode_changes[mode_count].letter = mode->letter;
@@ -1122,19 +1006,19 @@ const struct chan_mode  cmode_tab[] =
   { .letter = 'b', .func = chm_ban },
   { .letter = 'c', .mode = MODE_NOCTRL, .func = chm_simple },
   { .letter = 'e', .func = chm_except },
-  { .letter = 'h', .func = chm_hop },
+  { .letter = 'h', .flag = CHFL_HALFOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag },
   { .letter = 'i', .mode = MODE_INVITEONLY, .func = chm_simple },
   { .letter = 'k', .func = chm_key },
   { .letter = 'l', .func = chm_limit },
   { .letter = 'm', .mode = MODE_MODERATED, .func = chm_simple },
   { .letter = 'n', .mode = MODE_NOPRIVMSGS, .func = chm_simple },
-  { .letter = 'o', .func = chm_op },
+  { .letter = 'o', .flag = CHFL_CHANOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag },
   { .letter = 'p', .mode = MODE_PRIVATE, .func = chm_simple },
   { .letter = 'r', .mode = MODE_REGISTERED, .only_servers = 1, .func = chm_simple },
   { .letter = 's', .mode = MODE_SECRET, .func = chm_simple },
   { .letter = 't', .mode = MODE_TOPICLIMIT, .func = chm_simple },
   { .letter = 'u', .mode = MODE_HIDEBMASKS, .func = chm_simple },
-  { .letter = 'v', .func = chm_voice },
+  { .letter = 'v', .flag = CHFL_VOICE, .required_oplevel = CHFL_HALFOP, .func = chm_flag },
   { .letter = 'C', .mode = MODE_NOCTCP, .func = chm_simple },
   { .letter = 'I', .func = chm_invex },
   { .letter = 'L', .mode = MODE_EXTLIMIT, .only_opers = 1, .func = chm_simple },

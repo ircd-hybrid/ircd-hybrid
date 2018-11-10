@@ -424,33 +424,61 @@ chm_simple(struct Client *source_p, struct Channel *chptr, int parc, int *parn, 
 }
 
 static void
-chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-        int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
+chm_mask(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
+         int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
+  dlink_list *list;
+  enum irc_numerics rpl_list = 0, rpl_endlist = 0;
+  int errtype = 0;
+
+  switch (mode->flag)
+  {
+    case CHFL_BAN:
+      errtype = SM_ERR_RPL_B;
+      list = &chptr->banlist;
+      rpl_list = RPL_BANLIST;
+      rpl_endlist = RPL_ENDOFBANLIST;
+      break;
+    case CHFL_EXCEPTION:
+      errtype = SM_ERR_RPL_E;
+      list = &chptr->exceptlist;
+      rpl_list = RPL_EXCEPTLIST;
+      rpl_endlist = RPL_ENDOFEXCEPTLIST;
+      break;
+    case CHFL_INVEX:
+      errtype = SM_ERR_RPL_I;
+      list = &chptr->invexlist;
+      rpl_list = RPL_INVEXLIST;
+      rpl_endlist = RPL_ENDOFINVEXLIST;
+      break;
+    default:
+      list = NULL;  /* Let it crash */
+  }
+
   if (dir == MODE_QUERY || parc <= *parn)
   {
     dlink_node *node;
 
-    if (*errors & SM_ERR_RPL_B)
+    if (*errors & errtype)
       return;
 
-    *errors |= SM_ERR_RPL_B;
+    *errors |= errtype;
 
-    DLINK_FOREACH(node, chptr->banlist.head)
+    DLINK_FOREACH(node, list->head)
     {
       const struct Ban *ban = node->data;
 
-      if (!HasCMode(chptr, MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
-        sendto_one_numeric(source_p, &me, RPL_BANLIST, chptr->name,
+      if (!HasCMode(chptr, MODE_HIDEBMASKS) || alev >= mode->required_oplevel)
+        sendto_one_numeric(source_p, &me, rpl_list, chptr->name,
                            ban->name, ban->user, ban->host,
                            ban->who, ban->when);
     }
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFBANLIST, chptr->name);
+    sendto_one_numeric(source_p, &me, rpl_endlist, chptr->name);
     return;
   }
 
-  if (alev < CHACCESS_HALFOP)
+  if (alev < mode->required_oplevel)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(source_p, &me,
@@ -473,150 +501,12 @@ chm_ban(struct Client *source_p, struct Channel *chptr, int parc, int *parn, cha
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (add_id(source_p, chptr, mask, CHFL_BAN) == 0)
+    if (add_id(source_p, chptr, mask, mode->flag) == 0)
       return;
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (del_id(chptr, mask, CHFL_BAN) == 0)
-      return;
-  }
-
-  mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
-  mode_changes[mode_count].id = NULL;
-  if (HasCMode(chptr, MODE_HIDEBMASKS))
-    mode_changes[mode_count].flags = CHFL_CHANOP | CHFL_HALFOP;
-  else
-    mode_changes[mode_count].flags = 0;
-  mode_changes[mode_count++].dir = dir;
-}
-
-static void
-chm_except(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-           int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
-{
-  if (dir == MODE_QUERY || parc <= *parn)
-  {
-    dlink_node *node;
-
-    if (*errors & SM_ERR_RPL_E)
-      return;
-
-    *errors |= SM_ERR_RPL_E;
-
-    DLINK_FOREACH(node, chptr->exceptlist.head)
-    {
-      const struct Ban *ban = node->data;
-
-      if (!HasCMode(chptr, MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
-        sendto_one_numeric(source_p, &me, RPL_EXCEPTLIST, chptr->name,
-                           ban->name, ban->user, ban->host,
-                           ban->who, ban->when);
-    }
-
-    sendto_one_numeric(source_p, &me, RPL_ENDOFEXCEPTLIST, chptr->name);
-    return;
-  }
-
-  if (alev < CHACCESS_HALFOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(source_p, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->name);
-
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
-
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
-
-  char *const mask = nuh_mask[*parn];
-  strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
-  ++(*parn);
-
-  if (*mask == ':' || (!MyConnect(source_p) && strchr(mask, ' ')))
-    return;
-
-  if (dir == MODE_ADD)  /* setting + */
-  {
-    if (add_id(source_p, chptr, mask, CHFL_EXCEPTION) == 0)
-      return;
-  }
-  else if (dir == MODE_DEL)  /* setting - */
-  {
-    if (del_id(chptr, mask, CHFL_EXCEPTION) == 0)
-      return;
-  }
-
-  mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
-  mode_changes[mode_count].id = NULL;
-  if (HasCMode(chptr, MODE_HIDEBMASKS))
-    mode_changes[mode_count].flags = CHFL_CHANOP | CHFL_HALFOP;
-  else
-    mode_changes[mode_count].flags = 0;
-  mode_changes[mode_count++].dir = dir;
-}
-
-static void
-chm_invex(struct Client *source_p, struct Channel *chptr, int parc, int *parn, char **parv,
-          int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
-{
-  if (dir == MODE_QUERY || parc <= *parn)
-  {
-    dlink_node *node;
-
-    if (*errors & SM_ERR_RPL_I)
-      return;
-
-    *errors |= SM_ERR_RPL_I;
-
-    DLINK_FOREACH(node, chptr->invexlist.head)
-    {
-      const struct Ban *ban = node->data;
-
-      if (!HasCMode(chptr, MODE_HIDEBMASKS) || alev >= CHACCESS_HALFOP)
-        sendto_one_numeric(source_p, &me, RPL_INVEXLIST, chptr->name,
-                           ban->name, ban->user, ban->host,
-                           ban->who, ban->when);
-    }
-
-    sendto_one_numeric(source_p, &me, RPL_ENDOFINVEXLIST, chptr->name);
-    return;
-  }
-
-  if (alev < CHACCESS_HALFOP)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(source_p, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, chptr->name);
-
-    *errors |= SM_ERR_NOOPS;
-    return;
-  }
-
-  if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
-    return;
-
-  char *const mask = nuh_mask[*parn];
-  strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
-  ++(*parn);
-
-  if (*mask == ':' || (!MyConnect(source_p) && strchr(mask, ' ')))
-    return;
-
-  if (dir == MODE_ADD)  /* setting + */
-  {
-    if (add_id(source_p, chptr, mask, CHFL_INVEX) == 0)
-      return;
-  }
-  else if (dir == MODE_DEL)  /* setting - */
-  {
-    if (del_id(chptr, mask, CHFL_INVEX) == 0)
+    if (del_id(chptr, mask, mode->flag) == 0)
       return;
   }
 
@@ -1003,9 +893,9 @@ send_mode_changes_client(struct Client *source_p, struct Channel *chptr)
 const struct chan_mode *cmode_map[256];
 const struct chan_mode  cmode_tab[] =
 {
-  { .letter = 'b', .func = chm_ban },
+  { .letter = 'b', .flag = CHFL_BAN, .required_oplevel = CHFL_HALFOP, .func = chm_mask },
   { .letter = 'c', .mode = MODE_NOCTRL, .func = chm_simple },
-  { .letter = 'e', .func = chm_except },
+  { .letter = 'e', .flag = CHFL_EXCEPTION, .required_oplevel = CHFL_HALFOP, .func = chm_mask },
   { .letter = 'h', .flag = CHFL_HALFOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag },
   { .letter = 'i', .mode = MODE_INVITEONLY, .func = chm_simple },
   { .letter = 'k', .func = chm_key },
@@ -1020,7 +910,7 @@ const struct chan_mode  cmode_tab[] =
   { .letter = 'u', .mode = MODE_HIDEBMASKS, .func = chm_simple },
   { .letter = 'v', .flag = CHFL_VOICE, .required_oplevel = CHFL_HALFOP, .func = chm_flag },
   { .letter = 'C', .mode = MODE_NOCTCP, .func = chm_simple },
-  { .letter = 'I', .func = chm_invex },
+  { .letter = 'I', .flag = CHFL_INVEX, .required_oplevel = CHFL_HALFOP, .func = chm_mask },
   { .letter = 'L', .mode = MODE_EXTLIMIT, .only_opers = true, .func = chm_simple },
   { .letter = 'M', .mode = MODE_MODREG, .func = chm_simple },
   { .letter = 'N', .mode = MODE_NONICKCHANGE, .func = chm_simple },

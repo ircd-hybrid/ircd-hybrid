@@ -72,7 +72,7 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
       if (strcmp(whowas->account, "*"))
         sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, whowas->name, whowas->account, "was");
 
-      if ((whowas->shide || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
+      if ((whowas->server_hidden || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
         sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, whowas->name,
                            ConfigServerInfo.network_name, date_ctime(whowas->logoff));
       else

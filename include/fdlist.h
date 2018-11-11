@@ -74,8 +74,8 @@ typedef struct _fde
 
   struct
   {
-    unsigned int open:1;
-    unsigned int is_socket:1;
+    bool open;
+    bool is_socket;
   } flags;
 
   struct

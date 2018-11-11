@@ -85,7 +85,7 @@ struct Counter
 
 struct ServerState_t
 {
-  unsigned int foreground;
+  bool foreground;
 };
 
 struct ServerTime

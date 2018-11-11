@@ -34,7 +34,7 @@ struct GecosItem
   char *reason;
   uintmax_t expire;
   uintmax_t setat;
-  unsigned int in_database;
+  bool in_database;
 };
 
 extern const dlink_list *gecos_get_list(void);

@@ -309,7 +309,7 @@ extern int valid_wild_card_simple(const char *);
 extern int valid_wild_card(int, ...);
 
 extern struct MaskItem *conf_make(enum maskitem_type);
-extern void read_conf_files(int);
+extern void read_conf_files(bool);
 extern int conf_attach(struct Client *, struct MaskItem *);
 extern int check_client(struct Client *);
 

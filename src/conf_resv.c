@@ -207,7 +207,7 @@ resv_clear(void)
     {
       struct ResvItem *resv = node->data;
 
-      if (resv->in_database == 0)
+      if (resv->in_database == false)
         resv_delete(resv);
     }
   }

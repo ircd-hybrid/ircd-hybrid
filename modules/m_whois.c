@@ -101,7 +101,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
         t = buf + mlen;
       }
 
-      tlen = sprintf(t, "%s%s%s ", show == 2 ? "~" : "", get_member_status(member, 1),
+      tlen = sprintf(t, "%s%s%s ", show == 2 ? "~" : "", get_member_status(member, true),
                      member->chptr->name);
       t += tlen;
       cur_len += tlen;

@@ -68,7 +68,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
 static void
 do_etrace(struct Client *source_p, const char *name)
 {
-  int doall = 0;
+  bool doall = false;
   dlink_node *node;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
@@ -77,17 +77,17 @@ do_etrace(struct Client *source_p, const char *name)
                        source_p->host, source_p->servptr->name);
 
   if (EmptyString(name))
-    doall = 1;
+    doall = true;
   else if (match(name, me.name) == 0)
-    doall = 1;
+    doall = true;
   else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
-    doall = 1;
+    doall = true;
 
   DLINK_FOREACH(node, local_client_list.head)
   {
     const struct Client *target_p = node->data;
 
-    if (doall || match(name, target_p->name) == 0)
+    if (doall == true || match(name, target_p->name) == 0)
       report_this_status(source_p, target_p);
   }
 

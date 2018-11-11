@@ -172,7 +172,7 @@ io_loop(void)
     {
       dlink_node *node = NULL, *node_next = NULL;
       DLINK_FOREACH_SAFE(node, node_next, listing_client_list.head)
-        safe_list_channels(node->data, 0);
+        safe_list_channels(node->data, false);
     }
 
     /* Run pending events */
@@ -410,7 +410,7 @@ main(int argc, char *argv[])
   auth_init();          /* Initialise the auth code */
   resolver_init();      /* Needs to be setup before the io loop */
   modules_init();
-  read_conf_files(1);   /* cold start init conf files */
+  read_conf_files(true);   /* cold start init conf files */
   capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after read_conf_files() */
   channel_mode_init();

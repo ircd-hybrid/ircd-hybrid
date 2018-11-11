@@ -123,7 +123,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
 static void
 do_trace(struct Client *source_p, const char *name)
 {
-  int doall = 0;
+  bool doall = false;
   const dlink_node *node;
   const dlink_list *tab[] = { &local_client_list,
                               &local_server_list, &unknown_list, NULL };
@@ -136,11 +136,11 @@ do_trace(struct Client *source_p, const char *name)
                        source_p->host, source_p->servptr->name);
 
   if (EmptyString(name))
-    doall = 1;
+    doall = true;
   else if (match(name, me.name) == 0)
-    doall = 1;
+    doall = true;
   else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
-    doall = 1;
+    doall = true;
 
   for (const dlink_list **list = tab; *list; ++list)
   {
@@ -148,12 +148,12 @@ do_trace(struct Client *source_p, const char *name)
     {
       const struct Client *target_p = node->data;
 
-      if (doall || match(name, target_p->name) == 0)
+      if (doall == true || match(name, target_p->name) == 0)
         report_this_status(source_p, target_p);
     }
   }
 
-  if (doall)
+  if (doall == true)
   {
     DLINK_FOREACH(node, class_get_list()->head)
     {

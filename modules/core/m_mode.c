@@ -56,7 +56,8 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
   const struct user_modes *tab = NULL;
   const unsigned int setmodes = source_p->umodes;
   const struct Client *target_p = NULL;
-  int what = MODE_ADD, badmode = 0;
+  bool badmode = false;
+  int what = MODE_ADD;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
@@ -141,7 +142,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
         {
           if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER) &&
               (ConfigGeneral.oper_only_umodes & tab->flag))
-            badmode = 1;
+            badmode = true;
           else
           {
             if (what == MODE_ADD)
@@ -151,13 +152,13 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
           }
         }
         else if (MyConnect(source_p))
-          badmode = 1;
+          badmode = true;
 
         break;
     }
   }
 
-  if (badmode)
+  if (badmode == true)
     sendto_one_numeric(source_p, &me, ERR_UMODEUNKNOWNFLAG);
 
   if (MyConnect(source_p) && HasUMode(source_p, UMODE_ADMIN) &&

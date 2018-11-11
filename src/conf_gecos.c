@@ -52,7 +52,7 @@ gecos_clear(void)
   {
     struct GecosItem *gecos = node->data;
 
-    if (gecos->in_database == 0)
+    if (gecos->in_database == false)
       gecos_delete(gecos);
   }
 }

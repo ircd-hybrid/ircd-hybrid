@@ -1039,7 +1039,7 @@ find_accept(const char *nick, const char *user,
  * output       - 1 if accept this message 0 if not
  * side effects - See if source is on target's allow list
  */
-int
+bool
 accept_message(struct Client *source,
                struct Client *target)
 {
@@ -1047,18 +1047,18 @@ accept_message(struct Client *source,
 
   if (HasFlag(source, FLAGS_SERVICE) ||
       (HasUMode(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
-    return 1;
+    return true;
 
   if (source == target || find_accept(source->name, source->username,
                                       source->host, target, match))
-    return 1;
+    return true;
 
   if (!HasUMode(target, UMODE_CALLERID) && HasUMode(target, UMODE_SOFTCALLERID))
     DLINK_FOREACH(node, target->channel.head)
       if (IsMember(source, ((struct Membership *)node->data)->chptr))
-        return 1;
+        return true;
 
-  return 0;
+  return false;
 }
 
 /* del_all_accepts()

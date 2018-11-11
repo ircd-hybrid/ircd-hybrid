@@ -141,7 +141,7 @@ extern void channel_do_part(struct Client *, char *, const char *);
 extern void remove_ban(struct Ban *, dlink_list *);
 extern void add_user_to_channel(struct Channel *, struct Client *, unsigned int, int);
 extern void remove_user_from_channel(struct Membership *);
-extern void channel_member_names(struct Client *, struct Channel *, int);
+extern void channel_member_names(struct Client *, struct Channel *, bool);
 extern void add_invite(struct Channel *, struct Client *);
 extern void del_invite(struct Invite *);
 extern void clear_invite_list(dlink_list *);
@@ -151,7 +151,7 @@ extern void check_spambot_warning(struct Client *, const char *);
 extern void channel_free(struct Channel *);
 extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, int);
 
-extern const char *get_member_status(const struct Membership *, const int);
+extern const char *get_member_status(const struct Membership *, bool);
 
 extern struct Channel *channel_make(const char *);
 extern struct Membership *find_channel_link(const struct Client *, const struct Channel *);

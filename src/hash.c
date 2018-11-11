@@ -435,13 +435,13 @@ hash_get_bucket(int type, unsigned int hashv)
  *
  * Sendq limit is fairly conservative at 1/2 (In original anyway)
  */
-static int
+static bool
 exceeding_sendq(const struct Client *to)
 {
   if (dbuf_length(&to->connection->buf_sendq) > (get_sendq(&to->connection->confs) / 2))
-    return 1;
+    return true;
   else
-    return 0;
+    return false;
 }
 
 void
@@ -478,20 +478,20 @@ free_list_task(struct Client *source_p)
  *                0 otherwise
  * side effects -
  */
-static int
+static bool
 list_allow_channel(const char *name, const struct ListTask *lt)
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, lt->show_mask.head)
     if (match(node->data, name) != 0)
-      return 0;
+      return false;
 
   DLINK_FOREACH(node, lt->hide_mask.head)
     if (match(node->data, name) == 0)
-      return 0;
+      return false;
 
-  return 1;
+  return true;
 }
 
 /* list_one_channel()
@@ -527,7 +527,7 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
   if (lt->topic[0] && match(lt->topic, chptr->topic))
     return;
 
-  if (!list_allow_channel(chptr->name, lt))
+  if (list_allow_channel(chptr->name, lt) == false)
     return;
 
   channel_modes(chptr, source_p, modebuf, parabuf);
@@ -554,16 +554,16 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
  * - Dianora
  */
 void
-safe_list_channels(struct Client *source_p, int only_unmasked_channels)
+safe_list_channels(struct Client *source_p, bool only_unmasked_channels)
 {
   struct ListTask *const lt = source_p->connection->list_task;
   struct Channel *chptr = NULL;
 
-  if (!only_unmasked_channels)
+  if (only_unmasked_channels == false)
   {
     for (unsigned int i = lt->hash_index; i < HASHSIZE; ++i)
     {
-      if (exceeding_sendq(source_p))
+      if (exceeding_sendq(source_p) == true)
       {
         lt->hash_index = i;
         return;  /* Still more to do */

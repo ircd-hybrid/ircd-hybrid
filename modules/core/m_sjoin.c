@@ -69,14 +69,14 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   uintmax_t tstosend;
   struct Mode mode, *oldmode;
   int            args = 0;
-  char           keep_our_modes = 1;
-  char           keep_new_modes = 1;
-  char           have_many_uids = 0;
+  bool           isnew = false;
+  bool           keep_our_modes = true;
+  bool           keep_new_modes = true;
+  bool           have_many_uids = false;
   unsigned int   lcount;
   char           uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1];
   char           *up = NULL;
   int            len_uid = 0;
-  int            isnew = 0;
   int            buflen = 0;
   int            slen;
   unsigned       int fl;
@@ -144,7 +144,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
-    isnew = 1;
+    isnew = true;
     chptr = channel_make(parv[2]);
   }
 
@@ -165,7 +165,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
   else
   {
-    if (newts == 0 && isnew == 0 && oldts)
+    if (newts == 0 && isnew == false && oldts)
     {
       sendto_channel_local(NULL, chptr, 0, 0, 0,
                            ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
@@ -176,7 +176,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (isnew)
+  if (isnew == true)
     chptr->creationtime = tstosend = newts;
   else if (newts == 0 || oldts == 0)
     chptr->creationtime = tstosend = 0;
@@ -184,18 +184,18 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     tstosend = oldts;
   else if (newts < oldts)
   {
-    keep_our_modes = 0;
+    keep_our_modes = false;
     chptr->creationtime = tstosend = newts;
   }
   else
   {
-    keep_new_modes = 0;
+    keep_new_modes = false;
     tstosend = oldts;
   }
 
-  if (keep_new_modes == 0)
+  if (keep_new_modes == false)
     mode = *oldmode;
-  else if (keep_our_modes)
+  else if (keep_our_modes == true)
   {
     mode.mode |= oldmode->mode;
 
@@ -209,10 +209,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   chptr->mode = mode;
 
   /* Lost the TS, other side wins, so remove modes on this side */
-  if (keep_our_modes == 0)
+  if (keep_our_modes == false)
   {
     /* Update channel name to be the correct case */
-    if (isnew == 0)
+    if (isnew == false)
       strlcpy(chptr->name, parv[2], sizeof(chptr->name));
 
     remove_our_modes(chptr, source_p);
@@ -247,7 +247,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                          servername, chptr->name, modebuf, parabuf);
   }
 
-  if (*parv[3] != '0' && keep_new_modes)
+  if (*parv[3] != '0' && keep_new_modes == true)
     channel_modes(chptr, source_p, modebuf, parabuf);
   else
   {
@@ -285,7 +285,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     while (*p == ' ')
       ++p;
-    have_many_uids = *p;
+    have_many_uids = *p != '\0';
   }
 
   while (*s)
@@ -327,7 +327,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     len_uid = strlen(target_p->id);
     up = uid_prefix;
 
-    if (keep_new_modes)
+    if (keep_new_modes == true)
     {
       if (fl & CHFL_CHANOP)
       {
@@ -366,7 +366,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if (!IsMember(target_p, chptr))
     {
-      add_user_to_channel(chptr, target_p, fl, have_many_uids == 0);
+      add_user_to_channel(chptr, target_p, fl, have_many_uids == false);
 
       sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target_p->name, target_p->username,
@@ -519,7 +519,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
    * and leaving us with a channel formed just as the client parts.
    * - Dianora
    */
-  if (dlink_list_length(&chptr->members) == 0 && isnew)
+  if (dlink_list_length(&chptr->members) == 0 && isnew == true)
   {
     channel_free(chptr);
     return 0;

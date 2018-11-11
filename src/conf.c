@@ -707,7 +707,7 @@ conf_rehash(int sig)
 
   /* don't close listeners until we know we can go ahead with the rehash */
 
-  read_conf_files(0);
+  read_conf_files(false);
 
   load_conf_modules();
   check_conf_klines();
@@ -1001,11 +1001,11 @@ clear_out_old_conf(void)
 }
 
 static void
-conf_handle_tls(int cold)
+conf_handle_tls(bool cold)
 {
   if (!tls_new_cred())
   {
-    if (cold)
+    if (cold == true)
     {
       ilog(LOG_TYPE_IRCD, "Error while initializing TLS");
       exit(EXIT_FAILURE);
@@ -1026,7 +1026,7 @@ conf_handle_tls(int cold)
  * side effects - read all conf files needed, ircd.conf kline.conf etc.
  */
 void
-read_conf_files(int cold)
+read_conf_files(bool cold)
 {
   const char *filename = NULL;
   char chanmodes[IRCD_BUFSIZE] = "";
@@ -1045,7 +1045,7 @@ read_conf_files(int cold)
 
   if ((conf_parser_ctx.conf_file = fopen(filename, "r")) == NULL)
   {
-    if (cold)
+    if (cold == true)
     {
       ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
            filename, strerror(errno));
@@ -1060,7 +1060,7 @@ read_conf_files(int cold)
     }
   }
 
-  if (!cold)
+  if (cold == false)
     clear_out_old_conf();
 
   read_conf(conf_parser_ctx.conf_file);

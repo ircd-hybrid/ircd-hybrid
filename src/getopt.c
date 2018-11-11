@@ -54,7 +54,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
   /* Loop through each argument */
   while (1)
   {
-    int found = 0;
+    bool found = false;
     const char *opt = NULL;
 
     (*argc)--;
@@ -71,7 +71,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
       if (strcmp(opts[i].opt, opt) == 0)
       {
         /* Found our argument */
-        found = 1;
+        found = true;
 
         switch (opts[i].argtype)
         {
@@ -117,7 +117,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
       }
     }
 
-    if (found == 0)
+    if (found == false)
     {
       fprintf(stderr, "Error: unknown argument '%c%s'\n",
               OPTCHAR, opt);

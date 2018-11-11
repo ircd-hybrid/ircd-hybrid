@@ -89,9 +89,9 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 {
   uintmax_t newts = 0;
   uintmax_t oldts = 0;
-  int keep_our_modes = 1;
-  int keep_new_modes = 1;
-  int isnew = 0;
+  bool keep_our_modes = true;
+  bool keep_new_modes = true;
+  bool isnew = false;
   const char *servername = NULL;
   struct Channel *chptr = NULL;
   struct Mode mode, *oldmode;
@@ -117,7 +117,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
-    isnew = 1;
+    isnew = true;
     chptr = channel_make(parv[2]);
   }
 
@@ -139,7 +139,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
   else
   {
-    if (newts == 0 && isnew == 0 && oldts)
+    if (newts == 0 && isnew == false && oldts)
     {
       sendto_channel_local(NULL, chptr, 0, 0, 0,
                            ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
@@ -150,7 +150,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (isnew)
+  if (isnew == true)
     chptr->creationtime = newts;
   else if (newts == 0 || oldts == 0)
     chptr->creationtime = 0;
@@ -158,15 +158,15 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     ;
   else if (newts < oldts)
   {
-    keep_our_modes = 0;
+    keep_our_modes = false;
     chptr->creationtime = newts;
   }
   else
-    keep_new_modes = 0;
+    keep_new_modes = false;
 
-  if (keep_new_modes == 0)
+  if (keep_new_modes == false)
     mode = *oldmode;
-  else if (keep_our_modes)
+  else if (keep_our_modes == true)
   {
     mode.mode |= oldmode->mode;
 
@@ -180,7 +180,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   chptr->mode = mode;
 
   /* Lost the TS, other side wins, so remove modes on this side */
-  if (keep_our_modes == 0)
+  if (keep_our_modes == false)
   {
     remove_our_modes(chptr, source_p);
 

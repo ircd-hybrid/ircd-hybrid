@@ -79,14 +79,14 @@ static unsigned int ntargets;
  *                note, this does the canonize using pointers
  * side effects - NONE
  */
-static int
+static bool
 duplicate_ptr(const void *const ptr)
 {
   for (unsigned int i = 0; i < ntargets; ++i)
     if (targets[i].ptr == ptr)
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 /* flood_attack_client()
@@ -98,20 +98,20 @@ duplicate_ptr(const void *const ptr)
  * output       - 1 if target is under flood attack
  * side effects - check for flood attack on target target_p
  */
-static int
+static bool
 flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p)
 {
   assert(MyClient(target_p));
   assert(IsClient(source_p));
 
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
-    return 0;
+    return false;
 
   if (HasUMode(source_p, UMODE_OPER))
-    return 0;
+    return false;
 
   if (HasFlag(source_p, FLAGS_SERVICE | FLAGS_CANFLOOD))
-    return 0;
+    return false;
 
   if (target_p->connection->first_received_message_time + GlobalSetOptions.floodtime < CurrentTime)
   {
@@ -137,11 +137,11 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
     if (p_or_n != NOTICE)
       sendto_one_notice(source_p, &me, ":*** Message to %s throttled due to flooding",
                         target_p->name);
-    return 1;
+    return true;
   }
 
   ++target_p->connection->received_number_of_privmsgs;
-  return 0;
+  return false;
 }
 
 /* flood_attack_channel()
@@ -153,17 +153,17 @@ flood_attack_client(int p_or_n, struct Client *source_p, struct Client *target_p
  * output       - 1 if target is under flood attack
  * side effects - check for flood attack on target chptr
  */
-static int
+static bool
 flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
 {
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
-    return 0;
+    return false;
 
   if (HasUMode(source_p, UMODE_OPER))
-    return 0;
+    return false;
 
   if (HasFlag(source_p, FLAGS_SERVICE | FLAGS_CANFLOOD))
-    return 0;
+    return false;
 
   if (chptr->first_received_message_time + GlobalSetOptions.floodtime < CurrentTime)
   {
@@ -191,12 +191,12 @@ flood_attack_channel(int p_or_n, struct Client *source_p, struct Channel *chptr)
       if (p_or_n != NOTICE)
         sendto_one_notice(source_p, &me, ":*** Message to %s throttled due to flooding",
                           chptr->name);
-      return 1;
+      return true;
     }
   }
 
   ++chptr->received_number_of_privmsgs;
-  return 0;
+  return false;
 }
 
 /* msg_channel_flags()
@@ -237,7 +237,7 @@ msg_channel(int p_or_n, struct Client *source_p, struct Channel *chptr,
   int ret = can_send(chptr, source_p, NULL, text, p_or_n == NOTICE);
   if (ret < 0)
   {
-    if (ret == CAN_SEND_OPV || !flood_attack_channel(p_or_n, source_p, chptr))
+    if (ret == CAN_SEND_OPV || flood_attack_channel(p_or_n, source_p, chptr) == false)
       sendto_channel_butone(source_p, source_p, chptr, type, "%s %s%s :%s",
                             command[p_or_n], prefix, chptr->name, text);
   }
@@ -278,7 +278,7 @@ msg_client(int p_or_n, struct Client *source_p, struct Client *target_p,
   if (MyClient(target_p) && IsClient(source_p))
   {
     if (HasUMode(target_p, UMODE_CALLERID | UMODE_SOFTCALLERID) &&
-        !accept_message(source_p, target_p))
+        accept_message(source_p, target_p) == false)
     {
       const int callerid = !!HasUMode(target_p, UMODE_CALLERID);
 
@@ -307,7 +307,7 @@ msg_client(int p_or_n, struct Client *source_p, struct Client *target_p,
       return;
     }
 
-    if (flood_attack_client(p_or_n, source_p, target_p))
+    if (flood_attack_client(p_or_n, source_p, target_p) == true)
       return;
   }
 
@@ -447,7 +447,7 @@ build_target_list(int p_or_n, struct Client *source_p, char *list, const char *t
     {
       if ((target = hash_find_channel(name)))
       {
-        if (!duplicate_ptr(target))
+        if (duplicate_ptr(target) == false)
         {
           if (ntargets >= ConfigGeneral.max_targets)
           {
@@ -470,7 +470,7 @@ build_target_list(int p_or_n, struct Client *source_p, char *list, const char *t
     /* Look for a PRIVMSG/NOTICE to another client */
     if ((target = find_person(source_p, name)))
     {
-      if (!duplicate_ptr(target))
+      if (duplicate_ptr(target) == false)
       {
         if (ntargets >= ConfigGeneral.max_targets)
         {
@@ -529,7 +529,7 @@ build_target_list(int p_or_n, struct Client *source_p, char *list, const char *t
           }
         }
 
-        if (!duplicate_ptr(target))
+        if (duplicate_ptr(target) == false)
         {
           if (ntargets >= ConfigGeneral.max_targets)
           {

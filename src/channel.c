@@ -416,19 +416,19 @@ channel_pub_or_secret(const struct Channel *chptr)
  *                 (don't want it with /names with no params)
  */
 void
-channel_member_names(struct Client *client_p, struct Channel *chptr, int show_eon)
+channel_member_names(struct Client *client_p, struct Channel *chptr, bool show_eon)
 {
   dlink_node *node;
   char buf[IRCD_BUFSIZE + 1] = "";
   char *t = NULL, *start = NULL;
   int tlen = 0;
-  const int is_member = IsMember(client_p, chptr);
-  const int multi_prefix = HasCap(client_p, CAP_MULTI_PREFIX) != 0;
-  const int uhnames = HasCap(client_p, CAP_UHNAMES) != 0;
+  bool is_member = IsMember(client_p, chptr);
+  bool multi_prefix = HasCap(client_p, CAP_MULTI_PREFIX) != 0;
+  bool uhnames = HasCap(client_p, CAP_UHNAMES) != 0;
 
   assert(IsClient(client_p));
 
-  if (PubChannel(chptr) || is_member)
+  if (PubChannel(chptr) || is_member == true)
   {
     t = buf + snprintf(buf, sizeof(buf), numeric_form(RPL_NAMREPLY),
                        me.name, client_p->name,
@@ -439,16 +439,16 @@ channel_member_names(struct Client *client_p, struct Channel *chptr, int show_eo
     {
       const struct Membership *member = node->data;
 
-      if (HasUMode(member->client_p, UMODE_INVISIBLE) && !is_member)
+      if (HasUMode(member->client_p, UMODE_INVISIBLE) && is_member == false)
         continue;
 
-      if (uhnames)
+      if (uhnames == true)
         tlen = strlen(member->client_p->name) + strlen(member->client_p->username) +
                strlen(member->client_p->host) + 3;  /* +3 for ! + @ + space */
       else
         tlen = strlen(member->client_p->name) + 1;  /* +1 for space */
 
-      if (multi_prefix)
+      if (multi_prefix == true)
       {
         if (member->flags & CHFL_CHANOP)
           ++tlen;
@@ -470,7 +470,7 @@ channel_member_names(struct Client *client_p, struct Channel *chptr, int show_eo
         t = start;
       }
 
-      if (uhnames)
+      if (uhnames == true)
         t += sprintf(t, "%s%s!%s@%s ", get_member_status(member, multi_prefix),
                      member->client_p->name, member->client_p->username,
                      member->client_p->host);
@@ -486,7 +486,7 @@ channel_member_names(struct Client *client_p, struct Channel *chptr, int show_eo
     }
   }
 
-  if (show_eon)
+  if (show_eon == true)
     sendto_one_numeric(client_p, &me, RPL_ENDOFNAMES, chptr->name);
 }
 
@@ -580,21 +580,21 @@ clear_invite_list(dlink_list *list)
  * (like in client_get_name)
  */
 const char *
-get_member_status(const struct Membership *member, const int combine)
+get_member_status(const struct Membership *member, bool combine)
 {
   static char buffer[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
   char *p = buffer;
 
   if (member->flags & CHFL_CHANOP)
   {
-    if (!combine)
+    if (combine == false)
       return "@";
     *p++ = '@';
   }
 
   if (member->flags & CHFL_HALFOP)
   {
-    if (!combine)
+    if (combine == false)
       return "%";
     *p++ = '%';
   }
@@ -1048,7 +1048,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
                          chptr->topic_info, chptr->topic_time);
     }
 
-    channel_member_names(client_p, chptr, 1);
+    channel_member_names(client_p, chptr, true);
 
     client_p->connection->last_join_time = CurrentTime;
   }

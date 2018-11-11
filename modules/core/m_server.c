@@ -483,7 +483,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   const char *sid = parc == 6 ? parv[3] : source_p->id; /* TBR: compatibility 'mode' */
   struct Client *target_p = NULL;
   const char *error = NULL;
-  int warn = 1;
+  bool warn = true;
 
   if (EmptyString(parv[parc - 1]))
   {
@@ -523,7 +523,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   {
     case SERVER_CHECK_NOCONNECT:
       error = "No connect {} block";
-      warn = ConfigGeneral.warn_no_connect_block;
+      warn = ConfigGeneral.warn_no_connect_block != 0;
       break;
     case SERVER_CHECK_INVALID_PASSWORD:
       error = "Invalid password";
@@ -538,7 +538,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 
   if (error)
   {
-    if (warn)
+    if (warn == true)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
          "Unauthorized server connection attempt from %s: %s for server %s",

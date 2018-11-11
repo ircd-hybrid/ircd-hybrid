@@ -48,7 +48,7 @@ event_add(struct event *ev, void *data)
 
   ev->data = data;
   ev->next = CurrentTime + ev->when;
-  ev->active = 1;
+  ev->active = true;
 
   DLINK_FOREACH(node, event_list.head)
   {
@@ -80,11 +80,11 @@ event_addish(struct event *ev, void *data)
 void
 event_delete(struct event *ev)
 {
-  if (ev->active == 0)
+  if (ev->active == false)
     return;
 
   dlinkDelete(&ev->node, &event_list);
-  ev->active = 0;
+  ev->active = false;
 }
 
 void
@@ -108,7 +108,7 @@ event_run(void)
 
     ev->handler(ev->data);
 
-    if (ev->oneshot == 0)
+    if (ev->oneshot == false)
       event_add(ev, ev->data);
   }
 }

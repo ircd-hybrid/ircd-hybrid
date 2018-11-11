@@ -150,7 +150,7 @@ auth_release_client(struct AuthRequest *auth)
  * \param hostname The string to verify
  * \return 1 if it is valid, 0 if it isn't
  */
-static int
+static bool
 auth_verify_hostname(const char *hostname)
 {
   const char *p = hostname;
@@ -158,13 +158,13 @@ auth_verify_hostname(const char *hostname)
   assert(p);
 
   if (EmptyString(p) || *p == '.' || *p == ':')
-    return 0;
+    return false;
 
   for (; *p; ++p)
     if (!IsHostChar(*p))
-      return 0;
+      return false;
 
-  return 1;
+  return true;
 }
 
 /*! \brief Handle a complete DNS lookup. Send the client on its way to a connection
@@ -212,7 +212,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
     if (namelength > HOSTLEN)
       auth_sendheader(auth->client, REPORT_HOST_TOOLONG);
-    else if (auth_verify_hostname(name) == 0)
+    else if (auth_verify_hostname(name) == false)
       auth_sendheader(auth->client, REPORT_HOST_INVALID);
     else
     {

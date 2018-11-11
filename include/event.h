@@ -35,12 +35,12 @@ struct event
   const char *name;
   void (*handler)(void *);
   uintmax_t when;
-  unsigned int oneshot;
+  bool oneshot;
 
   /* private */
   uintmax_t next;
   void *data;
-  unsigned int active;
+  bool active;
   dlink_node node;
 };
 

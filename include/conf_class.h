@@ -39,6 +39,7 @@ struct ClassItem
 {
   char *name;
   dlink_node node;
+  bool active;
   void *ip_tree_v6;  /**< Pointer to 'patricia_tree_t' item */
   void *ip_tree_v4;  /**< Pointer to 'patricia_tree_t' item */
   unsigned int ref_count;
@@ -56,7 +57,6 @@ struct ClassItem
   unsigned int cidr_bitlen_ipv6;
   unsigned int number_per_cidr;
   unsigned int flags;
-  unsigned int active;
 };
 
 /* address of default class conf */

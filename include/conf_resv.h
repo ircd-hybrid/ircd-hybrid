@@ -36,7 +36,7 @@ struct ResvItem
   char *reason;
   uintmax_t expire;
   uintmax_t setat;
-  unsigned int in_database;
+  bool in_database;
 };
 
 struct ResvExemptItem

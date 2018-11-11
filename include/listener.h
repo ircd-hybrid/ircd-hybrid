@@ -40,10 +40,10 @@ enum
 struct Listener
 {
   dlink_node node;           /**< Doubly linked list node */
+  bool active;               /**< Current state of listener */
   fde_t *fd;                 /**< File descriptor */
   int port;                  /**< Listener IP port */
   int ref_count;             /**< Number of connection references */
-  int active;                /**< Current state of listener */
   struct irc_ssaddr addr;    /**< Holds an IPv6 or IPv4 address */
   char name[HOSTIPLEN + 1];  /**< Holds an IPv6 or IPv4 address in string representation*/
   unsigned int flags;        /**< Listener flags (ssl, hidden, server) */

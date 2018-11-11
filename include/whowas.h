@@ -37,8 +37,8 @@ struct Whowas
   dlink_node cnode;  /**< List node; linked into client->whowas_list */
   dlink_node lnode;  /**< List node; linked into whowas_list */
   unsigned int hashv;  /**< Hash value derived from Whowas::name */
-  unsigned int shide;  /**< Client's server is hidden */
   uintmax_t logoff;  /**< When the client logged off */
+  bool server_hidden;  /**< Client's server is hidden */
   char account[ACCOUNTLEN + 1];  /**< Services account */
   char name[NICKLEN + 1];  /**< Client's nick name */
   char username[USERLEN + 1];  /**< Client's user name */

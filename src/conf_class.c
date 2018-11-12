@@ -50,7 +50,7 @@ class_make(void)
 {
   struct ClassItem *class = xcalloc(sizeof(*class));
 
-  class->active    = 1;
+  class->active    = true;
   class->con_freq  = DEFAULT_CONNECTFREQUENCY;
   class->ping_freq = DEFAULT_PINGFREQUENCY;
   class->max_total = MAXIMUM_LINKS_DEFAULT;
@@ -187,7 +187,7 @@ class_ip_limit_trie(struct ClassItem *class, void *addr)
     return class->ip_tree_v4;
 }
 
-int
+bool
 class_ip_limit_add(struct ClassItem *class, void *addr, int over_rule)
 {
   int bitlen;
@@ -198,17 +198,17 @@ class_ip_limit_add(struct ClassItem *class, void *addr, int over_rule)
     bitlen = class->cidr_bitlen_ipv4;
 
   if (class->number_per_cidr == 0 || bitlen == 0)
-    return 0;
+    return false;
 
   patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(class, addr), addr, bitlen);
   if (((uintptr_t)pnode->data) >= class->number_per_cidr && over_rule == 0)
-    return 1;
+    return true;
 
   PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) + 1));
-  return 0;
+  return false;
 }
 
-int
+bool
 class_ip_limit_remove(struct ClassItem *class, void *addr)
 {
   int bitlen;
@@ -219,21 +219,21 @@ class_ip_limit_remove(struct ClassItem *class, void *addr)
     bitlen = class->cidr_bitlen_ipv4;
 
   if (class->number_per_cidr == 0 || bitlen == 0)
-    return 0;
+    return false;
 
   patricia_node_t *pnode = patricia_try_search_best_addr(class_ip_limit_trie(class, addr), addr, 0);
   if (pnode == NULL)
-    return 0;
+    return false;
 
   PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) - 1));
 
   if (((uintptr_t)pnode->data) == 0)
   {
     patricia_remove(class_ip_limit_trie(class, addr), pnode);
-    return 1;
+    return true;
   }
 
-  return 0;
+  return false;
 }
 
 void
@@ -251,6 +251,6 @@ class_ip_limit_rebuild(struct ClassItem *class)
 
     if (conf->type == CONF_CLIENT)
       if (conf->class == class)
-        class_ip_limit_add(class, &client_p->ip, 1);
+        class_ip_limit_add(class, &client_p->ip, true);
   }
 }

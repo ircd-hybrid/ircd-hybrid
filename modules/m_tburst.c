@@ -83,26 +83,26 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
    *        The TS of the remote channel is equal to ours AND
    *        the TS of the remote topic is newer than ours
    */
-  int accept_remote = 0;
+  bool accept_remote = false;
   if (HasFlag(source_p, FLAGS_SERVICE))
-    accept_remote = 1;
+    accept_remote = true;
   else if (remote_channel_ts < chptr->creationtime)
-    accept_remote = 1;
+    accept_remote = true;
   else if (remote_channel_ts == chptr->creationtime)
     if (remote_topic_ts > chptr->topic_time)
-      accept_remote = 1;
+      accept_remote = true;
 
-  if (accept_remote)
+  if (accept_remote == true)
   {
-    int topic_differs = strncmp(chptr->topic, topic, sizeof(chptr->topic) - 1);
-    int hidden_server = (ConfigServerHide.hide_servers || IsHidden(source_p));
+    bool topic_differs = strncmp(chptr->topic, topic, sizeof(chptr->topic) - 1);
+    bool hidden_server = (ConfigServerHide.hide_servers || IsHidden(source_p));
 
     channel_set_topic(chptr, topic, setby, remote_topic_ts, 0);
 
     sendto_server(source_p, CAPAB_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
                   source_p->id, parv[1], parv[2], parv[3], setby, topic);
 
-    if (topic_differs)
+    if (topic_differs == true)
     {
       if (IsClient(source_p))
         sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",

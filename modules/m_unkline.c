@@ -48,7 +48,7 @@
  * Output: returns YES on success, NO if no tkline removed.
  * Side effects: Any matching tklines are removed.
  */
-static int
+static bool
 kline_remove(const char *user, const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
@@ -73,17 +73,17 @@ kline_remove(const char *user, const char *host)
     if (IsConfDatabase(conf))
     {
       delete_one_address_conf(host, conf);
-      return 1;
+      return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
 static void
 kline_remove_and_notify(struct Client *source_p, const char *user, const char *host)
 {
-  if (kline_remove(user, host))
+  if (kline_remove(user, host) == true)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed", user, host);

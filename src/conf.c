@@ -95,12 +95,12 @@ conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 {
   struct MaskItem *const conf = vptr;
 
-  conf->dns_pending = 0;
+  conf->dns_pending = false;
 
   if (addr)
     memcpy(&conf->addr, addr, sizeof(conf->addr));
   else
-    conf->dns_failed = 1;
+    conf->dns_failed = true;
 }
 
 /* conf_dns_lookup()
@@ -112,10 +112,10 @@ conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 static void
 conf_dns_lookup(struct MaskItem *conf)
 {
-  if (conf->dns_pending)
+  if (conf->dns_pending == true)
     return;
 
-  conf->dns_pending = 1;
+  conf->dns_pending = true;
 
   if (conf->aftype == AF_INET)
     gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
@@ -152,7 +152,7 @@ conf_make(enum maskitem_type type)
   dlink_list *list = NULL;
 
   conf->type   = type;
-  conf->active = 1;
+  conf->active = true;
   conf->aftype = AF_INET;
 
   if ((list = map_to_list(type)))
@@ -171,7 +171,7 @@ conf_free(struct MaskItem *conf)
 
   xfree(conf->name);
 
-  if (conf->dns_pending)
+  if (conf->dns_pending == true)
     delete_resolver_queries(conf);
   if (conf->passwd)
     memset(conf->passwd, 0, strlen(conf->passwd));
@@ -217,21 +217,21 @@ static int
 attach_iline(struct Client *client_p, struct MaskItem *conf)
 {
   const struct ClassItem *const class = conf->class;
-  int a_limit_reached = 0;
+  bool a_limit_reached = false;
 
   struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->ip);
   ++ipcache->count_local;
   AddFlag(client_p, FLAGS_IPHASH);
 
   if (class->max_total && class->ref_count >= class->max_total)
-    a_limit_reached = 1;
+    a_limit_reached = true;
   else if (class->max_perip_local && ipcache->count_local > class->max_perip_local)
-    a_limit_reached = 1;
+    a_limit_reached = true;
   else if (class->max_perip_global &&
            (ipcache->count_local + ipcache->count_remote) > class->max_perip_global)
-    a_limit_reached = 1;
+    a_limit_reached = true;
 
-  if (a_limit_reached)
+  if (a_limit_reached == true)
   {
     if (!IsConfExemptLimits(conf))
       return TOO_MANY;   /* Already at maximum allowed */
@@ -406,13 +406,13 @@ conf_detach(struct Client *client_p, enum maskitem_type type)
     if (conf->type == CONF_CLIENT)
       class_ip_limit_remove(conf->class, &client_p->ip);
 
-    if (--conf->class->ref_count == 0 && conf->class->active == 0)
+    if (--conf->class->ref_count == 0 && conf->class->active == false)
     {
       class_free(conf->class);
       conf->class = NULL;
     }
 
-    if (--conf->ref_count == 0 && conf->active == 0)
+    if (--conf->ref_count == 0 && conf->active == false)
       conf_free(conf);
   }
 }
@@ -430,7 +430,7 @@ conf_attach(struct Client *client_p, struct MaskItem *conf)
     return 1;
 
   if (conf->type == CONF_CLIENT)
-    if (class_ip_limit_add(conf->class, &client_p->ip, IsConfExemptLimits(conf)))
+    if (class_ip_limit_add(conf->class, &client_p->ip, IsConfExemptLimits(conf)) == true)
       return TOO_MANY;    /* Already at maximum allowed */
 
   conf->class->ref_count++;
@@ -694,9 +694,9 @@ read_conf(FILE *file)
  * called as a result of the server receiving a HUP signal.
  */
 void
-conf_rehash(int sig)
+conf_rehash(bool sig)
 {
-  if (sig)
+  if (sig == true)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Got signal SIGHUP, reloading configuration file(s)");
@@ -930,7 +930,7 @@ clear_out_old_conf(void)
     {
       struct MaskItem *conf = node->data;
 
-      conf->active = 0;
+      conf->active = false;
       dlinkDelete(&conf->node, *iterator);
 
       if (!conf->ref_count)

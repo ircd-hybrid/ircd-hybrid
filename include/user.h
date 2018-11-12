@@ -44,15 +44,14 @@ extern const struct user_modes *umode_map[];
 extern const struct user_modes  umode_tab[];
 
 extern void user_modes_init(void);
-extern void send_umode(struct Client *, unsigned int,
-                       unsigned int, char *);
+extern void send_umode(struct Client *, bool, unsigned int, char *);
 extern void send_umode_out(struct Client *, unsigned int);
 extern void show_lusers(struct Client *);
 
 extern void register_local_user(struct Client *);
 extern void register_remote_user(struct Client *);
-extern int valid_hostname(const char *);
-extern int valid_username(const char *, const int);
-extern int valid_nickname(const char *, const int);
+extern bool valid_hostname(const char *);
+extern bool valid_username(const char *, const int);
+extern bool valid_nickname(const char *, const int);
 extern void user_set_hostmask(struct Client *, const char *);
 #endif  /* INCLUDED_user_h */

@@ -158,7 +158,7 @@ resv_find(const char *name, int (*compare)(const char *, const char *))
   return NULL;
 }
 
-int
+bool
 resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
 {
   dlink_node *node;
@@ -173,17 +173,17 @@ resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
       {
         case HM_HOST:
           if (!match(exempt->host, client_p->host) || !match(exempt->host, client_p->sockhost))
-            return 1;
+            return true;
           break;
         case HM_IPV4:
           if (client_p->ip.ss.ss_family == AF_INET)
             if (match_ipv4(&client_p->ip, &exempt->addr, exempt->bits))
-              return 1;
+              return true;
           break;
         case HM_IPV6:
           if (client_p->ip.ss.ss_family == AF_INET6)
             if (match_ipv6(&client_p->ip, &exempt->addr, exempt->bits))
-              return 1;
+              return true;
           break;
         default:
           assert(0);
@@ -191,7 +191,7 @@ resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
     }
   }
 
-  return 0;
+  return false;
 }
 
 void

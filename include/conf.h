@@ -126,13 +126,13 @@ struct MaskItem
   dlink_list         leaf_list;
   dlink_list         hub_list;
   enum maskitem_type type;
-  unsigned int       dns_failed;
-  unsigned int       dns_pending;
+  bool       active;
+  bool       dns_failed;
+  bool       dns_pending;
   unsigned int       flags;
   unsigned int       modes;
   unsigned int       port;
   unsigned int       aftype;
-  unsigned int       active;
   unsigned int       htype;
   unsigned int       ref_count;  /* Number of *LOCAL* clients using this */
   int                bits;
@@ -325,7 +325,7 @@ extern void conf_free(struct MaskItem *);
 extern void yyerror(const char *);
 extern void conf_error_report(const char *);
 extern void cleanup_tklines(void *);
-extern void conf_rehash(int);
+extern void conf_rehash(bool);
 extern void lookup_confhost(struct MaskItem *);
 extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 

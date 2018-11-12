@@ -170,7 +170,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   {
     char modebuf[IRCD_BUFSIZE] = "";
 
-    send_umode(target_p, 1, setmodes, modebuf);
+    send_umode(target_p, true, setmodes, modebuf);
   }
 
   return 0;

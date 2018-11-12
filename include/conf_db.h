@@ -36,14 +36,14 @@ struct dbFILE
   char tempname[HYB_PATH_MAX + 1];  /**< Name of the temporary file (for writing) */
 };
 
-extern int read_uint16(uint16_t *, struct dbFILE *);
-extern int write_uint16(uint16_t, struct dbFILE *);
-extern int read_uint32(uint32_t *, struct dbFILE *);
-extern int write_uint32(uint32_t, struct dbFILE *);
-extern int read_uint64(uint64_t *, struct dbFILE *);
-extern int write_uint64(uint64_t, struct dbFILE *);
-extern int read_string(char **, struct dbFILE *);
-extern int write_string(const char *, struct dbFILE *);
+extern bool read_uint16(uint16_t *, struct dbFILE *);
+extern bool write_uint16(uint16_t, struct dbFILE *);
+extern bool read_uint32(uint32_t *, struct dbFILE *);
+extern bool write_uint32(uint32_t, struct dbFILE *);
+extern bool read_uint64(uint64_t *, struct dbFILE *);
+extern bool write_uint64(uint64_t, struct dbFILE *);
+extern bool read_string(char **, struct dbFILE *);
+extern bool write_string(const char *, struct dbFILE *);
 
 extern void load_kline_database(const char *);
 extern void save_kline_database(const char *);

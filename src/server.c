@@ -397,7 +397,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
   ilog(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
 
   /* Still processing a DNS lookup? -> exit */
-  if (conf->dns_pending)
+  if (conf->dns_pending == true)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} in progress.",
@@ -405,7 +405,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
     return 0;
   }
 
-  if (conf->dns_failed)
+  if (conf->dns_failed == true)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} failed.",
@@ -432,7 +432,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
   /* We already converted the ip once, so lets use it - stu */
   strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 
-  client_p->connection->fd = fd_open(fd, 1, NULL);
+  client_p->connection->fd = fd_open(fd, true, NULL);
 
   /* Server names are always guaranteed under HOSTLEN chars */
   fd_note(client_p->connection->fd, "Server: %s", client_p->name);

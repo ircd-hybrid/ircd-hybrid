@@ -64,7 +64,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return 0;
 
-  if (valid_nickname(new_nick, 1) == 0)
+  if (valid_nickname(new_nick, 1) == false)
     return 0;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
@@ -127,7 +127,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
     char modebuf[IRCD_BUFSIZE] = "";
 
     DelUMode(target_p, UMODE_REGISTERED);
-    send_umode(target_p, 1, oldmodes, modebuf);
+    send_umode(target_p, true, oldmodes, modebuf);
   }
 
   sendto_common_channels_local(target_p, 1, 0, 0, ":%s!%s@%s NICK :%s",

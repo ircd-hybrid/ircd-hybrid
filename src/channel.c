@@ -734,7 +734,7 @@ find_channel_link(const struct Client *client_p, const struct Channel *chptr)
  * \param message The actual message string the client wants to send
  * \return 1 if the message does contain any control codes, 0 otherwise
  */
-static int
+static bool
 msg_has_ctrls(const char *message)
 {
   const unsigned char *p = (const unsigned char *)message;
@@ -755,10 +755,10 @@ msg_has_ctrls(const char *message)
       }
     }
 
-    return 1;  /* Control code */
+    return true;  /* Control code */
   }
 
-  return 0;  /* No control code found */
+  return false;  /* No control code found */
 }
 
 /*! Tests if a client can send to a channel
@@ -781,10 +781,10 @@ can_send(struct Channel *chptr, struct Client *client_p,
 
   if (MyConnect(client_p) && !HasFlag(client_p, FLAGS_EXEMPTRESV))
     if (!(HasUMode(client_p, UMODE_OPER) && HasOFlag(client_p, OPER_FLAG_JOIN_RESV)))
-      if ((resv = resv_find(chptr->name, match)) && !resv_exempt_find(client_p, resv))
+      if ((resv = resv_find(chptr->name, match)) && resv_exempt_find(client_p, resv) == false)
         return ERR_CANNOTSENDTOCHAN;
 
-  if (HasCMode(chptr, MODE_NOCTRL) && msg_has_ctrls(message))
+  if (HasCMode(chptr, MODE_NOCTRL) && msg_has_ctrls(message) == true)
     return ERR_NOCTRLSONCHAN;
 
   if (HasCMode(chptr, MODE_NOCTCP))
@@ -942,7 +942,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
 
     if (!HasFlag(client_p, FLAGS_EXEMPTRESV) &&
         !(HasUMode(client_p, UMODE_OPER) && HasOFlag(client_p, OPER_FLAG_JOIN_RESV)) &&
-        ((resv = resv_find(name, match)) && !resv_exempt_find(client_p, resv)))
+        ((resv = resv_find(name, match)) && resv_exempt_find(client_p, resv) == false))
     {
       sendto_one_numeric(client_p, &me, ERR_CHANBANREASON, name, resv->reason);
       sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,

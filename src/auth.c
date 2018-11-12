@@ -458,7 +458,7 @@ auth_start_query(struct AuthRequest *auth)
     return;
   }
 
-  auth->fd = fd_open(fd, 1, "ident");
+  auth->fd = fd_open(fd, true, "ident");
 
   SetDoingAuth(auth);
   auth_sendheader(auth->client, REPORT_DO_ID);

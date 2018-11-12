@@ -55,7 +55,7 @@ comm_select_init(void)
     exit(EXIT_FAILURE); /* Whee! */
   }
 
-  fd_open(kqueue_fd, 0, "kqueue() file descriptor");
+  fd_open(kqueue_fd, false, "kqueue() file descriptor");
 }
 
 /*
@@ -162,7 +162,7 @@ comm_select(void)
   {
     fde_t *F = ke[i].udata;
 
-    if (F->flags.open == 0 || (ke[i].flags & EV_ERROR))
+    if (F->flags.open == false || (ke[i].flags & EV_ERROR))
       continue;
 
     if (ke[i].filter == EVFILT_READ)
@@ -172,7 +172,7 @@ comm_select(void)
         F->read_handler = NULL;
         hdl(F, F->read_data);
 
-        if (F->flags.open == 0)
+        if (F->flags.open == false)
           continue;
       }
     }
@@ -184,7 +184,7 @@ comm_select(void)
         F->write_handler = NULL;
         hdl(F, F->write_data);
 
-        if (F->flags.open == 0)
+        if (F->flags.open == false)
           continue;
       }
     }

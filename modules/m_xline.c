@@ -101,7 +101,7 @@ xline_handle(struct Client *source_p, const char *mask, const char *reason, uint
   gecos->mask = xstrdup(mask);
   gecos->reason = xstrdup(buf);
   gecos->setat = CurrentTime;
-  gecos->in_database = 1;
+  gecos->in_database = true;
 
   if (duration)
   {

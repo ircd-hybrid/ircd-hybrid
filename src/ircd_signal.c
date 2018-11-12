@@ -45,7 +45,7 @@ sigterm_handler(int sig)
 static void
 sighup_handler(int sig)
 {
-  dorehash = 1;
+  dorehash = true;
 }
 
 /*
@@ -54,7 +54,7 @@ sighup_handler(int sig)
 static void
 sigusr1_handler(int sig)
 {
-  doremotd = 1;
+  doremotd = true;
 }
 
 /*

@@ -71,10 +71,10 @@ char **myargv;
 const char *logFileName = LPATH;
 const char *pidFileName = PPATH;
 
-unsigned int dorehash;
-unsigned int doremotd;
+bool dorehash;
+bool doremotd;
 
-static int printVersion;
+static bool printVersion;
 
 static struct lgetopt myopts[] =
 {
@@ -183,18 +183,18 @@ io_loop(void)
     free_exited_clients();
 
     /* Check to see whether we have to rehash the configuration. */
-    if (dorehash)
+    if (dorehash == true)
     {
-      conf_rehash(1);
-      dorehash = 0;
+      conf_rehash(true);
+      dorehash = false;
     }
 
-    if (doremotd)
+    if (doremotd == true)
     {
       motd_recache();
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Got signal SIGUSR1, reloading motd file(s)");
-      doremotd = 0;
+      doremotd = false;
     }
   }
 }

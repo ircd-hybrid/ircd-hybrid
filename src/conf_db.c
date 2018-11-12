@@ -50,7 +50,7 @@ get_file_version(struct dbFILE *f)
 {
   uint32_t version = 0;
 
-  if (read_uint32(&version, f) == -1)
+  if (read_uint32(&version, f) == false)
   {
     ilog(LOG_TYPE_IRCD, "Error reading version number on %s: %s",
          f->filename, strerror(errno));
@@ -70,19 +70,19 @@ get_file_version(struct dbFILE *f)
 /*! \brief Write the current version number to the file.
  * \param f dbFile Struct Member
  * \param version Database version
- * \return 0 on error, 1 on success.
+ * \return false on error, true on success.
  */
 static int
 write_file_version(struct dbFILE *f, uint32_t version)
 {
-  if (write_uint32(version, f) == -1)
+  if (write_uint32(version, f) == false)
   {
     ilog(LOG_TYPE_IRCD, "Error writing version number on %s",
          f->filename);
-    return 0;
+    return false;
   }
 
-  return 1;
+  return true;
 }
 
 /*! \brief Open the database for reading
@@ -148,7 +148,7 @@ open_db_write(const char *filename, uint32_t version)
   if (fd >= 0)
     f->fp = fdopen(fd, "wb");
 
-  if (!f->fp || !write_file_version(f, version))
+  if (!f->fp || write_file_version(f, version) == false)
   {
     int errno_save = errno;
     static int walloped = 0;
@@ -231,9 +231,9 @@ restore_db(struct dbFILE *f)
  * fails.
  *
  * \param dbFile struct
- * \return -1 on error, 0 on success.
+ * \return false on error, true on success.
  */
-static int
+static bool
 close_db(struct dbFILE *f)
 {
   int res;
@@ -241,14 +241,14 @@ close_db(struct dbFILE *f)
   if (!f->fp)
   {
     errno = EINVAL;
-    return -1;
+    return false;
   }
 
   res = fclose(f->fp);
   f->fp = NULL;
 
   if (res != 0)
-    return -1;
+    return false;
 
   if (f->mode == 'w' && f->tempname[0] && strcmp(f->tempname, f->filename))
   {
@@ -267,7 +267,7 @@ close_db(struct dbFILE *f)
   }
 
   xfree(f);
-  return 0;
+  return true;
 }
 
 /*
@@ -283,44 +283,44 @@ close_db(struct dbFILE *f)
  *
  * \param ret 16bit integer to read
  * \param dbFile struct
- * \return -1 on error, 0 otherwise.
+ * \return false on error, true otherwise.
  */
-int
+bool
 read_uint16(uint16_t *ret, struct dbFILE *f)
 {
   int c1 = fgetc(f->fp);
   int c2 = fgetc(f->fp);
 
   if (c1 == EOF || c2 == EOF)
-    return -1;
+    return false;
 
   *ret = c1 << 8 | c2;
-  return 0;
+  return true;
 }
 
 /*! \brief Write a unsigned 16bit integer
  *
  * \param val 16bit integer to write
  * \param dbFile struct
- * \return -1 on error, 0 otherwise.
+ * \return false on error, true otherwise.
  */
-int
+bool
 write_uint16(uint16_t val, struct dbFILE *f)
 {
   if (fputc((val >> 8) & 0xFF, f->fp) == EOF ||
       fputc(val        & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
 
-  return 0;
+  return true;
 }
 
 /*! \brief Read a unsigned 32bit integer
  *
  * \param ret unsigned 32bit integer to read
  * \param dbFile struct
- * \return -1 on error, 0 otherwise.
+ * \return false on error, true otherwise.
  */
-int
+bool
 read_uint32(uint32_t *ret, struct dbFILE *f)
 {
   int c1 = fgetc(f->fp);
@@ -329,10 +329,10 @@ read_uint32(uint32_t *ret, struct dbFILE *f)
   int c4 = fgetc(f->fp);
 
   if (c1 == EOF || c2 == EOF || c3 == EOF || c4 == EOF)
-    return -1;
+    return false;
 
   *ret = c1 << 24 | c2 << 16 | c3 << 8 | c4;
-  return 0;
+  return true;
 }
 
 
@@ -340,29 +340,29 @@ read_uint32(uint32_t *ret, struct dbFILE *f)
  *
  * \param val unsigned 32bit integer to write
  * \param dbFile struct
- * \return -1 on error, 0 otherwise.
+ * \return false on error, true otherwise.
  */
-int
+bool
 write_uint32(uint32_t val, struct dbFILE *f)
 {
   if (fputc((val >> 24) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val >> 16) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val >>  8) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val)       & 0xFF, f->fp) == EOF)
-    return -1;
-  return 0;
+    return false;
+  return true;
 }
 
 /*! \brief Read a unsigned 64bit integer
  *
  * \param ret unsigned 64bit integer to read
  * \param dbFile struct
- * \return -1 on error, 0 otherwise.
+ * \return false on error, true otherwise.
  */
-int
+bool
 read_uint64(uint64_t *ret, struct dbFILE *f)
 {
   int64_t c1 = fgetc(f->fp);
@@ -376,11 +376,11 @@ read_uint64(uint64_t *ret, struct dbFILE *f)
 
   if (c1 == EOF || c2 == EOF || c3 == EOF || c4 == EOF ||
       c5 == EOF || c6 == EOF || c7 == EOF || c8 == EOF)
-    return -1;
+    return false;
 
   *ret = c1 << 56 | c2 << 48 | c3 << 40 | c4 << 32 |
          c5 << 24 | c6 << 16 | c7 <<  8 | c8;
-  return 0;
+  return true;
 }
 
 
@@ -388,49 +388,49 @@ read_uint64(uint64_t *ret, struct dbFILE *f)
  *
  * \param val unsigned 64bit integer to write
  * \param dbFile struct
- * \return -1 on error, 0 otherwise.
+ * \return false on error, true otherwise.
  */
-int
+bool
 write_uint64(uint64_t val, struct dbFILE *f)
 {
   if (fputc((val >> 56) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val >> 48) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val >> 40) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val >> 32) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val >> 24) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val >> 16) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val >>  8) & 0xFF, f->fp) == EOF)
-    return -1;
+    return false;
   if (fputc((val)       & 0xFF, f->fp) == EOF)
-    return -1;
-  return 0;
+    return false;
+  return true;
 }
 
 /*! \brief Read String
  *
  * \param ret string
  * \param dbFile struct
- * \return -1 on error, 0 otherwise.
+ * \return false on error, true otherwise.
  */
-int
+bool
 read_string(char **ret, struct dbFILE *f)
 {
   char *s = NULL;
   uint32_t len = 0;
 
-  if (read_uint32(&len, f) < 0)
-    return -1;
+  if (read_uint32(&len, f) == false)
+    return false;
 
   if (len == 0)
   {
     *ret = NULL;
-    return 0;
+    return true;
   }
 
   s = xcalloc(len);
@@ -438,20 +438,20 @@ read_string(char **ret, struct dbFILE *f)
   if (len != fread(s, 1, len, f->fp))
   {
     xfree(s);
-    return -1;
+    return false;
   }
 
   *ret = s;
-  return 0;
+  return true;
 }
 
 /*! \brief Write String
  *
  * \param s string
  * \param dbFile struct
- * \return -1 on error, 0 otherwise.
+ * \return false on error, true otherwise.
  */
-int
+bool
 write_string(const char *s, struct dbFILE *f)
 {
   uint32_t len = 0;
@@ -463,24 +463,24 @@ write_string(const char *s, struct dbFILE *f)
 
   if (len > 4294967294)
     len = 4294967294;
-  if (write_uint32(len + 1, f) < 0)
-    return -1;
+  if (write_uint32(len + 1, f) == false)
+    return false;
   if (len > 0 && fwrite(s, 1, len, f->fp) != len)
-    return -1;
+    return false;
   if (fputc(0, f->fp) == EOF)
-    return -1;
+    return false;
 
-  return 0;
+  return true;
 }
 
 #define SAFE_READ(x) do {                             \
-    if ((x) < 0) {                                    \
+    if ((x) == false) {                               \
         break;                                        \
     }                                                 \
 } while (0)
 
 #define SAFE_WRITE(x,db) do {                         \
-    if ((x) < 0) {                                    \
+    if ((x) == false) {                               \
         restore_db(f);                                \
         ilog(LOG_TYPE_IRCD, "Write error on %s", db); \
         return;                                       \

@@ -66,7 +66,7 @@ comm_select_init(void)
     exit(EXIT_FAILURE); /* Whee! */
   }
 
-  fd_open(fd, 0, "epoll file descriptor");
+  fd_open(fd, false, "epoll file descriptor");
 
   epollop = xcalloc(sizeof(*epollop));
   epollop->fd = fd;
@@ -87,7 +87,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
   int new_events, op;
   struct epoll_event ep_event;
 
-  assert(F->flags.open);
+  assert(F->flags.open == true);
 
   if ((type & COMM_SELECT_READ))
   {
@@ -162,7 +162,7 @@ comm_select(void)
   {
     fde_t *F = epollop->events[i].data.ptr;
 
-    if (F->flags.open == 0)
+    if (F->flags.open == false)
       continue;
 
     if ((epollop->events[i].events & (EPOLLIN | EPOLLHUP | EPOLLERR)))
@@ -172,7 +172,7 @@ comm_select(void)
         F->read_handler = NULL;
         hdl(F, F->read_data);
 
-        if (F->flags.open == 0)
+        if (F->flags.open == false)
           continue;
       }
     }
@@ -184,7 +184,7 @@ comm_select(void)
         F->write_handler = NULL;
         hdl(F, F->write_data);
 
-        if (F->flags.open == 0)
+        if (F->flags.open == false)
           continue;
       }
     }

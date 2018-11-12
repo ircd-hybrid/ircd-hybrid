@@ -231,7 +231,7 @@ inetport(struct Listener *listener)
     return 0;
   }
 
-  listener->fd = fd_open(fd, 1, "Listener socket");
+  listener->fd = fd_open(fd, true, "Listener socket");
 
   /* Listen completion events are READ events .. */
 

@@ -48,7 +48,7 @@
  * Output: returns YES on success, NO if no tdline removed.
  * Side effects: Any matching tdlines are removed.
  */
-static int
+static bool
 dline_remove(const char *host)
 {
   struct irc_ssaddr iphost, *piphost;
@@ -73,17 +73,17 @@ dline_remove(const char *host)
     if (IsConfDatabase(conf))
     {
       delete_one_address_conf(host, conf);
-      return 1;
+      return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
 static void
 dline_remove_and_notify(struct Client *source_p, const char *host)
 {
-  if (dline_remove(host))
+  if (dline_remove(host) == true)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", host);

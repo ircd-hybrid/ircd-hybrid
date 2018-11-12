@@ -280,13 +280,13 @@ user_welcome(struct Client *client_p)
  * outupt       - 1 if exiting 0 if ok
  * side effects -
  */
-static int
+static bool
 check_xline(struct Client *client_p)
 {
   const struct GecosItem *gecos = NULL;
 
   if (HasFlag(client_p, FLAGS_EXEMPTXLINE))
-    return 0;
+    return false;
 
   if ((gecos = gecos_find(client_p->info, match)))
   {
@@ -298,10 +298,10 @@ check_xline(struct Client *client_p)
 
     ++ServerStats.is_ref;
     exit_client(client_p, "Bad user info");
-    return 1;
+    return true;
   }
 
-  return 0;
+  return false;
 }
 
 /*! \brief This function is called when both NICK and USER messages
@@ -416,7 +416,7 @@ register_local_user(struct Client *client_p)
     return;
   }
 
-  if (valid_username(client_p->username, 1) == 0)
+  if (valid_username(client_p->username, 1) == false)
   {
     char buf[IRCD_BUFSIZE] = "";
 
@@ -535,7 +535,7 @@ register_remote_user(struct Client *client_p)
  * NOTE: this doesn't allow a hostname to begin with a dot and
  * will not allow more dots than chars.
  */
-int
+bool
 valid_hostname(const char *hostname)
 {
   const char *p = hostname;
@@ -543,11 +543,11 @@ valid_hostname(const char *hostname)
   assert(p);
 
   if (EmptyString(p) || *p == '.' || *p == ':')
-    return 0;
+    return false;
 
   for (; *p; ++p)
     if (!IsHostChar(*p))
-      return 0;
+      return false;
 
   return p - hostname <= HOSTLEN;
 }
@@ -563,7 +563,7 @@ valid_hostname(const char *hostname)
  * Allow '.' in username to allow for "first.last"
  * style of username
  */
-int
+bool
 valid_username(const char *username, const int local)
 {
   const char *p = username;
@@ -579,7 +579,7 @@ valid_username(const char *username, const int local)
    * or "-hi-@somehost", "h-----@somehost" would still be accepted.
    */
   if (!IsAlNum(*p))
-    return 0;
+    return false;
 
   if (local)
   {
@@ -590,19 +590,19 @@ valid_username(const char *username, const int local)
       if (*p == '.' && ConfigGeneral.dots_in_ident)
       {
         if (++dots > ConfigGeneral.dots_in_ident)
-          return 0;
+          return false;
         if (!IsUserChar(*(p + 1)))
-          return 0;
+          return false;
       }
       else if (!IsUserChar(*p))
-        return 0;
+        return false;
     }
   }
   else
   {
     while (*++p)
       if (!IsUserChar(*p))
-        return 0;
+        return false;
   }
 
   return p - username <= USERLEN;
@@ -615,7 +615,7 @@ valid_username(const char *username, const int local)
  * output       - none
  * side effects - walks through the nickname, returning 0 if erroneous
  */
-int
+bool
 valid_nickname(const char *nickname, const int local)
 {
   const char *p = nickname;
@@ -626,11 +626,11 @@ valid_nickname(const char *nickname, const int local)
    * Nicks can't start with a digit or - or be 0 length.
    */
   if (EmptyString(p) || *p == '-' || (IsDigit(*p) && local))
-    return 0;
+    return false;
 
   for (; *p; ++p)
     if (!IsNickChar(*p))
-      return 0;
+      return false;
 
   return p - nickname <= NICKLEN;
 }
@@ -642,8 +642,7 @@ valid_nickname(const char *nickname, const int local)
  * \param buf       Pointer to buffer to build string in
  */
 void
-send_umode(struct Client *client_p, unsigned int dispatch,
-           unsigned int old, char *buf)
+send_umode(struct Client *client_p, bool dispatch, unsigned int old, char *buf)
 {
   char *m = buf;
   int what = 0;
@@ -680,7 +679,7 @@ send_umode(struct Client *client_p, unsigned int dispatch,
 
   *m = '\0';
 
-  if (dispatch && *buf)
+  if (dispatch == true && *buf)
     sendto_one(client_p, ":%s!%s@%s MODE %s :%s",
                client_p->name, client_p->username,
                client_p->host, client_p->name, buf);

@@ -109,7 +109,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     if (tlen > MODEBUFLEN)
       break;
 
-    if (tlen && *s != ':' && add_id(source_p, chptr, s, list))
+    if (tlen && *s != ':' && add_id(source_p, chptr, s, list) == true)
     {
       /* add_id can modify 's' */
       tlen = strlen(s);

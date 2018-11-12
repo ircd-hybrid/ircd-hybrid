@@ -55,7 +55,7 @@ resv_remove(struct Client *source_p, const char *mask)
     return;
   }
 
-  if (resv->in_database == 0)
+  if (resv->in_database == false)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":The RESV for %s is in ircd.conf and must be removed by hand",

@@ -59,7 +59,7 @@ fdlist_init(void)
 }
 
 static void
-fdlist_update_highest_fd(int fd, int opening)
+fdlist_update_highest_fd(int fd, bool opening)
 {
   if (fd < highest_fd)
     return;
@@ -71,7 +71,7 @@ fdlist_update_highest_fd(int fd, int opening)
     /*
      * assert() that we are not closing a FD bigger than our known highest FD.
      */
-    assert(opening);
+    assert(opening == true);
     highest_fd = fd;
     return;
   }
@@ -80,21 +80,21 @@ fdlist_update_highest_fd(int fd, int opening)
   /*
    * assert() that we are closing the highest FD; we can't be re-opening it.
    */
-  assert(opening == 0);
+  assert(opening == false);
 
-  while (highest_fd >= 0 && fd_table[highest_fd].flags.open == 0)
+  while (highest_fd >= 0 && fd_table[highest_fd].flags.open == false)
     --highest_fd;
 }
 
 /* Called to open a given filedescriptor */
 fde_t *
-fd_open(int fd, int is_socket, const char *desc)
+fd_open(int fd, bool is_socket, const char *desc)
 {
   fde_t *F = &fd_table[fd];
 
   assert(fd >= 0);
   assert(F->fd == 0);
-  assert(F->flags.open == 0);
+  assert(F->flags.open == false);
 
   /*
    * Note: normally we'd have to clear the other flags, but currently F
@@ -102,13 +102,13 @@ fd_open(int fd, int is_socket, const char *desc)
    */
   F->fd = fd;
   F->comm_index = -1;
-  F->flags.open = 1;
+  F->flags.open = true;
   F->flags.is_socket = is_socket;
 
   if (desc)
     strlcpy(F->desc, desc, sizeof(F->desc));
 
-  fdlist_update_highest_fd(F->fd, 1);
+  fdlist_update_highest_fd(F->fd, true);
   ++number_fd;
 
   return F;
@@ -119,9 +119,9 @@ fde_t *
 fd_close(fde_t *F)
 {
   assert(F->fd >= 0);
-  assert(F->flags.open);
+  assert(F->flags.open == true);
 
-  if (F->flags.is_socket)
+  if (F->flags.is_socket == true)
     comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
   delete_resolver_queries(F);
@@ -131,9 +131,9 @@ fd_close(fde_t *F)
 
   /* Unlike squid, we're actually closing the FD here! -- adrian */
   close(F->fd);
-  F->flags.open = 0;  /* Must set F->flags.open == 0 before fdlist_update_highest_fd() */
+  F->flags.open = false;  /* Must set F->flags.open == 0 before fdlist_update_highest_fd() */
 
-  fdlist_update_highest_fd(F->fd, 0);
+  fdlist_update_highest_fd(F->fd, false);
   --number_fd;
 
   memset(F, 0, sizeof(*F));

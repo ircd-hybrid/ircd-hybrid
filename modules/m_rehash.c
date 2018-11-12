@@ -53,7 +53,7 @@ rehash_conf(struct Client *source_p)
                        get_oper_name(source_p));
   ilog(LOG_TYPE_IRCD, "REHASH CONF from %s",
        get_oper_name(source_p));
-  conf_rehash(0);
+  conf_rehash(false);
 }
 
 /*! \brief REHASH MOTD handler

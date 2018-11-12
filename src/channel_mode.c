@@ -84,7 +84,7 @@ check_string(char *s)
  *   -is 8/9/00
  */
 
-int
+bool
 add_id(struct Client *client_p, struct Channel *chptr, char *banid, dlink_list *list)
 {
   dlink_node *node;
@@ -104,7 +104,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, dlink_list *
                                                         ConfigChannel.max_bans))
     {
       sendto_one_numeric(client_p, &me, ERR_BANLISTFULL, chptr->name, banid);
-      return 0;
+      return false;
     }
 
     collapse(banid);
@@ -134,7 +134,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, dlink_list *
     if (irccmp(ban->name, name) == 0 &&
         irccmp(ban->user, user) == 0 &&
         irccmp(ban->host, host) == 0)
-      return 0;
+      return false;
   }
 
   clear_ban_cache_list(&chptr->members_local);
@@ -157,7 +157,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, dlink_list *
 
   dlinkAdd(ban, &ban->node, list);
 
-  return 1;
+  return true;
 }
 
 /*
@@ -167,7 +167,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, dlink_list *
  * output	- 0 for failure, 1 for success
  * side effects	-
  */
-static int
+static bool
 del_id(struct Channel *chptr, char *banid, dlink_list *list)
 {
   dlink_node *node;
@@ -205,11 +205,11 @@ del_id(struct Channel *chptr, char *banid, dlink_list *list)
     {
       clear_ban_cache_list(&chptr->members_local);
       remove_ban(ban, list);
-      return 1;
+      return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
 /* channel_modes()
@@ -468,12 +468,12 @@ chm_mask(struct Client *source_p, struct Channel *chptr, int parc, int *parn, ch
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (add_id(source_p, chptr, mask, list) == 0)
+    if (add_id(source_p, chptr, mask, list) == false)
       return;
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (del_id(chptr, mask, list) == 0)
+    if (del_id(chptr, mask, list) == false)
       return;
   }
 

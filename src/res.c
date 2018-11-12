@@ -137,7 +137,7 @@ make_request(dns_callback_fnc callback, void *ctx)
  *      paul vixie, 29may94
  *      revised for ircd, cryogen(stu) may03
  */
-static int
+static bool
 res_ourserver(const struct irc_ssaddr *inp)
 {
   const struct sockaddr_in6 *v6in = (const struct sockaddr_in6 *)inp;
@@ -159,20 +159,20 @@ res_ourserver(const struct irc_ssaddr *inp)
         if (srv->ss.ss_family == inp->ss.ss_family)
           if (v6->sin6_port == v6in->sin6_port)
             if (memcmp(&v6->sin6_addr.s6_addr, &v6in->sin6_addr.s6_addr, sizeof(struct in6_addr)) == 0)
-              return 1;
+              return true;
         break;
       case AF_INET:
         if (srv->ss.ss_family == inp->ss.ss_family)
           if (v4->sin_port == v4in->sin_port)
             if (v4->sin_addr.s_addr == v4in->sin_addr.s_addr)
-              return 1;
+              return true;
         break;
       default:
         break;
     }
   }
 
-  return 0;
+  return false;
 }
 
 /*
@@ -190,7 +190,7 @@ start_resolver(void)
     if (fd == -1)
       return;
 
-    ResolverFileDescriptor = fd_open(fd, 1, "UDP resolver socket");
+    ResolverFileDescriptor = fd_open(fd, true, "UDP resolver socket");
 
     /* At the moment, the resolver FD data is global .. */
     comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
@@ -421,7 +421,7 @@ resend_query(struct reslist *request)
 /*
  * proc_answer - process name server reply
  */
-static int
+static bool
 proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigned char *eob)
 {
   char hostbuf[RFC1035_MAX_DOMAIN_LENGTH + 100]; /* working buffer */
@@ -450,7 +450,7 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
     n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
 
     if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
-      return 0;
+      return false;
 
     hostbuf[RFC1035_MAX_DOMAIN_LENGTH] = '\0';
 
@@ -478,45 +478,45 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
     {
       case T_A:
         if (request->type != T_A)
-          return 0;
+          return false;
 
         /*
          * Check for invalid rd_length or too many addresses
          */
         if (rd_length != sizeof(struct in_addr))
-          return 0;
+          return false;
 
         request->addr.ss_len = sizeof(struct sockaddr_in);
         v4 = (struct sockaddr_in *)&request->addr;
         v4->sin_family = AF_INET;
         memcpy(&v4->sin_addr, current, sizeof(struct in_addr));
-        return 1;
+        return true;
         break;
 
       case T_AAAA:
         if (request->type != T_AAAA)
-          return 0;
+          return false;
 
         if (rd_length != sizeof(struct in6_addr))
-          return 0;
+          return false;
 
         request->addr.ss_len = sizeof(struct sockaddr_in6);
         v6 = (struct sockaddr_in6 *)&request->addr;
         v6->sin6_family = AF_INET6;
         memcpy(&v6->sin6_addr, current, sizeof(struct in6_addr));
-        return 1;
+        return true;
         break;
 
       case T_PTR:
         if (request->type != T_PTR)
-          return 0;
+          return false;
 
         n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
         if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
-          return 0;
+          return false;
 
         request->namelength = strlcpy(request->name, hostbuf, sizeof(request->name));
-        return 1;
+        return true;
         break;
 
       case T_CNAME:
@@ -524,12 +524,12 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         break;
 
       default:
-        return 0;
+        return false;
         break;
     }
   }
 
-  return 0;
+  return false;
 }
 
 /*
@@ -551,7 +551,7 @@ res_readreply(fde_t *F, void *data)
     /*
      * Check against possibly fake replies
      */
-    if (res_ourserver(&lsin) == 0)
+    if (res_ourserver(&lsin) == false)
       continue;
 
     /*
@@ -587,7 +587,7 @@ res_readreply(fde_t *F, void *data)
      * We only give it one shot. If it fails, just leave the client
      * unresolved.
      */
-    if (proc_answer(request, header, buf, buf + rc) == 0)
+    if (proc_answer(request, header, buf, buf + rc) == false)
     {
       (*request->callback)(request->callback_ctx, NULL, NULL, 0);
       rem_request(request);

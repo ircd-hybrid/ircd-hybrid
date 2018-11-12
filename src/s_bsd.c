@@ -196,7 +196,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 {
   struct Client *client_p = client_make(NULL);
 
-  client_p->connection->fd = fd_open(fd, 1, (listener->flags & LISTENER_SSL) ?
+  client_p->connection->fd = fd_open(fd, true, (listener->flags & LISTENER_SSL) ?
                                      "Incoming SSL connection" : "Incoming connection");
 
   /*
@@ -271,7 +271,7 @@ comm_ignore_errno(int ierrno)
 void
 comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
-  assert(F->flags.open);
+  assert(F->flags.open == true);
 
   F->timeout = CurrentTime + (timeout / 1000);
   F->timeout_handler = callback;
@@ -293,7 +293,7 @@ comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), 
 void
 comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
-  assert(F->flags.open);
+  assert(F->flags.open == true);
 
   F->flush_timeout = CurrentTime + (timeout / 1000);
   F->flush_handler = callback;
@@ -317,7 +317,7 @@ comm_checktimeouts(void *unused)
   {
     fde_t *F = &fd_table[fd];
 
-    if (F->flags.open == 0)
+    if (F->flags.open == false)
       continue;
 
     /* check flush functions */

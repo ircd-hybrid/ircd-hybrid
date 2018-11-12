@@ -30,7 +30,7 @@
 #include "config.h"
 
 
-extern int has_wildcards(const char *);
+extern bool has_wildcards(const char *);
 extern int match(const char *, const char *);
 
 extern unsigned int token_vector(char *, char, char *[], unsigned int);

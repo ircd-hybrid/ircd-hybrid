@@ -578,7 +578,7 @@ stats_fdlist(struct Client *source_p, int parc, char *parv[])
   {
     const fde_t *F = &fd_table[fd];
 
-    if (F->flags.open)
+    if (F->flags.open == true)
       sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "F :fd %-5d desc '%s'", F->fd, F->desc);
   }
@@ -1143,16 +1143,16 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
  *
  */
 static const char *
-parse_stats_args(struct Client *source_p, int parc, char *parv[], int *doall, int *wilds)
+parse_stats_args(struct Client *source_p, int parc, char *parv[], bool *doall, bool *wilds)
 {
   if (parc > 2)
   {
     const char *name = parv[2];
 
     if (irccmp(name, ID_or_name(&me, source_p)) == 0)
-      *doall = 2;
+      *doall = true;
     else if (match(name, ID_or_name(&me, source_p)) == 0)
-      *doall = 1;
+      *doall = true;
 
     *wilds = has_wildcards(name);
 
@@ -1163,7 +1163,7 @@ parse_stats_args(struct Client *source_p, int parc, char *parv[], int *doall, in
 }
 
 static void
-stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
+stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
              dlink_list *list, const char statchar)
 {
   dlink_node *node;
@@ -1215,8 +1215,8 @@ stats_L_list(struct Client *source_p, const char *name, int doall, int wilds,
  * side effects -
  */
 static void
-stats_L(struct Client *source_p, const char *name, int doall,
-        int wilds, const char statchar)
+stats_L(struct Client *source_p, const char *name, bool doall,
+        bool wilds, const char statchar)
 {
   stats_L_list(source_p, name, doall, wilds, &unknown_list, statchar);
   stats_L_list(source_p, name, doall, wilds, &local_client_list, statchar);
@@ -1226,8 +1226,8 @@ stats_L(struct Client *source_p, const char *name, int doall,
 static void
 stats_ltrace(struct Client *source_p, int parc, char *parv[])
 {
-  int doall = 0;
-  int wilds = 0;
+  bool doall = false;
+  bool wilds = false;
   const char *name = NULL;
 
   if ((name = parse_stats_args(source_p, parc, parv, &doall, &wilds)))

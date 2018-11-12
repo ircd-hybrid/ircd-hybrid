@@ -121,7 +121,7 @@ server_send_client(struct Client *client_p, struct Client *target_p)
 
   assert(IsClient(target_p));
 
-  send_umode(target_p, 0, 0, buf);
+  send_umode(target_p, false, 0, buf);
 
   if (buf[0] == '\0')
   {
@@ -708,15 +708,15 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * leaf. If so, close the link.
    */
   dlink_node *node;
-  unsigned int hlined = 0;
-  unsigned int llined = 0;
+  bool hlined = false;
+  bool llined = false;
   const struct MaskItem *conf = source_p->from->connection->confs.head->data;
 
   DLINK_FOREACH(node, conf->leaf_list.head)
   {
     if (match(node->data, parv[1]) == 0)
     {
-      llined = 1;
+      llined = true;
       break;
     }
   }
@@ -725,7 +725,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   {
     if (match(node->data, parv[1]) == 0)
     {
-      hlined = 1;
+      hlined = true;
       break;
     }
   }
@@ -754,7 +754,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    */
 
   /* Ok, check source_p->from can hub the new server */
-  if (hlined == 0)
+  if (hlined == false)
   {
     /* OOOPs nope can't HUB */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
@@ -768,7 +768,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Check for the new server being leafed behind this HUB */
-  if (llined)
+  if (llined == true)
   {
     /* OOOPs nope can't HUB this leaf */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,

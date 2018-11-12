@@ -98,7 +98,7 @@ extern int highest_fd;
 extern fde_t *fd_table;
 
 extern void fdlist_init(void);
-extern fde_t *fd_open(int, int, const char *);
+extern fde_t *fd_open(int, bool, const char *);
 extern fde_t *fd_close(fde_t *);
 extern void fd_note(fde_t *, const char *, ...);
 extern void close_standard_fds(void);

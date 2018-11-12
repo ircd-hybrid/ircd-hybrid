@@ -48,27 +48,27 @@
  * Output:      returns YES on success, NO if no tkline removed.
  * Side effects: Any matching tklines are removed.
  */
-static int
+static bool
 xline_remove(const char *mask)
 {
   struct GecosItem *gecos;
 
   if ((gecos = gecos_find(mask, irccmp)))
   {
-    if (gecos->in_database)
+    if (gecos->in_database == true)
     {
       gecos_delete(gecos);
-      return 1;
+      return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
 static void
 xline_remove_and_notify(struct Client *source_p, const char *gecos)
 {
-  if (xline_remove(gecos))
+  if (xline_remove(gecos) == true)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos);

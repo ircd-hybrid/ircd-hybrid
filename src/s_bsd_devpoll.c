@@ -60,7 +60,7 @@ comm_select_init(void)
     exit(EXIT_FAILURE); /* Whee! */
   }
 
-  fd_open(devpoll_fd, 0, "/dev/poll file descriptor");
+  fd_open(devpoll_fd, false, "/dev/poll file descriptor");
 }
 
 /*
@@ -161,7 +161,7 @@ comm_select(void)
   {
     fde_t *F = &fd_table[dopoll.dp_fds[i].fd];
 
-    if (F->flags.open == 0)
+    if (F->flags.open == false)
       continue;
 
     if ((dopoll.dp_fds[i].revents & POLLIN))
@@ -171,7 +171,7 @@ comm_select(void)
         F->read_handler = NULL;
         hdl(F, F->read_data);
 
-        if (F->flags.open == 0)
+        if (F->flags.open == false)
           continue;
       }
     }
@@ -183,7 +183,7 @@ comm_select(void)
         F->write_handler = NULL;
         hdl(F, F->write_data);
 
-        if (F->flags.open == 0)
+        if (F->flags.open == false)
           continue;
       }
     }

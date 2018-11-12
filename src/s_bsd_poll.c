@@ -170,7 +170,7 @@ comm_select(void)
 
     fde_t *F = &fd_table[pollfds[ci].fd];
 
-    if (F->flags.open == 0)
+    if (F->flags.open == false)
       continue;
 
     if (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
@@ -180,7 +180,7 @@ comm_select(void)
         F->read_handler = NULL;
         hdl(F, F->read_data);
 
-        if (F->flags.open == 0)
+        if (F->flags.open == false)
           continue;
       }
     }
@@ -192,7 +192,7 @@ comm_select(void)
         F->write_handler = NULL;
         hdl(F, F->write_data);
 
-        if (F->flags.open == 0)
+        if (F->flags.open == false)
           continue;
       }
     }

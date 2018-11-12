@@ -82,7 +82,7 @@ resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const
   }
 
   resv->setat = CurrentTime;
-  resv->in_database = 1;
+  resv->in_database = true;
 
   if (duration)
   {

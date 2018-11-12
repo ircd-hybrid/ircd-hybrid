@@ -29,7 +29,7 @@
 #include "irc_string.h"
 
 
-int
+bool
 has_wildcards(const char *str)
 {
   const unsigned char *p = (const unsigned char *)str;
@@ -39,13 +39,13 @@ has_wildcards(const char *str)
     if (*p == '\\')
     {
       if (*++p == '\0')
-        return 0;
+        return false;
     }
     else if (IsMWildChar(*p))
-      return 1;
+      return true;
   }
 
-  return 0;
+  return false;
 }
 
 const char *

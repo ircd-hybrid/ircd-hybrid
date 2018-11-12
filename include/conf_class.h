@@ -74,7 +74,7 @@ extern unsigned int get_recvq(const dlink_list *const);
 extern struct ClassItem *class_find(const char *, int);
 extern void class_mark_for_deletion(void);
 extern void class_delete_marked(void);
-extern int class_ip_limit_add(struct ClassItem *, void *, int);
-extern int class_ip_limit_remove(struct ClassItem *, void *);
+extern bool class_ip_limit_add(struct ClassItem *, void *, int);
+extern bool class_ip_limit_remove(struct ClassItem *, void *);
 extern void class_ip_limit_rebuild(struct ClassItem *);
 #endif  /* INCLUDED_conf_class_h */

@@ -62,7 +62,7 @@ resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const
       return;
     }
 
-    if (valid_wild_card_simple(mask + !!IsChanPrefix(*mask)) == 0)
+    if (valid_wild_card_simple(mask + !!IsChanPrefix(*mask)) == false)
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the RESV",

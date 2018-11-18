@@ -183,12 +183,12 @@ parse_client_queued(struct Client *client_p)
   }
   else if (IsClient(client_p))
   {
-    unsigned int checkflood = 1;
+    bool checkflood = true;
 
     if (ConfigGeneral.no_oper_flood && HasUMode(client_p, UMODE_OPER))
-      checkflood = 0;
+      checkflood = false;
     else if (HasFlag(client_p, FLAGS_CANFLOOD))
-      checkflood = 0;
+      checkflood = false;
 
     /*
      * Handle flood protection here - if we exceed our flood limit on messages
@@ -214,7 +214,7 @@ parse_client_queued(struct Client *client_p)
        * as sent_parsed will always hover around the allow_read limit
        * and no 'bursts' will be permitted.
        */
-      if (checkflood)
+      if (checkflood == true)
         if (client_p->connection->sent_parsed >= client_p->connection->allow_read)
           break;
 
@@ -289,7 +289,6 @@ read_packet(fde_t *F, void *data)
 {
   struct Client *const client_p = data;
   int length = 0;
-  int want_write = 0;
 
   assert(client_p);
   assert(client_p->connection);
@@ -308,9 +307,10 @@ read_packet(fde_t *F, void *data)
   {
     if (tls_isusing(&F->ssl))
     {
+      bool want_write = false;
       length = tls_read(&F->ssl, readBuf, sizeof(readBuf), &want_write);
 
-      if (want_write)
+      if (want_write == true)
         comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);
     }
     else
@@ -322,7 +322,7 @@ read_packet(fde_t *F, void *data)
        * If true, then we can recover from this error. Just jump out of
        * the loop and re-register a new io-request.
        */
-      if (length < 0 && comm_ignore_errno(errno))
+      if (length < 0 && comm_ignore_errno(errno) == true)
         break;
 
       dead_link_on_read(client_p, length);

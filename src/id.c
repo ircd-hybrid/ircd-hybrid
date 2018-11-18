@@ -31,31 +31,31 @@
 
 static char new_uid[TOTALSIDUID + 1];  /* Allow for \0 */
 
-int
+bool
 valid_sid(const char *sid)
 {
   if (strlen(sid) == IRC_MAXSID)
     if (IsDigit(*sid))
       if (IsAlNum(*(sid + 1)) && IsAlNum(*(sid + 2)))
-        return 1;
+        return true;
 
-  return 0;
+  return false;
 }
 
-int
+bool
 valid_uid(const char *uid)
 {
   if (strlen(uid) != TOTALSIDUID)
-    return 0;
+    return false;
 
   if (!IsDigit(*uid))
-    return 0;
+    return false;
 
   for (unsigned int i = 1; i < TOTALSIDUID; ++i)
     if (!IsAlNum(*(uid + i)))
-      return 0;
+      return false;
 
-  return 1;
+  return true;
 }
 
 /*

@@ -57,10 +57,10 @@ extern void mod_add_path(const char *);
 extern void modules_conf_clear(void);
 
 /* load all modules */
-extern void load_all_modules(int);
+extern void load_all_modules(bool);
 
 /* load core modules */
-extern void load_core_modules(int);
+extern void load_core_modules(bool);
 
 /* Add this module to list of modules to be loaded from conf */
 extern void add_conf_module(const char *);
@@ -68,9 +68,9 @@ extern void add_conf_module(const char *);
 extern void load_conf_modules(void);
 extern void modules_init(void);
 
-extern int unload_one_module(const char *, int);
-extern int modules_valid_suffix(const char *);
-extern int load_one_module(const char *);
-extern int load_a_module(const char *, int);
+extern bool unload_one_module(const char *, bool);
+extern bool modules_valid_suffix(const char *);
+extern bool load_one_module(const char *);
+extern bool load_a_module(const char *, bool);
 extern struct module *findmodule_byname(const char *);
 #endif /* INCLUDED_modules_h */

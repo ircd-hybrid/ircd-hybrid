@@ -108,7 +108,7 @@ dline_handle(struct Client *source_p, const char *addr, const char *reason, uint
   struct irc_ssaddr daddr;
   int bits = 0, aftype = 0;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(1, addr) == 0)
+  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(1, addr) == false)
   {
     sendto_one_notice(source_p, &me,
                       ":Please include at least %u non-wildcard characters with the mask",

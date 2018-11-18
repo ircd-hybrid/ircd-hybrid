@@ -256,7 +256,7 @@ tls_free(tls_data_t *tls_data)
 }
 
 int
-tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, int *want_write)
+tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   SSL *ssl = *tls_data;
   int length = SSL_read(ssl, buf, bufsize);
@@ -269,7 +269,7 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, int *want_write)
       case SSL_ERROR_WANT_WRITE:
       {
         /* OpenSSL wants to write, we signal this to the caller and do nothing about that here */
-        *want_write = 1;
+        *want_write = true;
         break;
       }
       case SSL_ERROR_WANT_READ:
@@ -289,7 +289,7 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, int *want_write)
 }
 
 int
-tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, int *want_read)
+tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   SSL *ssl = *tls_data;
   int retlen = SSL_write(ssl, buf, bufsize);
@@ -300,7 +300,7 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, int *want_read)
     switch (SSL_get_error(ssl, retlen))
     {
       case SSL_ERROR_WANT_READ:
-        *want_read = 1;
+        *want_read = true;
         break;  /* Retry later, don't register for write events */
       case SSL_ERROR_WANT_WRITE:
         errno = EWOULDBLOCK;

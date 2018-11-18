@@ -96,7 +96,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   if (!IsServer(source_p))
     return 0;
 
-  if (channel_check_name(parv[2], 0) == 0)
+  if (channel_check_name(parv[2], false) == false)
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
@@ -226,7 +226,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if (chptr->topic[0])
     {
-      channel_set_topic(chptr, "", "", 0, 0);
+      channel_set_topic(chptr, "", "", 0, false);
       sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :",
                            (IsHidden(source_p) ||
                            ConfigServerHide.hide_servers) ?
@@ -290,7 +290,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   while (*s)
   {
-    int valid_mode = 1;
+    bool valid_mode = true;
     fl = 0;
 
     do
@@ -310,10 +310,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
           ++s;
           break;
         default:
-          valid_mode = 0;
+          valid_mode = false;
           break;
       }
-    } while (valid_mode);
+    } while (valid_mode == true);
 
     /*
      * If the client doesn't exist, or if it's fake direction/server, skip.

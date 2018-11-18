@@ -271,27 +271,27 @@ channel_send_modes(struct Client *client_p, const struct Channel *chptr)
  * \param local Indicates whether it's a local or remote creation
  * \return 0 if invalid, 1 otherwise
  */
-int
-channel_check_name(const char *name, const int local)
+bool
+channel_check_name(const char *name, bool local)
 {
   const char *p = name;
 
   assert(!EmptyString(p));
 
   if (!IsChanPrefix(*p))
-    return 0;
+    return false;
 
-  if (local == 0 || ConfigChannel.disable_fake_channels == 0)
+  if (local == false || ConfigChannel.disable_fake_channels == 0)
   {
     while (*++p)
       if (!IsChanChar(*p))
-        return 0;
+        return false;
   }
   else
   {
     while (*++p)
       if (!IsVisibleChanChar(*p))
-        return 0;
+        return false;
   }
 
   return p - name <= CHANNELLEN;
@@ -772,7 +772,7 @@ msg_has_ctrls(const char *message)
  */
 int
 can_send(struct Channel *chptr, struct Client *client_p,
-         struct Membership *member, const char *message, int notice)
+         struct Membership *member, const char *message, bool notice)
 {
   const struct ResvItem *resv = NULL;
 
@@ -804,7 +804,7 @@ can_send(struct Channel *chptr, struct Client *client_p,
   if (HasCMode(chptr, MODE_MODREG) && !HasUMode(client_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
 
-  if (HasCMode(chptr, MODE_NONOTICE) && notice)
+  if (HasCMode(chptr, MODE_NONOTICE) && notice == true)
     return ERR_CANNOTSENDTOCHAN;
 
   /* Cache can send if banned */
@@ -900,9 +900,9 @@ check_spambot_warning(struct Client *client_p, const char *name)
  */
 void
 channel_set_topic(struct Channel *chptr, const char *topic,
-                  const char *topic_info, uintmax_t topicts, int local)
+                  const char *topic_info, uintmax_t topicts, bool local)
 {
-  if (local)
+  if (local == true)
     strlcpy(chptr->topic, topic, IRCD_MIN(sizeof(chptr->topic), ConfigServerInfo.max_topic_length + 1));
   else
     strlcpy(chptr->topic, topic, sizeof(chptr->topic));
@@ -934,7 +934,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
     if (key && *key == '\0')
       key = NULL;
 
-    if (channel_check_name(name, 1) == 0)
+    if (channel_check_name(name, true) == false)
     {
       sendto_one_numeric(client_p, &me, ERR_BADCHANNAME, name);
       continue;
@@ -1087,7 +1087,7 @@ channel_part_one_client(struct Client *client_p, const char *name, const char *r
   if (*reason && (!MyConnect(client_p) ||
       ((client_p->connection->firsttime +
         ConfigGeneral.anti_spam_exit_message_time) < CurrentTime &&
-       can_send(chptr, client_p, member, reason, 0) < 0)))
+       can_send(chptr, client_p, member, reason, false) < 0)))
   {
     sendto_server(client_p, 0, 0, ":%s PART %s :%s",
                   client_p->id, chptr->name, reason);

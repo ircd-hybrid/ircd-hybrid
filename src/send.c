@@ -185,7 +185,7 @@ send_queued_write(struct Client *to)
   {
     do
     {
-      int want_read = 0;
+      bool want_read = false;
       const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
 
       if (tls_isusing(&to->connection->fd->ssl))
@@ -193,7 +193,7 @@ send_queued_write(struct Client *to)
         retlen = tls_write(&to->connection->fd->ssl, first->data + to->connection->buf_sendq.pos,
                                                      first->size - to->connection->buf_sendq.pos, &want_read);
 
-        if (want_read)
+        if (want_read == true)
           return;  /* Retry later, don't register for write events */
       }
       else
@@ -210,7 +210,7 @@ send_queued_write(struct Client *to)
       me.connection->send.bytes += retlen;
     } while (dbuf_length(&to->connection->buf_sendq));
 
-    if (retlen < 0 && comm_ignore_errno(errno))
+    if (retlen < 0 && comm_ignore_errno(errno) == true)
     {
       AddFlag(to, FLAGS_BLOCKED);
 

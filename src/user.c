@@ -373,7 +373,7 @@ register_local_user(struct Client *client_p)
   /* Password check */
   if (!EmptyString(conf->passwd))
   {
-    if (match_conf_password(client_p->connection->password, conf) == 0)
+    if (match_conf_password(client_p->connection->password, conf) == false)
     {
       ++ServerStats.is_ref;
 
@@ -416,7 +416,7 @@ register_local_user(struct Client *client_p)
     return;
   }
 
-  if (valid_username(client_p->username, 1) == false)
+  if (valid_username(client_p->username, true) == false)
   {
     char buf[IRCD_BUFSIZE] = "";
 
@@ -564,7 +564,7 @@ valid_hostname(const char *hostname)
  * style of username
  */
 bool
-valid_username(const char *username, const int local)
+valid_username(const char *username, bool local)
 {
   const char *p = username;
 
@@ -616,7 +616,7 @@ valid_username(const char *username, const int local)
  * side effects - walks through the nickname, returning 0 if erroneous
  */
 bool
-valid_nickname(const char *nickname, const int local)
+valid_nickname(const char *nickname, bool local)
 {
   const char *p = nickname;
 

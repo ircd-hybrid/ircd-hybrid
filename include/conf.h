@@ -305,8 +305,8 @@ extern struct config_serverhide_entry ConfigServerHide;
 extern struct config_serverinfo_entry ConfigServerInfo;
 extern struct config_admin_entry ConfigAdminInfo;
 
-extern int valid_wild_card_simple(const char *);
-extern int valid_wild_card(int, ...);
+extern bool valid_wild_card_simple(const char *);
+extern bool valid_wild_card(int, ...);
 
 extern struct MaskItem *conf_make(enum maskitem_type);
 extern void read_conf_files(bool);
@@ -336,5 +336,5 @@ extern int parse_aline(const char *, struct Client *, int, char **,
                        char **, char **, uintmax_t *, char **, char **);
 
 extern uintmax_t valid_tkline(const char *, const int);
-extern int match_conf_password(const char *, const struct MaskItem *);
+extern bool match_conf_password(const char *, const struct MaskItem *);
 #endif  /* INCLUDED_conf_h */

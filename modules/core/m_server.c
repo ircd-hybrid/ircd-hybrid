@@ -423,7 +423,7 @@ server_check(const char *name, struct Client *client_p)
     if (!irccmp(conf->host, client_p->host) ||
         !irccmp(conf->host, client_p->sockhost))
     {
-      if (!match_conf_password(client_p->connection->password, conf))
+      if (match_conf_password(client_p->connection->password, conf) == false)
         return SERVER_CHECK_INVALID_PASSWORD;
 
       if (!EmptyString(conf->certfp))
@@ -491,7 +491,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (server_valid_name(name) == 0)
+  if (server_valid_name(name) == false)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
@@ -503,7 +503,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (valid_sid(sid) == 0)
+  if (valid_sid(sid) == false)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
@@ -645,7 +645,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (server_valid_name(parv[1]) == 0)
+  if (server_valid_name(parv[1]) == false)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
@@ -657,7 +657,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (valid_sid(parv[3]) == 0)
+  if (valid_sid(parv[3]) == false)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",

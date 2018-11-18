@@ -1095,7 +1095,7 @@ read_conf_files(bool cold)
 void
 conf_add_class_to_conf(struct MaskItem *conf, const char *name)
 {
-  if (EmptyString(name) || (conf->class = class_find(name, 1)) == NULL)
+  if (EmptyString(name) || (conf->class = class_find(name, true)) == NULL)
   {
     conf->class = class_default;
 
@@ -1196,7 +1196,7 @@ valid_tkline(const char *data, const int minutes)
  * outputs      - 1 if valid, else 0
  * side effects - none
  */
-int
+bool
 valid_wild_card_simple(const char *data)
 {
   const unsigned char *p = (const unsigned char *)data;
@@ -1209,18 +1209,18 @@ valid_wild_card_simple(const char *data)
     {
       ++p;
       if (++nonwild >= ConfigGeneral.min_nonwildcard_simple)
-        return 1;
+        return true;
     }
     else if (!IsMWildChar(tmpch))
     {
       if (++nonwild >= ConfigGeneral.min_nonwildcard_simple)
-        return 1;
+        return true;
     }
     else
       ++wild;
   }
 
-  return !wild;
+  return wild == 0;
 }
 
 /* valid_wild_card()
@@ -1231,7 +1231,7 @@ valid_wild_card_simple(const char *data)
  * output       - 0 if not valid, 1 if valid
  * side effects - NOTICE is given to source_p if warn is 1
  */
-int
+bool
 valid_wild_card(int count, ...)
 {
   unsigned char tmpch = '\0';
@@ -1269,14 +1269,14 @@ valid_wild_card(int count, ...)
         if (++nonwild >= ConfigGeneral.min_nonwildcard)
         {
           va_end(args);
-          return 1;
+          return true;
         }
       }
     }
   }
 
   va_end(args);
-  return 0;
+  return false;
 }
 
 /* find_user_host()
@@ -1489,20 +1489,20 @@ parse_aline(const char *cmd, struct Client *source_p,
  * output       - 1 or 0 if match
  * side effects - none
  */
-int
+bool
 match_conf_password(const char *password, const struct MaskItem *conf)
 {
   const char *encr = NULL;
 
   if (EmptyString(password) || EmptyString(conf->passwd))
-    return 0;
+    return false;
 
   if (conf->flags & CONF_FLAGS_ENCRYPTED)
     encr = crypt(password, conf->passwd);
   else
     encr = password;
 
-  return encr && !strcmp(encr, conf->passwd);
+  return encr && strcmp(encr, conf->passwd) == 0;
 }
 
 /*

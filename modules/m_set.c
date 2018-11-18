@@ -242,8 +242,8 @@ struct SetStruct
 {
   const char *const name;
   void (*const handler)(struct Client *, const char *, int);
-  const unsigned int wants_char;  /* 1 if it expects (char *, [int]) */
-  const unsigned int wants_int;  /* 1 if it expects ([char *], int) */
+  bool wants_char;  /* 1 if it expects (char *, [int]) */
+  bool wants_int;  /* 1 if it expects ([char *], int) */
   /* eg:  0, 1 == only an int arg
    * eg:  1, 1 == char and int args */
 };
@@ -258,19 +258,19 @@ struct SetStruct
 static const struct SetStruct set_cmd_table[] =
 {
   /* name               function        string arg  int arg */
-  /* -------------------------------------------------------- */
-  { "AUTOCONN",         quote_autoconn,         1,      1 },
-  { "AUTOCONNALL",      quote_autoconnall,      0,      1 },
-  { "FLOODCOUNT",       quote_floodcount,       0,      1 },
-  { "FLOODTIME",        quote_floodtime,        0,      1 },
-  { "IDENTTIMEOUT",     quote_identtimeout,     0,      1 },
-  { "MAX",              quote_max,              0,      1 },
-  { "SPAMNUM",          quote_spamnum,          0,      1 },
-  { "SPAMTIME",         quote_spamtime,         0,      1 },
-  { "JFLOODTIME",       quote_jfloodtime,       0,      1 },
-  { "JFLOODCOUNT",      quote_jfloodcount,      0,      1 },
-  /* -------------------------------------------------------- */
-  { NULL,               NULL,                   0,      0 }
+  /* ------------------------------------------------------ */
+  { "AUTOCONN",         quote_autoconn,     true,   true  },
+  { "AUTOCONNALL",      quote_autoconnall,  false,  true  },
+  { "FLOODCOUNT",       quote_floodcount,   false,  true  },
+  { "FLOODTIME",        quote_floodtime,    false,  true  },
+  { "IDENTTIMEOUT",     quote_identtimeout, false,  true  },
+  { "MAX",              quote_max,          false,  true  },
+  { "SPAMNUM",          quote_spamnum,      false,  true  },
+  { "SPAMTIME",         quote_spamtime,     false,  true  },
+  { "JFLOODTIME",       quote_jfloodtime,   false,  true  },
+  { "JFLOODCOUNT",      quote_jfloodcount,  false,  true  },
+  /* ------------------------------------------------------ */
+  { NULL,               NULL,               false,  false }
 };
 
 /*

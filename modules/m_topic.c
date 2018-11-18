@@ -90,7 +90,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
 
       snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
                source_p->username, source_p->host);
-      channel_set_topic(chptr, parv[2], topic_info, CurrentTime, 1);
+      channel_set_topic(chptr, parv[2], topic_info, CurrentTime, true);
 
       sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
                     source_p->id, chptr->name,
@@ -163,7 +163,7 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
   else
     strlcpy(topic_info, source_p->name, sizeof(topic_info));
 
-  channel_set_topic(chptr, parv[2], topic_info, CurrentTime, 0);
+  channel_set_topic(chptr, parv[2], topic_info, CurrentTime, false);
 
   sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
                 source_p->id, chptr->name,

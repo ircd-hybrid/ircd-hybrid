@@ -112,7 +112,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
    * At this point we should be calling connect_server with a valid
    * connect{} block and a valid port in the connect{} block
    */
-  if (server_connect(conf, source_p))
+  if (server_connect(conf, source_p) == true)
   {
     if (ConfigServerHide.hide_server_ips == 0 && HasUMode(source_p, UMODE_ADMIN))
       sendto_one_notice(source_p, &me, ":*** Connecting to %s[%s].%u",
@@ -199,7 +199,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
    * At this point we should be calling connect_server with a valid
    * connect{} block and a valid port in the connect{} block
    */
-  if (server_connect(conf, source_p))
+  if (server_connect(conf, source_p) == true)
     sendto_one_notice(source_p, &me, ":*** Connecting to %s.%u",
                       conf->name, conf->port);
   else

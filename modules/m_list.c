@@ -42,7 +42,7 @@
 static void
 do_list(struct Client *source_p, char *arg)
 {
-  int no_masked_channels = 1;
+  bool no_masked_channels = true;
 
   if (source_p->connection->list_task)
   {
@@ -60,9 +60,10 @@ do_list(struct Client *source_p, char *arg)
 
   if (!EmptyString(arg))
   {
-    char *opt, *save = NULL;
     dlink_list *list = NULL;
-    int i = 0, errors = 0;
+    char *opt, *save = NULL;
+    bool errors = false;
+    int i = 0;
 
     for (opt = strtok_r(arg,  ",", &save); opt;
          opt = strtok_r(NULL, ",", &save))
@@ -73,13 +74,13 @@ do_list(struct Client *source_p, char *arg)
           if ((i = atoi(opt + 1)) > 0)
             lt->users_max = (unsigned int)i - 1;
           else
-            errors = 1;
+            errors = true;
           break;
         case '>':
           if ((i = atoi(opt + 1)) >= 0)
             lt->users_min = (unsigned int)i + 1;
           else
-            errors = 1;
+            errors = true;
           break;
         case 'C':
         case 'c':
@@ -89,16 +90,16 @@ do_list(struct Client *source_p, char *arg)
               if ((i = atoi(opt + 1)) >= 0)
                 lt->created_max = (unsigned int)(CurrentTime - 60 * i);
               else
-                errors = 1;
+                errors = true;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
                 lt->created_min = (unsigned int)(CurrentTime - 60 * i);
               else
-                errors = 1;
+                errors = true;
               break;
             default:
-              errors = 1;
+              errors = true;
           }
 
           break;
@@ -111,20 +112,20 @@ do_list(struct Client *source_p, char *arg)
               if ((i = atoi(opt + 1)) >= 0)
                 lt->topicts_min = (unsigned int)(CurrentTime - 60 * i);
               else
-                errors = 1;
+                errors = true;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
                 lt->topicts_max = (unsigned int)(CurrentTime - 60 * i);
               else
-                errors = 1;
+                errors = true;
               break;
             case ':':
               if (strlcpy(lt->topic, opt + 1, sizeof(lt->topic)) == 0)
-                errors = 1;
+                errors = true;
               break;
             default:
-              errors = 1;
+              errors = true;
           }
 
           break;
@@ -141,17 +142,17 @@ do_list(struct Client *source_p, char *arg)
           if (has_wildcards(opt + !!IsChanPrefix(*opt)))
           {
             if (list == &lt->show_mask)
-              no_masked_channels = 0;
+              no_masked_channels = false;
           }
           else if (!IsChanPrefix(*opt))
-            errors = 1;
+            errors = true;
 
-          if (errors == 0)
+          if (errors == false)
             dlinkAdd(xstrdup(opt), make_dlink_node(), list);
       }
     }
 
-    if (errors)
+    if (errors == true)
     {
       free_list_task(source_p);
       sendto_one_numeric(source_p, &me, ERR_LISTSYNTAX);

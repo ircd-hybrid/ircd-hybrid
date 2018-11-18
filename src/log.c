@@ -77,16 +77,16 @@ log_iterate(void (*func)(struct LogFile *))
     func(&log_type_table[type]);
 }
 
-static int
+static bool
 log_exceed_size(struct LogFile *log)
 {
   struct stat sb;
 
   if (log->size == 0)
-    return 0;
+    return false;
 
   if (stat(log->path, &sb) < 0)
-    return 0;
+    return false;
 
   return (size_t)sb.st_size > log->size;
 }
@@ -114,7 +114,7 @@ ilog(enum log_type type, const char *fmt, ...)
 
   log_write(log, buf);
 
-  if (log_exceed_size(log) == 0)
+  if (log_exceed_size(log) == false)
     return;
 
   snprintf(buf, sizeof(buf), "Rotating logfile %s", log->path);

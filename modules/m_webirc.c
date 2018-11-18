@@ -86,7 +86,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!match_conf_password(pass, conf))
+  if (match_conf_password(pass, conf) == false)
   {
     sendto_one_notice(source_p, &me, ":WEBIRC password incorrect");
     return 0;

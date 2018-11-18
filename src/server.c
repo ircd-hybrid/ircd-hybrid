@@ -329,7 +329,7 @@ try_connections(void *unused)
   }
 }
 
-int
+bool
 server_valid_name(const char *name)
 {
   unsigned int dots = 0;
@@ -338,7 +338,7 @@ server_valid_name(const char *name)
   for (; *p; ++p)
   {
     if (!IsServChar(*p))
-      return 0;
+      return false;
 
     if (*p == '.')
       ++dots;
@@ -379,7 +379,7 @@ server_make(struct Client *client_p)
  * We return 1 if the connection is attempted, since we don't know whether
  * it suceeded or not, and 0 if it fails in here somewhere.
  */
-int
+bool
 server_connect(struct MaskItem *conf, struct Client *by)
 {
   char buf[HOSTIPLEN + 1] = "";
@@ -402,7 +402,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} in progress.",
                          conf->name);
-    return 0;
+    return false;
   }
 
   if (conf->dns_failed == true)
@@ -410,7 +410,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} failed.",
                          conf->name);
-    return 0;
+    return false;
   }
 
   /* Create a socket for the server connection */
@@ -419,7 +419,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
   {
     /* Eek, failure to create the socket */
     report_error(L_ALL, "opening stream socket to %s: %s", conf->name, errno);
-    return 0;
+    return false;
   }
 
   /* Create a local client */
@@ -544,7 +544,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
    *
    * The socket has been connected or connect is in progress.
    */
-  return 1;
+  return true;
 }
 
 static void

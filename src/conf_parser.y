@@ -527,7 +527,7 @@ serverinfo_name: NAME '=' QSTRING ';'
   /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && !ConfigServerInfo.name)
   {
-    if (server_valid_name(yylval.string))
+    if (server_valid_name(yylval.string) == true)
       ConfigServerInfo.name = xstrdup(yylval.string);
     else
     {
@@ -1331,7 +1331,7 @@ class_entry: CLASS
   if (!block_state.class.buf[0])
     break;
 
-  if (!(class = class_find(block_state.class.buf, 0)))
+  if (!(class = class_find(block_state.class.buf, false)))
     class = class_make();
 
   class->active = 1;
@@ -1797,7 +1797,7 @@ service_name: NAME '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (server_valid_name(yylval.string))
+  if (server_valid_name(yylval.string) == true)
   {
     struct ServiceItem *service = service_make();
     service->name = xstrdup(yylval.string);

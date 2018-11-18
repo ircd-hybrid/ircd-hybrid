@@ -175,7 +175,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, const char *m
  *		  this is slightly expensive on EFnet ...
  */
 static void
-who_global(struct Client *source_p, const char *mask, int server_oper)
+who_global(struct Client *source_p, const char *mask, bool server_oper)
 {
   dlink_node *node;
   unsigned int maxmatches = WHO_MAX_REPLIES;
@@ -212,7 +212,7 @@ who_global(struct Client *source_p, const char *mask, int server_oper)
       continue;
     }
 
-    if (server_oper)
+    if (server_oper == true)
       if (!HasUMode(target_p, UMODE_OPER) ||
           (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
         continue;

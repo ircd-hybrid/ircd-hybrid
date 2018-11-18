@@ -151,12 +151,15 @@ open_db_write(const char *filename, uint32_t version)
   if (!f->fp || write_file_version(f, version) == false)
   {
     int errno_save = errno;
-    static int walloped = 0;
+    static bool walloped = false;
 
-    if (!walloped++)
+    if (walloped == false)
+    {
+      walloped = true;
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Cannot create temporary database file %s",
                            f->tempname);
+    }
 
     errno = errno_save;
     ilog(LOG_TYPE_IRCD, "Cannot create temporary database file %s",
@@ -678,7 +681,7 @@ save_resv_database(const char *filename)
   {
     resv = node->data;
 
-    if (resv->in_database)
+    if (resv->in_database == true)
       ++records;
   }
 
@@ -686,7 +689,7 @@ save_resv_database(const char *filename)
   {
     resv = node->data;
 
-    if (resv->in_database)
+    if (resv->in_database == true)
       ++records;
   }
 
@@ -696,7 +699,7 @@ save_resv_database(const char *filename)
   {
     resv = node->data;
 
-    if (!resv->in_database)
+    if (resv->in_database == false)
       continue;
 
     SAFE_WRITE(write_string(resv->mask, f), filename);
@@ -709,7 +712,7 @@ save_resv_database(const char *filename)
   {
     resv = node->data;
 
-    if (!resv->in_database)
+    if (resv->in_database == false)
       continue;
 
     SAFE_WRITE(write_string(resv->mask, f), filename);
@@ -755,7 +758,7 @@ load_resv_database(const char *filename)
 
     resv->setat = tmp64_setat;
     resv->expire = tmp64_hold;
-    resv->in_database = 1;
+    resv->in_database = true;
 
     xfree(name);
     xfree(reason);
@@ -779,7 +782,7 @@ save_xline_database(const char *filename)
   {
     gecos = ptr->data;
 
-    if (gecos->in_database)
+    if (gecos->in_database == true)
       ++records;
   }
 
@@ -789,7 +792,7 @@ save_xline_database(const char *filename)
   {
     gecos = ptr->data;
 
-    if (!gecos->in_database)
+    if (gecos->in_database == false)
       continue;
 
     SAFE_WRITE(write_string(gecos->mask, f), filename);
@@ -831,7 +834,7 @@ load_xline_database(const char *filename)
     SAFE_READ(read_uint64(&tmp64_hold, f));
 
     gecos = gecos_make();
-    gecos->in_database = 1;
+    gecos->in_database = true;
     gecos->mask = name;
     gecos->reason = reason;
     gecos->setat = tmp64_setat;

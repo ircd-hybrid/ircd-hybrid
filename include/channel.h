@@ -131,8 +131,8 @@ struct Invite
 
 
 extern const dlink_list *channel_get_list(void);
-extern int channel_check_name(const char *, const int);
-extern int can_send(struct Channel *, struct Client *, struct Membership *, const char *, int);
+extern bool channel_check_name(const char *, bool);
+extern int can_send(struct Channel *, struct Client *, struct Membership *, const char *, bool);
 extern int is_banned(const struct Channel *, const struct Client *);
 extern int has_member_flags(const struct Membership *, const unsigned int);
 
@@ -149,7 +149,7 @@ extern void channel_send_modes(struct Client *, const struct Channel *);
 extern void channel_modes(const struct Channel *, const struct Client *, char *, char *);
 extern void check_spambot_warning(struct Client *, const char *);
 extern void channel_free(struct Channel *);
-extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, int);
+extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, bool);
 
 extern const char *get_member_status(const struct Membership *, bool);
 

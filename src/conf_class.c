@@ -68,7 +68,7 @@ void
 class_free(struct ClassItem *const class)
 {
   assert(class != class_default);
-  assert(class->active    == 0);
+  assert(class->active == false);
   assert(class->ref_count == 0);
 
   if (class->ip_tree_v6)
@@ -136,7 +136,7 @@ get_recvq(const dlink_list *const list)
  * side effects - NONE
  */
 struct ClassItem *
-class_find(const char *name, int active)
+class_find(const char *name, bool active)
 {
   dlink_node *node;
 
@@ -145,7 +145,7 @@ class_find(const char *name, int active)
     struct ClassItem *class = node->data;
 
     if (irccmp(class->name, name) == 0)
-      return active && class->active == 0 ? NULL : class;
+      return active == true && class->active == false ? NULL : class;
   }
 
   return NULL;
@@ -161,7 +161,7 @@ class_mark_for_deletion(void)
   dlink_node *node;
 
   DLINK_FOREACH_PREV(node, class_list.tail->prev)
-    ((struct ClassItem *)node->data)->active = 0;
+    ((struct ClassItem *)node->data)->active = false;
 }
 
 void
@@ -173,7 +173,7 @@ class_delete_marked(void)
   {
     struct ClassItem *class = node->data;
 
-    if (class->active == 0 && class->ref_count == 0)
+    if (class->active == false && class->ref_count == 0)
       class_free(class);
   }
 }
@@ -188,7 +188,7 @@ class_ip_limit_trie(struct ClassItem *class, void *addr)
 }
 
 bool
-class_ip_limit_add(struct ClassItem *class, void *addr, int over_rule)
+class_ip_limit_add(struct ClassItem *class, void *addr, bool over_rule)
 {
   int bitlen;
 
@@ -201,7 +201,7 @@ class_ip_limit_add(struct ClassItem *class, void *addr, int over_rule)
     return false;
 
   patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(class, addr), addr, bitlen);
-  if (((uintptr_t)pnode->data) >= class->number_per_cidr && over_rule == 0)
+  if (((uintptr_t)pnode->data) >= class->number_per_cidr && over_rule == false)
     return true;
 
   PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) + 1));

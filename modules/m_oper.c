@@ -166,7 +166,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (match_conf_password(password, conf))
+  if (match_conf_password(password, conf) == true)
   {
     if (conf_attach(source_p, conf))
     {

@@ -131,7 +131,7 @@ fd_close(fde_t *F)
 
   /* Unlike squid, we're actually closing the FD here! -- adrian */
   close(F->fd);
-  F->flags.open = false;  /* Must set F->flags.open == 0 before fdlist_update_highest_fd() */
+  F->flags.open = false;  /* Must set F->flags.open == false before fdlist_update_highest_fd() */
 
   fdlist_update_highest_fd(F->fd, false);
   --number_fd;

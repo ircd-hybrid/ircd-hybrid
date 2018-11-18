@@ -370,7 +370,7 @@ main(int argc, char *argv[])
 
   parseargs(&argc, &argv, myopts);
 
-  if (printVersion)
+  if (printVersion == true)
   {
     printf("ircd: version %s(%s)\n", ircd_version, serno);
     exit(EXIT_SUCCESS);
@@ -382,7 +382,7 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  if (!server_state.foreground)
+  if (server_state.foreground == false)
   {
     make_daemon();
     close_standard_fds(); /* this needs to be before comm_select_init()! */
@@ -464,9 +464,9 @@ main(int argc, char *argv[])
   load_xline_database(ConfigGeneral.xlinefile);
   load_resv_database(ConfigGeneral.resvfile);
 
-  load_all_modules(1);
+  load_all_modules(true);
   load_conf_modules();
-  load_core_modules(1);
+  load_core_modules(true);
 
   write_pidfile(pidFileName);
 
@@ -481,7 +481,7 @@ main(int argc, char *argv[])
 
   event_addish(&event_save_all_databases, NULL);
 
-  if (ConfigServerHide.flatten_links_delay && event_write_links_file.active == 0)
+  if (ConfigServerHide.flatten_links_delay && event_write_links_file.active == false)
   {
     event_write_links_file.when = ConfigServerHide.flatten_links_delay;
     event_add(&event_write_links_file, NULL);

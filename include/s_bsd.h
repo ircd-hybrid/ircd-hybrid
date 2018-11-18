@@ -46,7 +46,7 @@ extern void add_connection(struct Listener *, struct irc_ssaddr *, int);
 extern void report_error(int, const char *, const char *, int);
 
 extern int comm_get_sockerr(int);
-extern int comm_ignore_errno(int);
+extern bool comm_ignore_errno(int);
 
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);

@@ -92,7 +92,7 @@ kline_handle(struct Client *source_p, const char *user, const char *host,
   int bits = 0, aftype = 0;
   struct irc_ssaddr iphost, *piphost = NULL;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(2, user, host) == 0)
+  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(2, user, host) == false)
   {
     sendto_one_notice(source_p, &me,
                       ":Please include at least %u non-wildcard characters with the mask",

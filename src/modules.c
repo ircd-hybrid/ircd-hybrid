@@ -73,7 +73,7 @@ modules_get_list(void)
   return &modules_list;
 }
 
-int
+bool
 modules_valid_suffix(const char *name)
 {
   return ((name = strrchr(name, '.'))) && strcmp(name, ".la") == 0;
@@ -83,16 +83,16 @@ modules_valid_suffix(const char *name)
  *
  * inputs       - name of module to unload
  *              - 1 to say modules unloaded, 0 to not
- * output       - 0 if successful, -1 if error
+ * output       - true if successful, false if error
  * side effects - module is unloaded
  */
-int
-unload_one_module(const char *name, int warn)
+bool
+unload_one_module(const char *name, bool warn)
 {
   struct module *modp = NULL;
 
   if ((modp = findmodule_byname(name)) == NULL)
-    return -1;
+    return false;
 
   if (modp->modexit)
    modp->modexit();
@@ -102,31 +102,31 @@ unload_one_module(const char *name, int warn)
 
   lt_dlclose(modp->handle);
 
-  if (warn == 1)
+  if (warn == true)
   {
     ilog(LOG_TYPE_IRCD, "Module %s unloaded", name);
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Module %s unloaded", name);
   }
 
-  return 0;
+  return true;
 }
 
 /* load_a_module()
  *
  * inputs       - path name of module, int to notice, int of core
- * output       - -1 if error 0 if success
+ * output       - false if error true if success
  * side effects - loads a module if successful
  */
-int
-load_a_module(const char *path, int warn)
+bool
+load_a_module(const char *path, bool warn)
 {
   lt_dlhandle tmpptr = NULL;
   const char *mod_basename = NULL;
   struct module *modp = NULL;
 
   if (findmodule_byname((mod_basename = libio_basename(path))))
-    return 1;
+    return false;
 
   if ((tmpptr = lt_dlopen(path)) == NULL)
   {
@@ -136,7 +136,7 @@ load_a_module(const char *path, int warn)
                          "Error loading module %s: %s",
                          mod_basename, err);
     ilog(LOG_TYPE_IRCD, "Error loading module %s: %s", mod_basename, err);
-    return -1;
+    return false;
   }
 
   if ((modp = lt_dlsym(tmpptr, "module_entry")) == NULL)
@@ -148,7 +148,7 @@ load_a_module(const char *path, int warn)
                          mod_basename, err);
     ilog(LOG_TYPE_IRCD, "Error loading module %s: %s", mod_basename, err);
     lt_dlclose(tmpptr);
-    return -1;
+    return false;
   }
 
   modp->handle = tmpptr;
@@ -162,7 +162,7 @@ load_a_module(const char *path, int warn)
   if (modp->modinit)
     modp->modinit();
 
-  if (warn == 1)
+  if (warn == true)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Module %s [version: %s handle: %p] loaded.",
@@ -171,7 +171,7 @@ load_a_module(const char *path, int warn)
          modp->name, modp->version, tmpptr);
   }
 
-  return 0;
+  return true;
 }
 
 /*
@@ -306,7 +306,7 @@ findmodule_byname(const char *name)
  * side effects - load all modules found in autoload directory
  */
 void
-load_all_modules(int warn)
+load_all_modules(bool warn)
 {
   DIR *system_module_dir = NULL;
   struct dirent *ldirent = NULL;
@@ -359,7 +359,7 @@ load_conf_modules(void)
  * side effects - core modules are loaded, if any fail, kill ircd
  */
 void
-load_core_modules(int warn)
+load_core_modules(bool warn)
 {
   char module_name[HYB_PATH_MAX + 1];
 
@@ -368,7 +368,7 @@ load_core_modules(int warn)
     snprintf(module_name, sizeof(module_name), "%s%s",
              MODPATH, core_module_table[i]);
 
-    if (load_a_module(module_name, warn) == -1)
+    if (load_a_module(module_name, warn) == false)
     {
       ilog(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd",
            core_module_table[i]);
@@ -384,7 +384,7 @@ load_core_modules(int warn)
  * output       - -1 if error
  * side effects - module is loaded if found.
  */
-int
+bool
 load_one_module(const char *name)
 {
   dlink_node *node;
@@ -397,18 +397,18 @@ load_one_module(const char *name)
 
     snprintf(path, sizeof(path), "%s/%s", mpath->path, name);
 
-    if (modules_valid_suffix(name) == 0)
+    if (modules_valid_suffix(name) == false)
       continue;
 
     if (strstr(path, "../") == NULL &&
         strstr(path, "/..") == NULL)
       if (stat(path, &statbuf) == 0)
         if (S_ISREG(statbuf.st_mode))  /* Regular files only please */
-          return load_a_module(path, 1);
+          return load_a_module(path, true);
   }
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "Cannot locate module %s", name);
   ilog(LOG_TYPE_IRCD, "Cannot locate module %s", name);
-  return -1;
+  return false;
 }

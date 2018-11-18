@@ -61,7 +61,7 @@ motd_create(const char *mask, const char *path)
 
   if (EmptyString(mask))
     motd->type = MOTD_UNIVERSAL;
-  else if (class_find(mask, 1))
+  else if (class_find(mask, true))
     motd->type = MOTD_CLASS;
   else
   {

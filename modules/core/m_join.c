@@ -104,7 +104,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   if (parc < 4)
     return 0;
 
-  if (channel_check_name(parv[2], 0) == 0)
+  if (channel_check_name(parv[2], false) == false)
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
@@ -186,7 +186,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
     if (chptr->topic[0])
     {
-      channel_set_topic(chptr, "", "", 0, 0);
+      channel_set_topic(chptr, "", "", 0, false);
       sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :",
                            (IsHidden(source_p) ||
                            ConfigServerHide.hide_servers) ?

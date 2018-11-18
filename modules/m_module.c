@@ -88,7 +88,7 @@ module_unload(struct Client *source_p, const char *arg)
     return;
   }
 
-  if (unload_one_module(m_bn, 1) == -1)
+  if (unload_one_module(m_bn, true) == false)
     sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
 }
 
@@ -116,7 +116,7 @@ module_reload(struct Client *source_p, const char *arg)
       modp = node->data;
 
       if (!(modp->flags & MODULE_FLAG_NOUNLOAD))
-        unload_one_module(modp->name, 0);
+        unload_one_module(modp->name, false);
     }
 
     load_all_modules(0);
@@ -144,14 +144,14 @@ module_reload(struct Client *source_p, const char *arg)
     return;
   }
 
-  if (unload_one_module(m_bn, 1) == -1)
+  if (unload_one_module(m_bn, true) == false)
   {
     sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
     return;
   }
 
-  int check_core = (modp->flags & MODULE_FLAG_CORE) != 0;
-  if (load_one_module(arg) == -1 && check_core)
+  bool check_core = (modp->flags & MODULE_FLAG_CORE) != 0;
+  if (load_one_module(arg) == false && check_core == true)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error reloading core "
@@ -190,16 +190,16 @@ struct ModuleStruct
 {
   const char *const cmd;
   void (*const handler)(struct Client *, const char *);
-  const unsigned int arg_required;
+  bool arg_required;
 };
 
 static const struct ModuleStruct module_cmd_table[] =
 {
-  { "LOAD",   module_load,   1 },
-  { "UNLOAD", module_unload, 1 },
-  { "RELOAD", module_reload, 1 },
-  { "LIST",   module_list,   0 },
-  { NULL,     NULL,          0 }
+  { "LOAD",   module_load,   true  },
+  { "UNLOAD", module_unload, true  },
+  { "RELOAD", module_reload, true  },
+  { "LIST",   module_list,   false },
+  { NULL,     NULL,          false }
 };
 
 /*! \brief MODULE command handler
@@ -237,7 +237,7 @@ mo_module(struct Client *source_p, int parc, char *parv[])
     if (irccmp(tab->cmd, subcmd))
       continue;
 
-    if (tab->arg_required && EmptyString(module))
+    if (tab->arg_required == true && EmptyString(module))
     {
       sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
       return 0;

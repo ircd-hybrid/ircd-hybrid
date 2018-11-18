@@ -72,13 +72,13 @@ tls_free(tls_data_t *tls_data)
 }
 
 int
-tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, int *want_write)
+tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   return -1;
 }
 
 int
-tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, int *want_read)
+tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   return -1;
 }

@@ -36,7 +36,6 @@
 #include "send.h"
 #include "server.h"
 #include "conf.h"
-#include "conf_resv.h"
 #include "parse.h"
 #include "modules.h"
 

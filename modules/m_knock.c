@@ -91,7 +91,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     /*
      * Don't allow a knock if the user is banned, or the channel is private.
      */
-    if (PrivateChannel(chptr) || is_banned(chptr, source_p))
+    if (PrivateChannel(chptr) || is_banned(chptr, source_p) == true)
     {
       sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, chptr->name);
       return 0;

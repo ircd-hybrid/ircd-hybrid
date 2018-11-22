@@ -393,7 +393,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
     if (paramcount > MAXPARA)
       paramcount = MAXPARA;
 
-    while (1)
+    while (true)
     {
        while (*s == ' ')
          *s++ = '\0';

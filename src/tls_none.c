@@ -31,10 +31,10 @@
 
 #ifndef HAVE_TLS
 
-int
+bool
 tls_is_initialized(void)
 {
-  return 0;
+  return false;
 }
 
 void
@@ -42,10 +42,10 @@ tls_init(void)
 {
 }
 
-int
+bool
 tls_new_cred(void)
 {
-  return 1;
+  return false;
 }
 
 const char *
@@ -60,10 +60,10 @@ tls_get_version(void)
   return NULL;
 }
 
-int
+bool
 tls_isusing(tls_data_t *tls_data)
 {
-  return 0;
+  return false;
 }
 
 void
@@ -88,10 +88,10 @@ tls_shutdown(tls_data_t *tls_data)
 {
 }
 
-int
+bool
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  return 0;
+  return false;
 }
 
 tls_handshake_status_t
@@ -100,15 +100,15 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
   return 0;
 }
 
-int
+bool
 tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 {
-  return 0;
+  return false;
 }
 
-int
+bool
 tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
-  return 0;
+  return false;
 }
 #endif  /* HAVE_TLS */

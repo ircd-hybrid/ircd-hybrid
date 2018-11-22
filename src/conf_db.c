@@ -480,7 +480,7 @@ write_string(const char *s, struct dbFILE *f)
     if ((x) == false) {                               \
         break;                                        \
     }                                                 \
-} while (0)
+} while (false)
 
 #define SAFE_WRITE(x,db) do {                         \
     if ((x) == false) {                               \
@@ -488,7 +488,7 @@ write_string(const char *s, struct dbFILE *f)
         ilog(LOG_TYPE_IRCD, "Write error on %s", db); \
         return;                                       \
     }                                                 \
-} while (0)
+} while (false)
 
 void
 save_kline_database(const char *filename)

@@ -134,7 +134,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
                                target_p->name, target_p->username,
                                target_p->host, new_nick);
 
-  whowas_add_history(target_p, 1);
+  whowas_add_history(target_p, true);
 
   sendto_server(NULL, 0, 0, ":%s NICK %s :%ju",
                 target_p->id, new_nick, target_p->tsinfo);

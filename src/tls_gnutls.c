@@ -35,9 +35,9 @@
 
 #ifdef HAVE_TLS_GNUTLS
 
-static int TLS_initialized;
+static bool TLS_initialized;
 
-int
+bool
 tls_is_initialized(void)
 {
   return TLS_initialized;
@@ -60,16 +60,16 @@ tls_free_cred(tls_context_t cred)
   xfree(cred);
 }
 
-int
+bool
 tls_new_cred(void)
 {
   int ret;
   struct gnutls_context *context;
 
-  TLS_initialized = 0;
+  TLS_initialized = false;
 
   if (!ConfigServerInfo.ssl_certificate_file || !ConfigServerInfo.rsa_private_key_file)
-    return 1;
+    return true;
 
   context = xcalloc(sizeof(*context));
 
@@ -80,7 +80,7 @@ tls_new_cred(void)
   {
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
     xfree(context);
-    return 0;
+    return false;
   }
 
   /* TBD: set ciphers based on serverinfo::ssl_cipher_list */
@@ -95,7 +95,7 @@ tls_new_cred(void)
     gnutls_certificate_free_credentials(context->x509_cred);
     gnutls_priority_deinit(context->priorities);
     xfree(context);
-    return 0;
+    return false;
   }
 
   gnutls_dh_params_init(&context->dh_params);
@@ -140,8 +140,8 @@ tls_new_cred(void)
   ConfigServerInfo.tls_ctx = context;
   ++context->refs;
 
-  TLS_initialized = 1;
-  return 1;
+  TLS_initialized = true;
+  return true;
 }
 
 const char *
@@ -168,7 +168,7 @@ tls_get_version(void)
   return buf;
 }
 
-int
+bool
 tls_isusing(tls_data_t *tls_data)
 {
   return tls_data->session != NULL;
@@ -234,11 +234,11 @@ tls_shutdown(tls_data_t *tls_data)
     tls_free_cred(tls_data->context);
 }
 
-int
+bool
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  if (!TLS_initialized)
-    return 0;
+  if (TLS_initialized == false)
+    return false;
 
   gnutls_init(&tls_data->session, role == TLS_ROLE_SERVER ? GNUTLS_SERVER : GNUTLS_CLIENT);
 
@@ -254,10 +254,10 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
     /* Request client certificate if any. */
     gnutls_certificate_server_set_request(tls_data->session, GNUTLS_CERT_REQUEST);
 
-  return 1;
+  return true;
 }
 
-int
+bool
 tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 {
   int ret;
@@ -272,10 +272,10 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
     ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default (NORMAL:%%SERVER_PRECEDENCE:!VERS-SSL3.0)",
          cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list));
     gnutls_priority_init(&tls_data->context->priorities, "NORMAL:%SERVER_PRECEDENCE:!VERS-SSL3.0", NULL);
-    return 0;
+    return false;
   }
 
-  return 1;
+  return true;
 }
 
 tls_handshake_status_t
@@ -312,7 +312,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
   }
 }
 
-int
+bool
 tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
   int ret;
@@ -325,11 +325,11 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 
   cert_list = gnutls_certificate_get_peers(tls_data->session, &cert_list_size);
   if (!cert_list)
-    return 1;  /* No certificate */
+    return true;  /* No certificate */
 
   ret = gnutls_x509_crt_init(&cert);
   if (ret != GNUTLS_E_SUCCESS)
-    return 1;
+    return true;
 
   ret = gnutls_x509_crt_import(cert, &cert_list[0], GNUTLS_X509_FMT_DER);
   if (ret != GNUTLS_E_SUCCESS)
@@ -343,10 +343,10 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
   *fingerprint = xstrdup(buf);
 
   gnutls_x509_crt_deinit(cert);
-  return 1;
+  return true;
 
 info_done_dealloc:
   gnutls_x509_crt_deinit(cert);
-  return 0;
+  return false;
 }
 #endif  /* HAVE_TLS_GNUTLS */

@@ -114,7 +114,7 @@ whowas_trim(void)
  * \param online   Either 1 if it's a nick change or 0 on client exit
  */
 void
-whowas_add_history(struct Client *client_p, const int online)
+whowas_add_history(struct Client *client_p, bool online)
 {
   struct Whowas *whowas = whowas_make();
 
@@ -133,7 +133,7 @@ whowas_add_history(struct Client *client_p, const int online)
   strlcpy(whowas->realname, client_p->info, sizeof(whowas->realname));
   strlcpy(whowas->servername, client_p->servptr->name, sizeof(whowas->servername));
 
-  if (online)
+  if (online == true)
   {
     whowas->online = client_p;
     dlinkAdd(whowas, &whowas->cnode, &client_p->whowas_list);

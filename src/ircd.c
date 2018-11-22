@@ -166,7 +166,7 @@ set_time(void)
 static void
 io_loop(void)
 {
-  while (1)
+  while (true)
   {
     if (listing_client_list.head)
     {

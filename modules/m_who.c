@@ -131,7 +131,7 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask)
  */
 static void
 who_common_channel(struct Client *source_p, struct Channel *chptr, const char *mask,
-                   int server_oper, unsigned int *maxmatches)
+                   bool server_oper, unsigned int *maxmatches)
 {
   dlink_node *node;
 
@@ -142,7 +142,7 @@ who_common_channel(struct Client *source_p, struct Channel *chptr, const char *m
     if (!HasUMode(target_p, UMODE_INVISIBLE) || HasFlag(target_p, FLAGS_MARK))
       continue;
 
-    if (server_oper)
+    if (server_oper == true)
       if (!HasUMode(target_p, UMODE_OPER) ||
           (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
         continue;

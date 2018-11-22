@@ -142,7 +142,7 @@ parse_client_queued(struct Client *client_p)
   {
     unsigned int i = 0;
 
-    while (1)
+    while (true)
     {
       if (IsDefunct(client_p))
         return;
@@ -170,7 +170,7 @@ parse_client_queued(struct Client *client_p)
 
   if (IsServer(client_p) || IsConnecting(client_p) || IsHandshake(client_p))
   {
-    while (1)
+    while (true)
     {
       if (IsDefunct(client_p))
         return;
@@ -195,7 +195,7 @@ parse_client_queued(struct Client *client_p)
      * in this loop, we simply drop out of the loop prematurely.
      *   -- adrian
      */
-    while (1)
+    while (true)
     {
       if (IsDefunct(client_p))
         break;

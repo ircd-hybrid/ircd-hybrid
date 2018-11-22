@@ -44,7 +44,7 @@ match(const char *mask, const char *name)
   const char *m_tmp = mask, *n_tmp = name;
   unsigned int star = 0;
 
-  while (1)
+  while (true)
   {
     switch (*m)
     {

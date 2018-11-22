@@ -245,7 +245,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   sendto_common_channels_local(source_p, 1, 0, 0, ":%s!%s@%s NICK :%s",
                                source_p->name, source_p->username,
                                source_p->host, nick);
-  whowas_add_history(source_p, 1);
+  whowas_add_history(source_p, true);
 
   sendto_server(source_p, 0, 0, ":%s NICK %s :%ju",
                 source_p->id, nick, source_p->tsinfo);
@@ -299,7 +299,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
                                source_p->name, source_p->username,
                                source_p->host, parv[1]);
 
-  whowas_add_history(source_p, 1);
+  whowas_add_history(source_p, true);
   sendto_server(source_p, 0, 0, ":%s NICK %s :%ju",
                 source_p->id, parv[1], source_p->tsinfo);
 

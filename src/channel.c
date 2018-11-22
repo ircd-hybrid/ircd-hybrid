@@ -65,13 +65,13 @@ channel_get_list(void)
  */
 void
 add_user_to_channel(struct Channel *chptr, struct Client *client_p,
-                    unsigned int flags, int flood_ctrl)
+                    unsigned int flags, bool flood_ctrl)
 {
   assert(IsClient(client_p));
 
   if (GlobalSetOptions.joinfloodtime)
   {
-    if (flood_ctrl)
+    if (flood_ctrl == true)
       ++chptr->number_joined;
 
     chptr->number_joined -= (CurrentTime - chptr->last_join_time) *
@@ -611,7 +611,7 @@ get_member_status(const struct Membership *member, bool combine)
  * \param list     Pointer to ban list to search
  * \return 1 if ban found for given n!u\@h mask, 0 otherwise
  */
-static int
+static bool
 find_bmask(const struct Client *client_p, const dlink_list *list)
 {
   dlink_node *node;
@@ -626,17 +626,17 @@ find_bmask(const struct Client *client_p, const dlink_list *list)
       {
         case HM_HOST:
           if (!match(ban->host, client_p->host) || !match(ban->host, client_p->sockhost))
-            return 1;
+            return true;
           break;
         case HM_IPV4:
           if (client_p->ip.ss.ss_family == AF_INET)
             if (match_ipv4(&client_p->ip, &ban->addr, ban->bits))
-              return 1;
+              return true;
           break;
         case HM_IPV6:
           if (client_p->ip.ss.ss_family == AF_INET6)
             if (match_ipv6(&client_p->ip, &ban->addr, ban->bits))
-              return 1;
+              return true;
           break;
         default:
           assert(0);
@@ -644,7 +644,7 @@ find_bmask(const struct Client *client_p, const dlink_list *list)
     }
   }
 
-  return 0;
+  return false;
 }
 
 /*!
@@ -652,14 +652,14 @@ find_bmask(const struct Client *client_p, const dlink_list *list)
  * \param client_p Pointer to client to check access fo
  * \return 0 if not banned, 1 otherwise
  */
-int
+bool
 is_banned(const struct Channel *chptr, const struct Client *client_p)
 {
-  if (find_bmask(client_p, &chptr->banlist))
-    if (!find_bmask(client_p, &chptr->exceptlist))
-      return 1;
+  if (find_bmask(client_p, &chptr->banlist) == true)
+    if (find_bmask(client_p, &chptr->exceptlist) == false)
+      return true;
 
-  return 0;
+  return false;
 }
 
 /*! Tests if a client can join a certain channel
@@ -683,7 +683,7 @@ can_join(struct Client *client_p, struct Channel *chptr, const char *key)
 
   if (HasCMode(chptr, MODE_INVITEONLY))
     if (!find_invite(chptr, client_p))
-      if (!find_bmask(client_p, &chptr->invexlist))
+      if (find_bmask(client_p, &chptr->invexlist) == false)
         return ERR_INVITEONLYCHAN;
 
   if (chptr->mode.key[0] && (!key || strcmp(chptr->mode.key, key)))
@@ -693,7 +693,7 @@ can_join(struct Client *client_p, struct Channel *chptr, const char *key)
       chptr->mode.limit)
     return ERR_CHANNELISFULL;
 
-  if (is_banned(chptr, client_p))
+  if (is_banned(chptr, client_p) == true)
     return ERR_BANNEDFROMCHAN;
 
   return 0;
@@ -817,7 +817,7 @@ can_send(struct Channel *chptr, struct Client *client_p,
 
       if (!(member->flags & CHFL_BAN_CHECKED))
       {
-        if (is_banned(chptr, client_p))
+        if (is_banned(chptr, client_p) == true)
         {
           member->flags |= (CHFL_BAN_CHECKED | CHFL_BAN_SILENCED);
           return ERR_CANNOTSENDTOCHAN;
@@ -826,7 +826,7 @@ can_send(struct Channel *chptr, struct Client *client_p,
         member->flags |= CHFL_BAN_CHECKED;
       }
     }
-    else if (is_banned(chptr, client_p))
+    else if (is_banned(chptr, client_p) == true)
       return ERR_CANNOTSENDTOCHAN;
   }
 
@@ -990,7 +990,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
     if (!HasUMode(client_p, UMODE_OPER))
       check_spambot_warning(client_p, chptr->name);
 
-    add_user_to_channel(chptr, client_p, flags, 1);
+    add_user_to_channel(chptr, client_p, flags, true);
 
     /*
      * Set timestamp if appropriate, and propagate

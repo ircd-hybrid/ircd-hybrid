@@ -210,7 +210,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
   if (!IsMember(source_p, chptr))
   {
-    add_user_to_channel(chptr, source_p, 0, 1);
+    add_user_to_channel(chptr, source_p, 0, true);
 
     sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                          source_p->name, source_p->username,

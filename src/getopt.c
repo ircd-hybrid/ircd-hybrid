@@ -52,7 +52,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
   const char *progname = (*argv)[0];
 
   /* Loop through each argument */
-  while (1)
+  while (true)
   {
     bool found = false;
     const char *opt = NULL;

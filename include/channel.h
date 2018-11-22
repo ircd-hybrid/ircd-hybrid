@@ -133,13 +133,13 @@ struct Invite
 extern const dlink_list *channel_get_list(void);
 extern bool channel_check_name(const char *, bool);
 extern int can_send(struct Channel *, struct Client *, struct Membership *, const char *, bool);
-extern int is_banned(const struct Channel *, const struct Client *);
+extern bool is_banned(const struct Channel *, const struct Client *);
 extern int has_member_flags(const struct Membership *, const unsigned int);
 
 extern void channel_do_join(struct Client *, char *, char *);
 extern void channel_do_part(struct Client *, char *, const char *);
 extern void remove_ban(struct Ban *, dlink_list *);
-extern void add_user_to_channel(struct Channel *, struct Client *, unsigned int, int);
+extern void add_user_to_channel(struct Channel *, struct Client *, unsigned int, bool);
 extern void remove_user_from_channel(struct Membership *);
 extern void channel_member_names(struct Client *, struct Channel *, bool);
 extern void add_invite(struct Channel *, struct Client *);

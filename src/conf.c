@@ -1003,7 +1003,7 @@ clear_out_old_conf(void)
 static void
 conf_handle_tls(bool cold)
 {
-  if (!tls_new_cred())
+  if (tls_new_cred() == false)
   {
     if (cold == true)
     {
@@ -1288,7 +1288,7 @@ valid_wild_card(int count, ...)
  * output       - 0 if not ok to kline, 1 to kline i.e. if valid user host
  * side effects -
  */
-static int
+static bool
 find_user_host(struct Client *source_p, char *user_host_or_nick,
                char *luser, char *lhost)
 {
@@ -1298,7 +1298,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
   if (lhost == NULL)
   {
     strlcpy(luser, user_host_or_nick, USERLEN*4 + 1);
-    return 1;
+    return true;
   }
 
   if ((hostp = strchr(user_host_or_nick, '@')) || *user_host_or_nick == '*')
@@ -1325,7 +1325,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
       strlcpy(lhost, user_host_or_nick, HOSTLEN*4 + 1);
     }
 
-    return 1;
+    return true;
   }
   else
   {
@@ -1333,13 +1333,13 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
     /* Okay to use source_p as the first param, because source_p == client_p */
     if ((target_p =
         find_chasing(source_p, user_host_or_nick)) == NULL)
-      return 0;  /* find_chasing sends ERR_NOSUCHNICK */
+      return false;  /* find_chasing sends ERR_NOSUCHNICK */
 
     if (HasFlag(target_p, FLAGS_EXEMPTKLINE))
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":%s is E-lined", target_p->name);
-      return 0;
+      return false;
     }
 
     /*
@@ -1352,10 +1352,10 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
       luser[0] = '*';
 
     strlcpy(lhost, target_p->sockhost, HOSTLEN*4 + 1);
-    return 1;
+    return true;
   }
 
-  return 0;
+  return false;
 }
 
 /* XXX should this go into a separate file ? -Dianora */
@@ -1388,7 +1388,7 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
  *
  * - Dianora
  */
-int
+bool
 parse_aline(const char *cmd, struct Client *source_p,
             int parc, char **parv,
             char **up_p, char **h_p, uintmax_t *tkline_time,
@@ -1414,22 +1414,22 @@ parse_aline(const char *cmd, struct Client *source_p,
     else
     {
       sendto_one_notice(source_p, &me, ":temp_line not supported by %s", cmd);
-      return 0;
+      return false;
     }
   }
 
   if (parc == 0)
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
-    return 0;
+    return false;
   }
 
   if (h_p == NULL)
     *up_p = *parv;
   else
   {
-    if (find_user_host(source_p, *parv, user, host) == 0)
-      return 0;
+    if (find_user_host(source_p, *parv, user, host) == false)
+      return false;
 
     *up_p = user;
     *h_p = host;
@@ -1448,13 +1448,13 @@ parse_aline(const char *cmd, struct Client *source_p,
       if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
       {
         sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "remoteban");
-        return 0;
+        return false;
       }
 
       if (parc == 0 || EmptyString(*parv))
       {
         sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
-        return 0;
+        return false;
       }
 
       *target_server = *parv;
@@ -1479,7 +1479,7 @@ parse_aline(const char *cmd, struct Client *source_p,
       *reason = default_reason;
   }
 
-  return 1;
+  return true;
 }
 
 /* match_conf_password()

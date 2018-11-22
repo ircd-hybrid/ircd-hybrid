@@ -664,7 +664,7 @@ exit_one_client(struct Client *source_p, const char *comment)
 
     svstag_clear_list(&source_p->svstags);
 
-    whowas_add_history(source_p, 0);
+    whowas_add_history(source_p, false);
     whowas_off_history(source_p);
 
     watch_check_hash(source_p, RPL_LOGOFF);

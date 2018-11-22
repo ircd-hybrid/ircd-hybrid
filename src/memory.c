@@ -100,10 +100,13 @@ xstrndup(const char *s, size_t len)
 void
 outofmemory(void)
 {
-  static int was_here = 0;
+  static bool was_here = false;
 
-  if (was_here++)
+  if (was_here == false)
+  {
+    was_here = true;
     abort();
+  }
 
   server_die("out of memory", SERVER_RESTART);
 }

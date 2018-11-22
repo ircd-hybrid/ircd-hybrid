@@ -51,15 +51,15 @@ typedef enum _tls_handshake_status
   TLS_HANDSHAKE_ERROR
 } tls_handshake_status_t;
 
-extern int tls_is_initialized(void);
+extern bool tls_is_initialized(void);
 extern void tls_init(void);
-extern int tls_new_cred(void);
+extern bool tls_new_cred(void);
 
 extern const char *tls_get_cipher(const tls_data_t *);
 extern const char *tls_get_version(void);
 
-extern int tls_isusing(tls_data_t *);
-extern int tls_new(tls_data_t *, int, tls_role_t);
+extern bool tls_isusing(tls_data_t *);
+extern bool tls_new(tls_data_t *, int, tls_role_t);
 extern void tls_free(tls_data_t *);
 
 extern tls_handshake_status_t tls_handshake(tls_data_t *, tls_role_t, const char **);
@@ -68,8 +68,8 @@ extern int tls_write(tls_data_t *, const char *, size_t, bool *);
 
 extern void tls_shutdown(tls_data_t *);
 
-extern int tls_set_ciphers(tls_data_t *, const char *);
+extern bool tls_set_ciphers(tls_data_t *, const char *);
 
-extern int tls_verify_cert(tls_data_t *, tls_md_t, char **);
+extern bool tls_verify_cert(tls_data_t *, tls_md_t, char **);
 
 #endif  /* INCLUDED_tls_h */

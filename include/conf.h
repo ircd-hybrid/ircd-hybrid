@@ -332,8 +332,8 @@ extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 extern const char *get_oper_name(const struct Client *);
 
 /* XXX should the parse_aline stuff go into another file ?? */
-extern int parse_aline(const char *, struct Client *, int, char **,
-                       char **, char **, uintmax_t *, char **, char **);
+extern bool parse_aline(const char *, struct Client *, int, char **,
+                        char **, char **, uintmax_t *, char **, char **);
 
 extern uintmax_t valid_tkline(const char *, const int);
 extern bool match_conf_password(const char *, const struct MaskItem *);

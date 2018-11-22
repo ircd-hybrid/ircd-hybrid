@@ -35,7 +35,7 @@
 
 #ifdef HAVE_TLS_OPENSSL
 
-static int TLS_initialized;
+static bool TLS_initialized;
 
 /*
  * report_crypto_errors - Dump crypto error list to log
@@ -55,7 +55,7 @@ always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
   return 1;
 }
 
-int
+bool
 tls_is_initialized(void)
 {
   return TLS_initialized;
@@ -117,33 +117,33 @@ tls_init(void)
   SSL_CTX_set_session_cache_mode(ConfigServerInfo.tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
 }
 
-int
+bool
 tls_new_cred(void)
 {
-  TLS_initialized = 0;
+  TLS_initialized = false;
 
   if (!ConfigServerInfo.ssl_certificate_file || !ConfigServerInfo.rsa_private_key_file)
-    return 1;
+    return true;
 
   if (SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_certificate_file) <= 0 ||
       SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.ssl_certificate_file) <= 0)
   {
     report_crypto_errors();
-    return 0;
+    return false;
   }
 
   if (SSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) <= 0 ||
       SSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) <= 0)
   {
     report_crypto_errors();
-    return 0;
+    return false;
   }
 
   if (!SSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.server_ctx) ||
       !SSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.client_ctx))
   {
     report_crypto_errors();
-    return 0;
+    return false;
   }
 
   if (ConfigServerInfo.ssl_dh_param_file)
@@ -213,8 +213,8 @@ set_default_curve:
   if (ConfigServerInfo.ssl_cipher_list)
     SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_cipher_list);
 
-  TLS_initialized = 1;
-  return 1;
+  TLS_initialized = true;
+  return true;
 }
 
 const char *
@@ -241,7 +241,7 @@ tls_get_version(void)
   return buf;
 }
 
-int
+bool
 tls_isusing(tls_data_t *tls_data)
 {
   SSL *ssl = *tls_data;
@@ -330,13 +330,13 @@ tls_shutdown(tls_data_t *tls_data)
     SSL_shutdown(ssl);
 }
 
-int
+bool
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
   SSL *ssl;
 
-  if (!TLS_initialized)
-    return 0;
+  if (TLS_initialized == false)
+    return false;
 
   if (role == TLS_ROLE_SERVER)
     ssl = SSL_new(ConfigServerInfo.tls_ctx.server_ctx);
@@ -347,19 +347,19 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   {
     ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
          ERR_error_string(ERR_get_error(), NULL));
-    return 0;
+    return false;
   }
 
   *tls_data = ssl;
   SSL_set_fd(ssl, fd);
-  return 1;
+  return true;
 }
 
-int
+bool
 tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 {
   SSL_set_cipher_list(*tls_data, cipher_list);
-  return 1;
+  return true;
 }
 
 tls_handshake_status_t
@@ -394,7 +394,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
   }
 }
 
-int
+bool
 tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
   SSL *ssl = *tls_data;
@@ -402,18 +402,18 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
   unsigned int n;
   char buf[EVP_MAX_MD_SIZE * 2 + 1];
   unsigned char md[EVP_MAX_MD_SIZE];
-  int ret = 0;
+  bool ret = false;
 
   /* Accept NULL return from SSL_get_peer_certificate */
   if (!cert)
-    return 1;
+    return true;
 
   int res = SSL_get_verify_result(ssl);
   if (res == X509_V_OK || res == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
       res == X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE ||
       res == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT)
   {
-    ret = 1;
+    ret = true;
 
     if (X509_digest(cert, digest, md, &n))
     {

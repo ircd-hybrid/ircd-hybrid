@@ -42,7 +42,7 @@
                          ch = ch - 'A' + 10; \
                        else if (ch >= 'a' && ch <= 'f') \
                          ch = ch - 'a' + 10; \
-                       } while (0);
+                       } while (false);
 
 /* Hashtable stuff...now external as it's used in m_stats.c */
 dlink_list atable[ATABLE_SIZE];
@@ -471,7 +471,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
   {
     const char *p = name;
 
-    while (1)
+    while (true)
     {
         DLINK_FOREACH(node, atable[hash_text(p)].head)
         {

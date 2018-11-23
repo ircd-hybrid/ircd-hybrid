@@ -160,6 +160,8 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
   if (IsClient(source_p))
     snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
              source_p->username, source_p->host);
+  else if (IsHidden(source_p) || ConfigServerHide.hide_servers)
+    strlcpy(topic_info, me.name, sizeof(topic_info));
   else
     strlcpy(topic_info, source_p->name, sizeof(topic_info));
 

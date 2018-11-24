@@ -208,7 +208,7 @@ dline_handle(struct Client *source_p, struct aline_ctx *aline)
 static int
 mo_dline(struct Client *source_p, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .requires_user = false };
+  struct aline_ctx aline = { .add = true, .simple_mask = false };
 
   if (!HasOFlag(source_p, OPER_FLAG_DLINE))
   {
@@ -256,7 +256,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = true,
-    .requires_user = false,
+    .simple_mask = false,
     .host = parv[3],
     .reason = parv[4],
     .server = parv[1],

@@ -197,7 +197,7 @@ kline_handle(struct Client *source_p, struct aline_ctx *aline)
 static int
 mo_kline(struct Client *source_p, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .requires_user = true };
+  struct aline_ctx aline = { .add = true, .simple_mask = false };
 
   if (!HasOFlag(source_p, OPER_FLAG_KLINE))
   {
@@ -247,7 +247,7 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = true,
-    .requires_user = true,
+    .simple_mask = false,
     .user = parv[3],
     .host = parv[4],
     .reason = parv[5],

@@ -54,7 +54,7 @@ resv_handle(struct Client *source_p, struct aline_ctx *aline)
 {
   if (!HasFlag(source_p, FLAGS_SERVICE))
   {
-    if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(aline->host))
+    if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(aline->mask))
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
@@ -62,7 +62,7 @@ resv_handle(struct Client *source_p, struct aline_ctx *aline)
       return;
     }
 
-    if (valid_wild_card_simple(aline->host + !!IsChanPrefix(*aline->host)) == false)
+    if (valid_wild_card_simple(aline->mask + !!IsChanPrefix(*aline->mask)) == false)
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the RESV",
@@ -73,10 +73,10 @@ resv_handle(struct Client *source_p, struct aline_ctx *aline)
   }
 
   struct ResvItem *resv;
-  if ((resv = resv_make(aline->host, aline->reason, NULL)) == NULL)
+  if ((resv = resv_make(aline->mask, aline->reason, NULL)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", aline->host);
+      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", aline->mask);
 
     return;
   }
@@ -121,7 +121,7 @@ resv_handle(struct Client *source_p, struct aline_ctx *aline)
 static int
 mo_resv(struct Client *source_p, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .requires_user = false };
+  struct aline_ctx aline = { .add = true, .simple_mask = true };
 
   if (!HasOFlag(source_p, OPER_FLAG_RESV))
   {
@@ -135,7 +135,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   if (aline.server)
   {
     sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "RESV %s %ju %s :%s",
-                       aline.server, aline.duration, aline.host, aline.reason);
+                       aline.server, aline.duration, aline.mask, aline.reason);
 
     /* Allow ON to apply local resv as well if it matches */
     if (match(aline.server, me.name))
@@ -143,7 +143,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_distribute(source_p, "RESV", CAPAB_KLN, CLUSTER_RESV, "%ju %s :%s",
-                       aline.duration, aline.host, aline.reason);
+                       aline.duration, aline.mask, aline.reason);
 
   resv_handle(source_p, &aline);
   return 0;
@@ -169,8 +169,8 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = true,
-    .requires_user = false,
-    .host = parv[2],
+    .simple_mask = true,
+    .mask = parv[2],
     .reason = parv[4],
     .server = parv[1],
     .duration = strtoumax(parv[2], NULL, 10)
@@ -179,7 +179,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "RESV %s %ju %s :%s",
-                     aline.server, aline.duration, aline.host, aline.reason);
+                     aline.server, aline.duration, aline.mask, aline.reason);
 
   if (match(aline.server, me.name))
     return 0;

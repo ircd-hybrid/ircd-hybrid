@@ -47,10 +47,10 @@ resv_remove(struct Client *source_p, struct aline_ctx *aline)
 {
   struct ResvItem *resv;
 
-  if ((resv = resv_find(aline->host, irccmp)) == NULL)
+  if ((resv = resv_find(aline->mask, irccmp)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":No RESV for %s", aline->host);
+      sendto_one_notice(source_p, &me, ":No RESV for %s", aline->mask);
 
     return;
   }
@@ -91,7 +91,7 @@ resv_remove(struct Client *source_p, struct aline_ctx *aline)
 static int
 mo_unresv(struct Client *source_p, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .requires_user = false };
+  struct aline_ctx aline = { .add = false, .simple_mask = true };
 
   if (!HasOFlag(source_p, OPER_FLAG_UNRESV))
   {
@@ -105,14 +105,14 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
   if (aline.server)
   {
     sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNRESV %s %s",
-                       aline.server, aline.host);
+                       aline.server, aline.mask);
 
     /* Allow ON to apply local unresv as well if it matches */
     if (match(aline.server, me.name))
       return 0;
   }
   else
-    cluster_distribute(source_p, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, aline.host);
+    cluster_distribute(source_p, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, aline.mask);
 
   resv_remove(source_p, &aline);
   return 0;
@@ -136,16 +136,16 @@ ms_unresv(struct Client *source_p, int parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = false,
-    .requires_user = false,
-    .host = parv[2],
-    .server = parv[1],
+    .simple_mask = true,
+    .mask = parv[2],
+    .server = parv[1]
   };
 
   if (parc != 3 || EmptyString(parv[parc - 1]))
     return 0;
 
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNRESV %s %s",
-                     aline.server, aline.host);
+                     aline.server, aline.mask);
 
   if (match(aline.server, me.name))
     return 0;

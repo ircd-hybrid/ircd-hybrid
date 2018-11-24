@@ -151,7 +151,7 @@ resv_find(const char *name, int (*compare)(const char *, const char *))
   {
     struct ResvItem *resv = node->data;
 
-    if (!compare(resv->mask, name))
+    if (compare(resv->mask, name) == 0)
       return resv;
   }
 
@@ -167,12 +167,12 @@ resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
   {
     const struct ResvExemptItem *exempt = node->data;
 
-    if (!match(exempt->name, client_p->name) && !match(exempt->user, client_p->username))
+    if (match(exempt->name, client_p->name) == 0 && match(exempt->user, client_p->username) == 0)
     {
       switch (exempt->type)
       {
         case HM_HOST:
-          if (!match(exempt->host, client_p->host) || !match(exempt->host, client_p->sockhost))
+          if (match(exempt->host, client_p->host) == 0 || match(exempt->host, client_p->sockhost) == 0)
             return true;
           break;
         case HM_IPV4:

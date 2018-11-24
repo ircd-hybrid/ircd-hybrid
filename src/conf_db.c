@@ -132,7 +132,7 @@ open_db_write(const char *filename, uint32_t version)
 
   snprintf(f->tempname, sizeof(f->tempname), "%s.new", filename);
 
-  if (f->tempname[0] == '\0' || !strcmp(f->tempname, filename))
+  if (f->tempname[0] == '\0' || strcmp(f->tempname, filename) == 0)
   {
     ilog(LOG_TYPE_IRCD, "Opening database file %s for write: Filename too long",
          filename);
@@ -148,7 +148,7 @@ open_db_write(const char *filename, uint32_t version)
   if (fd >= 0)
     f->fp = fdopen(fd, "wb");
 
-  if (!f->fp || write_file_version(f, version) == false)
+  if (f->fp == NULL || write_file_version(f, version) == false)
   {
     int errno_save = errno;
     static bool walloped = false;
@@ -241,7 +241,7 @@ close_db(struct dbFILE *f)
 {
   int res;
 
-  if (!f->fp)
+  if (f->fp == NULL)
   {
     errno = EINVAL;
     return false;
@@ -250,7 +250,7 @@ close_db(struct dbFILE *f)
   res = fclose(f->fp);
   f->fp = NULL;
 
-  if (res != 0)
+  if (res)
     return false;
 
   if (f->mode == 'w' && f->tempname[0] && strcmp(f->tempname, f->filename))
@@ -459,7 +459,7 @@ write_string(const char *s, struct dbFILE *f)
 {
   uint32_t len = 0;
 
-  if (!s)
+  if (s == NULL)
     return write_uint32(0, f);
 
   len = strlen(s);
@@ -547,7 +547,7 @@ load_kline_database(const char *filename)
   uint64_t field_4 = 0;
   uint64_t field_5 = 0;
 
-  if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
+  if ((f = open_db(filename, "r", KLINE_DB_VERSION)) == NULL)
     return;
 
   if (get_file_version(f) < 1)
@@ -588,7 +588,7 @@ save_dline_database(const char *filename)
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
 
-  if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
+  if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)
@@ -635,7 +635,7 @@ load_dline_database(const char *filename)
   uint64_t field_3 = 0;
   uint64_t field_4 = 0;
 
-  if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
+  if ((f = open_db(filename, "r", KLINE_DB_VERSION)) == NULL)
     return;
 
   if (get_file_version(f) < 1)
@@ -674,7 +674,7 @@ save_resv_database(const char *filename)
   dlink_node *node = NULL;
   const struct ResvItem *resv = NULL;
 
-  if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
+  if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
   DLINK_FOREACH(node, resv_chan_get_list()->head)
@@ -735,7 +735,7 @@ load_resv_database(const char *filename)
   char *reason = NULL;
   struct ResvItem *resv = NULL;
 
-  if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
+  if ((f = open_db(filename, "r", KLINE_DB_VERSION)) == NULL)
     return;
 
   if (get_file_version(f) < 1)
@@ -775,7 +775,7 @@ save_xline_database(const char *filename)
   dlink_node *ptr = NULL;
   struct GecosItem *gecos = NULL;
 
-  if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
+  if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
   DLINK_FOREACH(ptr, gecos_get_list()->head)
@@ -815,7 +815,7 @@ load_xline_database(const char *filename)
   char *reason = NULL;
   struct GecosItem *gecos = NULL;
 
-  if (!(f = open_db(filename, "r", KLINE_DB_VERSION)))
+  if ((f = open_db(filename, "r", KLINE_DB_VERSION)) == NULL)
     return;
 
   if (get_file_version(f) < 1)

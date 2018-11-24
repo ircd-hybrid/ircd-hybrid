@@ -102,13 +102,13 @@ dline_check(const struct AddressRec *arec)
  * side effects	- dline as given is placed
  */
 static void
-dline_handle(struct Client *source_p, const char *addr, const char *reason, uintmax_t duration)
+dline_handle(struct Client *source_p, struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
-  struct irc_ssaddr daddr;
+  struct irc_ssaddr addr;
   int bits = 0, aftype = 0;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(1, addr) == false)
+  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(1, aline->host) == false)
   {
     sendto_one_notice(source_p, &me,
                       ":Please include at least %u non-wildcard characters with the mask",
@@ -116,7 +116,7 @@ dline_handle(struct Client *source_p, const char *addr, const char *reason, uint
     return;
   }
 
-  switch (parse_netmask(addr, &daddr, &bits))
+  switch (parse_netmask(aline->host, &addr, &bits))
   {
     case HM_IPV4:
       if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.dline_min_cidr)
@@ -145,40 +145,40 @@ dline_handle(struct Client *source_p, const char *addr, const char *reason, uint
   }
 
   struct MaskItem *conf;
-  if ((conf = find_conf_by_address(NULL, &daddr, CONF_DLINE, aftype, NULL, NULL, 1)))
+  if ((conf = find_conf_by_address(NULL, &addr, CONF_DLINE, aftype, NULL, NULL, 1)))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",
-                        addr, conf->host, conf->reason);
+                        aline->host, conf->host, conf->reason);
     return;
   }
 
-  if (duration)
+  if (aline->duration)
     snprintf(buf, sizeof(buf), "Temporary D-line %ju min. - %.*s (%s)",
-             duration / 60, REASONLEN, reason, date_iso8601(0));
+             aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));
   else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, reason, date_iso8601(0));
+    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
 
   conf = conf_make(CONF_DLINE);
-  conf->host = xstrdup(addr);
+  conf->host = xstrdup(aline->host);
   conf->reason = xstrdup(buf);
   conf->setat = CurrentTime;
   SetConfDatabase(conf);
 
-  if (duration)
+  if (aline->duration)
   {
-    conf->until = CurrentTime + duration;
+    conf->until = CurrentTime + aline->duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %ju min. D-Line [%s]",
-                        duration / 60, conf->host);
+                        aline->duration / 60, conf->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. D-Line for [%s] [%s]",
-                         get_oper_name(source_p), duration / 60,
+                         get_oper_name(source_p), aline->duration / 60,
                          conf->host, conf->reason);
     ilog(LOG_TYPE_DLINE, "%s added temporary %ju min. D-Line for [%s] [%s]",
-         get_oper_name(source_p), duration / 60, conf->host, conf->reason);
+         get_oper_name(source_p), aline->duration / 60, conf->host, conf->reason);
   }
   else
   {
@@ -208,10 +208,8 @@ dline_handle(struct Client *source_p, const char *addr, const char *reason, uint
 static int
 mo_dline(struct Client *source_p, int parc, char *parv[])
 {
-  char *dlhost = NULL, *reason = NULL;
-  char *target_server = NULL;
+  struct aline_ctx aline = { .add = true, .requires_user = false };
   const struct Client *target_p = NULL;
-  uintmax_t duration = 0;
   int t = 0;
   char hostip[HOSTIPLEN + 1];
 
@@ -221,27 +219,25 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("DLINE", source_p, parc, parv, &dlhost,
-                   NULL, &duration, &target_server, &reason))
+  if (parse_aline("DLINE", source_p, parc, parv, &aline) == false)
     return 0;
 
-  if (target_server)
+  if (aline.server)
   {
-    sendto_match_servs(source_p, target_server, CAPAB_DLN, "DLINE %s %ju %s :%s",
-                       target_server, duration,
-                       dlhost, reason);
+    sendto_match_servs(source_p, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
+                       aline.server, aline.duration, aline.host, aline.reason);
 
     /* Allow ON to apply local dline as well if it matches */
-    if (match(target_server, me.name))
+    if (match(aline.server, me.name))
       return 0;
   }
   else
     cluster_distribute(source_p, "DLINE", CAPAB_DLN, CLUSTER_DLINE,
-                       "%ju %s :%s", duration, dlhost, reason);
+                       "%ju %s :%s", aline.duration, aline.host, aline.reason);
 
-  if ((t = parse_netmask(dlhost, NULL, NULL)) == HM_HOST)
+  if ((t = parse_netmask(aline.host, NULL, NULL)) == HM_HOST)
   {
-    if ((target_p = find_chasing(source_p, dlhost)) == NULL)
+    if ((target_p = find_chasing(source_p, aline.host)) == NULL)
       return 0;  /* find_chasing sends ERR_NOSUCHNICK */
 
     if (!MyConnect(target_p))
@@ -258,10 +254,10 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
     getnameinfo((const struct sockaddr *)&target_p->ip, target_p->ip.ss_len,
                 hostip, sizeof(hostip), NULL, 0, NI_NUMERICHOST);
-    dlhost = hostip;
+    aline.host = hostip;
   }
 
-  dline_handle(source_p, dlhost, reason, duration);
+  dline_handle(source_p, &aline);
   return 0;
 }
 
@@ -282,24 +278,29 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_dline(struct Client *source_p, int parc, char *parv[])
 {
-  const char *dlhost, *reason;
+  struct aline_ctx aline =
+  {
+    .add = true,
+    .requires_user = false,
+    .host = parv[3],
+    .reason = parv[4],
+    .server = parv[1],
+    .duration = strtoumax(parv[2], NULL, 10)
+  };
 
-  if (parc != 5 || EmptyString(parv[4]))
+  if (parc != 5 || EmptyString(parv[parc - 1]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAPAB_DLN, "DLINE %s %s %s :%s",
-                     parv[1], parv[2], parv[3], parv[4]);
+  sendto_match_servs(source_p, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
+                     aline.server, aline.duration, aline.host, aline.reason);
 
-  if (match(parv[1], me.name))
+  if (match(aline.server, me.name))
     return 0;
-
-  dlhost = parv[3];
-  reason = parv[4];
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_DLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-    dline_handle(source_p, dlhost, reason, strtoumax(parv[2], NULL, 10));
+    dline_handle(source_p, &aline);
 
   return 0;
 }

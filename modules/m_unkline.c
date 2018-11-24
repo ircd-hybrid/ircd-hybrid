@@ -49,14 +49,14 @@
  * Side effects: Any matching tklines are removed.
  */
 static bool
-kline_remove(const char *user, const char *host)
+kline_remove(struct aline_ctx *aline)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
   int t = 0;
   int aftype = 0;
 
-  if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
+  if ((t = parse_netmask(aline->host, &iphost, NULL)) != HM_HOST)
   {
     if (t == HM_IPV6)
       aftype = AF_INET6;
@@ -68,11 +68,11 @@ kline_remove(const char *user, const char *host)
   else
     piphost = NULL;
 
-  if ((conf = find_conf_by_address(host, piphost, CONF_KLINE, aftype, user, NULL, 0)))
+  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aftype, aline->user, NULL, 0)))
   {
     if (IsConfDatabase(conf))
     {
-      delete_one_address_conf(host, conf);
+      delete_one_address_conf(aline->host, conf);
       return true;
     }
   }
@@ -81,21 +81,23 @@ kline_remove(const char *user, const char *host)
 }
 
 static void
-kline_remove_and_notify(struct Client *source_p, const char *user, const char *host)
+kline_remove_and_notify(struct Client *source_p, struct aline_ctx *aline)
 {
-  if (kline_remove(user, host) == true)
+  if (kline_remove(aline) == true)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed", user, host);
+      sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
+                        aline->user, aline->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has removed the K-Line for: [%s@%s]",
-                         get_oper_name(source_p), user, host);
+                         get_oper_name(source_p), aline->user, aline->host);
     ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-         get_oper_name(source_p), user, host);
+         get_oper_name(source_p), aline->user, aline->host);
   }
   else if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", user, host);
+    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found",
+                      aline->user, aline->host);
 }
 
 /*! \brief UNKLINE command handler
@@ -114,8 +116,7 @@ kline_remove_and_notify(struct Client *source_p, const char *user, const char *h
 static int
 mo_unkline(struct Client *source_p, int parc, char *parv[])
 {
-  char *target_server = NULL;
-  char *user, *host;
+  struct aline_ctx aline = { .add = false, .requires_user = true };
 
   if (!HasOFlag(source_p, OPER_FLAG_UNKLINE))
   {
@@ -129,25 +130,23 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("UNKLINE", source_p, parc, parv, &user,
-                   &host, NULL, &target_server, NULL))
+  if (parse_aline("UNKLINE", source_p, parc, parv, &aline) == false)
     return 0;
 
-  if (target_server)
+  if (aline.server)
   {
-     sendto_match_servs(source_p, target_server, CAPAB_UNKLN,
-                        "UNKLINE %s %s %s",
-                        target_server, user, host);
+     sendto_match_servs(source_p, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
+                        aline.server, aline.user, aline.host);
 
     /* Allow ON to apply local unkline as well if it matches */
-    if (match(target_server, me.name))
+    if (match(aline.server, me.name))
       return 0;
   }
   else
     cluster_distribute(source_p, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE,
-                       "%s %s", user, host);
+                       "%s %s", aline.user, aline.host);
 
-  kline_remove_and_notify(source_p, user, host);
+  kline_remove_and_notify(source_p, &aline);
   return 0;
 }
 
@@ -167,24 +166,28 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_unkline(struct Client *source_p, int parc, char *parv[])
 {
-  const char *user, *host;
+  struct aline_ctx aline =
+  {
+    .add = false,
+    .requires_user = true,
+    .user = parv[2],
+    .host = parv[3],
+    .server = parv[1],
+  };
 
-  if (parc != 4 || EmptyString(parv[3]))
+  if (parc != 4 || EmptyString(parv[parc - 1]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAPAB_UNKLN, "UNKLINE %s %s %s",
-                     parv[1], parv[2], parv[3]);
+  sendto_match_servs(source_p, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
+                     aline.server, aline.user, aline.host);
 
-  user = parv[2];
-  host = parv[3];
-
-  if (match(parv[1], me.name))
+  if (match(aline.server, me.name))
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_UNKLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-    kline_remove_and_notify(source_p, user, host);
+    kline_remove_and_notify(source_p, &aline);
 
   return 0;
 }

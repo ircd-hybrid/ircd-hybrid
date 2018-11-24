@@ -1389,33 +1389,19 @@ find_user_host(struct Client *source_p, char *user_host_or_nick,
  * - Dianora
  */
 bool
-parse_aline(const char *cmd, struct Client *source_p,
-            int parc, char **parv,
-            char **up_p, char **h_p, uintmax_t *tkline_time,
-            char **target_server, char **reason)
+parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, struct aline_ctx *aline)
 {
-  uintmax_t found_tkline_time=0;
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN*4+1];
   static char host[HOSTLEN*4+1];
 
-  parv++;
-  parc--;
+  ++parv;
+  --parc;
 
-  found_tkline_time = valid_tkline(*parv, TK_MINUTES);
-
-  if (found_tkline_time)
+  if (aline->add == true && (aline->duration = valid_tkline(*parv, TK_MINUTES)))
   {
-    parv++;
-    parc--;
-
-    if (tkline_time)
-      *tkline_time = found_tkline_time;
-    else
-    {
-      sendto_one_notice(source_p, &me, ":temp_line not supported by %s", cmd);
-      return false;
-    }
+    ++parv;
+    --parc;
   }
 
   if (parc == 0)
@@ -1424,26 +1410,26 @@ parse_aline(const char *cmd, struct Client *source_p,
     return false;
   }
 
-  if (h_p == NULL)
-    *up_p = *parv;
+  if (aline->requires_user == false)
+    aline->host = *parv;
   else
   {
     if (find_user_host(source_p, *parv, user, host) == false)
       return false;
 
-    *up_p = user;
-    *h_p = host;
+    aline->user = user;
+    aline->host = host;
   }
 
-  parc--;
-  parv++;
+  ++parv;
+  --parc;
 
   if (parc)
   {
     if (irccmp(*parv, "ON") == 0)
     {
-      parc--;
-      parv++;
+      ++parv;
+      --parc;
 
       if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
       {
@@ -1457,26 +1443,20 @@ parse_aline(const char *cmd, struct Client *source_p,
         return false;
       }
 
-      *target_server = *parv;
-      parc--;
-      parv++;
+      aline->server = *parv;
+      ++parv;
+      --parc;
     }
     else
-    {
-      /* Make sure target_server *is* NULL if no ON server found
-       * caller probably NULL'd it first, but no harm to do it again -db
-       */
-      if (target_server)
-        *target_server = NULL;
-    }
+      aline->server = NULL;
   }
 
-  if (reason)
+  if (aline->add == true)
   {
     if (parc && !EmptyString(*parv))
-      *reason = *parv;
+      aline->reason = *parv;
     else
-      *reason = default_reason;
+      aline->reason = default_reason;
   }
 
   return true;

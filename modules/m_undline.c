@@ -49,14 +49,14 @@
  * Side effects: Any matching tdlines are removed.
  */
 static bool
-dline_remove(const char *host)
+dline_remove(struct aline_ctx *aline)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
   int t = 0;
   int aftype = 0;
 
-  if ((t = parse_netmask(host, &iphost, NULL)) != HM_HOST)
+  if ((t = parse_netmask(aline->host, &iphost, NULL)) != HM_HOST)
   {
     if (t == HM_IPV6)
       aftype = AF_INET6;
@@ -68,11 +68,11 @@ dline_remove(const char *host)
   else
     piphost = NULL;
 
-  if ((conf = find_conf_by_address(host, piphost, CONF_DLINE, aftype, NULL, NULL, 0)))
+  if ((conf = find_conf_by_address(aline->host, piphost, CONF_DLINE, aftype, NULL, NULL, 0)))
   {
     if (IsConfDatabase(conf))
     {
-      delete_one_address_conf(host, conf);
+      delete_one_address_conf(aline->host, conf);
       return true;
     }
   }
@@ -81,21 +81,21 @@ dline_remove(const char *host)
 }
 
 static void
-dline_remove_and_notify(struct Client *source_p, const char *host)
+dline_remove_and_notify(struct Client *source_p, struct aline_ctx *aline)
 {
-  if (dline_remove(host) == true)
+  if (dline_remove(aline) == true)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", host);
+      sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", aline->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has removed the D-Line for: [%s]",
-                         get_oper_name(source_p), host);
+                         get_oper_name(source_p), aline->host);
     ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
-         get_oper_name(source_p), host);
+         get_oper_name(source_p), aline->host);
   }
   else if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", host);
+    sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", aline->host);
 }
 
 /*! \brief UNDLINE command handler
@@ -114,8 +114,7 @@ dline_remove_and_notify(struct Client *source_p, const char *host)
 static int
 mo_undline(struct Client *source_p, int parc, char *parv[])
 {
-  char *addr = NULL;
-  char *target_server = NULL;
+  struct aline_ctx aline = { .add = false, .requires_user = false };
 
   if (!HasOFlag(source_p, OPER_FLAG_UNDLINE))
   {
@@ -123,29 +122,28 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (parc < 2 || EmptyString(parv[1]))
+  if (parc < 2 || EmptyString(parv[parc - 1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "UNDLINE");
     return 0;
   }
 
-  if (!parse_aline("UNDLINE", source_p, parc, parv, &addr,
-                   NULL, NULL, &target_server, NULL))
+  if (parse_aline("UNDLINE", source_p, parc, parv, &aline) == false)
     return 0;
 
-  if (target_server)
+  if (aline.server)
   {
-    sendto_match_servs(source_p, target_server, CAPAB_UNDLN,
-                       "UNDLINE %s %s", target_server, addr);
+    sendto_match_servs(source_p, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
+                       aline.server, aline.host);
 
     /* Allow ON to apply local undline as well if it matches */
-    if (match(target_server, me.name))
+    if (match(aline.server, me.name))
       return 0;
   }
   else
-    cluster_distribute(source_p, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s", addr);
+    cluster_distribute(source_p, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s", aline.host);
 
-  dline_remove_and_notify(source_p, addr);
+  dline_remove_and_notify(source_p, &aline);
   return 0;
 }
 
@@ -164,21 +162,27 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_undline(struct Client *source_p, int parc, char *parv[])
 {
-  const char *addr = parv[2];
+  struct aline_ctx aline =
+  {
+    .add = false,
+    .requires_user = false,
+    .host = parv[2],
+    .server = parv[1],
+  };
 
-  if (parc != 3 || EmptyString(parv[2]))
+  if (parc != 3 || EmptyString(parv[parc - 1]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAPAB_UNDLN, "UNDLINE %s %s",
-                     parv[1], parv[2]);
+  sendto_match_servs(source_p, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
+                     aline.server, aline.host);
 
-  if (match(parv[1], me.name))
+  if (match(aline.server, me.name))
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_UNDLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-    dline_remove_and_notify(source_p, addr);
+    dline_remove_and_notify(source_p, &aline);
 
   return 0;
 }

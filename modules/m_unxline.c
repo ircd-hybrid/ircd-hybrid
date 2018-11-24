@@ -49,11 +49,11 @@
  * Side effects: Any matching tklines are removed.
  */
 static bool
-xline_remove(const char *mask)
+xline_remove(struct aline_ctx *aline)
 {
   struct GecosItem *gecos;
 
-  if ((gecos = gecos_find(mask, irccmp)))
+  if ((gecos = gecos_find(aline->host, irccmp)))
   {
     if (gecos->in_database == true)
     {
@@ -66,21 +66,21 @@ xline_remove(const char *mask)
 }
 
 static void
-xline_remove_and_notify(struct Client *source_p, const char *gecos)
+xline_remove_and_notify(struct Client *source_p, struct aline_ctx *aline)
 {
-  if (xline_remove(gecos) == true)
+  if (xline_remove(aline) == true)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos);
+      sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", aline->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has removed the X-Line for: [%s]",
-                         get_oper_name(source_p), gecos);
+                         get_oper_name(source_p), aline->host);
     ilog(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
-         get_oper_name(source_p), gecos);
+         get_oper_name(source_p), aline->host);
   }
   else if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":No X-Line for %s", gecos);
+    sendto_one_notice(source_p, &me, ":No X-Line for %s", aline->host);
 }
 
 /*! \brief UNXLINE command handler
@@ -99,8 +99,7 @@ xline_remove_and_notify(struct Client *source_p, const char *gecos)
 static int
 mo_unxline(struct Client *source_p, int parc, char *parv[])
 {
-  char *gecos = NULL;
-  char *target_server = NULL;
+  struct aline_ctx aline = { .add = false, .requires_user = false };
 
   if (!HasOFlag(source_p, OPER_FLAG_UNXLINE))
   {
@@ -108,23 +107,22 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("UNXLINE", source_p, parc, parv, &gecos,
-                   NULL, NULL, &target_server, NULL))
+  if (parse_aline("UNXLINE", source_p, parc, parv, &aline) == false)
     return 0;
 
-  if (target_server)
+  if (aline.server)
   {
-    sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
-                       "UNXLINE %s %s", target_server, gecos);
+    sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
+                       aline.server, aline.host);
 
     /* Allow ON to apply local unxline as well if it matches */
-    if (match(target_server, me.name))
+    if (match(aline.server, me.name))
       return 0;
   }
   else
-    cluster_distribute(source_p, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s", gecos);
+    cluster_distribute(source_p, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s", aline.host);
 
-  xline_remove_and_notify(source_p, gecos);
+  xline_remove_and_notify(source_p, &aline);
   return 0;
 }
 
@@ -143,19 +141,27 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
 static int
 ms_unxline(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc != 3 || EmptyString(parv[2]))
+  struct aline_ctx aline =
+  {
+    .add = false,
+    .requires_user = false,
+    .host = parv[2],
+    .server = parv[1],
+  };
+
+  if (parc != 3 || EmptyString(parv[parc - 1]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAPAB_CLUSTER, "UNXLINE %s %s",
-                     parv[1], parv[2]);
+  sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
+                     aline.server, aline.host);
 
-  if (match(parv[1], me.name))
+  if (match(aline.server, me.name))
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_UNXLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-    xline_remove_and_notify(source_p, parv[2]);
+    xline_remove_and_notify(source_p, &aline);
   return 0;
 }
 

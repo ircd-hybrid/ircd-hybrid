@@ -50,11 +50,11 @@
  * side effects	- parse resv, create if valid
  */
 static void
-resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const char *reason)
+resv_handle(struct Client *source_p, struct aline_ctx *aline)
 {
   if (!HasFlag(source_p, FLAGS_SERVICE))
   {
-    if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(mask))
+    if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(aline->host))
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
@@ -62,7 +62,7 @@ resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const
       return;
     }
 
-    if (valid_wild_card_simple(mask + !!IsChanPrefix(*mask)) == false)
+    if (valid_wild_card_simple(aline->host + !!IsChanPrefix(*aline->host)) == false)
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the RESV",
@@ -73,10 +73,10 @@ resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const
   }
 
   struct ResvItem *resv;
-  if ((resv = resv_make(mask, reason, NULL)) == NULL)
+  if ((resv = resv_make(aline->host, aline->reason, NULL)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", mask);
+      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", aline->host);
 
     return;
   }
@@ -84,20 +84,20 @@ resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const
   resv->setat = CurrentTime;
   resv->in_database = true;
 
-  if (duration)
+  if (aline->duration)
   {
-    resv->expire = CurrentTime + duration;
+    resv->expire = CurrentTime + aline->duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %ju min. RESV [%s]",
-                        duration / 60, resv->mask);
+                        aline->duration / 60, resv->mask);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. RESV for [%s] [%s]",
-                         get_oper_name(source_p), duration / 60,
+                         get_oper_name(source_p), aline->duration / 60,
                          resv->mask, resv->reason);
     ilog(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
-         get_oper_name(source_p), duration / 60, resv->mask, resv->reason);
+         get_oper_name(source_p), aline->duration / 60, resv->mask, resv->reason);
   }
   else
   {
@@ -121,10 +121,7 @@ resv_handle(struct Client *source_p, const char *mask, uintmax_t duration, const
 static int
 mo_resv(struct Client *source_p, int parc, char *parv[])
 {
-  char *mask = NULL;
-  char *reason = NULL;
-  char *target_server = NULL;
-  uintmax_t duration = 0;
+  struct aline_ctx aline = { .add = true, .requires_user = false };
 
   if (!HasOFlag(source_p, OPER_FLAG_RESV))
   {
@@ -132,25 +129,23 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!parse_aline("RESV", source_p, parc, parv, &mask, NULL,
-                   &duration, &target_server, &reason))
+  if (parse_aline("RESV", source_p, parc, parv, &aline) == false)
     return 0;
 
-  if (target_server)
+  if (aline.server)
   {
-    sendto_match_servs(source_p, target_server, CAPAB_CLUSTER,
-                       "RESV %s %ju %s :%s",
-                       target_server, duration, mask, reason);
+    sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "RESV %s %ju %s :%s",
+                       aline.server, aline.duration, aline.host, aline.reason);
 
     /* Allow ON to apply local resv as well if it matches */
-    if (match(target_server, me.name))
+    if (match(aline.server, me.name))
       return 0;
   }
   else
-    cluster_distribute(source_p, "RESV", CAPAB_KLN, CLUSTER_RESV,
-                       "%ju %s :%s", duration, mask, reason);
+    cluster_distribute(source_p, "RESV", CAPAB_KLN, CLUSTER_RESV, "%ju %s :%s",
+                       aline.duration, aline.host, aline.reason);
 
-  resv_handle(source_p, mask, duration, reason);
+  resv_handle(source_p, &aline);
   return 0;
 }
 
@@ -171,19 +166,28 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
 static int
 ms_resv(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc != 5 || EmptyString(parv[4]))
+  struct aline_ctx aline =
+  {
+    .add = true,
+    .requires_user = false,
+    .host = parv[2],
+    .reason = parv[4],
+    .server = parv[1],
+    .duration = strtoumax(parv[2], NULL, 10)
+  };
+  if (parc != 5 || EmptyString(parv[parc - 1]))
     return 0;
 
-  sendto_match_servs(source_p, parv[1], CAPAB_CLUSTER, "RESV %s %s %s :%s",
-                     parv[1], parv[2], parv[3], parv[4]);
+  sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "RESV %s %ju %s :%s",
+                     aline.server, aline.duration, aline.host, aline.reason);
 
-  if (match(parv[1], me.name))
+  if (match(aline.server, me.name))
     return 0;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_RESV, source_p->servptr->name,
                   source_p->username, source_p->host))
-    resv_handle(source_p, parv[3], strtoumax(parv[2], NULL, 10), parv[4]);
+    resv_handle(source_p, &aline);
   return 0;
 }
 

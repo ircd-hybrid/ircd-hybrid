@@ -209,9 +209,6 @@ static int
 mo_dline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = true, .requires_user = false };
-  const struct Client *target_p = NULL;
-  int t = 0;
-  char hostip[HOSTIPLEN + 1];
 
   if (!HasOFlag(source_p, OPER_FLAG_DLINE))
   {
@@ -234,28 +231,6 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   else
     cluster_distribute(source_p, "DLINE", CAPAB_DLN, CLUSTER_DLINE,
                        "%ju %s :%s", aline.duration, aline.host, aline.reason);
-
-  if ((t = parse_netmask(aline.host, NULL, NULL)) == HM_HOST)
-  {
-    if ((target_p = find_chasing(source_p, aline.host)) == NULL)
-      return 0;  /* find_chasing sends ERR_NOSUCHNICK */
-
-    if (!MyConnect(target_p))
-    {
-      sendto_one_notice(source_p, &me, ":Cannot DLINE nick on another server");
-      return 0;
-    }
-
-    if (HasFlag(target_p, FLAGS_EXEMPTKLINE))
-    {
-      sendto_one_notice(source_p, &me, ":%s is E-lined", target_p->name);
-      return 0;
-    }
-
-    getnameinfo((const struct sockaddr *)&target_p->ip, target_p->ip.ss_len,
-                hostip, sizeof(hostip), NULL, 0, NI_NUMERICHOST);
-    aline.host = hostip;
-  }
 
   dline_handle(source_p, &aline);
   return 0;

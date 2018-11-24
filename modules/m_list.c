@@ -62,7 +62,7 @@ do_list(struct Client *source_p, char *arg)
   {
     dlink_list *list = NULL;
     char *opt, *save = NULL;
-    bool errors = false;
+    bool error = false;
     int i = 0;
 
     for (opt = strtok_r(arg,  ",", &save); opt;
@@ -74,13 +74,13 @@ do_list(struct Client *source_p, char *arg)
           if ((i = atoi(opt + 1)) > 0)
             lt->users_max = (unsigned int)i - 1;
           else
-            errors = true;
+            error = true;
           break;
         case '>':
           if ((i = atoi(opt + 1)) >= 0)
             lt->users_min = (unsigned int)i + 1;
           else
-            errors = true;
+            error = true;
           break;
         case 'C':
         case 'c':
@@ -90,16 +90,16 @@ do_list(struct Client *source_p, char *arg)
               if ((i = atoi(opt + 1)) >= 0)
                 lt->created_max = (unsigned int)(CurrentTime - 60 * i);
               else
-                errors = true;
+                error = true;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
                 lt->created_min = (unsigned int)(CurrentTime - 60 * i);
               else
-                errors = true;
+                error = true;
               break;
             default:
-              errors = true;
+              error = true;
           }
 
           break;
@@ -112,20 +112,20 @@ do_list(struct Client *source_p, char *arg)
               if ((i = atoi(opt + 1)) >= 0)
                 lt->topicts_min = (unsigned int)(CurrentTime - 60 * i);
               else
-                errors = true;
+                error = true;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
                 lt->topicts_max = (unsigned int)(CurrentTime - 60 * i);
               else
-                errors = true;
+                error = true;
               break;
             case ':':
               if (strlcpy(lt->topic, opt + 1, sizeof(lt->topic)) == 0)
-                errors = true;
+                error = true;
               break;
             default:
-              errors = true;
+              error = true;
           }
 
           break;
@@ -145,14 +145,14 @@ do_list(struct Client *source_p, char *arg)
               no_masked_channels = false;
           }
           else if (!IsChanPrefix(*opt))
-            errors = true;
+            error = true;
 
-          if (errors == false)
+          if (error == false)
             dlinkAdd(xstrdup(opt), make_dlink_node(), list);
       }
     }
 
-    if (errors == true)
+    if (error == true)
     {
       free_list_task(source_p);
       sendto_one_numeric(source_p, &me, ERR_LISTSYNTAX);

@@ -53,10 +53,10 @@ xline_remove(struct Client *source_p, struct aline_ctx *aline)
 {
   struct GecosItem *gecos;
 
-  if ((gecos = gecos_find(aline->host, irccmp)) == NULL)
+  if ((gecos = gecos_find(aline->mask, irccmp)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":No X-Line for %s", aline->host);
+      sendto_one_notice(source_p, &me, ":No X-Line for %s", aline->mask);
 
     return;
   }
@@ -97,7 +97,7 @@ xline_remove(struct Client *source_p, struct aline_ctx *aline)
 static int
 mo_unxline(struct Client *source_p, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .requires_user = false };
+  struct aline_ctx aline = { .add = false, .simple_mask = true };
 
   if (!HasOFlag(source_p, OPER_FLAG_UNXLINE))
   {
@@ -111,7 +111,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
   if (aline.server)
   {
     sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
-                       aline.server, aline.host);
+                       aline.server, aline.mask);
 
     /* Allow ON to apply local unxline as well if it matches */
     if (match(aline.server, me.name))
@@ -142,16 +142,16 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = false,
-    .requires_user = false,
-    .host = parv[2],
-    .server = parv[1],
+    .simple_mask = true,
+    .mask = parv[2],
+    .server = parv[1]
   };
 
   if (parc != 3 || EmptyString(parv[parc - 1]))
     return 0;
 
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
-                     aline.server, aline.host);
+                     aline.server, aline.mask);
 
   if (match(aline.server, me.name))
     return 0;

@@ -73,7 +73,7 @@ xline_handle(struct Client *source_p, struct aline_ctx *aline)
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
   {
-    if (valid_wild_card_simple(aline->host) == false)
+    if (valid_wild_card_simple(aline->mask) == false)
     {
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
@@ -83,11 +83,11 @@ xline_handle(struct Client *source_p, struct aline_ctx *aline)
   }
 
   struct GecosItem *gecos;
-  if ((gecos = gecos_find(aline->host, match)))
+  if ((gecos = gecos_find(aline->mask, match)))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
-                        aline->host, gecos->mask, gecos->reason);
+                        aline->mask, gecos->mask, gecos->reason);
     return;
   }
 
@@ -98,7 +98,7 @@ xline_handle(struct Client *source_p, struct aline_ctx *aline)
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
 
   gecos = gecos_make();
-  gecos->mask = xstrdup(aline->host);
+  gecos->mask = xstrdup(aline->mask);
   gecos->reason = xstrdup(buf);
   gecos->setat = CurrentTime;
   gecos->in_database = true;
@@ -148,7 +148,7 @@ xline_handle(struct Client *source_p, struct aline_ctx *aline)
 static int
 mo_xline(struct Client *source_p, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .requires_user = false };
+  struct aline_ctx aline = { .add = true, .simple_mask = true };
 
   if (!HasOFlag(source_p, OPER_FLAG_XLINE))
   {
@@ -162,7 +162,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
   if (aline.server)
   {
     sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
-                       aline.server, aline.host, aline.duration, aline.reason);
+                       aline.server, aline.mask, aline.duration, aline.reason);
 
     /* Allow ON to apply local xline as well if it matches */
     if (match(aline.server, me.name))
@@ -170,7 +170,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_distribute(source_p, "XLINE", CAPAB_CLUSTER, CLUSTER_XLINE, "%s %ju :%s",
-                       aline.host, aline.duration, aline.reason);
+                       aline.mask, aline.mask, aline.reason);
 
   xline_handle(source_p, &aline);
   return 0;
@@ -196,8 +196,8 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = true,
-    .requires_user = false,
-    .host = parv[2],
+    .simple_mask = true,
+    .mask = parv[2],
     .reason = parv[4],
     .server = parv[1],
     .duration = strtoumax(parv[3], NULL, 10)
@@ -207,7 +207,7 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
-                     aline.server, aline.host, aline.duration, aline.reason);
+                     aline.server, aline.mask, aline.duration, aline.reason);
 
   if (match(aline.server, me.name))
     return 0;

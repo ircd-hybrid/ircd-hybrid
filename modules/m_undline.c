@@ -114,7 +114,7 @@ dline_remove_and_notify(struct Client *source_p, struct aline_ctx *aline)
 static int
 mo_undline(struct Client *source_p, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .requires_user = false };
+  struct aline_ctx aline = { .add = false, .simple_mask = false };
 
   if (!HasOFlag(source_p, OPER_FLAG_UNDLINE))
   {
@@ -165,9 +165,9 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = false,
-    .requires_user = false,
+    .simple_mask = false,
     .host = parv[2],
-    .server = parv[1],
+    .server = parv[1]
   };
 
   if (parc != 3 || EmptyString(parv[parc - 1]))

@@ -1331,8 +1331,12 @@ parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, str
     return false;
   }
 
-  if (aline->requires_user == false)
-    aline->host = *parv;
+  if (aline->simple_mask == true)
+  {
+    aline->mask = *parv;
+    aline->user = NULL;
+    aline->host = NULL;
+  }
   else
   {
     struct split_nuh_item nuh;
@@ -1345,6 +1349,7 @@ parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, str
 
     split_nuh(&nuh);
 
+    aline->mask = NULL;
     aline->user = user;
     aline->host = host;
   }

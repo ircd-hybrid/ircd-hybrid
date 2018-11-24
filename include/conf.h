@@ -297,7 +297,8 @@ struct config_log_entry
 struct aline_ctx
 {
   bool add;
-  bool requires_user;
+  bool simple_mask;
+  char *mask;
   char *user;
   char *host;
   char *reason;

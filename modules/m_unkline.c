@@ -116,7 +116,7 @@ kline_remove_and_notify(struct Client *source_p, struct aline_ctx *aline)
 static int
 mo_unkline(struct Client *source_p, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .requires_user = true };
+  struct aline_ctx aline = { .add = false, .simple_mask = false };
 
   if (!HasOFlag(source_p, OPER_FLAG_UNKLINE))
   {
@@ -169,10 +169,10 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = false,
-    .requires_user = true,
+    .simple_mask = false,
     .user = parv[2],
     .host = parv[3],
-    .server = parv[1],
+    .server = parv[1]
   };
 
   if (parc != 4 || EmptyString(parv[parc - 1]))

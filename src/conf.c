@@ -1279,85 +1279,6 @@ valid_wild_card(int count, ...)
   return false;
 }
 
-/* find_user_host()
- *
- * inputs       - pointer to client placing kline
- *              - pointer to user_host_or_nick
- *              - pointer to user buffer
- *              - pointer to host buffer
- * output       - 0 if not ok to kline, 1 to kline i.e. if valid user host
- * side effects -
- */
-static bool
-find_user_host(struct Client *source_p, char *user_host_or_nick,
-               char *luser, char *lhost)
-{
-  struct Client *target_p = NULL;
-  char *hostp = NULL;
-
-  if (lhost == NULL)
-  {
-    strlcpy(luser, user_host_or_nick, USERLEN*4 + 1);
-    return true;
-  }
-
-  if ((hostp = strchr(user_host_or_nick, '@')) || *user_host_or_nick == '*')
-  {
-    /* Explicit user@host mask given */
-    if (hostp)                            /* I'm a little user@host */
-    {
-      *(hostp++) = '\0';                       /* short and squat */
-
-      if (*user_host_or_nick)
-        strlcpy(luser, user_host_or_nick, USERLEN*4 + 1); /* here is my user */
-      else
-        strcpy(luser, "*");
-
-      if (*hostp)
-        strlcpy(lhost, hostp, HOSTLEN + 1);    /* here is my host */
-      else
-        strcpy(lhost, "*");
-    }
-    else
-    {
-      luser[0] = '*';             /* no @ found, assume its *@somehost */
-      luser[1] = '\0';
-      strlcpy(lhost, user_host_or_nick, HOSTLEN*4 + 1);
-    }
-
-    return true;
-  }
-  else
-  {
-    /* Try to find user@host mask from nick */
-    /* Okay to use source_p as the first param, because source_p == client_p */
-    if ((target_p =
-        find_chasing(source_p, user_host_or_nick)) == NULL)
-      return false;  /* find_chasing sends ERR_NOSUCHNICK */
-
-    if (HasFlag(target_p, FLAGS_EXEMPTKLINE))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":%s is E-lined", target_p->name);
-      return false;
-    }
-
-    /*
-     * Turn the "user" bit into "*user", blow away '~'
-     * if found in original user name (non-idented)
-     */
-    strlcpy(luser, target_p->username, USERLEN*4 + 1);
-
-    if (target_p->username[0] == '~')
-      luser[0] = '*';
-
-    strlcpy(lhost, target_p->sockhost, HOSTLEN*4 + 1);
-    return true;
-  }
-
-  return false;
-}
-
 /* XXX should this go into a separate file ? -Dianora */
 /* parse_aline
  *
@@ -1392,8 +1313,8 @@ bool
 parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, struct aline_ctx *aline)
 {
   static char default_reason[] = CONF_NOREASON;
-  static char user[USERLEN*4+1];
-  static char host[HOSTLEN*4+1];
+  static char user[USERLEN * 2 + 1];
+  static char host[HOSTLEN * 2 + 1];
 
   ++parv;
   --parc;
@@ -1414,8 +1335,15 @@ parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, str
     aline->host = *parv;
   else
   {
-    if (find_user_host(source_p, *parv, user, host) == false)
-      return false;
+    struct split_nuh_item nuh;
+    nuh.nuhmask  = *parv;
+    nuh.userptr  = user;
+    nuh.hostptr  = host;
+
+    nuh.usersize = sizeof(user);
+    nuh.hostsize = sizeof(host);
+
+    split_nuh(&nuh);
 
     aline->user = user;
     aline->host = host;
@@ -1453,10 +1381,10 @@ parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, str
 
   if (aline->add == true)
   {
-    if (parc && !EmptyString(*parv))
-      aline->reason = *parv;
-    else
+    if (parc == 0 || EmptyString(*parv))
       aline->reason = default_reason;
+    else
+      aline->reason = *parv;
   }
 
   return true;

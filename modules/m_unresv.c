@@ -58,7 +58,7 @@ resv_remove(struct Client *source_p, struct aline_ctx *aline)
   if (resv->in_database == false)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":The RESV for %s is in ircd.conf and must be removed by hand",
+      sendto_one_notice(source_p, &me, ":The RESV for %s is in the configuration file and must be removed by hand",
                         resv->mask);
     return;
   }

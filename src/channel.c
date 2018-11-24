@@ -682,7 +682,7 @@ can_join(struct Client *client_p, struct Channel *chptr, const char *key)
     return ERR_OPERONLYCHAN;
 
   if (HasCMode(chptr, MODE_INVITEONLY))
-    if (!find_invite(chptr, client_p))
+    if (find_invite(chptr, client_p) == NULL)
       if (find_bmask(client_p, &chptr->invexlist) == false)
         return ERR_INVITEONLYCHAN;
 

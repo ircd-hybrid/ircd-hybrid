@@ -43,9 +43,9 @@
 
 enum
 {
-  ENTITY_NONE    = 0,
-  ENTITY_CHANNEL = 1,
-  ENTITY_CLIENT  = 2
+  ENTITY_NONE,
+  ENTITY_CHANNEL,
+  ENTITY_CLIENT
 };
 
 static const char *const command[] =

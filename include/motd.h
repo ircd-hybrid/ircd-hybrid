@@ -41,34 +41,34 @@ enum MotdType
 /** Entry for a single Message Of The Day (MOTD). */
 struct Motd
 {
-  dlink_node         node; /**< Next MOTD in the linked list. */
-  enum MotdType      type;     /**< Type of MOTD. */
-  char              *path;     /**< Pathname of MOTD file. */
-  char              *mask; /**< Hostmask if type==MOTD_HOSTMASK,
-                                       class name if type==MOTD_CLASS,
-                                       text IP mask if type==MOTD_IPMASK. */
-  struct irc_ssaddr  address;  /**< Address if type==MOTD_IPMASK. */
-  int                addrbits; /**< Number of bits checked in Motd::address. */
-  unsigned int       maxcount; /**< Number of lines for MOTD. */
-  struct MotdCache  *cache;    /**< MOTD cache entry. */
+  dlink_node node;  /**< Next MOTD in the linked list. */
+  enum MotdType type;  /**< Type of MOTD. */
+  char *path;  /**< Pathname of MOTD file. */
+  char *mask;  /**< Hostmask if type==MOTD_HOSTMASK,
+                    class name if type==MOTD_CLASS,
+                    text IP mask if type==MOTD_IPMASK. */
+  struct irc_ssaddr address;  /**< Address if type==MOTD_IPMASK. */
+  int addrbits;  /**< Number of bits checked in Motd::address. */
+  unsigned int maxcount;  /**< Number of lines for MOTD. */
+  struct MotdCache *cache;  /**< MOTD cache entry. */
 };
 
 /** Length of one MOTD line(320 chars + '\\0'). */
-enum { MOTD_LINESIZE  = 321 };
+enum { MOTD_LINESIZE = 321 };
 /** Maximum number of lines for MOTD */
-enum { MOTD_MAXLINES  = 100 };
+enum { MOTD_MAXLINES = 100 };
 
 
 /** Cache entry for the contents of a MOTD file. */
 struct MotdCache
 {
-  dlink_node   node;     /**< Next MotdCache in list. */
-  char        *path;     /**< Pathname of file. */
-  unsigned int ref;      /**< Number of references to this entry. */
-  unsigned int maxcount; /**< Number of lines allocated for message. */
-  unsigned int count;    /**< Actual number of lines used in message. */
-  uintmax_t    modtime;  /**< Last modification time from file. */
-  char         motd[][MOTD_LINESIZE]; /**< Message body. */
+  dlink_node node;  /**< Next MotdCache in list. */
+  char *path;  /**< Pathname of file. */
+  unsigned int ref;  /**< Number of references to this entry. */
+  unsigned int maxcount;  /**< Number of lines allocated for message. */
+  unsigned int count;  /**< Actual number of lines used in message. */
+  uintmax_t modtime;  /**< Last modification time from file. */
+  char motd[][MOTD_LINESIZE];  /**< Message body. */
 };
 
 /* motd_send sends a MOTD off to a user */

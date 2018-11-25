@@ -1340,10 +1340,13 @@ parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, str
   else
   {
     struct split_nuh_item nuh;
+
     nuh.nuhmask  = *parv;
+    nuh.nickptr  = NULL;
     nuh.userptr  = user;
     nuh.hostptr  = host;
 
+    nuh.nicksize = 0;
     nuh.usersize = sizeof(user);
     nuh.hostsize = sizeof(host);
 

@@ -1,4 +1,4 @@
-KLINE [time] <nick|user@host> :[reason]
+KLINE [time] <user@host> :[reason]
 
 [time] if present, gives number of minutes for KLINE
 
@@ -13,7 +13,7 @@ or 192.168.0.* (which is converted to CIDR form internally)
 
 For a temporary KLINE, length of kline is given in
 minutes as the first parameter [time] i.e.
-KLINE 10 <nick|user@host> :cool off for 10 minutes
+KLINE 10 <user@host> :cool off for 10 minutes
 
 KLINE <user@host> ON irc.server :[reason]
 will kline the user on irc.server if irc.server accepts

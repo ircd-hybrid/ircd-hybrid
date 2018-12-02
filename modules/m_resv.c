@@ -175,6 +175,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
     .server = parv[1],
     .duration = strtoumax(parv[2], NULL, 10)
   };
+
   if (parc != 5 || EmptyString(parv[parc - 1]))
     return 0;
 

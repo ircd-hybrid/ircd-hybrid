@@ -108,14 +108,6 @@ dline_handle(struct Client *source_p, struct aline_ctx *aline)
   struct irc_ssaddr addr;
   int bits = 0, aftype = 0;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(1, aline->host) == false)
-  {
-    sendto_one_notice(source_p, &me,
-                      ":Please include at least %u non-wildcard characters with the mask",
-                      ConfigGeneral.min_nonwildcard);
-    return;
-  }
-
   switch (parse_netmask(aline->host, &addr, &bits))
   {
     case HM_IPV4:

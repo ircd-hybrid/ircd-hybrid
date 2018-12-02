@@ -146,7 +146,7 @@ find_cap(const char **caplist_p, int *neg_p)
  * @param[in] rem Capabalities to show as removed (with no other modifier).
  * @param[in] subcmd Name of capability subcommand.
  */
-static int
+static void
 send_caplist(struct Client *source_p,
              const unsigned int *const set,
              const unsigned int *const rem, const char *subcmd)
@@ -205,20 +205,18 @@ send_caplist(struct Client *source_p,
   }
 
   sendto_one(source_p, "%s:%s", cmdbuf, capbuf);
-
-  return 0;  /* Convenience return */
 }
 
-static int
+static void
 cap_ls(struct Client *source_p, const char *caplist)
 {
   if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
     source_p->connection->registration |= REG_NEED_CAP;
 
-  return send_caplist(source_p, NULL, NULL, "LS");  /* Send list of capabilities */
+  send_caplist(source_p, NULL, NULL, "LS");  /* Send list of capabilities */
 }
 
-static int
+static void
 cap_req(struct Client *source_p, const char *caplist)
 {
   const char *cl = caplist;
@@ -237,7 +235,7 @@ cap_req(struct Client *source_p, const char *caplist)
         || (neg && (cap->flags & CAPFL_STICKY))) {  /* Is it sticky? */
       sendto_one(source_p, ":%s CAP %s NAK :%s", me.name,
                  source_p->name[0] ? source_p->name : "*", caplist);
-      return 0;  /* Can't complete requested op... */
+      return;  /* Can't complete requested op... */
     }
 
     if (neg)
@@ -266,11 +264,9 @@ cap_req(struct Client *source_p, const char *caplist)
 
   source_p->connection->cap_client = cs;
   source_p->connection->cap_active = as;
-
-  return 0;
 }
 
-static int
+static void
 cap_ack(struct Client *source_p, const char *caplist)
 {
   const char *cl = caplist;
@@ -306,11 +302,9 @@ cap_ack(struct Client *source_p, const char *caplist)
       source_p->connection->cap_active |=  cap->cap;
     }
   }
-
-  return 0;
 }
 
-static int
+static void
 cap_clear(struct Client *source_p, const char *caplist)
 {
   unsigned int cleared = 0;
@@ -330,39 +324,34 @@ cap_clear(struct Client *source_p, const char *caplist)
       source_p->connection->cap_active &= ~cap->cap;
   }
 
-  return send_caplist(source_p, NULL, &cleared, "ACK");
+  send_caplist(source_p, NULL, &cleared, "ACK");
 }
 
-static int
+static void
 cap_end(struct Client *source_p, const char *caplist)
 {
   if (!IsUnknown(source_p))  /* Registration has completed... */
-    return 0;  /* So just ignore the message... */
+    return;  /* So just ignore the message... */
 
   /* Capability negotiation is now done... */
   source_p->connection->registration &= ~REG_NEED_CAP;
 
   /* If client is now done... */
   if (source_p->connection->registration == 0)
-  {
     register_local_user(source_p);
-    return 0;
-  }
-
-  return 0;  /* Can't do registration yet... */
 }
 
-static int
+static void
 cap_list(struct Client *source_p, const char *caplist)
 {
   /* Send the list of the client's capabilities */
-  return send_caplist(source_p, &source_p->connection->cap_client, NULL, "LIST");
+  send_caplist(source_p, &source_p->connection->cap_client, NULL, "LIST");
 }
 
 static struct subcmd
 {
   const char *cmd;
-  int (*proc)(struct Client *, const char *);
+  void (*proc)(struct Client *, const char *);
 } cmdlist[] = {
   { "ACK",   cap_ack   },
   { "CLEAR", cap_clear },

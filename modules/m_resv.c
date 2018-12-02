@@ -54,14 +54,6 @@ resv_handle(struct Client *source_p, struct aline_ctx *aline)
 {
   if (!HasFlag(source_p, FLAGS_SERVICE))
   {
-    if (!HasUMode(source_p, UMODE_ADMIN) && has_wildcards(aline->mask))
-    {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":You must be an admin to perform a wildcard RESV");
-
-      return;
-    }
-
     if (valid_wild_card_simple(aline->mask + !!IsChanPrefix(*aline->mask)) == false)
     {
       if (IsClient(source_p))

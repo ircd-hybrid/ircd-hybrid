@@ -57,7 +57,7 @@ do_away(struct Client *source_p, const char *message)
 
       /* We now send this only if they were away before --is */
       sendto_server(source_p, 0, 0, ":%s AWAY", source_p->id);
-      sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
+      sendto_common_channels_local(source_p, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
                                    source_p->name, source_p->username, source_p->host);
     }
 
@@ -83,7 +83,7 @@ do_away(struct Client *source_p, const char *message)
   }
 
   strlcpy(source_p->away, message, sizeof(source_p->away));
-  sendto_common_channels_local(source_p, 1, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+  sendto_common_channels_local(source_p, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                                source_p->name, source_p->username,
                                source_p->host, source_p->away);
   sendto_server(source_p, 0, 0, ":%s AWAY :%s",

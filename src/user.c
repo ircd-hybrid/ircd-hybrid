@@ -712,10 +712,10 @@ user_set_hostmask(struct Client *client_p, const char *hostname)
     return;
 
   if (ConfigGeneral.cycle_on_host_change)
-    sendto_common_channels_local(client_p, 0, 0, CAP_CHGHOST, ":%s!%s@%s QUIT :Changing hostname",
+    sendto_common_channels_local(client_p, false, 0, CAP_CHGHOST, ":%s!%s@%s QUIT :Changing hostname",
                                  client_p->name, client_p->username, client_p->host);
 
-  sendto_common_channels_local(client_p, 0, CAP_CHGHOST, 0, ":%s!%s@%s CHGHOST %s %s",
+  sendto_common_channels_local(client_p, false, CAP_CHGHOST, 0, ":%s!%s@%s CHGHOST %s %s",
                                client_p->name, client_p->username,
                                client_p->host, client_p->username, hostname);
 
@@ -773,7 +773,7 @@ user_set_hostmask(struct Client *client_p, const char *hostname)
   }
 
   if (client_p->away[0])
-    sendto_common_channels_local(client_p, 0, CAP_AWAY_NOTIFY, CAP_CHGHOST,
+    sendto_common_channels_local(client_p, false, CAP_AWAY_NOTIFY, CAP_CHGHOST,
                                  ":%s!%s@%s AWAY :%s",
                                  client_p->name, client_p->username,
                                  client_p->host, client_p->away);

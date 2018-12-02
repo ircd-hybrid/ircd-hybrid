@@ -242,7 +242,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
                        "Nick change: From %s to %s [%s@%s]",
                        source_p->name, nick, source_p->username, source_p->host);
-  sendto_common_channels_local(source_p, 1, 0, 0, ":%s!%s@%s NICK :%s",
+  sendto_common_channels_local(source_p, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source_p->name, source_p->username,
                                source_p->host, nick);
   whowas_add_history(source_p, true);
@@ -295,7 +295,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
   sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
                        "Nick change: From %s to %s [%s@%s]",
                        source_p->name, parv[1], source_p->username, source_p->host);
-  sendto_common_channels_local(source_p, 1, 0, 0, ":%s!%s@%s NICK :%s",
+  sendto_common_channels_local(source_p, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source_p->name, source_p->username,
                                source_p->host, parv[1]);
 

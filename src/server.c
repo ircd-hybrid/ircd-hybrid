@@ -618,7 +618,7 @@ server_tls_handshake(fde_t *F, void *data)
 
   comm_settimeout(F, 0, NULL, NULL);
 
-  if (!tls_verify_cert(&F->ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp))
+  if (tls_verify_cert(&F->ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp) == false)
     ilog(LOG_TYPE_IRCD, "Server %s!%s@%s gave bad TLS client certificate",
          client_p->name, client_p->username, client_p->host);
 
@@ -633,7 +633,7 @@ server_tls_connect_init(struct Client *client_p, const struct MaskItem *conf, fd
   assert(client_p->connection->fd);
   assert(client_p->connection->fd == F);
 
-  if (!tls_new(&F->ssl, F->fd, TLS_ROLE_CLIENT))
+  if (tls_new(&F->ssl, F->fd, TLS_ROLE_CLIENT) == false)
   {
     SetDead(client_p);
     exit_client(client_p, "TLS context initialization failed");

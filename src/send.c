@@ -478,7 +478,7 @@ sendto_server(const struct Client *one,
  *		  used by m_nick.c and exit_one_client.
  */
 void
-sendto_common_channels_local(struct Client *user, int touser, unsigned int poscap,
+sendto_common_channels_local(struct Client *user, bool touser, unsigned int poscap,
                              unsigned int negcap, const char *pattern, ...)
 {
   va_list args;
@@ -519,7 +519,7 @@ sendto_common_channels_local(struct Client *user, int touser, unsigned int posca
     }
   }
 
-  if (touser && MyConnect(user) && !IsDead(user) &&
+  if (touser == true && MyConnect(user) && !IsDead(user) &&
       user->connection->serial != current_serial)
     if (HasCap(user, poscap) == poscap)
       send_message(user, buffer);

@@ -43,12 +43,12 @@
 /*! \brief Blindly opers up given source_p, using conf info.
  *         All checks on passwords have already been done.
  * \param source_p Pointer to given client to oper
+ * \param conf operator {} configuration record
  */
 static void
-oper_up(struct Client *source_p)
+oper_up(struct Client *source_p, const struct MaskItem *conf)
 {
   const unsigned int old = source_p->umodes;
-  const struct MaskItem *const conf = source_p->connection->confs.head->data;
 
   ++Count.oper;
   SetOper(source_p);
@@ -175,7 +175,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    oper_up(source_p);
+    oper_up(source_p, conf);
   }
   else
   {

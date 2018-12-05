@@ -87,9 +87,6 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
 {
   dlink_list *list;
 
-  if (resv_find(mask, irccmp))
-    return NULL;
-
   if (IsChanPrefix(*mask))
     list = &resv_chan_list;
   else

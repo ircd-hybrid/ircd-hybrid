@@ -65,14 +65,15 @@ resv_handle(struct Client *source_p, struct aline_ctx *aline)
   }
 
   struct ResvItem *resv;
-  if ((resv = resv_make(aline->mask, aline->reason, NULL)) == NULL)
+  if ((resv = resv_find(aline->mask, irccmp)))
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", aline->mask);
+      sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", resv->mask);
 
     return;
   }
 
+  resv = resv_make(aline->mask, aline->reason, NULL);
   resv->setat = CurrentTime;
   resv->in_database = true;
 

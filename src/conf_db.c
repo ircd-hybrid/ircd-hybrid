@@ -753,9 +753,7 @@ load_resv_database(const char *filename)
     SAFE_READ(read_uint64(&tmp64_setat, f));
     SAFE_READ(read_uint64(&tmp64_hold, f));
 
-    if ((resv = resv_make(name, reason, NULL)) == NULL)
-      continue;
-
+    resv = resv_make(name, reason, NULL);
     resv->setat = tmp64_setat;
     resv->expire = tmp64_hold;
     resv->in_database = true;

@@ -264,14 +264,14 @@ check_pidfile(const char *filename)
 
   if ((fb = fopen(filename, "r")))
   {
-    if (!fgets(buf, 20, fb))
+    if (fgets(buf, 20, fb) == NULL)
       ilog(LOG_TYPE_IRCD, "Error reading from pid file %s: %s",
            filename, strerror(errno));
     else
     {
       pid_t pid = atoi(buf);
 
-      if (!kill(pid, 0))
+      if (kill(pid, 0) == 0)
       {
         /* log(L_ERROR, "Server is already running"); */
         printf("ircd: daemon is already running\n");
@@ -299,7 +299,7 @@ setup_corefile(void)
   struct rlimit rlim; /* resource limits */
 
   /* Set corefilesize to maximum */
-  if (!getrlimit(RLIMIT_CORE, &rlim))
+  if (getrlimit(RLIMIT_CORE, &rlim) == 0)
   {
     rlim.rlim_cur = rlim.rlim_max;
     setrlimit(RLIMIT_CORE, &rlim);
@@ -341,7 +341,7 @@ int
 main(int argc, char *argv[])
 {
   /* Check to see if the user is running us as root, which is a nono */
-  if (!geteuid())
+  if (geteuid() == 0)
   {
     fprintf(stderr, "ERROR: This server won't run as root/superuser\n");
     return -1;

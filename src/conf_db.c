@@ -123,7 +123,6 @@ static struct dbFILE *
 open_db_write(const char *filename, uint32_t version)
 {
   struct dbFILE *f = xcalloc(sizeof(*f));
-  int fd = 0;
 
   strlcpy(f->filename, filename, sizeof(f->filename));
 
@@ -144,7 +143,10 @@ open_db_write(const char *filename, uint32_t version)
   remove(f->tempname);
 
   /* Use open() to avoid people sneaking a new file in under us */
-  fd = open(f->tempname, O_WRONLY | O_CREAT | O_EXCL, 0666);
+  /*
+   * TBD: replace with C11 fopen "x" mode
+   */
+  int fd = open(f->tempname, O_WRONLY | O_CREAT | O_EXCL, 0666);
   if (fd >= 0)
     f->fp = fdopen(fd, "wb");
 
@@ -239,15 +241,13 @@ restore_db(struct dbFILE *f)
 static bool
 close_db(struct dbFILE *f)
 {
-  int res;
-
   if (f->fp == NULL)
   {
     errno = EINVAL;
     return false;
   }
 
-  res = fclose(f->fp);
+  int res = fclose(f->fp);
   f->fp = NULL;
 
   if (res)
@@ -311,7 +311,7 @@ bool
 write_uint16(uint16_t val, struct dbFILE *f)
 {
   if (fputc((val >> 8) & 0xFF, f->fp) == EOF ||
-      fputc(val        & 0xFF, f->fp) == EOF)
+      fputc((val)      & 0xFF, f->fp) == EOF)
     return false;
 
   return true;
@@ -424,7 +424,6 @@ write_uint64(uint64_t val, struct dbFILE *f)
 bool
 read_string(char **ret, struct dbFILE *f)
 {
-  char *s = NULL;
   uint32_t len = 0;
 
   if (read_uint32(&len, f) == false)
@@ -436,8 +435,7 @@ read_string(char **ret, struct dbFILE *f)
     return true;
   }
 
-  s = xcalloc(len);
-
+  char *s = xcalloc(len);
   if (len != fread(s, 1, len, f->fp))
   {
     xfree(s);
@@ -457,13 +455,10 @@ read_string(char **ret, struct dbFILE *f)
 bool
 write_string(const char *s, struct dbFILE *f)
 {
-  uint32_t len = 0;
-
   if (s == NULL)
     return write_uint32(0, f);
 
-  len = strlen(s);
-
+  uint32_t len = strlen(s);
   if (len > 4294967294)
     len = 4294967294;
   if (write_uint32(len + 1, f) == false)
@@ -498,7 +493,7 @@ save_kline_database(const char *filename)
   struct dbFILE *f = NULL;
   dlink_node *ptr = NULL;
 
-  if (!(f = open_db(filename, "w", KLINE_DB_VERSION)))
+  if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)

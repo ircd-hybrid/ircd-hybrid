@@ -36,7 +36,7 @@ date(uintmax_t lclock)
   static char buf[80];
   static uintmax_t lclock_last;
 
-  if (!lclock)
+  if (lclock == 0)
     lclock = CurrentTime;
 
   if (lclock_last != lclock)
@@ -54,7 +54,7 @@ date_iso8601(uintmax_t lclock)
   static char buf[MAX_DATE_STRING];
   static uintmax_t lclock_last;
 
-  if (!lclock)
+  if (lclock == 0)
     lclock = CurrentTime;
 
   if (lclock_last != lclock)
@@ -84,7 +84,7 @@ date_ctime(uintmax_t lclock)
   static char buf[MAX_DATE_STRING];
   static uintmax_t lclock_last;
 
-  if (!lclock)
+  if (lclock == 0)
     lclock = CurrentTime;
 
   if (lclock_last != lclock)

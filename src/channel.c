@@ -620,12 +620,12 @@ find_bmask(const struct Client *client_p, const dlink_list *list)
   {
     const struct Ban *ban = node->data;
 
-    if (!match(ban->name, client_p->name) && !match(ban->user, client_p->username))
+    if (match(ban->name, client_p->name) == 0 && match(ban->user, client_p->username) == 0)
     {
       switch (ban->type)
       {
         case HM_HOST:
-          if (!match(ban->host, client_p->host) || !match(ban->host, client_p->sockhost))
+          if (match(ban->host, client_p->host) == 0 || match(ban->host, client_p->sockhost) == 0)
             return true;
           break;
         case HM_IPV4:
@@ -686,7 +686,7 @@ can_join(struct Client *client_p, struct Channel *chptr, const char *key)
       if (find_bmask(client_p, &chptr->invexlist) == false)
         return ERR_INVITEONLYCHAN;
 
-  if (chptr->mode.key[0] && (!key || strcmp(chptr->mode.key, key)))
+  if (chptr->mode.key[0] && (key == NULL || strcmp(chptr->mode.key, key)))
     return ERR_BADCHANNELKEY;
 
   if (chptr->mode.limit && dlink_list_length(&chptr->members) >=

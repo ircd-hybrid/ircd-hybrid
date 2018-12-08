@@ -50,8 +50,8 @@ class_make(void)
 {
   struct ClassItem *class = xcalloc(sizeof(*class));
 
-  class->active    = true;
-  class->con_freq  = DEFAULT_CONNECTFREQUENCY;
+  class->active = true;
+  class->con_freq = DEFAULT_CONNECTFREQUENCY;
   class->ping_freq = DEFAULT_PINGFREQUENCY;
   class->max_total = MAXIMUM_LINKS_DEFAULT;
   class->max_sendq = DEFAULT_SENDQ;

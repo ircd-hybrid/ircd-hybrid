@@ -103,10 +103,9 @@ outofmemory(void)
   static bool was_here = false;
 
   if (was_here == false)
-  {
     was_here = true;
+  else
     abort();
-  }
 
   server_die("out of memory", SERVER_RESTART);
 }

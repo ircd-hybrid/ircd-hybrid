@@ -274,7 +274,7 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
     if (HasUMode(target_p, UMODE_CALLERID | UMODE_SOFTCALLERID) &&
         accept_message(source_p, target_p) == false)
     {
-      const int callerid = !!HasUMode(target_p, UMODE_CALLERID);
+      bool callerid = HasUMode(target_p, UMODE_CALLERID) != 0;
 
       /* check for accept, flag recipient incoming message */
       if (notice == false)

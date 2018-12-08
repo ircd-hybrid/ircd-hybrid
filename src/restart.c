@@ -41,11 +41,16 @@ void
 server_die(const char *message, int action)
 {
   char buffer[IRCD_BUFSIZE] = "";
-  dlink_node *node = NULL;
-  static int was_here = 0;
+  dlink_node *node;
 
-  if (action == SERVER_RESTART && was_here++)
-    abort();
+  if (action == SERVER_RESTART)
+  {
+    static bool was_here = false;
+    if (was_here == false)
+      was_here = true;
+    else
+      abort(); 
+  } 
 
   if (EmptyString(message))
     snprintf(buffer, sizeof(buffer), "Server %s",

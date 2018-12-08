@@ -1503,7 +1503,7 @@ split_nuh(struct split_nuh_item *const iptr)
     else
     {
       /* No @ found */
-      if (!iptr->nickptr || strpbrk(iptr->nuhmask, ".:"))
+      if (iptr->nickptr == NULL || strpbrk(iptr->nuhmask, ".:"))
         strlcpy(iptr->hostptr, iptr->nuhmask, iptr->hostsize);
       else
         strlcpy(iptr->nickptr, iptr->nuhmask, iptr->nicksize);

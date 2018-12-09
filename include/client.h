@@ -343,7 +343,6 @@ struct Connection
    * decay to avoid flooding.
    *   -- adrian
    */
-  int allow_read;  /**< How many we're allowed to read in this second */
   int sent_parsed;  /**< How many messages we've parsed in this second */
 
   char *password;  /**< Password supplied by the client/server */

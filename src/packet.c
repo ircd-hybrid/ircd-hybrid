@@ -213,7 +213,7 @@ parse_client_queued(struct Client *client_p)
        * and no 'bursts' will be permitted.
        */
       if (checkflood == true)
-        if (client_p->connection->sent_parsed >= client_p->connection->allow_read)
+        if (client_p->connection->sent_parsed >= (IsFloodDone(client_p) ? MAX_FLOOD : MAX_FLOOD_BURST))
           break;
 
       size_t dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
@@ -234,9 +234,6 @@ void
 flood_endgrace(struct Client *client_p)
 {
   AddFlag(client_p, FLAGS_FLOODDONE);
-
-  /* Drop their flood limit back down */
-  client_p->connection->allow_read = MAX_FLOOD;
 
   /*
    * sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,

@@ -680,10 +680,6 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /* Mark end of grace period, to prevent nickflooding */
-  if (!IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
   /* Terminate nick to NICKLEN */
   strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
@@ -883,6 +879,7 @@ static struct Message nick_msgtab =
 {
   .cmd = "NICK",
   .args_max = MAXPARA,
+  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = mr_nick,
   .handlers[CLIENT_HANDLER] = m_nick,
   .handlers[SERVER_HANDLER] = ms_nick,

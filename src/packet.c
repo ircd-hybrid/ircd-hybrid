@@ -233,6 +233,9 @@ parse_client_queued(struct Client *client_p)
 void
 flood_endgrace(struct Client *client_p)
 {
+  if (IsFloodDone(client_p))
+    return;  /* Grace period has already ended */
+
   AddFlag(client_p, FLAGS_FLOODDONE);
 
   /*

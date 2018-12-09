@@ -73,9 +73,6 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
@@ -229,6 +226,7 @@ static struct Message invite_msgtab =
 {
   .cmd = "INVITE",
   .args_max = MAXPARA,
+  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_invite,
   .handlers[SERVER_HANDLER] = ms_invite,

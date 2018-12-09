@@ -231,13 +231,7 @@ m_mode(struct Client *source_p, int parc, char *parv[])
   }
 
   if (MyClient(source_p))
-  {
     member = find_channel_link(source_p, chptr);
-
-    if (!IsFloodDone(source_p))
-      if (!((parc == 3) && (parv[2][0] == 'b') && (parv[2][1] == '\0')))
-        flood_endgrace(source_p);
-  }
 
   channel_mode_set(source_p, chptr, member, parc - 2, parv + 2);
   return 0;

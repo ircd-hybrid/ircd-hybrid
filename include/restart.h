@@ -27,11 +27,5 @@
 #ifndef INCLUDED_restart_h
 #define INCLUDED_restart_h
 
-enum
-{
-  SERVER_SHUTDOWN,
-  SERVER_RESTART
-};
-
-extern void server_die(const char *, int);
+extern void server_die(const char *, bool);
 #endif  /* INCLUDED_restart_h */

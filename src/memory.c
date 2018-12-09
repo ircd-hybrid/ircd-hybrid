@@ -107,5 +107,5 @@ outofmemory(void)
   else
     abort();
 
-  server_die("out of memory", SERVER_RESTART);
+  server_die("out of memory", true);
 }

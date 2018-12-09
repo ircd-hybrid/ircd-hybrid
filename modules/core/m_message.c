@@ -575,10 +575,6 @@ m_message(bool notice, struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  /* Finish the flood grace period... */
-  if (MyClient(source_p) && !IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
   build_target_list(notice, source_p, parv[1], parv[2]);
 
   for (unsigned int i = 0; i < ntargets; ++i)
@@ -624,6 +620,7 @@ static struct Message privmsg_msgtab =
 {
   .cmd = "PRIVMSG",
   .args_max = MAXPARA,
+  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_privmsg,
   .handlers[SERVER_HANDLER] = m_privmsg,

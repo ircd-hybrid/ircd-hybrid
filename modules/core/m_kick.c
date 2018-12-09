@@ -69,9 +69,6 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
@@ -184,6 +181,7 @@ static struct Message kick_msgtab =
   .cmd = "KICK",
   .args_min = 3,
   .args_max = MAXPARA,
+  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_kick,
   .handlers[SERVER_HANDLER] = ms_kick,

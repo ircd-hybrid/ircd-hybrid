@@ -39,6 +39,7 @@
 #include "memory.h"
 #include "user.h"
 #include "server.h"
+#include "packet.h"
 
 
 /*
@@ -221,8 +222,10 @@ parse_handle_command(struct Message *message, struct Client *source_p,
 {
   if (IsServer(source_p->from))
     ++message->rcount;
-
   ++message->count;
+
+  if (MyClient(source_p) && (message->flags & MFLG_ENDGRACE))
+    flood_endgrace(source_p);
 
   /* Check right amount of parameters is passed... --is */
   if (i < message->args_min)

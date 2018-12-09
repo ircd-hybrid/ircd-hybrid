@@ -63,9 +63,6 @@ m_topic(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (!IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
@@ -191,6 +188,7 @@ static struct Message topic_msgtab =
   .cmd = "TOPIC",
   .args_min = 2,
   .args_max = MAXPARA,
+  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_topic,
   .handlers[SERVER_HANDLER] = ms_topic,

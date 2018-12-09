@@ -60,10 +60,6 @@ m_part(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /* Finish the flood grace period... */
-  if (MyClient(source_p) && !IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
   channel_do_part(source_p, parv[1], parv[2]);
   return 0;
 }
@@ -73,6 +69,7 @@ static struct Message part_msgtab =
   .cmd = "PART",
   .args_min = 2,
   .args_max = MAXPARA,
+  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_part,
   .handlers[SERVER_HANDLER] = m_part,

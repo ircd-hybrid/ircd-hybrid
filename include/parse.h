@@ -88,11 +88,13 @@ struct Message
   int (*handlers[LAST_HANDLER_TYPE])(struct Client *, int, char *[]);
 };
 
-/*
- * Constants
- */
-#define MFLG_EXTRA 0x00000001U
 #define MAXPARA    15
+
+enum
+{
+  MFLG_EXTRA    = 1 << 0,
+  MFLG_ENDGRACE = 1 << 1
+};
 
 extern void parse(struct Client *, char *, char *);
 extern void mod_add_cmd(struct Message *);

@@ -135,10 +135,6 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  /* end the grace period */
-  if (!IsFloodDone(source_p))
-    flood_endgrace(source_p);
-
   struct MaskItem *conf;
   if ((conf = operator_find(source_p, opername)) == NULL)
   {
@@ -210,6 +206,7 @@ static struct Message oper_msgtab =
   .cmd = "OPER",
   .args_min = 3,
   .args_max = MAXPARA,
+  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_oper,
   .handlers[SERVER_HANDLER] = m_ignore,

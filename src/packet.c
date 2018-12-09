@@ -78,10 +78,10 @@ client_dopacket(struct Client *client_p, char *buffer, unsigned int length)
  * output       - length of <buffer>
  * side effects - one line is copied and removed from the dbuf
  */
-static unsigned int
+static size_t
 extract_one_line(struct dbuf_queue *qptr, char *buffer)
 {
-  unsigned int line_bytes = 0, eol_bytes = 0;
+  size_t line_bytes = 0, eol_bytes = 0;
   dlink_node *node;
 
   DLINK_FOREACH(node, qptr->blocks.head)
@@ -136,8 +136,6 @@ out:
 static void
 parse_client_queued(struct Client *client_p)
 {
-  unsigned int dolen = 0;
-
   if (IsUnknown(client_p))
   {
     unsigned int i = 0;
@@ -151,8 +149,7 @@ parse_client_queued(struct Client *client_p)
       if (i >= MAX_FLOOD)
         break;
 
-      dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
-
+      size_t dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
       if (dolen == 0)
         break;
 
@@ -175,7 +172,8 @@ parse_client_queued(struct Client *client_p)
       if (IsDefunct(client_p))
         return;
 
-      if ((dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf)) == 0)
+      size_t dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
+      if (dolen == 0)
         break;
 
       client_dopacket(client_p, readBuf, dolen);
@@ -218,8 +216,7 @@ parse_client_queued(struct Client *client_p)
         if (client_p->connection->sent_parsed >= client_p->connection->allow_read)
           break;
 
-      dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
-
+      size_t dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
       if (dolen == 0)
         break;
 

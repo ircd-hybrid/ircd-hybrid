@@ -146,7 +146,7 @@ set_time(void)
 
     snprintf(buf, sizeof(buf), "Clock failure, TS can be corrupted: %s",
              strerror(errno));
-    server_die(buf, SERVER_SHUTDOWN);
+    server_die(buf, false);
   }
 
   if ((uintmax_t)newtime.tv_sec < CurrentTime)

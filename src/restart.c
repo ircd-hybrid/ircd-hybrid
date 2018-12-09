@@ -38,12 +38,12 @@
 
 
 void
-server_die(const char *message, int action)
+server_die(const char *message, bool restart)
 {
   char buffer[IRCD_BUFSIZE] = "";
   dlink_node *node;
 
-  if (action == SERVER_RESTART)
+  if (restart == true)
   {
     static bool was_here = false;
     if (was_here == false)
@@ -54,10 +54,10 @@ server_die(const char *message, int action)
 
   if (EmptyString(message))
     snprintf(buffer, sizeof(buffer), "Server %s",
-             action == SERVER_RESTART ? "Restarting" : "Terminating");
+             restart ? "Restarting" : "Terminating");
   else
     snprintf(buffer, sizeof(buffer), "Server %s: %s",
-             action == SERVER_RESTART ? "Restarting" : "Terminating", message);
+             restart ? "Restarting" : "Terminating", message);
 
   DLINK_FOREACH(node, local_client_list.head)
     sendto_one_notice(node->data, &me, ":%s", buffer);
@@ -73,7 +73,7 @@ server_die(const char *message, int action)
 
   unlink(pidFileName);
 
-  if (action == SERVER_RESTART)
+  if (restart == true)
   {
     execv(SPATH, myargv);
     exit(EXIT_FAILURE);

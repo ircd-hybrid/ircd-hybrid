@@ -133,7 +133,6 @@ auth_release_client(struct AuthRequest *auth)
    * us. This is what read_packet() does.
    *     -- adrian
    */
-  client->connection->allow_read = MAX_FLOOD;
   comm_setflush(client->connection->fd, 1000, flood_recalc, client);
 
   client->connection->since     = CurrentTime;

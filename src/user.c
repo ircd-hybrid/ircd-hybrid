@@ -336,10 +336,6 @@ register_local_user(struct Client *client_p)
       return;
   }
 
-  client_p->connection->last_privmsg = CurrentTime;
-  /* Straight up the maximum rate of flooding... */
-  client_p->connection->allow_read = MAX_FLOOD_BURST;
-
   if (check_client(client_p) == 0)
     return;
 
@@ -455,6 +451,8 @@ register_local_user(struct Client *client_p)
   assert(client_p->servptr == &me);
 
   SetClient(client_p);
+  client_p->connection->last_privmsg = CurrentTime;
+
   dlinkAdd(client_p, &client_p->lnode, &client_p->servptr->serv->client_list);
   dlinkAdd(client_p, &client_p->node, &global_client_list);
 

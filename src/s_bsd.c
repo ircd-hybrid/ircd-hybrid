@@ -271,6 +271,7 @@ comm_ignore_errno(int ierrno)
 void
 comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
+  assert(F);
   assert(F->flags.open == true);
 
   F->timeout = CurrentTime + (timeout / 1000);
@@ -293,6 +294,7 @@ comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), 
 void
 comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
 {
+  assert(F);
   assert(F->flags.open == true);
 
   F->flush_timeout = CurrentTime + (timeout / 1000);

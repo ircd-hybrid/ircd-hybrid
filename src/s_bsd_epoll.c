@@ -87,6 +87,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
   int new_events, op;
   struct epoll_event ep_event;
 
+  assert(F);
   assert(F->flags.open == true);
 
   if ((type & COMM_SELECT_READ))

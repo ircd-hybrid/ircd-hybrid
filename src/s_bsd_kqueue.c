@@ -91,6 +91,9 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 {
   int new_events, diff;
 
+  assert(F);
+  assert(F->flags.open == true);
+
   if ((type & COMM_SELECT_READ))
   {
     F->read_handler = handler;

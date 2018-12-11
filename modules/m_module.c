@@ -74,14 +74,14 @@ module_unload(struct Client *source_p, const char *arg)
     return;
   }
 
-  if (modp->flags & MODULE_FLAG_CORE)
+  if (modp->is_core == true)
   {
     sendto_one_notice(source_p, &me, ":Module %s is a core module and may not be unloaded",
                       m_bn);
     return;
   }
 
-  if (modp->flags & MODULE_FLAG_NOUNLOAD)
+  if (modp->is_resident == true)
   {
     sendto_one_notice(source_p, &me, ":Module %s is a resident module and may not be unloaded",
                       m_bn);
@@ -115,7 +115,7 @@ module_reload(struct Client *source_p, const char *arg)
     {
       modp = node->data;
 
-      if (!(modp->flags & MODULE_FLAG_NOUNLOAD))
+      if (modp->is_resident == false)
         unload_one_module(modp->name, false);
     }
 
@@ -137,12 +137,15 @@ module_reload(struct Client *source_p, const char *arg)
     return;
   }
 
-  if (modp->flags & MODULE_FLAG_NOUNLOAD)
+  if (modp->is_resident == true)
   {
     sendto_one_notice(source_p, &me, ":Module %s is a resident module and may not be unloaded",
                       m_bn);
     return;
   }
+
+  /* Cache modp->is_core for later use after the module is unloaded */
+  bool is_core = modp->is_core;
 
   if (unload_one_module(m_bn, true) == false)
   {
@@ -150,8 +153,7 @@ module_reload(struct Client *source_p, const char *arg)
     return;
   }
 
-  bool check_core = (modp->flags & MODULE_FLAG_CORE) != 0;
-  if (load_one_module(arg) == false && check_core == true)
+  if (load_one_module(arg) == false && is_core == true)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error reloading core "
@@ -180,7 +182,7 @@ module_list(struct Client *source_p, const char *arg)
 
     sendto_one_numeric(source_p, &me, RPL_MODLIST,
                        modp->name, modp->handle,
-                       modp->version, (modp->flags & MODULE_FLAG_CORE) ? "(core)" : "");
+                       modp->version, modp->is_core == true ? "(core)" : "");
   }
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFMODLIST);
@@ -282,5 +284,5 @@ struct module module_entry =
   .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
-  .flags   = MODULE_FLAG_NOUNLOAD
+  .is_resident = true
 };

@@ -122,7 +122,7 @@ auth_release_client(struct AuthRequest *auth)
 {
   struct Client *client = auth->client;
 
-  if (IsDoingAuth(auth) || IsDNSPending(auth))
+  if (auth->ident_pending == true || auth->dns_pending == true)
     return;
 
   auth_free(auth);
@@ -178,7 +178,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 {
   struct AuthRequest *const auth = vptr;
 
-  ClearDNSPending(auth);
+  auth->dns_pending = false;
 
   if (EmptyString(name))
     auth_sendheader(auth->client, REPORT_FAIL_DNS);
@@ -236,8 +236,7 @@ auth_error(struct AuthRequest *auth)
 
   fd_close(auth->fd);
   auth->fd = NULL;
-
-  ClearAuth(auth);
+  auth->ident_pending = false;
 
   auth_sendheader(auth->client, REPORT_FAIL_ID);
 
@@ -358,8 +357,7 @@ auth_read_reply(fde_t *F, void *data)
 
   fd_close(auth->fd);
   auth->fd = NULL;
-
-  ClearAuth(auth);
+  auth->ident_pending = false;
 
   if (EmptyString(username))
   {
@@ -458,8 +456,8 @@ auth_start_query(struct AuthRequest *auth)
   }
 
   auth->fd = fd_open(fd, true, "ident");
+  auth->ident_pending = true;
 
-  SetDoingAuth(auth);
   auth_sendheader(auth->client, REPORT_DO_ID);
 
   /*
@@ -496,7 +494,7 @@ auth_start(struct Client *client_p)
 
   auth_sendheader(client_p, REPORT_DO_DNS);
 
-  SetDNSPending(auth);
+  auth->dns_pending = true;
 
   if (ConfigGeneral.disable_auth == 0)
     auth_start_query(auth);
@@ -510,18 +508,17 @@ auth_start(struct Client *client_p)
 void
 auth_delete(struct AuthRequest *auth)
 {
-  if (IsDoingAuth(auth))
+  if (auth->ident_pending == true)
   {
     fd_close(auth->fd);
     auth->fd = NULL;
-
-    ClearAuth(auth);
+    auth->ident_pending = false;
   }
 
-  if (IsDNSPending(auth))
+  if (auth->dns_pending == true)
   {
     delete_resolver_queries(auth);
-    ClearDNSPending(auth);
+    auth->dns_pending = false;
   }
 
   auth_free(auth);
@@ -543,22 +540,21 @@ auth_timeout_queries(void *notused)
     if (auth->timeout > CurrentTime)
       break;
 
-    if (IsDoingAuth(auth))
+    if (auth->ident_pending == true)
     {
       ++ServerStats.is_abad;
 
       fd_close(auth->fd);
       auth->fd = NULL;
-
-      ClearAuth(auth);
+      auth->ident_pending = false;
 
       auth_sendheader(auth->client, REPORT_FAIL_ID);
     }
 
-    if (IsDNSPending(auth))
+    if (auth->dns_pending == true)
     {
       delete_resolver_queries(auth);
-      ClearDNSPending(auth);
+      auth->dns_pending = false;
 
       auth_sendheader(auth->client, REPORT_FAIL_DNS);
     }

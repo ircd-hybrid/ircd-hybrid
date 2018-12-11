@@ -30,27 +30,14 @@
 enum { RFC1413_BUFSIZ = 512 };  /**< rfc1413 says we MUST accept 512 bytes */
 enum { RFC1413_PORT   = 113 };  /**< As defined per rfc1413, IDENT server listens on TCP port 113 */
 
-enum
-{
-  AM_DOING_AUTH  = 1 << 0,
-  AM_DNS_PENDING = 1 << 1
-};
-
-#define SetDNSPending(x)     ((x)->flags |= AM_DNS_PENDING)
-#define ClearDNSPending(x)   ((x)->flags &= ~AM_DNS_PENDING)
-#define IsDNSPending(x)      ((x)->flags &  AM_DNS_PENDING)
-
-#define SetDoingAuth(x)      ((x)->flags |= AM_DOING_AUTH)
-#define ClearAuth(x)         ((x)->flags &= ~AM_DOING_AUTH)
-#define IsDoingAuth(x)       ((x)->flags &  AM_DOING_AUTH)
-
 struct Client;
 
 /** Stores state of the DNS and RFC 1413 ident lookups for a client. */
 struct AuthRequest
 {
   dlink_node node;        /**< Doubly linked list node. */
-  unsigned int flags;     /**< Current state of request. */
+  bool dns_pending;       /**< 'true' as long as dns request hasn't finished */
+  bool ident_pending;     /**< 'true' as long as identd request hasn't finished */
   struct Client *client;  /**< Pointer to Client structure for request. */
   fde_t *fd;              /**< File descriptor for identd queries. */
   uintmax_t timeout;      /**< Time when query expires. */

@@ -27,12 +27,6 @@
 #ifndef INCLUDED_modules_h
 #define INCLUDED_modules_h
 
-enum
-{
-  MODULE_FLAG_CORE     = 1 << 0,
-  MODULE_FLAG_NOUNLOAD = 1 << 1
-};
-
 struct module
 {
   dlink_node node;
@@ -41,7 +35,8 @@ struct module
   void *handle;
   void (*modinit)(void);
   void (*modexit)(void);
-  unsigned int flags;
+  bool is_resident;
+  bool is_core;
 };
 
 struct module_path

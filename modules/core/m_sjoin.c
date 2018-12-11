@@ -290,7 +290,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   while (*s)
   {
-    bool valid_mode = true;
+    int valid_mode = 1;
     fl = 0;
 
     do
@@ -310,10 +310,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
           ++s;
           break;
         default:
-          valid_mode = false;
+          valid_mode = 0;
           break;
       }
-    } while (valid_mode == true);
+    } while (valid_mode);
 
     /*
      * If the client doesn't exist, or if it's fake direction/server, skip.
@@ -768,5 +768,5 @@ struct module module_entry =
   .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
-  .flags   = MODULE_FLAG_CORE
+  .is_core = true
 };

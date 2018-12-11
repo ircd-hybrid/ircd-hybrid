@@ -452,5 +452,5 @@ struct module module_entry =
   .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
-  .flags   = MODULE_FLAG_CORE
+  .is_core = true
 };

@@ -80,6 +80,9 @@ do_away(struct Client *source_p, const char *message)
     source_p->connection->away.last_attempt = CurrentTime;
     source_p->connection->away.count++;
     sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
+
+    if (strncmp(source_p->away, message, sizeof(source_p->away) - 1) == 0)
+      return;
   }
 
   strlcpy(source_p->away, message, sizeof(source_p->away));

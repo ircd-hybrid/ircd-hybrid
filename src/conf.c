@@ -252,55 +252,51 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
 static int
 verify_access(struct Client *client_p)
 {
-  struct MaskItem *conf = NULL;
+  struct MaskItem *conf;
 
   if (HasFlag(client_p, FLAGS_GOTID))
-  {
-    conf = find_address_conf(client_p->host, client_p->username,
-                             &client_p->ip,
+    conf = find_address_conf(client_p->host, client_p->username, &client_p->ip,
                              client_p->ip.ss.ss_family,
                              client_p->connection->password);
-  }
   else
   {
     char non_ident[USERLEN + 1] = "~";
 
     strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
-    conf = find_address_conf(client_p->host, non_ident,
-                             &client_p->ip,
+    conf = find_address_conf(client_p->host, non_ident, &client_p->ip,
                              client_p->ip.ss.ss_family,
                              client_p->connection->password);
   }
 
-  if (!conf)
+  if (conf == NULL)
     return NOT_AUTHORIZED;
 
   assert(IsConfClient(conf) || IsConfKill(conf));
 
-  if (IsConfClient(conf))
+  if (IsConfKill(conf))
   {
-    if (IsConfRedir(conf))
-    {
-      sendto_one_numeric(client_p, &me, RPL_REDIR,
-                         conf->name ? conf->name : "",
-                         conf->port);
-      return NOT_AUTHORIZED;
-    }
-
-    if (IsConfDoSpoofIp(conf))
-    {
-      if (IsConfSpoofNotice(conf))
-        sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE, "%s spoofing: %s as %s",
-                             client_p->name, client_p->host, conf->name);
-
-      strlcpy(client_p->host, conf->name, sizeof(client_p->host));
-    }
-
-    return attach_iline(client_p, conf);
+    sendto_one_notice(client_p, &me, ":*** Banned: %s", conf->reason);
+    return BANNED_CLIENT;
   }
 
-  sendto_one_notice(client_p, &me, ":*** Banned: %s", conf->reason);
-  return BANNED_CLIENT;
+  if (IsConfRedir(conf))
+  {
+    sendto_one_numeric(client_p, &me, RPL_REDIR,
+                       conf->name ? conf->name : "",
+                       conf->port);
+    return NOT_AUTHORIZED;
+  }
+
+  if (IsConfDoSpoofIp(conf))
+  {
+    if (IsConfSpoofNotice(conf))
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE, "%s spoofing: %s as %s",
+                           client_p->name, client_p->host, conf->name);
+
+    strlcpy(client_p->host, conf->name, sizeof(client_p->host));
+  }
+
+  return attach_iline(client_p, conf);
 }
 
 /* check_client()

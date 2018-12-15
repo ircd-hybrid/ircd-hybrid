@@ -57,6 +57,8 @@
 #include "conf_class.h"
 #include "ipcache.h"
 #include "isupport.h"
+#include "patchlevel.h"
+#include "serno.h"
 
 
 struct SetOptions GlobalSetOptions;  /* /quote set variables */
@@ -312,7 +314,7 @@ setup_corefile(void)
 static void
 print_startup(int pid)
 {
-  printf("ircd: version %s(%s)\n", ircd_version, serno);
+  printf("ircd: version %s(%s)\n", PATCHLEVEL, SERIALNUM);
   printf("ircd: pid %d\n", pid);
   printf("ircd: running in %s mode from %s\n", !server_state.foreground ? "background"
          : "foreground", ConfigGeneral.dpath);
@@ -372,7 +374,7 @@ main(int argc, char *argv[])
 
   if (printVersion == true)
   {
-    printf("ircd: version %s(%s)\n", ircd_version, serno);
+    printf("ircd: version %s(%s)\n", PATCHLEVEL, SERIALNUM);
     exit(EXIT_SUCCESS);
   }
 
@@ -487,7 +489,7 @@ main(int argc, char *argv[])
     event_add(&event_write_links_file, NULL);
   }
 
-  ilog(LOG_TYPE_IRCD, "Server ready. Running version: %s(%s)", ircd_version, serno);
+  ilog(LOG_TYPE_IRCD, "Server ready. Running version: %s(%s)", PATCHLEVEL, SERIALNUM);
   io_loop();
 
   return 0;

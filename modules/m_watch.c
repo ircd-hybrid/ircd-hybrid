@@ -84,8 +84,8 @@ m_watch(struct Client *source_p, int parc, char *parv[])
   if (parc < 2)
     parv[1] = def;
 
-  for (char *s = strtok_r(parv[1], ", ", &p); s;
-             s = strtok_r(NULL,    ", ", &p))
+  for (const char *s = strtok_r(parv[1], ", ", &p); s;
+                   s = strtok_r(NULL,    ", ", &p))
   {
     char *user;
     if ((user = strchr(s, '!')))

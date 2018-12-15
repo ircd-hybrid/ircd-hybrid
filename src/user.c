@@ -51,6 +51,7 @@
 #include "watch.h"
 #include "isupport.h"
 #include "tls.h"
+#include "patchlevel.h"
 
 static char umode_buffer[UMODE_MAX_STR];
 
@@ -265,9 +266,9 @@ user_welcome(struct Client *client_p)
   sendto_one_numeric(client_p, &me, RPL_WELCOME, ConfigServerInfo.network_name,
                      client_p->name, client_p->username, client_p->realhost);
   sendto_one_numeric(client_p, &me, RPL_YOURHOST,
-                     listener_get_name(client_p->connection->listener), ircd_version);
+                     listener_get_name(client_p->connection->listener), PATCHLEVEL);
   sendto_one_numeric(client_p, &me, RPL_CREATED, built_date);
-  sendto_one_numeric(client_p, &me, RPL_MYINFO, me.name, ircd_version, umode_buffer);
+  sendto_one_numeric(client_p, &me, RPL_MYINFO, me.name, PATCHLEVEL, umode_buffer);
 
   isupport_show(client_p);
   show_lusers(client_p);

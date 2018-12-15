@@ -35,6 +35,8 @@
 #include "parse.h"
 #include "modules.h"
 #include "isupport.h"
+#include "patchlevel.h"
+#include "serno.h"
 
 
 /* Option string. */
@@ -80,7 +82,7 @@ m_version(struct Client *source_p, int parc, char *parv[])
     if (server_hunt(source_p, ":%s VERSION :%s", 1, parc, parv)->ret != HUNTED_ISME)
       return 0;
 
-  sendto_one_numeric(source_p, &me, RPL_VERSION, ircd_version, serno,
+  sendto_one_numeric(source_p, &me, RPL_VERSION, PATCHLEVEL, SERIALNUM,
                      me.name, serveropts);
   isupport_show(source_p);
   return 0;
@@ -103,7 +105,7 @@ ms_version(struct Client *source_p, int parc, char *parv[])
   if (server_hunt(source_p, ":%s VERSION :%s", 1, parc, parv)->ret != HUNTED_ISME)
     return 0;
 
-  sendto_one_numeric(source_p, &me, RPL_VERSION, ircd_version, serno,
+  sendto_one_numeric(source_p, &me, RPL_VERSION, PATCHLEVEL, SERIALNUM,
                      me.name, serveropts);
   isupport_show(source_p);
   return 0;

@@ -46,51 +46,32 @@
 static void
 dline_check(const struct AddressRec *arec)
 {
+  dlink_list *tab[] = { &local_client_list, &unknown_list, NULL };
   dlink_node *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
+  for (dlink_list **list = tab; *list; ++list)
   {
-    struct Client *client_p = node->data;
-
-    if (IsDead(client_p))
-      continue;
-
-    switch (arec->masktype)
+    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
     {
-      case HM_IPV4:
-        if (client_p->ip.ss.ss_family == AF_INET)
-          if (match_ipv4(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
-        break;
-      case HM_IPV6:
-        if (client_p->ip.ss.ss_family == AF_INET6)
-          if (match_ipv6(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
-        break;
-      default: break;
-    }
-  }
+      struct Client *client_p = node->data;
 
-  DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
-  {
-    struct Client *client_p = node->data;
+      if (IsDead(client_p))
+        continue;
 
-    if (IsDead(client_p))
-      continue;
-
-    switch (arec->masktype)
-    {
-      case HM_IPV4:
-        if (client_p->ip.ss.ss_family == AF_INET)
-          if (match_ipv4(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
-        break;
-      case HM_IPV6:
-        if (client_p->ip.ss.ss_family == AF_INET6)
-          if (match_ipv6(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
-        break;
-      default: break;
+      switch (arec->masktype)
+      {
+        case HM_IPV4:
+          if (client_p->ip.ss.ss_family == AF_INET)
+            if (match_ipv4(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+              conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
+          break;
+        case HM_IPV6:
+          if (client_p->ip.ss.ss_family == AF_INET6)
+            if (match_ipv6(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+              conf_try_ban(client_p, CLIENT_BAN_DLINE, arec->conf->reason);
+          break;
+        default: break;
+      }
     }
   }
 }

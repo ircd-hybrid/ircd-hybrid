@@ -47,10 +47,11 @@ static void
 dline_check(const struct AddressRec *arec)
 {
   dlink_list *tab[] = { &local_client_list, &unknown_list, NULL };
-  dlink_node *node, *node_next;
 
   for (dlink_list **list = tab; *list; ++list)
   {
+    dlink_node *node, *node_next;
+
     DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       struct Client *client_p = node->data;
@@ -114,6 +115,9 @@ dline_handle(struct Client *source_p, struct aline_ctx *aline)
       aftype = AF_INET6;
       break;
     default:  /* HM_HOST */
+      if (IsClient(source_p))
+        sendto_one_notice(source_p, &me, ":Invalid D-Line");
+
      return;
   }
 

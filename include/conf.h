@@ -152,13 +152,6 @@ struct MaskItem
   char              *cipher_list;
 };
 
-struct CidrItem
-{
-  dlink_node node;
-  struct irc_ssaddr mask;
-  unsigned int number_on_this_cidr;
-};
-
 struct conf_parser_context
 {
   unsigned int boot;

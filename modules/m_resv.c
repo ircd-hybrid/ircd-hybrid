@@ -163,7 +163,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
   {
     .add = true,
     .simple_mask = true,
-    .mask = parv[2],
+    .mask = parv[3],
     .reason = parv[4],
     .server = parv[1],
     .duration = strtoumax(parv[2], NULL, 10)

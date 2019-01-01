@@ -46,6 +46,9 @@ AC_CHECK_HEADERS_ONCE(crypt.h        \
 
 AC_SEARCH_LIBS(crypt, crypt)
 
+# Disable -Wformat-truncation
+AX_APPEND_COMPILE_FLAGS([-Wno-format-truncation])
+
 # Argument processing.
 AX_ARG_IOLOOP_MECHANISM
 AX_ARG_ENABLE_ASSERT

@@ -5,6 +5,7 @@ AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
     AX_APPEND_COMPILE_FLAGS([-Wall])
     AX_APPEND_COMPILE_FLAGS([-Wbad-function-cast])
     AX_APPEND_COMPILE_FLAGS([-Wcast-align])
+    AX_APPEND_COMPILE_FLAGS([-Wcast-function-type])
     AX_APPEND_COMPILE_FLAGS([-Wcast-qual])
     AX_APPEND_COMPILE_FLAGS([-Wclobbered])
     AX_APPEND_COMPILE_FLAGS([-Wduplicated-cond])

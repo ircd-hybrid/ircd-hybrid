@@ -1,5 +1,5 @@
 
-#line 2 "conf_lexer.c"
+#line 3 "conf_lexer.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1712,7 +1712,7 @@ char *yytext;
  */
 /*! \file conf_lexer.l
  * \brief Scans the ircd configuration file for tokens.
- * \version $Id: conf_lexer.l 8496 2018-04-05 12:46:00Z michael $
+ * \version $Id: conf_lexer.l 8751 2019-01-01 11:06:50Z michael $
  */
 #line 33 "conf_lexer.l"
 #include "stdinc.h"
@@ -1724,7 +1724,7 @@ char *yytext;
 #undef YY_INPUT
 #define YY_FATAL_ERROR(msg) conf_yy_fatal_error(msg)
 #define YY_INPUT(buf,result,max_size) \
-  if (!(result = conf_yy_input(buf, max_size))) \
+  if ((result = conf_yy_input(buf, max_size)) == 0) \
     YY_FATAL_ERROR("input in flex scanner failed");
 #define MAX_INCLUDE_DEPTH 10
 
@@ -1745,12 +1745,12 @@ static unsigned int include_stack_ptr;
 
 static void ccomment(void);
 static void cinclude(void);
-static int ieof(void);
+static bool ieof(void);
 
 static int
 conf_yy_input(char *lbuf, unsigned int max_size)
 {
-  return !fgets(lbuf, max_size, conf_parser_ctx.conf_file) ? 0 : strlen(lbuf);
+  return fgets(lbuf, max_size, conf_parser_ctx.conf_file) == NULL ? 0 : strlen(lbuf);
 }
 
 static int
@@ -1759,8 +1759,8 @@ conf_yy_fatal_error(const char *msg)
   return 0;
 }
 
-#line 1762 "conf_lexer.c"
 #line 1763 "conf_lexer.c"
+#line 1764 "conf_lexer.c"
 
 #define INITIAL 0
 
@@ -1977,7 +1977,7 @@ YY_DECL
 	{
 #line 85 "conf_lexer.l"
 
-#line 1980 "conf_lexer.c"
+#line 1981 "conf_lexer.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -3354,14 +3354,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 #line 385 "conf_lexer.l"
-{ if (ieof()) yyterminate(); }
+{ if (ieof() == true) yyterminate(); }
 	YY_BREAK
 case 256:
 YY_RULE_SETUP
 #line 387 "conf_lexer.l"
 ECHO;
 	YY_BREAK
-#line 3364 "conf_lexer.c"
+#line 3365 "conf_lexer.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -4373,7 +4373,7 @@ ccomment(void)
 static void
 cinclude(void)
 {
-  char *p = NULL;
+  char *p;
   char filenamebuf[IRCD_BUFSIZE];
 
   if ((p = strchr(yytext, '<')) == NULL)
@@ -4394,7 +4394,7 @@ cinclude(void)
     snprintf(filenamebuf, sizeof(filenamebuf), "%s/%s", ETCPATH, p);
 
   FILE *tmp_fbfile_in = fopen(filenamebuf, "r");
-  if (!tmp_fbfile_in)
+  if (tmp_fbfile_in == NULL)
   {
     ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
          filenamebuf, strerror(errno));
@@ -4417,13 +4417,13 @@ cinclude(void)
 /* This is function that will be called on EOF in conf file. It will
  * apropriately close conf if it not main conf and swap input buffers -kre
  * */
-static int
+static bool
 ieof(void)
 {
   if (include_stack_ptr == 0)
   {
     lineno = 1;
-    return 1;
+    return true;
   }
 
   /* switch buffer */
@@ -4443,6 +4443,6 @@ ieof(void)
   conf_parser_ctx.conf_file = file->file;
 
   strlcpy(conffilebuf, file->conffile, sizeof(conffilebuf));
-  return 0;
+  return false;
 }
 

@@ -39,7 +39,7 @@
 #undef YY_INPUT
 #define YY_FATAL_ERROR(msg) conf_yy_fatal_error(msg)
 #define YY_INPUT(buf,result,max_size) \
-  if (!(result = conf_yy_input(buf, max_size))) \
+  if ((result = conf_yy_input(buf, max_size)) == 0) \
     YY_FATAL_ERROR("input in flex scanner failed");
 #define MAX_INCLUDE_DEPTH 10
 
@@ -60,12 +60,12 @@ static unsigned int include_stack_ptr;
 
 static void ccomment(void);
 static void cinclude(void);
-static int ieof(void);
+static bool ieof(void);
 
 static int
 conf_yy_input(char *lbuf, unsigned int max_size)
 {
-  return !fgets(lbuf, max_size, conf_parser_ctx.conf_file) ? 0 : strlen(lbuf);
+  return fgets(lbuf, max_size, conf_parser_ctx.conf_file) == NULL ? 0 : strlen(lbuf);
 }
 
 static int
@@ -382,7 +382,7 @@ mb                          { return MBYTES; }
 \.\.                        { return TWODOTS; }
 
 .                           { return yytext[0]; }
-<<EOF>>                     { if (ieof()) yyterminate(); }
+<<EOF>>                     { if (ieof() == true) yyterminate(); }
 
 %%
 
@@ -428,7 +428,7 @@ ccomment(void)
 static void
 cinclude(void)
 {
-  char *p = NULL;
+  char *p;
   char filenamebuf[IRCD_BUFSIZE];
 
   if ((p = strchr(yytext, '<')) == NULL)
@@ -449,7 +449,7 @@ cinclude(void)
     snprintf(filenamebuf, sizeof(filenamebuf), "%s/%s", ETCPATH, p);
 
   FILE *tmp_fbfile_in = fopen(filenamebuf, "r");
-  if (!tmp_fbfile_in)
+  if (tmp_fbfile_in == NULL)
   {
     ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
          filenamebuf, strerror(errno));
@@ -472,13 +472,13 @@ cinclude(void)
 /* This is function that will be called on EOF in conf file. It will
  * apropriately close conf if it not main conf and swap input buffers -kre
  * */
-static int
+static bool
 ieof(void)
 {
   if (include_stack_ptr == 0)
   {
     lineno = 1;
-    return 1;
+    return true;
   }
 
   /* switch buffer */
@@ -498,5 +498,5 @@ ieof(void)
   conf_parser_ctx.conf_file = file->file;
 
   strlcpy(conffilebuf, file->conffile, sizeof(conffilebuf));
-  return 0;
+  return false;
 }

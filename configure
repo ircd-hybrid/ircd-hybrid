@@ -2323,6 +2323,7 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
+as_fn_append ac_func_list " accept4"
 as_fn_append ac_func_list " strtok_r"
 as_fn_append ac_func_list " strlcat"
 as_fn_append ac_func_list " strlcpy"
@@ -14152,6 +14153,8 @@ _ACEOF
 
 fi
 done
+
+
 
 
 

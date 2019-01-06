@@ -308,6 +308,32 @@ setup_corefile(void)
   }
 }
 
+static void
+setup_fdlimit(void)
+{
+  struct rlimit rlim; /* resource limits */
+
+  if (getrlimit(RLIMIT_NOFILE, &rlim))
+  {
+    fprintf(stderr, "getrlimit: couldn't get maximum number of file descriptors: %s\n",
+            strerror(errno));
+    exit(EXIT_FAILURE);
+  }
+
+  if (rlim.rlim_max > 0xFFFF)
+    rlim.rlim_max = 0xFFFF;
+  rlim.rlim_cur = rlim.rlim_max;
+
+  if (setrlimit(RLIMIT_NOFILE, &rlim) == 0)
+    hard_fdlimit = rlim.rlim_cur;
+  else
+  {
+    fprintf(stderr, "setrlimit: couldn't set maximum number of file descriptors: %s\n",
+            strerror(errno));
+    exit(EXIT_FAILURE);
+  }
+}
+
 /*
  * print_startup - print startup information
  */
@@ -351,6 +377,8 @@ main(int argc, char *argv[])
 
   /* Setup corefile size immediately after boot -kre */
   setup_corefile();
+
+  setup_fdlimit();
 
   /* Save server boot time right away, so getrusage works correctly */
   set_time();

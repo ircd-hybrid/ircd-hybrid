@@ -33,7 +33,8 @@ AX_LIBRARY_NET
 AC_C_BIGENDIAN
 
 # Checks for library functions.
-AC_CHECK_FUNCS_ONCE(strtok_r \
+AC_CHECK_FUNCS_ONCE(accept4  \
+                    strtok_r \
                     strlcat  \
                     strlcpy)
 

@@ -160,6 +160,7 @@ fd_note(fde_t *F, const char *format, ...)
     vsnprintf(buf, sizeof(buf), format, args);
     va_end(args);
 
+    xfree(F->desc);
     F->desc = xstrdup(buf);
   }
   else

@@ -106,7 +106,7 @@ fd_open(int fd, bool is_socket, const char *desc)
   F->flags.is_socket = is_socket;
 
   if (desc)
-    strlcpy(F->desc, desc, sizeof(F->desc));
+    F->desc = xstrndup(desc, FD_DESC_SIZE);
 
   fdlist_update_highest_fd(F->fd, true);
   ++number_fd;
@@ -129,6 +129,7 @@ fd_close(fde_t *F)
   if (tls_isusing(&F->ssl))
     tls_free(&F->ssl);
 
+  xfree(F->desc);
   /* Unlike squid, we're actually closing the FD here! -- adrian */
   close(F->fd);
   F->flags.open = false;  /* Must set F->flags.open == false before fdlist_update_highest_fd() */
@@ -150,16 +151,22 @@ fd_close(fde_t *F)
 void
 fd_note(fde_t *F, const char *format, ...)
 {
-  va_list args;
-
   if (format)
   {
+    char buf[FD_DESC_SIZE + 1];
+    va_list args;
+
     va_start(args, format);
-    vsnprintf(F->desc, sizeof(F->desc), format, args);
+    vsnprintf(buf, sizeof(buf), format, args);
     va_end(args);
+
+    F->desc = xstrdup(buf);
   }
   else
-    F->desc[0] = '\0';
+  {
+    xfree(F->desc);
+    F->desc = NULL;
+  }
 }
 
 /* Make sure stdio descriptors (0-2) and profiler descriptor (3)

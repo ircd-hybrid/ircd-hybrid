@@ -31,7 +31,7 @@
 #include "tls.h"
 
 
-enum { FD_DESC_SIZE = 128 };  /* HOSTLEN + comment */
+enum { FD_DESC_SIZE = 80 };  /* HOSTLEN + comment */
 
 enum
 {
@@ -43,8 +43,6 @@ enum
   COMM_ERROR,
   COMM_ERR_MAX
 };
-
-struct Client;
 
 typedef struct _fde
 {
@@ -81,7 +79,6 @@ typedef struct _fde
   struct
   {
     /* We don't need the host here ? */
-    struct irc_ssaddr S;
     struct irc_ssaddr hostaddr;
 
     void (*callback)(struct _fde *, int, void *);

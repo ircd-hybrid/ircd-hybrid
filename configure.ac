@@ -47,9 +47,6 @@ AC_CHECK_HEADERS_ONCE(crypt.h        \
 
 AC_SEARCH_LIBS(crypt, crypt)
 
-# Disable -Wformat-truncation
-AX_APPEND_COMPILE_FLAGS([-Wno-format-truncation])
-
 # Argument processing.
 AX_ARG_IOLOOP_MECHANISM
 AX_ARG_ENABLE_ASSERT
@@ -58,6 +55,9 @@ AX_ARG_ENABLE_WARNINGS
 AX_ARG_ENABLE_EFENCE
 AX_ARG_OPENSSL
 AX_ARG_GNUTLS
+
+# Disable -Wformat-truncation
+AX_APPEND_COMPILE_FLAGS([-Wno-format-truncation])
 
 AX_DEFINE_DIR([PREFIX],[prefix],[Set to prefix.])
 AX_DEFINE_DIR([SYSCONFDIR],[sysconfdir],[Set to sysconfdir.])

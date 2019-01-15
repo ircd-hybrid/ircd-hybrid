@@ -269,9 +269,9 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
   if (ret != GNUTLS_E_SUCCESS)
   {
     /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
-    ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default (NORMAL:%%SERVER_PRECEDENCE:!VERS-SSL3.0)",
+    ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default (NORMAL:%%SERVER_PRECEDENCE:!VERS-TLS1.0:!VERS-SSL3.0)",
          cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list));
-    gnutls_priority_init(&tls_data->context->priorities, "NORMAL:%SERVER_PRECEDENCE:!VERS-SSL3.0", NULL);
+    gnutls_priority_init(&tls_data->context->priorities, "NORMAL:%SERVER_PRECEDENCE:!VERS-TLS1.0:!VERS-SSL3.0", NULL);
     return false;
   }
 

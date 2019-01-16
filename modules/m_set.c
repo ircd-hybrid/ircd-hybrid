@@ -41,28 +41,29 @@
 static void
 quote_autoconn(struct Client *source_p, const char *arg, int newval)
 {
-  if (!EmptyString(arg))
+  if (EmptyString(arg))
   {
-    struct MaskItem *conf = connect_find(arg, irccmp);
-
-    if (conf)
-    {
-      if (newval)
-        SetConfAllowAutoConn(conf);
-      else
-        ClearConfAllowAutoConn(conf);
-
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "%s has changed AUTOCONN for %s to %i",
-                           get_oper_name(source_p), conf->name, newval);
-      sendto_one_notice(source_p, &me, ":AUTOCONN for %s is now set to %i",
-                        conf->name, newval);
-    }
-    else
-      sendto_one_notice(source_p, &me, ":Cannot find %s", arg);
-  }
-  else
     sendto_one_notice(source_p, &me, ":Please specify a server name!");
+    return;
+  }
+
+  struct MaskItem *conf = connect_find(arg, irccmp);
+  if (conf == NULL)
+  {
+    sendto_one_notice(source_p, &me, ":Cannot find %s", arg);
+    return;
+  }
+
+  if (newval)
+    SetConfAllowAutoConn(conf);
+  else
+    ClearConfAllowAutoConn(conf);
+
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                       "%s has changed AUTOCONN for %s to %i",
+                       get_oper_name(source_p), conf->name, newval);
+  sendto_one_notice(source_p, &me, ":AUTOCONN for %s is now set to %i",
+                    conf->name, newval);
 }
 
 /* SET AUTOCONNALL */

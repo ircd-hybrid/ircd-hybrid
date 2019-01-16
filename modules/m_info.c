@@ -323,12 +323,6 @@ static const struct InfoStruct info_table[] =
     "Nick Change Tracker for KILL"
   },
   {
-    "ignore_bogus_ts",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigGeneral.ignore_bogus_ts,
-    "Ignore bogus timestamps from other servers"
-  },
-  {
     "cycle_on_host_change",
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.cycle_on_host_change,

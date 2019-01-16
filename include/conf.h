@@ -200,7 +200,6 @@ struct config_general_entry
   unsigned int no_oper_flood;
   unsigned int tkline_expire_notices;
   unsigned int opers_bypass_callerid;
-  unsigned int ignore_bogus_ts;
   unsigned int pace_wait;
   unsigned int pace_wait_simple;
   unsigned int oper_only_umodes;

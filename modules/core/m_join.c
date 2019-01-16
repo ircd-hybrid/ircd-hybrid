@@ -124,29 +124,14 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   oldts   = chptr->creationtime;
   oldmode = &chptr->mode;
 
-  if (ConfigGeneral.ignore_bogus_ts)
+  if (newts == 0 && isnew == false && oldts)
   {
-    if (newts < 800000000)
-    {
-      sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                           "*** Bogus TS %ju on %s ignored from %s(via %s)",
-                           newts, chptr->name,
-                           source_p->name, source_p->from->name);
-
-      newts = (oldts == 0) ? 0 : 800000000;
-    }
-  }
-  else
-  {
-    if (newts == 0 && isnew == false && oldts)
-    {
-      sendto_channel_local(NULL, chptr, 0, 0, 0,
-                           ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
-                           me.name, chptr->name, chptr->name, oldts);
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "Server %s changing TS on %s from %ju to 0",
-                           source_p->name, chptr->name, oldts);
-    }
+    sendto_channel_local(NULL, chptr, 0, 0, 0,
+                         ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
+                         me.name, chptr->name, chptr->name, oldts);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                         "Server %s changing TS on %s from %ju to 0",
+                         source_p->name, chptr->name, oldts);
   }
 
   if (isnew == true)

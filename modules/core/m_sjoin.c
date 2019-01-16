@@ -290,7 +290,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   while (*s)
   {
-    int valid_mode = 1;
+    bool valid_mode = true;
     fl = 0;
 
     do
@@ -310,10 +310,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
           ++s;
           break;
         default:
-          valid_mode = 0;
+          valid_mode = false;
           break;
       }
-    } while (valid_mode);
+    } while (valid_mode == true);
 
     /*
      * If the client doesn't exist, or if it's fake direction/server, skip.

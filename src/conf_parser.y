@@ -197,7 +197,6 @@ reset_block_state(void)
 %token  HOST
 %token  HUB
 %token  HUB_MASK
-%token  IGNORE_BOGUS_TS
 %token  INVISIBLE_ON_CONNECT
 %token  INVITE_CLIENT_COUNT
 %token  INVITE_CLIENT_TIME
@@ -2380,7 +2379,6 @@ general_entry: GENERAL '{' general_items '}' ';';
 general_items:      general_items general_item | general_item;
 general_item:       general_away_count |
                     general_away_time |
-                    general_ignore_bogus_ts |
                     general_failed_oper_notice |
                     general_anti_nick_flood |
                     general_max_nick_time |
@@ -2482,11 +2480,6 @@ general_tkline_expire_notices: TKLINE_EXPIRE_NOTICES '=' TBOOL ';'
 general_kill_chase_time_limit: KILL_CHASE_TIME_LIMIT '=' timespec ';'
 {
   ConfigGeneral.kill_chase_time_limit = $3;
-};
-
-general_ignore_bogus_ts: IGNORE_BOGUS_TS '=' TBOOL ';'
-{
-  ConfigGeneral.ignore_bogus_ts = yylval.number;
 };
 
 general_failed_oper_notice: FAILED_OPER_NOTICE '=' TBOOL ';'

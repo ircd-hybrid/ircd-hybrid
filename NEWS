@@ -10,6 +10,7 @@ o) The 'class::number_per_ip', 'class::max_local' and 'class::max_global'
    and 'class::number_per_ip_global'. The 'class::max_local' basically was redundant
    as it had the same functionality as 'class::number_per_ip'
 o) Adding RESVs with wildcards no longer requires administrator privileges
+o) The 'general::ignore_bogus_ts' configuration option has been deprecated
 
 
 -- Noteworthy changes in version 8.2.24 (2018-04-05)

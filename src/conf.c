@@ -608,7 +608,6 @@ set_default_conf(void)
   ConfigGeneral.kline_min_cidr6 = 48;
   ConfigGeneral.invisible_on_connect = 1;
   ConfigGeneral.tkline_expire_notices = 1;
-  ConfigGeneral.ignore_bogus_ts = 0;
   ConfigGeneral.disable_auth = 0;
   ConfigGeneral.kill_chase_time_limit = 90;
   ConfigGeneral.default_floodcount = 8;

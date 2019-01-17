@@ -645,19 +645,16 @@ serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if ($3 < MAXCLIENTS_MIN)
+  if ($3 < 1)
   {
-    char buf[IRCD_BUFSIZE] = "";
-
-    snprintf(buf, sizeof(buf), "MAXCLIENTS too low, setting to %d", MAXCLIENTS_MIN);
-    conf_error_report(buf);
-    ConfigServerInfo.default_max_clients = MAXCLIENTS_MIN;
+    conf_error_report("default_max_clients too low, setting to 1");
+    ConfigServerInfo.default_max_clients = 1;
   }
   else if ($3 > MAXCLIENTS_MAX)
   {
     char buf[IRCD_BUFSIZE] = "";
 
-    snprintf(buf, sizeof(buf), "MAXCLIENTS too high, setting to %d", MAXCLIENTS_MAX);
+    snprintf(buf, sizeof(buf), "default_max_clients too high, setting to %d", MAXCLIENTS_MAX);
     conf_error_report(buf);
     ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   }

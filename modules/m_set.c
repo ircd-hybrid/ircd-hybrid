@@ -149,13 +149,6 @@ quote_max(struct Client *source_p, const char *arg, int newval)
       return;
     }
 
-    if (newval < MAXCLIENTS_MIN)
-    {
-      sendto_one_notice(source_p, &me, ":You cannot set MAXCLIENTS to < %d, restoring to %u",
-                        MAXCLIENTS_MIN, GlobalSetOptions.maxclients);
-      return;
-    }
-
     GlobalSetOptions.maxclients = newval;
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s set new MAXCLIENTS to %u (%u current)",

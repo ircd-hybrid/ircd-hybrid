@@ -123,9 +123,9 @@ quote_floodtime(struct Client *source_p, const char *arg, int newval)
 static void
 quote_identtimeout(struct Client *source_p, const char *arg, int newval)
 {
-  if (!HasUMode(source_p, UMODE_ADMIN))
+  if (!HasOFlag(source_p, OPER_FLAG_ADMIN))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "set");
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "admin");
     return;
   }
 

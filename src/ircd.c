@@ -211,7 +211,7 @@ static void
 initialize_global_set_options(void)
 {
   GlobalSetOptions.maxclients = ConfigServerInfo.default_max_clients;
-  GlobalSetOptions.autoconn = 1;
+  GlobalSetOptions.autoconn = true;
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num = MAX_JOIN_LEAVE_COUNT;
   GlobalSetOptions.floodcount = ConfigGeneral.default_floodcount;

@@ -34,8 +34,8 @@
 
 struct SetOptions
 {
+  bool autoconn;      /* autoconn enabled for all servers? */
   unsigned int maxclients;
-  unsigned int autoconn;      /* autoconn enabled for all servers? */
   unsigned int floodcount;  /* Number of messages in 'floodtime' seconds */
   unsigned int floodtime;
   unsigned int joinfloodtime;

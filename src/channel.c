@@ -656,7 +656,7 @@ bool
 is_banned(const struct Channel *chptr, const struct Client *client_p)
 {
   if (find_bmask(client_p, &chptr->banlist) == true)
-    return find_bmask(client_p, &chptr->exceptlist);
+    return find_bmask(client_p, &chptr->exceptlist) == false;
   return false;
 }
 

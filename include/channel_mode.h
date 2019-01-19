@@ -52,14 +52,6 @@ enum
   CHACCESS_REMOTE
 };
 
-/* can_send results */
-enum
-{
-  CAN_SEND_NO,
-  CAN_SEND_NONOP,
-  CAN_SEND_OPV
-};
-
 /* Channel related flags */
 enum
 {

@@ -38,6 +38,13 @@
 
 enum
 {
+  CAN_SEND_NO    =  0,
+  CAN_SEND_NONOP = -1,
+  CAN_SEND_OPV   = -2
+};
+
+enum
+{
   MSG_FLOOD_NOTICED  = 1 << 0,
   JOIN_FLOOD_NOTICED = 1 << 1
 };

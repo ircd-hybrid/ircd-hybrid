@@ -38,24 +38,20 @@
 #include "tls.h"
 
 
-/* Types for output_type in InfoStruct */
-enum
-{
-  OUTPUT_STRING     = 1 << 0,  /* Output option as %s w/ dereference  */
-  OUTPUT_STRING_PTR = 1 << 1,  /* Output option as %s w/out deference */
-  OUTPUT_DECIMAL    = 1 << 2,  /* Output option as decimal (%d) */
-  OUTPUT_BOOLEAN    = 1 << 3,  /* Output option as "ON" or "OFF" */
-  OUTPUT_BOOLEAN_YN = 1 << 4,  /* Output option as "YES" or "NO" */
-  OUTPUT_BOOLEAN2   = 1 << 5   /* Output option as "YES/NO/MASKED" */
-};
-
 /*
  * jdc -- Structure for our configuration value table
  */
 struct InfoStruct
 {
   const char *name;  /* Displayed variable name */
-  const unsigned int output_type;  /* Type of output. See enum above */
+  enum {
+    OUTPUT_STRING = 1,  /* Output option as %s w/ dereference  */
+    OUTPUT_STRING_PTR,  /* Output option as %s w/out deference */
+    OUTPUT_DECIMAL,  /* Output option as decimal (%d) */
+    OUTPUT_BOOLEAN,  /* Output option as "ON" or "OFF" */
+    OUTPUT_BOOLEAN_YN,  /* Output option as "YES" or "NO" */
+    OUTPUT_BOOLEAN2  /* Output option as "YES/NO/MASKED" */
+  } output_type;  /* Type of output. See enum above */
   const void *option;  /* Pointer reference to the value */
   const char *desc;  /* ASCII description of the variable */
 };

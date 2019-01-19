@@ -29,6 +29,17 @@
 
 #include "fdlist.h"
 
+enum
+{
+  COMM_OK,
+  COMM_ERR_BIND,
+  COMM_ERR_DNS,
+  COMM_ERR_TIMEOUT,
+  COMM_ERR_CONNECT,
+  COMM_ERROR,
+  COMM_ERR_MAX
+};
+
 /* Type of IO */
 enum
 {

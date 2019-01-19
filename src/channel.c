@@ -656,9 +656,7 @@ bool
 is_banned(const struct Channel *chptr, const struct Client *client_p)
 {
   if (find_bmask(client_p, &chptr->banlist) == true)
-    if (find_bmask(client_p, &chptr->exceptlist) == false)
-      return true;
-
+    return find_bmask(client_p, &chptr->exceptlist);
   return false;
 }
 
@@ -737,9 +735,7 @@ find_channel_link(const struct Client *client_p, const struct Channel *chptr)
 static bool
 msg_has_ctrls(const char *message)
 {
-  const unsigned char *p = (const unsigned char *)message;
-
-  for (; *p; ++p)
+  for (const char *p = message; *p; ++p)
   {
     if (*p > 31 || *p == 1)
       continue;  /* No control code or CTCP */
@@ -877,9 +873,8 @@ check_spambot_warning(struct Client *client_p, const char *name)
     }
     else
     {
-      if ((CurrentTime - (client_p->connection->last_join_time)) <
-          GlobalSetOptions.spam_time)
-        client_p->connection->join_leave_count++;  /* It's a possible spambot */
+      if ((CurrentTime - (client_p->connection->last_join_time)) < GlobalSetOptions.spam_time)
+        ++client_p->connection->join_leave_count;  /* It's a possible spambot */
     }
 
     if (name)

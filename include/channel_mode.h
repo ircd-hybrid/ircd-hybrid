@@ -38,26 +38,26 @@ enum { MAXMODEPARAMS = 6 };
 
 enum
 {
-  MODE_QUERY = 0,
-  MODE_DEL   = 1,
-  MODE_ADD   = 2
+  MODE_QUERY,
+  MODE_DEL,
+  MODE_ADD
 };
 
 enum
 {
   CHACCESS_NOTONCHAN = -1,
-  CHACCESS_PEON      =  0,
-  CHACCESS_HALFOP    =  1,
-  CHACCESS_CHANOP    =  2,
-  CHACCESS_REMOTE    =  3
+  CHACCESS_PEON,
+  CHACCESS_HALFOP,
+  CHACCESS_CHANOP,
+  CHACCESS_REMOTE
 };
 
 /* can_send results */
 enum
 {
-  CAN_SEND_NO    =  0,
-  CAN_SEND_NONOP = -1,
-  CAN_SEND_OPV   = -2
+  CAN_SEND_NO,
+  CAN_SEND_NONOP,
+  CAN_SEND_OPV
 };
 
 /* Channel related flags */

@@ -43,8 +43,8 @@ enum { STARTUP_CONNECTIONS_TIME = 60 };
 enum server_hunt_ret
 {
   HUNTED_NOSUCH  = -1,  /**< If the hunted server is not found */
-  HUNTED_ISME    =  0,  /**< If this server should execute the command */
-  HUNTED_PASS    =  1   /**< If message passed onwards successfully */
+  HUNTED_ISME,  /**< If this server should execute the command */
+  HUNTED_PASS  /**< If message passed onwards successfully */
 };
 
 struct server_hunt

@@ -33,17 +33,6 @@
 
 enum { FD_DESC_SIZE = 80 };  /* HOSTLEN + comment */
 
-enum
-{
-  COMM_OK,
-  COMM_ERR_BIND,
-  COMM_ERR_DNS,
-  COMM_ERR_TIMEOUT,
-  COMM_ERR_CONNECT,
-  COMM_ERROR,
-  COMM_ERR_MAX
-};
-
 typedef struct _fde
 {
   /* New-school stuff, again pretty much ripped from squid */

@@ -70,16 +70,21 @@ quote_autoconn(struct Client *source_p, const char *arg, int newval)
 static void
 quote_autoconnall(struct Client *source_p, const char *arg, int newval)
 {
+  static const char *const status[] =
+  {
+    "OFF", "ON"
+  };
+
   if (newval >= 0)
   {
-    GlobalSetOptions.autoconn = newval;
+    GlobalSetOptions.autoconn = newval != 0;
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed AUTOCONNALL to %u",
-                         get_oper_name(source_p), GlobalSetOptions.autoconn);
+                         "%s has changed AUTOCONNALL to %s",
+                         get_oper_name(source_p), status[GlobalSetOptions.autoconn]);
   }
   else
-    sendto_one_notice(source_p, &me, ":AUTOCONNALL is currently %u",
-                      GlobalSetOptions.autoconn);
+    sendto_one_notice(source_p, &me, ":AUTOCONNALL is currently %s",
+                      status[GlobalSetOptions.autoconn]);
 }
 
 /* SET FLOODCOUNT */

@@ -259,7 +259,7 @@ try_connections(void *unused)
 {
   dlink_node *node;
 
-  if (GlobalSetOptions.autoconn == 0)
+  if (GlobalSetOptions.autoconn == false)
     return;
 
   DLINK_FOREACH(node, connect_items.head)

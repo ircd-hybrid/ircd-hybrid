@@ -307,7 +307,7 @@ struct Connection
   uintmax_t last_join_time;  /**< When this client last joined a channel */
   uintmax_t last_leave_time;  /**< When this client last left a channel */
 
-  int join_leave_count;  /**< Count of JOIN/LEAVE in less than MIN_JOIN_LEAVE_TIME seconds */
+  unsigned int join_leave_count;  /**< Count of JOIN/LEAVE in less than MIN_JOIN_LEAVE_TIME seconds */
   int oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
 
   unsigned int received_number_of_privmsgs;

@@ -868,10 +868,10 @@ check_spambot_warning(struct Client *client_p, const char *name)
   }
   else
   {
-    int t_delta = CurrentTime - client_p->connection->last_leave_time;
+    unsigned int t_delta = CurrentTime - client_p->connection->last_leave_time;
     if (t_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
-      int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
+      unsigned int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
       if (decrement_count > client_p->connection->join_leave_count)
         client_p->connection->join_leave_count = 0;
       else

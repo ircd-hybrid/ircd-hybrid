@@ -80,11 +80,11 @@ quote_autoconnall(struct Client *source_p, const char *arg, int newval)
     GlobalSetOptions.autoconn = newval != 0;
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s has changed AUTOCONNALL to %s",
-                         get_oper_name(source_p), status[GlobalSetOptions.autoconn]);
+                         get_oper_name(source_p), status[GlobalSetOptions.autoconn == true]);
   }
   else
     sendto_one_notice(source_p, &me, ":AUTOCONNALL is currently %s",
-                      status[GlobalSetOptions.autoconn]);
+                      status[GlobalSetOptions.autoconn == true]);
 }
 
 /* SET FLOODCOUNT */

@@ -122,6 +122,9 @@ auth_release_client(struct AuthRequest *auth)
 {
   struct Client *client = auth->client;
 
+  assert(client);
+  assert(client->connection);
+
   if (auth->ident_pending == true || auth->dns_pending == true)
     return;
 
@@ -178,6 +181,9 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 {
   struct AuthRequest *const auth = vptr;
 
+  assert(auth->client);
+  assert(auth->client->connection);
+
   auth->dns_pending = false;
 
   if (EmptyString(name))
@@ -231,6 +237,8 @@ auth_error(struct AuthRequest *auth)
 {
   assert(auth);
   assert(auth->fd);
+  assert(auth->client);
+  assert(auth->client->connection);
 
   ++ServerStats.is_abad;
 
@@ -348,6 +356,8 @@ auth_read_reply(fde_t *F, void *data)
   char buf[RFC1413_BUFSIZ + 1];
 
   assert(auth->fd == F);
+  assert(auth->client);
+  assert(auth->client->connection);
 
   if ((len = recv(auth->fd->fd, buf, RFC1413_BUFSIZ, 0)) > 0)
   {
@@ -399,13 +409,15 @@ auth_connect_callback(fde_t *F, int error, void *data)
   uint16_t uport, tport;
   struct sockaddr_in6 *v6;
 
+  assert(auth->fd == F);
+  assert(auth->client);
+  assert(auth->client->connection);
+
   if (error != COMM_OK)
   {
     auth_error(auth);
     return;
   }
-
-  assert(auth->fd == F);
 
   if (getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&us, &ulen) ||
       getpeername(auth->client->connection->fd->fd, (struct sockaddr *)&them, &tlen))
@@ -444,6 +456,9 @@ auth_start_query(struct AuthRequest *auth)
   struct irc_ssaddr localaddr;
   socklen_t locallen = sizeof(struct irc_ssaddr);
   struct sockaddr_in6 *v6;
+
+  assert(auth->client);
+  assert(auth->client->connection);
 
   /* Open a socket of the same type as the client socket */
   int fd = comm_socket(auth->client->ip.ss.ss_family, SOCK_STREAM, 0);
@@ -490,6 +505,9 @@ auth_start(struct Client *client_p)
 {
   struct AuthRequest *auth = auth_make(client_p);
 
+  assert(client_p);
+  assert(client_p->connection);
+
   dlinkAddTail(auth, &auth->node, &auth_list);
 
   auth_sendheader(client_p, REPORT_DO_DNS);
@@ -508,6 +526,9 @@ auth_start(struct Client *client_p)
 void
 auth_delete(struct AuthRequest *auth)
 {
+  assert(auth->client);
+  assert(auth->client->connection);
+
   if (auth->ident_pending == true)
   {
     fd_close(auth->fd);
@@ -536,6 +557,9 @@ auth_timeout_queries(void *notused)
   DLINK_FOREACH_SAFE(node, node_next, auth_list.head)
   {
     struct AuthRequest *auth = node->data;
+
+    assert(auth->client);
+    assert(auth->client->connection);
 
     if (auth->timeout > CurrentTime)
       break;

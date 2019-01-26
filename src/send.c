@@ -701,6 +701,9 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
   {
     struct Client *target_p = node->data;
 
+    if (IsDead(target_p->from))
+      continue;
+
     /* Do not attempt to send to ourselves, or the source */
     if (IsMe(target_p) || target_p->from == source_p->from)
       continue;

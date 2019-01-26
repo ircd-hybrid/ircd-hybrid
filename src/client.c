@@ -746,6 +746,8 @@ exit_client(struct Client *source_p, const char *comment)
 
   if (MyConnect(source_p))
   {
+    assert(source_p == source_p->from);
+
     /*
      * DO NOT REMOVE. exit_client can be called twice after a failed read/write.
      */
@@ -795,6 +797,10 @@ exit_client(struct Client *source_p, const char *comment)
     {
       assert(dlinkFind(&local_server_list, source_p));
       dlinkDelete(&source_p->connection->lclient_node, &local_server_list);
+
+      if (!HasFlag(source_p, FLAGS_SQUIT))
+        /* For them, we are exiting the network */
+        sendto_one(source_p, ":%s SQUIT %s :%s", me.id, me.id, comment);
     }
     else
     {
@@ -802,21 +808,7 @@ exit_client(struct Client *source_p, const char *comment)
       dlinkDelete(&source_p->connection->lclient_node, &unknown_list);
     }
 
-    if (!IsDead(source_p))
-    {
-      if (IsServer(source_p))
-      {
-        if (!HasFlag(source_p, FLAGS_SQUIT))
-        {
-          /* For them, we are exiting the network */
-          sendto_one(source_p, ":%s SQUIT %s :%s",
-                     me.id, me.id, comment);
-        }
-      }
-
-      sendto_one(source_p, "ERROR :Closing Link: %s (%s)",
-                 source_p->host, comment);
-    }
+    sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 
     client_close_connection(source_p);
   }

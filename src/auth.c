@@ -359,7 +359,7 @@ auth_read_reply(fde_t *F, void *data)
   assert(auth->client);
   assert(auth->client->connection);
 
-  if ((len = recv(auth->fd->fd, buf, RFC1413_BUFSIZ, 0)) > 0)
+  if ((len = recv(auth->fd->fd, buf, sizeof(buf) - 1, 0)) > 0)
   {
     buf[len] = '\0';
     username = auth_check_ident_reply(buf);

@@ -82,7 +82,7 @@ tls_init(void)
     return;  /* Not reached */
   }
 
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TICKET);
+  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1|SSL_OP_NO_TICKET);
   SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_SINGLE_DH_USE|SSL_OP_CIPHER_SERVER_PREFERENCE);
   SSL_CTX_set_verify(ConfigServerInfo.tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);
@@ -110,7 +110,7 @@ tls_init(void)
     return;  /* Not reached */
   }
 
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TICKET);
+  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1|SSL_OP_NO_TICKET);
   SSL_CTX_set_options(ConfigServerInfo.tls_ctx.client_ctx, SSL_OP_SINGLE_DH_USE);
   SSL_CTX_set_verify(ConfigServerInfo.tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
                      always_accept_verify_cb);

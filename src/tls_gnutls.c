@@ -85,7 +85,7 @@ tls_new_cred(void)
 
   /* TBD: set ciphers based on serverinfo::ssl_cipher_list */
 
-  gnutls_priority_init(&context->priorities, "NORMAL:%SERVER_PRECEDENCE:!VERS-SSL3.0", NULL);
+  gnutls_priority_init(&context->priorities, "NORMAL:%SERVER_PRECEDENCE:!VERS-TLS1.1:!VERS-TLS1.0:!VERS-SSL3.0", NULL);
 
   ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.ssl_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
   if (ret != GNUTLS_E_SUCCESS)
@@ -269,9 +269,9 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
   if (ret != GNUTLS_E_SUCCESS)
   {
     /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
-    ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default (NORMAL:%%SERVER_PRECEDENCE:!VERS-TLS1.0:!VERS-SSL3.0)",
+    ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default (NORMAL:%%SERVER_PRECEDENCE:!VERS-TLS1.1:!VERS-TLS1.0:!VERS-SSL3.0)",
          cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list));
-    gnutls_priority_init(&tls_data->context->priorities, "NORMAL:%SERVER_PRECEDENCE:!VERS-TLS1.0:!VERS-SSL3.0", NULL);
+    gnutls_priority_init(&tls_data->context->priorities, "NORMAL:%SERVER_PRECEDENCE:!VERS-TLS1.1:!VERS-TLS1.0:!VERS-SSL3.0", NULL);
     return false;
   }
 

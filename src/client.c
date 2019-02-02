@@ -203,21 +203,17 @@ static void
 check_pings_list(dlink_list *list)
 {
   char buf[32] = "";  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
-  unsigned int ping = 0;      /* ping time value from client */
   dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
     struct Client *client_p = node->data;
+    assert(IsClient(client_p) || IsServer(client_p));
 
     if (IsDead(client_p))
       continue;  /* Ignore it, it's been exited already */
 
-    if (IsClient(client_p) || IsServer(client_p))
-      ping = get_client_ping(&client_p->connection->confs);
-    else
-      ping = CONNECTTIMEOUT;
-
+    unsigned int ping = get_client_ping(&client_p->connection->confs);
     if (ping < CurrentTime - client_p->connection->lasttime)
     {
       if (!HasFlag(client_p, FLAGS_PINGSENT))
@@ -239,7 +235,7 @@ check_pings_list(dlink_list *list)
            * If the client/server hasn't talked to us in 2*ping seconds
            * and it has a ping time, then close its connection.
            */
-          if (IsServer(client_p) || IsHandshake(client_p))
+          if (IsServer(client_p))
           {
             sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                                  "No response from %s, closing link",

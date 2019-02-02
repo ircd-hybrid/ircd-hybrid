@@ -320,7 +320,7 @@ extern int check_client(struct Client *);
 
 extern void conf_detach(struct Client *, enum maskitem_type);
 extern struct MaskItem *find_conf_name(dlink_list *, const char *, enum maskitem_type);
-extern int conf_connect_allowed(struct irc_ssaddr *, int);
+extern int conf_connect_allowed(struct irc_ssaddr *);
 extern const char *oper_privs_as_string(const unsigned int);
 extern void split_nuh(struct split_nuh_item *);
 extern struct MaskItem *operator_find(const struct Client *, const char *);

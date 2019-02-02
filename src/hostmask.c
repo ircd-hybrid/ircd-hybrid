@@ -408,7 +408,7 @@ get_mask_hash(const char *text)
  */
 struct MaskItem *
 find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned int type,
-                     int fam, const char *username, const char *password, int do_match)
+                     const char *username, const char *password, int do_match)
 {
   unsigned int hprecv = 0;
   dlink_node *node;
@@ -419,7 +419,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
   if (addr)
   {
     /* Check for IPV6 matches... */
-    if (fam == AF_INET6)
+    if (addr->ss.ss_family == AF_INET6)
     {
       for (int b = 128; b >= 0; b -= 16)
       {
@@ -442,7 +442,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
         }
       }
     }
-    else if (fam == AF_INET)
+    else if (addr->ss.ss_family == AF_INET)
     {
       for (int b = 32; b >= 0; b -= 8)
       {
@@ -522,13 +522,12 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
  * Side-effects: None
  */
 struct MaskItem *
-find_address_conf(const char *host, const char *user, const struct irc_ssaddr *ip,
-                  int aftype, const char *password)
+find_address_conf(const char *host, const char *user, const struct irc_ssaddr *addr, const char *password)
 {
   struct MaskItem *authcnf = NULL, *killcnf = NULL;
 
   /* Find the best auth{} block... If none, return NULL -A1kmm */
-  if ((authcnf = find_conf_by_address(host, ip, CONF_CLIENT, aftype, user, password, 1)) == NULL)
+  if ((authcnf = find_conf_by_address(host, addr, CONF_CLIENT, user, password, 1)) == NULL)
     return NULL;
 
   /* If they are exempt from K-lines, return the best auth{} block. -A1kmm */
@@ -536,7 +535,7 @@ find_address_conf(const char *host, const char *user, const struct irc_ssaddr *i
     return authcnf;
 
   /* Find the best K-line... -A1kmm */
-  killcnf = find_conf_by_address(host, ip, CONF_KLINE, aftype, user, NULL, 1);
+  killcnf = find_conf_by_address(host, addr, CONF_KLINE, user, NULL, 1);
 
   /*
    * If they are K-lined, return the K-line. Otherwise, return the
@@ -555,15 +554,15 @@ find_address_conf(const char *host, const char *user, const struct irc_ssaddr *i
  * Side effects: None.
  */
 struct MaskItem *
-find_dline_conf(const struct irc_ssaddr *addr, int aftype)
+find_dline_conf(const struct irc_ssaddr *addr)
 {
   struct MaskItem *eline;
 
-  eline = find_conf_by_address(NULL, addr, CONF_EXEMPT, aftype, NULL, NULL, 1);
+  eline = find_conf_by_address(NULL, addr, CONF_EXEMPT, NULL, NULL, 1);
   if (eline)
     return eline;
 
-  return find_conf_by_address(NULL, addr, CONF_DLINE, aftype, NULL, NULL, 1);
+  return find_conf_by_address(NULL, addr, CONF_DLINE, NULL, NULL, 1);
 }
 
 /* void add_conf_by_address(int, struct MaskItem *aconf)

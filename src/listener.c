@@ -134,7 +134,7 @@ listener_accept_connection(fde_t *F, void *data)
      * Do an initial check we aren't connecting too fast or with too many
      * from this IP...
      */
-    if ((pe = conf_connect_allowed(&addr, addr.ss.ss_family)))
+    if ((pe = conf_connect_allowed(&addr)))
     {
       ++ServerStats.is_ref;
 

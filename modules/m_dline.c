@@ -88,7 +88,7 @@ dline_handle(struct Client *source_p, struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
   struct irc_ssaddr addr;
-  int bits = 0, aftype = 0;
+  int bits = 0;
 
   switch (parse_netmask(aline->host, &addr, &bits))
   {
@@ -101,7 +101,6 @@ dline_handle(struct Client *source_p, struct aline_ctx *aline)
         return;
       }
 
-      aftype = AF_INET;
       break;
     case HM_IPV6:
       if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.dline_min_cidr6)
@@ -112,7 +111,6 @@ dline_handle(struct Client *source_p, struct aline_ctx *aline)
         return;
       }
 
-      aftype = AF_INET6;
       break;
     default:  /* HM_HOST */
       if (IsClient(source_p))
@@ -122,7 +120,7 @@ dline_handle(struct Client *source_p, struct aline_ctx *aline)
   }
 
   struct MaskItem *conf;
-  if ((conf = find_conf_by_address(NULL, &addr, CONF_DLINE, aftype, NULL, NULL, 1)))
+  if ((conf = find_conf_by_address(NULL, &addr, CONF_DLINE, NULL, NULL, 1)))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":[%s] already D-lined by [%s] - %s",

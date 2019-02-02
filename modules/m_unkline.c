@@ -53,22 +53,13 @@ kline_remove(struct aline_ctx *aline)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
-  int t = 0;
-  int aftype = 0;
 
-  if ((t = parse_netmask(aline->host, &iphost, NULL)) != HM_HOST)
-  {
-    if (t == HM_IPV6)
-      aftype = AF_INET6;
-    else
-      aftype = AF_INET;
-
+  if (parse_netmask(aline->host, &iphost, NULL) != HM_HOST)
     piphost = &iphost;
-  }
   else
     piphost = NULL;
 
-  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aftype, aline->user, NULL, 0)))
+  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)))
   {
     if (IsConfDatabase(conf))
     {

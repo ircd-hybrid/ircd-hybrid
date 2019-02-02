@@ -88,7 +88,7 @@ static void
 kline_handle(struct Client *source_p, struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
-  int bits = 0, aftype = 0;
+  int bits = 0;
   struct irc_ssaddr iphost, *piphost = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(2, aline->user, aline->host) == false)
@@ -110,7 +110,6 @@ kline_handle(struct Client *source_p, struct aline_ctx *aline)
         return;
       }
 
-      aftype = AF_INET;
       piphost = &iphost;
       break;
     case HM_IPV6:
@@ -122,7 +121,6 @@ kline_handle(struct Client *source_p, struct aline_ctx *aline)
         return;
       }
 
-      aftype = AF_INET6;
       piphost = &iphost;
       break;
     default:  /* HM_HOST */
@@ -130,7 +128,7 @@ kline_handle(struct Client *source_p, struct aline_ctx *aline)
   }
 
   struct MaskItem *conf;
-  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aftype, aline->user, NULL, 0)))
+  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",

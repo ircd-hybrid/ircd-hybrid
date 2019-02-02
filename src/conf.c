@@ -256,7 +256,6 @@ verify_access(struct Client *client_p)
 
   if (HasFlag(client_p, FLAGS_GOTID))
     conf = find_address_conf(client_p->host, client_p->username, &client_p->ip,
-                             client_p->ip.ss.ss_family,
                              client_p->connection->password);
   else
   {
@@ -264,7 +263,6 @@ verify_access(struct Client *client_p)
 
     strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
     conf = find_address_conf(client_p->host, non_ident, &client_p->ip,
-                             client_p->ip.ss.ss_family,
                              client_p->connection->password);
   }
 
@@ -753,10 +751,10 @@ lookup_confhost(struct MaskItem *conf)
  * side effects	- none
  */
 int
-conf_connect_allowed(struct irc_ssaddr *addr, int aftype)
+conf_connect_allowed(struct irc_ssaddr *addr)
 {
   struct ip_entry *ip_found = NULL;
-  const struct MaskItem *conf = find_dline_conf(addr, aftype);
+  const struct MaskItem *conf = find_dline_conf(addr);
 
   if (conf)
   {

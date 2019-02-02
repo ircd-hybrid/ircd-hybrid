@@ -338,16 +338,14 @@ check_conf_klines(void)
     if (IsDead(client_p))
       continue;
 
-    if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE,
-                                    client_p->ip.ss.ss_family, NULL, NULL, 1)))
+    if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
       conf_try_ban(client_p, CLIENT_BAN_DLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
 
-    if ((ptr = find_conf_by_address(client_p->host, &client_p->ip,
-                                    CONF_KLINE, client_p->ip.ss.ss_family,
+    if ((ptr = find_conf_by_address(client_p->host, &client_p->ip, CONF_KLINE,
                                     client_p->username, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
@@ -368,8 +366,7 @@ check_conf_klines(void)
   {
     struct Client *client_p = node->data;
 
-    if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE,
-                                    client_p->ip.ss.ss_family, NULL, NULL, 1)))
+    if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
       conf_try_ban(client_p, CLIENT_BAN_DLINE, conf->reason);
@@ -405,8 +402,7 @@ conf_try_ban(struct Client *client_p, int type, const char *reason)
       ban_type = 'K';
       break;
     case CLIENT_BAN_DLINE:
-      if (find_conf_by_address(NULL, &client_p->ip, CONF_EXEMPT,
-                               client_p->ip.ss.ss_family, NULL, NULL, 1))
+      if (find_conf_by_address(NULL, &client_p->ip, CONF_EXEMPT, NULL, NULL, 1))
         return;
       ban_type = 'D';
       break;

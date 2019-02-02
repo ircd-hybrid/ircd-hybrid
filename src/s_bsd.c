@@ -72,14 +72,17 @@ static void comm_connect_tryconnect(fde_t *, void *);
  * gamble anyway.
  */
 int
-comm_get_sockerr(int fd)
+comm_get_sockerr(fde_t *F)
 {
   int errtmp = errno;
 #ifdef SO_ERROR
   int err = 0;
   socklen_t len = sizeof(err);
 
-  if (fd > -1 && !getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len))
+  assert(F);
+  assert(F->flags.open == true);
+
+  if (getsockopt(F->fd, SOL_SOCKET, SO_ERROR, &err, &len) == 0)
   {
     if (err)
       errtmp = err;
@@ -588,7 +591,7 @@ comm_socket(int family, int sock_type, int proto)
  * fd_open (this function no longer does it).
  */
 int
-comm_accept(int fd, struct irc_ssaddr *addr)
+comm_accept(fde_t *F, struct irc_ssaddr *addr)
 {
   socklen_t addrlen = sizeof(struct irc_ssaddr);
 
@@ -605,16 +608,16 @@ comm_accept(int fd, struct irc_ssaddr *addr)
    * reserved fd limit, but we can deal with that when comm_open()
    * also does it. XXX -- adrian
    */
-  int new_fd = accept(fd, (struct sockaddr *)addr, &addrlen);
-  if (new_fd < 0)
+  int fd = accept(F->fd, (struct sockaddr *)addr, &addrlen);
+  if (fd < 0)
     return -1;
 
   remove_ipv6_mapping(addr);
 
-  setup_socket(new_fd);
+  setup_socket(fd);
 
   /* .. and return */
-  return new_fd;
+  return fd;
 }
 
 /*

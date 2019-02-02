@@ -112,7 +112,7 @@ listener_accept_connection(fde_t *F, void *data)
    * point, just assume that connections cannot
    * be accepted until some old is closed first.
    */
-  while ((fd = comm_accept(listener->fd->fd, &addr)) != -1)
+  while ((fd = comm_accept(listener->fd, &addr)) != -1)
   {
     /*
      * check for connection limit

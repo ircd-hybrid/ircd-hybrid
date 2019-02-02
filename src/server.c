@@ -563,6 +563,9 @@ server_finish_tls_handshake(struct Client *client_p)
     return;
   }
 
+  /* Next, send the initial handshake */
+  SetHandshake(client_p);
+
   sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
   sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
@@ -702,14 +705,14 @@ server_connect_callback(fde_t *F, int status, void *data)
     return;
   }
 
-  /* Next, send the initial handshake */
-  SetHandshake(client_p);
-
   if (IsConfSSL(conf))
   {
     server_tls_connect_init(client_p, conf, F);
     return;
   }
+
+  /* Next, send the initial handshake */
+  SetHandshake(client_p);
 
   sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 

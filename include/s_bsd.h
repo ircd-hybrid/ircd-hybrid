@@ -56,7 +56,7 @@ struct Listener;
 extern void add_connection(struct Listener *, struct irc_ssaddr *, int);
 extern void report_error(int, const char *, const char *, int);
 
-extern int comm_get_sockerr(int);
+extern int comm_get_sockerr(fde_t *);
 extern bool comm_ignore_errno(int);
 
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
@@ -66,7 +66,7 @@ extern void comm_connect_tcp(fde_t *, const char *, unsigned short, struct socka
                              void (fde_t *, int, void *), void *, int, uintmax_t);
 extern const char *comm_errstr(int);
 extern int comm_socket(int, int, int);
-extern int comm_accept(int, struct irc_ssaddr *);
+extern int comm_accept(fde_t *, struct irc_ssaddr *);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void comm_select_init(void);

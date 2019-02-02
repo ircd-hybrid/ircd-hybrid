@@ -270,12 +270,31 @@ check_unknowns_list(void)
   DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
     struct Client *client_p = node->data;
+    bool exit = false;
 
     /*
      * Check UNKNOWN connections - if they have been in this state
      * for > 30s, close them.
      */
-    if (HasFlag(client_p, FLAGS_FINISHED_AUTH) && (CurrentTime - client_p->connection->firsttime) > 30)
+    if ((CurrentTime - client_p->connection->firsttime) <= 30)
+      continue;
+
+    if (IsHandshake(client_p))
+    {
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+                           "No response from %s during handshake, closing link",
+                           client_get_name(client_p, SHOW_IP));
+      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+                           "No response from %s during handshake, closing link",
+                           client_get_name(client_p, MASK_IP));
+      ilog(LOG_TYPE_IRCD, "No response from %s during handshake, closing link",
+           client_get_name(client_p, SHOW_IP));
+      exit = true;
+    }
+    else if (HasFlag(client_p, FLAGS_FINISHED_AUTH))
+      exit = true;
+
+    if (exit == true)
       exit_client(client_p, "Registration timed out");
   }
 }

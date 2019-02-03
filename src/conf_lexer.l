@@ -274,7 +274,6 @@ ping_time                   { return PING_TIME; }
 port                        { return PORT; }
 prepend                     { return T_PREPEND; }
 pseudo                      { return T_PSEUDO; }
-quarantine                  { return RESV; }
 random_idle                 { return RANDOM_IDLE; }
 reason                      { return REASON; }
 recvq                       { return T_RECVQ; }

@@ -381,6 +381,10 @@ check_conf_klines(void)
   {
     struct Client *client_p = node->data;
 
+    /* If a client is already being exited */
+    if (IsDead(client_p))
+      continue;
+
     if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;

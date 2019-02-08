@@ -44,7 +44,8 @@
 struct InfoStruct
 {
   const char *name;  /* Displayed variable name */
-  enum {
+  enum
+  {
     OUTPUT_STRING = 1,  /* Output option as %s w/ dereference  */
     OUTPUT_STRING_PTR,  /* Output option as %s w/out deference */
     OUTPUT_DECIMAL,  /* Output option as decimal (%d) */
@@ -52,6 +53,7 @@ struct InfoStruct
     OUTPUT_BOOLEAN_YN,  /* Output option as "YES" or "NO" */
     OUTPUT_BOOLEAN2  /* Output option as "YES/NO/MASKED" */
   } output_type;  /* Type of output. See enum above */
+
   const void *option;  /* Pointer reference to the value */
   const char *desc;  /* ASCII description of the variable */
 };

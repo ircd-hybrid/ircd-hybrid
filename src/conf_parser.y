@@ -2014,6 +2014,9 @@ connect_entry: CONNECT
       !block_state.spass.buf[0])
     break;
 
+  if (server_valid_name(block_state.name.buf) == false)
+    return;
+
   if (has_wildcards(block_state.name.buf) ||
       has_wildcards(block_state.host.buf))
     break;

@@ -524,7 +524,7 @@ serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
 serverinfo_name: NAME '=' QSTRING ';'
 {
   /* This isn't rehashable */
-  if (conf_parser_ctx.pass == 2 && !ConfigServerInfo.name)
+  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.name == NULL)
   {
     if (server_valid_name(yylval.string) == true)
       ConfigServerInfo.name = xstrdup(yylval.string);
@@ -539,7 +539,7 @@ serverinfo_name: NAME '=' QSTRING ';'
 serverinfo_sid: IRCD_SID '=' QSTRING ';'
 {
   /* This isn't rehashable */
-  if (conf_parser_ctx.pass == 2 && !ConfigServerInfo.sid)
+  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.sid == NULL)
   {
     if (valid_sid(yylval.string))
       ConfigServerInfo.sid = xstrdup(yylval.string);
@@ -656,6 +656,7 @@ serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "default_max_clients too high, setting to %d", MAXCLIENTS_MAX);
     conf_error_report(buf);
+
     ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   }
   else
@@ -678,6 +679,7 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "max_nick_length too high, setting to %d", NICKLEN);
     conf_error_report(buf);
+
     ConfigServerInfo.max_nick_length = NICKLEN;
   }
   else
@@ -700,6 +702,7 @@ serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
 
     snprintf(buf, sizeof(buf), "max_topic_length too high, setting to %d", TOPICLEN);
     conf_error_report(buf);
+
     ConfigServerInfo.max_topic_length = TOPICLEN;
   }
   else
@@ -716,7 +719,7 @@ serverinfo_hub: HUB '=' TBOOL ';'
 /***************************************************************************
  * admin {} section
  ***************************************************************************/
-admin_entry: ADMIN  '{' admin_items '}' ';' ;
+admin_entry: ADMIN '{' admin_items '}' ';' ;
 
 admin_items: admin_items admin_item | admin_item;
 admin_item:  admin_name |
@@ -969,7 +972,6 @@ oper_entry: OPERATOR
 
   DLINK_FOREACH(node, block_state.mask.list.head)
   {
-    struct MaskItem *conf = NULL;
     struct split_nuh_item nuh;
     char *s = node->data;
 
@@ -980,15 +982,17 @@ oper_entry: OPERATOR
     nuh.nickptr  = NULL;
     nuh.userptr  = block_state.user.buf;
     nuh.hostptr  = block_state.host.buf;
+
     nuh.nicksize = 0;
     nuh.usersize = sizeof(block_state.user.buf);
     nuh.hostsize = sizeof(block_state.host.buf);
+
     split_nuh(&nuh);
 
-    conf         = conf_make(CONF_OPER);
-    conf->name   = xstrdup(block_state.name.buf);
-    conf->user   = xstrdup(block_state.user.buf);
-    conf->host   = xstrdup(block_state.host.buf);
+    struct MaskItem *conf = conf_make(CONF_OPER);
+    conf->name = xstrdup(block_state.name.buf);
+    conf->user = xstrdup(block_state.user.buf);
+    conf->host = xstrdup(block_state.host.buf);
 
     if (block_state.cert.buf[0])
       conf->certfp = xstrdup(block_state.cert.buf);
@@ -1319,18 +1323,17 @@ class_entry: CLASS
   block_state.max_recvq.value = DEFAULT_RECVQ;
 } '{' class_items '}' ';'
 {
-  struct ClassItem *class = NULL;
-
   if (conf_parser_ctx.pass != 1)
     break;
 
   if (!block_state.class.buf[0])
     break;
 
-  if (!(class = class_find(block_state.class.buf, false)))
+  struct ClassItem *class = class_find(block_state.class.buf, false);
+  if (class == NULL)
     class = class_make();
 
-  class->active = 1;
+  class->active = true;
   xfree(class->name);
   class->name = xstrdup(block_state.class.buf);
   class->ping_freq = block_state.ping_freq.value;
@@ -1353,8 +1356,8 @@ class_entry: CLASS
   class->min_idle = block_state.min_idle.value;
   class->max_idle = block_state.max_idle.value;
 
-  int diff = (class->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value ||
-              class->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value);
+  bool diff = (class->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value ||
+               class->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value);
   class->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
   class->cidr_bitlen_ipv6 = block_state.cidr_bitlen_ipv6.value;
   class->number_per_cidr = block_state.number_per_cidr.value;
@@ -1585,7 +1588,6 @@ auth_entry: IRCD_AUTH
 
   DLINK_FOREACH(node, block_state.mask.list.head)
   {
-    struct MaskItem *conf = NULL;
     struct split_nuh_item nuh;
     char *s = node->data;
 
@@ -1596,14 +1598,16 @@ auth_entry: IRCD_AUTH
     nuh.nickptr  = NULL;
     nuh.userptr  = block_state.user.buf;
     nuh.hostptr  = block_state.host.buf;
+
     nuh.nicksize = 0;
     nuh.usersize = sizeof(block_state.user.buf);
     nuh.hostsize = sizeof(block_state.host.buf);
+
     split_nuh(&nuh);
 
-    conf        = conf_make(CONF_CLIENT);
-    conf->user  = xstrdup(block_state.user.buf);
-    conf->host  = xstrdup(block_state.host.buf);
+    struct MaskItem *conf = conf_make(CONF_CLIENT);
+    conf->user = xstrdup(block_state.user.buf);
+    conf->host = xstrdup(block_state.host.buf);
 
     if (block_state.rpass.buf[0])
       conf->passwd = xstrdup(block_state.rpass.buf);
@@ -1662,7 +1666,7 @@ auth_flags: IRCD_FLAGS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value &= (CONF_FLAGS_ENCRYPTED | CONF_FLAGS_SPOOF_IP);
-} '='  auth_flags_items ';';
+} '=' auth_flags_items ';';
 
 auth_flags_items: auth_flags_items ',' auth_flags_item | auth_flags_item;
 auth_flags_item: SPOOF_NOTICE
@@ -2000,7 +2004,6 @@ connect_entry: CONNECT
   block_state.port.value = PORTNUM;
 } '{' connect_items '}' ';'
 {
-  struct MaskItem *conf = NULL;
   struct addrinfo hints, *res;
 
   if (conf_parser_ctx.pass != 2)
@@ -2015,13 +2018,13 @@ connect_entry: CONNECT
     break;
 
   if (server_valid_name(block_state.name.buf) == false)
-    return;
+    break;
 
   if (has_wildcards(block_state.name.buf) ||
       has_wildcards(block_state.host.buf))
     break;
 
-  conf = conf_make(CONF_SERVER);
+  struct MaskItem *conf = conf_make(CONF_SERVER);
   conf->port = block_state.port.value;
   conf->flags = block_state.flags.value;
   conf->aftype = block_state.aftype.value;
@@ -2104,9 +2107,9 @@ connect_send_password: SEND_PASSWORD '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if ($3[0] == ':')
+  if (*yylval.string == ':')
     conf_error_report("Server passwords cannot begin with a colon");
-  else if (strchr($3, ' '))
+  else if (strchr(yylval.string, ' '))
     conf_error_report("Server passwords cannot contain spaces");
   else
     strlcpy(block_state.spass.buf, yylval.string, sizeof(block_state.spass.buf));
@@ -2117,9 +2120,9 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if ($3[0] == ':')
+  if (*yylval.string == ':')
     conf_error_report("Server passwords cannot begin with a colon");
-  else if (strchr($3, ' '))
+  else if (strchr(yylval.string, ' '))
     conf_error_report("Server passwords cannot contain spaces");
   else
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
@@ -2150,7 +2153,7 @@ connect_aftype: AFTYPE '=' T_IPV4 ';'
 connect_flags: IRCD_FLAGS
 {
   block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
-} '='  connect_flags_items ';';
+} '=' connect_flags_items ';';
 
 connect_flags_items: connect_flags_items ',' connect_flags_item | connect_flags_item;
 connect_flags_item: AUTOCONN
@@ -2213,8 +2216,6 @@ kill_entry: KILL
     reset_block_state();
 } '{' kill_items '}' ';'
 {
-  struct MaskItem *conf = NULL;
-
   if (conf_parser_ctx.pass != 2)
     break;
 
@@ -2222,7 +2223,7 @@ kill_entry: KILL
       !block_state.host.buf[0])
     break;
 
-  conf = conf_make(CONF_KLINE);
+  struct MaskItem *conf = conf_make(CONF_KLINE);
   conf->user = xstrdup(block_state.user.buf);
   conf->host = xstrdup(block_state.host.buf);
 
@@ -2272,8 +2273,6 @@ deny_entry: DENY
     reset_block_state();
 } '{' deny_items '}' ';'
 {
-  struct MaskItem *conf = NULL;
-
   if (conf_parser_ctx.pass != 2)
     break;
 
@@ -2282,7 +2281,7 @@ deny_entry: DENY
 
   if (parse_netmask(block_state.addr.buf, NULL, NULL) != HM_HOST)
   {
-    conf = conf_make(CONF_DLINE);
+    struct MaskItem *conf = conf_make(CONF_DLINE);
     conf->host = xstrdup(block_state.addr.buf);
 
     if (block_state.rpass.buf[0])
@@ -2448,8 +2447,7 @@ general_whowas_history_length: WHOWAS_HISTORY_LENGTH '=' NUMBER ';'
 
 general_cycle_on_host_change: CYCLE_ON_HOST_CHANGE '=' TBOOL ';'
 {
-  if (conf_parser_ctx.pass == 2)
-    ConfigGeneral.cycle_on_host_change = yylval.number;
+  ConfigGeneral.cycle_on_host_change = yylval.number;
 };
 
 general_dline_min_cidr: DLINE_MIN_CIDR '=' NUMBER ';'
@@ -2519,8 +2517,7 @@ general_ts_warn_delta: TS_WARN_DELTA '=' timespec ';'
 
 general_ts_max_delta: TS_MAX_DELTA '=' timespec ';'
 {
-  if (conf_parser_ctx.pass == 2)
-    ConfigGeneral.ts_max_delta = $3;
+  ConfigGeneral.ts_max_delta = $3;
 };
 
 general_invisible_on_connect: INVISIBLE_ON_CONNECT '=' TBOOL ';'
@@ -2637,7 +2634,7 @@ general_throttle_time: THROTTLE_TIME '=' timespec ';'
 general_oper_umodes: OPER_UMODES
 {
   ConfigGeneral.oper_umodes = 0;
-} '='  umode_oitems ';' ;
+} '=' umode_oitems ';' ;
 
 umode_oitems:    umode_oitems ',' umode_oitem | umode_oitem;
 umode_oitem:     T_BOTS
@@ -2711,7 +2708,7 @@ umode_oitem:     T_BOTS
 general_oper_only_umodes: OPER_ONLY_UMODES
 {
   ConfigGeneral.oper_only_umodes = 0;
-} '='  umode_items ';' ;
+} '=' umode_items ';' ;
 
 umode_items:  umode_items ',' umode_item | umode_item;
 umode_item:   T_BOTS

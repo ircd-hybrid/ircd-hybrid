@@ -39,7 +39,7 @@ usage(const char *name, const struct lgetopt *opts)
 
   for (; opts->opt; ++opts)
     fprintf(stderr, "\t%c%-10s %-20s%s\n", OPTCHAR, opts->opt,
-            (opts->argtype == YESNO || opts->argtype == USAGE) ? "" :
+            (opts->argtype == BOOLEAN || opts->argtype == USAGE) ? "" :
             opts->argtype == INTEGER ? "<number>" : "<string>",
             opts->desc);
 
@@ -75,7 +75,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
 
         switch (opts[i].argtype)
         {
-          case YESNO:
+          case BOOLEAN:
             *((bool *)opts[i].argloc) = true;
             break;
 

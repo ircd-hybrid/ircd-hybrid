@@ -95,9 +95,9 @@ static struct lgetopt myopts[] =
   { "pidfile",    &pidFileName,
    STRING, "File to use for process ID" },
   { "foreground", &server_state.foreground,
-   YESNO, "Run in foreground (don't detach)" },
+   BOOLEAN, "Run in foreground (don't detach)" },
   { "version",    &printVersion,
-   YESNO, "Print version and exit" },
+   BOOLEAN, "Print version and exit" },
   { "help", NULL, USAGE, "Print this text" },
   { NULL, NULL, STRING, NULL },
 };

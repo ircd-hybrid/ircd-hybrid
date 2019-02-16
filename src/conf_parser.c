@@ -1026,58 +1026,58 @@ static const yytype_uint16 yyrline[] =
      804,   806,   806,   807,   809,   816,   816,   829,   830,   832,
      832,   833,   833,   835,   843,   846,   852,   851,   857,   857,
      858,   862,   866,   870,   874,   878,   882,   886,   897,   896,
-     958,   958,   959,   960,   961,   962,   963,   964,   965,   966,
-     967,   968,   969,   971,   977,   983,   989,   995,  1006,  1012,
-    1023,  1030,  1029,  1035,  1035,  1036,  1040,  1044,  1048,  1052,
-    1056,  1060,  1064,  1068,  1072,  1076,  1080,  1084,  1088,  1092,
-    1096,  1100,  1104,  1108,  1112,  1116,  1120,  1127,  1126,  1132,
-    1132,  1133,  1137,  1141,  1145,  1149,  1153,  1157,  1161,  1165,
-    1169,  1173,  1177,  1181,  1185,  1189,  1193,  1197,  1201,  1205,
-    1209,  1213,  1217,  1221,  1225,  1229,  1233,  1237,  1241,  1245,
-    1256,  1255,  1312,  1312,  1313,  1314,  1315,  1316,  1317,  1318,
-    1319,  1320,  1321,  1322,  1323,  1324,  1325,  1326,  1327,  1328,
-    1330,  1336,  1342,  1348,  1354,  1360,  1366,  1372,  1378,  1385,
-    1391,  1397,  1403,  1412,  1422,  1421,  1427,  1427,  1428,  1432,
-    1443,  1442,  1449,  1448,  1453,  1453,  1454,  1458,  1462,  1468,
-    1468,  1469,  1469,  1469,  1469,  1469,  1471,  1471,  1473,  1473,
-    1475,  1488,  1505,  1511,  1522,  1521,  1568,  1568,  1569,  1570,
-    1571,  1572,  1573,  1574,  1575,  1576,  1577,  1579,  1585,  1591,
-    1597,  1609,  1608,  1614,  1614,  1615,  1619,  1623,  1627,  1631,
-    1635,  1639,  1643,  1647,  1651,  1657,  1671,  1680,  1694,  1693,
-    1708,  1708,  1709,  1709,  1709,  1709,  1711,  1717,  1723,  1733,
-    1735,  1735,  1736,  1736,  1738,  1755,  1754,  1777,  1777,  1778,
-    1778,  1778,  1778,  1780,  1786,  1806,  1805,  1811,  1811,  1812,
-    1816,  1820,  1824,  1828,  1832,  1836,  1840,  1844,  1848,  1859,
-    1858,  1877,  1877,  1878,  1878,  1878,  1880,  1887,  1886,  1892,
-    1892,  1893,  1897,  1901,  1905,  1909,  1913,  1917,  1921,  1925,
-    1929,  1940,  1939,  2013,  2013,  2014,  2015,  2016,  2017,  2018,
-    2019,  2020,  2021,  2022,  2023,  2024,  2025,  2026,  2027,  2028,
-    2030,  2036,  2042,  2048,  2061,  2074,  2080,  2086,  2090,  2097,
-    2096,  2101,  2101,  2102,  2106,  2112,  2123,  2129,  2135,  2141,
-    2157,  2156,  2180,  2180,  2181,  2181,  2181,  2183,  2203,  2214,
-    2213,  2238,  2238,  2239,  2239,  2239,  2241,  2247,  2257,  2259,
-    2259,  2260,  2260,  2262,  2280,  2279,  2300,  2300,  2301,  2301,
-    2301,  2303,  2309,  2319,  2321,  2321,  2322,  2323,  2324,  2325,
-    2326,  2327,  2328,  2329,  2330,  2331,  2332,  2333,  2334,  2335,
-    2336,  2337,  2338,  2339,  2340,  2341,  2342,  2343,  2344,  2345,
-    2346,  2347,  2348,  2349,  2350,  2351,  2352,  2353,  2354,  2355,
-    2356,  2357,  2358,  2359,  2360,  2361,  2362,  2363,  2364,  2365,
-    2366,  2367,  2368,  2371,  2376,  2381,  2386,  2391,  2396,  2401,
-    2406,  2411,  2416,  2421,  2426,  2431,  2436,  2441,  2446,  2451,
-    2456,  2461,  2466,  2471,  2476,  2481,  2486,  2491,  2496,  2501,
-    2504,  2509,  2512,  2517,  2522,  2527,  2532,  2537,  2542,  2547,
-    2552,  2557,  2562,  2567,  2572,  2578,  2577,  2582,  2582,  2583,
-    2586,  2589,  2592,  2595,  2598,  2601,  2604,  2607,  2610,  2613,
-    2616,  2619,  2622,  2625,  2628,  2631,  2634,  2637,  2640,  2643,
-    2646,  2652,  2651,  2656,  2656,  2657,  2660,  2663,  2666,  2669,
-    2672,  2675,  2678,  2681,  2684,  2687,  2690,  2693,  2696,  2699,
-    2702,  2705,  2708,  2711,  2714,  2719,  2724,  2729,  2734,  2743,
-    2745,  2745,  2746,  2747,  2748,  2749,  2750,  2751,  2752,  2753,
-    2754,  2755,  2756,  2757,  2758,  2759,  2760,  2762,  2767,  2772,
-    2777,  2782,  2787,  2792,  2797,  2802,  2807,  2812,  2817,  2822,
-    2827,  2836,  2838,  2838,  2839,  2840,  2841,  2842,  2843,  2844,
-    2845,  2846,  2847,  2848,  2850,  2856,  2872,  2881,  2887,  2893,
-    2899,  2908,  2914
+     959,   959,   960,   961,   962,   963,   964,   965,   966,   967,
+     968,   969,   970,   972,   978,   984,   990,   996,  1007,  1013,
+    1024,  1031,  1030,  1036,  1036,  1037,  1041,  1045,  1049,  1053,
+    1057,  1061,  1065,  1069,  1073,  1077,  1081,  1085,  1089,  1093,
+    1097,  1101,  1105,  1109,  1113,  1117,  1121,  1128,  1127,  1133,
+    1133,  1134,  1138,  1142,  1146,  1150,  1154,  1158,  1162,  1166,
+    1170,  1174,  1178,  1182,  1186,  1190,  1194,  1198,  1202,  1206,
+    1210,  1214,  1218,  1222,  1226,  1230,  1234,  1238,  1242,  1246,
+    1257,  1256,  1313,  1313,  1314,  1315,  1316,  1317,  1318,  1319,
+    1320,  1321,  1322,  1323,  1324,  1325,  1326,  1327,  1328,  1329,
+    1331,  1337,  1343,  1349,  1355,  1361,  1367,  1373,  1379,  1386,
+    1392,  1398,  1404,  1413,  1423,  1422,  1428,  1428,  1429,  1433,
+    1444,  1443,  1450,  1449,  1454,  1454,  1455,  1459,  1463,  1469,
+    1469,  1470,  1470,  1470,  1470,  1470,  1472,  1472,  1474,  1474,
+    1476,  1489,  1506,  1512,  1523,  1522,  1569,  1569,  1570,  1571,
+    1572,  1573,  1574,  1575,  1576,  1577,  1578,  1580,  1586,  1592,
+    1598,  1610,  1609,  1615,  1615,  1616,  1620,  1624,  1628,  1632,
+    1636,  1640,  1644,  1648,  1652,  1658,  1672,  1681,  1695,  1694,
+    1709,  1709,  1710,  1710,  1710,  1710,  1712,  1718,  1724,  1734,
+    1736,  1736,  1737,  1737,  1739,  1756,  1755,  1778,  1778,  1779,
+    1779,  1779,  1779,  1781,  1787,  1807,  1806,  1812,  1812,  1813,
+    1817,  1821,  1825,  1829,  1833,  1837,  1841,  1845,  1849,  1860,
+    1859,  1878,  1878,  1879,  1879,  1879,  1881,  1888,  1887,  1893,
+    1893,  1894,  1898,  1902,  1906,  1910,  1914,  1918,  1922,  1926,
+    1930,  1941,  1940,  2017,  2017,  2018,  2019,  2020,  2021,  2022,
+    2023,  2024,  2025,  2026,  2027,  2028,  2029,  2030,  2031,  2032,
+    2034,  2040,  2046,  2052,  2065,  2078,  2084,  2090,  2094,  2101,
+    2100,  2105,  2105,  2106,  2110,  2116,  2127,  2133,  2139,  2145,
+    2161,  2160,  2184,  2184,  2185,  2185,  2185,  2187,  2207,  2218,
+    2217,  2242,  2242,  2243,  2243,  2243,  2245,  2251,  2261,  2263,
+    2263,  2264,  2264,  2266,  2284,  2283,  2304,  2304,  2305,  2305,
+    2305,  2307,  2313,  2323,  2325,  2325,  2326,  2327,  2328,  2329,
+    2330,  2331,  2332,  2333,  2334,  2335,  2336,  2337,  2338,  2339,
+    2340,  2341,  2342,  2343,  2344,  2345,  2346,  2347,  2348,  2349,
+    2350,  2351,  2352,  2353,  2354,  2355,  2356,  2357,  2358,  2359,
+    2360,  2361,  2362,  2363,  2364,  2365,  2366,  2367,  2368,  2369,
+    2370,  2371,  2372,  2375,  2380,  2385,  2390,  2395,  2400,  2405,
+    2410,  2415,  2420,  2425,  2430,  2435,  2440,  2445,  2450,  2455,
+    2460,  2465,  2470,  2475,  2480,  2485,  2490,  2495,  2500,  2505,
+    2508,  2513,  2516,  2521,  2526,  2531,  2536,  2541,  2546,  2551,
+    2556,  2561,  2566,  2571,  2576,  2582,  2581,  2586,  2586,  2587,
+    2590,  2593,  2596,  2599,  2602,  2605,  2608,  2611,  2614,  2617,
+    2620,  2623,  2626,  2629,  2632,  2635,  2638,  2641,  2644,  2647,
+    2650,  2656,  2655,  2660,  2660,  2661,  2664,  2667,  2670,  2673,
+    2676,  2679,  2682,  2685,  2688,  2691,  2694,  2697,  2700,  2703,
+    2706,  2709,  2712,  2715,  2718,  2723,  2728,  2733,  2738,  2747,
+    2749,  2749,  2750,  2751,  2752,  2753,  2754,  2755,  2756,  2757,
+    2758,  2759,  2760,  2761,  2762,  2763,  2764,  2766,  2771,  2776,
+    2781,  2786,  2791,  2796,  2801,  2806,  2811,  2816,  2821,  2826,
+    2831,  2840,  2842,  2842,  2843,  2844,  2845,  2846,  2847,  2848,
+    2849,  2850,  2851,  2852,  2854,  2860,  2876,  2885,  2891,  2897,
+    2903,  2912,  2918
 };
 #endif
 
@@ -3522,6 +3522,7 @@ yyreduce:
     split_nuh(&nuh);
 
     struct MaskItem *conf = conf_make(CONF_OPER);
+    conf->addr = xcalloc(sizeof(*conf->addr));
     conf->name = xstrdup(block_state.name.buf);
     conf->user = xstrdup(block_state.user.buf);
     conf->host = xstrdup(block_state.host.buf);
@@ -3538,52 +3539,52 @@ yyreduce:
     conf->flags = block_state.flags.value;
     conf->modes = block_state.modes.value;
     conf->port  = block_state.port.value;
-    conf->htype = parse_netmask(conf->host, &conf->addr, &conf->bits);
+    conf->htype = parse_netmask(conf->host, conf->addr, &conf->bits);
 
     conf_add_class_to_conf(conf, block_state.class.buf);
   }
 }
-#line 3547 "conf_parser.c" /* yacc.c:1652  */
+#line 3548 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 163:
-#line 972 "conf_parser.y" /* yacc.c:1652  */
+#line 973 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 3556 "conf_parser.c" /* yacc.c:1652  */
+#line 3557 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 164:
-#line 978 "conf_parser.y" /* yacc.c:1652  */
+#line 979 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
 }
-#line 3565 "conf_parser.c" /* yacc.c:1652  */
+#line 3566 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 165:
-#line 984 "conf_parser.y" /* yacc.c:1652  */
+#line 985 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 3574 "conf_parser.c" /* yacc.c:1652  */
+#line 3575 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 166:
-#line 990 "conf_parser.y" /* yacc.c:1652  */
+#line 991 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.whois.buf, yylval.string, sizeof(block_state.whois.buf));
 }
-#line 3583 "conf_parser.c" /* yacc.c:1652  */
+#line 3584 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 167:
-#line 996 "conf_parser.y" /* yacc.c:1652  */
+#line 997 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3593,20 +3594,20 @@ yyreduce:
   else
     block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
 }
-#line 3597 "conf_parser.c" /* yacc.c:1652  */
+#line 3598 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 168:
-#line 1007 "conf_parser.y" /* yacc.c:1652  */
+#line 1008 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 }
-#line 3606 "conf_parser.c" /* yacc.c:1652  */
+#line 3607 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 169:
-#line 1013 "conf_parser.y" /* yacc.c:1652  */
+#line 1014 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3616,497 +3617,497 @@ yyreduce:
   else
     block_state.flags.value &= ~CONF_FLAGS_SSL;
 }
-#line 3620 "conf_parser.c" /* yacc.c:1652  */
+#line 3621 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 170:
-#line 1024 "conf_parser.y" /* yacc.c:1652  */
+#line 1025 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
 }
-#line 3629 "conf_parser.c" /* yacc.c:1652  */
+#line 3630 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 171:
-#line 1030 "conf_parser.y" /* yacc.c:1652  */
+#line 1031 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value = 0;
 }
-#line 3638 "conf_parser.c" /* yacc.c:1652  */
+#line 3639 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 175:
-#line 1037 "conf_parser.y" /* yacc.c:1652  */
+#line 1038 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_BOTS;
 }
-#line 3647 "conf_parser.c" /* yacc.c:1652  */
+#line 3648 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 176:
-#line 1041 "conf_parser.y" /* yacc.c:1652  */
+#line 1042 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_CCONN;
 }
-#line 3656 "conf_parser.c" /* yacc.c:1652  */
+#line 3657 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 177:
-#line 1045 "conf_parser.y" /* yacc.c:1652  */
+#line 1046 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_DEAF;
 }
-#line 3665 "conf_parser.c" /* yacc.c:1652  */
+#line 3666 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 178:
-#line 1049 "conf_parser.y" /* yacc.c:1652  */
+#line 1050 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_DEBUG;
 }
-#line 3674 "conf_parser.c" /* yacc.c:1652  */
+#line 3675 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 179:
-#line 1053 "conf_parser.y" /* yacc.c:1652  */
+#line 1054 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_FULL;
 }
-#line 3683 "conf_parser.c" /* yacc.c:1652  */
+#line 3684 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 180:
-#line 1057 "conf_parser.y" /* yacc.c:1652  */
+#line 1058 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_HIDDEN;
 }
-#line 3692 "conf_parser.c" /* yacc.c:1652  */
+#line 3693 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 181:
-#line 1061 "conf_parser.y" /* yacc.c:1652  */
+#line 1062 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_HIDECHANS;
 }
-#line 3701 "conf_parser.c" /* yacc.c:1652  */
+#line 3702 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 182:
-#line 1065 "conf_parser.y" /* yacc.c:1652  */
+#line 1066 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_HIDEIDLE;
 }
-#line 3710 "conf_parser.c" /* yacc.c:1652  */
+#line 3711 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 183:
-#line 1069 "conf_parser.y" /* yacc.c:1652  */
+#line 1070 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_SKILL;
 }
-#line 3719 "conf_parser.c" /* yacc.c:1652  */
+#line 3720 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 184:
-#line 1073 "conf_parser.y" /* yacc.c:1652  */
+#line 1074 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_NCHANGE;
 }
-#line 3728 "conf_parser.c" /* yacc.c:1652  */
+#line 3729 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 185:
-#line 1077 "conf_parser.y" /* yacc.c:1652  */
+#line 1078 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_REJ;
 }
-#line 3737 "conf_parser.c" /* yacc.c:1652  */
+#line 3738 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 186:
-#line 1081 "conf_parser.y" /* yacc.c:1652  */
+#line 1082 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_UNAUTH;
 }
-#line 3746 "conf_parser.c" /* yacc.c:1652  */
+#line 3747 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 187:
-#line 1085 "conf_parser.y" /* yacc.c:1652  */
+#line 1086 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_SPY;
 }
-#line 3755 "conf_parser.c" /* yacc.c:1652  */
+#line 3756 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 188:
-#line 1089 "conf_parser.y" /* yacc.c:1652  */
+#line 1090 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_EXTERNAL;
 }
-#line 3764 "conf_parser.c" /* yacc.c:1652  */
+#line 3765 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 189:
-#line 1093 "conf_parser.y" /* yacc.c:1652  */
+#line 1094 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_SERVNOTICE;
 }
-#line 3773 "conf_parser.c" /* yacc.c:1652  */
+#line 3774 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 190:
-#line 1097 "conf_parser.y" /* yacc.c:1652  */
+#line 1098 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_INVISIBLE;
 }
-#line 3782 "conf_parser.c" /* yacc.c:1652  */
+#line 3783 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 191:
-#line 1101 "conf_parser.y" /* yacc.c:1652  */
+#line 1102 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_WALLOP;
 }
-#line 3791 "conf_parser.c" /* yacc.c:1652  */
+#line 3792 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 192:
-#line 1105 "conf_parser.y" /* yacc.c:1652  */
+#line 1106 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_SOFTCALLERID;
 }
-#line 3800 "conf_parser.c" /* yacc.c:1652  */
+#line 3801 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 193:
-#line 1109 "conf_parser.y" /* yacc.c:1652  */
+#line 1110 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_CALLERID;
 }
-#line 3809 "conf_parser.c" /* yacc.c:1652  */
+#line 3810 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 194:
-#line 1113 "conf_parser.y" /* yacc.c:1652  */
+#line 1114 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_LOCOPS;
 }
-#line 3818 "conf_parser.c" /* yacc.c:1652  */
+#line 3819 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 195:
-#line 1117 "conf_parser.y" /* yacc.c:1652  */
+#line 1118 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_REGONLY;
 }
-#line 3827 "conf_parser.c" /* yacc.c:1652  */
+#line 3828 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 196:
-#line 1121 "conf_parser.y" /* yacc.c:1652  */
+#line 1122 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_FARCONNECT;
 }
-#line 3836 "conf_parser.c" /* yacc.c:1652  */
+#line 3837 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 197:
-#line 1127 "conf_parser.y" /* yacc.c:1652  */
+#line 1128 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value = 0;
 }
-#line 3845 "conf_parser.c" /* yacc.c:1652  */
+#line 3846 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 201:
-#line 1134 "conf_parser.y" /* yacc.c:1652  */
+#line 1135 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_KILL_REMOTE;
 }
-#line 3854 "conf_parser.c" /* yacc.c:1652  */
+#line 3855 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 202:
-#line 1138 "conf_parser.y" /* yacc.c:1652  */
+#line 1139 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_KILL;
 }
-#line 3863 "conf_parser.c" /* yacc.c:1652  */
+#line 3864 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 203:
-#line 1142 "conf_parser.y" /* yacc.c:1652  */
+#line 1143 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_CONNECT_REMOTE;
 }
-#line 3872 "conf_parser.c" /* yacc.c:1652  */
+#line 3873 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 204:
-#line 1146 "conf_parser.y" /* yacc.c:1652  */
+#line 1147 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_CONNECT;
 }
-#line 3881 "conf_parser.c" /* yacc.c:1652  */
+#line 3882 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 205:
-#line 1150 "conf_parser.y" /* yacc.c:1652  */
+#line 1151 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_SQUIT_REMOTE;
 }
-#line 3890 "conf_parser.c" /* yacc.c:1652  */
+#line 3891 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 206:
-#line 1154 "conf_parser.y" /* yacc.c:1652  */
+#line 1155 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_SQUIT;
 }
-#line 3899 "conf_parser.c" /* yacc.c:1652  */
+#line 3900 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 207:
-#line 1158 "conf_parser.y" /* yacc.c:1652  */
+#line 1159 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_KLINE;
 }
-#line 3908 "conf_parser.c" /* yacc.c:1652  */
+#line 3909 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 208:
-#line 1162 "conf_parser.y" /* yacc.c:1652  */
+#line 1163 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNKLINE;
 }
-#line 3917 "conf_parser.c" /* yacc.c:1652  */
+#line 3918 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 209:
-#line 1166 "conf_parser.y" /* yacc.c:1652  */
+#line 1167 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_DLINE;
 }
-#line 3926 "conf_parser.c" /* yacc.c:1652  */
+#line 3927 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 210:
-#line 1170 "conf_parser.y" /* yacc.c:1652  */
+#line 1171 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNDLINE;
 }
-#line 3935 "conf_parser.c" /* yacc.c:1652  */
+#line 3936 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 211:
-#line 1174 "conf_parser.y" /* yacc.c:1652  */
+#line 1175 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_XLINE;
 }
-#line 3944 "conf_parser.c" /* yacc.c:1652  */
+#line 3945 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 212:
-#line 1178 "conf_parser.y" /* yacc.c:1652  */
+#line 1179 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNXLINE;
 }
-#line 3953 "conf_parser.c" /* yacc.c:1652  */
+#line 3954 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 213:
-#line 1182 "conf_parser.y" /* yacc.c:1652  */
+#line 1183 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_DIE;
 }
-#line 3962 "conf_parser.c" /* yacc.c:1652  */
+#line 3963 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 214:
-#line 1186 "conf_parser.y" /* yacc.c:1652  */
+#line 1187 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_RESTART;
 }
-#line 3971 "conf_parser.c" /* yacc.c:1652  */
+#line 3972 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 215:
-#line 1190 "conf_parser.y" /* yacc.c:1652  */
+#line 1191 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_REHASH_REMOTE;
 }
-#line 3980 "conf_parser.c" /* yacc.c:1652  */
+#line 3981 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 216:
-#line 1194 "conf_parser.y" /* yacc.c:1652  */
+#line 1195 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_REHASH;
 }
-#line 3989 "conf_parser.c" /* yacc.c:1652  */
+#line 3990 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 217:
-#line 1198 "conf_parser.y" /* yacc.c:1652  */
+#line 1199 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_ADMIN;
 }
-#line 3998 "conf_parser.c" /* yacc.c:1652  */
+#line 3999 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 218:
-#line 1202 "conf_parser.y" /* yacc.c:1652  */
+#line 1203 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_GLOBOPS;
 }
-#line 4007 "conf_parser.c" /* yacc.c:1652  */
+#line 4008 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 219:
-#line 1206 "conf_parser.y" /* yacc.c:1652  */
+#line 1207 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_WALLOPS;
 }
-#line 4016 "conf_parser.c" /* yacc.c:1652  */
+#line 4017 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 220:
-#line 1210 "conf_parser.y" /* yacc.c:1652  */
+#line 1211 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_LOCOPS;
 }
-#line 4025 "conf_parser.c" /* yacc.c:1652  */
+#line 4026 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 221:
-#line 1214 "conf_parser.y" /* yacc.c:1652  */
+#line 1215 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_REMOTEBAN;
 }
-#line 4034 "conf_parser.c" /* yacc.c:1652  */
+#line 4035 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 222:
-#line 1218 "conf_parser.y" /* yacc.c:1652  */
+#line 1219 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_SET;
 }
-#line 4043 "conf_parser.c" /* yacc.c:1652  */
+#line 4044 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 223:
-#line 1222 "conf_parser.y" /* yacc.c:1652  */
+#line 1223 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_MODULE;
 }
-#line 4052 "conf_parser.c" /* yacc.c:1652  */
+#line 4053 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 224:
-#line 1226 "conf_parser.y" /* yacc.c:1652  */
+#line 1227 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_OPME;
 }
-#line 4061 "conf_parser.c" /* yacc.c:1652  */
+#line 4062 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 225:
-#line 1230 "conf_parser.y" /* yacc.c:1652  */
+#line 1231 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_NICK_RESV;
 }
-#line 4070 "conf_parser.c" /* yacc.c:1652  */
+#line 4071 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 226:
-#line 1234 "conf_parser.y" /* yacc.c:1652  */
+#line 1235 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_JOIN_RESV;
 }
-#line 4079 "conf_parser.c" /* yacc.c:1652  */
+#line 4080 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 227:
-#line 1238 "conf_parser.y" /* yacc.c:1652  */
+#line 1239 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_RESV;
 }
-#line 4088 "conf_parser.c" /* yacc.c:1652  */
+#line 4089 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 228:
-#line 1242 "conf_parser.y" /* yacc.c:1652  */
+#line 1243 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNRESV;
 }
-#line 4097 "conf_parser.c" /* yacc.c:1652  */
+#line 4098 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 229:
-#line 1246 "conf_parser.y" /* yacc.c:1652  */
+#line 1247 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_CLOSE;
 }
-#line 4106 "conf_parser.c" /* yacc.c:1652  */
+#line 4107 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 230:
-#line 1256 "conf_parser.y" /* yacc.c:1652  */
+#line 1257 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 1)
     break;
@@ -4119,11 +4120,11 @@ yyreduce:
   block_state.max_sendq.value = DEFAULT_SENDQ;
   block_state.max_recvq.value = DEFAULT_RECVQ;
 }
-#line 4123 "conf_parser.c" /* yacc.c:1652  */
+#line 4124 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 231:
-#line 1268 "conf_parser.y" /* yacc.c:1652  */
+#line 1269 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 1)
     break;
@@ -4167,120 +4168,120 @@ yyreduce:
   if (diff)
     class_ip_limit_rebuild(class);
 }
-#line 4171 "conf_parser.c" /* yacc.c:1652  */
+#line 4172 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 250:
-#line 1331 "conf_parser.y" /* yacc.c:1652  */
+#line 1332 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
 }
-#line 4180 "conf_parser.c" /* yacc.c:1652  */
+#line 4181 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 251:
-#line 1337 "conf_parser.y" /* yacc.c:1652  */
+#line 1338 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.ping_freq.value = (yyvsp[-1].number);
 }
-#line 4189 "conf_parser.c" /* yacc.c:1652  */
+#line 4190 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 252:
-#line 1343 "conf_parser.y" /* yacc.c:1652  */
+#line 1344 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.max_perip_local.value = (yyvsp[-1].number);
 }
-#line 4198 "conf_parser.c" /* yacc.c:1652  */
+#line 4199 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 253:
-#line 1349 "conf_parser.y" /* yacc.c:1652  */
+#line 1350 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.max_perip_global.value = (yyvsp[-1].number);
 }
-#line 4207 "conf_parser.c" /* yacc.c:1652  */
+#line 4208 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 254:
-#line 1355 "conf_parser.y" /* yacc.c:1652  */
+#line 1356 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.con_freq.value = (yyvsp[-1].number);
 }
-#line 4216 "conf_parser.c" /* yacc.c:1652  */
+#line 4217 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 255:
-#line 1361 "conf_parser.y" /* yacc.c:1652  */
+#line 1362 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.max_channels.value = (yyvsp[-1].number);
 }
-#line 4225 "conf_parser.c" /* yacc.c:1652  */
+#line 4226 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 256:
-#line 1367 "conf_parser.y" /* yacc.c:1652  */
+#line 1368 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.max_total.value = (yyvsp[-1].number);
 }
-#line 4234 "conf_parser.c" /* yacc.c:1652  */
+#line 4235 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 257:
-#line 1373 "conf_parser.y" /* yacc.c:1652  */
+#line 1374 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.max_sendq.value = (yyvsp[-1].number);
 }
-#line 4243 "conf_parser.c" /* yacc.c:1652  */
+#line 4244 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 258:
-#line 1379 "conf_parser.y" /* yacc.c:1652  */
+#line 1380 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     if ((yyvsp[-1].number) >= CLIENT_FLOOD_MIN && (yyvsp[-1].number) <= CLIENT_FLOOD_MAX)
       block_state.max_recvq.value = (yyvsp[-1].number);
 }
-#line 4253 "conf_parser.c" /* yacc.c:1652  */
+#line 4254 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 259:
-#line 1386 "conf_parser.y" /* yacc.c:1652  */
+#line 1387 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.cidr_bitlen_ipv4.value = (yyvsp[-1].number) > 32 ? 32 : (yyvsp[-1].number);
 }
-#line 4262 "conf_parser.c" /* yacc.c:1652  */
+#line 4263 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 260:
-#line 1392 "conf_parser.y" /* yacc.c:1652  */
+#line 1393 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.cidr_bitlen_ipv6.value = (yyvsp[-1].number) > 128 ? 128 : (yyvsp[-1].number);
 }
-#line 4271 "conf_parser.c" /* yacc.c:1652  */
+#line 4272 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 261:
-#line 1398 "conf_parser.y" /* yacc.c:1652  */
+#line 1399 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.number_per_cidr.value = (yyvsp[-1].number);
 }
-#line 4280 "conf_parser.c" /* yacc.c:1652  */
+#line 4281 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 262:
-#line 1404 "conf_parser.y" /* yacc.c:1652  */
+#line 1405 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 1)
     break;
@@ -4288,11 +4289,11 @@ yyreduce:
   block_state.min_idle.value = (yyvsp[-1].number);
   block_state.flags.value |= CLASS_FLAGS_FAKE_IDLE;
 }
-#line 4292 "conf_parser.c" /* yacc.c:1652  */
+#line 4293 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 263:
-#line 1413 "conf_parser.y" /* yacc.c:1652  */
+#line 1414 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 1)
     break;
@@ -4300,88 +4301,88 @@ yyreduce:
   block_state.max_idle.value = (yyvsp[-1].number);
   block_state.flags.value |= CLASS_FLAGS_FAKE_IDLE;
 }
-#line 4304 "conf_parser.c" /* yacc.c:1652  */
+#line 4305 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 264:
-#line 1422 "conf_parser.y" /* yacc.c:1652  */
+#line 1423 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.flags.value &= CLASS_FLAGS_FAKE_IDLE;
 }
-#line 4313 "conf_parser.c" /* yacc.c:1652  */
+#line 4314 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 268:
-#line 1429 "conf_parser.y" /* yacc.c:1652  */
+#line 1430 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.flags.value |= CLASS_FLAGS_RANDOM_IDLE;
 }
-#line 4322 "conf_parser.c" /* yacc.c:1652  */
+#line 4323 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 269:
-#line 1433 "conf_parser.y" /* yacc.c:1652  */
+#line 1434 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 1)
     block_state.flags.value |= CLASS_FLAGS_HIDE_IDLE_FROM_OPERS;
 }
-#line 4331 "conf_parser.c" /* yacc.c:1652  */
+#line 4332 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 270:
-#line 1443 "conf_parser.y" /* yacc.c:1652  */
+#line 1444 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 4340 "conf_parser.c" /* yacc.c:1652  */
+#line 4341 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 272:
-#line 1449 "conf_parser.y" /* yacc.c:1652  */
+#line 1450 "conf_parser.y" /* yacc.c:1652  */
     {
   block_state.flags.value = 0;
 }
-#line 4348 "conf_parser.c" /* yacc.c:1652  */
+#line 4349 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 276:
-#line 1455 "conf_parser.y" /* yacc.c:1652  */
+#line 1456 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= LISTENER_SSL;
 }
-#line 4357 "conf_parser.c" /* yacc.c:1652  */
+#line 4358 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 277:
-#line 1459 "conf_parser.y" /* yacc.c:1652  */
+#line 1460 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= LISTENER_HIDDEN;
 }
-#line 4366 "conf_parser.c" /* yacc.c:1652  */
+#line 4367 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 278:
-#line 1463 "conf_parser.y" /* yacc.c:1652  */
+#line 1464 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
    block_state.flags.value |= LISTENER_SERVER;
 }
-#line 4375 "conf_parser.c" /* yacc.c:1652  */
+#line 4376 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 286:
-#line 1471 "conf_parser.y" /* yacc.c:1652  */
+#line 1472 "conf_parser.y" /* yacc.c:1652  */
     { block_state.flags.value = 0; }
-#line 4381 "conf_parser.c" /* yacc.c:1652  */
+#line 4382 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 290:
-#line 1476 "conf_parser.y" /* yacc.c:1652  */
+#line 1477 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -4395,11 +4396,11 @@ yyreduce:
     listener_add((yyvsp[0].number), block_state.addr.buf, block_state.flags.value);
   }
 }
-#line 4399 "conf_parser.c" /* yacc.c:1652  */
+#line 4400 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 291:
-#line 1489 "conf_parser.y" /* yacc.c:1652  */
+#line 1490 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -4415,38 +4416,38 @@ yyreduce:
       listener_add(i, block_state.addr.buf, block_state.flags.value);
   }
 }
-#line 4419 "conf_parser.c" /* yacc.c:1652  */
+#line 4420 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 292:
-#line 1506 "conf_parser.y" /* yacc.c:1652  */
+#line 1507 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.addr.buf, yylval.string, sizeof(block_state.addr.buf));
 }
-#line 4428 "conf_parser.c" /* yacc.c:1652  */
+#line 4429 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 293:
-#line 1512 "conf_parser.y" /* yacc.c:1652  */
+#line 1513 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.addr.buf, yylval.string, sizeof(block_state.addr.buf));
 }
-#line 4437 "conf_parser.c" /* yacc.c:1652  */
+#line 4438 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 294:
-#line 1522 "conf_parser.y" /* yacc.c:1652  */
+#line 1523 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 4446 "conf_parser.c" /* yacc.c:1652  */
+#line 4447 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 295:
-#line 1526 "conf_parser.y" /* yacc.c:1652  */
+#line 1527 "conf_parser.y" /* yacc.c:1652  */
     {
   dlink_node *node = NULL;
 
@@ -4488,38 +4489,38 @@ yyreduce:
     add_conf_by_address(CONF_CLIENT, conf);
   }
 }
-#line 4492 "conf_parser.c" /* yacc.c:1652  */
+#line 4493 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 307:
-#line 1580 "conf_parser.y" /* yacc.c:1652  */
+#line 1581 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
 }
-#line 4501 "conf_parser.c" /* yacc.c:1652  */
+#line 4502 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 308:
-#line 1586 "conf_parser.y" /* yacc.c:1652  */
+#line 1587 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 4510 "conf_parser.c" /* yacc.c:1652  */
+#line 4511 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 309:
-#line 1592 "conf_parser.y" /* yacc.c:1652  */
+#line 1593 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
 }
-#line 4519 "conf_parser.c" /* yacc.c:1652  */
+#line 4520 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 310:
-#line 1598 "conf_parser.y" /* yacc.c:1652  */
+#line 1599 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -4529,110 +4530,110 @@ yyreduce:
       block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
   }
 }
-#line 4533 "conf_parser.c" /* yacc.c:1652  */
+#line 4534 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 311:
-#line 1609 "conf_parser.y" /* yacc.c:1652  */
+#line 1610 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value &= (CONF_FLAGS_ENCRYPTED | CONF_FLAGS_SPOOF_IP);
 }
-#line 4542 "conf_parser.c" /* yacc.c:1652  */
+#line 4543 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 315:
-#line 1616 "conf_parser.y" /* yacc.c:1652  */
+#line 1617 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_SPOOF_NOTICE;
 }
-#line 4551 "conf_parser.c" /* yacc.c:1652  */
+#line 4552 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 316:
-#line 1620 "conf_parser.y" /* yacc.c:1652  */
+#line 1621 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_NOLIMIT;
 }
-#line 4560 "conf_parser.c" /* yacc.c:1652  */
+#line 4561 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 317:
-#line 1624 "conf_parser.y" /* yacc.c:1652  */
+#line 1625 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_EXEMPTKLINE;
 }
-#line 4569 "conf_parser.c" /* yacc.c:1652  */
+#line 4570 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 318:
-#line 1628 "conf_parser.y" /* yacc.c:1652  */
+#line 1629 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_EXEMPTXLINE;
 }
-#line 4578 "conf_parser.c" /* yacc.c:1652  */
+#line 4579 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 319:
-#line 1632 "conf_parser.y" /* yacc.c:1652  */
+#line 1633 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_NEED_IDENTD;
 }
-#line 4587 "conf_parser.c" /* yacc.c:1652  */
+#line 4588 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 320:
-#line 1636 "conf_parser.y" /* yacc.c:1652  */
+#line 1637 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_CAN_FLOOD;
 }
-#line 4596 "conf_parser.c" /* yacc.c:1652  */
+#line 4597 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 321:
-#line 1640 "conf_parser.y" /* yacc.c:1652  */
+#line 1641 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_NO_TILDE;
 }
-#line 4605 "conf_parser.c" /* yacc.c:1652  */
+#line 4606 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 322:
-#line 1644 "conf_parser.y" /* yacc.c:1652  */
+#line 1645 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_EXEMPTRESV;
 }
-#line 4614 "conf_parser.c" /* yacc.c:1652  */
+#line 4615 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 323:
-#line 1648 "conf_parser.y" /* yacc.c:1652  */
+#line 1649 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_WEBIRC;
 }
-#line 4623 "conf_parser.c" /* yacc.c:1652  */
+#line 4624 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 324:
-#line 1652 "conf_parser.y" /* yacc.c:1652  */
+#line 1653 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_NEED_PASSWORD;
 }
-#line 4632 "conf_parser.c" /* yacc.c:1652  */
+#line 4633 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 325:
-#line 1658 "conf_parser.y" /* yacc.c:1652  */
+#line 1659 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4645,11 +4646,11 @@ yyreduce:
   else
     ilog(LOG_TYPE_IRCD, "Spoof either is too long or contains invalid characters. Ignoring it.");
 }
-#line 4649 "conf_parser.c" /* yacc.c:1652  */
+#line 4650 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 326:
-#line 1672 "conf_parser.y" /* yacc.c:1652  */
+#line 1673 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4657,11 +4658,11 @@ yyreduce:
   strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
   block_state.flags.value |= CONF_FLAGS_REDIR;
 }
-#line 4661 "conf_parser.c" /* yacc.c:1652  */
+#line 4662 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 327:
-#line 1681 "conf_parser.y" /* yacc.c:1652  */
+#line 1682 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4669,11 +4670,11 @@ yyreduce:
   block_state.flags.value |= CONF_FLAGS_REDIR;
   block_state.port.value = (yyvsp[-1].number);
 }
-#line 4673 "conf_parser.c" /* yacc.c:1652  */
+#line 4674 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 328:
-#line 1694 "conf_parser.y" /* yacc.c:1652  */
+#line 1695 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4681,49 +4682,49 @@ yyreduce:
   reset_block_state();
   strlcpy(block_state.rpass.buf, CONF_NOREASON, sizeof(block_state.rpass.buf));
 }
-#line 4685 "conf_parser.c" /* yacc.c:1652  */
+#line 4686 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 329:
-#line 1701 "conf_parser.y" /* yacc.c:1652  */
+#line 1702 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
 
   resv_make(block_state.name.buf, block_state.rpass.buf, &block_state.mask.list);
 }
-#line 4696 "conf_parser.c" /* yacc.c:1652  */
+#line 4697 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 336:
-#line 1712 "conf_parser.y" /* yacc.c:1652  */
+#line 1713 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 4705 "conf_parser.c" /* yacc.c:1652  */
+#line 4706 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 337:
-#line 1718 "conf_parser.y" /* yacc.c:1652  */
+#line 1719 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 4714 "conf_parser.c" /* yacc.c:1652  */
+#line 4715 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 338:
-#line 1724 "conf_parser.y" /* yacc.c:1652  */
+#line 1725 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
 }
-#line 4723 "conf_parser.c" /* yacc.c:1652  */
+#line 4724 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 344:
-#line 1739 "conf_parser.y" /* yacc.c:1652  */
+#line 1740 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4734,11 +4735,11 @@ yyreduce:
     service->name = xstrdup(yylval.string);
   }
 }
-#line 4738 "conf_parser.c" /* yacc.c:1652  */
+#line 4739 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 345:
-#line 1755 "conf_parser.y" /* yacc.c:1652  */
+#line 1756 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4750,11 +4751,11 @@ yyreduce:
   strlcpy(block_state.host.buf, "*", sizeof(block_state.host.buf));
   block_state.flags.value = SHARED_ALL;
 }
-#line 4754 "conf_parser.c" /* yacc.c:1652  */
+#line 4755 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 346:
-#line 1766 "conf_parser.y" /* yacc.c:1652  */
+#line 1767 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4765,20 +4766,20 @@ yyreduce:
   shared->user = xstrdup(block_state.user.buf);
   shared->host = xstrdup(block_state.host.buf);
 }
-#line 4769 "conf_parser.c" /* yacc.c:1652  */
+#line 4770 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 353:
-#line 1781 "conf_parser.y" /* yacc.c:1652  */
+#line 1782 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 4778 "conf_parser.c" /* yacc.c:1652  */
+#line 4779 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 354:
-#line 1787 "conf_parser.y" /* yacc.c:1652  */
+#line 1788 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -4796,110 +4797,110 @@ yyreduce:
     split_nuh(&nuh);
   }
 }
-#line 4800 "conf_parser.c" /* yacc.c:1652  */
+#line 4801 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 355:
-#line 1806 "conf_parser.y" /* yacc.c:1652  */
+#line 1807 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value = 0;
 }
-#line 4809 "conf_parser.c" /* yacc.c:1652  */
+#line 4810 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 359:
-#line 1813 "conf_parser.y" /* yacc.c:1652  */
+#line 1814 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_KLINE;
 }
-#line 4818 "conf_parser.c" /* yacc.c:1652  */
+#line 4819 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 360:
-#line 1817 "conf_parser.y" /* yacc.c:1652  */
+#line 1818 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNKLINE;
 }
-#line 4827 "conf_parser.c" /* yacc.c:1652  */
+#line 4828 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 361:
-#line 1821 "conf_parser.y" /* yacc.c:1652  */
+#line 1822 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_DLINE;
 }
-#line 4836 "conf_parser.c" /* yacc.c:1652  */
+#line 4837 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 362:
-#line 1825 "conf_parser.y" /* yacc.c:1652  */
+#line 1826 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNDLINE;
 }
-#line 4845 "conf_parser.c" /* yacc.c:1652  */
+#line 4846 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 363:
-#line 1829 "conf_parser.y" /* yacc.c:1652  */
+#line 1830 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_XLINE;
 }
-#line 4854 "conf_parser.c" /* yacc.c:1652  */
+#line 4855 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 364:
-#line 1833 "conf_parser.y" /* yacc.c:1652  */
+#line 1834 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNXLINE;
 }
-#line 4863 "conf_parser.c" /* yacc.c:1652  */
+#line 4864 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 365:
-#line 1837 "conf_parser.y" /* yacc.c:1652  */
+#line 1838 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_RESV;
 }
-#line 4872 "conf_parser.c" /* yacc.c:1652  */
+#line 4873 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 366:
-#line 1841 "conf_parser.y" /* yacc.c:1652  */
+#line 1842 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNRESV;
 }
-#line 4881 "conf_parser.c" /* yacc.c:1652  */
+#line 4882 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 367:
-#line 1845 "conf_parser.y" /* yacc.c:1652  */
+#line 1846 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_LOCOPS;
 }
-#line 4890 "conf_parser.c" /* yacc.c:1652  */
+#line 4891 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 368:
-#line 1849 "conf_parser.y" /* yacc.c:1652  */
+#line 1850 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value = SHARED_ALL;
 }
-#line 4899 "conf_parser.c" /* yacc.c:1652  */
+#line 4900 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 369:
-#line 1859 "conf_parser.y" /* yacc.c:1652  */
+#line 1860 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4909,11 +4910,11 @@ yyreduce:
   strlcpy(block_state.name.buf, "*", sizeof(block_state.name.buf));
   block_state.flags.value = CLUSTER_ALL;
 }
-#line 4913 "conf_parser.c" /* yacc.c:1652  */
+#line 4914 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 370:
-#line 1868 "conf_parser.y" /* yacc.c:1652  */
+#line 1869 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4922,119 +4923,119 @@ yyreduce:
   cluster->type = block_state.flags.value;
   cluster->server = xstrdup(block_state.name.buf);
 }
-#line 4926 "conf_parser.c" /* yacc.c:1652  */
+#line 4927 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 376:
-#line 1881 "conf_parser.y" /* yacc.c:1652  */
+#line 1882 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 4935 "conf_parser.c" /* yacc.c:1652  */
+#line 4936 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 377:
-#line 1887 "conf_parser.y" /* yacc.c:1652  */
+#line 1888 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value = 0;
 }
-#line 4944 "conf_parser.c" /* yacc.c:1652  */
+#line 4945 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 381:
-#line 1894 "conf_parser.y" /* yacc.c:1652  */
+#line 1895 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_KLINE;
 }
-#line 4953 "conf_parser.c" /* yacc.c:1652  */
+#line 4954 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 382:
-#line 1898 "conf_parser.y" /* yacc.c:1652  */
+#line 1899 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_UNKLINE;
 }
-#line 4962 "conf_parser.c" /* yacc.c:1652  */
+#line 4963 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 383:
-#line 1902 "conf_parser.y" /* yacc.c:1652  */
+#line 1903 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_DLINE;
 }
-#line 4971 "conf_parser.c" /* yacc.c:1652  */
+#line 4972 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 384:
-#line 1906 "conf_parser.y" /* yacc.c:1652  */
+#line 1907 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_UNDLINE;
 }
-#line 4980 "conf_parser.c" /* yacc.c:1652  */
+#line 4981 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 385:
-#line 1910 "conf_parser.y" /* yacc.c:1652  */
+#line 1911 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_XLINE;
 }
-#line 4989 "conf_parser.c" /* yacc.c:1652  */
+#line 4990 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 386:
-#line 1914 "conf_parser.y" /* yacc.c:1652  */
+#line 1915 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_UNXLINE;
 }
-#line 4998 "conf_parser.c" /* yacc.c:1652  */
+#line 4999 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 387:
-#line 1918 "conf_parser.y" /* yacc.c:1652  */
+#line 1919 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_RESV;
 }
-#line 5007 "conf_parser.c" /* yacc.c:1652  */
+#line 5008 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 388:
-#line 1922 "conf_parser.y" /* yacc.c:1652  */
+#line 1923 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_UNRESV;
 }
-#line 5016 "conf_parser.c" /* yacc.c:1652  */
+#line 5017 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 389:
-#line 1926 "conf_parser.y" /* yacc.c:1652  */
+#line 1927 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_LOCOPS;
 }
-#line 5025 "conf_parser.c" /* yacc.c:1652  */
+#line 5026 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 390:
-#line 1930 "conf_parser.y" /* yacc.c:1652  */
+#line 1931 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value = CLUSTER_ALL;
 }
-#line 5034 "conf_parser.c" /* yacc.c:1652  */
+#line 5035 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 391:
-#line 1940 "conf_parser.y" /* yacc.c:1652  */
+#line 1941 "conf_parser.y" /* yacc.c:1652  */
     {
 
   if (conf_parser_ctx.pass != 2)
@@ -5044,11 +5045,11 @@ yyreduce:
   block_state.aftype.value = AF_INET;
   block_state.port.value = PORTNUM;
 }
-#line 5048 "conf_parser.c" /* yacc.c:1652  */
+#line 5049 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 392:
-#line 1949 "conf_parser.y" /* yacc.c:1652  */
+#line 1950 "conf_parser.y" /* yacc.c:1652  */
     {
   struct addrinfo hints, *res;
 
@@ -5071,6 +5072,7 @@ yyreduce:
     break;
 
   struct MaskItem *conf = conf_make(CONF_SERVER);
+  conf->addr = xcalloc(sizeof(*conf->addr));
   conf->port = block_state.port.value;
   conf->flags = block_state.flags.value;
   conf->aftype = block_state.aftype.value;
@@ -5102,9 +5104,11 @@ yyreduce:
     {
       assert(res);
 
-      memcpy(&conf->bind, res->ai_addr, res->ai_addrlen);
-      conf->bind.ss.ss_family = res->ai_family;
-      conf->bind.ss_len = res->ai_addrlen;
+      conf->bind = xcalloc(sizeof(*conf->bind));
+
+      memcpy(conf->bind, res->ai_addr, res->ai_addrlen);
+      conf->bind->ss.ss_family = res->ai_family;
+      conf->bind->ss_len = res->ai_addrlen;
       freeaddrinfo(res);
     }
   }
@@ -5112,38 +5116,38 @@ yyreduce:
   conf_add_class_to_conf(conf, block_state.class.buf);
   lookup_confhost(conf);
 }
-#line 5116 "conf_parser.c" /* yacc.c:1652  */
+#line 5120 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 410:
-#line 2031 "conf_parser.y" /* yacc.c:1652  */
+#line 2035 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 5125 "conf_parser.c" /* yacc.c:1652  */
+#line 5129 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 411:
-#line 2037 "conf_parser.y" /* yacc.c:1652  */
+#line 2041 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.host.buf, yylval.string, sizeof(block_state.host.buf));
 }
-#line 5134 "conf_parser.c" /* yacc.c:1652  */
+#line 5138 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 412:
-#line 2043 "conf_parser.y" /* yacc.c:1652  */
+#line 2047 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.bind.buf, yylval.string, sizeof(block_state.bind.buf));
 }
-#line 5143 "conf_parser.c" /* yacc.c:1652  */
+#line 5147 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 413:
-#line 2049 "conf_parser.y" /* yacc.c:1652  */
+#line 2053 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5155,11 +5159,11 @@ yyreduce:
   else
     strlcpy(block_state.spass.buf, yylval.string, sizeof(block_state.spass.buf));
 }
-#line 5159 "conf_parser.c" /* yacc.c:1652  */
+#line 5163 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 414:
-#line 2062 "conf_parser.y" /* yacc.c:1652  */
+#line 2066 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5171,73 +5175,73 @@ yyreduce:
   else
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5175 "conf_parser.c" /* yacc.c:1652  */
+#line 5179 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 415:
-#line 2075 "conf_parser.y" /* yacc.c:1652  */
+#line 2079 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 }
-#line 5184 "conf_parser.c" /* yacc.c:1652  */
+#line 5188 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 416:
-#line 2081 "conf_parser.y" /* yacc.c:1652  */
+#line 2085 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value = (yyvsp[-1].number);
 }
-#line 5193 "conf_parser.c" /* yacc.c:1652  */
+#line 5197 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 417:
-#line 2087 "conf_parser.y" /* yacc.c:1652  */
+#line 2091 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.aftype.value = AF_INET;
 }
-#line 5202 "conf_parser.c" /* yacc.c:1652  */
+#line 5206 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 418:
-#line 2091 "conf_parser.y" /* yacc.c:1652  */
+#line 2095 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.aftype.value = AF_INET6;
 }
-#line 5211 "conf_parser.c" /* yacc.c:1652  */
+#line 5215 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 419:
-#line 2097 "conf_parser.y" /* yacc.c:1652  */
+#line 2101 "conf_parser.y" /* yacc.c:1652  */
     {
   block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
 }
-#line 5219 "conf_parser.c" /* yacc.c:1652  */
+#line 5223 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 423:
-#line 2103 "conf_parser.y" /* yacc.c:1652  */
+#line 2107 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_ALLOW_AUTO_CONN;
 }
-#line 5228 "conf_parser.c" /* yacc.c:1652  */
+#line 5232 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 424:
-#line 2107 "conf_parser.y" /* yacc.c:1652  */
+#line 2111 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_SSL;
 }
-#line 5237 "conf_parser.c" /* yacc.c:1652  */
+#line 5241 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 425:
-#line 2113 "conf_parser.y" /* yacc.c:1652  */
+#line 2117 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -5247,38 +5251,38 @@ yyreduce:
       block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
   }
 }
-#line 5251 "conf_parser.c" /* yacc.c:1652  */
+#line 5255 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 426:
-#line 2124 "conf_parser.y" /* yacc.c:1652  */
+#line 2128 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.hub.list);
 }
-#line 5260 "conf_parser.c" /* yacc.c:1652  */
+#line 5264 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 427:
-#line 2130 "conf_parser.y" /* yacc.c:1652  */
+#line 2134 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.leaf.list);
 }
-#line 5269 "conf_parser.c" /* yacc.c:1652  */
+#line 5273 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 428:
-#line 2136 "conf_parser.y" /* yacc.c:1652  */
+#line 2140 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
 }
-#line 5278 "conf_parser.c" /* yacc.c:1652  */
+#line 5282 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 429:
-#line 2142 "conf_parser.y" /* yacc.c:1652  */
+#line 2146 "conf_parser.y" /* yacc.c:1652  */
     {
 #ifdef HAVE_TLS
   if (conf_parser_ctx.pass == 2)
@@ -5288,20 +5292,20 @@ yyreduce:
     conf_error_report("Ignoring connect::ciphers -- no TLS support");
 #endif
 }
-#line 5292 "conf_parser.c" /* yacc.c:1652  */
+#line 5296 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 430:
-#line 2157 "conf_parser.y" /* yacc.c:1652  */
+#line 2161 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 5301 "conf_parser.c" /* yacc.c:1652  */
+#line 5305 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 431:
-#line 2161 "conf_parser.y" /* yacc.c:1652  */
+#line 2165 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5320,11 +5324,11 @@ yyreduce:
     conf->reason = xstrdup(CONF_NOREASON);
   add_conf_by_address(CONF_KLINE, conf);
 }
-#line 5324 "conf_parser.c" /* yacc.c:1652  */
+#line 5328 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 437:
-#line 2184 "conf_parser.y" /* yacc.c:1652  */
+#line 2188 "conf_parser.y" /* yacc.c:1652  */
     {
 
   if (conf_parser_ctx.pass == 2)
@@ -5343,29 +5347,29 @@ yyreduce:
     split_nuh(&nuh);
   }
 }
-#line 5347 "conf_parser.c" /* yacc.c:1652  */
+#line 5351 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 438:
-#line 2204 "conf_parser.y" /* yacc.c:1652  */
+#line 2208 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5356 "conf_parser.c" /* yacc.c:1652  */
+#line 5360 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 439:
-#line 2214 "conf_parser.y" /* yacc.c:1652  */
+#line 2218 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 5365 "conf_parser.c" /* yacc.c:1652  */
+#line 5369 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 440:
-#line 2218 "conf_parser.y" /* yacc.c:1652  */
+#line 2222 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5385,29 +5389,29 @@ yyreduce:
     add_conf_by_address(CONF_DLINE, conf);
   }
 }
-#line 5389 "conf_parser.c" /* yacc.c:1652  */
+#line 5393 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 446:
-#line 2242 "conf_parser.y" /* yacc.c:1652  */
+#line 2246 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.addr.buf, yylval.string, sizeof(block_state.addr.buf));
 }
-#line 5398 "conf_parser.c" /* yacc.c:1652  */
+#line 5402 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 447:
-#line 2248 "conf_parser.y" /* yacc.c:1652  */
+#line 2252 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5407 "conf_parser.c" /* yacc.c:1652  */
+#line 5411 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 453:
-#line 2263 "conf_parser.y" /* yacc.c:1652  */
+#line 2267 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -5420,20 +5424,20 @@ yyreduce:
     }
   }
 }
-#line 5424 "conf_parser.c" /* yacc.c:1652  */
+#line 5428 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 454:
-#line 2280 "conf_parser.y" /* yacc.c:1652  */
+#line 2284 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 5433 "conf_parser.c" /* yacc.c:1652  */
+#line 5437 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 455:
-#line 2284 "conf_parser.y" /* yacc.c:1652  */
+#line 2288 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5449,870 +5453,870 @@ yyreduce:
   else
     gecos->reason = xstrdup(CONF_NOREASON);
 }
-#line 5453 "conf_parser.c" /* yacc.c:1652  */
+#line 5457 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 461:
-#line 2304 "conf_parser.y" /* yacc.c:1652  */
+#line 2308 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 5462 "conf_parser.c" /* yacc.c:1652  */
+#line 5466 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 462:
-#line 2310 "conf_parser.y" /* yacc.c:1652  */
+#line 2314 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5471 "conf_parser.c" /* yacc.c:1652  */
+#line 5475 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 513:
-#line 2372 "conf_parser.y" /* yacc.c:1652  */
+#line 2376 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.away_count = (yyvsp[-1].number);
 }
-#line 5479 "conf_parser.c" /* yacc.c:1652  */
+#line 5483 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 514:
-#line 2377 "conf_parser.y" /* yacc.c:1652  */
+#line 2381 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.away_time = (yyvsp[-1].number);
 }
-#line 5487 "conf_parser.c" /* yacc.c:1652  */
+#line 5491 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 515:
-#line 2382 "conf_parser.y" /* yacc.c:1652  */
+#line 2386 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.max_watch = (yyvsp[-1].number);
 }
-#line 5495 "conf_parser.c" /* yacc.c:1652  */
+#line 5499 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 516:
-#line 2387 "conf_parser.y" /* yacc.c:1652  */
+#line 2391 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.whowas_history_length = (yyvsp[-1].number);
 }
-#line 5503 "conf_parser.c" /* yacc.c:1652  */
+#line 5507 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 517:
-#line 2392 "conf_parser.y" /* yacc.c:1652  */
+#line 2396 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.cycle_on_host_change = yylval.number;
 }
-#line 5511 "conf_parser.c" /* yacc.c:1652  */
+#line 5515 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 518:
-#line 2397 "conf_parser.y" /* yacc.c:1652  */
+#line 2401 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.dline_min_cidr = (yyvsp[-1].number);
 }
-#line 5519 "conf_parser.c" /* yacc.c:1652  */
+#line 5523 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 519:
-#line 2402 "conf_parser.y" /* yacc.c:1652  */
+#line 2406 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.dline_min_cidr6 = (yyvsp[-1].number);
 }
-#line 5527 "conf_parser.c" /* yacc.c:1652  */
+#line 5531 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 520:
-#line 2407 "conf_parser.y" /* yacc.c:1652  */
+#line 2411 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.kline_min_cidr = (yyvsp[-1].number);
 }
-#line 5535 "conf_parser.c" /* yacc.c:1652  */
+#line 5539 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 521:
-#line 2412 "conf_parser.y" /* yacc.c:1652  */
+#line 2416 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.kline_min_cidr6 = (yyvsp[-1].number);
 }
-#line 5543 "conf_parser.c" /* yacc.c:1652  */
+#line 5547 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 522:
-#line 2417 "conf_parser.y" /* yacc.c:1652  */
+#line 2421 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.tkline_expire_notices = yylval.number;
 }
-#line 5551 "conf_parser.c" /* yacc.c:1652  */
+#line 5555 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 523:
-#line 2422 "conf_parser.y" /* yacc.c:1652  */
+#line 2426 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.kill_chase_time_limit = (yyvsp[-1].number);
 }
-#line 5559 "conf_parser.c" /* yacc.c:1652  */
+#line 5563 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 524:
-#line 2427 "conf_parser.y" /* yacc.c:1652  */
+#line 2431 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.failed_oper_notice = yylval.number;
 }
-#line 5567 "conf_parser.c" /* yacc.c:1652  */
+#line 5571 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 525:
-#line 2432 "conf_parser.y" /* yacc.c:1652  */
+#line 2436 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.anti_nick_flood = yylval.number;
 }
-#line 5575 "conf_parser.c" /* yacc.c:1652  */
+#line 5579 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 526:
-#line 2437 "conf_parser.y" /* yacc.c:1652  */
+#line 2441 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.max_nick_time = (yyvsp[-1].number);
 }
-#line 5583 "conf_parser.c" /* yacc.c:1652  */
+#line 5587 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 527:
-#line 2442 "conf_parser.y" /* yacc.c:1652  */
+#line 2446 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.max_nick_changes = (yyvsp[-1].number);
 }
-#line 5591 "conf_parser.c" /* yacc.c:1652  */
+#line 5595 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 528:
-#line 2447 "conf_parser.y" /* yacc.c:1652  */
+#line 2451 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.max_accept = (yyvsp[-1].number);
 }
-#line 5599 "conf_parser.c" /* yacc.c:1652  */
+#line 5603 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 529:
-#line 2452 "conf_parser.y" /* yacc.c:1652  */
+#line 2456 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.anti_spam_exit_message_time = (yyvsp[-1].number);
 }
-#line 5607 "conf_parser.c" /* yacc.c:1652  */
+#line 5611 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 530:
-#line 2457 "conf_parser.y" /* yacc.c:1652  */
+#line 2461 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.ts_warn_delta = (yyvsp[-1].number);
 }
-#line 5615 "conf_parser.c" /* yacc.c:1652  */
+#line 5619 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 531:
-#line 2462 "conf_parser.y" /* yacc.c:1652  */
+#line 2466 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.ts_max_delta = (yyvsp[-1].number);
 }
-#line 5623 "conf_parser.c" /* yacc.c:1652  */
+#line 5627 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 532:
-#line 2467 "conf_parser.y" /* yacc.c:1652  */
+#line 2471 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.invisible_on_connect = yylval.number;
 }
-#line 5631 "conf_parser.c" /* yacc.c:1652  */
+#line 5635 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 533:
-#line 2472 "conf_parser.y" /* yacc.c:1652  */
+#line 2476 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.warn_no_connect_block = yylval.number;
 }
-#line 5639 "conf_parser.c" /* yacc.c:1652  */
+#line 5643 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 534:
-#line 2477 "conf_parser.y" /* yacc.c:1652  */
+#line 2481 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_e_disabled = yylval.number;
 }
-#line 5647 "conf_parser.c" /* yacc.c:1652  */
+#line 5651 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 535:
-#line 2482 "conf_parser.y" /* yacc.c:1652  */
+#line 2486 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_m_oper_only = yylval.number;
 }
-#line 5655 "conf_parser.c" /* yacc.c:1652  */
+#line 5659 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 536:
-#line 2487 "conf_parser.y" /* yacc.c:1652  */
+#line 2491 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_o_oper_only = yylval.number;
 }
-#line 5663 "conf_parser.c" /* yacc.c:1652  */
+#line 5667 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 537:
-#line 2492 "conf_parser.y" /* yacc.c:1652  */
+#line 2496 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_P_oper_only = yylval.number;
 }
-#line 5671 "conf_parser.c" /* yacc.c:1652  */
+#line 5675 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 538:
-#line 2497 "conf_parser.y" /* yacc.c:1652  */
+#line 2501 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_u_oper_only = yylval.number;
 }
-#line 5679 "conf_parser.c" /* yacc.c:1652  */
+#line 5683 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 539:
-#line 2502 "conf_parser.y" /* yacc.c:1652  */
+#line 2506 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_k_oper_only = 2 * yylval.number;
 }
-#line 5687 "conf_parser.c" /* yacc.c:1652  */
+#line 5691 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 540:
-#line 2505 "conf_parser.y" /* yacc.c:1652  */
+#line 2509 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_k_oper_only = 1;
 }
-#line 5695 "conf_parser.c" /* yacc.c:1652  */
+#line 5699 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 541:
-#line 2510 "conf_parser.y" /* yacc.c:1652  */
+#line 2514 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_i_oper_only = 2 * yylval.number;
 }
-#line 5703 "conf_parser.c" /* yacc.c:1652  */
+#line 5707 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 542:
-#line 2513 "conf_parser.y" /* yacc.c:1652  */
+#line 2517 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.stats_i_oper_only = 1;
 }
-#line 5711 "conf_parser.c" /* yacc.c:1652  */
+#line 5715 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 543:
-#line 2518 "conf_parser.y" /* yacc.c:1652  */
+#line 2522 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.pace_wait = (yyvsp[-1].number);
 }
-#line 5719 "conf_parser.c" /* yacc.c:1652  */
+#line 5723 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 544:
-#line 2523 "conf_parser.y" /* yacc.c:1652  */
+#line 2527 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.caller_id_wait = (yyvsp[-1].number);
 }
-#line 5727 "conf_parser.c" /* yacc.c:1652  */
+#line 5731 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 545:
-#line 2528 "conf_parser.y" /* yacc.c:1652  */
+#line 2532 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.opers_bypass_callerid = yylval.number;
 }
-#line 5735 "conf_parser.c" /* yacc.c:1652  */
+#line 5739 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 546:
-#line 2533 "conf_parser.y" /* yacc.c:1652  */
+#line 2537 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.pace_wait_simple = (yyvsp[-1].number);
 }
-#line 5743 "conf_parser.c" /* yacc.c:1652  */
+#line 5747 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 547:
-#line 2538 "conf_parser.y" /* yacc.c:1652  */
+#line 2542 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.short_motd = yylval.number;
 }
-#line 5751 "conf_parser.c" /* yacc.c:1652  */
+#line 5755 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 548:
-#line 2543 "conf_parser.y" /* yacc.c:1652  */
+#line 2547 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.no_oper_flood = yylval.number;
 }
-#line 5759 "conf_parser.c" /* yacc.c:1652  */
+#line 5763 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 549:
-#line 2548 "conf_parser.y" /* yacc.c:1652  */
+#line 2552 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.dots_in_ident = (yyvsp[-1].number);
 }
-#line 5767 "conf_parser.c" /* yacc.c:1652  */
+#line 5771 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 550:
-#line 2553 "conf_parser.y" /* yacc.c:1652  */
+#line 2557 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.max_targets = (yyvsp[-1].number);
 }
-#line 5775 "conf_parser.c" /* yacc.c:1652  */
+#line 5779 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 551:
-#line 2558 "conf_parser.y" /* yacc.c:1652  */
+#line 2562 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.ping_cookie = yylval.number;
 }
-#line 5783 "conf_parser.c" /* yacc.c:1652  */
+#line 5787 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 552:
-#line 2563 "conf_parser.y" /* yacc.c:1652  */
+#line 2567 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.disable_auth = yylval.number;
 }
-#line 5791 "conf_parser.c" /* yacc.c:1652  */
+#line 5795 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 553:
-#line 2568 "conf_parser.y" /* yacc.c:1652  */
+#line 2572 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.throttle_count = (yyvsp[-1].number);
 }
-#line 5799 "conf_parser.c" /* yacc.c:1652  */
+#line 5803 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 554:
-#line 2573 "conf_parser.y" /* yacc.c:1652  */
+#line 2577 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.throttle_time = (yyvsp[-1].number);
 }
-#line 5807 "conf_parser.c" /* yacc.c:1652  */
+#line 5811 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 555:
-#line 2578 "conf_parser.y" /* yacc.c:1652  */
+#line 2582 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes = 0;
 }
-#line 5815 "conf_parser.c" /* yacc.c:1652  */
+#line 5819 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 559:
-#line 2584 "conf_parser.y" /* yacc.c:1652  */
+#line 2588 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_BOTS;
 }
-#line 5823 "conf_parser.c" /* yacc.c:1652  */
+#line 5827 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 560:
-#line 2587 "conf_parser.y" /* yacc.c:1652  */
+#line 2591 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_CCONN;
 }
-#line 5831 "conf_parser.c" /* yacc.c:1652  */
+#line 5835 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 561:
-#line 2590 "conf_parser.y" /* yacc.c:1652  */
+#line 2594 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_DEAF;
 }
-#line 5839 "conf_parser.c" /* yacc.c:1652  */
+#line 5843 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 562:
-#line 2593 "conf_parser.y" /* yacc.c:1652  */
+#line 2597 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_DEBUG;
 }
-#line 5847 "conf_parser.c" /* yacc.c:1652  */
+#line 5851 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 563:
-#line 2596 "conf_parser.y" /* yacc.c:1652  */
+#line 2600 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_FULL;
 }
-#line 5855 "conf_parser.c" /* yacc.c:1652  */
+#line 5859 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 564:
-#line 2599 "conf_parser.y" /* yacc.c:1652  */
+#line 2603 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_HIDDEN;
 }
-#line 5863 "conf_parser.c" /* yacc.c:1652  */
+#line 5867 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 565:
-#line 2602 "conf_parser.y" /* yacc.c:1652  */
+#line 2606 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_HIDECHANS;
 }
-#line 5871 "conf_parser.c" /* yacc.c:1652  */
+#line 5875 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 566:
-#line 2605 "conf_parser.y" /* yacc.c:1652  */
+#line 2609 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_HIDEIDLE;
 }
-#line 5879 "conf_parser.c" /* yacc.c:1652  */
+#line 5883 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 567:
-#line 2608 "conf_parser.y" /* yacc.c:1652  */
+#line 2612 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_SKILL;
 }
-#line 5887 "conf_parser.c" /* yacc.c:1652  */
+#line 5891 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 568:
-#line 2611 "conf_parser.y" /* yacc.c:1652  */
+#line 2615 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_NCHANGE;
 }
-#line 5895 "conf_parser.c" /* yacc.c:1652  */
+#line 5899 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 569:
-#line 2614 "conf_parser.y" /* yacc.c:1652  */
+#line 2618 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_REJ;
 }
-#line 5903 "conf_parser.c" /* yacc.c:1652  */
+#line 5907 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 570:
-#line 2617 "conf_parser.y" /* yacc.c:1652  */
+#line 2621 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_UNAUTH;
 }
-#line 5911 "conf_parser.c" /* yacc.c:1652  */
+#line 5915 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 571:
-#line 2620 "conf_parser.y" /* yacc.c:1652  */
+#line 2624 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_SPY;
 }
-#line 5919 "conf_parser.c" /* yacc.c:1652  */
+#line 5923 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 572:
-#line 2623 "conf_parser.y" /* yacc.c:1652  */
+#line 2627 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_EXTERNAL;
 }
-#line 5927 "conf_parser.c" /* yacc.c:1652  */
+#line 5931 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 573:
-#line 2626 "conf_parser.y" /* yacc.c:1652  */
+#line 2630 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_SERVNOTICE;
 }
-#line 5935 "conf_parser.c" /* yacc.c:1652  */
+#line 5939 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 574:
-#line 2629 "conf_parser.y" /* yacc.c:1652  */
+#line 2633 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_INVISIBLE;
 }
-#line 5943 "conf_parser.c" /* yacc.c:1652  */
+#line 5947 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 575:
-#line 2632 "conf_parser.y" /* yacc.c:1652  */
+#line 2636 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_WALLOP;
 }
-#line 5951 "conf_parser.c" /* yacc.c:1652  */
+#line 5955 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 576:
-#line 2635 "conf_parser.y" /* yacc.c:1652  */
+#line 2639 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_SOFTCALLERID;
 }
-#line 5959 "conf_parser.c" /* yacc.c:1652  */
+#line 5963 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 577:
-#line 2638 "conf_parser.y" /* yacc.c:1652  */
+#line 2642 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_CALLERID;
 }
-#line 5967 "conf_parser.c" /* yacc.c:1652  */
+#line 5971 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 578:
-#line 2641 "conf_parser.y" /* yacc.c:1652  */
+#line 2645 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_LOCOPS;
 }
-#line 5975 "conf_parser.c" /* yacc.c:1652  */
+#line 5979 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 579:
-#line 2644 "conf_parser.y" /* yacc.c:1652  */
+#line 2648 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_REGONLY;
 }
-#line 5983 "conf_parser.c" /* yacc.c:1652  */
+#line 5987 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 580:
-#line 2647 "conf_parser.y" /* yacc.c:1652  */
+#line 2651 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_umodes |= UMODE_FARCONNECT;
 }
-#line 5991 "conf_parser.c" /* yacc.c:1652  */
+#line 5995 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 581:
-#line 2652 "conf_parser.y" /* yacc.c:1652  */
+#line 2656 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes = 0;
 }
-#line 5999 "conf_parser.c" /* yacc.c:1652  */
+#line 6003 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 585:
-#line 2658 "conf_parser.y" /* yacc.c:1652  */
+#line 2662 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_BOTS;
 }
-#line 6007 "conf_parser.c" /* yacc.c:1652  */
+#line 6011 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 586:
-#line 2661 "conf_parser.y" /* yacc.c:1652  */
+#line 2665 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_CCONN;
 }
-#line 6015 "conf_parser.c" /* yacc.c:1652  */
+#line 6019 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 587:
-#line 2664 "conf_parser.y" /* yacc.c:1652  */
+#line 2668 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_DEAF;
 }
-#line 6023 "conf_parser.c" /* yacc.c:1652  */
+#line 6027 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 588:
-#line 2667 "conf_parser.y" /* yacc.c:1652  */
+#line 2671 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_DEBUG;
 }
-#line 6031 "conf_parser.c" /* yacc.c:1652  */
+#line 6035 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 589:
-#line 2670 "conf_parser.y" /* yacc.c:1652  */
+#line 2674 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_FULL;
 }
-#line 6039 "conf_parser.c" /* yacc.c:1652  */
+#line 6043 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 590:
-#line 2673 "conf_parser.y" /* yacc.c:1652  */
+#line 2677 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_SKILL;
 }
-#line 6047 "conf_parser.c" /* yacc.c:1652  */
+#line 6051 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 591:
-#line 2676 "conf_parser.y" /* yacc.c:1652  */
+#line 2680 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_HIDDEN;
 }
-#line 6055 "conf_parser.c" /* yacc.c:1652  */
+#line 6059 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 592:
-#line 2679 "conf_parser.y" /* yacc.c:1652  */
+#line 2683 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_NCHANGE;
 }
-#line 6063 "conf_parser.c" /* yacc.c:1652  */
+#line 6067 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 593:
-#line 2682 "conf_parser.y" /* yacc.c:1652  */
+#line 2686 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_REJ;
 }
-#line 6071 "conf_parser.c" /* yacc.c:1652  */
+#line 6075 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 594:
-#line 2685 "conf_parser.y" /* yacc.c:1652  */
+#line 2689 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_UNAUTH;
 }
-#line 6079 "conf_parser.c" /* yacc.c:1652  */
+#line 6083 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 595:
-#line 2688 "conf_parser.y" /* yacc.c:1652  */
+#line 2692 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_SPY;
 }
-#line 6087 "conf_parser.c" /* yacc.c:1652  */
+#line 6091 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 596:
-#line 2691 "conf_parser.y" /* yacc.c:1652  */
+#line 2695 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_EXTERNAL;
 }
-#line 6095 "conf_parser.c" /* yacc.c:1652  */
+#line 6099 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 597:
-#line 2694 "conf_parser.y" /* yacc.c:1652  */
+#line 2698 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_SERVNOTICE;
 }
-#line 6103 "conf_parser.c" /* yacc.c:1652  */
+#line 6107 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 598:
-#line 2697 "conf_parser.y" /* yacc.c:1652  */
+#line 2701 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_INVISIBLE;
 }
-#line 6111 "conf_parser.c" /* yacc.c:1652  */
+#line 6115 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 599:
-#line 2700 "conf_parser.y" /* yacc.c:1652  */
+#line 2704 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_WALLOP;
 }
-#line 6119 "conf_parser.c" /* yacc.c:1652  */
+#line 6123 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 600:
-#line 2703 "conf_parser.y" /* yacc.c:1652  */
+#line 2707 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_SOFTCALLERID;
 }
-#line 6127 "conf_parser.c" /* yacc.c:1652  */
+#line 6131 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 601:
-#line 2706 "conf_parser.y" /* yacc.c:1652  */
+#line 2710 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_CALLERID;
 }
-#line 6135 "conf_parser.c" /* yacc.c:1652  */
+#line 6139 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 602:
-#line 2709 "conf_parser.y" /* yacc.c:1652  */
+#line 2713 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_LOCOPS;
 }
-#line 6143 "conf_parser.c" /* yacc.c:1652  */
+#line 6147 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 603:
-#line 2712 "conf_parser.y" /* yacc.c:1652  */
+#line 2716 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_REGONLY;
 }
-#line 6151 "conf_parser.c" /* yacc.c:1652  */
+#line 6155 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 604:
-#line 2715 "conf_parser.y" /* yacc.c:1652  */
+#line 2719 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.oper_only_umodes |= UMODE_FARCONNECT;
 }
-#line 6159 "conf_parser.c" /* yacc.c:1652  */
+#line 6163 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 605:
-#line 2720 "conf_parser.y" /* yacc.c:1652  */
+#line 2724 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.min_nonwildcard = (yyvsp[-1].number);
 }
-#line 6167 "conf_parser.c" /* yacc.c:1652  */
+#line 6171 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 606:
-#line 2725 "conf_parser.y" /* yacc.c:1652  */
+#line 2729 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.min_nonwildcard_simple = (yyvsp[-1].number);
 }
-#line 6175 "conf_parser.c" /* yacc.c:1652  */
+#line 6179 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 607:
-#line 2730 "conf_parser.y" /* yacc.c:1652  */
+#line 2734 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.default_floodcount = (yyvsp[-1].number);
 }
-#line 6183 "conf_parser.c" /* yacc.c:1652  */
+#line 6187 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 608:
-#line 2735 "conf_parser.y" /* yacc.c:1652  */
+#line 2739 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigGeneral.default_floodtime = (yyvsp[-1].number);
 }
-#line 6191 "conf_parser.c" /* yacc.c:1652  */
+#line 6195 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 627:
-#line 2763 "conf_parser.y" /* yacc.c:1652  */
+#line 2767 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.disable_fake_channels = yylval.number;
 }
-#line 6199 "conf_parser.c" /* yacc.c:1652  */
+#line 6203 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 628:
-#line 2768 "conf_parser.y" /* yacc.c:1652  */
+#line 2772 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.invite_client_count = (yyvsp[-1].number);
 }
-#line 6207 "conf_parser.c" /* yacc.c:1652  */
+#line 6211 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 629:
-#line 2773 "conf_parser.y" /* yacc.c:1652  */
+#line 2777 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.invite_client_time = (yyvsp[-1].number);
 }
-#line 6215 "conf_parser.c" /* yacc.c:1652  */
+#line 6219 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 630:
-#line 2778 "conf_parser.y" /* yacc.c:1652  */
+#line 2782 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.invite_delay_channel = (yyvsp[-1].number);
 }
-#line 6223 "conf_parser.c" /* yacc.c:1652  */
+#line 6227 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 631:
-#line 2783 "conf_parser.y" /* yacc.c:1652  */
+#line 2787 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.invite_expire_time = (yyvsp[-1].number);
 }
-#line 6231 "conf_parser.c" /* yacc.c:1652  */
+#line 6235 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 632:
-#line 2788 "conf_parser.y" /* yacc.c:1652  */
+#line 2792 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.knock_client_count = (yyvsp[-1].number);
 }
-#line 6239 "conf_parser.c" /* yacc.c:1652  */
+#line 6243 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 633:
-#line 2793 "conf_parser.y" /* yacc.c:1652  */
+#line 2797 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.knock_client_time = (yyvsp[-1].number);
 }
-#line 6247 "conf_parser.c" /* yacc.c:1652  */
+#line 6251 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 634:
-#line 2798 "conf_parser.y" /* yacc.c:1652  */
+#line 2802 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.knock_delay_channel = (yyvsp[-1].number);
 }
-#line 6255 "conf_parser.c" /* yacc.c:1652  */
+#line 6259 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 635:
-#line 2803 "conf_parser.y" /* yacc.c:1652  */
+#line 2807 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.max_channels = (yyvsp[-1].number);
 }
-#line 6263 "conf_parser.c" /* yacc.c:1652  */
+#line 6267 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 636:
-#line 2808 "conf_parser.y" /* yacc.c:1652  */
+#line 2812 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.max_invites = (yyvsp[-1].number);
 }
-#line 6271 "conf_parser.c" /* yacc.c:1652  */
+#line 6275 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 637:
-#line 2813 "conf_parser.y" /* yacc.c:1652  */
+#line 2817 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.max_bans = (yyvsp[-1].number);
 }
-#line 6279 "conf_parser.c" /* yacc.c:1652  */
+#line 6283 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 638:
-#line 2818 "conf_parser.y" /* yacc.c:1652  */
+#line 2822 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.max_bans_large = (yyvsp[-1].number);
 }
-#line 6287 "conf_parser.c" /* yacc.c:1652  */
+#line 6291 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 639:
-#line 2823 "conf_parser.y" /* yacc.c:1652  */
+#line 2827 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.default_join_flood_count = yylval.number;
 }
-#line 6295 "conf_parser.c" /* yacc.c:1652  */
+#line 6299 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 640:
-#line 2828 "conf_parser.y" /* yacc.c:1652  */
+#line 2832 "conf_parser.y" /* yacc.c:1652  */
     {
   ConfigChannel.default_join_flood_time = (yyvsp[-1].number);
 }
-#line 6303 "conf_parser.c" /* yacc.c:1652  */
+#line 6307 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 654:
-#line 2851 "conf_parser.y" /* yacc.c:1652  */
+#line 2855 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.flatten_links = yylval.number;
 }
-#line 6312 "conf_parser.c" /* yacc.c:1652  */
+#line 6316 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 655:
-#line 2857 "conf_parser.y" /* yacc.c:1652  */
+#line 2861 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -6327,11 +6331,11 @@ yyreduce:
     ConfigServerHide.flatten_links_delay = (yyvsp[-1].number);
   }
 }
-#line 6331 "conf_parser.c" /* yacc.c:1652  */
+#line 6335 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 656:
-#line 2873 "conf_parser.y" /* yacc.c:1652  */
+#line 2877 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -6339,38 +6343,38 @@ yyreduce:
     ConfigServerHide.flatten_links_file = xstrdup(yylval.string);
   }
 }
-#line 6343 "conf_parser.c" /* yacc.c:1652  */
+#line 6347 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 657:
-#line 2882 "conf_parser.y" /* yacc.c:1652  */
+#line 2886 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.disable_remote_commands = yylval.number;
 }
-#line 6352 "conf_parser.c" /* yacc.c:1652  */
+#line 6356 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 658:
-#line 2888 "conf_parser.y" /* yacc.c:1652  */
+#line 2892 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hide_servers = yylval.number;
 }
-#line 6361 "conf_parser.c" /* yacc.c:1652  */
+#line 6365 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 659:
-#line 2894 "conf_parser.y" /* yacc.c:1652  */
+#line 2898 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hide_services = yylval.number;
 }
-#line 6370 "conf_parser.c" /* yacc.c:1652  */
+#line 6374 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 660:
-#line 2900 "conf_parser.y" /* yacc.c:1652  */
+#line 2904 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
   {
@@ -6378,29 +6382,29 @@ yyreduce:
     ConfigServerHide.hidden_name = xstrdup(yylval.string);
   }
 }
-#line 6382 "conf_parser.c" /* yacc.c:1652  */
+#line 6386 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 661:
-#line 2909 "conf_parser.y" /* yacc.c:1652  */
+#line 2913 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hidden = yylval.number;
 }
-#line 6391 "conf_parser.c" /* yacc.c:1652  */
+#line 6395 "conf_parser.c" /* yacc.c:1652  */
     break;
 
   case 662:
-#line 2915 "conf_parser.y" /* yacc.c:1652  */
+#line 2919 "conf_parser.y" /* yacc.c:1652  */
     {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hide_server_ips = yylval.number;
 }
-#line 6400 "conf_parser.c" /* yacc.c:1652  */
+#line 6404 "conf_parser.c" /* yacc.c:1652  */
     break;
 
 
-#line 6404 "conf_parser.c" /* yacc.c:1652  */
+#line 6408 "conf_parser.c" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

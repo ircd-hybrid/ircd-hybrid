@@ -556,12 +556,6 @@ set_default_conf(void)
 
   ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
   ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
-
-  memset(&ConfigServerInfo.ip, 0, sizeof(ConfigServerInfo.ip));
-  ConfigServerInfo.specific_ipv4_vhost = 0;
-  memset(&ConfigServerInfo.ip6, 0, sizeof(ConfigServerInfo.ip6));
-  ConfigServerInfo.specific_ipv6_vhost = 0;
-
   ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   ConfigServerInfo.max_nick_length = 9;
   ConfigServerInfo.max_topic_length = 80;

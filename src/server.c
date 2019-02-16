@@ -476,20 +476,6 @@ server_connect(struct MaskItem *conf, struct Client *by)
                          server_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       }
-      else if (ConfigServerInfo.specific_ipv4_vhost)
-      {
-        struct irc_ssaddr ipn;
-
-        memset(&ipn, 0, sizeof(ipn));
-        ipn.ss.ss_family = AF_INET;
-        ipn.ss_port = 0;
-        memcpy(&ipn, &ConfigServerInfo.ip, sizeof(ipn));
-
-        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
-                         (struct sockaddr *)&ipn, ipn.ss_len,
-                         server_connect_callback, client_p, conf->aftype,
-                         CONNECTTIMEOUT);
-      }
       else
         comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
                          NULL, 0, server_connect_callback, client_p, conf->aftype,
@@ -511,27 +497,13 @@ server_connect(struct MaskItem *conf, struct Client *by)
           ipn.ss.ss_family = AF_INET6;
           ipn.ss_port = 0;
 
-          comm_connect_tcp(client_p->connection->fd,
-                           conf->host, conf->port,
-                           (struct sockaddr *)&ipn, ipn.ss_len,
-                           server_connect_callback, client_p,
-                           conf->aftype, CONNECTTIMEOUT);
-        }
-        else if (ConfigServerInfo.specific_ipv6_vhost)
-        {
-          memcpy(&ipn, &ConfigServerInfo.ip6, sizeof(ipn));
-          ipn.ss.ss_family = AF_INET6;
-          ipn.ss_port = 0;
-
-          comm_connect_tcp(client_p->connection->fd,
-                           conf->host, conf->port,
+          comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
                            (struct sockaddr *)&ipn, ipn.ss_len,
                            server_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
         }
         else
-          comm_connect_tcp(client_p->connection->fd,
-                           conf->host, conf->port,
+          comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
                            NULL, 0, server_connect_callback, client_p,
                            conf->aftype, CONNECTTIMEOUT);
       }

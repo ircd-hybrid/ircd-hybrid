@@ -15,6 +15,10 @@ o) TLSv1.1 and TLSv1.0 are no longer supported and have been disabled in
    the openssl and gnutls module
 o) Minimum supported OpenSSL version is 1.0.1f now
 o) Minimum supported GnuTLS version is 3.5.8 now
+o) The 'serverinfo::vhost' and 'serverinfo:vhost6' configuration directives have
+   been deprecated. If you need to bind() a specific address you can specify one
+   in the connect {} block
+o) The 'connect::vhost' configuration directive has been renamed to 'connect::bind'
 
 
 -- Noteworthy changes in version 8.2.24 (2018-04-05)

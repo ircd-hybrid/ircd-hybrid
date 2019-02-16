@@ -141,6 +141,7 @@ auth                        { return IRCD_AUTH; }
 autoconn                    { return AUTOCONN; }
 away_count                  { return AWAY_COUNT; }
 away_time                   { return AWAY_TIME; }
+bind                        { return T_BIND; }
 bots                        { return T_BOTS; }
 caller_id_wait              { return CALLER_ID_WAIT; }
 callerid                    { return T_CALLERID; }
@@ -335,8 +336,6 @@ unresv                      { return T_UNRESV; }
 unxline                     { return T_UNXLINE; }
 use_logging                 { return USE_LOGGING; }
 user                        { return USER; }
-vhost                       { return VHOST; }
-vhost6                      { return VHOST6; }
 wallop                      { return T_WALLOP; }
 wallops                     { return T_WALLOPS; }
 warn_no_connect_block       { return WARN_NO_CONNECT_BLOCK; }

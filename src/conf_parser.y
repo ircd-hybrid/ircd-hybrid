@@ -295,6 +295,7 @@ reset_block_state(void)
 %token  STATS_P_OPER_ONLY
 %token  STATS_U_OPER_ONLY
 %token  T_ALL
+%token  T_BIND
 %token  T_BOTS
 %token  T_CALLERID
 %token  T_CCONN
@@ -448,7 +449,6 @@ serverinfo_entry: SERVERINFO '{' serverinfo_items '}' ';';
 
 serverinfo_items:       serverinfo_items serverinfo_item | serverinfo_item ;
 serverinfo_item:        serverinfo_name |
-                        serverinfo_vhost |
                         serverinfo_hub |
                         serverinfo_description |
                         serverinfo_network_name |
@@ -459,7 +459,6 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_ssl_dh_param_file |
                         serverinfo_ssl_dh_elliptic_curve |
                         serverinfo_rsa_private_key_file |
-                        serverinfo_vhost6 |
                         serverinfo_sid |
                         serverinfo_ssl_certificate_file |
                         serverinfo_ssl_cipher_list |
@@ -582,62 +581,6 @@ serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
 
   xfree(ConfigServerInfo.network_desc);
   ConfigServerInfo.network_desc = xstrdup(yylval.string);
-};
-
-serverinfo_vhost: VHOST '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2 && *yylval.string != '*')
-  {
-    struct addrinfo hints, *res;
-
-    memset(&hints, 0, sizeof(hints));
-
-    hints.ai_family   = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
-
-    if (getaddrinfo(yylval.string, NULL, &hints, &res))
-      ilog(LOG_TYPE_IRCD, "Invalid netmask for server vhost(%s)", yylval.string);
-    else
-    {
-      assert(res);
-
-      memcpy(&ConfigServerInfo.ip, res->ai_addr, res->ai_addrlen);
-      ConfigServerInfo.ip.ss.ss_family = res->ai_family;
-      ConfigServerInfo.ip.ss_len = res->ai_addrlen;
-      freeaddrinfo(res);
-
-      ConfigServerInfo.specific_ipv4_vhost = 1;
-    }
-  }
-};
-
-serverinfo_vhost6: VHOST6 '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2 && *yylval.string != '*')
-  {
-    struct addrinfo hints, *res;
-
-    memset(&hints, 0, sizeof(hints));
-
-    hints.ai_family   = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
-
-    if (getaddrinfo(yylval.string, NULL, &hints, &res))
-      ilog(LOG_TYPE_IRCD, "Invalid netmask for server vhost6(%s)", yylval.string);
-    else
-    {
-      assert(res);
-
-      memcpy(&ConfigServerInfo.ip6, res->ai_addr, res->ai_addrlen);
-      ConfigServerInfo.ip6.ss.ss_family = res->ai_family;
-      ConfigServerInfo.ip6.ss_len = res->ai_addrlen;
-      freeaddrinfo(res);
-
-      ConfigServerInfo.specific_ipv6_vhost = 1;
-    }
-  }
 };
 
 serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
@@ -2051,7 +1994,7 @@ connect_entry: CONNECT
     hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
 
     if (getaddrinfo(block_state.bind.buf, NULL, &hints, &res))
-      ilog(LOG_TYPE_IRCD, "Invalid netmask for server vhost(%s)", block_state.bind.buf);
+      ilog(LOG_TYPE_IRCD, "Invalid netmask for server bind(%s)", block_state.bind.buf);
     else
     {
       assert(res);
@@ -2070,7 +2013,7 @@ connect_entry: CONNECT
 connect_items:  connect_items connect_item | connect_item;
 connect_item:   connect_name |
                 connect_host |
-                connect_vhost |
+                connect_bind |
                 connect_send_password |
                 connect_accept_password |
                 connect_ssl_certificate_fingerprint |
@@ -2096,7 +2039,7 @@ connect_host: HOST '=' QSTRING ';'
     strlcpy(block_state.host.buf, yylval.string, sizeof(block_state.host.buf));
 };
 
-connect_vhost: VHOST '=' QSTRING ';'
+connect_bind: T_BIND '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.bind.buf, yylval.string, sizeof(block_state.bind.buf));

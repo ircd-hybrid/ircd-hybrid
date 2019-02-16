@@ -268,10 +268,6 @@ struct config_serverinfo_entry
   unsigned int default_max_clients;
   unsigned int max_nick_length;
   unsigned int max_topic_length;
-  unsigned int specific_ipv4_vhost;
-  unsigned int specific_ipv6_vhost;
-  struct irc_ssaddr ip;
-  struct irc_ssaddr ip6;
 };
 
 struct config_admin_entry

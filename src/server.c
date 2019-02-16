@@ -384,9 +384,6 @@ server_connect(struct MaskItem *conf, struct Client *by)
 {
   char buf[HOSTIPLEN + 1] = "";
 
-  /* conversion structs */
-  struct sockaddr_in *v4;
-
   /* Make sure conf is useful */
   assert(conf);
   assert(conf->type == CONF_SERVER);
@@ -460,53 +457,26 @@ server_connect(struct MaskItem *conf, struct Client *by)
   switch (conf->aftype)
   {
     case AF_INET:
-      v4 = (struct sockaddr_in*)&conf->bind;
-
-      if (v4->sin_addr.s_addr)
-      {
-        struct irc_ssaddr ipn;
-
-        memset(&ipn, 0, sizeof(ipn));
-        ipn.ss.ss_family = AF_INET;
-        ipn.ss_port = 0;
-        memcpy(&ipn, &conf->bind, sizeof(ipn));
-
+      if (((struct sockaddr_in*)&conf->bind)->sin_addr.s_addr)
         comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
-                         (struct sockaddr *)&ipn, ipn.ss_len,
+                         (struct sockaddr *)&conf->bind, conf->bind.ss_len,
                          server_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
-      }
       else
-        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
-                         NULL, 0, server_connect_callback, client_p, conf->aftype,
+        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port, NULL, 0,
+                         server_connect_callback, client_p, conf->aftype,
                          CONNECTTIMEOUT);
       break;
     case AF_INET6:
-      {
-        struct irc_ssaddr ipn;
-        struct sockaddr_in6 *v6;
-        struct sockaddr_in6 *v6conf;
-
-        memset(&ipn, 0, sizeof(ipn));
-        v6conf = (struct sockaddr_in6 *)&conf->bind;
-        v6 = (struct sockaddr_in6 *)&ipn;
-
-        if (memcmp(&v6conf->sin6_addr, &v6->sin6_addr, sizeof(struct in6_addr)))
-        {
-          memcpy(&ipn, &conf->bind, sizeof(ipn));
-          ipn.ss.ss_family = AF_INET6;
-          ipn.ss_port = 0;
-
-          comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
-                           (struct sockaddr *)&ipn, ipn.ss_len,
-                           server_connect_callback, client_p,
-                           conf->aftype, CONNECTTIMEOUT);
-        }
-        else
-          comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
-                           NULL, 0, server_connect_callback, client_p,
-                           conf->aftype, CONNECTTIMEOUT);
-      }
+      if (IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&conf->bind)->sin6_addr) == 0)
+        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
+                         (struct sockaddr *)&conf->bind, conf->bind.ss_len,
+                         server_connect_callback, client_p, conf->aftype,
+                         CONNECTTIMEOUT);
+      else
+        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port, NULL, 0,
+                         server_connect_callback, client_p, conf->aftype,
+                         CONNECTTIMEOUT);
   }
 
   /*

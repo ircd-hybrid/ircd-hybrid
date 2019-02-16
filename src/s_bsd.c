@@ -53,7 +53,6 @@ static const char *const comm_err_str[] =
 {
   [COMM_OK] = "Comm OK",
   [COMM_ERR_BIND] = "Error during bind()",
-  [COMM_ERR_DNS] = "Error during DNS lookup",
   [COMM_ERR_TIMEOUT] = "connect timeout",
   [COMM_ERR_CONNECT] = "Error during connect()",
   [COMM_ERROR] = "Comm Error"
@@ -61,7 +60,6 @@ static const char *const comm_err_str[] =
 
 static void comm_connect_callback(fde_t *, int);
 static void comm_connect_timeout(fde_t *, void *);
-static void comm_connect_dns_callback(void *, const struct irc_ssaddr *, const char *, size_t);
 static void comm_connect_tryconnect(fde_t *, void *);
 
 
@@ -364,19 +362,17 @@ comm_checktimeouts(void *unused)
  *               may be called now, or it may be called later.
  */
 void
-comm_connect_tcp(fde_t *F, const char *host, unsigned short port, struct sockaddr *clocal,
-                 int socklen, void (*callback)(fde_t *, int, void *), void *data,
-                 int aftype, uintmax_t timeout)
+comm_connect_tcp(fde_t *F, const struct irc_ssaddr *caddr, unsigned short port, const struct irc_ssaddr *baddr,
+                 void (*callback)(fde_t *, int, void *), void *data, uintmax_t timeout)
 {
-  struct addrinfo hints, *res;
-  char portname[PORTNAMELEN + 1];
-
   assert(callback);
+
+  memcpy(&F->connect.hostaddr, caddr, sizeof(F->connect.hostaddr));
+
+  /* The cast is hacky, but safe - port offset is same on v4 and v6 */
+  ((struct sockaddr_in *)&F->connect.hostaddr)->sin_port = htons(port);
   F->connect.callback = callback;
   F->connect.data = data;
-
-  F->connect.hostaddr.ss.ss_family = aftype;
-  F->connect.hostaddr.ss_port = htons(port);
 
   /* Note that we're using a passed sockaddr here. This is because
    * generally you'll be bind()ing to a sockaddr grabbed from
@@ -385,48 +381,15 @@ comm_connect_tcp(fde_t *F, const char *host, unsigned short port, struct sockadd
    * virtual host IP, for completeness.
    *   -- adrian
    */
-  if (clocal && bind(F->fd, clocal, socklen) < 0)
+  if (baddr && bind(F->fd, (const struct sockaddr *)baddr, baddr->ss_len) < 0)
   {
     /* Failure, call the callback with COMM_ERR_BIND */
     comm_connect_callback(F, COMM_ERR_BIND);
     return;  /* ... and quit */
   }
 
-  memset(&hints, 0, sizeof(hints));
-
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-
-  snprintf(portname, sizeof(portname), "%d", port);
-
-  /*
-   * Next, if we have been given an IP address, get the address and skip the
-   * DNS check (and head direct to comm_connect_tryconnect()).
-   */
-  if (getaddrinfo(host, portname, &hints, &res))
-  {
-    /* Send the DNS request, for the next level */
-    if (aftype == AF_INET6)
-      gethost_byname_type(comm_connect_dns_callback, F, host, T_AAAA);
-    else
-      gethost_byname_type(comm_connect_dns_callback, F, host, T_A);
-  }
-  else
-  {
-    /* We have a valid IP, so we just call tryconnect */
-    /* Make sure we actually set the timeout here .. */
-    assert(res);
-
-    memcpy(&F->connect.hostaddr, res->ai_addr, res->ai_addrlen);
-    F->connect.hostaddr.ss_len = res->ai_addrlen;
-    F->connect.hostaddr.ss.ss_family = res->ai_family;
-
-    freeaddrinfo(res);
-
-    comm_settimeout(F, timeout * 1000, comm_connect_timeout, NULL);
-    comm_connect_tryconnect(F, NULL);
-  }
+  comm_settimeout(F, timeout * 1000, comm_connect_timeout, NULL);
+  comm_connect_tryconnect(F, NULL);
 }
 
 /*
@@ -462,42 +425,6 @@ comm_connect_timeout(fde_t *F, void *unused)
 {
   /* error! */
   comm_connect_callback(F, COMM_ERR_TIMEOUT);
-}
-
-/*
- * comm_connect_dns_callback() - called at the completion of the DNS request
- *
- * The DNS request has completed, so if we've got an error, return it,
- * otherwise we initiate the connect()
- */
-static void
-comm_connect_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
-{
-  fde_t *const F = vptr;
-
-  if (addr == NULL)
-  {
-    comm_connect_callback(F, COMM_ERR_DNS);
-    return;
-  }
-
-  /* No error, set a 30 second timeout */
-  comm_settimeout(F, 30 * 1000, comm_connect_timeout, NULL);
-
-  /* Copy over the DNS reply info so we can use it in the connect() */
-  /*
-   * Note we don't fudge the refcount here, because we aren't keeping
-   * the DNS record around, and the DNS cache is gone anyway..
-   *     -- adrian
-   */
-  memcpy(&F->connect.hostaddr, addr, addr->ss_len);
-
-  /* The cast is hacky, but safe - port offset is same on v4 and v6 */
-  ((struct sockaddr_in *)&F->connect.hostaddr)->sin_port = F->connect.hostaddr.ss_port;
-  F->connect.hostaddr.ss_len = addr->ss_len;
-
-  /* Now, call the tryconnect() routine to try a connect() */
-  comm_connect_tryconnect(F, NULL);
 }
 
 /* static void comm_connect_tryconnect(fde_t *fd, void *unused)

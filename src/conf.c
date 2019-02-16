@@ -98,7 +98,7 @@ conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
   conf->dns_pending = false;
 
   if (addr)
-    memcpy(&conf->addr, addr, sizeof(conf->addr));
+    memcpy(conf->addr, addr, sizeof(*conf->addr));
   else
     conf->dns_failed = true;
 }
@@ -187,6 +187,8 @@ conf_free(struct MaskItem *conf)
   xfree(conf->whois);
   xfree(conf->user);
   xfree(conf->host);
+  xfree(conf->addr);
+  xfree(conf->bind);
   xfree(conf->cipher_list);
 
   DLINK_FOREACH_SAFE(node, node_next, conf->hub_list.head)
@@ -517,13 +519,13 @@ operator_find(const struct Client *who, const char *name)
             break;
           case HM_IPV4:
             if (who->ip.ss.ss_family == AF_INET)
-              if (match_ipv4(&who->ip, &conf->addr, conf->bits))
+              if (match_ipv4(&who->ip, conf->addr, conf->bits))
                 if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                   return conf;
             break;
           case HM_IPV6:
             if (who->ip.ss.ss_family == AF_INET6)
-              if (match_ipv6(&who->ip, &conf->addr, conf->bits))
+              if (match_ipv6(&who->ip, conf->addr, conf->bits))
                 if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
                   return conf;
             break;
@@ -730,9 +732,9 @@ lookup_confhost(struct MaskItem *conf)
 
   assert(res);
 
-  memcpy(&conf->addr, res->ai_addr, res->ai_addrlen);
-  conf->addr.ss_len = res->ai_addrlen;
-  conf->addr.ss.ss_family = res->ai_family;
+  memcpy(conf->addr, res->ai_addr, res->ai_addrlen);
+  conf->addr->ss_len = res->ai_addrlen;
+  conf->addr->ss.ss_family = res->ai_family;
 
   freeaddrinfo(res);
 }

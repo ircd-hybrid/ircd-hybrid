@@ -213,8 +213,6 @@ inetport(struct Listener *listener)
    * Bind a port to listen for new connections if port is non-null,
    * else assume it is already open and try get something from it.
    */
-  lsin.ss_port = htons(listener->port);
-
   if (bind(fd, (struct sockaddr *)&lsin, lsin.ss_len))
   {
     report_error(L_ALL, "binding listener socket %s:%s",
@@ -351,7 +349,6 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   assert(res);
 
   memcpy((struct sockaddr*)&vaddr, res->ai_addr, res->ai_addrlen);
-  vaddr.ss_port = port;
   vaddr.ss_len = res->ai_addrlen;
   freeaddrinfo(res);
 #ifdef MAKES_NO_SENSE
@@ -374,7 +371,6 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
     assert(res);
 
     memcpy((struct sockaddr*)&vaddr, res->ai_addr, res->ai_addrlen);
-    vaddr.ss_port = port;
     vaddr.ss_len = res->ai_addrlen;
     freeaddrinfo(res);
   }

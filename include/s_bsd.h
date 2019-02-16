@@ -33,7 +33,6 @@ enum
 {
   COMM_OK,
   COMM_ERR_BIND,
-  COMM_ERR_DNS,
   COMM_ERR_TIMEOUT,
   COMM_ERR_CONNECT,
   COMM_ERROR,
@@ -62,8 +61,8 @@ extern bool comm_ignore_errno(int);
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
-extern void comm_connect_tcp(fde_t *, const char *, unsigned short, struct sockaddr *, int,
-                             void (fde_t *, int, void *), void *, int, uintmax_t);
+extern void comm_connect_tcp(fde_t *, const struct irc_ssaddr *, unsigned short, const struct irc_ssaddr *,
+                             void (fde_t *, int, void *), void *, uintmax_t);
 extern const char *comm_errstr(int);
 extern int comm_socket(int, int, int);
 extern int comm_accept(fde_t *, struct irc_ssaddr *);

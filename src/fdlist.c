@@ -30,7 +30,6 @@
 #include "s_bsd.h"   /* comm_setselect */
 #include "memory.h"
 #include "misc.h"
-#include "res.h"
 
 
 fde_t *fd_table;
@@ -115,8 +114,6 @@ fd_close(fde_t *F)
 
   if (F->flags.is_socket == true)
     comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
-
-  delete_resolver_queries(F);
 
   if (tls_isusing(&F->ssl))
     tls_free(&F->ssl);

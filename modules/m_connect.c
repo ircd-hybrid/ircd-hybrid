@@ -116,7 +116,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   {
     if (ConfigServerHide.hide_server_ips == 0 && HasUMode(source_p, UMODE_ADMIN))
       sendto_one_notice(source_p, &me, ":*** Connecting to %s[%s].%u",
-                        conf->host, conf->name, conf->port);
+                        conf->name, conf->host, conf->port);
     else
       sendto_one_notice(source_p, &me, ":*** Connecting to %s.%u",
                         conf->name, conf->port);

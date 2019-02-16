@@ -485,12 +485,10 @@ auth_start_query(struct AuthRequest *auth)
   remove_ipv6_mapping(&localaddr);
   v6 = (struct sockaddr_in6 *)&localaddr;
   v6->sin6_port = htons(0);
-  localaddr.ss_port = htons(0);
 
-  comm_connect_tcp(auth->fd, auth->client->sockhost, RFC1413_PORT,
-      (struct sockaddr *)&localaddr, localaddr.ss_len, auth_connect_callback,
-      auth, auth->client->ip.ss.ss_family,
-      GlobalSetOptions.ident_timeout);
+  comm_connect_tcp(auth->fd, &auth->client->ip, RFC1413_PORT,
+                   &localaddr, auth_connect_callback, auth,
+                   GlobalSetOptions.ident_timeout);
 }
 
 /*

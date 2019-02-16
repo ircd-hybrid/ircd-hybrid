@@ -933,6 +933,7 @@ oper_entry: OPERATOR
     split_nuh(&nuh);
 
     struct MaskItem *conf = conf_make(CONF_OPER);
+    conf->addr = xcalloc(sizeof(*conf->addr));
     conf->name = xstrdup(block_state.name.buf);
     conf->user = xstrdup(block_state.user.buf);
     conf->host = xstrdup(block_state.host.buf);
@@ -949,7 +950,7 @@ oper_entry: OPERATOR
     conf->flags = block_state.flags.value;
     conf->modes = block_state.modes.value;
     conf->port  = block_state.port.value;
-    conf->htype = parse_netmask(conf->host, &conf->addr, &conf->bits);
+    conf->htype = parse_netmask(conf->host, conf->addr, &conf->bits);
 
     conf_add_class_to_conf(conf, block_state.class.buf);
   }
@@ -1968,6 +1969,7 @@ connect_entry: CONNECT
     break;
 
   struct MaskItem *conf = conf_make(CONF_SERVER);
+  conf->addr = xcalloc(sizeof(*conf->addr));
   conf->port = block_state.port.value;
   conf->flags = block_state.flags.value;
   conf->aftype = block_state.aftype.value;
@@ -1999,9 +2001,11 @@ connect_entry: CONNECT
     {
       assert(res);
 
-      memcpy(&conf->bind, res->ai_addr, res->ai_addrlen);
-      conf->bind.ss.ss_family = res->ai_family;
-      conf->bind.ss_len = res->ai_addrlen;
+      conf->bind = xcalloc(sizeof(*conf->bind));
+
+      memcpy(conf->bind, res->ai_addr, res->ai_addrlen);
+      conf->bind->ss.ss_family = res->ai_family;
+      conf->bind->ss_len = res->ai_addrlen;
       freeaddrinfo(res);
     }
   }

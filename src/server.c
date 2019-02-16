@@ -389,10 +389,6 @@ server_connect(struct MaskItem *conf, struct Client *by)
   assert(conf->type == CONF_SERVER);
   assert(hash_find_server(conf->name) == NULL);  /* This should have been checked by the caller */
 
-  getnameinfo((const struct sockaddr *)&conf->addr, conf->addr.ss_len,
-              buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
-  ilog(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
-
   /* Still processing a DNS lookup? -> exit */
   if (conf->dns_pending == true)
   {
@@ -410,8 +406,12 @@ server_connect(struct MaskItem *conf, struct Client *by)
     return false;
   }
 
+  getnameinfo((const struct sockaddr *)conf->addr, conf->addr->ss_len,
+              buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
+  ilog(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
+
   /* Create a socket for the server connection */
-  int fd = comm_socket(conf->addr.ss.ss_family, SOCK_STREAM, 0);
+  int fd = comm_socket(conf->addr->ss.ss_family, SOCK_STREAM, 0);
   if (fd == -1)
   {
     /* Eek, failure to create the socket */
@@ -428,6 +428,8 @@ server_connect(struct MaskItem *conf, struct Client *by)
 
   /* We already converted the ip once, so lets use it - stu */
   strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
+
+  memcpy(&client_p->ip, conf->addr, sizeof(client_p->ip));
 
   client_p->connection->fd = fd_open(fd, true, NULL);
 
@@ -448,36 +450,10 @@ server_connect(struct MaskItem *conf, struct Client *by)
     strlcpy(client_p->serv->by, "AutoConn.", sizeof(client_p->serv->by));
 
   SetConnecting(client_p);
-  client_p->ip.ss.ss_family = conf->aftype;
 
   /* Now, initiate the connection */
-  /* XXX assume that a non 0 type means a specific bind address
-   * for this connect.
-   */
-  switch (conf->aftype)
-  {
-    case AF_INET:
-      if (((struct sockaddr_in*)&conf->bind)->sin_addr.s_addr)
-        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
-                         (struct sockaddr *)&conf->bind, conf->bind.ss_len,
-                         server_connect_callback, client_p, conf->aftype,
-                         CONNECTTIMEOUT);
-      else
-        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port, NULL, 0,
-                         server_connect_callback, client_p, conf->aftype,
-                         CONNECTTIMEOUT);
-      break;
-    case AF_INET6:
-      if (IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&conf->bind)->sin6_addr) == 0)
-        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port,
-                         (struct sockaddr *)&conf->bind, conf->bind.ss_len,
-                         server_connect_callback, client_p, conf->aftype,
-                         CONNECTTIMEOUT);
-      else
-        comm_connect_tcp(client_p->connection->fd, conf->host, conf->port, NULL, 0,
-                         server_connect_callback, client_p, conf->aftype,
-                         CONNECTTIMEOUT);
-  }
+  comm_connect_tcp(client_p->connection->fd, conf->addr, conf->port, conf->bind,
+                   server_connect_callback, client_p, CONNECTTIMEOUT);
 
   /*
    * At this point we have a connection in progress and a connect {} block

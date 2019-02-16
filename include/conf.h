@@ -138,8 +138,8 @@ struct MaskItem
   int                bits;
   uintmax_t          until;     /* Hold action until this time (calendar time) */
   uintmax_t          setat;
-  struct irc_ssaddr  bind;  /* ip to bind to for outgoing connect */
-  struct irc_ssaddr  addr;  /* ip to connect to */
+  struct irc_ssaddr  *bind;  /* ip to bind to for outgoing connect */
+  struct irc_ssaddr  *addr;  /* ip to connect to */
   struct ClassItem  *class;  /* Class of connection */
   char              *name;
   char              *user;     /* user part of user@host */

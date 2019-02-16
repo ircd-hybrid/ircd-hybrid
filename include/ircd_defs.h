@@ -74,6 +74,5 @@ struct irc_ssaddr
 {
   struct sockaddr_storage ss;
   unsigned char   ss_len;
-  in_port_t       ss_port;
 };
 #endif /* INCLUDED_ircd_defs_h */

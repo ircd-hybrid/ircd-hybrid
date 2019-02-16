@@ -734,7 +734,6 @@ lookup_confhost(struct MaskItem *conf)
 
   memcpy(conf->addr, res->ai_addr, res->ai_addrlen);
   conf->addr->ss_len = res->ai_addrlen;
-  conf->addr->ss.ss_family = res->ai_family;
 
   freeaddrinfo(res);
 }

@@ -2004,7 +2004,6 @@ connect_entry: CONNECT
       conf->bind = xcalloc(sizeof(*conf->bind));
 
       memcpy(conf->bind, res->ai_addr, res->ai_addrlen);
-      conf->bind->ss.ss_family = res->ai_family;
       conf->bind->ss_len = res->ai_addrlen;
       freeaddrinfo(res);
     }

@@ -108,7 +108,6 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   memcpy(&source_p->ip, res->ai_addr, res->ai_addrlen);
   source_p->ip.ss_len = res->ai_addrlen;
-  source_p->ip.ss.ss_family = res->ai_family;
   freeaddrinfo(res);
 
   strlcpy(source_p->sockhost, addr, sizeof(source_p->sockhost));

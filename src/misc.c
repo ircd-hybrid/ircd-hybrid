@@ -140,3 +140,40 @@ binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
 
   *hex = '\0';
 }
+
+bool
+address_compare(const void *p1,
+                const void *p2, bool port)
+{
+  const struct irc_ssaddr *const addr1 = p1;
+  const struct irc_ssaddr *const addr2 = p2;
+
+  if (addr1->ss.ss_family != addr2->ss.ss_family)
+    return false;
+
+  if (addr1->ss.ss_family == AF_INET)
+  {
+    const struct sockaddr_in *const sin1 = (const struct sockaddr_in *)addr1;
+    const struct sockaddr_in *const sin2 = (const struct sockaddr_in *)addr2;
+
+    if (port == true && (sin1->sin_port != sin2->sin_port))
+      return false;
+    if (sin1->sin_addr.s_addr != sin2->sin_addr.s_addr)
+      return false;
+    return true;
+  }
+  else if (addr1->ss.ss_family == AF_INET6)
+  {
+    const struct sockaddr_in6 *const sin1 = (const struct sockaddr_in6 *)addr1;
+    const struct sockaddr_in6 *const sin2 = (const struct sockaddr_in6 *)addr2;
+
+    if (port == true && (sin1->sin6_port != sin2->sin6_port))
+      return false;
+    if (memcmp(sin1->sin6_addr.s6_addr,
+               sin2->sin6_addr.s6_addr, sizeof(struct in6_addr)))
+      return false;
+    return true;
+  }
+
+  return false;
+}

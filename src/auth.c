@@ -51,6 +51,7 @@
 #include "log.h"
 #include "send.h"
 #include "memory.h"
+#include "misc.h"
 
 
 enum
@@ -190,32 +191,9 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
     auth_sendheader(auth->client, REPORT_FAIL_DNS);
   else
   {
-    if (auth->client->ip.ss.ss_family == AF_INET6)
-    {
-      const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&auth->client->ip;
-      const struct sockaddr_in6 *const v6dns = (const struct sockaddr_in6 *)addr;
-
-      if (memcmp(&v6->sin6_addr, &v6dns->sin6_addr, sizeof(struct in6_addr)))
-      {
-        auth_sendheader(auth->client, REPORT_IP_MISMATCH);
-        auth_release_client(auth);
-        return;
-      }
-    }
-    else
-    {
-      const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&auth->client->ip;
-      const struct sockaddr_in *const v4dns = (const struct sockaddr_in *)addr;
-
-      if (v4->sin_addr.s_addr != v4dns->sin_addr.s_addr)
-      {
-        auth_sendheader(auth->client, REPORT_IP_MISMATCH);
-        auth_release_client(auth);
-        return;
-      }
-    }
-
-    if (namelength > HOSTLEN)
+    if (address_compare(addr, &auth->client->ip, false) == false)
+      auth_sendheader(auth->client, REPORT_IP_MISMATCH);
+    else if (namelength > HOSTLEN)
       auth_sendheader(auth->client, REPORT_HOST_TOOLONG);
     else if (auth_verify_hostname(name) == false)
       auth_sendheader(auth->client, REPORT_HOST_INVALID);

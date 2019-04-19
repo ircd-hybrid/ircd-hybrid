@@ -108,9 +108,12 @@ static void
 auth_free(struct AuthRequest *auth)
 {
   assert(dlinkFind(&auth_list, auth));
+
   dlinkDelete(&auth->node, &auth_list);
+
   assert(dlinkFind(&auth_list, auth) == NULL);
 
+  auth->client = NULL;
   xfree(auth);
 }
 

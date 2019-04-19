@@ -189,19 +189,16 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
   if (EmptyString(name))
     auth_sendheader(auth->client, REPORT_FAIL_DNS);
+  else if (address_compare(addr, &auth->client->ip, false) == false)
+    auth_sendheader(auth->client, REPORT_IP_MISMATCH);
+  else if (namelength > HOSTLEN)
+    auth_sendheader(auth->client, REPORT_HOST_TOOLONG);
+  else if (auth_verify_hostname(name) == false)
+    auth_sendheader(auth->client, REPORT_HOST_INVALID);
   else
   {
-    if (address_compare(addr, &auth->client->ip, false) == false)
-      auth_sendheader(auth->client, REPORT_IP_MISMATCH);
-    else if (namelength > HOSTLEN)
-      auth_sendheader(auth->client, REPORT_HOST_TOOLONG);
-    else if (auth_verify_hostname(name) == false)
-      auth_sendheader(auth->client, REPORT_HOST_INVALID);
-    else
-    {
-      strlcpy(auth->client->host, name, sizeof(auth->client->host));
-      auth_sendheader(auth->client, REPORT_FIN_DNS);
-    }
+    strlcpy(auth->client->host, name, sizeof(auth->client->host));
+    auth_sendheader(auth->client, REPORT_FIN_DNS);
   }
 
   auth_release_client(auth);

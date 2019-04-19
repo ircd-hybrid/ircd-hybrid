@@ -190,7 +190,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
   auth->dns_pending = false;
 
-  if (EmptyString(name))
+  if (namelength == 0)
     auth_sendheader(auth->client, REPORT_FAIL_DNS);
   else if (address_compare(addr, &auth->client->ip, false) == false)
     auth_sendheader(auth->client, REPORT_IP_MISMATCH);

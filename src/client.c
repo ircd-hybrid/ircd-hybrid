@@ -1091,11 +1091,11 @@ client_get_idle_time(const struct Client *source_p,
   const struct ClassItem *const class = class_get_ptr(&target_p->connection->confs);
 
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target_p == source_p)
-    return CurrentTime - target_p->connection->last_privmsg;
+    return event_base->time.sec_monotonic - target_p->connection->last_privmsg;
 
   if (HasUMode(source_p, UMODE_OPER) &&
       !(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
-    return CurrentTime - target_p->connection->last_privmsg;
+    return event_base->time.sec_monotonic - target_p->connection->last_privmsg;
 
   const unsigned int min_idle = class->min_idle;
   const unsigned int max_idle = class->max_idle;
@@ -1106,7 +1106,7 @@ client_get_idle_time(const struct Client *source_p,
   if (class->flags & CLASS_FLAGS_RANDOM_IDLE)
     idle = genrand_int32();
   else
-    idle = CurrentTime - target_p->connection->last_privmsg;
+    idle = event_base->time.sec_monotonic - target_p->connection->last_privmsg;
 
   if (max_idle)
     idle %= max_idle;

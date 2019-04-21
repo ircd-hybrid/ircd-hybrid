@@ -40,7 +40,6 @@ struct AuthRequest
   bool ident_pending;     /**< 'true' as long as identd request hasn't finished */
   struct Client *client;  /**< Pointer to Client structure for request. */
   fde_t *fd;              /**< File descriptor for identd queries. */
-  uintmax_t timeout;      /**< Time when query expires. */
 };
 
 extern void auth_init(void);

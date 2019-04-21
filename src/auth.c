@@ -82,7 +82,6 @@ static const char *const HeaderMessages[] =
 
 #define auth_sendheader(c, i) sendto_one_notice((c), &me, "%s", HeaderMessages[(i)])
 
-static dlink_list auth_list;
 
 
 /*! \brief Allocate a new auth request.
@@ -96,23 +95,16 @@ auth_make(struct Client *client)
 
   auth->client = client;
   auth->client->connection->auth = auth;
-  auth->timeout = CurrentTime + CONNECTTIMEOUT;
 
   return auth;
 }
 
-/*! \brief Unlink auth request from auth_list and free memory
+/*! \brief Free memory
  * \param auth The allocated auth request to cleanup.
  */
 static void
 auth_free(struct AuthRequest *auth)
 {
-  assert(dlinkFind(&auth_list, auth));
-
-  dlinkDelete(&auth->node, &auth_list);
-
-  assert(dlinkFind(&auth_list, auth) == NULL);
-
   auth->client = NULL;
   xfree(auth);
 }
@@ -464,9 +456,8 @@ auth_start_query(struct AuthRequest *auth)
   v6 = (struct sockaddr_in6 *)&localaddr;
   v6->sin6_port = htons(0);
 
-  comm_connect_tcp(auth->fd, &auth->client->ip, RFC1413_PORT,
-                   &localaddr, auth_connect_callback, auth,
-                   GlobalSetOptions.ident_timeout);
+  comm_connect_tcp(auth->fd, &auth->client->ip, RFC1413_PORT, &localaddr,
+                   auth_connect_callback, auth, 5);
 }
 
 /*
@@ -483,8 +474,6 @@ auth_start(struct Client *client_p)
 
   assert(client_p);
   assert(client_p->connection);
-
-  dlinkAddTail(auth, &auth->node, &auth_list);
 
   auth_sendheader(client_p, REPORT_DO_DNS);
 
@@ -519,63 +508,4 @@ auth_delete(struct AuthRequest *auth)
   }
 
   auth_free(auth);
-}
-
-/*
- * auth_timeout_queries - timeout resolver and identd requests
- * allow clients through if requests failed
- */
-static void
-auth_timeout_queries(void *notused)
-{
-  dlink_node *node, *node_next;
-
-  DLINK_FOREACH_SAFE(node, node_next, auth_list.head)
-  {
-    struct AuthRequest *auth = node->data;
-
-    assert(auth->client);
-    assert(auth->client->connection);
-
-    if (auth->timeout > CurrentTime)
-      break;
-
-    if (auth->ident_pending == true)
-    {
-      ++ServerStats.is_abad;
-
-      fd_close(auth->fd);
-      auth->fd = NULL;
-      auth->ident_pending = false;
-
-      auth_sendheader(auth->client, REPORT_FAIL_ID);
-    }
-
-    if (auth->dns_pending == true)
-    {
-      delete_resolver_queries(auth);
-      auth->dns_pending = false;
-
-      auth_sendheader(auth->client, REPORT_FAIL_DNS);
-    }
-
-    auth_release_client(auth);
-  }
-}
-
-/* auth_init
- *
- * Initialise the auth code
- */
-void
-auth_init(void)
-{
-  static struct event timeout_auth_queries =
-  {
-    .name = "auth_timeout_queries",
-    .handler = auth_timeout_queries,
-    .when = 1
-  };
-
-  event_add(&timeout_auth_queries, NULL);
 }

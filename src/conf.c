@@ -761,7 +761,7 @@ conf_connect_allowed(struct irc_ssaddr *addr)
 
   ip_found = ipcache_record_find_or_add(addr);
 
-  if ((CurrentTime - ip_found->last_attempt) < ConfigGeneral.throttle_time)
+  if ((event_base->time.sec_monotonic - ip_found->last_attempt) < ConfigGeneral.throttle_time)
   {
     if (ip_found->connection_count >= ConfigGeneral.throttle_count)
       return TOO_FAST;
@@ -771,7 +771,7 @@ conf_connect_allowed(struct irc_ssaddr *addr)
   else
     ip_found->connection_count = 1;
 
-  ip_found->last_attempt = CurrentTime;
+  ip_found->last_attempt = event_base->time.sec_monotonic;
   return 0;
 }
 

@@ -151,13 +151,13 @@ m_map(struct Client *source_p, int parc, char *parv[])
   if (ConfigServerHide.flatten_links)
     return m_not_oper(source_p, parc, parv);
 
-  if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
+  if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "MAP");
     return 0;
   }
 
-  last_used = CurrentTime;
+  last_used = event_base->time.sec_monotonic;
 
   do_map(source_p);
   sendto_one_numeric(source_p, &me, RPL_MAPEND);

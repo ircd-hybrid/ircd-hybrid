@@ -107,7 +107,7 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
 static int
 m_whowas(struct Client *source_p, int parc, char *parv[])
 {
-  static uintmax_t last_used = 0;
+  static uintmax_t last_used;
 
   if (parc < 2 || EmptyString(parv[1]))
   {
@@ -115,13 +115,13 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
+  if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "WHOWAS");
     return 0;
   }
 
-  last_used = CurrentTime;
+  last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s WHOWAS %s %s :%s", 3, parc, parv)->ret != HUNTED_ISME)

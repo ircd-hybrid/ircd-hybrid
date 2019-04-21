@@ -285,7 +285,7 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
                                       "server side ignore with the exception of common channels");
 
       if ((target_p->connection->last_caller_id_time +
-           ConfigGeneral.caller_id_wait) < CurrentTime)
+           ConfigGeneral.caller_id_wait) < event_base->time.sec_monotonic)
       {
         if (notice == false)
           sendto_one_numeric(source_p, &me, RPL_TARGNOTIFY, target_p->name);
@@ -293,7 +293,7 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
         sendto_one_numeric(target_p, &me, RPL_UMODEGMSG,
                            source_p->name, source_p->username, source_p->host,
                            callerid ? "+g" : "+G");
-        target_p->connection->last_caller_id_time = CurrentTime;
+        target_p->connection->last_caller_id_time = event_base->time.sec_monotonic;
       }
 
       /* Only so opers can watch for floods */

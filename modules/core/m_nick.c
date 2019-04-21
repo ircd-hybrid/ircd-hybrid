@@ -203,7 +203,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   assert(source_p->name[0] && !EmptyString(nick));
   assert(MyClient(source_p));
 
-  if ((source_p->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < CurrentTime)
+  if ((source_p->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < event_base->time.sec_monotonic)
     source_p->connection->nick.count = 0;
 
   if (ConfigGeneral.anti_nick_flood && !HasUMode(source_p, UMODE_OPER) &&
@@ -214,7 +214,7 @@ change_local_nick(struct Client *source_p, const char *nick)
     return;
   }
 
-  source_p->connection->nick.last_attempt = CurrentTime;
+  source_p->connection->nick.last_attempt = event_base->time.sec_monotonic;
   source_p->connection->nick.count++;
 
   bool samenick = irccmp(source_p->name, nick) == 0;

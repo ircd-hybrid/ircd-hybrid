@@ -68,7 +68,7 @@ do_away(struct Client *source_p, const char *message)
 
   if (MyConnect(source_p))
   {
-    if ((source_p->connection->away.last_attempt + ConfigGeneral.away_time) < CurrentTime)
+    if ((source_p->connection->away.last_attempt + ConfigGeneral.away_time) < event_base->time.sec_monotonic)
       source_p->connection->away.count = 0;
 
     if (source_p->connection->away.count > ConfigGeneral.away_count)
@@ -77,7 +77,7 @@ do_away(struct Client *source_p, const char *message)
       return;
     }
 
-    source_p->connection->away.last_attempt = CurrentTime;
+    source_p->connection->away.last_attempt = event_base->time.sec_monotonic;
     source_p->connection->away.count++;
     sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
 

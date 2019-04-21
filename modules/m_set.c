@@ -119,28 +119,6 @@ quote_floodtime(struct Client *source_p, const char *arg, int newval)
                       GlobalSetOptions.floodtime);
 }
 
-/* SET IDENTTIMEOUT */
-static void
-quote_identtimeout(struct Client *source_p, const char *arg, int newval)
-{
-  if (!HasOFlag(source_p, OPER_FLAG_ADMIN))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "admin");
-    return;
-  }
-
-  if (newval > 0)
-  {
-    GlobalSetOptions.ident_timeout = newval;
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed IDENTTIMEOUT to %u",
-                         get_oper_name(source_p), GlobalSetOptions.ident_timeout);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":IDENTTIMEOUT is currently %u",
-                      GlobalSetOptions.ident_timeout);
-}
-
 /* SET MAX */
 static void
 quote_max(struct Client *source_p, const char *arg, int newval)
@@ -262,7 +240,6 @@ static const struct SetStruct set_cmd_table[] =
   { "AUTOCONNALL",      quote_autoconnall,  false,  true  },
   { "FLOODCOUNT",       quote_floodcount,   false,  true  },
   { "FLOODTIME",        quote_floodtime,    false,  true  },
-  { "IDENTTIMEOUT",     quote_identtimeout, false,  true  },
   { "MAX",              quote_max,          false,  true  },
   { "SPAMNUM",          quote_spamnum,      false,  true  },
   { "SPAMTIME",         quote_spamtime,     false,  true  },

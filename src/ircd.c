@@ -44,7 +44,6 @@
 #include "res.h"
 #include "restart.h"
 #include "rng_mt.h"
-#include "auth.h"
 #include "s_bsd.h"
 #include "log.h"
 #include "server.h"
@@ -218,7 +217,6 @@ initialize_global_set_options(void)
   GlobalSetOptions.floodtime = ConfigGeneral.default_floodtime;
   GlobalSetOptions.joinfloodcount = ConfigChannel.default_join_flood_count;
   GlobalSetOptions.joinfloodtime = ConfigChannel.default_join_flood_time;
-  GlobalSetOptions.ident_timeout = IDENT_TIMEOUT;
 }
 
 /* write_pidfile()
@@ -437,7 +435,6 @@ main(int argc, char *argv[])
   ipcache_init();
   client_init();
   class_init();
-  auth_init();          /* Initialise the auth code */
   resolver_init();      /* Needs to be setup before the io loop */
   modules_init();
   read_conf_files(true);   /* cold start init conf files */

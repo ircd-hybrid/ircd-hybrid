@@ -109,7 +109,6 @@
 #define MAX_TARGETS_DEFAULT 4           /* default for max_targets */
 
 #define CONNECTTIMEOUT  30      /* Recommended value: 30 */
-#define IDENT_TIMEOUT 10
 
 #define MIN_JOIN_LEAVE_TIME  60
 #define MAX_JOIN_LEAVE_COUNT  25

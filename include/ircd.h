@@ -40,7 +40,6 @@ struct SetOptions
   unsigned int floodtime;
   unsigned int joinfloodtime;
   unsigned int joinfloodcount;
-  unsigned int ident_timeout; /* timeout for identd lookups        */
   unsigned int spam_num;
   unsigned int spam_time;
 };

@@ -127,8 +127,7 @@ event_time_set(void)
   else if (event_base->time.sec_real > (uintmax_t)newtime.tv_sec)
     ilog(LOG_TYPE_IRCD, "System clock is running backwards - (%ju < %ju)",
          (uintmax_t)newtime.tv_sec, event_base->time.sec_real);
-  else
-    event_base->time.sec_real = newtime.tv_sec;
+  event_base->time.sec_real = newtime.tv_sec;
 
 #ifdef CLOCK_MONOTONIC_RAW
   if (clock_gettime(CLOCK_MONOTONIC_RAW, &newtime) == 0)

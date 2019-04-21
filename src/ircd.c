@@ -139,9 +139,9 @@ struct event event_write_links_file =
 void
 set_time(void)
 {
-  struct timeval newtime = { .tv_sec = 0, .tv_usec = 0 };
+  struct timespec newtime = { .tv_sec = 0, .tv_nsec = 0 };
 
-  if (gettimeofday(&newtime, NULL) == -1)
+  if (clock_gettime(CLOCK_REALTIME, &newtime) == -1)
   {
     char buf[IRCD_BUFSIZE];
 
@@ -161,7 +161,7 @@ set_time(void)
   }
 
   SystemTime.tv_sec = newtime.tv_sec;
-  SystemTime.tv_usec = newtime.tv_usec;
+  SystemTime.tv_nsec = newtime.tv_nsec;
 }
 
 static void
@@ -382,7 +382,7 @@ main(int argc, char *argv[])
   set_time();
 
   /* It's not random, but it ought to be a little harder to guess */
-  init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
+  init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_nsec / 1000 | (getpid() << 20)));
 
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;

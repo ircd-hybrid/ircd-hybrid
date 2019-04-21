@@ -494,18 +494,16 @@ auth_delete(struct AuthRequest *auth)
   assert(auth->client);
   assert(auth->client->connection);
 
-  if (auth->ident_pending == true)
+  if (auth->fd)
   {
     fd_close(auth->fd);
     auth->fd = NULL;
-    auth->ident_pending = false;
   }
 
-  if (auth->dns_pending == true)
-  {
-    delete_resolver_queries(auth);
-    auth->dns_pending = false;
-  }
+  auth->ident_pending = false;
+
+  delete_resolver_queries(auth);
+  auth->dns_pending = false;
 
   auth_free(auth);
 }

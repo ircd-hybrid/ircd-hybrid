@@ -873,7 +873,7 @@ check_spambot_warning(struct Client *client_p, const char *name)
     }
     else
     {
-      if ((event_base->time.sec_monotonic - (client_p->connection->last_join_time)) < GlobalSetOptions.spam_time)
+      if ((event_base->time.sec_monotonic - client_p->connection->last_join_time) < GlobalSetOptions.spam_time)
         ++client_p->connection->join_leave_count;  /* It's a possible spambot */
     }
 

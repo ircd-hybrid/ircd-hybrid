@@ -273,10 +273,10 @@ struct ListTask
   unsigned int hash_index;  /**< The hash bucket we are currently in */
   unsigned int users_min;
   unsigned int users_max;
-  unsigned int created_min;
-  unsigned int created_max;
-  unsigned int topicts_min;
-  unsigned int topicts_max;
+  unsigned int created_min;  /**< Real time */
+  unsigned int created_max;  /**< Real time */
+  unsigned int topicts_min;  /**< Real time */
+  unsigned int topicts_max;  /**< Real time */
   char topic[TOPICLEN + 1];
 };
 
@@ -298,14 +298,14 @@ struct Connection
   unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
 
   uintmax_t serial;  /**< Used to enforce 1 send per nick */
-  uintmax_t lasttime;  /**< Last time data read from socket */
-  uintmax_t firsttime;  /**< Time client was created */
-  uintmax_t since;  /**< Last time we parsed something */
-  uintmax_t last_caller_id_time;
-  uintmax_t first_received_message_time;
-  uintmax_t last_privmsg;  /**< Last time we got a PRIVMSG */
-  uintmax_t last_join_time;  /**< When this client last joined a channel */
-  uintmax_t last_leave_time;  /**< When this client last left a channel */
+  uintmax_t lasttime;  /**< Last time data read from socket; real time XXX */
+  uintmax_t firsttime;  /**< Time client was created; real time XXX */
+  uintmax_t since;  /**< Last time we parsed something; real time XXX */
+  uintmax_t last_caller_id_time;  /**< Monotonic time */
+  uintmax_t first_received_message_time;  /**< Monotonic time */
+  uintmax_t last_privmsg;  /**< Last time we got a PRIVMSG; monotonic time */
+  uintmax_t last_join_time;  /**< When this client last joined a channel; monotonic time */
+  uintmax_t last_leave_time;  /**< When this client last left a channel; monotonic time */
 
   unsigned int join_leave_count;  /**< Count of JOIN/LEAVE in less than MIN_JOIN_LEAVE_TIME seconds */
   unsigned int oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
@@ -325,7 +325,7 @@ struct Connection
   struct
   {
     unsigned int count;  /**< How many AWAY/INVITE/KNOCK/NICK requests client has sent */
-    uintmax_t last_attempt;  /**< Last time the AWAY/INVITE/KNOCK/NICK request was issued */
+    uintmax_t last_attempt;  /**< Last time the AWAY/INVITE/KNOCK/NICK request was issued; monotonic time */
   } away, invite, knock, nick;
 
   struct AuthRequest *auth;
@@ -360,7 +360,7 @@ struct Client
   struct Client *servptr;  /**< Points to server this Client is on */
   struct Client *from;  /**< == self, if Local Client, *NEVER* NULL! */
 
-  uintmax_t tsinfo;  /**< TS on the nick, SVINFO on server */
+  uintmax_t tsinfo;  /**< Timestamp on this nick; real time */
 
   unsigned int flags;  /**< Client flags */
   unsigned int umodes;  /**< User modes this client has set */

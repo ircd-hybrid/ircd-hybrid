@@ -78,12 +78,12 @@ struct Channel
   char topic[TOPICLEN + 1];
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];
 
-  uintmax_t creationtime;
-  uintmax_t topic_time;
-  uintmax_t last_knock;  /**< Don't allow knock to flood */
-  uintmax_t last_invite;
-  uintmax_t last_join_time;
-  uintmax_t first_received_message_time; /*!< channel flood control */
+  uintmax_t creationtime;  /**< Real time */
+  uintmax_t topic_time;  /**< Real time */
+  uintmax_t last_knock;  /**< Don't allow knock to flood; monotonic time */
+  uintmax_t last_invite;  /**< Monotonic time */
+  uintmax_t last_join_time;  /**< Monotonic time */
+  uintmax_t first_received_message_time; /*!< Channel flood control; monotonic time */
   unsigned int flags;
   unsigned int received_number_of_privmsgs;
 
@@ -120,7 +120,7 @@ struct Ban
   char host[HOSTLEN + 1];
   char who[NICKLEN + USERLEN + HOSTLEN + 3];
   size_t len;
-  uintmax_t when;
+  uintmax_t when;  /**< Time this ban has been set; real time */
   struct irc_ssaddr addr;
   int bits;
   int type;
@@ -133,7 +133,7 @@ struct Invite
   dlink_node chan_node;  /**< link to chptr->invites */
   struct Channel *chptr;  /**< Channel pointer */
   struct Client *client_p;  /**< Client pointer */
-  uintmax_t when;  /**< Time the invite has been created */
+  uintmax_t when;  /**< Time the invite has been created; monotonic time */
 };
 
 

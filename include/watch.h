@@ -34,7 +34,7 @@ struct Watch
 {
   dlink_node node;  /**< List node; linked into watchTable */
   dlink_list watched_by;  /**< List of clients that have this entry on their watch list */
-  uintmax_t lasttime;  /**< Last time the client was seen */
+  uintmax_t lasttime;  /**< Last time the client was seen; real time */
   unsigned int hash_value; /**< Cached hash value derived from Watch::name */
   char name[NICKLEN + 1];  /**< Name of the client to watch */
 };

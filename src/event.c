@@ -124,7 +124,7 @@ event_time_set(void)
 
   if (clock_gettime(CLOCK_REALTIME, &newtime))
     exit(EXIT_FAILURE);
-  else if (event_base->time.sec_real > newtime.tv_sec)
+  else if (event_base->time.sec_real > (uintmax_t)newtime.tv_sec)
     ilog(LOG_TYPE_IRCD, "System clock is running backwards - (%ju < %ju)",
          (uintmax_t)newtime.tv_sec, event_base->time.sec_real);
   else

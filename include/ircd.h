@@ -89,7 +89,7 @@ struct ServerState_t
 
 struct ServerTime
 {
-  uintmax_t tv_sec, tv_usec;
+  uintmax_t tv_sec, tv_nsec;
 };
 
 

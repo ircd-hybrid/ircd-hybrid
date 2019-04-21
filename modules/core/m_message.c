@@ -603,7 +603,7 @@ m_privmsg(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (MyConnect(source_p))
-    source_p->connection->last_privmsg = CurrentTime;
+    source_p->connection->last_privmsg = event_base->time.sec_monotonic;
 
   m_message(false, source_p, parc, parv);
   return 0;

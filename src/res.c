@@ -116,7 +116,7 @@ make_request(dns_callback_fnc callback, void *ctx)
 {
   struct reslist *request = xcalloc(sizeof(*request));
 
-  request->sentat = CurrentTime;
+  request->sentat = event_base->time.sec_monotonic;
   request->retries = 2;
   request->timeout = 4;  /* Start at 4 and exponential inc. */
   request->callback = callback;
@@ -619,7 +619,7 @@ timeout_query_list(void)
     struct reslist *request = node->data;
     uintmax_t timeout = request->sentat + request->timeout;
 
-    if (CurrentTime >= timeout)
+    if (event_base->time.sec_monotonic >= timeout)
     {
       if (--request->retries <= 0)
       {
@@ -629,7 +629,7 @@ timeout_query_list(void)
       }
       else
       {
-        request->sentat = CurrentTime;
+        request->sentat = event_base->time.sec_monotonic;
         request->timeout += request->timeout;
         resend_query(request);
       }
@@ -639,7 +639,7 @@ timeout_query_list(void)
       next_time = timeout;
   }
 
-  return (next_time > CurrentTime) ? next_time : (CurrentTime + AR_TTL);
+  return (next_time > event_base->time.sec_monotonic) ? next_time : (event_base->time.sec_monotonic + AR_TTL);
 }
 
 /*

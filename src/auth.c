@@ -329,7 +329,7 @@ auth_read_reply(fde_t *F, void *data)
   assert(auth->client);
   assert(auth->client->connection);
 
-  if ((len = recv(auth->fd->fd, buf, sizeof(buf) - 1, 0)) > 0)
+  if (F->read_handler == NULL && (len = recv(auth->fd->fd, buf, sizeof(buf) - 1, 0)) > 0)
   {
     buf[len] = '\0';
     username = auth_check_ident_reply(buf);
@@ -411,7 +411,7 @@ auth_connect_callback(fde_t *F, int error, void *data)
     return;
   }
 
-  comm_setselect(F, COMM_SELECT_READ, auth_read_reply, auth, 0);
+  comm_setselect(F, COMM_SELECT_READ, auth_read_reply, auth, 3);
 }
 
 /*! \brief Flag the client to show an attempt to contact the ident server on

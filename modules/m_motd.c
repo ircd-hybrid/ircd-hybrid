@@ -68,13 +68,13 @@ m_motd(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
+  if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "MOTD");
     return 0;
   }
 
-  last_used = CurrentTime;
+  last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s MOTD :%s", 1, parc, parv)->ret != HUNTED_ISME)

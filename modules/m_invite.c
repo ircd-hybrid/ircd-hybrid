@@ -106,7 +106,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((source_p->connection->invite.last_attempt + ConfigChannel.invite_client_time) < CurrentTime)
+  if ((source_p->connection->invite.last_attempt + ConfigChannel.invite_client_time) < event_base->time.sec_monotonic)
     source_p->connection->invite.count = 0;
 
   if (source_p->connection->invite.count > ConfigChannel.invite_client_count)
@@ -115,13 +115,13 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if ((chptr->last_invite + ConfigChannel.invite_delay_channel) > CurrentTime)
+  if ((chptr->last_invite + ConfigChannel.invite_delay_channel) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->name, "channel");
     return 0;
   }
 
-  source_p->connection->invite.last_attempt = CurrentTime;
+  source_p->connection->invite.last_attempt = event_base->time.sec_monotonic;
   source_p->connection->invite.count++;
 
   sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->name);
@@ -129,7 +129,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   if (target_p->away[0])
     sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
 
-  chptr->last_invite = CurrentTime;
+  chptr->last_invite = event_base->time.sec_monotonic;
 
   if (MyConnect(target_p))
   {
@@ -192,7 +192,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
     if (strtoumax(parv[3], NULL, 10) > chptr->creationtime)
       return 0;
 
-  chptr->last_invite = CurrentTime;
+  chptr->last_invite = event_base->time.sec_monotonic;
 
   if (MyConnect(target_p))
   {

@@ -74,7 +74,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p,
     if (flood_ctrl == true)
       ++chptr->number_joined;
 
-    chptr->number_joined -= (CurrentTime - chptr->last_join_time) *
+    chptr->number_joined -= (event_base->time.sec_monotonic - chptr->last_join_time) *
       (((float)GlobalSetOptions.joinfloodcount) /
        (float)GlobalSetOptions.joinfloodtime);
 
@@ -97,7 +97,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *client_p,
       }
     }
 
-    chptr->last_join_time = CurrentTime;
+    chptr->last_join_time = event_base->time.sec_monotonic;
   }
 
   struct Membership *member = xcalloc(sizeof(*member));
@@ -334,7 +334,7 @@ channel_make(const char *name)
   chptr->hnextch = chptr;
   /* Doesn't hurt to set it here */
   chptr->creationtime = CurrentTime;
-  chptr->last_join_time = CurrentTime;
+  chptr->last_join_time = event_base->time.sec_monotonic;
 
   /* Cache channel name length to avoid repetitive strlen() calls. */
   chptr->name_len = strlcpy(chptr->name, name, sizeof(chptr->name));
@@ -507,7 +507,7 @@ find_invite(struct Channel *chptr, struct Client *client_p)
     struct Invite *invite = node->data;
 
     if (ConfigChannel.invite_expire_time &&
-        ConfigChannel.invite_expire_time + invite->when < CurrentTime)
+        ConfigChannel.invite_expire_time + invite->when < event_base->time.sec_monotonic)
       del_invite(invite);
     else if (invite->chptr == chptr && invite->client_p == client_p)
       return invite;
@@ -530,7 +530,7 @@ add_invite(struct Channel *chptr, struct Client *client_p)
   invite = xcalloc(sizeof(*invite));
   invite->client_p = client_p;
   invite->chptr = chptr;
-  invite->when = CurrentTime;
+  invite->when = event_base->time.sec_monotonic;
 
   /* Delete last link in chain if the list is max length */
   while (dlink_list_length(&client_p->connection->invited) && 
@@ -862,7 +862,7 @@ check_spambot_warning(struct Client *client_p, const char *name)
   }
   else
   {
-    unsigned int t_delta = CurrentTime - client_p->connection->last_leave_time;
+    unsigned int t_delta = event_base->time.sec_monotonic - client_p->connection->last_leave_time;
     if (t_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
       unsigned int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
@@ -873,14 +873,14 @@ check_spambot_warning(struct Client *client_p, const char *name)
     }
     else
     {
-      if ((CurrentTime - (client_p->connection->last_join_time)) < GlobalSetOptions.spam_time)
+      if ((event_base->time.sec_monotonic - (client_p->connection->last_join_time)) < GlobalSetOptions.spam_time)
         ++client_p->connection->join_leave_count;  /* It's a possible spambot */
     }
 
     if (name)
-      client_p->connection->last_join_time = CurrentTime;
+      client_p->connection->last_join_time = event_base->time.sec_monotonic;
     else
-      client_p->connection->last_leave_time = CurrentTime;
+      client_p->connection->last_leave_time = event_base->time.sec_monotonic;
   }
 }
 
@@ -1043,7 +1043,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
 
     channel_member_names(client_p, chptr, true);
 
-    client_p->connection->last_join_time = CurrentTime;
+    client_p->connection->last_join_time = event_base->time.sec_monotonic;
   }
 }
 

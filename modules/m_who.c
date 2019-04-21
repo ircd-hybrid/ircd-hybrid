@@ -183,13 +183,13 @@ who_global(struct Client *source_p, const char *mask, bool server_oper)
 
   if (!HasUMode(source_p, UMODE_OPER))
   {
-    if ((last_used + ConfigGeneral.pace_wait) > CurrentTime)
+    if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
     {
       sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "WHO");
       return;
     }
 
-    last_used = CurrentTime;
+    last_used = event_base->time.sec_monotonic;
   }
 
   /* First, list all matching invisible clients on common channels */

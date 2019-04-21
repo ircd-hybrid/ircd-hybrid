@@ -106,13 +106,13 @@ m_knock(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    if ((chptr->last_knock + ConfigChannel.knock_delay_channel) > CurrentTime)
+    if ((chptr->last_knock + ConfigChannel.knock_delay_channel) > event_base->time.sec_monotonic)
     {
       sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->name, "channel");
       return 0;
     }
 
-    source_p->connection->knock.last_attempt = CurrentTime;
+    source_p->connection->knock.last_attempt = event_base->time.sec_monotonic;
     source_p->connection->knock.count++;
 
     sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, chptr->name);

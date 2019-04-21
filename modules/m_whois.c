@@ -267,13 +267,13 @@ m_whois(struct Client *source_p, int parc, char *parv[])
   if (parc > 2 && !EmptyString(parv[2]))
   {
     /* seeing as this is going across servers, we should limit it */
-    if ((last_used + ConfigGeneral.pace_wait_simple) > CurrentTime)
+    if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
     {
       sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "WHOIS");
       return 0;
     }
 
-    last_used = CurrentTime;
+    last_used = event_base->time.sec_monotonic;
 
     /*
      * if we have serverhide enabled, they can either ask the clients

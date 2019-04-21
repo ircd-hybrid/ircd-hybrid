@@ -81,7 +81,7 @@ ipcache_record_delete(patricia_node_t *pnode)
   struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
 
   if (iptr->count_local == 0 && iptr->count_remote == 0 &&
-      (CurrentTime - iptr->last_attempt) >= ConfigGeneral.throttle_time)
+      (event_base->time.sec_monotonic - iptr->last_attempt) >= ConfigGeneral.throttle_time)
   {
     patricia_remove(iptr->trie_pointer, pnode);
 

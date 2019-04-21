@@ -833,10 +833,10 @@ sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
   va_list args;
   char buffer[IRCD_BUFSIZE] = "";
 
-  if ((CurrentTime - *rate) < 20)
+  if ((event_base->time.sec_monotonic - *rate) < 20)
     return;
 
-  *rate = CurrentTime;
+  *rate = event_base->time.sec_monotonic;
 
   va_start(args, pattern);
   vsnprintf(buffer, sizeof(buffer), pattern, args);

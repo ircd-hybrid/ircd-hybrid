@@ -107,14 +107,14 @@ flood_attack_client(bool notice, struct Client *source_p, struct Client *target_
   if (HasFlag(source_p, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (target_p->connection->first_received_message_time + GlobalSetOptions.floodtime < CurrentTime)
+  if (target_p->connection->first_received_message_time + GlobalSetOptions.floodtime < event_base->time.sec_monotonic)
   {
     if (target_p->connection->received_number_of_privmsgs)
       target_p->connection->received_number_of_privmsgs = 0;
     else
       DelFlag(target_p, FLAGS_FLOOD_NOTICED);
 
-    target_p->connection->first_received_message_time = CurrentTime;
+    target_p->connection->first_received_message_time = event_base->time.sec_monotonic;
   }
 
   if (target_p->connection->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
@@ -159,14 +159,14 @@ flood_attack_channel(bool notice, struct Client *source_p, struct Channel *chptr
   if (HasFlag(source_p, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (chptr->first_received_message_time + GlobalSetOptions.floodtime < CurrentTime)
+  if (chptr->first_received_message_time + GlobalSetOptions.floodtime < event_base->time.sec_monotonic)
   {
     if (chptr->received_number_of_privmsgs)
       chptr->received_number_of_privmsgs = 0;
     else
       ClearFloodNoticed(chptr);
 
-    chptr->first_received_message_time = CurrentTime;
+    chptr->first_received_message_time = event_base->time.sec_monotonic;
   }
 
   if (chptr->received_number_of_privmsgs >= GlobalSetOptions.floodcount)

@@ -79,7 +79,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   /*
    * Since we're here, might as well set CurrentTime while we're at it
    */
-  set_time();
+  event_time_set();
 
   intmax_t theirtime = strtoimax(parv[4], NULL, 10);
   intmax_t deltat = imaxabs(theirtime - CurrentTime);

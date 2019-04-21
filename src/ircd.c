@@ -64,7 +64,6 @@ struct SetOptions GlobalSetOptions;  /* /quote set variables */
 struct Counter Count;
 struct ServerState_t server_state;
 struct ServerStatistics ServerStats;
-struct ServerTime SystemTime;
 struct Connection meConnection;  /* That's also part of me */
 struct Client me = { .connection = &meConnection };  /* That's me */
 
@@ -135,34 +134,6 @@ struct event event_write_links_file =
   .handler = write_links_file,
 };
 
-
-void
-set_time(void)
-{
-  struct timespec newtime = { .tv_sec = 0, .tv_nsec = 0 };
-
-  if (clock_gettime(CLOCK_REALTIME, &newtime) == -1)
-  {
-    char buf[IRCD_BUFSIZE];
-
-    snprintf(buf, sizeof(buf), "Clock failure, TS can be corrupted: %s",
-             strerror(errno));
-    server_die(buf, false);
-  }
-
-  if ((uintmax_t)newtime.tv_sec < CurrentTime)
-  {
-    ilog(LOG_TYPE_IRCD, "System clock is running backwards - (%ju < %ju)",
-         (uintmax_t)newtime.tv_sec, CurrentTime);
-    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
-                         "System clock is running backwards - (%ju < %ju)",
-                         (uintmax_t)newtime.tv_sec, CurrentTime);
-    event_set_back_events(CurrentTime - (uintmax_t)newtime.tv_sec);
-  }
-
-  SystemTime.tv_sec = newtime.tv_sec;
-  SystemTime.tv_nsec = newtime.tv_nsec;
-}
 
 static void
 io_loop(void)
@@ -379,10 +350,10 @@ main(int argc, char *argv[])
   setup_fdlimit();
 
   /* Save server boot time right away, so getrusage works correctly */
-  set_time();
+  event_time_set();
 
   /* It's not random, but it ought to be a little harder to guess */
-  init_genrand(SystemTime.tv_sec ^ (SystemTime.tv_nsec / 1000 | (getpid() << 20)));
+  init_genrand(CurrentTime ^ /* TBD */ (getpid() << 20));
 
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;

@@ -29,7 +29,11 @@
 #include "ircd.h"
 #include "event.h"
 #include "rng_mt.h"
+#include "log.h"
 
+
+struct event_base ebase;
+struct event_base *event_base = &ebase;
 
 static dlink_list event_list;
 
@@ -47,7 +51,7 @@ event_add(struct event *ev, void *data)
   event_delete(ev);
 
   ev->data = data;
-  ev->next = CurrentTime + ev->when;
+  ev->next = event_base->time.sec_monotonic + ev->when;
   ev->active = true;
 
   DLINK_FOREACH(node, event_list.head)
@@ -92,16 +96,16 @@ event_run(void)
 {
   static uintmax_t last = 0;
 
-  if (last == CurrentTime)
+  if (last == event_base->time.sec_monotonic)
     return;
-  last = CurrentTime;
+  last = event_base->time.sec_monotonic;
 
   unsigned int len = dlink_list_length(&event_list);
   while (len-- && dlink_list_length(&event_list))
   {
     struct event *ev = event_list.head->data;
 
-    if (ev->next > CurrentTime)
+    if (ev->next > event_base->time.sec_monotonic)
       break;
 
     event_delete(ev);
@@ -113,20 +117,25 @@ event_run(void)
   }
 }
 
-/*
- * void event_set_back_events(uintmax_t by)
- * Input: Time to set back events by.
- * Output: None.
- * Side-effects: Sets back all events by "by" seconds.
- */
 void
-event_set_back_events(uintmax_t by)
+event_time_set(void)
 {
-  dlink_node *node;
+  struct timespec newtime;
 
-  DLINK_FOREACH(node, event_list.head)
-  {
-    struct event *ev = node->data;
-    ev->next -= by;
-  }
+  if (clock_gettime(CLOCK_REALTIME, &newtime))
+    exit(EXIT_FAILURE);
+  else if (event_base->time.sec_real > newtime.tv_sec)
+    ilog(LOG_TYPE_IRCD, "System clock is running backwards - (%ju < %ju)",
+         (uintmax_t)newtime.tv_sec, event_base->time.sec_real);
+  else
+    event_base->time.sec_real = newtime.tv_sec;
+
+#ifdef CLOCK_MONOTONIC_RAW
+  if (clock_gettime(CLOCK_MONOTONIC_RAW, &newtime) == 0)
+#else
+  if (clock_gettime(CLOCK_MONOTONIC, &newtime) == 0)
+#endif
+    event_base->time.sec_monotonic = newtime.tv_sec;
+  else
+    exit(EXIT_FAILURE);
 }

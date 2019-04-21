@@ -567,7 +567,7 @@ stats_events(struct Client *source_p, int parc, char *parv[])
 
     sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                        "E :%-30s %-4ji seconds",
-                       ev->name, ev->next - CurrentTime);
+                       ev->name, ev->next - event_base->time.sec_monotonic);
   }
 }
 

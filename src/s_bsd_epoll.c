@@ -107,7 +107,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 
   if (timeout)
   {
-    F->timeout = CurrentTime + (timeout / 1000);
+    F->timeout = event_base->time.sec_monotonic + (timeout / 1000);
     F->timeout_handler = handler;
     F->timeout_data = client_data;
   }
@@ -150,7 +150,7 @@ comm_select(void)
   num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, SELECT_DELAY);
   assert(num <= epollop->nevents);
 
-  set_time();
+  event_time_set();
 
   if (num < 0)
   {

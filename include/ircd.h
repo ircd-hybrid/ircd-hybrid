@@ -30,6 +30,7 @@
 
 #include "ircd_defs.h"
 #include "config.h"
+#include "event.h"
 
 
 struct SetOptions
@@ -87,12 +88,6 @@ struct ServerState_t
   bool foreground;
 };
 
-struct ServerTime
-{
-  uintmax_t tv_sec, tv_nsec;
-};
-
-
 extern char **myargv;
 extern const char *logFileName;
 extern const char *pidFileName;
@@ -103,8 +98,6 @@ extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
 extern struct event event_write_links_file;
-extern struct ServerTime SystemTime;
-#define CurrentTime SystemTime.tv_sec
+#define CurrentTime event_base->time.sec_real
 
-extern void set_time(void);
 #endif

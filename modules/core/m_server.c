@@ -281,6 +281,7 @@ server_estab(struct Client *client_p)
 
   /* Fixing eob timings.. -gnp */
   client_p->connection->created_monotonic = event_base->time.sec_monotonic;
+  client_p->connection->created_real = event_base->time.sec_real;
 
   if (service_find(client_p->name, irccmp))
     AddFlag(client_p, FLAGS_SERVICE);

@@ -34,7 +34,7 @@ struct ip_entry
   unsigned int count_local;       /**< Number of local users using this IP */
   unsigned int count_remote;      /**< Number of remote users using this IP */
   unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
-  uintmax_t last_attempt;         /**< The last time someone connected from this IP */
+  uintmax_t last_attempt;         /**< The last time someone connected from this IP; monotonic time */
 };
 
 extern struct ip_entry *ipcache_record_find_or_add(void *);

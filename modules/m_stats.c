@@ -947,7 +947,7 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
 
     sp.is_sbs += target_p->connection->send.bytes;
     sp.is_sbr += target_p->connection->recv.bytes;
-    sp.is_sti += CurrentTime - target_p->connection->firsttime;
+    sp.is_sti += event_base->time.sec_monotonic - target_p->connection->created_monotonic;
     sp.is_sv++;
   }
 
@@ -957,7 +957,7 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
 
     sp.is_cbs += target_p->connection->send.bytes;
     sp.is_cbr += target_p->connection->recv.bytes;
-    sp.is_cti += CurrentTime - target_p->connection->firsttime;
+    sp.is_cti += event_base->time.sec_monotonic - target_p->connection->created_monotonic;
     sp.is_cl++;
   }
 
@@ -1003,7 +1003,7 @@ stats_uptime(struct Client *source_p, int parc, char *parv[])
   else
   {
     sendto_one_numeric(source_p, &me, RPL_STATSUPTIME,
-                       time_dissect(CurrentTime - me.connection->since));
+                       time_dissect(event_base->time.sec_monotonic - me.connection->created_monotonic));
     if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(source_p, UMODE_OPER))
        sendto_one_numeric(source_p, &me, RPL_STATSCONN, Count.max_loc_con,
                           Count.max_loc, Count.totalrestartcount);
@@ -1036,7 +1036,7 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
                        "v :%s (%s!%s@%s) Idle: %s",
                        target_p->name,
                        (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
-                       "*", "*", time_dissect(CurrentTime - target_p->connection->lasttime));
+                       "*", "*", time_dissect(event_base->time.sec_monotonic - target_p->connection->last_data));
   }
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
@@ -1097,8 +1097,8 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
                target_p->connection->send.bytes >> 10,
                target_p->connection->recv.messages,
                target_p->connection->recv.bytes >> 10,
-               (unsigned int)(CurrentTime - target_p->connection->firsttime),
-               (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since) : 0,
+               (unsigned int)(event_base->time.sec_monotonic - target_p->connection->created_monotonic),
+               (unsigned int)(event_base->time.sec_monotonic - target_p->connection->last_data),
                HasUMode(source_p, UMODE_OPER) ? capab_get(target_p) : "TS");
   }
 
@@ -1112,7 +1112,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
                      _GMKv(recvB), _GMKs(recvB));
 
-  uptime = (CurrentTime - me.connection->since);
+  uptime = (event_base->time.sec_monotonic - me.connection->created_monotonic);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "? :Server send: %7.2f %s (%4.1f K/s)",
@@ -1196,8 +1196,8 @@ stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
                        target_p->connection->send.bytes >> 10,
                        target_p->connection->recv.messages,
                        target_p->connection->recv.bytes >> 10,
-                       (unsigned int)(CurrentTime - target_p->connection->firsttime),
-                       (CurrentTime > target_p->connection->since) ? (unsigned int)(CurrentTime - target_p->connection->since) : 0,
+                       (unsigned int)(event_base->time.sec_monotonic - target_p->connection->created_monotonic),
+                       (unsigned int)(event_base->time.sec_monotonic - target_p->connection->last_data),
                        IsServer(target_p) ? capab_get(target_p) : "-");
   }
 }

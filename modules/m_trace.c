@@ -84,18 +84,18 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
     case STAT_UNKNOWN:
       sendto_one_numeric(source_p, &me, RPL_TRACEUNKNOWN, class_name,
                          name, target_p->sockhost,
-                         CurrentTime - target_p->connection->firsttime);
+                         event_base->time.sec_monotonic - target_p->connection->created_monotonic);
       break;
     case STAT_CLIENT:
       if (HasUMode(target_p, UMODE_OPER))
         sendto_one_numeric(source_p, &me, RPL_TRACEOPERATOR, class_name, name,
                            target_p->sockhost,
-                           CurrentTime - target_p->connection->lasttime,
+                           event_base->time.sec_monotonic - target_p->connection->last_data,
                            client_get_idle_time(source_p, target_p));
       else
         sendto_one_numeric(source_p, &me, RPL_TRACEUSER, class_name, name,
                            target_p->sockhost,
-                           CurrentTime - target_p->connection->lasttime,
+                           event_base->time.sec_monotonic - target_p->connection->last_data,
                            client_get_idle_time(source_p, target_p));
       break;
     case STAT_SERVER:
@@ -111,7 +111,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
       sendto_one_numeric(source_p, &me, RPL_TRACESERVER, class_name, servers,
                          clients, name, *(target_p->serv->by) ?
                          target_p->serv->by : "*", "*",
-                         me.name, CurrentTime - target_p->connection->lasttime);
+                         me.name, event_base->time.sec_monotonic - target_p->connection->last_data);
       break;
     }
 

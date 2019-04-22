@@ -510,7 +510,7 @@ server_tls_handshake(fde_t *F, void *data)
   tls_handshake_status_t ret = tls_handshake(&F->ssl, TLS_ROLE_CLIENT, &sslerr);
   if (ret != TLS_HANDSHAKE_DONE)
   {
-    if ((CurrentTime - client_p->connection->firsttime) > CONNECTTIMEOUT)
+    if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) > CONNECTTIMEOUT)
     {
       exit_client(client_p, "Timeout during TLS handshake");
       return;

@@ -50,9 +50,8 @@ ms_eob(struct Client *source_p, int parc, char *parv[])
 
   if (MyConnect(source_p))
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "End of burst from %s (%ju seconds)",
-                         source_p->name,
-                         (CurrentTime - source_p->connection->firsttime));
+                         "End of burst from %s (%ju seconds)", source_p->name,
+                         (event_base->time.sec_monotonic - source_p->connection->created_monotonic));
 
   AddFlag(source_p, FLAGS_EOB);
   sendto_server(source_p, 0, 0, ":%s EOB", source_p->id);

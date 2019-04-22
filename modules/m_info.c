@@ -627,7 +627,7 @@ send_birthdate_online_time(struct Client *source_p)
 {
   sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                      ":On-line since %s",
-                     date(me.connection->firsttime));
+                     date(me.connection->created_real));
 }
 
 /* send_conf_options()

@@ -97,7 +97,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
       return 0;
     }
 
-    if ((source_p->connection->knock.last_attempt + ConfigChannel.knock_client_time) < CurrentTime)
+    if ((source_p->connection->knock.last_attempt + ConfigChannel.knock_client_time) < event_base->time.sec_monotonic)
       source_p->connection->knock.count = 0;
 
     if (source_p->connection->knock.count > ConfigChannel.knock_client_count)
@@ -118,7 +118,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, chptr->name);
   }
 
-  chptr->last_knock = CurrentTime;
+  chptr->last_knock = event_base->time.sec_monotonic;
   sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, 0, 0,
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
                        me.name, chptr->name, chptr->name,

@@ -140,7 +140,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, dlink_list *
   clear_ban_cache_list(&chptr->members_local);
 
   struct Ban *ban = xcalloc(sizeof(*ban));
-  ban->when = CurrentTime;
+  ban->when = event_base->time.sec_real;
   ban->len = len - 2;  /* -2 for ! + @ */
   ban->type = parse_netmask(host, &ban->addr, &ban->bits);
   strlcpy(ban->name, name, sizeof(ban->name));

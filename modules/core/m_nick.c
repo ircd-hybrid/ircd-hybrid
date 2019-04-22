@@ -172,7 +172,7 @@ set_initial_nick(struct Client *source_p, const char *nick)
 {
   bool samenick = irccmp(source_p->name, nick) == 0;
   if (samenick == false)
-    source_p->tsinfo = CurrentTime;
+    source_p->tsinfo = event_base->time.sec_real;
 
   source_p->connection->registration &= ~REG_NEED_NICK;
 
@@ -220,7 +220,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   bool samenick = irccmp(source_p->name, nick) == 0;
   if (samenick == false)
   {
-    source_p->tsinfo = CurrentTime;
+    source_p->tsinfo = event_base->time.sec_real;
     clear_ban_cache_list(&source_p->channel);
     watch_check_hash(source_p, RPL_LOGOFF);
 

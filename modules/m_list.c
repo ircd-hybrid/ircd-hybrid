@@ -88,13 +88,13 @@ do_list(struct Client *source_p, char *arg)
           {
             case '<':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->created_max = (unsigned int)(CurrentTime - 60 * i);
+                lt->created_max = (unsigned int)(event_base->time.sec_real - 60 * i);
               else
                 error = true;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->created_min = (unsigned int)(CurrentTime - 60 * i);
+                lt->created_min = (unsigned int)(event_base->time.sec_real - 60 * i);
               else
                 error = true;
               break;
@@ -110,13 +110,13 @@ do_list(struct Client *source_p, char *arg)
           {
             case '<':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_min = (unsigned int)(CurrentTime - 60 * i);
+                lt->topicts_min = (unsigned int)(event_base->time.sec_real - 60 * i);
               else
                 error = true;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_max = (unsigned int)(CurrentTime - 60 * i);
+                lt->topicts_max = (unsigned int)(event_base->time.sec_real - 60 * i);
               else
                 error = true;
               break;

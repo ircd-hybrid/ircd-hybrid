@@ -223,7 +223,7 @@ resv_expire(void)
     {
       struct ResvItem *resv = node->data;
 
-      if (resv->expire == 0 || resv->expire > CurrentTime)
+      if (resv->expire == 0 || resv->expire > event_base->time.sec_real)
         continue;
 
       if (ConfigGeneral.tkline_expire_notices)

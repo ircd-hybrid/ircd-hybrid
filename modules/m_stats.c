@@ -1089,7 +1089,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
     sendB += target_p->connection->send.bytes;
     recvB += target_p->connection->recv.bytes;
 
-    /* ":%s 211 %s %s %u %u %ju %u %ju :%u %u %s" */
+    /* ":%s 211 %s %s %u %u %ju %u %ju :%ju %ju %s" */
     sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
                client_get_name(target_p, HasUMode(source_p, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
                dbuf_length(&target_p->connection->buf_sendq),
@@ -1097,8 +1097,8 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
                target_p->connection->send.bytes >> 10,
                target_p->connection->recv.messages,
                target_p->connection->recv.bytes >> 10,
-               (unsigned int)(event_base->time.sec_monotonic - target_p->connection->created_monotonic),
-               (unsigned int)(event_base->time.sec_monotonic - target_p->connection->last_data),
+               (event_base->time.sec_monotonic - target_p->connection->created_monotonic),
+               (event_base->time.sec_monotonic - target_p->connection->last_data),
                HasUMode(source_p, UMODE_OPER) ? capab_get(target_p) : "TS");
   }
 
@@ -1196,8 +1196,8 @@ stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
                        target_p->connection->send.bytes >> 10,
                        target_p->connection->recv.messages,
                        target_p->connection->recv.bytes >> 10,
-                       (unsigned int)(event_base->time.sec_monotonic - target_p->connection->created_monotonic),
-                       (unsigned int)(event_base->time.sec_monotonic - target_p->connection->last_data),
+                       (event_base->time.sec_monotonic - target_p->connection->created_monotonic),
+                       (event_base->time.sec_monotonic - target_p->connection->last_data),
                        IsServer(target_p) ? capab_get(target_p) : "-");
   }
 }

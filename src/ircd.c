@@ -353,7 +353,9 @@ main(int argc, char *argv[])
   event_time_set();
 
   /* It's not random, but it ought to be a little harder to guess */
-  init_genrand(CurrentTime ^ /* TBD */ (getpid() << 20));
+  uint32_t seed = (uint32_t)(event_base->time.sec_real ^
+                             (event_base->time.sec_monotonic | (getpid() << 16)));
+  init_genrand(seed);
 
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;

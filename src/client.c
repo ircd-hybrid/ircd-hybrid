@@ -248,7 +248,7 @@ check_pings_list(dlink_list *list)
                  client_get_name(client_p, SHOW_IP));
           }
 
-          snprintf(buf, sizeof(buf), "Ping timeout: %ji seconds",
+          snprintf(buf, sizeof(buf), "Ping timeout: %ju seconds",
                    (event_base->time.sec_monotonic - client_p->connection->last_ping));
           exit_client(client_p, buf);
         }

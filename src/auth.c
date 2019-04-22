@@ -134,9 +134,11 @@ auth_release_client(struct AuthRequest *auth)
    */
   comm_setflush(client->connection->fd, 1000, flood_recalc, client);
 
-  client->connection->since     = CurrentTime;
-  client->connection->lasttime  = CurrentTime;
-  client->connection->firsttime = CurrentTime;
+  client->connection->last_ping = event_base->time.sec_monotonic;
+  client->connection->last_data = event_base->time.sec_monotonic;
+  client->connection->created_real = event_base->time.sec_real;
+  client->connection->created_monotonic = event_base->time.sec_monotonic;
+
   AddFlag(client, FLAGS_FINISHED_AUTH);
 
   strlcpy(client->realhost, client->host, sizeof(client->realhost));

@@ -280,7 +280,7 @@ server_estab(struct Client *client_p)
   server_make(client_p);
 
   /* Fixing eob timings.. -gnp */
-  client_p->connection->firsttime = CurrentTime;
+  client_p->connection->created_monotonic = event_base->time.sec_monotonic;
 
   if (service_find(client_p->name, irccmp))
     AddFlag(client_p, FLAGS_SERVICE);

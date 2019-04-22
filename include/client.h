@@ -298,9 +298,11 @@ struct Connection
   unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
 
   uintmax_t serial;  /**< Used to enforce 1 send per nick */
-  uintmax_t lasttime;  /**< Last time data read from socket; real time XXX */
-  uintmax_t firsttime;  /**< Time client was created; real time XXX */
-  uintmax_t since;  /**< Last time we parsed something; real time XXX */
+  uintmax_t last_data;  /**< Last time data read from socket; monotonic time */
+  uintmax_t last_ping;  /**< Last time data read from socket; currently this is a copy of last_data
+                             which can be modified by check_pings_list; monotonic time */
+  uintmax_t created_real;  /**< Time client was created; real time */
+  uintmax_t created_monotonic;  /**< Time client was created; monotonic time */
   uintmax_t last_caller_id_time;  /**< Monotonic time */
   uintmax_t first_received_message_time;  /**< Monotonic time */
   uintmax_t last_privmsg;  /**< Last time we got a PRIVMSG; monotonic time */

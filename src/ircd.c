@@ -445,9 +445,8 @@ main(int argc, char *argv[])
 
   me.from = &me;
   me.servptr = &me;
-  me.connection->lasttime = CurrentTime;
-  me.connection->since = CurrentTime;
-  me.connection->firsttime = CurrentTime;
+  me.connection->created_real = event_base->time.sec_real;
+  me.connection->created_monotonic = event_base->time.sec_monotonic;
 
   SetMe(&me);
   server_make(&me);

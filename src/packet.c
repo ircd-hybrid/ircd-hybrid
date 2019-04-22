@@ -328,11 +328,8 @@ read_packet(fde_t *F, void *data)
 
     dbuf_put(&client_p->connection->buf_recvq, readBuf, length);
 
-    if (client_p->connection->lasttime < CurrentTime)
-      client_p->connection->lasttime = CurrentTime;
-
-    if (client_p->connection->lasttime > client_p->connection->since)
-      client_p->connection->since = CurrentTime;
+    client_p->connection->last_ping = event_base->time.sec_monotonic;
+    client_p->connection->last_data = event_base->time.sec_monotonic;
 
     DelFlag(client_p, FLAGS_PINGSENT);
 

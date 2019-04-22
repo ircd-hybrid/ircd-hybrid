@@ -90,9 +90,10 @@ client_make(struct Client *from)
   {
     client_p->from = client_p;  /* 'from' of local client is self! */
     client_p->connection = xcalloc(sizeof(*client_p->connection));
-    client_p->connection->since = CurrentTime;
-    client_p->connection->lasttime = CurrentTime;
-    client_p->connection->firsttime = CurrentTime;
+    client_p->connection->last_data = event_base->time.sec_monotonic;
+    client_p->connection->last_ping = event_base->time.sec_monotonic;
+    client_p->connection->created_real = event_base->time.sec_real;
+    client_p->connection->created_monotonic = event_base->time.sec_monotonic;
     client_p->connection->registration = REG_INIT;
 
     /* as good a place as any... */
@@ -214,7 +215,7 @@ check_pings_list(dlink_list *list)
       continue;  /* Ignore it, it's been exited already */
 
     unsigned int ping = get_client_ping(&client_p->connection->confs);
-    if (ping < CurrentTime - client_p->connection->lasttime)
+    if (ping < event_base->time.sec_monotonic - client_p->connection->last_ping)
     {
       if (!HasFlag(client_p, FLAGS_PINGSENT))
       {
@@ -224,12 +225,12 @@ check_pings_list(dlink_list *list)
          * it is still alive.
          */
         AddFlag(client_p, FLAGS_PINGSENT);
-        client_p->connection->lasttime = CurrentTime - ping;
+        client_p->connection->last_ping = event_base->time.sec_monotonic - ping;
         sendto_one(client_p, "PING :%s", ID_or_name(&me, client_p));
       }
       else
       {
-        if (CurrentTime - client_p->connection->lasttime >= 2 * ping)
+        if (event_base->time.sec_monotonic - client_p->connection->last_ping >= 2 * ping)
         {
           /*
            * If the client/server hasn't talked to us in 2*ping seconds
@@ -248,7 +249,7 @@ check_pings_list(dlink_list *list)
           }
 
           snprintf(buf, sizeof(buf), "Ping timeout: %ji seconds",
-                   (CurrentTime - client_p->connection->lasttime));
+                   (event_base->time.sec_monotonic - client_p->connection->last_ping));
           exit_client(client_p, buf);
         }
       }
@@ -276,7 +277,7 @@ check_unknowns_list(void)
      * Check UNKNOWN connections - if they have been in this state
      * for > 30s, close them.
      */
-    if ((CurrentTime - client_p->connection->firsttime) <= 30)
+    if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) <= 30)
       continue;
 
     if (IsHandshake(client_p))
@@ -594,7 +595,7 @@ client_close_connection(struct Client *client_p)
     ++ServerStats.is_cl;
     ServerStats.is_cbs += client_p->connection->send.bytes;
     ServerStats.is_cbr += client_p->connection->recv.bytes;
-    ServerStats.is_cti += CurrentTime - client_p->connection->firsttime;
+    ServerStats.is_cti += event_base->time.sec_monotonic - client_p->connection->created_monotonic;
   }
   else if (IsServer(client_p))
   {
@@ -603,7 +604,7 @@ client_close_connection(struct Client *client_p)
     ++ServerStats.is_sv;
     ServerStats.is_sbs += client_p->connection->send.bytes;
     ServerStats.is_sbr += client_p->connection->recv.bytes;
-    ServerStats.is_sti += CurrentTime - client_p->connection->firsttime;
+    ServerStats.is_sti += event_base->time.sec_monotonic - client_p->connection->created_monotonic;
 
     DLINK_FOREACH(node, connect_items.head)
     {
@@ -801,8 +802,8 @@ exit_client(struct Client *source_p, const char *comment)
                            source_p->sockhost, comment);
 
       ilog(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
-           date_ctime(source_p->connection->firsttime),
-           CurrentTime - source_p->connection->firsttime,
+           date_ctime(source_p->connection->created_real),
+           event_base->time.sec_monotonic - source_p->connection->created_monotonic,
            source_p->name, source_p->username, source_p->host,
            source_p->sockhost, source_p->account,
            source_p->connection->send.bytes >> 10,
@@ -861,11 +862,11 @@ exit_client(struct Client *source_p, const char *comment)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s was connected for %s. %ju/%ju sendK/recvK.",
-                           source_p->name, time_dissect(CurrentTime - source_p->connection->firsttime),
+                           source_p->name, time_dissect(event_base->time.sec_monotonic - source_p->connection->created_monotonic),
                            source_p->connection->send.bytes >> 10,
                            source_p->connection->recv.bytes >> 10);
       ilog(LOG_TYPE_IRCD, "%s was connected for %s. %ju/%ju sendK/recvK.",
-           source_p->name, time_dissect(CurrentTime - source_p->connection->firsttime),
+           source_p->name, time_dissect(event_base->time.sec_monotonic - source_p->connection->created_monotonic),
            source_p->connection->send.bytes >> 10,
            source_p->connection->recv.bytes >> 10);
     }
@@ -954,7 +955,7 @@ dead_link_on_read(struct Client *client_p, int error)
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s was connected for %s",
-                         client_p->name, time_dissect(CurrentTime - client_p->connection->firsttime));
+                         client_p->name, time_dissect(event_base->time.sec_monotonic - client_p->connection->created_monotonic));
   }
 
   if (error == 0)

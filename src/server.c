@@ -280,10 +280,10 @@ try_connections(void *unused)
      * made one successfull connection... [this algorithm is
      * a bit fuzzy... -- msa >;) ]
      */
-    if (conf->until > CurrentTime)
+    if (conf->until > event_base->time.sec_real)
       continue;
 
-    conf->until = CurrentTime + conf->class->con_freq;
+    conf->until = event_base->time.sec_real + conf->class->con_freq;
 
     /*
      * Found a CONNECT config with port specified, scan clients

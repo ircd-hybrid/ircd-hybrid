@@ -333,7 +333,7 @@ channel_make(const char *name)
   struct Channel *chptr = xcalloc(sizeof(*chptr));
   chptr->hnextch = chptr;
   /* Doesn't hurt to set it here */
-  chptr->creationtime = CurrentTime;
+  chptr->creationtime = event_base->time.sec_real;
   chptr->last_join_time = event_base->time.sec_monotonic;
 
   /* Cache channel name length to avoid repetitive strlen() calls. */
@@ -990,7 +990,7 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
      */
     if (flags == CHFL_CHANOP)
     {
-      chptr->creationtime = CurrentTime;
+      chptr->creationtime = event_base->time.sec_real;
       AddCMode(chptr, MODE_TOPICLIMIT);
       AddCMode(chptr, MODE_NOPRIVMSGS);
 

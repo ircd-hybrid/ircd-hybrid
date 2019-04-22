@@ -100,12 +100,12 @@ xline_handle(struct Client *source_p, struct aline_ctx *aline)
   gecos = gecos_make();
   gecos->mask = xstrdup(aline->mask);
   gecos->reason = xstrdup(buf);
-  gecos->setat = CurrentTime;
+  gecos->setat = event_base->time.sec_real;
   gecos->in_database = true;
 
   if (aline->duration)
   {
-    gecos->expire = CurrentTime + aline->duration;
+    gecos->expire = event_base->time.sec_real + aline->duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %ju min. X-Line [%s]",

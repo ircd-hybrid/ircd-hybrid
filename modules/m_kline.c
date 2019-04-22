@@ -145,13 +145,13 @@ kline_handle(struct Client *source_p, struct aline_ctx *aline)
   conf = conf_make(CONF_KLINE);
   conf->user = xstrdup(aline->user);
   conf->host = xstrdup(aline->host);
-  conf->setat = CurrentTime;
+  conf->setat = event_base->time.sec_real;
   conf->reason = xstrdup(buf);
   SetConfDatabase(conf);
 
   if (aline->duration)
   {
-    conf->until = CurrentTime + aline->duration;
+    conf->until = event_base->time.sec_real + aline->duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %ju min. K-Line [%s@%s]",

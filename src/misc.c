@@ -37,7 +37,7 @@ date(uintmax_t lclock)
   static uintmax_t lclock_last;
 
   if (lclock == 0)
-    lclock = CurrentTime;
+    lclock = event_base->time.sec_real;
 
   if (lclock_last != lclock)
   {
@@ -55,7 +55,7 @@ date_iso8601(uintmax_t lclock)
   static uintmax_t lclock_last;
 
   if (lclock == 0)
-    lclock = CurrentTime;
+    lclock = event_base->time.sec_real;
 
   if (lclock_last != lclock)
   {
@@ -85,7 +85,7 @@ date_ctime(uintmax_t lclock)
   static uintmax_t lclock_last;
 
   if (lclock == 0)
-    lclock = CurrentTime;
+    lclock = event_base->time.sec_real;
 
   if (lclock_last != lclock)
   {

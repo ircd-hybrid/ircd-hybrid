@@ -137,12 +137,12 @@ dline_handle(struct Client *source_p, struct aline_ctx *aline)
   conf = conf_make(CONF_DLINE);
   conf->host = xstrdup(aline->host);
   conf->reason = xstrdup(buf);
-  conf->setat = CurrentTime;
+  conf->setat = event_base->time.sec_real;
   SetConfDatabase(conf);
 
   if (aline->duration)
   {
-    conf->until = CurrentTime + aline->duration;
+    conf->until = event_base->time.sec_real + aline->duration;
 
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added temporary %ju min. D-Line [%s]",

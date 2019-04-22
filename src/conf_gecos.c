@@ -100,7 +100,7 @@ gecos_expire(void)
   {
     struct GecosItem *gecos = node->data;
 
-    if (gecos->expire == 0 || gecos->expire > CurrentTime)
+    if (gecos->expire == 0 || gecos->expire > event_base->time.sec_real)
       continue;
 
     if (ConfigGeneral.tkline_expire_notices)

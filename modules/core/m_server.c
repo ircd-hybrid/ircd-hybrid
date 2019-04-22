@@ -251,7 +251,7 @@ server_estab(struct Client *client_p)
   }
 
   sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MIN,
-             CurrentTime);
+             event_base->time.sec_real);
 
   client_p->servptr = &me;
 

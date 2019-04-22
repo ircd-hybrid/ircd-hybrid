@@ -98,6 +98,4 @@ extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
 extern struct event event_write_links_file;
-#define CurrentTime event_base->time.sec_real
-
 #endif

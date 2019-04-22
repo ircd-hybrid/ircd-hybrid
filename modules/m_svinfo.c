@@ -77,24 +77,24 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   }
 
   /*
-   * Since we're here, might as well set CurrentTime while we're at it
+   * Since we're here, might as well set event_base->time.sec_real while we're at it
    */
   event_time_set();
 
   intmax_t theirtime = strtoimax(parv[4], NULL, 10);
-  intmax_t deltat = imaxabs(theirtime - CurrentTime);
+  intmax_t deltat = imaxabs(theirtime - event_base->time.sec_real);
 
   if (deltat > ConfigGeneral.ts_max_delta)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
          "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ji, delta=%ji)",
-         client_get_name(source_p, SHOW_IP), CurrentTime, theirtime, deltat);
+         client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
          "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ji, delta=%ji)",
-         client_get_name(source_p, MASK_IP), CurrentTime, theirtime, deltat);
+         client_get_name(source_p, MASK_IP), event_base->time.sec_real, theirtime, deltat);
     ilog(LOG_TYPE_IRCD,
          "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ji, delta=%ji)",
-         client_get_name(source_p, SHOW_IP), CurrentTime, theirtime, deltat);
+         client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
 
     exit_client(source_p, "Excessive TS delta");
     return 0;
@@ -104,10 +104,10 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
           "Link %s notable TS delta (my TS=%ju, their TS=%ji, delta=%ji)",
-          client_get_name(source_p, SHOW_IP), CurrentTime, theirtime, deltat);
+          client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
           "Link %s notable TS delta (my TS=%ju, their TS=%ji, delta=%ji)",
-          client_get_name(source_p, MASK_IP), CurrentTime, theirtime, deltat);
+          client_get_name(source_p, MASK_IP), event_base->time.sec_real, theirtime, deltat);
   }
 
   return 0;

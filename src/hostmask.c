@@ -727,7 +727,7 @@ hostmask_expire_temporary(void)
     {
       struct AddressRec *arec = node->data;
 
-      if (arec->conf->until == 0 || arec->conf->until > CurrentTime)
+      if (arec->conf->until == 0 || arec->conf->until > event_base->time.sec_real)
         continue;
 
       switch (arec->type)

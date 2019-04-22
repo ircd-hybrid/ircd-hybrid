@@ -81,7 +81,7 @@ watch_check_hash(const struct Client *client_p, const enum irc_numerics reply)
     return;  /* This name isn't on watch */
 
   /* Update the time of last change to item */
-  watch->lasttime = CurrentTime;
+  watch->lasttime = event_base->time.sec_real;
 
   /* Send notifies out to everybody on the list in header */
   DLINK_FOREACH(node, watch->watched_by.head)
@@ -126,7 +126,7 @@ watch_add_to_hash_table(const char *name, struct Client *client_p)
 
     strlcpy(watch->name, name, sizeof(watch->name));
     watch->hash_value = strhash(watch->name);
-    watch->lasttime = CurrentTime;
+    watch->lasttime = event_base->time.sec_real;
 
     dlinkAdd(watch, &watch->node, &watchTable[watch->hash_value]);
   }

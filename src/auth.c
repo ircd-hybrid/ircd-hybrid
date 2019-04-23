@@ -413,7 +413,7 @@ auth_connect_callback(fde_t *F, int error, void *data)
     return;
   }
 
-  comm_setselect(F, COMM_SELECT_READ, auth_read_reply, auth, 3);
+  comm_setselect(F, COMM_SELECT_READ, auth_read_reply, auth, 4);
 }
 
 /*! \brief Flag the client to show an attempt to contact the ident server on
@@ -459,7 +459,7 @@ auth_start_query(struct AuthRequest *auth)
   v6->sin6_port = htons(0);
 
   comm_connect_tcp(auth->fd, &auth->client->ip, RFC1413_PORT, &localaddr,
-                   auth_connect_callback, auth, 5);
+                   auth_connect_callback, auth, 4);
 }
 
 /*

@@ -4,7 +4,7 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
--- Noteworthy changes in version 8.2.25 (2018-??-??)
+-- Noteworthy changes in version 8.2.25 (2019-04-24)
 o) The 'class::number_per_ip', 'class::max_local' and 'class::max_global'
    configuration directives have been replaced with just 'class::number_per_ip_local'
    and 'class::number_per_ip_global'. The 'class::max_local' basically was

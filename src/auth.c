@@ -132,7 +132,7 @@ auth_release_client(struct AuthRequest *auth)
    * us. This is what read_packet() does.
    *     -- adrian
    */
-  comm_setflush(client->connection->fd, 1000, flood_recalc, client);
+  comm_setflush(client->connection->fd, 1, flood_recalc, client);
 
   client->connection->last_ping = event_base->time.sec_monotonic;
   client->connection->last_data = event_base->time.sec_monotonic;

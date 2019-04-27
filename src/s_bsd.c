@@ -275,7 +275,7 @@ comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), 
   assert(F);
   assert(F->flags.open == true);
 
-  F->timeout = event_base->time.sec_monotonic + (timeout / 1000);
+  F->timeout = event_base->time.sec_monotonic + timeout;
   F->timeout_handler = callback;
   F->timeout_data = cbdata;
 }
@@ -298,7 +298,7 @@ comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), vo
   assert(F);
   assert(F->flags.open == true);
 
-  F->flush_timeout = event_base->time.sec_monotonic + (timeout / 1000);
+  F->flush_timeout = event_base->time.sec_monotonic + timeout;
   F->flush_handler = callback;
   F->flush_data = cbdata;
 }
@@ -388,7 +388,7 @@ comm_connect_tcp(fde_t *F, const struct irc_ssaddr *caddr, unsigned short port, 
     return;  /* ... and quit */
   }
 
-  comm_settimeout(F, timeout * 1000, comm_connect_timeout, NULL);
+  comm_settimeout(F, timeout, comm_connect_timeout, NULL);
   comm_connect_tryconnect(F, NULL);
 }
 

@@ -92,7 +92,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 
   if (timeout)
   {
-    F->timeout = event_base->time.sec_monotonic + (timeout / 1000);
+    F->timeout = event_base->time.sec_monotonic + timeout;
     F->timeout_handler = handler;
     F->timeout_data = client_data;
   }

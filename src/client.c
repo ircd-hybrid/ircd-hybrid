@@ -503,16 +503,6 @@ find_chasing(struct Client *source_p, const char *name)
  *      return the "socket host" name of the client, if that
  *        differs from the advertised name (other than case).
  *        But, this can be used to any client structure.
- *
- * NOTE 1:
- *        Watch out the allocation of "buf", if either source_p->name
- *        or source_p->sockhost gets changed into pointers instead of
- *        directly allocated within the structure...
- *
- * NOTE 2:
- *        Function return either a pointer to the structure (source_p) or
- *        to internal buffer (buf). *NEVER* use the returned pointer
- *        to modify what it points!!!
  */
 const char *
 client_get_name(const struct Client *client_p, enum addr_mask_type type)

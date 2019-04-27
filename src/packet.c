@@ -274,7 +274,7 @@ flood_recalc(fde_t *F, void *data)
   if (!IsDead(client_p))
   {
     /* and finally, reset the flood check */
-    comm_setflush(F, 1000, flood_recalc, client_p);
+    comm_setflush(F, 1, flood_recalc, client_p);
   }
 }
 

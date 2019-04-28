@@ -510,7 +510,7 @@ server_tls_handshake(fde_t *F, void *data)
   tls_handshake_status_t ret = tls_handshake(&F->ssl, TLS_ROLE_CLIENT, &sslerr);
   if (ret != TLS_HANDSHAKE_DONE)
   {
-    if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) > CONNECTTIMEOUT)
+    if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
     {
       exit_client(client_p, "Timeout during TLS handshake");
       return;
@@ -520,11 +520,11 @@ server_tls_handshake(fde_t *F, void *data)
     {
       case TLS_HANDSHAKE_WANT_WRITE:
         comm_setselect(F, COMM_SELECT_WRITE,
-                       server_tls_handshake, client_p, CONNECTTIMEOUT);
+                       server_tls_handshake, client_p, TLS_HANDSHAKE_TIMEOUT);
         return;
       case TLS_HANDSHAKE_WANT_READ:
         comm_setselect(F, COMM_SELECT_READ,
-                       server_tls_handshake, client_p, CONNECTTIMEOUT);
+                       server_tls_handshake, client_p, TLS_HANDSHAKE_TIMEOUT);
         return;
       default:
       {

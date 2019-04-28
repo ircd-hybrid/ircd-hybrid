@@ -37,6 +37,8 @@
 #include "tls_none.h"
 #endif
 
+enum { TLS_HANDSHAKE_TIMEOUT = 5 };  /**< Time in seconds for the TLS handshake to time out */
+
 typedef enum _tls_role
 {
   TLS_ROLE_SERVER,

@@ -504,8 +504,13 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
       member = uptr->data;
       target_p = member->client_p;
 
-      if (target_p == user || IsDefunct(target_p) ||
-          target_p->connection->serial == current_serial)
+      if (IsDefunct(target_p))
+        continue;
+
+      if (target_p == user)
+        continue;
+
+      if (target_p->connection->serial == current_serial)
         continue;
 
       if (poscap && HasCap(target_p, poscap) != poscap)
@@ -590,7 +595,7 @@ sendto_channel_local(const struct Client *one, struct Channel *chptr, unsigned i
  * output	- 1 or 0 if match or not
  * side effects	- NONE
  */
-static int
+static bool
 match_it(const struct Client *one, const char *mask, unsigned int what)
 {
   if (what == MATCH_HOST)
@@ -631,9 +636,16 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
   {
     struct Client *client_p = node->data;
 
-    if ((one == NULL || client_p != one->from) && !IsDefunct(client_p))
-      if (match_it(client_p, mask, what))
-        send_message(client_p, local_buf);
+    if (IsDefunct(client_p))
+      continue;
+
+    if (one && client_p == one->from)
+      continue;
+
+    if (match_it(client_p, mask, what) == false)
+      continue;
+
+    send_message(client_p, local_buf);
   }
 
   /* Now scan servers */
@@ -665,8 +677,13 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
      * server deal with it.
      * -wnder
      */
-    if ((one == NULL || client_p != one->from) && !IsDefunct(client_p))
-      send_message_remote(client_p, from, remote_buf);
+    if (IsDefunct(client_p))
+      continue;
+
+    if (one && client_p == one->from)
+      continue;
+
+    send_message_remote(client_p, from, remote_buf);
   }
 
   dbuf_ref_free(local_buf);

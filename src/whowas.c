@@ -40,15 +40,15 @@ static dlink_list whowas_hash[HASHSIZE];
 
 
 /*! \brief Returns a slot of the whowas_hash by the hash value associated with it.
- * \param hashv Hash value.
+ * \param hash_value Hash value.
  */
 const dlink_list *
-whowas_get_hash(unsigned int hashv)
+whowas_get_hash(unsigned int hash_value)
 {
-  if (hashv >= HASHSIZE)
+  if (hash_value >= HASHSIZE)
     return NULL;
 
-  return &whowas_hash[hashv];
+  return &whowas_hash[hash_value];
 }
 
 /*! \brief Unlinks a Whowas struct from its associated lists.
@@ -60,7 +60,7 @@ whowas_unlink(struct Whowas *whowas)
   if (whowas->online)
     dlinkDelete(&whowas->cnode, &whowas->online->whowas_list);
 
-  dlinkDelete(&whowas->hnode, &whowas_hash[whowas->hashv]);
+  dlinkDelete(&whowas->hnode, &whowas_hash[whowas->hash_value]);
   dlinkDelete(&whowas->lnode, &whowas_list);
 
   return whowas;
@@ -120,7 +120,7 @@ whowas_add_history(struct Client *client_p, bool online)
 
   assert(IsClient(client_p));
 
-  whowas->hashv = strhash(client_p->name);
+  whowas->hash_value = strhash(client_p->name);
   whowas->logoff = event_base->time.sec_real;
   whowas->server_hidden = IsHidden(client_p->servptr) != 0;
 
@@ -141,7 +141,7 @@ whowas_add_history(struct Client *client_p, bool online)
   else
     whowas->online = NULL;
 
-  dlinkAdd(whowas, &whowas->hnode, &whowas_hash[whowas->hashv]);
+  dlinkAdd(whowas, &whowas->hnode, &whowas_hash[whowas->hash_value]);
   dlinkAdd(whowas, &whowas->lnode, &whowas_list);
 }
 

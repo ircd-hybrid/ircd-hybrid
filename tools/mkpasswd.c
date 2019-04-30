@@ -30,9 +30,6 @@ enum
   FLAG_PASS     = 1 << 7,
 };
 
-extern char *crypt();
-
-
 static const char *make_sha256_salt(unsigned int);
 static const char *make_sha256_salt_para(const char *);
 static const char *make_sha512_salt(unsigned int);

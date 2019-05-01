@@ -181,47 +181,41 @@ send_queued_write(struct Client *to)
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
-  if (dbuf_length(&to->connection->buf_sendq))
+  while (dbuf_length(&to->connection->buf_sendq))
   {
-    do
+    bool want_read = false;
+    const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
+
+    if (tls_isusing(&to->connection->fd->ssl))
     {
-      bool want_read = false;
-      const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
+      retlen = tls_write(&to->connection->fd->ssl, first->data + to->connection->buf_sendq.pos,
+                                                   first->size - to->connection->buf_sendq.pos, &want_read);
 
-      if (tls_isusing(&to->connection->fd->ssl))
+      if (want_read == true)
+        return;  /* Retry later, don't register for write events */
+    }
+    else
+      retlen = send(to->connection->fd->fd, first->data + to->connection->buf_sendq.pos,
+                                            first->size - to->connection->buf_sendq.pos, 0);
+
+    if (retlen <= 0)
+    {
+      if (retlen < 0 && comm_ignore_errno(errno) == true)
       {
-        retlen = tls_write(&to->connection->fd->ssl, first->data + to->connection->buf_sendq.pos,
-                                                     first->size - to->connection->buf_sendq.pos, &want_read);
-
-        if (want_read == true)
-          return;  /* Retry later, don't register for write events */
+        AddFlag(to, FLAGS_BLOCKED);
+        /* We have a non-fatal error, reschedule a write */
+        comm_setselect(to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to, 0);
       }
       else
-        retlen = send(to->connection->fd->fd, first->data + to->connection->buf_sendq.pos,
-                                              first->size - to->connection->buf_sendq.pos, 0);
-
-      if (retlen <= 0)
-        break;
-
-      dbuf_delete(&to->connection->buf_sendq, retlen);
-
-      /* We have some data written .. update counters */
-      to->connection->send.bytes += retlen;
-      me.connection->send.bytes += retlen;
-    } while (dbuf_length(&to->connection->buf_sendq));
-
-    if (retlen < 0 && comm_ignore_errno(errno) == true)
-    {
-      AddFlag(to, FLAGS_BLOCKED);
-
-      /* we have a non-fatal error, reschedule a write */
-      comm_setselect(to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to, 0);
-    }
-    else if (retlen <= 0)
-    {
-      dead_link_on_write(to, errno);
+        dead_link_on_write(to, errno);
       return;
     }
+
+    dbuf_delete(&to->connection->buf_sendq, retlen);
+
+    /* We have some data written .. update counters */
+    to->connection->send.bytes += retlen;
+    me.connection->send.bytes += retlen;
   }
 }
 

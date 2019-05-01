@@ -300,7 +300,7 @@ read_packet(fde_t *F, void *data)
    * I personally think it makes the code too hairy to make sane.
    *     -- adrian
    */
-  do
+  while (true)
   {
     if (tls_isusing(&F->ssl))
     {
@@ -347,7 +347,7 @@ read_packet(fde_t *F, void *data)
       exit_client(client_p, "Excess Flood");
       return;
     }
-  } while (length == sizeof(readBuf) || tls_isusing(&F->ssl));
+  }
 
   /* If we get here, we need to register for another COMM_SELECT_READ */
   comm_setselect(F, COMM_SELECT_READ, read_packet, client_p, 0);

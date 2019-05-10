@@ -180,10 +180,10 @@ tls_free(tls_data_t *tls_data)
   gnutls_deinit(tls_data->session);
 }
 
-int
+ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
-  int length = gnutls_record_recv(tls_data->session, buf, bufsize);
+  ssize_t length = gnutls_record_recv(tls_data->session, buf, bufsize);
 
   if (length <= 0)
   {
@@ -203,10 +203,10 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
   return length;
 }
 
-int
+ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
-  int length = gnutls_record_send(tls_data->session, buf, bufsize);
+  ssize_t length = gnutls_record_send(tls_data->session, buf, bufsize);
 
   if (length <= 0)
   {

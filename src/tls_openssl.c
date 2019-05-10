@@ -255,11 +255,11 @@ tls_free(tls_data_t *tls_data)
   *tls_data = NULL;
 }
 
-int
+ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   SSL *ssl = *tls_data;
-  int length = SSL_read(ssl, buf, bufsize);
+  ssize_t length = SSL_read(ssl, buf, bufsize);
 
   /* Translate openssl error codes, sigh */
   if (length < 0)
@@ -288,11 +288,11 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
   return length;
 }
 
-int
+ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   SSL *ssl = *tls_data;
-  int retlen = SSL_write(ssl, buf, bufsize);
+  ssize_t retlen = SSL_write(ssl, buf, bufsize);
 
   /* Translate openssl error codes, sigh */
   if (retlen < 0)

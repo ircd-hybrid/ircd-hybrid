@@ -65,8 +65,8 @@ extern bool tls_new(tls_data_t *, int, tls_role_t);
 extern void tls_free(tls_data_t *);
 
 extern tls_handshake_status_t tls_handshake(tls_data_t *, tls_role_t, const char **);
-extern int tls_read(tls_data_t *, char *, size_t, bool *);
-extern int tls_write(tls_data_t *, const char *, size_t, bool *);
+extern ssize_t tls_read(tls_data_t *, char *, size_t, bool *);
+extern ssize_t tls_write(tls_data_t *, const char *, size_t, bool *);
 
 extern void tls_shutdown(tls_data_t *);
 

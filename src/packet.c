@@ -285,7 +285,7 @@ void
 read_packet(fde_t *F, void *data)
 {
   struct Client *const client_p = data;
-  int length = 0;
+  ssize_t length = 0;
 
   assert(client_p);
   assert(client_p->connection);

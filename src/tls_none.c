@@ -71,13 +71,13 @@ tls_free(tls_data_t *tls_data)
 {
 }
 
-int
+ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   return -1;
 }
 
-int
+ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   return -1;

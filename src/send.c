@@ -171,7 +171,7 @@ sendq_unblocked(fde_t *F, void *data)
 void
 send_queued_write(struct Client *to)
 {
-  int retlen = 0;
+  ssize_t retlen = 0;
 
   /*
    ** Once socket is marked dead, we cannot start writing to it,

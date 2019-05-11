@@ -339,12 +339,6 @@ static const struct InfoStruct info_table[] =
     "Prevent users issuing commands on remote servers"
   },
   {
-    "tkline_expire_notices",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigGeneral.tkline_expire_notices,
-    "Show temporary kline/xline expire notices"
-  },
-  {
     "default_floodcount",
     OUTPUT_DECIMAL,
     &ConfigGeneral.default_floodcount,

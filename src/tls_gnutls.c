@@ -331,7 +331,7 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
   char buf[TLS_GNUTLS_MAX_HASH_SIZE * 2 + 1];
 
   cert_list = gnutls_certificate_get_peers(tls_data->session, &cert_list_size);
-  if (!cert_list)
+  if (cert_list == NULL)
     return true;  /* No certificate */
 
   ret = gnutls_x509_crt_init(&cert);

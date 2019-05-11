@@ -180,6 +180,7 @@ reset_block_state(void)
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  EXEMPT
+%token  EXPIRATION
 %token  FAILED_OPER_NOTICE
 %token  FLATTEN_LINKS
 %token  FLATTEN_LINKS_DELAY
@@ -346,7 +347,6 @@ reset_block_state(void)
 %token  TBOOL
 %token  THROTTLE_COUNT
 %token  THROTTLE_TIME
-%token  TKLINE_EXPIRE_NOTICES
 %token  TMASKED
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
@@ -1122,6 +1122,10 @@ oper_umodes_item:  T_BOTS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_FARCONNECT;
+} | EXPIRATION
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.modes.value |= UMODE_EXPIRATION;
 };
 
 oper_flags: IRCD_FLAGS
@@ -2360,7 +2364,6 @@ general_item:       general_away_count |
                     general_throttle_time |
                     general_ping_cookie |
                     general_disable_auth |
-                    general_tkline_expire_notices |
                     general_dline_min_cidr |
                     general_dline_min_cidr6 |
                     general_kline_min_cidr |
@@ -2414,11 +2417,6 @@ general_kline_min_cidr: KLINE_MIN_CIDR '=' NUMBER ';'
 general_kline_min_cidr6: KLINE_MIN_CIDR6 '=' NUMBER ';'
 {
   ConfigGeneral.kline_min_cidr6 = $3;
-};
-
-general_tkline_expire_notices: TKLINE_EXPIRE_NOTICES '=' TBOOL ';'
-{
-  ConfigGeneral.tkline_expire_notices = yylval.number;
 };
 
 general_kill_chase_time_limit: KILL_CHASE_TIME_LIMIT '=' timespec ';'
@@ -2649,6 +2647,9 @@ umode_oitem:     T_BOTS
 } | T_FARCONNECT
 {
   ConfigGeneral.oper_umodes |= UMODE_FARCONNECT;
+} | EXPIRATION
+{
+  ConfigGeneral.oper_umodes |= UMODE_EXPIRATION;
 };
 
 general_oper_only_umodes: OPER_ONLY_UMODES
@@ -2717,6 +2718,9 @@ umode_item:   T_BOTS
 } | T_FARCONNECT
 {
   ConfigGeneral.oper_only_umodes |= UMODE_FARCONNECT;
+} | EXPIRATION
+{
+  ConfigGeneral.oper_only_umodes |= UMODE_EXPIRATION;
 };
 
 general_min_nonwildcard: MIN_NONWILDCARD '=' NUMBER ';'

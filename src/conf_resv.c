@@ -226,9 +226,8 @@ resv_expire(void)
       if (resv->expire == 0 || resv->expire > event_base->time.sec_real)
         continue;
 
-      if (ConfigGeneral.tkline_expire_notices)
-        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Temporary RESV for [%s] expired",
-                             resv->mask);
+      sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary RESV for [%s] expired",
+                           resv->mask);
       resv_delete(resv);
     }
   }

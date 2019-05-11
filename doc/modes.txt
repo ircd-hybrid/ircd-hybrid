@@ -39,6 +39,7 @@ User Modes:
 +u - unauth       - See unauthorized client notices
 +w - wallop       - See server generated WALLOPS
 +W - webirc       - User is connected using a webirc gateway
++X - expiration   - See *LINE expiration notices
 +y - spy          - See ADMIN, LINKS, MOTD, STATS, TRACE notices
 
 Channel Modes:

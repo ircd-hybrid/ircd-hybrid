@@ -198,7 +198,6 @@ struct config_general_entry
   unsigned int stats_u_oper_only;
   unsigned int short_motd;
   unsigned int no_oper_flood;
-  unsigned int tkline_expire_notices;
   unsigned int opers_bypass_callerid;
   unsigned int pace_wait;
   unsigned int pace_wait_simple;

@@ -103,9 +103,8 @@ gecos_expire(void)
     if (gecos->expire == 0 || gecos->expire > event_base->time.sec_real)
       continue;
 
-    if (ConfigGeneral.tkline_expire_notices)
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Temporary X-line for [%s] expired",
-                           gecos->mask);
+    sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary X-line for [%s] expired",
+                         gecos->mask);
     gecos_delete(gecos);
   }
 }

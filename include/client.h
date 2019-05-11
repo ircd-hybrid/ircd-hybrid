@@ -173,7 +173,8 @@ enum
   UMODE_SSL          = 1 << 23,  /**< User is connected via TLS/SSL */
   UMODE_WEBIRC       = 1 << 24,  /**< User connected via a webirc gateway */
   UMODE_HIDEIDLE     = 1 << 25,  /**< Hides idle and signon time in WHOIS */
-  UMODE_HIDECHANS    = 1 << 26   /**< Hides channel list in WHOIS */
+  UMODE_HIDECHANS    = 1 << 26,  /**< Hides channel list in WHOIS */
+  UMODE_EXPIRATION   = 1 << 27   /**< Receives *LINE expiration notices */
 };
 
 #define HasUMode(x, y) ((x)->umodes &   (y))

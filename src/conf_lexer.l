@@ -178,6 +178,7 @@ email                       { return EMAIL; }
 encrypted                   { return ENCRYPTED; }
 exceed_limit                { return EXCEED_LIMIT; }
 exempt                      { return EXEMPT; }
+expiration                  { return EXPIRATION; }
 external                    { return T_EXTERNAL; }
 failed_oper_notice          { return FAILED_OPER_NOTICE; }
 farconnect                  { return T_FARCONNECT; }
@@ -323,7 +324,6 @@ stats_u_oper_only           { return STATS_U_OPER_ONLY; }
 target                      { return T_TARGET; }
 throttle_count              { return THROTTLE_COUNT; }
 throttle_time               { return THROTTLE_TIME; }
-tkline_expire_notices       { return TKLINE_EXPIRE_NOTICES; }
 ts_max_delta                { return TS_MAX_DELTA; }
 ts_warn_delta               { return TS_WARN_DELTA; }
 type                        { return TYPE; }

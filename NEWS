@@ -4,6 +4,12 @@ GnuTLS support as of version 8.2.13
 #######################################################################
 
 
+-- Noteworthy changes in version 8.2.26 (2019-??-??)
+o) The 'general::tkline_expire_notices' configuration directive has been
+   replaced with user mode 'X'. *LINE expiration notices are sent to IRC
+   operators with that mode set
+
+
 -- Noteworthy changes in version 8.2.25 (2019-04-24)
 o) The 'class::number_per_ip', 'class::max_local' and 'class::max_global'
    configuration directives have been replaced with just 'class::number_per_ip_local'

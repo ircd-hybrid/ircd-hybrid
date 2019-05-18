@@ -55,6 +55,60 @@
 #include "ipcache.h"
 
 
+static const char *
+oper_privs_as_string(const unsigned int flags)
+{
+  static const struct oper_flags
+  {
+    unsigned int flag;
+    unsigned char letter;
+  } flag_table[] = {
+    { OPER_FLAG_ADMIN,          'A' },
+    { OPER_FLAG_CLOSE,          'B' },
+    { OPER_FLAG_CONNECT,        'C' },
+    { OPER_FLAG_CONNECT_REMOTE, 'D' },
+    { OPER_FLAG_DIE,            'E' },
+    { OPER_FLAG_DLINE,          'F' },
+    { OPER_FLAG_GLOBOPS,        'G' },
+    { OPER_FLAG_JOIN_RESV,      'H' },
+    { OPER_FLAG_KILL,           'I' },
+    { OPER_FLAG_KILL_REMOTE,    'J' },
+    { OPER_FLAG_KLINE,          'K' },
+    { OPER_FLAG_LOCOPS,         'L' },
+    { OPER_FLAG_MODULE,         'M' },
+    { OPER_FLAG_NICK_RESV,      'N' },
+    { OPER_FLAG_OPME,           'O' },
+    { OPER_FLAG_REHASH,         'P' },
+    { OPER_FLAG_REMOTEBAN,      'Q' },
+    { OPER_FLAG_RESTART,        'R' },
+    { OPER_FLAG_RESV,           'S' },
+    { OPER_FLAG_SET,            'T' },
+    { OPER_FLAG_SQUIT,          'U' },
+    { OPER_FLAG_SQUIT_REMOTE,   'V' },
+    { OPER_FLAG_UNDLINE,        'W' },
+    { OPER_FLAG_UNKLINE,        'X' },
+    { OPER_FLAG_UNRESV,         'Y' },
+    { OPER_FLAG_UNXLINE,        'Z' },
+    { OPER_FLAG_WALLOPS,        'a' },
+    { OPER_FLAG_XLINE,          'b' },
+    { 0, '\0' }
+  };
+
+  static char buf[sizeof(flag_table) / sizeof(flag_table[0])];
+  char *p = buf;
+
+  for (const struct oper_flags *tab = flag_table; tab->flag; ++tab)
+    if (flags & tab->flag)
+      *p++ = tab->letter;
+
+  if (p == buf)
+    *p++ = '0';
+
+  *p = '\0';
+
+  return buf;
+}
+
 static void
 report_shared(struct Client *source_p)
 {

@@ -255,7 +255,7 @@ server_estab(struct Client *client_p)
 
   client_p->servptr = &me;
 
-  if (HasFlag(client_p, FLAGS_CLOSING))
+  if (IsDead(client_p))
     return;
 
   SetServer(client_p);

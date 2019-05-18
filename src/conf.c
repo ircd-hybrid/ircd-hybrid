@@ -789,66 +789,6 @@ cleanup_tklines(void *unused)
   resv_expire();
 }
 
-/* oper_privs_as_string()
- *
- * inputs        - pointer to client_p
- * output        - pointer to static string showing oper privs
- * side effects  - return as string, the oper privs as derived from port
- */
-static const struct oper_flags
-{
-  const unsigned int flag;
-  const unsigned char c;
-} flag_table[] = {
-  { OPER_FLAG_ADMIN,          'A' },
-  { OPER_FLAG_CLOSE,          'B' },
-  { OPER_FLAG_CONNECT,        'C' },
-  { OPER_FLAG_CONNECT_REMOTE, 'D' },
-  { OPER_FLAG_DIE,            'E' },
-  { OPER_FLAG_DLINE,          'F' },
-  { OPER_FLAG_GLOBOPS,        'G' },
-  { OPER_FLAG_JOIN_RESV,      'H' },
-  { OPER_FLAG_KILL,           'I' },
-  { OPER_FLAG_KILL_REMOTE,    'J' },
-  { OPER_FLAG_KLINE,          'K' },
-  { OPER_FLAG_LOCOPS,         'L' },
-  { OPER_FLAG_MODULE,         'M' },
-  { OPER_FLAG_NICK_RESV,      'N' },
-  { OPER_FLAG_OPME,           'O' },
-  { OPER_FLAG_REHASH,         'P' },
-  { OPER_FLAG_REMOTEBAN,      'Q' },
-  { OPER_FLAG_RESTART,        'R' },
-  { OPER_FLAG_RESV,           'S' },
-  { OPER_FLAG_SET,            'T' },
-  { OPER_FLAG_SQUIT,          'U' },
-  { OPER_FLAG_SQUIT_REMOTE,   'V' },
-  { OPER_FLAG_UNDLINE,        'W' },
-  { OPER_FLAG_UNKLINE,        'X' },
-  { OPER_FLAG_UNRESV,         'Y' },
-  { OPER_FLAG_UNXLINE,        'Z' },
-  { OPER_FLAG_WALLOPS,        'a' },
-  { OPER_FLAG_XLINE,          'b' },
-  { 0, '\0' }
-};
-
-const char *
-oper_privs_as_string(const unsigned int flags)
-{
-  static char buf[sizeof(flag_table) / sizeof(flag_table[0])];
-  char *p = buf;
-
-  for (const struct oper_flags *tab = flag_table; tab->flag; ++tab)
-    if (flags & tab->flag)
-      *p++ = tab->c;
-
-  if (p == buf)
-    *p++ = '0';
-
-  *p = '\0';
-
-  return buf;
-}
-
 /*
  * Input: A client to find the active operator {} name for.
  * Output: The nick!user@host{oper} of the oper.

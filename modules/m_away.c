@@ -113,33 +113,13 @@ m_away(struct Client *source_p, int parc, char *parv[])
   return 0;
 }
 
-/*! \brief AWAY command handler
- *
- * \param source_p Pointer to allocated Client struct from which the message
- *                 originally comes from.  This can be a local or remote client.
- * \param parc     Integer holding the number of supplied arguments.
- * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
- *                 pointers.
- * \note Valid arguments for this command are:
- *      - parv[0] = command
- *      - parv[1] = away message
- */
-static int
-ms_away(struct Client *source_p, int parc, char *parv[])
-{
-  const char *const message = parv[1];
-
-  do_away(source_p, message);
-  return 0;
-}
-
 static struct Message away_msgtab =
 {
   .cmd = "AWAY",
   .args_max = MAXPARA,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_away,
-  .handlers[SERVER_HANDLER] = ms_away,
+  .handlers[SERVER_HANDLER] = m_away,
   .handlers[ENCAP_HANDLER] = m_ignore,
   .handlers[OPER_HANDLER] = m_away
 };

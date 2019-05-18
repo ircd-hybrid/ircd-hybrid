@@ -52,7 +52,7 @@ struct ResvExemptItem
 
 extern const dlink_list *resv_chan_get_list(void);
 extern const dlink_list *resv_nick_get_list(void);
-extern void resv_delete(struct ResvItem *);
+extern void resv_delete(struct ResvItem *, bool);
 extern struct ResvItem *resv_make(const char *, const char *, const dlink_list *);
 extern bool resv_exempt_find(const struct Client *, const struct ResvItem *);
 extern struct ResvItem *resv_find(const char *, int (*)(const char *, const char *));

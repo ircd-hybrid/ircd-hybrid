@@ -53,13 +53,17 @@ gecos_clear(void)
     struct GecosItem *gecos = node->data;
 
     if (gecos->in_database == false)
-      gecos_delete(gecos);
+      gecos_delete(gecos, false);
   }
 }
 
 void
-gecos_delete(struct GecosItem *gecos)
+gecos_delete(struct GecosItem *gecos, bool expired)
 {
+  if (expired == true)
+    sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary X-line for [%s] expired",
+                         gecos->mask);
+
   dlinkDelete(&gecos->node, &gecos_list);
   xfree(gecos->mask);
   xfree(gecos->reason);
@@ -78,13 +82,16 @@ gecos_make(void)
 struct GecosItem *
 gecos_find(const char *name, int (*compare)(const char *, const char *))
 {
-  dlink_node *node;
+  dlink_node *node, *node_next;
 
-  DLINK_FOREACH(node, gecos_list.head)
+  DLINK_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *gecos = node->data;
 
-    if (compare(gecos->mask, name) == 0)
+    if (gecos->expire &&
+        (gecos->expire <= event_base->time.sec_real))
+      gecos_delete(gecos, true);
+    else if (compare(gecos->mask, name) == 0)
       return gecos;
   }
 
@@ -100,11 +107,8 @@ gecos_expire(void)
   {
     struct GecosItem *gecos = node->data;
 
-    if (gecos->expire == 0 || gecos->expire > event_base->time.sec_real)
-      continue;
-
-    sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary X-line for [%s] expired",
-                         gecos->mask);
-    gecos_delete(gecos);
+    if (gecos->expire &&
+        (gecos->expire <= event_base->time.sec_real))
+      gecos_delete(gecos, true);
   }
 }

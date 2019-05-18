@@ -55,8 +55,12 @@ resv_nick_get_list(void)
 }
 
 void
-resv_delete(struct ResvItem *resv)
+resv_delete(struct ResvItem *resv, bool expired)
 {
+  if (expired == true)
+    sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary RESV for [%s] expired",
+                         resv->mask);
+
   while (resv->exempt_list.head)
   {
     struct ResvExemptItem *exempt = resv->exempt_list.head->data;
@@ -136,7 +140,7 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
 struct ResvItem *
 resv_find(const char *name, int (*compare)(const char *, const char *))
 {
-  dlink_node *node;
+  dlink_node *node, *node_next;
   dlink_list *list;
 
   if (IsChanPrefix(*name))
@@ -144,11 +148,14 @@ resv_find(const char *name, int (*compare)(const char *, const char *))
   else
     list = &resv_nick_list;
 
-  DLINK_FOREACH(node, list->head)
+  DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
     struct ResvItem *resv = node->data;
 
-    if (compare(resv->mask, name) == 0)
+    if (resv->expire &&
+        (resv->expire <= event_base->time.sec_real))
+      resv_delete(resv, true);
+    else if (compare(resv->mask, name) == 0)
       return resv;
   }
 
@@ -205,7 +212,7 @@ resv_clear(void)
       struct ResvItem *resv = node->data;
 
       if (resv->in_database == false)
-        resv_delete(resv);
+        resv_delete(resv, false);
     }
   }
 }
@@ -223,12 +230,9 @@ resv_expire(void)
     {
       struct ResvItem *resv = node->data;
 
-      if (resv->expire == 0 || resv->expire > event_base->time.sec_real)
-        continue;
-
-      sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary RESV for [%s] expired",
-                           resv->mask);
-      resv_delete(resv);
+      if (resv->expire &&
+          (resv->expire <= event_base->time.sec_real))
+        resv_delete(resv, true);
     }
   }
 }

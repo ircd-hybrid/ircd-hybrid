@@ -78,7 +78,7 @@ xline_remove(struct Client *source_p, struct aline_ctx *aline)
   ilog(LOG_TYPE_RESV, "%s removed X-Line for [%s]",
        get_oper_name(source_p), gecos->mask);
 
-  gecos_delete(gecos);
+  gecos_delete(gecos, false);
 }
 
 /*! \brief UNXLINE command handler

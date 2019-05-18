@@ -72,7 +72,7 @@ resv_remove(struct Client *source_p, struct aline_ctx *aline)
   ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
        get_oper_name(source_p), resv->mask);
 
-  resv_delete(resv);
+  resv_delete(resv, false);
 }
 
 /*! \brief UNRESV command handler

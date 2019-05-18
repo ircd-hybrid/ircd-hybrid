@@ -38,7 +38,7 @@ struct GecosItem
 };
 
 extern const dlink_list *gecos_get_list(void);
-extern void gecos_delete(struct GecosItem *);
+extern void gecos_delete(struct GecosItem *, bool);
 extern struct GecosItem *gecos_make(void);
 extern struct GecosItem *gecos_find(const char *, int (*)(const char *, const char *));
 extern void gecos_clear(void);

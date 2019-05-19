@@ -600,14 +600,12 @@ client_close_connection(struct Client *client_p)
     {
       struct MaskItem *conf = node->data;
 
-      if (irccmp(conf->name, client_p->name))
-        continue;
-
       /*
        * Reset next-connect cycle of all connect{} blocks that match
        * this servername.
        */
-      conf->until = event_base->time.sec_real + conf->class->con_freq;
+      if (irccmp(conf->name, client_p->name) == 0)
+        conf->until = event_base->time.sec_monotonic + conf->class->con_freq;
     }
   }
   else

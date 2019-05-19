@@ -31,13 +31,6 @@ struct Client;
 struct MaskItem;
 
 /*
- * Number of seconds to wait after server starts up, before
- * starting try_connections()
- * TOO SOON and you can nick collide like crazy.
- */
-enum { STARTUP_CONNECTIONS_TIME = 60 };
-
-/*
  * Return values for server_hunt()
  */
 enum server_hunt_ret

@@ -111,7 +111,7 @@ static struct event event_try_connections =
 {
   .name = "try_connections",
   .handler = try_connections,
-  .when = STARTUP_CONNECTIONS_TIME
+  .when = 5
 };
 
 static struct event event_comm_checktimeouts =

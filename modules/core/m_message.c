@@ -486,7 +486,7 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
     const char *with_prefix = name;
 
     /* Allow %+@ if someone wants to do that */
-    while (1)
+    while (true)
     {
       if (*name == '@')
         type |= CHFL_CHANOP;

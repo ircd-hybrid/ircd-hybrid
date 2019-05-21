@@ -55,12 +55,10 @@ static int
 m_part(struct Client *source_p, int parc, char *parv[])
 {
   if (EmptyString(parv[1]))
-  {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "PART");
-    return 0;
-  }
+  else
+    channel_do_part(source_p, parv[1], parv[2]);
 
-  channel_do_part(source_p, parv[1], parv[2]);
   return 0;
 }
 

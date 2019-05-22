@@ -85,7 +85,7 @@ kline_check(const struct AddressRec *arec)
  * side effects - tkline as given is placed
  */
 static void
-kline_handle(struct Client *source_p, struct aline_ctx *aline)
+kline_handle(struct Client *source_p, const struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
   int bits = 0;

@@ -49,7 +49,7 @@
  * Side effects: Any matching tklines are removed.
  */
 static bool
-kline_remove(struct aline_ctx *aline)
+kline_remove(const struct aline_ctx *aline)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
@@ -72,7 +72,7 @@ kline_remove(struct aline_ctx *aline)
 }
 
 static void
-kline_remove_and_notify(struct Client *source_p, struct aline_ctx *aline)
+kline_remove_and_notify(struct Client *source_p, const struct aline_ctx *aline)
 {
   if (kline_remove(aline) == true)
   {

@@ -49,7 +49,7 @@
  * Side effects: Any matching tklines are removed.
  */
 static void
-xline_remove(struct Client *source_p, struct aline_ctx *aline)
+xline_remove(struct Client *source_p, const struct aline_ctx *aline)
 {
   struct GecosItem *gecos;
 

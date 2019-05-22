@@ -43,7 +43,7 @@
 
 
 static void
-resv_remove(struct Client *source_p, struct aline_ctx *aline)
+resv_remove(struct Client *source_p, const struct aline_ctx *aline)
 {
   struct ResvItem *resv;
 

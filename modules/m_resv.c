@@ -50,7 +50,7 @@
  * side effects	- parse resv, create if valid
  */
 static void
-resv_handle(struct Client *source_p, struct aline_ctx *aline)
+resv_handle(struct Client *source_p, const struct aline_ctx *aline)
 {
   if (!HasFlag(source_p, FLAGS_SERVICE))
   {

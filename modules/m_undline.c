@@ -49,7 +49,7 @@
  * Side effects: Any matching tdlines are removed.
  */
 static bool
-dline_remove(struct aline_ctx *aline)
+dline_remove(const struct aline_ctx *aline)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
@@ -72,7 +72,7 @@ dline_remove(struct aline_ctx *aline)
 }
 
 static void
-dline_remove_and_notify(struct Client *source_p, struct aline_ctx *aline)
+dline_remove_and_notify(struct Client *source_p, const struct aline_ctx *aline)
 {
   if (dline_remove(aline) == true)
   {

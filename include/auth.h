@@ -35,7 +35,6 @@ struct Client;
 /** Stores state of the DNS and RFC 1413 ident lookups for a client. */
 struct AuthRequest
 {
-  dlink_node node;        /**< Doubly linked list node. */
   bool dns_pending;       /**< 'true' as long as dns request hasn't finished */
   bool ident_pending;     /**< 'true' as long as identd request hasn't finished */
   struct Client *client;  /**< Pointer to Client structure for request. */

@@ -68,7 +68,6 @@ server_die(const char *message, bool restart)
 
   save_all_databases(NULL);
 
-  send_queued_all();
   close_fds();
 
   unlink(pidFileName);

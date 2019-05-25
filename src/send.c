@@ -215,34 +215,6 @@ send_queued_write(struct Client *to)
   }
 }
 
-/* send_queued_all()
- *
- * input        - NONE
- * output       - NONE
- * side effects - try to flush sendq of each client
- */
-void
-send_queued_all(void)
-{
-  dlink_node *node;
-  /*
-   * Servers are processed first, mainly because this can generate a notice
-   * to opers, which is to be delivered by this function.
-   */
-  dlink_list *tab[] = { &local_server_list, &unknown_list, &local_client_list, NULL };
-
-  for (dlink_list **list = tab; *list; ++list)
-    DLINK_FOREACH(node, (*list)->head)
-      send_queued_write(node->data);
-
-  /* NOTE: This can still put clients on aborted_list; unfortunately,
-   * exit_aborted_clients takes precedence over send_queued_all,
-   * because exiting clients can generate server/oper traffic.
-   * The easiest approach is dealing with aborted clients in the next I/O lap.
-   * -adx
-   */
-}
-
 /* sendto_one()
  *
  * inputs	- pointer to destination client

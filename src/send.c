@@ -378,7 +378,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 
     assert(IsClient(target_p));
 
-    if (IsDefunct(target_p->from))
+    if (IsDead(target_p->from))
       continue;
 
     if (one && (target_p->from == one->from))
@@ -498,7 +498,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
       member = uptr->data;
       target_p = member->client_p;
 
-      if (IsDefunct(target_p))
+      if (IsDead(target_p))
         continue;
 
       if (target_p == user)
@@ -551,7 +551,7 @@ sendto_channel_local(const struct Client *one, struct Channel *chptr, unsigned i
     struct Membership *member = node->data;
     struct Client *target_p = member->client_p;
 
-    if (IsDefunct(target_p))
+    if (IsDead(target_p))
       continue;
 
     if (one && target_p == one->from)
@@ -630,7 +630,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
   {
     struct Client *client_p = node->data;
 
-    if (IsDefunct(client_p))
+    if (IsDead(client_p))
       continue;
 
     if (one && client_p == one->from)
@@ -671,7 +671,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
      * server deal with it.
      * -wnder
      */
-    if (IsDefunct(client_p))
+    if (IsDead(client_p))
       continue;
 
     if (one && client_p == one->from)

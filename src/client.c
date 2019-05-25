@@ -868,6 +868,7 @@ exit_client(struct Client *source_p, const char *comment)
   assert(dlinkFind(&local_server_list, source_p) == NULL);
   assert(dlinkFind(&oper_list, source_p) == NULL);
   assert(dlinkFind(&listing_client_list, source_p) == NULL);
+  assert(dlinkFind(&abort_list, source_p) == NULL);
 
   exit_one_client(source_p, comment);
 }

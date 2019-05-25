@@ -225,19 +225,15 @@ void
 send_queued_all(void)
 {
   dlink_node *node;
-
   /*
    * Servers are processed first, mainly because this can generate a notice
    * to opers, which is to be delivered by this function.
    */
-  DLINK_FOREACH(node, local_server_list.head)
-    send_queued_write(node->data);
+  dlink_list *tab[] = { &local_server_list, &unknown_list, &local_client_list, NULL };
 
-  DLINK_FOREACH(node, unknown_list.head)
-    send_queued_write(node->data);
-
-  DLINK_FOREACH(node, local_client_list.head)
-    send_queued_write(node->data);
+  for (dlink_list **list = tab; *list; ++list)
+    DLINK_FOREACH(node, (*list)->head)
+      send_queued_write(node->data);
 
   /* NOTE: This can still put clients on aborted_list; unfortunately,
    * exit_aborted_clients takes precedence over send_queued_all,

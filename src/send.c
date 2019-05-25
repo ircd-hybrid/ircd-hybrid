@@ -515,8 +515,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
     }
   }
 
-  if (touser == true && MyConnect(user) && !IsDead(user) &&
-      user->connection->serial != current_serial)
+  if (touser == true && MyConnect(user) && !IsDead(user))
     if (HasCap(user, poscap) == poscap)
       send_message(user, buffer);
 

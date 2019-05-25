@@ -134,14 +134,10 @@ send_message_remote(struct Client *to, const struct Client *from, struct dbuf_bl
   assert(to->from == to);
 
   if (to == from->from)
-  {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Send message to %s dropped from %s (Fake Dir)",
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
                          to->name, from->name);
-    return;
-  }
-
-  send_message(to, buf);
+  else
+    send_message(to, buf);
 }
 
 /*
@@ -230,8 +226,9 @@ send_queued_all(void)
 {
   dlink_node *node;
 
-  /* Servers are processed first, mainly because this can generate
-   * a notice to opers, which is to be delivered by this function.
+  /*
+   * Servers are processed first, mainly because this can generate a notice
+   * to opers, which is to be delivered by this function.
    */
   DLINK_FOREACH(node, local_server_list.head)
     send_queued_write(node->data);
@@ -284,7 +281,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
   const char *numstr = NULL;
 
   if (IsDead(to->from))
-    return;
+    return;  /* This socket has already been marked as dead */
 
   const char *dest = ID_or_name(to, to);
   if (EmptyString(dest))
@@ -314,7 +311,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
   va_list args;
 
   if (IsDead(to->from))
-    return;
+    return;  /* This socket has already been marked as dead */
 
   const char *dest = ID_or_name(to, to);
   if (EmptyString(dest))
@@ -554,7 +551,7 @@ sendto_channel_local(const struct Client *one, struct Channel *chptr, unsigned i
     if (IsDead(target_p))
       continue;
 
-    if (one && target_p == one->from)
+    if (one && (target_p == one->from))
       continue;
 
     if (status && (member->flags & status) == 0)
@@ -633,7 +630,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
     if (IsDead(client_p))
       continue;
 
-    if (one && client_p == one->from)
+    if (one && (client_p == one->from))
       continue;
 
     if (match_it(client_p, mask, what) == false)
@@ -674,7 +671,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
     if (IsDead(client_p))
       continue;
 
-    if (one && client_p == one->from)
+    if (one && (client_p == one->from))
       continue;
 
     send_message_remote(client_p, from, remote_buf);
@@ -715,8 +712,12 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
     if (IsDead(target_p->from))
       continue;
 
-    /* Do not attempt to send to ourselves, or the source */
-    if (IsMe(target_p) || target_p->from == source_p->from)
+    /* Do not attempt to send to ourselves ... */
+    if (IsMe(target_p))
+      continue;
+
+    /* ... or the source */
+    if (target_p->from == source_p->from)
       continue;
 
     if (target_p->from->connection->serial == current_serial)
@@ -816,6 +817,9 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
     struct Client *client_p = node->data;
     assert(HasUMode(client_p, UMODE_OPER));
 
+    if (IsDead(client_p))
+      continue;
+
     /*
      * If we're sending it to opers and they're an admin, skip.
      * If we're sending it to admins, and they're not, skip.
@@ -824,8 +828,10 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
         ((level == L_OPER) && HasUMode(client_p, UMODE_ADMIN)))
       continue;
 
-    if (HasUMode(client_p, flags) && !IsDead(client_p))
-      send_message(client_p, buffer);
+    if (!HasUMode(client_p, flags))
+      continue;
+
+    send_message(client_p, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -887,8 +893,13 @@ sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
     struct Client *client_p = node->data;
     assert(client_p->umodes & UMODE_OPER);
 
-    if (HasUMode(client_p, flags) && !IsDead(client_p))
-      send_message(client_p, buffer);
+    if (IsDead(client_p))
+      continue;
+
+    if (!HasUMode(client_p, flags))
+      continue;
+
+    send_message(client_p, buffer);
   }
 
   dbuf_ref_free(buffer);

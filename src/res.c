@@ -347,7 +347,7 @@ do_query_number(dns_callback_fnc callback, void *ctx,
   {
     request = make_request(callback, ctx);
     request->type = T_PTR;
-    memcpy(&request->addr, addr, sizeof(struct irc_ssaddr));
+    request->addr = *addr;
   }
 
   query_name(ipbuf, C_IN, T_PTR, request);

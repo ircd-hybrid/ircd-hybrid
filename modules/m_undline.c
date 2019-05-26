@@ -48,8 +48,8 @@
  * Output: returns YES on success, NO if no tdline removed.
  * Side effects: Any matching tdlines are removed.
  */
-static bool
-dline_remove(const struct aline_ctx *aline)
+static void
+dline_remove(struct Client *source_p, const struct aline_ctx *aline)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
@@ -59,34 +59,33 @@ dline_remove(const struct aline_ctx *aline)
   else
     piphost = NULL;
 
-  if ((conf = find_conf_by_address(NULL, piphost, CONF_DLINE, NULL, NULL, 0)))
-  {
-    if (IsConfDatabase(conf))
-    {
-      delete_one_address_conf(aline->host, conf);
-      return true;
-    }
-  }
-
-  return false;
-}
-
-static void
-dline_remove_and_notify(struct Client *source_p, const struct aline_ctx *aline)
-{
-  if (dline_remove(aline) == true)
+  if ((conf = find_conf_by_address(NULL, piphost, CONF_DLINE, aline->user, NULL, 0)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed", aline->host);
+      sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", aline->host);
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has removed the D-Line for: [%s]",
-                         get_oper_name(source_p), aline->host);
-    ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
-         get_oper_name(source_p), aline->host);
+    return;
   }
-  else if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", aline->host);
+
+  if (IsConfDatabase(conf))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":The D-Line for [%s] is in the configuration file and must be removed by hand",
+                        conf->host);
+    return;
+  }
+
+  if (IsClient(source_p))
+    sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed",
+                      conf->host);
+
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                       "%s has removed the D-Line for: [%s]",
+                       get_oper_name(source_p), conf->host);
+  ilog(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
+       get_oper_name(source_p), conf->host);
+
+  delete_one_address_conf(aline->host, conf);
 }
 
 /*! \brief UNDLINE command handler
@@ -134,7 +133,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
   else
     cluster_distribute(source_p, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s", aline.host);
 
-  dline_remove_and_notify(source_p, &aline);
+  dline_remove(source_p, &aline);
   return 0;
 }
 
@@ -173,7 +172,7 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_UNDLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-    dline_remove_and_notify(source_p, &aline);
+    dline_remove(source_p, &aline);
 
   return 0;
 }

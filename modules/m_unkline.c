@@ -48,8 +48,8 @@
  * Output: returns YES on success, NO if no tkline removed.
  * Side effects: Any matching tklines are removed.
  */
-static bool
-kline_remove(const struct aline_ctx *aline)
+static void
+kline_remove(struct Client *source_p, const struct aline_ctx *aline)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
@@ -59,36 +59,33 @@ kline_remove(const struct aline_ctx *aline)
   else
     piphost = NULL;
 
-  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)))
-  {
-    if (IsConfDatabase(conf))
-    {
-      delete_one_address_conf(aline->host, conf);
-      return true;
-    }
-  }
-
-  return false;
-}
-
-static void
-kline_remove_and_notify(struct Client *source_p, const struct aline_ctx *aline)
-{
-  if (kline_remove(aline) == true)
+  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)) == NULL)
   {
     if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
-                        aline->user, aline->host);
+      sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", aline->user, aline->host);
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has removed the K-Line for: [%s@%s]",
-                         get_oper_name(source_p), aline->user, aline->host);
-    ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-         get_oper_name(source_p), aline->user, aline->host);
+    return;
   }
-  else if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found",
-                      aline->user, aline->host);
+
+  if (IsConfDatabase(conf))
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":The K-Line for [%s@%s] is in the configuration file and must be removed by hand",
+                        conf->user, conf->host);
+    return;
+  }
+
+  if (IsClient(source_p))
+    sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
+                      conf->user, conf->host);
+
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                       "%s has removed the K-Line for: [%s@%s]",
+                       get_oper_name(source_p), conf->user, conf->host);
+  ilog(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
+       get_oper_name(source_p), conf->user, conf->host);
+
+  delete_one_address_conf(aline->host, conf);
 }
 
 /*! \brief UNKLINE command handler
@@ -137,7 +134,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
     cluster_distribute(source_p, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE,
                        "%s %s", aline.user, aline.host);
 
-  kline_remove_and_notify(source_p, &aline);
+  kline_remove(source_p, &aline);
   return 0;
 }
 
@@ -178,7 +175,7 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_UNKLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
-    kline_remove_and_notify(source_p, &aline);
+    kline_remove(source_p, &aline);
 
   return 0;
 }

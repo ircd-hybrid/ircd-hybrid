@@ -991,9 +991,7 @@ static void
 stats_tstats(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
-  struct ServerStatistics sp;
-
-  memcpy(&sp, &ServerStats, sizeof(sp));
+  struct ServerStatistics sp = ServerStats;
 
   DLINK_FOREACH(node, local_server_list.head)
   {

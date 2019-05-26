@@ -181,13 +181,9 @@ listener_accept_connection(fde_t *F, void *data)
 static int
 inetport(struct Listener *listener)
 {
-  struct irc_ssaddr lsin;
   socklen_t opt = 1;
 
-  memset(&lsin, 0, sizeof(lsin));
-  memcpy(&lsin, &listener->addr, sizeof(lsin));
-
-  getnameinfo((const struct sockaddr *)&lsin, lsin.ss_len, listener->name,
+  getnameinfo((const struct sockaddr *)&listener->addr, listener->addr.ss_len, listener->name,
               sizeof(listener->name), NULL, 0, NI_NUMERICHOST);
 
   /*
@@ -213,7 +209,7 @@ inetport(struct Listener *listener)
    * Bind a port to listen for new connections if port is non-null,
    * else assume it is already open and try get something from it.
    */
-  if (bind(fd, (struct sockaddr *)&lsin, lsin.ss_len))
+  if (bind(fd, (const struct sockaddr *)&listener->addr, listener->addr.ss_len))
   {
     report_error(L_ALL, "binding listener socket %s:%s",
                  listener_get_name(listener), errno);

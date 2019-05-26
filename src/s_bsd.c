@@ -204,7 +204,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
    * copy address to 'sockhost' as a string, copy it to host too
    * so we have something valid to put into error messages...
    */
-  memcpy(&client_p->ip, irn, sizeof(client_p->ip));
+  client_p->ip = *irn;
 
   getnameinfo((const struct sockaddr *)&client_p->ip,
               client_p->ip.ss_len, client_p->sockhost,

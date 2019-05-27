@@ -1167,13 +1167,13 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   uptime = (event_base->time.sec_monotonic - me.connection->created_monotonic);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "? :Server send: %7.2f %s (%4.1f K/s)",
+                     "? :Server send: %7.2f %s (%4.1f KiB/s)",
                      _GMKv((me.connection->send.bytes >> 10)),
                      _GMKs((me.connection->send.bytes >> 10)),
                      (float)((float)((me.connection->send.bytes) >> 10) /
                      (float)uptime));
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "? :Server recv: %7.2f %s (%4.1f K/s)",
+                     "? :Server recv: %7.2f %s (%4.1f KiB/s)",
                      _GMKv((me.connection->recv.bytes >> 10)),
                      _GMKs((me.connection->recv.bytes >> 10)),
                      (float)((float)((me.connection->recv.bytes) >> 10) /

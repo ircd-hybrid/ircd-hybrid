@@ -55,7 +55,7 @@ listener_make(const int port, const struct irc_ssaddr *addr)
   struct Listener *listener = xcalloc(sizeof(*listener));
 
   listener->port = port;
-  memcpy(&listener->addr, addr, sizeof(listener->addr));
+  listener->addr = *addr;
 
   return listener;
 }

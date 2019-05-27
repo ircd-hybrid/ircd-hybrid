@@ -1,9 +1,3 @@
-#######################################################################
-Reminder for package maintainers of ircd-hybrid: ircd-hybrid now has
-GnuTLS support as of version 8.2.13
-#######################################################################
-
-
 -- Noteworthy changes in version 8.2.26 (2019-??-??)
 o) The 'general::tkline_expire_notices' configuration directive has been
    replaced with user mode 'X'. *LINE expiration notices are sent to IRC
@@ -25,6 +19,7 @@ o) The 'serverinfo::vhost' and 'serverinfo:vhost6' configuration directives have
    been deprecated. If you need to bind() a specific address you can specify one
    in the connect {} block
 o) The 'connect::vhost' configuration directive has been renamed to 'connect::bind'
+o) For a full list of all changes in this release, see https://git.io/fjRVk
 
 
 -- Noteworthy changes in version 8.2.24 (2018-04-05)
@@ -32,6 +27,7 @@ o) Added "STATS s" to show configured pseudo {} blocks
 o) Implemented channel mode 'N' which prevents users from changing their
    nick while in a channel with that mode set
 o) Services clients are now shown with 'is a Network Service' in "WHOIS"
+o) For a full list of all changes in this release, see https://git.io/fjRVt
 
 
 -- Noteworthy changes in version 8.2.23 (2018-03-26)
@@ -45,6 +41,7 @@ o) "JOIN 0" is no longer supported
 o) Fixed bug where ircd would not remove RPL_WHOISOPERATOR based svstags
    when deoppering
 o) Fixed 'unknown closes' statistic in "STATS t" showing invalid values sometimes
+o) For a full list of all changes in this release, see https://git.io/fjRVq
 
 
 -- Noteworthy changes in version 8.2.22 (2017-03-26)
@@ -57,6 +54,7 @@ o) Fixed an issue with "TRACE" where remote servers would reply with RPL_TRACEUS
    numerics containing UIDs
 o) "STATS z" now shows simple memory stats of servers linked to the network
 o) Added support for remote "ETRACE"
+o) For a full list of all changes in this release, see https://git.io/fjRVO
 
 
 -- Noteworthy changes in version 8.2.21 (2016-11-27)
@@ -65,6 +63,7 @@ o) The 'general::default_floodtime' configuration option has been added
    message throttling better
 o) Fixed an issue with /invite not showing the list of channels the
    sender is invited to
+o) For a full list of all changes in this release, see https://git.io/fjRVG
 
 
 -- Noteworthy changes in version 8.2.20 (2016-11-05)
@@ -77,6 +76,7 @@ o) /whois notices to operators have been re-added. User mode +y is required
    to see them
 o) The maximum line length for motd files has been increased to 320 bytes
    to support multibyte encodings better
+o) For a full list of all changes in this release, see https://git.io/fjRVZ
 
 
 -- Noteworthy changes in version 8.2.19 (2016-08-21)
@@ -85,6 +85,7 @@ o) "WHO" now allows opers to search by IP address
 o) Admins no longer can see IP addresses in "STATS P" with
    'serverhide::hide_server_ips' enabled
 o) User mode 'n' now shows nick name changes from remote clients, too
+o) For a full list of all changes in this release, see https://git.io/fjRVC
 
 
 -- Noteworthy changes in version 8.2.18 (2016-06-22)

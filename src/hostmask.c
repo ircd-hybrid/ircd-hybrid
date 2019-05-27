@@ -241,7 +241,10 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   {
     v4->sin_family = AF_INET;
     v4->sin_addr.s_addr =
-      htonl(addb[0] << 24 | addb[1] << 16 | addb[2] << 8 | addb[3]);
+      htonl((unsigned int)addb[0] << 24 |
+            (unsigned int)addb[1] << 16 |
+            (unsigned int)addb[2] <<  8 |
+            (unsigned int)addb[3]);
   }
 
   if (b)

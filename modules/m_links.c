@@ -52,7 +52,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
                        source_p->username, source_p->host,
                        source_p->servptr->name);
 
-  if (HasUMode(source_p, UMODE_OPER) || !ConfigServerHide.flatten_links)
+  if (HasUMode(source_p, UMODE_OPER) || ConfigServerHide.flatten_links == 0)
   {
     const char *mask = (parc > 2 ? parv[2] : parv[1]);
 
@@ -101,11 +101,6 @@ do_links(struct Client *source_p, int parc, char *parv[])
 static int
 mo_links(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc > 2)
-    if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(source_p, UMODE_OPER))
-      if (server_hunt(source_p, ":%s LINKS %s :%s", 1, parc, parv)->ret != HUNTED_ISME)
-        return 0;
-
   do_links(source_p, parc, parv);
   return 0;
 }
@@ -138,35 +133,8 @@ m_links(struct Client *source_p, int parc, char *parv[])
 
   last_used = event_base->time.sec_monotonic;
 
-  if (ConfigServerHide.flatten_links == 0)
-    return mo_links(source_p, parc, parv);
-
   do_links(source_p, parc, parv);
   return 0;
-}
-
-/*! \brief LINKS command handler
- *
- * \param source_p Pointer to allocated Client struct from which the message
- *                 originally comes from.  This can be a local or remote client.
- * \param parc     Integer holding the number of supplied arguments.
- * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
- *                 pointers.
- * \note Valid arguments for this command are:
- *      - parv[0] = command
- *      - parv[1] = servername mask
- * or
- *      - parv[0] = command
- *      - parv[1] = server to query
- *      - parv[2] = servername mask
- */
-static int
-ms_links(struct Client *source_p, int parc, char *parv[])
-{
-  if (server_hunt(source_p, ":%s LINKS %s :%s", 1, parc, parv)->ret != HUNTED_ISME)
-    return 0;
-
-  return m_links(source_p, parc, parv);
 }
 
 static struct Message links_msgtab =
@@ -175,7 +143,7 @@ static struct Message links_msgtab =
   .args_max = MAXPARA,
   .handlers[UNREGISTERED_HANDLER] = m_unregistered,
   .handlers[CLIENT_HANDLER] = m_links,
-  .handlers[SERVER_HANDLER] = ms_links,
+  .handlers[SERVER_HANDLER] = m_ignore,
   .handlers[ENCAP_HANDLER] = m_ignore,
   .handlers[OPER_HANDLER] = mo_links
 };

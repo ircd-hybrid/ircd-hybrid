@@ -91,12 +91,14 @@ o) For a full list of all changes in this release, see https://git.io/fjRVC
 -- Noteworthy changes in version 8.2.18 (2016-06-22)
 o) Fixed an assert when a client sends invalid LIST options
 o) Fixed invalid memory stats of channel invites in "STATS z"
+o) For a full list of all changes in this release, see https://git.io/fjRSx
 
 
 -- Noteworthy changes in version 8.2.17 (2016-04-21)
 o) Fixed core on "REHASH CONF" with 'general::whowas_history_length'
    set to 0
 o) Fixed possible core on "INVITE" with 'channel::max_channels' set to 0
+o) For a full list of all changes in this release, see https://git.io/fjRSp
 
 
 -- Noteworthy changes in version 8.2.16 (2016-03-20)
@@ -105,6 +107,7 @@ o) Added 'general::whowas_history_length' configuration option which
 o) Services are now allowed to override 'general::min_nonwildcard',
    and 'general::min_nonwildcard_simple' settings
 o) Minor updates to help files
+o) For a full list of all changes in this release, see https://git.io/fjRSj
 
 
 -- Noteworthy changes in version 8.2.15 (2016-02-24)
@@ -113,6 +116,7 @@ o) Added proper support for Raspbian/ARM. Gracias to Beave/2600.net
 o) Fixed an assert with empty user = "" directives in auth {} blocks
 o) "STATS z" now shows allocated listeners
 o) Fixed bug where 'can_flood' auth {} flags did not work on channels
+o) For a full list of all changes in this release, see https://git.io/fjR9v
 
 
 -- Noteworthy changes in version 8.2.14 (2016-02-09)
@@ -124,6 +128,7 @@ o) Improvements to libGeoIP support:
      and 'libgeoip_ipv6_database_file' configuration directives to the
      serverinfo {} block
 o) Further improvements to GnuTLS support
+o) For a full list of all changes in this release, see https://git.io/fjR9f
 
 
 -- Noteworthy changes in version 8.2.13 (2016-02-02)
@@ -136,6 +141,7 @@ o) Added support for remote REHASH: REHASH <server> <option>
 o) Added 'rehash:remote' irc-operator privilege flag
 o) Added 'rehash' type to shared {} blocks
 o) Fixed minor memory leak with shared {} and cluster {} blocks
+o) For a full list of all changes in this release, see https://git.io/fjR9J
 
 
 -- Noteworthy changes in version 8.2.12 (2016-01-05)

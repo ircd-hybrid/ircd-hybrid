@@ -110,13 +110,12 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
     {
       char *after;
 
-      d[dp] = d[dp] >> 4 * nyble;
-      ++dp;
       bits = strtoul(p + 1, &after, 10);
 
-      if (bits < 0 || *after)
+      if (bits < 0 || bits > 128 || *after)
         return HM_HOST;
-      if (bits > dp * 4 && !(finsert >= 0 && bits <= 128))
+      /* 16 bits for each hextet, plus 4 for each parsed nyble */
+      if (bits > dp * 16 + (4 - nyble) * 4 && !(finsert >= 0))
         return HM_HOST;
       break;
     }

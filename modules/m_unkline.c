@@ -67,7 +67,7 @@ kline_remove(struct Client *source_p, const struct aline_ctx *aline)
     return;
   }
 
-  if (IsConfDatabase(conf))
+  if (!IsConfDatabase(conf))
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":The K-Line for [%s@%s] is in the configuration file and must be removed by hand",

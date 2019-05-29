@@ -251,7 +251,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   unsigned int parc = 0;
   unsigned int paramcount;
 
-  if (IsDefunct(client_p))
+  if (IsDead(client_p))
     return;
 
   assert(client_p->connection);

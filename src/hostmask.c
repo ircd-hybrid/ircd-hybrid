@@ -66,7 +66,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   int finsert = -1;
   int bits = 128;
   int deficit = 0;
-  short dc[8];
+  uint16_t dc[8];
   struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)addr;
 
   for (const char *p = text; (c = *p); ++p)
@@ -158,7 +158,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 
     for (dp = 0; dp < 8; ++dp)
       /* The cast is a kludge to make netbsd work. */
-      ((unsigned short *)&v6->sin6_addr)[dp] = htons(dc[dp]);
+      ((uint16_t *)&v6->sin6_addr)[dp] = htons(dc[dp]);
   }
 
   if (b)

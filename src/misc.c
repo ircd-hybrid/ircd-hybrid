@@ -158,9 +158,8 @@ address_compare(const void *p1,
 
     if (port == true && (sin1->sin_port != sin2->sin_port))
       return false;
-    if (sin1->sin_addr.s_addr != sin2->sin_addr.s_addr)
-      return false;
-    return true;
+
+    return sin1->sin_addr.s_addr == sin2->sin_addr.s_addr;
   }
   else if (addr1->ss.ss_family == AF_INET6)
   {
@@ -169,10 +168,9 @@ address_compare(const void *p1,
 
     if (port == true && (sin1->sin6_port != sin2->sin6_port))
       return false;
-    if (memcmp(sin1->sin6_addr.s6_addr,
-               sin2->sin6_addr.s6_addr, sizeof(struct in6_addr)))
-      return false;
-    return true;
+
+    return memcmp(sin1->sin6_addr.s6_addr,
+                  sin2->sin6_addr.s6_addr, sizeof(struct in6_addr)) == 0;
   }
 
   return false;

@@ -367,10 +367,9 @@ comm_connect_tcp(fde_t *F, const struct irc_ssaddr *caddr, unsigned short port, 
 {
   assert(callback);
 
-  memcpy(&F->connect.hostaddr, caddr, sizeof(F->connect.hostaddr));
-
   /* The cast is hacky, but safe - port offset is same on v4 and v6 */
   ((struct sockaddr_in *)&F->connect.hostaddr)->sin_port = htons(port);
+  F->connect.hostaddr = *caddr;
   F->connect.callback = callback;
   F->connect.data = data;
 

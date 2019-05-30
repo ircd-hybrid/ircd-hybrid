@@ -145,7 +145,7 @@ class_find(const char *name, bool active)
     struct ClassItem *class = node->data;
 
     if (irccmp(class->name, name) == 0)
-      return active == true && class->active == true ? class : NULL;
+      return active == true && class->active == false ? NULL : class;
   }
 
   return NULL;

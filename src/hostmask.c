@@ -177,7 +177,7 @@ static int
 try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 {
   const char *digits[4];
-  unsigned char addb[4];
+  uint8_t addb[4];
   int n = 0, bits = 0;
   char c;
   struct sockaddr_in *const v4 = (struct sockaddr_in *)addr;

@@ -19,7 +19,7 @@
  *  USA
  */
 
-/*! \file s_misc.c
+/*! \file misc.c
  * \brief Yet another miscellaneous functions file.
  * \version $Id$
  */

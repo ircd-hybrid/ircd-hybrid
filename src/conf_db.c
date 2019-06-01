@@ -215,7 +215,7 @@ open_db(const char *filename, const char *mode, uint32_t version)
  * open for writing, we discard the new temporary file instead of renaming
  * it over the old file.  The value of errno is preserved.
  *
- * \param dbFile struct
+ * \param f dbFile struct
  */
 static void
 restore_db(struct dbFILE *f)
@@ -235,7 +235,7 @@ restore_db(struct dbFILE *f)
  * file over the old one, and logs/wallops an error message if the rename()
  * fails.
  *
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true on success.
  */
 static bool
@@ -285,7 +285,7 @@ close_db(struct dbFILE *f)
 /*! \brief Read a unsigned 8bit integer
  *
  * \param ret 16bit integer to read
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true otherwise.
  */
 bool
@@ -304,7 +304,7 @@ read_uint16(uint16_t *ret, struct dbFILE *f)
 /*! \brief Write a unsigned 16bit integer
  *
  * \param val 16bit integer to write
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true otherwise.
  */
 bool
@@ -320,7 +320,7 @@ write_uint16(uint16_t val, struct dbFILE *f)
 /*! \brief Read a unsigned 32bit integer
  *
  * \param ret unsigned 32bit integer to read
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true otherwise.
  */
 bool
@@ -342,7 +342,7 @@ read_uint32(uint32_t *ret, struct dbFILE *f)
 /*! \brief Write a unsigned 32bit integer
  *
  * \param val unsigned 32bit integer to write
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true otherwise.
  */
 bool
@@ -362,7 +362,7 @@ write_uint32(uint32_t val, struct dbFILE *f)
 /*! \brief Read a unsigned 64bit integer
  *
  * \param ret unsigned 64bit integer to read
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true otherwise.
  */
 bool
@@ -390,7 +390,7 @@ read_uint64(uint64_t *ret, struct dbFILE *f)
 /*! \brief Write a unsigned 64bit integer
  *
  * \param val unsigned 64bit integer to write
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true otherwise.
  */
 bool
@@ -418,7 +418,7 @@ write_uint64(uint64_t val, struct dbFILE *f)
 /*! \brief Read String
  *
  * \param ret string
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true otherwise.
  */
 bool
@@ -449,7 +449,7 @@ read_string(char **ret, struct dbFILE *f)
 /*! \brief Write String
  *
  * \param s string
- * \param dbFile struct
+ * \param f dbFile struct
  * \return false on error, true otherwise.
  */
 bool

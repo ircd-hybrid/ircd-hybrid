@@ -1,7 +1,28 @@
-#######################################################################
-Reminder for package maintainers of ircd-hybrid: ircd-hybrid now has
-GnuTLS support as of version 8.2.13
-#######################################################################
+-- Noteworthy changes in version 8.2.26 (2019-05-31)
+o) The 'general::tkline_expire_notices' configuration directive has been
+   replaced with user mode 'X'. *LINE expiration notices are sent to IRC
+   operators with that mode set
+o) Fixed issue with '/rehash conf' creating duplicated class entries
+   instead of updating existing ones that are already in use
+o) For a full list of all changes in this release, see https://git.io/fjEbq
+
+
+-- Noteworthy changes in version 8.2.25 (2019-04-24)
+o) The 'class::number_per_ip', 'class::max_local' and 'class::max_global'
+   configuration directives have been replaced with just 'class::number_per_ip_local'
+   and 'class::number_per_ip_global'. The 'class::max_local' basically was
+   redundant as it had the same functionality as 'class::number_per_ip'
+o) Adding RESVs with wildcards no longer requires administrator privileges
+o) The 'general::ignore_bogus_ts' configuration option has been deprecated
+o) TLSv1.1 and TLSv1.0 are no longer supported and have been disabled in
+   the openssl and gnutls module
+o) Minimum supported OpenSSL version is 1.0.1f now
+o) Minimum supported GnuTLS version is 3.5.8 now
+o) The 'serverinfo::vhost' and 'serverinfo:vhost6' configuration directives have
+   been deprecated. If you need to bind() a specific address you can specify one
+   in the connect {} block
+o) The 'connect::vhost' configuration directive has been renamed to 'connect::bind'
+o) For a full list of all changes in this release, see https://git.io/fjRVk
 
 
 -- Noteworthy changes in version 8.2.24 (2018-04-05)
@@ -9,6 +30,7 @@ o) Added "STATS s" to show configured pseudo {} blocks
 o) Implemented channel mode 'N' which prevents users from changing their
    nick while in a channel with that mode set
 o) Services clients are now shown with 'is a Network Service' in "WHOIS"
+o) For a full list of all changes in this release, see https://git.io/fjRVt
 
 
 -- Noteworthy changes in version 8.2.23 (2018-03-26)
@@ -22,6 +44,7 @@ o) "JOIN 0" is no longer supported
 o) Fixed bug where ircd would not remove RPL_WHOISOPERATOR based svstags
    when deoppering
 o) Fixed 'unknown closes' statistic in "STATS t" showing invalid values sometimes
+o) For a full list of all changes in this release, see https://git.io/fjRVq
 
 
 -- Noteworthy changes in version 8.2.22 (2017-03-26)
@@ -34,6 +57,7 @@ o) Fixed an issue with "TRACE" where remote servers would reply with RPL_TRACEUS
    numerics containing UIDs
 o) "STATS z" now shows simple memory stats of servers linked to the network
 o) Added support for remote "ETRACE"
+o) For a full list of all changes in this release, see https://git.io/fjRVO
 
 
 -- Noteworthy changes in version 8.2.21 (2016-11-27)
@@ -42,6 +66,7 @@ o) The 'general::default_floodtime' configuration option has been added
    message throttling better
 o) Fixed an issue with /invite not showing the list of channels the
    sender is invited to
+o) For a full list of all changes in this release, see https://git.io/fjRVG
 
 
 -- Noteworthy changes in version 8.2.20 (2016-11-05)
@@ -54,6 +79,7 @@ o) /whois notices to operators have been re-added. User mode +y is required
    to see them
 o) The maximum line length for motd files has been increased to 320 bytes
    to support multibyte encodings better
+o) For a full list of all changes in this release, see https://git.io/fjRVZ
 
 
 -- Noteworthy changes in version 8.2.19 (2016-08-21)
@@ -62,17 +88,20 @@ o) "WHO" now allows opers to search by IP address
 o) Admins no longer can see IP addresses in "STATS P" with
    'serverhide::hide_server_ips' enabled
 o) User mode 'n' now shows nick name changes from remote clients, too
+o) For a full list of all changes in this release, see https://git.io/fjRVC
 
 
 -- Noteworthy changes in version 8.2.18 (2016-06-22)
 o) Fixed an assert when a client sends invalid LIST options
 o) Fixed invalid memory stats of channel invites in "STATS z"
+o) For a full list of all changes in this release, see https://git.io/fjRSx
 
 
 -- Noteworthy changes in version 8.2.17 (2016-04-21)
 o) Fixed core on "REHASH CONF" with 'general::whowas_history_length'
    set to 0
 o) Fixed possible core on "INVITE" with 'channel::max_channels' set to 0
+o) For a full list of all changes in this release, see https://git.io/fjRSp
 
 
 -- Noteworthy changes in version 8.2.16 (2016-03-20)
@@ -81,6 +110,7 @@ o) Added 'general::whowas_history_length' configuration option which
 o) Services are now allowed to override 'general::min_nonwildcard',
    and 'general::min_nonwildcard_simple' settings
 o) Minor updates to help files
+o) For a full list of all changes in this release, see https://git.io/fjRSj
 
 
 -- Noteworthy changes in version 8.2.15 (2016-02-24)
@@ -89,6 +119,7 @@ o) Added proper support for Raspbian/ARM. Gracias to Beave/2600.net
 o) Fixed an assert with empty user = "" directives in auth {} blocks
 o) "STATS z" now shows allocated listeners
 o) Fixed bug where 'can_flood' auth {} flags did not work on channels
+o) For a full list of all changes in this release, see https://git.io/fjR9v
 
 
 -- Noteworthy changes in version 8.2.14 (2016-02-09)
@@ -100,6 +131,7 @@ o) Improvements to libGeoIP support:
      and 'libgeoip_ipv6_database_file' configuration directives to the
      serverinfo {} block
 o) Further improvements to GnuTLS support
+o) For a full list of all changes in this release, see https://git.io/fjR9f
 
 
 -- Noteworthy changes in version 8.2.13 (2016-02-02)
@@ -112,6 +144,7 @@ o) Added support for remote REHASH: REHASH <server> <option>
 o) Added 'rehash:remote' irc-operator privilege flag
 o) Added 'rehash' type to shared {} blocks
 o) Fixed minor memory leak with shared {} and cluster {} blocks
+o) For a full list of all changes in this release, see https://git.io/fjR9J
 
 
 -- Noteworthy changes in version 8.2.12 (2016-01-05)

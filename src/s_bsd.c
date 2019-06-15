@@ -136,6 +136,11 @@ setup_socket(int fd)
   setsockopt(fd, IPPROTO_IP, IP_TOS, &opt, sizeof(opt));
 #endif
 
+#ifdef TCP_QUICKACK
+  opt = 1;
+  setsockopt(fd, SOL_SOCKET, TCP_QUICKACK, &opt, sizeof(opt));
+#endif
+
   fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
 }
 

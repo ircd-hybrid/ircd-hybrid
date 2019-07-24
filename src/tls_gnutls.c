@@ -105,7 +105,13 @@ tls_new_cred(void)
     return false;
   }
 
-  gnutls_dh_params_init(&context->dh_params);
+  ret = gnutls_dh_params_init(&context->dh_params);
+  if (ret != GNUTLS_E_SUCCESS)
+  {
+    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the DH parameters -- %s", gnutls_strerror(ret));
+    xfree(context);
+    return false;
+  }
 
   if (ConfigServerInfo.ssl_dh_param_file)
   {
@@ -126,6 +132,7 @@ tls_new_cred(void)
     }
   }
 
+  /* TBR once 3.6 is our minimum supported version */
   gnutls_certificate_set_dh_params(context->x509_cred, context->dh_params);
 
   if (ConfigServerInfo.ssl_message_digest_algorithm == NULL)

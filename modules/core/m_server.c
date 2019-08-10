@@ -214,21 +214,7 @@ server_burst(struct Client *client_p)
 static void
 server_estab(struct Client *client_p)
 {
-  struct MaskItem *conf = NULL;
   dlink_node *node = NULL;
-
-  if ((conf = find_conf_name(&client_p->connection->confs, client_p->name, CONF_SERVER)) == NULL)
-  {
-    /* This shouldn't happen, better tell the ops... -A1kmm */
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Warning: lost connect{} block for %s",
-                         client_get_name(client_p, SHOW_IP));
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Warning: lost connect{} block for %s",
-                         client_get_name(client_p, MASK_IP));
-    exit_client(client_p, "Lost connect{} block!");
-    return;
-  }
 
   xfree(client_p->connection->password);
   client_p->connection->password = NULL;
@@ -242,6 +228,8 @@ server_estab(struct Client *client_p)
 
   if (IsUnknown(client_p))
   {
+    const struct MaskItem *const conf = client_p->connection->confs.head->data;
+
     sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
     sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
@@ -395,11 +383,12 @@ server_set_gecos(struct Client *client_p, const char *info)
 
 enum
 {
-  SERVER_CHECK_OK                  =  0,
-  SERVER_CHECK_NOCONNECT           = -1,
-  SERVER_CHECK_INVALID_PASSWORD    = -2,
-  SERVER_CHECK_INVALID_HOST        = -3,
-  SERVER_CHECK_INVALID_CERTIFICATE = -4,
+  SERVER_CHECK_OK                   =  0,
+  SERVER_CHECK_CONNECT_NOT_FOUND    = -1,
+  SERVER_CHECK_CONNECT_NOT_ATTACHED = -2,
+  SERVER_CHECK_INVALID_PASSWORD     = -3,
+  SERVER_CHECK_INVALID_HOST         = -4,
+  SERVER_CHECK_INVALID_CERTIFICATE  = -5,
 };
 
 static int
@@ -407,7 +396,7 @@ server_check(const char *name, struct Client *client_p)
 {
   dlink_node *node;
   struct MaskItem *server_conf = NULL;
-  int error = SERVER_CHECK_NOCONNECT;
+  int error = SERVER_CHECK_CONNECT_NOT_FOUND;
 
   assert(client_p);
 
@@ -438,9 +427,12 @@ server_check(const char *name, struct Client *client_p)
   if (server_conf == NULL)
     return error;
 
-  conf_attach(client_p, server_conf);
+  if (conf_attach(client_p, server_conf))
+    error = SERVER_CHECK_CONNECT_NOT_ATTACHED;
+  else
+    error = SERVER_CHECK_OK;
 
-  return SERVER_CHECK_OK;
+  return error;
 }
 
 /* mr_server()
@@ -502,9 +494,12 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    */
   switch (server_check(name, source_p))
   {
-    case SERVER_CHECK_NOCONNECT:
+    case SERVER_CHECK_CONNECT_NOT_FOUND:
       error = "No connect {} block";
       warn = ConfigGeneral.warn_no_connect_block != 0;
+      break;
+    case SERVER_CHECK_CONNECT_NOT_ATTACHED:
+      error = "Couldn't attach connect {} block";
       break;
     case SERVER_CHECK_INVALID_PASSWORD:
       error = "Invalid password";

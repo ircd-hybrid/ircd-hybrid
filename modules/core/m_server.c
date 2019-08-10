@@ -214,8 +214,6 @@ server_burst(struct Client *client_p)
 static void
 server_estab(struct Client *client_p)
 {
-  dlink_node *node = NULL;
-
   xfree(client_p->connection->password);
   client_p->connection->password = NULL;
 
@@ -326,6 +324,7 @@ server_estab(struct Client *client_p)
    * up connection this other fragment at the same time, it's
    * a race condition, not the normal way of operation...
    */
+  dlink_node *node;
   DLINK_FOREACH_PREV(node, global_server_list.tail)
   {
     struct Client *target_p = node->data;
@@ -383,17 +382,17 @@ server_set_gecos(struct Client *client_p, const char *info)
 
 enum
 {
-  SERVER_CHECK_OK                   =  0,
-  SERVER_CHECK_CONNECT_NOT_FOUND    = -1,
-  SERVER_CHECK_INVALID_PASSWORD     = -2,
-  SERVER_CHECK_INVALID_HOST         = -3,
-  SERVER_CHECK_INVALID_CERTIFICATE  = -4,
+  SERVER_CHECK_OK                  =  0,
+  SERVER_CHECK_CONNECT_NOT_FOUND   = -1,
+  SERVER_CHECK_INVALID_PASSWORD    = -2,
+  SERVER_CHECK_INVALID_HOST        = -3,
+  SERVER_CHECK_INVALID_CERTIFICATE = -4,
 };
 
 static int
 server_check(const char *name, struct Client *client_p)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
   int error = SERVER_CHECK_CONNECT_NOT_FOUND;
 
   assert(client_p);
@@ -418,7 +417,7 @@ server_check(const char *name, struct Client *client_p)
         if (EmptyString(client_p->certfp) || strcasecmp(client_p->certfp, conf->certfp))
           return SERVER_CHECK_INVALID_CERTIFICATE;
 
-      conf_attach(client_p, node->data);
+      conf_attach(client_p, conf);
       return SERVER_CHECK_OK;
     }
   }
@@ -445,7 +444,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 {
   const char *name = parv[1];
   const char *sid = parc == 6 ? parv[3] : source_p->id; /* TBR: compatibility 'mode' */
-  struct Client *target_p = NULL;
   const char *error = NULL;
   bool warn = true;
 
@@ -528,6 +526,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  struct Client *target_p;
   if ((target_p = hash_find_server(name)))
   {
     /* This link is trying feed me a server that I already have
@@ -609,8 +608,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 static int
 ms_sid(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
     return 0;
@@ -646,6 +643,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   }
 
   /* collision on SID? */
+  struct Client *target_p;
   if ((target_p = hash_find_id(parv[3])))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,

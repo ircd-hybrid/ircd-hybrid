@@ -385,17 +385,15 @@ enum
 {
   SERVER_CHECK_OK                   =  0,
   SERVER_CHECK_CONNECT_NOT_FOUND    = -1,
-  SERVER_CHECK_CONNECT_NOT_ATTACHED = -2,
-  SERVER_CHECK_INVALID_PASSWORD     = -3,
-  SERVER_CHECK_INVALID_HOST         = -4,
-  SERVER_CHECK_INVALID_CERTIFICATE  = -5,
+  SERVER_CHECK_INVALID_PASSWORD     = -2,
+  SERVER_CHECK_INVALID_HOST         = -3,
+  SERVER_CHECK_INVALID_CERTIFICATE  = -4,
 };
 
 static int
 server_check(const char *name, struct Client *client_p)
 {
-  dlink_node *node;
-  struct MaskItem *server_conf = NULL;
+  dlink_node *node = NULL;
   int error = SERVER_CHECK_CONNECT_NOT_FOUND;
 
   assert(client_p);
@@ -420,17 +418,10 @@ server_check(const char *name, struct Client *client_p)
         if (EmptyString(client_p->certfp) || strcasecmp(client_p->certfp, conf->certfp))
           return SERVER_CHECK_INVALID_CERTIFICATE;
 
-      server_conf = conf;
+      conf_attach(client_p, node->data);
+      return SERVER_CHECK_OK;
     }
   }
-
-  if (server_conf == NULL)
-    return error;
-
-  if (conf_attach(client_p, server_conf))
-    error = SERVER_CHECK_CONNECT_NOT_ATTACHED;
-  else
-    error = SERVER_CHECK_OK;
 
   return error;
 }
@@ -497,9 +488,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     case SERVER_CHECK_CONNECT_NOT_FOUND:
       error = "No connect {} block";
       warn = ConfigGeneral.warn_no_connect_block != 0;
-      break;
-    case SERVER_CHECK_CONNECT_NOT_ATTACHED:
-      error = "Couldn't attach connect {} block";
       break;
     case SERVER_CHECK_INVALID_PASSWORD:
       error = "Invalid password";

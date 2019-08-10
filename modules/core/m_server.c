@@ -479,6 +479,18 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
+  if (IsHandshake(source_p) && irccmp(source_p->name, name))
+  {
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+                         "Link %s introduced server with mismatching server name %s",
+                         client_get_name(source_p, SHOW_IP), name);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+                         "Link %s introduced server with mismatching server name %s",
+                         client_get_name(source_p, MASK_IP), name);
+    exit_client(source_p, "Mismatching server name introduced");
+    return 0;
+  }
+
   /*
    * Now we just have to call server_check() and everything should
    * be checked for us... -A1kmm.

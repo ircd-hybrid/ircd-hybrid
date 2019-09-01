@@ -127,13 +127,13 @@ tls_new_cred(void)
 
       if (ret != GNUTLS_E_SUCCESS)
         ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- unable to import dh params -- %s", gnutls_strerror(ret));
+      else
+        /* TBR once 3.6 is our minimum supported version */
+        gnutls_certificate_set_dh_params(context->x509_cred, context->dh_params);
 
       gnutls_free(data.data);
     }
   }
-
-  /* TBR once 3.6 is our minimum supported version */
-  gnutls_certificate_set_dh_params(context->x509_cred, context->dh_params);
 
   if (ConfigServerInfo.ssl_message_digest_algorithm == NULL)
     ConfigServerInfo.message_digest_algorithm = GNUTLS_DIG_SHA256;

@@ -148,7 +148,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     chptr = channel_make(parv[2]);
   }
 
-  oldts = chptr->creationtime;
+  oldts = chptr->creation_time;
   oldmode = &chptr->mode;
 
   if (newts == 0 && isnew == false && oldts)
@@ -162,15 +162,15 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
 
   if (isnew == true)
-    chptr->creationtime = tstosend = newts;
+    chptr->creation_time = tstosend = newts;
   else if (newts == 0 || oldts == 0)
-    chptr->creationtime = tstosend = 0;
+    chptr->creation_time = tstosend = 0;
   else if (newts == oldts)
     tstosend = oldts;
   else if (newts < oldts)
   {
     keep_our_modes = false;
-    chptr->creationtime = tstosend = newts;
+    chptr->creation_time = tstosend = newts;
   }
   else
   {

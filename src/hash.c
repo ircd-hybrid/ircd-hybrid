@@ -516,9 +516,9 @@ list_one_channel(struct Client *source_p, struct Channel *chptr)
 
   if (dlink_list_length(&chptr->members) < lt->users_min ||
       dlink_list_length(&chptr->members) > lt->users_max ||
-      (chptr->creationtime != 0 &&
-       ((unsigned int)chptr->creationtime < lt->created_min ||
-        (unsigned int)chptr->creationtime > lt->created_max)) ||
+      (chptr->creation_time != 0 &&
+       ((unsigned int)chptr->creation_time < lt->created_min ||
+        (unsigned int)chptr->creation_time > lt->created_max)) ||
       (unsigned int)chptr->topic_time < lt->topicts_min ||
       (chptr->topic_time ? (unsigned int)chptr->topic_time : UINT_MAX) >
       lt->topicts_max)

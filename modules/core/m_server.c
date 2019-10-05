@@ -100,7 +100,7 @@ server_send_tburst(struct Client *client_p, const struct Channel *chptr)
    */
   if (chptr->topic_time)
     sendto_one(client_p, ":%s TBURST %ju %s %ju %s :%s", me.id,
-               chptr->creationtime, chptr->name,
+               chptr->creation_time, chptr->name,
                chptr->topic_time,
                chptr->topic_info,
                chptr->topic);

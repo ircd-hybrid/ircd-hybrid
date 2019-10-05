@@ -119,7 +119,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
 
   newts   = strtoumax(parv[1], NULL, 10);
-  oldts   = chptr->creationtime;
+  oldts   = chptr->creation_time;
   oldmode = &chptr->mode;
 
   if (newts == 0 && isnew == false && oldts)
@@ -133,15 +133,15 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
 
   if (isnew == true)
-    chptr->creationtime = newts;
+    chptr->creation_time = newts;
   else if (newts == 0 || oldts == 0)
-    chptr->creationtime = 0;
+    chptr->creation_time = 0;
   else if (newts == oldts)
     ;
   else if (newts < oldts)
   {
     keep_our_modes = false;
-    chptr->creationtime = newts;
+    chptr->creation_time = newts;
   }
   else
     keep_new_modes = false;
@@ -210,7 +210,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_server(source_p, 0, 0, ":%s JOIN %ju %s +",
-                source_p->id, chptr->creationtime, chptr->name);
+                source_p->id, chptr->creation_time, chptr->name);
   return 0;
 }
 

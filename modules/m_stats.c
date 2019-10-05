@@ -502,7 +502,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
 static void
 stats_dns_servers(struct Client *source_p, int parc, char *parv[])
 {
-  char ipaddr[HOSTIPLEN + 1] = "";
+  char ipaddr[HOSTIPLEN + 1];
 
   for (unsigned int i = 0; i < irc_nscount; ++i)
   {
@@ -740,7 +740,7 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
   /* If unopered, only return matching auth blocks */
   else if (ConfigGeneral.stats_i_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
-    const struct MaskItem *conf = NULL;
+    const struct MaskItem *conf;
 
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
@@ -774,7 +774,7 @@ static void
 report_Klines(struct Client *source_p, int tkline)
 {
   dlink_node *node;
-  char c = '\0';
+  char c;
 
   if (tkline)
     c = 'k';
@@ -811,7 +811,7 @@ stats_tklines(struct Client *source_p, int parc, char *parv[])
   /* If unopered, only return matching klines */
   else if (ConfigGeneral.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
-    const struct MaskItem *conf = NULL;
+    const struct MaskItem *conf;
 
     if (MyConnect(source_p))
       conf = find_conf_by_address(source_p->host,
@@ -845,7 +845,7 @@ stats_klines(struct Client *source_p, int parc, char *parv[])
   /* If unopered, only return matching klines */
   else if (ConfigGeneral.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
   {
-    const struct MaskItem *conf = NULL;
+    const struct MaskItem *conf;
 
     /* Search for a kline */
     if (MyConnect(source_p))
@@ -904,7 +904,7 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
   unsigned int opercount = 0;
-  char buf[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
 
   DLINK_FOREACH(node, oper_list.head)
   {
@@ -1122,7 +1122,6 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
   uintmax_t sendB = 0, recvB = 0;
-  uintmax_t uptime = 0;
 
   if (ConfigServerHide.flatten_links && !HasUMode(source_p, UMODE_OPER))
   {
@@ -1164,8 +1163,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
                      _GMKv(recvB), _GMKs(recvB));
 
-  uptime = (event_base->time.sec_monotonic - me.connection->created_monotonic);
-
+  uintmax_t uptime = (event_base->time.sec_monotonic - me.connection->created_monotonic);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "? :Server send: %7.2f %s (%4.1f KiB/s)",
                      _GMKv((me.connection->send.bytes >> 10)),
@@ -1224,7 +1222,7 @@ stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
   DLINK_FOREACH(node, list->head)
   {
     const struct Client *target_p = node->data;
-    enum addr_mask_type type = 0;
+    enum addr_mask_type type;
 
     if (!doall && wilds && match(name, target_p->name))
       continue;
@@ -1277,7 +1275,7 @@ stats_ltrace(struct Client *source_p, int parc, char *parv[])
 {
   bool doall = false;
   bool wilds = false;
-  const char *name = NULL;
+  const char *name;
 
   if ((name = parse_stats_args(source_p, parc, parv, &doall, &wilds)))
   {

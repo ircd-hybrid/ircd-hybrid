@@ -78,7 +78,7 @@ struct Channel
   char topic[TOPICLEN + 1];
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];
 
-  uintmax_t creationtime;  /**< Real time */
+  uintmax_t creation_time;  /**< Real time */
   uintmax_t topic_time;  /**< Real time */
   uintmax_t last_knock;  /**< Don't allow knock to flood; monotonic time */
   uintmax_t last_invite;  /**< Monotonic time */

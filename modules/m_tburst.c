@@ -86,9 +86,9 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
   bool accept_remote = false;
   if (HasFlag(source_p, FLAGS_SERVICE))
     accept_remote = true;
-  else if (remote_channel_ts < chptr->creationtime)
+  else if (remote_channel_ts < chptr->creation_time)
     accept_remote = true;
-  else if (remote_channel_ts == chptr->creationtime)
+  else if (remote_channel_ts == chptr->creation_time)
     if (remote_topic_ts > chptr->topic_time)
       accept_remote = true;
 

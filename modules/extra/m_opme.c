@@ -102,7 +102,7 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
   AddMemberFlag(member, CHFL_CHANOP);
   sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s MODE %s +o %s",
                        me.name, chptr->name, source_p->name);
-  sendto_server(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, chptr->creationtime,
+  sendto_server(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, chptr->creation_time,
                 chptr->name, source_p->id);
   return 0;
 }

@@ -69,7 +69,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   /* TS is higher, drop it. */
-  if (strtoumax(parv[1], NULL, 10) > chptr->creationtime)
+  if (strtoumax(parv[1], NULL, 10) > chptr->creation_time)
     return 0;
 
   switch (*parv[3])
@@ -141,7 +141,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_server(source_p, 0, 0, ":%s BMASK %ju %s %s :%s",
-                source_p->id, chptr->creationtime, chptr->name,
+                source_p->id, chptr->creation_time, chptr->name,
                 parv[3], parv[4]);
   return 0;
 }

@@ -62,7 +62,7 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
     return 0;
   }
 
-  if (strtoumax(parv[1], NULL, 10) > chptr->creationtime)
+  if (strtoumax(parv[1], NULL, 10) > chptr->creation_time)
     return 0;
 
   channel_mode_set(source_p, chptr, NULL, parc - 3, parv + 3);

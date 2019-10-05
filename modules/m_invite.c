@@ -154,7 +154,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
-                chptr->name, chptr->creationtime);
+                chptr->name, chptr->creation_time);
   return 0;
 }
 
@@ -189,7 +189,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
     return 0;
 
   if (parc > 3 && IsDigit(*parv[3]))
-    if (strtoumax(parv[3], NULL, 10) > chptr->creationtime)
+    if (strtoumax(parv[3], NULL, 10) > chptr->creation_time)
       return 0;
 
   chptr->last_invite = event_base->time.sec_monotonic;
@@ -217,7 +217,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
-                chptr->name, chptr->creationtime);
+                chptr->name, chptr->creation_time);
   return 0;
 }
 

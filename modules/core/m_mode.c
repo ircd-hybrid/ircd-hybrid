@@ -226,7 +226,7 @@ m_mode(struct Client *source_p, int parc, char *parv[])
 
     channel_modes(chptr, source_p, modebuf, parabuf);
     sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS, chptr->name, modebuf, parabuf);
-    sendto_one_numeric(source_p, &me, RPL_CREATIONTIME, chptr->name, chptr->creationtime);
+    sendto_one_numeric(source_p, &me, RPL_CREATIONTIME, chptr->name, chptr->creation_time);
     return 0;
   }
 

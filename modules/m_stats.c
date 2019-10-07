@@ -1288,9 +1288,9 @@ stats_ltrace(struct Client *source_p, int parc, char *parv[])
 
 struct StatsStruct
 {
-  const unsigned char letter;
+  unsigned char letter;
   void (*handler)(struct Client *, int, char *[]);
-  const unsigned int required_modes;
+  unsigned int required_modes;
 };
 
 static const struct StatsStruct *stats_map[256];

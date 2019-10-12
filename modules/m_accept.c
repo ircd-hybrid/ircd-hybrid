@@ -112,7 +112,7 @@ add_accept(const struct split_nuh_item *nuh, struct Client *source_p)
  *      - parv[0] = command
  *      - parv[1] = comma-separated list of masks to be accepted or removed
  */
-static int
+static void
 m_accept(struct Client *source_p, int parc, char *parv[])
 {
   struct split_nuh_item nuh;
@@ -126,7 +126,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(mask) || strcmp(mask, "*") == 0)
   {
     list_accepts(source_p);
-    return 0;
+    return;
   }
 
   for (mask = strtok_r(mask, ",", &p); mask;
@@ -158,7 +158,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
       if (dlink_list_length(&source_p->connection->acceptlist) >= ConfigGeneral.max_accept)
       {
         sendto_one_numeric(source_p, &me, ERR_ACCEPTFULL);
-        return 0;
+        return;
       }
 
       nuh.nuhmask  = mask;
@@ -181,8 +181,6 @@ m_accept(struct Client *source_p, int parc, char *parv[])
       add_accept(&nuh, source_p);
     }
   }
-
-  return 0;
 }
 
 static struct Message accept_msgtab =

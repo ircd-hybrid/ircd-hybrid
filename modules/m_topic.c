@@ -52,7 +52,7 @@
  *      - parv[1] = channel name
  *      - parv[2] = topic text, if setting topic (can be an empty string)
  */
-static int
+static void
 m_topic(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
@@ -60,13 +60,13 @@ m_topic(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "TOPIC");
-    return 0;
+    return;
   }
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
-    return 0;
+    return;
   }
 
   /* setting topic */
@@ -77,7 +77,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
     if ((member = find_channel_link(source_p, chptr)) == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
-      return 0;
+      return;
     }
 
     if (!HasCMode(chptr, MODE_TOPICLIMIT) ||
@@ -119,8 +119,6 @@ m_topic(struct Client *source_p, int parc, char *parv[])
     else
       sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
   }
-
-  return 0;
 }
 
 
@@ -136,7 +134,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = channel name
  *      - parv[2] = topic text (can be an empty string)
  */
-static int
+static void
 ms_topic(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
@@ -145,13 +143,13 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
   if (parc < 3)
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "TOPIC");
-    return 0;
+    return;
   }
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
-    return 0;
+    return;
   }
 
   if (IsClient(source_p))
@@ -178,10 +176,7 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
     sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :%s",
                          (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
                          chptr->name, chptr->topic);
-
-  return 0;
 }
-
 
 static struct Message topic_msgtab =
 {

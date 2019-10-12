@@ -57,15 +57,13 @@ static void remove_a_mode(struct Channel *, struct Client *, int, const char);
  *      - parv[1] = channel
  *      - parv[2] = channel password (key)
  */
-static int
+static void
 m_join(struct Client *source_p, int parc, char *parv[])
 {
   if (EmptyString(parv[1]))
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "JOIN");
   else
     channel_do_join(source_p, parv[1], parv[2]);
-
-  return 0;
 }
 
 /* ms_join()
@@ -81,7 +79,7 @@ m_join(struct Client *source_p, int parc, char *parv[])
  *		  here, the initial code is in to take an extra parameter
  *		  and use it for the TimeStamp on a new channel.
  */
-static int
+static void
 ms_join(struct Client *source_p, int parc, char *parv[])
 {
   uintmax_t newts = 0;
@@ -96,17 +94,17 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   char parabuf[MODEBUFLEN];
 
   if (!IsClient(source_p))
-    return 0;
+    return;
 
   if (parc < 4)
-    return 0;
+    return;
 
   if (channel_check_name(parv[2], false) == false)
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
                          source_p->name, source_p->from->name, parv[2]);
-    return 0;
+    return;
   }
 
   mode.mode = mode.limit = 0;
@@ -211,7 +209,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(source_p, 0, 0, ":%s JOIN %ju %s +",
                 source_p->id, chptr->creation_time, chptr->name);
-  return 0;
 }
 
 /* set_final_mode

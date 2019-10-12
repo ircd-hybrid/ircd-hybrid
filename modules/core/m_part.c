@@ -51,15 +51,13 @@
  *      - parv[1] = channel name
  *      - parv[2] = part message
  */
-static int
+static void
 m_part(struct Client *source_p, int parc, char *parv[])
 {
   if (EmptyString(parv[1]))
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "PART");
   else
     channel_do_part(source_p, parv[1], parv[2]);
-
-  return 0;
 }
 
 static struct Message part_msgtab =

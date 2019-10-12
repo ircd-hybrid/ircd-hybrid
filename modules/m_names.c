@@ -48,7 +48,7 @@
  *      - parv[0] = command
  *      - parv[1] = channel name
  */
-static int
+static void
 m_names(struct Client *source_p, int parc, char *parv[])
 {
   const char *const para = parc > 1 ? parv[1] : NULL;
@@ -63,8 +63,6 @@ m_names(struct Client *source_p, int parc, char *parv[])
   }
   else
     sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, "*");
-
-  return 0;
 }
 
 static struct Message names_msgtab =

@@ -94,7 +94,7 @@ xline_remove(struct Client *source_p, const struct aline_ctx *aline)
  *      - parv[2] = "ON"
  *      - parv[3] = target server
  */
-static int
+static void
 mo_unxline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = false, .simple_mask = true };
@@ -102,11 +102,11 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_UNXLINE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "unxline");
-    return 0;
+    return;
   }
 
   if (parse_aline("UNXLINE", source_p, parc, parv, &aline) == false)
-    return 0;
+    return;
 
   if (aline.server)
   {
@@ -115,13 +115,12 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
 
     /* Allow ON to apply local unxline as well if it matches */
     if (match(aline.server, me.name))
-      return 0;
+      return;
   }
   else
     cluster_distribute(source_p, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s", aline.host);
 
   xline_remove(source_p, &aline);
-  return 0;
 }
 
 /*! \brief UNXLINE command handler
@@ -136,7 +135,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = target server mask
  *      - parv[2] = gecos
  */
-static int
+static void
 ms_unxline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline =
@@ -148,19 +147,18 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
   };
 
   if (parc != 3 || EmptyString(parv[parc - 1]))
-    return 0;
+    return;
 
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
                      aline.server, aline.mask);
 
   if (match(aline.server, me.name))
-    return 0;
+    return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_UNXLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
     xline_remove(source_p, &aline);
-  return 0;
 }
 
 static struct Message unxline_msgtab =

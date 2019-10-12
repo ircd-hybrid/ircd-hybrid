@@ -612,7 +612,7 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
  *      - parv[0] = command
  *      - parv[1] = nickname
  */
-static int
+static void
 mr_nick(struct Client *source_p, int parc, char *parv[])
 {
   char nick[NICKLEN + 1] = "";
@@ -620,7 +620,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
-    return 0;
+    return;
   }
 
   /* Copy the nick and terminate it */
@@ -630,7 +630,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   if (valid_nickname(nick, true) == false)
   {
     sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, parv[1], "Erroneous Nickname");
-    return 0;
+    return;
   }
 
   /* Check if the nick is resv'd */
@@ -641,7 +641,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Forbidding reserved nick %s from user %s",
                          nick, client_get_name(source_p, HIDE_IP));
-    return 0;
+    return;
   }
 
   struct Client *target_p;
@@ -649,8 +649,6 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
     set_initial_nick(source_p, nick);
   else
     sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, target_p->name);
-
-  return 0;
 }
 
 /*! \brief NICK command handler
@@ -664,7 +662,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = nickname
  */
-static int
+static void
 m_nick(struct Client *source_p, int parc, char *parv[])
 {
   char nick[NICKLEN + 1] = "";
@@ -675,7 +673,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
-    return 0;
+    return;
   }
 
   /* Terminate nick to NICKLEN */
@@ -685,7 +683,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   if (valid_nickname(nick, true) == false)
   {
     sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, "Erroneous Nickname");
-    return 0;
+    return;
   }
 
   if (!HasFlag(source_p, FLAGS_EXEMPTRESV) &&
@@ -696,7 +694,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Forbidding reserved nick %s from user %s",
                          nick, client_get_name(source_p, HIDE_IP));
-    return 0;
+    return;
   }
 
   dlink_node *node;
@@ -709,7 +707,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
       if (has_member_flags(member, CHFL_CHANOP | CHFL_HALFOP) == 0)
       {
         sendto_one_numeric(source_p, &me, ERR_NONICKCHANGE, member->chptr->name);
-        return 0;
+        return;
       }
     }
   }
@@ -739,8 +737,6 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   }
   else
     sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, target_p->name);
-
-  return 0;
 }
 
 /*! \brief NICK command handler
@@ -757,17 +753,17 @@ m_nick(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = nickname
  *      - parv[2] = timestamp
  */
-static int
+static void
 ms_nick(struct Client *source_p, int parc, char *parv[])
 {
   if (parc != 3 || EmptyString(parv[parc - 1]))
-    return 0;
+    return;
 
   if (!IsClient(source_p))
-    return 0;  /* Servers and unknown clients can't change nicks.. */
+    return;  /* Servers and unknown clients can't change nicks.. */
 
   if (check_clean_nick(source_p, parv[1]))
-    return 0;
+    return;
 
   /* If the nick doesn't exist, allow it and process like normal */
   struct Client *target_p;
@@ -786,7 +782,6 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
   }
   else if (perform_nick_change_collides(source_p, target_p, parc, parv) == true)
     change_remote_nick(source_p, parv);
-  return 0;
 }
 
 /*! \brief UID command handler
@@ -823,7 +818,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
  *      - parv[10] = services id (account name)
  *      - parv[11] = ircname (gecos)
  */
-static int
+static void
 ms_uid(struct Client *source_p, int parc, char *parv[])
 {
   /* TBR: compatibility mode */
@@ -833,11 +828,11 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
       check_clean_user(source_p, parv[1], parv[5]) ||
       check_clean_host(source_p, parv[1], parv[6]) ||
       check_clean_uid(source_p, parv[1], parv[8 + does_rhost]))
-    return 0;
+    return;
 
   /* TBR: compatibility mode */
   if (does_rhost && check_clean_host(source_p, parv[1], parv[7]))
-    return 0;
+    return;
 
   /*
    * If there is an ID collision, kill our client, and kill theirs.
@@ -858,7 +853,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
     ++ServerStats.is_kill;
     AddFlag(target_p, FLAGS_KILLED);
     exit_client(target_p, "ID Collision");
-    return 0;
+    return;
   }
 
   if ((target_p = hash_find_client(parv[1])) == NULL)
@@ -870,7 +865,6 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
   }
   else if (perform_uid_introduction_collides(source_p, target_p, parc, parv) == true)
     uid_from_server(source_p, parc, parv);
-  return 0;
 }
 
 static struct Message nick_msgtab =

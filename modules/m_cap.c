@@ -380,14 +380,14 @@ subcmd_search(const char *cmd, const struct subcmd *elem)
  *      - parv[1] = CAP subcommand
  *      - parv[2] = space-separated list of capabilities
  */
-static int
+static void
 m_cap(struct Client *source_p, int parc, char *parv[])
 {
   const char *subcmd = NULL, *caplist = NULL;
   struct subcmd *cmd = NULL;
 
   if (EmptyString(parv[1]))  /* A subcommand is required */
-    return 0;
+    return;
 
   subcmd = parv[1];
 
@@ -400,13 +400,12 @@ m_cap(struct Client *source_p, int parc, char *parv[])
                       sizeof(struct subcmd), (bqcmp)subcmd_search)))
   {
     sendto_one_numeric(source_p, &me, ERR_INVALIDCAPCMD, subcmd);
-    return 0;
+    return;
   }
 
   /* Then execute it... */
   if (cmd->proc)
     (cmd->proc)(source_p, caplist);
-  return 0;
 }
 
 static struct Message cap_msgtab =

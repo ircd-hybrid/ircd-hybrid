@@ -47,19 +47,19 @@
  *      - parv[2] = TS
  *      - parv[3] = host name
  */
-static int
+static void
 ms_svshost(struct Client *source_p, int parc, char *parv[])
 {
   if (!HasFlag(source_p, FLAGS_SERVICE))
-    return 0;
+    return;
 
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
-    return 0;
+    return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
   if (ts && (ts != target_p->tsinfo))
-    return 0;
+    return;
 
   if (valid_hostname(parv[3]) == true)
     user_set_hostmask(target_p, parv[3]);
@@ -67,7 +67,6 @@ ms_svshost(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, 0, 0, ":%s SVSHOST %s %ju %s",
                 source_p->id,
                 target_p->id, target_p->tsinfo, parv[3]);
-  return 0;
 }
 
 static struct Message svshost_msgtab =

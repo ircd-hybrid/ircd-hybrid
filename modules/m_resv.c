@@ -111,7 +111,7 @@ resv_handle(struct Client *source_p, const struct aline_ctx *aline)
  *   parv[0] = command
  *   parv[1] = channel/nick to forbid
  */
-static int
+static void
 mo_resv(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = true, .simple_mask = true };
@@ -119,11 +119,11 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_RESV))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "resv");
-    return 0;
+    return;
   }
 
   if (parse_aline("RESV", source_p, parc, parv, &aline) == false)
-    return 0;
+    return;
 
   if (aline.server)
   {
@@ -132,14 +132,13 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
 
     /* Allow ON to apply local resv as well if it matches */
     if (match(aline.server, me.name))
-      return 0;
+      return;
   }
   else
     cluster_distribute(source_p, "RESV", CAPAB_KLN, CLUSTER_RESV, "%ju %s :%s",
                        aline.duration, aline.mask, aline.reason);
 
   resv_handle(source_p, &aline);
-  return 0;
 }
 
 /*! \brief RESV command handler
@@ -156,7 +155,7 @@ mo_resv(struct Client *source_p, int parc, char *parv[])
  *      - parv[3] = name mask
  *      - parv[4] = reason
  */
-static int
+static void
 ms_resv(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline =
@@ -170,19 +169,18 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
   };
 
   if (parc != 5 || EmptyString(parv[parc - 1]))
-    return 0;
+    return;
 
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "RESV %s %ju %s :%s",
                      aline.server, aline.duration, aline.mask, aline.reason);
 
   if (match(aline.server, me.name))
-    return 0;
+    return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_RESV, source_p->servptr->name,
                   source_p->username, source_p->host))
     resv_handle(source_p, &aline);
-  return 0;
 }
 
 static struct Message resv_msgtab =

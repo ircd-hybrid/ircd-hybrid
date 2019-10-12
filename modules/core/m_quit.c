@@ -45,7 +45,7 @@
  *      - parv[0] = command
  *      - parv[1] = quit message
  */
-static int
+static void
 m_quit(struct Client *source_p, int parc, char *parv[])
 {
   char reason[KICKLEN + 1] = "Quit: ";
@@ -56,7 +56,6 @@ m_quit(struct Client *source_p, int parc, char *parv[])
     strlcpy(reason + 6, parv[1], sizeof(reason) - 6);
 
   exit_client(source_p, reason);
-  return 0;
 }
 
 /*! \brief QUIT command handler
@@ -70,7 +69,7 @@ m_quit(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = quit message
  */
-static int
+static void
 ms_quit(struct Client *source_p, int parc, char *parv[])
 {
   char reason[KICKLEN + 1] = "";
@@ -79,7 +78,6 @@ ms_quit(struct Client *source_p, int parc, char *parv[])
     strlcpy(reason, parv[1], sizeof(reason));
 
   exit_client(source_p, reason);
-  return 0;
 }
 
 static struct Message quit_msgtab =

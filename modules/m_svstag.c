@@ -50,19 +50,19 @@
  *      - parv[4] = required user mode(s) to see the tag
  *      - parv[5] = tag line
  */
-static int
+static void
 ms_svstag(struct Client *source_p, int parc, char *parv[])
 {
   if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
-    return 0;
+    return;
 
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
-    return 0;
+    return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
   if (ts && (ts != target_p->tsinfo))
-    return 0;
+    return;
 
   if (strncmp(parv[3], "-", 1) == 0)
   {
@@ -71,11 +71,11 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
     sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s",
                   source_p->id,
                   target_p->id, target_p->tsinfo, parv[3]);
-    return 0;
+    return;
   }
 
   if (parc < 6 || EmptyString(parv[5]))
-    return 0;
+    return;
 
   svstag_attach(&target_p->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
 
@@ -83,7 +83,6 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
                 source_p->id,
                 target_p->id, target_p->tsinfo,
                 parv[3], parv[4], parv[5]);
-  return 0;
 }
 
 static struct Message svstag_msgtab =

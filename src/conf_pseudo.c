@@ -48,7 +48,7 @@ pseudo_get_list(void)
   return &pseudo_list;
 }
 
-static int
+static void
 pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE] = "";
@@ -60,7 +60,7 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
   if (parc < 3 || EmptyString(msg))
   {
     sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
-    return 0;
+    return;
   }
 
   if (pseudo->prepend)
@@ -76,8 +76,6 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
     sendto_one(target_p, ":%s PRIVMSG %s :%s", source_p->id, target_p->id, msg);
   else
     sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, pseudo->name);
-
-  return 0;
 }
 
 void

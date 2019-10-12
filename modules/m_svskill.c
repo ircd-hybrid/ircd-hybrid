@@ -48,31 +48,31 @@
  *      - parv[2] = timestamp
  *      - parv[3] = kill message
  */
-static int
+static void
 ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
   const char *comment = parv[3];  /* Either defined or NULL */
   char reason[REASONLEN + 1] = "SVSKilled: ";
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
-    return 0;
+    return;
 
   if (EmptyString(comment))
     comment = CONF_NOREASON;
 
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
-    return 0;
+    return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
   if (ts && (ts != target_p->tsinfo))
-    return 0;
+    return;
 
   if (MyConnect(target_p))
   {
     strlcpy(reason + 11, comment, sizeof(reason) - 11);
     exit_client(target_p, reason);
-    return 0;
+    return;
   }
 
   if (target_p->from == source_p->from)
@@ -82,12 +82,11 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
                          "for %s (behind %s) from %s",
                          target_p->name, source_p->from->name,
                          client_get_name(source_p, HIDE_IP));
-    return 0;
+    return;
   }
 
   sendto_one(target_p, ":%s SVSKILL %s %ju :%s", source_p->id,
              target_p->id, ts, comment);
-  return 0;
 }
 
 static struct Message svskill_msgtab =

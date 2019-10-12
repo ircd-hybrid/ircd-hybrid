@@ -145,7 +145,7 @@ xline_handle(struct Client *source_p, const struct aline_ctx *aline)
  * side effects - x line is added
  *
  */
-static int
+static void
 mo_xline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = true, .simple_mask = true };
@@ -153,11 +153,11 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_XLINE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "xline");
-    return 0;
+    return;
   }
 
   if (parse_aline("XLINE", source_p, parc, parv, &aline) == false)
-    return 0;
+    return;
 
   if (aline.server)
   {
@@ -166,14 +166,13 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
 
     /* Allow ON to apply local xline as well if it matches */
     if (match(aline.server, me.name))
-      return 0;
+      return;
   }
   else
     cluster_distribute(source_p, "XLINE", CAPAB_CLUSTER, CLUSTER_XLINE, "%s %ju :%s",
                        aline.mask, aline.mask, aline.reason);
 
   xline_handle(source_p, &aline);
-  return 0;
 }
 
 /*! \brief XLINE command handler
@@ -190,7 +189,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
  *      - parv[3] = duration in seconds
  *      - parv[4] = reason
  */
-static int
+static void
 ms_xline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline =
@@ -204,20 +203,18 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
   };
 
   if (parc != 5 || EmptyString(parv[parc - 1]))
-    return 0;
+    return;
 
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
                      aline.server, aline.mask, aline.duration, aline.reason);
 
   if (match(aline.server, me.name))
-    return 0;
+    return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_XLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
     xline_handle(source_p, &aline);
-
-  return 0;
 }
 
 static struct Message xline_msgtab =

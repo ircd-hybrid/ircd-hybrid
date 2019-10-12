@@ -50,13 +50,13 @@
  *      - parv[1] = origin
  *      - parv[2] = destination
  */
-static int
+static void
 ms_pong(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
-    return 0;
+    return;
   }
 
   const char *const destination = parv[2];
@@ -74,8 +74,6 @@ ms_pong(struct Client *source_p, int parc, char *parv[])
     else if (!IsDigit(*destination))
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
   }
-
-  return 0;
 }
 
 /*! \brief PONG command handler
@@ -89,7 +87,7 @@ ms_pong(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = origin/ping cookie
  */
-static int
+static void
 mr_pong(struct Client *source_p, int parc, char *parv[])
 {
   assert(MyConnect(source_p));
@@ -114,8 +112,6 @@ mr_pong(struct Client *source_p, int parc, char *parv[])
   }
   else
     sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
-
-  return 0;
 }
 
 static struct Message pong_msgtab =

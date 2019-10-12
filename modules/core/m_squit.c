@@ -51,7 +51,7 @@
  *      - parv[1] = server name
  *      - parv[2] = comment
  */
-static int
+static void
 mo_squit(struct Client *source_p, int parc, char *parv[])
 {
   char comment[REASONLEN + 1] = "";
@@ -61,7 +61,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "SQUIT");
-    return 0;
+    return;
   }
 
   /* The following allows wild cards in SQUIT. */
@@ -83,19 +83,19 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   if (target_p == NULL || IsMe(target_p))
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server);
-    return 0;
+    return;
   }
 
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT_REMOTE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "squit:remote");
-    return 0;
+    return;
   }
 
   if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "squit");
-    return 0;
+    return;
   }
 
   if (EmptyString(parv[2]))
@@ -126,7 +126,6 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   AddFlag(target_p, FLAGS_SQUIT);
 
   exit_client(target_p, comment);
-  return 0;
 }
 
 /*! \brief SQUIT command handler
@@ -141,20 +140,20 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = server name
  *      - parv[2] = comment
  */
-static int
+static void
 ms_squit(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
   const char *comment = NULL;
 
   if (parc < 2 || EmptyString(parv[1]))
-    return 0;
+    return;
 
   if ((target_p = hash_find_server(parv[1])) == NULL)
-    return 0;
+    return;
 
   if (!IsServer(target_p) && !IsMe(target_p))
-    return 0;
+    return;
 
   if (IsMe(target_p))
     target_p = source_p->from;
@@ -194,7 +193,6 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
   AddFlag(target_p, FLAGS_SQUIT);
 
   exit_client(target_p, comment);
-  return 0;
 }
 
 static struct Message squit_msgtab =

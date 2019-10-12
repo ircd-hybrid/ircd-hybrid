@@ -439,7 +439,7 @@ server_check(const char *name, struct Client *client_p)
  *  parv[4] = string of flags starting with '+'
  *  parv[5] = serverinfo
  */
-static int
+static void
 mr_server(struct Client *source_p, int parc, char *parv[])
 {
   const char *name = parv[1];
@@ -450,7 +450,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[parc - 1]))
   {
     exit_client(source_p, "No server description supplied");
-    return 0;
+    return;
   }
 
   if (server_valid_name(name) == false)
@@ -462,7 +462,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
           "Unauthorized server connection attempt from %s: Bogus server name "
           "for server %s", client_get_name(source_p, MASK_IP), name);
     exit_client(source_p, "Bogus server name");
-    return 0;
+    return;
   }
 
   if (valid_sid(sid) == false)
@@ -474,7 +474,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server ID %s",
                          client_get_name(source_p, MASK_IP), sid);
     exit_client(source_p, "Bogus server ID introduced");
-    return 0;
+    return;
   }
 
   if (IsHandshake(source_p) && irccmp(source_p->name, name))
@@ -486,7 +486,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with mismatching server name %s",
                          client_get_name(source_p, MASK_IP), name);
     exit_client(source_p, "Mismatching server name introduced");
-    return 0;
+    return;
   }
 
   /*
@@ -523,7 +523,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     }
 
     exit_client(source_p, error);
-    return 0;
+    return;
   }
 
   struct Client *target_p;
@@ -546,7 +546,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
                          "Attempt to re-introduce server %s from %s",
                          name, client_get_name(source_p, MASK_IP));
     exit_client(source_p, "Server already exists");
-    return 0;
+    return;
   }
 
   if ((target_p = hash_find_id(source_p->id)))
@@ -560,7 +560,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
                          name, source_p->id,
                          client_get_name(source_p, MASK_IP));
     exit_client(source_p, "Server ID already exists");
-    return 0;
+    return;
   }
 
   /* XXX If somehow there is a connect in progress and
@@ -587,7 +587,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 
   source_p->hopcount = atoi(parv[2]);
   server_estab(source_p);
-  return 0;
 }
 
 /* ms_sid()
@@ -605,17 +604,17 @@ mr_server(struct Client *source_p, int parc, char *parv[])
  *  parv[4] = string of flags starting with '+'
  *  parv[5] = serverinfo
  */
-static int
+static void
 ms_sid(struct Client *source_p, int parc, char *parv[])
 {
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
-    return 0;
+    return;
 
   if (EmptyString(parv[parc - 1]))
   {
     exit_client(source_p->from, "No server description supplied");
-    return 0;
+    return;
   }
 
   if (server_valid_name(parv[1]) == false)
@@ -627,7 +626,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server name %s",
                          client_get_name(source_p->from, MASK_IP), parv[1]);
     exit_client(source_p->from, "Bogus server name introduced");
-    return 0;
+    return;
   }
 
   if (valid_sid(parv[3]) == false)
@@ -639,7 +638,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced server with bogus server ID %s",
                          client_get_name(source_p->from, MASK_IP), parv[3]);
     exit_client(source_p->from, "Bogus server ID introduced");
-    return 0;
+    return;
   }
 
   /* collision on SID? */
@@ -653,7 +652,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s cancelled, server ID %s already exists",
                          client_get_name(source_p->from, MASK_IP), parv[3]);
     exit_client(source_p->from, "Link cancelled, server ID already exists");
-    return 0;
+    return;
   }
 
   /* collision on name? */
@@ -666,7 +665,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s cancelled, server %s already exists",
                          client_get_name(source_p->from, MASK_IP), parv[1]);
     exit_client(source_p->from, "Server exists");
-    return 0;
+    return;
   }
 
   /* XXX If somehow there is a connect in progress and
@@ -738,7 +737,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Non-Hub link %s introduced %s.",
                          client_get_name(source_p->from, MASK_IP), parv[1]);
     exit_client(source_p, "No matching hub_mask.");
-    return 0;
+    return;
   }
 
   /* Check for the new server being leafed behind this HUB */
@@ -752,7 +751,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                          "Link %s introduced leafed server %s.",
                          client_get_name(source_p->from, MASK_IP), parv[1]);
     exit_client(source_p->from, "Leafed server.");
-    return 0;
+    return;
   }
 
   target_p = client_make(source_p->from);
@@ -788,7 +787,6 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
                        "Server %s being introduced by %s",
                        target_p->name, source_p->name);
-  return 0;
 }
 
 static struct Message server_msgtab =

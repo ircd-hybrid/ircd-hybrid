@@ -46,7 +46,7 @@
  *      - parv[0] = command
  *      - parv[1] = message text
  */
-static int
+static void
 mo_wallops(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
@@ -54,18 +54,17 @@ mo_wallops(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_WALLOPS))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "wallops");
-    return 0;
+    return;
   }
 
   if (EmptyString(message))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "WALLOPS");
-    return 0;
+    return;
   }
 
   sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
   sendto_server(source_p, 0, 0, ":%s WALLOPS :%s", source_p->id, message);
-  return 0;
 }
 
 /*! \brief WALLOPS command handler
@@ -79,17 +78,16 @@ mo_wallops(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = message text
  */
-static int
+static void
 ms_wallops(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
   if (EmptyString(message))
-    return 0;
+    return;
 
   sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
   sendto_server(source_p, 0, 0, ":%s WALLOPS :%s", source_p->id, message);
-  return 0;
 }
 
 static struct Message wallops_msgtab =

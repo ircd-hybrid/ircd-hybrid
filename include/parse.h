@@ -85,7 +85,7 @@ struct Message
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
    */
-  int (*handlers[LAST_HANDLER_TYPE])(struct Client *, int, char *[]);
+  void (*handlers[LAST_HANDLER_TYPE])(struct Client *, int, char *[]);
 };
 
 #define MAXPARA    15
@@ -103,8 +103,8 @@ extern struct Message *find_command(const char *);
 extern void report_messages(struct Client *);
 
 /* generic handlers */
-extern int m_ignore(struct Client *, int, char *[]);
-extern int m_not_oper(struct Client *, int, char *[]);
-extern int m_registered(struct Client *, int, char *[]);
-extern int m_unregistered(struct Client *, int, char *[]);
+extern void m_ignore(struct Client *, int, char *[]);
+extern void m_not_oper(struct Client *, int, char *[]);
+extern void m_registered(struct Client *, int, char *[]);
+extern void m_unregistered(struct Client *, int, char *[]);
 #endif  /* INCLUDED_parse_h */

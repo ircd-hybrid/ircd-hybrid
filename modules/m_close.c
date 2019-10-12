@@ -44,7 +44,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  */
-static int
+static void
 mo_close(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node, *node_next;
@@ -53,7 +53,7 @@ mo_close(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_CLOSE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "close");
-    return 0;
+    return;
   }
 
   DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
@@ -72,7 +72,6 @@ mo_close(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_one_numeric(source_p, &me, RPL_CLOSEEND, closed);
-  return 0;
 }
 
 static struct Message close_msgtab =

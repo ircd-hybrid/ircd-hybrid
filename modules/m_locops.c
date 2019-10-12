@@ -49,7 +49,7 @@
  *      - parv[0] = command
  *      - parv[1] = message text
  */
-static int
+static void
 mo_locops(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
@@ -57,19 +57,18 @@ mo_locops(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_LOCOPS))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "locops");
-    return 0;
+    return;
   }
 
   if (EmptyString(message))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "LOCOPS");
-    return 0;
+    return;
   }
 
   sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
                        source_p->name, message);
   cluster_distribute(source_p, "LOCOPS", 0, CLUSTER_LOCOPS, message);
-  return 0;
 }
 
 /*! \brief LOCOPS command handler
@@ -84,25 +83,24 @@ mo_locops(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = target server
  *      - parv[2] = message text
  */
-static int
+static void
 ms_locops(struct Client *source_p, int parc, char *parv[])
 {
   const char *const targets = parv[1];
   const char *const message = parv[2];
 
   if (parc != 3 || EmptyString(message))
-    return 0;
+    return;
 
   sendto_match_servs(source_p, targets, CAPAB_CLUSTER, "LOCOPS %s :%s",
                      targets, message);
 
   if (match(targets, me.name))
-    return 0;
+    return;
 
   if (shared_find(SHARED_LOCOPS, source_p->servptr->name, "*", "*"))
     sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
                          source_p->name, message);
-  return 0;
 }
 
 static struct Message locops_msgtab =

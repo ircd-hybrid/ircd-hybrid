@@ -53,7 +53,7 @@
  *      - parv[3] = mode
  *      - parv[4] = optional argument (services account, vhost)
  */
-static int
+static void
 ms_svsmode(struct Client *source_p, int parc, char *parv[])
 {
   const struct user_modes *tab = NULL;
@@ -63,17 +63,17 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   const char *modes = NULL, *extarg = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
-    return 0;
+    return;
 
   modes  = parv[3];
   extarg = (parc > 4) ? parv[4] : NULL;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
-    return 0;
+    return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
   if (ts && (ts != target_p->tsinfo))
-    return 0;
+    return;
 
   setmodes = target_p->umodes;
 
@@ -172,8 +172,6 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
     send_umode(target_p, true, setmodes, modebuf);
   }
-
-  return 0;
 }
 
 static struct Message svsmode_msgtab =

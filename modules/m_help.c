@@ -121,7 +121,7 @@ do_help(struct Client *source_p, char *topic)
  *      - parv[0] = command
  *      - parv[1] = help topic
  */
-static int
+static void
 m_help(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
@@ -129,13 +129,12 @@ m_help(struct Client *source_p, int parc, char *parv[])
   if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "HELP");
-    return 0;
+    return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   do_help(source_p, parv[1]);
-  return 0;
 }
 
 /*! \brief HELP command handler
@@ -149,11 +148,10 @@ m_help(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = help topic
  */
-static int
+static void
 mo_help(struct Client *source_p, int parc, char *parv[])
 {
   do_help(source_p, parv[1]);
-  return 0;
 }
 
 static struct Message help_msgtab =

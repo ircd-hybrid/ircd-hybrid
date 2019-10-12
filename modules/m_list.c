@@ -175,11 +175,10 @@ do_list(struct Client *source_p, char *arg)
  *      - parv[0] = command
  *      - parv[1] = channel name/list options
  */
-static int
+static void
 m_list(struct Client *source_p, int parc, char *parv[])
 {
   do_list(source_p, parv[1]);
-  return 0;
 }
 
 static struct Message list_msgtab =

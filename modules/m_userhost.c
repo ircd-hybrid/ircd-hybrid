@@ -45,7 +45,7 @@
  *      - parv[0] = command
  *      - parv[1] = space-separated list of up to 5 nicknames
  */
-static int
+static void
 m_userhost(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
@@ -102,7 +102,6 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_one(source_p, "%s", buf);
-  return 0;
 }
 
 static struct Message userhost_msgtab =

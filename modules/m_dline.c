@@ -180,7 +180,7 @@ dline_handle(struct Client *source_p, const struct aline_ctx *aline)
  * side effects - D line is added
  *
  */
-static int
+static void
 mo_dline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = true, .simple_mask = false };
@@ -188,11 +188,11 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_DLINE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "dline");
-    return 0;
+    return;
   }
 
   if (parse_aline("DLINE", source_p, parc, parv, &aline) == false)
-    return 0;
+    return;
 
   if (aline.server)
   {
@@ -201,14 +201,13 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
 
     /* Allow ON to apply local dline as well if it matches */
     if (match(aline.server, me.name))
-      return 0;
+      return;
   }
   else
     cluster_distribute(source_p, "DLINE", CAPAB_DLN, CLUSTER_DLINE,
                        "%ju %s :%s", aline.duration, aline.host, aline.reason);
 
   dline_handle(source_p, &aline);
-  return 0;
 }
 
 /*! \brief DLINE command handler
@@ -225,7 +224,7 @@ mo_dline(struct Client *source_p, int parc, char *parv[])
  *      - parv[3] = IP address
  *      - parv[4] = reason
  */
-static int
+static void
 ms_dline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline =
@@ -239,20 +238,18 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
   };
 
   if (parc != 5 || EmptyString(parv[parc - 1]))
-    return 0;
+    return;
 
   sendto_match_servs(source_p, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
                      aline.server, aline.duration, aline.host, aline.reason);
 
   if (match(aline.server, me.name))
-    return 0;
+    return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_DLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
     dline_handle(source_p, &aline);
-
-  return 0;
 }
 
 static struct Message dline_msgtab =

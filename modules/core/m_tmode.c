@@ -49,7 +49,7 @@
  *      - parv[2] = channel name
  *      - parv[3] = modes to be added or removed
  */
-static int
+static void
 ms_tmode(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr;
@@ -59,14 +59,13 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
-    return 0;
+    return;
   }
 
   if (strtoumax(parv[1], NULL, 10) > chptr->creation_time)
-    return 0;
+    return;
 
   channel_mode_set(source_p, chptr, NULL, parc - 3, parv + 3);
-  return 0;
 }
 
 static struct Message tmode_msgtab =

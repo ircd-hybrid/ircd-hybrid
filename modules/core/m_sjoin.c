@@ -59,7 +59,7 @@ static void remove_ban_list(struct Channel *, struct Client *, dlink_list *, cha
  * incoming modes or undo the existing ones or merge them, and JOIN
  * all the specified users while sending JOIN/MODEs to local clients
  */
-static int
+static void
 ms_sjoin(struct Client *source_p, int parc, char *parv[])
 {
   struct Channel *chptr = NULL;
@@ -94,14 +94,14 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   unsigned int pargs = 0;
 
   if (!IsServer(source_p))
-    return 0;
+    return;
 
   if (channel_check_name(parv[2], false) == false)
   {
     sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
                          source_p->name, source_p->from->name, parv[2]);
-    return 0;
+    return;
   }
 
   pargs = 0;
@@ -120,7 +120,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         ++args;
 
         if (parc < 5 + args)
-          return 0;
+          return;
         break;
 
       case 'l':
@@ -128,7 +128,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         ++args;
 
         if (parc < 5 + args)
-          return 0;
+          return;
         break;
 
       default:
@@ -254,7 +254,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Long SJOIN from server: %s(via %s) (ignored)",
                          source_p->name, source_p->from->name);
-    return 0;
+    return;
   }
 
   char *mbuf = modebuf;
@@ -507,14 +507,13 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   if (dlink_list_length(&chptr->members) == 0 && isnew == true)
   {
     channel_free(chptr);
-    return 0;
+    return;
   }
 
   if (*parv[4 + args] == '\0')
-    return 0;
+    return;
 
   sendto_server(source_p, 0, 0, "%s", uid_buf);
-  return 0;
 }
 
 /* set_final_mode

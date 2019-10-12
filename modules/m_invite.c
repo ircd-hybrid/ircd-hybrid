@@ -52,7 +52,7 @@
  *      - parv[1] = user to invite
  *      - parv[2] = channel name
  */
-static int
+static void
 m_invite(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2)
@@ -64,46 +64,46 @@ m_invite(struct Client *source_p, int parc, char *parv[])
                          ((const struct Invite *)node->data)->chptr->name);
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFINVITELIST);
-    return 0;
+    return;
   }
 
   if (parc < 3 || EmptyString(parv[2]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "INVITE");
-    return 0;
+    return;
   }
 
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
-    return 0;
+    return;
   }
 
   struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[2])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
-    return 0;
+    return;
   }
 
   struct Membership *member;
   if ((member = find_channel_link(source_p, chptr)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
-    return 0;
+    return;
   }
 
   if (!has_member_flags(member, CHFL_CHANOP | CHFL_HALFOP))
   {
     sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
-    return 0;
+    return;
   }
 
   if (IsMember(target_p, chptr))
   {
     sendto_one_numeric(source_p, &me, ERR_USERONCHANNEL, target_p->name, chptr->name);
-    return 0;
+    return;
   }
 
   if ((source_p->connection->invite.last_attempt + ConfigChannel.invite_client_time) < event_base->time.sec_monotonic)
@@ -112,13 +112,13 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   if (source_p->connection->invite.count > ConfigChannel.invite_client_count)
   {
     sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->name, "user");
-    return 0;
+    return;
   }
 
   if ((chptr->last_invite + ConfigChannel.invite_delay_channel) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->name, "channel");
-    return 0;
+    return;
   }
 
   source_p->connection->invite.last_attempt = event_base->time.sec_monotonic;
@@ -155,7 +155,6 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
                 chptr->name, chptr->creation_time);
-  return 0;
 }
 
 /*! \brief INVITE command handler
@@ -171,26 +170,26 @@ m_invite(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = channel name
  *      - parv[3] = channel timestamp
  */
-static int
+static void
 ms_invite(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 3 || EmptyString(parv[2]))
-    return 0;
+    return;
 
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
-    return 0;
+    return;
 
   struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[2])) == NULL)
-    return 0;
+    return;
 
   if (IsMember(target_p, chptr))
-    return 0;
+    return;
 
   if (parc > 3 && IsDigit(*parv[3]))
     if (strtoumax(parv[3], NULL, 10) > chptr->creation_time)
-      return 0;
+      return;
 
   chptr->last_invite = event_base->time.sec_monotonic;
 
@@ -218,7 +217,6 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
                 chptr->name, chptr->creation_time);
-  return 0;
 }
 
 

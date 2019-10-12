@@ -43,7 +43,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  */
-static int
+static void
 ms_eob(struct Client *source_p, int parc, char *parv[])
 {
   assert(IsServer(source_p));
@@ -55,8 +55,6 @@ ms_eob(struct Client *source_p, int parc, char *parv[])
 
   AddFlag(source_p, FLAGS_EOB);
   sendto_server(source_p, 0, 0, ":%s EOB", source_p->id);
-
-  return 0;
 }
 
 static struct Message eob_msgtab =

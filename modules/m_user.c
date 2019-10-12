@@ -75,7 +75,7 @@ do_user(struct Client *source_p,
  *      - parv[3] = server host name (ignored)
  *      - parv[4] = user's real name info
  */
-static int
+static void
 mr_user(struct Client *source_p, int parc, char *parv[])
 {
   char *p = NULL;
@@ -83,20 +83,19 @@ mr_user(struct Client *source_p, int parc, char *parv[])
   if (source_p->connection->listener->flags & LISTENER_SERVER)
   {
     exit_client(source_p, "Use a different port");
-    return 0;
+    return;
   }
 
   if (EmptyString(parv[4]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "USER");
-    return 0;
+    return;
   }
 
   if ((p = strchr(parv[1], '@')))
     *p = '\0';
 
   do_user(source_p, parv[1], parv[4]);
-  return 0;
 }
 
 static struct Message user_msgtab =

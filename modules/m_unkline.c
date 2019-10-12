@@ -101,7 +101,7 @@ kline_remove(struct Client *source_p, const struct aline_ctx *aline)
  *      - parv[2] = "ON"
  *      - parv[3] = target server
  */
-static int
+static void
 mo_unkline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = false, .simple_mask = false };
@@ -109,17 +109,17 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_UNKLINE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "unkline");
-    return 0;
+    return;
   }
 
   if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "UNKLINE");
-    return 0;
+    return;
   }
 
   if (parse_aline("UNKLINE", source_p, parc, parv, &aline) == false)
-    return 0;
+    return;
 
   if (aline.server)
   {
@@ -128,14 +128,13 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
 
     /* Allow ON to apply local unkline as well if it matches */
     if (match(aline.server, me.name))
-      return 0;
+      return;
   }
   else
     cluster_distribute(source_p, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE,
                        "%s %s", aline.user, aline.host);
 
   kline_remove(source_p, &aline);
-  return 0;
 }
 
 /*! \brief UNKLINE command handler
@@ -151,7 +150,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = user mask
  *      - parv[3] = host mask
  */
-static int
+static void
 ms_unkline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline =
@@ -164,20 +163,18 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
   };
 
   if (parc != 4 || EmptyString(parv[parc - 1]))
-    return 0;
+    return;
 
   sendto_match_servs(source_p, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
                      aline.server, aline.user, aline.host);
 
   if (match(aline.server, me.name))
-    return 0;
+    return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_UNKLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
     kline_remove(source_p, &aline);
-
-  return 0;
 }
 
 static struct Message unkline_msgtab =

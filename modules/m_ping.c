@@ -49,7 +49,7 @@
  *      - parv[1] = origin
  *      - parv[2] = destination
  */
-static int
+static void
 m_ping(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
@@ -57,7 +57,7 @@ m_ping(struct Client *source_p, int parc, char *parv[])
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
-    return 0;
+    return;
   }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
@@ -65,7 +65,7 @@ m_ping(struct Client *source_p, int parc, char *parv[])
   {
     sendto_one(source_p, ":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, parv[1]);
-    return 0;
+    return;
   }
 
   if (EmptyString(destination) || ((target_p = hash_find_server(destination)) && IsMe(target_p)))
@@ -76,8 +76,6 @@ m_ping(struct Client *source_p, int parc, char *parv[])
                ID_or_name(target_p, target_p));
   else
     sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
-
-  return 0;
 }
 
 /*! \brief PING command handler
@@ -92,7 +90,7 @@ m_ping(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = origin
  *      - parv[2] = destination
  */
-static int
+static void
 ms_ping(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
@@ -100,7 +98,7 @@ ms_ping(struct Client *source_p, int parc, char *parv[])
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
-    return 0;
+    return;
   }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
@@ -116,8 +114,6 @@ ms_ping(struct Client *source_p, int parc, char *parv[])
   }
   else if (!IsDigit(*destination))
     sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
-
-  return 0;
 }
 
 static struct Message ping_msgtab =

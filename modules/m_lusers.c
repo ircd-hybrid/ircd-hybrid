@@ -48,7 +48,7 @@
  *      - parv[1] = ignored
  *      - parv[2] = nickname/servername
  */
-static int
+static void
 m_lusers(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
@@ -56,17 +56,16 @@ m_lusers(struct Client *source_p, int parc, char *parv[])
   if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "LUSERS");
-    return 0;
+    return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s LUSERS %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
-      return 0;
+      return;
 
   show_lusers(source_p);
-  return 0;
 }
 
 /*! \brief LUSERS command handler
@@ -81,14 +80,13 @@ m_lusers(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = ignored
  *      - parv[2] = nickname/servername
  */
-static int
+static void
 ms_lusers(struct Client *source_p, int parc, char *parv[])
 {
   if (server_hunt(source_p, ":%s LUSERS %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
-    return 0;
+    return;
 
   show_lusers(source_p);
-  return 0;
 }
 
 static struct Message lusers_msgtab =

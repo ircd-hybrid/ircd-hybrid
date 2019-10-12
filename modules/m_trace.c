@@ -178,11 +178,10 @@ do_trace(struct Client *source_p, const char *name)
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  */
-static int
+static void
 m_trace(struct Client *source_p, int parc, char *parv[])
 {
   sendto_one_numeric(source_p, &me, RPL_TRACEEND, me.name);
-  return 0;
 }
 
 /*! \brief TRACE command handler
@@ -197,12 +196,12 @@ m_trace(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = nick or server name to trace
  *      - parv[2] = nick or server name to forward the trace to
  */
-static int
+static void
 mo_trace(struct Client *source_p, int parc, char *parv[])
 {
   if (parc > 2)
     if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
-      return 0;
+      return;
 
   const struct server_hunt *hunt = server_hunt(source_p, ":%s TRACE :%s", 1, parc, parv);
   switch (hunt->ret)
@@ -217,8 +216,6 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
     default:
       break;
   }
-
-  return 0;
 }
 
 static struct Message trace_msgtab =

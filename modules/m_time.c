@@ -48,16 +48,15 @@
  *      - parv[0] = command
  *      - parv[1] = nickname/servername
  */
-static int
+static void
 m_time(struct Client *source_p, int parc, char *parv[])
 {
   /* This is safe enough to use during non hidden server mode */
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s TIME :%s", 1, parc, parv)->ret != HUNTED_ISME)
-      return 0;
+      return;
 
   sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
-  return 0;
 }
 
 /*! \brief TIME command handler
@@ -71,14 +70,13 @@ m_time(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = nickname/servername
  */
-static int
+static void
 ms_time(struct Client *source_p, int parc, char *parv[])
 {
   if (server_hunt(source_p, ":%s TIME :%s", 1, parc, parv)->ret != HUNTED_ISME)
-    return 0;
+    return;
 
   sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
-  return 0;
 }
 
 static struct Message time_msgtab =

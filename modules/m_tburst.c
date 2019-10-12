@@ -50,7 +50,7 @@
  *      - parv[4] = topic setter
  *      - parv[5] = topic (can be an empty string)
  */
-static int
+static void
 ms_tburst(struct Client *source_p, int parc, char *parv[])
 {
   uintmax_t remote_channel_ts = strtoumax(parv[1], NULL, 10);
@@ -68,7 +68,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
 
   struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[2])) == NULL)
-    return 0;
+    return;
 
   /*
    * The logic for accepting and rejecting channel topics was
@@ -114,8 +114,6 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
                              chptr->name, chptr->topic);
     }
   }
-
-  return 0;
 }
 
 static struct Message tburst_msgtab =

@@ -764,7 +764,7 @@ send_info_text(struct Client *source_p)
  *      - parv[0] = command
  *      - parv[1] = nickname/servername
  */
-static int
+static void
 m_info(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
@@ -772,17 +772,16 @@ m_info(struct Client *source_p, int parc, char *parv[])
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "INFO");
-    return 0;
+    return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s INFO :%s", 1, parc, parv)->ret != HUNTED_ISME)
-      return 0;
+      return;
 
   send_info_text(source_p);
-  return 0;
 }
 
 /*! \brief INFO command handler
@@ -796,14 +795,13 @@ m_info(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = nickname/servername
  */
-static int
+static void
 ms_info(struct Client *source_p, int parc, char *parv[])
 {
   if (server_hunt(source_p, ":%s INFO :%s", 1, parc, parv)->ret != HUNTED_ISME)
-    return 0;
+    return;
 
   send_info_text(source_p);
-  return 0;
 }
 
 static struct Message info_msgtab =

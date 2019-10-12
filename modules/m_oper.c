@@ -123,7 +123,7 @@ failed_oper_notice(struct Client *source_p, const char *name,
  *      - parv[1] = oper name
  *      - parv[2] = oper password
  */
-static int
+static void
 m_oper(struct Client *source_p, int parc, char *parv[])
 {
   const char *const opername = parv[1];
@@ -132,7 +132,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(password))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "OPER");
-    return 0;
+    return;
   }
 
   struct MaskItem *conf;
@@ -142,14 +142,14 @@ m_oper(struct Client *source_p, int parc, char *parv[])
 
     conf = operator_find(NULL, opername);
     failed_oper_notice(source_p, opername, conf ? "host mismatch" : "no operator {} block");
-    return 0;
+    return;
   }
 
   if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
   {
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
     failed_oper_notice(source_p, opername, "requires SSL/TLS");
-    return 0;
+    return;
   }
 
   if (!EmptyString(conf->certfp))
@@ -158,7 +158,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     {
       sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
       failed_oper_notice(source_p, opername, "client certificate fingerprint mismatch");
-      return 0;
+      return;
     }
   }
 
@@ -168,7 +168,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     {
       sendto_one_notice(source_p, &me, ":Can't attach conf!");
       failed_oper_notice(source_p, opername, "can't attach conf!");
-      return 0;
+      return;
     }
 
     oper_up(source_p, conf);
@@ -178,8 +178,6 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
     failed_oper_notice(source_p, opername, "password mismatch");
   }
-
-  return 0;
 }
 
 /*! \brief OPER command handler
@@ -194,11 +192,10 @@ m_oper(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = oper name
  *      - parv[2] = oper password
  */
-static int
+static void
 mo_oper(struct Client *source_p, int parc, char *parv[])
 {
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
-  return 0;
 }
 
 static struct Message oper_msgtab =

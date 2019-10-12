@@ -143,25 +143,27 @@ do_map(struct Client *source_p)
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  */
-static int
+static void
 m_map(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if (ConfigServerHide.flatten_links)
-    return m_not_oper(source_p, parc, parv);
+  {
+    m_not_oper(source_p, parc, parv);
+    return;
+  }
 
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "MAP");
-    return 0;
+    return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   do_map(source_p);
   sendto_one_numeric(source_p, &me, RPL_MAPEND);
-  return 0;
 }
 
 /*! \brief MAP command handler
@@ -174,12 +176,11 @@ m_map(struct Client *source_p, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  */
-static int
+static void
 mo_map(struct Client *source_p, int parc, char *parv[])
 {
   do_map(source_p);
   sendto_one_numeric(source_p, &me, RPL_MAPEND);
-  return 0;
 }
 
 static struct Message map_msgtab =

@@ -253,7 +253,7 @@ do_whois(struct Client *source_p, const char *name)
  *      - parv[1] = nickname/servername
  *      - parv[2] = nickname
  */
-static int
+static void
 m_whois(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
@@ -261,7 +261,7 @@ m_whois(struct Client *source_p, int parc, char *parv[])
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
-    return 0;
+    return;
   }
 
   if (parc > 2 && !EmptyString(parv[2]))
@@ -270,7 +270,7 @@ m_whois(struct Client *source_p, int parc, char *parv[])
     if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
     {
       sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "WHOIS");
-      return 0;
+      return;
     }
 
     last_used = event_base->time.sec_monotonic;
@@ -284,13 +284,12 @@ m_whois(struct Client *source_p, int parc, char *parv[])
       parv[1] = parv[2];
 
     if (server_hunt(source_p, ":%s WHOIS %s :%s", 1, parc, parv)->ret != HUNTED_ISME)
-      return 0;
+      return;
 
     parv[1] = parv[2];
   }
 
   do_whois(source_p, parv[1]);
-  return 0;
 }
 
 /*! \brief WHOIS command handler
@@ -305,25 +304,24 @@ m_whois(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  *      - parv[2] = nickname
  */
-static int
+static void
 mo_whois(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2 || EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
-    return 0;
+    return;
   }
 
   if (parc > 2 && !EmptyString(parv[2]))
   {
     if (server_hunt(source_p, ":%s WHOIS %s :%s", 1, parc, parv)->ret != HUNTED_ISME)
-      return 0;
+      return;
 
     parv[1] = parv[2];
   }
 
   do_whois(source_p, parv[1]);
-  return 0;
 }
 
 static struct Message whois_msgtab =

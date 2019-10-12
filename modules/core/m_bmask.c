@@ -52,7 +52,7 @@
  *      - parv[3] = type of ban to add ('b' 'I' or 'e')
  *      - parv[4] = space delimited list of masks to add
  */
-static int
+static void
 ms_bmask(struct Client *source_p, int parc, char *parv[])
 {
   char modebuf[IRCD_BUFSIZE] = "";
@@ -66,11 +66,11 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   unsigned int flags = 0;
 
   if ((chptr = hash_find_channel(parv[2])) == NULL)
-    return 0;
+    return;
 
   /* TS is higher, drop it. */
   if (strtoumax(parv[1], NULL, 10) > chptr->creation_time)
-    return 0;
+    return;
 
   switch (*parv[3])
   {
@@ -84,7 +84,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       list = &chptr->invexlist;
       break;
     default:
-      return 0;
+      return;
   }
 
   strlcpy(banbuf, parv[4], sizeof(banbuf));
@@ -143,7 +143,6 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, 0, 0, ":%s BMASK %ju %s %s :%s",
                 source_p->id, chptr->creation_time, chptr->name,
                 parv[3], parv[4]);
-  return 0;
 }
 
 static struct Message bmask_msgtab =

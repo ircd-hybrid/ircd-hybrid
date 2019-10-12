@@ -101,7 +101,7 @@ dline_remove(struct Client *source_p, const struct aline_ctx *aline)
  *      - parv[2] = "ON"
  *      - parv[3] = target server
  */
-static int
+static void
 mo_undline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = false, .simple_mask = false };
@@ -109,17 +109,17 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_UNDLINE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "undline");
-    return 0;
+    return;
   }
 
   if (parc < 2 || EmptyString(parv[parc - 1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "UNDLINE");
-    return 0;
+    return;
   }
 
   if (parse_aline("UNDLINE", source_p, parc, parv, &aline) == false)
-    return 0;
+    return;
 
   if (aline.server)
   {
@@ -128,13 +128,12 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
 
     /* Allow ON to apply local undline as well if it matches */
     if (match(aline.server, me.name))
-      return 0;
+      return;
   }
   else
     cluster_distribute(source_p, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s", aline.host);
 
   dline_remove(source_p, &aline);
-  return 0;
 }
 
 /*! \brief UNDLINE command handler
@@ -149,7 +148,7 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = target server mask
  *      - parv[2] = IP address
  */
-static int
+static void
 ms_undline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline =
@@ -161,20 +160,18 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
   };
 
   if (parc != 3 || EmptyString(parv[parc - 1]))
-    return 0;
+    return;
 
   sendto_match_servs(source_p, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
                      aline.server, aline.host);
 
   if (match(aline.server, me.name))
-    return 0;
+    return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_UNDLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
     dline_remove(source_p, &aline);
-
-  return 0;
 }
 
 static struct Message undline_msgtab =

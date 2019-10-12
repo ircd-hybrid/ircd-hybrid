@@ -46,7 +46,7 @@
  *      - parv[0] = command
  *      - parv[1] = message text
  */
-static int
+static void
 mo_globops(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
@@ -54,19 +54,18 @@ mo_globops(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_GLOBOPS))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "globops");
-    return 0;
+    return;
   }
 
   if (EmptyString(message))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "GLOBOPS");
-    return 0;
+    return;
   }
 
   sendto_server(source_p, 0, 0, ":%s GLOBOPS :%s", source_p->id, message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s",
                        source_p->name, message);
-  return 0;
 }
 
 /*! \brief GLOBOPS command handler
@@ -80,18 +79,17 @@ mo_globops(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = message text
  */
-static int
+static void
 ms_globops(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
   if (EmptyString(message))
-    return 0;
+    return;
 
   sendto_server(source_p, 0, 0, ":%s GLOBOPS :%s", source_p->id, message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s",
                        source_p->name, message);
-  return 0;
 }
 
 static struct Message globops_msgtab =

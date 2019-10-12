@@ -45,7 +45,7 @@
  *      - parv[0] = command
  *      - parv[1] = error message
  */
-static int
+static void
 mr_error(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
@@ -53,7 +53,7 @@ mr_error(struct Client *source_p, int parc, char *parv[])
   assert(MyConnect(source_p));
 
   if (!IsHandshake(source_p) && !IsConnecting(source_p))
-    return 0;
+    return;
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        source_p->name, message);
@@ -64,7 +64,6 @@ mr_error(struct Client *source_p, int parc, char *parv[])
   sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                        "ERROR :from %s -- %s",
                        client_get_name(source_p, MASK_IP), message);
-  return 0;
 }
 
 /*! \brief ERROR command handler
@@ -78,7 +77,7 @@ mr_error(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  *      - parv[1] = error message
  */
-static int
+static void
 ms_error(struct Client *source_p, int parc, char *parv[])
 {
   const char *message = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
@@ -95,7 +94,6 @@ ms_error(struct Client *source_p, int parc, char *parv[])
                          "ERROR :from %s via %s -- %s",
                          source_p->name,
                          client_get_name(source_p->from, MASK_IP), message);
-  return 0;
 }
 
 static struct Message error_msgtab =

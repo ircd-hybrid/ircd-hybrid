@@ -104,13 +104,12 @@ do_away(struct Client *source_p, const char *message)
  *      - parv[0] = command
  *      - parv[1] = away message
  */
-static int
+static void
 m_away(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
   do_away(source_p, message);
-  return 0;
 }
 
 static struct Message away_msgtab =

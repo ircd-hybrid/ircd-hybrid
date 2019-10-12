@@ -592,7 +592,7 @@ m_message(bool notice, struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static int
+static void
 m_privmsg(struct Client *source_p, int parc, char *parv[])
 {
   /*
@@ -600,20 +600,18 @@ m_privmsg(struct Client *source_p, int parc, char *parv[])
    * for a notice.. (for example remote kline replies) --fl_
    */
   if (!IsClient(source_p))
-    return 0;
+    return;
 
   if (MyConnect(source_p))
     source_p->connection->last_privmsg = event_base->time.sec_monotonic;
 
   m_message(false, source_p, parc, parv);
-  return 0;
 }
 
-static int
+static void
 m_notice(struct Client *source_p, int parc, char *parv[])
 {
   m_message(true, source_p, parc, parv);
-  return 0;
 }
 
 static struct Message privmsg_msgtab =

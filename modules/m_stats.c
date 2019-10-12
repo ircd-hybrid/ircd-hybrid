@@ -1372,7 +1372,7 @@ do_stats(struct Client *source_p, int parc, char *parv[])
  *      parv[1] = stat letter/command
  *      parv[2] = (if present) server/mask in stats L
  */
-static int
+static void
 m_stats(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
@@ -1381,7 +1381,7 @@ m_stats(struct Client *source_p, int parc, char *parv[])
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "STATS");
-    return 0;
+    return;
   }
 
   last_used = event_base->time.sec_monotonic;
@@ -1389,10 +1389,9 @@ m_stats(struct Client *source_p, int parc, char *parv[])
   /* Is the stats meant for us? */
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source_p, ":%s STATS %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
-      return 0;
+      return;
 
   do_stats(source_p, parc, parv);
-  return 0;
 }
 
 /*
@@ -1401,14 +1400,13 @@ m_stats(struct Client *source_p, int parc, char *parv[])
  *      parv[1] = stat letter/command
  *      parv[2] = (if present) server/mask in stats L, or target
  */
-static int
+static void
 ms_stats(struct Client *source_p, int parc, char *parv[])
 {
   if (server_hunt(source_p, ":%s STATS %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
-     return 0;
+    return;
 
   do_stats(source_p, parc, parv);
-  return 0;
 }
 
 static void

@@ -51,7 +51,7 @@
  *      - parv[2] = unused/ignored
  *      - parv[3] = nickname/servername
  */
-static int
+static void
 mo_connect(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
@@ -59,7 +59,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(name))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CONNECT");
-    return 0;
+    return;
   }
 
   if (parc > 3)
@@ -67,17 +67,17 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
     if (!HasOFlag(source_p, OPER_FLAG_CONNECT_REMOTE))
     {
       sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "connect:remote");
-      return 0;
+      return;
     }
 
     if (server_hunt(source_p, ":%s CONNECT %s %s :%s", 3, parc, parv)->ret != HUNTED_ISME)
-      return 0;
+      return;
   }
 
   if (!HasOFlag(source_p, OPER_FLAG_CONNECT))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "connect");
-    return 0;
+    return;
   }
 
   /*
@@ -87,7 +87,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   if ((conf = connect_find(name, match)) == NULL)
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
-    return 0;
+    return;
   }
 
   const struct Client *target_p;
@@ -95,14 +95,14 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
                       target_p->name, target_p->from->name);
-    return 0;
+    return;
   }
 
   if (find_servconn_in_progress(conf->name))
   {
     sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress",
                       conf->name);
-    return 0;
+    return;
   }
 
   ilog(LOG_TYPE_IRCD, "CONNECT %s %u from %s",
@@ -129,7 +129,6 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
    * Client is either connecting with all the data it needs or has been
    * destroyed
    */
-  return 0;
 }
 
 /*! \brief CONNECT command handler
@@ -145,7 +144,7 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = unused/ignored
  *      - parv[3] = nickname/servername
  */
-static int
+static void
 ms_connect(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
@@ -153,11 +152,11 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   if (parc < 4 || EmptyString(parv[3]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CONNECT");
-    return 0;
+    return;
   }
 
   if (server_hunt(source_p, ":%s CONNECT %s %s :%s", 3, parc, parv)->ret != HUNTED_ISME)
-    return 0;
+    return;
 
   /*
    * Try to find the name. If it fails, notify and bail.
@@ -166,7 +165,7 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   if ((conf = connect_find(name, match)) == NULL)
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
-    return 0;
+    return;
   }
 
   const struct Client *target_p;
@@ -174,14 +173,14 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
                       target_p->name, target_p->from->name);
-    return 0;
+    return;
   }
 
   if (find_servconn_in_progress(conf->name))
   {
     sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress",
                       conf->name);
-    return 0;
+    return;
   }
 
   /*
@@ -210,7 +209,6 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
    * Client is either connecting with all the data it needs or has been
    * destroyed
    */
-  return 0;
 }
 
 static struct Message connect_msgtab =

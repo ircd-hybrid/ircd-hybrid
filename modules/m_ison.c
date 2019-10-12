@@ -45,7 +45,7 @@
  *      - parv[0] = command
  *      - parv[1] = space-separated list of nicknames
  */
-static int
+static void
 m_ison(struct Client *source_p, int parc, char *parv[])
 {
   char *p = NULL;
@@ -79,7 +79,6 @@ m_ison(struct Client *source_p, int parc, char *parv[])
   *(current_insert_point - cut) = '\0';
 
   sendto_one(source_p, "%s", buf);
-  return 0;
 }
 
 static struct Message ison_msgtab =

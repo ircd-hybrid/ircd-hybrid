@@ -50,7 +50,7 @@
  *      - parv[0] = command
  *      - parv[1] = channel name
  */
-static int
+static void
 mo_opme(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
@@ -61,25 +61,25 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(name))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "OPME");
-    return 0;
+    return;
   }
 
   if (!HasOFlag(source_p, OPER_FLAG_OPME))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "opme");
-    return 0;
+    return;
   }
 
   if ((chptr = hash_find_channel(name)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
-    return 0;
+    return;
   }
 
   if ((member = find_channel_link(source_p, chptr)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
-    return 0;
+    return;
   }
 
   DLINK_FOREACH(node, chptr->members.head)
@@ -88,7 +88,7 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
     {
       sendto_one_notice(source_p, &me, ":Cannot use OPME on %s: channel is not opless",
                         chptr->name);
-      return 0;
+      return;
     }
   }
 
@@ -104,7 +104,6 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
                        me.name, chptr->name, source_p->name);
   sendto_server(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, chptr->creation_time,
                 chptr->name, source_p->id);
-  return 0;
 }
 
 static struct Message opme_msgtab =

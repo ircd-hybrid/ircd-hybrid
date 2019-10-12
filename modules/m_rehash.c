@@ -117,7 +117,7 @@ static const struct RehashStruct rehash_cmd_table[] =
  *      - parv[1] = target server mask
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
-static int
+static void
 mo_rehash(struct Client *source_p, int parc, char *parv[])
 {
   const char *option = NULL;
@@ -126,7 +126,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[parc - 1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "REHASH");
-    return 0;
+    return;
   }
 
   if (parc < 3)
@@ -134,7 +134,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
     if (!HasOFlag(source_p, OPER_FLAG_REHASH))
     {
       sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "rehash");
-      return 0;
+      return;
     }
 
     option = parv[1];
@@ -144,7 +144,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
     if (!HasOFlag(source_p, OPER_FLAG_REHASH_REMOTE))
     {
       sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "rehash:remote");
-      return 0;
+      return;
     }
 
     server = parv[1];
@@ -162,13 +162,12 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
     if (EmptyString(server) || !match(server, me.name))
       tab->handler(source_p);
 
-    return 0;
+    return;
   }
 
   sendto_one_notice(source_p, &me, ":%s is not a valid option. "
                     "Choose from CONF, DNS, MOTD",
                     option);
-  return 0;
 }
 
 /*! \brief REHASH command handler
@@ -183,7 +182,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = target server mask
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
-static int
+static void
 ms_rehash(struct Client *source_p, int parc, char *parv[])
 {
   const char *const option = parv[2];
@@ -192,11 +191,11 @@ ms_rehash(struct Client *source_p, int parc, char *parv[])
   sendto_match_servs(source_p, server, 0, "REHASH %s %s", server, option);
 
   if (match(server, me.name))
-    return 0;
+    return;
 
   if (!shared_find(SHARED_REHASH, source_p->servptr->name,
                    source_p->username, source_p->host))
-    return 0;
+    return;
 
   for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)
   {
@@ -204,10 +203,8 @@ ms_rehash(struct Client *source_p, int parc, char *parv[])
       continue;
 
     tab->handler(source_p);
-    return 0;
+    return;
   }
-
-  return 0;
 }
 
 static struct Message rehash_msgtab =

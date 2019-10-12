@@ -52,7 +52,7 @@
  *      - parv[1] = kill victim
  *      - parv[2] = reason
  */
-static int
+static void
 mo_kill(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
@@ -61,7 +61,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
-    return 0;
+    return;
   }
 
   char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
@@ -84,7 +84,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
     if ((target_p = whowas_get_history(parv[1], ConfigGeneral.kill_chase_time_limit)) == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
-      return 0;
+      return;
     }
 
     sendto_one_notice(source_p, &me, ":KILL changed from %s to %s",
@@ -94,19 +94,19 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL_REMOTE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "kill:remote");
-    return 0;
+    return;
   }
 
   if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_KILL))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "kill");
-    return 0;
+    return;
   }
 
   if (IsServer(target_p) || IsMe(target_p))
   {
     sendto_one_numeric(source_p, &me, ERR_CANTKILLSERVER);
-    return 0;
+    return;
   }
 
   if (MyConnect(target_p))
@@ -147,7 +147,6 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
 
   snprintf(buf, sizeof(buf), "Killed (%s (%s))", source_p->name, reason);
   exit_client(target_p, buf);
-  return 0;
 }
 
 /*! \brief KILL command handler
@@ -162,7 +161,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = kill victim
  *      - parv[2] = kill path and reason
  */
-static int
+static void
 ms_kill(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
@@ -171,12 +170,12 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   if (parc < 3 || EmptyString(parv[2]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
-    return 0;
+    return;
   }
 
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
-    return 0;
+    return;
 
   char *reason = strchr(parv[2], ' ');
   if (reason)
@@ -187,7 +186,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   if (IsServer(target_p) || IsMe(target_p))
   {
     sendto_one_numeric(source_p, &me, ERR_CANTKILLSERVER);
-    return 0;
+    return;
   }
 
   if (MyConnect(target_p))
@@ -245,7 +244,6 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
     snprintf(buf, sizeof(buf), "Killed (%s %s)", source_p->name, reason);
 
   exit_client(target_p, buf);
-  return 0;
 }
 
 

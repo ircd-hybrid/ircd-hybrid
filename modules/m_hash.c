@@ -45,7 +45,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  */
-static int
+static void
 mo_hash(struct Client *source_p, int parc, char *parv[])
 {
   unsigned int i = 0;
@@ -117,7 +117,6 @@ mo_hash(struct Client *source_p, int parc, char *parv[])
 
   sendto_one_notice(source_p, &me, ":Id: entries: %u buckets: %u "
                     "max chain: %u", count, buckets, max_chain);
-  return 0;
 }
 
 static struct Message hash_msgtab =

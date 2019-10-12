@@ -278,7 +278,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *chptr,
  *      - parv[1] = nickname/channelname
  *      - parv[2] = additional selection flag, only 'o' for now
  */
-static int
+static void
 m_who(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
@@ -292,7 +292,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   {
     who_global(source_p, NULL, server_oper);
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, "*");
-    return 0;
+    return;
   }
 
   /* Mask isn't NULL at this point. repeat after me... -db */
@@ -311,7 +311,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     }
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
-    return 0;
+    return;
   }
 
   /* '/who nick' */
@@ -332,7 +332,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
       do_who(source_p, target_p, NULL, "");
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
-    return 0;
+    return;
   }
 
   /* '/who *' */
@@ -345,7 +345,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     }
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, "*");
-    return 0;
+    return;
   }
 
   /* '/who 0' */
@@ -356,7 +356,6 @@ m_who(struct Client *source_p, int parc, char *parv[])
 
   /* Wasn't a nick, wasn't a channel, wasn't a '*' so ... */
   sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
-  return 0;
 }
 
 static struct Message who_msgtab =

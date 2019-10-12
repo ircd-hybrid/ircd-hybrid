@@ -192,7 +192,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
  *      - parv[1] = channel or nick name
  *      - parv[2] = modes to be added or removed
  */
-static int
+static void
 m_mode(struct Client *source_p, int parc, char *parv[])
 {
   struct Membership *member = NULL;
@@ -200,7 +200,7 @@ m_mode(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODE");
-    return 0;
+    return;
   }
 
   /* Now, try to find the channel in question */
@@ -208,14 +208,14 @@ m_mode(struct Client *source_p, int parc, char *parv[])
   {
     /* If here, it has to be a non-channel name */
     set_user_mode(source_p, parc, parv);
-    return 0;
+    return;
   }
 
   struct Channel *chptr;
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
-    return 0;
+    return;
   }
 
   /* Now known the channel exists */
@@ -227,14 +227,13 @@ m_mode(struct Client *source_p, int parc, char *parv[])
     channel_modes(chptr, source_p, modebuf, parabuf);
     sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS, chptr->name, modebuf, parabuf);
     sendto_one_numeric(source_p, &me, RPL_CREATIONTIME, chptr->name, chptr->creation_time);
-    return 0;
+    return;
   }
 
   if (MyClient(source_p))
     member = find_channel_link(source_p, chptr);
 
   channel_mode_set(source_p, chptr, member, parc - 2, parv + 2);
-  return 0;
 }
 
 static struct Message mode_msgtab =

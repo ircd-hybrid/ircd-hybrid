@@ -54,7 +54,7 @@
  *      - parv[3] = new nickname
  *      - parv[4] = new timestamp
  */
-static int
+static void
 ms_svsnick(struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL, *exists_p = NULL;
@@ -62,19 +62,19 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   uintmax_t ts = 0, new_ts = 0;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
-    return 0;
+    return;
 
   if (valid_nickname(new_nick, true) == false)
-    return 0;
+    return;
 
   if ((target_p = find_person(source_p, parv[1])) == NULL)
-    return 0;
+    return;
 
   if (parc == 5)  /* TBR: compatibility mode */
   {
     ts = strtoumax(parv[2], NULL, 10);
     if (ts && (ts != target_p->tsinfo))
-      return 0;
+      return;
   }
   else  /* parc == 4 */
     ts = strtoumax(parv[3], NULL, 10);
@@ -93,12 +93,12 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
                            "for %s (behind %s) from %s",
                            target_p->name, source_p->from->name,
                            client_get_name(source_p, HIDE_IP));
-      return 0;
+      return;
     }
 
     sendto_one(target_p, ":%s SVSNICK %s %s %s", source_p->id,
                target_p->id, new_nick, parv[3]);
-    return 0;
+    return;
   }
 
   if ((exists_p = hash_find_client(new_nick)))
@@ -106,14 +106,14 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
     if (target_p == exists_p)
     {
       if (strcmp(target_p->name, new_nick) == 0)
-        return 0;
+        return;
     }
     else if (IsUnknown(exists_p))
       exit_client(exists_p, "SVSNICK Override");
     else
     {
       exit_client(target_p, "SVSNICK Collide");
-      return 0;
+      return;
     }
   }
 
@@ -146,7 +146,6 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   watch_check_hash(target_p, RPL_LOGON);
 
   fd_note(target_p->connection->fd, "Nick: %s", target_p->name);
-  return 0;
 }
 
 static struct Message svsnick_msgtab =

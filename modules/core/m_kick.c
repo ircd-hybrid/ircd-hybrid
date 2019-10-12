@@ -54,7 +54,7 @@
  *      - parv[2] = client to kick
  *      - parv[3] = reason
  */
-static int
+static void
 m_kick(struct Client *source_p, int parc, char *parv[])
 {
   char reason[KICKLEN + 1] = "";
@@ -66,34 +66,34 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[2]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KICK");
-    return 0;
+    return;
   }
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
-    return 0;
+    return;
   }
 
   if ((member_source = find_channel_link(source_p, chptr)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
-    return 0;
+    return;
   }
 
   if (!has_member_flags(member_source, CHFL_CHANOP | CHFL_HALFOP))
   {
     sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
-    return 0;
+    return;
   }
 
   if ((target_p = find_chasing(source_p, parv[2])) == NULL)
-    return 0;  /* find_chasing sends ERR_NOSUCHNICK */
+    return;  /* find_chasing sends ERR_NOSUCHNICK */
 
   if ((member_target = find_channel_link(target_p, chptr)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, chptr->name);
-    return 0;
+    return;
   }
 
   if (has_member_flags(member_source, CHFL_HALFOP) && !has_member_flags(member_source, CHFL_CHANOP))
@@ -101,7 +101,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     if (has_member_flags(member_target, CHFL_CHANOP | CHFL_HALFOP))
     {
       sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
-      return 0;
+      return;
     }
   }
 
@@ -118,7 +118,6 @@ m_kick(struct Client *source_p, int parc, char *parv[])
                 source_p->id, chptr->name,
                 target_p->id, reason);
   remove_user_from_channel(member_target);
-  return 0;
 }
 
 /*! \brief KICK command handler
@@ -134,7 +133,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = client to kick
  *      - parv[3] = reason
  */
-static int
+static void
 ms_kick(struct Client *source_p, int parc, char *parv[])
 {
   char reason[KICKLEN + 1] = "";
@@ -143,16 +142,16 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   struct Membership *member_target = NULL;
 
   if (EmptyString(parv[2]))
-    return 0;
+    return;
 
   if ((chptr = hash_find_channel(parv[1])) == NULL)
-    return 0;
+    return;
 
   if ((target_p = find_person(source_p, parv[2])) == NULL)
-    return 0;
+    return;
 
   if ((member_target = find_channel_link(target_p, chptr)) == NULL)
-    return 0;
+    return;
 
   if (!EmptyString(parv[3]))
     strlcpy(reason, parv[3], sizeof(reason));
@@ -173,7 +172,6 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
                 source_p->id, chptr->name,
                 target_p->id, reason);
   remove_user_from_channel(member_target);
-  return 0;
 }
 
 static struct Message kick_msgtab =

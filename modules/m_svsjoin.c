@@ -49,23 +49,23 @@
  *      - parv[2] = channel
  *      - parv[3] = channel password (key)
  */
-static int
+static void
 ms_svsjoin(struct Client *source_p, int parc, char *parv[])
 {
   if (!HasFlag(source_p, FLAGS_SERVICE))
-    return 0;
+    return;
 
   if (EmptyString(parv[2]))
-    return 0;
+    return;
 
   struct Client *target_p;
   if ((target_p = find_person(source_p, parv[1])) == NULL)
-    return 0;
+    return;
 
   if (MyConnect(target_p))
   {
     channel_do_join(target_p, parv[2], parv[3]);
-    return 0;
+    return;
   }
 
   if (target_p->from == source_p->from)
@@ -75,7 +75,7 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
                          "for %s (behind %s) from %s",
                          target_p->name, source_p->from->name,
                          client_get_name(source_p, HIDE_IP));
-    return 0;
+    return;
   }
 
   if (parc == 3)
@@ -84,7 +84,6 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
   else
     sendto_one(target_p, ":%s SVSJOIN %s %s %s", source_p->id,
                target_p->id, parv[2], parv[3]);
-  return 0;
 }
 
 static struct Message svsjoin_msgtab =

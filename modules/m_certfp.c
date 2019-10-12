@@ -44,18 +44,17 @@
  *      - parv[0] = command
  *      - parv[1] = certificate fingerprint
  */
-static int
+static void
 ms_certfp(struct Client *source_p, int parc, char *parv[])
 {
   if (!IsClient(source_p))
-    return 0;
+    return;
 
   xfree(source_p->certfp);
   source_p->certfp = xstrdup(parv[1]);
 
   sendto_server(source_p, 0, 0, ":%s CERTFP %s",
                 source_p->id, source_p->certfp);
-  return 0;
 }
 
 static struct Message certfp_msgtab =

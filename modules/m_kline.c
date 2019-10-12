@@ -192,7 +192,7 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
  * output	-
  * side effects - k line is added
  */
-static int
+static void
 mo_kline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = true, .simple_mask = false };
@@ -200,11 +200,11 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_KLINE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "kline");
-    return 0;
+    return;
   }
 
   if (parse_aline("KLINE", source_p, parc, parv, &aline) == false)
-    return 0;
+    return;
 
   if (aline.server)
   {
@@ -214,14 +214,13 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
 
     /* Allow ON to apply local kline as well if it matches */
     if (match(aline.server, me.name))
-      return 0;
+      return;
   }
   else
     cluster_distribute(source_p, "KLINE", CAPAB_KLN, CLUSTER_KLINE, "%ju %s %s :%s",
                        aline.duration, aline.user, aline.host, aline.reason);
 
   kline_handle(source_p, &aline);
-  return 0;
 }
 
 /*! \brief KLINE command handler
@@ -239,7 +238,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
  *      - parv[4] = host mask
  *      - parv[5] = reason
  */
-static int
+static void
 ms_kline(struct Client *source_p, int parc, char *parv[])
 {
   struct aline_ctx aline =
@@ -254,20 +253,18 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
   };
 
   if (parc != 6 || EmptyString(parv[parc - 1]))
-    return 0;
+    return;
 
   sendto_match_servs(source_p, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s", aline.server,
                      aline.duration, aline.user, aline.host, aline.reason);
 
   if (match(aline.server, me.name))
-    return 0;
+    return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
       shared_find(SHARED_KLINE, source_p->servptr->name,
                   source_p->username, source_p->host))
     kline_handle(source_p, &aline);
-
-  return 0;
 }
 
 static struct Message kline_msgtab =

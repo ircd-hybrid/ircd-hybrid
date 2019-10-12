@@ -53,7 +53,7 @@
  *      - parv[0] = command
  *      - parv[1] = channel name
  */
-static int
+static void
 m_knock(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
@@ -61,21 +61,21 @@ m_knock(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(name))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KNOCK");
-    return 0;
+    return;
   }
 
   struct Channel *chptr;
   if ((chptr = hash_find_channel(name)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
-    return 0;
+    return;
   }
 
   /* Normal channel, just be sure they aren't on it. */
   if (IsMember(source_p, chptr))
   {
     sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, chptr->name);
-    return 0;
+    return;
   }
 
   if (!((chptr->mode.mode & MODE_INVITEONLY) || chptr->mode.key[0] ||
@@ -83,7 +83,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
          chptr->mode.limit)))
   {
     sendto_one_numeric(source_p, &me, ERR_CHANOPEN, chptr->name);
-    return 0;
+    return;
   }
 
   if (MyClient(source_p))
@@ -94,7 +94,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     if (PrivateChannel(chptr) || is_banned(chptr, source_p) == true)
     {
       sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, chptr->name);
-      return 0;
+      return;
     }
 
     if ((source_p->connection->knock.last_attempt + ConfigChannel.knock_client_time) < event_base->time.sec_monotonic)
@@ -103,13 +103,13 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     if (source_p->connection->knock.count > ConfigChannel.knock_client_count)
     {
       sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->name, "user");
-      return 0;
+      return;
     }
 
     if ((chptr->last_knock + ConfigChannel.knock_delay_channel) > event_base->time.sec_monotonic)
     {
       sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->name, "channel");
-      return 0;
+      return;
     }
 
     source_p->connection->knock.last_attempt = event_base->time.sec_monotonic;
@@ -128,7 +128,6 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(source_p, CAPAB_KNOCK, 0, ":%s KNOCK %s",
                 source_p->id, chptr->name);
-  return 0;
 }
 
 static struct Message knock_msgtab =

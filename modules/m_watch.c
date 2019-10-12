@@ -70,7 +70,7 @@ show_watch(struct Client *source_p, const char *name,
  *      - parv[0] = command
  *      - parv[1] = watch options
  */
-static int
+static void
 m_watch(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
@@ -233,8 +233,6 @@ m_watch(struct Client *source_p, int parc, char *parv[])
 
     /* Hmm.. unknown prefix character.. Ignore it. :-) */
   }
-
-  return 0;
 }
 
 static struct Message watch_msgtab =

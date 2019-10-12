@@ -285,7 +285,7 @@ list_quote_commands(struct Client *source_p)
  * mo_set - SET command handler
  * set options while running
  */
-static int
+static void
 mo_set(struct Client *source_p, int parc, char *parv[])
 {
   int newval;
@@ -295,7 +295,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_SET))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "set");
-    return 0;
+    return;
   }
 
   if (parc > 1)
@@ -348,14 +348,14 @@ mo_set(struct Client *source_p, int parc, char *parv[])
         if (newval < 0)
         {
           sendto_one_notice(source_p, &me, ":Value less than 0 illegal for %s", tab->name);
-          return 0;
+          return;
         }
       }
       else
         newval = -1;
 
       tab->handler(source_p, strarg, newval);
-      return 0;
+      return;
     }
 
     /*
@@ -363,11 +363,10 @@ mo_set(struct Client *source_p, int parc, char *parv[])
      * found within set_cmd_table.
      */
     sendto_one_notice(source_p, &me, ":Variable not found.");
-    return 0;
+    return;
   }
 
   list_quote_commands(source_p);
-  return 0;
 }
 
 static struct Message set_msgtab =

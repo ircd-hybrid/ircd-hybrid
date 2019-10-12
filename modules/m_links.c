@@ -98,11 +98,10 @@ do_links(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static int
+static void
 mo_links(struct Client *source_p, int parc, char *parv[])
 {
   do_links(source_p, parc, parv);
-  return 0;
 }
 
 /*! \brief LINKS command handler
@@ -120,7 +119,7 @@ mo_links(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = server to query
  *      - parv[2] = servername mask
  */
-static int
+static void
 m_links(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
@@ -128,13 +127,12 @@ m_links(struct Client *source_p, int parc, char *parv[])
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
     sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "LINKS");
-    return 0;
+    return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   do_links(source_p, parc, parv);
-  return 0;
 }
 
 static struct Message links_msgtab =

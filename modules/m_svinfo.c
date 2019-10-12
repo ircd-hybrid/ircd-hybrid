@@ -49,11 +49,11 @@
  *      - parv[3] = unused
  *      - parv[4] = server's idea of UTC time
  */
-static int
+static void
 ms_svinfo(struct Client *source_p, int parc, char *parv[])
 {
   if (!IsServer(source_p) || !MyConnect(source_p))
-    return 0;
+    return;
 
   if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MIN)
   {
@@ -73,7 +73,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
          client_get_name(source_p, SHOW_IP), parv[1], parv[2]);
 
     exit_client(source_p, "Incompatible TS version");
-    return 0;
+    return;
   }
 
   /*
@@ -97,7 +97,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
          client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
 
     exit_client(source_p, "Excessive TS delta");
-    return 0;
+    return;
   }
 
   if (deltat > ConfigGeneral.ts_warn_delta)
@@ -109,8 +109,6 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
           "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
           client_get_name(source_p, MASK_IP), event_base->time.sec_real, theirtime, deltat);
   }
-
-  return 0;
 }
 
 static struct Message svinfo_msgtab =

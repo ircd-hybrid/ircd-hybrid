@@ -46,7 +46,7 @@
  *      - parv[0] = command
  *      - parv[1] = server name
  */
-static int
+static void
 mo_die(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";
@@ -55,25 +55,24 @@ mo_die(struct Client *source_p, int parc, char *parv[])
   if (!HasOFlag(source_p, OPER_FLAG_DIE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "die");
-    return 0;
+    return;
   }
 
   if (EmptyString(name))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "DIE");
-    return 0;
+    return;
   }
 
   if (irccmp(name, me.name))
   {
     sendto_one_notice(source_p, &me, ":Mismatch on /die %s", me.name);
-    return 0;
+    return;
   }
 
   snprintf(buf, sizeof(buf), "received DIE command from %s",
            client_get_name(source_p, HIDE_IP));
   server_die(buf, false);
-  return 0;
 }
 
 static struct Message die_msgtab =

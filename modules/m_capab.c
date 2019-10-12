@@ -43,7 +43,7 @@
  *      - parv[0] = command
  *      - parv[1] = space-separated list of capabilities
  */
-static int
+static void
 mr_capab(struct Client *source_p, int parc, char *parv[])
 {
   unsigned int cap = 0;
@@ -53,8 +53,6 @@ mr_capab(struct Client *source_p, int parc, char *parv[])
                    s = strtok_r(NULL,    " ", &p))
     if ((cap = capab_find(s)))
       SetCapable(source_p, cap);
-
-  return 0;
 }
 
 static struct Message capab_msgtab =

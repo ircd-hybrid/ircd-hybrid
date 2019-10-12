@@ -40,7 +40,7 @@
  * output	- none
  * side effects	- propagates subcommand to locally connected servers
  */
-static int
+static void
 ms_encap(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE] = "", *ptr = buffer;
@@ -56,7 +56,7 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
 
     /* Drop the whole command if this parameter would be truncated */
     if ((cur_len + len) >= sizeof(buffer))
-      return 0;
+      return;
 
     snprintf(ptr, sizeof(buffer) - cur_len, "%s ", parv[i]);
     cur_len += len;
@@ -73,10 +73,10 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
                      "ENCAP %s", buffer);
 
   if (match(parv[1], me.name))
-    return 0;
+    return;
 
   if ((mptr = find_command(parv[2])) == NULL)
-    return 0;
+    return;
 
 #ifdef NOT_USED_YET
   paramcount = mptr->parameters;
@@ -89,7 +89,6 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
 
   if ((unsigned int)parc >= mptr->args_min)
     mptr->handlers[ENCAP_HANDLER](source_p, parc, parv);
-  return 0;
 }
 
 static struct Message encap_msgtab =

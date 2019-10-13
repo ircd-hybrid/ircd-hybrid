@@ -58,30 +58,30 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   char modebuf[IRCD_BUFSIZE] = "";
   char parabuf[IRCD_BUFSIZE] = "";
   char banbuf[IRCD_BUFSIZE] = "";
-  struct Channel *chptr = NULL;
+  struct Channel *channel = NULL;
   char *s, *t, *mbuf, *pbuf;
   dlink_list *list = NULL;
   int mlen = 0, tlen = 0;
   int modecount = 0;
   unsigned int flags = 0;
 
-  if ((chptr = hash_find_channel(parv[2])) == NULL)
+  if ((channel = hash_find_channel(parv[2])) == NULL)
     return;
 
   /* TS is higher, drop it. */
-  if (strtoumax(parv[1], NULL, 10) > chptr->creation_time)
+  if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
     return;
 
   switch (*parv[3])
   {
     case 'b':
-      list = &chptr->banlist;
+      list = &channel->banlist;
       break;
     case 'e':
-      list = &chptr->exceptlist;
+      list = &channel->exceptlist;
       break;
     case 'I':
-      list = &chptr->invexlist;
+      list = &channel->invexlist;
       break;
     default:
       return;
@@ -92,11 +92,11 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
 
   mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s +",
                   (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
-                  chptr->name);
+                  channel->name);
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 
-  if (HasCMode(chptr, MODE_HIDEBMASKS))
+  if (HasCMode(channel, MODE_HIDEBMASKS))
     flags = CHFL_CHANOP | CHFL_HALFOP;
 
   do
@@ -109,7 +109,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     if (tlen > MODEBUFLEN)
       break;
 
-    if (tlen && *s != ':' && add_id(source_p, chptr, s, list) == true)
+    if (tlen && *s != ':' && add_id(source_p, channel, s, list) == true)
     {
       /* add_id can modify 's' */
       tlen = strlen(s);
@@ -120,7 +120,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       {
         *mbuf = *(pbuf - 1) = '\0';
 
-        sendto_channel_local(NULL, chptr, flags, 0, 0, "%s %s", modebuf, parabuf);
+        sendto_channel_local(NULL, channel, flags, 0, 0, "%s %s", modebuf, parabuf);
         mbuf = modebuf + mlen;
         pbuf = parabuf;
         modecount = 0;
@@ -137,11 +137,11 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   if (modecount)
   {
     *mbuf = *(pbuf - 1) = '\0';
-    sendto_channel_local(NULL, chptr, flags, 0, 0, "%s %s", modebuf, parabuf);
+    sendto_channel_local(NULL, channel, flags, 0, 0, "%s %s", modebuf, parabuf);
   }
 
   sendto_server(source_p, 0, 0, ":%s BMASK %ju %s %s :%s",
-                source_p->id, chptr->creation_time, chptr->name,
+                source_p->id, channel->creation_time, channel->name,
                 parv[3], parv[4]);
 }
 

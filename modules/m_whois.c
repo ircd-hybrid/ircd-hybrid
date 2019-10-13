@@ -44,14 +44,14 @@
 
 
 static int
-whois_can_see_channels(struct Channel *chptr,
+whois_can_see_channels(struct Channel *channel,
                        struct Client *source_p,
                        struct Client *target_p)
 {
-  if (PubChannel(chptr) && !HasUMode(target_p, UMODE_HIDECHANS))
+  if (PubChannel(channel) && !HasUMode(target_p, UMODE_HIDECHANS))
     return 1;
 
-  if (source_p == target_p || IsMember(source_p, chptr))
+  if (source_p == target_p || IsMember(source_p, channel))
     return 1;
 
   if (HasUMode(source_p, UMODE_OPER))
@@ -88,12 +88,12 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
   DLINK_FOREACH(node, target_p->channel.head)
   {
-    const struct Membership *member = node->data;
-    int show = whois_can_see_channels(member->chptr, source_p, target_p);
+    const struct ChannelMember *member = node->data;
+    int show = whois_can_see_channels(member->channel, source_p, target_p);
 
     if (show)
     {
-      if ((cur_len + 4 + member->chptr->name_len + 1) > (IRCD_BUFSIZE - 2))
+      if ((cur_len + 4 + member->channel->name_len + 1) > (IRCD_BUFSIZE - 2))
       {
         *(t - 1) = '\0';
         sendto_one(source_p, "%s", buf);
@@ -102,7 +102,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
       }
 
       tlen = sprintf(t, "%s%s%s ", show == 2 ? "~" : "", get_member_status(member, true),
-                     member->chptr->name);
+                     member->channel->name);
       t += tlen;
       cur_len += tlen;
       reply_to_send = 1;

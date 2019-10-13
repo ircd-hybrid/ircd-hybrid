@@ -52,20 +52,20 @@
 static void
 ms_tmode(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *chptr;
+  struct Channel *channel;
 
   assert(!MyClient(source_p));
 
-  if ((chptr = hash_find_channel(parv[2])) == NULL)
+  if ((channel = hash_find_channel(parv[2])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return;
   }
 
-  if (strtoumax(parv[1], NULL, 10) > chptr->creation_time)
+  if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
     return;
 
-  channel_mode_set(source_p, chptr, NULL, parc - 3, parv + 3);
+  channel_mode_set(source_p, channel, NULL, parc - 3, parv + 3);
 }
 
 static struct Message tmode_msgtab =

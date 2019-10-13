@@ -51,15 +51,15 @@
 static void
 m_names(struct Client *source_p, int parc, char *parv[])
 {
-  const char *const para = parc > 1 ? parv[1] : NULL;
+  const char *const name = parc > 1 ? parv[1] : NULL;
 
-  if (!EmptyString(para))
+  if (!EmptyString(name))
   {
-    struct Channel *chptr = hash_find_channel(para);
-    if (chptr)
-      channel_member_names(source_p, chptr, true);
+    struct Channel *channel = hash_find_channel(name);
+    if (channel)
+      channel_member_names(source_p, channel, true);
     else
-      sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, para);
+      sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, name);
   }
   else
     sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, "*");

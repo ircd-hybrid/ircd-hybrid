@@ -157,7 +157,7 @@ static void
 parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p = NULL;
-  struct Channel *chptr = NULL;
+  struct Channel *channel = NULL;
 
   /*
    * Avoid trash, we need it to come from a server and have a target
@@ -173,11 +173,11 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
    * Ahem... it can be a channel actually, csc bots use it :\ --Nem
    */
   if (IsChanPrefix(*parv[1]))
-    chptr = hash_find_channel(parv[1]);
+    channel = hash_find_channel(parv[1]);
   else
     target_p = find_person(source_p, parv[1]);
 
-  if ((target_p == NULL || target_p->from == source_p->from) && chptr == NULL)
+  if ((target_p == NULL || target_p->from == source_p->from) && channel == NULL)
     return;
 
   /*
@@ -202,8 +202,8 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
       sendto_one_numeric(target_p, source_p, numeric | SND_EXPLICIT, "%s", parv[2]);
   }
   else
-    sendto_channel_butone(source_p, source_p, chptr, 0, "%u %s %s",
-                          numeric, chptr->name, parv[2]);
+    sendto_channel_butone(source_p, source_p, channel, 0, "%u %s %s",
+                          numeric, channel->name, parv[2]);
 }
 
 /* handle_command()

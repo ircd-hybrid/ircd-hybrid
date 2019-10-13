@@ -54,8 +54,8 @@ static void
 mo_opme(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
-  struct Channel *chptr = NULL;
-  struct Membership *member = NULL;
+  struct Channel *channel = NULL;
+  struct ChannelMember *member = NULL;
   dlink_node *node = NULL;
 
   if (EmptyString(name))
@@ -70,40 +70,40 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((chptr = hash_find_channel(name)) == NULL)
+  if ((channel = hash_find_channel(name)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
-  if ((member = find_channel_link(source_p, chptr)) == NULL)
+  if ((member = find_channel_link(source_p, channel)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
     return;
   }
 
-  DLINK_FOREACH(node, chptr->members.head)
+  DLINK_FOREACH(node, channel->members.head)
   {
-    if (((struct Membership *)node->data)->flags & CHFL_CHANOP)
+    if (((struct ChannelMember *)node->data)->flags & CHFL_CHANOP)
     {
       sendto_one_notice(source_p, &me, ":Cannot use OPME on %s: channel is not opless",
-                        chptr->name);
+                        channel->name);
       return;
     }
   }
 
   ilog(LOG_TYPE_IRCD, "%s used OPME on channel %s",
-       get_oper_name(source_p), chptr->name);
+       get_oper_name(source_p), channel->name);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s used OPME on channel %s",
-                       me.name, get_oper_name(source_p), chptr->name);
+                       me.name, get_oper_name(source_p), channel->name);
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
-                me.id, get_oper_name(source_p), chptr->name);
+                me.id, get_oper_name(source_p), channel->name);
 
   AddMemberFlag(member, CHFL_CHANOP);
-  sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s MODE %s +o %s",
-                       me.name, chptr->name, source_p->name);
-  sendto_server(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, chptr->creation_time,
-                chptr->name, source_p->id);
+  sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +o %s",
+                       me.name, channel->name, source_p->name);
+  sendto_server(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, channel->creation_time,
+                channel->name, source_p->id);
 }
 
 static struct Message opme_msgtab =

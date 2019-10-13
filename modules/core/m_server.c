@@ -83,7 +83,7 @@ server_set_flags(struct Client *client_p, const char *flags)
  *                server is CAPAB_TBURST capable
  */
 static void
-server_send_tburst(struct Client *client_p, const struct Channel *chptr)
+server_send_tburst(struct Client *client_p, const struct Channel *channel)
 {
   /*
    * We may also send an empty topic here, but only if topic_time isn't 0,
@@ -98,12 +98,12 @@ server_send_tburst(struct Client *client_p, const struct Channel *chptr)
    * it to their old topic they had before.  Read m_tburst.c:ms_tburst
    * for further information   -Michael
    */
-  if (chptr->topic_time)
+  if (channel->topic_time)
     sendto_one(client_p, ":%s TBURST %ju %s %ju %s :%s", me.id,
-               chptr->creation_time, chptr->name,
-               chptr->topic_time,
-               chptr->topic_info,
-               chptr->topic);
+               channel->creation_time, channel->name,
+               channel->topic_time,
+               channel->topic_info,
+               channel->topic);
 }
 
 /* sendnick_TS()
@@ -190,14 +190,14 @@ server_burst(struct Client *client_p)
 
   DLINK_FOREACH(node, channel_get_list()->head)
   {
-    const struct Channel *chptr = node->data;
+    const struct Channel *channel = node->data;
 
-    if (dlink_list_length(&chptr->members))
+    if (dlink_list_length(&channel->members))
     {
-      channel_send_modes(client_p, chptr);
+      channel_send_modes(client_p, channel);
 
       if (IsCapable(client_p, CAPAB_TBURST))
-        server_send_tburst(client_p, chptr);
+        server_send_tburst(client_p, channel);
     }
   }
 

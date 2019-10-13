@@ -700,13 +700,13 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   dlink_node *node;
   DLINK_FOREACH(node, source_p->channel.head)
   {
-    const struct Membership *member = node->data;
+    const struct ChannelMember *member = node->data;
 
-    if (HasCMode(member->chptr, MODE_NONICKCHANGE))
+    if (HasCMode(member->channel, MODE_NONICKCHANGE))
     {
       if (has_member_flags(member, CHFL_CHANOP | CHFL_HALFOP) == 0)
       {
-        sendto_one_numeric(source_p, &me, ERR_NONICKCHANGE, member->chptr->name);
+        sendto_one_numeric(source_p, &me, ERR_NONICKCHANGE, member->channel->name);
         return;
       }
     }

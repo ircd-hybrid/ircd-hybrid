@@ -310,7 +310,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
  */
 void
 sendto_channel_butone(struct Client *one, const struct Client *from,
-                      struct Channel *chptr, unsigned int type,
+                      struct Channel *channel, unsigned int type,
                       const char *pattern, ...)
 {
   va_list alocal, aremote;
@@ -336,10 +336,10 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 
   ++current_serial;
 
-  DLINK_FOREACH(node, chptr->members.head)
+  DLINK_FOREACH(node, channel->members.head)
   {
-    struct Membership *member = node->data;
-    struct Client *target_p = member->client_p;
+    struct ChannelMember *member = node->data;
+    struct Client *target_p = member->client;
 
     assert(IsClient(target_p));
 
@@ -443,8 +443,8 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
   va_list args;
   dlink_node *uptr;
   dlink_node *cptr;
-  struct Channel *chptr;
-  struct Membership *member;
+  struct Channel *channel;
+  struct ChannelMember *member;
   struct Client *target_p;
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -456,12 +456,12 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
 
   DLINK_FOREACH(cptr, user->channel.head)
   {
-    chptr = ((struct Membership *)cptr->data)->chptr;
+    channel = ((struct ChannelMember *)cptr->data)->channel;
 
-    DLINK_FOREACH(uptr, chptr->members_local.head)
+    DLINK_FOREACH(uptr, channel->members_local.head)
     {
       member = uptr->data;
-      target_p = member->client_p;
+      target_p = member->client;
 
       if (IsDead(target_p))
         continue;
@@ -492,14 +492,14 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
 
 /*! \brief Send a message to members of a channel that are locally connected to this server.
  * \param one      Client to skip; can be NULL
- * \param chptr    Destination channel
+ * \param channel    Destination channel
  * \param status   Channel member status flags clients must have
  * \param poscap   Positive client capabilities flags (CAP)
  * \param negcap   Negative client capabilities flags (CAP)
  * \param pattern  Format string for command arguments
  */
 void
-sendto_channel_local(const struct Client *one, struct Channel *chptr, unsigned int status,
+sendto_channel_local(const struct Client *one, struct Channel *channel, unsigned int status,
                      unsigned int poscap, unsigned int negcap, const char *pattern, ...)
 {
   va_list args;
@@ -510,10 +510,10 @@ sendto_channel_local(const struct Client *one, struct Channel *chptr, unsigned i
   send_format(buffer, pattern, args);
   va_end(args);
 
-  DLINK_FOREACH(node, chptr->members_local.head)
+  DLINK_FOREACH(node, channel->members_local.head)
   {
-    struct Membership *member = node->data;
-    struct Client *target_p = member->client_p;
+    struct ChannelMember *member = node->data;
+    struct Client *target_p = member->client;
 
     if (IsDead(target_p))
       continue;

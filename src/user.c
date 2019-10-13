@@ -736,7 +736,7 @@ user_set_hostmask(struct Client *client_p, const char *hostname)
     char nickbuf[CMEMBER_STATUS_FLAGS_LEN * NICKLEN + CMEMBER_STATUS_FLAGS_LEN] = "";
     char *p = modebuf;
     int len = 0;
-    const struct Membership *member = node->data;
+    const struct ChannelMember *member = node->data;
 
     if (has_member_flags(member, CHFL_CHANOP))
     {
@@ -758,17 +758,17 @@ user_set_hostmask(struct Client *client_p, const char *hostname)
 
     *p = '\0';
 
-    sendto_channel_local(client_p, member->chptr, 0, CAP_EXTENDED_JOIN, CAP_CHGHOST, ":%s!%s@%s JOIN %s %s :%s",
+    sendto_channel_local(client_p, member->channel, 0, CAP_EXTENDED_JOIN, CAP_CHGHOST, ":%s!%s@%s JOIN %s %s :%s",
                          client_p->name, client_p->username,
-                         client_p->host, member->chptr->name,
+                         client_p->host, member->channel->name,
                          client_p->account, client_p->info);
-    sendto_channel_local(client_p, member->chptr, 0, 0, CAP_EXTENDED_JOIN | CAP_CHGHOST, ":%s!%s@%s JOIN :%s",
+    sendto_channel_local(client_p, member->channel, 0, 0, CAP_EXTENDED_JOIN | CAP_CHGHOST, ":%s!%s@%s JOIN :%s",
                          client_p->name, client_p->username,
-                         client_p->host, member->chptr->name);
+                         client_p->host, member->channel->name);
 
     if (nickbuf[0])
-      sendto_channel_local(client_p, member->chptr, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
-                           client_p->servptr->name, member->chptr->name,
+      sendto_channel_local(client_p, member->channel, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
+                           client_p->servptr->name, member->channel->name,
                            modebuf, nickbuf);
   }
 

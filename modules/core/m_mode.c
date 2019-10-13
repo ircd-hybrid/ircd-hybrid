@@ -195,7 +195,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 static void
 m_mode(struct Client *source_p, int parc, char *parv[])
 {
-  struct Membership *member = NULL;
+  struct ChannelMember *member = NULL;
 
   if (EmptyString(parv[1]))
   {
@@ -211,8 +211,8 @@ m_mode(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct Channel *chptr;
-  if ((chptr = hash_find_channel(parv[1])) == NULL)
+  struct Channel *channel;
+  if ((channel = hash_find_channel(parv[1])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
@@ -224,16 +224,16 @@ m_mode(struct Client *source_p, int parc, char *parv[])
     char modebuf[MODEBUFLEN] = "";
     char parabuf[MODEBUFLEN] = "";
 
-    channel_modes(chptr, source_p, modebuf, parabuf);
-    sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS, chptr->name, modebuf, parabuf);
-    sendto_one_numeric(source_p, &me, RPL_CREATIONTIME, chptr->name, chptr->creation_time);
+    channel_modes(channel, source_p, modebuf, parabuf);
+    sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS, channel->name, modebuf, parabuf);
+    sendto_one_numeric(source_p, &me, RPL_CREATIONTIME, channel->name, channel->creation_time);
     return;
   }
 
   if (MyClient(source_p))
-    member = find_channel_link(source_p, chptr);
+    member = find_channel_link(source_p, channel);
 
-  channel_mode_set(source_p, chptr, member, parc - 2, parv + 2);
+  channel_mode_set(source_p, channel, member, parc - 2, parv + 2);
 }
 
 static struct Message mode_msgtab =

@@ -64,25 +64,25 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct Channel *chptr;
-  if ((chptr = hash_find_channel(name)) == NULL)
+  struct Channel *channel;
+  if ((channel = hash_find_channel(name)) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
   /* Normal channel, just be sure they aren't on it. */
-  if (IsMember(source_p, chptr))
+  if (IsMember(source_p, channel))
   {
-    sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, chptr->name);
+    sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, channel->name);
     return;
   }
 
-  if (!((chptr->mode.mode & MODE_INVITEONLY) || chptr->mode.key[0] ||
-        (chptr->mode.limit && dlink_list_length(&chptr->members) >=
-         chptr->mode.limit)))
+  if (!((channel->mode.mode & MODE_INVITEONLY) || channel->mode.key[0] ||
+        (channel->mode.limit && dlink_list_length(&channel->members) >=
+         channel->mode.limit)))
   {
-    sendto_one_numeric(source_p, &me, ERR_CHANOPEN, chptr->name);
+    sendto_one_numeric(source_p, &me, ERR_CHANOPEN, channel->name);
     return;
   }
 
@@ -91,9 +91,9 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     /*
      * Don't allow a knock if the user is banned, or the channel is private.
      */
-    if (PrivateChannel(chptr) || is_banned(chptr, source_p) == true)
+    if (PrivateChannel(channel) || is_banned(channel, source_p) == true)
     {
-      sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, chptr->name);
+      sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, channel->name);
       return;
     }
 
@@ -102,32 +102,32 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 
     if (source_p->connection->knock.count > ConfigChannel.knock_client_count)
     {
-      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->name, "user");
+      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, channel->name, "user");
       return;
     }
 
-    if ((chptr->last_knock + ConfigChannel.knock_delay_channel) > event_base->time.sec_monotonic)
+    if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > event_base->time.sec_monotonic)
     {
-      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, chptr->name, "channel");
+      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, channel->name, "channel");
       return;
     }
 
     source_p->connection->knock.last_attempt = event_base->time.sec_monotonic;
     source_p->connection->knock.count++;
 
-    sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, chptr->name);
+    sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, channel->name);
   }
 
-  chptr->last_knock = event_base->time.sec_monotonic;
-  sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, 0, 0,
+  channel->last_knock_time = event_base->time.sec_monotonic;
+  sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, 0, 0,
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
-                       me.name, chptr->name, chptr->name,
+                       me.name, channel->name, channel->name,
                        source_p->name,
                        source_p->username,
                        source_p->host);
 
   sendto_server(source_p, CAPAB_KNOCK, 0, ":%s KNOCK %s",
-                source_p->id, chptr->name);
+                source_p->id, channel->name);
 }
 
 static struct Message knock_msgtab =

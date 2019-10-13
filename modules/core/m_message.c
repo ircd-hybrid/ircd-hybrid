@@ -145,10 +145,10 @@ flood_attack_client(bool notice, struct Client *source_p, struct Client *target_
  *              - pointer to source Client
  *              - pointer to target channel
  * output       - 1 if target is under flood attack
- * side effects - check for flood attack on target chptr
+ * side effects - check for flood attack on target channel
  */
 static bool
-flood_attack_channel(bool notice, struct Client *source_p, struct Channel *chptr)
+flood_attack_channel(bool notice, struct Client *source_p, struct Channel *channel)
 {
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
     return false;
@@ -159,37 +159,37 @@ flood_attack_channel(bool notice, struct Client *source_p, struct Channel *chptr
   if (HasFlag(source_p, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (chptr->first_received_message_time + GlobalSetOptions.floodtime < event_base->time.sec_monotonic)
+  if (channel->first_received_message_time + GlobalSetOptions.floodtime < event_base->time.sec_monotonic)
   {
-    if (chptr->received_number_of_privmsgs)
-      chptr->received_number_of_privmsgs = 0;
+    if (channel->received_number_of_privmsgs)
+      channel->received_number_of_privmsgs = 0;
     else
-      ClearFloodNoticed(chptr);
+      ClearFloodNoticed(channel);
 
-    chptr->first_received_message_time = event_base->time.sec_monotonic;
+    channel->first_received_message_time = event_base->time.sec_monotonic;
   }
 
-  if (chptr->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
+  if (channel->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
   {
-    if (!IsSetFloodNoticed(chptr))
+    if (!IsSetFloodNoticed(channel))
     {
       sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
                            "Possible Flooder %s on %s target: %s",
                            client_get_name(source_p, HIDE_IP),
-                           source_p->servptr->name, chptr->name);
-      SetFloodNoticed(chptr);
+                           source_p->servptr->name, channel->name);
+      SetFloodNoticed(channel);
     }
 
     if (MyClient(source_p))
     {
       if (notice == false)
         sendto_one_notice(source_p, &me, ":*** Message to %s throttled due to flooding",
-                          chptr->name);
+                          channel->name);
       return true;
     }
   }
 
-  ++chptr->received_number_of_privmsgs;
+  ++channel->received_number_of_privmsgs;
   return false;
 }
 
@@ -205,7 +205,7 @@ flood_attack_channel(bool notice, struct Client *source_p, struct Channel *chptr
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_channel(bool notice, struct Client *source_p, struct Channel *chptr,
+msg_channel(bool notice, struct Client *source_p, struct Channel *channel,
             unsigned int flags, const char *text)
 {
   unsigned int type = 0;
@@ -228,15 +228,15 @@ msg_channel(bool notice, struct Client *source_p, struct Channel *chptr,
   }
 
   /* Chanops and voiced can flood their own channel with impunity */
-  int ret = can_send(chptr, source_p, NULL, text, notice);
+  int ret = can_send(channel, source_p, NULL, text, notice);
   if (ret < 0)
   {
-    if (ret == CAN_SEND_OPV || flood_attack_channel(notice, source_p, chptr) == false)
-      sendto_channel_butone(source_p, source_p, chptr, type, "%s %s%s :%s",
-                            command[notice], prefix, chptr->name, text);
+    if (ret == CAN_SEND_OPV || flood_attack_channel(notice, source_p, channel) == false)
+      sendto_channel_butone(source_p, source_p, channel, type, "%s %s%s :%s",
+                            command[notice], prefix, channel->name, text);
   }
   else if (notice == false)
-    sendto_one_numeric(source_p, &me, ret, chptr->name, text);
+    sendto_one_numeric(source_p, &me, ret, channel->name, text);
 }
 
 /* msg_client()

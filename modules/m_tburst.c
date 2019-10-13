@@ -66,8 +66,8 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
    */
 
 
-  struct Channel *chptr;
-  if ((chptr = hash_find_channel(parv[2])) == NULL)
+  struct Channel *channel;
+  if ((channel = hash_find_channel(parv[2])) == NULL)
     return;
 
   /*
@@ -86,18 +86,18 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
   bool accept_remote = false;
   if (HasFlag(source_p, FLAGS_SERVICE))
     accept_remote = true;
-  else if (remote_channel_ts < chptr->creation_time)
+  else if (remote_channel_ts < channel->creation_time)
     accept_remote = true;
-  else if (remote_channel_ts == chptr->creation_time)
-    if (remote_topic_ts > chptr->topic_time)
+  else if (remote_channel_ts == channel->creation_time)
+    if (remote_topic_ts > channel->topic_time)
       accept_remote = true;
 
   if (accept_remote == true)
   {
-    bool topic_differs = strncmp(chptr->topic, topic, sizeof(chptr->topic) - 1);
+    bool topic_differs = strncmp(channel->topic, topic, sizeof(channel->topic) - 1);
     bool hidden_server = (ConfigServerHide.hide_servers || IsHidden(source_p));
 
-    channel_set_topic(chptr, topic, setby, remote_topic_ts, false);
+    channel_set_topic(channel, topic, setby, remote_topic_ts, false);
 
     sendto_server(source_p, CAPAB_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
                   source_p->id, parv[1], parv[2], parv[3], setby, topic);
@@ -105,13 +105,13 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
     if (topic_differs == true)
     {
       if (IsClient(source_p))
-        sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
+        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
                              source_p->name, source_p->username, source_p->host,
-                             chptr->name, chptr->topic);
+                             channel->name, channel->topic);
       else
-        sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :%s",
+        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
                              hidden_server ? me.name : source_p->name,
-                             chptr->name, chptr->topic);
+                             channel->name, channel->topic);
     }
   }
 }

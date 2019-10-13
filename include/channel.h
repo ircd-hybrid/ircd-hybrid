@@ -80,10 +80,10 @@ struct Channel
 
   uintmax_t creation_time;  /**< Real time */
   uintmax_t topic_time;  /**< Real time */
-  uintmax_t last_knock;  /**< Don't allow knock to flood; monotonic time */
-  uintmax_t last_invite;  /**< Monotonic time */
+  uintmax_t last_knock_time;  /**< Don't allow knock to flood; monotonic time */
+  uintmax_t last_invite_time;  /**< Monotonic time */
   uintmax_t last_join_time;  /**< Monotonic time */
-  uintmax_t first_received_message_time; /*!< Channel flood control; monotonic time */
+  uintmax_t first_received_message_time;  /*!< Channel flood control; monotonic time */
   unsigned int flags;
   unsigned int received_number_of_privmsgs;
 
@@ -100,15 +100,15 @@ struct Channel
   size_t name_len;
 };
 
-/*! \brief Membership structure */
-struct Membership
+/*! \brief ChannelMember structure */
+struct ChannelMember
 {
-  dlink_node locchannode;  /**< link to chptr->members_local */
-  dlink_node channode;     /**< link to chptr->members    */
-  dlink_node usernode;     /**< link to source_p->channel */
-  struct Channel *chptr;   /**< Channel pointer */
-  struct Client *client_p; /**< Client pointer */
-  unsigned int flags;      /**< user/channel flags, e.g. CHFL_CHANOP */
+  dlink_node locchannode;  /**< link to channel->members_local */
+  dlink_node channode;  /**< link to channel->members */
+  dlink_node usernode;  /**< link to source_p->channel */
+  struct Channel *channel;  /**< Channel pointer */
+  struct Client *client;  /**< Client pointer */
+  unsigned int flags;  /**< user/channel flags, e.g. CHFL_CHANOP */
 };
 
 /*! \brief Ban structure. Used for b/e/I n!u\@h masks */
@@ -130,24 +130,24 @@ struct Ban
 struct Invite
 {
   dlink_node user_node;  /**< link to client_p->connection->invited */
-  dlink_node chan_node;  /**< link to chptr->invites */
-  struct Channel *chptr;  /**< Channel pointer */
-  struct Client *client_p;  /**< Client pointer */
+  dlink_node chan_node;  /**< link to channel->invites */
+  struct Channel *channel;  /**< Channel pointer */
+  struct Client *client;  /**< Client pointer */
   uintmax_t when;  /**< Time the invite has been created; monotonic time */
 };
 
 
 extern const dlink_list *channel_get_list(void);
 extern bool channel_check_name(const char *, bool);
-extern int can_send(struct Channel *, struct Client *, struct Membership *, const char *, bool);
+extern int can_send(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool);
 extern bool is_banned(const struct Channel *, const struct Client *);
-extern int has_member_flags(const struct Membership *, const unsigned int);
+extern int has_member_flags(const struct ChannelMember *, const unsigned int);
 
 extern void channel_do_join(struct Client *, char *, char *);
 extern void channel_do_part(struct Client *, char *, const char *);
 extern void remove_ban(struct Ban *, dlink_list *);
 extern void add_user_to_channel(struct Channel *, struct Client *, unsigned int, bool);
-extern void remove_user_from_channel(struct Membership *);
+extern void remove_user_from_channel(struct ChannelMember *);
 extern void channel_member_names(struct Client *, struct Channel *, bool);
 extern void add_invite(struct Channel *, struct Client *);
 extern void del_invite(struct Invite *);
@@ -158,8 +158,8 @@ extern void check_spambot_warning(struct Client *, const char *);
 extern void channel_free(struct Channel *);
 extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, bool);
 
-extern const char *get_member_status(const struct Membership *, bool);
+extern const char *get_member_status(const struct ChannelMember *, bool);
 
 extern struct Channel *channel_make(const char *);
-extern struct Membership *find_channel_link(const struct Client *, const struct Channel *);
+extern struct ChannelMember *find_channel_link(const struct Client *, const struct Channel *);
 #endif  /* INCLUDED_channel_h */

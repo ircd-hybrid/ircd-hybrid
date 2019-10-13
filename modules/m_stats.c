@@ -376,19 +376,19 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   /* Count up all members, invites, ban lists, except lists, Invex lists */
   DLINK_FOREACH(node, channel_get_list()->head)
   {
-    const struct Channel *chptr = node->data;
+    const struct Channel *channel = node->data;
 
-    channel_members += dlink_list_length(&chptr->members);
-    channel_invites += dlink_list_length(&chptr->invites);
+    channel_members += dlink_list_length(&channel->members);
+    channel_invites += dlink_list_length(&channel->invites);
 
-    channel_bans += dlink_list_length(&chptr->banlist);
-    channel_ban_memory += dlink_list_length(&chptr->banlist) * sizeof(struct Ban);
+    channel_bans += dlink_list_length(&channel->banlist);
+    channel_ban_memory += dlink_list_length(&channel->banlist) * sizeof(struct Ban);
 
-    channel_except += dlink_list_length(&chptr->exceptlist);
-    channel_except_memory += dlink_list_length(&chptr->exceptlist) * sizeof(struct Ban);
+    channel_except += dlink_list_length(&channel->exceptlist);
+    channel_except_memory += dlink_list_length(&channel->exceptlist) * sizeof(struct Ban);
 
-    channel_invex += dlink_list_length(&chptr->invexlist);
-    channel_invex_memory += dlink_list_length(&chptr->invexlist) * sizeof(struct Ban);
+    channel_invex += dlink_list_length(&channel->invexlist);
+    channel_invex_memory += dlink_list_length(&channel->invexlist) * sizeof(struct Ban);
   }
 
   safelist_count = dlink_list_length(&listing_client_list);
@@ -469,7 +469,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Channel members %u(%zu) invites %u(%zu)",
                      channel_members,
-                     channel_members * sizeof(struct Membership),
+                     channel_members * sizeof(struct ChannelMember),
                      channel_invites,
                      channel_invites * sizeof(struct Invite));
 

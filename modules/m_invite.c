@@ -61,7 +61,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
     DLINK_FOREACH(node, source_p->connection->invited.head)
       sendto_one_numeric(source_p, &me, RPL_INVITELIST,
-                         ((const struct Invite *)node->data)->chptr->name);
+                         ((const struct Invite *)node->data)->channel->name);
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFINVITELIST);
     return;
@@ -80,29 +80,29 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct Channel *chptr;
-  if ((chptr = hash_find_channel(parv[2])) == NULL)
+  struct Channel *channel;
+  if ((channel = hash_find_channel(parv[2])) == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return;
   }
 
-  struct Membership *member;
-  if ((member = find_channel_link(source_p, chptr)) == NULL)
+  struct ChannelMember *member;
+  if ((member = find_channel_link(source_p, channel)) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, chptr->name);
+    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
     return;
   }
 
   if (!has_member_flags(member, CHFL_CHANOP | CHFL_HALFOP))
   {
-    sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, chptr->name);
+    sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;
   }
 
-  if (IsMember(target_p, chptr))
+  if (IsMember(target_p, channel))
   {
-    sendto_one_numeric(source_p, &me, ERR_USERONCHANNEL, target_p->name, chptr->name);
+    sendto_one_numeric(source_p, &me, ERR_USERONCHANNEL, target_p->name, channel->name);
     return;
   }
 
@@ -111,50 +111,50 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
   if (source_p->connection->invite.count > ConfigChannel.invite_client_count)
   {
-    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->name, "user");
+    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, channel->name, "user");
     return;
   }
 
-  if ((chptr->last_invite + ConfigChannel.invite_delay_channel) > event_base->time.sec_monotonic)
+  if ((channel->last_invite_time + ConfigChannel.invite_delay_channel) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, chptr->name, "channel");
+    sendto_one_numeric(source_p, &me, ERR_TOOMANYINVITE, channel->name, "channel");
     return;
   }
 
   source_p->connection->invite.last_attempt = event_base->time.sec_monotonic;
   source_p->connection->invite.count++;
 
-  sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, chptr->name);
+  sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, channel->name);
 
   if (target_p->away[0])
     sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
 
-  chptr->last_invite = event_base->time.sec_monotonic;
+  channel->last_invite_time = event_base->time.sec_monotonic;
 
   if (MyConnect(target_p))
   {
     sendto_one(target_p, ":%s!%s@%s INVITE %s :%s",
                source_p->name, source_p->username,
                source_p->host,
-               target_p->name, chptr->name);
+               target_p->name, channel->name);
 
-    if (HasCMode(chptr, MODE_INVITEONLY))
-      add_invite(chptr, target_p);  /* Add the invite if channel is +i */
+    if (HasCMode(channel, MODE_INVITEONLY))
+      add_invite(channel, target_p);  /* Add the invite if channel is +i */
   }
 
-  if (HasCMode(chptr, MODE_INVITEONLY))
+  if (HasCMode(channel, MODE_INVITEONLY))
   {
-    sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, 0, CAP_INVITE_NOTIFY,
+    sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, 0, CAP_INVITE_NOTIFY,
                          ":%s NOTICE %%%s :%s is inviting %s to %s.",
-                         me.name, chptr->name, source_p->name, target_p->name, chptr->name);
-    sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, CAP_INVITE_NOTIFY, 0,
+                         me.name, channel->name, source_p->name, target_p->name, channel->name);
+    sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, CAP_INVITE_NOTIFY, 0,
                          ":%s!%s@%s INVITE %s %s", source_p->name, source_p->username,
-                         source_p->host, target_p->name, chptr->name);
+                         source_p->host, target_p->name, channel->name);
   }
 
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
-                chptr->name, chptr->creation_time);
+                channel->name, channel->creation_time);
 }
 
 /*! \brief INVITE command handler
@@ -180,43 +180,43 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   if ((target_p = find_person(source_p, parv[1])) == NULL)
     return;
 
-  struct Channel *chptr;
-  if ((chptr = hash_find_channel(parv[2])) == NULL)
+  struct Channel *channel;
+  if ((channel = hash_find_channel(parv[2])) == NULL)
     return;
 
-  if (IsMember(target_p, chptr))
+  if (IsMember(target_p, channel))
     return;
 
   if (parc > 3 && IsDigit(*parv[3]))
-    if (strtoumax(parv[3], NULL, 10) > chptr->creation_time)
+    if (strtoumax(parv[3], NULL, 10) > channel->creation_time)
       return;
 
-  chptr->last_invite = event_base->time.sec_monotonic;
+  channel->last_invite_time = event_base->time.sec_monotonic;
 
   if (MyConnect(target_p))
   {
     sendto_one(target_p, ":%s!%s@%s INVITE %s :%s",
                source_p->name, source_p->username,
                source_p->host,
-               target_p->name, chptr->name);
+               target_p->name, channel->name);
 
-    if (HasCMode(chptr, MODE_INVITEONLY))
-      add_invite(chptr, target_p);  /* Add the invite if channel is +i */
+    if (HasCMode(channel, MODE_INVITEONLY))
+      add_invite(channel, target_p);  /* Add the invite if channel is +i */
   }
 
-  if (HasCMode(chptr, MODE_INVITEONLY))
+  if (HasCMode(channel, MODE_INVITEONLY))
   {
-    sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, 0, CAP_INVITE_NOTIFY,
+    sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, 0, CAP_INVITE_NOTIFY,
                          ":%s NOTICE %%%s :%s is inviting %s to %s.",
-                         me.name, chptr->name, source_p->name, target_p->name, chptr->name);
-    sendto_channel_local(NULL, chptr, CHFL_CHANOP | CHFL_HALFOP, CAP_INVITE_NOTIFY, 0,
+                         me.name, channel->name, source_p->name, target_p->name, channel->name);
+    sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, CAP_INVITE_NOTIFY, 0,
                          ":%s!%s@%s INVITE %s %s", source_p->name, source_p->username,
-                         source_p->host, target_p->name, chptr->name);
+                         source_p->host, target_p->name, channel->name);
   }
 
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
-                chptr->name, chptr->creation_time);
+                channel->name, channel->creation_time);
 }
 
 

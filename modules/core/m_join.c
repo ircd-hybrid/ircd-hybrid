@@ -88,7 +88,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   bool keep_new_modes = true;
   bool isnew = false;
   const char *servername = NULL;
-  struct Channel *chptr = NULL;
+  struct Channel *channel = NULL;
   struct Mode mode, *oldmode;
   char modebuf[MODEBUFLEN];
   char parabuf[MODEBUFLEN];
@@ -110,36 +110,36 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   mode.mode = mode.limit = 0;
   mode.key[0] = '\0';
 
-  if ((chptr = hash_find_channel(parv[2])) == NULL)
+  if ((channel = hash_find_channel(parv[2])) == NULL)
   {
     isnew = true;
-    chptr = channel_make(parv[2]);
+    channel = channel_make(parv[2]);
   }
 
   newts   = strtoumax(parv[1], NULL, 10);
-  oldts   = chptr->creation_time;
-  oldmode = &chptr->mode;
+  oldts   = channel->creation_time;
+  oldmode = &channel->mode;
 
   if (newts == 0 && isnew == false && oldts)
   {
-    sendto_channel_local(NULL, chptr, 0, 0, 0,
+    sendto_channel_local(NULL, channel, 0, 0, 0,
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
-                         me.name, chptr->name, chptr->name, oldts);
+                         me.name, channel->name, channel->name, oldts);
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Server %s changing TS on %s from %ju to 0",
-                         source_p->name, chptr->name, oldts);
+                         source_p->name, channel->name, oldts);
   }
 
   if (isnew == true)
-    chptr->creation_time = newts;
+    channel->creation_time = newts;
   else if (newts == 0 || oldts == 0)
-    chptr->creation_time = 0;
+    channel->creation_time = 0;
   else if (newts == oldts)
     ;
   else if (newts < oldts)
   {
     keep_our_modes = false;
-    chptr->creation_time = newts;
+    channel->creation_time = newts;
   }
   else
     keep_new_modes = false;
@@ -157,25 +157,25 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
 
   set_final_mode(&mode, oldmode, modebuf, parabuf);
-  chptr->mode = mode;
+  channel->mode = mode;
 
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
-    remove_our_modes(chptr, source_p);
+    remove_our_modes(channel, source_p);
 
-    if (chptr->topic[0])
+    if (channel->topic[0])
     {
-      channel_set_topic(chptr, "", "", 0, false);
-      sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s TOPIC %s :",
+      channel_set_topic(channel, "", "", 0, false);
+      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
                            (IsHidden(source_p) ||
                            ConfigServerHide.hide_servers) ?
-                           me.name : source_p->name, chptr->name);
+                           me.name : source_p->name, channel->name);
     }
 
-    sendto_channel_local(NULL, chptr, 0, 0, 0,
+    sendto_channel_local(NULL, channel, 0, 0, 0,
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
-                         me.name, chptr->name, chptr->name, oldts, newts);
+                         me.name, channel->name, channel->name, oldts, newts);
   }
 
   if (*modebuf)
@@ -185,30 +185,30 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
     /* This _SHOULD_ be to ALL_MEMBERS
      * It contains only +imnpstlk, etc */
-    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s MODE %s %s %s",
-                         servername, chptr->name, modebuf, parabuf);
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
+                         servername, channel->name, modebuf, parabuf);
   }
 
-  if (!IsMember(source_p, chptr))
+  if (!IsMember(source_p, channel))
   {
-    add_user_to_channel(chptr, source_p, 0, true);
+    add_user_to_channel(channel, source_p, 0, true);
 
-    sendto_channel_local(NULL, chptr, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+    sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                          source_p->name, source_p->username,
-                         source_p->host, chptr->name, source_p->account, source_p->info);
-    sendto_channel_local(NULL, chptr, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+                         source_p->host, channel->name, source_p->account, source_p->info);
+    sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                          source_p->name, source_p->username,
-                         source_p->host, chptr->name);
+                         source_p->host, channel->name);
 
     if (source_p->away[0])
-      sendto_channel_local(source_p, chptr, 0, CAP_AWAY_NOTIFY, 0,
+      sendto_channel_local(source_p, channel, 0, CAP_AWAY_NOTIFY, 0,
                            ":%s!%s@%s AWAY :%s",
                            source_p->name, source_p->username,
                            source_p->host, source_p->away);
   }
 
   sendto_server(source_p, 0, 0, ":%s JOIN %ju %s +",
-                source_p->id, chptr->creation_time, chptr->name);
+                source_p->id, channel->creation_time, channel->name);
 }
 
 /* set_final_mode
@@ -316,11 +316,11 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
  *                chanop modes etc., this side lost the TS.
  */
 static void
-remove_our_modes(struct Channel *chptr, struct Client *source_p)
+remove_our_modes(struct Channel *channel, struct Client *source_p)
 {
-  remove_a_mode(chptr, source_p, CHFL_CHANOP, 'o');
-  remove_a_mode(chptr, source_p, CHFL_HALFOP, 'h');
-  remove_a_mode(chptr, source_p, CHFL_VOICE, 'v');
+  remove_a_mode(channel, source_p, CHFL_CHANOP, 'o');
+  remove_a_mode(channel, source_p, CHFL_HALFOP, 'h');
+  remove_a_mode(channel, source_p, CHFL_VOICE, 'v');
 }
 
 /* remove_a_mode()
@@ -330,7 +330,7 @@ remove_our_modes(struct Channel *chptr, struct Client *source_p)
  * side effects - remove ONE mode from a channel
  */
 static void
-remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const char flag)
+remove_a_mode(struct Channel *channel, struct Client *source_p, int mask, const char flag)
 {
   dlink_node *node = NULL;
   char lmodebuf[MODEBUFLEN];
@@ -346,16 +346,16 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
 
   sendbuf[0] = '\0';
 
-  DLINK_FOREACH(node, chptr->members.head)
+  DLINK_FOREACH(node, channel->members.head)
   {
-    struct Membership *member = node->data;
+    struct ChannelMember *member = node->data;
 
     if ((member->flags & mask) == 0)
       continue;
 
     member->flags &= ~mask;
 
-    lpara[count++] = member->client_p->name;
+    lpara[count++] = member->client->name;
 
     *mbuf++ = flag;
 
@@ -372,11 +372,11 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
       }
 
       *mbuf = '\0';
-      sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s MODE %s %s%s",
+      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
                            (IsHidden(source_p) ||
                            ConfigServerHide.hide_servers) ?
                            me.name : source_p->name,
-                           chptr->name, lmodebuf, sendbuf);
+                           channel->name, lmodebuf, sendbuf);
       mbuf = lmodebuf;
       *mbuf++ = '-';
       count = 0;
@@ -397,9 +397,9 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, int mask, const ch
       strlcat(sendbuf, lpara[lcount], sizeof(sendbuf));
     }
 
-    sendto_channel_local(NULL, chptr, 0, 0, 0, ":%s MODE %s %s%s",
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
                          (IsHidden(source_p) || ConfigServerHide.hide_servers) ?
-                         me.name : source_p->name, chptr->name, lmodebuf, sendbuf);
+                         me.name : source_p->name, channel->name, lmodebuf, sendbuf);
   }
 }
 

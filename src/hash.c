@@ -127,18 +127,18 @@ hash_add_client(struct Client *client_p)
  * inputs       - pointer to channel
  * output       - NONE
  * side effects - Adds a channel's name in the proper hash linked
- *                list, can't fail. chptr must have a non-null name
+ *                list, can't fail. channel must have a non-null name
  *                or expect a coredump. As before the name is taken
- *                from chptr->name, we do hash its entire lenght
+ *                from channel->name, we do hash its entire lenght
  *                since this proved to be statistically faster
  */
 void
-hash_add_channel(struct Channel *chptr)
+hash_add_channel(struct Channel *channel)
 {
-  const unsigned int hashv = strhash(chptr->name);
+  const unsigned int hashv = strhash(channel->name);
 
-  chptr->hnextch = channelTable[hashv];
-  channelTable[hashv] = chptr;
+  channel->hnextch = channelTable[hashv];
+  channelTable[hashv] = channel;
 }
 
 void
@@ -220,26 +220,26 @@ hash_del_client(struct Client *client_p)
  *                hash linked list
  */
 void
-hash_del_channel(struct Channel *chptr)
+hash_del_channel(struct Channel *channel)
 {
-  const unsigned int hashv = strhash(chptr->name);
+  const unsigned int hashv = strhash(channel->name);
   struct Channel *tmp = channelTable[hashv];
 
   if (tmp)
   {
-    if (tmp == chptr)
+    if (tmp == channel)
     {
-      channelTable[hashv] = chptr->hnextch;
-      chptr->hnextch = chptr;
+      channelTable[hashv] = channel->hnextch;
+      channel->hnextch = channel;
     }
     else
     {
-      while (tmp->hnextch != chptr)
+      while (tmp->hnextch != channel)
         if ((tmp = tmp->hnextch) == NULL)
           return;
 
       tmp->hnextch = tmp->hnextch->hnextch;
-      chptr->hnextch = chptr;
+      channel->hnextch = channel;
     }
   }
 }
@@ -353,28 +353,28 @@ struct Channel *
 hash_find_channel(const char *name)
 {
   const unsigned int hashv = strhash(name);
-  struct Channel *chptr = NULL;
+  struct Channel *channel = NULL;
 
-  if ((chptr = channelTable[hashv]))
+  if ((channel = channelTable[hashv]))
   {
-    if (irccmp(name, chptr->name))
+    if (irccmp(name, channel->name))
     {
       struct Channel *prev;
 
-      while (prev = chptr, (chptr = chptr->hnextch))
+      while (prev = channel, (channel = channel->hnextch))
       {
-        if (!irccmp(name, chptr->name))
+        if (!irccmp(name, channel->name))
         {
-          prev->hnextch = chptr->hnextch;
-          chptr->hnextch = channelTable[hashv];
-          channelTable[hashv] = chptr;
+          prev->hnextch = channel->hnextch;
+          channel->hnextch = channelTable[hashv];
+          channelTable[hashv] = channel;
           break;
         }
       }
     }
   }
 
-  return chptr;
+  return channel;
 }
 
 /* hash_get_bucket(int type, unsigned int hashv)
@@ -503,43 +503,43 @@ list_allow_channel(const char *name, const struct ListTask *lt)
  * side effects -
  */
 static void
-list_one_channel(struct Client *source_p, struct Channel *chptr)
+list_one_channel(struct Client *source_p, struct Channel *channel)
 {
   const struct ListTask *const lt = source_p->connection->list_task;
   char listbuf[MODEBUFLEN] = "";
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
 
-  if (SecretChannel(chptr) &&
-      !(HasUMode(source_p, UMODE_ADMIN) || IsMember(source_p, chptr)))
+  if (SecretChannel(channel) &&
+      !(HasUMode(source_p, UMODE_ADMIN) || IsMember(source_p, channel)))
     return;
 
-  if (dlink_list_length(&chptr->members) < lt->users_min ||
-      dlink_list_length(&chptr->members) > lt->users_max ||
-      (chptr->creation_time != 0 &&
-       ((unsigned int)chptr->creation_time < lt->created_min ||
-        (unsigned int)chptr->creation_time > lt->created_max)) ||
-      (unsigned int)chptr->topic_time < lt->topicts_min ||
-      (chptr->topic_time ? (unsigned int)chptr->topic_time : UINT_MAX) >
+  if (dlink_list_length(&channel->members) < lt->users_min ||
+      dlink_list_length(&channel->members) > lt->users_max ||
+      (channel->creation_time != 0 &&
+       ((unsigned int)channel->creation_time < lt->created_min ||
+        (unsigned int)channel->creation_time > lt->created_max)) ||
+      (unsigned int)channel->topic_time < lt->topicts_min ||
+      (channel->topic_time ? (unsigned int)channel->topic_time : UINT_MAX) >
       lt->topicts_max)
     return;
 
-  if (lt->topic[0] && match(lt->topic, chptr->topic))
+  if (lt->topic[0] && match(lt->topic, channel->topic))
     return;
 
-  if (list_allow_channel(chptr->name, lt) == false)
+  if (list_allow_channel(channel->name, lt) == false)
     return;
 
-  channel_modes(chptr, source_p, modebuf, parabuf);
+  channel_modes(channel, source_p, modebuf, parabuf);
 
-  if (chptr->topic[0])
+  if (channel->topic[0])
     snprintf(listbuf, sizeof(listbuf), "[%s] ", modebuf);
   else
     snprintf(listbuf, sizeof(listbuf), "[%s]",  modebuf);
 
-  sendto_one_numeric(source_p, &me, RPL_LIST, chptr->name,
-                     dlink_list_length(&chptr->members),
-                     listbuf, chptr->topic);
+  sendto_one_numeric(source_p, &me, RPL_LIST, channel->name,
+                     dlink_list_length(&channel->members),
+                     listbuf, channel->topic);
 }
 
 /* safe_list_channels()
@@ -557,7 +557,7 @@ void
 safe_list_channels(struct Client *source_p, bool only_unmasked_channels)
 {
   struct ListTask *const lt = source_p->connection->list_task;
-  struct Channel *chptr = NULL;
+  struct Channel *channel = NULL;
 
   if (only_unmasked_channels == false)
   {
@@ -569,8 +569,8 @@ safe_list_channels(struct Client *source_p, bool only_unmasked_channels)
         return;  /* Still more to do */
       }
 
-      for (chptr = channelTable[i]; chptr; chptr = chptr->hnextch)
-        list_one_channel(source_p, chptr);
+      for (channel = channelTable[i]; channel; channel = channel->hnextch)
+        list_one_channel(source_p, channel);
     }
   }
   else
@@ -578,8 +578,8 @@ safe_list_channels(struct Client *source_p, bool only_unmasked_channels)
     dlink_node *node;
 
     DLINK_FOREACH(node, lt->show_mask.head)
-      if ((chptr = hash_find_channel(node->data)))
-        list_one_channel(source_p, chptr);
+      if ((channel = hash_find_channel(node->data)))
+        list_one_channel(source_p, channel);
   }
 
   free_list_task(source_p);

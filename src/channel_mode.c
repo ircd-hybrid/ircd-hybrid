@@ -676,7 +676,7 @@ get_channel_access(const struct Client *source_p,
     return CHACCESS_NOTONCHAN;
 
   /* Just to be sure.. */
-  assert(source_p == member->client_p);
+  assert(source_p == member->client);
 
   if (has_member_flags(member, CHFL_CHANOP))
     return CHACCESS_CHANOP;

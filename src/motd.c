@@ -102,7 +102,7 @@ motd_cache(struct Motd *motd)
   char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
   char *tmp = NULL;
   unsigned int i = 0;
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   assert(motd);
   assert(motd->path);
@@ -176,7 +176,7 @@ motd_cache(struct Motd *motd)
 static void
 motd_decache(struct Motd *motd)
 {
-  struct MotdCache *cache = NULL;
+  struct MotdCache *cache;
 
   assert(motd);
 

@@ -167,11 +167,11 @@ sendq_unblocked(fde_t *F, void *data)
 void
 send_queued_write(struct Client *to)
 {
-  ssize_t retlen = 0;
+  ssize_t retlen;
 
   /*
-   ** Once socket is marked dead, we cannot start writing to it,
-   ** even if the error is removed...
+   * Once socket is marked dead, we cannot start writing to it,
+   * even if the error is removed...
    */
   if (IsDead(to) || HasFlag(to, FLAGS_BLOCKED))
     return;  /* no use calling send() now */
@@ -246,7 +246,6 @@ void
 sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
   va_list args;
-  const char *numstr = NULL;
 
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
@@ -260,6 +259,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
 
   va_start(args, numeric);
 
+  const char *numstr;
   if (numeric & SND_EXPLICIT)
     numstr = va_arg(args, const char *);
   else

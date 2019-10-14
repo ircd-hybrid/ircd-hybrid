@@ -96,10 +96,10 @@ struct RehashStruct
 
 static const struct RehashStruct rehash_cmd_table[] =
 {
-  { "CONF", rehash_conf },
-  { "MOTD", rehash_motd },
-  { "DNS",  rehash_dns  },
-  { NULL,   NULL        }
+  { .option = "CONF", .handler = rehash_conf },
+  { .option = "MOTD", .handler = rehash_motd },
+  { .option = "DNS", .handler = rehash_dns },
+  { .option = NULL }
 };
 
 /*! \brief REHASH command handler
@@ -159,7 +159,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
     if (!EmptyString(server))
       sendto_match_servs(source_p, server, 0, "REHASH %s %s", server, option);
 
-    if (EmptyString(server) || !match(server, me.name))
+    if (EmptyString(server) || match(server, me.name) == 0)
       tab->handler(source_p);
 
     return;

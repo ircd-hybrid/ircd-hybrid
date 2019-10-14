@@ -147,7 +147,7 @@ channel_send_members(struct Client *client_p, const struct Channel *channel,
                      const char *modebuf, const char *parabuf)
 {
   dlink_node *node;
-  char buf[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
 
@@ -210,8 +210,8 @@ channel_send_mask_list(struct Client *client_p, const struct Channel *channel,
                        const dlink_list *list, const char flag)
 {
   dlink_node *node;
-  char mbuf[IRCD_BUFSIZE] = "";
-  char pbuf[IRCD_BUFSIZE] = "";
+  char mbuf[IRCD_BUFSIZE];
+  char pbuf[IRCD_BUFSIZE];
   int tlen, mlen, cur_len;
   char *pp = pbuf;
 
@@ -419,8 +419,7 @@ void
 channel_member_names(struct Client *client_p, struct Channel *channel, bool show_eon)
 {
   dlink_node *node;
-  char buf[IRCD_BUFSIZE + 1] = "";
-  char *t = NULL, *start = NULL;
+  char buf[IRCD_BUFSIZE + 1];
   int tlen = 0;
   bool is_member = IsMember(client_p, channel);
   bool multi_prefix = HasCap(client_p, CAP_MULTI_PREFIX) != 0;
@@ -430,10 +429,9 @@ channel_member_names(struct Client *client_p, struct Channel *channel, bool show
 
   if (PubChannel(channel) || is_member == true)
   {
-    t = buf + snprintf(buf, sizeof(buf), numeric_form(RPL_NAMREPLY),
-                       me.name, client_p->name,
-                       channel_pub_or_secret(channel), channel->name);
-    start = t;
+    char *t = buf + snprintf(buf, sizeof(buf), numeric_form(RPL_NAMREPLY), me.name, client_p->name,
+                             channel_pub_or_secret(channel), channel->name);
+    char *start = t;
 
     DLINK_FOREACH(node, channel->members.head)
     {
@@ -770,7 +768,7 @@ int
 can_send(struct Channel *channel, struct Client *client_p,
          struct ChannelMember *member, const char *message, bool notice)
 {
-  const struct ResvItem *resv = NULL;
+  const struct ResvItem *resv;
 
   if (IsServer(client_p) || HasFlag(client_p, FLAGS_SERVICE))
     return CAN_SEND_OPV;

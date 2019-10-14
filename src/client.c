@@ -203,7 +203,7 @@ client_free(struct Client *client_p)
 static void
 check_pings_list(dlink_list *list)
 {
-  char buf[32] = "";  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
+  char buf[32];  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
   dlink_node *node, *node_next;
 
   DLINK_FOREACH_SAFE(node, node_next, list->head)
@@ -343,7 +343,7 @@ check_pings(void *unused)
 void
 check_conf_klines(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
   const void *ptr;
 
   DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
@@ -470,7 +470,10 @@ find_person(const struct Client *source_p, const char *name)
   else
     target_p = hash_find_client(name);
 
-  return (target_p && IsClient(target_p)) ? target_p : NULL;
+  if (target_p && IsClient(target_p))
+    return target_p;
+
+  return NULL;
 }
 
 /*
@@ -824,7 +827,7 @@ exit_client(struct Client *source_p, const char *comment)
 
   if (IsServer(source_p))
   {
-    char splitstr[HOSTLEN + HOSTLEN + 2] = "";
+    char splitstr[HOSTLEN + HOSTLEN + 2];
 
     assert(source_p->serv);
     assert(source_p->servptr);

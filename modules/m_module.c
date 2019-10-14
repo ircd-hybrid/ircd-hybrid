@@ -197,11 +197,11 @@ struct ModuleStruct
 
 static const struct ModuleStruct module_cmd_table[] =
 {
-  { "LOAD",   module_load,   true  },
-  { "UNLOAD", module_unload, true  },
-  { "RELOAD", module_reload, true  },
-  { "LIST",   module_list,   false },
-  { NULL,     NULL,          false }
+  { .cmd = "LOAD", .handler = module_load, .arg_required = true },
+  { .cmd = "UNLOAD", .handler = module_unload, .arg_required = true },
+  { .cmd = "RELOAD", .handler = module_reload, .arg_required = true },
+  { .cmd = "LIST", .handler = module_list },
+  { .cmd = NULL }
 };
 
 /*! \brief MODULE command handler

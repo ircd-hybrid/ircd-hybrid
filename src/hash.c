@@ -255,7 +255,7 @@ hash_find_client(const char *name)
 
       while (prev = client_p, (client_p = client_p->hnext))
       {
-        if (!irccmp(name, client_p->name))
+        if (irccmp(name, client_p->name) == 0)
         {
           prev->hnext = client_p->hnext;
           client_p->hnext = clientTable[hashv];
@@ -283,7 +283,7 @@ hash_find_id(const char *name)
 
       while (prev = client_p, (client_p = client_p->idhnext))
       {
-        if (!strcmp(name, client_p->id))
+        if (strcmp(name, client_p->id) == 0)
         {
           prev->idhnext = client_p->idhnext;
           client_p->idhnext = idTable[hashv];
@@ -301,7 +301,7 @@ struct Client *
 hash_find_server(const char *name)
 {
   const unsigned int hashv = strhash(name);
-  struct Client *client_p = NULL;
+  struct Client *client_p;
 
   if (IsDigit(*name) && strlen(name) == IRC_MAXSID)
     return hash_find_id(name);
@@ -316,7 +316,7 @@ hash_find_server(const char *name)
       while (prev = client_p, (client_p = client_p->hnext))
       {
         if ((IsServer(client_p) || IsMe(client_p)) &&
-            !irccmp(name, client_p->name))
+            irccmp(name, client_p->name) == 0)
         {
           prev->hnext = client_p->hnext;
           client_p->hnext = clientTable[hashv];
@@ -342,7 +342,7 @@ struct Channel *
 hash_find_channel(const char *name)
 {
   const unsigned int hashv = strhash(name);
-  struct Channel *channel = NULL;
+  struct Channel *channel;
 
   if ((channel = channelTable[hashv]))
   {
@@ -352,7 +352,7 @@ hash_find_channel(const char *name)
 
       while (prev = channel, (channel = channel->hnextch))
       {
-        if (!irccmp(name, channel->name))
+        if (irccmp(name, channel->name) == 0)
         {
           prev->hnextch = channel->hnextch;
           channel->hnextch = channelTable[hashv];
@@ -546,7 +546,7 @@ void
 safe_list_channels(struct Client *source_p, bool only_unmasked_channels)
 {
   struct ListTask *const lt = source_p->connection->list_task;
-  struct Channel *channel = NULL;
+  struct Channel *channel;
 
   if (only_unmasked_channels == false)
   {

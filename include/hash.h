@@ -42,7 +42,6 @@ enum
   HASH_TYPE_CHANNEL
 };
 
-extern void hash_init(void);
 extern void hash_add_client(struct Client *);
 extern void hash_del_client(struct Client *);
 extern void hash_add_channel(struct Channel *);

@@ -41,8 +41,6 @@
 #include "dbuf.h"
 
 
-static unsigned int hashf_xor_key;
-
 /* The actual hash tables, They MUST be of the same HASHSIZE, variable
  * size tables could be supported but the rehash routine should also
  * rebuild the transformation maps, I kept the tables of equal size
@@ -52,21 +50,6 @@ static struct Client *idTable[HASHSIZE];
 static struct Client *clientTable[HASHSIZE];
 static struct Channel *channelTable[HASHSIZE];
 
-
-/* hash_init()
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - Initialize the maps used by hash
- *                functions and clear the tables
- */
-void
-hash_init(void)
-{
-  do
-    hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
-  while (!hashf_xor_key);
-}
 
 /*
  * New hash function based on the Fowler/Noll/Vo (FNV) algorithm from
@@ -78,11 +61,17 @@ hash_init(void)
 unsigned int
 strhash(const char *name)
 {
+  static unsigned int hashf_xor_key = 0;
   const unsigned char *p = (const unsigned char *)name;
   unsigned int hval = FNV1_32_INIT;
 
   if (EmptyString(p))
     return 0;
+
+  if (hashf_xor_key == 0)
+    do
+      hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
+    while (hashf_xor_key == 0);
 
   for (; *p; ++p)
   {
@@ -266,7 +255,7 @@ hash_find_client(const char *name)
 
       while (prev = client_p, (client_p = client_p->hnext))
       {
-        if (!irccmp(name, client_p->name))
+        if (irccmp(name, client_p->name) == 0)
         {
           prev->hnext = client_p->hnext;
           client_p->hnext = clientTable[hashv];
@@ -294,7 +283,7 @@ hash_find_id(const char *name)
 
       while (prev = client_p, (client_p = client_p->idhnext))
       {
-        if (!strcmp(name, client_p->id))
+        if (strcmp(name, client_p->id) == 0)
         {
           prev->idhnext = client_p->idhnext;
           client_p->idhnext = idTable[hashv];
@@ -312,7 +301,7 @@ struct Client *
 hash_find_server(const char *name)
 {
   const unsigned int hashv = strhash(name);
-  struct Client *client_p = NULL;
+  struct Client *client_p;
 
   if (IsDigit(*name) && strlen(name) == IRC_MAXSID)
     return hash_find_id(name);
@@ -327,7 +316,7 @@ hash_find_server(const char *name)
       while (prev = client_p, (client_p = client_p->hnext))
       {
         if ((IsServer(client_p) || IsMe(client_p)) &&
-            !irccmp(name, client_p->name))
+            irccmp(name, client_p->name) == 0)
         {
           prev->hnext = client_p->hnext;
           client_p->hnext = clientTable[hashv];
@@ -353,7 +342,7 @@ struct Channel *
 hash_find_channel(const char *name)
 {
   const unsigned int hashv = strhash(name);
-  struct Channel *channel = NULL;
+  struct Channel *channel;
 
   if ((channel = channelTable[hashv]))
   {
@@ -363,7 +352,7 @@ hash_find_channel(const char *name)
 
       while (prev = channel, (channel = channel->hnextch))
       {
-        if (!irccmp(name, channel->name))
+        if (irccmp(name, channel->name) == 0)
         {
           prev->hnextch = channel->hnextch;
           channel->hnextch = channelTable[hashv];
@@ -557,7 +546,7 @@ void
 safe_list_channels(struct Client *source_p, bool only_unmasked_channels)
 {
   struct ListTask *const lt = source_p->connection->list_task;
-  struct Channel *channel = NULL;
+  struct Channel *channel;
 
   if (only_unmasked_channels == false)
   {

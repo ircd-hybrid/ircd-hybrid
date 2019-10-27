@@ -404,7 +404,6 @@ main(int argc, char *argv[])
   check_pidfile(pidFileName);
 
   isupport_init();
-  hash_init();
   ipcache_init();
   client_init();
   class_init();

@@ -41,8 +41,6 @@
 #include "dbuf.h"
 
 
-static unsigned int hashf_xor_key;
-
 /* The actual hash tables, They MUST be of the same HASHSIZE, variable
  * size tables could be supported but the rehash routine should also
  * rebuild the transformation maps, I kept the tables of equal size
@@ -52,21 +50,6 @@ static struct Client *idTable[HASHSIZE];
 static struct Client *clientTable[HASHSIZE];
 static struct Channel *channelTable[HASHSIZE];
 
-
-/* hash_init()
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - Initialize the maps used by hash
- *                functions and clear the tables
- */
-void
-hash_init(void)
-{
-  do
-    hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
-  while (!hashf_xor_key);
-}
 
 /*
  * New hash function based on the Fowler/Noll/Vo (FNV) algorithm from
@@ -78,11 +61,17 @@ hash_init(void)
 unsigned int
 strhash(const char *name)
 {
+  static unsigned int hashf_xor_key = 0;
   const unsigned char *p = (const unsigned char *)name;
   unsigned int hval = FNV1_32_INIT;
 
   if (EmptyString(p))
     return 0;
+
+  if (hashf_xor_key == 0)
+    do
+      hashf_xor_key = genrand_int32() % 256;  /* better than nothing --adx */
+    while (hashf_xor_key == 0);
 
   for (; *p; ++p)
   {

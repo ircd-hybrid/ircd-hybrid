@@ -138,6 +138,7 @@ struct MaskItem
   int                bits;
   uintmax_t          until;     /* Hold action until this time (calendar time) */
   uintmax_t          setat;
+  uintmax_t          timeout;
   struct irc_ssaddr  *bind;  /* ip to bind to for outgoing connect */
   struct irc_ssaddr  *addr;  /* ip to connect to */
   struct ClassItem  *class;  /* Class of connection */

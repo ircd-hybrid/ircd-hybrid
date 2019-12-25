@@ -91,6 +91,7 @@ static struct
     size,
     type,
     port,
+    timeout,
     aftype,
     ping_freq,
     max_perip_local,
@@ -347,6 +348,7 @@ reset_block_state(void)
 %token  TBOOL
 %token  THROTTLE_COUNT
 %token  THROTTLE_TIME
+%token  TIMEOUT
 %token  TMASKED
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
@@ -1950,6 +1952,7 @@ connect_entry: CONNECT
   reset_block_state();
   block_state.aftype.value = AF_INET;
   block_state.port.value = PORTNUM;
+  block_state.timeout.value = CONNECTTIMEOUT;
 } '{' connect_items '}' ';'
 {
   struct addrinfo hints, *res;
@@ -1975,6 +1978,7 @@ connect_entry: CONNECT
   struct MaskItem *conf = conf_make(CONF_SERVER);
   conf->addr = xcalloc(sizeof(*conf->addr));
   conf->port = block_state.port.value;
+  conf->timeout = block_state.timeout.value;
   conf->flags = block_state.flags.value;
   conf->aftype = block_state.aftype.value;
   conf->host = xstrdup(block_state.host.buf);
@@ -2020,6 +2024,7 @@ connect_entry: CONNECT
 connect_items:  connect_items connect_item | connect_item;
 connect_item:   connect_name |
                 connect_host |
+                connect_timeout |
                 connect_bind |
                 connect_send_password |
                 connect_accept_password |
@@ -2044,6 +2049,12 @@ connect_host: HOST '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.host.buf, yylval.string, sizeof(block_state.host.buf));
+};
+
+connect_timeout: TIMEOUT '=' timespec ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.timeout.value = $3;
 };
 
 connect_bind: T_BIND '=' QSTRING ';'

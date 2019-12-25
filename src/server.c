@@ -452,7 +452,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
 
   /* Now, initiate the connection */
   comm_connect_tcp(client_p->connection->fd, conf->addr, conf->port, conf->bind,
-                   server_connect_callback, client_p, CONNECTTIMEOUT);
+                   server_connect_callback, client_p, conf->timeout);
 
   /*
    * At this point we have a connection in progress and a connect {} block

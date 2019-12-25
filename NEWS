@@ -1,6 +1,8 @@
 -- Noteworthy changes in version 8.2.27 (2019-??-??)
 o) Fixed segfault with GnuTLS/libgmp in case there's no DH parameters file
    defined in 'serverinfo::ssl_dh_param_file' or if that file is missing
+o) The connection timeout for connect{} blocks can now be configured via
+   the 'connect::timeout' configuration directive
 
 
 -- Noteworthy changes in version 8.2.26 (2019-05-31)

@@ -261,21 +261,22 @@ extern int yydebug;
     TBOOL = 467,
     THROTTLE_COUNT = 468,
     THROTTLE_TIME = 469,
-    TMASKED = 470,
-    TS_MAX_DELTA = 471,
-    TS_WARN_DELTA = 472,
-    TWODOTS = 473,
-    TYPE = 474,
-    UNKLINE = 475,
-    USE_LOGGING = 476,
-    USER = 477,
-    VHOST = 478,
-    VHOST6 = 479,
-    WARN_NO_CONNECT_BLOCK = 480,
-    WHOIS = 481,
-    WHOWAS_HISTORY_LENGTH = 482,
-    XLINE = 483,
-    XLINE_EXEMPT = 484
+    TIMEOUT = 470,
+    TMASKED = 471,
+    TS_MAX_DELTA = 472,
+    TS_WARN_DELTA = 473,
+    TWODOTS = 474,
+    TYPE = 475,
+    UNKLINE = 476,
+    USE_LOGGING = 477,
+    USER = 478,
+    VHOST = 479,
+    VHOST6 = 480,
+    WARN_NO_CONNECT_BLOCK = 481,
+    WHOIS = 482,
+    WHOWAS_HISTORY_LENGTH = 483,
+    XLINE = 484,
+    XLINE_EXEMPT = 485
   };
 #endif
 /* Tokens.  */
@@ -491,33 +492,34 @@ extern int yydebug;
 #define TBOOL 467
 #define THROTTLE_COUNT 468
 #define THROTTLE_TIME 469
-#define TMASKED 470
-#define TS_MAX_DELTA 471
-#define TS_WARN_DELTA 472
-#define TWODOTS 473
-#define TYPE 474
-#define UNKLINE 475
-#define USE_LOGGING 476
-#define USER 477
-#define VHOST 478
-#define VHOST6 479
-#define WARN_NO_CONNECT_BLOCK 480
-#define WHOIS 481
-#define WHOWAS_HISTORY_LENGTH 482
-#define XLINE 483
-#define XLINE_EXEMPT 484
+#define TIMEOUT 470
+#define TMASKED 471
+#define TS_MAX_DELTA 472
+#define TS_WARN_DELTA 473
+#define TWODOTS 474
+#define TYPE 475
+#define UNKLINE 476
+#define USE_LOGGING 477
+#define USER 478
+#define VHOST 479
+#define VHOST6 480
+#define WARN_NO_CONNECT_BLOCK 481
+#define WHOIS 482
+#define WHOWAS_HISTORY_LENGTH 483
+#define XLINE 484
+#define XLINE_EXEMPT 485
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 141 "conf_parser.y" /* yacc.c:1921  */
+#line 142 "conf_parser.y" /* yacc.c:1921  */
 
   int number;
   char *string;
 
-#line 521 "conf_parser.h" /* yacc.c:1921  */
+#line 523 "conf_parser.h" /* yacc.c:1921  */
 };
 
 typedef union YYSTYPE YYSTYPE;

@@ -332,12 +332,11 @@ tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
   int ret;
   gnutls_x509_crt_t cert;
   const gnutls_datum_t *cert_list;
-  unsigned int cert_list_size = 0;
   unsigned char digestbuf[TLS_GNUTLS_MAX_HASH_SIZE];
   size_t digest_size = sizeof(digestbuf);
   char buf[TLS_GNUTLS_MAX_HASH_SIZE * 2 + 1];
 
-  cert_list = gnutls_certificate_get_peers(tls_data->session, &cert_list_size);
+  cert_list = gnutls_certificate_get_peers(tls_data->session, NULL);
   if (cert_list == NULL)
     return true;  /* No certificate */
 

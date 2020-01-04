@@ -5127,7 +5127,7 @@ yyreduce:
   }
 
   conf_add_class_to_conf(conf, block_state.class.buf);
-  lookup_confhost(conf);
+  conf_resolve_host(conf);
 }
 #line 5133 "conf_parser.c" /* yacc.c:1652  */
     break;

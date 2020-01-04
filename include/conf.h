@@ -309,9 +309,9 @@ extern bool valid_wild_card_simple(const char *);
 extern bool valid_wild_card(int, ...);
 
 extern struct MaskItem *conf_make(enum maskitem_type);
-extern void read_conf_files(bool);
+extern void conf_read_files(bool);
 extern int conf_attach(struct Client *, struct MaskItem *);
-extern bool check_client(struct Client *);
+extern bool conf_check_client(struct Client *);
 
 
 extern void conf_detach(struct Client *, enum maskitem_type);
@@ -325,7 +325,7 @@ extern void yyerror(const char *);
 extern void conf_error_report(const char *);
 extern void cleanup_tklines(void *);
 extern void conf_rehash(bool);
-extern void lookup_confhost(struct MaskItem *);
+extern void conf_resolve_host(struct MaskItem *);
 extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 
 extern const char *get_oper_name(const struct Client *);

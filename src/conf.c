@@ -313,7 +313,7 @@ verify_access(struct Client *client_p)
  * 		  status as the flags passed.
  */
 bool
-check_client(struct Client *source_p)
+conf_check_client(struct Client *source_p)
 {
   int i;
 
@@ -541,7 +541,7 @@ operator_find(const struct Client *who, const char *name)
   return NULL;
 }
 
-/* set_default_conf()
+/* conf_set_defaults()
  *
  * inputs	- NONE
  * output	- NONE
@@ -551,7 +551,7 @@ operator_find(const struct Client *who, const char *name)
  *		  of values later, put them in validate_conf().
  */
 static void
-set_default_conf(void)
+conf_set_defaults(void)
 {
   /* verify init_class() ran, this should be an unnecessary check
    * but its not much work.
@@ -643,7 +643,7 @@ set_default_conf(void)
 }
 
 static void
-validate_conf(void)
+conf_validate(void)
 {
   if (EmptyString(ConfigServerInfo.network_name))
     ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
@@ -652,18 +652,18 @@ validate_conf(void)
     ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
 }
 
-/* read_conf()
+/* conf_read()
  *
  * inputs       - file descriptor pointing to config file to use
  * output       - None
  * side effects	- Read configuration file.
  */
 static void
-read_conf(FILE *file)
+conf_read(FILE *file)
 {
   lineno = 1;
 
-  set_default_conf();  /* Set default values prior to conf parsing */
+  conf_set_defaults();  /* Set default values prior to conf parsing */
   conf_parser_ctx.pass = 1;
   yyparse();  /* Pick up the classes first */
 
@@ -671,7 +671,7 @@ read_conf(FILE *file)
 
   conf_parser_ctx.pass = 2;
   yyparse();  /* Load the values from the conf */
-  validate_conf();  /* Check to make sure some values are still okay. */
+  conf_validate();  /* Check to make sure some values are still okay. */
                     /* Some global values are also loaded here. */
   whowas_trim();  /* Attempt to trim whowas list if necessary */
   class_delete_marked();  /* Delete unused classes that are marked for deletion */
@@ -697,19 +697,19 @@ conf_rehash(bool sig)
 
   /* don't close listeners until we know we can go ahead with the rehash */
 
-  read_conf_files(false);
+  conf_read_files(false);
 
   load_conf_modules();
   check_conf_klines();
 }
 
-/* lookup_confhost()
+/* conf_resolve_host()
  *
  * start DNS lookups of all hostnames in the conf
  * line and convert an IP addresses in a.b.c.d number for to IP#s.
  */
 void
-lookup_confhost(struct MaskItem *conf)
+conf_resolve_host(struct MaskItem *conf)
 {
   struct addrinfo hints, *res;
 
@@ -719,7 +719,7 @@ lookup_confhost(struct MaskItem *conf)
    */
   memset(&hints, 0, sizeof(hints));
 
-  hints.ai_family   = AF_UNSPEC;
+  hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
   /* Get us ready for a bind() and don't bother doing dns lookup */
@@ -833,14 +833,14 @@ get_oper_name(const struct Client *client_p)
   return buffer;
 }
 
-/* clear_out_old_conf()
+/* conf_clear()
  *
  * inputs       - none
  * output       - none
  * side effects - Clear out the old configuration
  */
 static void
-clear_out_old_conf(void)
+conf_clear(void)
 {
   dlink_node *node = NULL, *node_next = NULL;
   dlink_list *free_items [] = {
@@ -850,7 +850,7 @@ clear_out_old_conf(void)
   dlink_list ** iterator = free_items; /* C is dumb */
 
   /* We only need to free anything allocated by yyparse() here.
-   * Resetting structs, etc, is taken care of by set_default_conf().
+   * Resetting structs, etc, is taken care of by conf_set_defaults().
    */
 
   for (; *iterator; iterator++)
@@ -955,7 +955,7 @@ conf_handle_tls(bool cold)
  * side effects - read all conf files needed, ircd.conf kline.conf etc.
  */
 void
-read_conf_files(bool cold)
+conf_read_files(bool cold)
 {
   const char *filename = NULL;
   char chanmodes[IRCD_BUFSIZE] = "";
@@ -990,9 +990,9 @@ read_conf_files(bool cold)
   }
 
   if (cold == false)
-    clear_out_old_conf();
+    conf_clear();
 
-  read_conf(conf_parser_ctx.conf_file);
+  conf_read(conf_parser_ctx.conf_file);
   fclose(conf_parser_ctx.conf_file);
 
   log_iterate(log_reopen);

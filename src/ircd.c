@@ -409,9 +409,9 @@ main(int argc, char *argv[])
   class_init();
   resolver_init();      /* Needs to be setup before the io loop */
   modules_init();
-  read_conf_files(true);   /* cold start init conf files */
+  conf_read_files(true);   /* cold start init conf files */
   capab_init();  /* Set up default_server_capabs */
-  initialize_global_set_options();  /* Has to be called after read_conf_files() */
+  initialize_global_set_options();  /* Has to be called after conf_read_files() */
   channel_mode_init();
   read_links_file();
   motd_init();

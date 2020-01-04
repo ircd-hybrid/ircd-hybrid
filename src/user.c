@@ -308,7 +308,7 @@ register_local_user(struct Client *client_p)
       return;
   }
 
-  if (check_client(client_p) == false)
+  if (conf_check_client(client_p) == false)
     return;
 
   conf = client_p->connection->confs.head->data;

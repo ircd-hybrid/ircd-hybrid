@@ -276,36 +276,6 @@ user_welcome(struct Client *client_p)
   motd_signon(client_p);
 }
 
-/* check_xline()
- *
- * inputs       - pointer to client to test
- * outupt       - 1 if exiting 0 if ok
- * side effects -
- */
-static bool
-check_xline(struct Client *client_p)
-{
-  const struct GecosItem *gecos = NULL;
-
-  if (HasFlag(client_p, FLAGS_EXEMPTXLINE))
-    return false;
-
-  if ((gecos = gecos_find(client_p->info, match)))
-  {
-    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                         "X-line Rejecting [%s] [%s], user %s [%s]",
-                         client_p->info, gecos->reason,
-                         client_get_name(client_p, HIDE_IP),
-                         client_p->sockhost);
-
-    ++ServerStats.is_ref;
-    exit_client(client_p, "Bad user info");
-    return true;
-  }
-
-  return false;
-}
-
 /*! \brief This function is called when both NICK and USER messages
  *      have been accepted for the client, in whatever order. Only
  *      after this, is the UID message propagated.
@@ -427,8 +397,21 @@ register_local_user(struct Client *client_p)
     return;
   }
 
-  if (check_xline(client_p))
-    return;
+  if (!HasFlag(client_p, FLAGS_EXEMPTXLINE))
+  {
+    const struct GecosItem *gecos = gecos_find(client_p->info, match);
+    if (gecos)
+    {
+      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
+                           "X-line Rejecting [%s] [%s], user %s [%s]",
+                           client_p->info, gecos->reason,
+                           client_get_name(client_p, HIDE_IP),
+                           client_p->sockhost);
+      ++ServerStats.is_ref;
+      exit_client(client_p, "Bad user info");
+      return;
+    }
+  }
 
   const char *id;
   while (hash_find_id((id = uid_get())))

@@ -51,7 +51,7 @@
 static void
 m_names(struct Client *source_p, int parc, char *parv[])
 {
-  const char *const name = parc > 1 ? parv[1] : NULL;
+  const char *const name = parv[1];
 
   if (!EmptyString(name))
   {

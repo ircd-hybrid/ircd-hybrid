@@ -312,7 +312,7 @@ verify_access(struct Client *client_p)
  *		  Look for conf lines which have the same
  * 		  status as the flags passed.
  */
-int
+bool
 check_client(struct Client *source_p)
 {
   int i;
@@ -372,7 +372,9 @@ check_client(struct Client *source_p)
       break;
   }
 
-  return !(i < 0);
+  if (i < 0)
+    return false;
+  return true;
 }
 
 /*! \brief Disassociate configuration from the client. Also removes a class

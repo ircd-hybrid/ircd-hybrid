@@ -103,24 +103,52 @@ conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
     conf->dns_failed = true;
 }
 
-/* conf_dns_lookup()
+/* conf_resolve_host()
  *
- * do a nameserver lookup of the conf host
- * if the conf entry is currently doing a ns lookup do nothing, otherwise
- * allocate a dns_query and start ns lookup.
+ * start DNS lookups of all hostnames in the conf
+ * line and convert an IP addresses in a.b.c.d number for to IP#s.
  */
-static void
+void
 conf_dns_lookup(struct MaskItem *conf)
 {
-  if (conf->dns_pending == true)
+  struct addrinfo hints, *res;
+
+  /*
+   * Do name lookup now on hostnames given and store the
+   * ip numbers in conf structure.
+   */
+  memset(&hints, 0, sizeof(hints));
+
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+
+  /* Get us ready for a bind() and don't bother doing dns lookup */
+  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
+
+  if (getaddrinfo(conf->host, NULL, &hints, &res))
+  {
+    /*
+     * By this point conf->host possibly is not a numerical network address. Do a nameserver
+     * lookup of the conf host. If the conf entry is currently doing a ns lookup do nothing.
+     */
+    if (conf->dns_pending == true)
+      return;
+
+    conf->dns_pending = true;
+
+    if (conf->aftype == AF_INET)
+      gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
+    else
+      gethost_byname_type(conf_dns_callback, conf, conf->host, T_AAAA);
     return;
+  }
 
-  conf->dns_pending = true;
+  assert(res);
 
-  if (conf->aftype == AF_INET)
-    gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
-  else
-    gethost_byname_type(conf_dns_callback, conf, conf->host, T_AAAA);
+  memcpy(conf->addr, res->ai_addr, res->ai_addrlen);
+  conf->addr->ss_len = res->ai_addrlen;
+
+  freeaddrinfo(res);
 }
 
 /* map_to_list()
@@ -701,42 +729,6 @@ conf_rehash(bool sig)
 
   load_conf_modules();
   check_conf_klines();
-}
-
-/* conf_resolve_host()
- *
- * start DNS lookups of all hostnames in the conf
- * line and convert an IP addresses in a.b.c.d number for to IP#s.
- */
-void
-conf_resolve_host(struct MaskItem *conf)
-{
-  struct addrinfo hints, *res;
-
-  /*
-   * Do name lookup now on hostnames given and store the
-   * ip numbers in conf structure.
-   */
-  memset(&hints, 0, sizeof(hints));
-
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-
-  /* Get us ready for a bind() and don't bother doing dns lookup */
-  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
-
-  if (getaddrinfo(conf->host, NULL, &hints, &res))
-  {
-    conf_dns_lookup(conf);
-    return;
-  }
-
-  assert(res);
-
-  memcpy(conf->addr, res->ai_addr, res->ai_addrlen);
-  conf->addr->ss_len = res->ai_addrlen;
-
-  freeaddrinfo(res);
 }
 
 /* conf_connect_allowed()

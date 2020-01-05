@@ -2018,7 +2018,7 @@ connect_entry: CONNECT
   }
 
   conf_add_class_to_conf(conf, block_state.class.buf);
-  conf_resolve_host(conf);
+  conf_dns_lookup(conf);
 };
 
 connect_items:  connect_items connect_item | connect_item;

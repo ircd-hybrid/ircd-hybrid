@@ -90,6 +90,9 @@ tls_init(void)
   SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
 
 #ifndef OPENSSL_NO_ECDH
+  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_SINGLE_ECDH_USE);
+
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
   EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 
   if (key)
@@ -97,8 +100,10 @@ tls_init(void)
     SSL_CTX_set_tmp_ecdh(ConfigServerInfo.tls_ctx.server_ctx, key);
     EC_KEY_free(key);
   }
-
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_SINGLE_ECDH_USE);
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L
+  SSL_CTX_set_ecdh_auto(ConfigServerInfo.tls_ctx.server_ctx, 1);
+#endif
+  /* SSL_CTX_set_ecdh_auto() no longer exists as of 1.1.0 */
 #endif
 
   if ((ConfigServerInfo.tls_ctx.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
@@ -185,8 +190,8 @@ tls_new_cred(void)
   {
     EC_KEY *key;
 
-set_default_curve:
-
+set_default_curve: ;
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
     key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 
     if (key)
@@ -194,6 +199,10 @@ set_default_curve:
       SSL_CTX_set_tmp_ecdh(ConfigServerInfo.tls_ctx.server_ctx, key);
       EC_KEY_free(key);
     }
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L
+    SSL_CTX_set_ecdh_auto(ConfigServerInfo.tls_ctx.server_ctx, 1);
+#endif
+    /* SSL_CTX_set_ecdh_auto() no longer exists as of 1.1.0 */
   }
 #endif
 

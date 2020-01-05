@@ -325,7 +325,7 @@ extern void yyerror(const char *);
 extern void conf_error_report(const char *);
 extern void cleanup_tklines(void *);
 extern void conf_rehash(bool);
-extern void conf_resolve_host(struct MaskItem *);
+extern void conf_dns_lookup(struct MaskItem *);
 extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 
 extern const char *get_oper_name(const struct Client *);

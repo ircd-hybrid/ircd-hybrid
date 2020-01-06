@@ -188,11 +188,9 @@ tls_new_cred(void)
   }
   else
   {
-    EC_KEY *key;
-
 set_default_curve: ;
 #if OPENSSL_VERSION_NUMBER < 0x10002000L
-    key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+    EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 
     if (key)
     {

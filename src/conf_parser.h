@@ -514,7 +514,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 142 "conf_parser.y" /* yacc.c:1921  */
+#line 133 "conf_parser.y" /* yacc.c:1921  */
 
   int number;
   char *string;

@@ -111,27 +111,18 @@ static struct
 static void
 reset_block_state(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
+  dlink_node *node, *node_next;
+  dlink_list *tab[] = { &block_state.mask.list,
+                        &block_state.leaf.list, &block_state.hub.list, NULL };
 
-  DLINK_FOREACH_SAFE(node, node_next, block_state.mask.list.head)
+  for (dlink_list **list = tab; *list; ++list)
   {
-    xfree(node->data);
-    dlinkDelete(node, &block_state.mask.list);
-    free_dlink_node(node);
-  }
-
-  DLINK_FOREACH_SAFE(node, node_next, block_state.leaf.list.head)
-  {
-    xfree(node->data);
-    dlinkDelete(node, &block_state.leaf.list);
-    free_dlink_node(node);
-  }
-
-  DLINK_FOREACH_SAFE(node, node_next, block_state.hub.list.head)
-  {
-    xfree(node->data);
-    dlinkDelete(node, &block_state.hub.list);
-    free_dlink_node(node);
+    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
+    {
+      xfree(node->data);
+      dlinkDelete(node, *list);
+      free_dlink_node(node);
+    }
   }
 
   memset(&block_state, 0, sizeof(block_state));

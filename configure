@@ -16711,7 +16711,7 @@ fi
 
 if test "$cf_enable_openssl" != "no"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LibreSSL or OpenSSL 1.0.1f and above" >&5
-$as_echo_n "checking for LibreSSL or OpenSSL 1.0.2r and above... " >&6; }
+$as_echo_n "checking for LibreSSL, or OpenSSL 1.1.1 and above... " >&6; }
   if test "$cross_compiling" = yes; then :
   cf_openssl_version_ok=no
 else
@@ -16724,7 +16724,7 @@ else
 int
 main ()
 {
- exit(!(OPENSSL_VERSION_NUMBER >= 0x1000212fL));
+ exit(!(OPENSSL_VERSION_NUMBER >= 0x1010100fL));
   ;
   return 0;
 }

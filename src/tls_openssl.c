@@ -34,6 +34,9 @@
 #include "memory.h"
 
 #ifdef HAVE_TLS_OPENSSL
+#if OPENSSL_VERSION_NUMBER < 0x1010100fL
+#error "OpenSSL 1.1.1 and above is required to build this module"
+#endif
 
 static bool TLS_initialized;
 
@@ -70,55 +73,33 @@ tls_is_initialized(void)
 void
 tls_init(void)
 {
-  SSL_load_error_strings();
-  SSLeay_add_ssl_algorithms();
-
-  if ((ConfigServerInfo.tls_ctx.server_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL)
+  if ((ConfigServerInfo.tls_ctx.server_ctx = SSL_CTX_new(TLS_server_method())) == NULL)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS Server context -- %s", s);
+    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- %s", s);
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
 
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1|SSL_OP_NO_TICKET);
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_SINGLE_DH_USE|SSL_OP_CIPHER_SERVER_PREFERENCE);
-  SSL_CTX_set_verify(ConfigServerInfo.tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
-                     always_accept_verify_cb);
+  SSL_CTX_set_min_proto_version(ConfigServerInfo.tls_ctx.server_ctx, TLS1_2_VERSION);
+  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE|SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(ConfigServerInfo.tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
   SSL_CTX_set_session_cache_mode(ConfigServerInfo.tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
   SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
 
-#ifndef OPENSSL_NO_ECDH
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_SINGLE_ECDH_USE);
-
-#if OPENSSL_VERSION_NUMBER < 0x10002000L
-  EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-
-  if (key)
-  {
-    SSL_CTX_set_tmp_ecdh(ConfigServerInfo.tls_ctx.server_ctx, key);
-    EC_KEY_free(key);
-  }
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L
-  SSL_CTX_set_ecdh_auto(ConfigServerInfo.tls_ctx.server_ctx, 1);
-#endif
-  /* SSL_CTX_set_ecdh_auto() no longer exists as of 1.1.0 */
-#endif
-
-  if ((ConfigServerInfo.tls_ctx.client_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL)
+  if ((ConfigServerInfo.tls_ctx.client_ctx = SSL_CTX_new(TLS_client_method())) == NULL)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS Client context -- %s", s);
+    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- %s", s);
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
 
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.client_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1|SSL_OP_NO_TICKET);
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.client_ctx, SSL_OP_SINGLE_DH_USE);
-  SSL_CTX_set_verify(ConfigServerInfo.tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
-                     always_accept_verify_cb);
+  SSL_CTX_set_min_proto_version(ConfigServerInfo.tls_ctx.client_ctx, TLS1_2_VERSION);
+  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.client_ctx, SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(ConfigServerInfo.tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
   SSL_CTX_set_session_cache_mode(ConfigServerInfo.tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
 }
 
@@ -171,7 +152,6 @@ tls_new_cred(void)
       ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- could not open/read Diffie-Hellman parameter file");
   }
 
-#ifndef OPENSSL_NO_ECDH
   if (ConfigServerInfo.ssl_dh_elliptic_curve)
   {
     int nid = 0;
@@ -189,20 +169,8 @@ tls_new_cred(void)
   else
   {
 set_default_curve: ;
-#if OPENSSL_VERSION_NUMBER < 0x10002000L
-    EC_KEY *key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-
-    if (key)
-    {
-      SSL_CTX_set_tmp_ecdh(ConfigServerInfo.tls_ctx.server_ctx, key);
-      EC_KEY_free(key);
-    }
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L
-    SSL_CTX_set_ecdh_auto(ConfigServerInfo.tls_ctx.server_ctx, 1);
-#endif
     /* SSL_CTX_set_ecdh_auto() no longer exists as of 1.1.0 */
   }
-#endif
 
   if (ConfigServerInfo.ssl_message_digest_algorithm == NULL)
     ConfigServerInfo.message_digest_algorithm = EVP_sha256();
@@ -244,7 +212,7 @@ tls_get_version(void)
   static char buf[IRCD_BUFSIZE];
 
   snprintf(buf, sizeof(buf), "OpenSSL version: library: %s, header: %s",
-           SSLeay_version(SSLEAY_VERSION), OPENSSL_VERSION_TEXT);
+           OpenSSL_version(OPENSSL_VERSION), OPENSSL_VERSION_TEXT);
   return buf;
 }
 

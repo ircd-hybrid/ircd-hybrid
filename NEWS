@@ -5,7 +5,7 @@ o) The connection timeout for connect{} blocks can now be configured via
    the 'connect::timeout' configuration directive
 o) OpenSSL now runs in automatic curve selection mode if no curve is defined
    in 'serverinfo::ssl_dh_elliptic_curve'
-o) Minimum supported OpenSSL version is 1.0.2r now
+o) Minimum supported OpenSSL version is 1.1.1 now
 
 
 -- Noteworthy changes in version 8.2.26 (2019-05-31)

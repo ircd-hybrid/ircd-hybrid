@@ -340,6 +340,7 @@ reset_block_state(void)
 %token  THROTTLE_COUNT
 %token  THROTTLE_TIME
 %token  TIMEOUT
+%token  TLS_CIPHER_SUITES
 %token  TMASKED
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
@@ -455,6 +456,7 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_sid |
                         serverinfo_ssl_certificate_file |
                         serverinfo_ssl_cipher_list |
+                        serverinfo_tls_cipher_suites |
                         serverinfo_ssl_message_digest_algorithm |
                         error ';' ;
 
@@ -492,6 +494,15 @@ serverinfo_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
   {
     xfree(ConfigServerInfo.ssl_cipher_list);
     ConfigServerInfo.ssl_cipher_list = xstrdup(yylval.string);
+  }
+};
+
+serverinfo_tls_cipher_suites: TLS_CIPHER_SUITES '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+  {
+    xfree(ConfigServerInfo.tls_cipher_suites);
+    ConfigServerInfo.tls_cipher_suites = xstrdup(yylval.string);
   }
 };
 

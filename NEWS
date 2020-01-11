@@ -6,6 +6,8 @@ o) The connection timeout for connect{} blocks can now be configured via
 o) OpenSSL now runs in automatic curve selection mode if no curve is defined
    in 'serverinfo::ssl_dh_elliptic_curve'
 o) Minimum supported OpenSSL version is 1.1.1 now
+o) Supported TLSv1.3 cipher suites can now be configured explicitely via the
+   new 'serverinfo::tls_cipher_suites' configuration directive
 
 
 -- Noteworthy changes in version 8.2.26 (2019-05-31)

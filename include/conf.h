@@ -261,6 +261,7 @@ struct config_serverinfo_entry
   char *ssl_dh_param_file;
   char *ssl_dh_elliptic_curve;
   char *ssl_cipher_list;
+  char *tls_cipher_suites;
   char *ssl_message_digest_algorithm;
   tls_context_t tls_ctx;
   tls_md_t message_digest_algorithm;

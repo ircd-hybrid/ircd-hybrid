@@ -325,6 +325,7 @@ target                      { return T_TARGET; }
 throttle_count              { return THROTTLE_COUNT; }
 throttle_time               { return THROTTLE_TIME; }
 timeout                     { return TIMEOUT; }
+tls_cipher_suites           { return TLS_CIPHER_SUITES; }
 ts_max_delta                { return TS_MAX_DELTA; }
 ts_warn_delta               { return TS_WARN_DELTA; }
 type                        { return TYPE; }

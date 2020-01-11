@@ -118,13 +118,11 @@ tls_new_cred(void)
     gnutls_datum_t data;
 
     ret = gnutls_load_file(ConfigServerInfo.ssl_dh_param_file, &data);
-
     if (ret != GNUTLS_E_SUCCESS)
       ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- unable to load file -- %s", gnutls_strerror(ret));
     else
     {
       ret = gnutls_dh_params_import_pkcs3(context->dh_params, &data, GNUTLS_X509_FMT_PEM);
-
       if (ret != GNUTLS_E_SUCCESS)
         ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- unable to import dh params -- %s", gnutls_strerror(ret));
       else
@@ -305,15 +303,11 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
     /* Handshake needs resuming later, read() or write() would have blocked. */
 
     if (gnutls_record_get_direction(tls_data->session) == 0)
-    {
       /* gnutls_handshake() wants to read() again. */
       return TLS_HANDSHAKE_WANT_READ;
-    }
     else
-    {
       /* gnutls_handshake() wants to write() again. */
       return TLS_HANDSHAKE_WANT_WRITE;
-    }
   }
   else
   {

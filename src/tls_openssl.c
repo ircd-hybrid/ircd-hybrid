@@ -34,7 +34,7 @@
 #include "memory.h"
 
 #ifdef HAVE_TLS_OPENSSL
-#if OPENSSL_VERSION_NUMBER < 0x1010100fL
+#if OPENSSL_VERSION_NUMBER < 0x20000000L
 #error "OpenSSL 1.1.1 and above is required to build this module"
 #endif
 
@@ -153,24 +153,8 @@ tls_new_cred(void)
   }
 
   if (ConfigServerInfo.ssl_dh_elliptic_curve)
-  {
-    int nid = 0;
-    EC_KEY *key = NULL;
-
-    if ((nid = OBJ_sn2nid(ConfigServerInfo.ssl_dh_elliptic_curve)) == 0)
-      goto set_default_curve;
-
-    if ((key = EC_KEY_new_by_curve_name(nid)) == NULL)
-      goto set_default_curve;
-
-    SSL_CTX_set_tmp_ecdh(ConfigServerInfo.tls_ctx.server_ctx, key);
-    EC_KEY_free(key);
-  }
-  else
-  {
-set_default_curve: ;
-    /* SSL_CTX_set_ecdh_auto() no longer exists as of 1.1.0 */
-  }
+    if (SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_dh_elliptic_curve) == 0)
+      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_elliptic_curve -- could not set supported group(s)");
 
   if (ConfigServerInfo.ssl_message_digest_algorithm == NULL)
     ConfigServerInfo.message_digest_algorithm = EVP_sha256();

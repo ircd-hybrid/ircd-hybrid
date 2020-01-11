@@ -170,7 +170,8 @@ tls_new_cred(void)
   }
 
   if (ConfigServerInfo.ssl_cipher_list)
-    SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_cipher_list);
+    if (SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_cipher_list) == 0)
+      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_cipher_list -- could not set supported cipher(s)");
 
   TLS_initialized = true;
   return true;

@@ -34,7 +34,7 @@
 #include "memory.h"
 
 #ifdef HAVE_TLS_OPENSSL
-#if OPENSSL_VERSION_NUMBER < 0x20000000L
+#if OPENSSL_VERSION_NUMBER < 0x1010100fL
 #error "OpenSSL 1.1.1 and above is required to build this module"
 #endif
 
@@ -46,7 +46,7 @@ static bool TLS_initialized;
 static void
 report_crypto_errors(void)
 {
-  unsigned long e = 0;
+  unsigned long e;
 
   while ((e = ERR_get_error()))
     ilog(LOG_TYPE_IRCD, "SSL error: %s", ERR_error_string(e, 0));
@@ -286,7 +286,7 @@ tls_shutdown(tls_data_t *tls_data)
 
   SSL_set_shutdown(ssl, SSL_RECEIVED_SHUTDOWN);
 
-  if (!SSL_shutdown(ssl))
+  if (SSL_shutdown(ssl) == 0)
     SSL_shutdown(ssl);
 }
 
@@ -303,7 +303,7 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   else
     ssl = SSL_new(ConfigServerInfo.tls_ctx.client_ctx);
 
-  if (!ssl)
+  if (ssl == NULL)
   {
     ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
          ERR_error_string(ERR_get_error(), NULL));

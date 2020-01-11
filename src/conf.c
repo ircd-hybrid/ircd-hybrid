@@ -900,6 +900,8 @@ conf_clear(void)
   ConfigServerInfo.ssl_dh_elliptic_curve = NULL;
   xfree(ConfigServerInfo.ssl_cipher_list);
   ConfigServerInfo.ssl_cipher_list = NULL;
+  xfree(ConfigServerInfo.tls_cipher_suites);
+  ConfigServerInfo.tls_cipher_suites = NULL;
   xfree(ConfigServerInfo.ssl_message_digest_algorithm);
   ConfigServerInfo.ssl_message_digest_algorithm = NULL;
 

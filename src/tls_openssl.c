@@ -108,11 +108,11 @@ tls_new_cred(void)
 {
   TLS_initialized = false;
 
-  if (!ConfigServerInfo.ssl_certificate_file || !ConfigServerInfo.rsa_private_key_file)
+  if (!ConfigServerInfo.tls_certificate_file || !ConfigServerInfo.rsa_private_key_file)
     return true;
 
-  if (SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_certificate_file) <= 0 ||
-      SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.ssl_certificate_file) <= 0)
+  if (SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) <= 0 ||
+      SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) <= 0)
   {
     report_crypto_errors();
     return false;
@@ -132,9 +132,9 @@ tls_new_cred(void)
     return false;
   }
 
-  if (ConfigServerInfo.ssl_dh_param_file)
+  if (ConfigServerInfo.tls_dh_param_file)
   {
-    BIO *file = BIO_new_file(ConfigServerInfo.ssl_dh_param_file, "r");
+    BIO *file = BIO_new_file(ConfigServerInfo.tls_dh_param_file, "r");
 
     if (file)
     {
@@ -149,33 +149,33 @@ tls_new_cred(void)
       }
     }
     else
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- could not open/read Diffie-Hellman parameter file");
+      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
   }
 
-  if (ConfigServerInfo.ssl_dh_elliptic_curve == NULL)
+  if (ConfigServerInfo.tls_supported_groups == NULL)
     SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
-  else if (SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_dh_elliptic_curve) == 0)
+  else if (SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
   {
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_elliptic_curve -- could not set supported group(s)");
+    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
     SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
   }
 
-  if (ConfigServerInfo.ssl_message_digest_algorithm == NULL)
+  if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
     ConfigServerInfo.message_digest_algorithm = EVP_sha256();
   else
   {
-    ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.ssl_message_digest_algorithm);
+    ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm);
 
     if (ConfigServerInfo.message_digest_algorithm == NULL)
     {
       ConfigServerInfo.message_digest_algorithm = EVP_sha256();
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_message_digest_algorithm -- unknown message digest algorithm");
+      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
     }
   }
 
-  if (ConfigServerInfo.ssl_cipher_list)
-    if (SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_cipher_list) == 0)
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_cipher_list -- could not set supported cipher(s)");
+  if (ConfigServerInfo.tls_cipher_list)
+    if (SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) == 0)
+      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
 
 #ifndef LIBRESSL_VERSION_NUMBER
   if (ConfigServerInfo.tls_cipher_suites == NULL)

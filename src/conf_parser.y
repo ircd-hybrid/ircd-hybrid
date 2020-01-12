@@ -274,12 +274,6 @@ reset_block_state(void)
 %token  SPOOF
 %token  SPOOF_NOTICE
 %token  SQUIT
-%token  SSL_CERTIFICATE_FILE
-%token  SSL_CERTIFICATE_FINGERPRINT
-%token  SSL_CONNECTION_REQUIRED
-%token  SSL_DH_ELLIPTIC_CURVE
-%token  SSL_DH_PARAM_FILE
-%token  SSL_MESSAGE_DIGEST_ALGORITHM
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
 %token  STATS_K_OPER_ONLY
@@ -325,7 +319,6 @@ reset_block_state(void)
 %token  T_SOFTCALLERID
 %token  T_SPY
 %token  T_SSL
-%token  T_SSL_CIPHER_LIST
 %token  T_TARGET
 %token  T_UMODES
 %token  T_UNAUTH
@@ -340,7 +333,14 @@ reset_block_state(void)
 %token  THROTTLE_COUNT
 %token  THROTTLE_TIME
 %token  TIMEOUT
+%token  TLS_CERTIFICATE_FILE
+%token  TLS_CERTIFICATE_FINGERPRINT
+%token  TLS_CIPHER_LIST
 %token  TLS_CIPHER_SUITES
+%token  TLS_CONNECTION_REQUIRED
+%token  TLS_DH_PARAM_FILE
+%token  TLS_MESSAGE_DIGEST_ALGORITHM
+%token  TLS_SUPPORTED_GROUPS
 %token  TMASKED
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
@@ -450,23 +450,23 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_default_max_clients |
                         serverinfo_max_nick_length |
                         serverinfo_max_topic_length |
-                        serverinfo_ssl_dh_param_file |
-                        serverinfo_ssl_dh_elliptic_curve |
+                        serverinfo_tls_dh_param_file |
+                        serverinfo_tls_supported_groups |
                         serverinfo_rsa_private_key_file |
                         serverinfo_sid |
-                        serverinfo_ssl_certificate_file |
-                        serverinfo_ssl_cipher_list |
+                        serverinfo_tls_certificate_file |
+                        serverinfo_tls_cipher_list |
                         serverinfo_tls_cipher_suites |
-                        serverinfo_ssl_message_digest_algorithm |
+                        serverinfo_tls_message_digest_algorithm |
                         error ';' ;
 
 
-serverinfo_ssl_certificate_file: SSL_CERTIFICATE_FILE '=' QSTRING ';'
+serverinfo_tls_certificate_file: TLS_CERTIFICATE_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.ssl_certificate_file);
-    ConfigServerInfo.ssl_certificate_file = xstrdup(yylval.string);
+    xfree(ConfigServerInfo.tls_certificate_file);
+    ConfigServerInfo.tls_certificate_file = xstrdup(yylval.string);
   }
 };
 
@@ -479,21 +479,21 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
   }
 };
 
-serverinfo_ssl_dh_param_file: SSL_DH_PARAM_FILE '=' QSTRING ';'
+serverinfo_tls_dh_param_file: TLS_DH_PARAM_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.ssl_dh_param_file);
-    ConfigServerInfo.ssl_dh_param_file = xstrdup(yylval.string);
+    xfree(ConfigServerInfo.tls_dh_param_file);
+    ConfigServerInfo.tls_dh_param_file = xstrdup(yylval.string);
   }
 };
 
-serverinfo_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
+serverinfo_tls_cipher_list: TLS_CIPHER_LIST '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.ssl_cipher_list);
-    ConfigServerInfo.ssl_cipher_list = xstrdup(yylval.string);
+    xfree(ConfigServerInfo.tls_cipher_list);
+    ConfigServerInfo.tls_cipher_list = xstrdup(yylval.string);
   }
 };
 
@@ -506,21 +506,21 @@ serverinfo_tls_cipher_suites: TLS_CIPHER_SUITES '=' QSTRING ';'
   }
 };
 
-serverinfo_ssl_message_digest_algorithm: SSL_MESSAGE_DIGEST_ALGORITHM '=' QSTRING ';'
+serverinfo_tls_message_digest_algorithm: TLS_MESSAGE_DIGEST_ALGORITHM '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.ssl_message_digest_algorithm);
-    ConfigServerInfo.ssl_message_digest_algorithm = xstrdup(yylval.string);
+    xfree(ConfigServerInfo.tls_message_digest_algorithm);
+    ConfigServerInfo.tls_message_digest_algorithm = xstrdup(yylval.string);
   }
 }
 
-serverinfo_ssl_dh_elliptic_curve: SSL_DH_ELLIPTIC_CURVE '=' QSTRING ';'
+serverinfo_tls_supported_groups: TLS_SUPPORTED_GROUPS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.ssl_dh_elliptic_curve);
-    ConfigServerInfo.ssl_dh_elliptic_curve = xstrdup(yylval.string);
+    xfree(ConfigServerInfo.tls_supported_groups);
+    ConfigServerInfo.tls_supported_groups = xstrdup(yylval.string);
   }
 };
 
@@ -968,8 +968,8 @@ oper_item:      oper_name |
                 oper_umodes |
                 oper_class |
                 oper_encrypted |
-                oper_ssl_certificate_fingerprint |
-                oper_ssl_connection_required |
+                oper_tls_certificate_fingerprint |
+                oper_tls_connection_required |
                 oper_flags |
                 error ';' ;
 
@@ -1008,13 +1008,13 @@ oper_encrypted: ENCRYPTED '=' TBOOL ';'
     block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
 };
 
-oper_ssl_certificate_fingerprint: SSL_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
+oper_tls_certificate_fingerprint: TLS_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 };
 
-oper_ssl_connection_required: SSL_CONNECTION_REQUIRED '=' TBOOL ';'
+oper_tls_connection_required: TLS_CONNECTION_REQUIRED '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -2030,10 +2030,10 @@ connect_item:   connect_name |
                 connect_bind |
                 connect_send_password |
                 connect_accept_password |
-                connect_ssl_certificate_fingerprint |
+                connect_tls_certificate_fingerprint |
                 connect_aftype |
                 connect_port |
-                connect_ssl_cipher_list |
+                connect_tls_cipher_list |
                 connect_flags |
                 connect_hub_mask |
                 connect_leaf_mask |
@@ -2091,7 +2091,7 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
 
-connect_ssl_certificate_fingerprint: SSL_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
+connect_tls_certificate_fingerprint: TLS_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
@@ -2158,14 +2158,14 @@ connect_class: CLASS '=' QSTRING ';'
     strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
 };
 
-connect_ssl_cipher_list: T_SSL_CIPHER_LIST '=' QSTRING ';'
+connect_tls_cipher_list: TLS_CIPHER_LIST '=' QSTRING ';'
 {
 #ifdef HAVE_TLS
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.ciph.buf, yylval.string, sizeof(block_state.ciph.buf));
 #else
   if (conf_parser_ctx.pass == 2)
-    conf_error_report("Ignoring connect::ciphers -- no TLS support");
+    conf_error_report("Ignoring connect::tls_cipher_list -- no TLS support");
 #endif
 };
 

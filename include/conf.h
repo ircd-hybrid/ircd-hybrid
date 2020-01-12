@@ -257,12 +257,12 @@ struct config_serverinfo_entry
   char *network_name;
   char *network_desc;
   char *rsa_private_key_file;
-  char *ssl_certificate_file;
-  char *ssl_dh_param_file;
-  char *ssl_dh_elliptic_curve;
-  char *ssl_cipher_list;
+  char *tls_certificate_file;
+  char *tls_dh_param_file;
+  char *tls_supported_groups;
+  char *tls_cipher_list;
   char *tls_cipher_suites;
-  char *ssl_message_digest_algorithm;
+  char *tls_message_digest_algorithm;
   tls_context_t tls_ctx;
   tls_md_t message_digest_algorithm;
   unsigned int hub;

@@ -75,7 +75,7 @@ tls_new_cred(void)
 
   TLS_initialized = false;
 
-  if (!ConfigServerInfo.ssl_certificate_file || !ConfigServerInfo.rsa_private_key_file)
+  if (!ConfigServerInfo.tls_certificate_file || !ConfigServerInfo.rsa_private_key_file)
     return true;
 
   context = xcalloc(sizeof(*context));
@@ -90,11 +90,11 @@ tls_new_cred(void)
     return false;
   }
 
-  /* TBD: set ciphers based on serverinfo::ssl_cipher_list */
+  /* TBD: set ciphers based on serverinfo::tls_cipher_list */
 
   gnutls_priority_init(&context->priorities, tls_default_priority_string, NULL);
 
-  ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.ssl_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
+  ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.tls_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
   if (ret != GNUTLS_E_SUCCESS)
   {
     ilog(LOG_TYPE_IRCD, "Could not set TLS keys -- %s", gnutls_strerror(ret));
@@ -113,18 +113,18 @@ tls_new_cred(void)
     return false;
   }
 
-  if (ConfigServerInfo.ssl_dh_param_file)
+  if (ConfigServerInfo.tls_dh_param_file)
   {
     gnutls_datum_t data;
 
-    ret = gnutls_load_file(ConfigServerInfo.ssl_dh_param_file, &data);
+    ret = gnutls_load_file(ConfigServerInfo.tls_dh_param_file, &data);
     if (ret != GNUTLS_E_SUCCESS)
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- unable to load file -- %s", gnutls_strerror(ret));
+      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to load file -- %s", gnutls_strerror(ret));
     else
     {
       ret = gnutls_dh_params_import_pkcs3(context->dh_params, &data, GNUTLS_X509_FMT_PEM);
       if (ret != GNUTLS_E_SUCCESS)
-        ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- unable to import dh params -- %s", gnutls_strerror(ret));
+        ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to import dh params -- %s", gnutls_strerror(ret));
       else
         /* TBR once 3.6 is our minimum supported version */
         gnutls_certificate_set_dh_params(context->x509_cred, context->dh_params);
@@ -133,16 +133,16 @@ tls_new_cred(void)
     }
   }
 
-  if (ConfigServerInfo.ssl_message_digest_algorithm == NULL)
+  if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
     ConfigServerInfo.message_digest_algorithm = GNUTLS_DIG_SHA256;
   else
   {
-    ConfigServerInfo.message_digest_algorithm = gnutls_digest_get_id(ConfigServerInfo.ssl_message_digest_algorithm);
+    ConfigServerInfo.message_digest_algorithm = gnutls_digest_get_id(ConfigServerInfo.tls_message_digest_algorithm);
 
     if (ConfigServerInfo.message_digest_algorithm == GNUTLS_DIG_UNKNOWN)
     {
       ConfigServerInfo.message_digest_algorithm = GNUTLS_DIG_SHA256;
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_message_digest_algorithm -- unknown message digest algorithm");
+      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
     }
   }
 

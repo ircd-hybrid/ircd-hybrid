@@ -892,18 +892,18 @@ conf_clear(void)
   ConfigServerInfo.network_desc = NULL;
   xfree(ConfigServerInfo.rsa_private_key_file);
   ConfigServerInfo.rsa_private_key_file = NULL;
-  xfree(ConfigServerInfo.ssl_certificate_file);
-  ConfigServerInfo.ssl_certificate_file = NULL;
-  xfree(ConfigServerInfo.ssl_dh_param_file);
-  ConfigServerInfo.ssl_dh_param_file = NULL;
-  xfree(ConfigServerInfo.ssl_dh_elliptic_curve);
-  ConfigServerInfo.ssl_dh_elliptic_curve = NULL;
-  xfree(ConfigServerInfo.ssl_cipher_list);
-  ConfigServerInfo.ssl_cipher_list = NULL;
+  xfree(ConfigServerInfo.tls_certificate_file);
+  ConfigServerInfo.tls_certificate_file = NULL;
+  xfree(ConfigServerInfo.tls_dh_param_file);
+  ConfigServerInfo.tls_dh_param_file = NULL;
+  xfree(ConfigServerInfo.tls_supported_groups);
+  ConfigServerInfo.tls_supported_groups = NULL;
+  xfree(ConfigServerInfo.tls_cipher_list);
+  ConfigServerInfo.tls_cipher_list = NULL;
   xfree(ConfigServerInfo.tls_cipher_suites);
   ConfigServerInfo.tls_cipher_suites = NULL;
-  xfree(ConfigServerInfo.ssl_message_digest_algorithm);
-  ConfigServerInfo.ssl_message_digest_algorithm = NULL;
+  xfree(ConfigServerInfo.tls_message_digest_algorithm);
+  ConfigServerInfo.tls_message_digest_algorithm = NULL;
 
   /* Clean out ConfigAdminInfo */
   xfree(ConfigAdminInfo.name);

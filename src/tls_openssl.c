@@ -152,9 +152,13 @@ tls_new_cred(void)
       ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_param_file -- could not open/read Diffie-Hellman parameter file");
   }
 
-  if (ConfigServerInfo.ssl_dh_elliptic_curve)
-    if (SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_dh_elliptic_curve) == 0)
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_elliptic_curve -- could not set supported group(s)");
+  if (ConfigServerInfo.ssl_dh_elliptic_curve == NULL)
+    SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
+  else if (SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.ssl_dh_elliptic_curve) == 0)
+  {
+    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::ssl_dh_elliptic_curve -- could not set supported group(s)");
+    SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
+  }
 
   if (ConfigServerInfo.ssl_message_digest_algorithm == NULL)
     ConfigServerInfo.message_digest_algorithm = EVP_sha256();

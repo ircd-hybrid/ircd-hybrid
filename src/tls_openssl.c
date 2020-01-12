@@ -179,12 +179,11 @@ tls_new_cred(void)
 
 #ifndef LIBRESSL_VERSION_NUMBER
   if (ConfigServerInfo.tls_cipher_suites == NULL)
-    /* Default to TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256 */
-    SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "");
+    SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
   else if (SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
   {
     ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
-    SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "");
+    SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
   }
 #endif
 

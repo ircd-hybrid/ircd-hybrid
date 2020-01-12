@@ -196,13 +196,9 @@ const char *
 tls_get_cipher(const tls_data_t *tls_data)
 {
   static char buffer[IRCD_BUFSIZE];
-  int bits = 0;
   SSL *ssl = *tls_data;
 
-  SSL_CIPHER_get_bits(SSL_get_current_cipher(ssl), &bits);
-
-  snprintf(buffer, sizeof(buffer), "%s-%s-%d", SSL_get_version(ssl),
-           SSL_get_cipher(ssl), bits);
+  snprintf(buffer, sizeof(buffer), "%s-%s", SSL_get_version(ssl), SSL_get_cipher(ssl));
   return buffer;
 }
 

@@ -64,7 +64,7 @@ const struct user_modes  umode_tab[] =
   { 'H', UMODE_HIDDEN       },
   { 'X', UMODE_EXPIRATION   },
   { 'R', UMODE_REGONLY      },
-  { 'S', UMODE_SSL          },
+  { 'S', UMODE_SECURE       },
   { 'W', UMODE_WEBIRC       },
   { 'a', UMODE_ADMIN        },
   { 'b', UMODE_BOTS         },
@@ -257,11 +257,11 @@ user_welcome(struct Client *client_p)
 {
   static const char built_date[] = __DATE__ " at " __TIME__;
 
-  if (HasFlag(client_p, FLAGS_SSL))
+  if (HasFlag(client_p, FLAGS_TLS))
   {
-    AddUMode(client_p, UMODE_SSL);
+    AddUMode(client_p, UMODE_SECURE);
     sendto_one_notice(client_p, &me, ":*** Connected securely via %s",
-                      tls_get_cipher(&client_p->connection->fd->ssl));
+                      tls_get_cipher(&client_p->connection->fd->tls));
   }
 
   sendto_one_numeric(client_p, &me, RPL_WELCOME, ConfigServerInfo.network_name,

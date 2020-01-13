@@ -75,7 +75,7 @@ typedef struct _fde
     /* We'd also add the retry count here when we get to that -- adrian */
   } connect;
 
-  tls_data_t ssl;
+  tls_data_t tls;
 } fde_t;
 
 extern int number_fd;

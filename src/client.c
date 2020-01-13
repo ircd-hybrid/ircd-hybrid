@@ -614,8 +614,8 @@ client_close_connection(struct Client *client_p)
   else
     ++ServerStats.is_ni;
 
-  if (tls_isusing(&client_p->connection->fd->ssl))
-    tls_shutdown(&client_p->connection->fd->ssl);
+  if (tls_isusing(&client_p->connection->fd->tls))
+    tls_shutdown(&client_p->connection->fd->tls);
 
   if (client_p->connection->fd)
   {

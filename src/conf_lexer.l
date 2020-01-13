@@ -306,7 +306,7 @@ spoof                       { return SPOOF; }
 spoof_notice                { return SPOOF_NOTICE; }
 spy                         { return T_SPY; }
 squit                       { return SQUIT; }
-ssl                         { return T_SSL; }
+ssl                         { return T_TLS; }
 stats_e_disabled            { return STATS_E_DISABLED; }
 stats_i_oper_only           { return STATS_I_OPER_ONLY; }
 stats_k_oper_only           { return STATS_K_OPER_ONLY; }
@@ -318,6 +318,7 @@ target                      { return T_TARGET; }
 throttle_count              { return THROTTLE_COUNT; }
 throttle_time               { return THROTTLE_TIME; }
 timeout                     { return TIMEOUT; }
+tls                         { return T_TLS; }
 tls_certificate_file        { return TLS_CERTIFICATE_FILE; }
 tls_certificate_fingerprint { return TLS_CERTIFICATE_FINGERPRINT; }
 tls_cipher_list             { return TLS_CIPHER_LIST; }

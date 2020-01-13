@@ -75,7 +75,7 @@ enum
   MODE_TOPICLIMIT   = 1 <<  3,  /**< Only chanops can change the topic */
   MODE_INVITEONLY   = 1 <<  4,  /**< Only invited users may join this channel */
   MODE_NOPRIVMSGS   = 1 <<  5,  /**< Users must be in the channel to send text to it */
-  MODE_SSLONLY      = 1 <<  6,  /**< Prevents anyone who isn't connected via SSL/TLS from joining the channel */
+  MODE_SECUREONLY   = 1 <<  6,  /**< Prevents anyone who isn't connected via TLS from joining the channel */
   MODE_OPERONLY     = 1 <<  7,  /**< Prevents anyone who hasn't obtained IRC operator status from joining the channel */
   MODE_REGISTERED   = 1 <<  8,  /**< Channel has been registered with ChanServ */
   MODE_REGONLY      = 1 <<  9,  /**< Only registered clients may join a channel with that mode set */

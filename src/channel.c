@@ -668,8 +668,8 @@ is_banned(const struct Channel *channel, const struct Client *client_p)
 static int
 can_join(struct Client *client_p, struct Channel *channel, const char *key)
 {
-  if (HasCMode(channel, MODE_SSLONLY) && !HasUMode(client_p, UMODE_SSL))
-    return ERR_SSLONLYCHAN;
+  if (HasCMode(channel, MODE_SECUREONLY) && !HasUMode(client_p, UMODE_SECURE))
+    return ERR_SECUREONLYCHAN;
 
   if (HasCMode(channel, MODE_REGONLY) && !HasUMode(client_p, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;

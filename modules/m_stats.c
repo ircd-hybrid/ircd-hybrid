@@ -266,7 +266,7 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
 
     if (IsConfAllowAutoConn(conf))
       *p++ = 'A';
-    if (IsConfSSL(conf))
+    if (IsConfTLS(conf))
       *p++ = 'S';
     if (p == buf)
       *p++ = '*';
@@ -962,8 +962,8 @@ show_ports(struct Client *source_p)
 
     if (listener->flags & LISTENER_SERVER)
       *p++ = 'S';
-    if (listener->flags & LISTENER_SSL)
-      *p++ = 's';
+    if (listener->flags & LISTENER_TLS)
+      *p++ = 'T';
     *p = '\0';
 
     if (HasUMode(source_p, UMODE_ADMIN) && ConfigServerHide.hide_server_ips == 0)

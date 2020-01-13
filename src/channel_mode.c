@@ -883,7 +883,7 @@ const struct chan_mode  cmode_tab[] =
   { .letter = 'N', .mode = MODE_NONICKCHANGE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
   { .letter = 'O', .mode = MODE_OPERONLY, .required_oplevel = CHACCESS_HALFOP, .only_opers = true, .func = chm_simple },
   { .letter = 'R', .mode = MODE_REGONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'S', .mode = MODE_SSLONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
+  { .letter = 'S', .mode = MODE_SECUREONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
   { .letter = 'T', .mode = MODE_NONOTICE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
   { .letter = '\0', .mode = 0 }
 };

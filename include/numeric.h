@@ -208,7 +208,7 @@ enum irc_numerics
   ERR_CANTKILLSERVER       = 483,
   ERR_CHANBANREASON        = 485,
   ERR_NONONREG             = 486,
-  ERR_SSLONLYCHAN          = 489,
+  ERR_SECUREONLYCHAN       = 489,
   ERR_NOOPERHOST           = 491,
   ERR_NOCTCP               = 492,
   ERR_UMODEUNKNOWNFLAG     = 501,

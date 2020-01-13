@@ -134,7 +134,7 @@ enum
   FLAGS_FINISHED_AUTH = 1 << 18,  /**< Client has been released from auth */
   FLAGS_FLOOD_NOTICED = 1 << 19,  /**< Notice to opers about this flooder has been sent */
   FLAGS_SERVICE       = 1 << 20,  /**< Client/server is a network service */
-  FLAGS_SSL           = 1 << 21,  /**< User is connected via TLS/SSL */
+  FLAGS_TLS           = 1 << 21,  /**< User is connected via TLS (Transport Layer Security) */
   FLAGS_SQUIT         = 1 << 22,
   FLAGS_EXEMPTXLINE   = 1 << 23   /**< Client is exempt from x-lines */
 };
@@ -170,7 +170,7 @@ enum
   UMODE_OPER         = 1 << 20,  /**< IRC operator */
   UMODE_ADMIN        = 1 << 21,  /**< Admin on server */
   UMODE_FARCONNECT   = 1 << 22,  /**< Can see remote client connects/exits */
-  UMODE_SSL          = 1 << 23,  /**< User is connected via TLS/SSL */
+  UMODE_SECURE       = 1 << 23,  /**< User is connected via TLS */
   UMODE_WEBIRC       = 1 << 24,  /**< User connected via a webirc gateway */
   UMODE_HIDEIDLE     = 1 << 25,  /**< Hides idle and signon time in WHOIS */
   UMODE_HIDECHANS    = 1 << 26,  /**< Hides channel list in WHOIS */
@@ -377,7 +377,7 @@ struct Client
 
   struct irc_ssaddr ip;  /**< Real IP address */
 
-  char *certfp;  /**< SSL certificate fingerprint */
+  char *certfp;  /**< TLS certificate fingerprint */
 
   char away[AWAYLEN + 1];  /**< Client's AWAY message. Can be set/unset via AWAY command */
   char name[HOSTLEN + 1];  /**< Unique name for a client nick or host */

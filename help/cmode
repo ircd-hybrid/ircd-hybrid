@@ -57,8 +57,8 @@ NO PARAMETERS:
      +R     - 'Registered only'. Only registered clients may join a channel
               with that mode set
 
-     +S     - 'SSL only'. This will prevent anyone who isn't securely connected
-              via SSL/TLS from joining your channel.
+     +S     - 'Secure only'. This will prevent anyone who isn't securely connected
+              via TLS from joining your channel.
 
      +T     - 'No Notices'. This will prevent any user who isn't opped,
               half-opped or voiced (+o/+h/+v) from sending channel notices.

@@ -156,21 +156,16 @@ tls_new_cred(void)
     SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
   else if (SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
   {
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
     SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
+    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
   }
 
   if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
     ConfigServerInfo.message_digest_algorithm = EVP_sha256();
-  else
+  else if ((ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
   {
-    ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm);
-
-    if (ConfigServerInfo.message_digest_algorithm == NULL)
-    {
-      ConfigServerInfo.message_digest_algorithm = EVP_sha256();
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
-    }
+    ConfigServerInfo.message_digest_algorithm = EVP_sha256();
+    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
   }
 
   if (ConfigServerInfo.tls_cipher_list)
@@ -182,8 +177,8 @@ tls_new_cred(void)
     SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
   else if (SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
   {
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
     SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
+    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
   }
 #endif
 

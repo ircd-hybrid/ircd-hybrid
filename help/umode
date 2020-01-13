@@ -25,7 +25,7 @@ User modes: (* designates that the umode is oper only)
                  Can be set only by servers and services.
          R     - Only registered clients may message you.
          s     - Can see generic server messages and oper kills.
-         S     - Client is connected via SSL/TLS.
+         S     - Client is connected via TLS (Transport Layer Security).
        * e     - Can see new server introduction and split messages.
        * b     - Can see possible bot/join flood warnings.
        * a     - Is marked as a server admin in stats o/p.

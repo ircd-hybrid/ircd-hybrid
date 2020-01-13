@@ -35,7 +35,7 @@ User Modes:
                     Can be set only by servers and services.
 +R - regonly      - Only registered clients may message you
 +s - servnotice   - See general server notices
-+S - ssl          - Client is connected via SSL/TLS
++S - secure       - Client is connected via TLS
 +u - unauth       - See unauthorized client notices
 +w - wallop       - See server generated WALLOPS
 +W - webirc       - User is connected using a webirc gateway
@@ -69,7 +69,7 @@ Channel Modes:
 +R - regonly      - Only registered clients may join a channel with that mode set
 +s - secret       - The channel does not show up on NAMES or LIST or in the
                     WHOIS channel list unless you are a member of the channel
-+S - sslonly      - This mode will prevent anyone who isn't securely connected via SSL/TLS from joining
++S - secureonly   - This mode will prevent anyone who isn't securely connected via TLS from joining
                     the channel.
 +t - topic        - Only chanops and halfops can change the topic
 +u - hidebmasks   - Hides +b/+e/+I mode changes and lists to everyone except channel ops, and

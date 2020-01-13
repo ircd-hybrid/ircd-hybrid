@@ -318,8 +318,8 @@ reset_block_state(void)
 %token  T_SKILL
 %token  T_SOFTCALLERID
 %token  T_SPY
-%token  T_SSL
 %token  T_TARGET
+%token  T_TLS
 %token  T_UMODES
 %token  T_UNAUTH
 %token  T_UNDLINE
@@ -1020,9 +1020,9 @@ oper_tls_connection_required: TLS_CONNECTION_REQUIRED '=' TBOOL ';'
     break;
 
   if (yylval.number)
-    block_state.flags.value |= CONF_FLAGS_SSL;
+    block_state.flags.value |= CONF_FLAGS_TLS;
   else
-    block_state.flags.value &= ~CONF_FLAGS_SSL;
+    block_state.flags.value &= ~CONF_FLAGS_TLS;
 };
 
 oper_class: CLASS '=' QSTRING ';'
@@ -1460,10 +1460,10 @@ listen_flags: IRCD_FLAGS
 } '='  listen_flags_items ';';
 
 listen_flags_items: listen_flags_items ',' listen_flags_item | listen_flags_item;
-listen_flags_item: T_SSL
+listen_flags_item: T_TLS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= LISTENER_SSL;
+    block_state.flags.value |= LISTENER_TLS;
 } | HIDDEN
 {
   if (conf_parser_ctx.pass == 2)
@@ -1486,7 +1486,7 @@ port_item: NUMBER
   if (conf_parser_ctx.pass == 2)
   {
 #ifndef HAVE_TLS
-    if (block_state.flags.value & LISTENER_SSL)
+    if (block_state.flags.value & LISTENER_TLS)
     {
       conf_error_report("TLS not available - port closed");
       break;
@@ -1499,7 +1499,7 @@ port_item: NUMBER
   if (conf_parser_ctx.pass == 2)
   {
 #ifndef HAVE_TLS
-    if (block_state.flags.value & LISTENER_SSL)
+    if (block_state.flags.value & LISTENER_TLS)
     {
       conf_error_report("TLS not available - port closed");
       break;
@@ -2123,10 +2123,10 @@ connect_flags_item: AUTOCONN
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_ALLOW_AUTO_CONN;
-} | T_SSL
+} | T_TLS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_SSL;
+    block_state.flags.value |= CONF_FLAGS_TLS;
 };
 
 connect_encrypted: ENCRYPTED '=' TBOOL ';'

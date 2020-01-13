@@ -182,9 +182,9 @@ send_queued_write(struct Client *to)
     bool want_read = false;
     const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
 
-    if (tls_isusing(&to->connection->fd->ssl))
+    if (tls_isusing(&to->connection->fd->tls))
     {
-      retlen = tls_write(&to->connection->fd->ssl, first->data + to->connection->buf_sendq.pos,
+      retlen = tls_write(&to->connection->fd->tls, first->data + to->connection->buf_sendq.pos,
                                                    first->size - to->connection->buf_sendq.pos, &want_read);
 
       if (want_read == true)

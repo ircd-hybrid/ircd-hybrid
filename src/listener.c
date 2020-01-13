@@ -123,7 +123,7 @@ listener_accept_connection(fde_t *F, void *data)
       sendto_realops_flags_ratelimited(&rate, "All connections in use. (%s)",
                                        listener_get_name(listener));
 
-      if (!(listener->flags & LISTENER_SSL))
+      if (!(listener->flags & LISTENER_TLS))
         send(fd, ALLINUSE_WARNING, sizeof(ALLINUSE_WARNING) - 1, 0);
 
       close(fd);
@@ -138,7 +138,7 @@ listener_accept_connection(fde_t *F, void *data)
     {
       ++ServerStats.is_ref;
 
-      if (!(listener->flags & LISTENER_SSL))
+      if (!(listener->flags & LISTENER_TLS))
       {
         switch (pe)
         {

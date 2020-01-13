@@ -201,7 +201,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
                        target_p->username, target_p->realhost,
                        target_p->sockhost);
 
-  if (HasUMode(target_p, UMODE_SSL))
+  if (HasUMode(target_p, UMODE_SECURE))
     sendto_one_numeric(source_p, &me, RPL_WHOISSECURE, target_p->name);
 
   if (!EmptyString(target_p->certfp))

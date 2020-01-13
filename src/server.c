@@ -505,7 +505,7 @@ server_tls_handshake(fde_t *F, void *data)
   assert(client_p->connection->fd);
   assert(client_p->connection->fd == F);
 
-  tls_handshake_status_t ret = tls_handshake(&F->ssl, TLS_ROLE_CLIENT, &sslerr);
+  tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_CLIENT, &sslerr);
   if (ret != TLS_HANDSHAKE_DONE)
   {
     if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
@@ -537,7 +537,7 @@ server_tls_handshake(fde_t *F, void *data)
 
   comm_settimeout(F, 0, NULL, NULL);
 
-  if (tls_verify_cert(&F->ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp) == false)
+  if (tls_verify_cert(&F->tls, ConfigServerInfo.message_digest_algorithm, &client_p->certfp) == false)
     ilog(LOG_TYPE_IRCD, "Server %s!%s@%s gave bad TLS client certificate",
          client_p->name, client_p->username, client_p->host);
 
@@ -552,7 +552,7 @@ server_tls_connect_init(struct Client *client_p, const struct MaskItem *conf, fd
   assert(client_p->connection->fd);
   assert(client_p->connection->fd == F);
 
-  if (tls_new(&F->ssl, F->fd, TLS_ROLE_CLIENT) == false)
+  if (tls_new(&F->tls, F->fd, TLS_ROLE_CLIENT) == false)
   {
     SetDead(client_p);
     exit_client(client_p, "TLS context initialization failed");
@@ -560,7 +560,7 @@ server_tls_connect_init(struct Client *client_p, const struct MaskItem *conf, fd
   }
 
   if (!EmptyString(conf->cipher_list))
-    tls_set_ciphers(&F->ssl, conf->cipher_list);
+    tls_set_ciphers(&F->tls, conf->cipher_list);
 
   server_tls_handshake(F, client_p);
 }
@@ -618,7 +618,7 @@ server_connect_callback(fde_t *F, int status, void *data)
     return;
   }
 
-  if (IsConfSSL(conf))
+  if (IsConfTLS(conf))
   {
     server_tls_connect_init(client_p, conf, F);
     return;

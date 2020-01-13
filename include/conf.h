@@ -58,7 +58,7 @@ enum
   CONF_FLAGS_ENCRYPTED       = 1 << 10,
   CONF_FLAGS_IN_DATABASE     = 1 << 11,
   CONF_FLAGS_EXEMPTRESV      = 1 << 12,
-  CONF_FLAGS_SSL             = 1 << 13,
+  CONF_FLAGS_TLS             = 1 << 13,
   CONF_FLAGS_WEBIRC          = 1 << 14,
   CONF_FLAGS_EXEMPTXLINE     = 1 << 15
 };
@@ -79,7 +79,7 @@ enum
 #define SetConfAllowAutoConn(x)   ((x)->flags |= CONF_FLAGS_ALLOW_AUTO_CONN)
 #define ClearConfAllowAutoConn(x) ((x)->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN)
 #define IsConfRedir(x)            ((x)->flags & CONF_FLAGS_REDIR)
-#define IsConfSSL(x)              ((x)->flags & CONF_FLAGS_SSL)
+#define IsConfTLS(x)              ((x)->flags & CONF_FLAGS_TLS)
 #define IsConfDatabase(x)         ((x)->flags & CONF_FLAGS_IN_DATABASE)
 #define SetConfDatabase(x)        ((x)->flags |= CONF_FLAGS_IN_DATABASE)
 

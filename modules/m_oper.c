@@ -145,10 +145,10 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (IsConfSSL(conf) && !HasUMode(source_p, UMODE_SSL))
+  if (IsConfTLS(conf) && !HasUMode(source_p, UMODE_SECURE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-    failed_oper_notice(source_p, opername, "requires SSL/TLS");
+    failed_oper_notice(source_p, opername, "requires TLS");
     return;
   }
 

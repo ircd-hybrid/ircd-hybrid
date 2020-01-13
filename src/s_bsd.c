@@ -158,7 +158,7 @@ ssl_handshake(fde_t *F, void *data)
   assert(client_p->connection->fd);
   assert(client_p->connection->fd == F);
 
-  tls_handshake_status_t ret = tls_handshake(&F->ssl, TLS_ROLE_SERVER, NULL);
+  tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_SERVER, NULL);
   if (ret != TLS_HANDSHAKE_DONE)
   {
     if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
@@ -183,7 +183,7 @@ ssl_handshake(fde_t *F, void *data)
 
   comm_settimeout(F, 0, NULL, NULL);
 
-  if (tls_verify_cert(&F->ssl, ConfigServerInfo.message_digest_algorithm, &client_p->certfp) == false)
+  if (tls_verify_cert(&F->tls, ConfigServerInfo.message_digest_algorithm, &client_p->certfp) == false)
     ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad TLS client certificate",
          client_p->name, client_p->username, client_p->host);
 
@@ -202,8 +202,8 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 {
   struct Client *client_p = client_make(NULL);
 
-  client_p->connection->fd = fd_open(fd, true, (listener->flags & LISTENER_SSL) ?
-                                     "Incoming SSL connection" : "Incoming connection");
+  client_p->connection->fd = fd_open(fd, true, (listener->flags & LISTENER_TLS) ?
+                                     "Incoming TLS connection" : "Incoming connection");
 
   /*
    * copy address to 'sockhost' as a string, copy it to host too
@@ -226,16 +226,16 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   client_p->connection->listener = listener;
   ++listener->ref_count;
 
-  if (listener->flags & LISTENER_SSL)
+  if (listener->flags & LISTENER_TLS)
   {
-    if (tls_new(&client_p->connection->fd->ssl, fd, TLS_ROLE_SERVER) == false)
+    if (tls_new(&client_p->connection->fd->tls, fd, TLS_ROLE_SERVER) == false)
     {
       SetDead(client_p);
       exit_client(client_p, "TLS context initialization failed");
       return;
     }
 
-    AddFlag(client_p, FLAGS_SSL);
+    AddFlag(client_p, FLAGS_TLS);
     ssl_handshake(client_p->connection->fd, client_p);
   }
   else

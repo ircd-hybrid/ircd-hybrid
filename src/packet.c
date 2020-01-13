@@ -302,10 +302,10 @@ read_packet(fde_t *F, void *data)
    */
   while (true)
   {
-    if (tls_isusing(&F->ssl))
+    if (tls_isusing(&F->tls))
     {
       bool want_write = false;
-      length = tls_read(&F->ssl, readBuf, sizeof(readBuf), &want_write);
+      length = tls_read(&F->tls, readBuf, sizeof(readBuf), &want_write);
 
       if (want_write == true)
         comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);

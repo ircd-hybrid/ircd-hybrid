@@ -240,8 +240,8 @@ extern int yydebug;
     T_SKILL = 446,
     T_SOFTCALLERID = 447,
     T_SPY = 448,
-    T_SSL = 449,
-    T_TARGET = 450,
+    T_TARGET = 449,
+    T_TLS = 450,
     T_UMODES = 451,
     T_UNAUTH = 452,
     T_UNDLINE = 453,
@@ -472,8 +472,8 @@ extern int yydebug;
 #define T_SKILL 446
 #define T_SOFTCALLERID 447
 #define T_SPY 448
-#define T_SSL 449
-#define T_TARGET 450
+#define T_TARGET 449
+#define T_TLS 450
 #define T_UMODES 451
 #define T_UNAUTH 452
 #define T_UNDLINE 453

@@ -3,11 +3,21 @@ o) Fixed segfault with GnuTLS/libgmp in case there's no DH parameters file
    defined in 'serverinfo::ssl_dh_param_file' or if that file is missing
 o) The connection timeout for connect{} blocks can now be configured via
    the 'connect::timeout' configuration directive
-o) OpenSSL now runs in automatic curve selection mode if no curve is defined
-   in 'serverinfo::ssl_dh_elliptic_curve'
 o) Minimum supported OpenSSL version is 1.1.1 now
 o) Supported TLSv1.3 cipher suites can now be configured explicitely via the
    new 'serverinfo::tls_cipher_suites' configuration directive
+o) In the serverinfo {} block, the following configuration directives have been renamed:
+     ssl_certificate_file -> tls_certificate_file
+     ssl_dh_param_file -> tls_dh_param_file
+     ssl_dh_elliptic_curve -> tls_supported_groups
+     ssl_cipher_list -> tls_cipher_list
+     ssl_message_digest_algorithm -> tls_message_digest_algorithm
+o) In the operator {} block, the following configuration directives have been renamed:
+     ssl_certificate_fingerprint -> tls_certificate_fingerprint
+     ssl_connection_required -> tls_connection_required
+o) In the connect {} block, the following configuration directives have been renamed:
+     ssl_cipher_list -> tls_cipher_list
+     ssl_certificate_fingerprint -> tls_certificate_fingerprint
 
 
 -- Noteworthy changes in version 8.2.26 (2019-05-31)

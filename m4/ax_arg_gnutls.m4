@@ -14,9 +14,9 @@ if test "$cf_enable_openssl" != "auto" &&
         AC_LANG_PROGRAM([
           #include <gnutls/gnutls.h>
           #include <stdlib.h>], [
-          exit(!(GNUTLS_VERSION_NUMBER >= 0x030508)); ])], [ AC_CHECK_LIB(gnutls, gnutls_init, [], [])], [], [])])
+          exit(!(GNUTLS_VERSION_NUMBER >= 0x030605)); ])], [ AC_CHECK_LIB(gnutls, gnutls_init, [], [])], [], [])])
 
-    AC_MSG_CHECKING(for GnuTLS 3.5.8 and above)
+    AC_MSG_CHECKING(for GnuTLS 3.6.5 and above)
     AS_IF([test "$ac_cv_lib_gnutls_gnutls_init" = "yes"],
           [AC_MSG_RESULT(found)], [AC_MSG_RESULT(no - GnuTLS support disabled)])
 

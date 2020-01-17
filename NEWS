@@ -4,6 +4,7 @@ o) Fixed segfault with GnuTLS/libgmp in case there's no DH parameters file
 o) The connection timeout for connect{} blocks can now be configured via
    the 'connect::timeout' configuration directive
 o) Minimum supported OpenSSL version is 1.1.1 now
+o) Minimum supported GnuTLS version is 3.6.5 now
 o) Supported TLSv1.3 cipher suites can now be configured explicitely via the
    new 'serverinfo::tls_cipher_suites' configuration directive
 o) In the serverinfo {} block, the following configuration directives have been renamed:

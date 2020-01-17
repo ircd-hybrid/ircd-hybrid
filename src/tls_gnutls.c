@@ -34,6 +34,9 @@
 #include "memory.h"
 
 #ifdef HAVE_TLS_GNUTLS
+#if GNUTLS_VERSION_NUMBER < 0x030605
+#error "GnuTLS 3.6.5 and above is required to build this module"
+#endif
 
 static bool TLS_initialized;
 static const char tls_default_priority_string[] =

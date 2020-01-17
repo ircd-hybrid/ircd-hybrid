@@ -61,7 +61,7 @@ else
 fi
 
 AS_IF([test "$cf_enable_openssl" != "no"],
- [AC_MSG_CHECKING(for LibreSSL, or OpenSSL 1.1.1 and above)
+ [AC_MSG_CHECKING([for LibreSSL, or OpenSSL 1.1.1 and above])
   AC_RUN_IFELSE([
     AC_LANG_PROGRAM([
     #include <openssl/opensslv.h>

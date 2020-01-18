@@ -33,6 +33,8 @@
 #include "tls_openssl.h"
 #elif defined(HAVE_LIBGNUTLS)
 #include "tls_gnutls.h"
+#elif defined(HAVE_LIBWOLFSSL)
+#include "tls_wolfssl.h"
 #else
 #include "tls_none.h"
 #endif

@@ -56,6 +56,7 @@ ircd_SOURCES = auth.c            \
                tls_gnutls.c      \
                tls_none.c        \
                tls_openssl.c     \
+               tls_wolfssl.c     \
                res.c             \
                reslib.c          \
                restart.c         \

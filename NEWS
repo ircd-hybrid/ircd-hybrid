@@ -19,6 +19,7 @@ o) In the operator {} block, the following configuration directives have been re
 o) In the connect {} block, the following configuration directives have been renamed:
      ssl_cipher_list -> tls_cipher_list
      ssl_certificate_fingerprint -> tls_certificate_fingerprint
+o) Experimental support for wolfSSL has been implemented. Minimum supported version is 4.3.0
 
 
 -- Noteworthy changes in version 8.2.26 (2019-05-31)

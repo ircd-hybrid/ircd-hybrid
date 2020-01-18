@@ -100,6 +100,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_compile_flags.m4 \
 	$(top_srcdir)/m4/ax_arg_gnutls.m4 \
 	$(top_srcdir)/m4/ax_arg_ioloop_mechanism.m4 \
 	$(top_srcdir)/m4/ax_arg_openssl.m4 \
+	$(top_srcdir)/m4/ax_arg_wolfssl.m4 \
 	$(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_define_dir.m4 \
 	$(top_srcdir)/m4/ax_gcc_stack_protect.m4 \
@@ -135,10 +136,11 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	parse.$(OBJEXT) patricia.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
 	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
 	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
-	tls_openssl.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
-	restart.$(OBJEXT) rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) \
-	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
-	user.$(OBJEXT) watch.$(OBJEXT) whowas.$(OBJEXT)
+	tls_openssl.$(OBJEXT) tls_wolfssl.$(OBJEXT) res.$(OBJEXT) \
+	reslib.$(OBJEXT) restart.$(OBJEXT) rng_mt.$(OBJEXT) \
+	s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	server_capab.$(OBJEXT) user.$(OBJEXT) watch.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -189,8 +191,8 @@ am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/s_bsd_poll.Po ./$(DEPDIR)/send.Po \
 	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
 	./$(DEPDIR)/tls_gnutls.Po ./$(DEPDIR)/tls_none.Po \
-	./$(DEPDIR)/tls_openssl.Po ./$(DEPDIR)/user.Po \
-	./$(DEPDIR)/watch.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/tls_openssl.Po ./$(DEPDIR)/tls_wolfssl.Po \
+	./$(DEPDIR)/user.Po ./$(DEPDIR)/watch.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -454,6 +456,7 @@ ircd_SOURCES = auth.c            \
                tls_gnutls.c      \
                tls_none.c        \
                tls_openssl.c     \
+               tls_wolfssl.c     \
                res.c             \
                reslib.c          \
                restart.c         \
@@ -617,6 +620,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_gnutls.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_none.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_openssl.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_wolfssl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/watch.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@ # am--include-marker
@@ -848,6 +852,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tls_gnutls.Po
 	-rm -f ./$(DEPDIR)/tls_none.Po
 	-rm -f ./$(DEPDIR)/tls_openssl.Po
+	-rm -f ./$(DEPDIR)/tls_wolfssl.Po
 	-rm -f ./$(DEPDIR)/user.Po
 	-rm -f ./$(DEPDIR)/watch.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
@@ -951,6 +956,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tls_gnutls.Po
 	-rm -f ./$(DEPDIR)/tls_none.Po
 	-rm -f ./$(DEPDIR)/tls_openssl.Po
+	-rm -f ./$(DEPDIR)/tls_wolfssl.Po
 	-rm -f ./$(DEPDIR)/user.Po
 	-rm -f ./$(DEPDIR)/watch.Po
 	-rm -f ./$(DEPDIR)/whowas.Po

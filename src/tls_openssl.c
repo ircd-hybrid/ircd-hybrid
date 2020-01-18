@@ -193,17 +193,17 @@ tls_new_cred(void)
 const char *
 tls_get_cipher(const tls_data_t *tls_data)
 {
-  static char buffer[IRCD_BUFSIZE];
+  static char buf[128];
   SSL *ssl = *tls_data;
 
-  snprintf(buffer, sizeof(buffer), "%s-%s", SSL_get_version(ssl), SSL_get_cipher(ssl));
-  return buffer;
+  snprintf(buf, sizeof(buf), "%s-%s", SSL_get_version(ssl), SSL_get_cipher(ssl));
+  return buf;
 }
 
 const char *
 tls_get_version(void)
 {
-  static char buf[IRCD_BUFSIZE];
+  static char buf[256];
 
   snprintf(buf, sizeof(buf), "OpenSSL version: library: %s, header: %s",
            OpenSSL_version(OPENSSL_VERSION), OPENSSL_VERSION_TEXT);

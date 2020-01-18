@@ -162,21 +162,20 @@ tls_new_cred(void)
 const char *
 tls_get_cipher(const tls_data_t *tls_data)
 {
-  static char buffer[IRCD_BUFSIZE];
+  static char buf[128];
 
-  snprintf(buffer, sizeof(buffer), "%s-%s-%s-%s",
+  snprintf(buf, sizeof(buf), "%s-%s-%s-%s",
            gnutls_protocol_get_name(gnutls_protocol_get_version(tls_data->session)),
            gnutls_kx_get_name(gnutls_kx_get(tls_data->session)),
            gnutls_cipher_get_name(gnutls_cipher_get(tls_data->session)),
            gnutls_mac_get_name(gnutls_mac_get(tls_data->session)));
-
-  return buffer;
+  return buf;
 }
 
 const char *
 tls_get_version(void)
 {
-  static char buf[IRCD_BUFSIZE];
+  static char buf[256];
 
   snprintf(buf, sizeof(buf), "GnuTLS version: library: %s, header: %s",
            gnutls_check_version(NULL), GNUTLS_VERSION);

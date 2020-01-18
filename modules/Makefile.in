@@ -99,6 +99,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_compile_flags.m4 \
 	$(top_srcdir)/m4/ax_arg_gnutls.m4 \
 	$(top_srcdir)/m4/ax_arg_ioloop_mechanism.m4 \
 	$(top_srcdir)/m4/ax_arg_openssl.m4 \
+	$(top_srcdir)/m4/ax_arg_wolfssl.m4 \
 	$(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_define_dir.m4 \
 	$(top_srcdir)/m4/ax_gcc_stack_protect.m4 \

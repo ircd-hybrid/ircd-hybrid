@@ -91,6 +91,9 @@
 /* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 
+/* Define to 1 if you have the `wolfssl' library (-lwolfssl). */
+#undef HAVE_LIBWOLFSSL
+
 /* Define this if a modern libltdl is already installed */
 #undef HAVE_LTDL
 

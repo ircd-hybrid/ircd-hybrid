@@ -26,7 +26,7 @@ addons:
 
 script:
  - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$CC" = "gcc" ]; then export CC=$(ls -t /usr/local/bin/gcc-?.*); fi
- - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --disable-openssl --enable-assert; else ./configure --enable-assert; fi
+ - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --with-tls=none --enable-assert; else ./configure --enable-assert; fi
  - make
  - sudo make install
 

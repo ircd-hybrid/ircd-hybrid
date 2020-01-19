@@ -5,14 +5,6 @@ language: c
 matrix:
   include:
   - os: linux
-    dist: precise
-    compiler: gcc
-    arch: amd64
-  - os: linux
-    dist: precise
-    compiler: clang
-    arch: amd64
-  - os: linux
     dist: trusty
     compiler: gcc
     arch: amd64
@@ -33,6 +25,14 @@ matrix:
     compiler: gcc
     arch: arm64
   - os: linux
+    dist: xenial
+    compiler: gcc
+    arch: ppc64le
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    arch: s390x
+  - os: linux
     dist: bionic
     compiler: gcc
     arch: amd64
@@ -44,6 +44,14 @@ matrix:
     dist: bionic
     compiler: gcc
     arch: arm64
+  - os: linux
+    dist: bionic
+    compiler: gcc
+    arch: ppc64le
+  - os: linux
+    dist: bionic
+    compiler: gcc
+    arch: s390x
   - os: osx
     osx_image: xcode11.3
     compiler: clang

@@ -4,55 +4,68 @@ language: c
 
 matrix:
   include:
-  - os: linux
+  - name: "amd64 - Trusty - gcc"
+    os: linux
     dist: trusty
     compiler: gcc
     arch: amd64
-  - os: linux
+  - name: "amd64 - Trusty - clang"
+    os: linux
     dist: trusty
     compiler: clang
     arch: amd64
-  - os: linux
+  - name: "amd64 - Xenial - gcc"
+    os: linux
     dist: xenial
     compiler: gcc
     arch: amd64
-  - os: linux
+  - name: "amd64 - Xenial - clang"
+    os: linux
     dist: xenial
     compiler: clang
     arch: amd64
-  - os: linux
+  - name: "arm64 - Xenial - gcc"
+    os: linux
     dist: xenial
     compiler: gcc
     arch: arm64
-  - os: linux
+  - name: "ppc64le - Xenial - gcc"
+    os: linux
     dist: xenial
     compiler: gcc
     arch: ppc64le
-  - os: linux
+  - name: "s390x - Xenial - gcc"
+    os: linux
     dist: xenial
     compiler: gcc
     arch: s390x
-  - os: linux
+  - name: "amd64 - Bionic - gcc"
+    os: linux
     dist: bionic
     compiler: gcc
     arch: amd64
-  - os: linux
+  - name: "amd64 - Bionic - clang"
+    os: linux
     dist: bionic
     compiler: clang
     arch: amd64
-  - os: linux
+  - name: "arm64 - Bionic - gcc"
+    os: linux
     dist: bionic
     compiler: gcc
     arch: arm64
-  - os: linux
+  - name: "ppc64le - Bionic - gcc"
+    os: linux
     dist: bionic
     compiler: gcc
     arch: ppc64le
-  - os: linux
+  - name: "s390x - Bionic - gcc"
+    os: linux
     dist: bionic
     compiler: gcc
     arch: s390x
-  - os: osx
+  - name: "amd64 - High Sierra - xcode11.3/clang"
+    os: osx
     osx_image: xcode11.3
     compiler: clang
 

@@ -2,9 +2,51 @@
 
 language: c
 
-os:
-  - linux
-  - osx
+matrix:
+  include:
+  - os: linux
+    dist: precise
+    compiler: gcc
+    arch: amd64
+  - os: linux
+    dist: precise
+    compiler: clang
+    arch: amd64
+  - os: linux
+    dist: trusty
+    compiler: gcc
+    arch: amd64
+  - os: linux
+    dist: trusty
+    compiler: clang
+    arch: amd64
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    arch: amd64
+  - os: linux
+    dist: xenial
+    compiler: clang
+    arch: amd64
+  - os: linux
+    dist: xenial
+    compiler: gcc
+    arch: arm64
+  - os: linux
+    dist: bionic
+    compiler: gcc
+    arch: amd64
+  - os: linux
+    dist: bionic
+    compiler: clang
+    arch: amd64
+  - os: linux
+    dist: bionic
+    compiler: gcc
+    arch: arm64
+  - os: osx
+    osx_image: xcode11.3
+    compiler: clang
 
 env:
  global:
@@ -25,7 +67,6 @@ addons:
     branch_pattern: coverity_scan
 
 script:
- - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$CC" = "gcc" ]; then export CC=$(ls -t /usr/local/bin/gcc-?.*); fi
  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --with-tls=none --enable-assert; else ./configure --enable-assert; fi
  - make
  - sudo make install

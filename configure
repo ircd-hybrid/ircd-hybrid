@@ -814,9 +814,7 @@ enable_assert
 enable_debugging
 enable_warnings
 enable_efence
-enable_openssl
-enable_gnutls
-enable_wolfssl
+with_tls
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1483,12 +1481,6 @@ Optional Features:
   --enable-warnings       Enable compiler warnings.
   --enable-efence         Enable linking with Electric Fence 'efence' memory
                           debugger library.
-  --enable-openssl=DIR       Enable LibreSSL/OpenSSL support (DIR optional).
-  --disable-openssl            Disable LibreSSL/OpenSSL support.
-  --enable-gnutls             Enable GnuTLS support.
-  --disable-gnutls             Disable GnuTLS support.
-  --enable-wolfssl             Enable wolfSSL support.
-  --disable-wolfssl             Disable wolfSSL support.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1504,6 +1496,8 @@ Optional Packages:
   --with-included-ltdl    use the GNU ltdl sources included here
   --with-ltdl-include=DIR use the ltdl headers installed in DIR
   --with-ltdl-lib=DIR     use the libltdl.la installed in DIR
+  --with-tls              Enables TLS with specified library. Options:
+                          'openssl', 'wolfssl', 'gnutls' or 'none'
 
 Some influential environment variables:
   CC          C compiler command
@@ -16690,94 +16684,44 @@ fi
 fi
 
 
-# Check whether --enable-openssl was given.
-if test "${enable_openssl+set}" = set; then :
-  enableval=$enable_openssl;  cf_enable_openssl=$enableval
+
+
+# Check whether --with-tls was given.
+if test "${with_tls+set}" = set; then :
+  withval=$with_tls; with_tls=$withval
 else
-   cf_enable_openssl="auto"
+  with_tls=auto
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LibreSSL/OpenSSL" >&5
-$as_echo_n "checking for LibreSSL/OpenSSL... " >&6; }
-if test "$cf_enable_openssl" != "no"; then
-  cf_openssl_basedir=""
-  if test "$cf_enable_openssl" != "auto" &&
-     test "$cf_enable_openssl" != "yes"; then
-          cf_openssl_basedir="${cf_enable_openssl}"
-  else
-        for dirs in /usr/local/ssl /usr/pkg /usr/local /usr/lib /usr/lib/ssl\
-                /opt /opt/openssl /usr/local/openssl; do
-      if test -f "${dirs}/include/openssl/opensslv.h"; then
-        cf_openssl_basedir="${dirs}"
-        break
-      fi
-    done
-    unset dirs
-  fi
 
-    if test ! -z "$cf_openssl_basedir"; then
-    if test -f "${cf_openssl_basedir}/include/openssl/opensslv.h"; then
-      CPPFLAGS="-I${cf_openssl_basedir}/include $CPPFLAGS"
-      LDFLAGS="-L${cf_openssl_basedir}/lib $LDFLAGS"
-    else
-                  cf_openssl_basedir=""
-    fi
-  else
-                            if test -f "/usr/include/openssl/opensslv.h"; then
-      cf_openssl_basedir="/usr"
-    fi
-  fi
+if test "$with_tls" = "openssl" ||
+   test "$with_tls" = "auto"; then
+    ac_fn_c_check_header_mongrel "$LINENO" "openssl/opensslv.h" "ac_cv_header_openssl_opensslv_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_opensslv_h" = xyes; then :
 
-      if test ! -z "$cf_openssl_basedir"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $cf_openssl_basedir" >&5
-$as_echo "$cf_openssl_basedir" >&6; }
-    cf_enable_openssl="yes"
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found. Please check your path." >&5
-$as_echo "not found. Please check your path." >&6; }
-    cf_enable_openssl="no"
-  fi
-  unset cf_openssl_basedir
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: disabled" >&5
-$as_echo "disabled" >&6; }
-fi
-
-if test "$cf_enable_openssl" != "no"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LibreSSL, or OpenSSL 1.1.1 and above" >&5
-$as_echo_n "checking for LibreSSL, or OpenSSL 1.1.1 and above... " >&6; }
-  if test "$cross_compiling" = yes; then :
-  cf_openssl_version_ok=no
+      if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
-    #include <openssl/opensslv.h>
-    #include <stdlib.h>
+          #include <openssl/opensslv.h>
+          #include <stdlib.h>
 int
 main ()
 {
- exit(!(OPENSSL_VERSION_NUMBER >= 0x1010100fL));
+
+          exit(!(OPENSSL_VERSION_NUMBER >= 0x1010100fL));
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
-  cf_openssl_version_ok=yes
-else
-  cf_openssl_version_ok=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-
-  if test "$cf_openssl_version_ok" = "yes"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
-$as_echo "found" >&6; }
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for RSA_free in -lcrypto" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for RSA_free in -lcrypto" >&5
 $as_echo_n "checking for RSA_free in -lcrypto... " >&6; }
 if ${ac_cv_lib_crypto_RSA_free+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -16814,15 +16758,6 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_RSA_free" >&5
 $as_echo "$ac_cv_lib_crypto_RSA_free" >&6; }
 if test "x$ac_cv_lib_crypto_RSA_free" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBCRYPTO 1
-_ACEOF
-
-  LIBS="-lcrypto $LIBS"
-
-fi
-
-    if test "$ac_cv_lib_crypto_RSA_free" = "yes"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_connect in -lssl" >&5
 $as_echo_n "checking for SSL_connect in -lssl... " >&6; }
 if ${ac_cv_lib_ssl_SSL_connect+:} false; then :
@@ -16870,25 +16805,30 @@ fi
 
 fi
 
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LibreSSL, or OpenSSL 1.1.1 and above" >&5
+$as_echo_n "checking for LibreSSL, or OpenSSL 1.1.1 and above... " >&6; }
+    if test "$ac_cv_lib_ssl_SSL_connect" = "yes"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no - LibreSSL/OpenSSL support disabled" >&5
 $as_echo "no - LibreSSL/OpenSSL support disabled" >&6; }
-    cf_enable_openssl="no"
-fi
 fi
 
-
-# Check whether --enable-gnutls was given.
-if test "${enable_gnutls+set}" = set; then :
-  enableval=$enable_gnutls;  cf_enable_gnutls=$enableval
-else
-   cf_enable_gnutls="auto"
 fi
 
-
-if test "$cf_enable_openssl" != "auto" &&
-   test "$cf_enable_openssl" != "yes"; then
-  if test "$cf_enable_gnutls" != "no"; then
+if test "$with_tls" = "gnutls" ||
+   test "$with_tls" = "auto"; then
+  if test "$ac_cv_lib_ssl_SSL_connect" != "yes"; then
 
     ac_fn_c_check_header_mongrel "$LINENO" "gnutls/gnutls.h" "ac_cv_header_gnutls_gnutls_h" "$ac_includes_default"
 if test "x$ac_cv_header_gnutls_gnutls_h" = xyes; then :
@@ -16915,7 +16855,7 @@ main ()
 }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gnutls_init in -lgnutls" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gnutls_init in -lgnutls" >&5
 $as_echo_n "checking for gnutls_init in -lgnutls... " >&6; }
 if ${ac_cv_lib_gnutls_gnutls_init+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -16982,18 +16922,10 @@ fi
   fi
 fi
 
-
-# Check whether --enable-wolfssl was given.
-if test "${enable_wolfssl+set}" = set; then :
-  enableval=$enable_wolfssl;  cf_enable_wolfssl=$enableval
-else
-   cf_enable_wolfssl="auto"
-fi
-
-
-if test "$cf_enable_openssl" != "auto" &&
-   test "$cf_enable_openssl" != "yes"; then
-  if test "$cf_enable_gnutls" = "no"; then
+if test "$with_tls" = "wolfssl" ||
+   test "$with_tls" = "auto"; then
+  if test "$ac_cv_lib_ssl_SSL_connect" != "yes" &&
+     test "$ac_cv_lib_gnutls_gnutls_init" != "yes"; then
 
     ac_fn_c_check_header_mongrel "$LINENO" "wolfssl/ssl.h" "ac_cv_header_wolfssl_ssl_h" "$ac_includes_default"
 if test "x$ac_cv_header_wolfssl_ssl_h" = xyes; then :
@@ -17086,6 +17018,7 @@ fi
 
   fi
 fi
+
 
 
 # Disable -Wformat-truncation

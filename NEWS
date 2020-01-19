@@ -20,6 +20,11 @@ o) In the connect {} block, the following configuration directives have been ren
      ssl_cipher_list -> tls_cipher_list
      ssl_certificate_fingerprint -> tls_certificate_fingerprint
 o) Experimental support for wolfSSL has been implemented. Minimum supported version is 4.3.0
+o) The --enable-openssl, --enable-gnutls switches, and their disabling counterparts
+   --disable-openssl and --disable-gnutls, have been replaced with the --with-tls switch
+   which takes one of the following options: 'openssl', 'wolfssl', 'gnutls', and 'none'.
+   If nothing has been specified, configure tries to autodetect in the following order:
+   openssl/libressl -> gnutls -> wolfssl.
 
 
 -- Noteworthy changes in version 8.2.26 (2019-05-31)

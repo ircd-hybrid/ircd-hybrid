@@ -57,19 +57,12 @@
           detection in configure. So if you do have kqueue but wish to
           enable poll(2) instead (bad idea), you must use --enable-poll.
 
-          * --enable-openssl - Enable the LibreSSL/OpenSSL dependent TLS/crypto 
-            functions.
+          * --with-tls= - Controls TLS (Transport Layer Security) support. 
+            Supported options are currently 'openssl, 'wolfssl', 'gnutls',
+            and 'none'.
 
-            On systems where the configure script can automatically detect
-            LibreSSL or OpenSSL, this option is not necessary. If configure cannot
-            find LibreSSL or OpenSSL, you must specify a path with this option
-            (--enable-openssl=/path/to/openssl)
-
-          * --enable-gnutls - Enable the GnuTLS dependent TLS/crypto functions.
-
-            Note that OpenSSL detection takes precedence over GnuTLS detection.
-            In case you have both OpenSSL and GnuTLS installed and want the ircd to
-            make use of GnuTLS, run ./configure wih the --disable-openssl switch.
+            If nothing has been specified, configure tries to autodetect in the
+            following order: openssl/libressl -> gnutls -> wolfssl.
 
 
        These are optional or have default values that may be overridden:

@@ -2,9 +2,72 @@
 
 language: c
 
-os:
-  - linux
-  - osx
+matrix:
+  include:
+  - name: "amd64 - Trusty - gcc"
+    os: linux
+    dist: trusty
+    compiler: gcc
+    arch: amd64
+  - name: "amd64 - Trusty - clang"
+    os: linux
+    dist: trusty
+    compiler: clang
+    arch: amd64
+  - name: "amd64 - Xenial - gcc"
+    os: linux
+    dist: xenial
+    compiler: gcc
+    arch: amd64
+  - name: "amd64 - Xenial - clang"
+    os: linux
+    dist: xenial
+    compiler: clang
+    arch: amd64
+  - name: "arm64 - Xenial - gcc"
+    os: linux
+    dist: xenial
+    compiler: gcc
+    arch: arm64
+  - name: "ppc64le - Xenial - gcc"
+    os: linux
+    dist: xenial
+    compiler: gcc
+    arch: ppc64le
+  - name: "s390x - Xenial - gcc"
+    os: linux
+    dist: xenial
+    compiler: gcc
+    arch: s390x
+  - name: "amd64 - Bionic - gcc"
+    os: linux
+    dist: bionic
+    compiler: gcc
+    arch: amd64
+  - name: "amd64 - Bionic - clang"
+    os: linux
+    dist: bionic
+    compiler: clang
+    arch: amd64
+  - name: "arm64 - Bionic - gcc"
+    os: linux
+    dist: bionic
+    compiler: gcc
+    arch: arm64
+  - name: "ppc64le - Bionic - gcc"
+    os: linux
+    dist: bionic
+    compiler: gcc
+    arch: ppc64le
+  - name: "s390x - Bionic - gcc"
+    os: linux
+    dist: bionic
+    compiler: gcc
+    arch: s390x
+  - name: "amd64 - High Sierra - xcode11.3/clang"
+    os: osx
+    osx_image: xcode11.3
+    compiler: clang
 
 env:
  global:
@@ -25,7 +88,6 @@ addons:
     branch_pattern: coverity_scan
 
 script:
- - if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$CC" = "gcc" ]; then export CC=$(ls -t /usr/local/bin/gcc-?.*); fi
  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./configure --with-tls=none --enable-assert; else ./configure --enable-assert; fi
  - make
  - sudo make install

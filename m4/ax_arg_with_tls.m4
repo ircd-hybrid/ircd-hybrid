@@ -1,4 +1,4 @@
-AC_DEFUN([AX_ARG_TLS], [
+AC_DEFUN([AX_ARG_WITH_TLS], [
 
 AC_ARG_WITH(tls, [AS_HELP_STRING([--with-tls], [Enables TLS with specified library. Options: 'openssl', 'wolfssl', 'gnutls' or 'none'])], [with_tls=$withval], [with_tls=auto])
 

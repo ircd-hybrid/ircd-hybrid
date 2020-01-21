@@ -58,4 +58,4 @@ typedef struct
 } tls_data_t;
 
 #endif  /* defined(HAVE_LIBGNUTLS) && !defined(HAVE_LIBCRYPTO) */
-#endif  /* INCLUDED_tls_openssl_h */
+#endif  /* INCLUDED_tls_gnutls_h */

@@ -1,4 +1,10 @@
 -- Noteworthy changes in version 8.2.27 (2019-??-??)
+o) Experimental support for wolfSSL has been implemented. Minimum supported version is 4.3.0
+o) The --enable-openssl, --enable-gnutls switches, and their disabling counterparts
+   --disable-openssl and --disable-gnutls, have been replaced with the --with-tls switch
+   which takes one of the following options: 'openssl', 'wolfssl', 'gnutls', and 'none'.
+   If nothing has been specified, configure tries to autodetect in the following order:
+   openssl/libressl -> gnutls -> wolfssl.
 o) Fixed segfault with GnuTLS/libgmp in case there's no DH parameters file
    defined in 'serverinfo::ssl_dh_param_file' or if that file is missing
 o) The connection timeout for connect{} blocks can now be configured via
@@ -19,12 +25,6 @@ o) In the operator {} block, the following configuration directives have been re
 o) In the connect {} block, the following configuration directives have been renamed:
      ssl_cipher_list -> tls_cipher_list
      ssl_certificate_fingerprint -> tls_certificate_fingerprint
-o) Experimental support for wolfSSL has been implemented. Minimum supported version is 4.3.0
-o) The --enable-openssl, --enable-gnutls switches, and their disabling counterparts
-   --disable-openssl and --disable-gnutls, have been replaced with the --with-tls switch
-   which takes one of the following options: 'openssl', 'wolfssl', 'gnutls', and 'none'.
-   If nothing has been specified, configure tries to autodetect in the following order:
-   openssl/libressl -> gnutls -> wolfssl.
 
 
 -- Noteworthy changes in version 8.2.26 (2019-05-31)
@@ -193,12 +193,14 @@ o) Far client exit notices (+F) now show IP addresses, too
 o) Made idle time look nicer in "STATS v|p" by using a formatted time string
 o) 'general::ts_warn_delta', and 'general::ts_max_delta' can be set to 0 now
 o) Several code cleanups and optimizations. Improved documentation
+o) For a full list of all changes in this release, see https://git.io/JvLtj
 
 
 -- Noteworthy changes in version 8.2.11 (2015-11-19)
 o) Implemented IRCv3.2 invite-notify extension
 o) Implemented IRCv3.2 chghost extension
 o) Added channel::invite_delay_channel configuration option
+o) For a full list of all changes in this release, see https://git.io/JvLqe
 
 
 -- Noteworthy changes in version 8.2.10 (2015-11-06)
@@ -217,6 +219,7 @@ o) RSA keys with less than 2048 bits are no longer supported; same applies
    to the DH param file
 o) Added missing irc-operator privilege flags to /stats o. For a full list
    of flags see doc/reference.conf
+o) For a full list of all changes in this release, see https://git.io/JvLqJ
 
 
 -- Noteworthy changes in version 8.2.9 (2015-09-13)
@@ -248,6 +251,7 @@ o) Added 'resv', and 'unresv' irc-operator flags. Previously, all
    privileges.
 o) Added 'close' to irc-operator flags
 o) ircd is using ISO 8601 date and time notation in most places now
+o) For a full list of all changes in this release, see https://git.io/JvLqI
 
 
 -- Noteworthy changes in version 8.2.8 (2015-05-10)
@@ -266,6 +270,7 @@ o) Fixed bug where a REHASH would clear all X-Lines and RESVs that have
 o) Fixed broken temporary remote XLINEs
 o) The 'general::havent_read_conf' configuration directive has been removed
 o) Various code cleanups
+o) For a full list of all changes in this release, see https://git.io/JvLqq
 
 
 -- Noteworthy changes in version 8.2.7 (2015-04-05)

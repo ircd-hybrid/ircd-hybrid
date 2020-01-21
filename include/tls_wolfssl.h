@@ -23,7 +23,7 @@
 
 /*! \file tls_wolfssl.h
  * \brief wolfSSL-specific TLS types
- * \version $Id: tls_wolfssl.h 9101 2020-01-01 09:58:45Z michael $
+ * \version $Id$
  */
 
 

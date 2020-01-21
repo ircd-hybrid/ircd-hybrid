@@ -30,7 +30,7 @@
 #ifndef INCLUDED_tls_gnutls_h
 #define INCLUDED_tls_gnutls_h
 
-#if defined(HAVE_LIBGNUTLS) && !defined(HAVE_LIBCRYPTO)
+#ifdef HAVE_LIBGNUTLS
 
 #define HAVE_TLS
 #define HAVE_TLS_GNUTLS
@@ -57,5 +57,5 @@ typedef struct
   tls_context_t context;
 } tls_data_t;
 
-#endif  /* defined(HAVE_LIBGNUTLS) && !defined(HAVE_LIBCRYPTO) */
+#endif  /* HAVE_LIBGNUTLS */
 #endif  /* INCLUDED_tls_gnutls_h */

@@ -107,7 +107,7 @@ do_whowas(struct Client *source_p, const int parc, char *parv[])
 static void
 m_whowas(struct Client *source_p, int parc, char *parv[])
 {
-  static uintmax_t last_used;
+  static uintmax_t last_used = 0;
 
   if (parc < 2 || EmptyString(parv[1]))
   {

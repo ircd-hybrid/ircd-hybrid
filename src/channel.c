@@ -521,8 +521,8 @@ find_invite(struct Channel *channel, struct Client *client_p)
 void
 add_invite(struct Channel *channel, struct Client *client_p)
 {
-  struct Invite *invite;
-  if ((invite = find_invite(channel, client_p)))
+  struct Invite *invite = find_invite(channel, client_p);
+  if (invite)
     del_invite(invite);
 
   invite = xcalloc(sizeof(*invite));
@@ -949,8 +949,8 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
       break;
     }
 
-    struct Channel *channel;
-    if ((channel = hash_find_channel(name)))
+    struct Channel *channel = hash_find_channel(name);
+    if (channel)
     {
       if (IsMember(client_p, channel))
         continue;
@@ -1028,8 +1028,8 @@ channel_do_join(struct Client *client_p, char *chan_list, char *key_list)
                            client_p->name, client_p->username,
                            client_p->host, client_p->away);
 
-    struct Invite *invite;
-    if ((invite = find_invite(channel, client_p)))
+    struct Invite *invite = find_invite(channel, client_p);
+    if (invite)
       del_invite(invite);
 
     if (channel->topic[0])

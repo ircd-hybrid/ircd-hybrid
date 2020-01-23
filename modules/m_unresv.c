@@ -45,9 +45,9 @@
 static void
 resv_remove(struct Client *source_p, const struct aline_ctx *aline)
 {
-  struct ResvItem *resv;
+  struct ResvItem *resv = resv_find(aline->mask, irccmp);
 
-  if ((resv = resv_find(aline->mask, irccmp)) == NULL)
+  if (resv == NULL)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":No RESV for %s", aline->mask);

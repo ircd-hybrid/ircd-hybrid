@@ -83,15 +83,15 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Try to find the name. If it fails, notify and bail.
    */
-  struct MaskItem *conf;
-  if ((conf = connect_find(name, match)) == NULL)
+  struct MaskItem *conf = connect_find(name, match);
+  if (conf == NULL)
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
     return;
   }
 
-  const struct Client *target_p;
-  if ((target_p = hash_find_server(conf->name)))
+  const struct Client *target_p = hash_find_server(conf->name);
+  if (target_p)
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
                       target_p->name, target_p->from->name);
@@ -161,15 +161,15 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   /*
    * Try to find the name. If it fails, notify and bail.
    */
-  struct MaskItem *conf;
-  if ((conf = connect_find(name, match)) == NULL)
+  struct MaskItem *conf = connect_find(name, match);
+  if (conf == NULL)
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
     return;
   }
 
-  const struct Client *target_p;
-  if ((target_p = hash_find_server(conf->name)))
+  const struct Client *target_p = hash_find_server(conf->name);
+  if (target_p)
   {
     sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
                       target_p->name, target_p->from->name);

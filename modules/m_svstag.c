@@ -56,8 +56,8 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
     return;
 
-  struct Client *target_p;
-  if ((target_p = find_person(source_p, parv[1])) == NULL)
+  struct Client *target_p = find_person(source_p, parv[1]);
+  if (target_p == NULL)
     return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);

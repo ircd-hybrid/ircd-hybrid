@@ -57,9 +57,7 @@ static void
 ms_svsmode(struct Client *source_p, int parc, char *parv[])
 {
   const struct user_modes *tab = NULL;
-  struct Client *target_p = NULL;
   int what = MODE_ADD;
-  unsigned int setmodes = 0;
   const char *modes = NULL, *extarg = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
@@ -68,14 +66,15 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   modes  = parv[3];
   extarg = (parc > 4) ? parv[4] : NULL;
 
-  if ((target_p = find_person(source_p, parv[1])) == NULL)
+  struct Client *target_p = find_person(source_p, parv[1]);
+  if (target_p == NULL)
     return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
   if (ts && (ts != target_p->tsinfo))
     return;
 
-  setmodes = target_p->umodes;
+  const unsigned int setmodes = target_p->umodes;
 
   for (const char *m = modes; *m; ++m)
   {

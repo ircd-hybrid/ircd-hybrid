@@ -73,15 +73,16 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   else
     reason = def_reason;
 
-  struct Client *target_p;
-  if ((target_p = hash_find_client(parv[1])) == NULL)
+  struct Client *target_p = hash_find_client(parv[1]);
+  if (target_p == NULL)
   {
     /*
      * If the user has recently changed nick, automatically
      * rewrite the KILL for this new nickname--this keeps
      * servers in synch when nick change and kill collide
      */
-    if ((target_p = whowas_get_history(parv[1], ConfigGeneral.kill_chase_time_limit)) == NULL)
+    target_p = whowas_get_history(parv[1], ConfigGeneral.kill_chase_time_limit);
+    if (target_p == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
       return;
@@ -173,8 +174,8 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct Client *target_p;
-  if ((target_p = find_person(source_p, parv[1])) == NULL)
+  struct Client *target_p = find_person(source_p, parv[1]);
+  if (target_p == NULL)
     return;
 
   char *reason = strchr(parv[2], ' ');

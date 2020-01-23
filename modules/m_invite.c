@@ -73,22 +73,22 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct Client *target_p;
-  if ((target_p = find_person(source_p, parv[1])) == NULL)
+  struct Client *target_p = find_person(source_p, parv[1]);
+  if (target_p == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, parv[1]);
     return;
   }
 
-  struct Channel *channel;
-  if ((channel = hash_find_channel(parv[2])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[2]);
+  if (channel == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return;
   }
 
-  struct ChannelMember *member;
-  if ((member = find_channel_link(source_p, channel)) == NULL)
+  struct ChannelMember *member = find_channel_link(source_p, channel);
+  if (member == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
     return;
@@ -176,12 +176,12 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   if (parc < 3 || EmptyString(parv[2]))
     return;
 
-  struct Client *target_p;
-  if ((target_p = find_person(source_p, parv[1])) == NULL)
+  struct Client *target_p = find_person(source_p, parv[1]);
+  if (target_p == NULL)
     return;
 
-  struct Channel *channel;
-  if ((channel = hash_find_channel(parv[2])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[2]);
+  if (channel == NULL)
     return;
 
   if (IsMember(target_p, channel))

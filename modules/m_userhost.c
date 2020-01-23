@@ -50,19 +50,18 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
   char response[NICKLEN + USERLEN + HOSTLEN + 6]; /* +6 for "*=+@ \0" */
-  char *t = NULL, *p = NULL;
+  char *p = NULL;
   int i = 0;
-  int cur_len;
   int rl;
 
-  cur_len = snprintf(buf, sizeof(buf), numeric_form(RPL_USERHOST), me.name, source_p->name, "");
-  t = buf + cur_len;
+  int cur_len = snprintf(buf, sizeof(buf), numeric_form(RPL_USERHOST), me.name, source_p->name, "");
+  char *t = buf + cur_len;
 
   for (const char *name = strtok_r(parv[1], " ", &p); name && i++ < 5;
                    name = strtok_r(NULL,    " ", &p))
   {
-    const struct Client *target_p;
-    if ((target_p = find_person(source_p, name)))
+    const struct Client *target_p = find_person(source_p, name);
+    if (target_p)
     {
       /*
        * Show real IP address for USERHOST on yourself.

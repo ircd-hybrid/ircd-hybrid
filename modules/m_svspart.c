@@ -58,8 +58,8 @@ ms_svspart(struct Client *source_p, int parc, char *parv[])
   if (EmptyString(parv[2]))
     return;
 
-  struct Client *target_p;
-  if ((target_p = find_person(source_p, parv[1])) == NULL)
+  struct Client *target_p = find_person(source_p, parv[1]);
+  if (target_p == NULL)
     return;
 
   if (MyConnect(target_p))

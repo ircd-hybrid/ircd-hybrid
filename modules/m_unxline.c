@@ -51,9 +51,9 @@
 static void
 xline_remove(struct Client *source_p, const struct aline_ctx *aline)
 {
-  struct GecosItem *gecos;
+  struct GecosItem *gecos = gecos_find(aline->mask, irccmp);
 
-  if ((gecos = gecos_find(aline->mask, irccmp)) == NULL)
+  if (gecos == NULL)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":No X-Line for %s", aline->mask);

@@ -318,9 +318,9 @@ print_startup(int pid)
 static void
 make_daemon(void)
 {
-  int pid;
+  int pid = fork();
 
-  if ((pid = fork()) < 0)
+  if (pid < 0)
   {
     perror("fork");
     exit(EXIT_FAILURE);

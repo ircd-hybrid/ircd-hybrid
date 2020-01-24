@@ -104,7 +104,7 @@ tls_new_cred(void)
 {
   TLS_initialized = false;
 
-  if (!ConfigServerInfo.tls_certificate_file || !ConfigServerInfo.rsa_private_key_file)
+  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
   if (wolfSSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS ||
@@ -129,7 +129,7 @@ tls_new_cred(void)
   }
 
   if (ConfigServerInfo.tls_dh_param_file)
-    if (wolfSSL_CTX_SetTmpDH_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file, WOLFSSL_FILETYPE_PEM) != SSL_SUCCESS)
+    if (wolfSSL_CTX_SetTmpDH_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
        ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
 
   if (ConfigServerInfo.tls_supported_groups == NULL)

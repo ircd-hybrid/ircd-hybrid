@@ -69,11 +69,11 @@ cluster_distribute(const void *source_p, const char *command, unsigned int capab
                    unsigned int type, const char *pattern, ...)
 {
   va_list args;
-  char buffer[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
   dlink_node *node;
 
   va_start(args, pattern);
-  vsnprintf(buffer, sizeof(buffer), pattern, args);
+  vsnprintf(buf, sizeof(buf), pattern, args);
   va_end(args);
 
   DLINK_FOREACH(node, cluster_list.head)
@@ -82,6 +82,6 @@ cluster_distribute(const void *source_p, const char *command, unsigned int capab
 
     if (cluster->type & type)
       sendto_match_servs(source_p, cluster->server, CAPAB_CLUSTER | capab,
-                         "%s %s %s", command, cluster->server, buffer);
+                         "%s %s %s", command, cluster->server, buf);
   }
 }

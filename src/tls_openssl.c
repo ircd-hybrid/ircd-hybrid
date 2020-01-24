@@ -108,25 +108,25 @@ tls_new_cred(void)
 {
   TLS_initialized = false;
 
-  if (!ConfigServerInfo.tls_certificate_file || !ConfigServerInfo.rsa_private_key_file)
+  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
-  if (SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) <= 0 ||
-      SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) <= 0)
+  if (SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != 1 ||
+      SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (SSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) <= 0 ||
-      SSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) <= 0)
+  if (SSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1 ||
+      SSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (!SSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.server_ctx) ||
-      !SSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.client_ctx))
+  if (SSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.server_ctx) != 1 ||
+      SSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.client_ctx) != 1)
   {
     report_crypto_errors();
     return false;

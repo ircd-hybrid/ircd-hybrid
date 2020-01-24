@@ -508,7 +508,7 @@ connect_find(const char *name, int (*compare)(const char *, const char *))
   {
     struct MaskItem *conf = node->data;
 
-    if (!compare(name, conf->name))
+    if (compare(name, conf->name) == 0)
       return conf;
   }
 
@@ -527,36 +527,36 @@ connect_find(const char *name, int (*compare)(const char *, const char *))
 struct MaskItem *
 operator_find(const struct Client *who, const char *name)
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, operator_items.head)
   {
     struct MaskItem *conf = node->data;
 
-    if (!irccmp(conf->name, name))
+    if (irccmp(conf->name, name) == 0)
     {
-      if (!who)
+      if (who == NULL)
         return conf;
 
-      if (!match(conf->user, who->username))
+      if (match(conf->user, who->username) == 0)
       {
         switch (conf->htype)
         {
           case HM_HOST:
-            if (!match(conf->host, who->host) || !match(conf->host, who->sockhost))
-              if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
+            if (match(conf->host, who->host) == 0 || match(conf->host, who->sockhost) == 0)
+              if (conf->class->max_total == 0 || conf->class->ref_count < conf->class->max_total)
                 return conf;
             break;
           case HM_IPV4:
             if (who->ip.ss.ss_family == AF_INET)
               if (match_ipv4(&who->ip, conf->addr, conf->bits))
-                if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
+                if (conf->class->max_total == 0 || conf->class->ref_count < conf->class->max_total)
                   return conf;
             break;
           case HM_IPV6:
             if (who->ip.ss.ss_family == AF_INET6)
               if (match_ipv6(&who->ip, conf->addr, conf->bits))
-                if (!conf->class->max_total || conf->class->ref_count < conf->class->max_total)
+                if (conf->class->max_total == 0 || conf->class->ref_count < conf->class->max_total)
                   return conf;
             break;
           default:
@@ -581,8 +581,9 @@ operator_find(const struct Client *who, const char *name)
 static void
 conf_set_defaults(void)
 {
-  /* verify init_class() ran, this should be an unnecessary check
-   * but its not much work.
+  /*
+   * Verify init_class() ran, this should be an unnecessary check
+   * but it's not much work.
    */
   assert(class_default == class_get_list()->tail->data);
 
@@ -741,7 +742,6 @@ conf_rehash(bool sig)
 int
 conf_connect_allowed(struct irc_ssaddr *addr)
 {
-  struct ip_entry *ip_found = NULL;
   const struct MaskItem *conf = find_dline_conf(addr);
 
   if (conf)
@@ -752,8 +752,7 @@ conf_connect_allowed(struct irc_ssaddr *addr)
     return BANNED_CLIENT;
   }
 
-  ip_found = ipcache_record_find_or_add(addr);
-
+  struct ip_entry *ip_found = ipcache_record_find_or_add(addr);
   if ((event_base->time.sec_monotonic - ip_found->last_attempt) < ConfigGeneral.throttle_time)
   {
     if (ip_found->connection_count >= ConfigGeneral.throttle_count)
@@ -997,15 +996,17 @@ conf_read_files(bool cold)
 
   snprintf(chanmodes, sizeof(chanmodes), "beI:%u", ConfigChannel.max_bans);
   isupport_add("MAXLIST", chanmodes, -1);
+
   isupport_add("MAXTARGETS", NULL, ConfigGeneral.max_targets);
   isupport_add("CHANTYPES", "#", -1);
 
-  snprintf(chanlimit, sizeof(chanlimit), "#:%u",
-           ConfigChannel.max_channels);
+  snprintf(chanlimit, sizeof(chanlimit), "#:%u", ConfigChannel.max_channels);
   isupport_add("CHANLIMIT", chanlimit, -1);
-  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstuCLMNORST");
+
   isupport_add("CHANNELLEN", NULL, CHANNELLEN);
   isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
+
+  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstuCLMNORST");
   isupport_add("CHANMODES", chanmodes, -1);
 }
 

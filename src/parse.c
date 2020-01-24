@@ -453,8 +453,6 @@ static void
 add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
                 const char *cmd)
 {
-  struct MessageTree *ntree_p = NULL;
-
   if (*cmd == '\0')
   {
     mtree_p->msg = msg_p;
@@ -468,7 +466,8 @@ add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
      * between 0 and MAXPTRLEN.
      * Thus 'A' -> 0x1 'B' -> 0x2 'c' -> 0x3 etc.
      */
-    if ((ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)]) == NULL)
+    struct MessageTree *ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)];
+    if (ntree_p == NULL)
     {
       ntree_p = xcalloc(sizeof(*ntree_p));
       mtree_p->pointers[*cmd & (MAXPTRLEN - 1)] = ntree_p;
@@ -506,8 +505,6 @@ add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
 static void
 del_msg_element(struct MessageTree *mtree_p, const char *cmd)
 {
-  struct MessageTree *ntree_p = NULL;
-
   /*
    * In case this is called for a nonexistent command
    * check that there is a msg pointer here, else links-- goes -ve
@@ -520,7 +517,8 @@ del_msg_element(struct MessageTree *mtree_p, const char *cmd)
   }
   else
   {
-    if ((ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)]))
+    struct MessageTree *ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)];
+    if (ntree_p)
     {
       del_msg_element(ntree_p, cmd + 1);
 

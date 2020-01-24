@@ -69,7 +69,7 @@ whois_can_see_channels(struct Channel *channel,
 static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
-  char buf[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
   dlink_node *node;
   const struct ServicesTag *svstag = NULL;
   char *t = NULL;

@@ -73,19 +73,18 @@ tls_free_cred(tls_context_t cred)
 bool
 tls_new_cred(void)
 {
-  int ret;
   struct gnutls_context *context;
 
   TLS_initialized = false;
 
-  if (!ConfigServerInfo.tls_certificate_file || !ConfigServerInfo.rsa_private_key_file)
+  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
   context = xcalloc(sizeof(*context));
 
   gnutls_global_init();
 
-  ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
+  int ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
   if (ret != GNUTLS_E_SUCCESS)
   {
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
@@ -274,12 +273,11 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 bool
 tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 {
-  int ret;
   const char *prioerror;
 
   gnutls_priority_deinit(tls_data->context->priorities);
 
-  ret = gnutls_priority_init(&tls_data->context->priorities, cipher_list, &prioerror);
+  int ret = gnutls_priority_init(&tls_data->context->priorities, cipher_list, &prioerror);
   if (ret != GNUTLS_E_SUCCESS)
   {
     /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
@@ -325,18 +323,16 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 bool
 tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
-  int ret;
   gnutls_x509_crt_t cert;
-  const gnutls_datum_t *cert_list;
   unsigned char digestbuf[TLS_GNUTLS_MAX_HASH_SIZE];
   size_t digest_size = sizeof(digestbuf);
   char buf[TLS_GNUTLS_MAX_HASH_SIZE * 2 + 1];
 
-  cert_list = gnutls_certificate_get_peers(tls_data->session, NULL);
+  const gnutls_datum_t *cert_list = gnutls_certificate_get_peers(tls_data->session, NULL);
   if (cert_list == NULL)
     return true;  /* No certificate */
 
-  ret = gnutls_x509_crt_init(&cert);
+  int ret = gnutls_x509_crt_init(&cert);
   if (ret != GNUTLS_E_SUCCESS)
     return true;
 

@@ -58,14 +58,14 @@ static void server_connect_callback(fde_t *, int, void *);
 void
 write_links_file(void *unused)
 {
-  FILE *file = NULL;
+  char buf[IRCD_BUFSIZE];
   dlink_node *node, *node_next;
-  char buff[IRCD_BUFSIZE] = "";
 
   if (EmptyString(ConfigServerHide.flatten_links_file))
     return;
 
-  if ((file = fopen(ConfigServerHide.flatten_links_file, "w")) == NULL)
+  FILE *file = fopen(ConfigServerHide.flatten_links_file, "w");
+  if (file == NULL)
   {
     ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
          strerror(errno));
@@ -99,12 +99,11 @@ write_links_file(void *unused)
      * Mostly for aesthetic reasons - makes it look pretty in mIRC ;)
      * - madmax
      */
-    snprintf(buff, sizeof(buff), "%s %s :1 %s",   target_p->name,
-             me.name, target_p->info);
-    dlinkAddTail(xstrdup(buff), make_dlink_node(), &flatten_links);
+    snprintf(buf, sizeof(buf), "%s %s :1 %s", target_p->name, me.name, target_p->info);
+    dlinkAddTail(xstrdup(buf), make_dlink_node(), &flatten_links);
 
-    strlcat(buff, "\n", sizeof(buff));
-    fputs(buff, file);
+    strlcat(buf, "\n", sizeof(buf));
+    fputs(buf, file);
   }
 
   fclose(file);
@@ -113,26 +112,26 @@ write_links_file(void *unused)
 void
 read_links_file(void)
 {
-  FILE *file = NULL;
-  char *p = NULL;
-  char buff[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
 
   if (EmptyString(ConfigServerHide.flatten_links_file))
     return;
 
-  if ((file = fopen(ConfigServerHide.flatten_links_file, "r")) == NULL)
+  FILE *file = fopen(ConfigServerHide.flatten_links_file, "r");
+  if (file == NULL)
   {
     ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
          strerror(errno));
     return;
   }
 
-  while (fgets(buff, sizeof(buff), file))
+  while (fgets(buf, sizeof(buf), file))
   {
-    if ((p = strchr(buff, '\n')))
+    char *p = strchr(buf, '\n');
+    if (p)
       *p = '\0';
 
-    dlinkAddTail(xstrdup(buff), make_dlink_node(), &flatten_links);
+    dlinkAddTail(xstrdup(buf), make_dlink_node(), &flatten_links);
   }
 
   fclose(file);
@@ -173,7 +172,8 @@ server_hunt(struct Client *source_p, const char *command,
     return h;
   }
 
-  if ((h->target_p = find_person(source_p, parv[server])) == NULL)
+  h->target_p = find_person(source_p, parv[server]);
+  if (h->target_p == NULL)
     h->target_p = hash_find_server(parv[server]);
 
   /*
@@ -381,7 +381,7 @@ server_make(struct Client *client_p)
 bool
 server_connect(struct MaskItem *conf, struct Client *by)
 {
-  char buf[HOSTIPLEN + 1] = "";
+  char buf[HOSTIPLEN + 1];
 
   /* Make sure conf is useful */
   assert(conf);
@@ -468,7 +468,7 @@ server_finish_tls_handshake(struct Client *client_p)
 {
   const struct MaskItem *conf = find_conf_name(&client_p->connection->confs,
                                                 client_p->name, CONF_SERVER);
-  if (!conf)
+  if (conf == NULL)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Lost connect{} block for %s", client_get_name(client_p, SHOW_IP));
@@ -607,7 +607,7 @@ server_connect_callback(fde_t *F, int status, void *data)
   /* Get the connect {} block */
   const struct MaskItem *conf = find_conf_name(&client_p->connection->confs,
                                                 client_p->name, CONF_SERVER);
-  if (!conf)
+  if (conf == NULL)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Lost connect{} block for %s", client_get_name(client_p, SHOW_IP));

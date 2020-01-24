@@ -251,11 +251,11 @@ static void
 query_name(const char *name, int query_class, int type, struct reslist *request)
 {
   unsigned char buf[MAXPACKET];
-  int request_len = 0;
 
   memset(buf, 0, sizeof(buf));
 
-  if ((request_len = irc_res_mkquery(name, query_class, type, buf, sizeof(buf))) > 0)
+  int request_len = irc_res_mkquery(name, query_class, type, buf, sizeof(buf));
+  if (request_len > 0)
   {
     HEADER *header = (HEADER *)buf;
 
@@ -400,13 +400,13 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
   unsigned char *current = buf + sizeof(HEADER); /* current position in buf */
   unsigned int type = 0;       /* answer type */
   unsigned int rd_length = 0;
-  int n;                       /* temp count */
   struct sockaddr_in *v4;      /* conversion */
   struct sockaddr_in6 *v6;
 
   for (; header->qdcount > 0; --header->qdcount)
   {
-    if ((n = irc_dn_skipname(current, eob)) < 0)
+    int n = irc_dn_skipname(current, eob);
+    if (n < 0)
       break;
 
     current += (size_t)n + QFIXEDSZ;
@@ -419,8 +419,7 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
   {
     --header->ancount;
 
-    n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
-
+    int n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
     if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
       return false;
 
@@ -511,7 +510,7 @@ static void
 res_readreply(fde_t *F, void *data)
 {
   unsigned char buf[sizeof(HEADER) + MAXPACKET];
-  ssize_t rc = 0;
+  ssize_t rc;
   socklen_t len = sizeof(struct irc_ssaddr);
   struct irc_ssaddr lsin;
 
@@ -539,8 +538,8 @@ res_readreply(fde_t *F, void *data)
      * Response for an id which we have already received an answer for
      * just ignore this response.
      */
-    struct reslist *request;
-    if ((request = find_id(header->id)) == NULL)
+    struct reslist *request = find_id(header->id);
+    if (request == NULL)
       continue;
 
     if (header->rcode != NO_ERRORS || header->ancount == 0)

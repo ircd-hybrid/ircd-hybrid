@@ -23,7 +23,7 @@
 
 /*! \file tls_wolfssl.h
  * \brief wolfSSL-specific TLS types
- * \version $Id: tls_wolfssl.h 9101 2020-01-01 09:58:45Z michael $
+ * \version $Id: tls_wolfssl.h 9190 2020-01-21 15:27:30Z michael $
  */
 
 
@@ -47,5 +47,5 @@ typedef struct
   WOLFSSL_CTX *client_ctx;
 } tls_context_t;
 
-#endif  /* HAVE_LIBCRYPTO */
+#endif  /* HAVE_LIBWOLFSSL */
 #endif  /* INCLUDED_tls_wolfssl_h */

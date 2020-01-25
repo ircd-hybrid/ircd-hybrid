@@ -47,5 +47,5 @@ typedef struct
   WOLFSSL_CTX *client_ctx;
 } tls_context_t;
 
-#endif  /* HAVE_LIBCRYPTO */
+#endif  /* HAVE_LIBWOLFSSL */
 #endif  /* INCLUDED_tls_wolfssl_h */

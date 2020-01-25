@@ -41,7 +41,7 @@
 
           * --enable-kqueue - Use the superior kqueue(2) system call as
             opposed to the default poll(2). This is currently only available
-            on FreeBSD, OpenBSD, NetBSD, and Mac OS X
+            on FreeBSD, OpenBSD, NetBSD, DragonFly BSD and macOS
 
           * --enable-devpoll - Enable the superior /dev/poll support on
             Solaris. Linux /dev/poll is broken and will not work with this

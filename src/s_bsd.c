@@ -184,8 +184,8 @@ ssl_handshake(fde_t *F, void *data)
   comm_settimeout(F, 0, NULL, NULL);
 
   if (tls_verify_cert(&F->tls, ConfigServerInfo.message_digest_algorithm, &client_p->certfp) == false)
-    ilog(LOG_TYPE_IRCD, "Client %s!%s@%s gave bad TLS client certificate",
-         client_p->name, client_p->username, client_p->host);
+    ilog(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
+         client_get_name(client_p, MASK_IP));
 
   auth_start(client_p);
 }

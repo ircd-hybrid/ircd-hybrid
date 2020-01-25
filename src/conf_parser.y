@@ -437,7 +437,7 @@ modules_path: PATH '=' QSTRING ';'
 
 
 /***************************************************************************
- * serverinfo {}  section
+ * serverinfo {} section
  ***************************************************************************/
 serverinfo_entry: SERVERINFO '{' serverinfo_items '}' ';';
 
@@ -568,9 +568,9 @@ serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    char *p;
+    char *p = strchr(yylval.string, ' ');
 
-    if ((p = strchr(yylval.string, ' ')))
+    if (p)
       *p = '\0';
 
     xfree(ConfigServerInfo.network_name);
@@ -599,7 +599,7 @@ serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
   }
   else if ($3 > MAXCLIENTS_MAX)
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "default_max_clients too high, setting to %d", MAXCLIENTS_MAX);
     conf_error_report(buf);
@@ -622,7 +622,7 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
   }
   else if ($3 > NICKLEN)
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "max_nick_length too high, setting to %d", NICKLEN);
     conf_error_report(buf);
@@ -645,7 +645,7 @@ serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
   }
   else if ($3 > TOPICLEN)
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "max_topic_length too high, setting to %d", TOPICLEN);
     conf_error_report(buf);
@@ -711,7 +711,7 @@ motd_entry: MOTD
     reset_block_state();
 } '{' motd_items '}' ';'
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -804,7 +804,7 @@ pseudo_target: T_TARGET '=' QSTRING ';'
 /***************************************************************************
  * log {} section
  ***************************************************************************/
-logging_entry:          T_LOG  '{' logging_items '}' ';' ;
+logging_entry:          T_LOG '{' logging_items '}' ';' ;
 logging_items:          logging_items logging_item | logging_item ;
 
 logging_item:           logging_use_logging | logging_file_entry |
@@ -856,7 +856,7 @@ logging_file_type: TYPE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = 0;
-} '='  logging_file_type_items ';' ;
+} '=' logging_file_type_items ';' ;
 
 logging_file_type_items: logging_file_type_items ',' logging_file_type_item | logging_file_type_item;
 logging_file_type_item:  USER
@@ -906,7 +906,7 @@ oper_entry: OPERATOR
   block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
 } '{' oper_items '}' ';'
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -1035,7 +1035,7 @@ oper_umodes: T_UMODES
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value = 0;
-} '='  oper_umodes_items ';' ;
+} '=' oper_umodes_items ';' ;
 
 oper_umodes_items: oper_umodes_items ',' oper_umodes_item | oper_umodes_item;
 oper_umodes_item:  T_BOTS
@@ -1136,7 +1136,7 @@ oper_flags: IRCD_FLAGS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value = 0;
-} '='  oper_flags_items ';';
+} '=' oper_flags_items ';';
 
 oper_flags_items: oper_flags_items ',' oper_flags_item | oper_flags_item;
 oper_flags_item: KILL ':' REMOTE
@@ -1431,7 +1431,7 @@ class_flags: IRCD_FLAGS
 {
   if (conf_parser_ctx.pass == 1)
     block_state.flags.value &= CLASS_FLAGS_FAKE_IDLE;
-} '='  class_flags_items ';';
+} '=' class_flags_items ';';
 
 class_flags_items: class_flags_items ',' class_flags_item | class_flags_item;
 class_flags_item: RANDOM_IDLE
@@ -1457,7 +1457,7 @@ listen_entry: LISTEN
 listen_flags: IRCD_FLAGS
 {
   block_state.flags.value = 0;
-} '='  listen_flags_items ';';
+} '=' listen_flags_items ';';
 
 listen_flags_items: listen_flags_items ',' listen_flags_item | listen_flags_item;
 listen_flags_item: T_TLS
@@ -1533,7 +1533,7 @@ auth_entry: IRCD_AUTH
     reset_block_state();
 } '{' auth_items '}' ';'
 {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -1567,7 +1567,7 @@ auth_entry: IRCD_AUTH
       conf->name = xstrdup(block_state.name.buf);
 
     conf->flags = block_state.flags.value;
-    conf->port  = block_state.port.value;
+    conf->port = block_state.port.value;
 
     conf_add_class_to_conf(conf, block_state.class.buf);
     add_conf_by_address(CONF_CLIENT, conf);

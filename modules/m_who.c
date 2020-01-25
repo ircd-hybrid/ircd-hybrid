@@ -107,8 +107,12 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask)
     return true;
 
   if (HasUMode(source_p, UMODE_OPER))
+  {
     if (match(mask, target_p->sockhost) == 0)
       return true;
+    if (match(mask, target_p->realhost) == 0)
+      return true;
+  }
 
   if (HasUMode(source_p, UMODE_OPER) ||
       (ConfigServerHide.hide_servers == 0 && !IsHidden(target_p->servptr)))

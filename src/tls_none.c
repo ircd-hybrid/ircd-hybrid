@@ -43,7 +43,7 @@ tls_init(void)
 }
 
 bool
-tls_new_cred(void)
+tls_new_credentials(void)
 {
   return true;
 }
@@ -107,7 +107,7 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 }
 
 bool
-tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
+tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
   return false;
 }

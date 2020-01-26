@@ -59,7 +59,7 @@ tls_init(void)
 }
 
 static void
-tls_free_cred(tls_context_t cred)
+tls_free_credentials(tls_context_t cred)
 {
   gnutls_priority_deinit(cred->priorities);
   gnutls_dh_params_deinit(cred->dh_params);
@@ -71,7 +71,7 @@ tls_free_cred(tls_context_t cred)
 }
 
 bool
-tls_new_cred(void)
+tls_new_credentials(void)
 {
   struct gnutls_context *context;
 
@@ -155,7 +155,7 @@ tls_new_cred(void)
   }
 
   if (ConfigServerInfo.tls_ctx && --ConfigServerInfo.tls_ctx->refs == 0)
-    tls_free_cred(ConfigServerInfo.tls_ctx);
+    tls_free_credentials(ConfigServerInfo.tls_ctx);
 
   ConfigServerInfo.tls_ctx = context;
   ++context->refs;
@@ -250,7 +250,7 @@ tls_shutdown(tls_data_t *tls_data)
   gnutls_bye(tls_data->session, GNUTLS_SHUT_WR);
 
   if (--tls_data->context->refs == 0)
-    tls_free_cred(tls_data->context);
+    tls_free_credentials(tls_data->context);
 }
 
 bool
@@ -327,7 +327,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 bool
-tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
+tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
   gnutls_x509_crt_t cert;
   unsigned char digestbuf[TLS_GNUTLS_MAX_HASH_SIZE];

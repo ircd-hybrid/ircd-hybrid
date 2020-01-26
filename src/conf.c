@@ -951,8 +951,7 @@ void
 conf_read_files(bool cold)
 {
   const char *filename = NULL;
-  char chanmodes[IRCD_BUFSIZE] = "";
-  char chanlimit[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
 
   conf_parser_ctx.boot = cold;
   filename = ConfigGeneral.configfile;
@@ -994,20 +993,20 @@ conf_read_files(bool cold)
   isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", ConfigServerInfo.network_name, -1);
 
-  snprintf(chanmodes, sizeof(chanmodes), "beI:%u", ConfigChannel.max_bans);
-  isupport_add("MAXLIST", chanmodes, -1);
+  snprintf(buf, sizeof(buf), "beI:%u", ConfigChannel.max_bans);
+  isupport_add("MAXLIST", buf, -1);
 
   isupport_add("MAXTARGETS", NULL, ConfigGeneral.max_targets);
   isupport_add("CHANTYPES", "#", -1);
 
-  snprintf(chanlimit, sizeof(chanlimit), "#:%u", ConfigChannel.max_channels);
-  isupport_add("CHANLIMIT", chanlimit, -1);
+  snprintf(buf, sizeof(buf), "#:%u", ConfigChannel.max_channels);
+  isupport_add("CHANLIMIT", buf, -1);
 
   isupport_add("CHANNELLEN", NULL, CHANNELLEN);
   isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
 
-  snprintf(chanmodes, sizeof(chanmodes), "%s", "beI,k,l,cimnprstuCLMNORST");
-  isupport_add("CHANMODES", chanmodes, -1);
+  snprintf(buf, sizeof(buf), "%s", "beI,k,l,cimnprstuCLMNORST");
+  isupport_add("CHANMODES", buf, -1);
 }
 
 /* conf_add_class_to_conf()

@@ -3080,9 +3080,9 @@ yyreduce:
     {
   if (conf_parser_ctx.pass == 2)
   {
-    char *p;
+    char *p = strchr(yylval.string, ' ');
 
-    if ((p = strchr(yylval.string, ' ')))
+    if (p)
       *p = '\0';
 
     xfree(ConfigServerInfo.network_name);
@@ -3117,7 +3117,7 @@ yyreduce:
   }
   else if ((yyvsp[-1].number) > MAXCLIENTS_MAX)
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "default_max_clients too high, setting to %d", MAXCLIENTS_MAX);
     conf_error_report(buf);
@@ -3143,7 +3143,7 @@ yyreduce:
   }
   else if ((yyvsp[-1].number) > NICKLEN)
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "max_nick_length too high, setting to %d", NICKLEN);
     conf_error_report(buf);
@@ -3169,7 +3169,7 @@ yyreduce:
   }
   else if ((yyvsp[-1].number) > TOPICLEN)
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "max_topic_length too high, setting to %d", TOPICLEN);
     conf_error_report(buf);
@@ -3239,7 +3239,7 @@ yyreduce:
   case 99:
 #line 713 "conf_parser.y" /* yacc.c:1652  */
     {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3500,7 +3500,7 @@ yyreduce:
   case 151:
 #line 908 "conf_parser.y" /* yacc.c:1652  */
     {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4467,7 +4467,7 @@ yyreduce:
   case 298:
 #line 1535 "conf_parser.y" /* yacc.c:1652  */
     {
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4501,7 +4501,7 @@ yyreduce:
       conf->name = xstrdup(block_state.name.buf);
 
     conf->flags = block_state.flags.value;
-    conf->port  = block_state.port.value;
+    conf->port = block_state.port.value;
 
     conf_add_class_to_conf(conf, block_state.class.buf);
     add_conf_by_address(CONF_CLIENT, conf);

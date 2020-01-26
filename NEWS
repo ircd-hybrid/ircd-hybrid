@@ -1,7 +1,9 @@
 -- Noteworthy changes in version 8.2.28 (2020-01-26)
+o) Fixed issue with topics set by TBURST not being propagated properly to clients
 o) Allow IRC operators to search for real hosts in "WHO"
 o) Ban/exempt/invex masks are now also tested against realhosts to prevent clients
    from bypassing channel bans by activating a fakehost
+o) For a full list of all changes in this release, see https://git.io/JvqpT
 
 
 -- Noteworthy changes in version 8.2.27 (2020-01-22)

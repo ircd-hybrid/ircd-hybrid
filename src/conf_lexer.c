@@ -1695,7 +1695,7 @@ char *yytext;
  */
 /*! \file conf_lexer.l
  * \brief Scans the ircd configuration file for tokens.
- * \version $Id: conf_lexer.l 9144 2020-01-12 09:53:33Z michael $
+ * \version $Id: conf_lexer.l 9156 2020-01-13 14:51:47Z michael $
  */
 #line 33 "conf_lexer.l"
 #include "stdinc.h"

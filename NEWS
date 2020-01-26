@@ -1,5 +1,7 @@
--- Noteworthy changes in version 8.2.28 (2020-??-??)
+-- Noteworthy changes in version 8.2.28 (2020-01-26)
 o) Allow IRC operators to search for real hosts in "WHO"
+o) Ban/exempt/invex masks are now also tested against realhosts to prevent clients
+   from bypassing channel bans by activating a fakehost
 
 
 -- Noteworthy changes in version 8.2.27 (2020-01-22)
@@ -29,7 +31,7 @@ o) In the operator {} block, the following configuration directives have been re
 o) In the connect {} block, the following configuration directives have been renamed:
      ssl_cipher_list -> tls_cipher_list
      ssl_certificate_fingerprint -> tls_certificate_fingerprint
-o) For a full list of all changes in this release, see https://git.io/JvLM9
+o) For a full list of all changes in this release, see https://git.io/Jvq9g
 
 
 -- Noteworthy changes in version 8.2.26 (2019-05-31)

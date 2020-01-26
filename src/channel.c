@@ -623,7 +623,8 @@ find_bmask(const struct Client *client_p, const dlink_list *list)
       switch (ban->type)
       {
         case HM_HOST:
-          if (match(ban->host, client_p->host) == 0 || match(ban->host, client_p->sockhost) == 0)
+          if (match(ban->host, client_p->realhost) == 0 ||
+              match(ban->host, client_p->sockhost) == 0 || match(ban->host, client_p->host) == 0)
             return true;
           break;
         case HM_IPV4:

@@ -950,36 +950,37 @@ conf_handle_tls(bool cold)
 void
 conf_read_files(bool cold)
 {
-  const char *filename = NULL;
   char buf[IRCD_BUFSIZE];
 
   conf_parser_ctx.boot = cold;
-  filename = ConfigGeneral.configfile;
+  conf_parser_ctx.conf_file = fopen(ConfigGeneral.configfile, "r");
 
-  /* We need to know the initial filename for the yyerror() to report
-     FIXME: The full path is in conffilenamebuf first time since we
-             don't know anything else
-
-     - Gozem 2002-07-21
-  */
-  strlcpy(conffilebuf, filename, sizeof(conffilebuf));
-
-  if ((conf_parser_ctx.conf_file = fopen(filename, "r")) == NULL)
+  if (conf_parser_ctx.conf_file == NULL)
   {
     if (cold == true)
     {
       ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
-           filename, strerror(errno));
+           ConfigGeneral.configfile, strerror(errno));
       exit(EXIT_FAILURE);
     }
     else
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "Unable to read configuration file '%s': %s",
-                           filename, strerror(errno));
+                           ConfigGeneral.configfile, strerror(errno));
       return;
     }
   }
+
+  /*
+   * We need to know the initial filename for the yyerror() to report
+   *
+   *  FIXME: The full path is in conffilenamebuf first time since we
+   *          don't know anything else
+   *
+   *  - Gozem 2002-07-21
+   */
+  strlcpy(conffilebuf, ConfigGeneral.configfile, sizeof(conffilebuf));
 
   if (cold == false)
     conf_clear();

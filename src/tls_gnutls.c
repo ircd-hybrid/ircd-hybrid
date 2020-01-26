@@ -82,9 +82,15 @@ tls_new_cred(void)
 
   context = xcalloc(sizeof(*context));
 
-  gnutls_global_init();
+  int ret = gnutls_global_init();
+  if (ret != GNUTLS_E_SUCCESS)
+  {
+    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize GnuTLS library -- %s", gnutls_strerror(ret));
+    xfree(context);
+    return false;
+  }
 
-  int ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
+  ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
   if (ret != GNUTLS_E_SUCCESS)
   {
     ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));

@@ -50,7 +50,6 @@
 #include "server_capab.h"
 #include "send.h"
 #include "modules.h"
-#include "memory.h"
 #include "ircd_getopt.h"
 #include "conf_db.h"
 #include "conf_class.h"

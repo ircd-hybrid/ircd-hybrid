@@ -100,7 +100,7 @@ tls_init(void)
 }
 
 bool
-tls_new_cred(void)
+tls_new_credentials(void)
 {
   TLS_initialized = false;
 
@@ -333,7 +333,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 bool
-tls_verify_cert(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
+tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
 {
   WOLFSSL *ssl = *tls_data;
   unsigned int n;

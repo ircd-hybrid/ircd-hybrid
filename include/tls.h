@@ -57,7 +57,7 @@ typedef enum _tls_handshake_status
 
 extern bool tls_is_initialized(void);
 extern void tls_init(void);
-extern bool tls_new_cred(void);
+extern bool tls_new_credentials(void);
 
 extern const char *tls_get_cipher(const tls_data_t *);
 extern const char *tls_get_version(void);
@@ -74,6 +74,6 @@ extern void tls_shutdown(tls_data_t *);
 
 extern bool tls_set_ciphers(tls_data_t *, const char *);
 
-extern bool tls_verify_cert(tls_data_t *, tls_md_t, char **);
+extern bool tls_verify_certificate(tls_data_t *, tls_md_t, char **);
 
 #endif  /* INCLUDED_tls_h */

@@ -925,7 +925,7 @@ conf_clear(void)
 static void
 conf_handle_tls(bool cold)
 {
-  if (tls_new_cred() == false)
+  if (tls_new_credentials() == false)
   {
     if (cold == true)
     {

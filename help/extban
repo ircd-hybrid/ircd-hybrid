@@ -1,0 +1,36 @@
+Extbans are split into two types: matching extbans, which match on
+users in different ways, and acting extbans, which restrict users
+in different ways to a standard ban.
+
+To use an extban, simply set +b/e/I <ban> with it as the ban,
+instead of a normal nick!user@host mask, to ban or exempt matching
+users.
+
+Matching extbans:
+
+ $a:<account>   Matches users logged into a matching account.
+
+ $c:<channel>   Matches users that are on the given channel. An additional
+                prefix of either @, %, or + can be specified to test for
+                certain channel privileges.
+
+ $o:<class>     Matches IRC operators that have joined a class
+                matching the mask.
+
+ $r:<realname>  Matches users with a matching realname.
+
+ $s:<server>    Matches users that are connected to a server matching the mask.
+
+ $u:<modes>     Matches users having the specified user modes set or not set.
+
+ $z:<certfp>    Matches users having the given TLS certificate fingerprint.
+
+Acting extbans:
+
+ $j:<banmask>   Prevents matching users from joining the channel.
+
+ $m:<banmask>   Blocks messages from matching users. Users with voice
+                or above are not affected.
+
+A ban given to an acting extban may either be a nick!user@host mask,
+matched against users as a normal ban, or a matching extban.

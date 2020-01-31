@@ -34,6 +34,7 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "isupport.h"
+#include "channel.h"
 #include "channel_mode.h"
 #include "parse.h"
 

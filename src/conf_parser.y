@@ -169,6 +169,7 @@ reset_block_state(void)
 %token  DLINE_MIN_CIDR6
 %token  DOTS_IN_IDENT
 %token  EMAIL
+%token  ENABLE_EXTBANS
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  EXEMPT
@@ -2777,7 +2778,13 @@ channel_item:       channel_max_bans |
                     channel_default_join_flood_count |
                     channel_default_join_flood_time |
                     channel_disable_fake_channels |
+                    channel_enable_extbans |
                     error;
+
+channel_enable_extbans: ENABLE_EXTBANS '=' TBOOL ';'
+{
+  ConfigChannel.enable_extbans = yylval.number;
+};
 
 channel_disable_fake_channels: DISABLE_FAKE_CHANNELS '=' TBOOL ';'
 {

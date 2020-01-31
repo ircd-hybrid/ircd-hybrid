@@ -31,6 +31,7 @@
 #include "client_svstag.h"
 #include "ircd.h"
 #include "send.h"
+#include "channel.h"
 #include "channel_mode.h"
 #include "parse.h"
 #include "modules.h"

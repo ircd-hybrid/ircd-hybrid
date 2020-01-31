@@ -27,6 +27,16 @@ ircd_SOURCES = auth.c            \
                conf_lexer.l      \
                dbuf.c            \
                event.c           \
+               extban.c          \
+               extban_account.c  \
+               extban_channel.c  \
+               extban_fingerprint.c \
+               extban_gecos.c    \
+               extban_join.c     \
+               extban_mute.c     \
+               extban_operclass.c \
+               extban_server.c   \
+               extban_usermode.c \
                fdlist.c          \
                getopt.c          \
                hash.c            \

@@ -50,6 +50,7 @@
 #include "rng_mt.h"
 #include "parse.h"
 #include "ipcache.h"
+#include "channel.h"
 
 
 dlink_list listing_client_list;

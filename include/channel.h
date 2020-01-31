@@ -28,6 +28,7 @@
 #define INCLUDED_channel_h
 
 #include "ircd_defs.h"        /* KEYLEN, CHANNELLEN */
+#include "extban.h"
 
 #define IsMember(who, chan) ((find_channel_link(who, chan)) ? 1 : 0)
 #define AddMemberFlag(x, y) ((x)->flags |=  (y))
@@ -108,15 +109,19 @@ struct ChannelMember
   unsigned int flags;  /**< user/channel flags, e.g. CHFL_CHANOP */
 };
 
+enum { BANSTRLEN = 200 }; /* XXX */
+
 /*! \brief Ban structure. Used for b/e/I n!u\@h masks */
 struct Ban
 {
   dlink_node node;
+  unsigned int extban;
+  char banstr[BANSTRLEN];
   char name[NICKLEN + 1];
   char user[USERLEN + 1];
   char host[HOSTLEN + 1];
   char who[NICKLEN + USERLEN + HOSTLEN + 3];
-  size_t len;
+  size_t banstr_len;  /**< Cached string length of Ban::banstr */
   uintmax_t when;  /**< Time this ban has been set; real time */
   struct irc_ssaddr addr;
   int bits;
@@ -137,7 +142,8 @@ struct Invite
 extern const dlink_list *channel_get_list(void);
 extern bool channel_check_name(const char *, bool);
 extern int can_send(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool);
-extern bool is_banned(const struct Channel *, const struct Client *);
+extern bool is_banned(struct Channel *, struct Client *);
+extern bool find_bmask(struct Client *, struct Channel*, const dlink_list *, struct Extban *);
 extern int has_member_flags(const struct ChannelMember *, const unsigned int);
 
 extern void channel_do_join(struct Client *, char *, char *);

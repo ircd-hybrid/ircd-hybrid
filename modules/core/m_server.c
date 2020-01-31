@@ -46,6 +46,7 @@
 #include "memory.h"
 #include "modules.h"
 #include "fdlist.h"
+#include "channel.h"
 
 
 /*! Parses server flags to be potentially set

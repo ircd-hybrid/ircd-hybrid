@@ -32,7 +32,6 @@
 #include "fdlist.h"
 #include "ircd_defs.h"
 #include "dbuf.h"
-#include "channel.h"
 #include "auth.h"
 
 

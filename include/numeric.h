@@ -245,6 +245,7 @@ enum irc_numerics
   RPL_TARGNOTIFY           = 717,
   RPL_UMODEGMSG            = 718,
   ERR_NOPRIVS              = 723,
+  ERR_INVALIDBAN           = 743,
   RPL_ETRACEEND            = 759,
   ERR_LAST_ERR_MSG         = 999
 };

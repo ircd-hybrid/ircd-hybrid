@@ -21,7 +21,7 @@
 
 /*! \file extban_server.c
  * \brief Implements server name based extended channel bans.
- * \version $Id: extban_server.c 9223 2020-01-26 11:35:22Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

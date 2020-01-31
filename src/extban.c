@@ -260,7 +260,7 @@ extban_get_isupport(void)
   DLINK_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
-    extban_chars[(unsigned char)extban->character] = extban->character;
+    extban_chars[extban->character] = extban->character;
   }
 
   char *p = buf + strlcpy(buf, "$,", sizeof(buf));

@@ -63,7 +63,8 @@ enum
   CHFL_INVEX        = 1 << 5,
   /* Cache flags for silence on ban */
   CHFL_BAN_CHECKED  = 1 << 6,
-  CHFL_BAN_SILENCED = 1 << 7
+  CHFL_BAN_SILENCED = 1 << 7,
+  CHFL_MUTE_CHECKED = 1 << 8
 };
 
 /* channel modes ONLY */
@@ -124,7 +125,7 @@ extern const struct chan_mode *cmode_map[];
 extern const struct chan_mode  cmode_tab[];
 
 extern void channel_mode_init(void);
-extern bool add_id(struct Client *, struct Channel *, char *, dlink_list *);
+extern const char *add_id(struct Client *, struct Channel *, const char *, dlink_list *, unsigned int);
 extern void channel_mode_set(struct Client *, struct Channel *,
                              struct ChannelMember *, int, char **);
 extern void clear_ban_cache_list(dlink_list *);

@@ -41,6 +41,7 @@
 #include "event.h"
 #include "memory.h"
 #include "misc.h"
+#include "extban.h"
 
 
 /** Doubly linked list containing a list of all channels. */
@@ -226,7 +227,7 @@ channel_send_mask_list(struct Client *client_p, const struct Channel *channel,
   {
     const struct Ban *ban = node->data;
 
-    tlen = ban->len + 3;  /* +3 for ! + @ + space */
+    tlen = ban->banstr_len + 1;  /* +1 for space */
 
     /*
      * Send buffer and start over if we cannot fit another ban
@@ -240,7 +241,7 @@ channel_send_mask_list(struct Client *client_p, const struct Channel *channel,
       pp = pbuf;
     }
 
-    pp += sprintf(pp, "%s!%s@%s ", ban->name, ban->user, ban->host);
+    pp += sprintf(pp, "%s ", ban->banstr);
     cur_len += tlen;
   }
 
@@ -610,37 +611,78 @@ get_member_status(const struct ChannelMember *member, bool combine)
  * \return 1 if ban found for given n!u\@h mask, 0 otherwise
  */
 static bool
-find_bmask(const struct Client *client_p, const dlink_list *list)
+ban_matches(struct Client *client_p, struct Channel *channel, struct Ban *ban)
+{
+  /* Is a matching extban, call custom match handler */
+  if (ban->extban & extban_matching_mask())
+  {
+    struct Extban *extban = extban_find_flag(ban->extban & extban_matching_mask());
+    if (extban == NULL)
+      return false;
+
+    if (extban->matches == NULL || extban->matches(client_p, channel, ban) == EXTBAN_NO_MATCH)
+      return false;
+
+    return true;
+  }
+
+  if (match(ban->name, client_p->name) == 0 && match(ban->user, client_p->username) == 0)
+  {
+    switch (ban->type)
+    {
+      case HM_HOST:
+        if (match(ban->host, client_p->realhost) == 0 ||
+            match(ban->host, client_p->sockhost) == 0 || match(ban->host, client_p->host) == 0)
+          return true;
+        break;
+      case HM_IPV4:
+        if (client_p->ip.ss.ss_family == AF_INET)
+          if (match_ipv4(&client_p->ip, &ban->addr, ban->bits))
+            return true;
+        break;
+      case HM_IPV6:
+        if (client_p->ip.ss.ss_family == AF_INET6)
+          if (match_ipv6(&client_p->ip, &ban->addr, ban->bits))
+            return true;
+        break;
+      default:
+        assert(0);
+    }
+  }
+
+  return false;
+}
+
+bool
+find_bmask(struct Client *client_p, struct Channel *channel, const dlink_list *list, struct Extban *extban)
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, list->head)
   {
-    const struct Ban *ban = node->data;
+    struct Ban *ban = node->data;
 
-    if (match(ban->name, client_p->name) == 0 && match(ban->user, client_p->username) == 0)
+    /* Looking for a specific type of extban? */
+    if (extban)
     {
-      switch (ban->type)
-      {
-        case HM_HOST:
-          if (match(ban->host, client_p->realhost) == 0 ||
-              match(ban->host, client_p->sockhost) == 0 || match(ban->host, client_p->host) == 0)
-            return true;
-          break;
-        case HM_IPV4:
-          if (client_p->ip.ss.ss_family == AF_INET)
-            if (match_ipv4(&client_p->ip, &ban->addr, ban->bits))
-              return true;
-          break;
-        case HM_IPV6:
-          if (client_p->ip.ss.ss_family == AF_INET6)
-            if (match_ipv6(&client_p->ip, &ban->addr, ban->bits))
-              return true;
-          break;
-        default:
-          assert(0);
-      }
+      if (!(ban->extban & extban->flag))
+        continue;
     }
+    else
+    {
+      /*
+       * Acting extbans have their own time they act and are not general purpose bans,
+       * so skip them unless we are hunting them.
+       */
+      if (ban->extban & extban_acting_mask())
+        continue;
+    }
+
+    bool matches = ban_matches(client_p, channel, ban);
+    if (matches == false)
+      continue;
+
+    return true;
   }
 
   return false;
@@ -652,10 +694,10 @@ find_bmask(const struct Client *client_p, const dlink_list *list)
  * \return 0 if not banned, 1 otherwise
  */
 bool
-is_banned(const struct Channel *channel, const struct Client *client_p)
+is_banned(struct Channel *channel, struct Client *client_p)
 {
-  if (find_bmask(client_p, &channel->banlist) == true)
-    return find_bmask(client_p, &channel->exceptlist) == false;
+  if (find_bmask(client_p, channel, &channel->banlist, NULL) == true)
+    return find_bmask(client_p, channel, &channel->exceptlist, NULL) == false;
   return false;
 }
 
@@ -680,7 +722,7 @@ can_join(struct Client *client_p, struct Channel *channel, const char *key)
 
   if (HasCMode(channel, MODE_INVITEONLY))
     if (find_invite(channel, client_p) == NULL)
-      if (find_bmask(client_p, &channel->invexlist) == false)
+      if (find_bmask(client_p, channel, &channel->invexlist, NULL) == false)
         return ERR_INVITEONLYCHAN;
 
   if (channel->mode.key[0] && (key == NULL || strcmp(channel->mode.key, key)))
@@ -693,7 +735,7 @@ can_join(struct Client *client_p, struct Channel *channel, const char *key)
   if (is_banned(channel, client_p) == true)
     return ERR_BANNEDFROMCHAN;
 
-  return 0;
+  return extban_join_can_join(channel, client_p, NULL);
 }
 
 int
@@ -825,7 +867,7 @@ can_send(struct Channel *channel, struct Client *client_p,
       return ERR_CANNOTSENDTOCHAN;
   }
 
-  return CAN_SEND_NONOP;
+  return extban_mute_can_send(channel, client_p, member);
 }
 
 /*! \brief Updates the client's oper_warn_count_down, warns the

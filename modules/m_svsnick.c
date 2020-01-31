@@ -29,6 +29,7 @@
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
+#include "channel.h"
 #include "channel_mode.h"
 #include "send.h"
 #include "parse.h"

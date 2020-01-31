@@ -38,9 +38,9 @@
 #include "send.h"
 #include "memory.h"
 #include "parse.h"
+#include "extban.h"
 
 
-static char nuh_mask[MAXPARA][IRCD_BUFSIZE];
 static struct ChModeChange mode_changes[IRCD_BUFSIZE];
 static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
@@ -56,14 +56,12 @@ static unsigned int simple_modes_mask;  /* bit mask of simple modes already set 
  *                returns the 'fixed' string or "*" if the string
  *                was NULL length or a NULL pointer.
  */
-static char *
+static void
 check_string(char *s)
 {
-  char *const str = s;
-  static char star[] = "*";
+  char *str = s;
 
-  if (EmptyString(str))
-    return star;
+  assert(s);
 
   for (; *s; ++s)
   {
@@ -74,7 +72,25 @@ check_string(char *s)
     }
   }
 
-  return EmptyString(str) ? star : str;
+  if (EmptyString(str))
+    strcpy(str, "*");
+}
+
+static const char *
+get_mask(const struct Ban *ban)
+{
+  static char buf[MODEBUFLEN];
+  const unsigned int i = extban_format(ban->extban, buf);
+
+  assert(i <= sizeof(buf));
+
+  /* Matching extbans only use ban->host */
+  if (ban->extban & extban_matching_mask())
+    strlcpy(buf + i, ban->host, sizeof(buf) - i);
+  else
+    snprintf(buf + i, sizeof(buf) - i, "%s!%s@%s", ban->name, ban->user, ban->host);
+
+  return buf;
 }
 
 /*
@@ -84,14 +100,15 @@ check_string(char *s)
  *   -is 8/9/00
  */
 
-bool
-add_id(struct Client *client_p, struct Channel *channel, char *banid, dlink_list *list)
+const char *
+add_id(struct Client *client_p, struct Channel *channel, const char *banid, dlink_list *list, unsigned int type)
 {
   dlink_node *node;
-  char name[NICKLEN + 1] = "";
-  char user[USERLEN + 1] = "";
-  char host[HOSTLEN + 1] = "";
-  struct split_nuh_item nuh;
+  char mask[MODEBUFLEN];
+  char *maskptr = mask;
+  unsigned int extbans, offset;
+
+  strlcpy(mask, banid, sizeof(mask));
 
   if (MyClient(client_p))
   {
@@ -101,51 +118,105 @@ add_id(struct Client *client_p, struct Channel *channel, char *banid, dlink_list
 
     /* Don't let local clients overflow the b/e/I lists */
     if (num_mask >= ((HasCMode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large :
-                                                        ConfigChannel.max_bans))
+                                                          ConfigChannel.max_bans))
     {
       sendto_one_numeric(client_p, &me, ERR_BANLISTFULL, channel->name, banid);
       return false;
     }
 
-    collapse(banid);
+    collapse(mask);
   }
 
-  nuh.nuhmask  = check_string(banid);
-  nuh.nickptr  = name;
-  nuh.userptr  = user;
-  nuh.hostptr  = host;
+  enum extban_type etype = extban_parse(mask, &extbans, &offset);
+  maskptr += offset;
 
-  nuh.nicksize = sizeof(name);
-  nuh.usersize = sizeof(user);
-  nuh.hostsize = sizeof(host);
+  if (MyClient(client_p))
+  {
+    if (etype == EXTBAN_INVALID)
+    {
+      sendto_one_numeric(client_p, &me, ERR_INVALIDBAN, channel->name, mask);
+      return NULL;
+    }
 
-  split_nuh(&nuh);
+    if (etype != EXTBAN_NONE && ConfigChannel.enable_extbans == 0)
+    {
+      sendto_one_numeric(client_p, &me, ERR_INVALIDBAN, channel->name, mask);
+      return NULL;
+    }
 
-  /*
-   * Re-assemble a new n!u@h and print it back to banid for sending
-   * the mode to the channel.
-   */
-  size_t len = snprintf(banid, IRCD_BUFSIZE, "%s!%s@%s", name, user, host);
+    unsigned int extban_acting = extbans & extban_acting_mask();
+    if (extban_acting)
+    {
+      const struct Extban *extban = extban_find_flag(extban_acting);
+
+      if (extban == NULL || !(extban->types & type))
+      {
+        sendto_one_numeric(client_p, &me, ERR_INVALIDBAN, channel->name, mask);
+        return NULL;
+      }
+    }
+
+    unsigned extban_matching = extbans & extban_matching_mask();
+    if (extban_matching)
+    {
+      const struct Extban *extban = extban_find_flag(extban_matching);
+
+      if (extban == NULL || !(extban->types & type))
+      {
+        sendto_one_numeric(client_p, &me, ERR_INVALIDBAN, channel->name, mask);
+        return NULL;
+      }
+    }
+  }
+
+  /* Don't allow empty bans */
+  if (EmptyString(maskptr))
+    return NULL;
+
+  struct Ban *ban = xcalloc(sizeof(*ban));
+  ban->extban = extbans;
+  ban->when = event_base->time.sec_real;
+
+  check_string(maskptr);
+
+  if (etype == EXTBAN_MATCHING)
+    /* Matching extbans have their own format, don't try to parse it */
+    strlcpy(ban->host, maskptr, sizeof(ban->host));
+  else
+  {
+    struct split_nuh_item nuh;
+
+    nuh.nuhmask  = maskptr;
+    nuh.nickptr  = ban->name;
+    nuh.userptr  = ban->user;
+    nuh.hostptr  = ban->host;
+
+    nuh.nicksize = sizeof(ban->name);
+    nuh.usersize = sizeof(ban->user);
+    nuh.hostsize = sizeof(ban->host);
+
+    split_nuh(&nuh);
+
+    ban->type = parse_netmask(ban->host, &ban->addr, &ban->bits);
+  }
+
+  if (MyClient(client_p))
+    ban->banstr_len = strlcpy(ban->banstr, get_mask(ban), sizeof(ban->banstr));
+  else
+    ban->banstr_len = strlcpy(ban->banstr, mask, sizeof(ban->banstr));
 
   DLINK_FOREACH(node, list->head)
   {
-    const struct Ban *ban = node->data;
+    const struct Ban *tmp = node->data;
 
-    if (irccmp(ban->name, name) == 0 &&
-        irccmp(ban->user, user) == 0 &&
-        irccmp(ban->host, host) == 0)
-      return false;
+    if (irccmp(tmp->banstr, ban->banstr) == 0)
+    {
+      xfree(ban);
+      return NULL;
+    }
   }
 
   clear_ban_cache_list(&channel->members_local);
-
-  struct Ban *ban = xcalloc(sizeof(*ban));
-  ban->when = event_base->time.sec_real;
-  ban->len = len - 2;  /* -2 for ! + @ */
-  ban->type = parse_netmask(host, &ban->addr, &ban->bits);
-  strlcpy(ban->name, name, sizeof(ban->name));
-  strlcpy(ban->user, user, sizeof(ban->user));
-  strlcpy(ban->host, host, sizeof(ban->host));
 
   if (IsClient(client_p))
     snprintf(ban->who, sizeof(ban->who), "%s!%s@%s", client_p->name,
@@ -157,7 +228,7 @@ add_id(struct Client *client_p, struct Channel *channel, char *banid, dlink_list
 
   dlinkAdd(ban, &ban->node, list);
 
-  return true;
+  return ban->banstr;
 }
 
 /*
@@ -167,49 +238,30 @@ add_id(struct Client *client_p, struct Channel *channel, char *banid, dlink_list
  * output	- 0 for failure, 1 for success
  * side effects	-
  */
-static bool
-del_id(struct Channel *channel, char *banid, dlink_list *list)
+static const char *
+del_id(struct Client *client_p, struct Channel *channel, const char *banid, dlink_list *list, unsigned int type)
 {
+  static char mask[MODEBUFLEN];
   dlink_node *node;
-  char name[NICKLEN + 1] = "";
-  char user[USERLEN + 1] = "";
-  char host[HOSTLEN + 1] = "";
-  struct split_nuh_item nuh;
-
   assert(banid);
 
-  nuh.nuhmask  = check_string(banid);
-  nuh.nickptr  = name;
-  nuh.userptr  = user;
-  nuh.hostptr  = host;
-
-  nuh.nicksize = sizeof(name);
-  nuh.usersize = sizeof(user);
-  nuh.hostsize = sizeof(host);
-
-  split_nuh(&nuh);
-
-  /*
-   * Re-assemble a new n!u@h and print it back to banid for sending
-   * the mode to the channel.
-   */
-  snprintf(banid, IRCD_BUFSIZE, "%s!%s@%s", name, user, host);
+  /* TBD: n!u@h formatting fo local clients */
 
   DLINK_FOREACH(node, list->head)
   {
     struct Ban *ban = node->data;
 
-    if (irccmp(name, ban->name) == 0 &&
-        irccmp(user, ban->user) == 0 &&
-        irccmp(host, ban->host) == 0)
+    if (irccmp(banid, ban->banstr) == 0)
     {
+      strlcpy(mask, ban->banstr, sizeof(mask));  /* caSe might be different in 'banid' */
       clear_ban_cache_list(&channel->members_local);
       remove_ban(ban, list);
-      return true;
+
+      return mask;
     }
   }
 
-  return false;
+  return NULL;
 }
 
 /* channel_modes()
@@ -289,7 +341,7 @@ clear_ban_cache_list(dlink_list *list)
   DLINK_FOREACH(node, list->head)
   {
     struct ChannelMember *member = node->data;
-    member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED);
+    member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED | CHFL_MUTE_CHECKED);
   }
 }
 
@@ -394,6 +446,7 @@ static void
 chm_mask(struct Client *source_p, struct Channel *channel, int parc, int *parn, char **parv,
          int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
+  const char *ret = NULL;
   dlink_list *list;
   enum irc_numerics rpl_list = 0, rpl_endlist = 0;
   int errtype = 0;
@@ -437,8 +490,7 @@ chm_mask(struct Client *source_p, struct Channel *channel, int parc, int *parn, 
 
       if (!HasCMode(channel, MODE_HIDEBMASKS) || alev >= mode->required_oplevel)
         sendto_one_numeric(source_p, &me, rpl_list, channel->name,
-                           ban->name, ban->user, ban->host,
-                           ban->who, ban->when);
+                           ban->banstr, ban->who, ban->when);
     }
 
     sendto_one_numeric(source_p, &me, rpl_endlist, channel->name);
@@ -459,8 +511,7 @@ chm_mask(struct Client *source_p, struct Channel *channel, int parc, int *parn, 
   if (MyClient(source_p) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  char *const mask = nuh_mask[*parn];
-  strlcpy(mask, parv[*parn], sizeof(nuh_mask[*parn]));
+  char *mask = parv[*parn];
   ++(*parn);
 
   if (*mask == ':' || (!MyConnect(source_p) && strchr(mask, ' ')))
@@ -468,17 +519,23 @@ chm_mask(struct Client *source_p, struct Channel *channel, int parc, int *parn, 
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (add_id(source_p, channel, mask, list) == false)
+    ret = add_id(source_p, channel, mask, list, mode->flag);
+    if (ret == NULL)
       return;
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (del_id(channel, mask, list) == false)
+    ret = del_id(source_p, channel, mask, list, mode->flag);
+    if (ret == NULL)
       return;
   }
 
+  static char buf[MAXPARA][MODEBUFLEN];
+  mask = buf[(*parn) - 1];
+  strlcpy(mask, ret, sizeof(buf[(*parn) - 1]));
+
   mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than NICKLEN + USERLEN + HOSTLEN + 3 */
+  mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than MODEBUFLEN */
   mode_changes[mode_count].id = NULL;
   if (HasCMode(channel, MODE_HIDEBMASKS))
     mode_changes[mode_count].flags = CHFL_CHANOP | CHFL_HALFOP;

@@ -696,7 +696,7 @@ remove_ban_list(struct Channel *channel, struct Client *source_p, dlink_list *li
   DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
     struct Ban *ban = node->data;
-    int plen = ban->len + 4;  /* another +b and "!@ " */
+    int plen = ban->banstr_len + 2;  /* +2 = b and space */
 
     if (count >= MAXMODEPARAMS ||
         (cur_len + 1 /* space between */ + (plen - 1)) > IRCD_BUFSIZE - 2)
@@ -713,7 +713,7 @@ remove_ban_list(struct Channel *channel, struct Client *source_p, dlink_list *li
 
     *mbuf++ = c;
     cur_len += plen;
-    pbuf += sprintf(pbuf, "%s!%s@%s ", ban->name, ban->user, ban->host);
+    pbuf += sprintf(pbuf, "%s ", ban->banstr);
     ++count;
 
     remove_ban(ban, list);

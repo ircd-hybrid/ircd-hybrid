@@ -33,6 +33,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
+#include "channel.h"
 
 
 /*! \brief HASH command handler

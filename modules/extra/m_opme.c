@@ -35,6 +35,7 @@
 #include "irc_string.h"
 #include "parse.h"
 #include "modules.h"
+#include "channel.h"
 #include "channel_mode.h"
 #include "conf.h"
 

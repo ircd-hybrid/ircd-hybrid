@@ -33,6 +33,7 @@
 #include "server_capab.h"
 #include "conf.h"
 #include "parse.h"
+#include "channel.h"
 
 
 /*! \brief TBURST command handler

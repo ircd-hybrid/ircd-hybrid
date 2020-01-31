@@ -53,6 +53,7 @@
 #include "reslib.h"
 #include "motd.h"
 #include "ipcache.h"
+#include "channel.h"
 
 
 static const char *

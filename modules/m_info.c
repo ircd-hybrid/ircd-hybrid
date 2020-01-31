@@ -153,6 +153,12 @@ static const struct InfoStruct info_table[] =
     "Enable logging"
   },
   {
+    "enable_extbans",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.enable_extbans,
+    "Whether or not to enable extbans"
+  },
+  {
     "disable_fake_channels",
     OUTPUT_BOOLEAN_YN,
     &ConfigChannel.disable_fake_channels,

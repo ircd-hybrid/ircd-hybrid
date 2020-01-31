@@ -57,6 +57,7 @@
 #include "isupport.h"
 #include "patchlevel.h"
 #include "serno.h"
+#include "extban.h"
 
 
 struct SetOptions GlobalSetOptions;  /* /quote set variables */
@@ -412,6 +413,7 @@ main(int argc, char *argv[])
   capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after conf_read_files() */
   channel_mode_init();
+  extban_init();
   read_links_file();
   motd_init();
   user_modes_init();

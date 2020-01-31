@@ -46,6 +46,6 @@ struct Extban extban_server =
 {
   .character = 's',
   .type = EXTBAN_MATCHING,
-  .types = CHFL_BAN,
+  .types = CHFL_BAN | CHFL_INVEX,
   .matches = extban_server_matches
 };

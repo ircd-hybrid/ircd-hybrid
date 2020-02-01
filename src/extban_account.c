@@ -39,7 +39,7 @@ extban_account_matches(struct Client *client_p, struct Channel *channel, struct 
 {
   assert(client_p->account[0]);
 
-  if (irccmp(client_p->account, "*"))
+  if (strcmp(client_p->account, "*"))
     if (match(ban->host, client_p->account) == 0)
       return EXTBAN_MATCH;
 

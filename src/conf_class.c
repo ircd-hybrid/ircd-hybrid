@@ -246,11 +246,11 @@ class_ip_limit_rebuild(struct ClassItem *class)
 
   DLINK_FOREACH(node, local_client_list.head)
   {
-    struct Client *client_p = node->data;
-    struct MaskItem *conf = client_p->connection->confs.tail->data;
+    struct Client *client = node->data;
+    struct MaskItem *conf = client->connection->confs.tail->data;
 
     if (conf->type == CONF_CLIENT)
       if (conf->class == class)
-        class_ip_limit_add(class, &client_p->ip, true);
+        class_ip_limit_add(class, &client->ip, true);
   }
 }

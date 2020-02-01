@@ -98,17 +98,17 @@ strhash(const char *name)
  * inputs       - pointer to client
  * output       - NONE
  * side effects - Adds a client's name in the proper hash linked
- *                list, can't fail, client_p must have a non-null
+ *                list, can't fail, client must have a non-null
  *                name or expect a coredump, the name is infact
- *                taken from client_p->name
+ *                taken from client->name
  */
 void
-hash_add_client(struct Client *client_p)
+hash_add_client(struct Client *client)
 {
-  const unsigned int hashv = strhash(client_p->name);
+  const unsigned int hashv = strhash(client->name);
 
-  client_p->hnext = clientTable[hashv];
-  clientTable[hashv] = client_p;
+  client->hnext = clientTable[hashv];
+  clientTable[hashv] = client;
 }
 
 /* hash_add_channel()
@@ -131,12 +131,12 @@ hash_add_channel(struct Channel *channel)
 }
 
 void
-hash_add_id(struct Client *client_p)
+hash_add_id(struct Client *client)
 {
-  const unsigned int hashv = strhash(client_p->id);
+  const unsigned int hashv = strhash(client->id);
 
-  client_p->idhnext = idTable[hashv];
-  idTable[hashv] = client_p;
+  client->idhnext = idTable[hashv];
+  idTable[hashv] = client;
 }
 
 /* hash_del_id()
@@ -146,26 +146,26 @@ hash_add_id(struct Client *client_p)
  * side effects - Removes an ID from the hash linked list
  */
 void
-hash_del_id(struct Client *client_p)
+hash_del_id(struct Client *client)
 {
-  const unsigned int hashv = strhash(client_p->id);
+  const unsigned int hashv = strhash(client->id);
   struct Client *tmp = idTable[hashv];
 
   if (tmp)
   {
-    if (tmp == client_p)
+    if (tmp == client)
     {
-      idTable[hashv] = client_p->idhnext;
-      client_p->idhnext = client_p;
+      idTable[hashv] = client->idhnext;
+      client->idhnext = client;
     }
     else
     {
-      while (tmp->idhnext != client_p)
+      while (tmp->idhnext != client)
         if ((tmp = tmp->idhnext) == NULL)
           return;
 
       tmp->idhnext = tmp->idhnext->idhnext;
-      client_p->idhnext = client_p;
+      client->idhnext = client;
     }
   }
 }
@@ -177,26 +177,26 @@ hash_del_id(struct Client *client_p)
  * side effects - Removes a Client's name from the hash linked list
  */
 void
-hash_del_client(struct Client *client_p)
+hash_del_client(struct Client *client)
 {
-  const unsigned int hashv = strhash(client_p->name);
+  const unsigned int hashv = strhash(client->name);
   struct Client *tmp = clientTable[hashv];
 
   if (tmp)
   {
-    if (tmp == client_p)
+    if (tmp == client)
     {
-      clientTable[hashv] = client_p->hnext;
-      client_p->hnext = client_p;
+      clientTable[hashv] = client->hnext;
+      client->hnext = client;
     }
     else
     {
-      while (tmp->hnext != client_p)
+      while (tmp->hnext != client)
         if ((tmp = tmp->hnext) == NULL)
           return;
 
       tmp->hnext = tmp->hnext->hnext;
-      client_p->hnext = client_p;
+      client->hnext = client;
     }
   }
 }
@@ -245,89 +245,89 @@ struct Client *
 hash_find_client(const char *name)
 {
   const unsigned int hashv = strhash(name);
-  struct Client *client_p;
+  struct Client *client;
 
-  if ((client_p = clientTable[hashv]))
+  if ((client = clientTable[hashv]))
   {
-    if (irccmp(name, client_p->name))
+    if (irccmp(name, client->name))
     {
       struct Client *prev;
 
-      while (prev = client_p, (client_p = client_p->hnext))
+      while (prev = client, (client = client->hnext))
       {
-        if (irccmp(name, client_p->name) == 0)
+        if (irccmp(name, client->name) == 0)
         {
-          prev->hnext = client_p->hnext;
-          client_p->hnext = clientTable[hashv];
-          clientTable[hashv] = client_p;
+          prev->hnext = client->hnext;
+          client->hnext = clientTable[hashv];
+          clientTable[hashv] = client;
           break;
         }
       }
     }
   }
 
-  return client_p;
+  return client;
 }
 
 struct Client *
 hash_find_id(const char *name)
 {
   const unsigned int hashv = strhash(name);
-  struct Client *client_p;
+  struct Client *client;
 
-  if ((client_p = idTable[hashv]))
+  if ((client = idTable[hashv]))
   {
-    if (strcmp(name, client_p->id))
+    if (strcmp(name, client->id))
     {
       struct Client *prev;
 
-      while (prev = client_p, (client_p = client_p->idhnext))
+      while (prev = client, (client = client->idhnext))
       {
-        if (strcmp(name, client_p->id) == 0)
+        if (strcmp(name, client->id) == 0)
         {
-          prev->idhnext = client_p->idhnext;
-          client_p->idhnext = idTable[hashv];
-          idTable[hashv] = client_p;
+          prev->idhnext = client->idhnext;
+          client->idhnext = idTable[hashv];
+          idTable[hashv] = client;
           break;
         }
       }
     }
   }
 
-  return client_p;
+  return client;
 }
 
 struct Client *
 hash_find_server(const char *name)
 {
   const unsigned int hashv = strhash(name);
-  struct Client *client_p;
+  struct Client *client;
 
   if (IsDigit(*name) && strlen(name) == IRC_MAXSID)
     return hash_find_id(name);
 
-  if ((client_p = clientTable[hashv]))
+  if ((client = clientTable[hashv]))
   {
-    if ((!IsServer(client_p) && !IsMe(client_p)) ||
-        irccmp(name, client_p->name))
+    if ((!IsServer(client) && !IsMe(client)) ||
+        irccmp(name, client->name))
     {
       struct Client *prev;
 
-      while (prev = client_p, (client_p = client_p->hnext))
+      while (prev = client, (client = client->hnext))
       {
-        if ((IsServer(client_p) || IsMe(client_p)) &&
-            irccmp(name, client_p->name) == 0)
+        if ((IsServer(client) || IsMe(client)) &&
+            irccmp(name, client->name) == 0)
         {
-          prev->hnext = client_p->hnext;
-          client_p->hnext = clientTable[hashv];
-          clientTable[hashv] = client_p;
+          prev->hnext = client->hnext;
+          client->hnext = clientTable[hashv];
+          clientTable[hashv] = client;
           break;
         }
       }
     }
   }
 
-  return client_p;
+  return client;
 }
 
 /* hash_find_channel()
@@ -434,9 +434,9 @@ exceeding_sendq(const struct Client *to)
 }
 
 void
-free_list_task(struct Client *source_p)
+free_list_task(struct Client *client)
 {
-  struct ListTask *const lt = source_p->connection->list_task;
+  struct ListTask *const lt = client->connection->list_task;
   dlink_node *node, *node_next;
 
   dlinkDelete(&lt->node, &listing_client_list);
@@ -456,7 +456,7 @@ free_list_task(struct Client *source_p)
   }
 
   xfree(lt);
-  source_p->connection->list_task = NULL;
+  client->connection->list_task = NULL;
 }
 
 /* list_allow_channel()
@@ -492,15 +492,15 @@ list_allow_channel(const char *name, const struct ListTask *lt)
  * side effects -
  */
 static void
-list_one_channel(struct Client *source_p, struct Channel *channel)
+list_one_channel(struct Client *client, struct Channel *channel)
 {
-  const struct ListTask *const lt = source_p->connection->list_task;
+  const struct ListTask *const lt = client->connection->list_task;
   char listbuf[MODEBUFLEN] = "";
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
 
   if (SecretChannel(channel) &&
-      !(HasUMode(source_p, UMODE_ADMIN) || IsMember(source_p, channel)))
+      !(HasUMode(client, UMODE_ADMIN) || IsMember(client, channel)))
     return;
 
   if (dlink_list_length(&channel->members) < lt->users_min ||
@@ -519,14 +519,14 @@ list_one_channel(struct Client *source_p, struct Channel *channel)
   if (list_allow_channel(channel->name, lt) == false)
     return;
 
-  channel_modes(channel, source_p, modebuf, parabuf);
+  channel_modes(channel, client, modebuf, parabuf);
 
   if (channel->topic[0])
     snprintf(listbuf, sizeof(listbuf), "[%s] ", modebuf);
   else
     snprintf(listbuf, sizeof(listbuf), "[%s]",  modebuf);
 
-  sendto_one_numeric(source_p, &me, RPL_LIST, channel->name,
+  sendto_one_numeric(client, &me, RPL_LIST, channel->name,
                      dlink_list_length(&channel->members),
                      listbuf, channel->topic);
 }
@@ -535,7 +535,7 @@ list_one_channel(struct Client *source_p, struct Channel *channel)
  *
  * inputs	- pointer to client requesting list
  * output	- 0/1
- * side effects	- safely list all channels to source_p
+ * side effects	- safely list all channels to client
  *
  * Walk the channel buckets, ensure all pointers in a bucket are
  * traversed before blocking on a sendq. This means, no locking is needed.
@@ -543,23 +543,23 @@ list_one_channel(struct Client *source_p, struct Channel *channel)
  * - Dianora
  */
 void
-safe_list_channels(struct Client *source_p, bool only_unmasked_channels)
+safe_list_channels(struct Client *client, bool only_unmasked_channels)
 {
-  struct ListTask *const lt = source_p->connection->list_task;
+  struct ListTask *const lt = client->connection->list_task;
   struct Channel *channel;
 
   if (only_unmasked_channels == false)
   {
     for (unsigned int i = lt->hash_index; i < HASHSIZE; ++i)
     {
-      if (exceeding_sendq(source_p) == true)
+      if (exceeding_sendq(client) == true)
       {
         lt->hash_index = i;
         return;  /* Still more to do */
       }
 
       for (channel = channelTable[i]; channel; channel = channel->hnextch)
-        list_one_channel(source_p, channel);
+        list_one_channel(client, channel);
     }
   }
   else
@@ -568,9 +568,9 @@ safe_list_channels(struct Client *source_p, bool only_unmasked_channels)
 
     DLINK_FOREACH(node, lt->show_mask.head)
       if ((channel = hash_find_channel(node->data)))
-        list_one_channel(source_p, channel);
+        list_one_channel(client, channel);
   }
 
-  free_list_task(source_p);
-  sendto_one_numeric(source_p, &me, RPL_LISTEND);
+  free_list_task(client);
+  sendto_one_numeric(client, &me, RPL_LISTEND);
 }

@@ -43,14 +43,14 @@ static dlink_list watchTable[HASHSIZE];
 /*
  * Rough figure of the datastructures for watch:
  *
- * NOTIFY HASH          client_p1
- *   |                    |- nick1
- * nick1-|- client_p1     |- nick2
- *   |   |- client_p2                client_p3
- *   |   |- client_p3   client_p2      |- nick1
- *   |                    |- nick1
- * nick2-|- client_p2     |- nick2
- *       |- client_p1
+ * NOTIFY HASH        client1
+ *   |                  |- nick1
+ * nick1-|- client1     |- nick2
+ *   |   |- client2               client3
+ *   |   |- client3   client2       |- nick1
+ *   |                  |- nick1
+ * nick2-|- client2     |- nick2
+ *       |- client1
  */
 
 /*! \brief Counts up memory used by watch list headers
@@ -64,20 +64,20 @@ watch_count_memory(unsigned int *const count, size_t *const bytes)
   (*bytes) = *count * sizeof(struct Watch);
 }
 
-/*! \brief Notifies all clients that have client_p's name on
+/*! \brief Notifies all clients that have client's name on
  *         their watch list.
- * \param client_p Pointer to Client struct
- * \param reply Numeric to send. Either RPL_LOGON or RPL_LOGOFF
+ * \param client Pointer to Client struct
+ * \param reply  Numeric to send. Either RPL_LOGON or RPL_LOGOFF
  */
 void
-watch_check_hash(const struct Client *client_p, const enum irc_numerics reply)
+watch_check_hash(const struct Client *client, const enum irc_numerics reply)
 {
   struct Watch *watch = NULL;
   dlink_node *node = NULL;
 
-  assert(IsClient(client_p));
+  assert(IsClient(client));
 
-  if ((watch = watch_find_hash(client_p->name)) == NULL)
+  if ((watch = watch_find_hash(client->name)) == NULL)
     return;  /* This name isn't on watch */
 
   /* Update the time of last change to item */
@@ -85,9 +85,9 @@ watch_check_hash(const struct Client *client_p, const enum irc_numerics reply)
 
   /* Send notifies out to everybody on the list in header */
   DLINK_FOREACH(node, watch->watched_by.head)
-    sendto_one_numeric(node->data, &me, reply, client_p->name,
-                       client_p->username, client_p->host,
-                       watch->lasttime, client_p->info);
+    sendto_one_numeric(node->data, &me, reply, client->name,
+                       client->username, client->host,
+                       watch->lasttime, client->info);
 }
 
 /*! \brief Looks up the watch table for a given name
@@ -109,12 +109,12 @@ watch_find_hash(const char *name)
   return NULL;
 }
 
-/*! \brief Adds a watch entry to client_p's watch list
- * \param name     Nick name to add
- * \param client_p Pointer to Client struct
+/*! \brief Adds a watch entry to client's watch list
+ * \param name   Nick name to add
+ * \param client Pointer to Client struct
  */
 void
-watch_add_to_hash_table(const char *name, struct Client *client_p)
+watch_add_to_hash_table(const char *name, struct Client *client)
 {
   struct Watch *watch = NULL;
   dlink_node *node = NULL;
@@ -133,23 +133,23 @@ watch_add_to_hash_table(const char *name, struct Client *client_p)
   else
   {
     /* Is this client already on the watch-list? */
-    node = dlinkFind(&watch->watched_by, client_p);
+    node = dlinkFind(&watch->watched_by, client);
   }
 
   if (node == NULL)
   {
     /* No it isn't, so add it in the bucket and client adding it */
-    dlinkAdd(client_p, make_dlink_node(), &watch->watched_by);
-    dlinkAdd(watch, make_dlink_node(), &client_p->connection->watches);
+    dlinkAdd(client, make_dlink_node(), &watch->watched_by);
+    dlinkAdd(watch, make_dlink_node(), &client->connection->watches);
   }
 }
 
-/*! \brief Removes a single entry from client_p's watch list
- * \param name     Name to remove
- * \param client_p Pointer to Client struct
+/*! \brief Removes a single entry from client's watch list
+ * \param name   Name to remove
+ * \param client Pointer to Client struct
  */
 void
-watch_del_from_hash_table(const char *name, struct Client *client_p)
+watch_del_from_hash_table(const char *name, struct Client *client)
 {
   struct Watch *watch = NULL;
   dlink_node *node = NULL;
@@ -157,13 +157,13 @@ watch_del_from_hash_table(const char *name, struct Client *client_p)
   if ((watch = watch_find_hash(name)) == NULL)
     return;  /* No header found for that name. i.e. it's not being watched */
 
-  if ((node = dlinkFind(&watch->watched_by, client_p)) == NULL)
-    return;  /* This name isn't being watched by client_p */
+  if ((node = dlinkFind(&watch->watched_by, client)) == NULL)
+    return;  /* This name isn't being watched by client */
 
   dlinkDelete(node, &watch->watched_by);
   free_dlink_node(node);
 
-  if ((node = dlinkFindDelete(&client_p->connection->watches, watch)))
+  if ((node = dlinkFindDelete(&client->connection->watches, watch)))
     free_dlink_node(node);
 
   /* In case this header is now empty of notices, remove it */
@@ -175,23 +175,23 @@ watch_del_from_hash_table(const char *name, struct Client *client_p)
   }
 }
 
-/*! \brief Removes all entries from client_p's watch list
+/*! \brief Removes all entries from client's watch list
  *         and deletes headers that are no longer being watched.
- * \param client_p Pointer to Client struct
+ * \param client Pointer to Client struct
  */
 void
-watch_del_watch_list(struct Client *client_p)
+watch_del_watch_list(struct Client *client)
 {
   dlink_node *node = NULL, *node_next = NULL;
   dlink_node *temp = NULL;
 
-  DLINK_FOREACH_SAFE(node, node_next, client_p->connection->watches.head)
+  DLINK_FOREACH_SAFE(node, node_next, client->connection->watches.head)
   {
     struct Watch *watch = node->data;
 
-    assert(dlinkFind(&watch->watched_by, client_p));
+    assert(dlinkFind(&watch->watched_by, client));
 
-    if ((temp = dlinkFindDelete(&watch->watched_by, client_p)))
+    if ((temp = dlinkFindDelete(&watch->watched_by, client)))
       free_dlink_node(temp);
 
     /* If this leaves a header without notifies, remove it. */
@@ -203,10 +203,10 @@ watch_del_watch_list(struct Client *client_p)
       xfree(watch);
     }
 
-    dlinkDelete(node, &client_p->connection->watches);
+    dlinkDelete(node, &client->connection->watches);
     free_dlink_node(node);
   }
 
-  assert(client_p->connection->watches.head == NULL);
-  assert(client_p->connection->watches.tail == NULL);
+  assert(client->connection->watches.head == NULL);
+  assert(client->connection->watches.tail == NULL);
 }

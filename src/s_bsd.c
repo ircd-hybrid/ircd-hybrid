@@ -97,10 +97,10 @@ comm_get_sockerr(fde_t *F)
  *
  *        text        is a *format* string for outputing error. It must
  *                contain only two '%s', the first will be replaced
- *                by the sockhost from the client_p, and the latter will
+ *                by the sockhost from the client, and the latter will
  *                be taken from sys_errlist[errno].
  *
- *        client_p        if not NULL, is the *LOCAL* client associated with
+ *        client        if not NULL, is the *LOCAL* client associated with
  *                the error.
  *
  * Cannot use perror() within daemon. stderr is closed in
@@ -151,43 +151,43 @@ setup_socket(int fd)
 static void
 ssl_handshake(fde_t *F, void *data)
 {
-  struct Client *client_p = data;
+  struct Client *client = data;
 
-  assert(client_p);
-  assert(client_p->connection);
-  assert(client_p->connection->fd);
-  assert(client_p->connection->fd == F);
+  assert(client);
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd == F);
 
   tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_SERVER, NULL);
   if (ret != TLS_HANDSHAKE_DONE)
   {
-    if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
+    if ((event_base->time.sec_monotonic - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
     {
-      exit_client(client_p, "Timeout during TLS handshake");
+      exit_client(client, "Timeout during TLS handshake");
       return;
     }
 
     switch (ret)
     {
       case TLS_HANDSHAKE_WANT_WRITE:
-        comm_setselect(F, COMM_SELECT_WRITE, ssl_handshake, client_p, TLS_HANDSHAKE_TIMEOUT);
+        comm_setselect(F, COMM_SELECT_WRITE, ssl_handshake, client, TLS_HANDSHAKE_TIMEOUT);
         return;
       case TLS_HANDSHAKE_WANT_READ:
-        comm_setselect(F, COMM_SELECT_READ, ssl_handshake, client_p, TLS_HANDSHAKE_TIMEOUT);
+        comm_setselect(F, COMM_SELECT_READ, ssl_handshake, client, TLS_HANDSHAKE_TIMEOUT);
         return;
       default:
-        exit_client(client_p, "Error during TLS handshake");
+        exit_client(client, "Error during TLS handshake");
         return;
     }
   }
 
   comm_settimeout(F, 0, NULL, NULL);
 
-  if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client_p->certfp) == false)
+  if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client->certfp) == false)
     ilog(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
-         client_get_name(client_p, MASK_IP));
+         client_get_name(client, MASK_IP));
 
-  auth_start(client_p);
+  auth_start(client);
 }
 
 /*
@@ -200,46 +200,46 @@ ssl_handshake(fde_t *F, void *data)
 void
 add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 {
-  struct Client *client_p = client_make(NULL);
+  struct Client *client = client_make(NULL);
 
-  client_p->connection->fd = fd_open(fd, true, (listener->flags & LISTENER_TLS) ?
+  client->connection->fd = fd_open(fd, true, (listener->flags & LISTENER_TLS) ?
                                      "Incoming TLS connection" : "Incoming connection");
 
   /*
    * copy address to 'sockhost' as a string, copy it to host too
    * so we have something valid to put into error messages...
    */
-  client_p->ip = *irn;
+  client->ip = *irn;
 
-  getnameinfo((const struct sockaddr *)&client_p->ip,
-              client_p->ip.ss_len, client_p->sockhost,
-              sizeof(client_p->sockhost), NULL, 0, NI_NUMERICHOST);
+  getnameinfo((const struct sockaddr *)&client->ip,
+              client->ip.ss_len, client->sockhost,
+              sizeof(client->sockhost), NULL, 0, NI_NUMERICHOST);
 
-  if (client_p->sockhost[0] == ':')
+  if (client->sockhost[0] == ':')
   {
-    client_p->sockhost[0] = '0';
-    memmove(client_p->sockhost + 1, client_p->sockhost, sizeof(client_p->sockhost) - 1);
+    client->sockhost[0] = '0';
+    memmove(client->sockhost + 1, client->sockhost, sizeof(client->sockhost) - 1);
   }
 
-  strlcpy(client_p->host, client_p->sockhost, sizeof(client_p->host));
+  strlcpy(client->host, client->sockhost, sizeof(client->host));
 
-  client_p->connection->listener = listener;
+  client->connection->listener = listener;
   ++listener->ref_count;
 
   if (listener->flags & LISTENER_TLS)
   {
-    if (tls_new(&client_p->connection->fd->tls, fd, TLS_ROLE_SERVER) == false)
+    if (tls_new(&client->connection->fd->tls, fd, TLS_ROLE_SERVER) == false)
     {
-      SetDead(client_p);
-      exit_client(client_p, "TLS context initialization failed");
+      SetDead(client);
+      exit_client(client, "TLS context initialization failed");
       return;
     }
 
-    AddFlag(client_p, FLAGS_TLS);
-    ssl_handshake(client_p->connection->fd, client_p);
+    AddFlag(client, FLAGS_TLS);
+    ssl_handshake(client->connection->fd, client);
   }
   else
-    auth_start(client_p);
+    auth_start(client);
 }
 
 /*

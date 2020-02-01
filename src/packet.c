@@ -47,28 +47,28 @@ static char readBuf[READBUF_SIZE];
 
 /*
  * client_dopacket - copy packet to client buf and parse it
- *      client_p - pointer to client structure for which the buffer data
+ *      client - pointer to client structure for which the buffer data
  *             applies.
  *      buffer - pointer to the buffer containing the newly read data
  *      length - number of valid bytes of data in the buffer
  *
  * Note:
  *      It is implicitly assumed that client_dopacket() is called only
- *      with client_p of "local" variation, which contains all the
+ *      with client of "local" variation, which contains all the
  *      necessary fields (buffer etc..)
  */
 static void
-client_dopacket(struct Client *client_p, char *buffer, unsigned int length)
+client_dopacket(struct Client *client, char *buffer, unsigned int length)
 {
   /* Update messages received */
   ++me.connection->recv.messages;
-  ++client_p->connection->recv.messages;
+  ++client->connection->recv.messages;
 
   /* Update bytes received */
-  client_p->connection->recv.bytes += length;
+  client->connection->recv.bytes += length;
   me.connection->recv.bytes += length;
 
-  parse(client_p, buffer, buffer + length);
+  parse(client, buffer, buffer + length);
 }
 
 /* extract_one_line()
@@ -134,58 +134,58 @@ out:
  * parse_client_queued - parse client queued messages
  */
 static void
-parse_client_queued(struct Client *client_p)
+parse_client_queued(struct Client *client)
 {
-  if (IsUnknown(client_p))
+  if (IsUnknown(client))
   {
     unsigned int i = 0;
 
     while (true)
     {
-      if (IsDefunct(client_p))
+      if (IsDefunct(client))
         return;
 
       /* Rate unknown clients at MAX_FLOOD per loop */
       if (i >= MAX_FLOOD)
         break;
 
-      size_t dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
+      size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
         break;
 
-      client_dopacket(client_p, readBuf, dolen);
+      client_dopacket(client, readBuf, dolen);
       ++i;
 
       /*
        * If they've dropped out of the unknown state, break and move
        * to the parsing for their appropriate status.  --fl
        */
-      if (!IsUnknown(client_p))
+      if (!IsUnknown(client))
         break;
     }
   }
 
-  if (IsServer(client_p) || IsConnecting(client_p) || IsHandshake(client_p))
+  if (IsServer(client) || IsConnecting(client) || IsHandshake(client))
   {
     while (true)
     {
-      if (IsDefunct(client_p))
+      if (IsDefunct(client))
         return;
 
-      size_t dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
+      size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
         break;
 
-      client_dopacket(client_p, readBuf, dolen);
+      client_dopacket(client, readBuf, dolen);
     }
   }
-  else if (IsClient(client_p))
+  else if (IsClient(client))
   {
     bool checkflood = true;
 
-    if (ConfigGeneral.no_oper_flood && HasUMode(client_p, UMODE_OPER))
+    if (ConfigGeneral.no_oper_flood && HasUMode(client, UMODE_OPER))
       checkflood = false;
-    else if (HasFlag(client_p, FLAGS_CANFLOOD))
+    else if (HasFlag(client, FLAGS_CANFLOOD))
       checkflood = false;
 
     /*
@@ -195,7 +195,7 @@ parse_client_queued(struct Client *client_p)
      */
     while (true)
     {
-      if (IsDefunct(client_p))
+      if (IsDefunct(client))
         break;
 
       /*
@@ -213,15 +213,15 @@ parse_client_queued(struct Client *client_p)
        * and no 'bursts' will be permitted.
        */
       if (checkflood == true)
-        if (client_p->connection->sent_parsed >= (IsFloodDone(client_p) ? MAX_FLOOD : MAX_FLOOD_BURST))
+        if (client->connection->sent_parsed >= (IsFloodDone(client) ? MAX_FLOOD : MAX_FLOOD_BURST))
           break;
 
-      size_t dolen = extract_one_line(&client_p->connection->buf_recvq, readBuf);
+      size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
         break;
 
-      client_dopacket(client_p, readBuf, dolen);
-      ++client_p->connection->sent_parsed;
+      client_dopacket(client, readBuf, dolen);
+      ++client->connection->sent_parsed;
     }
   }
 }
@@ -231,18 +231,18 @@ parse_client_queued(struct Client *client_p)
  * marks the end of the clients grace period
  */
 void
-flood_endgrace(struct Client *client_p)
+flood_endgrace(struct Client *client)
 {
-  if (IsFloodDone(client_p))
+  if (IsFloodDone(client))
     return;  /* Grace period has already ended */
 
-  AddFlag(client_p, FLAGS_FLOODDONE);
+  AddFlag(client, FLAGS_FLOODDONE);
 
   /*
    * sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,
    * so reset it.
    */
-  client_p->connection->sent_parsed = 0;
+  client->connection->sent_parsed = 0;
 }
 
 /*
@@ -254,27 +254,27 @@ flood_endgrace(struct Client *client_p)
 void
 flood_recalc(fde_t *F, void *data)
 {
-  struct Client *const client_p = data;
+  struct Client *const client = data;
 
   /*
    * Allow a bursting client their allocation per second, allow
    * a client who is flooding an extra 2 per second
    */
-  if (IsFloodDone(client_p))
-    client_p->connection->sent_parsed -= 2;
+  if (IsFloodDone(client))
+    client->connection->sent_parsed -= 2;
   else
-    client_p->connection->sent_parsed = 0;
+    client->connection->sent_parsed = 0;
 
-  if (client_p->connection->sent_parsed < 0)
-    client_p->connection->sent_parsed = 0;
+  if (client->connection->sent_parsed < 0)
+    client->connection->sent_parsed = 0;
 
-  parse_client_queued(client_p);
+  parse_client_queued(client);
 
   /* And now, try flushing .. */
-  if (!IsDead(client_p))
+  if (!IsDead(client))
   {
     /* and finally, reset the flood check */
-    comm_setflush(F, 1, flood_recalc, client_p);
+    comm_setflush(F, 1, flood_recalc, client);
   }
 }
 
@@ -284,15 +284,15 @@ flood_recalc(fde_t *F, void *data)
 void
 read_packet(fde_t *F, void *data)
 {
-  struct Client *const client_p = data;
+  struct Client *const client = data;
   ssize_t length = 0;
 
-  assert(client_p);
-  assert(client_p->connection);
-  assert(client_p->connection->fd);
-  assert(client_p->connection->fd == F);
+  assert(client);
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd == F);
 
-  if (IsDefunct(client_p))
+  if (IsDefunct(client))
     return;
 
   /*
@@ -308,7 +308,7 @@ read_packet(fde_t *F, void *data)
       length = tls_read(&F->tls, readBuf, sizeof(readBuf), &want_write);
 
       if (want_write == true)
-        comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client_p, 0);
+        comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client, 0);
     }
     else
       length = recv(F->fd, readBuf, sizeof(readBuf), 0);
@@ -320,31 +320,31 @@ read_packet(fde_t *F, void *data)
        * another COMM_SELECT_READ io-request.
        */
       if (length < 0 && comm_ignore_errno(errno) == true)
-        comm_setselect(F, COMM_SELECT_READ, read_packet, client_p, 0);
+        comm_setselect(F, COMM_SELECT_READ, read_packet, client, 0);
       else
-        dead_link_on_read(client_p, length);
+        dead_link_on_read(client, length);
       return;
     }
 
-    dbuf_put(&client_p->connection->buf_recvq, readBuf, length);
+    dbuf_put(&client->connection->buf_recvq, readBuf, length);
 
-    client_p->connection->last_ping = event_base->time.sec_monotonic;
-    client_p->connection->last_data = event_base->time.sec_monotonic;
+    client->connection->last_ping = event_base->time.sec_monotonic;
+    client->connection->last_data = event_base->time.sec_monotonic;
 
-    DelFlag(client_p, FLAGS_PINGSENT);
+    DelFlag(client, FLAGS_PINGSENT);
 
     /* Attempt to parse what we have */
-    parse_client_queued(client_p);
+    parse_client_queued(client);
 
-    if (IsDefunct(client_p))
+    if (IsDefunct(client))
       return;
 
     /* Check to make sure we're not flooding */
-    if (!(IsServer(client_p) || IsHandshake(client_p) || IsConnecting(client_p)) &&
-        (dbuf_length(&client_p->connection->buf_recvq) >
-         get_recvq(&client_p->connection->confs)))
+    if (!(IsServer(client) || IsHandshake(client) || IsConnecting(client)) &&
+        (dbuf_length(&client->connection->buf_recvq) >
+         get_recvq(&client->connection->confs)))
     {
-      exit_client(client_p, "Excess Flood");
+      exit_client(client, "Excess Flood");
       return;
     }
   }

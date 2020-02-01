@@ -110,33 +110,33 @@ whowas_trim(void)
 /*! \brief Adds the currently defined name of the client to history.
  *         Usually called before changing to a new name (nick).
  *         Client must be a fully registered user.
- * \param client_p Pointer to Client struct to add to whowas history
- * \param online   Either 1 if it's a nick change or 0 on client exit
+ * \param client Pointer to Client struct to add to whowas history
+ * \param online Either 'true' if it's a nick change or 'false' on client exit
  */
 void
-whowas_add_history(struct Client *client_p, bool online)
+whowas_add_history(struct Client *client, bool online)
 {
   struct Whowas *whowas = whowas_make();
 
-  assert(IsClient(client_p));
+  assert(IsClient(client));
 
-  whowas->hash_value = strhash(client_p->name);
+  whowas->hash_value = strhash(client->name);
   whowas->logoff = event_base->time.sec_real;
-  whowas->server_hidden = IsHidden(client_p->servptr) != 0;
+  whowas->server_hidden = IsHidden(client->servptr) != 0;
 
-  strlcpy(whowas->account, client_p->account, sizeof(whowas->account));
-  strlcpy(whowas->name, client_p->name, sizeof(whowas->name));
-  strlcpy(whowas->username, client_p->username, sizeof(whowas->username));
-  strlcpy(whowas->hostname, client_p->host, sizeof(whowas->hostname));
-  strlcpy(whowas->realhost, client_p->realhost, sizeof(whowas->realhost));
-  strlcpy(whowas->sockhost, client_p->sockhost, sizeof(whowas->sockhost));
-  strlcpy(whowas->realname, client_p->info, sizeof(whowas->realname));
-  strlcpy(whowas->servername, client_p->servptr->name, sizeof(whowas->servername));
+  strlcpy(whowas->account, client->account, sizeof(whowas->account));
+  strlcpy(whowas->name, client->name, sizeof(whowas->name));
+  strlcpy(whowas->username, client->username, sizeof(whowas->username));
+  strlcpy(whowas->hostname, client->host, sizeof(whowas->hostname));
+  strlcpy(whowas->realhost, client->realhost, sizeof(whowas->realhost));
+  strlcpy(whowas->sockhost, client->sockhost, sizeof(whowas->sockhost));
+  strlcpy(whowas->realname, client->info, sizeof(whowas->realname));
+  strlcpy(whowas->servername, client->servptr->name, sizeof(whowas->servername));
 
   if (online == true)
   {
-    whowas->online = client_p;
-    dlinkAdd(whowas, &whowas->cnode, &client_p->whowas_list);
+    whowas->online = client;
+    dlinkAdd(whowas, &whowas->cnode, &client->whowas_list);
   }
   else
     whowas->online = NULL;
@@ -148,17 +148,17 @@ whowas_add_history(struct Client *client_p, bool online)
 /*! \brief This must be called when the client structure is about to
  *         be released. History mechanism keeps pointers to client
  *         structures and it must know when they cease to exist.
- * \param client_p Pointer to Client struct
+ * \param client Pointer to Client struct
  */
 void
-whowas_off_history(struct Client *client_p)
+whowas_off_history(struct Client *client)
 {
-  while (client_p->whowas_list.head)
+  while (client->whowas_list.head)
   {
-    struct Whowas *whowas = client_p->whowas_list.head->data;
+    struct Whowas *whowas = client->whowas_list.head->data;
 
     whowas->online = NULL;
-    dlinkDelete(&whowas->cnode, &client_p->whowas_list);
+    dlinkDelete(&whowas->cnode, &client->whowas_list);
   }
 }
 

@@ -35,15 +35,15 @@
 
 
 int
-extban_join_can_join(struct Channel *channel, struct Client *client_p,
+extban_join_can_join(struct Channel *channel, struct Client *client,
                      struct ChannelMember *member)
 {
   assert(member == NULL);
 
   /* Search for matching joinban */
-  if (find_bmask(client_p, channel, &channel->banlist, &extban_join) == true)
+  if (find_bmask(client, channel, &channel->banlist, &extban_join) == true)
     /* Clients who match +e j: override +b j: */
-    if (find_bmask(client_p, channel, &channel->exceptlist, &extban_join) == false)
+    if (find_bmask(client, channel, &channel->exceptlist, &extban_join) == false)
       return ERR_BANNEDFROMCHAN;
 
   return 0;

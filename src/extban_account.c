@@ -35,12 +35,12 @@
 
 
 static enum extban_match
-extban_account_matches(struct Client *client_p, struct Channel *channel, struct Ban *ban)
+extban_account_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
-  assert(client_p->account[0]);
+  assert(client->account[0]);
 
-  if (strcmp(client_p->account, "*"))
-    if (match(ban->host, client_p->account) == 0)
+  if (strcmp(client->account, "*"))
+    if (match(ban->host, client->account) == 0)
       return EXTBAN_MATCH;
 
   return EXTBAN_NO_MATCH;

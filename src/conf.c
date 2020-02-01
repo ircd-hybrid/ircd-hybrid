@@ -244,14 +244,14 @@ conf_free(struct MaskItem *conf)
  * side effects - do actual attach
  */
 static int
-attach_iline(struct Client *client_p, struct MaskItem *conf)
+attach_iline(struct Client *client, struct MaskItem *conf)
 {
   const struct ClassItem *const class = conf->class;
   bool a_limit_reached = false;
 
-  struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->ip);
+  struct ip_entry *ipcache = ipcache_record_find_or_add(&client->ip);
   ++ipcache->count_local;
-  AddFlag(client_p, FLAGS_IPHASH);
+  AddFlag(client, FLAGS_IPHASH);
 
   if (class->max_total && class->ref_count >= class->max_total)
     a_limit_reached = true;
@@ -266,11 +266,11 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
     if (!IsConfExemptLimits(conf))
       return TOO_MANY;   /* Already at maximum allowed */
 
-    sendto_one_notice(client_p, &me, ":*** Your connection class is full, "
+    sendto_one_notice(client, &me, ":*** Your connection class is full, "
                       "but you have exceed_limit = yes;");
   }
 
-  return conf_attach(client_p, conf);
+  return conf_attach(client, conf);
 }
 
 /* verify_access()
@@ -280,20 +280,20 @@ attach_iline(struct Client *client_p, struct MaskItem *conf)
  * side effect  - find the first (best) I line to attach.
  */
 static int
-verify_access(struct Client *client_p)
+verify_access(struct Client *client)
 {
   struct MaskItem *conf;
 
-  if (HasFlag(client_p, FLAGS_GOTID))
-    conf = find_address_conf(client_p->host, client_p->username, &client_p->ip,
-                             client_p->connection->password);
+  if (HasFlag(client, FLAGS_GOTID))
+    conf = find_address_conf(client->host, client->username, &client->ip,
+                             client->connection->password);
   else
   {
     char non_ident[USERLEN + 1] = "~";
 
-    strlcpy(non_ident + 1, client_p->username, sizeof(non_ident) - 1);
-    conf = find_address_conf(client_p->host, non_ident, &client_p->ip,
-                             client_p->connection->password);
+    strlcpy(non_ident + 1, client->username, sizeof(non_ident) - 1);
+    conf = find_address_conf(client->host, non_ident, &client->ip,
+                             client->connection->password);
   }
 
   if (conf == NULL)
@@ -303,13 +303,13 @@ verify_access(struct Client *client_p)
 
   if (IsConfKill(conf))
   {
-    sendto_one_notice(client_p, &me, ":*** Banned: %s", conf->reason);
+    sendto_one_notice(client, &me, ":*** Banned: %s", conf->reason);
     return BANNED_CLIENT;
   }
 
   if (IsConfRedir(conf))
   {
-    sendto_one_numeric(client_p, &me, RPL_REDIR,
+    sendto_one_numeric(client, &me, RPL_REDIR,
                        conf->name ? conf->name : "",
                        conf->port);
     return NOT_AUTHORIZED;
@@ -319,12 +319,12 @@ verify_access(struct Client *client_p)
   {
     if (IsConfSpoofNotice(conf))
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE, "%s spoofing: %s as %s",
-                           client_p->name, client_p->host, conf->name);
+                           client->name, client->host, conf->name);
 
-    strlcpy(client_p->host, conf->name, sizeof(client_p->host));
+    strlcpy(client->host, conf->name, sizeof(client->host));
   }
 
-  return attach_iline(client_p, conf);
+  return attach_iline(client, conf);
 }
 
 /* check_client()
@@ -341,36 +341,36 @@ verify_access(struct Client *client_p)
  * 		  status as the flags passed.
  */
 bool
-conf_check_client(struct Client *source_p)
+conf_check_client(struct Client *client)
 {
   int i;
 
-  if ((i = verify_access(source_p)))
+  if ((i = verify_access(client)))
     ilog(LOG_TYPE_IRCD, "Access denied: %s[%s]",
-         source_p->name, source_p->sockhost);
+         client->name, client->sockhost);
 
   switch (i)
   {
     case TOO_MANY:
       sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                            "Too many on IP for %s (%s).",
-                           client_get_name(source_p, SHOW_IP),
-                           source_p->sockhost);
+                           client_get_name(client, SHOW_IP),
+                           client->sockhost);
       ilog(LOG_TYPE_IRCD, "Too many connections on IP from %s.",
-           client_get_name(source_p, SHOW_IP));
+           client_get_name(client, SHOW_IP));
       ++ServerStats.is_ref;
-      exit_client(source_p, "No more connections allowed on that IP");
+      exit_client(client, "No more connections allowed on that IP");
       break;
 
     case I_LINE_FULL:
       sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
                            "auth {} block is full for %s (%s).",
-                           client_get_name(source_p, SHOW_IP),
-                           source_p->sockhost);
+                           client_get_name(client, SHOW_IP),
+                           client->sockhost);
       ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
-           client_get_name(source_p, SHOW_IP));
+           client_get_name(client, SHOW_IP));
       ++ServerStats.is_ref;
-      exit_client(source_p, "No more connections allowed in your connection class");
+      exit_client(client, "No more connections allowed in your connection class");
       break;
 
     case NOT_AUTHORIZED:
@@ -378,21 +378,21 @@ conf_check_client(struct Client *source_p)
       /*       a purely cosmetical change */
       sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
                            "Unauthorized client connection from %s on [%s/%u].",
-                           client_get_name(source_p, SHOW_IP),
-                           source_p->connection->listener->name,
-                           source_p->connection->listener->port);
+                           client_get_name(client, SHOW_IP),
+                           client->connection->listener->name,
+                           client->connection->listener->port);
       ilog(LOG_TYPE_IRCD, "Unauthorized client connection from %s on [%s/%u].",
-           client_get_name(source_p, SHOW_IP),
-           source_p->connection->listener->name,
-           source_p->connection->listener->port);
+           client_get_name(client, SHOW_IP),
+           client->connection->listener->name,
+           client->connection->listener->port);
 
       ++ServerStats.is_ref;
-      exit_client(source_p, "You are not authorized to use this server");
+      exit_client(client, "You are not authorized to use this server");
       break;
 
     case BANNED_CLIENT:
       ++ServerStats.is_ref;
-      exit_client(source_p, "Banned");
+      exit_client(client, "Banned");
       break;
 
     case 0:
@@ -407,15 +407,15 @@ conf_check_client(struct Client *source_p)
 
 /*! \brief Disassociate configuration from the client. Also removes a class
  *         from the list if marked for deleting.
- * \param client_p Client to operate on
+ * \param client Client to operate on
  * \param type     Type of conf to detach
  */
 void
-conf_detach(struct Client *client_p, enum maskitem_type type)
+conf_detach(struct Client *client, enum maskitem_type type)
 {
   dlink_node *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, client_p->connection->confs.head)
+  DLINK_FOREACH_SAFE(node, node_next, client->connection->confs.head)
   {
     struct MaskItem *conf = node->data;
 
@@ -426,11 +426,11 @@ conf_detach(struct Client *client_p, enum maskitem_type type)
     if (!(conf->type & type))
       continue;
 
-    dlinkDelete(node, &client_p->connection->confs);
+    dlinkDelete(node, &client->connection->confs);
     free_dlink_node(node);
 
     if (conf->type == CONF_CLIENT)
-      class_ip_limit_remove(conf->class, &client_p->ip);
+      class_ip_limit_remove(conf->class, &client->ip);
 
     if (--conf->class->ref_count == 0 && conf->class->active == false)
     {
@@ -446,23 +446,23 @@ conf_detach(struct Client *client_p, enum maskitem_type type)
 /*! \brief Associate a specific configuration entry to a *local* client (this
  *         is the one which used in accepting the connection). Note, that this
  *         automatically changes the attachment if there was an old one.
- * \param client_p Client to attach the conf to
+ * \param client Client to attach the conf to
  * \param conf Configuration record to attach
  */
 int
-conf_attach(struct Client *client_p, struct MaskItem *conf)
+conf_attach(struct Client *client, struct MaskItem *conf)
 {
-  if (dlinkFind(&client_p->connection->confs, conf))
+  if (dlinkFind(&client->connection->confs, conf))
     return 1;
 
   if (conf->type == CONF_CLIENT)
-    if (class_ip_limit_add(conf->class, &client_p->ip, IsConfExemptLimits(conf)) == true)
+    if (class_ip_limit_add(conf->class, &client->ip, IsConfExemptLimits(conf)) == true)
       return TOO_MANY;    /* Already at maximum allowed */
 
   conf->class->ref_count++;
   conf->ref_count++;
 
-  dlinkAdd(conf, make_dlink_node(), &client_p->connection->confs);
+  dlinkAdd(conf, make_dlink_node(), &client->connection->confs);
 
   return 0;
 }
@@ -790,16 +790,16 @@ cleanup_tklines(void *unused)
  * Side effects: None.
  */
 const char *
-get_oper_name(const struct Client *client_p)
+get_oper_name(const struct Client *client)
 {
   static char buffer[IRCD_BUFSIZE];
 
-  if (IsServer(client_p))
-    return client_p->name;
+  if (IsServer(client))
+    return client->name;
 
-  if (MyConnect(client_p))
+  if (MyConnect(client))
   {
-    const dlink_node *const node = client_p->connection->confs.head;
+    const dlink_node *const node = client->connection->confs.head;
 
     if (node)
     {
@@ -807,8 +807,8 @@ get_oper_name(const struct Client *client_p)
 
       if (conf->type == CONF_OPER)
       {
-        snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client_p->name,
-                 client_p->username, client_p->host, conf->name);
+        snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client->name,
+                 client->username, client->host, conf->name);
         return buffer;
       }
     }
@@ -820,8 +820,8 @@ get_oper_name(const struct Client *client_p)
     assert(0);  /* Oper without oper conf! */
   }
 
-  snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client_p->name,
-           client_p->username, client_p->host, client_p->servptr->name);
+  snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client->name,
+           client->username, client->host, client->servptr->name);
   return buffer;
 }
 
@@ -1154,7 +1154,7 @@ valid_wild_card_simple(const char *data)
  *		- int flag, 0 for no warning oper 1 for warning oper
  *		- count of following varargs to check
  * output       - 0 if not valid, 1 if valid
- * side effects - NOTICE is given to source_p if warn is 1
+ * side effects - NOTICE is given to client if warn is 1
  */
 bool
 valid_wild_card(int count, ...)
@@ -1235,7 +1235,7 @@ valid_wild_card(int count, ...)
  * - Dianora
  */
 bool
-parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, struct aline_ctx *aline)
+parse_aline(const char *cmd, struct Client *client, int parc, char **parv, struct aline_ctx *aline)
 {
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN * 2 + 1];
@@ -1252,7 +1252,7 @@ parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, str
 
   if (parc == 0)
   {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
+    sendto_one_numeric(client, &me, ERR_NEEDMOREPARAMS, cmd);
     return false;
   }
 
@@ -1292,15 +1292,15 @@ parse_aline(const char *cmd, struct Client *source_p, int parc, char **parv, str
       ++parv;
       --parc;
 
-      if (!HasOFlag(source_p, OPER_FLAG_REMOTEBAN))
+      if (!HasOFlag(client, OPER_FLAG_REMOTEBAN))
       {
-        sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "remoteban");
+        sendto_one_numeric(client, &me, ERR_NOPRIVS, "remoteban");
         return false;
       }
 
       if (parc == 0 || EmptyString(*parv))
       {
-        sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, cmd);
+        sendto_one_numeric(client, &me, ERR_NEEDMOREPARAMS, cmd);
         return false;
       }
 

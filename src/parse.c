@@ -104,7 +104,7 @@ static struct MessageTree
  * side effects -
  */
 static void
-parse_remove_unknown(struct Client *client_p, const char *lsender, char *lbuffer)
+parse_remove_unknown(struct Client *client, const char *lsender, char *lbuffer)
 {
   /*
    * Do kill if it came from a server because it means there is a ghost
@@ -120,15 +120,15 @@ parse_remove_unknown(struct Client *client_p, const char *lsender, char *lbuffer
   {
     sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",
-                         lbuffer, client_get_name(client_p, SHOW_IP), lsender);
+                         lbuffer, client_get_name(client, SHOW_IP), lsender);
     sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
                          "Unknown prefix (%s) from %s, Squitting %s",
-                         lbuffer, client_get_name(client_p, MASK_IP), lsender);
-    sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
-               me.id, lsender, lbuffer, client_p->name);
+                         lbuffer, client_get_name(client, MASK_IP), lsender);
+    sendto_one(client, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
+               me.id, lsender, lbuffer, client->name);
   }
   else
-    sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)",
+    sendto_one(client, ":%s KILL %s :%s (Unknown Client)",
                me.id, lsender, me.name);
 }
 
@@ -154,15 +154,15 @@ parse_remove_unknown(struct Client *client_p, const char *lsender, char *lbuffer
  * the savvy approach is NEVER generate an error in response to an... error :)
  */
 static void
-parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, char *parv[])
+parse_handle_numeric(unsigned int numeric, struct Client *source, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
+  struct Client *target = NULL;
   struct Channel *channel = NULL;
 
   /*
    * Avoid trash, we need it to come from a server and have a target
    */
-  if (parc < 2 || !IsServer(source_p))
+  if (parc < 2 || !IsServer(source))
     return;
 
   /*
@@ -175,9 +175,9 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
   if (IsChanPrefix(*parv[1]))
     channel = hash_find_channel(parv[1]);
   else
-    target_p = find_person(source_p, parv[1]);
+    target = find_person(source, parv[1]);
 
-  if ((target_p == NULL || target_p->from == source_p->from) && channel == NULL)
+  if ((target == NULL || target->from == source->from) && channel == NULL)
     return;
 
   /*
@@ -192,17 +192,17 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
   if (numeric < 100)
     numeric += 100;
 
-  if (target_p)
+  if (target)
   {
     /* Fake it for server hiding, if it's our client */
-    if ((ConfigServerHide.hide_servers || IsHidden(source_p)) && MyConnect(target_p) &&
-        !HasUMode(target_p, UMODE_OPER))
-      sendto_one_numeric(target_p, &me, numeric | SND_EXPLICIT, "%s", parv[2]);
+    if ((ConfigServerHide.hide_servers || IsHidden(source)) && MyConnect(target) &&
+        !HasUMode(target, UMODE_OPER))
+      sendto_one_numeric(target, &me, numeric | SND_EXPLICIT, "%s", parv[2]);
     else
-      sendto_one_numeric(target_p, source_p, numeric | SND_EXPLICIT, "%s", parv[2]);
+      sendto_one_numeric(target, source, numeric | SND_EXPLICIT, "%s", parv[2]);
   }
   else
-    sendto_channel_butone(source_p, source_p, channel, 0, "%u %s %s",
+    sendto_channel_butone(source, source, channel, 0, "%u %s %s",
                           numeric, channel->name, parv[2]);
 }
 
@@ -217,21 +217,21 @@ parse_handle_numeric(unsigned int numeric, struct Client *source_p, int parc, ch
  * side effects -
  */
 static void
-parse_handle_command(struct Message *message, struct Client *source_p,
+parse_handle_command(struct Message *message, struct Client *source,
                      unsigned int i, char *para[])
 {
-  if (IsServer(source_p->from))
+  if (IsServer(source->from))
     ++message->rcount;
   ++message->count;
 
-  if (MyClient(source_p) && (message->flags & MFLG_ENDGRACE))
-    flood_endgrace(source_p);
+  if (MyClient(source) && (message->flags & MFLG_ENDGRACE))
+    flood_endgrace(source);
 
   /* Check right amount of parameters is passed... --is */
   if (i < message->args_min)
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, message->cmd);
+    sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, message->cmd);
   else
-    message->handlers[source_p->from->handler](source_p, i, para);
+    message->handlers[source->from->handler](source, i, para);
 }
 
 /*
@@ -240,9 +240,9 @@ parse_handle_command(struct Message *message, struct Client *source_p,
  * NOTE: parse() should not be called recusively by any other functions!
  */
 void
-parse(struct Client *client_p, char *pbuffer, char *bufend)
+parse(struct Client *client, char *pbuffer, char *bufend)
 {
-  struct Client *from = client_p;
+  struct Client *from = client;
   struct Message *message = NULL;
   char *para[MAXPARA + 2];  /* <command> + <parameters> + NULL */
   char *ch = NULL;
@@ -251,12 +251,12 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
   unsigned int parc = 0;
   unsigned int paramcount;
 
-  if (IsDead(client_p))
+  if (IsDead(client))
     return;
 
-  assert(client_p->connection);
-  assert(client_p->connection->fd);
-  assert(client_p->connection->fd->flags.open);
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd->flags.open);
 
 
   assert((bufend - pbuffer) < IRCD_BUFSIZE);
@@ -278,7 +278,7 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       ch = ++s;
     }
 
-    if (*sender && IsServer(client_p))
+    if (*sender && IsServer(client))
     {
       if ((from = hash_find_id(sender)) == NULL)
         from = hash_find_client(sender);
@@ -291,21 +291,21 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
       if (from == NULL)
       {
         ++ServerStats.is_unpf;
-        parse_remove_unknown(client_p, sender, pbuffer);
+        parse_remove_unknown(client, sender, pbuffer);
         return;
       }
 
-      if (from->from != client_p)
+      if (from->from != client)
       {
         ++ServerStats.is_wrdi;
         sendto_realops_flags(UMODE_DEBUG, L_ADMIN, SEND_NOTICE,
                              "Fake direction: dropped message from %s[%s] via %s",
                              from->name, from->from->name,
-                             client_get_name(client_p, SHOW_IP));
+                             client_get_name(client, SHOW_IP));
         sendto_realops_flags(UMODE_DEBUG, L_OPER, SEND_NOTICE,
                              "Fake direction: dropped message from %s[%s] via %s",
                              from->name, from->from->name,
-                             client_get_name(client_p, MASK_IP));
+                             client_get_name(client, MASK_IP));
         return;
       }
     }
@@ -599,17 +599,17 @@ find_command(const char *cmd)
 }
 
 static void
-recurse_report_messages(struct Client *source_p, const struct MessageTree *mtree)
+recurse_report_messages(struct Client *source, const struct MessageTree *mtree)
 {
   if (mtree->msg)
-    sendto_one_numeric(source_p, &me, RPL_STATSCOMMANDS,
+    sendto_one_numeric(source, &me, RPL_STATSCOMMANDS,
                        mtree->msg->cmd,
                        mtree->msg->count, mtree->msg->bytes,
                        mtree->msg->rcount);
 
   for (unsigned int i = 0; i < MAXPTRLEN; ++i)
     if (mtree->pointers[i])
-      recurse_report_messages(source_p, mtree->pointers[i]);
+      recurse_report_messages(source, mtree->pointers[i]);
 }
 
 /* report_messages()
@@ -619,13 +619,13 @@ recurse_report_messages(struct Client *source_p, const struct MessageTree *mtree
  * side effects	- client is shown list of commands
  */
 void
-report_messages(struct Client *source_p)
+report_messages(struct Client *source)
 {
   const struct MessageTree *const mtree = &msg_tree;
 
   for (unsigned int i = 0; i < MAXPTRLEN; ++i)
     if (mtree->pointers[i])
-      recurse_report_messages(source_p, mtree->pointers[i]);
+      recurse_report_messages(source, mtree->pointers[i]);
 }
 
 /* m_not_oper()
@@ -634,25 +634,25 @@ report_messages(struct Client *source_p)
  * side effects	- just returns a nastyogram to given user
  */
 void
-m_not_oper(struct Client *source_p, int parc, char *parv[])
+m_not_oper(struct Client *source, int parc, char *parv[])
 {
-  sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+  sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
 }
 
 void
-m_unregistered(struct Client *source_p, int parc, char *parv[])
+m_unregistered(struct Client *source, int parc, char *parv[])
 {
-  sendto_one_numeric(source_p, &me, ERR_NOTREGISTERED);
+  sendto_one_numeric(source, &me, ERR_NOTREGISTERED);
 }
 
 void
-m_registered(struct Client *source_p, int parc, char *parv[])
+m_registered(struct Client *source, int parc, char *parv[])
 {
-  sendto_one_numeric(source_p, &me, ERR_ALREADYREGISTRED);
+  sendto_one_numeric(source, &me, ERR_ALREADYREGISTRED);
 }
 
 void
-m_ignore(struct Client *source_p, int parc, char *parv[])
+m_ignore(struct Client *source, int parc, char *parv[])
 {
   return;
 }

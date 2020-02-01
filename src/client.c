@@ -83,31 +83,31 @@ static dlink_node *eac_next;  /* next aborted client to exit */
 struct Client *
 client_make(struct Client *from)
 {
-  struct Client *client_p = xcalloc(sizeof(*client_p));
+  struct Client *client = xcalloc(sizeof(*client));
 
   if (from)
-    client_p->from = from;
+    client->from = from;
   else
   {
-    client_p->from = client_p;  /* 'from' of local client is self! */
-    client_p->connection = xcalloc(sizeof(*client_p->connection));
-    client_p->connection->last_data = event_base->time.sec_monotonic;
-    client_p->connection->last_ping = event_base->time.sec_monotonic;
-    client_p->connection->created_real = event_base->time.sec_real;
-    client_p->connection->created_monotonic = event_base->time.sec_monotonic;
-    client_p->connection->registration = REG_INIT;
+    client->from = client;  /* 'from' of local client is self! */
+    client->connection = xcalloc(sizeof(*client->connection));
+    client->connection->last_data = event_base->time.sec_monotonic;
+    client->connection->last_ping = event_base->time.sec_monotonic;
+    client->connection->created_real = event_base->time.sec_real;
+    client->connection->created_monotonic = event_base->time.sec_monotonic;
+    client->connection->registration = REG_INIT;
 
     /* as good a place as any... */
-    dlinkAdd(client_p, &client_p->connection->lclient_node, &unknown_list);
+    dlinkAdd(client, &client->connection->lclient_node, &unknown_list);
   }
 
-  client_p->idhnext = client_p;
-  client_p->hnext = client_p;
-  SetUnknown(client_p);
-  strcpy(client_p->username, "unknown");
-  strcpy(client_p->account, "*");
+  client->idhnext = client;
+  client->hnext = client;
+  SetUnknown(client);
+  strcpy(client->username, "unknown");
+  strcpy(client->account, "*");
 
-  return client_p;
+  return client;
 }
 
 /*
@@ -118,81 +118,81 @@ client_make(struct Client *from)
  * side effects	- client pointed to has its memory freed
  */
 static void
-client_free(struct Client *client_p)
+client_free(struct Client *client)
 {
-  assert(!IsMe(client_p));
-  assert(client_p != &me);
-  assert(client_p->hnext == client_p);
-  assert(client_p->idhnext == client_p);
+  assert(!IsMe(client));
+  assert(client != &me);
+  assert(client->hnext == client);
+  assert(client->idhnext == client);
 
-  assert(client_p->node.prev == NULL);
-  assert(client_p->node.next == NULL);
+  assert(client->node.prev == NULL);
+  assert(client->node.next == NULL);
 
-  assert(client_p->lnode.prev == NULL);
-  assert(client_p->lnode.next == NULL);
+  assert(client->lnode.prev == NULL);
+  assert(client->lnode.next == NULL);
 
-  assert(dlink_list_length(&client_p->whowas_list) == 0);
-  assert(client_p->whowas_list.head == NULL);
-  assert(client_p->whowas_list.tail == NULL);
+  assert(dlink_list_length(&client->whowas_list) == 0);
+  assert(client->whowas_list.head == NULL);
+  assert(client->whowas_list.tail == NULL);
 
-  assert(dlink_list_length(&client_p->channel) == 0);
-  assert(client_p->channel.head == NULL);
-  assert(client_p->channel.tail == NULL);
+  assert(dlink_list_length(&client->channel) == 0);
+  assert(client->channel.head == NULL);
+  assert(client->channel.tail == NULL);
 
-  assert(dlink_list_length(&client_p->svstags) == 0);
-  assert(client_p->svstags.head == NULL);
-  assert(client_p->svstags.tail == NULL);
+  assert(dlink_list_length(&client->svstags) == 0);
+  assert(client->svstags.head == NULL);
+  assert(client->svstags.tail == NULL);
 
 
-  xfree(client_p->serv);
-  xfree(client_p->certfp);
+  xfree(client->serv);
+  xfree(client->certfp);
 
-  if (MyConnect(client_p))
+  if (MyConnect(client))
   {
-    assert(client_p->connection->lclient_node.prev == NULL);
-    assert(client_p->connection->lclient_node.next == NULL);
+    assert(client->connection->lclient_node.prev == NULL);
+    assert(client->connection->lclient_node.next == NULL);
 
-    assert(client_p->connection->list_task == NULL);
-    assert(client_p->connection->auth == NULL);
+    assert(client->connection->list_task == NULL);
+    assert(client->connection->auth == NULL);
 
-    assert(dlink_list_length(&client_p->connection->acceptlist) == 0);
-    assert(client_p->connection->acceptlist.head == NULL);
-    assert(client_p->connection->acceptlist.tail == NULL);
+    assert(dlink_list_length(&client->connection->acceptlist) == 0);
+    assert(client->connection->acceptlist.head == NULL);
+    assert(client->connection->acceptlist.tail == NULL);
 
 
-    assert(dlink_list_length(&client_p->connection->watches) == 0);
-    assert(client_p->connection->watches.head == NULL);
-    assert(client_p->connection->watches.tail == NULL);
+    assert(dlink_list_length(&client->connection->watches) == 0);
+    assert(client->connection->watches.head == NULL);
+    assert(client->connection->watches.tail == NULL);
 
-    assert(dlink_list_length(&client_p->connection->confs) == 0);
-    assert(client_p->connection->confs.head == NULL);
-    assert(client_p->connection->confs.tail == NULL);
+    assert(dlink_list_length(&client->connection->confs) == 0);
+    assert(client->connection->confs.head == NULL);
+    assert(client->connection->confs.tail == NULL);
 
-    assert(dlink_list_length(&client_p->connection->invited) == 0);
-    assert(client_p->connection->invited.head == NULL);
-    assert(client_p->connection->invited.tail == NULL);
+    assert(dlink_list_length(&client->connection->invited) == 0);
+    assert(client->connection->invited.head == NULL);
+    assert(client->connection->invited.tail == NULL);
 
-    assert(client_p->connection->fd == NULL);
+    assert(client->connection->fd == NULL);
 
-    assert(HasFlag(client_p, FLAGS_CLOSING) && IsDead(client_p));
+    assert(HasFlag(client, FLAGS_CLOSING) && IsDead(client));
 
     /*
      * Clean up extra sockets from listen {} blocks which have been discarded.
      */
-    if (client_p->connection->listener)
+    if (client->connection->listener)
     {
-      listener_release(client_p->connection->listener);
-      client_p->connection->listener = NULL;
+      listener_release(client->connection->listener);
+      client->connection->listener = NULL;
     }
 
-    dbuf_clear(&client_p->connection->buf_recvq);
-    dbuf_clear(&client_p->connection->buf_sendq);
+    dbuf_clear(&client->connection->buf_recvq);
+    dbuf_clear(&client->connection->buf_sendq);
 
-    xfree(client_p->connection);
-    client_p->connection = NULL;
+    xfree(client->connection);
+    client->connection = NULL;
   }
 
-  xfree(client_p);
+  xfree(client);
 }
 
 /* check_pings_list()
@@ -209,49 +209,49 @@ check_pings_list(dlink_list *list)
 
   DLINK_FOREACH_SAFE(node, node_next, list->head)
   {
-    struct Client *client_p = node->data;
-    assert(IsClient(client_p) || IsServer(client_p));
+    struct Client *client = node->data;
+    assert(IsClient(client) || IsServer(client));
 
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;  /* Ignore it, it's been exited already */
 
-    unsigned int ping = get_client_ping(&client_p->connection->confs);
-    if (ping < event_base->time.sec_monotonic - client_p->connection->last_ping)
+    unsigned int ping = get_client_ping(&client->connection->confs);
+    if (ping < event_base->time.sec_monotonic - client->connection->last_ping)
     {
-      if (!HasFlag(client_p, FLAGS_PINGSENT))
+      if (!HasFlag(client, FLAGS_PINGSENT))
       {
         /*
          * If we haven't PINGed the connection and we haven't
          * heard from it in a while, PING it to make sure
          * it is still alive.
          */
-        AddFlag(client_p, FLAGS_PINGSENT);
-        client_p->connection->last_ping = event_base->time.sec_monotonic - ping;
-        sendto_one(client_p, "PING :%s", ID_or_name(&me, client_p));
+        AddFlag(client, FLAGS_PINGSENT);
+        client->connection->last_ping = event_base->time.sec_monotonic - ping;
+        sendto_one(client, "PING :%s", ID_or_name(&me, client));
       }
       else
       {
-        if (event_base->time.sec_monotonic - client_p->connection->last_ping >= 2 * ping)
+        if (event_base->time.sec_monotonic - client->connection->last_ping >= 2 * ping)
         {
           /*
            * If the client/server hasn't talked to us in 2*ping seconds
            * and it has a ping time, then close its connection.
            */
-          if (IsServer(client_p))
+          if (IsServer(client))
           {
             sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                                  "No response from %s, closing link",
-                                 client_get_name(client_p, SHOW_IP));
+                                 client_get_name(client, SHOW_IP));
             sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                                  "No response from %s, closing link",
-                                 client_get_name(client_p, MASK_IP));
+                                 client_get_name(client, MASK_IP));
             ilog(LOG_TYPE_IRCD, "No response from %s, closing link",
-                 client_get_name(client_p, SHOW_IP));
+                 client_get_name(client, SHOW_IP));
           }
 
           snprintf(buf, sizeof(buf), "Ping timeout: %ju seconds",
-                   (event_base->time.sec_monotonic - client_p->connection->last_ping));
-          exit_client(client_p, buf);
+                   (event_base->time.sec_monotonic - client->connection->last_ping));
+          exit_client(client, buf);
         }
       }
     }
@@ -271,33 +271,33 @@ check_unknowns_list(void)
 
   DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
-    struct Client *client_p = node->data;
+    struct Client *client = node->data;
     bool exit = false;
 
     /*
      * Check UNKNOWN connections - if they have been in this state
      * for > 30s, close them.
      */
-    if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) <= 30)
+    if ((event_base->time.sec_monotonic - client->connection->created_monotonic) <= 30)
       continue;
 
-    if (IsHandshake(client_p))
+    if (IsHandshake(client))
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "No response from %s during handshake, closing link",
-                           client_get_name(client_p, SHOW_IP));
+                           client_get_name(client, SHOW_IP));
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                            "No response from %s during handshake, closing link",
-                           client_get_name(client_p, MASK_IP));
+                           client_get_name(client, MASK_IP));
       ilog(LOG_TYPE_IRCD, "No response from %s during handshake, closing link",
-           client_get_name(client_p, SHOW_IP));
+           client_get_name(client, SHOW_IP));
       exit = true;
     }
-    else if (HasFlag(client_p, FLAGS_FINISHED_AUTH))
+    else if (HasFlag(client, FLAGS_FINISHED_AUTH))
       exit = true;
 
     if (exit == true)
-      exit_client(client_p, "Registration timed out");
+      exit_client(client, "Registration timed out");
   }
 }
 
@@ -349,31 +349,31 @@ check_conf_klines(void)
 
   DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client_p = node->data;
+    struct Client *client = node->data;
 
     /* If a client is already being exited */
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
-    if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE, NULL, NULL, 1)))
+    if ((ptr = find_conf_by_address(NULL, &client->ip, CONF_DLINE, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
-      conf_try_ban(client_p, CLIENT_BAN_DLINE, conf->reason);
+      conf_try_ban(client, CLIENT_BAN_DLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
 
-    if ((ptr = find_conf_by_address(client_p->host, &client_p->ip, CONF_KLINE,
-                                    client_p->username, NULL, 1)))
+    if ((ptr = find_conf_by_address(client->host, &client->ip, CONF_KLINE,
+                                    client->username, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
-      conf_try_ban(client_p, CLIENT_BAN_KLINE, conf->reason);
+      conf_try_ban(client, CLIENT_BAN_KLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
 
-    if ((ptr = gecos_find(client_p->info, match)))
+    if ((ptr = gecos_find(client->info, match)))
     {
       const struct GecosItem *conf = ptr;
-      conf_try_ban(client_p, CLIENT_BAN_XLINE, conf->reason);
+      conf_try_ban(client, CLIENT_BAN_XLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
   }
@@ -381,16 +381,16 @@ check_conf_klines(void)
   /* Also check the unknowns list for new dlines */
   DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
-    struct Client *client_p = node->data;
+    struct Client *client = node->data;
 
     /* If a client is already being exited */
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
-    if ((ptr = find_conf_by_address(NULL, &client_p->ip, CONF_DLINE, NULL, NULL, 1)))
+    if ((ptr = find_conf_by_address(NULL, &client->ip, CONF_DLINE, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
-      conf_try_ban(client_p, CLIENT_BAN_DLINE, conf->reason);
+      conf_try_ban(client, CLIENT_BAN_DLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
   }
@@ -402,37 +402,37 @@ check_conf_klines(void)
  * inputs	- pointer to client to ban
  * 		- pointer to MaskItem
  * output	- NONE
- * side effects	- given client_p is banned
+ * side effects	- given client is banned
  */
 void
-conf_try_ban(struct Client *client_p, int type, const char *reason)
+conf_try_ban(struct Client *client, int type, const char *reason)
 {
   char ban_type = '?';
 
   switch (type)
   {
     case CLIENT_BAN_KLINE:
-      if (HasFlag(client_p, FLAGS_EXEMPTKLINE))
+      if (HasFlag(client, FLAGS_EXEMPTKLINE))
       {
         sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                              "KLINE over-ruled for %s, client is kline_exempt",
-                             client_get_name(client_p, HIDE_IP));
+                             client_get_name(client, HIDE_IP));
         return;
       }
 
       ban_type = 'K';
       break;
     case CLIENT_BAN_DLINE:
-      if (find_conf_by_address(NULL, &client_p->ip, CONF_EXEMPT, NULL, NULL, 1))
+      if (find_conf_by_address(NULL, &client->ip, CONF_EXEMPT, NULL, NULL, 1))
         return;
       ban_type = 'D';
       break;
     case CLIENT_BAN_XLINE:
-      if (HasFlag(client_p, FLAGS_EXEMPTXLINE))
+      if (HasFlag(client, FLAGS_EXEMPTXLINE))
       {
         sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                              "XLINE over-ruled for %s, client is xline_exempt",
-                             client_get_name(client_p, HIDE_IP));
+                             client_get_name(client, HIDE_IP));
         return;
       }
 
@@ -444,12 +444,12 @@ conf_try_ban(struct Client *client_p, int type, const char *reason)
   }
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%c-line active for %s",
-                       ban_type, client_get_name(client_p, HIDE_IP));
+                       ban_type, client_get_name(client, HIDE_IP));
 
-  if (IsClient(client_p))
-    sendto_one_numeric(client_p, &me, ERR_YOUREBANNEDCREEP, reason);
+  if (IsClient(client))
+    sendto_one_numeric(client, &me, ERR_YOUREBANNEDCREEP, reason);
 
-  exit_client(client_p, reason);
+  exit_client(client, reason);
 }
 
 /* find_person()
@@ -509,17 +509,17 @@ find_chasing(struct Client *source_p, const char *name)
  *        But, this can be used to any client structure.
  */
 const char *
-client_get_name(const struct Client *client_p, enum addr_mask_type type)
+client_get_name(const struct Client *client, enum addr_mask_type type)
 {
   static char buf[HOSTLEN * 2 + USERLEN + 4];  /* +4 for [,@,],\0 */
 
-  if (!MyConnect(client_p))
-    return client_p->name;
+  if (!MyConnect(client))
+    return client->name;
 
-  if (IsServer(client_p) || IsConnecting(client_p) || IsHandshake(client_p))
+  if (IsServer(client) || IsConnecting(client) || IsHandshake(client))
   {
-    if (irccmp(client_p->name, client_p->host) == 0)
-      return client_p->name;
+    if (irccmp(client->name, client->host) == 0)
+      return client->name;
     else if (ConfigServerHide.hide_server_ips)
       type = MASK_IP;
   }
@@ -529,21 +529,21 @@ client_get_name(const struct Client *client_p, enum addr_mask_type type)
   {
     case SHOW_IP:
       snprintf(buf, sizeof(buf), "%s[%s@%s]",
-               client_p->name,
-               client_p->username, client_p->sockhost);
+               client->name,
+               client->username, client->sockhost);
       break;
     case MASK_IP:
-      if (client_p->ip.ss.ss_family == AF_INET)
+      if (client->ip.ss.ss_family == AF_INET)
         snprintf(buf, sizeof(buf), "%s[%s@255.255.255.255]",
-                 client_p->name, client_p->username);
+                 client->name, client->username);
       else
         snprintf(buf, sizeof(buf), "%s[%s@ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]",
-                 client_p->name, client_p->username);
+                 client->name, client->username);
       break;
     default:  /* HIDE_IP */
       snprintf(buf, sizeof(buf), "%s[%s@%s]",
-               client_p->name,
-               client_p->username, client_p->host);
+               client->name,
+               client->username, client->host);
   }
 
   return buf;
@@ -565,14 +565,14 @@ free_exited_clients(void)
 /*
  * client_close_connection
  *        Close the physical connection. This function must make
- *        MyConnect(client_p) == FALSE, and set client_p->from == NULL.
+ *        MyConnect(client) == FALSE, and set client->from == NULL.
  */
 static void
-client_close_connection(struct Client *client_p)
+client_close_connection(struct Client *client)
 {
-  assert(client_p);
+  assert(client);
 
-  if (!IsDead(client_p))
+  if (!IsDead(client))
   {
     /* Attempt to flush any pending dbufs. Evil, but .. -- adrian */
     /*
@@ -580,25 +580,25 @@ client_close_connection(struct Client *client_p)
      * even if it is marked as blocked (COMM_SELECT_READ handler is called
      * before COMM_SELECT_WRITE). Let's try, nothing to lose.. -adx
      */
-    DelFlag(client_p, FLAGS_BLOCKED);
-    send_queued_write(client_p);
+    DelFlag(client, FLAGS_BLOCKED);
+    send_queued_write(client);
   }
 
-  if (IsClient(client_p))
+  if (IsClient(client))
   {
     ++ServerStats.is_cl;
-    ServerStats.is_cbs += client_p->connection->send.bytes;
-    ServerStats.is_cbr += client_p->connection->recv.bytes;
-    ServerStats.is_cti += event_base->time.sec_monotonic - client_p->connection->created_monotonic;
+    ServerStats.is_cbs += client->connection->send.bytes;
+    ServerStats.is_cbr += client->connection->recv.bytes;
+    ServerStats.is_cti += event_base->time.sec_monotonic - client->connection->created_monotonic;
   }
-  else if (IsServer(client_p))
+  else if (IsServer(client))
   {
     dlink_node *node;
 
     ++ServerStats.is_sv;
-    ServerStats.is_sbs += client_p->connection->send.bytes;
-    ServerStats.is_sbr += client_p->connection->recv.bytes;
-    ServerStats.is_sti += event_base->time.sec_monotonic - client_p->connection->created_monotonic;
+    ServerStats.is_sbs += client->connection->send.bytes;
+    ServerStats.is_sbr += client->connection->recv.bytes;
+    ServerStats.is_sti += event_base->time.sec_monotonic - client->connection->created_monotonic;
 
     DLINK_FOREACH(node, connect_items.head)
     {
@@ -608,29 +608,29 @@ client_close_connection(struct Client *client_p)
        * Reset next-connect cycle of all connect{} blocks that match
        * this servername.
        */
-      if (irccmp(conf->name, client_p->name) == 0)
+      if (irccmp(conf->name, client->name) == 0)
         conf->until = event_base->time.sec_monotonic + conf->class->con_freq;
     }
   }
   else
     ++ServerStats.is_ni;
 
-  if (tls_isusing(&client_p->connection->fd->tls))
-    tls_shutdown(&client_p->connection->fd->tls);
+  if (tls_isusing(&client->connection->fd->tls))
+    tls_shutdown(&client->connection->fd->tls);
 
-  if (client_p->connection->fd)
+  if (client->connection->fd)
   {
-    fd_close(client_p->connection->fd);
-    client_p->connection->fd = NULL;
+    fd_close(client->connection->fd);
+    client->connection->fd = NULL;
   }
 
-  dbuf_clear(&client_p->connection->buf_sendq);
-  dbuf_clear(&client_p->connection->buf_recvq);
+  dbuf_clear(&client->connection->buf_sendq);
+  dbuf_clear(&client->connection->buf_recvq);
 
-  xfree(client_p->connection->password);
-  client_p->connection->password = NULL;
+  xfree(client->connection->password);
+  client->connection->password = NULL;
 
-  conf_detach(client_p, CONF_CLIENT | CONF_OPER | CONF_SERVER);
+  conf_detach(client, CONF_CLIENT | CONF_OPER | CONF_SERVER);
 }
 
 /*
@@ -882,25 +882,25 @@ exit_client(struct Client *source_p, const char *comment)
  *			mark it as dead then exit it
  */
 void
-dead_link_on_write(struct Client *client_p, int ierrno)
+dead_link_on_write(struct Client *client, int ierrno)
 {
   dlink_node *node;
 
-  if (IsDefunct(client_p))
+  if (IsDefunct(client))
     return;
 
-  dbuf_clear(&client_p->connection->buf_recvq);
-  dbuf_clear(&client_p->connection->buf_sendq);
+  dbuf_clear(&client->connection->buf_recvq);
+  dbuf_clear(&client->connection->buf_sendq);
 
-  assert(dlinkFind(&abort_list, client_p) == NULL);
+  assert(dlinkFind(&abort_list, client) == NULL);
   node = make_dlink_node();
   /* don't let exit_aborted_clients() finish yet */
-  dlinkAddTail(client_p, node, &abort_list);
+  dlinkAddTail(client, node, &abort_list);
 
   if (eac_next == NULL)
     eac_next = node;
 
-  SetDead(client_p); /* You are dead my friend */
+  SetDead(client); /* You are dead my friend */
 }
 
 /*
@@ -908,47 +908,47 @@ dead_link_on_write(struct Client *client_p, int ierrno)
  *			mark it as dead then exit it
  */
 void
-dead_link_on_read(struct Client *client_p, int error)
+dead_link_on_read(struct Client *client, int error)
 {
   char errmsg[IRCD_BUFSIZE];
   int current_error;
 
-  if (IsDefunct(client_p))
+  if (IsDefunct(client))
     return;
 
-  dbuf_clear(&client_p->connection->buf_recvq);
-  dbuf_clear(&client_p->connection->buf_sendq);
+  dbuf_clear(&client->connection->buf_recvq);
+  dbuf_clear(&client->connection->buf_sendq);
 
-  current_error = comm_get_sockerr(client_p->connection->fd);
+  current_error = comm_get_sockerr(client->connection->fd);
 
-  if (IsServer(client_p) || IsHandshake(client_p))
+  if (IsServer(client) || IsHandshake(client))
   {
     if (error == 0)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "Server %s closed the connection",
-                           client_get_name(client_p, SHOW_IP));
+                           client_get_name(client, SHOW_IP));
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                            "Server %s closed the connection",
-                           client_get_name(client_p, MASK_IP));
+                           client_get_name(client, MASK_IP));
       ilog(LOG_TYPE_IRCD, "Server %s closed the connection",
-           client_get_name(client_p, SHOW_IP));
+           client_get_name(client, SHOW_IP));
     }
     else
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "Lost connection to %s: %s",
-                           client_get_name(client_p, SHOW_IP), strerror(current_error));
+                           client_get_name(client, SHOW_IP), strerror(current_error));
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                            "Lost connection to %s: %s",
-                           client_get_name(client_p, MASK_IP), strerror(current_error));
+                           client_get_name(client, MASK_IP), strerror(current_error));
       ilog(LOG_TYPE_IRCD, "Lost connection to %s: %s",
-           client_get_name(client_p, SHOW_IP), strerror(current_error));
+           client_get_name(client, SHOW_IP), strerror(current_error));
     }
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s was connected for %s",
-                         client_p->name, time_dissect(event_base->time.sec_monotonic - client_p->connection->created_monotonic));
+                         client->name, time_dissect(event_base->time.sec_monotonic - client->connection->created_monotonic));
   }
 
   if (error == 0)
@@ -958,37 +958,36 @@ dead_link_on_read(struct Client *client_p, int error)
     snprintf(errmsg, sizeof(errmsg), "Read error: %s",
              strerror(current_error));
 
-  exit_client(client_p, errmsg);
+  exit_client(client, errmsg);
 }
 
 void
 exit_aborted_clients(void)
 {
   dlink_node *ptr;
-  struct Client *target_p;
   const char *notice;
 
   DLINK_FOREACH_SAFE(ptr, eac_next, abort_list.head)
   {
-    target_p = ptr->data;
+    struct Client *client = ptr->data;
     eac_next = ptr->next;
 
     dlinkDelete(ptr, &abort_list);
     free_dlink_node(ptr);
 
-    if (target_p == NULL)
+    if (client == NULL)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Warning: null client on abort_list!");
       continue;
     }
 
-    if (HasFlag(target_p, FLAGS_SENDQEX))
+    if (HasFlag(client, FLAGS_SENDQEX))
       notice = "Max SendQ exceeded";
     else
       notice = "Write error: connection closed";
 
-    exit_client(target_p, notice);
+    exit_client(client, notice);
   }
 }
 
@@ -1003,9 +1002,9 @@ exit_aborted_clients(void)
  */
 
 void
-del_accept(struct split_nuh_item *accept_p, struct Client *client_p)
+del_accept(struct split_nuh_item *accept_p, struct Client *client)
 {
-  dlinkDelete(&accept_p->node, &client_p->connection->acceptlist);
+  dlinkDelete(&accept_p->node, &client->connection->acceptlist);
 
   xfree(accept_p->nickptr);
   xfree(accept_p->userptr);
@@ -1015,12 +1014,12 @@ del_accept(struct split_nuh_item *accept_p, struct Client *client_p)
 
 struct split_nuh_item *
 find_accept(const char *nick, const char *user,
-            const char *host, struct Client *client_p,
+            const char *host, struct Client *client,
             int (*compare)(const char *, const char *))
 {
   dlink_node *node;
 
-  DLINK_FOREACH(node, client_p->connection->acceptlist.head)
+  DLINK_FOREACH(node, client->connection->acceptlist.head)
   {
     struct split_nuh_item *accept_p = node->data;
 
@@ -1069,12 +1068,12 @@ accept_message(struct Client *source,
  * side effects - Walk through given clients acceptlist and remove all entries
  */
 void
-del_all_accepts(struct Client *client_p)
+del_all_accepts(struct Client *client)
 {
   dlink_node *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, client_p->connection->acceptlist.head)
-    del_accept(node->data, client_p);
+  DLINK_FOREACH_SAFE(node, node_next, client->connection->acceptlist.head)
+    del_accept(node->data, client);
 }
 
 unsigned int

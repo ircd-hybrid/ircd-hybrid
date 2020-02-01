@@ -35,7 +35,7 @@
 
 
 static enum extban_match
-extban_usermode_matches(struct Client *client_p, struct Channel *channel, struct Ban *ban)
+extban_usermode_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
   int what = MODE_ADD;
   unsigned int modes_del = 0, modes_add = 0;
@@ -73,8 +73,8 @@ extban_usermode_matches(struct Client *client_p, struct Channel *channel, struct
     }
   }
 
-  if ((client_p->umodes & modes_add) == modes_add &&
-      (client_p->umodes & modes_del) == 0)
+  if ((client->umodes & modes_add) == modes_add &&
+      (client->umodes & modes_del) == 0)
     return EXTBAN_MATCH;
 
   return EXTBAN_NO_MATCH;

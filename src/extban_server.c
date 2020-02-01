@@ -34,7 +34,7 @@
 
 
 static enum extban_match
-extban_server_matches(struct Client *client_p, struct Channel *channel, struct Ban *ban)
+extban_server_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
   if (match(ban->host, me.name) == 0)
     return EXTBAN_MATCH;

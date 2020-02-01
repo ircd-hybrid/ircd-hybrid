@@ -147,15 +147,15 @@ send_message_remote(struct Client *to, const struct Client *from, struct dbuf_bl
 void
 sendq_unblocked(fde_t *F, void *data)
 {
-  struct Client *const client_p = data;
+  struct Client *const client = data;
 
-  assert(client_p);
-  assert(client_p->connection);
-  assert(client_p->connection->fd);
-  assert(client_p->connection->fd == F);
+  assert(client);
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd == F);
 
-  DelFlag(client_p, FLAGS_BLOCKED);
-  send_queued_write(client_p);
+  DelFlag(client, FLAGS_BLOCKED);
+  send_queued_write(client);
 }
 
 /*
@@ -339,28 +339,28 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
   DLINK_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
-    struct Client *target_p = member->client;
+    struct Client *target = member->client;
 
-    assert(IsClient(target_p));
+    assert(IsClient(target));
 
-    if (IsDead(target_p->from))
+    if (IsDead(target->from))
       continue;
 
-    if (one && (target_p->from == one->from))
+    if (one && (target->from == one->from))
       continue;
 
     if (type && (member->flags & type) == 0)
       continue;
 
-    if (HasUMode(target_p, UMODE_DEAF))
+    if (HasUMode(target, UMODE_DEAF))
       continue;
 
-    if (MyConnect(target_p))
-      send_message(target_p, local_buf);
-    else if (target_p->from->connection->serial != current_serial)
-      send_message_remote(target_p->from, from, remote_buf);
+    if (MyConnect(target))
+      send_message(target, local_buf);
+    else if (target->from->connection->serial != current_serial)
+      send_message_remote(target->from, from, remote_buf);
 
-    target_p->from->connection->serial = current_serial;
+    target->from->connection->serial = current_serial;
   }
 
   dbuf_ref_free(local_buf);
@@ -403,25 +403,25 @@ sendto_server(const struct Client *one,
 
   DLINK_FOREACH(node, local_server_list.head)
   {
-    struct Client *client_p = node->data;
+    struct Client *client = node->data;
 
     /* If dead already skip */
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
     /* check against 'one' */
-    if (one && (client_p == one->from))
+    if (one && (client == one->from))
       continue;
 
     /* check we have required capabs */
-    if ((client_p->connection->caps & caps) != caps)
+    if ((client->connection->caps & caps) != caps)
       continue;
 
     /* check we don't have any forbidden capabs */
-    if ((client_p->connection->caps & nocaps))
+    if ((client->connection->caps & nocaps))
       continue;
 
-    send_message(client_p, buffer);
+    send_message(client, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -445,7 +445,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
   dlink_node *cptr;
   struct Channel *channel;
   struct ChannelMember *member;
-  struct Client *target_p;
+  struct Client *target;
   struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, pattern);
@@ -461,25 +461,25 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
     DLINK_FOREACH(uptr, channel->members_local.head)
     {
       member = uptr->data;
-      target_p = member->client;
+      target = member->client;
 
-      if (IsDead(target_p))
+      if (IsDead(target))
         continue;
 
-      if (target_p == user)
+      if (target == user)
         continue;
 
-      if (target_p->connection->serial == current_serial)
+      if (target->connection->serial == current_serial)
         continue;
 
-      if (poscap && HasCap(target_p, poscap) != poscap)
+      if (poscap && HasCap(target, poscap) != poscap)
         continue;
 
-      if (negcap && HasCap(target_p, negcap))
+      if (negcap && HasCap(target, negcap))
         continue;
 
-      target_p->connection->serial = current_serial;
-      send_message(target_p, buffer);
+      target->connection->serial = current_serial;
+      send_message(target, buffer);
     }
   }
 
@@ -513,24 +513,24 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, unsigned
   DLINK_FOREACH(node, channel->members_local.head)
   {
     struct ChannelMember *member = node->data;
-    struct Client *target_p = member->client;
+    struct Client *target = member->client;
 
-    if (IsDead(target_p))
+    if (IsDead(target))
       continue;
 
-    if (one && (target_p == one->from))
+    if (one && (target == one->from))
       continue;
 
     if (status && (member->flags & status) == 0)
       continue;
 
-    if (poscap && HasCap(target_p, poscap) != poscap)
+    if (poscap && HasCap(target, poscap) != poscap)
       continue;
 
-    if (negcap && HasCap(target_p, negcap))
+    if (negcap && HasCap(target, negcap))
       continue;
 
-    send_message(target_p, buffer);
+    send_message(target, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -592,36 +592,36 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
   /* scan the local clients */
   DLINK_FOREACH(node, local_client_list.head)
   {
-    struct Client *client_p = node->data;
+    struct Client *client = node->data;
 
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
-    if (one && (client_p == one->from))
+    if (one && (client == one->from))
       continue;
 
-    if (match_it(client_p, mask, what) == false)
+    if (match_it(client, mask, what) == false)
       continue;
 
-    send_message(client_p, local_buf);
+    send_message(client, local_buf);
   }
 
   /* Now scan servers */
   DLINK_FOREACH(node, local_server_list.head)
   {
-    struct Client *client_p = node->data;
+    struct Client *client = node->data;
 
     /*
      * The old code looped through every client on the
      * network for each server to check if the
-     * server (client_p) has at least 1 client matching
+     * server (client) has at least 1 client matching
      * the mask, using something like:
      *
-     * for (target_p = GlobalClientList; target_p; target_p = target_p->next)
-     *        if (IsRegisteredUser(target_p) &&
-     *                        match_it(target_p, mask, what) &&
-     *                        (target_p->from == client_p))
-     *   vsendto_prefix_one(client_p, from, pattern, args);
+     * for (target = GlobalClientList; target; target = target->next)
+     *        if (IsRegisteredUser(target) &&
+     *                        match_it(target, mask, what) &&
+     *                        (target->from == client))
+     *   vsendto_prefix_one(client, from, pattern, args);
      *
      * That way, we wouldn't send the message to
      * a server who didn't have a matching client.
@@ -635,13 +635,13 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
      * server deal with it.
      * -wnder
      */
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
-    if (one && (client_p == one->from))
+    if (one && (client == one->from))
       continue;
 
-    send_message_remote(client_p, from, remote_buf);
+    send_message_remote(client, from, remote_buf);
   }
 
   dbuf_ref_free(local_buf);
@@ -674,30 +674,30 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
 
   DLINK_FOREACH(node, global_server_list.head)
   {
-    struct Client *target_p = node->data;
+    struct Client *target = node->data;
 
-    if (IsDead(target_p->from))
+    if (IsDead(target->from))
       continue;
 
     /* Do not attempt to send to ourselves ... */
-    if (IsMe(target_p))
+    if (IsMe(target))
       continue;
 
     /* ... or the source */
-    if (target_p->from == source_p->from)
+    if (target->from == source_p->from)
       continue;
 
-    if (target_p->from->connection->serial == current_serial)
+    if (target->from->connection->serial == current_serial)
       continue;
 
-    if (match(mask, target_p->name))
+    if (match(mask, target->name))
       continue;
 
-    if (cap && IsCapable(target_p->from, cap) != cap)
+    if (cap && IsCapable(target->from, cap) != cap)
       continue;
 
-    target_p->from->connection->serial = current_serial;
-    send_message_remote(target_p->from, source_p, buffer);
+    target->from->connection->serial = current_serial;
+    send_message_remote(target->from, source_p, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -781,24 +781,24 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
 
   DLINK_FOREACH(node, oper_list.head)
   {
-    struct Client *client_p = node->data;
-    assert(HasUMode(client_p, UMODE_OPER));
+    struct Client *client = node->data;
+    assert(HasUMode(client, UMODE_OPER));
 
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
     /*
      * If we're sending it to opers and they're an admin, skip.
      * If we're sending it to admins, and they're not, skip.
      */
-    if (((level == L_ADMIN) && !HasUMode(client_p, UMODE_ADMIN)) ||
-        ((level == L_OPER) && HasUMode(client_p, UMODE_ADMIN)))
+    if (((level == L_ADMIN) && !HasUMode(client, UMODE_ADMIN)) ||
+        ((level == L_OPER) && HasUMode(client, UMODE_ADMIN)))
       continue;
 
-    if (!HasUMode(client_p, flags))
+    if (!HasUMode(client, flags))
       continue;
 
-    send_message(client_p, buffer);
+    send_message(client, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -857,16 +857,16 @@ sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
 
   DLINK_FOREACH(node, oper_list.head)
   {
-    struct Client *client_p = node->data;
-    assert(client_p->umodes & UMODE_OPER);
+    struct Client *client = node->data;
+    assert(client->umodes & UMODE_OPER);
 
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
-    if (!HasUMode(client_p, flags))
+    if (!HasUMode(client, flags))
       continue;
 
-    send_message(client_p, buffer);
+    send_message(client, buffer);
   }
 
   dbuf_ref_free(buffer);

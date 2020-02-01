@@ -354,12 +354,12 @@ server_valid_name(const char *name)
  *                if it was not previously allocated.
  */
 struct Server *
-server_make(struct Client *client_p)
+server_make(struct Client *client)
 {
-  if (client_p->serv == NULL)
-    client_p->serv = xcalloc(sizeof(*client_p->serv));
+  if (client->serv == NULL)
+    client->serv = xcalloc(sizeof(*client->serv));
 
-  return client_p->serv;
+  return client->serv;
 }
 
 /* server_connect() - initiate a server connection
@@ -419,39 +419,39 @@ server_connect(struct MaskItem *conf, struct Client *by)
   }
 
   /* Create a local client */
-  struct Client *client_p = client_make(NULL);
+  struct Client *client = client_make(NULL);
 
   /* Copy in the server, hostname, fd */
-  strlcpy(client_p->name, conf->name, sizeof(client_p->name));
-  strlcpy(client_p->host, conf->host, sizeof(client_p->host));
+  strlcpy(client->name, conf->name, sizeof(client->name));
+  strlcpy(client->host, conf->host, sizeof(client->host));
 
   /* We already converted the ip once, so lets use it - stu */
-  strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
+  strlcpy(client->sockhost, buf, sizeof(client->sockhost));
 
-  client_p->ip = *conf->addr;
-  client_p->connection->fd = fd_open(fd, true, NULL);
+  client->ip = *conf->addr;
+  client->connection->fd = fd_open(fd, true, NULL);
 
   /* Server names are always guaranteed under HOSTLEN chars */
-  fd_note(client_p->connection->fd, "Server: %s", client_p->name);
+  fd_note(client->connection->fd, "Server: %s", client->name);
 
   /*
    * Attach config entries to client here rather than in server_connect_callback().
    * This to avoid null pointer references.
    */
-  conf_attach(client_p, conf);
+  conf_attach(client, conf);
 
-  server_make(client_p);
+  server_make(client);
 
   if (by && IsClient(by))
-    strlcpy(client_p->serv->by, by->name, sizeof(client_p->serv->by));
+    strlcpy(client->serv->by, by->name, sizeof(client->serv->by));
   else
-    strlcpy(client_p->serv->by, "AutoConn.", sizeof(client_p->serv->by));
+    strlcpy(client->serv->by, "AutoConn.", sizeof(client->serv->by));
 
-  SetConnecting(client_p);
+  SetConnecting(client);
 
   /* Now, initiate the connection */
-  comm_connect_tcp(client_p->connection->fd, conf->addr, conf->port, conf->bind,
-                   server_connect_callback, client_p, conf->timeout);
+  comm_connect_tcp(client->connection->fd, conf->addr, conf->port, conf->bind,
+                   server_connect_callback, client, conf->timeout);
 
   /*
    * At this point we have a connection in progress and a connect {} block
@@ -464,53 +464,53 @@ server_connect(struct MaskItem *conf, struct Client *by)
 }
 
 static void
-server_finish_tls_handshake(struct Client *client_p)
+server_finish_tls_handshake(struct Client *client)
 {
-  const struct MaskItem *conf = find_conf_name(&client_p->connection->confs,
-                                                client_p->name, CONF_SERVER);
+  const struct MaskItem *conf = find_conf_name(&client->connection->confs,
+                                                client->name, CONF_SERVER);
   if (conf == NULL)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Lost connect{} block for %s", client_get_name(client_p, SHOW_IP));
+                         "Lost connect{} block for %s", client_get_name(client, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Lost connect{} block for %s", client_get_name(client_p, MASK_IP));
+                         "Lost connect{} block for %s", client_get_name(client, MASK_IP));
 
-    exit_client(client_p, "Lost connect{} block");
+    exit_client(client, "Lost connect{} block");
     return;
   }
 
   /* Next, send the initial handshake */
-  SetHandshake(client_p);
+  SetHandshake(client);
 
-  sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
+  sendto_one(client, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
-  sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
+  sendto_one(client, "CAPAB :%s", capab_get(NULL));
 
-  sendto_one(client_p, "SERVER %s 1 :%s%s",
+  sendto_one(client, "SERVER %s 1 :%s%s",
              me.name, ConfigServerHide.hidden ? "(H) " : "",
              me.info);
 
   /* If we get here, we're ok, so lets start reading some data */
-  read_packet(client_p->connection->fd, client_p); 
+  read_packet(client->connection->fd, client); 
 }
 
 static void
 server_tls_handshake(fde_t *F, void *data)
 {
-  struct Client *client_p = data;
+  struct Client *client = data;
   const char *sslerr = NULL;
 
-  assert(client_p);
-  assert(client_p->connection);
-  assert(client_p->connection->fd);
-  assert(client_p->connection->fd == F);
+  assert(client);
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd == F);
 
   tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_CLIENT, &sslerr);
   if (ret != TLS_HANDSHAKE_DONE)
   {
-    if ((event_base->time.sec_monotonic - client_p->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
+    if ((event_base->time.sec_monotonic - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
     {
-      exit_client(client_p, "Timeout during TLS handshake");
+      exit_client(client, "Timeout during TLS handshake");
       return;
     }
 
@@ -518,18 +518,18 @@ server_tls_handshake(fde_t *F, void *data)
     {
       case TLS_HANDSHAKE_WANT_WRITE:
         comm_setselect(F, COMM_SELECT_WRITE,
-                       server_tls_handshake, client_p, TLS_HANDSHAKE_TIMEOUT);
+                       server_tls_handshake, client, TLS_HANDSHAKE_TIMEOUT);
         return;
       case TLS_HANDSHAKE_WANT_READ:
         comm_setselect(F, COMM_SELECT_READ,
-                       server_tls_handshake, client_p, TLS_HANDSHAKE_TIMEOUT);
+                       server_tls_handshake, client, TLS_HANDSHAKE_TIMEOUT);
         return;
       default:
       {
         sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                             "Error connecting to %s: %s", client_p->name,
+                             "Error connecting to %s: %s", client->name,
                              sslerr ? sslerr : "unknown TLS error");
-        exit_client(client_p, "Error during TLS handshake");
+        exit_client(client, "Error during TLS handshake");
         return;
       }
     }
@@ -537,32 +537,32 @@ server_tls_handshake(fde_t *F, void *data)
 
   comm_settimeout(F, 0, NULL, NULL);
 
-  if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client_p->certfp) == false)
+  if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client->certfp) == false)
     ilog(LOG_TYPE_IRCD, "Server %s gave bad TLS client certificate",
-         client_get_name(client_p, MASK_IP));
+         client_get_name(client, MASK_IP));
 
-  server_finish_tls_handshake(client_p);
+  server_finish_tls_handshake(client);
 }
 
 static void
-server_tls_connect_init(struct Client *client_p, const struct MaskItem *conf, fde_t *F)
+server_tls_connect_init(struct Client *client, const struct MaskItem *conf, fde_t *F)
 {
-  assert(client_p);
-  assert(client_p->connection);
-  assert(client_p->connection->fd);
-  assert(client_p->connection->fd == F);
+  assert(client);
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd == F);
 
   if (tls_new(&F->tls, F->fd, TLS_ROLE_CLIENT) == false)
   {
-    SetDead(client_p);
-    exit_client(client_p, "TLS context initialization failed");
+    SetDead(client);
+    exit_client(client, "TLS context initialization failed");
     return;
   }
 
   if (!EmptyString(conf->cipher_list))
     tls_set_ciphers(&F->tls, conf->cipher_list);
 
-  server_tls_handshake(F, client_p);
+  server_tls_handshake(F, client);
 }
 
 /* server_connect_callback() - complete a server connection.
@@ -576,13 +576,13 @@ server_tls_connect_init(struct Client *client_p, const struct MaskItem *conf, fd
 static void
 server_connect_callback(fde_t *F, int status, void *data)
 {
-  struct Client *const client_p = data;
+  struct Client *const client = data;
 
   /* First, make sure it's a real client! */
-  assert(client_p);
-  assert(client_p->connection);
-  assert(client_p->connection->fd);
-  assert(client_p->connection->fd == F);
+  assert(client);
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd == F);
 
   /* Check the status */
   if (status != COMM_OK)
@@ -590,52 +590,52 @@ server_connect_callback(fde_t *F, int status, void *data)
     /* We have an error, so report it and quit */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Error connecting to %s: %s",
-                         client_get_name(client_p, SHOW_IP), comm_errstr(status));
+                         client_get_name(client, SHOW_IP), comm_errstr(status));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Error connecting to %s: %s",
-                         client_get_name(client_p, MASK_IP), comm_errstr(status));
+                         client_get_name(client, MASK_IP), comm_errstr(status));
 
     /*
      * If a fd goes bad, call dead_link() the socket is no
      * longer valid for reading or writing.
      */
-    dead_link_on_write(client_p, 0);
+    dead_link_on_write(client, 0);
     return;
   }
 
   /* COMM_OK, so continue the connection procedure */
   /* Get the connect {} block */
-  const struct MaskItem *conf = find_conf_name(&client_p->connection->confs,
-                                                client_p->name, CONF_SERVER);
+  const struct MaskItem *conf = find_conf_name(&client->connection->confs,
+                                                client->name, CONF_SERVER);
   if (conf == NULL)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Lost connect{} block for %s", client_get_name(client_p, SHOW_IP));
+                         "Lost connect{} block for %s", client_get_name(client, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Lost connect{} block for %s", client_get_name(client_p, MASK_IP));
+                         "Lost connect{} block for %s", client_get_name(client, MASK_IP));
 
-    exit_client(client_p, "Lost connect{} block");
+    exit_client(client, "Lost connect{} block");
     return;
   }
 
   if (IsConfTLS(conf))
   {
-    server_tls_connect_init(client_p, conf, F);
+    server_tls_connect_init(client, conf, F);
     return;
   }
 
   /* Next, send the initial handshake */
-  SetHandshake(client_p);
+  SetHandshake(client);
 
-  sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
+  sendto_one(client, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
-  sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
+  sendto_one(client, "CAPAB :%s", capab_get(NULL));
 
-  sendto_one(client_p, "SERVER %s 1 :%s%s", me.name,
+  sendto_one(client, "SERVER %s 1 :%s%s", me.name,
              ConfigServerHide.hidden ? "(H) " : "", me.info);
 
   /* If we get here, we're ok, so lets start reading some data */
-  read_packet(client_p->connection->fd, client_p);
+  read_packet(client->connection->fd, client);
 }
 
 struct Client *

@@ -35,9 +35,9 @@
 
 
 static enum extban_match
-extban_gecos_matches(struct Client *client_p, struct Channel *channel, struct Ban *ban)
+extban_gecos_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
-  if (match(ban->host, client_p->info) == 0)
+  if (match(ban->host, client->info) == 0)
     return EXTBAN_MATCH;
 
   return EXTBAN_NO_MATCH;

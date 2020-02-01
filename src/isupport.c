@@ -219,10 +219,10 @@ isupport_rebuild(void)
  * side effects - display to client what we support (for them)
  */
 void
-isupport_show(struct Client *source_p)
+isupport_show(struct Client *client)
 {
-  const dlink_node *node = NULL;
+  dlink_node *node;
 
   DLINK_FOREACH(node, isupport_list_lines.head)
-    sendto_one_numeric(source_p, &me, RPL_ISUPPORT, node->data);
+    sendto_one_numeric(client, &me, RPL_ISUPPORT, node->data);
 }

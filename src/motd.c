@@ -215,17 +215,17 @@ motd_destroy(struct Motd *motd)
  * Otherwise, if there is a hostmask- or class-based MOTD that matches
  * the user, use it.
  * Otherwise, use the local MOTD.
- * \param client_p Client to find MOTD for.
+ * \param client Client to find MOTD for.
  * \return Pointer to first matching MOTD for the client.
  */
 static struct Motd *
-motd_lookup(const struct Client *client_p)
+motd_lookup(const struct Client *client)
 {
   dlink_node *node;
 
-  assert(client_p);
+  assert(client);
 
-  if (!MyConnect(client_p))  /* Not my user, always return remote motd */
+  if (!MyConnect(client))  /* Not my user, always return remote motd */
     return MotdList.remote;
 
   /* Check the motd blocks first */
@@ -237,23 +237,23 @@ motd_lookup(const struct Client *client_p)
     {
       case MOTD_CLASS:
       {
-        const struct ClassItem *class = class_get_ptr(&client_p->connection->confs);
+        const struct ClassItem *class = class_get_ptr(&client->connection->confs);
         if (match(motd->mask, class->name) == 0)
           return motd;
         break;
       }
       case MOTD_HOSTMASK:
-        if (match(motd->mask, client_p->host) == 0 || match(motd->mask, client_p->sockhost) == 0)
+        if (match(motd->mask, client->host) == 0 || match(motd->mask, client->sockhost) == 0)
           return motd;
         break;
       case MOTD_IPMASKV4:
-        if (client_p->ip.ss.ss_family == AF_INET)
-          if (match_ipv4(&client_p->ip, &motd->address, motd->addrbits))
+        if (client->ip.ss.ss_family == AF_INET)
+          if (match_ipv4(&client->ip, &motd->address, motd->addrbits))
             return motd;
         break;
       case MOTD_IPMASKV6:
-        if (client_p->ip.ss.ss_family == AF_INET6)
-          if (match_ipv6(&client_p->ip, &motd->address, motd->addrbits))
+        if (client->ip.ss.ss_family == AF_INET6)
+          if (match_ipv6(&client->ip, &motd->address, motd->addrbits))
             return motd;
         break;
       default: break;
@@ -265,59 +265,59 @@ motd_lookup(const struct Client *client_p)
 
 /*! \brief Send the content of a MotdCache to a user.
  * If \a cache is NULL, simply send ERR_NOMOTD to the client.
- * \param client_p Client to send MOTD to.
- * \param cache MOTD body to send to client.
+ * \param client Client to send MOTD to.
+ * \param cache  MOTD body to send to client.
  */
 static void
-motd_forward(struct Client *client_p, const struct MotdCache *cache)
+motd_forward(struct Client *client, const struct MotdCache *cache)
 {
   if (cache == NULL)  /* No motd to send */
   {
-    sendto_one_numeric(client_p, &me, ERR_NOMOTD);
+    sendto_one_numeric(client, &me, ERR_NOMOTD);
     return;
   }
 
   /* Send the motd */
-  sendto_one_numeric(client_p, &me, RPL_MOTDSTART, me.name);
+  sendto_one_numeric(client, &me, RPL_MOTDSTART, me.name);
 
   for (unsigned int i = 0; i < cache->count; ++i)
-    sendto_one_numeric(client_p, &me, RPL_MOTD, cache->motd[i]);
+    sendto_one_numeric(client, &me, RPL_MOTD, cache->motd[i]);
 
-  sendto_one_numeric(client_p, &me, RPL_ENDOFMOTD);
+  sendto_one_numeric(client, &me, RPL_ENDOFMOTD);
 }
 
 /*! \brief Find the MOTD for a client and send it.
- * \param client_p Client being greeted.
+ * \param client Client being greeted.
  */
 void
-motd_send(struct Client *client_p)
+motd_send(struct Client *client)
 {
-  assert(client_p);
+  assert(client);
 
-  motd_forward(client_p, motd_cache(motd_lookup(client_p)));
+  motd_forward(client, motd_cache(motd_lookup(client)));
 }
 
 /*! \brief Send the signon MOTD to a user.
  * If general::short_motd is true and a matching MOTD exists for the
  * user, direct the client to type /MOTD to read it. Otherwise, call
  * motd_forward() for the user.
- * \param client_p Client that has just connected.
+ * \param client Client that has just connected.
  */
 void
-motd_signon(struct Client *client_p)
+motd_signon(struct Client *client)
 {
-  const struct MotdCache *cache = motd_cache(motd_lookup(client_p));
+  const struct MotdCache *cache = motd_cache(motd_lookup(client));
 
   if (ConfigGeneral.short_motd == 0 || cache == NULL)
-    motd_forward(client_p, cache);
+    motd_forward(client, cache);
   else
   {
-    sendto_one_notice(client_p, &me, ":*** Notice -- motd was last changed at %s",
+    sendto_one_notice(client, &me, ":*** Notice -- motd was last changed at %s",
                       date_iso8601(cache->modtime));
-    sendto_one_notice(client_p, &me, ":*** Notice -- Please read the motd if you haven't read it");
-    sendto_one_numeric(client_p, &me, RPL_MOTDSTART, me.name);
-    sendto_one_numeric(client_p, &me, RPL_MOTD, "*** This is the short motd ***");
-    sendto_one_numeric(client_p, &me, RPL_ENDOFMOTD);
+    sendto_one_notice(client, &me, ":*** Notice -- Please read the motd if you haven't read it");
+    sendto_one_numeric(client, &me, RPL_MOTDSTART, me.name);
+    sendto_one_numeric(client, &me, RPL_MOTD, "*** This is the short motd ***");
+    sendto_one_numeric(client, &me, RPL_ENDOFMOTD);
   }
 }
 
@@ -395,10 +395,10 @@ motd_clear(void)
 }
 
 /*! \brief Report list of non-default MOTDs.
- * \param client_p Client requesting statistics.
+ * \param client Client requesting statistics.
  */
 void
-motd_report(struct Client *client_p, int parc, char *parv[])
+motd_report(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
@@ -406,16 +406,16 @@ motd_report(struct Client *client_p, int parc, char *parv[])
   {
     const struct Motd *motd = node->data;
 
-    sendto_one_numeric(client_p, &me, RPL_STATSTLINE,
+    sendto_one_numeric(client, &me, RPL_STATSTLINE,
                        motd->mask, motd->path);
   }
 }
 
 /*! \brief Report MOTD memory usage to a client.
- * \param client_p Client requesting memory usage.
+ * \param client Client requesting memory usage.
  */
 void
-motd_memory_count(struct Client *client_p)
+motd_memory_count(struct Client *client)
 {
   dlink_node *node;
   unsigned int mt  = 0;  /* Motd count */
@@ -454,7 +454,7 @@ motd_memory_count(struct Client *client_p)
     mtcm += sizeof(struct MotdCache) + (MOTD_LINESIZE * (cache->count - 1));
   }
 
-  sendto_one_numeric(client_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Motds %u(%zu) Cache %u(%zu)",
                      mt, mtm, mtc, mtcm);
 }

@@ -470,21 +470,21 @@ auth_start_query(struct AuthRequest *auth)
  * side effects - starts auth (identd) and dns queries for a client
  */
 void
-auth_start(struct Client *client_p)
+auth_start(struct Client *client)
 {
-  struct AuthRequest *auth = auth_make(client_p);
+  struct AuthRequest *auth = auth_make(client);
 
-  assert(client_p);
-  assert(client_p->connection);
+  assert(client);
+  assert(client->connection);
 
-  auth_sendheader(client_p, REPORT_DO_DNS);
+  auth_sendheader(client, REPORT_DO_DNS);
 
   auth->dns_pending = true;
 
   if (ConfigGeneral.disable_auth == 0)
     auth_start_query(auth);
 
-  gethost_byaddr(auth_dns_callback, auth, &client_p->ip);
+  gethost_byaddr(auth_dns_callback, auth, &client->ip);
 }
 
 /*

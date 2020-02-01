@@ -65,12 +65,12 @@ cluster_make(void)
 }
 
 void
-cluster_distribute(const void *source_p, const char *command, unsigned int capab,
+cluster_distribute(const void *client, const char *command, unsigned int capab,
                    unsigned int type, const char *pattern, ...)
 {
+  dlink_node *node;
   va_list args;
   char buf[IRCD_BUFSIZE];
-  dlink_node *node;
 
   va_start(args, pattern);
   vsnprintf(buf, sizeof(buf), pattern, args);
@@ -81,7 +81,7 @@ cluster_distribute(const void *source_p, const char *command, unsigned int capab
     const struct ClusterItem *cluster = node->data;
 
     if (cluster->type & type)
-      sendto_match_servs(source_p, cluster->server, CAPAB_CLUSTER | capab,
+      sendto_match_servs(client, cluster->server, CAPAB_CLUSTER | capab,
                          "%s %s %s", command, cluster->server, buf);
   }
 }

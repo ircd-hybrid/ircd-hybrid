@@ -35,7 +35,7 @@
 
 
 static enum extban_match
-extban_channel_matches(struct Client *client_p, struct Channel *channel, struct Ban *ban)
+extban_channel_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
   const char *name = ban->host;
   unsigned int flags;
@@ -65,7 +65,7 @@ extban_channel_matches(struct Client *client_p, struct Channel *channel, struct 
   if (!PubChannel(tmp) && tmp != channel)
     return EXTBAN_NO_MATCH;
 
-  struct ChannelMember *member = find_channel_link(client_p, tmp);
+  struct ChannelMember *member = find_channel_link(client, tmp);
   if (member)
   {
     if (flags && (member->flags & flags) == 0)

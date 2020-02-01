@@ -103,7 +103,7 @@ struct ChannelMember
 {
   dlink_node locchannode;  /**< link to channel->members_local */
   dlink_node channode;  /**< link to channel->members */
-  dlink_node usernode;  /**< link to source_p->channel */
+  dlink_node usernode;  /**< link to client->channel */
   struct Channel *channel;  /**< Channel pointer */
   struct Client *client;  /**< Client pointer */
   unsigned int flags;  /**< user/channel flags, e.g. CHFL_CHANOP */
@@ -131,7 +131,7 @@ struct Ban
 /*! \brief Invite structure */
 struct Invite
 {
-  dlink_node user_node;  /**< link to client_p->connection->invited */
+  dlink_node user_node;  /**< link to client->connection->invited */
   dlink_node chan_node;  /**< link to channel->invites */
   struct Channel *channel;  /**< Channel pointer */
   struct Client *client;  /**< Client pointer */

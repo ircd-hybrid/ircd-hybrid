@@ -36,10 +36,10 @@
 
 
 int
-extban_mute_can_send(struct Channel *channel, struct Client *client_p,
+extban_mute_can_send(struct Channel *channel, struct Client *client,
                      struct ChannelMember *member)
 {
-  if (!MyConnect(client_p))
+  if (!MyConnect(client))
     return CAN_SEND_NONOP;
 
   if (member)
@@ -54,10 +54,10 @@ extban_mute_can_send(struct Channel *channel, struct Client *client_p,
   }
 
   /* Search for matching muteban */
-  if (find_bmask(client_p, channel, &channel->banlist, &extban_mute) == true)
+  if (find_bmask(client, channel, &channel->banlist, &extban_mute) == true)
   {
     /* Clients who match +e m: override +b m: */
-    if (find_bmask(client_p, channel, &channel->exceptlist, &extban_mute) == false)
+    if (find_bmask(client, channel, &channel->exceptlist, &extban_mute) == false)
     {
       if (member)
         member->flags |= CHFL_BAN_SILENCED;

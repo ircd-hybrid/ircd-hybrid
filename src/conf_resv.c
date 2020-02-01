@@ -163,7 +163,7 @@ resv_find(const char *name, int (*compare)(const char *, const char *))
 }
 
 bool
-resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
+resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
 {
   dlink_node *node;
 
@@ -171,22 +171,22 @@ resv_exempt_find(const struct Client *client_p, const struct ResvItem *resv)
   {
     const struct ResvExemptItem *exempt = node->data;
 
-    if (match(exempt->name, client_p->name) == 0 && match(exempt->user, client_p->username) == 0)
+    if (match(exempt->name, client->name) == 0 && match(exempt->user, client->username) == 0)
     {
       switch (exempt->type)
       {
         case HM_HOST:
-          if (match(exempt->host, client_p->host) == 0 || match(exempt->host, client_p->sockhost) == 0)
+          if (match(exempt->host, client->host) == 0 || match(exempt->host, client->sockhost) == 0)
             return true;
           break;
         case HM_IPV4:
-          if (client_p->ip.ss.ss_family == AF_INET)
-            if (match_ipv4(&client_p->ip, &exempt->addr, exempt->bits))
+          if (client->ip.ss.ss_family == AF_INET)
+            if (match_ipv4(&client->ip, &exempt->addr, exempt->bits))
               return true;
           break;
         case HM_IPV6:
-          if (client_p->ip.ss.ss_family == AF_INET6)
-            if (match_ipv6(&client_p->ip, &exempt->addr, exempt->bits))
+          if (client->ip.ss.ss_family == AF_INET6)
+            if (match_ipv6(&client->ip, &exempt->addr, exempt->bits))
               return true;
           break;
         default:

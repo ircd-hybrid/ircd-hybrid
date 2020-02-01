@@ -35,10 +35,10 @@
 
 
 static enum extban_match
-extban_fingerprint_matches(struct Client *client_p, struct Channel *channel, struct Ban *ban)
+extban_fingerprint_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
-  if (!EmptyString(client_p->certfp))
-    if (match(ban->host, client_p->certfp) == 0)
+  if (!EmptyString(client->certfp))
+    if (match(ban->host, client->certfp) == 0)
       return EXTBAN_MATCH;
 
   return EXTBAN_NO_MATCH;

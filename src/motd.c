@@ -243,7 +243,8 @@ motd_lookup(const struct Client *client)
         break;
       }
       case MOTD_HOSTMASK:
-        if (match(motd->mask, client->host) == 0 || match(motd->mask, client->sockhost) == 0)
+        if (match(motd->mask, client->realhost) == 0 ||
+            match(motd->mask, client->sockhost) == 0 || match(motd->mask, client->host) == 0)
           return motd;
         break;
       case MOTD_IPMASKV4:

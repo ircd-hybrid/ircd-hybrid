@@ -9,9 +9,6 @@
 /* Define if SSP C support is enabled. */
 #undef ENABLE_SSP_CC
 
-/* Define to 1 if you have the `accept4' function. */
-#undef HAVE_ACCEPT4
-
 /* Define to 1 if you have the `argz_add' function. */
 #undef HAVE_ARGZ_ADD
 

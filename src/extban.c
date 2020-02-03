@@ -206,8 +206,9 @@ extban_format(unsigned int e, char *buf)
 
       *buf++ = extban->character;
       *buf++ = ':';
-
       written += 2;
+
+      break;
     }
   }
 
@@ -229,6 +230,8 @@ extban_format(unsigned int e, char *buf)
       *buf++ = extban->character;
       *buf++ = ':';
       written += 2;
+
+      break;
     }
   }
 

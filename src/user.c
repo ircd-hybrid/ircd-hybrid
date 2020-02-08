@@ -216,14 +216,14 @@ introduce_client(struct Client *client)
 
   DLINK_FOREACH(node, local_server_list.head)
   {
-    struct Client *server_p = node->data;
+    struct Client *server = node->data;
 
-    if (server_p == client->from)
+    if (server == client->from)
       continue;
 
     /* TBR: compatibility mode */
-    if (IsCapable(server_p, CAPAB_RHOST))
-      sendto_one(server_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
+    if (IsCapable(server, CAPAB_RHOST))
+      sendto_one(server, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
                  client->servptr->id,
                  client->name, client->hopcount+1,
                  client->tsinfo,
@@ -232,7 +232,7 @@ introduce_client(struct Client *client)
                  client->account,
                  client->info);
     else
-      sendto_one(server_p, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
+      sendto_one(server, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
                  client->servptr->id,
                  client->name, client->hopcount+1,
                  client->tsinfo,
@@ -242,7 +242,7 @@ introduce_client(struct Client *client)
                  client->info);
 
     if (!EmptyString(client->certfp))
-      sendto_one(server_p, ":%s CERTFP %s", client->id, client->certfp);
+      sendto_one(server, ":%s CERTFP %s", client->id, client->certfp);
   }
 }
 

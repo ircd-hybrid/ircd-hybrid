@@ -56,7 +56,7 @@ static void
 do_who(struct Client *source_p, const struct Client *target_p,
        const char *name, const char *op_flags)
 {
-  char status[IRCD_BUFSIZE] = "";
+  char status[8] = "";  /* sizeof("Gr*@%+") + 2 */
 
   if (HasUMode(source_p, UMODE_OPER))
     snprintf(status, sizeof(status), "%c%s%s%s", target_p->away[0] ? 'G' : 'H',

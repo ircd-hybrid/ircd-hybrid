@@ -21,7 +21,7 @@
 
 /*! \file channel_invite.h
  * \brief Channel invitation related functions
- * \version $Id: channel_invite.h 9249 2020-02-01 13:35:32Z michael $
+ * \version $Id$
  */
 
 #ifndef INCLUDED_channel_invite_h

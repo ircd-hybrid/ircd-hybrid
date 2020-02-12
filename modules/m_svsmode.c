@@ -168,7 +168,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
   if (MyConnect(target_p) && (setmodes != target_p->umodes))
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[UMODE_MAX_STR] = "";
 
     send_umode(target_p, true, setmodes, buf);
   }

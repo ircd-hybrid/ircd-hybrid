@@ -21,7 +21,7 @@
 
 /*! \file channel_invite.c
  * \brief Channel invitation related functions
- * \version $Id: channel_invite.c 9249 2020-02-01 13:35:32Z michael $
+ * \version $Id$
  */
 
 #include "stdinc.h"

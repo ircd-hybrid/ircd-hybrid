@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "channel.h"
+#include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
@@ -354,7 +355,7 @@ channel_make(const char *name)
 void
 channel_free(struct Channel *channel)
 {
-  clear_invite_list(&channel->invites);
+  invite_clear_list(&channel->invites);
 
   /* Free ban/exception/invex lists */
   channel_free_mask_list(&channel->banlist);
@@ -487,84 +488,6 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
 
   if (show_eon == true)
     sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);
-}
-
-static struct Invite *
-find_invite(struct Channel *channel, struct Client *client)
-{
-  dlink_node *node, *node_next;
-  dlink_list *list;
-
-  /* Take the shortest of the two lists */
-  if (dlink_list_length(&client->connection->invited) < dlink_list_length(&channel->invites))
-    list = &client->connection->invited;
-  else
-    list = &channel->invites;
-
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
-  {
-    struct Invite *invite = node->data;
-
-    if (ConfigChannel.invite_expire_time &&
-        ConfigChannel.invite_expire_time + invite->when < event_base->time.sec_monotonic)
-      del_invite(invite);
-    else if (invite->channel == channel && invite->client == client)
-      return invite;
-  }
-
-  return NULL;
-}
-
-/*! \brief Adds client to invite list
- * \param channel Pointer to channel block
- * \param client  Pointer to client to add invite to
- */
-void
-add_invite(struct Channel *channel, struct Client *client)
-{
-  struct Invite *invite = find_invite(channel, client);
-  if (invite)
-    del_invite(invite);
-
-  invite = xcalloc(sizeof(*invite));
-  invite->client = client;
-  invite->channel = channel;
-  invite->when = event_base->time.sec_monotonic;
-
-  /* Delete last link in chain if the list is max length */
-  while (dlink_list_length(&client->connection->invited) && 
-         dlink_list_length(&client->connection->invited) >= ConfigChannel.max_invites)
-    del_invite(client->connection->invited.tail->data);
-
-  /* Add client to channel invite list */
-  dlinkAdd(invite, &invite->chan_node, &channel->invites);
-
-  /* Add channel to the end of the client invite list */
-  dlinkAdd(invite, &invite->user_node, &client->connection->invited);
-}
-
-/*! \brief Delete Invite block from channel invite list
- *         and client invite list
- * \param invite Pointer to Invite struct
- */
-void
-del_invite(struct Invite *invite)
-{
-  dlinkDelete(&invite->user_node, &invite->client->connection->invited);
-  dlinkDelete(&invite->chan_node, &invite->channel->invites);
-
-  /* Release memory pointed to by 'invite' */
-  xfree(invite);
-}
-
-/*! \brief Removes and frees all Invite blocks from a list
- * \param list Pointer to a dlink_list
- */
-void
-clear_invite_list(dlink_list *list)
-{
-  while (list->head)
-    del_invite(list->head->data);
 }
 
 /* get_member_status()
@@ -721,7 +644,7 @@ can_join(struct Client *client, struct Channel *channel, const char *key)
     return ERR_OPERONLYCHAN;
 
   if (HasCMode(channel, MODE_INVITEONLY))
-    if (find_invite(channel, client) == NULL)
+    if (invite_find(channel, client) == NULL)
       if (find_bmask(client, channel, &channel->invexlist, NULL) == false)
         return ERR_INVITEONLYCHAN;
 
@@ -1071,9 +994,9 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
                            client->name, client->username,
                            client->host, client->away);
 
-    struct Invite *invite = find_invite(channel, client);
+    struct Invite *invite = invite_find(channel, client);
     if (invite)
-      del_invite(invite);
+      invite_del(invite);
 
     if (channel->topic[0])
     {

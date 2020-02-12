@@ -128,17 +128,6 @@ struct Ban
   int type;
 };
 
-/*! \brief Invite structure */
-struct Invite
-{
-  dlink_node user_node;  /**< link to client->connection->invited */
-  dlink_node chan_node;  /**< link to channel->invites */
-  struct Channel *channel;  /**< Channel pointer */
-  struct Client *client;  /**< Client pointer */
-  uintmax_t when;  /**< Time the invite has been created; monotonic time */
-};
-
-
 extern const dlink_list *channel_get_list(void);
 extern bool channel_check_name(const char *, bool);
 extern int can_send(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool);
@@ -152,9 +141,6 @@ extern void remove_ban(struct Ban *, dlink_list *);
 extern void add_user_to_channel(struct Channel *, struct Client *, unsigned int, bool);
 extern void remove_user_from_channel(struct ChannelMember *);
 extern void channel_member_names(struct Client *, struct Channel *, bool);
-extern void add_invite(struct Channel *, struct Client *);
-extern void del_invite(struct Invite *);
-extern void clear_invite_list(dlink_list *);
 extern void channel_send_modes(struct Client *, const struct Channel *);
 extern void channel_modes(const struct Channel *, const struct Client *, char *, char *);
 extern void check_spambot_warning(struct Client *, const char *);

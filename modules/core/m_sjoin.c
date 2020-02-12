@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "channel.h"
+#include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
@@ -207,7 +208,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     remove_ban_list(channel, source_p, &channel->invexlist, 'I');
 
     clear_ban_cache_list(&channel->members_local);
-    clear_invite_list(&channel->invites);
+    invite_clear_list(&channel->invites);
 
     if (channel->topic[0])
     {

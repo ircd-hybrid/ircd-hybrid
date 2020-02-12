@@ -11,6 +11,7 @@ ircd_DEPENDENCIES = $(LTDLDEPS)
 
 ircd_SOURCES = auth.c            \
                channel.c         \
+               channel_invite.c  \
                channel_mode.c    \
                client.c          \
                client_svstag.c   \

@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "channel.h"
+#include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "conf.h"
@@ -139,7 +140,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
                target_p->name, channel->name);
 
     if (HasCMode(channel, MODE_INVITEONLY))
-      add_invite(channel, target_p);  /* Add the invite if channel is +i */
+      invite_add(channel, target_p);  /* Add the invite if channel is +i */
   }
 
   if (HasCMode(channel, MODE_INVITEONLY))
@@ -201,7 +202,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
                target_p->name, channel->name);
 
     if (HasCMode(channel, MODE_INVITEONLY))
-      add_invite(channel, target_p);  /* Add the invite if channel is +i */
+      invite_add(channel, target_p);  /* Add the invite if channel is +i */
   }
 
   if (HasCMode(channel, MODE_INVITEONLY))

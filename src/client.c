@@ -51,6 +51,7 @@
 #include "parse.h"
 #include "ipcache.h"
 #include "channel.h"
+#include "channel_invite.h"
 
 
 dlink_list listing_client_list;
@@ -783,7 +784,7 @@ exit_client(struct Client *client, const char *comment)
       if (client->connection->list_task)
         free_list_task(client);
 
-      clear_invite_list(&client->connection->invited);
+      invite_clear_list(&client->connection->invited);
       del_all_accepts(client);
       watch_del_watch_list(client);
 

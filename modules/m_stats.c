@@ -54,6 +54,7 @@
 #include "motd.h"
 #include "ipcache.h"
 #include "channel.h"
+#include "channel_invite.h"
 
 
 static const char *

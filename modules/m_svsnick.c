@@ -58,7 +58,6 @@
 static void
 ms_svsnick(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL, *exists_p = NULL;
   const char *new_nick = parc == 5 ? parv[3] : parv[2];  /* TBR: compatibility mode */
   uintmax_t ts = 0, new_ts = 0;
 
@@ -68,7 +67,8 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   if (valid_nickname(new_nick, true) == false)
     return;
 
-  if ((target_p = find_person(source_p, parv[1])) == NULL)
+  struct Client *target_p = find_person(source_p, parv[1]);
+  if (target_p == NULL)
     return;
 
   if (parc == 5)  /* TBR: compatibility mode */
@@ -102,7 +102,8 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((exists_p = hash_find_client(new_nick)))
+  struct Client *exists_p = hash_find_client(new_nick);
+  if (exists_p)
   {
     if (target_p == exists_p)
     {
@@ -125,10 +126,10 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   if (HasUMode(target_p, UMODE_REGISTERED))
   {
     const unsigned int oldmodes = target_p->umodes;
-    char modebuf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE] = "";
 
     DelUMode(target_p, UMODE_REGISTERED);
-    send_umode(target_p, true, oldmodes, modebuf);
+    send_umode(target_p, true, oldmodes, buf);
   }
 
   sendto_common_channels_local(target_p, true, 0, 0, ":%s!%s@%s NICK :%s",

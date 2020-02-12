@@ -112,14 +112,14 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
           if (MyConnect(target_p))
           {
-            dlink_node *node;
-
             svstag_detach(&target_p->svstags, RPL_WHOISOPERATOR);
             conf_detach(target_p, CONF_OPER);
+
             ClrOFlag(target_p);
             DelUMode(target_p, ConfigGeneral.oper_only_umodes);
 
-            if ((node = dlinkFindDelete(&oper_list, target_p)))
+            dlink_node *node = dlinkFindDelete(&oper_list, target_p);
+            if (node)
               free_dlink_node(node);
           }
         }
@@ -168,9 +168,9 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
   if (MyConnect(target_p) && (setmodes != target_p->umodes))
   {
-    char modebuf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE] = "";
 
-    send_umode(target_p, true, setmodes, modebuf);
+    send_umode(target_p, true, setmodes, buf);
   }
 }
 

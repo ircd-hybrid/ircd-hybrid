@@ -132,6 +132,15 @@ tls_new_credentials(void)
     if (wolfSSL_CTX_SetTmpDH_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
        ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
 
+#ifdef SSL_CTX_set1_groups_list
+  if (ConfigServerInfo.tls_supported_groups == NULL)
+    wolfSSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
+  else if (wolfSSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
+  {
+    wolfSSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
+    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
+  }
+#else
   if (ConfigServerInfo.tls_supported_groups == NULL)
     wolfSSL_CTX_set1_curves_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
   else if (wolfSSL_CTX_set1_curves_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
@@ -139,6 +148,7 @@ tls_new_credentials(void)
     wolfSSL_CTX_set1_curves_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
     ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
   }
+#endif
 
   if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
     ConfigServerInfo.message_digest_algorithm = wolfSSL_EVP_sha256();

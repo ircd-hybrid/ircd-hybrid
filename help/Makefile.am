@@ -11,6 +11,7 @@ dist_helpf_DATA = accept    \
                   die       \
                   dline     \
                   etrace    \
+                  extban    \
                   hash      \
                   help      \
                   index     \

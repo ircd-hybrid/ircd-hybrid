@@ -9,7 +9,9 @@ if test "$with_tls" = "openssl" ||
         AC_LANG_PROGRAM([
           #include <openssl/opensslv.h>
           #include <stdlib.h>], [
-          exit(!(OPENSSL_VERSION_NUMBER >= 0x1010100fL)); ])], [AC_CHECK_LIB(crypto, RSA_free, [AC_CHECK_LIB(ssl, SSL_connect)], [], [])], [], [])])
+          exit(!(OPENSSL_VERSION_NUMBER >= 0x1010100fL)); ])], [AC_CHECK_LIB(crypto, RSA_free, [], [], [])], [], [])])
+
+    AS_IF([test "$ac_cv_lib_crypto_RSA_free" = "yes"], [AC_CHECK_LIB(ssl, SSL_connect)], [])
 
     AC_MSG_CHECKING([for LibreSSL, or OpenSSL 1.1.1 and above])
     AS_IF([test "$ac_cv_lib_ssl_SSL_connect" = "yes"],

@@ -16755,6 +16755,24 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_RSA_free" >&5
 $as_echo "$ac_cv_lib_crypto_RSA_free" >&6; }
 if test "x$ac_cv_lib_crypto_RSA_free" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCRYPTO 1
+_ACEOF
+
+  LIBS="-lcrypto $LIBS"
+
+fi
+
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
+
+
+    if test "$ac_cv_lib_crypto_RSA_free" = "yes"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_connect in -lssl" >&5
 $as_echo_n "checking for SSL_connect in -lssl... " >&6; }
 if ${ac_cv_lib_ssl_SSL_connect+:} false; then :
@@ -16801,15 +16819,6 @@ _ACEOF
 fi
 
 fi
-
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-
-
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LibreSSL, or OpenSSL 1.1.1 and above" >&5
 $as_echo_n "checking for LibreSSL, or OpenSSL 1.1.1 and above... " >&6; }

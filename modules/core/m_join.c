@@ -127,7 +127,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                          me.name, channel->name, channel->name, oldts);
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Server %s changing TS on %s from %ju to 0",
-                         source_p->name, channel->name, oldts);
+                         source_p->servptr->name, channel->name, oldts);
   }
 
   if (isnew == true)
@@ -162,15 +162,15 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
-    remove_our_modes(channel, source_p);
+    remove_our_modes(channel, source_p->servptr);
 
     if (channel->topic[0])
     {
       channel_set_topic(channel, "", "", 0, false);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
-                           (IsHidden(source_p) ||
+                           (IsHidden(source_p->servptr) ||
                            ConfigServerHide.hide_servers) ?
-                           me.name : source_p->name, channel->name);
+                           me.name : source_p->servptr->name, channel->name);
     }
 
     sendto_channel_local(NULL, channel, 0, 0, 0,
@@ -180,8 +180,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
   if (*modebuf)
   {
-    servername = (ConfigServerHide.hide_servers || IsHidden(source_p)) ?
-                  me.name : source_p->name;
+    servername = (ConfigServerHide.hide_servers || IsHidden(source_p->servptr)) ?
+                  me.name : source_p->servptr->name;
 
     /* This _SHOULD_ be to ALL_MEMBERS
      * It contains only +imnpstlk, etc */

@@ -237,9 +237,9 @@ change_local_nick(struct Client *source_p, const char *nick)
   }
 
   /*
-   * Client just changing his/her nick. If he/she is on a channel,
-   * send note of change to all clients on that channel. Propagate
-   * notice to other servers.
+   * Client just changing their nick. If they are on a channel, send
+   * note of change to all clients on that channel. Propagate notice
+   * to other servers.
    */
   sendto_realops_flags(UMODE_NCHANGE, L_ALL, SEND_NOTICE,
                        "Nick change: From %s to %s [%s@%s]",
@@ -256,7 +256,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   strlcpy(source_p->name, nick, sizeof(source_p->name));
   hash_add_client(source_p);
 
-  if (samenick == 0)
+  if (samenick == false)
     watch_check_hash(source_p, RPL_LOGON);
 
   /* fd_desc is long enough */
@@ -636,8 +636,8 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Check if the nick is resv'd */
-  const struct ResvItem *resv;
-  if ((resv = resv_find(nick, match)))
+  const struct ResvItem *resv = resv_find(nick, match);
+  if (resv)
   {
     sendto_one_numeric(source_p, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
@@ -646,8 +646,8 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct Client *target_p;
-  if ((target_p = hash_find_client(nick)) == NULL || target_p == source_p)
+  struct Client *target_p = hash_find_client(nick);
+  if (target_p == NULL || target_p == source_p)
     set_initial_nick(source_p, nick);
   else
     sendto_one_numeric(source_p, &me, ERR_NICKNAMEINUSE, target_p->name);
@@ -720,8 +720,8 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  struct Client *target_p;
-  if ((target_p = hash_find_client(nick)) == NULL)
+  struct Client *target_p = hash_find_client(nick);
+  if (target_p == NULL)
     change_local_nick(source_p, nick);
   else if (target_p == source_p)
   {
@@ -774,8 +774,8 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
     return;
 
   /* If the nick doesn't exist, allow it and process like normal */
-  struct Client *target_p;
-  if ((target_p = hash_find_client(parv[1])) == NULL)
+  struct Client *target_p = hash_find_client(parv[1]);
+  if (target_p == NULL)
     change_remote_nick(source_p, parv);
   else if (IsUnknown(target_p))
   {
@@ -847,8 +847,8 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
    * This may generate 401's, but it ensures that both clients always
    * go, even if the other server refuses to do the right thing.
    */
-  struct Client *target_p;
-  if ((target_p = hash_find_id(parv[8 + does_rhost])))
+  struct Client *target_p = hash_find_id(parv[8 + does_rhost]);
+  if (target_p)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "ID collision on %s(%s <- %s)(both killed)",
@@ -864,7 +864,8 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((target_p = hash_find_client(parv[1])) == NULL)
+  target_p = hash_find_client(parv[1]);
+  if (target_p == NULL)
     uid_from_server(source_p, parc, parv);
   else if (IsUnknown(target_p))
   {

@@ -58,7 +58,7 @@ Channel Modes:
 +L - extlimit     - Channel can make use of the extended ban list limit. Can be set only by irc-operators,
                     servers and services.
 +M - modreg       - Unregistered/unidentified clients cannot send text to the channel
-+N - nonickchange - This will prevent any user who isn't opped, half-opped or voiced (+o/+h/+v)) from
++N - nonickchange - This will prevent any user who isn't opped, half-opped or voiced (+o/+h/+v) from
                     changing their nick while in the channel.
 +n - noexternal   - Users must be in the channel to send text to it
 +o - chanop       - Full operator status

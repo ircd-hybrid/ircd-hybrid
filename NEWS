@@ -1,3 +1,10 @@
+-- Noteworthy changes in version 8.2.30 (2020-??-??)
+o) "QUOTE HELP extban" didn't work because the extban help file hasn't been
+   installed properly during installation
+o) Fixed broken libcrypto detection causing ircd not to work with openssl
+   under certain circumstances
+
+
 -- Noteworthy changes in version 8.2.29 (2020-02-19)
 o) Extbans have been implemented. Currently supported extbans:
 

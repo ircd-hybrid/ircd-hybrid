@@ -35,6 +35,7 @@ ircd_SOURCES = auth.c            \
                extban_gecos.c    \
                extban_join.c     \
                extban_mute.c     \
+               extban_nick.c     \
                extban_operclass.c \
                extban_server.c   \
                extban_usermode.c \

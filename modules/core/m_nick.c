@@ -45,6 +45,7 @@
 #include "misc.h"
 #include "id.h"
 #include "ipcache.h"
+#include "extban.h"
 
 
 /* check_clean_nick()
@@ -701,13 +702,19 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   dlink_node *node;
   DLINK_FOREACH(node, source_p->channel.head)
   {
-    const struct ChannelMember *member = node->data;
+    struct ChannelMember *member = node->data;
 
-    if (HasCMode(member->channel, MODE_NONICKCHANGE))
+    if ((member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE)) == 0)
     {
-      if (has_member_flags(member, CHFL_CHANOP | CHFL_HALFOP) == 0)
+      if (HasCMode(member->channel, MODE_NONICKCHANGE))
       {
         sendto_one_numeric(source_p, &me, ERR_NONICKCHANGE, member->channel->name);
+        return;
+      }
+
+      if (extban_nick_can_change(member->channel, source_p, member) == ERR_BANNEDFROMCHAN)
+      {
+        sendto_one_numeric(source_p, &me, ERR_BANNICKCHANGE, member->channel->name);
         return;
       }
     }

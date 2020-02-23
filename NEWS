@@ -1,8 +1,11 @@
 -- Noteworthy changes in version 8.2.30 (2020-??-??)
 o) "QUOTE HELP extban" didn't work because the extban help file hasn't been
    installed properly during installation
-o) Fixed broken libcrypto detection causing ircd not to work with openssl
-   under certain circumstances
+o) Fixed broken libcrypto detection which caused the ircd not to work with
+   openssl under certain circumstances
+o) Extban $n of type 'acting' has been implemented. This extban prevents
+   matching users from changing their nick while in the channel. Users
+   with voice or above are not affected.
 
 
 -- Noteworthy changes in version 8.2.29 (2020-02-19)

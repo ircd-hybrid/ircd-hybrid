@@ -79,12 +79,14 @@ extern const char *extban_get_isupport(void);
 /* TBD: move to modules: */
 extern int extban_mute_can_send(struct Channel *, struct Client *, struct ChannelMember *);
 extern int extban_join_can_join(struct Channel *, struct Client *, struct ChannelMember *);
+extern int extban_nick_can_change(struct Channel *, struct Client *, struct ChannelMember *);
 extern struct Extban extban_account;
 extern struct Extban extban_channel;
 extern struct Extban extban_fingerprint;
 extern struct Extban extban_join;
 extern struct Extban extban_gecos;
 extern struct Extban extban_mute;
+extern struct Extban extban_nick;
 extern struct Extban extban_operclass;
 extern struct Extban extban_server;
 extern struct Extban extban_usermode;

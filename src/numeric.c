@@ -160,6 +160,7 @@ static const char *const replies[] =
   /* 431 */  [ERR_NONICKNAMEGIVEN] = ":No nickname given",
   /* 432 */  [ERR_ERRONEUSNICKNAME] = "%s :%s",
   /* 433 */  [ERR_NICKNAMEINUSE] = "%s :Nickname is already in use.",
+  /* 435 */  [ERR_BANNICKCHANGE] = "%s :Cannot change nickname while banned on channel",
   /* 436 */  [ERR_NICKCOLLISION] = "%s :Nickname collision KILL",
   /* 438 */  [ERR_NICKTOOFAST] = "%s :Nick change too fast. Please wait %u seconds.",
   /* 440 */  [ERR_SERVICESDOWN] = "%s :Services are currently unavailable.",

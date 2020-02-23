@@ -26,7 +26,6 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "irc_string.h"
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"

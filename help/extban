@@ -32,5 +32,8 @@ Acting extbans:
  $m:<banmask>   Blocks messages from matching users. Users with voice
                 or above are not affected.
 
+ $n:<banmask>   Prevents matching users from changing their nicks. Users with
+                voice or above are not affected.
+
 A ban given to an acting extban may either be a nick!user@host mask,
 matched against users as a normal ban, or a matching extban.

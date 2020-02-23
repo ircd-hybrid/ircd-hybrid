@@ -1,0 +1,56 @@
+/*
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
+ *
+ *  Copyright (c) 2019-2020 ircd-hybrid development team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ *  USA
+ */
+
+/*! \file extban_nick.c
+ * \brief Implements nick change restriction extended channel bans.
+ * \version $Id: extban_nick.c 9249 2020-02-01 13:35:32Z michael $
+ */
+
+#include "stdinc.h"
+#include "list.h"
+#include "channel.h"
+#include "channel_mode.h"
+#include "client.h"
+#include "extban.h"
+#include "numeric.h"
+
+
+int
+extban_nick_can_change(struct Channel *channel, struct Client *client,
+                       struct ChannelMember *member)
+{
+  assert(member);
+
+  /* Search for matching joinban */
+  if (find_bmask(client, channel, &channel->banlist, &extban_nick) == true)
+    /* Clients who match +e n: override +b n: */
+    if (find_bmask(client, channel, &channel->exceptlist, &extban_nick) == false)
+      return ERR_BANNEDFROMCHAN;
+
+  return 0;
+}
+
+struct Extban extban_nick =
+{
+  .character = 'n',
+  .type = EXTBAN_ACTING,
+  .types = CHFL_BAN | CHFL_EXCEPTION
+};

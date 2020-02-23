@@ -67,7 +67,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   struct Client  *target_p = NULL;
   uintmax_t newts;
   uintmax_t oldts;
-  uintmax_t tstosend;
   struct Mode mode, *oldmode;
   int            args = 0;
   bool           isnew = false;
@@ -163,21 +162,18 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
 
   if (isnew == true)
-    channel->creation_time = tstosend = newts;
+    channel->creation_time = newts;
   else if (newts == 0 || oldts == 0)
-    channel->creation_time = tstosend = 0;
+    channel->creation_time = 0;
   else if (newts == oldts)
-    tstosend = oldts;
+    ;
   else if (newts < oldts)
   {
     keep_our_modes = false;
-    channel->creation_time = tstosend = newts;
+    channel->creation_time = newts;
   }
   else
-  {
     keep_new_modes = false;
-    tstosend = oldts;
-  }
 
   if (keep_new_modes == false)
     mode = *oldmode;
@@ -242,7 +238,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
 
   buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s %s:",
-                    source_p->id, tstosend,
+                    source_p->id, channel->creation_time,
                     channel->name, modebuf, parabuf);
   uid_ptr = uid_buf + buflen;
 
@@ -343,7 +339,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       sendto_server(source_p, 0, 0, "%s", uid_buf);
 
       buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s %s:",
-                        source_p->id, tstosend,
+                        source_p->id, channel->creation_time,
                         channel->name, modebuf, parabuf);
       uid_ptr = uid_buf + buflen;
     }

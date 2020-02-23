@@ -6,6 +6,8 @@ o) Fixed broken libcrypto detection which caused the ircd not to work with
 o) Extban $n of type 'acting' has been implemented. This extban prevents
    matching users from changing their nick while in the channel. Users
    with voice or above are not affected.
+o) Channel mode +N has been changed so channel members with +v can change
+   their nick name as well
 
 
 -- Noteworthy changes in version 8.2.29 (2020-02-19)

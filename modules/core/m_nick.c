@@ -60,7 +60,7 @@
  * side effects - if nickname is erroneous, or a different length to
  *                truncated nickname, return 1
  */
-static int
+static bool
 check_clean_nick(struct Client *source_p, const char *nick)
 {
   assert(IsServer(source_p) || (IsClient(source_p) && !MyConnect(source_p)));
@@ -70,7 +70,7 @@ check_clean_nick(struct Client *source_p, const char *nick)
    * and don't bother messing at all
    */
   if (valid_nickname(nick, false) == true)
-    return 0;
+    return true;
 
   ++ServerStats.is_kill;
   sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
@@ -88,16 +88,16 @@ check_clean_nick(struct Client *source_p, const char *nick)
     exit_client(source_p, "Bad Nickname");
   }
 
-  return 1;
+  return false;
 }
 
-static int
+static bool
 check_clean_uid(struct Client *source_p, const char *nick, const char *uid)
 {
   assert(IsServer(source_p));
 
   if (valid_uid(uid) == true && strncmp(uid, source_p->id, IRC_MAXSID) == 0)
-    return 0;
+    return true;
 
   ++ServerStats.is_kill;
   sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
@@ -105,7 +105,7 @@ check_clean_uid(struct Client *source_p, const char *nick, const char *uid)
                        uid, nick, source_p->name, source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad UID)",
              me.id, uid, me.name);
-  return 1;
+  return false;
 }
 
 /* check_clean_user()
@@ -117,13 +117,13 @@ check_clean_uid(struct Client *source_p, const char *nick, const char *uid)
  * output       - none
  * side effects - if username is erroneous, return 1
  */
-static int
+static bool
 check_clean_user(struct Client *source_p, const char *nick, const char *user)
 {
   assert(IsServer(source_p));
 
   if (valid_username(user, false) == true)
-    return 0;
+    return true;
 
   ++ServerStats.is_kill;
   sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
@@ -131,7 +131,7 @@ check_clean_user(struct Client *source_p, const char *nick, const char *user)
                        user, nick, source_p->name, source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad Username)",
              me.id, nick, me.name);
-  return 1;
+  return false;
 }
 
 /* check_clean_host()
@@ -143,13 +143,13 @@ check_clean_user(struct Client *source_p, const char *nick, const char *user)
  * output       - none
  * side effects - if hostname is erroneous, return 1
  */
-static int
+static bool
 check_clean_host(struct Client *source_p, const char *nick, const char *host)
 {
   assert(IsServer(source_p));
 
   if (valid_hostname(host) == true)
-    return 0;
+    return true;
 
   ++ServerStats.is_kill;
   sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
@@ -157,7 +157,7 @@ check_clean_host(struct Client *source_p, const char *nick, const char *host)
                        host, nick, source_p->name, source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad Hostname)",
              me.id, nick, me.name);
-  return 1;
+  return false;
 }
 
 /* set_initial_nick()
@@ -770,7 +770,7 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
   if (!IsClient(source_p))
     return;  /* Servers and unknown clients can't change nicks.. */
 
-  if (check_clean_nick(source_p, parv[1]))
+  if (check_clean_nick(source_p, parv[1]) == false)
     return;
 
   /* If the nick doesn't exist, allow it and process like normal */
@@ -832,14 +832,14 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
   /* TBR: compatibility mode */
   const int does_rhost = parc == 12;
 
-  if (check_clean_nick(source_p, parv[1]) ||
-      check_clean_user(source_p, parv[1], parv[5]) ||
-      check_clean_host(source_p, parv[1], parv[6]) ||
-      check_clean_uid(source_p, parv[1], parv[8 + does_rhost]))
+  if (check_clean_nick(source_p, parv[1]) == false ||
+      check_clean_user(source_p, parv[1], parv[5]) == false ||
+      check_clean_host(source_p, parv[1], parv[6]) == false ||
+      check_clean_uid(source_p, parv[1], parv[8 + does_rhost]) == false)
     return;
 
   /* TBR: compatibility mode */
-  if (does_rhost && check_clean_host(source_p, parv[1], parv[7]))
+  if (does_rhost && check_clean_host(source_p, parv[1], parv[7]) == false)
     return;
 
   /*

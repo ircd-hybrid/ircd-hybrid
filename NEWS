@@ -1,4 +1,4 @@
--- Noteworthy changes in version 8.2.30 (2020-??-??)
+-- Noteworthy changes in version 8.2.30 (2020-03-01)
 o) "QUOTE HELP extban" didn't work because the extban help file hasn't been
    installed properly during 'make install'
 o) Fixed broken libcrypto detection which caused the ircd not to work with
@@ -8,6 +8,7 @@ o) Extban $n of type 'acting' has been implemented. This extban prevents
    with voice or above are not affected.
 o) Channel mode +N has been changed so channel members with +v can change
    their nick name as well
+o) For a full list of all changes in this release, see https://git.io/JvgAq
 
 
 -- Noteworthy changes in version 8.2.29 (2020-02-19)
@@ -35,7 +36,7 @@ o) Extbans have been implemented. Currently supported extbans:
    For more details, see help/extban.
 o) Added 'channel::enable_extbans' configuration option. See doc/reference.conf
    for more information.
-o) For a full list of all changes in this release, see https://git.io/JvBca
+o) For a full list of all changes in this release, see https://git.io/JvgAL
 
 
 -- Noteworthy changes in version 8.2.28 (2020-01-26)

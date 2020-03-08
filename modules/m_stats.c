@@ -705,9 +705,16 @@ show_iline_prefix(const struct Client *source_p, const struct MaskItem *conf)
 }
 
 static void
-report_auth(struct Client *source_p, int parc, char *parv[])
+stats_auth(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
+
+  /* Oper only, if unopered, return ERR_NOPRIVILEGES */
+  if (ConfigGeneral.stats_i_oper_only && !HasUMode(source_p, UMODE_OPER))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    return;
+  }
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -731,39 +738,6 @@ report_auth(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static void
-stats_auth(struct Client *source_p, int parc, char *parv[])
-{
-  /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_i_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
-
-  /* If unopered, only return matching auth blocks */
-  else if (ConfigGeneral.stats_i_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
-  {
-    const struct MaskItem *conf;
-
-    if (MyConnect(source_p))
-      conf = find_conf_by_address(source_p->host,
-                                  &source_p->ip, CONF_CLIENT,
-                                  source_p->username,
-                                  source_p->connection->password, 1);
-    else
-      conf = find_conf_by_address(source_p->host, NULL, CONF_CLIENT,
-                                  source_p->username, NULL, 1);
-
-    if (conf == NULL)
-      return;
-
-    sendto_one_numeric(source_p, &me, RPL_STATSILINE,
-                       'I', "*", show_iline_prefix(source_p, conf),
-                       conf->host, conf->port,
-                       conf->class->name);
-  }
-  else  /* They are opered, or allowed to see all auth blocks */
-    report_auth(source_p, 0, NULL);
-}
-
 /* report_Klines()
  * Inputs: Client to report to,
  *         type(==0 for perm, !=0 for temporary)
@@ -772,15 +746,16 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
  * Side effects: Reports configured K(or k)-lines to source_p.
  */
 static void
-report_Klines(struct Client *source_p, int tkline)
+stats_kill(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
-  char c;
 
-  if (tkline)
-    c = 'k';
-  else
-    c = 'K';
+  /* Oper only, if unopered, return ERR_NOPRIVILEGES */
+  if (ConfigGeneral.stats_k_oper_only && !HasUMode(source_p, UMODE_OPER))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    return;
+  }
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
@@ -792,83 +767,46 @@ report_Klines(struct Client *source_p, int tkline)
         continue;
 
       const struct MaskItem *conf = arec->conf;
-      if ((!tkline && conf->until) ||
-          (tkline && !conf->until))
+      /* Don't report a temporary kline as permanent kline */
+      if (conf->until)
         continue;
 
-      sendto_one_numeric(source_p, &me, RPL_STATSKLINE, c, conf->host, conf->user,
+      sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'K', conf->host, conf->user,
                          conf->reason);
     }
   }
 }
 
 static void
-stats_tklines(struct Client *source_p, int parc, char *parv[])
+stats_tkill(struct Client *source_p, int parc, char *parv[])
 {
+  dlink_node *node;
+
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_k_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
-
-  /* If unopered, only return matching klines */
-  else if (ConfigGeneral.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only && !HasUMode(source_p, UMODE_OPER))
   {
-    const struct MaskItem *conf;
-
-    if (MyConnect(source_p))
-      conf = find_conf_by_address(source_p->host,
-                                  &source_p->ip, CONF_KLINE,
-                                  source_p->username, NULL, 1);
-    else
-      conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
-                                  source_p->username, NULL, 1);
-
-    if (conf == NULL)
-      return;
-
-    /* Don't report a permanent kline as temporary kline */
-    if (conf->until == 0)
-      return;
-
-    sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'k',
-                       conf->host, conf->user, conf->reason);
-  }
-  else  /* They are opered, or allowed to see all klines */
-    report_Klines(source_p, 1);
-}
-
-static void
-stats_klines(struct Client *source_p, int parc, char *parv[])
-{
-  /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_k_oper_only == 2 && !HasUMode(source_p, UMODE_OPER))
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
-
-  /* If unopered, only return matching klines */
-  else if (ConfigGeneral.stats_k_oper_only == 1 && !HasUMode(source_p, UMODE_OPER))
-  {
-    const struct MaskItem *conf;
-
-    /* Search for a kline */
-    if (MyConnect(source_p))
-      conf = find_conf_by_address(source_p->host,
-                                  &source_p->ip, CONF_KLINE,
-                                  source_p->username, NULL, 0);
-    else
-      conf = find_conf_by_address(source_p->host, NULL, CONF_KLINE,
-                                  source_p->username, NULL, 0);
-
-    if (conf == NULL)
-      return;
-
-    /* Don't report a temporary kline as permanent kline */
-    if (conf->until)
-      return;
-
-    sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'K',
-                       conf->host, conf->user, conf->reason);
+    return;
   }
-  else  /* They are opered, or allowed to see all klines */
-    report_Klines(source_p, 0);
+
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  {
+    DLINK_FOREACH(node, atable[i].head)
+    {
+      const struct AddressRec *arec = node->data;
+
+      if (arec->type != CONF_KLINE)
+        continue;
+
+      const struct MaskItem *conf = arec->conf;
+      /* Don't report a permanent kline as temporary kline */
+      if (conf->until == 0)
+        continue;
+
+      sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'k', conf->host, conf->user,
+                         conf->reason);
+    }
+  }
 }
 
 static void
@@ -1311,8 +1249,8 @@ static const struct StatsStruct  stats_tab[] =
   { .letter = 'H', .handler = stats_hubleaf, .required_modes = UMODE_OPER },
   { .letter = 'i', .handler = stats_auth },
   { .letter = 'I', .handler = stats_auth },
-  { .letter = 'k', .handler = stats_tklines },
-  { .letter = 'K', .handler = stats_klines },
+  { .letter = 'k', .handler = stats_tkill },
+  { .letter = 'K', .handler = stats_kill },
   { .letter = 'l', .handler = stats_ltrace, .required_modes = UMODE_OPER },
   { .letter = 'L', .handler = stats_ltrace, .required_modes = UMODE_OPER },
   { .letter = 'm', .handler = stats_messages },

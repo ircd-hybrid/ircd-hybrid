@@ -228,7 +228,6 @@ listen                      { return LISTEN; }
 locops                      { return T_LOCOPS; }
 log                         { return T_LOG; }
 mask                        { return MASK; }
-masked                      { return TMASKED; }
 max_accept                  { return MAX_ACCEPT; }
 max_bans                    { return MAX_BANS; }
 max_bans_large              { return MAX_BANS_LARGE; }

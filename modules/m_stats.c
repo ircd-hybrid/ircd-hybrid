@@ -905,8 +905,8 @@ static void
 stats_operedup(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
+  char buf[32];
   unsigned int opercount = 0;
-  char buf[IRCD_BUFSIZE];
 
   DLINK_FOREACH(node, oper_list.head)
   {

@@ -351,11 +351,8 @@ register_local_user(struct Client *client)
     }
   }
 
-  /*
-   * Don't free client->connection->password here - it can be required
-   * by masked /stats I if there are auth {} blocks with need_password = no;
-   * --adx
-   */
+  xfree(client->connection->password);
+  client->connection->password = NULL;
 
   /*
    * Report if user has &^>= etc. and set flags as needed in client

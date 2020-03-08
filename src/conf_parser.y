@@ -342,7 +342,6 @@ reset_block_state(void)
 %token  TLS_DH_PARAM_FILE
 %token  TLS_MESSAGE_DIGEST_ALGORITHM
 %token  TLS_SUPPORTED_GROUPS
-%token  TMASKED
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
 %token  TWODOTS
@@ -2515,18 +2514,12 @@ general_stats_u_oper_only: STATS_U_OPER_ONLY '=' TBOOL ';'
 
 general_stats_k_oper_only: STATS_K_OPER_ONLY '=' TBOOL ';'
 {
-  ConfigGeneral.stats_k_oper_only = 2 * yylval.number;
-} | STATS_K_OPER_ONLY '=' TMASKED ';'
-{
-  ConfigGeneral.stats_k_oper_only = 1;
+  ConfigGeneral.stats_k_oper_only = yylval.number;
 };
 
 general_stats_i_oper_only: STATS_I_OPER_ONLY '=' TBOOL ';'
 {
-  ConfigGeneral.stats_i_oper_only = 2 * yylval.number;
-} | STATS_I_OPER_ONLY '=' TMASKED ';'
-{
-  ConfigGeneral.stats_i_oper_only = 1;
+  ConfigGeneral.stats_i_oper_only = yylval.number;
 };
 
 general_pace_wait: PACE_WAIT '=' timespec ';'

@@ -50,8 +50,7 @@ struct InfoStruct
     OUTPUT_STRING_PTR,  /* Output option as %s w/out deference */
     OUTPUT_DECIMAL,  /* Output option as decimal (%d) */
     OUTPUT_BOOLEAN,  /* Output option as "ON" or "OFF" */
-    OUTPUT_BOOLEAN_YN,  /* Output option as "YES" or "NO" */
-    OUTPUT_BOOLEAN2  /* Output option as "YES/NO/MASKED" */
+    OUTPUT_BOOLEAN_YN  /* Output option as "YES" or "NO" */
   } output_type;  /* Type of output. See enum above */
 
   const void *option;  /* Pointer reference to the value */
@@ -472,13 +471,13 @@ static const struct InfoStruct info_table[] =
   },
   {
     "stats_i_oper_only",
-    OUTPUT_BOOLEAN2,
+    OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.stats_i_oper_only,
     "STATS I output is only shown to operators"
   },
   {
     "stats_k_oper_only",
-    OUTPUT_BOOLEAN2,
+    OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.stats_k_oper_only,
     "STATS K output is only shown to operators"
   },
@@ -702,17 +701,6 @@ send_conf_options(struct Client *source_p)
         sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
                            ":%-30s %-5s [%s]",
                            iptr->name, option ? "YES" : "NO",
-                           iptr->desc ? iptr->desc : "<none>");
-        break;
-      }
-
-      case OUTPUT_BOOLEAN2:
-      {
-        const unsigned int option = *((const unsigned int *const)iptr->option);
-
-        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
-                           ":%-30s %-5s [%s]",
-                           iptr->name, option ? ((option == 1) ? "MASK" : "YES") : "NO",
                            iptr->desc ? iptr->desc : "<none>");
         break;
       }

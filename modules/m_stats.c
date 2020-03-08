@@ -882,9 +882,15 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
  * side effects - send port listing to a client
  */
 static void
-show_ports(struct Client *source_p)
+stats_ports(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
+
+  if (ConfigGeneral.stats_P_oper_only && !HasUMode(source_p, UMODE_OPER))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    return;
+  }
 
   DLINK_FOREACH(node, listener_get_list()->head)
   {
@@ -915,15 +921,6 @@ show_ports(struct Client *source_p)
                          me.name, listener->ref_count, buf,
                          listener->active ? "active" : "disabled");
   }
-}
-
-static void
-stats_ports(struct Client *source_p, int parc, char *parv[])
-{
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_P_oper_only)
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
-  else
-    show_ports(source_p);
 }
 
 static void

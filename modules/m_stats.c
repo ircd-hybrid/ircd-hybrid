@@ -720,7 +720,7 @@ report_auth(struct Client *source_p, int parc, char *parv[])
         continue;
 
       const struct MaskItem *conf = arec->conf;
-      if (!HasUMode(source_p, UMODE_OPER) && IsConfDoSpoofIp(conf))
+      if (IsConfDoSpoofIp(conf) && !HasUMode(source_p, UMODE_OPER))
         continue;
 
       sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',

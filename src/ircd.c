@@ -289,6 +289,10 @@ setup_fdlimit(void)
     exit(EXIT_FAILURE);
   }
 
+#ifdef __APPLE__
+  if (rlim.rlim_max > OPEN_MAX)
+    rlim.rlim_max = OPEN_MAX;
+#endif
   if (rlim.rlim_max > 0xFFFF)
     rlim.rlim_max = 0xFFFF;
   rlim.rlim_cur = rlim.rlim_max;

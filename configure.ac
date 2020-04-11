@@ -33,8 +33,7 @@ AX_LIBRARY_NET
 AC_C_BIGENDIAN
 
 # Checks for library functions.
-AC_CHECK_FUNCS_ONCE(strtok_r \
-                    strlcat  \
+AC_CHECK_FUNCS_ONCE(strlcat \
                     strlcpy)
 
 # Checks for header files.

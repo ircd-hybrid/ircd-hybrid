@@ -70,10 +70,6 @@ extern const char *stripws(char *);
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
-#ifndef HAVE_STRTOK_R
-extern char *strtok_r(char *, const char *, char **);
-#endif
-
 /*
  * character macros
  */

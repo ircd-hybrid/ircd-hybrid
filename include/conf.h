@@ -50,17 +50,16 @@ enum
   CONF_FLAGS_EXEMPTKLINE     = 1 <<  2,
   CONF_FLAGS_NOLIMIT         = 1 <<  3,
   CONF_FLAGS_SPOOF_IP        = 1 <<  4,
-  CONF_FLAGS_SPOOF_NOTICE    = 1 <<  5,
-  CONF_FLAGS_REDIR           = 1 <<  6,
-  CONF_FLAGS_CAN_FLOOD       = 1 <<  7,
-  CONF_FLAGS_NEED_PASSWORD   = 1 <<  8,
-  CONF_FLAGS_ALLOW_AUTO_CONN = 1 <<  9,
-  CONF_FLAGS_ENCRYPTED       = 1 << 10,
-  CONF_FLAGS_IN_DATABASE     = 1 << 11,
+  CONF_FLAGS_REDIR           = 1 <<  5,
+  CONF_FLAGS_CAN_FLOOD       = 1 <<  6,
+  CONF_FLAGS_NEED_PASSWORD   = 1 <<  7,
+  CONF_FLAGS_ALLOW_AUTO_CONN = 1 <<  8,
+  CONF_FLAGS_ENCRYPTED       = 1 <<  9,
+  CONF_FLAGS_IN_DATABASE     = 1 << 10,
   CONF_FLAGS_EXEMPTRESV      = 1 << 12,
-  CONF_FLAGS_TLS             = 1 << 13,
-  CONF_FLAGS_WEBIRC          = 1 << 14,
-  CONF_FLAGS_EXEMPTXLINE     = 1 << 15
+  CONF_FLAGS_TLS             = 1 << 12,
+  CONF_FLAGS_WEBIRC          = 1 << 13,
+  CONF_FLAGS_EXEMPTXLINE     = 1 << 14
 };
 
 /* Macros for struct MaskItem */
@@ -74,7 +73,6 @@ enum
 #define IsConfExemptLimits(x)     ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
 #define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#define IsConfSpoofNotice(x)      ((x)->flags & CONF_FLAGS_SPOOF_NOTICE)
 #define IsConfAllowAutoConn(x)    ((x)->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
 #define SetConfAllowAutoConn(x)   ((x)->flags |= CONF_FLAGS_ALLOW_AUTO_CONN)
 #define ClearConfAllowAutoConn(x) ((x)->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN)

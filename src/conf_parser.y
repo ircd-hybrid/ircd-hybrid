@@ -273,7 +273,6 @@ reset_block_state(void)
 %token  SERVERINFO
 %token  SHORT_MOTD
 %token  SPOOF
-%token  SPOOF_NOTICE
 %token  SQUIT
 %token  STATS_E_DISABLED
 %token  STATS_I_OPER_ONLY
@@ -1621,11 +1620,7 @@ auth_flags: IRCD_FLAGS
 } '=' auth_flags_items ';';
 
 auth_flags_items: auth_flags_items ',' auth_flags_item | auth_flags_item;
-auth_flags_item: SPOOF_NOTICE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_SPOOF_NOTICE;
-} | EXCEED_LIMIT
+auth_flags_item: EXCEED_LIMIT
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_FLAGS_NOLIMIT;

@@ -303,7 +303,6 @@ size                        { return T_SIZE; }
 skill                       { return T_SKILL; }
 softcallerid                { return T_SOFTCALLERID; }
 spoof                       { return SPOOF; }
-spoof_notice                { return SPOOF_NOTICE; }
 spy                         { return T_SPY; }
 squit                       { return SQUIT; }
 ssl                         { return T_TLS; }

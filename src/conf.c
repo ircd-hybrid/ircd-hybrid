@@ -316,13 +316,7 @@ verify_access(struct Client *client)
   }
 
   if (IsConfDoSpoofIp(conf))
-  {
-    if (IsConfSpoofNotice(conf))
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE, "%s spoofing: %s as %s",
-                           client->name, client->host, conf->name);
-
     strlcpy(client->host, conf->name, sizeof(client->host));
-  }
 
   return attach_iline(client, conf);
 }

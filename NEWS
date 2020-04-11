@@ -1,3 +1,8 @@
+-- Noteworthy changes in version 8.2.31 (2020-??-??)
+o) macOS compatibility fixes
+o) Removed 'spoof_notice' from auth::flags
+
+
 -- Noteworthy changes in version 8.2.30 (2020-03-01)
 o) "QUOTE HELP extban" didn't work because the extban help file hasn't been
    installed properly during 'make install'

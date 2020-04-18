@@ -55,26 +55,24 @@
 static void
 m_topic(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *channel = NULL;
-
   if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "TOPIC");
     return;
   }
 
-  if ((channel = hash_find_channel(parv[1])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[1]);
+  if (channel == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
   }
 
-  /* setting topic */
+  /* Setting topic */
   if (parc > 2)
   {
-    const struct ChannelMember *member = NULL;
-
-    if ((member = find_channel_link(source_p, channel)) == NULL)
+    const struct ChannelMember *member = find_channel_link(source_p, channel);
+    if (member == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
       return;
@@ -101,7 +99,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
     else
       sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
   }
-  else /* only asking for topic */
+  else  /* Only asking for topic */
   {
     if (!SecretChannel(channel) || IsMember(source_p, channel))
     {
@@ -137,7 +135,6 @@ m_topic(struct Client *source_p, int parc, char *parv[])
 static void
 ms_topic(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *channel = NULL;
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
 
   if (parc < 3)
@@ -146,7 +143,8 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((channel = hash_find_channel(parv[1])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[1]);
+  if (channel == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;

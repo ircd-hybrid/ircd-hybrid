@@ -78,8 +78,6 @@ do_user(struct Client *source_p,
 static void
 mr_user(struct Client *source_p, int parc, char *parv[])
 {
-  char *p = NULL;
-
   if (source_p->connection->listener->flags & LISTENER_SERVER)
   {
     exit_client(source_p, "Use a different port");
@@ -92,7 +90,8 @@ mr_user(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((p = strchr(parv[1], '@')))
+  char *p = strchr(parv[1], '@');
+  if (p)
     *p = '\0';
 
   do_user(source_p, parv[1], parv[4]);

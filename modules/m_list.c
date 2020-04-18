@@ -60,10 +60,10 @@ do_list(struct Client *source_p, char *arg)
 
   if (!EmptyString(arg))
   {
-    dlink_list *list = NULL;
+    dlink_list *list;
     char *opt, *save = NULL;
     bool error = false;
-    int i = 0;
+    int i;
 
     for (opt = strtok_r(arg,  ",", &save); opt;
          opt = strtok_r(NULL, ",", &save))

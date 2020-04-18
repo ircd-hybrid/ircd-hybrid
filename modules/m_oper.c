@@ -135,8 +135,8 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct MaskItem *conf;
-  if ((conf = operator_find(source_p, opername)) == NULL)
+  struct MaskItem *conf = operator_find(source_p, opername);
+  if (conf == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
 

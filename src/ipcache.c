@@ -100,7 +100,7 @@ ipcache_record_delete(patricia_node_t *pnode)
  *                 the struct ip_entry is returned to the ip_entry_heap
  */
 void
-ipcache_record_remove(void *addr, int local)
+ipcache_record_remove(void *addr, bool local)
 {
   patricia_node_t *pnode = patricia_try_search_exact_addr(ipcache_get_trie(addr), addr, 0);
 
@@ -110,7 +110,7 @@ ipcache_record_remove(void *addr, int local)
   struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
   assert(iptr->count_local > 0 || iptr->count_remote > 0);
 
-  if (local)
+  if (local == true)
     --iptr->count_local;
   else
     --iptr->count_remote;

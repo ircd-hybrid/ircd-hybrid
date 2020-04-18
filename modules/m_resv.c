@@ -64,8 +64,8 @@ resv_handle(struct Client *source_p, const struct aline_ctx *aline)
     }
   }
 
-  struct ResvItem *resv;
-  if ((resv = resv_find(aline->mask, irccmp)))
+  struct ResvItem *resv = resv_find(aline->mask, irccmp);
+  if (resv)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", resv->mask);

@@ -37,7 +37,7 @@ struct event_base
   } time;
 };
 
-struct event_base *event_base;
+extern struct event_base *event_base;
 
 struct event
 {

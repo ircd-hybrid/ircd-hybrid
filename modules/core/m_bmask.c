@@ -131,7 +131,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       }
 
       *mbuf++ = *parv[3];
-      pbuf += sprintf(pbuf, "%s ", mask);
+      pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", mask);
       ++modecount;
     }
 

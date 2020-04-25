@@ -214,7 +214,7 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
   dlink_node *node;
   char mbuf[IRCD_BUFSIZE];
   char pbuf[IRCD_BUFSIZE];
-  int tlen, mlen, cur_len;
+  size_t tlen, mlen, cur_len;
   char *pp = pbuf;
 
   if (dlink_list_length(list) == 0)
@@ -233,7 +233,7 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
     /*
      * Send buffer and start over if we cannot fit another ban
      */
-    if (cur_len + (tlen - 1) > IRCD_BUFSIZE - 2)
+    if (cur_len + (tlen - 1) > sizeof(pbuf) - 2)
     {
       *(pp - 1) = '\0';  /* Get rid of trailing space on buffer */
       sendto_one(client, "%s%s", mbuf, pbuf);
@@ -242,7 +242,7 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
       pp = pbuf;
     }
 
-    pp += sprintf(pp, "%s ", ban->banstr);
+    pp += snprintf(pp, sizeof(pbuf) - (pp - pbuf), "%s ", ban->banstr);
     cur_len += tlen;
   }
 

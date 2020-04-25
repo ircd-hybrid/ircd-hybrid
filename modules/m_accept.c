@@ -67,9 +67,10 @@ list_accepts(struct Client *source_p)
       bufptr = buf;
     }
 
-    bufptr += sprintf(bufptr, "%s!%s@%s ",
-                      accept_p->nickptr,
-                      accept_p->userptr, accept_p->hostptr);
+    bufptr += snprintf(bufptr, sizeof(buf) - (buf - bufptr), "%s!%s@%s ",
+                       accept_p->nickptr,
+                       accept_p->userptr,
+                       accept_p->hostptr);
   }
 
   if (bufptr != buf)

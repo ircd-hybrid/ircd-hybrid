@@ -51,7 +51,7 @@ list_accepts(struct Client *source_p)
 
   /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */
   /* 1       23456              78                     9 10 */
-  int len = strlen(me.name) + strlen(source_p->name) + 10;
+  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
 
   DLINK_FOREACH(node, source_p->connection->acceptlist.head)
   {
@@ -67,7 +67,7 @@ list_accepts(struct Client *source_p)
       bufptr = buf;
     }
 
-    bufptr += snprintf(bufptr, sizeof(buf) - (buf - bufptr), "%s!%s@%s ",
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s!%s@%s ",
                        accept_p->nickptr,
                        accept_p->userptr,
                        accept_p->hostptr);

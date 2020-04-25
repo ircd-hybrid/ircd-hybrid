@@ -45,8 +45,8 @@
 static void
 list_accepts(struct Client *source_p)
 {
-  char nicks[IRCD_BUFSIZE] = "";
-  char *t = nicks;
+  char buf[IRCD_BUFSIZE];
+  char *bufptr = buf;
   dlink_node *node;
 
   /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */
@@ -60,22 +60,22 @@ list_accepts(struct Client *source_p)
                      strlen(accept_p->userptr) +
                      strlen(accept_p->hostptr) + 3;  /* +3 for ! + @ + space */
 
-    if ((t - nicks) + masklen + len > IRCD_BUFSIZE)
+    if ((bufptr - buf) + masklen + len > sizeof(buf))
     {
-      *(t - 1) = '\0';
-      sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, nicks);
-      t = nicks;
+      *(bufptr - 1) = '\0';
+      sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, buf);
+      bufptr = buf;
     }
 
-    t += sprintf(t, "%s!%s@%s ",
-                 accept_p->nickptr,
-                 accept_p->userptr, accept_p->hostptr);
+    bufptr += sprintf(bufptr, "%s!%s@%s ",
+                      accept_p->nickptr,
+                      accept_p->userptr, accept_p->hostptr);
   }
 
-  if (nicks[0])
+  if (bufptr != buf)
   {
-    *(t - 1) = '\0';
-    sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, nicks);
+    *(bufptr - 1) = '\0';
+    sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, buf);
   }
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFACCEPT);

@@ -48,36 +48,31 @@
 static void
 m_ison(struct Client *source_p, int parc, char *parv[])
 {
-  char *p = NULL;
-  char buf[IRCD_BUFSIZE];
-  int cut = 0;
+  char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */
+  char *bufptr = buf, *p = NULL;
 
-  int len = snprintf(buf, sizeof(buf), numeric_form(RPL_ISON), me.name, source_p->name);
-  char *current_insert_point = buf + len;
+  /* :me.name 303 source_p->name :nick1 nick2 ...      \r\n */
+  /* 1       23456              78                     9 10 */
+  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
+
 
   for (const char *name = strtok_r(parv[1], " ", &p); name;
                    name = strtok_r(NULL,    " ", &p))
   {
     const struct Client *target_p = find_person(source_p, name);
-    if (target_p)
-    {
-      len = strlen(target_p->name);
+    if (target_p == NULL)
+      continue;
 
-      if ((current_insert_point + (len + 5)) < (buf + sizeof(buf)))
-      {
-        cut = 1;
-        strlcpy(current_insert_point, target_p->name, len + 1);
-        current_insert_point += len;
-        *current_insert_point++ = ' ';
-      }
-      else
-        break;
-    }
+    if ((bufptr - buf) + strlen(target_p->name) + len + 1 /* +1 for space */ > sizeof(buf))
+      break;
+
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s ", target_p->name);
   }
 
-  *(current_insert_point - cut) = '\0';
+  if (bufptr != buf)
+    *(bufptr - 1) = '\0';  /* Get rid of trailing space on buffer */
 
-  sendto_one(source_p, "%s", buf);
+  sendto_one_numeric(source_p, &me, RPL_ISON, buf);
 }
 
 static struct Message ison_msgtab =

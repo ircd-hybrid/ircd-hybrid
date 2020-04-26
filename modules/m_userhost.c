@@ -34,6 +34,10 @@
 #include "modules.h"
 
 
+/** See 5.7 Userhost message in RFC1459 */
+enum { RFC1459_MAX_USERHOST_LIST = 5 };
+
+
 /*! \brief USERHOST command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
@@ -48,59 +52,54 @@
 static void
 m_userhost(struct Client *source_p, int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE];
   char response[NICKLEN + USERLEN + HOSTLEN + 6]; /* +6 for "*=+@ \0" */
-  char *p = NULL;
-  int i = 0;
-  int rl;
+  char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */
+  char *bufptr = buf, *p = NULL;
+  size_t masklen, i = 0;
 
-  int cur_len = snprintf(buf, sizeof(buf), numeric_form(RPL_USERHOST), me.name, source_p->name, "");
-  char *t = buf + cur_len;
+  /* :me.name 302 source_p->name :n1*=+u1@h1 n2=-u2@h2 ...\r\n */
+  /* 1       23456              78                        9 10 */
+  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
 
-  for (const char *name = strtok_r(parv[1], " ", &p); name && i++ < 5;
+  for (const char *name = strtok_r(parv[1], " ", &p); name && i++ < RFC1459_MAX_USERHOST_LIST;
                    name = strtok_r(NULL,    " ", &p))
   {
     const struct Client *target_p = find_person(source_p, name);
-    if (target_p)
-    {
-      /*
-       * Show real IP address for USERHOST on yourself.
-       * This is needed for things like mIRC, which do a server-based
-       * lookup (USERHOST) to figure out what the clients' local IP
-       * is. Useful for things like NAT, and dynamic dial-up users.
-       */
-      if (target_p == source_p)
-      {
-        rl = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
-                      target_p->name,
-                      HasUMode(target_p, UMODE_OPER) ? "*" : "",
-                      (target_p->away[0]) ? '-' : '+',
-                      target_p->username,
-                      target_p->sockhost);
-      }
-      else
-      {
-        rl = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
-                      target_p->name, (HasUMode(target_p, UMODE_OPER) &&
-                                       (!HasUMode(target_p, UMODE_HIDDEN) ||
-                                         HasUMode(source_p, UMODE_OPER))) ? "*" : "",
-                      (target_p->away[0]) ? '-' : '+',
-                      target_p->username,
-                      target_p->host);
-      }
+    if (target_p == NULL)
+      continue;
 
-      if ((rl + cur_len) < (IRCD_BUFSIZE - 10))
-      {
-        sprintf(t, "%s", response);
-        t += rl;
-        cur_len += rl;
-      }
-      else
-        break;
-    }
+    /*
+     * Show real IP address for USERHOST on yourself.
+     * This is needed for things like mIRC, which do a server-based
+     * lookup (USERHOST) to figure out what the clients' local IP
+     * is. Useful for things like NAT, and dynamic dial-up users.
+     */
+    if (target_p == source_p)
+      masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
+                         target_p->name,
+                         HasUMode(target_p, UMODE_OPER) ? "*" : "",
+                         (target_p->away[0]) ? '-' : '+',
+                         target_p->username,
+                         target_p->sockhost);
+    else
+      masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
+                         target_p->name, (HasUMode(target_p, UMODE_OPER) &&
+                                          (!HasUMode(target_p, UMODE_HIDDEN) ||
+                                            HasUMode(source_p, UMODE_OPER))) ? "*" : "",
+                         (target_p->away[0]) ? '-' : '+',
+                         target_p->username,
+                         target_p->host);
+
+    if ((bufptr - buf) + masklen + len > sizeof(buf))
+      break;
+
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s", response);
   }
 
-  sendto_one(source_p, "%s", buf);
+  if (bufptr != buf)
+    *(bufptr - 1) = '\0';  /* Get rid of trailing space on buffer */
+
+  sendto_one_numeric(source_p, &me, RPL_USERHOST, buf);
 }
 
 static struct Message userhost_msgtab =

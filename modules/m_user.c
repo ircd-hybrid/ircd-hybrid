@@ -78,23 +78,26 @@ do_user(struct Client *source_p,
 static void
 mr_user(struct Client *source_p, int parc, char *parv[])
 {
+  const char *const username = parv[1];
+  const char *const realname = parv[4];
+
   if (source_p->connection->listener->flags & LISTENER_SERVER)
   {
     exit_client(source_p, "Use a different port");
     return;
   }
 
-  if (EmptyString(parv[4]))
+  if (EmptyString(realname))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "USER");
     return;
   }
 
-  char *p = strchr(parv[1], '@');
+  char *p = strchr(username, '@');
   if (p)
     *p = '\0';
 
-  do_user(source_p, parv[1], parv[4]);
+  do_user(source_p, username, realname);
 }
 
 static struct Message user_msgtab =

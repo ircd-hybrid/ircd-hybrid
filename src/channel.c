@@ -699,7 +699,9 @@ find_channel_link(const struct Client *client, const struct Channel *channel)
 static bool
 msg_has_ctrls(const char *message)
 {
-  for (const char *p = message; *p; ++p)
+  const unsigned char *p = (const unsigned char *)message;
+
+  for (; *p; ++p)
   {
     if (*p > 31 || *p == 1)
       continue;  /* No control code or CTCP */

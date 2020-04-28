@@ -1,6 +1,9 @@
 -- Noteworthy changes in version 8.2.31 (2020-??-??)
 o) macOS compatibility fixes
 o) Removed 'spoof_notice' from auth::flags
+o) Fixed issue where ban masks might become malformed if set by remote clients/servers
+o) Fixed issue with channel mode +c where high ascii characters can be erroneously
+   detected as control characters
 
 
 -- Noteworthy changes in version 8.2.30 (2020-03-01)

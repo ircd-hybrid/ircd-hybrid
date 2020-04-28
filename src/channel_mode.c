@@ -203,7 +203,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
   if (MyClient(client))
     ban->banstr_len = strlcpy(ban->banstr, get_mask(ban), sizeof(ban->banstr));
   else
-    ban->banstr_len = strlcpy(ban->banstr, mask, sizeof(ban->banstr));
+    ban->banstr_len = strlcpy(ban->banstr, banid, sizeof(ban->banstr));
 
   DLINK_FOREACH(node, list->head)
   {

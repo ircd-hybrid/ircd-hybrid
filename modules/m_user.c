@@ -50,7 +50,6 @@ do_user(struct Client *source_p,
   assert(IsUnknown(source_p));
 
   source_p->connection->registration &= ~REG_NEED_USER;
-  source_p->servptr = &me;  /* Don't take the clients word for it, ever */
 
   strlcpy(source_p->info, realname, sizeof(source_p->info));
 

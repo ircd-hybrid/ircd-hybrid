@@ -240,12 +240,11 @@ server_estab(struct Client *client_p)
   sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MIN,
              event_base->time.sec_real);
 
-  client_p->servptr = &me;
-
   if (IsDead(client_p))
     return;
 
   SetServer(client_p);
+  client_p->servptr = &me;
 
   dlinkAdd(client_p, &client_p->lnode, &me.serv->server_list);
 

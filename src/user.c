@@ -430,8 +430,6 @@ register_local_user(struct Client *client)
     ++Count.invisi;
   }
 
-  assert(client->servptr == &me);
-
   SetClient(client);
 
   client->servptr = &me;

@@ -433,6 +433,8 @@ register_local_user(struct Client *client)
   assert(client->servptr == &me);
 
   SetClient(client);
+
+  client->servptr = &me;
   client->connection->last_privmsg = event_base->time.sec_monotonic;
 
   dlinkAdd(client, &client->lnode, &client->servptr->serv->client_list);

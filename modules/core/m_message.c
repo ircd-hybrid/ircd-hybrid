@@ -121,8 +121,7 @@ flood_attack_client(bool notice, struct Client *source_p, struct Client *target_
   {
     if (!HasFlag(target_p, FLAGS_FLOOD_NOTICED))
     {
-      sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
-                           "Possible Flooder %s on %s target: %s",
+      sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE, "Possible Flooder %s on %s target: %s",
                            client_get_name(source_p, HIDE_IP),
                            source_p->servptr->name, target_p->name);
       AddFlag(target_p, FLAGS_FLOOD_NOTICED);
@@ -173,8 +172,7 @@ flood_attack_channel(bool notice, struct Client *source_p, struct Channel *chann
   {
     if (!IsSetFloodNoticed(channel))
     {
-      sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
-                           "Possible Flooder %s on %s target: %s",
+      sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE, "Possible Flooder %s on %s target: %s",
                            client_get_name(source_p, HIDE_IP),
                            source_p->servptr->name, channel->name);
       SetFloodNoticed(channel);
@@ -332,15 +330,14 @@ static void
 handle_special(bool notice, struct Client *source_p,
                const char *nick, const char *text)
 {
-  struct Client *target_p = NULL;
-  const char *server = NULL, *s = NULL;
-
   /*
    * user[%host]@server addressed?
    */
-  if ((server = strchr(nick, '@')))
+  const char *server = strchr(nick, '@');
+  if (server)
   {
-    if ((target_p = hash_find_server(server + 1)) == NULL)
+    struct Client *target_p = hash_find_server(server + 1);
+    if (target_p == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server + 1);
       return;
@@ -385,7 +382,8 @@ handle_special(bool notice, struct Client *source_p,
       return;
     }
 
-    if ((s = strrchr(nick, '.')) == NULL)
+    const char *s = strrchr(nick, '.');
+    if (s == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOTOPLEVEL, nick);
       return;
@@ -508,8 +506,8 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
       }
 
       /*
-       * At this point, name+1 should be a channel name i.e. #foo or &foo
-       * if the channel is found, fine, if not report an error
+       * At this point, name+1 should be a channel name i.e. #foo. If the channel
+       * is found, fine, if not report an error.
        */
       if ((target = hash_find_channel(name)))
       {

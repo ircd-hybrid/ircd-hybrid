@@ -97,7 +97,6 @@ motd_create(const char *mask, const char *path)
 static struct MotdCache *
 motd_cache(struct Motd *motd)
 {
-  FILE *file = NULL;
   struct stat sb;
   char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
   char *tmp = NULL;
@@ -132,7 +131,8 @@ motd_cache(struct Motd *motd)
   }
 
   /* Gotta read in the file, now */
-  if ((file = fopen(motd->path, "r")) == NULL)
+  FILE *file = fopen(motd->path, "r");
+  if (file == NULL)
   {
     ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path,
          strerror(errno));
@@ -176,11 +176,10 @@ motd_cache(struct Motd *motd)
 static void
 motd_decache(struct Motd *motd)
 {
-  struct MotdCache *cache;
-
   assert(motd);
 
-  if ((cache = motd->cache) == NULL)  /* We can be called for records with no cache */
+  struct MotdCache *cache = motd->cache;
+  if (cache == NULL)  /* We can be called for records with no cache */
     return;
 
   motd->cache = NULL;  /* Zero the cache */
@@ -406,7 +405,6 @@ motd_report(struct Client *client, int parc, char *parv[])
   DLINK_FOREACH(node, MotdList.other.head)
   {
     const struct Motd *motd = node->data;
-
     sendto_one_numeric(client, &me, RPL_STATSTLINE,
                        motd->mask, motd->path);
   }

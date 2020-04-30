@@ -57,11 +57,7 @@
 static void
 m_kick(struct Client *source_p, int parc, char *parv[])
 {
-  char reason[KICKLEN + 1] = "";
-  struct Client *target_p = NULL;
-  struct Channel *channel = NULL;
-  struct ChannelMember *member_source = NULL;
-  struct ChannelMember *member_target = NULL;
+  char reason[KICKLEN + 1];
 
   if (EmptyString(parv[2]))
   {
@@ -69,13 +65,15 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((channel = hash_find_channel(parv[1])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[1]);
+  if (channel == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
   }
 
-  if ((member_source = find_channel_link(source_p, channel)) == NULL)
+  struct ChannelMember *member_source = find_channel_link(source_p, channel);
+  if (member_source == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
     return;
@@ -87,10 +85,12 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((target_p = find_chasing(source_p, parv[2])) == NULL)
+  struct Client *target_p = find_chasing(source_p, parv[2]);
+  if (target_p == NULL)
     return;  /* find_chasing sends ERR_NOSUCHNICK */
 
-  if ((member_target = find_channel_link(target_p, channel)) == NULL)
+  struct ChannelMember *member_target = find_channel_link(target_p, channel);
+  if (member_target == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, channel->name);
     return;
@@ -136,21 +136,21 @@ m_kick(struct Client *source_p, int parc, char *parv[])
 static void
 ms_kick(struct Client *source_p, int parc, char *parv[])
 {
-  char reason[KICKLEN + 1] = "";
-  struct Client *target_p = NULL;
-  struct Channel *channel = NULL;
-  struct ChannelMember *member_target = NULL;
+  char reason[KICKLEN + 1];
 
   if (EmptyString(parv[2]))
     return;
 
-  if ((channel = hash_find_channel(parv[1])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[1]);
+  if (channel == NULL)
     return;
 
-  if ((target_p = find_person(source_p, parv[2])) == NULL)
+  struct Client *target_p = find_person(source_p, parv[2]);
+  if (target_p == NULL)
     return;
 
-  if ((member_target = find_channel_link(target_p, channel)) == NULL)
+  struct ChannelMember *member_target = find_channel_link(target_p, channel);
+  if (member_target == NULL)
     return;
 
   if (!EmptyString(parv[3]))

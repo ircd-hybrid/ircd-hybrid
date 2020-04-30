@@ -143,13 +143,11 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 static void
 ms_squit(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
-  const char *comment = NULL;
-
   if (parc < 2 || EmptyString(parv[1]))
     return;
 
-  if ((target_p = hash_find_server(parv[1])) == NULL)
+  struct Client *target_p = hash_find_server(parv[1]);
+  if (target_p == NULL)
     return;
 
   if (!IsServer(target_p) && !IsMe(target_p))
@@ -158,7 +156,9 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
   if (IsMe(target_p))
     target_p = source_p->from;
 
-  comment = (parc > 2 && parv[parc - 1]) ? parv[parc - 1] : source_p->name;
+  const char *comment = source_p->name;
+  if (parc > 2 && parv[parc - 1]) 
+    comment = parv[parc - 1];
 
   if (MyConnect(target_p))
   {

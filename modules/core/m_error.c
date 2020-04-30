@@ -48,12 +48,14 @@
 static void
 mr_error(struct Client *source_p, int parc, char *parv[])
 {
-  const char *message = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
-
   assert(MyConnect(source_p));
 
   if (!IsHandshake(source_p) && !IsConnecting(source_p))
     return;
+
+  const char *message = "<>";
+  if (parc > 1 && !EmptyString(parv[1]))
+    message = parv[1];
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        source_p->name, message);
@@ -80,7 +82,9 @@ mr_error(struct Client *source_p, int parc, char *parv[])
 static void
 ms_error(struct Client *source_p, int parc, char *parv[])
 {
-  const char *message = (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "<>";
+  const char *message = "<>";
+  if (parc > 1 && !EmptyString(parv[1]))
+    message = parv[1];
 
   ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        source_p->name, message);

@@ -195,8 +195,6 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 static void
 m_mode(struct Client *source_p, int parc, char *parv[])
 {
-  struct ChannelMember *member = NULL;
-
   if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODE");
@@ -211,8 +209,8 @@ m_mode(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct Channel *channel;
-  if ((channel = hash_find_channel(parv[1])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[1]);
+  if (channel == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
@@ -230,6 +228,7 @@ m_mode(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
+  struct ChannelMember *member = NULL;
   if (MyClient(source_p))
     member = find_channel_link(source_p, channel);
 

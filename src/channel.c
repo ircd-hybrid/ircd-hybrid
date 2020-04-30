@@ -1021,16 +1021,15 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
 static void
 channel_part_one_client(struct Client *client, const char *name, const char *reason)
 {
-  struct Channel *channel = NULL;
-  struct ChannelMember *member = NULL;
-
-  if ((channel = hash_find_channel(name)) == NULL)
+  struct Channel *channel = hash_find_channel(name);
+  if (channel == NULL)
   {
     sendto_one_numeric(client, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
-  if ((member = find_channel_link(client, channel)) == NULL)
+  struct ChannelMember *member = find_channel_link(client, channel);
+  if (member == NULL)
   {
     sendto_one_numeric(client, &me, ERR_NOTONCHANNEL, channel->name);
     return;
@@ -1040,8 +1039,7 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
     check_spambot_warning(client, NULL);
 
   /*
-   * Remove user from the old channel (if any)
-   * only allow /part reasons in -m chans
+   * Remove user from the old channel (if any). Only allow /part reasons in -m chans.
    */
   if (*reason && (!MyConnect(client) ||
       ((client->connection->created_monotonic +

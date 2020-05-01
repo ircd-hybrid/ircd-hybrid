@@ -38,7 +38,6 @@ struct Invite
   uintmax_t when;  /**< Time the invite has been created; monotonic time */
 };
 
-
 extern struct Invite *invite_find(struct Channel *, struct Client *);
 extern void invite_add(struct Channel *, struct Client *);
 extern void invite_del(struct Invite *);

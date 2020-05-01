@@ -32,5 +32,4 @@ extern void isupport_add(const char *, const char *, int);
 extern void isupport_delete(const char *);
 extern void isupport_rebuild(void);
 extern void isupport_show(struct Client *);
-
 #endif

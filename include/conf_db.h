@@ -28,6 +28,9 @@
 #ifndef INCLUDED_conf_db_h
 #define INCLUDED_conf_db_h
 
+enum { DATABASE_UPDATE_TIMEOUT = 300 };
+enum { KLINE_DB_VERSION = 1 };
+
 struct dbFILE
 {
   char mode;  /**< 'r' for reading, 'w' for writing */
@@ -54,7 +57,4 @@ extern void save_xline_database(const char *);
 extern void load_resv_database(const char *);
 extern void save_resv_database(const char *);
 extern void save_all_databases(void *);
-
-enum { DATABASE_UPDATE_TIMEOUT = 300 };
-enum { KLINE_DB_VERSION = 1 };
 #endif

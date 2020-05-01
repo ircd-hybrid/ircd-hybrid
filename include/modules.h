@@ -45,7 +45,6 @@ struct module_path
   char *path;
 };
 
-
 extern dlink_list *modules_get_list(void);
 /* add a path */
 extern void mod_add_path(const char *);
@@ -68,4 +67,4 @@ extern bool modules_valid_suffix(const char *);
 extern bool load_one_module(const char *);
 extern bool load_a_module(const char *, bool);
 extern struct module *findmodule_byname(const char *);
-#endif /* INCLUDED_modules_h */
+#endif  /* INCLUDED_modules_h */

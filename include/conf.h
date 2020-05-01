@@ -40,7 +40,15 @@ enum
 
 enum { CLEANUP_TKLINES_TIME = 60 };
 
-#define CONF_NOREASON "<No reason supplied>"
+enum maskitem_type
+{
+  CONF_CLIENT = 1,
+  CONF_SERVER,
+  CONF_KLINE,
+  CONF_DLINE,
+  CONF_EXEMPT,
+  CONF_OPER
+};
 
 /* MaskItem->flags */
 enum
@@ -56,11 +64,22 @@ enum
   CONF_FLAGS_ALLOW_AUTO_CONN = 1 <<  8,
   CONF_FLAGS_ENCRYPTED       = 1 <<  9,
   CONF_FLAGS_IN_DATABASE     = 1 << 10,
-  CONF_FLAGS_EXEMPTRESV      = 1 << 12,
+  CONF_FLAGS_EXEMPTRESV      = 1 << 11,
   CONF_FLAGS_TLS             = 1 << 12,
   CONF_FLAGS_WEBIRC          = 1 << 13,
   CONF_FLAGS_EXEMPTXLINE     = 1 << 14
 };
+
+enum
+{
+  NOT_AUTHORIZED = -1,
+  I_LINE_FULL    = -2,
+  TOO_MANY       = -3,
+  BANNED_CLIENT  = -4,
+  TOO_FAST       = -5
+};
+
+#define CONF_NOREASON "<No reason supplied>"
 
 /* Macros for struct MaskItem */
 #define IsConfWebIRC(x)           ((x)->flags & CONF_FLAGS_WEBIRC)
@@ -82,27 +101,8 @@ enum
 #define SetConfDatabase(x)        ((x)->flags |= CONF_FLAGS_IN_DATABASE)
 
 
-enum maskitem_type
-{
-  CONF_CLIENT = 1,
-  CONF_SERVER,
-  CONF_KLINE,
-  CONF_DLINE,
-  CONF_EXEMPT,
-  CONF_OPER
-};
-
 #define IsConfKill(x)           ((x)->type == CONF_KLINE)
 #define IsConfClient(x)         ((x)->type == CONF_CLIENT)
-
-enum
-{
-  NOT_AUTHORIZED = -1,
-  I_LINE_FULL    = -2,
-  TOO_MANY       = -3,
-  BANNED_CLIENT  = -4,
-  TOO_FAST       = -5
-};
 
 struct split_nuh_item
 {

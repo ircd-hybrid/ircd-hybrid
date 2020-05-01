@@ -38,6 +38,11 @@ enum MotdType
   MOTD_CLASS      /**< MOTD selected by connection class */
 };
 
+/** Length of one MOTD line(320 chars + '\\0'). */
+enum { MOTD_LINESIZE = 321 };
+/** Maximum number of lines for MOTD */
+enum { MOTD_MAXLINES = 100 };
+
 /** Entry for a single Message Of The Day (MOTD). */
 struct Motd
 {
@@ -52,12 +57,6 @@ struct Motd
   unsigned int maxcount;  /**< Number of lines for MOTD. */
   struct MotdCache *cache;  /**< MOTD cache entry. */
 };
-
-/** Length of one MOTD line(320 chars + '\\0'). */
-enum { MOTD_LINESIZE = 321 };
-/** Maximum number of lines for MOTD */
-enum { MOTD_MAXLINES = 100 };
-
 
 /** Cache entry for the contents of a MOTD file. */
 struct MotdCache

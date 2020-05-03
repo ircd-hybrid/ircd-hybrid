@@ -1,3 +1,13 @@
+-- Noteworthy changes in version 8.2.31 (2020-05-03)
+o) macOS compatibility fixes
+o) Removed 'spoof_notice' from auth::flags. With vhosts now this notice doesn't make
+   much sense anymore
+o) Fixed issue where ban masks might become malformed if set by remote clients/servers
+o) Fixed issue with channel mode +c where high ascii characters can be erroneously
+   detected as control characters
+o) For a full list of all changes in this release, see https://git.io/JfsmV
+
+
 -- Noteworthy changes in version 8.2.30 (2020-03-01)
 o) "QUOTE HELP extban" didn't work because the extban help file hasn't been
    installed properly during 'make install'
@@ -8,7 +18,7 @@ o) Extban $n of type 'acting' has been implemented. This extban prevents
    with voice or above are not affected.
 o) Channel mode +N has been changed so channel members with +v can change
    their nick name as well
-o) For a full list of all changes in this release, see https://git.io/JvgAq
+o) For a full list of all changes in this release, see https://git.io/JfOyF
 
 
 -- Noteworthy changes in version 8.2.29 (2020-02-19)
@@ -328,6 +338,7 @@ o) Fixed a potential buffer overflow with the BMASK inter-server command
 o) Fixed undefined behavior in the HELP command module which could
    lead to stack corruption
 o) Removed useless help files for inter-server commands
+o) For a full list of all changes in this release, see https://git.io/JfOyA
 
 
 -- Noteworthy changes in version 8.2.6 (2015-03-29)

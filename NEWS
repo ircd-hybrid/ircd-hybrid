@@ -1,10 +1,11 @@
--- Noteworthy changes in version 8.2.31 (2020-??-??)
+-- Noteworthy changes in version 8.2.31 (2020-05-03)
 o) macOS compatibility fixes
 o) Removed 'spoof_notice' from auth::flags. With vhosts now this notice doesn't make
    much sense anymore
 o) Fixed issue where ban masks might become malformed if set by remote clients/servers
 o) Fixed issue with channel mode +c where high ascii characters can be erroneously
    detected as control characters
+o) For a full list of all changes in this release, see https://git.io/JfsmV
 
 
 -- Noteworthy changes in version 8.2.30 (2020-03-01)

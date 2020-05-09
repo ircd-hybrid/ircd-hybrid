@@ -68,11 +68,10 @@ typedef enum HandlerType
 struct MessageHandler
 {
   bool empty_last_arg;  /**< Last argument is allowed to be empty / NUL */
-  unsigned int args_min; /* at least this many args must be passed
-                          * or an error will be sent to the user
-                          * before the m_func is even called
-                          */
-  unsigned int args_max;    /* maximum permitted parameters */
+  unsigned int args_min;  /**< At least this many args must be passed or an error will
+                               be sent to the user before the m_func is even called */
+  unsigned int args_max;  /**< Maximum permitted parameters. If reached, the rest
+                               of the message will be put into this last parameter */
   void (*handler)(struct Client *, int, char *[]);
 };
 
@@ -83,10 +82,10 @@ struct Message
 {
   const char *cmd;
   void *extra;
-  unsigned int count;      /* number of times command used */
-  unsigned int rcount;     /* number of times command used by server */
+  unsigned int count;  /**< Number of times command used */
+  unsigned int rcount;  /**< Number of times command used by server */
   unsigned int flags;
-  uintmax_t bytes;  /* bytes received for this message */
+  uintmax_t bytes;  /**< Bytes received for this message */
 
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
@@ -94,7 +93,8 @@ struct Message
   struct MessageHandler handlers[LAST_HANDLER_TYPE];
 };
 
-#define MAXPARA    15
+/** See 2.3 Messages in RFC1459 */
+enum { MAXPARA = 15 };
 
 enum
 {

@@ -76,6 +76,8 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
 
   const struct MessageHandler *const handler = &message->handlers[ENCAP_HANDLER];
   message->bytes += strlen(buffer);
+  message->ecount++;
+
   parv += 2;
   parc -= 2;
 

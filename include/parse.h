@@ -80,10 +80,11 @@ struct MessageHandler
  */
 struct Message
 {
-  const char *cmd;
+  const char *cmd;  /**< The actual command string */
   void *extra;
   unsigned int count;  /**< Number of times command used */
   unsigned int rcount;  /**< Number of times command used by server */
+  unsigned int ecount;  /**< Number of times command has been issued via ENCAP */
   unsigned int flags;
   uintmax_t bytes;  /**< Bytes received for this message */
 

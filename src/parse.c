@@ -610,8 +610,10 @@ recurse_report_messages(struct Client *source, const struct MessageTree *mtree)
   if (mtree->msg)
     sendto_one_numeric(source, &me, RPL_STATSCOMMANDS,
                        mtree->msg->cmd,
-                       mtree->msg->count, mtree->msg->bytes,
-                       mtree->msg->rcount);
+                       mtree->msg->count,
+                       mtree->msg->bytes,
+                       mtree->msg->rcount,
+                       mtree->msg->ecount);
 
   for (unsigned int i = 0; i < MAXPTRLEN; ++i)
     if (mtree->pointers[i])

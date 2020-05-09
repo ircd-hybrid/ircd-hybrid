@@ -54,23 +54,18 @@
 static void
 m_part(struct Client *source_p, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "PART");
-  else
-    channel_do_part(source_p, parv[1], parv[2]);
+  channel_do_part(source_p, parv[1], parv[2]);
 }
 
 static struct Message part_msgtab =
 {
   .cmd = "PART",
-  .args_min = 2,
-  .args_max = MAXPARA,
   .flags = MFLG_ENDGRACE,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_part,
-  .handlers[SERVER_HANDLER] = m_part,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_part
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_part, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = m_part, .args_min = 2 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_part, .args_min = 2 }
 };
 
 static void

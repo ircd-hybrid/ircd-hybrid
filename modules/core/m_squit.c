@@ -58,12 +58,6 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
   const char *server = parv[1];
 
-  if (parc < 2 || EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "SQUIT");
-    return;
-  }
-
   /* The following allows wild cards in SQUIT. */
   dlink_node *node;
   DLINK_FOREACH(node, global_server_list.head)
@@ -143,9 +137,6 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 static void
 ms_squit(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc < 2 || EmptyString(parv[1]))
-    return;
-
   struct Client *target_p = hash_find_server(parv[1]);
   if (target_p == NULL)
     return;
@@ -198,12 +189,11 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
 static struct Message squit_msgtab =
 {
   .cmd = "SQUIT",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_squit,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_squit
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_squit, .args_min = 2 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_squit, .args_min = 2 }
 };
 
 static void

@@ -221,12 +221,11 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
 static struct Message trace_msgtab =
 {
   .cmd = "TRACE",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_trace,
-  .handlers[SERVER_HANDLER] = mo_trace,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_trace
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_trace },
+  .handlers[SERVER_HANDLER] = { .handler = mo_trace },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_trace }
 };
 
 static void

@@ -1355,13 +1355,11 @@ stats_init(void)
 static struct Message stats_msgtab =
 {
   .cmd = "STATS",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_stats,
-  .handlers[SERVER_HANDLER] = ms_stats,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = ms_stats
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_stats, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_stats, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_stats, .args_min = 2 }
 };
 
 static void

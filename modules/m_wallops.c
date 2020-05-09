@@ -57,12 +57,6 @@ mo_wallops(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(message))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "WALLOPS");
-    return;
-  }
-
   sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
   sendto_server(source_p, 0, 0, ":%s WALLOPS :%s", source_p->id, message);
 }
@@ -83,9 +77,6 @@ ms_wallops(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (EmptyString(message))
-    return;
-
   sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
   sendto_server(source_p, 0, 0, ":%s WALLOPS :%s", source_p->id, message);
 }
@@ -93,13 +84,11 @@ ms_wallops(struct Client *source_p, int parc, char *parv[])
 static struct Message wallops_msgtab =
 {
   .cmd = "WALLOPS",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_wallops,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_wallops
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_wallops, .args_min = 2 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_wallops, .args_min = 2 },
 };
 
 static void

@@ -252,9 +252,6 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
     .duration = strtoumax(parv[2], NULL, 10)
   };
 
-  if (parc != 6 || EmptyString(parv[parc - 1]))
-    return;
-
   sendto_match_servs(source_p, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s", aline.server,
                      aline.duration, aline.user, aline.host, aline.reason);
 
@@ -270,13 +267,11 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
 static struct Message kline_msgtab =
 {
   .cmd = "KLINE",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_kline,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_kline
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_kline, .args_min = 6 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_kline, .args_min = 2 }
 };
 
 static void

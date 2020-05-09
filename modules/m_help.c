@@ -157,12 +157,11 @@ mo_help(struct Client *source_p, int parc, char *parv[])
 static struct Message help_msgtab =
 {
   .cmd = "HELP",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_help,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_help
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_help },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_help }
 };
 
 static void

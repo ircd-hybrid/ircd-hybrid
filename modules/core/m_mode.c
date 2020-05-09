@@ -195,12 +195,6 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 static void
 m_mode(struct Client *source_p, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODE");
-    return;
-  }
-
   /* Now, try to find the channel in question */
   if (!IsChanPrefix(*parv[1]))
   {
@@ -238,13 +232,11 @@ m_mode(struct Client *source_p, int parc, char *parv[])
 static struct Message mode_msgtab =
 {
   .cmd = "MODE",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_mode,
-  .handlers[SERVER_HANDLER] = m_mode,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_mode
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_mode, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = m_mode, .args_min = 2 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_mode, .args_min = 2 }
 };
 
 static void

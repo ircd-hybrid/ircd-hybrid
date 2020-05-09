@@ -82,12 +82,11 @@ ms_time(struct Client *source_p, int parc, char *parv[])
 static struct Message time_msgtab =
 {
   .cmd = "TIME",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_time,
-  .handlers[SERVER_HANDLER] = ms_time,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = ms_time
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_time },
+  .handlers[SERVER_HANDLER] = { .handler = ms_time },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = ms_time }
 };
 
 static void

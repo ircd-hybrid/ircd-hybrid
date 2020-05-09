@@ -95,14 +95,13 @@ pseudo_register(const char *name, const char *nick, const char *serv,
     pseudo->prepend = xstrdup(prepend);
 
   pseudo->msg.cmd = pseudo->command;
-  pseudo->msg.args_max = 2;
   pseudo->msg.flags = MFLG_EXTRA;
   pseudo->msg.extra = pseudo;
-  pseudo->msg.handlers[UNREGISTERED_HANDLER] = m_unregistered;
-  pseudo->msg.handlers[CLIENT_HANDLER] = pseudo_message_handler;
-  pseudo->msg.handlers[SERVER_HANDLER] = m_ignore;
-  pseudo->msg.handlers[ENCAP_HANDLER] = m_ignore;
-  pseudo->msg.handlers[OPER_HANDLER] = pseudo_message_handler;
+  pseudo->msg.handlers[UNREGISTERED_HANDLER] = (struct MessageHandler) { .handler = m_unregistered };
+  pseudo->msg.handlers[CLIENT_HANDLER] = (struct MessageHandler) { .handler = pseudo_message_handler, .args_max = 2 };
+  pseudo->msg.handlers[SERVER_HANDLER] = (struct MessageHandler) { .handler = m_ignore };
+  pseudo->msg.handlers[ENCAP_HANDLER] = (struct MessageHandler) { .handler = m_ignore };
+  pseudo->msg.handlers[OPER_HANDLER] = (struct MessageHandler) { .handler = pseudo_message_handler, .args_max = 2 };
   dlinkAdd(pseudo, &pseudo->node, &pseudo_list);
 
   mod_add_cmd(&pseudo->msg);

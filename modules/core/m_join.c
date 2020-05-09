@@ -60,10 +60,7 @@ static void remove_a_mode(struct Channel *, struct Client *, int, const char);
 static void
 m_join(struct Client *source_p, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "JOIN");
-  else
-    channel_do_join(source_p, parv[1], parv[2]);
+  channel_do_join(source_p, parv[1], parv[2]);
 }
 
 /* ms_join()
@@ -94,9 +91,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   char parabuf[MODEBUFLEN];
 
   if (!IsClient(source_p))
-    return;
-
-  if (parc < 4)
     return;
 
   if (channel_check_name(parv[2], false) == false)
@@ -406,13 +400,11 @@ remove_a_mode(struct Channel *channel, struct Client *source_p, int mask, const 
 static struct Message join_msgtab =
 {
   .cmd = "JOIN",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_join,
-  .handlers[SERVER_HANDLER] = ms_join,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_join
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_join, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_join, .args_min = 4 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_join, .args_min = 2 }
 };
 
 static void

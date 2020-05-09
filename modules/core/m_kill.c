@@ -58,12 +58,6 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   char buf[IRCD_BUFSIZE] = "";
   char def_reason[] = CONF_NOREASON;
 
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
-    return;
-  }
-
   char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
   if (!EmptyString(reason))
   {
@@ -168,12 +162,6 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   char buf[IRCD_BUFSIZE] = "";
   char def_reason[] = CONF_NOREASON;
 
-  if (parc < 3 || EmptyString(parv[2]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KILL");
-    return;
-  }
-
   struct Client *target_p = find_person(source_p, parv[1]);
   if (target_p == NULL)
     return;
@@ -251,13 +239,11 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
 static struct Message kill_msgtab =
 {
   .cmd = "KILL",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_kill,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_kill
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_kill, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_kill, .args_min = 2 }
 };
 
 static void

@@ -58,13 +58,11 @@ mr_capab(struct Client *source_p, int parc, char *parv[])
 static struct Message capab_msgtab =
 {
   .cmd = "CAPAB",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = mr_capab,
-  .handlers[CLIENT_HANDLER] = m_ignore,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_ignore
+  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_capab, .args_min = 2 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void

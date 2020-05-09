@@ -112,12 +112,6 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "UNKLINE");
-    return;
-  }
-
   if (parse_aline("UNKLINE", source_p, parc, parv, &aline) == false)
     return;
 
@@ -162,9 +156,6 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
     .server = parv[1]
   };
 
-  if (parc != 4 || EmptyString(parv[parc - 1]))
-    return;
-
   sendto_match_servs(source_p, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
                      aline.server, aline.user, aline.host);
 
@@ -180,13 +171,11 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
 static struct Message unkline_msgtab =
 {
   .cmd = "UNKLINE",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_unkline,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_unkline
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_unkline, .args_min = 4 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_unkline, .args_min = 2 }
 };
 
 static void

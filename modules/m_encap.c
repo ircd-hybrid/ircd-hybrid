@@ -44,13 +44,9 @@ static void
 ms_encap(struct Client *source_p, int parc, char *parv[])
 {
   char buffer[IRCD_BUFSIZE] = "", *ptr = buffer;
-  unsigned int cur_len = 0, len, i;
-#ifdef NOT_USED_YET
-  int paramcount, mpara = 0;
-#endif
-  struct Message *mptr = NULL;
+  unsigned int cur_len = 0, len;
 
-  for (i = 1; i < (unsigned int)parc - 1; ++i)
+  for (unsigned int i = 1; i < (unsigned int)parc - 1; ++i)
   {
     len = strlen(parv[i]) + 1;  /* +1 for the space */
 
@@ -69,38 +65,36 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   else
     snprintf(ptr, sizeof(buffer) - cur_len, ":%s", parv[parc - 1]);
 
-  sendto_match_servs(source_p, parv[1], CAPAB_ENCAP,
-                     "ENCAP %s", buffer);
+  sendto_match_servs(source_p, parv[1], CAPAB_ENCAP, "ENCAP %s", buffer);
 
   if (match(parv[1], me.name))
     return;
 
-  if ((mptr = find_command(parv[2])) == NULL)
+  struct Message *message = find_command(parv[2]);
+  if (message == NULL)
     return;
 
-#ifdef NOT_USED_YET
-  paramcount = mptr->parameters;
-  mpara      = mptr->maxpara;
-#endif
-  mptr->bytes += strlen(buffer);
-
+  const struct MessageHandler *const handler = &message->handlers[ENCAP_HANDLER];
+  message->bytes += strlen(buffer);
   parv += 2;
   parc -= 2;
 
-  if ((unsigned int)parc >= mptr->args_min)
-    mptr->handlers[ENCAP_HANDLER](source_p, parc, parv);
+  if (handler->args_min &&
+      (((unsigned int)parc < handler->args_min) ||
+       (handler->empty_last_arg != true && EmptyString(parv[handler->args_min - 1]))))
+    return;
+
+  handler->handler(source_p, parc, parv);
 }
 
 static struct Message encap_msgtab =
 {
   .cmd = "ENCAP",
-  .args_min = 3,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_ignore,
-  .handlers[CLIENT_HANDLER] = m_ignore,
-  .handlers[SERVER_HANDLER] = ms_encap,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_ignore
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
+  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+  .handlers[SERVER_HANDLER] = { .handler = ms_encap, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void

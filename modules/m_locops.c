@@ -60,12 +60,6 @@ mo_locops(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(message))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "LOCOPS");
-    return;
-  }
-
   sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
                        source_p->name, message);
   cluster_distribute(source_p, "LOCOPS", 0, CLUSTER_LOCOPS, message);
@@ -89,9 +83,6 @@ ms_locops(struct Client *source_p, int parc, char *parv[])
   const char *const targets = parv[1];
   const char *const message = parv[2];
 
-  if (parc != 3 || EmptyString(message))
-    return;
-
   sendto_match_servs(source_p, targets, CAPAB_CLUSTER, "LOCOPS %s :%s",
                      targets, message);
 
@@ -106,13 +97,11 @@ ms_locops(struct Client *source_p, int parc, char *parv[])
 static struct Message locops_msgtab =
 {
   .cmd = "LOCOPS",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_locops,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_locops
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_locops, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_locops, .args_min = 2 },
 };
 
 static void

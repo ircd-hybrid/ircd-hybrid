@@ -58,12 +58,6 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
 
-  if (EmptyString(name))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KNOCK");
-    return;
-  }
-
   struct Channel *channel = hash_find_channel(name);
   if (channel == NULL)
   {
@@ -133,13 +127,11 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 static struct Message knock_msgtab =
 {
   .cmd = "KNOCK",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_knock,
-  .handlers[SERVER_HANDLER] = m_knock,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_knock
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_knock, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = m_knock, .args_min = 2 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_knock, .args_min = 2 }
 };
 
 static void

@@ -112,12 +112,6 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (parc < 2 || EmptyString(parv[parc - 1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "UNDLINE");
-    return;
-  }
-
   if (parse_aline("UNDLINE", source_p, parc, parv, &aline) == false)
     return;
 
@@ -159,9 +153,6 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
     .server = parv[1]
   };
 
-  if (parc != 3 || EmptyString(parv[parc - 1]))
-    return;
-
   sendto_match_servs(source_p, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
                      aline.server, aline.host);
 
@@ -177,13 +168,11 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
 static struct Message undline_msgtab =
 {
   .cmd = "UNDLINE",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_undline,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_undline
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_undline, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_undline, .args_min = 2 }
 };
 
 static void

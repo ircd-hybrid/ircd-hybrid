@@ -220,6 +220,8 @@ static void
 parse_handle_command(struct Message *message, struct Client *source,
                      unsigned int i, char *para[])
 {
+  const struct MessageHandler *const handler = &message->handlers[source->from->handler];
+
   if (IsServer(source->from))
     ++message->rcount;
   ++message->count;
@@ -228,10 +230,12 @@ parse_handle_command(struct Message *message, struct Client *source,
     flood_endgrace(source);
 
   /* Check right amount of parameters is passed... --is */
-  if (i < message->args_min)
+  if (handler->args_min &&
+      ((i < handler->args_min) ||
+       (handler->empty_last_arg != true && EmptyString(para[handler->args_min - 1]))))
     sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, message->cmd);
   else
-    message->handlers[source->from->handler](source, i, para);
+    handler->handler(source, i, para);
 }
 
 /*
@@ -366,11 +370,13 @@ parse(struct Client *client, char *pbuffer, char *bufend)
 
     assert(message->cmd);
 
-    paramcount = message->args_max;
+    paramcount = message->handlers[from->from->handler].args_max;
 
     size_t length = bufend - ((s) ? s : ch);
     message->bytes += length;
   }
+
+  memset(para, 0, sizeof(para));
 
   /*
    * Must the following loop really be so devious? On surface it
@@ -393,7 +399,7 @@ parse(struct Client *client, char *pbuffer, char *bufend)
 
   if (s)
   {
-    if (paramcount > MAXPARA)
+    if (paramcount == 0 || paramcount > MAXPARA)
       paramcount = MAXPARA;
 
     while (true)

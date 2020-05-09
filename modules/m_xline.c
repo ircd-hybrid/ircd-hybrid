@@ -202,9 +202,6 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
     .duration = strtoumax(parv[3], NULL, 10)
   };
 
-  if (parc != 5 || EmptyString(parv[parc - 1]))
-    return;
-
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
                      aline.server, aline.mask, aline.duration, aline.reason);
 
@@ -220,13 +217,11 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
 static struct Message xline_msgtab =
 {
   .cmd = "XLINE",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_xline,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_xline
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_xline, .args_min = 5 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_xline, .args_min = 2 }
 };
 
 static void

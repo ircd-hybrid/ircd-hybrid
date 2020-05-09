@@ -168,9 +168,6 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
     .duration = strtoumax(parv[2], NULL, 10)
   };
 
-  if (parc != 5 || EmptyString(parv[parc - 1]))
-    return;
-
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "RESV %s %ju %s :%s",
                      aline.server, aline.duration, aline.mask, aline.reason);
 
@@ -186,13 +183,11 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
 static struct Message resv_msgtab =
 {
   .cmd = "RESV",
-  .args_min = 3,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_resv,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_resv
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_resv, .args_min = 5 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_resv, .args_min = 2 }
 };
 
 static void

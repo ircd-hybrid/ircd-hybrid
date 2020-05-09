@@ -138,12 +138,11 @@ m_links(struct Client *source_p, int parc, char *parv[])
 static struct Message links_msgtab =
 {
   .cmd = "LINKS",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_links,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_links
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_links },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_links }
 };
 
 static void

@@ -146,9 +146,6 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
     .server = parv[1]
   };
 
-  if (parc != 3 || EmptyString(parv[parc - 1]))
-    return;
-
   sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
                      aline.server, aline.mask);
 
@@ -164,13 +161,11 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
 static struct Message unxline_msgtab =
 {
   .cmd = "UNXLINE",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_unxline,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_unxline
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_unxline, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_unxline, .args_min = 2 }
 };
 
 static void

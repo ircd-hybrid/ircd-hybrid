@@ -86,12 +86,6 @@ mr_user(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(realname))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "USER");
-    return;
-  }
-
   char *p = strchr(username, '@');
   if (p)
     *p = '\0';
@@ -102,13 +96,11 @@ mr_user(struct Client *source_p, int parc, char *parv[])
 static struct Message user_msgtab =
 {
   .cmd = "USER",
-  .args_min = 5,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = mr_user,
-  .handlers[CLIENT_HANDLER] = m_registered,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_registered
+  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_user, .args_min = 5 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_registered },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_registered }
 };
 
 static void

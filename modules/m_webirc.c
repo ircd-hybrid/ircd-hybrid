@@ -138,13 +138,11 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 static struct Message webirc_msgtab =
 {
   .cmd = "WEBIRC",
-  .args_min = 5,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = mr_webirc,
-  .handlers[CLIENT_HANDLER] = m_registered,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_registered
+  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_webirc, .args_min = 5 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_registered },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_registered }
 };
 
 static void

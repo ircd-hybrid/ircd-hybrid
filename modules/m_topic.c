@@ -55,12 +55,6 @@
 static void
 m_topic(struct Client *source_p, int parc, char *parv[])
 {
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "TOPIC");
-    return;
-  }
-
   struct Channel *channel = hash_find_channel(parv[1]);
   if (channel == NULL)
   {
@@ -179,14 +173,12 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
 static struct Message topic_msgtab =
 {
   .cmd = "TOPIC",
-  .args_min = 2,
-  .args_max = MAXPARA,
   .flags = MFLG_ENDGRACE,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_topic,
-  .handlers[SERVER_HANDLER] = ms_topic,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_topic
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_topic, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_topic, .args_min = 3, .empty_last_arg = true },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_topic, .args_min = 2 }
 };
 
 static void

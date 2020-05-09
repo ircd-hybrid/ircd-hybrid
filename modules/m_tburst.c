@@ -121,13 +121,11 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
 static struct Message tburst_msgtab =
 {
   .cmd = "TBURST",
-  .args_min = 6,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_ignore,
-  .handlers[CLIENT_HANDLER] = m_ignore,
-  .handlers[SERVER_HANDLER] = ms_tburst,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_ignore
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+  .handlers[SERVER_HANDLER] = { .handler = ms_tburst, .args_min = 6, .empty_last_arg = true },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void

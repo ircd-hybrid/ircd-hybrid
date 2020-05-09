@@ -57,12 +57,6 @@ mo_globops(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(message))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "GLOBOPS");
-    return;
-  }
-
   sendto_server(source_p, 0, 0, ":%s GLOBOPS :%s", source_p->id, message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s",
                        source_p->name, message);
@@ -84,9 +78,6 @@ ms_globops(struct Client *source_p, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (EmptyString(message))
-    return;
-
   sendto_server(source_p, 0, 0, ":%s GLOBOPS :%s", source_p->id, message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s",
                        source_p->name, message);
@@ -95,13 +86,11 @@ ms_globops(struct Client *source_p, int parc, char *parv[])
 static struct Message globops_msgtab =
 {
   .cmd = "GLOBOPS",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_globops,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_globops
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_globops, .args_min = 2 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_globops, .args_min = 2 },
 };
 
 static void

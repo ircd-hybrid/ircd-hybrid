@@ -153,13 +153,11 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
 static struct Message svsnick_msgtab =
 {
   .cmd = "SVSNICK",
-  .args_min = 4,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_ignore,
-  .handlers[CLIENT_HANDLER] = m_ignore,
-  .handlers[SERVER_HANDLER] = ms_svsnick,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_ignore
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+  .handlers[SERVER_HANDLER] = { .handler = ms_svsnick, .args_min = 4 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void

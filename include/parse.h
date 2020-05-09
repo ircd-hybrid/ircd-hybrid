@@ -65,6 +65,17 @@ typedef enum HandlerType
   LAST_HANDLER_TYPE
 } HandlerType;
 
+struct MessageHandler
+{
+  bool empty_last_arg;  /**< Last argument is allowed to be empty / NUL */
+  unsigned int args_min; /* at least this many args must be passed
+                          * or an error will be sent to the user
+                          * before the m_func is even called
+                          */
+  unsigned int args_max;    /* maximum permitted parameters */
+  void (*handler)(struct Client *, int, char *[]);
+};
+
 /*
  * Message table structure
  */
@@ -74,18 +85,13 @@ struct Message
   void *extra;
   unsigned int count;      /* number of times command used */
   unsigned int rcount;     /* number of times command used by server */
-  unsigned int args_min; /* at least this many args must be passed
-                             * or an error will be sent to the user
-                             * before the m_func is even called
-                             */
-  unsigned int args_max;    /* maximum permitted parameters */
   unsigned int flags;
   uintmax_t bytes;  /* bytes received for this message */
 
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
    */
-  void (*handlers[LAST_HANDLER_TYPE])(struct Client *, int, char *[]);
+  struct MessageHandler handlers[LAST_HANDLER_TYPE];
 };
 
 #define MAXPARA    15

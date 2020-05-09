@@ -109,7 +109,7 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return;
@@ -146,7 +146,7 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
 static void
 ms_whowas(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return;
@@ -161,12 +161,11 @@ ms_whowas(struct Client *source_p, int parc, char *parv[])
 static struct Message whowas_msgtab =
 {
   .cmd = "WHOWAS",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_whowas,
-  .handlers[SERVER_HANDLER] = ms_whowas,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = ms_whowas
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_whowas },
+  .handlers[SERVER_HANDLER] = { .handler = ms_whowas },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = ms_whowas }
 };
 
 static void

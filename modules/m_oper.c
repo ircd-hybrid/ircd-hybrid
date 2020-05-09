@@ -129,12 +129,6 @@ m_oper(struct Client *source_p, int parc, char *parv[])
   const char *const opername = parv[1];
   const char *const password = parv[2];
 
-  if (EmptyString(password))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "OPER");
-    return;
-  }
-
   struct MaskItem *conf = operator_find(source_p, opername);
   if (conf == NULL)
   {
@@ -201,14 +195,12 @@ mo_oper(struct Client *source_p, int parc, char *parv[])
 static struct Message oper_msgtab =
 {
   .cmd = "OPER",
-  .args_min = 3,
-  .args_max = MAXPARA,
   .flags = MFLG_ENDGRACE,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_oper,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_oper
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_oper, .args_min = 3 },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_oper, .args_min = 3 },
 };
 
 static void

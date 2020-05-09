@@ -57,14 +57,6 @@
 static void
 m_kick(struct Client *source_p, int parc, char *parv[])
 {
-  char reason[KICKLEN + 1];
-
-  if (EmptyString(parv[2]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "KICK");
-    return;
-  }
-
   struct Channel *channel = hash_find_channel(parv[1]);
   if (channel == NULL)
   {
@@ -105,6 +97,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     }
   }
 
+  char reason[KICKLEN + 1];
   if (!EmptyString(parv[3]))
     strlcpy(reason, parv[3], sizeof(reason));
   else
@@ -136,11 +129,6 @@ m_kick(struct Client *source_p, int parc, char *parv[])
 static void
 ms_kick(struct Client *source_p, int parc, char *parv[])
 {
-  char reason[KICKLEN + 1];
-
-  if (EmptyString(parv[2]))
-    return;
-
   struct Channel *channel = hash_find_channel(parv[1]);
   if (channel == NULL)
     return;
@@ -153,6 +141,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   if (member_target == NULL)
     return;
 
+  char reason[KICKLEN + 1];
   if (!EmptyString(parv[3]))
     strlcpy(reason, parv[3], sizeof(reason));
   else
@@ -177,14 +166,12 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
 static struct Message kick_msgtab =
 {
   .cmd = "KICK",
-  .args_min = 3,
-  .args_max = MAXPARA,
   .flags = MFLG_ENDGRACE,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_kick,
-  .handlers[SERVER_HANDLER] = ms_kick,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_kick
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_kick, .args_min = 3 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_kick, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_kick, .args_min = 3 }
 };
 
 static void

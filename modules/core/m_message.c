@@ -615,24 +615,22 @@ m_notice(struct Client *source_p, int parc, char *parv[])
 static struct Message privmsg_msgtab =
 {
   .cmd = "PRIVMSG",
-  .args_max = MAXPARA,
   .flags = MFLG_ENDGRACE,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_privmsg,
-  .handlers[SERVER_HANDLER] = m_privmsg,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_privmsg
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_privmsg },
+  .handlers[SERVER_HANDLER] = { .handler = m_privmsg },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_privmsg }
 };
 
 static struct Message notice_msgtab =
 {
   .cmd = "NOTICE",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_notice,
-  .handlers[SERVER_HANDLER] = m_notice,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_notice
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_notice },
+  .handlers[SERVER_HANDLER] = { .handler = m_notice },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_notice }
 };
 
 static void

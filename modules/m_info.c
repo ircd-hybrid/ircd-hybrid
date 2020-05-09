@@ -801,12 +801,11 @@ ms_info(struct Client *source_p, int parc, char *parv[])
 static struct Message info_msgtab =
 {
   .cmd = "INFO",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_info,
-  .handlers[SERVER_HANDLER] = ms_info,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = ms_info
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_info },
+  .handlers[SERVER_HANDLER] = { .handler = ms_info },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = ms_info }
 };
 
 static void

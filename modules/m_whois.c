@@ -258,13 +258,13 @@ m_whois(struct Client *source_p, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
-  if (parc > 2 && !EmptyString(parv[2]))
+  if (!EmptyString(parv[2]))
   {
     /* seeing as this is going across servers, we should limit it */
     if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
@@ -307,13 +307,13 @@ m_whois(struct Client *source_p, int parc, char *parv[])
 static void
 mo_whois(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
-  if (parc > 2 && !EmptyString(parv[2]))
+  if (!EmptyString(parv[2]))
   {
     if (server_hunt(source_p, ":%s WHOIS %s :%s", 1, parc, parv)->ret != HUNTED_ISME)
       return;
@@ -327,12 +327,11 @@ mo_whois(struct Client *source_p, int parc, char *parv[])
 static struct Message whois_msgtab =
 {
   .cmd = "WHOIS",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_whois,
-  .handlers[SERVER_HANDLER] = mo_whois,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_whois
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_whois },
+  .handlers[SERVER_HANDLER] = { .handler = mo_whois },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_whois }
 };
 
 static void

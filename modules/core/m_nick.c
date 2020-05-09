@@ -619,7 +619,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
 {
   char nick[NICKLEN + 1] = "";
 
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return;
@@ -672,7 +672,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
 
   assert(MyClient(source_p));
 
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
     return;
@@ -764,9 +764,6 @@ m_nick(struct Client *source_p, int parc, char *parv[])
 static void
 ms_nick(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc != 3 || EmptyString(parv[parc - 1]))
-    return;
-
   if (!IsClient(source_p))
     return;  /* Servers and unknown clients can't change nicks.. */
 
@@ -879,25 +876,22 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
 static struct Message nick_msgtab =
 {
   .cmd = "NICK",
-  .args_max = MAXPARA,
   .flags = MFLG_ENDGRACE,
-  .handlers[UNREGISTERED_HANDLER] = mr_nick,
-  .handlers[CLIENT_HANDLER] = m_nick,
-  .handlers[SERVER_HANDLER] = ms_nick,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_nick
+  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_nick },
+  .handlers[CLIENT_HANDLER] = { .handler = m_nick },
+  .handlers[SERVER_HANDLER] = { .handler = ms_nick, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_nick }
 };
 
 static struct Message uid_msgtab =
 {
   .cmd = "UID",
-  .args_min = 11,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_ignore,
-  .handlers[CLIENT_HANDLER] = m_ignore,
-  .handlers[SERVER_HANDLER] = ms_uid,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_ignore
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
+  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+  .handlers[SERVER_HANDLER] = { .handler = ms_uid, .args_min = 11 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void

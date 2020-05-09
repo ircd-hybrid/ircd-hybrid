@@ -92,12 +92,11 @@ ms_lusers(struct Client *source_p, int parc, char *parv[])
 static struct Message lusers_msgtab =
 {
   .cmd = "LUSERS",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_lusers,
-  .handlers[SERVER_HANDLER] = ms_lusers,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = ms_lusers
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_lusers },
+  .handlers[SERVER_HANDLER] = { .handler = ms_lusers },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = ms_lusers }
 };
 
 static void

@@ -447,12 +447,6 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   const char *error = NULL;
   bool warn = true;
 
-  if (EmptyString(parv[parc - 1]))
-  {
-    exit_client(source_p, "No server description supplied");
-    return;
-  }
-
   if (server_valid_name(name) == false)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
@@ -610,12 +604,6 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   /* Just to be sure -A1kmm. */
   if (!IsServer(source_p))
     return;
-
-  if (EmptyString(parv[parc - 1]))
-  {
-    exit_client(source_p->from, "No server description supplied");
-    return;
-  }
 
   if (server_valid_name(parv[1]) == false)
   {
@@ -792,25 +780,21 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 static struct Message server_msgtab =
 {
   .cmd = "SERVER",
-  .args_min = 4,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = mr_server,
-  .handlers[CLIENT_HANDLER] = m_registered,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_registered
+  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_server, .args_min = 4 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_registered },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_registered }
 };
 
 static struct Message sid_msgtab =
 {
   .cmd = "SID",
-  .args_min = 5,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_ignore,
-  .handlers[CLIENT_HANDLER] = m_ignore,
-  .handlers[SERVER_HANDLER] = ms_sid,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_ignore
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
+  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+  .handlers[SERVER_HANDLER] = { .handler = ms_sid, .args_min = 5 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void

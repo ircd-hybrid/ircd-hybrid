@@ -56,12 +56,6 @@ mr_pass(struct Client *source_p, int parc, char *parv[])
 {
   assert(MyConnect(source_p));
 
-  if (EmptyString(parv[1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "PASS");
-    return;
-  }
-
   xfree(source_p->connection->password);
   source_p->connection->password = xstrndup(parv[1], IRCD_MIN(strlen(parv[1]), PASSWDLEN));
 
@@ -74,13 +68,11 @@ mr_pass(struct Client *source_p, int parc, char *parv[])
 static struct Message pass_msgtab =
 {
   .cmd = "PASS",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = mr_pass,
-  .handlers[CLIENT_HANDLER] = m_registered,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_registered
+  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_pass, .args_min = 2 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_registered },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_registered }
 };
 
 static void

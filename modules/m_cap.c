@@ -383,16 +383,8 @@ subcmd_search(const char *cmd, const struct subcmd *elem)
 static void
 m_cap(struct Client *source_p, int parc, char *parv[])
 {
-  const char *subcmd = NULL, *caplist = NULL;
+  const char *subcmd = parv[1], *caplist = parv[2];
   struct subcmd *cmd = NULL;
-
-  if (EmptyString(parv[1]))  /* A subcommand is required */
-    return;
-
-  subcmd = parv[1];
-
-  if (parc > 2)  /* A capability list was provided */
-    caplist = parv[2];
 
   /* Find the subcommand handler */
   if (!(cmd = bsearch(subcmd, cmdlist,
@@ -411,13 +403,11 @@ m_cap(struct Client *source_p, int parc, char *parv[])
 static struct Message cap_msgtab =
 {
   .cmd = "CAP",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_cap,
-  .handlers[CLIENT_HANDLER] = m_cap,
-  .handlers[SERVER_HANDLER] = m_ignore,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_cap
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_cap, .args_min = 2 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_cap, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_cap, .args_min = 2 }
 };
 
 static void

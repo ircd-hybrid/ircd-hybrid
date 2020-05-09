@@ -55,9 +55,6 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return;
 
-  if (EmptyString(parv[2]))
-    return;
-
   struct Client *target_p = find_person(source_p, parv[1]);
   if (target_p == NULL)
     return;
@@ -89,13 +86,11 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
 static struct Message svsjoin_msgtab =
 {
   .cmd = "SVSJOIN",
-  .args_min = 3,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_ignore,
-  .handlers[SERVER_HANDLER] = ms_svsjoin,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_ignore
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+  .handlers[SERVER_HANDLER] = { .handler = ms_svsjoin, .args_min = 3 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void

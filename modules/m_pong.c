@@ -53,7 +53,7 @@
 static void
 ms_pong(struct Client *source_p, int parc, char *parv[])
 {
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
     return;
@@ -117,12 +117,11 @@ mr_pong(struct Client *source_p, int parc, char *parv[])
 static struct Message pong_msgtab =
 {
   .cmd = "PONG",
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = mr_pong,
-  .handlers[CLIENT_HANDLER] = m_ignore,
-  .handlers[SERVER_HANDLER] = ms_pong,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = m_ignore
+  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_pong },
+  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+  .handlers[SERVER_HANDLER] = { .handler = ms_pong },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void

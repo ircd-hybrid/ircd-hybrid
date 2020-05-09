@@ -56,12 +56,6 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
 
-  if (EmptyString(name))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CONNECT");
-    return;
-  }
-
   if (parc > 3)
   {
     if (!HasOFlag(source_p, OPER_FLAG_CONNECT_REMOTE))
@@ -149,12 +143,6 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
 
-  if (parc < 4 || EmptyString(parv[3]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "CONNECT");
-    return;
-  }
-
   if (server_hunt(source_p, ":%s CONNECT %s %s :%s", 3, parc, parv)->ret != HUNTED_ISME)
     return;
 
@@ -214,13 +202,11 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
 static struct Message connect_msgtab =
 {
   .cmd = "CONNECT",
-  .args_min = 2,
-  .args_max = MAXPARA,
-  .handlers[UNREGISTERED_HANDLER] = m_unregistered,
-  .handlers[CLIENT_HANDLER] = m_not_oper,
-  .handlers[SERVER_HANDLER] = ms_connect,
-  .handlers[ENCAP_HANDLER] = m_ignore,
-  .handlers[OPER_HANDLER] = mo_connect
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = ms_connect, .args_min = 4 },
+  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+  .handlers[OPER_HANDLER] = { .handler = mo_connect, .args_min = 2 },
 };
 
 static void

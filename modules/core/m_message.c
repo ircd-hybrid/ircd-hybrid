@@ -559,14 +559,14 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
 static void
 m_message(bool notice, struct Client *source_p, int parc, char *parv[])
 {
-  if (parc < 2 || EmptyString(parv[1]))
+  if (EmptyString(parv[1]))
   {
     if (notice == false)
       sendto_one_numeric(source_p, &me, ERR_NORECIPIENT, command[notice]);
     return;
   }
 
-  if (parc < 3 || EmptyString(parv[2]))
+  if (EmptyString(parv[2]))
   {
     if (notice == false)
       sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);

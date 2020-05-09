@@ -43,12 +43,12 @@
 enum { WHOWAS_MAX_REPLIES = 20 };  /* Only applies to remote clients */
 
 static void
-do_whowas(struct Client *source_p, const int parc, char *parv[])
+do_whowas(struct Client *source_p, char *parv[])
 {
   int count = 0, max = -1;
   dlink_node *node;
 
-  if (parc > 2 && !EmptyString(parv[2]))
+  if (!EmptyString(parv[2]))
     max = atoi(parv[2]);
 
   if (!MyConnect(source_p) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
@@ -127,7 +127,7 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
     if (server_hunt(source_p, ":%s WHOWAS %s %s :%s", 3, parc, parv)->ret != HUNTED_ISME)
       return;
 
-  do_whowas(source_p, parc, parv);
+  do_whowas(source_p, parv);
 }
 
 /*! \brief WHOWAS command handler
@@ -155,7 +155,7 @@ ms_whowas(struct Client *source_p, int parc, char *parv[])
   if (server_hunt(source_p, ":%s WHOWAS %s %s :%s", 3, parc, parv)->ret != HUNTED_ISME)
     return;
 
-  do_whowas(source_p, parc, parv);
+  do_whowas(source_p, parv);
 }
 
 static struct Message whowas_msgtab =

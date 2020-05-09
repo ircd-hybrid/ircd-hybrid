@@ -129,14 +129,6 @@ m_topic(struct Client *source_p, int parc, char *parv[])
 static void
 ms_topic(struct Client *source_p, int parc, char *parv[])
 {
-  char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-
-  if (parc < 3)
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "TOPIC");
-    return;
-  }
-
   struct Channel *channel = hash_find_channel(parv[1]);
   if (channel == NULL)
   {
@@ -144,6 +136,7 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
+  char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
   if (IsClient(source_p))
     snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
              source_p->username, source_p->host);

@@ -242,7 +242,7 @@ static struct Message watch_msgtab =
   .handlers[CLIENT_HANDLER] = { .handler = m_watch, .args_max = 1 },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_watch, .args_max = 1 },
+  .handlers[OPER_HANDLER] = { .handler = m_watch, .args_max = 1 }
 };
 
 static void

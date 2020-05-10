@@ -90,7 +90,7 @@ static struct Message globops_msgtab =
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_globops, .args_min = 2 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_globops, .args_min = 2 },
+  .handlers[OPER_HANDLER] = { .handler = mo_globops, .args_min = 2 }
 };
 
 static void

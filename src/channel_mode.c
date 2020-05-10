@@ -314,9 +314,10 @@ channel_modes(const struct Channel *channel, const struct Client *client, char *
 static char *
 fix_key(char *arg)
 {
-  unsigned char *s, *t, c;
+  unsigned char *s = (unsigned char *)arg;
+  unsigned char *t = (unsigned char *)arg;
 
-  for (s = t = (unsigned char *)arg; (c = *s) && s - (unsigned char *)arg < KEYLEN; ++s)
+  for (unsigned char c; (c = *s) && s - (unsigned char *)arg < KEYLEN; ++s)
   {
     c &= 0x7f;
 

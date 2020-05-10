@@ -199,7 +199,7 @@ static struct Message oper_msgtab =
   .handlers[CLIENT_HANDLER] = { .handler = m_oper, .args_min = 3, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_oper, .args_min = 3, .end_grace_period = true },
+  .handlers[OPER_HANDLER] = { .handler = mo_oper, .args_min = 3, .end_grace_period = true }
 };
 
 static void

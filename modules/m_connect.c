@@ -206,7 +206,7 @@ static struct Message connect_msgtab =
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_connect, .args_min = 4 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_connect, .args_min = 2 },
+  .handlers[OPER_HANDLER] = { .handler = mo_connect, .args_min = 2 }
 };
 
 static void

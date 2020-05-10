@@ -565,8 +565,9 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     if (target_p != source_p)
       exit_client(target_p, "Overridden");
 
-  /* if we are connecting (Handshake), we already have the name from the
-   * connect{} block in source_p->name
+  /*
+   * If we are connecting (Handshake), we already have the name from the
+   * connect{} block in source_p->name.
    */
   strlcpy(source_p->name, name, sizeof(source_p->name));
 

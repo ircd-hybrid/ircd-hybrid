@@ -52,6 +52,9 @@ struct Client;
  * non-NULL pointers.
  */
 
+/** See 2.3 Messages in RFC1459 */
+enum { MAXPARA = 15 };
+
 /*
  * MessageHandler
  */
@@ -67,6 +70,7 @@ typedef enum HandlerType
 
 struct MessageHandler
 {
+  bool end_grace_period;  /**< Handler ends the flood grace period */
   bool empty_last_arg;  /**< Last argument is allowed to be empty / NUL */
   unsigned int args_min;  /**< At least this many args must be passed or an error will
                                be sent to the user before the m_func is even called */
@@ -85,22 +89,12 @@ struct Message
   unsigned int count;  /**< Number of times command used */
   unsigned int rcount;  /**< Number of times command used by server */
   unsigned int ecount;  /**< Number of times command has been issued via ENCAP */
-  unsigned int flags;
   uintmax_t bytes;  /**< Bytes received for this message */
 
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
    */
   struct MessageHandler handlers[LAST_HANDLER_TYPE];
-};
-
-/** See 2.3 Messages in RFC1459 */
-enum { MAXPARA = 15 };
-
-enum
-{
-  MFLG_EXTRA    = 1 << 0,
-  MFLG_ENDGRACE = 1 << 1
 };
 
 extern void parse(struct Client *, char *, char *);

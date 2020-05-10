@@ -166,12 +166,11 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
 static struct Message topic_msgtab =
 {
   .cmd = "TOPIC",
-  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_topic, .args_min = 2 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_topic, .args_min = 2, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = ms_topic, .args_min = 3, .empty_last_arg = true },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_topic, .args_min = 2 }
+  .handlers[OPER_HANDLER] = { .handler = m_topic, .args_min = 2, .end_grace_period = true }
 };
 
 static void

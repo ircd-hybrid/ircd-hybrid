@@ -226,7 +226,7 @@ parse_handle_command(struct Message *message, struct Client *source,
     ++message->rcount;
   ++message->count;
 
-  if (MyClient(source) && (message->flags & MFLG_ENDGRACE))
+  if (handler->end_grace_period == true)
     flood_endgrace(source);
 
   /* Check right amount of parameters is passed... --is */
@@ -389,7 +389,7 @@ parse(struct Client *client, char *pbuffer, char *bufend)
 
   para[parc] = ch;
 
-  if (message && (message->flags & MFLG_EXTRA))
+  if (message && message->extra)
   {
     /*
      * XXX: This will have to go away after the command handler rewrite

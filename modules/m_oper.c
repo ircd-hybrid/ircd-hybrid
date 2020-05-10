@@ -195,12 +195,11 @@ mo_oper(struct Client *source_p, int parc, char *parv[])
 static struct Message oper_msgtab =
 {
   .cmd = "OPER",
-  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_oper, .args_min = 3 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_oper, .args_min = 3, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_oper, .args_min = 3 },
+  .handlers[OPER_HANDLER] = { .handler = mo_oper, .args_min = 3, .end_grace_period = true },
 };
 
 static void

@@ -60,12 +60,11 @@ m_part(struct Client *source_p, int parc, char *parv[])
 static struct Message part_msgtab =
 {
   .cmd = "PART",
-  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_part, .args_min = 2 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_part, .args_min = 2, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = m_part, .args_min = 2 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_part, .args_min = 2 }
+  .handlers[OPER_HANDLER] = { .handler = m_part, .args_min = 2, .end_grace_period = true }
 };
 
 static void

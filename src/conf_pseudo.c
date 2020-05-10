@@ -95,7 +95,6 @@ pseudo_register(const char *name, const char *nick, const char *serv,
     pseudo->prepend = xstrdup(prepend);
 
   pseudo->msg.cmd = pseudo->command;
-  pseudo->msg.flags = MFLG_EXTRA;
   pseudo->msg.extra = pseudo;
   pseudo->msg.handlers[UNREGISTERED_HANDLER] = (struct MessageHandler) { .handler = m_unregistered };
   pseudo->msg.handlers[CLIENT_HANDLER] = (struct MessageHandler) { .handler = pseudo_message_handler, .args_max = 2 };

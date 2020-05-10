@@ -876,9 +876,8 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
 static struct Message nick_msgtab =
 {
   .cmd = "NICK",
-  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_nick },
-  .handlers[CLIENT_HANDLER] = { .handler = m_nick },
+  .handlers[CLIENT_HANDLER] = { .handler = m_nick, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = ms_nick, .args_min = 3 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_nick }

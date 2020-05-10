@@ -166,12 +166,11 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
 static struct Message kick_msgtab =
 {
   .cmd = "KICK",
-  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_kick, .args_min = 3 },
+  .handlers[CLIENT_HANDLER] = { .handler = m_kick, .args_min = 3, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = ms_kick, .args_min = 3 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_kick, .args_min = 3 }
+  .handlers[OPER_HANDLER] = { .handler = m_kick, .args_min = 3, .end_grace_period = true }
 };
 
 static void

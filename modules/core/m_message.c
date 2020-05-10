@@ -615,12 +615,11 @@ m_notice(struct Client *source_p, int parc, char *parv[])
 static struct Message privmsg_msgtab =
 {
   .cmd = "PRIVMSG",
-  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_privmsg },
+  .handlers[CLIENT_HANDLER] = { .handler = m_privmsg, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = m_privmsg },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_privmsg }
+  .handlers[OPER_HANDLER] = { .handler = m_privmsg, .end_grace_period = true }
 };
 
 static struct Message notice_msgtab =

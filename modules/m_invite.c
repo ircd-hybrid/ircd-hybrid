@@ -221,12 +221,11 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
 static struct Message invite_msgtab =
 {
   .cmd = "INVITE",
-  .flags = MFLG_ENDGRACE,
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_invite },
+  .handlers[CLIENT_HANDLER] = { .handler = m_invite, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = ms_invite, .args_min = 3 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_invite },
+  .handlers[OPER_HANDLER] = { .handler = m_invite, .end_grace_period = true }
 };
 
 static void

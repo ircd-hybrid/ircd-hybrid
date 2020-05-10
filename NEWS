@@ -1,3 +1,7 @@
+-- Noteworthy changes in version 8.2.32 (2020-??-??)
+o) RESV couldn't be issued in case no reason has been supplied. This has been fixed.
+
+
 -- Noteworthy changes in version 8.2.31 (2020-05-03)
 o) macOS compatibility fixes
 o) Removed 'spoof_notice' from auth::flags. With vhosts now this notice doesn't make

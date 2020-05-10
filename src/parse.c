@@ -226,7 +226,7 @@ parse_handle_command(struct Message *message, struct Client *source,
     ++message->rcount;
   ++message->count;
 
-  if (handler->end_grace_period == true)
+  if (handler->end_grace_period == true && MyClient(source))
     flood_endgrace(source);
 
   /* Check right amount of parameters is passed... --is */

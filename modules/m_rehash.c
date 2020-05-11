@@ -123,12 +123,6 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
   const char *option = NULL;
   const char *server = NULL;
 
-  if (EmptyString(parv[parc - 1]))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "REHASH");
-    return;
-  }
-
   if (parc < 3)
   {
     if (!HasOFlag(source_p, OPER_FLAG_REHASH))

@@ -228,12 +228,6 @@ mo_module(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(subcmd))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
-    return;
-  }
-
   for (const struct ModuleStruct *tab = module_cmd_table; tab->handler; ++tab)
   {
     if (irccmp(tab->cmd, subcmd))

@@ -111,10 +111,10 @@ static void
 mo_etrace(struct Client *source_p, int parc, char *parv[])
 {
   if (parc > 2)
-    if (server_hunt(source_p, ":%s ETRACE %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source_p, ":%s ETRACE %s :%s", 2, parv)->ret != HUNTED_ISME)
       return;
 
-  const struct server_hunt *hunt = server_hunt(source_p, ":%s ETRACE :%s", 1, parc, parv);
+  const struct server_hunt *hunt = server_hunt(source_p, ":%s ETRACE :%s", 1, parv);
   switch (hunt->ret)
   {
     case HUNTED_PASS:

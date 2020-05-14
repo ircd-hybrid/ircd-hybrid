@@ -47,7 +47,7 @@ struct server_hunt
 };
 
 extern bool server_valid_name(const char *);
-extern const struct server_hunt *server_hunt(struct Client *, const char *, const int, const int, char *[]);
+extern const struct server_hunt *server_hunt(struct Client *, const char *, const int, char *[]);
 extern void write_links_file(void *);
 extern void read_links_file(void);
 extern void try_connections(void *);

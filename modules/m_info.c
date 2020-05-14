@@ -772,7 +772,7 @@ m_info(struct Client *source_p, int parc, char *parv[])
   last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source_p, ":%s INFO :%s", 1, parc, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source_p, ":%s INFO :%s", 1, parv)->ret != HUNTED_ISME)
       return;
 
   send_info_text(source_p);
@@ -792,7 +792,7 @@ m_info(struct Client *source_p, int parc, char *parv[])
 static void
 ms_info(struct Client *source_p, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s INFO :%s", 1, parc, parv)->ret != HUNTED_ISME)
+  if (server_hunt(source_p, ":%s INFO :%s", 1, parv)->ret != HUNTED_ISME)
     return;
 
   send_info_text(source_p);

@@ -62,7 +62,7 @@ m_lusers(struct Client *source_p, int parc, char *parv[])
   last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source_p, ":%s LUSERS %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source_p, ":%s LUSERS %s :%s", 2, parv)->ret != HUNTED_ISME)
       return;
 
   show_lusers(source_p);
@@ -83,7 +83,7 @@ m_lusers(struct Client *source_p, int parc, char *parv[])
 static void
 ms_lusers(struct Client *source_p, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s LUSERS %s :%s", 2, parc, parv)->ret != HUNTED_ISME)
+  if (server_hunt(source_p, ":%s LUSERS %s :%s", 2, parv)->ret != HUNTED_ISME)
     return;
 
   show_lusers(source_p);

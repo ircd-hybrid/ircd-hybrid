@@ -157,24 +157,24 @@ read_links_file(void)
  *      returns: (see #defines)
  */
 const struct server_hunt *
-server_hunt(struct Client *source_p, const char *command,
-            const int server, const int parc, char *parv[])
+server_hunt(struct Client *source_p, const char *command, const int server, char *parv[])
 {
   static struct server_hunt hunt;
   struct server_hunt *const h = &hunt;
   dlink_node *node;
+  const char *const mask = parv[server];
 
   /* Assume it's me, if no server */
-  if (parc <= server || EmptyString(parv[server]))
+  if (EmptyString(mask))
   {
     h->target_p = &me;
     h->ret = HUNTED_ISME;
     return h;
   }
 
-  h->target_p = find_person(source_p, parv[server]);
+  h->target_p = find_person(source_p, mask);
   if (h->target_p == NULL)
-    h->target_p = hash_find_server(parv[server]);
+    h->target_p = hash_find_server(mask);
 
   /*
    * These are to pickup matches that would cause the following
@@ -185,14 +185,14 @@ server_hunt(struct Client *source_p, const char *command,
     if (h->target_p->from == source_p->from && !MyConnect(h->target_p))
       h->target_p = NULL;
 
-  if (h->target_p == NULL && has_wildcards(parv[server]))
+  if (h->target_p == NULL && has_wildcards(mask))
   {
     DLINK_FOREACH(node, global_server_list.head)
     {
       struct Client *tmp = node->data;
 
       assert(IsMe(tmp) || IsServer(tmp));
-      if (match(parv[server], tmp->name) == 0)
+      if (match(mask, tmp->name) == 0)
       {
         if (tmp->from == source_p->from && !MyConnect(tmp))
           continue;
@@ -209,7 +209,7 @@ server_hunt(struct Client *source_p, const char *command,
         struct Client *tmp = node->data;
 
         assert(IsClient(tmp));
-        if (match(parv[server], tmp->name) == 0)
+        if (match(mask, tmp->name) == 0)
         {
           if (tmp->from == source_p->from && !MyConnect(tmp))
             continue;
@@ -238,7 +238,7 @@ server_hunt(struct Client *source_p, const char *command,
     return h;
   }
 
-  sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, parv[server]);
+  sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, mask);
   h->ret = HUNTED_NOSUCH;
   return h;
 }

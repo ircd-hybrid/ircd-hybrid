@@ -42,7 +42,7 @@
  * \param source_p Pointer to client to report to
  */
 static void
-do_links(struct Client *source_p, int parc, char *parv[])
+do_links(struct Client *source_p, char *parv[])
 {
   dlink_node *node;
 
@@ -54,7 +54,9 @@ do_links(struct Client *source_p, int parc, char *parv[])
 
   if (HasUMode(source_p, UMODE_OPER) || ConfigServerHide.flatten_links == 0)
   {
-    const char *mask = (parc > 2 ? parv[2] : parv[1]);
+    const char *mask = parv[2];
+    if (EmptyString(mask))
+      mask = parv[1];
 
     DLINK_FOREACH(node, global_server_list.head)
     {
@@ -101,7 +103,7 @@ do_links(struct Client *source_p, int parc, char *parv[])
 static void
 mo_links(struct Client *source_p, int parc, char *parv[])
 {
-  do_links(source_p, parc, parv);
+  do_links(source_p, parv);
 }
 
 /*! \brief LINKS command handler
@@ -132,7 +134,7 @@ m_links(struct Client *source_p, int parc, char *parv[])
 
   last_used = event_base->time.sec_monotonic;
 
-  do_links(source_p, parc, parv);
+  do_links(source_p, parv);
 }
 
 static struct Message links_msgtab =

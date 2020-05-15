@@ -97,5 +97,7 @@ notifications:
   - bugs@ircd-hybrid.org
  irc:
   channels:
-  - "irc.ircd-hybrid.org#ircd-coders"
+    - "irc.ircd-hybrid.org#ircd-coders"
+  on_success: change
+  on_failure: always
   skip_join: true

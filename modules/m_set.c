@@ -158,11 +158,11 @@ quote_spamnum(struct Client *source_p, const char *arg, int newval)
 
     GlobalSetOptions.spam_num = IRCD_MAX(newval, MIN_SPAM_NUM);
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed SPAMNUM to %i",
+                         "%s has changed SPAMNUM to %u",
                          get_oper_name(source_p), GlobalSetOptions.spam_num);
   }
   else
-    sendto_one_notice(source_p, &me, ":SPAMNUM is currently %i",
+    sendto_one_notice(source_p, &me, ":SPAMNUM is currently %u",
                       GlobalSetOptions.spam_num);
 }
 

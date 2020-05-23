@@ -254,14 +254,10 @@ parse(struct Client *client, char *pbuffer, char *bufend)
   unsigned int parc = 0;
   unsigned int paramcount;
 
-  if (IsDead(client))
-    return;
-
+  assert(!IsDead(client));
   assert(client->connection);
   assert(client->connection->fd);
   assert(client->connection->fd->flags.open);
-
-
   assert((bufend - pbuffer) < IRCD_BUFSIZE);
 
   for (ch = pbuffer; *ch == ' '; ++ch)  /* Skip spaces */

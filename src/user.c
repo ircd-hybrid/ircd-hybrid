@@ -241,8 +241,8 @@ introduce_client(struct Client *client)
                  client->account,
                  client->info);
 
-    if (!EmptyString(client->certfp))
-      sendto_one(server, ":%s CERTFP %s", client->id, client->certfp);
+    if (!EmptyString(client->tls_certfp))
+      sendto_one(server, ":%s CERTFP %s", client->id, client->tls_certfp);
   }
 }
 

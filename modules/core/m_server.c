@@ -148,8 +148,8 @@ server_send_client(struct Client *client_p, struct Client *target_p)
                target_p->sockhost, target_p->id,
                target_p->account, target_p->info);
 
-  if (!EmptyString(target_p->certfp))
-    sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->certfp);
+  if (!EmptyString(target_p->tls_certfp))
+    sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->tls_certfp);
 
   if (target_p->away[0])
     sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
@@ -414,7 +414,7 @@ server_check(const char *name, struct Client *client_p)
         return SERVER_CHECK_INVALID_PASSWORD;
 
       if (!EmptyString(conf->certfp))
-        if (EmptyString(client_p->certfp) || strcasecmp(client_p->certfp, conf->certfp))
+        if (EmptyString(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->certfp))
           return SERVER_CHECK_INVALID_CERTIFICATE;
 
       conf_attach(client_p, conf);

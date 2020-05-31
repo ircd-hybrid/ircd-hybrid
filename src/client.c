@@ -146,7 +146,7 @@ client_free(struct Client *client)
 
 
   xfree(client->serv);
-  xfree(client->certfp);
+  xfree(client->tls_certfp);
 
   if (MyConnect(client))
   {

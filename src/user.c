@@ -260,8 +260,10 @@ user_welcome(struct Client *client)
   if (HasFlag(client, FLAGS_TLS))
   {
     AddUMode(client, UMODE_SECURE);
+
+    client->tls_cipher = xstrdup(tls_get_cipher(&client->connection->fd->tls));
     sendto_one_notice(client, &me, ":*** Connected securely via %s",
-                      tls_get_cipher(&client->connection->fd->tls));
+                      client->tls_cipher);
   }
 
   sendto_one_numeric(client, &me, RPL_WELCOME, ConfigServerInfo.network_name,

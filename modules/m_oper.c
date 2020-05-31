@@ -79,8 +79,9 @@ oper_up(struct Client *source_p, const struct MaskItem *conf)
                   RPL_WHOISOPERATOR, conf->whois);
   }
 
-  ilog(LOG_TYPE_OPER, "OPER %s by %s!%s@%s", conf->name, source_p->name,
-       source_p->username, source_p->host);
+  ilog(LOG_TYPE_OPER, "OPER %s by %s",
+       conf->name, client_get_name(source_p, HIDE_IP));
+
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
@@ -102,13 +103,11 @@ failed_oper_notice(struct Client *source_p, const char *name,
 {
   if (ConfigGeneral.failed_oper_notice)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Failed OPER attempt as %s by %s (%s@%s) - %s",
-                         name, source_p->name, source_p->username,
-                         source_p->host, reason);
+                         "Failed OPER attempt as %s by %s - %s",
+                         name, client_get_name(source_p, HIDE_IP), reason);
 
-  ilog(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s (%s@%s) - %s",
-       name, source_p->name, source_p->username,
-       source_p->host, reason);
+  ilog(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
+       name, client_get_name(source_p, HIDE_IP), reason);
 }
 
 /*! \brief OPER command handler

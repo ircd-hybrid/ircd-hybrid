@@ -275,19 +275,21 @@ server_estab(struct Client *client_p)
   /* Show the real host/IP to admins */
   if (tls_isusing(&client_p->connection->fd->tls))
   {
+    client_p->tls_cipher = xstrdup(tls_get_cipher(&client_p->connection->fd->tls));
+
     /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                         client_get_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd->tls),
+                         client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
                          capab_get(client_p));
 
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                         client_get_name(client_p, MASK_IP), tls_get_cipher(&client_p->connection->fd->tls),
+                         client_get_name(client_p, MASK_IP), client_p->tls_cipher,
                          capab_get(client_p));
     ilog(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
-         client_get_name(client_p, SHOW_IP), tls_get_cipher(&client_p->connection->fd->tls),
+         client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
          capab_get(client_p));
   }
   else

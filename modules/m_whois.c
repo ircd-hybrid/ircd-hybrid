@@ -204,9 +204,9 @@ whois_person(struct Client *source_p, struct Client *target_p)
   if (HasUMode(target_p, UMODE_SECURE))
     sendto_one_numeric(source_p, &me, RPL_WHOISSECURE, target_p->name);
 
-  if (!EmptyString(target_p->certfp))
+  if (!EmptyString(target_p->tls_certfp))
     if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
-      sendto_one_numeric(source_p, &me, RPL_WHOISCERTFP, target_p->name, target_p->certfp);
+      sendto_one_numeric(source_p, &me, RPL_WHOISCERTFP, target_p->name, target_p->tls_certfp);
 
   if (MyConnect(target_p))
     if (!HasUMode(target_p, UMODE_HIDEIDLE) || HasUMode(source_p, UMODE_OPER) ||

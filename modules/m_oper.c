@@ -147,7 +147,7 @@ m_oper(struct Client *source_p, int parc, char *parv[])
 
   if (!EmptyString(conf->certfp))
   {
-    if (EmptyString(source_p->certfp) || strcasecmp(source_p->certfp, conf->certfp))
+    if (EmptyString(source_p->tls_certfp) || strcasecmp(source_p->tls_certfp, conf->certfp))
     {
       sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
       failed_oper_notice(source_p, opername, "client certificate fingerprint mismatch");

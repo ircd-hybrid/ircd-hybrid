@@ -376,7 +376,7 @@ struct Client
 
   struct irc_ssaddr ip;  /**< Real IP address */
 
-  char *certfp;  /**< TLS certificate fingerprint */
+  char *tls_certfp;  /**< TLS certificate fingerprint */
 
   char away[AWAYLEN + 1];  /**< Client's AWAY message. Can be set/unset via AWAY command */
   char name[HOSTLEN + 1];  /**< Unique name for a client nick or host */

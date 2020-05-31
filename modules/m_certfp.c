@@ -50,11 +50,11 @@ ms_certfp(struct Client *source_p, int parc, char *parv[])
   if (!IsClient(source_p))
     return;
 
-  xfree(source_p->certfp);
-  source_p->certfp = xstrdup(parv[1]);
+  xfree(source_p->tls_certfp);
+  source_p->tls_certfp = xstrdup(parv[1]);
 
   sendto_server(source_p, 0, 0, ":%s CERTFP %s",
-                source_p->id, source_p->certfp);
+                source_p->id, source_p->tls_certfp);
 }
 
 static struct Message certfp_msgtab =

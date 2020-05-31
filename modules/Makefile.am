@@ -30,6 +30,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_locops.la    \
                       m_lusers.la    \
                       m_map.la       \
+                      m_metadata.la  \
                       m_module.la    \
                       m_motd.la      \
                       m_names.la     \
@@ -96,6 +97,7 @@ m_list_la_LDFLAGS = $(MODULE_FLAGS)
 m_locops_la_LDFLAGS = $(MODULE_FLAGS)
 m_lusers_la_LDFLAGS = $(MODULE_FLAGS)
 m_map_la_LDFLAGS = $(MODULE_FLAGS)
+m_metadata_la_LDFLAGS = $(MODULE_FLAGS)
 m_module_la_LDFLAGS = $(MODULE_FLAGS)
 m_motd_la_LDFLAGS = $(MODULE_FLAGS)
 m_names_la_LDFLAGS = $(MODULE_FLAGS)
@@ -161,6 +163,7 @@ m_list_la_SOURCES = m_list.c
 m_locops_la_SOURCES = m_locops.c
 m_lusers_la_SOURCES = m_lusers.c
 m_map_la_SOURCES = m_map.c
+m_metadata_la_SOURCES = m_metadata.c
 m_module_la_SOURCES = m_module.c
 m_motd_la_SOURCES = m_motd.c
 m_names_la_SOURCES = m_names.c

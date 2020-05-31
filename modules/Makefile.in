@@ -297,6 +297,12 @@ m_map_la_OBJECTS = $(am_m_map_la_OBJECTS)
 m_map_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_map_la_LDFLAGS) $(LDFLAGS) -o $@
+m_metadata_la_LIBADD =
+am_m_metadata_la_OBJECTS = m_metadata.lo
+m_metadata_la_OBJECTS = $(am_m_metadata_la_OBJECTS)
+m_metadata_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_metadata_la_LDFLAGS) $(LDFLAGS) -o $@
 m_module_la_LIBADD =
 am_m_module_la_OBJECTS = m_module.lo
 m_module_la_OBJECTS = $(am_m_module_la_OBJECTS)
@@ -558,26 +564,27 @@ am__depfiles_remade = ./$(DEPDIR)/m_accept.Plo ./$(DEPDIR)/m_admin.Plo \
 	./$(DEPDIR)/m_kline.Plo ./$(DEPDIR)/m_knock.Plo \
 	./$(DEPDIR)/m_links.Plo ./$(DEPDIR)/m_list.Plo \
 	./$(DEPDIR)/m_locops.Plo ./$(DEPDIR)/m_lusers.Plo \
-	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_module.Plo \
-	./$(DEPDIR)/m_motd.Plo ./$(DEPDIR)/m_names.Plo \
-	./$(DEPDIR)/m_oper.Plo ./$(DEPDIR)/m_pass.Plo \
-	./$(DEPDIR)/m_ping.Plo ./$(DEPDIR)/m_pong.Plo \
-	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_rehash.Plo \
-	./$(DEPDIR)/m_restart.Plo ./$(DEPDIR)/m_resv.Plo \
-	./$(DEPDIR)/m_set.Plo ./$(DEPDIR)/m_stats.Plo \
-	./$(DEPDIR)/m_svinfo.Plo ./$(DEPDIR)/m_svshost.Plo \
-	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
-	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
-	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
-	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
-	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
-	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
-	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
-	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
-	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_wallops.Plo \
-	./$(DEPDIR)/m_watch.Plo ./$(DEPDIR)/m_webirc.Plo \
-	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
-	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo
+	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_metadata.Plo \
+	./$(DEPDIR)/m_module.Plo ./$(DEPDIR)/m_motd.Plo \
+	./$(DEPDIR)/m_names.Plo ./$(DEPDIR)/m_oper.Plo \
+	./$(DEPDIR)/m_pass.Plo ./$(DEPDIR)/m_ping.Plo \
+	./$(DEPDIR)/m_pong.Plo ./$(DEPDIR)/m_post.Plo \
+	./$(DEPDIR)/m_rehash.Plo ./$(DEPDIR)/m_restart.Plo \
+	./$(DEPDIR)/m_resv.Plo ./$(DEPDIR)/m_set.Plo \
+	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
+	./$(DEPDIR)/m_svshost.Plo ./$(DEPDIR)/m_svsjoin.Plo \
+	./$(DEPDIR)/m_svskill.Plo ./$(DEPDIR)/m_svsmode.Plo \
+	./$(DEPDIR)/m_svsnick.Plo ./$(DEPDIR)/m_svspart.Plo \
+	./$(DEPDIR)/m_svstag.Plo ./$(DEPDIR)/m_tburst.Plo \
+	./$(DEPDIR)/m_time.Plo ./$(DEPDIR)/m_topic.Plo \
+	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
+	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
+	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
+	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
+	./$(DEPDIR)/m_wallops.Plo ./$(DEPDIR)/m_watch.Plo \
+	./$(DEPDIR)/m_webirc.Plo ./$(DEPDIR)/m_who.Plo \
+	./$(DEPDIR)/m_whois.Plo ./$(DEPDIR)/m_whowas.Plo \
+	./$(DEPDIR)/m_xline.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -608,12 +615,13 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_kline_la_SOURCES) $(m_knock_la_SOURCES) \
 	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
 	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
-	$(m_map_la_SOURCES) $(m_module_la_SOURCES) \
-	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
-	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
-	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
-	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
-	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_map_la_SOURCES) $(m_metadata_la_SOURCES) \
+	$(m_module_la_SOURCES) $(m_motd_la_SOURCES) \
+	$(m_names_la_SOURCES) $(m_oper_la_SOURCES) \
+	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
+	$(m_post_la_SOURCES) $(m_rehash_la_SOURCES) \
+	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
+	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_svshost_la_SOURCES) \
 	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
 	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
@@ -638,12 +646,13 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_kline_la_SOURCES) $(m_knock_la_SOURCES) \
 	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
 	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
-	$(m_map_la_SOURCES) $(m_module_la_SOURCES) \
-	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
-	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
-	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
-	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
-	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_map_la_SOURCES) $(m_metadata_la_SOURCES) \
+	$(m_module_la_SOURCES) $(m_motd_la_SOURCES) \
+	$(m_names_la_SOURCES) $(m_oper_la_SOURCES) \
+	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
+	$(m_post_la_SOURCES) $(m_rehash_la_SOURCES) \
+	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
+	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_svshost_la_SOURCES) \
 	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
 	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
@@ -898,6 +907,7 @@ modules_LTLIBRARIES = m_accept.la    \
                       m_locops.la    \
                       m_lusers.la    \
                       m_map.la       \
+                      m_metadata.la  \
                       m_module.la    \
                       m_motd.la      \
                       m_names.la     \
@@ -963,6 +973,7 @@ m_list_la_LDFLAGS = $(MODULE_FLAGS)
 m_locops_la_LDFLAGS = $(MODULE_FLAGS)
 m_lusers_la_LDFLAGS = $(MODULE_FLAGS)
 m_map_la_LDFLAGS = $(MODULE_FLAGS)
+m_metadata_la_LDFLAGS = $(MODULE_FLAGS)
 m_module_la_LDFLAGS = $(MODULE_FLAGS)
 m_motd_la_LDFLAGS = $(MODULE_FLAGS)
 m_names_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1027,6 +1038,7 @@ m_list_la_SOURCES = m_list.c
 m_locops_la_SOURCES = m_locops.c
 m_lusers_la_SOURCES = m_lusers.c
 m_map_la_SOURCES = m_map.c
+m_metadata_la_SOURCES = m_metadata.c
 m_module_la_SOURCES = m_module.c
 m_motd_la_SOURCES = m_motd.c
 m_names_la_SOURCES = m_names.c
@@ -1210,6 +1222,9 @@ m_lusers.la: $(m_lusers_la_OBJECTS) $(m_lusers_la_DEPENDENCIES) $(EXTRA_m_lusers
 m_map.la: $(m_map_la_OBJECTS) $(m_map_la_DEPENDENCIES) $(EXTRA_m_map_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_map_la_LINK) -rpath $(modulesdir) $(m_map_la_OBJECTS) $(m_map_la_LIBADD) $(LIBS)
 
+m_metadata.la: $(m_metadata_la_OBJECTS) $(m_metadata_la_DEPENDENCIES) $(EXTRA_m_metadata_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_metadata_la_LINK) -rpath $(modulesdir) $(m_metadata_la_OBJECTS) $(m_metadata_la_LIBADD) $(LIBS)
+
 m_module.la: $(m_module_la_OBJECTS) $(m_module_la_DEPENDENCIES) $(EXTRA_m_module_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_module_la_LINK) -rpath $(modulesdir) $(m_module_la_OBJECTS) $(m_module_la_LIBADD) $(LIBS)
 
@@ -1358,6 +1373,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_locops.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_lusers.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_map.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_metadata.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_module.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_motd.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_names.Plo@am__quote@ # am--include-marker
@@ -1660,6 +1676,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/m_locops.Plo
 	-rm -f ./$(DEPDIR)/m_lusers.Plo
 	-rm -f ./$(DEPDIR)/m_map.Plo
+	-rm -f ./$(DEPDIR)/m_metadata.Plo
 	-rm -f ./$(DEPDIR)/m_module.Plo
 	-rm -f ./$(DEPDIR)/m_motd.Plo
 	-rm -f ./$(DEPDIR)/m_names.Plo
@@ -1769,6 +1786,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/m_locops.Plo
 	-rm -f ./$(DEPDIR)/m_lusers.Plo
 	-rm -f ./$(DEPDIR)/m_map.Plo
+	-rm -f ./$(DEPDIR)/m_metadata.Plo
 	-rm -f ./$(DEPDIR)/m_module.Plo
 	-rm -f ./$(DEPDIR)/m_motd.Plo
 	-rm -f ./$(DEPDIR)/m_names.Plo

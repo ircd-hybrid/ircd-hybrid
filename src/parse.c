@@ -372,16 +372,6 @@ parse(struct Client *client, char *pbuffer, char *bufend)
   }
 
   memset(para, 0, sizeof(para));
-
-  /*
-   * Must the following loop really be so devious? On surface it
-   * splits the message to parameters from blank spaces. But, if
-   * paramcount has been reached, the rest of the message goes into
-   * this last parameter (about same effect as ":" has...) --msa
-   */
-
-  /* Note initially true: s == NULL || *(s - 1) == '\0' !! */
-
   para[parc] = ch;
 
   if (message && message->extra)
@@ -392,6 +382,14 @@ parse(struct Client *client, char *pbuffer, char *bufend)
     para[++parc] = message->extra;
   }
 
+  /*
+   * Must the following loop really be so devious? On surface it
+   * splits the message to parameters from blank spaces. But, if
+   * paramcount has been reached, the rest of the message goes into
+   * this last parameter (about same effect as ":" has...) --msa
+   */
+
+  /* Note initially true: s == NULL || *(s - 1) == '\0' !! */
   if (s)
   {
     if (paramcount == 0 || paramcount > MAXPARA)

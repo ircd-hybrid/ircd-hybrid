@@ -69,50 +69,46 @@ whois_can_see_channels(struct Channel *channel,
 static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
-  char buf[IRCD_BUFSIZE];
   dlink_node *node;
   const struct ServicesTag *svstag = NULL;
-  char *t = NULL;
-  int cur_len = 0;
-  int mlen = 0;
-  int tlen = 0;
-  int reply_to_send = 0;
 
   sendto_one_numeric(source_p, &me, RPL_WHOISUSER, target_p->name,
                      target_p->username, target_p->host,
                      target_p->info);
 
-  cur_len = mlen = snprintf(buf, sizeof(buf), numeric_form(RPL_WHOISCHANNELS),
-                            me.name, source_p->name, target_p->name, "");
-  t = buf + mlen;
-
-  DLINK_FOREACH(node, target_p->channel.head)
+  if (dlink_list_length(&target_p->channel))
   {
-    const struct ChannelMember *member = node->data;
-    int show = whois_can_see_channels(member->channel, source_p, target_p);
+    char buf[IRCD_BUFSIZE];
+    char *bufptr = buf;
 
-    if (show)
+    /* :me.name 319 source_p->name target_p->name :~@#chan1 +#chan2 #chan3 ...\r\n */
+    /* 1       23456              7              89                           0 1  */
+    size_t len = strlen(me.name) + strlen(source_p->name) + strlen(target_p->name) + 11;
+
+    DLINK_FOREACH(node, target_p->channel.head)
     {
-      if ((cur_len + 4 + member->channel->name_len + 1) > (IRCD_BUFSIZE - 2))
+      const struct ChannelMember *member = node->data;
+      int show = whois_can_see_channels(member->channel, source_p, target_p);
+
+      if (show)
       {
-        *(t - 1) = '\0';
-        sendto_one(source_p, "%s", buf);
-        cur_len = mlen;
-        t = buf + mlen;
+        if ((bufptr - buf) + member->channel->name_len + 1 + (show == 2) + 3 /* 3 for @%+ */ + len > sizeof(buf))
+        {
+          *(bufptr - 1) = '\0';
+          sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
+          bufptr = buf;
+        }
+
+        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s%s ",
+                           show == 2 ? "~" : "", get_member_status(member, true), member->channel->name);
       }
-
-      tlen = sprintf(t, "%s%s%s ", show == 2 ? "~" : "", get_member_status(member, true),
-                     member->channel->name);
-      t += tlen;
-      cur_len += tlen;
-      reply_to_send = 1;
     }
-  }
 
-  if (reply_to_send)
-  {
-    *(t - 1) = '\0';
-    sendto_one(source_p, "%s", buf);
+    if (bufptr != buf)
+    {
+      *(bufptr - 1) = '\0';
+      sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
+    }
   }
 
   if ((ConfigServerHide.hide_servers || IsHidden(target_p->servptr)) &&
@@ -185,9 +181,10 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
   if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
   {
+    char buf[UMODE_MAX_STR];
     char *m = buf;
-    *m++ = '+';
 
+    *m++ = '+';
     for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
       if (HasUMode(target_p, tab->flag))
         *m++ = tab->c;

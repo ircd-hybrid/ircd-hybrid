@@ -43,20 +43,27 @@
 #include "modules.h"
 
 
+enum
+{
+  WHOIS_SHOW_NORMAL,
+  WHOIS_SHOW_PREFIXED,
+  WHOIS_SHOW_NO
+};
+
 static int
-whois_can_see_channels(struct Channel *channel,
-                       struct Client *source_p,
-                       struct Client *target_p)
+whois_channel_show_type(struct Channel *channel,
+                        struct Client *source_p,
+                        struct Client *target_p)
 {
   if (PubChannel(channel) && !HasUMode(target_p, UMODE_HIDECHANS))
-    return 1;
+    return WHOIS_SHOW_NORMAL;
 
   if (source_p == target_p || IsMember(source_p, channel))
-    return 1;
+    return WHOIS_SHOW_NORMAL;
 
   if (HasUMode(source_p, UMODE_OPER))
-    return 2;
-  return 0;
+    return WHOIS_SHOW_PREFIXED;
+  return WHOIS_SHOW_NO;
 }
 
 /* whois_person()
@@ -93,11 +100,11 @@ whois_person(struct Client *source_p, struct Client *target_p)
     DLINK_FOREACH(node, target_p->channel.head)
     {
       const struct ChannelMember *member = node->data;
-      int show = whois_can_see_channels(member->channel, source_p, target_p);
+      int show = whois_channel_show_type(member->channel, source_p, target_p);
 
-      if (show)
+      if (show != WHOIS_SHOW_NO)
       {
-        if ((bufptr - buf) + member->channel->name_len + 1 + (show == 2) + 3 /* 3 for @%+ */ + len > sizeof(buf))
+        if ((bufptr - buf) + member->channel->name_len + 1 + (show == WHOIS_SHOW_PREFIXED) + 3 /* 3 for @%+ */ + len > sizeof(buf))
         {
           *(bufptr - 1) = '\0';
           sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
@@ -105,7 +112,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
         }
 
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s%s ",
-                           show == 2 ? "~" : "", get_member_status(member, true), member->channel->name);
+                           show == WHOIS_SHOW_PREFIXED ? "~" : "", get_member_status(member, true), member->channel->name);
       }
     }
 

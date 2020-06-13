@@ -83,7 +83,12 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
     /* :me.name 319 source_p->name target_p->name :~@#chan1 +#chan2 #chan3 ...\r\n */
     /* 1       23456              7              89                           0 1  */
-    size_t len = strlen(me.name) + strlen(source_p->name) + strlen(target_p->name) + 11;
+    size_t len = strlen(target_p->name) + 11;
+
+    if (MyConnect(source_p))
+      len += strlen(me.name) + strlen(source_p->name);
+    else
+      len += IRCD_MAX(strlen(me.name), strlen(me.id)) + IRCD_MAX(strlen(source_p->name), strlen(source_p->id));
 
     DLINK_FOREACH(node, target_p->channel.head)
     {

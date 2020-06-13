@@ -422,7 +422,8 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
 {
   dlink_node *node;
   char buf[IRCD_BUFSIZE + 1];
-  int tlen = 0;
+  char *bufptr = buf;
+  size_t masklen = 0;
   bool is_member = IsMember(client, channel);
   bool multi_prefix = HasCap(client, CAP_MULTI_PREFIX) != 0;
   bool uhnames = HasCap(client, CAP_UHNAMES) != 0;
@@ -431,9 +432,9 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
 
   if (PubChannel(channel) || is_member == true)
   {
-    char *t = buf + snprintf(buf, sizeof(buf), numeric_form(RPL_NAMREPLY), me.name, client->name,
-                             channel_pub_or_secret(channel), channel->name);
-    char *start = t;
+    /* :me.name 353 source_p->name @ channel->name :+nick1 @nick2 %nick3 ...\r\n */
+    /* 1       23456              789             01                        2 3  */
+    size_t len = strlen(me.name) + strlen(client->name) + channel->name_len + 13;
 
     DLINK_FOREACH(node, channel->members.head)
     {
@@ -443,46 +444,50 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
         continue;
 
       if (uhnames == true)
-        tlen = strlen(member->client->name) + strlen(member->client->username) +
-               strlen(member->client->host) + 3;  /* +3 for ! + @ + space */
+        masklen = strlen(member->client->name) + strlen(member->client->username) +
+                  strlen(member->client->host) + 3;  /* +3 for ! + @ + space */
       else
-        tlen = strlen(member->client->name) + 1;  /* +1 for space */
+        masklen = strlen(member->client->name) + 1;  /* +1 for space */
 
       if (multi_prefix == true)
       {
         if (member->flags & CHFL_CHANOP)
-          ++tlen;
+          ++masklen;
         if (member->flags & CHFL_HALFOP)
-          ++tlen;
+          ++masklen;
         if (member->flags & CHFL_VOICE)
-          ++tlen;
+          ++masklen;
       }
       else
       {
         if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
-          ++tlen;
+          ++masklen;
       }
 
-      if (t + tlen - buf > IRCD_BUFSIZE - 2)
+      if ((bufptr - buf) + masklen + len > sizeof(buf))
       {
-        *(t - 1) = '\0';
-        sendto_one(client, "%s", buf);
-        t = start;
+        *(bufptr - 1) = '\0';
+        sendto_one_numeric(client, &me, RPL_NAMREPLY,
+                           channel_pub_or_secret(channel), channel->name, buf);
+        bufptr = buf;
       }
 
       if (uhnames == true)
-        t += sprintf(t, "%s%s!%s@%s ", get_member_status(member, multi_prefix),
-                     member->client->name, member->client->username,
-                     member->client->host);
+        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s!%s@%s ",
+                           get_member_status(member, multi_prefix),
+                           member->client->name, member->client->username,
+                           member->client->host);
       else
-        t += sprintf(t, "%s%s ", get_member_status(member, multi_prefix),
-                     member->client->name);
+        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s ",
+                           get_member_status(member, multi_prefix),
+                           member->client->name);
     }
 
-    if (tlen)
+    if (bufptr != buf)
     {
-      *(t - 1) = '\0';
-      sendto_one(client, "%s", buf);
+      *(bufptr - 1) = '\0';
+      sendto_one_numeric(client, &me, RPL_NAMREPLY,
+                         channel_pub_or_secret(channel), channel->name, buf);
     }
   }
 

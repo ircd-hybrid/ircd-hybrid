@@ -315,6 +315,9 @@ verify_access(struct Client *client)
     return NOT_AUTHORIZED;
   }
 
+  /* Preserve x->host in x->realhost before it gets overwritten. */
+  strlcpy(client->realhost, client->host, sizeof(client->realhost));
+
   if (IsConfDoSpoofIp(conf))
     strlcpy(client->host, conf->name, sizeof(client->host));
 

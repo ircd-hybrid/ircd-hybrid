@@ -141,8 +141,6 @@ auth_release_client(struct AuthRequest *auth)
 
   AddFlag(client, FLAGS_FINISHED_AUTH);
 
-  strlcpy(client->realhost, client->host, sizeof(client->realhost));
-
   read_packet(client->connection->fd, client);
 }
 

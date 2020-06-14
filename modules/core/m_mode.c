@@ -117,15 +117,14 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
           if (MyConnect(source_p))
           {
-            dlink_node *node;
-
             svstag_detach(&source_p->svstags, RPL_WHOISOPERATOR);
             conf_detach(source_p, CONF_OPER);
 
             ClrOFlag(source_p);
             DelUMode(source_p, ConfigGeneral.oper_only_umodes);
 
-            if ((node = dlinkFindDelete(&oper_list, source_p)))
+            dlink_node *node = dlinkFindDelete(&oper_list, source_p);
+            if (node)
               free_dlink_node(node);
           }
         }

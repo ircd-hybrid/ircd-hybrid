@@ -41,6 +41,11 @@
 static void
 quote_autoconn(struct Client *source_p, const char *arg, int newval)
 {
+  static const char *const status[] =
+  {
+    "OFF", "ON"
+  };
+
   if (EmptyString(arg))
   {
     sendto_one_notice(source_p, &me, ":Please specify a server name!");
@@ -60,10 +65,10 @@ quote_autoconn(struct Client *source_p, const char *arg, int newval)
     ClearConfAllowAutoConn(conf);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "%s has changed AUTOCONN for %s to %i",
-                       get_oper_name(source_p), conf->name, newval);
-  sendto_one_notice(source_p, &me, ":AUTOCONN for %s is now set to %i",
-                    conf->name, newval);
+                       "%s has changed AUTOCONN for %s to %s",
+                       get_oper_name(source_p), conf->name, status[newval != 0]);
+  sendto_one_notice(source_p, &me, ":AUTOCONN for %s is now set to %s",
+                    conf->name, status[newval != 0]);
 }
 
 /* SET AUTOCONNALL */

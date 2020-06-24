@@ -337,9 +337,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
 static void
 uid_from_server(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client *client_p = NULL;
-
-  client_p = client_make(source_p->from);
+  struct Client *client_p = client_make(source_p->from);
   client_p->servptr = source_p;
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = strtoumax(parv[3], NULL, 10);
@@ -382,9 +380,9 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   for (const char *m = &parv[4][1]; *m; ++m)
   {
     const struct user_modes *tab = umode_map[(unsigned char)*m];
-
     if (tab == NULL)
       continue;
+
     if ((tab->flag & UMODE_INVISIBLE) && !HasUMode(client_p, UMODE_INVISIBLE))
       ++Count.invisi;
     if ((tab->flag & UMODE_OPER) && !HasUMode(client_p, UMODE_OPER))

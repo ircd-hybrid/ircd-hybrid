@@ -441,11 +441,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
                              unsigned int negcap, const char *pattern, ...)
 {
   va_list args;
-  dlink_node *uptr;
-  dlink_node *cptr;
-  struct Channel *channel;
-  struct ChannelMember *member;
-  struct Client *target;
+  dlink_node *node, *node2;
   struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, pattern);
@@ -454,14 +450,15 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
 
   ++current_serial;
 
-  DLINK_FOREACH(cptr, user->channel.head)
+  DLINK_FOREACH(node, user->channel.head)
   {
-    channel = ((struct ChannelMember *)cptr->data)->channel;
+    struct ChannelMember *member = node->data;
+    struct Channel *channel = member->channel;
 
-    DLINK_FOREACH(uptr, channel->members_local.head)
+    DLINK_FOREACH(node2, channel->members_local.head)
     {
-      member = uptr->data;
-      target = member->client;
+      struct ChannelMember *member2 = node2->data;
+      struct Client *target = member2->client;
 
       if (IsDead(target))
         continue;

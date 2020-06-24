@@ -54,11 +54,9 @@
 static void
 mr_webirc(struct Client *source_p, int parc, char *parv[])
 {
-  const struct MaskItem *conf = NULL;
   const char *const pass = parv[1];
   const char *const host = parv[3];
   const char *const addr = parv[4];
-  struct addrinfo hints, *res;
 
   assert(MyConnect(source_p));
 
@@ -68,11 +66,14 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  conf = find_address_conf(source_p->host,
+  const struct MaskItem *conf = find_address_conf(source_p->host,
                            HasFlag(source_p, FLAGS_GOTID) ? source_p->username : "webirc",
                            &source_p->ip, pass);
-  if (!conf || !IsConfClient(conf))
+  if (conf == NULL)
     return;
+
+  if (!IsConfClient(conf))
+    return;  /* It's a CONF_KLINE */
 
   if (!IsConfWebIRC(conf))
   {
@@ -92,11 +93,12 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
+  struct addrinfo hints, *res;
   memset(&hints, 0, sizeof(hints));
 
-  hints.ai_family   = AF_UNSPEC;
+  hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
+  hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
 
   if (getaddrinfo(addr, NULL, &hints, &res))
   {
@@ -122,7 +124,8 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   strlcpy(source_p->realhost, host, sizeof(source_p->realhost));
 
   /* Check dlines now, k-lines will be checked on registration */
-  if ((conf = find_dline_conf(&source_p->ip)))
+  conf = find_dline_conf(&source_p->ip);
+  if (conf)
   {
     if (conf->type == CONF_DLINE)
     {

@@ -63,11 +63,8 @@ static void remove_ban_list(struct Channel *, struct Client *, dlink_list *, cha
 static void
 ms_sjoin(struct Client *source_p, int parc, char *parv[])
 {
-  struct Channel *channel = NULL;
   struct Client  *target_p = NULL;
-  uintmax_t newts;
-  uintmax_t oldts;
-  struct Mode mode, *oldmode;
+  struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
   int            args = 0;
   bool           isnew = false;
   bool           keep_our_modes = true;
@@ -104,13 +101,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  pargs = 0;
-  newts = strtoumax(parv[1], NULL, 10);
-
-  mode.mode = 0;
-  mode.limit = 0;
-  mode.key[0] = '\0';
-
   for (const char *modes = parv[3]; *modes; ++modes)
   {
     switch (*modes)
@@ -142,14 +132,15 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if ((channel = hash_find_channel(parv[2])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[2]);
+  if (channel == NULL)
   {
     isnew = true;
     channel = channel_make(parv[2]);
   }
 
-  oldts = channel->creation_time;
-  oldmode = &channel->mode;
+  uintmax_t newts = strtoumax(parv[1], NULL, 10);
+  uintmax_t oldts = channel->creation_time;
 
   if (newts == 0 && isnew == false && oldts)
   {
@@ -174,6 +165,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
   else
     keep_new_modes = false;
+
+  struct Mode *oldmode = &channel->mode;
 
   if (keep_new_modes == false)
     mode = *oldmode;

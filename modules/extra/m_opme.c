@@ -55,9 +55,7 @@ static void
 mo_opme(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
-  struct Channel *channel = NULL;
-  struct ChannelMember *member = NULL;
-  dlink_node *node = NULL;
+  dlink_node *node;
 
   if (!HasOFlag(source_p, OPER_FLAG_OPME))
   {
@@ -65,13 +63,15 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((channel = hash_find_channel(name)) == NULL)
+  struct Channel *channel = hash_find_channel(name);
+  if (channel == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
-  if ((member = find_channel_link(source_p, channel)) == NULL)
+  struct ChannelMember *member = find_channel_link(source_p, channel);
+  if (member == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
     return;
@@ -79,7 +79,9 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
 
   DLINK_FOREACH(node, channel->members.head)
   {
-    if (((struct ChannelMember *)node->data)->flags & CHFL_CHANOP)
+    const struct ChannelMember *tmp = node->data;
+
+    if (tmp->flags & CHFL_CHANOP)
     {
       sendto_one_notice(source_p, &me, ":Cannot use OPME on %s: channel is not opless",
                         channel->name);

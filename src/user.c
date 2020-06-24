@@ -317,7 +317,7 @@ register_local_user(struct Client *client)
 
   if (!HasFlag(client, FLAGS_GOTID))
   {
-    char username[USERLEN + 1] = "";
+    char username[USERLEN + 1];
     unsigned int i = 0;
 
     if (IsNeedIdentd(conf))
@@ -385,7 +385,7 @@ register_local_user(struct Client *client)
 
   if (valid_username(client->username, true) == false)
   {
-    char buf[IRCD_BUFSIZE] = "";
+    char buf[IRCD_BUFSIZE];
 
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Invalid username: %s (%s@%s)",

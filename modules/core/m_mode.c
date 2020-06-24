@@ -55,11 +55,11 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
   const struct user_modes *tab = NULL;
   const unsigned int setmodes = source_p->umodes;
-  const struct Client *target_p = NULL;
   bool badmode = false;
   int what = MODE_ADD;
 
-  if ((target_p = find_person(source_p, parv[1])) == NULL)
+  const struct Client *target_p = find_person(source_p, parv[1]);
+  if (target_p == NULL)
   {
     if (MyConnect(source_p))
       sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);

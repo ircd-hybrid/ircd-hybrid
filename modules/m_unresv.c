@@ -46,7 +46,6 @@ static void
 resv_remove(struct Client *source_p, const struct aline_ctx *aline)
 {
   struct ResvItem *resv = resv_find(aline->mask, irccmp);
-
   if (resv == NULL)
   {
     if (IsClient(source_p))

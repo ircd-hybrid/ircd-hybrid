@@ -58,7 +58,6 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   char modebuf[IRCD_BUFSIZE] = "";
   char parabuf[IRCD_BUFSIZE] = "";
   char banbuf[IRCD_BUFSIZE] = "";
-  struct Channel *channel = NULL;
   const char *mask;
   char *s, *t, *mbuf, *pbuf;
   dlink_list *list = NULL;
@@ -66,10 +65,11 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   int modecount = 0;
   unsigned int flags = 0, type = 0;
 
-  if ((channel = hash_find_channel(parv[2])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[2]);
+  if (channel == NULL)
     return;
 
-  /* TS is higher, drop it. */
+  /* Their TS is higher, drop it. */
   if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
     return;
 

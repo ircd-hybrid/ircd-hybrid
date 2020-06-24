@@ -522,8 +522,8 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct Client *target_p;
-  if ((target_p = hash_find_server(name)))
+  struct Client *target_p = hash_find_server(name);
+  if (target_p)
   {
     /* This link is trying feed me a server that I already have
      * access through another path -- multiple paths not accepted
@@ -545,7 +545,8 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if ((target_p = hash_find_id(source_p->id)))
+  target_p = hash_find_id(source_p->id);
+  if (target_p)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
@@ -563,9 +564,9 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  if ((target_p = find_servconn_in_progress(name)))
-    if (target_p != source_p)
-      exit_client(target_p, "Overridden");
+  target_p = find_servconn_in_progress(name);
+  if (target_p && (target_p != source_p))
+    exit_client(target_p, "Overridden");
 
   /*
    * If we are connecting (Handshake), we already have the name from the
@@ -633,8 +634,8 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   }
 
   /* collision on SID? */
-  struct Client *target_p;
-  if ((target_p = hash_find_id(parv[3])))
+  struct Client *target_p = hash_find_id(parv[3]);
+  if (target_p)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server ID %s already exists",
@@ -647,7 +648,8 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   }
 
   /* collision on name? */
-  if ((target_p = hash_find_server(parv[1])))
+  target_p = hash_find_server(parv[1]);
+  if (target_p)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
@@ -663,9 +665,9 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  if ((target_p = find_servconn_in_progress(parv[1])))
-    if (target_p != source_p->from)
-      exit_client(target_p, "Overridden");
+  target_p = find_servconn_in_progress(parv[1]);
+  if (target_p && (target_p != source_p->from))
+    exit_client(target_p, "Overridden");
 
   /*
    * See if the newly found server is behind a guaranteed

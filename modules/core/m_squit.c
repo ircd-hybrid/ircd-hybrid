@@ -62,13 +62,13 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   dlink_node *node;
   DLINK_FOREACH(node, global_server_list.head)
   {
-    struct Client *p = node->data;
+    struct Client *tmp = node->data;
 
-    if (IsServer(p) || IsMe(p))
+    if (IsServer(tmp) || IsMe(tmp))
     {
-      if (match(server, p->name) == 0)
+      if (match(server, tmp->name) == 0)
       {
-        target_p = p;
+        target_p = tmp;
         break;
       }
     }

@@ -79,14 +79,11 @@ m_join(struct Client *source_p, int parc, char *parv[])
 static void
 ms_join(struct Client *source_p, int parc, char *parv[])
 {
-  uintmax_t newts = 0;
-  uintmax_t oldts = 0;
   bool keep_our_modes = true;
   bool keep_new_modes = true;
   bool isnew = false;
   const char *servername = NULL;
-  struct Channel *channel = NULL;
-  struct Mode mode, *oldmode;
+  struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
   char modebuf[MODEBUFLEN];
   char parabuf[MODEBUFLEN];
 
@@ -101,18 +98,15 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  mode.mode = mode.limit = 0;
-  mode.key[0] = '\0';
-
-  if ((channel = hash_find_channel(parv[2])) == NULL)
+  struct Channel *channel = hash_find_channel(parv[2]);
+  if (channel == NULL)
   {
     isnew = true;
     channel = channel_make(parv[2]);
   }
 
-  newts   = strtoumax(parv[1], NULL, 10);
-  oldts   = channel->creation_time;
-  oldmode = &channel->mode;
+  uintmax_t newts = strtoumax(parv[1], NULL, 10);
+  uintmax_t oldts = channel->creation_time;
 
   if (newts == 0 && isnew == false && oldts)
   {
@@ -137,6 +131,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   }
   else
     keep_new_modes = false;
+
+  struct Mode *oldmode = &channel->mode;
 
   if (keep_new_modes == false)
     mode = *oldmode;

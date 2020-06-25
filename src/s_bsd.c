@@ -280,7 +280,7 @@ comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), 
   assert(F);
   assert(F->flags.open == true);
 
-  F->timeout = event_base->time.sec_monotonic + timeout;
+  F->timeout = timeout ? event_base->time.sec_monotonic + timeout : 0;
   F->timeout_handler = callback;
   F->timeout_data = cbdata;
 }
@@ -303,7 +303,7 @@ comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), vo
   assert(F);
   assert(F->flags.open == true);
 
-  F->flush_timeout = event_base->time.sec_monotonic + timeout;
+  F->flush_timeout = timeout ? event_base->time.sec_monotonic + timeout : 0;
   F->flush_handler = callback;
   F->flush_data = cbdata;
 }

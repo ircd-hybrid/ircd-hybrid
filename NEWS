@@ -1,5 +1,6 @@
 -- Noteworthy changes in version 8.2.32 (2020-??-??)
 o) RESV couldn't be issued in case no reason has been supplied. This has been fixed.
+o) Fixed possible RPL_WHOISCHANNELS line truncation of remote replies
 
 
 -- Noteworthy changes in version 8.2.31 (2020-05-03)

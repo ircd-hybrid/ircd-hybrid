@@ -80,19 +80,19 @@ send_format(struct dbuf_block *buffer, const char *pattern, va_list args)
  **      sendq.
  */
 static void
-send_message(struct Client *to, struct dbuf_block *buf)
+send_message(struct Client *to, struct dbuf_block *buffer)
 {
   assert(!IsMe(to));
   assert(to != &me);
   assert(MyConnect(to));
 
-  if (dbuf_length(&to->connection->buf_sendq) + buf->size > get_sendq(&to->connection->confs))
+  if (dbuf_length(&to->connection->buf_sendq) + buffer->size > get_sendq(&to->connection->confs))
   {
     if (IsServer(to))
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Max SendQ limit exceeded for %s: %zu > %u",
                            client_get_name(to, HIDE_IP),
-                           (dbuf_length(&to->connection->buf_sendq) + buf->size),
+                           (dbuf_length(&to->connection->buf_sendq) + buffer->size),
                            get_sendq(&to->connection->confs));
 
     if (IsClient(to))
@@ -102,7 +102,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
     return;
   }
 
-  dbuf_add(&to->connection->buf_sendq, buf);
+  dbuf_add(&to->connection->buf_sendq, buffer);
 
   /*
    * Update statistics. The following is slightly incorrect because
@@ -126,7 +126,7 @@ send_message(struct Client *to, struct dbuf_block *buf)
  *
  */
 static void
-send_message_remote(struct Client *to, const struct Client *from, struct dbuf_block *buf)
+send_message_remote(struct Client *to, const struct Client *from, struct dbuf_block *buffer)
 {
   assert(MyConnect(to));
   assert(IsServer(to));
@@ -137,7 +137,7 @@ send_message_remote(struct Client *to, const struct Client *from, struct dbuf_bl
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
                          to->name, from->name);
   else
-    send_message(to, buf);
+    send_message(to, buffer);
 }
 
 /*
@@ -313,26 +313,24 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
                       struct Channel *channel, unsigned int type,
                       const char *pattern, ...)
 {
-  va_list alocal, aremote;
-  struct dbuf_block *local_buf, *remote_buf;
+  va_list args_l, args_r;
   dlink_node *node;
-
-  local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
+  struct dbuf_block *buffer_l = dbuf_alloc();
+  struct dbuf_block *buffer_r = dbuf_alloc();
 
   if (IsClient(from))
-    dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
+    dbuf_put_fmt(buffer_l, ":%s!%s@%s ", from->name, from->username, from->host);
   else
-    dbuf_put_fmt(local_buf, ":%s ", from->name);
+    dbuf_put_fmt(buffer_l, ":%s ", from->name);
 
-  dbuf_put_fmt(remote_buf, ":%s ", from->id);
+  dbuf_put_fmt(buffer_r, ":%s ", from->id);
 
-  va_start(alocal, pattern);
-  va_start(aremote, pattern);
-  send_format(local_buf, pattern, alocal);
-  send_format(remote_buf, pattern, aremote);
-
-  va_end(aremote);
-  va_end(alocal);
+  va_start(args_l, pattern);
+  va_start(args_r, pattern);
+  send_format(buffer_l, pattern, args_l);
+  send_format(buffer_r, pattern, args_r);
+  va_end(args_l);
+  va_end(args_r);
 
   ++current_serial;
 
@@ -356,15 +354,15 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
       continue;
 
     if (MyConnect(target))
-      send_message(target, local_buf);
+      send_message(target, buffer_l);
     else if (target->from->connection->serial != current_serial)
-      send_message_remote(target->from, from, remote_buf);
+      send_message_remote(target->from, from, buffer_r);
 
     target->from->connection->serial = current_serial;
   }
 
-  dbuf_ref_free(local_buf);
-  dbuf_ref_free(remote_buf);
+  dbuf_ref_free(buffer_l);
+  dbuf_ref_free(buffer_r);
 }
 
 /* sendto_server()
@@ -393,12 +391,10 @@ sendto_server(const struct Client *one,
 {
   va_list args;
   dlink_node *node;
+  struct dbuf_block *buffer = dbuf_alloc();
 
   va_start(args, format);
-
-  struct dbuf_block *buffer = dbuf_alloc();
   send_format(buffer, format, args);
-
   va_end(args);
 
   DLINK_FOREACH(node, local_server_list.head)
@@ -570,23 +566,22 @@ void
 sendto_match_butone(const struct Client *one, const struct Client *from,
                     const char *mask, int what, const char *pattern, ...)
 {
-  va_list alocal, aremote;
+  va_list args_l, args_r;
   dlink_node *node;
-  struct dbuf_block *local_buf, *remote_buf;
+  struct dbuf_block *buffer_l = dbuf_alloc();
+  struct dbuf_block *buffer_r = dbuf_alloc();
 
-  local_buf = dbuf_alloc(), remote_buf = dbuf_alloc();
+  dbuf_put_fmt(buffer_l, ":%s!%s@%s ", from->name, from->username, from->host);
+  dbuf_put_fmt(buffer_r, ":%s ", from->id);
 
-  dbuf_put_fmt(local_buf, ":%s!%s@%s ", from->name, from->username, from->host);
-  dbuf_put_fmt(remote_buf, ":%s ", from->id);
+  va_start(args_l, pattern);
+  va_start(args_r, pattern);
+  send_format(buffer_l, pattern, args_l);
+  send_format(buffer_r, pattern, args_r);
+  va_end(args_l);
+  va_end(args_r);
 
-  va_start(alocal, pattern);
-  va_start(aremote, pattern);
-  send_format(local_buf, pattern, alocal);
-  send_format(remote_buf, pattern, aremote);
-  va_end(aremote);
-  va_end(alocal);
-
-  /* scan the local clients */
+  /* Scan the local clients */
   DLINK_FOREACH(node, local_client_list.head)
   {
     struct Client *client = node->data;
@@ -600,7 +595,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
     if (match_it(client, mask, what) == false)
       continue;
 
-    send_message(client, local_buf);
+    send_message(client, buffer_l);
   }
 
   /* Now scan servers */
@@ -609,10 +604,9 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
     struct Client *client = node->data;
 
     /*
-     * The old code looped through every client on the
-     * network for each server to check if the
-     * server (client) has at least 1 client matching
-     * the mask, using something like:
+     * The old code looped through every client on the network for each
+     * server to check if the server (client) has at least 1 client
+     * matching the mask, using something like:
      *
      * for (target = GlobalClientList; target; target = target->next)
      *        if (IsRegisteredUser(target) &&
@@ -620,16 +614,12 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
      *                        (target->from == client))
      *   vsendto_prefix_one(client, from, pattern, args);
      *
-     * That way, we wouldn't send the message to
-     * a server who didn't have a matching client.
-     * However, on a network such as EFNet, that
-     * code would have looped through about 50
-     * servers, and in each loop, loop through
-     * about 50k clients as well, calling match()
-     * in each nested loop. That is a very bad
-     * thing cpu wise - just send the message
-     * to every connected server and let that
-     * server deal with it.
+     * That way, we wouldn't send the message to a server who didn't have
+     * a matching client. However, on a network such as EFNet, that code
+     * would have looped through about 50 servers, and in each loop, loop
+     * through about 50k clients as well, calling match() in each nested
+     * loop. That is a very bad thing cpu wise - just send the message to
+     * every connected server and let that server deal with it.
      * -wnder
      */
     if (IsDead(client))
@@ -638,11 +628,11 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
     if (one && (client == one->from))
       continue;
 
-    send_message_remote(client, from, remote_buf);
+    send_message_remote(client, from, buffer_r);
   }
 
-  dbuf_ref_free(local_buf);
-  dbuf_ref_free(remote_buf);
+  dbuf_ref_free(buffer_l);
+  dbuf_ref_free(buffer_r);
 }
 
 /* sendto_match_servs()
@@ -663,6 +653,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
   struct dbuf_block *buffer = dbuf_alloc();
 
   dbuf_put_fmt(buffer, ":%s ", source_p->id);
+
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
@@ -687,10 +678,10 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
     if (target->from->connection->serial == current_serial)
       continue;
 
-    if (match(mask, target->name))
+    if (cap && IsCapable(target->from, cap) != cap)
       continue;
 
-    if (cap && IsCapable(target->from, cap) != cap)
+    if (match(mask, target->name))
       continue;
 
     target->from->connection->serial = current_serial;
@@ -750,9 +741,9 @@ sendto_anywhere(struct Client *to, const struct Client *from,
 void
 sendto_realops_flags(unsigned int flags, int level, int type, const char *pattern, ...)
 {
-  const char *ntype = "???";
-  dlink_node *node;
   va_list args;
+  dlink_node *node;
+  const char *ntype = "???";
 
   switch (type)
   {
@@ -812,7 +803,7 @@ void
 sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
 {
   va_list args;
-  char buffer[IRCD_BUFSIZE] = "";
+  char buffer[IRCD_BUFSIZE];
 
   if ((event_base->time.sec_monotonic - *rate) < 20)
     return;
@@ -839,8 +830,8 @@ void
 sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
                      const char *pattern, ...)
 {
-  dlink_node *node;
   va_list args;
+  dlink_node *node;
   struct dbuf_block *buffer = dbuf_alloc();
 
   if (IsClient(source_p))

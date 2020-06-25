@@ -95,7 +95,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
   }
   else  /* Only asking for topic */
   {
-    if (!SecretChannel(channel) || IsMember(source_p, channel))
+    if (!SecretChannel(channel) || find_channel_link(source_p, channel))
     {
       if (channel->topic[0] == '\0')
         sendto_one_numeric(source_p, &me, RPL_NOTOPIC, channel->name);

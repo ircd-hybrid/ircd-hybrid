@@ -288,7 +288,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, char *
   {
     *mbuf++ = 'l';
 
-    if (IsServer(client) || IsMember(client, channel))
+    if (IsServer(client) || find_channel_link(client, channel))
       pbuf += sprintf(pbuf, "%u ", channel->mode.limit);
   }
 
@@ -296,7 +296,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, char *
   {
     *mbuf++ = 'k';
 
-    if (IsServer(client) || IsMember(client, channel))
+    if (IsServer(client) || find_channel_link(client, channel))
       sprintf(pbuf, "%s ", channel->mode.key);
   }
 

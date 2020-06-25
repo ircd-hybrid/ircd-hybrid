@@ -500,7 +500,7 @@ list_one_channel(struct Client *client, struct Channel *channel)
   char parabuf[MODEBUFLEN] = "";
 
   if (SecretChannel(channel) &&
-      !(HasUMode(client, UMODE_ADMIN) || IsMember(client, channel)))
+      !(HasUMode(client, UMODE_ADMIN) || find_channel_link(client, channel)))
     return;
 
   if (dlink_list_length(&channel->members) < lt->users_min ||

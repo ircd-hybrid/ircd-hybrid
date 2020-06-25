@@ -1056,7 +1056,7 @@ accept_message(struct Client *source,
 
   if (!HasUMode(target, UMODE_CALLERID) && HasUMode(target, UMODE_SOFTCALLERID))
     DLINK_FOREACH(node, target->channel.head)
-      if (IsMember(source, ((struct ChannelMember *)node->data)->channel))
+      if (find_channel_link(source, ((struct ChannelMember *)node->data)->channel))
         return true;
 
   return false;

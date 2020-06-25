@@ -308,7 +308,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     /* List all users on a given channel */
     if ((channel = hash_find_channel(mask)))
     {
-      if (HasUMode(source_p, UMODE_ADMIN) || IsMember(source_p, channel))
+      if (HasUMode(source_p, UMODE_ADMIN) || find_channel_link(source_p, channel))
         do_who_on_channel(source_p, channel, true, server_oper);
       else if (!SecretChannel(channel))
         do_who_on_channel(source_p, channel, false, server_oper);
@@ -325,7 +325,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     DLINK_FOREACH(node, target_p->channel.head)
     {
       channel = ((struct ChannelMember *)node->data)->channel;
-      if (PubChannel(channel) || IsMember(source_p, channel))
+      if (PubChannel(channel) || find_channel_link(source_p, channel))
         break;
     }
 

@@ -179,7 +179,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                          servername, channel->name, modebuf, parabuf);
   }
 
-  if (!IsMember(source_p, channel))
+  if (find_channel_link(source_p, channel) == NULL)
   {
     add_user_to_channel(channel, source_p, 0, true);
 

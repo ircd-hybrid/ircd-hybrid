@@ -424,7 +424,7 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
   char buf[IRCD_BUFSIZE + 1];
   char *bufptr = buf;
   size_t masklen = 0;
-  bool is_member = IsMember(client, channel);
+  bool is_member = find_channel_link(client, channel) != NULL;
   bool multi_prefix = HasCap(client, CAP_MULTI_PREFIX) != 0;
   bool uhnames = HasCap(client, CAP_UHNAMES) != 0;
 
@@ -925,7 +925,7 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
     struct Channel *channel = hash_find_channel(name);
     if (channel)
     {
-      if (IsMember(client, channel))
+      if (find_channel_link(client, channel))
         continue;
 
       /* can_join() checks for +i, +l, key, bans, etc. */

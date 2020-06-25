@@ -30,7 +30,6 @@
 #include "ircd_defs.h"        /* KEYLEN, CHANNELLEN */
 #include "extban.h"
 
-#define IsMember(who, chan) ((find_channel_link(who, chan)) ? 1 : 0)
 #define AddMemberFlag(x, y) ((x)->flags |=  (y))
 #define DelMemberFlag(x, y) ((x)->flags &= ~(y))
 

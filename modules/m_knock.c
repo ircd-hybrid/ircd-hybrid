@@ -66,7 +66,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Normal channel, just be sure they aren't on it. */
-  if (IsMember(source_p, channel))
+  if (find_channel_link(source_p, channel))
   {
     sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, channel->name);
     return;

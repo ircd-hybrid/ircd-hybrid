@@ -318,9 +318,6 @@ comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), vo
 void
 comm_checktimeouts(void *unused)
 {
-  void (*hdl)(fde_t *, void *);
-  void *data;
-
   for (int fd = 0; fd <= highest_fd; ++fd)
   {
     fde_t *F = &fd_table[fd];
@@ -329,23 +326,21 @@ comm_checktimeouts(void *unused)
       continue;
 
     /* check flush functions */
-    if (F->flush_handler && F->flush_timeout > 0 &&
-        F->flush_timeout < event_base->time.sec_monotonic)
+    if (F->flush_timeout && F->flush_timeout < event_base->time.sec_monotonic)
     {
-      hdl = F->flush_handler;
-      data = F->flush_data;
+      void (*hdl)(fde_t *, void *) = F->flush_handler;
+      void *data = F->flush_data;
 
       comm_setflush(F, 0, NULL, NULL);
       hdl(F, data);
     }
 
     /* check timeouts */
-    if (F->timeout_handler && F->timeout > 0 &&
-        F->timeout < event_base->time.sec_monotonic)
+    if (F->timeout && F->timeout < event_base->time.sec_monotonic)
     {
       /* Call timeout handler */
-      hdl = F->timeout_handler;
-      data = F->timeout_data;
+      void (*hdl)(fde_t *, void *) = F->timeout_handler;
+      void *data = F->timeout_data;
 
       comm_settimeout(F, 0, NULL, NULL);
       hdl(F, data);

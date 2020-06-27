@@ -57,8 +57,8 @@ whowas_get_hash(unsigned int hash_value)
 static struct Whowas *
 whowas_unlink(struct Whowas *whowas)
 {
-  if (whowas->online)
-    dlinkDelete(&whowas->cnode, &whowas->online->whowas_list);
+  if (whowas->client)
+    dlinkDelete(&whowas->cnode, &whowas->client->whowas_list);
 
   dlinkDelete(&whowas->hnode, &whowas_hash[whowas->hash_value]);
   dlinkDelete(&whowas->lnode, &whowas_list);
@@ -135,11 +135,11 @@ whowas_add_history(struct Client *client, bool online)
 
   if (online == true)
   {
-    whowas->online = client;
+    whowas->client = client;
     dlinkAdd(whowas, &whowas->cnode, &client->whowas_list);
   }
   else
-    whowas->online = NULL;
+    whowas->client = NULL;
 
   dlinkAdd(whowas, &whowas->hnode, &whowas_hash[whowas->hash_value]);
   dlinkAdd(whowas, &whowas->lnode, &whowas_list);
@@ -157,7 +157,7 @@ whowas_off_history(struct Client *client)
   {
     struct Whowas *whowas = client->whowas_list.head->data;
 
-    whowas->online = NULL;
+    whowas->client = NULL;
     dlinkDelete(&whowas->cnode, &client->whowas_list);
   }
 }
@@ -183,7 +183,7 @@ whowas_get_history(const char *name, uintmax_t timelimit)
       continue;
     if (irccmp(name, whowas->name))
       continue;
-    return whowas->online;
+    return whowas->client;
   }
 
   return NULL;

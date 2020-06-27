@@ -47,7 +47,7 @@ struct Whowas
   char sockhost[HOSTIPLEN + 1];  /**< Client's IP address as string */
   char realname[REALLEN + 1];  /**< Client's real name/gecos */
   char servername[HOSTLEN + 1];  /**< Name of the server the client is using */
-  struct Client *online;  /**< Pointer to new nick name for chasing or NULL */
+  struct Client *client;  /**< Pointer to new nick name for chasing or NULL */
 };
 
 extern const dlink_list *whowas_get_hash(unsigned int);

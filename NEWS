@@ -1,6 +1,8 @@
 -- Noteworthy changes in version 8.2.32 (2020-??-??)
 o) RESV couldn't be issued in case no reason has been supplied. This has been fixed.
 o) Fixed possible RPL_WHOISCHANNELS line truncation of remote replies
+o) Extban $t of type 'acting' has been implemented. This extban allows matching
+   based on TLS protocol version and/or cipher suite
 
 
 -- Noteworthy changes in version 8.2.31 (2020-05-03)

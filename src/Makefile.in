@@ -129,21 +129,21 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	extban_gecos.$(OBJEXT) extban_join.$(OBJEXT) \
 	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
 	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
-	extban_usermode.$(OBJEXT) fdlist.$(OBJEXT) getopt.$(OBJEXT) \
-	hash.$(OBJEXT) hostmask.$(OBJEXT) id.$(OBJEXT) \
-	ipcache.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) list.$(OBJEXT) \
-	listener.$(OBJEXT) log.$(OBJEXT) match.$(OBJEXT) \
-	memory.$(OBJEXT) misc.$(OBJEXT) modules.$(OBJEXT) \
-	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
-	parse.$(OBJEXT) patricia.$(OBJEXT) s_bsd_epoll.$(OBJEXT) \
-	s_bsd_poll.$(OBJEXT) s_bsd_devpoll.$(OBJEXT) \
-	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
-	tls_openssl.$(OBJEXT) tls_wolfssl.$(OBJEXT) res.$(OBJEXT) \
-	reslib.$(OBJEXT) restart.$(OBJEXT) rng_mt.$(OBJEXT) \
-	s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
-	server_capab.$(OBJEXT) user.$(OBJEXT) watch.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
+	fdlist.$(OBJEXT) getopt.$(OBJEXT) hash.$(OBJEXT) \
+	hostmask.$(OBJEXT) id.$(OBJEXT) ipcache.$(OBJEXT) \
+	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
+	isupport.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
+	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) misc.$(OBJEXT) \
+	modules.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) patricia.$(OBJEXT) \
+	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
+	tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) tls_openssl.$(OBJEXT) \
+	tls_wolfssl.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
+	restart.$(OBJEXT) rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) \
+	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
+	user.$(OBJEXT) watch.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -182,9 +182,10 @@ am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_mute.Po \
 	./$(DEPDIR)/extban_nick.Po ./$(DEPDIR)/extban_operclass.Po \
-	./$(DEPDIR)/extban_server.Po ./$(DEPDIR)/extban_usermode.Po \
-	./$(DEPDIR)/fdlist.Po ./$(DEPDIR)/getopt.Po \
-	./$(DEPDIR)/hash.Po ./$(DEPDIR)/hostmask.Po ./$(DEPDIR)/id.Po \
+	./$(DEPDIR)/extban_server.Po ./$(DEPDIR)/extban_tlsinfo.Po \
+	./$(DEPDIR)/extban_usermode.Po ./$(DEPDIR)/fdlist.Po \
+	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/hash.Po \
+	./$(DEPDIR)/hostmask.Po ./$(DEPDIR)/id.Po \
 	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/irc_string.Po \
 	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_signal.Po \
 	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/list.Po \
@@ -447,6 +448,7 @@ ircd_SOURCES = auth.c            \
                extban_nick.c     \
                extban_operclass.c \
                extban_server.c   \
+               extban_tlsinfo.c  \
                extban_usermode.c \
                fdlist.c          \
                getopt.c          \
@@ -615,6 +617,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_nick.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_operclass.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_server.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_tlsinfo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_usermode.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@ # am--include-marker
@@ -859,6 +862,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/extban_nick.Po
 	-rm -f ./$(DEPDIR)/extban_operclass.Po
 	-rm -f ./$(DEPDIR)/extban_server.Po
+	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/fdlist.Po
 	-rm -f ./$(DEPDIR)/getopt.Po
@@ -975,6 +979,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/extban_nick.Po
 	-rm -f ./$(DEPDIR)/extban_operclass.Po
 	-rm -f ./$(DEPDIR)/extban_server.Po
+	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/fdlist.Po
 	-rm -f ./$(DEPDIR)/getopt.Po

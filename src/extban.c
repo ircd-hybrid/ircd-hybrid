@@ -69,6 +69,7 @@ extban_init(void)
   extban_add(&extban_nick);
   extban_add(&extban_operclass);
   extban_add(&extban_server);
+  extban_add(&extban_tlsinfo);
   extban_add(&extban_usermode);
 
   const char *ptr = extban_get_isupport();

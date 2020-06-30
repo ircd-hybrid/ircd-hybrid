@@ -138,6 +138,65 @@ remove_user_from_channel(struct ChannelMember *member)
     channel_free(channel);
 }
 
+/* remove_a_mode()
+ *
+ * inputs       -
+ * output       - NONE
+ * side effects - remove ONE mode from a channel
+ */
+void
+channel_demote_members(struct Channel *channel, const struct Client *client, unsigned int mask, const char flag)
+{
+  dlink_node *node;
+  char modebuf[MODEBUFLEN];
+  char parabuf[MODEBUFLEN];
+  char *mbuf = modebuf;
+  char *pbuf = modebuf;
+  const char *names[MAXMODEPARAMS];
+  static const unsigned int names_size = sizeof(names) / sizeof(names[0]);
+  unsigned int count = 0;
+
+  DLINK_FOREACH(node, channel->members.head)
+  {
+    struct ChannelMember *member = node->data;
+
+    if ((member->flags & mask) == 0)
+      continue;
+
+    member->flags &= ~mask;
+
+    names[count++] = member->client->name;
+
+    *mbuf++ = flag;
+
+    if (count >= names_size)
+    {
+      *mbuf = '\0';
+
+      for (unsigned int i = 0; i < names_size; ++i)
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
+
+      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",
+                           client->name, channel->name, modebuf, parabuf);
+      mbuf = modebuf;
+      pbuf = parabuf;
+      count = 0;
+    }
+  }
+
+  if (count)
+  {
+    assert(count < names_size);
+    *mbuf = '\0';
+
+    for (unsigned int i = 0; i < count; ++i)
+      pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
+
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",
+                         client->name, channel->name, modebuf, parabuf);
+  }
+}
+
 /* channel_send_members()
  *
  * inputs       -

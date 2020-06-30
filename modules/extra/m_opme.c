@@ -70,7 +70,7 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct ChannelMember *member = find_channel_link(source_p, channel);
+  struct ChannelMember *member = member_find_link(source_p, channel);
   if (member == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);

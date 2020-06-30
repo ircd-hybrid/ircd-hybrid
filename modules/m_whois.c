@@ -58,7 +58,7 @@ whois_channel_show_type(struct Channel *channel,
   if (PubChannel(channel) && !HasUMode(target_p, UMODE_HIDECHANS))
     return WHOIS_SHOW_NORMAL;
 
-  if (source_p == target_p || find_channel_link(source_p, channel))
+  if (source_p == target_p || member_find_link(source_p, channel))
     return WHOIS_SHOW_NORMAL;
 
   if (HasUMode(source_p, UMODE_OPER))

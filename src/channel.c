@@ -467,7 +467,7 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
   char buf[IRCD_BUFSIZE + 1];
   char *bufptr = buf;
   size_t masklen = 0;
-  bool is_member = find_channel_link(client, channel) != NULL;
+  bool is_member = member_find_link(client, channel) != NULL;
   bool multi_prefix = HasCap(client, CAP_MULTI_PREFIX) != 0;
   bool uhnames = HasCap(client, CAP_UHNAMES) != 0;
 
@@ -732,7 +732,7 @@ has_member_flags(const struct ChannelMember *member, const unsigned int flags)
 }
 
 struct ChannelMember *
-find_channel_link(const struct Client *client, const struct Channel *channel)
+member_find_link(const struct Client *client, const struct Channel *channel)
 {
   dlink_node *node;
 
@@ -817,7 +817,7 @@ can_send(struct Channel *channel, struct Client *client,
     if (*message == '\001' && strncmp(message + 1, "ACTION ", 7))
       return ERR_NOCTCP;
 
-  if (member || (member = find_channel_link(client, channel)))
+  if (member || (member = member_find_link(client, channel)))
     if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
       return CAN_SEND_OPV;
 
@@ -984,7 +984,7 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
     struct Channel *channel = hash_find_channel(name);
     if (channel)
     {
-      if (find_channel_link(client, channel))
+      if (member_find_link(client, channel))
         continue;
 
       /* can_join() checks for +i, +l, key, bans, etc. */
@@ -1092,7 +1092,7 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
     return;
   }
 
-  struct ChannelMember *member = find_channel_link(client, channel);
+  struct ChannelMember *member = member_find_link(client, channel);
   if (member == NULL)
   {
     sendto_one_numeric(client, &me, ERR_NOTONCHANNEL, channel->name);

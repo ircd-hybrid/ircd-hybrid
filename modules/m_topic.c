@@ -65,7 +65,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
   /* Setting topic */
   if (parc > 2)
   {
-    const struct ChannelMember *member = find_channel_link(source_p, channel);
+    const struct ChannelMember *member = member_find_link(source_p, channel);
     if (member == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
@@ -95,7 +95,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
   }
   else  /* Only asking for topic */
   {
-    if (!SecretChannel(channel) || find_channel_link(source_p, channel))
+    if (!SecretChannel(channel) || member_find_link(source_p, channel))
     {
       if (channel->topic[0] == '\0')
         sendto_one_numeric(source_p, &me, RPL_NOTOPIC, channel->name);

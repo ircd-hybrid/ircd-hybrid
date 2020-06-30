@@ -64,7 +64,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct ChannelMember *member_source = find_channel_link(source_p, channel);
+  struct ChannelMember *member_source = member_find_link(source_p, channel);
   if (member_source == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
@@ -81,7 +81,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   if (target_p == NULL)
     return;  /* find_chasing sends ERR_NOSUCHNICK */
 
-  struct ChannelMember *member_target = find_channel_link(target_p, channel);
+  struct ChannelMember *member_target = member_find_link(target_p, channel);
   if (member_target == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_USERNOTINCHANNEL, target_p->name, channel->name);
@@ -137,7 +137,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   if (target_p == NULL)
     return;
 
-  struct ChannelMember *member_target = find_channel_link(target_p, channel);
+  struct ChannelMember *member_target = member_find_link(target_p, channel);
   if (member_target == NULL)
     return;
 

@@ -41,7 +41,7 @@
 
 
 static void set_final_mode(const struct Mode *, const struct Mode *, char *, char *);
-static void remove_a_mode(struct Channel *, const struct Client *, int, const char);
+static void remove_a_mode(struct Channel *, const struct Client *, unsigned int, const char);
 
 
 /*! \brief JOIN command handler
@@ -299,21 +299,16 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
  * side effects - remove ONE mode from a channel
  */
 static void
-remove_a_mode(struct Channel *channel, const struct Client *client, int mask, const char flag)
+remove_a_mode(struct Channel *channel, const struct Client *client, unsigned int mask, const char flag)
 {
-  dlink_node *node = NULL;
-  char lmodebuf[MODEBUFLEN];
-  char sendbuf[MODEBUFLEN];
-  const char *lpara[MAXMODEPARAMS];
-  int count = 0, lcount = 0;
-  char *mbuf = lmodebuf;
-
-  *mbuf++ = '-';
-
-  for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
-    lpara[lcount] = "";
-
-  sendbuf[0] = '\0';
+  dlink_node *node;
+  char modebuf[MODEBUFLEN];
+  char parabuf[MODEBUFLEN];
+  char *mbuf = modebuf;
+  char *pbuf = modebuf;
+  const char *names[MAXMODEPARAMS];
+  static const unsigned int names_size = sizeof(names) / sizeof(names[0]);
+  unsigned int count = 0;
 
   DLINK_FOREACH(node, channel->members.head)
   {
@@ -324,29 +319,22 @@ remove_a_mode(struct Channel *channel, const struct Client *client, int mask, co
 
     member->flags &= ~mask;
 
-    lpara[count++] = member->client->name;
+    names[count++] = member->client->name;
 
     *mbuf++ = flag;
 
-    if (count >= MAXMODEPARAMS)
+    if (count >= names_size)
     {
-      for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
-      {
-        if (*lpara[lcount] == '\0')
-          break;
-
-        strlcat(sendbuf, " ", sizeof(sendbuf));
-        strlcat(sendbuf, lpara[lcount], sizeof(sendbuf));
-        lpara[lcount] = "";
-      }
-
       *mbuf = '\0';
-      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                           client->name, channel->name, lmodebuf, sendbuf);
-      mbuf = lmodebuf;
-      *mbuf++ = '-';
+
+      for (unsigned int i = 0; i < names_size; ++i)
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
+
+      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",
+                           client->name, channel->name, modebuf, parabuf);
+      mbuf = modebuf;
+      pbuf = parabuf;
       count = 0;
-      sendbuf[0] = '\0';
     }
   }
 
@@ -354,17 +342,11 @@ remove_a_mode(struct Channel *channel, const struct Client *client, int mask, co
   {
     *mbuf = '\0';
 
-    for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
-    {
-      if (*lpara[lcount] == '\0')
-        break;
+    for (unsigned int i = 0; i < names_size; ++i)
+      pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
 
-      strlcat(sendbuf, " ", sizeof(sendbuf));
-      strlcat(sendbuf, lpara[lcount], sizeof(sendbuf));
-    }
-
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                         client->name, channel->name, lmodebuf, sendbuf);
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",
+                         client->name, channel->name, modebuf, parabuf);
   }
 }
 

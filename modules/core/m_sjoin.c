@@ -335,7 +335,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     uid_ptr += sprintf(uid_ptr, "%s%s ", uid_prefix, target_p->id);
 
-    if (find_channel_link(target_p, channel) == NULL)
+    if (member_find_link(target_p, channel) == NULL)
     {
       add_user_to_channel(channel, target_p, fl, have_many_uids == false);
 

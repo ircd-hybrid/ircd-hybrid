@@ -173,7 +173,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                          origin->name, channel->name, modebuf, parabuf);
 
-  if (find_channel_link(source_p, channel) == NULL)
+  if (member_find_link(source_p, channel) == NULL)
   {
     add_user_to_channel(channel, source_p, 0, true);
 

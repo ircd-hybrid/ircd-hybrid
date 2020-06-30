@@ -88,7 +88,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct ChannelMember *member = find_channel_link(source_p, channel);
+  struct ChannelMember *member = member_find_link(source_p, channel);
   if (member == NULL)
   {
     sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
@@ -101,7 +101,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (find_channel_link(target_p, channel))
+  if (member_find_link(target_p, channel))
   {
     sendto_one_numeric(source_p, &me, ERR_USERONCHANNEL, target_p->name, channel->name);
     return;
@@ -182,7 +182,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  if (find_channel_link(target_p, channel))
+  if (member_find_link(target_p, channel))
     return;
 
   if (parc > 3 && IsDigit(*parv[3]))

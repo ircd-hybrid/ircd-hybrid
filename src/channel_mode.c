@@ -288,7 +288,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, char *
   {
     *mbuf++ = 'l';
 
-    if (IsServer(client) || find_channel_link(client, channel))
+    if (IsServer(client) || member_find_link(client, channel))
       pbuf += sprintf(pbuf, "%u ", channel->mode.limit);
   }
 
@@ -296,7 +296,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, char *
   {
     *mbuf++ = 'k';
 
-    if (IsServer(client) || find_channel_link(client, channel))
+    if (IsServer(client) || member_find_link(client, channel))
       sprintf(pbuf, "%s ", channel->mode.key);
   }
 
@@ -567,7 +567,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   if (client_target == NULL)
     return;  /* find_chasing sends ERR_NOSUCHNICK */
 
-  struct ChannelMember *member = find_channel_link(client_target, channel);
+  struct ChannelMember *member = member_find_link(client_target, channel);
   if (member == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))

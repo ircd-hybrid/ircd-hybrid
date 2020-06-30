@@ -513,7 +513,7 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
       {
         if (IsClient(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
         {
-          if (!has_member_flags(find_channel_link(source_p, target),
+          if (!has_member_flags(member_find_link(source_p, target),
                                 CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE))
           {
             sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, with_prefix);

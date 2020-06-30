@@ -151,5 +151,5 @@ extern const char *member_get_prefix(const struct ChannelMember *, bool);
 extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
 
 extern struct Channel *channel_make(const char *);
-extern struct ChannelMember *find_channel_link(const struct Client *, const struct Channel *);
+extern struct ChannelMember *member_find_link(const struct Client *, const struct Channel *);
 #endif  /* INCLUDED_channel_h */

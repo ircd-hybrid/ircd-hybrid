@@ -147,7 +147,8 @@ extern void check_spambot_warning(struct Client *, const char *);
 extern void channel_free(struct Channel *);
 extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, bool);
 
-extern const char *get_member_status(const struct ChannelMember *, bool);
+extern const char *member_get_prefix(const struct ChannelMember *, bool);
+extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
 
 extern struct Channel *channel_make(const char *);
 extern struct ChannelMember *find_channel_link(const struct Client *, const struct Channel *);

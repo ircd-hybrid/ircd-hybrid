@@ -265,7 +265,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *channel,
         if (!HasUMode(target_p, UMODE_OPER) ||
             (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
           continue;
-      do_who(source_p, target_p, channel->name, get_member_status(member, !!HasCap(source_p, CAP_MULTI_PREFIX)));
+      do_who(source_p, target_p, channel->name, member_get_prefix(member, !!HasCap(source_p, CAP_MULTI_PREFIX)));
     }
   }
 }
@@ -331,7 +331,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
 
     if (node)
       do_who(source_p, target_p, channel->name,
-             get_member_status(node->data, !!HasCap(source_p, CAP_MULTI_PREFIX)));
+             member_get_prefix(node->data, !!HasCap(source_p, CAP_MULTI_PREFIX)));
     else
       do_who(source_p, target_p, NULL, "");
 

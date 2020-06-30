@@ -221,13 +221,7 @@ channel_send_members(struct Client *client, const struct Channel *channel,
     const struct ChannelMember *member = node->data;
 
     tlen = strlen(member->client->id) + 1;  /* +1 for space */
-
-    if (member->flags & CHFL_CHANOP)
-      ++tlen;
-    if (member->flags & CHFL_HALFOP)
-      ++tlen;
-    if (member->flags & CHFL_VOICE)
-      ++tlen;
+    tlen += member_get_prefix_len(member, true);
 
     /*
      * Space will be converted into CR, but we also need space for LF..
@@ -240,17 +234,7 @@ channel_send_members(struct Client *client, const struct Channel *channel,
       t = start;
     }
 
-    if (member->flags & CHFL_CHANOP)
-      *t++ = '@';
-    if (member->flags & CHFL_HALFOP)
-      *t++ = '%';
-    if (member->flags & CHFL_VOICE)
-      *t++ = '+';
-
-    strcpy(t, member->client->id);
-
-    t += strlen(t);
-    *t++ = ' ';
+    t += snprintf(t, sizeof(buf) - (t - buf), "%s%s ", member_get_prefix(member, true), member->client->id);
   }
 
   /* Should always be non-NULL unless we have a kind of persistent channels */
@@ -508,20 +492,7 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
       else
         masklen = strlen(member->client->name) + 1;  /* +1 for space */
 
-      if (multi_prefix == true)
-      {
-        if (member->flags & CHFL_CHANOP)
-          ++masklen;
-        if (member->flags & CHFL_HALFOP)
-          ++masklen;
-        if (member->flags & CHFL_VOICE)
-          ++masklen;
-      }
-      else
-      {
-        if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
-          ++masklen;
-      }
+      masklen += member_get_prefix_len(member, multi_prefix);
 
       if ((bufptr - buf) + masklen + len > sizeof(buf))
       {
@@ -533,12 +504,12 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
 
       if (uhnames == true)
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s!%s@%s ",
-                           get_member_status(member, multi_prefix),
+                           member_get_prefix(member, multi_prefix),
                            member->client->name, member->client->username,
                            member->client->host);
       else
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s ",
-                           get_member_status(member, multi_prefix),
+                           member_get_prefix(member, multi_prefix),
                            member->client->name);
     }
 
@@ -554,7 +525,7 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
     sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);
 }
 
-/* get_member_status()
+/* member_get_prefix()
  *
  * inputs       - pointer to struct ChannelMember
  *              - YES if we can combine different flags
@@ -566,7 +537,7 @@ channel_member_names(struct Client *client, struct Channel *channel, bool show_e
  * (like in client_get_name)
  */
 const char *
-get_member_status(const struct ChannelMember *member, bool combine)
+member_get_prefix(const struct ChannelMember *member, bool combine)
 {
   static char buffer[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
   char *p = buffer;
@@ -590,6 +561,35 @@ get_member_status(const struct ChannelMember *member, bool combine)
   *p = '\0';
 
   return buffer;
+}
+
+size_t
+member_get_prefix_len(const struct ChannelMember *member, bool combine)
+{
+  size_t len = 0;
+
+  if (member->flags & CHFL_CHANOP)
+  {
+    if (combine == false)
+      return 1;
+    ++len;
+  }
+
+  if (member->flags & CHFL_HALFOP)
+  {
+    if (combine == false)
+      return 1;
+    ++len;
+  }
+
+  if (member->flags & CHFL_VOICE)
+  {
+    if (combine == false)
+      return 1;
+    ++len;
+  }
+
+  return len;
 }
 
 /*!

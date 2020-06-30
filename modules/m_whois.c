@@ -104,7 +104,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
       if (show != WHOIS_SHOW_NO)
       {
-        if ((bufptr - buf) + member->channel->name_len + 1 + (show == WHOIS_SHOW_PREFIXED) + 3 /* 3 for @%+ */ + len > sizeof(buf))
+        if ((bufptr - buf) + member->channel->name_len + 1 + (show == WHOIS_SHOW_PREFIXED) + member_get_prefix_len(member, true) + len > sizeof(buf))
         {
           *(bufptr - 1) = '\0';
           sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
@@ -112,7 +112,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
         }
 
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s%s ",
-                           show == WHOIS_SHOW_PREFIXED ? "~" : "", get_member_status(member, true), member->channel->name);
+                           show == WHOIS_SHOW_PREFIXED ? "~" : "", member_get_prefix(member, true), member->channel->name);
       }
     }
 

@@ -21,6 +21,8 @@ Matching extbans:
 
  $s:<server>    Matches users that are connected to a server matching the mask.
 
+ $t<tlsinfo>    Matches users based on TLS protocol version and/or cipher suite.
+
  $u:<modes>     Matches users having the specified user modes set or not set.
 
  $z:<certfp>    Matches users having the given TLS certificate fingerprint.

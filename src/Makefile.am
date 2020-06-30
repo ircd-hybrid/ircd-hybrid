@@ -38,6 +38,7 @@ ircd_SOURCES = auth.c            \
                extban_nick.c     \
                extban_operclass.c \
                extban_server.c   \
+               extban_tlsinfo.c  \
                extban_usermode.c \
                fdlist.c          \
                getopt.c          \

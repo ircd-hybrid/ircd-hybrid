@@ -43,7 +43,7 @@
 
 
 static void set_final_mode(struct Mode *, struct Mode *, char *, char *);
-static void remove_ban_list(struct Channel *, struct Client *, dlink_list *, char);
+static void remove_ban_list(struct Channel *, const struct Client *, dlink_list *, char);
 
 
 /* ms_sjoin()
@@ -80,8 +80,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   char uid_buf[IRCD_BUFSIZE];  /* buffer for modes/prefixes */
   char           *uid_ptr;
   char           *p; /* pointer used making sjbuf */
-  const char *servername = (ConfigServerHide.hide_servers || IsHidden(source_p)) ?
-                            me.name : source_p->name;
   const char *para[MAXMODEPARAMS];
   char sendbuf[MODEBUFLEN] = "";
   char modebuf[MODEBUFLEN] = "";
@@ -181,6 +179,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   set_final_mode(&mode, oldmode, modebuf, parabuf);
   channel->mode = mode;
 
+  const struct Client *origin = source_p;
+  if (IsHidden(source_p) || ConfigServerHide.hide_servers)
+    origin = &me;
+
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
@@ -188,13 +190,13 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     if (isnew == false)
       strlcpy(channel->name, parv[2], sizeof(channel->name));
 
-    channel_demote_members(channel, source_p, CHFL_CHANOP, 'o');
-    channel_demote_members(channel, source_p, CHFL_HALFOP, 'h');
-    channel_demote_members(channel, source_p, CHFL_VOICE, 'v');
+    channel_demote_members(channel, origin, CHFL_CHANOP, 'o');
+    channel_demote_members(channel, origin, CHFL_HALFOP, 'h');
+    channel_demote_members(channel, origin, CHFL_VOICE, 'v');
 
-    remove_ban_list(channel, source_p, &channel->banlist, 'b');
-    remove_ban_list(channel, source_p, &channel->exceptlist, 'e');
-    remove_ban_list(channel, source_p, &channel->invexlist, 'I');
+    remove_ban_list(channel, origin, &channel->banlist, 'b');
+    remove_ban_list(channel, origin, &channel->exceptlist, 'e');
+    remove_ban_list(channel, origin, &channel->invexlist, 'I');
 
     clear_ban_cache_list(&channel->members_local);
     invite_clear_list(&channel->invites);
@@ -203,9 +205,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     {
       channel_set_topic(channel, "", "", 0, false);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
-                           (IsHidden(source_p) ||
-                           ConfigServerHide.hide_servers) ?
-                           me.name : source_p->name, channel->name);
+                           origin->name, channel->name);
     }
 
     sendto_channel_local(NULL, channel, 0, 0, 0,
@@ -215,12 +215,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
 
   if (*modebuf)
-  {
-    /* This _SHOULD_ be to ALL_MEMBERS
-     * It contains only +imnpstlk, etc */
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
-                         servername, channel->name, modebuf, parabuf);
-  }
+                         origin->name, channel->name, modebuf, parabuf);
 
   if (*parv[3] != '0' && keep_new_modes == true)
     channel_modes(channel, source_p, modebuf, parabuf);
@@ -383,7 +379,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         }
 
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                             servername, channel->name, modebuf, sendbuf);
+                             origin->name, channel->name, modebuf, sendbuf);
         mbuf = modebuf;
         *mbuf++ = '+';
 
@@ -409,7 +405,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         }
 
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                             servername, channel->name, modebuf, sendbuf);
+                             origin->name, channel->name, modebuf, sendbuf);
 
         mbuf = modebuf;
         *mbuf++ = '+';
@@ -436,7 +432,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
         }
 
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                             servername, channel->name, modebuf, sendbuf);
+                             origin->name, channel->name, modebuf, sendbuf);
 
         mbuf = modebuf;
         *mbuf++ = '+';
@@ -484,7 +480,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
 
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                         servername, channel->name, modebuf, sendbuf);
+                         origin->name, channel->name, modebuf, sendbuf);
   }
 
   /*
@@ -573,7 +569,7 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode, char *mbuf, char *pbuf)
  * side effects	- given ban list is removed, modes are sent to local clients
  */
 static void
-remove_ban_list(struct Channel *channel, struct Client *source_p, dlink_list *list, char c)
+remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list *list, char c)
 {
   dlink_node *node, *node_next;
   char modebuf[IRCD_BUFSIZE];
@@ -587,7 +583,7 @@ remove_ban_list(struct Channel *channel, struct Client *source_p, dlink_list *li
     return;
 
   cur_len = mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s -",
-                            source_p->name, channel->name);
+                            client->name, channel->name);
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 

@@ -41,7 +41,6 @@
 
 
 static void set_final_mode(const struct Mode *, const struct Mode *, char *, char *);
-static void remove_a_mode(struct Channel *, const struct Client *, unsigned int, const char);
 
 
 /*! \brief JOIN command handler
@@ -154,9 +153,9 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
-    remove_a_mode(channel, origin, CHFL_CHANOP, 'o');
-    remove_a_mode(channel, origin, CHFL_HALFOP, 'h');
-    remove_a_mode(channel, origin, CHFL_VOICE, 'v');
+    channel_demote_members(channel, origin, CHFL_CHANOP, 'o');
+    channel_demote_members(channel, origin, CHFL_HALFOP, 'h');
+    channel_demote_members(channel, origin, CHFL_VOICE, 'v');
 
     if (channel->topic[0])
     {
@@ -290,65 +289,6 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
   }
 
   *mbuf = '\0';
-}
-
-/* remove_a_mode()
- *
- * inputs       -
- * output       - NONE
- * side effects - remove ONE mode from a channel
- */
-static void
-remove_a_mode(struct Channel *channel, const struct Client *client, unsigned int mask, const char flag)
-{
-  dlink_node *node;
-  char modebuf[MODEBUFLEN];
-  char parabuf[MODEBUFLEN];
-  char *mbuf = modebuf;
-  char *pbuf = modebuf;
-  const char *names[MAXMODEPARAMS];
-  static const unsigned int names_size = sizeof(names) / sizeof(names[0]);
-  unsigned int count = 0;
-
-  DLINK_FOREACH(node, channel->members.head)
-  {
-    struct ChannelMember *member = node->data;
-
-    if ((member->flags & mask) == 0)
-      continue;
-
-    member->flags &= ~mask;
-
-    names[count++] = member->client->name;
-
-    *mbuf++ = flag;
-
-    if (count >= names_size)
-    {
-      *mbuf = '\0';
-
-      for (unsigned int i = 0; i < names_size; ++i)
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
-
-      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",
-                           client->name, channel->name, modebuf, parabuf);
-      mbuf = modebuf;
-      pbuf = parabuf;
-      count = 0;
-    }
-  }
-
-  if (count)
-  {
-    assert(count < names_size);
-    *mbuf = '\0';
-
-    for (unsigned int i = 0; i < count; ++i)
-      pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
-
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",
-                         client->name, channel->name, modebuf, parabuf);
-  }
 }
 
 static struct Message join_msgtab =

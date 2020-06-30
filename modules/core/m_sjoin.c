@@ -43,8 +43,6 @@
 
 
 static void set_final_mode(struct Mode *, struct Mode *, char *, char *);
-static void remove_our_modes(struct Channel *, struct Client *);
-static void remove_a_mode(struct Channel *, struct Client *, int, char);
 static void remove_ban_list(struct Channel *, struct Client *, dlink_list *, char);
 
 
@@ -190,7 +188,9 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     if (isnew == false)
       strlcpy(channel->name, parv[2], sizeof(channel->name));
 
-    remove_our_modes(channel, source_p);
+    channel_demote_members(channel, source_p, CHFL_CHANOP, 'o');
+    channel_demote_members(channel, source_p, CHFL_HALFOP, 'h');
+    channel_demote_members(channel, source_p, CHFL_VOICE, 'v');
 
     remove_ban_list(channel, source_p, &channel->banlist, 'b');
     remove_ban_list(channel, source_p, &channel->exceptlist, 'e');
@@ -564,98 +564,6 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode, char *mbuf, char *pbuf)
     *(mbuf - 1) = '\0';
   else
     *mbuf = '\0';
-}
-
-/* remove_our_modes()
- *
- * inputs	- pointer to channel to remove modes from
- *		- client pointer
- * output	- NONE
- * side effects	- Go through the local members, remove all their
- *		  chanop modes etc., this side lost the TS.
- */
-static void
-remove_our_modes(struct Channel *channel, struct Client *source_p)
-{
-  remove_a_mode(channel, source_p, CHFL_CHANOP, 'o');
-  remove_a_mode(channel, source_p, CHFL_HALFOP, 'h');
-  remove_a_mode(channel, source_p, CHFL_VOICE, 'v');
-}
-
-/* remove_a_mode()
- *
- * inputs	- pointer to channel
- *		- server or client removing the mode
- *		- mask o/h/v mask to be removed
- *		- flag o/h/v to be removed
- * output	- NONE
- * side effects	- remove ONE mode from all members of a channel
- */
-static void
-remove_a_mode(struct Channel *channel, struct Client *source_p,
-             int mask, char flag)
-{
-  dlink_node *node = NULL;
-  char lmodebuf[MODEBUFLEN];
-  char sendbuf[MODEBUFLEN];
-  char *sp = sendbuf;
-  const char *lpara[MAXMODEPARAMS];
-  unsigned int count = 0;
-  int l = 0;
-  char *mbuf = lmodebuf;
-
-  *mbuf++ = '-';
-  *sp = '\0';
-
-  DLINK_FOREACH(node, channel->members.head)
-  {
-    struct ChannelMember *member = node->data;
-
-    if ((member->flags & mask) == 0)
-      continue;
-
-    member->flags &= ~mask;
-
-    lpara[count++] = member->client->name;
-
-    *mbuf++ = flag;
-
-    if (count >= MAXMODEPARAMS)
-    {
-      for (unsigned int i = 0; i < MAXMODEPARAMS; ++i)
-      {
-        l = sprintf(sp, " %s", lpara[i]);
-        sp += l;
-      }
-
-      *mbuf = '\0';
-      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                           (IsHidden(source_p) || ConfigServerHide.hide_servers) ?
-                           me.name : source_p->name,
-                           channel->name, lmodebuf, sendbuf);
-      mbuf = lmodebuf;
-      *mbuf++ = '-';
-      count = 0;
-      sp = sendbuf;
-      *sp = '\0';
-    }
-  }
-
-  if (count)
-  {
-    *mbuf = '\0';
-
-    for (unsigned int i = 0; i < count; ++i)
-    {
-      l = sprintf(sp, " %s", lpara[i]);
-      sp += l;
-    }
-
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                         (IsHidden(source_p) || ConfigServerHide.hide_servers) ?
-                         me.name : source_p->name,
-                         channel->name, lmodebuf, sendbuf);
-  }
 }
 
 /* remove_ban_list()

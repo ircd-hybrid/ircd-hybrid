@@ -340,9 +340,10 @@ remove_a_mode(struct Channel *channel, const struct Client *client, unsigned int
 
   if (count)
   {
+    assert(count < names_size);
     *mbuf = '\0';
 
-    for (unsigned int i = 0; i < names_size; ++i)
+    for (unsigned int i = 0; i < count; ++i)
       pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
 
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",

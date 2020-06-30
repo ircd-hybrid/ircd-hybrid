@@ -61,6 +61,10 @@ extban_channel_matches(struct Client *client, struct Channel *channel, struct Ba
   if (tmp == NULL)
     return EXTBAN_NO_MATCH;
 
+  /*
+   * If the channel in question is either +s, or +p, only allow a match against
+   * the source channel to prevent channel probing.
+   */
   if (!PubChannel(tmp) && tmp != channel)
     return EXTBAN_NO_MATCH;
 

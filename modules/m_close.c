@@ -47,18 +47,16 @@
 static void
 mo_close(struct Client *source_p, int parc, char *parv[])
 {
-  dlink_node *node, *node_next;
-  unsigned int closed = dlink_list_length(&unknown_list);
-
   if (!HasOFlag(source_p, OPER_FLAG_CLOSE))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "close");
     return;
   }
 
-  DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
+  const unsigned int closed = dlink_list_length(&unknown_list);
+  while (unknown_list.head)
   {
-    struct Client *target_p = node->data;
+    struct Client *target_p = unknown_list.head->data;
 
     sendto_one_numeric(source_p, &me, RPL_CLOSING,
                        client_get_name(target_p, SHOW_IP),

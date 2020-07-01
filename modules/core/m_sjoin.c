@@ -571,7 +571,6 @@ set_final_mode(struct Mode *mode, struct Mode *oldmode, char *mbuf, char *pbuf)
 static void
 remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list *list, char c)
 {
-  dlink_node *node, *node_next;
   char modebuf[IRCD_BUFSIZE];
   char parabuf[IRCD_BUFSIZE];
   char *mbuf;
@@ -587,9 +586,9 @@ remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
+  while (list->head)
   {
-    struct Ban *ban = node->data;
+    struct Ban *ban = list->head->data;
     int plen = ban->banstr_len + 2;  /* +2 = b and space */
 
     if (count >= MAXMODEPARAMS ||

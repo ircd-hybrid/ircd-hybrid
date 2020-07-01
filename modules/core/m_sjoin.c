@@ -42,7 +42,7 @@
 #include "misc.h"
 
 
-static void set_final_mode(struct Mode *, struct Mode *, char *, char *);
+static void set_final_mode(const struct Mode *, const struct Mode *, char *, char *);
 static void remove_ban_list(struct Channel *, const struct Client *, dlink_list *, char);
 
 
@@ -513,53 +513,86 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
  *		  but were not set in oldmode.
  */
 static void
-set_final_mode(struct Mode *mode, struct Mode *oldmode, char *mbuf, char *pbuf)
+set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
 {
-  int len = 0;
-
-  *mbuf++ = '-';
+  int what = MODE_QUERY;
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
+  {
+    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
+    {
+      if (what != MODE_ADD)
+      {
+        *mbuf++ = '+';
+        what = MODE_ADD;
+      }
+
       *mbuf++ = tab->letter;
+    }
+  }
+
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
+  {
+    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
+    {
+      if (what != MODE_DEL)
+      {
+        *mbuf++ = '-';
+        what = MODE_DEL;
+      }
+
+      *mbuf++ = tab->letter;
+    }
+  }
 
   if (oldmode->limit && mode->limit == 0)
+  {
+    if (what != MODE_DEL)
+    {
+      *mbuf++ = '-';
+      what = MODE_DEL;
+    }
+
     *mbuf++ = 'l';
+  }
 
   if (oldmode->key[0] && mode->key[0] == '\0')
   {
+    if (what != MODE_DEL)
+    {
+      *mbuf++ = '-';
+      what = MODE_DEL;
+    }
+
     *mbuf++ = 'k';
-    len = sprintf(pbuf, "%s ", oldmode->key);
-    pbuf += len;
+    pbuf += sprintf(pbuf, "%s ", oldmode->key);
   }
-
-  if (*(mbuf - 1) == '-')
-    *(mbuf - 1) = '+';
-  else
-    *mbuf++ = '+';
-
-  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
-      *mbuf++ = tab->letter;
 
   if (mode->limit && oldmode->limit != mode->limit)
   {
+    if (what != MODE_ADD)
+    {
+      *mbuf++ = '+';
+      what = MODE_ADD;
+    }
+
     *mbuf++ = 'l';
-    len = sprintf(pbuf, "%u ", mode->limit);
-    pbuf += len;
+    pbuf += sprintf(pbuf, "%u ", mode->limit);
   }
 
   if (mode->key[0] && strcmp(oldmode->key, mode->key))
   {
+    if (what != MODE_ADD)
+    {
+      *mbuf++ = '+';
+      what = MODE_ADD;
+    }
+
     *mbuf++ = 'k';
-    len = sprintf(pbuf, "%s ", mode->key);
-    pbuf += len;
+    pbuf += sprintf(pbuf, "%s ", mode->key);
   }
 
-  if (*(mbuf - 1) == '+')
-    *(mbuf - 1) = '\0';
-  else
-    *mbuf = '\0';
+  *mbuf = '\0';
 }
 
 /* remove_ban_list()

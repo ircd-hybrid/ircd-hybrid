@@ -457,11 +457,9 @@ channel_pub_or_secret(const struct Channel *channel)
 /*! \brief lists all names on given channel
  * \param client   Pointer to client struct requesting names
  * \param channel  Pointer to channel block
- * \param show_eon Show RPL_ENDOFNAMES numeric or not
- *                 (don't want it with /names with no params)
  */
 void
-channel_send_namereply(struct Client *client, struct Channel *channel, bool show_eon)
+channel_send_namereply(struct Client *client, struct Channel *channel)
 {
   dlink_node *node;
   char buf[IRCD_BUFSIZE + 1];
@@ -521,8 +519,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel, bool show
     }
   }
 
-  if (show_eon == true)
-    sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);
+  sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);
 }
 
 /* member_get_prefix()
@@ -1071,7 +1068,7 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
                          channel->topic_info, channel->topic_time);
     }
 
-    channel_send_namereply(client, channel, true);
+    channel_send_namereply(client, channel);
 
     client->connection->last_join_time = event_base->time.sec_monotonic;
   }

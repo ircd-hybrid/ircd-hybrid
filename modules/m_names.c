@@ -57,7 +57,7 @@ m_names(struct Client *source_p, int parc, char *parv[])
   {
     struct Channel *channel = hash_find_channel(name);
     if (channel)
-      channel_send_namereply(source_p, channel, true);
+      channel_send_namereply(source_p, channel);
     else
       sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, name);
   }

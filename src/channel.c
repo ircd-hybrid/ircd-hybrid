@@ -461,7 +461,7 @@ channel_pub_or_secret(const struct Channel *channel)
  *                 (don't want it with /names with no params)
  */
 void
-channel_member_names(struct Client *client, struct Channel *channel, bool show_eon)
+channel_send_namereply(struct Client *client, struct Channel *channel, bool show_eon)
 {
   dlink_node *node;
   char buf[IRCD_BUFSIZE + 1];
@@ -1071,7 +1071,7 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
                          channel->topic_info, channel->topic_time);
     }
 
-    channel_member_names(client, channel, true);
+    channel_send_namereply(client, channel, true);
 
     client->connection->last_join_time = event_base->time.sec_monotonic;
   }

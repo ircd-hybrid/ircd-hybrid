@@ -140,7 +140,7 @@ extern void remove_ban(struct Ban *, dlink_list *);
 extern void add_user_to_channel(struct Channel *, struct Client *, unsigned int, bool);
 extern void remove_user_from_channel(struct ChannelMember *);
 extern void channel_demote_members(struct Channel *, const struct Client *, unsigned int, const char);
-extern void channel_member_names(struct Client *, struct Channel *, bool);
+extern void channel_send_namereply(struct Client *, struct Channel *, bool);
 extern void channel_send_modes(struct Client *, const struct Channel *);
 extern void channel_modes(const struct Channel *, const struct Client *, char *, char *);
 extern void check_spambot_warning(struct Client *, const char *);

@@ -227,9 +227,10 @@ tls_free(tls_data_t *tls_data)
 ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
+  ERR_clear_error();
+
   SSL *ssl = *tls_data;
   ssize_t length = SSL_read(ssl, buf, bufsize);
-
   /* Translate openssl error codes, sigh */
   if (length < 0)
   {
@@ -260,9 +261,10 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
+  ERR_clear_error();
+
   SSL *ssl = *tls_data;
   ssize_t retlen = SSL_write(ssl, buf, bufsize);
-
   /* Translate openssl error codes, sigh */
   if (retlen < 0)
   {
@@ -336,6 +338,8 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 {
   SSL *ssl = *tls_data;
   int ret;
+
+  ERR_clear_error();
 
   if (role == TLS_ROLE_SERVER)
     ret = SSL_accept(ssl);

@@ -202,11 +202,11 @@ tls_free(tls_data_t *tls_data)
 ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
-  ssize_t length = gnutls_record_recv(tls_data->session, buf, bufsize);
+  ssize_t ret = gnutls_record_recv(tls_data->session, buf, bufsize);
 
-  if (length <= 0)
+  if (ret <= 0)
   {
-    switch (length)
+    switch (ret)
     {
       case GNUTLS_E_AGAIN:
       case GNUTLS_E_INTERRUPTED:
@@ -214,22 +214,22 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
         return -1;
       case 0:  /* Closed */
       default:  /* Other error */
-        /* XXX can gnutls_strerror(length) if <0 for gnutls's idea of the reason */
+        /* XXX can gnutls_strerror(ret) if <0 for gnutls's idea of the reason */
         return 0;
     }
   }
 
-  return length;
+  return ret;
 }
 
 ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
-  ssize_t length = gnutls_record_send(tls_data->session, buf, bufsize);
+  ssize_t ret = gnutls_record_send(tls_data->session, buf, bufsize);
 
-  if (length <= 0)
+  if (ret <= 0)
   {
-    switch (length)
+    switch (ret)
     {
       case GNUTLS_E_AGAIN:
       case GNUTLS_E_INTERRUPTED:
@@ -241,7 +241,7 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
     }
   }
 
-  return length;
+  return ret;
 }
 
 void

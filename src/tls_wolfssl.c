@@ -208,12 +208,12 @@ ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   WOLFSSL *ssl = *tls_data;
-  ssize_t length = wolfSSL_read(ssl, buf, bufsize);
+  ssize_t ret = wolfSSL_read(ssl, buf, bufsize);
 
   /* Translate wolfSSL error codes, sigh */
-  if (length < 0)
+  if (ret < 0)
   {
-    switch (wolfSSL_get_error(ssl, length))
+    switch (wolfSSL_get_error(ssl, ret))
     {
       case SSL_ERROR_WANT_WRITE:
       {
@@ -230,23 +230,23 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
           break;
       /* Fall through */
       default:
-        length = errno = 0;
+        ret = errno = 0;
     }
   }
 
-  return length;
+  return ret;
 }
 
 ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   WOLFSSL *ssl = *tls_data;
-  ssize_t retlen = wolfSSL_write(ssl, buf, bufsize);
+  ssize_t ret = wolfSSL_write(ssl, buf, bufsize);
 
   /* Translate WolfSSL error codes, sigh */
-  if (retlen < 0)
+  if (ret < 0)
   {
-    switch (wolfSSL_get_error(ssl, retlen))
+    switch (wolfSSL_get_error(ssl, ret))
     {
       case SSL_ERROR_WANT_READ:
         *want_read = true;
@@ -261,11 +261,11 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
           break;
       /* Fall through */
       default:
-        retlen = errno = 0;  /* Either an SSL-specific error or EOF */
+        ret = errno = 0;  /* Either an SSL-specific error or EOF */
     }
   }
 
-  return retlen;
+  return ret;
 }
 
 void

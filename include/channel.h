@@ -142,7 +142,7 @@ extern void remove_user_from_channel(struct ChannelMember *);
 extern void channel_demote_members(struct Channel *, const struct Client *, unsigned int, const char);
 extern void channel_send_namereply(struct Client *, struct Channel *);
 extern void channel_send_modes(struct Client *, const struct Channel *);
-extern void channel_modes(const struct Channel *, const struct Client *, char *, char *);
+extern void channel_modes(const struct Channel *, const struct Client *, const struct ChannelMember *, char *, char *);
 extern void check_spambot_warning(struct Client *, const char *);
 extern void channel_free(struct Channel *);
 extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, bool);

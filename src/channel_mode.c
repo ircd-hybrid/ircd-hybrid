@@ -275,7 +275,8 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
  * channel onto buffer mbuf with the parameters in pbuf.
  */
 void
-channel_modes(const struct Channel *channel, const struct Client *client, char *mbuf, char *pbuf)
+channel_modes(const struct Channel *channel, const struct Client *client,
+              const struct ChannelMember *member, char *mbuf, char *pbuf)
 {
   *mbuf++ = '+';
   *pbuf = '\0';
@@ -288,7 +289,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, char *
   {
     *mbuf++ = 'l';
 
-    if (IsServer(client) || member_find_link(client, channel))
+    if (IsServer(client) || member || (member = member_find_link(client, channel)))
       pbuf += sprintf(pbuf, "%u ", channel->mode.limit);
   }
 
@@ -296,7 +297,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, char *
   {
     *mbuf++ = 'k';
 
-    if (IsServer(client) || member_find_link(client, channel))
+    if (IsServer(client) || member || (member = member_find_link(client, channel)))
       sprintf(pbuf, "%s ", channel->mode.key);
   }
 

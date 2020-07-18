@@ -495,12 +495,13 @@ static void
 list_one_channel(struct Client *client, struct Channel *channel)
 {
   const struct ListTask *const lt = client->connection->list_task;
+  const struct ChannelMember *member = NULL;
   char listbuf[MODEBUFLEN] = "";
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
 
   if (SecretChannel(channel) &&
-      !(HasUMode(client, UMODE_ADMIN) || member_find_link(client, channel)))
+      !(HasUMode(client, UMODE_ADMIN) || (member = member_find_link(client, channel))))
     return;
 
   if (dlink_list_length(&channel->members) < lt->users_min ||
@@ -519,7 +520,7 @@ list_one_channel(struct Client *client, struct Channel *channel)
   if (list_allow_channel(channel->name, lt) == false)
     return;
 
-  channel_modes(channel, client, modebuf, parabuf);
+  channel_modes(channel, client, member, modebuf, parabuf);
 
   if (channel->topic[0])
     snprintf(listbuf, sizeof(listbuf), "[%s] ", modebuf);

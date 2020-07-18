@@ -303,7 +303,7 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
 
-  channel_modes(channel, client, modebuf, parabuf);
+  channel_modes(channel, client, NULL, modebuf, parabuf);
   channel_send_members(client, channel, modebuf, parabuf);
 
   channel_send_mask_list(client, channel, &channel->banlist, 'b');

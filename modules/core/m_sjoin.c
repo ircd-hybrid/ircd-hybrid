@@ -219,7 +219,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                          origin->name, channel->name, modebuf, parabuf);
 
   if (*parv[3] != '0' && keep_new_modes == true)
-    channel_modes(channel, source_p, modebuf, parabuf);
+    channel_modes(channel, source_p, NULL, modebuf, parabuf);
   else
   {
     modebuf[0] = '0';

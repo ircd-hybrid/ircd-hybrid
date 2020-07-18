@@ -7,7 +7,7 @@ AC_INIT([ircd-hybrid], [8.2.32], [bugs@ircd-hybrid.org])
 AM_INIT_AUTOMAKE(1.15 subdir-objects)
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_SRCDIR(src/ircd.c)
 
 # Checks for programs.

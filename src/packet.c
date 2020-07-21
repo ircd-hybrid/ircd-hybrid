@@ -147,11 +147,11 @@ parse_client_queued(struct Client *client)
 
       /* Rate unknown clients at MAX_FLOOD per loop */
       if (i >= MAX_FLOOD)
-        break;
+        return;
 
       size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
-        break;
+        return;
 
       client_dopacket(client, readBuf, dolen);
       ++i;
@@ -174,7 +174,7 @@ parse_client_queued(struct Client *client)
 
       size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
-        break;
+        return;
 
       client_dopacket(client, readBuf, dolen);
     }
@@ -196,7 +196,7 @@ parse_client_queued(struct Client *client)
     while (true)
     {
       if (IsDefunct(client))
-        break;
+        return;
 
       /*
        * This flood protection works as follows:
@@ -214,11 +214,11 @@ parse_client_queued(struct Client *client)
        */
       if (checkflood == true)
         if (client->connection->sent_parsed >= (IsFloodDone(client) ? MAX_FLOOD : MAX_FLOOD_BURST))
-          break;
+          return;
 
       size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
-        break;
+        return;
 
       client_dopacket(client, readBuf, dolen);
       ++client->connection->sent_parsed;

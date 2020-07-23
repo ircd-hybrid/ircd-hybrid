@@ -155,22 +155,21 @@ m_oper(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (match_conf_password(password, conf) == true)
-  {
-    if (conf_attach(source_p, conf))
-    {
-      sendto_one_notice(source_p, &me, ":Can't attach conf!");
-      failed_oper_notice(source_p, opername, "can't attach conf!");
-      return;
-    }
-
-    oper_up(source_p, conf);
-  }
-  else
+  if (match_conf_password(password, conf) == false)
   {
     sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
     failed_oper_notice(source_p, opername, "password mismatch");
+    return;
   }
+
+  if (conf_attach(source_p, conf))
+  {
+    sendto_one_notice(source_p, &me, ":Can't attach conf!");
+    failed_oper_notice(source_p, opername, "can't attach conf!");
+    return;
+  }
+
+  oper_up(source_p, conf);
 }
 
 /*! \brief OPER command handler

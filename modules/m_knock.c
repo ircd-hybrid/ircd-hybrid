@@ -82,6 +82,12 @@ m_knock(struct Client *source_p, int parc, char *parv[])
 
   if (MyClient(source_p))
   {
+    if (HasCMode(channel, MODE_NOKNOCK))
+    {
+      sendto_one_numeric(source_p, &me, ERR_CANNOTKNOCK, channel->name);
+      return;
+    }
+
     /*
      * Don't allow a knock if the user is banned, or the channel is private.
      */

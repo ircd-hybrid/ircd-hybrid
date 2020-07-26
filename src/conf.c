@@ -1004,7 +1004,7 @@ conf_read_files(bool cold)
   isupport_add("CHANNELLEN", NULL, CHANNELLEN);
   isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
 
-  snprintf(buf, sizeof(buf), "%s", "beI,k,l,cimnprstuCLMNORST");
+  snprintf(buf, sizeof(buf), "%s", "beI,k,l,cimnprstuCKLMNORST");
   isupport_add("CHANMODES", buf, -1);
 }
 

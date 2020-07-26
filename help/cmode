@@ -41,6 +41,8 @@ NO PARAMETERS:
 
      +C     - 'No CTCPs'. Prevent users from sending CTCPs to the channel.
 
+     +K     - 'No KNOCK'. KNOCK cannot be used on the channel.
+
      +L     - 'Large ban list'. Channel can make use of the extended ban list
               limit. Can be set only by irc-operators, servers and services.
 

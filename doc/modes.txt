@@ -55,6 +55,7 @@ Channel Modes:
 +k - key          - Key/password for the channel
 +l - limit        - Limit the number of users in a channel
 +m - moderated    - Users without +v/h/o cannot send text to the channel
++K - noknock      - KNOCK cannot be used on the channel
 +L - extlimit     - Channel can make use of the extended ban list limit. Can be set only by irc-operators,
                     servers and services.
 +M - modreg       - Unregistered/unidentified clients cannot send text to the channel

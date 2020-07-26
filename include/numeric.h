@@ -204,6 +204,7 @@ enum irc_numerics
   ERR_NEEDREGGEDNICK       = 477,
   ERR_BANLISTFULL          = 478,
   ERR_BADCHANNAME          = 479,
+  ERR_CANNOTKNOCK          = 480,
   ERR_NOPRIVILEGES         = 481,
   ERR_CHANOPRIVSNEEDED     = 482,
   ERR_CANTKILLSERVER       = 483,

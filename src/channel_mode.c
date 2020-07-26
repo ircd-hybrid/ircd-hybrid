@@ -936,6 +936,7 @@ const struct chan_mode  cmode_tab[] =
   { .letter = 'v', .flag = CHFL_VOICE, .required_oplevel = CHACCESS_HALFOP, .func = chm_flag },
   { .letter = 'C', .mode = MODE_NOCTCP, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
   { .letter = 'I', .flag = CHFL_INVEX, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask },
+  { .letter = 'K', .mode = MODE_NOKNOCK, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
   { .letter = 'L', .mode = MODE_EXTLIMIT, .required_oplevel = CHACCESS_HALFOP, .only_opers = true, .func = chm_simple },
   { .letter = 'M', .mode = MODE_MODREG, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
   { .letter = 'N', .mode = MODE_NONICKCHANGE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },

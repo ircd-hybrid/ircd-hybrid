@@ -1059,19 +1059,9 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   dlink_node *node;
   uintmax_t sendB = 0, recvB = 0;
 
-  if (ConfigServerHide.flatten_links && !HasUMode(source_p, UMODE_OPER))
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
-    return;
-  }
-
   DLINK_FOREACH(node, local_server_list.head)
   {
     const struct Client *target_p = node->data;
-
-    if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (!HasUMode(source_p, UMODE_OPER))
-        continue;
 
     sendB += target_p->connection->send.bytes;
     recvB += target_p->connection->recv.bytes;
@@ -1086,7 +1076,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
                target_p->connection->recv.bytes >> 10,
                (event_base->time.sec_monotonic - target_p->connection->created_monotonic),
                (event_base->time.sec_monotonic - target_p->connection->last_data),
-               HasUMode(source_p, UMODE_OPER) ? capab_get(target_p) : "TS");
+               capab_get(target_p));
   }
 
   sendB >>= 10;
@@ -1099,7 +1089,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
                      _GMKv(recvB), _GMKs(recvB));
 
-  uintmax_t uptime = (event_base->time.sec_monotonic - me.connection->created_monotonic);
+  const uintmax_t uptime = (event_base->time.sec_monotonic - me.connection->created_monotonic);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "? :Server send: %7.2f %s (%4.1f KiB/s)",
                      _GMKv((me.connection->send.bytes >> 10)),
@@ -1270,7 +1260,7 @@ static const struct StatsStruct  stats_tab[] =
   { .letter = 'y', .handler = stats_class, .required_modes = UMODE_OPER },
   { .letter = 'Y', .handler = stats_class, .required_modes = UMODE_OPER },
   { .letter = 'z', .handler = stats_memory, .required_modes = UMODE_OPER },
-  { .letter = '?', .handler = stats_servlinks },
+  { .letter = '?', .handler = stats_servlinks, .required_modes = UMODE_OPER },
   { .letter = '\0' }
 };
 

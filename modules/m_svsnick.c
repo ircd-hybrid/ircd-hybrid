@@ -97,8 +97,8 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
       return;
     }
 
-    sendto_one(target_p, ":%s SVSNICK %s %s %s", source_p->id,
-               target_p->id, new_nick, parv[3]);
+    sendto_one(target_p, ":%s SVSNICK %s %ju %s %ju", source_p->id,
+               target_p->id, ts, parv[3], new_ts);
     return;
   }
 

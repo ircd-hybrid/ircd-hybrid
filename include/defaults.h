@@ -102,8 +102,6 @@
 #define NETWORK_DESC_DEFAULT "2600net IRC Network"  /* default for network_desc */
 
 /* General defaults */
-#define MAXIMUM_LINKS_DEFAULT 0         /* default for maximum_links */
-
 #define LINKS_DELAY_DEFAULT  300
 
 #define MAX_TARGETS_DEFAULT 4           /* default for max_targets */

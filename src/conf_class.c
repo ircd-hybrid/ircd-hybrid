@@ -53,7 +53,6 @@ class_make(void)
   class->active = true;
   class->con_freq = DEFAULT_CONNECTFREQUENCY;
   class->ping_freq = DEFAULT_PINGFREQUENCY;
-  class->max_total = MAXIMUM_LINKS_DEFAULT;
   class->max_sendq = DEFAULT_SENDQ;
   class->max_recvq = DEFAULT_RECVQ;
   class->ip_tree_v6 = patricia_new(128);

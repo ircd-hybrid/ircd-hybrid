@@ -81,16 +81,16 @@ write_links_file(void *unused)
 
   DLINK_FOREACH(node, global_server_list.head)
   {
-    const struct Client *target_p = node->data;
+    const struct Client *client = node->data;
 
     /*
      * Skip hidden servers, aswell as ourselves, since we already send
      * ourselves in /links
      */
-    if (IsHidden(target_p) || IsMe(target_p))
+    if (IsHidden(client) || IsMe(client))
       continue;
 
-    if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (HasFlag(client, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       continue;
 
     /*
@@ -99,7 +99,7 @@ write_links_file(void *unused)
      * Mostly for aesthetic reasons - makes it look pretty in mIRC ;)
      * - madmax
      */
-    snprintf(buf, sizeof(buf), "%s %s :1 %s", target_p->name, me.name, target_p->info);
+    snprintf(buf, sizeof(buf), "%s %s :1 %s", client->name, me.name, client->info);
     dlinkAddTail(xstrdup(buf), make_dlink_node(), &flatten_links);
 
     strlcat(buf, "\n", sizeof(buf));

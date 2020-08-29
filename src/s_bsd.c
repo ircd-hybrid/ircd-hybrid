@@ -202,8 +202,8 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
 {
   struct Client *client = client_make(NULL);
 
-  client->connection->fd = fd_open(fd, true, (listener->flags & LISTENER_TLS) ?
-                                     "Incoming TLS connection" : "Incoming connection");
+  client->connection->fd = fd_open(fd, true, listener_has_flag(listener, LISTENER_TLS) ?
+                                   "Incoming TLS connection" : "Incoming connection");
 
   /*
    * copy address to 'sockhost' as a string, copy it to host too
@@ -226,7 +226,7 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
   client->connection->listener = listener;
   ++listener->ref_count;
 
-  if (listener->flags & LISTENER_TLS)
+  if (listener_has_flag(listener, LISTENER_TLS))
   {
     if (tls_new(&client->connection->fd->tls, fd, TLS_ROLE_SERVER) == false)
     {

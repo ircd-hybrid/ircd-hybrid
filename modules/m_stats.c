@@ -898,16 +898,18 @@ stats_ports(struct Client *source_p, int parc, char *parv[])
     char *p = buf;
     const struct Listener *listener = node->data;
 
-    if (listener->flags & LISTENER_HIDDEN)
+    if (listener_has_flag(listener, LISTENER_HIDDEN))
     {
       if (!HasUMode(source_p, UMODE_ADMIN))
         continue;
       *p++ = 'H';
     }
 
-    if (listener->flags & LISTENER_SERVER)
+    if (listener_has_flag(listener, LISTENER_SERVER))
       *p++ = 'S';
-    if (listener->flags & LISTENER_TLS)
+    if (listener_has_flag(listener, LISTENER_CLIENT))
+      *p++ = 'C';
+    if (listener_has_flag(listener, LISTENER_TLS))
       *p++ = 'T';
     *p = '\0';
 

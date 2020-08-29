@@ -36,30 +36,6 @@
 #include "listener.h"
 
 
-/* do_user()
- *
- * inputs       -
- * output       - NONE
- * side effects -
- */
-static void
-do_user(struct Client *source_p,
-        const char *username,
-        const char *realname)
-{
-  assert(IsUnknown(source_p));
-
-  source_p->connection->registration &= ~REG_NEED_USER;
-
-  strlcpy(source_p->info, realname, sizeof(source_p->info));
-
-  if (!HasFlag(source_p, FLAGS_GOTID))
-    strlcpy(source_p->username, username, sizeof(source_p->username));
-
-  if (source_p->connection->registration == 0)
-    register_local_user(source_p);
-}
-
 /*! \brief USER command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
@@ -80,17 +56,28 @@ mr_user(struct Client *source_p, int parc, char *parv[])
   const char *const username = parv[1];
   const char *const realname = parv[4];
 
+  assert(IsUnknown(source_p));
+
   if (source_p->connection->listener->flags & LISTENER_SERVER)
   {
     exit_client(source_p, "Use a different port");
     return;
   }
 
-  char *p = strchr(username, '@');
-  if (p)
-    *p = '\0';
+  if (!HasFlag(source_p, FLAGS_GOTID))
+  {
+    char *p = strchr(username, '@');
+    if (p)
+      *p = '\0';
 
-  do_user(source_p, username, realname);
+    strlcpy(source_p->username, username, sizeof(source_p->username));
+  }
+
+  strlcpy(source_p->info, realname, sizeof(source_p->info));
+  source_p->connection->registration &= ~REG_NEED_USER;
+
+  if (source_p->connection->registration == 0)
+    register_local_user(source_p);
 }
 
 static struct Message user_msgtab =

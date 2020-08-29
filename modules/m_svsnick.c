@@ -58,8 +58,7 @@
 static void
 ms_svsnick(struct Client *source_p, int parc, char *parv[])
 {
-  const char *new_nick = parc == 5 ? parv[3] : parv[2];  /* TBR: compatibility mode */
-  uintmax_t ts = 0, new_ts = 0;
+  const char *new_nick = parv[3];
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return;
@@ -71,19 +70,11 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   if (target_p == NULL)
     return;
 
-  if (parc == 5)  /* TBR: compatibility mode */
-  {
-    ts = strtoumax(parv[2], NULL, 10);
-    if (ts && (ts != target_p->tsinfo))
-      return;
-  }
-  else  /* parc == 4 */
-    ts = strtoumax(parv[3], NULL, 10);
+  uintmax_t ts = strtoumax(parv[2], NULL, 10);
+  if (ts && (ts != target_p->tsinfo))
+    return;
 
-  if (parc == 4)  /* TBR: compatibility mode */
-    new_ts = ts;
-  else
-    new_ts = strtoumax(parv[4], NULL, 10);
+  uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
 
   if (!MyConnect(target_p))
   {
@@ -155,7 +146,7 @@ static struct Message svsnick_msgtab =
   .cmd = "SVSNICK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_svsnick, .args_min = 4 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_svsnick, .args_min = 5 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };

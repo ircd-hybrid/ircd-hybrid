@@ -93,9 +93,10 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
 
   if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(2, aline->user, aline->host) == false)
   {
-    sendto_one_notice(source_p, &me,
-                      ":Please include at least %u non-wildcard characters with the mask",
-                      ConfigGeneral.min_nonwildcard);
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me,
+                        ":Please include at least %u non-wildcard characters with the mask",
+                        ConfigGeneral.min_nonwildcard);
     return;
   }
 

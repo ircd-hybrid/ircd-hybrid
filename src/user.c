@@ -41,7 +41,6 @@
 #include "conf_gecos.h"
 #include "log.h"
 #include "server.h"
-#include "server_capab.h" /* TBR: RHOST compatibility mode */
 #include "send.h"
 #include "memory.h"
 #include "packet.h"

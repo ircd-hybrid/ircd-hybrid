@@ -71,7 +71,8 @@ kline_check(const struct AddressRec *arec)
             conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
       default:  /* HM_HOST */
-        if (match(arec->Mask.hostname, client_p->host) == 0 || match(arec->Mask.hostname, client_p->sockhost) == 0)
+        if (match(arec->Mask.hostname, client_p->realhost) == 0 ||
+            match(arec->Mask.hostname, client_p->sockhost) == 0 || match(arec->Mask.hostname, client_p->host) == 0)
           conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
     }

@@ -287,7 +287,7 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
   if (ret != GNUTLS_E_SUCCESS)
   {
     /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
-    ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default %",
+    ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default %s",
          cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list), tls_default_priority_string);
     gnutls_priority_init(&tls_data->context->priorities, tls_default_priority_string, NULL);
     return false;

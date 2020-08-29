@@ -50,13 +50,13 @@ xline_check(const struct GecosItem *gecos)
 
   DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client_p = node->data;
+    struct Client *client = node->data;
 
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
-    if (match(gecos->mask, client_p->info) == 0)
-      conf_try_ban(client_p, CLIENT_BAN_XLINE, gecos->reason);
+    if (match(gecos->mask, client->info) == 0)
+      conf_try_ban(client, CLIENT_BAN_XLINE, gecos->reason);
   }
 }
 

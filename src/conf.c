@@ -522,7 +522,7 @@ connect_find(const char *name, int (*compare)(const char *, const char *))
  * side effects - looks for an exact match on name field
  */
 struct MaskItem *
-operator_find(const struct Client *who, const char *name)
+operator_find(const struct Client *client, const char *name)
 {
   dlink_node *node;
 
@@ -532,29 +532,31 @@ operator_find(const struct Client *who, const char *name)
 
     if (irccmp(conf->name, name) == 0)
     {
-      if (who == NULL)
+      if (client == NULL)
         return conf;
 
-      if (match(conf->user, who->username) == 0)
+      if (conf->class->max_total &&
+          conf->class->max_total <= conf->class->ref_count)
+        continue;
+
+      if (match(conf->user, client->username) == 0)
       {
         switch (conf->htype)
         {
           case HM_HOST:
-            if (match(conf->host, who->host) == 0 || match(conf->host, who->sockhost) == 0)
-              if (conf->class->max_total == 0 || conf->class->ref_count < conf->class->max_total)
-                return conf;
+            if (match(conf->host, client->realhost) == 0 ||
+                match(conf->host, client->sockhost) == 0 || match(conf->host, client->host) == 0)
+              return conf;
             break;
           case HM_IPV4:
-            if (who->ip.ss.ss_family == AF_INET)
-              if (match_ipv4(&who->ip, conf->addr, conf->bits))
-                if (conf->class->max_total == 0 || conf->class->ref_count < conf->class->max_total)
-                  return conf;
+            if (client->ip.ss.ss_family == AF_INET)
+              if (match_ipv4(&client->ip, conf->addr, conf->bits))
+                return conf;
             break;
           case HM_IPV6:
-            if (who->ip.ss.ss_family == AF_INET6)
-              if (match_ipv6(&who->ip, conf->addr, conf->bits))
-                if (conf->class->max_total == 0 || conf->class->ref_count < conf->class->max_total)
-                  return conf;
+            if (client->ip.ss.ss_family == AF_INET6)
+              if (match_ipv6(&client->ip, conf->addr, conf->bits))
+                return conf;
             break;
           default:
             assert(0);

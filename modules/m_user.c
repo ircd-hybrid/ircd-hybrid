@@ -58,7 +58,7 @@ mr_user(struct Client *source_p, int parc, char *parv[])
 
   assert(IsUnknown(source_p));
 
-  if (source_p->connection->listener->flags & LISTENER_SERVER)
+  if (listener_has_flag(source_p->connection->listener, LISTENER_SERVER) == true)
   {
     exit_client(source_p, "Use a different port");
     return;

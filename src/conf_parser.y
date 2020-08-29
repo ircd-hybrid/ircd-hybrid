@@ -150,6 +150,7 @@ reset_block_state(void)
 %token  CIDR_BITLEN_IPV4
 %token  CIDR_BITLEN_IPV6
 %token  CLASS
+%token  CLIENT
 %token  CLOSE
 %token  CONNECT
 %token  CONNECTFREQ
@@ -1470,6 +1471,10 @@ listen_flags_item: T_TLS
 {
   if (conf_parser_ctx.pass == 2)
    block_state.flags.value |= LISTENER_SERVER;
+} | CLIENT
+{
+  if (conf_parser_ctx.pass == 2)
+   block_state.flags.value |= LISTENER_CLIENT;
 };
 
 listen_items:   listen_items listen_item | listen_item;

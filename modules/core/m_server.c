@@ -36,6 +36,7 @@
 #include "numeric.h"
 #include "conf.h"
 #include "conf_service.h"
+#include "listener.h"
 #include "log.h"
 #include "misc.h"
 #include "server.h"
@@ -448,6 +449,12 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   const char *sid = parc == 6 ? parv[3] : source_p->id; /* TBR: compatibility 'mode' */
   const char *error = NULL;
   bool warn = true;
+
+  if (listener_has_flag(source_p->connection->listener, LISTENER_CLIENT) == true)
+  {
+    exit_client(source_p, "Use a different port");
+    return;
+  }
 
   if (server_valid_name(name) == false)
   {

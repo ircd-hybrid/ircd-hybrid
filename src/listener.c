@@ -81,6 +81,14 @@ listener_get_name(const struct Listener *listener)
   return buf;
 }
 
+bool
+listener_has_flag(const struct Listener *listener, unsigned int flags)
+{
+  if (listener && (listener->flags & flags))
+    return true;
+  return false;
+}
+
 void
 listener_count_memory(unsigned int *count, size_t *bytes)
 {

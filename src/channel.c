@@ -473,8 +473,8 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
   if (PubChannel(channel) || is_member == true)
   {
-    /* :me.name 353 source_p->name @ channel->name :+nick1 @nick2 %nick3 ...\r\n */
-    /* 1       23456              789             01                        2 3  */
+    /* :me.name 353 client->name @ channel->name :+nick1 @nick2 %nick3 ...\r\n */
+    /* 1       23456            789             01                        2 3  */
     size_t len = strlen(me.name) + strlen(client->name) + channel->name_len + 13;
 
     DLINK_FOREACH(node, channel->members.head)

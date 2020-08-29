@@ -50,30 +50,30 @@ kline_check(const struct AddressRec *arec)
 
   DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client_p = node->data;
+    struct Client *client = node->data;
 
-    if (IsDead(client_p))
+    if (IsDead(client))
       continue;
 
-    if (match(arec->username, client_p->username))
+    if (match(arec->username, client->username))
       continue;
 
     switch (arec->masktype)
     {
       case HM_IPV4:
-        if (client_p->ip.ss.ss_family == AF_INET)
-          if (match_ipv4(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
+        if (client->ip.ss.ss_family == AF_INET)
+          if (match_ipv4(&client->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+            conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
       case HM_IPV6:
-        if (client_p->ip.ss.ss_family == AF_INET6)
-          if (match_ipv6(&client_p->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
+        if (client->ip.ss.ss_family == AF_INET6)
+          if (match_ipv6(&client->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
+            conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
       default:  /* HM_HOST */
-        if (match(arec->Mask.hostname, client_p->realhost) == 0 ||
-            match(arec->Mask.hostname, client_p->sockhost) == 0 || match(arec->Mask.hostname, client_p->host) == 0)
-          conf_try_ban(client_p, CLIENT_BAN_KLINE, arec->conf->reason);
+        if (match(arec->Mask.hostname, client->realhost) == 0 ||
+            match(arec->Mask.hostname, client->sockhost) == 0 || match(arec->Mask.hostname, client->host) == 0)
+          conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
     }
   }

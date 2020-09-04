@@ -548,15 +548,10 @@ operator_find(const struct Client *client, const char *name)
                 match(conf->host, client->sockhost) == 0 || match(conf->host, client->host) == 0)
               return conf;
             break;
-          case HM_IPV4:
-            if (client->ip.ss.ss_family == AF_INET)
-              if (match_ipv4(&client->ip, conf->addr, conf->bits))
-                return conf;
-            break;
           case HM_IPV6:
-            if (client->ip.ss.ss_family == AF_INET6)
-              if (match_ipv6(&client->ip, conf->addr, conf->bits))
-                return conf;
+          case HM_IPV4:
+            if (address_compare(&client->ip, conf->addr, false, false, conf->bits))
+              return conf;
             break;
           default:
             assert(0);

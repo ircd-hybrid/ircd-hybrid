@@ -619,15 +619,10 @@ ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
             match(ban->host, client->sockhost) == 0 || match(ban->host, client->host) == 0)
           return true;
         break;
-      case HM_IPV4:
-        if (client->ip.ss.ss_family == AF_INET)
-          if (match_ipv4(&client->ip, &ban->addr, ban->bits))
-            return true;
-        break;
       case HM_IPV6:
-        if (client->ip.ss.ss_family == AF_INET6)
-          if (match_ipv6(&client->ip, &ban->addr, ban->bits))
-            return true;
+      case HM_IPV4:
+        if (address_compare(&client->ip, &ban->addr, false, false, ban->bits))
+          return true;
         break;
       default:
         assert(0);

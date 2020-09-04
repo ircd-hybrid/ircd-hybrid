@@ -68,6 +68,7 @@ struct AddressRec
 
 extern dlink_list atable[ATABLE_SIZE];
 extern int parse_netmask(const char *, struct irc_ssaddr *, int *);
+extern bool address_compare(const void *, const void *, bool, bool, int);
 extern bool match_ipv6(const struct irc_ssaddr *, const struct irc_ssaddr *, int);
 extern bool match_ipv4(const struct irc_ssaddr *, const struct irc_ssaddr *, int);
 

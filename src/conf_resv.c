@@ -176,18 +176,14 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
       switch (exempt->type)
       {
         case HM_HOST:
-          if (match(exempt->host, client->host) == 0 || match(exempt->host, client->sockhost) == 0)
+          if (match(exempt->host, client->realhost) == 0 ||
+              match(exempt->host, client->sockhost) == 0 || match(exempt->host, client->host) == 0)
             return true;
           break;
-        case HM_IPV4:
-          if (client->ip.ss.ss_family == AF_INET)
-            if (match_ipv4(&client->ip, &exempt->addr, exempt->bits))
-              return true;
-          break;
         case HM_IPV6:
-          if (client->ip.ss.ss_family == AF_INET6)
-            if (match_ipv6(&client->ip, &exempt->addr, exempt->bits))
-              return true;
+        case HM_IPV4:
+          if (address_compare(&client->ip, &exempt->addr, false, false, exempt->bits))
+            return true;
           break;
         default:
           assert(0);

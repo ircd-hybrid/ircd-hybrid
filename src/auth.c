@@ -52,6 +52,7 @@
 #include "send.h"
 #include "memory.h"
 #include "misc.h"
+#include "hostmask.h"
 
 
 enum
@@ -184,7 +185,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
 
   if (namelength == 0)
     auth_sendheader(auth->client, REPORT_FAIL_DNS);
-  else if (address_compare(addr, &auth->client->ip, false) == false)
+  else if (address_compare(addr, &auth->client->ip, true, false, 0) == false)
     auth_sendheader(auth->client, REPORT_IP_MISMATCH);
   else if (namelength > HOSTLEN)
     auth_sendheader(auth->client, REPORT_HOST_TOOLONG);

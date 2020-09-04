@@ -60,21 +60,18 @@ kline_check(const struct AddressRec *arec)
 
     switch (arec->masktype)
     {
-      case HM_IPV4:
-        if (client->ip.ss.ss_family == AF_INET)
-          if (match_ipv4(&client->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
-        break;
-      case HM_IPV6:
-        if (client->ip.ss.ss_family == AF_INET6)
-          if (match_ipv6(&client->ip, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
-        break;
-      default:  /* HM_HOST */
+      case HM_HOST:
         if (match(arec->Mask.hostname, client->realhost) == 0 ||
             match(arec->Mask.hostname, client->sockhost) == 0 || match(arec->Mask.hostname, client->host) == 0)
           conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
+      case HM_IPV6:
+      case HM_IPV4:
+        if (address_compare(&client->ip, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
+          conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
+        break;
+      default:
+        assert(0);
     }
   }
 }

@@ -241,20 +241,16 @@ motd_lookup(const struct Client *client)
           return motd;
         break;
       }
+
       case MOTD_HOSTMASK:
         if (match(motd->mask, client->realhost) == 0 ||
             match(motd->mask, client->sockhost) == 0 || match(motd->mask, client->host) == 0)
           return motd;
         break;
-      case MOTD_IPMASKV4:
-        if (client->ip.ss.ss_family == AF_INET)
-          if (match_ipv4(&client->ip, &motd->address, motd->addrbits))
-            return motd;
-        break;
       case MOTD_IPMASKV6:
-        if (client->ip.ss.ss_family == AF_INET6)
-          if (match_ipv6(&client->ip, &motd->address, motd->addrbits))
-            return motd;
+      case MOTD_IPMASKV4:
+        if (address_compare(&client->ip, &motd->address, false, false, motd->addrbits))
+          return motd;
         break;
       default: break;
     }

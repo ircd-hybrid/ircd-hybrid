@@ -73,7 +73,7 @@ m_topic(struct Client *source_p, int parc, char *parv[])
     }
 
     if (!HasCMode(channel, MODE_TOPICLIMIT) ||
-        has_member_flags(member, CHFL_CHANOP | CHFL_HALFOP))
+        member_has_flags(member, CHFL_CHANOP | CHFL_HALFOP) == true)
     {
       char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
 

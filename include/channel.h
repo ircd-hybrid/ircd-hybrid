@@ -132,7 +132,7 @@ extern bool channel_check_name(const char *, bool);
 extern int can_send(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool);
 extern bool is_banned(struct Channel *, struct Client *);
 extern bool find_bmask(struct Client *, struct Channel*, const dlink_list *, struct Extban *);
-extern int has_member_flags(const struct ChannelMember *, const unsigned int);
+extern bool member_has_flags(const struct ChannelMember *, const unsigned int);
 
 extern void channel_do_join(struct Client *, char *, char *);
 extern void channel_do_part(struct Client *, char *, const char *);

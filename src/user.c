@@ -708,19 +708,19 @@ user_set_hostmask(struct Client *client, const char *hostname)
     int len = 0;
     const struct ChannelMember *member = node->data;
 
-    if (has_member_flags(member, CHFL_CHANOP))
+    if (member_has_flags(member, CHFL_CHANOP) == true)
     {
       *p++ = 'o';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", client->name);
     }
 
-    if (has_member_flags(member, CHFL_HALFOP))
+    if (member_has_flags(member, CHFL_HALFOP) == true)
     {
       *p++ = 'h';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", client->name);
     }
 
-    if (has_member_flags(member, CHFL_VOICE))
+    if (member_has_flags(member, CHFL_VOICE) == true)
     {
       *p++ = 'v';
       len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", client->name);

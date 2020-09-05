@@ -151,7 +151,7 @@ channel_demote_members(struct Channel *channel, const struct Client *client, uns
   char modebuf[MODEBUFLEN];
   char parabuf[MODEBUFLEN];
   char *mbuf = modebuf;
-  char *pbuf = modebuf;
+  char *pbuf = parabuf;
   const char *names[MAXMODEPARAMS];
   static const unsigned int names_size = sizeof(names) / sizeof(names[0]);
   unsigned int count = 0;
@@ -255,15 +255,15 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
                        const dlink_list *list, const char flag)
 {
   dlink_node *node;
-  char mbuf[IRCD_BUFSIZE];
-  char pbuf[IRCD_BUFSIZE];
+  char modebuf[IRCD_BUFSIZE];
+  char parabuf[IRCD_BUFSIZE];
   size_t tlen, mlen, cur_len;
-  char *pp = pbuf;
+  char *pbuf = parabuf;
 
   if (dlink_list_length(list) == 0)
     return;
 
-  mlen = snprintf(mbuf, sizeof(mbuf), ":%s BMASK %ju %s %c :", me.id,
+  mlen = snprintf(modebuf, sizeof(modebuf), ":%s BMASK %ju %s %c :", me.id,
                   channel->creation_time, channel->name, flag);
   cur_len = mlen;
 
@@ -276,21 +276,21 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
     /*
      * Send buffer and start over if we cannot fit another ban
      */
-    if (cur_len + (tlen - 1) > sizeof(pbuf) - 2)
+    if (cur_len + (tlen - 1) > sizeof(parabuf) - 2)
     {
-      *(pp - 1) = '\0';  /* Get rid of trailing space on buffer */
-      sendto_one(client, "%s%s", mbuf, pbuf);
+      *(pbuf - 1) = '\0';  /* Get rid of trailing space on buffer */
+      sendto_one(client, "%s%s", modebuf, parabuf);
 
       cur_len = mlen;
-      pp = pbuf;
+      pbuf = parabuf;
     }
 
-    pp += snprintf(pp, sizeof(pbuf) - (pp - pbuf), "%s ", ban->banstr);
+    pbuf += snprintf(pbuf, sizeof(pbuf) - (pbuf - parabuf), "%s ", ban->banstr);
     cur_len += tlen;
   }
 
-  *(pp - 1) = '\0';  /* Get rid of trailing space on buffer */
-  sendto_one(client, "%s%s", mbuf, pbuf);
+  *(pbuf - 1) = '\0';  /* Get rid of trailing space on buffer */
+  sendto_one(client, "%s%s", modebuf, parabuf);
 }
 
 /*! \brief Send "client" a full list of the modes for channel channel
@@ -717,10 +717,12 @@ can_join(struct Client *client, struct Channel *channel, const char *key)
   return extban_join_can_join(channel, client, NULL);
 }
 
-int
-has_member_flags(const struct ChannelMember *member, const unsigned int flags)
+bool
+member_has_flags(const struct ChannelMember *member, const unsigned int flags)
 {
-  return member && (member->flags & flags);
+  if (member && (member->flags & flags))
+    return true;
+  return false;
 }
 
 struct ChannelMember *

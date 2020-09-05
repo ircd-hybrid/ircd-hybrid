@@ -71,7 +71,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (!has_member_flags(member_source, CHFL_CHANOP | CHFL_HALFOP))
+  if (member_has_flags(member_source, CHFL_CHANOP | CHFL_HALFOP) == false)
   {
     sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;
@@ -88,9 +88,9 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (has_member_flags(member_source, CHFL_HALFOP) && !has_member_flags(member_source, CHFL_CHANOP))
+  if (member_has_flags(member_source, CHFL_HALFOP) == true && member_has_flags(member_source, CHFL_CHANOP) == false)
   {
-    if (has_member_flags(member_target, CHFL_CHANOP | CHFL_HALFOP))
+    if (member_has_flags(member_target, CHFL_CHANOP | CHFL_HALFOP) == true)
     {
       sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
       return;

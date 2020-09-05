@@ -40,8 +40,98 @@
 #include "modules.h"
 
 
-static void set_final_mode(const struct Mode *, const struct Mode *, char *, char *);
+/* set_final_mode
+ *
+ * inputs       - channel mode
+ *              - old channel mode
+ * output       - NONE
+ * side effects - walk through all the channel modes turning off modes
+ *                that were on in oldmode but aren't on in mode.
+ *                Then walk through turning on modes that are on in mode
+ *                but were not set in oldmode.
+ */
+static void
+set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
+{
+  int what = MODE_QUERY;
 
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
+  {
+    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
+    {
+      if (what != MODE_ADD)
+      {
+        *mbuf++ = '+';
+        what = MODE_ADD;
+      }
+
+      *mbuf++ = tab->letter;
+    }
+  }
+
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
+  {
+    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
+    {
+      if (what != MODE_DEL)
+      {
+        *mbuf++ = '-';
+        what = MODE_DEL;
+      }
+
+      *mbuf++ = tab->letter;
+    }
+  }
+
+  if (oldmode->limit && mode->limit == 0)
+  {
+    if (what != MODE_DEL)
+    {
+      *mbuf++ = '-';
+      what = MODE_DEL;
+    }
+
+    *mbuf++ = 'l';
+  }
+
+  if (oldmode->key[0] && mode->key[0] == '\0')
+  {
+    if (what != MODE_DEL)
+    {
+      *mbuf++ = '-';
+      what = MODE_DEL;
+    }
+
+    *mbuf++ = 'k';
+    pbuf += sprintf(pbuf, "%s ", oldmode->key);
+  }
+
+  if (mode->limit && oldmode->limit != mode->limit)
+  {
+    if (what != MODE_ADD)
+    {
+      *mbuf++ = '+';
+      what = MODE_ADD;
+    }
+
+    *mbuf++ = 'l';
+    pbuf += sprintf(pbuf, "%u ", mode->limit);
+  }
+
+  if (mode->key[0] && strcmp(oldmode->key, mode->key))
+  {
+    if (what != MODE_ADD)
+    {
+      *mbuf++ = '+';
+      what = MODE_ADD;
+    }
+
+    *mbuf++ = 'k';
+    pbuf += sprintf(pbuf, "%s ", mode->key);
+  }
+
+  *mbuf = '\0';
+}
 
 /*! \brief JOIN command handler
  *
@@ -193,99 +283,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(source_p, 0, 0, ":%s JOIN %ju %s +",
                 source_p->id, channel->creation_time, channel->name);
-}
-
-/* set_final_mode
- *
- * inputs       - channel mode
- *              - old channel mode
- * output       - NONE
- * side effects - walk through all the channel modes turning off modes
- *                that were on in oldmode but aren't on in mode.
- *                Then walk through turning on modes that are on in mode
- *                but were not set in oldmode.
- */
-static void
-set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
-{
-  int what = MODE_QUERY;
-
-  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-  {
-    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
-    {
-      if (what != MODE_ADD)
-      {
-        *mbuf++ = '+';
-        what = MODE_ADD;
-      }
-
-      *mbuf++ = tab->letter;
-    }
-  }
-
-  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-  {
-    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
-    {
-      if (what != MODE_DEL)
-      {
-        *mbuf++ = '-';
-        what = MODE_DEL;
-      }
-
-      *mbuf++ = tab->letter;
-    }
-  }
-
-  if (oldmode->limit && mode->limit == 0)
-  {
-    if (what != MODE_DEL)
-    {
-      *mbuf++ = '-';
-      what = MODE_DEL;
-    }
-
-    *mbuf++ = 'l';
-  }
-
-  if (oldmode->key[0] && mode->key[0] == '\0')
-  {
-    if (what != MODE_DEL)
-    {
-      *mbuf++ = '-';
-      what = MODE_DEL;
-    }
-
-    *mbuf++ = 'k';
-    pbuf += sprintf(pbuf, "%s ", oldmode->key);
-  }
-
-  if (mode->limit && oldmode->limit != mode->limit)
-  {
-    if (what != MODE_ADD)
-    {
-      *mbuf++ = '+';
-      what = MODE_ADD;
-    }
-
-    *mbuf++ = 'l';
-    pbuf += sprintf(pbuf, "%u ", mode->limit);
-  }
-
-  if (mode->key[0] && strcmp(oldmode->key, mode->key))
-  {
-    if (what != MODE_ADD)
-    {
-      *mbuf++ = '+';
-      what = MODE_ADD;
-    }
-
-    *mbuf++ = 'k';
-    pbuf += sprintf(pbuf, "%s ", mode->key);
-  }
-
-  *mbuf = '\0';
 }
 
 static struct Message join_msgtab =

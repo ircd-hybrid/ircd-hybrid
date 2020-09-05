@@ -583,14 +583,14 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (has_member_flags(member, mode->flag))
+    if (member_has_flags(member, mode->flag) == true)
       return;  /* No redundant mode changes */
 
     AddMemberFlag(member, mode->flag);
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (has_member_flags(member, mode->flag) == 0)
+    if (member_has_flags(member, mode->flag) == false)
       return;  /* No redundant mode changes */
 
     DelMemberFlag(member, mode->flag);
@@ -736,10 +736,10 @@ get_channel_access(const struct Client *client,
   /* Just to be sure.. */
   assert(client == member->client);
 
-  if (has_member_flags(member, CHFL_CHANOP))
+  if (member_has_flags(member, CHFL_CHANOP) == true)
     return CHACCESS_CHANOP;
 
-  if (has_member_flags(member, CHFL_HALFOP))
+  if (member_has_flags(member, CHFL_HALFOP) == true)
     return CHACCESS_HALFOP;
 
   return CHACCESS_PEON;

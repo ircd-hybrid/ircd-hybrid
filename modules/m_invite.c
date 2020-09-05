@@ -95,7 +95,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (!has_member_flags(member, CHFL_CHANOP | CHFL_HALFOP))
+  if (member_has_flags(member, CHFL_CHANOP | CHFL_HALFOP) == false)
   {
     sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;

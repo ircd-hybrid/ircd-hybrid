@@ -42,9 +42,152 @@
 #include "misc.h"
 
 
-static void set_final_mode(const struct Mode *, const struct Mode *, char *, char *);
-static void remove_ban_list(struct Channel *, const struct Client *, dlink_list *, char);
+/* set_final_mode
+ *
+ * inputs	- channel mode
+ *		- old channel mode
+ * output	- NONE
+ * side effects	- walk through all the channel modes turning off modes
+ *		  that were on in oldmode but aren't on in mode.
+ *		  Then walk through turning on modes that are on in mode
+ *		  but were not set in oldmode.
+ */
+static void
+set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
+{
+  int what = MODE_QUERY;
 
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
+  {
+    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
+    {
+      if (what != MODE_ADD)
+      {
+        *mbuf++ = '+';
+        what = MODE_ADD;
+      }
+
+      *mbuf++ = tab->letter;
+    }
+  }
+
+  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
+  {
+    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
+    {
+      if (what != MODE_DEL)
+      {
+        *mbuf++ = '-';
+        what = MODE_DEL;
+      }
+
+      *mbuf++ = tab->letter;
+    }
+  }
+
+  if (oldmode->limit && mode->limit == 0)
+  {
+    if (what != MODE_DEL)
+    {
+      *mbuf++ = '-';
+      what = MODE_DEL;
+    }
+
+    *mbuf++ = 'l';
+  }
+
+  if (oldmode->key[0] && mode->key[0] == '\0')
+  {
+    if (what != MODE_DEL)
+    {
+      *mbuf++ = '-';
+      what = MODE_DEL;
+    }
+
+    *mbuf++ = 'k';
+    pbuf += sprintf(pbuf, "%s ", oldmode->key);
+  }
+
+  if (mode->limit && oldmode->limit != mode->limit)
+  {
+    if (what != MODE_ADD)
+    {
+      *mbuf++ = '+';
+      what = MODE_ADD;
+    }
+
+    *mbuf++ = 'l';
+    pbuf += sprintf(pbuf, "%u ", mode->limit);
+  }
+
+  if (mode->key[0] && strcmp(oldmode->key, mode->key))
+  {
+    if (what != MODE_ADD)
+    {
+      *mbuf++ = '+';
+      what = MODE_ADD;
+    }
+
+    *mbuf++ = 'k';
+    pbuf += sprintf(pbuf, "%s ", mode->key);
+  }
+
+  *mbuf = '\0';
+}
+
+/* remove_ban_list()
+ *
+ * inputs	- channel, source, list to remove, char of mode
+ * outputs	- none
+ * side effects	- given ban list is removed, modes are sent to local clients
+ */
+static void
+remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list *list, char c)
+{
+  char modebuf[IRCD_BUFSIZE];
+  char parabuf[IRCD_BUFSIZE];
+  char *mbuf;
+  char *pbuf;
+  int count = 0;
+  int cur_len, mlen;
+
+  if (dlink_list_length(list) == 0)
+    return;
+
+  cur_len = mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s -",
+                            client->name, channel->name);
+  mbuf = modebuf + mlen;
+  pbuf = parabuf;
+
+  while (list->head)
+  {
+    struct Ban *ban = list->head->data;
+    int plen = ban->banstr_len + 2;  /* +2 = b and space */
+
+    if (count >= MAXMODEPARAMS ||
+        (cur_len + 1 /* space between */ + (plen - 1)) > IRCD_BUFSIZE - 2)
+    {
+      /* NUL-terminate and remove trailing space */
+      *mbuf = *(pbuf - 1) = '\0';
+      sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
+
+      cur_len = mlen;
+      mbuf = modebuf + mlen;
+      pbuf = parabuf;
+      count = 0;
+    }
+
+    *mbuf++ = c;
+    cur_len += plen;
+    pbuf += sprintf(pbuf, "%s ", ban->banstr);
+    ++count;
+
+    remove_ban(ban, list);
+  }
+
+  *mbuf = *(pbuf - 1) = '\0';
+  sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
+}
 
 /* ms_sjoin()
  *
@@ -500,153 +643,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     return;
 
   sendto_server(source_p, 0, 0, "%s", uid_buf);
-}
-
-/* set_final_mode
- *
- * inputs	- channel mode
- *		- old channel mode
- * output	- NONE
- * side effects	- walk through all the channel modes turning off modes
- *		  that were on in oldmode but aren't on in mode.
- *		  Then walk through turning on modes that are on in mode
- *		  but were not set in oldmode.
- */
-static void
-set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
-{
-  int what = MODE_QUERY;
-
-  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-  {
-    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
-    {
-      if (what != MODE_ADD)
-      {
-        *mbuf++ = '+';
-        what = MODE_ADD;
-      }
-
-      *mbuf++ = tab->letter;
-    }
-  }
-
-  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-  {
-    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
-    {
-      if (what != MODE_DEL)
-      {
-        *mbuf++ = '-';
-        what = MODE_DEL;
-      }
-
-      *mbuf++ = tab->letter;
-    }
-  }
-
-  if (oldmode->limit && mode->limit == 0)
-  {
-    if (what != MODE_DEL)
-    {
-      *mbuf++ = '-';
-      what = MODE_DEL;
-    }
-
-    *mbuf++ = 'l';
-  }
-
-  if (oldmode->key[0] && mode->key[0] == '\0')
-  {
-    if (what != MODE_DEL)
-    {
-      *mbuf++ = '-';
-      what = MODE_DEL;
-    }
-
-    *mbuf++ = 'k';
-    pbuf += sprintf(pbuf, "%s ", oldmode->key);
-  }
-
-  if (mode->limit && oldmode->limit != mode->limit)
-  {
-    if (what != MODE_ADD)
-    {
-      *mbuf++ = '+';
-      what = MODE_ADD;
-    }
-
-    *mbuf++ = 'l';
-    pbuf += sprintf(pbuf, "%u ", mode->limit);
-  }
-
-  if (mode->key[0] && strcmp(oldmode->key, mode->key))
-  {
-    if (what != MODE_ADD)
-    {
-      *mbuf++ = '+';
-      what = MODE_ADD;
-    }
-
-    *mbuf++ = 'k';
-    pbuf += sprintf(pbuf, "%s ", mode->key);
-  }
-
-  *mbuf = '\0';
-}
-
-/* remove_ban_list()
- *
- * inputs	- channel, source, list to remove, char of mode
- * outputs	- none
- * side effects	- given ban list is removed, modes are sent to local clients
- */
-static void
-remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list *list, char c)
-{
-  char modebuf[IRCD_BUFSIZE];
-  char parabuf[IRCD_BUFSIZE];
-  char *mbuf;
-  char *pbuf;
-  int count = 0;
-  int cur_len, mlen;
-
-  if (dlink_list_length(list) == 0)
-    return;
-
-  cur_len = mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s -",
-                            client->name, channel->name);
-  mbuf = modebuf + mlen;
-  pbuf = parabuf;
-
-  while (list->head)
-  {
-    struct Ban *ban = list->head->data;
-    int plen = ban->banstr_len + 2;  /* +2 = b and space */
-
-    if (count >= MAXMODEPARAMS ||
-        (cur_len + 1 /* space between */ + (plen - 1)) > IRCD_BUFSIZE - 2)
-    {
-      /* NUL-terminate and remove trailing space */
-      *mbuf = *(pbuf - 1) = '\0';
-      sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
-
-      cur_len = mlen;
-      mbuf = modebuf + mlen;
-      pbuf = parabuf;
-      count = 0;
-    }
-
-    *mbuf++ = c;
-    cur_len += plen;
-    pbuf += sprintf(pbuf, "%s ", ban->banstr);
-    ++count;
-
-    remove_ban(ban, list);
-  }
-
-  *mbuf = *(pbuf - 1) = '\0';
-  sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
 }
 
 static struct Message sjoin_msgtab =

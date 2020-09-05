@@ -1,5 +1,6 @@
 -- Noteworthy changes in version 8.2.33 (2020-??-??)
 o) Added 'client' option to listener::flags
+o) IRC operators may now use CIDR notation in "WHO"
 
 
 -- Noteworthy changes in version 8.2.32 (2020-08-16)

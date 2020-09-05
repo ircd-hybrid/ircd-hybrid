@@ -38,6 +38,7 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
+#include "hostmask.h"
 
 
 enum { WHO_MAX_REPLIES = 500 };
@@ -108,6 +109,17 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask)
 
   if (HasUMode(source_p, UMODE_OPER))
   {
+    int bits = 0;
+    struct irc_ssaddr addr;
+
+    switch (parse_netmask(mask, &addr, &bits))
+    {
+      case HM_IPV6:
+      case HM_IPV4:
+        if (address_compare(&target_p->ip, &addr, false, false, bits))
+          return true;
+    }
+
     if (match(mask, target_p->sockhost) == 0)
       return true;
     if (match(mask, target_p->realhost) == 0)

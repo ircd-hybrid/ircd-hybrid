@@ -32,7 +32,6 @@
 #include "user.h"
 
 
-
 static void
 svstag_free(struct ServicesTag *svstag, dlink_list *list)
 {

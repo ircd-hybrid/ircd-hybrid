@@ -88,7 +88,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (member_has_flags(member_source, CHFL_HALFOP) == true && member_has_flags(member_source, CHFL_CHANOP) == false)
+  if (member_has_flags(member_source, CHFL_CHANOP) == false)
   {
     if (member_has_flags(member_target, CHFL_CHANOP | CHFL_HALFOP) == true)
     {

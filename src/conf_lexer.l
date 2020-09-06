@@ -165,6 +165,7 @@ default_floodtime           { return DEFAULT_FLOODTIME; }
 default_join_flood_count    { return DEFAULT_JOIN_FLOOD_COUNT; }
 default_join_flood_time     { return DEFAULT_JOIN_FLOOD_TIME; }
 default_max_clients         { return DEFAULT_MAX_CLIENTS; }
+defer                       { return DEFER; }
 deny                        { return DENY; }
 description                 { return DESCRIPTION; }
 die                         { return DIE; }

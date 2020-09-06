@@ -35,7 +35,8 @@ enum
   LISTENER_TLS    = 1 << 0,
   LISTENER_HIDDEN = 1 << 1,
   LISTENER_SERVER = 1 << 2,
-  LISTENER_CLIENT = 1 << 3
+  LISTENER_CLIENT = 1 << 3,
+  LISTENER_DEFER  = 1 << 4
 };
 
 struct Listener
@@ -47,7 +48,7 @@ struct Listener
   int ref_count;             /**< Number of connection references */
   struct irc_ssaddr addr;    /**< Holds an IPv6 or IPv4 address */
   char name[HOSTIPLEN + 1];  /**< Holds an IPv6 or IPv4 address in string representation*/
-  unsigned int flags;        /**< Listener flags (tls, hidden, server, client) */
+  unsigned int flags;        /**< Listener flags (tls, hidden, server, client, defer) */
 };
 
 extern const dlink_list *listener_get_list(void);

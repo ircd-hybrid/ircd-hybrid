@@ -160,6 +160,7 @@ reset_block_state(void)
 %token  DEFAULT_JOIN_FLOOD_COUNT
 %token  DEFAULT_JOIN_FLOOD_TIME
 %token  DEFAULT_MAX_CLIENTS
+%token  DEFER
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
@@ -1475,6 +1476,10 @@ listen_flags_item: T_TLS
 {
   if (conf_parser_ctx.pass == 2)
    block_state.flags.value |= LISTENER_CLIENT;
+} | DEFER
+{
+  if (conf_parser_ctx.pass == 2)
+   block_state.flags.value |= LISTENER_DEFER;
 };
 
 listen_items:   listen_items listen_item | listen_item;

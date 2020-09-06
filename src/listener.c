@@ -233,6 +233,25 @@ inetport(struct Listener *listener)
     return 0;
   }
 
+#ifdef TCP_DEFER_ACCEPT
+  if (listener_has_flag(listener, LISTENER_DEFER))
+  {
+    int timeout = 1;
+
+    setsockopt(fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout));
+  }
+#endif
+#ifdef SO_ACCEPTFILTER
+  if (listener_has_flag(listener, LISTENER_DEFER))
+  {
+    struct accept_filter_arg afa;
+
+    memset(&afa, 0, sizeof(afa));
+    strlcpy(afa.af_name, "dataready", sizeof(afa.af_name));
+    setsockopt(fd, SOL_SOCKET, SO_ACCEPTFILTER, &afa, sizeof(afa));
+  }
+#endif
+
   listener->fd = fd_open(fd, true, "Listener socket");
 
   /* Listen completion events are READ events .. */

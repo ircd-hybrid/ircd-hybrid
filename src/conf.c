@@ -550,7 +550,7 @@ operator_find(const struct Client *client, const char *name)
             break;
           case HM_IPV6:
           case HM_IPV4:
-            if (address_compare(&client->ip, conf->addr, false, false, conf->bits))
+            if (address_compare(&client->ip, conf->addr, false, false, conf->bits) == true)
               return conf;
             break;
           default:

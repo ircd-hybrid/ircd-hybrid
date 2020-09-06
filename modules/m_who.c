@@ -116,7 +116,7 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask)
     {
       case HM_IPV6:
       case HM_IPV4:
-        if (address_compare(&target_p->ip, &addr, false, false, bits))
+        if (address_compare(&target_p->ip, &addr, false, false, bits) == true)
           return true;
     }
 

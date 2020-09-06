@@ -911,6 +911,8 @@ stats_ports(struct Client *source_p, int parc, char *parv[])
       *p++ = 'C';
     if (listener_has_flag(listener, LISTENER_TLS))
       *p++ = 'T';
+    if (listener_has_flag(listener, LISTENER_DEFER))
+      *p++ = 'D';
     *p = '\0';
 
     if (HasUMode(source_p, UMODE_ADMIN) && ConfigServerHide.hide_server_ips == 0)

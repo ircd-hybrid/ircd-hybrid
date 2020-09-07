@@ -160,7 +160,10 @@ class_mark_for_deletion(void)
   dlink_node *node;
 
   DLINK_FOREACH_PREV(node, class_list.tail->prev)
-    ((struct ClassItem *)node->data)->active = false;
+  {
+    struct ClassItem *class = node->data;
+    class->active = false;
+  }
 }
 
 void

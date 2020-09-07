@@ -1,7 +1,8 @@
--- Noteworthy changes in version 8.2.33 (2020-??-??)
+-- Noteworthy changes in version 8.2.33 (2020-09-07)
 o) Added 'client' option to listener::flags
 o) Added 'defer' option to listener::flags
 o) IRC operators may now use CIDR notation in "WHO"
+o) For a full list of all changes in this release, see https://git.io/JUZKO
 
 
 -- Noteworthy changes in version 8.2.32 (2020-08-16)
@@ -11,6 +12,7 @@ o) Extban $t of type 'matching' has been implemented. This extban allows matchin
    based on TLS protocol version and/or cipher suite
 o) Implemented channel mode 'K'. KNOCK cannot be used on channels with that mode set
 o) "STATS ?" is now oper-only
+o) For a full list of all changes in this release, see https://git.io/JUZa1
 
 
 -- Noteworthy changes in version 8.2.31 (2020-05-03)
@@ -20,7 +22,7 @@ o) Removed 'spoof_notice' from auth::flags. With vhosts now this notice doesn't 
 o) Fixed issue where ban masks might become malformed if set by remote clients/servers
 o) Fixed issue with channel mode +c where high ascii characters can be erroneously
    detected as control characters
-o) For a full list of all changes in this release, see https://git.io/JfsmV
+o) For a full list of all changes in this release, see https://git.io/JUZa6
 
 
 -- Noteworthy changes in version 8.2.30 (2020-03-01)

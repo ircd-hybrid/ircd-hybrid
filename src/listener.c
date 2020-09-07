@@ -186,7 +186,7 @@ listener_accept_connection(fde_t *F, void *data)
 #define HYBRID_SOMAXCONN SOMAXCONN
 #endif
 
-static int
+static bool
 inetport(struct Listener *listener)
 {
   socklen_t opt = 1;
@@ -202,7 +202,7 @@ inetport(struct Listener *listener)
   {
     report_error(L_ALL, "opening listener socket %s:%s",
                  listener_get_name(listener), errno);
-    return 0;
+    return false;
   }
 
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
@@ -210,7 +210,7 @@ inetport(struct Listener *listener)
     report_error(L_ALL, "setting SO_REUSEADDR for listener %s:%s",
                  listener_get_name(listener), errno);
     close(fd);
-    return 0;
+    return false;
   }
 
   /*
@@ -222,7 +222,7 @@ inetport(struct Listener *listener)
     report_error(L_ALL, "binding listener socket %s:%s",
                  listener_get_name(listener), errno);
     close(fd);
-    return 0;
+    return false;
   }
 
   if (listen(fd, HYBRID_SOMAXCONN))
@@ -230,7 +230,7 @@ inetport(struct Listener *listener)
     report_error(L_ALL, "listen failed for %s:%s",
                  listener_get_name(listener), errno);
     close(fd);
-    return 0;
+    return false;
   }
 
 #ifdef TCP_DEFER_ACCEPT
@@ -257,7 +257,7 @@ inetport(struct Listener *listener)
   /* Listen completion events are READ events .. */
 
   listener_accept_connection(listener->fd, listener);
-  return 1;
+  return true;
 }
 
 static struct Listener *
@@ -302,7 +302,7 @@ listener_close(struct Listener *listener)
     listener->fd = NULL;
   }
 
-  listener->active = 0;
+  listener->active = false;
 
   if (listener->ref_count)
     return;
@@ -328,7 +328,7 @@ listener_release(struct Listener *listener)
 {
   assert(listener->ref_count > 0);
 
-  if (--listener->ref_count == 0 && !listener->active)
+  if (--listener->ref_count == 0 && listener->active == false)
     listener_close(listener);
 }
 
@@ -423,8 +423,8 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
     listener->flags = flags;
   }
 
-  if (inetport(listener))
-    listener->active = 1;
+  if (inetport(listener) == true)
+    listener->active = true;
   else
     listener_close(listener);
 }

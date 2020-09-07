@@ -919,11 +919,11 @@ stats_ports(struct Client *source_p, int parc, char *parv[])
       sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
                          listener->name,
                          listener->ref_count, buf,
-                         listener->active ? "active" : "disabled");
+                         listener->active == true ? "active" : "disabled");
     else
       sendto_one_numeric(source_p, &me, RPL_STATSPLINE, 'P', listener->port,
                          me.name, listener->ref_count, buf,
-                         listener->active ? "active" : "disabled");
+                         listener->active == true ? "active" : "disabled");
   }
 }
 

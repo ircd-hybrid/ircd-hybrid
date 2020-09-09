@@ -387,6 +387,13 @@ m_svinfo_la_OBJECTS = $(am_m_svinfo_la_OBJECTS)
 m_svinfo_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_svinfo_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svsaccount_la_LIBADD =
+am_m_svsaccount_la_OBJECTS = m_svsaccount.lo
+m_svsaccount_la_OBJECTS = $(am_m_svsaccount_la_OBJECTS)
+m_svsaccount_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(m_svsaccount_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
 m_svshost_la_LIBADD =
 am_m_svshost_la_OBJECTS = m_svshost.lo
 m_svshost_la_OBJECTS = $(am_m_svshost_la_OBJECTS)
@@ -572,19 +579,19 @@ am__depfiles_remade = ./$(DEPDIR)/m_accept.Plo ./$(DEPDIR)/m_admin.Plo \
 	./$(DEPDIR)/m_rehash.Plo ./$(DEPDIR)/m_restart.Plo \
 	./$(DEPDIR)/m_resv.Plo ./$(DEPDIR)/m_set.Plo \
 	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
-	./$(DEPDIR)/m_svshost.Plo ./$(DEPDIR)/m_svsjoin.Plo \
-	./$(DEPDIR)/m_svskill.Plo ./$(DEPDIR)/m_svsmode.Plo \
-	./$(DEPDIR)/m_svsnick.Plo ./$(DEPDIR)/m_svspart.Plo \
-	./$(DEPDIR)/m_svstag.Plo ./$(DEPDIR)/m_tburst.Plo \
-	./$(DEPDIR)/m_time.Plo ./$(DEPDIR)/m_topic.Plo \
-	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
-	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
-	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
-	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
-	./$(DEPDIR)/m_wallops.Plo ./$(DEPDIR)/m_watch.Plo \
-	./$(DEPDIR)/m_webirc.Plo ./$(DEPDIR)/m_who.Plo \
-	./$(DEPDIR)/m_whois.Plo ./$(DEPDIR)/m_whowas.Plo \
-	./$(DEPDIR)/m_xline.Plo
+	./$(DEPDIR)/m_svsaccount.Plo ./$(DEPDIR)/m_svshost.Plo \
+	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
+	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
+	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
+	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
+	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
+	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
+	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
+	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
+	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_wallops.Plo \
+	./$(DEPDIR)/m_watch.Plo ./$(DEPDIR)/m_webirc.Plo \
+	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
+	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -622,19 +629,20 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_post_la_SOURCES) $(m_rehash_la_SOURCES) \
 	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
 	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
-	$(m_svinfo_la_SOURCES) $(m_svshost_la_SOURCES) \
-	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
-	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
-	$(m_svspart_la_SOURCES) $(m_svstag_la_SOURCES) \
-	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
-	$(m_topic_la_SOURCES) $(m_trace_la_SOURCES) \
-	$(m_undline_la_SOURCES) $(m_unkline_la_SOURCES) \
-	$(m_unresv_la_SOURCES) $(m_unxline_la_SOURCES) \
-	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
-	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
-	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
-	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
-	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
+	$(m_svinfo_la_SOURCES) $(m_svsaccount_la_SOURCES) \
+	$(m_svshost_la_SOURCES) $(m_svsjoin_la_SOURCES) \
+	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
+	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
+	$(m_svstag_la_SOURCES) $(m_tburst_la_SOURCES) \
+	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
+	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
+	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
+	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
+	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
+	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
+	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
+	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
+	$(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
 	$(m_certfp_la_SOURCES) $(m_close_la_SOURCES) \
@@ -653,19 +661,20 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_post_la_SOURCES) $(m_rehash_la_SOURCES) \
 	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
 	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
-	$(m_svinfo_la_SOURCES) $(m_svshost_la_SOURCES) \
-	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
-	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
-	$(m_svspart_la_SOURCES) $(m_svstag_la_SOURCES) \
-	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
-	$(m_topic_la_SOURCES) $(m_trace_la_SOURCES) \
-	$(m_undline_la_SOURCES) $(m_unkline_la_SOURCES) \
-	$(m_unresv_la_SOURCES) $(m_unxline_la_SOURCES) \
-	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
-	$(m_version_la_SOURCES) $(m_wallops_la_SOURCES) \
-	$(m_watch_la_SOURCES) $(m_webirc_la_SOURCES) \
-	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
-	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
+	$(m_svinfo_la_SOURCES) $(m_svsaccount_la_SOURCES) \
+	$(m_svshost_la_SOURCES) $(m_svsjoin_la_SOURCES) \
+	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
+	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
+	$(m_svstag_la_SOURCES) $(m_tburst_la_SOURCES) \
+	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
+	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
+	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
+	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
+	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
+	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
+	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
+	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
+	$(m_xline_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -882,70 +891,71 @@ MODULE_FLAGS = -module -avoid-version
 SUBDIRS = core extra
 AM_CPPFLAGS = -I$(top_srcdir)/include
 modulesdir = $(pkglibdir)/modules/autoload
-modules_LTLIBRARIES = m_accept.la    \
-                      m_admin.la     \
-                      m_away.la      \
-                      m_capab.la     \
-                      m_cap.la       \
-                      m_certfp.la    \
-                      m_close.la     \
-                      m_connect.la   \
-                      m_dline.la     \
-                      m_encap.la     \
-                      m_eob.la       \
-                      m_etrace.la    \
-                      m_globops.la   \
-                      m_hash.la      \
-                      m_help.la      \
-                      m_info.la      \
-                      m_invite.la    \
-                      m_ison.la      \
-                      m_kline.la     \
-                      m_knock.la     \
-                      m_links.la     \
-                      m_list.la      \
-                      m_locops.la    \
-                      m_lusers.la    \
-                      m_map.la       \
-                      m_metadata.la  \
-                      m_module.la    \
-                      m_motd.la      \
-                      m_names.la     \
-                      m_oper.la      \
-                      m_pass.la      \
-                      m_ping.la      \
-                      m_pong.la      \
-                      m_post.la      \
-                      m_rehash.la    \
-                      m_restart.la   \
-                      m_resv.la      \
-                      m_set.la       \
-                      m_stats.la     \
-                      m_svinfo.la    \
-                      m_svshost.la   \
-                      m_svsjoin.la   \
-                      m_svskill.la   \
-                      m_svsmode.la   \
-                      m_svsnick.la   \
-                      m_svspart.la   \
-                      m_svstag.la    \
-                      m_tburst.la    \
-                      m_time.la      \
-                      m_topic.la     \
-                      m_trace.la     \
-                      m_undline.la   \
-                      m_unkline.la   \
-                      m_unresv.la    \
-                      m_unxline.la   \
-                      m_user.la      \
-                      m_userhost.la  \
-                      m_version.la   \
-                      m_wallops.la   \
-                      m_watch.la     \
-                      m_webirc.la    \
-                      m_who.la       \
-                      m_whois.la     \
-                      m_whowas.la    \
+modules_LTLIBRARIES = m_accept.la     \
+                      m_admin.la      \
+                      m_away.la       \
+                      m_capab.la      \
+                      m_cap.la        \
+                      m_certfp.la     \
+                      m_close.la      \
+                      m_connect.la    \
+                      m_dline.la      \
+                      m_encap.la      \
+                      m_eob.la        \
+                      m_etrace.la     \
+                      m_globops.la    \
+                      m_hash.la       \
+                      m_help.la       \
+                      m_info.la       \
+                      m_invite.la     \
+                      m_ison.la       \
+                      m_kline.la      \
+                      m_knock.la      \
+                      m_links.la      \
+                      m_list.la       \
+                      m_locops.la     \
+                      m_lusers.la     \
+                      m_map.la        \
+                      m_metadata.la   \
+                      m_module.la     \
+                      m_motd.la       \
+                      m_names.la      \
+                      m_oper.la       \
+                      m_pass.la       \
+                      m_ping.la       \
+                      m_pong.la       \
+                      m_post.la       \
+                      m_rehash.la     \
+                      m_restart.la    \
+                      m_resv.la       \
+                      m_set.la        \
+                      m_stats.la      \
+                      m_svinfo.la     \
+                      m_svsaccount.la \
+                      m_svshost.la    \
+                      m_svsjoin.la    \
+                      m_svskill.la    \
+                      m_svsmode.la    \
+                      m_svsnick.la    \
+                      m_svspart.la    \
+                      m_svstag.la     \
+                      m_tburst.la     \
+                      m_time.la       \
+                      m_topic.la      \
+                      m_trace.la      \
+                      m_undline.la    \
+                      m_unkline.la    \
+                      m_unresv.la     \
+                      m_unxline.la    \
+                      m_user.la       \
+                      m_userhost.la   \
+                      m_version.la    \
+                      m_wallops.la    \
+                      m_watch.la      \
+                      m_webirc.la     \
+                      m_who.la        \
+                      m_whois.la      \
+                      m_whowas.la     \
                       m_xline.la
 
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
@@ -988,6 +998,7 @@ m_resv_la_LDFLAGS = $(MODULE_FLAGS)
 m_set_la_LDFLAGS = $(MODULE_FLAGS)
 m_stats_la_LDFLAGS = $(MODULE_FLAGS)
 m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
+m_svsaccount_la_LDFLAGS = $(MODULE_FLAGS)
 m_svshost_la_LDFLAGS = $(MODULE_FLAGS)
 m_svsjoin_la_LDFLAGS = $(MODULE_FLAGS)
 m_svskill_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1052,6 +1063,7 @@ m_restart_la_SOURCES = m_restart.c
 m_resv_la_SOURCES = m_resv.c
 m_set_la_SOURCES = m_set.c
 m_stats_la_SOURCES = m_stats.c
+m_svsaccount_la_SOURCES = m_svsaccount.c
 m_svshost_la_SOURCES = m_svshost.c
 m_svinfo_la_SOURCES = m_svinfo.c
 m_svsjoin_la_SOURCES = m_svsjoin.c
@@ -1267,6 +1279,9 @@ m_stats.la: $(m_stats_la_OBJECTS) $(m_stats_la_DEPENDENCIES) $(EXTRA_m_stats_la_
 m_svinfo.la: $(m_svinfo_la_OBJECTS) $(m_svinfo_la_DEPENDENCIES) $(EXTRA_m_svinfo_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_svinfo_la_LINK) -rpath $(modulesdir) $(m_svinfo_la_OBJECTS) $(m_svinfo_la_LIBADD) $(LIBS)
 
+m_svsaccount.la: $(m_svsaccount_la_OBJECTS) $(m_svsaccount_la_DEPENDENCIES) $(EXTRA_m_svsaccount_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_svsaccount_la_LINK) -rpath $(modulesdir) $(m_svsaccount_la_OBJECTS) $(m_svsaccount_la_LIBADD) $(LIBS)
+
 m_svshost.la: $(m_svshost_la_OBJECTS) $(m_svshost_la_DEPENDENCIES) $(EXTRA_m_svshost_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_svshost_la_LINK) -rpath $(modulesdir) $(m_svshost_la_OBJECTS) $(m_svshost_la_LIBADD) $(LIBS)
 
@@ -1388,6 +1403,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_set.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_stats.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svinfo.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsaccount.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svshost.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsjoin.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svskill.Plo@am__quote@ # am--include-marker
@@ -1691,6 +1707,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/m_set.Plo
 	-rm -f ./$(DEPDIR)/m_stats.Plo
 	-rm -f ./$(DEPDIR)/m_svinfo.Plo
+	-rm -f ./$(DEPDIR)/m_svsaccount.Plo
 	-rm -f ./$(DEPDIR)/m_svshost.Plo
 	-rm -f ./$(DEPDIR)/m_svsjoin.Plo
 	-rm -f ./$(DEPDIR)/m_svskill.Plo
@@ -1801,6 +1818,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/m_set.Plo
 	-rm -f ./$(DEPDIR)/m_stats.Plo
 	-rm -f ./$(DEPDIR)/m_svinfo.Plo
+	-rm -f ./$(DEPDIR)/m_svsaccount.Plo
 	-rm -f ./$(DEPDIR)/m_svshost.Plo
 	-rm -f ./$(DEPDIR)/m_svsjoin.Plo
 	-rm -f ./$(DEPDIR)/m_svskill.Plo

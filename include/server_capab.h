@@ -38,10 +38,9 @@ enum
   CAPAB_CLUSTER = 1 <<  5,  /**< Supports server clustering */
   CAPAB_ENCAP   = 1 <<  6,  /**< Supports ENCAP message */
   CAPAB_TBURST  = 1 <<  7,  /**< Supports TBURST */
-  CAPAB_SVS     = 1 <<  8,  /**< Supports services */
-  CAPAB_DLN     = 1 <<  9,  /**< Can do DLINE message */
-  CAPAB_UNDLN   = 1 << 10,  /**< Can do UNDLINE message */
-  CAPAB_RHOST   = 1 << 11   /**< Can do extended realhost UID messages */
+  CAPAB_DLN     = 1 <<  8,  /**< Can do DLINE message */
+  CAPAB_UNDLN   = 1 <<  9,  /**< Can do UNDLINE message */
+  CAPAB_RHOST   = 1 << 10   /**< Can do extended realhost UID messages */
 };
 
 /*

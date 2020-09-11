@@ -44,7 +44,6 @@ static dlink_list capab_list;  /* List of capabilities supported by this server 
 void
 capab_init(void)
 {
-  capab_add("QS", CAPAB_QS);
   capab_add("EOB", CAPAB_EOB);
   capab_add("CLUSTER", CAPAB_CLUSTER);
   capab_add("RHOST", CAPAB_RHOST);

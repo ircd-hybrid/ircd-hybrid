@@ -30,17 +30,16 @@
 /** Server capability flags */
 enum
 {
-  CAPAB_QS      = 1 <<  0,  /**< Can handle quit storm removal */
-  CAPAB_EOB     = 1 <<  1,  /**< Can do EOB message */
-  CAPAB_KLN     = 1 <<  2,  /**< Can do KLINE message */
-  CAPAB_KNOCK   = 1 <<  3,  /**< Supports KNOCK */
-  CAPAB_UNKLN   = 1 <<  4,  /**< Can do UNKLINE message */
-  CAPAB_CLUSTER = 1 <<  5,  /**< Supports server clustering */
-  CAPAB_ENCAP   = 1 <<  6,  /**< Supports ENCAP message */
-  CAPAB_TBURST  = 1 <<  7,  /**< Supports TBURST */
-  CAPAB_DLN     = 1 <<  8,  /**< Can do DLINE message */
-  CAPAB_UNDLN   = 1 <<  9,  /**< Can do UNDLINE message */
-  CAPAB_RHOST   = 1 << 10   /**< Can do extended realhost UID messages */
+  CAPAB_EOB     = 1 <<  0,  /**< Can do EOB message */
+  CAPAB_KLN     = 1 <<  1,  /**< Can do KLINE message */
+  CAPAB_KNOCK   = 1 <<  2,  /**< Supports KNOCK */
+  CAPAB_UNKLN   = 1 <<  3,  /**< Can do UNKLINE message */
+  CAPAB_CLUSTER = 1 <<  4,  /**< Supports server clustering */
+  CAPAB_ENCAP   = 1 <<  5,  /**< Supports ENCAP message */
+  CAPAB_TBURST  = 1 <<  6,  /**< Supports TBURST */
+  CAPAB_DLN     = 1 <<  7,  /**< Can do DLINE message */
+  CAPAB_UNDLN   = 1 <<  8,  /**< Can do UNDLINE message */
+  CAPAB_RHOST   = 1 <<  9  /**< Can do extended realhost UID messages */
 };
 
 /*

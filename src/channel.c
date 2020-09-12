@@ -870,6 +870,8 @@ check_spambot_warning(struct Client *client, const char *name)
 
     if (client->connection->oper_warn_count_down == 0)
     {
+      client->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
+
       /* It's already known as a possible spambot */
       if (name)
         sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
@@ -881,7 +883,6 @@ check_spambot_warning(struct Client *client, const char *name)
                              "User %s (%s@%s) is a possible spambot",
                              client->name, client->username,
                              client->host);
-      client->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
     }
   }
   else

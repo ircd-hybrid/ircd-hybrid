@@ -131,23 +131,13 @@ server_send_client(struct Client *client_p, struct Client *target_p)
     buf[1] = '\0';
   }
 
-    /* TBR: compatibility mode */
-  if (IsCapable(client_p, CAPAB_RHOST))
-    sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
-               target_p->servptr->id,
-               target_p->name, target_p->hopcount + 1,
-               target_p->tsinfo,
-               buf, target_p->username, target_p->host, target_p->realhost,
-               target_p->sockhost, target_p->id,
-               target_p->account, target_p->info);
-  else
-    sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s :%s",
-               target_p->servptr->id,
-               target_p->name, target_p->hopcount + 1,
-               target_p->tsinfo,
-               buf, target_p->username, target_p->host,
-               target_p->sockhost, target_p->id,
-               target_p->account, target_p->info);
+  sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
+             target_p->servptr->id,
+             target_p->name, target_p->hopcount + 1,
+             target_p->tsinfo,
+             buf, target_p->username, target_p->host, target_p->realhost,
+             target_p->sockhost, target_p->id,
+             target_p->account, target_p->info);
 
   if (!EmptyString(target_p->tls_certfp))
     sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->tls_certfp);

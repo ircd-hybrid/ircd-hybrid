@@ -371,18 +371,11 @@ conf_check_client(struct Client *client)
       break;
 
     case NOT_AUTHORIZED:
-      /* jdc - lists server name & port connections are on */
-      /*       a purely cosmetical change */
       sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
-                           "Unauthorized client connection from %s on [%s/%u].",
-                           client_get_name(client, SHOW_IP),
-                           client->connection->listener->name,
-                           client->connection->listener->port);
-      ilog(LOG_TYPE_IRCD, "Unauthorized client connection from %s on [%s/%u].",
-           client_get_name(client, SHOW_IP),
-           client->connection->listener->name,
-           client->connection->listener->port);
-
+                           "Unauthorized client connection from %s.",
+                           client_get_name(client, SHOW_IP));
+      ilog(LOG_TYPE_IRCD, "Unauthorized client connection from %s.",
+           client_get_name(client, SHOW_IP));
       ++ServerStats.is_ref;
       exit_client(client, "You are not authorized to use this server");
       break;

@@ -363,7 +363,7 @@ register_local_user(struct Client *client)
   if ((dlink_list_length(&local_client_list) >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
       (dlink_list_length(&local_client_list) >= GlobalSetOptions.maxclients && !HasFlag(client, FLAGS_NOLIMIT)))
   {
-    sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Too many clients, rejecting %s[%s].",
                          client->name, client->host);
     ++ServerStats.is_ref;

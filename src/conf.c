@@ -349,7 +349,7 @@ conf_check_client(struct Client *client)
   switch (i)
   {
     case TOO_MANY:
-      sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                            "Too many on IP for %s (%s).",
                            client_get_name(client, SHOW_IP),
                            client->sockhost);
@@ -360,7 +360,7 @@ conf_check_client(struct Client *client)
       break;
 
     case I_LINE_FULL:
-      sendto_realops_flags(UMODE_FULL, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                            "auth {} block is full for %s (%s).",
                            client_get_name(client, SHOW_IP),
                            client->sockhost);
@@ -371,7 +371,7 @@ conf_check_client(struct Client *client)
       break;
 
     case NOT_AUTHORIZED:
-      sendto_realops_flags(UMODE_UNAUTH, L_ALL, SEND_NOTICE,
+      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                            "Unauthorized client connection from %s.",
                            client_get_name(client, SHOW_IP));
       ilog(LOG_TYPE_IRCD, "Unauthorized client connection from %s.",

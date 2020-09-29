@@ -92,7 +92,7 @@ add_user_to_channel(struct Channel *channel, struct Client *client,
       if (!IsSetJoinFloodNoticed(channel))
       {
         SetJoinFloodNoticed(channel);
-        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
+        sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
                              "Possible Join Flooder %s on %s target: %s",
                              client_get_name(client, HIDE_IP),
                              client->servptr->name, channel->name);
@@ -874,12 +874,12 @@ check_spambot_warning(struct Client *client, const char *name)
 
       /* It's already known as a possible spambot */
       if (name)
-        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
+        sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
                              "User %s (%s@%s) trying to join %s is a possible spambot",
                              client->name, client->username,
                              client->host, name);
       else
-        sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE,
+        sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
                              "User %s (%s@%s) is a possible spambot",
                              client->name, client->username,
                              client->host);

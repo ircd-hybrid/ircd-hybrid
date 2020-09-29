@@ -142,7 +142,6 @@ autoconn                    { return AUTOCONN; }
 away_count                  { return AWAY_COUNT; }
 away_time                   { return AWAY_TIME; }
 bind                        { return T_BIND; }
-bots                        { return T_BOTS; }
 caller_id_wait              { return CALLER_ID_WAIT; }
 callerid                    { return T_CALLERID; }
 can_flood                   { return CAN_FLOOD; }
@@ -190,7 +189,7 @@ flags                       { return IRCD_FLAGS; }
 flatten_links               { return FLATTEN_LINKS; }
 flatten_links_delay         { return FLATTEN_LINKS_DELAY; }
 flatten_links_file          { return FLATTEN_LINKS_FILE; }
-full                        { return T_FULL; }
+flood                       { return T_FLOOD; }
 gecos                       { return GECOS; }
 general                     { return GENERAL; }
 kline_min_cidr              { return KLINE_MIN_CIDR; }
@@ -332,7 +331,6 @@ ts_max_delta                { return TS_MAX_DELTA; }
 ts_warn_delta               { return TS_WARN_DELTA; }
 type                        { return TYPE; }
 umodes                      { return T_UMODES; }
-unauth                      { return T_UNAUTH; }
 undline                     { return T_UNDLINE; }
 unkline                     { return UNKLINE; }
 unlimited                   { return T_UNLIMITED; }

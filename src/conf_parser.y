@@ -285,7 +285,6 @@ reset_block_state(void)
 %token  STATS_U_OPER_ONLY
 %token  T_ALL
 %token  T_BIND
-%token  T_BOTS
 %token  T_CALLERID
 %token  T_CCONN
 %token  T_COMMAND
@@ -296,7 +295,7 @@ reset_block_state(void)
 %token  T_EXTERNAL
 %token  T_FARCONNECT
 %token  T_FILE
-%token  T_FULL
+%token  T_FLOOD
 %token  T_GLOBOPS
 %token  T_INVISIBLE
 %token  T_IPV4
@@ -323,7 +322,6 @@ reset_block_state(void)
 %token  T_TARGET
 %token  T_TLS
 %token  T_UMODES
-%token  T_UNAUTH
 %token  T_UNDLINE
 %token  T_UNLIMITED
 %token  T_UNRESV
@@ -1039,11 +1037,7 @@ oper_umodes: T_UMODES
 } '=' oper_umodes_items ';' ;
 
 oper_umodes_items: oper_umodes_items ',' oper_umodes_item | oper_umodes_item;
-oper_umodes_item:  T_BOTS
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_BOTS;
-} | T_CCONN
+oper_umodes_item:  T_CCONN
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_CCONN;
@@ -1055,10 +1049,10 @@ oper_umodes_item:  T_BOTS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_DEBUG;
-} | T_FULL
+} | T_FLOOD
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_FULL;
+    block_state.modes.value |= UMODE_FLOOD;
 } | HIDDEN
 {
   if (conf_parser_ctx.pass == 2)
@@ -1083,10 +1077,6 @@ oper_umodes_item:  T_BOTS
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_REJ;
-} | T_UNAUTH
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_UNAUTH;
 } | T_SPY
 {
   if (conf_parser_ctx.pass == 2)
@@ -2592,10 +2582,7 @@ general_oper_umodes: OPER_UMODES
 } '=' umode_oitems ';' ;
 
 umode_oitems:    umode_oitems ',' umode_oitem | umode_oitem;
-umode_oitem:     T_BOTS
-{
-  ConfigGeneral.oper_umodes |= UMODE_BOTS;
-} | T_CCONN
+umode_oitem: T_CCONN
 {
   ConfigGeneral.oper_umodes |= UMODE_CCONN;
 } | T_DEAF
@@ -2604,9 +2591,9 @@ umode_oitem:     T_BOTS
 } | T_DEBUG
 {
   ConfigGeneral.oper_umodes |= UMODE_DEBUG;
-} | T_FULL
+} | T_FLOOD
 {
-  ConfigGeneral.oper_umodes |= UMODE_FULL;
+  ConfigGeneral.oper_umodes |= UMODE_FLOOD;
 } | HIDDEN
 {
   ConfigGeneral.oper_umodes |= UMODE_HIDDEN;
@@ -2625,9 +2612,6 @@ umode_oitem:     T_BOTS
 } | T_REJ
 {
   ConfigGeneral.oper_umodes |= UMODE_REJ;
-} | T_UNAUTH
-{
-  ConfigGeneral.oper_umodes |= UMODE_UNAUTH;
 } | T_SPY
 {
   ConfigGeneral.oper_umodes |= UMODE_SPY;
@@ -2669,10 +2653,7 @@ general_oper_only_umodes: OPER_ONLY_UMODES
 } '=' umode_items ';' ;
 
 umode_items:  umode_items ',' umode_item | umode_item;
-umode_item:   T_BOTS
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_BOTS;
-} | T_CCONN
+umode_item: T_CCONN
 {
   ConfigGeneral.oper_only_umodes |= UMODE_CCONN;
 } | T_DEAF
@@ -2681,9 +2662,9 @@ umode_item:   T_BOTS
 } | T_DEBUG
 {
   ConfigGeneral.oper_only_umodes |= UMODE_DEBUG;
-} | T_FULL
+} | T_FLOOD
 {
-  ConfigGeneral.oper_only_umodes |= UMODE_FULL;
+  ConfigGeneral.oper_only_umodes |= UMODE_FLOOD;
 } | T_SKILL
 {
   ConfigGeneral.oper_only_umodes |= UMODE_SKILL;
@@ -2696,9 +2677,6 @@ umode_item:   T_BOTS
 } | T_REJ
 {
   ConfigGeneral.oper_only_umodes |= UMODE_REJ;
-} | T_UNAUTH
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_UNAUTH;
 } | T_SPY
 {
   ConfigGeneral.oper_only_umodes |= UMODE_SPY;

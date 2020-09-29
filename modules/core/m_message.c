@@ -121,7 +121,7 @@ flood_attack_client(bool notice, struct Client *source_p, struct Client *target_
   {
     if (!HasFlag(target_p, FLAGS_FLOOD_NOTICED))
     {
-      sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE, "Possible Flooder %s on %s target: %s",
+      sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE, "Possible Flooder %s on %s target: %s",
                            client_get_name(source_p, HIDE_IP),
                            source_p->servptr->name, target_p->name);
       AddFlag(target_p, FLAGS_FLOOD_NOTICED);
@@ -172,7 +172,7 @@ flood_attack_channel(bool notice, struct Client *source_p, struct Channel *chann
   {
     if (!IsSetFloodNoticed(channel))
     {
-      sendto_realops_flags(UMODE_BOTS, L_ALL, SEND_NOTICE, "Possible Flooder %s on %s target: %s",
+      sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE, "Possible Flooder %s on %s target: %s",
                            client_get_name(source_p, HIDE_IP),
                            source_p->servptr->name, channel->name);
       SetFloodNoticed(channel);

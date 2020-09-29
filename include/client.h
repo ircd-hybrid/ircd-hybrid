@@ -150,30 +150,28 @@ enum
   UMODE_CCONN        = 1 <<  1,  /**< Can see client connection notices */
   UMODE_REJ          = 1 <<  2,  /**< Bot Rejections */
   UMODE_SKILL        = 1 <<  3,  /**< Server Killed */
-  UMODE_FULL         = 1 <<  4,  /**< Full messages */
+  UMODE_FLOOD        = 1 <<  4,  /**< Flooding/spambot notices */
   UMODE_SPY          = 1 <<  5,  /**< See STATS / LINKS */
   UMODE_DEBUG        = 1 <<  6,  /**< 'debugging' info */
   UMODE_NCHANGE      = 1 <<  7,  /**< Nick change notice */
   UMODE_WALLOP       = 1 <<  8,  /**< Send wallops to them */
   UMODE_INVISIBLE    = 1 <<  9,  /**< Makes user invisible */
-  UMODE_BOTS         = 1 << 10,  /**< Shows bots */
-  UMODE_EXTERNAL     = 1 << 11,  /**< Show servers introduced and splitting */
-  UMODE_CALLERID     = 1 << 12,  /**< Block unless caller id's */
-  UMODE_SOFTCALLERID = 1 << 13,  /**< Block unless on common channel */
-  UMODE_UNAUTH       = 1 << 14,  /**< Show unauth connects here */
-  UMODE_LOCOPS       = 1 << 15,  /**< Can see LOCOPS messages */
-  UMODE_DEAF         = 1 << 16,  /**< Don't receive channel messages */
-  UMODE_REGISTERED   = 1 << 17,  /**< User has identified for that nick. */
-  UMODE_REGONLY      = 1 << 18,  /**< Only registered nicks may PM */
-  UMODE_HIDDEN       = 1 << 19,  /**< IRC operator status is hidden */
-  UMODE_OPER         = 1 << 20,  /**< IRC operator */
-  UMODE_ADMIN        = 1 << 21,  /**< Admin on server */
-  UMODE_FARCONNECT   = 1 << 22,  /**< Can see remote client connects/exits */
-  UMODE_SECURE       = 1 << 23,  /**< User is connected via TLS */
-  UMODE_WEBIRC       = 1 << 24,  /**< User connected via a webirc gateway */
-  UMODE_HIDEIDLE     = 1 << 25,  /**< Hides idle and signon time in WHOIS */
-  UMODE_HIDECHANS    = 1 << 26,  /**< Hides channel list in WHOIS */
-  UMODE_EXPIRATION   = 1 << 27   /**< Receives *LINE expiration notices */
+  UMODE_EXTERNAL     = 1 << 10,  /**< Show servers introduced and splitting */
+  UMODE_CALLERID     = 1 << 11,  /**< Block unless caller id's */
+  UMODE_SOFTCALLERID = 1 << 12,  /**< Block unless on common channel */
+  UMODE_LOCOPS       = 1 << 13,  /**< Can see LOCOPS messages */
+  UMODE_DEAF         = 1 << 14,  /**< Don't receive channel messages */
+  UMODE_REGISTERED   = 1 << 15,  /**< User has identified for that nick. */
+  UMODE_REGONLY      = 1 << 16,  /**< Only registered nicks may PM */
+  UMODE_HIDDEN       = 1 << 17,  /**< IRC operator status is hidden */
+  UMODE_OPER         = 1 << 18,  /**< IRC operator */
+  UMODE_ADMIN        = 1 << 19,  /**< Admin on server */
+  UMODE_FARCONNECT   = 1 << 20,  /**< Can see remote client connects/exits */
+  UMODE_SECURE       = 1 << 21,  /**< User is connected via TLS */
+  UMODE_WEBIRC       = 1 << 22,  /**< User connected via a webirc gateway */
+  UMODE_HIDEIDLE     = 1 << 23,  /**< Hides idle and signon time in WHOIS */
+  UMODE_HIDECHANS    = 1 << 24,  /**< Hides channel list in WHOIS */
+  UMODE_EXPIRATION   = 1 << 25   /**< Receives *LINE expiration notices */
 };
 
 #define HasUMode(x, y) ((x)->umodes &   (y))

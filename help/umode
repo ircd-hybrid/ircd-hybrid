@@ -11,10 +11,9 @@ User modes: (* designates that the umode is oper only)
          W     - User is connected using a webirc gateway.
        * l     - Can see oper locops (local wallops).
        * c     - Can see client connections and exits.
-       * u     - Can see unauthorized client connections.
        * j     - Can see 'rejected' client notices.
        * k     - Can see server kill messages.
-       * f     - Can see 'auth {} block is full' notices.
+       * f     - Can see possible flood/spam warnings.
        * F     - Can see remote client connection/quit notices.
        * y     - Can see stats/links/admin requests to name a few.
        * d     - Can see server debug messages.
@@ -27,7 +26,6 @@ User modes: (* designates that the umode is oper only)
          s     - Can see generic server messages and oper kills.
          S     - Client is connected via TLS (Transport Layer Security).
        * e     - Can see new server introduction and split messages.
-       * b     - Can see possible bot/join flood warnings.
        * a     - Is marked as a server admin in stats o/p.
          D     - "Deaf": don't receive channel messages.
          G     - "Soft Caller ID": block private messages from people not on

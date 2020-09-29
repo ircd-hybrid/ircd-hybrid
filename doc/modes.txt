@@ -3,7 +3,7 @@
 
 Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.24 DFGHRSWabcdefgijklnopqrsuwy bchiklmnoprstuveCILMNORST bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.34 DFGHRSWacdefgijklnopqrswy bchiklmnoprstuveCILMNORST bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -13,12 +13,11 @@ Here is a guide to the preceding modes:
 User Modes:
 
 +a - admin        - Admin status. Can for example see IP addresses in "STATS c"
-+b - bots         - See bot and drone flooding notices
 +c - cconn        - Client connection/quit notices
 +D - deaf         - Don't receive channel messages
 +d - debug        - See debugging notices
 +e - external     - See remote server connection and split notices
-+f - full         - See auth {} block full notices
++f - flood        - See possible flood/spam warnings.
 +F - farconnect   - See remote client connection/quit notices
 +G - softcallerid - Server Side Ignore for users not on your channels
 +g - callerid     - Server Side Ignore (see modeg.txt)
@@ -36,7 +35,6 @@ User Modes:
 +R - regonly      - Only registered clients may message you
 +s - servnotice   - See general server notices
 +S - secure       - Client is connected via TLS
-+u - unauth       - See unauthorized client notices
 +w - wallop       - See server generated WALLOPS
 +W - webirc       - User is connected using a webirc gateway
 +X - expiration   - See *LINE expiration notices

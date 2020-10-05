@@ -34,12 +34,17 @@ static char new_uid[TOTALSIDUID + 1];  /* Allow for \0 */
 bool
 valid_sid(const char *sid)
 {
-  if (strlen(sid) == IRC_MAXSID)
-    if (IsDigit(*sid))
-      if (IsAlNum(*(sid + 1)) && IsAlNum(*(sid + 2)))
-        return true;
+  if (strlen(sid) != IRC_MAXSID)
+    return false;
 
-  return false;
+  if (!IsDigit(*sid))
+    return false;
+
+  for (unsigned int i = 1; i < IRC_MAXSID; ++i)
+    if (!IsUpper(*(sid + i)) && !IsDigit(*(sid + i)))
+      return false;
+
+  return true;
 }
 
 bool
@@ -52,7 +57,7 @@ valid_uid(const char *uid)
     return false;
 
   for (unsigned int i = 1; i < TOTALSIDUID; ++i)
-    if (!IsAlNum(*(uid + i)))
+    if (!IsUpper(*(uid + i)) && !IsDigit(*(uid + i)))
       return false;
 
   return true;

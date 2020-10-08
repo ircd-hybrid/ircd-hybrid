@@ -220,12 +220,12 @@ server_estab(struct Client *client_p)
   {
     const struct MaskItem *const conf = client_p->connection->confs.head->data;
 
-    sendto_one(client_p, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
+    sendto_one(client_p, "PASS %s", conf->spasswd);
 
     sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
 
-    sendto_one(client_p, "SERVER %s 1 :%s%s",
-               me.name, ConfigServerHide.hidden ? "(H) " : "", me.info);
+    sendto_one(client_p, "SERVER %s 1 %s +%s :%s", me.name, me.id,
+               ConfigServerHide.hidden ? "h" : "", me.info);
   }
 
   sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MIN,
@@ -299,9 +299,9 @@ server_estab(struct Client *client_p)
 
   fd_note(client_p->connection->fd, "Server: %s", client_p->name);
 
-  sendto_server(client_p, 0, 0, ":%s SID %s 2 %s :%s%s",
+  sendto_server(client_p, 0, 0, ":%s SID %s 2 %s +%s :%s",
                 me.id, client_p->name, client_p->id,
-                IsHidden(client_p) ? "(H) " : "", client_p->info);
+                IsHidden(client_p) ? "h" : "", client_p->info);
 
   /*
    * Pass on my client information to the new server
@@ -326,9 +326,9 @@ server_estab(struct Client *client_p)
     if (IsMe(target_p) || target_p->from == client_p)
       continue;
 
-    sendto_one(client_p, ":%s SID %s %u %s :%s%s",
+    sendto_one(client_p, ":%s SID %s %u %s +%s :%s",
                target_p->servptr->id, target_p->name, target_p->hopcount+1,
-               target_p->id, IsHidden(target_p) ? "(H) " : "",
+               target_p->id, IsHidden(target_p) ? "h" : "",
                target_p->info);
   }
 
@@ -771,9 +771,9 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   hash_add_client(target_p);
   hash_add_id(target_p);
 
-  sendto_server(source_p->from, 0, 0, ":%s SID %s %u %s :%s%s",
+  sendto_server(source_p->from, 0, 0, ":%s SID %s %u %s +%s :%s",
                 source_p->id, target_p->name, target_p->hopcount + 1,
-                target_p->id, IsHidden(target_p) ? "(H) " : "", target_p->info);
+                target_p->id, IsHidden(target_p) ? "h" : "", target_p->info);
   sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
                        "Server %s being introduced by %s",
                        target_p->name, source_p->name);

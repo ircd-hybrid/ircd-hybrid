@@ -2,7 +2,7 @@
 * Added `client` option to `listener::flags`
 * Added `defer` option to `listener::flags`
 * IRC operators may now use CIDR notation in `WHO`
-* For a full list of all changes in this release, see <https://git.io/JUZKO>
+* For a full list of all changes in this release, see <https://git.io/JTftW>
 
 
 -- Noteworthy changes in version 8.2.32 (2020-08-16)
@@ -145,7 +145,7 @@
   and /whois even if the user has a fakehost/vhost
 * `RPL_WELCOME` now does use the rfc2812 style nick!user@host format
 * Removed rudimentary libgeoip support
-* Added --enable-efence switch to allow easy linking with the
+* Added `--enable-efence` switch to allow easy linking with the
   electric fence memory debugger library
 * `JOIN 0` is no longer supported
 * Fixed bug where ircd would not remove `RPL_WHOISOPERATOR` based svstags
@@ -171,7 +171,7 @@
 * The `general::default_floodtime` configuration option has been added
   along with the `SET FLOODTIME` command. These allow to fine-tune the
   message throttling better
-* Fixed an issue with /invite not showing the list of channels the
+* Fixed an issue with `INVITE` not showing the list of channels the
   sender is invited to
 * For a full list of all changes in this release, see <https://git.io/fjRVG>
 
@@ -199,7 +199,7 @@
 
 
 -- Noteworthy changes in version 8.2.18 (2016-06-22)
-* Fixed an assert when a client sends invalid LIST options
+* Fixed an assert when a client sends invalid `LIST` options
 * Fixed invalid memory stats of channel invites in `STATS z`
 * For a full list of all changes in this release, see <https://git.io/fjRSx>
 
@@ -259,8 +259,8 @@
   to update all servers on the network to prevent possible channel
   desynchronizations and nick name collision kills
 * Added channel mode +T which forbids NOTICEs to be sent to a channel
-* Fixed minor SVSTAG memory leak
-* Fixed broken PART message blocking mechanism
+* Fixed minor `SVSTAG` memory leak
+* Fixed broken `PART` message blocking mechanism
 * ircd now makes use of up to 8 name servers that are specified in
   /etc/resolv.conf
 * The `-klinefile`, `-dlinefile`, etc. switches didn't work at all
@@ -268,7 +268,6 @@
 * Far client exit notices (+F) now show IP addresses, too
 * Made idle time look nicer in `STATS v|p` by using a formatted time string
 * `general::ts_warn_delta`, and `general::ts_max_delta` can be set to 0 now
-* Several code cleanups and optimizations. Improved documentation
 * For a full list of all changes in this release, see <https://git.io/JvLtj>
 
 
@@ -297,8 +296,8 @@
 
 
 -- Noteworthy changes in version 8.2.9 (2015-09-13)
-* **IMPORTANT:** database files and links.txt are now stored in /var/lib
-  instead of /etc, so make sure to move your k/d/x-line database files
+* **IMPORTANT:** database files and links.txt are now stored in `/var/lib`
+  instead of `/etc`, so make sure to move your k/d/x-line database files
   to the new path before (re)starting the ircd
 * **IMPORTANT:** the splitmode logic has been removed along with the
   following channel {} block configuration directives:
@@ -313,7 +312,7 @@
 * Services can now add RESVs (SQLINEs) that have wildcards in it
 * Channel name RESVs are now sanity checked for too broad masks
 * `class::connectfreq` now works properly with values lower than 300 seconds
-* Implemented IRCv3.1 account-notify extension
+* Implemented IRCv3.1 `account-notify` extension
 * The `general::oper_pass_resv` configuration directive has been deprecated
   in favor of the new `join:resv`, and `nick:resv` irc-operator flags.
   See doc/reference.conf for more information.
@@ -334,13 +333,12 @@
 * The `GLINE`/`GUNGLINE` commands have been removed. `KLINE` in conjunction
   with cluster {} and/or shared {} blocks is now the recommended
   way to add global user@host mask based server bans
-* Added dline_min_cidr, dline_min_cidr6, kline_min_cidr, and kline_min_cidr6
-  configuration options to the general {} block
+* Added `dline_min_cidr`, `dline_min_cidr6`, `kline_min_cidr`, and
+ `kline_min_cidr6` configuration options to the general {} block
 * Fixed bug where a `REHASH` would clear all X-Lines and RESVs that have
   been set with the `XLINE`/`RESV commands`
 * Fixed broken temporary remote XLINEs
 * The `general::havent_read_conf` configuration directive has been removed
-* Various code cleanups
 * For a full list of all changes in this release, see <https://git.io/JvLqq>
 
 
@@ -353,11 +351,10 @@
 
 
 -- Noteworthy changes in version 8.2.6 (2015-03-29)
-* INFO now shows configured values of `max_watch` and `stats_m_oper_only`
-* WHOWAS now shows IP addresses to irc operators
+* `INFO` now shows configured values of `max_watch` and `stats_m_oper_only`
+* `WHOWAS` now shows IP addresses to irc operators
 * Fixed bug that would allow remote clients to bypass the hard
-  limit of max WHOWAS entries to be returned
-* Code cleanups and performance improvements
+  limit of max `WHOWAS` entries to be returned
 
 
 -- Noteworthy changes in version 8.2.5 (2015-02-24)
@@ -366,12 +363,12 @@
 
 
 -- Noteworthy changes in version 8.2.4 (2015-02-17)
-* Added SVSTAG command which services may use to add tags to users which can
-  be seen in /whois
+* Added `SVSTAG` command which services may use to add tags to users which can
+  be seen in `WHOIS`
 * Added `oper::whois` configuration option which allows to override the default
-  `RPL_WHOISOPERATOR` numeric string shown in /whois.
+  `RPL_WHOISOPERATOR` numeric string shown in `WHOIS`
 * IRC operators may now use +O on a channel even if they are only a half-op
-* Fixed bug where TOPIC messages were not n!u@h prefixed in case of `TBURST`
+* Fixed bug where `TOPIC` messages were not n!u@h prefixed in case of `TBURST`
   issued by services clients
 
 
@@ -380,15 +377,14 @@
    `max_clients` -> `default_max_clients`
    `join_flood_count` -> `default_join_flood_count`
    `join_flood_time` -> `default_join_flood_time`
-* Fixed bug where `/rehash` would always reset the `MAX`, `JFLOODTIME`, and
-  `JFLOODCOUNT` values that have been changed from within IRC via the `/set`
+* Fixed bug where `REHASH` would always reset the `MAX`, `JFLOODTIME`, and
+  `JFLOODCOUNT` values that have been changed from within IRC via the `SET`
   command
 * Added channel mode +C which prevents users from sending CTCPs to a channel
 * Fixes to the NOTICE/PRIVMSG anti-flood logic
 * Allow to disable the NOTICE/PRIVMSG anti-flood mechanism by setting the
   `general::default_floodcount` configuration option to 0
 * Updated some help files
-* Minor code cleanups and improvements
 * Operators may now see certificate fingerprints, user modes and hidden
   channels via `WHOIS` as well. This used to be admin only.
 
@@ -415,15 +411,15 @@
 * Due to potential weakness, TLS session caching and session tickets
   have been disabled
 * Minor improvements to TS6 implementation
-* WHOWAS now shows the name of the services account a user was logged in
+* `WHOWAS` now shows the name of the services account a user was logged in
 
 
 -- Noteworthy changes in version 8.2.0 (2014-08-24)
 * Successful operator logins are now announced globally via `GLOBOPS`
 * Cleanups and improvements to the resolver code
 * Cleanups and improvements to the poll() I/O event notification support
-* A topic mask can now be specified within the LIST options
-* All users may now see channel modes in the /list reply
+* A topic mask can now be specified within the `LIST` options
+* All users may now see channel modes in the `LIST` reply
 * Fixed bug where `NOTICE +#somechan` did allow bypassing resv {} channels,
   or channels that are set +c (no control codes)
 * pseudo {} blocks also known as service aliases have been implemented.
@@ -437,7 +433,6 @@
   newly added `away_count` and `away_time` configuration directives
   in the general {} block
 * Support for the select() I/O event notification has been dropped
-* Minor code cleanups and improvements
 
 
 -- Noteworthy changes in version 8.2.0rc1 (2014-07-20)
@@ -449,7 +444,6 @@
 -- Noteworthy changes in version 8.2.0beta4 (2014-07-06)
 * **IMPORTANT:** channel halfops are now an integral part of ircd-hybrid
   and can't be disabled anymore
-* Many code cleanups and improvements
 * Added flood control for the `INVITE` command. See channel {} block in reference.conf
 * Changed flood control logic for the `KNOCK` command. See channel {} block in reference.conf
 * `INVITE` without any parameters now shows a list of channels a client is invited to
@@ -538,15 +532,13 @@
 * The `USERS` command has been removed
 * Fixed issue with `SVSNICK` where clients self-collided when changing
   just the case of the nick name, i.e. somenick -> SomeNicK
-* Minor code cleanups and cosmetical fixes
 
 
 -- Noteworthy changes in version 8.1.14 (2014-02-25)
 * WHOWAS now honors `serverhide::disable_remote_commands`
 * Improved TS6 inter-server communication
-* Minor code cleanups and speed enhancements
 * Added `unxline` oper flag
-* Implemented IRCv3.2 userhost-in-names extension
+* Implemented IRCv3.2 `userhost-in-names` extension
 * ircd now allows private RSA keys larger than 2048 bits
 * Fixed bug where signals stopped from working after restarting
   the ircd via SIGINT
@@ -583,8 +575,8 @@
 
 -- Noteworthy changes in version 8.1.10 (2013-11-25)
 * Fixed bug with kqueue() where it occasionally dropped updates
-* Changed WHOIS to show certificate fingerprint to administrators only
-* The WHO reply now shows if a nickname has been registered
+* Changed `WHOIS` to show certificate fingerprint to administrators only
+* The `WHO` reply now shows if a nickname has been registered
   with NickServ. (`r` status flag)
 * Fixed some flaws with server hiding
 * Fixed bug where `STATS P` would leak ip addresses to remotely connected
@@ -656,7 +648,7 @@
   doc/reference.conf for more information
 * Added usermode +S (client is connected via SSL/TLS). Allows services
   to keep track of what users are connected via SSL, and allows to see
-  ssl-status of remote clients in a /whois
+  ssl-status of remote clients in a `WHOIS`
 * Fixed a server name leak with server hiding enabled
 
 
@@ -694,7 +686,7 @@
 -- Noteworthy changes in version 8.1.0beta4 (2013-05-09)
 * Implemented channel mode +M. Clients that haven't identified their
   name with NickServ may not speak in a channel that has this mode set
-* Fixed weird idletimes shown in /trace
+* Fixed weird idletimes shown in `TRACE`
 * Added `nononreg` (+R) to `general::oper_umodes`
 * Added user mode +F (can see remote client connect/exit notices)
 
@@ -734,7 +726,6 @@
   A `webirc.` spoof is now no longer required
 * Implemented new memory pool allocator which basically is based upon Tor's
   mempool allocator for Tor cells
-* Major code cleanups
 * Implemented new binary database storage for X-, D-, K-, G-Lines and RESVs.
   Temporary bans are now stored as well and will persist after a reboot
 * Channel based resv {} blocks may now contain wildcards
@@ -742,7 +733,7 @@
 * contrib/ and its content has been enirely removed from the tree
 * Added `serverhide::hide_services` configuration option
 * Added `nononreg` (+R) to `oper::umodes` and `general::oper_only_modes`
-* Implemented IRCv3.1 away-notify extension
+* Implemented IRCv3.1 `away-notify` extension
 
 
 -- Noteworthy changes in version 8.0.9 (2013-05-16)
@@ -842,7 +833,7 @@
 -- Noteworthy changes in version 8.0.0beta3 (2012-08-24)
 * Fixed wrong syntax in several language files
 * Removed &localchannels
-* PRIVMSG to opers@some.server is no longer supported
+* `PRIVMSG` to opers@some.server is no longer supported
 * Fixed bug that could lead to topic desynchronization
 * Removed `serverhide::disable_hidden` configuration option
 * Dropped ircd-hybrid-6 GLINE compatibility mode
@@ -855,10 +846,10 @@
   when set to yes
 * Added `channel::max_chans_per_oper` configuration directive. The old way
   was to let operators join three times the amount of max_chans_per_user
-* Replaced MODLOAD, MODUNLOAD, MODRELOAD, MODLIST and MODRESTART commands
-  with the new MODULE command which can be fed with the LOAD, UNLOAD, RELOAD
-  and LIST parameters.
-  MODRESTART has been entirely removed. Use `MODULE RELOAD *` to reload
+* Replaced `MODLOAD`, `MODUNLOAD`, `MODRELOAD`, `MODLIST` and `MODRESTART`
+  commands with the new `MODULE` command which can be fed with the `LOAD,`
+  `UNLOAD`, `RELOAD` and `LIST` parameters.
+  `MODRESTART` has been entirely removed. Use `MODULE RELOAD *` to reload
   all modules
 * Added back server notice when a client tries to obtain a reserved nick name
 * Removed `OMOTD` module

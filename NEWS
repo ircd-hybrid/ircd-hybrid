@@ -42,25 +42,25 @@
 * Extbans have been implemented. Currently supported extbans:
 
   Matching:
-  
-  $a:<account>   Matches users logged into a matching account.
-  $c:<channel>   Matches users that are on the given channel. An additional
-                 prefix of either @, %, or + can be specified to test for
-                 certain channel privileges.
-  $o:<class>     Matches IRC operators that have joined a class
-                 matching the mask.
-  $r:<realname>  Matches users with a matching realname.
-  $s:<server>    Matches users that are connected to a server matching the mask.
-  $u:<modes>     Matches users having the specified user modes set or not set.
-  $z:<certfp>    Matches users having the given TLS certificate fingerprint.
-  
-  Acting:
-  
-  $j:<banmask>   Prevents matching users from joining the channel.
-  $m:<banmask>   Blocks messages from matching users. Users with voice
-                 or above are not affected.
 
-  For more details, see help/extban.
+  * `$a:<account>`   Matches users logged into a matching account.
+  * `$c:<channel>`   Matches users that are on the given channel. An additional
+                     prefix of either @, %, or + can be specified to test for
+                     certain channel privileges.
+  * `$o:<class>`     Matches IRC operators that have joined a class
+                     matching the mask.
+  * `$r:<realname>`  Matches users with a matching realname.
+  * `$s:<server>`    Matches users that are connected to a server matching the mask.
+  * `$u:<modes>`     Matches users having the specified user modes set or not set.
+  * `$z:<certfp>`    Matches users having the given TLS certificate fingerprint.
+
+  Acting:
+
+  * `$j:<banmask>`   Prevents matching users from joining the channel.
+  * `$m:<banmask>`   Blocks messages from matching users. Users with voice
+                     or above are not affected.
+
+  For more details, see `help/extban`.
 * Added `channel::enable_extbans` configuration option. See `doc/reference.conf`
   for more information.
 * For a full list of all changes in this release, see <https://git.io/JvgAL>
@@ -355,11 +355,13 @@
 * `WHOWAS` now shows IP addresses to irc operators
 * Fixed bug that would allow remote clients to bypass the hard
   limit of max `WHOWAS` entries to be returned
+* For a full list of all changes in this release, see <https://git.io/JTTuf>
 
 
 -- Noteworthy changes in version 8.2.5 (2015-02-24)
 * Fixed core on Mac OSX 10.10 and possibly some other systems when parsing
   the `ircd.conf` with configured pseudo {} blocks
+* For a full list of all changes in this release, see <https://git.io/JTTuI>
 
 
 -- Noteworthy changes in version 8.2.4 (2015-02-17)
@@ -370,10 +372,11 @@
 * IRC operators may now use +O on a channel even if they are only a half-op
 * Fixed bug where `TOPIC` messages were not n!u@h prefixed in case of `TBURST`
   issued by services clients
+* For a full list of all changes in this release, see <https://git.io/JTTut>
 
 
 -- Noteworthy changes in version 8.2.3 (2015-02-11)
-* **IMPORTANT:** the following ircd.conf configuration directives have been renamed:
+* **IMPORTANT:** the following configuration directives have been renamed:
    `max_clients` -> `default_max_clients`
    `join_flood_count` -> `default_join_flood_count`
    `join_flood_time` -> `default_join_flood_time`
@@ -444,8 +447,8 @@
 -- Noteworthy changes in version 8.2.0beta4 (2014-07-06)
 * **IMPORTANT:** channel halfops are now an integral part of ircd-hybrid
   and can't be disabled anymore
-* Added flood control for the `INVITE` command. See channel {} block in reference.conf
-* Changed flood control logic for the `KNOCK` command. See channel {} block in reference.conf
+* Added flood control for the `INVITE` command. See channel {} block in `reference.conf`
+* Changed flood control logic for the `KNOCK` command. See channel {} block in `reference.conf`
 * `INVITE` without any parameters now shows a list of channels a client is invited to
 * The `OPERWALL` command has been removed. Use `GLOBOPS` instead
 * Added `max_channels` to class {} blocks
@@ -677,7 +680,7 @@
  `squit`, and `kill` flags for better fine-tuning instead. Whether or
   not a specific action is allowed on a remote server can be controlled
   by appending the `:remote` flag. For example: `kill` allows only local
-  clients to be killed, whereas `kill:remote` allows to issue a KILL for
+  clients to be killed, whereas `kill:remote` allows to issue a `KILL` for
   remote clients
 * Added `locops` and `wallops` to IRC operator flags
 * Improve/cleanup `HELP` system
@@ -765,7 +768,7 @@
 
 
 -- Noteworthy changes in version 8.0.5 (2013-01-24)
-* **IMPORTANT:** nick and topic lengths are now configurable via ircd.conf.
+* **IMPORTANT:** nick and topic lengths are now configurable via `ircd.conf`.
   A `max_nick_length`, as well as a `max_topic_length` configuration option
   can now be found in the serverinfo {} block
 * Fixed build on GNU/Hurd
@@ -871,11 +874,11 @@
   - Added usermode +R (only registered clients may send a private message)
   - Added channelmode +R (only registered clients may join that channel)
   - Various services shortcuts have been added (`NS`, `CS`, `NICKSERV`, `CHANSERV`, etc.)
-  - Added services {} block to ircd.conf
+  - Added services {} block to `ircd.conf`
   - Added services_name directive to general {} block
   - Added `GLOBOPS` mainly for services compatibility, but can be used by operators, too
 * Removed `RKLINE` and `RXLINE` commands. Regular expression based bans should
-  only be added via ircd.conf
+  only be added via `ircd.conf`
 * Added `globops`, `restart`, `dline`, `undline` and `module` operator privilege flags.
   Read `doc/reference.conf` for further explanation of what these flags control
 * Removed Idle-time klines

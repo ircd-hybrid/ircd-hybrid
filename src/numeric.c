@@ -118,7 +118,7 @@ static const char *const replies[] =
   /* 347 */  [RPL_ENDOFINVEXLIST] = "%s :End of Channel Invite List",
   /* 348 */  [RPL_EXCEPTLIST] = "%s %s %s %ju",
   /* 349 */  [RPL_ENDOFEXCEPTLIST] = "%s :End of Channel Exception List",
-  /* 351 */  [RPL_VERSION] = "%s(%s). %s :%s",
+  /* 351 */  [RPL_VERSION] = "%s. %s :%s",
   /* 352 */  [RPL_WHOREPLY] = "%s %s %s %s %s %s :%u %s",
   /* 353 */  [RPL_NAMREPLY] = "%s %s :%s",
   /* 362 */  [RPL_CLOSING] = "%s :Closed. Status = %u",

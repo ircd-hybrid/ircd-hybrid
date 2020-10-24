@@ -42,7 +42,7 @@
 * `QUOTE HELP extban` didn't work because the extban help file hasn't been
   installed properly during `make install`
 * Fixed broken libcrypto detection which caused the ircd not to work with
-  openssl under certain circumstances
+  OpenSSL under certain circumstances
 * Extban $n of type `acting` has been implemented. This extban prevents
   matching users from changing their nick while in the channel. Users
   with voice or above are not affected.
@@ -94,7 +94,7 @@
   switch which takes one of the following options: `openssl`, `wolfssl`, `gnutls`,
   and `none`.
   If nothing has been specified, configure tries to autodetect in the following order:
-  openssl/libressl -> gnutls -> wolfssl.
+  OpenSSL/LibreSSL -> GnuTLS -> wolfSSL.
 * Fixed segfault with GnuTLS/libgmp in case there's no DH parameters file
   defined in `serverinfo::ssl_dh_param_file` or if that file is missing
 * The connection timeout for connect{} blocks can now be configured via
@@ -135,7 +135,7 @@
 * Adding RESVs with wildcards no longer requires administrator privileges
 * The `general::ignore_bogus_ts` configuration option has been deprecated
 * TLSv1.1 and TLSv1.0 are no longer supported and have been disabled in
-  the openssl and gnutls module
+  the OpenSSL and GnuTLS module
 * Minimum supported OpenSSL version is 1.0.1f now
 * Minimum supported GnuTLS version is 3.5.8 now
 * The `serverinfo::vhost` and `serverinfo:vhost6` configuration directives have
@@ -154,8 +154,8 @@
 
 
 -- Noteworthy changes in version 8.2.23 (2018-03-26)
-* IRC operators are now able to see a user's resolved hostname in /whowas,
-  and /whois even if the user has a fakehost/vhost
+* IRC operators are now able to see a user's resolved hostname in `WHOWAS`,
+  and `WHOIS` even if the user has a fakehost/vhost
 * `RPL_WELCOME` now does use the rfc2812 style nick!user@host format
 * Removed rudimentary libgeoip support
 * Added `--enable-efence` switch to allow easy linking with the
@@ -195,10 +195,10 @@
   for more information.
 * `INVITE` expirations have been implemented. Expire time can be adjusted with
   the `channel::invite_expire_time` configuration directive
-* `WHOIS` notices to operators have been re-added. User mode +y is required
+* `WHOIS` notices to IRC operators have been re-added. User mode +y is required
   to see them
-* The maximum line length for motd files has been increased to 320 bytes
-  to support multibyte encodings better
+* The maximum line length for motd files has been increased to 320 bytes to
+  support multibyte encodings better
 * For a full list of all changes in this release, see <https://git.io/fjRVZ>
 
 
@@ -271,7 +271,7 @@
 * **IMPORTANT:** Character case mapping is `ascii` now. It is recommended
   to update all servers on the network to prevent possible channel
   desynchronizations and nick name collision kills
-* Added channel mode +T which forbids `NOTICE` to be sent to a channel
+* Added channel mode `T` which forbids `NOTICE` to be sent to a channel
 * Fixed minor `SVSTAG` memory leak
 * Fixed broken `PART` message blocking mechanism
 * ircd now makes use of up to 8 name servers that are specified in
@@ -297,8 +297,8 @@
 * Added `serverhide::flatten_links_file` configuration option
 * Fixed bug where changing `serverhide::flatten_links_delay` on runtime
   would not have any effect
-* mkpasswd (tools): fixed broken bcrypt support on *BSD in conjunction
-  with the -s and -l switches. Dropped MD5, DES and Extended DES support.
+* mkpasswd (tools): fixed broken bcrypt support on *BSD in conjunction with
+  the `-s` and `-l` switches. Dropped MD5, DES and Extended DES support.
 * Removed `CHALLENGE` in favor of ssl certificate fingerprint enabled
   operator {} blocks
 * RSA keys with less than 2048 bits are no longer supported; same applies
@@ -365,7 +365,7 @@
 
 -- Noteworthy changes in version 8.2.6 (2015-03-29)
 * `INFO` now shows configured values of `max_watch` and `stats_m_oper_only`
-* `WHOWAS` now shows IP addresses to irc operators
+* `WHOWAS` now shows IP addresses to IRC operators
 * Fixed bug that would allow remote clients to bypass the hard
   limit of max `WHOWAS` entries to be returned
 * For a full list of all changes in this release, see <https://git.io/JTTuf>
@@ -396,12 +396,12 @@
 * Fixed bug where `REHASH` would always reset the `MAX`, `JFLOODTIME`, and
   `JFLOODCOUNT` values that have been changed from within IRC via the `SET`
   command
-* Added channel mode +C which prevents users from sending CTCPs to a channel
+* Added channel mode `C` which prevents users from sending CTCPs to a channel
 * Fixes to the NOTICE/PRIVMSG anti-flood logic
 * Allow to disable the NOTICE/PRIVMSG anti-flood mechanism by setting the
   `general::default_floodcount` configuration option to 0
 * Updated some help files
-* Operators may now see certificate fingerprints, user modes and hidden
+* IRC operators may now see certificate fingerprints, user modes and hidden
   channels via `WHOIS` as well. This used to be admin only.
 
 
@@ -414,7 +414,7 @@
 * Updated several help files
 * The `general::hide_spoof_ips` configuration option has been deprecated
 * The `general::true_no_oper_flood` configuration option has been deprecated.
-  Operators still can have higher `flood` limits with `no_oper_flood = yes;`
+  IRC operators still can have higher `flood` limits with `no_oper_flood = yes;`
   hoewever, they are no longer allowed to bypass RecvQ limits.
 * Added `general::stats_m_oper_only` configuration option
 * Remote client connection notices (user mode +F) now do show IP addresses, too

@@ -1,4 +1,8 @@
 Contact Information:
+  * Home Page:
+    - https://www.ircd-hybrid.org
+  * GitHub:
+    - https://github.com/ircd-hybrid
   * Bug Reports:
     - bugs@ircd-hybrid.org
   * General Discussion and Support mailing list:
@@ -8,7 +12,7 @@ Contact Information:
     - #ircd-coders on irc.ircd-hybrid.org
 
 Recommended IRC services packages:
-- Anope 2.0.7 and above, which can be found on https://anope.org
+- Anope 2.0.9 and above, which can be found on https://anope.org
 - HOPM (hybrid open proxy monitor), which can be found on https://ircd-hybrid.org
 
 ******************************* IMPORTANT *************************************
@@ -33,7 +37,7 @@ Necessary Requirements:
 
 Feature Specific Requirements:
 - For TLS server links, as well as TLS client connections, a working TLS
-  library such as, OpenSSL, LibreSSL, GnuTLS or wolfSSL is required
+  implementation such as, OpenSSL, LibreSSL, GnuTLS, or wolfSSL is required
 - For encrypted operator, server and auth passwords, a working DES, MD5, or
   SHA library
 

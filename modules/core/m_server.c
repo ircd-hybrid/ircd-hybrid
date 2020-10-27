@@ -522,7 +522,8 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = hash_find_server(name);
   if (target_p)
   {
-    /* This link is trying feed me a server that I already have
+    /*
+     * This link is trying feed me a server that I already have
      * access through another path -- multiple paths not accepted
      * currently, kill this link immediately!!
      *
@@ -630,7 +631,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  /* collision on SID? */
+  /* Collision on SID? */
   struct Client *target_p = hash_find_id(parv[3]);
   if (target_p)
   {
@@ -644,7 +645,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  /* collision on name? */
+  /* Collision on name? */
   target_p = hash_find_server(parv[1]);
   if (target_p)
   {
@@ -693,7 +694,8 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  /* Ok, this way this works is
+  /*
+   * Ok, this way this works is
    *
    * A server can have a CONF_HUB allowing it to introduce servers
    * behind it.
@@ -711,9 +713,9 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    *            name = "irc.somehub.fi";
    *		hub_mask="*";
    *		leaf_mask="*.edu";
-   *...
-   * Would allow this server in finland to hub anything but
-   * .edu's
+   *            ...
+   *
+   * Would allow this server in finland to hub anything but .edu's
    */
 
   /* Ok, check source_p->from can hub the new server */

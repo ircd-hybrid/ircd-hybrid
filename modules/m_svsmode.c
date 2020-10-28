@@ -58,10 +58,13 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 {
   const struct user_modes *tab = NULL;
   int what = MODE_ADD;
-  const char *const modes = parv[3];
+  const char *modes = NULL, *extarg = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return;
+
+  modes  = parv[3];
+  extarg = (parc > 4) ? parv[4] : NULL;
 
   struct Client *target_p = find_person(source_p, parv[1]);
   if (target_p == NULL)
@@ -82,6 +85,22 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
         break;
       case '-':
         what = MODE_DEL;
+        break;
+
+      case 'd':
+        if (!EmptyString(extarg))
+        {
+          strlcpy(target_p->account, extarg, sizeof(target_p->account));
+          sendto_common_channels_local(target_p, true, CAP_ACCOUNT_NOTIFY, 0, ":%s!%s@%s ACCOUNT %s",
+                                       target_p->name, target_p->username,
+                                       target_p->host, target_p->account);
+        }
+
+        break;
+
+      case 'x':
+        if (!EmptyString(extarg) && valid_hostname(extarg))
+          user_set_hostmask(target_p, extarg);
         break;
 
       case 'o':
@@ -137,9 +156,14 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  sendto_server(source_p, 0, 0, ":%s SVSMODE %s %ju %s",
-                source_p->id,
-                target_p->id, target_p->tsinfo, modes);
+  if (extarg)
+    sendto_server(source_p, 0, 0, ":%s SVSMODE %s %ju %s %s",
+                  source_p->id,
+                  target_p->id, target_p->tsinfo, modes, extarg);
+  else
+    sendto_server(source_p, 0, 0, ":%s SVSMODE %s %ju %s",
+                  source_p->id,
+                  target_p->id, target_p->tsinfo, modes);
 
   if (MyConnect(target_p) && (setmodes != target_p->umodes))
   {

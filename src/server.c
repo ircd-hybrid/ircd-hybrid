@@ -482,12 +482,13 @@ server_finish_tls_handshake(struct Client *client)
   /* Next, send the initial handshake */
   SetHandshake(client);
 
-  sendto_one(client, "PASS %s", conf->spasswd);
+  sendto_one(client, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
   sendto_one(client, "CAPAB :%s", capab_get(NULL));
 
-  sendto_one(client, "SERVER %s 1 %s +%s :%s", me.name, me.id,
-             ConfigServerHide.hidden ? "h" : "", me.info);
+  sendto_one(client, "SERVER %s 1 :%s%s",
+             me.name, ConfigServerHide.hidden ? "(H) " : "",
+             me.info);
 
   /* If we get here, we're ok, so lets start reading some data */
   read_packet(client->connection->fd, client); 
@@ -626,12 +627,12 @@ server_connect_callback(fde_t *F, int status, void *data)
   /* Next, send the initial handshake */
   SetHandshake(client);
 
-  sendto_one(client, "PASS %s", conf->spasswd);
+  sendto_one(client, "PASS %s TS %u %s", conf->spasswd, TS_CURRENT, me.id);
 
   sendto_one(client, "CAPAB :%s", capab_get(NULL));
 
-  sendto_one(client, "SERVER %s 1 %s +%s :%s", me.name, me.id,
-             ConfigServerHide.hidden ? "h" : "", me.info);
+  sendto_one(client, "SERVER %s 1 :%s%s", me.name,
+             ConfigServerHide.hidden ? "(H) " : "", me.info);
 
   /* If we get here, we're ok, so lets start reading some data */
   read_packet(client->connection->fd, client);

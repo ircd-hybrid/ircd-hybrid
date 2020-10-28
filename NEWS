@@ -1,6 +1,4 @@
 -- Noteworthy changes in version 8.2.34 (2020-??-??)
-* **IMPORTANT:** ircd-hybrid is now no longer link-compatible to Anope 2.0.7 and
-  below. Please use Anope 2.0.8 or higher.
 * Server notices that previously have been sent to user modes +f and +u are now
   sent to user mode +j (reject notices) instead. Due to this change, `unauth` and
   `full` have been removed from `general::oper_only_umodes`, `general::oper_umodes`,

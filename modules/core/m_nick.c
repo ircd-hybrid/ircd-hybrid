@@ -381,7 +381,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
 
     if ((tab->flag & UMODE_INVISIBLE) && !HasUMode(client_p, UMODE_INVISIBLE))
       ++Count.invisi;
-    if ((tab->flag & UMODE_OPER) && !HasUMode(client_p, UMODE_OPER))
+    else if ((tab->flag & UMODE_OPER) && !HasUMode(client_p, UMODE_OPER))
       ++Count.oper;
 
     AddUMode(client_p, tab->flag);

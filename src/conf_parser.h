@@ -153,7 +153,7 @@ extern int yydebug;
     NAME = 359,
     NEED_IDENT = 360,
     NEED_PASSWORD = 361,
-    NETWORK_DESC = 362,
+    NETWORK_DESCRIPTION = 362,
     NETWORK_NAME = 363,
     NICK = 364,
     NO_OPER_FLOOD = 365,
@@ -384,7 +384,7 @@ extern int yydebug;
 #define NAME 359
 #define NEED_IDENT 360
 #define NEED_PASSWORD 361
-#define NETWORK_DESC 362
+#define NETWORK_DESCRIPTION 362
 #define NETWORK_NAME 363
 #define NICK 364
 #define NO_OPER_FLOOD 365

@@ -116,9 +116,9 @@ static const struct InfoStruct info_table[] =
     "Network name"
   },
   {
-    "network_desc",
+    "network_description",
     OUTPUT_STRING,
-    &ConfigServerInfo.network_desc,
+    &ConfigServerInfo.network_description,
     "Network description"
   },
   {

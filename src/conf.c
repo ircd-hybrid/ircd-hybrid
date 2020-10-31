@@ -575,7 +575,7 @@ conf_set_defaults(void)
   assert(class_default == class_get_list()->tail->data);
 
   ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
-  ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
+  ConfigServerInfo.network_description = xstrdup(NETWORK_DESCRIPTION_DEFAULT);
   ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   ConfigServerInfo.max_nick_length = 9;
   ConfigServerInfo.max_topic_length = 80;
@@ -665,8 +665,8 @@ conf_validate(void)
   if (EmptyString(ConfigServerInfo.network_name))
     ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
 
-  if (EmptyString(ConfigServerInfo.network_desc))
-    ConfigServerInfo.network_desc = xstrdup(NETWORK_DESC_DEFAULT);
+  if (EmptyString(ConfigServerInfo.network_description))
+    ConfigServerInfo.network_description = xstrdup(NETWORK_DESCRIPTION_DEFAULT);
 }
 
 /* conf_read()
@@ -875,8 +875,8 @@ conf_clear(void)
   ConfigServerInfo.description = NULL;
   xfree(ConfigServerInfo.network_name);
   ConfigServerInfo.network_name = NULL;
-  xfree(ConfigServerInfo.network_desc);
-  ConfigServerInfo.network_desc = NULL;
+  xfree(ConfigServerInfo.network_description);
+  ConfigServerInfo.network_description = NULL;
   xfree(ConfigServerInfo.rsa_private_key_file);
   ConfigServerInfo.rsa_private_key_file = NULL;
   xfree(ConfigServerInfo.tls_certificate_file);

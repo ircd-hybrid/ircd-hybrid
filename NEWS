@@ -1,4 +1,6 @@
 -- Noteworthy changes in version 8.2.34 (2020-??-??)
+* For consistency, the `general::network_desc` configuration directive has been
+  renamed to `general::network_description`
 * Server notices that previously have been sent to user modes +f and +u are now
   sent to user mode +j (reject notices) instead. Due to this change, `unauth` and
   `full` have been removed from `general::oper_only_umodes`, `general::oper_umodes`,

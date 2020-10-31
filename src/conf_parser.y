@@ -237,7 +237,7 @@ reset_block_state(void)
 %token  NAME
 %token  NEED_IDENT
 %token  NEED_PASSWORD
-%token  NETWORK_DESC
+%token  NETWORK_DESCRIPTION
 %token  NETWORK_NAME
 %token  NICK
 %token  NO_OPER_FLOOD
@@ -445,7 +445,7 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_hub |
                         serverinfo_description |
                         serverinfo_network_name |
-                        serverinfo_network_desc |
+                        serverinfo_network_description |
                         serverinfo_default_max_clients |
                         serverinfo_max_nick_length |
                         serverinfo_max_topic_length |
@@ -577,13 +577,13 @@ serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
   }
 };
 
-serverinfo_network_desc: NETWORK_DESC '=' QSTRING ';'
+serverinfo_network_description: NETWORK_DESCRIPTION '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass != 2)
     break;
 
-  xfree(ConfigServerInfo.network_desc);
-  ConfigServerInfo.network_desc = xstrdup(yylval.string);
+  xfree(ConfigServerInfo.network_description);
+  ConfigServerInfo.network_description = xstrdup(yylval.string);
 };
 
 serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'

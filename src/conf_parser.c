@@ -313,7 +313,7 @@ extern int yydebug;
     NAME = 359,
     NEED_IDENT = 360,
     NEED_PASSWORD = 361,
-    NETWORK_DESC = 362,
+    NETWORK_DESCRIPTION = 362,
     NETWORK_NAME = 363,
     NICK = 364,
     NO_OPER_FLOOD = 365,
@@ -544,7 +544,7 @@ extern int yydebug;
 #define NAME 359
 #define NEED_IDENT 360
 #define NEED_PASSWORD 361
-#define NETWORK_DESC 362
+#define NETWORK_DESCRIPTION 362
 #define NETWORK_NAME 363
 #define NICK 364
 #define NO_OPER_FLOOD 365
@@ -1105,8 +1105,8 @@ static const char *const yytname[] =
   "MAX_NICK_TIME", "MAX_NUMBER", "MAX_TARGETS", "MAX_TOPIC_LENGTH",
   "MAX_WATCH", "MIN_IDLE", "MIN_NONWILDCARD", "MIN_NONWILDCARD_SIMPLE",
   "MODULE", "MODULES", "MOTD", "NAME", "NEED_IDENT", "NEED_PASSWORD",
-  "NETWORK_DESC", "NETWORK_NAME", "NICK", "NO_OPER_FLOOD", "NO_TILDE",
-  "NUMBER", "NUMBER_PER_CIDR", "NUMBER_PER_IP_GLOBAL",
+  "NETWORK_DESCRIPTION", "NETWORK_NAME", "NICK", "NO_OPER_FLOOD",
+  "NO_TILDE", "NUMBER", "NUMBER_PER_CIDR", "NUMBER_PER_IP_GLOBAL",
   "NUMBER_PER_IP_LOCAL", "OPER_ONLY_UMODES", "OPER_UMODES", "OPERATOR",
   "OPERS_BYPASS_CALLERID", "PACE_WAIT", "PACE_WAIT_SIMPLE", "PASSWORD",
   "PATH", "PING_COOKIE", "PING_TIME", "PORT", "QSTRING", "RANDOM_IDLE",
@@ -1141,7 +1141,7 @@ static const char *const yytname[] =
   "serverinfo_tls_message_digest_algorithm",
   "serverinfo_tls_supported_groups", "serverinfo_name", "serverinfo_sid",
   "serverinfo_description", "serverinfo_network_name",
-  "serverinfo_network_desc", "serverinfo_default_max_clients",
+  "serverinfo_network_description", "serverinfo_default_max_clients",
   "serverinfo_max_nick_length", "serverinfo_max_topic_length",
   "serverinfo_hub", "admin_entry", "admin_items", "admin_item",
   "admin_name", "admin_email", "admin_description", "motd_entry", "$@1",
@@ -3121,8 +3121,8 @@ yyreduce:
   if (conf_parser_ctx.pass != 2)
     break;
 
-  xfree(ConfigServerInfo.network_desc);
-  ConfigServerInfo.network_desc = xstrdup(yylval.string);
+  xfree(ConfigServerInfo.network_description);
+  ConfigServerInfo.network_description = xstrdup(yylval.string);
 }
 #line 3128 "conf_parser.c" /* yacc.c:1652  */
     break;

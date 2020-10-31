@@ -127,7 +127,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
       !(HasUMode(source_p, UMODE_OPER) || source_p == target_p))
     sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, target_p->name,
                        ConfigServerHide.hidden_name,
-                       ConfigServerInfo.network_desc);
+                       ConfigServerInfo.network_description);
   else
     sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, target_p->name,
                        target_p->servptr->name, target_p->servptr->info);

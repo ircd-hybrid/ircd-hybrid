@@ -254,7 +254,7 @@ struct config_serverinfo_entry
   char *name;
   char *description;
   char *network_name;
-  char *network_desc;
+  char *network_description;
   char *rsa_private_key_file;
   char *tls_certificate_file;
   char *tls_dh_param_file;

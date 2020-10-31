@@ -99,7 +99,7 @@
 
 /* ConfigServerInfo default values */
 #define NETWORK_NAME_DEFAULT "2600net"  /* default for network_name */
-#define NETWORK_DESC_DEFAULT "2600net IRC Network"  /* default for network_desc */
+#define NETWORK_DESCRIPTION_DEFAULT "2600net IRC Network"  /* default for network_description */
 
 /* General defaults */
 #define LINKS_DELAY_DEFAULT  300

@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_REVISION([$Id$])
 
 AC_PREREQ(2.69)
-AC_INIT([ircd-hybrid], [8.2.33], [bugs@ircd-hybrid.org])
+AC_INIT([ircd-hybrid], [8.2.34], [bugs@ircd-hybrid.org])
 AM_INIT_AUTOMAKE(1.16.1 subdir-objects)
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])

@@ -342,14 +342,17 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   client_p->hopcount = atoi(parv[2]);
   client_p->tsinfo = strtoumax(parv[3], NULL, 10);
 
+  /* TBR: compatibility mode */
+  const int does_rhost = parc == 12;
+
   strlcpy(client_p->name, parv[1], sizeof(client_p->name));
   strlcpy(client_p->username, parv[5], sizeof(client_p->username));
   strlcpy(client_p->host, parv[6], sizeof(client_p->host));
-  strlcpy(client_p->realhost, parv[7], sizeof(client_p->realhost));
-  strlcpy(client_p->sockhost, parv[8], sizeof(client_p->sockhost));
-  strlcpy(client_p->id, parv[9], sizeof(client_p->id));
-  strlcpy(client_p->account, parv[10], sizeof(client_p->account));
-  strlcpy(client_p->info, parv[11], sizeof(client_p->info));
+  strlcpy(client_p->realhost, parv[6 + does_rhost], sizeof(client_p->realhost));
+  strlcpy(client_p->sockhost, parv[7 + does_rhost], sizeof(client_p->sockhost));
+  strlcpy(client_p->id, parv[8 + does_rhost], sizeof(client_p->id));
+  strlcpy(client_p->account, parv[9 + does_rhost], sizeof(client_p->account));
+  strlcpy(client_p->info, parv[parc - 1], sizeof(client_p->info));
 
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof(hints));
@@ -416,7 +419,9 @@ static bool
 perform_uid_introduction_collides(struct Client *source_p, struct Client *target_p,
                                   int parc, char *parv[])
 {
-  const char *uid = parv[9];
+  /* TBR: compatibility mode */
+  const int does_rhost = parc == 12;
+  const char *uid = parv[8 + does_rhost];
   uintmax_t newts = strtoumax(parv[3], NULL, 10);
 
   assert(IsServer(source_p));
@@ -447,7 +452,7 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
 
   /* The timestamps are different */
   bool sameuser = irccmp(target_p->username, parv[5]) == 0 &&
-                  irccmp(target_p->sockhost, parv[8]) == 0;
+                  irccmp(target_p->sockhost, parv[7 + does_rhost]) == 0;
 
   /*
    * If the users are the same (loaded a client on a different server)
@@ -794,11 +799,17 @@ ms_nick(struct Client *source_p, int parc, char *parv[])
 static void
 ms_uid(struct Client *source_p, int parc, char *parv[])
 {
+/* TBR: compatibility mode */
+  const int does_rhost = parc == 12;
+
   if (check_clean_nick(source_p, parv[1]) == false ||
       check_clean_user(source_p, parv[1], parv[5]) == false ||
       check_clean_host(source_p, parv[1], parv[6]) == false ||
-      check_clean_host(source_p, parv[1], parv[7]) == false ||
-      check_clean_uid(source_p, parv[1], parv[9]) == false)
+      check_clean_uid(source_p, parv[1], parv[8 + does_rhost]) == false)
+    return;
+
+  /* TBR: compatibility mode */
+  if (does_rhost && check_clean_host(source_p, parv[1], parv[7]) == false)
     return;
 
   /*
@@ -806,7 +817,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
    * This may generate 401's, but it ensures that both clients always
    * go, even if the other server refuses to do the right thing.
    */
-  struct Client *target_p = hash_find_id(parv[9]);
+  struct Client *target_p = hash_find_id(parv[8 + does_rhost]);
   if (target_p)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
@@ -850,7 +861,7 @@ static struct Message uid_msgtab =
   .cmd = "UID",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_uid, .args_min = 12 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_uid, .args_min = 11 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };

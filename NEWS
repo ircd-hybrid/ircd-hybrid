@@ -1,6 +1,6 @@
 -- Noteworthy changes in version 8.2.34 (2020-11-01)
 * Re-implement backwards compatibility mode for old ircd-hybrid 8.2.23 and below.
-  Final removal is scheduled for the end of 2020.
+  Final removal is scheduled for early 2021.
 * For consistency, the `general::network_desc` configuration directive has been
   renamed to `general::network_description`
 * Server notices that previously have been sent to user modes +f and +u are now
@@ -11,6 +11,8 @@
   to this user mode. For this, `bots` has been removed from
   `general::oper_only_umodes`, `general::oper_umodes`, and `operator::umodes`.
   `flood` has been added instead to these configuration directives.
+* Stricten server/user ID validation. IDs have to be all uppercase everywhere now.
+* For a full list of all changes in this release, see <https://git.io/JT7UH>
 
 
 -- Noteworthy changes in version 8.2.33 (2020-09-07)

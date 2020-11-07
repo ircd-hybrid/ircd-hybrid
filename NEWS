@@ -7,12 +7,12 @@
   sent to user mode +j (reject notices) instead. Due to this change, `unauth` and
   `full` have been removed from `general::oper_only_umodes`, `general::oper_umodes`,
   and `operator::umodes`.
-* User mode +b has been replaced with +f (flood). Spam/flood notices are now sent
-  to this user mode. For this, `bots` has been removed from
+* User mode +b (bots) has been replaced with +f (flood). Spam/flood notices are now
+  sent to this user mode. For this, `bots` has been removed from
   `general::oper_only_umodes`, `general::oper_umodes`, and `operator::umodes`.
   `flood` has been added instead to these configuration directives.
 * Stricten server/user ID validation. IDs have to be all uppercase everywhere now.
-* For a full list of all changes in this release, see <https://git.io/JT7UH>
+* For a full list of all changes in this release, see <https://git.io/JkeID>
 
 
 -- Noteworthy changes in version 8.2.33 (2020-09-07)
@@ -208,7 +208,7 @@
 
 -- Noteworthy changes in version 8.2.19 (2016-08-21)
 * Fixed a possible server name leak in `WHO` with server hiding enabled
-* `WHO` now allows opers to search by IP address
+* `WHO` now allows IRC operators to search by IP address
 * Admins no longer can see IP addresses in `STATS P` with
   `serverhide::hide_server_ips` enabled
 * User mode `n` now shows nick name changes from remote clients, too
@@ -345,7 +345,7 @@
 * ircd now rejects remote k-line requests for user@host mask that don't
   have at least `general::min_nonwildcard` non-wildcard characters in it
 * Configuration related server notices are now sent to admins only as
-  they potentially could leak passwords and other sensitive data to irc
+  they potentially could leak passwords and other sensitive data to IRC
   operators that don't have administrator privileges
 * The `GLINE`/`GUNGLINE` commands have been removed. `KLINE` in conjunction
   with cluster {} and/or shared {} blocks is now the recommended
@@ -401,8 +401,8 @@
   `JFLOODCOUNT` values that have been changed from within IRC via the `SET`
   command
 * Added channel mode `C` which prevents users from sending CTCPs to a channel
-* Fixes to the NOTICE/PRIVMSG anti-flood logic
-* Allow to disable the NOTICE/PRIVMSG anti-flood mechanism by setting the
+* Fixes to the `NOTICE`/`PRIVMSG` anti-flood logic
+* Allow to disable the `NOTICE`/`PRIVMSG` anti-flood mechanism by setting the
   `general::default_floodcount` configuration option to 0
 * Updated some help files
 * IRC operators may now see certificate fingerprints, user modes and hidden
@@ -429,7 +429,7 @@
 -- Noteworthy changes in version 8.2.1 (2014-10-21)
 * Fixed bug where `UNDLINE remote.server IP` did not work as expected
 * Servers are now allowed to add/remove K-/D-/X-lines and RESVs
-* Usermode +G now no longer allows to override +g
+* User mode +G now no longer allows to override +g
 * Due to potential weakness, TLS session caching and session tickets
   have been disabled
 * Minor improvements to TS6 implementation
@@ -438,7 +438,7 @@
 
 
 -- Noteworthy changes in version 8.2.0 (2014-08-24)
-* Successful operator logins are now announced globally via `GLOBOPS`
+* Successful IRC operator logins are now announced globally via `GLOBOPS`
 * Cleanups and improvements to the resolver code
 * Cleanups and improvements to the poll() I/O event notification support
 * A topic mask can now be specified within the `LIST` options
@@ -457,12 +457,14 @@
   newly added `away_count` and `away_time` configuration directives
   in the general {} block
 * Support for the select() I/O event notification has been dropped
+* For a full list of all changes in this release, see <https://git.io/JkeIF>
 
 
 -- Noteworthy changes in version 8.2.0rc1 (2014-07-20)
 * Miscellaneous code cleanups and stabilization fixes
 * `./configure` now requires OpenSSL 0.9.8o or above in order
   to enable TLS/SSL support
+* For a full list of all changes in this release, see <https://git.io/JkeLI>
 
 
 -- Noteworthy changes in version 8.2.0beta4 (2014-07-06)
@@ -481,18 +483,21 @@
 * Removed `ssl_server_method` and `ssl_client_method` configuration options.
   ircd now only allows TLSv1, TLSv1.1 and TLSv1.2 protocols depending
   on the OpenSSL version. SSLv3 is no longer supported.
+* For a full list of all changes in this release, see <https://git.io/JkeLO>
 
 
 -- Noteworthy changes in version 8.2.0beta3 (2014-05-26)
 * Code cleanups/performance improvements
+* For a full list of all changes in this release, see <https://git.io/JkeLW>
 
 
 -- Noteworthy changes in version 8.2.0beta2 (2014-05-15)
 * **IMPORTANT:** renamed `general::warn_no_nline` configuration directive to
   `general::warn_no_connect_block`
 * Fixed bug with `WHOIS` not showing a list of channel names as expected
-* Added usermode +q which hides idle and signon time in `WHOIS`
-* Added usermode +p which hides channel list in `WHOIS`
+* Added user mode +q which hides idle and signon time in `WHOIS`
+* Added user mode +p which hides channel list in `WHOIS`
+* For a full list of all changes in this release, see <https://git.io/JkeLB>
 
 
 -- Noteworthy changes in version 8.2.0beta1 (2014-04-29)
@@ -514,8 +519,8 @@
 
 -- Noteworthy changes in version 8.1.19 (2014-07-05)
 * Fixed `EOB` logic for remote servers
-* Fixed bug where opers that have the +g/+G/+R umodes set won't receive server
-  notices for remote CONNECT/KLINE/DLINE/XLINE/RESV attempts
+* Fixed bug where IRC operators that have the +g/+G/+R umodes set won't receive
+  server notices for remote CONNECT/KLINE/DLINE/XLINE/RESV attempts
 * Sending messages to user@server to local targets is now no longer possible,
   as this was an easy way to bypass +R/+G/+g user modes.
 * Fixed splicode logic so `SPLITNUM` now works as expected
@@ -561,7 +566,7 @@
 -- Noteworthy changes in version 8.1.14 (2014-02-25)
 * WHOWAS now honors `serverhide::disable_remote_commands`
 * Improved TS6 inter-server communication
-* Added `unxline` oper flag
+* Added `unxline` IRC operator flag
 * Implemented IRCv3.2 `userhost-in-names` extension
 * ircd now allows private RSA keys larger than 2048 bits
 * Fixed bug where signals stopped from working after restarting
@@ -609,7 +614,7 @@
 
 
 -- Noteworthy changes in version 8.1.9 (2013-11-08)
-* Added usermode +W. Users connected via a webirc gateway get this
+* Added user mode +W. Users connected via a webirc gateway get this
   mode set by servers.
 * `WHOIS` now shows if a client is connected via a webirc gateway
 * Administrators may now see +s channels a user is in with `WHOIS`.
@@ -670,7 +675,7 @@
   fingerprints
 * Added `operator::ssl_connection_required` configuration option. See
   `doc/reference.conf` for more information
-* Added usermode +S (client is connected via SSL/TLS). Allows services
+* Added user mode +S (client is connected via SSL/TLS). Allows services
   to keep track of what users are connected via SSL, and allows to see
   ssl-status of remote clients in a `WHOIS`
 * Fixed a server name leak with server hiding enabled
@@ -680,8 +685,8 @@
 * **IMPORTANT:** moved `disable_remote_command` configuration directive from
   general {} block to serverhide {} block
 * Minor code cleanups/performance improvements
-* Fixed bug where opers could see `LOCOPS` messages even if they don't have
-  the +l mode set
+* Fixed bug where IRC operators could see `LOCOPS` messages even if they don't
+  have the +l mode set
 * Fixed bug where non-SSL clients could join +S channels on non-SSL servers
 * Implemented motd {} configuration blocks. See `doc/reference.conf` for more
   information
@@ -731,7 +736,7 @@
 -- Noteworthy changes in version 8.1.0beta2 (2013-04-28)
 * Fixed broken compile with libGeoIP disabled
 * Code cleanups; working towards stabilization and improved performance
-* Removed operflag `nick_changes`. Operators can now set +n at will
+* Removed oper flag `nick_changes`. IRC operators can now set +n at will
 * Fixed shared {} blocks not working as expected
 * Fixed spoofs not working as expected
 
@@ -776,8 +781,8 @@
 -- Noteworthy changes in version 8.0.7 (2013-04-12)
 * Services may now set a channel topic without joining the channel first
 * Fixed bug where `WHOIS` would send empty sockhost information on TS5 servers
-* Remote server connection and split notices now go to new usermode +e.
-  These previously used usermode +x.
+* Remote server connection and split notices now go to new user mode +e.
+  These previously used user mode +x.
 * Services may now change the host of a specific user
   via `SVSMODE <timestamp> <target> +x <hostname>`
 
@@ -831,7 +836,7 @@
 
 
 -- Noteworthy changes in version 8.0.1 (2012-11-04)
-* Fixed broken CIDR support for `CHALLENGE` based irc operator logins
+* Fixed broken CIDR support for `CHALLENGE` based IRC operator logins
 * Fixed class limits not properly applying to operator {} blocks
 * Fixed possible `TBURST` desynchronization with services
 * Fixed `TBURST` from leaking the server name if it's a hidden server
@@ -869,7 +874,7 @@
 * `channel::disable_fake_channels` now also disables ascii 29 (mIRC italic)
   when set to yes
 * Added `channel::max_chans_per_oper` configuration directive. The old way
-  was to let operators join three times the amount of max_chans_per_user
+  was to let IRC operators join three times the amount of max_chans_per_user
 * Replaced `MODLOAD`, `MODUNLOAD`, `MODRELOAD`, `MODLIST` and `MODRESTART`
   commands with the new `MODULE` command which can be fed with the `LOAD,`
   `UNLOAD`, `RELOAD` and `LIST` parameters.
@@ -877,7 +882,7 @@
   all modules
 * Added back server notice when a client tries to obtain a reserved nick name
 * Removed `OMOTD` module
-* Added `set` to operator privilege flags. Gives access to the `SET` command
+* Added `set` to IRC operator privilege flags. Gives access to the `SET` command
 * Improved TS6 support
 * Channel keys/passwords are now case sensitive
 
@@ -889,18 +894,18 @@
   - Added service stamps to `NICK`/`UID` messages
   - Added SVS to server capabilities (`CAPAB`). SVS capable servers can
     deal with extended `NICK`/`UID` messages that contain service IDs/stamps.
-  - Changed rejected client notices to go to new usermode +j. These
-    previously used usermode +r.
-  - Added usermode +r (registered nick) and channelmode +r (registered channel)
-  - Added usermode +R (only registered clients may send a private message)
-  - Added channelmode +R (only registered clients may join that channel)
+  - Changed rejected client notices to go to new user mode +j. These
+    previously used user mode +r.
+  - Added user mode +r (registered nick) and channel mode +r (registered channel)
+  - Added user mode +R (only registered clients may send a private message)
+  - Added channel mode +R (only registered clients may join that channel)
   - Various services shortcuts have been added (`NS`, `CS`, `NICKSERV`, `CHANSERV`, etc.)
   - Added services {} block to `ircd.conf`
   - Added services_name directive to general {} block
-  - Added `GLOBOPS` mainly for services compatibility, but can be used by operators, too
+  - Added `GLOBOPS` mainly for services compatibility, but can be used by IRC operators, too
 * Removed `RKLINE` and `RXLINE` commands. Regular expression based bans should
   only be added via `ircd.conf`
-* Added `globops`, `restart`, `dline`, `undline` and `module` operator privilege flags.
+* Added `globops`, `restart`, `dline`, `undline` and `module` IRC operator privilege flags.
   Read `doc/reference.conf` for further explanation of what these flags control
 * Removed Idle-time klines
 * Cleaned up modules API. Old modules won't work anymore
@@ -909,8 +914,8 @@
 * Introduced new logging subsystem including log rotation based on
   file sizes. Log timestamp format is ISO8601 now
 * Added support for remote D-lines
-* Added usermode +H which is basically a replacement for the hidden_admin and
-  `hidden_oper` operator flags. With usermode +H, irc operator status can now
+* Added user mode +H which is basically a replacement for the hidden_admin and
+  `hidden_oper` operator flags. With user mode +H, IRC operator status can now
   be hidden even on remote servers
 * Added CIDR support for operator {} blocks
 * Removed the servlink program. ircd-hybrid can now make use of
@@ -920,11 +925,11 @@
 * Removed `ssl_server_protocol` configuration directive and
   added `ssl_client_method` and `ssl_server_method` instead.
   Both of these options can now be changed at runtime
-* Oper login IDs are no longer limited to NICKLEN*2
+* IRC operator login IDs are no longer limited to NICKLEN*2
 * Removed `channel::burst_topicwho` configuration option. This feature is now
   enabled by default
 * `STATS Y|y` now reports CIDR limits as well
-* Added m_webirc.c to contrib/
+* Added `m_webirc.c` to `contrib/`
 * Overall code cleanup and speed improvements
 
 --------------------------------------------------------------------------------

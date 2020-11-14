@@ -110,7 +110,7 @@ static struct event event_try_connections =
 {
   .name = "try_connections",
   .handler = try_connections,
-  .when = 5
+  .when = 15
 };
 
 static struct event event_comm_checktimeouts =

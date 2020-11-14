@@ -285,7 +285,7 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
       pbuf = parabuf;
     }
 
-    pbuf += snprintf(pbuf, sizeof(pbuf) - (pbuf - parabuf), "%s ", ban->banstr);
+    pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", ban->banstr);
     cur_len += tlen;
   }
 

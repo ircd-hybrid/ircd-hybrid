@@ -712,7 +712,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    *
    * connect {
    *            name = "irc.bighub.net";
-   *            hub_mask="*";
+   *            hub_mask = "*";
    *            ...
    *
    * That would allow "irc.bighub.net" to introduce anything it wanted..
@@ -721,8 +721,8 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    *
    * connect {
    *            name = "irc.somehub.fi";
-   *		hub_mask="*";
-   *		leaf_mask="*.edu";
+   *            hub_mask = "*";
+   *            leaf_mask = "*.edu";
    *            ...
    *
    * Would allow this server in finland to hub anything but .edu's

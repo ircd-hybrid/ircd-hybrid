@@ -495,7 +495,7 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
       }
 
       /*
-       * At this point, name+1 should be a channel name i.e. #foo. If the channel
+       * At this point, name should be a channel name i.e. #foo. If the channel
        * is found, fine, if not report an error.
        */
       if ((target = hash_find_channel(name)))

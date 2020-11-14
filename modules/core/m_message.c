@@ -312,8 +312,7 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
  *		- nick stuff to grok for opers
  *		- text to send if grok
  * output	- none
- * side effects	- old style username@server is handled here for non opers
- *		  opers are allowed username%hostname@server
+ * side effects	- old style nick@server is handled here for non opers
  *		  all the traditional oper type messages are also parsed here.
  *		  i.e. "/msg #some.host."
  *		  However, syntax has been changed.
@@ -321,17 +320,13 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
  *		  now becomes     "/msg $#some.host.mask"
  *		  previous syntax of: "/msg $some.server.mask" remains
  *		  This disambiguates the syntax.
- *
- * XXX		  N.B. dalnet changed it to nick@server as have other servers.
- *		  we will stick with tradition for now.
- *		- Dianora
  */
 static void
 handle_special(bool notice, struct Client *source_p,
                const char *nick, const char *text)
 {
   /*
-   * user[%host]@server addressed?
+   * nick@server addressed?
    */
   const char *server = strchr(nick, '@');
   if (server)
@@ -340,12 +335,6 @@ handle_special(bool notice, struct Client *source_p,
     if (target_p == NULL)
     {
       sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server + 1);
-      return;
-    }
-
-    if (!HasUMode(source_p, UMODE_OPER) && strchr(nick, '%'))
-    {
-      sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, nick);
       return;
     }
 

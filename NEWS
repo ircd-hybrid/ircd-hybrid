@@ -1,3 +1,7 @@
+-- Noteworthy changes in version 8.2.35 (2020-11-14)
+* Fixed issue where servers could propagate truncated ban masks during net-join
+
+
 -- Noteworthy changes in version 8.2.34 (2020-11-01)
 * Re-implement backwards compatibility mode for old ircd-hybrid 8.2.23 and below.
   Final removal is scheduled for early 2021.

@@ -1122,21 +1122,18 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
 static const char *
 parse_stats_args(struct Client *source_p, int parc, char *parv[], bool *doall, bool *wilds)
 {
-  if (parc > 2)
-  {
-    const char *name = parv[2];
+  const char *const name = parv[2];
 
-    if (irccmp(name, ID_or_name(&me, source_p)) == 0)
-      *doall = true;
-    else if (match(name, ID_or_name(&me, source_p)) == 0)
-      *doall = true;
+  if (EmptyString(name))
+    return NULL;
 
-    *wilds = has_wildcards(name);
+  if (irccmp(name, ID_or_name(&me, source_p)) == 0)
+    *doall = true;
+  else if (match(name, ID_or_name(&me, source_p)) == 0)
+    *doall = true;
 
-    return name;
-  }
-
-  return NULL;
+  *wilds = has_wildcards(name);
+  return name;
 }
 
 static void

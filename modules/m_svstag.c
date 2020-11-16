@@ -66,7 +66,6 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
 
   if (strncmp(parv[3], "-", 1) == 0)
   {
-    /* TBD: possibly allow to remove certain tags by numeric */
     svstag_clear_list(&target_p->svstags);
     sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s",
                   source_p->id,
@@ -74,7 +73,7 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (parc < 6 || EmptyString(parv[5]))
+  if (EmptyString(parv[5]))
     return;
 
   svstag_attach(&target_p->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);

@@ -75,7 +75,7 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (parc == 3)
+  if (EmptyString(parv[3]))
     sendto_one(target_p, ":%s SVSJOIN %s %s", source_p->id,
                target_p->id, parv[2]);
   else

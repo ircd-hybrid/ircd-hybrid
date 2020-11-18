@@ -301,7 +301,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
   struct Channel *channel = NULL;
   char *mask = parv[1];
-  const bool server_oper = parc > 2 && *parv[2] == 'o';  /* Show OPERS only */
+  const bool server_oper = parv[2] && *parv[2] == 'o';  /* Show OPERS only */
 
   /* See if mask is there, collapse it or return if not there */
   if (EmptyString(mask))

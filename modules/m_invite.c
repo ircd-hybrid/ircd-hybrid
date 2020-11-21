@@ -185,9 +185,8 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   if (member_find_link(target_p, channel))
     return;
 
-  if (parc > 3 && IsDigit(*parv[3]))
-    if (strtoumax(parv[3], NULL, 10) > channel->creation_time)
-      return;
+  if (strtoumax(parv[3], NULL, 10) > channel->creation_time)
+    return;
 
   channel->last_invite_time = event_base->time.sec_monotonic;
 
@@ -223,7 +222,7 @@ static struct Message invite_msgtab =
   .cmd = "INVITE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_invite, .end_grace_period = true },
-  .handlers[SERVER_HANDLER] = { .handler = ms_invite, .args_min = 3 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_invite, .args_min = 4 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_invite, .end_grace_period = true }
 };

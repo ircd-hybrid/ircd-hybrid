@@ -64,12 +64,12 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   if (ts && (ts != target_p->tsinfo))
     return;
 
-  if (strncmp(parv[3], "-", 1) == 0)
+  if (strcmp(parv[3], "-") == 0)
   {
     svstag_clear_list(&target_p->svstags);
-    sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s",
+    sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju -",
                   source_p->id,
-                  target_p->id, target_p->tsinfo, parv[3]);
+                  target_p->id, target_p->tsinfo);
     return;
   }
 

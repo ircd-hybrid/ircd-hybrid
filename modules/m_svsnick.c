@@ -37,7 +37,7 @@
 #include "irc_string.h"
 #include "user.h"
 #include "hash.h"
-#include "watch.h"
+#include "monitor.h"
 #include "whowas.h"
 
 
@@ -112,7 +112,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
 
   target_p->tsinfo = new_ts;
   clear_ban_cache_list(&target_p->channel);
-  watch_check_hash(target_p, RPL_LOGOFF);
+  monitor_signoff(target_p);
 
   if (HasUMode(target_p, UMODE_REGISTERED))
   {
@@ -136,7 +136,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   strlcpy(target_p->name, new_nick, sizeof(target_p->name));
   hash_add_client(target_p);
 
-  watch_check_hash(target_p, RPL_LOGON);
+  monitor_signon(target_p);
 
   fd_note(target_p->connection->fd, "Nick: %s", target_p->name);
 }

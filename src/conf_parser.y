@@ -221,13 +221,13 @@ reset_block_state(void)
 %token  MAX_CHANNELS
 %token  MAX_IDLE
 %token  MAX_INVITES
+%token  MAX_MONITOR
 %token  MAX_NICK_CHANGES
 %token  MAX_NICK_LENGTH
 %token  MAX_NICK_TIME
 %token  MAX_NUMBER
 %token  MAX_TARGETS
 %token  MAX_TOPIC_LENGTH
-%token  MAX_WATCH
 %token  MIN_IDLE
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
@@ -2376,7 +2376,7 @@ general_item:       general_away_count |
                     general_kline_min_cidr |
                     general_kline_min_cidr6 |
                     general_stats_e_disabled |
-                    general_max_watch |
+                    general_max_monitor |
                     general_cycle_on_host_change |
                     error;
 
@@ -2391,9 +2391,9 @@ general_away_time: AWAY_TIME '=' timespec ';'
   ConfigGeneral.away_time = $3;
 };
 
-general_max_watch: MAX_WATCH '=' NUMBER ';'
+general_max_monitor: MAX_MONITOR '=' NUMBER ';'
 {
-  ConfigGeneral.max_watch = $3;
+  ConfigGeneral.max_monitor = $3;
 };
 
 general_whowas_history_length: WHOWAS_HISTORY_LENGTH '=' NUMBER ';'

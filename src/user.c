@@ -47,7 +47,7 @@
 #include "rng_mt.h"
 #include "misc.h"
 #include "parse.h"
-#include "watch.h"
+#include "monitor.h"
 #include "isupport.h"
 #include "tls.h"
 #include "patchlevel.h"
@@ -204,7 +204,7 @@ introduce_client(struct Client *client)
   char buf[UMODE_MAX_STR] = "";
 
   send_umode(client, MyConnect(client), 0, buf);
-  watch_check_hash(client, RPL_LOGON);
+  monitor_signon(client);
 
   if (buf[0] == '\0')
   {

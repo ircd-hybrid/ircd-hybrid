@@ -135,15 +135,15 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
 	isupport.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
 	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) misc.$(OBJEXT) \
-	modules.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
-	packet.$(OBJEXT) parse.$(OBJEXT) patricia.$(OBJEXT) \
-	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	modules.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	patricia.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
 	s_bsd_devpoll.$(OBJEXT) s_bsd_kqueue.$(OBJEXT) \
 	tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) tls_openssl.$(OBJEXT) \
 	tls_wolfssl.$(OBJEXT) res.$(OBJEXT) reslib.$(OBJEXT) \
 	restart.$(OBJEXT) rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) \
 	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
-	user.$(OBJEXT) watch.$(OBJEXT) whowas.$(OBJEXT)
+	user.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -191,18 +191,19 @@ am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/list.Po \
 	./$(DEPDIR)/listener.Po ./$(DEPDIR)/log.Po \
 	./$(DEPDIR)/match.Po ./$(DEPDIR)/memory.Po ./$(DEPDIR)/misc.Po \
-	./$(DEPDIR)/modules.Po ./$(DEPDIR)/motd.Po \
-	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
-	./$(DEPDIR)/parse.Po ./$(DEPDIR)/patricia.Po \
-	./$(DEPDIR)/res.Po ./$(DEPDIR)/reslib.Po \
-	./$(DEPDIR)/restart.Po ./$(DEPDIR)/rng_mt.Po \
-	./$(DEPDIR)/s_bsd.Po ./$(DEPDIR)/s_bsd_devpoll.Po \
-	./$(DEPDIR)/s_bsd_epoll.Po ./$(DEPDIR)/s_bsd_kqueue.Po \
-	./$(DEPDIR)/s_bsd_poll.Po ./$(DEPDIR)/send.Po \
-	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
-	./$(DEPDIR)/tls_gnutls.Po ./$(DEPDIR)/tls_none.Po \
-	./$(DEPDIR)/tls_openssl.Po ./$(DEPDIR)/tls_wolfssl.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/watch.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/modules.Po ./$(DEPDIR)/monitor.Po \
+	./$(DEPDIR)/motd.Po ./$(DEPDIR)/numeric.Po \
+	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po \
+	./$(DEPDIR)/patricia.Po ./$(DEPDIR)/res.Po \
+	./$(DEPDIR)/reslib.Po ./$(DEPDIR)/restart.Po \
+	./$(DEPDIR)/rng_mt.Po ./$(DEPDIR)/s_bsd.Po \
+	./$(DEPDIR)/s_bsd_devpoll.Po ./$(DEPDIR)/s_bsd_epoll.Po \
+	./$(DEPDIR)/s_bsd_kqueue.Po ./$(DEPDIR)/s_bsd_poll.Po \
+	./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
+	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/tls_gnutls.Po \
+	./$(DEPDIR)/tls_none.Po ./$(DEPDIR)/tls_openssl.Po \
+	./$(DEPDIR)/tls_wolfssl.Po ./$(DEPDIR)/user.Po \
+	./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -467,6 +468,7 @@ ircd_SOURCES = auth.c            \
                memory.c          \
                misc.c            \
                modules.c         \
+               monitor.c         \
                motd.c            \
                numeric.c         \
                packet.c          \
@@ -489,7 +491,6 @@ ircd_SOURCES = auth.c            \
                server.c          \
                server_capab.c    \
                user.c            \
-               watch.c           \
                whowas.c
 
 all: all-am
@@ -636,6 +637,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@ # am--include-marker
@@ -658,7 +660,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_openssl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_wolfssl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/watch.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -881,6 +882,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/memory.Po
 	-rm -f ./$(DEPDIR)/misc.Po
 	-rm -f ./$(DEPDIR)/modules.Po
+	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
 	-rm -f ./$(DEPDIR)/numeric.Po
 	-rm -f ./$(DEPDIR)/packet.Po
@@ -903,7 +905,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tls_openssl.Po
 	-rm -f ./$(DEPDIR)/tls_wolfssl.Po
 	-rm -f ./$(DEPDIR)/user.Po
-	-rm -f ./$(DEPDIR)/watch.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -998,6 +999,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/memory.Po
 	-rm -f ./$(DEPDIR)/misc.Po
 	-rm -f ./$(DEPDIR)/modules.Po
+	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
 	-rm -f ./$(DEPDIR)/numeric.Po
 	-rm -f ./$(DEPDIR)/packet.Po
@@ -1020,7 +1022,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tls_openssl.Po
 	-rm -f ./$(DEPDIR)/tls_wolfssl.Po
 	-rm -f ./$(DEPDIR)/user.Po
-	-rm -f ./$(DEPDIR)/watch.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

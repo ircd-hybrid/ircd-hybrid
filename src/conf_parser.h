@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.3.2.  */
+/* A Bison parser, made by GNU Bison 3.5.1.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -137,13 +137,13 @@ extern int yydebug;
     MAX_CHANNELS = 343,
     MAX_IDLE = 344,
     MAX_INVITES = 345,
-    MAX_NICK_CHANGES = 346,
-    MAX_NICK_LENGTH = 347,
-    MAX_NICK_TIME = 348,
-    MAX_NUMBER = 349,
-    MAX_TARGETS = 350,
-    MAX_TOPIC_LENGTH = 351,
-    MAX_WATCH = 352,
+    MAX_MONITOR = 346,
+    MAX_NICK_CHANGES = 347,
+    MAX_NICK_LENGTH = 348,
+    MAX_NICK_TIME = 349,
+    MAX_NUMBER = 350,
+    MAX_TARGETS = 351,
+    MAX_TOPIC_LENGTH = 352,
     MIN_IDLE = 353,
     MIN_NONWILDCARD = 354,
     MIN_NONWILDCARD_SIMPLE = 355,
@@ -368,13 +368,13 @@ extern int yydebug;
 #define MAX_CHANNELS 343
 #define MAX_IDLE 344
 #define MAX_INVITES 345
-#define MAX_NICK_CHANGES 346
-#define MAX_NICK_LENGTH 347
-#define MAX_NICK_TIME 348
-#define MAX_NUMBER 349
-#define MAX_TARGETS 350
-#define MAX_TOPIC_LENGTH 351
-#define MAX_WATCH 352
+#define MAX_MONITOR 346
+#define MAX_NICK_CHANGES 347
+#define MAX_NICK_LENGTH 348
+#define MAX_NICK_TIME 349
+#define MAX_NUMBER 350
+#define MAX_TARGETS 351
+#define MAX_TOPIC_LENGTH 352
 #define MIN_IDLE 353
 #define MIN_NONWILDCARD 354
 #define MIN_NONWILDCARD_SIMPLE 355
@@ -511,17 +511,16 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-#line 133 "conf_parser.y" /* yacc.c:1921  */
+#line 133 "conf_parser.y"
 
   int number;
   char *string;
 
-#line 523 "conf_parser.h" /* yacc.c:1921  */
-};
+#line 522 "conf_parser.h"
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

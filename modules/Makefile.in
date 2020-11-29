@@ -309,6 +309,12 @@ m_module_la_OBJECTS = $(am_m_module_la_OBJECTS)
 m_module_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_module_la_LDFLAGS) $(LDFLAGS) -o $@
+m_monitor_la_LIBADD =
+am_m_monitor_la_OBJECTS = m_monitor.lo
+m_monitor_la_OBJECTS = $(am_m_monitor_la_OBJECTS)
+m_monitor_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_monitor_la_LDFLAGS) $(LDFLAGS) -o $@
 m_motd_la_LIBADD =
 am_m_motd_la_OBJECTS = m_motd.lo
 m_motd_la_OBJECTS = $(am_m_motd_la_OBJECTS)
@@ -508,12 +514,6 @@ m_wallops_la_OBJECTS = $(am_m_wallops_la_OBJECTS)
 m_wallops_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_wallops_la_LDFLAGS) $(LDFLAGS) -o $@
-m_watch_la_LIBADD =
-am_m_watch_la_OBJECTS = m_watch.lo
-m_watch_la_OBJECTS = $(am_m_watch_la_OBJECTS)
-m_watch_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_watch_la_LDFLAGS) $(LDFLAGS) -o $@
 m_webirc_la_LIBADD =
 am_m_webirc_la_OBJECTS = m_webirc.lo
 m_webirc_la_OBJECTS = $(am_m_webirc_la_OBJECTS)
@@ -572,24 +572,24 @@ am__depfiles_remade = ./$(DEPDIR)/m_accept.Plo ./$(DEPDIR)/m_admin.Plo \
 	./$(DEPDIR)/m_links.Plo ./$(DEPDIR)/m_list.Plo \
 	./$(DEPDIR)/m_locops.Plo ./$(DEPDIR)/m_lusers.Plo \
 	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_metadata.Plo \
-	./$(DEPDIR)/m_module.Plo ./$(DEPDIR)/m_motd.Plo \
-	./$(DEPDIR)/m_names.Plo ./$(DEPDIR)/m_oper.Plo \
-	./$(DEPDIR)/m_pass.Plo ./$(DEPDIR)/m_ping.Plo \
-	./$(DEPDIR)/m_pong.Plo ./$(DEPDIR)/m_post.Plo \
-	./$(DEPDIR)/m_rehash.Plo ./$(DEPDIR)/m_restart.Plo \
-	./$(DEPDIR)/m_resv.Plo ./$(DEPDIR)/m_set.Plo \
-	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
-	./$(DEPDIR)/m_svsaccount.Plo ./$(DEPDIR)/m_svshost.Plo \
-	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
-	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
-	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
-	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
-	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
-	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
-	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
-	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
-	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_wallops.Plo \
-	./$(DEPDIR)/m_watch.Plo ./$(DEPDIR)/m_webirc.Plo \
+	./$(DEPDIR)/m_module.Plo ./$(DEPDIR)/m_monitor.Plo \
+	./$(DEPDIR)/m_motd.Plo ./$(DEPDIR)/m_names.Plo \
+	./$(DEPDIR)/m_oper.Plo ./$(DEPDIR)/m_pass.Plo \
+	./$(DEPDIR)/m_ping.Plo ./$(DEPDIR)/m_pong.Plo \
+	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_rehash.Plo \
+	./$(DEPDIR)/m_restart.Plo ./$(DEPDIR)/m_resv.Plo \
+	./$(DEPDIR)/m_set.Plo ./$(DEPDIR)/m_stats.Plo \
+	./$(DEPDIR)/m_svinfo.Plo ./$(DEPDIR)/m_svsaccount.Plo \
+	./$(DEPDIR)/m_svshost.Plo ./$(DEPDIR)/m_svsjoin.Plo \
+	./$(DEPDIR)/m_svskill.Plo ./$(DEPDIR)/m_svsmode.Plo \
+	./$(DEPDIR)/m_svsnick.Plo ./$(DEPDIR)/m_svspart.Plo \
+	./$(DEPDIR)/m_svstag.Plo ./$(DEPDIR)/m_tburst.Plo \
+	./$(DEPDIR)/m_time.Plo ./$(DEPDIR)/m_topic.Plo \
+	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
+	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
+	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
+	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
+	./$(DEPDIR)/m_wallops.Plo ./$(DEPDIR)/m_webirc.Plo \
 	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
 	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo
 am__mv = mv -f
@@ -623,12 +623,12 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
 	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
 	$(m_map_la_SOURCES) $(m_metadata_la_SOURCES) \
-	$(m_module_la_SOURCES) $(m_motd_la_SOURCES) \
-	$(m_names_la_SOURCES) $(m_oper_la_SOURCES) \
-	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
-	$(m_post_la_SOURCES) $(m_rehash_la_SOURCES) \
-	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
-	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_module_la_SOURCES) $(m_monitor_la_SOURCES) \
+	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
+	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
+	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
+	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
+	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_svsaccount_la_SOURCES) \
 	$(m_svshost_la_SOURCES) $(m_svsjoin_la_SOURCES) \
 	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
@@ -639,10 +639,9 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
 	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
 	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_wallops_la_SOURCES) $(m_webirc_la_SOURCES) \
+	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
+	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
 	$(m_certfp_la_SOURCES) $(m_close_la_SOURCES) \
@@ -655,12 +654,12 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
 	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
 	$(m_map_la_SOURCES) $(m_metadata_la_SOURCES) \
-	$(m_module_la_SOURCES) $(m_motd_la_SOURCES) \
-	$(m_names_la_SOURCES) $(m_oper_la_SOURCES) \
-	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
-	$(m_post_la_SOURCES) $(m_rehash_la_SOURCES) \
-	$(m_restart_la_SOURCES) $(m_resv_la_SOURCES) \
-	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_module_la_SOURCES) $(m_monitor_la_SOURCES) \
+	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
+	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
+	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
+	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
+	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_svsaccount_la_SOURCES) \
 	$(m_svshost_la_SOURCES) $(m_svsjoin_la_SOURCES) \
 	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
@@ -671,10 +670,9 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
 	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
 	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_wallops_la_SOURCES) $(m_watch_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_wallops_la_SOURCES) $(m_webirc_la_SOURCES) \
+	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
+	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -918,6 +916,7 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_map.la        \
                       m_metadata.la   \
                       m_module.la     \
+                      m_monitor.la    \
                       m_motd.la       \
                       m_names.la      \
                       m_oper.la       \
@@ -951,7 +950,6 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_userhost.la   \
                       m_version.la    \
                       m_wallops.la    \
-                      m_watch.la      \
                       m_webirc.la     \
                       m_who.la        \
                       m_whois.la      \
@@ -985,6 +983,7 @@ m_lusers_la_LDFLAGS = $(MODULE_FLAGS)
 m_map_la_LDFLAGS = $(MODULE_FLAGS)
 m_metadata_la_LDFLAGS = $(MODULE_FLAGS)
 m_module_la_LDFLAGS = $(MODULE_FLAGS)
+m_monitor_la_LDFLAGS = $(MODULE_FLAGS)
 m_motd_la_LDFLAGS = $(MODULE_FLAGS)
 m_names_la_LDFLAGS = $(MODULE_FLAGS)
 m_oper_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1018,7 +1017,6 @@ m_user_la_LDFLAGS = $(MODULE_FLAGS)
 m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
 m_wallops_la_LDFLAGS = $(MODULE_FLAGS)
-m_watch_la_LDFLAGS = $(MODULE_FLAGS)
 m_webirc_la_LDFLAGS = $(MODULE_FLAGS)
 m_who_la_LDFLAGS = $(MODULE_FLAGS)
 m_whois_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1051,6 +1049,7 @@ m_lusers_la_SOURCES = m_lusers.c
 m_map_la_SOURCES = m_map.c
 m_metadata_la_SOURCES = m_metadata.c
 m_module_la_SOURCES = m_module.c
+m_monitor_la_SOURCES = m_monitor.c
 m_motd_la_SOURCES = m_motd.c
 m_names_la_SOURCES = m_names.c
 m_oper_la_SOURCES = m_oper.c
@@ -1084,7 +1083,6 @@ m_user_la_SOURCES = m_user.c
 m_userhost_la_SOURCES = m_userhost.c
 m_version_la_SOURCES = m_version.c
 m_wallops_la_SOURCES = m_wallops.c
-m_watch_la_SOURCES = m_watch.c
 m_webirc_la_SOURCES = m_webirc.c
 m_who_la_SOURCES = m_who.c
 m_whois_la_SOURCES = m_whois.c
@@ -1240,6 +1238,9 @@ m_metadata.la: $(m_metadata_la_OBJECTS) $(m_metadata_la_DEPENDENCIES) $(EXTRA_m_
 m_module.la: $(m_module_la_OBJECTS) $(m_module_la_DEPENDENCIES) $(EXTRA_m_module_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_module_la_LINK) -rpath $(modulesdir) $(m_module_la_OBJECTS) $(m_module_la_LIBADD) $(LIBS)
 
+m_monitor.la: $(m_monitor_la_OBJECTS) $(m_monitor_la_DEPENDENCIES) $(EXTRA_m_monitor_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_monitor_la_LINK) -rpath $(modulesdir) $(m_monitor_la_OBJECTS) $(m_monitor_la_LIBADD) $(LIBS)
+
 m_motd.la: $(m_motd_la_OBJECTS) $(m_motd_la_DEPENDENCIES) $(EXTRA_m_motd_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_motd_la_LINK) -rpath $(modulesdir) $(m_motd_la_OBJECTS) $(m_motd_la_LIBADD) $(LIBS)
 
@@ -1339,9 +1340,6 @@ m_version.la: $(m_version_la_OBJECTS) $(m_version_la_DEPENDENCIES) $(EXTRA_m_ver
 m_wallops.la: $(m_wallops_la_OBJECTS) $(m_wallops_la_DEPENDENCIES) $(EXTRA_m_wallops_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_wallops_la_LINK) -rpath $(modulesdir) $(m_wallops_la_OBJECTS) $(m_wallops_la_LIBADD) $(LIBS)
 
-m_watch.la: $(m_watch_la_OBJECTS) $(m_watch_la_DEPENDENCIES) $(EXTRA_m_watch_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_watch_la_LINK) -rpath $(modulesdir) $(m_watch_la_OBJECTS) $(m_watch_la_LIBADD) $(LIBS)
-
 m_webirc.la: $(m_webirc_la_OBJECTS) $(m_webirc_la_DEPENDENCIES) $(EXTRA_m_webirc_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_webirc_la_LINK) -rpath $(modulesdir) $(m_webirc_la_OBJECTS) $(m_webirc_la_LIBADD) $(LIBS)
 
@@ -1390,6 +1388,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_map.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_metadata.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_module.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_monitor.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_motd.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_names.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_oper.Plo@am__quote@ # am--include-marker
@@ -1423,7 +1422,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_userhost.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_version.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_wallops.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_watch.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_webirc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_who.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_whois.Plo@am__quote@ # am--include-marker
@@ -1694,6 +1692,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/m_map.Plo
 	-rm -f ./$(DEPDIR)/m_metadata.Plo
 	-rm -f ./$(DEPDIR)/m_module.Plo
+	-rm -f ./$(DEPDIR)/m_monitor.Plo
 	-rm -f ./$(DEPDIR)/m_motd.Plo
 	-rm -f ./$(DEPDIR)/m_names.Plo
 	-rm -f ./$(DEPDIR)/m_oper.Plo
@@ -1727,7 +1726,6 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/m_userhost.Plo
 	-rm -f ./$(DEPDIR)/m_version.Plo
 	-rm -f ./$(DEPDIR)/m_wallops.Plo
-	-rm -f ./$(DEPDIR)/m_watch.Plo
 	-rm -f ./$(DEPDIR)/m_webirc.Plo
 	-rm -f ./$(DEPDIR)/m_who.Plo
 	-rm -f ./$(DEPDIR)/m_whois.Plo
@@ -1805,6 +1803,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/m_map.Plo
 	-rm -f ./$(DEPDIR)/m_metadata.Plo
 	-rm -f ./$(DEPDIR)/m_module.Plo
+	-rm -f ./$(DEPDIR)/m_monitor.Plo
 	-rm -f ./$(DEPDIR)/m_motd.Plo
 	-rm -f ./$(DEPDIR)/m_names.Plo
 	-rm -f ./$(DEPDIR)/m_oper.Plo
@@ -1838,7 +1837,6 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/m_userhost.Plo
 	-rm -f ./$(DEPDIR)/m_version.Plo
 	-rm -f ./$(DEPDIR)/m_wallops.Plo
-	-rm -f ./$(DEPDIR)/m_watch.Plo
 	-rm -f ./$(DEPDIR)/m_webirc.Plo
 	-rm -f ./$(DEPDIR)/m_who.Plo
 	-rm -f ./$(DEPDIR)/m_whois.Plo

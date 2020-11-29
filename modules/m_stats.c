@@ -49,7 +49,7 @@
 #include "event.h"
 #include "modules.h"
 #include "whowas.h"
-#include "watch.h"
+#include "monitor.h"
 #include "reslib.h"
 #include "motd.h"
 #include "ipcache.h"
@@ -349,9 +349,9 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   size_t local_client_memory_used  = 0;
   size_t remote_client_memory_used = 0;
 
-  unsigned int watch_list_headers = 0;   /* watchlist headers     */
-  unsigned int watch_list_entries = 0;   /* watchlist entries     */
-  size_t watch_list_memory = 0; /* watchlist memory used */
+  unsigned int monitor_list_headers = 0;   /* monitorlist headers     */
+  unsigned int monitor_list_entries = 0;   /* monitorlist entries     */
+  size_t monitor_list_memory = 0; /* monitorlist memory used */
 
   unsigned int listener_count = 0;
   size_t listener_memory = 0;
@@ -369,7 +369,7 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
     const struct Client *target_p = node->data;
 
     local_client_conf_count += dlink_list_length(&target_p->connection->confs);
-    watch_list_entries += dlink_list_length(&target_p->connection->watches);
+    monitor_list_entries += dlink_list_length(&target_p->connection->monitors);
   }
 
   local_client_count = dlink_list_length(&local_server_list) + dlink_list_length(&local_client_list);
@@ -410,13 +410,13 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  watch_count_memory(&watch_list_headers, &watch_list_memory);
+  monitor_count_memory(&monitor_list_headers, &monitor_list_memory);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :WATCH headers %u(%zu) entries %u(%zu)",
-                     watch_list_headers,
-                     watch_list_memory,
-                     watch_list_entries,
-                     watch_list_entries * sizeof(dlink_node) * 2);
+                     "z :MONITOR headers %u(%zu) entries %u(%zu)",
+                     monitor_list_headers,
+                     monitor_list_memory,
+                     monitor_list_entries,
+                     monitor_list_entries * sizeof(dlink_node) * 2);
 
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Clients %u(%zu)",

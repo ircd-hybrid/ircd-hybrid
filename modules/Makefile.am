@@ -32,6 +32,7 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_map.la        \
                       m_metadata.la   \
                       m_module.la     \
+                      m_monitor.la    \
                       m_motd.la       \
                       m_names.la      \
                       m_oper.la       \
@@ -65,7 +66,6 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_userhost.la   \
                       m_version.la    \
                       m_wallops.la    \
-                      m_watch.la      \
                       m_webirc.la     \
                       m_who.la        \
                       m_whois.la      \
@@ -100,6 +100,7 @@ m_lusers_la_LDFLAGS = $(MODULE_FLAGS)
 m_map_la_LDFLAGS = $(MODULE_FLAGS)
 m_metadata_la_LDFLAGS = $(MODULE_FLAGS)
 m_module_la_LDFLAGS = $(MODULE_FLAGS)
+m_monitor_la_LDFLAGS = $(MODULE_FLAGS)
 m_motd_la_LDFLAGS = $(MODULE_FLAGS)
 m_names_la_LDFLAGS = $(MODULE_FLAGS)
 m_oper_la_LDFLAGS = $(MODULE_FLAGS)
@@ -133,7 +134,6 @@ m_user_la_LDFLAGS = $(MODULE_FLAGS)
 m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
 m_version_la_LDFLAGS = $(MODULE_FLAGS)
 m_wallops_la_LDFLAGS = $(MODULE_FLAGS)
-m_watch_la_LDFLAGS = $(MODULE_FLAGS)
 m_webirc_la_LDFLAGS = $(MODULE_FLAGS)
 m_who_la_LDFLAGS = $(MODULE_FLAGS)
 m_whois_la_LDFLAGS = $(MODULE_FLAGS)
@@ -167,6 +167,7 @@ m_lusers_la_SOURCES = m_lusers.c
 m_map_la_SOURCES = m_map.c
 m_metadata_la_SOURCES = m_metadata.c
 m_module_la_SOURCES = m_module.c
+m_monitor_la_SOURCES = m_monitor.c
 m_motd_la_SOURCES = m_motd.c
 m_names_la_SOURCES = m_names.c
 m_oper_la_SOURCES = m_oper.c
@@ -200,7 +201,6 @@ m_user_la_SOURCES = m_user.c
 m_userhost_la_SOURCES = m_userhost.c
 m_version_la_SOURCES = m_version.c
 m_wallops_la_SOURCES = m_wallops.c
-m_watch_la_SOURCES = m_watch.c
 m_webirc_la_SOURCES = m_webirc.c
 m_who_la_SOURCES = m_who.c
 m_whois_la_SOURCES = m_whois.c

@@ -177,7 +177,7 @@ struct config_general_entry
   unsigned int failed_oper_notice;
   unsigned int anti_spam_exit_message_time;
   unsigned int max_accept;
-  unsigned int max_watch;
+  unsigned int max_monitor;
   unsigned int whowas_history_length;
   unsigned int away_time;
   unsigned int away_count;

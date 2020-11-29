@@ -41,7 +41,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "packet.h"
-#include "watch.h"
+#include "monitor.h"
 #include "misc.h"
 #include "id.h"
 #include "ipcache.h"
@@ -224,7 +224,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   {
     source_p->tsinfo = event_base->time.sec_real;
     clear_ban_cache_list(&source_p->channel);
-    watch_check_hash(source_p, RPL_LOGOFF);
+    monitor_signoff(source_p);
 
     if (HasUMode(source_p, UMODE_REGISTERED))
     {
@@ -257,7 +257,7 @@ change_local_nick(struct Client *source_p, const char *nick)
   hash_add_client(source_p);
 
   if (samenick == false)
-    watch_check_hash(source_p, RPL_LOGON);
+    monitor_signon(source_p);
 
   /* fd_desc is long enough */
   fd_note(source_p->connection->fd, "Nick: %s", source_p->name);
@@ -287,7 +287,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
   if (samenick == false)
   {
     DelUMode(source_p, UMODE_REGISTERED);
-    watch_check_hash(source_p, RPL_LOGOFF);
+    monitor_signoff(source_p);
 
     source_p->tsinfo = strtoumax(parv[2], NULL, 10);
     assert(source_p->tsinfo);
@@ -310,7 +310,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
   hash_add_client(source_p);
 
   if (samenick == false)
-    watch_check_hash(source_p, RPL_LOGON);
+    monitor_signon(source_p);
 }
 
 /*!

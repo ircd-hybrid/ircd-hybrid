@@ -57,6 +57,7 @@ ircd_SOURCES = auth.c            \
                memory.c          \
                misc.c            \
                modules.c         \
+               monitor.c         \
                motd.c            \
                numeric.c         \
                packet.c          \
@@ -79,5 +80,4 @@ ircd_SOURCES = auth.c            \
                server.c          \
                server_capab.c    \
                user.c            \
-               watch.c           \
                whowas.c

@@ -331,7 +331,7 @@ struct Connection
   struct AuthRequest *auth;
   struct Listener *listener;  /**< Listener accepted from */
   dlink_list acceptlist;  /**< Clients I'll allow to talk to me */
-  dlink_list watches;  /**< Chain of Watch pointer blocks */
+  dlink_list monitors;  /**< Chain of Monitor pointer blocks */
   dlink_list confs;  /**< Configuration record associated */
   dlink_list invited;  /**< Chain of invite pointer blocks */
 

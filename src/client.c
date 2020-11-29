@@ -46,7 +46,7 @@
 #include "memory.h"
 #include "hostmask.h"
 #include "listener.h"
-#include "watch.h"
+#include "monitor.h"
 #include "rng_mt.h"
 #include "parse.h"
 #include "ipcache.h"
@@ -162,9 +162,9 @@ client_free(struct Client *client)
     assert(client->connection->acceptlist.tail == NULL);
 
 
-    assert(dlink_list_length(&client->connection->watches) == 0);
-    assert(client->connection->watches.head == NULL);
-    assert(client->connection->watches.tail == NULL);
+    assert(dlink_list_length(&client->connection->monitors) == 0);
+    assert(client->connection->monitors.head == NULL);
+    assert(client->connection->monitors.tail == NULL);
 
     assert(dlink_list_length(&client->connection->confs) == 0);
     assert(client->connection->confs.head == NULL);
@@ -677,7 +677,7 @@ exit_one_client(struct Client *client, const char *comment)
     whowas_add_history(client, false);
     whowas_off_history(client);
 
-    watch_check_hash(client, RPL_LOGOFF);
+    monitor_signoff(client);
   }
   else if (IsServer(client))
   {
@@ -787,7 +787,7 @@ exit_client(struct Client *client, const char *comment)
 
       invite_clear_list(&client->connection->invited);
       del_all_accepts(client);
-      watch_del_watch_list(client);
+      monitor_clear_list(client);
 
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                            "Client exiting: %s (%s@%s) [%s] [%s]",

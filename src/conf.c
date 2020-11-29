@@ -612,7 +612,7 @@ conf_set_defaults(void)
 
   ConfigGeneral.away_count = 2;
   ConfigGeneral.away_time = 10;
-  ConfigGeneral.max_watch = 50;
+  ConfigGeneral.max_monitor = 50;
   ConfigGeneral.whowas_history_length = 15000;
   ConfigGeneral.cycle_on_host_change = 1;
   ConfigGeneral.dline_min_cidr = 16;

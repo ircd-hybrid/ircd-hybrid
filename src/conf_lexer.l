@@ -235,13 +235,13 @@ max_bans_large              { return MAX_BANS_LARGE; }
 max_channels                { return MAX_CHANNELS; }
 max_idle                    { return MAX_IDLE; }
 max_invites                 { return MAX_INVITES; }
+max_monitor                 { return MAX_MONITOR; }
 max_nick_changes            { return MAX_NICK_CHANGES; }
 max_nick_length             { return MAX_NICK_LENGTH; }
 max_nick_time               { return MAX_NICK_TIME; }
 max_number                  { return MAX_NUMBER; }
 max_targets                 { return MAX_TARGETS; }
 max_topic_length            { return MAX_TOPIC_LENGTH; }
-max_watch                   { return MAX_WATCH; }
 min_idle                    { return MIN_IDLE; }
 min_nonwildcard             { return MIN_NONWILDCARD; }
 min_nonwildcard_simple      { return MIN_NONWILDCARD_SIMPLE; }

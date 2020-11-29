@@ -380,10 +380,10 @@ static const struct InfoStruct info_table[] =
     "Minimum non-wildcards in gecos bans"
   },
   {
-    "max_watch",
+    "max_monitor",
     OUTPUT_DECIMAL,
-    &ConfigGeneral.max_watch,
-    "Maximum nicknames on watch list"
+    &ConfigGeneral.max_monitor,
+    "Maximum nicknames on monitor list"
   },
   {
     "max_accept",

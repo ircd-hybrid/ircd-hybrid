@@ -242,7 +242,6 @@ reset_block_state(void)
 %token  NICK
 %token  NO_OPER_FLOOD
 %token  NO_TILDE
-%token  NUMBER
 %token  NUMBER_PER_CIDR
 %token  NUMBER_PER_IP_GLOBAL
 %token  NUMBER_PER_IP_LOCAL
@@ -257,7 +256,6 @@ reset_block_state(void)
 %token  PING_COOKIE
 %token  PING_TIME
 %token  PORT
-%token  QSTRING
 %token  RANDOM_IDLE
 %token  REASON
 %token  REDIRPORT
@@ -356,8 +354,8 @@ reset_block_state(void)
 %token  XLINE
 %token  XLINE_EXEMPT
 
-%type  <string> QSTRING
-%type  <number> NUMBER
+%token  <string> QSTRING
+%token  <number> NUMBER
 %type  <number> timespec
 %type  <number> timespec_
 %type  <number> sizespec

@@ -127,10 +127,10 @@ monitor_find_hash(const char *name)
   return NULL;
 }
 
-/*! \brief Adds a monitor entry to client's monitor list
+/*! \brief Adds a monitor entry to client's monitor list if it doesn't exist
  * \param name   Nick name to add
  * \param client Pointer to Client struct
- * \return false if the target is already being watched, true otherwise
+ * \return false if the target is already being monitored, true otherwise
  */
 bool
 monitor_add_to_hash_table(const char *name, struct Client *client)

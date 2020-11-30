@@ -779,7 +779,7 @@ cleanup_tklines(void *unused)
 const char *
 get_oper_name(const struct Client *client)
 {
-  static char buffer[IRCD_BUFSIZE];
+  static char buf[IRCD_BUFSIZE];
 
   if (IsServer(client))
     return client->name;
@@ -794,9 +794,9 @@ get_oper_name(const struct Client *client)
 
       if (conf->type == CONF_OPER)
       {
-        snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client->name,
+        snprintf(buf, sizeof(buf), "%s!%s@%s{%s}", client->name,
                  client->username, client->host, conf->name);
-        return buffer;
+        return buf;
       }
     }
 
@@ -807,9 +807,9 @@ get_oper_name(const struct Client *client)
     assert(0);  /* Oper without oper conf! */
   }
 
-  snprintf(buffer, sizeof(buffer), "%s!%s@%s{%s}", client->name,
+  snprintf(buf, sizeof(buf), "%s!%s@%s{%s}", client->name,
            client->username, client->host, client->servptr->name);
-  return buffer;
+  return buf;
 }
 
 /* conf_clear()

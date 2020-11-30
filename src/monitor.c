@@ -37,7 +37,7 @@
 #include "monitor.h"
 
 
-static dlink_list monitor_table[HASHSIZE];
+static dlink_list monitor_hash[HASHSIZE];
 
 
 /*
@@ -59,7 +59,7 @@ void
 monitor_count_memory(unsigned int *const count, size_t *const bytes)
 {
   for (unsigned int i = 0; i < HASHSIZE; ++i)
-    (*count) += dlink_list_length(&monitor_table[i]);
+    (*count) += dlink_list_length(&monitor_hash[i]);
 
   (*bytes) = *count * sizeof(struct Monitor);
 }
@@ -116,7 +116,7 @@ monitor_find_hash(const char *name)
 {
   dlink_node *node;
 
-  DLINK_FOREACH(node, monitor_table[strhash(name)].head)
+  DLINK_FOREACH(node, monitor_hash[strhash(name)].head)
   {
     struct Monitor *monitor = node->data;
 
@@ -146,7 +146,7 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
     strlcpy(monitor->name, name, sizeof(monitor->name));
     monitor->hash_value = strhash(monitor->name);
 
-    dlinkAdd(monitor, &monitor->node, &monitor_table[monitor->hash_value]);
+    dlinkAdd(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);
   }
   else
   {
@@ -190,8 +190,8 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
   /* In case this header is now empty of notices, remove it */
   if (monitor->monitored_by.head == NULL)
   {
-    assert(dlinkFind(&monitor_table[monitor->hash_value], monitor));
-    dlinkDelete(&monitor->node, &monitor_table[monitor->hash_value]);
+    assert(dlinkFind(&monitor_hash[monitor->hash_value], monitor));
+    dlinkDelete(&monitor->node, &monitor_hash[monitor->hash_value]);
     xfree(monitor);
   }
 }
@@ -218,8 +218,8 @@ monitor_clear_list(struct Client *client)
     /* If this leaves a header without notifies, remove it. */
     if (monitor->monitored_by.head == NULL)
     {
-      assert(dlinkFind(&monitor_table[monitor->hash_value], monitor));
-      dlinkDelete(&monitor->node, &monitor_table[monitor->hash_value]);
+      assert(dlinkFind(&monitor_hash[monitor->hash_value], monitor));
+      dlinkDelete(&monitor->node, &monitor_hash[monitor->hash_value]);
 
       xfree(monitor);
     }

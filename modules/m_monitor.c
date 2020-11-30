@@ -63,9 +63,9 @@ monitor_add(struct Client *source_p, char *list)
     {
       char buf[IRCD_BUFSIZE];
 
-      if (onbuf != onbufptr)
+      if (onbufptr != onbuf)
         sendto_one_numeric(source_p, &me, RPL_MONONLINE, onbuf);
-      if (ofbuf != ofbufptr)
+      if (ofbufptr != ofbuf)
         sendto_one_numeric(source_p, &me, RPL_MONOFFLINE, ofbuf);
 
       if (EmptyString(p))
@@ -95,15 +95,14 @@ monitor_add(struct Client *source_p, char *list)
         ofbufptr = ofbuf;
       }
 
-      if (ofbuf != ofbufptr)
+      if (ofbufptr != ofbuf)
         *ofbufptr++ = ',';
 
       ofbufptr += snprintf(ofbufptr, sizeof(ofbuf) - (ofbufptr - ofbuf), "%s", name);
     }
     else
     {
-      size_t masklen = strlen(target_p->name) +
-                       strlen(target_p->username) +
+      size_t masklen = strlen(target_p->name) + strlen(target_p->username) +
                        strlen(target_p->host) + 3;  /* +3 for ! + @ + comma */
 
       if ((onbufptr - onbuf) + masklen + len > sizeof(onbuf))
@@ -112,7 +111,7 @@ monitor_add(struct Client *source_p, char *list)
         onbufptr = onbuf;
       }
 
-      if (onbuf != onbufptr)
+      if (onbufptr != onbuf)
         *onbufptr++ = ',';
 
       onbufptr += snprintf(onbufptr, sizeof(onbuf) - (onbufptr - onbuf), "%s!%s@%s",
@@ -120,9 +119,9 @@ monitor_add(struct Client *source_p, char *list)
     }
   }
 
-  if (onbuf != onbufptr)
+  if (onbufptr != onbuf)
     sendto_one_numeric(source_p, &me, RPL_MONONLINE, onbuf);
-  if (ofbuf != ofbufptr)
+  if (ofbufptr != ofbuf)
     sendto_one_numeric(source_p, &me, RPL_MONOFFLINE, ofbuf);
 }
 
@@ -136,10 +135,8 @@ monitor_del(struct Client *source_p, char *list)
 
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
-  {
     if (!EmptyString(name))
       monitor_del_from_hash_table(name, source_p);
-  }
 }
 
 static void
@@ -163,7 +160,7 @@ monitor_list(struct Client *source_p)
       bufptr = buf;
     }
 
-    if (buf != bufptr)
+    if (bufptr != buf)
       *bufptr++ = ',';
 
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s", monitor->name);
@@ -202,15 +199,14 @@ monitor_status(struct Client *source_p)
         ofbufptr = ofbuf;
       }
 
-      if (ofbuf != ofbufptr)
+      if (ofbufptr != ofbuf)
         *ofbufptr++ = ',';
 
       ofbufptr += snprintf(ofbufptr, sizeof(ofbuf) - (ofbufptr - ofbuf), "%s", monitor->name);
     }
     else
     {
-      size_t masklen = strlen(target_p->name) +
-                       strlen(target_p->username) +
+      size_t masklen = strlen(target_p->name) + strlen(target_p->username) +
                        strlen(target_p->host) + 3;  /* +3 for ! + @ + comma */
 
       if ((onbufptr - onbuf) + masklen + len > sizeof(onbuf))
@@ -219,7 +215,7 @@ monitor_status(struct Client *source_p)
         onbufptr = onbuf;
       }
 
-      if (onbuf != onbufptr)
+      if (onbufptr != onbuf)
         *onbufptr++ = ',';
 
       onbufptr += snprintf(onbufptr, sizeof(onbuf) - (onbufptr - onbuf), "%s!%s@%s",
@@ -227,9 +223,9 @@ monitor_status(struct Client *source_p)
     }
   }
 
-  if (onbuf != onbufptr)
+  if (onbufptr != onbuf)
     sendto_one_numeric(source_p, &me, RPL_MONONLINE, onbuf);
-  if (ofbuf != ofbufptr)
+  if (ofbufptr != ofbuf)
     sendto_one_numeric(source_p, &me, RPL_MONOFFLINE, ofbuf);
 }
 

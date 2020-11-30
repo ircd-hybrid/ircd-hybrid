@@ -383,7 +383,7 @@ register_local_user(struct Client *client)
 
   if (valid_username(client->username, true) == false)
   {
-    char buf[IRCD_BUFSIZE];
+    char buf[sizeof("Invalid username []") + sizeof(client->username)];
 
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Invalid username: %s (%s@%s)",

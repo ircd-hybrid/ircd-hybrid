@@ -536,28 +536,28 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 const char *
 member_get_prefix(const struct ChannelMember *member, bool combine)
 {
-  static char buffer[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
-  char *p = buffer;
+  static char buf[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
+  char *bufptr = buf;
 
   if (member->flags & CHFL_CHANOP)
   {
     if (combine == false)
       return "@";
-    *p++ = '@';
+    *bufptr++ = '@';
   }
 
   if (member->flags & CHFL_HALFOP)
   {
     if (combine == false)
       return "%";
-    *p++ = '%';
+    *bufptr++ = '%';
   }
 
   if (member->flags & CHFL_VOICE)
-    *p++ = '+';
-  *p = '\0';
+    *bufptr++ = '+';
+  *bufptr = '\0';
 
-  return buffer;
+  return buf;
 }
 
 size_t

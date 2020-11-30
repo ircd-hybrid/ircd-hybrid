@@ -51,7 +51,7 @@ pseudo_get_list(void)
 static void
 pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
 {
-  char buffer[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
   const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];
   struct Client *target_p = NULL;
   struct Client *server_p = NULL;
@@ -65,8 +65,8 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
 
   if (pseudo->prepend)
   {
-    snprintf(buffer, sizeof(buffer), "%s%s", pseudo->prepend, msg);
-    msg = buffer;
+    snprintf(buf, sizeof(buf), "%s%s", pseudo->prepend, msg);
+    msg = buf;
   }
 
   target_p = find_person(source_p, pseudo->nick);

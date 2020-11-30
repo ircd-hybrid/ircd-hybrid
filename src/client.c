@@ -773,11 +773,12 @@ exit_client(struct Client *client, const char *comment)
 
     if (IsClient(client))
     {
-      dlink_node *node;
-
       if (HasUMode(client, UMODE_OPER))
-        if ((node = dlinkFindDelete(&oper_list, client)))
+      {
+        dlink_node *node = dlinkFindDelete(&oper_list, client);
+        if (node)
           free_dlink_node(node);
+      }
 
       assert(dlinkFind(&local_client_list, client));
       dlinkDelete(&client->connection->lclient_node, &local_client_list);

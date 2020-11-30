@@ -46,13 +46,16 @@
 static void
 mr_capab(struct Client *source_p, int parc, char *parv[])
 {
-  unsigned int cap = 0;
+  char *const list = parv[1];
   char *p = NULL;
 
-  for (const char *s = strtok_r(parv[1], " ", &p); s;
-                   s = strtok_r(NULL,    " ", &p))
-    if ((cap = capab_find(s)))
+  for (const char *s = strtok_r(list, " ", &p); s;
+                   s = strtok_r(NULL, " ", &p))
+  {
+    unsigned int cap = capab_find(s);
+    if (cap)
       SetCapable(source_p, cap);
+  }
 }
 
 static struct Message capab_msgtab =

@@ -43,7 +43,8 @@
 static void
 ms_encap(struct Client *source_p, int parc, char *parv[])
 {
-  char buffer[IRCD_BUFSIZE] = "", *ptr = buffer;
+  char buf[IRCD_BUFSIZE];
+  char *bufptr = buf;
   unsigned int cur_len = 0, len;
 
   for (unsigned int i = 1; i < (unsigned int)parc - 1; ++i)
@@ -51,21 +52,21 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
     len = strlen(parv[i]) + 1;  /* +1 for the space */
 
     /* Drop the whole command if this parameter would be truncated */
-    if ((cur_len + len) >= sizeof(buffer))
+    if ((cur_len + len) >= sizeof(buf))
       return;
 
-    snprintf(ptr, sizeof(buffer) - cur_len, "%s ", parv[i]);
+    snprintf(bufptr, sizeof(buf) - cur_len, "%s ", parv[i]);
     cur_len += len;
-    ptr += len;
+    bufptr += len;
   }
 
   /* If it's a command without parameters, don't prepend a ':' */
   if (parc == 3)
-    snprintf(ptr, sizeof(buffer) - cur_len, "%s", parv[2]);
+    snprintf(bufptr, sizeof(buf) - cur_len, "%s", parv[2]);
   else
-    snprintf(ptr, sizeof(buffer) - cur_len, ":%s", parv[parc - 1]);
+    snprintf(bufptr, sizeof(buf) - cur_len, ":%s", parv[parc - 1]);
 
-  sendto_match_servs(source_p, parv[1], CAPAB_ENCAP, "ENCAP %s", buffer);
+  sendto_match_servs(source_p, parv[1], CAPAB_ENCAP, "ENCAP %s", buf);
 
   if (match(parv[1], me.name))
     return;
@@ -75,7 +76,7 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
     return;
 
   const struct MessageHandler *const handler = &message->handlers[ENCAP_HANDLER];
-  message->bytes += strlen(buffer);
+  message->bytes += strlen(buf);
   message->ecount++;
 
   parv += 2;

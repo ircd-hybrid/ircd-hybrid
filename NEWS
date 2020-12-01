@@ -6,6 +6,7 @@
 
 -- Noteworthy changes in version 8.2.35 (2020-11-14)
 * Fixed issue where servers could propagate truncated ban masks during net-join
+* For a full list of all changes in this release, see <https://git.io/JIUa6>
 
 
 -- Noteworthy changes in version 8.2.34 (2020-11-01)

@@ -35,7 +35,7 @@ struct Monitor
   dlink_node node;  /**< List node; linked into monitor_table */
   dlink_list monitored_by;  /**< List of clients that have this entry on their monitor list */
   unsigned int hash_value; /**< Cached hash value derived from Monitor::name */
-  char name[NICKLEN + 1];  /**< Name of the client to monitor */
+  char *name;  /**< Name of the client to monitor */
 };
 
 extern void monitor_signon(const struct Client *);

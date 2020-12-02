@@ -59,9 +59,18 @@ void
 monitor_count_memory(unsigned int *const count, size_t *const bytes)
 {
   for (unsigned int i = 0; i < HASHSIZE; ++i)
+  {
+    dlink_node *node;
     (*count) += dlink_list_length(&monitor_hash[i]);
 
-  (*bytes) = *count * sizeof(struct Monitor);
+    DLINK_FOREACH(node, monitor_hash[i].head)
+    {
+      const struct Monitor *const monitor = node->data;
+      (*bytes) += strlen(monitor->name);
+    }
+  }
+
+  (*bytes) += *count * sizeof(struct Monitor);
 }
 
 /*! \brief Notifies all clients that have client's name on
@@ -142,8 +151,7 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
   if (monitor == NULL)
   {
     monitor = xcalloc(sizeof(*monitor));
-
-    strlcpy(monitor->name, name, sizeof(monitor->name));
+    monitor->name = xstrdup(name);
     monitor->hash_value = strhash(monitor->name);
 
     dlinkAdd(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);
@@ -192,6 +200,8 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
   {
     assert(dlinkFind(&monitor_hash[monitor->hash_value], monitor));
     dlinkDelete(&monitor->node, &monitor_hash[monitor->hash_value]);
+
+    xfree(monitor->name);
     xfree(monitor);
   }
 }
@@ -221,6 +231,7 @@ monitor_clear_list(struct Client *client)
       assert(dlinkFind(&monitor_hash[monitor->hash_value], monitor));
       dlinkDelete(&monitor->node, &monitor_hash[monitor->hash_value]);
 
+      xfree(monitor->name);
       xfree(monitor);
     }
 

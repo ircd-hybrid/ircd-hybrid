@@ -66,7 +66,7 @@ monitor_count_memory(unsigned int *const count, size_t *const bytes)
     DLINK_FOREACH(node, monitor_hash[i].head)
     {
       const struct Monitor *const monitor = node->data;
-      (*bytes) += strlen(monitor->name);
+      (*bytes) += strlen(monitor->name) + 1;  /* +1 for '\0' */
     }
   }
 

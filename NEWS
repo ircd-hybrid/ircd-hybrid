@@ -2,6 +2,11 @@
 * The old WATCH implementation has been replaced with IRCv3.2 MONITOR. For this,
   the `general::max_watch` configuration directive has been renamed to
   `general::max_monitor`.
+* User mode `B` has been implemented. Clients with that mode set are marked as a bot
+  in both `WHOIS` and `WHO`. This mode can only be set by IRC operators (as long as
+  the `bot` directive is set in `general::oper_only_umodes`), servers, and services.
+
+  This mode can for example be used to mark HOPM as official network bot.
 
 
 -- Noteworthy changes in version 8.2.35 (2020-11-14)

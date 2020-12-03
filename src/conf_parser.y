@@ -143,6 +143,7 @@ reset_block_state(void)
 %token  AUTOCONN
 %token  AWAY_COUNT
 %token  AWAY_TIME
+%token  BOT
 %token  BYTES KBYTES MBYTES
 %token  CALLER_ID_WAIT
 %token  CAN_FLOOD
@@ -1035,7 +1036,11 @@ oper_umodes: T_UMODES
 } '=' oper_umodes_items ';' ;
 
 oper_umodes_items: oper_umodes_items ',' oper_umodes_item | oper_umodes_item;
-oper_umodes_item:  T_CCONN
+oper_umodes_item: BOT
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.modes.value |= UMODE_BOT;
+} | T_CCONN
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_CCONN;
@@ -2580,7 +2585,10 @@ general_oper_umodes: OPER_UMODES
 } '=' umode_oitems ';' ;
 
 umode_oitems:    umode_oitems ',' umode_oitem | umode_oitem;
-umode_oitem: T_CCONN
+umode_oitem: BOT
+{
+  ConfigGeneral.oper_umodes |= UMODE_BOT;
+} | T_CCONN
 {
   ConfigGeneral.oper_umodes |= UMODE_CCONN;
 } | T_DEAF
@@ -2651,7 +2659,10 @@ general_oper_only_umodes: OPER_ONLY_UMODES
 } '=' umode_items ';' ;
 
 umode_items:  umode_items ',' umode_item | umode_item;
-umode_item: T_CCONN
+umode_item: BOT
+{
+  ConfigGeneral.oper_only_umodes |= UMODE_BOT;
+} | T_CCONN
 {
   ConfigGeneral.oper_only_umodes |= UMODE_CCONN;
 } | T_DEAF

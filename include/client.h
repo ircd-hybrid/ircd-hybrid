@@ -171,7 +171,8 @@ enum
   UMODE_WEBIRC       = 1 << 22,  /**< User connected via a webirc gateway */
   UMODE_HIDEIDLE     = 1 << 23,  /**< Hides idle and signon time in WHOIS */
   UMODE_HIDECHANS    = 1 << 24,  /**< Hides channel list in WHOIS */
-  UMODE_EXPIRATION   = 1 << 25   /**< Receives *LINE expiration notices */
+  UMODE_EXPIRATION   = 1 << 25,  /**< Receives *LINE expiration notices */
+  UMODE_BOT          = 1 << 26  /**< Client is marked as a bot in WHOIS and WHO */
 };
 
 #define HasUMode(x, y) ((x)->umodes &   (y))

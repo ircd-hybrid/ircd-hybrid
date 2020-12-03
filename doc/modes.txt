@@ -3,7 +3,7 @@
 
 Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.34 DFGHXRSWacdefgijklnopqrswy bchiklmnoprstuveCIKLMNORST bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.36 BDFGHXRSWacdefgijklnopqrswy bchiklmnoprstuveCIKLMNORST bkloveIh
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -13,6 +13,7 @@ Here is a guide to the preceding modes:
 User Modes:
 
 +a - admin        - Admin status. Can for example see IP addresses in "STATS c"
++B - bot          - Marks the client as being a bot
 +c - cconn        - Client connection/quit notices
 +D - deaf         - Don't receive channel messages
 +d - debug        - See debugging notices

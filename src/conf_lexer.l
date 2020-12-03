@@ -142,6 +142,7 @@ autoconn                    { return AUTOCONN; }
 away_count                  { return AWAY_COUNT; }
 away_time                   { return AWAY_TIME; }
 bind                        { return T_BIND; }
+bot                         { return BOT; }
 caller_id_wait              { return CALLER_ID_WAIT; }
 callerid                    { return T_CALLERID; }
 can_flood                   { return CAN_FLOOD; }

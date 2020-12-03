@@ -123,6 +123,7 @@ enum irc_numerics
   RPL_NOTOPIC              = 331,
   RPL_TOPIC                = 332,
   RPL_TOPICWHOTIME         = 333,
+  RPL_WHOISBOT             = 335,
   RPL_INVITELIST           = 336,
   RPL_ENDOFINVITELIST      = 337,
   RPL_WHOISACTUALLY        = 338,

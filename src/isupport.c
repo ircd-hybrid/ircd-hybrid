@@ -63,6 +63,7 @@ static dlink_list isupport_list_lines;
 void
 isupport_init(void)
 {
+  isupport_add("BOT", "B", -1);
   isupport_add("CALLERID", NULL, -1);
   isupport_add("CASEMAPPING", "ascii", -1);
   isupport_add("DEAF", "D", -1);

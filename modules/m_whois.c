@@ -187,6 +187,9 @@ whois_person(struct Client *source_p, struct Client *target_p)
                          target_p->name, svstag->tag);
   }
 
+  if (HasUMode(target_p, UMODE_BOT))
+    sendto_one_numeric(source_p, &me, RPL_WHOISBOT, target_p->name);
+
   if (HasUMode(target_p, UMODE_WEBIRC))
     sendto_one_numeric(source_p, &me, RPL_WHOISTEXT, target_p->name,
                        "User connected using a webirc gateway");

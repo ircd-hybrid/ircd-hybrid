@@ -57,14 +57,16 @@ static void
 do_who(struct Client *source_p, const struct Client *target_p,
        const char *name, const char *op_flags)
 {
-  char status[8] = "";  /* sizeof("Gr*@%+") + 2 */
+  char status[8] = "";  /* sizeof("GBr*@%+") + 1 */
 
   if (HasUMode(source_p, UMODE_OPER))
-    snprintf(status, sizeof(status), "%c%s%s%s", target_p->away[0] ? 'G' : 'H',
+    snprintf(status, sizeof(status), "%c%s%s%s%s", target_p->away[0] ? 'G' : 'H',
+             HasUMode(target_p, UMODE_BOT) ? "B" : "",
              HasUMode(target_p, UMODE_REGISTERED) ? "r" : "",
              HasUMode(target_p, UMODE_OPER) ? "*" : "", op_flags);
   else
-    snprintf(status, sizeof(status), "%c%s%s%s", target_p->away[0] ? 'G' : 'H',
+    snprintf(status, sizeof(status), "%c%s%s%s%s", target_p->away[0] ? 'G' : 'H',
+             HasUMode(target_p, UMODE_BOT) ? "B" : "",
              HasUMode(target_p, UMODE_REGISTERED) ? "r" : "",
              HasUMode(target_p, UMODE_OPER) &&
              !HasUMode(target_p, UMODE_HIDDEN) ? "*" : "", op_flags);

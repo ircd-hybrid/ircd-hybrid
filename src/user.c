@@ -58,6 +58,7 @@ static char umode_buffer[UMODE_MAX_STR];
 const struct user_modes *umode_map[256];
 const struct user_modes  umode_tab[] =
 {
+  { 'B', UMODE_BOT          },
   { 'D', UMODE_DEAF         },
   { 'F', UMODE_FARCONNECT   },
   { 'G', UMODE_SOFTCALLERID },

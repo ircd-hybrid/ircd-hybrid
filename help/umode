@@ -10,6 +10,7 @@ User modes: (* designates that the umode is oper only)
          w     - Can see server wallops.
          W     - User is connected using a webirc gateway.
        * l     - Can see oper locops (local wallops).
+       * B     - Marks the client as being a bot
        * c     - Can see client connections and exits.
        * j     - Can see 'rejected' client notices.
        * k     - Can see server kill messages.

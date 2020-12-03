@@ -109,6 +109,7 @@ static const char *const replies[] =
   /* 331 */  [RPL_NOTOPIC] = "%s :No topic is set.",
   /* 332 */  [RPL_TOPIC] = "%s :%s",
   /* 333 */  [RPL_TOPICWHOTIME] = "%s %s %ju",
+  /* 335 */  [RPL_WHOISBOT] = "%s :is a Bot",
   /* 336 */  [RPL_INVITELIST] = ":%s",
   /* 337 */  [RPL_ENDOFINVITELIST] = ":End of /INVITE list.",
   /* 338 */  [RPL_WHOISACTUALLY] = "%s %s@%s %s :Actual user@host, actual IP",

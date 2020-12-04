@@ -7,6 +7,7 @@
   long as the `bot` directive is set in `general::oper_only_umodes`), servers,
   and services.
   This mode can for example be used to mark HOPM as official network bot.
+* For a full list of all changes in this release, see <https://git.io/JI3fG>
 
 
 -- Noteworthy changes in version 8.2.35 (2020-11-14)

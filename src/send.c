@@ -369,14 +369,14 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
  *
  * inputs       - pointer to client to NOT send to
  *              - pointer to channel
- *              - caps or'd together which must ALL be present
- *              - caps or'd together which must ALL NOT be present
+ *              - capabs or'd together which must ALL be present
+ *              - capabs or'd together which must ALL NOT be present
  *              - printf style format string
  *              - args to format string
  * output       - NONE
  * side effects - Send a message to all connected servers, except the
  *                client 'one' (if non-NULL), as long as the servers
- *                support ALL capabs in 'caps', and NO capabs in 'nocaps'.
+ *                support ALL capabs in 'capab', and NO capabs in 'nocapab'.
  *
  * This function was written in an attempt to merge together the other
  * billion sendto_*serv*() functions, which sprung up with capabs,
@@ -385,8 +385,8 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
  */
 void
 sendto_server(const struct Client *one,
-              const unsigned int caps,
-              const unsigned int nocaps,
+              const unsigned int capab,
+              const unsigned int nocapab,
               const char *format, ...)
 {
   va_list args;
@@ -410,11 +410,11 @@ sendto_server(const struct Client *one,
       continue;
 
     /* check we have required capabs */
-    if ((client->connection->caps & caps) != caps)
+    if (IsCapable(client, capab) != capab)
       continue;
 
     /* check we don't have any forbidden capabs */
-    if ((client->connection->caps & nocaps))
+    if (IsCapable(client, nocapab))
       continue;
 
     send_message(client, buffer);

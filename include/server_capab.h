@@ -45,9 +45,9 @@ enum
 /*
  * Capability macros.
  */
-#define IsCapable(x, cap)   ((x)->connection->caps &   (cap))
-#define SetCapable(x, cap)  ((x)->connection->caps |=  (cap))
-#define ClearCap(x, cap)    ((x)->connection->caps &= ~(cap))
+#define IsCapable(x, cap)   ((x)->connection->capab &   (cap))
+#define SetCapable(x, cap)  ((x)->connection->capab |=  (cap))
+#define ClearCap(x, cap)    ((x)->connection->capab &= ~(cap))
 
 /* Capabilities */
 struct Capability

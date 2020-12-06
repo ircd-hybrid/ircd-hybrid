@@ -291,7 +291,7 @@ struct Connection
   unsigned int registration;
   unsigned int cap_client;  /**< Client capabilities (from us) */
   unsigned int cap_active;  /**< Active capabilities (to us) */
-  unsigned int caps;  /**< Capabilities bit-field */
+  unsigned int capab;  /**< Server CAPAB bit field */
 
   unsigned int operflags;     /**< IRC Operator privilege flags */
   unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */

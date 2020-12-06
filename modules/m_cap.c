@@ -267,67 +267,6 @@ cap_req(struct Client *source_p, const char *caplist)
 }
 
 static void
-cap_ack(struct Client *source_p, const char *caplist)
-{
-  const char *cl = caplist;
-  struct capabilities *cap = NULL;
-  int neg = 0;
-
-  /*
-   * Coming from the client, this generally indicates that the client
-   * is using a new backwards-incompatible protocol feature. As such,
-   * it does not require further response from the server.
-   */
-  while (cl)
-  {
-    /* Walk through the capabilities list... */
-    if (!(cap = find_cap(&cl, &neg)) ||  /* Look up capability... */
-        (neg ? (source_p->connection->cap_client & cap->cap) :
-              !(source_p->connection->cap_client & cap->cap)))  /* uh... */
-      continue;
-
-    /* Set or clear the active capability... */
-    if (neg)
-    {
-      if (cap->flags & CAPFL_STICKY)
-        continue;  /* but don't clear sticky capabilities */
-
-      source_p->connection->cap_active &= ~cap->cap;
-    }
-    else
-    {
-      if (cap->flags & CAPFL_PROHIBIT)
-        continue;  /* and don't set prohibited ones */
-
-      source_p->connection->cap_active |=  cap->cap;
-    }
-  }
-}
-
-static void
-cap_clear(struct Client *source_p, const char *caplist)
-{
-  unsigned int cleared = 0;
-
-  for (unsigned int ii = 0; ii < CAPAB_LIST_LEN; ++ii)
-  {
-    const struct capabilities *cap = &capab_list[ii];
-
-    /* Only clear active non-sticky capabilities. */
-    if (!(source_p->connection->cap_client & cap->cap) || (cap->flags & CAPFL_STICKY))
-      continue;
-
-    cleared |= cap->cap;
-    source_p->connection->cap_client &= ~cap->cap;
-
-    if (!(cap->flags & CAPFL_PROTO))
-      source_p->connection->cap_active &= ~cap->cap;
-  }
-
-  send_caplist(source_p, NULL, &cleared, "ACK");
-}
-
-static void
 cap_end(struct Client *source_p, const char *caplist)
 {
   if (!IsUnknown(source_p))  /* Registration has completed... */
@@ -353,13 +292,10 @@ static struct subcmd
   const char *cmd;
   void (*proc)(struct Client *, const char *);
 } cmdlist[] = {
-  { "ACK",   cap_ack   },
-  { "CLEAR", cap_clear },
-  { "END",   cap_end   },
-  { "LIST",  cap_list  },
-  { "LS",    cap_ls    },
-  { "NAK",   NULL      },
-  { "REQ",   cap_req   }
+  { "END",  cap_end   },
+  { "LIST", cap_list  },
+  { "LS",   cap_ls    },
+  { "REQ",  cap_req   }
 };
 
 static int

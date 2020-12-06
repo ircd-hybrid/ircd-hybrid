@@ -208,21 +208,21 @@ send_caplist(struct Client *source_p,
 }
 
 static void
-cap_ls(struct Client *source_p, const char *caplist)
+cap_ls(struct Client *source_p, const char *arg)
 {
   if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
     source_p->connection->registration |= REG_NEED_CAP;
 
-  if (caplist && atoi(caplist) >= 302)
+  if (arg && atoi(arg) >= 302)
     AddFlag(source_p, FLAGS_CAP302);
 
   send_caplist(source_p, NULL, NULL, "LS");  /* Send list of capabilities */
 }
 
 static void
-cap_req(struct Client *source_p, const char *caplist)
+cap_req(struct Client *source_p, const char *arg)
 {
-  const char *cl = caplist;
+  const char *cl = arg;
   struct capabilities *cap = NULL;
   unsigned int set = 0, rem = 0;
   unsigned int cs = source_p->connection->cap_client; /* capability set */
@@ -237,7 +237,7 @@ cap_req(struct Client *source_p, const char *caplist)
         || (!neg && (cap->flags & CAPFL_PROHIBIT))  /* Is it prohibited? */
         || (neg && (cap->flags & CAPFL_STICKY))) {  /* Is it sticky? */
       sendto_one(source_p, ":%s CAP %s NAK :%s", me.name,
-                 source_p->name[0] ? source_p->name : "*", caplist);
+                 source_p->name[0] ? source_p->name : "*", arg);
       return;  /* Can't complete requested op... */
     }
 
@@ -270,7 +270,7 @@ cap_req(struct Client *source_p, const char *caplist)
 }
 
 static void
-cap_end(struct Client *source_p, const char *caplist)
+cap_end(struct Client *source_p, const char *arg)
 {
   if (!IsUnknown(source_p))  /* Registration has completed... */
     return;  /* So just ignore the message... */
@@ -284,7 +284,7 @@ cap_end(struct Client *source_p, const char *caplist)
 }
 
 static void
-cap_list(struct Client *source_p, const char *caplist)
+cap_list(struct Client *source_p, const char *arg)
 {
   /* Send the list of the client's capabilities */
   send_caplist(source_p, &source_p->connection->cap_client, NULL, "LIST");

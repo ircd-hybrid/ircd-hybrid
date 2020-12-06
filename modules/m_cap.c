@@ -213,6 +213,9 @@ cap_ls(struct Client *source_p, const char *caplist)
   if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
     source_p->connection->registration |= REG_NEED_CAP;
 
+  if (caplist && atoi(caplist) >= 302)
+    AddFlag(source_p, FLAGS_CAP302);
+
   send_caplist(source_p, NULL, NULL, "LS");  /* Send list of capabilities */
 }
 

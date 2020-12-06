@@ -135,7 +135,8 @@ enum
   FLAGS_SERVICE       = 1 << 20,  /**< Client/server is a network service */
   FLAGS_TLS           = 1 << 21,  /**< User is connected via TLS (Transport Layer Security) */
   FLAGS_SQUIT         = 1 << 22,
-  FLAGS_EXEMPTXLINE   = 1 << 23   /**< Client is exempt from x-lines */
+  FLAGS_EXEMPTXLINE   = 1 << 23,  /**< Client is exempt from x-lines */
+  FLAGS_CAP302        = 1 << 24  /**< Client supports the IRCv3 CAP 302 extension */
 };
 
 #define HasFlag(x, y) ((x)->flags &   (y))

@@ -106,7 +106,7 @@ enum
   CAP_CHGHOST        = 1 << 6   /**< ircv3.2 chghost client capability */
 };
 
-#define HasCap(x, y) ((x)->connection->cap_active & (y))
+#define HasCap(x, y) ((x)->connection->cap & (y))
 
 
 /* housekeeping flags */
@@ -290,8 +290,7 @@ struct Connection
   dlink_node lclient_node;
 
   unsigned int registration;
-  unsigned int cap_client;  /**< Client capabilities (from us) */
-  unsigned int cap_active;  /**< Active capabilities (to us) */
+  unsigned int cap;  /**< Client CAP bit-field */
   unsigned int capab;  /**< Server CAPAB bit field */
 
   unsigned int operflags;     /**< IRC Operator privilege flags */

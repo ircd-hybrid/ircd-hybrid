@@ -214,8 +214,7 @@ static void
 cap_req(struct Client *source_p, const char *arg)
 {
   unsigned int set = 0, rem = 0;
-  unsigned int cs = source_p->connection->cap_client; /* capability set */
-  unsigned int as = source_p->connection->cap_active; /* active set */
+  unsigned int cs = source_p->connection->cap;  /* Enabled capabilities */
   int neg = 0;
 
   if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
@@ -240,22 +239,19 @@ cap_req(struct Client *source_p, const char *arg)
       rem |=  cap->cap;
       set &= ~cap->cap;
       cs  &= ~cap->cap;
-      as &= ~cap->cap;
     }
     else
     {
       rem &= ~cap->cap;
       set |=  cap->cap;
       cs  |=  cap->cap;
-      as |= cap->cap;
     }
   }
 
   /* Notify client of accepted changes and copy over results. */
   send_caplist(source_p, &set, &rem, "ACK");
 
-  source_p->connection->cap_client = cs;
-  source_p->connection->cap_active = as;
+  source_p->connection->cap = cs;
 }
 
 static void
@@ -276,7 +272,7 @@ static void
 cap_list(struct Client *source_p, const char *arg)
 {
   /* Send the list of the client's capabilities */
-  send_caplist(source_p, &source_p->connection->cap_client, NULL, "LIST");
+  send_caplist(source_p, &source_p->connection->cap, NULL, "LIST");
 }
 
 static struct subcmd

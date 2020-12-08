@@ -39,9 +39,7 @@
 enum
 {
   CAPFL_HIDDEN    = 1 << 0,  /**< Do not advertize this capability */
-  CAPFL_PROHIBIT  = 1 << 1,  /**< Client may not set this capability */
-  CAPFL_PROTO     = 1 << 2,  /**< Cap must be acknowledged by client */
-  CAPFL_STICKY    = 1 << 3   /**< Cap may not be cleared once set */
+  CAPFL_STICKY    = 1 << 1   /**< Cap may not be cleared once set */
 };
 
 typedef int (*bqcmp)(const void *, const void *);
@@ -151,7 +149,7 @@ send_caplist(struct Client *source_p,
              const unsigned int *const set,
              const unsigned int *const rem, const char *subcmd)
 {
-  char capbuf[IRCD_BUFSIZE] = "", pfx[16];
+  char capbuf[IRCD_BUFSIZE] = "", pfx[4];
   char cmdbuf[IRCD_BUFSIZE] = "";
   unsigned int i, loc, len, pfx_len, clen;
 
@@ -181,13 +179,6 @@ send_caplist(struct Client *source_p,
       pfx[pfx_len++] = ' ';
     if (rem && (*rem & cap->cap))
       pfx[pfx_len++] = '-';
-    else
-    {
-      if (cap->flags & CAPFL_PROTO)
-        pfx[pfx_len++] = '~';
-      if (cap->flags & CAPFL_STICKY)
-        pfx[pfx_len++] = '=';
-    }
 
     pfx[pfx_len] = '\0';
 
@@ -222,8 +213,6 @@ cap_ls(struct Client *source_p, const char *arg)
 static void
 cap_req(struct Client *source_p, const char *arg)
 {
-  const char *cl = arg;
-  struct capabilities *cap = NULL;
   unsigned int set = 0, rem = 0;
   unsigned int cs = source_p->connection->cap_client; /* capability set */
   unsigned int as = source_p->connection->cap_active; /* active set */
@@ -232,10 +221,14 @@ cap_req(struct Client *source_p, const char *arg)
   if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
     source_p->connection->registration |= REG_NEED_CAP;
 
-  while (cl) {  /* Walk through the capabilities list... */
-    if (!(cap = find_cap(&cl, &neg))  /* Look up capability... */
-        || (!neg && (cap->flags & CAPFL_PROHIBIT))  /* Is it prohibited? */
-        || (neg && (cap->flags & CAPFL_STICKY))) {  /* Is it sticky? */
+  /* Walk through the capabilities list... */
+  for (const char *cl = arg; cl; )
+  {
+    /* Look up capability... */
+    const struct capabilities *cap = find_cap(&cl, &neg);
+    if (cap == NULL ||
+        (neg && (cap->flags & CAPFL_STICKY)))
+    {
       sendto_one(source_p, ":%s CAP %s NAK :%s", me.name,
                  source_p->name[0] ? source_p->name : "*", arg);
       return;  /* Can't complete requested op... */
@@ -247,18 +240,14 @@ cap_req(struct Client *source_p, const char *arg)
       rem |=  cap->cap;
       set &= ~cap->cap;
       cs  &= ~cap->cap;
-
-      if (!(cap->flags & CAPFL_PROTO))
-        as &= ~cap->cap;
+      as &= ~cap->cap;
     }
     else
     {
       rem &= ~cap->cap;
       set |=  cap->cap;
       cs  |=  cap->cap;
-
-      if (!(cap->flags & CAPFL_PROTO))
-        as |= cap->cap;
+      as |= cap->cap;
     }
   }
 

@@ -38,8 +38,7 @@
 
 enum
 {
-  CAPFL_HIDDEN    = 1 << 0,  /**< Do not advertize this capability */
-  CAPFL_STICKY    = 1 << 1   /**< Cap may not be cleared once set */
+  CAPFL_STICKY = 1 << 0   /**< Cap may not be cleared once set */
 };
 
 typedef int (*bqcmp)(const void *, const void *);
@@ -165,11 +164,10 @@ send_caplist(struct Client *source_p,
      * This is a little bit subtle, but just involves applying de
      * Morgan's laws to the obvious check: We must display the
      * capability if (and only if) it is set in \a rem or \a set, or
-     * if both are null and the capability is hidden.
+     * if both are null.
      */
     if (!(rem && (*rem & cap->cap)) &&
-        !(set && (*set & cap->cap)) &&
-         (rem || set || (cap->flags & CAPFL_HIDDEN)))
+        !(set && (*set & cap->cap)) && (rem || set))
       continue;
 
     /* Build the prefix (space separator and any modifiers needed). */

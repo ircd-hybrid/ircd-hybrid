@@ -57,6 +57,7 @@ static struct capabilities
   _CAP(CAP_AWAY_NOTIFY, 0, "away-notify"),
   _CAP(CAP_EXTENDED_JOIN, 0, "extended-join"),
   _CAP(CAP_ACCOUNT_NOTIFY, 0, "account-notify"),
+  _CAP(CAP_CAP_NOTIFY, 0, "cap-notify"),
   _CAP(CAP_INVITE_NOTIFY, 0, "invite-notify"),
   _CAP(CAP_CHGHOST, 0, "chghost")
 #undef _CAP
@@ -153,7 +154,7 @@ send_caplist(struct Client *source_p,
   unsigned int i, loc, len, pfx_len, clen;
 
   /* Set up the buffer for the final LS message... */
-  clen = snprintf(cmdbuf, sizeof(capbuf), ":%s CAP %s %s ", me.name,
+  clen = snprintf(cmdbuf, sizeof(cmdbuf), ":%s CAP %s %s ", me.name,
                   source_p->name[0] ? source_p->name : "*", subcmd);
 
   for (i = 0, loc = 0; i < CAPAB_LIST_LEN; ++i)
@@ -203,7 +204,10 @@ cap_ls(struct Client *source_p, const char *arg)
     source_p->connection->registration |= REG_NEED_CAP;
 
   if (arg && atoi(arg) >= 302)
+  {
+    source_p->connection->cap |= CAP_CAP_NOTIFY;
     AddFlag(source_p, FLAGS_CAP302);
+  }
 
   send_caplist(source_p, NULL, NULL, "LS");  /* Send list of capabilities */
 }
@@ -223,8 +227,16 @@ cap_req(struct Client *source_p, const char *arg)
   {
     /* Look up capability... */
     const struct capabilities *cap = find_cap(&cl, &neg);
-    if (cap == NULL ||
-        (neg && (cap->flags & CAPFL_STICKY)))
+    bool error = false;
+
+    if (cap == NULL)
+      error = true;
+    else if (neg && (cap->flags & CAPFL_STICKY))
+      error = true;
+    else if (neg && (cap->cap & CAP_CAP_NOTIFY) && HasFlag(source_p, FLAGS_CAP302))
+      error = true;
+
+    if (error == true)
     {
       sendto_one(source_p, ":%s CAP %s NAK :%s", me.name,
                  source_p->name[0] ? source_p->name : "*", arg);
@@ -351,4 +363,5 @@ struct module module_entry =
   .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
+  .is_resident = true  /* XXX for now until caps are completely modular */
 };

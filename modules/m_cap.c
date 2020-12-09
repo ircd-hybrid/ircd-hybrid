@@ -36,30 +36,25 @@
 #include "irc_string.h"
 
 
-enum
-{
-  CAPFL_STICKY = 1 << 0   /**< Cap may not be cleared once set */
-};
-
 typedef int (*bqcmp)(const void *, const void *);
 
 static struct capabilities
 {
   unsigned int cap;
-  unsigned int flags;
+  bool sticky;  /**< Cap may not be cleared once set */
   const char *name;
-  size_t namelen;
+  size_t name_len;
 } capab_list[] = {
 #define _CAP(cap, flags, name)  \
     { (cap), (flags), (name), sizeof(name) - 1 }
-  _CAP(CAP_UHNAMES, 0, "userhost-in-names"),
-  _CAP(CAP_MULTI_PREFIX, 0, "multi-prefix"),
-  _CAP(CAP_AWAY_NOTIFY, 0, "away-notify"),
-  _CAP(CAP_EXTENDED_JOIN, 0, "extended-join"),
-  _CAP(CAP_ACCOUNT_NOTIFY, 0, "account-notify"),
-  _CAP(CAP_CAP_NOTIFY, 0, "cap-notify"),
-  _CAP(CAP_INVITE_NOTIFY, 0, "invite-notify"),
-  _CAP(CAP_CHGHOST, 0, "chghost")
+  _CAP(CAP_UHNAMES, false, "userhost-in-names"),
+  _CAP(CAP_MULTI_PREFIX, false, "multi-prefix"),
+  _CAP(CAP_AWAY_NOTIFY, false, "away-notify"),
+  _CAP(CAP_EXTENDED_JOIN, false, "extended-join"),
+  _CAP(CAP_ACCOUNT_NOTIFY, false, "account-notify"),
+  _CAP(CAP_CAP_NOTIFY, false, "cap-notify"),
+  _CAP(CAP_INVITE_NOTIFY, false, "invite-notify"),
+  _CAP(CAP_CHGHOST, false, "chghost")
 #undef _CAP
 };
 
@@ -121,7 +116,7 @@ find_cap(const char **caplist_p, int *neg_p)
         ++caplist;
     }
     else
-      caplist += cap->namelen;  /* Advance to end of capability name */
+      caplist += cap->name_len;  /* Advance to end of capability name */
 
     /* Strip trailing spaces */
     while (*caplist && IsSpace(*caplist))
@@ -181,7 +176,7 @@ send_caplist(struct Client *source_p,
 
     pfx[pfx_len] = '\0';
 
-    len = cap->namelen + pfx_len;  /* How much we'd add... */
+    len = cap->name_len + pfx_len;  /* How much we'd add... */
 
     if (sizeof(capbuf) < (clen + loc + len + 15))
     {
@@ -231,7 +226,7 @@ cap_req(struct Client *source_p, const char *arg)
 
     if (cap == NULL)
       error = true;
-    else if (neg && (cap->flags & CAPFL_STICKY))
+    else if (neg && (cap->sticky == true))
       error = true;
     else if (neg && (cap->cap & CAP_CAP_NOTIFY) && HasFlag(source_p, FLAGS_CAP302))
       error = true;

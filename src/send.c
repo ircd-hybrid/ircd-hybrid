@@ -362,7 +362,8 @@ sendto_channel_butone(struct Client *one, struct Client *from,
   }
 
   if (MyClient(from) && HasCap(from, CAP_ECHO_MESSAGE))
-    send_message(from, buffer_l);
+    if (!IsDead(from))
+      send_message(from, buffer_l);
 
   dbuf_ref_free(buffer_l);
   dbuf_ref_free(buffer_r);
@@ -734,6 +735,9 @@ sendto_anywhere(struct Client *to, struct Client *from,
 
   if (MyClient(from) && HasCap(from, CAP_ECHO_MESSAGE) && from != to)
   {
+    if (IsDead(from))
+      return;
+
     va_list args_l;
     struct dbuf_block *buffer_l = dbuf_alloc();
     dbuf_put_fmt(buffer_l, ":%s!%s@%s %s %s ", from->name, from->username,

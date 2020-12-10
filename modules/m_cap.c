@@ -285,10 +285,10 @@ static struct subcmd
   const char *cmd;
   void (*proc)(struct Client *, const char *);
 } cmdlist[] = {
-  { "END",  cap_end   },
-  { "LIST", cap_list  },
-  { "LS",   cap_ls    },
-  { "REQ",  cap_req   }
+  { "END",  cap_end  },
+  { "LIST", cap_list },
+  { "LS",   cap_ls   },
+  { "REQ",  cap_req  }
 };
 
 static int
@@ -325,8 +325,7 @@ m_cap(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Then execute it... */
-  if (cmd->proc)
-    (cmd->proc)(source_p, caplist);
+  cmd->proc(source_p, caplist);
 }
 
 static struct Message cap_msgtab =

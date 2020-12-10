@@ -309,7 +309,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
  * WARNING - +D clients are ignored
  */
 void
-sendto_channel_butone(struct Client *one, const struct Client *from,
+sendto_channel_butone(struct Client *one, struct Client *from,
                       struct Channel *channel, unsigned int type,
                       const char *pattern, ...)
 {
@@ -360,6 +360,9 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 
     target->from->connection->serial = current_serial;
   }
+
+  if (MyClient(from) && HasCap(from, CAP_ECHO_MESSAGE))
+    send_message(from, buffer_l);
 
   dbuf_ref_free(buffer_l);
   dbuf_ref_free(buffer_r);
@@ -701,7 +704,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
  * 		  but useful when one does not know where target "lives"
  */
 void
-sendto_anywhere(struct Client *to, const struct Client *from,
+sendto_anywhere(struct Client *to, struct Client *from,
                 const char *command,
                 const char *pattern, ...)
 {
@@ -726,6 +729,10 @@ sendto_anywhere(struct Client *to, const struct Client *from,
     send_message(to, buffer);
   else
     send_message_remote(to->from, from, buffer);
+
+  if (MyClient(from) && HasCap(from, CAP_ECHO_MESSAGE))
+    if (from != to)
+      send_message(from, buffer);
 
   dbuf_ref_free(buffer);
 }

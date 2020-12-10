@@ -1,3 +1,8 @@
+-- Noteworthy changes in version 8.2.37 (202?-??-??)
+* Implemented IRCv3 `CAP 302`
+* Implemented IRCv3 `cap-notify` capability
+
+
 -- Noteworthy changes in version 8.2.36 (2020-12-04)
 * The old WATCH implementation has been replaced with IRCv3.2 MONITOR. For this,
   the `general::max_watch` configuration directive has been renamed to

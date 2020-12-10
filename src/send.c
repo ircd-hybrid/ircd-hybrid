@@ -730,11 +730,22 @@ sendto_anywhere(struct Client *to, struct Client *from,
   else
     send_message_remote(to->from, from, buffer);
 
-  if (MyClient(from) && HasCap(from, CAP_ECHO_MESSAGE))
-    if (from != to)
-      send_message(from, buffer);
-
   dbuf_ref_free(buffer);
+
+  if (MyClient(from) && HasCap(from, CAP_ECHO_MESSAGE) && from != to)
+  {
+    va_list args_l;
+    struct dbuf_block *buffer_l = dbuf_alloc();
+    dbuf_put_fmt(buffer_l, ":%s!%s@%s %s %s ", from->name, from->username,
+                 from->host, command, to->name);
+
+    va_start(args_l, pattern);
+    send_format(buffer, pattern, args_l);
+    va_end(args_l);
+
+    send_message(from, buffer_l);
+    dbuf_ref_free(buffer_l);
+  }
 }
 
 /* sendto_realops_flags()

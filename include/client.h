@@ -105,7 +105,6 @@ enum
   CAP_INVITE_NOTIFY  = 1 << 5,  /**< ircv3.2 invite-notify client capability */
   CAP_CHGHOST        = 1 << 6,  /**< ircv3.2 chghost client capability */
   CAP_CAP_NOTIFY     = 1 << 7,  /**< ircv3 CAP LS 302 cap-notify client capability */
-  CAP_ECHO_MESSAGE   = 1 << 8  /**< ircv3.2 echo-message client capability */
 };
 
 #define HasCap(x, y) ((x)->connection->cap & (y))

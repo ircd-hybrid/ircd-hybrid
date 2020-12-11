@@ -63,7 +63,7 @@ extern void send_queued_write(struct Client *);
 extern void sendto_one(struct Client *, const char *, ...) AFP(2,3);
 extern void sendto_one_numeric(struct Client *, const struct Client *, enum irc_numerics, ...);
 extern void sendto_one_notice(struct Client *, const struct Client *, const char *, ...) AFP(3,4);
-extern void sendto_channel_butone(struct Client *, struct Client *,
+extern void sendto_channel_butone(struct Client *, const struct Client *,
                                   struct Channel *, unsigned int,
                                   const char *, ...) AFP(5,6);
 extern void sendto_common_channels_local(struct Client *, bool, unsigned int, unsigned int,
@@ -82,7 +82,7 @@ extern void sendto_wallops_flags(unsigned int, const struct Client *,
                                  const char *, ...) AFP(3,4);
 extern void sendto_realops_flags_ratelimited(uintmax_t *, const char *, ...) AFP(2,3);
 
-extern void sendto_anywhere(struct Client *, struct Client *,
+extern void sendto_anywhere(struct Client *, const struct Client *,
                             const char *,
                             const char *, ...) AFP(4,5);
 #endif  /* INCLUDED_send_h */

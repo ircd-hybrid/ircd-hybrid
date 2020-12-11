@@ -51,7 +51,6 @@ static struct capabilities
   _CAP(CAP_MULTI_PREFIX, false, "multi-prefix"),
   _CAP(CAP_AWAY_NOTIFY, false, "away-notify"),
   _CAP(CAP_EXTENDED_JOIN, false, "extended-join"),
-  _CAP(CAP_ECHO_MESSAGE, false, "echo-message"),
   _CAP(CAP_ACCOUNT_NOTIFY, false, "account-notify"),
   _CAP(CAP_CAP_NOTIFY, false, "cap-notify"),
   _CAP(CAP_INVITE_NOTIFY, false, "invite-notify"),

@@ -1,7 +1,6 @@
 -- Noteworthy changes in version 8.2.37 (202?-??-??)
 * Implemented IRCv3 `CAP 302`
 * Implemented IRCv3 `cap-notify` capability
-* Implemented IRCv3.2 `echo-message` capability
 
 
 -- Noteworthy changes in version 8.2.36 (2020-12-04)

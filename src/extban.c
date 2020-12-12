@@ -273,7 +273,7 @@ extban_get_isupport(void)
   for (unsigned int i = 0; i < 256; ++i)
     if (extban_chars[i])
       *p++ = extban_chars[i];
-  *p++ = '\0';
+  *p = '\0';
 
   return buf;
 }

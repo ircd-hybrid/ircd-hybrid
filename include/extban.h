@@ -58,7 +58,7 @@ struct Extban
   unsigned char character;
   enum extban_type type;
   int (*is_valid)(const char *);
-  enum extban_match (*matches)(struct Client *, struct Channel*, struct Ban *);
+  enum extban_match (*matches)(struct Client *, struct Channel *, struct Ban *);
   unsigned int types;  /* CHFL_BAN/EXCEPTION/INVEX */
   unsigned int flag;
   dlink_node node;

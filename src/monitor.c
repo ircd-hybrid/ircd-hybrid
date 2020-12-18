@@ -136,6 +136,22 @@ monitor_find_hash(const char *name)
   return NULL;
 }
 
+/*! \brief Unlinks a Monitor struct from its associated hash table
+ *         and frees memory.
+ * \param monitor Name to remove
+ */
+static void
+monitor_free(struct Monitor *monitor)
+{
+  assert(monitor->monitored_by.head == NULL);
+  assert(dlinkFind(&monitor_hash[monitor->hash_value], monitor));
+
+  dlinkDelete(&monitor->node, &monitor_hash[monitor->hash_value]);
+
+  xfree(monitor->name);
+  xfree(monitor);
+}
+
 /*! \brief Adds a monitor entry to client's monitor list if it doesn't exist
  * \param name   Nick name to add
  * \param client Pointer to Client struct
@@ -197,13 +213,7 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
 
   /* In case this header is now empty of notices, remove it */
   if (monitor->monitored_by.head == NULL)
-  {
-    assert(dlinkFind(&monitor_hash[monitor->hash_value], monitor));
-    dlinkDelete(&monitor->node, &monitor_hash[monitor->hash_value]);
-
-    xfree(monitor->name);
-    xfree(monitor);
-  }
+    monitor_free(monitor);
 }
 
 /*! \brief Removes all entries from client's monitor list
@@ -227,13 +237,7 @@ monitor_clear_list(struct Client *client)
 
     /* If this leaves a header without notifies, remove it. */
     if (monitor->monitored_by.head == NULL)
-    {
-      assert(dlinkFind(&monitor_hash[monitor->hash_value], monitor));
-      dlinkDelete(&monitor->node, &monitor_hash[monitor->hash_value]);
-
-      xfree(monitor->name);
-      xfree(monitor);
-    }
+      monitor_free(monitor);
 
     dlinkDelete(node, &client->connection->monitors);
     free_dlink_node(node);

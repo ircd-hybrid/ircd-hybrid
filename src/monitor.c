@@ -200,11 +200,10 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
   if (monitor == NULL)
     return;  /* No header found for that name. i.e. it's not being monitored */
 
-  dlink_node *node = dlinkFind(&monitor->monitored_by, client);
+  dlink_node *node = dlinkFindDelete(&monitor->monitored_by, client);
   if (node == NULL)
     return;  /* This name isn't being monitored by client */
 
-  dlinkDelete(node, &monitor->monitored_by);
   free_dlink_node(node);
 
   node = dlinkFindDelete(&client->connection->monitors, monitor);

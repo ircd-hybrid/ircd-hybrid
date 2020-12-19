@@ -44,5 +44,4 @@ extern bool monitor_add_to_hash_table(const char *, struct Client *);
 extern void monitor_del_from_hash_table(const char *, struct Client *);
 extern void monitor_clear_list(struct Client *);
 extern void monitor_count_memory(unsigned int *const, size_t *const);
-extern struct Monitor *monitor_find_hash(const char *);
 #endif  /* INCLUDED_monitor_h */

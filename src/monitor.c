@@ -73,6 +73,25 @@ monitor_count_memory(unsigned int *const count, size_t *const bytes)
   (*bytes) += *count * sizeof(struct Monitor);
 }
 
+/*! \brief Looks up the monitor table for a given name
+ * \param name Nick name to look up
+ */
+static struct Monitor *
+monitor_find_hash(const char *name)
+{
+  dlink_node *node;
+
+  DLINK_FOREACH(node, monitor_hash[strhash(name)].head)
+  {
+    struct Monitor *monitor = node->data;
+
+    if (irccmp(monitor->name, name) == 0)
+      return monitor;
+  }
+
+  return NULL;
+}
+
 /*! \brief Notifies all clients that have client's name on
  *         their monitor list.
  * \param client Pointer to Client struct
@@ -115,25 +134,6 @@ monitor_signoff(const struct Client *client)
   /* Send notifies out to everybody on the list in header */
   DLINK_FOREACH(node, monitor->monitored_by.head)
     sendto_one_numeric(node->data, &me, RPL_MONOFFLINE, client->name);
-}
-
-/*! \brief Looks up the monitor table for a given name
- * \param name Nick name to look up
- */
-struct Monitor *
-monitor_find_hash(const char *name)
-{
-  dlink_node *node;
-
-  DLINK_FOREACH(node, monitor_hash[strhash(name)].head)
-  {
-    struct Monitor *monitor = node->data;
-
-    if (irccmp(monitor->name, name) == 0)
-      return monitor;
-  }
-
-  return NULL;
 }
 
 /*! \brief Unlinks a Monitor struct from its associated hash table

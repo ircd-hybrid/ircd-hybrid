@@ -311,8 +311,8 @@
 
 
 -- Noteworthy changes in version 8.2.11 (2015-11-19)
-* Implemented IRCv3.2 `invite-notify extension`
-* Implemented IRCv3.2 `chghost extension`
+* Implemented IRCv3.2 `invite-notify` extension
+* Implemented IRCv3.2 `chghost` extension
 * Added `channel::invite_delay_channel` configuration option
 * For a full list of all changes in this release, see <https://git.io/JvLqe>
 
@@ -433,10 +433,10 @@
 
 
 -- Noteworthy changes in version 8.2.2 (2015-01-20)
-* Implemented IRCv3.1 extended-join extension
+* Implemented IRCv3.1 `extended-join` extension
 * Channel half-ops can now use `INVITE` as well
 * Fixed broken `make install -jX`
-* m_opme.c has been added to modules/extra. Can be used on opless channels only.
+* `m_opme.c` has been added to `modules/extra`. Can be used on opless channels only.
 * Added `opme` to IRC operator flags
 * Updated several help files
 * The `general::hide_spoof_ips` configuration option has been deprecated

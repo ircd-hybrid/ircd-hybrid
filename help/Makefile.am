@@ -29,6 +29,7 @@ dist_helpf_DATA = accept    \
                   lusers    \
                   map       \
                   module    \
+                  monitor   \
                   motd      \
                   names     \
                   nick      \

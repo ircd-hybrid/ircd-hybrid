@@ -439,6 +439,7 @@ motd_memory_count(struct Client *client)
     ++mt;
     mtm += sizeof(struct Motd);
     mtm += motd->path ? (strlen(motd->path) + 1) : 0;
+    mtm += motd->mask ? (strlen(motd->mask) + 1) : 0;
   }
 
   DLINK_FOREACH(node, MotdList.cachelist.head)
@@ -447,6 +448,7 @@ motd_memory_count(struct Client *client)
 
     ++mtc;
     mtcm += sizeof(struct MotdCache) + (MOTD_LINESIZE * (cache->count - 1));
+    mtcm += cache->path ? (strlen(cache->path) + 1) : 0;
   }
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,

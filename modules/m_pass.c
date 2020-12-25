@@ -54,10 +54,11 @@
 static void
 mr_pass(struct Client *source_p, int parc, char *parv[])
 {
+  const char *const password = parv[1];
   assert(MyConnect(source_p));
 
-  xfree(source_p->connection->password);
-  source_p->connection->password = xstrndup(parv[1], IRCD_MIN(strlen(parv[1]), PASSWDLEN));
+  if (source_p->connection->password == NULL)
+    source_p->connection->password = xstrndup(password, IRCD_MIN(strlen(password), PASSWDLEN));
 
   /* Only do this stuff if we are doing ts6 */
   if (parc > 4)

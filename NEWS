@@ -1,6 +1,8 @@
 -- Noteworthy changes in version 8.2.37 (202?-??-??)
 * Implemented IRCv3 `CAP 302`
 * Implemented IRCv3 `cap-notify` capability
+* In case a client sends multiple PASS messages, ircd only accepts the password
+  sent in the first PASS message
 
 
 -- Noteworthy changes in version 8.2.36 (2020-12-04)

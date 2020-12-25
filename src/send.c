@@ -645,7 +645,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
  * side effects	- data sent to servers matching with capab
  */
 void
-sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int cap,
+sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int capab,
                    const char *pattern, ...)
 {
   va_list args;
@@ -678,7 +678,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
     if (target->from->connection->serial == current_serial)
       continue;
 
-    if (cap && IsCapable(target->from, cap) != cap)
+    if (IsCapable(target->from, capab) != capab)
       continue;
 
     if (match(mask, target->name))

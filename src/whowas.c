@@ -58,10 +58,10 @@ static struct Whowas *
 whowas_unlink(struct Whowas *whowas)
 {
   if (whowas->client)
-    dlinkDelete(&whowas->cnode, &whowas->client->whowas_list);
+    dlinkDelete(&whowas->client_list_node, &whowas->client->whowas_list);
 
-  dlinkDelete(&whowas->hnode, &whowas_hash[whowas->hash_value]);
-  dlinkDelete(&whowas->lnode, &whowas_list);
+  dlinkDelete(&whowas->hash_node, &whowas_hash[whowas->hash_value]);
+  dlinkDelete(&whowas->list_node, &whowas_list);
 
   return whowas;
 }
@@ -136,13 +136,13 @@ whowas_add_history(struct Client *client, bool online)
   if (online == true)
   {
     whowas->client = client;
-    dlinkAdd(whowas, &whowas->cnode, &client->whowas_list);
+    dlinkAdd(whowas, &whowas->client_list_node, &client->whowas_list);
   }
   else
     whowas->client = NULL;
 
-  dlinkAdd(whowas, &whowas->hnode, &whowas_hash[whowas->hash_value]);
-  dlinkAdd(whowas, &whowas->lnode, &whowas_list);
+  dlinkAdd(whowas, &whowas->hash_node, &whowas_hash[whowas->hash_value]);
+  dlinkAdd(whowas, &whowas->list_node, &whowas_list);
 }
 
 /*! \brief This must be called when the client structure is about to
@@ -158,7 +158,7 @@ whowas_off_history(struct Client *client)
     struct Whowas *whowas = client->whowas_list.head->data;
 
     whowas->client = NULL;
-    dlinkDelete(&whowas->cnode, &client->whowas_list);
+    dlinkDelete(&whowas->client_list_node, &client->whowas_list);
   }
 }
 

@@ -118,9 +118,9 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 {
   struct split_nuh_item nuh;
   struct split_nuh_item *accept_p = NULL;
-  char nick[NICKLEN + 1] = "";
-  char user[USERLEN + 1] = "";
-  char host[HOSTLEN + 1] = "";
+  char nick[NICKLEN + 1];
+  char user[USERLEN + 1];
+  char host[HOSTLEN + 1];
   char *p = NULL;
   char *mask = collapse(parv[1]);
 

@@ -55,13 +55,13 @@
 static void
 mo_kill(struct Client *source_p, int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
   char def_reason[] = CONF_NOREASON;
 
   char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
   if (!EmptyString(reason))
   {
-    if (strlen(reason) > (size_t)REASONLEN)
+    if (strlen(reason) > REASONLEN)
       reason[REASONLEN] = '\0';
   }
   else
@@ -159,7 +159,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
 static void
 ms_kill(struct Client *source_p, int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE] = "";
+  char buf[IRCD_BUFSIZE];
   char def_reason[] = CONF_NOREASON;
 
   struct Client *target_p = find_person(source_p, parv[1]);

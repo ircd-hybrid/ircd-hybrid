@@ -238,7 +238,7 @@ server_estab(struct Client *client_p)
                me.name, ConfigServerHide.hidden ? "(H) " : "", me.info);
   }
 
-  sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MIN,
+  sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MINIMUM,
              event_base->time.sec_real);
 
   if (IsDead(client_p))

@@ -54,9 +54,8 @@
 static void
 mo_squit(struct Client *source_p, int parc, char *parv[])
 {
-  char comment[REASONLEN + 1] = "";
+  const char *const name = parv[1];
   struct Client *target_p = NULL;
-  const char *server = parv[1];
 
   /* The following allows wild cards in SQUIT. */
   dlink_node *node;
@@ -66,7 +65,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 
     if (IsServer(tmp) || IsMe(tmp))
     {
-      if (match(server, tmp->name) == 0)
+      if (match(name, tmp->name) == 0)
       {
         target_p = tmp;
         break;
@@ -76,7 +75,7 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
 
   if (target_p == NULL || IsMe(target_p))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, server);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, name);
     return;
   }
 
@@ -92,9 +91,8 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(parv[2]))
-    strlcpy(comment, CONF_NOREASON, sizeof(comment));
-  else
+  char comment[REASONLEN + 1] = CONF_NOREASON;
+  if (!EmptyString(parv[2]))
     strlcpy(comment, parv[2], sizeof(comment));
 
   if (MyConnect(target_p))

@@ -121,7 +121,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
                                                           ConfigChannel.max_bans))
     {
       sendto_one_numeric(client, &me, ERR_BANLISTFULL, channel->name, banid);
-      return false;
+      return NULL;
     }
 
     collapse(mask);
@@ -243,6 +243,7 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
 {
   static char mask[MODEBUFLEN];
   dlink_node *node;
+
   assert(banid);
 
   /* TBD: n!u@h formatting fo local clients */
@@ -379,7 +380,7 @@ static void
 chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
            int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
 {
-  if (mode->only_opers)
+  if (mode->only_opers == true)
   {
     if (MyClient(client) && !HasUMode(client, UMODE_OPER))
     {
@@ -391,7 +392,7 @@ chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, 
     }
   }
 
-  if (mode->only_servers)
+  if (mode->only_servers == true)
   {
     if (!IsServer(client) && !HasFlag(client, FLAGS_SERVICE))
     {
@@ -755,8 +756,8 @@ get_channel_access(const struct Client *client,
 static void
 send_mode_changes_server(struct Client *client, struct Channel *channel)
 {
-  char modebuf[IRCD_BUFSIZE] = "";
-  char parabuf[IRCD_BUFSIZE] = "";
+  char modebuf[IRCD_BUFSIZE];
+  char parabuf[IRCD_BUFSIZE];
   char *parptr = parabuf;
   unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
   unsigned int dir = MODE_QUERY;
@@ -843,8 +844,8 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
 
   for (unsigned int pass = 2; pass--; flags = CHFL_CHANOP | CHFL_HALFOP)
   {
-    char modebuf[IRCD_BUFSIZE] = "";
-    char parabuf[IRCD_BUFSIZE] = "";
+    char modebuf[IRCD_BUFSIZE];
+    char parabuf[IRCD_BUFSIZE];
     char *parptr = parabuf;
     unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
     unsigned int dir = MODE_QUERY;

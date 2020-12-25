@@ -602,8 +602,6 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
 static void
 mr_nick(struct Client *source_p, int parc, char *parv[])
 {
-  char nick[NICKLEN + 1] = "";
-
   if (EmptyString(parv[1]))
   {
     sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
@@ -611,6 +609,7 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Copy the nick and terminate it */
+  char nick[NICKLEN + 1];
   strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
@@ -652,7 +651,6 @@ mr_nick(struct Client *source_p, int parc, char *parv[])
 static void
 m_nick(struct Client *source_p, int parc, char *parv[])
 {
-  char nick[NICKLEN + 1] = "";
   const struct ResvItem *resv = NULL;
 
   assert(MyClient(source_p));
@@ -664,6 +662,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Terminate nick to NICKLEN */
+  char nick[NICKLEN + 1];
   strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */

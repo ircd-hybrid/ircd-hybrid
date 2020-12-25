@@ -33,9 +33,9 @@
 
 struct Whowas
 {
-  dlink_node hnode;  /**< List node; linked into whowas_hash */
-  dlink_node cnode;  /**< List node; linked into client->whowas_list */
-  dlink_node lnode;  /**< List node; linked into whowas_list */
+  dlink_node hash_node;  /**< List node; linked into whowas_hash */
+  dlink_node list_node;  /**< List node; linked into whowas_list */
+  dlink_node client_list_node;  /**< List node; linked into client->whowas_list */
   unsigned int hash_value;  /**< Hash value derived from Whowas::name */
   uintmax_t logoff;  /**< When the client logged off; real time */
   bool server_hidden;  /**< Client's server is hidden */

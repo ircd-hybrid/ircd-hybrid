@@ -72,7 +72,7 @@ m_quit(struct Client *source_p, int parc, char *parv[])
 static void
 ms_quit(struct Client *source_p, int parc, char *parv[])
 {
-  char reason[KICKLEN + 1] = "";
+  char reason[KICKLEN + 1] = "";  /* Essential that buf[0] = '\0' */
 
   if (!EmptyString(parv[1]))
     strlcpy(reason, parv[1], sizeof(reason));

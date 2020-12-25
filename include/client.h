@@ -92,7 +92,7 @@ enum
 enum
 {
   TS_CURRENT = 6,  /**< Current TS protocol version */
-  TS_MIN     = 6   /**< Minimum supported TS protocol version */
+  TS_MINIMUM = 6,  /**< Minimum supported TS protocol version */
 };
 
 enum

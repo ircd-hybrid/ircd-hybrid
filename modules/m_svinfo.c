@@ -45,7 +45,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = TS_CURRENT for the server
- *      - parv[2] = TS_MIN for the server
+ *      - parv[2] = TS_MINIMUM for the server
  *      - parv[3] = unused
  *      - parv[4] = server's idea of UTC time
  */
@@ -55,7 +55,7 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   if (!IsServer(source_p) || !MyConnect(source_p))
     return;
 
-  if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MIN)
+  if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MINIMUM)
   {
     /*
      * A server with the wrong TS version connected; since we're

@@ -1127,7 +1127,7 @@ void
 channel_do_part(struct Client *client, char *channel, const char *reason)
 {
   char *p = NULL;
-  char buf[KICKLEN + 1] = "";
+  char buf[KICKLEN + 1] = "";  /* Essential that buf[0] = '\0' */
 
   assert(IsClient(client));
 

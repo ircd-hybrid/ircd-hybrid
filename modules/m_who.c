@@ -57,7 +57,7 @@ static void
 do_who(struct Client *source_p, const struct Client *target_p,
        const char *name, const char *op_flags)
 {
-  char status[8] = "";  /* sizeof("GBr*@%+") + 1 */
+  char status[8];  /* sizeof("GBr*@%+") + 1 */
 
   if (HasUMode(source_p, UMODE_OPER))
     snprintf(status, sizeof(status), "%c%s%s%s%s", target_p->away[0] ? 'G' : 'H',
@@ -302,7 +302,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   dlink_node *node;
   struct Client *target_p = NULL;
   struct Channel *channel = NULL;
-  char *mask = parv[1];
+  char *const mask = parv[1];
   const bool server_oper = parv[2] && *parv[2] == 'o';  /* Show OPERS only */
 
   /* See if mask is there, collapse it or return if not there */

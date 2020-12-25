@@ -49,7 +49,6 @@
 static void
 mo_restart(struct Client *source_p, int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE];
   const char *const name = parv[1];
 
   if (!HasOFlag(source_p, OPER_FLAG_RESTART))
@@ -64,6 +63,7 @@ mo_restart(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
+  char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "received RESTART command from %s",
            client_get_name(source_p, HIDE_IP));
   server_die(buf, true);

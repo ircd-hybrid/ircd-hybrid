@@ -54,7 +54,7 @@ monitor_add(struct Client *source_p, char *list)
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
   {
-    if (EmptyString(name))
+    if (EmptyString(name) || valid_nickname(name, true) == false)
       continue;
 
     if (dlink_list_length(&source_p->connection->monitors) >=
@@ -76,9 +76,6 @@ monitor_add(struct Client *source_p, char *list)
                          ConfigGeneral.max_monitor, buf);
       return;
     }
-
-    if (valid_nickname(name, true) == false)
-      continue;
 
     if (monitor_add_to_hash_table(name, source_p) == false)
       continue;  /* Name is already being monitored */

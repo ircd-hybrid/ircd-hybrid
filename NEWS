@@ -1,10 +1,11 @@
--- Noteworthy changes in version 8.2.37 (202?-??-??)
+-- Noteworthy changes in version 8.2.37 (2020-12-26)
 * Implemented IRCv3 `CAP 302`
 * Implemented IRCv3 `cap-notify` capability
 * In case a client sends multiple `PASS` messages, ircd only accepts the password
   sent in the first `PASS` message instead of the last one
 * Missing help file for `MONITOR` has been added
 * Fixed slightly off memory count for motds in `STATS z`
+* For a full list of all changes in this release, see <https://git.io/JLMnk>
 
 
 -- Noteworthy changes in version 8.2.36 (2020-12-04)
@@ -16,7 +17,7 @@
   long as the `bot` directive is set in `general::oper_only_umodes`), servers,
   and services.
   This mode can for example be used to mark HOPM as official network bot.
-* For a full list of all changes in this release, see <https://git.io/JI3fG>
+* For a full list of all changes in this release, see <https://git.io/JLMnJ>
 
 
 -- Noteworthy changes in version 8.2.35 (2020-11-14)

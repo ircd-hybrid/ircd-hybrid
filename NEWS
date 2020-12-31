@@ -1,3 +1,8 @@
+-- Noteworthy changes in version 8.2.38 (2021-??-??)
+* Backwards compatibility mode for ircd-hybrid 8.2.22 and below has been removed
+* Minimum supported version of the Anope IRC services is now 2.0.8
+
+
 -- Noteworthy changes in version 8.2.37 (2020-12-26)
 * Implemented IRCv3 `CAP 302`
 * Implemented IRCv3 `cap-notify` capability

@@ -1,6 +1,16 @@
--- Noteworthy changes in version 8.2.37 (202?-??-??)
+-- Noteworthy changes in version 8.2.38 (2021-??-??)
+* Backwards compatibility mode for ircd-hybrid 8.2.22 and below has been removed
+* Minimum supported version of the Anope IRC services is now 2.0.8
+
+
+-- Noteworthy changes in version 8.2.37 (2020-12-26)
 * Implemented IRCv3 `CAP 302`
 * Implemented IRCv3 `cap-notify` capability
+* In case a client sends multiple `PASS` messages, ircd only accepts the password
+  sent in the first `PASS` message instead of the last one
+* Missing help file for `MONITOR` has been added
+* Fixed slightly off memory count for motds in `STATS z`
+* For a full list of all changes in this release, see <https://git.io/JLMnk>
 
 
 -- Noteworthy changes in version 8.2.36 (2020-12-04)
@@ -12,7 +22,7 @@
   long as the `bot` directive is set in `general::oper_only_umodes`), servers,
   and services.
   This mode can for example be used to mark HOPM as official network bot.
-* For a full list of all changes in this release, see <https://git.io/JI3fG>
+* For a full list of all changes in this release, see <https://git.io/JLMnJ>
 
 
 -- Noteworthy changes in version 8.2.35 (2020-11-14)
@@ -311,8 +321,8 @@
 
 
 -- Noteworthy changes in version 8.2.11 (2015-11-19)
-* Implemented IRCv3.2 `invite-notify extension`
-* Implemented IRCv3.2 `chghost extension`
+* Implemented IRCv3.2 `invite-notify` extension
+* Implemented IRCv3.2 `chghost` extension
 * Added `channel::invite_delay_channel` configuration option
 * For a full list of all changes in this release, see <https://git.io/JvLqe>
 
@@ -433,10 +443,10 @@
 
 
 -- Noteworthy changes in version 8.2.2 (2015-01-20)
-* Implemented IRCv3.1 extended-join extension
+* Implemented IRCv3.1 `extended-join` extension
 * Channel half-ops can now use `INVITE` as well
 * Fixed broken `make install -jX`
-* m_opme.c has been added to modules/extra. Can be used on opless channels only.
+* `m_opme.c` has been added to `modules/extra`. Can be used on opless channels only.
 * Added `opme` to IRC operator flags
 * Updated several help files
 * The `general::hide_spoof_ips` configuration option has been deprecated

@@ -609,11 +609,10 @@ res_readreply(fde_t *F, void *data)
  * timeout_query_list - Remove queries from the list which have been
  * there too long without being resolved.
  */
-static uintmax_t
-timeout_query_list(void)
+static void
+resolver_timeout(void *unused)
 {
   dlink_node *node, *node_next;
-  uintmax_t next_time = 0;
 
   DLINK_FOREACH_SAFE(node, node_next, request_list.head)
   {
@@ -626,7 +625,6 @@ timeout_query_list(void)
       {
         (*request->callback)(request->callback_ctx, NULL, NULL, 0);
         rem_request(request);
-        continue;
       }
       else
       {
@@ -635,21 +633,7 @@ timeout_query_list(void)
         resend_query(request);
       }
     }
-
-    if (next_time == 0 || timeout < next_time)
-      next_time = timeout;
   }
-
-  return (next_time > event_base->time.sec_monotonic) ? next_time : (event_base->time.sec_monotonic + AR_TTL);
-}
-
-/*
- * timeout_resolver - check request list
- */
-static void
-timeout_resolver(void *unused)
-{
-  timeout_query_list();
 }
 
 /*
@@ -658,13 +642,13 @@ timeout_resolver(void *unused)
 void
 resolver_init(void)
 {
-  static struct event event_timeout_resolver =
+  static struct event resolver_timeout_event =
   {
-    .name = "timeout_resolver",
-    .handler = timeout_resolver,
+    .name = "resolver_timeout",
+    .handler = resolver_timeout,
     .when = 1
   };
 
   start_resolver();
-  event_add(&event_timeout_resolver, NULL);
+  event_add(&resolver_timeout_event, NULL);
 }

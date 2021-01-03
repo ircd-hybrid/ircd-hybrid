@@ -830,7 +830,7 @@ exit_client(struct Client *client, const char *comment)
 
   if (IsServer(client))
   {
-    char splitstr[HOSTLEN + HOSTLEN + 2];
+    char splitstr[HOSTLEN + HOSTLEN + 2];  /* +2 for space and \0 */
 
     assert(client->serv);
     assert(client->servptr);

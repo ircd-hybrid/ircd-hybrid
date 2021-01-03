@@ -200,7 +200,6 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
 static void
 introduce_client(struct Client *client)
 {
-  dlink_node *node;
   char buf[UMODE_MAX_STR] = "";
 
   send_umode(client, MyConnect(client), 0, buf);
@@ -212,25 +211,14 @@ introduce_client(struct Client *client)
     buf[1] = '\0';
   }
 
-  DLINK_FOREACH(node, local_server_list.head)
-  {
-    struct Client *server = node->data;
+  sendto_server(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
+                client->servptr->id, client->name, client->hopcount + 1,
+                client->tsinfo, buf, client->username, client->host,
+                client->realhost, client->sockhost, client->id,
+                client->account, client->info);
 
-    if (server == client->from)
-      continue;
-
-    sendto_one(server, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
-               client->servptr->id,
-               client->name, client->hopcount + 1,
-               client->tsinfo,
-               buf, client->username, client->host, client->realhost,
-               client->sockhost, client->id,
-               client->account,
-               client->info);
-
-    if (!EmptyString(client->tls_certfp))
-      sendto_one(server, ":%s CERTFP %s", client->id, client->tls_certfp);
-  }
+  if (!EmptyString(client->tls_certfp))
+    sendto_server(client, 0, 0, ":%s CERTFP %s", client->id, client->tls_certfp);
 }
 
 /* user_welcome()

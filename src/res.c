@@ -598,8 +598,6 @@ res_readreply(fde_t *F, void *data)
       (*request->callback)(request->callback_ctx, &request->addr, request->name, request->namelength);
       rem_request(request);
     }
-
-    continue;
   }
 
   comm_setselect(F, COMM_SELECT_READ, res_readreply, NULL, 0);

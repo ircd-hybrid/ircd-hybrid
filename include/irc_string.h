@@ -99,12 +99,14 @@ enum
   SERV_C    = 1 << 13,
   EOL_C     = 1 << 14,
   MWILD_C   = 1 << 15,
-  VCHAN_C   = 1 << 16
+  VCHAN_C   = 1 << 16,
+  USER2_C   = 1 << 17,
 };
 
 #define IsVisibleChanChar(c)   (CharAttrs[(unsigned char)(c)] & VCHAN_C)
 #define IsHostChar(c)   (CharAttrs[(unsigned char)(c)] & HOST_C)
 #define IsUserChar(c)   (CharAttrs[(unsigned char)(c)] & USER_C)
+#define IsUser2Char(c)  (CharAttrs[(unsigned char)(c)] & USER2_C)
 #define IsChanPrefix(c) (CharAttrs[(unsigned char)(c)] & CHANPFX_C)
 #define IsChanChar(c)   (CharAttrs[(unsigned char)(c)] & CHAN_C)
 #define IsKWildChar(c)  (CharAttrs[(unsigned char)(c)] & KWILD_C)

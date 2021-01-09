@@ -542,16 +542,16 @@ valid_username(const char *username, bool local)
   {
     unsigned int dots = 0;
 
-    while (*++p)
+    while (*p)
     {
       if (*p == '.' && ConfigGeneral.dots_in_ident)
       {
         if (++dots > ConfigGeneral.dots_in_ident)
           return false;
-        if (!IsUserChar(*(p + 1)))
+        if (!IsUser2Char(*(p + 1)))
           return false;
       }
-      else if (!IsUserChar(*p))
+      else if (!IsUser2Char(*p))
         return false;
     }
   }

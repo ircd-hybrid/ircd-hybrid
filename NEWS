@@ -1,6 +1,7 @@
 -- Noteworthy changes in version 8.2.38 (2021-??-??)
 * Backwards compatibility mode for ircd-hybrid 8.2.22 and below has been removed
 * Minimum supported version of the Anope IRC services is now 2.0.8
+* Valid characters allowed in user names for local clients are now [A-Za-z0-9._-]
 
 
 -- Noteworthy changes in version 8.2.37 (2020-12-26)

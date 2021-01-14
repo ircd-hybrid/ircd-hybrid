@@ -340,58 +340,43 @@ verify_access(struct Client *client)
 bool
 conf_check_client(struct Client *client)
 {
-  int i;
+  const char *error = NULL;
+  bool warn = true;
 
-  if ((i = verify_access(client)))
-    ilog(LOG_TYPE_IRCD, "Access denied: %s[%s]",
-         client->name, client->sockhost);
-
-  switch (i)
+  switch (verify_access(client))
   {
     case TOO_MANY:
-      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                           "Too many on IP for %s (%s).",
-                           client_get_name(client, SHOW_IP),
-                           client->sockhost);
-      ilog(LOG_TYPE_IRCD, "Too many connections on IP from %s.",
-           client_get_name(client, SHOW_IP));
-      ++ServerStats.is_ref;
-      exit_client(client, "No more connections allowed on that IP");
+      error = "too many connections on IP";
       break;
-
     case I_LINE_FULL:
-      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                           "auth {} block is full for %s (%s).",
-                           client_get_name(client, SHOW_IP),
-                           client->sockhost);
-      ilog(LOG_TYPE_IRCD, "Too many connections from %s.",
-           client_get_name(client, SHOW_IP));
-      ++ServerStats.is_ref;
-      exit_client(client, "No more connections allowed in your connection class");
+      error = "connection class is full";
       break;
-
     case NOT_AUTHORIZED:
-      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                           "Unauthorized client connection from %s.",
-                           client_get_name(client, SHOW_IP));
-      ilog(LOG_TYPE_IRCD, "Unauthorized client connection from %s.",
-           client_get_name(client, SHOW_IP));
-      ++ServerStats.is_ref;
-      exit_client(client, "You are not authorized to use this server");
+      error = "not authorized";
       break;
-
     case BANNED_CLIENT:
-      ++ServerStats.is_ref;
-      exit_client(client, "Banned");
-      break;
-
-    case 0:
-    default:
+      error = "banned from server";
+      warn = false;
       break;
   }
 
-  if (i < 0)
+  if (error)
+  {
+    char buf[REASONLEN + 1];
+    snprintf(buf, sizeof(buf), "Connection rejected - %s", error);
+
+    ++ServerStats.is_ref;
+
+    if (warn == true)
+      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Rejecting client connection from %s: %s",
+                           client_get_name(client, SHOW_IP), error);
+
+    ilog(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
+         client_get_name(client, SHOW_IP), error);
+    exit_client(client, buf);
     return false;
+  }
+
   return true;
 }
 

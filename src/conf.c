@@ -260,6 +260,8 @@ attach_iline(struct Client *client, struct MaskItem *conf)
   else if (class->max_perip_global &&
            (ipcache->count_local + ipcache->count_remote) > class->max_perip_global)
     a_limit_reached = true;
+  else if (class_ip_limit_add(conf->class, &client->ip, IsConfExemptLimits(conf)) == true)
+    a_limit_reached = true;
 
   if (a_limit_reached == true)
   {
@@ -429,10 +431,6 @@ conf_attach(struct Client *client, struct MaskItem *conf)
 {
   if (dlinkFind(&client->connection->confs, conf))
     return 1;
-
-  if (conf->type == CONF_CLIENT)
-    if (class_ip_limit_add(conf->class, &client->ip, IsConfExemptLimits(conf)) == true)
-      return TOO_MANY;    /* Already at maximum allowed */
 
   conf->class->ref_count++;
   conf->ref_count++;

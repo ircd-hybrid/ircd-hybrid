@@ -208,8 +208,19 @@ class_ip_limit_add(struct ClassItem *class, void *addr, bool over_rule)
     return false;
 
   patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(class, addr), addr, bitlen);
-  if (((uintptr_t)pnode->data) >= class->number_per_cidr && over_rule == false)
+  if (((uintptr_t)pnode->data) >= class->number_per_cidr)
+  {
+    if (over_rule == true)
+      /*
+       * In case of overruling, we continue with the client registration process
+       * which means we expect a class_ip_limit_remove() call when detaching the
+       * configuration record upon client exit, therefore pnode->data has to be
+       * increased.
+       */
+      PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) + 1));
+
     return true;
+  }
 
   PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) + 1));
   return false;

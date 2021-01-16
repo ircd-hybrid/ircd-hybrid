@@ -787,7 +787,9 @@ exit_client(struct Client *client, const char *comment)
         free_list_task(client);
 
       invite_clear_list(&client->connection->invited);
-      del_all_accepts(client);
+
+      accept_clear_list(&client->connection->acceptlist);
+
       monitor_clear_list(client);
 
       sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
@@ -1004,31 +1006,32 @@ exit_aborted_clients(void)
  */
 
 void
-del_accept(struct split_nuh_item *accept_p, struct Client *client)
+accept_del(struct AcceptItem *accept, dlink_list *list)
 {
-  dlinkDelete(&accept_p->node, &client->connection->acceptlist);
+  dlinkDelete(&accept->node, list);
 
-  xfree(accept_p->nickptr);
-  xfree(accept_p->userptr);
-  xfree(accept_p->hostptr);
-  xfree(accept_p);
+  xfree(accept->nick);
+  xfree(accept->user);
+  xfree(accept->host);
+  xfree(accept);
 }
 
-struct split_nuh_item *
-find_accept(const char *nick, const char *user,
-            const char *host, struct Client *client,
+struct AcceptItem *
+accept_find(const char *nick,
+            const char *user,
+            const char *host, dlink_list *list,
             int (*compare)(const char *, const char *))
 {
   dlink_node *node;
 
-  DLINK_FOREACH(node, client->connection->acceptlist.head)
+  DLINK_FOREACH(node, list->head)
   {
-    struct split_nuh_item *accept_p = node->data;
+    struct AcceptItem *accept = node->data;
 
-    if (compare(accept_p->nickptr, nick) == 0 &&
-        compare(accept_p->userptr, user) == 0 &&
-        compare(accept_p->hostptr, host) == 0)
-      return accept_p;
+    if (compare(accept->nick, nick) == 0 &&
+        compare(accept->user, user) == 0 &&
+        compare(accept->host, host) == 0)
+      return accept;
   }
 
   return NULL;
@@ -1051,8 +1054,8 @@ accept_message(struct Client *source,
       (HasUMode(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
     return true;
 
-  if (source == target || find_accept(source->name, source->username,
-                                      source->host, target, match))
+  if (source == target || accept_find(source->name, source->username, source->host,
+                                      &target->connection->acceptlist, match))
     return true;
 
   if (!HasUMode(target, UMODE_CALLERID) && HasUMode(target, UMODE_SOFTCALLERID))
@@ -1070,12 +1073,10 @@ accept_message(struct Client *source,
  * side effects - Walk through given clients acceptlist and remove all entries
  */
 void
-del_all_accepts(struct Client *client)
+accept_clear_list(dlink_list *list)
 {
-  dlink_node *node, *node_next;
-
-  DLINK_FOREACH_SAFE(node, node_next, client->connection->acceptlist.head)
-    del_accept(node->data, client);
+  while (list->head)
+    accept_del(list->head->data, list);
 }
 
 unsigned int

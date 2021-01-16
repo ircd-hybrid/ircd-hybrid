@@ -423,6 +423,15 @@ struct Client
 };
 
 
+struct AcceptItem
+{
+  dlink_node node;
+  char *nick;
+  char *user;
+  char *host;
+};
+
+
 extern struct Client me;
 extern dlink_list listing_client_list;
 extern dlink_list global_client_list;
@@ -434,11 +443,11 @@ extern dlink_list oper_list;          /* our opers, duplicated in local_client_l
 
 extern bool accept_message(struct Client *, struct Client *);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
-extern struct split_nuh_item *find_accept(const char *, const char *,
-                                          const char *, struct Client *,
+extern struct AcceptItem *accept_find(const char *, const char *,
+                                          const char *, dlink_list *,
                                           int (*)(const char *, const char *));
-extern void del_accept(struct split_nuh_item *, struct Client *);
-extern void del_all_accepts(struct Client *);
+extern void accept_del(struct AcceptItem *, dlink_list *);
+extern void accept_clear_list(dlink_list *);
 extern void exit_client(struct Client *, const char *);
 extern void conf_try_ban(struct Client *, int, const char *);
 extern void check_conf_klines(void);

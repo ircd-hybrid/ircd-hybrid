@@ -215,10 +215,11 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
               client->ip.ss_len, client->sockhost,
               sizeof(client->sockhost), NULL, 0, NI_NUMERICHOST);
 
-  if (client->sockhost[0] == ':')
+  if (client->sockhost[0] == ':' &&
+      client->sockhost[1] == ':')
   {
-    client->sockhost[0] = '0';
     memmove(client->sockhost + 1, client->sockhost, sizeof(client->sockhost) - 1);
+    client->sockhost[0] = '0';
   }
 
   strlcpy(client->host, client->sockhost, sizeof(client->host));

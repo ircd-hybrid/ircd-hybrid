@@ -173,7 +173,7 @@ struct config_general_entry
   unsigned int dline_min_cidr6;
   unsigned int kline_min_cidr;
   unsigned int kline_min_cidr6;
-  unsigned int dots_in_ident;
+  unsigned int specials_in_ident;
   unsigned int failed_oper_notice;
   unsigned int anti_spam_exit_message_time;
   unsigned int max_accept;

@@ -183,7 +183,6 @@ disable_remote_commands     { return DISABLE_REMOTE_COMMANDS; }
 dline                       { return T_DLINE; }
 dline_min_cidr              { return DLINE_MIN_CIDR; }
 dline_min_cidr6             { return DLINE_MIN_CIDR6; }
-dots_in_ident               { return DOTS_IN_IDENT; }
 email                       { return EMAIL; }
 enable_extbans              { return ENABLE_EXTBANS; }
 encrypted                   { return ENCRYPTED; }
@@ -312,6 +311,7 @@ sid                         { return IRCD_SID; }
 size                        { return T_SIZE; }
 skill                       { return T_SKILL; }
 softcallerid                { return T_SOFTCALLERID; }
+specials_in_ident           { return SPECIALS_IN_IDENT; }
 spoof                       { return SPOOF; }
 spy                         { return T_SPY; }
 squit                       { return SQUIT; }

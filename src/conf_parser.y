@@ -170,7 +170,6 @@ reset_block_state(void)
 %token  DISABLE_REMOTE_COMMANDS
 %token  DLINE_MIN_CIDR
 %token  DLINE_MIN_CIDR6
-%token  DOTS_IN_IDENT
 %token  EMAIL
 %token  ENABLE_EXTBANS
 %token  ENCRYPTED
@@ -273,6 +272,7 @@ reset_block_state(void)
 %token  SERVERHIDE
 %token  SERVERINFO
 %token  SHORT_MOTD
+%token  SPECIALS_IN_IDENT
 %token  SPOOF
 %token  SQUIT
 %token  STATS_E_DISABLED
@@ -2350,7 +2350,7 @@ general_item:       general_away_count |
                     general_kill_chase_time_limit |
                     general_invisible_on_connect |
                     general_warn_no_connect_block |
-                    general_dots_in_ident |
+                    general_specials_in_ident |
                     general_stats_i_oper_only |
                     general_stats_k_oper_only |
                     general_stats_m_oper_only |
@@ -2549,9 +2549,9 @@ general_no_oper_flood: NO_OPER_FLOOD '=' TBOOL ';'
   ConfigGeneral.no_oper_flood = yylval.number;
 };
 
-general_dots_in_ident: DOTS_IN_IDENT '=' NUMBER ';'
+general_specials_in_ident: SPECIALS_IN_IDENT '=' NUMBER ';'
 {
-  ConfigGeneral.dots_in_ident = $3;
+  ConfigGeneral.specials_in_ident = $3;
 };
 
 general_max_targets: MAX_TARGETS '=' NUMBER ';'

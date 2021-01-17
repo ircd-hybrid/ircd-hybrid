@@ -540,19 +540,20 @@ valid_username(const char *username, bool local)
 
   if (local)
   {
-    unsigned int dots = 0;
+    unsigned int special = 0;
 
     while (*p)
     {
-      if (*p == '.' && ConfigGeneral.dots_in_ident)
+      if (*p == '-' || *p == '_' || *p == '.')
       {
-        if (++dots > ConfigGeneral.dots_in_ident)
-          return false;
-        if (!IsUser2Char(*(p + 1)))
+        if (ConfigGeneral.specials_in_ident &&
+            ConfigGeneral.specials_in_ident < ++special)
           return false;
       }
       else if (!IsUser2Char(*p))
         return false;
+
+      ++p;
     }
   }
   else

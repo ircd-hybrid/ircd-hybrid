@@ -362,10 +362,10 @@ static const struct InfoStruct info_table[] =
     "Inform opers if someone tries to /oper with the wrong credentials"
   },
   {
-    "dots_in_ident",
+    "specials_in_ident",
     OUTPUT_DECIMAL,
-    &ConfigGeneral.dots_in_ident,
-    "Number of permissable dots in an ident"
+    &ConfigGeneral.specials_in_ident,
+    "Number of permissable '-', '_', or '.' characters in an ident"
   },
   {
     "min_nonwildcard",

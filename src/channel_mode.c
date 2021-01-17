@@ -756,8 +756,8 @@ get_channel_access(const struct Client *client,
 static void
 send_mode_changes_server(struct Client *client, struct Channel *channel)
 {
-  char modebuf[IRCD_BUFSIZE];
-  char parabuf[IRCD_BUFSIZE];
+  char modebuf[IRCD_BUFSIZE] = "";
+  char parabuf[IRCD_BUFSIZE] = "";  /* Essential that parabuf[0] = '\0' */
   char *parptr = parabuf;
   unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
   unsigned int dir = MODE_QUERY;
@@ -790,7 +790,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
         ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > IRCD_BUFSIZE))
     {
       if (modecount)
-        sendto_server(client, 0, 0, "%s %s", modebuf, parabuf);
+        sendto_server(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
 
       modecount = 0;
       paracount = 0;
@@ -824,7 +824,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
   }
 
   if (modecount)
-    sendto_server(client, 0, 0, "%s %s", modebuf, parabuf);
+    sendto_server(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
 }
 
 /* void send_mode_changes(struct Client *client,
@@ -844,8 +844,8 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
 
   for (unsigned int pass = 2; pass--; flags = CHFL_CHANOP | CHFL_HALFOP)
   {
-    char modebuf[IRCD_BUFSIZE];
-    char parabuf[IRCD_BUFSIZE];
+    char modebuf[IRCD_BUFSIZE] = "";
+    char parabuf[IRCD_BUFSIZE] = "";  /* Essential that parabuf[0] = '\0' */
     char *parptr = parabuf;
     unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
     unsigned int dir = MODE_QUERY;
@@ -873,7 +873,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
           ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > IRCD_BUFSIZE))
       {
         if (modecount)
-          sendto_channel_local(NULL, channel, flags, 0, 0, "%s %s", modebuf, parabuf);
+          sendto_channel_local(NULL, channel, flags, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
 
         modecount = 0;
         paracount = 0;
@@ -912,7 +912,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
     }
 
     if (modecount)
-      sendto_channel_local(NULL, channel, flags, 0, 0, "%s %s", modebuf, parabuf);
+      sendto_channel_local(NULL, channel, flags, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
   }
 }
 

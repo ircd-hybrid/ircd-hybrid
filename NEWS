@@ -5,6 +5,8 @@
 * Characters valid for user names for local clients are now [A-Za-z0-9._-]. 'Special'
   characters like }|{`^]\[$, that were allwed previously, are no longer valid.
   Also user names may not begin with '.', '_', or '-'.
+* Fixed issue with clients connected from IPv6 localhost that, depending on the
+  system's getaddrinfo() implementation, could lead to a crash on remote servers
 
 
 -- Noteworthy changes in version 8.2.37 (2020-12-26)

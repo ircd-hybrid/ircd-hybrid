@@ -44,12 +44,14 @@
 #define YY_INPUT(buf,result,max_size) \
   if ((result = conf_yy_input(buf, max_size)) == 0) \
     YY_FATAL_ERROR("input in flex scanner failed");
-#define MAX_INCLUDE_DEPTH 10
 
 
 unsigned int lineno = 1;
 char linebuf[IRCD_BUFSIZE];
 char conffilebuf[IRCD_BUFSIZE];
+
+enum { MAX_INCLUDE_DEPTH = 5 };
+static unsigned int include_stack_ptr;
 
 static struct included_file
 {
@@ -59,7 +61,6 @@ static struct included_file
   char conffile[IRCD_BUFSIZE];
 } include_stack[MAX_INCLUDE_DEPTH];
 
-static unsigned int include_stack_ptr;
 
 static void conf_include(void);
 static bool conf_eof(void);
@@ -81,7 +82,7 @@ conf_yy_fatal_error(const char *msg)
 WS        [[:blank:]]*
 DIGIT     [[:digit:]]+
 COMMENT   ("//"|"#").*
-qstring   \"[^\"\n]*[\"\n]
+qstring   \"[^"\n]+[\"\n]
 include   \.include{WS}(\<.*\>|\".*\")
 
 %%
@@ -90,7 +91,7 @@ include   \.include{WS}(\<.*\>|\".*\")
 <IN_COMMENT>"*/"    { BEGIN INITIAL;    }
 <IN_COMMENT>.       ;  /* Eat everything but a newline */
 <IN_COMMENT>\n      { ++lineno; }
-<IN_COMMENT><<EOF>> { BEGIN INITIAL; if (conf_eof()) yyterminate(); }
+<IN_COMMENT><<EOF>> { BEGIN INITIAL; if (conf_eof() == true) yyterminate(); }
 
 {include}       { conf_include(); }
 \n.*            { strlcpy(linebuf, yytext + 1, sizeof(linebuf)); ++lineno; yyless(1); }

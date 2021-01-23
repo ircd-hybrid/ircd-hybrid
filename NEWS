@@ -1,16 +1,19 @@
+-- Noteworthy changes in version 8.2.39 (2021-??-??)
+
+
 -- Noteworthy changes in version 8.2.38 (2021-01-17)
 * Backwards compatibility mode for ircd-hybrid 8.2.22 and below has been removed
 * Minimum supported version of the Anope IRC services is now 2.0.8
-* Fixed displaying issue with channel MODE messages
-* Characters valid for user names for local clients are now [A-Za-z0-9._-]. 'Special'
-  characters like }|{`^]\[$, that were allowed previously, are no longer valid.
-  Also user names may not begin with '.', '_', or '-'.
+* Fixed displaying issue with channel `MODE` messages
+* Characters valid for user names (ident) for local clients are now `[A-Za-z0-9._-]`.
+  Special characters like ``}|{`^]\[$``, that were allowed previously, are no longer
+  valid. Also user names may not begin with `.`, `_`, or `-`.
 * The `general::dots_in_ident` configuration directive has been renamed to
-  `general::specials_in_ident` and now covers the '-' and '_' characters in
-  addition to '.'
+  `general::specials_in_ident` and now covers the `-` and `_` characters in
+  addition to `.`
 * Fixed issue with clients connected from IPv6 localhost that, depending on the
-  system's getaddrinfo() implementation, could lead to a crash of remote servers
-* For a full list of all changes in this release, see <https://git.io/JtkgL>
+  system's `getaddrinfo` implementation, could lead to a crash of remote servers
+* For a full list of all changes in this release, see <https://git.io/Jts3u>
 
 
 -- Noteworthy changes in version 8.2.37 (2020-12-26)
@@ -185,7 +188,7 @@
 * Minimum supported OpenSSL version is 1.0.1f now
 * Minimum supported GnuTLS version is 3.5.8 now
 * The `serverinfo::vhost` and `serverinfo:vhost6` configuration directives have
-  been deprecated. If you need to bind() a specific address you can specify one
+  been deprecated. If you need to bind a specific address you can specify one
   in the connect {} block
 * The `connect::vhost` configuration directive has been renamed to `connect::bind`
 * For a full list of all changes in this release, see <https://git.io/fjRVk>
@@ -482,7 +485,7 @@
 -- Noteworthy changes in version 8.2.0 (2014-08-24)
 * Successful IRC operator logins are now announced globally via `GLOBOPS`
 * Cleanups and improvements to the resolver code
-* Cleanups and improvements to the poll() I/O event notification support
+* Cleanups and improvements to the `poll` I/O event notification support
 * A topic mask can now be specified within the `LIST` options
 * All users may now see channel modes in the `LIST` reply
 * Fixed bug where `NOTICE +#somechan` did allow bypassing resv {} channels,
@@ -498,7 +501,7 @@
 * Improved AWAY throttling to allow for better fine-tuning. See the
   newly added `away_count` and `away_time` configuration directives
   in the general {} block
-* Support for the select() I/O event notification has been dropped
+* Support for the `select` I/O event notification has been dropped
 * For a full list of all changes in this release, see <https://git.io/JkeIF>
 
 
@@ -590,7 +593,7 @@
 
 
 -- Noteworthy changes in version 8.1.16 (2014-04-20)
-* Fixed undefined behaviour with crypt() returning `NULL`
+* Fixed undefined behaviour with `crypt` returning `NULL`
   since glibc2.17 in certain cases
 * Admins may now see all channel members via `WHO #channel`
   regardless of channel mode +s
@@ -641,11 +644,11 @@
 
 -- Noteworthy changes in version 8.1.11 (2013-12-06)
 * Administrators may now see channel modes in `LIST`
-* Fixed compile error on BSD systems when building with kqueue()
+* Fixed compile error on BSD systems when building with `kqueue`
 
 
 -- Noteworthy changes in version 8.1.10 (2013-11-25)
-* Fixed bug with kqueue() where it occasionally dropped updates
+* Fixed bug with `kqueue` where it occasionally dropped updates
 * Changed `WHOIS` to show certificate fingerprint to administrators only
 * The `WHO` reply now shows if a nickname has been registered
   with NickServ. (`r` status flag)
@@ -832,7 +835,7 @@
 -- Noteworthy changes in version 8.0.6 (2013-01-28)
 * Fix bug where idle time sometimes is 0 even if the client didn't
   send any private message
-* Fixed possible core in try_parse_v4_netmask()
+* Fixed possible core in `try_parse_v4_netmask`
 
 
 -- Noteworthy changes in version 8.0.5 (2013-01-24)

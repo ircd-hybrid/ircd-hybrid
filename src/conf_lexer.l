@@ -82,7 +82,7 @@ conf_yy_fatal_error(const char *msg)
 WS        [[:blank:]]*
 DIGIT     [[:digit:]]+
 COMMENT   ("//"|"#").*
-qstring   \"[^"\n]+[\"\n]
+qstring   \"[^\"\n]*[\"\n]
 include   \.include{WS}(\<.*\>|\".*\")
 
 %%

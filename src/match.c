@@ -42,7 +42,7 @@ match(const char *mask, const char *name)
 {
   const char *m = mask, *n = name;
   const char *m_tmp = mask, *n_tmp = name;
-  unsigned int star = 0;
+  bool star = false;
 
   while (true)
   {
@@ -70,10 +70,10 @@ match(const char *mask, const char *name)
         break;
       case '*':
       case '?':
-        for (star = 0; ; ++m)
+        for (star = false; ; ++m)
         {
           if (*m == '*')
-            star = 1;
+            star = true;
           else if (*m == '?')
           {
             if (*n++ == '\0')
@@ -139,9 +139,9 @@ match(const char *mask, const char *name)
 char *
 collapse(char *mask)
 {
-  unsigned int star = 0;
   char *m = mask;
   char *b = NULL;
+  bool star = false;
 
   if (m)
   {
@@ -154,13 +154,13 @@ collapse(char *mask)
         do
         {
           if (*m == '*')
-            star = 1;
+            star = true;
           else
           {
             if (star && (*m != '?'))
             {
               *b++ = '*';
-              star = 0;
+              star = false;
             }
 
             *b++ = *m;

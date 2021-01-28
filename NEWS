@@ -146,7 +146,7 @@
   OpenSSL/LibreSSL -> GnuTLS -> wolfSSL.
 * Fixed segfault with GnuTLS/libgmp in case there's no DH parameters file
   defined in `serverinfo::ssl_dh_param_file` or if that file is missing
-* The connection timeout for connect{} blocks can now be configured via
+* The connection timeout for connect {} blocks can now be configured via
   the `connect::timeout` configuration directive
 * Minimum supported OpenSSL version is 1.1.1 now
 * Minimum supported GnuTLS version is 3.6.5 now
@@ -876,7 +876,7 @@
 * Fixed bug where timed events stopped from working if the system's
   clock is running backwards
 * `STATS q|Q` now shows how many times a resv {} block has been matched
-* Fixed contributed WEBIRC module
+* Fixed contributed `WEBIRC` module
 * IRC operators may now again see server generated nick rejection notices
 
 
@@ -907,7 +907,7 @@
 -- Noteworthy changes in version 8.0.0beta3 (2012-08-24)
 * Fixed wrong syntax in several language files
 * Removed &localchannels
-* `PRIVMSG` to opers@some.server is no longer supported
+* `PRIVMSG` to `opers@some.server` is no longer supported
 * Fixed bug that could lead to topic desynchronization
 * Removed `serverhide::disable_hidden` configuration option
 * Dropped ircd-hybrid-6 `GLINE` compatibility mode
@@ -917,7 +917,7 @@
 
 -- Noteworthy changes in version 8.0.0beta2 (2012-07-21)
 * `channel::disable_fake_channels` now also disables ascii 29 (mIRC italic)
-  when set to yes
+  when set to `yes`
 * Added `channel::max_chans_per_oper` configuration directive. The old way
   was to let IRC operators join three times the amount of max_chans_per_user
 * Replaced `MODLOAD`, `MODUNLOAD`, `MODRELOAD`, `MODLIST` and `MODRESTART`
@@ -954,7 +954,7 @@
   Read `doc/reference.conf` for further explanation of what these flags control
 * Removed Idle-time klines
 * Cleaned up modules API. Old modules won't work anymore
-* Removed `general::burst_away` configuration directive. AWAY bursts are now
+* Removed `general::burst_away` configuration directive. `AWAY` bursts are now
   controlled via `connect::flags` explicitly
 * Introduced new logging subsystem including log rotation based on
   file sizes. Log timestamp format is ISO8601 now
@@ -970,7 +970,7 @@
 * Removed `ssl_server_protocol` configuration directive and
   added `ssl_client_method` and `ssl_server_method` instead.
   Both of these options can now be changed at runtime
-* IRC operator login IDs are no longer limited to NICKLEN*2
+* IRC operator login IDs are no longer limited to `NICKLEN*2`
 * Removed `channel::burst_topicwho` configuration option. This feature is now
   enabled by default
 * `STATS Y|y` now reports CIDR limits as well

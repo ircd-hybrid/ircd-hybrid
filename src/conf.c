@@ -264,13 +264,8 @@ attach_iline(struct Client *client, struct MaskItem *conf)
     a_limit_reached = true;
 
   if (a_limit_reached == true)
-  {
     if (!IsConfExemptLimits(conf))
       return TOO_MANY;   /* Already at maximum allowed */
-
-    sendto_one_notice(client, &me, ":*** Your connection class is full, "
-                      "but you have exceed_limit = yes;");
-  }
 
   return conf_attach(client, conf);
 }

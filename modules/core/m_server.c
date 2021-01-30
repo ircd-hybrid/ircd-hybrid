@@ -231,9 +231,6 @@ server_estab(struct Client *client_p)
   sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MINIMUM,
              event_base->time.sec_real);
 
-  if (IsDead(client_p))
-    return;
-
   SetServer(client_p);
   client_p->servptr = &me;
 

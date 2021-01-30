@@ -336,9 +336,6 @@ register_local_user(struct Client *client)
    */
   report_and_set_user_flags(client, conf);
 
-  if (IsDead(client))
-    return;
-
   /*
    * Limit clients -
    * We want to be able to have servers and F-line clients

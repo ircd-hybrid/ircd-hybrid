@@ -14,6 +14,7 @@ The third field describes the status information about
 the user. The possible combinations for this field
 are listed below:
 
+B - The user is marked as a bot. I.e. has the bot mode set (+B).
 H - The user is not away.
 G - The user is set away.
 r - The user is using a registered nickname.

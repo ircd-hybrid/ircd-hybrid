@@ -1032,45 +1032,29 @@ conf_error_report(const char *msg)
 }
 
 /*
- * valid_tkline()
+ * valid_line_time()
  *
  * inputs       - pointer to ascii string to check
- *              - whether the specified time is in seconds or minutes
  * output       - -1 not enough parameters
  *              - 0 if not an integer number, else the number
  * side effects - none
  * Originally written by Dianora (Diane, db@db.net)
  */
-uintmax_t
-valid_tkline(const char *data, const int minutes)
+static intmax_t
+valid_aline_time(const char *data)
 {
   const unsigned char *p = (const unsigned char *)data;
   unsigned char tmpch = '\0';
-  uintmax_t result = 0;
+  intmax_t result = 0;
 
   while ((tmpch = *p++))
   {
     if (!IsDigit(tmpch))
-      return 0;
+      return -1;
 
     result *= 10;
     result += (tmpch & 0xF);
   }
-
-  /*
-   * In the degenerate case where oper does a /quote kline 0 user@host :reason
-   * i.e. they specifically use 0, I am going to return 1 instead as a return
-   * value of non-zero is used to flag it as a temporary kline
-   */
-  if (result == 0)
-    result = 1;
-
-  /*
-   * If the incoming time is in seconds convert it to minutes for the purpose
-   * of this calculation
-   */
-  if (minutes == 0)
-    result = result / 60;
 
   if (result > MAX_TDKLINE_TIME)
     result = MAX_TDKLINE_TIME;
@@ -1205,12 +1189,14 @@ parse_aline(const char *cmd, struct Client *client, int parc, char **parv, struc
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN * 2 + 1];
   static char host[HOSTLEN * 2 + 1];
+  intmax_t duration;
 
   ++parv;
   --parc;
 
-  if (aline->add == true && (aline->duration = valid_tkline(*parv, TK_MINUTES)))
+  if (aline->add == true && (duration = valid_aline_time(*parv)) >= 0)
   {
+    aline->duration = duration;
     ++parv;
     --parc;
   }

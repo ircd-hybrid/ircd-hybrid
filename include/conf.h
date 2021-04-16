@@ -32,12 +32,6 @@
 #include "tls.h"
 
 
-enum
-{
-  TK_SECONDS,
-  TK_MINUTES
-};
-
 enum { CLEANUP_TKLINES_TIME = 60 };
 
 enum maskitem_type
@@ -333,6 +327,5 @@ extern const char *get_oper_name(const struct Client *);
 /* XXX should the parse_aline stuff go into another file ?? */
 extern bool parse_aline(const char *, struct Client *, int, char **, struct aline_ctx *);
 
-extern uintmax_t valid_tkline(const char *, const int);
 extern bool match_conf_password(const char *, const struct MaskItem *);
 #endif  /* INCLUDED_conf_h */

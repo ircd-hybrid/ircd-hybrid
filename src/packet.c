@@ -213,7 +213,8 @@ parse_client_queued(struct Client *client)
        * and no 'bursts' will be permitted.
        */
       if (checkflood == true)
-        if (client->connection->sent_parsed >= (IsFloodDone(client) ? MAX_FLOOD : MAX_FLOOD_BURST))
+        if (client->connection->sent_parsed >=
+          (HasFlag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
           return;
 
       size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
@@ -233,7 +234,7 @@ parse_client_queued(struct Client *client)
 void
 flood_endgrace(struct Client *client)
 {
-  if (IsFloodDone(client))
+  if (HasFlag(client, FLAGS_FLOODDONE))
     return;  /* Grace period has already ended */
 
   AddFlag(client, FLAGS_FLOODDONE);
@@ -260,7 +261,7 @@ flood_recalc(fde_t *F, void *data)
    * Allow a bursting client their allocation per second, allow
    * a client who is flooding an extra 2 per second
    */
-  if (IsFloodDone(client))
+  if (HasFlag(client, FLAGS_FLOODDONE))
     client->connection->sent_parsed -= 2;
   else
     client->connection->sent_parsed = 0;

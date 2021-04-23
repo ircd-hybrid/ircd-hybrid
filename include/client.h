@@ -236,7 +236,6 @@ enum
                                  if (MyClient((x))) \
                                   (x)->handler = CLIENT_HANDLER; }
 
-#define IsFloodDone(x)          ((x)->flags &  FLAGS_FLOODDONE)
 #define IsHidden(x)             ((x)->flags &  FLAGS_HIDDEN)
 
 

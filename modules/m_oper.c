@@ -60,8 +60,6 @@ oper_up(struct Client *source_p, const struct MaskItem *conf)
 
   if (!(old & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
     ++Count.invisi;
-  else if ((old & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
-    --Count.invisi;
 
   assert(dlinkFind(&oper_list, source_p) == NULL);
   dlinkAdd(source_p, make_dlink_node(), &oper_list);

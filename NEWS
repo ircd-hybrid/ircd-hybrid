@@ -1,4 +1,5 @@
 -- Noteworthy changes in version 8.2.39 (2021-??-??)
+* `hidechans` and `hideidle` may now be set in `general::oper_only_umodes`
 
 
 -- Noteworthy changes in version 8.2.38 (2021-01-17)

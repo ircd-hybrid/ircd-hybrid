@@ -2680,6 +2680,12 @@ umode_item: BOT
 } | HIDDEN
 {
   ConfigGeneral.oper_only_umodes |= UMODE_HIDDEN;
+} | HIDE_CHANS
+{
+  ConfigGeneral.oper_only_umodes |= UMODE_HIDECHANS;
+} | HIDE_IDLE
+{
+  ConfigGeneral.oper_only_umodes |= UMODE_HIDEIDLE;
 } | T_NCHANGE
 {
   ConfigGeneral.oper_only_umodes |= UMODE_NCHANGE;

@@ -134,6 +134,7 @@ tls_new_credentials(void)
 
   if (ConfigServerInfo.tls_dh_param_file)
   {
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     BIO *file = BIO_new_file(ConfigServerInfo.tls_dh_param_file, "r");
 
     if (file)
@@ -150,6 +151,40 @@ tls_new_credentials(void)
     }
     else
       ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
+#else
+    EVP_PKEY *dhpkey = NULL;
+    OSSL_STORE_CTX *ctx = OSSL_STORE_open(ConfigServerInfo.tls_dh_param_file, NULL, NULL, NULL, NULL);
+    if (ctx)
+    {
+      if (OSSL_STORE_expect(ctx, OSSL_STORE_INFO_PARAMS))
+      {
+        while (OSSL_STORE_eof(ctx) == 0)
+        {
+          OSSL_STORE_INFO *info = OSSL_STORE_load(ctx);
+          if (info)
+          {
+            dhpkey = OSSL_STORE_INFO_get1_PARAMS(info);
+            OSSL_STORE_INFO_free(info);
+
+            if (dhpkey)
+            {
+              if (EVP_PKEY_is_a(dhpkey, "DH"))
+                if (SSL_CTX_set0_tmp_dh_pkey(ConfigServerInfo.tls_ctx.server_ctx, dhpkey))
+                  break;
+
+              EVP_PKEY_free(dhpkey);
+              dhpkey = NULL;
+            }
+          }
+        }
+      }
+
+      OSSL_STORE_close(ctx);
+    }
+
+    if (dhpkey == NULL)
+      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
+#endif
   }
 
   if (ConfigServerInfo.tls_supported_groups == NULL)

@@ -37,6 +37,9 @@
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/store.h>
+#endif
 
 typedef SSL * tls_data_t;
 typedef const EVP_MD * tls_md_t;

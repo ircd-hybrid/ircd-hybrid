@@ -2,13 +2,13 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_REVISION([$Id$])
 
-AC_PREREQ(2.69)
+AC_PREREQ([2.69])
 AC_INIT([ircd-hybrid], [8.2.38], [bugs@ircd-hybrid.org])
-AM_INIT_AUTOMAKE(1.16.1 subdir-objects)
+AM_INIT_AUTOMAKE([1.16.1 subdir-objects])
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_HEADERS(config.h)
-AC_CONFIG_SRCDIR(src/ircd.c)
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_SRCDIR([src/ircd.c])
 
 # Checks for programs.
 AC_PROG_CC_C99
@@ -33,17 +33,18 @@ AX_LIBRARY_NET
 AC_C_BIGENDIAN
 
 # Checks for library functions.
-AC_CHECK_FUNCS_ONCE(strlcat \
-                    strlcpy)
+AC_CHECK_FUNCS_ONCE([strlcat strlcpy])
 
 # Checks for header files.
-AC_CHECK_HEADERS_ONCE(crypt.h        \
-                      sys/param.h    \
-                      types.h        \
-                      socket.h       \
-                      sys/wait.h)
+AC_CHECK_HEADERS_ONCE([
+  crypt.h
+  sys/param.h
+  types.h
+  socket.h
+  sys/wait.h
+])
 
-AC_SEARCH_LIBS(crypt, crypt)
+AC_SEARCH_LIBS([crypt], [crypt])
 
 # Argument processing.
 AX_ARG_IOLOOP_MECHANISM
@@ -56,22 +57,23 @@ AX_ARG_WITH_TLS
 # Disable -Wformat-truncation
 AX_APPEND_COMPILE_FLAGS([-Wno-format-truncation])
 
-AX_DEFINE_DIR([PREFIX],[prefix],[Set to prefix.])
-AX_DEFINE_DIR([SYSCONFDIR],[sysconfdir],[Set to sysconfdir.])
-AX_DEFINE_DIR([LIBDIR],[libdir],[Set to libdir.])
-AX_DEFINE_DIR([DATADIR],[datadir],[Set to datadir.])
-AX_DEFINE_DIR([LOCALSTATEDIR],[localstatedir],[Set to localstatedir.])
+AX_DEFINE_DIR([PREFIX], [prefix], [Set to prefix.])
+AX_DEFINE_DIR([SYSCONFDIR], [sysconfdir], [Set to sysconfdir.])
+AX_DEFINE_DIR([LIBDIR], [libdir], [Set to libdir.])
+AX_DEFINE_DIR([DATADIR], [datadir], [Set to datadir.])
+AX_DEFINE_DIR([LOCALSTATEDIR], [localstatedir], [Set to localstatedir.])
 
-AC_CONFIG_FILES(              \
-       Makefile               \
-       src/Makefile           \
-       libltdl/Makefile       \
-       modules/Makefile       \
-       modules/core/Makefile  \
-       modules/extra/Makefile \
-       doc/Makefile           \
-       help/Makefile          \
-       tools/Makefile)
+AC_CONFIG_FILES([
+  Makefile
+  src/Makefile
+  libltdl/Makefile
+  modules/Makefile
+  modules/core/Makefile
+  modules/extra/Makefile
+  doc/Makefile
+  help/Makefile
+  tools/Makefile
+])
 
 AC_OUTPUT
 

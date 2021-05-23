@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#define _XOPEN_SOURCE
 #include <unistd.h>
 #include <fcntl.h>
 

@@ -51,22 +51,18 @@ extban_usermode_matches(struct Client *client, struct Channel *channel, struct B
         break;
       default:
       {
+        const struct user_modes *tab = umode_map[(unsigned char)*m];
+
         switch (what)
         {
           case MODE_DEL:
-          {
-            const struct user_modes *tab = umode_map[(unsigned char)*m];
             if (tab)
               modes_del |= tab->flag;
             break;
-          }
           case MODE_ADD:
-          {
-            const struct user_modes *tab = umode_map[(unsigned char)*m];
             if (tab)
               modes_add |= tab->flag;
             break;
-          }
         }
       }
     }

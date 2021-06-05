@@ -1,6 +1,7 @@
 -- Noteworthy changes in version 8.2.39 (2021-??-??)
 * `hidechans` and `hideidle` may now be set in `general::oper_only_umodes`
 * OpenSSL 3.0 compatibility improvements
+* Fixed crashing issue in the mkpasswd tool with older glibc
 
 
 -- Noteworthy changes in version 8.2.38 (2021-01-17)

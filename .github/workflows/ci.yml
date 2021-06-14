@@ -11,6 +11,9 @@ jobs:
       matrix:
         compiler: [gcc, clang]
 
+    env:
+      CC: ${{ matrix.compiler }}
+
     steps:
     - uses: actions/checkout@v2
     - name: configure

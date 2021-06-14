@@ -6,6 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+
     steps:
     - uses: actions/checkout@v2
     - name: configure
@@ -13,4 +17,4 @@ jobs:
     - name: make
       run: make -j$(nproc)
     - name: make install
-      run: make install
+      run: sudo make install

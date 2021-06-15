@@ -1,7 +1,7 @@
 name: coverity
 on:
   schedule:
-    - cron: "3 9 * * *"
+    - cron: "3 10 * * *"
 
 jobs:
   scan:
@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Download coverity scan build tool
       run: |
-        wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=ircd-hybrid%2Fircd-hybrid" -O cov-analysis-linux64.tar.gz
+        wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=$GITHUB_REPOSITORY" -O cov-analysis-linux64.tar.gz
         mkdir cov-analysis-linux64
         tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
       env:
@@ -30,12 +30,12 @@ jobs:
       run: |
         tar czvf ircd-hybrid.tgz cov-int
         curl \
-          --form project=ircd-hybrid/ircd-hybrid \
+          --form project=$GITHUB_REPOSITORY \
           --form token=$TOKEN \
           --form email=bugs@ircd-hybrid.org \
           --form file=@ircd-hybrid.tgz \
           --form version=8.2.x \
           --form description="A lightweight, high-performance internet relay chat daemon." \
-            https://scan.coverity.com/builds?project=ircd-hybrid%2Fircd-hybrid
-        env:
-          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+            https://scan.coverity.com/builds?project=$GITHUB_REPOSITORY
+      env:
+        TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}

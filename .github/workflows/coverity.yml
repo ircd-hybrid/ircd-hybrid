@@ -1,12 +1,12 @@
 name: coverity
 on:
   schedule:
-    - cron: "3 10 * * *"
+    - cron: "3 12 * * *"
 
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 20
 
     steps:
     - uses: actions/checkout@v2
@@ -28,14 +28,14 @@ jobs:
 
     - name: Submit result to coverity scan
       run: |
-        tar czvf ircd-hybrid.tgz cov-int
+        tar czvf result.tgz cov-int
         curl \
           --form project=$GITHUB_REPOSITORY \
           --form token=$TOKEN \
           --form email=bugs@ircd-hybrid.org \
-          --form file=@ircd-hybrid.tgz \
-          --form version=8.2.x \
-          --form description="A lightweight, high-performance internet relay chat daemon." \
+          --form file=@result.tgz \
+          --form version=`git branch --show-current` \
+          --form description=`git rev-parse HEAD` \
             https://scan.coverity.com/builds?project=$GITHUB_REPOSITORY
       env:
         TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}

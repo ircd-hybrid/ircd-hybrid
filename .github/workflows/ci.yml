@@ -4,12 +4,16 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
 
     strategy:
       matrix:
+        os: [macos-latest, ubuntu-latest]
         compiler: [gcc, clang]
+        exclude:
+          - os: macos-latest
+            compiler: gcc
 
     env:
       CC: ${{ matrix.compiler }}

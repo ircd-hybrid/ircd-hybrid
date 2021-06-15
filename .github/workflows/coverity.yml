@@ -1,12 +1,12 @@
-name: coverity
+name: Coverity Scan
 on:
   schedule:
-    - cron: "3 12 * * *"
+    - cron: "0 0 * * 0"
 
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
     - uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
 
     - name: Build with cov-build
       run: |
-        export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
+        export PATH=$(pwd)/cov-analysis-linux64/bin:$PATH
         cov-build --dir cov-int make
 
     - name: Submit result to coverity scan
@@ -34,8 +34,7 @@ jobs:
           --form token=$TOKEN \
           --form email=bugs@ircd-hybrid.org \
           --form file=@result.tgz \
-          --form version=`git branch --show-current` \
-          --form description=`git rev-parse HEAD` \
-            https://scan.coverity.com/builds?project=$GITHUB_REPOSITORY
+          --form version=$(git rev-parse HEAD) \
+          --form description=$(date +%Y-%m-%dT%H:%M:%S%z) https://scan.coverity.com/builds?project=$GITHUB_REPOSITORY
       env:
         TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}

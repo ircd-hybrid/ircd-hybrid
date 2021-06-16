@@ -46,6 +46,12 @@ AC_CHECK_HEADERS_ONCE([
 
 AC_SEARCH_LIBS([crypt], [crypt])
 
+# Set -Werror=unknown-warning-option for clang so subsequent
+# AX_APPEND_COMPILE_FLAGS executions work properly.
+AX_APPEND_COMPILE_FLAGS([-Werror=unknown-warning-option])
+# Disable -Wformat-truncation specifically for gcc.
+AX_APPEND_COMPILE_FLAGS([-Wno-format-truncation])
+
 # Argument processing.
 AX_ARG_IOLOOP_MECHANISM
 AX_ARG_ENABLE_ASSERT
@@ -53,9 +59,6 @@ AX_ARG_ENABLE_DEBUGGING
 AX_ARG_ENABLE_WARNINGS
 AX_ARG_ENABLE_EFENCE
 AX_ARG_WITH_TLS
-
-# Disable -Wformat-truncation
-AX_APPEND_COMPILE_FLAGS([-Wno-format-truncation])
 
 AX_DEFINE_DIR([PREFIX], [prefix], [Set to prefix.])
 AX_DEFINE_DIR([SYSCONFDIR], [sysconfdir], [Set to sysconfdir.])

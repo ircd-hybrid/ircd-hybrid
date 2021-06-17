@@ -2,6 +2,8 @@
 * `hidechans` and `hideidle` may now be set in `general::oper_only_umodes`
 * OpenSSL 3.0 compatibility improvements
 * Fixed crashing issue in the mkpasswd tool with older glibc
+* Fixed issue where the ircd wouldn't listen on both IPv4 and IPv6 ports in
+  case only a port but no address has been specified in a listen {} block
 
 
 -- Noteworthy changes in version 8.2.38 (2021-01-17)

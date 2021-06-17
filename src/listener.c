@@ -25,6 +25,9 @@
  */
 
 #include "stdinc.h"
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
 #include "list.h"
 #include "listener.h"
 #include "client.h"
@@ -189,7 +192,7 @@ listener_accept_connection(fde_t *F, void *data)
 static bool
 inetport(struct Listener *listener)
 {
-  socklen_t opt = 1;
+  const socklen_t opt = 1;
 
   getnameinfo((const struct sockaddr *)&listener->addr, listener->addr.ss_len, listener->name,
               sizeof(listener->name), NULL, 0, NI_NUMERICHOST);
@@ -204,6 +207,20 @@ inetport(struct Listener *listener)
                  listener_get_name(listener), errno);
     return false;
   }
+
+#ifdef IPV6_V6ONLY
+  if (listener->addr.ss.ss_family == AF_INET6 &&
+      IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&listener->addr)->sin6_addr))
+  {
+    if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt)))
+    {
+      report_error(L_ALL, "setting IPV6_V6ONLY for listener %s:%s",
+                   listener_get_name(listener), errno);
+      close(fd);
+      return false;
+    }
+  }
+#endif
 
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
   {

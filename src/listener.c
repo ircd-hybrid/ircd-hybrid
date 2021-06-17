@@ -358,7 +358,6 @@ listener_release(struct Listener *listener)
 void
 listener_add(int port, const char *vhost_ip, unsigned int flags)
 {
-  struct Listener *listener;
   struct irc_ssaddr vaddr;
   struct addrinfo hints, *res;
   char portname[PORTNAMELEN + 1];
@@ -371,8 +370,6 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   if (!(port > 0 && port <= 0xFFFF))
     return;
 
-  memset(&vaddr, 0, sizeof(vaddr));
-
   /* Set up the hints structure */
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
@@ -380,28 +377,14 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   /* Get us ready for a bind() and don't bother doing dns lookup */
   hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
 
-  /* TBD: This makes no sense here at all. Needs to be reworked */
-
   snprintf(portname, sizeof(portname), "%d", port);
-  getaddrinfo("::", portname, &hints, &res);
-  vaddr.ss.ss_family = AF_INET6;
 
+  getaddrinfo("::", portname, &hints, &res);
   assert(res);
 
-  memcpy((struct sockaddr*)&vaddr, res->ai_addr, res->ai_addrlen);
+  memcpy((struct sockaddr *)&vaddr, res->ai_addr, res->ai_addrlen);
   vaddr.ss_len = res->ai_addrlen;
   freeaddrinfo(res);
-#ifdef MAKES_NO_SENSE
-  {
-    struct sockaddr_in *v4 = (struct sockaddr_in*) &vaddr;
-    v4->sin_addr.s_addr = INADDR_ANY;
-    vaddr.ss.ss_family = AF_INET;
-    vaddr.ss_len = sizeof(struct sockaddr_in);
-    v4->sin_port = htons(port);
-  }
-#endif
-
-  snprintf(portname, PORTNAMELEN, "%d", port);
 
   if (!EmptyString(vhost_ip))
   {
@@ -410,7 +393,7 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
 
     assert(res);
 
-    memcpy((struct sockaddr*)&vaddr, res->ai_addr, res->ai_addrlen);
+    memcpy((struct sockaddr *)&vaddr, res->ai_addr, res->ai_addrlen);
     vaddr.ss_len = res->ai_addrlen;
     freeaddrinfo(res);
   }
@@ -423,7 +406,8 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
 
   pass = 0;
 
-  if ((listener = listener_find(port, &vaddr)))
+  struct Listener *listener = listener_find(port, &vaddr);
+  if (listener)
   {
     listener->flags = flags;
 

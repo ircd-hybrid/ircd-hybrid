@@ -68,7 +68,6 @@ Feature Specific Requirements:
 - Development process can be followed on GitHub at https://github.com/ircd-hybrid/ircd-hybrid
 
 - Anonymous SVN access is also available:
-  Latest cutting-edge: svn co svn://svn.ircd-hybrid.org/svnroot/ircd-hybrid/trunk
   Latest stable branch (8.2.x): svn co svn://svn.ircd-hybrid.org/svnroot/ircd-hybrid/branches/8.2.x
 
 $Id$

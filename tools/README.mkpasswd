@@ -14,7 +14,8 @@ Options:
 -r - Specify a number of rounds for a Blowfish password
 -p - Specify the plaintext password at the command line
 -s - Specify the salt at the command line
--h - Get help
+-h - Get full usage help
+-? - Get brief usage help
 
 Known bugs:
 The encryption algorithms supported depend on your system's crypt()

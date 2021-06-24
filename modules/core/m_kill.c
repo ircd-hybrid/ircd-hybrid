@@ -67,7 +67,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   else
     reason = def_reason;
 
-  struct Client *target_p = hash_find_client(parv[1]);
+  struct Client *target_p = find_person(source_p, parv[1]);
   if (target_p == NULL)
   {
     /*

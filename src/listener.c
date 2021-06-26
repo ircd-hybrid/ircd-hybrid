@@ -199,6 +199,13 @@ listener_finalize(struct Listener *listener)
 
   getnameinfo((const struct sockaddr *)&listener->addr, listener->addr.ss_len,
               buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
+
+  if (buf[0] == ':' && buf[1] == ':')
+  {
+    memmove(buf + 1, buf, sizeof(buf) - 1);
+    buf[0] = '0';
+  }
+
   listener->name = xstrdup(buf);
 
   /*

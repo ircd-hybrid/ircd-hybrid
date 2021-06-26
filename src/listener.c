@@ -59,6 +59,7 @@ listener_make(const int port, const struct irc_ssaddr *addr)
 
   listener->port = port;
   listener->addr = *addr;
+  dlinkAdd(listener, &listener->node, &listener_list);
 
   return listener;
 }
@@ -67,6 +68,7 @@ static void
 listener_free(struct Listener *listener)
 {
   dlinkDelete(&listener->node, &listener_list);
+  xfree(listener->name);
   xfree(listener);
 }
 
@@ -190,12 +192,14 @@ listener_accept_connection(fde_t *F, void *data)
 #endif
 
 static bool
-inetport(struct Listener *listener)
+listener_finalize(struct Listener *listener)
 {
+  char buf[HOSTIPLEN + 1];
   const socklen_t opt = 1;
 
-  getnameinfo((const struct sockaddr *)&listener->addr, listener->addr.ss_len, listener->name,
-              sizeof(listener->name), NULL, 0, NI_NUMERICHOST);
+  getnameinfo((const struct sockaddr *)&listener->addr, listener->addr.ss_len,
+              buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
+  listener->name = xstrdup(buf);
 
   /*
    * At first, open a new socket
@@ -424,7 +428,7 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
     listener->flags = flags;
   }
 
-  if (inetport(listener) == true)
+  if (listener_finalize(listener) == true)
     listener->active = true;
   else
     listener_close(listener);

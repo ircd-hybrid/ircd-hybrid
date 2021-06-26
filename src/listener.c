@@ -424,7 +424,6 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   else
   {
     listener = listener_make(port, &vaddr);
-    dlinkAdd(listener, &listener->node, &listener_list);
     listener->flags = flags;
   }
 

@@ -4,6 +4,7 @@
 * Fixed crashing issue in the mkpasswd tool with older glibc
 * Fixed issue where the ircd wouldn't listen on both IPv4 and IPv6 ports in
   case only a port but no address has been specified in a listen {} block
+* Fixed a `STATS P` displaying issue with compressed ipv6 loopback/inaddr_any
 
 
 -- Noteworthy changes in version 8.2.38 (2021-01-17)

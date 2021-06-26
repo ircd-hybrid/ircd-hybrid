@@ -543,8 +543,7 @@ valid_username(const char *username, bool local)
     {
       if (*p == '-' || *p == '_' || *p == '.')
       {
-        if (ConfigGeneral.specials_in_ident &&
-            ConfigGeneral.specials_in_ident < ++special)
+        if (ConfigGeneral.specials_in_ident < ++special)
           return false;
       }
       else if (!IsUser2Char(*p))

@@ -26,7 +26,6 @@
  * \version $Id$
  */
 
-
 #ifndef INCLUDED_tls_gnutls_h
 #define INCLUDED_tls_gnutls_h
 
@@ -56,6 +55,5 @@ typedef struct
   gnutls_session_t session;
   tls_context_t context;
 } tls_data_t;
-
 #endif  /* HAVE_LIBGNUTLS */
 #endif  /* INCLUDED_tls_gnutls_h */

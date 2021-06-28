@@ -127,7 +127,6 @@ extern const struct chan_mode  cmode_tab[];
 
 extern void channel_mode_init(void);
 extern const char *add_id(struct Client *, struct Channel *, const char *, dlink_list *, unsigned int);
-extern void channel_mode_set(struct Client *, struct Channel *,
-                             struct ChannelMember *, int, char **);
+extern void channel_mode_set(struct Client *, struct Channel *, struct ChannelMember *, int, char **);
 extern void clear_ban_cache_list(dlink_list *);
-#endif /* INCLUDED_channel_mode_h */
+#endif  /* INCLUDED_channel_mode_h */

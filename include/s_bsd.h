@@ -61,8 +61,7 @@ extern bool comm_ignore_errno(int);
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
-extern void comm_connect_tcp(fde_t *, const struct irc_ssaddr *, unsigned short, const struct irc_ssaddr *,
-                             void (fde_t *, int, void *), void *, uintmax_t);
+extern void comm_connect_tcp(fde_t *, const struct irc_ssaddr *, unsigned short, const struct irc_ssaddr *, void (fde_t *, int, void *), void *, uintmax_t);
 extern const char *comm_errstr(int);
 extern int comm_socket(int, int, int);
 extern int comm_accept(fde_t *, struct irc_ssaddr *);
@@ -72,4 +71,4 @@ extern void comm_select_init(void);
 extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);
 extern void comm_select(void);
 extern void remove_ipv6_mapping(struct irc_ssaddr *);
-#endif /* INCLUDED_s_bsd_h */
+#endif  /* INCLUDED_s_bsd_h */

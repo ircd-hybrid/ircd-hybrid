@@ -89,4 +89,4 @@ extern fde_t *fd_close(fde_t *);
 extern void fd_note(fde_t *, const char *, ...);
 extern void close_standard_fds(void);
 extern void close_fds(void);
-#endif
+#endif  /* INCLUDED_fdlist_h */

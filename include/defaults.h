@@ -115,4 +115,4 @@
 
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
-#endif /* INCLUDED_defaults_h */
+#endif  /* INCLUDED_defaults_h */

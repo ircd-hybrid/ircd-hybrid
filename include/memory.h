@@ -33,4 +33,4 @@ extern void *xrealloc(void *, size_t);
 extern void xfree(void *);
 extern void *xstrdup(const char *);
 extern void *xstrndup(const char *, size_t);
-#endif /* INCLUDED_memory_h */
+#endif  /* INCLUDED_memory_h */

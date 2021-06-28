@@ -37,4 +37,4 @@ extern const dlink_list *service_get_list(void);
 extern void service_clear(void);
 extern struct ServiceItem *service_make(void);
 extern const struct ServiceItem *service_find(const char *, int (*)(const char *, const char *));
-#endif
+#endif  /* INCLUDED_conf_service_h */

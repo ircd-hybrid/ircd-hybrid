@@ -34,7 +34,7 @@ struct Monitor
 {
   dlink_node node;  /**< List node; linked into monitor_hash */
   dlink_list monitored_by;  /**< List of clients that have this entry on their monitor list */
-  unsigned int hash_value; /**< Cached hash value derived from Monitor::name */
+  unsigned int hash_value;  /**< Cached hash value derived from Monitor::name */
   char *name;  /**< Name of the client to monitor */
 };
 

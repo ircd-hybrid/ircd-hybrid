@@ -33,8 +33,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PATRICIA_H
-#define _PATRICIA_H
+#ifndef INCLUDED_patricia_h
+#define INCLUDED_patricia_h
 
 /* { from defs.h */
 #define prefix_touchar(prefix) ((unsigned char *)&(prefix)->add.sin)
@@ -144,4 +144,4 @@ extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, struct 
   } \
 } while (0)
 
-#endif
+#endif  /* INCLUDED_patricia_h */

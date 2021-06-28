@@ -23,7 +23,7 @@
  *
  */
 
-#ifndef INCLUDED_stdinc_h /* prevent multiple #includes */
+#ifndef INCLUDED_stdinc_h
 #define INCLUDED_stdinc_h
 
 #include "config.h"
@@ -89,4 +89,4 @@
 #define AFP(a,b)
 #endif
 
-#endif
+#endif  /* INCLUDED_stdinc_h */

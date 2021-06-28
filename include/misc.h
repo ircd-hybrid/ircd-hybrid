@@ -27,12 +27,6 @@
 #ifndef INCLUDED_misc_h
 #define INCLUDED_misc_h
 
-extern const char *date(uintmax_t);
-extern const char *date_iso8601(uintmax_t);
-extern const char *date_ctime(uintmax_t);
-extern const char *time_dissect(uintmax_t);
-extern void binary_to_hex(const unsigned char *, char *, unsigned int);
-
 /* Just blindly define our own MIN/MAX macro */
 #define IRCD_MAX(a, b)  ((a) > (b) ? (a) : (b))
 #define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
@@ -45,4 +39,10 @@ extern void binary_to_hex(const unsigned char *, char *, unsigned int);
 #define _GMKv(x)  (((x) > _1TER) ? (float)((x)/_1TER) : (((x) > _1GIG) ? \
                    (float)((x)/_1GIG) : (((x) > _1MEG) ? (float)((x)/_1MEG) : \
                    (float)(x))))
-#endif
+
+extern const char *date(uintmax_t);
+extern const char *date_iso8601(uintmax_t);
+extern const char *date_ctime(uintmax_t);
+extern const char *time_dissect(uintmax_t);
+extern void binary_to_hex(const unsigned char *, char *, unsigned int);
+#endif  /* INCLUDED_misc_h */

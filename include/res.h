@@ -117,4 +117,4 @@ extern void restart_resolver(void);
 extern void delete_resolver_queries(const void *);
 extern void gethost_byname_type(dns_callback_fnc , void *, const char *, int);
 extern void gethost_byaddr(dns_callback_fnc, void *, const struct irc_ssaddr *);
-#endif
+#endif  /* INCLUDED_res_h */

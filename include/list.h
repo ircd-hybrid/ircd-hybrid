@@ -80,4 +80,4 @@ extern void dlink_move_node(dlink_node *, dlink_list *, dlink_list *);
 extern dlink_node *dlinkFind(dlink_list *, const void *);
 extern dlink_node *dlinkFindDelete(dlink_list *, void *);
 extern dlink_node *make_dlink_node(void);
-#endif
+#endif  /* INCLUDED_list_h */

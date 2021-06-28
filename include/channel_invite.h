@@ -42,4 +42,4 @@ extern struct Invite *invite_find(struct Channel *, struct Client *);
 extern void invite_add(struct Channel *, struct Client *);
 extern void invite_del(struct Invite *);
 extern void invite_clear_list(dlink_list *);
-#endif
+#endif  /* INCLUDED_channel_invite_h */

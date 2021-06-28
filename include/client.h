@@ -293,8 +293,8 @@ struct Connection
   unsigned int cap;  /**< Client CAP bit-field */
   unsigned int capab;  /**< Server CAPAB bit field */
 
-  unsigned int operflags;     /**< IRC Operator privilege flags */
-  unsigned int random_ping; /**< Holding a 32bit value used for PING cookies */
+  unsigned int operflags;  /**< IRC Operator privilege flags */
+  unsigned int random_ping;  /**< Holding a 32bit value used for PING cookies */
 
   uintmax_t serial;  /**< Used to enforce 1 send per nick */
   uintmax_t last_data;  /**< Last time data read from socket; monotonic time */
@@ -434,17 +434,15 @@ struct AcceptItem
 extern struct Client me;
 extern dlink_list listing_client_list;
 extern dlink_list global_client_list;
-extern dlink_list global_server_list;   /* global servers on the network              */
-extern dlink_list local_client_list;  /* local clients only ON this server          */
-extern dlink_list local_server_list;  /* local servers to this server ONLY          */
-extern dlink_list unknown_list;       /* unknown clients ON this server only        */
-extern dlink_list oper_list;          /* our opers, duplicated in local_client_list */
+extern dlink_list global_server_list;  /* global servers on the network */
+extern dlink_list local_client_list;  /* local clients only ON this server */
+extern dlink_list local_server_list;  /* local servers to this server ONLY */
+extern dlink_list unknown_list;  /* unknown clients ON this server only */
+extern dlink_list oper_list;  /* our opers, duplicated in local_client_list */
 
 extern bool accept_message(struct Client *, struct Client *);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
-extern struct AcceptItem *accept_find(const char *, const char *,
-                                          const char *, dlink_list *,
-                                          int (*)(const char *, const char *));
+extern struct AcceptItem *accept_find(const char *, const char *, const char *, dlink_list *, int (*)(const char *, const char *));
 extern void accept_del(struct AcceptItem *, dlink_list *);
 extern void accept_clear_list(dlink_list *);
 extern void exit_client(struct Client *, const char *);

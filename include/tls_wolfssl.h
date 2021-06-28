@@ -26,7 +26,6 @@
  * \version $Id$
  */
 
-
 #ifndef INCLUDED_tls_wolfssl_h
 #define INCLUDED_tls_wolfssl_h
 
@@ -46,6 +45,5 @@ typedef struct
   WOLFSSL_CTX *server_ctx;
   WOLFSSL_CTX *client_ctx;
 } tls_context_t;
-
 #endif  /* HAVE_LIBWOLFSSL */
 #endif  /* INCLUDED_tls_wolfssl_h */

@@ -44,4 +44,4 @@ struct AuthRequest
 extern void auth_init(void);
 extern void auth_start(struct Client *);
 extern void auth_delete(struct AuthRequest *);
-#endif
+#endif  /* INCLUDED_auth_h */

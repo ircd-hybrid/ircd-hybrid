@@ -6,6 +6,9 @@
 #ifndef INCLUDED_reslib_h
 #define INCLUDED_reslib_h
 
+/** Maximum number of nameservers in /etc/resolv.conf we care about */
+#define RESLIB_MAXNS 8
+
 /*
  * Inline versions of get/put short/long.  Pointer is advanced.
  */
@@ -45,17 +48,15 @@
 	(cp) += NS_INT32SZ; \
 }
 
-#define RESLIB_MAXNS 8  /* Maximum number of nameservers in
-                           /etc/resolv.conf we care about */
 
 extern struct irc_ssaddr irc_nsaddr_list[];
 extern unsigned int irc_nscount;
 extern void irc_res_init(void);
-extern int irc_dn_expand(const unsigned char *msg, const unsigned char *eom, const unsigned char *src, char *dst, int dstsiz);
-extern int irc_dn_skipname(const unsigned char *ptr, const unsigned char *eom);
-extern unsigned int irc_ns_get16(const unsigned char *src);
-extern unsigned long irc_ns_get32(const unsigned char *src);
-extern void irc_ns_put16(unsigned int src, unsigned char *dst);
-extern void irc_ns_put32(unsigned long src, unsigned char *dst);
-extern int irc_res_mkquery(const char *dname, int class, int type, unsigned char *buf, int buflen);
-#endif /* INCLUDED_res_h */
+extern int irc_dn_expand(const unsigned char *, const unsigned char *, const unsigned char *, char *, int);
+extern int irc_dn_skipname(const unsigned char *, const unsigned char *);
+extern unsigned int irc_ns_get16(const unsigned char *);
+extern unsigned long irc_ns_get32(const unsigned char *);
+extern void irc_ns_put16(unsigned int, unsigned char *);
+extern void irc_ns_put32(unsigned long, unsigned char *);
+extern int irc_res_mkquery(const char *, int class, int, unsigned char *, int);
+#endif  /* INCLUDED_reslib_h */

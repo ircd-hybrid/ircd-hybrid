@@ -26,7 +26,6 @@
  * \version $Id$
  */
 
-
 #ifndef INCLUDED_tls_openssl_h
 #define INCLUDED_tls_openssl_h
 
@@ -49,6 +48,5 @@ typedef struct
   SSL_CTX *server_ctx;
   SSL_CTX *client_ctx;
 } tls_context_t;
-
 #endif  /* HAVE_LIBCRYPTO */
 #endif  /* INCLUDED_tls_openssl_h */

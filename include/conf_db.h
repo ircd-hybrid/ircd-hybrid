@@ -57,4 +57,4 @@ extern void save_xline_database(const char *);
 extern void load_resv_database(const char *);
 extern void save_resv_database(const char *);
 extern void save_all_databases(void *);
-#endif
+#endif  /* INCLUDED_conf_db_h */

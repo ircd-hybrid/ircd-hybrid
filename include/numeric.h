@@ -250,4 +250,4 @@ enum irc_numerics
 };
 
 extern const char *numeric_form(enum irc_numerics);
-#endif /* INCLUDED_numeric_h */
+#endif  /* INCLUDED_numeric_h */

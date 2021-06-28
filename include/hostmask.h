@@ -79,6 +79,5 @@ extern void hostmask_expire_temporary(void);
 
 extern struct MaskItem *find_address_conf(const char *, const char *, const struct irc_ssaddr *, const char *);
 extern struct MaskItem *find_dline_conf(const struct irc_ssaddr *);
-extern struct MaskItem *find_conf_by_address(const char *, const struct irc_ssaddr *,
-                                             unsigned int, const char *, const char *, int);
-#endif /* INCLUDED_hostmask_h */
+extern struct MaskItem *find_conf_by_address(const char *, const struct irc_ssaddr *, unsigned int, const char *, const char *, int);
+#endif  /* INCLUDED_hostmask_h */

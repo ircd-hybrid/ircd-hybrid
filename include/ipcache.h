@@ -29,16 +29,16 @@
 
 struct ip_entry
 {
-  dlink_node node;                /**< List node; linked into ipcache_list */
-  void *trie_pointer;             /**< Pointer to 'patricia_tree_t' item */
-  unsigned int count_local;       /**< Number of local users using this IP */
-  unsigned int count_remote;      /**< Number of remote users using this IP */
+  dlink_node node;  /**< List node; linked into ipcache_list */
+  void *trie_pointer;  /**< Pointer to 'patricia_tree_t' item */
+  unsigned int count_local;  /**< Number of local users using this IP */
+  unsigned int count_remote;  /**< Number of remote users using this IP */
   unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
-  uintmax_t last_attempt;         /**< The last time someone connected from this IP; monotonic time */
+  uintmax_t last_attempt;  /**< The last time someone connected from this IP; monotonic time */
 };
 
 extern struct ip_entry *ipcache_record_find_or_add(void *);
 extern void ipcache_record_remove(void *, bool);
 extern void ipcache_get_stats(unsigned int *const, size_t *const);
 extern void ipcache_init(void);
-#endif
+#endif  /* INCLUDED_ipcache_h */

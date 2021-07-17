@@ -46,10 +46,10 @@ server_die(const char *message, bool restart)
   if (restart == true)
   {
     static bool was_here = false;
-    if (was_here == false)
-      was_here = true;
-    else
-      abort(); 
+    if (was_here == true)
+      abort();
+
+    was_here = true;
   } 
 
   if (EmptyString(message))

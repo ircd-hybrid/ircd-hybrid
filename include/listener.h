@@ -27,7 +27,6 @@
 #ifndef INCLUDED_listener_h
 #define INCLUDED_listener_h
 
-#include "ircd_defs.h"
 #include "fdlist.h"
 
 enum

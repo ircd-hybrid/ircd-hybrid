@@ -12,7 +12,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Download coverity scan build tool
       run: |
-        wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=$GITHUB_REPOSITORY" -O cov-analysis-linux64.tar.gz
+        curl -o cov-analysis-linux64.tar.gz https://scan.coverity.com/download/cxx/linux64 \
+          --form project=$GITHUB_REPOSITORY \
+          --form token=$TOKEN
         mkdir cov-analysis-linux64
         tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
       env:

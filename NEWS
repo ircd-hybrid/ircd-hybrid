@@ -1,3 +1,7 @@
+-- Noteworthy changes in version 8.2.40 (2021-??-??)
+* 
+
+
 -- Noteworthy changes in version 8.2.39 (2021-08-14)
 * `hidechans` and `hideidle` may now be set in `general::oper_only_umodes`
 * OpenSSL 3.0 compatibility improvements
@@ -5,6 +9,7 @@
 * Fixed issue where the ircd wouldn't listen on both IPv4 and IPv6 ports in
   case only a port but no address has been specified in a listen {} block
 * Fixed a `STATS P` displaying issue with compressed ipv6 loopback/inaddr_any
+* For a full list of all changes in this release, see <https://git.io/JRNaC>
 
 
 -- Noteworthy changes in version 8.2.38 (2021-01-17)

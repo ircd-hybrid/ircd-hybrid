@@ -330,8 +330,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   if (keep_our_modes == false)
   {
     /* Update channel name to be the correct case */
-    if (isnew == false)
-      strlcpy(channel->name, parv[2], sizeof(channel->name));
+    strlcpy(channel->name, parv[2], sizeof(channel->name));
 
     channel_demote_members(channel, origin, CHFL_CHANOP, 'o');
     channel_demote_members(channel, origin, CHFL_HALFOP, 'h');

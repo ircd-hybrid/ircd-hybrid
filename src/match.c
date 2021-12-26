@@ -339,7 +339,7 @@ const unsigned int CharAttrs[] =
 /* 27 */     CNTRL_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* 28 */     CNTRL_C|CHAN_C|VCHAN_C|NONEOS_C,
 /* 29 */     CNTRL_C|CHAN_C|NONEOS_C,
-/* 30 */     CNTRL_C|CHAN_C|VCHAN_C|NONEOS_C,
+/* 30 */     CNTRL_C|CHAN_C|NONEOS_C,
 /* 31 */     CNTRL_C|CHAN_C|NONEOS_C,
 /* SP */     PRINT_C|SPACE_C,
 /* ! */      PRINT_C|CHAN_C|VCHAN_C|NONEOS_C,

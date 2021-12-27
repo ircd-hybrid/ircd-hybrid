@@ -1,5 +1,5 @@
 -- Noteworthy changes in version 8.2.40 (2021-??-??)
-* 
+* `channel::disable_fake_channels` now also blocks strikethrough text (0x1E (30))
 
 
 -- Noteworthy changes in version 8.2.39 (2021-08-14)

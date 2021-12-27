@@ -314,7 +314,7 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
 /*! \brief Check channel name for invalid characters
  * \param name Pointer to channel name string
  * \param local Indicates whether it's a local or remote creation
- * \return 0 if invalid, 1 otherwise
+ * \return false if invalid, true otherwise
  */
 bool
 channel_check_name(const char *name, bool local)
@@ -592,7 +592,7 @@ member_get_prefix_len(const struct ChannelMember *member, bool combine)
 /*!
  * \param client Pointer to Client to check
  * \param list   Pointer to ban list to search
- * \return 1 if ban found for given n!u\@h mask, 0 otherwise
+ * \return true if ban found for given n!u\@h mask, false otherwise
  */
 static bool
 ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
@@ -670,7 +670,7 @@ find_bmask(struct Client *client, struct Channel *channel, const dlink_list *lis
 /*!
  * \param channel Pointer to channel block
  * \param client  Pointer to client to check access fo
- * \return 0 if not banned, 1 otherwise
+ * \return false if not banned, true otherwise
  */
 bool
 is_banned(struct Channel *channel, struct Client *client)
@@ -752,7 +752,7 @@ member_find_link(const struct Client *client, const struct Channel *channel)
 
 /*! Checks if a message contains control codes
  * \param message The actual message string the client wants to send
- * \return 1 if the message does contain any control codes, 0 otherwise
+ * \return true if the message does contain any control codes, false otherwise
  */
 static bool
 msg_has_ctrls(const char *message)

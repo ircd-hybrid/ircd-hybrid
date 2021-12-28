@@ -288,10 +288,6 @@ verify_access(struct Client *client)
 
   struct MaskItem *conf = find_address_conf(client->host, username, &client->ip,
                                             client->connection->password);
-
-  if (!HasFlag(client, FLAGS_GOTID) && !IsNoTilde(conf))
-    strlcpy(client->username, username, sizeof(client->username));
-
   if (conf == NULL)
     return NOT_AUTHORIZED;
 
@@ -310,6 +306,9 @@ verify_access(struct Client *client)
                        conf->port);
     return NOT_AUTHORIZED;
   }
+
+  if (!HasFlag(client, FLAGS_GOTID) && !IsNoTilde(conf))
+    strlcpy(client->username, username, sizeof(client->username));
 
   /* Preserve x->host in x->realhost before it gets overwritten. */
   strlcpy(client->realhost, client->host, sizeof(client->realhost));

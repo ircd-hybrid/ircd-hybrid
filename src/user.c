@@ -302,6 +302,19 @@ register_local_user(struct Client *client)
     }
   }
 
+  if (valid_username(client->username, true) == false)
+  {
+    char buf[sizeof("Invalid username []") + sizeof(client->username)];
+
+    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
+                         "Invalid username: %s (%s@%s)",
+                         client->name, client->username, client->host);
+    ++ServerStats.is_ref;
+    snprintf(buf, sizeof(buf), "Invalid username [%s]", client->username);
+    exit_client(client, buf);
+    return;
+  }
+
   /* Password check */
   if (!EmptyString(conf->passwd))
   {
@@ -339,19 +352,6 @@ register_local_user(struct Client *client)
                          client->name, client->host);
     ++ServerStats.is_ref;
     exit_client(client, "Sorry, server is full - try later");
-    return;
-  }
-
-  if (valid_username(client->username, true) == false)
-  {
-    char buf[sizeof("Invalid username []") + sizeof(client->username)];
-
-    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                         "Invalid username: %s (%s@%s)",
-                         client->name, client->username, client->host);
-    ++ServerStats.is_ref;
-    snprintf(buf, sizeof(buf), "Invalid username [%s]", client->username);
-    exit_client(client, buf);
     return;
   }
 

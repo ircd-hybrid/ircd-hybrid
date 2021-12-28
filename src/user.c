@@ -292,9 +292,6 @@ register_local_user(struct Client *client)
 
   if (!HasFlag(client, FLAGS_GOTID))
   {
-    char username[USERLEN + 1];
-    unsigned int i = 0;
-
     if (IsNeedIdentd(conf))
     {
       ++ServerStats.is_ref;
@@ -303,16 +300,6 @@ register_local_user(struct Client *client)
       exit_client(client, "Install identd");
       return;
     }
-
-    strlcpy(username, client->username, sizeof(username));
-
-    if (!IsNoTilde(conf))
-      client->username[i++] = '~';
-
-    for (const char *p = username; *p && i < USERLEN; ++p)
-      client->username[i++] = *p;
-
-    client->username[i] = '\0';
   }
 
   /* Password check */

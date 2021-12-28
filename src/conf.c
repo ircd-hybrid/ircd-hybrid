@@ -279,19 +279,18 @@ attach_iline(struct Client *client, struct MaskItem *conf)
 static int
 verify_access(struct Client *client)
 {
-  struct MaskItem *conf;
+  char username[USERLEN + 1] = "~";
 
   if (HasFlag(client, FLAGS_GOTID))
-    conf = find_address_conf(client->host, client->username, &client->ip,
-                             client->connection->password);
+    strlcpy(username, client->username, sizeof(username));
   else
-  {
-    char non_ident[USERLEN + 1] = "~";
+    strlcpy(username + 1, client->username, sizeof(username) - 1);
 
-    strlcpy(non_ident + 1, client->username, sizeof(non_ident) - 1);
-    conf = find_address_conf(client->host, non_ident, &client->ip,
-                             client->connection->password);
-  }
+  struct MaskItem *conf = find_address_conf(client->host, username, &client->ip,
+                                            client->connection->password);
+
+  if (!HasFlag(client, FLAGS_GOTID) && !IsNoTilde(conf))
+    strlcpy(client->username, username, sizeof(client->username));
 
   if (conf == NULL)
     return NOT_AUTHORIZED;

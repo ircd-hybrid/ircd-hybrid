@@ -332,9 +332,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     /* Update channel name to be the correct case */
     strlcpy(channel->name, parv[2], sizeof(channel->name));
 
-    channel_demote_members(channel, origin, CHFL_CHANOP, 'o');
-    channel_demote_members(channel, origin, CHFL_HALFOP, 'h');
-    channel_demote_members(channel, origin, CHFL_VOICE, 'v');
+    channel_demote_members(channel, origin);
 
     remove_ban_list(channel, origin, &channel->banlist, 'b');
     remove_ban_list(channel, origin, &channel->exceptlist, 'e');

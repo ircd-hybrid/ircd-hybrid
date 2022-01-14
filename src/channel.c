@@ -145,54 +145,56 @@ remove_user_from_channel(struct ChannelMember *member)
  * side effects - remove ONE mode from a channel
  */
 void
-channel_demote_members(struct Channel *channel, const struct Client *client, unsigned int mask, const char flag)
+channel_demote_members(struct Channel *channel, const struct Client *client)
 {
   dlink_node *node;
-  char modebuf[MODEBUFLEN];
-  char parabuf[MODEBUFLEN];
+  char modebuf[MAXMODEPARAMS + 1];
+  char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
   char *mbuf = modebuf;
   char *pbuf = parabuf;
-  const char *names[MAXMODEPARAMS];
-  static const unsigned int names_size = sizeof(names) / sizeof(names[0]);
-  unsigned int count = 0;
+  unsigned int pargs = 0;
+  struct member_status
+  {
+    unsigned char prefix;
+    unsigned int flag;
+  } table[] =
+  {
+    { 'o', CHFL_CHANOP },
+    { 'h', CHFL_HALFOP },
+    { 'v', CHFL_VOICE  },
+    { '\0', 0 }
+  };
 
   DLINK_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
 
-    if ((member->flags & mask) == 0)
-      continue;
-
-    member->flags &= ~mask;
-
-    names[count++] = member->client->name;
-
-    *mbuf++ = flag;
-
-    if (count >= names_size)
+    for (const struct member_status *status = table; status->flag; ++status)
     {
-      *mbuf = '\0';
+      if (member->flags & status->flag)
+      {
+        member->flags &= ~status->flag;
+        *mbuf++ = status->prefix;
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", member->client->name);
 
-      for (unsigned int i = 0; i < names_size; ++i)
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
+        if (++pargs >= MAXMODEPARAMS)
+        {
+          *mbuf = *(pbuf - 1) = '\0';
+          sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
+                               client->name, channel->name, modebuf, parabuf);
 
-      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",
-                           client->name, channel->name, modebuf, parabuf);
-      mbuf = modebuf;
-      pbuf = parabuf;
-      count = 0;
+          mbuf = modebuf;
+          pbuf = parabuf;
+          pargs = 0;
+        }
+      }
     }
   }
 
-  if (count)
+  if (pargs)
   {
-    assert(count < names_size);
-    *mbuf = '\0';
-
-    for (unsigned int i = 0; i < count; ++i)
-      pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), " %s", names[i]);
-
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s%s",
+    *mbuf = *(pbuf - 1) = '\0';
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
                          client->name, channel->name, modebuf, parabuf);
   }
 }

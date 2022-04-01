@@ -811,7 +811,7 @@ can_send(struct Channel *channel, struct Client *client,
 
   if (HasCMode(channel, MODE_NOCTCP))
     if (*message == '\001' && strncmp(message + 1, "ACTION ", 7))
-      return ERR_NOCTCP;
+      return ERR_CANNOTSENDTOCHAN;
 
   if (member || (member = member_find_link(client, channel)))
     if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))

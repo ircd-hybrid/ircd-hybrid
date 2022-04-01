@@ -213,7 +213,6 @@ enum irc_numerics
   ERR_NONONREG             = 486,
   ERR_SECUREONLYCHAN       = 489,
   ERR_NOOPERHOST           = 491,
-  ERR_NOCTCP               = 492,
   ERR_UMODEUNKNOWNFLAG     = 501,
   ERR_USERSDONTMATCH       = 502,
   ERR_USERNOTONSERV        = 504,

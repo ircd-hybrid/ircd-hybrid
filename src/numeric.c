@@ -194,7 +194,6 @@ static const char *const replies[] =
   /* 486 */  [ERR_NONONREG] = "%s :You must identify to a registered nick to private message that person",
   /* 489 */  [ERR_SECUREONLYCHAN] = "%s :Cannot join channel (+S) - TLS required",
   /* 491 */  [ERR_NOOPERHOST] = ":Only few of mere mortals may try to enter the twilight zone",
-  /* 492 */  [ERR_NOCTCP] = "%s :You cannot send CTCPs to this channel. Not sent: %s",
   /* 501 */  [ERR_UMODEUNKNOWNFLAG] = ":Unknown MODE flag",
   /* 502 */  [ERR_USERSDONTMATCH] = ":Cannot change mode for other users",
   /* 504 */  [ERR_USERNOTONSERV] = "%s :User is not on this server",

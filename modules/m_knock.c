@@ -84,16 +84,14 @@ m_knock(struct Client *source_p, int parc, char *parv[])
   {
     if (HasCMode(channel, MODE_NOKNOCK))
     {
-      sendto_one_numeric(source_p, &me, ERR_CANNOTKNOCK, channel->name);
+      sendto_one_numeric(source_p, &me, ERR_CANNOTKNOCK, channel->name, "knocks are not allowed (+K)");
       return;
     }
 
-    /*
-     * Don't allow a knock if the user is banned, or the channel is private.
-     */
-    if (PrivateChannel(channel) || is_banned(channel, source_p) == true)
+    /* Don't allow a knock if the user is banned. */
+    if (is_banned(channel, source_p) == true)
     {
-      sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, channel->name);
+      sendto_one_numeric(source_p, &me, ERR_CANNOTKNOCK, channel->name, "you are banned (+b)");
       return;
     }
 

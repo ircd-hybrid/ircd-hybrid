@@ -207,7 +207,7 @@ msg_channel(bool notice, struct Client *source_p, struct Channel *channel,
             unsigned int flags, const char *text)
 {
   unsigned int type = 0;
-  const char *prefix = "";
+  const char *prefix = "", *error = NULL;
 
   if (flags & CHFL_VOICE)
   {
@@ -226,15 +226,15 @@ msg_channel(bool notice, struct Client *source_p, struct Channel *channel,
   }
 
   /* Chanops and voiced can flood their own channel with impunity */
-  int ret = can_send(channel, source_p, NULL, text, notice);
-  if (ret < 0)
+  int ret = can_send(channel, source_p, NULL, text, notice, &error);
+  if (ret != CAN_SEND_NO)
   {
     if (ret == CAN_SEND_OPV || flood_attack_channel(notice, source_p, channel) == false)
       sendto_channel_butone(source_p, source_p, channel, type, "%s %s%s :%s",
                             command[notice], prefix, channel->name, text);
   }
   else if (notice == false)
-    sendto_one_numeric(source_p, &me, ret, channel->name, text);
+    sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, channel->name, error);
 }
 
 /* msg_client()

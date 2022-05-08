@@ -788,68 +788,95 @@ msg_has_ctrls(const char *message)
  * \param client  Pointer to Client struct
  * \param member  Pointer to Membership struct (can be NULL)
  * \param message The actual message string the client wants to send
- * \return CAN_SEND_OPV if op or voiced on channel\n
+ * \return CAN_SEND_OPV if op, halfop, or voiced on channel\n
  *         CAN_SEND_NONOP if can send to channel but is not an op\n
- *         ERR_CANNOTSENDTOCHAN or ERR_NEEDREGGEDNICK if they cannot send to channel\n
+ *         CAN_SEND_NO if they cannot send to channel\n
  */
 int
 can_send(struct Channel *channel, struct Client *client,
-         struct ChannelMember *member, const char *message, bool notice)
+         struct ChannelMember *member, const char *message, bool notice, const char **error)
 {
-  const struct ResvItem *resv;
-
   if (IsServer(client) || HasFlag(client, FLAGS_SERVICE))
     return CAN_SEND_OPV;
 
   if (MyConnect(client) && !HasFlag(client, FLAGS_EXEMPTRESV))
+  {
     if (!(HasUMode(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)))
-      if ((resv = resv_find(channel->name, match)) && resv_exempt_find(client, resv) == false)
-        return ERR_CANNOTSENDTOCHAN;
+    {
+      const struct ResvItem *const resv = resv_find(channel->name, match);
+      if (resv && resv_exempt_find(client, resv) == false)
+      {
+        *error = "channel is reserved";
+        return CAN_SEND_NO;
+      }
+    }
+  }
 
   if (HasCMode(channel, MODE_NOCTRL) && msg_has_ctrls(message) == true)
-    return ERR_NOCTRLSONCHAN;
+  {
+    *error = "control codes are not permitted";
+    return CAN_SEND_NO;
+  }
 
   if (HasCMode(channel, MODE_NOCTCP))
+  {
     if (*message == '\001' && strncmp(message + 1, "ACTION ", 7))
-      return ERR_NOCTCP;
+    {
+      *error = "CTCPs are not permitted";
+      return CAN_SEND_NO;
+    }
+  }
 
   if (member || (member = member_find_link(client, channel)))
     if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
       return CAN_SEND_OPV;
 
   if (member == NULL && HasCMode(channel, MODE_NOPRIVMSGS))
-    return ERR_CANNOTSENDTOCHAN;
+  {
+    *error = "external messages are not permitted";
+    return CAN_SEND_NO;
+  }
 
   if (HasCMode(channel, MODE_MODERATED))
-    return ERR_CANNOTSENDTOCHAN;
+  {
+    *error = "channel is moderated (+m)";
+    return CAN_SEND_NO;
+  }
 
   if (HasCMode(channel, MODE_MODREG) && !HasUMode(client, UMODE_REGISTERED))
-    return ERR_NEEDREGGEDNICK;
+  {
+    *error = "you need to identify to a registered nick";
+    return CAN_SEND_NO;
+  }
 
   if (HasCMode(channel, MODE_NONOTICE) && notice == true)
-    return ERR_CANNOTSENDTOCHAN;
+  {
+    *error = "NOTICEs are not permitted";
+    return CAN_SEND_NO;
+  }
 
+  *error = "you are banned (+b)";
   /* Cache can send if banned */
   if (MyConnect(client))
   {
     if (member)
     {
       if (member->flags & CHFL_BAN_SILENCED)
-        return ERR_CANNOTSENDTOCHAN;
+        return CAN_SEND_NO;
 
       if (!(member->flags & CHFL_BAN_CHECKED))
       {
         if (is_banned(channel, client) == true)
         {
           member->flags |= (CHFL_BAN_CHECKED | CHFL_BAN_SILENCED);
-          return ERR_CANNOTSENDTOCHAN;
+          return CAN_SEND_NO;
         }
 
         member->flags |= CHFL_BAN_CHECKED;
       }
     }
     else if (is_banned(channel, client) == true)
-      return ERR_CANNOTSENDTOCHAN;
+      return CAN_SEND_NO;
   }
 
   return extban_mute_can_send(channel, client, member);
@@ -1082,6 +1109,7 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
 static void
 channel_part_one_client(struct Client *client, const char *name, const char *reason)
 {
+  const char *error;
   struct Channel *channel = hash_find_channel(name);
   if (channel == NULL)
   {
@@ -1105,7 +1133,7 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
   if (*reason && (!MyConnect(client) ||
       ((client->connection->created_monotonic +
         ConfigGeneral.anti_spam_exit_message_time) < event_base->time.sec_monotonic &&
-       can_send(channel, client, member, reason, false) < 0)))
+       can_send(channel, client, member, reason, false, &error) < 0)))
   {
     sendto_server(client, 0, 0, ":%s PART %s :%s",
                   client->id, channel->name, reason);

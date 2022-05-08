@@ -44,7 +44,7 @@ extban_mute_can_send(struct Channel *channel, struct Client *client,
   if (member)
   {
     if (member->flags & CHFL_BAN_SILENCED)
-      return ERR_CANNOTSENDTOCHAN;
+      return CAN_SEND_NO;
 
     if (member->flags & CHFL_MUTE_CHECKED)
       return CAN_SEND_NONOP;
@@ -61,7 +61,7 @@ extban_mute_can_send(struct Channel *channel, struct Client *client,
       if (member)
         member->flags |= CHFL_BAN_SILENCED;
 
-      return ERR_CANNOTSENDTOCHAN;
+      return CAN_SEND_NO;
     }
   }
 

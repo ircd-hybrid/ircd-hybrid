@@ -146,15 +146,13 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   }
 
   if (HasCMode(channel, MODE_INVITEONLY))
-  {
     sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, 0, CAP_INVITE_NOTIFY,
                          ":%s NOTICE %%%s :%s is inviting %s to %s.",
                          me.name, channel->name, source_p->name, target_p->name, channel->name);
-    sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, CAP_INVITE_NOTIFY, 0,
-                         ":%s!%s@%s INVITE %s %s", source_p->name, source_p->username,
-                         source_p->host, target_p->name, channel->name);
-  }
 
+  sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, CAP_INVITE_NOTIFY, 0,
+                       ":%s!%s@%s INVITE %s %s", source_p->name, source_p->username,
+                       source_p->host, target_p->name, channel->name);
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
                 channel->name, channel->creation_time);
@@ -204,15 +202,13 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   }
 
   if (HasCMode(channel, MODE_INVITEONLY))
-  {
     sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, 0, CAP_INVITE_NOTIFY,
                          ":%s NOTICE %%%s :%s is inviting %s to %s.",
                          me.name, channel->name, source_p->name, target_p->name, channel->name);
-    sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, CAP_INVITE_NOTIFY, 0,
-                         ":%s!%s@%s INVITE %s %s", source_p->name, source_p->username,
-                         source_p->host, target_p->name, channel->name);
-  }
 
+  sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, CAP_INVITE_NOTIFY, 0,
+                       ":%s!%s@%s INVITE %s %s", source_p->name, source_p->username,
+                       source_p->host, target_p->name, channel->name);
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
                 source_p->id, target_p->id,
                 channel->name, channel->creation_time);

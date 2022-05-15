@@ -35,9 +35,9 @@
 
 enum
 {
-  CAN_SEND_NO    =  0,
-  CAN_SEND_NONOP = -1,
-  CAN_SEND_OPV   = -2
+  CAN_SEND_NO,
+  CAN_SEND_NONOP,
+  CAN_SEND_OPV
 };
 
 enum

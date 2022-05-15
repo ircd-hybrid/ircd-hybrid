@@ -43,10 +43,6 @@
             opposed to the default poll(2). This is currently only available
             on FreeBSD, OpenBSD, NetBSD, DragonFly BSD and macOS
 
-          * --enable-devpoll - Enable the superior /dev/poll support on
-            Solaris. Linux /dev/poll is broken and will not work with this
-            option.
-
           * --enable-epoll - Enables epoll(4) Signal I/O system. This is
             currently only available on 2.5.44 Linux kernel versions or
             later.

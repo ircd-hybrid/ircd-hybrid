@@ -4,7 +4,6 @@ AC_DEFUN([AX_ARG_IOLOOP_MECHANISM],[
 
   AC_ARG_ENABLE([kqueue], [AS_HELP_STRING([--enable-kqueue], [Force kqueue usage.])], [desired_iopoll_mechanism="kqueue"])
   AC_ARG_ENABLE([epoll],  [AS_HELP_STRING([--enable-epoll],  [Force epoll usage.])],  [desired_iopoll_mechanism="epoll"])
-  AC_ARG_ENABLE([devpoll],[AS_HELP_STRING([--enable-devpoll],[Force devpoll usage.])],[desired_iopoll_mechanism="devpoll"])
   AC_ARG_ENABLE([poll],   [AS_HELP_STRING([--enable-poll],   [Force poll usage.])],   [desired_iopoll_mechanism="poll"])
 
   AC_MSG_CHECKING([for optimal/desired iopoll mechanism])
@@ -20,23 +19,12 @@ AC_DEFUN([AX_ARG_IOLOOP_MECHANISM],[
   AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_EPOLL],[$iopoll_mechanism_epoll],[epoll mechanism])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [epoll_create1(EPOLL_CLOEXEC);])], [is_epoll_mechanism_available="yes"],[is_epoll_mechanism_available="no"])
 
-  iopoll_mechanism_devpoll=3
-  AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_DEVPOLL],[$iopoll_mechanism_devpoll],[devpoll mechanism])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <devpoll.h>])],[is_devpoll_mechanism_available="yes"],[is_devpoll_mechanism_available="no"])
-  if test "$is_devpoll_mechanism_available" = "yes" ; then
-    AC_DEFINE([HAVE_DEVPOLL_H],[1],[Define to 1 if you have the <devpoll.h> header file.])
-  fi
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/devpoll.h>])],[is_devpoll_mechanism_available="yes"],[is_devpoll_mechanism_available="no"])
-  if test "$is_devpoll_mechanism_available" = "yes" ; then
-    AC_DEFINE([HAVE_SYS_DEVPOLL_H],[1],[Define to 1 if you have the <sys/devpoll.h> header file.])
-  fi
-
-  iopoll_mechanism_poll=4
+  iopoll_mechanism_poll=3
   AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_POLL],[$iopoll_mechanism_poll],[poll mechanism])
   AC_LINK_IFELSE([AC_LANG_FUNC_LINK_TRY([poll])],[is_poll_mechanism_available="yes"],[is_poll_mechanism_available="no"])
 
   optimal_iopoll_mechanism="none"
-  for mechanism in "kqueue" "epoll" "devpoll" "poll" ; do # order is important
+  for mechanism in "kqueue" "epoll" "poll" ; do # order is important
     eval "is_optimal_iopoll_mechanism_available=\$is_${mechanism}_mechanism_available"
     if test "$is_optimal_iopoll_mechanism_available" = "yes" ; then
       optimal_iopoll_mechanism="$mechanism"

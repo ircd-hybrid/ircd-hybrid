@@ -43,9 +43,6 @@
    you don't. */
 #undef HAVE_DECL_CYGWIN_CONV_PATH
 
-/* Define to 1 if you have the <devpoll.h> header file. */
-#undef HAVE_DEVPOLL_H
-
 /* Define to 1 if you have the <dirent.h> header file. */
 #undef HAVE_DIRENT_H
 
@@ -132,9 +129,6 @@
 
 /* Define to 1 if you have the `strlcpy' function. */
 #undef HAVE_STRLCPY
-
-/* Define to 1 if you have the <sys/devpoll.h> header file. */
-#undef HAVE_SYS_DEVPOLL_H
 
 /* Define to 1 if you have the <sys/dl.h> header file. */
 #undef HAVE_SYS_DL_H
@@ -251,9 +245,6 @@
 /* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */
 #undef YYTEXT_POINTER
-
-/* devpoll mechanism */
-#undef __IOPOLL_MECHANISM_DEVPOLL
 
 /* epoll mechanism */
 #undef __IOPOLL_MECHANISM_EPOLL

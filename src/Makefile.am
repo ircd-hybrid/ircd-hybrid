@@ -65,7 +65,6 @@ ircd_SOURCES = auth.c            \
                patricia.c        \
                s_bsd_epoll.c     \
                s_bsd_poll.c      \
-               s_bsd_devpoll.c   \
                s_bsd_kqueue.c    \
                tls_gnutls.c      \
                tls_none.c        \

@@ -808,7 +808,6 @@ with_ltdl_lib
 enable_ltdl_install
 enable_kqueue
 enable_epoll
-enable_devpoll
 enable_poll
 enable_assert
 enable_debugging
@@ -1474,7 +1473,6 @@ Optional Features:
   --enable-ltdl-install   install libltdl
   --enable-kqueue         Force kqueue usage.
   --enable-epoll          Force epoll usage.
-  --enable-devpoll        Force devpoll usage.
   --enable-poll           Force poll usage.
   --enable-assert         Enable assert() statements
   --enable-debugging      Enable debugging.
@@ -14441,11 +14439,6 @@ if test "${enable_epoll+set}" = set; then :
   enableval=$enable_epoll; desired_iopoll_mechanism="epoll"
 fi
 
-  # Check whether --enable-devpoll was given.
-if test "${enable_devpoll+set}" = set; then :
-  enableval=$enable_devpoll; desired_iopoll_mechanism="devpoll"
-fi
-
   # Check whether --enable-poll was given.
 if test "${enable_poll+set}" = set; then :
   enableval=$enable_poll; desired_iopoll_mechanism="poll"
@@ -14542,58 +14535,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
-  iopoll_mechanism_devpoll=3
-
-cat >>confdefs.h <<_ACEOF
-#define __IOPOLL_MECHANISM_DEVPOLL $iopoll_mechanism_devpoll
-_ACEOF
-
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <devpoll.h>
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  is_devpoll_mechanism_available="yes"
-else
-  is_devpoll_mechanism_available="no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  if test "$is_devpoll_mechanism_available" = "yes" ; then
-
-$as_echo "#define HAVE_DEVPOLL_H 1" >>confdefs.h
-
-  fi
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/devpoll.h>
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  is_devpoll_mechanism_available="yes"
-else
-  is_devpoll_mechanism_available="no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  if test "$is_devpoll_mechanism_available" = "yes" ; then
-
-$as_echo "#define HAVE_SYS_DEVPOLL_H 1" >>confdefs.h
-
-  fi
-
-  iopoll_mechanism_poll=4
+  iopoll_mechanism_poll=3
 
 cat >>confdefs.h <<_ACEOF
 #define __IOPOLL_MECHANISM_POLL $iopoll_mechanism_poll
@@ -14649,7 +14591,7 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
   optimal_iopoll_mechanism="none"
-  for mechanism in "kqueue" "epoll" "devpoll" "poll" ; do # order is important
+  for mechanism in "kqueue" "epoll" "poll" ; do # order is important
     eval "is_optimal_iopoll_mechanism_available=\$is_${mechanism}_mechanism_available"
     if test "$is_optimal_iopoll_mechanism_available" = "yes" ; then
       optimal_iopoll_mechanism="$mechanism"

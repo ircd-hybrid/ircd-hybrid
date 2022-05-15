@@ -1133,7 +1133,7 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
   if (*reason && (!MyConnect(client) ||
       ((client->connection->created_monotonic +
         ConfigGeneral.anti_spam_exit_message_time) < event_base->time.sec_monotonic &&
-       can_send(channel, client, member, reason, false, &error) < 0)))
+       can_send(channel, client, member, reason, false, &error) != CAN_SEND_NO)))
   {
     sendto_server(client, 0, 0, ":%s PART %s :%s",
                   client->id, channel->name, reason);

@@ -35,7 +35,7 @@ struct MaskItem;
  */
 enum server_hunt_ret
 {
-  HUNTED_NOSUCH  = -1,  /**< If the hunted server is not found */
+  HUNTED_NOSUCH,  /**< If the hunted server is not found */
   HUNTED_ISME,  /**< If this server should execute the command */
   HUNTED_PASS  /**< If message passed onwards successfully */
 };

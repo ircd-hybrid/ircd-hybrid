@@ -827,7 +827,7 @@ stats_pseudo(struct Client *source_p, int parc, char *parv[])
   {
     const struct PseudoItem *pseudo = node->data;
     sendto_one_numeric(source_p, &me, RPL_STATSPSEUDO, pseudo->command,
-                       pseudo->name, pseudo->nick, pseudo->serv,
+                       pseudo->name, pseudo->nick, pseudo->server,
                        pseudo->prepend ? pseudo->prepend : "*");
   }
 }

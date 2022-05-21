@@ -70,7 +70,7 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
   }
 
   target_p = find_person(source_p, pseudo->nick);
-  server_p = hash_find_server(pseudo->serv);
+  server_p = hash_find_server(pseudo->server);
 
   if (target_p && server_p && (target_p->servptr == server_p) && !IsMe(server_p))
     sendto_one(target_p, ":%s PRIVMSG %s :%s", source_p->id, target_p->id, msg);
@@ -79,7 +79,7 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
 }
 
 void
-pseudo_register(const char *name, const char *nick, const char *serv, 
+pseudo_register(const char *name, const char *nick, const char *server, 
                 const char *prepend,
                 const char *command)
 {
@@ -89,7 +89,7 @@ pseudo_register(const char *name, const char *nick, const char *serv,
   struct PseudoItem *pseudo = xcalloc(sizeof(*pseudo));
   pseudo->name = xstrdup(name);
   pseudo->nick = xstrdup(nick);
-  pseudo->serv = xstrdup(serv);
+  pseudo->server = xstrdup(server);
   pseudo->command = xstrdup(command);
   if (!EmptyString(prepend))
     pseudo->prepend = xstrdup(prepend);
@@ -119,7 +119,7 @@ pseudo_clear(void)
 
     xfree(pseudo->name);
     xfree(pseudo->nick);
-    xfree(pseudo->serv);
+    xfree(pseudo->server);
     xfree(pseudo->prepend);
     xfree(pseudo->command);
     xfree(pseudo);

@@ -33,7 +33,7 @@ struct PseudoItem
   struct Message msg;
   char *name;
   char *nick;
-  char *serv;
+  char *server;
   char *prepend;
   char *command;
 };

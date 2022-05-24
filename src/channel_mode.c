@@ -41,6 +41,9 @@
 #include "extban.h"
 
 
+char cmode_rpl04[2][256];
+char cmode_class[4][256];
+
 static struct ChModeChange mode_changes[IRCD_BUFSIZE];
 static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
@@ -919,33 +922,33 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
 const struct chan_mode *cmode_map[256];
 const struct chan_mode  cmode_tab[] =
 {
-  { .letter = 'b', .flag = CHFL_BAN, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask },
-  { .letter = 'c', .mode = MODE_NOCTRL, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'e', .flag = CHFL_EXCEPTION, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask },
-  { .letter = 'h', .flag = CHFL_HALFOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag },
-  { .letter = 'i', .mode = MODE_INVITEONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'k', .func = chm_key, .required_oplevel = CHACCESS_HALFOP },
-  { .letter = 'l', .func = chm_limit, .required_oplevel = CHACCESS_HALFOP },
-  { .letter = 'm', .mode = MODE_MODERATED, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'n', .mode = MODE_NOPRIVMSGS, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'o', .flag = CHFL_CHANOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag },
-  { .letter = 'p', .mode = MODE_PRIVATE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'r', .mode = MODE_REGISTERED, .required_oplevel = CHACCESS_REMOTE, .only_servers = true, .func = chm_simple },
-  { .letter = 's', .mode = MODE_SECRET, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 't', .mode = MODE_TOPICLIMIT, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'u', .mode = MODE_HIDEBMASKS, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'v', .flag = CHFL_VOICE, .required_oplevel = CHACCESS_HALFOP, .func = chm_flag },
-  { .letter = 'C', .mode = MODE_NOCTCP, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'I', .flag = CHFL_INVEX, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask },
-  { .letter = 'K', .mode = MODE_NOKNOCK, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'L', .mode = MODE_EXTLIMIT, .required_oplevel = CHACCESS_HALFOP, .only_opers = true, .func = chm_simple },
-  { .letter = 'M', .mode = MODE_MODREG, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'N', .mode = MODE_NONICKCHANGE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'O', .mode = MODE_OPERONLY, .required_oplevel = CHACCESS_HALFOP, .only_opers = true, .func = chm_simple },
-  { .letter = 'R', .mode = MODE_REGONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'S', .mode = MODE_SECUREONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = 'T', .mode = MODE_NONOTICE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple },
-  { .letter = '\0', .mode = 0 }
+  { .letter = 'b', .flag = CHFL_BAN, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask, .class = MODE_CLASS_A },
+  { .letter = 'c', .mode = MODE_NOCTRL, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'e', .flag = CHFL_EXCEPTION, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask, .class = MODE_CLASS_A },
+  { .letter = 'h', .flag = CHFL_HALFOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'i', .mode = MODE_INVITEONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'k', .func = chm_key, .required_oplevel = CHACCESS_HALFOP, .class = MODE_CLASS_B },
+  { .letter = 'l', .func = chm_limit, .required_oplevel = CHACCESS_HALFOP, .class = MODE_CLASS_C },
+  { .letter = 'm', .mode = MODE_MODERATED, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'n', .mode = MODE_NOPRIVMSGS, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'o', .flag = CHFL_CHANOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'p', .mode = MODE_PRIVATE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'r', .mode = MODE_REGISTERED, .required_oplevel = CHACCESS_REMOTE, .only_servers = true, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 's', .mode = MODE_SECRET, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 't', .mode = MODE_TOPICLIMIT, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'u', .mode = MODE_HIDEBMASKS, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'v', .flag = CHFL_VOICE, .required_oplevel = CHACCESS_HALFOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'C', .mode = MODE_NOCTCP, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'I', .flag = CHFL_INVEX, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask, .class = MODE_CLASS_A },
+  { .letter = 'K', .mode = MODE_NOKNOCK, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'L', .mode = MODE_EXTLIMIT, .required_oplevel = CHACCESS_HALFOP, .only_opers = true, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'M', .mode = MODE_MODREG, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'N', .mode = MODE_NONICKCHANGE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'O', .mode = MODE_OPERONLY, .required_oplevel = CHACCESS_HALFOP, .only_opers = true, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'R', .mode = MODE_REGONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'S', .mode = MODE_SECUREONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'T', .mode = MODE_NONOTICE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = '\0' }
 };
 
 void
@@ -953,6 +956,28 @@ channel_mode_init(void)
 {
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
     cmode_map[tab->letter] = tab;
+
+  for (unsigned int i = 0; i < 256; ++i)
+  {
+    const struct chan_mode *cmode = cmode_map[i];
+    if (cmode == NULL)
+      continue;
+
+    const char str[] = { cmode->letter, '\0' };
+    strlcat(cmode_rpl04[0], str, sizeof(cmode_rpl04[0]));
+
+    if (cmode->class != MODE_CLASS_D)
+      strlcat(cmode_rpl04[1], str, sizeof(cmode_rpl04[1]));
+
+   /*
+    * from draft-brocklesby-irc-isupport-03:
+    * The IRC server MUST NOT list modes in CHANMODES which are also
+    * present in the PREFIX parameter; however, for completeness, modes
+    * described in PREFIX may be treated as type B modes.
+    */
+    if (cmode->func != chm_flag)
+      strlcat(cmode_class[cmode->class], str, sizeof(cmode_class[cmode->class]));
+  }
 }
 
 /*

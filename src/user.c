@@ -246,7 +246,8 @@ user_welcome(struct Client *client)
   sendto_one_numeric(client, &me, RPL_YOURHOST,
                      listener_get_name(client->connection->listener), PATCHLEVEL);
   sendto_one_numeric(client, &me, RPL_CREATED, built_date);
-  sendto_one_numeric(client, &me, RPL_MYINFO, me.name, PATCHLEVEL, umode_buffer);
+  sendto_one_numeric(client, &me, RPL_MYINFO, me.name, PATCHLEVEL, umode_buffer,
+                     cmode_rpl04[0], cmode_rpl04[1]);
 
   isupport_show(client);
   show_lusers(client);

@@ -52,6 +52,32 @@ enum
   CHACCESS_REMOTE
 };
 
+enum mode_class
+{
+  /* A = modes that take a parameter, and add or remove nicks
+   *     or addresses to a list, such as +bIe for the ban,
+   *     invite, and exception lists.
+   */
+  MODE_CLASS_A,
+
+  /* B = modes that change channel settings, but which take
+   *     a parameter when they are set and unset, such as
+   *     +k key, and -k key.
+   */
+  MODE_CLASS_B,
+
+  /* C = modes that change channel settings, but which take
+   *     a parameter only when they are set, such as +l N,
+   *     and -l.
+   */
+  MODE_CLASS_C,
+
+  /* D = modes that change channel settings, such as +imnpst
+   *     and take no parameters.
+   */
+  MODE_CLASS_D
+};
+
 /* Channel related flags */
 enum
 {
@@ -114,6 +140,7 @@ struct chan_mode
   unsigned char letter;
   unsigned int mode;
   unsigned int flag;
+  enum mode_class class;
   bool only_opers;
   bool only_servers;
   int required_oplevel;
@@ -124,6 +151,8 @@ struct chan_mode
 
 extern const struct chan_mode *cmode_map[];
 extern const struct chan_mode  cmode_tab[];
+extern char cmode_rpl04[][256];
+extern char cmode_class[][256];
 
 extern void channel_mode_init(void);
 extern const char *add_id(struct Client *, struct Channel *, const char *, dlink_list *, unsigned int);

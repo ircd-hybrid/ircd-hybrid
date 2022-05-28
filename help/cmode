@@ -36,9 +36,6 @@ NO PARAMETERS:
      +r     - 'Registered'. Channel has been registered with ChanServ.
               Can be set only by servers and services.
 
-     +u     - 'Hide bmasks'. Hides +b/+e/+I mode changes and lists to everyone
-              except channel ops, and half-ops (+o/+h).
-
      +C     - 'No CTCPs'. Prevent users from sending CTCPs to the channel.
 
      +K     - 'No KNOCK'. KNOCK cannot be used on the channel.

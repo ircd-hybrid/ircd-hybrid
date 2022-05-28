@@ -3,7 +3,7 @@
 
 Upon connecting to the IRC server, you will see something like this:
 
-irc.ircd-hybrid.org hybrid-8.2.36 BDFGHXRSWacdefgijklnopqrswy bchiklmnoprstuveCIKLMNORST bkloveIh
+irc.ircd-hybrid.org hybrid-8.2.40 BDFGHXRSWacdefgijklnopqrswy CIKLMNORSTbcehiklmnoprstv Ibehklov
 
 These describe the user modes, channel modes, and channel modes that require
 arguments that are available to the user.
@@ -72,13 +72,11 @@ Channel Modes:
 +S - secureonly   - This mode will prevent anyone who isn't securely connected via TLS from joining
                     the channel.
 +t - topic        - Only chanops and halfops can change the topic
-+u - hidebmasks   - Hides +b/+e/+I mode changes and lists to everyone except channel ops, and
-                    half-ops (+o/+h)
 +T - nonotice     - Users without +v/h/o cannot send NOTICEs to the channel
 +v - voice        - Can speak in a moderated channel, and is exempt from flood restrictions
 
 The third part of the 004 numeric lists channel modes that require arguments.
-Currently these are bkloveIh.
+Currently these are Ibehklov.
 
 
 # $Id$

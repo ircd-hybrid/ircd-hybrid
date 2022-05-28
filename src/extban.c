@@ -185,11 +185,11 @@ extban_parse(const char *mask, unsigned int *input_extbans, unsigned int *offset
   return EXTBAN_NONE;
 }
 
-unsigned int
+size_t
 extban_format(unsigned int e, char *buf)
 {
   dlink_node *node;
-  unsigned int written = 0;
+  size_t written = 0;
 
   DLINK_FOREACH(node, extban_list.head)
   {

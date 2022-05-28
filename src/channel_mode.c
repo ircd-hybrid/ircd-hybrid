@@ -85,15 +85,15 @@ static const char *
 get_mask(const struct Ban *ban)
 {
   static char buf[MODEBUFLEN];
-  const unsigned int i = extban_format(ban->extban, buf);
+  const size_t len = extban_format(ban->extban, buf);
 
-  assert(i <= sizeof(buf));
+  assert(len <= sizeof(buf));
 
   /* Matching extbans only use ban->host */
   if (ban->extban & extban_matching_mask())
-    strlcpy(buf + i, ban->host, sizeof(buf) - i);
+    strlcpy(buf + len, ban->host, sizeof(buf) - len);
   else
-    snprintf(buf + i, sizeof(buf) - i, "%s!%s@%s", ban->name, ban->user, ban->host);
+    snprintf(buf + len, sizeof(buf) - len, "%s!%s@%s", ban->name, ban->user, ban->host);
 
   return buf;
 }

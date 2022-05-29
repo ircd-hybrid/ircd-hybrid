@@ -28,8 +28,7 @@
 #define INCLUDED_channel_mode_h
 
 
-#define CMEMBER_STATUS_FLAGS "~&@%+"
-enum { CMEMBER_STATUS_FLAGS_LEN = sizeof(CMEMBER_STATUS_FLAGS) - 1 };
+enum { CMEMBER_STATUS_FLAGS_LEN = 5 };
 
 enum { MODEBUFLEN = 200 };
 

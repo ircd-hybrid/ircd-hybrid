@@ -39,7 +39,10 @@ enum
   CAPAB_TBURST  = 1 <<  6,  /**< Supports TBURST */
   CAPAB_DLN     = 1 <<  7,  /**< Can do DLINE message */
   CAPAB_UNDLN   = 1 <<  8,  /**< Can do UNDLINE message */
-  CAPAB_RHOST   = 1 <<  9  /**< Can do extended realhost UID messages */
+  CAPAB_RHOST   = 1 <<  9,  /**< Can do extended realhost UID messages */
+  CAPAB_QOP     = 1 << 10,  /**< Server supports the owner (~) channel prefix mode */
+  CAPAB_AOP     = 1 << 11,  /**< Server supports the admin (&) channel prefix mode */
+  CAPAB_HOP     = 1 << 12,  /**< Server supports the half-op (%) channel prefix mode */
 };
 
 /*
@@ -55,11 +58,12 @@ struct Capability
   dlink_node node;  /**< List node; linked into capab_list */
   char *name;  /**< Name of capability */
   unsigned int cap;  /**< Mask value */
+  bool active;  /**< Capability is active on this server and advertized to others */
 };
 
 extern void capab_init(void);
-extern void capab_add(const char *, unsigned int);
+extern void capab_add(const char *, unsigned int, bool);
 extern void capab_del(const char *);
 extern unsigned int capab_find(const char *);
-extern const char *capab_get(const void *);
+extern const char *capab_get(const void *, bool);
 #endif  /* INCLUDED_server_capab_h */

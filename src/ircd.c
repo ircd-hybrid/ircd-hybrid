@@ -412,9 +412,9 @@ main(int argc, char *argv[])
   class_init();
   resolver_init();      /* Needs to be setup before the io loop */
   modules_init();
+  conf_read_files(true);   /* cold start init conf files */
   channel_mode_init();
   extban_init();
-  conf_read_files(true);   /* cold start init conf files */
   capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after conf_read_files() */
   read_links_file();

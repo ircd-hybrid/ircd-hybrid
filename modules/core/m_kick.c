@@ -71,7 +71,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (member_has_flags(member_source, CHFL_CHANOP | CHFL_HALFOP) == false)
+  if (member_highest_rank(member_source) < CHACCESS_HALFOP)
   {
     sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;
@@ -88,13 +88,10 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (member_has_flags(member_source, CHFL_CHANOP) == false)
+  if (member_highest_rank(member_source) < member_highest_rank(member_target))
   {
-    if (member_has_flags(member_target, CHFL_CHANOP | CHFL_HALFOP) == true)
-    {
-      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
-      return;
-    }
+    sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
+    return;
   }
 
   char reason[KICKLEN + 1];

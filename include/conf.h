@@ -213,6 +213,8 @@ struct config_general_entry
 struct config_channel_entry
 {
   unsigned int enable_extbans;
+  unsigned int enable_owner;
+  unsigned int enable_admin;
   unsigned int disable_fake_channels;
   unsigned int invite_client_count;
   unsigned int invite_client_time;

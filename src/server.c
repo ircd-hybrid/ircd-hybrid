@@ -484,7 +484,7 @@ server_finish_tls_handshake(struct Client *client)
 
   sendto_one(client, "PASS %s", conf->spasswd);
 
-  sendto_one(client, "CAPAB :%s", capab_get(NULL));
+  sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
 
   sendto_one(client, "SERVER %s 1 %s +%s :%s",
              me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
@@ -629,7 +629,7 @@ server_connect_callback(fde_t *F, int status, void *data)
 
   sendto_one(client, "PASS %s", conf->spasswd);
 
-  sendto_one(client, "CAPAB :%s", capab_get(NULL));
+  sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
 
   sendto_one(client, "SERVER %s 1 %s +%s :%s",
              me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);

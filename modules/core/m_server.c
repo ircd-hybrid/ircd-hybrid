@@ -222,7 +222,7 @@ server_estab(struct Client *client_p)
 
     sendto_one(client_p, "PASS %s", conf->spasswd);
 
-    sendto_one(client_p, "CAPAB :%s", capab_get(NULL));
+    sendto_one(client_p, "CAPAB :%s", capab_get(NULL, true));
 
     sendto_one(client_p, "SERVER %s 1 %s +%s :%s",
                me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
@@ -269,29 +269,29 @@ server_estab(struct Client *client_p)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
                          client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
-                         capab_get(client_p));
+                         capab_get(client_p, true));
 
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
                          client_get_name(client_p, MASK_IP), client_p->tls_cipher,
-                         capab_get(client_p));
+                         capab_get(client_p, true));
     ilog(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
          client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
-         capab_get(client_p));
+         capab_get(client_p, true));
   }
   else
   {
     /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
-                         client_get_name(client_p, SHOW_IP), capab_get(client_p));
+                         client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
     /* Now show the masked hostname/IP to opers */
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
-                         client_get_name(client_p, MASK_IP), capab_get(client_p));
+                         client_get_name(client_p, MASK_IP), capab_get(client_p, true));
     ilog(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
-         client_get_name(client_p, SHOW_IP), capab_get(client_p));
+         client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
   }
 
   fd_note(client_p->connection->fd, "Server: %s", client_p->name);
@@ -514,6 +514,22 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 
     exit_client(source_p, error);
     return;
+  }
+
+  if (service_find(name, irccmp) == NULL)
+  {
+    if ((ConfigChannel.enable_owner == 0) != !IsCapable(source_p, CAPAB_QOP) ||
+        (ConfigChannel.enable_admin == 0) != !IsCapable(source_p, CAPAB_AOP))
+    {
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+                           "Link %s introduced server with mismatching AOP/QOP capabilities",
+                           client_get_name(source_p, SHOW_IP));
+      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+                           "Link %s introduced server with mismatching AOP/QOP capabilities",
+                           client_get_name(source_p, MASK_IP));
+      exit_client(source_p, "Mismatching AOP/QOP capabilities");
+      return;
+    }
   }
 
   struct Client *target_p = hash_find_server(name);

@@ -683,7 +683,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
   {
     struct ChannelMember *member = node->data;
 
-    if (member_has_flags(member, CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE) == false)
+    if (member_highest_rank(member) < CHACCESS_VOICE)
     {
       if (HasCMode(member->channel, MODE_NONICKCHANGE))
       {

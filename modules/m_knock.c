@@ -117,7 +117,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
   }
 
   channel->last_knock_time = event_base->time.sec_monotonic;
-  sendto_channel_local(NULL, channel, CHFL_CHANOP | CHFL_HALFOP, 0, 0,
+  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, 0,
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
                        me.name, channel->name, channel->name,
                        source_p->name,
@@ -142,7 +142,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&knock_msgtab);
-  capab_add("KNOCK", CAPAB_KNOCK);
+  capab_add("KNOCK", CAPAB_KNOCK, true);
   isupport_add("KNOCK", NULL, -1);
 }
 

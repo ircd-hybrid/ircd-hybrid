@@ -179,7 +179,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&undline_msgtab);
-  capab_add("UNDLN", CAPAB_UNDLN);
+  capab_add("UNDLN", CAPAB_UNDLN, true);
 }
 
 static void

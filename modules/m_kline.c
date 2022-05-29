@@ -277,7 +277,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&kline_msgtab);
-  capab_add("KLN", CAPAB_KLN);
+  capab_add("KLN", CAPAB_KLN, true);
 }
 
 static void

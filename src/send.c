@@ -310,7 +310,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
  */
 void
 sendto_channel_butone(struct Client *one, const struct Client *from,
-                      struct Channel *channel, unsigned int type,
+                      struct Channel *channel, int rank,
                       const char *pattern, ...)
 {
   va_list args_l, args_r;
@@ -347,7 +347,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
     if (one && (target->from == one->from))
       continue;
 
-    if (type && (member->flags & type) == 0)
+    if (rank && member_highest_rank(member) < rank)
       continue;
 
     if (HasUMode(target, UMODE_DEAF))
@@ -486,13 +486,13 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
 /*! \brief Send a message to members of a channel that are locally connected to this server.
  * \param one      Client to skip; can be NULL
  * \param channel    Destination channel
- * \param status   Channel member status flags clients must have
+ * \param rank     Minimum channel member rank clients must have
  * \param poscap   Positive client capabilities flags (CAP)
  * \param negcap   Negative client capabilities flags (CAP)
  * \param pattern  Format string for command arguments
  */
 void
-sendto_channel_local(const struct Client *one, struct Channel *channel, unsigned int status,
+sendto_channel_local(const struct Client *one, struct Channel *channel, int rank,
                      unsigned int poscap, unsigned int negcap, const char *pattern, ...)
 {
   va_list args;
@@ -514,7 +514,7 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, unsigned
     if (one && (target == one->from))
       continue;
 
-    if (status && (member->flags & status) == 0)
+    if (rank && member_highest_rank(member) < rank)
       continue;
 
     if (poscap && HasCap(target, poscap) != poscap)

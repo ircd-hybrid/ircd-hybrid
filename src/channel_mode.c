@@ -39,6 +39,8 @@
 #include "memory.h"
 #include "parse.h"
 #include "extban.h"
+#include "isupport.h"
+#include "server_capab.h"
 
 
 /** Buffer holding as list of channel modes to be used for RPL_MYINFO */
@@ -730,6 +732,12 @@ get_channel_access(const struct Client *client,
   /* Just to be sure.. */
   assert(client == member->client);
 
+  if (member_has_flags(member, CHFL_CHANOWNER) == true)
+    return CHACCESS_CHANOWNER;
+
+  if (member_has_flags(member, CHFL_CHANADMIN) == true)
+    return CHACCESS_CHANADMIN;
+
   if (member_has_flags(member, CHFL_CHANOP) == true)
     return CHACCESS_CHANOP;
 
@@ -905,23 +913,20 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
 }
 
 const struct chan_mode *cmode_map[256];
-const struct chan_mode  cmode_tab[] =
+const struct chan_mode cmode_tab[] =
 {
   { .letter = 'b', .flag = CHFL_BAN, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask, .class = MODE_CLASS_A },
   { .letter = 'c', .mode = MODE_NOCTRL, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'e', .flag = CHFL_EXCEPTION, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask, .class = MODE_CLASS_A },
-  { .letter = 'h', .flag = CHFL_HALFOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
   { .letter = 'i', .mode = MODE_INVITEONLY, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'k', .func = chm_key, .required_oplevel = CHACCESS_HALFOP, .class = MODE_CLASS_B },
   { .letter = 'l', .func = chm_limit, .required_oplevel = CHACCESS_HALFOP, .class = MODE_CLASS_C },
   { .letter = 'm', .mode = MODE_MODERATED, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'n', .mode = MODE_NOPRIVMSGS, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
-  { .letter = 'o', .flag = CHFL_CHANOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
   { .letter = 'p', .mode = MODE_PRIVATE, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'r', .mode = MODE_REGISTERED, .required_oplevel = CHACCESS_REMOTE, .only_servers = true, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 's', .mode = MODE_SECRET, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 't', .mode = MODE_TOPICLIMIT, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
-  { .letter = 'v', .flag = CHFL_VOICE, .required_oplevel = CHACCESS_HALFOP, .func = chm_flag, .class = MODE_CLASS_B },
   { .letter = 'C', .mode = MODE_NOCTCP, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'I', .flag = CHFL_INVEX, .required_oplevel = CHACCESS_HALFOP, .func = chm_mask, .class = MODE_CLASS_A },
   { .letter = 'K', .mode = MODE_NOKNOCK, .required_oplevel = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
@@ -935,11 +940,41 @@ const struct chan_mode  cmode_tab[] =
   { .letter = '\0' }
 };
 
+/*
+ * XXX: Currently this needs to be sorted from highest to lowest rank.
+ */
+const struct chan_mode cflag_tab[] =
+{
+  { .letter = 'q', .prefix = '~', .flag = CHFL_CHANOWNER, .required_oplevel = CHACCESS_CHANOWNER, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'a', .prefix = '&', .flag = CHFL_CHANADMIN, .required_oplevel = CHACCESS_CHANOWNER, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'o', .prefix = '@', .flag = CHFL_CHANOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'h', .prefix = '%', .flag = CHFL_HALFOP, .required_oplevel = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'v', .prefix = '+', .flag = CHFL_VOICE, .required_oplevel = CHACCESS_HALFOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = '\0' }
+};
+
 void
 channel_mode_init(void)
 {
+  char letter[8] = "";
+  char prefix[8] = "";
+
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
     cmode_map[tab->letter] = tab;
+
+  for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+  {
+    if ((tab->flag == CHFL_CHANOWNER && ConfigChannel.enable_owner == 0) ||
+        (tab->flag == CHFL_CHANADMIN && ConfigChannel.enable_admin == 0))
+      continue;
+
+    cmode_map[tab->letter] = tab;
+
+    const char lstr[] = { tab->letter, '\0' };
+    const char pstr[] = { tab->prefix, '\0' };
+    strlcat(letter, lstr, sizeof(letter));
+    strlcat(prefix, pstr, sizeof(prefix));
+  }
 
   for (unsigned int i = 0; i < 256; ++i)
   {
@@ -962,6 +997,22 @@ channel_mode_init(void)
     if (cmode->func != chm_flag)
       strlcat(cmode_class[cmode->class], str, sizeof(cmode_class[cmode->class]));
   }
+
+  char buf[IRCD_BUFSIZE];
+  snprintf(buf, sizeof(buf), "%s,%s,%s,%s", cmode_class[MODE_CLASS_A],
+           cmode_class[MODE_CLASS_B],
+           cmode_class[MODE_CLASS_C],
+           cmode_class[MODE_CLASS_D]);
+  isupport_add("CHANMODES", buf, -1);
+
+
+  snprintf(buf, sizeof(buf), "(%s)%s", letter, prefix);
+  isupport_add("PREFIX", buf, -1);
+  isupport_add("STATUSMSG", prefix, -1);
+
+  capab_add("QOP", CAPAB_QOP, ConfigChannel.enable_owner != 0);
+  capab_add("AOP", CAPAB_AOP, ConfigChannel.enable_admin != 0);
+  capab_add("HOP", CAPAB_HOP, true);
 }
 
 /*

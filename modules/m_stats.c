@@ -1080,7 +1080,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
                target_p->connection->recv.bytes >> 10,
                (event_base->time.sec_monotonic - target_p->connection->created_monotonic),
                (event_base->time.sec_monotonic - target_p->connection->last_data),
-               capab_get(target_p));
+               capab_get(target_p, true));
   }
 
   sendB >>= 10;
@@ -1175,7 +1175,7 @@ stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
                        target_p->connection->recv.bytes >> 10,
                        (event_base->time.sec_monotonic - target_p->connection->created_monotonic),
                        (event_base->time.sec_monotonic - target_p->connection->last_data),
-                       IsServer(target_p) ? capab_get(target_p) : "-");
+                       IsServer(target_p) ? capab_get(target_p, true) : "-");
   }
 }
 

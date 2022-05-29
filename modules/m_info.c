@@ -158,6 +158,18 @@ static const struct InfoStruct info_table[] =
     "Whether or not to enable extbans"
   },
   {
+    "enable_owner",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.enable_owner,
+    "Enables channel prefix mode +q (channel owner)"
+  },
+  {
+    "enable_admin",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigChannel.enable_admin,
+    "Enables channel prefix mode +a (channel admin)"
+  },
+  {
     "disable_fake_channels",
     OUTPUT_BOOLEAN_YN,
     &ConfigChannel.disable_fake_channels,

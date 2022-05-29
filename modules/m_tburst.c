@@ -132,7 +132,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&tburst_msgtab);
-  capab_add("TBURST", CAPAB_TBURST);
+  capab_add("TBURST", CAPAB_TBURST, true);
 }
 
 static void

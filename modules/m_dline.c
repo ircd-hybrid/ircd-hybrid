@@ -259,7 +259,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&dline_msgtab);
-  capab_add("DLN", CAPAB_DLN);
+  capab_add("DLN", CAPAB_DLN, true);
 }
 
 static void

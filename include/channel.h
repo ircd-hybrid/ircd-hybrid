@@ -149,6 +149,7 @@ extern void channel_set_topic(struct Channel *, const char *, const char *, uint
 
 extern const char *member_get_prefix(const struct ChannelMember *, bool);
 extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
+extern int member_highest_rank(const struct ChannelMember *);
 
 extern struct Channel *channel_make(const char *);
 extern struct ChannelMember *member_find_link(const struct Client *, const struct Channel *);

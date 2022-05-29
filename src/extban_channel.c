@@ -37,24 +37,30 @@ static enum extban_match
 extban_channel_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
   const char *name = ban->host;
-  unsigned int flags;
+  int rank = CHACCESS_PEON;
 
   switch (*name)
   {
     case '+':
-      flags = CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE;
+      rank = CHACCESS_VOICE;
       ++name;
       break;
     case '%':
-      flags = CHFL_HALFOP | CHFL_VOICE;
+      rank = CHACCESS_HALFOP;
       ++name;
       break;
     case '@':
-      flags = CHFL_CHANOP;
+      rank = CHACCESS_CHANOP;
       ++name;
       break;
-    default:
-      flags = 0;
+    case '&':
+      rank = CHACCESS_CHANADMIN;
+      ++name;
+      break;
+    case '~':
+      rank = CHACCESS_CHANOWNER;
+      ++name;
+      break;
   }
 
   struct Channel *tmp = hash_find_channel(name);
@@ -71,7 +77,7 @@ extban_channel_matches(struct Client *client, struct Channel *channel, struct Ba
   struct ChannelMember *member = member_find_link(client, tmp);
   if (member)
   {
-    if (flags && (member->flags & flags) == 0)
+    if (rank > member_highest_rank(member))
       return EXTBAN_NO_MATCH;
     return EXTBAN_MATCH;
   }

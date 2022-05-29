@@ -408,6 +408,14 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     {
       switch (*s)
       {
+        case '~':
+          fl |= CHFL_CHANOWNER;
+          ++s;
+          break;
+        case '&':
+          fl |= CHFL_CHANADMIN;
+          ++s;
+          break;
         case '@':
           fl |= CHFL_CHANOP;
           ++s;
@@ -440,6 +448,18 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if (keep_new_modes == true)
     {
+      if (fl & CHFL_CHANOWNER)
+      {
+        *up++  = '~';
+        len_uid++;
+      }
+
+      if (fl & CHFL_CHANADMIN)
+      {
+        *up++  = '&';
+        len_uid++;
+      }
+
       if (fl & CHFL_CHANOP)
       {
         *up++  = '@';
@@ -491,6 +511,76 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                              ":%s!%s@%s AWAY :%s",
                              target_p->name, target_p->username,
                              target_p->host, target_p->away);
+    }
+
+    if (fl & CHFL_CHANOWNER)
+    {
+      *mbuf++ = 'q';
+      para[pargs++] = target_p->name;
+
+      if (pargs >= MAXMODEPARAMS)
+      {
+        /*
+         * Ok, the code is now going to "walk" through
+         * sendbuf, filling in para strings. So, I will use sptr
+         * to point into the sendbuf.
+         * Notice, that ircsprintf() returns the number of chars
+         * successfully inserted into string.
+         * - Dianora
+         */
+
+        sptr = sendbuf;
+        *mbuf = '\0';
+
+        for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
+        {
+          slen = sprintf(sptr, " %s", para[lcount]);  /* see? */
+          sptr += slen;  /* ready for next */
+        }
+
+        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
+                             origin->name, channel->name, modebuf, sendbuf);
+        mbuf = modebuf;
+        *mbuf++ = '+';
+
+        sendbuf[0] = '\0';
+        pargs = 0;
+      }
+    }
+
+    if (fl & CHFL_CHANADMIN)
+    {
+      *mbuf++ = 'a';
+      para[pargs++] = target_p->name;
+
+      if (pargs >= MAXMODEPARAMS)
+      {
+        /*
+         * Ok, the code is now going to "walk" through
+         * sendbuf, filling in para strings. So, I will use sptr
+         * to point into the sendbuf.
+         * Notice, that ircsprintf() returns the number of chars
+         * successfully inserted into string.
+         * - Dianora
+         */
+
+        sptr = sendbuf;
+        *mbuf = '\0';
+
+        for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
+        {
+          slen = sprintf(sptr, " %s", para[lcount]);  /* see? */
+          sptr += slen;  /* ready for next */
+        }
+
+        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
+                             origin->name, channel->name, modebuf, sendbuf);
+        mbuf = modebuf;
+        *mbuf++ = '+';
+
+        sendbuf[0] = '\0';
+        pargs = 0;
+      }
     }
 
     if (fl & CHFL_CHANOP)

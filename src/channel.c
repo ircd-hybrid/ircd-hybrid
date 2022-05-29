@@ -153,28 +153,17 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
   char *mbuf = modebuf;
   char *pbuf = parabuf;
   unsigned int pargs = 0;
-  struct member_status
-  {
-    unsigned char prefix;
-    unsigned int flag;
-  } table[] =
-  {
-    { 'o', CHFL_CHANOP },
-    { 'h', CHFL_HALFOP },
-    { 'v', CHFL_VOICE  },
-    { '\0', 0 }
-  };
 
   DLINK_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
 
-    for (const struct member_status *status = table; status->flag; ++status)
+    for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
     {
-      if (member->flags & status->flag)
+      if (member_has_flags(member, tab->flag) == true)
       {
-        member->flags &= ~status->flag;
-        *mbuf++ = status->prefix;
+        member->flags &= ~tab->flag;
+        *mbuf++ = tab->letter;
         pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", member->client->name);
 
         if (++pargs >= MAXMODEPARAMS)
@@ -541,24 +530,12 @@ member_get_prefix(const struct ChannelMember *member, bool combine)
   static char buf[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
   char *bufptr = buf;
 
-  if (member->flags & CHFL_CHANOP)
-  {
-    if (combine == false)
-      return "@";
-    *bufptr++ = '@';
-  }
+  for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+    if (member_has_flags(member, tab->flag) == true)
+      if (*bufptr++ = tab->prefix, combine == false)
+        break;
 
-  if (member->flags & CHFL_HALFOP)
-  {
-    if (combine == false)
-      return "%";
-    *bufptr++ = '%';
-  }
-
-  if (member->flags & CHFL_VOICE)
-    *bufptr++ = '+';
   *bufptr = '\0';
-
   return buf;
 }
 
@@ -567,28 +544,33 @@ member_get_prefix_len(const struct ChannelMember *member, bool combine)
 {
   size_t len = 0;
 
-  if (member->flags & CHFL_CHANOP)
-  {
-    if (combine == false)
-      return 1;
-    ++len;
-  }
-
-  if (member->flags & CHFL_HALFOP)
-  {
-    if (combine == false)
-      return 1;
-    ++len;
-  }
-
-  if (member->flags & CHFL_VOICE)
-  {
-    if (combine == false)
-      return 1;
-    ++len;
-  }
+  for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+    if (member_has_flags(member, tab->flag) == true)
+      if (++len, combine == false)
+        break;
 
   return len;
+}
+
+int
+member_highest_rank(const struct ChannelMember *member)
+{
+  if (member == NULL)
+    return CHACCESS_NOTONCHAN;
+
+  if (member_has_flags(member, CHFL_CHANOWNER) == true)
+    return CHACCESS_CHANOWNER;
+
+  if (member_has_flags(member, CHFL_CHANADMIN) == true)
+    return CHACCESS_CHANADMIN;
+
+  if (member_has_flags(member, CHFL_CHANOP) == true)
+    return CHACCESS_CHANOP;
+
+  if (member_has_flags(member, CHFL_HALFOP) == true)
+    return CHACCESS_HALFOP;
+
+  return CHACCESS_PEON;
 }
 
 /*!
@@ -828,7 +810,7 @@ can_send(struct Channel *channel, struct Client *client,
   }
 
   if (member || (member = member_find_link(client, channel)))
-    if (member->flags & (CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE))
+    if (member_highest_rank(member) > CHACCESS_PEON)
       return CAN_SEND_OPV;
 
   if (member == NULL && HasCMode(channel, MODE_NOPRIVMSGS))

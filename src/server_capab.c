@@ -44,9 +44,9 @@ static dlink_list capab_list;  /* List of capabilities supported by this server 
 void
 capab_init(void)
 {
-  capab_add("EOB", CAPAB_EOB);
-  capab_add("CLUSTER", CAPAB_CLUSTER);
-  capab_add("RHOST", CAPAB_RHOST);
+  capab_add("EOB", CAPAB_EOB, true);
+  capab_add("CLUSTER", CAPAB_CLUSTER, true);
+  capab_add("RHOST", CAPAB_RHOST, true);
 }
 
 /* capab_add()
@@ -59,12 +59,13 @@ capab_init(void)
  *                modules to dynamically add or subtract their capability.
  */
 void
-capab_add(const char *name, unsigned int flag)
+capab_add(const char *name, unsigned int flag, bool active)
 {
   struct Capability *cap = xcalloc(sizeof(*cap));
 
   cap->name = xstrdup(name);
   cap->cap = flag;
+  cap->active = active;
   dlinkAdd(cap, &cap->node, &capab_list);
 }
 
@@ -123,7 +124,7 @@ capab_find(const char *name)
  * side effects - build up string representing capabilities of server listed
  */
 const char *
-capab_get(const void *ptr)
+capab_get(const void *ptr, bool active)
 {
   static char buf[IRCD_BUFSIZE] = "";
   dlink_node *node;
@@ -134,6 +135,8 @@ capab_get(const void *ptr)
   {
     const struct Capability *cap = node->data;
 
+    if (active && cap->active == false)
+      continue;
     if (ptr && !IsCapable(((const struct Client *)ptr), cap->cap))
       continue;
 

@@ -39,6 +39,7 @@
 #include "irc_string.h"
 #include "hash.h"
 #include "packet.h"
+#include "misc.h"
 
 
 enum
@@ -58,7 +59,7 @@ static struct
 {
   void *ptr;
   unsigned int type;
-  unsigned int flags;
+  unsigned int rank;
 } targets[IRCD_BUFSIZE];
 
 static unsigned int ntargets;
@@ -204,25 +205,29 @@ flood_attack_channel(bool notice, struct Client *source_p, struct Channel *chann
  */
 static void
 msg_channel(bool notice, struct Client *source_p, struct Channel *channel,
-            unsigned int flags, const char *text)
+            unsigned int rank, const char *text)
 {
-  unsigned int type = 0;
-  const char *prefix = "", *error = NULL;
+  const char *prefix, *error = NULL;
 
-  if (flags & CHFL_VOICE)
+  switch (rank)
   {
-    type = CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE;
-    prefix = "+";
-  }
-  else if (flags & CHFL_HALFOP)
-  {
-    type = CHFL_CHANOP | CHFL_HALFOP;
-    prefix = "%";
-  }
-  else if (flags & CHFL_CHANOP)
-  {
-    type = CHFL_CHANOP;
-    prefix = "@";
+    case CHACCESS_VOICE:
+      prefix = "+";
+      break;
+    case CHACCESS_HALFOP:
+      prefix = "%";
+      break;
+    case CHACCESS_CHANOP:
+      prefix = "@";
+      break;
+    case CHACCESS_CHANADMIN:
+      prefix = "&";
+      break;
+    case CHACCESS_CHANOWNER:
+      prefix = "~";
+      break;
+    default:
+      prefix = "";
   }
 
   /* Chanops and voiced can flood their own channel with impunity */
@@ -230,7 +235,7 @@ msg_channel(bool notice, struct Client *source_p, struct Channel *channel,
   if (ret != CAN_SEND_NO)
   {
     if (ret == CAN_SEND_OPV || flood_attack_channel(notice, source_p, channel) == false)
-      sendto_channel_butone(source_p, source_p, channel, type, "%s %s%s :%s",
+      sendto_channel_butone(source_p, source_p, channel, rank, "%s %s%s :%s",
                             command[notice], prefix, channel->name, text);
   }
   else if (notice == false)
@@ -439,7 +444,7 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
 
           targets[ntargets].ptr = target;
           targets[ntargets].type = ENTITY_CHANNEL;
-          targets[ntargets++].flags = 0;
+          targets[ntargets++].rank = 0;
         }
       }
       else if (notice == false)
@@ -462,31 +467,35 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
 
         targets[ntargets].ptr = target;
         targets[ntargets].type = ENTITY_CLIENT;
-        targets[ntargets++].flags = 0;
+        targets[ntargets++].rank = 0;
       }
 
       continue;
     }
 
     /* @#channel or +#channel message ? */
-    unsigned int type = 0;
+    unsigned int rank = CHACCESS_REMOTE;
     const char *with_prefix = name;
 
     /* Allow %+@ if someone wants to do that */
     while (true)
     {
-      if (*name == '@')
-        type |= CHFL_CHANOP;
+      if (*name == '~')
+        rank = IRCD_MIN(rank, CHACCESS_CHANOWNER);
+      else if (*name == '&')
+        rank = IRCD_MIN(rank, CHACCESS_CHANADMIN);
+      else if (*name == '@')
+        rank = IRCD_MIN(rank, CHACCESS_CHANOP);
       else if (*name == '%')
-        type |= CHFL_CHANOP | CHFL_HALFOP;
+        rank = IRCD_MIN(rank, CHACCESS_HALFOP);
       else if (*name == '+')
-        type |= CHFL_CHANOP | CHFL_HALFOP | CHFL_VOICE;
+        rank = IRCD_MIN(rank, CHACCESS_VOICE);
       else
         break;
       ++name;
     }
 
-    if (type)
+    if (rank != CHACCESS_REMOTE)
     {
       if (EmptyString(name))  /* If it's a '\0' dump it, there is no recipient */
       {
@@ -502,8 +511,7 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
       {
         if (IsClient(source_p) && !HasFlag(source_p, FLAGS_SERVICE))
         {
-          if (member_has_flags(member_find_link(source_p, target),
-                               CHFL_CHANOP|CHFL_HALFOP|CHFL_VOICE) == false)
+          if (member_highest_rank(member_find_link(source_p, target)) < CHACCESS_VOICE)
           {
             sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, with_prefix);
             continue;
@@ -521,7 +529,7 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
 
           targets[ntargets].ptr = target;
           targets[ntargets].type = ENTITY_CHANNEL;
-          targets[ntargets++].flags = type;
+          targets[ntargets++].rank = rank;
         }
       }
       else if (notice == false)
@@ -573,7 +581,7 @@ m_message(bool notice, struct Client *source_p, int parc, char *parv[])
         break;
 
       case ENTITY_CHANNEL:
-        msg_channel(notice, source_p, targets[i].ptr, targets[i].flags, parv[2]);
+        msg_channel(notice, source_p, targets[i].ptr, targets[i].rank, parv[2]);
         break;
     }
   }

@@ -72,8 +72,9 @@ m_topic(struct Client *source_p, int parc, char *parv[])
       return;
     }
 
-    if (!HasCMode(channel, MODE_TOPICLIMIT) ||
-        member_has_flags(member, CHFL_CHANOP | CHFL_HALFOP) == true)
+    if (HasCMode(channel, MODE_TOPICLIMIT) && member_highest_rank(member) < CHACCESS_HALFOP)
+      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
+    else
     {
       char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
 
@@ -90,8 +91,6 @@ m_topic(struct Client *source_p, int parc, char *parv[])
                            source_p->host,
                            channel->name, channel->topic);
     }
-    else
-      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
   }
   else  /* Only asking for topic */
   {

@@ -182,7 +182,7 @@ static void
 module_init(void)
 {
   mod_add_cmd(&unkline_msgtab);
-  capab_add("UNKLN", CAPAB_UNKLN);
+  capab_add("UNKLN", CAPAB_UNKLN, true);
 }
 
 static void

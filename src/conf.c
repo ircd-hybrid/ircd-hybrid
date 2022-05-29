@@ -969,12 +969,6 @@ conf_read_files(bool cold)
 
   isupport_add("CHANNELLEN", NULL, CHANNELLEN);
   isupport_add("TOPICLEN", NULL, ConfigServerInfo.max_topic_length);
-
-  snprintf(buf, sizeof(buf), "%s,%s,%s,%s", cmode_class[MODE_CLASS_A],
-           cmode_class[MODE_CLASS_B],
-           cmode_class[MODE_CLASS_C],
-           cmode_class[MODE_CLASS_D]);
-  isupport_add("CHANMODES", buf, -1);
 }
 
 /* conf_add_class_to_conf()

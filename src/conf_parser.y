@@ -171,7 +171,9 @@ reset_block_state(void)
 %token  DLINE_MIN_CIDR
 %token  DLINE_MIN_CIDR6
 %token  EMAIL
+%token  ENABLE_ADMIN
 %token  ENABLE_EXTBANS
+%token  ENABLE_OWNER
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  EXEMPT
@@ -2769,11 +2771,25 @@ channel_item:       channel_max_bans |
                     channel_default_join_flood_time |
                     channel_disable_fake_channels |
                     channel_enable_extbans |
+                    channel_enable_owner |
+                    channel_enable_admin |
                     error;
 
 channel_enable_extbans: ENABLE_EXTBANS '=' TBOOL ';'
 {
   ConfigChannel.enable_extbans = yylval.number;
+};
+
+channel_enable_owner: ENABLE_OWNER '=' TBOOL ';'
+{
+  if (conf_parser_ctx.boot)
+    ConfigChannel.enable_owner = yylval.number;
+};
+
+channel_enable_admin: ENABLE_ADMIN '=' TBOOL ';'
+{
+  if (conf_parser_ctx.boot)
+    ConfigChannel.enable_admin = yylval.number;
 };
 
 channel_disable_fake_channels: DISABLE_FAKE_CHANNELS '=' TBOOL ';'

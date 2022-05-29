@@ -28,7 +28,7 @@
 #define INCLUDED_channel_mode_h
 
 
-#define CMEMBER_STATUS_FLAGS "@%+"
+#define CMEMBER_STATUS_FLAGS "~&@%+"
 enum { CMEMBER_STATUS_FLAGS_LEN = sizeof(CMEMBER_STATUS_FLAGS) - 1 };
 
 enum { MODEBUFLEN = 200 };
@@ -47,8 +47,11 @@ enum
 {
   CHACCESS_NOTONCHAN = -1,
   CHACCESS_PEON,
+  CHACCESS_VOICE,
   CHACCESS_HALFOP,
   CHACCESS_CHANOP,
+  CHACCESS_CHANADMIN,
+  CHACCESS_CHANOWNER,
   CHACCESS_REMOTE
 };
 
@@ -81,16 +84,18 @@ enum mode_class
 /* Channel related flags */
 enum
 {
-  CHFL_CHANOP       = 1 << 0,  /* Channel operator   */
-  CHFL_HALFOP       = 1 << 1,  /* Channel half op    */
-  CHFL_VOICE        = 1 << 2,  /* the power to speak */
-  CHFL_BAN          = 1 << 3,  /* ban channel flag */
-  CHFL_EXCEPTION    = 1 << 4,  /* exception to ban channel flag */
-  CHFL_INVEX        = 1 << 5,
+  CHFL_CHANOWNER    = 1 <<  0,  /**< Channel owner (~) */
+  CHFL_CHANADMIN    = 1 <<  1,  /**< Channel admin (&) */
+  CHFL_CHANOP       = 1 <<  2,  /**< Channel operator (@) */
+  CHFL_HALFOP       = 1 <<  3,  /**< Channel half-op (%) */
+  CHFL_VOICE        = 1 <<  4,  /**< Channel voice (+) */
+  CHFL_BAN          = 1 <<  5,  /* ban channel flag */
+  CHFL_EXCEPTION    = 1 <<  6,  /* exception to ban channel flag */
+  CHFL_INVEX        = 1 <<  7,
   /* Cache flags for silence on ban */
-  CHFL_BAN_CHECKED  = 1 << 6,
-  CHFL_BAN_SILENCED = 1 << 7,
-  CHFL_MUTE_CHECKED = 1 << 8
+  CHFL_BAN_CHECKED  = 1 <<  8,
+  CHFL_BAN_SILENCED = 1 <<  9,
+  CHFL_MUTE_CHECKED = 1 << 10,
 };
 
 /* channel modes ONLY */
@@ -98,8 +103,8 @@ enum
 {
   MODE_PRIVATE      = 1 <<  0,  /**< */
   MODE_SECRET       = 1 <<  1,  /**< Channel does not show up on NAMES or LIST */
-  MODE_MODERATED    = 1 <<  2,  /**< Users without +v/+h/+o cannot send text to the channel */
-  MODE_TOPICLIMIT   = 1 <<  3,  /**< Only chanops can change the topic */
+  MODE_MODERATED    = 1 <<  2,  /**< Users without +v or higher cannot send text to the channel */
+  MODE_TOPICLIMIT   = 1 <<  3,  /**< Only chanops or higher can change the topic */
   MODE_INVITEONLY   = 1 <<  4,  /**< Only invited users may join this channel */
   MODE_NOPRIVMSGS   = 1 <<  5,  /**< Users must be in the channel to send text to it */
   MODE_SECUREONLY   = 1 <<  6,  /**< Prevents anyone who isn't connected via TLS from joining the channel */
@@ -136,6 +141,7 @@ struct ChModeChange
 struct chan_mode
 {
   unsigned char letter;
+  unsigned char prefix;
   unsigned int mode;
   unsigned int flag;
   enum mode_class class;
@@ -149,6 +155,7 @@ struct chan_mode
 
 extern const struct chan_mode *cmode_map[];
 extern const struct chan_mode  cmode_tab[];
+extern const struct chan_mode  cflag_tab[];
 extern char cmode_rpl04[][256];
 extern char cmode_class[][256];
 

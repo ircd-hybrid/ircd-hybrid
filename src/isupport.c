@@ -69,8 +69,6 @@ isupport_init(void)
   isupport_add("DEAF", "D", -1);
   isupport_add("KICKLEN", NULL, KICKLEN);
   isupport_add("MODES", NULL, MAXMODEPARAMS);
-  isupport_add("PREFIX", "(ohv)" CMEMBER_STATUS_FLAGS, -1);
-  isupport_add("STATUSMSG", CMEMBER_STATUS_FLAGS, -1);
   isupport_add("EXCEPTS", NULL, -1);
   isupport_add("INVEX", NULL, -1);
 }

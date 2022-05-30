@@ -570,6 +570,9 @@ member_highest_rank(const struct ChannelMember *member)
   if (member_has_flags(member, CHFL_HALFOP) == true)
     return CHACCESS_HALFOP;
 
+  if (member_has_flags(member, CHFL_VOICE) == true)
+    return CHACCESS_VOICE;
+
   return CHACCESS_PEON;
 }
 

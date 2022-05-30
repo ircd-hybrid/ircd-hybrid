@@ -717,6 +717,8 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
  * output       - CHACCESS_CHANOP if we should let them have
  *                chanop level access, 0 for peon level access.
  * side effects - NONE
+ *
+ * XXX - partially duplicated in channel.c::member_highest_rank
  */
 static int
 get_channel_access(const struct Client *client,
@@ -743,6 +745,9 @@ get_channel_access(const struct Client *client,
 
   if (member_has_flags(member, CHFL_HALFOP) == true)
     return CHACCESS_HALFOP;
+
+  if (member_has_flags(member, CHFL_VOICE) == true)
+    return CHACCESS_VOICE;
 
   return CHACCESS_PEON;
 }

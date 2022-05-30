@@ -146,7 +146,7 @@ struct chan_mode
   enum mode_class class;
   bool only_opers;
   bool only_servers;
-  int required_oplevel;
+  int required_rank;
   void (*func)(struct Client *,
                struct Channel *, int, int *, char **, int *,
                int, int, const char, const struct chan_mode *);

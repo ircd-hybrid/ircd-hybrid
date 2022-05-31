@@ -43,17 +43,18 @@
 #include "modules.h"
 
 
-enum
+enum whois_show_type
 {
-  WHOIS_SHOW_NORMAL,
-  WHOIS_SHOW_PREFIXED,
-  WHOIS_SHOW_NO
+  WHOIS_SHOW_NORMAL,  /**< Can see just normal; no restrictions apply */
+  WHOIS_SHOW_NONPUB,  /**< Channel is either +s, or +p */
+  WHOIS_SHOW_HIDDEN,  /**< Client is +p */
+  WHOIS_SHOW_NO,  /**< May not see this channel */
 };
 
-static int
-whois_channel_show_type(struct Channel *channel,
-                        struct Client *source_p,
-                        struct Client *target_p)
+static enum whois_show_type
+whois_show_channel(struct Channel *channel,
+                   struct Client *source_p,
+                   struct Client *target_p)
 {
   if (PubChannel(channel) && !HasUMode(target_p, UMODE_HIDECHANS))
     return WHOIS_SHOW_NORMAL;
@@ -62,7 +63,13 @@ whois_channel_show_type(struct Channel *channel,
     return WHOIS_SHOW_NORMAL;
 
   if (HasUMode(source_p, UMODE_OPER))
-    return WHOIS_SHOW_PREFIXED;
+  {
+    if (!PubChannel(channel))
+      return WHOIS_SHOW_NONPUB;
+    /* HasUMode(target_p, UMODE_HIDECHANS) == true */
+    return WHOIS_SHOW_HIDDEN;
+  }
+
   return WHOIS_SHOW_NO;
 }
 
@@ -100,19 +107,24 @@ whois_person(struct Client *source_p, struct Client *target_p)
     DLINK_FOREACH(node, target_p->channel.head)
     {
       const struct ChannelMember *member = node->data;
-      int show = whois_channel_show_type(member->channel, source_p, target_p);
+      enum whois_show_type show = whois_show_channel(member->channel, source_p, target_p);
 
       if (show != WHOIS_SHOW_NO)
       {
-        if ((bufptr - buf) + member->channel->name_len + 1 + (show == WHOIS_SHOW_PREFIXED) + member_get_prefix_len(member, true) + len > sizeof(buf))
+        if ((bufptr - buf) + member->channel->name_len + 1 + (show != WHOIS_SHOW_NORMAL) + member_get_prefix_len(member, true) + len > sizeof(buf))
         {
           *(bufptr - 1) = '\0';
           sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
           bufptr = buf;
         }
 
+        const char *channel_prefix = "";
+        if (show == WHOIS_SHOW_NONPUB)
+          channel_prefix = "?";
+        else  /* show == WHOIS_SHOW_HIDDEN */
+          channel_prefix = "!";
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s%s ",
-                           show == WHOIS_SHOW_PREFIXED ? "?" : "", member_get_prefix(member, true), member->channel->name);
+                           channel_prefix, member_get_prefix(member, true), member->channel->name);
       }
     }
 

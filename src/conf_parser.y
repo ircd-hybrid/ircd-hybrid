@@ -856,9 +856,8 @@ logging_file_type: TYPE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = 0;
-} '=' logging_file_type_items ';' ;
+} '=' logging_file_type_item ';' ;
 
-logging_file_type_items: logging_file_type_items ',' logging_file_type_item | logging_file_type_item;
 logging_file_type_item:  USER
 {
   if (conf_parser_ctx.pass == 2)

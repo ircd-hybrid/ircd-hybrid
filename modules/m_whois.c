@@ -121,8 +121,9 @@ whois_person(struct Client *source_p, struct Client *target_p)
         const char *channel_prefix = "";
         if (show == WHOIS_SHOW_NONPUB)
           channel_prefix = "?";
-        else  /* show == WHOIS_SHOW_HIDDEN */
+        else if (show == WHOIS_SHOW_HIDDEN)
           channel_prefix = "!";
+
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s%s ",
                            channel_prefix, member_get_prefix(member, true), member->channel->name);
       }

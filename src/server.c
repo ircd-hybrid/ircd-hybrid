@@ -161,7 +161,6 @@ server_hunt(struct Client *source_p, const char *command, const int server, char
 {
   static struct server_hunt hunt;
   struct server_hunt *const h = &hunt;
-  dlink_node *node;
   const char *const mask = parv[server];
 
   /* Assume it's me, if no server */
@@ -187,6 +186,7 @@ server_hunt(struct Client *source_p, const char *command, const int server, char
 
   if (h->target_p == NULL && has_wildcards(mask))
   {
+    dlink_node *node;
     DLINK_FOREACH(node, global_server_list.head)
     {
       struct Client *tmp = node->data;

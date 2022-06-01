@@ -52,7 +52,6 @@ static void
 ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
   const char *comment = parv[3];  /* Either defined or NULL */
-  char reason[REASONLEN + 1] = "SVSKilled: ";
 
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return;
@@ -70,7 +69,9 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
 
   if (MyConnect(target_p))
   {
+    char reason[REASONLEN + 1] = "SVSKilled: ";
     strlcpy(reason + 11, comment, sizeof(reason) - 11);
+
     exit_client(target_p, reason);
     return;
   }

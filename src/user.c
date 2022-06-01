@@ -578,13 +578,13 @@ valid_nickname(const char *nickname, bool local)
 }
 
 /*! \brief Builds a mode change string to buffer pointed by \a buf
- * \param client   Pointer to client
- * \param dispatch Whether to send a MODE message to client
- * \param old      Old user mode to compare against when building new mode buffer
- * \param buf      Pointer to buffer to build string in
+ * \param client  Pointer to client
+ * \param send    Whether to send a MODE message to client
+ * \param old     Old user mode to compare against when building new mode buffer
+ * \param buf     Pointer to buffer to build string in
  */
 void
-send_umode(struct Client *client, bool dispatch, unsigned int old, char *buf)
+send_umode(struct Client *client, bool send, unsigned int old, char *buf)
 {
   char *m = buf;
   int what = 0;
@@ -621,7 +621,7 @@ send_umode(struct Client *client, bool dispatch, unsigned int old, char *buf)
 
   *m = '\0';
 
-  if (dispatch == true && *buf)
+  if (send == true && *buf)
     sendto_one(client, ":%s!%s@%s MODE %s :%s",
                client->name, client->username,
                client->host, client->name, buf);
@@ -648,8 +648,6 @@ send_umode_out(struct Client *client, unsigned int old)
 void
 user_set_hostmask(struct Client *client, const char *hostname)
 {
-  dlink_node *node;
-
   if (strcmp(client->host, hostname) == 0)
     return;
 
@@ -672,6 +670,7 @@ user_set_hostmask(struct Client *client, const char *hostname)
   if (ConfigGeneral.cycle_on_host_change == 0)
     return;
 
+  dlink_node *node;
   DLINK_FOREACH(node, client->channel.head)
   {
     char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];
@@ -692,17 +691,14 @@ user_set_hostmask(struct Client *client, const char *hostname)
     *p = '\0';
 
     sendto_channel_local(client, member->channel, 0, CAP_EXTENDED_JOIN, CAP_CHGHOST, ":%s!%s@%s JOIN %s %s :%s",
-                         client->name, client->username,
-                         client->host, member->channel->name,
+                         client->name, client->username, client->host, member->channel->name,
                          client->account, client->info);
     sendto_channel_local(client, member->channel, 0, 0, CAP_EXTENDED_JOIN | CAP_CHGHOST, ":%s!%s@%s JOIN :%s",
-                         client->name, client->username,
-                         client->host, member->channel->name);
+                         client->name, client->username, client->host, member->channel->name);
 
     if (nickbuf[0])
       sendto_channel_local(client, member->channel, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
-                           client->servptr->name, member->channel->name,
-                           modebuf, nickbuf);
+                           client->servptr->name, member->channel->name, modebuf, nickbuf);
   }
 
   if (client->away[0])

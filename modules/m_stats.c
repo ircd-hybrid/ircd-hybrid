@@ -1023,7 +1023,6 @@ stats_servers(struct Client *source_p, int parc, char *parv[])
   DLINK_FOREACH(node, local_server_list.head)
   {
     const struct Client *target_p = node->data;
-
     sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                        "v :%s (%s!%s@%s) Idle: %s",
                        target_p->name,
@@ -1044,7 +1043,6 @@ stats_class(struct Client *source_p, int parc, char *parv[])
   DLINK_FOREACH(node, class_get_list()->head)
   {
     const struct ClassItem *class = node->data;
-
     sendto_one_numeric(source_p, &me, RPL_STATSYLINE, 'Y',
                        class->name, class->ping_freq,
                        class->con_freq,
@@ -1269,15 +1267,14 @@ static void
 do_stats(struct Client *source_p, int parc, char *parv[])
 {
   const unsigned char statchar = *parv[1];
-  const struct StatsStruct *tab;
-
   if (statchar == '\0')
   {
     sendto_one_numeric(source_p, &me, RPL_ENDOFSTATS, '*');
     return;
   }
 
-  if ((tab = stats_map[statchar]))
+  const struct StatsStruct *const tab = stats_map[statchar];
+  if (tab)
   {
     if (tab->required_modes == 0 || HasUMode(source_p, tab->required_modes))
       tab->handler(source_p, parc, parv);

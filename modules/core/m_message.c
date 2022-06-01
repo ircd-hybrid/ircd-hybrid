@@ -418,13 +418,14 @@ static void
 build_target_list(bool notice, struct Client *source_p, char *list, const char *text)
 {
   char *p = NULL;
-  void *target = NULL;
 
   ntargets = 0;
 
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
   {
+    void *target;
+
     /*
      * Channels are privmsg'd a lot more than other clients, moved up
      * here plain old channel msg?

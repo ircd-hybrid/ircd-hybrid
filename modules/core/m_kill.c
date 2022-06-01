@@ -55,7 +55,6 @@
 static void
 mo_kill(struct Client *source_p, int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE];
   char def_reason[] = CONF_NOREASON;
 
   char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
@@ -140,7 +139,9 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
     AddFlag(target_p, FLAGS_KILLED);
   }
 
+  char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "Killed (%s (%s))", source_p->name, reason);
+
   exit_client(target_p, buf);
 }
 
@@ -159,7 +160,6 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
 static void
 ms_kill(struct Client *source_p, int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE];
   char def_reason[] = CONF_NOREASON;
 
   struct Client *target_p = find_person(source_p, parv[1]);
@@ -227,6 +227,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
   AddFlag(target_p, FLAGS_KILLED);
 
   /* Reason comes supplied with its own ()'s */
+  char buf[IRCD_BUFSIZE];
   if (IsServer(source_p) && (IsHidden(source_p) || ConfigServerHide.hide_servers))
     snprintf(buf, sizeof(buf), "Killed (%s %s)", me.name, reason);
   else

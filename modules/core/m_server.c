@@ -118,7 +118,6 @@ server_send_tburst(struct Client *client_p, const struct Channel *channel)
 static void
 server_send_client(struct Client *client_p, struct Client *target_p)
 {
-  dlink_node *node;
   char buf[UMODE_MAX_STR] = "";
 
   assert(IsClient(target_p));
@@ -145,7 +144,7 @@ server_send_client(struct Client *client_p, struct Client *target_p)
   if (target_p->away[0])
     sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
 
-
+  dlink_node *node;
   DLINK_FOREACH(node, target_p->svstags.head)
   {
     const struct ServicesTag *svstag = node->data;

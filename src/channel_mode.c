@@ -110,7 +110,6 @@ get_mask(const struct Ban *ban)
 const char *
 add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_list *list, unsigned int type)
 {
-  dlink_node *node;
   char mask[MODEBUFLEN];
   char *maskptr = mask;
   unsigned int extbans, offset;
@@ -155,7 +154,6 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
     if (extban_acting)
     {
       const struct Extban *extban = extban_find_flag(extban_acting);
-
       if (extban == NULL || !(extban->types & type))
       {
         sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
@@ -167,7 +165,6 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
     if (extban_matching)
     {
       const struct Extban *extban = extban_find_flag(extban_matching);
-
       if (extban == NULL || !(extban->types & type))
       {
         sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
@@ -212,6 +209,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
   else
     ban->banstr_len = strlcpy(ban->banstr, banid, sizeof(ban->banstr));
 
+  dlink_node *node;
   DLINK_FOREACH(node, list->head)
   {
     const struct Ban *tmp = node->data;
@@ -486,13 +484,12 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 
   if (dir == MODE_QUERY || parc <= *parn)
   {
-    dlink_node *node;
-
     if (*errors & errtype)
       return;
 
     *errors |= errtype;
 
+    dlink_node *node;
     DLINK_FOREACH(node, list->head)
     {
       const struct Ban *ban = node->data;

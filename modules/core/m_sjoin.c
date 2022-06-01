@@ -450,31 +450,31 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     {
       if (fl & CHFL_CHANOWNER)
       {
-        *up++  = '~';
+        *up++ = '~';
         len_uid++;
       }
 
       if (fl & CHFL_CHANADMIN)
       {
-        *up++  = '&';
+        *up++ = '&';
         len_uid++;
       }
 
       if (fl & CHFL_CHANOP)
       {
-        *up++  = '@';
+        *up++ = '@';
         len_uid++;
       }
 
       if (fl & CHFL_HALFOP)
       {
-        *up++  = '%';
+        *up++ = '%';
         len_uid++;
       }
 
       if (fl & CHFL_VOICE)
       {
-        *up++  = '+';
+        *up++ = '+';
         len_uid++;
       }
     }

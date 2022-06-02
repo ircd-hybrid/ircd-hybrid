@@ -3,6 +3,11 @@
 * `KNOCK` can now be used on private channels. Channel mode +K may be used instead
   to control whether or not `KNOCK` is allowed on a channel.
 * Support for /dev/poll has been dropped
+* `INFO` now also reports configured values of `channel::default_join_flood_count`
+  and `channel::default_join_flood_time`
+* The founder (+q) and admin (+a) channel prefix modes have been implemented.
+  These are optional and can be enabled with the new `channel::enable_owner`
+  and `channel::enable_admin` configuration directives.
 
 
 -- Noteworthy changes in version 8.2.39 (2021-08-14)

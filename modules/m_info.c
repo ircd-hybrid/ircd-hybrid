@@ -242,6 +242,24 @@ static const struct InfoStruct info_table[] =
     "Total +b/e/I modes allowed in a +L channel"
   },
   {
+    "default_join_flood_count",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.default_join_flood_count,
+    "Startup value of JFLOODCOUNT"
+  },
+  {
+    "default_join_flood_time",
+    OUTPUT_DECIMAL,
+    &ConfigChannel.default_join_flood_time,
+    "Startup value of JFLOODTIME"
+  },
+  {
+    "disable_remote_commands",
+    OUTPUT_BOOLEAN_YN,
+    &ConfigServerHide.disable_remote_commands,
+    "Prevent users issuing commands on remote servers"
+  },
+  {
     "flatten_links",
     OUTPUT_BOOLEAN_YN,
     &ConfigServerHide.flatten_links,
@@ -348,12 +366,6 @@ static const struct InfoStruct info_table[] =
     OUTPUT_BOOLEAN_YN,
     &ConfigGeneral.disable_auth,
     "Completely disable ident lookups"
-  },
-  {
-    "disable_remote_commands",
-    OUTPUT_BOOLEAN_YN,
-    &ConfigServerHide.disable_remote_commands,
-    "Prevent users issuing commands on remote servers"
   },
   {
     "default_floodcount",

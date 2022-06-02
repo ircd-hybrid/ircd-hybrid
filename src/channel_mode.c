@@ -996,7 +996,7 @@ channel_mode_init(void)
     * present in the PREFIX parameter; however, for completeness, modes
     * described in PREFIX may be treated as type B modes.
     */
-    if (cmode->func != chm_flag)
+    if (cmode->prefix == '\0')
       strlcat(cmode_class[cmode->class], str, sizeof(cmode_class[cmode->class]));
   }
 

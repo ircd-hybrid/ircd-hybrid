@@ -1115,7 +1115,7 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
    * Remove user from the old channel (if any). Only allow /part reasons in -m chans.
    */
   bool show_reason = true;
-  if (*reason == '\0')
+  if (EmptyString(reason))
     show_reason = false;
   else if (MyConnect(client))
   {
@@ -1129,11 +1129,11 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
 
   if (show_reason == true)
   {
-    sendto_server(client, 0, 0, ":%s PART %s :%s",
-                  client->id, channel->name, reason);
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s PART %s :%s",
+    sendto_server(client, 0, 0, ":%s PART %s :%.*s",
+                  client->id, channel->name, KICKLEN, reason);
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s PART %s :%.*s",
                          client->name, client->username,
-                         client->host, channel->name, reason);
+                         client->host, channel->name, KICKLEN, reason);
   }
   else
   {
@@ -1151,14 +1151,9 @@ void
 channel_do_part(struct Client *client, char *channel, const char *reason)
 {
   char *p = NULL;
-  char buf[KICKLEN + 1] = "";  /* Essential that buf[0] = '\0' */
-
   assert(IsClient(client));
-
-  if (!EmptyString(reason))
-    strlcpy(buf, reason, sizeof(buf));
 
   for (const char *name = strtok_r(channel, ",", &p); name;
                    name = strtok_r(NULL,    ",", &p))
-    channel_part_one_client(client, name, buf);
+    channel_part_one_client(client, name, reason);
 }

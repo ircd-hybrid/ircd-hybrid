@@ -1094,8 +1094,6 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
 static void
 channel_part_one_client(struct Client *client, const char *name, const char *reason)
 {
-  const char *error;
-
   struct Channel *channel = hash_find_channel(name);
   if (channel == NULL)
   {
@@ -1116,10 +1114,20 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
   /*
    * Remove user from the old channel (if any). Only allow /part reasons in -m chans.
    */
-  if (*reason && (!MyConnect(client) ||
-      ((client->connection->created_monotonic +
-        ConfigGeneral.anti_spam_exit_message_time) < event_base->time.sec_monotonic &&
-       can_send(channel, client, member, reason, false, &error) != CAN_SEND_NO)))
+  bool show_reason = true;
+  if (*reason == '\0')
+    show_reason = false;
+  else if (MyConnect(client))
+  {
+    const char *error;
+    if ((client->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
+          >= event_base->time.sec_monotonic)
+      show_reason = false;
+    else if (can_send(channel, client, member, reason, false, &error) == CAN_SEND_NO)
+      show_reason = false;
+  }
+
+  if (show_reason == true)
   {
     sendto_server(client, 0, 0, ":%s PART %s :%s",
                   client->id, channel->name, reason);

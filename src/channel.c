@@ -660,10 +660,10 @@ find_bmask(struct Client *client, struct Channel *channel, const dlink_list *lis
  * \return false if not banned, true otherwise
  */
 bool
-is_banned(struct Channel *channel, struct Client *client)
+is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
 {
-  if (find_bmask(client, channel, &channel->banlist, NULL) == true)
-    return find_bmask(client, channel, &channel->exceptlist, NULL) == false;
+  if (find_bmask(client, channel, &channel->banlist, extban) == true)
+    return find_bmask(client, channel, &channel->exceptlist, extban) == false;
   return false;
 }
 
@@ -698,10 +698,10 @@ can_join(struct Client *client, struct Channel *channel, const char *key)
       channel->mode.limit)
     return ERR_CHANNELISFULL;
 
-  if (is_banned(channel, client) == true)
+  if (is_banned(channel, client, NULL) == true || is_banned(channel, client, &extban_join) == true)
     return ERR_BANNEDFROMCHAN;
 
-  return extban_join_can_join(channel, client, NULL);
+  return 0;
 }
 
 bool
@@ -851,7 +851,7 @@ can_send(struct Channel *channel, struct Client *client,
 
       if (!(member->flags & CHFL_BAN_CHECKED))
       {
-        if (is_banned(channel, client) == true)
+        if (is_banned(channel, client, NULL) == true || is_banned(channel, client, &extban_mute) == true)
         {
           member->flags |= (CHFL_BAN_CHECKED | CHFL_BAN_SILENCED);
           return CAN_SEND_NO;
@@ -860,11 +860,11 @@ can_send(struct Channel *channel, struct Client *client,
         member->flags |= CHFL_BAN_CHECKED;
       }
     }
-    else if (is_banned(channel, client) == true)
+    else if (is_banned(channel, client, NULL) == true || is_banned(channel, client, &extban_mute) == true)
       return CAN_SEND_NO;
   }
 
-  return extban_mute_can_send(channel, client, member);
+  return CAN_SEND_NONOP;
 }
 
 /*! \brief Updates the client's oper_warn_count_down, warns the

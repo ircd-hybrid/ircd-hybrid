@@ -691,7 +691,7 @@ m_nick(struct Client *source_p, int parc, char *parv[])
         return;
       }
 
-      if (extban_nick_can_change(member->channel, source_p, member) == ERR_BANNEDFROMCHAN)
+      if (is_banned(member->channel, source_p, &extban_nick) == true)
       {
         sendto_one_numeric(source_p, &me, ERR_BANNICKCHANGE, member->channel->name);
         return;

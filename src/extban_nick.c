@@ -30,23 +30,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "extban.h"
-#include "numeric.h"
 
-
-int
-extban_nick_can_change(struct Channel *channel, struct Client *client,
-                       struct ChannelMember *member)
-{
-  assert(member);
-
-  /* Search for matching joinban */
-  if (find_bmask(client, channel, &channel->banlist, &extban_nick) == true)
-    /* Clients who match +e n: override +b n: */
-    if (find_bmask(client, channel, &channel->exceptlist, &extban_nick) == false)
-      return ERR_BANNEDFROMCHAN;
-
-  return 0;
-}
 
 struct Extban extban_nick =
 {

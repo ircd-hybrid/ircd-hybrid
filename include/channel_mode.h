@@ -94,7 +94,6 @@ enum
   /* Cache flags for silence on ban */
   CHFL_BAN_CHECKED  = 1 <<  8,
   CHFL_BAN_SILENCED = 1 <<  9,
-  CHFL_MUTE_CHECKED = 1 << 10,
 };
 
 /* channel modes ONLY */

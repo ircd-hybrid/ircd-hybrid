@@ -349,7 +349,7 @@ clear_ban_cache_list(dlink_list *list)
   DLINK_FOREACH(node, list->head)
   {
     struct ChannelMember *member = node->data;
-    member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED | CHFL_MUTE_CHECKED);
+    member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED);
   }
 }
 

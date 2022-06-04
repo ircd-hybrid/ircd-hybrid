@@ -31,42 +31,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "extban.h"
-#include "numeric.h"
 
-
-int
-extban_mute_can_send(struct Channel *channel, struct Client *client,
-                     struct ChannelMember *member)
-{
-  if (!MyConnect(client))
-    return CAN_SEND_NONOP;
-
-  if (member)
-  {
-    if (member->flags & CHFL_BAN_SILENCED)
-      return CAN_SEND_NO;
-
-    if (member->flags & CHFL_MUTE_CHECKED)
-      return CAN_SEND_NONOP;
-
-    member->flags |= CHFL_MUTE_CHECKED;
-  }
-
-  /* Search for matching muteban */
-  if (find_bmask(client, channel, &channel->banlist, &extban_mute) == true)
-  {
-    /* Clients who match +e m: override +b m: */
-    if (find_bmask(client, channel, &channel->exceptlist, &extban_mute) == false)
-    {
-      if (member)
-        member->flags |= CHFL_BAN_SILENCED;
-
-      return CAN_SEND_NO;
-    }
-  }
-
-  return CAN_SEND_NONOP;
-}
 
 struct Extban extban_mute =
 {

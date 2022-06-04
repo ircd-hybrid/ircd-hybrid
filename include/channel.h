@@ -130,7 +130,7 @@ struct Ban
 extern const dlink_list *channel_get_list(void);
 extern bool channel_check_name(const char *, bool);
 extern int can_send(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool, const char **);
-extern bool is_banned(struct Channel *, struct Client *);
+extern bool is_banned(struct Channel *, struct Client *, struct Extban *);
 extern bool find_bmask(struct Client *, struct Channel*, const dlink_list *, struct Extban *);
 extern bool member_has_flags(const struct ChannelMember *, const unsigned int);
 

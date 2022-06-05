@@ -518,7 +518,7 @@ channel_prefix_to_rank(const char prefix)
 {
   for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
     if (tab->prefix == prefix)
-      return tab->required_rank;
+      return tab->rank;
   return CHACCESS_PEON;
 }
 
@@ -527,7 +527,7 @@ channel_rank_to_prefix(const int rank)
 {
   for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
   {
-    if (tab->required_rank == rank)
+    if (tab->rank == rank)
     {
       static char prefix[2];
       prefix[0] = tab->prefix;

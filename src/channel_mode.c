@@ -947,11 +947,11 @@ const struct chan_mode cmode_tab[] =
  */
 const struct chan_mode cflag_tab[] =
 {
-  { .letter = 'q', .prefix = '~', .flag = CHFL_CHANOWNER, .required_rank = CHACCESS_CHANOWNER, .func = chm_flag, .class = MODE_CLASS_B },
-  { .letter = 'a', .prefix = '&', .flag = CHFL_CHANADMIN, .required_rank = CHACCESS_CHANOWNER, .func = chm_flag, .class = MODE_CLASS_B },
-  { .letter = 'o', .prefix = '@', .flag = CHFL_CHANOP, .required_rank = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
-  { .letter = 'h', .prefix = '%', .flag = CHFL_HALFOP, .required_rank = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
-  { .letter = 'v', .prefix = '+', .flag = CHFL_VOICE, .required_rank = CHACCESS_HALFOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'q', .prefix = '~', .flag = CHFL_CHANOWNER, .rank = CHACCESS_CHANOWNER, .required_rank = CHACCESS_CHANOWNER, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'a', .prefix = '&', .flag = CHFL_CHANADMIN, .rank = CHACCESS_CHANADMIN, .required_rank = CHACCESS_CHANOWNER, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'o', .prefix = '@', .flag = CHFL_CHANOP, .rank = CHACCESS_CHANOP, .required_rank = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'h', .prefix = '%', .flag = CHFL_HALFOP, .rank = CHACCESS_HALFOP, .required_rank = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'v', .prefix = '+', .flag = CHFL_VOICE, .rank = CHACCESS_VOICE, .required_rank = CHACCESS_HALFOP, .func = chm_flag, .class = MODE_CLASS_B },
   { .letter = '\0' }
 };
 

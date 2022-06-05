@@ -146,6 +146,7 @@ struct chan_mode
   bool only_opers;
   bool only_servers;
   int required_rank;
+  int rank;
   void (*func)(struct Client *,
                struct Channel *, int, int *, char **, int *,
                int, int, const char, const struct chan_mode *);

@@ -195,20 +195,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   uintmax_t newts = strtoumax(parv[1], NULL, 10);
   uintmax_t oldts = channel->creation_time;
 
-  if (newts == 0 && isnew == false && oldts)
-  {
-    sendto_channel_local(NULL, channel, 0, 0, 0,
-                         ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to 0",
-                         me.name, channel->name, channel->name, oldts);
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Server %s changing TS on %s from %ju to 0",
-                         source_p->servptr->name, channel->name, oldts);
-  }
-
   if (isnew == true)
     channel->creation_time = newts;
-  else if (newts == 0 || oldts == 0)
-    channel->creation_time = 0;
   else if (newts == oldts)
     ;
   else if (newts < oldts)

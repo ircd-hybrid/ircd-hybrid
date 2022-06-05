@@ -587,7 +587,7 @@ void
 send_umode(struct Client *client, bool send, unsigned int old, char *buf)
 {
   char *m = buf;
-  int what = 0;
+  int what = MODE_QUERY;
 
   /*
    * Build a string in umode_buf to represent the change in the user's

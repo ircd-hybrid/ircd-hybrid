@@ -204,29 +204,23 @@ remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list
 static void
 ms_sjoin(struct Client *source_p, int parc, char *parv[])
 {
-  struct Client  *target_p = NULL;
   struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
   int            args = 0;
   bool           isnew = false;
   bool           keep_our_modes = true;
   bool           keep_new_modes = true;
   bool           have_many_uids = false;
-  unsigned int   lcount;
   char           uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1];
-  char           *up = NULL;
   int            len_uid = 0;
   int            buflen = 0;
-  int            slen;
-  unsigned       int fl;
   char           *s;
-  char           *sptr;
   char uid_buf[IRCD_BUFSIZE];  /* buffer for modes/prefixes */
   char           *uid_ptr;
   char           *p; /* pointer used making sjbuf */
-  const char *para[MAXMODEPARAMS];
-  char sendbuf[MODEBUFLEN] = "";
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
+  char parabuf2[MODEBUFLEN] = "";
+  char *pbuf = parabuf2;
   unsigned int pargs = 0;
 
   if (!IsServer(source_p))
@@ -384,7 +378,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
 
   char *mbuf = modebuf;
-  *mbuf++ = '+';
 
   s = parv[args + 4];
   while (*s == ' ')
@@ -401,38 +394,12 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   while (*s)
   {
-    bool valid_mode = true;
-    fl = 0;
-
-    do
+    unsigned int ret, flags = 0;
+    while ((ret = channel_prefix_to_flag(*s)))
     {
-      switch (*s)
-      {
-        case '~':
-          fl |= CHFL_CHANOWNER;
-          ++s;
-          break;
-        case '&':
-          fl |= CHFL_CHANADMIN;
-          ++s;
-          break;
-        case '@':
-          fl |= CHFL_CHANOP;
-          ++s;
-          break;
-        case '%':
-          fl |= CHFL_HALFOP;
-          ++s;
-          break;
-        case '+':
-          fl |= CHFL_VOICE;
-          ++s;
-          break;
-        default:
-          valid_mode = false;
-          break;
-      }
-    } while (valid_mode == true);
+      flags |= ret;
+      ++s;
+    }
 
     /*
      * If the client doesn't exist, or if it's fake direction/server, skip.
@@ -440,48 +407,20 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
      * lookup the nick, and it's better to never send the numeric than only
      * sometimes.
      */
-    if ((target_p = find_person(source_p, s)) == NULL || target_p->from != source_p->from)
+    struct Client *target_p = find_person(source_p, s);
+    if (target_p == NULL || target_p->from != source_p->from)
       goto nextnick;
 
     len_uid = strlen(target_p->id);
-    up = uid_prefix;
+    uid_prefix[0] = '\0';
 
-    if (keep_new_modes == true)
+    if (flags && keep_new_modes == true)
     {
-      if (fl & CHFL_CHANOWNER)
-      {
-        *up++ = '~';
-        len_uid++;
-      }
-
-      if (fl & CHFL_CHANADMIN)
-      {
-        *up++ = '&';
-        len_uid++;
-      }
-
-      if (fl & CHFL_CHANOP)
-      {
-        *up++ = '@';
-        len_uid++;
-      }
-
-      if (fl & CHFL_HALFOP)
-      {
-        *up++ = '%';
-        len_uid++;
-      }
-
-      if (fl & CHFL_VOICE)
-      {
-        *up++ = '+';
-        len_uid++;
-      }
+      const struct ChannelMember member = { .flags = flags };
+      len_uid += strlcpy(uid_prefix, member_get_prefix(&member, true), sizeof(uid_prefix));
     }
     else
-      fl = 0;
-
-    *up = '\0';
+      flags = 0;
 
     if ((uid_ptr - uid_buf + len_uid) > (IRCD_BUFSIZE - 2))
     {
@@ -497,7 +436,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if (member_find_link(target_p, channel) == NULL)
     {
-      add_user_to_channel(channel, target_p, fl, have_many_uids == false);
+      add_user_to_channel(channel, target_p, flags, have_many_uids == false);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target_p->name, target_p->username,
@@ -513,162 +452,23 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                              target_p->host, target_p->away);
     }
 
-    if (fl & CHFL_CHANOWNER)
+    for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
     {
-      *mbuf++ = 'q';
-      para[pargs++] = target_p->name;
-
-      if (pargs >= MAXMODEPARAMS)
+      if (flags & tab->flag)
       {
-        /*
-         * Ok, the code is now going to "walk" through
-         * sendbuf, filling in para strings. So, I will use sptr
-         * to point into the sendbuf.
-         * Notice, that ircsprintf() returns the number of chars
-         * successfully inserted into string.
-         * - Dianora
-         */
+        *mbuf++ = tab->letter;
+        pbuf += snprintf(pbuf, sizeof(parabuf2) - (pbuf - parabuf2), "%s ", target_p->name);
 
-        sptr = sendbuf;
-        *mbuf = '\0';
-
-        for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
+        if (++pargs >= MAXMODEPARAMS)
         {
-          slen = sprintf(sptr, " %s", para[lcount]);  /* see? */
-          sptr += slen;  /* ready for next */
+          *mbuf = *(pbuf - 1) = '\0';
+          sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
+                               origin->name, channel->name, modebuf, parabuf2);
+
+          mbuf = modebuf;
+          pbuf = parabuf2;
+          pargs = 0;
         }
-
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                             origin->name, channel->name, modebuf, sendbuf);
-        mbuf = modebuf;
-        *mbuf++ = '+';
-
-        sendbuf[0] = '\0';
-        pargs = 0;
-      }
-    }
-
-    if (fl & CHFL_CHANADMIN)
-    {
-      *mbuf++ = 'a';
-      para[pargs++] = target_p->name;
-
-      if (pargs >= MAXMODEPARAMS)
-      {
-        /*
-         * Ok, the code is now going to "walk" through
-         * sendbuf, filling in para strings. So, I will use sptr
-         * to point into the sendbuf.
-         * Notice, that ircsprintf() returns the number of chars
-         * successfully inserted into string.
-         * - Dianora
-         */
-
-        sptr = sendbuf;
-        *mbuf = '\0';
-
-        for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
-        {
-          slen = sprintf(sptr, " %s", para[lcount]);  /* see? */
-          sptr += slen;  /* ready for next */
-        }
-
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                             origin->name, channel->name, modebuf, sendbuf);
-        mbuf = modebuf;
-        *mbuf++ = '+';
-
-        sendbuf[0] = '\0';
-        pargs = 0;
-      }
-    }
-
-    if (fl & CHFL_CHANOP)
-    {
-      *mbuf++ = 'o';
-      para[pargs++] = target_p->name;
-
-      if (pargs >= MAXMODEPARAMS)
-      {
-        /*
-         * Ok, the code is now going to "walk" through
-         * sendbuf, filling in para strings. So, I will use sptr
-         * to point into the sendbuf.
-         * Notice, that ircsprintf() returns the number of chars
-         * successfully inserted into string.
-         * - Dianora
-         */
-
-        sptr = sendbuf;
-        *mbuf = '\0';
-
-        for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
-        {
-          slen = sprintf(sptr, " %s", para[lcount]);  /* see? */
-          sptr += slen;  /* ready for next */
-        }
-
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                             origin->name, channel->name, modebuf, sendbuf);
-        mbuf = modebuf;
-        *mbuf++ = '+';
-
-        sendbuf[0] = '\0';
-        pargs = 0;
-      }
-    }
-
-    if (fl & CHFL_HALFOP)
-    {
-      *mbuf++ = 'h';
-      para[pargs++] = target_p->name;
-
-      if (pargs >= MAXMODEPARAMS)
-      {
-        sptr = sendbuf;
-        *mbuf = '\0';
-
-        for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
-        {
-          slen = sprintf(sptr, " %s", para[lcount]);
-          sptr += slen;
-        }
-
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                             origin->name, channel->name, modebuf, sendbuf);
-
-        mbuf = modebuf;
-        *mbuf++ = '+';
-
-        sendbuf[0] = '\0';
-        pargs = 0;
-      }
-    }
-
-    if (fl & CHFL_VOICE)
-    {
-      *mbuf++ = 'v';
-      para[pargs++] = target_p->name;
-
-      if (pargs >= MAXMODEPARAMS)
-      {
-        sptr = sendbuf;
-        *mbuf = '\0';
-
-        for (lcount = 0; lcount < MAXMODEPARAMS; ++lcount)
-        {
-          slen = sprintf(sptr, " %s", para[lcount]);
-          sptr += slen;
-        }
-
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                             origin->name, channel->name, modebuf, sendbuf);
-
-        mbuf = modebuf;
-        *mbuf++ = '+';
-
-        sendbuf[0] = '\0';
-        pargs = 0;
       }
     }
 
@@ -688,29 +488,11 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  *mbuf = '\0';
-  *(uid_ptr - 1) = '\0';
-
-  /*
-   * checking for lcount < MAXMODEPARAMS at this time is wrong
-   * since the code has already verified above that pargs < MAXMODEPARAMS
-   * checking for para[lcount] != '\0' is also wrong, since
-   * there is no place where para[lcount] is set!
-   * - Dianora
-   */
-
   if (pargs)
   {
-    sptr = sendbuf;
-
-    for (lcount = 0; lcount < pargs; ++lcount)
-    {
-      slen = sprintf(sptr, " %s", para[lcount]);
-      sptr += slen;
-    }
-
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s%s",
-                         origin->name, channel->name, modebuf, sendbuf);
+    *mbuf = *(pbuf - 1) = '\0';
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
+                         origin->name, channel->name, modebuf, parabuf2);
   }
 
   /*
@@ -729,6 +511,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   if (*parv[4 + args] == '\0')
     return;
 
+  *(uid_ptr - 1) = '\0';
   sendto_server(source_p, 0, 0, "%s", uid_buf);
 }
 

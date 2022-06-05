@@ -152,6 +152,7 @@ extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
 extern int member_highest_rank(const struct ChannelMember *);
 extern int channel_prefix_to_rank(const char);
 extern const char *channel_rank_to_prefix(const int);
+extern unsigned int channel_prefix_to_flag(const char);
 
 extern struct Channel *channel_make(const char *);
 extern struct ChannelMember *member_find_link(const struct Client *, const struct Channel *);

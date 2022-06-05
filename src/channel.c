@@ -540,6 +540,15 @@ channel_rank_to_prefix(const int rank)
   return "";
 }
 
+unsigned int
+channel_prefix_to_flag(const char prefix)
+{
+  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
+    if (tab->prefix == prefix)
+      return tab->flag;
+  return 0;
+}
+
 /* member_get_prefix()
  *
  * inputs       - pointer to struct ChannelMember

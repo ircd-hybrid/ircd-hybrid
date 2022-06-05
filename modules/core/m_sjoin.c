@@ -209,7 +209,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   bool           isnew = false;
   bool           keep_our_modes = true;
   bool           keep_new_modes = true;
-  bool           have_many_uids = false;
   char           uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1];
   int            len_uid = 0;
   int            buflen = 0;
@@ -378,7 +377,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     while (*p == ' ')
       ++p;
-    have_many_uids = *p != '\0';
   }
 
   while (*s)
@@ -425,7 +423,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if (member_find_link(target_p, channel) == NULL)
     {
-      add_user_to_channel(channel, target_p, flags, have_many_uids == false);
+      bool synced = HasFlag(source_p, FLAGS_EOB) != 0;
+      add_user_to_channel(channel, target_p, flags, synced);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target_p->name, target_p->username,

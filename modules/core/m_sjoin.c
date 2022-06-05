@@ -351,13 +351,9 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                          origin->name, channel->name, modebuf, parabuf);
 
-  if (*parv[3] != '0' && keep_new_modes == true)
+  if (keep_new_modes == true)
     channel_modes(channel, source_p, NULL, modebuf, parabuf);
-  else
-  {
-    modebuf[0] = '0';
-    modebuf[1] = '\0';
-  }
+
 
   buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s %s:",
                     source_p->id, channel->creation_time,

@@ -365,17 +365,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                     channel->name, modebuf, parabuf);
   uid_ptr = uid_buf + buflen;
 
-  /*
-   * Check we can fit a nick on the end, as well as \r\n and a prefix "
-   * @%+", and a space.
-   */
-  if (buflen >= (IRCD_BUFSIZE - IDLEN - 2 - CMEMBER_STATUS_FLAGS_LEN - 1))
-  {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Long SJOIN from server: %s(via %s) (ignored)",
-                         source_p->name, source_p->from->name);
-    return;
-  }
 
   char *mbuf = modebuf;
 

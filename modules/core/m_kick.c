@@ -94,19 +94,17 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  char reason[KICKLEN + 1];
+  const char *reason = source_p->name;
   if (!EmptyString(parv[3]))
-    strlcpy(reason, parv[3], sizeof(reason));
-  else
-    strlcpy(reason, source_p->name, sizeof(reason));
+    reason = parv[3];
 
-  sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%s",
+  sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
                        source_p->name, source_p->username,
                        source_p->host, channel->name,
-                       target_p->name, reason);
-  sendto_server(source_p, 0, 0, ":%s KICK %s %s :%s",
+                       target_p->name, KICKLEN, reason);
+  sendto_server(source_p, 0, 0, ":%s KICK %s %s :%.*s",
                 source_p->id, channel->name,
-                target_p->id, reason);
+                target_p->id, KICKLEN, reason);
   remove_user_from_channel(member_target);
 }
 
@@ -138,25 +136,23 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   if (member_target == NULL)
     return;
 
-  char reason[KICKLEN + 1];
+  const char *reason = source_p->name;
   if (!EmptyString(parv[3]))
-    strlcpy(reason, parv[3], sizeof(reason));
-  else
-    strlcpy(reason, source_p->name, sizeof(reason));
+    reason = parv[3];
 
   if (IsClient(source_p))
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%s",
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
                          source_p->name, source_p->username,
                          source_p->host, channel->name,
-                         target_p->name, reason);
+                         target_p->name, KICKLEN, reason);
   else
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%s",
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
                          IsHidden(source_p) || ConfigServerHide.hide_servers ? me.name : source_p->name,
-                         channel->name, target_p->name, reason);
+                         channel->name, target_p->name, KICKLEN, reason);
 
-  sendto_server(source_p, 0, 0, ":%s KICK %s %s :%s",
+  sendto_server(source_p, 0, 0, ":%s KICK %s %s :%.*s",
                 source_p->id, channel->name,
-                target_p->id, reason);
+                target_p->id, KICKLEN, reason);
   remove_user_from_channel(member_target);
 }
 

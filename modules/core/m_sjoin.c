@@ -212,10 +212,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   char           uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1];
   int            len_uid = 0;
   int            buflen = 0;
-  char           *s;
   char uid_buf[IRCD_BUFSIZE];  /* buffer for modes/prefixes */
   char           *uid_ptr;
-  char           *p; /* pointer used making sjbuf */
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
   char parabuf2[MODEBUFLEN] = "";
@@ -313,6 +311,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     /* Update channel name to be the correct case */
     strlcpy(channel->name, parv[2], sizeof(channel->name));
 
+    sendto_channel_local(NULL, channel, 0, 0, 0,
+                         ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
+                         me.name, channel->name, channel->name, oldts, newts);
+
     channel_demote_members(channel, origin);
 
     remove_ban_list(channel, origin, &channel->banlist, 'b');
@@ -328,11 +330,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
                            origin->name, channel->name);
     }
-
-    sendto_channel_local(NULL, channel, 0, 0, 0,
-                         ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
-                         me.name, channel->name, channel->name,
-                         oldts, newts);
   }
 
   if (*modebuf)
@@ -350,20 +347,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
 
   char *mbuf = modebuf;
+  char *list = parv[args + 4], *p = NULL;
 
-  s = parv[args + 4];
-  while (*s == ' ')
-    ++s;
-
-  if ((p = strchr(s, ' ')))
-  {
-    *p++ = '\0';
-
-    while (*p == ' ')
-      ++p;
-  }
-
-  while (*s)
+  for (const char *s = strtok_r(list, " ", &p); s;
+                   s = strtok_r(NULL, " ", &p))
   {
     unsigned int ret, flags = 0;
     while ((ret = channel_prefix_to_flag(*s)))
@@ -374,13 +361,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     /*
      * If the client doesn't exist, or if it's fake direction/server, skip.
-     * we cannot send ERR_NOSUCHNICK here because if it's a UID, we cannot
-     * lookup the nick, and it's better to never send the numeric than only
-     * sometimes.
      */
     struct Client *target_p = find_person(source_p, s);
     if (target_p == NULL || target_p->from != source_p->from)
-      goto nextnick;
+      continue;
 
     len_uid = strlen(target_p->id);
     uid_prefix[0] = '\0';
@@ -418,8 +402,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                            target_p->host, channel->name);
 
       if (target_p->away[0])
-        sendto_channel_local(target_p, channel, 0, CAP_AWAY_NOTIFY, 0,
-                             ":%s!%s@%s AWAY :%s",
+        sendto_channel_local(target_p, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                              target_p->name, target_p->username,
                              target_p->host, target_p->away);
     }
@@ -442,21 +425,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
           pargs = 0;
         }
       }
-    }
-
-  nextnick:
-    if ((s = p) == NULL)
-      break;
-
-    while (*s == ' ')
-      ++s;
-
-    if ((p = strchr(s, ' ')))
-    {
-      *p++ = '\0';
-
-      while (*p == ' ')
-        ++p;
     }
   }
 

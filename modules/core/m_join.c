@@ -234,6 +234,10 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     /* Update channel name to be the correct case */
     strlcpy(channel->name, parv[2], sizeof(channel->name));
 
+    sendto_channel_local(NULL, channel, 0, 0, 0,
+                         ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
+                         me.name, channel->name, channel->name, oldts, newts);
+
     channel_demote_members(channel, origin);
 
     if (channel->topic[0])
@@ -242,10 +246,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
                            origin->name, channel->name);
     }
-
-    sendto_channel_local(NULL, channel, 0, 0, 0,
-                         ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
-                         me.name, channel->name, channel->name, oldts, newts);
   }
 
   if (*modebuf)
@@ -264,8 +264,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                          source_p->host, channel->name);
 
     if (source_p->away[0])
-      sendto_channel_local(source_p, channel, 0, CAP_AWAY_NOTIFY, 0,
-                           ":%s!%s@%s AWAY :%s",
+      sendto_channel_local(source_p, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                            source_p->name, source_p->username,
                            source_p->host, source_p->away);
   }

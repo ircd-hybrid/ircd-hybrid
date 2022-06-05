@@ -513,6 +513,33 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
   sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);
 }
 
+int
+channel_prefix_to_rank(const char prefix)
+{
+  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
+    if (tab->prefix == prefix)
+      return tab->required_rank;
+  return CHACCESS_PEON;
+}
+
+const char *
+channel_rank_to_prefix(const int rank)
+{
+  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
+  {
+    if (tab->required_rank == rank)
+    {
+      static char prefix[2];
+      prefix[0] = tab->prefix;
+      prefix[1] = '\0';  /* Just for safety */
+
+      return prefix;
+    }
+  }
+
+  return "";
+}
+
 /* member_get_prefix()
  *
  * inputs       - pointer to struct ChannelMember

@@ -207,36 +207,18 @@ static void
 msg_channel(bool notice, struct Client *source_p, struct Channel *channel,
             unsigned int rank, const char *text)
 {
-  const char *prefix, *error = NULL;
-
-  switch (rank)
-  {
-    case CHACCESS_VOICE:
-      prefix = "+";
-      break;
-    case CHACCESS_HALFOP:
-      prefix = "%";
-      break;
-    case CHACCESS_CHANOP:
-      prefix = "@";
-      break;
-    case CHACCESS_CHANADMIN:
-      prefix = "&";
-      break;
-    case CHACCESS_CHANOWNER:
-      prefix = "~";
-      break;
-    default:
-      prefix = "";
-  }
+  const char *error = NULL;
 
   /* Chanops and voiced can flood their own channel with impunity */
   int ret = can_send(channel, source_p, NULL, text, notice, &error);
   if (ret != CAN_SEND_NO)
   {
     if (ret == CAN_SEND_OPV || flood_attack_channel(notice, source_p, channel) == false)
+    {
+      const char *const prefix = channel_rank_to_prefix(rank);
       sendto_channel_butone(source_p, source_p, channel, rank, "%s %s%s :%s",
                             command[notice], prefix, channel->name, text);
+    }
   }
   else if (notice == false)
     sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOCHAN, channel->name, error);
@@ -479,20 +461,10 @@ build_target_list(bool notice, struct Client *source_p, char *list, const char *
     const char *with_prefix = name;
 
     /* Allow %+@ if someone wants to do that */
-    while (true)
+    unsigned int ret;
+    while ((ret = channel_prefix_to_rank(*name)) != CHACCESS_PEON)
     {
-      if (*name == '~')
-        rank = IRCD_MIN(rank, CHACCESS_CHANOWNER);
-      else if (*name == '&')
-        rank = IRCD_MIN(rank, CHACCESS_CHANADMIN);
-      else if (*name == '@')
-        rank = IRCD_MIN(rank, CHACCESS_CHANOP);
-      else if (*name == '%')
-        rank = IRCD_MIN(rank, CHACCESS_HALFOP);
-      else if (*name == '+')
-        rank = IRCD_MIN(rank, CHACCESS_VOICE);
-      else
-        break;
+      rank = IRCD_MIN(rank, ret);
       ++name;
     }
 

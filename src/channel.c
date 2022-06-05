@@ -586,13 +586,13 @@ member_highest_rank(const struct ChannelMember *member)
     return CHACCESS_NOTONCHAN;
 
   if (member_has_flags(member, CHFL_CHANOWNER) == true)
-    return CHACCESS_CHANOWNER;
+    return CHACCESS_OWNER;
 
   if (member_has_flags(member, CHFL_CHANADMIN) == true)
-    return CHACCESS_CHANADMIN;
+    return CHACCESS_ADMIN;
 
   if (member_has_flags(member, CHFL_CHANOP) == true)
-    return CHACCESS_CHANOP;
+    return CHACCESS_OP;
 
   if (member_has_flags(member, CHFL_HALFOP) == true)
     return CHACCESS_HALFOP;

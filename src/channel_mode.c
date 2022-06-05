@@ -732,13 +732,13 @@ get_channel_access(const struct Client *client,
   assert(client == member->client);
 
   if (member_has_flags(member, CHFL_CHANOWNER) == true)
-    return CHACCESS_CHANOWNER;
+    return CHACCESS_OWNER;
 
   if (member_has_flags(member, CHFL_CHANADMIN) == true)
-    return CHACCESS_CHANADMIN;
+    return CHACCESS_ADMIN;
 
   if (member_has_flags(member, CHFL_CHANOP) == true)
-    return CHACCESS_CHANOP;
+    return CHACCESS_OP;
 
   if (member_has_flags(member, CHFL_HALFOP) == true)
     return CHACCESS_HALFOP;
@@ -947,10 +947,10 @@ const struct chan_mode cmode_tab[] =
  */
 const struct chan_mode cflag_tab[] =
 {
-  { .letter = 'q', .prefix = '~', .flag = CHFL_CHANOWNER, .rank = CHACCESS_CHANOWNER, .required_rank = CHACCESS_CHANOWNER, .func = chm_flag, .class = MODE_CLASS_B },
-  { .letter = 'a', .prefix = '&', .flag = CHFL_CHANADMIN, .rank = CHACCESS_CHANADMIN, .required_rank = CHACCESS_CHANOWNER, .func = chm_flag, .class = MODE_CLASS_B },
-  { .letter = 'o', .prefix = '@', .flag = CHFL_CHANOP, .rank = CHACCESS_CHANOP, .required_rank = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
-  { .letter = 'h', .prefix = '%', .flag = CHFL_HALFOP, .rank = CHACCESS_HALFOP, .required_rank = CHACCESS_CHANOP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'q', .prefix = '~', .flag = CHFL_CHANOWNER, .rank = CHACCESS_OWNER, .required_rank = CHACCESS_OWNER, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'a', .prefix = '&', .flag = CHFL_CHANADMIN, .rank = CHACCESS_ADMIN, .required_rank = CHACCESS_OWNER, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'o', .prefix = '@', .flag = CHFL_CHANOP, .rank = CHACCESS_OP, .required_rank = CHACCESS_OP, .func = chm_flag, .class = MODE_CLASS_B },
+  { .letter = 'h', .prefix = '%', .flag = CHFL_HALFOP, .rank = CHACCESS_HALFOP, .required_rank = CHACCESS_OP, .func = chm_flag, .class = MODE_CLASS_B },
   { .letter = 'v', .prefix = '+', .flag = CHFL_VOICE, .rank = CHACCESS_VOICE, .required_rank = CHACCESS_HALFOP, .func = chm_flag, .class = MODE_CLASS_B },
   { .letter = '\0' }
 };
@@ -966,8 +966,8 @@ channel_mode_init(void)
 
   for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
   {
-    if ((tab->flag == CHFL_CHANOWNER && ConfigChannel.enable_owner == 0) ||
-        (tab->flag == CHFL_CHANADMIN && ConfigChannel.enable_admin == 0))
+    if ((tab->rank == CHACCESS_OWNER && ConfigChannel.enable_owner == 0) ||
+        (tab->rank == CHACCESS_ADMIN && ConfigChannel.enable_admin == 0))
       continue;
 
     cmode_map[tab->letter] = tab;

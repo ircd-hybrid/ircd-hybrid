@@ -216,8 +216,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   char           *uid_ptr;
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
-  char parabuf2[MODEBUFLEN] = "";
-  char *pbuf = parabuf2;
+  char *mbuf = modebuf;
+  char *pbuf = parabuf;
   unsigned int pargs = 0;
 
   if (!IsServer(source_p))
@@ -346,9 +346,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   uid_ptr = uid_buf + buflen;
 
 
-  char *mbuf = modebuf;
   char *list = parv[args + 4], *p = NULL;
-
   for (const char *s = strtok_r(list, " ", &p); s;
                    s = strtok_r(NULL, " ", &p))
   {
@@ -410,16 +408,16 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       if (flags & tab->flag)
       {
         *mbuf++ = tab->letter;
-        pbuf += snprintf(pbuf, sizeof(parabuf2) - (pbuf - parabuf2), "%s ", target_p->name);
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", target_p->name);
 
         if (++pargs >= MAXMODEPARAMS)
         {
           *mbuf = *(pbuf - 1) = '\0';
           sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
-                               origin->name, channel->name, modebuf, parabuf2);
+                               origin->name, channel->name, modebuf, parabuf);
 
           mbuf = modebuf;
-          pbuf = parabuf2;
+          pbuf = parabuf;
           pargs = 0;
         }
       }
@@ -430,7 +428,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   {
     *mbuf = *(pbuf - 1) = '\0';
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
-                         origin->name, channel->name, modebuf, parabuf2);
+                         origin->name, channel->name, modebuf, parabuf);
   }
 
   /*

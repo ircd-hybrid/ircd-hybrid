@@ -382,9 +382,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       *(uid_ptr - 1) = '\0';
       sendto_server(source_p, 0, 0, "%s", uid_buf);
 
-      buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s %s:",
-                        source_p->id, channel->creation_time,
-                        channel->name, modebuf, parabuf);
       uid_ptr = uid_buf + buflen;
     }
 

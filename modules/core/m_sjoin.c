@@ -379,6 +379,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if ((uid_ptr - uid_buf + len_uid) > (IRCD_BUFSIZE - 2))
     {
+      *(uid_ptr - 1) = '\0';
       sendto_server(source_p, 0, 0, "%s", uid_buf);
 
       buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s %s:",

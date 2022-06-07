@@ -205,15 +205,10 @@ static void
 ms_sjoin(struct Client *source_p, int parc, char *parv[])
 {
   struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
-  int            args = 0;
-  bool           isnew = false;
-  bool           keep_our_modes = true;
-  bool           keep_new_modes = true;
-  char           uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1];
-  int            len_uid = 0;
-  int            buflen = 0;
-  char uid_buf[IRCD_BUFSIZE];  /* buffer for modes/prefixes */
-  char           *uid_ptr;
+  int args = 0;
+  bool isnew = false;
+  bool keep_our_modes = true;
+  bool keep_new_modes = true;
   char modebuf[MODEBUFLEN] = "";
   char parabuf[MODEBUFLEN] = "";
   char *mbuf = modebuf;
@@ -332,7 +327,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (*modebuf)
+  if (modebuf[0])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                          origin->name, channel->name, modebuf, parabuf);
 
@@ -340,10 +335,11 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     channel_modes(channel, source_p, NULL, modebuf, parabuf);
 
 
-  buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s %s:",
-                    source_p->id, channel->creation_time,
-                    channel->name, modebuf, parabuf);
-  uid_ptr = uid_buf + buflen;
+  char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */
+  const int buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s %s:",
+                              source_p->id, channel->creation_time,
+                              channel->name, modebuf, parabuf);
+  char *uid_ptr = uid_buf + buflen;
 
 
   char *list = parv[args + 4], *p = NULL;
@@ -364,8 +360,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     if (target_p == NULL || target_p->from != source_p->from)
       continue;
 
-    len_uid = strlen(target_p->id);
-    uid_prefix[0] = '\0';
+    size_t len_uid = strlen(target_p->id);
+    char uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1] = "";
 
     if (flags && keep_new_modes == true)
     {

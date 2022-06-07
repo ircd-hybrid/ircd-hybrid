@@ -207,6 +207,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
   int args = 0;
   bool isnew = false;
+  bool joins = false;
   bool keep_our_modes = true;
   bool keep_new_modes = true;
   char modebuf[MODEBUFLEN] = "";
@@ -380,6 +381,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
 
     uid_ptr += snprintf(uid_ptr, sizeof(uid_buf) - (uid_ptr - uid_buf), "%s%s ", uid_prefix, target_p->id);
+    joins = true;
 
     if (member_find_link(target_p, channel) == NULL)
     {
@@ -427,24 +429,13 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                          origin->name, channel->name, modebuf, parabuf);
   }
 
-  /*
-   * If this happens, it's the result of a malformed SJOIN
-   * a remnant from the old persistent channel code. *sigh*
-   * Or it could be the result of a client just leaving
-   * and leaving us with a channel formed just as the client parts.
-   * - Dianora
-   */
-  if (dlink_list_length(&channel->members) == 0 && isnew == true)
-  {
-    channel_free(channel);
-    return;
-  }
+  if (joins == true)
+    *(uid_ptr - 1) = '\0';
 
-  if (*parv[4 + args] == '\0')
-    return;
-
-  *(uid_ptr - 1) = '\0';
   sendto_server(source_p, 0, 0, "%s", uid_buf);
+
+  if (dlink_list_length(&channel->members) == 0 && isnew == true)
+    channel_free(channel);
 }
 
 static struct Message sjoin_msgtab =

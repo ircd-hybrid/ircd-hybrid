@@ -122,19 +122,11 @@ server_send_client(struct Client *client_p, struct Client *target_p)
 
   assert(IsClient(target_p));
 
-  send_umode(target_p, false, 0, buf);
-
-  if (buf[0] == '\0')
-  {
-    buf[0] = '+';
-    buf[1] = '\0';
-  }
-
   sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
              target_p->servptr->id,
              target_p->name, target_p->hopcount + 1,
-             target_p->tsinfo,
-             buf, target_p->username, target_p->host, target_p->realhost,
+             target_p->tsinfo, user_get_mode_str(target_p),
+             target_p->username, target_p->host, target_p->realhost,
              target_p->sockhost, target_p->id,
              target_p->account, target_p->info);
 

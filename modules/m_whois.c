@@ -208,18 +208,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
                        "User connected using a webirc gateway");
 
   if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
-  {
-    char buf[UMODE_MAX_STR];
-    char *m = buf;
-
-    *m++ = '+';
-    for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
-      if (HasUMode(target_p, tab->flag))
-        *m++ = tab->c;
-    *m = '\0';
-
-    sendto_one_numeric(source_p, &me, RPL_WHOISMODES, target_p->name, buf);
-  }
+    sendto_one_numeric(source_p, &me, RPL_WHOISMODES, target_p->name, user_get_mode_str(target_p));
 
   if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
     sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, target_p->name,

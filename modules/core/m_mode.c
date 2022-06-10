@@ -74,16 +74,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
   if (parc < 3)
   {
-    char buf[UMODE_MAX_STR] = "";
-    char *m = buf;
-
-    *m++ = '+';
-    for (tab = umode_tab; tab->c; ++tab)
-      if (HasUMode(source_p, tab->flag))
-        *m++ = tab->c;
-    *m = '\0';
-
-    sendto_one_numeric(source_p, &me, RPL_UMODEIS, buf);
+    sendto_one_numeric(source_p, &me, RPL_UMODEIS, user_get_mode_str(source_p));
     return;
   }
 

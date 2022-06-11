@@ -1,71 +1,23 @@
-Contact Information:
-  * Home Page:
-    - https://www.ircd-hybrid.org
-  * GitHub:
-    - https://github.com/ircd-hybrid
-  * Bug Reports:
-    - bugs@ircd-hybrid.org
-  * General Discussion and Support mailing list:
-    - https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
-    - hybrid@lists.ircd-hybrid.org
-  * IRC contact:
-    - #ircd-coders on irc.ircd-hybrid.org
+ircd-hybrid
+&middot;
+[![Latest Github release](https://img.shields.io/github/tag/ircd-hybrid/ircd-hybrid.svg)](https://github.com/ircd-hybrid/ircd-hybrid/tags)
+[![Build status](https://img.shields.io/github/workflow/status/ircd-hybrid/ircd-hybrid/CI/8.2.x)](https://github.com/ircd-hybrid/ircd-hybrid/actions/workflows/ci.yml)
+[![Coverity scan](https://img.shields.io/coverity/scan/ircd-hybrid-ircd-hybrid)](https://scan.coverity.com/projects/ircd-hybrid-ircd-hybrid)
+[![License](https://img.shields.io/github/license/ircd-hybrid/ircd-hybrid)](COPYING)
+=====
+A lightweight, high-performance internet relay chat daemon. Designed to be fast and reliable. Powering irc networks since 1997.
 
-Recommended IRC services packages:
-- Anope 2.0.9 and above, which can be found on https://anope.org
-- HOPM (hybrid open proxy monitor), which can be found on https://ircd-hybrid.org
 
-******************************* IMPORTANT *************************************
+## Requirements
+ircd-hybrid requires a POSIX compliant operating system like GNU/Linux, GNU/Hurd, *BSD family, or macOS.
 
-  ************ Note for those who don't bother reading docs ***************
-  * - Reading INSTALL is now a must, as the old DPATH is now specified    *
-  *   when configure is run.                                              *
-  *   You now need to ./configure --prefix="/path/to/install/it"          *
-  * - The old config format WILL NOT WORK. Please see doc/reference.conf !*
-  * - The old kline, dline, xline format WILL NOT WORK.                   *
-  *************************************************************************
+## Installation
+See the [INSTALL.md](INSTALL.md) document for info on configuring and compiling ircd-hybrid.
 
-  ALSO, IF YOU ARE UPGRADING YOUR CURRENT SOURCE TREE, AND YOU TRY TO BUILD
-  IN IT WITHOUT PERFORMING AT LEAST 'make clean', THINGS _WILL_ BREAK. IT IS
-  RECOMMENDED THAT YOU RUN 'make distclean' AND THEN RERUN './configure'!
 
-******************************* REQUIREMENTS **********************************
+## Support
+In case you need help or just want to delve deeper, you can join us on irc - #ircd-coders on irc.ircd-hybrid.org
 
-Necessary Requirements:
-- A supported platform (look below)
-- A working dynamic load library
 
-Feature Specific Requirements:
-- For TLS server links, as well as TLS client connections, a working TLS
-  implementation such as, OpenSSL, LibreSSL, GnuTLS, or wolfSSL is required
-- For encrypted operator, server and auth passwords, a working DES, MD5, or
-  SHA library
-
-*******************************************************************************
-
-- See the INSTALL document for info on configuring and compiling ircd-hybrid.
-
-- Please read doc/index.txt to get an overview of the current documentation.
-
-- TESTED PLATFORMS: The code has been tested on the following platforms, and
-  is known to run properly.
-  CentOS 5.8, 6.7, 7.0
-  Red Hat Linux 9
-  Ubuntu 10.10, 12.04, 14.04, 18.04, 19.04
-  FreeBSD 9.1
-  OpenBSD 5.2, 5.7, 5.8
-  Arch Linux 2012.12.01
-  Debian GNU/Linux 7.6, 8.0, 8.5, 9.3, 9.4
-  Debian GNU/Hurd 0.3
-  Raspbian Jessie
-  openSUSE 13.1
-  Mac OS X 10.10 (Yosemite)
-
-- /etc/resolv.conf must exist for the resolver to work.
-
-- Please read NEWS for information about what is in this release.
-
-- Development process can be followed on GitHub at https://github.com/ircd-hybrid/ircd-hybrid
-
-- Anonymous SVN access is also available:
-  Latest stable branch (8.2.x): svn co svn://svn.ircd-hybrid.org/svnroot/ircd-hybrid/branches/8.2.x
+## License
+ircd-hybrid is licensed under the **GNU General Public License v2.0**. A complete version of the license is available in the [COPYING](COPYING) file in this repository.

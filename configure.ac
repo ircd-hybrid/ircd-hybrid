@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_REVISION([$Id$])
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.71])
 AC_INIT([ircd-hybrid], [8.2.40], [bugs@ircd-hybrid.org])
 AM_INIT_AUTOMAKE([1.16.1 subdir-objects])
 AM_MAINTAINER_MODE
@@ -10,12 +10,9 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([src/ircd.c])
 
-# Checks for programs.
-AC_PROG_CC_C99
-AS_IF([test "$ac_cv_prog_cc_c99" = "no"],
-    [AC_MSG_ERROR([no suitable C99 compiler found. Aborting.])])
+AC_PROG_CC
 AC_PROG_YACC
-AM_PROG_LEX
+AC_PROG_LEX([noyywrap])
 AC_PROG_INSTALL
 
 # Initializing libtool.

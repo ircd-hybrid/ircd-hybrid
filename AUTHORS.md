@@ -9,9 +9,9 @@
 
 - A1kmm, Andrew Miller \<a1kmm@mware.virtualave.net> ([@A1kmm](https://github.com/A1kmm))
 - Adam, Adam \<Adam@anope.org> ([@Adam-](https://github.com/Adam-))
-- Adrian Chadd \<adrian@creative.net.au>  ([@erikarn](https://github.com/erikarn))
+- Adrian Chadd \<adrian@creative.net.au> ([@erikarn](https://github.com/erikarn))
 - adx, Piotr Nizynski \<nizynski@sysplex.pl>
-- AndroSyn, Aaron Sethman \<androsyn@ratbox.org>
+- AndroSyn, Aaron Sethman \<androsyn@ratbox.org> ([@synandro](https://github.com/synandro))
 - bane, Dragan Dosen \<bane@idolnet.org>
 - billy-jon, William Bierman III \<bill@thebiermans.org> ([@wbierman](https://github.com/wbierman))
 - bysin, Ben Kittridge \<bkittridge@cfl.rr.com>

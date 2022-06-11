@@ -1,15 +1,15 @@
 -- Noteworthy changes in version 8.2.40 (2021-??-??)
 * `channel::disable_fake_channels` now also blocks strikethrough text (0x1E (30))
-* `KNOCK` can now be used on private channels. Channel mode +K may be used instead
+* `KNOCK` can now be used on private channels. Channel mode `K` may be used instead
   to control whether or not `KNOCK` is allowed on a channel.
-* Support for /dev/poll has been dropped
+* Support for `/dev/poll` has been dropped
 * `INFO` now also reports configured values of `channel::default_join_flood_count`
   and `channel::default_join_flood_time`
-* The founder (+q) and admin (+a) channel prefix modes have been implemented.
+* The founder `q` and admin `a` channel prefix modes have been implemented.
   These are optional and can be enabled with the new `channel::enable_owner`
   and `channel::enable_admin` configuration directives.
-* Extban $K of type `acting` has been implemented. This extban prevents
-  matching users from using the KNOCK command.
+* Extban `$K` of type acting has been implemented. This extban prevents
+  matching users from using the `KNOCK` command.
 
 
 -- Noteworthy changes in version 8.2.39 (2021-08-14)
@@ -64,11 +64,11 @@
   Final removal is scheduled for early 2021.
 * For consistency, the `general::network_desc` configuration directive has been
   renamed to `general::network_description`
-* Server notices that previously have been sent to user modes +f and +u are now
-  sent to user mode +j (reject notices) instead. Due to this change, `unauth` and
+* Server notices that previously have been sent to user modes `f` and `u` are now
+  sent to user mode `j` (reject notices) instead. Due to this change, `unauth` and
   `full` have been removed from `general::oper_only_umodes`, `general::oper_umodes`,
   and `operator::umodes`.
-* User mode +b (bots) has been replaced with +f (flood). Spam/flood notices are now
+* User mode `b` (bots) has been replaced with `f` (flood). Spam/flood notices are now
   sent to this user mode. For this, `bots` has been removed from
   `general::oper_only_umodes`, `general::oper_umodes`, and `operator::umodes`.
   `flood` has been added instead to these configuration directives.
@@ -84,7 +84,7 @@
 -- Noteworthy changes in version 8.2.32 (2020-08-16)
 * `RESV` couldn't be issued in case no reason has been supplied. This has been fixed.
 * Fixed possible `RPL_WHOISCHANNELS` line truncation of remote replies
-* Extban $t of type `matching` has been implemented. This extban allows matching
+* Extban `$t` of type matching has been implemented. This extban allows matching
   based on TLS protocol version and/or cipher suite
 * Implemented channel mode `K`. `KNOCK` cannot be used on channels with that mode set
 * `STATS ?` is now oper-only
@@ -95,7 +95,7 @@
 * Removed `spoof_notice` from `auth::flags`. With vhosts now this notice doesn't make
   much sense anymore
 * Fixed issue where ban masks might become malformed if set by remote clients/servers
-* Fixed issue with channel mode +c where high ascii characters can be erroneously
+* Fixed issue with channel mode `c` where high ascii characters can be erroneously
   detected as control characters
 
 
@@ -104,11 +104,11 @@
   installed properly during `make install`
 * Fixed broken libcrypto detection which caused the ircd not to work with
   OpenSSL under certain circumstances
-* Extban $n of type `acting` has been implemented. This extban prevents
+* Extban `$n` of type acting has been implemented. This extban prevents
   matching users from changing their nick while in the channel. Users
   with voice or above are not affected.
-* Channel mode +N has been changed so channel members with +v can change
-  their nick name as well
+* Channel mode `N` has been changed so channel members with `v` (voice) can
+  change their nick name as well
 
 
 -- Noteworthy changes in version 8.2.29 (2020-02-19)
@@ -118,8 +118,8 @@
 
   * `$a:<account>`   Matches users logged into a matching account.
   * `$c:<channel>`   Matches users that are on the given channel. An additional
-                     prefix of either @, %, or + can be specified to test for
-                     certain channel privileges.
+                     prefix of either `@`, `%`, or `+` can be specified to test
+                     for certain channel privileges.
   * `$o:<class>`     Matches IRC operators that have joined a class
                      matching the mask.
   * `$r:<realname>`  Matches users with a matching realname.
@@ -246,8 +246,8 @@
   for more information.
 * `INVITE` expirations have been implemented. Expire time can be adjusted with
   the `channel::invite_expire_time` configuration directive
-* `WHOIS` notices to IRC operators have been re-added. User mode +y is required
-  to see them
+* `WHOIS` notices to IRC operators have been re-added. User mode `y` (spy) is
+  required to see them
 * The maximum line length for motd files has been increased to 320 bytes to
   support multibyte encodings better
 
@@ -311,9 +311,9 @@
 
 
 -- Noteworthy changes in version 8.2.12 (2016-01-05)
-* **IMPORTANT:** Character case mapping is `ascii` now. It is recommended
-  to update all servers on the network to prevent possible channel
-  desynchronizations and nick name collision kills
+* Character case mapping is `ascii` now. It is recommended to update all
+  servers on the network to prevent possible channel desynchronizations
+  and nick name collision kills
 * Added channel mode `T` which forbids `NOTICE` to be sent to a channel
 * Fixed minor `SVSTAG` memory leak
 * Fixed broken `PART` message blocking mechanism
@@ -321,7 +321,7 @@
   `/etc/resolv.conf`
 * The `-klinefile`, `-dlinefile`, etc. switches didn't work at all
 * Fixed possible core on ident lookups if ircd is out of file descriptors
-* Far client exit notices (+F) now show IP addresses, too
+* Far client exit notices (user mode `F`) now show IP addresses, too
 * Made idle time look nicer in `STATS v|p` by using a formatted time string
 * `general::ts_warn_delta`, and `general::ts_max_delta` can be set to 0 now
 
@@ -333,7 +333,7 @@
 
 
 -- Noteworthy changes in version 8.2.10 (2015-11-06)
-* **IMPORTANT:** renamed `serverhide::links_delay` configuration directive
+* The `serverhide::links_delay` configuration directive has been renamed
   to `serverhide::flatten_links_delay`
 * Added `serverhide::flatten_links_file` configuration option
 * Fixed bug where changing `serverhide::flatten_links_delay` on runtime
@@ -349,11 +349,11 @@
 
 
 -- Noteworthy changes in version 8.2.9 (2015-09-13)
-* **IMPORTANT:** database files and links.txt are now stored in `/var/lib`
-  instead of `/etc`, so make sure to move your k/d/x-line database files
-  to the new path before (re)starting the ircd
-* **IMPORTANT:** the splitmode logic has been removed along with the
-  following channel {} block configuration directives:
+* Database files and `links.txt` are now stored in `/var/lib` instead
+  of `/etc`, so make sure to move your k/d/x-line database files to
+  the new path before (re)starting the ircd
+* The splitmode logic has been removed along with the following
+  channel {} block configuration directives:
   `default_split_user_count`, `default_split_server_count`,
   `no_create_on_split`, `no_join_on_split`
 * Added `xline_exempt` to auth {} block flags
@@ -423,7 +423,7 @@
 
 
 -- Noteworthy changes in version 8.2.3 (2015-02-11)
-* **IMPORTANT:** the following configuration directives have been renamed:
+* The following configuration directives have been renamed:
    `max_clients` -> `default_max_clients`
    `join_flood_count` -> `default_join_flood_count`
    `join_flood_time` -> `default_join_flood_time`
@@ -451,13 +451,13 @@
   IRC operators still can have higher `flood` limits with `no_oper_flood = yes;`
   hoewever, they are no longer allowed to bypass RecvQ limits.
 * Added `general::stats_m_oper_only` configuration option
-* Remote client connection notices (user mode +F) now do show IP addresses, too
+* Remote client connection notices (user mode `F`) now do show IP addresses, too
 
 
 -- Noteworthy changes in version 8.2.1 (2014-10-21)
 * Fixed bug where `UNDLINE remote.server IP` did not work as expected
 * Servers are now allowed to add/remove K-/D-/X-lines and RESVs
-* User mode +G now no longer allows to override +g
+* User mode `G` now no longer allows to override user mode `g`
 * Due to potential weakness, TLS session caching and session tickets
   have been disabled
 * Minor improvements to TS6 implementation
@@ -492,8 +492,7 @@
 
 
 -- Noteworthy changes in version 8.2.0beta4 (2014-07-06)
-* **IMPORTANT:** channel halfops are now an integral part of ircd-hybrid
-  and can't be disabled anymore
+* Channel halfops are now an integral part of ircd-hybrid and can't be disabled anymore
 * Added flood control for the `INVITE` command. See channel {} block in `reference.conf`
 * Changed flood control logic for the `KNOCK` command. See channel {} block in `reference.conf`
 * `INVITE` without any parameters now shows a list of channels a client is invited to
@@ -517,8 +516,8 @@
 * **IMPORTANT:** renamed `general::warn_no_nline` configuration directive to
   `general::warn_no_connect_block`
 * Fixed bug with `WHOIS` not showing a list of channel names as expected
-* Added user mode +q which hides idle and signon time in `WHOIS`
-* Added user mode +p which hides channel list in `WHOIS`
+* Added user mode `q` which hides idle and signon time in `WHOIS`
+* Added user mode `p` which hides channel list in `WHOIS`
 
 
 -- Noteworthy changes in version 8.2.0beta1 (2014-04-29)
@@ -572,7 +571,7 @@
 * Fixed undefined behaviour with `crypt` returning `NULL`
   since glibc2.17 in certain cases
 * Admins may now see all channel members via `WHO #channel`
-  regardless of channel mode +s
+  regardless of channel mode `s`
 * Fixed corrupted `STATS U` output
 
 
@@ -605,7 +604,7 @@
   haven't finished the SSL handshake
 * Fixed several bugs with server hiding
 * Updated/fixed help files
-* `WHOIS` no longer sends a notice to +y operators
+* `WHOIS` no longer sends a notice to IRC operators with user mode `y` (spy)
 
 
 -- Noteworthy changes in version 8.1.12 (2013-12-22)
@@ -635,7 +634,7 @@
 
 
 -- Noteworthy changes in version 8.1.9 (2013-11-08)
-* Added user mode +W. Users connected via a webirc gateway get this
+* Added user mode `W`. Users connected via a webirc gateway get this
   mode set by servers.
 * `WHOIS` now shows if a client is connected via a webirc gateway
 * Administrators may now see +s channels a user is in with `WHOIS`.
@@ -734,11 +733,11 @@
 
 
 -- Noteworthy changes in version 8.1.0beta4 (2013-05-09)
-* Implemented channel mode +M. Clients that haven't identified their
+* Implemented channel mode `M`. Clients that haven't identified their
   name with NickServ may not speak in a channel that has this mode set
 * Fixed weird idletimes shown in `TRACE`
-* Added `nononreg` (+R) to `general::oper_umodes`
-* Added user mode +F (can see remote client connect/exit notices)
+* Added `nononreg` (user mode `R`) to `general::oper_umodes`
+* Added user mode `F` (can see remote client connect/exit notices)
 
 
 -- Noteworthy changes in version 8.1.0beta3 (2013-05-05)
@@ -802,8 +801,8 @@
 -- Noteworthy changes in version 8.0.7 (2013-04-12)
 * Services may now set a channel topic without joining the channel first
 * Fixed bug where `WHOIS` would send empty sockhost information on TS5 servers
-* Remote server connection and split notices now go to new user mode +e.
-  These previously used user mode +x.
+* Remote server connection and split notices now go to new user mode `e`.
+  These previously used user mode `x`.
 * Services may now change the host of a specific user
   via `SVSMODE <timestamp> <target> +x <hostname>`
 
@@ -815,7 +814,7 @@
 
 
 -- Noteworthy changes in version 8.0.5 (2013-01-24)
-* **IMPORTANT:** nick and topic lengths are now configurable via `ircd.conf`.
+* Nick and topic lengths are now configurable via `ircd.conf`.
   A `max_nick_length`, as well as a `max_topic_length` configuration option
   can now be found in the serverinfo {} block
 * Fixed build on GNU/Hurd
@@ -915,11 +914,11 @@
   - Added service stamps to `NICK`/`UID` messages
   - Added SVS to server capabilities (`CAPAB`). SVS capable servers can
     deal with extended `NICK`/`UID` messages that contain service IDs/stamps.
-  - Changed rejected client notices to go to new user mode +j. These
-    previously used user mode +r.
-  - Added user mode +r (registered nick) and channel mode +r (registered channel)
-  - Added user mode +R (only registered clients may send a private message)
-  - Added channel mode +R (only registered clients may join that channel)
+  - Changed rejected client notices to go to new user mode `j`. These
+    previously used user mode `r`.
+  - Added user mode `r` (registered nick) and channel mode `r` (registered channel)
+  - Added user mode `R` (only registered clients may send a private message)
+  - Added channel mode `R` (only registered clients may join that channel)
   - Various services shortcuts have been added (`NS`, `CS`, `NICKSERV`, `CHANSERV`, etc.)
   - Added services {} block to `ircd.conf`
   - Added services_name directive to general {} block
@@ -935,8 +934,8 @@
 * Introduced new logging subsystem including log rotation based on
   file sizes. Log timestamp format is ISO8601 now
 * Added support for remote D-lines
-* Added user mode +H which is basically a replacement for the hidden_admin and
-  `hidden_oper` operator flags. With user mode +H, IRC operator status can now
+* Added user mode `H` which is basically a replacement for the hidden_admin and
+  `hidden_oper` operator flags. With user mode `H`, IRC operator status can now
   be hidden even on remote servers
 * Added CIDR support for operator {} blocks
 * Removed the servlink program. ircd-hybrid can now make use of

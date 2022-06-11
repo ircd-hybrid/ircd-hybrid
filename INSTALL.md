@@ -1,118 +1,57 @@
-                            Hybrid INSTALL Document
+## ircd-hybrid installation instructions
 
-   Copyright (c) 1997-2022 ircd-hybrid development team
+1.  Read the `NEWS.md` file to find out about the exciting new features in this
+    version. Other good reads are `doc/reference.conf`, and `README.md`.
 
-     ----------------------------------------------------------------------
+2.  Run the configure script. It will create `config.h` and the
+    Makefiles to match your system. The paths are now handled
+    with the `--prefix` option to configure.
+    `/usr/local/ircd` is the default if no prefix is specified.
 
-   +------------------------------------------------------------------------+
-   | Note for those who don't bother reading docs:                          |
-   |                                                                        |
-   | Reading INSTALL is now a must, as the old DPATH is now specified when  |
-   | configure is run.                                                      |
-   |                                                                        |
-   | - You now need to ./configure --prefix="/path/to/install/it" as a      |
-   |   minimum. Try ./configure --help or read this file for more info on   |
-   |   the possible options you can pass to configure.                      |
-   +------------------------------------------------------------------------+
+    `./configure --prefix=/usr/local/ircd`
 
-     ----------------------------------------------------------------------
+    The script will determine whichever of the following is best for
+    your system, but you may (unsupported) force their usage with
+    undefined results:
 
-                                  HOW TO BUILD
+       * `--enable-kqueue` - Use the superior kqueue(2) system call as
+         opposed to the default poll(2). This is currently only available
+         on FreeBSD, OpenBSD, NetBSD, DragonFly BSD and macOS
 
-   As of hybrid-4, the distribution uses GNU autoconf instead of the old
-   Config script. You must run ./configure before you can (sanely) build
-   ircd-hybrid.
+       * `--enable-epoll` - Enables epoll(4) Signal I/O system. This is
+         currently only available on 2.5.44 Linux kernel versions or
+         later.
 
-   1.  Read the NEWS file to find out about the exciting new features in
-       this version. Other good reads are doc/reference.conf, and README.
+       * `--enable-poll` - Use POSIX poll(2).
 
-   2.  Run the configure script. It will create config.h and the
-       Makefiles to match your system. The paths are now handled
-       with the --prefix option to configure.
-       /usr/local/ircd is the default if no prefix is specified.
+       Incidentally, the order of listing above is the order of auto-
+       detection in configure. So if you do have kqueue but wish to
+       enable poll(2) instead (bad idea), you must use `--enable-poll`.
 
-       ./configure --prefix=/usr/local/ircd
+       * `--with-tls=` - Controls TLS (Transport Layer Security) support.
+         Supported options are currently `openssl`, `wolfssl`, `gnutls`,
+         and `none`.
 
-       The script will determine whichever of the following is best for
-       your system, but you may (unsupported) force their usage with
-       undefined results:
-
-          * --enable-kqueue - Use the superior kqueue(2) system call as
-            opposed to the default poll(2). This is currently only available
-            on FreeBSD, OpenBSD, NetBSD, DragonFly BSD and macOS
-
-          * --enable-epoll - Enables epoll(4) Signal I/O system. This is
-            currently only available on 2.5.44 Linux kernel versions or
-            later.
-
-          * --enable-poll - Use POSIX poll(2).
-
-          Incidentally, the order of listing above is the order of auto-
-          detection in configure. So if you do have kqueue but wish to
-          enable poll(2) instead (bad idea), you must use --enable-poll.
-
-          * --with-tls= - Controls TLS (Transport Layer Security) support. 
-            Supported options are currently 'openssl, 'wolfssl', 'gnutls',
-            and 'none'.
-
-            If nothing has been specified, configure tries to autodetect in the
-            following order: openssl/libressl -> gnutls -> wolfssl.
+         If nothing has been specified, configure tries to autodetect in the
+         following order: openssl/libressl -> gnutls -> wolfssl.
 
 
-       These are optional or have default values that may be overridden:
+    These are optional or have default values that may be overridden:
 
-          * --enable-assert - Enable use of numerous debugging checks. This is
-            considered a developer-only feature and should not be used on any
-            production servers for maximum speed so as to prevent cores from
-            things that shouldn't normally happen.
+       * `--enable-assert` - Enable use of numerous debugging checks. This is
+         considered a developer-only feature and should not be used on any
+         production servers for maximum speed so as to prevent cores from
+         things that shouldn't normally happen.
 
-          * --enable-debugging - Prepares Makefiles to compile the ircd sources
-            with proper settings that are required for debugging purposes.
-            This switch basically sets CFLAGS to "-g -O0".
+       * `--enable-debugging` - Prepares Makefiles to compile the ircd sources
+         with proper settings that are required for debugging purposes.
+         This switch basically sets `CFLAGS` to `-g -O0`.
 
-          * --enable-efence - Allows easy linking with the electric fence memory
-            debugger library.
-
-
-   3.  Run 'make'; this should build the ircd.
-
-   4.  Run 'make install'; this will install the server, modules, and tools
-       in the path with the prefix specified when configure was ran.
-
-     ----------------------------------------------------------------------
-
-                                HOW TO GET HELP
-
-   - Send Check or Money Order to... just kidding! For bugs, patches or crash
-     reports, contact bugs@ircd-hybrid.org. Please provide as much information
-     as possible, context or unified diffs or backtrace of the core.
-     The Hybrid team can't fix bugs if no one tells us about them!
-
-   - For general discussion or support, you can subscribe to our mailing list at
-     https://lists.ircd-hybrid.org/mailman/listinfo/hybrid. Alternatively,
-     you can find us on IRC in #ircd-coders on irc.ircd-hybrid.org.
-
-     ----------------------------------------------------------------------
-
-                                     NOTES
-
-   The best way to get a backtrace of the core is to follow this sequence of
-   instructions:
-
-   1.  Change to the directory containing the core file
-
-   2.  Run gdb on the binary and the core file. With an unmodified ircd-hybrid
-       installation, an example command line is below (in the /usr/local/ircd
-       directory)
-
-       $ gdb bin/ircd ircd.core
+       * `--enable-efence` - Allows easy linking with the electric fence memory
+         debugger library.
 
 
-   3.  At the "(gdb)" prompt, enter the command "bt full"
+3.  Run `make`; this should build the ircd.
 
-   4.  Save the output of the backtrace command and send it to
-       bugs@ircd-hybrid.org.
-
-   5.  Be sure to save the ircd binary, the modules, and the core file in a
-       safe place in case the developers need to look deeper than a backtrace
-       provides.
+4.  Run `make install`; this will install the server, modules, and tools in the
+    path with the prefix specified when configure was ran.

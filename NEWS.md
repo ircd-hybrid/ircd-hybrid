@@ -952,23 +952,3 @@
 * `STATS Y|y` now reports CIDR limits as well
 * Added `m_webirc.c` to `contrib/`
 * Overall code cleanup and speed improvements
-
---------------------------------------------------------------------------------
-
-BUG REPORTS: If you run this code and encounter problems, you must report
- the bug by EMAIL to bugs@ircd-hybrid.org
- Please include a gdb backtrace and a copy of your config.h and
- ircd.conf with any report (with passwords and other sensitive
- information masked).
-
-DISCUSSION: There is a mailing list for discussion of hybrid issues,
- including betas. To subscribe, use this link:
-    https://lists.ircd-hybrid.org/mailman/listinfo/hybrid
- This is the proper place to discuss new features, bugs, etc.
-
-Questions/comments directed to bugs@ircd-hybrid.org
-
-Other files recommended for reading: README, INSTALL
-
---------------------------------------------------------------------------------
-$Id$

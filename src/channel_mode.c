@@ -1027,12 +1027,15 @@ channel_mode_init(void)
  *               clients.
  */
 void
-channel_mode_set(struct Client *client, struct Channel *channel,
-                 struct ChannelMember *member, int parc, char *parv[])
+channel_mode_set(struct Client *client, struct Channel *channel, int parc, char *parv[])
 {
   int dir = MODE_ADD;
   int parn = 1;
   int alevel = 0, errors = 0;
+  struct ChannelMember *member = NULL;
+
+  if (MyClient(client))
+    member = member_find_link(client, channel);
 
   mode_count = 0;
   mode_limit = 0;

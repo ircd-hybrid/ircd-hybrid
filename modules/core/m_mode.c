@@ -213,11 +213,7 @@ m_mode(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  struct ChannelMember *member = NULL;
-  if (MyClient(source_p))
-    member = member_find_link(source_p, channel);
-
-  channel_mode_set(source_p, channel, member, parc - 2, parv + 2);
+  channel_mode_set(source_p, channel, parc - 2, parv + 2);
 }
 
 static struct Message mode_msgtab =

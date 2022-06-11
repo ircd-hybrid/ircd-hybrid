@@ -64,7 +64,7 @@ ms_tmode(struct Client *source_p, int parc, char *parv[])
   if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
     return;
 
-  channel_mode_set(source_p, channel, NULL, parc - 3, parv + 3);
+  channel_mode_set(source_p, channel, parc - 3, parv + 3);
 }
 
 static struct Message tmode_msgtab =

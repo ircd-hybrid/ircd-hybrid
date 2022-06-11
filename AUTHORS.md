@@ -1,5 +1,3 @@
-$Id$
-
 The core team as of this major release:
 
 Dianora, Diane Bruce <db@db.net>

@@ -1,7 +1,5 @@
                             Hybrid INSTALL Document
 
-   $Id$
-
    Copyright (c) 1997-2022 ircd-hybrid development team
 
      ----------------------------------------------------------------------

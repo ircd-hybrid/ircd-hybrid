@@ -69,5 +69,3 @@ Feature Specific Requirements:
 
 - Anonymous SVN access is also available:
   Latest stable branch (8.2.x): svn co svn://svn.ircd-hybrid.org/svnroot/ircd-hybrid/branches/8.2.x
-
-$Id$

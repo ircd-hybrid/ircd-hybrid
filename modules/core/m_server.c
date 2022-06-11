@@ -118,14 +118,12 @@ server_send_tburst(struct Client *client_p, const struct Channel *channel)
 static void
 server_send_client(struct Client *client_p, struct Client *target_p)
 {
-  char buf[UMODE_MAX_STR] = "";
-
   assert(IsClient(target_p));
 
   sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
              target_p->servptr->id,
              target_p->name, target_p->hopcount + 1,
-             target_p->tsinfo, user_get_mode_str(target_p),
+             target_p->tsinfo, user_get_mode_str(target_p->umodes),
              target_p->username, target_p->host, target_p->realhost,
              target_p->sockhost, target_p->id,
              target_p->account, target_p->info);
@@ -140,15 +138,9 @@ server_send_client(struct Client *client_p, struct Client *target_p)
   DLINK_FOREACH(node, target_p->svstags.head)
   {
     const struct ServicesTag *svstag = node->data;
-    char *m = buf;
-
-    for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
-      if (svstag->umodes & tab->flag)
-        *m++ = tab->c;
-    *m = '\0';
-
-    sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id, target_p->id,
-               target_p->tsinfo, svstag->numeric, buf, svstag->tag);
+    sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id,
+               target_p->id, target_p->tsinfo, svstag->numeric,
+               user_get_mode_str(svstag->umodes), svstag->tag);
   }
 }
 

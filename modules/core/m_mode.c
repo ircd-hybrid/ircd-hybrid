@@ -74,7 +74,8 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
   if (parc < 3)
   {
-    sendto_one_numeric(source_p, &me, RPL_UMODEIS, user_get_mode_str(source_p));
+    sendto_one_numeric(source_p, &me, RPL_UMODEIS,
+                       user_get_mode_str(source_p->umodes));
     return;
   }
 

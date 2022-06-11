@@ -646,14 +646,14 @@ send_umode_out(struct Client *client, unsigned int old)
 }
 
 const char *
-user_get_mode_str(const struct Client *client)
+user_get_mode_str(unsigned int modes)
 {
   static char buf[UMODE_MAX_STR];
   char *m = buf;
 
   *m++ = '+';
   for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
-    if (HasUMode(client, tab->flag))
+    if (modes &tab->flag)
       *m++ = tab->c;
   *m = '\0';
 

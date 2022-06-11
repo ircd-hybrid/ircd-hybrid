@@ -135,7 +135,7 @@ server_send_client(struct Client *client_p, struct Client *target_p)
     sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
 
   dlink_node *node;
-  DLINK_FOREACH(node, target_p->svstags.head)
+  DLINK_FOREACH_PREV(node, target_p->svstags.tail)
   {
     const struct ServicesTag *svstag = node->data;
     sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id,

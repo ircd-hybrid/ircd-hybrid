@@ -160,6 +160,6 @@ extern char cmode_class[][256];
 
 extern void channel_mode_init(void);
 extern const char *add_id(struct Client *, struct Channel *, const char *, dlink_list *, unsigned int);
-extern void channel_mode_set(struct Client *, struct Channel *, int, char **);
+extern void channel_mode_set(struct Client *, struct Channel *, int, char *[]);
 extern void clear_ban_cache_list(dlink_list *);
 #endif  /* INCLUDED_channel_mode_h */

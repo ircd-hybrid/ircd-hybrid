@@ -61,12 +61,6 @@ ms_resync(struct Client *source_p, int parc, char *parv[])
     return;
 
   channel_send_modes(source_p, channel);
-
-  if (channel->topic_time)
-    sendto_one(source_p, ":%s TBURST %ju %s %ju %s :%s", me.id,
-               channel->creation_time, channel->name,
-               channel->topic_time, channel->topic_info,
-               channel->topic);
 }
 
 static struct Message resync_msgtab =

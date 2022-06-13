@@ -300,6 +300,25 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
   channel_send_mask_list(client, channel, &channel->banlist, 'b');
   channel_send_mask_list(client, channel, &channel->exceptlist, 'e');
   channel_send_mask_list(client, channel, &channel->invexlist, 'I');
+
+  /*
+   * We may also send an empty topic here, but only if topic_time isn't 0,
+   * i.e. if we had a topic that got unset.  This is required for syncing
+   * topics properly.
+   *
+   * Imagine the following scenario: Our downlink introduces a channel
+   * to us with a TS that is equal to ours, but the channel topic on
+   * their side got unset while the servers were in splitmode, which means
+   * their 'topic' is newer.  They simply wanted to unset it, so we have to
+   * deal with it in a more sophisticated fashion instead of just resetting
+   * it to their old topic they had before.  Read m_tburst.c:ms_tburst
+   * for further information   -Michael
+   */
+  if (channel->topic_time)
+    sendto_one(client, ":%s TBURST %ju %s %ju %s :%s",
+               me.id, channel->creation_time,
+               channel->name, channel->topic_time,
+               channel->topic_info, channel->topic);
 }
 
 /*! \brief Check channel name for invalid characters

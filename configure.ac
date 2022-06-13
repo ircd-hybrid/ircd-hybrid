@@ -4,12 +4,13 @@ AC_REVISION([$Id$])
 
 AC_PREREQ([2.71])
 AC_INIT([ircd-hybrid], [8.2.40], [bugs@ircd-hybrid.org])
-AM_INIT_AUTOMAKE([1.16.1 subdir-objects])
+AM_INIT_AUTOMAKE([1.16.5 subdir-objects])
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([src/ircd.c])
 
+# Checks for programs.
 AC_PROG_CC
 AC_PROG_YACC
 AC_PROG_LEX([noyywrap])

@@ -43,6 +43,7 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_rehash.la     \
                       m_restart.la    \
                       m_resv.la       \
+                      m_resync.la     \
                       m_set.la        \
                       m_stats.la      \
                       m_svinfo.la     \
@@ -111,6 +112,7 @@ m_post_la_LDFLAGS = $(MODULE_FLAGS)
 m_rehash_la_LDFLAGS = $(MODULE_FLAGS)
 m_restart_la_LDFLAGS = $(MODULE_FLAGS)
 m_resv_la_LDFLAGS = $(MODULE_FLAGS)
+m_resync_la_LDFLAGS = $(MODULE_FLAGS)
 m_set_la_LDFLAGS = $(MODULE_FLAGS)
 m_stats_la_LDFLAGS = $(MODULE_FLAGS)
 m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
@@ -178,6 +180,7 @@ m_post_la_SOURCES = m_post.c
 m_rehash_la_SOURCES = m_rehash.c
 m_restart_la_SOURCES = m_restart.c
 m_resv_la_SOURCES = m_resv.c
+m_resync_la_SOURCES = m_resync.c
 m_set_la_SOURCES = m_set.c
 m_stats_la_SOURCES = m_stats.c
 m_svsaccount_la_SOURCES = m_svsaccount.c

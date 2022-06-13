@@ -375,6 +375,12 @@ m_resv_la_OBJECTS = $(am_m_resv_la_OBJECTS)
 m_resv_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_resv_la_LDFLAGS) $(LDFLAGS) -o $@
+m_resync_la_LIBADD =
+am_m_resync_la_OBJECTS = m_resync.lo
+m_resync_la_OBJECTS = $(am_m_resync_la_OBJECTS)
+m_resync_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_resync_la_LDFLAGS) $(LDFLAGS) -o $@
 m_set_la_LIBADD =
 am_m_set_la_OBJECTS = m_set.lo
 m_set_la_OBJECTS = $(am_m_set_la_OBJECTS)
@@ -578,20 +584,21 @@ am__depfiles_remade = ./$(DEPDIR)/m_accept.Plo ./$(DEPDIR)/m_admin.Plo \
 	./$(DEPDIR)/m_ping.Plo ./$(DEPDIR)/m_pong.Plo \
 	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_rehash.Plo \
 	./$(DEPDIR)/m_restart.Plo ./$(DEPDIR)/m_resv.Plo \
-	./$(DEPDIR)/m_set.Plo ./$(DEPDIR)/m_stats.Plo \
-	./$(DEPDIR)/m_svinfo.Plo ./$(DEPDIR)/m_svsaccount.Plo \
-	./$(DEPDIR)/m_svshost.Plo ./$(DEPDIR)/m_svsjoin.Plo \
-	./$(DEPDIR)/m_svskill.Plo ./$(DEPDIR)/m_svsmode.Plo \
-	./$(DEPDIR)/m_svsnick.Plo ./$(DEPDIR)/m_svspart.Plo \
-	./$(DEPDIR)/m_svstag.Plo ./$(DEPDIR)/m_tburst.Plo \
-	./$(DEPDIR)/m_time.Plo ./$(DEPDIR)/m_topic.Plo \
-	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
-	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
-	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
-	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
-	./$(DEPDIR)/m_wallops.Plo ./$(DEPDIR)/m_webirc.Plo \
-	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
-	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo
+	./$(DEPDIR)/m_resync.Plo ./$(DEPDIR)/m_set.Plo \
+	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
+	./$(DEPDIR)/m_svsaccount.Plo ./$(DEPDIR)/m_svshost.Plo \
+	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
+	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
+	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
+	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
+	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
+	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
+	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
+	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
+	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_wallops.Plo \
+	./$(DEPDIR)/m_webirc.Plo ./$(DEPDIR)/m_who.Plo \
+	./$(DEPDIR)/m_whois.Plo ./$(DEPDIR)/m_whowas.Plo \
+	./$(DEPDIR)/m_xline.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -628,7 +635,8 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
 	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
-	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_resv_la_SOURCES) $(m_resync_la_SOURCES) \
+	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_svsaccount_la_SOURCES) \
 	$(m_svshost_la_SOURCES) $(m_svsjoin_la_SOURCES) \
 	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
@@ -659,7 +667,8 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
 	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
-	$(m_resv_la_SOURCES) $(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
+	$(m_resv_la_SOURCES) $(m_resync_la_SOURCES) \
+	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_svsaccount_la_SOURCES) \
 	$(m_svshost_la_SOURCES) $(m_svsjoin_la_SOURCES) \
 	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
@@ -928,6 +937,7 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_rehash.la     \
                       m_restart.la    \
                       m_resv.la       \
+                      m_resync.la     \
                       m_set.la        \
                       m_stats.la      \
                       m_svinfo.la     \
@@ -995,6 +1005,7 @@ m_post_la_LDFLAGS = $(MODULE_FLAGS)
 m_rehash_la_LDFLAGS = $(MODULE_FLAGS)
 m_restart_la_LDFLAGS = $(MODULE_FLAGS)
 m_resv_la_LDFLAGS = $(MODULE_FLAGS)
+m_resync_la_LDFLAGS = $(MODULE_FLAGS)
 m_set_la_LDFLAGS = $(MODULE_FLAGS)
 m_stats_la_LDFLAGS = $(MODULE_FLAGS)
 m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1061,6 +1072,7 @@ m_post_la_SOURCES = m_post.c
 m_rehash_la_SOURCES = m_rehash.c
 m_restart_la_SOURCES = m_restart.c
 m_resv_la_SOURCES = m_resv.c
+m_resync_la_SOURCES = m_resync.c
 m_set_la_SOURCES = m_set.c
 m_stats_la_SOURCES = m_stats.c
 m_svsaccount_la_SOURCES = m_svsaccount.c
@@ -1272,6 +1284,9 @@ m_restart.la: $(m_restart_la_OBJECTS) $(m_restart_la_DEPENDENCIES) $(EXTRA_m_res
 m_resv.la: $(m_resv_la_OBJECTS) $(m_resv_la_DEPENDENCIES) $(EXTRA_m_resv_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_resv_la_LINK) -rpath $(modulesdir) $(m_resv_la_OBJECTS) $(m_resv_la_LIBADD) $(LIBS)
 
+m_resync.la: $(m_resync_la_OBJECTS) $(m_resync_la_DEPENDENCIES) $(EXTRA_m_resync_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_resync_la_LINK) -rpath $(modulesdir) $(m_resync_la_OBJECTS) $(m_resync_la_LIBADD) $(LIBS)
+
 m_set.la: $(m_set_la_OBJECTS) $(m_set_la_DEPENDENCIES) $(EXTRA_m_set_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_set_la_LINK) -rpath $(modulesdir) $(m_set_la_OBJECTS) $(m_set_la_LIBADD) $(LIBS)
 
@@ -1400,6 +1415,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_rehash.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_restart.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_resv.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_resync.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_set.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_stats.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svinfo.Plo@am__quote@ # am--include-marker
@@ -1703,6 +1719,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/m_rehash.Plo
 	-rm -f ./$(DEPDIR)/m_restart.Plo
 	-rm -f ./$(DEPDIR)/m_resv.Plo
+	-rm -f ./$(DEPDIR)/m_resync.Plo
 	-rm -f ./$(DEPDIR)/m_set.Plo
 	-rm -f ./$(DEPDIR)/m_stats.Plo
 	-rm -f ./$(DEPDIR)/m_svinfo.Plo
@@ -1814,6 +1831,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/m_rehash.Plo
 	-rm -f ./$(DEPDIR)/m_restart.Plo
 	-rm -f ./$(DEPDIR)/m_resv.Plo
+	-rm -f ./$(DEPDIR)/m_resync.Plo
 	-rm -f ./$(DEPDIR)/m_set.Plo
 	-rm -f ./$(DEPDIR)/m_stats.Plo
 	-rm -f ./$(DEPDIR)/m_svinfo.Plo

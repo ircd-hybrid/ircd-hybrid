@@ -131,6 +131,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
   }
 
   *mbuf = '\0';
+  *pbuf = '\0';
 }
 
 /*! \brief JOIN command handler

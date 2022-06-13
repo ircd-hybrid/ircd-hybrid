@@ -169,11 +169,7 @@ static void
 ms_join(struct Client *source_p, int parc, char *parv[])
 {
   bool keep_our_modes = true;
-  bool keep_new_modes = true;
   bool isnew = false;
-  struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
-  char modebuf[MODEBUFLEN];
-  char parabuf[MODEBUFLEN];
 
   if (!IsClient(source_p))
     return;
@@ -205,25 +201,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     keep_our_modes = false;
     channel->creation_time = newts;
   }
-  else
-    keep_new_modes = false;
-
-  struct Mode *oldmode = &channel->mode;
-
-  if (keep_new_modes == false)
-    mode = *oldmode;
-  else if (keep_our_modes == true)
-  {
-    mode.mode |= oldmode->mode;
-
-    if (oldmode->limit > mode.limit)
-      mode.limit = oldmode->limit;
-    if (strcmp(mode.key, oldmode->key) < 0)
-      strlcpy(mode.key, oldmode->key, sizeof(mode.key));
-  }
-
-  set_final_mode(&mode, oldmode, modebuf, parabuf);
-  channel->mode = mode;
 
   const struct Client *origin = source_p->servptr;
   if (IsHidden(source_p->servptr) || ConfigServerHide.hide_servers)
@@ -232,6 +209,13 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
+    struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
+    char modebuf[MODEBUFLEN];
+    char parabuf[MODEBUFLEN];
+
+    set_final_mode(&mode, &channel->mode, modebuf, parabuf);
+    channel->mode = mode;
+
     /* Update channel name to be the correct case */
     strlcpy(channel->name, parv[2], sizeof(channel->name));
 
@@ -241,6 +225,10 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
     channel_demote_members(channel, origin);
 
+    if (*modebuf)
+      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
+                           origin->name, channel->name, modebuf, parabuf);
+
     if (channel->topic[0])
     {
       channel_set_topic(channel, "", "", 0, false);
@@ -248,10 +236,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                            origin->name, channel->name);
     }
   }
-
-  if (*modebuf)
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
-                         origin->name, channel->name, modebuf, parabuf);
 
   if (member_find_link(source_p, channel) == NULL)
   {

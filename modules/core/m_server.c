@@ -134,7 +134,7 @@ server_burst(struct Client *client_p)
   {
     const struct Channel *channel = node->data;
 
-    assert(dlink_list_length(&channel->members) == 0);
+    assert(dlink_list_length(&channel->members) != 0);
     if (dlink_list_length(&channel->members))
       channel_send_modes(client_p, channel);
   }

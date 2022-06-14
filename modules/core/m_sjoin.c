@@ -333,8 +333,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                          origin->name, channel->name, modebuf, parabuf);
 
-  if (keep_new_modes == true)
-    channel_modes(channel, source_p, NULL, modebuf, parabuf);
+  channel_modes(channel, source_p, NULL, modebuf, parabuf);
 
 
   char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */

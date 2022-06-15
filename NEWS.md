@@ -8,6 +8,7 @@
 * The founder `q` and admin `a` channel prefix modes have been implemented.
   These are optional and can be enabled with the new `channel::enable_owner`
   and `channel::enable_admin` configuration directives.
+* Channel half-ops may now kick other half-ops
 * Extban `$K` of type acting has been implemented. This extban prevents
   matching users from using the `KNOCK` command.
 

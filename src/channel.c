@@ -1004,7 +1004,6 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
   char *p = NULL;
   const struct ResvItem *resv = NULL;
   const struct ClassItem *const class = class_get_ptr(&client->connection->confs);
-  unsigned int flags = 0;
 
   assert(MyClient(client));
 
@@ -1012,6 +1011,7 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
                    name = strtok_r(NULL,      ",", &p))
   {
     const char *key = NULL;
+    unsigned int flags = 0;
 
     /* If we have any more keys, take the first for this channel. */
     if (!EmptyString(key_list) && (key_list = strchr(key = key_list, ',')))
@@ -1058,15 +1058,6 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
         sendto_one_numeric(client, &me, ret, channel->name);
         continue;
       }
-
-      /*
-       * This should never be the case unless there is some sort of
-       * persistent channels.
-       */
-      if (dlink_list_length(&channel->members) == 0)
-        flags = CHFL_CHANOP;
-      else
-        flags = 0;
     }
     else
     {

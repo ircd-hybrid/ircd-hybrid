@@ -372,7 +372,7 @@ enum
 /* Mode functions handle mode changes for a particular mode... */
 static void
 chm_nosuch(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
-           int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
+           int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (*errors & SM_ERR_UNKNOWN)
     return;
@@ -383,7 +383,7 @@ chm_nosuch(struct Client *client, struct Channel *channel, int parc, int *parn, 
 
 static void
 chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
-           int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
+           int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (mode->only_opers == true)
   {
@@ -403,7 +403,7 @@ chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, 
     {
       if (!(*errors & SM_ERR_ONLYSERVER))
         sendto_one_numeric(client, &me,
-                           alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                           rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                            ERR_ONLYSERVERSCANCHANGE, channel->name);
 
       *errors |= SM_ERR_ONLYSERVER;
@@ -411,11 +411,11 @@ chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, 
     }
   }
 
-  if (alev < mode->required_rank)
+  if (rank < mode->required_rank)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(client, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, channel->name);
 
     *errors |= SM_ERR_NOOPS;
@@ -451,7 +451,7 @@ chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, 
 
 static void
 chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
-         int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
+         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   const char *ret = NULL;
   dlink_list *list;
@@ -501,11 +501,11 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     return;
   }
 
-  if (alev < mode->required_rank)
+  if (rank < mode->required_rank)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(client, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, channel->name);
 
     *errors |= SM_ERR_NOOPS;
@@ -546,13 +546,13 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 
 static void
 chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
-         int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
+         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (alev < mode->required_rank)
+  if (rank < mode->required_rank)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(client, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, channel->name);
 
     *errors |= SM_ERR_NOOPS;
@@ -602,13 +602,13 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 
 static void
 chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
-          int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
+          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (alev < mode->required_rank)
+  if (rank < mode->required_rank)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(client, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, channel->name);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -655,13 +655,13 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
 
 static void
 chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
-        int *errors, int alev, int dir, const char c, const struct chan_mode *mode)
+        int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (alev < mode->required_rank)
+  if (rank < mode->required_rank)
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(client, &me,
-                         alev == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, channel->name);
     *errors |= SM_ERR_NOOPS;
     return;
@@ -990,10 +990,10 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
   int dir = MODE_ADD;
   int parn = 1;
   int errors = 0;
-  int alevel = CHACCESS_REMOTE;  /* Let hacked servers in for now... */
+  int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now... */
 
   if (MyClient(client))
-    alevel = member_highest_rank(member_find_link(client, channel));
+    rank = member_highest_rank(member_find_link(client, channel));
 
   mode_count = 0;
   mode_limit = 0;
@@ -1017,9 +1017,9 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
         const struct chan_mode *mode = cmode_map[(unsigned char)*ml];
 
         if (mode)
-          mode->func(client, channel, parc, &parn, parv, &errors, alevel, dir, *ml, mode);
+          mode->func(client, channel, parc, &parn, parv, &errors, rank, dir, *ml, mode);
         else
-          chm_nosuch(client, channel, parc, &parn, parv, &errors, alevel, dir, *ml, NULL);
+          chm_nosuch(client, channel, parc, &parn, parv, &errors, rank, dir, *ml, NULL);
         break;
       }
     }

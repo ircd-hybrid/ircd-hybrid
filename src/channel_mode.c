@@ -707,48 +707,6 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
   }
 }
 
-/* get_channel_access()
- *
- * inputs       - pointer to Client struct
- *              - pointer to Membership struct
- * output       - CHACCESS_CHANOP if we should let them have
- *                chanop level access, 0 for peon level access.
- * side effects - NONE
- *
- * XXX - partially duplicated in channel.c::member_highest_rank
- */
-static int
-get_channel_access(const struct Client *client,
-                   const struct ChannelMember *member)
-{
-  /* Let hacked servers in for now... */
-  if (!MyClient(client))
-    return CHACCESS_REMOTE;
-
-  if (member == NULL)
-    return CHACCESS_NOTONCHAN;
-
-  /* Just to be sure.. */
-  assert(client == member->client);
-
-  if (member_has_flags(member, CHFL_CHANOWNER) == true)
-    return CHACCESS_OWNER;
-
-  if (member_has_flags(member, CHFL_CHANADMIN) == true)
-    return CHACCESS_ADMIN;
-
-  if (member_has_flags(member, CHFL_CHANOP) == true)
-    return CHACCESS_OP;
-
-  if (member_has_flags(member, CHFL_HALFOP) == true)
-    return CHACCESS_HALFOP;
-
-  if (member_has_flags(member, CHFL_VOICE) == true)
-    return CHACCESS_VOICE;
-
-  return CHACCESS_PEON;
-}
-
 /* send_mode_changes_server()
  * Input: the source client(client),
  *        the channel to send mode changes for(channel)
@@ -1031,17 +989,15 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
 {
   int dir = MODE_ADD;
   int parn = 1;
-  int alevel = 0, errors = 0;
-  struct ChannelMember *member = NULL;
+  int errors = 0;
+  int alevel = CHACCESS_REMOTE;  /* Let hacked servers in for now... */
 
   if (MyClient(client))
-    member = member_find_link(client, channel);
+    alevel = member_highest_rank(member_find_link(client, channel));
 
   mode_count = 0;
   mode_limit = 0;
   simple_modes_mask = 0;
-
-  alevel = get_channel_access(client, member);
 
   for (const char *ml = parv[0]; *ml; ++ml)
   {

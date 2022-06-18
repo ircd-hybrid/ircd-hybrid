@@ -333,13 +333,11 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                          origin->name, channel->name, modebuf, parabuf);
 
-  channel_modes(channel, source_p, NULL, modebuf, parabuf);
-
 
   char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */
-  const int buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s %s:",
-                              source_p->id, channel->creation_time,
-                              channel->name, modebuf, parabuf);
+  const int buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s :",
+                              source_p->id, channel->creation_time, channel->name,
+                              channel_modes(channel, source_p, true));
   char *uid_ptr = uid_buf + buflen;
 
 

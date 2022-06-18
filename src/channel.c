@@ -195,17 +195,16 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
  * side effects -
  */
 static void
-channel_send_members(struct Client *client, const struct Channel *channel,
-                     const char *modebuf, const char *parabuf)
+channel_send_members(struct Client *client, const struct Channel *channel)
 {
   dlink_node *node;
   char buf[IRCD_BUFSIZE];
   int tlen;              /* length of text to append */
   char *t, *start;       /* temp char pointer */
 
-  start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s %s:",
+  start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s :",
                              me.id, channel->creation_time,
-                             channel->name, modebuf, parabuf);
+                             channel->name, channel_modes(channel, client, true));
 
   DLINK_FOREACH(node, channel->members.head)
   {
@@ -291,11 +290,7 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
 void
 channel_send_modes(struct Client *client, const struct Channel *channel)
 {
-  char modebuf[MODEBUFLEN] = "";
-  char parabuf[MODEBUFLEN] = "";
-
-  channel_modes(channel, client, NULL, modebuf, parabuf);
-  channel_send_members(client, channel, modebuf, parabuf);
+  channel_send_members(client, channel);
 
   channel_send_mask_list(client, channel, &channel->banlist, 'b');
   channel_send_mask_list(client, channel, &channel->exceptlist, 'e');

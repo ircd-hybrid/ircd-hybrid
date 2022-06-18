@@ -280,34 +280,47 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
  * side effects - write the "simple" list of channel modes for channel
  * channel onto buffer mbuf with the parameters in pbuf.
  */
-void
-channel_modes(const struct Channel *channel, const struct Client *client,
-              const struct ChannelMember *member, char *mbuf, char *pbuf)
+const char *
+channel_modes(const struct Channel *channel, const struct Client *client, bool params)
 {
-  *mbuf++ = '+';
-  *pbuf = '\0';
+  static char buf[MODEBUFLEN];
+  char *bufptr = buf;
+  bool server_or_member = false;
+
+  *bufptr++ = '+';
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
     if (tab->mode && HasCMode(channel, tab->mode))
-      *mbuf++ = tab->letter;
+      *bufptr++ = tab->letter;
 
   if (channel->mode.limit)
   {
-    *mbuf++ = 'l';
+    *bufptr++ = 'l';
 
-    if (IsServer(client) || member || (member = member_find_link(client, channel)))
-      pbuf += sprintf(pbuf, "%u ", channel->mode.limit);
+    if (params == true)
+      server_or_member =
+        (server_or_member == true || IsServer(client) || member_find_link(client, channel));
   }
 
   if (channel->mode.key[0])
   {
-    *mbuf++ = 'k';
+    *bufptr++ = 'k';
 
-    if (IsServer(client) || member || (member = member_find_link(client, channel)))
-      sprintf(pbuf, "%s ", channel->mode.key);
+    if (params == true)
+      server_or_member =
+        (server_or_member == true || IsServer(client) || member_find_link(client, channel));
   }
 
-  *mbuf = '\0';
+  if (server_or_member == true)
+  {
+    if (channel->mode.limit)
+      bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %u", channel->mode.limit);
+    if (channel->mode.key[0])
+      bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %s", channel->mode.key);
+  }
+
+  *bufptr = '\0';
+  return buf;
 }
 
 /* fix_key()

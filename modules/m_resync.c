@@ -77,12 +77,14 @@ static void
 module_init(void)
 {
   mod_add_cmd(&resync_msgtab);
+  capab_add("RESYNC", CAPAB_RESYNC, true);
 }
 
 static void
 module_exit(void)
 {
   mod_del_cmd(&resync_msgtab);
+  capab_del("RESYNC");
 }
 
 struct module module_entry =

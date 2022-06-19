@@ -35,6 +35,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "server.h"
+#include "server_capab.h"
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
@@ -185,6 +186,12 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
   {
+    if (IsCapable(source_p->from, CAPAB_RESYNC))
+    {
+      sendto_one(source_p->from, ":%s RESYNC %s", me.id, parv[2]);
+      return;
+    }
+
     isnew = true;
     channel = channel_make(parv[2]);
   }

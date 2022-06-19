@@ -188,7 +188,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   {
     if (IsCapable(source_p->from, CAPAB_RESYNC))
     {
-      sendto_one(source_p->from, ":%s RESYNC %s", me.id, parv[2]);
+      sendto_one(source_p, ":%s RESYNC %s", me.id, parv[2]);
       return;
     }
 

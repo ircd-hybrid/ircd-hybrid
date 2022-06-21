@@ -259,27 +259,26 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
   }
 
+
+  uintmax_t newts = strtoumax(parv[1], NULL, 10);
+  uintmax_t oldts = 0;
+
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
   {
     isnew = true;
     channel = channel_make(parv[2]);
-  }
-
-  uintmax_t newts = strtoumax(parv[1], NULL, 10);
-  uintmax_t oldts = channel->creation_time;
-
-  if (isnew == true)
     channel->creation_time = newts;
-  else if (newts == oldts)
-    ;
-  else if (newts < oldts)
+  }
+  else if (newts < channel->creation_time)
   {
     keep_our_modes = false;
+    oldts = channel->creation_time;
     channel->creation_time = newts;
   }
-  else
+  else if (newts > channel->creation_time)
     keep_new_modes = false;
+
 
   struct Mode *oldmode = &channel->mode;
 

@@ -53,7 +53,7 @@ ms_resync(struct Client *source_p, int parc, char *parv[])
   assert(MyConnect(source_p));
   assert(IsServer(source_p));
 
-  if (!MyConnect(source_p))
+  if (!MyConnect(source_p) || !IsServer(source_p))
     return;
 
   struct Channel *channel = hash_find_channel(parv[1]);

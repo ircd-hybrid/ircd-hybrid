@@ -623,6 +623,7 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
       sendto_one_numeric(client, &me,
                          rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, channel->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -676,6 +677,7 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
       sendto_one_numeric(client, &me,
                          rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
                          ERR_CHANOPRIVSNEEDED, channel->name);
+
     *errors |= SM_ERR_NOOPS;
     return;
   }
@@ -761,7 +763,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
      * another line for the other modes
      */
     if ((paracount == MAXMODEPARAMS) ||
-        ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > IRCD_BUFSIZE))
+        ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
     {
       if (modecount)
         sendto_server(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
@@ -840,7 +842,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
       arglen = 0;
 
     if ((paracount == MAXMODEPARAMS) ||
-        ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > IRCD_BUFSIZE))
+        ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
     {
       if (modecount)
         sendto_channel_local(NULL, channel, 0, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);

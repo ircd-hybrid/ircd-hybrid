@@ -55,9 +55,9 @@
 static void
 ms_bmask(struct Client *source_p, int parc, char *parv[])
 {
-  char modebuf[IRCD_BUFSIZE] = "";
-  char parabuf[IRCD_BUFSIZE] = "";
-  char banbuf[IRCD_BUFSIZE] = "";
+  char modebuf[IRCD_BUFSIZE];
+  char parabuf[IRCD_BUFSIZE];
+  char banbuf[IRCD_BUFSIZE];
   const char *mask;
   char *s, *t, *mbuf, *pbuf;
   dlink_list *list = NULL;
@@ -116,7 +116,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       tlen = strlen(mask);
 
       /* this new one wont fit.. */
-      if (mbuf - modebuf + 2 + pbuf - parabuf + tlen > IRCD_BUFSIZE - 2 ||
+      if (mbuf - modebuf + 2 + pbuf - parabuf + tlen > sizeof(modebuf) - 2 ||
           modecount >= MAXMODEPARAMS)
       {
         *mbuf = *(pbuf - 1) = '\0';

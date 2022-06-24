@@ -266,7 +266,7 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
     /*
      * Send buffer and start over if we cannot fit another ban
      */
-    if (cur_len + (tlen - 1) > sizeof(parabuf) - 2)
+    if (cur_len + (tlen - 1) > sizeof(modebuf) - 2)
     {
       *(pbuf - 1) = '\0';  /* Get rid of trailing space on buffer */
       sendto_one(client, "%s%s", modebuf, parabuf);

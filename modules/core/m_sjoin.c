@@ -166,7 +166,7 @@ remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list
     int plen = ban->banstr_len + 2;  /* +2 = b and space */
 
     if (count >= MAXMODEPARAMS ||
-        (cur_len + 1 /* space between */ + (plen - 1)) > IRCD_BUFSIZE - 2)
+        (cur_len + 1 /* space between */ + (plen - 1)) > sizeof(modebuf) - 2)
     {
       /* NUL-terminate and remove trailing space */
       *mbuf = *(pbuf - 1) = '\0';
@@ -259,7 +259,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-
   uintmax_t newts = strtoumax(parv[1], NULL, 10);
   uintmax_t oldts = 0;
 
@@ -278,7 +277,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   }
   else if (newts > channel->creation_time)
     keep_new_modes = false;
-
 
   struct Mode *oldmode = &channel->mode;
 
@@ -369,7 +367,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     else
       flags = 0;
 
-    if ((uid_ptr - uid_buf + len_uid) > (IRCD_BUFSIZE - 2))
+    if ((uid_ptr - uid_buf + len_uid) > (sizeof(uid_buf) - 2))
     {
       *(uid_ptr - 1) = '\0';
       sendto_server(source_p, 0, 0, "%s", uid_buf);

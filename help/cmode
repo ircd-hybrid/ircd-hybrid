@@ -10,118 +10,114 @@ MODE <channel> <+|-><modes> [parameters]
 NO PARAMETERS:
 --------------
 
-     +c     - No control codes. Prevent users from sending messages containing
-              control codes to the channel
+     c = No control codes. Prevent users from sending messages containing
+         control codes to the channel.
 
-     +n     - No external messages. This will prevent any user who
-              isn't in the channel from sending messages to the channel.
+     n = No external messages. This will prevent any user who isn't in the
+         channel from sending messages to the channel.
 
-     +t     - Ops topic. This will prevent any user who isn't opped,
-              or half-opped (+o/+h) from setting a channel topic.
+     t = Ops topic. This will prevent any user who isn't opped, or
+         half-opped (+o/+h) from setting a channel topic.
 
-     +s     - Secret. This will prevent the channel from being shown
-              in a /whois, and in the channel list.
+     s = Secret. This will prevent the channel from being shown in a /whois,
+         and in the channel list.
 
-     +p     - Paranoia. Controls whether halfops may invite users
-              into a channel or whether they may kick other members of a
-              channel.
+     p = Paranoia. Controls whether halfops may invite users into a channel or
+         whether they may kick other members of a channel.
 
-     +m     - Moderated. This will prevent any user who isn't opped,
-              half-opped or voiced (+o/+h/+v) from talking in the channel.
+     m = Moderated. This will prevent any user who isn't opped, half-opped or
+         voiced (+o/+h/+v) from talking in the channel.
 
-     +i     - Invite only. This will prevent anyone from joining your
-              channel who hasn't received an /invite or whose host isn't in
-              the +I list.
+     i = Invite only. This will prevent anyone from joining the channel who
+         hasn't received an /invite or whose host isn't in the +I list.
 
-     +r     - Registered. Channel has been registered with ChanServ.
-              Can be set only by servers and services.
+     r = Registered. Channel has been registered with ChanServ.
+         Can be set only by servers and services.
 
-     +C     - No CTCPs. Prevent users from sending CTCPs to the channel.
+     C = No CTCPs. Prevent users from sending CTCPs to the channel.
 
-     +K     - No KNOCK. KNOCK cannot be used on the channel.
+     K = No KNOCK. KNOCK cannot be used on the channel.
 
-     +L     - Large ban list. Channel can make use of the extended ban list
-              limit. Can be set only by irc-operators, servers and services.
+     L = Large ban list. Channel can make use of the extended ban list limit.
+         Can be set only by irc-operators, servers and services.
 
-     +M     - Modreg. Unregistered/unidentified clients cannot send text to
-              the channel
+     M = Modreg. Users that are not logged into a services account cannot send
+         text to the channel.
 
-     +N     - No nick changes. This will prevent any user who isn't opped,
-              half-opped or voiced (+o/+h/+v) from changing their nick while
-              in the channel.
+     N = No nick changes. This will prevent any user who isn't opped,
+         half-opped or voiced (+o/+h/+v) from changing their nick while
+         in the channel.
 
-     +O     - IRC operators only. This will prevent anyone who hasn't obtained
-              irc-operator status from joining your channel. Can be set only
-              by irc-operators, servers and services.
+     O = IRC operators only. This will prevent anyone who hasn't obtained
+         irc-operator status from joining the channel. Can be set only
+         by irc-operators, servers and services.
 
-     +R     - Registered only. Only registered clients may join a channel
-              with that mode set
+     R = Registered only. Only users that are logged into a services account
+         may join the channel.
 
-     +S     - Secure only. This will prevent anyone who isn't securely connected
-              via TLS from joining your channel.
+     S = Secure only. This will prevent anyone who isn't securely connected via
+         TLS (Transport Layer Security) from joining the channel.
 
-     +T     - No notices. This will prevent any user who isn't opped,
-              half-opped or voiced (+o/+h/+v) from sending channel notices.
+     T = No notices. This will prevent any user who isn't opped,
+         half-opped or voiced (+o/+h/+v) from sending channel notices.
 
 
 WITH PARAMETERS:
 ----------------
 
-     +k     - Key. This will require users joining to know the key,
-              they must then use /join #channel KEY
+     k = Key. This will require users joining to know the key, they must then
+         use /join #channel KEY
 
-              PARAMS: /mode #channel +k key
+         PARAMS: /mode #channel +k key
 
-     +l     - Limit. This will prevent more than LIMIT number of people
-              in the channel at any time.
+     l = Limit. This will prevent more than LIMIT number of people in the
+         channel at any time.
 
-              PARAMS: /mode #channel +l limit
+         PARAMS: /mode #channel +l limit
 
-     +v     - Voice. This will allow a user to talk in a moderated (+m)
-              channel. Shown by the +nick flag.
+     v = Voice. This will allow a user to talk in a moderated (+m) channel.
+         Shown by the +nick flag.
 
-              PARAMS: /mode #channel +vvvv nick1 nick2 nick3 nick4
+         PARAMS: /mode #channel +vvvv nick1 nick2 nick3 nick4
 
-     +h     - Half-op. This will allow a user to set all of the above
-              modes, (and some more below..), whilst stopping the user
-              from doing harm to the channel. Users who are +h CANNOT
-              kick opped (+o) users, or set modes +h/-h/+o/-o.
+     h = Half-op. This will allow a user to set all of the above modes, (and
+         some more below..), whilst stopping the user from doing harm to the
+         channel. Users who are +h cannot kick opped (+o) users, or set
+         modes +h/-h/+o/-o.
 
-              They can perform all other modes, and can kick regular users.
+         They can perform all other modes, and can kick regular users.
 
-              PARAMS: /mode #channel +hhhh nick1 nick2 nick3 nick4
+         PARAMS: /mode #channel +hhhh nick1 nick2 nick3 nick4
 
-     +o     - Op. This gives the user full control over the channel.
-              An opped user may op other users, set any mode, and
-              remove ops from whoever they want.
+     o = Op. This gives the user full control over the channel. An opped user
+         may op other users, set any mode, and remove ops from whoever they
+         want.
 
-              PARAMS: /mode #channel +oooo nick1 nick2 nick3 nick4
+         PARAMS: /mode #channel +oooo nick1 nick2 nick3 nick4
 
-     +a     - Admin. This gives the user control over opped, half-opped,
-              voiced, and regular users. A admin may op other users, set
-              any mode except +q and +a, and remove ops from whoever they
-              want.
+     a = Admin. This gives the user control over opped, half-opped, voiced, and
+         regular users. A admin may op other users, set any mode except +q and
+         +a, and remove ops from whoever they want.
 
-              PARAMS: /mode #channel +aaaa nick1 nick2 nick3 nick4
+         PARAMS: /mode #channel +aaaa nick1 nick2 nick3 nick4
 
-     +q     - Owner. This gives the user full control over the channel.
-              An owner may owner/admin/op/half-op/voice other users, set any
-              mode, and remove owner/admin/op/half-op/voice from whomever they
-              want.
+     q = Owner. This gives the user full control over the channel. An owner may
+         owner/admin/op/half-op/voice other users, set any mode, and remove
+         owner/admin/op/half-op/voice from whomever they want.
 
-              PARAMS: /mode #channel +qqqq nick1 nick2 nick3 nick4
+         PARAMS: /mode #channel +qqqq nick1 nick2 nick3 nick4
 
-     +b     - Ban. This will prevent a user from entering the channel,
-              based on a nick!ident@host match.
+     b = Ban. This will prevent a user from entering the channel, based on a
+         nick!ident@host match.
 
-              PARAMS: /mode #channel +bbbb n!u@h1b n!u@h2b n!u@h3b n!u@h4
+         PARAMS: /mode #channel +bbbb n!u@h1b n!u@h2b n!u@h3b n!u@h4
 
-     +e     - Exempt. This will allow a user to join a channel even if
-              they are banned (+b), based on a nick!ident@host match.
+     e = Exempt. This will allow a user to join a channel even if they are
+         banned (+b), based on a nick!ident@host match.
 
-              PARAMS: /mode #channel +eeee n!u@h1b n!u@h2b n!u@h3b n!u@h4
+         PARAMS: /mode #channel +eeee n!u@h1b n!u@h2b n!u@h3b n!u@h4
 
-     +I     - Invite exempt. This will allow a user to join an
-              invite-only (+i) channel, based on a nick!user@host match.
+     I = Invite exempt. This will allow a user to join an invite-only (+i)
+         channel, based on a nick!user@host match.
 
-              PARAMS: /mode #channel +IIII n!u@h1b n!u@h2b n!u@h3b n!u@h4
+         PARAMS: /mode #channel +IIII n!u@h1b n!u@h2b n!u@h3b n!u@h4

@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "channel.h"
+#include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
@@ -228,6 +229,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                          me.name, channel->name, channel->name, oldts, newts);
 
     channel_demote_members(channel, origin);
+
+    invite_clear_list(&channel->invites);
 
     channel_set_mode_lock(source_p->from, channel, NULL, false);
 

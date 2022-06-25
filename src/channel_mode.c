@@ -379,16 +379,20 @@ enum
   SM_ERR_RPL_I        = 1 << 4,
   SM_ERR_NOTONCHANNEL = 1 << 5,  /* Client is not on channel */
   SM_ERR_NOTOPER      = 1 << 6,  /* Only irc-operators can change that mode */
-  SM_ERR_ONLYSERVER   = 1 << 7   /* Only servers or services can change that mode */
+  SM_ERR_ONLYSERVER   = 1 << 7,  /* Only servers or services can change that mode */
+  SM_ERR_MLOCK        = 1 << 8,
 };
 
 static bool
 channel_mode_can_change(struct Client *client, struct Channel *channel, int *errors, int rank,
                         const char c, const struct chan_mode *mode)
 {
+  if (!MyClient(client))
+    return true;
+
   if (mode->only_opers == true)
   {
-    if (MyClient(client) && !HasUMode(client, UMODE_OPER))
+    if (!HasUMode(client, UMODE_OPER))
     {
       if (!(*errors & SM_ERR_NOTOPER))
         sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
@@ -420,6 +424,16 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
                          ERR_CHANOPRIVSNEEDED, channel->name);
 
     *errors |= SM_ERR_NOOPS;
+    return false;
+  }
+
+  if (channel->mode_lock && strchr(channel->mode_lock, c))
+  {
+    if (!(*errors & SM_ERR_MLOCK))
+      sendto_one_numeric(client, &me, ERR_MLOCKRESTRICTED,
+                         channel->name, c, channel->mode_lock);
+
+    *errors |= SM_ERR_MLOCK;
     return false;
   }
 

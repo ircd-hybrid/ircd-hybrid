@@ -189,6 +189,12 @@ m_message_la_OBJECTS = $(am_m_message_la_OBJECTS)
 m_message_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_message_la_LDFLAGS) $(LDFLAGS) -o $@
+m_mlock_la_LIBADD =
+am_m_mlock_la_OBJECTS = m_mlock.lo
+m_mlock_la_OBJECTS = $(am_m_mlock_la_OBJECTS)
+m_mlock_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_mlock_la_LDFLAGS) $(LDFLAGS) -o $@
 m_mode_la_LIBADD =
 am_m_mode_la_OBJECTS = m_mode.lo
 m_mode_la_OBJECTS = $(am_m_mode_la_OBJECTS)
@@ -255,11 +261,11 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/m_bmask.Plo ./$(DEPDIR)/m_die.Plo \
 	./$(DEPDIR)/m_error.Plo ./$(DEPDIR)/m_join.Plo \
 	./$(DEPDIR)/m_kick.Plo ./$(DEPDIR)/m_kill.Plo \
-	./$(DEPDIR)/m_message.Plo ./$(DEPDIR)/m_mode.Plo \
-	./$(DEPDIR)/m_nick.Plo ./$(DEPDIR)/m_part.Plo \
-	./$(DEPDIR)/m_quit.Plo ./$(DEPDIR)/m_server.Plo \
-	./$(DEPDIR)/m_sjoin.Plo ./$(DEPDIR)/m_squit.Plo \
-	./$(DEPDIR)/m_tmode.Plo
+	./$(DEPDIR)/m_message.Plo ./$(DEPDIR)/m_mlock.Plo \
+	./$(DEPDIR)/m_mode.Plo ./$(DEPDIR)/m_nick.Plo \
+	./$(DEPDIR)/m_part.Plo ./$(DEPDIR)/m_quit.Plo \
+	./$(DEPDIR)/m_server.Plo ./$(DEPDIR)/m_sjoin.Plo \
+	./$(DEPDIR)/m_squit.Plo ./$(DEPDIR)/m_tmode.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -282,17 +288,19 @@ am__v_CCLD_1 =
 SOURCES = $(m_bmask_la_SOURCES) $(m_die_la_SOURCES) \
 	$(m_error_la_SOURCES) $(m_join_la_SOURCES) \
 	$(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
-	$(m_message_la_SOURCES) $(m_mode_la_SOURCES) \
-	$(m_nick_la_SOURCES) $(m_part_la_SOURCES) $(m_quit_la_SOURCES) \
-	$(m_server_la_SOURCES) $(m_sjoin_la_SOURCES) \
-	$(m_squit_la_SOURCES) $(m_tmode_la_SOURCES)
+	$(m_message_la_SOURCES) $(m_mlock_la_SOURCES) \
+	$(m_mode_la_SOURCES) $(m_nick_la_SOURCES) $(m_part_la_SOURCES) \
+	$(m_quit_la_SOURCES) $(m_server_la_SOURCES) \
+	$(m_sjoin_la_SOURCES) $(m_squit_la_SOURCES) \
+	$(m_tmode_la_SOURCES)
 DIST_SOURCES = $(m_bmask_la_SOURCES) $(m_die_la_SOURCES) \
 	$(m_error_la_SOURCES) $(m_join_la_SOURCES) \
 	$(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
-	$(m_message_la_SOURCES) $(m_mode_la_SOURCES) \
-	$(m_nick_la_SOURCES) $(m_part_la_SOURCES) $(m_quit_la_SOURCES) \
-	$(m_server_la_SOURCES) $(m_sjoin_la_SOURCES) \
-	$(m_squit_la_SOURCES) $(m_tmode_la_SOURCES)
+	$(m_message_la_SOURCES) $(m_mlock_la_SOURCES) \
+	$(m_mode_la_SOURCES) $(m_nick_la_SOURCES) $(m_part_la_SOURCES) \
+	$(m_quit_la_SOURCES) $(m_server_la_SOURCES) \
+	$(m_sjoin_la_SOURCES) $(m_squit_la_SOURCES) \
+	$(m_tmode_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -474,6 +482,7 @@ m_join_la_LDFLAGS = $(MODULE_FLAGS)
 m_kick_la_LDFLAGS = $(MODULE_FLAGS)
 m_kill_la_LDFLAGS = $(MODULE_FLAGS)
 m_message_la_LDFLAGS = $(MODULE_FLAGS)
+m_mlock_la_LDFLAGS = $(MODULE_FLAGS)
 m_mode_la_LDFLAGS = $(MODULE_FLAGS)
 m_nick_la_LDFLAGS = $(MODULE_FLAGS)
 m_part_la_LDFLAGS = $(MODULE_FLAGS)
@@ -489,6 +498,7 @@ m_join_la_SOURCES = m_join.c
 m_kick_la_SOURCES = m_kick.c
 m_kill_la_SOURCES = m_kill.c
 m_message_la_SOURCES = m_message.c
+m_mlock_la_SOURCES = m_mlock.c
 m_mode_la_SOURCES = m_mode.c
 m_nick_la_SOURCES = m_nick.c
 m_part_la_SOURCES = m_part.c
@@ -504,6 +514,7 @@ modules_LTLIBRARIES = m_bmask.la   \
                       m_kick.la    \
                       m_kill.la    \
                       m_message.la \
+                      m_mlock.la   \
                       m_mode.la    \
                       m_nick.la    \
                       m_part.la    \
@@ -603,6 +614,9 @@ m_kill.la: $(m_kill_la_OBJECTS) $(m_kill_la_DEPENDENCIES) $(EXTRA_m_kill_la_DEPE
 m_message.la: $(m_message_la_OBJECTS) $(m_message_la_DEPENDENCIES) $(EXTRA_m_message_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_message_la_LINK) -rpath $(modulesdir) $(m_message_la_OBJECTS) $(m_message_la_LIBADD) $(LIBS)
 
+m_mlock.la: $(m_mlock_la_OBJECTS) $(m_mlock_la_DEPENDENCIES) $(EXTRA_m_mlock_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_mlock_la_LINK) -rpath $(modulesdir) $(m_mlock_la_OBJECTS) $(m_mlock_la_LIBADD) $(LIBS)
+
 m_mode.la: $(m_mode_la_OBJECTS) $(m_mode_la_DEPENDENCIES) $(EXTRA_m_mode_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_mode_la_LINK) -rpath $(modulesdir) $(m_mode_la_OBJECTS) $(m_mode_la_LIBADD) $(LIBS)
 
@@ -640,6 +654,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_kick.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_kill.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_message.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_mlock.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_mode.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_nick.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_part.Plo@am__quote@ # am--include-marker
@@ -819,6 +834,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/m_kick.Plo
 	-rm -f ./$(DEPDIR)/m_kill.Plo
 	-rm -f ./$(DEPDIR)/m_message.Plo
+	-rm -f ./$(DEPDIR)/m_mlock.Plo
 	-rm -f ./$(DEPDIR)/m_mode.Plo
 	-rm -f ./$(DEPDIR)/m_nick.Plo
 	-rm -f ./$(DEPDIR)/m_part.Plo
@@ -879,6 +895,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/m_kick.Plo
 	-rm -f ./$(DEPDIR)/m_kill.Plo
 	-rm -f ./$(DEPDIR)/m_message.Plo
+	-rm -f ./$(DEPDIR)/m_mlock.Plo
 	-rm -f ./$(DEPDIR)/m_mode.Plo
 	-rm -f ./$(DEPDIR)/m_nick.Plo
 	-rm -f ./$(DEPDIR)/m_part.Plo

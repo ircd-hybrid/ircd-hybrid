@@ -229,6 +229,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
     channel_demote_members(channel, origin);
 
+    channel_set_mode_lock(source_p->from, channel, NULL, false);
+
     if (modebuf[0])
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                            origin->name, channel->name, modebuf, parabuf);

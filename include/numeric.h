@@ -242,6 +242,7 @@ enum irc_numerics
   RPL_MONLIST              = 732,
   RPL_ENDOFMONLIST         = 733,
   ERR_MONLISTFULL          = 734,
+  ERR_MLOCKRESTRICTED      = 742,
   ERR_INVALIDBAN           = 743,
   RPL_ETRACEEND            = 759,
   ERR_LAST_ERR_MSG         = 999

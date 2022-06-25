@@ -12,6 +12,7 @@ m_join_la_LDFLAGS = $(MODULE_FLAGS)
 m_kick_la_LDFLAGS = $(MODULE_FLAGS)
 m_kill_la_LDFLAGS = $(MODULE_FLAGS)
 m_message_la_LDFLAGS = $(MODULE_FLAGS)
+m_mlock_la_LDFLAGS = $(MODULE_FLAGS)
 m_mode_la_LDFLAGS = $(MODULE_FLAGS)
 m_nick_la_LDFLAGS = $(MODULE_FLAGS)
 m_part_la_LDFLAGS = $(MODULE_FLAGS)
@@ -28,6 +29,7 @@ m_join_la_SOURCES = m_join.c
 m_kick_la_SOURCES = m_kick.c
 m_kill_la_SOURCES = m_kill.c
 m_message_la_SOURCES = m_message.c
+m_mlock_la_SOURCES = m_mlock.c
 m_mode_la_SOURCES = m_mode.c
 m_nick_la_SOURCES = m_nick.c
 m_part_la_SOURCES = m_part.c
@@ -44,6 +46,7 @@ modules_LTLIBRARIES = m_bmask.la   \
                       m_kick.la    \
                       m_kill.la    \
                       m_message.la \
+                      m_mlock.la   \
                       m_mode.la    \
                       m_nick.la    \
                       m_part.la    \

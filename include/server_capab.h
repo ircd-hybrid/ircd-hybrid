@@ -44,6 +44,7 @@ enum
   CAPAB_AOP     = 1 << 11,  /**< Server supports the admin (&) channel prefix mode */
   CAPAB_HOP     = 1 << 12,  /**< Server supports the half-op (%) channel prefix mode */
   CAPAB_RESYNC  = 1 << 13,  /**< Can do RESYNC message */
+  CAPAB_MLOCK   = 1 << 14,  /**< Supports mode locking (MLOCK) */
 };
 
 /*

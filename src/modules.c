@@ -55,6 +55,7 @@ static const char *const core_module_table[] =
   "m_kick.la",
   "m_kill.la",
   "m_message.la",
+  "m_mlock.la",
   "m_mode.la",
   "m_nick.la",
   "m_part.la",

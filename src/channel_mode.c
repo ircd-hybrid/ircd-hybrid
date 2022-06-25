@@ -382,6 +382,50 @@ enum
   SM_ERR_ONLYSERVER   = 1 << 7   /* Only servers or services can change that mode */
 };
 
+static bool
+channel_mode_can_change(struct Client *client, struct Channel *channel, int *errors, int rank,
+                        const char c, const struct chan_mode *mode)
+{
+  if (mode->only_opers == true)
+  {
+    if (MyClient(client) && !HasUMode(client, UMODE_OPER))
+    {
+      if (!(*errors & SM_ERR_NOTOPER))
+        sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
+
+      *errors |= SM_ERR_NOTOPER;
+      return false;
+    }
+  }
+
+  if (mode->only_servers == true)
+  {
+    if (!IsServer(client) && !HasFlag(client, FLAGS_SERVICE))
+    {
+      if (!(*errors & SM_ERR_ONLYSERVER))
+        sendto_one_numeric(client, &me,
+                           rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                           ERR_ONLYSERVERSCANCHANGE, channel->name);
+
+      *errors |= SM_ERR_ONLYSERVER;
+      return false;
+    }
+  }
+
+  if (rank < mode->required_rank)
+  {
+    if (!(*errors & SM_ERR_NOOPS))
+      sendto_one_numeric(client, &me,
+                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
+                         ERR_CHANOPRIVSNEEDED, channel->name);
+
+    *errors |= SM_ERR_NOOPS;
+    return false;
+  }
+
+  return true;
+}
+
 /* Mode functions handle mode changes for a particular mode... */
 static void
 chm_nosuch(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
@@ -398,42 +442,8 @@ static void
 chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
            int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (mode->only_opers == true)
-  {
-    if (MyClient(client) && !HasUMode(client, UMODE_OPER))
-    {
-      if (!(*errors & SM_ERR_NOTOPER))
-        sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-
-      *errors |= SM_ERR_NOTOPER;
-      return;
-    }
-  }
-
-  if (mode->only_servers == true)
-  {
-    if (!IsServer(client) && !HasFlag(client, FLAGS_SERVICE))
-    {
-      if (!(*errors & SM_ERR_ONLYSERVER))
-        sendto_one_numeric(client, &me,
-                           rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                           ERR_ONLYSERVERSCANCHANGE, channel->name);
-
-      *errors |= SM_ERR_ONLYSERVER;
-      return;
-    }
-  }
-
-  if (rank < mode->required_rank)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(client, &me,
-                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, channel->name);
-
-    *errors |= SM_ERR_NOOPS;
+  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
     return;
-  }
 
   /* If have already dealt with this simple mode, ignore it */
   if (simple_modes_mask & mode->mode)
@@ -514,16 +524,8 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     return;
   }
 
-  if (rank < mode->required_rank)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(client, &me,
-                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, channel->name);
-
-    *errors |= SM_ERR_NOOPS;
+  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
     return;
-  }
 
   if (MyClient(client) && (++mode_limit > MAXMODEPARAMS))
     return;
@@ -561,16 +563,8 @@ static void
 chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (rank < mode->required_rank)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(client, &me,
-                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, channel->name);
-
-    *errors |= SM_ERR_NOOPS;
+  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
     return;
-  }
 
   if (dir == MODE_QUERY || parc <= *parn)
     return;
@@ -617,16 +611,8 @@ static void
 chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
           int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (rank < mode->required_rank)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(client, &me,
-                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, channel->name);
-
-    *errors |= SM_ERR_NOOPS;
+  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
     return;
-  }
 
   if (dir == MODE_QUERY)
     return;
@@ -671,16 +657,8 @@ static void
 chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (rank < mode->required_rank)
-  {
-    if (!(*errors & SM_ERR_NOOPS))
-      sendto_one_numeric(client, &me,
-                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, channel->name);
-
-    *errors |= SM_ERR_NOOPS;
+  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
     return;
-  }
 
   if (dir == MODE_QUERY)
     return;

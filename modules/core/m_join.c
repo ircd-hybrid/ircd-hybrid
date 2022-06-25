@@ -171,7 +171,6 @@ static void
 ms_join(struct Client *source_p, int parc, char *parv[])
 {
   bool keep_our_modes = true;
-  bool isnew = false;
 
   if (!IsClient(source_p))
     return;
@@ -196,7 +195,6 @@ ms_join(struct Client *source_p, int parc, char *parv[])
       return;
     }
 
-    isnew = true;
     channel = channel_make(parv[2]);
     channel->creation_time = newts;
   }

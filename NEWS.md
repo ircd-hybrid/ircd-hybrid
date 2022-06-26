@@ -11,6 +11,7 @@
 * Channel half-ops may now kick other half-ops
 * Extban `$K` of type acting has been implemented. This extban prevents
   matching users from using the `KNOCK` command.
+* Server-side channel mode locking `MLOCK` has been implemented
 
 
 #### Noteworthy changes in version 8.2.39 (2021-08-14)

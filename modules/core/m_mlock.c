@@ -59,10 +59,12 @@ ms_mlock(struct Client *source_p, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
-    return;
+  if (strtoumax(parv[1], NULL, 10) <= channel->creation_time)
+    channel_set_mode_lock(source_p, channel, parv[3]);
 
-  channel_set_mode_lock(source_p, channel, parv[3], true);
+  sendto_server(source_p, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s :%s",
+                source_p->id, channel->creation_time, channel->name,
+                channel->mode_lock ? channel->mode_lock : "");
 }
 
 static struct Message mlock_msgtab =

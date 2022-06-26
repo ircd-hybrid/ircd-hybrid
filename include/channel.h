@@ -146,7 +146,7 @@ extern void channel_send_modes(struct Client *, const struct Channel *);
 extern const char *channel_modes(const struct Channel *, const struct Client *, bool);
 extern void check_spambot_warning(struct Client *, const char *);
 extern void channel_free(struct Channel *);
-extern void channel_set_mode_lock(struct Client *, struct Channel *, const char *, bool);
+extern void channel_set_mode_lock(struct Client *, struct Channel *, const char *);
 extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, bool);
 
 extern const char *member_get_prefix(const struct ChannelMember *, bool);

@@ -318,7 +318,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     clear_ban_cache_list(&channel->members_local);
     invite_clear_list(&channel->invites);
 
-    channel_set_mode_lock(source_p, channel, NULL, false);
+    channel_set_mode_lock(source_p, channel, NULL);
 
     if (channel->topic[0])
     {

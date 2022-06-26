@@ -315,6 +315,11 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
                me.id, channel->creation_time,
                channel->name, channel->topic_time,
                channel->topic_info, channel->topic);
+
+  if (IsCapable(client, CAPAB_MLOCK))
+    sendto_one(client, ":%s MLOCK %ju %s :%s",
+               me.id, channel->creation_time, channel->name,
+               channel->mode_lock == NULL ? "" : channel->mode_lock);
 }
 
 /*! \brief Check channel name for invalid characters
@@ -999,22 +1004,16 @@ channel_set_topic(struct Channel *channel, const char *topic,
  * \param client     Pointer to struct Client
  * \param channel    Pointer to struct Channel
  * \param mode_lock  The modes to lock as a string. Can be NULL.
- * \param propagate  Whether or not the MLOCK should be distributed to other servers
  */
 void
 channel_set_mode_lock(struct Client *client, struct Channel *channel,
-                      const char *mode_lock, bool propagate)
+                      const char *mode_lock)
 {
   xfree(channel->mode_lock);
   channel->mode_lock = NULL;
 
   if (!EmptyString(mode_lock))
     channel->mode_lock = xstrdup(mode_lock);
-
-  if (propagate == true)
-    sendto_server(client, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s :%s",
-                  client->id, channel->creation_time, channel->name,
-                  channel->mode_lock ? channel->mode_lock : "");
 }
 
 void

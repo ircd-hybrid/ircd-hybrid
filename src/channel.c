@@ -317,8 +317,8 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
                channel->topic_info, channel->topic);
 
   if (IsCapable(client, CAPAB_MLOCK))
-    sendto_one(client, ":%s MLOCK %ju %s :%s",
-               me.id, channel->creation_time, channel->name,
+    sendto_one(client, ":%s MLOCK %ju %s %ju :%s",
+               me.id, channel->creation_time, channel->name, channel->mode_lock_time,
                channel->mode_lock == NULL ? "" : channel->mode_lock);
 }
 

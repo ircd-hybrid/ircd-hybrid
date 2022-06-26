@@ -77,6 +77,7 @@ struct Channel
 
   uintmax_t creation_time;  /**< Real time */
   uintmax_t topic_time;  /**< Real time */
+  uintmax_t mode_lock_time;  /**< Real time; this gets set by services only */
   uintmax_t last_knock_time;  /**< Don't allow knock to flood; monotonic time */
   uintmax_t last_invite_time;  /**< Monotonic time */
   uintmax_t last_join_time;  /**< Monotonic time */

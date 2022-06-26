@@ -48,7 +48,8 @@
  *      - parv[0] = command
  *      - parv[1] = timestamp
  *      - parv[2] = channel name
- *      - parv[3] = modes to be locked
+ *      - parv[3] = timestamp of the mode lock
+ *      - parv[4] = modes to be locked
  */
 static void
 ms_mlock(struct Client *source_p, int parc, char *parv[])
@@ -60,10 +61,15 @@ ms_mlock(struct Client *source_p, int parc, char *parv[])
     return;
 
   if (strtoumax(parv[1], NULL, 10) <= channel->creation_time)
-    channel_set_mode_lock(source_p, channel, parv[3]);
+    channel_set_mode_lock(source_p, channel, parv[4]);
 
-  sendto_server(source_p, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s :%s",
+  uintmax_t timestamp = strtoumax(parv[3], NULL, 10);
+  if (timestamp)
+    channel->mode_lock_time = timestamp;
+
+  sendto_server(source_p, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
                 source_p->id, channel->creation_time, channel->name,
+                channel->mode_lock_time,
                 channel->mode_lock ? channel->mode_lock : "");
 }
 
@@ -72,7 +78,7 @@ static struct Message mlock_msgtab =
   .cmd = "MLOCK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_mlock, .args_min = 3, .empty_last_arg = true },
+  .handlers[SERVER_HANDLER] = { .handler = ms_mlock, .args_min = 5, .empty_last_arg = true },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };

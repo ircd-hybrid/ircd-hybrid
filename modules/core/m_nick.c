@@ -351,7 +351,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
   strlcpy(client_p->account, parv[10], sizeof(client_p->account));
   strlcpy(client_p->info, parv[11], sizeof(client_p->info));
 
-  struct addrinfo hints, *res;
+  struct addrinfo hints, *res = NULL;
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
   hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;

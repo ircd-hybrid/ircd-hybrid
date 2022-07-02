@@ -313,9 +313,6 @@ m_who(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  /* Mask isn't NULL at this point. repeat after me... -db */
-  collapse(mask);
-
   /* '/who #some_channel' */
   if (IsChanPrefix(*mask))
   {
@@ -352,6 +349,9 @@ m_who(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
     return;
   }
+
+  /* Mask isn't NULL at this point. repeat after me... -db */
+  collapse(mask);
 
   /* '/who *' */
   if (strcmp(mask, "*") == 0)

@@ -36,6 +36,7 @@
 #include "server.h"
 #include "send.h"
 #include "conf.h"
+#include "conf_service.h"
 #include "parse.h"
 #include "modules.h"
 
@@ -72,7 +73,16 @@ do_whowas(struct Client *source_p, char *parv[])
       if (strcmp(whowas->account, "*"))
         sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, whowas->name, whowas->account, "was");
 
-      if ((whowas->server_hidden || ConfigServerHide.hide_servers) && !HasUMode(source_p, UMODE_OPER))
+      bool server_hidden = false;
+      if (!HasUMode(source_p, UMODE_OPER))
+      {
+        if (whowas->server_hidden || ConfigServerHide.hide_servers)
+          server_hidden = true;
+        else if (ConfigServerHide.hide_services && service_find(whowas->servername, irccmp))
+          server_hidden = true;
+      }
+
+      if (server_hidden == true)
         sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, whowas->name,
                            ConfigServerInfo.network_name, date_ctime(whowas->logoff));
       else

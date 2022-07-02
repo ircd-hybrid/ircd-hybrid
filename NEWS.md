@@ -12,6 +12,7 @@
 * Extban `$K` of type acting has been implemented. This extban prevents
   matching users from using the `KNOCK` command.
 * Server-side channel mode locking `MLOCK` has been implemented
+* Fixed server name leak in `WHOWAS` with `serverhide::hide_services` enabled
 
 
 #### Noteworthy changes in version 8.2.39 (2021-08-14)

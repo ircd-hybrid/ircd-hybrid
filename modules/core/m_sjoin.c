@@ -150,7 +150,7 @@ remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list
   char *mbuf;
   char *pbuf;
   int count = 0;
-  int cur_len, mlen;
+  size_t cur_len, mlen;
 
   if (dlink_list_length(list) == 0)
     return;
@@ -334,9 +334,9 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
 
   char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */
-  const int buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s :",
-                              source_p->id, channel->creation_time, channel->name,
-                              channel_modes(channel, source_p, true));
+  const size_t buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s :",
+                                 source_p->id, channel->creation_time, channel->name,
+                                 channel_modes(channel, source_p, true));
   char *uid_ptr = uid_buf + buflen;
 
 

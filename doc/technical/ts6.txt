@@ -1,5 +1,3 @@
-$Id$
-
 TS6 Proposal (v8)
 Written by Lee H <lee@leeh.co.uk>
 Ideas borrowed heavily from ircnet (Beeth, jv, Q)

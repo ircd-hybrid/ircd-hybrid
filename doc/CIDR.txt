@@ -1,5 +1,3 @@
-$Id$
-
 CIDR Information
 ----------------
   Presently, we all use IPv4.  The format of IPv4 is the following:

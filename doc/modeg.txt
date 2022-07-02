@@ -108,4 +108,3 @@ Client Hwy-LL: /accept -SpamBot,*!*@services.example.net
 Hwy-LL will now only accept messages from Hwy101 and services.
 
 W. Campbell
-$Id$

@@ -1,7 +1,5 @@
                              Server Hide Reference
 
-   $Id$
-
    Copyright (c) 2001-2022 ircd-hybrid development team
 
      ----------------------------------------------------------------------

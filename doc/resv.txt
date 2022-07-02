@@ -3,8 +3,6 @@
  * Lee Hardy <lee@leeh.co.uk>
  *
  * Copyright (c) 2001-2022 ircd-hybrid development team
- *
- * $Id$
  */
 
 				RESV

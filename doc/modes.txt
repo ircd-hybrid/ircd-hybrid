@@ -77,6 +77,3 @@ Channel Modes:
 
 The third part of the 004 numeric lists channel modes that require arguments.
 Currently these are Ibehklov.
-
-
-# $Id$

@@ -1,8 +1,6 @@
   Overview of the TS5 system
   Lee H <lee@leeh.co.uk>
 
-$Id$
-
 For the purposes of this document, ircd versions:
   hybrid6.0
   ircd-comstud-1.12

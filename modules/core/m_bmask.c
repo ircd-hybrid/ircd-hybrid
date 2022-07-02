@@ -61,7 +61,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   const char *mask;
   char *s, *t, *mbuf, *pbuf;
   dlink_list *list = NULL;
-  int mlen = 0, tlen = 0;
+  size_t mlen = 0, tlen = 0;
   int modecount = 0;
   unsigned int type = 0;
 

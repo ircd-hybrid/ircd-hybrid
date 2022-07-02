@@ -1,7 +1,7 @@
 ## ircd-hybrid installation instructions
 
-1.  Read the `NEWS.md` file to find out about the exciting new features in this
-    version. Other good reads are `doc/reference.conf`, and `README.md`.
+1.  Read the [NEWS.md](NEWS.md) file to find out about the exciting new features in this
+    version. Other good reads are [doc/reference.conf](doc/reference.conf), and [README.md](README.md)
 
 2.  Run the configure script. It will create `config.h` and the
     Makefiles to match your system. The paths are now handled

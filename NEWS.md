@@ -1,4 +1,4 @@
-#### Noteworthy changes in version 8.2.40 (2021-??-??)
+#### Noteworthy changes in version 8.2.40 (2022-07-02)
 * `channel::disable_fake_channels` now also blocks strikethrough text (0x1E (30))
 * `KNOCK` can now be used on private channels. Channel mode `K` may be used instead
   to control whether or not `KNOCK` is allowed on a channel.

@@ -57,7 +57,7 @@ static void
 do_who(struct Client *source_p, const struct Client *target_p,
        const char *name, const char *op_flags)
 {
-  char status[8];  /* sizeof("GBr*@%+") + 1 */
+  char status[10];  /* sizeof("GBr*~&@%+") + 1 */
 
   if (HasUMode(source_p, UMODE_OPER))
     snprintf(status, sizeof(status), "%c%s%s%s%s", target_p->away[0] ? 'G' : 'H',

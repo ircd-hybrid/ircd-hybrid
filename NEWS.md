@@ -1,6 +1,7 @@
 #### Noteworthy changes in version 8.2.41 (2022-??-??)
 * Fixed issue where `WHO` didn't work on channel names with two or more consequent
   asterisk characters
+* IRCv3 WHOX has been implemented
 
 
 #### Noteworthy changes in version 8.2.40 (2022-07-02)

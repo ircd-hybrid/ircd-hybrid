@@ -136,6 +136,7 @@ enum irc_numerics
   RPL_VERSION              = 351,
   RPL_WHOREPLY             = 352,
   RPL_NAMREPLY             = 353,
+  RPL_WHOSPCRPL            = 354,
   RPL_CLOSING              = 362,
   RPL_CLOSEEND             = 363,
   RPL_LINKS                = 364,

@@ -300,13 +300,13 @@ who_on_common_channel(struct Client *source_p, struct Channel *channel, const ch
 
     AddFlag(target_p, FLAGS_MARK);
 
-    if (who_matches(source_p, target_p, mask, who) == true)
+    if (who->maxmatches)
     {
-      who_send(source_p, target_p, member, who);
-
-      if (who->maxmatches)
-        if (--who->maxmatches == 0)
-          return;
+      if (who_matches(source_p, target_p, mask, who) == true)
+      {
+        who_send(source_p, target_p, member, who);
+        --who->maxmatches;
+      }
     }
   }
 }
@@ -357,13 +357,13 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
       continue;
     }
 
-    if (who_matches(source_p, target_p, mask, who) == true)
+    if (who->maxmatches)
     {
-      who_send(source_p, target_p, NULL, who);
-
-      if (who->maxmatches)
-        if (--who->maxmatches == 0)
-          return;
+      if (who_matches(source_p, target_p, mask, who) == true)
+      {
+        who_send(source_p, target_p, NULL, who);
+        --who->maxmatches;
+      }
     }
   }
 }

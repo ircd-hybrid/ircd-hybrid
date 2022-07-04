@@ -546,16 +546,10 @@ m_who(struct Client *source_p, int parc, char *parv[])
         do_who_on_channel(source_p, channel, true, who);
       else if (!SecretChannel(channel))
         do_who_on_channel(source_p, channel, false, who);
-
-      sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
-      return;
     }
 
-    /*
-     * From rfc1459, 4.5.1 Who query:
-     * The <name> passed to WHO is matched against users' host, server, real
-     * name and nickname if the channel <name> cannot be found.
-     */
+    sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
+    return;
   }
 
   collapse(mask);

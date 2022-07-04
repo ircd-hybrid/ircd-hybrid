@@ -275,7 +275,8 @@ who_on_common_channel(struct Client *source_p, struct Channel *channel, const ch
 
   DLINK_FOREACH(node, channel->members.head)
   {
-    struct Client *target_p = ((struct ChannelMember *)node->data)->client;
+    struct ChannelMember *member = node->data;
+    struct Client *target_p = member->client;
 
     if (!HasUMode(target_p, UMODE_INVISIBLE) || HasFlag(target_p, FLAGS_MARK))
       continue;
@@ -284,7 +285,7 @@ who_on_common_channel(struct Client *source_p, struct Channel *channel, const ch
 
     if (who_matches(source_p, target_p, mask, who) == true)
     {
-      who_send(source_p, target_p, NULL, who);
+      who_send(source_p, target_p, member, who);
 
       if (who->maxmatches)
         if (--who->maxmatches == 0)
@@ -322,8 +323,8 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
   /* First, list all matching invisible clients on common channels */
   DLINK_FOREACH(node, source_p->channel.head)
   {
-    struct Channel *channel = ((struct ChannelMember *)node->data)->channel;
-    who_on_common_channel(source_p, channel, mask, who);
+    struct ChannelMember *member = node->data;
+    who_on_common_channel(source_p, member->channel, mask, who);
   }
 
   /* Second, list all matching visible clients */

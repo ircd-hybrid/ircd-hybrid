@@ -52,7 +52,7 @@ enum
 
 enum
 {
-  WHO_FIELD_QTY = 1 <<  0,  /**< Display query type. */
+  WHO_FIELD_QTO = 1 <<  0,  /**< Display query token. */
   WHO_FIELD_CHA = 1 <<  1,  /**< Show common channel name. */
   WHO_FIELD_UID = 1 <<  2,  /**< Show username. */
   WHO_FIELD_NIP = 1 <<  3,  /**< Show IP address. */
@@ -69,13 +69,13 @@ enum
   WHO_FIELD_DEF = WHO_FIELD_NIC | WHO_FIELD_UID | WHO_FIELD_HOS | WHO_FIELD_SER,
 };
 
-struct who_options
+struct WhoQuery
 {
   unsigned int bitsel;  /**< User mode matching flags */
   unsigned int matchsel;  /**< Field matching flags */
   unsigned int fields;  /**< Fields to be shown in the output */
   unsigned int maxmatches;  /**< Maximum number of replies to be sent */
-  const char *querytype;  /**< User-defined query type */
+  const char *token;  /**< User-defined query token */
 };
 
 
@@ -89,8 +89,8 @@ struct who_options
  * side effects - do a who on given person
  */
 static void
-do_who(struct Client *source_p, const struct Client *target_p,
-       struct ChannelMember *member, struct who_options *who)
+who_send(struct Client *source_p, const struct Client *target_p,
+         struct ChannelMember *member, struct WhoQuery *who)
 {
   char buf1[IRCD_BUFSIZE];
   char *p1 = buf1;
@@ -106,12 +106,12 @@ do_who(struct Client *source_p, const struct Client *target_p,
    * means "default query".
    */
 
-  if ((who->fields & WHO_FIELD_QTY))  /* Query type */
+  if ((who->fields & WHO_FIELD_QTO))  /* Query token */
   {
-    if (EmptyString(who->querytype))
+    if (EmptyString(who->token))
       p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", "0");
     else
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", who->querytype);
+      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", who->token);
   }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_CHA))
@@ -203,7 +203,7 @@ do_who(struct Client *source_p, const struct Client *target_p,
  * \return true if mask matches, false otherwise
  */
 static bool
-who_matches(struct Client *source_p, struct Client *target_p, const char *mask, struct who_options *who)
+who_matches(struct Client *source_p, struct Client *target_p, const char *mask, struct WhoQuery *who)
 {
   if (mask == NULL)
     return true;
@@ -263,8 +263,8 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask, 
  *
  */
 static void
-who_common_channel(struct Client *source_p, struct Channel *channel, const char *mask,
-                   struct who_options *who)
+who_on_common_channel(struct Client *source_p, struct Channel *channel, const char *mask,
+                      struct WhoQuery *who)
 {
   dlink_node *node;
 
@@ -284,7 +284,7 @@ who_common_channel(struct Client *source_p, struct Channel *channel, const char 
 
     if (who_matches(source_p, target_p, mask, who) == true)
     {
-      do_who(source_p, target_p, NULL, who);
+      who_send(source_p, target_p, NULL, who);
 
       if (who->maxmatches)
         if (--who->maxmatches == 0)
@@ -303,7 +303,7 @@ who_common_channel(struct Client *source_p, struct Channel *channel, const char 
  *		  this is slightly expensive on EFnet ...
  */
 static void
-who_global(struct Client *source_p, const char *mask, struct who_options *who)
+who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
 {
   dlink_node *node;
   static uintmax_t last_used = 0;
@@ -323,7 +323,7 @@ who_global(struct Client *source_p, const char *mask, struct who_options *who)
   DLINK_FOREACH(node, source_p->channel.head)
   {
     struct Channel *channel = ((struct ChannelMember *)node->data)->channel;
-    who_common_channel(source_p, channel, mask, who);
+    who_on_common_channel(source_p, channel, mask, who);
   }
 
   /* Second, list all matching visible clients */
@@ -346,7 +346,7 @@ who_global(struct Client *source_p, const char *mask, struct who_options *who)
 
     if (who_matches(source_p, target_p, mask, who) == true)
     {
-      do_who(source_p, target_p, NULL, who);
+      who_send(source_p, target_p, NULL, who);
 
       if (who->maxmatches)
         if (--who->maxmatches == 0)
@@ -355,7 +355,7 @@ who_global(struct Client *source_p, const char *mask, struct who_options *who)
   }
 }
 
-/* do_who_on_channel()
+/* who_on_channel()
  *
  * inputs	- pointer to client requesting who
  *		- pointer to channel to do who on
@@ -367,7 +367,7 @@ who_global(struct Client *source_p, const char *mask, struct who_options *who)
  * side effects - do a who on given channel
  */
 static void
-do_who_on_channel(struct Client *source_p, struct Channel *channel, bool is_member, struct who_options *who)
+who_on_channel(struct Client *source_p, struct Channel *channel, bool is_member, struct WhoQuery *who)
 {
   dlink_node *node;
 
@@ -383,7 +383,7 @@ do_who_on_channel(struct Client *source_p, struct Channel *channel, bool is_memb
             (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
           continue;
 
-      do_who(source_p, target_p, member, who);
+      who_send(source_p, target_p, member, who);
     }
   }
 }
@@ -408,8 +408,8 @@ m_who(struct Client *source_p, int parc, char *parv[])
 {
   char *mask = parv[1];
   char *options = parv[2];
-  char *p, *qty = NULL;
-  struct who_options w = { .maxmatches = WHO_MAX_REPLIES, .matchsel = WHO_FIELD_DEF }, *who = &w;
+  char *p, *token = NULL;
+  struct WhoQuery w = { .maxmatches = WHO_MAX_REPLIES, .matchsel = WHO_FIELD_DEF }, *who = &w;
 
   if (!EmptyString(options))
   {
@@ -499,7 +499,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
             break;
           case 't':
           case 'T':
-            who->fields |= WHO_FIELD_QTY;
+            who->fields |= WHO_FIELD_QTO;
             break;
           case 'u':
           case 'U':
@@ -516,11 +516,11 @@ m_who(struct Client *source_p, int parc, char *parv[])
     }
 
     if (ch)
-      qty = p;
+      token = p;
 
-    if (qty && (who->fields & WHO_FIELD_QTY))
+    if (token && (who->fields & WHO_FIELD_QTO))
     {
-      p = qty;
+      p = token;
       if (!((*p > '9') || (*p < '0')))
         p++;
       if (!((*p > '9') || (*p < '0')))
@@ -530,9 +530,9 @@ m_who(struct Client *source_p, int parc, char *parv[])
       *p = '\0';
     }
     else
-      qty = NULL;
+      token = NULL;
 
-    who->querytype = qty;
+    who->token = token;
   }
 
   /* '/who #some_channel' */
@@ -543,9 +543,9 @@ m_who(struct Client *source_p, int parc, char *parv[])
     if (channel)
     {
       if (HasUMode(source_p, UMODE_ADMIN) || member_find_link(source_p, channel))
-        do_who_on_channel(source_p, channel, true, who);
+        who_on_channel(source_p, channel, true, who);
       else if (!SecretChannel(channel))
-        do_who_on_channel(source_p, channel, false, who);
+        who_on_channel(source_p, channel, false, who);
     }
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);

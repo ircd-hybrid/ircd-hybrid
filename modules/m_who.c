@@ -42,6 +42,7 @@
 #include "modules.h"
 #include "hostmask.h"
 
+
 enum { WHO_MAX_REPLIES = 500 };
 enum
 {
@@ -92,14 +93,14 @@ static void
 who_send(struct Client *source_p, const struct Client *target_p,
          struct ChannelMember *member, struct WhoQuery *who)
 {
-  char buf1[IRCD_BUFSIZE];
-  char *p1 = buf1;
+  char buf[IRCD_BUFSIZE];
+  char *p = buf;
 
   /*
    * NOTE: with current fields list and sizes this _cannot_ overrun,
    * and also the message finally sent shouldn't ever be truncated.
    */
-  buf1[1] = '\0';
+  buf[1] = '\0';
 
   /* If we don't have a channel and we need one... try to find it. */
   if (member == NULL)
@@ -126,34 +127,34 @@ who_send(struct Client *source_p, const struct Client *target_p,
   if ((who->fields & WHO_FIELD_QTO))  /* Query token */
   {
     if (EmptyString(who->token))
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", "0");
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", "0");
     else
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", who->token);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", who->token);
   }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_CHA))
-    p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", member ? member->channel->name : "*");
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", member ? member->channel->name : "*");
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_UID))
-    p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", target_p->username);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->username);
 
   if ((who->fields & WHO_FIELD_NIP))
-    p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", target_p->sockhost);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->sockhost);
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_HOS))
-    p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", target_p->host);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->host);
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_SER))
   {
     if (!HasUMode(source_p, UMODE_OPER) &&
         (ConfigServerHide.hide_servers || IsHidden(target_p->servptr)))
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", ConfigServerHide.hidden_name);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", ConfigServerHide.hidden_name);
     else
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", target_p->servptr->name);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->servptr->name);
   }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_NIC))
-    p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", target_p->name);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->name);
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_FLA))
   {
@@ -173,44 +174,44 @@ who_send(struct Client *source_p, const struct Client *target_p,
                HasUMode(target_p, UMODE_OPER) &&
                !HasUMode(target_p, UMODE_HIDDEN) ? "*" : "",
                member ? member_get_prefix(member, who->fields || !!HasCap(source_p, CAP_MULTI_PREFIX)) : "");
-    p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", status);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", status);
   }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_DIS))
   {
     if (!HasUMode(source_p, UMODE_OPER) &&
         (ConfigServerHide.hide_servers || IsHidden(target_p->servptr)))
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s%u", who->fields == 0 ? ":" : "", 0);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s%u", who->fields == 0 ? ":" : "", 0);
     else
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s%u", who->fields == 0 ? ":" : "", target_p->hopcount);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s%u", who->fields == 0 ? ":" : "", target_p->hopcount);
   }
 
   if ((who->fields & WHO_FIELD_IDL))
   {
     if (MyClient(target_p) &&
         (HasUMode(source_p, UMODE_OPER) || target_p == source_p))
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %u", client_get_idle_time(source_p, target_p));
+      p += snprintf(p, sizeof(buf) - (p - buf), " %u", client_get_idle_time(source_p, target_p));
     else
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %u", 0);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %u", 0);
   }
 
   if ((who->fields & WHO_FIELD_ACC))
   {
     if (strcmp(target_p->account, "*"))
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", target_p->account);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->account);
     else
-      p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", "0");
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", "0");
   }
 
   if ((who->fields & WHO_FIELD_OPL))
-    p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s", "n/a");
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", "n/a");
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_REN))
-    p1 += snprintf(p1, sizeof(buf1) - (p1 - buf1), " %s%s", who->fields ? ":" : "", target_p->info);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s%s", who->fields ? ":" : "", target_p->info);
                                      /* Place colon here for special reply ^ */
 
-  p1 = buf1 + 1;  /* The first char will always be an useless blank. */
-  sendto_one_numeric(source_p, &me, who->fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, p1);
+  p = buf + 1;  /* The first char will always be an useless blank. */
+  sendto_one_numeric(source_p, &me, who->fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, p);
 }
 
 /*!
@@ -427,13 +428,13 @@ m_who(struct Client *source_p, int parc, char *parv[])
 {
   char *mask = parv[1];
   char *options = parv[2];
-  char *p, *token = NULL;
+  char *token = NULL;
   struct WhoQuery w = { .maxmatches = WHO_MAX_REPLIES, .matchsel = WHO_FIELD_DEF }, *who = &w;
 
   if (!EmptyString(options))
   {
     char ch;
-    p = options;
+    char *p = options;
 
     while (((ch = *(p++))) && (ch != '%') && (ch != ','))
     {
@@ -442,35 +443,35 @@ m_who(struct Client *source_p, int parc, char *parv[])
         case 'o':
         case 'O':
           who->bitsel |= WHOSELECT_OPER;
-          continue;
+          break;
         case 'n':
         case 'N':
           who->matchsel |= WHO_FIELD_NIC;
-          continue;
+          break;
         case 'u':
         case 'U':
           who->matchsel |= WHO_FIELD_UID;
-          continue;
+          break;
         case 'h':
         case 'H':
           who->matchsel |= WHO_FIELD_HOS;
-          continue;
+          break;
         case 'i':
         case 'I':
           who->matchsel |= WHO_FIELD_NIP;
-          continue;
+          break;
         case 's':
         case 'S':
           who->matchsel |= WHO_FIELD_SER;
-          continue;
+          break;
         case 'r':
         case 'R':
           who->matchsel |= WHO_FIELD_REN;
-          continue;
+          break;
         case 'a':
         case 'A':
           who->matchsel |= WHO_FIELD_ACC;
-          continue;
+          break;
       }
     }
 
@@ -527,8 +528,6 @@ m_who(struct Client *source_p, int parc, char *parv[])
           case 'a':
           case 'A':
             who->fields |= WHO_FIELD_ACC;
-            break;
-          default:
             break;
         }
       }

@@ -205,6 +205,11 @@ who_send(struct Client *source_p, const struct Client *target_p,
 static bool
 who_matches(struct Client *source_p, struct Client *target_p, const char *mask, struct WhoQuery *who)
 {
+  if ((who->bitsel & WHOSELECT_OPER))
+    if (!HasUMode(target_p, UMODE_OPER) ||
+        (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
+      return false;
+
   if (mask == NULL)
     return true;
 
@@ -275,11 +280,6 @@ who_on_common_channel(struct Client *source_p, struct Channel *channel, const ch
     if (!HasUMode(target_p, UMODE_INVISIBLE) || HasFlag(target_p, FLAGS_MARK))
       continue;
 
-    if ((who->bitsel & WHOSELECT_OPER))
-      if (!HasUMode(target_p, UMODE_OPER) ||
-          (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
-        continue;
-
     AddFlag(target_p, FLAGS_MARK);
 
     if (who_matches(source_p, target_p, mask, who) == true)
@@ -338,11 +338,6 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
       DelFlag(target_p, FLAGS_MARK);
       continue;
     }
-
-    if ((who->bitsel & WHOSELECT_OPER))
-      if (!HasUMode(target_p, UMODE_OPER) ||
-          (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
-        continue;
 
     if (who_matches(source_p, target_p, mask, who) == true)
     {

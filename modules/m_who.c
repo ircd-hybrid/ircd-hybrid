@@ -367,10 +367,16 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
  * side effects - do a who on given channel
  */
 static void
-who_on_channel(struct Client *source_p, struct Channel *channel, bool is_member, struct WhoQuery *who)
+who_on_channel(struct Client *source_p, struct Channel *channel, struct WhoQuery *who)
 {
-  dlink_node *node;
+  bool is_member = false;
 
+  if (HasUMode(source_p, UMODE_ADMIN) || member_find_link(source_p, channel))
+    is_member = true;
+  else if (SecretChannel(channel))
+    return;
+
+  dlink_node *node;
   DLINK_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
@@ -541,12 +547,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     /* List all users on a given channel */
     struct Channel *channel = hash_find_channel(mask);
     if (channel)
-    {
-      if (HasUMode(source_p, UMODE_ADMIN) || member_find_link(source_p, channel))
-        who_on_channel(source_p, channel, true, who);
-      else if (!SecretChannel(channel))
-        who_on_channel(source_p, channel, false, who);
-    }
+      who_on_channel(source_p, channel, who);
 
     sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
     return;

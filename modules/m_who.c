@@ -101,6 +101,23 @@ who_send(struct Client *source_p, const struct Client *target_p,
    */
   buf1[1] = '\0';
 
+  /* If we don't have a channel and we need one... try to find it. */
+  if (member == NULL)
+  {
+    if (who->fields == 0 || (who->fields & (WHO_FIELD_CHA | WHO_FIELD_FLA)))
+    {
+      dlink_node *node;
+      DLINK_FOREACH(node, target_p->channel.head)
+      {
+        member = node->data;
+
+        if (PubChannel(member->channel))
+          break;
+        member = NULL;
+      }
+    }
+  }
+
   /*
    * Place the fields in the buffer and send it. Note that who->fields == 0
    * means "default query".

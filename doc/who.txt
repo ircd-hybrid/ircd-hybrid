@@ -1,0 +1,102 @@
+[:source] WHO <mask1> [options]
+
+When matching IP numbers the <mask> can be in 3 forms:
+
+- The old and well known IRC masks using * and ? as wanted
+- The IPmask form a.b.c.d/e.f.g.h as used in most firewalls and
+  system configurations, where what is before the / are the bits we expect
+  in the IP number and what is after the / is the "filter mask" telling wich
+  bits whould be considered and wich should be ignored.
+- The IPmask form a.b.c.d/bitcount where bitcount is an integer between 0
+  and 31 (inclusive), the matching will be for the IPs whose first
+  "bitcount" bits are equal to those in a.b.c.d
+
+Note that:
+. The bitcount must be between 0 and 31, 32 is NOT good (and
+  makes no sense to use it... just match against the static IP a.b.c.d)
+. The missing pieces of both the bitmask and the ipnumber in the forms
+  ipnumber/bitmask and ipnumber/bitcount default to zero from right to left,
+  this is NOT what inet_aton and most tools do but makes more sense here
+  IMO, in example /who 194.243/16 is taken as /who 194.243.0.0/255.255.0.0
+  (inet_aton whould take 194.243 as 194.0.0.243).
+. For the above reason and specified validity limits 1.2.3.4/31 becomes
+  1.2.3.4/255.255.255.254 while 1.2.3.4/32 becomes 1.2.3.4/32.0.0.0 :)
+
+For all the other fields th match happens as has always been, i.e. it's only
+considered the IRC mask with * and ? (that is: don't expect to catch an user
+with "realname" = "1.2.3.4" when doing "/who 1.2/16 h" :)
+
+For both the masks and the options (and thus for all flags) case is NOT
+significative (so "/who <any> o" is exactly the same as "/who <ANY> O".
+
+The "options" part can be as follows:
+
+ [<flags>][%[<fields>[,<querytype>]]]
+
+in which:
+
+ <flags>: can be a sequence of field matching flags, use mode matching flags
+          and special purpose flags
+
+   Field matching flags, when one of these is specified the field in
+   question is matched against the mask, otherwise it's not matched.
+
+   n : Nick (in nick!user@host)
+   u : Username (in nick!user@host)
+   h : Hostname (in nick!user@host)
+   i : Numeric IP (the unresolved host)
+   s : Servername (the canonic name of the server the user is on)
+   r : Info text (formerly "Realname")
+   a : Account name
+
+   If no field-matching flags are specified they default to what old servers
+   used to do: nuhsr.
+
+   User mode matching flags (specifying one of these means that only clients
+   with that umode are considered, what is not specified is always matched):
+
+   o : IRC operator
+       [In the future more flags will be supported, basically all
+        usermodes plus the +/- specificators to revert the filtering]
+
+   The rest, what follows the %, that is [%[fields[,<querytype>]]], is as it
+   has always been since the first who.patch, the <fields> part specifies
+   wich fields to include in the output as:
+
+   c : Include (first) channel name
+   d : Include "distance" in hops (hopcount)
+   f : Include flags (all of them)
+   h : Include hostname
+   i : Include IP
+   l : Include idle time (0 for remote users)
+   n : Include nick
+   r : Include real name
+   s : Include server name
+   t : Include the querytype in the reply
+   u : Include userID with eventual ~
+   a : Include account name
+   o : Include oplevel
+
+And the ,<querytype> final option can be used to specify what you want the
+server to say in the querytype field of the output, useful to filter the
+output in scripts that do a kind of "on 354 ..."
+
+If no %fields are specified the reply is _exactly_ the same as has always
+been, numeric 352, same fields, same order.
+
+If one or more %fields are specified the reply uses a new numeric, since an
+out-of-standard 352 crashes EPIC and confuses several other clients. I used
+354.
+
+:"source" 354 "target" ["querytype"] ["channel"] ["user"]
+                       ["IP"] ["host"] ["server"] ["nick"]
+                       ["flags"] ["hops"] ["idle"] ["account"]
+                       ["oplevel"] [:"realname"]
+
+Where only the fields specified in the %fields options are present.
+
+"querytype" is the same value passed in the /who command, it is provided to
+simplify scripting, in example one could pass a certain value in the query
+and have that value "signal" back what is to be done with those replies.
+
+Regards, Andrea aka Nemesi

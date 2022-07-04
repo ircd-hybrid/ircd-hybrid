@@ -536,7 +536,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   }
 
   /* '/who #some_channel' */
-  if (mask && IsChanPrefix(*mask))
+  if (IsChanPrefix(*mask))
   {
     /* List all users on a given channel */
     struct Channel *channel = hash_find_channel(mask);
@@ -558,14 +558,10 @@ m_who(struct Client *source_p, int parc, char *parv[])
      */
   }
 
-  if (mask)
-  {
-    collapse(mask);
-
-    if (strcmp(mask, "0") == 0 ||
-        strcmp(mask, "*") == 0)
-      mask = NULL;
-  }
+  collapse(mask);
+  if (strcmp(mask, "0") == 0 ||
+      strcmp(mask, "*") == 0)
+    mask = NULL;
 
   who_global(source_p, mask, who);
 
@@ -578,10 +574,10 @@ static struct Message who_msgtab =
 {
   .cmd = "WHO",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_who },
+  .handlers[CLIENT_HANDLER] = { .handler = m_who, .args_min = 2 },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_who }
+  .handlers[OPER_HANDLER] = { .handler = m_who, .args_min = 2 }
 };
 
 static void

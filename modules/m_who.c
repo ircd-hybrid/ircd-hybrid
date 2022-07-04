@@ -225,16 +225,13 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask, 
 
   if ((who->matchsel & WHO_FIELD_NIP) && HasUMode(source_p, UMODE_OPER))
   {
-    int bits = 0;
     struct irc_ssaddr addr;
+    int bits = 0;
+    const int ret = parse_netmask(mask, &addr, &bits);
 
-    switch (parse_netmask(mask, &addr, &bits))
-    {
-      case HM_IPV6:
-      case HM_IPV4:
-        if (address_compare(&target_p->ip, &addr, false, false, bits) == true)
-          return true;
-    }
+    if (ret == HM_IPV4 || ret == HM_IPV6)
+      if (address_compare(&target_p->ip, &addr, false, false, bits) == true)
+        return true;
 
     if (match(mask, target_p->sockhost) == 0)
       return true;

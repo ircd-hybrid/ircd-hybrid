@@ -214,8 +214,13 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask, 
   if ((who->matchsel & WHO_FIELD_UID) && match(mask, target_p->username) == 0)
     return true;
 
-  if ((who->matchsel & WHO_FIELD_HOS) && match(mask, target_p->host) == 0)
-    return true;
+  if ((who->matchsel & WHO_FIELD_HOS))
+  {
+    if (match(mask, target_p->host) == 0)
+      return true;
+    else if (HasUMode(source_p, UMODE_OPER) && match(mask, target_p->realhost) == 0)
+      return true;
+  }
 
   if ((who->matchsel & WHO_FIELD_REN) && match(mask, target_p->info) == 0)
     return true;
@@ -234,8 +239,6 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask, 
         return true;
 
     if (match(mask, target_p->sockhost) == 0)
-      return true;
-    if (match(mask, target_p->realhost) == 0)
       return true;
   }
 

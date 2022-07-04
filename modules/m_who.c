@@ -429,7 +429,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
   char *mask = parv[1];
   char *options = parv[2];
   char *token = NULL;
-  struct WhoQuery w = { .maxmatches = WHO_MAX_REPLIES, .matchsel = WHO_FIELD_DEF }, *who = &w;
+  struct WhoQuery w = { .maxmatches = WHO_MAX_REPLIES }, *who = &w;
 
   if (!EmptyString(options))
   {
@@ -552,6 +552,9 @@ m_who(struct Client *source_p, int parc, char *parv[])
 
     who->token = token;
   }
+
+  if (who->matchsel == 0)
+    who->matchsel = WHO_FIELD_DEF;
 
   /* '/who #some_channel' */
   if (IsChanPrefix(*mask))

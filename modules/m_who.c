@@ -529,6 +529,10 @@ m_who(struct Client *source_p, int parc, char *parv[])
           case 'A':
             who->fields |= WHO_FIELD_ACC;
             break;
+          case 'o':
+          case 'O':
+            who->fields |= WHO_FIELD_OPL;
+            break;
         }
       }
     }

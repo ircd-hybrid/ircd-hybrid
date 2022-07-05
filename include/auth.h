@@ -35,10 +35,10 @@ struct Client;
 /** Stores state of the DNS and RFC 1413 ident lookups for a client. */
 struct AuthRequest
 {
-  bool dns_pending;       /**< 'true' as long as dns request hasn't finished */
-  bool ident_pending;     /**< 'true' as long as identd request hasn't finished */
+  bool dns_pending;  /**< 'true' as long as dns request hasn't finished */
+  bool ident_pending;  /**< 'true' as long as identd request hasn't finished */
   struct Client *client;  /**< Pointer to Client structure for request. */
-  fde_t *fd;              /**< File descriptor for identd queries. */
+  fde_t *fd;  /**< File descriptor for identd queries. */
 };
 
 extern void auth_init(void);

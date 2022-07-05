@@ -27,7 +27,6 @@
 #ifndef INCLUDED_channel_invite_h
 #define INCLUDED_channel_invite_h
 
-
 /*! \brief Invite structure */
 struct Invite
 {

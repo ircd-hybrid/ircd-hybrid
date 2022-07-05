@@ -3,9 +3,9 @@ MONITOR - Protocol for notification of when clients become online/offline
 -------------------------------------------------------------------------
 
 Currently, ISON requests by clients use a large amount of bandwidth.  It is
-expected that it is more efficient for this to be done by the server at the 
-expense of cpu cycles.  The WATCH implementation that was designed to counter 
-this is (in my opinion) severely flawed.  This protocol was designed to 
+expected that it is more efficient for this to be done by the server at the
+expense of cpu cycles.  The WATCH implementation that was designed to counter
+this is (in my opinion) severely flawed.  This protocol was designed to
 provide a cleaner implementation.
 
 The command used throughout this specification is "MONITOR".
@@ -59,7 +59,7 @@ RPL_MONLIST, and the output will be terminated with RPL_ENDOFMONLIST
 MONITOR S
 ---------
 Outputs for each nickname in the list being monitored, whether the client is
-online or offline.  All nicks that are online will be sent using 
+online or offline.  All nicks that are online will be sent using
 RPL_MONONLINE, all nicks that are offline will be sent using RPL_MONOFFLINE.
 
 
@@ -108,6 +108,6 @@ This numeric is used to indicate to a client the end of a monitor list.
 :<server> 734 <nick> <limit> <nicks> :Monitor list is full.
 
 This numeric is used to indicate to a client that their monitor list is
-full, so the command failed.  The <limit> parameter is the maximum number of 
+full, so the command failed.  The <limit> parameter is the maximum number of
 nicknames a client may have in their list, the <nicks> parameter is the list
 of nicknames, as the client sent them, that cannot be added.

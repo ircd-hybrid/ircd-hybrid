@@ -69,7 +69,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (parc < 3 || EmptyString(parv[2]))
+  if (EmptyString(parv[2]))
   {
     sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "INVITE");
     return;

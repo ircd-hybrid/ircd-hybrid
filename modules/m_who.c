@@ -43,7 +43,9 @@
 #include "hostmask.h"
 
 
+/** Maximum number of lines to send in response to a /WHO. */
 enum { WHO_MAX_REPLIES = 500 };
+
 enum
 {
   WHOSELECT_OPER  = 1 << 0,  /**< Flag for /WHO: Show IRC operators. */
@@ -66,7 +68,7 @@ enum
   WHO_FIELD_IDL = 1 << 10,  /**< Show idle time. */
   WHO_FIELD_ACC = 1 << 11,  /**< Show account name. */
   WHO_FIELD_OPL = 1 << 12,  /**< Show oplevel. */
-  /** Default fields for /WHO as specified by the rfc1459 */
+  /** Default fields for /WHO */
   WHO_FIELD_DEF = WHO_FIELD_NIC | WHO_FIELD_UID | WHO_FIELD_HOS | WHO_FIELD_SER,
 };
 
@@ -80,14 +82,11 @@ struct WhoQuery
 };
 
 
-/* do_who()
- *
- * inputs       - pointer to client requesting who
- *              - pointer to client to do who on
- *              - The reported name
- *              - channel flags
- * output       - NONE
- * side effects - do a who on given person
+/*! \brief Send a WHO reply to a client who asked.
+ * \param source_p Pointer to client requesting who.
+ * \param target_p Client who is shown to \a source_p.
+ * \param member ChannelMember pointer of a shared channel that provides visibility.
+ * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
 who_send(struct Client *source_p, const struct Client *target_p,
@@ -215,10 +214,11 @@ who_send(struct Client *source_p, const struct Client *target_p,
 }
 
 /*!
- * \param source_p Pointer to client requesting who
- * \param target_p Pointer to client to do who on
- * \param mask Mask to match
- * \return true if mask matches, false otherwise
+ * \param source_p Pointer to client requesting who.
+ * \param target_p Pointer to client to do who on.
+ * \param mask Mask to match.
+ * \param who Pointer to struct WhoQuery item that defines the options for this query.
+ * \return true if mask matches, false otherwise.
  */
 static bool
 who_matches(struct Client *source_p, struct Client *target_p, const char *mask, struct WhoQuery *who)
@@ -274,16 +274,11 @@ who_matches(struct Client *source_p, struct Client *target_p, const char *mask, 
   return false;
 }
 
-/* who_common_channel
- * inputs	- pointer to client requesting who
- * 		- pointer to channel member chain.
- *		- char * mask to match
- *		- int if oper on a server or not
- *		- pointer to int maxmatches
- * output	- NONE
- * side effects - lists matching clients on specified channel,
- * 		  marks matched clients.
- *
+/*! \brief Lists matching clients on specified channel. Marks matched clients.
+ * \param source_p Pointer to client requesting who.
+ * \param channel Pointer to channel member chain.
+ * \param mask Mask to match.
+ * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
 who_on_common_channel(struct Client *source_p, struct Channel *channel, const char *mask,
@@ -312,14 +307,10 @@ who_on_common_channel(struct Client *source_p, struct Channel *channel, const ch
   }
 }
 
-/* who_global()
- *
- * inputs	- pointer to client requesting who
- *		- char * mask to match
- *		- int if oper on a server or not
- * output	- NONE
- * side effects - do a global scan of all clients looking for match
- *		  this is slightly expensive on EFnet ...
+/*! \brief Does a global scan of all clients looking for match.
+ * \param source_p Pointer to client requesting who.
+ * \param mask Mask to match.
+ * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
 who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
@@ -369,16 +360,10 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
   }
 }
 
-/* who_on_channel()
- *
- * inputs	- pointer to client requesting who
- *		- pointer to channel to do who on
- *		- The "real name" of this channel
- *		- int if source_p is a server oper or not
- *		- int if client is member or not
- *		- int server_op flag
- * output	- NONE
- * side effects - do a who on given channel
+/*! \brief Does a WHO on given channel.
+ * \param source_p Pointer to client requesting who.
+ * \param channel Pointer to channel to do who on.
+ * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
 who_on_channel(struct Client *source_p, struct Channel *channel, struct WhoQuery *who)

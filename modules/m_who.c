@@ -138,7 +138,12 @@ who_send(struct Client *source_p, const struct Client *target_p,
     p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->username);
 
   if ((who->fields & WHO_FIELD_NIP))
-    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->sockhost);
+  {
+    if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->sockhost);
+    else
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", "255.255.255.255");
+  }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_HOS))
     p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->host);

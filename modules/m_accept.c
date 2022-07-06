@@ -37,7 +37,7 @@
 #include "memory.h"
 
 
-/*! \brief Creates and sends a list of nick!user\@host masks a Client
+/*! \brief Sends a list of nick!user\@host masks a Client
  *         has on its acceptlist.
  *
  * \param source_p The actual Client the list will be sent to.
@@ -82,10 +82,12 @@ list_accepts(struct Client *source_p)
   sendto_one_numeric(source_p, &me, RPL_ENDOFACCEPT);
 }
 
-/*! \brief Allocates and adds a split_nuh_item holding a nick!user\@host
+/*! \brief Allocates and adds a struct AccepItem holding a nick!user\@host
  *         mask to a Client's acceptlist.
  *
- * \param nuh      A split_nuh_item already prepared with required masks.
+ * \param nick nick portion of the nick!user\@host masks.
+ * \param user user portion of the nick!user\@host masks.
+ * \param host host portion of the nick!user\@host masks.
  * \param source_p The actual Client the new accept is added to.
  */
 static void

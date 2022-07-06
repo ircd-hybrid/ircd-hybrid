@@ -123,17 +123,7 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
   const char *option = NULL;
   const char *server = NULL;
 
-  if (parc < 3)
-  {
-    if (!HasOFlag(source_p, OPER_FLAG_REHASH))
-    {
-      sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "rehash");
-      return;
-    }
-
-    option = parv[1];
-  }
-  else
+  if (!EmptyString(parv[2]))
   {
     if (!HasOFlag(source_p, OPER_FLAG_REHASH_REMOTE))
     {
@@ -143,6 +133,16 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
 
     server = parv[1];
     option = parv[2];
+  }
+  else
+  {
+    if (!HasOFlag(source_p, OPER_FLAG_REHASH))
+    {
+      sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "rehash");
+      return;
+    }
+
+    option = parv[1];
   }
 
   for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)

@@ -41,7 +41,8 @@
 #include "modules.h"
 
 
-enum { WHOWAS_MAX_REPLIES = 20 };  /* Only applies to remote clients */
+/** Maximum number of lines to send in response to a /WHOWAS. Only applies to remote clients. */
+enum { WHOWAS_MAX_REPLIES = 20 };
 
 static void
 do_whowas(struct Client *source_p, char *parv[])

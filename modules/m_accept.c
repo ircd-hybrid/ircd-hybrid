@@ -85,9 +85,9 @@ list_accepts(struct Client *source_p)
 /*! \brief Allocates and adds a struct AccepItem holding a nick!user\@host
  *         mask to a Client's acceptlist.
  *
- * \param nick nick portion of the nick!user\@host masks.
- * \param user user portion of the nick!user\@host masks.
- * \param host host portion of the nick!user\@host masks.
+ * \param nick nick portion of the nick!user\@host mask.
+ * \param user user portion of the nick!user\@host mask.
+ * \param host host portion of the nick!user\@host mask.
  * \param source_p The actual Client the new accept is added to.
  */
 static void

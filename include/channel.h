@@ -59,44 +59,44 @@ struct Client;
 /*! \brief Mode structure for channels */
 struct Mode
 {
-  unsigned int mode;   /**< simple modes */
+  unsigned int mode;  /**< Simple modes */
   unsigned int limit;  /**< +l userlimit */
-  char key[KEYLEN + 1];    /**< +k key */
+  char key[KEYLEN + 1];  /**< +k key */
 };
 
 /*! \brief Channel structure */
 struct Channel
 {
-  dlink_node node;
+  dlink_node node;  /**< List node; linked into channel_list */
 
-  struct Channel *hnextch;
+  struct Channel *hnextch;  /**< Pointer to the next Channel with the same hash value */
   struct Mode mode;
 
   char topic[TOPICLEN + 1];
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];
 
-  uintmax_t creation_time;  /**< Real time */
-  uintmax_t topic_time;  /**< Real time */
+  uintmax_t creation_time;  /**< Time the channel has been created; real time */
+  uintmax_t topic_time;  /**< Modification time of the topic; real time */
   uintmax_t mode_lock_time;  /**< Real time; this gets set by services only */
   uintmax_t last_knock_time;  /**< Don't allow knock to flood; monotonic time */
-  uintmax_t last_invite_time;  /**< Monotonic time */
-  uintmax_t last_join_time;  /**< Monotonic time */
-  uintmax_t first_received_message_time;  /*!< Channel flood control; monotonic time */
+  uintmax_t last_invite_time;  /**< Last time an INVITE to this channel has been issued; monotonic time */
+  uintmax_t last_join_time;  /**< Last time a user has joined the channel; monotonic time */
+  uintmax_t first_received_message_time;  /**< Channel flood control; monotonic time */
   unsigned int flags;
   unsigned int received_number_of_privmsgs;
 
-  dlink_list members_local;  /*!< local members are here too */
-  dlink_list members;
-  dlink_list invites;
-  dlink_list banlist;
-  dlink_list exceptlist;
-  dlink_list invexlist;
+  dlink_list members_local;  /**< List of local members on this channel */
+  dlink_list members;  /**< List of members on this channel */
+  dlink_list invites;  /**< List of invites on this channel */
+  dlink_list banlist;  /**< List of bans on this channel */
+  dlink_list exceptlist;  /**< List of ban exceptions on this channel */
+  dlink_list invexlist;  /**< List of invite exceptions on this channel */
 
   float number_joined;
 
   char *mode_lock;
-  char name[CHANNELLEN + 1];
-  size_t name_len;
+  char name[CHANNELLEN + 1];  /**< Unique name of the channel */
+  size_t name_len;  /**< Cached string length of Channel::name */
 };
 
 /*! \brief ChannelMember structure */

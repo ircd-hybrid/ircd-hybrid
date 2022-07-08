@@ -34,7 +34,6 @@
 #include "ircd.h"
 #include "isupport.h"
 #include "numeric.h"
-#include "server.h"
 #include "send.h"
 #include "irc_string.h"
 #include "conf.h"

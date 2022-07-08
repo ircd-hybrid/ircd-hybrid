@@ -89,7 +89,7 @@ struct WhoQuery
  */
 static void
 who_send(struct Client *source_p, const struct Client *target_p,
-         struct ChannelMember *member, struct WhoQuery *who)
+         const struct ChannelMember *member, const struct WhoQuery *who)
 {
   char buf[IRCD_BUFSIZE];
   char *p = buf;
@@ -225,7 +225,8 @@ who_send(struct Client *source_p, const struct Client *target_p,
  * \return true if mask matches, false otherwise.
  */
 static bool
-who_matches(struct Client *source_p, struct Client *target_p, const char *mask, struct WhoQuery *who)
+who_matches(struct Client *source_p, const struct Client *target_p,
+            const char *mask, const struct WhoQuery *who)
 {
   if ((who->bitsel & WHOSELECT_OPER))
     if (!HasUMode(target_p, UMODE_OPER) ||
@@ -370,7 +371,7 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_on_channel(struct Client *source_p, struct Channel *channel, struct WhoQuery *who)
+who_on_channel(struct Client *source_p, struct Channel *channel, const struct WhoQuery *who)
 {
   bool is_member = false;
 

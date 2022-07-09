@@ -427,7 +427,7 @@ hash_get_bucket(int type, unsigned int hashv)
 static bool
 exceeding_sendq(const struct Client *to)
 {
-  if (dbuf_length(&to->connection->buf_sendq) > (get_sendq(&to->connection->confs) / 2))
+  if (dbuf_length(&to->connection->buf_sendq) > (class_get_sendq(&to->connection->confs) / 2))
     return true;
   else
     return false;

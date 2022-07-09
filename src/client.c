@@ -217,7 +217,7 @@ check_pings_list(dlink_list *list)
     if (IsDead(client))
       continue;  /* Ignore it, it's been exited already */
 
-    unsigned int ping = get_client_ping(&client->connection->confs);
+    unsigned int ping = class_get_ping_freq(&client->connection->confs);
     if (ping < event_base->time.sec_monotonic - client->connection->last_ping)
     {
       if (!HasFlag(client, FLAGS_PINGSENT))

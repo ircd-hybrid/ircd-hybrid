@@ -383,7 +383,7 @@ register_local_user(struct Client *client)
                        "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
                        client->name, client->username, client->realhost,
                        client->sockhost,
-                       get_client_class(&client->connection->confs),
+                       class_get_name(&client->connection->confs),
                        client->info, client->id);
 
   if (ConfigGeneral.invisible_on_connect)

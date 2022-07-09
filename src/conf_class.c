@@ -106,25 +106,25 @@ class_get_ptr(const dlink_list *const list)
 }
 
 const char *
-get_client_class(const dlink_list *const list)
+class_get_name(const dlink_list *const list)
 {
   return class_get_ptr(list)->name;
 }
 
 unsigned int
-get_client_ping(const dlink_list *const list)
+class_get_ping_freq(const dlink_list *const list)
 {
   return class_get_ptr(list)->ping_freq;
 }
 
 unsigned int
-get_sendq(const dlink_list *const list)
+class_get_sendq(const dlink_list *const list)
 {
   return class_get_ptr(list)->max_sendq;
 }
 
 unsigned int
-get_recvq(const dlink_list *const list)
+class_get_recvq(const dlink_list *const list)
 {
   return class_get_ptr(list)->max_recvq;
 }

@@ -343,7 +343,7 @@ read_packet(fde_t *F, void *data)
     /* Check to make sure we're not flooding */
     if (!(IsServer(client) || IsHandshake(client) || IsConnecting(client)) &&
         (dbuf_length(&client->connection->buf_recvq) >
-         get_recvq(&client->connection->confs)))
+         class_get_recvq(&client->connection->confs)))
     {
       exit_client(client, "Excess Flood");
       return;

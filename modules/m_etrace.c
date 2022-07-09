@@ -55,7 +55,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
 
   sendto_one_numeric(source_p, &me, RPL_ETRACE,
                      HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-                     get_client_class(&target_p->connection->confs),
+                     class_get_name(&target_p->connection->confs),
                      target_p->name,
                      target_p->username,
                      target_p->host,

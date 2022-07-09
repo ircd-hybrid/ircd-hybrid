@@ -86,14 +86,14 @@ send_message(struct Client *to, struct dbuf_block *buffer)
   assert(to != &me);
   assert(MyConnect(to));
 
-  if (dbuf_length(&to->connection->buf_sendq) + buffer->size > get_sendq(&to->connection->confs))
+  if (dbuf_length(&to->connection->buf_sendq) + buffer->size > class_get_sendq(&to->connection->confs))
   {
     if (IsServer(to))
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Max SendQ limit exceeded for %s: %zu > %u",
                            client_get_name(to, HIDE_IP),
                            (dbuf_length(&to->connection->buf_sendq) + buffer->size),
-                           get_sendq(&to->connection->confs));
+                           class_get_sendq(&to->connection->confs));
 
     if (IsClient(to))
       AddFlag(to, FLAGS_SENDQEX);

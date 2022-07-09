@@ -67,7 +67,7 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
   const char *class_name;
 
   name = client_get_name(target_p, HIDE_IP);
-  class_name = get_client_class(&target_p->connection->confs);
+  class_name = class_get_name(&target_p->connection->confs);
 
   switch (target_p->status)
   {

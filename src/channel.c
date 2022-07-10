@@ -930,8 +930,8 @@ can_send(struct Channel *channel, struct Client *client,
  * \param client Pointer to struct Client to check
  * \param name   Channel name or NULL if this is a part.
  */
-void
-check_spambot_warning(struct Client *client, const char *name)
+static void
+channel_check_spambot_warning(struct Client *client, const char *name)
 {
   if (GlobalSetOptions.spam_num &&
       (client->connection->join_leave_count >= GlobalSetOptions.spam_num))
@@ -1084,7 +1084,7 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
     }
 
     if (!HasUMode(client, UMODE_OPER))
-      check_spambot_warning(client, channel->name);
+      channel_check_spambot_warning(client, channel->name);
 
     channel_add_user(channel, client, flags, true);
 
@@ -1173,7 +1173,7 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
   }
 
   if (MyConnect(client) && !HasUMode(client, UMODE_OPER))
-    check_spambot_warning(client, NULL);
+    channel_check_spambot_warning(client, NULL);
 
   /*
    * Remove user from the old channel (if any). Only allow /part reasons in -m chans.

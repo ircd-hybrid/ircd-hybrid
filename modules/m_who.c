@@ -213,8 +213,7 @@ who_send(struct Client *source_p, const struct Client *target_p,
     p += snprintf(p, sizeof(buf) - (p - buf), " %s%s", who->fields ? ":" : "", target_p->info);
                                      /* Place colon here for special reply ^ */
 
-  p = buf + 1;  /* The first char will always be an useless blank. */
-  sendto_one_numeric(source_p, &me, who->fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, p);
+  sendto_one_numeric(source_p, &me, who->fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, buf + 1);
 }
 
 /*!

@@ -67,8 +67,8 @@ channel_get_list(void)
  * \param flood_ctrl Whether to count this join in flood calculations
  */
 void
-add_user_to_channel(struct Channel *channel, struct Client *client,
-                    unsigned int flags, bool flood_ctrl)
+channel_add_user(struct Channel *channel, struct Client *client,
+                 unsigned int flags, bool flood_ctrl)
 {
   assert(IsClient(client));
 
@@ -121,7 +121,7 @@ add_user_to_channel(struct Channel *channel, struct Client *client,
  * \param member Pointer to Membership struct
  */
 void
-remove_user_from_channel(struct ChannelMember *member)
+channel_remove_user(struct ChannelMember *member)
 {
   struct Client *const client = member->client;
   struct Channel *const channel = member->channel;
@@ -1086,7 +1086,7 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
     if (!HasUMode(client, UMODE_OPER))
       check_spambot_warning(client, channel->name);
 
-    add_user_to_channel(channel, client, flags, true);
+    channel_add_user(channel, client, flags, true);
 
     /*
      * Set timestamp if appropriate, and propagate
@@ -1208,7 +1208,7 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
                          client->host, channel->name);
   }
 
-  remove_user_from_channel(member);
+  channel_remove_user(member);
 }
 
 void

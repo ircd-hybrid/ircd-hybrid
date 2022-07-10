@@ -105,7 +105,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, 0, 0, ":%s KICK %s %s :%.*s",
                 source_p->id, channel->name,
                 target_p->id, KICKLEN, reason);
-  remove_user_from_channel(member_target);
+  channel_remove_user(member_target);
 }
 
 /*! \brief KICK command handler
@@ -153,7 +153,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, 0, 0, ":%s KICK %s %s :%.*s",
                 source_p->id, channel->name,
                 target_p->id, KICKLEN, reason);
-  remove_user_from_channel(member_target);
+  channel_remove_user(member_target);
 }
 
 static struct Message kick_msgtab =

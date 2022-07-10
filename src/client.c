@@ -670,7 +670,7 @@ exit_one_client(struct Client *client, const char *comment)
                                  client->host, comment);
 
     DLINK_FOREACH_SAFE(node, node_next, client->channel.head)
-      remove_user_from_channel(node->data);
+      channel_remove_user(node->data);
 
     svstag_clear_list(&client->svstags);
 

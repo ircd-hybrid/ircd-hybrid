@@ -939,21 +939,15 @@ channel_check_spambot_warning(struct Client *client, const char *name)
     if (client->connection->oper_warn_count_down)
       --client->connection->oper_warn_count_down;
 
-    if (client->connection->oper_warn_count_down == 0)
+    if (client->connection->oper_warn_count_down == 0 && name)
     {
       client->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 
       /* It's already known as a possible spambot */
-      if (name)
-        sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
-                             "User %s (%s@%s) trying to join %s is a possible spambot",
-                             client->name, client->username,
-                             client->host, name);
-      else
-        sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
-                             "User %s (%s@%s) is a possible spambot",
-                             client->name, client->username,
-                             client->host);
+      sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
+                           "User %s (%s@%s) trying to join %s is a possible spambot",
+                           client->name, client->username,
+                           client->host, name);
     }
   }
   else

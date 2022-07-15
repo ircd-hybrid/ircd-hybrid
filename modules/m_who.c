@@ -425,7 +425,7 @@ m_who(struct Client *source_p, int parc, char *parv[])
     char ch;
     char *p = options;
 
-    while (((ch = *(p++))) && (ch != '%') && (ch != ','))
+    while ((ch = *p++) && (ch != '%') && (ch != ','))
     {
       switch (ch)
       {

@@ -296,7 +296,7 @@ struct Connection
   unsigned int operflags;  /**< IRC Operator privilege flags */
   unsigned int random_ping;  /**< Holding a 32bit value used for PING cookies */
 
-  uintmax_t serial;  /**< Used to enforce 1 send per nick */
+  uintmax_t send_marker;  /**< Used to enforce one send per user */
   uintmax_t last_data;  /**< Last time data read from socket; monotonic time */
   uintmax_t last_ping;  /**< Last time data read from socket; currently this is a copy of last_data
                              which can be modified by check_pings_list; monotonic time */

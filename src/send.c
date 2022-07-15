@@ -38,7 +38,7 @@
 #include "log.h"
 
 
-static uintmax_t current_serial;
+static uintmax_t send_marker;
 
 
 /* send_format()
@@ -332,7 +332,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
   va_end(args_l);
   va_end(args_r);
 
-  ++current_serial;
+  ++send_marker;
 
   DLINK_FOREACH(node, channel->members.head)
   {
@@ -355,10 +355,10 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 
     if (MyConnect(target))
       send_message(target, buffer_l);
-    else if (target->from->connection->serial != current_serial)
+    else if (target->from->connection->send_marker != send_marker)
       send_message_remote(target->from, from, buffer_r);
 
-    target->from->connection->serial = current_serial;
+    target->from->connection->send_marker = send_marker;
   }
 
   dbuf_ref_free(buffer_l);
@@ -444,7 +444,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
   send_format(buffer, pattern, args);
   va_end(args);
 
-  ++current_serial;
+  ++send_marker;
 
   DLINK_FOREACH(node, user->channel.head)
   {
@@ -462,7 +462,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
       if (target == user)
         continue;
 
-      if (target->connection->serial == current_serial)
+      if (target->connection->send_marker == send_marker)
         continue;
 
       if (poscap && HasCap(target, poscap) != poscap)
@@ -471,7 +471,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
       if (negcap && HasCap(target, negcap))
         continue;
 
-      target->connection->serial = current_serial;
+      target->connection->send_marker = send_marker;
       send_message(target, buffer);
     }
   }
@@ -658,7 +658,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
   send_format(buffer, pattern, args);
   va_end(args);
 
-  ++current_serial;
+  ++send_marker;
 
   DLINK_FOREACH(node, global_server_list.head)
   {
@@ -675,7 +675,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
     if (target->from == source_p->from)
       continue;
 
-    if (target->from->connection->serial == current_serial)
+    if (target->from->connection->send_marker == send_marker)
       continue;
 
     if (IsCapable(target->from, capab) != capab)
@@ -684,7 +684,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
     if (match(mask, target->name))
       continue;
 
-    target->from->connection->serial = current_serial;
+    target->from->connection->send_marker = send_marker;
     send_message_remote(target->from, source_p, buffer);
   }
 

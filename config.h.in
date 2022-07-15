@@ -3,6 +3,18 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* epoll mechanism */
+#undef AX_IOPOLL_MECHANISM_EPOLL
+
+/* kqueue mechanism */
+#undef AX_IOPOLL_MECHANISM_KQUEUE
+
+/* no iopoll mechanism */
+#undef AX_IOPOLL_MECHANISM_NONE
+
+/* poll mechanism */
+#undef AX_IOPOLL_MECHANISM_POLL
+
 /* Set to datadir. */
 #undef DATADIR
 
@@ -247,18 +259,6 @@
 /* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
    `char[]'. */
 #undef YYTEXT_POINTER
-
-/* epoll mechanism */
-#undef __IOPOLL_MECHANISM_EPOLL
-
-/* kqueue mechanism */
-#undef __IOPOLL_MECHANISM_KQUEUE
-
-/* no iopoll mechanism */
-#undef __IOPOLL_MECHANISM_NONE
-
-/* poll mechanism */
-#undef __IOPOLL_MECHANISM_POLL
 
 /* Define so that glibc/gnulib argp.h does not typedef error_t. */
 #undef __error_t_defined

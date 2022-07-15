@@ -25,7 +25,7 @@
  */
 
 #include "stdinc.h"
-#if USE_IOPOLL_MECHANISM == __IOPOLL_MECHANISM_EPOLL
+#if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_EPOLL
 #include "fdlist.h"
 #include "ircd.h"
 #include "s_bsd.h"

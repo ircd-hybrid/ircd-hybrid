@@ -15082,12 +15082,12 @@ printf %s "checking for optimal/desired iopoll mechanism... " >&6; }
 
   iopoll_mechanism_none=0
 
-printf "%s\n" "#define __IOPOLL_MECHANISM_NONE $iopoll_mechanism_none" >>confdefs.h
+printf "%s\n" "#define AX_IOPOLL_MECHANISM_NONE $iopoll_mechanism_none" >>confdefs.h
 
 
   iopoll_mechanism_kqueue=1
 
-printf "%s\n" "#define __IOPOLL_MECHANISM_KQUEUE $iopoll_mechanism_kqueue" >>confdefs.h
+printf "%s\n" "#define AX_IOPOLL_MECHANISM_KQUEUE $iopoll_mechanism_kqueue" >>confdefs.h
 
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -15134,7 +15134,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
 
   iopoll_mechanism_epoll=2
 
-printf "%s\n" "#define __IOPOLL_MECHANISM_EPOLL $iopoll_mechanism_epoll" >>confdefs.h
+printf "%s\n" "#define AX_IOPOLL_MECHANISM_EPOLL $iopoll_mechanism_epoll" >>confdefs.h
 
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -15158,7 +15158,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
 
   iopoll_mechanism_poll=3
 
-printf "%s\n" "#define __IOPOLL_MECHANISM_POLL $iopoll_mechanism_poll" >>confdefs.h
+printf "%s\n" "#define AX_IOPOLL_MECHANISM_POLL $iopoll_mechanism_poll" >>confdefs.h
 
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */

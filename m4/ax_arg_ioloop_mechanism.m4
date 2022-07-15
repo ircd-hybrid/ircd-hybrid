@@ -9,18 +9,18 @@ AC_DEFUN([AX_ARG_IOLOOP_MECHANISM],[
   AC_MSG_CHECKING([for optimal/desired iopoll mechanism])
 
   iopoll_mechanism_none=0
-  AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_NONE],[$iopoll_mechanism_none],[no iopoll mechanism])
+  AC_DEFINE_UNQUOTED([AX_IOPOLL_MECHANISM_NONE],[$iopoll_mechanism_none],[no iopoll mechanism])
 
   iopoll_mechanism_kqueue=1
-  AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_KQUEUE],[$iopoll_mechanism_kqueue],[kqueue mechanism])
+  AC_DEFINE_UNQUOTED([AX_IOPOLL_MECHANISM_KQUEUE],[$iopoll_mechanism_kqueue],[kqueue mechanism])
   AC_LINK_IFELSE([AC_LANG_FUNC_LINK_TRY([kevent])],[is_kqueue_mechanism_available="yes"],[is_kqueue_mechanism_available="no"])
 
   iopoll_mechanism_epoll=2
-  AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_EPOLL],[$iopoll_mechanism_epoll],[epoll mechanism])
+  AC_DEFINE_UNQUOTED([AX_IOPOLL_MECHANISM_EPOLL],[$iopoll_mechanism_epoll],[epoll mechanism])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [epoll_create1(EPOLL_CLOEXEC);])], [is_epoll_mechanism_available="yes"],[is_epoll_mechanism_available="no"])
 
   iopoll_mechanism_poll=3
-  AC_DEFINE_UNQUOTED([__IOPOLL_MECHANISM_POLL],[$iopoll_mechanism_poll],[poll mechanism])
+  AC_DEFINE_UNQUOTED([AX_IOPOLL_MECHANISM_POLL],[$iopoll_mechanism_poll],[poll mechanism])
   AC_LINK_IFELSE([AC_LANG_FUNC_LINK_TRY([poll])],[is_poll_mechanism_available="yes"],[is_poll_mechanism_available="no"])
 
   optimal_iopoll_mechanism="none"

@@ -25,7 +25,7 @@
  */
 
 #include "stdinc.h"
-#if USE_IOPOLL_MECHANISM == __IOPOLL_MECHANISM_KQUEUE
+#if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_KQUEUE
 #include <sys/event.h>
 #include "fdlist.h"
 #include "ircd.h"

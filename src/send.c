@@ -547,9 +547,9 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
  * side effects	- NONE
  */
 static bool
-match_it(const struct Client *one, const char *mask, unsigned int what)
+match_it(const struct Client *one, const char *mask, bool host)
 {
-  if (what == MATCH_HOST)
+  if (host == true)
     return match(mask, one->host) == 0;
 
   return match(mask, one->servptr->name) == 0;
@@ -564,7 +564,7 @@ match_it(const struct Client *one, const char *mask, unsigned int what)
  */
 void
 sendto_match_butone(const struct Client *one, const struct Client *from,
-                    const char *mask, int what, const char *pattern, ...)
+                    const char *mask, bool host, const char *pattern, ...)
 {
   va_list args_l, args_r;
   dlink_node *node;
@@ -592,7 +592,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
     if (one && (client == one->from))
       continue;
 
-    if (match_it(client, mask, what) == false)
+    if (match_it(client, mask, host) == false)
       continue;
 
     send_message(client, buffer_l);

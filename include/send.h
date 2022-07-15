@@ -44,13 +44,6 @@ enum
   SEND_LOCOPS
 };
 
-/* Used when sending to $#mask or $$mask */
-enum
-{
-  MATCH_SERVER,
-  MATCH_HOST
-};
-
 /*
  * struct decls
  */
@@ -67,7 +60,7 @@ extern void sendto_channel_butone(struct Client *, const struct Client *, struct
 extern void sendto_common_channels_local(struct Client *, bool, unsigned int, unsigned int, const char *, ...) AFP(5,6);
 extern void sendto_channel_local(const struct Client *, struct Channel *, int, unsigned int, unsigned int, const char *, ...) AFP(6,7);
 extern void sendto_server(const struct Client *, const unsigned int, const unsigned int, const char *, ...) AFP(4,5);
-extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, int, const char *, ...) AFP(5,6);
+extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, bool, const char *, ...) AFP(5,6);
 extern void sendto_match_servs(const struct Client *, const char *, unsigned int, const char *, ...) AFP(4,5);
 extern void sendto_realops_flags(unsigned int, int, int, const char *, ...) AFP(4,5);
 extern void sendto_wallops_flags(unsigned int, const struct Client *, const char *, ...) AFP(3,4);

@@ -50,6 +50,7 @@
 #include "log.h"
 #include "send.h"
 #include "memory.h"
+#include "reslib.h"
 #include "res.h"
 #include "user.h"
 #include "channel_mode.h"

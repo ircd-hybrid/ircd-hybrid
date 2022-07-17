@@ -65,15 +65,28 @@
  */
 
 /* Original copyright ISC as above.
- * Code modified specifically for ircd use from the following orginal files
- * in bind ...
  *
- * res_comp.c
- * ns_name.c
- * ns_netint.c
- * res_init.c
+ * The following functions were extracted from glibc's resolver
+ * implementation. All functions (except for res_mkquery, which
+ * has been heavily modified for use in ircd-hybrid), remain
+ * unmodified.
  *
- * - Dianora
+ * dn_expand() - dn_expand.c
+ * dn_find() - ns_name_pack.c
+ * dn_skipname() - dn_skipname.c
+ * mklower() - ns_name_pack.c
+ * ns_get16 - ns_netint.c
+ * ns_get32() - ns_netint.c
+ * ns_name_compress() - ns_name_compress.c
+ * ns_name_ntop() - ns_name_ntop.c
+ * ns_name_pack() - ns_name_pack.c
+ * ns_name_pton() - ns_name_pton.c
+ * ns_name_skip() - ns_name_skip.c
+ * ns_name_uncompress() - ns_name_uncompress.c
+ * ns_name_unpack() - ns_name_unpack.c
+ * printable() - ns_name_ntop.c
+ * res_mkquery() - res_mkquery.c
+ * special() - ns_name_ntop.c
  */
 
 #include "stdinc.h"
@@ -82,54 +95,21 @@
 #include "reslib.h"
 #include "irc_string.h"
 
-#define NS_TYPE_ELT             0x40 /* EDNS0 extended label type */
-#define DNS_LABELTYPE_BITSTRING 0x41
 #define MAXLINE 128
-
-/* $Id$ */
 
 struct irc_ssaddr irc_nsaddr_list[RESLIB_MAXNS];
 unsigned int irc_nscount = 0;
 
-static const char digits[] = "0123456789";
-static const char digitvalue[256] =
-{
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /*16*/
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /*32*/
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /*48*/
-   0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1, /*64*/
-  -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, /*80*/
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /*96*/
-  -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, /*112*/
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /*128*/
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /*256*/
-};
-
-static int labellen(const unsigned char *lp);
-static int special(int ch);
-static int printable(int ch);
-static int irc_decode_bitstring(const unsigned char **cpp, char *dn, const char *eom);
-static int irc_ns_name_compress(const char *src, unsigned char *dst, size_t dstsiz,
-    const unsigned char **dnptrs, const unsigned char **lastdnptr);
-static int irc_dn_find(const unsigned char *, const unsigned char *, const unsigned char * const *,
-                       const unsigned char * const *);
-static int irc_encode_bitsring(const char **, const char *, unsigned char **, unsigned char **,
-                               const unsigned char *);
-static int irc_ns_name_uncompress(const unsigned char *, const unsigned char *,
-                                  const unsigned char *, char *, size_t);
-static int irc_ns_name_unpack(const unsigned char *, const unsigned char *,
-                              const unsigned char *, unsigned char *,
-                              size_t);
+static bool special(int);
+static bool printable(int);
+static int irc_ns_name_compress(const char *, unsigned char *, size_t, const unsigned char **, const unsigned char **);
+static int irc_dn_find(const unsigned char *, const unsigned char *, const unsigned char **, const unsigned char **);
+static int irc_ns_name_uncompress(const unsigned char *, const unsigned char *, const unsigned char *, char *, size_t);
+static int irc_ns_name_unpack(const unsigned char *, const unsigned char *, const unsigned char *, unsigned char *, size_t);
 static int irc_ns_name_ntop(const unsigned char *, char *, size_t);
 static int irc_ns_name_skip(const unsigned char **, const unsigned char *);
-static int mklower(int ch);
+static int mklower(int);
+
 
 /* add_nameserver()
  *
@@ -241,13 +221,11 @@ irc_res_init(void)
     add_nameserver("127.0.0.1");
 }
 
-/*
- * Expand compressed domain name 'comp_dn' to full domain name.
- * 'msg' is a pointer to the begining of the message,
- * 'eomorig' points to the first location after the message,
- * 'exp_dn' is a pointer to a buffer of size 'length' for the result.
- * Return size of compressed name or -1 if there was an error.
- */
+/* Expand compressed domain name COMP_DN to full domain name.  MSG is
+   a pointer to the beginning of the message, EOMORIG points to the
+   first location after the message, EXP_DN is a pointer to a buffer
+   of size LENGTH for the result.  Returns size of compressed name or
+   -1 if there was an error.  */
 int
 irc_dn_expand(const unsigned char *msg, const unsigned char *eom,
               const unsigned char *src, char *dst, int dstsiz)
@@ -259,34 +237,25 @@ irc_dn_expand(const unsigned char *msg, const unsigned char *eom,
   return n;
 }
 
-/*
- * irc_ns_name_uncompress(msg, eom, src, dst, dstsiz)
- *	Expand compressed domain name to presentation format.
- * return:
- *	Number of bytes read out of `src', or -1 (with errno set).
- * note:
- *	Root domain returns as "." not "".
- */
+/* Expand compressed domain name to presentation format.  Returns the
+   number of bytes read out of `src', or -1 (with errno set).  The
+   root domain is returned as ".", not "".  */
 static int
 irc_ns_name_uncompress(const unsigned char *msg, const unsigned char *eom,
                        const unsigned char *src, char *dst, size_t dstsiz)
 {
   unsigned char tmp[NS_MAXCDNAME];
-  int n;
+  int n = irc_ns_name_unpack(msg, eom, src, tmp, sizeof tmp);
 
-  if ((n = irc_ns_name_unpack(msg, eom, src, tmp, sizeof tmp)) == -1)
+  if (n < 0)
     return -1;
-  if (irc_ns_name_ntop(tmp, dst, dstsiz) == -1)
+  if (irc_ns_name_ntop(tmp, dst, dstsiz) < 0)
     return -1;
   return n;
 }
 
-/*
- * irc_ns_name_unpack(msg, eom, src, dst, dstsiz)
- *	Unpack a domain name from a message, source may be compressed.
- * return:
- *	-1 if it fails, or consumed octets if it succeeds.
- */
+/* Unpack a domain name from a message, source may be compressed.
+   Returns -1 if it fails, or consumed octets if it succeeds.  */
 static int
 irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
                    const unsigned char *src, unsigned char *dst,
@@ -294,7 +263,7 @@ irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
 {
   const unsigned char *srcp, *dstlim;
   unsigned char *dstp;
-  int n, len, checked, l;
+  int n, len, checked;
 
   len = -1;
   checked = 0;
@@ -308,33 +277,33 @@ irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
     return -1;
   }
 
-  /* Fetch next label in domain name. */
+  /* Fetch next label in domain name.  */
   while ((n = *srcp++) != 0)
   {
-    /* Check for indirection. */
+    /* Check for indirection.  */
     switch (n & NS_CMPRSFLGS)
     {
       case 0:
-      case NS_TYPE_ELT:
-        /* Limit checks. */
-        if ((l = labellen(srcp - 1)) < 0)
+        /* Limit checks.  */
+        if (n >= 64)
         {
           errno = EMSGSIZE;
           return -1;
         }
 
-        if (dstp + l + 1 >= dstlim || srcp + l >= eom)
+        /* NB: n + 1 and >= to cover the *dstp = '\0' assignment
+           below.  */
+        if (n + 1 >= dstlim - dstp || n >= eom - srcp)
         {
           errno = EMSGSIZE;
           return -1;
         }
 
-        checked += l + 1;
+        checked += n + 1;
         *dstp++ = n;
-        memcpy(dstp, srcp, l);
-
-        dstp += l;
-        srcp += l;
+        memcpy(dstp, srcp, n);
+        dstp += n;
+        srcp += n;
         break;
 
       case NS_CMPRSFLGS:
@@ -347,22 +316,22 @@ irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
         if (len < 0)
           len = srcp - src + 1;
 
-        srcp = msg + (((n & 0x3f) << 8) | (*srcp & 0xff));
-
-        if (srcp < msg || srcp >= eom)
         {
-          /* Out of range. */
-          errno = EMSGSIZE;
-          return -1;
+          int target = ((n & 0x3f) << 8) | *srcp;
+          if (target >= eom - msg)
+          {
+            /* Out of range.  */
+            errno = EMSGSIZE;
+            return -1;
+          }
+
+          srcp = msg + target;
         }
 
         checked += 2;
 
-        /*
-         * Check for loops in the compressed name;
-         * if we've looked at the whole message,
-         * there must be a loop.
-         */
+        /* Check for loops in the compressed name; if we've looked
+           at the whole message, there must be a loop.  */
         if (checked >= eom - msg)
         {
           errno = EMSGSIZE;
@@ -373,7 +342,7 @@ irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
 
       default:
         errno = EMSGSIZE;
-        return -1;  /* Flag error */
+        return -1;
     }
   }
 
@@ -385,33 +354,27 @@ irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
   return len;
 }
 
-/*
- * irc_ns_name_ntop(src, dst, dstsiz)
- *	Convert an encoded domain name to printable ascii as per RFC1035.
- * return:
- *	Number of bytes written to buffer, or -1 (with errno set)
- * notes:
- *	The root is returned as "."
- *	All other domains are returned in non absolute form
- */
+/* Converts an uncompressed, encoded domain name to printable ASCII as
+   per RFC1035.  Returns the number of bytes written to buffer, or -1
+   (with errno set).  The root is returned as "."  All other domains
+   are returned in non absolute form.  */
 static int
 irc_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
 {
   const unsigned char *cp;
   char *dn, *eom;
   unsigned char c;
-  unsigned int n;
   int l;
 
   cp = src;
   dn = dst;
   eom = dst + dstsiz;
 
-  while ((n = *cp++) != 0)
+  while ((l = *cp++) != 0)
   {
-    if ((n & NS_CMPRSFLGS) == NS_CMPRSFLGS)
+    if (l >= 64)
     {
-      /* Some kind of compression pointer. */
+      /* Some kind of compression pointer.  */
       errno = EMSGSIZE;
       return -1;
     }
@@ -427,76 +390,43 @@ irc_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
       *dn++ = '.';
     }
 
-    if ((l = labellen((cp - 1))) < 0)
-    {
-      errno = EMSGSIZE;  /* XXX */
-      return -1;
-    }
-
-    if (dn + l >= eom)
-    {
-      errno = EMSGSIZE;
-      return -1;
-    }
-
-    if ((n & NS_CMPRSFLGS) == NS_TYPE_ELT)
-    {
-      int m;
-
-      if (n != DNS_LABELTYPE_BITSTRING)
-      {
-        /* XXX: labellen should reject this case */
-        errno = EINVAL;
-        return -1;
-      }
-
-      if ((m = irc_decode_bitstring(&cp, dn, eom)) < 0)
-      {
-        errno = EMSGSIZE;
-        return -1;
-      }
-
-      dn += m;
-      continue;
-    }
-
-    for ((void)NULL; l > 0; l--)
+    for (; l > 0; l--)
     {
       c = *cp++;
 
       if (special(c))
       {
-        if (dn + 1 >= eom)
+        if (eom - dn < 2)
         {
           errno = EMSGSIZE;
           return -1;
         }
 
         *dn++ = '\\';
-        *dn++ = (char)c;
+        *dn++ = c;
       }
       else if (!printable(c))
       {
-        if (dn + 3 >= eom)
+        if (eom - dn < 4)
         {
           errno = EMSGSIZE;
           return -1;
         }
 
         *dn++ = '\\';
-        *dn++ = digits[c / 100];
-        *dn++ = digits[(c % 100) / 10];
-        *dn++ = digits[c % 10];
+        *dn++ = '0' + (c / 100);
+        *dn++ = '0' + ((c % 100) / 10);
+        *dn++ = '0' + (c % 10);
       }
       else
       {
-        if (dn >= eom)
+        if (eom - dn < 2)
         {
           errno = EMSGSIZE;
           return -1;
         }
 
-        *dn++ = (char)c;
+        *dn++ = c;
       }
     }
   }
@@ -519,73 +449,64 @@ irc_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
   }
 
   *dn++ = '\0';
-  return (dn - dst);
+  return dn - dst;
 }
 
-/*
- * Skip over a compressed domain name. Return the size or -1.
- */
+/* Skips over a compressed domain name. Returns the size or -1.  */
 int
 irc_dn_skipname(const unsigned char *ptr, const unsigned char *eom)
 {
   const unsigned char *saveptr = ptr;
 
-  if (irc_ns_name_skip(&ptr, eom) == -1)
+  if (irc_ns_name_skip(&ptr, eom) < 0)
     return -1;
   return ptr - saveptr;
 }
 
-/*
- * ns_name_skip(ptrptr, eom)
- *	Advance *ptrptr to skip over the compressed name it points at.
- * return:
- *	0 on success, -1 (with errno set) on failure.
- */
+/* Advances *PTRPTR to skip over the compressed name it points at.
+   Returns 0 on success, -1 (with errno set) on failure.  */
 static int
 irc_ns_name_skip(const unsigned char **ptrptr, const unsigned char *eom)
 {
   const unsigned char *cp;
   unsigned int n;
-  int l;
 
   cp = *ptrptr;
 
-  while (cp < eom && (n = *cp++) != 0)
+  while (cp < eom)
   {
-    /* Check for indirection. */
-    switch (n & NS_CMPRSFLGS)
-    {
-      case 0:  /* Normal case, n == len */
-        cp += n;
-        continue;
-      case NS_TYPE_ELT:  /* EDNS0 extended label */
-        if ((l = labellen(cp - 1)) < 0)
-        {
-          errno = EMSGSIZE;  /* XXX */
-          return -1;
-        }
+    n = *cp++;
 
-        cp += l;
-        continue;
-      case NS_CMPRSFLGS:  /* Indirection */
-        cp++;
-        break;
-      default:  /* Illegal type */
-        errno = EMSGSIZE;
-        return -1;
+    if (n == 0)
+    {
+      /* End of domain name without indirection.  */
+      *ptrptr = cp;
+      return 0;
     }
 
-    break;
+    /* Check for indirection.  */
+    switch (n & NS_CMPRSFLGS)
+    {
+      case 0:  /* Normal case, n == len.  */
+        if (eom - cp < n)
+          goto malformed;
+
+        cp += n;
+        break;
+      case NS_CMPRSFLGS:  /* Indirection.  */
+        if (cp == eom)
+          /* No room for second indirection byte.  */
+          goto malformed;
+        *ptrptr = cp + 1;
+        return 0;
+      default:  /* Illegal type.  */
+        goto malformed;
+    }
   }
 
-  if (cp > eom)
-  {
-    errno = EMSGSIZE;
-    return -1;
-  }
-
-  *ptrptr = cp;
-  return 0;
+malformed:
+  errno = EMSGSIZE;
+  return -1;
 }
 
 unsigned int
@@ -606,142 +527,45 @@ irc_ns_get32(const unsigned char *src)
   return dst;
 }
 
-void
-irc_ns_put16(unsigned int src, unsigned char *dst)
-{
-  IRC_NS_PUT16(src, dst);
-}
-
-void
-irc_ns_put32(unsigned long src, unsigned char *dst)
-{
-  IRC_NS_PUT32(src, dst);
-}
-
-/* From ns_name.c */
-
-/*
- * special(ch)
- *      Thinking in noninternationalized USASCII (per the DNS spec),
- *      is this characted special ("in need of quoting") ?
- * return:
- *      boolean.
- */
-static int
+/* Thinking in noninternationalized US-ASCII (per the DNS spec), is
+   this character special ("in need of quoting")?  */
+static inline bool
 special(int ch)
 {
   switch (ch)
   {
-    case 0x22:  /* '"'  */
-    case 0x2E:  /* '.'  */
-    case 0x3B:  /* ';'  */
-    case 0x5C:  /* '\\' */
-    case 0x28:  /* '('  */
-    case 0x29:  /* ')'  */
-    /* Special modifiers in zone files. */
-    case 0x40:  /* '@'  */
-    case 0x24:  /* '$'  */
-      return 1;
+    case '"':
+    case '.':
+    case ';':
+    case '\\':
+    case '(':
+    case ')':
+      /* Special modifiers in zone files.  */
+    case '@':
+    case '$':
+      return true;
     default:
-      return 0;
+      return false;
   }
 }
 
-static int
-labellen(const unsigned char *lp)
-{
-  int bitlen;
-  unsigned char l = *lp;
-
-  if ((l & NS_CMPRSFLGS) == NS_CMPRSFLGS)
-  {
-    /* Should be avoided by the caller */
-    return -1;
-  }
-
-  if ((l & NS_CMPRSFLGS) == NS_TYPE_ELT)
-  {
-    if (l == DNS_LABELTYPE_BITSTRING)
-    {
-      if ((bitlen = *(lp + 1)) == 0)
-        bitlen = 256;
-      return (bitlen + 7 ) / 8 + 1;
-    }
-
-    return -1;  /* Unknwon ELT */
-  }
-
-  return l;
-}
-
-/*
- * printable(ch)
- *      Thinking in noninternationalized USASCII (per the DNS spec),
- *      is this character visible and not a space when printed ?
- * return:
- *      boolean.
- */
-static int
+/* Thinking in noninternationalized US-ASCII (per the DNS spec), is
+   this character visible and not a space when printed?  */
+static inline bool
 printable(int ch)
 {
   return ch > 0x20 && ch < 0x7f;
 }
 
-static int
-irc_decode_bitstring(const unsigned char **cpp, char *dn, const char *eom)
-{
-  const unsigned char *cp = *cpp;
-  char *beg = dn, tc;
-  int b, blen, plen;
-
-  if ((blen = (*cp & 0xff)) == 0)
-    blen = 256;
-
-  plen = (blen + 3) / 4;
-  plen += sizeof("\\[x/]") + (blen > 99 ? 3 : (blen > 9) ? 2 : 1);
-
-  if (dn + plen >= eom)
-    return -1;
-
-  cp++;
-  dn += sprintf(dn, "\\[x");
-
-  for (b = blen; b > 7; b -= 8, cp++)
-    dn += sprintf(dn, "%02x", *cp & 0xff);
-
-  if (b > 4)
-  {
-    tc = *cp++;
-    dn += sprintf(dn, "%02x", tc & (0xff << (8 - b)));
-  }
-  else if (b > 0)
-  {
-    tc = *cp++;
-    dn += sprintf(dn, "%1x", ((tc >> 4) & 0x0f) & (0x0f << (4 - b)));
-  }
-
-  dn += sprintf(dn, "/%d]", blen);
-
-  *cpp = cp;
-  return dn - beg;
-}
-
-/*
- * irc_ns_name_pton(src, dst, dstsiz)
- *  Convert a ascii string into an encoded domain name as per RFC1035.
- * return:
- *  -1 if it fails
- *  1 if string was fully qualified
- *  0 is string was not fully qualified
- * notes:
- *  Enforces label and domain length limits.
- */
+/* Converts an ASCII string into an encoded domain name as per
+   RFC1035.  Returns -1 if it fails, 1 if string was fully qualified,
+   0 is string was not fully qualified.  Enforces label and domain
+   length limits.  */
 static int
 irc_ns_name_pton(const char *src, unsigned char *dst, size_t dstsiz)
 {
   unsigned char *label, *bp, *eom;
-  char *cp;
-  int c, n, escaped, e = 0;
+  int c, n, escaped;
 
   escaped = 0;
   bp = dst;
@@ -752,53 +576,25 @@ irc_ns_name_pton(const char *src, unsigned char *dst, size_t dstsiz)
   {
     if (escaped)
     {
-      if (c == '[')
+      if ('0' <= c && c <= '9')
       {
-        /* start a bit string label */
-        if ((cp = strchr(src, ']')) == NULL)
+        n = (c - '0') * 100;
+
+        if ((c = *src++) == 0 || c < '0' || c > '9')
         {
-          errno = EINVAL;  /* ??? */
+           errno = EMSGSIZE;
           return -1;
         }
 
-        if ((e = irc_encode_bitsring(&src, cp + 2, &label, &bp, eom)) != 0)
-        {
-          errno = e;
-          return -1;
-        }
+        n += (c - '0') * 10;
 
-        escaped = 0;
-        label = bp++;
-
-        if ((c = *src++) == 0)
-          goto done;
-        else if (c != '.')
-        {
-          errno = EINVAL;
-          return -1;
-        }
-
-        continue;
-      }
-      else if ((cp = strchr(digits, c)) != NULL)
-      {
-        n = (cp - digits) * 100;
-
-        if ((c = *src++) == 0 || (cp = strchr(digits, c)) == NULL)
+        if ((c = *src++) == 0 || c < '0' || c > '9')
         {
           errno = EMSGSIZE;
           return -1;
         }
 
-        n += (cp - digits) * 10;
-
-        if ((c = *src++) == 0 || (cp = strchr(digits, c)) == NULL)
-        {
-          errno = EMSGSIZE;
-          return -1;
-        }
-
-        n += (cp - digits);
+        n += c - '0';
 
         if (n > 255)
         {
@@ -820,9 +616,8 @@ irc_ns_name_pton(const char *src, unsigned char *dst, size_t dstsiz)
     {
       c = (bp - label - 1);
 
-      if ((c & NS_CMPRSFLGS) != 0)
+      if ((c & NS_CMPRSFLGS) != 0)  /* Label too big.  */
       {
-        /* Label too big. */
         errno = EMSGSIZE;
         return -1;
       }
@@ -877,16 +672,20 @@ irc_ns_name_pton(const char *src, unsigned char *dst, size_t dstsiz)
     *bp++ = (unsigned char)c;
   }
 
-  c = (bp - label - 1);
-
-  if ((c & NS_CMPRSFLGS) != 0)
+  if (escaped)  /* Trailing backslash.  */
   {
-    /* Label too big. */
     errno = EMSGSIZE;
     return -1;
   }
 
-done:
+  c = (bp - label - 1);
+
+  if ((c & NS_CMPRSFLGS) != 0)  /* Label too big.  */
+  {
+    errno = EMSGSIZE;
+    return -1;
+  }
+
   if (label >= eom)
   {
     errno = EMSGSIZE;
@@ -906,9 +705,8 @@ done:
     *bp++ = 0;
   }
 
-  if ((bp - dst) > NS_MAXCDNAME)
+  if ((bp - dst) > NS_MAXCDNAME)  /* src too big.  */
   {
-    /* src too big */
     errno = EMSGSIZE;
     return -1;
   }
@@ -916,23 +714,18 @@ done:
   return 0;
 }
 
-/*
- * irc_ns_name_pack(src, dst, dstsiz, dnptrs, lastdnptr)
- *  Pack domain name 'domain' into 'comp_dn'.
- * return:
- *  Size of the compressed name, or -1.
- * notes:
- *  'dnptrs' is an array of pointers to previous compressed names.
- *  dnptrs[0] is a pointer to the beginning of the message. The array
- *  ends with NULL.
- *  'lastdnptr' is a pointer to the end of the array pointed to
- *  by 'dnptrs'.
- * Side effects:
- *  The list of pointers in dnptrs is updated for labels inserted into
- *  the message as we compress the name.  If 'dnptr' is NULL, we don't
- *  try to compress names. If 'lastdnptr' is NULL, we don't update the
- *  list.
- */
+/* Packs domain name SRC into DST.  Returns size of the compressed
+   name, or -1.
+
+   DNPTRS is an array of pointers to previous compressed names.
+   DNPTRS[0] is a pointer to the beginning of the message. The array
+   ends with NULL.  LASTDNPTR is a pointer to the end of the array
+   pointed to by 'dnptrs'.
+
+   The list of pointers in DNPTRS is updated for labels inserted into
+   the message as we compress the name.  If DNPTRS is NULL, we don't
+   try to compress names. If LASTDNPTR is NULL, we don't update the
+   list.  */
 static int
 irc_ns_name_pack(const unsigned char *src, unsigned char *dst, int dstsiz,
                  const unsigned char **dnptrs, const unsigned char **lastdnptr)
@@ -949,61 +742,54 @@ irc_ns_name_pack(const unsigned char *src, unsigned char *dst, int dstsiz,
 
   if (dnptrs != NULL)
   {
-    if ((msg = *dnptrs++))
+    if ((msg = *dnptrs++) != NULL)
     {
       for (cpp = dnptrs; *cpp != NULL; cpp++)
         ;
-      lpp = cpp;  /* End of list to search */
+
+      lpp = cpp;  /* End of list to search.  */
     }
   }
   else
     msg = NULL;
 
-  /* Make sure the domain we are about to add is legal */
+  /* Make sure the domain we are about to add is legal.  */
   l = 0;
+
   do
   {
-    int l0;
-
     n = *srcp;
-    if ((n & NS_CMPRSFLGS) == NS_CMPRSFLGS)
+
+    if (n >= 64)
     {
       errno = EMSGSIZE;
       return -1;
     }
 
-    if ((l0 = labellen(srcp)) < 0)
-    {
-      errno = EINVAL;
-      return -1;
-    }
+    l += n + 1;
 
-    l += l0 + 1;
     if (l > NS_MAXCDNAME)
     {
       errno = EMSGSIZE;
       return -1;
     }
 
-    srcp += l0 + 1;
+    srcp += n + 1;
   } while (n != 0);
 
-  /* From here on we need to reset compression pointer array on error */
+  /* from here on we need to reset compression pointer array on error */
   srcp = src;
-
   do
   {
-    /* Look to see if we can use pointers. */
+    /* Look to see if we can use pointers.  */
     n = *srcp;
 
     if (n != 0 && msg != NULL)
     {
-      l = irc_dn_find(srcp, msg, (const unsigned char *const *)dnptrs,
-                      (const unsigned char *const *)lpp);
-
+      l = irc_dn_find(srcp, msg, dnptrs, lpp);
       if (l >= 0)
       {
-        if (dstp + 1 >= eob)
+        if (eob - dstp <= 1)
           goto cleanup;
 
         *dstp++ = (l >> 8) | NS_CMPRSFLGS;
@@ -1011,7 +797,7 @@ irc_ns_name_pack(const unsigned char *src, unsigned char *dst, int dstsiz,
         return dstp - dst;
       }
 
-      /* Not found, save it. */
+      /* Not found, save it.  */
       if (lastdnptr != NULL && cpp < lastdnptr - 1 && (dstp - msg) < 0x4000 && first)
       {
         *cpp++ = dstp;
@@ -1020,12 +806,12 @@ irc_ns_name_pack(const unsigned char *src, unsigned char *dst, int dstsiz,
       }
     }
 
-    /* Copy label to buffer */
-    if ((n & NS_CMPRSFLGS) == NS_CMPRSFLGS)
-      goto cleanup;  /* Should not happen. */
+    /* Copy label to buffer.  */
+    if (n >= 64)
+      /* Should not happen.  */
+      goto cleanup;
 
-    n = labellen(srcp);
-    if (dstp + 1 + n >= eob)
+    if (n + 1 > eob - dstp)
       goto cleanup;
 
     memcpy(dstp, srcp, n + 1);
@@ -1046,173 +832,48 @@ cleanup:
   return dstp - dst;
 }
 
+/* Compresses a domain name into wire format, using compression pointers.
+   Returns the number of bytes consumed in DST or -1 (with errno set).
+
+   DNPTRS is an array of pointers to previous compressed names.
+   DNPTRS[0] is a pointer to the beginning of the message.
+
+   The list ends with NULL.  LASTDNPTR is a pointer to the end of the
+   array pointed to by DNPTRS.  Side effect is to update the list of
+   pointers for labels inserted into the message as we compress the
+   name.  If DNPTRS is NULL, we don't try to compress names.  If
+   LASTDNPTR * is NULL, we don't update the list.  */
 static int
 irc_ns_name_compress(const char *src, unsigned char *dst, size_t dstsiz,
                      const unsigned char **dnptrs, const unsigned char **lastdnptr)
 {
   unsigned char tmp[NS_MAXCDNAME];
 
-  if (irc_ns_name_pton(src, tmp, sizeof tmp) == -1)
+  if (irc_ns_name_pton(src, tmp, sizeof tmp) < 0)
     return -1;
   return irc_ns_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr);
 }
 
-static int
-irc_encode_bitsring(const char **bp, const char *end, unsigned char **labelp,
-                    unsigned char **dst, const unsigned char *eom)
-{
-  int afterslash = 0;
-  const char *cp = *bp;
-  unsigned char *tp;
-  char c;
-  const char *beg_blen;
-  char *end_blen = NULL;
-  int value = 0, count = 0, tbcount = 0, blen = 0;
+/* Search for the counted-label name in an array of compressed names.
+   Returns the offset from MSG if found, or -1.
 
-  beg_blen = end_blen = NULL;
-
-  /* a bitstring must contain at least 2 characters */
-  if (end - cp < 2)
-    return EINVAL;
-
-  /* XXX: currently, only hex strings are supported */
-  if (*cp++ != 'x')
-    return EINVAL;
-
-  if (!isxdigit((*cp) & 0xff))  /* reject '\[x/BLEN]' */
-    return EINVAL;
-
-  for (tp = *dst + 1; cp < end && tp < eom; cp++)
-  {
-    switch((c = *cp))
-    {
-      case ']':  /* end of the bitstring */
-        if (afterslash)
-        {
-          if (beg_blen == NULL)
-            return EINVAL;
-
-          blen = (int)strtol(beg_blen, &end_blen, 10);
-          if (*end_blen != ']')
-            return EINVAL;
-        }
-
-        if (count)
-          *tp++ = ((value << 4) & 0xff);
-
-        cp++; /* skip ']' */
-        goto done;
-      case '/':
-        afterslash = 1;
-        break;
-      default:
-        if (afterslash)
-        {
-          if (!isdigit(c&0xff))
-            return EINVAL;
-
-          if (beg_blen == NULL)
-          {
-            if (c == '0')
-            {
-              /* blen never begings with 0 */
-              return EINVAL;
-            }
-
-            beg_blen = cp;
-          }
-        }
-        else
-        {
-          if (!isxdigit(c&0xff))
-            return EINVAL;
-
-          value <<= 4;
-          value += digitvalue[(int)c];
-          count += 4;
-          tbcount += 4;
-
-          if (tbcount > 256)
-            return EINVAL;
-
-          if (count == 8)
-          {
-            *tp++ = value;
-            count = 0;
-          }
-        }
-
-        break;
-    }
-  }
-
-done:
-  if (cp >= end || tp >= eom)
-    return EMSGSIZE;
-
-  /*
-   * bit length validation:
-   * If a <length> is present, the number of digits in the <bit-data>
-   * MUST be just sufficient to contain the number of bits specified
-   * by the <length>. If there are insignificant bits in a final
-   * hexadecimal or octal digit, they MUST be zero.
-   * RFC 2673, Section 3.2.
-   */
-  if (blen > 0)
-  {
-    int traillen;
-
-    if (((blen + 3) & ~3) != tbcount)
-      return EINVAL;
-    traillen = tbcount - blen; /* between 0 and 3 */
-
-    if (((value << (8 - traillen)) & 0xff) != 0)
-      return EINVAL;
-  }
-  else
-    blen = tbcount;
-
-  if (blen == 256)
-    blen = 0;
-
-  /* encode the type and the significant bit fields */
-  **labelp = DNS_LABELTYPE_BITSTRING;
-  **dst = blen;
-
-  *bp = cp;
-  *dst = tp;
-
-  return 0;
-}
-
-/*
- * dn_find(domain, msg, dnptrs, lastdnptr)
- *  Search for the counted-label name in an array of compressed names.
- * return:
- *  offset from msg if found, or -1.
- * notes:
- *  dnptrs is the pointer to the first name on the list,
- *  not the pointer to the start of the message.
- */
+   DNPTRS is the pointer to the first name on the list, not the
+   pointer to the start of the message.  */
 static int
 irc_dn_find(const unsigned char *domain, const unsigned char *msg,
-            const unsigned char *const *dnptrs,
-            const unsigned char *const *lastdnptr)
+            const unsigned char **dnptrs,
+            const unsigned char **lastdnptr)
 {
   const unsigned char *dn, *cp, *sp;
-  const unsigned char * const *cpp;
+  const unsigned char **cpp;
   unsigned int n;
 
   for (cpp = dnptrs; cpp < lastdnptr; cpp++)
   {
     sp = *cpp;
 
-    /*
-     * terminate search on:
-     * root label
-     * compression pointer
-     * unusable offset
-     */
+    /* Terminate search on: root label, compression pointer, unusable
+       offset.  */
     while (*sp != 0 && (*sp & NS_CMPRSFLGS) == 0 && (sp - msg) < 0x4000)
     {
       dn = domain;
@@ -1220,37 +881,33 @@ irc_dn_find(const unsigned char *domain, const unsigned char *msg,
 
       while ((n = *cp++) != 0)
       {
-        /*
-         * check for indirection
-         */
+        /* Check for indirection.  */
         switch (n & NS_CMPRSFLGS)
         {
-          case 0:  /* normal case, n == len */
-            n = labellen(cp - 1); /* XXX */
-
+          case 0:  /* Normal case, n == len.  */
             if (n != *dn++)
               goto next;
 
-            for ((void)NULL; n > 0; n--)
+            for (; n > 0; n--)
               if (mklower(*dn++) != mklower(*cp++))
                 goto next;
 
-            /* Is next root for both ? */
+            /* Is next root for both?  */
             if (*dn == '\0' && *cp == '\0')
               return sp - msg;
+
             if (*dn)
               continue;
             goto next;
-          case NS_CMPRSFLGS:  /* indirection */
+
+          case NS_CMPRSFLGS:  /* Indirection.  */
             cp = msg + (((n & 0x3f) << 8) | *cp);
             break;
-
-          default:  /* illegal type */
+          default:  /* Illegal type.  */
             errno = EMSGSIZE;
             return -1;
         }
       }
-
 next: ;
       sp += *sp + 1;
     }
@@ -1260,25 +917,21 @@ next: ;
   return -1;
 }
 
-/*
- *  *  Thinking in noninternationalized USASCII (per the DNS spec),
- *   *  convert this character to lower case if it's upper case.
- *    */
+/* Thinking in noninternationalized USASCII (per the DNS spec),
+   convert this character to lower case if it's upper case.  */
 static int
 mklower(int ch)
 {
-  if (ch >= 0x41 && ch <= 0x5A)
-    return ch + 0x20;
-
+  if (ch >= 'A' && ch <= 'Z')
+    return ch - 'A' + 'a';
   return ch;
 }
 
-/* From resolv/mkquery.c */
+/* Form all types of queries.  Returns the size of the result or -1 on
+   error.
 
-/*
- * Form all types of queries.
- * Returns the size of the result or -1.
- */
+   DNAME is the domain.  CLASS and TYPE are the DNS query
+   class and type.  BUF must point to the out buffer of BUFLEN bytes. */
 int
 irc_res_mkquery(const char *dname, int class, int type, unsigned char *buf, int buflen)
 {
@@ -1287,18 +940,19 @@ irc_res_mkquery(const char *dname, int class, int type, unsigned char *buf, int 
   int n;
   const unsigned char *dnptrs[20], **dpp, **lastdnptr;
 
-  /*
-   * Initialize header fields.
-   */
-  if (buf == NULL || buflen < HFIXEDSZ)
+  if (class < 0 || class > 65535 || type < 0 || type > 65535)
+    return -1;
+
+  /* Initialize header fields.  */
+  if ((buf == NULL) || (buflen < HFIXEDSZ))
     return -1;
 
   memset(buf, 0, HFIXEDSZ);
   hp = (HEADER *)buf;
 
   hp->id = 0;
-  hp->opcode = QUERY;
-  hp->rd = 1;  /* recurse */
+  hp->opcode = QUERY;  /* standard query */
+  hp->rd = 1;  /* recursion desired */
   hp->rcode = NO_ERRORS;
   cp = buf + HFIXEDSZ;
   buflen -= HFIXEDSZ;
@@ -1309,7 +963,9 @@ irc_res_mkquery(const char *dname, int class, int type, unsigned char *buf, int 
 
   if ((buflen -= QFIXEDSZ) < 0)
     return -1;
-  if ((n = irc_ns_name_compress(dname, cp, buflen, dnptrs, lastdnptr)) < 0)
+
+  n = irc_ns_name_compress(dname, cp, buflen, dnptrs, lastdnptr);
+  if (n < 0)
     return -1;
 
   cp += n;

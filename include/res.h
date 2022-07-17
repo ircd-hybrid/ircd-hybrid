@@ -48,29 +48,30 @@
 
 
 /* Here we define some values lifted from nameser.h */
-#define NS_NOTIFY_OP 4
-#define NS_INT16SZ 2
-#define NS_IN6ADDRSZ    16
-#define NS_INADDRSZ     4
-#define NS_INT32SZ 4
-#define NS_CMPRSFLGS    0xc0
-#define NS_MAXCDNAME 255
+#define NS_INT16SZ 2  /*%< #/bytes of data in a uint16_t */
+#define NS_IN6ADDRSZ 16  /*%< IPv6 T_AAAA */
+#define NS_INADDRSZ 4  /*%< IPv4 T_A */
+#define NS_INT32SZ 4  /*%< #/bytes of data in a uint32_t */
+#define NS_CMPRSFLGS 0xc0  /*%< Flag bits indicating name compression. */
+#define NS_MAXCDNAME 255  /*%< maximum compressed domain name */
 #define QUERY 0
-#define IQUERY 1
 #define NO_ERRORS 0
-#define SERVFAIL 2
-#define NXDOMAIN 3
+#define SERVFAIL 2  /*%< Server failure. */
+#define NXDOMAIN 3  /*%< Name error. */
 #define T_A 1
 #define T_AAAA 28
 #define T_PTR 12
 #define T_CNAME 5
-#define T_NULL 10
 #define C_IN 1
-#define QFIXEDSZ 4
-#define RRFIXEDSZ 10
-#define HFIXEDSZ 12
+#define QFIXEDSZ 4  /*%< #/bytes of fixed data in query */
+#define HFIXEDSZ 12  /*%< #/bytes of fixed data in header */
 
-
+/*%
+ * Structure for query header.  The order of the fields is machine- and
+ * compiler-dependent, depending on the byte/bit order and the layout
+ * of bit fields.  We use bit fields only in int variables, as this
+ * is all ANSI requires.  This requires a somewhat confusing rearrangement.
+ */
 typedef struct
 {
   unsigned  id :16;     /* query identification number */

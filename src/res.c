@@ -253,8 +253,6 @@ query_name(const char *name, int query_class, int type, struct reslist *request)
 {
   unsigned char buf[MAXPACKET];
 
-  memset(buf, 0, sizeof(buf));
-
   int request_len = reslib_res_mkquery(name, query_class, type, buf, sizeof(buf));
   if (request_len > 0)
   {

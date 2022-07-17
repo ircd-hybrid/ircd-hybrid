@@ -506,9 +506,9 @@ stats_dns_servers(struct Client *source_p, int parc, char *parv[])
 {
   char ipaddr[HOSTIPLEN + 1];
 
-  for (unsigned int i = 0; i < irc_nscount; ++i)
+  for (unsigned int i = 0; i < reslib_nscount; ++i)
   {
-    getnameinfo((const struct sockaddr *)&irc_nsaddr_list[i], irc_nsaddr_list[i].ss_len,
+    getnameinfo((const struct sockaddr *)&reslib_nsaddr_list[i], reslib_nsaddr_list[i].ss_len,
                 ipaddr, sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
     sendto_one_numeric(source_p, &me, RPL_STATSALINE, ipaddr);
   }

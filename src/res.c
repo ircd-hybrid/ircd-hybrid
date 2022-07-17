@@ -131,7 +131,7 @@ make_request(dns_callback_fnc callback, void *ctx)
 /*
  * int
  * res_ourserver(inp)
- *      looks up "inp" in irc_nsaddr_list[]
+ *      looks up "inp" in reslib_nsaddr_list[]
  * returns:
  *      0  : not found
  *      >0 : found
@@ -142,8 +142,8 @@ make_request(dns_callback_fnc callback, void *ctx)
 static bool
 res_ourserver(const struct irc_ssaddr *inp)
 {
-  for (unsigned int i = 0; i < irc_nscount; ++i)
-    if (address_compare(inp, &irc_nsaddr_list[i], true, true, 0) == true)
+  for (unsigned int i = 0; i < reslib_nscount; ++i)
+    if (address_compare(inp, &reslib_nsaddr_list[i], true, true, 0) == true)
       return true;
 
   return false;
@@ -156,11 +156,11 @@ res_ourserver(const struct irc_ssaddr *inp)
 static void
 start_resolver(void)
 {
-  irc_res_init();
+  reslib_res_init();
 
   if (ResolverFileDescriptor == NULL)
   {
-    int fd = comm_socket(irc_nsaddr_list[0].ss.ss_family, SOCK_DGRAM, 0);
+    int fd = comm_socket(reslib_nsaddr_list[0].ss.ss_family, SOCK_DGRAM, 0);
     if (fd == -1)
       return;
 
@@ -214,7 +214,7 @@ delete_resolver_queries(const void *vptr)
 static void
 send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 {
-  unsigned int max_queries = IRCD_MIN(irc_nscount, rcount);
+  unsigned int max_queries = IRCD_MIN(reslib_nscount, rcount);
 
   /* RES_PRIMARY option is not implemented
    * if (res.options & RES_PRIMARY || 0 == max_queries)
@@ -224,7 +224,7 @@ send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 
   for (unsigned int i = 0; i < max_queries; ++i)
     sendto(ResolverFileDescriptor->fd, msg, len, 0,
-           (struct sockaddr *)&irc_nsaddr_list[i], irc_nsaddr_list[i].ss_len);
+           (struct sockaddr *)&reslib_nsaddr_list[i], reslib_nsaddr_list[i].ss_len);
 }
 
 /*
@@ -256,7 +256,7 @@ query_name(const char *name, int query_class, int type, struct reslist *request)
 
   memset(buf, 0, sizeof(buf));
 
-  int request_len = irc_res_mkquery(name, query_class, type, buf, sizeof(buf));
+  int request_len = reslib_res_mkquery(name, query_class, type, buf, sizeof(buf));
   if (request_len > 0)
   {
     HEADER *header = (HEADER *)buf;
@@ -407,7 +407,7 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
 
   for (; header->qdcount > 0; --header->qdcount)
   {
-    int n = irc_dn_skipname(current, eob);
+    int n = reslib_dn_skipname(current, eob);
     if (n < 0)
       break;
 
@@ -421,7 +421,7 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
   {
     --header->ancount;
 
-    int n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
+    int n = reslib_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
     if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
       return false;
 
@@ -437,11 +437,11 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
     if (!((current + ANSWER_FIXED_SIZE) < eob))
       break;
 
-    type = irc_ns_get16(current);
+    type = reslib_ns_get16(current);
     current += TYPE_SIZE;
     current += CLASS_SIZE;
     current += TTL_SIZE;
-    rd_length = irc_ns_get16(current);
+    rd_length = reslib_ns_get16(current);
     current += RDLENGTH_SIZE;
 
     /*
@@ -484,7 +484,7 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         if (request->type != T_PTR)
           return false;
 
-        n = irc_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
+        n = reslib_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
         if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
           return false;
 

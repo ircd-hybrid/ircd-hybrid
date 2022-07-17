@@ -97,34 +97,34 @@
 
 #define MAXLINE 128
 
-struct irc_ssaddr irc_nsaddr_list[RESLIB_MAXNS];
-unsigned int irc_nscount = 0;
+struct irc_ssaddr reslib_nsaddr_list[RESLIB_MAXNS];
+unsigned int reslib_nscount = 0;
 
-static bool special(int);
-static bool printable(int);
-static int irc_ns_name_compress(const char *, unsigned char *, size_t, const unsigned char **, const unsigned char **);
-static int irc_dn_find(const unsigned char *, const unsigned char *, const unsigned char **, const unsigned char **);
-static int irc_ns_name_uncompress(const unsigned char *, const unsigned char *, const unsigned char *, char *, size_t);
-static int irc_ns_name_unpack(const unsigned char *, const unsigned char *, const unsigned char *, unsigned char *, size_t);
-static int irc_ns_name_ntop(const unsigned char *, char *, size_t);
-static int irc_ns_name_skip(const unsigned char **, const unsigned char *);
-static int mklower(int);
+static inline bool reslib_special(int);
+static inline bool reslib_printable(int);
+static int reslib_ns_name_compress(const char *, unsigned char *, size_t, const unsigned char **, const unsigned char **);
+static int reslib_dn_find(const unsigned char *, const unsigned char *, const unsigned char **, const unsigned char **);
+static int reslib_ns_name_uncompress(const unsigned char *, const unsigned char *, const unsigned char *, char *, size_t);
+static int reslib_ns_name_unpack(const unsigned char *, const unsigned char *, const unsigned char *, unsigned char *, size_t);
+static int reslib_ns_name_ntop(const unsigned char *, char *, size_t);
+static int reslib_ns_name_skip(const unsigned char **, const unsigned char *);
+static int reslib_mklower(int);
 
 
-/* add_nameserver()
+/* reslib_add_nameserver()
  *
  * input        - either an IPV4 address in dotted quad
  *                or an IPV6 address in : format
  * output       - NONE
- * side effects - entry in irc_nsaddr_list is filled in as needed
+ * side effects - entry in reslib_nsaddr_list is filled in as needed
  */
 static void
-add_nameserver(const char *arg)
+reslib_add_nameserver(const char *arg)
 {
   struct addrinfo hints, *res;
 
   /* Done max number of nameservers? */
-  if (irc_nscount >= RESLIB_MAXNS)
+  if (reslib_nscount >= RESLIB_MAXNS)
     return;
 
   memset(&hints, 0, sizeof(hints));
@@ -135,8 +135,8 @@ add_nameserver(const char *arg)
   if (getaddrinfo(arg, "domain", &hints, &res))
     return;
 
-  memcpy(&irc_nsaddr_list[irc_nscount].ss, res->ai_addr, res->ai_addrlen);
-  irc_nsaddr_list[irc_nscount++].ss_len = res->ai_addrlen;
+  memcpy(&reslib_nsaddr_list[reslib_nscount].ss, res->ai_addr, res->ai_addrlen);
+  reslib_nsaddr_list[reslib_nscount++].ss_len = res->ai_addrlen;
   freeaddrinfo(res);
 }
 
@@ -144,10 +144,10 @@ add_nameserver(const char *arg)
  *
  * inputs - NONE
  * output - -1 if failure 0 if success
- * side effects - fills in irc_nsaddr_list
+ * side effects - fills in reslib_nsaddr_list
  */
 static void
-parse_resvconf(void)
+reslib_parse_resolv_conf(void)
 {
   char *p;
   char *opt;
@@ -203,22 +203,22 @@ parse_resvconf(void)
       *p = '\0';  /* take the first word */
 
     if (!strcasecmp(opt, "nameserver"))
-      add_nameserver(arg);
+      reslib_add_nameserver(arg);
   }
 
   fclose(file);
 }
 
 void
-irc_res_init(void)
+reslib_res_init(void)
 {
-  irc_nscount = 0;
-  memset(irc_nsaddr_list, 0, sizeof(irc_nsaddr_list));
+  reslib_nscount = 0;
+  memset(reslib_nsaddr_list, 0, sizeof(reslib_nsaddr_list));
 
-  parse_resvconf();
+  reslib_parse_resolv_conf();
 
-  if (irc_nscount == 0)
-    add_nameserver("127.0.0.1");
+  if (reslib_nscount == 0)
+    reslib_add_nameserver("127.0.0.1");
 }
 
 /* Expand compressed domain name COMP_DN to full domain name.  MSG is
@@ -227,10 +227,10 @@ irc_res_init(void)
    of size LENGTH for the result.  Returns size of compressed name or
    -1 if there was an error.  */
 int
-irc_dn_expand(const unsigned char *msg, const unsigned char *eom,
-              const unsigned char *src, char *dst, int dstsiz)
+reslib_dn_expand(const unsigned char *msg, const unsigned char *eom,
+                 const unsigned char *src, char *dst, int dstsiz)
 {
-  int n = irc_ns_name_uncompress(msg, eom, src, dst, (size_t)dstsiz);
+  int n = reslib_ns_name_uncompress(msg, eom, src, dst, (size_t)dstsiz);
 
   if (n > 0 && dst[0] == '.')
     dst[0] = '\0';
@@ -241,15 +241,15 @@ irc_dn_expand(const unsigned char *msg, const unsigned char *eom,
    number of bytes read out of `src', or -1 (with errno set).  The
    root domain is returned as ".", not "".  */
 static int
-irc_ns_name_uncompress(const unsigned char *msg, const unsigned char *eom,
+reslib_ns_name_uncompress(const unsigned char *msg, const unsigned char *eom,
                        const unsigned char *src, char *dst, size_t dstsiz)
 {
   unsigned char tmp[NS_MAXCDNAME];
-  int n = irc_ns_name_unpack(msg, eom, src, tmp, sizeof tmp);
+  int n = reslib_ns_name_unpack(msg, eom, src, tmp, sizeof tmp);
 
   if (n < 0)
     return -1;
-  if (irc_ns_name_ntop(tmp, dst, dstsiz) < 0)
+  if (reslib_ns_name_ntop(tmp, dst, dstsiz) < 0)
     return -1;
   return n;
 }
@@ -257,9 +257,9 @@ irc_ns_name_uncompress(const unsigned char *msg, const unsigned char *eom,
 /* Unpack a domain name from a message, source may be compressed.
    Returns -1 if it fails, or consumed octets if it succeeds.  */
 static int
-irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
-                   const unsigned char *src, unsigned char *dst,
-                   size_t dstsiz)
+reslib_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
+                      const unsigned char *src, unsigned char *dst,
+                      size_t dstsiz)
 {
   const unsigned char *srcp, *dstlim;
   unsigned char *dstp;
@@ -359,7 +359,7 @@ irc_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
    (with errno set).  The root is returned as "."  All other domains
    are returned in non absolute form.  */
 static int
-irc_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
+reslib_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
 {
   const unsigned char *cp;
   char *dn, *eom;
@@ -394,7 +394,7 @@ irc_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
     {
       c = *cp++;
 
-      if (special(c))
+      if (reslib_special(c))
       {
         if (eom - dn < 2)
         {
@@ -405,7 +405,7 @@ irc_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
         *dn++ = '\\';
         *dn++ = c;
       }
-      else if (!printable(c))
+      else if (!reslib_printable(c))
       {
         if (eom - dn < 4)
         {
@@ -454,11 +454,11 @@ irc_ns_name_ntop(const unsigned char *src, char *dst, size_t dstsiz)
 
 /* Skips over a compressed domain name. Returns the size or -1.  */
 int
-irc_dn_skipname(const unsigned char *ptr, const unsigned char *eom)
+reslib_dn_skipname(const unsigned char *ptr, const unsigned char *eom)
 {
   const unsigned char *saveptr = ptr;
 
-  if (irc_ns_name_skip(&ptr, eom) < 0)
+  if (reslib_ns_name_skip(&ptr, eom) < 0)
     return -1;
   return ptr - saveptr;
 }
@@ -466,7 +466,7 @@ irc_dn_skipname(const unsigned char *ptr, const unsigned char *eom)
 /* Advances *PTRPTR to skip over the compressed name it points at.
    Returns 0 on success, -1 (with errno set) on failure.  */
 static int
-irc_ns_name_skip(const unsigned char **ptrptr, const unsigned char *eom)
+reslib_ns_name_skip(const unsigned char **ptrptr, const unsigned char *eom)
 {
   const unsigned char *cp;
   unsigned int n;
@@ -510,27 +510,27 @@ malformed:
 }
 
 unsigned int
-irc_ns_get16(const unsigned char *src)
+reslib_ns_get16(const unsigned char *src)
 {
   unsigned int dst;
 
-  IRC_NS_GET16(dst, src);
+  RESLIB_NS_GET16(dst, src);
   return dst;
 }
 
 unsigned long
-irc_ns_get32(const unsigned char *src)
+reslib_ns_get32(const unsigned char *src)
 {
   unsigned long dst;
 
-  IRC_NS_GET32(dst, src);
+  RESLIB_NS_GET32(dst, src);
   return dst;
 }
 
 /* Thinking in noninternationalized US-ASCII (per the DNS spec), is
    this character special ("in need of quoting")?  */
 static inline bool
-special(int ch)
+reslib_special(int ch)
 {
   switch (ch)
   {
@@ -552,7 +552,7 @@ special(int ch)
 /* Thinking in noninternationalized US-ASCII (per the DNS spec), is
    this character visible and not a space when printed?  */
 static inline bool
-printable(int ch)
+reslib_printable(int ch)
 {
   return ch > 0x20 && ch < 0x7f;
 }
@@ -562,7 +562,7 @@ printable(int ch)
    0 is string was not fully qualified.  Enforces label and domain
    length limits.  */
 static int
-irc_ns_name_pton(const char *src, unsigned char *dst, size_t dstsiz)
+reslib_ns_name_pton(const char *src, unsigned char *dst, size_t dstsiz)
 {
   unsigned char *label, *bp, *eom;
   int c, n, escaped;
@@ -727,8 +727,8 @@ irc_ns_name_pton(const char *src, unsigned char *dst, size_t dstsiz)
    try to compress names. If LASTDNPTR is NULL, we don't update the
    list.  */
 static int
-irc_ns_name_pack(const unsigned char *src, unsigned char *dst, int dstsiz,
-                 const unsigned char **dnptrs, const unsigned char **lastdnptr)
+reslib_ns_name_pack(const unsigned char *src, unsigned char *dst, int dstsiz,
+                    const unsigned char **dnptrs, const unsigned char **lastdnptr)
 {
   unsigned char *dstp;
   const unsigned char **cpp, **lpp, *eob, *msg;
@@ -786,7 +786,7 @@ irc_ns_name_pack(const unsigned char *src, unsigned char *dst, int dstsiz,
 
     if (n != 0 && msg != NULL)
     {
-      l = irc_dn_find(srcp, msg, dnptrs, lpp);
+      l = reslib_dn_find(srcp, msg, dnptrs, lpp);
       if (l >= 0)
       {
         if (eob - dstp <= 1)
@@ -844,14 +844,14 @@ cleanup:
    name.  If DNPTRS is NULL, we don't try to compress names.  If
    LASTDNPTR * is NULL, we don't update the list.  */
 static int
-irc_ns_name_compress(const char *src, unsigned char *dst, size_t dstsiz,
-                     const unsigned char **dnptrs, const unsigned char **lastdnptr)
+reslib_ns_name_compress(const char *src, unsigned char *dst, size_t dstsiz,
+                        const unsigned char **dnptrs, const unsigned char **lastdnptr)
 {
   unsigned char tmp[NS_MAXCDNAME];
 
-  if (irc_ns_name_pton(src, tmp, sizeof tmp) < 0)
+  if (reslib_ns_name_pton(src, tmp, sizeof tmp) < 0)
     return -1;
-  return irc_ns_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr);
+  return reslib_ns_name_pack(tmp, dst, dstsiz, dnptrs, lastdnptr);
 }
 
 /* Search for the counted-label name in an array of compressed names.
@@ -860,9 +860,9 @@ irc_ns_name_compress(const char *src, unsigned char *dst, size_t dstsiz,
    DNPTRS is the pointer to the first name on the list, not the
    pointer to the start of the message.  */
 static int
-irc_dn_find(const unsigned char *domain, const unsigned char *msg,
-            const unsigned char **dnptrs,
-            const unsigned char **lastdnptr)
+reslib_dn_find(const unsigned char *domain, const unsigned char *msg,
+               const unsigned char **dnptrs,
+               const unsigned char **lastdnptr)
 {
   const unsigned char *dn, *cp, *sp;
   const unsigned char **cpp;
@@ -889,7 +889,7 @@ irc_dn_find(const unsigned char *domain, const unsigned char *msg,
               goto next;
 
             for (; n > 0; n--)
-              if (mklower(*dn++) != mklower(*cp++))
+              if (reslib_mklower(*dn++) != reslib_mklower(*cp++))
                 goto next;
 
             /* Is next root for both?  */
@@ -920,7 +920,7 @@ next: ;
 /* Thinking in noninternationalized USASCII (per the DNS spec),
    convert this character to lower case if it's upper case.  */
 static int
-mklower(int ch)
+reslib_mklower(int ch)
 {
   if (ch >= 'A' && ch <= 'Z')
     return ch - 'A' + 'a';
@@ -933,7 +933,7 @@ mklower(int ch)
    DNAME is the domain.  CLASS and TYPE are the DNS query
    class and type.  BUF must point to the out buffer of BUFLEN bytes. */
 int
-irc_res_mkquery(const char *dname, int class, int type, unsigned char *buf, int buflen)
+reslib_res_mkquery(const char *dname, int class, int type, unsigned char *buf, int buflen)
 {
   HEADER *hp;
   unsigned char *cp;
@@ -964,14 +964,14 @@ irc_res_mkquery(const char *dname, int class, int type, unsigned char *buf, int 
   if ((buflen -= QFIXEDSZ) < 0)
     return -1;
 
-  n = irc_ns_name_compress(dname, cp, buflen, dnptrs, lastdnptr);
+  n = reslib_ns_name_compress(dname, cp, buflen, dnptrs, lastdnptr);
   if (n < 0)
     return -1;
 
   cp += n;
   buflen -= n;
-  IRC_NS_PUT16(type, cp);
-  IRC_NS_PUT16(class, cp);
+  RESLIB_NS_PUT16(type, cp);
+  RESLIB_NS_PUT16(class, cp);
   hp->qdcount = htons(1);
 
   return cp - buf;

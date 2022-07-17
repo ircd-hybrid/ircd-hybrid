@@ -88,7 +88,7 @@ struct reslist
   uintmax_t timeout;                         /**< When this request times out. */
   struct irc_ssaddr addr;                    /**< Address for this request. */
   char name[RFC1035_MAX_DOMAIN_LENGTH + 1];  /**< Hostname for this request. */
-  size_t namelength;                         /**< Actual hostname length. */
+  size_t name_len;                         /**< Actual hostname length. */
   dns_callback_fnc callback;                 /**< Callback function on completion. */
   void *callback_ctx;                        /**< Context pointer for callback. */
 };
@@ -292,7 +292,7 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
   {
     request = make_request(callback, ctx);
     request->type = type;
-    request->namelength = strlcpy(request->name, host_name, sizeof(request->name));
+    request->name_len = strlcpy(request->name, host_name, sizeof(request->name));
   }
 
   request->type = type;
@@ -487,7 +487,7 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
           return false;
 
-        request->namelength = strlcpy(request->name, hostbuf, sizeof(request->name));
+        request->name_len = strlcpy(request->name, hostbuf, sizeof(request->name));
         return true;
         break;
 
@@ -568,7 +568,7 @@ res_readreply(fde_t *F, void *data)
 
     if (request->type == T_PTR)
     {
-      if (request->namelength == 0)
+      if (request->name_len == 0)
       {
         /*
          * Got a PTR response with no name, something bogus is happening
@@ -594,7 +594,7 @@ res_readreply(fde_t *F, void *data)
       /*
        * Got a name and address response, client resolved
        */
-      (*request->callback)(request->callback_ctx, &request->addr, request->name, request->namelength);
+      (*request->callback)(request->callback_ctx, &request->addr, request->name, request->name_len);
       rem_request(request);
     }
   }

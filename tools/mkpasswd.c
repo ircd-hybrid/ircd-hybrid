@@ -151,11 +151,17 @@ main(int argc, char *argv[])
 
   if (flag & FLAG_PASS)
   {
-    if (!plaintext)
+    if (plaintext == NULL)
+    {
       printf("Please enter a valid password\n");
+      exit(EXIT_FAILURE);
+    }
   }
-  else
-    plaintext = getpass("plaintext: ");
+  else if ((plaintext = getpass("plaintext: ")) == NULL)
+  {
+    printf("getpass() failed\n");
+    exit(EXIT_FAILURE);
+  }
 
   if ((ret = crypt(plaintext, salt)))
     printf("%s\n", ret);

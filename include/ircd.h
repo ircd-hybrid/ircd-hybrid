@@ -21,7 +21,6 @@
 
 /*! \file ircd.h
  * \brief A header for the ircd startup routines.
- * \version $Id$
  */
 
 

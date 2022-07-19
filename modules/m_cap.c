@@ -22,7 +22,6 @@
 
 /*! \file m_cap.c
  * \brief Includes required functions for processing the CAP command.
- * \version $Id$
  */
 
 #include "stdinc.h"
@@ -354,7 +353,6 @@ module_exit(void)
 
 struct module module_entry =
 {
-  .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
   .is_resident = true  /* XXX for now until caps are completely modular */

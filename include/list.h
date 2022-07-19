@@ -21,7 +21,6 @@
 
 /*! \file list.h
  * \brief A header for the list manipulation routines.
- * \version $Id$
  */
 
 #ifndef INCLUDED_list_h

@@ -1,5 +1,3 @@
-$Id$
-
 This is documentation for the mkpasswd.c included in ircd-hybrid.
 
 This version of mkpasswd can create Blowfish, SHA-256 and SHA-512

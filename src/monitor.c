@@ -22,7 +22,6 @@
 
 /*! \file monitor.c
  * \brief File including functions for MONITOR support
- * \version $Id$
  */
 
 #include "stdinc.h"

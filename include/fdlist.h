@@ -21,7 +21,6 @@
 
 /*! \file fdlist.h
  * \brief The file descriptor list header.
- * \version $Id$
  */
 
 #ifndef INCLUDED_fdlist_h

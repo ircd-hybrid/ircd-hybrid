@@ -21,7 +21,6 @@
 
 /*! \file s_bsd.c
  * \brief Network functions.
- * \version $Id$
  */
 
 #include "stdinc.h"

@@ -23,7 +23,6 @@
 
 /*! \file tls_openssl.h
  * \brief OpenSSL-specific TLS types
- * \version $Id$
  */
 
 #ifndef INCLUDED_tls_openssl_h

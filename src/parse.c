@@ -21,7 +21,6 @@
 
 /*! \file parse.c
  * \brief The message parser.
- * \version $Id$
  */
 
 #include "stdinc.h"

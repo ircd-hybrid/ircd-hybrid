@@ -21,7 +21,6 @@
 
 /*! \file packet.h
  * \brief A header for the packet functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_packet_h

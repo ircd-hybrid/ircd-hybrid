@@ -22,7 +22,6 @@
 
 /*! \file extban_gecos.c
  * \brief Implements gecos (real name) based extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

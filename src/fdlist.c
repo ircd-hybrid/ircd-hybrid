@@ -21,7 +21,6 @@
 
 /*! \file fdlist.c
  * \brief Maintains a list of file descriptors.
- * \version $Id$
  */
 
 #include "stdinc.h"

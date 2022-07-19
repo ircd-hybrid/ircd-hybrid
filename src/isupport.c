@@ -21,7 +21,6 @@
 
 /*! \file isupport.c
  * \brief Contains functions pertaining to RPL_ISUPPORT.
- * \version $Id$
  */
 
 #include "stdinc.h"

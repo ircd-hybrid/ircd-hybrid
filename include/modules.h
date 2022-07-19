@@ -21,7 +21,6 @@
 
 /*! \file modules.h
  * \brief A header for the modules functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_modules_h

@@ -21,7 +21,6 @@
 
 /*! \file client.h
  * \brief Header including structures, macros and prototypes for client handling
- * \version $Id$
  */
 
 

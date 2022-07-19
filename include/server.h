@@ -21,7 +21,6 @@
 
 /*! \file server.h
  * \brief A header for the server functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_server_h

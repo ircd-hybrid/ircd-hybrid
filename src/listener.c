@@ -21,7 +21,6 @@
 
 /*! \file listener.c
  * \brief Implementation for handling listening sockets.
- * \version $Id$
  */
 
 #include "stdinc.h"

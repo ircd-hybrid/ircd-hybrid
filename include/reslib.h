@@ -1,7 +1,6 @@
 /*
  * include/reslib.h (C)opyright 1992 Darren Reed.
  *
- * $Id$
  */
 #ifndef INCLUDED_reslib_h
 #define INCLUDED_reslib_h

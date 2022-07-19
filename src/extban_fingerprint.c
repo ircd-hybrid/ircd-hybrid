@@ -22,7 +22,6 @@
 
 /*! \file extban_fingerprint.c
  * \brief Implements TLS certificate fingerprint based extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

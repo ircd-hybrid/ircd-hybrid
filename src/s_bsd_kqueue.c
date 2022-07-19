@@ -21,7 +21,6 @@
 
 /*! \file s_bsd_kqueue.c
  * \brief kqueue() compatible network routines.
- * \version $Id$
  */
 
 #include "stdinc.h"

@@ -23,7 +23,6 @@
 
 /*! \file tls_gnutls.h
  * \brief GnuTLS-specific TLS types
- * \version $Id$
  */
 
 #ifndef INCLUDED_tls_gnutls_h

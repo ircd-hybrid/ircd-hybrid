@@ -21,7 +21,6 @@
 
 /*! \file misc.c
  * \brief Yet another miscellaneous functions file.
- * \version $Id$
  */
 
 #include "stdinc.h"

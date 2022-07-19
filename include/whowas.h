@@ -21,7 +21,6 @@
 
 /*! \file whowas.h
  * \brief A header for the whowas functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_whowas_h

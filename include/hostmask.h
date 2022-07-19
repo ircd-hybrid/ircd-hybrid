@@ -21,7 +21,6 @@
 
 /*! \file hostmask.h
  * \brief A header for the hostmask code.
- * \version $Id$
  */
 
 #ifndef INCLUDED_hostmask_h

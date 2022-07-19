@@ -21,7 +21,6 @@
 
 /*! \file s_bsd_poll.c
  * \brief POSIX poll() compatible network routines.
- * \version $Id$
  */
 
 #include "stdinc.h"

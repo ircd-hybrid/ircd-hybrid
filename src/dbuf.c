@@ -21,7 +21,6 @@
 
 /*! \file dbuf.c
  * \brief Supports dynamic data buffers.
- * \version $Id$
  */
 
 #include "stdinc.h"

@@ -21,7 +21,6 @@
 
 /*! \file hostmask.c
  * \brief Code to efficiently find IP & hostmask based configs.
- * \version $Id$
  */
 
 #include "stdinc.h"

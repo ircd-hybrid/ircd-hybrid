@@ -23,7 +23,6 @@
 
 /*! \file tls_none.c
  * \brief Dummy file for no TLS support
- * \version $Id$
  */
 
 #include "stdinc.h"

@@ -21,7 +21,6 @@
 
 /*! \file hash.c
  * \brief Hash table management.
- * \version $Id$
  */
 
 #include "stdinc.h"

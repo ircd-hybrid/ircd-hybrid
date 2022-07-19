@@ -21,7 +21,6 @@
 
 /*! \file tls_none.h
  * \brief A header for builds that do not support a TLS library
- * \version $Id$
  */
 
 #ifndef INCLUDED_tls_none_h

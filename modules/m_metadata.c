@@ -21,7 +21,6 @@
 
 /*! \file m_metadata.c
  * \brief Includes required functions for processing the METADATA command.
- * \version $Id$
  */
 
 #include "stdinc.h"
@@ -84,7 +83,6 @@ module_exit(void)
 
 struct module module_entry =
 {
-  .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
 };

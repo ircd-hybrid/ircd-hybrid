@@ -21,7 +21,6 @@
 
 /*! \file m_sjoin.c
  * \brief Includes required functions for processing the SJOIN command.
- * \version $Id$
  */
 
 #include "stdinc.h"
@@ -459,7 +458,6 @@ module_exit(void)
 
 struct module module_entry =
 {
-  .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
   .is_core = true

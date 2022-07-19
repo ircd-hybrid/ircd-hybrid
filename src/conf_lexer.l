@@ -21,7 +21,6 @@
 
 /*! \file conf_lexer.l
  * \brief Scans the ircd configuration file for tokens.
- * \version $Id$
  */
 
 %option case-insensitive

@@ -21,7 +21,6 @@
 
 /*! \file m_names.c
  * \brief Includes required functions for processing the NAMES command.
- * \version $Id$
  */
 
 #include "stdinc.h"
@@ -89,7 +88,6 @@ module_exit(void)
 
 struct module module_entry =
 {
-  .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
 };

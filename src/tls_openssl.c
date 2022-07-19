@@ -23,7 +23,6 @@
 
 /*! \file tls_openssl.c
  * \brief Includes all OpenSSL-specific TLS functions
- * \version $Id$
  */
 
 #include "stdinc.h"

@@ -21,7 +21,6 @@
 
 /*! \file dbuf.h
  * \brief A header for the dynamic buffers functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_dbuf_h

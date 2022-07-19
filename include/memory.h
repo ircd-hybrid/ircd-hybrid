@@ -21,7 +21,6 @@
 
 /*! \file memory.h
  * \brief A header for the memory functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_memory_h

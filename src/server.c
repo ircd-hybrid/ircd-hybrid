@@ -21,7 +21,6 @@
 
 /*! \file server.c
  * \brief Server related functions.
- * \version $Id$
  */
 
 #include "stdinc.h"

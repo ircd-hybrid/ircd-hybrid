@@ -21,7 +21,6 @@
 
 /*! \file list.c
  * \brief Maintains doubly-linked lists.
- * \version $Id$
  */
 
 #include "stdinc.h"

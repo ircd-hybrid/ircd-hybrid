@@ -21,7 +21,6 @@
 
 /*! \file misc.h
  * \brief A header for the miscellaneous functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_misc_h

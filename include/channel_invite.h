@@ -21,7 +21,6 @@
 
 /*! \file channel_invite.h
  * \brief Channel invitation related functions
- * \version $Id$
  */
 
 #ifndef INCLUDED_channel_invite_h

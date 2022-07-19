@@ -21,7 +21,6 @@
 
 /*! \file extban_usermode.c
  * \brief Implements usermode based extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

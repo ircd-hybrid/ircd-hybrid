@@ -21,7 +21,6 @@
 
 /*! \file log.c
  * \brief Logger functions.
- * \version $Id$
  */
 
 #include "stdinc.h"

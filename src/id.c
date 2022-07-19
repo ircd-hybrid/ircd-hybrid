@@ -21,7 +21,6 @@
 
 /*! \file id.c
  * \brief Contains functions pertaining to SID/UID generation.
- * \version $Id$
  */
 
 #include "stdinc.h"

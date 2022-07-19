@@ -22,7 +22,6 @@
 
 /*! \file m_svsmode.c
  * \brief Includes required functions for processing the SVSMODE command.
- * \version $Id$
  */
 
 #include "stdinc.h"
@@ -173,7 +172,6 @@ module_exit(void)
 
 struct module module_entry =
 {
-  .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
 };

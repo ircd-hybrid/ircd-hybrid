@@ -21,7 +21,6 @@
 
 /*! \file listener.h
  * \brief A header for the listener code.
- * \version $Id$
  */
 
 #ifndef INCLUDED_listener_h

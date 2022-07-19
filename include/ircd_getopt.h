@@ -21,7 +21,6 @@
 
 /*! \file ircd_getopt.h
  * \brief A header for the getopt() command line option calls.
- * \version $Id$
  */
 
 #ifndef INCLUDED_ircd_getopt_h

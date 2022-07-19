@@ -21,7 +21,6 @@
 
 /*! \file auth.h
  * \brief Interface for DNS and ident lookups.
- * \version $Id$
  */
 
 #ifndef INCLUDED_auth_h

@@ -21,7 +21,6 @@
 
 /*! \file conf_service.c
  * \brief Implements service {} block configuration management.
- * \version $Id$
  */
 
 #include "stdinc.h"

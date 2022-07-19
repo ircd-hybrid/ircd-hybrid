@@ -21,7 +21,6 @@
 
 /*! \file ipcache.c
  * \brief Routines to count connections from particular IP addresses.
- * \version $Id$
  */
 
 #include "stdinc.h"

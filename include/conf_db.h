@@ -22,7 +22,6 @@
 
 /*! \file conf_db.h
  * \brief Includes file utilities for database handling
- * \version $Id$
  */
 
 #ifndef INCLUDED_conf_db_h

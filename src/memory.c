@@ -21,7 +21,6 @@
 
 /*! \file memory.c
  * \brief Memory utilities.
- * \version $Id$
  */
 
 #include "stdinc.h"

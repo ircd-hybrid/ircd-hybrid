@@ -21,7 +21,6 @@
 
 /*! \file restart.h
  * \brief A header for the restart/die functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_restart_h

@@ -21,7 +21,6 @@
 
 /*! \file ircd_defs.h
  * \brief A header for ircd global definitions.
- * \version $Id$
  */
 
 /* ircd_defs.h - Global size definitions for record entries used

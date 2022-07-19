@@ -21,7 +21,6 @@
 
 /*! \file whowas.c
  * \brief WHOWAS user cache.
- * \version $Id$
  */
 
 #include "stdinc.h"

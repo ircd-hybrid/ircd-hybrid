@@ -1,5 +1,3 @@
-$Id$
-
 A directory of support programs for ircd.
 
 mkpasswd.c - makes password for operator {} blocks

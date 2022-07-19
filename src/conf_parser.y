@@ -21,7 +21,6 @@
 
 /*! \file conf_parser.y
  * \brief Parses the ircd configuration file.
- * \version $Id$
  */
 
 

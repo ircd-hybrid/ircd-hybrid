@@ -23,7 +23,6 @@
 
 /*! \file tls_wolfssl.h
  * \brief wolfSSL-specific TLS types
- * \version $Id$
  */
 
 #ifndef INCLUDED_tls_wolfssl_h

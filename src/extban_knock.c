@@ -22,7 +22,6 @@
 
 /*! \file extban_knock.c
  * \brief Implements $K extban which bans users from using the KNOCK command.
- * \version $Id: extban_mute.c 10054 2022-06-04 16:41:14Z michael $
  */
 
 #include "stdinc.h"

@@ -21,7 +21,6 @@
 
 /*! \file extban_nick.c
  * \brief Implements nick change restriction extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

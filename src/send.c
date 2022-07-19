@@ -21,7 +21,6 @@
 
 /*! \file send.c
  * \brief Functions for sending messages.
- * \version $Id$
  */
 
 #include "stdinc.h"

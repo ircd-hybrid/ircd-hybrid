@@ -21,7 +21,6 @@
 
 /*! \file conf.h
  * \brief A header for the configuration functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_conf_h

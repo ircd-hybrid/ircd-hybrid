@@ -21,7 +21,6 @@
 
 /*! \file isupport.h
  * \brief Contains functions pertaining to RPL_ISUPPORT.
- * \version $Id$
  */
 
 #ifndef INCLUDED_isupport_h

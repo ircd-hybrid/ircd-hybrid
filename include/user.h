@@ -21,7 +21,6 @@
 
 /*! \file user.h
  * \brief A header for the user functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_user_h

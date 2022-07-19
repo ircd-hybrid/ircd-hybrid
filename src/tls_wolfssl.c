@@ -23,7 +23,6 @@
 
 /*! \file tls_wolfssl.c
  * \brief Includes all wolfSSL-specific TLS functions
- * \version $Id$
  */
 
 #include "stdinc.h"

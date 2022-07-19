@@ -21,7 +21,6 @@
 
 /*! \file
  * \brief Configuration managment for class{} blocks
- * \version $Id$
  */
 
 

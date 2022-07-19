@@ -21,7 +21,6 @@
 
 /*! \file conf_shared.c
  * \brief Implements shared {} block configuration management.
- * \version $Id$
  */
 
 #include "stdinc.h"

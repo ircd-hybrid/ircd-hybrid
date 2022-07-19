@@ -22,7 +22,6 @@
 
 /*! \file m_svsnick.c
  * \brief Includes required functions for processing the SVSNICK command.
- * \version $Id$
  */
 
 
@@ -165,7 +164,6 @@ module_exit(void)
 
 struct module module_entry =
 {
-  .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
 };

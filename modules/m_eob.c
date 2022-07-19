@@ -21,7 +21,6 @@
 
 /*! \file m_eob.c
  * \brief Includes required functions for processing the EOB command.
- * \version $Id$
  */
 
 #include "stdinc.h"
@@ -81,7 +80,6 @@ module_exit(void)
 
 struct module module_entry =
 {
-  .version = "$Revision$",
   .modinit = module_init,
   .modexit = module_exit,
 };

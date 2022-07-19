@@ -21,7 +21,6 @@
 
 /*! \file conf.c
  * \brief Configuration file functions.
- * \version $Id$
  */
 
 #include "stdinc.h"

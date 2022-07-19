@@ -21,7 +21,6 @@
 
 /*! \file conf_pseudo.c
  * \brief Handles with pseudo commands/service aliases.
- * \version $Id$
  */
 
 #include "stdinc.h"

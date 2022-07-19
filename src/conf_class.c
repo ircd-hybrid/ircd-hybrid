@@ -21,7 +21,6 @@
 
 /*! \file conf_class.c
  * \brief Configuration managment for class{} blocks
- * \version $Id$
  */
 
 #include "stdinc.h"

@@ -21,7 +21,6 @@
 
 /*! \file auth.c
  * \brief Implementation of DNS and ident lookups.
- * \version $Id$
  */
 
 /*

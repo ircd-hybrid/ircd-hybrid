@@ -21,7 +21,6 @@
 
 /*! \file channel.h
  * \brief Responsible for managing channels, members, bans and topics
- * \version $Id$
  */
 
 #ifndef INCLUDED_channel_h

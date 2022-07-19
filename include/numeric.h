@@ -21,7 +21,6 @@
 
 /*! \file numeric.h
  * \brief Declarations of numeric replies.
- * \version $Id$
  */
 
 #ifndef INCLUDED_numeric_h

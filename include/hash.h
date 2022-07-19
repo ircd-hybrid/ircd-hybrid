@@ -21,7 +21,6 @@
 
 /*! \file hash.h
  * \brief A header for the ircd hashtable code.
- * \version $Id$
  */
 
 #ifndef INCLUDED_hash_h

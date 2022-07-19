@@ -23,7 +23,6 @@
 
 /*! \file tls_gnutls.c
  * \brief Includes all GnuTLS-specific TLS functions
- * \version $Id$
  */
 
 #include "stdinc.h"

@@ -22,7 +22,6 @@
 
 /*! \file extban_tlsinfo.c
  * \brief Implements TLS version/cipher based extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

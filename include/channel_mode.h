@@ -21,7 +21,6 @@
 
 /*! \file channel_mode.h
  * \brief Includes channel mode related definitions and structures.
- * \version $Id$
  */
 
 #ifndef INCLUDED_channel_mode_h

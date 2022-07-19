@@ -21,7 +21,6 @@
 
 /*! \file id.h
  * \brief Contains functions pertaining to SID/UID generation.
- * \version $Id$
  */
 
 #ifndef INCLUDED_id_h

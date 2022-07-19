@@ -21,7 +21,6 @@
 
 /*! \file irc_string.c
  * \brief IRC string functions.
- * \version $Id$
  */
 
 #include "config.h"

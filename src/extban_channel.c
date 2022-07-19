@@ -21,7 +21,6 @@
 
 /*! \file extban_channel.c
  * \brief Implements channel name based extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

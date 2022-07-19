@@ -21,7 +21,6 @@
 
 /*! \file irc_string.h
  * \brief A header for the ircd string functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_irc_string_h

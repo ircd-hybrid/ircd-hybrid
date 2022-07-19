@@ -21,7 +21,6 @@
 
 /*! \file modules.c
  * \brief A module loader.
- * \version $Id$
  */
 
 #include "ltdl.h"

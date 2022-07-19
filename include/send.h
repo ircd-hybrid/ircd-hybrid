@@ -21,7 +21,6 @@
 
 /*! \file send.h
  * \brief A header for the message sending functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_send_h

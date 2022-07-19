@@ -21,7 +21,6 @@
 
 /*! \file ircd_signal.h
  * \brief A header for ircd signals.
- * \version $Id$
  */
 
 #ifndef INCLUDED_ircd_signal_h

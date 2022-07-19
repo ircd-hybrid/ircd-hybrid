@@ -21,7 +21,6 @@
 
 /*! \file ircd.c
  * \brief Starts up and runs the ircd.
- * \version $Id$
  */
 
 #include "stdinc.h"

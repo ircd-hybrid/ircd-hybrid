@@ -23,7 +23,6 @@
 
 /*! \file tls.h
  * \brief A header for generic TLS functions
- * \version $Id$
  */
 
 #ifndef INCLUDED_tls_h

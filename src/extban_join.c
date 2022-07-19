@@ -21,7 +21,6 @@
 
 /*! \file extban_join.c
  * \brief Implements join restriction extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

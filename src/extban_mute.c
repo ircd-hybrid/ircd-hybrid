@@ -22,7 +22,6 @@
 
 /*! \file extban_mute.c
  * \brief Implements message muting extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

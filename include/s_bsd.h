@@ -21,7 +21,6 @@
 
 /*! \file s_bsd.h
  * \brief A header for the network subsystem.
- * \version $Id$
  */
 
 #ifndef INCLUDED_s_bsd_h

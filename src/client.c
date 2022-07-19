@@ -21,7 +21,6 @@
 
 /*! \file client.c
  * \brief Controls clients.
- * \version $Id$
  */
 
 #include "stdinc.h"

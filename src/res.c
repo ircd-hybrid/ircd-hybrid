@@ -21,7 +21,6 @@
 
 /*! \file res.c
  * \brief ircd resolver functions
- * \version $Id$
  */
 
 /*

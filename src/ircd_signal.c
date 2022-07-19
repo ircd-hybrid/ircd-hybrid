@@ -21,7 +21,6 @@
 
 /*! \file ircd_signal.c
  * \brief responsible for ircd's signal handling.
- * \version $Id$
  */
 
 #include "stdinc.h"

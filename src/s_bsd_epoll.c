@@ -21,7 +21,6 @@
 
 /*! \file s_bsd_epoll.c
  * \brief Linux epoll() compatible network routines.
- * \version $Id$
  */
 
 #include "stdinc.h"

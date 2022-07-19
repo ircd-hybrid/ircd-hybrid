@@ -21,7 +21,6 @@
 
 /*! \file conf_resv.c
  * \brief Functions to reserve(jupe) a nick/channel.
- * \version $Id$
  */
 
 #include "stdinc.h"

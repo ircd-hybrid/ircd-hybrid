@@ -21,7 +21,6 @@
 
 /*! \file res.h
  * \brief ircd resolver functions
- * \version $Id$
  */
 
 #ifndef INCLUDED_res_h

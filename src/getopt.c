@@ -21,7 +21,6 @@
 
 /*! \file getopt.c
  * \brief Uses getopt to fetch the command line options.
- * \version $Id$
  */
 
 #include "stdinc.h"

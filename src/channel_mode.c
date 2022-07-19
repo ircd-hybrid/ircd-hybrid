@@ -21,7 +21,6 @@
 
 /*! \file channel_mode.c
  * \brief Controls modes on channels.
- * \version $Id$
  */
 
 #include "stdinc.h"

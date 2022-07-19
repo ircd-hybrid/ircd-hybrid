@@ -22,7 +22,6 @@
 
 /*! \file monitor.h
  * \brief Header including structures and prototypes for MONITOR support
- * \version $Id$
  */
 
 #ifndef INCLUDED_monitor_h

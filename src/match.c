@@ -21,7 +21,6 @@
 
 /*! \file match.c
  * \brief Functions to match/compare strings.
- * \version $Id$
  */
 
 #include "stdinc.h"

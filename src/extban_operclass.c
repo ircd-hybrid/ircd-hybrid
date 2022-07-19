@@ -21,7 +21,6 @@
 
 /*! \file extban_operclass.c
  * \brief Implements oper class based extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

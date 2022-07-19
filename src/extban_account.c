@@ -22,7 +22,6 @@
 
 /*! \file extban_account.c
  * \brief Implements services account based extended channel bans.
- * \version $Id$
  */
 
 #include "stdinc.h"

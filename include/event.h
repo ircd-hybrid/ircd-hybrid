@@ -21,7 +21,6 @@
 
 /*! \file event.h
  * \brief Timer based event execution
- * \version $Id$
  */
 
 #ifndef INCLUDED_event_h

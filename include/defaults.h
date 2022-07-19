@@ -21,7 +21,6 @@
 
 /*! \file defaults.h
  * \brief The ircd defaults header for values and paths.
- * \version $Id$
  */
 
 #ifndef INCLUDED_defaults_h

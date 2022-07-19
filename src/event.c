@@ -21,7 +21,6 @@
 
 /*! \file event.c
  * \brief Timer based event execution
- * \version $Id$
  */
 
 #include "stdinc.h"

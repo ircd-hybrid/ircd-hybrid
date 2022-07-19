@@ -22,7 +22,6 @@
 
 /*! \file extban.h
  * \brief Implements extended channel bans.
- * \version $Id$
  */
 
 #ifndef INCLUDED_extban_h

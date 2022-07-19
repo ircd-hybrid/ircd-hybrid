@@ -1,5 +1,4 @@
 /*
- * $Id$
  * Dave Plonka <plonka@doit.wisc.edu>
  *
  * This file had been called "radix.h" in the MRT sources.

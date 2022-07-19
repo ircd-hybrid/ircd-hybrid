@@ -21,7 +21,6 @@
 
 /*! \file log.h
  * \brief A header for the logger functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_log_h

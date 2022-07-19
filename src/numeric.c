@@ -21,7 +21,6 @@
 
 /*! \file numeric.c
  * \brief Declarations of numeric replies.
- * \version $Id$
  */
 
 #include "stdinc.h"

@@ -21,7 +21,6 @@
 
 /*! \file restart.c
  * \brief Functions to allow the ircd to restart.
- * \version $Id$
  */
 
 #include "stdinc.h"

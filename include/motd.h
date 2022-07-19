@@ -22,7 +22,6 @@
 
 /*! \file motd.h
  * \brief Message-of-the-day manipulation implementation.
- * \version $Id$
  */
 
 #ifndef INCLUDED_motd_h

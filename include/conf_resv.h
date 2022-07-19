@@ -21,7 +21,6 @@
 
 /*! \file conf_resv.h
  * \brief A header for the RESV functions.
- * \version $Id$
  */
 
 #ifndef INCLUDED_conf_resv_h

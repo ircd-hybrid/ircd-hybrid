@@ -21,7 +21,6 @@
 
 /*! \file packet.c
  * \brief Packet handlers.
- * \version $Id$
  */
 
 #include "stdinc.h"

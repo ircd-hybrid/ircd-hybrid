@@ -22,7 +22,6 @@
 
 /*! \file motd.c
  * \brief Message-of-the-day manipulation implementation.
- * \version $Id$
  */
 
 #include "stdinc.h"

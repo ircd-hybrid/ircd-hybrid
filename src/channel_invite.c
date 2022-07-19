@@ -21,7 +21,6 @@
 
 /*! \file channel_invite.c
  * \brief Channel invitation related functions
- * \version $Id$
  */
 
 #include "stdinc.h"

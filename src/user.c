@@ -21,7 +21,6 @@
 
 /*! \file user.c
  * \brief User related functions.
- * \version $Id$
  */
 
 #include "stdinc.h"

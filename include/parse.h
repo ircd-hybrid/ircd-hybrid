@@ -21,7 +21,6 @@
 
 /*! \file parse.h
  * \brief A header for the message parser.
- * \version $Id$
  */
 
 #ifndef INCLUDED_parse_h

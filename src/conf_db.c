@@ -22,7 +22,6 @@
 
 /*! \file conf_db.c
  * \brief Includes file utilities for database handling
- * \version $Id$
  */
 
 

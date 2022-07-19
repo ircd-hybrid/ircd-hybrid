@@ -21,7 +21,6 @@
 
 /*! \file conf_shared.h
  * \brief Implements shared {} block configuration management.
- * \version $Id$
  */
 
 #ifndef INCLUDED_conf_shared_h

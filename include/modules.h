@@ -30,7 +30,6 @@ struct module
 {
   dlink_node node;
   char *name;
-  const char *version;
   void *handle;
   void (*modinit)(void);
   void (*modexit)(void);

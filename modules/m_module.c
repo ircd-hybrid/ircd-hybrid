@@ -181,7 +181,7 @@ module_list(struct Client *source_p, const char *arg)
 
     sendto_one_numeric(source_p, &me, RPL_MODLIST,
                        modp->name, modp->handle,
-                       modp->version, modp->is_core == true ? "(core)" : "");
+                       "*", modp->is_core == true ? "(core)" : "");
   }
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFMODLIST);

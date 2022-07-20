@@ -44,7 +44,6 @@ static dlink_list modules_list;
 static dlink_list modules_path;
 static dlink_list modules_conf;
 
-static const char *const unknown_ver = "<unknown>";
 static const char *const core_module_table[] =
 {
   "m_bmask.la",
@@ -152,10 +151,6 @@ load_a_module(const char *path, bool warn)
   }
 
   modp->handle = tmpptr;
-
-  if (EmptyString(modp->version))
-    modp->version = unknown_ver;
-
   modp->name = xstrdup(mod_basename);
   dlinkAdd(modp, &modp->node, &modules_list);
 
@@ -165,10 +160,10 @@ load_a_module(const char *path, bool warn)
   if (warn == true)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Module %s [version: %s handle: %p] loaded.",
-                         modp->name, modp->version, tmpptr);
-    ilog(LOG_TYPE_IRCD, "Module %s [version: %s handle: %p] loaded.",
-         modp->name, modp->version, tmpptr);
+                         "Module %s [handle: %p] loaded.",
+                         modp->name, tmpptr);
+    ilog(LOG_TYPE_IRCD, "Module %s [handle: %p] loaded.",
+         modp->name, tmpptr);
   }
 
   return true;

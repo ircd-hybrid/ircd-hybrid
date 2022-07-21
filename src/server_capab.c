@@ -125,10 +125,11 @@ capab_find(const char *name)
 const char *
 capab_get(const void *ptr, bool active)
 {
-  static char buf[IRCD_BUFSIZE] = "";
+  static char buf[IRCD_BUFSIZE];
+  char *bufptr = buf;
   dlink_node *node;
 
-  buf[0] = '\0';  /* buf is static */
+  *bufptr = '\0';  /* buf is static */
 
   DLINK_FOREACH(node, capab_list.head)
   {
@@ -138,11 +139,9 @@ capab_get(const void *ptr, bool active)
       continue;
     if (ptr && !IsCapable(((const struct Client *)ptr), cap->cap))
       continue;
-
-    strlcat(buf, cap->name, sizeof(buf));
-
-    if (node->next)
-      strlcat(buf, " ", sizeof(buf));
+    if (bufptr != buf)
+      *bufptr++ = ' ';
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s", cap->name);
   }
 
   return buf;

@@ -71,7 +71,7 @@ get_file_version(struct dbFILE *f)
  * \param version Database version
  * \return false on error, true on success.
  */
-static int
+static bool
 write_file_version(struct dbFILE *f, uint32_t version)
 {
   if (write_uint32(version, f) == false)

@@ -51,20 +51,18 @@ struct Client;
  * non-NULL pointers.
  */
 
-/** See 2.3 Messages in RFC1459 */
+/** Maximum parameters a command can have. See 2.3 Messages in RFC 1459. */
 enum { MAXPARA = 15 };
 
-/*
- * MessageHandler
- */
+/** Enumerated type for client message handlers. */
 typedef enum HandlerType
 {
-  UNREGISTERED_HANDLER,
-  CLIENT_HANDLER,
-  SERVER_HANDLER,
-  ENCAP_HANDLER,
-  OPER_HANDLER,
-  LAST_HANDLER_TYPE
+  UNREGISTERED_HANDLER,  /**< Used for unregistered clients. */
+  CLIENT_HANDLER,  /**< Used for local users. */
+  SERVER_HANDLER,  /**< Used for server connections. */
+  ENCAP_HANDLER,  /**< Used for encapsulated commands (ENCAP). */
+  OPER_HANDLER,  /**< Used for IRC operators. */
+  LAST_HANDLER_TYPE,  /**< Number of handler types. */
 } HandlerType;
 
 struct MessageHandler
@@ -75,7 +73,7 @@ struct MessageHandler
                                be sent to the user before the m_func is even called */
   unsigned int args_max;  /**< Maximum permitted parameters. If reached, the rest
                                of the message will be put into this last parameter */
-  void (*handler)(struct Client *, int, char *[]);
+  void (*handler)(struct Client *, int, char *[]);  /**< Message/command handler function. */
 };
 
 /*
@@ -84,7 +82,7 @@ struct MessageHandler
 struct Message
 {
   const char *cmd;  /**< The actual command string */
-  void *extra;
+  void *extra;  /**< Extra pointer to be passed in parv[1] */
   unsigned int count;  /**< Number of times command used */
   unsigned int rcount;  /**< Number of times command used by server */
   unsigned int ecount;  /**< Number of times command has been issued via ENCAP */

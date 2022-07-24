@@ -139,9 +139,8 @@ capab_get(const void *ptr, bool active)
       continue;
     if (ptr && !IsCapable(((const struct Client *)ptr), cap->cap))
       continue;
-    if (bufptr != buf)
-      *bufptr++ = ' ';
-    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s", cap->name);
+
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s" : "%s", cap->name);
   }
 
   return buf;

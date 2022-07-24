@@ -112,7 +112,6 @@ whois_person(struct Client *source_p, struct Client *target_p)
       {
         if ((bufptr - buf) + member->channel->name_len + 1 + (show != WHOIS_SHOW_NORMAL) + member_get_prefix_len(member, true) + len > sizeof(buf))
         {
-          *(bufptr - 1) = '\0';
           sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
           bufptr = buf;
         }
@@ -123,16 +122,13 @@ whois_person(struct Client *source_p, struct Client *target_p)
         else if (show == WHOIS_SHOW_HIDDEN)
           channel_prefix = "!";
 
-        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s%s ",
+        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",
                            channel_prefix, member_get_prefix(member, true), member->channel->name);
       }
     }
 
     if (bufptr != buf)
-    {
-      *(bufptr - 1) = '\0';
       sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
-    }
   }
 
   if ((ConfigServerHide.hide_servers || IsHidden(target_p->servptr)) &&

@@ -61,22 +61,18 @@ list_accepts(struct Client *source_p)
 
     if ((bufptr - buf) + masklen + len > sizeof(buf))
     {
-      *(bufptr - 1) = '\0';
       sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, buf);
       bufptr = buf;
     }
 
-    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s!%s@%s ",
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s!%s@%s" : "%s!%s@%s",
                        accept->nick,
                        accept->user,
                        accept->host);
   }
 
   if (bufptr != buf)
-  {
-    *(bufptr - 1) = '\0';
     sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, buf);
-  }
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFACCEPT);
 }

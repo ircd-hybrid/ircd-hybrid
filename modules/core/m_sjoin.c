@@ -207,7 +207,6 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
   int args = 0;
   bool isnew = false;
-  bool joins = false;
   bool keep_our_modes = true;
   bool keep_new_modes = true;
   char modebuf[MODEBUFLEN] = "";
@@ -337,6 +336,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                                  source_p->id, channel->creation_time, channel->name,
                                  channel_modes(channel, source_p, true));
   char *uid_ptr = uid_buf + buflen;
+  char *const uid_buf_start = uid_ptr;
 
 
   char *list = parv[args + 4], *p = NULL;
@@ -370,14 +370,11 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if ((uid_ptr - uid_buf + len_uid) > (sizeof(uid_buf) - 2))
     {
-      *(uid_ptr - 1) = '\0';
       sendto_server(source_p, 0, 0, "%s", uid_buf);
-
-      uid_ptr = uid_buf + buflen;
+      uid_ptr = uid_buf_start;
     }
 
-    uid_ptr += snprintf(uid_ptr, sizeof(uid_buf) - (uid_ptr - uid_buf), "%s%s ", uid_prefix, target_p->id);
-    joins = true;
+    uid_ptr += snprintf(uid_ptr, sizeof(uid_buf) - (uid_ptr - uid_buf), uid_ptr != uid_buf_start ? " %s%s" : "%s%s", uid_prefix, target_p->id);
 
     if (member_find_link(target_p, channel) == NULL)
     {
@@ -402,11 +399,11 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       if (flags & tab->flag)
       {
         *mbuf++ = tab->letter;
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", target_p->name);
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", target_p->name);
 
         if (++pargs >= MAXMODEPARAMS)
         {
-          *mbuf = *(pbuf - 1) = '\0';
+          *mbuf = '\0';
           sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
                                origin->name, channel->name, modebuf, parabuf);
 
@@ -420,13 +417,10 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   if (pargs)
   {
-    *mbuf = *(pbuf - 1) = '\0';
+    *mbuf = '\0';
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
                          origin->name, channel->name, modebuf, parabuf);
   }
-
-  if (joins == true)
-    *(uid_ptr - 1) = '\0';
 
   sendto_server(source_p, 0, 0, "%s", uid_buf);
 

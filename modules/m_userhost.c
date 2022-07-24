@@ -51,7 +51,7 @@ enum { RFC1459_MAX_USERHOST_LIST = 5 };
 static void
 m_userhost(struct Client *source_p, int parc, char *parv[])
 {
-  char response[NICKLEN + USERLEN + HOSTLEN + 6]; /* +6 for "*=+@ \0" */
+  char response[NICKLEN + USERLEN + HOSTLEN + 5]; /* +5 for "*=+@\0" */
   char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */
   char *bufptr = buf, *p = NULL;
   size_t masklen, i = 0;
@@ -74,14 +74,14 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
      * is. Useful for things like NAT, and dynamic dial-up users.
      */
     if (target_p == source_p)
-      masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
+      masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
                          target_p->name,
                          HasUMode(target_p, UMODE_OPER) ? "*" : "",
                          (target_p->away[0]) ? '-' : '+',
                          target_p->username,
                          target_p->sockhost);
     else
-      masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s ",
+      masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
                          target_p->name, (HasUMode(target_p, UMODE_OPER) &&
                                           (!HasUMode(target_p, UMODE_HIDDEN) ||
                                             HasUMode(source_p, UMODE_OPER))) ? "*" : "",
@@ -89,14 +89,11 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
                          target_p->username,
                          target_p->host);
 
-    if ((bufptr - buf) + masklen + len > sizeof(buf))
+    if ((bufptr - buf) + masklen + len + 1 /* +1 for space */ > sizeof(buf))
       break;
 
-    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s", response);
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s" : "%s", response);
   }
-
-  if (bufptr != buf)
-    *(bufptr - 1) = '\0';  /* Get rid of trailing space on buffer */
 
   sendto_one_numeric(source_p, &me, RPL_USERHOST, buf);
 }

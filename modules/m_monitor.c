@@ -90,10 +90,7 @@ monitor_add(struct Client *source_p, char *list)
         ofbufptr = ofbuf;
       }
 
-      if (ofbufptr != ofbuf)
-        *ofbufptr++ = ',';
-
-      ofbufptr += snprintf(ofbufptr, sizeof(ofbuf) - (ofbufptr - ofbuf), "%s", name);
+      ofbufptr += snprintf(ofbufptr, sizeof(ofbuf) - (ofbufptr - ofbuf), ofbufptr != ofbuf ? ",%s" : "%s", name);
     }
     else
     {
@@ -106,10 +103,7 @@ monitor_add(struct Client *source_p, char *list)
         onbufptr = onbuf;
       }
 
-      if (onbufptr != onbuf)
-        *onbufptr++ = ',';
-
-      onbufptr += snprintf(onbufptr, sizeof(onbuf) - (onbufptr - onbuf), "%s!%s@%s",
+      onbufptr += snprintf(onbufptr, sizeof(onbuf) - (onbufptr - onbuf), onbufptr != onbuf ? ",%s!%s@%s" : "%s!%s@%s",
                            target_p->name, target_p->username, target_p->host);
     }
   }
@@ -155,10 +149,7 @@ monitor_list(struct Client *source_p)
       bufptr = buf;
     }
 
-    if (bufptr != buf)
-      *bufptr++ = ',';
-
-    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s", monitor->name);
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? ",%s" : "%s", monitor->name);
   }
 
   if (bufptr != buf)
@@ -194,10 +185,7 @@ monitor_status(struct Client *source_p)
         ofbufptr = ofbuf;
       }
 
-      if (ofbufptr != ofbuf)
-        *ofbufptr++ = ',';
-
-      ofbufptr += snprintf(ofbufptr, sizeof(ofbuf) - (ofbufptr - ofbuf), "%s", monitor->name);
+      ofbufptr += snprintf(ofbufptr, sizeof(ofbuf) - (ofbufptr - ofbuf), ofbufptr != ofbuf ? ",%s" : "%s", monitor->name);
     }
     else
     {
@@ -210,10 +198,7 @@ monitor_status(struct Client *source_p)
         onbufptr = onbuf;
       }
 
-      if (onbufptr != onbuf)
-        *onbufptr++ = ',';
-
-      onbufptr += snprintf(onbufptr, sizeof(onbuf) - (onbufptr - onbuf), "%s!%s@%s",
+      onbufptr += snprintf(onbufptr, sizeof(onbuf) - (onbufptr - onbuf), onbufptr != onbuf ? ",%s!%s@%s" : "%s!%s@%s",
                            target_p->name, target_p->username, target_p->host);
     }
   }

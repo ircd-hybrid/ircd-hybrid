@@ -65,11 +65,8 @@ m_ison(struct Client *source_p, int parc, char *parv[])
     if ((bufptr - buf) + strlen(target_p->name) + len + 1 /* +1 for space */ > sizeof(buf))
       break;
 
-    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s ", target_p->name);
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s" : "%s", target_p->name);
   }
-
-  if (bufptr != buf)
-    *(bufptr - 1) = '\0';  /* Get rid of trailing space on buffer */
 
   sendto_one_numeric(source_p, &me, RPL_ISON, buf);
 }

@@ -118,7 +118,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       if (mbuf - modebuf + 2 + pbuf - parabuf + tlen > sizeof(modebuf) - 2 ||
           modecount >= MAXMODEPARAMS)
       {
-        *mbuf = *(pbuf - 1) = '\0';
+        *mbuf = '\0';
 
         sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
         mbuf = modebuf + mlen;
@@ -127,7 +127,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
       }
 
       *mbuf++ = *parv[3];
-      pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", mask);
+      pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", mask);
       ++modecount;
     }
 
@@ -136,7 +136,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
 
   if (modecount)
   {
-    *mbuf = *(pbuf - 1) = '\0';
+    *mbuf = '\0';
     sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
   }
 

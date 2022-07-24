@@ -164,11 +164,11 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
       {
         member->flags &= ~tab->flag;
         *mbuf++ = tab->letter;
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", member->client->name);
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", member->client->name);
 
         if (++pargs >= MAXMODEPARAMS)
         {
-          *mbuf = *(pbuf - 1) = '\0';
+          *mbuf = '\0';
           sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
                                client->name, channel->name, modebuf, parabuf);
 
@@ -182,7 +182,7 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
 
   if (pargs)
   {
-    *mbuf = *(pbuf - 1) = '\0';
+    *mbuf = '\0';
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
                          client->name, channel->name, modebuf, parabuf);
   }
@@ -219,18 +219,13 @@ channel_send_members(struct Client *client, const struct Channel *channel)
      */
     if (t + tlen - buf > sizeof(buf) - 1)
     {
-      *(t - 1) = '\0';  /* Kill the space and terminate the string */
       sendto_one(client, "%s", buf);
       t = start;
     }
 
-    t += snprintf(t, sizeof(buf) - (t - buf), "%s%s ", member_get_prefix(member, true), member->client->id);
+    t += snprintf(t, sizeof(buf) - (t - buf), t != start ? " %s%s" : "%s%s", member_get_prefix(member, true), member->client->id);
   }
 
-  /* Should always be non-NULL unless we have a kind of persistent channels */
-  if (channel->members.head)
-    --t;  /* Take the space out */
-  *t = '\0';
   sendto_one(client, "%s", buf);
 }
 
@@ -268,18 +263,16 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
      */
     if (cur_len + (tlen - 1) > sizeof(modebuf) - 2)
     {
-      *(pbuf - 1) = '\0';  /* Get rid of trailing space on buffer */
       sendto_one(client, "%s%s", modebuf, parabuf);
 
       cur_len = mlen;
       pbuf = parabuf;
     }
 
-    pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), "%s ", ban->banstr);
+    pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", ban->banstr);
     cur_len += tlen;
   }
 
-  *(pbuf - 1) = '\0';  /* Get rid of trailing space on buffer */
   sendto_one(client, "%s%s", modebuf, parabuf);
 }
 
@@ -505,29 +498,25 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
       if ((bufptr - buf) + masklen + len > sizeof(buf))
       {
-        *(bufptr - 1) = '\0';
         sendto_one_numeric(client, &me, RPL_NAMREPLY,
                            channel_pub_or_secret(channel), channel->name, buf);
         bufptr = buf;
       }
 
       if (uhnames == true)
-        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s!%s@%s ",
+        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s!%s@%s" : "%s%s!%s@%s",
                            member_get_prefix(member, multi_prefix),
                            member->client->name, member->client->username,
                            member->client->host);
       else
-        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), "%s%s ",
+        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s" : "%s%s",
                            member_get_prefix(member, multi_prefix),
                            member->client->name);
     }
 
     if (bufptr != buf)
-    {
-      *(bufptr - 1) = '\0';
       sendto_one_numeric(client, &me, RPL_NAMREPLY,
                          channel_pub_or_secret(channel), channel->name, buf);
-    }
   }
 
   sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);

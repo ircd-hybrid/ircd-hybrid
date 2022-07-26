@@ -1478,7 +1478,7 @@ listen_flags_item: T_TLS
 listen_items:   listen_items listen_item | listen_item;
 listen_item:    listen_port | listen_flags | listen_address | listen_host | error ';';
 
-listen_port: PORT '=' port_items { block_state.flags.value = 0; } ';';
+listen_port: PORT '=' port_items { reset_block_state(); } ';';
 
 port_items: port_items ',' port_item | port_item;
 

@@ -198,32 +198,27 @@ static void
 channel_send_members(struct Client *client, const struct Channel *channel)
 {
   dlink_node *node;
+  size_t len;
   char buf[IRCD_BUFSIZE];
-  int tlen;              /* length of text to append */
-  char *t, *start;       /* temp char pointer */
-
-  start = t = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s :",
-                             me.id, channel->creation_time,
-                             channel->name, channel_modes(channel, client, true));
+  char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s :",
+                                me.id, channel->creation_time,
+                                channel->name, channel_modes(channel, client, true));
+  char *const bufptr_start = bufptr;
 
   DLINK_FOREACH(node, channel->members.head)
   {
     const struct ChannelMember *member = node->data;
 
-    tlen = strlen(member->client->id) + 1;  /* +1 for space */
-    tlen += member_get_prefix_len(member, true);
+    len = strlen(member->client->id) + 1;  /* +1 for space */
+    len += member_get_prefix_len(member, true);
 
-    /*
-     * Space will be converted into CR, but we also need space for LF..
-     * That's why we use '- 1' here -adx
-     */
-    if (t + tlen - buf > sizeof(buf) - 1)
+    if ((bufptr - buf) + len > sizeof(buf) - 2)
     {
       sendto_one(client, "%s", buf);
-      t = start;
+      bufptr = bufptr_start;
     }
 
-    t += snprintf(t, sizeof(buf) - (t - buf), t != start ? " %s%s" : "%s%s", member_get_prefix(member, true), member->client->id);
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != bufptr_start ? " %s%s" : "%s%s", member_get_prefix(member, true), member->client->id);
   }
 
   sendto_one(client, "%s", buf);

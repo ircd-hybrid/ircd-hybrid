@@ -235,40 +235,35 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
                        const dlink_list *list, const char flag)
 {
   dlink_node *node;
-  char modebuf[IRCD_BUFSIZE];
-  char parabuf[IRCD_BUFSIZE];
-  size_t tlen, mlen, cur_len;
-  char *pbuf = parabuf;
+  size_t len;
+  char buf[IRCD_BUFSIZE];
 
   if (dlink_list_length(list) == 0)
     return;
 
-  mlen = snprintf(modebuf, sizeof(modebuf), ":%s BMASK %ju %s %c :", me.id,
-                  channel->creation_time, channel->name, flag);
-  cur_len = mlen;
+  char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s BMASK %ju %s %c :", me.id,
+                                channel->creation_time, channel->name, flag);
+  char *const bufptr_start = bufptr;
 
   DLINK_FOREACH(node, list->head)
   {
     const struct Ban *ban = node->data;
 
-    tlen = ban->banstr_len + 1;  /* +1 for space */
+    len = ban->banstr_len + 1;  /* +1 for space */
 
     /*
      * Send buffer and start over if we cannot fit another ban
      */
-    if (cur_len + (tlen - 1) > sizeof(modebuf) - 2)
+    if ((bufptr - buf) + len > sizeof(buf) - 2)
     {
-      sendto_one(client, "%s%s", modebuf, parabuf);
-
-      cur_len = mlen;
-      pbuf = parabuf;
+      sendto_one(client, "%s", buf);
+      bufptr = bufptr_start;
     }
 
-    pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", ban->banstr);
-    cur_len += tlen;
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != bufptr_start ? " %s" : "%s", ban->banstr);
   }
 
-  sendto_one(client, "%s%s", modebuf, parabuf);
+  sendto_one(client, "%s", buf);
 }
 
 /*! \brief Send "client" a full list of the modes for channel channel

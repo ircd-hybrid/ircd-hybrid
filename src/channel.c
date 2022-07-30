@@ -456,7 +456,7 @@ void
 channel_send_namereply(struct Client *client, struct Channel *channel)
 {
   dlink_node *node;
-  char buf[IRCD_BUFSIZE + 1];
+  char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
   size_t masklen = 0;
   bool is_member = member_find_link(client, channel) != NULL;

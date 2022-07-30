@@ -1061,11 +1061,10 @@ channel_do_join(struct Client *client, char *chan_list, char *key_list)
     channel_add_user(channel, client, flags, true);
 
     /*
-     * Set timestamp if appropriate, and propagate
+     * Set channel modes if appropriate, and propagate
      */
     if (flags == CHFL_CHANOP)
     {
-      channel->creation_time = event_base->time.sec_real;
       AddCMode(channel, MODE_TOPICLIMIT);
       AddCMode(channel, MODE_NOPRIVMSGS);
 

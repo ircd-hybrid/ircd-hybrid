@@ -42,9 +42,9 @@
 #include "server_capab.h"
 
 
-/** Buffer holding as list of channel modes to be used for RPL_MYINFO */
+/** Buffer holding a list of channel modes to be used for RPL_MYINFO */
 char cmode_rpl04[2][256];
-/** Buffer holding as list of channel modes to be used for RPL_ISUPPORT */
+/** Buffer holding a list of channel modes to be used for RPL_ISUPPORT */
 char cmode_class[4][256];
 
 static struct ChModeChange mode_changes[IRCD_BUFSIZE];

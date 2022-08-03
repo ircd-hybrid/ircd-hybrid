@@ -54,7 +54,6 @@
 #include "conf_class.h"
 #include "ipcache.h"
 #include "isupport.h"
-#include "patchlevel.h"
 #include "extban.h"
 
 
@@ -311,7 +310,7 @@ setup_fdlimit(void)
 static void
 print_startup(int pid)
 {
-  printf("ircd: version %s\n", PATCHLEVEL);
+  printf("ircd: version %s\n", IRCD_VERSION);
   printf("ircd: pid %d\n", pid);
   printf("ircd: running in %s mode from %s\n", !server_state.foreground ? "background"
          : "foreground", ConfigGeneral.dpath);
@@ -375,7 +374,7 @@ main(int argc, char *argv[])
 
   if (printVersion == true)
   {
-    printf("ircd: version %s\n", PATCHLEVEL);
+    printf("ircd: version %s\n", IRCD_VERSION);
     exit(EXIT_SUCCESS);
   }
 
@@ -488,7 +487,7 @@ main(int argc, char *argv[])
     event_add(&event_write_links_file, NULL);
   }
 
-  ilog(LOG_TYPE_IRCD, "Server ready. Running version: %s", PATCHLEVEL);
+  ilog(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
   io_loop();
 
   return 0;

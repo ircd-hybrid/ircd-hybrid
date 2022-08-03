@@ -32,6 +32,9 @@
 #include "event.h"
 
 
+#define IRCD_VERSION PACKAGE_NAME "-" PACKAGE_VERSION
+
+
 struct SetOptions
 {
   bool autoconn;  /**< autoconn enabled for all servers? */

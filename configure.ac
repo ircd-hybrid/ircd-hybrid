@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.71])
-AC_INIT([ircd-hybrid], [8.2.41], [bugs@ircd-hybrid.org])
+AC_INIT([ircd-hybrid], [8.2.42], [bugs@ircd-hybrid.org])
 AM_INIT_AUTOMAKE([1.16.5 subdir-objects])
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])

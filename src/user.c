@@ -229,7 +229,11 @@ introduce_client(struct Client *client)
 static void
 user_welcome(struct Client *client)
 {
+#ifdef AX_BUILD_DATE
+  static const char built_date[] = AX_BUILD_DATE;
+#else
   static const char built_date[] = __DATE__ " at " __TIME__;
+#endif
 
   if (HasFlag(client, FLAGS_TLS))
   {

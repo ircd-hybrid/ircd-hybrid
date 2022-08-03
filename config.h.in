@@ -3,6 +3,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Defines the build date */
+#undef AX_BUILD_DATE
+
 /* epoll mechanism */
 #undef AX_IOPOLL_MECHANISM_EPOLL
 

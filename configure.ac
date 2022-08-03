@@ -62,6 +62,8 @@ AX_DEFINE_DIR([LIBDIR], [libdir], [Set to libdir.])
 AX_DEFINE_DIR([DATADIR], [datadir], [Set to datadir.])
 AX_DEFINE_DIR([LOCALSTATEDIR], [localstatedir], [Set to localstatedir.])
 
+AX_DEFINE_BUILD_DATE
+
 AC_CONFIG_FILES([
   Makefile
   src/Makefile

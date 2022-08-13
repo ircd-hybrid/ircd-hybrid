@@ -115,6 +115,7 @@ enum
   MODE_EXTLIMIT     = 1 << 14,  /**< Channel can make use of the extended ban list limit */
   MODE_NONICKCHANGE = 1 << 15,  /**< User is prevented from changing their nick while in this channel */
   MODE_NOKNOCK      = 1 << 16,  /**< Clients may not use KNOCK on this channel */
+  MODE_NOKICK       = 1 << 17,  /**< Clients may not use KICK on this channel */
 };
 
 #define HasCMode(x, y) ((x)->mode.mode &   (y))

@@ -208,6 +208,7 @@ enum irc_numerics
   ERR_NOPRIVILEGES         = 481,
   ERR_CHANOPRIVSNEEDED     = 482,
   ERR_CANTKILLSERVER       = 483,
+  ERR_CANNOTKICK           = 484,
   ERR_CHANBANREASON        = 485,
   ERR_NONONREG             = 486,
   ERR_SECUREONLYCHAN       = 489,

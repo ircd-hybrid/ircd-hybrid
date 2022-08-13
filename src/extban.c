@@ -64,6 +64,7 @@ extban_init(void)
   extban_add(&extban_fingerprint);
   extban_add(&extban_gecos);
   extban_add(&extban_join);
+  extban_add(&extban_kick);
   extban_add(&extban_knock);
   extban_add(&extban_mute);
   extban_add(&extban_nick);

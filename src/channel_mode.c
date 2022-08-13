@@ -900,6 +900,7 @@ const struct chan_mode cmode_tab[] =
   { .letter = 'M', .mode = MODE_MODREG, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'N', .mode = MODE_NONICKCHANGE, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'O', .mode = MODE_OPERONLY, .required_rank = CHACCESS_HALFOP, .only_opers = true, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'Q', .mode = MODE_NOKICK, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'R', .mode = MODE_REGONLY, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'S', .mode = MODE_SECUREONLY, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'T', .mode = MODE_NONOTICE, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },

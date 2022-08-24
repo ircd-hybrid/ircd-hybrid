@@ -483,6 +483,24 @@ chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, 
   mode_changes[mode_count].arg = NULL;
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count++].dir = dir;
+
+  /*
+   * TBR: backwards-compatibility code for servers that don't have channel mode 'z'.
+   */
+  if (mode->letter == 'S')
+  {
+    mode_changes[mode_count].letter = 'z';
+    mode_changes[mode_count].arg = NULL;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].dir = dir;
+  }
+  else if (mode->letter == 'z')
+  {
+    mode_changes[mode_count].letter = 'S';
+    mode_changes[mode_count].arg = NULL;
+    mode_changes[mode_count].id = NULL;
+    mode_changes[mode_count++].dir = dir;
+  }
 }
 
 static void
@@ -893,6 +911,7 @@ const struct chan_mode cmode_tab[] =
   { .letter = 'r', .mode = MODE_REGISTERED, .required_rank = CHACCESS_REMOTE, .only_servers = true, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 's', .mode = MODE_SECRET, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 't', .mode = MODE_TOPICLIMIT, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'z', .mode = MODE_SECUREONLY, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'C', .mode = MODE_NOCTCP, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'I', .flag = CHFL_INVEX, .required_rank = CHACCESS_HALFOP, .func = chm_mask, .class = MODE_CLASS_A },
   { .letter = 'K', .mode = MODE_NOKNOCK, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },

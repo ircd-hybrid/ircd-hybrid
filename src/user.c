@@ -82,6 +82,7 @@ const struct user_modes  umode_tab[] =
   { 's', UMODE_SERVNOTICE   },
   { 'w', UMODE_WALLOP       },
   { 'y', UMODE_SPY          },
+  { 'z', UMODE_SECURE       },
   { '\0', 0 }
 };
 

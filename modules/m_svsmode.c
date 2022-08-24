@@ -119,6 +119,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
 
         break;
 
+      case 'z':
       case 'S':  /* Only servers may set +S in a burst */
       case 'W':  /* Only servers may set +W in a burst */
         break;

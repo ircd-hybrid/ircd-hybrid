@@ -322,6 +322,7 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
 {
   dlink_node *node;
   static uintmax_t last_used = 0;
+  struct Client *target_p;
 
   if (!HasUMode(source_p, UMODE_OPER))
   {
@@ -334,17 +335,24 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
     last_used = event_base->time.sec_monotonic;
   }
 
-  /* First, list all matching invisible clients on common channels */
+  /* First, if mask contains no wildcard, always send the one reply, even if invisible */
+  if (mask && (target_p = find_person(source_p, mask)))
+  {
+    who_send(source_p, target_p, NULL, who);
+    return;
+  }
+
+  /* Second, list all matching invisible clients on common channels */
   DLINK_FOREACH(node, source_p->channel.head)
   {
     struct ChannelMember *member = node->data;
     who_on_common_channel(source_p, member->channel, mask, who);
   }
 
-  /* Second, list all matching visible clients */
+  /* Third, list all matching visible clients */
   DLINK_FOREACH(node, global_client_list.head)
   {
-    struct Client *target_p = node->data;
+    target_p = node->data;
 
     assert(IsClient(target_p));
 

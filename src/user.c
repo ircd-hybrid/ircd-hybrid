@@ -64,6 +64,7 @@ const struct user_modes  umode_tab[] =
   { 'R', UMODE_REGONLY      },
   { 'S', UMODE_SECURE       },
   { 'W', UMODE_WEBIRC       },
+  { 'Z', UMODE_SECUREONLY   },
   { 'a', UMODE_ADMIN        },
   { 'c', UMODE_CCONN        },
   { 'd', UMODE_DEBUG        },

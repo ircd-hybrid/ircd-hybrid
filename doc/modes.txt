@@ -40,6 +40,7 @@ User Modes:
 +W - webirc       - User is connected using a webirc gateway
 +X - expiration   - See *LINE expiration notices
 +y - spy          - See ADMIN, LINKS, MOTD, STATS, TRACE notices
++Z - secureonly   - User may only receive private messages from secure connections
 
 Channel Modes:
 

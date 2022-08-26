@@ -5,6 +5,8 @@
 * Extban `$Q` of type acting has been implemented. This extban prevents
   matching users from using the `KICK` command.
 * Implemented channel mode `Q`. `KICK` cannot be used on channels with that mode set
+* Implemented user mode `Z`. Users with that mode set may only receive private
+  messages from other users that are connected via TLS.
 
 
 #### Noteworthy changes in version 8.2.41 (2022-07-15)

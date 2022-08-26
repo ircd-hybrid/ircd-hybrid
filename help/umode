@@ -33,3 +33,4 @@ User modes: (* designates that the umode is oper only)
                  any common channels with you (unless they are accepted).
          g     - "Caller ID" mode: only allow accepted clients to message you.
        * H     - IRC operator status is hidden to other users.
+         Z     - Can only receive private messages from secure connections.

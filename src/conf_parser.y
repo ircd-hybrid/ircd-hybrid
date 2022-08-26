@@ -310,6 +310,7 @@ reset_block_state(void)
 %token  T_RECVQ
 %token  T_REJ
 %token  T_RESTART
+%token  T_SECUREONLY
 %token  T_SERVER
 %token  T_SERVICE
 %token  T_SERVNOTICE
@@ -1124,6 +1125,10 @@ oper_umodes_item: BOT
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_EXPIRATION;
+} | T_SECUREONLY
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.modes.value |= UMODE_SECUREONLY;
 };
 
 oper_flags: IRCD_FLAGS
@@ -2651,6 +2656,9 @@ umode_oitem: BOT
 } | EXPIRATION
 {
   ConfigGeneral.oper_umodes |= UMODE_EXPIRATION;
+} | T_SECUREONLY
+{
+  ConfigGeneral.oper_umodes |= UMODE_SECUREONLY;
 };
 
 general_oper_only_umodes: OPER_ONLY_UMODES
@@ -2725,6 +2733,9 @@ umode_item: BOT
 } | EXPIRATION
 {
   ConfigGeneral.oper_only_umodes |= UMODE_EXPIRATION;
+} | T_SECUREONLY
+{
+  ConfigGeneral.oper_only_umodes |= UMODE_SECUREONLY;
 };
 
 general_min_nonwildcard: MIN_NONWILDCARD '=' NUMBER ';'

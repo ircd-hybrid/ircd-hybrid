@@ -202,6 +202,7 @@ static const char *const replies[] =
   /* 521 */  [ERR_LISTSYNTAX] = ":Bad list syntax, type /QUOTE HELP LIST",
   /* 523 */  [ERR_WHOLIMEXCEED] = "%u :%s search limit exceeded.",
   /* 524 */  [ERR_HELPNOTFOUND] = "%s :Help not found",
+  /* 531 */  [ERR_CANNOTSENDTOUSER] = "%s :%s",
   /* 671 */  [RPL_WHOISSECURE] = "%s :is connected via TLS (secure link)",
   /* 702 */  [RPL_MODLIST] = "%s %p %s %s",
   /* 703 */  [RPL_ENDOFMODLIST] = ":End of /MODULE LIST.",

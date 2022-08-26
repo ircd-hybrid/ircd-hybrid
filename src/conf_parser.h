@@ -238,53 +238,54 @@ extern int yydebug;
     T_RECVQ = 439,                 /* T_RECVQ  */
     T_REJ = 440,                   /* T_REJ  */
     T_RESTART = 441,               /* T_RESTART  */
-    T_SERVER = 442,                /* T_SERVER  */
-    T_SERVICE = 443,               /* T_SERVICE  */
-    T_SERVNOTICE = 444,            /* T_SERVNOTICE  */
-    T_SET = 445,                   /* T_SET  */
-    T_SHARED = 446,                /* T_SHARED  */
-    T_SIZE = 447,                  /* T_SIZE  */
-    T_SKILL = 448,                 /* T_SKILL  */
-    T_SOFTCALLERID = 449,          /* T_SOFTCALLERID  */
-    T_SPY = 450,                   /* T_SPY  */
-    T_TARGET = 451,                /* T_TARGET  */
-    T_TLS = 452,                   /* T_TLS  */
-    T_UMODES = 453,                /* T_UMODES  */
-    T_UNDLINE = 454,               /* T_UNDLINE  */
-    T_UNLIMITED = 455,             /* T_UNLIMITED  */
-    T_UNRESV = 456,                /* T_UNRESV  */
-    T_UNXLINE = 457,               /* T_UNXLINE  */
-    T_WALLOP = 458,                /* T_WALLOP  */
-    T_WALLOPS = 459,               /* T_WALLOPS  */
-    T_WEBIRC = 460,                /* T_WEBIRC  */
-    TBOOL = 461,                   /* TBOOL  */
-    THROTTLE_COUNT = 462,          /* THROTTLE_COUNT  */
-    THROTTLE_TIME = 463,           /* THROTTLE_TIME  */
-    TIMEOUT = 464,                 /* TIMEOUT  */
-    TLS_CERTIFICATE_FILE = 465,    /* TLS_CERTIFICATE_FILE  */
-    TLS_CERTIFICATE_FINGERPRINT = 466, /* TLS_CERTIFICATE_FINGERPRINT  */
-    TLS_CIPHER_LIST = 467,         /* TLS_CIPHER_LIST  */
-    TLS_CIPHER_SUITES = 468,       /* TLS_CIPHER_SUITES  */
-    TLS_CONNECTION_REQUIRED = 469, /* TLS_CONNECTION_REQUIRED  */
-    TLS_DH_PARAM_FILE = 470,       /* TLS_DH_PARAM_FILE  */
-    TLS_MESSAGE_DIGEST_ALGORITHM = 471, /* TLS_MESSAGE_DIGEST_ALGORITHM  */
-    TLS_SUPPORTED_GROUPS = 472,    /* TLS_SUPPORTED_GROUPS  */
-    TS_MAX_DELTA = 473,            /* TS_MAX_DELTA  */
-    TS_WARN_DELTA = 474,           /* TS_WARN_DELTA  */
-    TWODOTS = 475,                 /* TWODOTS  */
-    TYPE = 476,                    /* TYPE  */
-    UNKLINE = 477,                 /* UNKLINE  */
-    USE_LOGGING = 478,             /* USE_LOGGING  */
-    USER = 479,                    /* USER  */
-    VHOST = 480,                   /* VHOST  */
-    VHOST6 = 481,                  /* VHOST6  */
-    WARN_NO_CONNECT_BLOCK = 482,   /* WARN_NO_CONNECT_BLOCK  */
-    WHOIS = 483,                   /* WHOIS  */
-    WHOWAS_HISTORY_LENGTH = 484,   /* WHOWAS_HISTORY_LENGTH  */
-    XLINE = 485,                   /* XLINE  */
-    XLINE_EXEMPT = 486,            /* XLINE_EXEMPT  */
-    QSTRING = 487,                 /* QSTRING  */
-    NUMBER = 488                   /* NUMBER  */
+    T_SECUREONLY = 442,            /* T_SECUREONLY  */
+    T_SERVER = 443,                /* T_SERVER  */
+    T_SERVICE = 444,               /* T_SERVICE  */
+    T_SERVNOTICE = 445,            /* T_SERVNOTICE  */
+    T_SET = 446,                   /* T_SET  */
+    T_SHARED = 447,                /* T_SHARED  */
+    T_SIZE = 448,                  /* T_SIZE  */
+    T_SKILL = 449,                 /* T_SKILL  */
+    T_SOFTCALLERID = 450,          /* T_SOFTCALLERID  */
+    T_SPY = 451,                   /* T_SPY  */
+    T_TARGET = 452,                /* T_TARGET  */
+    T_TLS = 453,                   /* T_TLS  */
+    T_UMODES = 454,                /* T_UMODES  */
+    T_UNDLINE = 455,               /* T_UNDLINE  */
+    T_UNLIMITED = 456,             /* T_UNLIMITED  */
+    T_UNRESV = 457,                /* T_UNRESV  */
+    T_UNXLINE = 458,               /* T_UNXLINE  */
+    T_WALLOP = 459,                /* T_WALLOP  */
+    T_WALLOPS = 460,               /* T_WALLOPS  */
+    T_WEBIRC = 461,                /* T_WEBIRC  */
+    TBOOL = 462,                   /* TBOOL  */
+    THROTTLE_COUNT = 463,          /* THROTTLE_COUNT  */
+    THROTTLE_TIME = 464,           /* THROTTLE_TIME  */
+    TIMEOUT = 465,                 /* TIMEOUT  */
+    TLS_CERTIFICATE_FILE = 466,    /* TLS_CERTIFICATE_FILE  */
+    TLS_CERTIFICATE_FINGERPRINT = 467, /* TLS_CERTIFICATE_FINGERPRINT  */
+    TLS_CIPHER_LIST = 468,         /* TLS_CIPHER_LIST  */
+    TLS_CIPHER_SUITES = 469,       /* TLS_CIPHER_SUITES  */
+    TLS_CONNECTION_REQUIRED = 470, /* TLS_CONNECTION_REQUIRED  */
+    TLS_DH_PARAM_FILE = 471,       /* TLS_DH_PARAM_FILE  */
+    TLS_MESSAGE_DIGEST_ALGORITHM = 472, /* TLS_MESSAGE_DIGEST_ALGORITHM  */
+    TLS_SUPPORTED_GROUPS = 473,    /* TLS_SUPPORTED_GROUPS  */
+    TS_MAX_DELTA = 474,            /* TS_MAX_DELTA  */
+    TS_WARN_DELTA = 475,           /* TS_WARN_DELTA  */
+    TWODOTS = 476,                 /* TWODOTS  */
+    TYPE = 477,                    /* TYPE  */
+    UNKLINE = 478,                 /* UNKLINE  */
+    USE_LOGGING = 479,             /* USE_LOGGING  */
+    USER = 480,                    /* USER  */
+    VHOST = 481,                   /* VHOST  */
+    VHOST6 = 482,                  /* VHOST6  */
+    WARN_NO_CONNECT_BLOCK = 483,   /* WARN_NO_CONNECT_BLOCK  */
+    WHOIS = 484,                   /* WHOIS  */
+    WHOWAS_HISTORY_LENGTH = 485,   /* WHOWAS_HISTORY_LENGTH  */
+    XLINE = 486,                   /* XLINE  */
+    XLINE_EXEMPT = 487,            /* XLINE_EXEMPT  */
+    QSTRING = 488,                 /* QSTRING  */
+    NUMBER = 489                   /* NUMBER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -477,53 +478,54 @@ extern int yydebug;
 #define T_RECVQ 439
 #define T_REJ 440
 #define T_RESTART 441
-#define T_SERVER 442
-#define T_SERVICE 443
-#define T_SERVNOTICE 444
-#define T_SET 445
-#define T_SHARED 446
-#define T_SIZE 447
-#define T_SKILL 448
-#define T_SOFTCALLERID 449
-#define T_SPY 450
-#define T_TARGET 451
-#define T_TLS 452
-#define T_UMODES 453
-#define T_UNDLINE 454
-#define T_UNLIMITED 455
-#define T_UNRESV 456
-#define T_UNXLINE 457
-#define T_WALLOP 458
-#define T_WALLOPS 459
-#define T_WEBIRC 460
-#define TBOOL 461
-#define THROTTLE_COUNT 462
-#define THROTTLE_TIME 463
-#define TIMEOUT 464
-#define TLS_CERTIFICATE_FILE 465
-#define TLS_CERTIFICATE_FINGERPRINT 466
-#define TLS_CIPHER_LIST 467
-#define TLS_CIPHER_SUITES 468
-#define TLS_CONNECTION_REQUIRED 469
-#define TLS_DH_PARAM_FILE 470
-#define TLS_MESSAGE_DIGEST_ALGORITHM 471
-#define TLS_SUPPORTED_GROUPS 472
-#define TS_MAX_DELTA 473
-#define TS_WARN_DELTA 474
-#define TWODOTS 475
-#define TYPE 476
-#define UNKLINE 477
-#define USE_LOGGING 478
-#define USER 479
-#define VHOST 480
-#define VHOST6 481
-#define WARN_NO_CONNECT_BLOCK 482
-#define WHOIS 483
-#define WHOWAS_HISTORY_LENGTH 484
-#define XLINE 485
-#define XLINE_EXEMPT 486
-#define QSTRING 487
-#define NUMBER 488
+#define T_SECUREONLY 442
+#define T_SERVER 443
+#define T_SERVICE 444
+#define T_SERVNOTICE 445
+#define T_SET 446
+#define T_SHARED 447
+#define T_SIZE 448
+#define T_SKILL 449
+#define T_SOFTCALLERID 450
+#define T_SPY 451
+#define T_TARGET 452
+#define T_TLS 453
+#define T_UMODES 454
+#define T_UNDLINE 455
+#define T_UNLIMITED 456
+#define T_UNRESV 457
+#define T_UNXLINE 458
+#define T_WALLOP 459
+#define T_WALLOPS 460
+#define T_WEBIRC 461
+#define TBOOL 462
+#define THROTTLE_COUNT 463
+#define THROTTLE_TIME 464
+#define TIMEOUT 465
+#define TLS_CERTIFICATE_FILE 466
+#define TLS_CERTIFICATE_FINGERPRINT 467
+#define TLS_CIPHER_LIST 468
+#define TLS_CIPHER_SUITES 469
+#define TLS_CONNECTION_REQUIRED 470
+#define TLS_DH_PARAM_FILE 471
+#define TLS_MESSAGE_DIGEST_ALGORITHM 472
+#define TLS_SUPPORTED_GROUPS 473
+#define TS_MAX_DELTA 474
+#define TS_WARN_DELTA 475
+#define TWODOTS 476
+#define TYPE 477
+#define UNKLINE 478
+#define USE_LOGGING 479
+#define USER 480
+#define VHOST 481
+#define VHOST6 482
+#define WARN_NO_CONNECT_BLOCK 483
+#define WHOIS 484
+#define WHOWAS_HISTORY_LENGTH 485
+#define XLINE 486
+#define XLINE_EXEMPT 487
+#define QSTRING 488
+#define NUMBER 489
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -534,7 +536,7 @@ union YYSTYPE
   int number;
   char *string;
 
-#line 538 "conf_parser.h"
+#line 540 "conf_parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

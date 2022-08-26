@@ -242,6 +242,22 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
     if (target_p->away[0] && notice == false)
       sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
 
+    if (HasUMode(target_p, UMODE_SECUREONLY) && !HasUMode(source_p, UMODE_SECURE))
+    {
+      if (notice == false)
+        sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOUSER, target_p->name,
+                           "You must be connected via TLS to message this user");
+      return;
+    }
+
+    if (HasUMode(source_p, UMODE_SECUREONLY) && !HasUMode(target_p, UMODE_SECURE))
+    {
+      if (notice == false)
+        sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOUSER, target_p->name,
+                           "Recipient is not connected via TLS and you are +Z");
+      return;
+    }
+
     if (HasUMode(target_p, UMODE_REGONLY) && target_p != source_p)
     {
       if (!HasUMode(source_p, UMODE_REGISTERED | UMODE_OPER))

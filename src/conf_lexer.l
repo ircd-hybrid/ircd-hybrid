@@ -299,6 +299,7 @@ restart                     { return T_RESTART; }
 resv                        { return RESV; }
 resv_exempt                 { return RESV_EXEMPT; }
 rsa_private_key_file        { return RSA_PRIVATE_KEY_FILE; }
+secureonly                  { return T_SECUREONLY; }
 send_password               { return SEND_PASSWORD; }
 sendq                       { return SENDQ; }
 server                      { return T_SERVER; }

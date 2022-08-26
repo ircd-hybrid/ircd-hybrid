@@ -173,7 +173,8 @@ enum
   UMODE_HIDEIDLE     = 1 << 23,  /**< Hides idle and signon time in WHOIS */
   UMODE_HIDECHANS    = 1 << 24,  /**< Hides channel list in WHOIS */
   UMODE_EXPIRATION   = 1 << 25,  /**< Receives *LINE expiration notices */
-  UMODE_BOT          = 1 << 26  /**< Client is marked as a bot in WHOIS and WHO */
+  UMODE_BOT          = 1 << 26,  /**< Client is marked as a bot in WHOIS and WHO */
+  UMODE_SECUREONLY   = 1 << 27,  /**< Client may only receive private messages from secure connections */
 };
 
 #define HasUMode(x, y) ((x)->umodes &   (y))

@@ -109,7 +109,7 @@ who_send(struct Client *source_p, const struct Client *target_p,
       {
         member = node->data;
 
-        if (PubChannel(member->channel))
+        if (PubChannel(member->channel) || source_p == target_p || member_find_link(source_p, member->channel))
           break;
         member = NULL;
       }

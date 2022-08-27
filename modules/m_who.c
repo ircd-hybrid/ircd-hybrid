@@ -547,9 +547,6 @@ m_who(struct Client *source_p, int parc, char *parv[])
     who->token = token;
   }
 
-  if (who->matchsel == 0)
-    who->matchsel = WHO_FIELD_DEF;
-
   /* '/who #some_channel' */
   if (IsChanPrefix(*mask))
   {
@@ -562,10 +559,27 @@ m_who(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
+  /* '/who nick' */
+  if (who->matchsel == 0 || (who->matchsel & WHO_FIELD_NIC))
+  {
+    const struct Client *target_p = find_person(source_p, mask);
+    if (target_p)
+      if (!(who->bitsel & WHOSELECT_OPER) ||
+        (HasUMode(target_p, UMODE_OPER) &&
+          (!HasUMode(target_p, UMODE_HIDDEN) || HasUMode(source_p, UMODE_OPER))))
+        who_send(source_p, target_p, NULL, who);
+
+    sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
+    return;
+  }
+
   collapse(mask);
   if (strcmp(mask, "0") == 0 ||
       strcmp(mask, "*") == 0)
     mask = NULL;
+
+  if (who->matchsel == 0)
+    who->matchsel = WHO_FIELD_DEF;
 
   who_global(source_p, mask, who);
 

@@ -263,7 +263,8 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
       if (!HasUMode(source_p, UMODE_REGISTERED | UMODE_OPER))
       {
         if (notice == false)
-          sendto_one_numeric(source_p, &me, ERR_NONONREG, target_p->name);
+          sendto_one_numeric(source_p, &me, ERR_CANNOTSENDTOUSER, target_p->name,
+                             "You must identify to a registered account to message this user");
         return;
       }
     }

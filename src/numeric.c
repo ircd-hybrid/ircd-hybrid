@@ -191,7 +191,6 @@ static const char *const replies[] =
   /* 483 */  [ERR_CANTKILLSERVER] = ":You cannot kill a server!",
   /* 484 */  [ERR_CANNOTKICK] = "%s :Cannot kick user %s from channel (%s)",
   /* 485 */  [ERR_CHANBANREASON] = "%s :Cannot join channel (%s)",
-  /* 486 */  [ERR_NONONREG] = "%s :You must identify to a registered nick to private message that person",
   /* 489 */  [ERR_SECUREONLYCHAN] = "%s :Cannot join channel (+S) - TLS required",
   /* 491 */  [ERR_NOOPERHOST] = ":Only few of mere mortals may try to enter the twilight zone",
   /* 501 */  [ERR_UMODEUNKNOWNFLAG] = ":Unknown MODE flag",

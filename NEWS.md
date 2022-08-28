@@ -1,4 +1,4 @@
-#### Noteworthy changes in version 8.2.42 (2022-??-??)
+#### Noteworthy changes in version 8.2.42 (2022-08-28)
 * Added support for reproducible builds using the `SOURCE_DATE_EPOCH` environment
   variable. See https://reproducible-builds.org/docs/source-date-epoch/ for more
   information.

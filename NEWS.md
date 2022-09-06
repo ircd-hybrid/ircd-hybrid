@@ -1,3 +1,7 @@
+#### Noteworthy changes in version 8.2.43 (2022-??-??)
+*
+
+
 #### Noteworthy changes in version 8.2.42 (2022-08-28)
 * Added support for reproducible builds using the `SOURCE_DATE_EPOCH` environment
   variable. See https://reproducible-builds.org/docs/source-date-epoch/ for more
@@ -109,7 +113,7 @@
 * `RESV` couldn't be issued in case no reason has been supplied. This has been fixed.
 * Fixed possible `RPL_WHOISCHANNELS` line truncation of remote replies
 * Extban `$t` of type matching has been implemented. This extban allows matching
-  based on TLS protocol version and/or cipher suite
+  based on TLS protocol version and/or cipher suite.
 * Implemented channel mode `K`. `KNOCK` cannot be used on channels with that mode set.
 * `STATS ?` is now oper-only
 
@@ -117,7 +121,7 @@
 #### Noteworthy changes in version 8.2.31 (2020-05-03)
 * macOS compatibility fixes
 * Removed `spoof_notice` from `auth::flags`. With vhosts now this notice doesn't make
-  much sense anymore
+  much sense anymore.
 * Fixed issue where ban masks might become malformed if set by remote clients/servers
 * Fixed issue with channel mode `c` where high ascii characters can be erroneously
   detected as control characters
@@ -220,7 +224,7 @@
 * Minimum supported GnuTLS version is 3.5.8 now
 * The `serverinfo::vhost` and `serverinfo:vhost6` configuration directives have
   been deprecated. If you need to bind a specific address you can specify one
-  in the connect {} block
+  in the connect {} block.
 * The `connect::vhost` configuration directive has been renamed to `connect::bind`
 
 
@@ -269,7 +273,7 @@
 * Added `channel::max_invites` configuration option. See `doc/reference.conf`
   for more information.
 * `INVITE` expirations have been implemented. Expire time can be adjusted with
-  the `channel::invite_expire_time` configuration directive
+  the `channel::invite_expire_time` configuration directive.
 * `WHOIS` notices to IRC operators have been re-added. User mode `y` (spy) is
   required to see them
 * The maximum line length for motd files has been increased to 320 bytes to
@@ -897,7 +901,7 @@
 * Removed `general::client_flood` configuration option and added the
   new `recvq` configuration directive to class {} blocks.
   The max size of a receive queue can be seen in `STATS Y`
-  for each class
+  for each class.
 * Allow the `[` and `]` characters in server description
 
 
@@ -966,9 +970,9 @@
   connection is required, as compression is now handled via OpenSSL
 * Removed `ssl_server_protocol` configuration directive and
   added `ssl_client_method` and `ssl_server_method` instead.
-  Both of these options can now be changed at runtime
+  Both of these options can now be changed at runtime.
 * IRC operator login IDs are no longer limited to `NICKLEN*2`
 * Removed `channel::burst_topicwho` configuration option. This feature is now
-  enabled by default
+  enabled by default.
 * `STATS Y|y` now reports CIDR limits as well
 * Added `m_webirc.c` to `contrib/`

@@ -165,7 +165,7 @@ who_send(struct Client *source_p, const struct Client *target_p,
     if (HasUMode(source_p, UMODE_OPER))
       snprintf(status, sizeof(status), "%c%s%s%s%s%s", target_p->away[0] ? 'G' : 'H',
                HasUMode(target_p, UMODE_BOT) ? "B" : "",
-               HasUMode(target_p, UMODE_SECURE) ? "S" : "",
+               HasUMode(target_p, UMODE_SECURE) ? "z" : "",
                HasUMode(target_p, UMODE_REGISTERED) ? "r" : "",
                HasUMode(target_p, UMODE_OPER) ? "*" : "",
                member ? member_get_prefix(member, who->fields || !!HasCap(source_p, CAP_MULTI_PREFIX)) : "");
@@ -173,7 +173,7 @@ who_send(struct Client *source_p, const struct Client *target_p,
     else
       snprintf(status, sizeof(status), "%c%s%s%s%s%s", target_p->away[0] ? 'G' : 'H',
                HasUMode(target_p, UMODE_BOT) ? "B" : "",
-               HasUMode(target_p, UMODE_SECURE) ? "S" : "",
+               HasUMode(target_p, UMODE_SECURE) ? "z" : "",
                HasUMode(target_p, UMODE_REGISTERED) ? "r" : "",
                HasUMode(target_p, UMODE_OPER) &&
                !HasUMode(target_p, UMODE_HIDDEN) ? "*" : "",

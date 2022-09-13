@@ -1,0 +1,34 @@
+# Autotools
+/autom4te.cache
+*.la
+*.lo
+.deps
+.dirstamp
+.libs
+Makefile
+config.cache
+config.h
+config.log
+config.status
+config.status.lineno
+configure.lineno
+libtool
+stamp-h*
+
+# C object files
+*.o
+
+# Editor droppings
+*.swo
+*.swp
+*~
+.#*
+\#*\#
+
+# Diff droppings
+*.orig
+*.rej
+
+# Executables
+/src/ircd
+/tools/mkpasswd

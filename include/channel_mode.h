@@ -117,6 +117,7 @@ enum
   MODE_NOKNOCK      = 1 << 16,  /**< Clients may not use KNOCK on this channel */
   MODE_NOKICK       = 1 << 17,  /**< Clients may not use KICK on this channel */
   MODE_ISSECURE     = 1 << 18,
+  MODE_NOINVITE     = 1 << 19,  /**< Clients may not use INVITE on this channel */
 };
 
 #define HasCMode(x, y) ((x)->mode.mode &   (y))

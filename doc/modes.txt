@@ -75,6 +75,7 @@ Channel Modes:
 +t - topic        - Only chanops and halfops can change the topic
 +T - nonotice     - Users without +v/h/o cannot send NOTICEs to the channel
 +v - voice        - Can speak in a moderated channel, and is exempt from flood restrictions
++V - noinvite     - INVITE cannot be used on the channel
 
 The third part of the 004 numeric lists channel modes that require arguments.
 Currently these are Ibehklov.

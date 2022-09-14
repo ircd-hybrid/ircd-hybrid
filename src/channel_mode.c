@@ -923,6 +923,7 @@ const struct chan_mode cmode_tab[] =
   { .letter = 'R', .mode = MODE_REGONLY, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'S', .mode = MODE_SECUREONLY, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'T', .mode = MODE_NONOTICE, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
+  { .letter = 'V', .mode = MODE_NOINVITE, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'Z', .mode = MODE_ISSECURE, .required_rank = CHACCESS_REMOTE, .only_servers = true, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = '\0' }
 };

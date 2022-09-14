@@ -216,6 +216,7 @@ enum irc_numerics
   ERR_USERSDONTMATCH       = 502,
   ERR_USERNOTONSERV        = 504,
   ERR_WRONGPONG            = 513,
+  ERR_NOINVITE             = 518,
   ERR_OPERONLYCHAN         = 520,
   ERR_LISTSYNTAX           = 521,
   ERR_WHOLIMEXCEED         = 523,

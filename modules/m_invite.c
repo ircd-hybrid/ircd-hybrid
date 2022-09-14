@@ -107,6 +107,12 @@ m_invite(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
+  if (HasCMode(channel, MODE_NOINVITE))
+  {
+    sendto_one_numeric(source_p, &me, ERR_NOINVITE, target_p->name, channel->name);
+    return;
+  }
+
   if ((source_p->connection->invite.last_attempt + ConfigChannel.invite_client_time) < event_base->time.sec_monotonic)
     source_p->connection->invite.count = 0;
 

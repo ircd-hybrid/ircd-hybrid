@@ -61,6 +61,8 @@ NO PARAMETERS:
      T = No notices. This will prevent any user who isn't opped,
          half-opped or voiced (+o/+h/+v) from sending channel notices.
 
+     V = No INVITE. INVITE cannot be used on the channel.
+
 
 WITH PARAMETERS:
 ----------------

@@ -71,9 +71,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  if (!((channel->mode.mode & MODE_INVITEONLY) || channel->mode.key[0] ||
-        (channel->mode.limit && dlink_list_length(&channel->members) >=
-         channel->mode.limit)))
+  if (!HasCMode(channel, MODE_INVITEONLY))
   {
     sendto_one_numeric(source_p, &me, ERR_CHANOPEN, channel->name);
     return;

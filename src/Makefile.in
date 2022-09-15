@@ -127,19 +127,20 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) \
 	event.$(OBJEXT) extban.$(OBJEXT) extban_account.$(OBJEXT) \
 	extban_channel.$(OBJEXT) extban_fingerprint.$(OBJEXT) \
-	extban_gecos.$(OBJEXT) extban_join.$(OBJEXT) \
-	extban_kick.$(OBJEXT) extban_knock.$(OBJEXT) \
-	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
-	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
-	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
-	fdlist.$(OBJEXT) getopt.$(OBJEXT) hash.$(OBJEXT) \
-	hostmask.$(OBJEXT) id.$(OBJEXT) ipcache.$(OBJEXT) \
-	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
-	isupport.$(OBJEXT) list.$(OBJEXT) listener.$(OBJEXT) \
-	log.$(OBJEXT) match.$(OBJEXT) memory.$(OBJEXT) misc.$(OBJEXT) \
-	modules.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	patricia.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	extban_gecos.$(OBJEXT) extban_invite.$(OBJEXT) \
+	extban_join.$(OBJEXT) extban_kick.$(OBJEXT) \
+	extban_knock.$(OBJEXT) extban_mute.$(OBJEXT) \
+	extban_nick.$(OBJEXT) extban_operclass.$(OBJEXT) \
+	extban_server.$(OBJEXT) extban_tlsinfo.$(OBJEXT) \
+	extban_usermode.$(OBJEXT) fdlist.$(OBJEXT) getopt.$(OBJEXT) \
+	hash.$(OBJEXT) hostmask.$(OBJEXT) id.$(OBJEXT) \
+	ipcache.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) list.$(OBJEXT) \
+	listener.$(OBJEXT) log.$(OBJEXT) match.$(OBJEXT) \
+	memory.$(OBJEXT) misc.$(OBJEXT) modules.$(OBJEXT) \
+	monitor.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) patricia.$(OBJEXT) \
+	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
 	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
 	tls_openssl.$(OBJEXT) tls_wolfssl.$(OBJEXT) res.$(OBJEXT) \
 	reslib.$(OBJEXT) restart.$(OBJEXT) rng_mt.$(OBJEXT) \
@@ -181,13 +182,13 @@ am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/event.Po ./$(DEPDIR)/extban.Po \
 	./$(DEPDIR)/extban_account.Po ./$(DEPDIR)/extban_channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
-	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_kick.Po \
-	./$(DEPDIR)/extban_knock.Po ./$(DEPDIR)/extban_mute.Po \
-	./$(DEPDIR)/extban_nick.Po ./$(DEPDIR)/extban_operclass.Po \
-	./$(DEPDIR)/extban_server.Po ./$(DEPDIR)/extban_tlsinfo.Po \
-	./$(DEPDIR)/extban_usermode.Po ./$(DEPDIR)/fdlist.Po \
-	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/hash.Po \
-	./$(DEPDIR)/hostmask.Po ./$(DEPDIR)/id.Po \
+	./$(DEPDIR)/extban_invite.Po ./$(DEPDIR)/extban_join.Po \
+	./$(DEPDIR)/extban_kick.Po ./$(DEPDIR)/extban_knock.Po \
+	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
+	./$(DEPDIR)/extban_operclass.Po ./$(DEPDIR)/extban_server.Po \
+	./$(DEPDIR)/extban_tlsinfo.Po ./$(DEPDIR)/extban_usermode.Po \
+	./$(DEPDIR)/fdlist.Po ./$(DEPDIR)/getopt.Po \
+	./$(DEPDIR)/hash.Po ./$(DEPDIR)/hostmask.Po ./$(DEPDIR)/id.Po \
 	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/irc_string.Po \
 	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_signal.Po \
 	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/list.Po \
@@ -446,6 +447,7 @@ ircd_SOURCES = auth.c            \
                extban_channel.c  \
                extban_fingerprint.c \
                extban_gecos.c    \
+               extban_invite.c   \
                extban_join.c     \
                extban_kick.c     \
                extban_knock.c    \
@@ -616,6 +618,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_channel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_fingerprint.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_gecos.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_invite.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_join.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_kick.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_knock.Po@am__quote@ # am--include-marker
@@ -861,6 +864,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/extban_channel.Po
 	-rm -f ./$(DEPDIR)/extban_fingerprint.Po
 	-rm -f ./$(DEPDIR)/extban_gecos.Po
+	-rm -f ./$(DEPDIR)/extban_invite.Po
 	-rm -f ./$(DEPDIR)/extban_join.Po
 	-rm -f ./$(DEPDIR)/extban_kick.Po
 	-rm -f ./$(DEPDIR)/extban_knock.Po
@@ -979,6 +983,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/extban_channel.Po
 	-rm -f ./$(DEPDIR)/extban_fingerprint.Po
 	-rm -f ./$(DEPDIR)/extban_gecos.Po
+	-rm -f ./$(DEPDIR)/extban_invite.Po
 	-rm -f ./$(DEPDIR)/extban_join.Po
 	-rm -f ./$(DEPDIR)/extban_kick.Po
 	-rm -f ./$(DEPDIR)/extban_knock.Po

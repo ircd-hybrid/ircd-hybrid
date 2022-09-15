@@ -441,9 +441,9 @@ channel_free(struct Channel *channel)
 static const char *
 channel_pub_or_secret(const struct Channel *channel)
 {
-  if (SecretChannel(channel))
+  if (HasCMode(channel, MODE_SECRET))
     return "@";
-  if (PrivateChannel(channel))
+  if (HasCMode(channel, MODE_PRIVATE))
     return "*";
   return "=";
 }

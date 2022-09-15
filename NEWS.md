@@ -1,5 +1,7 @@
 #### Noteworthy changes in version 8.2.43 (2022-??-??)
-*
+* Extban `$V` of type acting has been implemented. This extban prevents
+  matching users from using the `INVITE` command.
+* Implemented channel mode `V`. `INVITE` cannot be used on channels with that mode set.
 
 
 #### Noteworthy changes in version 8.2.42 (2022-08-28)
@@ -215,7 +217,7 @@
 * The `class::number_per_ip`, `class::max_local` and `class::max_global`
   configuration directives have been replaced with just `class::number_per_ip_local`
   and `class::number_per_ip_global`. The `class::max_local` basically was
-  redundant as it had the same functionality as `class::number_per_ip`
+  redundant as it had the same functionality as `class::number_per_ip`.
 * Adding RESVs with wildcards no longer requires administrator privileges
 * The `general::ignore_bogus_ts` configuration option has been deprecated
 * TLSv1.1 and TLSv1.0 are no longer supported and have been disabled in
@@ -263,7 +265,7 @@
 #### Noteworthy changes in version 8.2.21 (2016-11-27)
 * The `general::default_floodtime` configuration option has been added
   along with the `SET FLOODTIME` command. These allow to fine-tune the
-  message throttling better
+  message throttling better.
 * Fixed an issue with `INVITE` not showing the list of channels the
   sender is invited to
 
@@ -275,7 +277,7 @@
 * `INVITE` expirations have been implemented. Expire time can be adjusted with
   the `channel::invite_expire_time` configuration directive.
 * `WHOIS` notices to IRC operators have been re-added. User mode `y` (spy) is
-  required to see them
+  required to see them.
 * The maximum line length for motd files has been increased to 320 bytes to
   support multibyte encodings better
 

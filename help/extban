@@ -39,5 +39,9 @@ Acting extbans:
 
  $K:<banmask>   Prevents matching users from using the KNOCK command.
 
+ $Q:<banmask>   Prevents matching users from using the KICK command.
+
+ $V:<banmask>   Prevents matching users from using the INVITE command.
+
 A ban given to an acting extban may either be a nick!user@host mask, matched
 against users as a normal ban, or a matching extban.

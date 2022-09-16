@@ -496,7 +496,7 @@ list_one_channel(struct Client *client, struct Channel *channel)
   const struct ListTask *const lt = client->connection->list_task;
   char buf[MODEBUFLEN];
 
-  if (SecretChannel(channel) &&
+  if (HasCMode(channel, MODE_SECRET) &&
       !(HasUMode(client, UMODE_ADMIN) || member_find_link(client, channel)))
     return;
 

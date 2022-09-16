@@ -377,7 +377,7 @@ who_on_channel(struct Client *source_p, struct Channel *channel, const struct Wh
 
   if (HasUMode(source_p, UMODE_ADMIN) || member_find_link(source_p, channel))
     is_member = true;
-  else if (SecretChannel(channel))
+  else if (HasCMode(channel, MODE_SECRET))
     return;
 
   dlink_node *node;

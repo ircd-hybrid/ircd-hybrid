@@ -125,7 +125,6 @@ enum
 #define DelCMode(x, y) ((x)->mode.mode &= ~(y))
 
 /* name invisible */
-#define SecretChannel(x)        (((x)->mode.mode & MODE_SECRET))
 #define PubChannel(x)           (((x)->mode.mode & (MODE_PRIVATE | MODE_SECRET)) == 0)
 
 struct ChModeChange

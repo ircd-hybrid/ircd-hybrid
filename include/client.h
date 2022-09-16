@@ -94,22 +94,23 @@ enum
   TS_MINIMUM = 6,  /**< Minimum supported TS protocol version */
 };
 
+/** IRCv3 extension flags */
 enum
 {
-  CAP_MULTI_PREFIX   = 1 << 0,  /**< ircv3.1 multi-prefix client capability */
-  CAP_AWAY_NOTIFY    = 1 << 1,  /**< ircv3.1 away-notify client capability */
-  CAP_UHNAMES        = 1 << 2,  /**< ircv3.2 userhost-in-names client capability */
-  CAP_EXTENDED_JOIN  = 1 << 3,  /**< ircv3.1 extended-join client capability */
-  CAP_ACCOUNT_NOTIFY = 1 << 4,  /**< ircv3.1 account-notify client capability */
-  CAP_INVITE_NOTIFY  = 1 << 5,  /**< ircv3.2 invite-notify client capability */
-  CAP_CHGHOST        = 1 << 6,  /**< ircv3.2 chghost client capability */
-  CAP_CAP_NOTIFY     = 1 << 7,  /**< ircv3 CAP LS 302 cap-notify client capability */
+  CAP_MULTI_PREFIX   = 1 << 0,  /**< multi-prefix client capability */
+  CAP_AWAY_NOTIFY    = 1 << 1,  /**< away-notify client capability */
+  CAP_UHNAMES        = 1 << 2,  /**< userhost-in-names client capability */
+  CAP_EXTENDED_JOIN  = 1 << 3,  /**< extended-join client capability */
+  CAP_ACCOUNT_NOTIFY = 1 << 4,  /**< account-notify client capability */
+  CAP_INVITE_NOTIFY  = 1 << 5,  /**< invite-notify client capability */
+  CAP_CHGHOST        = 1 << 6,  /**< chghost client capability */
+  CAP_CAP_NOTIFY     = 1 << 7,  /**< CAP LS 302 cap-notify client capability */
 };
 
 #define HasCap(x, y) ((x)->connection->cap & (y))
 
 
-/* housekeeping flags */
+/** Client flags */
 enum
 {
   FLAGS_PINGSENT      = 1 <<  0,  /**< Unreplied ping sent */
@@ -144,7 +145,7 @@ enum
 #define DelFlag(x, y) ((x)->flags &= ~(y))
 
 
-/* umodes, settable flags */
+/** User mode flags */
 enum
 {
   UMODE_SERVNOTICE   = 1 <<  0,  /**< Server notices such as kill */
@@ -239,7 +240,7 @@ enum
 #define IsHidden(x)             ((x)->flags &  FLAGS_HIDDEN)
 
 
-/*! \brief server ban types */
+/** server ban types */
 enum
 {
   CLIENT_BAN_KLINE,
@@ -247,7 +248,7 @@ enum
   CLIENT_BAN_XLINE
 };
 
-/*! \brief addr_mask_type enumeration */
+/** addr_mask_type enumeration */
 enum addr_mask_type
 {
   HIDE_IP,  /**< IP is hidden. Resolved hostname is shown instead */
@@ -255,7 +256,7 @@ enum addr_mask_type
   MASK_IP   /**< IP is masked. 255.255.255.255 is shown instead */
 };
 
-/*! \brief Server structure */
+/** Server structure */
 struct Server
 {
   dlink_list server_list;  /**< Servers on this server */
@@ -263,7 +264,7 @@ struct Server
   char by[NICKLEN + 1];  /**< Who activated this connection */
 };
 
-/*! \brief ListTask structure */
+/** ListTask structure */
 struct ListTask
 {
   dlink_node node;  /**< Embedded list node used to link into listing_client_list */
@@ -280,8 +281,7 @@ struct ListTask
   char topic[TOPICLEN + 1];
 };
 
-/*! \brief Connection structure
- *
+/** Connection structure
  * Allocated only for local clients, that are directly connected
  * to \b this server with a socket.
  */
@@ -348,7 +348,7 @@ struct Connection
   char *password;  /**< Password supplied by the client/server */
 };
 
-/*! \brief Client structure */
+/** Client structure */
 struct Client
 {
   dlink_node node;

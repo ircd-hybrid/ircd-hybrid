@@ -45,7 +45,7 @@ enum
   COMM_SELECT_WRITE = 1 << 1
 };
 
-/* How long can comm_select() wait for network events [milliseconds] */
+/** How long can comm_select() wait for network events [milliseconds] */
 enum { SELECT_DELAY = 500 };
 
 struct Client;

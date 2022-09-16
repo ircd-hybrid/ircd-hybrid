@@ -53,7 +53,7 @@ enum
 #define SetCapable(x, cap)  ((x)->connection->capab |=  (cap))
 #define ClearCap(x, cap)    ((x)->connection->capab &= ~(cap))
 
-/* Capabilities */
+/** Capability structure. Describes a single server capability. */
 struct Capability
 {
   dlink_node node;  /**< List node; linked into capab_list */

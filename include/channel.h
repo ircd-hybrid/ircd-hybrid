@@ -55,7 +55,7 @@ enum
 
 struct Client;
 
-/*! \brief Mode structure for channels */
+/** Mode structure for channels */
 struct Mode
 {
   unsigned int mode;  /**< Simple modes */
@@ -63,7 +63,7 @@ struct Mode
   char key[KEYLEN + 1];  /**< +k key */
 };
 
-/*! \brief Channel structure */
+/** Channel structure */
 struct Channel
 {
   dlink_node node;  /**< List node; linked into channel_list */
@@ -98,7 +98,7 @@ struct Channel
   size_t name_len;  /**< Cached string length of Channel::name */
 };
 
-/*! \brief ChannelMember structure */
+/** ChannelMember structure */
 struct ChannelMember
 {
   dlink_node locchannode;  /**< link to channel->members_local */
@@ -111,7 +111,7 @@ struct ChannelMember
 
 enum { BANSTRLEN = 200 }; /* XXX */
 
-/*! \brief Ban structure. Used for b/e/I n!u\@h masks */
+/** Ban structure. Used for b/e/I n!u\@h masks */
 struct Ban
 {
   dlink_node node;

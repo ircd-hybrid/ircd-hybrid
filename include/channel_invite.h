@@ -26,7 +26,7 @@
 #ifndef INCLUDED_channel_invite_h
 #define INCLUDED_channel_invite_h
 
-/*! \brief Invite structure */
+/** Invite structure */
 struct Invite
 {
   dlink_node user_node;  /**< link to client->connection->invited */

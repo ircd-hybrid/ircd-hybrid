@@ -28,7 +28,7 @@
 #define INCLUDED_monitor_h
 
 
-/*! \brief Monitor structure */
+/** Monitor structure */
 struct Monitor
 {
   dlink_node node;  /**< List node; linked into monitor_hash */

@@ -31,7 +31,7 @@ enum { CMEMBER_STATUS_FLAGS_LEN = 5 };
 
 enum { MODEBUFLEN = 200 };
 
-/* Maximum mode changes allowed per client, per server is different */
+/** Maximum mode changes allowed per client, per server is different */
 enum { MAXMODEPARAMS = 6 };
 
 enum
@@ -79,7 +79,7 @@ enum mode_class
   MODE_CLASS_D
 };
 
-/* Channel related flags */
+/** Channel related flags */
 enum
 {
   CHFL_CHANOWNER    = 1 <<  0,  /**< Channel owner (~) */
@@ -95,7 +95,7 @@ enum
   CHFL_BAN_SILENCED = 1 <<  9,
 };
 
-/* channel modes ONLY */
+/** Channel mode flags */
 enum
 {
   MODE_PRIVATE      = 1 <<  0,  /**< */

@@ -29,9 +29,7 @@
 struct Client;
 struct MaskItem;
 
-/*
- * Return values for server_hunt()
- */
+/** Return values for server_hunt() */
 enum server_hunt_ret
 {
   HUNTED_NOSUCH,  /**< If the hunted server is not found */

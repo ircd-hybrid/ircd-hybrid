@@ -109,13 +109,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
   if (HasCMode(channel, MODE_NOINVITE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOINVITE, target_p->name, channel->name, "invites are not allowed (+V)");
-    return;
-  }
-
-  if (is_banned(channel, source_p, &extban_invite) == true)
-  {
-    sendto_one_numeric(source_p, &me, ERR_NOINVITE, target_p->name, channel->name, "you are extbanned");
+    sendto_one_numeric(source_p, &me, ERR_NOINVITE, target_p->name, channel->name);
     return;
   }
 

@@ -95,13 +95,7 @@ m_kick(struct Client *source_p, int parc, char *parv[])
 
   if (HasCMode(channel, MODE_NOKICK))
   {
-    sendto_one_numeric(source_p, &me, ERR_CANNOTKICK, channel->name, target_p->name, "+Q");
-    return;
-  }
-
-  if (is_banned(channel, source_p, &extban_kick) == true)
-  {
-    sendto_one_numeric(source_p, &me, ERR_CANNOTKICK, channel->name, target_p->name, "you are extbanned");
+    sendto_one_numeric(source_p, &me, ERR_CANNOTKICK, channel->name, target_p->name);
     return;
   }
 

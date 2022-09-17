@@ -1,6 +1,4 @@
 #### Noteworthy changes in version 8.2.43 (2022-??-??)
-* Extban `$V` of type acting has been implemented. This extban prevents
-  matching users from using the `INVITE` command.
 * Implemented channel mode `V`. `INVITE` cannot be used on channels with that mode set.
 
 
@@ -8,8 +6,6 @@
 * Added support for reproducible builds using the `SOURCE_DATE_EPOCH` environment
   variable. See https://reproducible-builds.org/docs/source-date-epoch/ for more
   information.
-* Extban `$Q` of type acting has been implemented. This extban prevents
-  matching users from using the `KICK` command.
 * Implemented channel mode `Q`. `KICK` cannot be used on channels with that mode set.
 * Implemented user mode `Z`. Users with that mode set may only receive private
   messages from other users that are connected via TLS.

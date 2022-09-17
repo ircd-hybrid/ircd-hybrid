@@ -33,9 +33,7 @@ ircd_SOURCES = auth.c            \
                extban_channel.c  \
                extban_fingerprint.c \
                extban_gecos.c    \
-               extban_invite.c   \
                extban_join.c     \
-               extban_kick.c     \
                extban_knock.c    \
                extban_mute.c     \
                extban_nick.c     \

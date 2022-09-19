@@ -441,7 +441,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
 
 /* Mode functions handle mode changes for a particular mode... */
 static void
-chm_nosuch(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
+chm_nosuch(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
            int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (*errors & SM_ERR_UNKNOWN)
@@ -452,7 +452,7 @@ chm_nosuch(struct Client *client, struct Channel *channel, int parc, int *parn, 
 }
 
 static void
-chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
+chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
            int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
@@ -504,7 +504,7 @@ chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, 
 }
 
 static void
-chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
+chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   const char *ret = NULL;
@@ -591,7 +591,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 }
 
 static void
-chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
+chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
@@ -639,7 +639,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 }
 
 static void
-chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
+chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
           int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
@@ -685,7 +685,7 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
 }
 
 static void
-chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, char **parv,
+chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)

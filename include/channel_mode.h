@@ -147,7 +147,7 @@ struct chan_mode
   int required_rank;
   int rank;
   void (*func)(struct Client *,
-               struct Channel *, int, int *, char **, int *,
+               struct Channel *, int, int *, char *[], int *,
                int, int, const char, const struct chan_mode *);
 };
 

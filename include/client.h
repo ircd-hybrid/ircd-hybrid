@@ -34,17 +34,15 @@
 #include "auth.h"
 
 
-/*
- * status macros.
- */
+/** Client connection states */
 enum
 {
-  STAT_CONNECTING = 1,
-  STAT_HANDSHAKE,
-  STAT_ME,
-  STAT_UNKNOWN,
-  STAT_SERVER,
-  STAT_CLIENT
+  STAT_CONNECTING = 1,  /**< Connecting to another server */
+  STAT_HANDSHAKE,  /**< PASS, CAPAB, and SERVER sent */
+  STAT_ME,  /**< This is &me */
+  STAT_UNKNOWN,  /**< Unknown/unidentified connection */
+  STAT_SERVER,  /**< Fully registered server */
+  STAT_CLIENT,  /**< Fully registered client */
 };
 
 enum
@@ -240,7 +238,7 @@ enum
 #define IsHidden(x)             ((x)->flags &  FLAGS_HIDDEN)
 
 
-/** server ban types */
+/** Server ban types */
 enum
 {
   CLIENT_BAN_KLINE,
@@ -283,7 +281,7 @@ struct ListTask
 
 /** Connection structure
  * Allocated only for local clients, that are directly connected
- * to \b this server with a socket.
+ * to this server with a socket.
  */
 struct Connection
 {
@@ -383,8 +381,7 @@ struct Client
   char id[IDLEN + 1];  /**< Client ID, unique ID per client */
   char account[ACCOUNTLEN + 1];  /**< Services account */
 
-  /*
-   * client->username is the username from ident or the USER message,
+  /** client->username is the username from ident or the USER message,
    * If the client is idented the USER message is ignored, otherwise
    * the username part of the USER message is put here prefixed with a
    * tilde depending on the auth{} block. Once a client has registered,
@@ -392,29 +389,25 @@ struct Client
    */
   char username[USERLEN + 1];  /**< client's username */
 
-  /*
-   * client->host contains the resolved name or ip address as a string
+  /** client->host contains the resolved name or ip address as a string
    * for the user, it may be fiddled with for oper spoofing etc.
    * once it's changed the *real* address goes away.
    */
   char host[HOSTLEN + 1];  /**< Client's hostname. Can be faked/spoofed */
 
-  /*
-   * client->realhost contains the resolved name or ip address as a string
+  /** client->realhost contains the resolved name or ip address as a string
    * for the user. Once a client has registered, this field should be
    * considered read-only.
    */
   char realhost[HOSTLEN + 1];  /**< Client's real hostname */
 
 
-  /*
-   * client->info for unix clients will normally contain the info from the
+  /** client->info for unix clients will normally contain the info from the
    * gcos field in /etc/passwd but anything can go here.
    */
   char info[REALLEN + 1];  /**< Free form additional client info */
 
-  /*
-   * client->sockhost contains the ip address gotten from the socket as a
+  /** client->sockhost contains the ip address gotten from the socket as a
    * string, this field should be considered read-only once the connection
    * has been made. (set in s_bsd.c only)
    */

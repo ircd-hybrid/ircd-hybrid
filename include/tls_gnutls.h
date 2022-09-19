@@ -36,6 +36,7 @@
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
 
+/** The maximum digest size. Basically equals to OpenSSL's EVP_MAX_MD_SIZE in evp.h */
 enum { TLS_GNUTLS_MAX_HASH_SIZE = 64 };
 
 typedef gnutls_digest_algorithm_t tls_md_t;

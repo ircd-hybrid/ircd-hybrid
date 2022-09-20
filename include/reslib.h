@@ -69,23 +69,23 @@
 
 
 /* Here we define some values lifted from nameser.h */
-#define NS_INT16SZ 2  /*%< #/bytes of data in a uint16_t */
-#define NS_IN6ADDRSZ 16  /*%< IPv6 T_AAAA */
-#define NS_INADDRSZ 4  /*%< IPv4 T_A */
-#define NS_INT32SZ 4  /*%< #/bytes of data in a uint32_t */
-#define NS_CMPRSFLGS 0xc0  /*%< Flag bits indicating name compression. */
-#define NS_MAXCDNAME 255  /*%< maximum compressed domain name */
+#define NS_INT16SZ 2  /**< #/bytes of data in a uint16_t */
+#define NS_IN6ADDRSZ 16  /**< IPv6 T_AAAA */
+#define NS_INADDRSZ 4  /**< IPv4 T_A */
+#define NS_INT32SZ 4  /**< #/bytes of data in a uint32_t */
+#define NS_CMPRSFLGS 0xc0  /**< Flag bits indicating name compression. */
+#define NS_MAXCDNAME 255  /**< maximum compressed domain name */
 #define QUERY 0
 #define NO_ERRORS 0
-#define SERVFAIL 2  /*%< Server failure. */
-#define NXDOMAIN 3  /*%< Name error. */
+#define SERVFAIL 2  /**< Server failure. */
+#define NXDOMAIN 3  /**< Name error. */
 #define T_A 1
 #define T_AAAA 28
 #define T_PTR 12
 #define T_CNAME 5
 #define C_IN 1
-#define QFIXEDSZ 4  /*%< #/bytes of fixed data in query */
-#define HFIXEDSZ 12  /*%< #/bytes of fixed data in header */
+#define QFIXEDSZ 4  /**< #/bytes of fixed data in query */
+#define HFIXEDSZ 12  /**< #/bytes of fixed data in header */
 
 /*%
  * Structure for query header.  The order of the fields is machine- and
@@ -95,41 +95,41 @@
  */
 typedef struct
 {
-  unsigned  id :16;     /* query identification number */
+  unsigned  id : 16;  /**< Query identification number */
 #ifdef WORDS_BIGENDIAN
-  /* fields in third byte */
-  unsigned  qr: 1;      /* response flag */
-  unsigned  opcode: 4;  /* purpose of message */
-  unsigned  aa: 1;      /* authoritive answer */
-  unsigned  tc: 1;      /* truncated message */
-  unsigned  rd: 1;      /* recursion desired */
+  /* Fields in third byte */
+  unsigned  qr : 1;  /**< Response flag */
+  unsigned  opcode : 4;  /**< Purpose of message */
+  unsigned  aa : 1;  /**< Authoritive answer */
+  unsigned  tc : 1;  /**< Truncated message */
+  unsigned  rd : 1;  /**< Recursion desired */
 
-  /* fields in fourth byte */
-  unsigned  ra: 1;      /* recursion available */
-  unsigned  unused :1;  /* unused bits (MBZ as of 4.9.3a3) */
-  unsigned  ad: 1;      /* authentic data from named */
-  unsigned  cd: 1;      /* checking disabled by resolver */
-  unsigned  rcode :4;   /* response code */
+  /* Fields in fourth byte */
+  unsigned  ra : 1;  /**< Recursion available */
+  unsigned  unused : 1;  /**< Unused bits (MBZ as of 4.9.3a3) */
+  unsigned  ad : 1;  /**< Authentic data from named */
+  unsigned  cd : 1;  /**< Checking disabled by resolver */
+  unsigned  rcode : 4;  /**< Response code */
 #else
-  /* fields in third byte */
-  unsigned  rd :1;      /* recursion desired */
-  unsigned  tc :1;      /* truncated message */
-  unsigned  aa :1;      /* authoritive answer */
-  unsigned  opcode :4;  /* purpose of message */
-  unsigned  qr :1;      /* response flag */
+  /* Fields in third byte */
+  unsigned  rd : 1;  /**< Recursion desired */
+  unsigned  tc : 1;  /**< Truncated message */
+  unsigned  aa : 1;  /**< Authoritive answer */
+  unsigned  opcode : 4;  /**< Purpose of message */
+  unsigned  qr : 1;  /**< Response flag */
 
-  /* fields in fourth byte */
-  unsigned  rcode :4;   /* response code */
-  unsigned  cd: 1;      /* checking disabled by resolver */
-  unsigned  ad: 1;      /* authentic data from named */
-  unsigned  unused :1;  /* unused bits (MBZ as of 4.9.3a3) */
-  unsigned  ra :1;      /* recursion available */
+  /* Fields in fourth byte */
+  unsigned  rcode : 4;  /**< Response code */
+  unsigned  cd : 1;  /**< Checking disabled by resolver */
+  unsigned  ad : 1;  /**< Authentic data from named */
+  unsigned  unused : 1;  /**< Unused bits (MBZ as of 4.9.3a3) */
+  unsigned  ra : 1;  /**< Recursion available */
 #endif
-  /* remaining bytes */
-  unsigned  qdcount :16; /* number of question entries */
-  unsigned  ancount :16; /* number of answer entries */
-  unsigned  nscount :16; /* number of authority entries */
-  unsigned  arcount :16; /* number of resource entries */
+  /* Remaining bytes */
+  unsigned  qdcount : 16;  /**< Number of question entries */
+  unsigned  ancount : 16;  /**< Number of answer entries */
+  unsigned  nscount : 16;  /**< Number of authority entries */
+  unsigned  arcount : 16;  /**< Number of resource entries */
 } HEADER;
 
 extern struct irc_ssaddr reslib_nsaddr_list[];

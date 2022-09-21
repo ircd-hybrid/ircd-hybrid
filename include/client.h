@@ -83,14 +83,6 @@ enum
 #define MyConnect(x)            ((x)->connection != NULL)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
 
-/*
- * ts stuff
- */
-enum
-{
-  TS_CURRENT = 6,  /**< Current TS protocol version */
-  TS_MINIMUM = 6,  /**< Minimum supported TS protocol version */
-};
 
 /** IRCv3 extension flags */
 enum

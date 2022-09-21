@@ -29,6 +29,15 @@
 struct Client;
 struct MaskItem;
 
+/*
+ * ts stuff
+ */
+enum
+{
+  TS_CURRENT = 6,  /**< Current TS protocol version */
+  TS_MINIMUM = 6,  /**< Minimum supported TS protocol version */
+};
+
 /** Return values for server_hunt() */
 enum server_hunt_ret
 {

@@ -28,24 +28,26 @@
 
 #include "fdlist.h"
 
+/** Listener flags */
 enum
 {
-  LISTENER_TLS    = 1 << 0,
-  LISTENER_HIDDEN = 1 << 1,
-  LISTENER_SERVER = 1 << 2,
-  LISTENER_CLIENT = 1 << 3,
-  LISTENER_DEFER  = 1 << 4
+  LISTENER_TLS    = 1 << 0,  /**< Listener accepts only TLS connections */
+  LISTENER_HIDDEN = 1 << 1,  /**< Listener doesn't show up in '/stats P', except for server administrators */
+  LISTENER_SERVER = 1 << 2,  /**< Listener accepts only server connections */
+  LISTENER_CLIENT = 1 << 3,  /**< Listener accepts only client connections */
+  LISTENER_DEFER  = 1 << 4,  /**< Listener has the TCP_DEFER_ACCEPT/SO_ACCEPTFILTER socket option enabled */
 };
 
+/** Entry for a single listener/port */
 struct Listener
 {
-  dlink_node node;  /**< Doubly linked list node */
+  dlink_node node;  /**< List node; linked into listener_list */
   bool active;  /**< Current state of listener */
   fde_t *fd;  /**< File descriptor */
   int port;  /**< Listener IP port */
   int ref_count;  /**< Number of connection references */
   struct irc_ssaddr addr;  /**< Holds an IPv6 or IPv4 address */
-  char *name;  /**< Holds an IPv6 or IPv4 address in string representation*/
+  char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
   unsigned int flags;  /**< Listener flags (tls, hidden, server, client, defer) */
 };
 

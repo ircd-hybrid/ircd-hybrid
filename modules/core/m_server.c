@@ -291,30 +291,6 @@ server_estab(struct Client *client_p)
   }
 }
 
-/* set_server_gecos()
- *
- * input        - pointer to client
- * output       - NONE
- * side effects - servers gecos field is set
- */
-static void
-server_set_gecos(struct Client *client_p, const char *info)
-{
-  const char *s = info;
-
-  /* check for (H) which is a hidden server */
-  if (!strncmp(s, "(H) ", 4))
-  {
-    AddFlag(client_p, FLAGS_HIDDEN);
-    s = s + 4;
-  }
-
-  if (!EmptyString(s))
-    strlcpy(client_p->info, s, sizeof(client_p->info));
-  else
-    strlcpy(client_p->info, "(Unknown Location)", sizeof(client_p->info));
-}
-
 enum
 {
   SERVER_CHECK_OK                  =  0,
@@ -364,12 +340,6 @@ server_check(const char *name, struct Client *client_p)
  *  parv[0] = command
  *  parv[1] = servername
  *  parv[2] = hopcount
- *  parv[3] = serverinfo
- *
- * 8.3.x+:
- *  parv[0] = command
- *  parv[1] = servername
- *  parv[2] = hopcount
  *  parv[3] = sid
  *  parv[4] = string of flags starting with '+'
  *  parv[5] = serverinfo
@@ -378,7 +348,7 @@ static void
 mr_server(struct Client *source_p, int parc, char *parv[])
 {
   const char *name = parv[1];
-  const char *sid = parc == 6 ? parv[3] : source_p->id; /* TBR: compatibility 'mode' */
+  const char *sid = parv[3];
   const char *error = NULL;
   bool warn = true;
 
@@ -529,15 +499,10 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    * connect{} block in source_p->name.
    */
   strlcpy(source_p->name, name, sizeof(source_p->name));
+  strlcpy(source_p->id, sid, sizeof(source_p->id));
+  strlcpy(source_p->info, parv[parc - 1], sizeof(source_p->info));
 
-  if (parc == 6)  /* TBR: compatibility 'mode' */
-  {
-    strlcpy(source_p->id, sid, sizeof(source_p->id));
-    strlcpy(source_p->info, parv[parc - 1], sizeof(source_p->info));
-    server_set_flags(source_p, parv[4]);
-  }
-  else
-    server_set_gecos(source_p, parv[parc - 1]);
+  server_set_flags(source_p, parv[4]);
 
   source_p->hopcount = atoi(parv[2]);
   server_estab(source_p);
@@ -711,14 +676,9 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 
   strlcpy(target_p->name, parv[1], sizeof(target_p->name));
   strlcpy(target_p->id, parv[3], sizeof(target_p->id));
+  strlcpy(target_p->info, parv[parc - 1], sizeof(target_p->info));
 
-  if (parc == 6)  /* TBR: compatibility 'mode' */
-  {
-    strlcpy(target_p->info, parv[parc - 1], sizeof(target_p->info));
-    server_set_flags(target_p, parv[4]);
-  }
-  else
-    server_set_gecos(target_p, parv[parc - 1]);
+  server_set_flags(target_p, parv[4]);
 
   SetServer(target_p);
 
@@ -742,7 +702,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
 static struct Message server_msgtab =
 {
   .cmd = "SERVER",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_server, .args_min = 4 },
+  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_server, .args_min = 6 },
   .handlers[CLIENT_HANDLER] = { .handler = m_registered },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
@@ -754,7 +714,7 @@ static struct Message sid_msgtab =
   .cmd = "SID",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_sid, .args_min = 5 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_sid, .args_min = 6 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };

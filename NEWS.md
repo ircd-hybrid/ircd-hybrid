@@ -3,6 +3,8 @@
   code, ircd-hybrid is now no longer link compatible to 8.2.33 and below.
   As for the Anope IRC Services, 2.0.8 is the minimum supported version now.
 * Implemented channel mode `V`. `INVITE` cannot be used on channels with that mode set.
+* `WHOIS` on clients connected via TLS now also shows some details about the TLS version
+  and cipher being used
 
 
 #### Noteworthy changes in version 8.2.42 (2022-08-28)

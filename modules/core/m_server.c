@@ -97,6 +97,10 @@ server_send_client(struct Client *client_p, struct Client *target_p)
   if (!EmptyString(target_p->tls_certfp))
     sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->tls_certfp);
 
+  if (!EmptyString(target_p->tls_cipher))
+    sendto_one(client_p, ":%s METADATA client %s cipher :%s",
+               target_p->servptr->id, target_p->id, target_p->tls_cipher);
+
   if (target_p->away[0])
     sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
 

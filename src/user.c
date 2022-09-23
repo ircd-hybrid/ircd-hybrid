@@ -219,6 +219,10 @@ introduce_client(struct Client *client)
 
   if (!EmptyString(client->tls_certfp))
     sendto_server(client, 0, 0, ":%s CERTFP %s", client->id, client->tls_certfp);
+
+  if (!EmptyString(client->tls_cipher))
+    sendto_server(client, 0, 0, ":%s METADATA client %s cipher :%s",
+                  client->servptr->id, client->id, client->tls_cipher);
 }
 
 /* user_welcome()

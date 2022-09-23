@@ -29,6 +29,7 @@
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
+#include "memory.h"
 #include "modules.h"
 #include "irc_string.h"
 
@@ -49,11 +50,24 @@ ms_metadata(struct Client *source_p, int parc, char *parv[])
   if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
     return;
 
+  if (irccmp(parv[1], "client") == 0)
+  {
+    struct Client *target_p = find_person(source_p, parv[2]);
+    if (target_p == NULL)
+      return;
+
+    if (irccmp(parv[3], "cipher") == 0)
+    {
+      xfree(target_p->tls_cipher);
+      target_p->tls_cipher = xstrdup(parv[4]);
+    }
+  }
+
   if (parc == 4)
     sendto_server(source_p, 0, 0, ":%s METADATA %s %s %s",
                   source_p->id,
                   parv[1], parv[2], parv[3]);
-  else
+  else  /* parc == 5 */
     sendto_server(source_p, 0, 0, ":%s METADATA %s %s %s :%s",
                   source_p->id,
                   parv[1], parv[2], parv[3], parv[4]);

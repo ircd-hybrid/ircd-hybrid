@@ -82,6 +82,7 @@ whois_show_channel(struct Channel *channel,
 static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
+  char buf[IRCD_BUFSIZE];
   dlink_node *node;
   const struct ServicesTag *svstag = NULL;
 
@@ -91,7 +92,6 @@ whois_person(struct Client *source_p, struct Client *target_p)
 
   if (dlink_list_length(&target_p->channel))
   {
-    char buf[IRCD_BUFSIZE];
     char *bufptr = buf;
 
     /* :me.name 319 source_p->name target_p->name :~@#chan1 +#chan2 #chan3 ...\r\n */
@@ -212,7 +212,12 @@ whois_person(struct Client *source_p, struct Client *target_p)
                        target_p->sockhost);
 
   if (HasUMode(target_p, UMODE_SECURE))
-    sendto_one_numeric(source_p, &me, RPL_WHOISSECURE, target_p->name);
+  {
+    snprintf(buf, sizeof(buf), target_p->tls_cipher ?
+             "is using a secure connection [%s]" :
+             "is using a secure connection", target_p->tls_cipher);
+    sendto_one_numeric(source_p, &me, RPL_WHOISSECURE, target_p->name, buf);
+  }
 
   if (!EmptyString(target_p->tls_certfp))
     if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)

@@ -61,13 +61,13 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   if (!valid_hostname(host))
   {
-    sendto_one_notice(source_p, &me, ":WEBIRC: Invalid hostname %s", host);
+    exit_client(source_p, "Invalid WebIRC hostname");
     return;
   }
 
-  const struct MaskItem *conf = find_address_conf(source_p->host,
-                           HasFlag(source_p, FLAGS_GOTID) ? source_p->username : "webirc",
-                           &source_p->ip, pass);
+  const struct MaskItem *conf =
+    find_address_conf(source_p->host, HasFlag(source_p, FLAGS_GOTID) ?
+                      source_p->username : "webirc", &source_p->ip, pass);
   if (conf == NULL)
     return;
 
@@ -76,19 +76,19 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   if (!IsConfWebIRC(conf))
   {
-    sendto_one_notice(source_p, &me, ":Not a WEBIRC auth {} block");
+    exit_client(source_p, "Not a WebIRC auth block");
     return;
   }
 
   if (EmptyString(conf->passwd))
   {
-    sendto_one_notice(source_p, &me, ":WEBIRC auth {} blocks must have a password");
+    exit_client(source_p, "WebIRC auth blocks must have a password");
     return;
   }
 
   if (match_conf_password(pass, conf) == false)
   {
-    sendto_one_notice(source_p, &me, ":WEBIRC password incorrect");
+    exit_client(source_p, "Invalid WebIRC password");
     return;
   }
 
@@ -101,7 +101,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   if (getaddrinfo(addr, NULL, &hints, &res))
   {
-    sendto_one_notice(source_p, &me, ":Invalid WEBIRC IP address %s", addr);
+    exit_client(source_p, "Invalid WebIRC IP address");
     return;
   }
 
@@ -134,7 +134,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   }
 
   AddUMode(source_p, UMODE_WEBIRC);
-  sendto_one_notice(source_p, &me, ":WEBIRC host/IP set to %s %s", host, addr);
+  sendto_one_notice(source_p, &me, ":WebIRC host/IP set to %s %s", host, addr);
 }
 
 static struct Message webirc_msgtab =

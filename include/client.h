@@ -144,7 +144,7 @@ enum
   UMODE_SKILL        = 1 <<  3,  /**< Server Killed */
   UMODE_FLOOD        = 1 <<  4,  /**< Flooding/spambot notices */
   UMODE_SPY          = 1 <<  5,  /**< See STATS / LINKS */
-  UMODE_DEBUG        = 1 <<  6,  /**< 'debugging' info */
+/*UMODE_             = 1 <<  6,*/  /**<  */
   UMODE_NCHANGE      = 1 <<  7,  /**< Nick change notice */
   UMODE_WALLOP       = 1 <<  8,  /**< Send wallops to them */
   UMODE_INVISIBLE    = 1 <<  9,  /**< Makes user invisible */

@@ -16,7 +16,6 @@ User Modes:
 +B - bot          - Marks the client as being a bot
 +c - cconn        - Client connection/quit notices
 +D - deaf         - Don't receive channel messages
-+d - debug        - See debugging notices
 +e - external     - See remote server connection and split notices
 +f - flood        - See possible flood/spam warnings.
 +F - farconnect   - See remote client connection/quit notices

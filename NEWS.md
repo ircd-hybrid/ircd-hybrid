@@ -5,6 +5,7 @@
 * Implemented channel mode `V`. `INVITE` cannot be used on channels with that mode set.
 * `WHOIS` on clients connected via TLS now also shows some details about the TLS version
   and cipher being used
+* Removed user mode `d` (debugging notices)
 
 
 #### Noteworthy changes in version 8.2.42 (2022-08-28)

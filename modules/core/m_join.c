@@ -176,7 +176,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
   if (channel_check_name(parv[2], false) == false)
   {
-    sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
                          source_p->name, source_p->from->name, parv[2]);
     return;

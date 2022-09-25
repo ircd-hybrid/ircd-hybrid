@@ -67,7 +67,6 @@ const struct user_modes  umode_tab[] =
   { 'Z', UMODE_SECUREONLY   },
   { 'a', UMODE_ADMIN        },
   { 'c', UMODE_CCONN        },
-  { 'd', UMODE_DEBUG        },
   { 'e', UMODE_EXTERNAL     },
   { 'f', UMODE_FLOOD        },
   { 'g', UMODE_CALLERID     },

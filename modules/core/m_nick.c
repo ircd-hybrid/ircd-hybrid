@@ -72,7 +72,7 @@ check_clean_nick(struct Client *source_p, const char *nick)
     return true;
 
   ++ServerStats.is_kill;
-  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
                        nick, IsServer(source_p) ? source_p->name : source_p->servptr->name,
                        source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad Nickname)",
@@ -99,7 +99,7 @@ check_clean_uid(struct Client *source_p, const char *nick, const char *uid)
     return true;
 
   ++ServerStats.is_kill;
-  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "Bad UID: %s Nickname: %s From: %s(via %s)",
                        uid, nick, source_p->name, source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad UID)",
@@ -125,7 +125,7 @@ check_clean_user(struct Client *source_p, const char *nick, const char *user)
     return true;
 
   ++ServerStats.is_kill;
-  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
                        user, nick, source_p->name, source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad Username)",
@@ -151,7 +151,7 @@ check_clean_host(struct Client *source_p, const char *nick, const char *host)
     return true;
 
   ++ServerStats.is_kill;
-  sendto_realops_flags(UMODE_DEBUG, L_ALL, SEND_NOTICE,
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
                        host, nick, source_p->name, source_p->from->name);
   sendto_one(source_p, ":%s KILL %s :%s (Bad Hostname)",

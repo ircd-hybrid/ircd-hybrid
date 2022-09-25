@@ -1049,10 +1049,6 @@ oper_umodes_item: BOT
 {
   if (conf_parser_ctx.pass == 2)
     block_state.modes.value |= UMODE_DEAF;
-} | T_DEBUG
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_DEBUG;
 } | T_FLOOD
 {
   if (conf_parser_ctx.pass == 2)
@@ -2599,9 +2595,6 @@ umode_oitem: BOT
 } | T_DEAF
 {
   ConfigGeneral.oper_umodes |= UMODE_DEAF;
-} | T_DEBUG
-{
-  ConfigGeneral.oper_umodes |= UMODE_DEBUG;
 } | T_FLOOD
 {
   ConfigGeneral.oper_umodes |= UMODE_FLOOD;
@@ -2676,9 +2669,6 @@ umode_item: BOT
 } | T_DEAF
 {
   ConfigGeneral.oper_only_umodes |= UMODE_DEAF;
-} | T_DEBUG
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_DEBUG;
 } | T_FLOOD
 {
   ConfigGeneral.oper_only_umodes |= UMODE_FLOOD;

@@ -17,7 +17,6 @@ User modes: (* designates that the umode is oper only)
        * f     - Can see possible flood/spam warnings.
        * F     - Can see remote client connection/quit notices.
        * y     - Can see stats/links/admin requests to name a few.
-       * d     - Can see server debug messages.
        * n     - Can see client nick changes.
          p     - Hides channel list in WHOIS.
          q     - Hides idle and signon time in WHOIS.

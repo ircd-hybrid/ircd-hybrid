@@ -1,4 +1,4 @@
-#### Noteworthy changes in version 8.2.43 (2022-??-??)
+#### Noteworthy changes in version 8.2.43 (2022-09-26)
 * Due to ongoing protocol modernizations and deprecation of old backwards compatibility
   code, ircd-hybrid is now no longer link compatible to 8.2.33 and below.
   As for the Anope IRC Services, 2.0.8 is the minimum supported version now.

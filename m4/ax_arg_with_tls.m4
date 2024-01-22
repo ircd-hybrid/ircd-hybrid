@@ -5,11 +5,9 @@ AC_ARG_WITH([tls], [AS_HELP_STRING([--with-tls], [Enables TLS with specified lib
 if test "$with_tls" = "openssl" ||
    test "$with_tls" = "auto"; then
     AC_CHECK_HEADER([openssl/opensslv.h], [
-      AC_RUN_IFELSE([
-        AC_LANG_PROGRAM([
-          #include <openssl/opensslv.h>
-          #include <stdlib.h>], [
-          exit(!(OPENSSL_VERSION_NUMBER >= 0x1010100fL)); ])], [AC_CHECK_LIB([crypto], [RSA_free], [], [], [])], [], [])])
+      AC_COMPUTE_INT([OPENSSL_VERSION_NUMBER],[OPENSSL_VERSION_NUMBER],[#include <openssl/opensslv.h>])
+      AS_IF([test "$OPENSSL_VERSION_NUMBER" -ge $((0x1010100f))],[AC_CHECK_LIB([crypto], [RSA_free], [], [], [])])
+    ])
 
     AS_IF([test "$ac_cv_lib_crypto_RSA_free" = "yes"], [AC_CHECK_LIB([ssl], [SSL_connect])], [])
 
@@ -24,11 +22,9 @@ if test "$with_tls" = "gnutls" ||
   if test "$ac_cv_lib_ssl_SSL_connect" != "yes"; then
 
     AC_CHECK_HEADER([gnutls/gnutls.h], [
-      AC_RUN_IFELSE([
-        AC_LANG_PROGRAM([
-          #include <gnutls/gnutls.h>
-          #include <stdlib.h>], [
-          exit(!(GNUTLS_VERSION_NUMBER >= 0x030605)); ])], [AC_CHECK_LIB([gnutls], [gnutls_init], [], [], [])], [], [])])
+      AC_COMPUTE_INT([GNUTLS_VERSION_NUMBER],[GNUTLS_VERSION_NUMBER],[#include <gnutls/gnutls.h>])
+      AS_IF([test "$GNUTLS_VERSION_NUMBER" -ge $((0x030605))],[AC_CHECK_LIB([gnutls], [gnutls_init], [], [], [])])
+    ])
 
     AC_MSG_CHECKING([for GnuTLS 3.6.5 and above])
     AS_IF([test "$ac_cv_lib_gnutls_gnutls_init" = "yes"],
@@ -43,11 +39,9 @@ if test "$with_tls" = "wolfssl" ||
      test "$ac_cv_lib_gnutls_gnutls_init" != "yes"; then
 
     AC_CHECK_HEADER([wolfssl/ssl.h], [
-      AC_RUN_IFELSE([
-        AC_LANG_PROGRAM([
-          #include <wolfssl/version.h>
-          #include <stdlib.h>], [
-          exit(!(LIBWOLFSSL_VERSION_HEX >= 0x04003000)); ])], [AC_CHECK_LIB([wolfssl], [wolfSSL_X509_digest], [], [], [])], [], [])])
+      AC_COMPUTE_INT([LIBWOLFSSL_VERSION_HEX],[LIBWOLFSSL_VERSION_HEX],[#include <wolfssl/version.h>])
+      AS_IF([test "$LIBWOLFSSL_VERSION_HEX" -ge $((0x04003000))],[AC_CHECK_LIB([wolfssl], [wolfSSL_X509_digest], [], [], [])])
+    ])
 
     AC_MSG_CHECKING([for wolfSSL 4.3.0 and above built with extended/full OpenSSL compatibility layer])
     AS_IF([test "$ac_cv_lib_wolfssl_wolfSSL_X509_digest" = "yes"],

@@ -24,37 +24,37 @@
 /* Define if SSP C support is enabled. */
 #undef ENABLE_SSP_CC
 
-/* Define to 1 if you have the `argz_add' function. */
+/* Define to 1 if you have the 'argz_add' function. */
 #undef HAVE_ARGZ_ADD
 
-/* Define to 1 if you have the `argz_append' function. */
+/* Define to 1 if you have the 'argz_append' function. */
 #undef HAVE_ARGZ_APPEND
 
-/* Define to 1 if you have the `argz_count' function. */
+/* Define to 1 if you have the 'argz_count' function. */
 #undef HAVE_ARGZ_COUNT
 
-/* Define to 1 if you have the `argz_create_sep' function. */
+/* Define to 1 if you have the 'argz_create_sep' function. */
 #undef HAVE_ARGZ_CREATE_SEP
 
 /* Define to 1 if you have the <argz.h> header file. */
 #undef HAVE_ARGZ_H
 
-/* Define to 1 if you have the `argz_insert' function. */
+/* Define to 1 if you have the 'argz_insert' function. */
 #undef HAVE_ARGZ_INSERT
 
-/* Define to 1 if you have the `argz_next' function. */
+/* Define to 1 if you have the 'argz_next' function. */
 #undef HAVE_ARGZ_NEXT
 
-/* Define to 1 if you have the `argz_stringify' function. */
+/* Define to 1 if you have the 'argz_stringify' function. */
 #undef HAVE_ARGZ_STRINGIFY
 
-/* Define to 1 if you have the `closedir' function. */
+/* Define to 1 if you have the 'closedir' function. */
 #undef HAVE_CLOSEDIR
 
 /* Define to 1 if you have the <crypt.h> header file. */
 #undef HAVE_CRYPT_H
 
-/* Define to 1 if you have the declaration of `cygwin_conv_path', and to 0 if
+/* Define to 1 if you have the declaration of 'cygwin_conv_path', and to 0 if
    you don't. */
 #undef HAVE_DECL_CYGWIN_CONV_PATH
 
@@ -67,7 +67,7 @@
 /* Define to 1 if you have the <dld.h> header file. */
 #undef HAVE_DLD_H
 
-/* Define to 1 if you have the `dlerror' function. */
+/* Define to 1 if you have the 'dlerror' function. */
 #undef HAVE_DLERROR
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
@@ -79,13 +79,13 @@
 /* Define if you have the _dyld_func_lookup function. */
 #undef HAVE_DYLD
 
-/* Define to 1 if the system has the type `error_t'. */
+/* Define to 1 if the system has the type 'error_t'. */
 #undef HAVE_ERROR_T
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `crypto' library (-lcrypto). */
+/* Define to 1 if you have the 'crypto' library (-lcrypto). */
 #undef HAVE_LIBCRYPTO
 
 /* Define if you have the libdl library or equivalent. */
@@ -94,13 +94,13 @@
 /* Define if libdlloader will be built on this platform */
 #undef HAVE_LIBDLLOADER
 
-/* Define to 1 if you have the `gnutls' library (-lgnutls). */
+/* Define to 1 if you have the 'gnutls' library (-lgnutls). */
 #undef HAVE_LIBGNUTLS
 
-/* Define to 1 if you have the `ssl' library (-lssl). */
+/* Define to 1 if you have the 'ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 
-/* Define to 1 if you have the `wolfssl' library (-lwolfssl). */
+/* Define to 1 if you have the 'wolfssl' library (-lwolfssl). */
 #undef HAVE_LIBWOLFSSL
 
 /* Define this if a modern libltdl is already installed */
@@ -109,13 +109,13 @@
 /* Define to 1 if you have the <mach-o/dyld.h> header file. */
 #undef HAVE_MACH_O_DYLD_H
 
-/* Define to 1 if you have the `opendir' function. */
+/* Define to 1 if you have the 'opendir' function. */
 #undef HAVE_OPENDIR
 
 /* Define if libtool can extract symbol lists from object files. */
 #undef HAVE_PRELOADED_SYMBOLS
 
-/* Define to 1 if you have the `readdir' function. */
+/* Define to 1 if you have the 'readdir' function. */
 #undef HAVE_READDIR
 
 /* Define if you have the shl_load function. */
@@ -139,10 +139,10 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define to 1 if you have the `strlcat' function. */
+/* Define to 1 if you have the 'strlcat' function. */
 #undef HAVE_STRLCAT
 
-/* Define to 1 if you have the `strlcpy' function. */
+/* Define to 1 if you have the 'strlcpy' function. */
 #undef HAVE_STRLCPY
 
 /* Define to 1 if you have the <sys/dl.h> header file. */
@@ -233,7 +233,7 @@
 /* Set to prefix. */
 #undef PREFIX
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
+/* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */
 #undef STDC_HEADERS
@@ -259,8 +259,8 @@
 # endif
 #endif
 
-/* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
-   `char[]'. */
+/* Define to 1 if 'lex' declares 'yytext' as a 'char *' by default, not a
+   'char[]'. */
 #undef YYTEXT_POINTER
 
 /* Define so that glibc/gnulib argp.h does not typedef error_t. */

@@ -1,7 +1,7 @@
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (c) 1997-2022 ircd-hybrid development team
+ *  Copyright (c) 1997-2024 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -579,7 +579,7 @@ static const char *infotext[] =
   "ircd-hybrid --",
   "Based on the original code written by Jarkko Oikarinen",
   "Copyright (c) 1988-1991 University of Oulu, Computing Center",
-  "Copyright (c) 1997-2022 ircd-hybrid development team",
+  "Copyright (c) 1997-2024 ircd-hybrid development team",
   "",
   "This program is free software; you can redistribute it and/or",
   "modify it under the terms of the GNU General Public License as",

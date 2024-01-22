@@ -2,7 +2,7 @@
  * doc/resv.txt - Overview of the resv system
  * Lee Hardy <lee@leeh.co.uk>
  *
- * Copyright (c) 2001-2022 ircd-hybrid development team
+ * Copyright (c) 2001-2024 ircd-hybrid development team
  */
 
 				RESV

@@ -1,3 +1,8 @@
+#### Noteworthy changes in version 8.2.44 (2024-??-??)
+* Fixed FTCBFS issue caused by ./configure using macros that have no special handling
+  for cross-compilation
+
+
 #### Noteworthy changes in version 8.2.43 (2022-09-26)
 * Due to ongoing protocol modernizations and deprecation of old backwards compatibility
   code, ircd-hybrid is now no longer link compatible to 8.2.33 and below.

@@ -212,7 +212,7 @@ who_send(struct Client *source_p, const struct Client *target_p,
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_REN))
     p += snprintf(p, sizeof(buf) - (p - buf), " %s%s", who->fields ? ":" : "", target_p->info);
-                                     /* Place colon here for special reply ^ */
+                                /* Place colon here for special reply ^ */
 
   sendto_one_numeric(source_p, &me, who->fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, buf + 1);
 }

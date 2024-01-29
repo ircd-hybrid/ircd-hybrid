@@ -598,8 +598,11 @@ recurse_report_messages(struct Client *source, const struct MessageTree *mtree)
                        mtree->msg->ecount);
 
   for (unsigned int i = 0; i < MAXPTRLEN; ++i)
-    if (mtree->pointers[i])
-      recurse_report_messages(source, mtree->pointers[i]);
+  {
+    const struct MessageTree *ptr = mtree->pointers[i];
+    if (ptr)
+      recurse_report_messages(source, ptr);
+  }
 }
 
 /* report_messages()
@@ -614,8 +617,11 @@ report_messages(struct Client *source)
   const struct MessageTree *const mtree = &msg_tree;
 
   for (unsigned int i = 0; i < MAXPTRLEN; ++i)
-    if (mtree->pointers[i])
-      recurse_report_messages(source, mtree->pointers[i]);
+  {
+    const struct MessageTree *ptr = mtree->pointers[i];
+    if (ptr)
+      recurse_report_messages(source, ptr);
+  }
 }
 
 /* m_not_oper()

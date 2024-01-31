@@ -35,6 +35,50 @@
 #include "channel.h"
 
 
+static void
+do_hash(struct Client *source_p, unsigned int type)
+{
+  unsigned int max_chain = 0;
+  unsigned int buckets   = 0;
+  unsigned int count     = 0;
+
+  assert(type == HASH_TYPE_CLIENT || type == HASH_TYPE_ID || type == HASH_TYPE_CHANNEL);
+
+  for (unsigned int i = 0; i < HASHSIZE; ++i)
+  {
+    const void *ptr = hash_get_bucket(type, i);
+    if (ptr)
+    {
+      unsigned int len = 0;
+      ++buckets;
+
+      while (ptr)
+      {
+        if (type == HASH_TYPE_CLIENT)
+          ptr = ((const struct Client *)ptr)->hnext;
+        else if (type == HASH_TYPE_ID)
+          ptr = ((const struct Client *)ptr)->idhnext;
+        else /* type == HASH_TYPE_CHANNEL */
+          ptr = ((const struct Channel *)ptr)->hnextch;
+
+        if (++len > max_chain)
+          max_chain = len;
+        count += len;
+      }
+    }
+  }
+
+  static const char *const strtype[] =
+  {
+    [HASH_TYPE_CLIENT] = "Client",
+    [HASH_TYPE_ID] = "Id",
+    [HASH_TYPE_CHANNEL] = "Channel",
+  };
+
+  sendto_one_notice(source_p, &me, ":%s: entries: %u buckets: %u max chain: %u",
+                    strtype[type], count, buckets, max_chain);
+}
+
 /*! \brief HASH command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
@@ -48,75 +92,9 @@
 static void
 mo_hash(struct Client *source_p, int parc, char *parv[])
 {
-  unsigned int i = 0;
-  unsigned int max_chain = 0;
-  unsigned int buckets   = 0;
-  unsigned int count     = 0;
-  const struct Client *cl = NULL;
-  const struct Client *icl = NULL;
-  const struct Channel *ch = NULL;
-
-  for (i = 0; i < HASHSIZE; ++i)
-  {
-    if ((cl = hash_get_bucket(HASH_TYPE_CLIENT, i)))
-    {
-      unsigned int len = 0;
-
-      ++buckets;
-      for (; cl; cl = cl->hnext)
-        ++len;
-      if (len > max_chain)
-        max_chain = len;
-      count += len;
-    }
-  }
-
-  sendto_one_notice(source_p, &me, ":Client: entries: %u buckets: %u "
-                    "max chain: %u", count, buckets, max_chain);
-
-  count     = 0;
-  buckets   = 0;
-  max_chain = 0;
-
-  for (i = 0; i < HASHSIZE; ++i)
-  {
-    if ((ch = hash_get_bucket(HASH_TYPE_CHANNEL, i)))
-    {
-      unsigned int len = 0;
-
-      ++buckets;
-      for (; ch; ch = ch->hnextch)
-        ++len;
-      if (len > max_chain)
-        max_chain = len;
-      count += len;
-    }
-  }
-
-  sendto_one_notice(source_p, &me, ":Channel: entries: %u buckets: %u "
-                    "max chain: %u", count, buckets, max_chain);
-
-  count     = 0;
-  buckets   = 0;
-  max_chain = 0;
-
-  for (i = 0; i < HASHSIZE; ++i)
-  {
-    if ((icl = hash_get_bucket(HASH_TYPE_ID, i)))
-    {
-      unsigned int len = 0;
-
-      ++buckets;
-      for (; icl; icl = icl->idhnext)
-        ++len;
-      if (len > max_chain)
-        max_chain = len;
-      count += len;
-    }
-  }
-
-  sendto_one_notice(source_p, &me, ":Id: entries: %u buckets: %u "
-                    "max chain: %u", count, buckets, max_chain);
+  do_hash(source_p, HASH_TYPE_CLIENT);
+  do_hash(source_p, HASH_TYPE_ID);
+  do_hash(source_p, HASH_TYPE_CHANNEL);
 }
 
 static struct Message hash_msgtab =

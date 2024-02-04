@@ -19,30 +19,59 @@
  *  USA
  */
 
-/*! \file dbuf.h
- * \brief A header for the dynamic buffers functions.
+/**
+ * @file dbuf.h
+ * @brief Header file for dynamic buffers.
+ *
+ * The dbuf.h file provides structures and functions for managing dynamic buffers.
+ * Dynamic buffers are used for efficient handling and manipulation of
+ * variable-length data.
  */
 
 #ifndef INCLUDED_dbuf_h
 #define INCLUDED_dbuf_h
 
+/**
+ * @def dbuf_length(x)
+ * @brief Macro to get the total length of a dbuf queue.
+ * @param x Pointer to the dbuf_queue.
+ * @return Total length of the dbuf queue.
+ */
 #define dbuf_length(x) ((x)->total_size)
+
+/**
+ * @def dbuf_clear(x)
+ * @brief Macro to clear a dbuf queue.
+ * @param x Pointer to the dbuf_queue.
+ */
 #define dbuf_clear(x) dbuf_delete(x, dbuf_length(x))
 
+/**
+ * @enum DBUF_BLOCK_SIZE
+ * @brief Size of each data block within the dynamic buffer.
+ */
 enum { DBUF_BLOCK_SIZE = 1024 };
 
+/**
+ * @struct dbuf_block
+ * @brief Structure representing a block of data within the dynamic buffer.
+ */
 struct dbuf_block
 {
-  int refs;
-  size_t size;
-  char data[DBUF_BLOCK_SIZE];
+  int refs;  /**< Reference count for the data block. */
+  size_t size;  /**< Size of the data block. */
+  char data[DBUF_BLOCK_SIZE];  /**< Actual data stored in the block. */
 };
 
+/**
+ * @struct dbuf_queue
+ * @brief Structure representing a dynamic buffer queue.
+ */
 struct dbuf_queue
 {
-  dlink_list blocks;
-  size_t total_size;
-  size_t pos;
+  dlink_list blocks;  /**< List of data blocks. */
+  size_t total_size;  /**< Total size of the dynamic buffer. */
+  size_t pos;  /**< Current position within the dynamic buffer. */
 };
 
 extern struct dbuf_block *dbuf_alloc(void);

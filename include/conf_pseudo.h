@@ -19,22 +19,34 @@
  *  USA
  */
 
-/*! \file conf_pseudo.h
- * \brief Handles with pseudo commands/service aliases.
+/**
+ * @file conf_pseudo.h
+ * @brief Handles pseudo commands/service aliases.
+ *
+ * This file provides declarations for managing pseudo/custom commands, commonly
+ * known as service aliases. Pseudo commands allow for creating custom commands
+ * with specific targets and handling.
  */
 
 #ifndef INCLUDED_conf_pseudo_h
 #define INCLUDED_conf_pseudo_h
 
+/**
+ * @struct PseudoItem
+ * @brief Structure representing a pseudo command item.
+ *
+ * This structure holds information about a pseudo command, including its name,
+ * associated nick, server, prepend text, and the actual command to be executed.
+ */
 struct PseudoItem
 {
-  dlink_node node;
-  struct Message msg;
-  char *name;
-  char *nick;
-  char *server;
-  char *prepend;
-  char *command;
+  dlink_node node;  /**< Node for linking into the pseudo command list. */
+  struct Message msg;  /**< Message structure for handling the pseudo command. */
+  char *name;  /**< Name of the pseudo command, used for error messages. */
+  char *nick;  /**< Associated nick for the pseudo command. */
+  char *server;  /**< Associated server for the pseudo command. */
+  char *prepend;  /**< Optional text to be prepended to the user's message. */
+  char *command;  /**< Actual command/alias to be executed. */
 };
 
 extern const dlink_list *pseudo_get_list(void);

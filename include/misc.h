@@ -19,22 +19,71 @@
  *  USA
  */
 
-/*! \file misc.h
- * \brief A header for the miscellaneous functions.
+/**
+ * @file misc.h
+ * @brief Header file for miscellaneous functions.
  */
 
 #ifndef INCLUDED_misc_h
 #define INCLUDED_misc_h
 
-/* Just blindly define our own MIN/MAX macro */
+/**
+ * @def IRCD_MAX
+ * @brief Macro for maximum of two values.
+ * @param a First value.
+ * @param b Second value.
+ * @return The greater of the two values.
+ */
 #define IRCD_MAX(a, b)  ((a) > (b) ? (a) : (b))
+
+/**
+ * @def IRCD_MIN
+ * @brief Macro for minimum of two values.
+ * @param a First value.
+ * @param b Second value.
+ * @return The smaller of the two values.
+ */
 #define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
 
+/**
+ * @def _1MEG
+ * @brief Represents 1 Mebibyte (MiB).
+ *  
+ * This macro defines the size equivalent to 1 MiB, where 1 MiB equals 1024 Kibibytes (KiB).
+ */
 #define _1MEG     (1024.0f)
-#define _1GIG     (1024.0f*1024.0f)
-#define _1TER     (1024.0f*1024.0f*1024.0f)
+
+/**
+ * @def _1GIG
+ * @brief Represents 1 Gibibyte (GiB).
+ *  
+ * This macro defines the size equivalent to 1 GiB, where 1 GiB equals 1024 Mebibytes (MiB).
+ */
+#define _1GIG     (1024.0f * 1024.0f)
+
+/**
+ * @def _1TER
+ * @brief Represents 1 Tebibyte (TiB).
+ *  
+ * This macro defines the size equivalent to 1 TiB, where 1 TiB equals 1024 Gibibytes (GiB).
+ */
+#define _1TER     (1024.0f * 1024.0f * 1024.0f)
+
+/**
+ * @def _GMKs
+ * @brief Returns a string representing the appropriate size unit for a given size.
+ * @param x Size value.
+ * @return String representation of the size unit (Kibibytes, Mebibytes, Gibibytes, or Tebibytes).
+ */
 #define _GMKs(x)  (((x) > _1TER) ? "Tebibytes" : (((x) > _1GIG) ? "Gibibytes" :\
                   (((x) > _1MEG) ? "Mebibytes" : "Kibibytes")))
+
+/**
+ * @def _GMKv
+ * @brief Returns the size value converted to the appropriate unit.
+ * @param x Size value.
+ * @return Size value converted to Kibibytes, Mebibytes, Gibibytes, or left unchanged.
+ */
 #define _GMKv(x)  (((x) > _1TER) ? (float)((x)/_1TER) : (((x) > _1GIG) ? \
                    (float)((x)/_1GIG) : (((x) > _1MEG) ? (float)((x)/_1MEG) : \
                    (float)(x))))

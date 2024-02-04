@@ -271,12 +271,27 @@ parse_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   return HM_HOST;
 }
 
+/**
+ * @brief Compare two network addresses for equality or matching.
+ *
+ * This function compares two network addresses for equality or matching based on
+ * specified criteria such as exact match, port match, and subnet match.
+ *
+ * @param p1    Pointer to the first network address (struct irc_ssaddr).
+ * @param p2    Pointer to the second network address (struct irc_ssaddr).
+ * @param exact If true, performs an exact address match (ignores bits parameter).
+ * @param port  If true, compares port numbers for equality.
+ * @param bits  Number of bits to consider for subnet matching (ignored if exact is true).
+ *
+ * @return True if addresses match based on the specified criteria, false otherwise.
+ */
 bool
 address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
 {
   const struct irc_ssaddr *const addr = p1;
   const struct irc_ssaddr *const mask = p2;
 
+  /* Check if address families are the same */
   if (addr->ss.ss_family != mask->ss.ss_family)
     return false;
 
@@ -285,6 +300,7 @@ address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
     const struct sockaddr_in *const sin1 = (const struct sockaddr_in *)addr;
     const struct sockaddr_in *const sin2 = (const struct sockaddr_in *)mask;
 
+    /* Compare port numbers if required */
     if (port == true && (sin1->sin_port != sin2->sin_port))
       return false; 
     if (exact == true)
@@ -305,7 +321,7 @@ address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
     return match_ipv6(addr, mask, bits);
   }
 
-  return false;
+  return false;  /* Invalid address family */
 }
 
 /* The address matching stuff... */

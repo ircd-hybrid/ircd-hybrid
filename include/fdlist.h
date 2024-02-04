@@ -19,8 +19,13 @@
  *  USA
  */
 
-/*! \file fdlist.h
- * \brief The file descriptor list header.
+/**
+ * @file fdlist.h
+ * @brief Header file for managing file descriptors.
+ *
+ * The fdlist.h file provides data structures and functions for managing
+ * file descriptors. It includes features for handling event callbacks,
+ * timeouts, and connection information associated with file descriptors.
  */
 
 #ifndef INCLUDED_fdlist_h
@@ -29,58 +34,71 @@
 #include "ircd_defs.h"
 #include "tls.h"
 
-
+/**
+ * @def FD_DESC_SIZE
+ * @brief Size of the file descriptor description buffer.
+ */
 enum { FD_DESC_SIZE = 80 };  /* HOSTLEN + comment */
 
+/**
+ * @struct _fde
+ * @brief Structure representing a file descriptor entry.
+ */
 typedef struct _fde
 {
-  /* New-school stuff, again pretty much ripped from squid */
   /*
    * Yes, this gives us only one pending read and one pending write per
    * filedescriptor. Think though: when do you think we'll need more?
    */
-  int fd;  /* So we can use the fde_t as a callback ptr */
-  int comm_index;  /* where in the poll list we live */
-  int evcache;          /* current fd events as set up by the underlying I/O */
-  char *desc;
+  int fd;  /**< File descriptor. */
+  int comm_index;  /**< Index in the poll list. */
+  int evcache;  /**< Current fd events as set up by the underlying I/O. */
+  char *desc;  /**< File descriptor description. */
 
-  void (*read_handler)(struct _fde *, void *);
-  void *read_data;
+  /** @name Event Handlers */
+  /**@{*/
+  void (*read_handler)(struct _fde *, void *);  /**< Read event handler. */
+  void *read_data;  /**< Data for the read event handler. */
 
-  void (*write_handler)(struct _fde *, void *);
-  void *write_data;
+  void (*write_handler)(struct _fde *, void *);  /**< Write event handler. */
+  void *write_data;  /**< Data for the write event handler. */
 
-  void (*timeout_handler)(struct _fde *, void *);
-  void *timeout_data;
-  uintmax_t timeout;
+  void (*timeout_handler)(struct _fde *, void *);  /**< Timeout event handler. */
+  void *timeout_data;  /**< Data for the timeout event handler. */
+  uintmax_t timeout;  /**< Timeout duration. */
 
-  void (*flush_handler)(struct _fde *, void *);
-  void *flush_data;
-  uintmax_t flush_timeout;
+  void (*flush_handler)(struct _fde *, void *);  /**< Flush event handler. */
+  void *flush_data;  /**< Data for the flush event handler. */
+  uintmax_t flush_timeout;  /**< Flush timeout duration. */
+  /**@}*/
 
+  /** @name Flags */
+  /**@{*/
   struct
   {
-    bool open;
-    bool is_socket;
+    bool open;  /**< Flag indicating if the file descriptor is open. */
+    bool is_socket;  /**< Flag indicating if the file descriptor is a socket. */
   } flags;
+  /**@}*/
 
+  /** @name Connection Information */
+  /**@{*/
   struct
   {
-    /* We don't need the host here ? */
-    struct irc_ssaddr hostaddr;
-
-    void (*callback)(struct _fde *, int, void *);
-    void *data;
-    /* We'd also add the retry count here when we get to that -- adrian */
+    struct irc_ssaddr hostaddr;  /**< Host address information. */
+    void (*callback)(struct _fde *, int, void *);  /**< Callback function for connection events. */
+    void *data;  /**< Data for the connection callback. */
+    /* Retry count could be added here in the future -- adrian */
   } connect;
+  /**@}*/
 
-  tls_data_t tls;
+  tls_data_t tls; /**< TLS-related data. */
 } fde_t;
 
-extern int number_fd;
-extern int hard_fdlimit;
-extern int highest_fd;
-extern fde_t *fd_table;
+extern int number_fd;  /**< Number of file descriptors. */
+extern int hard_fdlimit;  /**< Hard file descriptor limit. */
+extern int highest_fd;  /**< Highest file descriptor in use. */
+extern fde_t *fd_table;  /**< File descriptor table. */
 
 extern void fdlist_init(void);
 extern fde_t *fd_open(int, bool, const char *);

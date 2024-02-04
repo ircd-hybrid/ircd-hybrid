@@ -35,17 +35,17 @@
  */
 enum
 {
-  CLUSTER_KLINE   = 1 << 0, /*!< Share KLINE commands */
-  CLUSTER_UNKLINE = 1 << 1, /*!< Share UNKLINE commands */
-  CLUSTER_XLINE   = 1 << 2, /*!< Share XLINE commands */
-  CLUSTER_UNXLINE = 1 << 3, /*!< Share UNXLINE commands */
-  CLUSTER_RESV    = 1 << 4, /*!< Share RESV commands */
-  CLUSTER_UNRESV  = 1 << 5, /*!< Share UNRESV commands */
-  CLUSTER_LOCOPS  = 1 << 6, /*!< Share LOCOPS commands */
-  CLUSTER_DLINE   = 1 << 7, /*!< Share DLINE commands */
-  CLUSTER_UNDLINE = 1 << 8, /*!< Share UNDLINE commands */
-  CLUSTER_REHASH  = 1 << 9, /*!< Share REHASH commands */
-  CLUSTER_ALL     = UINT_MAX /*!< Share all supported commands (default) */
+  CLUSTER_KLINE   = 1 << 0,  /*!< Share KLINE commands. */
+  CLUSTER_UNKLINE = 1 << 1,  /*!< Share UNKLINE commands. */
+  CLUSTER_XLINE   = 1 << 2,  /*!< Share XLINE commands. */
+  CLUSTER_UNXLINE = 1 << 3,  /*!< Share UNXLINE commands. */
+  CLUSTER_RESV    = 1 << 4,  /*!< Share RESV commands. */
+  CLUSTER_UNRESV  = 1 << 5,  /*!< Share UNRESV commands. */
+  CLUSTER_LOCOPS  = 1 << 6,  /*!< Share LOCOPS commands. */
+  CLUSTER_DLINE   = 1 << 7,  /*!< Share DLINE commands. */
+  CLUSTER_UNDLINE = 1 << 8,  /*!< Share UNDLINE commands. */
+  CLUSTER_REHASH  = 1 << 9,  /*!< Share REHASH commands. */
+  CLUSTER_ALL     = UINT_MAX  /*!< Share all supported commands (default). */
 };
 
 extern const dlink_list *cluster_get_list(void);

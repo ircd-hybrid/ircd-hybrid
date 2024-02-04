@@ -19,55 +19,81 @@
  *  USA
  */
 
-/*! \file list.h
- * \brief A header for the list manipulation routines.
+/**
+ * @file
+ * @brief Declarations for double-linked list manipulation routines.
+ *
+ * This file contains declarations for functions and structures used in
+ * manipulating double-linked lists. It provides functions for adding,
+ * deleting, and moving nodes within the list, as well as functions for
+ * finding nodes and retrieving the length of the list.
  */
 
 #ifndef INCLUDED_list_h
 #define INCLUDED_list_h
 
-/* These macros are basically swiped from the linux kernel
- * they are simple yet effective
- */
-
-/*
- * Walks forward of a list.
- * pos is your node
- * head is your list head
+/**
+ * @def DLINK_FOREACH
+ * @brief Iterates forward through the double-linked list.
+ *
+ * This macro is used to iterate through a double-linked list in the forward direction.
+ * @param pos Node variable for iteration.
+ * @param head List head.
  */
 #define DLINK_FOREACH(pos, head) for (pos = (head); pos != NULL; pos = pos->next)
 
-/*
- * Walks forward of a list safely while removing nodes
- * pos is your node
- * n is another list head for temporary storage
- * head is your list head
+/**
+ * @def DLINK_FOREACH_SAFE
+ * @brief Iterates forward through the double-linked list safely while removing nodes.
+ *
+ * This macro is used to iterate through a double-linked list in the forward direction
+ * while safely removing nodes. It uses a temporary list head for safe removal.
+ * @param pos Node variable for iteration.
+ * @param n Temporary list head for safe removal.
+ * @param head List head.
  */
 #define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL)
+
+/**
+ * @def DLINK_FOREACH_PREV
+ * @brief Iterates backward through a double-linked list.
+ *
+ * This macro is used to iterate through a double-linked list in the backward direction.
+ * @param pos Node variable for iteration.
+ * @param head List head.
+ */
 #define DLINK_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
 
-/* Returns the list length */
+/**
+ * @def dlink_list_length
+ * @brief Macro to retrieve the length of the double-linked list.
+ *
+ * This macro returns the number of nodes in the specified double-linked list.
+ * @param list Pointer to the double-linked list.
+ */
 #define dlink_list_length(list) (list)->length
 
-/*
- * double-linked-list stuff
+/**
+ * @struct dlink_node
+ * @brief Structure representing a node in a double-linked list.
  */
-typedef struct _dlink_node dlink_node;
-typedef struct _dlink_list dlink_list;
-
-struct _dlink_node
+typedef struct _dlink_node
 {
-  void *data;
-  dlink_node *prev;
-  dlink_node *next;
-};
+  void *data;  /**< Pointer to the data stored in the node. */
+  struct _dlink_node *prev;  /**< Pointer to the previous node in the list. */
+  struct _dlink_node *next;  /**< Pointer to the next node in the list. */
+} dlink_node;
 
-struct _dlink_list
+/**
+ * @struct dlink_list
+ * @brief Structure representing a double-linked list.
+ */
+typedef struct _dlink_list
 {
-  dlink_node *head;
-  dlink_node *tail;
-  unsigned int length;
-};
+  dlink_node *head;  /**< Pointer to the head (first node) of the list. */
+  dlink_node *tail;  /**< Pointer to the tail (last node) of the list. */
+  unsigned int length;  /**< Number of nodes in the list. */
+} dlink_list;
 
 extern void free_dlink_node(dlink_node *);
 extern void dlinkAdd(void *, dlink_node *, dlink_list *);

@@ -19,8 +19,12 @@
  *  USA
  */
 
-/*! \file conf_pseudo.c
- * \brief Handles with pseudo commands/service aliases.
+/**
+ * @file conf_pseudo.c
+ * @brief Manages pseudo commands and service aliases in the IRC daemon.
+ *
+ * This file contains functions and structures responsible for handling pseudo
+ * commands and service aliases within the IRC daemon.
  */
 
 #include "stdinc.h"
@@ -37,16 +41,31 @@
 #include "server.h"
 #include "conf_pseudo.h"
 
+static dlink_list pseudo_list;  /**< List to manage pseudo items. */
 
-static dlink_list pseudo_list;
-
-
+/**
+ * @brief Retrieves the list of pseudo items.
+ *
+ * This function returns a pointer to the list of pseudo items.
+ *
+ * @return Pointer to the list of pseudo items.
+ */
 const dlink_list *
 pseudo_get_list(void)
 {
   return &pseudo_list;
 }
 
+/**
+ * @brief Handles incoming pseudo messages and forwards them accordingly.
+ *
+ * This function processes incoming pseudo messages and forwards them to the
+ * appropriate target based on the pseudo configuration.
+ *
+ * @param source_p Source client sending the pseudo message.
+ * @param parc Number of parameters in the message.
+ * @param parv Array of parameters in the message.
+ */
 static void
 pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
 {
@@ -77,6 +96,17 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, pseudo->name);
 }
 
+/**
+ * @brief Registers a new pseudo command or service alias.
+ *
+ * This function registers a new pseudo command or service alias with the IRC daemon.
+ *
+ * @param name Service name used for error messages.
+ * @param nick Nickname associated with the pseudo command.
+ * @param server Target server for the pseudo command.
+ * @param prepend Optional text to be prepended to the user's message.
+ * @param command Actual command or alias being registered.
+ */
 void
 pseudo_register(const char *name, const char *nick, const char *server, 
                 const char *prepend,
@@ -108,6 +138,12 @@ pseudo_register(const char *name, const char *nick, const char *server,
   mod_add_cmd(&pseudo->msg);
 }
 
+/**
+ * @brief Clears the list of pseudo commands and service aliases.
+ *
+ * This function removes all registered pseudo commands and service aliases from
+ * the list and frees their memory.
+ */
 void
 pseudo_clear(void)
 {

@@ -19,8 +19,9 @@
  *  USA
  */
 
-/*! \file misc.c
- * \brief Yet another miscellaneous functions file.
+/*
+ * @file misc.c
+ * @brief Miscellaneous functions for IRCd.
  */
 
 #include "stdinc.h"
@@ -28,7 +29,16 @@
 #include "irc_string.h"
 #include "ircd.h"
 
-
+/**
+ * @brief Formats a given time value into a human-readable string using the strftime format.
+ *
+ * This function formats the provided time value into a string representing the date
+ * using the "%A %B %-e %Y -- %T %z" strftime format. It caches the result to avoid
+ * repetitive strftime() calls with the same time value.
+ *
+ * @param lclock Time value to format (default is the current server time).
+ * @return Formatted date string.
+ */
 const char *
 date(uintmax_t lclock)
 {
@@ -47,6 +57,16 @@ date(uintmax_t lclock)
   return buf;
 }
 
+/**
+ * @brief Formats a given time value into ISO 8601 date and time string.
+ *
+ * This function formats the provided time value into a string representing the date
+ * using the "%FT%T%z" strftime format (ISO 8601). It caches the result to avoid
+ * repetitive strftime() calls with the same time value.
+ *
+ * @param lclock Time value to format (default is the current server time).
+ * @return Formatted ISO 8601 date and time string.
+ */
 const char *
 date_iso8601(uintmax_t lclock)
 {
@@ -65,17 +85,15 @@ date_iso8601(uintmax_t lclock)
   return buf;
 }
 
-/*
- * myctime - This is like standard ctime()-function, but it zaps away
- *   the newline from the end of that string. Also, it takes
- *   the time value as parameter, instead of pointer to it.
- *   Note that it is necessary to copy the string to alternate
- *   buffer (who knows how ctime() implements it, maybe it statically
- *   has newline there and never 'refreshes' it -- zapping that
- *   might break things in other places...)
+/**
+ * @brief Formats a given time value into a string using the ctime format.
  *
+ * This function formats the provided time value into a string using the ctime format,
+ * without the trailing newline. It caches the result to avoid repetitive strftime() calls
+ * with the same time value.
  *
- * Thu Nov 24 18:22:48 1986
+ * @param lclock Time value to format (default is the current server time).
+ * @return Formatted ctime string without newline.
  */
 const char *
 date_ctime(uintmax_t lclock)
@@ -95,6 +113,15 @@ date_ctime(uintmax_t lclock)
   return buf;
 }
 
+/**
+ * @brief Converts a duration in seconds into a human-readable string.
+ *
+ * This function takes a duration in seconds and formats it into a string representing
+ * days, hours, minutes, and seconds (e.g., "3 days, 23:59:59").
+ *
+ * @param duration Duration in seconds.
+ * @return Formatted duration string.
+ */
 const char *
 time_dissect(uintmax_t duration)
 {
@@ -126,6 +153,15 @@ time_dissect(uintmax_t duration)
   return buf;
 }
 
+/**
+ * @brief Converts binary data to a hexadecimal string.
+ *
+ * This function takes binary data and converts it into a hexadecimal string.
+ *
+ * @param bin Binary data to convert.
+ * @param hex Output buffer for the hexadecimal string.
+ * @param length Length of the binary data.
+ */
 void
 binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
 {

@@ -38,7 +38,7 @@
 #include "conf.h"
 
 static dlink_list whowas_list;  /*!< Linked list of struct Whowas pointers. */
-static dlink_list whowas_hash[HASHSIZE];  /*! \brief Array of linked lists for Whowas entry retrieval based on hash values. */
+static dlink_list whowas_hash[HASHSIZE];  /*!< Array of linked lists for Whowas entry retrieval based on hash values. */
 
 /**
  * @brief Retrieves a slot of the whowas_hash based on the provided hash value.

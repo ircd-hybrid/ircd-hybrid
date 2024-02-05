@@ -1078,6 +1078,20 @@ accept_clear_list(dlink_list *list)
     accept_del(list->head->data, list);
 }
 
+/** 
+ * @brief Retrieves the (fake) idle time for a target client.
+ *
+ * This function calculates the (fake) idle time for a target client based on the
+ * configuration of the class it belongs to. If fake idle is not enabled or the
+ * target client is the same as the source client, the actual idle time is returned.
+ * If the source client has oper mode and hiding idle from opers is not enabled, the
+ * actual idle time is also returned. Otherwise, the (fake) idle time is calculated
+ * based on the class configuration.
+ *
+ * @param source_p Pointer to the source client.
+ * @param target_p Pointer to the target client.
+ * @return The calculated (fake) idle time for the target client.
+ */
 unsigned int
 client_get_idle_time(const struct Client *source_p,
                      const struct Client *target_p)

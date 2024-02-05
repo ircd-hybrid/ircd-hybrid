@@ -19,8 +19,12 @@
  *  USA
  */
 
-/*! \file whowas.c
- * \brief WHOWAS user cache.
+/**
+ * @file whowas.c
+ * @brief Implementation of the WHOWAS user cache.
+ *
+ * This file contains the implementation of a data structure and functions used for
+ * storing historical information about IRC users.
  */
 
 #include "stdinc.h"
@@ -33,13 +37,14 @@
 #include "ircd.h"
 #include "conf.h"
 
+static dlink_list whowas_list;  /*!< Linked list of struct Whowas pointers. */
+static dlink_list whowas_hash[HASHSIZE];  /*! \brief Array of linked lists for Whowas entry retrieval based on hash values. */
 
-static dlink_list whowas_list;  /*! Chain of struct Whowas pointers */
-static dlink_list whowas_hash[HASHSIZE];
-
-
-/*! \brief Returns a slot of the whowas_hash by the hash value associated with it.
- * \param hash_value Hash value.
+/**
+ * @brief Retrieves a slot of the whowas_hash based on the provided hash value.
+ *
+ * @param hash_value The hash value used to locate the slot.
+ * @return A pointer to the dlink_list associated with the specified hash value.
  */
 const dlink_list *
 whowas_get_hash(unsigned int hash_value)
@@ -50,8 +55,10 @@ whowas_get_hash(unsigned int hash_value)
   return &whowas_hash[hash_value];
 }
 
-/*! \brief Unlinks a Whowas struct from its associated lists.
- * \param whowas Pointer to Whowas struct to be unlinked.
+/**
+ * @brief Unlinks a Whowas struct from its associated lists.
+ * @param whowas Pointer to the Whowas struct to be unlinked.
+ * @return Pointer to the unlinked Whowas struct.
  */
 static struct Whowas *
 whowas_unlink(struct Whowas *whowas)
@@ -65,9 +72,9 @@ whowas_unlink(struct Whowas *whowas)
   return whowas;
 }
 
-/*! \brief Unlinks a Whowas struct from its associated lists
- *         and frees memory.
- * \param whowas Pointer to Whowas struct to be unlinked and freed.
+/**
+ * @brief Unlinks a Whowas struct from its associated lists and frees memory.
+ * @param whowas Pointer to the Whowas struct to be unlinked and freed.
  */
 static void
 whowas_free(struct Whowas *whowas)
@@ -76,9 +83,13 @@ whowas_free(struct Whowas *whowas)
   xfree(whowas);
 }
 
-/*! \brief Returns a Whowas struct for further use. Either allocates
- *         a new one, or returns the oldest entry from the whowas_list
- *         if it ran over ConfigGeneral.whowas_history_length
+/**
+ * @brief Retrieves a Whowas struct for further use.
+ *
+ * Allocates a new Whowas struct or returns the oldest entry from whowas_list
+ * if it exceeds the configured history length.
+ *
+ * @return A pointer to the allocated or reused Whowas struct.
  */
 static struct Whowas *
 whowas_make(void)
@@ -94,9 +105,13 @@ whowas_make(void)
   return whowas;
 }
 
-/*! \brief Trims the whowas_list if necessary until there are no
- *         more than ConfigGeneral.whowas_history_length Whowas
- *         struct items.
+/**
+ * @brief Trims the Whowas history to the configured maximum length.
+ *
+ * Removes Whowas entries from the end of the Whowas history list until
+ * the total number of entries is within the specified maximum limit
+ * (ConfigGeneral.whowas_history_length). This function is called to
+ * maintain the size of the Whowas history within acceptable bounds.
  */
 void
 whowas_trim(void)
@@ -106,11 +121,14 @@ whowas_trim(void)
     whowas_free(whowas_list.tail->data);
 }
 
-/*! \brief Adds the currently defined name of the client to history.
- *         Usually called before changing to a new name (nick).
- *         Client must be a fully registered user.
- * \param client Pointer to Client struct to add to whowas history
- * \param online Either 'true' if it's a nick change or 'false' on client exit
+/**
+ * @brief Adds the current client's name to the history.
+ *
+ * This function is usually called before changing to a new name (nick).
+ * The client must be a fully registered user.
+ *
+ * @param client A pointer to the Client struct to add to the Whowas history.
+ * @param online A boolean indicating whether it's a nick change (true) or client exit (false).
  */
 void
 whowas_add_history(struct Client *client, bool online)
@@ -144,10 +162,14 @@ whowas_add_history(struct Client *client, bool online)
   dlinkAdd(whowas, &whowas->list_node, &whowas_list);
 }
 
-/*! \brief This must be called when the client structure is about to
- *         be released. History mechanism keeps pointers to client
- *         structures and it must know when they cease to exist.
- * \param client Pointer to Client struct
+/**
+ * @brief Clears the Whowas history entries associated with a specific client.
+ *
+ * Removes all Whowas entries linked to the specified client from the Whowas history.
+ * This function is typically called when a client structure is about to be released,
+ * ensuring that the Whowas history no longer references the client after its termination.
+ *
+ * @param client Pointer to the Client struct for which Whowas history entries should be cleared.
  */
 void
 whowas_off_history(struct Client *client)
@@ -161,11 +183,15 @@ whowas_off_history(struct Client *client)
   }
 }
 
-/*! \brief Returns the current client that was using the given
- *         nickname within the timelimit. Returns NULL, if no
- *         one found.
- * \param name      Name of the nick
- * \param timelimit Maximum age for a client since log-off
+/**
+ * @brief Retrieves the most recent client associated with a given nickname within a specified time limit.
+ *
+ * Searches the Whowas history to find a client that was using the provided nickname within the given time limit.
+ * If a matching entry is found, it returns a pointer to the associated Client struct; otherwise, it returns NULL.
+ *
+ * @param name      The name of the nickname to search for.
+ * @param timelimit The maximum age for a client since log-off.
+ * @return A pointer to the Client struct representing the most recent user of the specified nickname within the time limit, or NULL if not found.
  */
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)
@@ -188,7 +214,11 @@ whowas_get_history(const char *name, uintmax_t timelimit)
   return NULL;
 }
 
-/*! \brief For debugging. Counts allocated structures stored in whowas_list
+/**
+ * @brief Counts the allocated structures stored in whowas_list for debugging purposes.
+ *
+ * @param count A pointer to an unsigned integer to store the count of allocated structures.
+ * @param bytes A pointer to a size_t to store the total memory occupied by the structures.
  */
 void
 whowas_count_memory(unsigned int *const count, size_t *const bytes)

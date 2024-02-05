@@ -19,46 +19,62 @@
  *  USA
  */
 
-/*! \file
- * \brief Configuration managment for class{} blocks
+/** 
+ * @file conf_class.h
+ * @brief Configuration management for class {} blocks.
+ *
+ * This file defines structures and functions related to the configuration
+ * management of class {} blocks in the IRC daemon.
  */
-
 
 #ifndef INCLUDED_conf_class_h
 #define INCLUDED_conf_class_h
 
+/**
+ * @brief Flags for controlling class behavior.
+ */
 enum
 {
-  CLASS_FLAGS_FAKE_IDLE            = 1 << 0,
-  CLASS_FLAGS_RANDOM_IDLE          = 1 << 1,
-  CLASS_FLAGS_HIDE_IDLE_FROM_OPERS = 1 << 2
+  CLASS_FLAGS_FAKE_IDLE            = 1 << 0,  /**< Flag indicating fake idle is enabled. */
+  CLASS_FLAGS_RANDOM_IDLE          = 1 << 1,  /**< Flag indicating random idle is enabled. */
+  CLASS_FLAGS_HIDE_IDLE_FROM_OPERS = 1 << 2,  /**< Flag indicating idle is hidden from operators. */
 };
 
+/**
+ * @struct ClassItem
+ * @brief Structure representing a class configuration.
+ *
+ * This structure contains information about a class configuration,
+ * including its name, flags, and various settings such as send/receive
+ * queue sizes, idle time limits, and IP address limits.
+ */
 struct ClassItem
 {
-  char *name;
-  dlink_node node;
-  bool active;
-  void *ip_tree_v6;  /**< Pointer to 'patricia_tree_t' item */
-  void *ip_tree_v4;  /**< Pointer to 'patricia_tree_t' item */
-  unsigned int ref_count;
-  unsigned int max_sendq;
-  unsigned int max_recvq;
-  unsigned int con_freq;
-  unsigned int ping_freq;
-  unsigned int max_total;
-  unsigned int max_perip_local;
-  unsigned int max_perip_global;
-  unsigned int min_idle;
-  unsigned int max_idle;
-  unsigned int max_channels;
-  unsigned int cidr_bitlen_ipv4;
-  unsigned int cidr_bitlen_ipv6;
-  unsigned int number_per_cidr;
-  unsigned int flags;
+  char *name;  /**< Name of the class. */
+  dlink_node node;  /**< List node for linking into class_list. */
+  bool active;  /**< Indicates if the class is active. */
+  void *ip_tree_v6;  /**< Pointer to IPv6 patricia_tree_t item. */
+  void *ip_tree_v4;  /**< Pointer to IPv4 patricia_tree_t item. */
+  unsigned int ref_count;  /**< Reference count for the class. */
+  unsigned int max_sendq;  /**< Maximum send queue size for clients in this class. */
+  unsigned int max_recvq;  /**< Maximum receive queue size for clients in this class. */
+  unsigned int con_freq;  /**< Connection frequency for servers in this class. */
+  unsigned int ping_freq;  /**< Ping frequency for clients in this class. */
+  unsigned int max_total;  /**< Maximum total number of clients in this class. */
+  unsigned int max_perip_local;  /**< Maximum number of local clients per IP in this class. */
+  unsigned int max_perip_global;  /**< Maximum number of global clients per IP in this class. */
+  unsigned int min_idle;  /**< Minimum idle time shown in WHOIS for clients in this class. */
+  unsigned int max_idle;  /**< Maximum idle time shown in WHOIS for clients in this class. */
+  unsigned int max_channels;  /**< Maximum number of channels clients in this class can join. */
+  unsigned int cidr_bitlen_ipv4;  /**< CIDR bit length for IPv4 subnets. */
+  unsigned int cidr_bitlen_ipv6;  /**< CIDR bit length for IPv6 subnets. */
+  unsigned int number_per_cidr;  /**< Maximum number of clients allowed per CIDR subnet. */
+  unsigned int flags;  /**< Bitwise flags indicating class configuration options. */
 };
 
-/* address of default class conf */
+/** 
+ * @brief Pointer to the default class configuration.
+ */
 extern struct ClassItem *class_default;
 
 extern struct ClassItem *class_make(void);

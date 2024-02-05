@@ -19,8 +19,11 @@
  *  USA
  */
 
-/*! \file whowas.h
- * \brief A header for the whowas functions.
+/**
+ * @file whowas.h
+ * @brief Declarations for the WHOWAS user cache.
+ *
+ * This header file defines the structure for storing historical information about IRC users.
  */
 
 #ifndef INCLUDED_whowas_h
@@ -29,24 +32,30 @@
 #include "ircd_defs.h"
 #include "client.h"
 
-
+/**
+ * @struct Whowas
+ * @brief Structure representing a historical record of an IRC user.
+ *
+ * This structure contains information about a user's historical presence on the network,
+ * including details such as nickname, user name, host, logoff time, and more.
+ */
 struct Whowas
 {
-  dlink_node hash_node;  /**< List node; linked into whowas_hash */
-  dlink_node list_node;  /**< List node; linked into whowas_list */
-  dlink_node client_list_node;  /**< List node; linked into client->whowas_list */
-  unsigned int hash_value;  /**< Hash value derived from Whowas::name */
-  uintmax_t logoff;  /**< When the client logged off; real time */
-  bool server_hidden;  /**< Client's server is hidden */
-  char account[ACCOUNTLEN + 1];  /**< Services account */
-  char name[NICKLEN + 1];  /**< Client's nick name */
-  char username[USERLEN + 1];  /**< Client's user name */
-  char hostname[HOSTLEN + 1];  /**< Client's host name */
-  char realhost[HOSTLEN + 1];  /**< Client's real host name */
-  char sockhost[HOSTIPLEN + 1];  /**< Client's IP address as string */
-  char realname[REALLEN + 1];  /**< Client's real name/gecos */
-  char servername[HOSTLEN + 1];  /**< Name of the server the client is using */
-  struct Client *client;  /**< Pointer to new nick name for chasing or NULL */
+  dlink_node hash_node;  /**< List node; linked into whowas_hash. */
+  dlink_node list_node;  /**< List node; linked into whowas_list. */
+  dlink_node client_list_node;  /**< List node; linked into client->whowas_list. */
+  unsigned int hash_value;  /**< Hash value derived from Whowas::name. */
+  uintmax_t logoff;  /**< Time when the client logged off; real time. */
+  bool server_hidden;  /**< Indicates if the client's server is hidden. */
+  char account[ACCOUNTLEN + 1];  /**< Services account associated with the client. */
+  char name[NICKLEN + 1];  /**< Client's nickname. */
+  char username[USERLEN + 1];  /**< Client's username. */
+  char hostname[HOSTLEN + 1];  /**< Client's host name. */
+  char realhost[HOSTLEN + 1];  /**< Client's real host name. */
+  char sockhost[HOSTIPLEN + 1];  /**< Client's IP address as a string. */
+  char realname[REALLEN + 1];  /**< Client's real name or GECOS information. */
+  char servername[HOSTLEN + 1];  /**< Name of the server the client is using. */
+  struct Client *client;  /**< Pointer to the current client or NULL if offline. */
 };
 
 extern const dlink_list *whowas_get_hash(unsigned int);

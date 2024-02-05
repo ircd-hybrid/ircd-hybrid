@@ -19,8 +19,9 @@
  *  USA
  */
 
-/*! \file conf_cluster.c
- * \brief Implements cluster {} block configuration management.
+/**
+ * @file conf_cluster.c
+ * @brief Implements cluster block configuration management.
  */
 
 #include "stdinc.h"
@@ -31,16 +32,27 @@
 #include "server_capab.h"
 #include "send.h"
 
+static dlink_list cluster_list;  /**< List to manage cluster items. */
 
-static dlink_list cluster_list;
 
-
+/**
+ * @brief Retrieves the list of cluster items.
+ *
+ * This function returns a pointer to the list of cluster items.
+ *
+ * @return Pointer to the list of cluster items.
+ */
 const dlink_list *
 cluster_get_list(void)
 {
   return &cluster_list;
 }
 
+/**
+ * @brief Clears the list of cluster items.
+ *
+ * This function removes all cluster items from the list and frees their memory.
+ */
 void
 cluster_clear(void)
 {
@@ -54,6 +66,14 @@ cluster_clear(void)
   }
 }
 
+/**
+ * @brief Creates a new cluster item and adds it to the list.
+ *
+ * This function allocates memory for a new cluster item, adds it to the cluster list,
+ * and returns a pointer to the created cluster item.
+ *
+ * @return Pointer to the newly created cluster item.
+ */
 struct ClusterItem *
 cluster_make(void)
 {
@@ -63,6 +83,19 @@ cluster_make(void)
   return cluster;
 }
 
+/**
+ * @brief Distributes a command to servers in the cluster.
+ *
+ * This function sends a command to servers in the cluster based on the specified type
+ * and pattern. It formats the command and its arguments and sends it to matching servers.
+ *
+ * @param client Sender client.
+ * @param command IRC command to be distributed.
+ * @param capab Capabilities for the command.
+ * @param type Type of the command.
+ * @param pattern Format string for the command arguments.
+ * @param ... Additional arguments for the command.
+ */
 void
 cluster_distribute(const void *client, const char *command, unsigned int capab,
                    unsigned int type, const char *pattern, ...)

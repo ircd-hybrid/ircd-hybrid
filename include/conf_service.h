@@ -19,17 +19,28 @@
  *  USA
  */
 
-/*! \file conf_service.h
- * \brief Implements service {} block configuration management.
+/**
+ * @file conf_service.h
+ * @brief Implements service {} block configuration management.
+ *
+ * This file defines structures and functions related to the configuration
+ * management of service {} blocks. It provides a set of functions to
+ * create, retrieve, and clear service configurations.
  */
 
 #ifndef INCLUDED_conf_service_h
 #define INCLUDED_conf_service_h
 
+/**
+ * @struct ServiceItem
+ * @brief Represents a service configuration item.
+ *
+ *  This structure is used to store information related to a service configuration.
+ */
 struct ServiceItem
 {
-  dlink_node node;
-  char *name;
+  dlink_node node;  /**< Node for linking in the service list. */
+  char *name;  /**< Name of the service. */
 };
 
 extern const dlink_list *service_get_list(void);

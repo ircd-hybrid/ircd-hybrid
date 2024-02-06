@@ -19,8 +19,9 @@
  *  USA
  */
 
-/*! \file conf_service.c
- * \brief Implements service {} block configuration management.
+/**
+ * @file conf_service.c
+ * @brief Implementation of service {} block configuration management.
  */
 
 #include "stdinc.h"
@@ -28,16 +29,37 @@
 #include "memory.h"
 #include "conf_service.h"
 
-
+/**
+ * @brief List to hold configurations for service {} blocks.
+ *
+ * This static variable represents a doubly-linked list that stores
+ * configurations for service {} blocks in the ircd-hybrid daemon. Each
+ * node in the list corresponds to a specific service configuration.
+ */
 static dlink_list service_list;
 
-
+/**
+ * @brief Get the list of service configurations.
+ *
+ * This function returns a constant pointer to the list of service
+ * configurations. It allows external components to access the list without
+ * modifying it.
+ *
+ * @return A pointer to the list of service configurations.
+ */
 const dlink_list *
 service_get_list(void)
 {
   return &service_list;
 }
 
+/**
+ * @brief Clear all service configurations.
+ *
+ * This function iterates over the service_list and removes all service
+ * configurations from the list. It also frees the associated memory to
+ * prevent memory leaks.
+ */
 void
 service_clear(void)
 {
@@ -51,6 +73,14 @@ service_clear(void)
   }
 }
 
+/**
+ * @brief Create a new service configuration item.
+ *
+ * This function allocates memory for a new ServiceItem structure, adds it to
+ * the service_list, and returns a pointer to the newly created ServiceItem.
+ *
+ * @return A pointer to the newly created ServiceItem.
+ */
 struct ServiceItem *
 service_make(void)
 {
@@ -60,6 +90,18 @@ service_make(void)
   return service;
 }
 
+/**
+ * @brief Find a service configuration by name.
+ *
+ * This function searches the service_list for a service configuration with
+ * the specified name. It uses the provided compare function pointer to
+ * perform the string comparison.
+ *
+ * @param name The name of the service to find.
+ * @param compare A function pointer for comparing two strings.
+ *
+ * @return A pointer to the found ServiceItem, or NULL if not found.
+ */
 const struct ServiceItem *
 service_find(const char *name, int (*compare)(const char *, const char *))
 {

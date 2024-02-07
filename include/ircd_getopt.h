@@ -19,19 +19,31 @@
  *  USA
  */
 
-/*! \file ircd_getopt.h
- * \brief A header for the getopt() command line option calls.
+/**
+ * @file ircd_getopt.h
+ * @brief Header for the lightweight command-line option parser avoiding getopt_long().
+ *
+ * This header provides structures and functions for parsing command-line options in a simple way,
+ * avoiding the use of getopt_long() as it is a GNU extension.
  */
 
 #ifndef INCLUDED_ircd_getopt_h
 #define INCLUDED_ircd_getopt_h
 
+/**
+ * @struct lgetopt
+ * @brief Structure representing a command-line option.
+ *
+ * This structure contains information about a command-line option, including its
+ * name, the location to store the argument (if any), the type of the argument,
+ * and a description for usage and help printing.
+ */
 struct lgetopt
 {
-  const char *opt; /* name of the argument */
-  void *argloc; /* where we store the argument to it (-option argument) */
-  enum { INTEGER, BOOLEAN, STRING, USAGE } argtype;
-  const char *desc; /* description of the argument, usage for printing help */
+  const char *opt;  /**< Name of the argument. */
+  void *argloc;  /**< Location to store the argument to it (-option argument). */
+  enum { INTEGER, BOOLEAN, STRING, USAGE } argtype;  /**< Type of the argument. */
+  const char *desc;  /**< Description of the argument, usage for printing help. */
 };
 
 extern void parseargs(int *, char ***, struct lgetopt *);

@@ -19,17 +19,38 @@
  *  USA
  */
 
-/*! \file getopt.c
- * \brief Uses getopt to fetch the command line options.
+/**
+ * @file getopt.c
+ * @brief Command-line option parsing utility, avoiding getopt_long().
+ *
+ * This file provides functionality for parsing command-line options using a custom
+ * approach, avoiding the use of getopt_long(), which is a GNU extension. It offers a
+ * simple interface for specifying valid options along with their types and descriptions.
  */
 
 #include "stdinc.h"
 #include "ircd_getopt.h"
 #include "memory.h"
 
+/**
+ * @def OPTCHAR
+ * @brief Character used to denote command-line options.
+ *
+ * This macro defines the character used to denote command-line options. In this
+ * context, options are command-line arguments preceded by a specific character,
+ * typically a hyphen (-).
+ */
 #define OPTCHAR '-'
 
-
+/**
+ * @brief Display usage information for the program.
+ *
+ * Displays the program's usage information, including valid options and their descriptions,
+ * based on the provided lgetopt structure.
+ *
+ * @param name The name of the program.
+ * @param opts An array of lgetopt structures representing valid command-line options.
+ */
 static void
 usage(const char *name, const struct lgetopt *opts)
 {
@@ -45,6 +66,16 @@ usage(const char *name, const struct lgetopt *opts)
   exit(EXIT_FAILURE);
 }
 
+/**
+ * @brief Parse command-line arguments.
+ *
+ * This function parses command-line arguments based on the provided options and
+ * updates the corresponding variables as specified by the options.
+ *
+ * @param argc Pointer to the argument count.
+ * @param argv Pointer to the argument vector.
+ * @param opts An array of lgetopt structures representing valid command-line options.
+ */
 void
 parseargs(int *argc, char ***argv, struct lgetopt *opts)
 {

@@ -19,8 +19,13 @@
  *  USA
  */
 
-/*! \file hash.c
- * \brief Hash table management.
+/**
+ * @file hash.c
+ * @brief Hash table management.
+ *
+ * This file contains functions and structures related to hash table management.
+ * The hash tables are used to efficiently store and retrieve information about
+ * clients, channels, and IDs.
  */
 
 #include "stdinc.h"
@@ -39,23 +44,44 @@
 #include "memory.h"
 #include "dbuf.h"
 
-
-/* The actual hash tables, They MUST be of the same HASHSIZE, variable
- * size tables could be supported but the rehash routine should also
- * rebuild the transformation maps, I kept the tables of equal size
- * so that I can use one hash function.
+/**
+ * @var static struct Client *idTable[HASHSIZE]
+ * @brief Hash table storing pointers to clients based on their IDs.
+ *
+ * @var static struct Client *clientTable[HASHSIZE]
+ * @brief Hash table storing pointers to clients based on their names.
+ *
+ * @var static struct Channel *channelTable[HASHSIZE]
+ * @brief Hash table storing pointers to channels based on their names.
+ *
+ * These hash tables are used for efficient retrieval of clients and channels
+ * based on either their unique identifiers (IDs) or names. The tables have a
+ * fixed size specified by HASHSIZE, and it is crucial that all hash tables
+ * (idTable, clientTable, and channelTable) have the same size. While variable
+ * size tables could be supported theoretically, it would require additional
+ * complexity in the rehashing routine to rebuild the transformation maps.
+ * Keeping all tables of equal size ensures that only one hash function needs
+ * to be used, simplifying the implementation.
  */
 static struct Client *idTable[HASHSIZE];
 static struct Client *clientTable[HASHSIZE];
 static struct Channel *channelTable[HASHSIZE];
 
-
-/*
- * New hash function based on the Fowler/Noll/Vo (FNV) algorithm from
- * http://www.isthe.com/chongo/tech/comp/fnv/
+/**
+ * @brief Generate a hash value for the given string using the FNV-1 algorithm with a random XOR key to mitigate hash table degeneration attacks.
  *
- * Here, we use the FNV-1 method, which gives slightly better results
- * than FNV-1a.   -Michael
+ * This function employs the Fowler/Noll/Vo (FNV) algorithm, specifically the FNV-1
+ * method, to produce a hash value for the provided string. FNV-1 is chosen for its
+ * slightly superior results compared to FNV-1a in this context. The algorithm iterates
+ * over each character of the input string, incorporating it into the hash calculation.
+ * To counteract possible hash table degeneration attacks, a random XOR key is introduced.
+ * Hash table degeneration attacks aim to exploit weaknesses in hash functions by causing
+ * many keys to hash to the same values, leading to poor performance. The random XOR key
+ * adds an element of unpredictability, making it harder for attackers to manipulate input
+ * in a way that causes clustering in the hash table and degrades its efficiency.
+ *
+ * @param name A pointer to the null-terminated string for which the hash is generated.
+ * @return The calculated hash value for the input string.
  */
 unsigned int
 strhash(const char *name)
@@ -82,24 +108,12 @@ strhash(const char *name)
   return (hval >> FNV1_32_BITS) ^ (hval & ((1 << FNV1_32_BITS) - 1));
 }
 
-/************************** Externally visible functions ********************/
-
-/* Optimization note: in these functions I supposed that the CSE optimization
- * (Common Subexpression Elimination) does its work decently, this means that
- * I avoided introducing new variables to do the work myself and I did let
- * the optimizer play with more free registers, actual tests proved this
- * solution to be faster than doing things like tmp2=tmp->hnext... and then
- * use tmp2 myself which would have given less freedom to the optimizer.
- */
-
-/* hash_add_client()
+/**
+ * @brief Add a client to the client hash table.
  *
- * inputs       - pointer to client
- * output       - NONE
- * side effects - Adds a client's name in the proper hash linked
- *                list, can't fail, client must have a non-null
- *                name or expect a coredump, the name is infact
- *                taken from client->name
+ * This function adds a client to the client hash table based on its name.
+ *
+ * @param client A pointer to the client to be added.
  */
 void
 hash_add_client(struct Client *client)
@@ -110,15 +124,12 @@ hash_add_client(struct Client *client)
   clientTable[hashv] = client;
 }
 
-/* hash_add_channel()
+/**
+ * @brief Add a channel to the channel hash table.
  *
- * inputs       - pointer to channel
- * output       - NONE
- * side effects - Adds a channel's name in the proper hash linked
- *                list, can't fail. channel must have a non-null name
- *                or expect a coredump. As before the name is taken
- *                from channel->name, we do hash its entire lenght
- *                since this proved to be statistically faster
+ * This function adds a channel to the channel hash table based on its name.
+ *
+ * @param channel A pointer to the channel to be added.
  */
 void
 hash_add_channel(struct Channel *channel)
@@ -129,6 +140,13 @@ hash_add_channel(struct Channel *channel)
   channelTable[hashv] = channel;
 }
 
+/**
+ * @brief Add a client to the ID hash table.
+ *
+ * This function adds a client to the ID hash table based on its ID.
+ *
+ * @param client A pointer to the client to be added.
+ */
 void
 hash_add_id(struct Client *client)
 {
@@ -138,11 +156,12 @@ hash_add_id(struct Client *client)
   idTable[hashv] = client;
 }
 
-/* hash_del_id()
+/**
+ * @brief Remove a client from the ID hash table.
  *
- * inputs       - pointer to client
- * output       - NONE
- * side effects - Removes an ID from the hash linked list
+ * This function removes a client from the ID hash table.
+ *
+ * @param client A pointer to the client to be removed.
  */
 void
 hash_del_id(struct Client *client)
@@ -169,11 +188,12 @@ hash_del_id(struct Client *client)
   }
 }
 
-/* hash_del_client()
+/**
+ * @brief Remove a client from the client hash table.
  *
- * inputs       - pointer to client
- * output       - NONE
- * side effects - Removes a Client's name from the hash linked list
+ * This function removes a client from the client hash table.
+ *
+ * @param client A pointer to the client to be removed.
  */
 void
 hash_del_client(struct Client *client)
@@ -200,12 +220,12 @@ hash_del_client(struct Client *client)
   }
 }
 
-/* hash_del_channel()
+/**
+ * @brief Remove a channel from the channel hash table.
  *
- * inputs       - pointer to client
- * output       - NONE
- * side effects - Removes the channel's name from the corresponding
- *                hash linked list
+ * This function removes a channel from the channel hash table.
+ *
+ * @param channel A pointer to the channel to be removed.
  */
 void
 hash_del_channel(struct Channel *channel)
@@ -232,13 +252,15 @@ hash_del_channel(struct Channel *channel)
   }
 }
 
-/* hash_find_client()
+/**
+ * @brief Find a client based on its name in the client hash table.
  *
- * inputs       - pointer to name
- * output       - NONE
- * side effects - New semantics: finds a client whose name is 'name'
- *                if can't find one returns NULL. If it finds one moves
- *                it to the top of the list and returns it.
+ * This function searches for a client in the client hash table based on its name.
+ * If found, it moves the client to the top of the list and returns it.
+ * This reordering of the list optimizes subsequent lookups for the same name.
+ *
+ * @param name The name of the client to find.
+ * @return A pointer to the found client, or NULL if not found.
  */
 struct Client *
 hash_find_client(const char *name)
@@ -268,6 +290,16 @@ hash_find_client(const char *name)
   return client;
 }
 
+/**
+ * @brief Find a client based on its ID in the ID hash table.
+ *
+ * This function searches for a client in the ID hash table based on its ID.
+ * If found, it moves the client to the top of the list and returns it.
+ * This reordering of the list optimizes subsequent lookups for the same ID.
+ *
+ * @param name The ID of the client to find.
+ * @return A pointer to the found client, or NULL if not found.
+ */
 struct Client *
 hash_find_id(const char *name)
 {
@@ -296,6 +328,16 @@ hash_find_id(const char *name)
   return client;
 }
 
+/**
+ * @brief Find a server based on its name in the server hash table.
+ *
+ * This function searches for a server in the server hash table based on its name.
+ * If found, it moves the server to the top of the list and returns it.
+ * This reordering of the list optimizes subsequent lookups for the same name.
+ *
+ * @param name The name of the server to find.
+ * @return A pointer to the found server, or NULL if not found.
+ */
 struct Client *
 hash_find_server(const char *name)
 {
@@ -329,13 +371,15 @@ hash_find_server(const char *name)
   return client;
 }
 
-/* hash_find_channel()
+/**
+ * @brief Find a channel based on its name in the channel hash table.
  *
- * inputs       - pointer to name
- * output       - NONE
- * side effects - New semantics: finds a channel whose name is 'name',
- *                if can't find one returns NULL, if can find it moves
- *                it to the top of the list and returns it.
+ * This function searches for a channel in the channel hash table based on its name.
+ * If found, it moves the channel to the top of the list and returns it.
+ * This reordering of the list optimizes subsequent lookups for the same name.
+ *
+ * @param name The name of the channel to find.
+ * @return A pointer to the found channel, or NULL if not found.
  */
 struct Channel *
 hash_find_channel(const char *name)
@@ -365,15 +409,14 @@ hash_find_channel(const char *name)
   return channel;
 }
 
-/* hash_get_bucket(int type, unsigned int hashv)
+/**
+ * @brief Get the first entry in a specific hash bucket.
  *
- * inputs       - hash value (must be between 0 and HASHSIZE - 1)
- * output       - NONE
- * returns      - pointer to first channel in channelTable[hashv]
- *                if that exists;
- *                NULL if there is no channel in that place;
- *                NULL if hashv is an invalid number.
- * side effects - NONE
+ * This function retrieves the first entry in a specific hash bucket based on the hash type.
+ *
+ * @param type The type of hash (HASH_TYPE_ID, HASH_TYPE_CHANNEL, HASH_TYPE_CLIENT).
+ * @param hashv The hash value indicating the bucket.
+ * @return A pointer to the first entry in the specified hash bucket.
  */
 void *
 hash_get_bucket(int type, unsigned int hashv)
@@ -401,27 +444,16 @@ hash_get_bucket(int type, unsigned int hashv)
   return NULL;
 }
 
-/*
- * Safe list code.
+/**
+ * @brief Check if the send queue of a client is close to its limit.
  *
- * The idea is really quite simple. As the link lists pointed to in
- * each "bucket" of the channel hash table are traversed atomically
- * there is no locking needed. Overall, yes, inconsistent reported
- * state can still happen, but normally this isn't a big deal.
- * I don't like sticking the code into hash.c but oh well. Moreover,
- * if a hash isn't used in future, oops.
+ * This function determines whether the send queue of a client is close to its limit,
+ * providing a conservative estimate to avoid excessive queue growth. The calculation
+ * considers the client's send queue length in comparison to half of its configured
+ * maximum send queue size.
  *
- * - Dianora
- */
-
-/* exceeding_sendq()
- *
- * inputs       - pointer to client to check
- * output	- 1 if client is in danger of blowing its sendq
- *		  0 if it is not.
- * side effects -
- *
- * Sendq limit is fairly conservative at 1/2 (In original anyway)
+ * @param to A pointer to the client to check.
+ * @return true if the client is in danger of exhausting its send queue, false otherwise.
  */
 static bool
 exceeding_sendq(const struct Client *to)
@@ -432,6 +464,17 @@ exceeding_sendq(const struct Client *to)
     return false;
 }
 
+/**
+ * @brief Frees resources associated with a ListTask for a given client.
+ *
+ * This function is responsible for freeing the memory allocated for the ListTask
+ * associated with the specified client. The ListTask contains information about
+ * channel listing preferences for the client, including show and hide masks.
+ * Additionally, it removes the client from the global list of clients with active
+ * list tasks.
+ *
+ * @param client Pointer to the client for which the ListTask resources are to be freed.
+ */
 void
 free_list_task(struct Client *client)
 {
@@ -458,13 +501,14 @@ free_list_task(struct Client *client)
   client->connection->list_task = NULL;
 }
 
-/* list_allow_channel()
+/**
+ * @brief Allow listing a channel based on show/hide masks.
  *
- * inputs       - channel name
- *              - pointer to a list task
- * output       - 1 if the channel is to be displayed
- *                0 otherwise
- * side effects -
+ * This function determines whether a channel is allowed to be listed based on show/hide masks.
+ *
+ * @param name The name of the channel to check.
+ * @param lt A pointer to the ListTask structure.
+ * @return true if the channel is allowed, false otherwise.
  */
 static bool
 list_allow_channel(const char *name, const struct ListTask *lt)
@@ -482,13 +526,16 @@ list_allow_channel(const char *name, const struct ListTask *lt)
   return true;
 }
 
-/* list_one_channel()
+/**
+ * @brief Lists information about a single channel to a client.
  *
- * inputs       - client pointer to return result to
- *              - pointer to channel to list
- *              - pointer to ListTask structure
- * output	- none
- * side effects -
+ * This function lists information about a single channel to the specified client,
+ * based on the client's list task preferences. It checks various criteria such as
+ * the number of users in the channel, creation time, topic, and mode to determine
+ * whether the channel should be listed to the client.
+ *
+ * @param client Pointer to the client to which channel information is to be sent.
+ * @param channel Pointer to the channel for which information is to be listed.
  */
 static void
 list_one_channel(struct Client *client, struct Channel *channel)
@@ -528,16 +575,21 @@ list_one_channel(struct Client *client, struct Channel *channel)
                      buf, channel->topic);
 }
 
-/* safe_list_channels()
+/**
+ * @brief Safely lists channels to the client without risking sendq limits.
  *
- * inputs	- pointer to client requesting list
- * output	- 0/1
- * side effects	- safely list all channels to client
+ * This function safely lists channels to the specified client without risking sendq limits.
+ * It traverses the channel hash table buckets atomically to ensure safe traversal of linked lists.
+ * If the only_unmasked_channels flag is set, it only lists channels that are not masked by the client's
+ * ListTask structure. The function also takes into account various conditions, such as channel user count,
+ * creation time, topic time, and other criteria specified in the ListTask structure.
  *
- * Walk the channel buckets, ensure all pointers in a bucket are
- * traversed before blocking on a sendq. This means, no locking is needed.
+ * @param client Pointer to the client requesting the list.
+ * @param only_unmasked_channels Flag to list only unmasked channels.
  *
- * - Dianora
+ * @note The function follows a simple idea where link lists in each "bucket" of the channel hash table are
+ *       traversed atomically, eliminating the need for locking. While inconsistent reported state may still
+ *       happen, it is generally not a significant issue.
  */
 void
 safe_list_channels(struct Client *client, bool only_unmasked_channels)
@@ -545,14 +597,16 @@ safe_list_channels(struct Client *client, bool only_unmasked_channels)
   struct ListTask *const lt = client->connection->list_task;
   struct Channel *channel;
 
+  /* If only_unmasked_channels is false, list all channels. */
   if (only_unmasked_channels == false)
   {
     for (unsigned int i = lt->hash_index; i < HASHSIZE; ++i)
     {
+      /* Check if the client is in danger of exceeding its sendq. */
       if (exceeding_sendq(client) == true)
       {
         lt->hash_index = i;
-        return;  /* Still more to do */
+        return;  /* Still more channels to list. */
       }
 
       for (channel = channelTable[i]; channel; channel = channel->hnextch)

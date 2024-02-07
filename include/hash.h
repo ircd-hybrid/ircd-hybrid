@@ -19,16 +19,40 @@
  *  USA
  */
 
-/*! \file hash.h
- * \brief A header for the ircd hashtable code.
+/**
+ * @file hash.h
+ * @brief A header file for the hashtable code.
+ *
+ * This header file defines constants, structures, and function prototypes
+ * related to the hashtable code. It includes settings for the FNV-1 32-bit
+ * hash algorithm, hash table size, and enumerations for different hash types.
  */
 
 #ifndef INCLUDED_hash_h
 #define INCLUDED_hash_h
 
+/**
+ * @def FNV1_32_INIT
+ * @brief Initial value for FNV-1 32-bit hash algorithm.
+ */
 #define FNV1_32_INIT 0x811c9dc5
+
+/**
+ * @def FNV1_32_BITS
+ * @brief Number of bits used in FNV-1 32-bit hash algorithm.
+ */
 #define FNV1_32_BITS 16
-#define FNV1_32_SIZE (1 << FNV1_32_BITS)  /* 2^16 = 65536 */
+
+/**
+ * @def FNV1_32_SIZE
+ * @brief Size of hash table in FNV-1 32-bit hash algorithm (2^16 = 65536 entries).
+ */
+#define FNV1_32_SIZE (1 << FNV1_32_BITS)
+
+/**
+ * @def HASHSIZE
+ *  @brief Size of hash table used in the code (aligned with FNV1_32_SIZE).
+ */
 #define HASHSIZE FNV1_32_SIZE
 
 struct Client;

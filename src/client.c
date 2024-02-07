@@ -64,21 +64,18 @@ dlink_list oper_list;
 static dlink_list dead_list, abort_list;
 static dlink_node *eac_next;  /* next aborted client to exit */
 
-
-/*
- * client_make - create a new Client struct and set it to initial state.
+/**
+ * @brief Create a new Client struct and set it to the initial state.
  *
- *      from == NULL,   create local client (a client connected
- *                      to a socket).
- *                      WARNING: This leaves the client in a dangerous
- *                      state where fd == -1, dead flag is not set and
- *                      the client is on the unknown_list; therefore,
- *                      the first thing to do after calling make_client(NULL)
- *                      is setting fd to something reasonable. -adx
+ * If 'from' is NULL, it creates a local client (a client connected to a socket).
+ * If 'from' is provided, it creates a remote client (behind a socket associated
+ * with the local client defined by 'from').
  *
- *      from,   create remote client (behind a socket
- *                      associated with the client defined by
- *                      'from'). ('from' is a local client!!).
+ * @param from The local client associated with the new remote client.
+ * @return A pointer to the newly created Client struct.
+ *
+ * @warning If 'from' is NULL, the client is in a dangerous state with fd == -1.
+ * The first thing after calling client_make(NULL) should be setting fd to a valid value.
  */
 struct Client *
 client_make(struct Client *from)

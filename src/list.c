@@ -2,6 +2,7 @@
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
  *  Copyright (c) 2000-2024 ircd-hybrid development team
+ *  Copyright (c) 1996-2023 The Squid Software Foundation and contributors
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,20 +20,26 @@
  *  USA
  */
 
-/*! \file list.c
- * \brief Maintains doubly-linked lists.
+/**
+ * @file list.c
+ * @brief Maintains doubly-linked lists.
+ *
+ * This file contains functions for manipulating doubly-linked lists, including
+ * creating nodes, adding, deleting, and moving nodes within the list, and finding
+ * nodes by data value.
  */
 
 #include "stdinc.h"
 #include "list.h"
 #include "memory.h"
 
-
-/* make_dlink_node()
+/**
+ * @brief Creates a new double-linked list node.
  *
- * inputs       - NONE
- * output       - pointer to new dlink_node
- * side effects	- NONE
+ * This function allocates memory for a new double-linked list node and returns
+ * a pointer to it.
+ *
+ * @return Pointer to the new double-linked list node.
  */
 dlink_node *
 make_dlink_node(void)
@@ -42,11 +49,12 @@ make_dlink_node(void)
   return node;
 }
 
-/* free_dlink_node()
+/**
+ * @brief Frees memory associated with a double-linked list node.
  *
- * inputs       - pointer to dlink_node
- * output       - NONE
- * side effects	- free given dlink_node
+ * This function frees memory associated with the specified double-linked list node.
+ *
+ * @param node Pointer to the double-linked list node to be freed.
  */
 void
 free_dlink_node(dlink_node *node)
@@ -54,10 +62,15 @@ free_dlink_node(dlink_node *node)
   xfree(node);
 }
 
-/*
- * dlink_ routines are stolen from squid, except for dlinkAddBefore,
- * which is mine.
- *   -- adrian
+/**
+ * @brief Adds a node to the beginning of a double-linked list.
+ *
+ * This function adds a node containing the specified data to the beginning of
+ * the double-linked list.
+ *
+ * @param data Pointer to the data to be stored in the new node.
+ * @param m Pointer to the node to be added.
+ * @param list Pointer to the double-linked list.
  */
 void
 dlinkAdd(void *data, dlink_node *m, dlink_list *list)
@@ -76,6 +89,17 @@ dlinkAdd(void *data, dlink_node *m, dlink_list *list)
   list->length++;
 }
 
+/**
+ * @brief Adds a node before a specified node in a double-linked list.
+ *
+ * This function adds a node containing the specified data before the specified
+ * node in the double-linked list.
+ *
+ * @param b Pointer to the node before which the new node will be added.
+ * @param data Pointer to the data to be stored in the new node.
+ * @param m Pointer to the node to be added.
+ * @param list Pointer to the double-linked list.
+ */
 void
 dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 {
@@ -93,6 +117,16 @@ dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
   }
 }
 
+/**
+ * @brief Adds a node to the end of a double-linked list.
+ *
+ * This function adds a node containing the specified data to the end of the
+ * double-linked list.
+ *
+ * @param data Pointer to the data to be stored in the new node.
+ * @param m Pointer to the node to be added.
+ * @param list Pointer to the double-linked list.
+ */
 void
 dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 {
@@ -110,9 +144,14 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
   list->length++;
 }
 
-/* Execution profiles show that this function is called the most
- * often of all non-spontaneous functions. So it had better be
- * efficient. */
+/**
+ * @brief Deletes a node from a double-linked list.
+ *
+ * This function deletes the specified node from the double-linked list.
+ *
+ * @param m Pointer to the node to be deleted.
+ * @param list Pointer to the double-linked list.
+ */
 void
 dlinkDelete(dlink_node *m, dlink_list *list)
 {
@@ -144,12 +183,15 @@ dlinkDelete(dlink_node *m, dlink_list *list)
   list->length--;
 }
 
-/*
- * dlinkFind
- * inputs       - list to search
- *              - data
- * output       - pointer to link or NULL if not found
- * side effects - Look for ptr in the linked listed pointed to by link.
+/**
+ * @brief Finds a node with a specific data value in a double-linked list.
+ *
+ * This function searches for a node with the specified data value in the
+ * double-linked list and returns a pointer to it.
+ *
+ * @param list Pointer to the double-linked list.
+ * @param data Pointer to the data value to search for.
+ * @return Pointer to the node with the specified data value, or NULL if not found.
  */
 dlink_node *
 dlinkFind(dlink_list *list, const void *data)
@@ -163,6 +205,15 @@ dlinkFind(dlink_list *list, const void *data)
   return NULL;
 }
 
+/**
+ * @brief Moves the contents of one double-linked list to another.
+ *
+ * This function moves the contents of the specified source double-linked list
+ * to the destination double-linked list.
+ *
+ * @param from Pointer to the source double-linked list.
+ * @param to Pointer to the destination double-linked list.
+ */
 void
 dlinkMoveList(dlink_list *from, dlink_list *to)
 {
@@ -194,6 +245,15 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
   /* I think I got that right */
 }
 
+/**
+ * @brief Moves a node from one double-linked list to another.
+ *
+ * This function moves the specified node from one double-linked list to another.
+ *
+ * @param m Pointer to the node to be moved.
+ * @param list_del Pointer to the source double-linked list.
+ * @param list_add Pointer to the destination double-linked list.
+ */
 void
 dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
 {
@@ -231,6 +291,16 @@ dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
   list_del->length--;
 }
 
+/**
+ * @brief Finds and deletes a node with a specific data value in a double-linked list.
+ *
+ * This function searches for a node with the specified data value in the
+ * double-linked list, deletes it, and returns a pointer to it.
+ *
+ * @param list Pointer to the double-linked list.
+ * @param data Pointer to the data value to search for and delete.
+ * @return Pointer to the deleted node, or NULL if not found.
+ */
 dlink_node *
 dlinkFindDelete(dlink_list *list, void *data)
 {

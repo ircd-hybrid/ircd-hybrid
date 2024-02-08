@@ -841,7 +841,6 @@ static void
 stats_operedup(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
-  char buf[32];
   unsigned int opercount = 0;
 
   DLINK_FOREACH(node, oper_list.head)
@@ -851,22 +850,21 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
     if (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER))
       continue;
 
+    const char *duration = "n/a";
     if (HasUMode(source_p, UMODE_OPER) || !HasUMode(target_p, UMODE_HIDEIDLE))
-      snprintf(buf, sizeof(buf), "%s", time_dissect(client_get_idle_time(source_p, target_p)));
-    else
-      strlcpy(buf, "n/a", sizeof(buf));
+      duration = time_dissect(client_get_idle_time(source_p, target_p));
 
     if (MyConnect(source_p) && HasUMode(source_p, UMODE_OPER))
       sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "p :[%c][%s] %s (%s@%s) Idle: %s",
                          HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
                          oper_privs_as_string(target_p->connection->operflags),
-                         target_p->name, target_p->username, target_p->host, buf);
+                         target_p->name, target_p->username, target_p->host, duration);
     else
       sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "p :[%c] %s (%s@%s) Idle: %s",
                          HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
-                         target_p->name, target_p->username, target_p->host, buf);
+                         target_p->name, target_p->username, target_p->host, duration);
     ++opercount;
   }
 

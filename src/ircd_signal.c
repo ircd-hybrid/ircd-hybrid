@@ -19,8 +19,11 @@
  *  USA
  */
 
-/*! \file ircd_signal.c
- * \brief responsible for ircd's signal handling.
+/**
+ * @file ircd_signal.c
+ * @brief Responsible for handling signals in the IRC daemon.
+ *
+ * This file contains functions for handling various signals that the IRC daemon may receive.
  */
 
 #include "stdinc.h"
@@ -28,9 +31,14 @@
 #include "ircd.h"
 #include "restart.h"
 
-
-/*
- * sigterm_handler - exit the server
+/**
+ * @brief Handles the SIGTERM signal, causing the server to exit gracefully.
+ *
+ * This function is the signal handler for the SIGTERM signal. When the
+ * server receives the SIGTERM signal, it calls this function, prompting
+ * the server to exit gracefully.
+ *
+ * @param sig Signal number (SIGTERM).
  */
 static void
 sigterm_handler(int sig)
@@ -38,8 +46,14 @@ sigterm_handler(int sig)
   server_die("received signal SIGTERM", false);
 }
 
-/*
- * sighup_handler - reread the server configuration
+/**
+ * @brief Handles the SIGHUP signal, triggering a reread of the server configuration.
+ *
+ * This function is the signal handler for the SIGHUP signal. When the
+ * server receives the SIGHUP signal, it sets the global flag `dorehash`
+ * to true, prompting a reread of the server configuration.
+ *
+ * @param sig Signal number (SIGHUP).
  */
 static void
 sighup_handler(int sig)
@@ -47,8 +61,14 @@ sighup_handler(int sig)
   dorehash = true;
 }
 
-/*
- * sigusr1_handler - reread the motd file
+/**
+ * @brief Handles the SIGUSR1 signal, triggering a reread of the MOTD file.
+ *
+ * This function is the signal handler for the SIGUSR1 signal. When the
+ * server receives the SIGUSR1 signal, it sets the global flag `doremotd`
+ * to true, prompting a reread of the Message of the Day (MOTD) file.
+ *
+ * @param sig Signal number (SIGUSR1).
  */
 static void
 sigusr1_handler(int sig)
@@ -56,12 +76,14 @@ sigusr1_handler(int sig)
   doremotd = true;
 }
 
-/*
+/**
+ * @brief Reaps zombie processes periodically as a side effect.
  *
- * inputs	- nothing
- * output	- nothing
- * side effects - Reaps zombies periodically
- * -AndroSyn
+ * This function is the signal handler for the SIGCHLD signal. When the
+ * server receives the SIGCHLD signal, it reaps zombie processes
+ * periodically to prevent them from lingering in the system.
+ *
+ * @param sig Signal number (SIGCHLD).
  */
 static void
 sigchld_handler(int sig)
@@ -73,8 +95,14 @@ sigchld_handler(int sig)
   errno = errno_save;
 }
 
-/*
- * sigint_handler - restart the server
+/**
+ * @brief Handles the SIGINT signal, restarting the server if running in the background.
+ *
+ * This function is the signal handler for the SIGINT signal. When the
+ * server receives the SIGINT signal, it calls `server_die` to exit gracefully.
+ * If the server is running in the background, it restarts the server.
+ *
+ * @param sig Signal number (SIGINT).
  */
 static void
 sigint_handler(int sig)
@@ -82,8 +110,13 @@ sigint_handler(int sig)
   server_die("received signal SIGINT", server_state.foreground ? false : true);
 }
 
-/*
- * setup_signals - initialize signal handlers for server
+/**
+ * @brief Initializes signal handlers for the server.
+ *
+ * This function sets up the signal handlers for various signals, including
+ * SIGXFSZ, SIGWINCH, SIGTRAP, SIGPIPE, SIGALRM, SIGHUP, SIGINT, SIGTERM,
+ * SIGUSR1, and SIGCHLD. It also specifies the corresponding signal handlers
+ * for each signal.
  */
 void
 setup_signals(void)

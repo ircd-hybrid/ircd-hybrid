@@ -19,8 +19,13 @@
  *  USA
  */
 
-/*! \file ircd.c
- * \brief Starts up and runs the ircd.
+/**
+ * @file ircd.c
+ * @brief Starts up and runs the ircd.
+ *
+ * This file contains the main entry point and functionality for starting up
+ * and running the ircd (Internet Relay Chat Daemon). It initializes various
+ * components, sets up event handlers, and manages server configurations.
  */
 
 #include "stdinc.h"
@@ -56,23 +61,110 @@
 #include "isupport.h"
 #include "extban.h"
 
+/**
+ * @struct SetOptions
+ * @brief Structure for server configuration options.
+ *
+ * The `SetOptions` structure holds various options related to server configuration,
+ * allowing modification through the SET irc command. It includes flags and settings
+ * for features such as auto connection, maximum clients, and flood control.
+ */
+struct SetOptions GlobalSetOptions;
 
-struct SetOptions GlobalSetOptions;  /* /quote set variables */
+/**
+ * @struct Counter
+ * @brief Structure holding various server activity counters.
+ *
+ * The `Counter` structure tracks various server activity metrics, including total
+ * client connections, IRC operator count, invisible clients, and peak client counts.
+ */
 struct Counter Count;
-struct ServerState_t server_state;
-struct ServerStatistics ServerStats;
-struct Connection meConnection;  /* That's also part of me */
-struct Client me = { .connection = &meConnection };  /* That's me */
 
+/**
+ * @struct ServerState_t
+ * @brief Structure representing the server's foreground state.
+ *
+ * The `ServerState_t` structure holds a flag indicating whether the server should
+ * run in the foreground. The flag is set based on the command line parameter
+ * '-foreground' when launching the ircd process.
+ */
+struct ServerState_t server_state;
+
+/**
+ * @struct ServerStatistics
+ * @brief Structure for server communication and connection statistics.
+ *
+ * The `ServerStatistics` structure contains statistics related to server communication
+ * and connections. These metrics provide insights into data transmission, connection
+ * durations, and various activities between clients and servers.
+ */
+struct ServerStatistics ServerStats;
+
+/**
+ * @struct Connection
+ * @brief Structure representing the connection details for this server.
+ *
+ * The `Connection` structure encapsulates the connection details for the server,
+ * including information such as connection status, socket details, and connection settings.
+ */
+struct Connection meConnection;
+
+/**
+ * @struct Client
+ * @brief Structure representing the client details for this server.
+ *
+ * The `Client` structure represents the client details for the server, with a connection
+ * link pointing to the associated `Connection` structure. This structure provides a
+ * comprehensive view of the client's attributes within the context of the server.
+ */
+struct Client me = { .connection = &meConnection };
+
+/**
+ * @var char **myargv
+ * @brief Pointer to the command line arguments.
+ */
 char **myargv;
+
+/**
+ * @var const char *logFileName
+ * @brief Pointer to the filename for the ircd.log file.
+ */
 const char *logFileName = LPATH;
+
+/**
+ * @var const char *pidFileName
+ * @brief Pointer to the filename for the process ID file.
+ */
 const char *pidFileName = PPATH;
 
+/**
+ * @var bool dorehash
+ * @brief Flag indicating whether to reload ircd configuration files.
+ *
+ * This flag is set to true when the ircd receives a SIGHUP signal,
+ * indicating the need to reload the configuration files.
+ */
 bool dorehash;
+
+/**
+ * @var bool doremotd
+ * @brief Flag indicating whether to reload the Message of the Day (MOTD) files.
+ *
+ * This flag is set to true when the ircd receives a SIGUSR1 signal,
+ * indicating the need to reload the MOTD files.
+ */
 bool doremotd;
 
+/**
+ * @var bool printVersion
+ * @brief Flag indicating whether to print the version and exit.
+ */
 static bool printVersion;
 
+/**
+ * @var struct lgetopt myopts[]
+ * @brief Array of command-line options and their descriptions.
+ */
 static struct lgetopt myopts[] =
 {
   { "configfile", &ConfigGeneral.configfile,
@@ -131,7 +223,12 @@ struct event event_write_links_file =
   .handler = write_links_file,
 };
 
-
+/**
+ * @brief Main IO loop for processing events and managing server activities.
+ *
+ * This function runs continuously, handling various tasks such as
+ * processing events, checking for rehash signals, and managing client connections.
+ */
 static void
 io_loop(void)
 {
@@ -168,11 +265,12 @@ io_loop(void)
   }
 }
 
-/* initalialize_global_set_options()
+/**
+ * @brief Initializes global server configuration options.
  *
- * inputs       - none
- * output       - none
- * side effects - This sets all global set options needed
+ * This function sets default values for various global server configuration options
+ * needed during runtime. It is responsible for initializing the `GlobalSetOptions`
+ * structure, which holds key settings that can be modified using the SET irc command.
  */
 static void
 initialize_global_set_options(void)
@@ -187,11 +285,13 @@ initialize_global_set_options(void)
   GlobalSetOptions.joinfloodtime = ConfigChannel.default_join_flood_time;
 }
 
-/* write_pidfile()
+/**
+ * @brief Writes the process ID to the specified file.
  *
- * inputs       - filename+path of pid file
- * output       - NONE
- * side effects - write the pid of the ircd to filename
+ * @param filename Path to the process ID file.
+ *
+ * This function opens the specified file and writes the process ID of
+ * the ircd server to it.
  */
 static void
 write_pidfile(const char *filename)
@@ -216,13 +316,14 @@ write_pidfile(const char *filename)
          filename, strerror(errno));
 }
 
-/* check_pidfile()
+/**
+ * @brief Checks if the daemon is already running using the process ID file.
  *
- * inputs       - filename+path of pid file
- * output       - none
- * side effects - reads pid from pidfile and checks if ircd is in process
- *                list. if it is, gracefully exits
- * -kre
+ * @param filename Path to the process ID file.
+ *
+ * This function reads the process ID from the specified file and checks
+ * if the ircd server is already running. If it is, the program exits
+ * to prevent multiple instances.
  */
 static void
 check_pidfile(const char *filename)
@@ -254,12 +355,10 @@ check_pidfile(const char *filename)
          filename, strerror(errno));
 }
 
-/* setup_corefile()
+/**
+ * @brief Sets up the core file size to system limits.
  *
- * inputs       - nothing
- * output       - nothing
- * side effects - setups corefile to system limits.
- * -kre
+ * This function sets the core file size to the maximum allowed by the system.
  */
 static void
 setup_corefile(void)
@@ -274,10 +373,16 @@ setup_corefile(void)
   }
 }
 
+/**
+ * @brief Sets up the maximum number of file descriptors.
+ *
+ * This function sets up the maximum number of file descriptors that
+ * the ircd server is allowed to use.
+ */
 static void
 setup_fdlimit(void)
 {
-  struct rlimit rlim; /* resource limits */
+  struct rlimit rlim;
 
   if (getrlimit(RLIMIT_NOFILE, &rlim))
   {
@@ -304,8 +409,13 @@ setup_fdlimit(void)
   }
 }
 
-/*
- * print_startup - print startup information
+/**
+ * @brief Prints startup information including version and process ID.
+ *
+ * @param pid Process ID of the ircd server.
+ *
+ * This function prints information about the server version, process ID,
+ * and whether it is running in the background or foreground.
  */
 static void
 print_startup(int pid)
@@ -316,6 +426,12 @@ print_startup(int pid)
          : "foreground", ConfigGeneral.dpath);
 }
 
+/**
+ * @brief Detaches the server process to run as a daemon.
+ *
+ * This function forks the process to create a child, detaches it from
+ * the terminal, and runs it as a daemon in the background.
+ */
 static void
 make_daemon(void)
 {
@@ -335,6 +451,18 @@ make_daemon(void)
   setsid();
 }
 
+/**
+ * @brief Main function to initialize and run the IRC server.
+ *
+ * @param argc Number of command line arguments.
+ * @param argv Array of command line argument strings.
+ *
+ * @return Returns 0 upon successful execution.
+ *
+ * This is the main entry point for the ircd server. It initializes various
+ * components, sets up signal handling, reads configuration files, and runs
+ * the main IO loop to handle server activities.
+ */
 int
 main(int argc, char *argv[])
 {

@@ -38,4 +38,4 @@ extern bool valid_uid(const char *);
 extern void init_uid(void);
 extern const char *uid_get(void);
 extern void generate_sid(void);
-#endif
+#endif  /* INCLUDED_id_h */

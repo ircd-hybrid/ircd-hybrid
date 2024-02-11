@@ -20,7 +20,7 @@
  */
 
 /**
- * @file
+ * @file ircd.h
  * @brief Header file for ircd startup routines and server configurations.
  *
  * This header file contains declarations and definitions related to ircd startup routines,

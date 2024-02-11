@@ -19,8 +19,14 @@
  *  USA
  */
 
-/*! \file memory.h
- * \brief A header for the memory functions.
+/**
+ * @file memory.h
+ * @brief Memory utilities for allocation, deallocation, and duplication.
+ *
+ * The memory.h header provides functions for handling memory-related operations,
+ * such as allocation, deallocation, and string duplication. These utilities help
+ * manage memory resources effectively and include safeguards for out-of-memory
+ * conditions to ensure robust program behavior.
  */
 
 #ifndef INCLUDED_memory_h

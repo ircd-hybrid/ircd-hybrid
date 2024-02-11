@@ -19,8 +19,9 @@
  *  USA
  */
 
-/*! \file restart.c
- * \brief Functions to allow the ircd to restart.
+/**
+ * @file restart.c
+ * @brief Functions to facilitate the restart and termination of the IRC server.
  */
 
 #include "stdinc.h"
@@ -35,7 +36,17 @@
 #include "memory.h"
 #include "conf_db.h"
 
-
+/**
+ * @brief Initiates server termination or restart.
+ *
+ * This function is responsible for initiating the termination or restart of the IRC server.
+ * It broadcasts server termination or restart messages, saves databases, closes file descriptors,
+ * unlinks the PID file, and then either restarts the server or exits based on the 'restart' parameter.
+ * In the case of a restart, it attempts to execute the server binary with the original command line arguments.
+ *
+ * @param message A message indicating the reason for server termination or restart.
+ * @param restart A boolean flag indicating whether to restart the server (true) or terminate it (false).
+ */
 void
 server_die(const char *message, bool restart)
 {

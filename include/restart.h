@@ -19,8 +19,9 @@
  *  USA
  */
 
-/*! \file restart.h
- * \brief A header for the restart/die functions.
+/**
+ * @file restart.h
+ * @brief Header file for server restart and termination functionality.
  */
 
 #ifndef INCLUDED_restart_h

@@ -19,24 +19,52 @@
  *  USA
  */
 
-/*! \file auth.h
- * \brief Interface for DNS and ident lookups.
+/**
+ * @file auth.h
+ * @brief This file contains the interface for handling DNS and ident lookups in the server.
+ *
+ * The functions and structures defined in this file are responsible for managing the authentication
+ * process, including DNS hostname resolution and RFC 1413 Identd queries for connecting clients.
  */
 
 #ifndef INCLUDED_auth_h
 #define INCLUDED_auth_h
 
-enum { RFC1413_BUFSIZ = 512 };  /**< rfc1413 says we MUST accept 512 bytes */
-enum { RFC1413_PORT   = 113 };  /**< As defined per rfc1413, IDENT server listens on TCP port 113 */
+/**
+ * @enum RFC1413_BUFSIZ
+ * @brief Maximum buffer size for RFC 1413 ident replies.
+ *
+ * The RFC1413_BUFSIZ constant represents the maximum buffer size, in bytes, that is
+ * allowed for RFC 1413 ident replies. According to the RFC 1413 standard, a server
+ * should not send more than 512 octets of user ID and a client must accept at least
+ * 512 octets of user ID.
+ */
+enum { RFC1413_BUFSIZ = 512 };
+
+/**
+ * @enum RFC1413_PORT
+ * @brief Port number for the (Ident) server.
+ *
+ * The RFC1413_PORT constant represents the TCP port number (113) on which the
+ * Ident server listens, adhering to the guidelines outlined in RFC 1413.
+ */
+enum { RFC1413_PORT = 113 };
 
 struct Client;
 
-/** Stores state of the DNS and RFC 1413 ident lookups for a client. */
+/**
+ * @struct AuthRequest
+ * @brief Structure to maintain the state of DNS and ident lookups for a client.
+ *
+ * The AuthRequest structure holds information about ongoing DNS and ident lookup
+ * processes for a specific client. It is used to track the progress of these
+ * lookups and manage associated resources.
+ */
 struct AuthRequest
 {
-  bool dns_pending;  /**< 'true' as long as dns request hasn't finished */
-  bool ident_pending;  /**< 'true' as long as identd request hasn't finished */
-  struct Client *client;  /**< Pointer to Client structure for request. */
+  bool dns_pending;  /**< Flag indicating whether a DNS request is pending for the client. */
+  bool ident_pending;  /**< Flag indicating whether an identd request is pending for the client. */
+  struct Client *client;  /**< Pointer to the Client structure associated with the request. */
   fde_t *fd;  /**< File descriptor for identd queries. */
 };
 

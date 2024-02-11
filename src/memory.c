@@ -19,8 +19,12 @@
  *  USA
  */
 
-/*! \file memory.c
- * \brief Memory utilities.
+/**
+ * @file memory.c
+ * @brief Memory utilities.
+ *
+ * This file contains utility functions for memory management, including allocation,
+ * reallocation, and deallocation, as well as string duplication functions.
  */
 
 #include "stdinc.h"
@@ -28,9 +32,15 @@
 #include "memory.h"
 #include "restart.h"
 
-
-/*
- * xcalloc - allocate memory, call outofmemory on failure
+/**
+ * @brief Allocates memory using calloc.
+ *
+ * This function allocates memory of the specified size using calloc.
+ * The use of calloc ensures that the allocated memory is initialized to zero.
+ * If memory allocation fails, it calls the outofmemory() function.
+ *
+ * @param size The size of the memory block to allocate.
+ * @return A pointer to the allocated memory block.
  */
 void *
 xcalloc(size_t size)
@@ -43,8 +53,15 @@ xcalloc(size_t size)
   return ret;
 }
 
-/*
- * xrealloc - reallocate memory, call outofmemory on failure
+/**
+ * @brief Reallocates memory using realloc.
+ *
+ * This function reallocates memory for the specified block to the new size using realloc.
+ * If memory allocation fails and the new size is non-zero, it calls the outofmemory() function.
+ *
+ * @param x Pointer to the memory block to reallocate.
+ * @param y The new size of the memory block.
+ * @return A pointer to the reallocated memory block.
  */
 void *
 xrealloc(void *x, size_t y)
@@ -57,12 +74,28 @@ xrealloc(void *x, size_t y)
   return ret;
 }
 
+/**
+ * @brief Deallocates memory.
+ *
+ * This function deallocates the memory block pointed to by x using free.
+ *
+ * @param x Pointer to the memory block to deallocate.
+ */
 void
 xfree(void *x)
 {
   free(x);
 }
 
+/**
+ * @brief Duplicates a string and handles out-of-memory conditions.
+ *
+ * This function duplicates the specified string using malloc and strcpy.
+ * If memory allocation fails, it calls the outofmemory() function.
+ *
+ * @param s The string to duplicate.
+ * @return A pointer to the duplicated string.
+ */
 void *
 xstrdup(const char *s)
 {
@@ -76,6 +109,16 @@ xstrdup(const char *s)
   return ret;
 }
 
+/**
+ * @brief Duplicates a string up to a specified length using malloc and strlcpy.
+ *
+ * This function duplicates the specified string up to the specified length using malloc and strlcpy.
+ * If memory allocation fails, it calls the outofmemory() function.
+ *
+ * @param s The string to duplicate.
+ * @param len The maximum length of the duplicated string.
+ * @return A pointer to the duplicated string.
+ */
 void *
 xstrndup(const char *s, size_t len)
 {
@@ -89,12 +132,11 @@ xstrndup(const char *s, size_t len)
   return ret;
 }
 
-/* outofmemory()
+/**
+ * @brief Handles out-of-memory conditions.
  *
- * input        - NONE
- * output       - NONE
- * side effects - simply try to report there is a problem.
- *                Abort if it was called more than once
+ * This function reports an out-of-memory condition and restarts the program.
+ * If it is called more than once, it aborts the program execution.
  */
 void
 outofmemory(void)

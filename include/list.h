@@ -20,7 +20,7 @@
  */
 
 /**
- * @file
+ * @file list.h
  * @brief Declarations for double-linked list manipulation routines.
  *
  * This file contains declarations for functions and structures used in

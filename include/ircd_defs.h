@@ -19,8 +19,9 @@
  *  USA
  */
 
-/*! \file ircd_defs.h
- * \brief A header for ircd global definitions.
+/**
+ * @file ircd_defs.h
+ * @brief A header for ircd global definitions.
  *
  * This header file defines various global constants and structures used
  * throughout the ircd. It includes size definitions for record entries,
@@ -34,7 +35,7 @@
 #include "stdinc.h"
 
 /**
- * \defgroup ircd_constants IRCd Constants
+ * @defgroup ircd_constants IRCd Constants
  * @{
  */
 

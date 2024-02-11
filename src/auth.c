@@ -408,7 +408,7 @@ auth_read_reply(fde_t *F, void *data)
   struct AuthRequest *const auth = data;
   const char *username = NULL;
   ssize_t len = 0;
-  char buf[RFC1413_BUFSIZ + 1];
+  char buf[RFC1413_BUFSIZE + 1];
 
   assert(auth->fd == F);
   assert(auth->client);
@@ -559,7 +559,7 @@ auth_start_query(struct AuthRequest *auth)
   v6 = (struct sockaddr_in6 *)&localaddr;
   v6->sin6_port = htons(0);
 
-  comm_connect_tcp(auth->fd, &auth->client->ip, RFC1413_PORT, &localaddr,
+  comm_connect_tcp(auth->fd, &auth->client->ip, RFC1413_PORTNUM, &localaddr,
                    auth_connect_callback, auth, 4);
 }
 

@@ -39,20 +39,6 @@ enum
   CAN_SEND_OPV
 };
 
-enum
-{
-  MSG_FLOOD_NOTICED  = 1 << 0,
-  JOIN_FLOOD_NOTICED = 1 << 1
-};
-
-#define SetFloodNoticed(x)   ((x)->flags |= MSG_FLOOD_NOTICED)
-#define IsSetFloodNoticed(x) ((x)->flags & MSG_FLOOD_NOTICED)
-#define ClearFloodNoticed(x) ((x)->flags &= ~MSG_FLOOD_NOTICED)
-
-#define SetJoinFloodNoticed(x)   ((x)->flags |= JOIN_FLOOD_NOTICED)
-#define IsSetJoinFloodNoticed(x) ((x)->flags & JOIN_FLOOD_NOTICED)
-#define ClearJoinFloodNoticed(x) ((x)->flags &= ~JOIN_FLOOD_NOTICED)
-
 struct Client;
 
 /** Mode structure for channels */
@@ -81,8 +67,10 @@ struct Channel
   uintmax_t last_invite_time;  /**< Last time an INVITE to this channel has been issued; monotonic time */
   uintmax_t last_join_time;  /**< Last time a user has joined the channel; monotonic time */
   uintmax_t first_received_message_time;  /**< Channel flood control; monotonic time */
-  unsigned int flags;
   unsigned int received_number_of_privmsgs;
+
+  bool sent_join_flood_notice;  /**< Indicates whether a server notice about a join flood event has been sent to IRC operators. */
+  bool sent_message_flood_notice;  /**< Indicates whether a server notice about a message flood event has been sent to IRC operators. */
 
   dlink_list members_local;  /**< List of local members on this channel */
   dlink_list members;  /**< List of members on this channel */

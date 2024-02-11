@@ -83,15 +83,15 @@ channel_add_user(struct Channel *channel, struct Client *client,
     if (channel->number_joined <= 0)
     {
       channel->number_joined = 0;
-      ClearJoinFloodNoticed(channel);
+      channel->sent_join_flood_notice = false;
     }
     else if (channel->number_joined >= GlobalSetOptions.joinfloodcount)
     {
       channel->number_joined = GlobalSetOptions.joinfloodcount;
 
-      if (!IsSetJoinFloodNoticed(channel))
+      if (channel->sent_join_flood_notice == false)
       {
-        SetJoinFloodNoticed(channel);
+        channel->sent_join_flood_notice = true;
         sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
                              "Possible Join Flooder %s on %s target: %s",
                              client_get_name(client, HIDE_IP),

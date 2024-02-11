@@ -163,19 +163,19 @@ flood_attack_channel(bool notice, struct Client *source_p, struct Channel *chann
     if (channel->received_number_of_privmsgs)
       channel->received_number_of_privmsgs = 0;
     else
-      ClearFloodNoticed(channel);
+      channel->sent_message_flood_notice = false;
 
     channel->first_received_message_time = event_base->time.sec_monotonic;
   }
 
   if (channel->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
   {
-    if (!IsSetFloodNoticed(channel))
+    if (channel->sent_message_flood_notice == false)
     {
       sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE, "Possible Flooder %s on %s target: %s",
                            client_get_name(source_p, HIDE_IP),
                            source_p->servptr->name, channel->name);
-      SetFloodNoticed(channel);
+      channel->sent_message_flood_notice = true;
     }
 
     if (MyClient(source_p))

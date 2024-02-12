@@ -35,7 +35,7 @@
 #include "tls.h"
 
 /**
- * @def FD_DESC_SIZE
+ * @enum FD_DESC_SIZE
  * @brief Size of the file descriptor description buffer.
  */
 enum { FD_DESC_SIZE = 80 };  /* HOSTLEN + comment */
@@ -92,7 +92,7 @@ typedef struct _fde
   } connect;
   /**@}*/
 
-  tls_data_t tls; /**< TLS-related data. */
+  tls_data_t tls;  /**< TLS-related data. */
 } fde_t;
 
 extern int number_fd;  /**< Number of file descriptors. */

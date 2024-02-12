@@ -42,7 +42,8 @@
  * passed to a function is a custom pattern to be used for constructing a message.
  * This flag provides flexibility in handling specific cases, such as custom IRC
  * numeric messages, where a predefined pattern may not be suitable.
- * \see sendto_one_numeric
+ *
+ * @see sendto_one_numeric
  */
 #define SND_EXPLICIT 0x40000000
 
@@ -54,7 +55,7 @@
  * Numeric replies provide information or responses to client commands, while error codes
  * indicate various error conditions that can occur during communication.
  *
- * \note Numerics in the range 000-099 are reserved for server-client connections where
+ * @note Numerics in the range 000-099 are reserved for server-client connections where
  *       the client is local to the server. If any server receives a numeric in this
  *       range from another server, it is remapped to the range 100-199.
  */

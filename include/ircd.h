@@ -25,6 +25,7 @@
  *
  * This header file contains declarations and definitions related to ircd startup routines,
  * server configurations, and various server statistics.
+ *
  * @see ircd.c
  */
 

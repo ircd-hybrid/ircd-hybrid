@@ -101,12 +101,12 @@ init_uid(void)
 }
 
 /**
- * \brief Increments the User ID (UID) by one.
+ * @brief Increments the User ID (UID) by one.
  *
- * \param i Index number into new_uid.
+ * @param i Index number into new_uid.
  *
- * This function increments the User ID (UID) by one. It starts from the rightmost character and propagates any carry-over
- * to the leftmost characters if needed.
+ * This function increments the User ID (UID) by one. It starts from the rightmost character and
+ * propagates any carry-over to the leftmost characters if needed.
  */
 static void
 add_one_to_uid(unsigned int i)

@@ -37,6 +37,7 @@
  * @brief Iterates forward through the double-linked list.
  *
  * This macro is used to iterate through a double-linked list in the forward direction.
+ *
  * @param pos Node variable for iteration.
  * @param head List head.
  */
@@ -48,6 +49,7 @@
  *
  * This macro is used to iterate through a double-linked list in the forward direction
  * while safely removing nodes. It uses a temporary list head for safe removal.
+ *
  * @param pos Node variable for iteration.
  * @param n Temporary list head for safe removal.
  * @param head List head.
@@ -59,6 +61,7 @@
  * @brief Iterates backward through a double-linked list.
  *
  * This macro is used to iterate through a double-linked list in the backward direction.
+ *
  * @param pos Node variable for iteration.
  * @param head List head.
  */
@@ -69,6 +72,7 @@
  * @brief Macro to retrieve the length of the double-linked list.
  *
  * This macro returns the number of nodes in the specified double-linked list.
+ *
  * @param list Pointer to the double-linked list.
  */
 #define dlink_list_length(list) (list)->length

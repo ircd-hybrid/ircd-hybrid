@@ -51,7 +51,7 @@
 
 /**
  * @def HASHSIZE
- *  @brief Size of hash table used in the code (aligned with FNV1_32_SIZE).
+ * @brief Size of hash table used in the code (aligned with FNV1_32_SIZE).
  */
 #define HASHSIZE FNV1_32_SIZE
 

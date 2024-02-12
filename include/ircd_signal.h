@@ -19,8 +19,9 @@
  *  USA
  */
 
-/*! \file ircd_signal.h
- * \brief A header for ircd signals.
+/**
+ * @file ircd_signal.h
+ * @brief Header file for IRC daemon signal handling.
  */
 
 #ifndef INCLUDED_ircd_signal_h

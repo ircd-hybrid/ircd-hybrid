@@ -19,19 +19,35 @@
  *  USA
  */
 
-/*! \file id.h
- * \brief Contains functions pertaining to SID/UID generation.
+/**
+ * @file id.h
+ * @brief Functions for SID/UID generation and validation.
+ *
+ * This file contains declarations for functions related to Server ID (SID)
+ * and User ID (UID) generation and validation. These functions are
+ * essential for managing unique identifiers within the IRC daemon.
  */
 
 #ifndef INCLUDED_id_h
 #define INCLUDED_id_h
 
-enum
-{
-  IRC_MAXSID  = 3,
-  IRC_MAXUID  = 6,
-  TOTALSIDUID = IRC_MAXSID + IRC_MAXUID
-};
+/**
+ * @enum IRC_MAXSID
+ * @brief Maximum length of SID (Server ID).
+ */
+enum { IRC_MAXSID = 3 };
+
+/**
+ * @enum IRC_MAXUID
+ * @brief Maximum length of UID (User ID).
+ */
+enum { IRC_MAXUID = 6 };
+
+/**
+ * @enum TOTALSIDUID
+ * @brief Total length of SID and UID combined.
+ */
+enum { TOTALSIDUID = IRC_MAXSID + IRC_MAXUID };
 
 extern bool valid_sid(const char *);
 extern bool valid_uid(const char *);

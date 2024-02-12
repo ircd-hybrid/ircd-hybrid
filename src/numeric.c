@@ -19,14 +19,23 @@
  *  USA
  */
 
-/*! \file numeric.c
- * \brief Declarations of numeric replies.
+/**
+ * @file numeric.c
+ * @brief Declarations of numeric replies.
+ *
+ * This file contains the implementation of IRC numeric replies and their corresponding strings.
  */
 
 #include "stdinc.h"
 #include "numeric.h"
 
-
+/**
+ * @brief Array of string representations for IRC numeric replies.
+ *
+ * This array maps IRC numeric replies to their corresponding string representations.
+ * Each IRC numeric is represented by an index in the array, and its corresponding string
+ * template is stored at that index.
+ */
 static const char *const replies[] =
 {
   /* 001 */  [RPL_WELCOME] = ":Welcome to the %s Internet Relay Chat Network %s!%s@%s",
@@ -231,12 +240,14 @@ static const char *const replies[] =
   /* 999 */  [ERR_LAST_ERR_MSG] = ":Last error message"
 };
 
-/*
- * numeric_form
+/**
+ * @brief Get the string representation of an IRC numeric.
  *
- * inputs       - numeric
- * output       - corresponding string
- * side effects - NONE
+ * This function returns the string representation of the specified IRC numeric.
+ * If the numeric is not recognized, it returns the string representation for the last error message.
+ *
+ * @param numeric The IRC numeric for which to retrieve the string representation.
+ * @return A pointer to the string representation of the IRC numeric or the last error message string.
  */
 const char *
 numeric_form(enum irc_numerics numeric)

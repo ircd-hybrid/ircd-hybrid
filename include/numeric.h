@@ -19,22 +19,45 @@
  *  USA
  */
 
-/*! \file numeric.h
- * \brief Declarations of numeric replies.
+/**
+ * @file numeric.h
+ * @brief Declarations of numeric replies.
+ *
+ * The numeric.h file provides an enumeration of IRC (Internet Relay Chat)
+ * numeric replies, which are messages exchanged between servers and clients
+ * during the IRC communication process. Numeric replies convey various
+ * information, such as welcome messages, channel lists, user details, and
+ * error notifications. Each numeric reply is represented by a symbolic constant
+ * defined in the enum irc_numerics enumeration.
  */
 
 #ifndef INCLUDED_numeric_h
 #define INCLUDED_numeric_h
 
-
-#define SND_EXPLICIT 0x40000000  /**< First argument is a pattern to use */
-
-/*
- * Reserve numerics 000-099 for server-client connections where the client
- * is local to the server. If any server is passed a numeric in this range
- * from another server then it is remapped to 100-199. -avalon
+/**
+ * @def SND_EXPLICIT
+ * @brief Flag indicating that the first argument to a function is a custom pattern.
+ *
+ * When the SND_EXPLICIT flag is set, it indicates that the first argument
+ * passed to a function is a custom pattern to be used for constructing a message.
+ * This flag provides flexibility in handling specific cases, such as custom IRC
+ * numeric messages, where a predefined pattern may not be suitable.
+ * \see sendto_one_numeric
  */
+#define SND_EXPLICIT 0x40000000
 
+/**
+ * @enum irc_numerics
+ * @brief Enumeration of IRC numeric replies and error codes.
+ *
+ * This enumeration defines the numeric replies and error codes used in the IRC protocol.
+ * Numeric replies provide information or responses to client commands, while error codes
+ * indicate various error conditions that can occur during communication.
+ *
+ * \note Numerics in the range 000-099 are reserved for server-client connections where
+ *       the client is local to the server. If any server receives a numeric in this
+ *       range from another server, it is remapped to the range 100-199.
+ */
 enum irc_numerics
 {
   RPL_WELCOME              =  1,

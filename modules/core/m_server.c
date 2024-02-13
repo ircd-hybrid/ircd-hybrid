@@ -598,28 +598,10 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  dlink_node *node;
-  bool hlined = false;
-  bool llined = false;
   const struct MaskItem *conf = source_p->from->connection->confs.head->data;
+  bool hlined = dlinkFindCmp(&conf->hub_list , parv[1], match) != NULL;
+  bool llined = dlinkFindCmp(&conf->leaf_list, parv[1], match) != NULL;
 
-  DLINK_FOREACH(node, conf->leaf_list.head)
-  {
-    if (match(node->data, parv[1]) == 0)
-    {
-      llined = true;
-      break;
-    }
-  }
-
-  DLINK_FOREACH(node, conf->hub_list.head)
-  {
-    if (match(node->data, parv[1]) == 0)
-    {
-      hlined = true;
-      break;
-    }
-  }
 
   /*
    * Ok, this way this works is

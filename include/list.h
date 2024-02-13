@@ -107,6 +107,7 @@ extern void dlinkDelete(dlink_node *, dlink_list *);
 extern void dlinkMoveList(dlink_list *, dlink_list *);
 extern void dlink_move_node(dlink_node *, dlink_list *, dlink_list *);
 extern dlink_node *dlinkFind(dlink_list *, const void *);
+extern dlink_node *dlinkFindCmp(const dlink_list *, const void *, int (*)(const char *, const char *));
 extern dlink_node *dlinkFindDelete(dlink_list *, void *);
 extern dlink_node *make_dlink_node(void);
 #endif  /* INCLUDED_list_h */

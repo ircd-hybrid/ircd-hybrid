@@ -206,6 +206,29 @@ dlinkFind(dlink_list *list, const void *data)
 }
 
 /**
+ * @brief Finds a node with a specific data value using a custom comparison function.
+ *
+ * This function searches for a node with the specified data value in the double-linked list
+ * using a custom comparison function.
+ *
+ * @param list Pointer to the double-linked list.
+ * @param data Pointer to the data value to search for.
+ * @param cmp Function pointer to the comparison function.
+ * @return Pointer to the node with the specified data value, or NULL if not found.
+ */
+dlink_node *
+dlinkFindCmp(const dlink_list *list, const void *data, int (*cmp)(const char *, const char *))
+{
+  dlink_node *node;
+
+  DLINK_FOREACH(node, list->head)
+    if (cmp(node->data, data) == 0)
+      return node;
+
+  return NULL;
+}
+
+/**
  * @brief Moves the contents of one double-linked list to another.
  *
  * This function moves the contents of the specified source double-linked list

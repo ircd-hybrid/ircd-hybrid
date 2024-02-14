@@ -107,7 +107,7 @@ struct ServerStatistics ServerStats;
  * The `Connection` structure encapsulates the connection details for the server,
  * including information such as connection status, socket details, and connection settings.
  */
-struct Connection meConnection;
+static struct Connection meConnection;
 
 /**
  * @struct Client

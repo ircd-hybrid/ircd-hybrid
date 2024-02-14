@@ -513,10 +513,13 @@ free_list_task(struct Client *client)
 static bool
 list_allow_channel(const char *name, const struct ListTask *lt)
 {
+  if (dlink_list_length(&lt->show_mask))
+    if (dlinkFindCmp(&lt->show_mask, name, match) == NULL)
+      return false;
 
-  if (dlinkFindCmp(&lt->show_mask, name, match) == NULL ||
-      dlinkFindCmp(&lt->hide_mask, name, match))
-    return false;
+  if (dlink_list_length(&lt->hide_mask))
+    if (dlinkFindCmp(&lt->hide_mask, name, match))
+      return false;
 
   return true;
 }

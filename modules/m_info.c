@@ -670,6 +670,7 @@ send_conf_options(struct Client *source_p)
     {
       case OUTPUT_STRING:  /* For "char *" references */
         value = iptr->option ? *((const char *const *)iptr->option) : "NONE";
+        break;
       case OUTPUT_STRING_PTR:  /* For "char foo[]" references */
         value = iptr->option ? iptr->option : "NONE";
         break;

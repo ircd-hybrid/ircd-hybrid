@@ -661,73 +661,32 @@ send_birthdate_online_time(struct Client *source_p)
 static void
 send_conf_options(struct Client *source_p)
 {
-  /*
-   * Parse the info_table[] and do the magic.
-   */
   for (const struct InfoStruct *iptr = info_table; iptr->name; ++iptr)
   {
+    char buf[24]; /* 24 = sizeof("18446744073709551615") +3 */
+    const char *value = NULL;
+
     switch (iptr->output_type)
     {
-      /* For "char *" references */
-      case OUTPUT_STRING:
-      {
-        const char *option = *((const char *const *)iptr->option);
-
-        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
-                           ":%-30s %-5s [%s]",
-                           iptr->name, option ? option : "NONE",
-                           iptr->desc ? iptr->desc : "<none>");
+      case OUTPUT_STRING:  /* For "char *" references */
+        value = iptr->option ? *((const char *const *)iptr->option) : "NONE";
+      case OUTPUT_STRING_PTR:  /* For "char foo[]" references */
+        value = iptr->option ? iptr->option : "NONE";
         break;
-      }
-
-      /* For "char foo[]" references */
-      case OUTPUT_STRING_PTR:
-      {
-        const char *option = iptr->option;
-
-        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
-                           ":%-30s %-5s [%s]",
-                           iptr->name, option ? option : "NONE",
-                           iptr->desc ? iptr->desc : "<none>");
+      case OUTPUT_DECIMAL:  /* Output info_table[i].option as a decimal value. */
+        snprintf(buf, sizeof(buf), "%u", *((const unsigned int *const)iptr->option));
+        value = buf;
         break;
-      }
-
-      /* Output info_table[i].option as a decimal value. */
-      case OUTPUT_DECIMAL:
-      {
-        const unsigned int option = *((const unsigned int *const)iptr->option);
-
-        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
-                           ":%-30s %-5u [%s]",
-                           iptr->name, option, iptr->desc ? iptr->desc : "<none>");
+      case OUTPUT_BOOLEAN:  /* Output info_table[i].option as "ON" or "OFF" */
+        value = (iptr->option && *((const unsigned int *const)iptr->option)) ? "ON" : "OFF";
         break;
-      }
-
-      /* Output info_table[i].option as "ON" or "OFF" */
-      case OUTPUT_BOOLEAN:
-      {
-        const unsigned int option = *((const unsigned int *const)iptr->option);
-
-        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
-                           ":%-30s %-5s [%s]",
-                           iptr->name, option ? "ON" : "OFF",
-                           iptr->desc ? iptr->desc : "<none>");
-
+      case OUTPUT_BOOLEAN_YN:  /* Output info_table[i].option as "YES" or "NO" */
+        value = (iptr->option && *((const unsigned int *const)iptr->option)) ? "YES" : "NO";
         break;
-      }
-
-      /* Output info_table[i].option as "YES" or "NO" */
-      case OUTPUT_BOOLEAN_YN:
-      {
-        const unsigned int option = *((const unsigned int *const)iptr->option);
-
-        sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
-                           ":%-30s %-5s [%s]",
-                           iptr->name, option ? "YES" : "NO",
-                           iptr->desc ? iptr->desc : "<none>");
-        break;
-      }
     }
+
+    sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT, ":%-30s %-5s [%s]",
+                       iptr->name, value, iptr->desc);
   }
 
   sendto_one_numeric(source_p, &me, RPL_INFO, "");

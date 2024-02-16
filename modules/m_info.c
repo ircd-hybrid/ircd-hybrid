@@ -46,7 +46,6 @@ struct InfoStruct
   enum
   {
     OUTPUT_STRING = 1,  /* Output option as %s w/ dereference  */
-    OUTPUT_STRING_PTR,  /* Output option as %s w/out deference */
     OUTPUT_DECIMAL,  /* Output option as decimal (%d) */
     OUTPUT_BOOLEAN,  /* Output option as "ON" or "OFF" */
     OUTPUT_BOOLEAN_YN  /* Output option as "YES" or "NO" */
@@ -243,9 +242,6 @@ send_conf_options(struct Client *source_p)
     {
       case OUTPUT_STRING:  /* For "char *" references */
         value = iptr->option ? *((const char *const *)iptr->option) : "NONE";
-        break;
-      case OUTPUT_STRING_PTR:  /* For "char foo[]" references */
-        value = iptr->option ? iptr->option : "NONE";
         break;
       case OUTPUT_DECIMAL:  /* Output info_table[i].option as a decimal value. */
         snprintf(buf, sizeof(buf), "%u", *((const unsigned int *const)iptr->option));

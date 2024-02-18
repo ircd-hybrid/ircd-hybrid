@@ -12,8 +12,10 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Download coverity scan build tool
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download and extract Coverity Scan build tool
       run: |
         curl -o cov-analysis-linux64.tar.gz https://scan.coverity.com/download/cxx/linux64 \
           --form project=$GITHUB_REPOSITORY \
@@ -23,15 +25,13 @@ jobs:
       env:
         TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 
-    - name: configure
-      run: ./configure
-
-    - name: Build with cov-build
+    - name: Configure and build with cov-build
       run: |
         export PATH=$(pwd)/cov-analysis-linux64/bin:$PATH
+        ./configure
         cov-build --dir cov-int make
 
-    - name: Submit result to coverity scan
+    - name: Submit result to Coverity Scan
       run: |
         tar czvf result.tgz cov-int
         curl \

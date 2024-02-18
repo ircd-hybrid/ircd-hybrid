@@ -41,6 +41,7 @@
 #include "id.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
+#include "memory.h"
 #include "motd.h"
 #include "conf.h"
 #include "hostmask.h"
@@ -568,6 +569,7 @@ main(int argc, char *argv[])
   {
     ilog(LOG_TYPE_IRCD, "Generating server ID");
     generate_sid();
+    ConfigServerInfo.sid = xstrdup(me.id);
   }
   else
     strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));

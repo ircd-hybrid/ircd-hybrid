@@ -67,6 +67,9 @@ static const struct InfoStruct info_table[] =
   INFO_ENTRY("KPATH", OUTPUT_STRING, &ConfigGeneral.klinefile, "Path to K-line database file"),
   INFO_ENTRY("XPATH", OUTPUT_STRING, &ConfigGeneral.xlinefile, "Path to X-line database file"),
   INFO_ENTRY("RESVPATH", OUTPUT_STRING, &ConfigGeneral.resvfile, "Path to resv database file"),
+  INFO_ENTRY("name", OUTPUT_STRING, &ConfigServerInfo.name, "Server name"),
+  INFO_ENTRY("sid", OUTPUT_STRING, &ConfigServerInfo.sid, "Server ID"),
+  INFO_ENTRY("description", OUTPUT_STRING, &ConfigServerInfo.description, "Server description"),
   INFO_ENTRY("network_name", OUTPUT_STRING, &ConfigServerInfo.network_name, "Network name"),
   INFO_ENTRY("network_description", OUTPUT_STRING, &ConfigServerInfo.network_description, "Network description"),
   INFO_ENTRY("hub", OUTPUT_BOOLEAN_YN, &ConfigServerInfo.hub, "Server is a hub"),
@@ -143,7 +146,7 @@ static const struct InfoStruct info_table[] =
   INFO_ENTRY("max_targets", OUTPUT_DECIMAL, &ConfigGeneral.max_targets, "The maximum number of PRIVMSG/NOTICE targets"),
   INFO_ENTRY("throttle_count", OUTPUT_DECIMAL, &ConfigGeneral.throttle_count, "Number of connects in throttle_time before connections are blocked"),
   INFO_ENTRY("throttle_time", OUTPUT_DECIMAL, &ConfigGeneral.throttle_time, "Minimum time between client reconnects"),
-  { NULL, 0, NULL, NULL }
+  INFO_ENTRY(NULL, 0, NULL, NULL)
 };
 
 static const char *infotext[] =

@@ -100,7 +100,6 @@ void
 cluster_distribute(const void *client, const char *command, unsigned int capab,
                    unsigned int type, const char *pattern, ...)
 {
-  dlink_node *node;
   va_list args;
   char buf[IRCD_BUFSIZE];
 
@@ -108,6 +107,7 @@ cluster_distribute(const void *client, const char *command, unsigned int capab,
   vsnprintf(buf, sizeof(buf), pattern, args);
   va_end(args);
 
+  dlink_node *node;
   DLINK_FOREACH(node, cluster_list.head)
   {
     const struct ClusterItem *cluster = node->data;

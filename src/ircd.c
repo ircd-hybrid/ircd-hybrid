@@ -236,7 +236,7 @@ io_loop(void)
   {
     if (listing_client_list.head)
     {
-      dlink_node *node = NULL, *node_next = NULL;
+      dlink_node *node, *node_next;
       DLINK_FOREACH_SAFE(node, node_next, listing_client_list.head)
         safe_list_channels(node->data, false);
     }

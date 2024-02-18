@@ -256,11 +256,10 @@ class_ip_limit_remove(struct ClassItem *class, void *addr)
 void
 class_ip_limit_rebuild(struct ClassItem *class)
 {
-  dlink_node *node;
-
   patricia_clear(class->ip_tree_v6, NULL);
   patricia_clear(class->ip_tree_v4, NULL);
 
+  dlink_node *node;
   DLINK_FOREACH(node, local_client_list.head)
   {
     struct Client *client = node->data;

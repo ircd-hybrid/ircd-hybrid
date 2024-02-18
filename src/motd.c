@@ -100,7 +100,6 @@ motd_cache(struct Motd *motd)
   char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
   char *tmp = NULL;
   unsigned int i = 0;
-  dlink_node *node;
 
   assert(motd);
   assert(motd->path);
@@ -109,6 +108,7 @@ motd_cache(struct Motd *motd)
     return motd->cache;
 
   /* Try to find it in the list of cached files */
+  dlink_node *node;
   DLINK_FOREACH(node, MotdList.cachelist.head)
   {
     struct MotdCache *cache = node->data;
@@ -219,14 +219,13 @@ motd_destroy(struct Motd *motd)
 static struct Motd *
 motd_lookup(const struct Client *client)
 {
-  dlink_node *node;
-
   assert(client);
 
   if (!MyConnect(client))  /* Not my user, always return remote motd */
     return MotdList.remote;
 
   /* Check the motd blocks first */
+  dlink_node *node;
   DLINK_FOREACH(node, MotdList.other.head)
   {
     struct Motd *motd = node->data;
@@ -322,11 +321,10 @@ motd_signon(struct Client *client)
 void
 motd_recache(void)
 {
-  dlink_node *node;
-
   motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
   motd_decache(MotdList.remote);
 
+  dlink_node *node;
   DLINK_FOREACH(node, MotdList.other.head)  /* Now all the others */
     motd_decache(node->data);
 
@@ -411,7 +409,6 @@ motd_report(struct Client *client, int parc, char *parv[])
 void
 motd_memory_count(struct Client *client)
 {
-  dlink_node *node;
   unsigned int mt  = 0;  /* Motd count */
   unsigned int mtc = 0;  /* Motd cache count */
   size_t mtm  = 0;  /* Memory consumed by motd */
@@ -431,6 +428,7 @@ motd_memory_count(struct Client *client)
     mtm += MotdList.remote->path ? (strlen(MotdList.remote->path) + 1) : 0;
   }
 
+  dlink_node *node;
   DLINK_FOREACH(node, MotdList.other.head)
   {
     const struct Motd *motd = node->data;

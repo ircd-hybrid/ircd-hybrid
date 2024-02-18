@@ -255,13 +255,13 @@ extban_acting_mask(void)
 const char *
 extban_get_isupport(void)
 {
-  dlink_node *node;
   char extban_chars[256] = { 0 };
   static char buf[sizeof(extban_chars) + 3 /* +3 = $,\0 */ ];
 
   if (dlink_list_length(&extban_list) == 0)
     return NULL;
 
+  dlink_node *node;
   DLINK_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;

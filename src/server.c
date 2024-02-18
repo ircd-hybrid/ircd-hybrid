@@ -255,11 +255,10 @@ server_hunt(struct Client *source_p, const char *command, const int server, char
 void
 try_connections(void *unused)
 {
-  dlink_node *node;
-
   if (GlobalSetOptions.autoconn == false)
     return;
 
+  dlink_node *node;
   DLINK_FOREACH(node, connect_items.head)
   {
     struct MaskItem *conf = node->data;

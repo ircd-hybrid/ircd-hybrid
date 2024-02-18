@@ -196,10 +196,9 @@ whowas_off_history(struct Client *client)
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)
 {
-  dlink_node *node;
-
   timelimit = event_base->time.sec_real - timelimit;
 
+  dlink_node *node;
   DLINK_FOREACH(node, whowas_hash[strhash(name)].head)
   {
     struct Whowas *whowas = node->data;

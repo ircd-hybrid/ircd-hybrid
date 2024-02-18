@@ -455,7 +455,6 @@ channel_pub_or_secret(const struct Channel *channel)
 void
 channel_send_namereply(struct Client *client, struct Channel *channel)
 {
-  dlink_node *node;
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
   size_t masklen = 0;
@@ -471,6 +470,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
     /* 1       23456            789             01                        2 3  */
     size_t len = strlen(me.name) + strlen(client->name) + channel->name_len + 13;
 
+    dlink_node *node;
     DLINK_FOREACH(node, channel->members.head)
     {
       const struct ChannelMember *member = node->data;

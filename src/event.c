@@ -45,14 +45,13 @@ event_get_list(void)
 void
 event_add(struct event *ev, void *data)
 {
-  dlink_node *node;
-
   event_delete(ev);
 
   ev->data = data;
   ev->next = event_base->time.sec_monotonic + ev->when;
   ev->active = true;
 
+  dlink_node *node;
   DLINK_FOREACH(node, event_list.head)
   {
     struct event *e = node->data;

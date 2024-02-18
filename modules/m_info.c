@@ -47,8 +47,7 @@ struct InfoStruct
   {
     OUTPUT_STRING = 1,  /* Output option as %s w/ dereference  */
     OUTPUT_DECIMAL,  /* Output option as decimal (%d) */
-    OUTPUT_BOOLEAN,  /* Output option as "ON" or "OFF" */
-    OUTPUT_BOOLEAN_YN  /* Output option as "YES" or "NO" */
+    OUTPUT_BOOLEAN,  /* Output option as "YES" or "NO" */
   } output_type;  /* Type of output. See enum above */
 
   const void *option;  /* Pointer reference to the value */
@@ -72,15 +71,15 @@ static const struct InfoStruct info_table[] =
   INFO_ENTRY("description", OUTPUT_STRING, &ConfigServerInfo.description, "Server description"),
   INFO_ENTRY("network_name", OUTPUT_STRING, &ConfigServerInfo.network_name, "Network name"),
   INFO_ENTRY("network_description", OUTPUT_STRING, &ConfigServerInfo.network_description, "Network description"),
-  INFO_ENTRY("hub", OUTPUT_BOOLEAN_YN, &ConfigServerInfo.hub, "Server is a hub"),
+  INFO_ENTRY("hub", OUTPUT_BOOLEAN, &ConfigServerInfo.hub, "Server is a hub"),
   INFO_ENTRY("default_max_clients", OUTPUT_DECIMAL, &ConfigServerInfo.default_max_clients, "The default maximum number of clients permitted simultaneously on this server"),
   INFO_ENTRY("max_nick_length", OUTPUT_DECIMAL, &ConfigServerInfo.max_nick_length, "Maximum nickname length"),
   INFO_ENTRY("max_topic_length", OUTPUT_DECIMAL, &ConfigServerInfo.max_topic_length, "Maximum topic length"),
-  INFO_ENTRY("use_logging", OUTPUT_BOOLEAN_YN, &ConfigLog.use_logging, "Enable logging"),
-  INFO_ENTRY("enable_extbans", OUTPUT_BOOLEAN_YN, &ConfigChannel.enable_extbans, "Whether or not to enable extbans"),
-  INFO_ENTRY("enable_owner", OUTPUT_BOOLEAN_YN, &ConfigChannel.enable_owner, "Enables channel prefix mode +q (channel owner)"),
-  INFO_ENTRY("enable_admin", OUTPUT_BOOLEAN_YN, &ConfigChannel.enable_admin, "Enables channel prefix mode +a (channel admin)"),
-  INFO_ENTRY("disable_fake_channels", OUTPUT_BOOLEAN_YN, &ConfigChannel.disable_fake_channels, "Forbids channels with special ASCII characters in their name"),
+  INFO_ENTRY("use_logging", OUTPUT_BOOLEAN, &ConfigLog.use_logging, "Enable logging"),
+  INFO_ENTRY("enable_extbans", OUTPUT_BOOLEAN, &ConfigChannel.enable_extbans, "Whether or not to enable extbans"),
+  INFO_ENTRY("enable_owner", OUTPUT_BOOLEAN, &ConfigChannel.enable_owner, "Enables channel prefix mode +q (channel owner)"),
+  INFO_ENTRY("enable_admin", OUTPUT_BOOLEAN, &ConfigChannel.enable_admin, "Enables channel prefix mode +a (channel admin)"),
+  INFO_ENTRY("disable_fake_channels", OUTPUT_BOOLEAN, &ConfigChannel.disable_fake_channels, "Forbids channels with special ASCII characters in their name"),
   INFO_ENTRY("invite_client_count", OUTPUT_DECIMAL, &ConfigChannel.invite_client_count, "How many INVITE attempts are permitted in invite_client_time"),
   INFO_ENTRY("invite_client_time", OUTPUT_DECIMAL, &ConfigChannel.invite_client_time, "How many invite_client_count invites are allowed in this time"),
   INFO_ENTRY("invite_delay_channel", OUTPUT_DECIMAL, &ConfigChannel.invite_delay_channel, "Delay between INVITE attempts to a channel"),
@@ -94,55 +93,55 @@ static const struct InfoStruct info_table[] =
   INFO_ENTRY("max_bans_large", OUTPUT_DECIMAL, &ConfigChannel.max_bans_large, "Total +b/e/I modes allowed in a +L channel"),
   INFO_ENTRY("default_join_flood_count", OUTPUT_DECIMAL, &ConfigChannel.default_join_flood_count, "Startup value of JFLOODCOUNT"),
   INFO_ENTRY("default_join_flood_time", OUTPUT_DECIMAL, &ConfigChannel.default_join_flood_time, "Startup value of JFLOODTIME"),
-  INFO_ENTRY("disable_remote_commands", OUTPUT_BOOLEAN_YN, &ConfigServerHide.disable_remote_commands, "Prevent users issuing commands on remote servers"),
-  INFO_ENTRY("flatten_links", OUTPUT_BOOLEAN_YN, &ConfigServerHide.flatten_links, "Flatten /links list"),
+  INFO_ENTRY("disable_remote_commands", OUTPUT_BOOLEAN, &ConfigServerHide.disable_remote_commands, "Prevent users issuing commands on remote servers"),
+  INFO_ENTRY("flatten_links", OUTPUT_BOOLEAN, &ConfigServerHide.flatten_links, "Flatten /links list"),
   INFO_ENTRY("flatten_links_delay", OUTPUT_DECIMAL, &ConfigServerHide.flatten_links_delay, "Links rehash delay"),
   INFO_ENTRY("flatten_links_file", OUTPUT_STRING, &ConfigServerHide.flatten_links_file, "Path to the flatten links cache file"),
-  INFO_ENTRY("hidden", OUTPUT_BOOLEAN_YN, &ConfigServerHide.hidden, "Hide this server from a flattened /links on remote servers"),
-  INFO_ENTRY("hide_servers", OUTPUT_BOOLEAN_YN, &ConfigServerHide.hide_servers, "Hide servernames from users"),
-  INFO_ENTRY("hide_services", OUTPUT_BOOLEAN_YN, &ConfigServerHide.hide_services, "Hides the location of services server"),
+  INFO_ENTRY("hidden", OUTPUT_BOOLEAN, &ConfigServerHide.hidden, "Hide this server from a flattened /links on remote servers"),
+  INFO_ENTRY("hide_servers", OUTPUT_BOOLEAN, &ConfigServerHide.hide_servers, "Hide servernames from users"),
+  INFO_ENTRY("hide_services", OUTPUT_BOOLEAN, &ConfigServerHide.hide_services, "Hides the location of services server"),
   INFO_ENTRY("hidden_name", OUTPUT_STRING, &ConfigServerHide.hidden_name, "Server name users see if hide_servers = yes"),
-  INFO_ENTRY("hide_server_ips", OUTPUT_BOOLEAN_YN, &ConfigServerHide.hide_server_ips, "Prevent people from seeing server IP addresses"),
+  INFO_ENTRY("hide_server_ips", OUTPUT_BOOLEAN, &ConfigServerHide.hide_server_ips, "Prevent people from seeing server IP addresses"),
   INFO_ENTRY("away_count", OUTPUT_DECIMAL, &ConfigGeneral.away_count, "How many AWAY attempts are permitted in away_time"),
   INFO_ENTRY("away_time", OUTPUT_DECIMAL, &ConfigGeneral.away_time, "How many away_count aways are allowed in this time"),
   INFO_ENTRY("dline_min_cidr", OUTPUT_DECIMAL, &ConfigGeneral.dline_min_cidr, "Minimum required length of a CIDR bitmask for IPv4 D-Lines"),
   INFO_ENTRY("dline_min_cidr6", OUTPUT_DECIMAL, &ConfigGeneral.dline_min_cidr6, "Minimum required length of a CIDR bitmask for IPv6 D-Lines"),
   INFO_ENTRY("kline_min_cidr", OUTPUT_DECIMAL, &ConfigGeneral.kline_min_cidr, "Minimum required length of a CIDR bitmask for IPv4 K-Lines"),
   INFO_ENTRY("kline_min_cidr6", OUTPUT_DECIMAL, &ConfigGeneral.kline_min_cidr6, "Minimum required length of a CIDR bitmask for IPv6 K-Lines"),
-  INFO_ENTRY("invisible_on_connect", OUTPUT_BOOLEAN_YN, &ConfigGeneral.invisible_on_connect, "Automatically set mode +i on connecting users"),
+  INFO_ENTRY("invisible_on_connect", OUTPUT_BOOLEAN, &ConfigGeneral.invisible_on_connect, "Automatically set mode +i on connecting users"),
   INFO_ENTRY("kill_chase_time_limit", OUTPUT_DECIMAL, &ConfigGeneral.kill_chase_time_limit, "Nick Change Tracker for KILL"),
-  INFO_ENTRY("cycle_on_host_change", OUTPUT_BOOLEAN_YN, &ConfigGeneral.cycle_on_host_change, "Send a fake QUIT/JOIN combination on host change"),
-  INFO_ENTRY("disable_auth", OUTPUT_BOOLEAN_YN, &ConfigGeneral.disable_auth, "Completely disable ident lookups"),
+  INFO_ENTRY("cycle_on_host_change", OUTPUT_BOOLEAN, &ConfigGeneral.cycle_on_host_change, "Send a fake QUIT/JOIN combination on host change"),
+  INFO_ENTRY("disable_auth", OUTPUT_BOOLEAN, &ConfigGeneral.disable_auth, "Completely disable ident lookups"),
   INFO_ENTRY("default_floodcount", OUTPUT_DECIMAL, &ConfigGeneral.default_floodcount, "Startup value of FLOODCOUNT"),
   INFO_ENTRY("default_floodtime", OUTPUT_DECIMAL, &ConfigGeneral.default_floodtime, "Startup value of FLOODTIME"),
-  INFO_ENTRY("failed_oper_notice", OUTPUT_BOOLEAN_YN, &ConfigGeneral.failed_oper_notice, "Inform opers if someone tries to /oper with the wrong credentials"),
+  INFO_ENTRY("failed_oper_notice", OUTPUT_BOOLEAN, &ConfigGeneral.failed_oper_notice, "Inform opers if someone tries to /oper with the wrong credentials"),
   INFO_ENTRY("specials_in_ident", OUTPUT_DECIMAL, &ConfigGeneral.specials_in_ident, "Number of permissable '-', '_', or '.' characters in an ident"),
   INFO_ENTRY("min_nonwildcard", OUTPUT_DECIMAL, &ConfigGeneral.min_nonwildcard, "Minimum non-wildcard chars in K/D lines"),
   INFO_ENTRY("min_nonwildcard_simple", OUTPUT_DECIMAL, &ConfigGeneral.min_nonwildcard_simple, "Minimum non-wildcards in gecos bans"),
   INFO_ENTRY("max_monitor", OUTPUT_DECIMAL, &ConfigGeneral.max_monitor, "Maximum nicknames on monitor list"),
   INFO_ENTRY("max_accept", OUTPUT_DECIMAL, &ConfigGeneral.max_accept, "Maximum nicknames on accept list"),
   INFO_ENTRY("whowas_history_length", OUTPUT_DECIMAL, &ConfigGeneral.whowas_history_length, "Length of the WHOWAS nick name history list"),
-  INFO_ENTRY("anti_nick_flood", OUTPUT_BOOLEAN_YN, &ConfigGeneral.anti_nick_flood, "NICK flood protection"),
+  INFO_ENTRY("anti_nick_flood", OUTPUT_BOOLEAN, &ConfigGeneral.anti_nick_flood, "NICK flood protection"),
   INFO_ENTRY("max_nick_time", OUTPUT_DECIMAL, &ConfigGeneral.max_nick_time, "NICK flood protection time interval"),
   INFO_ENTRY("max_nick_changes", OUTPUT_DECIMAL, &ConfigGeneral.max_nick_changes, "NICK change threshhold setting"),
   INFO_ENTRY("anti_spam_exit_message_time", OUTPUT_DECIMAL, &ConfigGeneral.anti_spam_exit_message_time, "Duration a client must be connected for to have an exit message"),
   INFO_ENTRY("ts_warn_delta", OUTPUT_DECIMAL, &ConfigGeneral.ts_warn_delta, "Maximum permitted TS delta before displaying a warning"),
   INFO_ENTRY("ts_max_delta", OUTPUT_DECIMAL, &ConfigGeneral.ts_max_delta, "Maximum permitted TS delta from another server"),
-  INFO_ENTRY("warn_no_connect_block", OUTPUT_BOOLEAN_YN, &ConfigGeneral.warn_no_connect_block, "Display warning if connecting server lacks a connect{} block"),
-  INFO_ENTRY("stats_e_disabled", OUTPUT_BOOLEAN_YN, &ConfigGeneral.stats_e_disabled, "Whether or not STATS e is disabled"),
-  INFO_ENTRY("stats_m_oper_only", OUTPUT_BOOLEAN_YN, &ConfigGeneral.stats_m_oper_only, "STATS m output is only shown to operators"),
-  INFO_ENTRY("stats_o_oper_only", OUTPUT_BOOLEAN_YN, &ConfigGeneral.stats_o_oper_only, "STATS O output is only shown to operators"),
-  INFO_ENTRY("stats_P_oper_only", OUTPUT_BOOLEAN_YN, &ConfigGeneral.stats_P_oper_only, "STATS P output is only shown to operators"),
-  INFO_ENTRY("stats_u_oper_only", OUTPUT_BOOLEAN_YN, &ConfigGeneral.stats_u_oper_only, "STATS u output is only shown to operators"),
-  INFO_ENTRY("stats_i_oper_only", OUTPUT_BOOLEAN_YN, &ConfigGeneral.stats_i_oper_only, "STATS I output is only shown to operators"),
-  INFO_ENTRY("stats_k_oper_only", OUTPUT_BOOLEAN_YN, &ConfigGeneral.stats_k_oper_only, "STATS K output is only shown to operators"),
+  INFO_ENTRY("warn_no_connect_block", OUTPUT_BOOLEAN, &ConfigGeneral.warn_no_connect_block, "Display warning if connecting server lacks a connect{} block"),
+  INFO_ENTRY("stats_e_disabled", OUTPUT_BOOLEAN, &ConfigGeneral.stats_e_disabled, "Whether or not STATS e is disabled"),
+  INFO_ENTRY("stats_m_oper_only", OUTPUT_BOOLEAN, &ConfigGeneral.stats_m_oper_only, "STATS m output is only shown to operators"),
+  INFO_ENTRY("stats_o_oper_only", OUTPUT_BOOLEAN, &ConfigGeneral.stats_o_oper_only, "STATS O output is only shown to operators"),
+  INFO_ENTRY("stats_P_oper_only", OUTPUT_BOOLEAN, &ConfigGeneral.stats_P_oper_only, "STATS P output is only shown to operators"),
+  INFO_ENTRY("stats_u_oper_only", OUTPUT_BOOLEAN, &ConfigGeneral.stats_u_oper_only, "STATS u output is only shown to operators"),
+  INFO_ENTRY("stats_i_oper_only", OUTPUT_BOOLEAN, &ConfigGeneral.stats_i_oper_only, "STATS I output is only shown to operators"),
+  INFO_ENTRY("stats_k_oper_only", OUTPUT_BOOLEAN, &ConfigGeneral.stats_k_oper_only, "STATS K output is only shown to operators"),
   INFO_ENTRY("caller_id_wait", OUTPUT_DECIMAL, &ConfigGeneral.caller_id_wait, "Minimum delay between notifying UMODE +g users of messages"),
-  INFO_ENTRY("opers_bypass_callerid", OUTPUT_BOOLEAN_YN, &ConfigGeneral.opers_bypass_callerid, "Allows IRC operators to message users who are +g (callerid)"),
+  INFO_ENTRY("opers_bypass_callerid", OUTPUT_BOOLEAN, &ConfigGeneral.opers_bypass_callerid, "Allows IRC operators to message users who are +g (callerid)"),
   INFO_ENTRY("pace_wait_simple", OUTPUT_DECIMAL, &ConfigGeneral.pace_wait_simple, "Minimum delay between less intensive commands"),
   INFO_ENTRY("pace_wait", OUTPUT_DECIMAL, &ConfigGeneral.pace_wait, "Minimum delay between uses of certain commands"),
-  INFO_ENTRY("short_motd", OUTPUT_BOOLEAN_YN, &ConfigGeneral.short_motd, "Do not show MOTD; only tell clients they should read it"),
-  INFO_ENTRY("ping_cookie", OUTPUT_BOOLEAN_YN, &ConfigGeneral.ping_cookie, "Require ping cookies to connect"),
-  INFO_ENTRY("no_oper_flood", OUTPUT_BOOLEAN_YN, &ConfigGeneral.no_oper_flood, "Reduce flood control for operators"),
+  INFO_ENTRY("short_motd", OUTPUT_BOOLEAN, &ConfigGeneral.short_motd, "Do not show MOTD; only tell clients they should read it"),
+  INFO_ENTRY("ping_cookie", OUTPUT_BOOLEAN, &ConfigGeneral.ping_cookie, "Require ping cookies to connect"),
+  INFO_ENTRY("no_oper_flood", OUTPUT_BOOLEAN, &ConfigGeneral.no_oper_flood, "Reduce flood control for operators"),
   INFO_ENTRY("max_targets", OUTPUT_DECIMAL, &ConfigGeneral.max_targets, "The maximum number of PRIVMSG/NOTICE targets"),
   INFO_ENTRY("throttle_count", OUTPUT_DECIMAL, &ConfigGeneral.throttle_count, "Number of connects in throttle_time before connections are blocked"),
   INFO_ENTRY("throttle_time", OUTPUT_DECIMAL, &ConfigGeneral.throttle_time, "Minimum time between client reconnects"),
@@ -250,10 +249,8 @@ send_conf_options(struct Client *source_p)
         snprintf(buf, sizeof(buf), "%u", *((const unsigned int *const)iptr->option));
         value = buf;
         break;
-      case OUTPUT_BOOLEAN:  /* Output info_table[i].option as "ON" or "OFF" */
-        value = (iptr->option && *((const unsigned int *const)iptr->option)) ? "ON" : "OFF";
         break;
-      case OUTPUT_BOOLEAN_YN:  /* Output info_table[i].option as "YES" or "NO" */
+      case OUTPUT_BOOLEAN:  /* Output info_table[i].option as "YES" or "NO" */
         value = (iptr->option && *((const unsigned int *const)iptr->option)) ? "YES" : "NO";
         break;
     }

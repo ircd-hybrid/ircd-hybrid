@@ -19,15 +19,28 @@
  *  USA
  */
 
-/*! \file irc_string.c
- * \brief IRC string functions.
+/**
+ * @file irc_string.c
+ * @brief String manipulation functions.
  */
 
 #include "config.h"
 #include "stdinc.h"
 #include "irc_string.h"
 
-
+/**
+ * @brief Check for the presence of wildcard characters in a string.
+ * 
+ * This function thoroughly examines each character in the given string to
+ * determine if it contains any wildcard characters. Wildcard characters are
+ * identified based on the IsMWildChar() function. The function takes into
+ * account escape characters ('\') to distinguish literal characters from
+ * wildcards.
+ * 
+ * @param str The input string to be examined for wildcard characters.
+ * @return Returns true if the string contains any wildcard characters,
+ *         otherwise returns false.
+ */
 bool
 has_wildcards(const char *str)
 {
@@ -47,6 +60,15 @@ has_wildcards(const char *str)
   return false;
 }
 
+/**
+ * @brief Strip leading and trailing whitespaces from a string.
+ * 
+ * This function removes leading and trailing whitespaces (spaces and tabs)
+ * from the input string and returns a pointer to the modified string.
+ * 
+ * @param txt Input string to be stripped.
+ * @return Pointer to the stripped string.
+ */
 const char *
 stripws(char *txt)
 {
@@ -62,16 +84,19 @@ stripws(char *txt)
   return txt;
 }
 
-/** Fill a vector of tokens from a delimited input list.
- * Empty tokens (when \a token occurs at the start or end of \a list,
- * or when \a token occurs adjacent to itself) are ignored.  When
- * \a size tokens have been written to \a vector, the rest of the
- * string is ignored.
- * \param names Input buffer.
- * \param token Delimiter used to split \a list.
- * \param vector Output vector.
- * \param size Maximum number of elements to put in \a vector.
- * \return Number of elements written to \a vector.
+/**
+ * @brief Tokenize a delimited input list into a vector of tokens.
+ * 
+ * This function splits an input buffer, 'names', using a specified delimiter, 'token'.
+ * The resulting tokens are stored in the 'vector' array, up to the specified 'size'.
+ * Empty tokens, occurring at the start or end of the list or adjacent to each other, are ignored.
+ * The function returns the number of tokens written to the vector.
+ * 
+ * @param names Input buffer containing the list to be tokenized.
+ * @param token Delimiter used to split the list into tokens.
+ * @param vector Output array to store the tokens.
+ * @param size Maximum number of elements in the vector.
+ * @return Number of tokens written to the vector.
  */
 unsigned int
 token_vector(char *names, char token, char *vector[], unsigned int size)
@@ -105,11 +130,19 @@ token_vector(char *names, char token, char *vector[], unsigned int size)
   return count;
 }
 
-/* libio_basename()
+/**
+ * @brief Extracts the base name of a path.
  *
- * input	- i.e. "/usr/local/ircd/modules/m_whois.so"
- * output	- i.e. "m_whois.so"
- * side effects - this will be overwritten on subsequent calls
+ * This function returns a pointer to the base name portion of a file path.
+ * It finds the last occurrence of the directory separator ('/') in the input
+ * path. If none is found, the entire input string is considered the base name.
+ *
+ * Note: Unlike some standard C library implementations, this function does not
+ * modify the input path argument, making it suitable when the original path
+ * must remain unchanged.
+ *
+ * @param path The input path from which to extract the base name.
+ * @return A pointer to the extracted base name within the input path.
  */
 const char *
 libio_basename(const char *path)

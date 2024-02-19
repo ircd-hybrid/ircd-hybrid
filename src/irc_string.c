@@ -147,12 +147,12 @@ token_vector(char *names, char token, char *vector[], unsigned int size)
 const char *
 libio_basename(const char *path)
 {
-  const char *s;
+  const char *s = strrchr(path, '/');
 
-  if ((s = strrchr(path, '/')) == NULL)
-    s = path;
-  else
+  if (s)
     s++;
+  else
+    s = path;
 
   return s;
 }

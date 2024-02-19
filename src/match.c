@@ -19,22 +19,30 @@
  *  USA
  */
 
-/*! \file match.c
- * \brief Functions to match/compare strings.
+/**
+ * @file match.c
+ * @brief String Matching and Comparison Functions
+ *
+ * This file contains functions for matching and comparing strings.
+ * The functions include wildcard-based string matching, collapsing
+ * mask strings to minimize redundancy, and case-insensitive string
+ * comparison. Additionally, character attribute tables are defined
+ * for specific character properties relevant to IRC standards.
  */
 
 #include "stdinc.h"
 #include "irc_string.h"
 
-
-/*! \brief Check a string against a mask.
- * This test checks using traditional IRC wildcards only: '*' means
- * match zero or more characters of any type; '?' means match exactly
- * one character of any type.  A backslash escapes the next character
- * so that a wildcard may be matched exactly.
- * param mask Wildcard-containing mask.
- * param name String to check against \a mask.
- * return Zero if \a mask matches \a name, non-zero if no match.
+/**
+ * @brief Matches a string against a wildcard pattern with support for '*' and '?' wildcards.
+ *
+ * This function compares a given string against a wildcard pattern, supporting '*' to match
+ * any sequence of characters and '?' to match any single character. Backslash '\' is used as
+ * an escape character, allowing literal matching of '*' and '?'.
+ *
+ * @param mask The wildcard pattern to match against.
+ * @param name The string to match.
+ * @return Returns 0 if the strings match, 1 if there is no match.
  */
 int
 match(const char *mask, const char *name)
@@ -121,23 +129,20 @@ match(const char *mask, const char *name)
   return 1;
 }
 
-/*
- * collapse()
- * Collapse a pattern string into minimal components.
- * This particular version is "in place", so that it changes the pattern
- * which is to be reduced to a "minimal" size.
+/**
+ * @brief Collapse a mask string by optimizing consecutive '*' characters.
  *
- * (C) Carlo Wood - 6 Oct 1998
- * Speedup rewrite by Andrea Cocito, December 1998.
- * Note that this new optimized algorithm can *only* work in place.
- */
-
-/*! \brief Collapse a mask string to remove redundancies.
- * Specifically, it replaces a sequence of '*' followed by additional
- * '*' or '?' with the same number of '?'s as the input, followed by
- * one '*'.  This minimizes useless backtracking when matching later.
- * \param mask Mask string to collapse.
- * \return Pointer to the start of the string.
+ * This function reduces redundancy in a mask string by transforming sequences
+ * of consecutive '*' characters followed by more '*' or '?' into an equivalent
+ * pattern with the same count of '?' characters, concluded by a single '*'.
+ * This optimization aims to enhance matching efficiency by minimizing unnecessary
+ * backtracking during subsequent comparisons.
+ *
+ * @param mask The mask string to undergo the collapse optimization.
+ * @return Pointer to the beginning of the modified mask string.
+ *
+ * @author Carlo Wood
+ * @copyright Carlo Wood - 6 Oct 1998
  */
 char *
 collapse(char *mask)
@@ -186,11 +191,16 @@ collapse(char *mask)
   return mask;
 }
 
-/*
- * irccmp - case insensitive comparison of two 0 terminated strings.
+/**
+ * @brief Case-insensitive comparison of two null-terminated strings.
  *
- *      returns  0, if s1 equal to s2
- *               1, if not
+ * This function performs a case-insensitive comparison between two strings,
+ * considering them equal if their characters, when converted to uppercase,
+ * match. The comparison is based on the entire strings.
+ *
+ * @param s1 Pointer to the first null-terminated string.
+ * @param s2 Pointer to the second null-terminated string.
+ * @return Returns 0 if the strings are equal, otherwise returns 1.
  */
 int
 irccmp(const char *s1, const char *s2)
@@ -208,6 +218,19 @@ irccmp(const char *s1, const char *s2)
   return 1;
 }
 
+/**
+ * @brief Case-insensitive comparison of a specified number of characters from two strings.
+ *
+ * This function compares, in a case-insensitive manner, up to the first n characters
+ * of two strings. It considers the strings equal if the corresponding characters,
+ * converted to uppercase, match. The comparison stops after n characters or when the
+ * end of either string is reached, whichever comes first.
+ *
+ * @param s1 Pointer to the first string to be compared.
+ * @param s2 Pointer to the second string to be compared.
+ * @param n Maximum number of characters to compare.
+ * @return Returns 0 if the specified portions of the strings are equal, otherwise returns 1.
+ */
 int
 ircncmp(const char *s1, const char *s2, size_t n)
 {
@@ -228,6 +251,17 @@ ircncmp(const char *s1, const char *s2, size_t n)
   return 1;
 }
 
+/**
+ * @var ToLowerTab
+ * @brief Array for converting characters to lowercase.
+ *
+ * The ToLowerTab array is a lookup table that associates each ASCII character code
+ * with its corresponding lowercase representation. The table includes entries for
+ * control characters, punctuation, digits, and alphabetic characters. The conversion
+ * is case-insensitive, and non-alphabetic characters remain unchanged.
+ *
+ * Note: The array extends beyond the ASCII range (0-127) to cover extended ASCII and Unicode characters.
+ */
 const unsigned char ToLowerTab[] =
 {
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
@@ -264,6 +298,17 @@ const unsigned char ToLowerTab[] =
   0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
 };
 
+/**
+ * @var ToUpperTab
+ * @brief Array for converting characters to uppercase.
+ *
+ * The ToUpperTab array is a lookup table that associates each ASCII character code
+ * with its corresponding uppercase representation. The table includes entries for
+ * control characters, punctuation, digits, and alphabetic characters. The conversion
+ * is case-insensitive, and non-alphabetic characters remain unchanged.
+ *
+ * Note: The array extends beyond the ASCII range (0-127) to cover extended ASCII and Unicode characters.
+ */
 const unsigned char ToUpperTab[] =
 {
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
@@ -300,11 +345,13 @@ const unsigned char ToUpperTab[] =
   0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
 };
 
-/*
- * CharAttrs table
+/**
+ * @var CharAttrs
+ * @brief Array containing attributes for each ASCII character.
  *
- * NOTE: RFC 1459 says: anything but a ^G, comma, or space is allowed
- * for channel names
+ * The CharAttrs array serves as a lookup table, associating attributes with ASCII characters.
+ * Each index corresponds to an ASCII character code, and the value at that index represents
+ * the combination of attributes associated with the character.
  */
 const unsigned int CharAttrs[] =
 {

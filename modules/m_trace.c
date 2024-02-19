@@ -147,12 +147,12 @@ do_trace(struct Client *source_p, const char *name)
     {
       const struct Client *target_p = node->data;
 
-      if (doall == true || match(name, target_p->name) == 0)
+      if (doall || match(name, target_p->name) == 0)
         report_this_status(source_p, target_p);
     }
   }
 
-  if (doall == true)
+  if (doall)
   {
     DLINK_FOREACH(node, class_get_list()->head)
     {

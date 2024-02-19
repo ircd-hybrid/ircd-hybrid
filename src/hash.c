@@ -601,7 +601,7 @@ safe_list_channels(struct Client *client, bool only_unmasked_channels)
     for (unsigned int i = lt->hash_index; i < HASHSIZE; ++i)
     {
       /* Check if the client is in danger of exceeding its sendq. */
-      if (exceeding_sendq(client) == true)
+      if (exceeding_sendq(client))
       {
         lt->hash_index = i;
         return;  /* Still more channels to list. */

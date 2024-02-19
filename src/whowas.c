@@ -150,7 +150,7 @@ whowas_add_history(struct Client *client, bool online)
   strlcpy(whowas->realname, client->info, sizeof(whowas->realname));
   strlcpy(whowas->servername, client->servptr->name, sizeof(whowas->servername));
 
-  if (online == true)
+  if (online)
   {
     whowas->client = client;
     dlinkAdd(whowas, &whowas->client_list_node, &client->whowas_list);

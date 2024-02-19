@@ -632,7 +632,7 @@ stats_fdlist(struct Client *source_p, int parc, char *parv[])
   {
     const fde_t *F = &fd_table[fd];
 
-    if (F->flags.open == true)
+    if (F->flags.open)
       sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "F :fd %-5d desc '%s'", F->fd, F->desc);
   }

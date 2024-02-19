@@ -66,7 +66,7 @@ kline_check(const struct AddressRec *arec)
         break;
       case HM_IPV6:
       case HM_IPV4:
-        if (address_compare(&client->ip, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits) == true)
+        if (address_compare(&client->ip, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
           conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
         break;
       default:

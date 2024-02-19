@@ -433,7 +433,7 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
     listener->flags = flags;
   }
 
-  if (listener_finalize(listener) == true)
+  if (listener_finalize(listener))
     listener->active = true;
   else
     listener_close(listener);

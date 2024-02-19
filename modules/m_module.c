@@ -73,14 +73,14 @@ module_unload(struct Client *source_p, const char *arg)
     return;
   }
 
-  if (modp->is_core == true)
+  if (modp->is_core)
   {
     sendto_one_notice(source_p, &me, ":Module %s is a core module and may not be unloaded",
                       m_bn);
     return;
   }
 
-  if (modp->is_resident == true)
+  if (modp->is_resident)
   {
     sendto_one_notice(source_p, &me, ":Module %s is a resident module and may not be unloaded",
                       m_bn);
@@ -136,7 +136,7 @@ module_reload(struct Client *source_p, const char *arg)
     return;
   }
 
-  if (modp->is_resident == true)
+  if (modp->is_resident)
   {
     sendto_one_notice(source_p, &me, ":Module %s is a resident module and may not be unloaded",
                       m_bn);
@@ -152,7 +152,7 @@ module_reload(struct Client *source_p, const char *arg)
     return;
   }
 
-  if (load_one_module(arg) == false && is_core == true)
+  if (load_one_module(arg) == false && is_core)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error reloading core "
@@ -232,7 +232,7 @@ mo_module(struct Client *source_p, int parc, char *parv[])
     if (irccmp(tab->cmd, subcmd))
       continue;
 
-    if (tab->arg_required == true && EmptyString(module))
+    if (tab->arg_required && EmptyString(module))
     {
       sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
       return;

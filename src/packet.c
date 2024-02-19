@@ -211,7 +211,7 @@ parse_client_queued(struct Client *client)
        * as sent_parsed will always hover around the allow_read limit
        * and no 'bursts' will be permitted.
        */
-      if (checkflood == true)
+      if (checkflood)
         if (client->connection->sent_parsed >=
           (HasFlag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
           return;
@@ -307,7 +307,7 @@ read_packet(fde_t *F, void *data)
       bool want_write = false;
       length = tls_read(&F->tls, readBuf, sizeof(readBuf), &want_write);
 
-      if (want_write == true)
+      if (want_write)
         comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client, 0);
     }
     else
@@ -319,7 +319,7 @@ read_packet(fde_t *F, void *data)
        * If true, then we can recover from this error. Stop here and register for
        * another COMM_SELECT_READ io-request.
        */
-      if (length < 0 && comm_ignore_errno(errno) == true)
+      if (length < 0 && comm_ignore_errno(errno))
         comm_setselect(F, COMM_SELECT_READ, read_packet, client, 0);
       else
         dead_link_on_read(client, length);

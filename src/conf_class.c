@@ -144,7 +144,7 @@ class_find(const char *name, bool active)
 
     if (irccmp(class->name, name) == 0)
     {
-      if (active == true && class->active == false)
+      if (active && class->active == false)
         return NULL;
 
       return class;
@@ -209,7 +209,7 @@ class_ip_limit_add(struct ClassItem *class, void *addr, bool over_rule)
   patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(class, addr), addr, bitlen);
   if (((uintptr_t)pnode->data) >= class->number_per_cidr)
   {
-    if (over_rule == true)
+    if (over_rule)
       /*
        * In case of overruling, we continue with the client registration process
        * which means we expect a class_ip_limit_remove() call when detaching the

@@ -151,7 +151,7 @@ do_list(struct Client *source_p, char *arg)
       }
     }
 
-    if (error == true)
+    if (error)
     {
       free_list_task(source_p);
       sendto_one_numeric(source_p, &me, ERR_LISTSYNTAX);

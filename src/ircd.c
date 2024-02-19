@@ -250,13 +250,13 @@ io_loop(void)
     free_exited_clients();
 
     /* Check to see whether we have to rehash the configuration. */
-    if (dorehash == true)
+    if (dorehash)
     {
       conf_rehash(true);
       dorehash = false;
     }
 
-    if (doremotd == true)
+    if (doremotd)
     {
       motd_recache();
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
@@ -501,7 +501,7 @@ main(int argc, char *argv[])
 
   parseargs(&argc, &argv, myopts);
 
-  if (printVersion == true)
+  if (printVersion)
   {
     printf("ircd: version %s\n", IRCD_VERSION);
     exit(EXIT_SUCCESS);

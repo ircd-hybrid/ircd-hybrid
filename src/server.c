@@ -387,7 +387,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
   assert(hash_find_server(conf->name) == NULL);  /* This should have been checked by the caller */
 
   /* Still processing a DNS lookup? -> exit */
-  if (conf->dns_pending == true)
+  if (conf->dns_pending)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} in progress.",
@@ -395,7 +395,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
     return false;
   }
 
-  if (conf->dns_failed == true)
+  if (conf->dns_failed)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} failed.",

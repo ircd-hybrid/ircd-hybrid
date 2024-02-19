@@ -73,7 +73,7 @@ channel_add_user(struct Channel *channel, struct Client *client,
 
   if (GlobalSetOptions.joinfloodtime)
   {
-    if (flood_ctrl == true)
+    if (flood_ctrl)
       ++channel->number_joined;
 
     channel->number_joined -= (event_base->time.sec_monotonic - channel->last_join_time) *
@@ -160,7 +160,7 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
     {
-      if (member_has_flags(member, tab->flag) == true)
+      if (member_has_flags(member, tab->flag))
       {
         member->flags &= ~tab->flag;
         *mbuf++ = tab->letter;
@@ -464,7 +464,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
   assert(IsClient(client));
 
-  if (PubChannel(channel) || is_member == true)
+  if (PubChannel(channel) || is_member)
   {
     /* :me.name 353 client->name @ channel->name :+nick1 @nick2 %nick3 ...\r\n */
     /* 1       23456            789             01                        2 3  */
@@ -478,7 +478,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
       if (HasUMode(member->client, UMODE_INVISIBLE) && is_member == false)
         continue;
 
-      if (uhnames == true)
+      if (uhnames)
         masklen = strlen(member->client->name) + strlen(member->client->username) +
                   strlen(member->client->host) + 3;  /* +3 for ! + @ + space */
       else
@@ -493,7 +493,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
         bufptr = buf;
       }
 
-      if (uhnames == true)
+      if (uhnames)
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s!%s@%s" : "%s%s!%s@%s",
                            member_get_prefix(member, multi_prefix),
                            member->client->name, member->client->username,
@@ -566,7 +566,7 @@ member_get_prefix(const struct ChannelMember *member, bool combine)
   char *bufptr = buf;
 
   for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
-    if (member_has_flags(member, tab->flag) == true)
+    if (member_has_flags(member, tab->flag))
       if (*bufptr++ = tab->prefix, combine == false)
         break;
 
@@ -580,7 +580,7 @@ member_get_prefix_len(const struct ChannelMember *member, bool combine)
   size_t len = 0;
 
   for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
-    if (member_has_flags(member, tab->flag) == true)
+    if (member_has_flags(member, tab->flag))
       if (++len, combine == false)
         break;
 
@@ -593,19 +593,19 @@ member_highest_rank(const struct ChannelMember *member)
   if (member == NULL)
     return CHACCESS_NOTONCHAN;
 
-  if (member_has_flags(member, CHFL_CHANOWNER) == true)
+  if (member_has_flags(member, CHFL_CHANOWNER))
     return CHACCESS_OWNER;
 
-  if (member_has_flags(member, CHFL_CHANADMIN) == true)
+  if (member_has_flags(member, CHFL_CHANADMIN))
     return CHACCESS_ADMIN;
 
-  if (member_has_flags(member, CHFL_CHANOP) == true)
+  if (member_has_flags(member, CHFL_CHANOP))
     return CHACCESS_OP;
 
-  if (member_has_flags(member, CHFL_HALFOP) == true)
+  if (member_has_flags(member, CHFL_HALFOP))
     return CHACCESS_HALFOP;
 
-  if (member_has_flags(member, CHFL_VOICE) == true)
+  if (member_has_flags(member, CHFL_VOICE))
     return CHACCESS_VOICE;
 
   return CHACCESS_PEON;
@@ -643,7 +643,7 @@ ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
         break;
       case HM_IPV6:
       case HM_IPV4:
-        if (address_compare(&client->ip, &ban->addr, false, false, ban->bits) == true)
+        if (address_compare(&client->ip, &ban->addr, false, false, ban->bits))
           return true;
         break;
       default:
@@ -697,7 +697,7 @@ find_bmask(struct Client *client, struct Channel *channel, const dlink_list *lis
 bool
 is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
 {
-  if (find_bmask(client, channel, &channel->banlist, extban) == true)
+  if (find_bmask(client, channel, &channel->banlist, extban))
     return find_bmask(client, channel, &channel->exceptlist, extban) == false;
   return false;
 }
@@ -733,7 +733,7 @@ can_join(struct Client *client, struct Channel *channel, const char *key)
       channel->mode.limit)
     return ERR_CHANNELISFULL;
 
-  if (is_banned(channel, client, NULL) == true || is_banned(channel, client, &extban_join) == true)
+  if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_join))
     return ERR_BANNEDFROMCHAN;
 
   return 0;
@@ -832,7 +832,7 @@ can_send(struct Channel *channel, struct Client *client,
     }
   }
 
-  if (HasCMode(channel, MODE_NOCTRL) && msg_has_ctrls(message) == true)
+  if (HasCMode(channel, MODE_NOCTRL) && msg_has_ctrls(message))
   {
     *error = "control codes are not permitted";
     return CAN_SEND_NO;
@@ -869,7 +869,7 @@ can_send(struct Channel *channel, struct Client *client,
     return CAN_SEND_NO;
   }
 
-  if (HasCMode(channel, MODE_NONOTICE) && notice == true)
+  if (HasCMode(channel, MODE_NONOTICE) && notice)
   {
     *error = "NOTICEs are not permitted";
     return CAN_SEND_NO;
@@ -886,7 +886,7 @@ can_send(struct Channel *channel, struct Client *client,
 
       if (!(member->flags & CHFL_BAN_CHECKED))
       {
-        if (is_banned(channel, client, NULL) == true || is_banned(channel, client, &extban_mute) == true)
+        if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_mute))
         {
           member->flags |= (CHFL_BAN_CHECKED | CHFL_BAN_SILENCED);
           return CAN_SEND_NO;
@@ -895,7 +895,7 @@ can_send(struct Channel *channel, struct Client *client,
         member->flags |= CHFL_BAN_CHECKED;
       }
     }
-    else if (is_banned(channel, client, NULL) == true || is_banned(channel, client, &extban_mute) == true)
+    else if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_mute))
       return CAN_SEND_NO;
   }
 
@@ -963,7 +963,7 @@ void
 channel_set_topic(struct Channel *channel, const char *topic,
                   const char *topic_info, uintmax_t topicts, bool local)
 {
-  if (local == true)
+  if (local)
     strlcpy(channel->topic, topic, IRCD_MIN(sizeof(channel->topic), ConfigServerInfo.max_topic_length + 1));
   else
     strlcpy(channel->topic, topic, sizeof(channel->topic));
@@ -1162,7 +1162,7 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
       show_reason = false;
   }
 
-  if (show_reason == true)
+  if (show_reason)
   {
     sendto_server(client, 0, 0, ":%s PART %s :%.*s",
                   client->id, channel->name, KICKLEN, reason);

@@ -101,7 +101,7 @@ unload_one_module(const char *name, bool warn)
 
   lt_dlclose(modp->handle);
 
-  if (warn == true)
+  if (warn)
   {
     ilog(LOG_TYPE_IRCD, "Module %s unloaded", name);
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
@@ -157,7 +157,7 @@ load_a_module(const char *path, bool warn)
   if (modp->modinit)
     modp->modinit();
 
-  if (warn == true)
+  if (warn)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Module %s [handle: %p] loaded.",

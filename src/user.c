@@ -628,7 +628,7 @@ send_umode(struct Client *client, bool send, unsigned int old, char *buf)
 
   *m = '\0';
 
-  if (send == true && *buf)
+  if (send && *buf)
     sendto_one(client, ":%s!%s@%s MODE %s :%s",
                client->name, client->username,
                client->host, client->name, buf);
@@ -703,7 +703,7 @@ user_set_hostmask(struct Client *client, const char *hostname)
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
     {
-      if (member_has_flags(member, tab->flag) == true)
+      if (member_has_flags(member, tab->flag))
       {
         *p++ = tab->letter;
         len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", client->name);

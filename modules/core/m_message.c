@@ -302,7 +302,7 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
       return;
     }
 
-    if (flood_attack_client(notice, source_p, target_p) == true)
+    if (flood_attack_client(notice, source_p, target_p))
       return;
   }
 

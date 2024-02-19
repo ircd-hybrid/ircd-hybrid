@@ -356,7 +356,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   const char *error = NULL;
   bool warn = true;
 
-  if (listener_has_flag(source_p->connection->listener, LISTENER_CLIENT) == true)
+  if (listener_has_flag(source_p->connection->listener, LISTENER_CLIENT))
   {
     exit_client(source_p, "Use a different port");
     return;
@@ -421,7 +421,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
 
   if (error)
   {
-    if (warn == true)
+    if (warn)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
          "Unauthorized server connection attempt from %s: %s for server %s",
@@ -642,7 +642,7 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   }
 
   /* Check for the new server being leafed behind this HUB */
-  if (llined == true)
+  if (llined)
   {
     /* OOOPs nope can't HUB this leaf */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,

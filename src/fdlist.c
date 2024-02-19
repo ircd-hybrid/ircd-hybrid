@@ -111,7 +111,7 @@ fd_close(fde_t *F)
   assert(F->fd >= 0);
   assert(F->flags.open == true);
 
-  if (F->flags.is_socket == true)
+  if (F->flags.is_socket)
     comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
   if (tls_isusing(&F->tls))

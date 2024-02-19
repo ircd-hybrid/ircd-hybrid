@@ -157,7 +157,7 @@ auth_release_client(struct AuthRequest *auth)
   assert(client->connection);
 
   /* Check if DNS or ident queries are still pending; if yes, do not release the client yet. */
-  if (auth->ident_pending == true || auth->dns_pending == true)
+  if (auth->ident_pending || auth->dns_pending)
     return;
 
   auth_free(auth);

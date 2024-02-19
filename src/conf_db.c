@@ -675,7 +675,7 @@ save_resv_database(const char *filename)
   {
     resv = node->data;
 
-    if (resv->in_database == true)
+    if (resv->in_database)
       ++records;
   }
 
@@ -683,7 +683,7 @@ save_resv_database(const char *filename)
   {
     resv = node->data;
 
-    if (resv->in_database == true)
+    if (resv->in_database)
       ++records;
   }
 
@@ -774,7 +774,7 @@ save_xline_database(const char *filename)
   {
     gecos = ptr->data;
 
-    if (gecos->in_database == true)
+    if (gecos->in_database)
       ++records;
   }
 

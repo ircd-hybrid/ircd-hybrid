@@ -86,7 +86,7 @@ m_knock(struct Client *source_p, int parc, char *parv[])
     }
 
     /* Don't allow a knock if the user is banned. */
-    if (is_banned(channel, source_p, NULL) == true || is_banned(channel, source_p, &extban_knock) == true)
+    if (is_banned(channel, source_p, NULL) || is_banned(channel, source_p, &extban_knock))
     {
       sendto_one_numeric(source_p, &me, ERR_CANNOTKNOCK, channel->name, "you are banned (+b)");
       return;

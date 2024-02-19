@@ -131,7 +131,7 @@ conf_dns_lookup(struct MaskItem *conf)
      * By this point conf->host possibly is not a numerical network address. Do a nameserver
      * lookup of the conf host. If the conf entry is currently doing a ns lookup do nothing.
      */
-    if (conf->dns_pending == true)
+    if (conf->dns_pending)
       return;
 
     conf->dns_pending = true;
@@ -199,7 +199,7 @@ conf_free(struct MaskItem *conf)
 
   xfree(conf->name);
 
-  if (conf->dns_pending == true)
+  if (conf->dns_pending)
     delete_resolver_queries(conf);
   if (conf->passwd)
     memset(conf->passwd, 0, strlen(conf->passwd));
@@ -260,10 +260,10 @@ attach_iline(struct Client *client, struct MaskItem *conf)
   else if (class->max_perip_global &&
            (ipcache->count_local + ipcache->count_remote) > class->max_perip_global)
     a_limit_reached = true;
-  else if (class_ip_limit_add(conf->class, &client->ip, IsConfExemptLimits(conf)) == true)
+  else if (class_ip_limit_add(conf->class, &client->ip, IsConfExemptLimits(conf)))
     a_limit_reached = true;
 
-  if (a_limit_reached == true)
+  if (a_limit_reached)
     if (!IsConfExemptLimits(conf))
       return TOO_MANY;   /* Already at maximum allowed */
 
@@ -362,7 +362,7 @@ conf_check_client(struct Client *client)
 
     ++ServerStats.is_ref;
 
-    if (warn == true)
+    if (warn)
       sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Rejecting client connection from %s: %s",
                            client_get_name(client, SHOW_IP), error);
 
@@ -519,7 +519,7 @@ operator_find(const struct Client *client, const char *name)
             break;
           case HM_IPV6:
           case HM_IPV4:
-            if (address_compare(&client->ip, conf->addr, false, false, conf->bits) == true)
+            if (address_compare(&client->ip, conf->addr, false, false, conf->bits))
               return conf;
             break;
           default:
@@ -679,7 +679,7 @@ conf_read(FILE *file)
 void
 conf_rehash(bool sig)
 {
-  if (sig == true)
+  if (sig)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Got signal SIGHUP, reloading configuration file(s)");
@@ -891,7 +891,7 @@ conf_handle_tls(bool cold)
 {
   if (tls_new_credentials() == false)
   {
-    if (cold == true)
+    if (cold)
     {
       ilog(LOG_TYPE_IRCD, "Error while initializing TLS");
       exit(EXIT_FAILURE);
@@ -921,7 +921,7 @@ conf_read_files(bool cold)
 
   if (conf_parser_ctx.conf_file == NULL)
   {
-    if (cold == true)
+    if (cold)
     {
       ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
            ConfigGeneral.configfile, strerror(errno));
@@ -1189,7 +1189,7 @@ parse_aline(const char *cmd, struct Client *client, int parc, char **parv, struc
   ++parv;
   --parc;
 
-  if (aline->add == true && (duration = valid_aline_time(*parv)) >= 0)
+  if (aline->add && (duration = valid_aline_time(*parv)) >= 0)
   {
     aline->duration = duration;
     ++parv;
@@ -1202,7 +1202,7 @@ parse_aline(const char *cmd, struct Client *client, int parc, char **parv, struc
     return false;
   }
 
-  if (aline->simple_mask == true)
+  if (aline->simple_mask)
   {
     aline->mask = *parv;
     aline->user = NULL;
@@ -1258,7 +1258,7 @@ parse_aline(const char *cmd, struct Client *client, int parc, char **parv, struc
       aline->server = NULL;
   }
 
-  if (aline->add == true)
+  if (aline->add)
   {
     if (parc == 0 || EmptyString(*parv))
       aline->reason = default_reason;

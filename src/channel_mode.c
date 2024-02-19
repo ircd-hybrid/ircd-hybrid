@@ -296,7 +296,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   {
     *bufptr++ = 'l';
 
-    if (params == true)
+    if (params)
       server_or_member =
         (server_or_member == true || IsServer(client) || member_find_link(client, channel));
   }
@@ -305,12 +305,12 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   {
     *bufptr++ = 'k';
 
-    if (params == true)
+    if (params)
       server_or_member =
         (server_or_member == true || IsServer(client) || member_find_link(client, channel));
   }
 
-  if (server_or_member == true)
+  if (server_or_member)
   {
     if (channel->mode.limit)
       bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %u", channel->mode.limit);
@@ -389,7 +389,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
   if (!MyClient(client))
     return true;
 
-  if (mode->only_opers == true)
+  if (mode->only_opers)
   {
     if (!HasUMode(client, UMODE_OPER))
     {
@@ -401,7 +401,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
     }
   }
 
-  if (mode->only_servers == true)
+  if (mode->only_servers)
   {
     if (!IsServer(client) && !HasFlag(client, FLAGS_SERVICE))
     {
@@ -619,7 +619,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (member_has_flags(member, mode->flag) == true)
+    if (member_has_flags(member, mode->flag))
       return;  /* No redundant mode changes */
 
     AddMemberFlag(member, mode->flag);

@@ -109,7 +109,7 @@ ipcache_record_remove(void *addr, bool local)
   struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
   assert(iptr->count_local > 0 || iptr->count_remote > 0);
 
-  if (local == true)
+  if (local)
     --iptr->count_local;
   else
     --iptr->count_remote;

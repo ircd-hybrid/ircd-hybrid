@@ -86,7 +86,7 @@ do_etrace(struct Client *source_p, const char *name)
   {
     const struct Client *target_p = node->data;
 
-    if (doall == true || match(name, target_p->name) == 0)
+    if (doall || match(name, target_p->name) == 0)
       report_this_status(source_p, target_p);
   }
 

@@ -56,7 +56,7 @@ resv_nick_get_list(void)
 void
 resv_delete(struct ResvItem *resv, bool expired)
 {
-  if (expired == true)
+  if (expired)
     sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary RESV for [%s] expired",
                          resv->mask);
 
@@ -181,7 +181,7 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
           break;
         case HM_IPV6:
         case HM_IPV4:
-          if (address_compare(&client->ip, &exempt->addr, false, false, exempt->bits) == true)
+          if (address_compare(&client->ip, &exempt->addr, false, false, exempt->bits))
             return true;
           break;
         default:

@@ -186,7 +186,7 @@ send_queued_write(struct Client *to)
       retlen = tls_write(&to->connection->fd->tls, first->data + to->connection->buf_sendq.pos,
                                                    first->size - to->connection->buf_sendq.pos, &want_read);
 
-      if (want_read == true)
+      if (want_read)
         return;  /* Retry later, don't register for write events */
     }
     else
@@ -195,7 +195,7 @@ send_queued_write(struct Client *to)
 
     if (retlen <= 0)
     {
-      if (retlen < 0 && comm_ignore_errno(errno) == true)
+      if (retlen < 0 && comm_ignore_errno(errno))
       {
         AddFlag(to, FLAGS_BLOCKED);
         /* We have a non-fatal error, reschedule a write */
@@ -475,7 +475,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
     }
   }
 
-  if (touser == true && MyConnect(user) && !IsDead(user))
+  if (touser && MyConnect(user) && !IsDead(user))
     if (HasCap(user, poscap) == poscap)
       send_message(user, buffer);
 
@@ -548,7 +548,7 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
 static bool
 match_it(const struct Client *one, const char *mask, bool host)
 {
-  if (host == true)
+  if (host)
     return match(mask, one->host) == 0;
 
   return match(mask, one->servptr->name) == 0;

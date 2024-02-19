@@ -294,7 +294,7 @@ check_unknowns_list(void)
     else if (HasFlag(client, FLAGS_FINISHED_AUTH))
       exit = true;
 
-    if (exit == true)
+    if (exit)
       exit_client(client, "Registration timed out");
   }
 }

@@ -92,7 +92,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
     if (remote_topic_ts > channel->topic_time)
       accept_remote = true;
 
-  if (accept_remote == true)
+  if (accept_remote)
   {
     bool topic_differs = strncmp(channel->topic, topic, sizeof(channel->topic) - 1);
     bool hidden_server = (ConfigServerHide.hide_servers || IsHidden(source_p));
@@ -103,7 +103,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
                   source_p->id, parv[1], parv[2], parv[3], setby, topic);
 
     /* If it's a new topic, send it to clients, otherwise drop it to save bandwith. */
-    if (topic_differs == true)
+    if (topic_differs)
     {
       if (IsClient(source_p))
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",

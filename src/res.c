@@ -141,7 +141,7 @@ static bool
 res_ourserver(const struct irc_ssaddr *inp)
 {
   for (unsigned int i = 0; i < reslib_nscount; ++i)
-    if (address_compare(inp, &reslib_nsaddr_list[i], true, true, 0) == true)
+    if (address_compare(inp, &reslib_nsaddr_list[i], true, true, 0))
       return true;
 
   return false;

@@ -301,9 +301,9 @@ address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
     const struct sockaddr_in *const sin2 = (const struct sockaddr_in *)mask;
 
     /* Compare port numbers if required */
-    if (port == true && (sin1->sin_port != sin2->sin_port))
+    if (port && (sin1->sin_port != sin2->sin_port))
       return false; 
-    if (exact == true)
+    if (exact)
       return sin1->sin_addr.s_addr == sin2->sin_addr.s_addr;
     return match_ipv4(addr, mask, bits);
   }
@@ -312,10 +312,10 @@ address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
     const struct sockaddr_in6 *const sin1 = (const struct sockaddr_in6 *)addr;
     const struct sockaddr_in6 *const sin2 = (const struct sockaddr_in6 *)mask;
 
-    if (port == true && (sin1->sin6_port != sin2->sin6_port))
+    if (port && (sin1->sin6_port != sin2->sin6_port))
       return false;
 
-    if (exact == true)
+    if (exact)
       return memcmp(sin1->sin6_addr.s6_addr,
                     sin2->sin6_addr.s6_addr, sizeof(struct in6_addr)) == 0;
     return match_ipv6(addr, mask, bits);

@@ -90,7 +90,7 @@ include   \.include{WS}(\<.*\>|\".*\")
 <IN_COMMENT>"*/"    { BEGIN INITIAL;    }
 <IN_COMMENT>.       ;  /* Eat everything but a newline */
 <IN_COMMENT>\n      { ++lineno; }
-<IN_COMMENT><<EOF>> { BEGIN INITIAL; if (conf_eof() == true) yyterminate(); }
+<IN_COMMENT><<EOF>> { BEGIN INITIAL; if (conf_eof()) yyterminate(); }
 
 {include}       { conf_include(); }
 \n.*            { strlcpy(linebuf, yytext + 1, sizeof(linebuf)); ++lineno; yyless(1); }
@@ -392,7 +392,7 @@ mb                          { return MBYTES; }
 \.\.                        { return TWODOTS; }
 
 .                           { return yytext[0]; }
-<<EOF>>                     { if (conf_eof() == true) yyterminate(); }
+<<EOF>>                     { if (conf_eof()) yyterminate(); }
 
 %%
 

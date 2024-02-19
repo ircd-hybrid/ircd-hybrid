@@ -280,7 +280,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   if (keep_new_modes == false)
     mode = *oldmode;
-  else if (keep_our_modes == true)
+  else if (keep_our_modes)
   {
     mode.mode |= oldmode->mode;
 
@@ -360,7 +360,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     size_t len_uid = strlen(target_p->id);
     char uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1] = "";
 
-    if (flags && keep_new_modes == true)
+    if (flags && keep_new_modes)
     {
       const struct ChannelMember member = { .flags = flags };
       len_uid += strlcpy(uid_prefix, member_get_prefix(&member, true), sizeof(uid_prefix));
@@ -424,7 +424,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(source_p, 0, 0, "%s", uid_buf);
 
-  if (dlink_list_length(&channel->members) == 0 && isnew == true)
+  if (dlink_list_length(&channel->members) == 0 && isnew)
     channel_free(channel);
 }
 

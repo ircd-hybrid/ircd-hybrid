@@ -225,12 +225,12 @@ cap_req(struct Client *source_p, const char *arg)
 
     if (cap == NULL)
       error = true;
-    else if (neg && (cap->sticky == true))
+    else if (neg && cap->sticky)
       error = true;
     else if (neg && (cap->cap & CAP_CAP_NOTIFY) && HasFlag(source_p, FLAGS_CAP302))
       error = true;
 
-    if (error == true)
+    if (error)
     {
       sendto_one(source_p, ":%s CAP %s NAK :%s", me.name,
                  source_p->name[0] ? source_p->name : "*", arg);

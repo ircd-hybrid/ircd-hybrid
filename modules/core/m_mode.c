@@ -149,7 +149,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     }
   }
 
-  if (badmode == true)
+  if (badmode)
     sendto_one_numeric(source_p, &me, ERR_UMODEUNKNOWNFLAG);
 
   if (MyConnect(source_p) && HasUMode(source_p, UMODE_ADMIN) &&

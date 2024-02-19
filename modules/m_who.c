@@ -263,7 +263,7 @@ who_matches(struct Client *source_p, const struct Client *target_p,
     const int ret = parse_netmask(mask, &addr, &bits);
 
     if (ret == HM_IPV4 || ret == HM_IPV6)
-      if (address_compare(&target_p->ip, &addr, false, false, bits) == true)
+      if (address_compare(&target_p->ip, &addr, false, false, bits))
         return true;
 
     if (match(mask, target_p->sockhost) == 0)
@@ -303,7 +303,7 @@ who_on_common_channel(struct Client *source_p, struct Channel *channel, const ch
 
     if (who->maxmatches)
     {
-      if (who_matches(source_p, target_p, mask, who) == true)
+      if (who_matches(source_p, target_p, mask, who))
       {
         who_send(source_p, target_p, member, who);
         --who->maxmatches;
@@ -356,7 +356,7 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
 
     if (who->maxmatches)
     {
-      if (who_matches(source_p, target_p, mask, who) == true)
+      if (who_matches(source_p, target_p, mask, who))
       {
         who_send(source_p, target_p, NULL, who);
         --who->maxmatches;
@@ -386,7 +386,7 @@ who_on_channel(struct Client *source_p, struct Channel *channel, const struct Wh
     struct ChannelMember *member = node->data;
     struct Client *target_p = member->client;
 
-    if (is_member == true || !HasUMode(target_p, UMODE_INVISIBLE))
+    if (is_member || !HasUMode(target_p, UMODE_INVISIBLE))
     {
       if ((who->bitsel & WHOSELECT_OPER))
         if (!HasUMode(target_p, UMODE_OPER) ||

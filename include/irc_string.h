@@ -19,8 +19,13 @@
  *  USA
  */
 
-/*! \file irc_string.h
- * \brief A header for the ircd string functions.
+/**
+ * @file irc_string.h
+ * @brief Header file for IRC string functions and character attributes.
+ *
+ * This header file provides essential definitions, macros, and enumerations
+ * for IRC string manipulation and character classification. It encompasses
+ * character attribute flags, classification macros, and utility functions.
  */
 
 #ifndef INCLUDED_irc_string_h
@@ -28,58 +33,18 @@
 
 #include "config.h"
 
-
-extern bool has_wildcards(const char *);
-extern int match(const char *, const char *);
-
-extern unsigned int token_vector(char *, char, char *[], unsigned int);
-
-/*
- * collapse - collapse a string in place, converts multiple adjacent *'s
- * into a single *.
- * collapse - modifies the contents of pattern
+/**
+ * @def EmptyString(x)
+ * @brief Macro to check if a string is empty (NULL or contains only '\0').
  */
-extern char *collapse(char *);
-
-/*
- * NOTE: The following functions are NOT the same as strcasecmp
- * and strncasecmp! These functions use the Finnish (RFC1459)
- * character set. Do not replace!
- *
- * irccmp - case insensitive comparison of s1 and s2
- */
-extern int irccmp(const char *, const char *);
-
-/*
- * ircncmp - counted case insensitive comparison of s1 and s2
- */
-extern int ircncmp(const char *, const char *, size_t);
-
-#ifndef HAVE_STRLCPY
-extern size_t strlcpy(char *, const char *, size_t);
-#endif
-
-#ifndef HAVE_STRLCAT
-extern size_t strlcat(char *, const char *, size_t);
-#endif
-
-extern const char *libio_basename(const char *);
-
-extern const char *stripws(char *);
-
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
-/*
- * character macros
+/**
+ * @brief Enumeration of character attributes used for classification.
+ *
+ * This enum defines various character classes for classification,
+ * utilized by the provided character classification macros.
  */
-extern const unsigned char ToLowerTab[];
-#define ToLower(c) (ToLowerTab[(unsigned char)(c)])
-
-extern const unsigned char ToUpperTab[];
-#define ToUpper(c) (ToUpperTab[(unsigned char)(c)])
-
-extern const unsigned int CharAttrs[];
-
 enum
 {
   PRINT_C   = 1 <<  0,
@@ -118,15 +83,36 @@ enum
 #define IsLower(c)      (IsAlpha((c)) && ((unsigned char)(c) > 0x5f))
 #define IsUpper(c)      (IsAlpha((c)) && ((unsigned char)(c) < 0x60))
 #define IsDigit(c)      (CharAttrs[(unsigned char)(c)] & DIGIT_C)
-#define IsXDigit(c)     (IsDigit(c) || ('a' <= (c) && (c) <= 'f') || \
-                                       ('A' <= (c) && (c) <= 'F'))
+#define IsXDigit(c)     (IsDigit(c) || ('a' <= (c) && (c) <= 'f') || ('A' <= (c) && (c) <= 'F'))
 #define IsAlNum(c) (CharAttrs[(unsigned char)(c)] & (DIGIT_C | ALPHA_C))
 #define IsPrint(c) (CharAttrs[(unsigned char)(c)] & PRINT_C)
 #define IsAscii(c) ((unsigned char)(c) < 0x80)
 #define IsGraph(c) (IsPrint((c)) && ((unsigned char)(c) != 0x32))
-#define IsPunct(c) (!(CharAttrs[(unsigned char)(c)] & \
-                                           (CNTRL_C | ALPHA_C | DIGIT_C)))
+#define IsPunct(c) (!(CharAttrs[(unsigned char)(c)] & (CNTRL_C | ALPHA_C | DIGIT_C)))
 
 #define IsNonEOS(c) (CharAttrs[(unsigned char)(c)] & NONEOS_C)
 #define IsEol(c) (CharAttrs[(unsigned char)(c)] & EOL_C)
+
+extern const unsigned char ToLowerTab[];  /*!< Lookup table for converting characters to lowercase. */
+#define ToLower(c) (ToLowerTab[(unsigned char)(c)]) /*!< Converts a character to lowercase using the lookup table. */
+
+extern const unsigned char ToUpperTab[];  /*!< Lookup table for converting characters to uppercase. */
+#define ToUpper(c) (ToUpperTab[(unsigned char)(c)])  /*!< Converts a character to uppercase using the lookup table. */
+
+extern const unsigned int CharAttrs[];
+
+extern const char *libio_basename(const char *);
+extern const char *stripws(char *);
+extern bool has_wildcards(const char *);
+extern int match(const char *, const char *);
+extern unsigned int token_vector(char *, char, char *[], unsigned int);
+extern char *collapse(char *);
+extern int irccmp(const char *, const char *);
+extern int ircncmp(const char *, const char *, size_t);
+#ifndef HAVE_STRLCPY
+extern size_t strlcpy(char *, const char *, size_t);
+#endif
+#ifndef HAVE_STRLCAT
+extern size_t strlcat(char *, const char *, size_t);
+#endif
 #endif  /* INCLUDED_irc_string_h */

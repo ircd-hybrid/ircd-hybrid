@@ -19,8 +19,13 @@
  *  USA
  */
 
-/*! \file server_capab.c
- * \brief Server CAPAB related functions.
+/**
+ * @file server_capab.c
+ * @brief Implementation of Server CAPAB related functions.
+ *
+ * This file provides functions for managing server capabilities in an IRC server.
+ * Server capabilities represent features or behaviors that a server supports,
+ * and these capabilities can be dynamically added or removed during runtime.
  */
 
 #include "stdinc.h"
@@ -31,14 +36,14 @@
 #include "server_capab.h"
 #include "memory.h"
 
+/** @brief List of server capabilities supported by this IRC server. */
+static dlink_list capab_list;
 
-static dlink_list capab_list;  /* List of capabilities supported by this server */
-
-
-/* capab_init()
+/**
+ * @brief Initialize the server capabilities.
  *
- * inputs       - none
- * output       - none
+ * This function initializes the server capabilities by adding essential capabilities
+ * such as End of Burst (EOB), clustering, and extended realhost UID messages.
  */
 void
 capab_init(void)
@@ -48,14 +53,17 @@ capab_init(void)
   capab_add("RHOST", CAPAB_RHOST, true);
 }
 
-/* capab_add()
+/**
+ * @brief Add a capability to the list of supported capabilities.
  *
- * inputs       - string name of CAPAB
- *              - int flag of capability
- * output       - NONE
- * side effects - Adds given capability name and bit mask to
- *                current supported capabilities. This allows
- *                modules to dynamically add or subtract their capability.
+ * This function adds a new server capability to the list of supported capabilities.
+ * The capability is specified by its name, associated integer flag, and an active state.
+ * The active state indicates whether the capability is currently active on this server
+ * and should be advertised to other servers.
+ *
+ * @param name String name of the capability.
+ * @param flag Integer flag representing the capability.
+ * @param active Boolean indicating whether the capability is initially active.
  */
 void
 capab_add(const char *name, unsigned int flag, bool active)
@@ -68,11 +76,13 @@ capab_add(const char *name, unsigned int flag, bool active)
   dlinkAdd(cap, &cap->node, &capab_list);
 }
 
-/* capab_del()
+/**
+ * @brief Delete a specified capability from the list of known capabilities.
  *
- * inputs       - string name of CAPAB
- * output       - NONE
- * side effects - delete given capability from ones known.
+ * This function deletes a specified capability from the list of known capabilities.
+ * The capability is identified by its name, and its memory is freed during deletion.
+ *
+ * @param name String name of the capability to be deleted.
  */
 void
 capab_del(const char *name)
@@ -92,12 +102,14 @@ capab_del(const char *name)
   }
 }
 
-/*
- * capab_find()
+/**
+ * @brief Find and retrieve the integer flag value associated with a given capability name.
  *
- * inputs       - string name of capab to find
- * output       - 0 if not found CAPAB otherwise
- * side effects - none
+ * This function searches for a capability in the list based on its name and returns
+ * the associated integer flag value. If the capability is not found, it returns 0.
+ *
+ * @param name String name of the capability to find.
+ * @return Integer flag value of the capability; returns 0 if not found.
  */
 unsigned int
 capab_find(const char *name)
@@ -115,12 +127,16 @@ capab_find(const char *name)
   return 0;
 }
 
-/*
- * capab_get() - show current server capabilities
+/**
+ * @brief Show the current server capabilities.
  *
- * inputs       - pointer to a struct Client
- * output       - pointer to static string
- * side effects - build up string representing capabilities of server listed
+ * This function generates a static string representation of the current server capabilities.
+ * The capabilities can be filtered based on a struct Client (ptr), and the active parameter
+ * controls whether only active capabilities should be included in the output.
+ *
+ * @param ptr Pointer to a struct Client (can be NULL).
+ * @param active Boolean indicating whether to display only active capabilities.
+ * @return Pointer to a static string representing the server capabilities.
  */
 const char *
 capab_get(const void *ptr, bool active)

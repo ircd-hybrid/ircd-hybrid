@@ -19,47 +19,81 @@
  *  USA
  */
 
-/*! \file server_capab.h
- * \brief A header for the server CAPAB functions.
+/**
+ * @file server_capab.h
+ * @brief Declarations for server capability functions and structures.
+ *
+ * This file provides declarations for functions and structures related to server capabilities.
+ * Server capabilities represent features or functionalities that a server supports or implements.
+ * These capabilities can be used to negotiate and advertise supported features between servers
+ * in an Internet Relay Chat (IRC) network.
  */
 
 #ifndef INCLUDED_server_capab_h
 #define INCLUDED_server_capab_h
 
-/** Server capability flags */
+/**
+ * @brief Server capability flags.
+ *
+ * Enumeration representing various server capabilities with corresponding bitmask values.
+ */
 enum
 {
-  CAPAB_EOB     = 1 <<  0,  /**< Can do EOB message */
-  CAPAB_KLN     = 1 <<  1,  /**< Can do KLINE message */
-  CAPAB_KNOCK   = 1 <<  2,  /**< Supports KNOCK */
-  CAPAB_UNKLN   = 1 <<  3,  /**< Can do UNKLINE message */
-  CAPAB_CLUSTER = 1 <<  4,  /**< Supports server clustering */
-  CAPAB_ENCAP   = 1 <<  5,  /**< Supports ENCAP message */
-  CAPAB_TBURST  = 1 <<  6,  /**< Supports TBURST */
-  CAPAB_DLN     = 1 <<  7,  /**< Can do DLINE message */
-  CAPAB_UNDLN   = 1 <<  8,  /**< Can do UNDLINE message */
-  CAPAB_RHOST   = 1 <<  9,  /**< Can do extended realhost UID messages */
-  CAPAB_QOP     = 1 << 10,  /**< Server supports the owner (~) channel prefix mode */
-  CAPAB_AOP     = 1 << 11,  /**< Server supports the admin (&) channel prefix mode */
-  CAPAB_HOP     = 1 << 12,  /**< Server supports the half-op (%) channel prefix mode */
-  CAPAB_RESYNC  = 1 << 13,  /**< Can do RESYNC message */
-  CAPAB_MLOCK   = 1 << 14,  /**< Supports mode locking (MLOCK) */
+  CAPAB_EOB     = 1 <<  0,  /**< Indicates support for the End of Burst (EOB) message. */
+  CAPAB_KLN     = 1 <<  1,  /**< Indicates support for the KLINE message. */
+  CAPAB_KNOCK   = 1 <<  2,  /**< Indicates support for the KNOCK command. */
+  CAPAB_UNKLN   = 1 <<  3,  /**< Indicates support for the UNKLINE message. */
+  CAPAB_CLUSTER = 1 <<  4,  /**< Indicates support for server clustering. */
+  CAPAB_ENCAP   = 1 <<  5,  /**< Indicates support for the ENCAP message. */
+  CAPAB_TBURST  = 1 <<  6,  /**< Indicates support for TBURST. */
+  CAPAB_DLN     = 1 <<  7,  /**< Indicates support for the DLINE message. */
+  CAPAB_UNDLN   = 1 <<  8,  /**< Indicates support for the UNDLINE message. */
+  CAPAB_RHOST   = 1 <<  9,  /**< Indicates support for extended realhost UID messages. */
+  CAPAB_QOP     = 1 << 10,  /**< Indicates support for the owner (~) channel prefix mode (QOP). */
+  CAPAB_AOP     = 1 << 11,  /**< Indicates support for the admin (&) channel prefix mode (AOP). */
+  CAPAB_HOP     = 1 << 12,  /**< Indicates support for the half-op (%) channel prefix mode (HOP). */
+  CAPAB_RESYNC  = 1 << 13,  /**< Indicates support for the RESYNC message. */
+  CAPAB_MLOCK   = 1 << 14,  /**< Indicates support for mode locking (MLOCK). */
 };
 
-/*
- * Capability macros.
+/**
+ * @def IsCapable(x, cap)
+ * @brief Check if a server is capable of a certain capability.
+ * @param x Pointer to the client structure.
+ * @param cap Capability flag to check.
  */
 #define IsCapable(x, cap)   ((x)->connection->capab &   (cap))
+
+/**
+ * @def SetCapable(x, cap)
+ * @brief Set a capability for a server.
+ * @param x Pointer to the client structure.
+ * @param cap Capability flag to set.
+ */
 #define SetCapable(x, cap)  ((x)->connection->capab |=  (cap))
+
+/**
+ * @def ClearCap(x, cap)
+ * @brief Clear a capability for a server.
+ * @param x Pointer to the client structure.
+ * @param cap Capability flag to clear.
+ */
 #define ClearCap(x, cap)    ((x)->connection->capab &= ~(cap))
 
-/** Capability structure. Describes a single server capability. */
+/**
+ * @struct Capability
+ * @brief Describes a single server capability.
+ *
+ * This structure represents a single server capability. It is used to store
+ * information about a specific capability, including its name, bitmask value,
+ * and whether it is currently active on the server and advertised to others.
+ */
 struct Capability
 {
-  dlink_node node;  /**< List node; linked into capab_list */
-  char *name;  /**< Name of capability */
-  unsigned int cap;  /**< Mask value */
-  bool active;  /**< Capability is active on this server and advertized to others */
+  dlink_node node;  /**< List node; linked into capab_list. */
+  char *name;  /**< Name of the capability. */
+  unsigned int cap;  /**< Bitmask value representing the capability. */
+  bool active;  /**< Indicates whether the capability is currently active on this server and advertised to others. */
 };
 
 extern void capab_init(void);

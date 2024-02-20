@@ -36,40 +36,6 @@
 #include "misc.h"
 
 
-/* SET AUTOCONN */
-static void
-quote_autoconn(struct Client *source_p, const char *arg, int newval)
-{
-  static const char *const status[] =
-  {
-    "OFF", "ON"
-  };
-
-  if (EmptyString(arg))
-  {
-    sendto_one_notice(source_p, &me, ":Please specify a server name!");
-    return;
-  }
-
-  struct MaskItem *conf = connect_find(arg, irccmp);
-  if (conf == NULL)
-  {
-    sendto_one_notice(source_p, &me, ":Cannot find %s", arg);
-    return;
-  }
-
-  if (newval)
-    SetConfAllowAutoConn(conf);
-  else
-    ClearConfAllowAutoConn(conf);
-
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "%s has changed AUTOCONN for %s to %s",
-                       get_oper_name(source_p), conf->name, status[newval != 0]);
-  sendto_one_notice(source_p, &me, ":AUTOCONN for %s is now set to %s",
-                    conf->name, status[newval != 0]);
-}
-
 /* SET AUTOCONNALL */
 static void
 quote_autoconnall(struct Client *source_p, const char *arg, int newval)
@@ -240,7 +206,6 @@ static const struct SetStruct set_cmd_table[] =
 {
   /* name               function        string arg  int arg */
   /* ------------------------------------------------------ */
-  { "AUTOCONN",         quote_autoconn,     true,   true  },
   { "AUTOCONNALL",      quote_autoconnall,  false,  true  },
   { "FLOODCOUNT",       quote_floodcount,   false,  true  },
   { "FLOODTIME",        quote_floodtime,    false,  true  },

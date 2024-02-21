@@ -35,202 +35,73 @@
 #include "modules.h"
 #include "misc.h"
 
-
-/* SET AUTOCONNALL */
-static void
-quote_autoconnall(struct Client *source_p, const char *arg, int newval)
-{
-  static const char *const status[] =
-  {
-    "OFF", "ON"
-  };
-
-  if (newval >= 0)
-  {
-    GlobalSetOptions.autoconn = newval != 0;
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed AUTOCONNALL to %s",
-                         get_oper_name(source_p), status[GlobalSetOptions.autoconn == true]);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":AUTOCONNALL is currently %s",
-                      status[GlobalSetOptions.autoconn == true]);
-}
-
-/* SET FLOODCOUNT */
-static void
-quote_floodcount(struct Client *source_p, const char *arg, int newval)
-{
-  if (newval >= 0)
-  {
-    GlobalSetOptions.floodcount = newval;
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed FLOODCOUNT to %u",
-                         get_oper_name(source_p), GlobalSetOptions.floodcount);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":FLOODCOUNT is currently %u",
-                      GlobalSetOptions.floodcount);
-}
-
-/* SET FLOODTIME */
-static void
-quote_floodtime(struct Client *source_p, const char *arg, int newval)
-{
-  if (newval >= 0)
-  {
-    GlobalSetOptions.floodtime = newval;
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed FLOODTIME to %u",
-                         get_oper_name(source_p), GlobalSetOptions.floodtime);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":FLOODTIME is currently %u",
-                      GlobalSetOptions.floodtime);
-}
-
-/* SET MAX */
-static void
-quote_max(struct Client *source_p, const char *arg, int newval)
-{
-  if (newval > 0)
-  {
-    if (newval > MAXCLIENTS_MAX)
-    {
-      sendto_one_notice(source_p, &me, ":You cannot set MAXCLIENTS to > %d, restoring to %u",
-                        MAXCLIENTS_MAX, GlobalSetOptions.maxclients);
-      return;
-    }
-
-    GlobalSetOptions.maxclients = newval;
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s set new MAXCLIENTS to %u (%u current)",
-                         get_oper_name(source_p), GlobalSetOptions.maxclients, dlink_list_length(&local_client_list));
-  }
-  else
-    sendto_one_notice(source_p, &me, ":Current MAXCLIENTS = %u (%u)",
-                      GlobalSetOptions.maxclients, dlink_list_length(&local_client_list));
-}
-
-/* SET SPAMNUM */
-static void
-quote_spamnum(struct Client *source_p, const char *arg, int newval)
-{
-  if (newval >= 0)
-  {
-    if (newval == 0)
-    {
-      GlobalSetOptions.spam_num = newval;
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "%s has disabled ANTI_SPAMBOT", source_p->name);
-      return;
-    }
-
-    GlobalSetOptions.spam_num = IRCD_MAX(newval, MIN_SPAM_NUM);
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed SPAMNUM to %u",
-                         get_oper_name(source_p), GlobalSetOptions.spam_num);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":SPAMNUM is currently %u",
-                      GlobalSetOptions.spam_num);
-}
-
-/* SET SPAMTIME */
-static void
-quote_spamtime(struct Client *source_p, const char *arg, int newval)
-{
-  if (newval > 0)
-  {
-    GlobalSetOptions.spam_time = IRCD_MAX(newval, MIN_SPAM_TIME);
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed SPAMTIME to %u",
-                         get_oper_name(source_p), GlobalSetOptions.spam_time);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":SPAMTIME is currently %u",
-                      GlobalSetOptions.spam_time);
-}
-
-/* SET JFLOODTIME */
-static void
-quote_jfloodtime(struct Client *source_p, const char *arg, int newval)
-{
-  if (newval >= 0)
-  {
-    GlobalSetOptions.joinfloodtime = newval;
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed JFLOODTIME to %u",
-                         get_oper_name(source_p), GlobalSetOptions.joinfloodtime);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":JFLOODTIME is currently %u",
-                      GlobalSetOptions.joinfloodtime);
-}
-
-/* SET JFLOODCOUNT */
-static void
-quote_jfloodcount(struct Client *source_p, const char *arg, int newval)
-{
-  if (newval >= 0)
-  {
-    GlobalSetOptions.joinfloodcount = newval;
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s has changed JFLOODCOUNT to %u",
-                         get_oper_name(source_p), GlobalSetOptions.joinfloodcount);
-  }
-  else
-    sendto_one_notice(source_p, &me, ":JFLOODCOUNT is currently %u",
-                      GlobalSetOptions.joinfloodcount);
-}
-
-/* Structure used for the SET table itself */
 struct SetStruct
 {
   const char *const name;
-  void (*const handler)(struct Client *, const char *, int);
-  bool wants_char;  /* 1 if it expects (char *, [int]) */
-  bool wants_int;  /* 1 if it expects ([char *], int) */
-  /* eg:  0, 1 == only an int arg
-   * eg:  1, 1 == char and int args */
+  unsigned int *const ptr;
+  const bool wants_bool;
+  const int value_min;
+  const int value_max;
 };
 
-/*
- * If this ever needs to be expanded to more than one arg of each
- * type, want_char/want_int could be the count of the arguments,
- * instead of just a boolean flag...
- *
- * -davidt
- */
-static const struct SetStruct set_cmd_table[] =
+static struct SetStruct set_cmd_table[] =
 {
-  /* name               function        string arg  int arg */
-  /* ------------------------------------------------------ */
-  { "AUTOCONNALL",      quote_autoconnall,  false,  true  },
-  { "FLOODCOUNT",       quote_floodcount,   false,  true  },
-  { "FLOODTIME",        quote_floodtime,    false,  true  },
-  { "MAX",              quote_max,          false,  true  },
-  { "SPAMNUM",          quote_spamnum,      false,  true  },
-  { "SPAMTIME",         quote_spamtime,     false,  true  },
-  { "JFLOODTIME",       quote_jfloodtime,   false,  true  },
-  { "JFLOODCOUNT",      quote_jfloodcount,  false,  true  },
-  /* ------------------------------------------------------ */
-  { NULL,               NULL,               false,  false }
+  { .name = "AUTOCONNALL", .ptr = &GlobalSetOptions.autoconn, .wants_bool = true, .value_max = 1 },
+  { .name = "FLOODCOUNT", .ptr = &GlobalSetOptions.floodcount, .value_max = INT_MAX },
+  { .name = "FLOODTIME", .ptr = &GlobalSetOptions.floodtime, .value_max = INT_MAX },
+  { .name = "MAX", .ptr = &GlobalSetOptions.maxclients, .value_min = 1, .value_max = INT_MAX },
+  { .name = "SPAMNUM", .ptr = &GlobalSetOptions.spam_num, .value_min = MIN_SPAM_NUM, .value_max = INT_MAX },
+  { .name = "SPAMTIME", .ptr = &GlobalSetOptions.spam_time, .value_min = MIN_SPAM_TIME, .value_max = INT_MAX },
+  { .name = "JFLOODTIME", .ptr = &GlobalSetOptions.joinfloodtime, .value_max = INT_MAX },
+  { .name = "JFLOODCOUNT", .ptr = &GlobalSetOptions.joinfloodcount, .value_max = INT_MAX },
+  { .name = NULL }
 };
+
+static void
+set_option(struct Client *source_p, struct SetStruct *option, int newval)
+{
+  static const char *const status[] = { "OFF", "ON" };
+
+  if (newval >= 0)
+  {
+    if (newval < option->value_min || newval > option->value_max)
+    {
+      sendto_one_notice(source_p, &me, ":Value for %s must be between %i and %i",
+                        option->name, option->value_min, option->value_max);
+      return;
+    }
+
+    *option->ptr = newval;
+
+    if (option->wants_bool)
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has changed %s to %s",
+                           get_oper_name(source_p), option->name, status[*option->ptr != 0]);
+    else
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has changed %s to %i",
+                           get_oper_name(source_p), option->name, *option->ptr);
+  }
+  else
+  {
+    if (option->wants_bool)
+      sendto_one_notice(source_p, &me, ":%s is currently %s", option->name, status[*option->ptr != 0]);
+    else
+      sendto_one_notice(source_p, &me, ":%s is currently %i", option->name, *option->ptr);
+  }
+}
 
 /*
  * list_quote_commands() sends the client all the available commands.
  * Four to a line for now.
  */
 static void
-list_quote_commands(struct Client *source_p)
+set_option_list(struct Client *source_p)
 {
   unsigned int j = 0;
   const char *names[4] = { "", "", "", "" };
 
   sendto_one_notice(source_p, &me, ":Available QUOTE SET commands:");
 
-  for (const struct SetStruct *tab = set_cmd_table; tab->handler; ++tab)
+  for (const struct SetStruct *tab = set_cmd_table; tab->name; ++tab)
   {
     names[j++] = tab->name;
 
@@ -250,17 +121,9 @@ list_quote_commands(struct Client *source_p)
                       names[2], names[3]);
 }
 
-/*
- * mo_set - SET command handler
- * set options while running
- */
 static void
 mo_set(struct Client *source_p, int parc, char *parv[])
 {
-  int newval;
-  const char *strarg = NULL;
-  const char *intarg = NULL;
-
   if (!HasOFlag(source_p, OPER_FLAG_SET))
   {
     sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "set");
@@ -273,46 +136,21 @@ mo_set(struct Client *source_p, int parc, char *parv[])
      * Go through all the commands in set_cmd_table, until one is
      * matched.
      */
-    for (const struct SetStruct *tab = set_cmd_table; tab->handler; ++tab)
+    for (struct SetStruct *tab = set_cmd_table; tab->name; ++tab)
     {
       if (irccmp(tab->name, parv[1]))
         continue;
 
-      /*
-       * Command found; now execute the code
-       */
-      int n = 2;
-
-      if (tab->wants_char)
-        strarg = parv[n++];
-
-      if (tab->wants_int)
-        intarg = parv[n++];
-
-      if ((n - 1) > parc)
-        sendto_one_notice(source_p, &me, ":SET %s expects (\"%s%s\") args", tab->name,
-                          (tab->wants_char ? "string, " : ""),
-                          (tab->wants_int ? "int" : ""));
-
-      if (parc <= 2)
+      int newval = -1;
+      const char *const arg = parv[2];
+      if (arg)
       {
-        strarg = NULL;
-        intarg = NULL;
-      }
-
-      if (tab->wants_int && parc > 2)
-      {
-        if (intarg)
-        {
-          if (irccmp(intarg, "yes") == 0 || irccmp(intarg, "on") == 0)
-            newval = 1;
-          else if (irccmp(intarg, "no") == 0 || irccmp(intarg, "off") == 0)
-            newval = 0;
-          else
-            newval = atoi(intarg);
-        }
+        if (irccmp(arg, "yes") == 0 || irccmp(arg, "on") == 0)
+          newval = 1;
+        else if (irccmp(arg, "no") == 0 || irccmp(arg, "off") == 0)
+          newval = 0;
         else
-          newval = -1;
+          newval = atoi(arg);
 
         if (newval < 0)
         {
@@ -320,10 +158,8 @@ mo_set(struct Client *source_p, int parc, char *parv[])
           return;
         }
       }
-      else
-        newval = -1;
 
-      tab->handler(source_p, strarg, newval);
+      set_option(source_p, tab, newval);
       return;
     }
 
@@ -335,7 +171,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  list_quote_commands(source_p);
+  set_option_list(source_p);
 }
 
 static struct Message set_msgtab =

@@ -86,6 +86,7 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
   int bits = 0;
+  unsigned int min_cidr = 0;
   struct irc_ssaddr iphost, *piphost = NULL;
 
   if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(2, aline->user, aline->host) == false)
@@ -100,29 +101,22 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
   switch (parse_netmask(aline->host, &iphost, &bits))
   {
     case HM_IPV4:
-      if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.kline_min_cidr)
-      {
-        if (IsClient(source_p))
-          sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                            ConfigGeneral.kline_min_cidr);
-        return;
-      }
-
+      min_cidr = ConfigGeneral.kline_min_cidr;
       piphost = &iphost;
       break;
     case HM_IPV6:
-      if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.kline_min_cidr6)
-      {
-        if (IsClient(source_p))
-          sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                            ConfigGeneral.kline_min_cidr6);
-        return;
-      }
-
+      min_cidr = ConfigGeneral.kline_min_cidr6;
       piphost = &iphost;
       break;
     default:  /* HM_HOST */
       break;
+  }
+
+  if (min_cidr > 0 && !HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < min_cidr)
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
+    return;
   }
 
   struct MaskItem *conf;

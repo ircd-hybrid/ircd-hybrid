@@ -35,6 +35,8 @@
 #include "modules.h"
 #include "misc.h"
 
+enum { SET_COMMAND_LIST_SIZE = 128 };
+
 struct SetStruct
 {
   const char *const name;
@@ -91,34 +93,20 @@ set_option(struct Client *source_p, struct SetStruct *option, int newval)
 
 /*
  * list_quote_commands() sends the client all the available commands.
- * Four to a line for now.
  */
 static void
 set_option_list(struct Client *source_p)
 {
-  unsigned int j = 0;
-  const char *names[4] = { "", "", "", "" };
-
-  sendto_one_notice(source_p, &me, ":Available QUOTE SET commands:");
+  char command_list[SET_COMMAND_LIST_SIZE] = "";
 
   for (const struct SetStruct *tab = set_cmd_table; tab->name; ++tab)
   {
-    names[j++] = tab->name;
-
-    if (j > 3)
-    {
-      sendto_one_notice(source_p, &me, ":%s %s %s %s",
-                        names[0], names[1],
-                        names[2], names[3]);
-      j = 0;
-      names[0] = names[1] = names[2] = names[3] = "";
-    }
+    strlcat(command_list, tab->name, sizeof(command_list));
+    if ((tab + 1)->name)
+      strlcat(command_list, " ", sizeof(command_list));
   }
 
-  if (j)
-    sendto_one_notice(source_p, &me, ":%s %s %s %s",
-                      names[0], names[1],
-                      names[2], names[3]);
+  sendto_one_notice(source_p, &me, ":Available QUOTE SET commands: %s", command_list);
 }
 
 static void
@@ -154,7 +142,7 @@ mo_set(struct Client *source_p, int parc, char *parv[])
 
         if (newval < 0)
         {
-          sendto_one_notice(source_p, &me, ":Value less than 0 illegal for %s", tab->name);
+          sendto_one_notice(source_p, &me, ":Invalid value for %s. Please use a non-negative value.", tab->name);
           return;
         }
       }

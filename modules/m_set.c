@@ -60,20 +60,20 @@ static struct SetStruct set_cmd_table[] =
 };
 
 static void
-set_option(struct Client *source_p, struct SetStruct *option, int newval)
+set_option(struct Client *source_p, struct SetStruct *option, int value_new)
 {
   static const char *const status[] = { "OFF", "ON" };
 
-  if (newval >= 0)
+  if (value_new >= 0)
   {
-    if (newval < option->value_min || newval > option->value_max)
+    if (value_new < option->value_min || value_new > option->value_max)
     {
       sendto_one_notice(source_p, &me, ":Value for %s must be between %i and %i",
                         option->name, option->value_min, option->value_max);
       return;
     }
 
-    *option->ptr = newval;
+    *option->ptr = value_new;
 
     if (option->wants_bool)
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has changed %s to %s",
@@ -129,25 +129,25 @@ mo_set(struct Client *source_p, int parc, char *parv[])
       if (irccmp(tab->name, parv[1]))
         continue;
 
-      int newval = -1;
+      int value_new = -1;
       const char *const arg = parv[2];
       if (arg)
       {
         if (irccmp(arg, "yes") == 0 || irccmp(arg, "on") == 0)
-          newval = 1;
+          value_new = 1;
         else if (irccmp(arg, "no") == 0 || irccmp(arg, "off") == 0)
-          newval = 0;
+          value_new = 0;
         else
-          newval = atoi(arg);
+          value_new = atoi(arg);
 
-        if (newval < 0)
+        if (value_new < 0)
         {
           sendto_one_notice(source_p, &me, ":Invalid value for %s. Please use a non-negative value.", tab->name);
           return;
         }
       }
 
-      set_option(source_p, tab, newval);
+      set_option(source_p, tab, value_new);
       return;
     }
 

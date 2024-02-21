@@ -25,7 +25,6 @@
 
 #include "stdinc.h"
 #include "client.h"
-#include "event.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -33,7 +32,6 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "misc.h"
 
 enum { SET_COMMAND_LIST_SIZE = 128 };
 

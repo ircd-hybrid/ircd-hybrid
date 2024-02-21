@@ -84,34 +84,28 @@ dline_handle(struct Client *source_p, const struct aline_ctx *aline)
   char buf[IRCD_BUFSIZE];
   struct irc_ssaddr addr;
   int bits = 0;
+  unsigned int min_cidr = 0;
 
   switch (parse_netmask(aline->host, &addr, &bits))
   {
     case HM_IPV4:
-      if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.dline_min_cidr)
-      {
-        if (IsClient(source_p))
-          sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                            ConfigGeneral.dline_min_cidr);
-        return;
-      }
-
+      min_cidr = ConfigGeneral.dline_min_cidr;
       break;
     case HM_IPV6:
-      if (!HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < ConfigGeneral.dline_min_cidr6)
-      {
-        if (IsClient(source_p))
-          sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.",
-                            ConfigGeneral.dline_min_cidr6);
-        return;
-      }
-
+      min_cidr = ConfigGeneral.dline_min_cidr6;
       break;
     default:  /* HM_HOST */
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":Invalid D-Line");
 
      return;
+  }
+
+  if (min_cidr > 0 && !HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < min_cidr)
+  {
+    if (IsClient(source_p))
+      sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
+    return;
   }
 
   struct MaskItem *conf;

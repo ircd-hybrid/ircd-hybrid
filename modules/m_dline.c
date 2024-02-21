@@ -97,8 +97,7 @@ dline_handle(struct Client *source_p, const struct aline_ctx *aline)
     default:  /* HM_HOST */
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":Invalid D-Line");
-
-     return;
+      return;
   }
 
   if (min_cidr > 0 && !HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < min_cidr)

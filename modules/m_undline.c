@@ -62,7 +62,6 @@ dline_remove(struct Client *source_p, const struct aline_ctx *aline)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":No D-Line for [%s] found", aline->host);
-
     return;
   }
 

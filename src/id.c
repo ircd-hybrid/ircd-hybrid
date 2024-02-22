@@ -41,11 +41,11 @@ static char new_uid[TOTALSIDUID + 1];
 /**
  * @brief Checks if the provided Server ID (SID) is valid.
  *
- * @param sid Pointer to the SID string to be validated.
- * @return Returns true if the SID is valid, false otherwise.
- *
  * The SID must be exactly IRC_MAXSID characters long and consist of ASCII uppercase letters and digits.
  * The first character must be a digit.
+ *
+ * @param sid Pointer to the SID string to be validated.
+ * @return Returns true if the SID is valid, false otherwise.
  */
 bool
 valid_sid(const char *sid)
@@ -66,11 +66,11 @@ valid_sid(const char *sid)
 /**
  * @brief Checks if the provided User ID (UID) is valid.
  *
- * @param uid Pointer to the UID string to be validated.
- * @return Returns true if the UID is valid, false otherwise.
- *
  * The UID must be exactly TOTALSIDUID characters long and consist of ASCII uppercase letters and digits.
  * The first character must be a digit.
+ *
+ * @param uid Pointer to the UID string to be validated.
+ * @return Returns true if the UID is valid, false otherwise.
  */
 bool
 valid_uid(const char *uid)
@@ -103,10 +103,10 @@ init_uid(void)
 /**
  * @brief Increments the User ID (UID) by one.
  *
- * @param i Index number into new_uid.
- *
  * This function increments the User ID (UID) by one. It starts from the rightmost character and
  * propagates any carry-over to the leftmost characters if needed.
+ *
+ * @param i Index number into new_uid.
  */
 static void
 add_one_to_uid(unsigned int i)
@@ -128,9 +128,9 @@ add_one_to_uid(unsigned int i)
 /**
  * @brief Gets the next available User ID (UID) and increments it by one.
  *
- * @return Returns the new UID.
- *
  * This function retrieves the next available User ID (UID) and increments it by one for future use.
+ *
+ * @return Returns the new UID.
  */
 const char *
 uid_get(void)

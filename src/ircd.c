@@ -320,11 +320,11 @@ write_pidfile(const char *filename)
 /**
  * @brief Checks if the daemon is already running using the process ID file.
  *
- * @param filename Path to the process ID file.
- *
  * This function reads the process ID from the specified file and checks
  * if the ircd server is already running. If it is, the program exits
  * to prevent multiple instances.
+ *
+ * @param filename Path to the process ID file.
  */
 static void
 check_pidfile(const char *filename)
@@ -413,10 +413,10 @@ setup_fdlimit(void)
 /**
  * @brief Prints startup information including version and process ID.
  *
- * @param pid Process ID of the ircd server.
- *
  * This function prints information about the server version, process ID,
  * and whether it is running in the background or foreground.
+ *
+ * @param pid Process ID of the ircd server.
  */
 static void
 print_startup(int pid)
@@ -455,14 +455,13 @@ make_daemon(void)
 /**
  * @brief Main function to initialize and run the IRC server.
  *
- * @param argc Number of command line arguments.
- * @param argv Array of command line argument strings.
- *
- * @return Returns 0 upon successful execution.
- *
  * This is the main entry point for the ircd server. It initializes various
  * components, sets up signal handling, reads configuration files, and runs
  * the main IO loop to handle server activities.
+ *
+ * @param argc Number of command line arguments.
+ * @param argv Array of command line argument strings.
+ * @return Returns 0 upon successful execution.
  */
 int
 main(int argc, char *argv[])

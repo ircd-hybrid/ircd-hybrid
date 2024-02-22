@@ -48,7 +48,7 @@
 /**
  * @def _1MEG
  * @brief Represents 1 Mebibyte (MiB).
- *  
+ *
  * This macro defines the size equivalent to 1 MiB, where 1 MiB equals 1024 Kibibytes (KiB).
  */
 #define _1MEG     (1024.0f)
@@ -56,7 +56,7 @@
 /**
  * @def _1GIG
  * @brief Represents 1 Gibibyte (GiB).
- *  
+ *
  * This macro defines the size equivalent to 1 GiB, where 1 GiB equals 1024 Mebibytes (MiB).
  */
 #define _1GIG     (1024.0f * 1024.0f)
@@ -64,7 +64,7 @@
 /**
  * @def _1TER
  * @brief Represents 1 Tebibyte (TiB).
- *  
+ *
  * This macro defines the size equivalent to 1 TiB, where 1 TiB equals 1024 Gibibytes (GiB).
  */
 #define _1TER     (1024.0f * 1024.0f * 1024.0f)

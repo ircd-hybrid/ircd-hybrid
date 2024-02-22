@@ -30,13 +30,13 @@
 
 /**
  * @brief Check for the presence of wildcard characters in a string.
- * 
+ *
  * This function thoroughly examines each character in the given string to
  * determine if it contains any wildcard characters. Wildcard characters are
  * identified based on the IsMWildChar() function. The function takes into
  * account escape characters ('\') to distinguish literal characters from
  * wildcards.
- * 
+ *
  * @param str The input string to be examined for wildcard characters.
  * @return Returns true if the string contains any wildcard characters,
  *         otherwise returns false.
@@ -62,10 +62,10 @@ has_wildcards(const char *str)
 
 /**
  * @brief Strip leading and trailing whitespaces from a string.
- * 
+ *
  * This function removes leading and trailing whitespaces (spaces and tabs)
  * from the input string and returns a pointer to the modified string.
- * 
+ *
  * @param txt Input string to be stripped.
  * @return Pointer to the stripped string.
  */
@@ -86,12 +86,12 @@ stripws(char *txt)
 
 /**
  * @brief Tokenize a delimited input list into a vector of tokens.
- * 
+ *
  * This function splits an input buffer, 'names', using a specified delimiter, 'token'.
  * The resulting tokens are stored in the 'vector' array, up to the specified 'size'.
  * Empty tokens, occurring at the start or end of the list or adjacent to each other, are ignored.
  * The function returns the number of tokens written to the vector.
- * 
+ *
  * @param names Input buffer containing the list to be tokenized.
  * @param token Delimiter used to split the list into tokens.
  * @param vector Output array to store the tokens.

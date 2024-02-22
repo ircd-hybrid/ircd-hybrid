@@ -35,7 +35,7 @@
  * @struct ServiceItem
  * @brief Represents a service configuration item.
  *
- *  This structure is used to store information related to a service configuration.
+ * This structure is used to store information related to a service configuration.
  */
 struct ServiceItem
 {

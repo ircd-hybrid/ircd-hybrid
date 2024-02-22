@@ -58,7 +58,6 @@ resv_handle(struct Client *source_p, const struct aline_ctx *aline)
       if (IsClient(source_p))
         sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the RESV",
                           ConfigGeneral.min_nonwildcard_simple);
-
       return;
     }
   }
@@ -68,7 +67,6 @@ resv_handle(struct Client *source_p, const struct aline_ctx *aline)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":A RESV has already been placed on: %s", resv->mask);
-
     return;
   }
 

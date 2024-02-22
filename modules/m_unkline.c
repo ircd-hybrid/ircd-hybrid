@@ -62,7 +62,6 @@ kline_remove(struct Client *source_p, const struct aline_ctx *aline)
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", aline->user, aline->host);
-
     return;
   }
 

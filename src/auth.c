@@ -58,6 +58,7 @@
 #include "hostmask.h"
 
 /**
+ * @enum auth_report_type
  * @brief Enumerates the different types of reports generated during the authentication process.
  *
  * This enumeration defines constants representing various reports that may occur during
@@ -65,7 +66,7 @@
  * message to be conveyed to the user or server, indicating the progress or outcome of
  * DNS and ident lookups.
  */
-enum
+enum auth_report_type
 {
   REPORT_DO_DNS,  /**< Indicates the initiation of hostname lookup. */
   REPORT_FIN_DNS,  /**< Indicates the successful completion of hostname lookup. */
@@ -225,6 +226,7 @@ static void
 auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
 {
   struct AuthRequest *const auth = vptr;
+  enum auth_report_type report_type;
 
   assert(auth->client);
   assert(auth->client->connection);
@@ -232,19 +234,20 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
   auth->dns_pending = false;
 
   if (namelength == 0)
-    auth_sendheader(auth->client, REPORT_FAIL_DNS);
-  else if (address_compare(addr, &auth->client->ip, true, false, 0) == false)
-    auth_sendheader(auth->client, REPORT_IP_MISMATCH);
+    report_type = REPORT_FAIL_DNS;
   else if (namelength > HOSTLEN)
-    auth_sendheader(auth->client, REPORT_HOST_TOOLONG);
+    report_type = REPORT_HOST_TOOLONG;
+  else if (address_compare(addr, &auth->client->ip, true, false, 0) == false)
+    report_type = REPORT_IP_MISMATCH;
   else if (auth_verify_hostname(name) == false)
-    auth_sendheader(auth->client, REPORT_HOST_INVALID);
+    report_type = REPORT_HOST_INVALID;
   else
   {
+    report_type = REPORT_FIN_DNS;
     strlcpy(auth->client->host, name, sizeof(auth->client->host));
-    auth_sendheader(auth->client, REPORT_FIN_DNS);
   }
 
+  auth_sendheader(auth->client, report_type);
   auth_release_client(auth);
 }
 

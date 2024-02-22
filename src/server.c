@@ -488,7 +488,7 @@ server_finish_tls_handshake(struct Client *client)
              me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
 
   /* If we get here, we're ok, so lets start reading some data */
-  read_packet(client->connection->fd, client); 
+  read_packet(client->connection->fd, client);
 }
 
 static void

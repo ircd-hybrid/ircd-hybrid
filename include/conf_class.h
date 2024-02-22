@@ -19,7 +19,7 @@
  *  USA
  */
 
-/** 
+/**
  * @file conf_class.h
  * @brief Configuration management for class {} blocks.
  *
@@ -72,7 +72,7 @@ struct ClassItem
   unsigned int flags;  /**< Bitwise flags indicating class configuration options. */
 };
 
-/** 
+/**
  * @brief Pointer to the default class configuration.
  */
 extern struct ClassItem *class_default;

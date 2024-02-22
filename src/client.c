@@ -1075,7 +1075,7 @@ accept_clear_list(dlink_list *list)
     accept_del(list->head->data, list);
 }
 
-/** 
+/**
  * @brief Retrieves the (fake) idle time for a target client.
  *
  * This function calculates the (fake) idle time for a target client based on the

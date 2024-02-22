@@ -302,7 +302,7 @@ address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
 
     /* Compare port numbers if required */
     if (port && (sin1->sin_port != sin2->sin_port))
-      return false; 
+      return false;
     if (exact)
       return sin1->sin_addr.s_addr == sin2->sin_addr.s_addr;
     return match_ipv4(addr, mask, bits);

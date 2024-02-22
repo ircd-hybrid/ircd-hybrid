@@ -59,7 +59,7 @@ server_die(const char *message, bool restart)
       abort();
 
     was_here = true;
-  } 
+  }
 
   if (EmptyString(message))
     snprintf(buf, sizeof(buf), "Server %s",

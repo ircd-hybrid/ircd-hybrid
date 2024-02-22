@@ -760,7 +760,7 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
   }
 
   struct dbuf_block *buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype); 
+  dbuf_put_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype);
 
   va_start(args, pattern);
   send_format(buffer, pattern, args);

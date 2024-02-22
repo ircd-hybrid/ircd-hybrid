@@ -145,7 +145,7 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
     target_p = source_p->from;
 
   const char *comment = source_p->name;
-  if (parc > 2 && parv[parc - 1]) 
+  if (parc > 2 && parv[parc - 1])
     comment = parv[parc - 1];
 
   if (MyConnect(target_p))

@@ -249,7 +249,6 @@ send_conf_options(struct Client *source_p)
         snprintf(buf, sizeof(buf), "%u", *((const unsigned int *const)iptr->option));
         value = buf;
         break;
-        break;
       case OUTPUT_BOOLEAN:  /* Output info_table[i].option as "YES" or "NO" */
         value = (iptr->option && *((const unsigned int *const)iptr->option)) ? "YES" : "NO";
         break;

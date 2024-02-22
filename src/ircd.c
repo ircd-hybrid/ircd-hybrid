@@ -297,9 +297,9 @@ initialize_global_set_options(void)
 static void
 write_pidfile(const char *filename)
 {
-  FILE *fb;
+  FILE *fb = fopen(filename, "w");
 
-  if ((fb = fopen(filename, "w")))
+  if (fb)
   {
     char buf[IRCD_BUFSIZE];
     unsigned int pid = (unsigned int)getpid();
@@ -329,11 +329,12 @@ write_pidfile(const char *filename)
 static void
 check_pidfile(const char *filename)
 {
-  FILE *fb;
-  char buf[IRCD_BUFSIZE];
+  FILE *fb = fopen(filename, "r");
 
-  if ((fb = fopen(filename, "r")))
+  if (fb)
   {
+    char buf[IRCD_BUFSIZE]; 
+
     if (fgets(buf, 20, fb) == NULL)
       ilog(LOG_TYPE_IRCD, "Error reading from pid file %s: %s",
            filename, strerror(errno));
@@ -400,14 +401,14 @@ setup_fdlimit(void)
     rlim.rlim_max = 0xFFFF;
   rlim.rlim_cur = rlim.rlim_max;
 
-  if (setrlimit(RLIMIT_NOFILE, &rlim) == 0)
-    hard_fdlimit = rlim.rlim_cur;
-  else
+  if (setrlimit(RLIMIT_NOFILE, &rlim))
   {
     fprintf(stderr, "setrlimit: couldn't set maximum number of file descriptors: %s\n",
             strerror(errno));
     exit(EXIT_FAILURE);
   }
+
+  hard_fdlimit = rlim.rlim_cur;
 }
 
 /**
@@ -512,13 +513,13 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  if (server_state.foreground == false)
+  if (server_state.foreground)
+    print_startup(getpid());
+  else
   {
     make_daemon();
     close_standard_fds(); /* this needs to be before comm_select_init()! */
   }
-  else
-    print_startup(getpid());
 
   setup_signals();
 

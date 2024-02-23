@@ -46,7 +46,7 @@ struct SetStruct
 
 static struct SetStruct set_cmd_table[] =
 {
-  { .name = "AUTOCONNALL", .ptr = &GlobalSetOptions.autoconn, .wants_bool = true, .value_max = 1 },
+  { .name = "AUTOCONNECT", .ptr = &GlobalSetOptions.autoconnect, .wants_bool = true, .value_max = 1 },
   { .name = "FLOODCOUNT", .ptr = &GlobalSetOptions.floodcount, .value_max = INT_MAX },
   { .name = "FLOODTIME", .ptr = &GlobalSetOptions.floodtime, .value_max = INT_MAX },
   { .name = "MAX", .ptr = &GlobalSetOptions.maxclients, .value_min = 1, .value_max = INT_MAX },

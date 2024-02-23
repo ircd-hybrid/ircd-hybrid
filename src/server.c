@@ -255,7 +255,7 @@ server_hunt(struct Client *source_p, const char *command, const int server, char
 void
 try_connections(void *unused)
 {
-  if (GlobalSetOptions.autoconn == false)
+  if (GlobalSetOptions.autoconnect == false)
     return;
 
   dlink_node *node;

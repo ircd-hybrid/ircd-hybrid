@@ -55,7 +55,7 @@
  */
 struct SetOptions
 {
-  unsigned int autoconn;  /**< Flag indicating if autoconn is enabled for all servers. */
+  unsigned int autoconnect;  /**< Flag indicating if autoconnect is enabled for all servers. */
   unsigned int maxclients;  /**< Maximum allowed client connections. */
   unsigned int floodcount;  /**< Number of messages allowed in 'floodtime' seconds. */
   unsigned int floodtime;  /**< Time threshold for flood control. */

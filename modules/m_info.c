@@ -243,7 +243,7 @@ send_conf_options(struct Client *source_p)
     switch (iptr->output_type)
     {
       case OUTPUT_STRING:  /* For "char *" references */
-        value = iptr->option ? *((const char *const *)iptr->option) : "NONE";
+        value = (iptr->option && *((const char *const *)iptr->option)) ? *((const char *const *)iptr->option) : "NONE";
         break;
       case OUTPUT_DECIMAL:  /* Output info_table[i].option as a decimal value. */
         snprintf(buf, sizeof(buf), "%u", *((const unsigned int *const)iptr->option));

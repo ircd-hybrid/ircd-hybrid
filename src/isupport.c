@@ -19,8 +19,14 @@
  *  USA
  */
 
-/*! \file isupport.c
- * \brief Contains functions pertaining to RPL_ISUPPORT.
+/**
+ * @file isupport.c
+ * @brief Implementation of IRC ISUPPORT messages (RPL_ISUPPORT) in ircd-hybrid.
+ *
+ * The ISUPPORT mechanism provides a means for IRC servers to communicate their
+ * capabilities and configuration settings to clients during the connection
+ * establishment phase. This file contains functions and structures necessary for
+ * handling and managing ISUPPORT messages within the ircd-hybrid server.
  */
 
 #include "stdinc.h"
@@ -37,20 +43,52 @@
 #include "channel_mode.h"
 #include "parse.h"
 
-
-/* Used for building up the isupport string,
+/**
+ * @struct Isupport
+ * @brief Structure representing an IRC ISUPPORT option.
+ *
+ * This structure encapsulates an IRC ISUPPORT option, including its name, options, and
+ * numerical value if applicable.
  */
 struct Isupport
 {
-  dlink_node node;
-  char *name;
-  char *options;
-  int number;
+  dlink_node node;  /**< Node for linking Isupport structures in a list. */
+  char *name;  /**< Name of the ISUPPORT option. */
+  char *options;  /**< Options associated with the ISUPPORT option. */
+  int number;  /**< Numerical value associated with the ISUPPORT option. */
 };
 
+/**
+ * @var isupport_list
+ * @brief List containing Isupport structures representing active ISUPPORT options.
+ *
+ * The isupport_list is a linked list that stores Isupport structures, each representing
+ * a unique ISUPPORT option in the ircd-hybrid server. This list serves as the central
+ * repository for managing and organizing ISUPPORT options. Various operations, such as
+ * addition, deletion, and retrieval, are performed on this list to maintain and update
+ * ISUPPORT options dynamically.
+ */
 static dlink_list isupport_list;
+
+/**
+ * @var isupport_list_lines
+ * @brief List containing formatted ISUPPORT strings for transmission.
+ *
+ * The isupport_list_lines is a linked list that stores formatted ISUPPORT strings, each
+ * representing a line of ISUPPORT information suitable for sending to clients. These
+ * strings are constructed based on the options stored in the isupport_list. The list is
+ * updated and rebuilt as needed to reflect the current set of supported features and
+ * configurations.
+ */
 static dlink_list isupport_list_lines;
 
+/**
+ * @brief Constructs formatted lines for ISUPPORT messages.
+ *
+ * This function constructs formatted lines for ISUPPORT messages based on the ISUPPORT
+ * options stored in the isupport_list. Each line represents a set of ISUPPORT options,
+ * and the resulting lines are stored in isupport_list_lines.
+ */
 static void
 isupport_build_lines(void)
 {
@@ -102,6 +140,14 @@ isupport_build_lines(void)
   }
 }
 
+/**
+ * @brief Finds an ISUPPORT option by name.
+ *
+ * Searches the list of ISUPPORT options for an option with the specified name.
+ *
+ * @param name The name of the ISUPPORT option to find.
+ * @return A pointer to the Isupport structure if found, otherwise NULL.
+ */
 static struct Isupport *
 isupport_find(const char *name)
 {
@@ -117,12 +163,12 @@ isupport_find(const char *name)
   return NULL;
 }
 
-/*
- * isupport_init()
+/**
+ * @brief Initializes the ISUPPORT system with default options.
  *
- * input        - NONE
- * output       - NONE
- * side effects - Must be called before isupport is enabled
+ * This function initializes the ISUPPORT system with default options. The default
+ * options include, but are not limited to, BOT, CALLERID, CASEMAPPING, DEAF,
+ * KICKLEN, MODES, EXCEPTS, and INVEX.
  */
 void
 isupport_init(void)
@@ -137,6 +183,16 @@ isupport_init(void)
   isupport_add("INVEX", NULL, -1);
 }
 
+/**
+ * @brief Creates a new ISUPPORT option.
+ *
+ * Creates a new ISUPPORT option with the specified name, options, and number.
+ *
+ * @param name The name of the ISUPPORT option.
+ * @param options The options associated with the ISUPPORT option.
+ * @param number The numerical value associated with the ISUPPORT option.
+ * @return A pointer to the newly created Isupport structure.
+ */
 static struct Isupport *
 isupport_create(const char *name, const char *options, int number)
 {
@@ -149,6 +205,13 @@ isupport_create(const char *name, const char *options, int number)
   return support;
 }
 
+/**
+ * @brief Destroys an ISUPPORT option.
+ *
+ * Removes an ISUPPORT option from the list and deallocates its memory.
+ *
+ * @param support A pointer to the Isupport structure to destroy.
+ */
 static void
 isupport_destroy(struct Isupport *support)
 {
@@ -158,6 +221,17 @@ isupport_destroy(struct Isupport *support)
   xfree(support);
 }
 
+/**
+ * @brief Adds or updates an ISUPPORT option.
+ *
+ * Adds a new ISUPPORT option or updates an existing one with the specified name,
+ * options, and number. If an option with the same name exists, it is replaced.
+ * After modification, the ISUPPORT lines are rebuilt.
+ *
+ * @param name The name of the ISUPPORT option.
+ * @param options The options associated with the ISUPPORT option.
+ * @param number The numerical value associated with the ISUPPORT option.
+ */
 void
 isupport_add(const char *name, const char *options, int number)
 {
@@ -167,9 +241,18 @@ isupport_add(const char *name, const char *options, int number)
 
   isupport_create(name, options, number);
 
+  /* Rebuild ISUPPORT lines after modification. */
   isupport_build_lines();
 }
 
+/**
+ * @brief Deletes an ISUPPORT option.
+ *
+ * Deletes an ISUPPORT option with the specified name. After deletion,
+ * the ISUPPORT lines are rebuilt.
+ *
+ * @param name The name of the ISUPPORT option to delete.
+ */
 void
 isupport_delete(const char *name)
 {
@@ -177,15 +260,19 @@ isupport_delete(const char *name)
   if (support)
   {
     isupport_destroy(support);
+
+    /* Rebuild ISUPPORT lines after modification. */
     isupport_build_lines();
   }
 }
 
-/* isupport_show()
+/**
+ * @brief Displays ISUPPORT information to a client.
  *
- * inputs       - pointer to client
- * output       - NONE
- * side effects - display to client what we support (for them)
+ * Sends formatted ISUPPORT messages to a client to inform them about the
+ * server's supported features and settings.
+ *
+ * @param client A pointer to the Client structure.
  */
 void
 isupport_show(struct Client *client)

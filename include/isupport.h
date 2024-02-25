@@ -19,8 +19,9 @@
  *  USA
  */
 
-/*! \file isupport.h
- * \brief Contains functions pertaining to RPL_ISUPPORT.
+/**
+ * @file isupport.h
+ * @brief Declarations for managing IRC ISUPPORT functionality.
  */
 
 #ifndef INCLUDED_isupport_h

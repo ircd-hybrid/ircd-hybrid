@@ -39,7 +39,6 @@
 
 
 /* Used for building up the isupport string,
- * used with init_isupport, add_isupport, delete_isupport
  */
 struct Isupport
 {
@@ -51,6 +50,72 @@ struct Isupport
 
 static dlink_list isupport_list;
 static dlink_list isupport_list_lines;
+
+static void
+isupport_build_lines(void)
+{
+  char isupportbuffer[IRCD_BUFSIZE];
+  char *p = isupportbuffer;
+  int tokens = 0;
+  size_t len = 0;
+  size_t reserve = strlen(me.name) + HOSTLEN + strlen(numeric_form(RPL_ISUPPORT));
+
+  dlink_node *node, *node_next;
+  DLINK_FOREACH_SAFE(node, node_next, isupport_list_lines.head)
+  {
+    dlinkDelete(node, &isupport_list_lines);
+    xfree(node->data);
+    free_dlink_node(node);
+  }
+
+  DLINK_FOREACH(node, isupport_list.head)
+  {
+    struct Isupport *support = node->data;
+
+    len += snprintf(p + len, sizeof(isupportbuffer) - len, "%s", support->name);
+
+    if (support->options)
+      len += snprintf(p + len, sizeof(isupportbuffer) - len, "=%s", support->options);
+    if (support->number > 0)
+      len += snprintf(p + len, sizeof(isupportbuffer) - len, "=%d", support->number);
+
+    len += snprintf(p + len, sizeof(isupportbuffer) - len, " ");
+
+    if (++tokens == (MAXPARA - 2) || len >= (sizeof(isupportbuffer) - reserve))
+    {
+      if (p[len - 1] == ' ')
+        p[--len] = '\0';
+
+      dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &isupport_list_lines);
+      p = isupportbuffer;
+      len = 0;
+      tokens = 0;
+    }
+  }
+
+  if (len > 0)
+  {
+    if (p[len - 1] == ' ')
+      p[--len] = '\0';
+
+    dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &isupport_list_lines);
+  }
+}
+
+static struct Isupport *
+isupport_find(const char *name)
+{
+  dlink_node *node;
+
+  DLINK_FOREACH(node, isupport_list.head)
+  {
+    struct Isupport *support = node->data;
+    if (irccmp(support->name, name) == 0)
+      return support;
+  }
+
+  return NULL;
+}
 
 /*
  * isupport_init()
@@ -72,141 +137,47 @@ isupport_init(void)
   isupport_add("INVEX", NULL, -1);
 }
 
-/*
- * isupport_add()
- *
- * input        - name of supported function
- *              - options if any
- *              - number if any
- * output       - NONE
- * side effects - Each supported item must call this when activated
- */
-void
-isupport_add(const char *name, const char *options, int n)
+static struct Isupport *
+isupport_create(const char *name, const char *options, int number)
 {
-  dlink_node *node = NULL;
-  struct Isupport *support = NULL;
-
-  DLINK_FOREACH(node, isupport_list.head)
-  {
-    support = node->data;
-    if (irccmp(support->name, name) == 0)
-    {
-      xfree(support->name);
-      xfree(support->options);
-      break;
-    }
-  }
-
-  if (node == NULL)
-  {
-    support = xcalloc(sizeof(*support));
-    dlinkAddTail(support, &support->node, &isupport_list);
-  }
-
+  struct Isupport *support = xcalloc(sizeof(*support));
   support->name = xstrdup(name);
-  if (options)
-    support->options = xstrdup(options);
-  support->number = n;
+  support->options = (options) ? xstrdup(options) : NULL;
+  support->number = number;
+  dlinkAddTail(support, &support->node, &isupport_list);
 
-  isupport_rebuild();
+  return support;
 }
 
-/*
- * isupport_delete()
- *
- * input        - name of supported function
- * output       - NONE
- * side effects - Each supported item must call this when deactivated
- */
+static void
+isupport_destroy(struct Isupport *support)
+{
+  dlinkDelete(&support->node, &isupport_list);
+  xfree(support->name);
+  xfree(support->options);
+  xfree(support);
+}
+
+void
+isupport_add(const char *name, const char *options, int number)
+{
+  struct Isupport *support = isupport_find(name);
+  if (support)
+    isupport_destroy(support);
+
+  isupport_create(name, options, number);
+
+  isupport_build_lines();
+}
+
 void
 isupport_delete(const char *name)
 {
-  dlink_node *node = NULL;
-
-  DLINK_FOREACH(node, isupport_list.head)
+  struct Isupport *support = isupport_find(name);
+  if (support)
   {
-    struct Isupport *support = node->data;
-
-    if (irccmp(support->name, name) == 0)
-    {
-      dlinkDelete(node, &isupport_list);
-      xfree(support->name);
-      xfree(support->options);
-      xfree(support);
-      break;
-    }
-  }
-
-  isupport_rebuild();
-}
-
-/*
- * issuport_rebuild()
- *
- * input        - NONE
- * output       - NONE
- * side effects - Destroy the isupport MessageFile lines, and rebuild.
- */
-void
-isupport_rebuild(void)
-{
-  char isupportbuffer[IRCD_BUFSIZE];
-  char *p = isupportbuffer;
-  dlink_node *node = NULL, *node_next = NULL;
-  int n = 0;
-  int tokens = 0;
-  size_t len = 0;
-  size_t reserve = strlen(me.name) + HOSTLEN + strlen(numeric_form(RPL_ISUPPORT));
-
-  DLINK_FOREACH_SAFE(node, node_next, isupport_list_lines.head)
-  {
-    dlinkDelete(node, &isupport_list_lines);
-    xfree(node->data);
-    free_dlink_node(node);
-  }
-
-  DLINK_FOREACH(node, isupport_list.head)
-  {
-    struct Isupport *support = node->data;
-
-    p += (n = sprintf(p, "%s", support->name));
-    len += n;
-
-    if (support->options)
-    {
-      p += (n = sprintf(p, "=%s", support->options));
-      len += n;
-    }
-
-    if (support->number > 0)
-    {
-      p += (n = sprintf(p, "=%d", support->number));
-      len += n;
-    }
-
-    *p++ = ' ';
-    len++;
-    *p = '\0';
-
-    if (++tokens == (MAXPARA-2) || len >= (sizeof(isupportbuffer)-reserve))
-    { /* arbritrary for now */
-      if (*--p == ' ')
-        *p = '\0';
-
-      dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &isupport_list_lines);
-      p = isupportbuffer;
-      len = 0;
-      n = 0;
-      tokens = 0;
-    }
-  }
-
-  if (len)
-  {
-    if (*--p == ' ')
-      *p = '\0';
-    dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &isupport_list_lines);
+    isupport_destroy(support);
+    isupport_build_lines();
   }
 }
 
@@ -222,5 +193,8 @@ isupport_show(struct Client *client)
   dlink_node *node;
 
   DLINK_FOREACH(node, isupport_list_lines.head)
-    sendto_one_numeric(client, &me, RPL_ISUPPORT, node->data);
+  {
+    const char *const string = node->data;
+    sendto_one_numeric(client, &me, RPL_ISUPPORT, string);
+  }
 }

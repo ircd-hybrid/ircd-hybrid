@@ -499,7 +499,7 @@ main(int argc, char *argv[])
   myargv = argv;
   umask(077);  /* umask 077: u=rwx,g=,o= */
 
-  parseargs(&argc, &argv, myopts);
+  ircd_getopt(&argc, &argv, myopts);
 
   if (printVersion)
   {

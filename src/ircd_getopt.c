@@ -20,7 +20,7 @@
  */
 
 /**
- * @file getopt.c
+ * @file ircd_getopt.c
  * @brief Command-line option parsing utility, avoiding getopt_long().
  *
  * This file provides functionality for parsing command-line options using a custom
@@ -52,7 +52,7 @@
  * @param opts An array of lgetopt structures representing valid command-line options.
  */
 static void
-usage(const char *name, const struct lgetopt *opts)
+ircd_getop_usage(const char *name, const struct lgetopt *opts)
 {
   fprintf(stderr, "Usage: %s [options]\n", name);
   fprintf(stderr, "Where valid options are:\n");
@@ -77,7 +77,7 @@ usage(const char *name, const struct lgetopt *opts)
  * @param opts An array of lgetopt structures representing valid command-line options.
  */
 void
-parseargs(int *argc, char ***argv, struct lgetopt *opts)
+ircd_getop(int *argc, char ***argv, struct lgetopt *opts)
 {
   const char *progname = (*argv)[0];
 
@@ -114,7 +114,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
             {
               fprintf(stderr, "Error: option '%c%s' requires an argument\n",
                       OPTCHAR, opts[i].opt);
-              usage((*argv)[0], opts);
+              ircd_getop_usage((*argv)[0], opts);
             }
 
             *((int *)opts[i].argloc) = atoi((*argv)[1]);
@@ -127,7 +127,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
             {
               fprintf(stderr, "Error: option '%c%s' requires an argument\n",
                       OPTCHAR, opts[i].opt);
-              usage(progname, opts);
+              ircd_getop_usage(progname, opts);
             }
 
             *((char **)opts[i].argloc) = xstrdup((*argv)[1]);
@@ -136,11 +136,11 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
             break;
 
           case USAGE:
-            usage(progname, opts);
+            ircd_getop_usage(progname, opts);
             /* NOTREACHED */
 
           default:
-            fprintf(stderr, "Error: internal error in parseargs() at %s:%d\n",
+            fprintf(stderr, "Error: internal error in ircd_getop() at %s:%d\n",
                     __FILE__, __LINE__);
             exit(EXIT_FAILURE);
         }
@@ -151,7 +151,7 @@ parseargs(int *argc, char ***argv, struct lgetopt *opts)
     {
       fprintf(stderr, "Error: unknown argument '%c%s'\n",
               OPTCHAR, opt);
-      usage(progname, opts);
+      ircd_getop_usage(progname, opts);
     }
   }
 }

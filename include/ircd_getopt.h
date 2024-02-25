@@ -46,5 +46,5 @@ struct lgetopt
   const char *desc;  /**< Description of the argument, usage for printing help. */
 };
 
-extern void parseargs(int *, char ***, struct lgetopt *);
+extern void ircd_getopt(int *, char ***, struct lgetopt *);
 #endif /* INCLUDED_ircd_getopt_h */

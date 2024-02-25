@@ -83,6 +83,25 @@ static dlink_list isupport_list;
 static dlink_list isupport_list_lines;
 
 /**
+ * @brief Clears the list of lines used for RPL_ISUPPORT messages.
+ *
+ * This function removes all stored lines in preparation for rebuilding
+ * the RPL_ISUPPORT response. It iterates through the list of lines,
+ * deallocates memory, and frees the associated data.
+ */
+static void
+isupport_clear_lines(void)
+{
+  while (isupport_list_lines.head)
+  {
+    dlink_node *node = isupport_list_lines.head;
+    dlinkDelete(node, &isupport_list_lines);
+    xfree(node->data);
+    free_dlink_node(node);
+  }
+}
+
+/**
  * @brief Constructs formatted lines for ISUPPORT messages.
  *
  * This function constructs formatted lines for ISUPPORT messages based on the ISUPPORT
@@ -98,14 +117,9 @@ isupport_build_lines(void)
   size_t len = 0;
   size_t reserve = strlen(me.name) + HOSTLEN + strlen(numeric_form(RPL_ISUPPORT));
 
-  dlink_node *node, *node_next;
-  DLINK_FOREACH_SAFE(node, node_next, isupport_list_lines.head)
-  {
-    dlinkDelete(node, &isupport_list_lines);
-    xfree(node->data);
-    free_dlink_node(node);
-  }
+  isupport_clear_lines();
 
+  dlink_node *node;
   DLINK_FOREACH(node, isupport_list.head)
   {
     const struct Isupport *support = node->data;

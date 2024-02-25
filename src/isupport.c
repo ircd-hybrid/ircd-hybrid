@@ -92,8 +92,8 @@ static dlink_list isupport_list_lines;
 static void
 isupport_build_lines(void)
 {
-  char isupportbuffer[IRCD_BUFSIZE];
-  char *p = isupportbuffer;
+  char buf[IRCD_BUFSIZE];
+  char *bufptr = buf;
   int tokens = 0;
   size_t len = 0;
   size_t reserve = strlen(me.name) + HOSTLEN + strlen(numeric_form(RPL_ISUPPORT));
@@ -108,24 +108,24 @@ isupport_build_lines(void)
 
   DLINK_FOREACH(node, isupport_list.head)
   {
-    struct Isupport *support = node->data;
+    const struct Isupport *support = node->data;
 
-    len += snprintf(p + len, sizeof(isupportbuffer) - len, "%s", support->name);
+    len += snprintf(bufptr + len, sizeof(buf) - len, "%s", support->name);
 
     if (support->options)
-      len += snprintf(p + len, sizeof(isupportbuffer) - len, "=%s", support->options);
+      len += snprintf(bufptr + len, sizeof(buf) - len, "=%s", support->options);
     if (support->number > 0)
-      len += snprintf(p + len, sizeof(isupportbuffer) - len, "=%d", support->number);
+      len += snprintf(bufptr + len, sizeof(buf) - len, "=%d", support->number);
 
-    len += snprintf(p + len, sizeof(isupportbuffer) - len, " ");
+    len += snprintf(bufptr + len, sizeof(buf) - len, " ");
 
-    if (++tokens == (MAXPARA - 2) || len >= (sizeof(isupportbuffer) - reserve))
+    if (++tokens == (MAXPARA - 2) || len >= (sizeof(buf) - reserve))
     {
-      if (p[len - 1] == ' ')
-        p[--len] = '\0';
+      if (bufptr[len - 1] == ' ')
+        bufptr[--len] = '\0';
 
-      dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &isupport_list_lines);
-      p = isupportbuffer;
+      dlinkAddTail(xstrdup(buf), make_dlink_node(), &isupport_list_lines);
+      bufptr = buf;
       len = 0;
       tokens = 0;
     }
@@ -133,10 +133,10 @@ isupport_build_lines(void)
 
   if (len > 0)
   {
-    if (p[len - 1] == ' ')
-      p[--len] = '\0';
+    if (bufptr[len - 1] == ' ')
+      bufptr[--len] = '\0';
 
-    dlinkAddTail(xstrdup(isupportbuffer), make_dlink_node(), &isupport_list_lines);
+    dlinkAddTail(xstrdup(buf), make_dlink_node(), &isupport_list_lines);
   }
 }
 

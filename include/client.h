@@ -277,7 +277,7 @@ struct ListTask
  */
 struct Connection
 {
-  dlink_node lclient_node;
+  dlink_node node;
 
   unsigned int registration;
   unsigned int cap;  /**< Client CAP bit-field */

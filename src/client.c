@@ -95,7 +95,7 @@ client_make(struct Client *from)
     client->connection->registration = REG_INIT;
 
     /* as good a place as any... */
-    dlinkAdd(client, &client->connection->lclient_node, &unknown_list);
+    dlinkAdd(client, &client->connection->node, &unknown_list);
   }
 
   client->idhnext = client;
@@ -147,8 +147,8 @@ client_free(struct Client *client)
 
   if (MyConnect(client))
   {
-    assert(client->connection->lclient_node.prev == NULL);
-    assert(client->connection->lclient_node.next == NULL);
+    assert(client->connection->node.prev == NULL);
+    assert(client->connection->node.next == NULL);
 
     assert(client->connection->list_task == NULL);
     assert(client->connection->auth == NULL);
@@ -777,7 +777,7 @@ exit_client(struct Client *client, const char *comment)
       }
 
       assert(dlinkFind(&local_client_list, client));
-      dlinkDelete(&client->connection->lclient_node, &local_client_list);
+      dlinkDelete(&client->connection->node, &local_client_list);
 
       if (client->connection->list_task)
         free_list_task(client);
@@ -804,7 +804,7 @@ exit_client(struct Client *client, const char *comment)
     else if (IsServer(client))
     {
       assert(dlinkFind(&local_server_list, client));
-      dlinkDelete(&client->connection->lclient_node, &local_server_list);
+      dlinkDelete(&client->connection->node, &local_server_list);
 
       if (!HasFlag(client, FLAGS_SQUIT))
         /* For them, we are exiting the network */
@@ -813,7 +813,7 @@ exit_client(struct Client *client, const char *comment)
     else
     {
       assert(dlinkFind(&unknown_list, client));
-      dlinkDelete(&client->connection->lclient_node, &unknown_list);
+      dlinkDelete(&client->connection->node, &unknown_list);
     }
 
     sendto_one(client, "ERROR :Closing Link: %s (%s)", client->host, comment);

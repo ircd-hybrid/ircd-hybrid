@@ -409,8 +409,7 @@ register_local_user(struct Client *client)
 
   assert(dlinkFind(&unknown_list, client));
 
-  dlink_move_node(&client->connection->lclient_node,
-                  &unknown_list, &local_client_list);
+  dlink_move_node(&client->connection->node, &unknown_list, &local_client_list);
 
   if (dlink_list_length(&local_client_list) > Count.max_loc)
   {
